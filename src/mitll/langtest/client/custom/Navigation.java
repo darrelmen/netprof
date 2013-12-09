@@ -60,7 +60,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
   private final ExerciseController controller;
   private LangTestDatabaseAsync service;
   private UserManager userManager;
-  private int userListID;
+  private long userListID;
 
   private ScrollPanel listScrollPanel;
   private UserFeedback feedback;
@@ -68,6 +68,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
   private NPFHelper npfHelper;
   private NPFHelper avpHelper;
   private HTML itemMarker;
+  EditItem editItem;
 
   public Navigation(final LangTestDatabaseAsync service, final UserManager userManager,
                     final ExerciseController controller, final ListInterface listInterface) {
@@ -77,6 +78,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
     this.listInterface = listInterface;
     npfHelper = new NPFHelper(service, feedback, userManager, controller);
     avpHelper = new AVPHelper(feedback,service, userManager, controller);
+    editItem = new EditItem(service,userManager,controller);
   }
 
   /**
@@ -190,7 +192,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
   }
 
   public void showInitialState() {
-    System.out.println("show initial state for " + userManager.getUser());
+    System.out.println("showInitialState show initial state for " + userManager.getUser() + " : getting user lists");
 
     service.getListsForUser(userManager.getUser(), false, new AsyncCallback<Collection<UserList>>() {
       @Override
@@ -218,6 +220,8 @@ public class Navigation extends BasicDialog implements RequiresResize {
           });
         }
         else {
+          System.out.println("\tshowInitialState show initial state for " + userManager.getUser() + " found " +result.size() + " lists");
+
           showMyLists();
         }
       }
@@ -248,7 +252,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
   }
 
   private void viewLessons(final Panel contentPanel, boolean getAll) {
-    System.out.println("doing viewLessons----> " + getAll);
+    System.out.println("viewLessons----> getAll = " + getAll);
     contentPanel.clear();
     contentPanel.getElement().setId("contentPanel");
 
@@ -258,6 +262,8 @@ public class Navigation extends BasicDialog implements RequiresResize {
     if (getAll) {
       service.getUserListsForText("", new UserListCallback(contentPanel, child));
     } else {
+      System.out.println("\t viewLessons for " + userManager.getUser());
+
       service.getListsForUser(userManager.getUser(), false, new UserListCallback(contentPanel, child));
     }
   }
@@ -303,6 +309,18 @@ public class Navigation extends BasicDialog implements RequiresResize {
     Panel operations = getListOperations(ul, created);
     container.add(operations);
     container.add(listContent);
+
+    service.addVisitor(ul, (long)controller.getUser(), new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        //To change body of implemented methods use File | Settings | File Templates.
+      }
+
+      @Override
+      public void onSuccess(Void result) {              // tODO : consider checking on user list validity...?
+        //To change body of implemented methods use File | Settings | File Templates.
+      }
+    });
   }
 
   private Panel getListOperations(final UserList ul, final boolean created) {
@@ -384,7 +402,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
 
   private void showEditItem(UserList ul, TabAndContent addItem) {
     addItem.content.clear();
-    Panel widgets = editItem(ul);
+    Panel widgets = editItem.editItem(ul,itemMarker);
     addItem.content.add(widgets);
   }
 
@@ -411,35 +429,44 @@ public class Navigation extends BasicDialog implements RequiresResize {
     return hp;
   }
 
-  private Panel editItem(UserList ul) {
+/*  private Panel editItem(final UserList ul) {
     HorizontalPanel hp = new HorizontalPanel();
     SimplePanel left = new SimplePanel();
     hp.add(left);
-    SimplePanel right = new SimplePanel();
+    final SimplePanel right = new SimplePanel();
     hp.add(right);
 
-    PagingContainer<ExerciseShell> pagingContainer = new PagingContainer<ExerciseShell>(controller, 100){
+    final PagingContainer<UserExercise> pagingContainer = new PagingContainer<UserExercise>(controller, 100) {
       @Override
-      protected void gotClickOnItem(ExerciseShell e) {
-          System.out.println("Got click on " +e);
+      protected void gotClickOnItem(UserExercise exerciseShell) {
+        Navigation.this.editItem(exerciseShell, right, ul, pagingContainer);
       }
     };
 
     Panel container = pagingContainer.getTableWithPager();
     left.add(container);
-    for (ExerciseShell es : ul.getExercises()) {
-      if (es instanceof UserExercise) {
-        if (es.getID().startsWith("Custom")) {
-          pagingContainer.addExerciseToList2(es);
-        }
+    for (UserExercise es : ul.getExercises()) {
+      if (es.getID().startsWith("Custom")) {
+        pagingContainer.addExerciseToList2(es);
       }
     }
     pagingContainer.flush();
-    pagingContainer.selectFirst();
-    //TODO : add an edit thing here...
-   // right.add(new NewUserExercise(service,userManager,controller,itemMarker).addNew(ul, pagingContainer, right));
+    UserExercise exerciseShell = pagingContainer.selectFirst();
+    if (exerciseShell == null) System.err.println("huh? nothing first?");
+
+*//*    NewUserExercise newUserExercise = new NewUserExercise(service, userManager, controller, itemMarker);
+    right.add(newUserExercise.addNew(ul, pagingContainer, right));
+    newUserExercise.setFields(exerciseShell);*//*
+    editItem(exerciseShell,right,ul,pagingContainer);
     return hp;
   }
+
+  private void editItem(UserExercise exerciseShell, SimplePanel right, UserList ul, PagingContainer<UserExercise> pagingContainer) {
+    NewUserExercise newUserExercise = new NewUserExercise(service, userManager, controller, itemMarker);
+    right.clear();
+    right.add(newUserExercise.addNew(ul, pagingContainer, right));
+    newUserExercise.setFields(exerciseShell);
+  }*/
 
   private void setScrollPanelWidth(ScrollPanel row) {
     if (row != null) {
@@ -498,14 +525,14 @@ public class Navigation extends BasicDialog implements RequiresResize {
         enterKeyButtonHelper.removeKeyHandler();
         // TODO : validate
 
-        service.addUserList(userManager.getUser(), titleBox.getText(), area.getText(), classBox.getText(), new AsyncCallback<Integer>() {
+        service.addUserList(userManager.getUser(), titleBox.getText(), area.getText(), classBox.getText(), new AsyncCallback<Long>() {
           @Override
           public void onFailure(Throwable caught) {
             //To change body of implemented methods use File | Settings | File Templates.
           }
 
           @Override
-          public void onSuccess(Integer result) {
+          public void onSuccess(Long result) {
             userListID = result;
             System.out.println("userListID " + userListID);
             showInitialState();
@@ -529,12 +556,11 @@ public class Navigation extends BasicDialog implements RequiresResize {
 
     @Override
     public void onFailure(Throwable caught) {
-      //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
     public void onSuccess(Collection<UserList> result) {
-      System.out.println("UserListCallback : Displaying " + result.size() + " items");
+      System.out.println("\tUserListCallback : Displaying " + result.size() + " items");
       // if (result.isEmpty()) System.err.println("\n\nhuh? no results for user");
       if (result.isEmpty()) {
         child.add(new Heading(3, "No lists created yet."));
