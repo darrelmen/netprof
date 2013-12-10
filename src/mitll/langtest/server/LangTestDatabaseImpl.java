@@ -1085,6 +1085,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       audioType, doFlashcard, this);
   }
 
+  /**
+   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#getExercises(long, boolean)
+   * @param user
+   * @return
+   */
   @Override
   public Set<String> getCompletedExercises(int user) {  return db.getCompletedExercises(user);  }
 
