@@ -208,9 +208,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return ids;
   }
 
+  /**
+   * @see mitll.langtest.client.list.PagingExerciseList#loadExercises(String, String)
+   * @param reqID
+   * @param userID
+   * @param prefix
+   * @param userListID
+   * @return
+   */
   @Override
   public ExerciseListWrapper getExerciseIds(int reqID, long userID, String prefix, long userListID) {
-    logger.debug("getExerciseIds : getting exercise ids for User id=" + userID + " config " + relativeConfigDir);
+    logger.debug("getExerciseIds : getting exercise ids for User id=" + userID + " config " + relativeConfigDir + " and user list id " +userListID);
     List<Exercise> exercises = getExercises(userID);
 
     if (userListID != -1) {
@@ -466,7 +474,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       byID = db.getUserExerciseWhere(id);
     }
     if (byID == null) {
-      logger.error("huh? couldn't find exercise with id " + id + " when examining " + exercises.size() + " items");
+      logger.error("getExercise : huh? couldn't find exercise with id " + id + " when examining " + exercises.size() + " items");
     }
     long now = System.currentTimeMillis();
     if (now - then > 50) {
@@ -481,7 +489,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private void ensureMP3s(Exercise byID) {
     Collection<AudioAttribute> audioAttributes = byID.getAudioAttributes();
     for (AudioAttribute audioAttribute : audioAttributes) {
-      ensureMP3(audioAttribute.getAudioRef());
+      ensureMP3(audioAttribute.getAudioRef(), false);
     }
 
     if (audioAttributes.isEmpty()) {
@@ -489,7 +497,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
 
     for (String spath : byID.getSynonymAudioRefs()) {
-      ensureMP3(spath);
+      ensureMP3(spath, false);
     }
   }
 
@@ -634,7 +642,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String refAudio = nextExercise.getNextExercise().getRefAudio();
     if (refAudio != null && refAudio.length() > 0) {
       getWavAudioFile(refAudio);
-      ensureMP3(refAudio);
+      ensureMP3(refAudio, false);
     }
     return nextExercise;
   }
@@ -696,10 +704,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see #getExercise(String)
    * @see #getFlashcardResponse(long, mitll.langtest.shared.flashcard.FlashcardResponse)
    * @param wavFile
+   * @param overwrite
    */
-  private void ensureMP3(String wavFile) {
+  private void ensureMP3(String wavFile, boolean overwrite) {
     if (wavFile != null) {
-        new AudioConversion().ensureWriteMP3(wavFile, pathHelper.getInstallPath());
+        new AudioConversion().ensureWriteMP3(wavFile, pathHelper.getInstallPath(), false);
     }
   }
 
@@ -731,7 +740,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
             imageType.equalsIgnoreCase(ImageType.SPECTROGRAM.toString()) ? ImageType.SPECTROGRAM : null;
     if (imageType1 == null) return new ImageResponse(); // success = false!
     String imageOutDir = pathHelper.getImageOutDir();
-    logger.debug("getting images (" + width + ", " + height + ") (" +reqid+ ") type " + imageType+
+    logger.debug("getting images (" + width + " x " + height + ") (" +reqid+ ") type " + imageType+
       " for " + wavAudioFile + "");
     String absolutePathToImage = imageWriter.writeImageSimple(wavAudioFile, pathHelper.getAbsoluteFile(imageOutDir).getAbsolutePath(),
         width, height, imageType1);
@@ -851,7 +860,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private void ensureMP3(Collection<Result> results) {
     for (Result r : results) {
       if (r.answer.endsWith(".wav")) {
-        new AudioConversion().ensureWriteMP3(r.answer, pathHelper.getInstallPath());
+        new AudioConversion().ensureWriteMP3(r.answer, pathHelper.getInstallPath(), false);
       }
     }
   }
@@ -983,33 +992,47 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param userExercise
    */
   public UserExercise reallyCreateNewItem(UserList userList, UserExercise userExercise) {
+    db.getUserListManager().reallyCreateNewItem(userList, userExercise);
+    fixAudioPaths(userExercise,true);
+
+    logger.debug("reallyCreateNewItem : made user exercise " + userExercise);
+
+    return userExercise;
+  }
+
+  @Override
+  public void editItem(UserExercise userExercise) {
+    fixAudioPaths(userExercise,true);
+    db.getUserListManager().editItem(userExercise);
+    logger.debug("editItem : now user exercise " + userExercise);
+  }
+
+  private void fixAudioPaths(UserExercise userExercise, boolean overwrite) {
     File fileRef = pathHelper.getAbsoluteFile(userExercise.getRefAudio());
     String fast = FAST + ".wav";
-    db.getUserListManager().reallyCreateNewItem(userList, userExercise);
 
-    String refAudio = getRefAudioPath(userExercise, fileRef, fast);
+    String refAudio = getRefAudioPath(userExercise, fileRef, fast, overwrite);
     userExercise.setRefAudio(refAudio);
 
     if (userExercise.getSlowAudioRef() != null && !userExercise.getSlowAudioRef().isEmpty()) {
       fileRef = pathHelper.getAbsoluteFile(userExercise.getSlowAudioRef());
       String slow = SLOW + ".wav";
 
-      refAudio = getRefAudioPath(userExercise, fileRef, slow);
+      refAudio = getRefAudioPath(userExercise, fileRef, slow, overwrite);
       userExercise.setSlowRefAudio(refAudio);
     }
-    logger.debug("exercise now  " + userExercise);
-
-    return userExercise;
   }
 
   /**
    * Copying audio from initial recording location to new location.
+   *
    * @param userExercise
    * @param fileRef
    * @param fast
+   * @param overwrite
    * @return
    */
-  private String getRefAudioPath(UserExercise userExercise, File fileRef, String fast) {
+  private String getRefAudioPath(UserExercise userExercise, File fileRef, String fast, boolean overwrite) {
     final File bestDir = pathHelper.getAbsoluteFile("bestAudio");
     bestDir.mkdir();
     File bestDirForExercise = new File(bestDir, userExercise.getID());
@@ -1019,15 +1042,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String s = "bestAudio" + File.separator + userExercise.getID() + File.separator + fast;
     logger.debug("getRefAudioPath : dest path    " + bestDirForExercise.getPath() + " vs " +s);
     new FileCopier().copy(fileRef.getAbsolutePath(), destination.getAbsolutePath());
-    ensureMP3(s);
+    ensureMP3(s, overwrite);
     return s;
   }
 
   /**
-   *
-   *
-   *
-   *
    * @param age
    * @param gender
    * @param experience

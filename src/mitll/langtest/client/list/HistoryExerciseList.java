@@ -136,7 +136,7 @@ public class HistoryExerciseList extends PagingExerciseList {
    * @param userID
    */
   protected void noSectionsGetExercises(long userID) {
-    //System.out.println("noSectionsGetExercises for " + userID);
+    System.out.println("HistoryExerciseList.noSectionsGetExercises for " + userID);
     super.getExercises(userID, true);
   }
 
@@ -328,7 +328,16 @@ public class HistoryExerciseList extends PagingExerciseList {
   public void onValueChange(ValueChangeEvent<String> event) {
     String rawToken = getTokenFromEvent(event);
     System.out.println(new Date() +" HistoryExerciseList.onValueChange : ------ start: token is '" + rawToken +"' ------------\n\n\n ");
-    String item = getSelectionState(rawToken).getItem();
+    SelectionState selectionState1 = getSelectionState(rawToken);
+
+    String instance1 = selectionState1.getInstance();
+
+    if (!instance1.equals(instance)) {
+      System.out.println("onValueChange : skipping event " + rawToken + " for instance " + instance1 + " that is not mine "+instance);
+      return;
+    }
+
+    String item = selectionState1.getItem();
 
     if (item != null && item.length() > 0 && hasExercise(item)) {
       if (includeItemInBookmark) {
@@ -386,7 +395,7 @@ public class HistoryExerciseList extends PagingExerciseList {
       reallyLoadExercises(typeToSection, null);
     } else {
       lastReqID++;
-      System.out.println("loadExercisesUsingPrefix looking for '" + prefix + "' (" + prefix.length() + " chars) in context of " + typeToSection);
+      System.out.println("HistoryExerciseList.loadExercisesUsingPrefix looking for '" + prefix + "' (" + prefix.length() + " chars) in context of " + typeToSection);
 
       if (typeToSection.isEmpty()) {
         service.getExerciseIds(lastReqID, userID, prefix, -1, new SetExercisesCallback());
