@@ -265,13 +265,14 @@ public class AudioConversion {
    * @see mitll.langtest.server.LangTestDatabaseImpl#ensureMP3(String)
    * @param pathToWav
    * @param realContextPath
+   * @param overwrite
    */
-  public void ensureWriteMP3(String pathToWav, String realContextPath) {
+  public void ensureWriteMP3(String pathToWav, String realContextPath, boolean overwrite) {
     File absolutePathToWav = getAbsoluteFile(pathToWav,realContextPath);
 
     String mp3File = absolutePathToWav.getAbsolutePath().replace(".wav",".mp3");
     File mp3 = new File(mp3File);
-    if (!mp3.exists()) {
+    if (!mp3.exists() || overwrite) {
       logger.debug("doing mp3 conversion for " + absolutePathToWav);
 
       String binPath = WINDOWS_SOX_BIN_DIR;
@@ -366,7 +367,7 @@ public class AudioConversion {
   }
 
   /**
-   * @see #ensureWriteMP3(String, String)
+   * @see #ensureWriteMP3(String, String, boolean)
    * @param lamePath
    * @param pathToAudioFile
    * @param mp3File
