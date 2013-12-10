@@ -141,9 +141,11 @@ public interface LangTestDatabaseAsync {
 
   void createNewItem(long userid, String english, String foreign, AsyncCallback<UserExercise> async);
 
-  void reallyCreateNewItem(UserList userList, UserExercise userExercise,/*, String refAudioPath, String slowRefAudioPath*/AsyncCallback<UserExercise> async);
+  void reallyCreateNewItem(UserList userList, UserExercise userExercise,AsyncCallback<UserExercise> async);
 
   void addUserList(long userid, String name, String description, String dliClass, AsyncCallback<Long> async);
 
   void addVisitor(UserList ul, long user, AsyncCallback<Void> asyncCallback);
+
+  void editItem(UserExercise userExercise, AsyncCallback<Void> async);
 }
