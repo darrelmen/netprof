@@ -78,7 +78,7 @@ public class UserListDAO extends DAO {
    * <p/>
    * Uses return generated keys to get the user id
    *
-   * @see mitll.langtest.server.database.custom.UserListManager#reallyCreateNewItem(mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserExercise)
+   * @see UserListManager#reallyCreateNewItem(long, mitll.langtest.shared.custom.UserExercise)
    */
   public void add(UserList userList) {
     long id = 0;
@@ -156,7 +156,7 @@ public class UserListDAO extends DAO {
     return Collections.emptyList();
   }
 
-  public List<UserList> getAllOwnedBy(long id) {
+/*  public List<UserList> getAllOwnedBy(long id) {
     try {
       String sql = "SELECT * from " + USER_EXERCISE_LIST + " where creatorid=" + id+
         " order by modified";
@@ -165,17 +165,18 @@ public class UserListDAO extends DAO {
       logger.error("got " + ee, ee);
     }
     return Collections.emptyList();
-  }
+  }*/
 
   public UserList getWhere(long unique) {
-    //String unique = exid.substring("Custom_".length());
     String sql = "SELECT * from " + USER_EXERCISE_LIST + " where uniqueid=" + unique + " order by modified";
     try {
       List<UserList> lists = getUserLists(sql);
       if (lists.isEmpty()) {
         logger.error("huh? no custom exercise with id " + unique);
         return null;
-      } else return lists.iterator().next();
+      } else {
+        return lists.iterator().next();
+      }
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
