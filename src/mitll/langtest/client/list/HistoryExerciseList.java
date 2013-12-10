@@ -327,13 +327,14 @@ public class HistoryExerciseList extends PagingExerciseList {
   @Override
   public void onValueChange(ValueChangeEvent<String> event) {
     String rawToken = getTokenFromEvent(event);
-    System.out.println(new Date() +" HistoryExerciseList.onValueChange : ------ start: token is '" + rawToken +"' ------------\n\n\n ");
+    System.out.println(new Date() +" HistoryExerciseList.onValueChange : ------ start: token is '" + rawToken +"' ----");
     SelectionState selectionState1 = getSelectionState(rawToken);
 
     String instance1 = selectionState1.getInstance();
 
     if (!instance1.equals(instance)) {
-      System.out.println("onValueChange : skipping event " + rawToken + " for instance " + instance1 + " that is not mine "+instance);
+      System.out.println("onValueChange : skipping event " + rawToken + " for instance " + instance1 +
+          " that is not mine "+instance);
       return;
     }
 
