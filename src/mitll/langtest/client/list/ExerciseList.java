@@ -244,6 +244,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     token = token.replaceAll("%3D", "=").replaceAll("%3B", ";").replaceAll("%2", " ");
     return token;
   }
+
   public Panel getCreatedPanel() {
     return createdPanel;
   }
@@ -452,15 +453,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
   }
 
-  /**
-   * @see #loadByIDFromToken(String)
-   * @param exerciseShell
-   */
-  protected void askServerForExercise(ExerciseShell exerciseShell) {
-    System.out.println("ExerciseList.askServerForExercise id = " + exerciseShell.getID());
-    service.getExercise(exerciseShell.getID(), new ExerciseAsyncCallback(exerciseShell));
-  }
-
   protected String getTokenFromEvent(ValueChangeEvent<String> event) {
     String token = event.getValue();
     token = allowPlusInURL ? unencodeTokenDontRemovePlus(token) : unencodeToken(token);
@@ -496,6 +488,15 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     else {
       return false;
     }
+  }
+
+  /**
+   * @see #loadByIDFromToken(String)
+   * @param exerciseShell
+   */
+  protected void askServerForExercise(ExerciseShell exerciseShell) {
+    System.out.println("ExerciseList.askServerForExercise id = " + exerciseShell.getID());
+    service.getExercise(exerciseShell.getID(), new ExerciseAsyncCallback(exerciseShell));
   }
 
   private class ExerciseAsyncCallback implements AsyncCallback<Exercise> {
