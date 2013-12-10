@@ -34,10 +34,10 @@ public class UserListManager {
   private UserListDAO userListDAO;
   private UserListExerciseJoinDAO userListExerciseJoinDAO;
 
-  public UserListManager(Database database,UserDAO userDAO) {
+  public UserListManager(UserDAO userDAO, UserListDAO userListDAO,UserListExerciseJoinDAO userListExerciseJoinDAO ) {
     this.userDAO = userDAO;
-    this.userListDAO = new UserListDAO(database, userDAO);
-    userListExerciseJoinDAO = new UserListExerciseJoinDAO(database, userDAO);
+    this.userListDAO = userListDAO;
+    this.userListExerciseJoinDAO = userListExerciseJoinDAO;//
   }
 
   /**
@@ -112,8 +112,10 @@ public class UserListManager {
 
     if (where != null) {
       where.addExercise(userExercise);
-      userListExerciseJoinDAO.add(where,userExercise);
-      return where.getExercises();
+      userListExerciseJoinDAO.add(where, userExercise);
+      Collection<UserExercise> exercises = where.getExercises();
+      logger.debug("Exercises now " + exercises);
+      return exercises;
     }
     return Collections.emptyList();
   }
@@ -151,6 +153,11 @@ public class UserListManager {
     userListDAO.setUserExerciseDAO(userExerciseDAO);
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds(int, long, String, long)
+   * @param id
+   * @return
+   */
   public UserList getUserListByID(long id) {
     return userListDAO.getWithExercises(id);
   }
