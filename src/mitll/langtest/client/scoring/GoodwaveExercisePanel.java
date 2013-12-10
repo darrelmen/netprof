@@ -155,7 +155,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * @see #makeAddToList(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController)
    * @see #wasRevealed()
    */
-  private void populateListChoices(final Exercise e, ExerciseController controller, final SplitDropdownButton w1) {
+  private void populateListChoices(final Exercise e, final ExerciseController controller, final SplitDropdownButton w1) {
     System.out.println("populateListChoices : populate list choices for " + controller.getUser());
     service.getListsForUser(controller.getUser(), true, new AsyncCallback<Collection<UserList>>() {
       @Override
@@ -176,7 +176,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
             widget.addClickHandler(new ClickHandler() {
               @Override
               public void onClick(ClickEvent event) {
-                service.addItemToUserList(ul.getUniqueID(), new UserExercise(e), new AsyncCallback<Collection<UserExercise>>() {
+                service.addItemToUserList(ul.getUniqueID(), new UserExercise(e,controller.getUser()), new AsyncCallback<Collection<UserExercise>>() {
                   @Override
                   public void onFailure(Throwable caught) {
                   }
@@ -542,14 +542,11 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         RadioButton fast = new RadioButton(GROUP, audioAttribute.getDisplay());
         if (audioAttribute.isRegularSpeed()) {
           regular = fast;
-          System.out.println(audioAttribute +" is regular speed\n\n\n ");
-
-          //fast.setValue(true);
-          //madeFast = true;
+//          System.out.println(audioAttribute +" is regular speed\n\n\n ");
         }
-        else {
-          System.out.println(audioAttribute +" is not regular speed ");
-        }
+//        else {
+//          System.out.println(audioAttribute +" is not regular speed ");
+ //       }
         if (first == null) {
           first = fast;
         }
@@ -569,23 +566,14 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
       if (regular != null) {
         regular.setValue(true);
-        System.out.println( "\n\n----> getBeforePlayWidget : set regular!\n\n");
+       // System.out.println( "\n\n----> getBeforePlayWidget : set regular!\n\n");
 
       }
       else if (first != null) {
         first.setValue(true);
-        System.out.println( "\n\n----> getBeforePlayWidget : set somethign else!\n\n");
+       // System.out.println( "\n\n----> getBeforePlayWidget : set somethign else!\n\n");
 
       }
-  /*    if (!madeFast && first != null) {
-        first.setValue(true); // select something by default
-        System.out.println( "\n\n----> getBeforePlayWidget : set default value\n\n\n");
-      }
-      else {
-        System.out.println( "\n\n\n\n----> getBeforePlayWidget : " + madeFast + " first " +first+
-          "\n\n\n");
-
-      }*/
 
      // vp.setWidth("80px");
 
