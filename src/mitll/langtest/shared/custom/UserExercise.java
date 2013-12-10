@@ -122,6 +122,7 @@ public class UserExercise extends AudioExercise {
 
   public void setEnglish(String english) {
     this.english = english;
+    setTooltip(english);
   }
 
   public void setForeignLanguage(String foreignLanguage) {
