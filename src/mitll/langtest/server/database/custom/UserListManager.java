@@ -29,8 +29,6 @@ public class UserListManager {
   // TODO add a DAO -- do something smarter!
   private int i = 0;
 
- // private List<UserList> userLists = new ArrayList<UserList>();
-
   private UserExerciseDAO userExerciseDAO;
   private int userExerciseCount = 0;
   private UserListDAO userListDAO;
@@ -109,15 +107,6 @@ public class UserListManager {
     return listsForUser;
   }
 
-/*  private void sortByTime(List<UserList> listsForUser) {
-    Collections.sort(listsForUser, new Comparator<UserList>() {
-      @Override
-      public int compare(UserList o1, UserList o2) {
-        return o1.getModified() > o2.getModified() ? -1 : o1.getModified() < o2.getModified() ? +1 : 0;
-      }
-    });
-  }*/
-
   public Collection<UserExercise> addItemToUserList(long userListID, UserExercise userExercise) {
     UserList where = userListDAO.getWithExercises(userListID);
 
@@ -126,15 +115,6 @@ public class UserListManager {
       userListExerciseJoinDAO.add(where,userExercise);
       return where.getExercises();
     }
-
-/*    for (UserList userList : userLists) {
-      if (userList.getUniqueID() == userListID) {
-        userList.addExercise(userExercise);
-        logger.debug("addItemToUserList " + userList);
-        return userList.getExercises();
-      }
-    }*/
-
     return Collections.emptyList();
   }
 
@@ -159,20 +139,10 @@ public class UserListManager {
   public void reallyCreateNewItem(UserList userList, UserExercise userExercise) {
     userExerciseDAO.add(userExercise);
 
-  //  boolean found = false;
-
     UserList where = userListDAO.getWhere(userList.getUniqueID());
     if (where != null) {
       userListExerciseJoinDAO.add(where,userExercise);
     }
-
-/*    for (UserList ul : userLists) {
-      if (ul.getUniqueID() == userList.getUniqueID()) {
-        ul.addExercise(userExercise);
-        logger.debug("now " + ul + " after adding " + userExercise);
-        found = true;
-      }
-    }*/
     if (where == null) logger.error("reallyCreateNewItem : couldn't find ul with id " + userList.getUniqueID());
   }
 
@@ -192,7 +162,7 @@ public class UserListManager {
     }
   }
 
-/*  public UserExerciseDAO getUserExerciseDAO() {
-    return userExerciseDAO;
-  }*/
+  public void editItem(UserExercise userExercise) {
+    userExerciseDAO.update(userExercise);
+  }
 }
