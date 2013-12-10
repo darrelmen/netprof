@@ -1,6 +1,7 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.database.custom.UserListExerciseJoinDAO;
+import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.custom.UserExercise;
 import org.apache.log4j.Logger;
 
@@ -8,20 +9,20 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class UserExerciseDAO extends DAO {
   private static Logger logger = Logger.getLogger(UserExerciseDAO.class);
 
   public static final String USEREXERCISE = "userexercise";
+  UserListExerciseJoinDAO userListExerciseJoinDAO;
+  private ExerciseDAO exerciseDAO;
 
-  public UserExerciseDAO(Database database) {
+  public UserExerciseDAO(Database database, UserListExerciseJoinDAO userListExerciseJoinDAO) {
     super(database);
     try {
       createUserTable(database);
+      this.userListExerciseJoinDAO = userListExerciseJoinDAO;
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
@@ -102,31 +103,63 @@ public class UserExerciseDAO extends DAO {
     database.closeConnection(connection);
   }
 
-  void dropUserTable(Database database) throws Exception {
+/*  void dropUserTable(Database database) throws Exception {
     System.err.println("----------- dropUserTable -------------------- ");
     Connection connection = database.getConnection();
     PreparedStatement statement = connection.prepareStatement("drop TABLE " + USEREXERCISE);
     statement.execute();
     statement.close();
     database.closeConnection(connection);
-  }
+  }*/
 
+  /**
+   * @see mitll.langtest.server.database.custom.UserListDAO#populateList
+   * @param listID
+   * @param db
+   * @return
+   */
   public Collection<UserExercise> getOnList(long listID) {
     String sql = "SELECT " +
       "ue.* from " + USEREXERCISE + " ue, " + UserListExerciseJoinDAO.USER_EXERCISE_LIST_EXERCISE +" uele "+
       " where ue.uniqueid=uele.exerciseid AND uele.userlistid=" + listID + ";";
+    
+    // TODO fix join - don't do uniqueid, do exercise id so we can do mixed lists
     try {
       List<UserExercise> userExercises = getUserExercises(sql);
+      Set<String> ids = new HashSet<String>();
+      for (UserExercise ue : userExercises) ids.add(ue.getID());
+
+      List<String> allFor = userListExerciseJoinDAO.getAllFor(listID, ids);
+      logger.debug("all ids " + allFor);
+      logger.debug("userExercises " + userExercises);
+
+      for (String id : allFor) {
+        Exercise byID = exerciseDAO.getExercise(id);
+
+        if (byID != null) {
+          userExercises.add(new UserExercise(byID.getShell())); // all predefined references
+        } else logger.error("huh can't find  " + id);
+      }
+      logger.debug("userExercises " + userExercises);
+
       if (userExercises.isEmpty()) {
         logger.info("getOnList : no exercises on list id " + listID);
         return new ArrayList<UserExercise>();
-      } else return userExercises;
+      } else {
+        logger.debug("getOnList got " + userExercises);
+        return userExercises;
+      }
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
     return new ArrayList<UserExercise>();
   }
 
+  /**
+   * @see DatabaseImpl#getUserExerciseWhere(String)
+   * @param exid
+   * @return
+   */
   public UserExercise getWhere(String exid) {
     String unique = exid.substring("Custom_".length());
     String sql = "SELECT * from " + USEREXERCISE + " where uniqueid=" + unique + ";";
@@ -160,13 +193,10 @@ public class UserExerciseDAO extends DAO {
   private List<UserExercise> getUserExercises(String sql) throws SQLException {
     Connection connection = database.getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
-    int i;
-
     ResultSet rs = statement.executeQuery();
     List<UserExercise> exercises = new ArrayList<UserExercise>();
 
     while (rs.next()) {
-      i = 1;
       exercises.add(new UserExercise(rs.getLong("uniqueid"), //id
         rs.getLong("creatorid"), // age
         rs.getString("english"), // exp
@@ -211,6 +241,9 @@ public class UserExerciseDAO extends DAO {
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
+  }
 
+  public void setExerciseDAO(ExerciseDAO exerciseDAO) {
+    this.exerciseDAO = exerciseDAO;
   }
 }
