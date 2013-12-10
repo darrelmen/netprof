@@ -38,8 +38,8 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     "Please add this site to its whitelist.</font>");
   private AudioControl listener;
  // private HandlerRegistration keyHandler;
-  private PlayListener playListener;
  // private boolean hasFocus;
+  private PlayListener playListener;
   private static int counter = 0;
   private int id;
   private static final boolean DEBUG = false;
@@ -58,7 +58,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   }
 
   /**
-   * @see mitll.langtest.client.exercise.WaveformExercisePanel.RecordAudioPanel#makePlayAudioPanel(com.google.gwt.user.client.ui.Widget)
+   * @see mitll.langtest.client.exercise.RecordAudioPanel.MyPlayAudioPanel#MyPlayAudioPanel(com.github.gwtbootstrap.client.ui.Image, com.github.gwtbootstrap.client.ui.Image, com.google.gwt.user.client.ui.Panel)
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.ASRRecordAudioPanel#makePlayAudioPanel(com.google.gwt.user.client.ui.Widget)
    * @param soundManager
    * @param playListener
@@ -292,6 +292,8 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     if (DEBUG) System.out.println("PlayAudioPanel.createSound : " + this + " created sound " + currentSound);
 
     soundManager.createSound(currentSound, song, song);
+    showPlayButton();
+    reinitialize();
   }
 
   private void destroySound() {
@@ -304,6 +306,8 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    * Does repeat audio if count > 0
    */
   public void reinitialize(){
+    if (DEBUG) System.out.println("PlayAudioPanel :reinitialize");
+
     if (count == 0) setPlayLabel();
     update(0);
     soundManager.setPosition(currentSound, 0);
@@ -325,10 +329,16 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
 
   public void songFirstLoaded(double durationEstimate){
     if (!playButton.isEnabled()) setPlayEnabled(true);
-    playButton.setVisible(true);
+    if (DEBUG) System.out.println("PlayAudioPanel.songFirstLoaded : " + this);
+
+    showPlayButton();
     if (listener != null) {
       listener.songFirstLoaded(durationEstimate);
     }
+  }
+
+  public void showPlayButton() {
+    playButton.setVisible(true);
   }
 
   /**
