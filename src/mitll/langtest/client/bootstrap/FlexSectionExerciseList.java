@@ -371,6 +371,10 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     return widget;
   }
 
+  /**
+   * @see HistoryExerciseList#onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
+   * @param selectionState
+   */
   @Override
   protected void restoreListBoxState(SelectionState selectionState) {
     super.restoreListBoxState(selectionState);
