@@ -81,7 +81,7 @@ public class NPFHelper implements RequiresResize {
     npfContentPanel = new SimplePanel();
     hp.add(npfContentPanel);
     npfContentPanel.addStyleName("floatRight");
-    npfExerciseList = makeNPFExerciseList(npfContentPanel,instanceName/*,ul*/);
+    npfExerciseList = makeNPFExerciseList(npfContentPanel,instanceName);
 
     left.add(npfExerciseList.getExerciseListOnLeftSide(controller.getProps()));
     rememberAndLoadFirst(ul);
@@ -98,7 +98,7 @@ public class NPFHelper implements RequiresResize {
     return npfContentPanel;
   }
 
-  private PagingExerciseList makeNPFExerciseList(SimplePanel right, String instanceName/*,UserList ul*/) {
+  private PagingExerciseList makeNPFExerciseList(SimplePanel right, String instanceName) {
     PagingExerciseList exerciseList = new PagingExerciseList(right, service, feedback, false, false, controller, instanceName) {
       @Override
       protected void onLastItem() {
@@ -139,7 +139,4 @@ public class NPFHelper implements RequiresResize {
     //  npfContentPanel.setWidth(v + "px");
     }
   }
-
-  //public void removeKeyHandler() {}
-  //public void addKeyHandler() {}
 }
