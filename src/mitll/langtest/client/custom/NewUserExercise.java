@@ -44,11 +44,11 @@ public class NewUserExercise extends BasicDialog {
   private LangTestDatabaseAsync service;
   private UserManager userManager;
   private HTML itemMarker;
-  BasicDialog.FormField english;
-  BasicDialog.FormField foreignLang;
-  CreateFirstRecordAudioPanel rap;
-  CreateFirstRecordAudioPanel rapSlow;
-  Button submit;
+  private BasicDialog.FormField english;
+  private BasicDialog.FormField foreignLang;
+  private CreateFirstRecordAudioPanel rap;
+  private CreateFirstRecordAudioPanel rapSlow;
+  private Button submit;
 
   /**
    * @see Navigation#addItem(mitll.langtest.shared.custom.UserList)
@@ -150,23 +150,28 @@ public class NewUserExercise extends BasicDialog {
         if (validateForm(english, foreignLang, rap, normalSpeedRecording)) {
           newUserExercise.setEnglish(english.getText());
           newUserExercise.setForeignLanguage(foreignLang.getText());
-          service.reallyCreateNewItem(ul, newUserExercise, new AsyncCallback<UserExercise>() {
-            @Override
-            public void onFailure(Throwable caught) {}
-
-            @Override
-            public void onSuccess(UserExercise newExercise) {
-              ul.addExercise(newExercise);
-              itemMarker.setText(ul.getExercises().size() + " items");
-              pagingContainer.addAndFlush(newExercise);
-              toAddTo.clear();
-              toAddTo.add(addNew(ul, pagingContainer, toAddTo));
-            }
-          });
+          NewUserExercise.this.onClick(ul, pagingContainer, toAddTo);
         }
       }
     });
     return submit;
+  }
+
+  protected void onClick(final UserList ul, final PagingContainer<?> pagingContainer, final Panel toAddTo) {
+    service.reallyCreateNewItem(ul, newUserExercise, new AsyncCallback<UserExercise>() {
+      @Override
+      public void onFailure(Throwable caught) {}
+
+      @Override
+      public void onSuccess(UserExercise newExercise) {
+        ul.addExercise(newExercise);
+        itemMarker.setText(ul.getExercises().size() + " items");
+        pagingContainer.addAndFlush(newExercise);
+        toAddTo.clear();
+        toAddTo.add(addNew(ul, pagingContainer, toAddTo));
+        newUserExercise = null;
+      }
+    });
   }
 
   private CreateFirstRecordAudioPanel makeRecordAudioPanel(final FluidRow row, final FormField english, final FormField foreignLang,boolean recordRegularSpeed) {
@@ -217,7 +222,7 @@ public class NewUserExercise extends BasicDialog {
                 @Override
                 public void onSuccess(UserExercise newExercise) {
                   newUserExercise = newExercise;
-                  System.out.println("onSuccess : stopRecording with newUserExercise " + newUserExercise);
+                  System.out.println("\tonSuccess : stopRecording with newUserExercise " + newUserExercise);
 
                   exercise = newExercise.toExercise();
                   otherRAP.setExercise(exercise);
@@ -226,7 +231,7 @@ public class NewUserExercise extends BasicDialog {
                 }
               });
             } else {
-              System.out.println("onSuccess : stopRecording with newUserExercise " + newUserExercise + " and exercise " + exercise);
+              System.out.println("\t\tonSuccess : stopRecording with newUserExercise " + newUserExercise + " and exercise " + exercise);
 
               super.stopRecording();
             }
