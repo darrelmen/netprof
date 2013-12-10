@@ -104,7 +104,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
    */
   protected void loadExercises(String selectionState, String prefix) {
     lastReqID++;
-    System.out.println("loadExercises : looking for '" + prefix + "' (" + prefix.length() + " chars)");
+    System.out.println("PagingExerciseList.loadExercises : looking for '" + prefix + "' (" + prefix.length() + " chars)");
 
     long l = userList == null ? -1 : userList.getUniqueID();
     service.getExerciseIds(lastReqID, controller.getUser(), prefix, l, new SetExercisesCallback());
