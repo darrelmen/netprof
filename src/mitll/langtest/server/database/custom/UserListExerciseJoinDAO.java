@@ -38,9 +38,7 @@ public class UserListExerciseJoinDAO extends DAO {
 
   void createUserListTable(Database database) throws SQLException {
     Connection connection = database.getConnection();
-    PreparedStatement statement;
-
-    statement = connection.prepareStatement("CREATE TABLE if not exists " +
+    PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
       USER_EXERCISE_LIST_EXERCISE +
       " (" +
       "uniqueid IDENTITY, " +
