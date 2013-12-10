@@ -265,7 +265,7 @@ public class AudioFileHelper {
       if (file.exists()) {
         String orig = audioFile;
         audioFile = file.getAbsolutePath();
-        logger.info("from " + orig + " wrote to " + file + " or " + audioFile);
+        logger.info("\n\ngetWavForMP3 : from " + orig + " wrote to " + file + " or " + audioFile);
       }
       else {
         logger.error("getImageForAudioFile : can't find " + file.getAbsolutePath());
