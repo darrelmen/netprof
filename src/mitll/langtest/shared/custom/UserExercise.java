@@ -17,8 +17,8 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class UserExercise extends AudioExercise {
-  static int globalCount  = 0;
-  int count = 0;
+  private static int globalCount  = 0;
+  private int count = 0;
   private long uniqueID = -1; //set by database
   private String english;
   private String foreignLanguage;
@@ -28,19 +28,13 @@ public class UserExercise extends AudioExercise {
   String comment;*/
 
   boolean isPredef;
-  String exerciseID;
 
-  public UserExercise() {}
+  public UserExercise() {}  // just for serialization
 
-/*  public UserExercise(String id, String tooltip) {
-    super(id,tooltip);
-    isPredef = true;
-  }*/
-
-
-  public UserExercise(ExerciseShell shell) {
+  public UserExercise(ExerciseShell shell,long creator) {
     super(shell.getID(),shell.getTooltip());
     isPredef = true;
+    this.creator = creator;
   }
 
   /**
@@ -82,7 +76,6 @@ public class UserExercise extends AudioExercise {
     super(exercise.getID(), exercise.getEnglishSentence());
 
     this.isPredef = true;
-    this.exerciseID = exercise.getID();
     this.english = exercise.getEnglishSentence();
     this.foreignLanguage = exercise.getContent();
   }
@@ -97,6 +90,11 @@ public class UserExercise extends AudioExercise {
     return exercise;
   }
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#getUserExerciseWhere(String)
+   * @param language
+   * @return
+   */
   public Exercise toExercise(String language) {
     String content = ExerciseFormatter.getContent(getForeignLanguage(), "", english, "", language);
     Exercise imported = new Exercise("import", id, content, false, true, english);
@@ -120,15 +118,16 @@ public class UserExercise extends AudioExercise {
     return creator;
   }
 
-  public void setUniqueID(long uniqueID) {
-    this.uniqueID = uniqueID;
-  }
-
+  /**
+   * @see mitll.langtest.server.database.UserExerciseDAO#add
+   * @param uniqueID
+   */
+  public void setUniqueID(long uniqueID) { this.uniqueID = uniqueID; /*setID("Custom_"+uniqueID);*/ }
   public long getUniqueID() { return uniqueID; }
 
   @Override
   public String getID() {
-    return isPredef ? super.getID() : "Custom_"+uniqueID;    //To change body of overridden methods use File | Settings | File Templates.
+    return isPredef ? super.getID() : "Custom_"+uniqueID;
   }
 
   public void setEnglish(String english) {
@@ -140,9 +139,13 @@ public class UserExercise extends AudioExercise {
     this.foreignLanguage = foreignLanguage;
   }
 
+  public boolean isPredefined() {
+    return isPredef;
+  }
+
   public String toString() {
     return "UserExercise (" +count+
-      ") #" + uniqueID + "/" + exerciseID+
+      ") #" + uniqueID + "/" + getID()+ (isPredef ? " <Predef>" :  " <User>")+  " creator " + getCreator()+
         " : " + getEnglish() + " = " + getForeignLanguage() + " audio attr (" +getAudioAttributes().size()+
       ") :" + getAudioAttributes();
   }
