@@ -49,17 +49,15 @@ public class SimpleRecordPanel extends RecordButtonPanel {
       ((HorizontalPanel)widget).setSpacing(10);
     }
 
+    widget.getElement().setId("SimpleRecordPanel_panel");
     playback.setHeight("30px"); // for audio controls to show
     playback.addStyleName("leftFiveMargin");
     playback.setWidth("300px");
+    playback.getElement().setId("SimpleRecordPanel_playback");
     // make audio feedback widget
     addValidityFeedback(index);
 
     // add playback html
-    addPlayback();
-  }
-
-  private void addPlayback() {
     getPanel().add(playback);
   }
 
