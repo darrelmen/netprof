@@ -281,7 +281,12 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     rememberExercises(exercises);
     if (firstExercise != null) {
       ExerciseShell firstExerciseShell = findFirstExercise();
-      useExercise(firstExercise, firstExerciseShell);   // allows us to skip another round trip with the server to ask for the first exercise
+      if (firstExerciseShell.getID().equals(firstExercise.getID())) {
+        useExercise(firstExercise, firstExerciseShell);   // allows us to skip another round trip with the server to ask for the first exercise
+      }
+      else {
+        loadFirstExercise();
+      }
     }
     else {
       loadFirstExercise();
@@ -666,14 +671,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     return onLast;
   }
 
-/*
-  private boolean isOnLastItem(int i) {
-    return i == currentExercises.size() - 1;
-  }
-*/
-
   public boolean loadNextExercise(String id) {
-    System.out.println("ExerciseList.loadNextExercise " + id);
+    System.out.println("ExerciseList.loadNextExercise id = " + id);
     ExerciseShell exerciseByID = getExerciseByID(id);
     return exerciseByID != null && loadNextExercise(exerciseByID);
   }
@@ -756,7 +755,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   public Widget getWidget() {   return this;  }
 
   /**
-   * @see NavigationHelper#getNextAndPreviousButtons(mitll.langtest.shared.Exercise, ExerciseController)
+   * @see mitll.langtest.client.exercise.NavigationHelper#makePrevButton
    * @param current
    * @return
    */
