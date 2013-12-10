@@ -10,7 +10,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * To change this template use File | Settings | File Templates.
  */
 public class ExerciseShell implements IsSerializable {
-  protected String tooltip;
+  private String tooltip;
   protected String id;
 
   public ExerciseShell() {}
@@ -21,9 +21,13 @@ public class ExerciseShell implements IsSerializable {
 
   public String getID() { return id; }
   public String getTooltip() { return tooltip; }
+  public void setTooltip(String tooltip) {
+    this.tooltip = tooltip;
+  }
   @Override
   public boolean equals(Object other) {
     return other instanceof ExerciseShell && getID().equals(((ExerciseShell)other).getID());
   }
+
   public String toString() { return "Exercise id = " +id; }
 }
