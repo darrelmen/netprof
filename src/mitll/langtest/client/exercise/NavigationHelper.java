@@ -32,7 +32,7 @@ import java.util.Date;
 public class NavigationHelper extends HorizontalPanel {
   private static final String LEFT_ARROW_TOOLTIP = "Press the left arrow key to go to the previous item.";
   private static final String RIGHT_ARROW_TOOLTIP = "Press enter to go to the next item.";
-  private static final String RIGHT_ARROW_TOOLTIP2 = "Press the right arrow key to go to the next item.";
+ // private static final String RIGHT_ARROW_TOOLTIP2 = "Press the right arrow key to go to the next item.";
   private static final String THE_FOREIGN_LANGUAGE = " the foreign language";
 
   private Button prev;
@@ -61,6 +61,7 @@ public class NavigationHelper extends HorizontalPanel {
     this.listContainer = listContainer;
     setSpacing(5);
     getNextAndPreviousButtons(exercise, controller, addButtons);
+    getElement().setId("NavigationHelper");
   }
 
   private String getLanguage( ExerciseController controller) {
@@ -79,7 +80,6 @@ public class NavigationHelper extends HorizontalPanel {
     boolean useKeyHandler = controller.isCollectAudio();
 
     makePrevButton(e, controller, addButtons, useKeyHandler);
-
     makeNextButton(e, controller, addButtons);
 
     // TODO : revisit in the context of text data collections
@@ -108,7 +108,9 @@ public class NavigationHelper extends HorizontalPanel {
     if (enableNextOnlyWhenAllCompleted) { // initially not enabled
       next.setEnabled(false);
     }
-    next.setEnabled(!listContainer.onLast(e));
+    else {
+      next.setEnabled(!listContainer.onLast(e));
+    }
 
     if (addButtons)  add(next);
     if (controller.getProps().isBindNextToEnter()) next.setTitle(RIGHT_ARROW_TOOLTIP);
