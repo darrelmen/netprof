@@ -48,7 +48,7 @@ public class NewUserExercise extends BasicDialog {
   private BasicDialog.FormField foreignLang;
   private CreateFirstRecordAudioPanel rap;
   private CreateFirstRecordAudioPanel rapSlow;
-  private Button submit;
+  protected Button submit;
 
   /**
    * @see Navigation#addItem(mitll.langtest.shared.custom.UserList)
@@ -77,16 +77,16 @@ public class NewUserExercise extends BasicDialog {
     row = new FluidRow();
     container.add(row);
     foreignLang = addControlFormField(row, "Foreign Language (" + controller.getLanguage() + ")",false,1);
+    foreignLang.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
 
     row = new FluidRow();
     container.add(row);
 
     rap = makeRecordAudioPanel(row, english, foreignLang, true);
-    final ControlGroup normalSpeedRecording = addControlGroupEntry(row, "Record normal speed reference recording", rap);
+    final ControlGroup normalSpeedRecording = addControlGroupEntry(row, "Normal speed reference recording", rap);
 
     rapSlow = makeRecordAudioPanel(row, english, foreignLang, false);
-   /* final ControlGroup slowSpeedRecording =*/
-    addControlGroupEntry(row, "Record slow speed reference recording", rapSlow);
+    addControlGroupEntry(row, "Slow speed reference recording (optional)", rapSlow);
     rap.setOtherRAP(rapSlow.getPostAudioButton());
     rapSlow.setOtherRAP(rap.getPostAudioButton());
 
@@ -158,7 +158,9 @@ public class NewUserExercise extends BasicDialog {
   }
 
   protected void onClick(final UserList ul, final PagingContainer<?> pagingContainer, final Panel toAddTo) {
-    service.reallyCreateNewItem(ul, newUserExercise, new AsyncCallback<UserExercise>() {
+    System.out.println("onClick : adding " + newUserExercise + " to " +ul);
+
+    service.reallyCreateNewItem(ul.getUniqueID(), newUserExercise, new AsyncCallback<UserExercise>() {
       @Override
       public void onFailure(Throwable caught) {}
 
