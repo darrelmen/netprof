@@ -176,14 +176,11 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       Scheduler.get().scheduleDeferred(new Command() {   // helpful???
         public void execute() {
           if (debug) System.out.println("\tonLoad : deferred - audio path is " + audioPath);
-
           getImagesForPath(audioPath);
         }
       });
-
-     // getImagesForPath(audioPath);
-    }
-    else {
+      // getImagesForPath(audioPath);
+    } else {
       if (debug) System.out.println("onLoad : for AudioPanel got no audio path?");
     }
   }
@@ -194,7 +191,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   }
 
   public void setScreenPortion(float screenPortion) {
-    System.out.println("setScreenPortion : screenPortion " + screenPortion);
+    if (debug) System.out.println("AudioPanel.setScreenPortion : screenPortion " + screenPortion);
     this.screenPortion = screenPortion;
   }
 
@@ -224,6 +221,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    */
   public void getImagesForPath(String path) {
     path = wavToMP3(path);
+    path = ensureForwardSlashes(path);
     if (debug) System.out.println("AudioPanel : getImagesForPath " +path);
     if (path != null) {
       this.audioPath = path;
@@ -231,6 +229,11 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     lastWidth = 0;
     getImages();
     playAudio.startSong(path);
+  }
+
+
+  private String ensureForwardSlashes(String wavPath) {
+    return wavPath.replaceAll("\\\\", "/");
   }
 
   private String wavToMP3(String path) {
@@ -346,7 +349,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       int reqid = getReqID(type);
       final long then = System.currentTimeMillis();
 
-      //System.out.println("getImageURLForAudio : req " + reqid + " path " + path + " type " + type + " width " + width);
+      System.out.println("getImageURLForAudio : req " + reqid + " path " + path + " type " + type + " width " + width);
       service.getImageForAudioFile(reqid, path, type, toUse, height, new AsyncCallback<ImageResponse>() {
         public void onFailure(Throwable caught) {
           long now = System.currentTimeMillis();
