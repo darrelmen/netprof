@@ -1,5 +1,6 @@
 package mitll.langtest.client.custom;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
@@ -25,10 +26,9 @@ public class EditItem {
   //private HTML itemMarker;
   PagingContainer<UserExercise> pagingContainer;
 
-  public EditItem(final LangTestDatabaseAsync service, final UserManager userManager, ExerciseController controller/*,HTML itemMarker*/) {
+  public EditItem(final LangTestDatabaseAsync service, final UserManager userManager, ExerciseController controller) {
     this.controller = controller;
     this.service = service;
-    //   this.itemMarker = itemMarker;
     this.userManager = userManager;
   }
 
@@ -57,18 +57,34 @@ public class EditItem {
     UserExercise exerciseShell = pagingContainer.selectFirst();
     if (exerciseShell == null) System.err.println("huh? nothing first?");
 
-/*    NewUserExercise newUserExercise = new NewUserExercise(service, userManager, controller, itemMarker);
-    right.add(newUserExercise.addNew(ul, pagingContainer, right));
-    newUserExercise.setFields(exerciseShell);*/
     editItem(exerciseShell, right, ul, itemMarker);
     return hp;
   }
 
-  private void editItem(UserExercise exerciseShell, SimplePanel right, UserList ul, HTML itemMarker) {
-    NewUserExercise newUserExercise = new NewUserExercise(service, userManager, controller, itemMarker);
+  private void editItem(final UserExercise exerciseShell, SimplePanel right, UserList ul, HTML itemMarker) {
+    final PagingContainer<UserExercise> outer = pagingContainer;
+    NewUserExercise newUserExercise = new NewUserExercise(service, userManager, controller, itemMarker) {
+      @Override
+      protected void onClick(final UserList ul, PagingContainer<?> pagingContainer, Panel toAddTo) {
+        service.editItem(exerciseShell, new AsyncCallback<Void>() {
+          @Override
+          public void onFailure(Throwable caught) {}
+
+          @Override
+          public void onSuccess(Void newExercise) {
+            outer.refresh();
+            for (UserExercise ue : ul.getExercises())  {
+               if (ue.getID() == exerciseShell.getID()) {
+                 System.out.println("old " + ue);
+                 System.out.println("new " + exerciseShell);
+               }
+            }
+          }
+        });
+      }
+    };
     right.clear();
     right.add(newUserExercise.addNew(ul, pagingContainer, right));
     newUserExercise.setFields(exerciseShell);
   }
-
 }
