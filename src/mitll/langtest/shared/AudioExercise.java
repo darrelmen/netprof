@@ -37,7 +37,7 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.server.database.ExcelImport#getExercise(String, mitll.langtest.server.database.FileExerciseDAO, String, String, String, String, String, boolean, String)
+   * @see mitll.langtest.server.database.ExcelImport#getExercise(String, String, String, String, String, String, boolean, String)
    * @param s
    */
   public void setSlowRefAudio(String s) {
@@ -57,4 +57,10 @@ public class AudioExercise extends ExerciseShell {
   public boolean hasRefAudio() { return !audioAttributes.isEmpty(); }
 
   public Collection<AudioAttribute> getAudioAttributes() { return audioAttributes.values();  }
+  public void forgetAllAudio() { audioAttributes.clear(); }
+
+  public String toString() {
+    return super.toString() +" audio attr (" +getAudioAttributes().size()+
+      ") :" + getAudioAttributes();
+  }
 }
