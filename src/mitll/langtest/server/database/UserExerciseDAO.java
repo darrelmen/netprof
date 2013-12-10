@@ -39,7 +39,7 @@ public class UserExerciseDAO extends DAO {
 
     try {
       // there are much better ways of doing this...
-      logger.info("add :userExercise " + userExercise);
+      logger.info("\n\n\nadd :userExercise " + userExercise);
 
       Connection connection = database.getConnection();
       PreparedStatement statement;
@@ -118,13 +118,13 @@ public class UserExerciseDAO extends DAO {
     try {
       List<UserExercise> userExercises = getUserExercises(sql);
       if (userExercises.isEmpty()) {
-        logger.error("huh? no exercises on list id " + listID);
-        return Collections.emptyList();
+        logger.info("getOnList : no exercises on list id " + listID);
+        return new ArrayList<UserExercise>();
       } else return userExercises;
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
-    return Collections.emptyList();
+    return new ArrayList<UserExercise>();
   }
 
   public UserExercise getWhere(String exid) {
@@ -133,7 +133,7 @@ public class UserExerciseDAO extends DAO {
     try {
       List<UserExercise> userExercises = getUserExercises(sql);
       if (userExercises.isEmpty()) {
-        logger.error("huh? no custom exercise with id " + unique);
+        logger.error("getWhere : huh? no custom exercise with id " + unique);
         return null;
       } else return userExercises.iterator().next();
     } catch (SQLException e) {
@@ -180,5 +180,37 @@ public class UserExerciseDAO extends DAO {
     database.closeConnection(connection);
 
     return exercises;
+  }
+
+  public void update(UserExercise userExercise) {
+    try {
+      Connection connection = database.getConnection();
+
+      String sql = "UPDATE " + USEREXERCISE +
+        " " +
+        "SET " +
+        "english='" + userExercise.getEnglish() + "', " +
+        "foreignLanguage='" + userExercise.getForeignLanguage() + "', " +
+        "refAudio='" + userExercise.getRefAudio() + "', " +
+        "slowAudioRef='" + userExercise.getSlowAudioRef() + "' " +
+        "WHERE uniqueid=" + userExercise.getUniqueID();
+ /*       if (false) {
+          logger.debug("update " + id + " score " +score);
+        }*/
+      PreparedStatement statement = connection.prepareStatement(sql);
+
+      int i = statement.executeUpdate();
+
+      if (false) logger.debug("UPDATE " + i);
+      if (i == 0) {
+        logger.error("huh? didn't update the userExercise for " + userExercise + " sql " + sql);
+      }
+
+      statement.close();
+      database.closeConnection(connection);
+    } catch (Exception e) {
+      logger.error("got " + e, e);
+    }
+
   }
 }
