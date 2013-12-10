@@ -44,6 +44,7 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
     });
     navigationHelper.enablePrevButton(!controller.getExerciseList().onFirst(null));
     navigationHelper.enableNextButton(false);
+    getElement().setId("DataCollectionFlashcard");
   }
 
   /**
