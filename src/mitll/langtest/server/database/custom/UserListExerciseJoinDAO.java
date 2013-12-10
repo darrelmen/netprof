@@ -12,6 +12,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -24,7 +28,6 @@ public class UserListExerciseJoinDAO extends DAO {
   private static Logger logger = Logger.getLogger(UserListExerciseJoinDAO.class);
 
   public static final String USER_EXERCISE_LIST_EXERCISE = "userexerciselist_exercise";
-  //private UserDAO userDAO;
 
   public UserListExerciseJoinDAO(Database database, UserDAO userDAO) {
     super(database);
@@ -33,7 +36,6 @@ public class UserListExerciseJoinDAO extends DAO {
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
-   // this.userDAO = userDAO;
   }
 
   void createUserListTable(Database database) throws SQLException {
@@ -43,13 +45,14 @@ public class UserListExerciseJoinDAO extends DAO {
       " (" +
       "uniqueid IDENTITY, " +
       "userlistid LONG, " +
-      "exerciseid LONG, " +
+      "exerciseid VARCHAR, " +
       "FOREIGN KEY(userlistid) REFERENCES " +
       UserListDAO.USER_EXERCISE_LIST +
-      "(uniqueid)," +
-      "FOREIGN KEY(exerciseid) REFERENCES " +
+      "(uniqueid)" +    // user lists can be combinations of predefined and user defined exercises
+        //"," +
+/*      "FOREIGN KEY(exerciseid) REFERENCES " +
       UserExerciseDAO.USEREXERCISE +
-      "(uniqueid)" +
+      "(uniqueid)" +*/
       ")");
     statement.execute();
     statement.close();
@@ -80,7 +83,7 @@ public class UserListExerciseJoinDAO extends DAO {
       int i = 1;
       //     statement.setLong(i++, userList.getUserID());
       statement.setLong(i++, userList.getUniqueID());
-      statement.setLong(i++, exercise.getUniqueID());
+      statement.setString(i++, exercise.getID());
 
       int j = statement.executeUpdate();
 
@@ -104,20 +107,35 @@ public class UserListExerciseJoinDAO extends DAO {
     }
   }
 
-
   /**
    * Pulls the list of users out of the database.
    *
    * @return
    */
-/*  public List<UserList> getAll() {
+  public List<String> getAllFor(long userListID, Set<String> exclude) {
     try {
-      String sql = "SELECT * from " + USER_EXERCISE_LIST + " order by modified";
-      return getUserLists(sql);
+      String sql = "SELECT * from " + USER_EXERCISE_LIST_EXERCISE +" where userlistid=" + userListID ;
+      return getUserExercises(sql,exclude);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
     return Collections.emptyList();
-  }*/
+  }
 
+  private List<String> getUserExercises(String sql, Set<String> exclude) throws SQLException {
+    Connection connection = database.getConnection();
+    PreparedStatement statement = connection.prepareStatement(sql);
+    ResultSet rs = statement.executeQuery();
+    List<String> exercises = new ArrayList<String>();
+
+    while (rs.next()) {
+      String exerciseid = rs.getString("exerciseid");
+      if (!exclude.contains(exerciseid)) exercises.add(exerciseid);
+    }
+    rs.close();
+    statement.close();
+    database.closeConnection(connection);
+
+    return exercises;
+  }
 }
