@@ -529,18 +529,21 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     protected Widget getBeforePlayWidget() {
       VerticalPanel vp = new VerticalPanel();
 
-      boolean madeFast = false;
+     // boolean madeFast = false;
 
       Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
       RadioButton first = null;
 
       System.out.println("Attributes were " + audioAttributes);
-
+      RadioButton regular = null;
       for (final AudioAttribute audioAttribute : audioAttributes) {
         RadioButton fast = new RadioButton(GROUP, audioAttribute.getDisplay());
         if (audioAttribute.isRegularSpeed()) {
-          fast.setValue(true);
-          madeFast = true;
+          regular = fast;
+          System.out.println(audioAttribute +" is regular speed\n\n\n ");
+
+          //fast.setValue(true);
+          //madeFast = true;
         }
         else {
           System.out.println(audioAttribute +" is not regular speed ");
@@ -562,10 +565,25 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         });
       }
 
-      if (!madeFast && first != null) {
-        first.setValue(true); // select something by default
-        System.out.println( "----> set default value\n\n\n");
+      if (regular != null) {
+        regular.setValue(true);
+        System.out.println( "\n\n----> getBeforePlayWidget : set regular!\n\n");
+
       }
+      else if (first != null) {
+        first.setValue(true);
+        System.out.println( "\n\n----> getBeforePlayWidget : set somethign else!\n\n");
+
+      }
+  /*    if (!madeFast && first != null) {
+        first.setValue(true); // select something by default
+        System.out.println( "\n\n----> getBeforePlayWidget : set default value\n\n\n");
+      }
+      else {
+        System.out.println( "\n\n\n\n----> getBeforePlayWidget : " + madeFast + " first " +first+
+          "\n\n\n");
+
+      }*/
 
      // vp.setWidth("80px");
 
