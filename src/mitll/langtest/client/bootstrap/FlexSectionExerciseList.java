@@ -49,8 +49,8 @@ import java.util.Set;
  */
 public class FlexSectionExerciseList extends HistoryExerciseList {
   private static final int HEADING_FOR_LABEL = 4;
-  public static final int PANEL_INSIDE_SCROLL_MIN_HEIGHT = 50;
-  public static final int PANEL_INSIDE_SCROLL_MIN_HEIGHT_SMALL = 30;
+ // public static final int PANEL_INSIDE_SCROLL_MIN_HEIGHT = 50;
+ // public static final int PANEL_INSIDE_SCROLL_MIN_HEIGHT_SMALL = 30;
   private static final int UNACCOUNTED_WIDTH = 120;
 
 
@@ -73,7 +73,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @param feedback
    * @param showTurkToken
    * @param showInOrder
-   * @param showListBox
+   * @paramx showListBox
    * @param controller
    * @param instance
    */
@@ -118,6 +118,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
         public void onFailure(Throwable caught) {}
         @Override
         public void onSuccess(Set<String> result) {
+          //System.out.println("\tFlexSectionExerciseList : getCompletedExercises : completed for user=" + userID + " result " + result.size());
           controller.getExerciseList().setCompleted(result);
           addWidgets();
         }
