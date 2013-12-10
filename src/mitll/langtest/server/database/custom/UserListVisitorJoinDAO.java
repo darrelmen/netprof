@@ -67,6 +67,7 @@ public class UserListVisitorJoinDAO extends DAO {
   public void add(long uniqueID, long visitor) {
     long id = 0;
 
+    if (existsAlready(uniqueID,visitor)) return;
     try {
       // there are much better ways of doing this...
       logger.info("add :visitor " +visitor+
@@ -75,8 +76,13 @@ public class UserListVisitorJoinDAO extends DAO {
       Connection connection = database.getConnection();
       PreparedStatement statement;
 
+ /*     String prefix = "IF NOT EXISTS (SELECT visitorid" +
+        " FROM " + USER_EXERCISE_LIST_VISITOR +
+        " WHERE visitorid = " + visitor +
+        " AND userlistid = " + uniqueID +
+        ") ";*/
       statement = connection.prepareStatement(
-        "INSERT INTO " + USER_EXERCISE_LIST_VISITOR +
+        /*prefix +*/ "INSERT INTO " + USER_EXERCISE_LIST_VISITOR +
           "(userlistid,visitorid) " +
           "VALUES(?,?);");
       int i = 1;
@@ -166,6 +172,17 @@ public class UserListVisitorJoinDAO extends DAO {
     return exercises;
   }*/
 
+  private boolean existsAlready(long uniqueID, long visitor) {
+    //String unique = exid.substring("Custom_".length());
+    String sql = "SELECT * from " + USER_EXERCISE_LIST_VISITOR + " where userlistid=" + uniqueID + " AND visitorid="+visitor;
+
+    try {
+      return !getVisitors(sql).isEmpty();
+    } catch (SQLException e) {
+      logger.error("got " + e, e);
+    }
+    return false;
+  }
 
 
   public Set<Long> getWhere(long listid) {
