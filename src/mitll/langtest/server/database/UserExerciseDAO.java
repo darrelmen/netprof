@@ -15,7 +15,7 @@ public class UserExerciseDAO extends DAO {
   private static Logger logger = Logger.getLogger(UserExerciseDAO.class);
 
   public static final String USEREXERCISE = "userexercise";
-  UserListExerciseJoinDAO userListExerciseJoinDAO;
+  private UserListExerciseJoinDAO userListExerciseJoinDAO;
   private ExerciseDAO exerciseDAO;
 
   public UserExerciseDAO(Database database, UserListExerciseJoinDAO userListExerciseJoinDAO) {
@@ -33,24 +33,25 @@ public class UserExerciseDAO extends DAO {
    * <p/>
    * Uses return generated keys to get the user id
    *
-   * @see mitll.langtest.server.database.custom.UserListManager#reallyCreateNewItem(mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserExercise)
+   * @see mitll.langtest.server.database.custom.UserListManager#reallyCreateNewItem(long, mitll.langtest.shared.custom.UserExercise)
    */
   public void add(UserExercise userExercise) {
     long id = 0;
 
     try {
       // there are much better ways of doing this...
-      logger.info("\n\n\nadd :userExercise " + userExercise);
+      logger.info("UserExerciseDAO.add :userExercise " + userExercise);
 
       Connection connection = database.getConnection();
       PreparedStatement statement;
 
       statement = connection.prepareStatement(
         "INSERT INTO " + USEREXERCISE +
-          "(english,foreignLanguage,creatorid,refAudio,slowAudioRef) " +
-          "VALUES(?,?,?,?,?);");
+          "(exerciseid,english,foreignLanguage,creatorid,refAudio,slowAudioRef) " +
+          "VALUES(?,?,?,?,?,?);");
       int i = 1;
       //     statement.setLong(i++, userExercise.getUserID());
+      statement.setString(i++, userExercise.getID());
       statement.setString(i++, userExercise.getEnglish());
       statement.setString(i++, userExercise.getForeignLanguage());
       statement.setLong(i++, userExercise.getCreator());
@@ -89,6 +90,7 @@ public class UserExerciseDAO extends DAO {
       USEREXERCISE +
       " (" +
       "uniqueid IDENTITY, " +
+      "exerciseid VARCHAR, " +
       "english VARCHAR, " +
       "foreignLanguage VARCHAR, " +
       "creatorid LONG, " +
@@ -115,38 +117,51 @@ public class UserExerciseDAO extends DAO {
   /**
    * @see mitll.langtest.server.database.custom.UserListDAO#populateList
    * @param listID
-   * @param db
    * @return
    */
   public Collection<UserExercise> getOnList(long listID) {
     String sql = "SELECT " +
       "ue.* from " + USEREXERCISE + " ue, " + UserListExerciseJoinDAO.USER_EXERCISE_LIST_EXERCISE +" uele "+
-      " where ue.uniqueid=uele.exerciseid AND uele.userlistid=" + listID + ";";
+      " where ue." +
+      //  "exerciseid" +
+       "uniqueid" +
+      "=uele." +
+      "exerciseid" +
+    //  "uniqueid" +
+      " AND uele.userlistid=" + listID + ";";
     
-    // TODO fix join - don't do uniqueid, do exercise id so we can do mixed lists
     try {
       List<UserExercise> userExercises = getUserExercises(sql);
+      logger.debug("\tfound (" +userExercises.size()+ ") userExercises on list " +listID);
+
       Set<String> ids = new HashSet<String>();
-      for (UserExercise ue : userExercises) ids.add(ue.getID());
+      for (UserExercise ue : userExercises) {
+        logger.debug("\ton list " +listID + " " + ue.getID() + " / " +ue.getUniqueID());
+        ids.add(ue.getID());
+      }
+
+      logger.debug("\tids " + ids + " on list " +listID);
 
       List<String> allFor = userListExerciseJoinDAO.getAllFor(listID, ids);
-      logger.debug("all ids " + allFor);
-      logger.debug("userExercises " + userExercises);
+      logger.debug("\tall ids " + allFor);
+      logger.debug("\tuserExercises before (" +userExercises.size()+
+        ") : " + userExercises);
 
       for (String id : allFor) {
         Exercise byID = exerciseDAO.getExercise(id);
 
         if (byID != null) {
           userExercises.add(new UserExercise(byID.getShell())); // all predefined references
-        } else logger.error("huh can't find  " + id);
+        } else if (!id.startsWith("Custom")) logger.error("huh can't find  " + id);
       }
-      logger.debug("userExercises " + userExercises);
+      logger.debug("\tuserExercises after  (" +userExercises.size()+
+        ") : " + userExercises);
 
       if (userExercises.isEmpty()) {
         logger.info("getOnList : no exercises on list id " + listID);
         return new ArrayList<UserExercise>();
       } else {
-        logger.debug("getOnList got " + userExercises);
+        logger.debug("\tgetOnList for " + listID+ "  got " + userExercises);
         return userExercises;
       }
     } catch (SQLException e) {
@@ -161,12 +176,11 @@ public class UserExerciseDAO extends DAO {
    * @return
    */
   public UserExercise getWhere(String exid) {
-    String unique = exid.substring("Custom_".length());
-    String sql = "SELECT * from " + USEREXERCISE + " where uniqueid=" + unique + ";";
+    String sql = "SELECT * from " + USEREXERCISE + " where exerciseid='" + exid + "'";
     try {
       List<UserExercise> userExercises = getUserExercises(sql);
       if (userExercises.isEmpty()) {
-        logger.error("getWhere : huh? no custom exercise with id " + unique);
+        logger.error("getWhere : huh? no custom exercise with id " + exid);
         return null;
       } else return userExercises.iterator().next();
     } catch (SQLException e) {
@@ -193,6 +207,7 @@ public class UserExerciseDAO extends DAO {
   private List<UserExercise> getUserExercises(String sql) throws SQLException {
     Connection connection = database.getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
+    logger.debug("getUserExercises sql = " + sql);
     ResultSet rs = statement.executeQuery();
     List<UserExercise> exercises = new ArrayList<UserExercise>();
 
@@ -224,9 +239,7 @@ public class UserExerciseDAO extends DAO {
         "refAudio='" + userExercise.getRefAudio() + "', " +
         "slowAudioRef='" + userExercise.getSlowAudioRef() + "' " +
         "WHERE uniqueid=" + userExercise.getUniqueID();
- /*       if (false) {
-          logger.debug("update " + id + " score " +score);
-        }*/
+
       PreparedStatement statement = connection.prepareStatement(sql);
 
       int i = statement.executeUpdate();
