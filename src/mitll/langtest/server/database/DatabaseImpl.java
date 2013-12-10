@@ -4,6 +4,8 @@ import mitll.flashcard.UserState;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
+import mitll.langtest.server.database.custom.UserListDAO;
+import mitll.langtest.server.database.custom.UserListExerciseJoinDAO;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.flashcard.UserStateWrapper;
 import mitll.langtest.shared.DLIUser;
@@ -139,13 +141,16 @@ public class DatabaseImpl implements Database {
    */
   private void initializeDAOs() {
     userDAO = new UserDAO(this);
-    userExerciseDAO = new UserExerciseDAO(this);
+    UserListDAO userListDAO = new UserListDAO(this, userDAO);
+
+    UserListExerciseJoinDAO userListExerciseJoinDAO = new UserListExerciseJoinDAO(this, userDAO);
+    userExerciseDAO = new UserExerciseDAO(this,userListExerciseJoinDAO);
     dliUserDAO = new DLIUserDAO(this);
     resultDAO = new ResultDAO(this,userDAO);
     answerDAO = new AnswerDAO(this, resultDAO);
     gradeDAO = new GradeDAO(this,userDAO, resultDAO);
     siteDAO = new SiteDAO(this, userDAO);
-    userListManager = new UserListManager(this, userDAO);
+    userListManager = new UserListManager( userDAO,userListDAO,userListExerciseJoinDAO);
 
 
     if (DROP_USER) {
@@ -287,6 +292,7 @@ public class DatabaseImpl implements Database {
       else {
         this.exerciseDAO = makeExerciseDAO(useFile);
       }
+      userExerciseDAO.setExerciseDAO(exerciseDAO);
     }
   }
 
