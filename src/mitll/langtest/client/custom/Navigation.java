@@ -195,9 +195,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
 
     service.getListsForUser(userManager.getUser(), false, new AsyncCallback<Collection<UserList>>() {
       @Override
-      public void onFailure(Throwable caught) {
-        //To change body of implemented methods use File | Settings | File Templates.
-      }
+      public void onFailure(Throwable caught) {}
 
       @Override
       public void onSuccess(Collection<UserList> result) {
@@ -311,14 +309,9 @@ public class Navigation extends BasicDialog implements RequiresResize {
 
     service.addVisitor(ul, (long)controller.getUser(), new AsyncCallback<Void>() {
       @Override
-      public void onFailure(Throwable caught) {
-        //To change body of implemented methods use File | Settings | File Templates.
-      }
-
+      public void onFailure(Throwable caught) {}
       @Override
-      public void onSuccess(Void result) {              // tODO : consider checking on user list validity...?
-        //To change body of implemented methods use File | Settings | File Templates.
-      }
+      public void onSuccess(Void result) {}
     });
   }
 
@@ -428,48 +421,9 @@ public class Navigation extends BasicDialog implements RequiresResize {
     return hp;
   }
 
-/*  private Panel editItem(final UserList ul) {
-    HorizontalPanel hp = new HorizontalPanel();
-    SimplePanel left = new SimplePanel();
-    hp.add(left);
-    final SimplePanel right = new SimplePanel();
-    hp.add(right);
-
-    final PagingContainer<UserExercise> pagingContainer = new PagingContainer<UserExercise>(controller, 100) {
-      @Override
-      protected void gotClickOnItem(UserExercise exerciseShell) {
-        Navigation.this.editItem(exerciseShell, right, ul, pagingContainer);
-      }
-    };
-
-    Panel container = pagingContainer.getTableWithPager();
-    left.add(container);
-    for (UserExercise es : ul.getExercises()) {
-      if (es.getID().startsWith("Custom")) {
-        pagingContainer.addExerciseToList2(es);
-      }
-    }
-    pagingContainer.flush();
-    UserExercise exerciseShell = pagingContainer.selectFirst();
-    if (exerciseShell == null) System.err.println("huh? nothing first?");
-
-*//*    NewUserExercise newUserExercise = new NewUserExercise(service, userManager, controller, itemMarker);
-    right.add(newUserExercise.addNew(ul, pagingContainer, right));
-    newUserExercise.setFields(exerciseShell);*//*
-    editItem(exerciseShell,right,ul,pagingContainer);
-    return hp;
-  }
-
-  private void editItem(UserExercise exerciseShell, SimplePanel right, UserList ul, PagingContainer<UserExercise> pagingContainer) {
-    NewUserExercise newUserExercise = new NewUserExercise(service, userManager, controller, itemMarker);
-    right.clear();
-    right.add(newUserExercise.addNew(ul, pagingContainer, right));
-    newUserExercise.setFields(exerciseShell);
-  }*/
-
   private void setScrollPanelWidth(ScrollPanel row) {
     if (row != null) {
-      row.setWidth((Window.getClientWidth() * 0.90) + "px");
+      row.setWidth((Window.getClientWidth() * 0.95) + "px");
       row.setHeight((Window.getClientHeight() * 0.7) + "px");
     }
   }
