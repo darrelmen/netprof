@@ -152,6 +152,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * @param e
    * @param controller
    * @param w1
+   * @see #makeAddToList(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController)
+   * @see #wasRevealed()
    */
   private void populateListChoices(final Exercise e, ExerciseController controller, final SplitDropdownButton w1) {
     System.out.println("populateListChoices : populate list choices for " + controller.getUser());
