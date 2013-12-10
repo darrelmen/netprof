@@ -19,7 +19,7 @@ import java.util.List;
 public class UserExercise extends AudioExercise {
   static int globalCount  = 0;
   int count = 0;
-  private long uniqueID; //set by database
+  private long uniqueID = -1; //set by database
   private String english;
   private String foreignLanguage;
   private long creator;
@@ -31,6 +31,17 @@ public class UserExercise extends AudioExercise {
   String exerciseID;
 
   public UserExercise() {}
+
+/*  public UserExercise(String id, String tooltip) {
+    super(id,tooltip);
+    isPredef = true;
+  }*/
+
+
+  public UserExercise(ExerciseShell shell) {
+    super(shell.getID(),shell.getTooltip());
+    isPredef = true;
+  }
 
   /**
    * @see mitll.langtest.server.database.custom.UserListManager#createNewItem(long, String, String)
@@ -68,7 +79,7 @@ public class UserExercise extends AudioExercise {
      * @param exercise
      */
   public UserExercise(Exercise exercise) {
-    super(exercise.getID(),exercise.getEnglishSentence());
+    super(exercise.getID(), exercise.getEnglishSentence());
 
     this.isPredef = true;
     this.exerciseID = exercise.getID();
@@ -131,7 +142,8 @@ public class UserExercise extends AudioExercise {
 
   public String toString() {
     return "UserExercise (" +count+
-      ") #" + uniqueID + " : " + getEnglish() + " = " + getForeignLanguage() + " audio attr (" +getAudioAttributes().size()+
+      ") #" + uniqueID + "/" + exerciseID+
+        " : " + getEnglish() + " = " + getForeignLanguage() + " audio attr (" +getAudioAttributes().size()+
       ") :" + getAudioAttributes();
   }
 }
