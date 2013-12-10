@@ -41,6 +41,11 @@ public class UserListDAO extends DAO {
     }
     this.userDAO = userDAO;
     userListVisitorJoinDAO = new UserListVisitorJoinDAO(database,userDAO);
+    try {
+      userListVisitorJoinDAO.createUserListTable(database);
+    } catch (SQLException e) {
+      logger.error("got " +e,e);
+    }
   }
 
   public void addVisitor(long listid, long userid) { userListVisitorJoinDAO.add(listid,userid);}
@@ -183,7 +188,7 @@ public class UserListDAO extends DAO {
     return where;
   }
 
-  public void populateList(UserList where) {
+  private void populateList(UserList where) {
     Collection<UserExercise> onList = userExerciseDAO.getOnList(where.getUniqueID());
     where.setExercises(onList);
     where.setVisitors(userListVisitorJoinDAO.getWhere(where.getUniqueID()));
