@@ -138,8 +138,8 @@ public class DatabaseImpl implements Database {
    * Create or alter tables as needed.
    */
   private void initializeDAOs() {
-
     userDAO = new UserDAO(this);
+    userExerciseDAO = new UserExerciseDAO(this);
     dliUserDAO = new DLIUserDAO(this);
     resultDAO = new ResultDAO(this,userDAO);
     answerDAO = new AnswerDAO(this, resultDAO);
@@ -176,7 +176,6 @@ public class DatabaseImpl implements Database {
       dliUserDAO.createUserTable(this);
 
       siteDAO.createTable(getConnection());
-      userExerciseDAO = new UserExerciseDAO(this);
       userListManager.setUserExerciseDAO(userExerciseDAO);
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
