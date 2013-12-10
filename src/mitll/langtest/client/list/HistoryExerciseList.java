@@ -332,9 +332,15 @@ public class HistoryExerciseList extends PagingExerciseList {
 
     String instance1 = selectionState1.getInstance();
 
-    if (!instance1.equals(instance)) {
-      System.out.println("onValueChange : skipping event " + rawToken + " for instance " + instance1 +
-          " that is not mine "+instance);
+    if (!instance1.equals(instance) && instance1.length() > 0) {
+      System.out.println("onValueChange : skipping event " + rawToken + " for instance '" + instance1 +
+          "' that is not mine "+instance);
+      if (getCreatedPanel() == null) {
+/*
+        getExercises(controller.getUser(),false);
+*/
+        noSectionsGetExercises(controller.getUser());
+      }
       return;
     }
 
