@@ -42,6 +42,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
+import org.h2.store.fs.FileUtils;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -224,12 +225,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (userListID != -1) {
       UserList userListByID = db.getUserListManager().getUserListByID(userListID);
       if (userListByID != null) { // defensive!
-        //userListByID.getExercises();
         List<Exercise> exercises2 = new ArrayList<Exercise>();
-        for (UserExercise ue : userListByID.getExercises()) {
+        Collection<UserExercise> exercises1 = userListByID.getExercises();
+        logger.debug("getExerciseIds " + exercises1);
+        for (UserExercise ue : exercises1) {
           Exercise exercise = getExercise(ue.getID());
           if (exercise != null) exercises2.add(exercise);
         }
+        logger.debug("getExerciseIds " + exercises2);
+
         exercises = exercises2;
       }
     }
@@ -708,7 +712,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   private void ensureMP3(String wavFile, boolean overwrite) {
     if (wavFile != null) {
-        new AudioConversion().ensureWriteMP3(wavFile, pathHelper.getInstallPath(), false);
+        new AudioConversion().ensureWriteMP3(wavFile, pathHelper.getInstallPath(), overwrite);
     }
   }
 
@@ -740,7 +744,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
             imageType.equalsIgnoreCase(ImageType.SPECTROGRAM.toString()) ? ImageType.SPECTROGRAM : null;
     if (imageType1 == null) return new ImageResponse(); // success = false!
     String imageOutDir = pathHelper.getImageOutDir();
-    logger.debug("getting images (" + width + " x " + height + ") (" +reqid+ ") type " + imageType+
+    logger.debug("getImageForAudioFile : getting images (" + width + " x " + height + ") (" +reqid+ ") type " + imageType+
       " for " + wavAudioFile + "");
     String absolutePathToImage = imageWriter.writeImageSimple(wavAudioFile, pathHelper.getAbsoluteFile(imageOutDir).getAbsolutePath(),
         width, height, imageType1);
@@ -774,11 +778,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       audioFile = test.exists() ? test.getAbsolutePath() : audioFileHelper.getWavForMP3(audioFile);
     }
 
-    return audioFile;
+    return ensureWAV(audioFile);
   }
 
   private String removeSuffix(String audioFile) {
     return audioFile.substring(0, audioFile.length() - ".mp3".length());
+  }
+
+  private String ensureWAV(String audioFile) {
+    if (!audioFile.endsWith("wav"))
+      return audioFile.substring(0, audioFile.length() - ".mp3".length()) + ".wav";
+    else return audioFile;
   }
 
   /**
@@ -1010,15 +1020,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private void fixAudioPaths(UserExercise userExercise, boolean overwrite) {
     File fileRef = pathHelper.getAbsoluteFile(userExercise.getRefAudio());
     String fast = FAST + ".wav";
-
     String refAudio = getRefAudioPath(userExercise, fileRef, fast, overwrite);
     userExercise.setRefAudio(refAudio);
+    logger.debug("fast is " + fast + " size " + FileUtils.size(refAudio));
 
     if (userExercise.getSlowAudioRef() != null && !userExercise.getSlowAudioRef().isEmpty()) {
       fileRef = pathHelper.getAbsoluteFile(userExercise.getSlowAudioRef());
       String slow = SLOW + ".wav";
 
       refAudio = getRefAudioPath(userExercise, fileRef, slow, overwrite);
+      logger.debug("slow is " + refAudio + " size " + FileUtils.size(refAudio));
+
       userExercise.setSlowRefAudio(refAudio);
     }
   }
@@ -1041,7 +1053,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     logger.debug("getRefAudioPath : copying from " + fileRef +  " to " + destination.getAbsolutePath());
     String s = "bestAudio" + File.separator + userExercise.getID() + File.separator + fast;
     logger.debug("getRefAudioPath : dest path    " + bestDirForExercise.getPath() + " vs " +s);
-    new FileCopier().copy(fileRef.getAbsolutePath(), destination.getAbsolutePath());
+    if (!fileRef.equals(destination)) {
+      new FileCopier().copy(fileRef.getAbsolutePath(), destination.getAbsolutePath());
+    }
+    else {
+      if (FileUtils.size(destination.getAbsolutePath()) == 0) logger.error("\ngetRefAudioPath : huh? " + destination + " is empty???");
+    }
     ensureMP3(s, overwrite);
     return s;
   }
