@@ -987,10 +987,23 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getUserListManager().getUserListsForText(search);
   }
 
+  /**
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#populateListChoices(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController, com.github.gwtbootstrap.client.ui.SplitDropdownButton)
+   * @param userListID
+   * @param userExercise
+   * @return
+   */
   public Collection<UserExercise> addItemToUserList(long userListID, UserExercise userExercise) {
     return db.getUserListManager().addItemToUserList(userListID, userExercise);
   }
 
+  /**
+   * @see mitll.langtest.client.custom.NewUserExercise.CreateFirstRecordAudioPanel#makePostAudioRecordButton()
+   * @param userid
+   * @param english
+   * @param foreign
+   * @return
+   */
   public UserExercise createNewItem(long userid, String english, String foreign) {
     return db.getUserListManager().createNewItem(userid, english, foreign);
   }
@@ -999,11 +1012,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * Put the new item in the database,
    * copy the audio under bestAudio
    * assign the item to a user list
+   * @see mitll.langtest.client.custom.NewUserExercise#onClick(mitll.langtest.shared.custom.UserList, mitll.langtest.client.exercise.PagingContainer, com.google.gwt.user.client.ui.Panel)
+   * @param userListID
    * @param userExercise
    */
-  public UserExercise reallyCreateNewItem(UserList userList, UserExercise userExercise) {
-    db.getUserListManager().reallyCreateNewItem(userList, userExercise);
-    fixAudioPaths(userExercise,true);
+  public UserExercise reallyCreateNewItem(long userListID, UserExercise userExercise) {
+    db.getUserListManager().reallyCreateNewItem(userListID, userExercise);
+    fixAudioPaths(userExercise, true); // do this after the id has been made
 
     logger.debug("reallyCreateNewItem : made user exercise " + userExercise);
 
@@ -1022,14 +1037,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String fast = FAST + ".wav";
     String refAudio = getRefAudioPath(userExercise, fileRef, fast, overwrite);
     userExercise.setRefAudio(refAudio);
-    logger.debug("fast is " + fast + " size " + FileUtils.size(refAudio));
+    logger.debug("for " + userExercise.getID()+
+      " fast is " + fast + " size " + FileUtils.size(refAudio));
 
     if (userExercise.getSlowAudioRef() != null && !userExercise.getSlowAudioRef().isEmpty()) {
       fileRef = pathHelper.getAbsoluteFile(userExercise.getSlowAudioRef());
       String slow = SLOW + ".wav";
 
       refAudio = getRefAudioPath(userExercise, fileRef, slow, overwrite);
-      logger.debug("slow is " + refAudio + " size " + FileUtils.size(refAudio));
+      logger.debug("for " + userExercise.getID()+
+        "slow is " + refAudio + " size " + FileUtils.size(refAudio));
 
       userExercise.setSlowRefAudio(refAudio);
     }
