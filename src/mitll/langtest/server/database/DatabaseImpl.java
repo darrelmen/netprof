@@ -143,7 +143,7 @@ public class DatabaseImpl implements Database {
     userDAO = new UserDAO(this);
     UserListDAO userListDAO = new UserListDAO(this, userDAO);
 
-    UserListExerciseJoinDAO userListExerciseJoinDAO = new UserListExerciseJoinDAO(this, userDAO);
+    UserListExerciseJoinDAO userListExerciseJoinDAO = new UserListExerciseJoinDAO(this);
     userExerciseDAO = new UserExerciseDAO(this,userListExerciseJoinDAO);
     dliUserDAO = new DLIUserDAO(this);
     resultDAO = new ResultDAO(this,userDAO);
@@ -242,10 +242,14 @@ public class DatabaseImpl implements Database {
    */
   public List<Exercise> getExercises() { return getExercises(useFile, lessonPlanFile); }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise(String)
+   * @param id
+   * @return
+   */
   public Exercise getExercise(String id) { return exerciseDAO.getExercise(id); }
 
   /**
-   *
    *
    * @param useFile
    * @param lessonPlanFile
