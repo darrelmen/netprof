@@ -106,6 +106,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     this.controller = controller;
     this.instance = instance;
 
+    System.out.println("ExerciseList : got instance  " + instance);
+
     // Add history listener
     History.addValueChangeHandler(this);
   }
@@ -141,12 +143,14 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param getNext
    */
   public void getExercises(long userID, boolean getNext) {
-    System.out.println("ExerciseList.getExercises for user " +userID);
+  //  System.out.println("ExerciseList.getExercises for user " +userID);
 
     if (showInOrder) {
       getExercisesInOrder();
     } else {
       lastReqID++;
+      System.out.println("ExerciseList.getExercises for user " +userID);
+
       service.getExerciseIds(lastReqID, userID, new SetExercisesCallback());
     }
   }
@@ -207,6 +211,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   private void getExercisesInOrder() {
     lastReqID++;
+    System.out.println("------------ ExerciseList.getExercisesInOrder  -------------- ");
+
     service.getExerciseIds(lastReqID, new SetExercisesCallback());
   }
 
