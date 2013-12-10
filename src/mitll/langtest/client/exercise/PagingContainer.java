@@ -56,6 +56,10 @@ public class PagingContainer<T extends ExerciseShell> {
     this.verticalUnaccountedFor = verticalUnaccountedFor;
   }
 
+  public void refresh() {
+    table.redraw();
+  }
+
   public interface TableResources extends CellTable.Resources {
     /**
      * The styles applied to the table.
@@ -242,14 +246,14 @@ public class PagingContainer<T extends ExerciseShell> {
     list.add(exercise);
   }*/
 
-  public <S extends ExerciseShell> void addExerciseToList2(S exercise) {
-    List<T> list = dataProvider.getList();
-    list.add((T) exercise);  // TODO : can't remember how I avoid this
-  }
-
   public <S extends ExerciseShell> void addAndFlush(S exercise) {
     addExerciseToList2(exercise);
     flush();
+  }
+
+  public <S extends ExerciseShell> void addExerciseToList2(S exercise) {
+    List<T> list = dataProvider.getList();
+    list.add((T) exercise);  // TODO : can't remember how I avoid this
   }
 
 /*  protected void addExerciseShellToList(ExerciseShell exercise) {
