@@ -40,7 +40,6 @@ import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.ExerciseShell;
-import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 
 import java.util.Collection;
@@ -68,7 +67,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
   private NPFHelper npfHelper;
   private NPFHelper avpHelper;
   private HTML itemMarker;
-  EditItem editItem;
+  private EditItem editItem;
 
   public Navigation(final LangTestDatabaseAsync service, final UserManager userManager,
                     final ExerciseController controller, final ListInterface listInterface) {
@@ -402,7 +401,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
 
   private void showEditItem(UserList ul, TabAndContent addItem) {
     addItem.content.clear();
-    Panel widgets = editItem.editItem(ul,itemMarker);
+    Panel widgets = editItem.editItem(ul, itemMarker);
     addItem.content.add(widgets);
   }
 
