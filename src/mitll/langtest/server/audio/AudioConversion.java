@@ -268,7 +268,7 @@ public class AudioConversion {
    * @param overwrite
    */
   public void ensureWriteMP3(String pathToWav, String realContextPath, boolean overwrite) {
-    if (pathToWav == null) throw new IllegalArgumentException("huh? path is null");
+    if (pathToWav == null || pathToWav.equals("null")) throw new IllegalArgumentException("huh? path is null");
 
     File absolutePathToWav = getAbsoluteFile(pathToWav,realContextPath);
 
