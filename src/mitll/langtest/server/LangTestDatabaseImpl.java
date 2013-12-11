@@ -477,6 +477,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (byID == null) {
       byID = db.getUserExerciseWhere(id);
     }
+    logger.debug("getExercise : returning " +byID);
     if (byID == null) {
       logger.error("getExercise : huh? couldn't find exercise with id " + id + " when examining " + exercises.size() + " items");
     }
@@ -1019,7 +1020,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public UserExercise reallyCreateNewItem(long userListID, UserExercise userExercise) {
     db.getUserListManager().reallyCreateNewItem(userListID, userExercise);
     fixAudioPaths(userExercise, true); // do this after the id has been made
-
+    db.getUserListManager().editItem(userExercise);
     logger.debug("reallyCreateNewItem : made user exercise " + userExercise);
 
     return userExercise;
