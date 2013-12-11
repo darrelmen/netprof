@@ -143,8 +143,8 @@ public class DatabaseImpl implements Database {
     userDAO = new UserDAO(this);
     UserListDAO userListDAO = new UserListDAO(this, userDAO);
 
+    userExerciseDAO = new UserExerciseDAO(this);
     UserListExerciseJoinDAO userListExerciseJoinDAO = new UserListExerciseJoinDAO(this);
-    userExerciseDAO = new UserExerciseDAO(this,userListExerciseJoinDAO);
     dliUserDAO = new DLIUserDAO(this);
     resultDAO = new ResultDAO(this,userDAO);
     answerDAO = new AnswerDAO(this, resultDAO);
@@ -575,9 +575,14 @@ public class DatabaseImpl implements Database {
     }*/
     logger.debug("getUserStateWrapper : making user state for " + userID + " with " + strings.length + " exercises");
     userStateWrapper = new UserStateWrapper(userState, userID, exercises);
-    for (ResultDAO.SimpleResult result : resultDAO.getResultsForUser(userID)) {
+    List<ResultDAO.SimpleResult> resultsForUser = resultDAO.getResultsForUser(userID);
+    //logger.debug("getUserStateWrapper : found existing " + resultsForUser.size() + " results");
+
+    for (ResultDAO.SimpleResult result : resultsForUser) {
       userStateWrapper.addCompleted(result.id);
     }
+    logger.debug("getUserStateWrapper : after found existing " + userStateWrapper.getCompleted().size() + " completed.");
+
     return userStateWrapper;
   }
 
