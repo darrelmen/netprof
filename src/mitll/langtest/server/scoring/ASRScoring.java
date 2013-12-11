@@ -276,7 +276,7 @@ public class ASRScoring extends Scoring {
       audioToScore.put(key, scores);
     }
     else {
-      //logger.debug("found cached score for file '" + key + "'");
+      logger.debug("found cached score for file '" + key + "'");
     }
     return scores;
   }
