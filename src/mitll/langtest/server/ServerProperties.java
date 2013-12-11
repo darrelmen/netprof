@@ -68,10 +68,10 @@ public class ServerProperties {
   private static final String EMAIL_ADDRESS = "emailAddress";
   private static final String DEFAULT_EMAIL = "gordon.vidaver@ll.mit.edu";
   private static final String AUDIO_OFFSET = "audioOffset";
+  private static final String COLLECT_SYNONYMS = "collectSynonyms";
   //private static final String EXERCISES_IN_ORDER = "exercisesInOrder";
   private static final String FOREIGN_LANGUAGE_QUESTIONS_ONLY = "foreignLanguageQuestionsOnly";
   private static final String MAX_NUM_EXERCISES = "maxNumExercises";
-  private static final String COLLECT_SYNONYMS = "collectSynonyms";
 
   private Properties props = new Properties();
 
@@ -215,6 +215,10 @@ public class ServerProperties {
   public boolean showForeignLanguageQuestionsOnly() {
     return getDefaultFalse(FOREIGN_LANGUAGE_QUESTIONS_ONLY);
   }
+  
+  public boolean getCollectSynonyms() {
+    return props.getProperty(COLLECT_SYNONYMS, "true").equals("true");
+  }
 
   public String getEmailAddress() {
     return props.getProperty(EMAIL_ADDRESS, DEFAULT_EMAIL);
@@ -236,10 +240,6 @@ public class ServerProperties {
     } catch (NumberFormatException e) {
       return maxNumExercises;
     }
-  }
-
-  public boolean getCollectSynonyms() {
-    return getDefaultTrue(COLLECT_SYNONYMS);
   }
 
   /**
