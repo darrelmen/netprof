@@ -77,16 +77,18 @@ public class UserListManager {
     logger.debug("getListsForUser for user #" + userid);
 
     List<UserList> listsForUser = new ArrayList<UserList>();
+    UserList favorite = null;
     for (UserList userList : userListDAO.getAll()) {
       logger.debug("\tgetListsForUser  list " + userList);
-
       boolean isCreator = userList.getCreator().id == userid;
       if (onlyCreated) {
         if (isCreator) {
+          if (userList.getName().equals(MY_LIST)) favorite = userList;
           listsForUser.add(userList);
         }
       } else {
         if (userList.getVisitorIDs().contains(userid) || isCreator) {
+          if (userList.getName().equals(MY_LIST)) favorite = userList;
           listsForUser.add(userList);
         }
       }
@@ -96,6 +98,10 @@ public class UserListManager {
       UserList userList = createUserList(userid, MY_LIST, "My Favorites", "", true);
       if (userList == null) return Collections.emptyList();
       else return Collections.singletonList(userList);
+    }
+    else {
+      listsForUser.remove(favorite);
+      listsForUser.add(0,favorite);// put at front
     }
 
     logger.debug("getListsForUser " + listsForUser.size() + "(" +listsForUser+ ") for " + userid);
