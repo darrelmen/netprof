@@ -45,6 +45,8 @@ public class PagingContainer<T extends ExerciseShell> {
   private CellTable<T> table;
   protected ExerciseController controller;
   private int verticalUnaccountedFor = 100;
+  private Set<String> completed = new HashSet<String>();
+  private boolean isCRTDataMode;
 
   /**
    * @see mitll.langtest.client.list.PagingExerciseList#makePagingContainer()
@@ -54,6 +56,7 @@ public class PagingContainer<T extends ExerciseShell> {
   public PagingContainer(ExerciseController controller, int verticalUnaccountedFor) {
     this.controller = controller;
     this.verticalUnaccountedFor = verticalUnaccountedFor;
+    this.isCRTDataMode = controller.getProps().isCRTDataCollectMode();
   }
 
   public void refresh() {
@@ -156,7 +159,14 @@ public class PagingContainer<T extends ExerciseShell> {
   }
 
   private void addColumnsToTable(boolean consumeClicks) {
-    Column<T, SafeHtml> id2 = getExerciseIdColumn(consumeClicks);
+    if (isCRTDataMode) {
+      Column<T, SafeHtml> id2 = getExerciseIdColumn2(consumeClicks);
+      table.addColumn(id2);
+    } else {
+      Column<T, SafeHtml> id2 = getExerciseIdColumn(consumeClicks);
+      id2.setCellStyleNames("alignLeft");
+      table.addColumn(id2);
+    }
 
     // this would be better, but want to consume clicks
   /*  TextColumn<ExerciseShell> id2 = new TextColumn<ExerciseShell>() {
@@ -168,9 +178,15 @@ public class PagingContainer<T extends ExerciseShell> {
         return columnText;
       }
     };*/
+  }
 
-    id2.setCellStyleNames("alignLeft");
-    table.addColumn(id2);
+  /**
+   * @see mitll.langtest.client.recorder.FeedbackRecordPanel#enableNext()
+   * @param completed
+   */
+  public void setCompleted(Set<String> completed) {
+    this.completed = completed;
+    if (table != null) table.redraw(); // todo check this...
   }
 
   /**
@@ -213,6 +229,35 @@ public class PagingContainer<T extends ExerciseShell> {
     };
   }
 
+  protected Column<T, SafeHtml> getExerciseIdColumn2(final boolean consumeClicks) {
+    return new Column<T, SafeHtml>(new MySafeHtmlCell(consumeClicks)) {
+
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        if (BrowserEvents.CLICK.equals(event.getType())) {
+          System.out.println("getExerciseIdColumn.onBrowserEvent : got click " + event);
+          final T e = object;
+     /*     if (isExercisePanelBusy()) {
+            tellUserPanelIsBusy();
+            markCurrentExercise(currentExercise);
+          } else {*/
+            gotClickOnItem(e);
+       //   }
+        }
+      }
+
+      @Override
+      public SafeHtml getValue(ExerciseShell object) {
+        String columnText = object.getTooltip();
+        if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
+        boolean complete = completed.contains(object.getID());
+        // System.out.println("check -- " + complete + " for " + object.getID() + " in " + completed.size() + " : " + completed);
+        return new SafeHtmlBuilder().appendHtmlConstant(columnText +(complete?"&nbsp;<i class='icon-check'></i>":"")).toSafeHtml();
+      }
+    };
+  }
+
 /*  protected void tellUserPanelIsBusy() {
     Window.alert("Please stop recording before changing items.");
   }*/
@@ -226,6 +271,22 @@ public class PagingContainer<T extends ExerciseShell> {
     onResize(0);
     return first;
   }
+
+  /**
+   * @seex SectionExerciseList.MySetExercisesCallback#onSuccess
+   */
+/*  protected void loadFirstExercise() {
+    selectFirst();
+  }*/
+
+/*
+  public void selectFirst() {
+    table.getSelectionModel().setSelected(dataProvider.getList().get(0), true);
+    table.redraw();
+    onResize(0);
+    return first;
+  }
+*/
 
   public void clear() {
     List<T> list = dataProvider.getList();
@@ -255,12 +316,6 @@ public class PagingContainer<T extends ExerciseShell> {
     List<T> list = dataProvider.getList();
     list.add((T) exercise);  // TODO : can't remember how I avoid this
   }
-
-/*  protected void addExerciseShellToList(ExerciseShell exercise) {
-    List<T> list = dataProvider.getList();
-    T something = (T)exercise;
-    list.add(something);
-  }*/
 
   public void onResize(int currentExercise) {
     // super.onResize();
@@ -339,5 +394,20 @@ public class PagingContainer<T extends ExerciseShell> {
       }
     }
     table.redraw();
+  }
+
+  private static class MySafeHtmlCell extends SafeHtmlCell {
+    private final boolean consumeClicks;
+
+    public MySafeHtmlCell(boolean consumeClicks) {
+      this.consumeClicks = consumeClicks;
+    }
+
+    @Override
+    public Set<String> getConsumedEvents() {
+      Set<String> events = new HashSet<String>();
+      if (consumeClicks) events.add(BrowserEvents.CLICK);
+      return events;
+    }
   }
 }
