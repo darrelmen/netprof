@@ -5,7 +5,10 @@ import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Created with IntelliJ IDEA.
@@ -18,11 +21,16 @@ public class ExerciseTrie extends Trie {
   private static final Logger logger = Logger.getLogger(ExerciseTrie.class);
   private static final int MB = (1024 * 1024);
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds(int, long, String, long)
+   * @param exercisesForState
+   * @param includeForeign
+   */
   public ExerciseTrie(Collection<Exercise> exercisesForState, boolean includeForeign) {
     startMakingNodes();
     Runtime rt = Runtime.getRuntime();
     long free = rt.freeMemory()/ MB ;
-   // logger.debug("getExercisesForSelectionState : before " + free);
+    logger.debug("ExerciseTrie : searching over " + exercisesForState.size());
 
     long then = System.currentTimeMillis();
 
@@ -58,9 +66,14 @@ public class ExerciseTrie extends Trie {
    */
   public List<Exercise> getExercises(String prefix) {
     List<EmitValue> emits = getEmits(prefix);
+    Set<Exercise> unique = new HashSet<Exercise>();
     List<Exercise> ids = new ArrayList<Exercise>();
     for (EmitValue ev : emits) {
-      ids.add(ev.getExercise());
+      Exercise exercise = ev.getExercise();
+      if (!unique.contains(exercise)) {
+        ids.add(exercise);
+        unique.add(exercise);
+      }
     }
     logger.debug("getExercises : for '" +prefix + "' got " + ids.size() + " matches");
     return ids;
