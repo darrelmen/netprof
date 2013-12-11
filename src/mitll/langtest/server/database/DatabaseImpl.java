@@ -72,7 +72,6 @@ public class DatabaseImpl implements Database {
   private final SiteDAO siteDAO = new SiteDAO(this, userDAO);
   private final UserListManager userListManager = new UserListManager(userDAO);
   private UserExerciseDAO userExerciseDAO;
-  FileExerciseDAO fileExerciseDAO = new FileExerciseDAO("","",false);
 
   private DatabaseConnection connection = null;
   private MonitoringSupport monitoringSupport;
@@ -557,9 +556,14 @@ public class DatabaseImpl implements Database {
     }*/
     logger.debug("getUserStateWrapper : making user state for " + userID + " with " + strings.length + " exercises");
     userStateWrapper = new UserStateWrapper(userState, userID, exercises);
-    for (ResultDAO.SimpleResult result : resultDAO.getResultsForUser(userID)) {
+    List<ResultDAO.SimpleResult> resultsForUser = resultDAO.getResultsForUser(userID);
+    //logger.debug("getUserStateWrapper : found existing " + resultsForUser.size() + " results");
+
+    for (ResultDAO.SimpleResult result : resultsForUser) {
       userStateWrapper.addCompleted(result.id);
     }
+    logger.debug("getUserStateWrapper : after found existing " + userStateWrapper.getCompleted().size() + " completed.");
+
     return userStateWrapper;
   }
 
