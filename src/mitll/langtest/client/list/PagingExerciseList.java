@@ -128,16 +128,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     final PagingExerciseList outer = this;
     PagingContainer<ExerciseShell> pagingContainer1 = new PagingContainer<ExerciseShell>(controller, getVerticalUnaccountedFor()) {
       @Override
-      protected void gotClickOnItem(ExerciseShell e) {
-        outer.gotClickOnItem(e);
-      }
-
-/*      @Override
-      protected void loadFirstExercise() {
-        outer.loadFirstExercise();
-
-        selectFirst();    //To change body of overridden methods use File | Settings | File Templates.
-      }*/
+      protected void gotClickOnItem(ExerciseShell e) {  outer.gotClickOnItem(e);  }
     };
     pagingContainer = pagingContainer1;
     return pagingContainer1;
