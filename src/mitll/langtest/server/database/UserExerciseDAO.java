@@ -48,13 +48,21 @@ public class UserExerciseDAO extends DAO {
           "(exerciseid,english,foreignLanguage,creatorid,refAudio,slowAudioRef) " +
           "VALUES(?,?,?,?,?,?);");
       int i = 1;
-      //     statement.setLong(i++, userExercise.getUserID());
       statement.setString(i++, userExercise.getID());
       statement.setString(i++, userExercise.getEnglish());
       statement.setString(i++, userExercise.getForeignLanguage());
       statement.setLong(i++, userExercise.getCreator());
-      statement.setString(i++, userExercise.getRefAudio());
-      statement.setString(i++, userExercise.getSlowAudioRef());
+
+      String refAudio = userExercise.getRefAudio();
+      statement.setString(i++, refAudio == null ? "" : refAudio);
+      String slowAudioRef = userExercise.getSlowAudioRef();
+      String aNull = slowAudioRef == null || slowAudioRef.equals("null") ? "" : slowAudioRef;
+
+
+      logger.debug("\n\n\nslow ref = '" +aNull+ "'");
+
+
+      statement.setString(i++, aNull);
 
       int j = statement.executeUpdate();
 
@@ -70,6 +78,21 @@ public class UserExerciseDAO extends DAO {
       logger.debug("unique id = " + id);
 
       userExercise.setUniqueID(id);
+
+      if (!userExercise.isPredefined()) {     // cheesy!
+        String customID = UserExercise.CUSTOM_PREFIX + id;
+        String sql = "UPDATE " + USEREXERCISE +
+          " " +
+          "SET " +
+          "exerciseid='" + customID + "' " +
+          "WHERE uniqueid=" + userExercise.getUniqueID();
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.executeUpdate();
+        preparedStatement.close();
+        userExercise.setID(customID);
+
+        logger.debug("\tuserExercise= " + userExercise);
+      }
 
       statement.close();
       database.closeConnection(connection);
@@ -103,15 +126,6 @@ public class UserExerciseDAO extends DAO {
     database.closeConnection(connection);
   }
 
-/*  void dropUserTable(Database database) throws Exception {
-    System.err.println("----------- dropUserTable -------------------- ");
-    Connection connection = database.getConnection();
-    PreparedStatement statement = connection.prepareStatement("drop TABLE " + USEREXERCISE);
-    statement.execute();
-    statement.close();
-    database.closeConnection(connection);
-  }*/
-
   /**
    * @see mitll.langtest.server.database.custom.UserListDAO#populateList
    * @param listID
@@ -121,11 +135,9 @@ public class UserExerciseDAO extends DAO {
     String sql = "SELECT " +
       "ue.* from " + USEREXERCISE + " ue, " + UserListExerciseJoinDAO.USER_EXERCISE_LIST_EXERCISE +" uele "+
       " where ue." +
-      //  "exerciseid" +
        "uniqueid" +
       "=uele." +
       "exerciseid" +
-    //  "uniqueid" +
       " AND uele.userlistid=" + listID + ";";
     
     try {
@@ -134,38 +146,22 @@ public class UserExerciseDAO extends DAO {
 
       List<UserExercise> userExercises2 = new ArrayList<UserExercise>();
 
-      //Set<String> ids = new HashSet<String>();
       for (UserExercise ue : userExercises) {
-        logger.debug("\ton list " +listID + " " + ue.getID() + " / " +ue.getUniqueID() + " : " + ue);
+        //logger.debug("\ton list " +listID + " " + ue.getID() + " / " +ue.getUniqueID() + " : " + ue);
         if (ue.isPredefined()) {
           Exercise byID = exerciseDAO.getExercise(ue.getID());
 
           if (byID != null) {
-            userExercises2.add(new UserExercise(byID/*.getShell()*/)); // all predefined references
+            userExercises2.add(new UserExercise(byID)); // all predefined references
           } else logger.error("huh can't find '" + ue.getID() +"'");
         }
         else {
           userExercises2.add(ue);
         }
-        //ids.add(ue.getID());
       }
 
-/*      logger.debug("\tids " + ids + " on list " +listID);
-
-      List<String> predefined = userListExerciseJoinDAO.getAllFor(listID, ids);
-      logger.debug("\tall ids " + predefined);
-      logger.debug("\tuserExercises before (" +userExercises.size()+
-        ") : " + userExercises);
-
-      for (String id : predefined) {
-        Exercise byID = exerciseDAO.getExercise(id);
-
-        if (byID != null) {
-          userExercises.add(new UserExercise(byID*//*.getShell()*//*)); // all predefined references
-        } else if (!id.startsWith("Custom")) logger.error("huh can't find '" + id +"'");
-      }*/
-      logger.debug("\tuserExercises after  (" +userExercises2.size()+
-        ") : " /*+ userExercises2*/);
+/*      logger.debug("\tuserExercises after  (" +userExercises2.size()+
+        ") : " *//*+ userExercises2*//*);*/
 
       if (userExercises2.isEmpty()) {
         logger.info("getOnList : no exercises on list id " + listID);
@@ -217,19 +213,22 @@ public class UserExerciseDAO extends DAO {
   private List<UserExercise> getUserExercises(String sql) throws SQLException {
     Connection connection = database.getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
-    logger.debug("getUserExercises sql = " + sql);
+    //logger.debug("getUserExercises sql = " + sql);
     ResultSet rs = statement.executeQuery();
     List<UserExercise> exercises = new ArrayList<UserExercise>();
 
     while (rs.next()) {
-      exercises.add(new UserExercise(rs.getLong("uniqueid"), //id
+      UserExercise e = new UserExercise(rs.getLong("uniqueid"), //id
 
         rs.getString("exerciseid"), rs.getLong("creatorid"), // age
         rs.getString("english"), // exp
         rs.getString("foreignLanguage"), // exp
         rs.getString("refAudio"), // exp
-        rs.getString("slowAudioRef"))
-      );
+        rs.getString("slowAudioRef"));
+/*      if (!e.isPredefined()) {
+        e.setID(UserExercise.CUSTOM_PREFIX+e.getUniqueID());
+      }*/
+      exercises.add(e);
     }
     rs.close();
     statement.close();
