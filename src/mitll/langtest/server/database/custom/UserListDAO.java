@@ -189,37 +189,41 @@ public class UserListDAO extends DAO {
     return where;
   }
 
-  private void populateList(UserList where) {
-    Collection<UserExercise> onList = userExerciseDAO.getOnList(where.getUniqueID());
-    where.setExercises(onList);
-    where.setVisitors(userListVisitorJoinDAO.getWhere(where.getUniqueID()));
-  }
-
   private List<UserList> getUserLists(String sql) throws SQLException {
     Connection connection = database.getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
-    int i;
-
     ResultSet rs = statement.executeQuery();
-    List<UserList> exercises = new ArrayList<UserList>();
+    List<UserList> lists = new ArrayList<UserList>();
 
     while (rs.next()) {
       long uniqueid = rs.getLong("uniqueid");
-      exercises.add(new UserList(uniqueid, //id
+      lists.add(new UserList(uniqueid, //id
         userDAO.getUserWhere(rs.getLong("creatorid")), // age
         rs.getString("name"), // exp
         rs.getString("description"), // exp
         rs.getString("classmarker"), // exp
         rs.getTimestamp("modified").getTime(),
         rs.getBoolean("isprivate")
-        )
+      )
       );
     }
     rs.close();
     statement.close();
     database.closeConnection(connection);
-    for (UserList ul : exercises) populateList(ul);
-    return exercises;
+    for (UserList ul : lists) {
+      populateList(ul);
+    }
+    return lists;
+  }
+
+  private void populateList(UserList where) {
+    Collection<UserExercise> onList = userExerciseDAO.getOnList(where.getUniqueID());
+    logger.debug("got " + onList.size() + " for list "+where.getUniqueID());
+    where.setExercises(onList);
+    where.setVisitors(userListVisitorJoinDAO.getWhere(where.getUniqueID()));
+
+    logger.debug("\tlist now "+where);
+
   }
 
   public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {

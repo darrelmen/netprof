@@ -74,10 +74,12 @@ public class UserListManager {
    */
   public Collection<UserList> getListsForUser(long userid, boolean onlyCreated) {
     if (userid == -1) return Collections.emptyList();
-    logger.debug("getListsForUser for " + userid);
+    logger.debug("getListsForUser for user #" + userid);
 
     List<UserList> listsForUser = new ArrayList<UserList>();
     for (UserList userList : userListDAO.getAll()) {
+      logger.debug("\tgetListsForUser  list " + userList);
+
       boolean isCreator = userList.getCreator().id == userid;
       if (onlyCreated) {
         if (isCreator) {
@@ -136,7 +138,7 @@ public class UserListManager {
 
   public UserExercise createNewItem(long userid, String english, String foreign) {
     int uniqueID = userExerciseCount++;
-    return new UserExercise(uniqueID, userid, english, foreign);
+    return new UserExercise(uniqueID, UserExercise.CUSTOM_PREFIX+uniqueID, userid, english, foreign);
   }
 
   /**
