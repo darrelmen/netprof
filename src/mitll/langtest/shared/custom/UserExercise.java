@@ -1,13 +1,9 @@
 package mitll.langtest.shared.custom;
 
-import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.AudioExercise;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.ExerciseShell;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -17,6 +13,7 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class UserExercise extends AudioExercise {
+  public static final String CUSTOM_PREFIX = "Custom_";
   private static int globalCount  = 0;
   private int count = 0;
   private long uniqueID = -1; //set by database
@@ -40,30 +37,34 @@ public class UserExercise extends AudioExercise {
   /**
    * @see mitll.langtest.server.database.custom.UserListManager#createNewItem(long, String, String)
    * @param uniqueID
+   * @param exerciseID
    * @param creator
    * @param english
    * @param foreignLanguage
    */
-  public UserExercise(long uniqueID, long creator, String english, String foreignLanguage) {
-    super("Custom_"+uniqueID,english);
+  public UserExercise(long uniqueID, String exerciseID, long creator, String english, String foreignLanguage) {
+   // super("Custom_"+uniqueID,english);
+    super(exerciseID,english);
     this.creator = creator;
     this.uniqueID = uniqueID;
     this.english = english;
     this.foreignLanguage = foreignLanguage;
     count = globalCount++;
+    isPredef = !exerciseID.startsWith(CUSTOM_PREFIX);
   }
 
   /**
    * @see mitll.langtest.server.database.UserExerciseDAO#getUserExercises(String)
    * @param uniqueID
+   * @param exerciseID
    * @param creator
    * @param english
    * @param foreignLanguage
    * @param refAudio
    * @param slowAudioRef
    */
-  public UserExercise(long uniqueID, long creator, String english, String foreignLanguage, String refAudio, String slowAudioRef) {
-    this(uniqueID,creator,english,foreignLanguage);
+  public UserExercise(long uniqueID, String exerciseID, long creator, String english, String foreignLanguage, String refAudio, String slowAudioRef) {
+    this(uniqueID, exerciseID, creator,english,foreignLanguage);
     setRefAudio(refAudio);
     setSlowRefAudio(slowAudioRef);
   }
@@ -85,7 +86,7 @@ public class UserExercise extends AudioExercise {
    * @return
    */
   public Exercise toExercise() {
-    Exercise exercise = new Exercise("plan", "Custom_" + uniqueID, getEnglish(), getRefAudio(), getForeignLanguage(), getEnglish());
+    Exercise exercise = new Exercise("plan", CUSTOM_PREFIX + uniqueID, getEnglish(), getRefAudio(), getForeignLanguage(), getEnglish());
     exercise.setSlowRefAudio(getSlowAudioRef());
     return exercise;
   }
@@ -125,10 +126,10 @@ public class UserExercise extends AudioExercise {
   public void setUniqueID(long uniqueID) { this.uniqueID = uniqueID; /*setID("Custom_"+uniqueID);*/ }
   public long getUniqueID() { return uniqueID; }
 
-  @Override
+/*  @Override
   public String getID() {
-    return isPredef ? super.getID() : "Custom_"+uniqueID;
-  }
+    return isPredef ? super.getID() : CUSTOM_PREFIX +uniqueID;
+  }*/
 
   public void setEnglish(String english) {
     this.english = english;
