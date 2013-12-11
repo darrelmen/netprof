@@ -117,6 +117,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
         public void onFailure(Throwable caught) {}
         @Override
         public void onSuccess(Set<String> result) {
+          //System.out.println("\tFlexSectionExerciseList : getCompletedExercises : completed for user=" + userID + " result " + result.size());
           controller.getExerciseList().setCompleted(result);
           addWidgets();
         }
