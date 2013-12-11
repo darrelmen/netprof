@@ -219,8 +219,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public ExerciseListWrapper getExerciseIds(int reqID, long userID, String prefix, long userListID) {
-    logger.debug("getExerciseIds : getting exercise ids for User id=" + userID + " config " + relativeConfigDir + " and user list id " +userListID);
     List<Exercise> exercises = getExercises(userID);
+    logger.debug("getExerciseIds : getting exercise ids for User id=" + userID + " config " + relativeConfigDir +
+      " and user list id " +userListID + " full list size is " + exercises.size());
 
     if (userListID != -1) {
       UserList userListByID = db.getUserListManager().getUserListByID(userListID);
