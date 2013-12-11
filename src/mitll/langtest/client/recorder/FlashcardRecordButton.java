@@ -34,16 +34,20 @@ public class FlashcardRecordButton extends RecordButton {
   private static final String NO_SPACE_WARNING = "Press and hold space bar or mouse button to begin recording, release to stop.";
 
   private boolean warnUserWhenNotSpace = true;
+  private final boolean addKeyBinding;
 
   /**
+   * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#makeRecordButton(mitll.langtest.client.exercise.ExerciseController)
    * @param delay
    * @param recordingListener
    * @param warnNotASpace
+   * @param addKeyBinding
    */
-  public FlashcardRecordButton(int delay, RecordingListener recordingListener, boolean warnNotASpace) {
+  public FlashcardRecordButton(int delay, RecordingListener recordingListener, boolean warnNotASpace, boolean addKeyBinding) {
     super(delay, recordingListener, true);
-    this.warnUserWhenNotSpace = warnNotASpace;
-    setText(SPACE_BAR);
+    this.addKeyBinding = addKeyBinding;
+    this.warnUserWhenNotSpace = addKeyBinding && warnNotASpace;
+   // setText(addKeyBinding ? getButtonText() : "Click and hold mouse button to record, release to stop.");
     DOM.setStyleAttribute(getElement(), "width", "460px");
     DOM.setStyleAttribute(getElement(), "height", "48px");
     DOM.setStyleAttribute(getElement(), "fontSize", "x-large");
@@ -54,31 +58,33 @@ public class FlashcardRecordButton extends RecordButton {
     initRecordButton();
   }
 
-  protected void setupRecordButton() {
-    super.setupRecordButton();
+  protected void setupRecordButton(boolean addKeyBinding) {
+    super.setupRecordButton(addKeyBinding);
 
-    addKeyDownHandler(new KeyDownHandler() {
-      @Override
-      public void onKeyDown(KeyDownEvent event) {
-        if (event.getNativeKeyCode() == SPACE_CHAR) {
-          if (!mouseDown) {
-            mouseDown = true;
+    if (addKeyBinding) {
+      addKeyDownHandler(new KeyDownHandler() {
+        @Override
+        public void onKeyDown(KeyDownEvent event) {
+          if (event.getNativeKeyCode() == SPACE_CHAR) {
+            if (!mouseDown) {
+              mouseDown = true;
+              doClick();
+            }
+          } else if (warnUserWhenNotSpace) {
+            warnNotASpace();
+          }
+        }
+      });
+      addKeyUpHandler(new KeyUpHandler() {
+        @Override
+        public void onKeyUp(KeyUpEvent event) {
+          if (event.getNativeKeyCode() == SPACE_CHAR) {
+            mouseDown = false;
             doClick();
           }
-        } else if (warnUserWhenNotSpace) {
-          warnNotASpace();
         }
-      }
-    });
-    addKeyUpHandler(new KeyUpHandler() {
-      @Override
-      public void onKeyUp(KeyUpEvent event) {
-        if (event.getNativeKeyCode() == SPACE_CHAR) {
-          mouseDown = false;
-          doClick();
-        }
-      }
-    });
+      });
+    }
     getFocus();
   }
 
@@ -131,7 +137,7 @@ public class FlashcardRecordButton extends RecordButton {
 
   public void initRecordButton() {
     super.initRecordButton();
-    setText(SPACE_BAR);
+    setText(addKeyBinding ? SPACE_BAR : "Click and hold mouse button to record.");
     setType(ButtonType.PRIMARY);
     getFocus();
   }
