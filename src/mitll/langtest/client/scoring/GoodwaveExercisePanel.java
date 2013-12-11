@@ -44,7 +44,6 @@ import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Mainly delegates recording to the {@link mitll.langtest.client.recorder.SimpleRecordPanel}.
@@ -64,7 +63,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   private Image recordImage2;
   private String refAudio;
 
-  private Exercise exercise = null;
+  private final Exercise exercise;
   private final ExerciseController controller;
   private final LangTestDatabaseAsync service;
   private ScoreListener scorePanel;
@@ -72,7 +71,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   private NavigationHelper navigationHelper;
   private SplitDropdownButton addToList;
   private int activeCount = 0;
-  private float screenPortion;
+  private final float screenPortion;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -131,7 +130,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     this.navigationHelper = new NavigationHelper(exercise, controller, new PostAnswerProvider() {
       @Override
       public void postAnswers(ExerciseController controller, Exercise completedExercise) {
-        System.out.println("postAnswers : load next exercise " + completedExercise.getID());
+        //System.out.println("postAnswers : load next exercise " + completedExercise.getID());
         listContainer.loadNextExercise(completedExercise);
       }
     }, listContainer, true, addKeyHandler);
@@ -144,7 +143,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     addToList.setIcon(IconType.PLUS_SIGN);
 
     System.out.println("makeAddToList : populate list choices for " + controller.getUser());
-
 
     populateListChoices(e, controller, addToList);
     addToList.setType(ButtonType.PRIMARY);
@@ -444,6 +442,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         recordImage1.setVisible(false);
         add(recordImage2);
         recordImage2.setVisible(false);
+        getElement().setId("GoodwaveExercisePanel_MyPlayAudioPanel");
       }
 
       @Override
@@ -452,17 +451,11 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         postAudioRecordButton.addStyleName("rightFiveMargin");
         super.addButtons();
       }
-
-      /**
-       * No keyboard listener for play button -- since there can be two play buttons -- which one gets the space bar?
-       */
-/*      @Override
-      protected void addKeyboardListener() {}*/
     }
 
     private class MyPostAudioRecordButton extends PostAudioRecordButton {
       public MyPostAudioRecordButton(ExerciseController controller) {
-        super(exercise, controller, ASRRecordAudioPanel.this.service, ASRRecordAudioPanel.this.index, false);
+        super(exercise, controller, ASRRecordAudioPanel.this.service, ASRRecordAudioPanel.this.index, false, true);
       }
 
       @Override
@@ -512,9 +505,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * versions of the audio file.
    */
   private class FastAndSlowASRScoringAudioPanel extends ASRScoringAudioPanel {
-  //  private static final String RADIO_BUTTON_WIDTH = "40px";
     private static final String GROUP = "group";
-
     /**
      * @param path
      * @see GoodwaveExercisePanel#getScoringAudioPanel(mitll.langtest.shared.Exercise, String)
@@ -537,52 +528,42 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     protected Widget getBeforePlayWidget() {
       VerticalPanel vp = new VerticalPanel();
 
-     // boolean madeFast = false;
-
       Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
       RadioButton first = null;
 
-      System.out.println("Attributes were " + audioAttributes);
+      System.out.println("getBeforePlayWidget : for " + audioPath + "Attributes were " + audioAttributes);
       RadioButton regular = null;
       for (final AudioAttribute audioAttribute : audioAttributes) {
-        RadioButton fast = new RadioButton(GROUP, audioAttribute.getDisplay());
+        RadioButton fast = new RadioButton(GROUP +"_"+audioPath, audioAttribute.getDisplay());
         if (audioAttribute.isRegularSpeed()) {
           regular = fast;
-//          System.out.println(audioAttribute +" is regular speed\n\n\n ");
         }
-//        else {
-//          System.out.println(audioAttribute +" is not regular speed ");
- //       }
         if (first == null) {
           first = fast;
         }
         vp.add(fast);
-        //fast.setWidth(RADIO_BUTTON_WIDTH);
 
         fast.addClickHandler(new ClickHandler() {
           @Override
           public void onClick(ClickEvent event) {
-            doPause();    // if the audio is playing, stop it
-            String audioRef = audioAttribute.getAudioRef();
-            setRefAudio(audioRef);
-            getImagesForPath(audioRef);
+            showAudio(audioAttribute);
           }
         });
       }
 
       if (regular != null) {
         regular.setValue(true);
-       // System.out.println( "\n\n----> getBeforePlayWidget : set regular!\n\n");
+        System.out.println("selecting regular speed ");
 
       }
       else if (first != null) {
         first.setValue(true);
-       // System.out.println( "\n\n----> getBeforePlayWidget : set somethign else!\n\n");
+        System.out.println("selecting first ");
 
       }
-
-     // vp.setWidth("80px");
-
+      else {
+        System.err.println("no radio choice got selected??? ");
+      }
       if (audioAttributes.isEmpty()) {
         vp.add(new Label("No reference audio."));
       }
@@ -590,8 +571,14 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       HorizontalPanel hp = new HorizontalPanel();
       hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
       hp.add(vp);
-    //  hp.setWidth("60px");
       return vp;
+    }
+
+    private void showAudio(AudioAttribute audioAttribute) {
+      doPause();    // if the audio is playing, stop it
+      String audioRef = audioAttribute.getAudioRef();
+      setRefAudio(audioRef);
+      getImagesForPath(audioRef);
     }
   }
 }
