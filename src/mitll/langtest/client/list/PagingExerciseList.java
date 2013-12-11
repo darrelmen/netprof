@@ -32,7 +32,6 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class PagingExerciseList extends ExerciseList implements RequiresResize {
-
   protected ExerciseController controller;
   protected PagingContainer<? extends ExerciseShell> pagingContainer;
   private boolean isCRTDataMode;
@@ -65,7 +64,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
    */
   public void setCompleted(Set<String> completed) {
     this.completed = completed;
-    //if (table != null) table.redraw(); // todo check this...
+    pagingContainer.setCompleted(completed);
   }
 
   @Override
@@ -142,6 +141,23 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     };
     pagingContainer = pagingContainer1;
     return pagingContainer1;
+  }
+
+  @Override
+  protected ExerciseShell findFirstExercise() {
+    if (isCRTDataMode) {
+      return getFirstNotCompleted();
+    }
+    else {
+      return super.findFirstExercise();
+    }
+  }
+
+  private ExerciseShell getFirstNotCompleted() {
+    for (ExerciseShell es : currentExercises) {
+      if (!completed.contains(es.getID())) return es;
+    }
+    return super.findFirstExercise();
   }
 
   protected int getVerticalUnaccountedFor() {
