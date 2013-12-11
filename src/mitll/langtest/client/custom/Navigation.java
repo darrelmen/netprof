@@ -142,7 +142,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
             " ' target name '" + showEvent.getTarget().getName() + "'");*/
         String targetName = showEvent.getTarget() == null ? "" : showEvent.getTarget().toString();
 
-        System.out.println("got shown event : '" +showEvent + "'\n target '" + targetName + "'");
+        System.out.println("got shown event : '" +showEvent + "' target '" + targetName + "'");
 
         boolean wasChapters = targetName.contains(CHAPTERS);
         if (wasChapters) {
@@ -196,8 +196,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
 
     service.getListsForUser(userManager.getUser(), false, new AsyncCallback<Collection<UserList>>() {
       @Override
-      public void onFailure(Throwable caught) {
-      }
+      public void onFailure(Throwable caught) {}
 
       @Override
       public void onSuccess(Collection<UserList> result) {
@@ -250,7 +249,6 @@ public class Navigation extends BasicDialog implements RequiresResize {
   }
 
   private void viewLessons(final Panel contentPanel, boolean getAll) {
-    System.out.println("viewLessons----> getAll = " + getAll);
     contentPanel.clear();
     contentPanel.getElement().setId("contentPanel");
 
@@ -258,10 +256,10 @@ public class Navigation extends BasicDialog implements RequiresResize {
     contentPanel.add(child);
     child.addStyleName("exerciseBackground");
     if (getAll) {
+      System.out.println("viewLessons----> getAll = " + getAll);
       service.getUserListsForText("", new UserListCallback(contentPanel, child));
     } else {
-      System.out.println("\t viewLessons for " + userManager.getUser());
-
+      System.out.println("viewLessons for " + userManager.getUser());
       service.getListsForUser(userManager.getUser(), false, new UserListCallback(contentPanel, child));
     }
   }
@@ -482,7 +480,6 @@ public class Navigation extends BasicDialog implements RequiresResize {
         service.addUserList(userManager.getUser(), titleBox.getText(), area.getText(), classBox.getText(), new AsyncCallback<Long>() {
           @Override
           public void onFailure(Throwable caught) {
-            //To change body of implemented methods use File | Settings | File Templates.
           }
 
           @Override
