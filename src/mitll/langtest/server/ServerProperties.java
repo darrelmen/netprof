@@ -72,7 +72,6 @@ public class ServerProperties {
   //private static final String EXERCISES_IN_ORDER = "exercisesInOrder";
   private static final String FOREIGN_LANGUAGE_QUESTIONS_ONLY = "foreignLanguageQuestionsOnly";
   private static final String MAX_NUM_EXERCISES = "maxNumExercises";
-  private static final String COLLECT_SYNONYMS = "collectSynonyms";
 
   private Properties props = new Properties();
 
@@ -241,10 +240,6 @@ public class ServerProperties {
     } catch (NumberFormatException e) {
       return maxNumExercises;
     }
-  }
-
-  public boolean getCollectSynonyms() {
-    return getDefaultTrue(COLLECT_SYNONYMS);
   }
 
   /**
