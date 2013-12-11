@@ -1455,30 +1455,4 @@ public class DatabaseImpl implements Database {
   }
 
   public String toString() { return "Database : "+ connection.getConnection(); }
-
-/*  private static String getConfigDir(String language) {
-    String installPath = ".";
-    String dariConfig = File.separator +
-      "war" +
-      File.separator +
-      "config" +
-      File.separator +
-      language +
-      File.separator;
-    return installPath + dariConfig;
-  }*/
-
-/*  public static void main(String [] arg) {
-
-    String language = "pilot";
-    final String configDir = getConfigDir(language);
-
-    DatabaseImpl unitAndChapter = new DatabaseImpl(
-      configDir,
-      "arabicText",
-      "");
-    unitAndChapter.useFile =false;
-    unitAndChapter.mediaDir = "config";
-    unitAndChapter.getRandomBalancedList(0);
-  }*/
 }
