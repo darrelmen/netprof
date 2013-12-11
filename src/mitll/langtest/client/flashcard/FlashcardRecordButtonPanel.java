@@ -225,13 +225,19 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
         playAllAudio(correctPrompt, toPlay);
       } else {
         String path = exercise.getRefAudio();
+        System.out.println("showIncorrectFeedback : regular " + path);
         if (path == null) {
+          System.out.println("showIncorrectFeedback : slow " + path);
           path = exercise.getSlowAudioRef(); // fall back to slow audio
         }
+
         if (path == null) {
           exercisePanel.getSoundFeedback().playIncorrect(); // this should never happen
         } else {
           path = (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
+          path = ensureForwardSlashes(path);
+          System.out.println("showIncorrectFeedback : playing " + path);
+
           final String fcorrectPrompt = correctPrompt;
 
           exercisePanel.getSoundFeedback().createSound(path, new SoundFeedback.EndListener() {
@@ -267,6 +273,10 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
       DOM.setStyleAttribute(recoOutput.getElement(), "color", "#000000");
     }
     return correctPrompt;
+  }
+
+  private String ensureForwardSlashes(String wavPath) {
+    return wavPath.replaceAll("\\\\", "/");
   }
 
   /**
