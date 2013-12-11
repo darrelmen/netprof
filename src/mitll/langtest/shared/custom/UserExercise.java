@@ -64,7 +64,7 @@ public class UserExercise extends AudioExercise {
    * @param slowAudioRef
    */
   public UserExercise(long uniqueID, String exerciseID, long creator, String english, String foreignLanguage, String refAudio, String slowAudioRef) {
-    this(uniqueID, exerciseID, creator,english,foreignLanguage);
+    this(uniqueID, exerciseID, creator, english, foreignLanguage);
     setRefAudio(refAudio);
     setSlowRefAudio(slowAudioRef);
   }
@@ -99,8 +99,13 @@ public class UserExercise extends AudioExercise {
   public Exercise toExercise(String language) {
     String content = ExerciseFormatter.getContent(getForeignLanguage(), "", english, "", language);
     Exercise imported = new Exercise("import", id, content, false, true, english);
+    System.out.println("toExercise : before " + imported + " " + getRefAudio() + " " + getSlowAudioRef());
+
     imported.setRefAudio(getRefAudio());
     imported.setSlowRefAudio(getSlowAudioRef());
+
+    System.out.println("toExercise : after  " +imported + " " + getRefAudio() + " " + getSlowAudioRef());
+
     imported.setType(Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW);
     imported.setRefSentence(getForeignLanguage());
     imported.setEnglishSentence(english);
@@ -123,13 +128,8 @@ public class UserExercise extends AudioExercise {
    * @see mitll.langtest.server.database.UserExerciseDAO#add
    * @param uniqueID
    */
-  public void setUniqueID(long uniqueID) { this.uniqueID = uniqueID; /*setID("Custom_"+uniqueID);*/ }
+  public void setUniqueID(long uniqueID) { this.uniqueID = uniqueID;  }
   public long getUniqueID() { return uniqueID; }
-
-/*  @Override
-  public String getID() {
-    return isPredef ? super.getID() : CUSTOM_PREFIX +uniqueID;
-  }*/
 
   public void setEnglish(String english) {
     this.english = english;
