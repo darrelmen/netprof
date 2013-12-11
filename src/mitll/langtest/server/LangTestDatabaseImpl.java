@@ -1035,19 +1035,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   private void fixAudioPaths(UserExercise userExercise, boolean overwrite) {
     File fileRef = pathHelper.getAbsoluteFile(userExercise.getRefAudio());
-    String fast = FAST + ".wav";
+    long now = System.currentTimeMillis();
+    String fast = FAST + "_"+ now +"_.wav";
     String refAudio = getRefAudioPath(userExercise, fileRef, fast, overwrite);
     userExercise.setRefAudio(refAudio);
-    logger.debug("for " + userExercise.getID()+
-      " fast is " + fast + " size " + FileUtils.size(refAudio));
+    logger.debug("for " + userExercise.getID() + " fast is " + fast + " size " + FileUtils.size(refAudio));
 
     if (userExercise.getSlowAudioRef() != null && !userExercise.getSlowAudioRef().isEmpty()) {
       fileRef = pathHelper.getAbsoluteFile(userExercise.getSlowAudioRef());
-      String slow = SLOW + ".wav";
+      String slow = SLOW + "_"+ now+"_.wav";
 
       refAudio = getRefAudioPath(userExercise, fileRef, slow, overwrite);
-      logger.debug("for " + userExercise.getID()+
-        "slow is " + refAudio + " size " + FileUtils.size(refAudio));
+      logger.debug("for " + userExercise.getID()+ "slow is " + refAudio + " size " + FileUtils.size(refAudio));
 
       userExercise.setSlowRefAudio(refAudio);
     }
@@ -1159,12 +1158,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param flq was the prompt a foreign language query
    * @param audioType regular or fast then slow audio recording
    * @param doFlashcard
+   * @param recordInResults
    * @return URL to audio on server and if audio is valid (not too short, etc.)
    */
   public AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int questionID,
-                                    int user, int reqid, boolean flq, String audioType, boolean doFlashcard) {
-    return audioFileHelper.writeAudioFile(base64EncodedString, plan, exercise, questionID, user, reqid, flq,
-      audioType, doFlashcard, this);
+                                    int user, int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults) {
+    Exercise exercise1 = getExercise(exercise);
+    return audioFileHelper.writeAudioFile(base64EncodedString, plan, exercise, exercise1, questionID, user, reqid,
+      flq, audioType, doFlashcard, recordInResults);
   }
 
   /**
