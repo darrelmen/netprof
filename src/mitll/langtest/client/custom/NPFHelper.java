@@ -118,6 +118,9 @@ public class NPFHelper implements RequiresResize {
     exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, feedback, controller, exerciseList, 0.7f) {
       @Override
       public Panel getExercisePanel(Exercise e) {
+
+        System.out.println("\n\nmaking new GoodwaveExercisePanel for " +e);
+
         return new GoodwaveExercisePanel(e, controller, exerciseList, 0.65f,false, "classroom");
       }
     }, userManager, 1);
