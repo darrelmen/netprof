@@ -61,6 +61,7 @@ public class BootstrapExercisePanel extends FluidContainer {
     addRecordingAndFeedbackWidgets(e, service, controller, feedbackHeight);
     warnNoFlash.setVisible(false);
     add(warnNoFlash);
+    getElement().setId("BootstrapExercisePanel");
   }
 
   /**
