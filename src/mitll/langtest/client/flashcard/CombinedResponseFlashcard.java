@@ -30,6 +30,7 @@ public class CombinedResponseFlashcard extends TextCRTFlashcard implements Exerc
 
   public CombinedResponseFlashcard(Exercise e, LangTestDatabaseAsync service, ExerciseController controller) {
     super(e, service, controller);
+    getElement().setId("CombinedResponseFlashcard");
   }
 
   /**
