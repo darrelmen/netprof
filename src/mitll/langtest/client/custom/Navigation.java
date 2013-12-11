@@ -39,6 +39,7 @@ import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
+import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.custom.UserList;
 
@@ -195,29 +196,29 @@ public class Navigation extends BasicDialog implements RequiresResize {
 
     service.getListsForUser(userManager.getUser(), false, new AsyncCallback<Collection<UserList>>() {
       @Override
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+      }
 
       @Override
       public void onSuccess(Collection<UserList> result) {
         if (result.size() == 1 && result.iterator().next().getExercises().isEmpty()) {
           service.getUserListsForText("", new AsyncCallback<Collection<UserList>>() {
             @Override
-            public void onFailure(Throwable caught) {}
+            public void onFailure(Throwable caught) {
+            }
 
             @Override
             public void onSuccess(Collection<UserList> result) {
               if (!result.isEmpty()) {
                 // show site-wide browse list instead
                 showBrowse();
-              }
-              else { // otherwise show the chapters tab
+              } else { // otherwise show the chapters tab
                 tabPanel.selectTab(3);
               }
             }
           });
-        }
-        else {
-          System.out.println("\tshowInitialState show initial state for " + userManager.getUser() + " found " +result.size() + " lists");
+        } else {
+          System.out.println("\tshowInitialState show initial state for " + userManager.getUser() + " found " + result.size() + " lists");
 
           showMyLists();
         }
@@ -608,7 +609,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
         r1.add(getUserListText2(ul.getClassMarker()));
       }
 
-      if (createdByYou(ul)) {
+      if (createdByYou(ul) && !ul.getName().equals(UserListManager.MY_LIST)) {
         r1 = new FluidRow();
         w.add(r1);
         r1.add(new HTML("<b>Created by you.</b>"));
