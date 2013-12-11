@@ -57,11 +57,6 @@ public class UserExerciseDAO extends DAO {
       statement.setString(i++, refAudio == null ? "" : refAudio);
       String slowAudioRef = userExercise.getSlowAudioRef();
       String aNull = slowAudioRef == null || slowAudioRef.equals("null") ? "" : slowAudioRef;
-
-
-      logger.debug("\n\n\nslow ref = '" +aNull+ "'");
-
-
       statement.setString(i++, aNull);
 
       int j = statement.executeUpdate();
@@ -142,7 +137,7 @@ public class UserExerciseDAO extends DAO {
     
     try {
       List<UserExercise> userExercises = getUserExercises(sql);
-      logger.debug("\tfound (" +userExercises.size()+ ") userExercises on list " +listID);
+//      logger.debug("\tfound (" +userExercises.size()+ ") userExercises on list " +listID);
 
       List<UserExercise> userExercises2 = new ArrayList<UserExercise>();
 
@@ -159,9 +154,6 @@ public class UserExerciseDAO extends DAO {
           userExercises2.add(ue);
         }
       }
-
-/*      logger.debug("\tuserExercises after  (" +userExercises2.size()+
-        ") : " *//*+ userExercises2*//*);*/
 
       if (userExercises2.isEmpty()) {
         logger.info("getOnList : no exercises on list id " + listID);
@@ -200,7 +192,7 @@ public class UserExerciseDAO extends DAO {
    *
    * @return
    */
-  public List<UserExercise> getAll() {
+/*  public List<UserExercise> getAll() {
     try {
       String sql = "SELECT * from " + USEREXERCISE;
       return getUserExercises(sql);
@@ -208,7 +200,7 @@ public class UserExerciseDAO extends DAO {
       logger.error("got " + ee, ee);
     }
     return Collections.emptyList();
-  }
+  }*/
 
   private List<UserExercise> getUserExercises(String sql) throws SQLException {
     Connection connection = database.getConnection();
@@ -219,15 +211,11 @@ public class UserExerciseDAO extends DAO {
 
     while (rs.next()) {
       UserExercise e = new UserExercise(rs.getLong("uniqueid"), //id
-
         rs.getString("exerciseid"), rs.getLong("creatorid"), // age
         rs.getString("english"), // exp
         rs.getString("foreignLanguage"), // exp
         rs.getString("refAudio"), // exp
         rs.getString("slowAudioRef"));
-/*      if (!e.isPredefined()) {
-        e.setID(UserExercise.CUSTOM_PREFIX+e.getUniqueID());
-      }*/
       exercises.add(e);
     }
     rs.close();
@@ -254,7 +242,7 @@ public class UserExerciseDAO extends DAO {
 
       int i = statement.executeUpdate();
 
-      if (false) logger.debug("UPDATE " + i);
+      //if (false) logger.debug("UPDATE " + i);
       if (i == 0) {
         logger.error("huh? didn't update the userExercise for " + userExercise + " sql " + sql);
       }
