@@ -68,9 +68,11 @@ public class SoundManagerStatic implements SoundManagerAPI {
     SoundManager.setPosition(sound, position);
   }
 
+/*
   public void setPositionAndPlay(Sound sound, double position) {
     SoundManager.setPositionAndPlay(sound, position);
   }
+*/
 
   public void playInterval(Sound sound, int start, int end) {
     SoundManager.playInterval(sound, start, end);
@@ -86,11 +88,11 @@ public class SoundManagerStatic implements SoundManagerAPI {
     SoundManager.loaded();
   }
 
-  public void songFinished(Sound sound) {
+/*  public void songFinished(Sound sound) {
     if (debug) System.out.println("SoundManagerStatic.songFinished ");
 
     SoundManager.songFinished(sound);
-  }
+  }*/
 
   public void songFirstLoaded(Sound sound, double durationEstimate) {
     if (debug) System.out.println("SoundManagerStatic.songFirstLoaded " +sound);
