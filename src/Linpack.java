@@ -32,11 +32,6 @@ Translated to C by Bonnie Toy 5/88
 */
 
 
-import java.net.*;
-import java.io.*;
-import java.util.*;
-
-
 public class Linpack {
 
   public static final int SIZE = 14000;
