@@ -84,7 +84,7 @@ public class HistoryExerciseList extends PagingExerciseList {
     StringBuilder builder = new StringBuilder();
     for (String type : typeToBox.keySet()) {
       String section = getCurrentSelection(type);
-      System.out.println("\tSectionExerciseList.getHistoryToken for " + type + " section = " +section);
+      System.out.println("\tHistoryExerciseList.getHistoryToken for " + type + " section = " +section);
       if (section.equals(HistoryExerciseList.ANY)) {
         //System.out.println("getHistoryToken : Skipping box " + type + " (ANY) ");
       } else {
@@ -97,8 +97,8 @@ public class HistoryExerciseList extends PagingExerciseList {
 
       builder.append(historyToken);
     }*/
-   System.out.println("\tgetHistoryToken for " + id + " is '" +builder.toString() + "'");
-
+    System.out.println("\tgetHistoryToken for " + id + " is '" +builder.toString() + "'");
+    if (id != null && id.length() > 0 && builder.toString().isEmpty()) return super.getHistoryToken(id);
     return builder.toString();
   }
 
@@ -347,12 +347,12 @@ public class HistoryExerciseList extends PagingExerciseList {
     String item = selectionState1.getItem();
 
     if (item != null && item.length() > 0 && hasExercise(item)) {
-      if (includeItemInBookmark) {
+    //  if (includeItemInBookmark) {
         loadByIDFromToken(item);
-      }
+  /*    }
       else {
         System.out.println("onValueChange : skipping item " + item);
-      }
+      }*/
     } else {
       String token = event.getValue();
       try {
