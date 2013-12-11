@@ -55,8 +55,6 @@ public class RecordButtonPanel implements RecordButton.RecordingListener{
     this.questionState = questionState;
     this.index = index;
     this.doFlashcardAudio = doFlashcardAudio;
-    // make record button
-
     layoutRecordButton(recordButton = makeRecordButton(controller));
   }
 
@@ -132,7 +130,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener{
       !exercise.isPromptInEnglish(),
       controller.getAudioType(),
       doFlashcardAudio,
-      new AsyncCallback<AudioAnswer>() {
+      true, new AsyncCallback<AudioAnswer>() {
         public void onFailure(Throwable caught) {
           controller.logException(caught);
           if (tries > 0) {
