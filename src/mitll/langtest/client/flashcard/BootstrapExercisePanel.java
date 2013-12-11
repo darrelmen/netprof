@@ -61,6 +61,7 @@ public class BootstrapExercisePanel extends FluidContainer {
     addRecordingAndFeedbackWidgets(e, service, controller, feedbackHeight);
     warnNoFlash.setVisible(false);
     add(warnNoFlash);
+    getElement().setId("BootstrapExercisePanel");
   }
 
   /**
@@ -152,7 +153,7 @@ public class BootstrapExercisePanel extends FluidContainer {
       add(getRecoOutputRow());
     }
 
-    add(audioScoreFeedback.getScoreFeedbackRow(feedbackHeight, false));
+    add(audioScoreFeedback.getScoreFeedbackRow(feedbackHeight, controller.getProps().isClassroomMode()));
   }
 
   protected Widget getAnswerAndRecordButtonRow(Exercise e, LangTestDatabaseAsync service, ExerciseController controller) {
