@@ -100,11 +100,15 @@ public class UserExercise extends AudioExercise {
     String content = ExerciseFormatter.getContent(getForeignLanguage(), "", english, "", language);
     Exercise imported = new Exercise("import", id, content, false, true, english);
     System.out.println("toExercise : before " + imported + " " + getRefAudio() + " " + getSlowAudioRef());
+    System.out.println("toExercise : before " + imported + " " + imported.getRefAudio() + " " + imported.getSlowAudioRef());
 
-    imported.setRefAudio(getRefAudio());
-    imported.setSlowRefAudio(getSlowAudioRef());
+    if (getRefAudio() != null)
+      imported.setRefAudio(getRefAudio());
+    if (getSlowAudioRef() != null)
+      imported.setSlowRefAudio(getSlowAudioRef());
 
     System.out.println("toExercise : after  " +imported + " " + getRefAudio() + " " + getSlowAudioRef());
+    System.out.println("toExercise : after  " + imported + " " + imported.getRefAudio() + " " + imported.getSlowAudioRef());
 
     imported.setType(Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW);
     imported.setRefSentence(getForeignLanguage());

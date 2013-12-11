@@ -142,6 +142,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   private Panel makeAddToList(Exercise e, ExerciseController controller) {
     addToList = new SplitDropdownButton("Add Item to List");
     addToList.setIcon(IconType.PLUS_SIGN);
+
+    System.out.println("makeAddToList : populate list choices for " + controller.getUser());
+
+
     populateListChoices(e, controller, addToList);
     addToList.setType(ButtonType.PRIMARY);
     return addToList;
@@ -339,6 +343,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   }
 
   public void wasRevealed() {
+    System.out.println("wasRevealed : populate list choices for " + controller.getUser());
+
     populateListChoices(exercise, controller, addToList);
   }
 
