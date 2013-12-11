@@ -24,6 +24,7 @@ public class AudioAttribute implements IsSerializable {
 
   public AudioAttribute(String audioRef) {
     this.audioRef = audioRef;
+    if (audioRef == null) throw new IllegalArgumentException("huh audio ref is null?");
     markFast();
   }
 
