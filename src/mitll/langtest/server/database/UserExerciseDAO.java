@@ -15,14 +15,12 @@ public class UserExerciseDAO extends DAO {
   private static Logger logger = Logger.getLogger(UserExerciseDAO.class);
 
   public static final String USEREXERCISE = "userexercise";
-  private UserListExerciseJoinDAO userListExerciseJoinDAO;
   private ExerciseDAO exerciseDAO;
 
-  public UserExerciseDAO(Database database, UserListExerciseJoinDAO userListExerciseJoinDAO) {
+  public UserExerciseDAO(Database database) {
     super(database);
     try {
       createUserTable(database);
-      this.userListExerciseJoinDAO = userListExerciseJoinDAO;
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
@@ -134,35 +132,47 @@ public class UserExerciseDAO extends DAO {
       List<UserExercise> userExercises = getUserExercises(sql);
       logger.debug("\tfound (" +userExercises.size()+ ") userExercises on list " +listID);
 
-      Set<String> ids = new HashSet<String>();
+      List<UserExercise> userExercises2 = new ArrayList<UserExercise>();
+
+      //Set<String> ids = new HashSet<String>();
       for (UserExercise ue : userExercises) {
-        logger.debug("\ton list " +listID + " " + ue.getID() + " / " +ue.getUniqueID());
-        ids.add(ue.getID());
+        logger.debug("\ton list " +listID + " " + ue.getID() + " / " +ue.getUniqueID() + " : " + ue);
+        if (ue.isPredefined()) {
+          Exercise byID = exerciseDAO.getExercise(ue.getID());
+
+          if (byID != null) {
+            userExercises2.add(new UserExercise(byID/*.getShell()*/)); // all predefined references
+          } else logger.error("huh can't find '" + ue.getID() +"'");
+        }
+        else {
+          userExercises2.add(ue);
+        }
+        //ids.add(ue.getID());
       }
 
-      logger.debug("\tids " + ids + " on list " +listID);
+/*      logger.debug("\tids " + ids + " on list " +listID);
 
-      List<String> allFor = userListExerciseJoinDAO.getAllFor(listID, ids);
-      logger.debug("\tall ids " + allFor);
+      List<String> predefined = userListExerciseJoinDAO.getAllFor(listID, ids);
+      logger.debug("\tall ids " + predefined);
       logger.debug("\tuserExercises before (" +userExercises.size()+
         ") : " + userExercises);
 
-      for (String id : allFor) {
+      for (String id : predefined) {
         Exercise byID = exerciseDAO.getExercise(id);
 
         if (byID != null) {
-          userExercises.add(new UserExercise(byID.getShell())); // all predefined references
-        } else if (!id.startsWith("Custom")) logger.error("huh can't find  " + id);
-      }
-      logger.debug("\tuserExercises after  (" +userExercises.size()+
-        ") : " + userExercises);
+          userExercises.add(new UserExercise(byID*//*.getShell()*//*)); // all predefined references
+        } else if (!id.startsWith("Custom")) logger.error("huh can't find '" + id +"'");
+      }*/
+      logger.debug("\tuserExercises after  (" +userExercises2.size()+
+        ") : " /*+ userExercises2*/);
 
-      if (userExercises.isEmpty()) {
+      if (userExercises2.isEmpty()) {
         logger.info("getOnList : no exercises on list id " + listID);
         return new ArrayList<UserExercise>();
       } else {
-        logger.debug("\tgetOnList for " + listID+ "  got " + userExercises);
-        return userExercises;
+        logger.debug("\tgetOnList for " + listID+ "  got " + userExercises2.size());
+        return userExercises2;
       }
     } catch (SQLException e) {
       logger.error("got " + e, e);
@@ -213,7 +223,8 @@ public class UserExerciseDAO extends DAO {
 
     while (rs.next()) {
       exercises.add(new UserExercise(rs.getLong("uniqueid"), //id
-        rs.getLong("creatorid"), // age
+
+        rs.getString("exerciseid"), rs.getLong("creatorid"), // age
         rs.getString("english"), // exp
         rs.getString("foreignLanguage"), // exp
         rs.getString("refAudio"), // exp
