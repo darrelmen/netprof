@@ -56,6 +56,11 @@ public class UserStateWrapper {
     return incorrect;
   }
   public void addCompleted(String exid) { completed.add(exid); }
+
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#getCompletedExercises(int)
+   * @return
+   */
   public Set<String> getCompleted() { return completed; }
 
   public void setIncorrect(int incorrect) {
