@@ -98,20 +98,12 @@ public abstract class UserDialog extends BasicDialog {
     login.setType(ButtonType.PRIMARY);
     login.setEnabled(true);
     login.setTitle("Hit enter to log in.");
-    // We can set the id of a widget by accessing its Element
     login.getElement().setId("login");
     hp.add(login);
 
     dialogBox.add(hp);
     return login;
   }
-
-  /*
-
-  protected FormField addControlFormField(Panel dialogBox, String label) {
-    return addControlFormField(dialogBox, label, false, 0);
-  }
-*/
 
   protected FormField addControlFormField(Panel dialogBox, String label, int minLength) {
     return addControlFormField(dialogBox, label, false, minLength);
@@ -128,31 +120,9 @@ public abstract class UserDialog extends BasicDialog {
     return new FormField(user, userGroup, minLength);
   }
 
-/*  protected ListBoxFormField getListBoxFormField(Panel dialogBox, String label, ListBox user) {
-    addControlGroupEntry(dialogBox, label, user);
-    return new ListBoxFormField(user);
-  }*/
-
-/*  private ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget user) {
-    final ControlGroup userGroup = new ControlGroup();
-    userGroup.addStyleName("leftFiveMargin");
-
-    Controls controls = new Controls();
-    userGroup.add(new ControlLabel(label));
-    controls.add(user);
-    userGroup.add(controls);
-
-    dialogBox.add(userGroup);
-    return userGroup;
-  }*/
-
   protected void markError(FormField dialectGroup, String message) {
     markError(dialectGroup.group, dialectGroup.box, "Try Again", message);
   }
-
-  /*  protected void setupPopover(final Widget w, String heading, final String message) {
-    setupPopover(w, heading, message, Placement.RIGHT);
-  }*/
 
   private HandlerRegistration keyHandler;
 
