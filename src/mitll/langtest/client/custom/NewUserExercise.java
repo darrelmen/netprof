@@ -201,13 +201,17 @@ public class NewUserExercise extends BasicDialog {
     }
 
     /**
+     * Note that we want to post the audio the server, but not record in the results table (since it's not an answer
+     * to an exercise...)
+     * That's the final "false" on the end of the WaveformPostAudioRecordButton
      * @see mitll.langtest.client.exercise.RecordAudioPanel#makePlayAudioPanel(com.google.gwt.user.client.ui.Widget)
      * @return
      */
     @Override
     protected WaveformPostAudioRecordButton makePostAudioRecordButton() {
       postAudioButton =
-        new WaveformPostAudioRecordButton(exercise, controller, exercisePanel, this, service, 0) {
+        new WaveformPostAudioRecordButton(exercise, controller, exercisePanel, this, service, 0, false // don't record in results table
+        ) {
           @Override
           public void stopRecording() {
             showStop();
