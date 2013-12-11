@@ -30,7 +30,7 @@ public class AudioExercise extends ExerciseShell {
   }
 
   public void setRefAudio(String s) {
-    if (s != null) {
+    if (s != null && s.length() > 0) {
       AudioAttribute audioAttribute = new AudioAttribute(s).markFast();
       audioAttributes.put(audioAttribute.getAttributes().toString(),audioAttribute);
     }
@@ -41,7 +41,7 @@ public class AudioExercise extends ExerciseShell {
    * @param s
    */
   public void setSlowRefAudio(String s) {
-    if (s != null) {
+    if (s != null && s.length() > 0) {
       AudioAttribute audioAttribute = new AudioAttribute(s).markSlow();
       audioAttributes.put(audioAttribute.getAttributes().toString(), audioAttribute);
     }
