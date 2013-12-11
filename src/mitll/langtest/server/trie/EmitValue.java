@@ -1,7 +1,5 @@
 package mitll.langtest.server.trie;
 
-import mitll.langtest.shared.Exercise;
-
 /**
  * Created with IntelliJ IDEA.
  * User: go22670
@@ -9,21 +7,20 @@ import mitll.langtest.shared.Exercise;
  * Time: 1:22 AM
  * To change this template use File | Settings | File Templates.
  */
-public class EmitValue {
-  int n;
-  private TextEntityValue textEntityDescription;
-  public EmitValue(TextEntityValue textEntityDescription, int n) {
-    this.n=  n;
+public class EmitValue<T> {
+  private int numTokens;
+  private TextEntityValue<T> textEntityDescription;
+  public EmitValue(TextEntityValue<T> textEntityDescription, int n) {
+    this.numTokens = n;
     this.textEntityDescription = textEntityDescription;
   }
-  public String getValue() { return textEntityDescription.getNormalizedValue(); }
 
-  public TextEntityValue getTextEntityDescription() {
-    return textEntityDescription;
+  public TextEntityValue<T> getTextEntityDescription() { return textEntityDescription; }
+
+  public String getNormalizedValue() { return textEntityDescription.getNormalizedValue(); }
+  public T getValue() { return textEntityDescription.getValue(); }
+
+  public String toString() {
+    return textEntityDescription == null ? "huh?" : "'" + textEntityDescription.getNormalizedValue() + "'";
   }
-  public Exercise getExercise() { return textEntityDescription.getExercise(); }
-  public String toString() { return textEntityDescription == null ? "huh?" : "'"+textEntityDescription.getNormalizedValue() + "'"
-      //+
-      //" : " +n
-      ;}
 }
