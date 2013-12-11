@@ -33,7 +33,7 @@ public class ScoreFeedback {
   private boolean useWhite;
 
   public ScoreFeedback(boolean useWhite) {  this.useWhite = useWhite;  }
-
+  boolean useShortWidth;
   /**
    * Holds the pron score feedback.
    * Initially made with a placeholder.
@@ -42,12 +42,17 @@ public class ScoreFeedback {
    * @return
    */
   public FluidRow getScoreFeedbackRow(int height, boolean useShortWidth) {
+    this.useShortWidth = useShortWidth;
+
+
+    System.out.println("getScoreFeedbackRow mode " + useShortWidth);
+
     FluidRow feedbackRow = new FluidRow();
     feedbackDummyPanel = new SimplePanel();
     feedbackDummyPanel.setHeight(height + "px");
     scoreFeedbackColumn = new Column(6, 3, feedbackDummyPanel);
 
-    scoreFeedbackColumn.setWidth(Math.min(useShortWidth ? 300 : Window.getClientWidth() *0.8,Window.getClientWidth() * 0.5) + "px");
+    //scoreFeedbackColumn.setWidth(Math.min(Window.getClientWidth() *0.8,Window.getClientWidth() * 0.5) + "px");
 
     feedbackRow.add(scoreFeedbackColumn);
     feedbackRow.getElement().setId("ScoreFeedbackfeedbackRow");
@@ -81,7 +86,8 @@ public class ScoreFeedback {
     feedbackDummyPanel.addStyleName("floatLeft");
 
     scoreFeedbackColumn = new SimplePanel(feedbackDummyPanel);
-    scoreFeedbackColumn.setWidth(Math.min(300,Window.getClientWidth() * 0.5) + "px");
+    double width = useShortWidth ? 300 : Math.min(300, Window.getClientWidth() * 0.5);
+    scoreFeedbackColumn.setWidth((int)width + "px");
     scoreFeedbackColumn.addStyleName("floatRight");
 
     feedbackRow.add(scoreFeedbackColumn);
@@ -105,7 +111,7 @@ public class ScoreFeedback {
     result = Math.max(0, result);
     result = Math.min(1.0, result);
     if (result > 0.9) result = 1.0; //let's round up when we're almost totally correct 97%->100%
-    showScoreFeedback(pronunciationScore, result, centerVertically, true);
+    showScoreFeedback(pronunciationScore, result, centerVertically, useShortWidth);
     if (result > CORRECT_SCORE_THRESHOLD) {
       soundFeedback.playCorrect();
       showScoreIcon(true);
@@ -143,7 +149,8 @@ public class ScoreFeedback {
 
     scoreFeedbackColumn.clear();
     scoreFeedbackColumn.add(getScoreFeedback());
-    getScoreFeedback().setWidth(Math.min(useShortWidth ? 300 : Window.getClientWidth() *0.8,Window.getClientWidth() * 0.5) + "px");
+    double val = useShortWidth ? 300 : Math.min(Window.getClientWidth() * 0.8, Window.getClientWidth() * 0.5);
+    getScoreFeedback().setWidth((int)val + "px");
 
     int percent1 = (int) percent;
     getScoreFeedback().setPercent(percent1 < 40 ? 40 : percent1);   // just so the words will show up
