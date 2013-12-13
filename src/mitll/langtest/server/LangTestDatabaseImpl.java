@@ -994,8 +994,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param userExercise
    * @return
    */
-  public Collection<UserExercise> addItemToUserList(long userListID, UserExercise userExercise) {
-    return db.getUserListManager().addItemToUserList(userListID, userExercise);
+  public void addItemToUserList(long userListID, UserExercise userExercise) {
+    db.getUserListManager().addItemToUserList(userListID, userExercise);
   }
 
   /**
