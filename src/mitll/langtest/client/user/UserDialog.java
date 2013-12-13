@@ -8,6 +8,7 @@ import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.Modal;
 import com.github.gwtbootstrap.client.ui.PasswordTextBox;
 import com.github.gwtbootstrap.client.ui.TextBox;
+import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.BackdropType;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.dom.client.NativeEvent;
@@ -62,7 +63,7 @@ public abstract class UserDialog extends BasicDialog {
     this.userNotification =  userNotification;
   }
 
-  protected int getAge(TextBox ageEntryBox) {
+  protected int getAge(TextBoxBase ageEntryBox) {
     int i = 0;
     try {
       i = props.isDataCollectAdminView() ? MAX_AGE-1 : Integer.parseInt(ageEntryBox.getText());
@@ -183,7 +184,7 @@ public abstract class UserDialog extends BasicDialog {
 
   protected boolean checkPassword(FormField password) { return checkPassword(password.box);  }
 
-  private boolean checkPassword(TextBox password) {
+  private boolean checkPassword(TextBoxBase password) {
     String trim = password.getText().trim();
     return trim.equalsIgnoreCase(GRADING) || trim.equalsIgnoreCase(TESTING);
   }
