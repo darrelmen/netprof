@@ -13,6 +13,7 @@ import java.util.Map;
  */
 public class AudioExercise extends ExerciseShell {
   protected Map<String,AudioAttribute> audioAttributes = new HashMap<String, AudioAttribute>();
+  private Map<String,ExerciseAnnotation> fieldToAnnotation = new HashMap<String, ExerciseAnnotation>();
 
   public AudioExercise() {}
   public AudioExercise(String id, String tooltip) {  super(id,tooltip); }
@@ -57,8 +58,17 @@ public class AudioExercise extends ExerciseShell {
   public Collection<AudioAttribute> getAudioAttributes() { return audioAttributes.values();  }
   public void forgetAllAudio() { audioAttributes.clear(); }
 
+  public void addAnnotation(String field, String status, String comment) {
+    fieldToAnnotation.put(field,new ExerciseAnnotation(status,comment));
+  }
+
+
+  public Map<String, ExerciseAnnotation> getFieldToAnnotation() {
+    return fieldToAnnotation;
+  }
+
   public String toString() {
     return super.toString() +" audio attr (" +getAudioAttributes().size()+
-      ") :" + getAudioAttributes();
+      ") :" + getAudioAttributes() + " and " +fieldToAnnotation + " annotations";
   }
 }
