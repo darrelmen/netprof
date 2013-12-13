@@ -35,14 +35,13 @@ public class NPFExercise extends GoodwaveExercisePanel {
   private int activeCount = 0;
 
   /**
-   * @see mitll.langtest.client.custom.NPFHelper#setFactory(mitll.langtest.client.list.PagingExerciseList)
-   *
    * @param e
    * @param controller
    * @param listContainer
    * @param screenPortion
    * @param addKeyHandler
    * @param instance
+   * @see mitll.langtest.client.custom.NPFHelper#setFactory(mitll.langtest.client.list.PagingExerciseList)
    */
   public NPFExercise(Exercise e, ExerciseController controller, ListInterface listContainer, float screenPortion, boolean addKeyHandler, String instance) {
     super(e, controller, listContainer, screenPortion, addKeyHandler, instance);
@@ -61,6 +60,9 @@ public class NPFExercise extends GoodwaveExercisePanel {
 
   /**
    * Ask server for the set of current lists for this user.
+   *
+   * TODO : do this better -- tell server to return lists that don't have exercise in them.
+   *
    * @param e
    * @param controller
    * @param w1
@@ -69,9 +71,10 @@ public class NPFExercise extends GoodwaveExercisePanel {
    */
   private void populateListChoices(final Exercise e, final ExerciseController controller, final SplitDropdownButton w1) {
     System.out.println("populateListChoices : populate list choices for " + controller.getUser());
-    service.getListsForUser(controller.getUser(), true, new AsyncCallback<Collection<UserList>>() {
+    service.getListsForUser(controller.getUser(), true, true, new AsyncCallback<Collection<UserList>>() {
       @Override
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+      }
 
       @Override
       public void onSuccess(Collection<UserList> result) {
@@ -88,7 +91,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
             widget.addClickHandler(new ClickHandler() {
               @Override
               public void onClick(ClickEvent event) {
-                service.addItemToUserList(ul.getUniqueID(), new UserExercise(e,controller.getUser()), new AsyncCallback<Void>() {
+                service.addItemToUserList(ul.getUniqueID(), new UserExercise(e, controller.getUser()), new AsyncCallback<Void>() {
                   @Override
                   public void onFailure(Throwable caught) {
                   }
@@ -124,11 +127,11 @@ public class NPFExercise extends GoodwaveExercisePanel {
 
   @Override
   protected void addQuestionContentRow(Exercise e, ExerciseController controller, HorizontalPanel hp) {
-      hp.getElement().setId("GoodwaveHorizontalPanel");
-      Panel addToList = makeAddToList(e, controller);
-      Widget questionContent = getQuestionContent(e, addToList);
-      questionContent.addStyleName("floatLeft");
-      hp.add(questionContent);
+    hp.getElement().setId("GoodwaveHorizontalPanel");
+    Panel addToList = makeAddToList(e, controller);
+    Widget questionContent = getQuestionContent(e, addToList);
+    questionContent.addStyleName("floatLeft");
+    hp.add(questionContent);
   }
 
   private void showPopup(String html) {
