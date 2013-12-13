@@ -3,6 +3,7 @@ package mitll.langtest.client.custom;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -20,6 +21,7 @@ import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -89,9 +91,24 @@ public class NPFHelper implements RequiresResize {
     return hp;
   }
 
-  private void rememberAndLoadFirst(UserList ul) {
-    npfExerciseList.setUserList(ul);
-    npfExerciseList.rememberAndLoadFirst(new ArrayList<UserExercise>(ul.getExercises()),null);
+  private void rememberAndLoadFirst(final UserList ul) {
+    if (controller.isReviewMode()) {
+      service.getCompletedExercises(controller.getUser(), controller.isReviewMode(), new AsyncCallback<Set<String>>() {
+        @Override
+        public void onFailure(Throwable caught) {
+        }
+
+        @Override
+        public void onSuccess(Set<String> result) {
+          npfExerciseList.setCompleted(result);
+          npfExerciseList.setUserList(ul);
+          npfExerciseList.rememberAndLoadFirst(new ArrayList<UserExercise>(ul.getExercises()), null);
+        }
+      });
+    } else {
+      npfExerciseList.setUserList(ul);
+      npfExerciseList.rememberAndLoadFirst(new ArrayList<UserExercise>(ul.getExercises()), null);
+    }
   }
 
   protected Panel setupContent(Panel hp) {
@@ -99,7 +116,10 @@ public class NPFHelper implements RequiresResize {
   }
 
   private PagingExerciseList makeNPFExerciseList(SimplePanel right, String instanceName) {
-    PagingExerciseList exerciseList = new PagingExerciseList(right, service, feedback, false, false, controller, instanceName) {
+    boolean showCompleted = controller.getAudioType().equals(Result.AUDIO_TYPE_REVIEW) || controller.getProps().isCRTDataCollectMode();
+    boolean showTypeAhead = !controller.getProps().isCRTDataCollectMode();
+    PagingExerciseList exerciseList = new PagingExerciseList(right, service, feedback, false, false, controller,
+      showTypeAhead, instanceName) {
       @Override
       protected void onLastItem() {
         new ModalInfoDialog("Complete","List complete!", new HiddenHandler() {
