@@ -466,6 +466,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
+   * TODO : join with annotation data when doing QC.
+   *
    * @see mitll.langtest.client.list.ExerciseList#askServerForExercise
    * @param id
    * @return
@@ -957,7 +959,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.custom.Navigation#doCreate
+   * @see mitll.langtest.client.custom.CreateListDialog#doCreate
    * @param userid
    * @param name
    * @param description
@@ -974,12 +976,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * @see mitll.langtest.client.custom.Navigation#showInitialState()
    * @see mitll.langtest.client.custom.Navigation#viewLessons
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#populateListChoices
+   * @see mitll.langtest.client.custom.NPFExercise#populateListChoices
    * @param userid
    * @param onlyCreated
+   * @param getExercises
    * @return
    */
-  public Collection<UserList> getListsForUser(long userid, boolean onlyCreated) {
+  public Collection<UserList> getListsForUser(long userid, boolean onlyCreated, boolean getExercises) {
    return db.getUserListManager().getListsForUser(userid, onlyCreated);
   }
 
@@ -996,6 +999,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public void addItemToUserList(long userListID, UserExercise userExercise) {
     db.getUserListManager().addItemToUserList(userListID, userExercise);
+  }
+
+  @Override
+  public void addAnnotation(String exerciseID, String field, String status, String comment) {
+    Exercise exercise = getExercise(exerciseID);
+    exercise.addAnnotation(field,status,comment);
+    db.getUserListManager().addAnnotation(exerciseID,field,status,comment);
   }
 
   /**
