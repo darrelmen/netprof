@@ -145,12 +145,12 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   public void getExercises(long userID, boolean getNext) {
   //  System.out.println("ExerciseList.getExercises for user " +userID);
 
-    if (showInOrder) {
-      getExercisesInOrder();
-    } else {
-      lastReqID++;
-      System.out.println("ExerciseList.getExercises for user " +userID);
+    lastReqID++;
 
+    if (showInOrder) {
+      service.getExerciseIds(lastReqID, new SetExercisesCallback());
+    } else {
+      System.out.println("ExerciseList.getExercises for user " +userID);
       service.getExerciseIds(lastReqID, userID, new SetExercisesCallback());
     }
   }
@@ -204,16 +204,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   protected void pushNewItem(String exerciseID) {
     System.out.println("------------ ExerciseList.pushNewItem : push history " + exerciseID + " -------------- ");
     History.newItem("#item=" + exerciseID + ";instance="+instance);
-  }
-
-  /**
-   * @see mitll.langtest.client.grading.GradedExerciseList#setFactory(ExercisePanelFactory, mitll.langtest.client.user.UserManager, int)
-   */
-  private void getExercisesInOrder() {
-    lastReqID++;
-    System.out.println("------------ ExerciseList.getExercisesInOrder  -------------- ");
-
-    service.getExerciseIds(lastReqID, new SetExercisesCallback());
   }
 
   public void onResize() {
