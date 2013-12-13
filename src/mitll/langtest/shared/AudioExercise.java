@@ -58,13 +58,25 @@ public class AudioExercise extends ExerciseShell {
   public Collection<AudioAttribute> getAudioAttributes() { return audioAttributes.values();  }
   public void forgetAllAudio() { audioAttributes.clear(); }
 
+  /**
+   * @see mitll.langtest.server.database.custom.UserListManager#addAnnotations
+   * @param field
+   * @param status
+   * @param comment
+   */
   public void addAnnotation(String field, String status, String comment) {
-    fieldToAnnotation.put(field,new ExerciseAnnotation(status,comment));
+    fieldToAnnotation.put(field, new ExerciseAnnotation(status,comment));
   }
 
 
+/*
   public Map<String, ExerciseAnnotation> getFieldToAnnotation() {
     return fieldToAnnotation;
+  }
+*/
+
+  public ExerciseAnnotation getAnnotation(String field) {
+    return fieldToAnnotation.get(field);
   }
 
   public String toString() {
