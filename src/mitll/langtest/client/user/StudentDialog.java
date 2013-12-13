@@ -51,6 +51,11 @@ public class StudentDialog extends UserDialog {
   private static final int MAX_WEEKS = 104;
   public static final int ILR_CHOICE_WIDTH = 80;
   public static final int MIN_LENGTH_USER_ID = 4;
+  private static final String PRACTICE = "Practice";
+  private static final String DEMO = "Demo";
+  private static final String DATA_COLLECTION = "Data Collection";
+  private static final String REVIEW = "Review";
+  private static final String[] ROLES = new String[]{DATA_COLLECTION, PRACTICE, DEMO, REVIEW};
   private final UserManager userManager;
   private final UserNotification langTest;
   private List<String> purposes;
@@ -62,7 +67,7 @@ public class StudentDialog extends UserDialog {
     purposes = new ArrayList<String>();
     purposes.add(props.getPurposeDefault());
 
-    for (String purpose : Arrays.asList("Data Collection", "Practice", "Demo")) {
+    for (String purpose : Arrays.asList(ROLES)) {
       if (!purpose.equalsIgnoreCase(props.getPurposeDefault())) purposes.add(purpose);
     }
   }
@@ -86,7 +91,7 @@ public class StudentDialog extends UserDialog {
     final ListBoxFormField purpose = getListBoxFormField(fieldset, "Purpose", getListBox2(purposes));
 
     final FormField user = addControlFormField(fieldset, "User ID", MIN_LENGTH_USER_ID);
-    user.setVisible(purpose.getValue().equals("Data Collection"));
+    user.setVisible(purpose.getValue().equals(DATA_COLLECTION));
 
     //final FormField password = addControlFormField(fieldset, "Password", true);
 
@@ -101,7 +106,8 @@ public class StudentDialog extends UserDialog {
       @Override
       public void onChange(ChangeEvent event) {
         boolean b = canSkipRegister(purpose.getValue());
-        user.setVisible(purpose.getValue().equals("Data Collection"));
+        boolean needUserID = purpose.getValue().equals(DATA_COLLECTION) || purpose.getValue().equals(REVIEW);
+        user.setVisible(needUserID);
         accordion.setVisible(!canSkipRegister(purpose.getValue()));
 
         if (b) {
@@ -240,14 +246,17 @@ public class StudentDialog extends UserDialog {
   }
 
   private String getAudioTypeFromPurpose(String purposeValue) {
-    return purposeValue.equalsIgnoreCase("Practice") ?
-      Result.AUDIO_TYPE_PRACTICE : (purposeValue.equalsIgnoreCase("Demo") ?
-      Result.AUDIO_TYPE_DEMO :
-      Result.AUDIO_TYPE_REGULAR);
+    if (purposeValue.equalsIgnoreCase(PRACTICE)) return Result.AUDIO_TYPE_PRACTICE;
+    else if (purposeValue.equalsIgnoreCase(DEMO)) return Result.AUDIO_TYPE_DEMO;
+    else if (purposeValue.equalsIgnoreCase(DATA_COLLECTION)) return Result.AUDIO_TYPE_REGULAR;
+    else return Result.AUDIO_TYPE_REVIEW;
   }
 
+  // TODO : add password field for REVIEW
   private boolean canSkipRegister(String purposeValue) {
-    return purposeValue.equalsIgnoreCase("Practice") || purposeValue.equalsIgnoreCase("Demo");
+    return purposeValue.equalsIgnoreCase(PRACTICE) ||
+      purposeValue.equalsIgnoreCase(DEMO) ||
+      purposeValue.equalsIgnoreCase(REVIEW);
   }
 
   private boolean checkValidUser(FormField user) {
@@ -293,13 +302,10 @@ public class StudentDialog extends UserDialog {
   }
 
   protected ListBox getListBox2(List<String> values) {
-    final ListBox genderBox = new ListBox(false);
-    for (String s : values) {
-      genderBox.addItem(s);
-    }
-    genderBox.setWidth(ILR_CHOICE_WIDTH +
-      "px");
-    return genderBox;
+    final ListBox listBox = new ListBox(false);
+    for (String s : values) { listBox.addItem(s); }
+    listBox.setWidth(ILR_CHOICE_WIDTH + "px");
+    return listBox;
   }
 
   /**
@@ -406,28 +412,6 @@ public class StudentDialog extends UserDialog {
     return highlightIntegerBox(ageEntryGroup, MIN_AGE, MAX_AGE, TEST_AGE);
   }
 
-/*  private boolean highlightIntegerBox(FormField ageEntryGroup, int min, int max) {
-    return highlightIntegerBox(ageEntryGroup, min, max, Integer.MAX_VALUE);
-  }*/
-
-/*  private boolean highlightIntegerBox(FormField ageEntryGroup, int min, int max, int exception) {
-    String text = ageEntryGroup.box.getText();
-    boolean validAge = false;
-    if (text.length() == 0) {
-      ageEntryGroup.group.setType(ControlGroupType.WARNING);
-    } else {
-      try {
-        int age = Integer.parseInt(text);
-        validAge = (age >= min && age <= max) || age == exception;
-        ageEntryGroup.group.setType(validAge ? ControlGroupType.NONE : ControlGroupType.ERROR);
-      } catch (NumberFormatException e) {
-        ageEntryGroup.group.setType(ControlGroupType.ERROR);
-      }
-    }
-
-    return validAge;
-  }*/
-
   private class RegistrationInfo {
     private FormField ageEntryGroup;
     private ListBoxFormField genderGroup;
@@ -513,31 +497,6 @@ public class StudentDialog extends UserDialog {
       return row;
     }
 
-/*    private FluidRow getEstimating() {
-      FluidRow row2 = new FluidRow();
-
-      Column cc0 = new Column(2, new HTML("Estimating:"));
-      row2.add(cc0);
-
-      rilr = new CheckBox();
-      rilr.addStyleName("leftThirtyMargin");
-      lilr = new CheckBox();
-      lilr.addStyleName("leftThirtyMargin");
-      silr = new CheckBox();
-      silr.addStyleName("leftThirtyMargin");
-      wilr = new CheckBox();
-      wilr.addStyleName("leftThirtyMargin");
-      Column cc1 = new Column(2, rilr);
-      row2.add(cc1);
-      Column cc2 = new Column(2, lilr);
-      row2.add(cc2);
-      Column cc3 = new Column(2, silr);
-      row2.add(cc3);
-      Column cc4 = new Column(2, wilr);
-      row2.add(cc4);
-      return row2;
-    }*/
-
     private List<YesNo> ilrs = new ArrayList<YesNo>();
     private FluidRow getEstimating2() {
       FluidRow row2 = new FluidRow();
@@ -554,64 +513,14 @@ public class StudentDialog extends UserDialog {
         ilrs.add(e);
       }
 
- /*     rilr = new CheckBox();
-      rilr.addStyleName("leftThirtyMargin");
-      lilr = new CheckBox();
-      lilr.addStyleName("leftThirtyMargin");
-      silr = new CheckBox();
-      silr.addStyleName("leftThirtyMargin");
-      wilr = new CheckBox();
-      wilr.addStyleName("leftThirtyMargin");
-      Column cc1 = new Column(2, rilr);
-      row2.add(cc1);
-      Column cc2 = new Column(2, lilr);
-      row2.add(cc2);
-      Column cc3 = new Column(2, silr);
-      row2.add(cc3);
-      Column cc4 = new Column(2, wilr);
-      row2.add(cc4);*/
       return row2;
     }
-
-/*    private ControlGroup addChoice(String name) {
-     // String name = "AudioType";
-      final RadioButton yes = new RadioButton(name, "Y");
-      final RadioButton no = new RadioButton(name, "N");
-
-      final ControlGroup group = new ControlGroup();
-
-      yes.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          group.setType(ControlGroupType.NONE);
-        }
-      });
-      no.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          group.setType(ControlGroupType.NONE);
-        }
-      });
-
-      if (props.isCollectAudio()) {
-        //group.add(new ControlLabel("<b>Audio Recording Style</b>"));
-        Controls controls = new Controls();
-        controls.add(yes);
-        controls.add(no);
-        group.add(controls);
-       // dialogBox.add(group);
-      }
-      return group;
-    }*/
-
-
   }
 
   private class YesNo {
    public final RadioButton yes, no;
     private final String name;
     public ControlGroup group;
-
 
     public YesNo(String name) {
       this.name = name;
@@ -647,13 +556,10 @@ public class StudentDialog extends UserDialog {
         }
       });
 
-      //group.add(new ControlLabel("<b>Audio Recording Style</b>"));
       Controls controls = new Controls();
       controls.add(yes);
       controls.add(no);
       group.add(controls);
-      // dialogBox.add(group);
-
     }
     public boolean markSimpleError() {
       if (!yes.getValue() && !no.getValue()) {
