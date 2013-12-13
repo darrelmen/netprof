@@ -43,7 +43,6 @@ public class UserExercise extends AudioExercise {
    * @param foreignLanguage
    */
   public UserExercise(long uniqueID, String exerciseID, long creator, String english, String foreignLanguage) {
-   // super("Custom_"+uniqueID,english);
     super(exerciseID,english);
     this.creator = creator;
     this.uniqueID = uniqueID;
@@ -54,7 +53,7 @@ public class UserExercise extends AudioExercise {
   }
 
   /**
-   * @see mitll.langtest.server.database.UserExerciseDAO#getUserExercises(String)
+   * @see mitll.langtest.server.database.custom.UserExerciseDAO#getUserExercises(String)
    * @param uniqueID
    * @param exerciseID
    * @param creator
@@ -63,14 +62,15 @@ public class UserExercise extends AudioExercise {
    * @param refAudio
    * @param slowAudioRef
    */
-  public UserExercise(long uniqueID, String exerciseID, long creator, String english, String foreignLanguage, String refAudio, String slowAudioRef) {
+  public UserExercise(long uniqueID, String exerciseID, long creator, String english, String foreignLanguage,
+                      String refAudio, String slowAudioRef) {
     this(uniqueID, exerciseID, creator, english, foreignLanguage);
     setRefAudio(refAudio);
     setSlowRefAudio(slowAudioRef);
   }
 
     /**
-     * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#populateListChoices(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController, com.github.gwtbootstrap.client.ui.SplitDropdownButton)
+     * @see mitll.langtest.client.custom.NPFExercise#populateListChoices(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController, com.github.gwtbootstrap.client.ui.SplitDropdownButton)
      * @param exercise
      */
   public UserExercise(Exercise exercise) {
@@ -129,7 +129,7 @@ public class UserExercise extends AudioExercise {
   }
 
   /**
-   * @see mitll.langtest.server.database.UserExerciseDAO#add
+   * @see mitll.langtest.server.database.custom.UserExerciseDAO#add
    * @param uniqueID
    */
   public void setUniqueID(long uniqueID) { this.uniqueID = uniqueID;  }
