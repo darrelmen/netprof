@@ -31,7 +31,6 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.server.database.custom.UserListManager;
@@ -203,7 +202,7 @@ public class Navigation implements RequiresResize {
   public void showInitialState() {
     System.out.println("showInitialState show initial state for " + userManager.getUser() + " : getting user lists");
 
-    service.getListsForUser(userManager.getUser(), false, new AsyncCallback<Collection<UserList>>() {
+    service.getListsForUser(userManager.getUser(), false, true, new AsyncCallback<Collection<UserList>>() {
       @Override
       public void onFailure(Throwable caught) {}
 
@@ -263,7 +262,7 @@ public class Navigation implements RequiresResize {
       service.getUserListsForText("", new UserListCallback(contentPanel, child));
     } else {
       System.out.println("viewLessons for " + userManager.getUser());
-      service.getListsForUser(userManager.getUser(), false, new UserListCallback(contentPanel, child));
+      service.getListsForUser(userManager.getUser(), false, true, new UserListCallback(contentPanel, child));
     }
   }
 
