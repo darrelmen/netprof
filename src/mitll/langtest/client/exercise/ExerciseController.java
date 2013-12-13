@@ -49,6 +49,8 @@ public interface ExerciseController {
   boolean isGrading();
   boolean isLogClientMessages();
   String getAudioType();
+  boolean isReviewMode();
+  boolean showCompleted();
 
   void showFlashHelp();
   String getLanguage();
