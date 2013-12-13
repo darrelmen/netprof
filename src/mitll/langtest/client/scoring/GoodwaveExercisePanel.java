@@ -104,17 +104,21 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     if (e.isRepeat() && widgets != null) {
       add(widgets);
     }
-    addQuestions(service, controller, 1, center, screenPortion); // todo : revisit screen portion...
+    addUserRecorder(service, controller, center, screenPortion); // todo : revisit screen portion...
 
     this.navigationHelper = new NavigationHelper(exercise, controller, new PostAnswerProvider() {
       @Override
       public void postAnswers(ExerciseController controller, Exercise completedExercise) {
-        //System.out.println("postAnswers : load next exercise " + completedExercise.getID());
-        listContainer.loadNextExercise(completedExercise);
+        nextWasPressed(listContainer, completedExercise);
       }
     }, listContainer, true, addKeyHandler);
     center.add(navigationHelper.makeSpacer());
     center.add(navigationHelper);
+  }
+
+  protected void nextWasPressed(ListInterface listContainer, Exercise completedExercise) {
+    //System.out.println("postAnswers : load next exercise " + completedExercise.getID());
+    listContainer.loadNextExercise(completedExercise);
   }
 
   protected void addQuestionContentRow(Exercise e, ExerciseController controller, HorizontalPanel hp) {
@@ -134,11 +138,11 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    *
    * @param service
    * @param controller    used in subclasses for audio control
-   * @param i
+   * @paramx i
    * @param screenPortion
    */
-  private void addQuestions(LangTestDatabaseAsync service, ExerciseController controller, int i, Panel toAddTo, float screenPortion) {
-    Widget answerWidget = getAnswerWidget(service, controller, i, screenPortion);
+  protected void addUserRecorder(LangTestDatabaseAsync service, ExerciseController controller, Panel toAddTo, float screenPortion) {
+    Widget answerWidget = getAnswerWidget(service, controller, 1, screenPortion);
 
     ResizableCaptionPanel cp = new ResizableCaptionPanel(USER_RECORDER);
     cp.setContentWidget(answerWidget);
