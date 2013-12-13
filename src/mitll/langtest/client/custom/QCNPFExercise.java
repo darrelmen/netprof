@@ -8,6 +8,7 @@ import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.InlineHTML;
@@ -15,6 +16,8 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.scoring.ASRScoringAudioPanel;
+import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseFormatter;
 
@@ -41,7 +44,7 @@ public class QCNPFExercise extends NPFExercise {
     FlowPanel column = new FlowPanel();
     column.addStyleName("blockStyle");
 
-    column.add(getEntry(e, "foreignLanguage" , ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getRefSentence()));
+    column.add(getEntry(e, "foreignLanguage", ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getRefSentence()));
     column.add(getEntry(e, "english", ExerciseFormatter.ENGLISH_PROMPT, e.getEnglishSentence()));
 
     column.getElement().setId("QuestionContent");
@@ -49,28 +52,54 @@ public class QCNPFExercise extends NPFExercise {
     return column;
   }
 
+  protected Widget getScoringAudioPanel(final Exercise e, String pathxxxx) {
+    FlowPanel column = new FlowPanel();
+    column.addStyleName("blockStyle");
+
+    for (AudioAttribute audio : e.getAudioAttributes()) {
+      String audioRef = audio.getAudioRef();
+      if (audioRef != null) {
+        audioRef = wavToMP3(audioRef);   // todo why do we have to do this?
+      }
+      ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel(audioRef, e.getRefSentence(), service, controller, false, scorePanel);
+      audioPanel.getElement().setId("ASRScoringAudioPanel");
+      audioPanel.setRefAudio(audioRef, e.getRefSentence());
+      ResizableCaptionPanel cp = new ResizableCaptionPanel("Reference" + " : " + audio.getDisplay());
+      cp.setContentWidget(audioPanel);
+
+      column.add(getEntry(e, audio.toString(), cp)); // TODO add unique audio attribute id
+    }
+    return column;
+  }
+
+  private Widget getEntry(Exercise e, final String field, final String label, String value) {
+    Panel nameValueRow = getContentWidget(label, value);
+    return getEntry(e, field, nameValueRow);
+  }
+
   /**
    * TODO add annotation info to exercise
+   * TODOx mark this on the radio
    * TODO fill in incorrect fields with annotation info (if in qc or in edit mode?)
-   * TODO post annnotation to server
-   * TODO after edit, clear annotation
+   * TODO post annotation to server
+   * TODO after edit, clear annotation -- where do we edit? in edit window
    *
    * @param e
    * @param field
-   * @param label
-   * @param value
    * @return
+   * @paramx label
+   * @paramx value
    */
-  private Widget getEntry(Exercise e, final String field, final String label, String value) {
+  private Widget getEntry(Exercise e, final String field, Widget content) {
     Panel row = new HorizontalPanel();
     FlowPanel qcCol = new FlowPanel();
     qcCol.addStyleName("blockStyle");
 
-    String group = "QC_" + e.getID() + "_" + label;
+    String group = "QC_" + e.getID() + "_" + field;
     RadioButton correct = new RadioButton(group, "Correct");
     qcCol.add(correct);
     final FlowPanel commentRow = new FlowPanel();
-         commentRow.setVisible(false);
+    commentRow.setVisible(false);
     final Label comment = new Label("comment?");
     final TextBox commentEntry = new TextBox();
 
@@ -80,7 +109,15 @@ public class QCNPFExercise extends NPFExercise {
         commentRow.setVisible(false);
         // send to server
         System.out.println("post to server " + exercise.getID() + " field " + field + " is correct");
-        //service.postAnnotation();
+        service.addAnnotation(exercise.getID(), field, "correct", "", new AsyncCallback<Void>() {
+          @Override
+          public void onFailure(Throwable caught) {
+          }
+
+          @Override
+          public void onSuccess(Void result) {
+          }
+        });
       }
     });
     correct.setValue(true);
@@ -92,8 +129,9 @@ public class QCNPFExercise extends NPFExercise {
       public void onClick(ClickEvent event) {
         commentRow.setVisible(true);
         commentEntry.setFocus(true);
-       // comment.setText("comment?");
+        // comment.setText("comment?");
         // send to server
+
       }
     });
     row.add(qcCol);
@@ -103,20 +141,9 @@ public class QCNPFExercise extends NPFExercise {
     FlowPanel nameValueComment = new FlowPanel();
     nameValueComment.addStyleName("blockStyle");
 
-    Panel nameValueRow = new FlowPanel();
-    nameValueRow.getElement().setId("nameValueRow_" + label);
-    nameValueRow.addStyleName("Instruction");
+    //Panel nameValueRow = getContentWidget(label, value);
 
-    InlineHTML foreignPhrase = new InlineHTML(label);
-    foreignPhrase.addStyleName("Instruction-title");
-    nameValueRow.add(foreignPhrase);
-
-    InlineHTML englishPhrase = new InlineHTML(value);
-    englishPhrase.addStyleName("Instruction-data");
-    nameValueRow.add(englishPhrase);
-    englishPhrase.addStyleName("leftFiveMargin");
-
-    nameValueComment.add(nameValueRow);
+    nameValueComment.add(content);
 
     DOM.setStyleAttribute(comment.getElement(), "backgroundColor", "#ff0000");
     comment.setVisible(true);
@@ -131,11 +158,37 @@ public class QCNPFExercise extends NPFExercise {
     commentEntry.addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
-       System.out.println("post to server " + exercise.getID() + " field " + field + " comment " + commentEntry.getText() + " is incorrect");
+        System.out.println("post to server " + exercise.getID() + " field " + field + " comment " + commentEntry.getText() + " is incorrect");
+
+        service.addAnnotation(exercise.getID(), field, "incorrect", commentEntry.getText(), new AsyncCallback<Void>() {
+          @Override
+          public void onFailure(Throwable caught) {
+          }
+
+          @Override
+          public void onSuccess(Void result) {
+          }
+        });
       }
     });
     nameValueComment.add(commentRow);
     row.add(nameValueComment);
     return row;
+  }
+
+  private Panel getContentWidget(String label, String value) {
+    Panel nameValueRow = new FlowPanel();
+    nameValueRow.getElement().setId("nameValueRow_" + label);
+    nameValueRow.addStyleName("Instruction");
+
+    InlineHTML foreignPhrase = new InlineHTML(label);
+    foreignPhrase.addStyleName("Instruction-title");
+    nameValueRow.add(foreignPhrase);
+
+    InlineHTML englishPhrase = new InlineHTML(value);
+    englishPhrase.addStyleName("Instruction-data");
+    nameValueRow.add(englishPhrase);
+    englishPhrase.addStyleName("leftFiveMargin");
+    return nameValueRow;
   }
 }
