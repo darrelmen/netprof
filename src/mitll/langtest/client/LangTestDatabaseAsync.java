@@ -109,7 +109,11 @@ public interface LangTestDatabaseAsync {
 
   void getGradeCountPerExercise(AsyncCallback<Map<Integer, Map<String, Map<String, Integer>>>> async);
 
+  void getExerciseIds(int reqID, AsyncCallback<ExerciseListWrapper> async);
+
   void getExerciseIds(int reqID, long userID, AsyncCallback<ExerciseListWrapper> async);
+
+  void getExerciseIds(int reqID, long userID, String prefix, long userListID, AsyncCallback<ExerciseListWrapper> async);
 
   /**
    * @param reqID
@@ -119,17 +123,14 @@ public interface LangTestDatabaseAsync {
    */
   void getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID, AsyncCallback<ExerciseListWrapper> async);
 
-  void getExerciseIds(int reqID, AsyncCallback<ExerciseListWrapper> async);
 
   void postTimesUp(long userid, long timeTaken, Map<String, Collection<String>> selectionState, AsyncCallback<Leaderboard> async);
 
   void addDLIUser(DLIUser dliUser, AsyncCallback<Void> async);
 
-  void getCompletedExercises(int user, AsyncCallback<Set<String>> async);
+  void getCompletedExercises(int user, boolean isReviewMode, AsyncCallback<Set<String>> async);
 
   void getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID, String prefix, AsyncCallback<ExerciseListWrapper> async);
-
-  void getExerciseIds(int reqID, long userID, String prefix, long userListID, AsyncCallback<ExerciseListWrapper> async);
 
   void getStartupInfo(AsyncCallback<StartupInfo> async);
 
@@ -150,4 +151,6 @@ public interface LangTestDatabaseAsync {
   void editItem(UserExercise userExercise, AsyncCallback<Void> async);
 
   void addAnnotation(String exerciseID, String field, String status, String comment, AsyncCallback<Void> async);
+
+  void markReviewed(String id, AsyncCallback<Void> asyncCallback);
 }
