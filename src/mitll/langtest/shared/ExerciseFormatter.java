@@ -8,6 +8,9 @@ package mitll.langtest.shared;
  * To change this template use File | Settings | File Templates.
  */
 public class ExerciseFormatter {
+  public static final String FOREIGN_LANGUAGE_PROMPT = "Say:";
+  public static final String ENGLISH_PROMPT = "Meaning:";
+
   /**
    * @see mitll.langtest.server.database.ExcelImport#getExercise(String, String, String, String, String, String, boolean, String)
    * @see mitll.langtest.shared.custom.UserExercise#toExercise()
@@ -39,7 +42,7 @@ public class ExerciseFormatter {
     String translationHTML = english.length() > 0 ?//(!isEnglish && english.length() > 0) ?
       getSpanWrapper("Translation:", english) : "";
     String meaningHTML = (isEnglish && meaning.length() > 0) ?
-      getSpanWrapper("Meaning:", meaning) : "";
+      getSpanWrapper(ENGLISH_PROMPT, meaning) : "";
 
     String contextHTML = (context.length() > 0) ?
       getSpanWrapper("Context:", context) : "";
@@ -62,7 +65,9 @@ public class ExerciseFormatter {
 
   public static String getArabic(String arabic, boolean isUrdu, boolean isPashto) {
     return "<div class=\"Instruction\">\n" +
-      "<span class=\"Instruction-title\">Say:</span>\n" +
+      "<span class=\"Instruction-title\">" +
+      FOREIGN_LANGUAGE_PROMPT +
+      "</span>\n" +
       "<span class=\"" +
       (isUrdu ? "urdufont" : isPashto ? "pashtofont" : "Instruction-data") +
       "\"> " + arabic +
