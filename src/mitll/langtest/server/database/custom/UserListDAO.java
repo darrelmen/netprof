@@ -3,7 +3,6 @@ package mitll.langtest.server.database.custom;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.UserDAO;
-import mitll.langtest.server.database.UserExerciseDAO;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import org.apache.log4j.Logger;
@@ -128,6 +127,33 @@ public class UserListDAO extends DAO {
     }
   }
 
+  public void updateModified(long uniqueID) {
+    try {
+      Connection connection = database.getConnection();
+
+      String sql = "UPDATE " + USER_EXERCISE_LIST +
+        " " +
+        "SET " +
+        "modified=? "+
+        "WHERE uniqueid=?";
+
+      PreparedStatement statement = connection.prepareStatement(sql);
+      statement.setTimestamp(1,new Timestamp(System.currentTimeMillis()));
+      statement.setLong(2, uniqueID);
+      int i = statement.executeUpdate();
+
+      //if (false) logger.debug("UPDATE " + i);
+      if (i == 0) {
+        logger.error("huh? didn't update the userList for " + uniqueID + " sql " + sql);
+      }
+
+      statement.close();
+      database.closeConnection(connection);
+    } catch (Exception e) {
+      logger.error("got " + e, e);
+    }
+  }
+
   public int getCount() { return getCount(USER_EXERCISE_LIST); }
 
 
@@ -138,7 +164,7 @@ public class UserListDAO extends DAO {
    */
   public List<UserList> getAll() {
     try {
-      String sql = "SELECT * from " + USER_EXERCISE_LIST + " order by modified";
+      String sql = "SELECT * from " + USER_EXERCISE_LIST + " order by modified desc";
       return getUserLists(sql);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
