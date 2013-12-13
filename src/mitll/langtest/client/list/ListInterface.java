@@ -85,8 +85,8 @@ public interface ListInterface extends RequiresResize {
   int getPercentComplete();
 
   int getComplete();
-
   void setCompleted(Set<String> completed);
+  void addCompleted(String id);
 
   void setSelectionState(Map<String,Collection<String>> selectionState);
 
