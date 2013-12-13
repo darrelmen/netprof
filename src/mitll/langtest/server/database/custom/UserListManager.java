@@ -39,7 +39,7 @@ public class UserListManager {
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#addUserList(long, String, String, String)
-   * @see mitll.langtest.client.custom.Navigation#doCreate
+   * @see mitll.langtest.client.custom.CreateListDialog#doCreate
    * @param userid
    * @param name
    * @param description
@@ -124,7 +124,7 @@ public class UserListManager {
   }
 
   /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#populateListChoices(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController, com.github.gwtbootstrap.client.ui.SplitDropdownButton)
+   * @see mitll.langtest.client.custom.NPFExercise#populateListChoices(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController, com.github.gwtbootstrap.client.ui.SplitDropdownButton)
    * @see mitll.langtest.server.LangTestDatabaseImpl#addItemToUserList(long, mitll.langtest.shared.custom.UserExercise)
    * @param userListID
    * @param userExercise
@@ -175,5 +175,10 @@ public class UserListManager {
     if (where != null) {
       userListDAO.addVisitor(where.getUniqueID(), user);
     }
+  }
+
+  public void addAnnotation(String exerciseID, String field, String status, String comment) {
+    //exerciseID
+    logger.info("write to database!");
   }
 }
