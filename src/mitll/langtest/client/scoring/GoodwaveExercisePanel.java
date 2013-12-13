@@ -43,7 +43,7 @@ import java.util.Collection;
  * To change this template use File | Settings | File Templates.
  */
 public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel, RequiresResize, ProvidesResize {
-  private static final String NATIVE_REFERENCE_SPEAKER = "Native Reference Speaker";
+  protected static final String NATIVE_REFERENCE_SPEAKER = "Native Reference Speaker";
   private static final String USER_RECORDER = "User Recorder";
   private boolean isBusy = false;
 
@@ -56,7 +56,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   protected final Exercise exercise;
   protected final ExerciseController controller;
   protected final LangTestDatabaseAsync service;
-  private ScoreListener scorePanel;
+  protected ScoreListener scorePanel;
   private AudioPanel contentAudio, answerAudio;
   private NavigationHelper navigationHelper;
   private final float screenPortion;
@@ -219,7 +219,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * @param path
    * @return
    */
-  private Widget getScoringAudioPanel(final Exercise e, String path) {
+  protected Widget getScoringAudioPanel(final Exercise e, String path) {
     if (path != null) {
       path = wavToMP3(path);
     }
@@ -241,11 +241,11 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     return cp;
   }
 
-  private String wavToMP3(String path) {
+  protected String wavToMP3(String path) {
     return (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
   }
 
-  private static class ResizableCaptionPanel extends CaptionPanel implements ProvidesResize, RequiresResize {
+  protected static class ResizableCaptionPanel extends CaptionPanel implements ProvidesResize, RequiresResize {
     public ResizableCaptionPanel(String name) {
       super(name);
     }
