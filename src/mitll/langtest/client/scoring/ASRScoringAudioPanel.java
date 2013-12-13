@@ -45,8 +45,7 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
    */
   public ASRScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
                               ExerciseController controller, boolean useKeyboard, ScoreListener gaugePanel) {
-    super(path, refSentence, service,
-      controller.getSegmentRepeats(), useKeyboard, controller, gaugePanel);
+    super(path, refSentence, service, controller.getSegmentRepeats(), useKeyboard, controller, gaugePanel);
     this.useScoreToColorBkg = controller.useBkgColorForRef();
   }
 
@@ -81,6 +80,8 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
 
     // Schedule the timer to run once in 1 seconds.
     t.schedule(wasVisible ? 1000 : 1);
+
+    System.out.println("scoreAudio : req " + reqid + " path " + path + " type " + "score" + " width " + toUse);
 
     service.getASRScoreForAudio(reqid, resultID, path, refSentence, toUse, height, useScoreToColorBkg, new AsyncCallback<PretestScore>() {
       public void onFailure(Throwable caught) {
