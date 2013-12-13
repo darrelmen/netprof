@@ -406,7 +406,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
         return false;
       }
       else {
-       // System.out.println("req for " + type + " = " + mostRecentIDForType);
+        //System.out.println("req for " + type + " = " + mostRecentIDForType + " compared to " + responseReqID);
         return mostRecentIDForType == responseReqID;
       }
     }
