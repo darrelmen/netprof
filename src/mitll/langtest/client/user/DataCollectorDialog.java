@@ -9,6 +9,7 @@ import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.Modal;
 import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.TextBox;
+import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
@@ -241,7 +242,7 @@ public class DataCollectorDialog extends UserDialog {
    */
   private void checkUserOrCreate(final int enteredAge, final FormField user, final ListBox experienceBox,
                                  final ListBox genderBox,
-                                 final TextBox nativeLang, final TextBox dialect,
+                                 final TextBoxBase nativeLang, final TextBoxBase dialect,
                                  final Modal dialogBox,
                                  final Button closeButton,
                                  final boolean isFastAndSlow) {
@@ -262,7 +263,6 @@ public class DataCollectorDialog extends UserDialog {
     });
   }
 
-
   /**
    * @param age
    * @param experienceBox
@@ -276,8 +276,8 @@ public class DataCollectorDialog extends UserDialog {
    * @see #checkUserOrCreate
    */
   private void addTeacher(int age, ListBox experienceBox, ListBox genderBox,
-                          TextBox nativeLang,
-                          TextBox dialect, final TextBox user,
+                          TextBoxBase nativeLang,
+                          TextBoxBase dialect, final TextBoxBase user,
                           final Modal dialogBox,
                           final Button closeButton,
                           final boolean isFastAndSlow) {
