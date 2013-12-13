@@ -11,11 +11,11 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.Result;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 
@@ -118,10 +118,13 @@ public class NPFHelper implements RequiresResize {
     exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, feedback, controller, exerciseList, 0.7f) {
       @Override
       public Panel getExercisePanel(Exercise e) {
-
         System.out.println("\n\nmaking new GoodwaveExercisePanel for " +e);
-
-        return new GoodwaveExercisePanel(e, controller, exerciseList, 0.65f,false, "classroom");
+        if (controller.getAudioType().equalsIgnoreCase(Result.AUDIO_TYPE_REVIEW)) {
+          return new QCNPFExercise(e, controller, exerciseList, 0.65f, false, "classroom");
+        }
+        else {
+          return new NPFExercise(e, controller, exerciseList, 0.65f, false, "classroom");
+        }
       }
     }, userManager, 1);
   }
@@ -130,9 +133,7 @@ public class NPFHelper implements RequiresResize {
    * @see #doNPF(mitll.langtest.shared.custom.UserList, String)
    * @return
    */
-  protected SimplePanel getNpfContentPanel() {
-    return npfContentPanel;
-  }
+  protected SimplePanel getNpfContentPanel() { return npfContentPanel; }
 
   @Override
   public void onResize() {
