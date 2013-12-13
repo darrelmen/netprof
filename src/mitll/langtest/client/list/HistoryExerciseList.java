@@ -41,8 +41,8 @@ public class HistoryExerciseList extends PagingExerciseList {
 
   public HistoryExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
                              boolean showTurkToken, boolean showInOrder, ExerciseController controller,
-                             boolean isCRTDataMode, String instance) {
-    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, /*isCRTDataMode,*/instance);
+                             boolean showTypeAhead, String instance) {
+    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, showTypeAhead, instance);
   }
 
   /**
@@ -375,8 +375,8 @@ public class HistoryExerciseList extends PagingExerciseList {
    */
   protected void loadExercises(final Map<String, Collection<String>> typeToSection, final String item) {
     System.out.println("HistoryExerciseList.loadExercises : " + typeToSection + " and item '" + item + "'");
-    if (allowPlusInURL) {
-      service.getCompletedExercises(controller.getUser(),new AsyncCallback<Set<String>>() {
+    if (controller.showCompleted()) {
+      service.getCompletedExercises(controller.getUser(), controller.isReviewMode(), new AsyncCallback<Set<String>>() {
         @Override
         public void onFailure(Throwable caught) {}
 

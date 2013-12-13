@@ -37,6 +37,7 @@ import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import mitll.langtest.client.custom.NPFExercise;
 import mitll.langtest.client.custom.Navigation;
+import mitll.langtest.client.custom.QCNPFExercise;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.ModalInfoDialog;
@@ -196,6 +197,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         });
   }
 
+  Panel belowFirstRow;
+  Panel leftColumn;
+  FluidContainer bothSecondAndThird;
+
   /**
    * Use DockLayout to put a header at the top, exercise list on the left, and eventually
    * the current exercise in the center.  There is also a status on line on the bottom.
@@ -247,7 +252,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     boolean usualLayout = !showOnlyOneExercise();
     Container verticalContainer = new FluidContainer();
-
+    //verticalContainer.addStyleName("rootContainer");
     if (usualLayout) {
       RootPanel.get().add(verticalContainer);
     }
@@ -260,7 +265,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     verticalContainer.add(headerRow = makeHeaderRow());
     headerRow.getElement().setId("headerRow");
 
-    Panel belowFirstRow = new FluidRow();
+    /*Panel*/ belowFirstRow = new FluidRow();
     verticalContainer.add(belowFirstRow);
 
     // second row ---------------
@@ -270,11 +275,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // third row ---------------
 
    Panel thirdRow = new HorizontalPanel();
-    Panel leftColumn = new SimplePanel();
+    /*Panel*/ leftColumn = new SimplePanel();
     thirdRow.add(leftColumn);
     thirdRow.getElement().setId("outerThirdRow");
 
-    FluidContainer bothSecondAndThird = new FluidContainer();
+    /*FluidContainer*/ bothSecondAndThird = new FluidContainer();
     bothSecondAndThird.add(secondRow);
     bothSecondAndThird.add(thirdRow);
 
@@ -291,14 +296,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingLeft", "5px");
     DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingRight", "2px");
 
-    ListInterface listInterface = makeExerciseList(secondRow, leftColumn);
-    if (getProps().isClassroomMode()) {
-      navigation = new Navigation(service, userManager, this, listInterface);
-      belowFirstRow.add(navigation.getNav(bothSecondAndThird, this));
-    }
-    else {
-      belowFirstRow.add(bothSecondAndThird);
-    }
+    //reallyMakeExerciseList(belowFirstRow, leftColumn, bothSecondAndThird);
 
     if (usualLayout) {
       currentExerciseVPanel.addStyleName("floatLeft");
@@ -331,9 +329,30 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     loadVisualizationPackages();  // Note : this was formerly done in LangTest.html, since it seemed to be intermittently not loaded properly
   }
 
-  private boolean isIPad() {
-    return Window.Navigator.getUserAgent().toLowerCase().contains("ipad");
+  private void reallyMakeExerciseList(/*Panel belowFirstRow, Panel leftColumn, FluidContainer bothSecondAndThird*/) {
+
+    System.out.println("\n\n\ndid reallyMakeExerciseList\n\n\n");
+    ListInterface listInterface = makeExerciseList(secondRow, leftColumn);
+    if (getProps().isClassroomMode()) {
+      navigation = new Navigation(service, userManager, this, listInterface);
+      belowFirstRow.add(navigation.getNav(bothSecondAndThird, this));
+    }
+    else {
+      belowFirstRow.add(bothSecondAndThird);
+    }
+
+  /*  if (shouldCollectAudio()) {
+     // makeFlashContainer();
+      //    currentExerciseVPanel.add(flashRecordPanel);
+      belowFirstRow.add(flashRecordPanel);
+    }
+    else {
+      System.out.println("*not* allowing recording of audio.");
+    }*/
+    //checkInitFlash();
   }
+
+  private boolean isIPad() { return Window.Navigator.getUserAgent().toLowerCase().contains("ipad");  }
 
   private void loadFlashcard() {
     doFlashcard();
@@ -367,12 +386,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (isGoodwaveMode()) {
       flashcard = new Flashcard();
       title = flashcard.makeNPFHeaderRow(props.getSplash());
-    }
-/*    else if (props.isTrackUsers()) {
-      flashcard = new Flashcard();
-      title = flashcard.makeNPFHeaderRow(props.getSplash(), props.getAppTitle());
-    }*/
-    else if (props.isFlashcardTeacherView() || props.isAutocrt()) {
+    } else if (props.isFlashcardTeacherView() || props.isAutocrt()) {
       flashcard = new Flashcard();
       title = flashcard.getHeaderRow(props.getSplash(), "NewProF2.png",props.getAppTitle());
     }
@@ -728,14 +742,20 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see #gotUser(long)
    */
   private void setFactory(final long userID) {
+    reallyMakeExerciseList();
+
     final LangTest outer = this;
     if (props.isGoodwaveMode() && !props.isGrading()) {
       if (props.isClassroomMode()) {
         exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer, exerciseList, 0.7f) {
           @Override
           public Panel getExercisePanel(Exercise e) {
-            System.out.println("\n\nmaking new NPFExercise for " + e);
-            return new NPFExercise(e, controller, exerciseList, 0.65f, false, "classroom");
+            if (isReviewMode()) {
+              return new QCNPFExercise(e, controller, exerciseList, 0.65f, false, "classroom");
+            }
+            else {
+              return new NPFExercise(e, controller, exerciseList, 0.65f, false, "classroom");
+            }
           }
         }, userManager, 1);
       } else {
@@ -772,11 +792,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer, exerciseList), userManager, 1);
     }
     doEverythingAfterFactory(userID);
-
-    // Tamas aksed us to turn this off 11/14/13
-/*    if (getLanguage().equalsIgnoreCase("Pashto")) {
-      new FontChecker(this).checkPashto();
-    }*/
   }
 
   /**
@@ -1005,12 +1020,21 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   @Override
   public void rememberAudioType(String audioType) {
     this.audioType = audioType;
+    System.out.println("audio type " + audioType + " review " + isReviewMode());
+  }
+
+  public boolean showCompleted() {
+    boolean b = isReviewMode() || isCRTDataCollectMode();
+    System.out.println("showCompleted " + b);
+
+    return b;
   }
 
   @Override
   public String getAudioType() {
     return audioType;
   }
+  public boolean isReviewMode() { return audioType.equals(Result.AUDIO_TYPE_REVIEW); }
 
   /**
    * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers
@@ -1037,7 +1061,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public String getLanguage() {  return props.getLanguage(); }
   public boolean isPromptBeforeNextItem() {  return props.isPromptBeforeNextItem(); }
   public boolean isRightAlignContent() {  return props.isRightAlignContent(); }
-  public boolean isFlashCard() {  return props.isFlashCard(); }
+
   public boolean isGoodwaveMode() {  return props.isGoodwaveMode(); }
   public boolean shouldAddRecordKeyBinding() { return props.shouldAddRecordKeyBinding(); }
   public int getFlashcardPreviewFrameHeight() { return props.getFlashcardPreviewFrameHeight(); }
