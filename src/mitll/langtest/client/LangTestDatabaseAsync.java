@@ -135,7 +135,7 @@ public interface LangTestDatabaseAsync {
 
   void getUserListsForText(String search, AsyncCallback<Collection<UserList>> async);
 
-  void getListsForUser(long userid, boolean onlyCreated, AsyncCallback<Collection<UserList>> async);
+  void getListsForUser(long userid, boolean onlyCreated, boolean getExercises, AsyncCallback<Collection<UserList>> async);
 
   void addItemToUserList(long userListID, UserExercise userExercise, AsyncCallback<Void> async);
 
@@ -148,4 +148,6 @@ public interface LangTestDatabaseAsync {
   void addVisitor(UserList ul, long user, AsyncCallback<Void> asyncCallback);
 
   void editItem(UserExercise userExercise, AsyncCallback<Void> async);
+
+  void addAnnotation(String exerciseID, String field, String status, String comment, AsyncCallback<Void> async);
 }
