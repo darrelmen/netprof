@@ -30,14 +30,14 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   private static final String PLAY_LABEL = "\u25ba play";
   private static final String PAUSE_LABEL = "|| pause";
   private Sound currentSound = null;
-  private SoundManagerAPI soundManager;
+  private final SoundManagerAPI soundManager;
   private final Button playButton = new Button(PLAY_LABEL);
   private final HTML warnNoFlash = new HTML("<font color='red'>Flash is not activated. Do you have a flashblocker? " +
     "Please add this site to its whitelist.</font>");
   private AudioControl listener;
   private PlayListener playListener;
   private static int counter = 0;
-  private int id;
+  private final int id;
   private static final boolean DEBUG = false;
 
   private int count = 0;
@@ -112,10 +112,6 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     if (isPlaying()) {
       pause();
     }
-  }
-
-  public void setPlayEnabled(boolean val) {
-    playButton.setEnabled(val);
   }
 
   /**
@@ -250,7 +246,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     if (DEBUG) System.out.println("PlayAudioPanel.createSound : " + this + " created sound " + currentSound);
 
     soundManager.createSound(currentSound, song, song);
-    showPlayButton();
+    //showPlayButton();
     reinitialize();
   }
 
@@ -291,10 +287,8 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   }
 
   public void songFirstLoaded(double durationEstimate){
-    if (!playButton.isEnabled()) setPlayEnabled(true);
     if (DEBUG) System.out.println("PlayAudioPanel.songFirstLoaded : " + this);
 
-    showPlayButton();
     if (listener != null) {
       listener.songFirstLoaded(durationEstimate);
     }
@@ -303,24 +297,30 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     }
   }
 
-  public void showPlayButton() {
-    playButton.setVisible(true);
-  }
-
   /**
    * @see SoundManager#songLoaded(Sound, double)
    * @param duration
    */
   public void songLoaded(double duration){
+    if (DEBUG) System.out.println("PlayAudioPanel.songLoaded : " + this);
+
     if (listener != null) {
       listener.songLoaded(duration);
     }
     else {
       System.out.println("no listener for song loaded " + duration);
     }
+    if (!playButton.isEnabled()) setPlayEnabled(true);
+    showPlayButton();
+  }
+
+  public void setPlayEnabled(boolean val) {
+    playButton.setEnabled(val);
+  }
+
+  private void showPlayButton() {
+    playButton.setVisible(true);
   }
 
   public String toString() { return "PlayAudioPanel #" +id; }
 }
-
-
