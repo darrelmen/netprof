@@ -78,6 +78,8 @@ public class ExerciseListLayout {
   private ListInterface makeExerciseList(FluidRow secondRow, boolean isGrading, final UserFeedback feedback,
                                          Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                          ExerciseController controller) {
+    boolean showCompleted =  props.isCRTDataCollectMode() || controller.isReviewMode();
+    boolean showTypeAhead = !props.isCRTDataCollectMode();
     if (isGrading) {
       return new GradedExerciseList(currentExerciseVPanel, service, feedback,
         true, props.isEnglishOnlyMode(), controller,"grading");
@@ -91,13 +93,14 @@ public class ExerciseListLayout {
             return new ResponseExerciseList(secondRow, currentExerciseVPanel, service, feedback,
               props.isShowTurkToken(), props.showExercisesInOrder(), controller, props.isCRTDataCollectMode(), "response");
           } else {
+            System.out.println("show completed " + showCompleted);
             return new FlexSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
-              props.isShowTurkToken(), props.showExercisesInOrder(), controller, /*props.isCRTDataCollectMode()*/"flex");
+              props.isShowTurkToken(), props.showExercisesInOrder(), controller, showTypeAhead, "flex");
           }
         }
       } else {
         return new PagingExerciseList(currentExerciseVPanel, service, feedback,
-          props.isShowTurkToken(), props.showExercisesInOrder(), controller, /*props.isCRTDataCollectMode(), */"paging");
+          props.isShowTurkToken(), props.showExercisesInOrder(), controller, showTypeAhead, "paging");
       }
     }
   }
