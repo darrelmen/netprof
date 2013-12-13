@@ -153,11 +153,13 @@ public interface LangTestDatabase extends RemoteService {
   StartupInfo getStartupInfo();
   long addUserList(long userid, String name, String description, String dliClass);
   void addVisitor(UserList ul, long user);
-  Collection<UserList> getListsForUser(long userid, boolean onlyCreated);
+  Collection<UserList> getListsForUser(long userid, boolean onlyCreated, boolean getExercises);
   Collection<UserList> getUserListsForText(String search);
   void addItemToUserList(long userListID, UserExercise userExercise);
   UserExercise createNewItem(long userid, String english, String foreign);
   UserExercise reallyCreateNewItem(long userListID, UserExercise userExercise);
 
   void editItem(UserExercise userExercise);
+
+  void addAnnotation(String exerciseID, String field, String status, String comment);
 }
