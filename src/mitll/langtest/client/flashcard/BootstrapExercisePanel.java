@@ -61,7 +61,8 @@ public class BootstrapExercisePanel extends FluidContainer {
     HTML warnNoFlash = new HTML(WARN_NO_FLASH);
     soundFeedback = new SoundFeedback(controller.getSoundManager(), warnNoFlash);
 
-    add(getHelpRow(controller));
+    Widget helpRow = getHelpRow(controller);
+    if (helpRow != null) add(helpRow);
     cardPrompt = getCardPrompt(e, controller);
     cardPrompt.getElement().setId("cardPrompt");
     add(cardPrompt);
@@ -78,7 +79,7 @@ public class BootstrapExercisePanel extends FluidContainer {
    * @param controller
    * @return
    */
-  private Widget getHelpRow(final ExerciseController controller) {
+  protected Widget getHelpRow(final ExerciseController controller) {
     FlowPanel helpRow = new FlowPanel();
     helpRow.addStyleName("floatRight");
     helpRow.addStyleName("helpPadding");

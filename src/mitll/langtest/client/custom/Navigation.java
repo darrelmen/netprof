@@ -1,15 +1,12 @@
 package mitll.langtest.client.custom;
 
-import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Tab;
 import com.github.gwtbootstrap.client.ui.TabPanel;
-import com.github.gwtbootstrap.client.ui.TextArea;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
@@ -31,12 +28,10 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.dialog.EnterKeyButtonHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
-import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.server.database.custom.UserListManager;
@@ -52,7 +47,7 @@ import java.util.Collection;
  * Time: 8:50 PM
  * To change this template use File | Settings | File Templates.
  */
-public class Navigation extends BasicDialog implements RequiresResize {
+public class Navigation implements RequiresResize {
   private static final String CHAPTERS = "Chapters";
   private static final boolean SHOW_CREATED = false;
   private static final String YOUR_LISTS = "Your Lists";
@@ -103,6 +98,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
   private Panel getButtonRow2(Panel secondAndThird) {
     tabPanel = new TabPanel();
 
+    // your list tab
     final TabAndContent yourStuff = makeTab(tabPanel, IconType.FOLDER_CLOSE, YOUR_LISTS);
     yourItems = yourStuff.tab;
     yourItemsContent = yourStuff.content;
@@ -114,14 +110,17 @@ public class Navigation extends BasicDialog implements RequiresResize {
     });
     refreshViewLessons();
 
+    // create tab
     final TabAndContent create = makeTab(tabPanel, IconType.PLUS_SIGN, "Create");
+    final CreateListDialog createListDialog = new CreateListDialog(this,service,userManager);
     create.tab.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        doCreate(create.content);
+        createListDialog.doCreate(create.content);
       }
     });
 
+    // browse tab
     browse = makeTab(tabPanel, IconType.TH_LIST, "Browse");
     browse.tab.addClickHandler(new ClickHandler() {
       @Override
@@ -130,6 +129,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
       }
     });
 
+    // chapter tab
     final TabAndContent chapters = makeTab(tabPanel, IconType.TH_LIST, CHAPTERS);
     chapters.content.add(secondAndThird);
 
@@ -145,20 +145,21 @@ public class Navigation extends BasicDialog implements RequiresResize {
         System.out.println("got shown event : '" +showEvent + "' target '" + targetName + "'");
 
         boolean wasChapters = targetName.contains(CHAPTERS);
+        Panel createdPanel = listInterface.getCreatedPanel();
+        boolean hasCreated = createdPanel != null;
         if (wasChapters) {
-          System.out.println("got chapters! created panel : " + listInterface.getCreatedPanel() + "\n\n\n");
+          System.out.println("got chapters! created panel : , has created " + hasCreated + "\n\n\n");
         }
-        if (listInterface.getCreatedPanel() != null && wasChapters) {
-          ((GoodwaveExercisePanel) listInterface.getCreatedPanel()).wasRevealed();
+        if (hasCreated && wasChapters) {
+          System.out.println("\tgot chapters! created panel :  has created " + hasCreated + " was revealed  " + createdPanel.getClass());
+
+
+          ((NPFExercise) createdPanel).wasRevealed();
         }
       }
     });
 
     return tabPanel;
-  }
-
-  private void viewBrowse() {
-    viewLessons(browse.content, true);
   }
 
   private TabAndContent makeTab(TabPanel toAddTo, IconType iconType, String label) {
@@ -172,9 +173,17 @@ public class Navigation extends BasicDialog implements RequiresResize {
     return new TabAndContent(create, createContent);
   }
 
-  private void zeroPadding(Panel createContent) {
+  void zeroPadding(Panel createContent) {
     DOM.setStyleAttribute(createContent.getElement(), "paddingLeft", "0px");
     DOM.setStyleAttribute(createContent.getElement(), "paddingRight", "0px");
+  }
+
+  public long getUserListID() {
+    return userListID;
+  }
+
+  public void setUserListID(long userListID) {
+    this.userListID = userListID;
   }
 
   public static class TabAndContent {
@@ -237,17 +246,11 @@ public class Navigation extends BasicDialog implements RequiresResize {
     viewBrowse();
   }
 
-  @Override
-  public void onResize() {
-    setScrollPanelWidth(listScrollPanel);
-    npfHelper.onResize();
-    avpHelper.onResize();
+  private void viewBrowse() {
+    viewLessons(browse.content, true);
   }
 
-  private class ButtonClickEvent extends ClickEvent {
-        /*To call click() function for Programmatic equivalent of the user clicking the button.*/
-  }
-
+  /*To call click() function for Programmatic equivalent of the user clicking the button.*/
   private void viewLessons(final Panel contentPanel, boolean getAll) {
     contentPanel.clear();
     contentPanel.getElement().setId("contentPanel");
@@ -262,6 +265,17 @@ public class Navigation extends BasicDialog implements RequiresResize {
       System.out.println("viewLessons for " + userManager.getUser());
       service.getListsForUser(userManager.getUser(), false, new UserListCallback(contentPanel, child));
     }
+  }
+
+  @Override
+  public void onResize() {
+    setScrollPanelWidth(listScrollPanel);
+    npfHelper.onResize();
+    avpHelper.onResize();
+  }
+
+  private class ButtonClickEvent extends ClickEvent {
+
   }
 
   private boolean createdByYou(UserList ul) {
@@ -422,78 +436,9 @@ public class Navigation extends BasicDialog implements RequiresResize {
 
   private void setScrollPanelWidth(ScrollPanel row) {
     if (row != null) {
-      row.setWidth((Window.getClientWidth() * 0.95) + "px");
+      //row.setWidth((Window.getClientWidth() * 0.95) + "px");
       row.setHeight((Window.getClientHeight() * 0.7) + "px");
     }
-  }
-
-  /**
-   * @see #getButtonRow2(com.google.gwt.user.client.ui.Panel)
-   * @param thirdRow
-   */
-  private void doCreate(Panel thirdRow) {
-    // fill in the middle panel with a form to allow you to create a list
-    // post the results to the server
-    thirdRow.clear();
-    final EnterKeyButtonHelper enterKeyButtonHelper = new EnterKeyButtonHelper(true);
-    Panel child = new DivWidget() {
-      @Override
-      protected void onUnload() {
-        super.onUnload();
-        enterKeyButtonHelper.removeKeyHandler();
-      }
-    };
-    thirdRow.add(child);
-    zeroPadding(child);
-    child.addStyleName("userListContainer");
-
-    FluidRow row = new FluidRow();
-    child.add(row);
-    final Heading header = new Heading(2, "Create a New List");
-    row.add(header);
-
-    row = new FluidRow();
-    child.add(row);
-    final FormField titleBox = addControlFormField(row, "Title");
-
-    row = new FluidRow();
-    child.add(row);
-    final TextArea area = new TextArea();
-    addControlGroupEntry(row, "Description", area);
-
-    row = new FluidRow();
-    child.add(row);
-
-    final FormField classBox = addControlFormField(row, "Class");
-    row = new FluidRow();
-    child.add(row);
-
-    Button submit = new Button("Create List");
-    submit.setType(ButtonType.PRIMARY);
-    submit.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        System.out.println("creating list for " + titleBox + " " + area.getText() + " and " + classBox.getText());
-        enterKeyButtonHelper.removeKeyHandler();
-        // TODO : validate
-
-        service.addUserList(userManager.getUser(), titleBox.getText(), area.getText(), classBox.getText(), new AsyncCallback<Long>() {
-          @Override
-          public void onFailure(Throwable caught) {
-          }
-
-          @Override
-          public void onSuccess(Long result) {
-            userListID = result;
-            System.out.println("userListID " + userListID);
-            showInitialState();
-            // TODO : show enter item panel
-          }
-        });
-      }
-    });
-    enterKeyButtonHelper.addKeyHandler(submit);
-    row.add(submit);
   }
 
   private class UserListCallback implements AsyncCallback<Collection<UserList>> {
@@ -523,6 +468,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
         final Panel insideScroll = new DivWidget();
         insideScroll.getElement().setId("insideScroll");
         insideScroll.addStyleName("userListContainer");
+
         listScrollPanel.add(insideScroll);
         boolean anyAdded = false;
         for (final UserList ul : result) {
@@ -544,6 +490,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
       widgets.addStyleName("userListContent");
       widgets.addStyleName("userListBackground");
       widgets.addStyleName("leftTenMargin");
+      widgets.addStyleName("rightTenMargin");
 
       widgets.addClickHandler(new ClickHandler() {
         @Override
@@ -571,49 +518,52 @@ public class Navigation extends BasicDialog implements RequiresResize {
       FluidContainer w = new FluidContainer();
       widgets.add(w);
 
-      FluidRow r1 = new FluidRow();
-      w.add(r1);
+      addWidgetsForList(ul, w);
+      return widgets;
+    }
+  }
+
+  private void addWidgetsForList(UserList ul, FluidContainer w) {
+    FluidRow r1 = new FluidRow();
+    w.add(r1);
 
 
-      //FlowPanel fp = new FlowPanel();
-      //  Heading nameInfo = new Heading(2, ul.getName());
-      Widget nameInfo = getUserListText(ul.getName());
-      //nameInfo.addStyleName("floatLeft");
-      // r1.add(fp);
-      //fp.add(nameInfo);
-      r1.add(new Column(6, nameInfo));
-      //  itemMarker = new Heading(3, ul.getExercises().size() + " items");
-      itemMarker = new HTML(ul.getExercises().size() + " items");
-      itemMarker.addStyleName("numItemFont");
-      //   itemMarker.addStyleName("floatRight");
-      r1.add(new Column(3, itemMarker));
-      //    fp.add(itemMarker);
+    //FlowPanel fp = new FlowPanel();
+    //  Heading nameInfo = new Heading(2, ul.getName());
+    Widget nameInfo = getUserListText(ul.getName());
+    //nameInfo.addStyleName("floatLeft");
+    // r1.add(fp);
+    //fp.add(nameInfo);
+    r1.add(new Column(6, nameInfo));
+    //  itemMarker = new Heading(3, ul.getExercises().size() + " items");
+    itemMarker = new HTML(ul.getExercises().size() + " items");
+    itemMarker.addStyleName("numItemFont");
+    //   itemMarker.addStyleName("floatRight");
+    r1.add(new Column(3, itemMarker));
+    //    fp.add(itemMarker);
 /*
         r1 = new FluidRow();
         w.add(r1);
         r1.add(new Heading(3, "Description : " + ul.getDescription()));
         */
-      r1 = new FluidRow();
-      w.add(r1);
-      r1.add(getUserListText2(ul.getDescription()));
+    r1 = new FluidRow();
+    w.add(r1);
+    r1.add(getUserListText2(ul.getDescription()));
   /*      r1 = new FluidRow();
         w.add(r1);
         r1.add(new Heading(3, "Class : " + ul.getClassMarker()));
 */
-      if (!ul.getClassMarker().isEmpty()) {
-        r1 = new FluidRow();
-        w.add(r1);
-        r1.add(getUserListText2(ul.getClassMarker()));
-      }
-
-      if (createdByYou(ul) && !ul.getName().equals(UserListManager.MY_LIST)) {
-        r1 = new FluidRow();
-        w.add(r1);
-        r1.add(new HTML("<b>Created by you.</b>"));
-      }
-      return widgets;
+    if (!ul.getClassMarker().isEmpty()) {
+      r1 = new FluidRow();
+      w.add(r1);
+      r1.add(getUserListText2(ul.getClassMarker()));
     }
 
+    if (createdByYou(ul) && !ul.getName().equals(UserListManager.MY_LIST)) {
+      r1 = new FluidRow();
+      w.add(r1);
+      r1.add(new HTML("<b>Created by you.</b>"));
+    }
   }
 
   private Widget getUserListText(String content) {
