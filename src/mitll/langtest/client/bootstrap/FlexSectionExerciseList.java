@@ -72,14 +72,15 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @param feedback
    * @param showTurkToken
    * @param showInOrder
-   * @paramx showListBox
    * @param controller
-   * @param instance
-   */
+   * @param showTypeAhead @paramx showListBox
+   * @param instance          */
   public FlexSectionExerciseList(FluidRow secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                  UserFeedback feedback,
-                                 boolean showTurkToken, boolean showInOrder,/* boolean showListBox, */ExerciseController controller, String instance) {
-    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, controller.isCRTDataCollectMode(),instance);
+                                 boolean showTurkToken, boolean showInOrder,
+                                 ExerciseController controller,
+                                 boolean showTypeAhead, String instance) {
+    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, showTypeAhead, instance);
 
     sectionPanel = new FluidContainer();
     sectionPanel.getElement().setId("sectionPanel");
@@ -97,7 +98,6 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   @Override
   protected void addComponents() {
     PagingContainer<? extends ExerciseShell> exerciseShellPagingContainer = makePagingContainer();
-    //System.out.println("addComponents made container " + exerciseShellPagingContainer);
     addTableWithPager(exerciseShellPagingContainer);
   }
 
@@ -111,13 +111,13 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     System.out.println("FlexSectionExerciseList : getExercises : Get exercises for user=" + userID + " crt mode " + allowPlusInURL);
     this.userID = userID;
 
-    if (allowPlusInURL) {
-      service.getCompletedExercises((int)userID, new AsyncCallback<Set<String>>() {
+    if (controller.showCompleted()) {
+      service.getCompletedExercises((int)userID, controller.isReviewMode(), new AsyncCallback<Set<String>>() {
         @Override
         public void onFailure(Throwable caught) {}
         @Override
         public void onSuccess(Set<String> result) {
-          //System.out.println("\tFlexSectionExerciseList : getCompletedExercises : completed for user=" + userID + " result " + result.size());
+          System.out.println("\n\n\n\tFlexSectionExerciseList : getCompletedExercises : completed for user=" + userID + " result " + result.size());
           controller.getExerciseList().setCompleted(result);
           addWidgets();
         }
