@@ -35,6 +35,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
+import mitll.langtest.client.custom.NPFExercise;
 import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
@@ -729,7 +730,17 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void setFactory(final long userID) {
     final LangTest outer = this;
     if (props.isGoodwaveMode() && !props.isGrading()) {
-      exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer, exerciseList, getScreenPortion()), userManager, 1);
+      if (props.isClassroomMode()) {
+        exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer, exerciseList, 0.7f) {
+          @Override
+          public Panel getExercisePanel(Exercise e) {
+            System.out.println("\n\nmaking new NPFExercise for " + e);
+            return new NPFExercise(e, controller, exerciseList, 0.65f, false, "classroom");
+          }
+        }, userManager, 1);
+      } else {
+        exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer, exerciseList, getScreenPortion()), userManager, 1);
+      }
     } else if (props.isGrading()) {
       exerciseList.setFactory(new GradingExercisePanelFactory(service, outer, outer, exerciseList), userManager, props.getNumGradesToCollect());
     } else if (props.getFlashcardNextAndPrev()) {
