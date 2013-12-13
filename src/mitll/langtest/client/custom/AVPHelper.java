@@ -3,6 +3,7 @@ package mitll.langtest.client.custom;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.NavigationHelper;
@@ -63,6 +64,11 @@ class AVPHelper extends NPFHelper {
             cardPrompt.insert(navigationHelper.getPrev(), 0);
             cardPrompt.add(navigationHelper.getNext());
             return cardPrompt;    //To change body of overridden methods use File | Settings | File Templates.
+          }
+
+          @Override
+          protected Widget getHelpRow(ExerciseController controller) {
+            return null;
           }
         };
 
