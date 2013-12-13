@@ -49,6 +49,8 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
     this.useScoreToColorBkg = controller.useBkgColorForRef();
   }
 
+  public void setShowColor(boolean v) { this.useScoreToColorBkg = v;}
+
   /**
    * Shows spinning beachball (ish) gif while we wait...
    * @see ScoringAudioPanel#getTranscriptImageURLForAudio
