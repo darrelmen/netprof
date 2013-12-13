@@ -46,7 +46,6 @@ public class PagingContainer<T extends ExerciseShell> {
   protected ExerciseController controller;
   private int verticalUnaccountedFor = 100;
   private Set<String> completed = new HashSet<String>();
-  private boolean isCRTDataMode;
 
   /**
    * @see mitll.langtest.client.list.PagingExerciseList#makePagingContainer()
@@ -56,12 +55,20 @@ public class PagingContainer<T extends ExerciseShell> {
   public PagingContainer(ExerciseController controller, int verticalUnaccountedFor) {
     this.controller = controller;
     this.verticalUnaccountedFor = verticalUnaccountedFor;
-    this.isCRTDataMode = controller.getProps().isCRTDataCollectMode();
   }
 
+  public void addCompleted(String id) {
+    completed.add(id);
+    refresh();
+
+    System.out.println("addCompleted : completed " + id +  " now " + getCompleted().size());
+
+  }
   public void refresh() {
     table.redraw();
   }
+
+  public Set<String> getCompleted() { return completed; }
 
   public interface TableResources extends CellTable.Resources {
     /**
@@ -147,7 +154,7 @@ public class PagingContainer<T extends ExerciseShell> {
     table.setSelectionModel(selectionModel);
     // we don't want to listen for changes in the selection model, since that happens on load too -- we just want clicks
 
-    addColumnsToTable(true);
+    addColumnsToTable();
   }
 
   private CellTable<T> makeCellTable(CellTable.Resources o) {
@@ -158,15 +165,17 @@ public class PagingContainer<T extends ExerciseShell> {
     return new com.github.gwtbootstrap.client.ui.CellTable<T>(PAGE_SIZE, o);
   }
 
-  private void addColumnsToTable(boolean consumeClicks) {
-    if (isCRTDataMode) {
-      Column<T, SafeHtml> id2 = getExerciseIdColumn2(consumeClicks);
-      table.addColumn(id2);
+  private void addColumnsToTable() {
+    System.out.println("addColumnsToTable : completed " + controller.showCompleted() +  " now " + getCompleted().size());
+
+    Column<T, SafeHtml> id2;
+    if (controller.showCompleted()) {
+      id2 = getExerciseIdColumn2(true);
     } else {
-      Column<T, SafeHtml> id2 = getExerciseIdColumn(consumeClicks);
+      id2 = getExerciseIdColumn(true);
       id2.setCellStyleNames("alignLeft");
-      table.addColumn(id2);
     }
+    table.addColumn(id2);
 
     // this would be better, but want to consume clicks
   /*  TextColumn<ExerciseShell> id2 = new TextColumn<ExerciseShell>() {
