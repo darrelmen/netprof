@@ -29,8 +29,8 @@ public class UserListDAO extends DAO {
 
   public static final String USER_EXERCISE_LIST = "userexerciselist";
   private UserDAO userDAO;
-  UserExerciseDAO userExerciseDAO;
-  UserListVisitorJoinDAO userListVisitorJoinDAO;
+  private UserExerciseDAO userExerciseDAO;
+  private UserListVisitorJoinDAO userListVisitorJoinDAO;
   public UserListDAO(Database database, UserDAO userDAO) {
     super(database);
     try {
@@ -209,6 +209,12 @@ public class UserListDAO extends DAO {
     return null;
   }
 
+  /**
+   * TODO don't want to always get all the exercises!
+   * @see UserListManager#getUserListByID(long)
+   * @param unique
+   * @return
+   */
   public UserList getWithExercises(long unique) {
     UserList where = getWhere(unique);
     populateList(where);
@@ -236,20 +242,24 @@ public class UserListDAO extends DAO {
     rs.close();
     statement.close();
     database.closeConnection(connection);
+
     for (UserList ul : lists) {
       populateList(ul);
     }
     return lists;
   }
 
+  /**
+   * TODO : This is going to get slow?
+   * @param where
+   */
   private void populateList(UserList where) {
     Collection<UserExercise> onList = userExerciseDAO.getOnList(where.getUniqueID());
-    logger.debug("got " + onList.size() + " for list "+where.getUniqueID());
+    logger.debug("populateList : got " + onList.size() + " for list "+where.getUniqueID());
     where.setExercises(onList);
     where.setVisitors(userListVisitorJoinDAO.getWhere(where.getUniqueID()));
 
     logger.debug("\tlist now "+where);
-
   }
 
   public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
