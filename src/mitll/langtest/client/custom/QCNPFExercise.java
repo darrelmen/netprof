@@ -14,11 +14,13 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseFormatter;
 
 /**
@@ -34,6 +36,32 @@ public class QCNPFExercise extends NPFExercise {
     super(e, controller, listContainer, screenPortion, addKeyHandler, instance);
   }
 
+  @Override
+  protected void nextWasPressed(ListInterface listContainer, Exercise completedExercise) {
+    System.out.println("nextWasPressed : load next exercise " + completedExercise.getID());
+    super.nextWasPressed(listContainer, completedExercise);
+    listContainer.addCompleted(completedExercise.getID());
+    service.markReviewed(completedExercise.getID(), new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {
+      }
+
+      @Override
+      public void onSuccess(Void result) {
+      }
+    });
+  }
+
+  /**
+   * No user recorder for QC
+   * @param service
+   * @param controller    used in subclasses for audio control
+   * @param toAddTo
+   * @param screenPortion
+   */
+  @Override
+  protected void addUserRecorder(LangTestDatabaseAsync service, ExerciseController controller, Panel toAddTo, float screenPortion) {}
+
   /**
    * @param e
    * @param content
@@ -44,8 +72,10 @@ public class QCNPFExercise extends NPFExercise {
     FlowPanel column = new FlowPanel();
     column.addStyleName("blockStyle");
 
-    column.add(getEntry(e, "foreignLanguage", ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getRefSentence()));
-    column.add(getEntry(e, "english", ExerciseFormatter.ENGLISH_PROMPT, e.getEnglishSentence()));
+    ExerciseAnnotation foreignLanguage = e.getAnnotation("foreignLanguage");
+    ExerciseAnnotation english = e.getAnnotation("english");
+    column.add(getEntry(e, "foreignLanguage", ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getRefSentence(), foreignLanguage));
+    column.add(getEntry(e, "english", ExerciseFormatter.ENGLISH_PROMPT, e.getEnglishSentence(), english));
 
     column.getElement().setId("QuestionContent");
     column.addStyleName("floatLeft");
@@ -62,46 +92,56 @@ public class QCNPFExercise extends NPFExercise {
         audioRef = wavToMP3(audioRef);   // todo why do we have to do this?
       }
       ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel(audioRef, e.getRefSentence(), service, controller, false, scorePanel);
+      audioPanel.setShowColor(true);
       audioPanel.getElement().setId("ASRScoringAudioPanel");
       audioPanel.setRefAudio(audioRef, e.getRefSentence());
       ResizableCaptionPanel cp = new ResizableCaptionPanel("Reference" + " : " + audio.getDisplay());
       cp.setContentWidget(audioPanel);
+      ExerciseAnnotation audioAnnotation = e.getAnnotation(audio.getAudioRef());
 
-      column.add(getEntry(e, audio.toString(), cp)); // TODO add unique audio attribute id
+      column.add(getEntry(e.getID(), audio.getAudioRef(), cp, audioAnnotation)); // TODO add unique audio attribute id
     }
     return column;
   }
 
-  private Widget getEntry(Exercise e, final String field, final String label, String value) {
+  private Widget getEntry(Exercise e, final String field, final String label, String value, ExerciseAnnotation annotation) {
     Panel nameValueRow = getContentWidget(label, value);
-    return getEntry(e, field, nameValueRow);
+    return getEntry(e.getID(), field, nameValueRow, annotation);
   }
 
   /**
-   * TODO add annotation info to exercise
+   * TODOx add annotation info to exercise
    * TODOx mark this on the radio
-   * TODO fill in incorrect fields with annotation info (if in qc or in edit mode?)
-   * TODO post annotation to server
+   * TODOx fill in incorrect fields with annotation info (if in qc or in edit mode?)
+   * TODOx post annotation to server
    * TODO after edit, clear annotation -- where do we edit? in edit window
    *
-   * @param e
+   *
+   * @param id
    * @param field
+   * @param annotation
    * @return
    * @paramx label
    * @paramx value
    */
-  private Widget getEntry(Exercise e, final String field, Widget content) {
+  private Widget getEntry(//Exercise e,
+                          String id,
+                          final String field, Widget content, ExerciseAnnotation annotation) {
     Panel row = new HorizontalPanel();
     FlowPanel qcCol = new FlowPanel();
     qcCol.addStyleName("blockStyle");
 
-    String group = "QC_" + e.getID() + "_" + field;
+    System.out.println("For  " + id + " and " + field + " anno " + annotation);
+
+    String group = "QC_" + id + "_" + field;
     RadioButton correct = new RadioButton(group, "Correct");
     qcCol.add(correct);
     final FlowPanel commentRow = new FlowPanel();
-    commentRow.setVisible(false);
     final Label comment = new Label("comment?");
     final TextBox commentEntry = new TextBox();
+    if (annotation != null) {
+      commentEntry.setText(annotation.comment);
+    }
 
     correct.addClickHandler(new ClickHandler() {
       @Override
@@ -120,7 +160,10 @@ public class QCNPFExercise extends NPFExercise {
         });
       }
     });
-    correct.setValue(true);
+    boolean alreadyMarkedCorrect = annotation == null || annotation.status == null || annotation.status.equals("correct");
+    correct.setValue(alreadyMarkedCorrect);
+    commentRow.setVisible(!alreadyMarkedCorrect);
+
     RadioButton incorrect = new RadioButton(group, "Incorrect");
     qcCol.add(incorrect);
 
@@ -129,11 +172,10 @@ public class QCNPFExercise extends NPFExercise {
       public void onClick(ClickEvent event) {
         commentRow.setVisible(true);
         commentEntry.setFocus(true);
-        // comment.setText("comment?");
-        // send to server
-
       }
     });
+    incorrect.setValue(!alreadyMarkedCorrect);
+
     row.add(qcCol);
     qcCol.addStyleName("qcRightBorder");
     qcCol.addStyleName("rightFiveMargin");
