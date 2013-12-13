@@ -137,7 +137,7 @@ public interface LangTestDatabaseAsync {
 
   void getListsForUser(long userid, boolean onlyCreated, AsyncCallback<Collection<UserList>> async);
 
-  void addItemToUserList(long userListID, UserExercise userExercise, AsyncCallback<Collection<UserExercise>> async);
+  void addItemToUserList(long userListID, UserExercise userExercise, AsyncCallback<Void> async);
 
   void createNewItem(long userid, String english, String foreign, AsyncCallback<UserExercise> async);
 

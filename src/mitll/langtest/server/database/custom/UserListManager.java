@@ -1,7 +1,6 @@
 package mitll.langtest.server.database.custom;
 
 import mitll.langtest.server.database.UserDAO;
-import mitll.langtest.server.database.UserExerciseDAO;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
@@ -110,29 +109,6 @@ public class UserListManager {
   }
 
   /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#populateListChoices(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController, com.github.gwtbootstrap.client.ui.SplitDropdownButton)
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addItemToUserList(long, mitll.langtest.shared.custom.UserExercise)
-   * @param userListID
-   * @param userExercise
-   * @return
-   */
-  public Collection<UserExercise> addItemToUserList(long userListID, UserExercise userExercise) {
-  /*  UserList where = userListDAO.getWithExercises(userListID);
-
-    if (where != null) {
-      where.addExercise(userExercise);
-      userListExerciseJoinDAO.add(where, userExercise);
-      Collection<UserExercise> exercises = where.getExercises();
-      logger.debug("List " + userListID + " now has "+
-         exercises.size() + " exercises");
-      return exercises;
-    }
-*/
-    reallyCreateNewItem(userListID, userExercise);
-    return Collections.emptyList();
-  }
-
-  /**
    * TODO : do a search over the list fields to find matches
    * @param search
    * @return
@@ -148,6 +124,17 @@ public class UserListManager {
   }
 
   /**
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#populateListChoices(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController, com.github.gwtbootstrap.client.ui.SplitDropdownButton)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addItemToUserList(long, mitll.langtest.shared.custom.UserExercise)
+   * @param userListID
+   * @param userExercise
+   * @return
+   */
+  public void addItemToUserList(long userListID, UserExercise userExercise) {
+    reallyCreateNewItem(userListID, userExercise);
+  }
+
+  /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#reallyCreateNewItem
    * @param userListID
    * @param userExercise
@@ -158,6 +145,7 @@ public class UserListManager {
     UserList where = userListDAO.getWhere(userListID);
     if (where != null) {
       userListExerciseJoinDAO.add(where, userExercise);
+      userListDAO.updateModified(userListID);
     }
     if (where == null) {
       logger.error("\n\nreallyCreateNewItem : couldn't find ul with id " + userListID);
