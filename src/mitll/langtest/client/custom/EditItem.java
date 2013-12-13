@@ -76,12 +76,6 @@ public class EditItem {
           public void onSuccess(Void newExercise) {
             outer.refresh();
             showPopup(exerciseShell.getTooltip() + " has been updated.",submit);
-        /*    for (UserExercise ue : ul.getExercises())  {
-               if (ue.getID() == exerciseShell.getID()) {
-                 System.out.println("old " + ue);
-                 System.out.println("new " + exerciseShell);
-               }
-            }*/
           }
         });
       }
