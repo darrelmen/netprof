@@ -34,8 +34,8 @@ import java.util.Set;
 public class PagingExerciseList extends ExerciseList implements RequiresResize {
   protected ExerciseController controller;
   protected PagingContainer<? extends ExerciseShell> pagingContainer;
-  private boolean isCRTDataMode;
-  private Set<String> completed;
+ // protected boolean showCompleted;
+  private boolean showTypeAhead;
 
   private TextBox typeAhead = null;
   private String lastValue = "";
@@ -48,13 +48,16 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
    * @param feedback
    * @param showTurkToken
    * @param controller
+   * @param showTypeAhead
    * @param instance
    */
   public PagingExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                            boolean showTurkToken, boolean showInOrder, ExerciseController controller, String instance) {
+                            boolean showTurkToken, boolean showInOrder, ExerciseController controller,
+                            boolean showTypeAhead, String instance) {
     super(currentExerciseVPanel, service, feedback, null, controller, showTurkToken, showInOrder, instance);
     this.controller = controller;
-    this.isCRTDataMode = controller.getProps().isCRTDataCollectMode();
+   // this.showCompleted = showCompleted;
+    this.showTypeAhead = showTypeAhead;
     addComponents();
   }
 
@@ -63,16 +66,25 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
    * @param completed
    */
   public void setCompleted(Set<String> completed) {
-    this.completed = completed;
+    System.out.println("\n\n\nsetCompleted : now " + getCompleted().size());
+
     pagingContainer.setCompleted(completed);
   }
 
+  public void addCompleted(String id) {
+
+    pagingContainer.addCompleted(id);
+    System.out.println("\n\n\naddCompleted : completed " + id + " now " + getCompleted().size());
+  }
+
+  private Set<String> getCompleted() { return pagingContainer.getCompleted(); }
+
   @Override
   public int getPercentComplete() {
-    if (isCRTDataMode) {
-      int i = (int) Math.ceil(100f * ((float) completed.size() / (float) currentExercises.size()));
+    if (controller.showCompleted()) {
+      int i = (int) Math.ceil(100f * ((float) getCompleted().size() / (float) currentExercises.size()));
       if (i > 100) i = 100;
-      System.out.println("completed " + completed.size() + " current " + currentExercises.size() + " " + i);
+      System.out.println("completed " + getCompleted().size() + " current " + currentExercises.size() + " " + i);
       return i;
     } else {
       return super.getPercentComplete();
@@ -80,8 +92,8 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   }
 
   public int getComplete() {
-    if (isCRTDataMode) {
-      return completed.size();
+    if (controller.showCompleted()) {
+      return getCompleted().size();
     } else {
       return super.getComplete();
     }
@@ -126,7 +138,8 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
 
   protected PagingContainer<? extends ExerciseShell> makePagingContainer() {
     final PagingExerciseList outer = this;
-    PagingContainer<ExerciseShell> pagingContainer1 = new PagingContainer<ExerciseShell>(controller, getVerticalUnaccountedFor()) {
+    PagingContainer<ExerciseShell> pagingContainer1 =
+      new PagingContainer<ExerciseShell>(controller, getVerticalUnaccountedFor()) {
       @Override
       protected void gotClickOnItem(ExerciseShell e) {  outer.gotClickOnItem(e);  }
     };
@@ -136,7 +149,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
 
   @Override
   protected ExerciseShell findFirstExercise() {
-    if (isCRTDataMode) {
+    if (controller.showCompleted()) {
       return getFirstNotCompleted();
     }
     else {
@@ -146,7 +159,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
 
   private ExerciseShell getFirstNotCompleted() {
     for (ExerciseShell es : currentExercises) {
-      if (!completed.contains(es.getID())) return es;
+      if (!getCompleted().contains(es.getID())) return es;
     }
     return super.findFirstExercise();
   }
@@ -164,7 +177,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   }
 
   protected void addTypeAhead(FlowPanel column) {
-    if (!isCRTDataMode) {
+    if (showTypeAhead) {
       typeAhead = new TextBox();
       typeAhead.setDirectionEstimator(true);   // automatically detect whether text is RTL
       typeAhead.addKeyUpHandler(new KeyUpHandler() {
