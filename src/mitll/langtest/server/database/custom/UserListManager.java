@@ -1,6 +1,7 @@
 package mitll.langtest.server.database.custom;
 
 import mitll.langtest.server.database.UserDAO;
+import mitll.langtest.shared.AudioExercise;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
@@ -9,7 +10,9 @@ import org.apache.log4j.Logger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -177,8 +180,27 @@ public class UserListManager {
     }
   }
 
+  // TODO : replace with DAO for this
+  private List<UserAnnotation> annotations = new ArrayList<UserAnnotation>();
+
   public void addAnnotation(String exerciseID, String field, String status, String comment) {
     //exerciseID
     logger.info("write to database!");
+    annotations.add(new UserAnnotation(exerciseID, field, status, comment));
   }
+
+  public <T extends AudioExercise> void addAnnotations(T exercise) {
+    for (UserAnnotation annotation : annotations) {
+      if (annotation.exerciseID.equals(exercise.getID())) {
+        exercise.addAnnotation(annotation.field, annotation.status, annotation.comment);
+      }
+    }
+  }
+
+  Set<String> reviewedExercises = new HashSet<String>();
+  public void markReviewed(String id) {
+    reviewedExercises.add(id);
+    logger.debug("now " + reviewedExercises.size() + " reviewed exercises");
+  }
+  public Set<String> getReviewedExercises() { return reviewedExercises; }
 }
