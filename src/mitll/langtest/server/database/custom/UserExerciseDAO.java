@@ -1,5 +1,8 @@
-package mitll.langtest.server.database;
+package mitll.langtest.server.database.custom;
 
+import mitll.langtest.server.database.DAO;
+import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.ExerciseDAO;
 import mitll.langtest.server.database.custom.UserListExerciseJoinDAO;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.custom.UserExercise;
@@ -74,6 +77,7 @@ public class UserExerciseDAO extends DAO {
 
       userExercise.setUniqueID(id);
 
+      // TODO : consider making this an actual prepared statement?
       if (!userExercise.isPredefined()) {     // cheesy!
         String customID = UserExercise.CUSTOM_PREFIX + id;
         String sql = "UPDATE " + USEREXERCISE +
@@ -169,7 +173,7 @@ public class UserExerciseDAO extends DAO {
   }
 
   /**
-   * @see DatabaseImpl#getUserExerciseWhere(String)
+   * @see mitll.langtest.server.database.DatabaseImpl#getUserExerciseWhere(String)
    * @param exid
    * @return
    */
@@ -229,6 +233,8 @@ public class UserExerciseDAO extends DAO {
     try {
       Connection connection = database.getConnection();
 
+      // TODO : consider making this an actual prepared statement?
+
       String sql = "UPDATE " + USEREXERCISE +
         " " +
         "SET " +
@@ -239,10 +245,8 @@ public class UserExerciseDAO extends DAO {
         "WHERE uniqueid=" + userExercise.getUniqueID();
 
       PreparedStatement statement = connection.prepareStatement(sql);
-
       int i = statement.executeUpdate();
 
-      //if (false) logger.debug("UPDATE " + i);
       if (i == 0) {
         logger.error("huh? didn't update the userExercise for " + userExercise + " sql " + sql);
       }
