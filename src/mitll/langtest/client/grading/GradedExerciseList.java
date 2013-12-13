@@ -38,7 +38,7 @@ public class GradedExerciseList extends PagingExerciseList {
    */
   public GradedExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
                             boolean showInOrder, boolean englishOnly, ExerciseController controller, String instance) {
-    super(currentExerciseVPanel, service, feedback, false, showInOrder, controller, instance);
+    super(currentExerciseVPanel, service, feedback, false, showInOrder, controller, true, instance);
     this.englishOnly = englishOnly;
   }
 
