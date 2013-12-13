@@ -1,7 +1,6 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseFormatter;
 import org.apache.log4j.Logger;
