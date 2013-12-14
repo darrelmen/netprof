@@ -1004,15 +1004,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   @Override
   public void addAnnotation(String exerciseID, String field, String status, String comment) {
-   // Exercise exercise = getExercise(exerciseID);
-   // exercise.addAnnotation(field,status,comment);
     db.getUserListManager().addAnnotation(exerciseID,field,status,comment);
   }
 
-  public void markReviewed(String id) {
+  public void markReviewed(String id, boolean isCorrect) {
     db.getUserListManager().markReviewed(id);
+    db.getUserListManager().markIncorrect(id);
   }
 
+  @Override
+  public UserList getReviewList() { return db.getUserListManager().getReviewList(); }
 
   /**
    * @see mitll.langtest.client.custom.NewUserExercise.CreateFirstRecordAudioPanel#makePostAudioRecordButton()
