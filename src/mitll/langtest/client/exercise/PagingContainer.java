@@ -169,12 +169,12 @@ public class PagingContainer<T extends ExerciseShell> {
     System.out.println("addColumnsToTable : completed " + controller.showCompleted() +  " now " + getCompleted().size());
 
     Column<T, SafeHtml> id2;
-    if (controller.showCompleted()) {
+  //  if (controller.showCompleted()) {
       id2 = getExerciseIdColumn2(true);
-    } else {
-      id2 = getExerciseIdColumn(true);
-      id2.setCellStyleNames("alignLeft");
-    }
+  //  } else {
+   //   id2 = getExerciseIdColumn(true);
+   //   id2.setCellStyleNames("alignLeft");
+   // }
     table.addColumn(id2);
 
     // this would be better, but want to consume clicks
@@ -202,6 +202,7 @@ public class PagingContainer<T extends ExerciseShell> {
    * @return
    * @see #addColumnsToTable
    */
+/*
   private Column<T, SafeHtml> getExerciseIdColumn(final boolean consumeClicks) {
     return new Column<T, SafeHtml>(new SafeHtmlCell() {
       @Override
@@ -222,10 +223,12 @@ public class PagingContainer<T extends ExerciseShell> {
         if (BrowserEvents.CLICK.equals(event.getType())) {
           System.out.println("getExerciseIdColumn.onBrowserEvent : got click " + event);
           final T e = object;
-       /*   if (isExercisePanelBusy()) {
+       */
+/*   if (isExercisePanelBusy()) {
             tellUserPanelIsBusy();
             markCurrentExercise(currentExercise);
-          } else {*/
+          } else {*//*
+
           gotClickOnItem(e);
           // }
         }
@@ -237,6 +240,7 @@ public class PagingContainer<T extends ExerciseShell> {
       }
     };
   }
+*/
 
   protected Column<T, SafeHtml> getExerciseIdColumn2(final boolean consumeClicks) {
     return new Column<T, SafeHtml>(new MySafeHtmlCell(consumeClicks)) {
@@ -247,29 +251,34 @@ public class PagingContainer<T extends ExerciseShell> {
         if (BrowserEvents.CLICK.equals(event.getType())) {
           System.out.println("getExerciseIdColumn.onBrowserEvent : got click " + event);
           final T e = object;
-     /*     if (isExercisePanelBusy()) {
-            tellUserPanelIsBusy();
-            markCurrentExercise(currentExercise);
-          } else {*/
-            gotClickOnItem(e);
-       //   }
+          gotClickOnItem(e);
         }
       }
 
       @Override
       public SafeHtml getValue(ExerciseShell object) {
+        if (!controller.showCompleted()) {
+          return getColumnToolTip(object.getTooltip());
+        }
+        else {
         String columnText = object.getTooltip();
+        String html = object.getID();
+        if (columnText != null) {
+          if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
+          boolean complete = completed.contains(object.getID());
+          // System.out.println("check -- " + complete + " for " + object.getID() + " in " + completed.size() + " : " + completed);
+          html = (complete ? "<i class='icon-check'></i>&nbsp;" : "") + columnText;
+        }
+        return new SafeHtmlBuilder().appendHtmlConstant(html).toSafeHtml();
+        }
+      }
+
+      private SafeHtml getColumnToolTip(String columnText) {
         if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
-        boolean complete = completed.contains(object.getID());
-        // System.out.println("check -- " + complete + " for " + object.getID() + " in " + completed.size() + " : " + completed);
-        return new SafeHtmlBuilder().appendHtmlConstant(columnText +(complete?"&nbsp;<i class='icon-check'></i>":"")).toSafeHtml();
+        return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
       }
     };
   }
-
-/*  protected void tellUserPanelIsBusy() {
-    Window.alert("Please stop recording before changing items.");
-  }*/
 
   protected void gotClickOnItem(final T e) {}
 
