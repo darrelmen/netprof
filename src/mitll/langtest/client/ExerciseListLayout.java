@@ -93,7 +93,7 @@ public class ExerciseListLayout {
             return new ResponseExerciseList(secondRow, currentExerciseVPanel, service, feedback,
               props.isShowTurkToken(), props.showExercisesInOrder(), controller, props.isCRTDataCollectMode(), "response");
           } else {
-            System.out.println("show completed " + showCompleted);
+            System.out.println("makeExerciseList : show completed " + showCompleted + " flex");
             return new FlexSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
               props.isShowTurkToken(), props.showExercisesInOrder(), controller, showTypeAhead, "flex");
           }
@@ -110,6 +110,7 @@ public class ExerciseListLayout {
    * @param leftColumnContainer
    */
   private void addExerciseListOnLeftSide(Panel leftColumnContainer) {
+   // leftColumnContainer.clear();
     if (props.isTeacherView()) {
       leftColumnContainer.add(exerciseList.getWidget());
     } else {
