@@ -41,11 +41,12 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
    * @param service
    * @param controller
    * @param useKeyboard
+   * @param showSpectrogram
    * @param gaugePanel
    */
   public ASRScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
-                              ExerciseController controller, boolean useKeyboard, ScoreListener gaugePanel) {
-    super(path, refSentence, service, controller.getSegmentRepeats(), useKeyboard, controller, gaugePanel);
+                              ExerciseController controller, boolean useKeyboard, boolean showSpectrogram, ScoreListener gaugePanel) {
+    super(path, refSentence, service, controller.getSegmentRepeats(), useKeyboard, controller, showSpectrogram, gaugePanel);
     this.useScoreToColorBkg = controller.useBkgColorForRef();
   }
 
