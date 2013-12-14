@@ -255,8 +255,8 @@ public class StudentDialog extends UserDialog {
   // TODO : add password field for REVIEW
   private boolean canSkipRegister(String purposeValue) {
     return purposeValue.equalsIgnoreCase(PRACTICE) ||
-      purposeValue.equalsIgnoreCase(DEMO) ||
-      purposeValue.equalsIgnoreCase(REVIEW);
+      purposeValue.equalsIgnoreCase(DEMO)/* ||
+      purposeValue.equalsIgnoreCase(REVIEW)*/;
   }
 
   private boolean checkValidUser(FormField user) {
