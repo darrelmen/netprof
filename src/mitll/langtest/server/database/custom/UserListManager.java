@@ -221,14 +221,13 @@ public class UserListManager {
   private List<UserAnnotation> annotations = new ArrayList<UserAnnotation>();
 
   public void addAnnotation(String exerciseID, String field, String status, String comment) {
-    //exerciseID
-    logger.info("write to database!");
+    logger.info("write to database! " +exerciseID + " " + field + " " + status + " " + comment);
     annotations.add(new UserAnnotation(exerciseID, field, status, comment));
   }
 
   public <T extends AudioExercise> void addAnnotations(T exercise) {
     for (UserAnnotation annotation : annotations) {
-      if (annotation.exerciseID.equals(exercise.getID())) {
+      if (annotation != null && annotation.exerciseID != null && annotation.exerciseID.equals(exercise.getID())) {
         exercise.addAnnotation(annotation.field, annotation.status, annotation.comment);
       }
     }
