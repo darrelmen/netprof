@@ -64,7 +64,6 @@ public class Navigation implements RequiresResize {
   private ListInterface listInterface;
   private NPFHelper npfHelper;
   private NPFHelper avpHelper;
-  //private HTML itemMarker;
   private EditItem editItem;
 
   public Navigation(final LangTestDatabaseAsync service, final UserManager userManager,
@@ -137,6 +136,8 @@ public class Navigation implements RequiresResize {
     chapters.content.add(secondAndThird);
 
     if (controller.isReviewMode()) {
+      System.out.println("\n\n\nadding review tab");
+
       review = makeTab(tabPanel, IconType.EDIT, "Review");
       review.tab.addClickHandler(new ClickHandler() {
         @Override
@@ -144,6 +145,10 @@ public class Navigation implements RequiresResize {
           viewReview(review.content);
         }
       });
+    }
+    else {
+      System.out.println("not adding review tab");
+
     }
 
     // so we can know when chapters is revealed and tell it to update it's lists
@@ -171,15 +176,6 @@ public class Navigation implements RequiresResize {
   }
 
   public void checkMode() {
-    if (controller.isReviewMode()) {
-      review = makeTab(tabPanel, IconType.EDIT, "Review");
-      review.tab.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          viewReview(review.content);
-        }
-      });
-    }
   }
 
   private TabAndContent makeTab(TabPanel toAddTo, IconType iconType, String label) {
