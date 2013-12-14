@@ -75,14 +75,15 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private boolean showSpectrogram = true;
 
   /**
-   * @see ScoringAudioPanel#ScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, int, boolean, mitll.langtest.client.exercise.ExerciseController, ScoreListener)
+   * @see ScoringAudioPanel#ScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, int, boolean, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener)
    * @param service
    * @param useKeyboard
+   * @param showSpectrogram
    * @param gaugePanel
    */
   public AudioPanel(String path, LangTestDatabaseAsync service,
-                    boolean useKeyboard, ExerciseController controller, ScoreListener gaugePanel) {
-    this(service, useKeyboard, controller, true, gaugePanel);
+                    boolean useKeyboard, ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel) {
+    this(service, useKeyboard, controller, showSpectrogram, gaugePanel);
     this.audioPath = path;
 
     addWidgets(path);
@@ -107,7 +108,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
   /**
    * Replace the html 5 audio tag with our fancy waveform widget.
-   * @see #AudioPanel(String, mitll.langtest.client.LangTestDatabaseAsync, boolean, mitll.langtest.client.exercise.ExerciseController, ScoreListener)
+   * @see #AudioPanel(String, mitll.langtest.client.LangTestDatabaseAsync, boolean, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener)
    * @see mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, int, boolean)
    * @param path
    * @return
@@ -384,9 +385,12 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       " " + ((float) roundtrip / (float) (result.durationInSeconds * 1000f)) + " roundtrip/audio duration ratio.";
     service.logMessage(message, new AsyncCallback<Void>() {
       @Override
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+      }
+
       @Override
-      public void onSuccess(Void result) {}
+      public void onSuccess(Void result) {
+      }
     });
   }
 
