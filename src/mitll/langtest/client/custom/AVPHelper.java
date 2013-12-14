@@ -41,7 +41,7 @@ class AVPHelper extends NPFHelper {
   }
 
   @Override
-  protected void setFactory(PagingExerciseList exerciseList) {
+  protected void setFactory(PagingExerciseList exerciseList, String instanceName) {
     outerExerciseList = exerciseList;
     exerciseList.setFactory(new FlashcardExercisePanelFactory(service, feedback, controller, exerciseList) {
       @Override
