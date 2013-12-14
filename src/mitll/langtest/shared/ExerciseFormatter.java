@@ -10,6 +10,7 @@ package mitll.langtest.shared;
 public class ExerciseFormatter {
   public static final String FOREIGN_LANGUAGE_PROMPT = "Say:";
   public static final String ENGLISH_PROMPT = "Meaning:";
+  public static final String TRANSLITERATION = "Transliteration:";
 
   /**
    * @see mitll.langtest.server.database.ExcelImport#getExercise(String, String, String, String, String, String, boolean, String)
@@ -37,7 +38,7 @@ public class ExerciseFormatter {
                                   boolean isEnglish, boolean isUrdu, boolean isPashto) {
     String arabicHTML = getArabic(arabic, isUrdu, isPashto);
     String translitHTML = translit.length() > 0 ?
-      getSpanWrapper("Transliteration:", translit)
+      getSpanWrapper(TRANSLITERATION, translit)
       : "";
     String translationHTML = english.length() > 0 ?//(!isEnglish && english.length() > 0) ?
       getSpanWrapper("Translation:", english) : "";
