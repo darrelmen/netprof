@@ -2,6 +2,7 @@ package mitll.langtest.server.database.custom;
 
 import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.shared.AudioExercise;
+import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
@@ -10,8 +11,10 @@ import org.apache.log4j.Logger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -80,18 +83,21 @@ public class UserListManager {
 
     List<UserList> listsForUser = new ArrayList<UserList>();
     UserList favorite = null;
-    for (UserList userList : userListDAO.getAll()) {
-      logger.debug("\tgetListsForUser  list " + userList);
+    for (UserList userList : userListDAO.getAll(userid)) {
       boolean isCreator = userList.getCreator().id == userid;
-      if (onlyCreated) {
-        if (isCreator) {
-          if (userList.getName().equals(MY_LIST)) favorite = userList;
-          listsForUser.add(userList);
-        }
-      } else {
-        if (userList.getVisitorIDs().contains(userid) || isCreator) {
-          if (userList.getName().equals(MY_LIST)) favorite = userList;
-          listsForUser.add(userList);
+      if (isCreator || !isFavorite(userList)) {
+        if (onlyCreated) {
+          logger.debug("\tgetListsForUser  list " + userList);
+          if (isCreator) {
+            if (isFavorite(userList)) favorite = userList;
+            listsForUser.add(userList);
+          }
+        } else {
+          logger.debug("\tgetListsForUser  list " + userList);
+          if (userList.getVisitorIDs().contains(userid) || isCreator) {
+            if (isFavorite(userList)) favorite = userList;
+            listsForUser.add(userList);
+          }
         }
       }
     }
@@ -109,6 +115,37 @@ public class UserListManager {
     logger.debug("getListsForUser " + listsForUser.size() + "(" +listsForUser+ ") for " + userid);
 
     return listsForUser;
+  }
+
+  private boolean isFavorite(UserList userList) {
+    return userList.getName().equals(MY_LIST);
+  }
+
+  public UserList getReviewList() {
+    UserList e = new UserList(i++, new User(-1,89,0,0,"","",false), "Review", "Items to review", "Review", System.currentTimeMillis(), false);
+
+    List<UserExercise> onList = new ArrayList<UserExercise>();
+    List<UserExercise> allKnown = userExerciseDAO.getWhere(incorrect);
+
+    Map<String, UserExercise> idToUser = new HashMap<String, UserExercise>();
+    for (UserExercise ue : allKnown) idToUser.put(ue.getID(),ue);
+    for (String id : incorrect) {
+      if (!id.startsWith(UserExercise.CUSTOM_PREFIX)) {
+        Exercise byID = userExerciseDAO.getExercise(id);
+
+        if (byID != null) {
+          onList.add(new UserExercise(byID)); // all predefined references
+        }
+      }
+      else {
+        if (idToUser.containsKey(id)) onList.add(idToUser.get(id));
+      }
+    }
+
+    logger.debug("getReviewList ids " + incorrect + " yielded " + onList.size() + " : " + onList);
+
+    e.setExercises(onList);
+    return e;
   }
 
   /**
@@ -198,9 +235,14 @@ public class UserListManager {
   }
 
   Set<String> reviewedExercises = new HashSet<String>();
+  Set<String> incorrect = new HashSet<String>();
   public void markReviewed(String id) {
     reviewedExercises.add(id);
-    logger.debug("now " + reviewedExercises.size() + " reviewed exercises");
+    logger.debug("markReviewed now " + reviewedExercises.size() + " reviewed exercises");
   }
   public Set<String> getReviewedExercises() { return reviewedExercises; }
+
+  public void markIncorrect(String id) {
+    incorrect.add(id);
+  }
 }
