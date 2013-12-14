@@ -1009,7 +1009,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   public void markReviewed(String id, boolean isCorrect) {
     db.getUserListManager().markReviewed(id);
-    db.getUserListManager().markIncorrect(id);
+    if (!isCorrect) {
+      db.getUserListManager().markIncorrect(id);
+    }
   }
 
   @Override
