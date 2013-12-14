@@ -48,7 +48,7 @@ public class BootstrapExercisePanel extends FluidContainer {
    * @param controller
    * @param addKeyBinding
    * @see mitll.langtest.client.flashcard.FlashcardExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
-   * @see mitll.langtest.client.custom.AVPHelper#setFactory(mitll.langtest.client.list.PagingExerciseList)
+   * @see mitll.langtest.client.custom.NPFHelper#setFactory(mitll.langtest.client.list.PagingExerciseList, String)
    */
   public BootstrapExercisePanel(final Exercise e, final LangTestDatabaseAsync service,
                                 final ExerciseController controller, int feedbackHeight, boolean addKeyBinding) {
