@@ -233,7 +233,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     if (e.getType() == Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW) {
       audioPanel = new FastAndSlowASRScoringAudioPanel(path, controller, scorePanel);
     } else {
-      audioPanel = new ASRScoringAudioPanel(path, e.getRefSentence(), service, controller, false, scorePanel);
+      audioPanel = new ASRScoringAudioPanel(path, e.getRefSentence(), service, controller, false, true, scorePanel);
     }
     audioPanel.getElement().setId("ASRScoringAudioPanel");
     audioPanel.setRefAudio(path, e.getRefSentence());
@@ -420,7 +420,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         controller1,
         false // no keyboard space bar binding
         ,
-        scoreListener);
+        true, scoreListener);
     }
 
     /**
