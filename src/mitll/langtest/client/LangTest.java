@@ -197,9 +197,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         });
   }
 
-  Panel belowFirstRow;
+/*  Panel belowFirstRow;
   Panel leftColumn;
-  FluidContainer bothSecondAndThird;
+  FluidContainer bothSecondAndThird;*/
 
   /**
    * Use DockLayout to put a header at the top, exercise list on the left, and eventually
@@ -265,7 +265,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     verticalContainer.add(headerRow = makeHeaderRow());
     headerRow.getElement().setId("headerRow");
 
-    /*Panel*/ belowFirstRow = new FluidRow();
+    Panel belowFirstRow = new FluidRow();
     verticalContainer.add(belowFirstRow);
 
     // second row ---------------
@@ -275,11 +275,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // third row ---------------
 
    Panel thirdRow = new HorizontalPanel();
-    /*Panel*/ leftColumn = new SimplePanel();
+    Panel leftColumn = new SimplePanel();
     thirdRow.add(leftColumn);
     thirdRow.getElement().setId("outerThirdRow");
 
-    /*FluidContainer*/ bothSecondAndThird = new FluidContainer();
+    FluidContainer bothSecondAndThird = new FluidContainer();
     bothSecondAndThird.add(secondRow);
     bothSecondAndThird.add(thirdRow);
 
@@ -296,7 +296,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingLeft", "5px");
     DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingRight", "2px");
 
-    //reallyMakeExerciseList(belowFirstRow, leftColumn, bothSecondAndThird);
+     reallyMakeExerciseList(belowFirstRow, leftColumn, bothSecondAndThird);
 
     if (usualLayout) {
       currentExerciseVPanel.addStyleName("floatLeft");
@@ -329,8 +329,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     loadVisualizationPackages();  // Note : this was formerly done in LangTest.html, since it seemed to be intermittently not loaded properly
   }
 
-  private void reallyMakeExerciseList(/*Panel belowFirstRow, Panel leftColumn, FluidContainer bothSecondAndThird*/) {
-
+  private void reallyMakeExerciseList(Panel belowFirstRow, Panel leftColumn, FluidContainer bothSecondAndThird) {
     System.out.println("\n\n\ndid reallyMakeExerciseList\n\n\n");
     ListInterface listInterface = makeExerciseList(secondRow, leftColumn);
     if (getProps().isClassroomMode()) {
@@ -340,16 +339,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     else {
       belowFirstRow.add(bothSecondAndThird);
     }
-
-  /*  if (shouldCollectAudio()) {
-     // makeFlashContainer();
-      //    currentExerciseVPanel.add(flashRecordPanel);
-      belowFirstRow.add(flashRecordPanel);
-    }
-    else {
-      System.out.println("*not* allowing recording of audio.");
-    }*/
-    //checkInitFlash();
   }
 
   private boolean isIPad() { return Window.Navigator.getUserAgent().toLowerCase().contains("ipad");  }
@@ -742,8 +731,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see #gotUser(long)
    */
   private void setFactory(final long userID) {
-    reallyMakeExerciseList();
-
     final LangTest outer = this;
     if (props.isGoodwaveMode() && !props.isGrading()) {
       if (props.isClassroomMode()) {
@@ -955,6 +942,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   boolean everShownInitialState =false;
   private boolean doEverythingAfterFactory(long userID) {
+
     if (userID != lastUser || (props.isGoodwaveMode() || props.isFlashCard() && !props.isTimedGame())) {
       System.out.println("doEverythingAfterFactory : user changed - new " + userID + " vs last " + lastUser);
       if (!shouldCollectAudio() || flashRecordPanel.gotPermission()) {
@@ -1025,7 +1013,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   public boolean showCompleted() {
     boolean b = isReviewMode() || isCRTDataCollectMode();
-    System.out.println("showCompleted " + b);
+    //System.out.println("showCompleted " + b);
 
     return b;
   }

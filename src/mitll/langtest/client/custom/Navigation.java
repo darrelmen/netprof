@@ -38,6 +38,9 @@ import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.custom.UserList;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -61,7 +64,7 @@ public class Navigation implements RequiresResize {
   private ListInterface listInterface;
   private NPFHelper npfHelper;
   private NPFHelper avpHelper;
-  private HTML itemMarker;
+  //private HTML itemMarker;
   private EditItem editItem;
 
   public Navigation(final LangTestDatabaseAsync service, final UserManager userManager,
@@ -93,6 +96,7 @@ public class Navigation implements RequiresResize {
   private Tab yourItems;
   private Panel yourItemsContent;
   private TabAndContent browse;
+  private TabAndContent review;
 
   private Panel getButtonRow2(Panel secondAndThird) {
     tabPanel = new TabPanel();
@@ -132,6 +136,16 @@ public class Navigation implements RequiresResize {
     final TabAndContent chapters = makeTab(tabPanel, IconType.TH_LIST, CHAPTERS);
     chapters.content.add(secondAndThird);
 
+    if (controller.isReviewMode()) {
+      review = makeTab(tabPanel, IconType.EDIT, "Review");
+      review.tab.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          viewReview(review.content);
+        }
+      });
+    }
+
     // so we can know when chapters is revealed and tell it to update it's lists
     tabPanel.addShowHandler(new TabPanel.ShowEvent.Handler() {
       @Override
@@ -146,19 +160,26 @@ public class Navigation implements RequiresResize {
         boolean wasChapters = targetName.contains(CHAPTERS);
         Panel createdPanel = listInterface.getCreatedPanel();
         boolean hasCreated = createdPanel != null;
-        if (wasChapters) {
-          System.out.println("got chapters! created panel : , has created " + hasCreated + "\n\n\n");
-        }
         if (hasCreated && wasChapters) {
           System.out.println("\tgot chapters! created panel :  has created " + hasCreated + " was revealed  " + createdPanel.getClass());
-
-
           ((NPFExercise) createdPanel).wasRevealed();
         }
       }
     });
 
     return tabPanel;
+  }
+
+  public void checkMode() {
+    if (controller.isReviewMode()) {
+      review = makeTab(tabPanel, IconType.EDIT, "Review");
+      review.tab.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          viewReview(review.content);
+        }
+      });
+    }
   }
 
   private TabAndContent makeTab(TabPanel toAddTo, IconType iconType, String label) {
@@ -201,7 +222,7 @@ public class Navigation implements RequiresResize {
 
   public void showInitialState() {
     System.out.println("showInitialState show initial state for " + userManager.getUser() + " : getting user lists");
-
+    checkMode();
     service.getListsForUser(userManager.getUser(), false, true, new AsyncCallback<Collection<UserList>>() {
       @Override
       public void onFailure(Throwable caught) {}
@@ -257,13 +278,36 @@ public class Navigation implements RequiresResize {
     final Panel child = new DivWidget();
     contentPanel.add(child);
     child.addStyleName("exerciseBackground");
+    listScrollPanel = new ScrollPanel();
+
     if (getAll) {
       System.out.println("viewLessons----> getAll = " + getAll);
-      service.getUserListsForText("", new UserListCallback(contentPanel, child));
+      service.getUserListsForText("", new UserListCallback(contentPanel, child,listScrollPanel, "lessons"));
     } else {
       System.out.println("viewLessons for " + userManager.getUser());
-      service.getListsForUser(userManager.getUser(), false, true, new UserListCallback(contentPanel, child));
+      service.getListsForUser(userManager.getUser(), false, true, new UserListCallback(contentPanel, child,listScrollPanel, "lessons"));
     }
+  }
+
+  private void viewReview(final Panel contentPanel) {
+    contentPanel.clear();
+    contentPanel.getElement().setId("viewReview_contentPanel");
+
+    final Panel child = new DivWidget();
+    contentPanel.add(child);
+    child.addStyleName("exerciseBackground");
+    System.out.println("\n\nreviewLessons for " + userManager.getUser());
+    service.getReviewList(new AsyncCallback<UserList>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        //To change body of implemented methods use File | Settings | File Templates.
+      }
+
+      @Override
+      public void onSuccess(UserList result) {
+        new UserListCallback(contentPanel,child,new ScrollPanel(), "review").onSuccess(Collections.singleton(result));
+      }
+    });
   }
 
   @Override
@@ -282,11 +326,14 @@ public class Navigation implements RequiresResize {
   }
 
   /**
-   * @see Navigation.UserListCallback#onSuccess(java.util.Collection)
+   * @see Navigation.UserListCallback#getDisplayRowPerList(mitll.langtest.shared.custom.UserList)
    * @param ul
    * @param contentPanel
    */
-  private void showList(final UserList ul, Panel contentPanel) {
+  private void showList(final UserList ul, Panel contentPanel, final String instanceName) {
+
+    System.out.println("showList " +ul);
+
     FluidContainer container = new FluidContainer();
     contentPanel.clear();
     contentPanel.add(container);
@@ -303,11 +350,12 @@ public class Navigation implements RequiresResize {
     child.addStyleName("userListDarkerBlueColor");
 
     r1.add(new Column(3, new Heading(1, ul.getName())));
-    itemMarker = new HTML(ul.getExercises().size() + " items");
+    HTML itemMarker = new HTML(ul.getExercises().size() + " items");
+    listToMarker.put(ul,itemMarker);
     itemMarker.addStyleName("subtitleForeground");
     r1.add(new Column(3, itemMarker));
 
-    boolean created = createdByYou(ul);
+    boolean created = createdByYou(ul) || instanceName.equals("review");
     if (created && SHOW_CREATED) {
       child = new FluidRow();
       container.add(child);
@@ -315,7 +363,7 @@ public class Navigation implements RequiresResize {
     }
     final FluidContainer listContent = new FluidContainer();
 
-    Panel operations = getListOperations(ul, created);
+    Panel operations = getListOperations(ul, created, instanceName);
     container.add(operations);
     container.add(listContent);
 
@@ -327,14 +375,16 @@ public class Navigation implements RequiresResize {
     });
   }
 
-  private Panel getListOperations(final UserList ul, final boolean created) {
+  private Panel getListOperations(final UserList ul, final boolean created, final String instanceName) {
     final TabPanel tabPanel = new TabPanel();
-
+    System.out.println("getListOperations : '" + instanceName);
     final TabAndContent learn = makeTab(tabPanel, IconType.LIGHTBULB, "Learn Pronunciation");
     learn.tab.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        npfHelper.showNPF(ul, learn, "learn");
+        System.out.println("\t\tgetListOperations : '" + instanceName +"'");
+
+        npfHelper.showNPF(ul, learn, instanceName.equals("review") ? "review" : "learn");
       }
     });
 
@@ -374,7 +424,7 @@ public class Navigation implements RequiresResize {
           showAddItem(ul, finalAddItem);
         } else {
           tabPanel.selectTab(0);
-          npfHelper.showNPF(ul, learn, "learn");
+          npfHelper.showNPF(ul, learn, instanceName.equals("review") ? "review" : "learn");
         }
       }
     });
@@ -406,7 +456,7 @@ public class Navigation implements RequiresResize {
 
   private void showEditItem(UserList ul, TabAndContent addItem) {
     addItem.content.clear();
-    Panel widgets = editItem.editItem(ul, itemMarker);
+    Panel widgets = editItem.editItem(ul, listToMarker.get(ul));
     addItem.content.add(widgets);
   }
 
@@ -429,7 +479,7 @@ public class Navigation implements RequiresResize {
       pagingContainer.addExerciseToList2(es);
     }
     pagingContainer.flush();
-    right.add(new NewUserExercise(service,userManager,controller,itemMarker).addNew(ul, pagingContainer, right));
+    right.add(new NewUserExercise(service,userManager,controller, listToMarker.get(ul)).addNew(ul, pagingContainer, right));
     return hp;
   }
 
@@ -443,10 +493,14 @@ public class Navigation implements RequiresResize {
   private class UserListCallback implements AsyncCallback<Collection<UserList>> {
     private final Panel contentPanel;
     private final Panel child;
+    private final ScrollPanel listScrollPanel;
+    String instanceName;
 
-    public UserListCallback(Panel contentPanel, Panel child) {
+    public UserListCallback(Panel contentPanel, Panel child, ScrollPanel listScrollPanel, String instanceName) {
       this.contentPanel = contentPanel;
       this.child = child;
+      this.listScrollPanel = listScrollPanel;
+      this.instanceName = instanceName;
     }
 
     @Override
@@ -455,12 +509,11 @@ public class Navigation implements RequiresResize {
 
     @Override
     public void onSuccess(Collection<UserList> result) {
-      System.out.println("\tUserListCallback : Displaying " + result.size() + " items");
+      System.out.println("\tUserListCallback : Displaying " + result.size() + " user lists for " + instanceName);
       // if (result.isEmpty()) System.err.println("\n\nhuh? no results for user");
       if (result.isEmpty()) {
         child.add(new Heading(3, "No lists created yet."));
       } else {
-        listScrollPanel = new ScrollPanel();
         listScrollPanel.getElement().setId("scrollPanel");
 
         setScrollPanelWidth(listScrollPanel);
@@ -483,6 +536,12 @@ public class Navigation implements RequiresResize {
       }
     }
 
+    private void setScrollPanelWidth(ScrollPanel row) {
+      if (row != null) {
+        row.setHeight((Window.getClientHeight() * 0.7) + "px");
+      }
+    }
+
     private Panel getDisplayRowPerList(final UserList ul) {
       final FocusPanel widgets = new FocusPanel();
 
@@ -494,7 +553,7 @@ public class Navigation implements RequiresResize {
       widgets.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          showList(ul, contentPanel);
+          showList(ul, contentPanel, instanceName);
         }
       });
       widgets.addMouseOverHandler(new MouseOverHandler() {
@@ -522,6 +581,8 @@ public class Navigation implements RequiresResize {
     }
   }
 
+  Map<UserList, HTML> listToMarker = new HashMap<UserList, HTML>();
+
   private void addWidgetsForList(UserList ul, FluidContainer w) {
     FluidRow r1 = new FluidRow();
     w.add(r1);
@@ -535,8 +596,9 @@ public class Navigation implements RequiresResize {
     //fp.add(nameInfo);
     r1.add(new Column(6, nameInfo));
     //  itemMarker = new Heading(3, ul.getExercises().size() + " items");
-    itemMarker = new HTML(ul.getExercises().size() + " items");
+    HTML itemMarker = new HTML(ul.getExercises().size() + " items");
     itemMarker.addStyleName("numItemFont");
+    listToMarker.put(ul,itemMarker);
     //   itemMarker.addStyleName("floatRight");
     r1.add(new Column(3, itemMarker));
     //    fp.add(itemMarker);
