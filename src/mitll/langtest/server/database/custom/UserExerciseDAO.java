@@ -148,7 +148,7 @@ public class UserExerciseDAO extends DAO {
       for (UserExercise ue : userExercises) {
         //logger.debug("\ton list " +listID + " " + ue.getID() + " / " +ue.getUniqueID() + " : " + ue);
         if (ue.isPredefined()) {
-          Exercise byID = exerciseDAO.getExercise(ue.getID());
+          Exercise byID = getExercise(ue);
 
           if (byID != null) {
             userExercises2.add(new UserExercise(byID)); // all predefined references
@@ -172,6 +172,15 @@ public class UserExerciseDAO extends DAO {
     return new ArrayList<UserExercise>();
   }
 
+  private Exercise getExercise(UserExercise ue) {
+    String id = ue.getID();
+    return getExercise(id);
+  }
+
+  Exercise getExercise(String id) {
+    return exerciseDAO.getExercise(id);
+  }
+
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#getUserExerciseWhere(String)
    * @param exid
@@ -190,6 +199,26 @@ public class UserExerciseDAO extends DAO {
     }
     return null;
   }
+
+  public List<UserExercise> getWhere(Collection<String> exids) {
+    if (exids.isEmpty()) return new ArrayList<UserExercise>();
+    StringBuilder builder = new StringBuilder();
+    for (String id : exids) builder.append("'"+id+"'").append(",");
+    String s = builder.toString();
+    s = s.substring(0,s.length()-1);
+    String sql = "SELECT * from " + USEREXERCISE + " where exerciseid in (" + s+ ")";
+    try {
+      List<UserExercise> userExercises = getUserExercises(sql);
+      if (userExercises.isEmpty()) {
+        logger.warn("getWhere : no user exercises in " + exids);
+      }
+      return userExercises;
+    } catch (SQLException e) {
+      logger.error("got " + e, e);
+    }
+    return null;
+  }
+
 
   /**
    * Pulls the list of users out of the database.
