@@ -23,6 +23,9 @@ import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseFormatter;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Created with IntelliJ IDEA.
  * User: GO22670
@@ -31,25 +34,34 @@ import mitll.langtest.shared.ExerciseFormatter;
  * To change this template use File | Settings | File Templates.
  */
 public class QCNPFExercise extends NPFExercise {
+  String instance;
+  Set<String> incorrectSet = new HashSet<String>();
+
   public QCNPFExercise(Exercise e, ExerciseController controller, ListInterface listContainer,
                        float screenPortion, boolean addKeyHandler, String instance) {
     super(e, controller, listContainer, screenPortion, addKeyHandler, instance);
+    this.instance = instance;
+    System.out.println("QCNPFExercise :  instance " +instance);
   }
 
   @Override
   protected void nextWasPressed(ListInterface listContainer, Exercise completedExercise) {
-    System.out.println("nextWasPressed : load next exercise " + completedExercise.getID());
+    //System.out.println("nextWasPressed : load next exercise " + completedExercise.getID() + " instance " +instance);
     super.nextWasPressed(listContainer, completedExercise);
-    listContainer.addCompleted(completedExercise.getID());
-    service.markReviewed(completedExercise.getID(), new AsyncCallback<Void>() {
-      @Override
-      public void onFailure(Throwable caught) {
-      }
+    if (!instance.equals("review")) {
+     // System.out.println("\n\n\n\n\tnextWasPressed : add completed " + completedExercise.getID());
 
-      @Override
-      public void onSuccess(Void result) {
-      }
-    });
+      listContainer.addCompleted(completedExercise.getID());
+      service.markReviewed(completedExercise.getID(), incorrectSet.isEmpty(), new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {
+        }
+
+        @Override
+        public void onSuccess(Void result) {
+        }
+      });
+    }
   }
 
   /**
@@ -74,7 +86,9 @@ public class QCNPFExercise extends NPFExercise {
 
     ExerciseAnnotation foreignLanguage = e.getAnnotation("foreignLanguage");
     ExerciseAnnotation english = e.getAnnotation("english");
+    ExerciseAnnotation translit = e.getAnnotation("translit");
     column.add(getEntry(e, "foreignLanguage", ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getRefSentence(), foreignLanguage));
+    column.add(getEntry(e, "transliteration", ExerciseFormatter.TRANSLITERATION, e.getTranslitSentence(), translit));
     column.add(getEntry(e, "english", ExerciseFormatter.ENGLISH_PROMPT, e.getEnglishSentence(), english));
 
     column.getElement().setId("QuestionContent");
@@ -91,7 +105,7 @@ public class QCNPFExercise extends NPFExercise {
       if (audioRef != null) {
         audioRef = wavToMP3(audioRef);   // todo why do we have to do this?
       }
-      ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel(audioRef, e.getRefSentence(), service, controller, false, scorePanel);
+      ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel(audioRef, e.getRefSentence(), service, controller, false, false, scorePanel);
       audioPanel.setShowColor(true);
       audioPanel.getElement().setId("ASRScoringAudioPanel");
       audioPanel.setRefAudio(audioRef, e.getRefSentence());
@@ -124,14 +138,13 @@ public class QCNPFExercise extends NPFExercise {
    * @paramx label
    * @paramx value
    */
-  private Widget getEntry(//Exercise e,
-                          String id,
+  private Widget getEntry(String id,
                           final String field, Widget content, ExerciseAnnotation annotation) {
     Panel row = new HorizontalPanel();
     FlowPanel qcCol = new FlowPanel();
     qcCol.addStyleName("blockStyle");
 
-    System.out.println("For  " + id + " and " + field + " anno " + annotation);
+    //System.out.println("For  " + id + " and " + field + " anno " + annotation);
 
     String group = "QC_" + id + "_" + field;
     RadioButton correct = new RadioButton(group, "Correct");
@@ -148,7 +161,8 @@ public class QCNPFExercise extends NPFExercise {
       public void onClick(ClickEvent event) {
         commentRow.setVisible(false);
         // send to server
-        System.out.println("post to server " + exercise.getID() + " field " + field + " is correct");
+        incorrectSet.remove(field);
+        //System.out.println("post to server " + exercise.getID() + " field " + field + " is correct");
         service.addAnnotation(exercise.getID(), field, "correct", "", new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -172,6 +186,8 @@ public class QCNPFExercise extends NPFExercise {
       public void onClick(ClickEvent event) {
         commentRow.setVisible(true);
         commentEntry.setFocus(true);
+        incorrectSet.add(field);
+
       }
     });
     incorrect.setValue(!alreadyMarkedCorrect);
@@ -200,7 +216,7 @@ public class QCNPFExercise extends NPFExercise {
     commentEntry.addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
-        System.out.println("post to server " + exercise.getID() + " field " + field + " comment " + commentEntry.getText() + " is incorrect");
+        //System.out.println("post to server " + exercise.getID() + " field " + field + " comment " + commentEntry.getText() + " is incorrect");
 
         service.addAnnotation(exercise.getID(), field, "incorrect", commentEntry.getText(), new AsyncCallback<Void>() {
           @Override
