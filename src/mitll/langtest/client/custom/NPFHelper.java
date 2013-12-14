@@ -49,12 +49,14 @@ public class NPFHelper implements RequiresResize {
   }
 
   /**
-   * @see Navigation#getListOperations(mitll.langtest.shared.custom.UserList, boolean)
+   * @see Navigation#getListOperations
    * @param ul
    * @param learn
    * @param instanceName
    */
   public void showNPF(UserList ul, Navigation.TabAndContent learn,String instanceName) {
+    System.out.println(getClass() + " : adding npf content instanceName = " + instanceName);
+
     int widgetCount = learn.content.getWidgetCount();
     if (!madeNPFContent || widgetCount == 0) {
       System.out.println(getClass() + " : adding npf content widget count = " + widgetCount);
@@ -116,7 +118,6 @@ public class NPFHelper implements RequiresResize {
   }
 
   private PagingExerciseList makeNPFExerciseList(SimplePanel right, String instanceName) {
-    boolean showCompleted = controller.getAudioType().equals(Result.AUDIO_TYPE_REVIEW) || controller.getProps().isCRTDataCollectMode();
     boolean showTypeAhead = !controller.getProps().isCRTDataCollectMode();
     PagingExerciseList exerciseList = new PagingExerciseList(right, service, feedback, false, false, controller,
       showTypeAhead, instanceName) {
@@ -130,20 +131,20 @@ public class NPFHelper implements RequiresResize {
         });
       }
     };
-    setFactory(exerciseList);
+    setFactory(exerciseList, instanceName);
     return exerciseList;
   }
 
-  protected void setFactory(final PagingExerciseList exerciseList) {
+  protected void setFactory(final PagingExerciseList exerciseList, final String instanceName) {
     exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, feedback, controller, exerciseList, 0.7f) {
       @Override
       public Panel getExercisePanel(Exercise e) {
-        System.out.println("\n\nmaking new GoodwaveExercisePanel for " +e);
+        System.out.println("\nmaking new GoodwaveExercisePanel for " +e + " instance " + instanceName);
         if (controller.getAudioType().equalsIgnoreCase(Result.AUDIO_TYPE_REVIEW)) {
-          return new QCNPFExercise(e, controller, exerciseList, 0.65f, false, "classroom");
+          return new QCNPFExercise(e, controller, exerciseList, 0.65f, false, instanceName);
         }
         else {
-          return new NPFExercise(e, controller, exerciseList, 0.65f, false, "classroom");
+          return new NPFExercise(e, controller, exerciseList, 0.65f, false, instanceName);
         }
       }
     }, userManager, 1);
