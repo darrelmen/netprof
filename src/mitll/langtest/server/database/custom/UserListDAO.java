@@ -161,11 +161,12 @@ public class UserListDAO extends DAO {
    * Pulls the list of users out of the database.
    *
    * @return
+   * @param userid
    */
-  public List<UserList> getAll() {
+  public List<UserList> getAll(long userid) {
     try {
       String sql = "SELECT * from " + USER_EXERCISE_LIST + " order by modified desc";
-      return getUserLists(sql);
+      return getUserLists(sql,userid);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
@@ -175,7 +176,7 @@ public class UserListDAO extends DAO {
   public List<UserList> getAllPublic() {
     try {
       String sql = "SELECT * from " + USER_EXERCISE_LIST + " where isprivate=false order by modified";
-      return getUserLists(sql);
+      return getUserLists(sql,-1);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
@@ -196,7 +197,7 @@ public class UserListDAO extends DAO {
   public UserList getWhere(long unique) {
     String sql = "SELECT * from " + USER_EXERCISE_LIST + " where uniqueid=" + unique + " order by modified";
     try {
-      List<UserList> lists = getUserLists(sql);
+      List<UserList> lists = getUserLists(sql,-1);
       if (lists.isEmpty()) {
         logger.error("huh? no custom exercise with id " + unique);
         return null;
@@ -221,7 +222,7 @@ public class UserListDAO extends DAO {
     return where;
   }
 
-  private List<UserList> getUserLists(String sql) throws SQLException {
+  private List<UserList> getUserLists(String sql,long userid) throws SQLException {
     Connection connection = database.getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
     ResultSet rs = statement.executeQuery();
@@ -244,7 +245,12 @@ public class UserListDAO extends DAO {
     database.closeConnection(connection);
 
     for (UserList ul : lists) {
-      populateList(ul);
+      if (userid == -1 || ul.getCreator().id == userid || !ul.isFavorite()) {   // skip other's favorites
+        populateList(ul);
+      }
+      else {
+        //logger.info("for " + userid +" skipping " + ul);
+      }
     }
     return lists;
   }
