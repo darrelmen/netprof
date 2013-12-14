@@ -923,6 +923,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       belowFirstRow.clear();
       navigation = new Navigation(service, userManager, this, exerciseList);
       belowFirstRow.add(navigation.getNav(bothSecondAndThird, this));
+      belowFirstRow.add(flashRecordPanel);
       showInitialState();
     }
   }
