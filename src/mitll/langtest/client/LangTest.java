@@ -19,6 +19,7 @@ import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
@@ -196,7 +197,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           }
         });
   }
-
+ Panel belowFirstRow;
+  FluidContainer bothSecondAndThird;
 /*  Panel belowFirstRow;
   Panel leftColumn;
   FluidContainer bothSecondAndThird;*/
@@ -267,7 +269,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     Panel belowFirstRow = new FluidRow();
     verticalContainer.add(belowFirstRow);
-
+     this.belowFirstRow = belowFirstRow;
     // second row ---------------
     secondRow = new FluidRow();
     secondRow.getElement().setId("secondRow");
@@ -282,7 +284,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     FluidContainer bothSecondAndThird = new FluidContainer();
     bothSecondAndThird.add(secondRow);
     bothSecondAndThird.add(thirdRow);
-
+    this.bothSecondAndThird = bothSecondAndThird;
     if ((isCRTDataCollectMode() || props.isDataCollectMode()) && !props.isFlashcardTeacherView()) {
       addProgressBar(verticalContainer);
     }
@@ -330,11 +332,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void reallyMakeExerciseList(Panel belowFirstRow, Panel leftColumn, FluidContainer bothSecondAndThird) {
-    System.out.println("\n\n\ndid reallyMakeExerciseList\n\n\n");
     ListInterface listInterface = makeExerciseList(secondRow, leftColumn);
     if (getProps().isClassroomMode()) {
-      navigation = new Navigation(service, userManager, this, listInterface);
-      belowFirstRow.add(navigation.getNav(bothSecondAndThird, this));
+      //navigation = new Navigation(service, userManager, this, listInterface);
+      //belowFirstRow.add(navigation.getNav(bothSecondAndThird, this));
     }
     else {
       belowFirstRow.add(bothSecondAndThird);
@@ -905,11 +906,25 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   @Override
   public void resetState() {
+    everShownInitialState = false;
+    History.newItem(""); // clear history!
     userManager.clearUser();
     exerciseList.removeCurrentExercise();
     exerciseList.clear();
     lastUser = -2;
     modeSelect();
+
+    //resetClassroomState();
+  }
+
+  private void resetClassroomState() {
+    if (getProps().isClassroomMode() && navigation == null) {
+      System.out.println("\n\n\nreset classroom state");
+      belowFirstRow.clear();
+      navigation = new Navigation(service, userManager, this, exerciseList);
+      belowFirstRow.add(navigation.getNav(bothSecondAndThird, this));
+      showInitialState();
+    }
   }
 
   @Override
@@ -954,12 +969,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           System.out.println("\tdoEverythingAfterFactory : " + userID + " exercise list is null???");
         }
 
-        if (navigation != null) {
-          if (!everShownInitialState) {
-            navigation.showInitialState();
-            everShownInitialState = true;
-          }
-        }
+       // showInitialState();
+        resetClassroomState();
       }
       else {
         System.out.println("\tdoEverythingAfterFactory : " + userID + " NOT getting exercises");
@@ -971,6 +982,17 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       exerciseList.reloadExercises();
       return true;
     } else return false;
+  }
+
+  private void showInitialState() {
+    System.out.println("\n\n\n\tshowInitialState : " + getUser());
+
+    if (navigation != null) {
+      if (!everShownInitialState) {
+        navigation.showInitialState();
+        everShownInitialState = true;
+      }
+    }
   }
 
   /**
