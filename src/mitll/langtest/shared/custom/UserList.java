@@ -16,6 +16,8 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class UserList extends ExerciseShell {
+  public static final String MY_LIST = "Favorites";
+
   private long uniqueID;
 
   private User creator;
@@ -47,7 +49,7 @@ public class UserList extends ExerciseShell {
     this.classMarker = classMarker;
     this.isPrivate = isPrivate;
     visitorIDs = new HashSet<Long>();
-    addVisitor(user);
+    if (user != null) addVisitor(user);
     this.modified = modified;
   }
 
@@ -102,9 +104,9 @@ public class UserList extends ExerciseShell {
     this.uniqueID = uniqueID;
   }
 
-  public long getModified() {
+/*  public long getModified() {
     return modified;
-  }
+  }*/
 
   public boolean contains(UserExercise userExercise) {
     return getExercises().contains(userExercise);
@@ -116,6 +118,10 @@ public class UserList extends ExerciseShell {
 
   public boolean isEmpty() {
     return getExercises().isEmpty();
+  }
+
+  public boolean isFavorite() {
+    return getName().equals(MY_LIST);
   }
 
   @Override
