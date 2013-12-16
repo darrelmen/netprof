@@ -87,10 +87,13 @@ public class Navigation implements RequiresResize {
     this.feedback = feedback;
     Panel buttonRow = getButtonRow2(secondAndThird);
     container.add(buttonRow);
-
+    this.container = container;
     return container;
   }
 
+  public Widget getContainer() { return container; }
+
+  private Widget container;
   private TabPanel tabPanel;
   private Tab yourItems;
   private Panel yourItemsContent;
@@ -147,8 +150,9 @@ public class Navigation implements RequiresResize {
       });
     }
     else {
-      System.out.println("not adding review tab");
-
+      System.out.println("\n" +
+        "\n" +
+        "\nnot adding review tab");
     }
 
     // so we can know when chapters is revealed and tell it to update it's lists
@@ -212,12 +216,15 @@ public class Navigation implements RequiresResize {
     }
   }
 
-  private void refreshViewLessons() {
-    viewLessons(yourItemsContent, false);
-  }
+  /**
+   * @see #getButtonRow2(com.google.gwt.user.client.ui.Panel)
+   * @see #showMyLists()
+   */
+  private void refreshViewLessons() { viewLessons(yourItemsContent, false);  }
 
   public void showInitialState() {
-    System.out.println("showInitialState show initial state for " + userManager.getUser() + " : getting user lists");
+    System.out.println("showInitialState show initial state for " + userManager.getUser() +
+      " : getting user lists " + controller.isReviewMode());
     checkMode();
     service.getListsForUser(userManager.getUser(), false, true, new AsyncCallback<Collection<UserList>>() {
       @Override
