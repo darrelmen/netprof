@@ -87,20 +87,20 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     center.addStyleName("floatLeft");
     // attempt to left justify
 
-    ASRScorePanel widgets = null;
-    if (e.isRepeat()) {
-      widgets = new ASRScorePanel("GoodwaveExercisePanel_"+instance);
-      scorePanel = widgets;
-    }
+    ASRScorePanel widgets = makeScorePanel(e, instance);
 
     HorizontalPanel hp = new HorizontalPanel();
     hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
+    hp.getElement().setId("questionContentRowContainer");
 
     addQuestionContentRow(e, controller, hp);
 
     center.add(hp);
+
+    // content is on the left side
     add(center);
 
+    // score panel with gauge is on the right
     if (e.isRepeat() && widgets != null) {
       add(widgets);
     }
@@ -112,8 +112,18 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         nextWasPressed(listContainer, completedExercise);
       }
     }, listContainer, true, addKeyHandler);
-    center.add(navigationHelper.makeSpacer());
+    navigationHelper.addStyleName("topBarMargin");
+   // center.add(navigationHelper.makeSpacer());
     center.add(navigationHelper);
+  }
+
+  protected ASRScorePanel makeScorePanel(Exercise e, String instance) {
+    ASRScorePanel widgets = null;
+    if (e.isRepeat()) {
+      widgets = new ASRScorePanel("GoodwaveExercisePanel_"+instance);
+      scorePanel = widgets;
+    }
+    return widgets;
   }
 
   protected void nextWasPressed(ListInterface listContainer, Exercise completedExercise) {
