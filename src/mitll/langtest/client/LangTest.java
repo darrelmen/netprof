@@ -179,7 +179,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     int user = userManager != null ? userManager.getUser() : -1;
     String exerciseID = exerciseList != null ? exerciseList.getCurrentExerciseID() : "Unknown";
-    logMessageOnServer("got browser exception : user #" + user + " exercise " + exerciseID + " browser " + browserCheck.getBrowserAndVersion()+
+    logMessageOnServer("got browser exception : user #" + user +
+      " exercise " + exerciseID + " browser " + browserCheck.getBrowserAndVersion()+
     " : " + exceptionAsString);
     return exceptionAsString;
   }
@@ -198,7 +199,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         });
   }
  Panel belowFirstRow;
-  FluidContainer bothSecondAndThird;
+  Panel bothSecondAndThird;
 /*  Panel belowFirstRow;
   Panel leftColumn;
   FluidContainer bothSecondAndThird;*/
@@ -276,12 +277,16 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     // third row ---------------
 
-   Panel thirdRow = new HorizontalPanel();
+ // Panel thirdRow = new HorizontalPanel();
+    Panel thirdRow = new FlowPanel();
     Panel leftColumn = new SimplePanel();
     thirdRow.add(leftColumn);
+    leftColumn.addStyleName("floatLeft");
     thirdRow.getElement().setId("outerThirdRow");
+    thirdRow.setWidth("100%");
+    thirdRow.addStyleName("trueInlineStyle");
 
-    FluidContainer bothSecondAndThird = new FluidContainer();
+    Panel bothSecondAndThird = new FlowPanel();
     bothSecondAndThird.add(secondRow);
     bothSecondAndThird.add(thirdRow);
     this.bothSecondAndThird = bothSecondAndThird;
@@ -293,15 +298,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
 
     // set up center panel, initially with flash record panel
-    currentExerciseVPanel = new FluidContainer();
+    currentExerciseVPanel = new FlowPanel();
     currentExerciseVPanel.getElement().setId("currentExercisePanel");
-    DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingLeft", "5px");
-    DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingRight", "2px");
+/*    DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingLeft", "5px");
+    DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingRight", "2px");*/
 
-     reallyMakeExerciseList(belowFirstRow, leftColumn, bothSecondAndThird);
+    reallyMakeExerciseList(belowFirstRow, leftColumn, bothSecondAndThird);
 
     if (usualLayout) {
-      currentExerciseVPanel.addStyleName("floatLeft");
+      currentExerciseVPanel.addStyleName("floatLeftList");
       thirdRow.add(currentExerciseVPanel);
     }
     else {  // show fancy lace background image
@@ -331,7 +336,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     loadVisualizationPackages();  // Note : this was formerly done in LangTest.html, since it seemed to be intermittently not loaded properly
   }
 
-  private void reallyMakeExerciseList(Panel belowFirstRow, Panel leftColumn, FluidContainer bothSecondAndThird) {
+  private void reallyMakeExerciseList(Panel belowFirstRow, Panel leftColumn, Panel bothSecondAndThird) {
     ListInterface listInterface = makeExerciseList(secondRow, leftColumn);
     if (getProps().isClassroomMode()) {
       //navigation = new Navigation(service, userManager, this, listInterface);
@@ -918,20 +923,21 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void resetClassroomState() {
-    if (getProps().isClassroomMode() && navigation == null) {
-      System.out.println("\n\n\nreset classroom state");
-      belowFirstRow.clear();
+    if (getProps().isClassroomMode()/* && navigation == null*/) {
+      System.out.println("\n\n\nreset classroom state : " + isReviewMode());
+      //belowFirstRow.clear();
+      if (navigation != null) {
+        belowFirstRow.remove(navigation.getContainer());
+      }
       navigation = new Navigation(service, userManager, this, exerciseList);
       belowFirstRow.add(navigation.getNav(bothSecondAndThird, this));
-      belowFirstRow.add(flashRecordPanel);
+      //belowFirstRow.add(flashRecordPanel);
       showInitialState();
     }
   }
 
   @Override
-  public StartupInfo getStartupInfo() {
-    return startupInfo;
-  }
+  public StartupInfo getStartupInfo() { return startupInfo; }
 
   /**
    * Init Flash recorder once we login.
@@ -989,10 +995,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     System.out.println("\n\n\n\tshowInitialState : " + getUser());
 
     if (navigation != null) {
-      if (!everShownInitialState) {
+      //if (!everShownInitialState) {
         navigation.showInitialState();
-        everShownInitialState = true;
-      }
+      //  everShownInitialState = true;
+     // }
     }
   }
 
