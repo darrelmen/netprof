@@ -101,6 +101,7 @@
       <excludeFolder url="file://$MODULE_DIR$/war/answers" />
       <excludeFolder url="file://$MODULE_DIR$/war/audioimages" />
       <excludeFolder url="file://$MODULE_DIR$/war/bestAudio" />
+      <excludeFolder url="file://$MODULE_DIR$/war/langtest" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="imagewriter" />
