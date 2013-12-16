@@ -68,11 +68,12 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   protected final LangTestDatabaseAsync service;
   protected final SoundManagerAPI soundManager;
   private PlayAudioPanel playAudio;
-  private final boolean debug = false;
   private float screenPortion = 1.0f;
   private final boolean logMessages;
   protected ExerciseController controller;
   private boolean showSpectrogram = true;
+
+  private final boolean debug = true;
 
   /**
    * @see ScoringAudioPanel#ScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, int, boolean, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener)
@@ -99,7 +100,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     this.logMessages = controller.isLogClientMessages();
     this.controller = controller;
     this.gaugePanel = gaugePanel;
-    if (debug) System.out.println("gauge panel " + gaugePanel);
+    if (debug) System.out.println("AudioPanel : gauge panel " + gaugePanel);
     //addWidgets(path);
     this.showSpectrogram = showSpectrogram;
   }
@@ -286,29 +287,30 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @see #onResize()
    */
   private void getImages() {
-    int leftColumnWidth = Math.min(175,controller.getLeftColumnWidth()) + IMAGE_WIDTH_SLOP;
-    int rightSide = gaugePanel != null ? gaugePanel.getOffsetWidth() : 0;
+    int leftColumnWidth = Math.min(175, controller.getLeftColumnWidth()) + IMAGE_WIDTH_SLOP;
+    int rightSide = gaugePanel != null ? gaugePanel.getOffsetWidth() : 90;
     if (gaugePanel != null && rightSide == 0) {
       rightSide = 180; // hack!!!
+    } else {
+      if (gaugePanel == null) System.out.println("getImages : gauge panel is null");
     }
-    else {
-      if (debug && gaugePanel == null) System.out.println("\n\n\ngauge panel is null!!!");
-    }
-     int width = (int) ((screenPortion*((float)Window.getClientWidth())) - leftColumnWidth) - rightSide;
+    int width = (int) ((screenPortion * ((float) Window.getClientWidth())) - leftColumnWidth) - rightSide;
 
-    if (debug) System.out.println("getImages : leftColumnWidth " + leftColumnWidth + " width " + width + " (screen portion = " +screenPortion+
-      ") vs window width " + Window.getClientWidth() + " right side " + rightSide);
+    if (debug) {
+      System.out.println("getImages : leftColumnWidth " + leftColumnWidth + " width " + width + " (screen portion = " + screenPortion +
+        ") vs window width " + Window.getClientWidth() + " right side " + rightSide);
+    }
 
     int diff = Math.abs(Window.getClientWidth() - lastWidth);
     if (lastWidth == 0 || diff > WINDOW_SIZE_CHANGE_THRESHOLD) {
       lastWidth = Window.getClientWidth();
 
-
-      if (debug)  System.out.println("getImages : offset width " + getOffsetWidth() + " width " + width + " path " + audioPath);
+      if (debug) {
+        System.out.println("getImages : offset width " + getOffsetWidth() + " width " + width + " path " + audioPath);
+      }
       getEachImage(width);
-    }
-    else {
-      // System.out.println("getImages : not updating, offset width " + getOffsetWidth() + " width " + width + " path " + audioPath + " diff " + diff + " last " + lastWidth);
+    } else {
+      System.out.println("getImages : not updating, offset width " + getOffsetWidth() + " width " + width + " path " + audioPath + " diff " + diff + " last " + lastWidth);
     }
   }
 
