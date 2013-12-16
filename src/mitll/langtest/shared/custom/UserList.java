@@ -26,7 +26,7 @@ public class UserList extends ExerciseShell {
   private String name;
   private String description;
   private String classMarker;
-  private long modified;
+  //private long modified;
   private boolean isPrivate;
   private Collection<UserExercise> exercises = new ArrayList<UserExercise>();
 
@@ -50,12 +50,12 @@ public class UserList extends ExerciseShell {
     this.isPrivate = isPrivate;
     visitorIDs = new HashSet<Long>();
     if (user != null) addVisitor(user);
-    this.modified = modified;
+    //this.modified = modified;
   }
 
   public void addExercise(UserExercise toAdd) {
     exercises.add(toAdd);
-    modified = System.currentTimeMillis();
+    //modified = System.currentTimeMillis();
   }
 
   /**
