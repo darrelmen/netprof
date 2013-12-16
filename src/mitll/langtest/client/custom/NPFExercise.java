@@ -48,7 +48,13 @@ public class NPFExercise extends GoodwaveExercisePanel {
     super(e, controller, listContainer, screenPortion, addKeyHandler, instance);
   }
 
-  private Panel makeAddToList(Exercise e, ExerciseController controller) {
+  /**
+   * @see #addQuestionContentRow(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.HorizontalPanel)
+   * @param e
+   * @param controller
+   * @return
+   */
+  protected Panel makeAddToList(Exercise e, ExerciseController controller) {
     addToList = new SplitDropdownButton("Add Item to List");
     addToList.setIcon(IconType.PLUS_SIGN);
 
