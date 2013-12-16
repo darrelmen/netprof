@@ -225,6 +225,11 @@ public class UserListManager {
     annotations.add(new UserAnnotation(exerciseID, field, status, comment));
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise(String)
+   * @param exercise
+   * @param <T>
+   */
   public <T extends AudioExercise> void addAnnotations(T exercise) {
     for (UserAnnotation annotation : annotations) {
       if (annotation != null && annotation.exerciseID != null && annotation.exerciseID.equals(exercise.getID())) {
