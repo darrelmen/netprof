@@ -262,12 +262,14 @@ public class AudioConversion {
    * This is required b/c soundmanager doesn't do audio segment playing properly otherwise (it plays the wrong
    * part of the file.)
    *
-   * @see mitll.langtest.server.LangTestDatabaseImpl#ensureMP3(String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#ensureMP3
    * @param pathToWav
    * @param realContextPath
    * @param overwrite
    */
   public void ensureWriteMP3(String pathToWav, String realContextPath, boolean overwrite) {
+    if (pathToWav == null || pathToWav.equals("null")) throw new IllegalArgumentException("huh? path is null");
+
     File absolutePathToWav = getAbsoluteFile(pathToWav,realContextPath);
 
     String mp3File = absolutePathToWav.getAbsolutePath().replace(".wav",".mp3");
