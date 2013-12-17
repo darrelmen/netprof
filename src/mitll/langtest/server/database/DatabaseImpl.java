@@ -489,7 +489,7 @@ public class DatabaseImpl implements Database {
           userStateWrapper.getCorrect(),
           userStateWrapper.getIncorrect(), onFirst, onLast);
 
-      logger.debug("returning " + flashcardResponse);
+      logger.debug("getFlashcardResponse returning " + flashcardResponse);
       return flashcardResponse;
     }
     else {
@@ -534,7 +534,7 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @see #getFlashcardResponse
+   * @see #createOrGetUserState(long, java.util.List)
    * @param userID
    * @param exercises
    * @return
