@@ -205,10 +205,6 @@ public class UserManager {
       rememberAudioType();
       langTest.gotUser(user);
     }
-/*    else if (isFlashcard) {
-      System.out.println("UserManager.login : adding anonymous user");
-      addAnonymousUser();
-    }*/
     else {
       StudentDialog studentDialog = new StudentDialog(service,props,this, langTest);
       studentDialog.displayLoginBox();
@@ -353,8 +349,6 @@ public class UserManager {
         if (expirationDate < System.currentTimeMillis()) {
           System.out.println("checkExpiration : " + sid + " has expired.");
           return true;
-        } else {
-          //System.out.println("checkExpiration : " +sid + " has expires on " + new Date(expirationDate) + " vs now " + new Date());
         }
       } catch (NumberFormatException e) {
         e.printStackTrace();
@@ -368,21 +362,6 @@ public class UserManager {
     return localStorageIfSupported.getItem(getExpires());
   }
 
-/*  private PropertyHandler.LOGIN_TYPE getLoginTypeFromStorage() {
-    Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-    String item = localStorageIfSupported.getItem(getLoginType());
-    try {
-      if (item == null) {
-        return PropertyHandler.LOGIN_TYPE.UNDEFINED;
-      } else {
-        return PropertyHandler.LOGIN_TYPE.valueOf(item.toUpperCase());
-      }
-    } catch (IllegalArgumentException e) {
-      System.err.println("couldn't parse " + item);
-      return PropertyHandler.LOGIN_TYPE.UNDEFINED;
-    }
-  }*/
-
   /**
    * @see mitll.langtest.client.LangTest#getLogout()
    */
@@ -392,7 +371,6 @@ public class UserManager {
   }
 
   private void clearUser(int userID) {
-    //userOnline(userID, false);
     clearCookieState();
   }
 
@@ -453,6 +431,7 @@ public class UserManager {
       localStorageIfSupported.setItem(getAudioType(), "" + audioType);
       localStorageIfSupported.setItem(getLoginType(), "" + userType);
       System.out.println("storeUser : user now " + sessionID + " / " + getUser() + " audio '" + audioType+"' expires in " + (DURATION/1000) + " seconds");
+      langTest.rememberAudioType(audioType);
     } else {
       userID = sessionID;
       this.userChosenID = userChosenID;
