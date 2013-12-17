@@ -89,7 +89,7 @@ public class ExercisePanel extends VerticalPanel implements
   public ExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                        final ExerciseController controller, ListInterface exerciseList) {
     this.exercise = e;
-    System.out.println("\n\nexercise is " + exercise.getID());
+    System.out.println("ExercisePanel.ExercisePanel : exercise is " + exercise.getID());
     this.controller = controller;
     this.service = service;
     this.feedback = userFeedback;
@@ -139,7 +139,7 @@ public class ExercisePanel extends VerticalPanel implements
   private Widget getQuestionContent(Exercise e) {
     String content = e.getContent();
 
-    System.out.println("getQuestionContent : content is " + content);
+    //System.out.println("getQuestionContent : content is " + content);
     if (content.contains("Listen")) {
       return new AudioExerciseContent().getQuestionContent(e, controller, false, false);
     }
