@@ -30,6 +30,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.shared.DLIUser;
@@ -97,7 +98,7 @@ public class StudentDialog extends UserDialog {
     purpose.box.setWidth("150px");
 
     Panel register = new FlowPanel();
-    RegistrationInfo registrationInfo = new RegistrationInfo(register);
+    final RegistrationInfo registrationInfo = new RegistrationInfo(register);
     final AccordionGroup accordion = getAccordion(dialogBox, register);
     accordion.setVisible(!canSkipRegister(purpose.getValue()));
 
@@ -108,6 +109,7 @@ public class StudentDialog extends UserDialog {
         boolean needUserID = purpose.getValue().equals(DATA_COLLECTION) || purpose.getValue().equals(REVIEW);
         user.setVisible(needUserID);
         accordion.setVisible(!canSkipRegister(purpose.getValue()));
+        registrationInfo.showOrHideILR(!purpose.getValue().equals(REVIEW));
 
         if (b) {
           accordion.hide();
@@ -168,7 +170,6 @@ public class StudentDialog extends UserDialog {
    * @param dialogBox
    * @param registrationInfo
    * @param user
-   * @paramx password
    * @param purpose
    * @param accordion
    * @see #displayLoginBox()
@@ -176,7 +177,6 @@ public class StudentDialog extends UserDialog {
   private ClickHandler makeCloseHandler(final Modal dialogBox,
                                         final RegistrationInfo registrationInfo,
                                         final FormField user,
-                                        //final FormField password,
                                         final ListBoxFormField purpose,
                                         final AccordionGroup accordion) {
     // Create a handler for the sendButton and nameField
@@ -420,6 +420,9 @@ public class StudentDialog extends UserDialog {
     private ListBoxFormField speaking;
     private ListBoxFormField writing;
     private FormField dialectGroup;
+    FluidRow ilrLevels, estimating;
+    Widget label;
+
 
     public RegistrationInfo(Panel dialogBox) {
       Form form = new Form();
@@ -436,19 +439,28 @@ public class StudentDialog extends UserDialog {
 
       final ControlGroup ilrLevel = new ControlGroup();
       ilrLevel.addStyleName("leftFiveMargin");
-      ilrLevel.add(new ControlLabel("Select your ILR level (check boxes below if estimating)"));
+      ControlLabel label = new ControlLabel("Select your ILR level (check boxes below if estimating)");
+      ilrLevel.add(label);
+      this.label = label;
       dialogBox.add(ilrLevel);
 
       FluidRow row = getILRLevels();
       dialogBox.add(row);
-
+      ilrLevels = row;
       FluidRow row2 = getEstimating2();
       dialogBox.add(row2);
-
+          estimating = row2;
       dialectGroup = getDialect(fieldset);
     }
 
+    public void showOrHideILR(boolean show) {
+      ilrLevels.setVisible(show);
+      estimating.setVisible(show);
+      label.setVisible(show);
+    }
+
     public boolean checkValidity() {
+      if (!ilrLevels.isVisible()) return true;
       for (ListBoxFormField f : Arrays.asList(reading,listening,speaking,writing)) {
          if (f.box.getValue().equals("Unset")) {
            f.markSimpleError("Choose a level");
@@ -459,6 +471,8 @@ public class StudentDialog extends UserDialog {
     }
 
     public boolean checkValidity2() {
+      if (!estimating.isVisible()) return true;
+
       for (YesNo f : ilrs) {
         if (!f.markSimpleError()) {
           return false;
@@ -474,6 +488,10 @@ public class StudentDialog extends UserDialog {
       return false;
     }
 
+    /**
+     * @see #RegistrationInfo(com.google.gwt.user.client.ui.Panel)
+     * @return
+     */
     private FluidRow getILRLevels() {
       FluidRow row = new FluidRow();
       Column column = new Column(2, new HTML());
