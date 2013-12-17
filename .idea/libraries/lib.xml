@@ -1,9 +1,9 @@
 <component name="libraryTable">
   <library name="lib">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/../../clean/bootstrap/imagewriter/lib/mysql-connector-java-5.1.16-bin.jar!/" />
-      <root url="jar://$PROJECT_DIR$/../../clean/bootstrap/imagewriter/lib/junit-4.10.jar!/" />
-      <root url="jar://$PROJECT_DIR$/../../clean/bootstrap/imagewriter/lib/log4j-1.2.17.jar!/" />
+      <root url="jar://$USER_HOME$/clean/bootstrap/imagewriter/lib/mysql-connector-java-5.1.16-bin.jar!/" />
+      <root url="jar://$USER_HOME$/clean/bootstrap/imagewriter/lib/junit-4.10.jar!/" />
+      <root url="jar://$USER_HOME$/clean/bootstrap/imagewriter/lib/log4j-1.2.17.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
