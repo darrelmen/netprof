@@ -125,7 +125,7 @@ public class ExercisePanel extends VerticalPanel implements
   }
 
   protected NavigationHelper getNavigationHelper(ExerciseController controller) {
-    return new NavigationHelper(exercise,controller, this, exerciseList, true);
+    return new NavigationHelper(exercise,controller, this, exerciseList, false);
   }
 
   protected void addInstructions() {
