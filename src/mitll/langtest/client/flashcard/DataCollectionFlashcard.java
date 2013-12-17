@@ -88,7 +88,7 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
   }
 
   protected void makeNavigationHelper(Exercise e, ExerciseController controller) {
-    navigationHelper = new NavigationHelper(e,controller,null,controller.getExerciseList(), true);
+    navigationHelper = new NavigationHelper(e,controller,null,controller.getExerciseList(), false);
   }
 
   private HorizontalPanel getCenteredContainer(Widget prev) {
