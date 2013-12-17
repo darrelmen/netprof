@@ -100,9 +100,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   protected void service(HttpServletRequest request,
                          HttpServletResponse response) throws ServletException, IOException {
-    boolean isMultipart = ServletFileUpload.isMultipartContent(new ServletRequestContext(request));
+    ServletRequestContext ctx = new ServletRequestContext(request);
+    boolean isMultipart = ServletFileUpload.isMultipartContent(ctx);
     if (isMultipart) {
-      logger.debug("Request " + request.getQueryString() + " path "  +request.getPathInfo());
+      logger.debug("isMultipart : Request " + request.getQueryString() + " path "  +request.getPathInfo());
       SiteDeployer siteDeployer = new SiteDeployer();
       SiteDeployer.SiteInfo siteInfo = siteDeployer.getSite(request, configDir, db, pathHelper.getInstallPath());
       Site site = siteInfo.site;
@@ -642,7 +643,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   List<Exercise> getExercises() {
     List<Exercise> exercises = db.getExercises();
     makeAutoCRT();   // side effect of db.getExercises is to make the exercise DAO which is needed here...
-    logger.debug("getExercises found " + exercises.size()+ " exercises");
+    logger.debug("getExercises found " + exercises.size() + " exercises");
     return exercises;
   }
 
