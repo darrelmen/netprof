@@ -36,7 +36,7 @@ public interface LangTestDatabaseAsync {
   void getUsers(AsyncCallback<List<User>> async);
 
   void writeAudioFile(String base64EncodedString, String plan, String exercise, int question, int user,
-                      int reqid, boolean flq, String audioType, boolean doFlashcard, AsyncCallback<AudioAnswer> async);
+                      int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults, AsyncCallback<AudioAnswer> async);
 
   void getNextUngradedExercise(String user, int expectedGrades, boolean englishOnly, AsyncCallback<Exercise> async);
 
@@ -109,7 +109,11 @@ public interface LangTestDatabaseAsync {
 
   void getGradeCountPerExercise(AsyncCallback<Map<Integer, Map<String, Map<String, Integer>>>> async);
 
+  void getExerciseIds(int reqID, AsyncCallback<ExerciseListWrapper> async);
+
   void getExerciseIds(int reqID, long userID, AsyncCallback<ExerciseListWrapper> async);
+
+  void getExerciseIds(int reqID, long userID, String prefix, long userListID, AsyncCallback<ExerciseListWrapper> async);
 
   /**
    * @param reqID
@@ -119,33 +123,36 @@ public interface LangTestDatabaseAsync {
    */
   void getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID, AsyncCallback<ExerciseListWrapper> async);
 
-  void getExerciseIds(int reqID, AsyncCallback<ExerciseListWrapper> async);
 
   void postTimesUp(long userid, long timeTaken, Map<String, Collection<String>> selectionState, AsyncCallback<Leaderboard> async);
 
   void addDLIUser(DLIUser dliUser, AsyncCallback<Void> async);
 
-  void getCompletedExercises(int user, AsyncCallback<Set<String>> async);
+  void getCompletedExercises(int user, boolean isReviewMode, AsyncCallback<Set<String>> async);
 
   void getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID, String prefix, AsyncCallback<ExerciseListWrapper> async);
-
-  void getExerciseIds(int reqID, long userID, String prefix, long userListID, AsyncCallback<ExerciseListWrapper> async);
 
   void getStartupInfo(AsyncCallback<StartupInfo> async);
 
   void getUserListsForText(String search, AsyncCallback<Collection<UserList>> async);
 
-  void getListsForUser(long userid, boolean onlyCreated, AsyncCallback<Collection<UserList>> async);
+  void getListsForUser(long userid, boolean onlyCreated, boolean getExercises, AsyncCallback<Collection<UserList>> async);
 
-  void addItemToUserList(long userListID, UserExercise userExercise, AsyncCallback<Collection<UserExercise>> async);
+  void addItemToUserList(long userListID, UserExercise userExercise, AsyncCallback<Void> async);
 
   void createNewItem(long userid, String english, String foreign, AsyncCallback<UserExercise> async);
 
-  void reallyCreateNewItem(UserList userList, UserExercise userExercise,AsyncCallback<UserExercise> async);
+  void reallyCreateNewItem(long userListID, UserExercise userExercise,AsyncCallback<UserExercise> async);
 
   void addUserList(long userid, String name, String description, String dliClass, AsyncCallback<Long> async);
 
   void addVisitor(UserList ul, long user, AsyncCallback<Void> asyncCallback);
 
   void editItem(UserExercise userExercise, AsyncCallback<Void> async);
+
+  void addAnnotation(String exerciseID, String field, String status, String comment, AsyncCallback<Void> async);
+
+  void markReviewed(String id, boolean isCorrect, AsyncCallback<Void> asyncCallback);
+
+  void getReviewList(AsyncCallback<UserList> async);
 }

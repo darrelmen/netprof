@@ -1,7 +1,6 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseFormatter;
 import org.apache.log4j.Logger;
@@ -59,6 +58,7 @@ public class ExcelImport implements ExerciseDAO {
   private boolean skipSemicolons;
   private int audioOffset = 0;
   private final int maxExercises;
+  private ServerProperties serverProps;
 
   /**
    * @see mitll.langtest.server.SiteDeployer#readExercisesPopulateSite(mitll.langtest.shared.Site, String, java.io.InputStream)
@@ -77,6 +77,7 @@ public class ExcelImport implements ExerciseDAO {
    */
   public ExcelImport(String file, String mediaDir, String relativeConfigDir, ServerProperties serverProps) {
     this.file = file;
+    this.serverProps = serverProps;
     this.isFlashcard = serverProps.isFlashcard();
     maxExercises = serverProps.getMaxNumExercises();
     this.mediaDir = mediaDir;
@@ -377,8 +378,8 @@ public class ExcelImport implements ExerciseDAO {
           }
         }
       }
-
-      addSynonyms(englishToExercises);
+      if(this.serverProps.getCollectSynonyms())
+         addSynonyms(englishToExercises);
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
