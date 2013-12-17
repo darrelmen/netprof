@@ -1,7 +1,7 @@
 <component name="libraryTable">
-  <library name="imagewriter">
+  <library name="log4j-1.2.17">
     <CLASSES>
-      <root url="jar://$USER_HOME$/clean/bootstrap/imagewriter/imagewriter.jar!/" />
+      <root url="jar://$PROJECT_DIR$/imagewriter/lib/log4j-1.2.17.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
