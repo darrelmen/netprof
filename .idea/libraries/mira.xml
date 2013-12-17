@@ -1,7 +1,7 @@
 <component name="libraryTable">
-  <library name="imagewriter">
+  <library name="mira">
     <CLASSES>
-      <root url="jar://$USER_HOME$/clean/bootstrap/imagewriter/imagewriter.jar!/" />
+      <root url="jar://$PROJECT_DIR$/war/WEB-INF/lib/mira.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
