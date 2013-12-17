@@ -146,13 +146,13 @@ public class TextResponse {
                                  final TextBox noPasteAnswer, final ScoreFeedback scoreFeedback, final String answerType,
                                  boolean addEnterKeyBinding, final int questionID) {
     check.setType(ButtonType.PRIMARY);
-    check.setTitle("Hit Enter to submit answer.");
     check.setEnabled(false);
     check.addStyleName("leftFiveMargin");
 
     if (addEnterKeyBinding) {
       enterKeyButtonHelper = new EnterKeyButtonHelper(false);
       enterKeyButtonHelper.addKeyHandler(check);
+      check.setTitle("Hit Enter to submit answer.");
     }
 
     check.addClickHandler(new ClickHandler() {
