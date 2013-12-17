@@ -136,7 +136,10 @@ public class QCNPFExercise extends NPFExercise {
       audioPanel.setShowColor(true);
       audioPanel.getElement().setId("ASRScoringAudioPanel");
       audioPanel.setRefAudio(audioRef, e.getRefSentence());
-      ResizableCaptionPanel cp = new ResizableCaptionPanel("Reference" + " : " + audio.getDisplay());
+      String name = "Reference" + " : " + audio.getDisplay();
+      if (audio.isFast()) name = "Regular speed audio example";
+      else if (audio.isSlow()) name = "Slow speed audio example";
+      ResizableCaptionPanel cp = new ResizableCaptionPanel(name);
       cp.setContentWidget(audioPanel);
       toResize.add(cp);
       ExerciseAnnotation audioAnnotation = e.getAnnotation(audio.getAudioRef());
