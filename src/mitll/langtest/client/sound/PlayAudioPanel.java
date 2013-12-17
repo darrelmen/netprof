@@ -26,23 +26,22 @@ import java.util.Date;
  */
 public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   private static final int QUIET_BETWEEN_REPEATS = 300;
-  // anything longer than this gets the long audio number of repeats
   private static final float LONG_AUDIO_THRESHOLD = 1f;
   private static final String PLAY_LABEL = "\u25ba play";
   private static final String PAUSE_LABEL = "|| pause";
-//  public static final int SPACE_BAR = 32;
   private Sound currentSound = null;
-  private SoundManagerAPI soundManager;
+  private final SoundManagerAPI soundManager;
   private final Button playButton = new Button(PLAY_LABEL);
   private final HTML warnNoFlash = new HTML("<font color='red'>Flash is not activated. Do you have a flashblocker? " +
     "Please add this site to its whitelist.</font>");
   private AudioControl listener;
- // private HandlerRegistration keyHandler;
- // private boolean hasFocus;
   private PlayListener playListener;
   private static int counter = 0;
-  private int id;
+  private final int id;
   private static final boolean DEBUG = false;
+
+  private int count = 0;
+  private float start, end;
 
   /**
    * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel
@@ -80,8 +79,6 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     destroySound();
     if (listener != null) listener.reinitialize();    // remove playing line, if it's there
     if (DEBUG) System.out.println("doing unload of play ------------------> ");
-
-    //if (keyHandler != null) keyHandler.removeHandler();
   }
 
   protected void addButtons() {
@@ -90,53 +87,14 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
         doClick();
       }
     });
-/*
-    playButton.addFocusHandler(new FocusHandler() {
-      @Override
-      public void onFocus(FocusEvent event) {
-        hasFocus = true;
-      }
-    });
-    playButton.addBlurHandler(new BlurHandler() {
-      @Override
-      public void onBlur(BlurEvent event) {
-        hasFocus = false;
-      }
-    });*/
     playButton.setType(ButtonType.INFO);
     playButton.getElement().setId("playButton");
     playButton.addStyleName("leftFiveMargin");
-
-    // addKeyboardListener();
-/*    if (keyHandler != null) {
-      playButton.setTitle("Press the space bar to play/stop playing audio.");
-    }*/
     playButton.setVisible(false);
     add(playButton);
     warnNoFlash.setVisible(false);
     add(warnNoFlash);
   }
-
-/*  protected void addKeyboardListener() {
-    keyHandler = Event.addNativePreviewHandler(new
-                                                   Event.NativePreviewHandler() {
-
-                                                     @Override
-                                                     public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
-                                                       NativeEvent ne = event.getNativeEvent();
-                                                       if (ne.getCharCode() == SPACE_BAR &&
-                                                           "[object KeyboardEvent]".equals(ne.getString()) &&
-                                                           !hasFocus && playButton.isVisible()) {
-                                                         ne.preventDefault();
-
-                                                         System.out.println(new Date() + " : Play click handler : Got " + event + " type int " +
-                                                             event.getTypeInt() + " assoc " + event.getAssociatedType() +
-                                                             " native " + event.getNativeEvent() + " source " + event.getSource());
-                                                         doClick();
-                                                       }
-                                                     }
-                                                   });
-  }*/
 
   private void doClick() {
     if (playButton.isVisible() && playButton.isEnabled()) {
@@ -154,10 +112,6 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     if (isPlaying()) {
       pause();
     }
-  }
-
-  public void setPlayEnabled(boolean val) {
-    playButton.setEnabled(val);
   }
 
   /**
@@ -202,9 +156,6 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   }
 
   // --- playing audio ---
-
-  private int count = 0;
-  private float start, end;
 
   /**
    * Repeat the segment 2 or 3 times, depending on length
@@ -261,6 +212,9 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     if (listener != null) {
       listener.update(position);
     }
+    else {
+      System.out.println("PlayAudioPanel :update - no listener");
+    }
   }
 
   /**
@@ -292,7 +246,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     if (DEBUG) System.out.println("PlayAudioPanel.createSound : " + this + " created sound " + currentSound);
 
     soundManager.createSound(currentSound, song, song);
-    showPlayButton();
+    //showPlayButton();
     reinitialize();
   }
 
@@ -313,7 +267,12 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     soundManager.setPosition(currentSound, 0);
 
     if (listener != null) {
+      System.out.println("PlayAudioPanel :reinitialize - my id " + getElement().getId());
+
       listener.reinitialize();
+    }
+    else {
+      System.out.println("PlayAudioPanel :reinitialize - no listener");
     }
 
     if (count > 0) {
@@ -328,17 +287,14 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   }
 
   public void songFirstLoaded(double durationEstimate){
-    if (!playButton.isEnabled()) setPlayEnabled(true);
     if (DEBUG) System.out.println("PlayAudioPanel.songFirstLoaded : " + this);
 
-    showPlayButton();
     if (listener != null) {
       listener.songFirstLoaded(durationEstimate);
     }
-  }
-
-  public void showPlayButton() {
-    playButton.setVisible(true);
+    else {
+      System.out.println("PlayAudioPanel :songFirstLoaded - no listener");
+    }
   }
 
   /**
@@ -346,17 +302,25 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    * @param duration
    */
   public void songLoaded(double duration){
+    if (DEBUG) System.out.println("PlayAudioPanel.songLoaded : " + this);
+
     if (listener != null) {
       listener.songLoaded(duration);
     }
     else {
       System.out.println("no listener for song loaded " + duration);
     }
+    if (!playButton.isEnabled()) setPlayEnabled(true);
+    showPlayButton();
   }
 
- // public Button getPlayButton() { return playButton;  }
+  public void setPlayEnabled(boolean val) {
+    playButton.setEnabled(val);
+  }
+
+  private void showPlayButton() {
+    playButton.setVisible(true);
+  }
 
   public String toString() { return "PlayAudioPanel #" +id; }
 }
-
-

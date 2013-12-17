@@ -1,7 +1,5 @@
 package mitll.langtest.server.trie;
 
-import mitll.langtest.shared.Exercise;
-
 /**
  * Created with IntelliJ IDEA.
  * User: go22670
@@ -9,7 +7,7 @@ import mitll.langtest.shared.Exercise;
  * Time: 1:21 AM
  * To change this template use File | Settings | File Templates.
  */
-public interface TextEntityValue {
+public interface TextEntityValue<T> {
   String getNormalizedValue();
-  Exercise getExercise();
+  T getValue();
 }
