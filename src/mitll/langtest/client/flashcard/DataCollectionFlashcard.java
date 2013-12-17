@@ -44,6 +44,7 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
     });
     navigationHelper.enablePrevButton(!controller.getExerciseList().onFirst(null));
     navigationHelper.enableNextButton(false);
+    getElement().setId("DataCollectionFlashcard");
   }
 
   /**
@@ -57,7 +58,7 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
    */
   @Override
   protected RecordButtonPanel getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, int index, boolean addKeyBinding) {
-    return new FlashcardRecordButtonPanel(this, service, controller, exercise, index, false);
+    return new FlashcardRecordButtonPanel(this, service, controller, exercise, index);
   }
 
   /**
