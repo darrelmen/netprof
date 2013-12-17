@@ -55,7 +55,7 @@ public class SectionExerciseList extends HistoryExerciseList {
                              UserFeedback feedback,
                              boolean showTurkToken, boolean showInOrder, boolean showListBoxes,
                              ExerciseController controller, boolean isCRTDataMode) {
-    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, isCRTDataMode, "");
+    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, true, "");
     this.showListBoxes = showListBoxes;
   }
 

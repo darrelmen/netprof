@@ -28,7 +28,7 @@ import mitll.langtest.shared.Exercise;
  * Time: 4:34 PM
  * To change this template use File | Settings | File Templates.
  */
-public class RecordButtonPanel {
+public class RecordButtonPanel implements RecordButton.RecordingListener{
   protected RecordButton recordButton;
   protected LangTestDatabaseAsync service;
   protected ExerciseController controller;
@@ -55,28 +55,16 @@ public class RecordButtonPanel {
     this.questionState = questionState;
     this.index = index;
     this.doFlashcardAudio = doFlashcardAudio;
-    // make record button
-
     layoutRecordButton(recordButton = makeRecordButton(controller));
   }
 
   protected RecordButton makeRecordButton(ExerciseController controller) {
-    return new RecordButton( controller.getRecordTimeout(),new RecordButton.RecordingListener() {
-      public void startRecording() {
-        recordImage1.setVisible(true);
-      }
+    return new RecordButton( controller.getRecordTimeout(),this, false);
+  }
 
-      public void flip(boolean first) {
-        recordImage1.setVisible(!first);
-        recordImage2.setVisible(first);
-      }
-
-      @Override
-      public void stopRecording() {
-        recordImage1.setVisible(false);
-        recordImage2.setVisible(false);
-      }
-    }, false);
+  public void flip(boolean first) {
+    recordImage1.setVisible(!first);
+    recordImage2.setVisible(first);
   }
 
   /**
@@ -108,6 +96,7 @@ public class RecordButtonPanel {
   }
 
   public void startRecording() {
+    recordImage1.setVisible(true);
     controller.startRecording();
   }
 
@@ -124,6 +113,8 @@ public class RecordButtonPanel {
    * @see #RecordButtonPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseQuestionState, int, boolean, boolean)
    */
   public void stopRecording() {
+    recordImage1.setVisible(false);
+    recordImage2.setVisible(false);
     controller.stopRecording();
     postAudioFile(getPanel(), 1);
   }
@@ -139,7 +130,7 @@ public class RecordButtonPanel {
       !exercise.isPromptInEnglish(),
       controller.getAudioType(),
       doFlashcardAudio,
-      new AsyncCallback<AudioAnswer>() {
+      true, new AsyncCallback<AudioAnswer>() {
         public void onFailure(Throwable caught) {
           controller.logException(caught);
           if (tries > 0) {
