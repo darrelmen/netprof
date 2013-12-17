@@ -5,7 +5,7 @@ import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
-import com.github.gwtbootstrap.client.ui.TextBox;
+import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.google.gwt.core.client.Scheduler;
@@ -48,7 +48,7 @@ public class NewUserExercise extends BasicDialog {
   private BasicDialog.FormField foreignLang;
   private CreateFirstRecordAudioPanel rap;
   private CreateFirstRecordAudioPanel rapSlow;
-  private Button submit;
+  protected Button submit;
 
   /**
    * @see Navigation#addItem(mitll.langtest.shared.custom.UserList)
@@ -77,16 +77,16 @@ public class NewUserExercise extends BasicDialog {
     row = new FluidRow();
     container.add(row);
     foreignLang = addControlFormField(row, "Foreign Language (" + controller.getLanguage() + ")",false,1);
+    foreignLang.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
 
     row = new FluidRow();
     container.add(row);
 
     rap = makeRecordAudioPanel(row, english, foreignLang, true);
-    final ControlGroup normalSpeedRecording = addControlGroupEntry(row, "Record normal speed reference recording", rap);
+    final ControlGroup normalSpeedRecording = addControlGroupEntry(row, "Normal speed reference recording", rap);
 
     rapSlow = makeRecordAudioPanel(row, english, foreignLang, false);
-   /* final ControlGroup slowSpeedRecording =*/
-    addControlGroupEntry(row, "Record slow speed reference recording", rapSlow);
+    addControlGroupEntry(row, "Slow speed reference recording (optional)", rapSlow);
     rap.setOtherRAP(rapSlow.getPostAudioButton());
     rapSlow.setOtherRAP(rap.getPostAudioButton());
 
@@ -100,11 +100,15 @@ public class NewUserExercise extends BasicDialog {
     return container;
   }
 
+  /**
+   * @see EditItem#editItem(mitll.langtest.shared.custom.UserExercise, com.google.gwt.user.client.ui.SimplePanel, mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.HTML)
+   * @param userExercise
+   */
   public void setFields(UserExercise userExercise) {
     newUserExercise = userExercise;
     System.out.println("setting fields with " + userExercise);
-    TextBox box = english.box;
-    System.out.println("box " + box);
+    TextBoxBase box = english.box;
+  //  System.out.println("box " + box);
 
     box.setText(userExercise.getEnglish());
     foreignLang.box.setText(userExercise.getForeignLanguage());
@@ -158,7 +162,9 @@ public class NewUserExercise extends BasicDialog {
   }
 
   protected void onClick(final UserList ul, final PagingContainer<?> pagingContainer, final Panel toAddTo) {
-    service.reallyCreateNewItem(ul, newUserExercise, new AsyncCallback<UserExercise>() {
+    System.out.println("onClick : adding " + newUserExercise + " to " +ul);
+
+    service.reallyCreateNewItem(ul.getUniqueID(), newUserExercise, new AsyncCallback<UserExercise>() {
       @Override
       public void onFailure(Throwable caught) {}
 
@@ -199,13 +205,17 @@ public class NewUserExercise extends BasicDialog {
     }
 
     /**
+     * Note that we want to post the audio the server, but not record in the results table (since it's not an answer
+     * to an exercise...)
+     * That's the final "false" on the end of the WaveformPostAudioRecordButton
      * @see mitll.langtest.client.exercise.RecordAudioPanel#makePlayAudioPanel(com.google.gwt.user.client.ui.Widget)
      * @return
      */
     @Override
     protected WaveformPostAudioRecordButton makePostAudioRecordButton() {
       postAudioButton =
-        new WaveformPostAudioRecordButton(exercise, controller, exercisePanel, this, service, 0) {
+        new WaveformPostAudioRecordButton(exercise, controller, exercisePanel, this, service, 0, false // don't record in results table
+        ) {
           @Override
           public void stopRecording() {
             showStop();
