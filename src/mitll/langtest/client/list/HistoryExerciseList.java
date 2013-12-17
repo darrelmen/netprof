@@ -41,8 +41,8 @@ public class HistoryExerciseList extends PagingExerciseList {
 
   public HistoryExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
                              boolean showTurkToken, boolean showInOrder, ExerciseController controller,
-                             boolean isCRTDataMode, String instance) {
-    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, /*isCRTDataMode,*/instance);
+                             boolean showTypeAhead, String instance) {
+    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, showTypeAhead, instance);
   }
 
   /**
@@ -84,7 +84,7 @@ public class HistoryExerciseList extends PagingExerciseList {
     StringBuilder builder = new StringBuilder();
     for (String type : typeToBox.keySet()) {
       String section = getCurrentSelection(type);
-      System.out.println("\tSectionExerciseList.getHistoryToken for " + type + " section = " +section);
+      System.out.println("\tHistoryExerciseList.getHistoryToken for " + type + " section = " +section);
       if (section.equals(HistoryExerciseList.ANY)) {
         //System.out.println("getHistoryToken : Skipping box " + type + " (ANY) ");
       } else {
@@ -97,8 +97,8 @@ public class HistoryExerciseList extends PagingExerciseList {
 
       builder.append(historyToken);
     }*/
-   System.out.println("\tgetHistoryToken for " + id + " is '" +builder.toString() + "'");
-
+    System.out.println("\tgetHistoryToken for " + id + " is '" +builder.toString() + "'");
+    if (id != null && id.length() > 0 && builder.toString().isEmpty()) return super.getHistoryToken(id);
     return builder.toString();
   }
 
@@ -332,21 +332,27 @@ public class HistoryExerciseList extends PagingExerciseList {
 
     String instance1 = selectionState1.getInstance();
 
-    if (!instance1.equals(instance)) {
-      System.out.println("onValueChange : skipping event " + rawToken + " for instance " + instance1 +
-          " that is not mine "+instance);
+    if (!instance1.equals(instance) && instance1.length() > 0) {
+      System.out.println("onValueChange : skipping event " + rawToken + " for instance '" + instance1 +
+          "' that is not mine "+instance);
+      if (getCreatedPanel() == null) {
+/*
+        getExercises(controller.getUser(),false);
+*/
+        noSectionsGetExercises(controller.getUser());
+      }
       return;
     }
 
     String item = selectionState1.getItem();
 
     if (item != null && item.length() > 0 && hasExercise(item)) {
-      if (includeItemInBookmark) {
+    //  if (includeItemInBookmark) {
         loadByIDFromToken(item);
-      }
+  /*    }
       else {
         System.out.println("onValueChange : skipping item " + item);
-      }
+      }*/
     } else {
       String token = event.getValue();
       try {
@@ -369,8 +375,8 @@ public class HistoryExerciseList extends PagingExerciseList {
    */
   protected void loadExercises(final Map<String, Collection<String>> typeToSection, final String item) {
     System.out.println("HistoryExerciseList.loadExercises : " + typeToSection + " and item '" + item + "'");
-    if (allowPlusInURL) {
-      service.getCompletedExercises(controller.getUser(),new AsyncCallback<Set<String>>() {
+    if (controller.showCompleted()) {
+      service.getCompletedExercises(controller.getUser(), controller.isReviewMode(), new AsyncCallback<Set<String>>() {
         @Override
         public void onFailure(Throwable caught) {}
 
