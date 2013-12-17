@@ -18,6 +18,8 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.recorder.FlashcardRecordButton;
+import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.Exercise;
@@ -37,6 +39,7 @@ public class BootstrapExercisePanel extends FluidContainer {
   protected final Widget cardPrompt;
   protected ScoreFeedback audioScoreFeedback = new ScoreFeedback(false);
   protected Panel recoOutputContainer;
+  private final boolean addKeyBinding;
 
   /**
    *
@@ -45,15 +48,18 @@ public class BootstrapExercisePanel extends FluidContainer {
    * @param controller
    * @param addKeyBinding
    * @see mitll.langtest.client.flashcard.FlashcardExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
+   * @see mitll.langtest.client.custom.NPFHelper#setFactory(mitll.langtest.client.list.PagingExerciseList, String)
    */
   public BootstrapExercisePanel(final Exercise e, final LangTestDatabaseAsync service,
                                 final ExerciseController controller, int feedbackHeight, boolean addKeyBinding) {
+    this.addKeyBinding = addKeyBinding;
     setStyleName("exerciseBackground");
     addStyleName("cardBorder");
     HTML warnNoFlash = new HTML(WARN_NO_FLASH);
     soundFeedback = new SoundFeedback(controller.getSoundManager(), warnNoFlash);
 
-    add(getHelpRow(controller));
+    Widget helpRow = getHelpRow(controller);
+    if (helpRow != null) add(helpRow);
     cardPrompt = getCardPrompt(e, controller);
     cardPrompt.getElement().setId("cardPrompt");
     add(cardPrompt);
@@ -61,6 +67,7 @@ public class BootstrapExercisePanel extends FluidContainer {
     addRecordingAndFeedbackWidgets(e, service, controller, feedbackHeight);
     warnNoFlash.setVisible(false);
     add(warnNoFlash);
+    getElement().setId("BootstrapExercisePanel");
   }
 
   /**
@@ -69,7 +76,7 @@ public class BootstrapExercisePanel extends FluidContainer {
    * @param controller
    * @return
    */
-  private Widget getHelpRow(final ExerciseController controller) {
+  protected Widget getHelpRow(final ExerciseController controller) {
     FlowPanel helpRow = new FlowPanel();
     helpRow.addStyleName("floatRight");
     helpRow.addStyleName("helpPadding");
@@ -152,11 +159,13 @@ public class BootstrapExercisePanel extends FluidContainer {
       add(getRecoOutputRow());
     }
 
-    add(audioScoreFeedback.getScoreFeedbackRow(feedbackHeight, false));
+    boolean classroomMode = controller.getProps().isClassroomMode();
+    System.out.println("classroom mode " + classroomMode);
+    add(audioScoreFeedback.getScoreFeedbackRow(feedbackHeight, classroomMode));
   }
 
   protected Widget getAnswerAndRecordButtonRow(Exercise e, LangTestDatabaseAsync service, ExerciseController controller) {
-    RecordButtonPanel answerWidget = getAnswerWidget(e, service, controller, 1, controller.getProps().shouldAddRecordKeyBinding());
+    RecordButtonPanel answerWidget = getAnswerWidget(e, service, controller, 1, controller.getProps().shouldAddRecordKeyBinding() || addKeyBinding);
     return getRecordButtonRow(answerWidget.getRecordButton());
   }
 
@@ -199,9 +208,28 @@ public class BootstrapExercisePanel extends FluidContainer {
     return recoOutputRow;
   }
 
+  /**
+   * @see #getAnswerAndRecordButtonRow(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
+   * @param exercise
+   * @param service
+   * @param controller
+   * @param index
+   * @param addKeyBinding
+   * @return
+   */
   protected RecordButtonPanel getAnswerWidget(final Exercise exercise, LangTestDatabaseAsync service,
                                               ExerciseController controller, final int index, boolean addKeyBinding) {
-    return new FlashcardRecordButtonPanel(this, service, controller, exercise, index, true);
+    if (addKeyBinding) {
+      return new FlashcardRecordButtonPanel(this, service, controller, exercise, index);
+    } else {
+      return new FlashcardRecordButtonPanel(this, service, controller, exercise, index) {
+
+        @Override
+        protected RecordButton makeRecordButton(ExerciseController controller) {
+          return new FlashcardRecordButton(controller.getRecordTimeout(), this, true, false);  // TODO : fix later in classroom?
+        }
+      };
+    }
   }
 
   /**
@@ -214,7 +242,7 @@ public class BootstrapExercisePanel extends FluidContainer {
    * @see FlashcardRecordButtonPanel#showIncorrectFeedback(mitll.langtest.shared.AudioAnswer, double, boolean)
    */
   public void showPronScoreFeedback(double score, String scorePrefix) {
-    audioScoreFeedback.showScoreFeedback(scorePrefix, score, false, false);
+    audioScoreFeedback.showScoreFeedback(scorePrefix, score, false, !addKeyBinding);
   }
 
   public void clearFeedback() {
