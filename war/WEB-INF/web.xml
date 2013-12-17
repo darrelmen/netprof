@@ -30,19 +30,35 @@
     <url-pattern>/langtest/langtestdatabase</url-pattern>
   </servlet-mapping>
 
-  <context-param>
+
+    <servlet>
+        <servlet-name>downloadServet</servlet-name>
+        <servlet-class>mitll.langtest.server.DownloadServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>downloadServet</servlet-name>
+        <url-pattern>/downloadUsers/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>downloadServet</servlet-name>
+        <url-pattern>/downloadResults/*</url-pattern>
+    </servlet-mapping>
+
+    <context-param>
     <param-name>tomcatWriteDirectoryFullPath</param-name>
     <param-value>answers</param-value>
   </context-param>
 
   <context-param>
      <param-name>config</param-name>
-     <param-value>farsi</param-value>
+     <param-value>pilot</param-value>
   </context-param>
 
   <context-param>
      <param-name>configFile</param-name>
-     <param-value>farsiHeadstart.properties</param-value>
+     <param-value>crtMSAaudio.properties</param-value>
   </context-param>
 </web-app>
 
