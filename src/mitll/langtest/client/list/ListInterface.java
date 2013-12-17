@@ -57,8 +57,8 @@ public interface ListInterface extends RequiresResize {
   void loadExercise(ExerciseShell exerciseShell);
   /**
    * @param current
-   * @return
-   * @see mitll.langtest.client.LangTest#loadNextExercise
+   * @return true if on last exercise
+   * @see mitll.langtest.client.exercise.ExercisePanel#postAnswers
    */
   boolean loadNextExercise(ExerciseShell current);
 
