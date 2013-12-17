@@ -23,8 +23,8 @@ public class RecordAudioPanel extends AudioPanel {
   private PlayAudioPanel playAudioPanel;
   protected Panel exercisePanel;
 
-  public Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3.png"));
-  public Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4.png"));
+  public Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
+  public Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
   protected Exercise exercise;
 
   /**
@@ -64,7 +64,7 @@ public class RecordAudioPanel extends AudioPanel {
   }
 
   protected WaveformPostAudioRecordButton makePostAudioRecordButton() {
-    return new WaveformPostAudioRecordButton(exercise, controller, exercisePanel, this, service, index) {
+    return new WaveformPostAudioRecordButton(exercise, controller, exercisePanel, this, service, index, true) {
       @Override
       public void startRecording() {
         super.startRecording();
