@@ -31,13 +31,14 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
-  private List<AutoCRTRecordPanel> autoCRTRecordPanels;
+ // private List<AutoCRTRecordPanel> autoCRTRecordPanels;
   private List<TextResponse> textResponses;
 
   private SoundFeedback soundFeedback;
 
   public FeedbackRecordPanel(Exercise e, LangTestDatabaseAsync service, UserFeedback userFeedback, ExerciseController controller) {
     super(e, service, userFeedback, controller, controller.getExerciseList());
+    getElement().setId("FeedbackRecordPanel");
   }
 
   /**
@@ -59,11 +60,11 @@ public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
   protected Widget getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller,
                                    final int index) {
     // evil
-    if (autoCRTRecordPanels == null) autoCRTRecordPanels = new ArrayList<AutoCRTRecordPanel>();
+   // if (autoCRTRecordPanels == null) autoCRTRecordPanels = new ArrayList<AutoCRTRecordPanel>();
     if (textResponses == null) textResponses = new ArrayList<TextResponse>();
 
     AutoCRTRecordPanel autoCRTRecordPanel = new AutoCRTRecordPanel(service, controller, exercise, this, index);
-    autoCRTRecordPanels.add(autoCRTRecordPanel);
+    //autoCRTRecordPanels.add(autoCRTRecordPanel);
     String responseType = controller.getProps().getResponseType();
 
     if (responseType.equalsIgnoreCase("Audio")) {
@@ -73,8 +74,9 @@ public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
       FluidContainer outerContainer = new FluidContainer();
       outerContainer.add(panel);
       outerContainer.addStyleName("floatLeft");
+      outerContainer.getElement().setId("FeedbackRecordPanel_outerContainer");
 
-      getFeedbackContainer(outerContainer, new ScoreFeedback(true),autoCRTRecordPanel, true);
+      getFeedbackContainer(outerContainer, new ScoreFeedback(true), autoCRTRecordPanel, true);
       return outerContainer;
     }
     else if (responseType.equalsIgnoreCase("Text")){
@@ -82,7 +84,7 @@ public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
     }
     else {
       FluidRow row = new FluidRow();
-      Panel textWidget = doText(exercise, service, controller, index,autoCRTRecordPanel);
+      Panel textWidget = doText(exercise, service, controller, index, autoCRTRecordPanel);
       textWidget.addStyleName("floatLeft");
       Panel panel = autoCRTRecordPanel.getPanel();
       panel.getElement().setId("recordButtonPanel_"+index);
@@ -91,6 +93,7 @@ public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
 
       FluidContainer outerContainer = new FluidContainer();
       outerContainer.add(panel);
+      outerContainer.getElement().setId("FeedbackRecordPanel_outerContainer_both");
 
       getFeedbackContainer(outerContainer, new ScoreFeedback(true), autoCRTRecordPanel,true);
       row.add(new Column(6,textWidget));
@@ -160,7 +163,7 @@ public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
   protected void enableNext() {
     super.enableNext();
     if (isCompleted()) {
-      service.getCompletedExercises(controller.getUser(), new AsyncCallback<Set<String>>() {
+      service.getCompletedExercises(controller.getUser(), false, new AsyncCallback<Set<String>>() {
         @Override
         public void onFailure(Throwable caught) {
         }
