@@ -38,8 +38,9 @@ public interface LangTestDatabase extends RemoteService {
   boolean WRITE_ALTERNATE_COMPRESSED_AUDIO = false;
 
   // exerciseDAO
-  ExerciseListWrapper getExerciseIds(int reqID, long userID);
   ExerciseListWrapper getExerciseIds(int reqID);
+  ExerciseListWrapper getExerciseIds(int reqID, long userID);
+  ExerciseListWrapper getExerciseIds(int reqID, long userID, String prefix, long userListID);
   Exercise getExercise(String id);
 
   ResultsAndGrades getResultsForExercise(String exid, boolean arabicTextDataCollect);
@@ -58,7 +59,7 @@ public interface LangTestDatabase extends RemoteService {
   // answer DAO
   void addTextAnswer(int userID, Exercise exercise, int questionID, String answer);
   AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int question, int user,
-                             int reqid, boolean flq, String audioType, boolean doFlashcard);
+                             int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults);
   double getScoreForAnswer(long userID, Exercise e, int questionID, String answer, String answerType);
 
   Exercise getNextUngradedExercise(String user, int expectedGrades, boolean englishOnly);
@@ -144,20 +145,23 @@ public interface LangTestDatabase extends RemoteService {
 
   void addDLIUser(DLIUser dliUser);
 
-  Set<String> getCompletedExercises(int user);
+  Set<String> getCompletedExercises(int user, boolean isReviewMode);
 
   ExerciseListWrapper getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID, String prefix);
-
-  ExerciseListWrapper getExerciseIds(int reqID, long userID, String prefix, long userListID);
 
   StartupInfo getStartupInfo();
   long addUserList(long userid, String name, String description, String dliClass);
   void addVisitor(UserList ul, long user);
-  Collection<UserList> getListsForUser(long userid, boolean onlyCreated);
+  Collection<UserList> getListsForUser(long userid, boolean onlyCreated, boolean getExercises);
   Collection<UserList> getUserListsForText(String search);
-  Collection<UserExercise> addItemToUserList(long userListID, UserExercise userExercise);
+  void addItemToUserList(long userListID, UserExercise userExercise);
   UserExercise createNewItem(long userid, String english, String foreign);
-  UserExercise reallyCreateNewItem(UserList userList, UserExercise userExercise);
+  UserExercise reallyCreateNewItem(long userListID, UserExercise userExercise);
 
   void editItem(UserExercise userExercise);
+
+  void addAnnotation(String exerciseID, String field, String status, String comment);
+  void markReviewed(String exid, boolean isCorrect);
+
+  UserList getReviewList();
 }
