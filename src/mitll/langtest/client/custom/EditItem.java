@@ -1,10 +1,13 @@
 package mitll.langtest.client.custom;
 
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
@@ -23,8 +26,7 @@ public class EditItem {
   private final ExerciseController controller;
   private LangTestDatabaseAsync service;
   private UserManager userManager;
-  //private HTML itemMarker;
-  PagingContainer<UserExercise> pagingContainer;
+  private PagingContainer<UserExercise> pagingContainer;
 
   public EditItem(final LangTestDatabaseAsync service, final UserManager userManager, ExerciseController controller) {
     this.controller = controller;
@@ -49,7 +51,7 @@ public class EditItem {
     Panel container = pagingContainer.getTableWithPager();
     left.add(container);
     for (UserExercise es : ul.getExercises()) {
-      if (es.getID().startsWith("Custom")) {
+      if (!es.isPredefined()) {
         pagingContainer.addExerciseToList2(es);
       }
     }
@@ -73,12 +75,7 @@ public class EditItem {
           @Override
           public void onSuccess(Void newExercise) {
             outer.refresh();
-            for (UserExercise ue : ul.getExercises())  {
-               if (ue.getID() == exerciseShell.getID()) {
-                 System.out.println("old " + ue);
-                 System.out.println("new " + exerciseShell);
-               }
-            }
+            showPopup(exerciseShell.getTooltip() + " has been updated.",submit);
           }
         });
       }
@@ -86,5 +83,15 @@ public class EditItem {
     right.clear();
     right.add(newUserExercise.addNew(ul, pagingContainer, right));
     newUserExercise.setFields(exerciseShell);
+  }
+  private void showPopup(String toShow, Widget over) {
+    final PopupPanel popupImage = new PopupPanel(true);
+    popupImage.add(new HTML(toShow));
+    popupImage.showRelativeTo(over);
+    Timer t = new Timer() {
+      @Override
+      public void run() { popupImage.hide(); }
+    };
+    t.schedule(3000);
   }
 }

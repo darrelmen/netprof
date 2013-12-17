@@ -1,9 +1,7 @@
 package mitll.langtest.shared;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -15,6 +13,7 @@ import java.util.Map;
  */
 public class AudioExercise extends ExerciseShell {
   protected Map<String,AudioAttribute> audioAttributes = new HashMap<String, AudioAttribute>();
+  private Map<String,ExerciseAnnotation> fieldToAnnotation = new HashMap<String, ExerciseAnnotation>();
 
   public AudioExercise() {}
   public AudioExercise(String id, String tooltip) {  super(id,tooltip); }
@@ -30,18 +29,18 @@ public class AudioExercise extends ExerciseShell {
   }
 
   public void setRefAudio(String s) {
-    if (s != null) {
+    if (s != null && s.length() > 0 && !s.equals("null")) {
       AudioAttribute audioAttribute = new AudioAttribute(s).markFast();
       audioAttributes.put(audioAttribute.getAttributes().toString(),audioAttribute);
     }
   }
 
   /**
-   * @see mitll.langtest.server.database.ExcelImport#getExercise(String, mitll.langtest.server.database.FileExerciseDAO, String, String, String, String, String, boolean, String)
+   * @see mitll.langtest.server.database.ExcelImport#getExercise(String, String, String, String, String, String, boolean, String)
    * @param s
    */
   public void setSlowRefAudio(String s) {
-    if (s != null) {
+    if (s != null && s.length() > 0 && !s.equals("null")) {
       AudioAttribute audioAttribute = new AudioAttribute(s).markSlow();
       audioAttributes.put(audioAttribute.getAttributes().toString(), audioAttribute);
     }
@@ -57,4 +56,31 @@ public class AudioExercise extends ExerciseShell {
   public boolean hasRefAudio() { return !audioAttributes.isEmpty(); }
 
   public Collection<AudioAttribute> getAudioAttributes() { return audioAttributes.values();  }
+  public void forgetAllAudio() { audioAttributes.clear(); }
+
+  /**
+   * @see mitll.langtest.server.database.custom.UserListManager#addAnnotations
+   * @param field
+   * @param status
+   * @param comment
+   */
+  public void addAnnotation(String field, String status, String comment) {
+    fieldToAnnotation.put(field, new ExerciseAnnotation(status,comment));
+  }
+
+
+/*
+  public Map<String, ExerciseAnnotation> getFieldToAnnotation() {
+    return fieldToAnnotation;
+  }
+*/
+
+  public ExerciseAnnotation getAnnotation(String field) {
+    return fieldToAnnotation.get(field);
+  }
+
+  public String toString() {
+    return super.toString() +" audio attr (" +getAudioAttributes().size()+
+      ") :" + getAudioAttributes() + " and " +fieldToAnnotation + " annotations";
+  }
 }
