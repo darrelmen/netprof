@@ -44,12 +44,13 @@ public class RecordButton extends Button {
     void stopRecording();
   }
 
-  public RecordButton(int delay, boolean doClickAndHold) {
+  public RecordButton(int delay, boolean doClickAndHold, boolean addKeyBinding) {
     super(RECORD);
     this.doClickAndHold = doClickAndHold;
+    //if (doClickAndHold) setText("Click and hold to record");
     this.autoStopDelay = delay;
     setType(ButtonType.PRIMARY);
-    setupRecordButton();
+    setupRecordButton(addKeyBinding);
     getElement().setId("record_button");
   }
 
@@ -59,7 +60,7 @@ public class RecordButton extends Button {
    * @param doClickAndHold
    */
   public RecordButton(int delay, RecordingListener recordingListener, boolean doClickAndHold) {
-    this(delay, doClickAndHold);
+    this(delay, doClickAndHold, true);
     this.setRecordingListener(recordingListener);
   }
 
@@ -73,7 +74,7 @@ public class RecordButton extends Button {
    */
   public void setRecordingListener(RecordingListener recordingListener) { this.recordingListener = recordingListener;  }
 
-  protected void setupRecordButton() {
+  protected void setupRecordButton(boolean addKeyBinding) {
     if (doClickAndHold) {
       addMouseDownHandler(new MouseDownHandler() {
         @Override
