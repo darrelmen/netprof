@@ -38,22 +38,23 @@ public abstract class ScoringAudioPanel extends AudioPanel {
    */
   public ScoringAudioPanel(LangTestDatabaseAsync service,
                            int numRepeats, boolean useKeyboard, ExerciseController controller, ScoreListener gaugePanel) {
-    this(null, null, service, numRepeats, useKeyboard, controller, gaugePanel);
+    this(null, null, service, numRepeats, useKeyboard, controller, true, gaugePanel);
   }
 
   /**
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener)
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, boolean, ScoreListener)
    * @param path
    * @param refSentence
    * @param service
    * @param numRepeats
    * @param useKeyboard
+   * @param showSpectrogram
    * @param gaugePanel
    */
   public ScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
                            int numRepeats, boolean useKeyboard, ExerciseController controller,
-                           ScoreListener gaugePanel) {
-    super(path, service, useKeyboard, controller, gaugePanel);
+                           boolean showSpectrogram, ScoreListener gaugePanel) {
+    super(path, service, useKeyboard, controller, showSpectrogram, gaugePanel);
     this.refSentence = refSentence;
     showOnlyOneExercise = controller.showOnlyOneExercise();
     addClickHandlers(numRepeats);
