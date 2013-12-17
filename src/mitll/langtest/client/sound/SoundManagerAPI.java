@@ -8,19 +8,24 @@ package mitll.langtest.client.sound;
  * To change this template use File | Settings | File Templates.
  */
 public interface SoundManagerAPI {
- void initialize();
+  void initialize();
+
   boolean isReady();
 
   void createSound(Sound sound, String title, String file);
+
   void destroySound(Sound sound);
-   void pause(Sound sound);
+
+  void pause(Sound sound);
 
   /**
-   * @see mitll.langtest.client.sound.PlayAudioPanel#play()
    * @param sound
+   * @see mitll.langtest.client.sound.PlayAudioPanel#play()
    */
-   void play(Sound sound);
-   void setPosition(Sound sound, double position);
+  void play(Sound sound);
+
+  void setPosition(Sound sound, double position);
+
   //void setPositionAndPlay(Sound sound, double position);
   void playInterval(Sound sound, int start, int end);
 
@@ -29,8 +34,10 @@ public interface SoundManagerAPI {
    */
 
   void exportStaticMethods();
+
   void loaded();
- // void songFinished(Sound sound);
+
+  // void songFinished(Sound sound);
   // void songFirstLoaded(Sound sound, double durationEstimate);
   // void songLoaded(Sound sound, double duration);
   void update(Sound sound, double position);
