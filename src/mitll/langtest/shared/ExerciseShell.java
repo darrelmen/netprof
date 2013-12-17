@@ -20,6 +20,7 @@ public class ExerciseShell implements IsSerializable {
   }
 
   public String getID() { return id; }
+  public void setID(String id) { this.id = id; }
   public String getTooltip() { return tooltip; }
   public void setTooltip(String tooltip) {
     this.tooltip = tooltip;
