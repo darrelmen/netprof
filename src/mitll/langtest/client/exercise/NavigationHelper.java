@@ -77,13 +77,10 @@ public class NavigationHelper extends HorizontalPanel {
    */
   private void getNextAndPreviousButtons(final Exercise e,
                                          final ExerciseController controller, boolean addButtons) {
-    boolean useKeyHandler = controller.isCollectAudio();
-
     makePrevButton(e, controller, addButtons);
     makeNextButton(e, controller, addButtons);
 
-    // TODO : revisit in the context of text data collections
-    addKeyHandler(e, controller, useKeyHandler);
+    //addKeyHandler(e, controller, useKeyHandler);
   }
 
   private void makePrevButton(final Exercise e, ExerciseController controller, boolean addButtons) {
