@@ -1,8 +1,8 @@
 package mitll.langtest.server.database.custom;
 
-import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.UserDAO;
-import mitll.langtest.server.database.UserExerciseDAO;
+import mitll.langtest.shared.AudioExercise;
+import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
@@ -11,7 +11,11 @@ import org.apache.log4j.Logger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -26,7 +30,6 @@ public class UserListManager {
   public static final String MY_LIST = "Favorites";
 
   private final UserDAO userDAO;
-  // TODO add a DAO -- do something smarter!
   private int i = 0;
 
   private UserExerciseDAO userExerciseDAO;
@@ -37,12 +40,12 @@ public class UserListManager {
   public UserListManager(UserDAO userDAO, UserListDAO userListDAO,UserListExerciseJoinDAO userListExerciseJoinDAO ) {
     this.userDAO = userDAO;
     this.userListDAO = userListDAO;
-    this.userListExerciseJoinDAO = userListExerciseJoinDAO;//
+    this.userListExerciseJoinDAO = userListExerciseJoinDAO;
   }
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#addUserList(long, String, String, String)
-   * @see mitll.langtest.client.custom.Navigation#doCreate
+   * @see mitll.langtest.client.custom.CreateListDialog#doCreate
    * @param userid
    * @param name
    * @param description
@@ -62,7 +65,6 @@ public class UserListManager {
       return null;
     } else {
       UserList e = new UserList(i++, userWhere, name, description, dliClass, System.currentTimeMillis(), isPrivate);
-     // userLists.add(e);
       userListDAO.add(e);
       logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists for " + userid);
       return e;
@@ -77,18 +79,25 @@ public class UserListManager {
    */
   public Collection<UserList> getListsForUser(long userid, boolean onlyCreated) {
     if (userid == -1) return Collections.emptyList();
-    logger.debug("getListsForUser for " + userid);
+    logger.debug("getListsForUser for user #" + userid);
 
     List<UserList> listsForUser = new ArrayList<UserList>();
-    for (UserList userList : userListDAO.getAll()) {
+    UserList favorite = null;
+    for (UserList userList : userListDAO.getAll(userid)) {
       boolean isCreator = userList.getCreator().id == userid;
-      if (onlyCreated) {
-        if (isCreator) {
-          listsForUser.add(userList);
-        }
-      } else {
-        if (userList.getVisitorIDs().contains(userid) || isCreator) {
-          listsForUser.add(userList);
+      if (isCreator || !isFavorite(userList)) {
+        if (onlyCreated) {
+          logger.debug("\tgetListsForUser  list " + userList);
+          if (isCreator) {
+            if (isFavorite(userList)) favorite = userList;
+            listsForUser.add(userList);
+          }
+        } else {
+          logger.debug("\tgetListsForUser  list " + userList);
+          if (userList.getVisitorIDs().contains(userid) || isCreator) {
+            if (isFavorite(userList)) favorite = userList;
+            listsForUser.add(userList);
+          }
         }
       }
     }
@@ -98,54 +107,93 @@ public class UserListManager {
       if (userList == null) return Collections.emptyList();
       else return Collections.singletonList(userList);
     }
+    else {
+      listsForUser.remove(favorite);
+      listsForUser.add(0,favorite);// put at front
+    }
 
-  //  sortByTime(listsForUser);
-
-    logger.debug("getListsForUser " + listsForUser.size() + "(" +listsForUser+
-      ") for " + userid);
+    logger.debug("getListsForUser " + listsForUser.size() + "(" +listsForUser+ ") for " + userid);
 
     return listsForUser;
   }
 
-  public Collection<UserExercise> addItemToUserList(long userListID, UserExercise userExercise) {
-    UserList where = userListDAO.getWithExercises(userListID);
-
-    if (where != null) {
-      where.addExercise(userExercise);
-      userListExerciseJoinDAO.add(where, userExercise);
-      Collection<UserExercise> exercises = where.getExercises();
-      logger.debug("Exercises now " + exercises);
-      return exercises;
-    }
-    return Collections.emptyList();
+  private boolean isFavorite(UserList userList) {
+    return userList.getName().equals(MY_LIST);
   }
 
-  public List<UserList> getUserListsForText(String search) {
-    List<UserList> listsForUser = new ArrayList<UserList>(userListDAO.getAllPublic());
-  //  sortByTime(listsForUser);
-/*    Iterator<UserList> iterator = listsForUser.iterator();
-    while (iterator.hasNext()) {
-      if (iterator.next().isPrivate()) iterator.remove();
+  public UserList getReviewList() {
+    UserList e = new UserList(i++, new User(-1,89,0,0,"","",false), "Review", "Items to review", "Review", System.currentTimeMillis(), false);
+
+    List<UserExercise> onList = new ArrayList<UserExercise>();
+    List<UserExercise> allKnown = userExerciseDAO.getWhere(incorrect);
+
+    Map<String, UserExercise> idToUser = new HashMap<String, UserExercise>();
+    for (UserExercise ue : allKnown) idToUser.put(ue.getID(),ue);
+    for (String id : incorrect) {
+      if (!id.startsWith(UserExercise.CUSTOM_PREFIX)) {
+        Exercise byID = userExerciseDAO.getExercise(id);
+
+        if (byID != null) {
+          onList.add(new UserExercise(byID)); // all predefined references
+        }
+      }
+      else {
+        if (idToUser.containsKey(id)) onList.add(idToUser.get(id));
+      }
     }
 
-    System.out.println("before " + userLists.size() + " after " + listsForUser.size());*/
+    logger.debug("getReviewList ids " + incorrect + " yielded " + onList.size() + " : " + onList);
 
-    return listsForUser;  //To change body of created methods use File | Settings | File Templates.
+    e.setExercises(onList);
+    return e;
+  }
+
+  /**
+   * TODO : do a search over the list fields to find matches
+   * @param search
+   * @return
+   */
+  public List<UserList> getUserListsForText(String search) {
+    List<UserList> listsForUser = new ArrayList<UserList>(userListDAO.getAllPublic());
+    return listsForUser;
   }
 
   public UserExercise createNewItem(long userid, String english, String foreign) {
     int uniqueID = userExerciseCount++;
-    return new UserExercise(uniqueID, userid, english, foreign);
+    return new UserExercise(uniqueID, UserExercise.CUSTOM_PREFIX+uniqueID, userid, english, foreign);
   }
 
-  public void reallyCreateNewItem(UserList userList, UserExercise userExercise) {
+  /**
+   * @see mitll.langtest.client.custom.NPFExercise#populateListChoices(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController, com.github.gwtbootstrap.client.ui.SplitDropdownButton)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addItemToUserList(long, mitll.langtest.shared.custom.UserExercise)
+   * @param userListID
+   * @param userExercise
+   * @return
+   */
+  public void addItemToUserList(long userListID, UserExercise userExercise) {
+    reallyCreateNewItem(userListID, userExercise);
+  }
+
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#reallyCreateNewItem
+   * @param userListID
+   * @param userExercise
+   */
+  public void reallyCreateNewItem(long userListID, UserExercise userExercise) {
     userExerciseDAO.add(userExercise);
 
-    UserList where = userListDAO.getWhere(userList.getUniqueID());
+    UserList where = userListDAO.getWhere(userListID);
     if (where != null) {
-      userListExerciseJoinDAO.add(where,userExercise);
+      userListExerciseJoinDAO.add(where, userExercise);
+      userListDAO.updateModified(userListID);
     }
-    if (where == null) logger.error("reallyCreateNewItem : couldn't find ul with id " + userList.getUniqueID());
+    if (where == null) {
+      logger.error("\n\nreallyCreateNewItem : couldn't find ul with id " + userListID);
+    }
+  }
+
+  public void editItem(UserExercise userExercise) {
+    userExerciseDAO.update(userExercise);
   }
 
   public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
@@ -169,7 +217,36 @@ public class UserListManager {
     }
   }
 
-  public void editItem(UserExercise userExercise) {
-    userExerciseDAO.update(userExercise);
+  // TODO : replace with DAO for this
+  private List<UserAnnotation> annotations = new ArrayList<UserAnnotation>();
+
+  public void addAnnotation(String exerciseID, String field, String status, String comment) {
+    logger.info("write to database! " +exerciseID + " " + field + " " + status + " " + comment);
+    annotations.add(new UserAnnotation(exerciseID, field, status, comment));
+  }
+
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise(String)
+   * @param exercise
+   * @param <T>
+   */
+  public <T extends AudioExercise> void addAnnotations(T exercise) {
+    for (UserAnnotation annotation : annotations) {
+      if (annotation != null && annotation.exerciseID != null && annotation.exerciseID.equals(exercise.getID())) {
+        exercise.addAnnotation(annotation.field, annotation.status, annotation.comment);
+      }
+    }
+  }
+
+  Set<String> reviewedExercises = new HashSet<String>();
+  Set<String> incorrect = new HashSet<String>();
+  public void markReviewed(String id) {
+    reviewedExercises.add(id);
+    logger.debug("markReviewed now " + reviewedExercises.size() + " reviewed exercises");
+  }
+  public Set<String> getReviewedExercises() { return reviewedExercises; }
+
+  public void markIncorrect(String id) {
+    incorrect.add(id);
   }
 }
