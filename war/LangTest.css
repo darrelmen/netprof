@@ -50,6 +50,20 @@ h1 {
     padding-right: 0px;
  }
 
+
+.qcBorder {
+    border-style:solid;
+    border-width: 2px;
+    border-top-width: 0;
+    border-left-width: 0;
+    border-right-width: 0;
+
+    border-top-color: #404141;
+    border-bottom-color: #269cce;
+    border-left-color: #404141;
+    border-right-color: #404141;
+}
+
 .cardBackground {
      background-color: #e8eaea;
  }
@@ -151,7 +165,12 @@ h1 {
 
 .floatLeft {
     float: left;
+    clear:none;
 }
+
+.floatLeftList {
+   float: left;
+ }
 .floatRight {
     float: right;
 }
@@ -384,10 +403,6 @@ fieldset > legend {
   padding-left: 20px;
 }
 
-.currentExercisePanel {
-
-}
-
 .alignTop {
     vertical-align:top;
 }
@@ -395,6 +410,13 @@ fieldset > legend {
 .ImageOverlay{
     border: none;
     background-color: red;
+}
+
+.qcRightBorder {
+    border-right: 3px solid blue;
+    padding-right: 5px;
+    margin-right: 5px;
+
 }
 
 .Button{
@@ -457,7 +479,7 @@ fieldset > legend {
     font-weight: bold;
     word-wrap: break-word;       /* Internet Explorer 5.5+ */
     word-break: break-all;
-    white-space: normal;
+    white-space: nowrap;
 }
 
 .blueColor {
@@ -740,14 +762,13 @@ fieldset > legend {
 }
 
 .userNPFContent {
-    margin-top: 10px;
-    width:100%;
+    margin-top: 2px;
     /*
         background: none repeat scroll 0 0 #FFFFFF;
     */
     border-radius: 3px 3px 3px 3px;
     box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
-    padding: 5px;
+    padding: 5px 110px 5px 5px;
 }
 
 .userListBackground {
@@ -812,4 +833,22 @@ fieldset > legend {
     position: absolute;
     top: 0px;
     left: 0px;
+}
+
+.tabbable .nav {
+    margin-bottom : 2px;
+}
+
+/*#QuestionContent .checkbox {
+    padding-left: 2px;
+}*/
+
+.borderTopQC {
+    margin-top: 5px;
+/*
+    float: left;
+*/
+
+    border-radius: 0px 0px 3px 0px;
+    border-top: inset rgba(0, 0, 0, 0.1);
 }
