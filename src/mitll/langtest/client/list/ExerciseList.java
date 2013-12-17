@@ -145,12 +145,12 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   public void getExercises(long userID, boolean getNext) {
   //  System.out.println("ExerciseList.getExercises for user " +userID);
 
-    if (showInOrder) {
-      getExercisesInOrder();
-    } else {
-      lastReqID++;
-      System.out.println("ExerciseList.getExercises for user " +userID);
+    lastReqID++;
 
+    if (showInOrder) {
+      service.getExerciseIds(lastReqID, new SetExercisesCallback());
+    } else {
+      System.out.println("ExerciseList.getExercises for user " +userID);
       service.getExerciseIds(lastReqID, userID, new SetExercisesCallback());
     }
   }
@@ -206,16 +206,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     History.newItem("#item=" + exerciseID + ";instance="+instance);
   }
 
-  /**
-   * @see mitll.langtest.client.grading.GradedExerciseList#setFactory(ExercisePanelFactory, mitll.langtest.client.user.UserManager, int)
-   */
-  private void getExercisesInOrder() {
-    lastReqID++;
-    System.out.println("------------ ExerciseList.getExercisesInOrder  -------------- ");
-
-    service.getExerciseIds(lastReqID, new SetExercisesCallback());
-  }
-
   public void onResize() {
     Widget current = innerContainer.getWidget();
     if (current != null) {
@@ -244,6 +234,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     token = token.replaceAll("%3D", "=").replaceAll("%3B", ";").replaceAll("%2", " ");
     return token;
   }
+
   public Panel getCreatedPanel() {
     return createdPanel;
   }
@@ -287,7 +278,12 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     rememberExercises(exercises);
     if (firstExercise != null) {
       ExerciseShell firstExerciseShell = findFirstExercise();
-      useExercise(firstExercise, firstExerciseShell);   // allows us to skip another round trip with the server to ask for the first exercise
+      if (firstExerciseShell.getID().equals(firstExercise.getID())) {
+        useExercise(firstExercise, firstExerciseShell);   // allows us to skip another round trip with the server to ask for the first exercise
+      }
+      else {
+        loadFirstExercise();
+      }
     }
     else {
       loadFirstExercise();
@@ -452,15 +448,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
   }
 
-  /**
-   * @see #loadByIDFromToken(String)
-   * @param exerciseShell
-   */
-  protected void askServerForExercise(ExerciseShell exerciseShell) {
-    System.out.println("ExerciseList.askServerForExercise id = " + exerciseShell.getID());
-    service.getExercise(exerciseShell.getID(), new ExerciseAsyncCallback(exerciseShell));
-  }
-
   protected String getTokenFromEvent(ValueChangeEvent<String> event) {
     String token = event.getValue();
     token = allowPlusInURL ? unencodeTokenDontRemovePlus(token) : unencodeToken(token);
@@ -496,6 +483,15 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     else {
       return false;
     }
+  }
+
+  /**
+   * @see #loadByIDFromToken(String)
+   * @param exerciseShell
+   */
+  protected void askServerForExercise(ExerciseShell exerciseShell) {
+    System.out.println("ExerciseList.askServerForExercise id = " + exerciseShell.getID());
+    service.getExercise(exerciseShell.getID(), new ExerciseAsyncCallback(exerciseShell));
   }
 
   private class ExerciseAsyncCallback implements AsyncCallback<Exercise> {
@@ -667,7 +663,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   public boolean loadNextExercise(String id) {
-    System.out.println("ExerciseList.loadNextExercise " + id);
+    System.out.println("ExerciseList.loadNextExercise id = " + id);
     ExerciseShell exerciseByID = getExerciseByID(id);
     return exerciseByID != null && loadNextExercise(exerciseByID);
   }
