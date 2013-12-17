@@ -34,7 +34,7 @@ public class ResponseExerciseList extends FlexSectionExerciseList {
   public ResponseExerciseList(FluidRow secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                               UserFeedback feedback, boolean showTurkToken, boolean showInOrder,
                               final ExerciseController controller, boolean isCRTDataMode, String instance) {
-    super(secondRow, currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, instance);
+    super(secondRow, currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, !isCRTDataMode, instance);
     String responseType = controller.getProps().getResponseType();
     responseChoice = new ResponseChoice(responseType, new ResponseChoice.ChoiceMade() {
       @Override
