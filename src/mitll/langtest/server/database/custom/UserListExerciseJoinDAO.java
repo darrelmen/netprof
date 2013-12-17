@@ -2,8 +2,6 @@ package mitll.langtest.server.database.custom;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.UserDAO;
-import mitll.langtest.server.database.UserExerciseDAO;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import org.apache.log4j.Logger;
@@ -29,7 +27,7 @@ public class UserListExerciseJoinDAO extends DAO {
 
   public static final String USER_EXERCISE_LIST_EXERCISE = "userexerciselist_exercise";
 
-  public UserListExerciseJoinDAO(Database database, UserDAO userDAO) {
+  public UserListExerciseJoinDAO(Database database) {
     super(database);
     try {
       createUserListTable(database);
@@ -45,14 +43,15 @@ public class UserListExerciseJoinDAO extends DAO {
       " (" +
       "uniqueid IDENTITY, " +
       "userlistid LONG, " +
-      "exerciseid VARCHAR, " +
+      //"exerciseid VARCHAR, " +
+      "exerciseid LONG, " +
       "FOREIGN KEY(userlistid) REFERENCES " +
       UserListDAO.USER_EXERCISE_LIST +
       "(uniqueid)" +    // user lists can be combinations of predefined and user defined exercises
-        //"," +
-/*      "FOREIGN KEY(exerciseid) REFERENCES " +
+        "," +
+      "FOREIGN KEY(exerciseid) REFERENCES " +
       UserExerciseDAO.USEREXERCISE +
-      "(uniqueid)" +*/
+      "(uniqueid)" +
       ")");
     statement.execute();
     statement.close();
@@ -64,26 +63,31 @@ public class UserListExerciseJoinDAO extends DAO {
    * <p/>
    * Uses return generated keys to get the user id
    *
-   * @see UserListManager#reallyCreateNewItem(mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserExercise)
+   * @see UserListManager#reallyCreateNewItem(long, mitll.langtest.shared.custom.UserExercise)
    */
   public void add(UserList userList, UserExercise exercise) {
     long id = 0;
 
     try {
       // there are much better ways of doing this...
-      logger.info("add :userList " + userList);
+      logger.info("UserListExerciseJoinDAO.add :userList " + userList + " exercise " + exercise);
+      logger.info("UserListExerciseJoinDAO.add :userList " + userList.getUniqueID() + " exercise " + exercise.getUniqueID());
 
       Connection connection = database.getConnection();
       PreparedStatement statement;
 
       statement = connection.prepareStatement(
         "INSERT INTO " + USER_EXERCISE_LIST_EXERCISE +
-          "(userlistid,exerciseid) " +
+          "(userlistid," +
+          "exerciseid" +
+          //"uniqueid" +
+          ") " +
           "VALUES(?,?);");
       int i = 1;
       //     statement.setLong(i++, userList.getUserID());
       statement.setLong(i++, userList.getUniqueID());
-      statement.setString(i++, exercise.getID());
+    //  statement.setString(i++, exercise.getID());
+      statement.setLong(i++, exercise.getUniqueID());
 
       int j = statement.executeUpdate();
 
@@ -101,15 +105,16 @@ public class UserListExerciseJoinDAO extends DAO {
       statement.close();
       database.closeConnection(connection);
 
-      logger.debug("now " + getCount(USER_EXERCISE_LIST_EXERCISE) + " and user exercise is " + userList);
+      logger.debug("\tUserListExerciseJoinDAO.add : now " + getCount(USER_EXERCISE_LIST_EXERCISE) + " and user exercise is " + userList);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
   }
 
   /**
-   * Pulls the list of users out of the database.
-   *
+   * Pulls the list of exercises out of the database.
+   * @see UserExerciseDAO#getOnList(long)
+   * @param exclude skip ones in this set of ids
    * @return
    */
   public List<String> getAllFor(long userListID, Set<String> exclude) {
