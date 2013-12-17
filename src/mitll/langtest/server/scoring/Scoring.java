@@ -83,39 +83,33 @@ public abstract class Scoring {
     }
     imageOutDir = deployPath + File.separator + imageOutDir;
 
+    boolean foundATranscript = false;
     // These may not all exist. The speech file is created only by multisv
     // right now.
     String phoneLabFile  = prependDeploy(audioFileNoSuffix + ".phones.lab");
-    String speechLabFile = prependDeploy(audioFileNoSuffix + ".speech.lab");
-    String wordLabFile   = prependDeploy(audioFileNoSuffix + ".words.lab");
     Map<ImageType, String> typeToFile = new HashMap<ImageType, String>();
-    boolean foundATranscript = false;
     if (new File(phoneLabFile).exists()) {
       typeToFile.put(ImageType.PHONE_TRANSCRIPT, phoneLabFile);
       foundATranscript = true;
-    //  System.out.println("writeTranscripts found " + new File(phoneLabFile).getAbsolutePath());
     }
+
+    String wordLabFile   = prependDeploy(audioFileNoSuffix + ".words.lab");
     if (new File(wordLabFile).exists()) {
       typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLabFile);
       foundATranscript = true;
-      //  System.out.println("writeTranscripts found " + new File(wordLabFile).getAbsolutePath());
     }
+
+    String speechLabFile = prependDeploy(audioFileNoSuffix + ".speech.lab");
     if (new File(speechLabFile).exists()) {
       foundATranscript = true;
       typeToFile.put(ImageType.SPEECH_TRANSCRIPT, speechLabFile);
-     // System.out.println("writeTranscripts found " + new File(speechLabFile).getAbsolutePath());
     }
     if (!foundATranscript) {
       logger.error("no label files found, e.g. " + phoneLabFile);
     }
 
-    //Map<ImageType, String> typeToImageFile2;
-
-    ImageWriter.EventAndFileInfo eventAndFileInfo = new ImageWriter().writeTranscripts(pathname,
+    return new ImageWriter().writeTranscripts(pathname,
         imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg);
-//    Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
-//    logger.debug("image map is " + sTypeToImage);
-    return eventAndFileInfo;
   }
 
   /**

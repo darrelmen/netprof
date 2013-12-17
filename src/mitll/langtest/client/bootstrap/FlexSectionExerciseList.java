@@ -49,10 +49,9 @@ import java.util.Set;
  */
 public class FlexSectionExerciseList extends HistoryExerciseList {
   private static final int HEADING_FOR_LABEL = 4;
-  public static final int PANEL_INSIDE_SCROLL_MIN_HEIGHT = 50;
-  public static final int PANEL_INSIDE_SCROLL_MIN_HEIGHT_SMALL = 30;
-  private static final int UNACCOUNTED_WIDTH = 120;
-
+ // public static final int PANEL_INSIDE_SCROLL_MIN_HEIGHT = 50;
+ // public static final int PANEL_INSIDE_SCROLL_MIN_HEIGHT_SMALL = 30;
+  private static final int UNACCOUNTED_WIDTH = 150;
 
   private final List<ButtonType> buttonTypes = new ArrayList<ButtonType>();
   private Map<String, ButtonType> typeToButton = new HashMap<String, ButtonType>();
@@ -73,14 +72,15 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @param feedback
    * @param showTurkToken
    * @param showInOrder
-   * @param showListBox
    * @param controller
-   * @param instance
-   */
+   * @param showTypeAhead @paramx showListBox
+   * @param instance          */
   public FlexSectionExerciseList(FluidRow secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                  UserFeedback feedback,
-                                 boolean showTurkToken, boolean showInOrder,/* boolean showListBox, */ExerciseController controller, String instance) {
-    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, controller.isCRTDataCollectMode(),instance);
+                                 boolean showTurkToken, boolean showInOrder,
+                                 ExerciseController controller,
+                                 boolean showTypeAhead, String instance) {
+    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, showTypeAhead, instance);
 
     sectionPanel = new FluidContainer();
     sectionPanel.getElement().setId("sectionPanel");
@@ -98,7 +98,6 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   @Override
   protected void addComponents() {
     PagingContainer<? extends ExerciseShell> exerciseShellPagingContainer = makePagingContainer();
-    //System.out.println("addComponents made container " + exerciseShellPagingContainer);
     addTableWithPager(exerciseShellPagingContainer);
   }
 
@@ -112,12 +111,13 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     System.out.println("FlexSectionExerciseList : getExercises : Get exercises for user=" + userID + " crt mode " + allowPlusInURL);
     this.userID = userID;
 
-    if (allowPlusInURL) {
-      service.getCompletedExercises((int)userID, new AsyncCallback<Set<String>>() {
+    if (controller.showCompleted()) {
+      service.getCompletedExercises((int)userID, controller.isReviewMode(), new AsyncCallback<Set<String>>() {
         @Override
         public void onFailure(Throwable caught) {}
         @Override
         public void onSuccess(Set<String> result) {
+          System.out.println("\n\n\n\tFlexSectionExerciseList : getCompletedExercises : completed for user=" + userID + " result " + result.size());
           controller.getExerciseList().setCompleted(result);
           addWidgets();
         }
@@ -265,7 +265,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     long now = System.currentTimeMillis();
     if (now - then > 200) System.out.println("\taddButtonRow took " + (now - then) + " millis");
 
-    if (last != null) setSizesAndPushFirst(last/*, usuallyThereWillBeAHorizScrollbar*/);
+    if (last != null) setSizesAndPushFirst(last);
     addBottomText(container);
   }
 
@@ -310,6 +310,10 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     clearColumnContainer.add(clearButton);
   }
 
+  /**
+   * @see #addButtonRow(java.util.List, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection, boolean)
+   * @param firstTypeRow
+   */
   private void makePanelInsideScrollPanel(FlexTable firstTypeRow) {
     panelInsideScrollPanel = new HorizontalPanel();
     panelInsideScrollPanel.addStyleName("blueBackground");
@@ -318,6 +322,11 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     makeScrollPanel(firstTypeRow, panelInsideScrollPanel);
   }
 
+  /**
+   * @see #makePanelInsideScrollPanel(com.google.gwt.user.client.ui.FlexTable)
+   * @param firstTypeRow
+   * @param panelInside
+   */
   private void makeScrollPanel(FlexTable firstTypeRow, Panel panelInside) {
     this.scrollPanel = new ScrollPanel(panelInside);
     this.scrollPanel.addStyleName("leftFiveMargin");
@@ -327,7 +336,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     div.addStyleName("positionAbsolute");
     div.add(scrollPanel);*/
     firstTypeRow.setWidget(0, 2, scrollPanel);
-    setScrollPanelWidth();
+   // setScrollPanelWidth();
   }
 
   private void populateButtonGroups(Collection<String> types) {
@@ -579,6 +588,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
 
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
+                              System.out.println("deferred set scroll panel width");
         setScrollPanelWidth();
       }
     });
@@ -703,8 +713,11 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
 
   protected void setScrollPanelWidth() {
     if (labelColumn != null) {
-      int width = Window.getClientWidth() - labelColumn.getOffsetWidth() - clearColumnContainer.getOffsetWidth() - UNACCOUNTED_WIDTH;
-      System.out.println("setScrollPanelWidth : scrollPanel width is " + width);
+      int leftSideWidth = labelColumn.getOffsetWidth() + clearColumnContainer.getOffsetWidth();
+      if (leftSideWidth == 0) leftSideWidth = 130;
+      int width = Window.getClientWidth() - leftSideWidth - UNACCOUNTED_WIDTH;
+      System.out.println("FlexSectionExeciseList.setScrollPanelWidth : scrollPanel width is " + width +"\n\tclient " +Window.getClientWidth() +
+        " label col " +labelColumn.getOffsetWidth() + " clear " +clearColumnContainer.getOffsetWidth() + " unacct "+UNACCOUNTED_WIDTH);
       scrollPanel.setWidth(Math.max(300, width) + "px");
     }
     else {
