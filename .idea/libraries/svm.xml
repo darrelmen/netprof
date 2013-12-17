@@ -1,7 +1,7 @@
 <component name="libraryTable">
-  <library name="imagewriter">
+  <library name="svm">
     <CLASSES>
-      <root url="jar://$USER_HOME$/clean/bootstrap/imagewriter/imagewriter.jar!/" />
+      <root url="jar://$PROJECT_DIR$/war/WEB-INF/lib/svm.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
