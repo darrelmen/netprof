@@ -27,7 +27,7 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
    */
   @Override
   protected void makeNavigationHelper(Exercise e, ExerciseController controller) {
-    navigationHelper = new NavigationHelper(e, controller, null,controller.getExerciseList(),false);  // todo how to control whether to add buttons???
+    navigationHelper = new NavigationHelper(e, controller, null,controller.getExerciseList(),true);  // todo how to control whether to add buttons???
     textResponse = new TextResponse(controller.getUser(), soundFeedback, new TextResponse.AnswerPosted() {
       @Override
       public void answerPosted() {
