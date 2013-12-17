@@ -6,7 +6,6 @@ import mitll.langtest.shared.User;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -17,6 +16,8 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class UserList extends ExerciseShell {
+  public static final String MY_LIST = "Favorites";
+
   private long uniqueID;
 
   private User creator;
@@ -25,7 +26,7 @@ public class UserList extends ExerciseShell {
   private String name;
   private String description;
   private String classMarker;
-  private long modified;
+  //private long modified;
   private boolean isPrivate;
   private Collection<UserExercise> exercises = new ArrayList<UserExercise>();
 
@@ -48,13 +49,13 @@ public class UserList extends ExerciseShell {
     this.classMarker = classMarker;
     this.isPrivate = isPrivate;
     visitorIDs = new HashSet<Long>();
-    addVisitor(user);
-    this.modified = modified;
+    if (user != null) addVisitor(user);
+    //this.modified = modified;
   }
 
   public void addExercise(UserExercise toAdd) {
     exercises.add(toAdd);
-    modified = System.currentTimeMillis();
+    //modified = System.currentTimeMillis();
   }
 
   /**
@@ -103,9 +104,9 @@ public class UserList extends ExerciseShell {
     this.uniqueID = uniqueID;
   }
 
-  public long getModified() {
+/*  public long getModified() {
     return modified;
-  }
+  }*/
 
   public boolean contains(UserExercise userExercise) {
     return getExercises().contains(userExercise);
@@ -119,10 +120,14 @@ public class UserList extends ExerciseShell {
     return getExercises().isEmpty();
   }
 
+  public boolean isFavorite() {
+    return getName().equals(MY_LIST);
+  }
+
   @Override
   public String toString() {
     return "UserList #" + getUniqueID() + " '"+name + "' by " + creator.id+ " visited by " + visitorIDs+
-        "  : "+
+        " :"+
         " with " + getExercises().size() + " exercises.";
   }
 }
