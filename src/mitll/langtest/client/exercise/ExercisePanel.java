@@ -74,7 +74,8 @@ public class ExercisePanel extends VerticalPanel implements
   protected NavigationHelper navigationHelper;
   protected Map<Integer,Set<Object>> indexToWidgets = new HashMap<Integer, Set<Object>>();
   protected ListInterface exerciseList;
-
+  private TabPanel tabPanel = null;
+  private Map<Integer,Tab> indexToTab = new HashMap<Integer, Tab>();
 
   /**
    * @see ExercisePanelFactory#getExercisePanel
@@ -88,6 +89,7 @@ public class ExercisePanel extends VerticalPanel implements
   public ExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                        final ExerciseController controller, ListInterface exerciseList) {
     this.exercise = e;
+    System.out.println("\n\nexercise is " + exercise.getID());
     this.controller = controller;
     this.service = service;
     this.feedback = userFeedback;
@@ -119,6 +121,7 @@ public class ExercisePanel extends VerticalPanel implements
     // add next and prev buttons
     add(navigationHelper);
     navigationHelper.addStyleName("topMargin");
+    getElement().setId("ExercisePanel");
   }
 
   protected NavigationHelper getNavigationHelper(ExerciseController controller) {
@@ -182,8 +185,6 @@ public class ExercisePanel extends VerticalPanel implements
 
   public void onResize() {}
   public boolean isBusy() { return false; }
-  private TabPanel tabPanel = null;
-  private Map<Integer,Tab> indexToTab = new HashMap<Integer, Tab>();
 
   @Override
   public void setBusy(boolean v) {
@@ -395,6 +396,8 @@ public class ExercisePanel extends VerticalPanel implements
     int i = 1;
     int user = controller.getUser();
     final Set<Widget> incomplete = new HashSet<Widget>();
+
+    System.out.println("postAnswers " + completedExercise);
 
     boolean allHaveText = true;
     for (final Widget tb : answers) {
