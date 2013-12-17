@@ -385,10 +385,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       flashcard = new Flashcard();
       title = flashcard.makeNPFHeaderRow(props.getSplash());
     }
-/*    else if (props.isTrackUsers()) {
-      flashcard = new Flashcard();
-      title = flashcard.makeNPFHeaderRow(props.getSplash(), props.getAppTitle());
-    }*/
     else if (props.isFlashcardTeacherView() || props.isAutocrt()) {
       flashcard = new Flashcard();
       title = flashcard.getHeaderRow(props.getSplash(), "NewProF2.png",props.getAppTitle());
@@ -779,11 +775,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer, exerciseList), userManager, 1);
     }
     doEverythingAfterFactory(userID);
-
-    // Tamas aksed us to turn this off 11/14/13
-/*    if (getLanguage().equalsIgnoreCase("Pashto")) {
-      new FontChecker(this).checkPashto();
-    }*/
   }
 
   /**
