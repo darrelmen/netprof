@@ -1,12 +1,17 @@
 package mitll.langtest.client.user;
 
+import com.github.gwtbootstrap.client.ui.Label;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -63,6 +68,7 @@ public class UserTable extends PagerTable {
         }
 
         Widget table = getTable(result, service);
+        dialogVPanel.add(new Anchor(getURL2()));
         dialogVPanel.add(table);
         dialogVPanel.add(closeButton);
 
@@ -79,6 +85,18 @@ public class UserTable extends PagerTable {
         dialogBox.hide();
       }
     });
+  }
+
+  private SafeHtml getURL2() {
+    SafeHtmlBuilder sb = new SafeHtmlBuilder();
+    sb.appendHtmlConstant("<a href='" +
+      "downloadUsers" +
+      //   name +
+      "'" +
+      ">");
+    sb.appendEscaped("Download Excel");
+    sb.appendHtmlConstant("</a>");
+    return sb.toSafeHtml();
   }
 
   private Widget getTable(List<User> result, final LangTestDatabaseAsync service) {
