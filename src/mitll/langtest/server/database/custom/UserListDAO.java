@@ -3,7 +3,6 @@ package mitll.langtest.server.database.custom;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.UserDAO;
-import mitll.langtest.server.database.UserExerciseDAO;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import org.apache.log4j.Logger;
@@ -30,8 +29,8 @@ public class UserListDAO extends DAO {
 
   public static final String USER_EXERCISE_LIST = "userexerciselist";
   private UserDAO userDAO;
-  UserExerciseDAO userExerciseDAO;
-  UserListVisitorJoinDAO userListVisitorJoinDAO;
+  private UserExerciseDAO userExerciseDAO;
+  private UserListVisitorJoinDAO userListVisitorJoinDAO;
   public UserListDAO(Database database, UserDAO userDAO) {
     super(database);
     try {
@@ -78,7 +77,7 @@ public class UserListDAO extends DAO {
    * <p/>
    * Uses return generated keys to get the user id
    *
-   * @see mitll.langtest.server.database.custom.UserListManager#reallyCreateNewItem(mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserExercise)
+   * @see UserListManager#reallyCreateNewItem(long, mitll.langtest.shared.custom.UserExercise)
    */
   public void add(UserList userList) {
     long id = 0;
@@ -128,6 +127,33 @@ public class UserListDAO extends DAO {
     }
   }
 
+  public void updateModified(long uniqueID) {
+    try {
+      Connection connection = database.getConnection();
+
+      String sql = "UPDATE " + USER_EXERCISE_LIST +
+        " " +
+        "SET " +
+        "modified=? "+
+        "WHERE uniqueid=?";
+
+      PreparedStatement statement = connection.prepareStatement(sql);
+      statement.setTimestamp(1,new Timestamp(System.currentTimeMillis()));
+      statement.setLong(2, uniqueID);
+      int i = statement.executeUpdate();
+
+      //if (false) logger.debug("UPDATE " + i);
+      if (i == 0) {
+        logger.error("huh? didn't update the userList for " + uniqueID + " sql " + sql);
+      }
+
+      statement.close();
+      database.closeConnection(connection);
+    } catch (Exception e) {
+      logger.error("got " + e, e);
+    }
+  }
+
   public int getCount() { return getCount(USER_EXERCISE_LIST); }
 
 
@@ -135,11 +161,12 @@ public class UserListDAO extends DAO {
    * Pulls the list of users out of the database.
    *
    * @return
+   * @param userid
    */
-  public List<UserList> getAll() {
+  public List<UserList> getAll(long userid) {
     try {
-      String sql = "SELECT * from " + USER_EXERCISE_LIST + " order by modified";
-      return getUserLists(sql);
+      String sql = "SELECT * from " + USER_EXERCISE_LIST + " order by modified desc";
+      return getUserLists(sql,userid);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
@@ -149,14 +176,14 @@ public class UserListDAO extends DAO {
   public List<UserList> getAllPublic() {
     try {
       String sql = "SELECT * from " + USER_EXERCISE_LIST + " where isprivate=false order by modified";
-      return getUserLists(sql);
+      return getUserLists(sql,-1);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
     return Collections.emptyList();
   }
 
-  public List<UserList> getAllOwnedBy(long id) {
+/*  public List<UserList> getAllOwnedBy(long id) {
     try {
       String sql = "SELECT * from " + USER_EXERCISE_LIST + " where creatorid=" + id+
         " order by modified";
@@ -165,60 +192,80 @@ public class UserListDAO extends DAO {
       logger.error("got " + ee, ee);
     }
     return Collections.emptyList();
-  }
+  }*/
 
   public UserList getWhere(long unique) {
-    //String unique = exid.substring("Custom_".length());
     String sql = "SELECT * from " + USER_EXERCISE_LIST + " where uniqueid=" + unique + " order by modified";
     try {
-      List<UserList> lists = getUserLists(sql);
+      List<UserList> lists = getUserLists(sql,-1);
       if (lists.isEmpty()) {
         logger.error("huh? no custom exercise with id " + unique);
         return null;
-      } else return lists.iterator().next();
+      } else {
+        return lists.iterator().next();
+      }
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
     return null;
   }
 
+  /**
+   * TODO don't want to always get all the exercises!
+   * @see UserListManager#getUserListByID(long)
+   * @param unique
+   * @return
+   */
   public UserList getWithExercises(long unique) {
     UserList where = getWhere(unique);
     populateList(where);
     return where;
   }
 
-  private void populateList(UserList where) {
-    Collection<UserExercise> onList = userExerciseDAO.getOnList(where.getUniqueID());
-    where.setExercises(onList);
-    where.setVisitors(userListVisitorJoinDAO.getWhere(where.getUniqueID()));
-  }
-
-  private List<UserList> getUserLists(String sql) throws SQLException {
+  private List<UserList> getUserLists(String sql,long userid) throws SQLException {
     Connection connection = database.getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
-    int i;
-
     ResultSet rs = statement.executeQuery();
-    List<UserList> exercises = new ArrayList<UserList>();
+    List<UserList> lists = new ArrayList<UserList>();
 
     while (rs.next()) {
       long uniqueid = rs.getLong("uniqueid");
-      exercises.add(new UserList(uniqueid, //id
+      lists.add(new UserList(uniqueid, //id
         userDAO.getUserWhere(rs.getLong("creatorid")), // age
         rs.getString("name"), // exp
         rs.getString("description"), // exp
         rs.getString("classmarker"), // exp
         rs.getTimestamp("modified").getTime(),
         rs.getBoolean("isprivate")
-        )
+      )
       );
     }
     rs.close();
     statement.close();
     database.closeConnection(connection);
-    for (UserList ul : exercises) populateList(ul);
-    return exercises;
+
+    for (UserList ul : lists) {
+      if (userid == -1 || ul.getCreator().id == userid || !ul.isFavorite()) {   // skip other's favorites
+        populateList(ul);
+      }
+      else {
+        //logger.info("for " + userid +" skipping " + ul);
+      }
+    }
+    return lists;
+  }
+
+  /**
+   * TODO : This is going to get slow?
+   * @param where
+   */
+  private void populateList(UserList where) {
+    Collection<UserExercise> onList = userExerciseDAO.getOnList(where.getUniqueID());
+    logger.debug("populateList : got " + onList.size() + " for list "+where.getUniqueID());
+    where.setExercises(onList);
+    where.setVisitors(userListVisitorJoinDAO.getWhere(where.getUniqueID()));
+
+    logger.debug("\tlist now "+where);
   }
 
   public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {

@@ -26,24 +26,24 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   private Exercise exercise;
   private final ExerciseController controller;
   private final LangTestDatabaseAsync service;
-
+  private final boolean recordInResults;
   /**
    * @see GoodwaveExercisePanel.ASRRecordAudioPanel.MyPostAudioRecordButton
    * @param exercise
    * @param controller
    * @param service
    * @param index
-   * @paramx record1
-   * @paramx record2
+   * @param recordInResults
    */
   public PostAudioRecordButton(Exercise exercise, final ExerciseController controller, LangTestDatabaseAsync service,
-                               int index, boolean addKeyHandler) {
-    super(controller.getRecordTimeout(), false);
+                               int index, boolean addKeyHandler, boolean recordInResults) {
+    super(controller.getRecordTimeout(), false, true);
     setRecordingListener(this);
     this.index = index;
     this.exercise = exercise;
     this.controller = controller;
     this.service = service;
+    this.recordInResults = recordInResults;
     getElement().setId("PostAudioRecordButton");
   }
 
@@ -69,7 +69,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
       reqid,
       !exercise.isPromptInEnglish(),
       controller.getAudioType(),
-      false, new AsyncCallback<AudioAnswer>() {
+      false, recordInResults, new AsyncCallback<AudioAnswer>() {
         public void onFailure(Throwable caught) {
           long now = System.currentTimeMillis();
           System.out.println("PostAudioRecordButton : (failure) posting audio took " + (now - then) + " millis");
