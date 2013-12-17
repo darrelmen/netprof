@@ -183,7 +183,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public ExerciseListWrapper getExerciseIds(int reqID, long userID) {
     logger.debug("getExerciseIds : getting exercise ids for User id=" + userID + " config " + relativeConfigDir);
     List<Exercise> exercises = getExercises(userID);
-    return getExerciseListWrapper(reqID, exercises);
+    ExerciseListWrapper exerciseListWrapper = getExerciseListWrapper(reqID, exercises);
+    logger.debug("\tgetExerciseIds : found " + exerciseListWrapper.getExercises().size() +
+        " exercise ids for User id=" + userID);
+
+    return exerciseListWrapper;
   }
 
   private List<ExerciseShell> getExerciseShells(Collection<Exercise> exercises) {
@@ -427,13 +431,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public ExerciseListWrapper getExerciseIds(int reqID) {
     List<Exercise> exercises = getExercises();
-    return makeExerciseListWrapper(reqID, exercises);
+    ExerciseListWrapper exerciseListWrapper = makeExerciseListWrapper(reqID, exercises);
+    logger.debug("returning " + exerciseListWrapper.getExercises().size()+ " exercises");
+    return exerciseListWrapper;
   }
 
   private ExerciseListWrapper makeExerciseListWrapper(int reqID, List<Exercise> exercises) {
     if (!exercises.isEmpty()) {
       ensureMP3s(exercises.get(0));
     }
+
     return new ExerciseListWrapper(reqID, getExerciseShells(exercises), exercises.isEmpty() ? null : exercises.get(0));
   }
 
@@ -504,7 +511,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private List<Exercise> getExercisesInModeDependentOrder(long userID) {
     List<Exercise> exercises;
     if (serverProps.dataCollectMode) {
-      logger.debug("in data collect mode");
+      logger.debug("getExercisesInModeDependentOrder in data collect mode");
       if (serverProps.biasTowardsUnanswered) {
         //logger.debug("in biasTowardsUnanswered mode : user " +userID);
 
@@ -519,6 +526,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           setPromptAndRecordOnExercises(exercises);
         }
       }
+      makeAutoCRT();
     } else {
       //if (!serverProps.isArabicTextDataCollect()) logger.debug("*not* in data collect mode");
       exercises = serverProps.isArabicTextDataCollect() ? db.getExercisesGradeBalancing(userID) : db.getUnmodExercises();
@@ -634,6 +642,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   List<Exercise> getExercises() {
     List<Exercise> exercises = db.getExercises();
     makeAutoCRT();   // side effect of db.getExercises is to make the exercise DAO which is needed here...
+    logger.debug("getExercises found " + exercises.size()+ " exercises");
     return exercises;
   }
 
