@@ -79,14 +79,14 @@ public class NavigationHelper extends HorizontalPanel {
                                          final ExerciseController controller, boolean addButtons) {
     boolean useKeyHandler = controller.isCollectAudio();
 
-    makePrevButton(e, controller, addButtons, useKeyHandler);
+    makePrevButton(e, controller, addButtons);
     makeNextButton(e, controller, addButtons);
 
     // TODO : revisit in the context of text data collections
     addKeyHandler(e, controller, useKeyHandler);
   }
 
-  private void makePrevButton(final Exercise e, ExerciseController controller, boolean addButtons, boolean useKeyHandler) {
+  private void makePrevButton(final Exercise e, ExerciseController controller, boolean addButtons) {
     this.prev = new Button("Previous");
     getPrev().addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
@@ -95,7 +95,7 @@ public class NavigationHelper extends HorizontalPanel {
     });
     boolean onFirst = !listContainer.onFirst(e);
     getPrev().setEnabled(onFirst);
-    if (useKeyHandler) getPrev().setTitle(LEFT_ARROW_TOOLTIP);
+    if (false) getPrev().setTitle(LEFT_ARROW_TOOLTIP);
     getPrev().setType(ButtonType.SUCCESS);
 
     if (addButtons) add(getPrev());
