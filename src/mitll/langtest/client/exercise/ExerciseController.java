@@ -49,12 +49,14 @@ public interface ExerciseController {
   boolean isGrading();
   boolean isLogClientMessages();
   String getAudioType();
+  boolean isReviewMode();
+  boolean showCompleted();
 
   void showFlashHelp();
   String getLanguage();
   boolean isPromptBeforeNextItem();
   boolean isRightAlignContent();
-  boolean isFlashCard();
+ // boolean isFlashCard();
   boolean isGoodwaveMode();
   int getLeftColumnWidth();
   int getHeightOfTopRows();
