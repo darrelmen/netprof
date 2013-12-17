@@ -48,6 +48,7 @@ public class Result implements IsSerializable {
   public static final String AUDIO_TYPE_FAST_AND_SLOW = "fastAndSlow";
   public static final String AUDIO_TYPE_DEMO = "demo";
   public static final String AUDIO_TYPE_PRACTICE = "practice";
+  public static final String AUDIO_TYPE_REVIEW = "review";
 
 /*  public enum AudioType implements IsSerializable {
     UNSET,
