@@ -4,6 +4,7 @@ import mitll.flashcard.UserState;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
+import mitll.langtest.server.database.custom.UserExerciseDAO;
 import mitll.langtest.server.database.custom.UserListDAO;
 import mitll.langtest.server.database.custom.UserListExerciseJoinDAO;
 import mitll.langtest.server.database.custom.UserListManager;
@@ -143,8 +144,8 @@ public class DatabaseImpl implements Database {
     userDAO = new UserDAO(this);
     UserListDAO userListDAO = new UserListDAO(this, userDAO);
 
-    UserListExerciseJoinDAO userListExerciseJoinDAO = new UserListExerciseJoinDAO(this, userDAO);
-    userExerciseDAO = new UserExerciseDAO(this,userListExerciseJoinDAO);
+    userExerciseDAO = new UserExerciseDAO(this);
+    UserListExerciseJoinDAO userListExerciseJoinDAO = new UserListExerciseJoinDAO(this);
     dliUserDAO = new DLIUserDAO(this);
     resultDAO = new ResultDAO(this,userDAO);
     answerDAO = new AnswerDAO(this, resultDAO);
@@ -242,10 +243,14 @@ public class DatabaseImpl implements Database {
    */
   public List<Exercise> getExercises() { return getExercises(useFile, lessonPlanFile); }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise(String)
+   * @param id
+   * @return
+   */
   public Exercise getExercise(String id) { return exerciseDAO.getExercise(id); }
 
   /**
-   *
    *
    * @param useFile
    * @param lessonPlanFile
@@ -571,9 +576,14 @@ public class DatabaseImpl implements Database {
     }*/
     logger.debug("getUserStateWrapper : making user state for " + userID + " with " + strings.length + " exercises");
     userStateWrapper = new UserStateWrapper(userState, userID, exercises);
-    for (ResultDAO.SimpleResult result : resultDAO.getResultsForUser(userID)) {
+    List<ResultDAO.SimpleResult> resultsForUser = resultDAO.getResultsForUser(userID);
+    //logger.debug("getUserStateWrapper : found existing " + resultsForUser.size() + " results");
+
+    for (ResultDAO.SimpleResult result : resultsForUser) {
       userStateWrapper.addCompleted(result.id);
     }
+    logger.debug("getUserStateWrapper : after found existing " + userStateWrapper.getCompleted().size() + " completed.");
+
     return userStateWrapper;
   }
 
@@ -1446,30 +1456,4 @@ public class DatabaseImpl implements Database {
   }
 
   public String toString() { return "Database : "+ connection.getConnection(); }
-
-/*  private static String getConfigDir(String language) {
-    String installPath = ".";
-    String dariConfig = File.separator +
-      "war" +
-      File.separator +
-      "config" +
-      File.separator +
-      language +
-      File.separator;
-    return installPath + dariConfig;
-  }*/
-
-/*  public static void main(String [] arg) {
-
-    String language = "pilot";
-    final String configDir = getConfigDir(language);
-
-    DatabaseImpl unitAndChapter = new DatabaseImpl(
-      configDir,
-      "arabicText",
-      "");
-    unitAndChapter.useFile =false;
-    unitAndChapter.mediaDir = "config";
-    unitAndChapter.getRandomBalancedList(0);
-  }*/
 }
