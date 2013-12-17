@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
@@ -338,7 +339,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
 
   @Override
   public boolean onLast(ExerciseShell current) {
-    return false;  //To change body of implemented methods use File | Settings | File Templates.
+    return false;
   }
 
   @Override
@@ -440,4 +441,10 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
       }
     }
   }
+
+@Override
+public void addCompleted(String id) {
+	// TODO Auto-generated method stub
+	
+}
 }
