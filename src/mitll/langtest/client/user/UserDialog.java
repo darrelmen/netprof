@@ -8,6 +8,7 @@ import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.Modal;
 import com.github.gwtbootstrap.client.ui.PasswordTextBox;
 import com.github.gwtbootstrap.client.ui.TextBox;
+import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.BackdropType;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.dom.client.NativeEvent;
@@ -62,7 +63,7 @@ public abstract class UserDialog extends BasicDialog {
     this.userNotification =  userNotification;
   }
 
-  protected int getAge(TextBox ageEntryBox) {
+  protected int getAge(TextBoxBase ageEntryBox) {
     int i = 0;
     try {
       i = props.isDataCollectAdminView() ? MAX_AGE-1 : Integer.parseInt(ageEntryBox.getText());
@@ -98,20 +99,12 @@ public abstract class UserDialog extends BasicDialog {
     login.setType(ButtonType.PRIMARY);
     login.setEnabled(true);
     login.setTitle("Hit enter to log in.");
-    // We can set the id of a widget by accessing its Element
     login.getElement().setId("login");
     hp.add(login);
 
     dialogBox.add(hp);
     return login;
   }
-
-  /*
-
-  protected FormField addControlFormField(Panel dialogBox, String label) {
-    return addControlFormField(dialogBox, label, false, 0);
-  }
-*/
 
   protected FormField addControlFormField(Panel dialogBox, String label, int minLength) {
     return addControlFormField(dialogBox, label, false, minLength);
@@ -128,31 +121,9 @@ public abstract class UserDialog extends BasicDialog {
     return new FormField(user, userGroup, minLength);
   }
 
-/*  protected ListBoxFormField getListBoxFormField(Panel dialogBox, String label, ListBox user) {
-    addControlGroupEntry(dialogBox, label, user);
-    return new ListBoxFormField(user);
-  }*/
-
-/*  private ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget user) {
-    final ControlGroup userGroup = new ControlGroup();
-    userGroup.addStyleName("leftFiveMargin");
-
-    Controls controls = new Controls();
-    userGroup.add(new ControlLabel(label));
-    controls.add(user);
-    userGroup.add(controls);
-
-    dialogBox.add(userGroup);
-    return userGroup;
-  }*/
-
   protected void markError(FormField dialectGroup, String message) {
     markError(dialectGroup.group, dialectGroup.box, "Try Again", message);
   }
-
-  /*  protected void setupPopover(final Widget w, String heading, final String message) {
-    setupPopover(w, heading, message, Placement.RIGHT);
-  }*/
 
   private HandlerRegistration keyHandler;
 
@@ -213,7 +184,7 @@ public abstract class UserDialog extends BasicDialog {
 
   protected boolean checkPassword(FormField password) { return checkPassword(password.box);  }
 
-  private boolean checkPassword(TextBox password) {
+  private boolean checkPassword(TextBoxBase password) {
     String trim = password.getText().trim();
     return trim.equalsIgnoreCase(GRADING) || trim.equalsIgnoreCase(TESTING);
   }

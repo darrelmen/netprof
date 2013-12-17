@@ -70,7 +70,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   private Button timedFlashcardCopy;
   private TextBox urlInputBox = new TextBox();
   private TextBox urlInputBox2 = new TextBox();
-  private int tries = 10;
+ // private int tries = 10;
   private String token = "";
   private int frameHeight = FRAME_HEIGHT;
   private CellTable<? extends ExerciseShell> table;
@@ -78,8 +78,8 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
 
   public TableSectionExerciseList(FluidRow secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                   UserFeedback feedback, boolean showTurkToken, boolean showInOrder,
-                                  /*boolean showListBox,*/ ExerciseController controller, String instance) {
-    super(secondRow, currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, /*showListBox,*/ controller, instance);
+                                  ExerciseController controller, String instance) {
+    super(secondRow, currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, false, instance);
     setWidth("100%");
     this.frameHeight = controller.getFlashcardPreviewFrameHeight();
     responseChoice = new ResponseChoice(controller.getProps().getResponseType());
@@ -88,7 +88,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   @Override
   public void clear() {  removeComponents();  }
 
- // @Override
+  @Override
   protected void addTypeAhead(FlowPanel column) {}
 
   protected void noSectionsGetExercises(long userID) {
@@ -96,8 +96,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     addTableToLayout(objectObjectMap);
   }
 
-    //container.add(responseChoice.getResponseTypeWidget());
-    @Override
+  @Override
   protected void addTableWithPager(PagingContainer<? extends ExerciseShell> pagingContainer) {  }
 
   private Panel getPagerAndTable(CellTable<?> table) {
