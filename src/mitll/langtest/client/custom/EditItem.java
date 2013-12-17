@@ -57,9 +57,13 @@ public class EditItem {
     }
     pagingContainer.flush();
     UserExercise exerciseShell = pagingContainer.selectFirst();
-    if (exerciseShell == null) System.err.println("huh? nothing first?");
-
-    editItem(exerciseShell, right, ul, itemMarker);
+    if (exerciseShell == null) {
+      System.err.println("huh? nothing first?");
+      showPopup("No editable items yet.",container);
+    }
+    else {
+      editItem(exerciseShell, right, ul, itemMarker);
+    }
     return hp;
   }
 
