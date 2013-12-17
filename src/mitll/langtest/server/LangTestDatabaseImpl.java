@@ -15,7 +15,6 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.SectionHelper;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.AutoCRTScoring;
-import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.DLIUser;
@@ -177,18 +176,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       pathHelper.getInstallPath(), id, name, language, notes);
   }
 
-  /**
-   * @see mitll.langtest.client.list.ExerciseList#getExercises
-   * @param reqID
-   * @param userID
-   * @return
-   */
-  public ExerciseListWrapper getExerciseIds(int reqID, long userID) {
-    logger.debug("getExerciseIds : getting exercise ids for User id=" + userID + " config " + relativeConfigDir);
-    List<Exercise> exercises = getExercises(userID);
-    return getExerciseListWrapper(reqID, exercises);
-  }
-
   private List<ExerciseShell> getExerciseShells(Collection<Exercise> exercises) {
     return serverProps.getLanguage().equals("English") ? getExerciseShellsShort(exercises) : getExerciseShellsCombined(exercises);
   }
@@ -210,6 +197,28 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
+   * @see mitll.langtest.client.list.ExerciseList#getExercises(long, boolean)
+   * @return
+   * @param reqID
+   */
+  public ExerciseListWrapper getExerciseIds(int reqID) {
+    List<Exercise> exercises = getExercises();
+    return makeExerciseListWrapper(reqID, exercises);
+  }
+
+  /**
+   * @see mitll.langtest.client.list.ExerciseList#getExercises
+   * @param reqID
+   * @param userID
+   * @return
+   */
+  public ExerciseListWrapper getExerciseIds(int reqID, long userID) {
+    logger.debug("getExerciseIds : getting exercise ids for User id=" + userID + " config " + relativeConfigDir);
+    List<Exercise> exercises = getExercises(userID);
+    return getExerciseListWrapper(reqID, exercises);
+  }
+
+  /**
    * @see mitll.langtest.client.list.PagingExerciseList#loadExercises(String, String)
    * @param reqID
    * @param userID
@@ -219,8 +228,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public ExerciseListWrapper getExerciseIds(int reqID, long userID, String prefix, long userListID) {
-    logger.debug("getExerciseIds : getting exercise ids for User id=" + userID + " config " + relativeConfigDir + " and user list id " +userListID);
     List<Exercise> exercises = getExercises(userID);
+    logger.debug("getExerciseIds : getting exercise ids for User id=" + userID + " config " + relativeConfigDir +
+      " and user list id " +userListID + " full list size is " + exercises.size());
 
     if (userListID != -1) {
       UserList userListByID = db.getUserListManager().getUserListByID(userListID);
@@ -284,6 +294,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     List<Exercise> exercises = trie.getExercises(prefix);
 
     return makeExerciseListWrapper(reqID, exercises);
+  }
+
+  private ExerciseListWrapper makeExerciseListWrapper(int reqID, List<Exercise> exercises) {
+    if (!exercises.isEmpty()) {
+      ensureMP3s(exercises.get(0));
+    }
+    return new ExerciseListWrapper(reqID, getExerciseShells(exercises), exercises.isEmpty() ? null : exercises.get(0));
   }
 
   private List<Exercise> getExercisesForState(int reqID, Map<String, Collection<String>> typeToSection, long userID) {
@@ -449,23 +466,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.list.ExerciseList#getExercisesInOrder()
-   * @return
-   * @param reqID
-   */
-  public ExerciseListWrapper getExerciseIds(int reqID) {
-    List<Exercise> exercises = getExercises();
-    return makeExerciseListWrapper(reqID, exercises);
-  }
-
-  private ExerciseListWrapper makeExerciseListWrapper(int reqID, List<Exercise> exercises) {
-    if (!exercises.isEmpty()) {
-      ensureMP3s(exercises.get(0));
-    }
-    return new ExerciseListWrapper(reqID, getExerciseShells(exercises), exercises.isEmpty() ? null : exercises.get(0));
-  }
-
-  /**
+   * TODO : join with annotation data when doing QC.
+   *
    * @see mitll.langtest.client.list.ExerciseList#askServerForExercise
    * @param id
    * @return
@@ -477,6 +479,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (byID == null) {
       byID = db.getUserExerciseWhere(id);
     }
+    db.getUserListManager().addAnnotations(byID); // TODO nice not to do this when not in classroom...
+    logger.debug("getExercise : returning " +byID);
     if (byID == null) {
       logger.error("getExercise : huh? couldn't find exercise with id " + id + " when examining " + exercises.size() + " items");
     }
@@ -659,7 +663,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * Called from the client:
-   * @see mitll.langtest.client.list.ExerciseList#getExercisesInOrder()
+   * @see mitll.langtest.client.list.ExerciseList#getExercises()
    * @return
    */
   List<Exercise> getExercises() {
@@ -956,7 +960,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.custom.Navigation#doCreate
+   * @see mitll.langtest.client.custom.CreateListDialog#doCreate
    * @param userid
    * @param name
    * @param description
@@ -973,12 +977,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * @see mitll.langtest.client.custom.Navigation#showInitialState()
    * @see mitll.langtest.client.custom.Navigation#viewLessons
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#populateListChoices
+   * @see mitll.langtest.client.custom.NPFExercise#populateListChoices
    * @param userid
    * @param onlyCreated
+   * @param getExercises
    * @return
    */
-  public Collection<UserList> getListsForUser(long userid, boolean onlyCreated) {
+  public Collection<UserList> getListsForUser(long userid, boolean onlyCreated, boolean getExercises) {
    return db.getUserListManager().getListsForUser(userid, onlyCreated);
   }
 
@@ -987,10 +992,38 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getUserListManager().getUserListsForText(search);
   }
 
-  public Collection<UserExercise> addItemToUserList(long userListID, UserExercise userExercise) {
-    return db.getUserListManager().addItemToUserList(userListID, userExercise);
+  /**
+   * @see mitll.langtest.client.custom.NPFExercise#populateListChoices(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController, com.github.gwtbootstrap.client.ui.SplitDropdownButton)
+   * @param userListID
+   * @param userExercise
+   * @return
+   */
+  public void addItemToUserList(long userListID, UserExercise userExercise) {
+    db.getUserListManager().addItemToUserList(userListID, userExercise);
   }
 
+  @Override
+  public void addAnnotation(String exerciseID, String field, String status, String comment) {
+    db.getUserListManager().addAnnotation(exerciseID,field,status,comment);
+  }
+
+  public void markReviewed(String id, boolean isCorrect) {
+    db.getUserListManager().markReviewed(id);
+    if (!isCorrect) {
+      db.getUserListManager().markIncorrect(id);
+    }
+  }
+
+  @Override
+  public UserList getReviewList() { return db.getUserListManager().getReviewList(); }
+
+  /**
+   * @see mitll.langtest.client.custom.NewUserExercise.CreateFirstRecordAudioPanel#makePostAudioRecordButton()
+   * @param userid
+   * @param english
+   * @param foreign
+   * @return
+   */
   public UserExercise createNewItem(long userid, String english, String foreign) {
     return db.getUserListManager().createNewItem(userid, english, foreign);
   }
@@ -999,12 +1032,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * Put the new item in the database,
    * copy the audio under bestAudio
    * assign the item to a user list
+   * @see mitll.langtest.client.custom.NewUserExercise#onClick(mitll.langtest.shared.custom.UserList, mitll.langtest.client.exercise.PagingContainer, com.google.gwt.user.client.ui.Panel)
+   * @param userListID
    * @param userExercise
    */
-  public UserExercise reallyCreateNewItem(UserList userList, UserExercise userExercise) {
-    db.getUserListManager().reallyCreateNewItem(userList, userExercise);
-    fixAudioPaths(userExercise,true);
-
+  public UserExercise reallyCreateNewItem(long userListID, UserExercise userExercise) {
+    db.getUserListManager().reallyCreateNewItem(userListID, userExercise);
+    fixAudioPaths(userExercise, true); // do this after the id has been made
+    db.getUserListManager().editItem(userExercise);
     logger.debug("reallyCreateNewItem : made user exercise " + userExercise);
 
     return userExercise;
@@ -1019,17 +1054,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   private void fixAudioPaths(UserExercise userExercise, boolean overwrite) {
     File fileRef = pathHelper.getAbsoluteFile(userExercise.getRefAudio());
-    String fast = FAST + ".wav";
+    long now = System.currentTimeMillis();
+    String fast = FAST + "_"+ now +"_.wav";
     String refAudio = getRefAudioPath(userExercise, fileRef, fast, overwrite);
     userExercise.setRefAudio(refAudio);
-    logger.debug("fast is " + fast + " size " + FileUtils.size(refAudio));
+    logger.debug("for " + userExercise.getID() + " fast is " + fast + " size " + FileUtils.size(refAudio));
 
     if (userExercise.getSlowAudioRef() != null && !userExercise.getSlowAudioRef().isEmpty()) {
       fileRef = pathHelper.getAbsoluteFile(userExercise.getSlowAudioRef());
-      String slow = SLOW + ".wav";
+      String slow = SLOW + "_"+ now+"_.wav";
 
       refAudio = getRefAudioPath(userExercise, fileRef, slow, overwrite);
-      logger.debug("slow is " + refAudio + " size " + FileUtils.size(refAudio));
+      logger.debug("for " + userExercise.getID()+ "slow is " + refAudio + " size " + FileUtils.size(refAudio));
 
       userExercise.setSlowRefAudio(refAudio);
     }
@@ -1141,16 +1177,26 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param flq was the prompt a foreign language query
    * @param audioType regular or fast then slow audio recording
    * @param doFlashcard
+   * @param recordInResults
    * @return URL to audio on server and if audio is valid (not too short, etc.)
    */
   public AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int questionID,
-                                    int user, int reqid, boolean flq, String audioType, boolean doFlashcard) {
-    return audioFileHelper.writeAudioFile(base64EncodedString, plan, exercise, questionID, user, reqid, flq,
-      audioType, doFlashcard, this);
+                                    int user, int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults) {
+    Exercise exercise1 = getExercise(exercise);
+    return audioFileHelper.writeAudioFile(base64EncodedString, plan, exercise, exercise1, questionID, user, reqid,
+      flq, audioType, doFlashcard, recordInResults);
   }
 
+  /**
+   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#getExercises(long, boolean)
+   * @param user
+   * @param isReviewMode
+   * @return
+   */
   @Override
-  public Set<String> getCompletedExercises(int user) {  return db.getCompletedExercises(user);  }
+  public Set<String> getCompletedExercises(int user, boolean isReviewMode) {
+    return isReviewMode ? db.getUserListManager().getReviewedExercises() : db.getCompletedExercises(user);
+  }
 
   void makeAutoCRT() { audioFileHelper.makeAutoCRT(relativeConfigDir, this, studentAnswersDB, this); }
 

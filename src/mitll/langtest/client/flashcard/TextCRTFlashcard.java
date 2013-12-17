@@ -17,6 +17,7 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
 
   public TextCRTFlashcard(Exercise e, LangTestDatabaseAsync service, ExerciseController controller) {
     super(e, service, controller, 40);
+    getElement().setId("TextCRTFlashcard");
   }
 
   /**
