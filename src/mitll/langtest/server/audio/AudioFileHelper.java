@@ -320,7 +320,7 @@ public class AudioFileHelper {
    * @param studentAnswersDB
    * @param langTestDatabase
    */
-  public void makeAutoCRT(String relativeConfigDir, AutoCRTScoring crtScoring, DatabaseImpl studentAnswersDB, LangTestDatabaseImpl langTestDatabase) {
+  public synchronized void makeAutoCRT(String relativeConfigDir, AutoCRTScoring crtScoring, DatabaseImpl studentAnswersDB, LangTestDatabaseImpl langTestDatabase) {
     if (autoCRT == null) {
       DatabaseImpl exportDB = serverProps.isAutoCRT() ? studentAnswersDB : db;
       if (serverProps.isAutoCRT()) {
