@@ -79,7 +79,9 @@ public class ResultDAO extends DAO {
         RESULTS + whereClause;
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement(sql);
-      return getSimpleResultsForQuery(connection, statement);
+      List<SimpleResult> simpleResultsForQuery = getSimpleResultsForQuery(connection, statement);
+//      logger.debug("for sql " + sql  + " found " + simpleResultsForQuery.size() + " results");
+      return simpleResultsForQuery;
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }

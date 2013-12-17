@@ -8,9 +8,6 @@ package mitll.langtest.server.trie;
  * To change this template use File | Settings | File Templates.
  */
 
-
-import mitll.langtest.shared.Exercise;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -23,11 +20,11 @@ import java.util.Queue;
  * A tree-like data structure that enables quick lookup due to sharing common prefixes (using Aho Corasick algorithm).
  *
  */
-public class Trie {
+public class Trie<T> {
   private static final boolean USE_SINGLE_TOKEN_MAP = false;
   private static final boolean SPLIT_ON_CHARACTERS = true;
-  private TrieNode root;
-  private Map<String,TextEntityValue> singleTokenMap;
+  private TrieNode<T> root;
+  private Map<String,TextEntityValue<T>> singleTokenMap;
   private Map<String,String> tempCache;
   private boolean convertToUpper = true;
 
@@ -37,8 +34,8 @@ public class Trie {
 
   public Trie(boolean convertToUpper) {
     this.convertToUpper = convertToUpper;
-    this.root = new TrieNode();
-    this.singleTokenMap = new HashMap<String,TextEntityValue>();
+    this.root = new TrieNode<T>();
+    this.singleTokenMap = new HashMap<String,TextEntityValue<T>>();
   }
 
   /**
@@ -50,17 +47,17 @@ public class Trie {
     build(entryList);
   }*/
 
-  private TrieNode getRoot() {
+  private TrieNode<T> getRoot() {
     return root;
   }
 
   /**
-   * @see ExerciseTrie#getExercises(String)
+   * @see mitll.langtest.server.ExerciseTrie#getExercises(String)
    * @param toMatch
    * @return
    */
-  List<EmitValue> getEmits(String toMatch) {
-    TrieNode start = getRoot();
+  protected List<EmitValue<T>> getEmits(String toMatch) {
+    TrieNode<T> start = getRoot();
     for (String c : getChars(toMatch)) {
       start = start.getNextState(c);
       if (start == null) break;
@@ -93,7 +90,7 @@ public class Trie {
    * @param transitionLabel
    * @return entity found with this label
    */
-  public TextEntityValue getSingleTokenValue(String transitionLabel) {
+  public TextEntityValue<T> getSingleTokenValue(String transitionLabel) {
     return singleTokenMap.get(transitionLabel);
   }
 
@@ -134,13 +131,13 @@ public class Trie {
     computeFailureFunction();
   }
 
-  public boolean addEntryToTrie(TextEntityValue textEntityDescription) {
+  public boolean addEntryToTrie(TextEntityValue<T> textEntityDescription) {
     return addEntryToTrie(textEntityDescription, tempCache);
   }
 
-  public boolean addEntryToTrie(final String entry) {
+/*  public boolean addEntryToTrie(final String entry) {
     return addEntryToTrie(new MyTextEntityValue(entry), tempCache);
-  }
+  }*/
 
   /**
    * addEntryToTrie is a method to implement algorithm 2 in the AC paper
@@ -154,7 +151,7 @@ public class Trie {
    * @param stringCache - don't keep around multiple copies of identical strings (10-15% memory savings)
    * @return true if entry went into trie, false if into singleTokenMap
    */
-  private boolean addEntryToTrie(TextEntityValue textEntityDescription, Map<String,String> stringCache) {
+  private boolean addEntryToTrie(TextEntityValue<T> textEntityDescription, Map<String,String> stringCache) {
     String normalizedValue = textEntityDescription.getNormalizedValue();
     List<String> split = SPLIT_ON_CHARACTERS ? getChars(normalizedValue) : getSpaceSeparatedTokens(normalizedValue);
 
@@ -165,23 +162,23 @@ public class Trie {
       return false;
     }
 
-    TrieNode currentState = root;
+    TrieNode<T> currentState = root;
     for (String aSplit : split) {
       String upperCaseToken = convertToUpper ? aSplit.toUpperCase() : aSplit;
 
       // avoid keeping references to duplicate strings
       String uniqueCopy = getUnique(stringCache, upperCaseToken);
 
-      TrieNode nextState = currentState.getNextState(uniqueCopy);
+      TrieNode<T> nextState = currentState.getNextState(uniqueCopy);
 
       if (nextState == null) {
-        nextState = new TrieNode();
+        nextState = new TrieNode<T>();
         currentState.addTransition(uniqueCopy, nextState);
       }
       currentState = nextState;
     }
 
-    currentState.getAndCreateEmitList().add(new EmitValue(textEntityDescription, n));
+    currentState.getAndCreateEmitList().add(new EmitValue<T>(textEntityDescription, n));
     return true;
   }
 
@@ -233,20 +230,20 @@ public class Trie {
   private void computeFailureFunction() {
     // computeFailureFunction is a method to implement algorithm 3 here from
     // AC paper after the tree is built
-    Queue<TrieNode> queue = new LinkedList<TrieNode>();
-    for (TrieNode child : root.getTransitionValues()) {
+    Queue<TrieNode<T>> queue = new LinkedList<TrieNode<T>>();
+    for (TrieNode<T> child : root.getTransitionValues()) {
       queue.add(child);
       child.setFailureNode(root);
     }
     while (!queue.isEmpty()) {
-      TrieNode r = queue.remove();
+      TrieNode<T> r = queue.remove();
       for (String a : r.getTransitionLabels()) {
         // a is transition label
         // r is current node
-        TrieNode s = r.getKnownNextState(a);
+        TrieNode<T> s = r.getKnownNextState(a);
         // s is the successor node/state when you follow along edge "a"
         queue.add(s);
-        TrieNode state = r.getFailureNode();
+        TrieNode<T> state = r.getFailureNode();
 
         while (!state.hasTransitionLabel(a)) {
           if (state.getFailureNode() == null) {
@@ -272,14 +269,14 @@ public class Trie {
 
   }
 
-  private static class MyTextEntityValue implements TextEntityValue {
+  private static class MyTextEntityValue implements TextEntityValue<String> {
     private final String entry;
     public MyTextEntityValue(String entry) {
       this.entry = entry;
     }
 
     @Override
-    public Exercise getExercise() {
+    public String getValue() {
       return null;
     }
 
