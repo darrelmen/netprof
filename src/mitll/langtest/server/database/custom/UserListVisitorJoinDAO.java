@@ -23,7 +23,6 @@ public class UserListVisitorJoinDAO extends DAO {
   private static Logger logger = Logger.getLogger(UserListVisitorJoinDAO.class);
 
   public static final String USER_EXERCISE_LIST_VISITOR = "userexerciselist_visitor";
-  //private UserDAO userDAO;
 
   public UserListVisitorJoinDAO(Database database, UserDAO userDAO) {
     super(database);
@@ -32,7 +31,6 @@ public class UserListVisitorJoinDAO extends DAO {
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
-   // this.userDAO = userDAO;
   }
 
   void createUserListTable(Database database) throws SQLException {
@@ -62,7 +60,7 @@ public class UserListVisitorJoinDAO extends DAO {
    * <p/>
    * Uses return generated keys to get the user id
    *
-   * @see mitll.langtest.server.database.custom.UserListManager#reallyCreateNewItem(mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserExercise)
+   * @see UserListManager#reallyCreateNewItem(long, mitll.langtest.shared.custom.UserExercise)
    */
   public void add(long uniqueID, long visitor) {
     long id = 0;
