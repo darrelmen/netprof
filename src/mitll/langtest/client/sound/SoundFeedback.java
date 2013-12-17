@@ -63,8 +63,7 @@ public class SoundFeedback {
       }
 
       @Override
-      public void songFirstLoaded(double durationEstimate) {
-      }
+      public void songFirstLoaded(double durationEstimate) {}
 
       @Override
       public void songLoaded(double duration) {
@@ -72,8 +71,7 @@ public class SoundFeedback {
       }
 
       @Override
-      public void update(double position) {
-      }
+      public void update(double position) {}
     });
     soundManager.createSound(currentSound, song, song);
   }
