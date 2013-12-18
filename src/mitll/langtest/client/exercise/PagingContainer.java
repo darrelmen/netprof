@@ -283,28 +283,13 @@ public class PagingContainer<T extends ExerciseShell> {
   protected void gotClickOnItem(final T e) {}
 
   public T selectFirst() {
+    if (dataProvider.getList().isEmpty()) return null;
     T first = dataProvider.getList().get(0);
     table.getSelectionModel().setSelected(first, true);
     table.redraw();
     onResize(0);
     return first;
   }
-
-  /**
-   * @seex SectionExerciseList.MySetExercisesCallback#onSuccess
-   */
-/*  protected void loadFirstExercise() {
-    selectFirst();
-  }*/
-
-/*
-  public void selectFirst() {
-    table.getSelectionModel().setSelected(dataProvider.getList().get(0), true);
-    table.redraw();
-    onResize(0);
-    return first;
-  }
-*/
 
   public void clear() {
     List<T> list = dataProvider.getList();
@@ -319,11 +304,6 @@ public class PagingContainer<T extends ExerciseShell> {
     dataProvider.flush();
     table.setRowCount(dataProvider.getList().size());
   }
-
-/*  protected void addExerciseToList(T exercise) {
-    List<T> list = dataProvider.getList();
-    list.add(exercise);
-  }*/
 
   public <S extends ExerciseShell> void addAndFlush(S exercise) {
     addExerciseToList2(exercise);
