@@ -47,7 +47,7 @@ class AVPHelper extends NPFHelper {
       public Panel getExercisePanel(Exercise e) {
         currentExercise = e;
 
-        bootstrapPanel = new BootstrapExercisePanel(e, service, controller, 40, false) {
+        bootstrapPanel = new BootstrapExercisePanel(e, service, controller, 40) {
           NavigationHelper navigationHelper;
 
           @Override
