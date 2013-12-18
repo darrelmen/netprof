@@ -34,7 +34,7 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
    * Has a answerPanel mark to indicate when the saved audio has been successfully posted to the server.
    *
    *
-   * @see mitll.langtest.client.exercise.ExercisePanel#ExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.exercise.ListInterface)
+   * @see mitll.langtest.client.exercise.ExercisePanel#getQuestionPanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int, java.util.List, java.util.List, int, mitll.langtest.shared.Exercise.QAPair, com.google.gwt.user.client.ui.HasWidgets)
    * @param exercise
    * @param service
    * @param controller
@@ -46,7 +46,7 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
     System.out.println("getAnswerWidget : ex " +exercise.getID()+ " index " + index);
 
     SimpleRecordExercisePanel questionState = this;
-    Panel panel = new SimpleRecordPanel(service, controller, exercise, questionState, index).getPanel();
+    Panel panel = new SimpleRecordPanel(service, controller, exercise, questionState, index);
     addAnswerWidget(index, panel);
     return panel;
   }
