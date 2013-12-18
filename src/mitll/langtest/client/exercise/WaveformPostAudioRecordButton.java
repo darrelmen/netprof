@@ -36,7 +36,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
                                        ExerciseController controller,
                                        Panel widgets,
                                        RecordAudioPanel recordAudioPanel, LangTestDatabaseAsync service, int index) {
-    super(exercise, controller, service, index, false);
+    super(exercise, controller, service, index);
     this.recordAudioPanel = recordAudioPanel;
     this.parentPanel = widgets;
     getElement().setId("WaveformPostAudioRecordButton");
@@ -50,6 +50,9 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     super.startRecording();
     playAudioPanel.setPlayEnabled(false);
   }
+
+  @Override
+  public void flip(boolean first) {} // force not to be abstract
 
   /**
    * @see mitll.langtest.client.recorder.RecordButton#stop()
