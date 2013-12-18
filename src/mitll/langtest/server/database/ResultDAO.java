@@ -1,10 +1,8 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
-import mitll.langtest.shared.Demographics;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.User;
 import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.monitoring.Session;
 import org.apache.log4j.Logger;
@@ -798,6 +796,13 @@ public class ResultDAO extends DAO {
     Sheet sheet = wb.createSheet("Results");
     int rownum = 0;
 
+    long then = System.currentTimeMillis();
+    List<Result> results = getResults();
+    long now = System.currentTimeMillis();
+    if (now-then > 100) logger.warn("toXLSX : took " + (now-then) + " millis to read " +results.size()+
+      " results from database");
+    then = now;
+
     List<String> columns = Arrays.asList("id", "userid", Database.EXID, "qid", Database.TIME, "answer",
       "valid", FLQ, SPOKEN, AUDIO_TYPE, DURATION, CORRECT, PRON_SCORE, STIMULUS);
 
@@ -811,7 +816,7 @@ public class ResultDAO extends DAO {
       headerCell.setCellValue(columns.get(i));
     }
 
-    for (Result result : getResults()) {
+    for (Result result : results) {
       Row row = sheet.createRow(rownum++);
       int j = 0;
       Cell cell = row.createCell(j++);
@@ -844,9 +849,18 @@ public class ResultDAO extends DAO {
       cell = row.createCell(j++);
       cell.setCellValue(result.getStimulus());
     }
-
+     now = System.currentTimeMillis();
+    if (now-then > 100) {
+      logger.warn("toXLSX : took " + (now-then) + " millis to add " + rownum + " rows to sheet, or " + (now-then)/rownum + " millis/row");
+    }
+    then = now;
     try {
       wb.write(out);
+      now = System.currentTimeMillis();
+      if (now-then > 100) {
+        logger.warn("toXLSX : took " + (now-then) + " millis to write excel to output stream ");
+      }
+      then = now;
       out.close();
     } catch (IOException e) {
       logger.error("got " + e, e);
