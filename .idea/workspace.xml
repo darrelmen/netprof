@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3390f7a7-1248-40e4-8630-564409f1e0a8" name="Default" comment="">
+<<<<<<< HEAD
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/war/config/pilot/arabicText_08_02_13.h2.db" afterPath="$PROJECT_DIR$/war/config/pilot/arabicText_08_02_13.h2.db" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/war/config/pilot/crtMSAaudio.h2.db" afterPath="$PROJECT_DIR$/war/config/pilot/crtMSAaudio.h2.db" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/war/config/dari/dariCEDLI.h2.db" afterPath="$PROJECT_DIR$/war/config/dari/dariCEDLI.h2.db" />
@@ -35,12 +36,47 @@
     <file path="/arabic-nn-model-decode.cfg.template" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1355080786173" ignored="false" />
     <file path="/SimpleRecordPanel.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1387395727432" ignored="false" />
     <file path="/RecordButtonPanel.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1387395800682" ignored="false" />
+=======
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/imagewriter" afterPath="$PROJECT_DIR$/imagewriter" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/war/config/english/npfEnglish.h2.db" afterPath="$PROJECT_DIR$/war/config/english/npfEnglish.h2.db" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.classpath" afterPath="$PROJECT_DIR$/.classpath" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/LangTest.iml" afterPath="$PROJECT_DIR$/LangTest.iml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.settings/com.google.gwt.eclipse.core.prefs" afterPath="$PROJECT_DIR$/.settings/com.google.gwt.eclipse.core.prefs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/libraries/imagewriter.xml" afterPath="$PROJECT_DIR$/.idea/libraries/imagewriter.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/libraries/lib.xml" afterPath="$PROJECT_DIR$/.idea/libraries/lib.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/libraries/lib1.xml" afterPath="$PROJECT_DIR$/.idea/libraries/lib1.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/war/config/english/quizlet.properties" afterPath="$PROJECT_DIR$/war/config/english/quizlet.properties" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/war/WEB-INF/web.xml" afterPath="$PROJECT_DIR$/war/WEB-INF/web.xml" />
+    </list>
+    <ignored path="LangTest.iws" />
+    <ignored path=".idea/workspace.xml" />
+    <file path="/Dummy.txt" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1387252506350" ignored="false" />
+    <file path="/web.xml" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1386650185956" ignored="false" />
+    <file path="/ASRScoring.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1366608989389" ignored="false" />
+    <file path="/BrowserCheck.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1355029572403" ignored="false" />
+    <file path="/a.dummy" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1386650610082" ignored="false" />
+    <file path="/a.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1385182763845" ignored="false" />
+    <file path="/ProcessRunner.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1355181329170" ignored="false" />
+    <file path="/LangTestDatabaseImpl.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1386655207267" ignored="false" />
+    <file path="/fragment.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1386656134556" ignored="false" />
+    <file path="/ExercisePanel.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1355337943944" ignored="false" />
+    <file path="/DatabaseImpl.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1386656473974" ignored="false" />
+    <file path="/SQLExerciseDAO.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1355077197919" ignored="false" />
+    <file path="/Exercise.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1355077249825" ignored="false" />
+    <file path="/arabic-nn-model-decode.cfg.template" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1355080786173" ignored="false" />
+    <file path="/SimpleRecordPanel.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1355334079082" ignored="false" />
+    <file path="/RecordButtonPanel.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1355088353789" ignored="false" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
     <file path="/RecordButton.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1355088284840" ignored="false" />
     <file path="/AudioAnswer.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1355087813142" ignored="false" />
     <file path="/GoodwaveExercisePanel.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1386650682005" ignored="false" />
     <file path="/build.xml" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1366814722289" ignored="false" />
     <file path="/ScoringAudioPanel.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1355335124710" ignored="false" />
+<<<<<<< HEAD
     <file path="/LangTest.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1387254113297" ignored="false" />
+=======
+    <file path="/LangTest.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1380921461430" ignored="false" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
     <file path="/PagingExerciseList.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1356764405024" ignored="false" />
     <file path="/ExerciseShell.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1356764053746" ignored="false" />
     <file path="/DataCollectAdmin.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1361083028097" ignored="false" />
@@ -234,7 +270,11 @@
     <file path="/LangTest.css" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1380924948856" ignored="false" />
     <file path="/testFarsi.properties" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1366609023270" ignored="false" />
     <file path="/BootstrapFlashcardExerciseList.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1379646717473" ignored="false" />
+<<<<<<< HEAD
     <file path="/BootstrapExercisePanel.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1387395654121" ignored="false" />
+=======
+    <file path="/BootstrapExercisePanel.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1379649853297" ignored="false" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
     <file path="/testMSA.properties" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1366612014385" ignored="false" />
     <file path="/TableSectionExerciseList.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1379477791303" ignored="false" />
     <file path="/FlexSectionExerciseList.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1379481411927" ignored="false" />
@@ -305,8 +345,13 @@
     <file path="/MyBootstrapFlashcardExerciseList.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1379653603003" ignored="false" />
     <file path="/ExerciseController.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1379654988181" ignored="false" />
     <file path="/Navigation.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1381121516817" ignored="false" />
+<<<<<<< HEAD
     <file path="/ExerciseList.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1387254193054" ignored="false" />
     <file path="/ListInterface.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1387254543242" ignored="false" />
+=======
+    <file path="/ExerciseList.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1381116367736" ignored="false" />
+    <file path="/ListInterface.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1380921418265" ignored="false" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
     <file path="/UserList.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1381119592026" ignored="false" />
     <file path="/UserListManager.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1386655128653" ignored="false" />
     <file path="$APPLICATION_HOME_DIR$/lib/idea.jar!/standardSchemas/xml.xsd" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1381865313143" ignored="false" />
@@ -317,6 +362,7 @@
     <file path="/PagingContainer.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1380944305606" ignored="false" />
     <file path="$PROJECT_DIR$/src/mitll/langtest/client/exercise/PostAudioRecordButton.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1380944738862" ignored="false" />
     <file path="/RecordAudioPanel.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1381117708864" ignored="false" />
+<<<<<<< HEAD
     <file path="/WaveformPostAudioRecordButton.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1387393950340" ignored="false" />
     <file path="/WaveformExercisePanel.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1380946707881" ignored="false" />
     <file path="/AudioPanel.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1380948031858" ignored="false" />
@@ -325,12 +371,23 @@
     <file path="/EmitValue.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1384326803348" ignored="false" />
     <file path="/TrieNode.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1384328738626" ignored="false" />
     <file path="/AutoCRT.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1387390678804" ignored="false" />
+=======
+    <file path="/WaveformPostAudioRecordButton.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1381121226721" ignored="false" />
+    <file path="/WaveformExercisePanel.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1380946707881" ignored="false" />
+    <file path="/AudioPanel.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1380948031858" ignored="false" />
+    <file path="/PostAudioRecordButton.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1381119934367" ignored="false" />
+    <file path="/Trie.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1384327819371" ignored="false" />
+    <file path="/EmitValue.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1384326803348" ignored="false" />
+    <file path="/TrieNode.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1384328738626" ignored="false" />
+    <file path="/AutoCRT.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1385181805230" ignored="false" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
     <file path="/Export.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1385172756617" ignored="false" />
     <file path="/Linpack.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1385183680489" ignored="false" />
     <file path="/benchClassifer.sh" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1385182759798" ignored="false" />
     <file path="/quizlet.properties" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1386650224608" ignored="false" />
     <file path="/UserListExerciseJoinDAO.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1386654326807" ignored="false" />
     <file path="/UserExerciseDAO.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1386656359486" ignored="false" />
+<<<<<<< HEAD
     <file path="/AudioFileHelper.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1387253710371" ignored="false" />
     <file path="/crtMSAaudio.properties" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1387255146530" ignored="false" />
     <file path="/UserDAO.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1387384936887" ignored="false" />
@@ -344,6 +401,8 @@
     <file path="/SimpleRecordExercisePanel.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1387393862083" ignored="false" />
     <file path="/ScoreFeedback.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1387395503719" ignored="false" />
     <file path="/TextResponse.java" changelist="3390f7a7-1248-40e4-8630-564409f1e0a8" time="1387395277584" ignored="false" />
+=======
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -357,12 +416,17 @@
   <component name="DaemonCodeAnalyzer">
     <disable_hints />
   </component>
+<<<<<<< HEAD
   <component name="DatabaseView">
     <flatten value="false" />
     <groupTables value="false" />
     <sortChildren value="false" />
   </component>
   <component name="DebuggerManager">
+=======
+  <component name="DebuggerManager">
+    <ui_properties default_suspend_policy="SuspendAll" default_condition_enabled="true" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
     <breakpoint_any default_suspend_policy="SuspendAll" default_condition_enabled="true">
       <breakpoint>
         <option name="NOTIFY_CAUGHT" value="true" />
@@ -399,7 +463,10 @@
         <option name="LOG_MESSAGE" value="" />
       </breakpoint>
     </breakpoint_any>
+<<<<<<< HEAD
     <ui_properties default_suspend_policy="SuspendAll" default_condition_enabled="true" />
+=======
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
     <breakpoint_rules />
     <ui_properties />
   </component>
@@ -409,10 +476,17 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
+<<<<<<< HEAD
       <file leaf-file-name="StudentDialog.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/mitll/langtest/client/user/StudentDialog.java">
           <provider selected="true" editor-type-id="text-editor">
             <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+=======
+      <file leaf-file-name="LangTestDatabaseImpl.java" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/mitll/langtest/server/LangTestDatabaseImpl.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="72" column="13" selection-start="2713" selection-end="2713" vertical-scroll-proportion="0.3324397">
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -420,6 +494,90 @@
           </provider>
         </entry>
       </file>
+<<<<<<< HEAD
+=======
+      <file leaf-file-name="DatabaseImpl.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/mitll/langtest/server/database/DatabaseImpl.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="294" column="48" selection-start="10045" selection-end="10045" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="UserListExerciseJoinDAO.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/mitll/langtest/server/database/custom/UserListExerciseJoinDAO.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="117" column="20" selection-start="3861" selection-end="3861" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="UserExerciseDAO.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/mitll/langtest/server/database/UserExerciseDAO.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="242" column="52" selection-start="8109" selection-end="8120" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ExerciseDAO.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/mitll/langtest/server/database/ExerciseDAO.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="13" column="17" selection-start="277" selection-end="277" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="UserListDAO.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/mitll/langtest/server/database/custom/UserListDAO.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="191" column="58" selection-start="6048" selection-end="6048" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="UserListManager.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/mitll/langtest/server/database/custom/UserListManager.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="77" column="30" selection-start="2580" selection-end="2580" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="UserList.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/mitll/langtest/shared/custom/UserList.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="77" column="34" selection-start="1963" selection-end="1963" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="UserExercise.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/mitll/langtest/shared/custom/UserExercise.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="34" column="2" selection-start="826" selection-end="928" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="AudioExercise.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/mitll/langtest/shared/AudioExercise.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="19" column="9" selection-start="501" selection-end="501" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
     </leaf>
   </component>
   <component name="FindManager">
@@ -445,6 +603,7 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
+<<<<<<< HEAD
         <option value="$PROJECT_DIR$/src/mitll/langtest/server/database/DatabaseImpl.java" />
         <option value="$PROJECT_DIR$/src/mitll/langtest/client/exercise/ExercisePanel.java" />
         <option value="$PROJECT_DIR$/src/mitll/langtest/server/scoring/ASRScoring.java" />
@@ -466,14 +625,39 @@
         <option value="$PROJECT_DIR$/src/mitll/langtest/client/flashcard/CombinedResponseFlashcard.java" />
         <option value="$PROJECT_DIR$/src/mitll/langtest/client/flashcard/FlashcardRecordButtonPanel.java" />
         <option value="$PROJECT_DIR$/src/mitll/langtest/client/scoring/PostAudioRecordButton.java" />
+=======
+        <option value="$PROJECT_DIR$/src/mitll/langtest/server/autocrt/AutoCRT.java" />
+        <option value="$PROJECT_DIR$/benchClassifer.sh" />
+        <option value="$PROJECT_DIR$/benchLinpack.sh" />
+        <option value="$PROJECT_DIR$/src/Linpack.java" />
+        <option value="$PROJECT_DIR$/war/WEB-INF/web.xml" />
+        <option value="$PROJECT_DIR$/war/config/english/quizlet.properties" />
+        <option value="$PROJECT_DIR$/src/mitll/langtest/client/scoring/GoodwaveExercisePanel.java" />
+        <option value="$PROJECT_DIR$/src/mitll/langtest/server/audio/AudioFileHelper.java" />
+        <option value="$PROJECT_DIR$/src/mitll/langtest/client/list/HistoryExerciseList.java" />
+        <option value="$PROJECT_DIR$/src/mitll/langtest/server/database/custom/UserListExerciseJoinDAO.java" />
+        <option value="$PROJECT_DIR$/src/mitll/langtest/server/database/custom/UserListManager.java" />
+        <option value="$PROJECT_DIR$/src/mitll/langtest/server/LangTestDatabaseImpl.java" />
+        <option value="$PROJECT_DIR$/src/mitll/langtest/shared/custom/UserExercise.java" />
+        <option value="$PROJECT_DIR$/src/mitll/langtest/server/database/custom/UserListDAO.java" />
+        <option value="$PROJECT_DIR$/src/mitll/langtest/server/database/UserExerciseDAO.java" />
+        <option value="$PROJECT_DIR$/src/mitll/langtest/server/database/DatabaseImpl.java" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
+<<<<<<< HEAD
     <option name="x" value="1912" />
     <option name="y" value="-8" />
     <option name="width" value="1936" />
     <option name="height" value="1216" />
+=======
+    <option name="x" value="11" />
+    <option name="y" value="22" />
+    <option name="width" value="1647" />
+    <option name="height" value="930" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
     <OptionsSetting value="true" id="Add" />
@@ -541,6 +725,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+<<<<<<< HEAD
               <option name="myItemId" value="bootstrap" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -556,6 +741,9 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="war" />
+=======
+              <option name="myItemId" value="LangTest" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -565,6 +753,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+<<<<<<< HEAD
               <option name="myItemId" value="bootstrap" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -584,12 +773,16 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="bootstrap" />
+=======
+              <option name="myItemId" value="LangTest" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="war" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
+<<<<<<< HEAD
             <PATH_ELEMENT>
               <option name="myItemId" value="WEB-INF" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
@@ -598,6 +791,8 @@
               <option name="myItemId" value="lib" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
+=======
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
           </PATH>
           <PATH>
             <PATH_ELEMENT>
@@ -605,7 +800,11 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+<<<<<<< HEAD
               <option name="myItemId" value="bootstrap" />
+=======
+              <option name="myItemId" value="LangTest" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -616,6 +815,7 @@
               <option name="myItemId" value="WEB-INF" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
+<<<<<<< HEAD
             <PATH_ELEMENT>
               <option name="myItemId" value="lib" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
@@ -624,6 +824,8 @@
               <option name="myItemId" value="pronz.jar" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiFileNode" />
             </PATH_ELEMENT>
+=======
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
           </PATH>
           <PATH>
             <PATH_ELEMENT>
@@ -631,7 +833,11 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+<<<<<<< HEAD
               <option name="myItemId" value="bootstrap" />
+=======
+              <option name="myItemId" value="LangTest" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -646,6 +852,7 @@
               <option name="myItemId" value="lib" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
+<<<<<<< HEAD
             <PATH_ELEMENT>
               <option name="myItemId" value="pronz.jar" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiFileNode" />
@@ -662,6 +869,8 @@
               <option name="myItemId" value="Audio.class" />
               <option name="myItemType" value="org.jetbrains.plugins.scala.components.ScalaDefsProjectViewProvider$ScalaFileTreeNode" />
             </PATH_ELEMENT>
+=======
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
           </PATH>
           <PATH>
             <PATH_ELEMENT>
@@ -669,7 +878,11 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+<<<<<<< HEAD
               <option name="myItemId" value="bootstrap" />
+=======
+              <option name="myItemId" value="LangTest" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -688,6 +901,7 @@
               <option name="myItemId" value="pronz.jar" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiFileNode" />
             </PATH_ELEMENT>
+<<<<<<< HEAD
             <PATH_ELEMENT>
               <option name="myItemId" value="pronz" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
@@ -696,6 +910,8 @@
               <option name="myItemId" value="speech" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
+=======
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
           </PATH>
           <PATH>
             <PATH_ELEMENT>
@@ -703,7 +919,11 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+<<<<<<< HEAD
               <option name="myItemId" value="bootstrap" />
+=======
+              <option name="myItemId" value="LangTest" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -723,7 +943,11 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiFileNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+<<<<<<< HEAD
               <option name="myItemId" value="pronz" />
+=======
+              <option name="myItemId" value="org" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -733,6 +957,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+<<<<<<< HEAD
               <option name="myItemId" value="bootstrap" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -764,6 +989,9 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="bootstrap" />
+=======
+              <option name="myItemId" value="LangTest" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -779,6 +1007,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+<<<<<<< HEAD
               <option name="myItemId" value="poi-ooxml-3.9-20121203.jar" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiFileNode" />
             </PATH_ELEMENT>
@@ -788,6 +1017,17 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="xssf" />
+=======
+              <option name="myItemId" value="pronz.jar" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiFileNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="org" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="h2" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -797,6 +1037,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+<<<<<<< HEAD
               <option name="myItemId" value="bootstrap" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -836,6 +1077,9 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="bootstrap" />
+=======
+              <option name="myItemId" value="LangTest" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -851,6 +1095,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+<<<<<<< HEAD
               <option name="myItemId" value="poi-ooxml-3.9-20121203.jar" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiFileNode" />
             </PATH_ELEMENT>
@@ -880,6 +1125,23 @@
               <option name="myItemId" value="poi-3.9-20121203.jar" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiFileNode" />
             </PATH_ELEMENT>
+=======
+              <option name="myItemId" value="pronz.jar" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiFileNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="org" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="h2" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="store" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
           </PATH>
           <PATH>
             <PATH_ELEMENT>
@@ -887,6 +1149,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+<<<<<<< HEAD
               <option name="myItemId" value="bootstrap" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -918,6 +1181,9 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="bootstrap" />
+=======
+              <option name="myItemId" value="LangTest" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -933,6 +1199,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+<<<<<<< HEAD
               <option name="myItemId" value="poi-3.9-20121203.jar" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiFileNode" />
             </PATH_ELEMENT>
@@ -1234,6 +1501,25 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="sound" />
+=======
+              <option name="myItemId" value="pronz.jar" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiFileNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="org" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="h2" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="store" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="fs" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -1243,6 +1529,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+<<<<<<< HEAD
               <option name="myItemId" value="bootstrap" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -1260,6 +1547,33 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="scoring" />
+=======
+              <option name="myItemId" value="LangTest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="war" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="WEB-INF" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="lib" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="pronz.jar" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiFileNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="org" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="commons" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -1269,6 +1583,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+<<<<<<< HEAD
               <option name="myItemId" value="bootstrap" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -1286,6 +1601,37 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="result" />
+=======
+              <option name="myItemId" value="LangTest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="war" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="WEB-INF" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="lib" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="pronz.jar" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiFileNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="org" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="commons" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="io" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -1295,6 +1641,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+<<<<<<< HEAD
               <option name="myItemId" value="bootstrap" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -1312,6 +1659,29 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="recorder" />
+=======
+              <option name="myItemId" value="LangTest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="war" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="WEB-INF" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="lib" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="ezmorph-1.0.6.jar" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiFileNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="ezmorph" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -1321,6 +1691,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+<<<<<<< HEAD
               <option name="myItemId" value="bootstrap" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -1339,6 +1710,26 @@
             <PATH_ELEMENT>
               <option name="myItemId" value="flashcard" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+=======
+              <option name="myItemId" value="LangTest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="war" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="WEB-INF" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="lib" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="ezmorph-1.0.6.jar" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiFileNode" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
             </PATH_ELEMENT>
           </PATH>
           <PATH>
@@ -1347,6 +1738,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+<<<<<<< HEAD
               <option name="myItemId" value="bootstrap" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -1378,6 +1770,16 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="gwt" />
+=======
+              <option name="myItemId" value="LangTest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="war" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="config" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -1387,6 +1789,30 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+              <option name="myItemId" value="LangTest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="war" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="config" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="pilot" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="LangTest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+<<<<<<< HEAD
               <option name="myItemId" value="bootstrap" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -1397,6 +1823,22 @@
             <PATH_ELEMENT>
               <option name="myItemId" value="gwt-user.jar" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiFileNode" />
+=======
+              <option name="myItemId" value="LangTest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="war" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="config" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="english" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
             </PATH_ELEMENT>
           </PATH>
           <PATH>
@@ -1405,6 +1847,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+<<<<<<< HEAD
               <option name="myItemId" value="bootstrap" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -1418,6 +1861,21 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="javax" />
+=======
+              <option name="myItemId" value="LangTest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="testFiles" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="config" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="pilot" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -1427,6 +1885,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+<<<<<<< HEAD
               <option name="myItemId" value="bootstrap" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -1444,6 +1903,12 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="servlet" />
+=======
+              <option name="myItemId" value="LangTest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -1453,6 +1918,26 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+              <option name="myItemId" value="LangTest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="langtest" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="LangTest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+<<<<<<< HEAD
               <option name="myItemId" value="bootstrap" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -1474,6 +1959,21 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="http" />
+=======
+              <option name="myItemId" value="LangTest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="langtest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="shared" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -1483,6 +1983,49 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+<<<<<<< HEAD
+              <option name="myItemId" value="bootstrap" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="gwt" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="gwt-user.jar" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiFileNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="google" />
+=======
+              <option name="myItemId" value="LangTest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="langtest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="shared" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="custom" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="LangTest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+<<<<<<< HEAD
               <option name="myItemId" value="bootstrap" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -1498,6 +2041,25 @@
               <option name="myItemId" value="google" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="gwt" />
+=======
+              <option name="myItemId" value="LangTest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="langtest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="server" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
           </PATH>
           <PATH>
             <PATH_ELEMENT>
@@ -1505,32 +2067,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="bootstrap" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="gwt" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="gwt-user.jar" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiFileNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="google" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="gwt" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="LangTest" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
+<<<<<<< HEAD
               <option name="myItemId" value="bootstrap" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -1552,6 +2089,25 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="user" />
+=======
+              <option name="myItemId" value="LangTest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="langtest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="server" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="database" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -1561,6 +2117,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+<<<<<<< HEAD
               <option name="myItemId" value="bootstrap" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -1586,6 +2143,29 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="client" />
+=======
+              <option name="myItemId" value="LangTest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="langtest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="server" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="database" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="custom" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -1595,6 +2175,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+<<<<<<< HEAD
               <option name="myItemId" value="bootstrap" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -1643,6 +2224,25 @@
             <PATH_ELEMENT>
               <option name="myItemId" value="gwt-dev.jar" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiFileNode" />
+=======
+              <option name="myItemId" value="LangTest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="langtest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="server" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="autocrt" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
           <PATH>
@@ -1651,6 +2251,34 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+              <option name="myItemId" value="LangTest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="langtest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="server" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="audio" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="LangTest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+<<<<<<< HEAD
               <option name="myItemId" value="bootstrap" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -1664,6 +2292,21 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="javax" />
+=======
+              <option name="myItemId" value="LangTest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="langtest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="client" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -1673,6 +2316,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+<<<<<<< HEAD
               <option name="myItemId" value="bootstrap" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -1690,6 +2334,25 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="servlet" />
+=======
+              <option name="myItemId" value="LangTest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="langtest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="scoring" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -1699,6 +2362,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+<<<<<<< HEAD
               <option name="myItemId" value="bootstrap" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -1720,6 +2384,25 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="http" />
+=======
+              <option name="myItemId" value="LangTest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="langtest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="list" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -1730,6 +2413,7 @@
   <component name="PropertiesComponent">
     <property name="project.structure.last.edited" value="Modules" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth0" value="178" />
+<<<<<<< HEAD
     <property name="project.structure.proportion" value="0.09832842" />
     <property name="OverrideImplement.combined" value="true" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth1" value="194" />
@@ -1740,6 +2424,18 @@
     <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder1" value="1" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder0" value="0" />
     <property name="last_opened_file_path" value="$USER_HOME$/guava/guava13/guava-13.0-javadoc.jar!/" />
+=======
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth1" value="194" />
+    <property name="OverrideImplement.combined" value="true" />
+    <property name="project.structure.proportion" value="0.09832842" />
+    <property name="options.splitter.main.proportions" value="0.3" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder1" value="1" />
+    <property name="recentsLimit" value="5" />
+    <property name="MemberChooser.sorted" value="false" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth0" value="189" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder0" value="0" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
     <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth2" value="199" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth3" value="982" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth3" value="986" />
@@ -1754,9 +2450,15 @@
     <property name="MemberChooser.showClasses" value="true" />
     <property name="GoToClass.includeLibraries" value="false" />
     <property name="options.splitter.details.proportions" value="0.2" />
+<<<<<<< HEAD
     <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder0" value="0" />
     <property name="GoToFile.includeJavaFiles" value="false" />
     <property name="last_directory_selection" value="$PROJECT_DIR$/src/mitll/langtest/client/bootstrap" />
+=======
+    <property name="last_directory_selection" value="$PROJECT_DIR$/src/mitll/langtest/client/bootstrap" />
+    <property name="GoToFile.includeJavaFiles" value="false" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder0" value="0" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
     <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder3" value="3" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder1" value="1" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder2" value="2" />
@@ -1764,8 +2466,13 @@
     <property name="project.structure.side.proportion" value="0.11992948" />
     <property name="MemberChooser.copyJavadoc" value="false" />
     <property name="restartRequiresConfirmation" value="true" />
+<<<<<<< HEAD
     <property name="dynamic.classpath" value="false" />
     <property name="options.searchVisible" value="true" />
+=======
+    <property name="options.searchVisible" value="true" />
+    <property name="dynamic.classpath" value="false" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -1905,6 +2612,7 @@
       <envs />
       <method />
     </configuration>
+<<<<<<< HEAD
     <configuration default="true" type="GWT.ConfigurationType" factoryName="GWT Configuration">
       <module name="" />
       <method />
@@ -1916,6 +2624,8 @@
       </JSDebuggerConfigurationSettings>
       <method />
     </configuration>
+=======
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
     <configuration default="true" type="JUnit" factoryName="JUnit">
       <extension name="coverage" enabled="false" merge="false" runner="idea" />
       <module name="" />
@@ -1937,6 +2647,20 @@
       <patterns />
       <method />
     </configuration>
+<<<<<<< HEAD
+=======
+    <configuration default="true" type="JavascriptDebugSession" factoryName="Local" singleton="true">
+      <JSDebuggerConfigurationSettings>
+        <option name="engineId" value="embedded" />
+        <option name="fileUrl" />
+      </JSDebuggerConfigurationSettings>
+      <method />
+    </configuration>
+    <configuration default="true" type="GWT.ConfigurationType" factoryName="GWT Configuration">
+      <module name="" />
+      <method />
+    </configuration>
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
     <list size="4">
       <item index="0" class="java.lang.String" itemvalue="Application.DatabaseImpl" />
       <item index="1" class="java.lang.String" itemvalue="Application.Trie" />
@@ -1983,20 +2707,30 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
+<<<<<<< HEAD
     <frame x="1912" y="-8" width="1936" height="1216" extended-state="6" />
+=======
+    <frame x="11" y="22" width="1647" height="930" extended-state="0" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
     <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4356659" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+<<<<<<< HEAD
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.1769158" sideWeight="0.99935895" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.11419424" sideWeight="0.82213813" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32977587" sideWeight="0.76726586" order="3" side_tool="false" content_ui="tabs" />
+=======
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.11430356" sideWeight="0.8965517" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="IDEtalk Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.51358026" sideWeight="0.49906307" order="13" side_tool="true" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="IDEtalk" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33204633" sideWeight="0.49743262" order="10" side_tool="false" content_ui="tabs" />
+<<<<<<< HEAD
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.17786187" sideWeight="0.5009369" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Web" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="true" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -2012,6 +2746,24 @@
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+=======
+      <window_info id="Web" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="true" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.23797627" sideWeight="0.2" order="1" side_tool="true" content_ui="tabs" />
+      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.23797627" sideWeight="0.7987654" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.40246913" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="jenkinsBrowser" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Jenkins" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.21986258" sideWeight="0.76790124" order="1" side_tool="false" content_ui="combo" />
+      <window_info id="Data Sources" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.10493827" sideWeight="0.99935895" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.09876543" sideWeight="0.5009369" order="11" side_tool="false" content_ui="tabs" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
       <window_info id="Dependency Viewer" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.15054946" sideWeight="0.5" order="12" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
@@ -2094,6 +2846,7 @@
         <filter targetName="warUrdu" isVisible="false" />
         <filter targetName="warEnglish" isVisible="false" />
         <filter targetName="warFarsi2" isVisible="false" />
+<<<<<<< HEAD
         <filter targetName="flashcard" isVisible="false" />
         <filter targetName="frenchEnglishGame" isVisible="false" />
         <filter targetName="flashcardEnglishArabic" isVisible="false" />
@@ -2125,6 +2878,15 @@
         <filter targetName="avpMSA" isVisible="false" />
         <filter targetName="avpDari" isVisible="false" />
         <filter targetName="pashtoFlashcard" isVisible="false" />
+=======
+        <filter targetName="warArabicVLL" isVisible="false" />
+        <filter targetName="dataCollectAdmin" isVisible="false" />
+        <filter targetName="warArabicVLL2" isVisible="false" />
+        <filter targetName="crtDari" isVisible="false" />
+        <filter targetName="crtPashto" isVisible="false" />
+        <filter targetName="testPashto" isVisible="false" />
+        <filter targetName="farsiSections" isVisible="false" />
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
         <filter targetName="dataCollectAdmin2" isVisible="false" />
         <filter targetName="fullPatch" isVisible="false" />
         <filter targetName="patch" isVisible="false" />
@@ -2143,27 +2905,46 @@
     </buildFile>
   </component>
   <component name="editorHistoryManager">
+<<<<<<< HEAD
     <entry file="file://$PROJECT_DIR$/src/mitll/langtest/client/flashcard/BootstrapExercisePanel.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="45" column="40" selection-start="1778" selection-end="1778" vertical-scroll-proportion="0.46484375">
+=======
+    <entry file="file://$PROJECT_DIR$/src/mitll/langtest/client/list/HistoryExerciseList.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="363" column="10" selection-start="13783" selection-end="13783" vertical-scroll-proportion="-16.5">
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
           <folding />
         </state>
       </provider>
     </entry>
+<<<<<<< HEAD
     <entry file="jar://$PROJECT_DIR$/war/WEB-INF/lib/gwt-bootstrap-2.3.2.0-SNAPSHOT.jar!/com/github/gwtbootstrap/client/ui/FluidContainer.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="57" column="9" selection-start="1692" selection-end="1692" vertical-scroll-proportion="0.80921894">
+=======
+    <entry file="file://$PROJECT_DIR$/src/mitll/langtest/server/audio/AudioFileHelper.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="267" column="28" selection-start="11278" selection-end="11281" vertical-scroll-proportion="-5.3461537">
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
           <folding />
         </state>
       </provider>
     </entry>
+<<<<<<< HEAD
     <entry file="file://$PROJECT_DIR$/src/mitll/langtest/client/recorder/AutoCRTRecordPanel.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="20" column="29" selection-start="742" selection-end="742" vertical-scroll-proportion="0.25033468">
+=======
+    <entry file="file://$PROJECT_DIR$/src/mitll/langtest/server/audio/AudioConversion.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="269" column="14" selection-start="9663" selection-end="9663" vertical-scroll-proportion="0.0">
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
           <folding />
         </state>
       </provider>
     </entry>
+<<<<<<< HEAD
     <entry file="file://$PROJECT_DIR$/src/mitll/langtest/client/recorder/SimpleRecordExercisePanel.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="23" column="54" selection-start="857" selection-end="857" vertical-scroll-proportion="0.34474018">
@@ -2181,59 +2962,117 @@
     <entry file="file://$PROJECT_DIR$/src/mitll/langtest/client/recorder/SimpleRecordPanel.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="21" column="23" selection-start="757" selection-end="757" vertical-scroll-proportion="0.11125655">
+=======
+    <entry file="jar://$PROJECT_DIR$/war/WEB-INF/lib/pronz.jar!/org/h2/store/fs/FileUtils.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="31" column="21" selection-start="1177" selection-end="1177" vertical-scroll-proportion="-18.0" />
+      </provider>
+    </entry>
+    <entry file="jar://$PROJECT_DIR$/war/WEB-INF/lib/pronz.jar!/org/apache/commons/io/FileUtils.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="4" column="29" selection-start="127" selection-end="148" vertical-scroll-proportion="-1.8" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/mitll/langtest/server/database/ExcelImport.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="40" column="13" selection-start="1206" selection-end="1206" vertical-scroll-proportion="0.0">
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
           <folding />
         </state>
       </provider>
     </entry>
+<<<<<<< HEAD
     <entry file="file://$PROJECT_DIR$/src/mitll/langtest/client/recorder/RecordButtonPanel.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="19" column="45" selection-start="822" selection-end="822" vertical-scroll-proportion="0.11125655">
+=======
+    <entry file="file://$PROJECT_DIR$/src/mitll/langtest/shared/custom/UserList.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="77" column="34" selection-start="1963" selection-end="1963" vertical-scroll-proportion="0.0">
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
           <folding />
         </state>
       </provider>
     </entry>
+<<<<<<< HEAD
     <entry file="file://$PROJECT_DIR$/src/mitll/langtest/client/flashcard/CombinedResponseFlashcard.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="33" column="28" selection-start="1302" selection-end="1302" vertical-scroll-proportion="0.36034912">
+=======
+    <entry file="file://$PROJECT_DIR$/src/mitll/langtest/server/database/custom/UserListManager.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="77" column="30" selection-start="2580" selection-end="2580" vertical-scroll-proportion="0.0">
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
           <folding />
         </state>
       </provider>
     </entry>
+<<<<<<< HEAD
     <entry file="jar://$PROJECT_DIR$/gwt/gwt-user.jar!/com/google/gwt/user/client/ui/Image.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="128" column="13" selection-start="6162" selection-end="6162" vertical-scroll-proportion="0.32442284">
+=======
+    <entry file="file://$PROJECT_DIR$/src/mitll/langtest/shared/custom/UserExercise.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="34" column="2" selection-start="826" selection-end="928" vertical-scroll-proportion="0.0">
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
           <folding />
         </state>
       </provider>
     </entry>
+<<<<<<< HEAD
     <entry file="file://$PROJECT_DIR$/src/mitll/langtest/client/recorder/RecordButton.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="60" column="9" selection-start="2106" selection-end="2106" vertical-scroll-proportion="-0.41919807">
+=======
+    <entry file="file://$PROJECT_DIR$/src/mitll/langtest/server/database/custom/UserListDAO.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="191" column="58" selection-start="6048" selection-end="6048" vertical-scroll-proportion="0.0">
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
           <folding />
         </state>
       </provider>
     </entry>
+<<<<<<< HEAD
     <entry file="file://$PROJECT_DIR$/src/mitll/langtest/client/sound/PlayAudioPanel.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="322" column="111" selection-start="10297" selection-end="10297" vertical-scroll-proportion="-2.96">
+=======
+    <entry file="file://$PROJECT_DIR$/src/mitll/langtest/server/database/ExerciseDAO.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="13" column="17" selection-start="277" selection-end="277" vertical-scroll-proportion="0.0">
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
           <folding />
         </state>
       </provider>
     </entry>
+<<<<<<< HEAD
     <entry file="file://$PROJECT_DIR$/src/mitll/langtest/client/scoring/AudioPanel.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="309" column="45" selection-start="10706" selection-end="10706" vertical-scroll-proportion="-13.6">
+=======
+    <entry file="file://$PROJECT_DIR$/src/mitll/langtest/server/database/DatabaseImpl.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="294" column="48" selection-start="10045" selection-end="10045" vertical-scroll-proportion="0.0">
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
           <folding />
         </state>
       </provider>
     </entry>
+<<<<<<< HEAD
     <entry file="file://$PROJECT_DIR$/src/mitll/langtest/client/user/UserTable.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="24" column="13" selection-start="996" selection-end="996" vertical-scroll-proportion="0.0">
+=======
+    <entry file="file://$PROJECT_DIR$/src/mitll/langtest/server/database/custom/UserListExerciseJoinDAO.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="117" column="20" selection-start="3861" selection-end="3861" vertical-scroll-proportion="0.0">
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
           <folding />
         </state>
       </provider>
     </entry>
+<<<<<<< HEAD
     <entry file="file://$PROJECT_DIR$/src/mitll/langtest/server/database/ResultDAO.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="793" column="16" selection-start="25424" selection-end="25430" vertical-scroll-proportion="0.0">
@@ -2253,19 +3092,31 @@
     <entry file="file://$PROJECT_DIR$/src/mitll/langtest/server/scoring/ASRScoring.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="556" column="23" selection-start="23098" selection-end="23098" vertical-scroll-proportion="0.0">
+=======
+    <entry file="file://$PROJECT_DIR$/src/mitll/langtest/server/database/UserExerciseDAO.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="242" column="52" selection-start="8109" selection-end="8120" vertical-scroll-proportion="0.0">
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
           <folding />
         </state>
       </provider>
     </entry>
+<<<<<<< HEAD
     <entry file="file://$PROJECT_DIR$/src/mitll/langtest/server/autocrt/AutoCRT.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="101" column="20" selection-start="4395" selection-end="4395" vertical-scroll-proportion="-13.68">
+=======
+    <entry file="file://$PROJECT_DIR$/src/mitll/langtest/server/LangTestDatabaseImpl.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="72" column="13" selection-start="2713" selection-end="2713" vertical-scroll-proportion="0.3324397">
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+<<<<<<< HEAD
     <entry file="file://$PROJECT_DIR$/src/mitll/langtest/shared/AudioAnswer.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="20" column="24" selection-start="550" selection-end="550" vertical-scroll-proportion="0.0">
@@ -2290,10 +3141,16 @@
     <entry file="file://$PROJECT_DIR$/src/mitll/langtest/client/scoring/PostAudioRecordButton.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="25" column="43" selection-start="956" selection-end="956" vertical-scroll-proportion="0.33211234">
+=======
+    <entry file="file://$PROJECT_DIR$/src/mitll/langtest/shared/AudioExercise.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="19" column="9" selection-start="501" selection-end="501" vertical-scroll-proportion="0.0">
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
           <folding />
         </state>
       </provider>
     </entry>
+<<<<<<< HEAD
     <entry file="file://$PROJECT_DIR$/src/mitll/langtest/client/user/StudentDialog.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
@@ -2303,6 +3160,8 @@
         </state>
       </provider>
     </entry>
+=======
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
   </component>
   <component name="masterDetails">
     <states>
@@ -2343,7 +3202,11 @@
       </state>
       <state key="JdkListConfigurable.UI">
         <settings>
+<<<<<<< HEAD
           <last-edited>1.6 (1)</last-edited>
+=======
+          <last-edited>1.6</last-edited>
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
           <splitter-proportions>
             <option name="proportions">
               <list>
@@ -2380,7 +3243,11 @@
       </state>
       <state key="ProjectLibrariesConfigurable.UI">
         <settings>
+<<<<<<< HEAD
           <last-edited>gwt-bootstrap-2.3.2.0-SNAPSHOT</last-edited>
+=======
+          <last-edited>svm</last-edited>
+>>>>>>> 07b057d8719c5a04ddf68ab2e830739138734adf
           <splitter-proportions>
             <option name="proportions">
               <list>
