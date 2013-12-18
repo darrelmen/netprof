@@ -31,7 +31,7 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
-  private List<AutoCRTRecordPanel> autoCRTRecordPanels;
+  //private List<AutoCRTRecordPanel> autoCRTRecordPanels;
   private List<TextResponse> textResponses;
 
   private SoundFeedback soundFeedback;
@@ -60,11 +60,11 @@ public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
   protected Widget getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller,
                                    final int index) {
     // evil
-    if (autoCRTRecordPanels == null) autoCRTRecordPanels = new ArrayList<AutoCRTRecordPanel>();
+    //if (autoCRTRecordPanels == null) autoCRTRecordPanels = new ArrayList<AutoCRTRecordPanel>();
     if (textResponses == null) textResponses = new ArrayList<TextResponse>();
 
     AutoCRTRecordPanel autoCRTRecordPanel = new AutoCRTRecordPanel(service, controller, exercise, this, index);
-    autoCRTRecordPanels.add(autoCRTRecordPanel);
+   // autoCRTRecordPanels.add(autoCRTRecordPanel);
     String responseType = controller.getProps().getResponseType();
 
     if (responseType.equalsIgnoreCase("Audio")) {
