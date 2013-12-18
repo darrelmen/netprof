@@ -1,7 +1,5 @@
 package mitll.langtest.client.user;
 
-import com.github.gwtbootstrap.client.ui.Label;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
