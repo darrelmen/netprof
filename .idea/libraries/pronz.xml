@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="pronz">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/war/WEB-INF/lib/pronz.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
