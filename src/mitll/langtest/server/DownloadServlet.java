@@ -2,20 +2,15 @@ package mitll.langtest.server;
 
 import mitll.langtest.server.database.DLIUserDAO;
 import mitll.langtest.server.database.DatabaseImpl;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URLDecoder;
 
 /**
  * Created with IntelliJ IDEA.
@@ -30,22 +25,20 @@ public class DownloadServlet extends HttpServlet {
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     String encodedFileName = request.getRequestURI();
-   // System.out.println("uri " + encodedFileName);
 
     String pathInfo = request.getPathInfo();
-    logger.debug("Request " + request.getQueryString() + " path "  + pathInfo +
+    logger.debug("DownloadServlet.doGet : Request " + request.getQueryString() + " path "  + pathInfo +
       " uri " + request.getRequestURI() + "  " + request.getRequestURL() +  "  " + request.getServletPath());
 
-
-    response.setContentType("application/vnd.ms-excel");
+    response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     DatabaseImpl db = readProperties();
 
     if (encodedFileName.toLowerCase().contains("users")) {
-      response.setHeader("Content-Disposition", "attachment; filename=users.xlsx");
+      response.setHeader("Content-Disposition", "attachment; filename=users");
       db.getUserDAO().toXLSX(response.getOutputStream(), new DLIUserDAO(db));
     }
     else {
-      response.setHeader("Content-Disposition", "attachment; filename=results.xlsx");
+      response.setHeader("Content-Disposition", "attachment; filename=results");
       db.getResultDAO().toXLSX(response.getOutputStream());
     }
     response.getOutputStream().close();
@@ -64,8 +57,7 @@ public class DownloadServlet extends HttpServlet {
     serverProps.readPropertiesFile(servletContext, configDir);
     String h2DatabaseFile = serverProps.getH2Database();
 
-    DatabaseImpl db = makeDatabaseImpl(h2DatabaseFile,configDir,relativeConfigDir,serverProps);
-    return db;
+    return makeDatabaseImpl(h2DatabaseFile,configDir,relativeConfigDir,serverProps);
   }
 
   private DatabaseImpl makeDatabaseImpl(String h2DatabaseFile, String configDir, String relativeConfigDir, ServerProperties serverProperties) {
