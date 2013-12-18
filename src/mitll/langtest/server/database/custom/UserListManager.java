@@ -231,9 +231,11 @@ public class UserListManager {
    * @param <T>
    */
   public <T extends AudioExercise> void addAnnotations(T exercise) {
-    for (UserAnnotation annotation : annotations) {
-      if (annotation != null && annotation.exerciseID != null && annotation.exerciseID.equals(exercise.getID())) {
-        exercise.addAnnotation(annotation.field, annotation.status, annotation.comment);
+    if (exercise != null) {
+      for (UserAnnotation annotation : annotations) {
+        if (annotation != null && annotation.exerciseID != null && annotation.exerciseID.equals(exercise.getID())) {
+          exercise.addAnnotation(annotation.field, annotation.status, annotation.comment);
+        }
       }
     }
   }
