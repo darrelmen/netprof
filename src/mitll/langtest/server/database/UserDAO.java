@@ -5,15 +5,12 @@ import mitll.langtest.shared.Demographics;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.grade.Grader;
 import org.apache.log4j.Logger;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataFormat;
-import org.apache.poi.ss.usermodel.PrintSetup;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.IOException;
@@ -360,6 +357,14 @@ public class UserDAO extends DAO {
   }
 
   public void toXLSX(OutputStream out,DLIUserDAO dliUserDAO) {
+    long then = System.currentTimeMillis();
+
+    List<User> users = joinWithDLIUsers(dliUserDAO);
+    long now = System.currentTimeMillis();
+    if (now-then > 100) logger.warn("toXLSX : took " + (now-then) + " millis to read " + users.size()+
+      " users from database");
+    then = now;
+
     Workbook wb = new XSSFWorkbook();
     Sheet sheet = wb.createSheet("Users");
     int rownum = 0;
@@ -374,7 +379,8 @@ public class UserDAO extends DAO {
 
     cellStyle.setDataFormat(dataFormat.getFormat("MMM dd HH:mm:ss"));
 
-    for (User user : joinWithDLIUsers(dliUserDAO)) {
+
+    for (User user : users) {
       Row row = sheet.createRow(rownum++);
       int j = 0;
       Cell cell = row.createCell(j++);
@@ -401,9 +407,17 @@ public class UserDAO extends DAO {
    //   if (demographics == null) logger.warn("no demographics for " + user);
       cell.setCellValue(demographics == null ? "" :demographics.toString());
     }
-
+    now = System.currentTimeMillis();
+    if (now-then > 100) logger.warn("toXLSX : took " + (now-then) + " millis to write " + rownum+
+      " rows to sheet, or " + (now-then)/rownum + " millis/row");
+    then = now;
     try {
       wb.write(out);
+      now = System.currentTimeMillis();
+      if (now-then > 100) {
+        logger.warn("toXLSX : took " + (now-then) + " millis to write excel to output stream ");
+      }
+      then = now;
       out.close();
     } catch (IOException e) {
       logger.error("got " +e,e);
