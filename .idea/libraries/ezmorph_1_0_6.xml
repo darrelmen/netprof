@@ -1,7 +1,7 @@
 <component name="libraryTable">
-  <library name="imagewriter">
+  <library name="ezmorph-1.0.6">
     <CLASSES>
-      <root url="jar://$USER_HOME$/clean/bootstrap/imagewriter/imagewriter.jar!/" />
+      <root url="jar://$PROJECT_DIR$/war/WEB-INF/lib/ezmorph-1.0.6.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
