@@ -548,14 +548,14 @@ public class ExercisePanel extends VerticalPanel implements
   }
 
   protected void enableNext() {
-    System.out.println("enableNext : answered " + completed.size() + " vs total " + answers.size());
+    //System.out.println("enableNext : answered " + completed.size() + " vs total " + answers.size());
     boolean isComplete = isCompleted();
     navigationHelper.enableNextButton(isComplete);
   }
 
   protected boolean isCompleted() {
     boolean b = completed.size() == answers.size();
-    System.out.println("isCompleted : answered " + completed.size() + " vs total " + answers.size() + " : " + b);
+    //System.out.println("isCompleted : answered " + completed.size() + " vs total " + answers.size() + " : " + b);
     return b;
   }
 
