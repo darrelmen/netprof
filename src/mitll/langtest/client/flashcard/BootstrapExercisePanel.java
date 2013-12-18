@@ -31,6 +31,7 @@ import mitll.langtest.shared.Exercise;
  */
 public class BootstrapExercisePanel extends FluidContainer {
   public static final String WARN_NO_FLASH = "<font color='red'>Flash is not activated. Do you have a flashblocker? Please add this site to its whitelist.</font>";
+  public static final int WIDTH = 300;
 
   private Heading recoOutput;
   protected SoundFeedback soundFeedback;
@@ -40,14 +41,14 @@ public class BootstrapExercisePanel extends FluidContainer {
 
   /**
    *
+   *
    * @param e
    * @param service
    * @param controller
-   * @param addKeyBinding
    * @see mitll.langtest.client.flashcard.FlashcardExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
    */
   public BootstrapExercisePanel(final Exercise e, final LangTestDatabaseAsync service,
-                                final ExerciseController controller, int feedbackHeight, boolean addKeyBinding) {
+                                final ExerciseController controller, int feedbackHeight) {
     setStyleName("exerciseBackground");
     addStyleName("cardBorder");
     HTML warnNoFlash = new HTML(WARN_NO_FLASH);
@@ -57,7 +58,6 @@ public class BootstrapExercisePanel extends FluidContainer {
     cardPrompt = getCardPrompt(e, controller);
     cardPrompt.getElement().setId("cardPrompt");
     add(cardPrompt);
-    //System.out.println("height " +feedbackHeight);
     addRecordingAndFeedbackWidgets(e, service, controller, feedbackHeight);
     warnNoFlash.setVisible(false);
     add(warnNoFlash);
@@ -142,7 +142,7 @@ public class BootstrapExercisePanel extends FluidContainer {
    * @param e
    * @param service
    * @param controller used in subclasses for audio control
-   * @see #BootstrapExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int, boolean)
+   * @see #BootstrapExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    */
   protected void addRecordingAndFeedbackWidgets(Exercise e, LangTestDatabaseAsync service, ExerciseController controller,
                                               int feedbackHeight) {
@@ -153,7 +153,7 @@ public class BootstrapExercisePanel extends FluidContainer {
       add(getRecoOutputRow());
     }
 
-    add(audioScoreFeedback.getScoreFeedbackRow(feedbackHeight, false));
+    add(audioScoreFeedback.getScoreFeedbackRow(feedbackHeight, WIDTH, false));
   }
 
   protected Widget getAnswerAndRecordButtonRow(Exercise e, LangTestDatabaseAsync service, ExerciseController controller) {
@@ -215,7 +215,7 @@ public class BootstrapExercisePanel extends FluidContainer {
    * @see FlashcardRecordButtonPanel#showIncorrectFeedback(mitll.langtest.shared.AudioAnswer, double, boolean)
    */
   public void showPronScoreFeedback(double score, String scorePrefix) {
-    audioScoreFeedback.showScoreFeedback(scorePrefix, score, false, false);
+    audioScoreFeedback.showScoreFeedback(scorePrefix, score, false, false, WIDTH);
   }
 
   public void clearFeedback() {
