@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="gwt-visualization">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/war/WEB-INF/lib/gwt-visualization.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/war/WEB-INF/lib/gwt-visualization.jar!/" />
+    </SOURCES>
+  </library>
+</component>
