@@ -81,7 +81,7 @@ public class AudioAnswer implements IsSerializable {
 
   /**
    * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#receivedAudioAnswer(AudioAnswer, mitll.langtest.client.exercise.ExerciseQuestionState, com.google.gwt.user.client.ui.Panel)
-   * @see mitll.langtest.server.autocrt.AutoCRT#getAutoCRTDecodeOutput(String, int, Exercise, java.io.File, AudioAnswer)
+   * @see mitll.langtest.server.autocrt.AutoCRT#getAutoCRTDecodeOutput(String, int, java.io.File, AudioAnswer)
    * @return
    */
   public boolean isCorrect() { return correct; }
