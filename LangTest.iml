@@ -97,6 +97,9 @@
       <excludeFolder url="file://$MODULE_DIR$/crtH2Dumps" />
       <excludeFolder url="file://$MODULE_DIR$/gwt-unitCache" />
       <excludeFolder url="file://$MODULE_DIR$/out" />
+      <excludeFolder url="file://$MODULE_DIR$/splitScripts" />
+      <excludeFolder url="file://$MODULE_DIR$/test-classes" />
+      <excludeFolder url="file://$MODULE_DIR$/tmp" />
       <excludeFolder url="file://$MODULE_DIR$/war/WEB-INF/deploy" />
       <excludeFolder url="file://$MODULE_DIR$/war/answers" />
       <excludeFolder url="file://$MODULE_DIR$/war/audioimages" />
@@ -131,7 +134,9 @@
           <root url="jar://$MODULE_DIR$/war/WEB-INF/lib/guava-13.0.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/guava/guava13/guava-13.0-sources.jar!/" />
+        </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library">
