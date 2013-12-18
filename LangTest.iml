@@ -194,6 +194,7 @@
     <orderEntry type="library" name="poi-3.9-20121203" level="project" />
     <orderEntry type="library" name="pronz" level="project" />
     <orderEntry type="library" name="mira" level="project" />
+    <orderEntry type="library" name="poi-ooxml-3.9-20121203 (3)" level="project" />
     <orderEntry type="library" name="org.moxieapps.gwt.highcharts-1.5.0" level="project" />
   </component>
 </module>
