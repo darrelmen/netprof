@@ -19,6 +19,7 @@ import java.io.IOException;
  * Time: 4:57 PM
  * To change this template use File | Settings | File Templates.
  */
+@SuppressWarnings("serial")
 public class DownloadServlet extends HttpServlet {
   private static final Logger logger = Logger.getLogger(DownloadServlet.class);
 

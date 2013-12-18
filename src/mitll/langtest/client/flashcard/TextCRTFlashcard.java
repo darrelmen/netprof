@@ -33,7 +33,7 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
       public void answerPosted() {
         TextCRTFlashcard.this.answerPosted();
       }
-    });
+    }, 300);
   }
 
   protected void answerPosted() {
