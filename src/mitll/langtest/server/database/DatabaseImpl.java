@@ -174,7 +174,7 @@ public class DatabaseImpl implements Database {
   }
 
   @Override
-  public Connection getConnection()/* throws Exception*/ {
+  public Connection getConnection() {
     return connection.getConnection();
   }
 
