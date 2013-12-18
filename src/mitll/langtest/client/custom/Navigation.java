@@ -401,20 +401,22 @@ public class Navigation implements RequiresResize {
 
     TabAndContent addItem = null;
     if (created && !ul.isPrivate()) {
-      addItem = makeTab(tabPanel, IconType.PLUS_SIGN, "Add Item");
-      final TabAndContent finalAddItem = addItem;
-      addItem.tab.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          showAddItem(ul, finalAddItem);
-        }
-      });
+      if (!instanceName.equals("review")) {
+        addItem = makeTab(tabPanel, IconType.PLUS_SIGN, "Add Item");
+        final TabAndContent finalAddItem = addItem;
+        addItem.tab.addClickHandler(new ClickHandler() {
+          @Override
+          public void onClick(ClickEvent event) {
+            showAddItem(ul, finalAddItem);
+          }
+        });
+      }
 
       final TabAndContent edit = makeTab(tabPanel, IconType.EDIT, "Edit");
       edit.tab.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-        showEditItem(ul,edit);
+          showEditItem(ul, edit);
         }
       });
     }
@@ -422,28 +424,12 @@ public class Navigation implements RequiresResize {
     final TabAndContent finalAddItem = addItem;
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
-        if (created && !ul.isPrivate() && ul.isEmpty()) {
+        if (created && !ul.isPrivate() && ul.isEmpty() && finalAddItem != null) {
           tabPanel.selectTab(2);
           showAddItem(ul, finalAddItem);
         } else {
           tabPanel.selectTab(0);
           npfHelper.showNPF(ul, learn, instanceName.equals("review") ? "review" : "learn");
-        }
-      }
-    });
-
-    tabPanel.addShowHandler(new TabPanel.ShowEvent.Handler() {
-      @Override
-      public void onShow(TabPanel.ShowEvent showEvent) {
-        String targetName = showEvent.getTarget() == null ? "" : showEvent.getTarget().toString();
-
-        if (targetName.length() > 0) {
-         // System.out.println("got shown event : '" + showEvent + "'\n target '" + targetName + "'");
-/*          if (targetName.contains(PRACTICE)) {
-            avpHelper.addKeyHandler();
-          } else {
-            avpHelper.removeKeyHandler();
-          }*/
         }
       }
     });
