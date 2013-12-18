@@ -24,15 +24,18 @@ import mitll.langtest.shared.Exercise;
 public class AutoCRTRecordPanel extends SimpleRecordPanel {
   protected ScoreFeedback scoreFeedback;
   private SoundFeedback soundFeedback;
-
+  int feedbackWidth;
   /**
    * Has three parts -- record/stop button, audio validity feedback icon, and the audio control widget that allows playback.
    *
    * @see mitll.langtest.client.recorder.FeedbackRecordPanel
+   * @see mitll.langtest.client.flashcard.CombinedResponseFlashcard
    */
   public AutoCRTRecordPanel(final LangTestDatabaseAsync service, final ExerciseController controller,
-                            final Exercise exercise, final ExerciseQuestionState questionState, final int index) {
+                            final Exercise exercise, final ExerciseQuestionState questionState, final int index, int feedbackWidth) {
     super(service, controller, exercise, questionState, index);
+    /*getPanel().*/getElement().setId("AutoCRTRecordPanel");
+    this.feedbackWidth = feedbackWidth;
   }
 
   public void setSoundFeedback(SoundFeedback soundFeedback) {  this.soundFeedback = soundFeedback;  }
@@ -53,7 +56,7 @@ public class AutoCRTRecordPanel extends SimpleRecordPanel {
   @Override
   protected void receivedAudioAnswer(AudioAnswer result, final ExerciseQuestionState questionState, final Panel outer) {
     super.receivedAudioAnswer(result, questionState, outer);
-    scoreFeedback.showCRTFeedback(result.getScore(), soundFeedback, "Score ", true);
+    scoreFeedback.showCRTFeedback(result.getScore(), soundFeedback, "Score ", true, feedbackWidth);
   }
 
   @Override
