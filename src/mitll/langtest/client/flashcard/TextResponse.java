@@ -40,6 +40,7 @@ public class TextResponse {
   private int user;
   private AnswerPosted answerPosted;
   private Widget textResponseWidget;
+  int width = 250; // TODO please do something better than having a fixed width
 
   /**
    * @see TextCRTFlashcard#makeNavigationHelper(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController)
@@ -47,9 +48,11 @@ public class TextResponse {
    * @param user to whom to file this answer under
    * @param soundFeedback so we can play a sound when the answer is correct or incorrect
    * @param answerPosted callback for when the user types in an answer and the post to the server has completed
+   * @param width
    */
-  public TextResponse(int user, SoundFeedback soundFeedback, AnswerPosted answerPosted) {
+  public TextResponse(int user, SoundFeedback soundFeedback, AnswerPosted answerPosted, int width) {
     this(user, soundFeedback);
+    this.width = width;
     this.answerPosted = answerPosted;
   }
 
@@ -86,7 +89,7 @@ public class TextResponse {
     textResponseWidget = getTextResponseWidget(exercise, service, controller, getTextScoreFeedback(), centered, addKeyBinding, questionID);
     toAddTo.add(textResponseWidget);
     textResponseWidget.addStyleName("floatLeft");
-    FluidRow scoreFeedbackRow = getTextScoreFeedback().getScoreFeedbackRow(FEEDBACK_HEIGHT, true);
+    Panel scoreFeedbackRow = getTextScoreFeedback().getScoreFeedbackRow(FEEDBACK_HEIGHT, width, true);
     toAddTo.add(scoreFeedbackRow);
 
     return textResponseWidget;
@@ -209,10 +212,9 @@ public class TextResponse {
    * @param result
    */
   private void gotScoreForGuess(Double result) {
-    getTextScoreFeedback().showCRTFeedback(result, soundFeedback, "Score ", false);
-   // getTextScoreFeedback().hideFeedback();
+    getTextScoreFeedback().showCRTFeedback(result, soundFeedback, "Score ", false, width);
     if (answerPosted != null) {
-      System.out.println("calling answer posted for " + result);
+      //System.out.println("calling answer posted for " + result);
       answerPosted.answerPosted();
     }
   }
