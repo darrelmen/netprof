@@ -295,14 +295,14 @@ public class AudioFileHelper {
     if (serverProps.isFlashcard()|| doFlashcard) {
       makeASRScoring();
       if (serverProps.isAutoCRT()) {
-        autoCRT.getAutoCRTDecodeOutput(exercise, questionID, exercise1, file, audioAnswer);
+        autoCRT.getAutoCRTDecodeOutput(exercise, questionID, file, audioAnswer);
       } else {
         autoCRT.getFlashcardAnswer(exercise1, file, audioAnswer);
       }
       db.updateFlashcardState(user, exercise, audioAnswer.isCorrect());
       return audioAnswer;
     } else if (serverProps.isAutoCRT() && !exercise1.isPromptInEnglish()) { // TODO : hack -- don't do CRT on english
-      autoCRT.getAutoCRTDecodeOutput(exercise, questionID, exercise1, file, audioAnswer);
+      autoCRT.getAutoCRTDecodeOutput(exercise, questionID, file, audioAnswer);
     }
     return audioAnswer;
   }
@@ -320,7 +320,7 @@ public class AudioFileHelper {
    * @param studentAnswersDB
    * @param langTestDatabase
    */
-  public void makeAutoCRT(String relativeConfigDir, AutoCRTScoring crtScoring, DatabaseImpl studentAnswersDB, LangTestDatabaseImpl langTestDatabase) {
+  public synchronized void makeAutoCRT(String relativeConfigDir, AutoCRTScoring crtScoring, DatabaseImpl studentAnswersDB, LangTestDatabaseImpl langTestDatabase) {
     if (autoCRT == null) {
       DatabaseImpl exportDB = serverProps.isAutoCRT() ? studentAnswersDB : db;
       if (serverProps.isAutoCRT()) {
