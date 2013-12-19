@@ -1,7 +1,9 @@
 package mitll.langtest.client.custom;
 
+import com.github.gwtbootstrap.client.ui.DropdownButton;
 import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.SplitDropdownButton;
+import com.github.gwtbootstrap.client.ui.base.DropdownBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -31,7 +33,7 @@ import java.util.Collection;
  * To change this template use File | Settings | File Templates.
  */
 public class NPFExercise extends GoodwaveExercisePanel {
-  private SplitDropdownButton addToList;
+  private DropdownButton addToList;
   private int activeCount = 0;
 
   /**
@@ -55,10 +57,10 @@ public class NPFExercise extends GoodwaveExercisePanel {
    * @return
    */
   protected Panel makeAddToList(Exercise e, ExerciseController controller) {
-    addToList = new SplitDropdownButton("Add Item to List");
+    addToList = new DropdownButton("Add Item to List");
     addToList.setIcon(IconType.PLUS_SIGN);
 
-    System.out.println("makeAddToList : populate list choices for " + controller.getUser());
+  //  System.out.println("makeAddToList : populate list choices for " + controller.getUser());
 
     populateListChoices(e, controller, addToList);
     addToList.setType(ButtonType.PRIMARY);
@@ -76,7 +78,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
    * @see #makeAddToList(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController)
    * @see #wasRevealed()
    */
-  private void populateListChoices(final Exercise e, final ExerciseController controller, final SplitDropdownButton w1) {
+  private void populateListChoices(final Exercise e, final ExerciseController controller, final DropdownBase w1) {
     System.out.println("populateListChoices : populate list choices for " + controller.getUser());
     service.getListsForUser(controller.getUser(), true, true, new AsyncCallback<Collection<UserList>>() {
       @Override
@@ -126,9 +128,11 @@ public class NPFExercise extends GoodwaveExercisePanel {
     });
   }
 
+  /**
+   * @see Navigation#getButtonRow2(com.google.gwt.user.client.ui.Panel)
+   */
   public void wasRevealed() {
-    System.out.println("\nwasRevealed : populate list choices for " + controller.getUser() + "\n\n");
-
+    System.out.println("wasRevealed : populate list choices for " + controller.getUser() + "\n\n");
     populateListChoices(exercise, controller, addToList);
   }
 
