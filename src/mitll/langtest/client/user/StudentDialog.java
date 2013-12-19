@@ -92,7 +92,7 @@ public class StudentDialog extends UserDialog {
     final ListBoxFormField purpose = getListBoxFormField(fieldset, "Purpose", getListBox2(purposes));
 
     final FormField user = addControlFormField(fieldset, "User ID", MIN_LENGTH_USER_ID);
-    user.setVisible(purpose.getValue().equals(DATA_COLLECTION));
+    user.setVisible(isDataCollection(purpose) || isPractice(purpose));
     //final FormField password = addControlFormField(fieldset, "Password", true);
 
     purpose.box.setWidth("150px");
@@ -106,10 +106,10 @@ public class StudentDialog extends UserDialog {
       @Override
       public void onChange(ChangeEvent event) {
         boolean b = canSkipRegister(purpose.getValue());
-        boolean needUserID = purpose.getValue().equals(DATA_COLLECTION) || purpose.getValue().equals(REVIEW);
+        boolean needUserID = isDataCollection(purpose) || isReview(purpose) || isPractice(purpose);
         user.setVisible(needUserID);
         accordion.setVisible(!canSkipRegister(purpose.getValue()));
-        registrationInfo.showOrHideILR(!purpose.getValue().equals(REVIEW));
+        registrationInfo.showOrHideILR(!isReview(purpose));
 
         if (b) {
           accordion.hide();
@@ -128,7 +128,12 @@ public class StudentDialog extends UserDialog {
               public void onSuccess(Integer result) {
                 boolean exists = result != -1;
                 if (!exists) {
-                  accordion.show();
+              /*    if (isPractice(purpose)) {
+                    addUser(userID,getAudioTypeFromPurpose(purpose.getValue()));
+                  }
+                  else {*/
+                    accordion.show();
+                //  }
                 }
               }
             });
@@ -149,6 +154,18 @@ public class StudentDialog extends UserDialog {
     });
 
     dialogBox.show();
+  }
+
+  private boolean isDataCollection(ListBoxFormField purpose) {
+    return purpose.getValue().equals(DATA_COLLECTION);
+  }
+
+  private boolean isPractice(ListBoxFormField purpose) {
+    return purpose.getValue().equals(PRACTICE);
+  }
+
+  private boolean isReview(ListBoxFormField purpose) {
+    return purpose.getValue().equals(REVIEW);
   }
 
   private void configureKeyHandler(Modal dialogBox, final Button closeButton) {
@@ -188,19 +205,25 @@ public class StudentDialog extends UserDialog {
       public void onClick(ClickEvent event) {
         String purposeSetting = purpose.getValue();
         final String audioType = getAudioTypeFromPurpose(purposeSetting);
-        if (canSkipRegister(purposeSetting)) {
+        if (canLoginAnonymously(purpose)) {
           dialogBox.hide();
           langTest.rememberAudioType(audioType);
           addAnonymousUser(audioType);
         } else {
-          checkUserAndMaybeRegister(audioType, user, dialogBox, accordion, registrationInfo);
+          checkUserAndMaybeRegister(audioType, user, dialogBox, accordion, registrationInfo,purposeSetting);
         }
       }
     };
   }
 
+  private boolean canLoginAnonymously(ListBoxFormField purpose) {
+    String purposeSetting = purpose.getValue();
+    return purposeSetting.equalsIgnoreCase(DEMO);
+  }
+
   private void checkUserAndMaybeRegister(final String audioType, FormField user, final Modal dialogBox,
-                                         final AccordionGroup accordion, final RegistrationInfo registrationInfo) {
+                                         final AccordionGroup accordion, final RegistrationInfo registrationInfo,
+                                         final String purposeSetting) {
     final String userID = user.box.getText();
     if (checkValidUser(user)
       //&& checkValidPassword(password)
@@ -218,7 +241,9 @@ public class StudentDialog extends UserDialog {
             langTest.rememberAudioType(audioType);
             userManager.storeUser(result, audioType, userID, PropertyHandler.LOGIN_TYPE.STUDENT);
           } else {
-            accordion.show();
+            if (!canSkipRegister(purposeSetting)) {
+              accordion.show();
+            }
             checkThenRegister(audioType, registrationInfo, dialogBox, userID);
           }
         }
@@ -227,13 +252,17 @@ public class StudentDialog extends UserDialog {
   }
 
   private void checkThenRegister(String audioType, RegistrationInfo registrationInfo, Modal dialogBox, String userID) {
-    if (highlightIntegerBox(registrationInfo.ageEntryGroup)) {
-      if (highlightIntegerBox(registrationInfo.weeks, MIN_WEEKS, MAX_WEEKS)) {
+    boolean skipWeekCheck = audioType.contains(REVIEW);
+    boolean skipChecks = audioType.contains(PRACTICE);
+    if (skipChecks) {
+      hideAndSend(audioType, registrationInfo, dialogBox, userID);
+    }
+    else if (highlightIntegerBox(registrationInfo.ageEntryGroup)) {
+      if (skipWeekCheck || highlightIntegerBox(registrationInfo.weeks, MIN_WEEKS, MAX_WEEKS)) {
         if (registrationInfo.dialectGroup.getText().isEmpty()) {
           markError(registrationInfo.dialectGroup, "Please enter a language dialect.");
         } else if (registrationInfo.checkValidity() && registrationInfo.checkValidity2()) {
-          dialogBox.hide();
-          sendNameToServer(registrationInfo, audioType, userID);
+          hideAndSend(audioType, registrationInfo, dialogBox, userID);
         }
       } else {
         markError(registrationInfo.weeks, "Please enter weeks between " + MIN_WEEKS + " and " + MAX_WEEKS + ".");
@@ -242,6 +271,11 @@ public class StudentDialog extends UserDialog {
       markError(registrationInfo.ageEntryGroup.group, registrationInfo.ageEntryGroup.box, "",
        "Enter age between " + MIN_AGE + " and " + MAX_AGE + ".");
     }
+  }
+
+  private void hideAndSend(String audioType, RegistrationInfo registrationInfo, Modal dialogBox, String userID) {
+    dialogBox.hide();
+    sendNameToServer(registrationInfo, audioType, userID);
   }
 
   private String getAudioTypeFromPurpose(String purposeValue) {
@@ -376,6 +410,21 @@ public class StudentDialog extends UserDialog {
     addUser(age, gender, monthsOfExperience, "", PropertyHandler.LOGIN_TYPE.ANONYMOUS, audioType);
   }
 
+/*  private void addUser(String userID,
+                       final String audioType) {
+    AsyncCallback<Long> async = new AsyncCallback<Long>() {
+      public void onFailure(Throwable caught) {
+        Window.alert("addUser : Couldn't contact server.");
+      }
+
+      public void onSuccess(Long result) {
+        System.out.println("addUser : server result is " + result);
+        userManager.storeUser(result, audioType, "" + result, PropertyHandler.LOGIN_TYPE.STUDENT);
+      }
+    };
+    addUser(89, "male", 0, "Unknown", "Unknown", userID, async);
+  }*/
+
   /**
    * @param age
    * @param gender
@@ -449,7 +498,7 @@ public class StudentDialog extends UserDialog {
       ilrLevels = row;
       FluidRow row2 = getEstimating2();
       dialogBox.add(row2);
-          estimating = row2;
+      estimating = row2;
       dialectGroup = getDialect(fieldset);
     }
 
@@ -457,6 +506,7 @@ public class StudentDialog extends UserDialog {
       ilrLevels.setVisible(show);
       estimating.setVisible(show);
       label.setVisible(show);
+      weeks.setVisible(show);
     }
 
     public boolean checkValidity() {
