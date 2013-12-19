@@ -188,6 +188,10 @@
     <orderEntry type="library" name="ezmorph-1.0.6" level="project" />
     <orderEntry type="library" name="commons-beanutils-1.8.0" level="project" />
     <orderEntry type="library" name="gwt-bootstrap-2.3.2.0-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="org.moxieapps.gwt.highcharts-1.5.0" level="project" />
+    <orderEntry type="library" name="mira" level="project" />
+    <orderEntry type="library" name="gwt-bootstrap-2.3.2.0-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="gwt-visualization" level="project" />
   </component>
 </module>
 
