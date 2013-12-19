@@ -1,12 +1,12 @@
 package mitll.langtest.client.custom;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.CheckBox;
-import com.github.gwtbootstrap.client.ui.FluidContainer;
-import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.TextBox;
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -24,6 +24,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.ASRScorePanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
+import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseAnnotation;
@@ -42,34 +43,24 @@ import java.util.Set;
  * Time: 5:44 PM
  * To change this template use File | Settings | File Templates.
  */
-public class QCNPFExercise extends NPFExercise {
-  private static final String CHECKBOX_LABEL = "";//"Has defect";
+public class QCNPFExercise extends GoodwaveExercisePanel {
+  private static final String CHECKBOX_LABEL = "         ";//"Has defect";
   private String instance;
   private Set<String> incorrectSet = new HashSet<String>();
-  private int count = 0;
   private List<RequiresResize> toResize;
-
   public QCNPFExercise(Exercise e, ExerciseController controller, ListInterface listContainer,
                        float screenPortion, boolean addKeyHandler, String instance) {
     super(e, controller, listContainer, screenPortion, addKeyHandler, instance);
     this.instance = instance;
-    System.out.println("QCNPFExercise :  instance " +instance);
   }
 
   @Override
   protected ASRScorePanel makeScorePanel(Exercise e, String instance) { return null;  }
   @Override
-  protected Panel makeAddToList(Exercise e, ExerciseController controller) { return null; }
-  @Override
-  public void wasRevealed() {}
-
-  @Override
   protected void nextWasPressed(ListInterface listContainer, Exercise completedExercise) {
     //System.out.println("nextWasPressed : load next exercise " + completedExercise.getID() + " instance " +instance);
     super.nextWasPressed(listContainer, completedExercise);
     if (!instance.equals("review")) {
-     // System.out.println("\n\n\n\n\tnextWasPressed : add completed " + completedExercise.getID());
-
       listContainer.addCompleted(completedExercise.getID());
       service.markReviewed(completedExercise.getID(), incorrectSet.isEmpty(), new AsyncCallback<Void>() {
         @Override
@@ -99,22 +90,20 @@ public class QCNPFExercise extends NPFExercise {
   @Override
   protected Widget getQuestionContent(Exercise e, String content) {
     Panel column = new FlowPanel();
-    Heading heading = new Heading(4, "Defect?");
-    FluidRow row = new FluidRow();
-    column.add(row);
-    row.add(heading);
-
-
-    Widget foreignLanguage = getEntry(e, "foreignLanguage", ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getRefSentence());
-
-    column.add(foreignLanguage);
-
-    column.add(getEntry(e, "transliteration", ExerciseFormatter.TRANSLITERATION, e.getTranslitSentence()));
-    column.add(getEntry(e, "english", ExerciseFormatter.ENGLISH_PROMPT, e.getEnglishSentence()));
-
     column.getElement().setId("QuestionContent");
     column.addStyleName("floatLeft");
     column.setWidth("100%");
+
+    Heading heading = new Heading(4, "Defect?");
+    heading.addStyleName("borderBottomQC");
+    Panel row = new FlowPanel();
+    row.add(heading);
+
+    column.add(row);
+    column.add(getEntry(e, "foreignLanguage", ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getRefSentence()));
+    column.add(getEntry(e, "transliteration", ExerciseFormatter.TRANSLITERATION, e.getTranslitSentence()));
+    column.add(getEntry(e, "english", ExerciseFormatter.ENGLISH_PROMPT, e.getEnglishSentence()));
+
     return column;
   }
 
@@ -124,7 +113,7 @@ public class QCNPFExercise extends NPFExercise {
   }
 
   protected Widget getScoringAudioPanel(final Exercise e, String pathxxxx) {
-    FlowPanel column = new FlowPanel();
+    Panel column = new FlowPanel();
     column.addStyleName("blockStyle");
     if (toResize == null) toResize = new ArrayList<RequiresResize>();
 
@@ -145,71 +134,93 @@ public class QCNPFExercise extends NPFExercise {
       toResize.add(cp);
       ExerciseAnnotation audioAnnotation = e.getAnnotation(audio.getAudioRef());
 
-      column.add(getEntry(e.getID(), audio.getAudioRef(), cp, audioAnnotation)); // TODO add unique audio attribute id
+      column.add(getEntry(audio.getAudioRef(), cp, audioAnnotation)); // TODO add unique audio attribute id
     }
     return column;
   }
 
   private Widget getEntry(Exercise e, final String field, final String label, String value) {
     ExerciseAnnotation currentAnnotation = e.getAnnotation(field);
-    return getEntry(e, field, label, value, currentAnnotation);
+    return getEntry(field, label, value, currentAnnotation);
   }
 
-  private Widget getEntry(Exercise e, final String field, final String label, String value, ExerciseAnnotation annotation) {
+  private Widget getEntry(final String field, final String label, String value, ExerciseAnnotation annotation) {
     Panel nameValueRow = getContentWidget(label, value);
-    return getEntry(e.getID(), field, nameValueRow, annotation);
+    return getEntry(field, nameValueRow, annotation);
   }
 
   /**
    * TODO after edit, clear annotation -- where do we edit? in edit window
    *
    *
-   * @param id
    * @param field
    * @param annotation
    * @return
    * @paramx label
    * @paramx value
    */
-  private Widget getEntry(String id,
-                          final String field, Widget content, ExerciseAnnotation annotation) {
-    Panel rowContainer = new FlowPanel();
-    rowContainer.addStyleName("topFiveMargin");
-    rowContainer.addStyleName("blockStyle");
-
-    Panel row = new FlowPanel();
-    row.addStyleName("trueInlineStyle");
-    rowContainer.add(row);
-    FlowPanel qcCol = new FlowPanel();
-    qcCol.addStyleName("floatLeft");
-
-     qcCol.addStyleName("qcRightBorder");
-    if (count == 0) rowContainer.addStyleName("borderTopQC");
-    if (count++ % 2 == 0) {
-      row.addStyleName("greenBackground");
-    }
-    final Panel commentRow = new FlowPanel();
-
+  private Widget getEntry(final String field, Widget content, ExerciseAnnotation annotation) {
     final FocusWidget commentEntry = makeCommentEntry(field, annotation);
 
     boolean alreadyMarkedCorrect = annotation == null || annotation.status == null || annotation.status.equals("correct");
+    final Panel commentRow = new FlowPanel();
+    final Panel qcCol = getQCCheckBox(field, commentEntry, alreadyMarkedCorrect, commentRow);
 
-    final Label commentLabel = new Label("comment?");
-    final CheckBox checkBox = makeCheckBox(field, commentRow, commentEntry, alreadyMarkedCorrect);
-    qcCol.add(checkBox);
-    row.add(qcCol);
-    commentRow.setVisible(!alreadyMarkedCorrect);
+    populateCommentRow(commentEntry, alreadyMarkedCorrect, commentRow);
+
+    // comment to left, content to right
+
+    Panel row;
+    //if (count == 0) rowContainer.addStyleName("borderTopQC");
+/*    if (count++ % 2 == 0) {
+      row.addStyleName("greenBackground");
+    }*/
+
+      row = new FlowPanel();
+      row.addStyleName("trueInlineStyle");
+      qcCol.addStyleName("floatLeft");
+      row.add(qcCol);
+      row.add(content);
+
+
+    Panel rowContainer = new FlowPanel();
+    rowContainer.addStyleName("topFiveMargin");
+    rowContainer.addStyleName("blockStyle");
+    rowContainer.add(row);
     rowContainer.add(commentRow);
 
-    DOM.setStyleAttribute(commentLabel.getElement(), "backgroundColor", "#ff0000");
-    commentLabel.setVisible(true);
-    commentLabel.addStyleName("ImageOverlay");
+    return rowContainer;
+  }
+
+  private Panel getQCCheckBox(String field, FocusWidget commentEntry, boolean alreadyMarkedCorrect, Panel commentRow) {
+    final CheckBox checkBox = makeCheckBox(field, commentRow, commentEntry, alreadyMarkedCorrect);
+
+    Panel qcCol = new FlowPanel();
+    Button child = new Button();
+    child.setIcon(IconType.COMMENT);
+    child.setSize(ButtonSize.MINI);
+    qcCol.add(child);
+   qcCol.addStyleName("qcRightBorder");
+
+    qcCol.add(checkBox);
+    return qcCol;
+  }
+
+  private void populateCommentRow(FocusWidget commentEntry, boolean alreadyMarkedCorrect, Panel commentRow) {
+    commentRow.setVisible(!alreadyMarkedCorrect);
+
+    final Label commentLabel = getCommentLabel();
 
     commentRow.add(commentLabel);
     commentRow.add(commentEntry);
+  }
 
-    row.add(content);
-    return rowContainer;
+  private Label getCommentLabel() {
+    final Label commentLabel = new Label("comment?");
+    DOM.setStyleAttribute(commentLabel.getElement(), "backgroundColor", "#ff0000");
+    commentLabel.setVisible(true);
+    commentLabel.addStyleName("ImageOverlay");
+    return commentLabel;
   }
 
   private FocusWidget makeCommentEntry(final String field,ExerciseAnnotation annotation) {
@@ -223,48 +234,35 @@ public class QCNPFExercise extends NPFExercise {
     commentEntry.addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
-        System.out.println(new Date() +" : post to server " + exercise.getID() +
-          " field " + field + " commentLabel " + commentEntry.getText() + " is incorrect");
-        final long then = System.currentTimeMillis();
-        service.addAnnotation(exercise.getID(), field, "incorrect", commentEntry.getText(), new AsyncCallback<Void>() {
-          @Override
-          public void onFailure(Throwable caught) {}
-
-          @Override
-          public void onSuccess(Void result) {
-            long now = System.currentTimeMillis();
-            System.out.println("\t" + new Date() +" : posted to server " + exercise.getID() +
-              " field " + field + " commentLabel " + commentEntry.getText() + " is incorrect, took " + (now-then) + " millis");
-
-          }
-        });
+        final String comment = commentEntry.getText();
+        addIncorrectComment(comment, field);
       }
     });
     return commentEntry;
   }
 
+  /**
+   * @see #getQCCheckBox
+   * @param field
+   * @param commentRow
+   * @param commentEntry
+   * @param alreadyMarkedCorrect
+   * @return
+   */
   private CheckBox makeCheckBox(final String field, final Panel commentRow, final FocusWidget commentEntry, boolean alreadyMarkedCorrect) {
     final CheckBox checkBox = new CheckBox(CHECKBOX_LABEL);
+    checkBox.addStyleName("centeredRadio");
     checkBox.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        if (!checkBox.getValue()) {
+        Boolean isIncorrect = checkBox.getValue();
+        if (!isIncorrect) {
           incorrectSet.remove(field);
-          System.out.println(new Date() +" : post to server " + exercise.getID() + " field " + field + " is correct");
-          service.addAnnotation(exercise.getID(), field, "correct", "", new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-            }
-
-            @Override
-            public void onSuccess(Void result) {
-            }
-          });
+          addCorrectAnnotation(field);
         }
-         commentRow.setVisible(checkBox.getValue());
-        commentEntry.setFocus(checkBox.getValue());
-        incorrectSet.add(field);
-
+        commentRow.setVisible(isIncorrect);
+        commentEntry.setFocus(isIncorrect);
+        if (isIncorrect) incorrectSet.add(field);
       }
     });
     checkBox.setValue(!alreadyMarkedCorrect);
@@ -285,5 +283,36 @@ public class QCNPFExercise extends NPFExercise {
     nameValueRow.add(englishPhrase);
     englishPhrase.addStyleName("leftFiveMargin");
     return nameValueRow;
+  }
+
+  private void addIncorrectComment(final String comment, final String field) {
+    System.out.println(new Date() +" : post to server " + exercise.getID() +
+      " field " + field + " commentLabel " + comment + " is incorrect");
+    final long then = System.currentTimeMillis();
+    service.addAnnotation(exercise.getID(), field, "incorrect", comment, new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {}
+
+      @Override
+      public void onSuccess(Void result) {
+        long now = System.currentTimeMillis();
+        System.out.println("\t" + new Date() +" : posted to server " + exercise.getID() +
+          " field " + field + " commentLabel " + comment + " is incorrect, took " + (now-then) + " millis");
+
+      }
+    });
+  }
+
+  private void addCorrectAnnotation(String field) {
+    System.out.println(new Date() +" : post to server " + exercise.getID() + " field " + field + " is correct");
+    service.addAnnotation(exercise.getID(), field, "correct", "", new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {
+      }
+
+      @Override
+      public void onSuccess(Void result) {
+      }
+    });
   }
 }
