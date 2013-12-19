@@ -329,8 +329,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @param imageAndCheck
    */
   private void getImageURLForAudio(final String path, final String type,int width, final ImageAndCheck imageAndCheck) {
-   // new Exception("get images").printStackTrace();
-
     int toUse = Math.max(MIN_WIDTH, width);
     float heightForType = type.equals(WAVEFORM) ? WAVEFORM_HEIGHT : SPECTROGRAM_HEIGHT;
     int height = Math.max(10,(int) (((float)Window.getClientHeight())/1200f * heightForType));
