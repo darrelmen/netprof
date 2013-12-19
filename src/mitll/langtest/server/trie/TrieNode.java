@@ -23,13 +23,13 @@ import java.util.Map;
  *
  * Nodes represent states in a state machine, e.g., (root)--"joe"-->(node1)--"blow"-->(node2)
  */
-public class TrieNode {
-  private Map<String, TrieNode> gotoMap; // gotoMap is a property of each node
+public class TrieNode<T> {
+  private Map<String, TrieNode<T>> gotoMap; // gotoMap is a property of each node
   private String singleTransition;
-  private TrieNode singleNode;
-  private TrieNode failureNode; // define the node to go to if the transition node is not found in the goto map
+  private TrieNode<T> singleNode;
+  private TrieNode<T> failureNode; // define the node to go to if the transition node is not found in the goto map
 
-  private List<EmitValue> emitList; // define emission values for each node
+  private List<EmitValue<T>> emitList; // define emission values for each node
 
   public TrieNode() {
     this.gotoMap = null;
@@ -47,7 +47,7 @@ public class TrieNode {
    * @see mitll.langtest.server.trie.Trie#computeFailureFunction()
    * @return
    */
-  public List<EmitValue> getEmitList() {
+  public List<EmitValue<T>> getEmitList() {
     return emitList;
   }
 
@@ -55,7 +55,7 @@ public class TrieNode {
    * @see mitll.langtest.server.trie.Trie#computeFailureFunction()
    * @return
    */
-  public TrieNode getFailureNode() {
+  public TrieNode<T> getFailureNode() {
     return failureNode;
   }
 
@@ -72,15 +72,15 @@ public class TrieNode {
    * @param transitionLabel
    * @return node for label or null if not known
    */
-  public TrieNode getNextState(String transitionLabel) {
+  public TrieNode<T> getNextState(String transitionLabel) {
     if (singleTransition != null) {
       return (singleTransition.equals(transitionLabel)) ? singleNode : null;
     }
     return gotoMap != null ? gotoMap.get(transitionLabel) : null;
   }
 
-  public List<EmitValue> getEmitsBelow() {
-    List<EmitValue> emits = new ArrayList<EmitValue>();
+  public List<EmitValue<T>> getEmitsBelow() {
+    List<EmitValue<T>> emits = new ArrayList<EmitValue<T>>();
     if (emitList != null) {
       emits.addAll(emitList);
     }
@@ -88,7 +88,7 @@ public class TrieNode {
       emits.addAll(singleNode.getEmitsBelow());
     }
     else if (gotoMap != null) {
-      for (TrieNode child : gotoMap.values()) {
+      for (TrieNode<T> child : gotoMap.values()) {
         emits.addAll(child.getEmitsBelow());
       }
     }
@@ -102,9 +102,9 @@ public class TrieNode {
    * @see mitll.langtest.server.trie.Trie#computeFailureFunction()
    * @return
    */
-  List<EmitValue> getAndCreateEmitList() {
+  List<EmitValue<T>> getAndCreateEmitList() {
     if (emitList == null)  {
-      emitList = new ArrayList<EmitValue>(1);
+      emitList = new ArrayList<EmitValue<T>>(1);
     }
     return emitList;
   }
@@ -113,7 +113,7 @@ public class TrieNode {
    * @see mitll.langtest.server.trie.Trie#computeFailureFunction()
    * @param failureNode
    */
-  void setFailureNode(TrieNode failureNode) {
+  void setFailureNode(TrieNode<T> failureNode) {
     this.failureNode = failureNode;
   }
 
@@ -126,14 +126,14 @@ public class TrieNode {
    * @param label
    * @param node
    */
-  void addTransition(String label, TrieNode node) {
+  void addTransition(String label, TrieNode<T> node) {
     if (singleTransition == null && gotoMap == null) {
       singleTransition = label;
       singleNode = node;
     }
     else { // either we have a single entry or multiple
       if (gotoMap == null)  { // if single, make multiple storage
-        gotoMap = new HashMap<String, TrieNode>(2);
+        gotoMap = new HashMap<String, TrieNode<T>>(2);
         gotoMap.put(singleTransition, singleNode);
         singleTransition = null;
         singleNode = null;
@@ -162,7 +162,7 @@ public class TrieNode {
    * @see mitll.langtest.server.trie.Trie#computeFailureFunction()
    * @return
    */
-  Collection<TrieNode> getTransitionValues() {
+  Collection<TrieNode<T>> getTransitionValues() {
     if (singleNode != null) {
       return Collections.singleton(singleNode);
     }
@@ -183,7 +183,7 @@ public class TrieNode {
    * @param transitionLabel
    * @return node for label
    */
-  TrieNode getKnownNextState(String transitionLabel) {
+  TrieNode<T> getKnownNextState(String transitionLabel) {
     if (singleNode != null) {
       return singleNode;
     }
