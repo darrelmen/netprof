@@ -211,7 +211,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
           if (mouseClickTime > endTime && mouseClickTime <= next) {
             if (debug) System.out.println("\t playing from " + endTime + " to " + next);
 
-            playSegment(endTime, next, numRepeats);
+            playSegment(endTime, next);
           }
           index++;
         }
