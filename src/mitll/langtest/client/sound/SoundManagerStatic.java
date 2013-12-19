@@ -8,7 +8,8 @@ package mitll.langtest.client.sound;
  * To change this template use File | Settings | File Templates.
  */
 public class SoundManagerStatic implements SoundManagerAPI {
-  private boolean debug = true;
+  private boolean debug = false;
+
   public void initialize() {
     SoundManager.initialize();
   }
@@ -35,36 +36,28 @@ public class SoundManagerStatic implements SoundManagerAPI {
     return ok;
   }
 
- // boolean isActive = false;
-  Sound currentSound;
   /**
    * If you call this when SoundManger is not OK, will throw an exception.
    *
-   * @see mitll.langtest.client.sound.PlayAudioPanel#createSound
-   * @see SoundFeedback#createSound(String, mitll.langtest.client.sound.SoundFeedback.EndListener)
    * @param sound
    * @param title
    * @param file
+   * @see mitll.langtest.client.sound.PlayAudioPanel#createSound
+   * @see SoundFeedback#createSound(String, mitll.langtest.client.sound.SoundFeedback.EndListener)
    */
   public void createSound(Sound sound, String title, String file) {
-  if (debug) System.out.println("SoundManagerStatic.createSound " +sound);
-    if (currentSound != null) {
-      System.out.println("\n\nSoundManagerStatic.createSound must destroy current sound " +currentSound);
-      //destroySound(currentSound);
-    }
+    if (debug) System.out.println("SoundManagerStatic.createSound " + sound);
     SoundManager.createSound(sound, title, file);
-    currentSound = sound;
   }
 
   /**
+   * @param sound
    * @see mitll.langtest.client.sound.PlayAudioPanel#destroySound()
    * @see mitll.langtest.client.sound.SoundFeedback#destroySound()
-   * @param sound
    */
   public void destroySound(Sound sound) {
-    if (debug)  System.out.println("SoundManagerStatic.destroy " +sound);
+    if (debug) System.out.println("SoundManagerStatic.destroy " + sound);
     SoundManager.destroySound(sound);
-    currentSound = null;
   }
 
   public void pause(Sound sound) {
