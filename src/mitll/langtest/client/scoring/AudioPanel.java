@@ -228,9 +228,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @param start
    * @param end
    * @paramx waveDurInSeconds
-   * @param numRepeats
    */
-  public void playSegment(float start, float end, int numRepeats) {
+  public void playSegment(float start, float end) {
     if (start >= end) {
       System.err.println("bad segment " + start + "-" + end);
     }
@@ -278,7 +277,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     if (gaugePanel != null && rightSide == 0) {
       rightSide = 180; // hack!!!
     } else {
-      if (gaugePanel == null) System.out.println("getImages : gauge panel is null");
+     // if (gaugePanel == null) System.out.println("getImages : gauge panel is null");
     }
     int width = (int) ((screenPortion * ((float) Window.getClientWidth())) - leftColumnWidth) - rightSide;
 
