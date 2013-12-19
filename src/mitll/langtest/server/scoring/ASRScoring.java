@@ -499,7 +499,9 @@ public class ASRScoring extends Scoring {
     HTKDictionary htkDictionary = new HTKDictionary(dictFile);
     long now = System.currentTimeMillis();
     int size = htkDictionary.size(); // force read from lazy val
-    logger.debug("read dict " + dictFile + " of size " +size + " in " + (now-then) + " millis");
+    if (now-then > 100) {
+      logger.debug("read dict " + dictFile + " of size " +size + " in " + (now-then) + " millis");
+    }
     return htkDictionary;
   }
 
@@ -521,7 +523,8 @@ public class ASRScoring extends Scoring {
       jscoreOut = testAudio.jscore(sentence, htkDictionary, letterToSoundClass, configFile);
       float hydec_score = jscoreOut._1;
       long timeToRunHydec = System.currentTimeMillis() - then;
-      logger.debug("getScoresFromHydec : got score " + hydec_score +" and took " + timeToRunHydec + " millis");
+      logger.debug("getScoresFromHydec : scoring sentence " +sentence.length()+" characters long, got score " + hydec_score +
+        " and took " + timeToRunHydec + " millis");
 
       return new Scores(hydec_score, jscoreOut._2);
     } catch (AssertionError e) {
