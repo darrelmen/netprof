@@ -336,6 +336,17 @@
         </jar>
     </target>
 
+    <target depends="build" name="hsPashto">
+        <jar destfile="hsPashto.war" basedir="war"
+             includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/pashto/headstartAudio/**,config/pashto/*xlsx,config/pashto/pashtoHS.h2*,config/pashto/*.properties,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-pashto/**"
+                >
+
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
+    </target>
+
 
     <target depends="build" name="npMSADC">
         <jar destfile="npMSADC.war" basedir="war"
