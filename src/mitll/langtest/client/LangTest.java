@@ -36,6 +36,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
+import mitll.langtest.client.custom.CommentNPFExercise;
 import mitll.langtest.client.custom.NPFExercise;
 import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.custom.QCNPFExercise;
@@ -750,10 +751,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           @Override
           public Panel getExercisePanel(Exercise e) {
             if (isReviewMode()) {
+              System.out.println("\nmaking new QCNPFExercise for " +e + " instance " + "classroom");
+
               return new QCNPFExercise(e, controller, exerciseList, 1.0f, false, "classroom");
             }
             else {
-              return new NPFExercise(e, controller, exerciseList, 1.0f, false, "classroom");
+              System.out.println("\nmaking new CommentNPFExercise for " +e + " instance " + "classroom");
+
+              return new CommentNPFExercise(e, controller, exerciseList, 1.0f, false, "classroom");
             }
           }
         }, userManager, 1);
@@ -924,20 +929,17 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     exerciseList.clear();
     lastUser = -2;
     modeSelect();
-
-    //resetClassroomState();
   }
 
   private void resetClassroomState() {
-    if (getProps().isClassroomMode()/* && navigation == null*/) {
-      System.out.println("\n\n\nreset classroom state : " + isReviewMode());
+    if (getProps().isClassroomMode()) {
+     // System.out.println("\n\n\nreset classroom state : " + isReviewMode());
       //belowFirstRow.clear();
       if (navigation != null) {
         belowFirstRow.remove(navigation.getContainer());
       }
       navigation = new Navigation(service, userManager, this, exerciseList);
       belowFirstRow.add(navigation.getNav(bothSecondAndThird, this));
-      //belowFirstRow.add(flashRecordPanel);
       showInitialState();
     }
   }
@@ -998,13 +1000,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void showInitialState() {
-    System.out.println("\n\n\n\tshowInitialState : " + getUser());
-
     if (navigation != null) {
-      //if (!everShownInitialState) {
-        navigation.showInitialState();
-      //  everShownInitialState = true;
-     // }
+      System.out.println("showInitialState : " + getUser());
+      navigation.showInitialState();
     }
   }
 
