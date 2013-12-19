@@ -10,7 +10,7 @@
     <welcome-file>LangTest.html</welcome-file>
   </welcome-file-list>
 
-    <filter>
+<!--    <filter>
         <filter-name>gwtCacheControlFilter</filter-name>
         <filter-class>mitll.langtest.server.filter.GWTFilter</filter-class>
     </filter>
@@ -18,7 +18,7 @@
     <filter-mapping>
         <filter-name>gwtCacheControlFilter</filter-name>
         <url-pattern>/*</url-pattern>
-    </filter-mapping>
+    </filter-mapping>-->
 
  <servlet>
     <servlet-name>databaseServlet</servlet-name>
@@ -30,19 +30,43 @@
     <url-pattern>/langtest/langtestdatabase</url-pattern>
   </servlet-mapping>
 
-  <context-param>
+
+    <servlet>
+        <servlet-name>downloadServet</servlet-name>
+        <servlet-class>mitll.langtest.server.DownloadServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>downloadServet</servlet-name>
+        <url-pattern>/downloadUsers/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>downloadServet</servlet-name>
+        <url-pattern>/downloadResults/*</url-pattern>
+    </servlet-mapping>
+
+    <context-param>
     <param-name>tomcatWriteDirectoryFullPath</param-name>
     <param-value>answers</param-value>
   </context-param>
 
   <context-param>
      <param-name>config</param-name>
+<<<<<<< HEAD
      <param-value>pashto</param-value>
+=======
+     <param-value>pilot</param-value>
+>>>>>>> 70050fccedb9ae3ea4340924ce42751f540daf96
   </context-param>
 
   <context-param>
      <param-name>configFile</param-name>
+<<<<<<< HEAD
      <param-value>pashtoHeadstart.properties</param-value>
+=======
+     <param-value>crtMSAaudio.properties</param-value>
+>>>>>>> 70050fccedb9ae3ea4340924ce42751f540daf96
   </context-param>
 </web-app>
 
