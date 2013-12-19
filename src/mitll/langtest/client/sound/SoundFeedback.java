@@ -38,7 +38,6 @@ public class SoundFeedback {
   private void startSong(String path, EndListener endListener) {
     // System.out.println("PlayAudioPanel : start song : " + path);
     if (soundManager.isReady()) {
-      //System.out.println(new Date() + " Sound manager is ready.");
       if (soundManager.isOK()) {
         destroySound();
         createSound(path, endListener);
@@ -56,18 +55,18 @@ public class SoundFeedback {
   public void createSound(final String song, final EndListener endListener) {
     currentSound = new Sound(new AudioControl() {
       @Override
-      public void reinitialize() {
-       // System.out.println("song " + song + " ended---");
-        destroySound();
-        endListener.songEnded();
-      }
+      public void reinitialize() {}
 
       @Override
       public void songFirstLoaded(double durationEstimate) {}
 
       @Override
-      public void songLoaded(double duration) {
-        soundManager.play(currentSound);
+      public void songLoaded(double duration) { soundManager.play(currentSound); }
+
+      @Override
+      public void songFinished() {
+        destroySound();
+        endListener.songEnded();
       }
 
       @Override
