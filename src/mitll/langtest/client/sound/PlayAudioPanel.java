@@ -90,7 +90,8 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     playButton.setType(ButtonType.INFO);
     playButton.getElement().setId("playButton");
     playButton.addStyleName("leftFiveMargin");
-    playButton.setVisible(false);
+   // playButton.setVisible(true);
+    playButton.setEnabled(false);
     add(playButton);
     warnNoFlash.setVisible(false);
     add(warnNoFlash);
@@ -243,15 +244,23 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    */
   private void createSound(String song){
     currentSound = new Sound(this);
-    if (DEBUG) System.out.println("PlayAudioPanel.createSound : " + this + " created sound " + currentSound);
+    if (true) {
+      System.out.println("PlayAudioPanel.createSound : (" + getElement().getId()+ ") for " +song +" : "+ this + " created sound " + currentSound);
+    }
 
     soundManager.createSound(currentSound, song, song);
     //showPlayButton();
-    reinitialize();
+    //reinitialize();
   }
 
+  /**
+   * TODO : arg -- sound manager is static -- how do we deal with that across multiple play buttons????
+   *
+   */
   private void destroySound() {
     if (currentSound != null) {
+      System.out.println("PlayAudioPanel.destroySound : (" + getElement().getId()+ ") destroy sound " + currentSound);
+
       this.soundManager.destroySound(currentSound);
     }
   }
@@ -260,14 +269,14 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    * Does repeat audio if count > 0
    */
   public void reinitialize(){
-    if (DEBUG) System.out.println("PlayAudioPanel :reinitialize");
+    if (true) System.out.println("PlayAudioPanel :reinitialize "+ getElement().getId());
 
     if (count == 0) setPlayLabel();
     update(0);
     soundManager.setPosition(currentSound, 0);
 
     if (listener != null) {
-      System.out.println("PlayAudioPanel :reinitialize - my id " + getElement().getId());
+      System.out.println("PlayAudioPanel :reinitialize - telling listener to reinitialize ");
 
       listener.reinitialize();
     }
@@ -287,7 +296,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   }
 
   public void songFirstLoaded(double durationEstimate){
-    if (DEBUG) System.out.println("PlayAudioPanel.songFirstLoaded : " + this);
+    if (true) System.out.println("PlayAudioPanel.songFirstLoaded : " + this);
 
     if (listener != null) {
       listener.songFirstLoaded(durationEstimate);
@@ -295,6 +304,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     else {
       System.out.println("PlayAudioPanel :songFirstLoaded - no listener");
     }
+    setPlayEnabled(true);
   }
 
   /**
@@ -302,7 +312,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    * @param duration
    */
   public void songLoaded(double duration){
-    if (DEBUG) System.out.println("PlayAudioPanel.songLoaded : " + this);
+    if (true) System.out.println("PlayAudioPanel.songLoaded : " + this);
 
     if (listener != null) {
       listener.songLoaded(duration);
@@ -310,17 +320,18 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     else {
       System.out.println("no listener for song loaded " + duration);
     }
-    if (!playButton.isEnabled()) setPlayEnabled(true);
-    showPlayButton();
+    /*if (!playButton.isEnabled())*/ setPlayEnabled(true);
+  //  showPlayButton();
+    reinitialize();
   }
 
   public void setPlayEnabled(boolean val) {
     playButton.setEnabled(val);
   }
 
-  private void showPlayButton() {
+/*  private void showPlayButton() {
     playButton.setVisible(true);
-  }
+  }*/
 
   public String toString() { return "PlayAudioPanel #" +id; }
 }
