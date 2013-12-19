@@ -87,7 +87,6 @@ public class SoundManager {
   /**
    * Actually calls destruct on sound object
    *
-   * TODO : destroy sounds by id/title - not by the latest one!
    * @param sound
    */
   public static native void destroySound(Sound sound) /*-{
@@ -135,7 +134,6 @@ public class SoundManager {
    */
   public static void loaded(){
      if (debug) System.out.println(new Date() + " : Got loaded call!");
-    //Window.alert("SoundManager loaded.");
   }
 
   /**
@@ -160,7 +158,7 @@ public class SoundManager {
 
 	public static void songFinished(Sound sound){
     if (debug) System.out.println("sound finished " +sound);
-		sound.parent.reinitialize();
+		sound.parent.songFinished();
 	}
 
 	public static void songFirstLoaded(Sound sound, double durationEstimate){
