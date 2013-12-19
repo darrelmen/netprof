@@ -40,7 +40,7 @@ public class RecordAudioPanel extends AudioPanel {
                           LangTestDatabaseAsync service, int index, boolean showSpectrogram) {
     super(service,
       // use full screen width
-      true, // use keyboard
+      // use keyboard
       controller, showSpectrogram,null);
     this.exercisePanel = widgets;
     this.index = index;
