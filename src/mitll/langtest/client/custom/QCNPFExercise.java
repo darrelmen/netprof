@@ -43,10 +43,11 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class QCNPFExercise extends NPFExercise {
+  private static final String CHECKBOX_LABEL = "";//"Has defect";
   private String instance;
   private Set<String> incorrectSet = new HashSet<String>();
-  int count = 0;
-  List<RequiresResize> toResize;
+  private int count = 0;
+  private List<RequiresResize> toResize;
 
   public QCNPFExercise(Exercise e, ExerciseController controller, ListInterface listContainer,
                        float screenPortion, boolean addKeyHandler, String instance) {
@@ -243,7 +244,7 @@ public class QCNPFExercise extends NPFExercise {
   }
 
   private CheckBox makeCheckBox(final String field, final Panel commentRow, final FocusWidget commentEntry, boolean alreadyMarkedCorrect) {
-    final CheckBox checkBox = new CheckBox("Has defect");
+    final CheckBox checkBox = new CheckBox(CHECKBOX_LABEL);
     checkBox.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
