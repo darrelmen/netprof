@@ -34,7 +34,7 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
    * @param controller
    */
   public DataCollectionFlashcard(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, int feedbackHeight) {
-    super(e, service, controller, feedbackHeight, controller.shouldAddRecordKeyBinding());
+    super(e, service, controller, feedbackHeight);
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand () {
       public void execute () {
         int offsetHeight = cardPrompt.getOffsetHeight();
@@ -44,6 +44,7 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
     });
     navigationHelper.enablePrevButton(!controller.getExerciseList().onFirst(null));
     navigationHelper.enableNextButton(false);
+    navigationHelper.setVisible(true);
     getElement().setId("DataCollectionFlashcard");
   }
 
@@ -62,7 +63,7 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
   }
 
   /**
-   * @see BootstrapExercisePanel#BootstrapExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int, boolean)
+   * @see BootstrapExercisePanel#BootstrapExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    * @param e
    * @param controller
    * @return
