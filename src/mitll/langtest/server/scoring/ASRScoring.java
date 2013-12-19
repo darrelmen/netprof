@@ -281,10 +281,10 @@ public class ASRScoring extends Scoring {
     return scores;
   }
 
-  public void clearCacheFor(String testAudioDir, String testAudioFileNoSuffix, boolean useCache) {
+/*  public void clearCacheFor(String testAudioDir, String testAudioFileNoSuffix, boolean useCache) {
     String key = testAudioDir + File.separator + testAudioFileNoSuffix;
     Scores scores = useCache ? audioToScore.getIfPresent(key) : null;
-  }
+  }*/
 
   /**
    * There are two modes you can use to score the audio : align mode and decode mode
