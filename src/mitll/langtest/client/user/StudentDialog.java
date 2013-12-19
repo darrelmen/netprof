@@ -203,13 +203,19 @@ public class StudentDialog extends UserDialog {
        * Fired when the user clicks on the sendButton.
        */
       public void onClick(ClickEvent event) {
+
+        System.out.println("makeCloseHandler : got click " + event);
+
         String purposeSetting = purpose.getValue();
         final String audioType = getAudioTypeFromPurpose(purposeSetting);
         if (canLoginAnonymously(purpose)) {
+          System.out.println("\tcan login anonymously for " + purposeSetting);
           dialogBox.hide();
           langTest.rememberAudioType(audioType);
           addAnonymousUser(audioType);
         } else {
+          System.out.println("\tcheckUserAndMaybeRegister for " + purposeSetting);
+
           checkUserAndMaybeRegister(audioType, user, dialogBox, accordion, registrationInfo,purposeSetting);
         }
       }
@@ -237,10 +243,14 @@ public class StudentDialog extends UserDialog {
         public void onSuccess(Integer result) {
           boolean exists = result != -1;
           if (exists) {
+            System.out.println("checkUserAndMaybeRegister for " + purposeSetting + " user exists id=" + result);
+
             dialogBox.hide();
             langTest.rememberAudioType(audioType);
             userManager.storeUser(result, audioType, userID, PropertyHandler.LOGIN_TYPE.STUDENT);
           } else {
+            System.out.println("checkUserAndMaybeRegister for " + purposeSetting + " user does not exist id=" + result);
+
             if (!canSkipRegister(purposeSetting)) {
               accordion.show();
             }
@@ -249,23 +259,39 @@ public class StudentDialog extends UserDialog {
         }
       });
     }
+    else {
+      System.out.println("checkUserAndMaybeRegister for " + purposeSetting + " user name " +userID + " is invalid?");
+    }
   }
 
   private void checkThenRegister(String audioType, RegistrationInfo registrationInfo, Modal dialogBox, String userID) {
-    boolean skipWeekCheck = audioType.contains(REVIEW);
-    boolean skipChecks = audioType.contains(PRACTICE);
+    boolean skipWeekCheck = audioType.toLowerCase().contains(REVIEW.toLowerCase());
+    boolean skipChecks = audioType.toLowerCase().contains(PRACTICE.toLowerCase());
     if (skipChecks) {
+      System.out.println("checkThenRegister : skipChecks " + audioType +  " user  " +userID);
+
       hideAndSend(audioType, registrationInfo, dialogBox, userID);
     }
     else if (highlightIntegerBox(registrationInfo.ageEntryGroup)) {
+      System.out.println("\tcheckThenRegister : age OK skipChecks " + audioType + " skipWeekCheck " +skipWeekCheck);
+
       if (skipWeekCheck || highlightIntegerBox(registrationInfo.weeks, MIN_WEEKS, MAX_WEEKS)) {
         if (registrationInfo.dialectGroup.getText().isEmpty()) {
-          markError(registrationInfo.dialectGroup, "Please enter a language dialect.");
+          System.out.println("\tcheckThenRegister : dialectGroup " );
+
+          markError(registrationInfo.dialectGroup, "Enter a language dialect.");
         } else if (registrationInfo.checkValidity() && registrationInfo.checkValidity2()) {
+          System.out.println("\tcheckThenRegister : hideAndSend");
+
           hideAndSend(audioType, registrationInfo, dialogBox, userID);
+        } else {
+          System.out.println("\tcheckThenRegister : skipChecks " + audioType +  " user  " +userID);
+
         }
       } else {
-        markError(registrationInfo.weeks, "Please enter weeks between " + MIN_WEEKS + " and " + MAX_WEEKS + ".");
+        System.out.println("\tcheckThenRegister : markError weeks " );
+
+        markError(registrationInfo.weeks, "Enter weeks between " + MIN_WEEKS + " and " + MAX_WEEKS + ".");
       }
     } else {
       markError(registrationInfo.ageEntryGroup.group, registrationInfo.ageEntryGroup.box, "",
@@ -274,6 +300,8 @@ public class StudentDialog extends UserDialog {
   }
 
   private void hideAndSend(String audioType, RegistrationInfo registrationInfo, Modal dialogBox, String userID) {
+    System.out.println("hideAndSend : audioType " + audioType +  " user  " +userID);
+
     dialogBox.hide();
     sendNameToServer(registrationInfo, audioType, userID);
   }
@@ -410,21 +438,6 @@ public class StudentDialog extends UserDialog {
     addUser(age, gender, monthsOfExperience, "", PropertyHandler.LOGIN_TYPE.ANONYMOUS, audioType);
   }
 
-/*  private void addUser(String userID,
-                       final String audioType) {
-    AsyncCallback<Long> async = new AsyncCallback<Long>() {
-      public void onFailure(Throwable caught) {
-        Window.alert("addUser : Couldn't contact server.");
-      }
-
-      public void onSuccess(Long result) {
-        System.out.println("addUser : server result is " + result);
-        userManager.storeUser(result, audioType, "" + result, PropertyHandler.LOGIN_TYPE.STUDENT);
-      }
-    };
-    addUser(89, "male", 0, "Unknown", "Unknown", userID, async);
-  }*/
-
   /**
    * @param age
    * @param gender
@@ -451,6 +464,8 @@ public class StudentDialog extends UserDialog {
 
   private void addUser(int age, String gender, int monthsOfExperience, String dialect, String nativeLang, String userID,
                        AsyncCallback<Long> async) {
+    System.out.println("\n\naddUser : userID is " + userID);
+
     service.addUser(age,
       gender,
       monthsOfExperience, nativeLang, dialect, userID, async);
