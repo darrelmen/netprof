@@ -53,20 +53,12 @@
 
   <context-param>
      <param-name>config</param-name>
-<<<<<<< HEAD
-     <param-value>pashto</param-value>
-=======
      <param-value>pilot</param-value>
->>>>>>> 70050fccedb9ae3ea4340924ce42751f540daf96
   </context-param>
 
   <context-param>
      <param-name>configFile</param-name>
-<<<<<<< HEAD
-     <param-value>pashtoHeadstart.properties</param-value>
-=======
      <param-value>crtMSAaudio.properties</param-value>
->>>>>>> 70050fccedb9ae3ea4340924ce42751f540daf96
   </context-param>
 </web-app>
 
