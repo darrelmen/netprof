@@ -41,13 +41,13 @@ public class ScoreFeedback {
    * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#addRecordingAndFeedbackWidgets(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    * @return
    */
-  public FluidRow getScoreFeedbackRow(int height, boolean useShortWidth) {
+  public Panel getScoreFeedbackRow(int height, int width, boolean useShortWidth) {
     FluidRow feedbackRow = new FluidRow();
     feedbackDummyPanel = new SimplePanel();
     feedbackDummyPanel.setHeight(height + "px");
     scoreFeedbackColumn = new Column(6, 3, feedbackDummyPanel);
 
-    scoreFeedbackColumn.setWidth(Math.min(useShortWidth ? 300 : Window.getClientWidth() *0.8,Window.getClientWidth() * 0.5) + "px");
+    scoreFeedbackColumn.setWidth(Math.min(useShortWidth ? width : Window.getClientWidth() *0.8,Window.getClientWidth() * 0.5) + "px");
 
     feedbackRow.add(scoreFeedbackColumn);
     feedbackRow.getElement().setId("ScoreFeedbackfeedbackRow");
@@ -71,9 +71,10 @@ public class ScoreFeedback {
    * @see mitll.langtest.client.recorder.FeedbackRecordPanel#getFeedbackContainer
    * @param left
    * @param height
+   * @param minWidth
    * @return
    */
-  public Panel getSimpleRow(Widget left, int height) {
+  public Panel getSimpleRow(Widget left, int height, int minWidth) {
     FlowPanel feedbackRow = new FlowPanel();
     feedbackRow.add(left);
     feedbackDummyPanel = new SimplePanel();
@@ -81,7 +82,7 @@ public class ScoreFeedback {
     feedbackDummyPanel.addStyleName("floatLeft");
 
     scoreFeedbackColumn = new SimplePanel(feedbackDummyPanel);
-    scoreFeedbackColumn.setWidth(Math.min(300,Window.getClientWidth() * 0.5) + "px");
+    scoreFeedbackColumn.setWidth(Math.min(minWidth,Window.getClientWidth() * 0.5) + "px");
     scoreFeedbackColumn.addStyleName("floatRight");
 
     feedbackRow.add(scoreFeedbackColumn);
@@ -100,12 +101,13 @@ public class ScoreFeedback {
    * @param soundFeedback
    * @param pronunciationScore
    * @param centerVertically
+   * @param width
    */
-  public void showCRTFeedback(Double result, SoundFeedback soundFeedback, String pronunciationScore, boolean centerVertically) {
+  public void showCRTFeedback(Double result, SoundFeedback soundFeedback, String pronunciationScore, boolean centerVertically, int width) {
     result = Math.max(0, result);
     result = Math.min(1.0, result);
     if (result > 0.9) result = 1.0; //let's round up when we're almost totally correct 97%->100%
-    showScoreFeedback(pronunciationScore, result, centerVertically, true);
+    showScoreFeedback(pronunciationScore, result, centerVertically, true, width);
     if (result > CORRECT_SCORE_THRESHOLD) {
       soundFeedback.playCorrect();
       showScoreIcon(true);
@@ -131,19 +133,21 @@ public class ScoreFeedback {
 
   /**
    * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#showPronScoreFeedback(double, String)
-   * @see #showCRTFeedback(Double, mitll.langtest.client.sound.SoundFeedback, String, boolean)
+   * @see #showCRTFeedback(Double, mitll.langtest.client.sound.SoundFeedback, String, boolean, int)
    * @param pronunciationScore
    * @param score
    * @param centerVertically
    * @param useShortWidth
+   * @param width
    */
-  public void showScoreFeedback(String pronunciationScore, double score, boolean centerVertically, boolean useShortWidth) {
+  public void showScoreFeedback(String pronunciationScore, double score, boolean centerVertically, boolean useShortWidth, int width) {
     if (score < 0) score = 0;
     double percent = 100 * score;
 
     scoreFeedbackColumn.clear();
     scoreFeedbackColumn.add(getScoreFeedback());
-    getScoreFeedback().setWidth(Math.min(useShortWidth ? 300 : Window.getClientWidth() *0.8,Window.getClientWidth() * 0.5) + "px");
+    if (width == 0) width = 250; // horrible hack for now!
+    getScoreFeedback().setWidth(Math.min(useShortWidth ? width : Window.getClientWidth() *0.8,Window.getClientWidth() * 0.5) + "px");
 
     int percent1 = (int) percent;
     getScoreFeedback().setPercent(percent1 < 40 ? 40 : percent1);   // just so the words will show up
