@@ -59,15 +59,14 @@ public class CombinedResponseFlashcard extends TextCRTFlashcard implements Exerc
   protected void addRecordingAndFeedbackWidgets(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller,
                                                 int feedbackHeight) {
     super.addRecordingAndFeedbackWidgets(exercise,service,controller,feedbackHeight);
-    autoCRTRecordPanel = new AutoCRTRecordPanel(service, controller, exercise, this, 1) {
+    autoCRTRecordPanel = new AutoCRTRecordPanel(service, controller, exercise, this, 1, 300) {
       @Override
       protected void receivedAudioAnswer(AudioAnswer result, final ExerciseQuestionState questionState, final Panel outer) {
         super.receivedAudioAnswer(result, questionState, outer);
         scoreFeedback.hideFeedback();
       }
     };
-    Panel panel = autoCRTRecordPanel.getPanel();
-    add(getRecordButtonRow(getVerticalPanel(panel, new ScoreFeedback(false), controller)));
+    add(getRecordButtonRow(getVerticalPanel(autoCRTRecordPanel, new ScoreFeedback(false), controller)));
   }
 
   private AutoCRTRecordPanel autoCRTRecordPanel;
