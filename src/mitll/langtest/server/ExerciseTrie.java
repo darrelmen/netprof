@@ -1,5 +1,8 @@
-package mitll.langtest.server.trie;
+package mitll.langtest.server;
 
+import mitll.langtest.server.trie.EmitValue;
+import mitll.langtest.server.trie.TextEntityValue;
+import mitll.langtest.server.trie.Trie;
 import mitll.langtest.shared.Exercise;
 import org.apache.log4j.Logger;
 
@@ -8,7 +11,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * Created with IntelliJ IDEA.
@@ -17,12 +19,12 @@ import java.util.TreeSet;
  * Time: 4:42 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ExerciseTrie extends Trie {
+public class ExerciseTrie extends Trie<Exercise> {
   private static final Logger logger = Logger.getLogger(ExerciseTrie.class);
   private static final int MB = (1024 * 1024);
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds(int, long, String, long)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds(int, long, String)
    * @param exercisesForState
    * @param includeForeign
    */
@@ -53,9 +55,6 @@ public class ExerciseTrie extends Trie {
     if (freeAfter-free > 10) {
       logMemory();
     }
-    else {
-     // logger.debug("getExercisesForSelectionState : after " + freeAfter);
-    }
   }
 
   /**
@@ -65,11 +64,11 @@ public class ExerciseTrie extends Trie {
    * @return
    */
   public List<Exercise> getExercises(String prefix) {
-    List<EmitValue> emits = getEmits(prefix);
+    List<EmitValue<Exercise>> emits = getEmits(prefix);
     Set<Exercise> unique = new HashSet<Exercise>();
     List<Exercise> ids = new ArrayList<Exercise>();
-    for (EmitValue ev : emits) {
-      Exercise exercise = ev.getExercise();
+    for (EmitValue<Exercise> ev : emits) {
+      Exercise exercise = ev.getValue();
       if (!unique.contains(exercise)) {
         ids.add(exercise);
         unique.add(exercise);
@@ -79,7 +78,7 @@ public class ExerciseTrie extends Trie {
     return ids;
   }
 
-  private static class ExerciseWrapper implements TextEntityValue {
+  private static class ExerciseWrapper implements TextEntityValue<Exercise> {
     private String value;
     private Exercise e;
 
@@ -94,7 +93,7 @@ public class ExerciseTrie extends Trie {
     }
 
     @Override
-    public Exercise getExercise() { return e; }
+    public Exercise getValue() { return e; }
 
     @Override
     public String getNormalizedValue() { return value; }
