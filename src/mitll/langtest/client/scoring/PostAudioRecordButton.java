@@ -37,7 +37,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    * @paramx record2
    */
   public PostAudioRecordButton(Exercise exercise, final ExerciseController controller, LangTestDatabaseAsync service,
-                               int index, boolean addKeyHandler) {
+                               int index) {
     super(controller.getRecordTimeout(), false);
     setRecordingListener(this);
     this.index = index;
@@ -47,12 +47,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     getElement().setId("PostAudioRecordButton");
   }
 
-  @Override
-  public void flip(boolean first) {}
-
   public void setExercise(Exercise exercise) { this.exercise = exercise; }
-
-  private Widget getOuter() { return this; }
 
   /**
    * @see mitll.langtest.client.recorder.RecordButton#stop()
@@ -109,12 +104,14 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
             showPopup(result.validity.getPrompt());
             useInvalidResult(result);
           }
-          if (controller.isLogClientMessages()) {
+          if (controller.isLogClientMessages() || roundtrip > 7000) {
             logRoundtripTime(result, roundtrip);
           }
         }
       });
   }
+
+  private Widget getOuter() { return this; }
 
   private void logRoundtripTime(AudioAnswer result, long roundtrip) {
     String message = "PostAudioRecordButton : (success) User #" + controller.getUser() +
@@ -131,11 +128,8 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     });
   }
 
-  public void startRecording() {
-    controller.startRecording();
-  }
+  public void startRecording() { controller.startRecording();  }
 
   protected abstract void useInvalidResult(AudioAnswer result);
-
   public abstract void useResult(AudioAnswer result);
 }
