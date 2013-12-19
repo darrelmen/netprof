@@ -54,7 +54,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   public ScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
                            int numRepeats, boolean useKeyboard, ExerciseController controller,
                            boolean showSpectrogram, ScoreListener gaugePanel) {
-    super(path, service, useKeyboard, controller, showSpectrogram, gaugePanel);
+    super(path, service, controller, showSpectrogram, gaugePanel);
     this.refSentence = refSentence;
     showOnlyOneExercise = controller.showOnlyOneExercise();
     addClickHandlers(numRepeats);
@@ -100,7 +100,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
       getTranscriptImageURLForAudio(audioPath, refAudio, refSentence, width,words,phones);
     }
     else {
-      System.out.println("AudioPanel.getImages : no ref audio");
+      System.out.println("ScoringAudioPanel.getEachImage : no ref audio for id " + getElement().getId());
     }
   }
 
