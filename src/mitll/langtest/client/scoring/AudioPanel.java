@@ -2,10 +2,8 @@ package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.Heading;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -166,15 +164,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   @Override
   public void onLoad() {
     if (debug) System.out.println("onLoad : id="+ getElement().getId()+ " audio path is " + audioPath);
-    if (audioPath != null) {
-/*      Scheduler.get().scheduleDeferred(new Command() {   // helpful???
-        public void execute() {
-          if (debug) System.out.println("\tonLoad : deferred - audio path is " + audioPath);
-          getImagesForPath(audioPath);
-        }
-      });*/
-      getImagesForPath(audioPath);
-    }
+    if (audioPath != null) {  getImagesForPath(audioPath);  }
   }
 
   @Override
@@ -245,7 +235,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       System.err.println("bad segment " + start + "-" + end);
     }
     else {
-      playAudio.repeatSegment(start,end,numRepeats);
+      playAudio.repeatSegment(start,end);
     }
   }
 
