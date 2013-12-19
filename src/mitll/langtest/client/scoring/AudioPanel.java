@@ -78,30 +78,27 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   /**
    * @see ScoringAudioPanel#ScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, int, boolean, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener)
    * @param service
-   * @param useKeyboard
    * @param showSpectrogram
    * @param gaugePanel
    */
   public AudioPanel(String path, LangTestDatabaseAsync service,
-                    boolean useKeyboard, ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel) {
-    this(service, useKeyboard, controller, showSpectrogram, gaugePanel);
+                    ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel) {
+    this(service, controller, showSpectrogram, gaugePanel);
     this.audioPath = path;
 
     addWidgets(path);
   }
 
   public AudioPanel(LangTestDatabaseAsync service,
-                    boolean useKeyboard, ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel) {
+                    ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel) {
     this.screenPortion = controller.getScreenPortion();
     //System.out.println("Screen portion " + screenPortion);
     this.soundManager = controller.getSoundManager();
     this.service = service;
- //   this.useKeyboard = useKeyboard;
     this.logMessages = controller.isLogClientMessages();
     this.controller = controller;
     this.gaugePanel = gaugePanel;
     if (debug) System.out.println("AudioPanel : gauge panel " + gaugePanel);
-    //addWidgets(path);
     this.showSpectrogram = showSpectrogram;
   }
 
@@ -109,7 +106,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
   /**
    * Replace the html 5 audio tag with our fancy waveform widget.
-   * @see #AudioPanel(String, mitll.langtest.client.LangTestDatabaseAsync, boolean, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener)
+   * @see #AudioPanel(String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener)
    * @see mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, int, boolean)
    * @param path
    * @return
@@ -168,17 +165,15 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
   @Override
   public void onLoad() {
+    if (debug) System.out.println("onLoad : id="+ getElement().getId()+ " audio path is " + audioPath);
     if (audioPath != null) {
-      if (debug) System.out.println("onLoad : audio path is " + audioPath);
-      Scheduler.get().scheduleDeferred(new Command() {   // helpful???
+/*      Scheduler.get().scheduleDeferred(new Command() {   // helpful???
         public void execute() {
           if (debug) System.out.println("\tonLoad : deferred - audio path is " + audioPath);
           getImagesForPath(audioPath);
         }
-      });
-      // getImagesForPath(audioPath);
-    } else {
-      if (debug) System.out.println("onLoad : for AudioPanel got no audio path?");
+      });*/
+      getImagesForPath(audioPath);
     }
   }
 
@@ -219,7 +214,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   public void getImagesForPath(String path) {
     path = wavToMP3(path);
     path = ensureForwardSlashes(path);
-    if (debug) System.out.println("AudioPanel : getImagesForPath " +path);
+    if (debug) System.out.println("AudioPanel : " + getElement().getId()+
+      " getImagesForPath " +path);
     if (path != null) {
       this.audioPath = path;
     }
@@ -315,6 +311,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   }
 
   protected void getEachImage(int width) {
+    System.out.println("getEachImage : " + getElement().getId()+ " path " + audioPath);
+
     getImageURLForAudio(audioPath, WAVEFORM, width, getWaveform());
     if (showSpectrogram) {
       getImageURLForAudio(audioPath, SPECTROGRAM, width, getSpectrogram());
