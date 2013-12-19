@@ -62,7 +62,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
   public FlashcardRecordButtonPanel(BootstrapExercisePanel exercisePanel, LangTestDatabaseAsync service,
                                     ExerciseController controller, Exercise exercise, int index,
                                     boolean warnUserWhenNotSpace) {
-    super(service, controller, exercise, null, index, true, controller.shouldAddRecordKeyBinding());
+    super(service, controller, exercise, null, index, true);
 
     this.exercisePanel = exercisePanel;
     this.exercise = exercise;
@@ -77,7 +77,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
   private IconAnchor incorrect;
 
   @Override
-  protected void addImages() {
+  protected void addImages(Panel container) {
     waiting = new IconAnchor();
     correctIcon = new IconAnchor();
     incorrect = new IconAnchor();
@@ -86,11 +86,9 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
     waiting.setVisible(false);
 
     correctIcon.setBaseIcon(MyCustomIconType.correct);
-
     correctIcon.setVisible(false);
 
     incorrect.setBaseIcon(MyCustomIconType.incorrect);
-
     incorrect.setVisible(false);
   }
 
