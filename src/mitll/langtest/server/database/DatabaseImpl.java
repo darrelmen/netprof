@@ -174,7 +174,7 @@ public class DatabaseImpl implements Database {
   }
 
   @Override
-  public Connection getConnection()/* throws Exception*/ {
+  public Connection getConnection() {
     return connection.getConnection();
   }
 
@@ -489,7 +489,7 @@ public class DatabaseImpl implements Database {
           userStateWrapper.getCorrect(),
           userStateWrapper.getIncorrect(), onFirst, onLast);
 
-      logger.debug("returning " + flashcardResponse);
+      logger.debug("getFlashcardResponse returning " + flashcardResponse);
       return flashcardResponse;
     }
     else {
@@ -534,7 +534,7 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @see #getFlashcardResponse
+   * @see #createOrGetUserState(long, java.util.List)
    * @param userID
    * @param exercises
    * @return
@@ -1155,7 +1155,7 @@ public class DatabaseImpl implements Database {
     return idToCount;
   }
 
-  private void joinWithDLIUsers(List<User> users) {
+  public Collection<User> joinWithDLIUsers(List<User> users) {
     List<DLIUser> users1 = dliUserDAO.getUsers();
     Map<Long, User> userMap = userDAO.getMap(users);
 
@@ -1166,6 +1166,7 @@ public class DatabaseImpl implements Database {
       }
     }
     if (users1.isEmpty()) logger.info("no dli users.");
+    return userMap.values();
   }
 
   /**
@@ -1423,14 +1424,22 @@ public class DatabaseImpl implements Database {
   }
   public void addDLIUser(DLIUser dliUser) throws Exception { dliUserDAO.addUser(dliUser);  }
 
-  public String toString() { return "Database : "+ connection.getConnection(); }
-
   public UserListManager getUserListManager() { return userListManager; }
 
   public Exercise getUserExerciseWhere(String id) {
     UserExercise where = userExerciseDAO.getWhere(id);
     return where != null ? where.toExercise(language) : null;
   }
+
+  public UserDAO getUserDAO() {
+    return userDAO;
+  }
+
+  public ResultDAO getResultDAO() {
+    return resultDAO;
+  }
+
+  public String toString() { return "Database : "+ connection.getConnection(); }
 
 /*  private static String getConfigDir(String language) {
     String installPath = ".";
