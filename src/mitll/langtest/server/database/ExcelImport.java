@@ -220,7 +220,7 @@ public class ExcelImport implements ExerciseDAO {
     int meaningIndex = -1;
     int idIndex = -1;
     int contextIndex = -1;
-    int segmentedIndex = -1;
+   // int segmentedIndex = -1;
     int audioIndex = -1;
     List<String> lastRowValues = new ArrayList<String>();
     Map<String, List<Exercise>> englishToExercises = new HashMap<String, List<Exercise>>();
@@ -277,8 +277,8 @@ public class ExcelImport implements ExerciseDAO {
               idIndex = columns.indexOf(col);
             } else if (colNormalized.contains("context")) {
               contextIndex = columns.indexOf(col);
-            } else if (colNormalized.contains("segmented")) {
-              segmentedIndex = columns.indexOf(col);
+           // } else if (colNormalized.contains("segmented")) {
+             // segmentedIndex = columns.indexOf(col);
             } else if (colNormalized.contains("audio_index")) {
               audioIndex = columns.indexOf(col);
             }
