@@ -131,6 +131,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
   /**
    * @see Navigation#getButtonRow2(com.google.gwt.user.client.ui.Panel)
    */
+  @Override
   public void wasRevealed() {
     System.out.println("wasRevealed : populate list choices for " + controller.getUser() + "\n\n");
     populateListChoices(exercise, controller, addToList);
