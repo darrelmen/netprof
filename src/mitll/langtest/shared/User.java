@@ -102,6 +102,10 @@ public class User implements IsSerializable, Comparable<User> {
     return demographics;
   }
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#joinWithDLIUsers(java.util.List)
+   * @param demographics
+   */
   public void setDemographics(Demographics demographics) {
     this.demographics = demographics;
   }
