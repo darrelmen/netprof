@@ -136,15 +136,15 @@ public class NPFHelper implements RequiresResize {
   }
 
   protected void setFactory(final PagingExerciseList exerciseList, final String instanceName) {
-    exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, feedback, controller, exerciseList, 0.7f) {
+    exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, feedback, controller, exerciseList, 1.0f) {
       @Override
       public Panel getExercisePanel(Exercise e) {
         System.out.println("\nmaking new GoodwaveExercisePanel for " +e + " instance " + instanceName);
         if (controller.getAudioType().equalsIgnoreCase(Result.AUDIO_TYPE_REVIEW)) {
-          return new QCNPFExercise(e, controller, exerciseList, 0.65f, false, instanceName);
+          return new QCNPFExercise(e, controller, exerciseList, 1.0f, false, instanceName);
         }
         else {
-          return new NPFExercise(e, controller, exerciseList, 0.65f, false, instanceName);
+          return new NPFExercise(e, controller, exerciseList, 1.0f, false, instanceName);
         }
       }
     }, userManager, 1);
