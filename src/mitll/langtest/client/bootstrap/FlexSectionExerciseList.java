@@ -60,7 +60,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   private ScrollPanel scrollPanel;
   private Panel clearColumnContainer;
   private Panel labelColumn;
-  protected Heading statusHeader = new Heading(4);
+  private Heading statusHeader = new Heading(4);
   private Collection<String> typeOrder;
   private Panel sectionPanel;
 
@@ -117,7 +117,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
         public void onFailure(Throwable caught) {}
         @Override
         public void onSuccess(Set<String> result) {
-          System.out.println("\n\n\n\tFlexSectionExerciseList : getCompletedExercises : completed for user=" + userID + " result " + result.size());
+          //System.out.println("FlexSectionExerciseList : getCompletedExercises : completed for user=" + userID + " result " + result.size());
           controller.getExerciseList().setCompleted(result);
           addWidgets();
         }
@@ -166,25 +166,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   }
 
   @Override
-  protected Collection<String> getTypeOrder(Map<String, Collection<String>> selectionState2) {
-    return typeOrder;
-  }
-
-/*  private void addStudentTypeAndSection(FluidContainer container, Collection<String> sortedTypes) {
-    String token = unencodeToken(History.getToken());
-    SelectionState selectionState = getSelectionState(token);
-    //System.out.println("\n\nsorted types " + sortedTypes);
-    for (final String type : sortedTypes) {
-      Collection<String> typeValue = selectionState.getTypeToSection().get(type);
-      if (typeValue != null) {
-        FluidRow fluidRow = new FluidRow();
-        container.add(fluidRow);
-
-        fluidRow.add(new Column(2, new Heading(4, type)));
-        fluidRow.add(new Column(1, new Heading(4, typeValue.toString())));
-      }
-    }
-  }*/
+  protected Collection<String> getTypeOrder(Map<String, Collection<String>> selectionState2) { return typeOrder;  }
 
   /**
    * @param rootNodes
@@ -444,9 +426,6 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
 
     return status;
   }
-
-  //@Override
-  protected int getKludge() { return 170;}
 
   protected Panel getInstructionRow() {
     Panel instructions = new FluidRow();
@@ -815,7 +794,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
       return parent;
     }
 
-    public List<ButtonWithChildren> getSiblings() {
+/*    public List<ButtonWithChildren> getSiblings() {
       List<ButtonWithChildren> siblings = new ArrayList<ButtonWithChildren>();
       if (parent != null) {
         for (ButtonWithChildren button : parent.children) {
@@ -823,7 +802,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
         }
       }
       return siblings;
-    }
+    }*/
 
     public void setParentButton(ButtonWithChildren parent) {
       this.parent = parent;
