@@ -4,7 +4,6 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 
@@ -229,7 +228,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    */
   private void destroySound() {
     if (currentSound != null) {
-      System.out.println("PlayAudioPanel.destroySound : (" + getElement().getId()+ ") destroy sound " + currentSound);
+      if (DEBUG) System.out.println("PlayAudioPanel.destroySound : (" + getElement().getId()+ ") destroy sound " + currentSound);
 
       this.soundManager.destroySound(currentSound);
     }
@@ -240,8 +239,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    */
   public void reinitialize(){
     if (DEBUG) {
-      System.out.println("PlayAudioPanel :reinitialize "+ getElement().getId());
-      new Exception().printStackTrace();
+      System.out.println("PlayAudioPanel :reinitialize " + getElement().getId());
     }
 
     setPlayLabel();
