@@ -481,6 +481,14 @@ fieldset > legend {
     word-break: break-all;
     white-space: nowrap;
 }
+.Instruction-data-with-wrap  {
+    color: #CC6600;
+    font-size: 18px;
+    font-weight: bold;
+    word-wrap: break-word;       /* Internet Explorer 5.5+ */
+    word-break: break-all;
+    white-space: normal;
+}
 
 .blueColor {
     color: #6192bb;
@@ -851,4 +859,26 @@ fieldset > legend {
 
     border-radius: 0px 0px 3px 0px;
     border-top: inset rgba(0, 0, 0, 0.1);
+}
+
+
+.borderBottomQC {
+    margin-bottom: 5px;
+    width: 70px;
+    /*
+        float: left;
+    */
+
+    border-radius: 0px 0px 3px 0px;
+    border-bottom: inset rgba(0, 0, 0, 0.1);
+}
+
+.centeredRadio {
+    margin-left: 30px;
+    margin-right: 30px;
+}
+
+.comment-button-group-new {
+    opacity:0.50;
+    filter:alpha(opacity=50);
 }
