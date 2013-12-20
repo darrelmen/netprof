@@ -247,7 +247,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     soundManager.setPosition(currentSound, 0);
 
     if (listener != null) {
-      System.out.println("PlayAudioPanel :reinitialize - telling listener to reinitialize ");
+      if (DEBUG) System.out.println("PlayAudioPanel :reinitialize - telling listener to reinitialize ");
 
       listener.reinitialize();
     }
