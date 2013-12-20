@@ -22,9 +22,7 @@ public class AnnotationDAO extends DAO {
   private static Logger logger = Logger.getLogger(AnnotationDAO.class);
 
   public static final String ANNOTATION = "annotation";
-  private UserDAO userDAO;
-  private UserExerciseDAO userExerciseDAO;
-  private UserListVisitorJoinDAO userListVisitorJoinDAO;
+
   public AnnotationDAO(Database database) {
     super(database);
     try {
@@ -115,33 +113,6 @@ public class AnnotationDAO extends DAO {
     }
   }
 
-/*  public void updateModified(long uniqueID) {
-    try {
-      Connection connection = database.getConnection();
-
-      String sql = "UPDATE " + ANNOTATION +
-        " " +
-        "SET " +
-        "modified=? "+
-        "WHERE uniqueid=?";
-
-      PreparedStatement statement = connection.prepareStatement(sql);
-      statement.setTimestamp(1,new Timestamp(System.currentTimeMillis()));
-      statement.setLong(2, uniqueID);
-      int i = statement.executeUpdate();
-
-      //if (false) logger.debug("UPDATE " + i);
-      if (i == 0) {
-        logger.error("huh? didn't update the userList for " + uniqueID + " sql " + sql);
-      }
-
-      statement.close();
-      database.closeConnection(connection);
-    } catch (Exception e) {
-      logger.error("got " + e, e);
-    }
-  }*/
-
   public int getCount() { return getCount(ANNOTATION); }
 
 
@@ -160,29 +131,13 @@ public class AnnotationDAO extends DAO {
     return Collections.emptyList();
   }
 
-/*  public UserAnnotation getWhere(long unique) {
-    String sql = "SELECT * from " + ANNOTATION + " where uniqueid=" + unique + " order by modified";
-    try {
-      List<UserAnnotation> lists = getUserAnnotations(sql,-1);
-      if (lists.isEmpty()) {
-        logger.error("huh? no annotation with id " + unique);
-        return null;
-      } else {
-        return lists.iterator().next();
-      }
-    } catch (SQLException e) {
-      logger.error("got " + e, e);
-    }
-    return null;
-  }*/
-
   /**
    * @see UserListManager#addAnnotations(mitll.langtest.shared.AudioExercise)
    * @param exerciseID
    * @return
    */
   public Map<String,ExerciseAnnotation> getLatestByExerciseID(String exerciseID) {
-    String sql = "SELECT * from " + ANNOTATION + " where exerciseid=" + exerciseID + " order by field,modified desc";
+    String sql = "SELECT * from " + ANNOTATION + " where exerciseid='" + exerciseID + "' order by field,modified desc";
     try {
       Map<String,UserAnnotation> fieldToAnno = new HashMap<String, UserAnnotation>();
       List<UserAnnotation> lists = getUserAnnotations(sql);
@@ -230,7 +185,7 @@ public class AnnotationDAO extends DAO {
       );
     }
 
-    logger.debug("getUserAnnotations sql " +sql+" yielded " + lists);
+    logger.debug("getUserAnnotations sql " + sql + " yielded " + lists);
     rs.close();
     statement.close();
     database.closeConnection(connection);
@@ -238,6 +193,4 @@ public class AnnotationDAO extends DAO {
 
     return lists;
   }
-
-
 }
