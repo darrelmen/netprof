@@ -9,6 +9,7 @@ package mitll.langtest.client.sound;
  */
 public class SoundManagerStatic implements SoundManagerAPI {
   private boolean debug = false;
+
   public void initialize() {
     SoundManager.initialize();
   }
@@ -38,18 +39,24 @@ public class SoundManagerStatic implements SoundManagerAPI {
   /**
    * If you call this when SoundManger is not OK, will throw an exception.
    *
-   * @see mitll.langtest.client.sound.PlayAudioPanel#createSound
    * @param sound
    * @param title
    * @param file
+   * @see mitll.langtest.client.sound.PlayAudioPanel#createSound
+   * @see SoundFeedback#createSound(String, mitll.langtest.client.sound.SoundFeedback.EndListener)
    */
   public void createSound(Sound sound, String title, String file) {
-  if (debug) System.out.println("SoundManagerStatic.createSound " +sound);
+    if (debug) System.out.println("SoundManagerStatic.createSound " + sound);
     SoundManager.createSound(sound, title, file);
   }
 
+  /**
+   * @param sound
+   * @see mitll.langtest.client.sound.PlayAudioPanel#destroySound()
+   * @see mitll.langtest.client.sound.SoundFeedback#destroySound()
+   */
   public void destroySound(Sound sound) {
-    if (debug)  System.out.println("SoundManagerStatic.destroy " +sound);
+    if (debug) System.out.println("SoundManagerStatic.destroy " + sound);
     SoundManager.destroySound(sound);
   }
 
@@ -76,6 +83,9 @@ public class SoundManagerStatic implements SoundManagerAPI {
     SoundManager.playInterval(sound, start, end);
   }
 
+  /**
+   * @see mitll.langtest.client.LangTest#setupSoundManager
+   */
   public void exportStaticMethods() {
     SoundManager.exportStaticMethods();
   }
