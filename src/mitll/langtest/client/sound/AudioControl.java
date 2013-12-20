@@ -11,5 +11,6 @@ public interface AudioControl {
   void reinitialize();
   void songFirstLoaded(double durationEstimate);
   void songLoaded(double duration);
+  void songFinished();
   void update(double position);
 }
