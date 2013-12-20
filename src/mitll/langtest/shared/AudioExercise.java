@@ -75,6 +75,7 @@ public class AudioExercise extends ExerciseShell {
 */
 
   public ExerciseAnnotation getAnnotation(String field) {
+    if (!fieldToAnnotation.containsKey(field)) System.out.println("Can't find " + field + " in "+ fieldToAnnotation.keySet());
     return fieldToAnnotation.get(field);
   }
 
