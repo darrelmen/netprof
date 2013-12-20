@@ -9,10 +9,7 @@ import mitll.langtest.shared.custom.UserList;
 import org.apache.log4j.Logger;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -152,40 +149,18 @@ public class AnnotationDAO extends DAO {
    * Pulls the list of users out of the database.
    *
    * @return
-   * @param userid
    */
-  public List<UserAnnotation> getAll(long userid) {
+  public List<UserAnnotation> getAll() {
     try {
       String sql = "SELECT * from " + ANNOTATION + " order by modified desc";
-      return getUserLists(sql,userid);
+      return getUserAnnotations(sql);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
     return Collections.emptyList();
   }
 
-  public List<UserAnnotation> getAllPublic() {
-    try {
-      String sql = "SELECT * from " + ANNOTATION + " order by modified";
-      return getUserLists(sql,-1);
-    } catch (Exception ee) {
-      logger.error("got " + ee, ee);
-    }
-    return Collections.emptyList();
-  }
-
-/*  public List<UserList> getAllOwnedBy(long id) {
-    try {
-      String sql = "SELECT * from " + ANNOTATION + " where creatorid=" + id+
-        " order by modified";
-      return getUserLists(sql);
-    } catch (Exception ee) {
-      logger.error("got " + ee, ee);
-    }
-    return Collections.emptyList();
-  }*/
-
-  public UserAnnotation getWhere(long unique) {
+/*  public UserAnnotation getWhere(long unique) {
     String sql = "SELECT * from " + ANNOTATION + " where uniqueid=" + unique + " order by modified";
     try {
       List<UserAnnotation> lists = getUserAnnotations(sql,-1);
@@ -199,17 +174,35 @@ public class AnnotationDAO extends DAO {
       logger.error("got " + e, e);
     }
     return null;
-  }
+  }*/
 
-  public List<UserAnnotation> getByExerciseID(String exerciseID) {
+  /**
+   * @see UserListManager#addAnnotations(mitll.langtest.shared.AudioExercise)
+   * @param exerciseID
+   * @return
+   */
+  public Map<String,ExerciseAnnotation> getLatestByExerciseID(String exerciseID) {
     String sql = "SELECT * from " + ANNOTATION + " where exerciseid=" + exerciseID + " order by field,modified desc";
     try {
-      List<UserAnnotation> lists = getUserAnnotations(sql,-1);
+      Map<String,UserAnnotation> fieldToAnno = new HashMap<String, UserAnnotation>();
+      List<UserAnnotation> lists = getUserAnnotations(sql);
+      for (UserAnnotation annotation : lists) {
+        UserAnnotation annotation1 = fieldToAnno.get(annotation.getField());
+        if (annotation1 == null) fieldToAnno.put(annotation.getField(),annotation);
+        else if (annotation1.getTimestamp() < annotation.getTimestamp()) {
+          fieldToAnno.put(annotation.getField(),annotation);
+        }
+      }
       if (lists.isEmpty()) {
         //logger.error("huh? no annotation with id " + unique);
-        return Collections.emptyList();
+        return Collections.emptyMap();
       } else {
-        return lists;
+        Map<String,ExerciseAnnotation>  fieldToAnnotation = new HashMap<String, ExerciseAnnotation>();
+        for (Map.Entry<String, UserAnnotation> pair : fieldToAnno.entrySet()) {
+          fieldToAnnotation.put(pair.getKey(),new ExerciseAnnotation(pair.getValue().getStatus(),pair.getValue().getComment()));
+        }
+        logger.debug("field->anno " + fieldToAnno);
+        return fieldToAnnotation;
       }
     } catch (SQLException e) {
       logger.error("got " + e, e);
@@ -217,20 +210,7 @@ public class AnnotationDAO extends DAO {
     return null;
   }
 
-
-  /**
-   * TODO don't want to always get all the exercises!
-   * @see mitll.langtest.server.database.custom.UserAnnotationManager#getUserAnnotationByID(long)
-   * @param unique
-   * @return
-   */
-  public UserAnnotation getWithExercises(long unique) {
-    UserAnnotation where = getWhere(unique);
-    populateList(where);
-    return where;
-  }
-
-  private List<UserAnnotation> getUserAnnotations(String sql,long userid) throws SQLException {
+  private List<UserAnnotation> getUserAnnotations(String sql) throws SQLException {
     Connection connection = database.getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
     ResultSet rs = statement.executeQuery();
@@ -239,44 +219,25 @@ public class AnnotationDAO extends DAO {
     while (rs.next()) {
       long uniqueid = rs.getLong("uniqueid");
       lists.add(new UserAnnotation(uniqueid, //id
-        userDAO.getUserWhere(rs.getLong("creatorid")), // age
-        rs.getString("name"), // exp
-        rs.getString("description"), // exp
-        rs.getString("classmarker"), // exp
-        rs.getTimestamp("modified").getTime(),
-        rs.getBoolean("isprivate")
+          rs.getString("exerciseid"), // exp
+          rs.getString("field"), // exp
+          rs.getString("status"), // exp
+          rs.getString("comment"),
+          rs.getLong("creatorid"), //
+          rs.getTimestamp("modified").getTime()
+
       )
       );
     }
+
+    logger.debug("getUserAnnotations sql " +sql+" yielded " + lists);
     rs.close();
     statement.close();
     database.closeConnection(connection);
 
-    for (UserAnnotation ul : lists) {
-      if (userid == -1 || ul.getCreator().id == userid || !ul.isFavorite()) {   // skip other's favorites
-        populateList(ul);
-      }
-      else {
-        //logger.info("for " + userid +" skipping " + ul);
-      }
-    }
+
     return lists;
   }
 
-  /**
-   * TODO : This is going to get slow?
-   * @param where
-   */
-  private void populateList(UserAnnotation where) {
-    Collection<UserExercise> onList = userExerciseDAO.getOnList(where.getUniqueID());
-    logger.debug("populateList : got " + onList.size() + " for list "+where.getUniqueID());
-    where.setExercises(onList);
-    where.setVisitors(UserAnnotationVisitorJoinDAO.getWhere(where.getUniqueID()));
 
-    logger.debug("\tlist now "+where);
-  }
-
-  public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
-    this.userExerciseDAO = userExerciseDAO;
-  }
 }

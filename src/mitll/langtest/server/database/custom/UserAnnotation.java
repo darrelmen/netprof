@@ -13,7 +13,8 @@ public class UserAnnotation {
   private long creatorID;
 
    private long timestamp;
-  public UserAnnotation(String exerciseID, String field, String status, String comment, long userID) {
+  public UserAnnotation(long uniqueID,String exerciseID, String field, String status, String comment, long userID, long timestamp) {
+    this.uniqueID = uniqueID;
     this.exerciseID = exerciseID;
     this.field = field;
     this.status = status;
