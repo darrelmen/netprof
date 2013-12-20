@@ -1,12 +1,9 @@
 package mitll.langtest.client.custom;
 
-import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.TextBox;
-import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -113,7 +110,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
       if (audioRef != null) {
         audioRef = wavToMP3(audioRef);   // todo why do we have to do this?
       }
-      ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel(audioRef, e.getRefSentence(), service, controller, false, false, scorePanel);
+      ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel(audioRef, e.getRefSentence(), service, controller, false, scorePanel);
       audioPanel.setShowColor(true);
       audioPanel.getElement().setId("ASRScoringAudioPanel");
       audioPanel.setRefAudio(audioRef, e.getRefSentence());
