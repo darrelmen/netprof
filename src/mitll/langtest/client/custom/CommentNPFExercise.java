@@ -227,6 +227,7 @@ public class CommentNPFExercise extends NPFExercise {
       @Override
       public void onBlur(BlurEvent event) {
         postIncorrect(commentEntry, field);
+        commentButton.setTitle(commentEntry.getText());
       }
     });
     commentEntry.addKeyPressHandler(new KeyPressHandler() {
@@ -235,18 +236,16 @@ public class CommentNPFExercise extends NPFExercise {
         char keyPress = event.getCharCode();
         int key = (int) keyPress;
         if (keyPress == KeyCodes.KEY_ENTER || key == 0) {
-          System.out.println("\tGot enter key " + keyPress);
+       //   System.out.println("\tGot enter key " + keyPress);
           postIncorrect(commentEntry, field);
           commentRow.setVisible(false);
           commentEntry.setFocus(false);
-          final String commentToPost = commentEntry.getText();
-          commentButton.setTitle(commentToPost);
+          commentButton.setTitle(commentEntry.getText());
         }
-        else {
+      /*  else {
           System.out.println("\tdid not get enter key '" + keyPress + "' (" +key+
             ") vs " + KeyCodes.KEY_ENTER  + " event " + event );
-
-        }
+        }*/
       }
     });
     return commentEntry;
