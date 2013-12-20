@@ -1107,6 +1107,13 @@ public class DatabaseImpl implements Database {
     return addUser(age, gender, experience, ip,dialect);
   }
 
+  public long addUser(HttpServletRequest request,
+                      int age, String gender, int experience,
+                      String nativeLang, String dialect, String userID) {
+    String ip = getIPInfo(request);
+    return addUser(age, gender, experience, ip, nativeLang, dialect, userID);
+  }
+
   /**
    * Somehow on subsequent runs, the ids skip by 30 or so?
    * <p/>
@@ -1121,14 +1128,16 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#addUser
    */
   private long addUser(int age, String gender, int experience, String ipAddr, String dialect) {
-    return userDAO.addUser(age, gender, experience, ipAddr, "", dialect, "", false);
+    long l = userDAO.addUser(age, gender, experience, ipAddr, "", dialect, "", false);
+    userListManager.createFavorites(l);
+    return l;
   }
 
-  public long addUser(HttpServletRequest request,
-                      int age, String gender, int experience,
-                      String nativeLang, String dialect, String userID) {
-    String ip = getIPInfo(request);
-    return addUser(age, gender, experience, ip, nativeLang, dialect, userID);
+  private long addUser(int age, String gender, int experience, String ipAddr,
+                       String nativeLang, String dialect, String userID) {
+    long l = userDAO.addUser(age, gender, experience, ipAddr, nativeLang, dialect, userID, false);
+    userListManager.createFavorites(l);
+    return l;
   }
 
   private String getIPInfo(HttpServletRequest request) {
@@ -1136,11 +1145,6 @@ public class DatabaseImpl implements Database {
     SimpleDateFormat sdf = new SimpleDateFormat();
     String format = sdf.format(new Date());
     return request.getRemoteHost() +/*"/"+ request.getRemoteAddr()+*/(header != null ? "/" + header : "") + " at " + format;
-  }
-
-  private long addUser(int age, String gender, int experience, String ipAddr,
-                       String nativeLang, String dialect, String userID) {
-    return userDAO.addUser(age, gender, experience, ipAddr, nativeLang, dialect, userID, false);
   }
 
   /**
