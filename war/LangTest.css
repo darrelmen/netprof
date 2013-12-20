@@ -778,6 +778,16 @@ fieldset > legend {
     padding: 5px 110px 5px 5px;
 }
 
+.shadowBorder {
+    margin-top: 2px;
+    /*
+        background: none repeat scroll 0 0 #FFFFFF;
+    */
+    border-radius: 3px 3px 3px 3px;
+    box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
+    padding: 5px 5px 5px 5px;
+}
+
 .userListBackground {
     background-color:#ffffff;
 }
