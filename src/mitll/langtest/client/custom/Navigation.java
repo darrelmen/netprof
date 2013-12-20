@@ -594,7 +594,7 @@ public class Navigation implements RequiresResize {
       r1.add(getUserListText2(ul.getClassMarker()));
     }
 
-    if (createdByYou(ul) && !ul.getName().equals(UserListManager.MY_LIST)) {
+    if (createdByYou(ul) && !ul.getName().equals(UserList.MY_LIST)) {
       r1 = new FluidRow();
       w.add(r1);
       r1.add(new HTML("<b>Created by you.</b>"));
