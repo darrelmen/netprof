@@ -299,6 +299,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private ExerciseListWrapper makeExerciseListWrapper(int reqID, List<Exercise> exercises) {
     if (!exercises.isEmpty()) {
       ensureMP3s(exercises.get(0));
+      addAnnotations(exercises.get(0)); // todo do this in a better way
     }
     return new ExerciseListWrapper(reqID, getExerciseShells(exercises), exercises.isEmpty() ? null : exercises.get(0));
   }
@@ -479,7 +480,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (byID == null) {
       byID = db.getUserExerciseWhere(id);
     }
-    db.getUserListManager().addAnnotations(byID); // TODO nice not to do this when not in classroom...
+    addAnnotations(byID);
     logger.debug("getExercise : returning " +byID);
     if (byID == null) {
       logger.error("getExercise : huh? couldn't find exercise with id " + id + " when examining " + exercises.size() + " items");
@@ -492,6 +493,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       ensureMP3s(byID);
     }
     return byID;
+  }
+
+  private void addAnnotations(Exercise byID) {
+    db.getUserListManager().addAnnotations(byID); // TODO nice not to do this when not in classroom...
   }
 
   private void ensureMP3s(Exercise byID) {
@@ -663,7 +668,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * Called from the client:
-   * @see mitll.langtest.client.list.ExerciseList#getExercises()
+   * @see mitll.langtest.client.list.ExerciseList#getExercises
    * @return
    */
   List<Exercise> getExercises() {
@@ -993,7 +998,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.custom.NPFExercise#populateListChoices(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController, com.github.gwtbootstrap.client.ui.SplitDropdownButton)
+   * @see mitll.langtest.client.custom.NPFExercise#populateListChoices
    * @param userListID
    * @param userExercise
    * @return
