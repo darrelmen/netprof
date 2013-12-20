@@ -31,6 +31,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.server.database.custom.UserListManager;
@@ -139,7 +140,7 @@ public class Navigation implements RequiresResize {
     chapters.content.add(secondAndThird);
 
     if (controller.isReviewMode()) {
-      System.out.println("\n\n\nadding review tab");
+      //System.out.println("adding review tab");
 
       review = makeTab(tabPanel, IconType.EDIT, "Review");
       review.tab.addClickHandler(new ClickHandler() {
@@ -149,11 +150,11 @@ public class Navigation implements RequiresResize {
         }
       });
     }
-    else {
+   /* else {
       System.out.println("\n" +
         "\n" +
         "\nnot adding review tab");
-    }
+    }*/
 
     // so we can know when chapters is revealed and tell it to update it's lists
     tabPanel.addShowHandler(new TabPanel.ShowEvent.Handler() {
@@ -171,7 +172,7 @@ public class Navigation implements RequiresResize {
         boolean hasCreated = createdPanel != null;
         if (hasCreated && wasChapters) {
           System.out.println("\tgot chapters! created panel :  has created " + hasCreated + " was revealed  " + createdPanel.getClass());
-          ((NPFExercise) createdPanel).wasRevealed();
+          ((GoodwaveExercisePanel) createdPanel).wasRevealed();
         }
       }
     });
