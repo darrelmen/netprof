@@ -82,15 +82,15 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    */
   public AudioPanel(String path, LangTestDatabaseAsync service,
                     ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel) {
-    this(service, controller, showSpectrogram, gaugePanel);
+    this(service, controller, showSpectrogram, gaugePanel, 1.0f);
     this.audioPath = path;
 
     addWidgets(path);
   }
 
   public AudioPanel(LangTestDatabaseAsync service,
-                    ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel) {
-    this.screenPortion = controller.getScreenPortion();
+                    ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel, float screenPortion) {
+    this.screenPortion = screenPortion;
     this.soundManager = controller.getSoundManager();
     this.service = service;
     this.logMessages = controller.isLogClientMessages();
@@ -289,7 +289,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     }
     int width = (int) ((screenPortion * ((float) Window.getClientWidth())) - leftColumnWidth) - rightSide;
 
-    if (debug) {
+    if (true) {
       System.out.println("AudioPanel.getImages : leftColumnWidth " + leftColumnWidth + " width " + width + " (screen portion = " + screenPortion +
         ") vs window width " + Window.getClientWidth() + " right side " + rightSide);
     }
@@ -298,8 +298,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     if (lastWidth == 0 || diff > WINDOW_SIZE_CHANGE_THRESHOLD) {
       lastWidth = Window.getClientWidth();
 
-      if (debug) {
-        System.out.println("AudioPanel.getImages : offset width " + getOffsetWidth() + " width " + width + " path " + audioPath);
+      if (true) {
+        System.out.println("\tAudioPanel.getImages : offset width " + getOffsetWidth() + " request width " + width + " path " + audioPath);
       }
       getEachImage(width);
     } else {
