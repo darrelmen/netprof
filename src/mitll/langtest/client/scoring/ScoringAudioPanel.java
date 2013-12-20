@@ -21,6 +21,7 @@ import java.util.List;
  */
 public abstract class ScoringAudioPanel extends AudioPanel {
   private static final int ANNOTATION_HEIGHT = 20;
+  private static final boolean SHOW_SPECTROGRAM = false;
 
   private String refSentence;
   private String refAudio;
@@ -33,26 +34,24 @@ public abstract class ScoringAudioPanel extends AudioPanel {
    * @see ASRScoringAudioPanel#ASRScoringAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, int, boolean, mitll.langtest.client.exercise.ExerciseController, ScoreListener)
    * @param service
    * @param numRepeats
-   * @param useKeyboard
    * @param gaugePanel
    */
   public ScoringAudioPanel(LangTestDatabaseAsync service,
-                           int numRepeats, boolean useKeyboard, ExerciseController controller, ScoreListener gaugePanel) {
-    this(null, null, service, numRepeats, useKeyboard, controller, true, gaugePanel);
+                           int numRepeats, ExerciseController controller, ScoreListener gaugePanel) {
+    this(null, null, service, numRepeats, controller, SHOW_SPECTROGRAM, gaugePanel);
   }
 
   /**
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, boolean, ScoreListener)
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener)
    * @param path
    * @param refSentence
    * @param service
    * @param numRepeats
-   * @param useKeyboard
    * @param showSpectrogram
    * @param gaugePanel
    */
   public ScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
-                           int numRepeats, boolean useKeyboard, ExerciseController controller,
+                           int numRepeats, ExerciseController controller,
                            boolean showSpectrogram, ScoreListener gaugePanel) {
     super(path, service, controller, showSpectrogram, gaugePanel);
     this.refSentence = refSentence;
