@@ -5,6 +5,7 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.server.database.custom.AnnotationDAO;
+import mitll.langtest.server.database.custom.ReviewedDAO;
 import mitll.langtest.server.database.custom.UserExerciseDAO;
 import mitll.langtest.server.database.custom.UserListDAO;
 import mitll.langtest.server.database.custom.UserListExerciseJoinDAO;
@@ -22,9 +23,11 @@ import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.grade.ResultsAndGrades;
 import mitll.langtest.shared.monitoring.Session;
+
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -152,7 +155,7 @@ public class DatabaseImpl implements Database {
     answerDAO = new AnswerDAO(this, resultDAO);
     gradeDAO = new GradeDAO(this,userDAO, resultDAO);
     siteDAO = new SiteDAO(this, userDAO);
-    userListManager = new UserListManager( userDAO,userListDAO,userListExerciseJoinDAO, new AnnotationDAO(this));
+    userListManager = new UserListManager( userDAO,userListDAO,userListExerciseJoinDAO, new AnnotationDAO(this), new ReviewedDAO(this));
 
 
     if (DROP_USER) {
