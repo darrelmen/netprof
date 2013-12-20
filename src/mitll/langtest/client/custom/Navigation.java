@@ -19,14 +19,7 @@ import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FocusPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.ScrollPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
@@ -84,9 +77,12 @@ public class Navigation implements RequiresResize {
    * @see mitll.langtest.client.LangTest#onModuleLoad2
    */
   public Widget getNav(final Panel secondAndThird, final UserFeedback feedback) {
-    FluidContainer container = new FluidContainer();
+    Panel container = new FlowPanel();
+    container.getElement().setId("getNav_container");
     this.feedback = feedback;
     Panel buttonRow = getButtonRow2(secondAndThird);
+    buttonRow.getElement().setId("getNav_buttonRow");
+
     container.add(buttonRow);
     this.container = container;
     return container;
@@ -150,11 +146,6 @@ public class Navigation implements RequiresResize {
         }
       });
     }
-   /* else {
-      System.out.println("\n" +
-        "\n" +
-        "\nnot adding review tab");
-    }*/
 
     // so we can know when chapters is revealed and tell it to update it's lists
     tabPanel.addShowHandler(new TabPanel.ShowEvent.Handler() {
@@ -342,7 +333,7 @@ public class Navigation implements RequiresResize {
     contentPanel.clear();
     contentPanel.add(container);
     container.getElement().setId("showListContainer");
-    container.addStyleName("fullWidth2");
+    //container.addStyleName("fullWidth2");
     DOM.setStyleAttribute(container.getElement(), "paddingLeft", "2px");
     DOM.setStyleAttribute(container.getElement(), "paddingRight", "2px");
 
@@ -365,11 +356,11 @@ public class Navigation implements RequiresResize {
       container.add(child);
       child.add(new Heading(3, "<b>Created by you.</b>"));
     }
-    final FluidContainer listContent = new FluidContainer();
+    //final FluidContainer listContent = new FluidContainer();
 
     Panel operations = getListOperations(ul, created, instanceName);
     container.add(operations);
-    container.add(listContent);
+    //container.add(listContent);
 
     service.addVisitor(ul, (long)controller.getUser(), new AsyncCallback<Void>() {
       @Override
