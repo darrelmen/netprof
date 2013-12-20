@@ -50,14 +50,19 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     super.nextWasPressed(listContainer, completedExercise);
     if (!instance.equals("review")) {
       listContainer.addCompleted(completedExercise.getID());
-      service.markReviewed(completedExercise.getID(), incorrectSet.isEmpty(), new AsyncCallback<Void>() {
-        @Override
-        public void onFailure(Throwable caught) {}
-
-        @Override
-        public void onSuccess(Void result) {}
-      });
+      markReviewed(completedExercise);
     }
+  }
+
+  private void markReviewed(Exercise completedExercise) {
+    service.markReviewed(completedExercise.getID(), incorrectSet.isEmpty(), controller.getUser(),
+      new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {}
+
+      @Override
+      public void onSuccess(Void result) {}
+    });
   }
 
   /**
@@ -68,7 +73,8 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
    * @param screenPortion
    */
   @Override
-  protected void addUserRecorder(LangTestDatabaseAsync service, ExerciseController controller, Panel toAddTo, float screenPortion) {}
+  protected void addUserRecorder(LangTestDatabaseAsync service, ExerciseController controller, Panel toAddTo,
+                                 float screenPortion) {}
 
   /**
    * @param e
@@ -133,7 +139,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   }
 
   private Widget getEntry(final String field, final String label, String value, ExerciseAnnotation annotation) {
-    Panel nameValueRow = getContentWidget(label, value);
+    Panel nameValueRow = getContentWidget(label, value, false);
     return getEntry(field, nameValueRow, annotation);
   }
 
@@ -199,14 +205,6 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     commentRow.add(commentEntry);
   }
 
-  private Label getCommentLabel() {
-    final Label commentLabel = new Label("comment?");
-    DOM.setStyleAttribute(commentLabel.getElement(), "backgroundColor", "#ff0000");
-    commentLabel.setVisible(true);
-    commentLabel.addStyleName("ImageOverlay");
-    return commentLabel;
-  }
-
   private FocusWidget makeCommentEntry(final String field,ExerciseAnnotation annotation) {
     final TextBox commentEntry = new TextBox();
     commentEntry.addStyleName("topFiveMargin");
@@ -252,41 +250,6 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     });
     checkBox.setValue(!alreadyMarkedCorrect);
     return checkBox;
-  }
-
-  private Panel getContentWidget(String label, String value) {
-    Panel nameValueRow = new FlowPanel();
-    nameValueRow.getElement().setId("nameValueRow_" + label);
-    nameValueRow.addStyleName("Instruction");
-
-    InlineHTML foreignPhrase = new InlineHTML(label);
-    foreignPhrase.addStyleName("Instruction-title");
-    nameValueRow.add(foreignPhrase);
-
-    InlineHTML englishPhrase = new InlineHTML(value);
-    englishPhrase.addStyleName("Instruction-data");
-    nameValueRow.add(englishPhrase);
-    englishPhrase.addStyleName("leftFiveMargin");
-    return nameValueRow;
-  }
-
-  private void addIncorrectComment(final String comment, final String field) {
-    System.out.println(new Date() +" : post to server " + exercise.getID() +
-      " field " + field + " commentLabel " + comment + " is incorrect");
-    final long then = System.currentTimeMillis();
-    service.addAnnotation(exercise.getID(), field, "incorrect", comment, controller.getUser(), new AsyncCallback<Void>() {
-      @Override
-      public void onFailure(Throwable caught) {
-      }
-
-      @Override
-      public void onSuccess(Void result) {
-        long now = System.currentTimeMillis();
-        System.out.println("\t" + new Date() + " : posted to server " + exercise.getID() +
-            " field " + field + " commentLabel " + comment + " is incorrect, took " + (now - then) + " millis");
-
-      }
-    });
   }
 
   private void addCorrectAnnotation(String field) {
