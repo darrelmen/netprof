@@ -220,9 +220,9 @@ public class UserListManager {
   // TODO : replace with DAO for this
   private List<UserAnnotation> annotations = new ArrayList<UserAnnotation>();
 
-  public void addAnnotation(String exerciseID, String field, String status, String comment) {
+  public void addAnnotation(String exerciseID, String field, String status, String comment, long userID) {
     logger.info("write to database! " +exerciseID + " " + field + " " + status + " " + comment);
-    annotations.add(new UserAnnotation(exerciseID, field, status, comment));
+    annotations.add(new UserAnnotation(exerciseID, field, status, comment, userID));
   }
 
   /**
@@ -233,8 +233,8 @@ public class UserListManager {
   public <T extends AudioExercise> void addAnnotations(T exercise) {
     if (exercise != null) {
       for (UserAnnotation annotation : annotations) {
-        if (annotation != null && annotation.exerciseID != null && annotation.exerciseID.equals(exercise.getID())) {
-          exercise.addAnnotation(annotation.field, annotation.status, annotation.comment);
+        if (annotation != null && annotation.getExerciseID() != null && annotation.getExerciseID().equals(exercise.getID())) {
+          exercise.addAnnotation(annotation.getField(), annotation.getStatus(), annotation.getComment());
         }
       }
     }
