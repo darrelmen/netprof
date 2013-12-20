@@ -1,17 +1,19 @@
 package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.Image;
+import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -34,6 +36,7 @@ import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.Exercise;
 
 import java.util.Collection;
+import java.util.Date;
 
 /**
  * Mainly delegates recording to the {@link mitll.langtest.client.recorder.SimpleRecordPanel}.
@@ -277,6 +280,49 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     return (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
   }
 
+  protected void addIncorrectComment(final String commentToPost, final String field) {
+    System.out.println(new Date() + " : post to server " + exercise.getID() +
+      " field " + field + " commentLabel " + commentToPost + " is incorrect");
+    final long then = System.currentTimeMillis();
+    service.addAnnotation(exercise.getID(), field, "incorrect", commentToPost, controller.getUser(),new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {
+      }
+
+      @Override
+      public void onSuccess(Void result) {
+        long now = System.currentTimeMillis();
+        System.out.println("\t" + new Date() + " : posted to server " + exercise.getID() +
+          " field " + field + " commentLabel " + commentToPost + " is incorrect, took " + (now - then) + " millis");
+
+      }
+    });
+  }
+
+  protected Panel getContentWidget(String label, String value, boolean withWrap) {
+    Panel nameValueRow = new FlowPanel();
+    nameValueRow.getElement().setId("nameValueRow_" + label);
+    nameValueRow.addStyleName("Instruction");
+
+    InlineHTML foreignPhrase = new InlineHTML(label);
+    foreignPhrase.addStyleName("Instruction-title");
+    nameValueRow.add(foreignPhrase);
+
+    InlineHTML englishPhrase = new InlineHTML(value);
+    englishPhrase.addStyleName(withWrap ? "Instruction-data-with-wrap" : "Instruction-data");
+    nameValueRow.add(englishPhrase);
+    englishPhrase.addStyleName("leftFiveMargin");
+    return nameValueRow;
+  }
+
+  protected Label getCommentLabel() {
+    final Label commentLabel = new Label("comment?");
+    DOM.setStyleAttribute(commentLabel.getElement(), "backgroundColor", "#ff0000");
+    commentLabel.setVisible(true);
+    commentLabel.addStyleName("ImageOverlay");
+    return commentLabel;
+  }
+
   protected static class ResizableCaptionPanel extends CaptionPanel implements ProvidesResize, RequiresResize {
     public ResizableCaptionPanel(String name) {
       super(name);
@@ -431,10 +477,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
   public boolean isBusy() { return isBusy;  }
 
+  protected void setAudioRef(String audioRef) {}
+
   class FastAndSlowASRScoringAudioPanel extends ASRScoringAudioPanel {
     private static final String GROUP = "group";
-    //private GoodwaveExercisePanel widgets;
-
     /**
      * @param exercise
      * @param path
@@ -448,8 +494,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         exercise.getRefSentence(),
         service,
         controller1,
-          // no keyboard space bar binding
-          SHOW_SPECTROGRAM, scoreListener);
+        SHOW_SPECTROGRAM, scoreListener);
     }
 
     /**
@@ -511,6 +556,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       String audioRef = audioAttribute.getAudioRef();
       setRefAudio(audioRef);
       getImagesForPath(audioRef);
+
+      setAudioRef(audioRef);
     }
   }
 }
