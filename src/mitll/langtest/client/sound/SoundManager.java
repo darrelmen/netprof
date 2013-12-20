@@ -86,6 +86,7 @@ public class SoundManager {
 
   /**
    * Actually calls destruct on sound object
+   *
    * @param sound
    */
   public static native void destroySound(Sound sound) /*-{
@@ -133,7 +134,6 @@ public class SoundManager {
    */
   public static void loaded(){
      if (debug) System.out.println(new Date() + " : Got loaded call!");
-    //Window.alert("SoundManager loaded.");
   }
 
   /**
@@ -158,7 +158,7 @@ public class SoundManager {
 
 	public static void songFinished(Sound sound){
     if (debug) System.out.println("sound finished " +sound);
-		sound.parent.reinitialize();
+		sound.parent.songFinished();
 	}
 
 	public static void songFirstLoaded(Sound sound, double durationEstimate){
@@ -168,7 +168,7 @@ public class SoundManager {
 	}
 
 	public static void songLoaded(Sound sound, double duration){
-    if (debug) System.out.println("songLoaded sound " +sound);
+    if (true) System.out.println("songLoaded sound " +sound + " with dur " +duration);
 
     sound.parent.songLoaded(duration);
 	}
@@ -176,7 +176,10 @@ public class SoundManager {
 	public static void update(Sound sound, double position){
 		sound.parent.update(position);
 	}
-	
+
+  /**
+   * @see mitll.langtest.client.sound.SoundManagerStatic#exportStaticMethods()
+   */
 	public static native void exportStaticMethods() /*-{
     $wnd.loaded = $entry(@mitll.langtest.client.sound.SoundManager::loaded());
     $wnd.ontimeout = $entry(@mitll.langtest.client.sound.SoundManager::ontimeout());
