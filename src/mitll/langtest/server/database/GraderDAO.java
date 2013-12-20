@@ -199,7 +199,7 @@ public class GraderDAO {
       database.closeConnection(connection);
     } catch (Exception e) {
       if (e.getMessage().contains("not found")) {
-        logger.debug("note there is no grader table.");
+        //logger.debug("note there is no grader table.");
       } else {
         logger.error("got " + e, e);
       }
