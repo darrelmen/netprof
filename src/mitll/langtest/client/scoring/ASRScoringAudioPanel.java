@@ -31,22 +31,21 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
    */
   public ASRScoringAudioPanel(LangTestDatabaseAsync service,
                               int numRepeats, boolean useKeyboard, ExerciseController controller, ScoreListener gaugePanel) {
-    super(service, numRepeats, useKeyboard, controller, gaugePanel);
+    super(service, numRepeats, controller, gaugePanel);
   }
 
   /**
-   * @see GoodwaveExercisePanel#getScoringAudioPanel(mitll.langtest.shared.Exercise, String)
+   * @see GoodwaveExercisePanel#getAudioPanel(mitll.langtest.shared.Exercise, String)
    * @param path
    * @param refSentence
    * @param service
    * @param controller
-   * @param useKeyboard
    * @param showSpectrogram
    * @param gaugePanel
    */
   public ASRScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
-                              ExerciseController controller, boolean useKeyboard, boolean showSpectrogram, ScoreListener gaugePanel) {
-    super(path, refSentence, service, controller.getSegmentRepeats(), useKeyboard, controller, showSpectrogram, gaugePanel);
+                              ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel) {
+    super(path, refSentence, service, controller.getSegmentRepeats(), controller, showSpectrogram, gaugePanel);
     this.useScoreToColorBkg = controller.useBkgColorForRef();
   }
 
