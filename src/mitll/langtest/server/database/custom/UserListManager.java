@@ -31,6 +31,7 @@ public class UserListManager {
   public static final String MY_LIST = "Favorites";
 
   private final UserDAO userDAO;
+  private final ReviewedDAO reviewedDAO;
   private int i = 0;
 
   private UserExerciseDAO userExerciseDAO;
@@ -39,11 +40,21 @@ public class UserListManager {
   private UserListExerciseJoinDAO userListExerciseJoinDAO;
   private AnnotationDAO annotationDAO;
 
-  public UserListManager(UserDAO userDAO, UserListDAO userListDAO,UserListExerciseJoinDAO userListExerciseJoinDAO,AnnotationDAO annotationDAO ) {
+  // TODO : DAO for  reviewed
+  private Set<String> reviewedExercises = new HashSet<String>();
+  private Set<String> incorrect = new HashSet<String>();
+
+  public UserListManager(UserDAO userDAO, UserListDAO userListDAO,UserListExerciseJoinDAO userListExerciseJoinDAO,
+                         AnnotationDAO annotationDAO,ReviewedDAO reviewedDAO ) {
     this.userDAO = userDAO;
     this.userListDAO = userListDAO;
     this.userListExerciseJoinDAO = userListExerciseJoinDAO;
     this.annotationDAO = annotationDAO;
+    this.reviewedDAO = reviewedDAO;
+
+    incorrect = annotationDAO.getIncorrectIds();
+    reviewedExercises = reviewedDAO.getReviewed();
+
   }
 
   /**
@@ -129,15 +140,23 @@ public class UserListManager {
    * @return
    */
   public UserList getReviewList() {
-    UserList e = new UserList(i++, new User(-1,89,0,0,"","",false),
-        "Review", "Items to review", "Review", System.currentTimeMillis(), false);
-
-    List<UserExercise> onList = new ArrayList<UserExercise>();
     List<UserExercise> allKnown = userExerciseDAO.getWhere(incorrect);
 
     Map<String, UserExercise> idToUser = new HashMap<String, UserExercise>();
-    for (UserExercise ue : allKnown) idToUser.put(ue.getID(),ue);
+    for (UserExercise ue : allKnown) idToUser.put(ue.getID(), ue);
 
+    List<UserExercise> onList = getReviewedUserExercises(idToUser, incorrect);
+
+    logger.debug("getReviewList ids #=" + incorrect.size() + " yielded " + onList.size() + " : " + onList);
+
+    UserList userList = new UserList(i++, new User(-1,89,0,0,"","",false),
+      "Review", "Items to review", "Review", System.currentTimeMillis(), false);
+    userList.setExercises(onList);
+    return userList;
+  }
+
+  private List<UserExercise> getReviewedUserExercises(Map<String, UserExercise> idToUser, Set<String> incorrect) {
+    List<UserExercise> onList = new ArrayList<UserExercise>();
     for (String id : incorrect) {
       if (!id.startsWith(UserExercise.CUSTOM_PREFIX)) {
         Exercise byID = userExerciseDAO.getExercise(id);
@@ -150,11 +169,7 @@ public class UserListManager {
         if (idToUser.containsKey(id)) onList.add(idToUser.get(id));
       }
     }
-
-    logger.debug("getReviewList ids #=" + incorrect.size() + " yielded " + onList.size() + " : " + onList);
-
-    e.setExercises(onList);
-    return e;
+    return onList;
   }
 
   /**
@@ -256,11 +271,14 @@ public class UserListManager {
     }
   }
 
-  // TODO : DAO for incorrect & reviewed
-  Set<String> reviewedExercises = new HashSet<String>();
-  Set<String> incorrect = new HashSet<String>();
-  public void markReviewed(String id) {
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#markReviewed(String, boolean)
+   * @param id
+   * @param creatorID
+   */
+  public void markReviewed(String id, long creatorID) {
     reviewedExercises.add(id);
+    reviewedDAO.add(id,creatorID);
     logger.debug("markReviewed now " + reviewedExercises.size() + " reviewed exercises");
   }
   public Set<String> getReviewedExercises() { return reviewedExercises; }
