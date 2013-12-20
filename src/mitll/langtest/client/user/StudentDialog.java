@@ -92,7 +92,7 @@ public class StudentDialog extends UserDialog {
     final ListBoxFormField purpose = getListBoxFormField(fieldset, "Purpose", getListBox2(purposes));
 
     final FormField user = addControlFormField(fieldset, "User ID", MIN_LENGTH_USER_ID);
-    user.setVisible(purpose.getValue().equals(DATA_COLLECTION));
+    user.setVisible(isDataCollection(purpose) || isPractice(purpose));
     //final FormField password = addControlFormField(fieldset, "Password", true);
 
     purpose.box.setWidth("150px");
@@ -106,10 +106,10 @@ public class StudentDialog extends UserDialog {
       @Override
       public void onChange(ChangeEvent event) {
         boolean b = canSkipRegister(purpose.getValue());
-        boolean needUserID = purpose.getValue().equals(DATA_COLLECTION) || purpose.getValue().equals(REVIEW);
+        boolean needUserID = isDataCollection(purpose) || isReview(purpose) || isPractice(purpose);
         user.setVisible(needUserID);
         accordion.setVisible(!canSkipRegister(purpose.getValue()));
-        registrationInfo.showOrHideILR(!purpose.getValue().equals(REVIEW));
+        registrationInfo.showOrHideILR(!isReview(purpose));
 
         if (b) {
           accordion.hide();
@@ -128,7 +128,12 @@ public class StudentDialog extends UserDialog {
               public void onSuccess(Integer result) {
                 boolean exists = result != -1;
                 if (!exists) {
-                  accordion.show();
+              /*    if (isPractice(purpose)) {
+                    addUser(userID,getAudioTypeFromPurpose(purpose.getValue()));
+                  }
+                  else {*/
+                    accordion.show();
+                //  }
                 }
               }
             });
@@ -149,6 +154,18 @@ public class StudentDialog extends UserDialog {
     });
 
     dialogBox.show();
+  }
+
+  private boolean isDataCollection(ListBoxFormField purpose) {
+    return purpose.getValue().equals(DATA_COLLECTION);
+  }
+
+  private boolean isPractice(ListBoxFormField purpose) {
+    return purpose.getValue().equals(PRACTICE);
+  }
+
+  private boolean isReview(ListBoxFormField purpose) {
+    return purpose.getValue().equals(REVIEW);
   }
 
   private void configureKeyHandler(Modal dialogBox, final Button closeButton) {
@@ -186,21 +203,33 @@ public class StudentDialog extends UserDialog {
        * Fired when the user clicks on the sendButton.
        */
       public void onClick(ClickEvent event) {
+
+        System.out.println("makeCloseHandler : got click " + event);
+
         String purposeSetting = purpose.getValue();
         final String audioType = getAudioTypeFromPurpose(purposeSetting);
-        if (canSkipRegister(purposeSetting)) {
+        if (canLoginAnonymously(purpose)) {
+          System.out.println("\tcan login anonymously for " + purposeSetting);
           dialogBox.hide();
           langTest.rememberAudioType(audioType);
           addAnonymousUser(audioType);
         } else {
-          checkUserAndMaybeRegister(audioType, user, dialogBox, accordion, registrationInfo);
+          System.out.println("\tcheckUserAndMaybeRegister for " + purposeSetting);
+
+          checkUserAndMaybeRegister(audioType, user, dialogBox, accordion, registrationInfo,purposeSetting);
         }
       }
     };
   }
 
+  private boolean canLoginAnonymously(ListBoxFormField purpose) {
+    String purposeSetting = purpose.getValue();
+    return purposeSetting.equalsIgnoreCase(DEMO);
+  }
+
   private void checkUserAndMaybeRegister(final String audioType, FormField user, final Modal dialogBox,
-                                         final AccordionGroup accordion, final RegistrationInfo registrationInfo) {
+                                         final AccordionGroup accordion, final RegistrationInfo registrationInfo,
+                                         final String purposeSetting) {
     final String userID = user.box.getText();
     if (checkValidUser(user)
       //&& checkValidPassword(password)
@@ -214,34 +243,67 @@ public class StudentDialog extends UserDialog {
         public void onSuccess(Integer result) {
           boolean exists = result != -1;
           if (exists) {
+            System.out.println("checkUserAndMaybeRegister for " + purposeSetting + " user exists id=" + result);
+
             dialogBox.hide();
             langTest.rememberAudioType(audioType);
             userManager.storeUser(result, audioType, userID, PropertyHandler.LOGIN_TYPE.STUDENT);
           } else {
-            accordion.show();
+            System.out.println("checkUserAndMaybeRegister for " + purposeSetting + " user does not exist id=" + result);
+
+            if (!canSkipRegister(purposeSetting)) {
+              accordion.show();
+            }
             checkThenRegister(audioType, registrationInfo, dialogBox, userID);
           }
         }
       });
     }
+    else {
+      System.out.println("checkUserAndMaybeRegister for " + purposeSetting + " user name " +userID + " is invalid?");
+    }
   }
 
   private void checkThenRegister(String audioType, RegistrationInfo registrationInfo, Modal dialogBox, String userID) {
-    if (highlightIntegerBox(registrationInfo.ageEntryGroup)) {
-      if (highlightIntegerBox(registrationInfo.weeks, MIN_WEEKS, MAX_WEEKS)) {
+    boolean skipWeekCheck = audioType.toLowerCase().contains(REVIEW.toLowerCase());
+    boolean skipChecks = audioType.toLowerCase().contains(PRACTICE.toLowerCase());
+    if (skipChecks) {
+      System.out.println("checkThenRegister : skipChecks " + audioType +  " user  " +userID);
+
+      hideAndSend(audioType, registrationInfo, dialogBox, userID);
+    }
+    else if (highlightIntegerBox(registrationInfo.ageEntryGroup)) {
+      System.out.println("\tcheckThenRegister : age OK skipChecks " + audioType + " skipWeekCheck " +skipWeekCheck);
+
+      if (skipWeekCheck || highlightIntegerBox(registrationInfo.weeks, MIN_WEEKS, MAX_WEEKS)) {
         if (registrationInfo.dialectGroup.getText().isEmpty()) {
-          markError(registrationInfo.dialectGroup, "Please enter a language dialect.");
+          System.out.println("\tcheckThenRegister : dialectGroup " );
+
+          markError(registrationInfo.dialectGroup, "Enter a language dialect.");
         } else if (registrationInfo.checkValidity() && registrationInfo.checkValidity2()) {
-          dialogBox.hide();
-          sendNameToServer(registrationInfo, audioType, userID);
+          System.out.println("\tcheckThenRegister : hideAndSend");
+
+          hideAndSend(audioType, registrationInfo, dialogBox, userID);
+        } else {
+          System.out.println("\tcheckThenRegister : skipChecks " + audioType +  " user  " +userID);
+
         }
       } else {
-        markError(registrationInfo.weeks, "Please enter weeks between " + MIN_WEEKS + " and " + MAX_WEEKS + ".");
+        System.out.println("\tcheckThenRegister : markError weeks " );
+
+        markError(registrationInfo.weeks, "Enter weeks between " + MIN_WEEKS + " and " + MAX_WEEKS + ".");
       }
     } else {
       markError(registrationInfo.ageEntryGroup.group, registrationInfo.ageEntryGroup.box, "",
        "Enter age between " + MIN_AGE + " and " + MAX_AGE + ".");
     }
+  }
+
+  private void hideAndSend(String audioType, RegistrationInfo registrationInfo, Modal dialogBox, String userID) {
+    System.out.println("hideAndSend : audioType " + audioType +  " user  " +userID);
+
+    dialogBox.hide();
+    sendNameToServer(registrationInfo, audioType, userID);
   }
 
   private String getAudioTypeFromPurpose(String purposeValue) {
@@ -402,6 +464,8 @@ public class StudentDialog extends UserDialog {
 
   private void addUser(int age, String gender, int monthsOfExperience, String dialect, String nativeLang, String userID,
                        AsyncCallback<Long> async) {
+    System.out.println("\n\naddUser : userID is " + userID);
+
     service.addUser(age,
       gender,
       monthsOfExperience, nativeLang, dialect, userID, async);
@@ -449,7 +513,7 @@ public class StudentDialog extends UserDialog {
       ilrLevels = row;
       FluidRow row2 = getEstimating2();
       dialogBox.add(row2);
-          estimating = row2;
+      estimating = row2;
       dialectGroup = getDialect(fieldset);
     }
 
@@ -457,6 +521,7 @@ public class StudentDialog extends UserDialog {
       ilrLevels.setVisible(show);
       estimating.setVisible(show);
       label.setVisible(show);
+      weeks.setVisible(show);
     }
 
     public boolean checkValidity() {
