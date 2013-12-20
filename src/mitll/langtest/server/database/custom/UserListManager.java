@@ -124,14 +124,20 @@ public class UserListManager {
     return userList.getName().equals(MY_LIST);
   }
 
+  /**
+   * @see #markIncorrect(String)
+   * @return
+   */
   public UserList getReviewList() {
-    UserList e = new UserList(i++, new User(-1,89,0,0,"","",false), "Review", "Items to review", "Review", System.currentTimeMillis(), false);
+    UserList e = new UserList(i++, new User(-1,89,0,0,"","",false),
+        "Review", "Items to review", "Review", System.currentTimeMillis(), false);
 
     List<UserExercise> onList = new ArrayList<UserExercise>();
     List<UserExercise> allKnown = userExerciseDAO.getWhere(incorrect);
 
     Map<String, UserExercise> idToUser = new HashMap<String, UserExercise>();
     for (UserExercise ue : allKnown) idToUser.put(ue.getID(),ue);
+
     for (String id : incorrect) {
       if (!id.startsWith(UserExercise.CUSTOM_PREFIX)) {
         Exercise byID = userExerciseDAO.getExercise(id);
@@ -145,7 +151,7 @@ public class UserListManager {
       }
     }
 
-    logger.debug("getReviewList ids " + incorrect + " yielded " + onList.size() + " : " + onList);
+    logger.debug("getReviewList ids #=" + incorrect.size() + " yielded " + onList.size() + " : " + onList);
 
     e.setExercises(onList);
     return e;
@@ -227,6 +233,10 @@ public class UserListManager {
     logger.info("write to database! " +exerciseID + " " + field + " " + status + " " + comment);
   //  annotations.add(new UserAnnotation(-1,exerciseID, field, status, comment, userID,System.currentTimeMillis()));
     annotationDAO.add(new UserAnnotation(-1,exerciseID, field, status, comment, userID,System.currentTimeMillis()));
+
+    if (status.equalsIgnoreCase("incorrect")) {
+       markIncorrect(exerciseID);
+    }
   }
 
   /**
@@ -246,6 +256,7 @@ public class UserListManager {
     }
   }
 
+  // TODO : DAO for incorrect & reviewed
   Set<String> reviewedExercises = new HashSet<String>();
   Set<String> incorrect = new HashSet<String>();
   public void markReviewed(String id) {
