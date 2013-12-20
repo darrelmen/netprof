@@ -107,7 +107,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
 
                   @Override
                   public void onSuccess(Void result) {
-                    showPopup("Item Added!");
+                    showPopup("Item Added!",w1);
                     widget.setVisible(false);
                     activeCount--;
                     if (activeCount == 0) {
@@ -146,11 +146,12 @@ public class NPFExercise extends GoodwaveExercisePanel {
     hp.add(questionContent);
   }
 
-  private void showPopup(String html) {
+  private void showPopup(String html, Widget target) {
     final PopupPanel pleaseWait = new DecoratedPopupPanel();
     pleaseWait.setAutoHideEnabled(true);
     pleaseWait.add(new HTML(html));
-    pleaseWait.center();
+    pleaseWait.showRelativeTo(target);
+   // pleaseWait.center();
 
     Timer t = new Timer() {
       @Override
