@@ -150,7 +150,7 @@ public interface LangTestDatabaseAsync {
 
   void editItem(UserExercise userExercise, AsyncCallback<Void> async);
 
-  void addAnnotation(String exerciseID, String field, String status, String comment, AsyncCallback<Void> async);
+  void addAnnotation(String exerciseID, String field, String status, String comment, long userID, AsyncCallback<Void> async);
 
   void markReviewed(String id, boolean isCorrect, AsyncCallback<Void> asyncCallback);
 
