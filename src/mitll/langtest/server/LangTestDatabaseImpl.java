@@ -1020,8 +1020,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db.getUserListManager().addAnnotation(exerciseID,field,status,comment, userID);
   }
 
-  public void markReviewed(String id, boolean isCorrect) {
-    db.getUserListManager().markReviewed(id);
+  /**
+   * @see mitll.langtest.client.custom.QCNPFExercise#markReviewed(mitll.langtest.shared.Exercise)
+   * @param id
+   * @param isCorrect
+   * @param creatorID
+   */
+  public void markReviewed(String id, boolean isCorrect, long creatorID) {
+    db.getUserListManager().markReviewed(id, creatorID);
     if (!isCorrect) {
       db.getUserListManager().markIncorrect(id);
     }
