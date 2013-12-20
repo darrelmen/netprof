@@ -2,6 +2,7 @@ package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Timer;
@@ -164,7 +165,16 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   @Override
   public void onLoad() {
     if (debug) System.out.println("onLoad : id="+ getElement().getId()+ " audio path is " + audioPath);
-    if (audioPath != null) {  getImagesForPath(audioPath);  }
+    if (audioPath != null) {
+
+
+      Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+        public void execute() {
+          getImagesForPath(audioPath);
+        }
+      });
+
+        }
   }
 
   @Override
@@ -204,8 +214,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   public void getImagesForPath(String path) {
     path = wavToMP3(path);
     path = ensureForwardSlashes(path);
-    if (debug) System.out.println("AudioPanel : " + getElement().getId()+
-      " getImagesForPath " +path);
+    if (debug) System.out.println("AudioPanel : " + getElement().getId()+ " getImagesForPath " +path);
     if (path != null) {
       this.audioPath = path;
     }
@@ -272,7 +281,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @see #onResize()
    */
   private void getImages() {
-    int leftColumnWidth = Math.min(175, controller.getLeftColumnWidth()) + IMAGE_WIDTH_SLOP;
+    int leftColumnWidth = Math.max(225, controller.getLeftColumnWidth()) + IMAGE_WIDTH_SLOP;
     int rightSide = gaugePanel != null ? gaugePanel.getOffsetWidth() : 90;
     if (gaugePanel != null && rightSide == 0) {
       rightSide = 180; // hack!!!
@@ -282,7 +291,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     int width = (int) ((screenPortion * ((float) Window.getClientWidth())) - leftColumnWidth) - rightSide;
 
     if (debug) {
-      System.out.println("getImages : leftColumnWidth " + leftColumnWidth + " width " + width + " (screen portion = " + screenPortion +
+      System.out.println("AudioPanel.getImages : leftColumnWidth " + leftColumnWidth + " width " + width + " (screen portion = " + screenPortion +
         ") vs window width " + Window.getClientWidth() + " right side " + rightSide);
     }
 
@@ -291,16 +300,16 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       lastWidth = Window.getClientWidth();
 
       if (debug) {
-        System.out.println("getImages : offset width " + getOffsetWidth() + " width " + width + " path " + audioPath);
+        System.out.println("AudioPanel.getImages : offset width " + getOffsetWidth() + " width " + width + " path " + audioPath);
       }
       getEachImage(width);
     } else {
-      System.out.println("getImages : not updating, offset width " + getOffsetWidth() + " width " + width + " path " + audioPath + " diff " + diff + " last " + lastWidth);
+      System.out.println("AudioPanel.getImages : not updating, offset width " + getOffsetWidth() + " width " + width + " path " + audioPath + " diff " + diff + " last " + lastWidth);
     }
   }
 
   protected void getEachImage(int width) {
-    System.out.println("getEachImage : " + getElement().getId()+ " path " + audioPath);
+    System.out.println("AudioPanel.getEachImage : " + getElement().getId()+ " path " + audioPath);
 
     getImageURLForAudio(audioPath, WAVEFORM, width, getWaveform());
     if (showSpectrogram) {
