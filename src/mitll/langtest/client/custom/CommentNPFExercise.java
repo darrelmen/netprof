@@ -276,7 +276,6 @@ public class CommentNPFExercise extends NPFExercise {
   private FocusWidget makeCommentEntry(final FieldInfo fieldInfo, ExerciseAnnotation annotation,
                                        final TextBox commentEntry,final Panel commentRow,
                                        final Button commentButton) {
-    //final TextBox commentEntry = new TextBox();
     commentEntry.addStyleName("topFiveMargin");
     if (annotation != null) {
       commentEntry.setText(annotation.comment);
@@ -293,19 +292,16 @@ public class CommentNPFExercise extends NPFExercise {
     commentEntry.addKeyPressHandler(new KeyPressHandler() {
       @Override
       public void onKeyPress(KeyPressEvent event) {
-        char keyPress = event.getCharCode();
-        int key = (int) keyPress;
-        if (keyPress == KeyCodes.KEY_ENTER || key == 0) {
-       //   System.out.println("\tGot enter key " + keyPress);
+        int keyCode = event.getNativeEvent ().getKeyCode();
+        if (keyCode == KeyCodes.KEY_ENTER) {
+//          System.out.println("\tGot enter key '" + keyCode + "'");
           commentRow.setVisible(false);
-          commentEntry.setFocus(false);
           postIncorrect(commentEntry, fieldInfo.field);
           commentButton.setTitle(commentEntry.getText());
         }
-      /*  else {
-          System.out.println("\tdid not get enter key '" + keyPress + "' (" +key+
-            ") vs " + KeyCodes.KEY_ENTER  + " event " + event );
-        }*/
+        else {
+//          System.out.println("\tdid not get enter key '" + keyCode + " " +KeyCodes.KEY_ENTER  + " event " + event );
+        }
       }
     });
     return commentEntry;
@@ -316,9 +312,11 @@ public class CommentNPFExercise extends NPFExercise {
     addIncorrectComment(commentToPost, field);
   }
 
-  private void reactToClick( Panel commentRow, FocusWidget commentEntry) {
+  private void reactToClick(Panel commentRow, FocusWidget commentEntry) {
     boolean visible = commentRow.isVisible();
     commentRow.setVisible(!visible);
-    commentEntry.setFocus(!visible);
+    if (!visible) {
+      commentEntry.setFocus(!visible);
+    }
   }
 }
