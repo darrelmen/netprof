@@ -1002,9 +1002,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db.getUserListManager().addItemToUserList(userListID, userExercise);
   }
 
+  /**
+   * @see mitll.langtest.client.custom.QCNPFExercise#makeCheckBox(String, com.google.gwt.user.client.ui.Panel, com.google.gwt.user.client.ui.FocusWidget, boolean)
+   * @param exerciseID
+   * @param field
+   * @param status
+   * @param comment
+   * @param userID
+   */
   @Override
-  public void addAnnotation(String exerciseID, String field, String status, String comment) {
-    db.getUserListManager().addAnnotation(exerciseID,field,status,comment);
+  public void addAnnotation(String exerciseID, String field, String status, String comment, long userID) {
+    db.getUserListManager().addAnnotation(exerciseID,field,status,comment, userID);
   }
 
   public void markReviewed(String id, boolean isCorrect) {
