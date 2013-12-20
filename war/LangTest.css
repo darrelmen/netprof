@@ -882,3 +882,9 @@ fieldset > legend {
     opacity:0.50;
     filter:alpha(opacity=50);
 }
+
+.comment-button-group-new-hide {
+    opacity:0.00;
+    filter:alpha(opacity=0);
+}
+
