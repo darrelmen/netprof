@@ -70,12 +70,12 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private float screenPortion = 1.0f;
   private final boolean logMessages;
   protected ExerciseController controller;
-  private boolean showSpectrogram = true;
+  private boolean showSpectrogram = false;
 
   private final boolean debug = true;
 
   /**
-   * @see ScoringAudioPanel#ScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, int, boolean, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener)
+   * @see ScoringAudioPanel#ScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, int, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener)
    * @param service
    * @param showSpectrogram
    * @param gaugePanel
