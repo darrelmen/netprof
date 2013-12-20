@@ -45,6 +45,7 @@ import java.util.Collection;
 public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel, RequiresResize, ProvidesResize {
   protected static final String NATIVE_REFERENCE_SPEAKER = "Native Reference Speaker";
   private static final String USER_RECORDER = "User Recorder";
+  private static final boolean SHOW_SPECTROGRAM = false;
   private boolean isBusy = false;
 
   private static final String WAV = ".wav";
@@ -154,7 +155,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * @paramx i
    * @param screenPortion
    */
-  protected void addUserRecorder(LangTestDatabaseAsync service, ExerciseController controller, com.google.gwt.user.client.ui.Panel toAddTo, float screenPortion) {
+  protected void addUserRecorder(LangTestDatabaseAsync service, ExerciseController controller, Panel toAddTo, float screenPortion) {
     Widget answerWidget = getAnswerWidget(service, controller, 1, screenPortion);
 
     ResizableCaptionPanel cp = new ResizableCaptionPanel(USER_RECORDER);
@@ -236,7 +237,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * If the exercise type is {@link Exercise.EXERCISE_TYPE#REPEAT_FAST_SLOW} then we put the fast/slow radio
    * buttons before the play button.
    *
-   * @see #getQuestionContent(mitll.langtest.shared.Exercise, com.google.gwt.user.client.ui.Panel)
+   * @see #getQuestionContent(mitll.langtest.shared.Exercise, Panel)
    * @param e
    * @param path
    * @return
@@ -265,7 +266,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     if (e.getType() == Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW) {
       audioPanel = new FastAndSlowASRScoringAudioPanel(exercise, path, service, controller, scorePanel);
     } else {
-      audioPanel = new ASRScoringAudioPanel(path, e.getRefSentence(), service, controller, false, true, scorePanel);
+      audioPanel = new ASRScoringAudioPanel(path, e.getRefSentence(), service, controller, SHOW_SPECTROGRAM, scorePanel);
     }
     audioPanel.getElement().setId("ASRScoringAudioPanel");
     audioPanel.setRefAudio(path, e.getRefSentence());
@@ -336,7 +337,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
      *
      * @param toAdd
      * @return
-     * @see AudioPanel#getPlayButtons(com.google.gwt.user.client.ui.Widget)
+     * @see AudioPanel#getPlayButtons(Widget)
      */
     @Override
     protected PlayAudioPanel makePlayAudioPanel(Widget toAdd) {
@@ -447,9 +448,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         exercise.getRefSentence(),
         service,
         controller1,
-        false // no keyboard space bar binding
-        ,
-        true, scoreListener);
+          // no keyboard space bar binding
+          SHOW_SPECTROGRAM, scoreListener);
     }
 
     /**
