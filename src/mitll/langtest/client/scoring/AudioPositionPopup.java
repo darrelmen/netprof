@@ -9,10 +9,11 @@ import mitll.langtest.client.sound.AudioControl;
  * Makes a red line appear on top of the waveform/spectogram,etc. marking playback position.
  */
 class AudioPositionPopup implements AudioControl {
+  private static int counter  = 0;
   private int id = 0;
+
   private PopupPanel imageOverlay;
   private float durationInMillis;
-  private static int counter  = 0;
   private final boolean debugPartial = false;
   private final boolean debug = false;
   private Panel imageContainer;
@@ -42,11 +43,7 @@ class AudioPositionPopup implements AudioControl {
 
   public void reinitialize() {
     if (debugPartial) System.out.println(this + "  : AudioPositionPopup.reinitialize ");
-
-    imageOverlay.hide();
-    int left = imageContainer.getAbsoluteLeft();
-    int top  = imageContainer.getAbsoluteTop();
-    imageOverlay.setPopupPosition(left, top);
+    songFinished();
   }
 
   private void setWavDurationInSeconds(double durationInSeconds) {
@@ -72,6 +69,16 @@ class AudioPositionPopup implements AudioControl {
     if (debug) System.out.println("songLoaded " + imageOverlay.isShowing() + " vis " + imageOverlay.isVisible() +
         " x " + imageOverlay.getPopupLeft() + " y " + imageOverlay.getPopupTop() + " dim " +
         imageOverlay.getOffsetWidth() + " x " + imageOverlay.getOffsetHeight());
+  }
+
+  @Override
+  public void songFinished() {
+    if (debugPartial) System.out.println(this + "  : AudioPositionPopup.songFinished ");
+
+    imageOverlay.hide();
+    int left = imageContainer.getAbsoluteLeft();
+    int top  = imageContainer.getAbsoluteTop();
+    imageOverlay.setPopupPosition(left, top);
   }
 
   /**
