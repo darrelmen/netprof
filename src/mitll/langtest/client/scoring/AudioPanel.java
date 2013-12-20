@@ -72,7 +72,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   protected ExerciseController controller;
   private boolean showSpectrogram = false;
 
-  private final boolean debug = true;
+  private final boolean debug = false;
 
   /**
    * @see ScoringAudioPanel#ScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, int, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener)
@@ -91,7 +91,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   public AudioPanel(LangTestDatabaseAsync service,
                     ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel) {
     this.screenPortion = controller.getScreenPortion();
-    //System.out.println("Screen portion " + screenPortion);
     this.soundManager = controller.getSoundManager();
     this.service = service;
     this.logMessages = controller.isLogClientMessages();
