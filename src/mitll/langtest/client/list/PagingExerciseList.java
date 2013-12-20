@@ -8,10 +8,14 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -20,6 +24,8 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.custom.UserList;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -199,6 +205,28 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
         }
       });
     }
+  }
+
+
+  public void showEmptySelection() {
+
+   // List<String> strings = Arrays.asList("No items match the selection and search.", "Try clearing one of your selections or changing the search.");
+
+    showPopup("No items match the selection and search.","Try clearing one of your selections or changing the search.",typeAhead);
+  }
+
+  private void showPopup(String toShow,String toShow2, Widget over) {
+    final PopupPanel popupImage = new PopupPanel(true);
+    VerticalPanel vp = new VerticalPanel();
+    vp.add(new HTML(toShow));
+    vp.add(new HTML(toShow2));
+    popupImage.add(vp);
+    popupImage.showRelativeTo(over);
+    Timer t = new Timer() {
+      @Override
+      public void run() { popupImage.hide(); }
+    };
+    t.schedule(3000);
   }
 
   protected void tellUserPanelIsBusy() {
