@@ -512,8 +512,10 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @see HistoryExerciseList.MySetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
    */
   protected void gotEmptyExerciseList() {
-    List<String> strings = Arrays.asList("No items match the selection and search.", "Try clearing one of your selections or changing the search.");
-    new ModalInfoDialog("Empty selection", strings);
+   // List<String> strings = Arrays.asList("No items match the selection and search.", "Try clearing one of your selections or changing the search.");
+  //  new ModalInfoDialog("Empty selection", strings);
+
+    showEmptySelection();
   }
 
   /**
