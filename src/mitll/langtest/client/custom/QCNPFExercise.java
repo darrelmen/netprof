@@ -1,12 +1,10 @@
 package mitll.langtest.client.custom;
 
 import com.github.gwtbootstrap.client.ui.CheckBox;
-import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.TextBox;
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -225,7 +223,7 @@ public class QCNPFExercise extends NPFExercise {
         System.out.println(new Date() +" : post to server " + exercise.getID() +
           " field " + field + " commentLabel " + commentEntry.getText() + " is incorrect");
         final long then = System.currentTimeMillis();
-        service.addAnnotation(exercise.getID(), field, "incorrect", commentEntry.getText(), new AsyncCallback<Void>() {
+        service.addAnnotation(exercise.getID(), field, "incorrect", commentEntry.getText(), controller.getUser(), new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {}
 
@@ -250,7 +248,7 @@ public class QCNPFExercise extends NPFExercise {
         if (!checkBox.getValue()) {
           incorrectSet.remove(field);
           System.out.println(new Date() +" : post to server " + exercise.getID() + " field " + field + " is correct");
-          service.addAnnotation(exercise.getID(), field, "correct", "", new AsyncCallback<Void>() {
+          service.addAnnotation(exercise.getID(), field, "correct", "", controller.getUser(), new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
             }
