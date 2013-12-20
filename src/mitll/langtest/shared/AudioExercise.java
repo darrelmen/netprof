@@ -68,7 +68,6 @@ public class AudioExercise extends ExerciseShell {
     fieldToAnnotation.put(field, new ExerciseAnnotation(status,comment));
   }
 
-
 /*
   public Map<String, ExerciseAnnotation> getFieldToAnnotation() {
     return fieldToAnnotation;
