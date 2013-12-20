@@ -43,7 +43,6 @@ public class UserListExerciseJoinDAO extends DAO {
       " (" +
       "uniqueid IDENTITY, " +
       "userlistid LONG, " +
-      //"exerciseid VARCHAR, " +
       "exerciseid LONG, " +
       "FOREIGN KEY(userlistid) REFERENCES " +
       UserListDAO.USER_EXERCISE_LIST +
@@ -117,7 +116,7 @@ public class UserListExerciseJoinDAO extends DAO {
    * @param exclude skip ones in this set of ids
    * @return
    */
-  public List<String> getAllFor(long userListID, Set<String> exclude) {
+/*  public List<String> getAllFor(long userListID, Set<String> exclude) {
     try {
       String sql = "SELECT * from " + USER_EXERCISE_LIST_EXERCISE +" where userlistid=" + userListID ;
       return getUserExercises(sql,exclude);
@@ -125,7 +124,7 @@ public class UserListExerciseJoinDAO extends DAO {
       logger.error("got " + ee, ee);
     }
     return Collections.emptyList();
-  }
+  }*/
 
   private List<String> getUserExercises(String sql, Set<String> exclude) throws SQLException {
     Connection connection = database.getConnection();
