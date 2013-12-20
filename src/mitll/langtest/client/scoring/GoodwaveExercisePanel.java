@@ -60,6 +60,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   private AudioPanel contentAudio, answerAudio;
   private NavigationHelper navigationHelper;
   private final float screenPortion;
+  String instance;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -78,6 +79,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     this.controller = controller;
     this.service = controller.getService();
     this.screenPortion = screenPortion;
+    this.instance = instance;
 
     addStyleName("inlineBlockStyle");
     getElement().setId("GoodwaveExercisePanel");
@@ -201,6 +203,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
     //Panel rowForContent = new FlowPanel();
     Panel rowForContent = new HorizontalPanel();
+    rowForContent.setWidth("100%");
     //rowForContent.addStyleName("trueInlineStyle");
     rowForContent.add(questionContent);
     if (addToList != null) {
@@ -465,7 +468,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       //System.out.println("getBeforePlayWidget : for " + audioPath + "Attributes were " + audioAttributes);
       RadioButton regular = null;
       for (final AudioAttribute audioAttribute : audioAttributes) {
-        RadioButton fast = new RadioButton(GROUP + "_" + audioPath, audioAttribute.getDisplay());
+        RadioButton fast = new RadioButton(GROUP + "_" + audioPath + "_"+instance, audioAttribute.getDisplay());
         if (audioAttribute.isRegularSpeed()) {
           regular = fast;
         }
