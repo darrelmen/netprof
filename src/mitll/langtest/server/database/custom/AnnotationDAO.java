@@ -3,15 +3,12 @@ package mitll.langtest.server.database.custom;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.UserDAO;
+import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import org.apache.log4j.Logger;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -24,41 +21,39 @@ import java.util.List;
  * Time: 2:23 PM
  * To change this template use File | Settings | File Templates.
  */
-public class UserListDAO extends DAO {
-  private static Logger logger = Logger.getLogger(UserListDAO.class);
+public class AnnotationDAO extends DAO {
+  private static Logger logger = Logger.getLogger(AnnotationDAO.class);
 
-  public static final String USER_EXERCISE_LIST = "userexerciselist";
+  public static final String ANNOTATION = "annotation";
   private UserDAO userDAO;
   private UserExerciseDAO userExerciseDAO;
   private UserListVisitorJoinDAO userListVisitorJoinDAO;
-  public UserListDAO(Database database, UserDAO userDAO) {
+  public AnnotationDAO(Database database) {
     super(database);
     try {
-      createUserListTable(database);
+      createTable(database);
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
-    this.userDAO = userDAO;
-    userListVisitorJoinDAO = new UserListVisitorJoinDAO(database,userDAO);
-    try {
-      userListVisitorJoinDAO.createUserListTable(database);
-    } catch (SQLException e) {
-      logger.error("got " +e,e);
-    }
+
   }
 
-  public void addVisitor(long listid, long userid) { userListVisitorJoinDAO.add(listid,userid);}
-
-  void createUserListTable(Database database) throws SQLException {
+  /**
+   *   String exerciseID; String field; String status; String comment;
+   String userID;
+   * @param database
+   * @throws SQLException
+   */
+  void createTable(Database database) throws SQLException {
     Connection connection = database.getConnection();
     PreparedStatement statement;
 
     statement = connection.prepareStatement("CREATE TABLE if not exists " +
-      USER_EXERCISE_LIST +
+        ANNOTATION +
       " (" +
       "uniqueid IDENTITY, " +
       "creatorid LONG, " +
-      "name VARCHAR, description VARCHAR, classmarker VARCHAR, modified TIMESTAMP, isprivate BOOLEAN, " +
+      "exerciseid VARCHAR, field VARCHAR, status VARCHAR, modified TIMESTAMP, comment VARCHAR, " +
       "FOREIGN KEY(creatorid) REFERENCES " +
       "USERS" +
       "(ID)" +
@@ -74,31 +69,30 @@ public class UserListDAO extends DAO {
    * <p/>
    * Uses return generated keys to get the user id
    *
-   * @see UserListManager#reallyCreateNewItem(long, mitll.langtest.shared.custom.UserExercise)
+   * @see mitll.langtest.server.database.custom.UserListManager#reallyCreateNewItem(long, mitll.langtest.shared.custom.UserExercise)
    */
-  public void add(UserList userList) {
+  public void add(UserAnnotation annotation) {
     long id = 0;
 
     try {
       // there are much better ways of doing this...
-      logger.info("add :userList " + userList);
+      logger.info("add :annotation " + annotation);
 
       Connection connection = database.getConnection();
       PreparedStatement statement;
 
       statement = connection.prepareStatement(
-        "INSERT INTO " + USER_EXERCISE_LIST +
-          "(creatorid,name,description,classmarker,modified,isprivate) " +
+        "INSERT INTO " + ANNOTATION +
+          "(creatorid,exerciseid,field,status,modified,comment) " +
           "VALUES(?,?,?,?,?,?);");
       int i = 1;
-      //     statement.setLong(i++, userList.getUserID());
-      statement.setLong(i++, userList.getCreator().id);
-      statement.setString(i++, userList.getName());
-      statement.setString(i++, userList.getDescription());
-      statement.setString(i++, userList.getClassMarker());
+      //     statement.setLong(i++, annotation.getUserID());
+      statement.setLong(i++, annotation.getCreatorID());
+      statement.setString(i++, annotation.getExerciseID());
+      statement.setString(i++, annotation.getField());
+      statement.setString(i++, annotation.getStatus());
       statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));
-
-      statement.setBoolean(i++, userList.isPrivate());
+      statement.setString(i++, annotation.getComment());
 
       int j = statement.executeUpdate();
 
@@ -113,22 +107,22 @@ public class UserListDAO extends DAO {
       }
       logger.debug("unique id = " + id);
 
-      userList.setUniqueID(id);
+      annotation.setUniqueID(id);
 
       statement.close();
       database.closeConnection(connection);
 
-    //  logger.debug("now " + getCount(USER_EXERCISE_LIST) + " and user exercise is " + userList);
+    //  logger.debug("now " + getCount(ANNOTATION) + " and user exercise is " + annotation);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
   }
 
-  public void updateModified(long uniqueID) {
+/*  public void updateModified(long uniqueID) {
     try {
       Connection connection = database.getConnection();
 
-      String sql = "UPDATE " + USER_EXERCISE_LIST +
+      String sql = "UPDATE " + ANNOTATION +
         " " +
         "SET " +
         "modified=? "+
@@ -149,9 +143,9 @@ public class UserListDAO extends DAO {
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
-  }
+  }*/
 
-  public int getCount() { return getCount(USER_EXERCISE_LIST); }
+  public int getCount() { return getCount(ANNOTATION); }
 
 
   /**
@@ -160,9 +154,9 @@ public class UserListDAO extends DAO {
    * @return
    * @param userid
    */
-  public List<UserList> getAll(long userid) {
+  public List<UserAnnotation> getAll(long userid) {
     try {
-      String sql = "SELECT * from " + USER_EXERCISE_LIST + " order by modified desc";
+      String sql = "SELECT * from " + ANNOTATION + " order by modified desc";
       return getUserLists(sql,userid);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
@@ -170,9 +164,9 @@ public class UserListDAO extends DAO {
     return Collections.emptyList();
   }
 
-  public List<UserList> getAllPublic() {
+  public List<UserAnnotation> getAllPublic() {
     try {
-      String sql = "SELECT * from " + USER_EXERCISE_LIST + " where isprivate=false order by modified";
+      String sql = "SELECT * from " + ANNOTATION + " order by modified";
       return getUserLists(sql,-1);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
@@ -182,7 +176,7 @@ public class UserListDAO extends DAO {
 
 /*  public List<UserList> getAllOwnedBy(long id) {
     try {
-      String sql = "SELECT * from " + USER_EXERCISE_LIST + " where creatorid=" + id+
+      String sql = "SELECT * from " + ANNOTATION + " where creatorid=" + id+
         " order by modified";
       return getUserLists(sql);
     } catch (Exception ee) {
@@ -191,12 +185,12 @@ public class UserListDAO extends DAO {
     return Collections.emptyList();
   }*/
 
-  public UserList getWhere(long unique) {
-    String sql = "SELECT * from " + USER_EXERCISE_LIST + " where uniqueid=" + unique + " order by modified";
+  public UserAnnotation getWhere(long unique) {
+    String sql = "SELECT * from " + ANNOTATION + " where uniqueid=" + unique + " order by modified";
     try {
-      List<UserList> lists = getUserLists(sql,-1);
+      List<UserAnnotation> lists = getUserAnnotations(sql,-1);
       if (lists.isEmpty()) {
-        logger.error("huh? no custom exercise with id " + unique);
+        logger.error("huh? no annotation with id " + unique);
         return null;
       } else {
         return lists.iterator().next();
@@ -207,27 +201,44 @@ public class UserListDAO extends DAO {
     return null;
   }
 
+  public List<UserAnnotation> getByExerciseID(String exerciseID) {
+    String sql = "SELECT * from " + ANNOTATION + " where exerciseid=" + exerciseID + " order by field,modified desc";
+    try {
+      List<UserAnnotation> lists = getUserAnnotations(sql,-1);
+      if (lists.isEmpty()) {
+        //logger.error("huh? no annotation with id " + unique);
+        return Collections.emptyList();
+      } else {
+        return lists;
+      }
+    } catch (SQLException e) {
+      logger.error("got " + e, e);
+    }
+    return null;
+  }
+
+
   /**
    * TODO don't want to always get all the exercises!
-   * @see UserListManager#getUserListByID(long)
+   * @see mitll.langtest.server.database.custom.UserAnnotationManager#getUserAnnotationByID(long)
    * @param unique
    * @return
    */
-  public UserList getWithExercises(long unique) {
-    UserList where = getWhere(unique);
+  public UserAnnotation getWithExercises(long unique) {
+    UserAnnotation where = getWhere(unique);
     populateList(where);
     return where;
   }
 
-  private List<UserList> getUserLists(String sql,long userid) throws SQLException {
+  private List<UserAnnotation> getUserAnnotations(String sql,long userid) throws SQLException {
     Connection connection = database.getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
     ResultSet rs = statement.executeQuery();
-    List<UserList> lists = new ArrayList<UserList>();
+    List<UserAnnotation> lists = new ArrayList<UserAnnotation>();
 
     while (rs.next()) {
       long uniqueid = rs.getLong("uniqueid");
-      lists.add(new UserList(uniqueid, //id
+      lists.add(new UserAnnotation(uniqueid, //id
         userDAO.getUserWhere(rs.getLong("creatorid")), // age
         rs.getString("name"), // exp
         rs.getString("description"), // exp
@@ -241,7 +252,7 @@ public class UserListDAO extends DAO {
     statement.close();
     database.closeConnection(connection);
 
-    for (UserList ul : lists) {
+    for (UserAnnotation ul : lists) {
       if (userid == -1 || ul.getCreator().id == userid || !ul.isFavorite()) {   // skip other's favorites
         populateList(ul);
       }
@@ -256,11 +267,11 @@ public class UserListDAO extends DAO {
    * TODO : This is going to get slow?
    * @param where
    */
-  private void populateList(UserList where) {
+  private void populateList(UserAnnotation where) {
     Collection<UserExercise> onList = userExerciseDAO.getOnList(where.getUniqueID());
     logger.debug("populateList : got " + onList.size() + " for list "+where.getUniqueID());
     where.setExercises(onList);
-    where.setVisitors(userListVisitorJoinDAO.getWhere(where.getUniqueID()));
+    where.setVisitors(UserAnnotationVisitorJoinDAO.getWhere(where.getUniqueID()));
 
     logger.debug("\tlist now "+where);
   }
