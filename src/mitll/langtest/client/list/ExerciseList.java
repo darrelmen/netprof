@@ -117,11 +117,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     this.innerContainer.setWidth("100%");
     this.innerContainer.setHeight("100%");
     currentExerciseVPanel.add(innerContainer);
-    Scheduler.get().scheduleDeferred(new Command() {
-      public void execute() {
-        currentExerciseVPanel.addStyleName("userNPFContent");
-      }
-    });
+    currentExerciseVPanel.addStyleName("shadowBorder");
   }
 
   /**
@@ -144,7 +140,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   public void getExercises(long userID, boolean getNext) {
   //  System.out.println("ExerciseList.getExercises for user " +userID);
-
     lastReqID++;
 
     if (showInOrder) {
