@@ -569,7 +569,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
 
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
-                              System.out.println("deferred set scroll panel width");
+        System.out.println("deferred set scroll panel width");
         setScrollPanelWidth();
       }
     });
@@ -689,7 +689,15 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   @Override
   public void onResize() {
     super.onResize();
-    setScrollPanelWidth();
+
+   // setScrollPanelWidth();
+
+    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      public void execute() {
+        System.out.println("deferred set scroll panel width");
+        setScrollPanelWidth();
+      }
+    });
   }
 
   protected void setScrollPanelWidth() {
@@ -697,7 +705,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
       int leftSideWidth = labelColumn.getOffsetWidth() + clearColumnContainer.getOffsetWidth();
       if (leftSideWidth == 0) leftSideWidth = 130;
       int width = Window.getClientWidth() - leftSideWidth - UNACCOUNTED_WIDTH;
-      System.out.println("FlexSectionExeciseList.setScrollPanelWidth : scrollPanel width is " + width +"\n\tclient " +Window.getClientWidth() +
+      System.out.println("FlexSectionExeciseList.setScrollPanelWidth : scrollPanel width is " + width +" client " +Window.getClientWidth() +
         " label col " +labelColumn.getOffsetWidth() + " clear " +clearColumnContainer.getOffsetWidth() + " unacct "+UNACCOUNTED_WIDTH);
       scrollPanel.setWidth(Math.max(300, width) + "px");
     }
