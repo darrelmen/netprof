@@ -27,10 +27,6 @@ import mitll.langtest.shared.ExerciseFormatter;
 
 import java.util.*;
 
-<<<<<<<HEAD
-    =======
-    >>>>>>>5ec41e1f6ce77e8d03825086b9a1931222381bfc
-
 /**
  * Created with IntelliJ IDEA.
  * User: GO22670
@@ -191,11 +187,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     final CheckBox checkBox = makeCheckBox(field, commentRow, commentEntry, alreadyMarkedCorrect);
 
     Panel qcCol = new FlowPanel();
-    Button child = new Button();
-    child.setIcon(IconType.COMMENT);
-    child.setSize(ButtonSize.MINI);
-    qcCol.add(child);
-   qcCol.addStyleName("qcRightBorder");
+    qcCol.addStyleName("qcRightBorder");
 
     qcCol.add(checkBox);
     return qcCol;
