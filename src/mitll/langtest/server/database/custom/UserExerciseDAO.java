@@ -3,7 +3,6 @@ package mitll.langtest.server.database.custom;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.ExerciseDAO;
-import mitll.langtest.server.database.custom.UserListExerciseJoinDAO;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.custom.UserExercise;
 import org.apache.log4j.Logger;
@@ -12,7 +11,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class UserExerciseDAO extends DAO {
   private static Logger logger = Logger.getLogger(UserExerciseDAO.class);
