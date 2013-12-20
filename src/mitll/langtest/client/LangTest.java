@@ -36,6 +36,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
+import mitll.langtest.client.custom.CommentNPFExercise;
 import mitll.langtest.client.custom.NPFExercise;
 import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.custom.QCNPFExercise;
@@ -107,7 +108,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private HTML releaseStatus;
   private StartupInfo startupInfo;
 
-  Navigation navigation;
+  private Navigation navigation;
 
   /**
    * Make an exception handler that displays the exception.
@@ -211,6 +212,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * Initially the flash record player is put in the center of the DockLayout
    */
   private void onModuleLoad2() {
+    setupSoundManager();
+
     userManager = new UserManager(this, service, props);
     if (props.isFlashCard()) {
       loadFlashcard();
@@ -230,28 +233,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       return;
     }
 
-    if (props.isAdminView() || props.isGrading()) {
-      final LangTest outer = this;
-      GWT.runAsync(new RunAsyncCallback() {
-        public void onFailure(Throwable caught) {
-          Window.alert("Code download failed");
-        }
-
-        public void onSuccess() {
-          resultManager = new ResultManager(service, outer, props.getNameForAnswer(), props);
-        }
-      });
-
-      GWT.runAsync(new RunAsyncCallback() {
-        public void onFailure(Throwable caught) {
-          Window.alert("Code download failed");
-        }
-
-        public void onSuccess() {
-          monitoringManager = new MonitoringManager(service, props);
-        }
-      });
-    }
+    checkAdmin();
 
     boolean usualLayout = !showOnlyOneExercise();
     Container verticalContainer = new FluidContainer();
@@ -277,8 +259,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     // third row ---------------
 
- // Panel thirdRow = new HorizontalPanel();
-    Panel thirdRow = new FlowPanel();
+  Panel thirdRow = new HorizontalPanel();
+   // Panel thirdRow = new FlowPanel();
     Panel leftColumn = new SimplePanel();
     thirdRow.add(leftColumn);
     leftColumn.addStyleName("floatLeft");
@@ -330,10 +312,34 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     setPageTitle();
     browserCheck.checkForCompatibleBrowser();
-    setupSoundManager();
 
     modeSelect();
     loadVisualizationPackages();  // Note : this was formerly done in LangTest.html, since it seemed to be intermittently not loaded properly
+  }
+
+  private void checkAdmin() {
+    if (props.isAdminView() || props.isGrading()) {
+      final LangTest outer = this;
+      GWT.runAsync(new RunAsyncCallback() {
+        public void onFailure(Throwable caught) {
+          Window.alert("Code download failed");
+        }
+
+        public void onSuccess() {
+          resultManager = new ResultManager(service, outer, props.getNameForAnswer(), props);
+        }
+      });
+
+      GWT.runAsync(new RunAsyncCallback() {
+        public void onFailure(Throwable caught) {
+          Window.alert("Code download failed");
+        }
+
+        public void onSuccess() {
+          monitoringManager = new MonitoringManager(service, props);
+        }
+      });
+    }
   }
 
   private void reallyMakeExerciseList(Panel belowFirstRow, Panel leftColumn, Panel bothSecondAndThird) {
@@ -621,6 +627,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void setupSoundManager() {
+    System.out.println("setupSoundManager " );
     soundManager = new SoundManagerStatic();
     soundManager.exportStaticMethods();
     soundManager.initialize();
@@ -740,14 +747,18 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     final LangTest outer = this;
     if (props.isGoodwaveMode() && !props.isGrading()) {
       if (props.isClassroomMode()) {
-        exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer, exerciseList, 0.7f) {
+        exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer, exerciseList,1.0f) {
           @Override
           public Panel getExercisePanel(Exercise e) {
             if (isReviewMode()) {
-              return new QCNPFExercise(e, controller, exerciseList, 0.65f, false, "classroom");
+              System.out.println("\nmaking new QCNPFExercise for " +e + " instance " + "classroom");
+
+              return new QCNPFExercise(e, controller, exerciseList, 1.0f, false, "classroom");
             }
             else {
-              return new NPFExercise(e, controller, exerciseList, 0.65f, false, "classroom");
+              System.out.println("\nmaking new CommentNPFExercise for " +e + " instance " + "classroom");
+
+              return new CommentNPFExercise(e, controller, exerciseList, 1.0f, false, "classroom");
             }
           }
         }, userManager, 1);
@@ -918,20 +929,17 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     exerciseList.clear();
     lastUser = -2;
     modeSelect();
-
-    //resetClassroomState();
   }
 
   private void resetClassroomState() {
-    if (getProps().isClassroomMode()/* && navigation == null*/) {
-      System.out.println("\n\n\nreset classroom state : " + isReviewMode());
+    if (getProps().isClassroomMode()) {
+     // System.out.println("\n\n\nreset classroom state : " + isReviewMode());
       //belowFirstRow.clear();
       if (navigation != null) {
         belowFirstRow.remove(navigation.getContainer());
       }
       navigation = new Navigation(service, userManager, this, exerciseList);
       belowFirstRow.add(navigation.getNav(bothSecondAndThird, this));
-      //belowFirstRow.add(flashRecordPanel);
       showInitialState();
     }
   }
@@ -992,13 +1000,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void showInitialState() {
-    System.out.println("\n\n\n\tshowInitialState : " + getUser());
-
     if (navigation != null) {
-      //if (!everShownInitialState) {
-        navigation.showInitialState();
-      //  everShownInitialState = true;
-     // }
+      System.out.println("showInitialState : " + getUser());
+      navigation.showInitialState();
     }
   }
 
