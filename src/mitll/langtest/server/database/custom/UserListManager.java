@@ -27,8 +27,7 @@ import java.util.Set;
  */
 public class UserListManager {
   private static Logger logger = Logger.getLogger(UserListManager.class);
-
-  public static final String MY_LIST = "Favorites";
+  private static final String MY_FAVORITES = "My Favorites";
 
   private final UserDAO userDAO;
   private final ReviewedDAO reviewedDAO;
@@ -80,7 +79,7 @@ public class UserListManager {
     } else {
       UserList e = new UserList(i++, userWhere, name, description, dliClass, System.currentTimeMillis(), isPrivate);
       userListDAO.add(e);
-      logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists for " + userid);
+      logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists total, for " + userid);
       return e;
     }
   }
@@ -117,9 +116,7 @@ public class UserListManager {
     }
 
     if (listsForUser.isEmpty()) {
-      UserList userList = createUserList(userid, MY_LIST, "My Favorites", "", true);
-      if (userList == null) return Collections.emptyList();
-      else return Collections.singletonList(userList);
+      logger.error("getListsForUser - list is empty?? " + listsForUser.size() + "(" +listsForUser+ ") for " + userid);
     }
     else {
       listsForUser.remove(favorite);
@@ -131,8 +128,13 @@ public class UserListManager {
     return listsForUser;
   }
 
+  public UserList createFavorites(long userid) {
+    logger.debug("createFavorites for " + userid);
+    return createUserList(userid, UserList.MY_LIST, MY_FAVORITES, "", true);
+  }
+
   private boolean isFavorite(UserList userList) {
-    return userList.getName().equals(MY_LIST);
+    return userList.getName().equals(UserList.MY_LIST);
   }
 
   /**
@@ -147,7 +149,7 @@ public class UserListManager {
 
     List<UserExercise> onList = getReviewedUserExercises(idToUser, incorrect);
 
-    logger.debug("getReviewList ids #=" + incorrect.size() + " yielded " + onList.size() + " : " + onList);
+    logger.debug("getReviewList ids #=" + incorrect.size() + " yielded " + onList.size());
 
     UserList userList = new UserList(i++, new User(-1,89,0,0,"","",false),
       "Review", "Items to review", "Review", System.currentTimeMillis(), false);
@@ -241,12 +243,8 @@ public class UserListManager {
     }
   }
 
-  // TODO : replace with DAO for this
- // private List<UserAnnotation> annotations = new ArrayList<UserAnnotation>();
-
   public void addAnnotation(String exerciseID, String field, String status, String comment, long userID) {
-    logger.info("write to database! " +exerciseID + " " + field + " " + status + " " + comment);
-  //  annotations.add(new UserAnnotation(-1,exerciseID, field, status, comment, userID,System.currentTimeMillis()));
+    logger.info("addAnnotation write to database! " +exerciseID + " " + field + " " + status + " " + comment);
     annotationDAO.add(new UserAnnotation(-1,exerciseID, field, status, comment, userID,System.currentTimeMillis()));
 
     if (status.equalsIgnoreCase("incorrect")) {
@@ -266,13 +264,12 @@ public class UserListManager {
       logger.debug("addAnnotations : found " + latestByExerciseID + " for " + exercise.getID());
       for (Map.Entry<String, ExerciseAnnotation> pair : latestByExerciseID.entrySet()) {
         exercise.addAnnotation(pair.getKey(), pair.getValue().status, pair.getValue().comment);
-
       }
     }
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#markReviewed(String, boolean)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#markReviewed
    * @param id
    * @param creatorID
    */
