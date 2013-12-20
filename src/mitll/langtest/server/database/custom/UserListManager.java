@@ -3,6 +3,7 @@ package mitll.langtest.server.database.custom;
 import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.shared.AudioExercise;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
@@ -36,11 +37,13 @@ public class UserListManager {
   private int userExerciseCount = 0;
   private UserListDAO userListDAO;
   private UserListExerciseJoinDAO userListExerciseJoinDAO;
+  private AnnotationDAO annotationDAO;
 
-  public UserListManager(UserDAO userDAO, UserListDAO userListDAO,UserListExerciseJoinDAO userListExerciseJoinDAO ) {
+  public UserListManager(UserDAO userDAO, UserListDAO userListDAO,UserListExerciseJoinDAO userListExerciseJoinDAO,AnnotationDAO annotationDAO ) {
     this.userDAO = userDAO;
     this.userListDAO = userListDAO;
     this.userListExerciseJoinDAO = userListExerciseJoinDAO;
+    this.annotationDAO = annotationDAO;
   }
 
   /**
@@ -164,7 +167,7 @@ public class UserListManager {
   }
 
   /**
-   * @see mitll.langtest.client.custom.NPFExercise#populateListChoices(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController, com.github.gwtbootstrap.client.ui.SplitDropdownButton)
+   * @see mitll.langtest.client.custom.NPFExercise#populateListChoices
    * @see mitll.langtest.server.LangTestDatabaseImpl#addItemToUserList(long, mitll.langtest.shared.custom.UserExercise)
    * @param userListID
    * @param userExercise
@@ -218,11 +221,12 @@ public class UserListManager {
   }
 
   // TODO : replace with DAO for this
-  private List<UserAnnotation> annotations = new ArrayList<UserAnnotation>();
+ // private List<UserAnnotation> annotations = new ArrayList<UserAnnotation>();
 
   public void addAnnotation(String exerciseID, String field, String status, String comment, long userID) {
     logger.info("write to database! " +exerciseID + " " + field + " " + status + " " + comment);
-    annotations.add(new UserAnnotation(exerciseID, field, status, comment, userID));
+  //  annotations.add(new UserAnnotation(-1,exerciseID, field, status, comment, userID,System.currentTimeMillis()));
+    annotationDAO.add(new UserAnnotation(-1,exerciseID, field, status, comment, userID,System.currentTimeMillis()));
   }
 
   /**
@@ -232,10 +236,12 @@ public class UserListManager {
    */
   public <T extends AudioExercise> void addAnnotations(T exercise) {
     if (exercise != null) {
-      for (UserAnnotation annotation : annotations) {
-        if (annotation != null && annotation.getExerciseID() != null && annotation.getExerciseID().equals(exercise.getID())) {
-          exercise.addAnnotation(annotation.getField(), annotation.getStatus(), annotation.getComment());
-        }
+      Map<String, ExerciseAnnotation> latestByExerciseID = annotationDAO.getLatestByExerciseID(exercise.getID());
+
+      logger.debug("addAnnotations : found " + latestByExerciseID + " for " + exercise.getID());
+      for (Map.Entry<String, ExerciseAnnotation> pair : latestByExerciseID.entrySet()) {
+        exercise.addAnnotation(pair.getKey(), pair.getValue().status, pair.getValue().comment);
+
       }
     }
   }
