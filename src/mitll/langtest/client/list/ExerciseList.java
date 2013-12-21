@@ -80,7 +80,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   private final ExerciseController controller;
   protected String instance;
 
-
   /**
    * @see  mitll.langtest.client.LangTest#makeExerciseList
    * @param currentExerciseVPanel
