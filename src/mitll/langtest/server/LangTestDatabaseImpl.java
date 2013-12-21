@@ -1044,6 +1044,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   public UserExercise createNewItem(long userid, String english, String foreign) {
+    logger.debug("create new item - " +foreign);
+    if (!audioFileHelper.checkLTS(foreign)) return null;
     return db.getUserListManager().createNewItem(userid, english, foreign);
   }
 
