@@ -1,6 +1,8 @@
 package mitll.langtest.server.database;
 
+import corpus.LTS;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseFormatter;
 import org.apache.log4j.Logger;
@@ -493,6 +495,24 @@ public class ExcelImport implements ExerciseDAO {
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
     }
   }*/
+
+  public boolean checkLTS(LTS lts, String foreignLanguagePhrase) {
+    List<String> tokens = new SmallVocabDecoder().getTokens(foreignLanguagePhrase);
+    try {
+
+      for (String token : tokens) {
+        String[][] process = lts.process(token);
+        if (process == null) {
+
+          return false;
+        }
+      }
+    } catch (Exception e) {
+      logger.error("lts failed on " + foreignLanguagePhrase);
+      return false;
+    }
+    return true;
+  }
 
   /**
    * @param id
