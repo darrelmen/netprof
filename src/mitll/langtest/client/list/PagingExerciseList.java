@@ -72,15 +72,14 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
    * @param completed
    */
   public void setCompleted(Set<String> completed) {
-    System.out.println("\n\n\nsetCompleted : now " + getCompleted().size());
+    //System.out.println("PagingExerciseList.setCompleted : now " + getCompleted().size());
 
     pagingContainer.setCompleted(completed);
   }
 
   public void addCompleted(String id) {
-
     pagingContainer.addCompleted(id);
-    System.out.println("\n\n\naddCompleted : completed " + id + " now " + getCompleted().size());
+    System.out.println("PagingExerciseList.addCompleted : completed " + id + " now " + getCompleted().size());
   }
 
   private Set<String> getCompleted() { return pagingContainer.getCompleted(); }
