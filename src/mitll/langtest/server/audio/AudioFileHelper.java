@@ -43,6 +43,8 @@ public class AudioFileHelper {
     this.langTestDatabase = langTestDatabase;
   }
 
+  public boolean checkLTS(String foreignLanguagePhrase) { return asrScoring.checkLTS(foreignLanguagePhrase); }
+
   /**
    * Record an answer entry in the database.<br></br>
    * Write the posted data to a wav and an mp3 file (since all the browser audio works with mp3).
