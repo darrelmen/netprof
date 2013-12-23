@@ -49,12 +49,12 @@ public class DataCollectorDialog extends UserDialog {
     final FormField user = addControlFormField(dialogBox, "User ID");
     final FormField password = addControlFormField(dialogBox, "Password", true, 0);
 
-    final RadioButton regular = new RadioButton("AudioType", "Regular Audio Recording");
-    final RadioButton fastThenSlow = new RadioButton("AudioType", "Record Regular Speed then Slow");
+/*    final RadioButton regular = new RadioButton("AudioType", "Regular Audio Recording");
+    final RadioButton fastThenSlow = new RadioButton("AudioType", "Record Regular Speed then Slow");*/
 
-    final ControlGroup recordingStyle = new ControlGroup();
+   // final ControlGroup recordingStyle = new ControlGroup();
 
-    regular.addClickHandler(new ClickHandler() {
+/*    regular.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         recordingStyle.setType(ControlGroupType.NONE);   // clear any error markings
@@ -65,16 +65,16 @@ public class DataCollectorDialog extends UserDialog {
       public void onClick(ClickEvent event) {
         recordingStyle.setType(ControlGroupType.NONE);
       }
-    });
+    });*/
 
-    if (props.isCollectAudio()) {
+/*    if (props.isCollectAudio()) {
       recordingStyle.add(new ControlLabel("<b>Audio Recording Style</b>"));
       Controls controls = new Controls();
       controls.add(regular);
       controls.add(fastThenSlow);
       recordingStyle.add(controls);
       dialogBox.add(recordingStyle);
-    }
+    }*/
 
     final RegistrationInfo registrationInfo = getRegistrationInfo();
     Panel register = registrationInfo.getRegister();
@@ -105,19 +105,18 @@ public class DataCollectorDialog extends UserDialog {
               if (exists) {
                 if (!checkPassword(password)) {
                   markError(password, "Please use password from the email.");
-                } else if (checkAudioSelection(regular, fastThenSlow)) {
+  /*              } else if (checkAudioSelection(regular, fastThenSlow)) {
                   markError(recordingStyle, regular, "Try again", "Please choose either regular or regular then slow audio recording.", Placement.BOTTOM);
-                } else {
+  */              } else {
                   dialogBox.hide();
-                  String audioType = fastThenSlow.getValue() ? Result.AUDIO_TYPE_FAST_AND_SLOW : Result.AUDIO_TYPE_REGULAR;
-                  storeAudioType(audioType);
-                  userManager.storeUser(result, audioType, userID, PropertyHandler.LOGIN_TYPE.DATA_COLLECTOR);
+                  storeAudioType(props.getAudioType());
+                  userManager.storeUser(result, props.getAudioType(), userID, PropertyHandler.LOGIN_TYPE.DATA_COLLECTOR);
                 }
               } else {
                 System.out.println(userID + " doesn't exist");
                 if (checkPassword(password)) {
-                  doRegistration(user, password, recordingStyle,
-                    regular, fastThenSlow, registrationInfo,
+                  doRegistration(user, password,
+                    registrationInfo,
                     dialogBox, login, accordionFinal);
                 } else {
                   markError(password, "Please use password from the email.");
@@ -158,16 +157,12 @@ public class DataCollectorDialog extends UserDialog {
    *
    * @param user
    * @param password
-   * @param regular
-   * @param fastThenSlow
    * @param dialogBox
    * @param login
    * @param accordion
    * @see #displayTeacherLogin
    */
-  private void doRegistration(FormField user, FormField password, ControlGroup audioGroup,
-                              RadioButton regular,
-                              RadioButton fastThenSlow,
+  private void doRegistration(FormField user, FormField password,
                               RegistrationInfo registrationInfo,
                               Modal dialogBox,
                               Button login, AccordionGroup accordion) {
@@ -188,10 +183,10 @@ public class DataCollectorDialog extends UserDialog {
       if (!valid) {
         markError(password, "Please use password from the email sent to you.");
         valid = false;
-      } else if (!props.isDataCollectAdminView() && checkAudioSelection(regular, fastThenSlow)) {
+      } /*else if (!props.isDataCollectAdminView() && checkAudioSelection(regular, fastThenSlow)) {
         markError(audioGroup, regular, "Try Again", "Please choose a style", Placement.BOTTOM);// either regular or regular then slow audio recording.");
         valid = false;
-      } else {
+      }*/ else {
         if (!props.isDataCollectAdminView() && nativeLangGroup.getText().isEmpty()) {
           accordion.show();
           markError(nativeLangGroup, "Language is empty");
@@ -222,7 +217,8 @@ public class DataCollectorDialog extends UserDialog {
         checkUserOrCreate(enteredAge, user,
           registrationInfo.getExperienceGroup().box, registrationInfo.getGenderGroup().box,
           nativeLangGroup.box, dialectGroup.box, dialogBox,
-          login, fastThenSlow.getValue());
+          login
+        );
       }
     }
     }
@@ -236,15 +232,13 @@ public class DataCollectorDialog extends UserDialog {
    * @param dialect
    * @param dialogBox
    * @param closeButton
-   * @param isFastAndSlow
    * @seex #displayTeacherLogin()
    */
   private void checkUserOrCreate(final int enteredAge, final FormField user, final ListBox experienceBox,
                                  final ListBox genderBox,
                                  final TextBox nativeLang, final TextBox dialect,
                                  final Modal dialogBox,
-                                 final Button closeButton,
-                                 final boolean isFastAndSlow) {
+                                 final Button closeButton) {
     service.userExists(user.getText(), new AsyncCallback<Integer>() {
       public void onFailure(Throwable caught) {
         Window.alert("Couldn't contact server.");
@@ -254,7 +248,7 @@ public class DataCollectorDialog extends UserDialog {
         System.out.println("user '" + user.getText() + "' exists " + result);
         if (result == -1) {
           addTeacher(enteredAge,
-            experienceBox, genderBox, nativeLang, dialect, user.box, dialogBox, closeButton, isFastAndSlow);
+            experienceBox, genderBox, nativeLang, dialect, user.box, dialogBox, closeButton);
         } else {
           markError(user, "User " + user.getText() + " already registered, click login.");
         }
@@ -272,15 +266,15 @@ public class DataCollectorDialog extends UserDialog {
    * @param user
    * @param dialogBox
    * @param closeButton
-   * @param isFastAndSlow
+   * @paramx isFastAndSlow
    * @see #checkUserOrCreate
    */
   private void addTeacher(int age, ListBox experienceBox, ListBox genderBox,
                           TextBox nativeLang,
                           TextBox dialect, final TextBox user,
                           final Modal dialogBox,
-                          final Button closeButton,
-                          final boolean isFastAndSlow) {
+                          final Button closeButton/*,
+                          final boolean isFastAndSlow*/) {
     int monthsOfExperience = experienceBox.getSelectedIndex() * 3;
     if (experienceBox.getSelectedIndex() == EXPERIENCE_CHOICES.size() - 1) {
       monthsOfExperience = NATIVE_MONTHS;
@@ -291,13 +285,15 @@ public class DataCollectorDialog extends UserDialog {
     String nativeLangValue = nativeLang.getText();
     String dialectValue = dialect.getText();
     addFullUser(dialogBox, closeButton, userManager,
-      userName, gender, nativeLangValue, dialectValue, age, monthsOfExperience, isFastAndSlow);
+      userName, gender, nativeLangValue, dialectValue, age, monthsOfExperience/*, isFastAndSlow*/);
   }
 
   protected void addFullUser(final Modal dialogBox, final Button closeButton,
                              final UserManager userManager,
                              final String userName, String gender, String nativeLangValue, String dialectValue, int age,
-                             int monthsOfExperience, final boolean isFastAndSlow) {
+                             int monthsOfExperience//,
+  //                           final boolean isFastAndSlow
+  ) {
     service.addUser(age,
       gender,
       monthsOfExperience,
@@ -314,9 +310,9 @@ public class DataCollectorDialog extends UserDialog {
         public void onSuccess(Long result) {
           System.out.println("addUser : server result is " + result);
           dialogBox.hide();
-          String audioType = isFastAndSlow ? Result.AUDIO_TYPE_FAST_AND_SLOW : Result.AUDIO_TYPE_REGULAR;
-          storeAudioType(audioType);
-          userManager.storeUser(result, audioType, userName, PropertyHandler.LOGIN_TYPE.DATA_COLLECTOR);
+          //String audioType = isFastAndSlow ? Result.AUDIO_TYPE_FAST_AND_SLOW : Result.AUDIO_TYPE_REGULAR;
+          storeAudioType(props.getAudioType());
+          userManager.storeUser(result, props.getAudioType(), userName, PropertyHandler.LOGIN_TYPE.DATA_COLLECTOR);
         }
       });
   }
