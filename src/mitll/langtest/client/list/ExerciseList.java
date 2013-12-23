@@ -659,7 +659,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     System.out.println("ExerciseList.loadNextExercise current is : " +current + " index " +i +
       " of " + currentExercises.size() +" last is " + (currentExercises.size() - 1)+" on last " + onLast);
 
-    if (onLast) {
+    if (onLast || isComplete()) {
       onLastItem();
     }
     else {
@@ -671,19 +671,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     return onLast;
   }
 
-  public boolean loadNextExercise(String id) {
-    System.out.println("ExerciseList.loadNextExercise id = " + id);
-    ExerciseShell exerciseByID = getExerciseByID(id);
-    return exerciseByID != null && loadNextExercise(exerciseByID);
-  }
-
-  private ExerciseShell getExerciseByID(String id) {
-    for (ExerciseShell e : currentExercises) {
-      if (e.getID().equals(id)) {
-        return e;
-      }
-    }
-    return null;
+  protected boolean isComplete() {
+    return false;
   }
 
   /**
@@ -692,7 +681,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   protected void onLastItem() {
     PropertyHandler props = controller.getProps();
     if (props.isCRTDataCollectMode() || props.isDataCollectMode()) {
-      feedback.showErrorMessage("Test Complete", "Test Complete! Thank you!");
+      String title = props.isDataCollectMode() ? "Collection Complete" : "Test complete";
+      feedback.showErrorMessage(title, "All Items Complete! Thank you!");
     }
     else {
       loadFirstExercise();
