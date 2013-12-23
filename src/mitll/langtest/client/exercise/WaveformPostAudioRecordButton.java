@@ -22,23 +22,26 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   private RecordAudioPanel recordAudioPanel;
   private PlayAudioPanel playAudioPanel;
   private Panel parentPanel;
+  private String audioType;
 
   /**
-   * @see RecordAudioPanel#makePlayAudioPanel(com.google.gwt.user.client.ui.Widget)
+   * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel(com.google.gwt.user.client.ui.Widget, String)
    * @param exercise
    * @param controller
    * @param widgets
    * @param recordAudioPanel
    * @param service
    * @param index
+   * @param audioType
    */
   public WaveformPostAudioRecordButton(Exercise exercise,
                                        ExerciseController controller,
                                        Panel widgets,
-                                       RecordAudioPanel recordAudioPanel, LangTestDatabaseAsync service, int index) {
+                                       RecordAudioPanel recordAudioPanel, LangTestDatabaseAsync service, int index, String audioType) {
     super(exercise, controller, service, index);
     this.recordAudioPanel = recordAudioPanel;
     this.parentPanel = widgets;
+    this.audioType = audioType;
     getElement().setId("WaveformPostAudioRecordButton");
   }
 
@@ -68,6 +71,11 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     super.stopRecording();
 
     playAudioPanel.setPlayEnabled(true);
+  }
+
+  @Override
+  protected String getAudioType() {
+    return audioType;
   }
 
   @Override
