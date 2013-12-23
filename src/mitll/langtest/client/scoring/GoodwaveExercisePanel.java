@@ -12,7 +12,6 @@ import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -343,19 +342,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     populateListChoices(exercise, controller, addToList);
   }
 
-  private static class ResizableCaptionPanel extends CaptionPanel implements ProvidesResize, RequiresResize {
-    public ResizableCaptionPanel(String name) {
-      super(name);
-    }
-
-    public void onResize() {
-      Widget contentWidget = getContentWidget();
-      if (contentWidget instanceof RequiresResize) {
-        ((RequiresResize) contentWidget).onResize();
-      }
-    }
-  }
-
   /**
    * Has a answerPanel mark to indicate when the saved audio has been successfully posted to the server.
    *
@@ -401,12 +387,14 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
      * to the extent that when we're recording, we can't play audio, and when we're playing
      * audio, we can't record. We also mark the widget as busy so we can't move on to a different exercise.
      *
+     *
      * @param toAdd
+     * @param audioType
      * @return
      * @see AudioPanel#getPlayButtons(com.google.gwt.user.client.ui.Widget)
      */
     @Override
-    protected PlayAudioPanel makePlayAudioPanel(Widget toAdd) {
+    protected PlayAudioPanel makePlayAudioPanel(Widget toAdd, String audioType) {
       recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
       recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
       postAudioRecordButton = new MyPostAudioRecordButton(controller);
@@ -530,7 +518,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
     /**
      * @return
-     * @see AudioPanel#addWidgets(String)
+     * @see AudioPanel#addWidgets(String, String)
      */
     @Override
     protected Widget getBeforePlayWidget() {
