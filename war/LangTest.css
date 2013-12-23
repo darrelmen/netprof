@@ -897,3 +897,6 @@ fieldset > legend {
     filter:alpha(opacity=0);
 }
 
+.questionContentPadding {
+    padding-right: 93px;
+}
