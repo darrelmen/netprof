@@ -20,51 +20,72 @@ public class RecordAudioPanel extends AudioPanel {
   private final int index;
 
   private PostAudioRecordButton postAudioRecordButton;
-  private PlayAudioPanel playAudioPanel;
   protected Panel exercisePanel;
 
-  public Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3.png"));
-  public Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4.png"));
+  public Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
+  public Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
   protected Exercise exercise;
 
   /**
+   *
    *
    * @param exercise
    * @param controller
    * @param service
    * @param index
    * @param showSpectrogram
+   * @param audioType
    * @see mitll.langtest.client.exercise.WaveformExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    */
   public RecordAudioPanel(Exercise exercise, ExerciseController controller, Panel widgets,
-                          LangTestDatabaseAsync service, int index, boolean showSpectrogram) {
+                          LangTestDatabaseAsync service, int index, boolean showSpectrogram, String audioType) {
     super(service,
       // use full screen width
       true, // use keyboard
-      controller, showSpectrogram,null);
+      controller, showSpectrogram, null);
     this.exercisePanel = widgets;
     this.index = index;
     this.exercise = exercise;
-    addWidgets(null);
+    addWidgets(null, audioType);
   }
 
   /**
    * @see mitll.langtest.client.scoring.AudioPanel#getPlayButtons(com.google.gwt.user.client.ui.Widget)
    * @param toAdd
+   * @param audioType
    * @return
    */
   @Override
-  protected PlayAudioPanel makePlayAudioPanel(Widget toAdd) {
-    WaveformPostAudioRecordButton myPostAudioRecordButton = makePostAudioRecordButton();
+  protected PlayAudioPanel makePlayAudioPanel(Widget toAdd, String audioType) {
+    WaveformPostAudioRecordButton myPostAudioRecordButton = makePostAudioRecordButton(audioType);
     postAudioRecordButton = myPostAudioRecordButton;
-    playAudioPanel = new MyPlayAudioPanel(recordImage1, recordImage2, exercisePanel);
+    PlayAudioPanel playAudioPanel = new MyPlayAudioPanel(recordImage1, recordImage2, exercisePanel);
     myPostAudioRecordButton.setPlayAudioPanel(playAudioPanel);
 
     return playAudioPanel;
   }
 
-  protected WaveformPostAudioRecordButton makePostAudioRecordButton() {
-    return new WaveformPostAudioRecordButton(exercise, controller, exercisePanel, this, service, index);
+  protected WaveformPostAudioRecordButton makePostAudioRecordButton(String audioType) {
+    return new WaveformPostAudioRecordButton(exercise, controller, exercisePanel, this, service, index, audioType) {
+      @Override
+      public void startRecording() {
+        super.startRecording();
+        recordImage1.setVisible(true);
+      }
+
+      @Override
+      public void flip(boolean first) {
+        recordImage1.setVisible(first);
+        recordImage2.setVisible(!first);
+      }
+
+      @Override
+      public void stopRecording() {
+        super.stopRecording();
+        recordImage1.setVisible(false);
+        recordImage2.setVisible(false);
+      }
+    };
   }
 
   @Override
