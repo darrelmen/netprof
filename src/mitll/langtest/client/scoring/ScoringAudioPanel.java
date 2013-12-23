@@ -53,7 +53,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   public ScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
                            int numRepeats, boolean useKeyboard, ExerciseController controller,
                            ScoreListener gaugePanel) {
-    super(path, service, useKeyboard, controller, gaugePanel);
+    super(path, service, useKeyboard, controller, gaugePanel, controller.getAudioType());
     this.refSentence = refSentence;
     showOnlyOneExercise = controller.showOnlyOneExercise();
     addClickHandlers(numRepeats);
@@ -67,7 +67,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   }
 
   /**
-   * @see GoodwaveExercisePanel#getAnswerWidget(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @see GoodwaveExercisePanel#getAnswerWidget
    * @param l
    */
   public void addScoreListener(ScoreListener l) { this.scoreListener = l;}
