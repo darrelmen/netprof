@@ -359,7 +359,7 @@ public class HistoryExerciseList extends PagingExerciseList {
    */
   protected void loadExercises(final Map<String, Collection<String>> typeToSection, final String item) {
     System.out.println("HistoryExerciseList.loadExercises : " + typeToSection + " and item '" + item + "'");
-    if (allowPlusInURL) {
+    if (showCompleted) {
       service.getCompletedExercises(controller.getUser(),new AsyncCallback<Set<String>>() {
         @Override
         public void onFailure(Throwable caught) {}
