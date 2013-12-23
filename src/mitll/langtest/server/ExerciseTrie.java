@@ -38,10 +38,15 @@ public class ExerciseTrie extends Trie<Exercise> {
 
     for (Exercise e : exercisesForState) {
       if (e.getEnglishSentence() != null) {
-        addEntryToTrie(new ExerciseWrapper(e, true));
+        ExerciseWrapper textEntityDescription = new ExerciseWrapper(e, true);
+  //      logger.debug("Adding " + textEntityDescription);
+        addEntryToTrie(textEntityDescription);
       }
       if (includeForeign) {
-        addEntryToTrie(new ExerciseWrapper(e, false));
+        ExerciseWrapper textEntityDescription = new ExerciseWrapper(e, false);
+//        logger.debug("Adding " + textEntityDescription);
+
+        addEntryToTrie(textEntityDescription);
       }
     }
     endMakingNodes();
@@ -97,6 +102,8 @@ public class ExerciseTrie extends Trie<Exercise> {
 
     @Override
     public String getNormalizedValue() { return value; }
+
+    public String toString() { return "e " +e.getID() + " : " + value; }
   }
 
   private long logMemory() {
