@@ -46,12 +46,12 @@ public class PagingContainer<T extends ExerciseShell> {
   protected ExerciseController controller;
   private int verticalUnaccountedFor = 100;
   private Set<String> completed = new HashSet<String>();
-  private boolean isCRTDataMode;
+  private boolean showCompleted;
 
-  public PagingContainer(ExerciseController controller, int verticalUnaccountedFor) {
+  public PagingContainer(ExerciseController controller, int verticalUnaccountedFor, boolean showCompleted) {
     this.controller = controller;
     this.verticalUnaccountedFor = verticalUnaccountedFor;
-    this.isCRTDataMode = controller.getProps().isCRTDataCollectMode();
+    this.showCompleted = showCompleted;
   }
 
   public interface TableResources extends CellTable.Resources {
@@ -151,7 +151,7 @@ public class PagingContainer<T extends ExerciseShell> {
   }
 
   private void addColumnsToTable(boolean consumeClicks) {
-    if (isCRTDataMode) {
+    if (showCompleted) {
       Column<T, SafeHtml> id2 = getExerciseIdColumn2(consumeClicks);
       table.addColumn(id2);
     } else {
@@ -245,7 +245,8 @@ public class PagingContainer<T extends ExerciseShell> {
         if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
         boolean complete = completed.contains(object.getID());
         // System.out.println("check -- " + complete + " for " + object.getID() + " in " + completed.size() + " : " + completed);
-        return new SafeHtmlBuilder().appendHtmlConstant(columnText +(complete?"&nbsp;<i class='icon-check'></i>":"")).toSafeHtml();
+        String completePrefix = complete ? "<i class='icon-check'></i>&nbsp;" : "";
+        return new SafeHtmlBuilder().appendHtmlConstant(completePrefix + columnText).toSafeHtml();
       }
     };
   }
@@ -257,13 +258,6 @@ public class PagingContainer<T extends ExerciseShell> {
   //protected String getHistoryToken(String id) { return "item=" +id; }
 
   protected void gotClickOnItem(final T e) {}
-
-  /**
-   * @seex SectionExerciseList.MySetExercisesCallback#onSuccess
-   */
-  protected void loadFirstExercise() {
-    selectFirst();
-  }
 
   public void selectFirst() {
     table.getSelectionModel().setSelected(dataProvider.getList().get(0), true);
@@ -283,11 +277,6 @@ public class PagingContainer<T extends ExerciseShell> {
   public void flush() {
     dataProvider.flush();
     table.setRowCount(dataProvider.getList().size());
-  }
-
-  protected void addExerciseToList(T exercise) {
-    List<T> list = dataProvider.getList();
-    list.add(exercise);
   }
 
   public <S extends ExerciseShell> void addExerciseToList2(S exercise) {
