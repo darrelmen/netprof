@@ -62,7 +62,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
 
   /**
    * @see mitll.langtest.client.exercise.WaveformExercisePanel.RecordAudioPanel#makePlayAudioPanel(com.google.gwt.user.client.ui.Widget)
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.ASRRecordAudioPanel#makePlayAudioPanel(com.google.gwt.user.client.ui.Widget)
+   * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel(com.google.gwt.user.client.ui.Widget, String)
    * @param soundManager
    * @param playListener
    */
