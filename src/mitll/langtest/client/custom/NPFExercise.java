@@ -71,27 +71,6 @@ public class NPFExercise extends GoodwaveExercisePanel {
     return addToList;
   }
 
-
-  public Tooltip createAddTooltip(Widget w, String tip, Placement placement) {
-    Tooltip tooltip = new Tooltip();
-    tooltip.setWidget(w);
-    tooltip.setText(tip);
-    tooltip.setAnimation(true);
-// As of 4/22 - bootstrap 2.2.1.0 -
-// Tooltips have an bug which causes the cursor to
-// toggle between finger and normal when show delay
-// is configured.
-
-    tooltip.setShowDelay(500);
-    tooltip.setHideDelay(500);
-
-    tooltip.setPlacement(placement);
-    tooltip.reconfigure();
-    return tooltip;
-  }
-
-
-
   /**
    * Ask server for the set of current lists for this user.
    *
@@ -163,7 +142,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
   }
 
   @Override
-  protected void addQuestionContentRow(Exercise e, ExerciseController controller, HorizontalPanel hp) {
+  protected void addQuestionContentRow(Exercise e, ExerciseController controller, Panel hp) {
     hp.getElement().setId("GoodwaveHorizontalPanel");
     Panel addToList = makeAddToList(e, controller);
     Widget questionContent = getQuestionContent(e, addToList);
