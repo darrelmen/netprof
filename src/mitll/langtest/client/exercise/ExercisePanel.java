@@ -56,7 +56,7 @@ public class ExercisePanel extends VerticalPanel implements
   private static final String REPEAT_ONCE = "<i>Repeat the phrase once at normal speed.</i>";
   private static final String REPEAT_TWICE = "<i>Repeat the phrase twice, first at normal and then at slow speed.</i>";
   private static final String TWO_SPACES = "&nbsp;&nbsp;";
-  private static final String THREE_SPACES = "&nbsp;&nbsp;&nbsp;";
+  protected static final String THREE_SPACES = "&nbsp;&nbsp;&nbsp;";
   private static final String TEACHER_PROMPT = "Record the phrase above by clicking the record button, speak, and then stop when finished. ";
   private static final String THE_FOREIGN_LANGUAGE = " the foreign language";
   private static final String ENGLISH = "English";
@@ -147,15 +147,19 @@ public class ExercisePanel extends VerticalPanel implements
       HTML maybeRTLContent = getMaybeRTLContent(content, true);
       maybeRTLContent.addStyleName("rightTenMargin");
       if (content.length() > 200) {
-        System.out.println("content length " + content.length() + " " + content);
-        ScrollPanel scroller = new ScrollPanel(maybeRTLContent);
-        scroller.getElement().setId("contentScroller");
-        scroller.setHeight(CONTENT_SCROLL_HEIGHT + "px");
-        return scroller;
+        //System.out.println("content length " + content.length() + " " + content);
+        return getContentScroller(maybeRTLContent);
       } else {
         return maybeRTLContent;
       }
     }
+  }
+
+  protected Widget getContentScroller(HTML maybeRTLContent) {
+    ScrollPanel scroller = new ScrollPanel(maybeRTLContent);
+    scroller.getElement().setId("contentScroller");
+    scroller.setHeight(CONTENT_SCROLL_HEIGHT + "px");
+    return scroller;
   }
 
   private HTML getMaybeRTLContent(String content, boolean requireAlignment) {
@@ -555,7 +559,7 @@ public class ExercisePanel extends VerticalPanel implements
 
   protected boolean isCompleted() {
     boolean b = completed.size() == answers.size();
-    //System.out.println("isCompleted : answered " + completed.size() + " vs total " + answers.size() + " : " + b);
+    System.out.println("isCompleted : answered " + completed.size() + " vs total " + answers.size() + " : " + b);
     return b;
   }
 
