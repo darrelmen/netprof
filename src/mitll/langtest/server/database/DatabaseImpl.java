@@ -1297,6 +1297,7 @@ public class DatabaseImpl implements Database {
   }
 
   public void addCompleted(int userID, String exerciseID) {
+    logger.debug("Add completed " + userID + " : " + exerciseID);
     List<Exercise> objects = Collections.emptyList();
     UserStateWrapper userStateWrapper = createOrGetUserState(userID, objects);
     userStateWrapper.addCompleted(exerciseID);
