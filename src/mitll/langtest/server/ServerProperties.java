@@ -274,7 +274,7 @@ public class ServerProperties {
     dataCollectMode = getDefaultFalse(DATA_COLLECT_MODE);
     collectAudio = !props.getProperty(COLLECT_AUDIO, COLLECT_AUDIO_DEFAULT).equals("false");
     isUrdu = !props.getProperty(URDU, "false").equals("false");
-    biasTowardsUnanswered = !props.getProperty(BIAS_TOWARDS_UNANSWERED, "true").equals("false");
+    biasTowardsUnanswered = !props.getProperty(BIAS_TOWARDS_UNANSWERED, "false").equals("false");
     useOutsideResultCounts = !props.getProperty(USE_OUTSIDE_RESULT_COUNTS, "false").equals("false");
     isDataCollectAdminView = !props.getProperty("dataCollectAdminView", "false").equals("false");
     outsideFile = props.getProperty(OUTSIDE_FILE, OUTSIDE_FILE_DEFAULT);
