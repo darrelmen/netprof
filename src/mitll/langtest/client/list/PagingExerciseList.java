@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.user.UserFeedback;
@@ -33,8 +34,11 @@ import java.util.Set;
 public class PagingExerciseList extends ExerciseList implements RequiresResize {
   protected ExerciseController controller;
   protected PagingContainer<? extends ExerciseShell> pagingContainer;
-  boolean isCRTDataMode;
   private Set<String> completed;
+  boolean showCompleted = false;
+  boolean showTypeAhead = true;
+  protected TextBox typeAhead = null;
+  private String lastValue = "";
 
   /**
    * @see mitll.langtest.client.ExerciseListLayout#makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, boolean, mitll.langtest.client.user.UserFeedback, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController)
@@ -49,7 +53,8 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
                             boolean showTurkToken, boolean showInOrder, ExerciseController controller, String instance) {
     super(currentExerciseVPanel, service, feedback, null, controller, showTurkToken, showInOrder, instance);
     this.controller = controller;
-    this.isCRTDataMode = controller.getProps().isCRTDataCollectMode();
+    this.showCompleted = controller.getProps().isCRTDataCollectMode() || controller.getProps().isDataCollectMode();
+    if (controller.getProps().isCRTDataCollectMode()) showTypeAhead = false;
     addComponents();
   }
 
@@ -62,12 +67,19 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     pagingContainer.setCompleted(completed);
   }
 
+  public void addCompleted(String id) {
+    completed.add(id);
+    pagingContainer.setCompleted(completed);
+    controller.showProgress();
+    System.out.println("addCompleted : completed " + completed.size() + " current " + currentExercises.size() + " " + id);
+  }
+
   @Override
   public int getPercentComplete() {
-    if (isCRTDataMode) {
+    if (showCompleted) {
       int i = (int) Math.ceil(100f * ((float) completed.size() / (float) currentExercises.size()));
       if (i > 100) i = 100;
-      System.out.println("completed " + completed.size() + " current " + currentExercises.size() + " " + i);
+      System.out.println("getPercentComplete : completed " + completed.size() + " current " + currentExercises.size() + " " + i);
       return i;
     } else {
       return super.getPercentComplete();
@@ -75,11 +87,27 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   }
 
   public int getComplete() {
-    if (isCRTDataMode) {
+    if (showCompleted) {
       return completed.size();
     } else {
       return super.getComplete();
     }
+  }
+
+  protected void onLastItem() {
+    PropertyHandler props = controller.getProps();
+    if (props.isCRTDataCollectMode() || props.isDataCollectMode() && isComplete()) {
+      String title = props.isDataCollectMode() ? "Collection Complete" : "Test complete";
+      feedback.showErrorMessage(title, "All Items Complete! Thank you!");
+    }
+    else {
+      loadFirstExercise();
+    }
+  }
+
+  @Override
+  protected boolean isComplete() {
+    return completed.size() == currentExercises.size();
   }
 
   /**
@@ -91,10 +119,8 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     addTableWithPager(exerciseShellPagingContainer);
   }
 
-  private TextBox typeAhead = null;
-  private String lastValue = "";
   protected void addTypeAhead(FlowPanel column) {
-    if (!isCRTDataMode) {
+    if (showTypeAhead) {
       typeAhead = new TextBox();
       typeAhead.setDirectionEstimator(true);   // automatically detect whether text is RTL
       typeAhead.addKeyUpHandler(new KeyUpHandler() {
@@ -120,7 +146,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
 
   protected void loadExercises(String selectionState, String prefix) {
     lastReqID++;
-    System.out.println("looking for '" + prefix + "' (" + prefix.length() + " chars)");
+    System.out.println("loadExercises : looking for '" + prefix + "' (" + prefix.length() + " chars)");
 
     service.getExerciseIds(lastReqID, controller.getUser(), prefix, new SetExercisesCallback());
   }
@@ -143,17 +169,11 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
 
   protected PagingContainer<? extends ExerciseShell> makePagingContainer() {
     final PagingExerciseList outer = this;
-    PagingContainer<ExerciseShell> pagingContainer1 = new PagingContainer<ExerciseShell>(controller, getVerticalUnaccountedFor()) {
+    boolean markComplete = controller.getProps().isCRTDataCollectMode() || controller.getProps().isDataCollectMode();
+    PagingContainer<ExerciseShell> pagingContainer1 = new PagingContainer<ExerciseShell>(controller, getVerticalUnaccountedFor(), markComplete) {
       @Override
       protected void gotClickOnItem(ExerciseShell e) {
         outer.gotClickOnItem(e);
-      }
-
-      @Override
-      protected void loadFirstExercise() {
-        outer.loadFirstExercise();
-
-        selectFirst();    //To change body of overridden methods use File | Settings | File Templates.
       }
     };
     pagingContainer = pagingContainer1;
@@ -162,7 +182,9 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
 
   @Override
   protected ExerciseShell findFirstExercise() {
-    if (isCRTDataMode) {
+    if (showCompleted) {
+      System.out.println("getFirstNotCompleted : ");
+
       return getFirstNotCompleted();
     }
     else {
@@ -172,6 +194,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
 
   private ExerciseShell getFirstNotCompleted() {
     for (ExerciseShell es : currentExercises) {
+
       if (!completed.contains(es.getID())) return es;
     }
     return super.findFirstExercise();
