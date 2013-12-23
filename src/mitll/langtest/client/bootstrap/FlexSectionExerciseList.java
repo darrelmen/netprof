@@ -10,12 +10,15 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -64,6 +67,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   protected Heading statusHeader = new Heading(4);
   private Collection<String> typeOrder;
   private Panel sectionPanel;
+  boolean showCompleted = false;
 
   /**
    * @see mitll.langtest.client.ExerciseListLayout#makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, boolean, mitll.langtest.client.user.UserFeedback, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
@@ -81,7 +85,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
                                  UserFeedback feedback,
                                  boolean showTurkToken, boolean showInOrder,/* boolean showListBox, */ExerciseController controller, String instance) {
     super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, controller.isCRTDataCollectMode(),instance);
-
+    showCompleted = controller.isCRTDataCollectMode() || controller.isDataCollectMode();
     sectionPanel = new FluidContainer();
     sectionPanel.getElement().setId("sectionPanel");
 
@@ -109,16 +113,16 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @see mitll.langtest.client.LangTest#doEverythingAfterFactory
    */
   public void getExercises(final long userID, boolean getNext) {
-    System.out.println("FlexSectionExerciseList : getExercises : Get exercises for user=" + userID + " crt mode " + allowPlusInURL);
+    System.out.println("FlexSectionExerciseList : getExercises : Get exercises for user=" + userID + " crt mode " + showCompleted);
     this.userID = userID;
 
-    if (allowPlusInURL) {
+    if (showCompleted) {
       service.getCompletedExercises((int)userID, new AsyncCallback<Set<String>>() {
         @Override
         public void onFailure(Throwable caught) {}
         @Override
         public void onSuccess(Set<String> result) {
-          //System.out.println("\tFlexSectionExerciseList : getCompletedExercises : completed for user=" + userID + " result " + result.size());
+          System.out.println("\tFlexSectionExerciseList : getCompletedExercises : completed for user=" + userID + " result " + result.size());
           controller.getExerciseList().setCompleted(result);
           addWidgets();
         }
@@ -170,22 +174,6 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   protected Collection<String> getTypeOrder(Map<String, Collection<String>> selectionState2) {
     return typeOrder;
   }
-
-/*  private void addStudentTypeAndSection(FluidContainer container, Collection<String> sortedTypes) {
-    String token = unencodeToken(History.getToken());
-    SelectionState selectionState = getSelectionState(token);
-    //System.out.println("\n\nsorted types " + sortedTypes);
-    for (final String type : sortedTypes) {
-      Collection<String> typeValue = selectionState.getTypeToSection().get(type);
-      if (typeValue != null) {
-        FluidRow fluidRow = new FluidRow();
-        container.add(fluidRow);
-
-        fluidRow.add(new Column(2, new Heading(4, type)));
-        fluidRow.add(new Column(1, new Heading(4, typeValue.toString())));
-      }
-    }
-  }*/
 
   /**
    * @param rootNodes
@@ -521,8 +509,19 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @see HistoryExerciseList.MySetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
    */
   protected void gotEmptyExerciseList() {
-    List<String> strings = Arrays.asList("No items match the selection and search.", "Try clearing one of your selections or changing the search.");
-    new ModalInfoDialog("Empty selection", strings);
+//    List<String> strings = Arrays.asList("No items match the selection and search.", "Try clearing one of your selections or changing the search.");
+    showPopup("No items match the selection and search.",typeAhead);
+  }
+
+  private void showPopup(String toShow,Widget widget) {
+    final PopupPanel popupImage = new PopupPanel(true);
+    popupImage.add(new HTML(toShow));
+    popupImage.showRelativeTo(widget);
+    Timer t = new Timer() {
+      @Override
+      public void run() { popupImage.hide(); }
+    };
+    t.schedule(3000);
   }
 
   /**
