@@ -529,6 +529,7 @@ public class SiteDeployer {
     copy.setProperty("dataCollect","true");
     copy.setProperty("dataCollectAdminView","false");
     copy.setProperty("h2Database", "template");
+    copy.setProperty("language", toDeploy.language);
     copy.setProperty("urdu", ""+toDeploy.language.equalsIgnoreCase("urdu"));
 
 
