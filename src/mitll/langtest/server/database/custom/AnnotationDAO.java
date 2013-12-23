@@ -191,7 +191,7 @@ public class AnnotationDAO extends DAO {
       );
     }
 
-    logger.debug("getUserAnnotations sql " + sql + " yielded " + lists);
+    //logger.debug("getUserAnnotations sql " + sql + " yielded " + lists);
     rs.close();
     statement.close();
     database.closeConnection(connection);
@@ -213,7 +213,7 @@ public class AnnotationDAO extends DAO {
 
       }
 
-      logger.debug("getUserAnnotations sql " + sql + " yielded " + lists);
+      //logger.debug("getUserAnnotations sql " + sql + " yielded " + lists);
       rs.close();
       statement.close();
       database.closeConnection(connection);
