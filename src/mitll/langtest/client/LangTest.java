@@ -1086,7 +1086,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     showProgress(exerciseList);
   }
 
-  public void showProgress(ListInterface exerciseList) {
+  private void showProgress(ListInterface exerciseList) {
     if (progressBar != null) {
       progressBar.showAdvance(exerciseList);
     }
