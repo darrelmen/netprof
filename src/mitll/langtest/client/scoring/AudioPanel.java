@@ -43,7 +43,7 @@ import java.util.Map;
 public class AudioPanel extends VerticalPanel implements RequiresResize {
   protected static final int MIN_WIDTH = 256;
   private static final float WAVEFORM_HEIGHT = 80f;//96;
-  private static final float SPECTROGRAM_HEIGHT = 50f;//96;
+  private static final float SPECTROGRAM_HEIGHT = 30f;//96;
   protected static final String WAVEFORM = "Waveform";
   protected static final String SPECTROGRAM = "Spectrogram";
   public static final String WAVEFORM_TOOLTIP = "The waveform should only be used to determine when periods of silence" +
@@ -81,11 +81,12 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @param service
    * @param useKeyboard
    * @param gaugePanel
+   * @param audioType
    */
   public AudioPanel(String path, LangTestDatabaseAsync service,
-                    boolean useKeyboard, ExerciseController controller, ScoreListener gaugePanel) {
+                    boolean useKeyboard, ExerciseController controller, ScoreListener gaugePanel, String audioType) {
     this(service, useKeyboard, controller, true,gaugePanel);
-    addWidgets(path);
+    addWidgets(path, audioType);
   }
 
   public AudioPanel(LangTestDatabaseAsync service,
@@ -107,11 +108,12 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
   /**
    * Replace the html 5 audio tag with our fancy waveform widget.
-   * @see #AudioPanel(String, mitll.langtest.client.LangTestDatabaseAsync, boolean, mitll.langtest.client.exercise.ExerciseController, ScoreListener)
+   * @see #AudioPanel(String, mitll.langtest.client.LangTestDatabaseAsync, boolean, mitll.langtest.client.exercise.ExerciseController, ScoreListener, String)
    * @param path
+   * @param audioType
    * @return
    */
-  public void addWidgets(String path) {
+  public void addWidgets(String path, String audioType) {
     //System.out.println("addWidgets audio path = " + path);
     imageContainer = new VerticalPanel();
 
@@ -119,7 +121,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     hp.setVerticalAlignment(ALIGN_MIDDLE);
 
     Widget beforePlayWidget = getBeforePlayWidget();
-    playAudio = getPlayButtons(beforePlayWidget);
+    playAudio = getPlayButtons(beforePlayWidget, audioType);
     hp.add(playAudio);
     hp.setCellHorizontalAlignment(playAudio,HorizontalPanel.ALIGN_LEFT);
 
@@ -246,17 +248,17 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   }
 
     /**
-    * @see #addWidgets(String)
+    * @see #addWidgets(String, String)
     * @return PlayAudioPanel
     */
-  private PlayAudioPanel getPlayButtons(Widget toTheLeftWidget) {
-    PlayAudioPanel playAudio = makePlayAudioPanel(toTheLeftWidget);
+  private PlayAudioPanel getPlayButtons(Widget toTheLeftWidget, String audioType) {
+    PlayAudioPanel playAudio = makePlayAudioPanel(toTheLeftWidget, audioType);
     audioPositionPopup = new AudioPositionPopup();
     playAudio.addListener(audioPositionPopup);
     return playAudio;
   }
 
-  protected PlayAudioPanel makePlayAudioPanel(final Widget toTheLeftWidget) {
+  protected PlayAudioPanel makePlayAudioPanel(final Widget toTheLeftWidget, String audioType) {
     return new PlayAudioPanel(soundManager) {
       @Override
       protected void addButtons() {
