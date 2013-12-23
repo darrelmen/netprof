@@ -476,7 +476,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   @Override
   protected PagingContainer<? extends ExerciseShell> makePagingContainer() {
     final TableSectionExerciseList outer = this;
-    exercisePagingContainer = new PagingContainer<Exercise>(controller, 100) {
+    exercisePagingContainer = new PagingContainer<Exercise>(controller, 100, false) {
       /**
        * @see mitll.langtest.client.list.TableSectionExerciseList#getAsyncTable(java.util.Map, int)
        * @return
