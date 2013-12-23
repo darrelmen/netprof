@@ -402,7 +402,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
     SimplePanel right = new SimplePanel();
     hp.add(right);
 
-    PagingContainer<ExerciseShell> pagingContainer = new PagingContainer<ExerciseShell>(controller, 100);
+    PagingContainer<ExerciseShell> pagingContainer = new PagingContainer<ExerciseShell>(controller, 100, false);
     Panel container = pagingContainer.getTableWithPager();
     left.add(container);
     for (ExerciseShell es : ul.getExercises()) {
@@ -452,7 +452,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
     container.add(row);
 
     final LangTestDatabaseAsync outerService = service;
-    final RecordAudioPanel rap = new RecordAudioPanel(null, controller, row, service, 0, false) {
+    final RecordAudioPanel rap = new RecordAudioPanel(null, controller, row, service, 0, false, controller.getAudioType()) {
       @Override
       protected void getEachImage(int width) {
         float newWidth = Window.getClientWidth() * 0.65f;
@@ -460,12 +460,12 @@ public class Navigation extends BasicDialog implements RequiresResize {
       }
 
       /**
-       * @see RecordAudioPanel#makePlayAudioPanel(com.google.gwt.user.client.ui.Widget)
+       * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel(com.google.gwt.user.client.ui.Widget, String)
        * @return
        */
       @Override
-      protected WaveformPostAudioRecordButton makePostAudioRecordButton() {
-        return new WaveformPostAudioRecordButton(exercise, controller, exercisePanel, this, service, 0) {
+      protected WaveformPostAudioRecordButton makePostAudioRecordButton(String audioType) {
+        return new WaveformPostAudioRecordButton(exercise, controller, exercisePanel, this, service, 0, audioType) {
           @Override
           public void stopRecording() {
             System.out.println("stopRecording with exercise " + exercise);
