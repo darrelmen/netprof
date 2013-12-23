@@ -8,7 +8,6 @@ import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -44,6 +43,13 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
   @Override
   protected ASRScorePanel makeScorePanel(Exercise e, String instance) { return null;  }
+
+  @Override
+  protected void addQuestionContentRow(Exercise e, ExerciseController controller, Panel hp) {
+    super.addQuestionContentRow(e,controller,hp);
+    hp.addStyleName("questionContentPadding");
+  }
+
   @Override
   protected void nextWasPressed(ListInterface listContainer, Exercise completedExercise) {
     //System.out.println("nextWasPressed : load next exercise " + completedExercise.getID() + " instance " +instance);
@@ -116,7 +122,8 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
       if (audioRef != null) {
         audioRef = wavToMP3(audioRef);   // todo why do we have to do this?
       }
-      ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel(audioRef, e.getRefSentence(), service, controller, false, scorePanel);
+      ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel(audioRef, e.getRefSentence(), service, controller,
+        false, scorePanel, 93);
       audioPanel.setShowColor(true);
       audioPanel.getElement().setId("ASRScoringAudioPanel");
       audioPanel.setRefAudio(audioRef, e.getRefSentence());
