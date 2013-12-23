@@ -66,10 +66,6 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
 
   @Override
   public void loadExercise(ExerciseShell exerciseShell) {}
-  @Override
-  public boolean loadNextExercise(String id) {
-    return false;
-  }
 
   private boolean expired = false;
   private boolean timerRunning = false;
@@ -393,6 +389,9 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   public Panel getCreatedPanel() {
     return null;
   }
+
+  @Override
+  public void addCompleted(String id) {}
 
   public void rememberAndLoadFirst(List<? extends ExerciseShell> exercises, Exercise first){}
 
