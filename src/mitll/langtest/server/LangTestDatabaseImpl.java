@@ -264,8 +264,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private List<Exercise> getExercisesForState(int reqID, Map<String, Collection<String>> typeToSection, long userID) {
-    logger.debug("getExercisesForSelectionState req " + reqID+ " for " + typeToSection + " and " +userID);
+    logger.debug("getExercisesForState req " + reqID+ " for " + typeToSection + " and " +userID);
     Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
+    if (exercisesForSection.isEmpty()) {
+      exercisesForSection = getExercises();
+    }
     if (serverProps.sortExercises() || serverProps.isGoodwaveMode() || serverProps.isFlashcardTeacherView()) {
       return getSortedExercises(exercisesForSection);
     } else {
@@ -689,8 +692,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param wavFile
    */
   private void ensureMP3(String wavFile) {
-    if (wavFile != null) {
-        new AudioConversion().ensureWriteMP3(wavFile, pathHelper.getInstallPath());
+    if (wavFile != null && (wavFile.endsWith(".mp3") || new File(wavFile).exists())) {
+      logger.debug("ensureMP3 " + wavFile);
+      new AudioConversion().ensureWriteMP3(wavFile, pathHelper.getInstallPath());
     }
   }
 
@@ -1100,7 +1104,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   @Override
-  public Set<String> getCompletedExercises(int user) {  return db.getCompletedExercises(user);  }
+  public Set<String> getCompletedExercises(int user) {
+    Set<String> completedExercises = db.getCompletedExercises(user);
+    logger.debug("got " + completedExercises.size() + " completed for " + user);
+    return completedExercises;
+  }
 
   void makeAutoCRT() { audioFileHelper.makeAutoCRT(relativeConfigDir, this, studentAnswersDB, this); }
 

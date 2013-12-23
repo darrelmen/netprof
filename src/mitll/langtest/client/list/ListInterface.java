@@ -62,7 +62,7 @@ public interface ListInterface extends RequiresResize {
    */
   boolean loadNextExercise(ExerciseShell current);
 
-  boolean loadNextExercise(String id);
+  //boolean loadNextExercise(String id);
   Panel makeExercisePanel(Exercise result);
 
   boolean loadPreviousExercise(ExerciseShell current);
@@ -87,6 +87,7 @@ public interface ListInterface extends RequiresResize {
   int getComplete();
 
   void setCompleted(Set<String> completed);
+  void addCompleted(String id);
 
   void setSelectionState(Map<String,Collection<String>> selectionState);
 
