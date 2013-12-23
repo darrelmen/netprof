@@ -199,11 +199,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           }
         });
   }
- Panel belowFirstRow;
+  Panel belowFirstRow;
   Panel bothSecondAndThird;
-/*  Panel belowFirstRow;
-  Panel leftColumn;
-  FluidContainer bothSecondAndThird;*/
 
   /**
    * Use DockLayout to put a header at the top, exercise list on the left, and eventually
@@ -252,7 +249,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     Panel belowFirstRow = new FluidRow();
     verticalContainer.add(belowFirstRow);
-     this.belowFirstRow = belowFirstRow;
+    this.belowFirstRow = belowFirstRow;
+    belowFirstRow.getElement().setId("belowFirstRow");
+
     // second row ---------------
     secondRow = new FluidRow();
     secondRow.getElement().setId("secondRow");
@@ -817,10 +816,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void removeAndReloadFlash() {
     System.out.println(new Date() + " : removeAndReloadFlash - reloading...");
 
-    currentExerciseVPanel.remove(flashRecordPanel);
+    belowFirstRow.remove(flashRecordPanel);
     flashRecordPanel.removeFlash();
     makeFlashContainer();
-    currentExerciseVPanel.add(flashRecordPanel);
+    belowFirstRow.add(flashRecordPanel);
     flashRecordPanel.initFlash();
   }
 
