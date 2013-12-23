@@ -63,7 +63,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
       controller.getUser(),
       reqid,
       !exercise.isPromptInEnglish(),
-      controller.getAudioType(),
+      getAudioType(),
       false, new AsyncCallback<AudioAnswer>() {
         public void onFailure(Throwable caught) {
           long now = System.currentTimeMillis();
@@ -109,6 +109,10 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
           }
         }
       });
+  }
+
+  protected String getAudioType() {
+    return controller.getAudioType();
   }
 
   private Widget getOuter() { return this; }
