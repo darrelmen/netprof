@@ -1,17 +1,21 @@
 package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.Image;
+import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.RadioButton;
+import com.github.gwtbootstrap.client.ui.Tooltip;
+import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -34,6 +38,7 @@ import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.Exercise;
 
 import java.util.Collection;
+import java.util.Date;
 
 /**
  * Mainly delegates recording to the {@link mitll.langtest.client.recorder.SimpleRecordPanel}.
@@ -81,10 +86,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     this.service = controller.getService();
     this.screenPortion = screenPortion;
     this.instance = instance;
-
+    setWidth("100%");
     addStyleName("inlineBlockStyle");
     getElement().setId("GoodwaveExercisePanel");
-    final com.google.gwt.user.client.ui.Panel center = new FlowPanel();
+    final Panel center = new FlowPanel();
     center.addStyleName("blockStyle");
     center.getElement().setId("GoodwaveVerticalCenter");
     center.addStyleName("floatLeft");
@@ -92,13 +97,13 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
     ASRScorePanel widgets = makeScorePanel(e, instance);
 
-    HorizontalPanel hp = new HorizontalPanel();
+/*    HorizontalPanel hp = new HorizontalPanel();
     hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
-    hp.getElement().setId("questionContentRowContainer");
+    hp.getElement().setId("questionContentRowContainer");*/
 
-    addQuestionContentRow(e, controller, hp);
+    addQuestionContentRow(e, controller, center);
 
-    center.add(hp);
+   // center.add(hp);
 
     // content is on the left side
     add(center);
@@ -135,8 +140,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     listContainer.loadNextExercise(completedExercise);
   }
 
-  protected void addQuestionContentRow(Exercise e, ExerciseController controller, HorizontalPanel hp) {
-     hp.add(getQuestionContent(e, (com.google.gwt.user.client.ui.Panel)null));
+  protected void addQuestionContentRow(Exercise e, ExerciseController controller, Panel hp) {
+     hp.add(getQuestionContent(e, (Panel)null));
   }
 
   public void setBusy(boolean v) {  this.isBusy = v;  }
@@ -197,22 +202,27 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     }
 
     final VerticalPanel vp = new VerticalPanel();
-    vp.getElement().setId("verticalContainer");
+    vp.getElement().setId("getQuestionContent_verticalContainer");
     vp.addStyleName("blockStyle");
 
     Widget questionContent = getQuestionContent(e, content);
 
+
     //Panel rowForContent = new FlowPanel();
-    Panel rowForContent = new HorizontalPanel();
-    rowForContent.setWidth("100%");
-    //rowForContent.addStyleName("trueInlineStyle");
-    rowForContent.add(questionContent);
+
     if (addToList != null) {
+      Panel rowForContent = new HorizontalPanel();
+      rowForContent.setWidth("100%");
+      rowForContent.getElement().setId("getQuestionContent_rowForContent");
+      //rowForContent.addStyleName("trueInlineStyle");
+      rowForContent.add(questionContent);
       rowForContent.add(addToList);
       addToList.addStyleName("floatRight");
+      vp.add(rowForContent);
     }
-
-    vp.add(rowForContent);
+    else {
+      vp.add(questionContent);
+    }
 
     Widget scoringAudioPanel = getScoringAudioPanel(e, path);
     SimplePanel div = new SimplePanel(scoringAudioPanel);
@@ -266,7 +276,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     if (e.getType() == Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW) {
       audioPanel = new FastAndSlowASRScoringAudioPanel(exercise, path, service, controller, scorePanel);
     } else {
-      audioPanel = new ASRScoringAudioPanel(path, e.getRefSentence(), service, controller, SHOW_SPECTROGRAM, scorePanel);
+      audioPanel = new ASRScoringAudioPanel(path, e.getRefSentence(), service, controller, SHOW_SPECTROGRAM, scorePanel, 23);
     }
     audioPanel.getElement().setId("ASRScoringAudioPanel");
     audioPanel.setRefAudio(path, e.getRefSentence());
@@ -275,6 +285,67 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
   protected String wavToMP3(String path) {
     return (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
+  }
+
+  protected void addIncorrectComment(final String commentToPost, final String field) {
+    System.out.println(new Date() + " : post to server " + exercise.getID() +
+      " field " + field + " commentLabel " + commentToPost + " is incorrect");
+    final long then = System.currentTimeMillis();
+    service.addAnnotation(exercise.getID(), field, "incorrect", commentToPost, controller.getUser(),new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {
+      }
+
+      @Override
+      public void onSuccess(Void result) {
+        long now = System.currentTimeMillis();
+        System.out.println("\t" + new Date() + " : posted to server " + exercise.getID() +
+          " field " + field + " commentLabel " + commentToPost + " is incorrect, took " + (now - then) + " millis");
+
+      }
+    });
+  }
+
+  protected Panel getContentWidget(String label, String value, boolean withWrap) {
+    Panel nameValueRow = new FlowPanel();
+    nameValueRow.getElement().setId("nameValueRow_" + label);
+    nameValueRow.addStyleName("Instruction");
+
+    InlineHTML foreignPhrase = new InlineHTML(label);
+    foreignPhrase.addStyleName("Instruction-title");
+    nameValueRow.add(foreignPhrase);
+
+    InlineHTML englishPhrase = new InlineHTML(value);
+    englishPhrase.addStyleName(withWrap ? "Instruction-data-with-wrap" : "Instruction-data");
+    nameValueRow.add(englishPhrase);
+    englishPhrase.addStyleName("leftFiveMargin");
+    return nameValueRow;
+  }
+
+  protected Label getCommentLabel() {
+    final Label commentLabel = new Label("comment?");
+    DOM.setStyleAttribute(commentLabel.getElement(), "backgroundColor", "#ff0000");
+    commentLabel.setVisible(true);
+    commentLabel.addStyleName("ImageOverlay");
+    return commentLabel;
+  }
+
+  protected Tooltip createAddTooltip(Widget w, String tip, Placement placement) {
+    Tooltip tooltip = new Tooltip();
+    tooltip.setWidget(w);
+    tooltip.setText(tip);
+    tooltip.setAnimation(true);
+// As of 4/22 - bootstrap 2.2.1.0 -
+// Tooltips have an bug which causes the cursor to
+// toggle between finger and normal when show delay
+// is configured.
+
+    tooltip.setShowDelay(500);
+    tooltip.setHideDelay(500);
+
+    tooltip.setPlacement(placement);
+    tooltip.reconfigure();
+    return tooltip;
   }
 
   protected static class ResizableCaptionPanel extends CaptionPanel implements ProvidesResize, RequiresResize {
@@ -324,7 +395,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
      */
     public ASRRecordAudioPanel(LangTestDatabaseAsync service, int index, ExerciseController controller) {
       super(service, controller.getSegmentRepeats(),
-        false, // no keyboard
+        // no keyboard
         controller, scorePanel);
       this.index = index;
 
@@ -431,10 +502,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
   public boolean isBusy() { return isBusy;  }
 
+  protected void setAudioRef(String audioRef) {}
+
   class FastAndSlowASRScoringAudioPanel extends ASRScoringAudioPanel {
     private static final String GROUP = "group";
-    //private GoodwaveExercisePanel widgets;
-
     /**
      * @param exercise
      * @param path
@@ -448,8 +519,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         exercise.getRefSentence(),
         service,
         controller1,
-          // no keyboard space bar binding
-          SHOW_SPECTROGRAM, scoreListener);
+        SHOW_SPECTROGRAM, scoreListener, 23);
     }
 
     /**
@@ -511,6 +581,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       String audioRef = audioAttribute.getAudioRef();
       setRefAudio(audioRef);
       getImagesForPath(audioRef);
+
+      setAudioRef(audioRef);
     }
   }
 }
