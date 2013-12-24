@@ -459,7 +459,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     FluidRow titleRow = new FluidRow();
     titleRow.addStyleName("alignCenter");
     titleRow.addStyleName("inlineBlockStyle");
-    Heading pageTitle = new Heading(2, props.getAppTitle());
+    Heading pageTitle = new Heading(3, props.getAppTitle());
 
     titleRow.add(pageTitle);
 
