@@ -59,6 +59,7 @@ public class ExcelImport implements ExerciseDAO {
   private int audioOffset = 0;
   private final int maxExercises;
   private ServerProperties serverProps;
+  boolean collectSynonyms = true;
 
   /**
    * @see mitll.langtest.server.SiteDeployer#readExercisesPopulateSite(mitll.langtest.shared.Site, String, java.io.InputStream)
@@ -88,6 +89,7 @@ public class ExcelImport implements ExerciseDAO {
     this.language = serverProps.getLanguage();
     this.skipSemicolons = serverProps.shouldSkipSemicolonEntries();
     this.audioOffset = serverProps.getAudioOffset();
+    collectSynonyms = this.serverProps.getCollectSynonyms();
 
 /*    logger.debug("\n\n\n\n ---> ExcelImport : config " + relativeConfigDir +
       " media dir " +mediaDir + " slow missing " +missingSlowSet.size() + " fast " + missingFastSet.size());*/
@@ -380,7 +382,8 @@ public class ExcelImport implements ExerciseDAO {
           }
         }
       }
-      if(this.serverProps.getCollectSynonyms())
+
+      if(collectSynonyms)
          addSynonyms(englishToExercises);
     } catch (Exception e) {
       logger.error("got " + e, e);
@@ -597,8 +600,8 @@ public class ExcelImport implements ExerciseDAO {
   private Exercise getExercise(String id,
                                String english, String foreignLanguagePhrase, String translit, String meaning,
                                String context, boolean promptInEnglish, String refAudioIndex) {
-    String content = ExerciseFormatter.getContent(foreignLanguagePhrase, translit, english, meaning, context);
-    Exercise imported = new Exercise("import", id, content, promptInEnglish, true, english);// + "/"+foreignLanguagePhrase);
+    String content = ExerciseFormatter.getContent(foreignLanguagePhrase, translit, english, meaning, context, language);
+    Exercise imported = new Exercise("import", id, content, promptInEnglish, true, english);
     imported.addQuestion();   // TODO : needed?
 
     String prefix = "";//language.equalsIgnoreCase("msa") ? id + "_" : "";
