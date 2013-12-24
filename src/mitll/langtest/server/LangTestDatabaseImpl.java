@@ -1020,8 +1020,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db.getUserListManager().addAnnotation(exerciseID,field,status,comment, userID);
   }
 
-  public void markReviewed(String id, boolean isCorrect) {
-    db.getUserListManager().markReviewed(id);
+  /**
+   * @see mitll.langtest.client.custom.QCNPFExercise#markReviewed(mitll.langtest.shared.Exercise)
+   * @param id
+   * @param isCorrect
+   * @param creatorID
+   */
+  public void markReviewed(String id, boolean isCorrect, long creatorID) {
+    db.getUserListManager().markReviewed(id, creatorID);
     if (!isCorrect) {
       db.getUserListManager().markIncorrect(id);
     }
@@ -1038,6 +1044,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   public UserExercise createNewItem(long userid, String english, String foreign) {
+    logger.debug("create new item - " +foreign);
+    if (!audioFileHelper.checkLTS(foreign)) return null;
     return db.getUserListManager().createNewItem(userid, english, foreign);
   }
 
