@@ -5,6 +5,7 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.server.database.custom.AnnotationDAO;
+import mitll.langtest.server.database.custom.ReviewedDAO;
 import mitll.langtest.server.database.custom.UserExerciseDAO;
 import mitll.langtest.server.database.custom.UserListDAO;
 import mitll.langtest.server.database.custom.UserListExerciseJoinDAO;
@@ -22,9 +23,11 @@ import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.grade.ResultsAndGrades;
 import mitll.langtest.shared.monitoring.Session;
+
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -152,7 +155,7 @@ public class DatabaseImpl implements Database {
     answerDAO = new AnswerDAO(this, resultDAO);
     gradeDAO = new GradeDAO(this,userDAO, resultDAO);
     siteDAO = new SiteDAO(this, userDAO);
-    userListManager = new UserListManager( userDAO,userListDAO,userListExerciseJoinDAO, new AnnotationDAO(this));
+    userListManager = new UserListManager( userDAO,userListDAO,userListExerciseJoinDAO, new AnnotationDAO(this), new ReviewedDAO(this));
 
 
     if (DROP_USER) {
@@ -1104,6 +1107,13 @@ public class DatabaseImpl implements Database {
     return addUser(age, gender, experience, ip,dialect);
   }
 
+  public long addUser(HttpServletRequest request,
+                      int age, String gender, int experience,
+                      String nativeLang, String dialect, String userID) {
+    String ip = getIPInfo(request);
+    return addUser(age, gender, experience, ip, nativeLang, dialect, userID);
+  }
+
   /**
    * Somehow on subsequent runs, the ids skip by 30 or so?
    * <p/>
@@ -1118,14 +1128,16 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#addUser
    */
   private long addUser(int age, String gender, int experience, String ipAddr, String dialect) {
-    return userDAO.addUser(age, gender, experience, ipAddr, "", dialect, "", false);
+    long l = userDAO.addUser(age, gender, experience, ipAddr, "", dialect, "", false);
+    userListManager.createFavorites(l);
+    return l;
   }
 
-  public long addUser(HttpServletRequest request,
-                      int age, String gender, int experience,
-                      String nativeLang, String dialect, String userID) {
-    String ip = getIPInfo(request);
-    return addUser(age, gender, experience, ip, nativeLang, dialect, userID);
+  private long addUser(int age, String gender, int experience, String ipAddr,
+                       String nativeLang, String dialect, String userID) {
+    long l = userDAO.addUser(age, gender, experience, ipAddr, nativeLang, dialect, userID, false);
+    userListManager.createFavorites(l);
+    return l;
   }
 
   private String getIPInfo(HttpServletRequest request) {
@@ -1133,11 +1145,6 @@ public class DatabaseImpl implements Database {
     SimpleDateFormat sdf = new SimpleDateFormat();
     String format = sdf.format(new Date());
     return request.getRemoteHost() +/*"/"+ request.getRemoteAddr()+*/(header != null ? "/" + header : "") + " at " + format;
-  }
-
-  private long addUser(int age, String gender, int experience, String ipAddr,
-                       String nativeLang, String dialect, String userID) {
-    return userDAO.addUser(age, gender, experience, ipAddr, nativeLang, dialect, userID, false);
   }
 
   /**

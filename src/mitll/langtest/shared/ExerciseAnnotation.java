@@ -14,5 +14,7 @@ public class ExerciseAnnotation implements IsSerializable {
   public String comment;
   public ExerciseAnnotation(){}
   public ExerciseAnnotation(String status, String comment) { this.status = status; this.comment = comment; }
+  public boolean isCorrect() { return status.equals("correct"); }
+
   public String toString() { return "Anno " +status + " : " + comment; }
 }
