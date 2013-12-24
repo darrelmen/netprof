@@ -8,8 +8,8 @@
     <property name="ECLIPSE_HOME" value="../../../eclipse_juno"/>
     <property name="imagewriter.location" value="imagewriter"/>
     <property name="debuglevel" value="source,lines,vars"/>
-    <property name="target" value="1.6"/>
-    <property name="source" value="1.6"/>
+    <property name="target" value="1.7"/>
+    <property name="source" value="1.7"/>
 
     <tstamp>
         <format property="current.time" pattern="MM/dd_HH"/>
