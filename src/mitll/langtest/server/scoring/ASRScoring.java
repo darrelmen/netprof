@@ -64,7 +64,7 @@ public class ASRScoring extends Scoring {
   private LTS letterToSoundClass;
   private final Cache<String, Scores> audioToScore;
   private ConfigFileCreator configFileCreator;
-
+  boolean isMandarin;
   /**
    * Normally we delete the tmp dir created by hydec, but if something went wrong, we want to keep it around.
    * If the score was below a threshold, or the magic -1, we keep it around for future study.
@@ -96,10 +96,47 @@ public class ASRScoring extends Scoring {
 
     String language = properties.get("language") != null ? properties.get("language") : "";
 
+    isMandarin = language.equalsIgnoreCase("mandarin");
     this.letterToSoundClass = new LTSFactory().getLTSClass(language);
 //    logger.info("using LTS " + letterToSoundClass.getClass());
     this.htkDictionary = dict;
     this.configFileCreator = new ConfigFileCreator(properties, letterToSoundClass, scoringDir);
+  }
+
+  public boolean checkLTS(String foreignLanguagePhrase) { return checkLTS(letterToSoundClass, foreignLanguagePhrase); }
+
+  private boolean checkLTS(LTS lts, String foreignLanguagePhrase) {
+
+    List<String> tokens = new SmallVocabDecoder().getTokens(foreignLanguagePhrase);
+
+    logger.debug("checkLTS " + (isMandarin? " MANDARIN " : "")+      " tokens : " +tokens);
+
+    try {
+
+      for (String token : tokens) {
+        if (isMandarin) {
+          scala.collection.immutable.List<String[]> apply = htkDictionary.apply(token);
+          if (apply == null || apply.isEmpty()) {
+            logger.debug("checkLTS: mandarin token : " + token + " invalid!");
+
+            return false;
+          }
+        } else {
+          String[][] process = lts.process(token);
+          if (process == null) {
+            logger.debug("checkLTS token : " + token + " invalid!");
+
+            return false;
+          }
+        }
+      }
+    } catch (Exception e) {
+      logger.error("lts failed on " + foreignLanguagePhrase);
+      return false;
+    }
+    logger.debug("checkLTS tokens : " +tokens + " valid!");
+
+    return true;
   }
 
 /*  private Set<String> wordsInDict = new HashSet<String>();
