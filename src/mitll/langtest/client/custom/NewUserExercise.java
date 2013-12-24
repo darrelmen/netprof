@@ -14,10 +14,14 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
@@ -39,6 +43,7 @@ import mitll.langtest.shared.custom.UserList;
  * To change this template use File | Settings | File Templates.
  */
 public class NewUserExercise extends BasicDialog {
+  public static final String FOREIGN_LANGUAGE = "Foreign Language";
   private UserExercise newUserExercise = null;
   private final ExerciseController controller;
   private LangTestDatabaseAsync service;
@@ -76,7 +81,8 @@ public class NewUserExercise extends BasicDialog {
 
     row = new FluidRow();
     container.add(row);
-    foreignLang = addControlFormField(row, "Foreign Language (" + controller.getLanguage() + ")",false,1);
+    foreignLang = addControlFormField(row, FOREIGN_LANGUAGE +
+      " (" + controller.getLanguage() + ")",false,1);
     foreignLang.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
 
     row = new FluidRow();
@@ -213,6 +219,7 @@ public class NewUserExercise extends BasicDialog {
      */
     @Override
     protected WaveformPostAudioRecordButton makePostAudioRecordButton() {
+      final ExerciseController outer = controller;
       postAudioButton =
         new WaveformPostAudioRecordButton(exercise, controller, exercisePanel, this, service, 0, false // don't record in results table
         ) {
@@ -229,17 +236,22 @@ public class NewUserExercise extends BasicDialog {
                   System.out.println("onFailure : stopRecording  " + caught);
                 }
 
-                @Override
-                public void onSuccess(UserExercise newExercise) {
-                  newUserExercise = newExercise;
-                  System.out.println("\tonSuccess : stopRecording with newUserExercise " + newUserExercise);
+                  @Override
+                  public void onSuccess(UserExercise newExercise) {
+                    if (newExercise == null) {
+                      showPopup("The " + FOREIGN_LANGUAGE +
+                        " text doesn't seem to be valid " + outer.getLanguage() + ".  Please edit.", postAudioButton);
+                    } else {
+                      newUserExercise = newExercise;
+                      System.out.println("\tonSuccess : stopRecording with newUserExercise " + newUserExercise);
 
-                  exercise = newExercise.toExercise();
-                  otherRAP.setExercise(exercise);
-                  setExercise(exercise);
-                  stopRecording();
-                }
-              });
+                      exercise = newExercise.toExercise();
+                      otherRAP.setExercise(exercise);
+                      setExercise(exercise);
+                      stopRecording();
+                    }
+                  }
+                });
             } else {
               System.out.println("\t\tonSuccess : stopRecording with newUserExercise " + newUserExercise + " and exercise " + exercise);
 
@@ -283,6 +295,22 @@ public class NewUserExercise extends BasicDialog {
     public WaveformPostAudioRecordButton getPostAudioButton() {
       return postAudioButton;
     }
+  }
+
+  private void showPopup(String html, Widget target) {
+    final PopupPanel pleaseWait = new DecoratedPopupPanel();
+    pleaseWait.setAutoHideEnabled(true);
+    pleaseWait.add(new HTML(html));
+    pleaseWait.showRelativeTo(target);
+    // pleaseWait.center();
+
+    Timer t = new Timer() {
+      @Override
+      public void run() {
+        pleaseWait.hide();
+      }
+    };
+    t.schedule(2000);
   }
 
   private boolean validateForm(final FormField english, final FormField foreignLang, final RecordAudioPanel rap,
