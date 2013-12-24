@@ -3,9 +3,11 @@ package mitll.langtest.client.custom;
 import com.github.gwtbootstrap.client.ui.DropdownButton;
 import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.SplitDropdownButton;
+import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.base.DropdownBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
@@ -57,7 +59,9 @@ public class NPFExercise extends GoodwaveExercisePanel {
    * @return
    */
   protected Panel makeAddToList(Exercise e, ExerciseController controller) {
-    addToList = new DropdownButton("Add Item to List");
+    addToList = new DropdownButton("");
+    addToList.setRightDropdown(true);
+    createAddTooltip(addToList,"Add Item to List",Placement.BOTTOM);
     addToList.setIcon(IconType.PLUS_SIGN);
 
   //  System.out.println("makeAddToList : populate list choices for " + controller.getUser());
@@ -138,7 +142,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
   }
 
   @Override
-  protected void addQuestionContentRow(Exercise e, ExerciseController controller, HorizontalPanel hp) {
+  protected void addQuestionContentRow(Exercise e, ExerciseController controller, Panel hp) {
     hp.getElement().setId("GoodwaveHorizontalPanel");
     Panel addToList = makeAddToList(e, controller);
     Widget questionContent = getQuestionContent(e, addToList);
