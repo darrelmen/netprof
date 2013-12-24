@@ -8,8 +8,8 @@ package mitll.langtest.shared;
  * To change this template use File | Settings | File Templates.
  */
 public class ExerciseFormatter {
-  public static String getContent(String arabic, String translit, String english, String meaning, String language) {
-    return getContent(arabic, translit, english, meaning, "", language.equalsIgnoreCase("english"), language.equalsIgnoreCase("urdu"), language.equalsIgnoreCase("pashto"));
+  public static String getContent(String arabic, String translit, String english, String meaning, String context, String language) {
+    return getContent(arabic, translit, english, meaning, context, language.equalsIgnoreCase("english"), language.equalsIgnoreCase("urdu"), language.equalsIgnoreCase("pashto"));
   }
 
   public static String getContent(String arabic, String translit, String english, String meaning, boolean isEnglish, boolean isUrdu, boolean isPashto) {
@@ -21,7 +21,7 @@ public class ExerciseFormatter {
     String translitHTML = translit.length() > 0 ?
       getSpanWrapper("Transliteration:", translit)
       : "";
-    String translationHTML = english.length() > 0 ?//(!isEnglish && english.length() > 0) ?
+    String translationHTML = english.length() > 0 ?
       getSpanWrapper("Translation:", english) : "";
     String meaningHTML = (isEnglish && meaning.length() > 0) ?
       getSpanWrapper("Meaning:", meaning) : "";
