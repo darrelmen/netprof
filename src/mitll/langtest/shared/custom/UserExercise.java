@@ -73,7 +73,7 @@ public class UserExercise extends ExerciseShell {
   }
 
   public Exercise toExercise(String language) {
-    String content = ExerciseFormatter.getContent(getForeignLanguage(), "", english, "", language);
+    String content = ExerciseFormatter.getContent(getForeignLanguage(), "", english, "", "",language);
     Exercise imported = new Exercise("import", id, content, false, true, english);
     imported.setRefAudio(refAudio);
     imported.setSlowRefAudio(slowAudioRef);
