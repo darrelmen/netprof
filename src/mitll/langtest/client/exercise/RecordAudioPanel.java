@@ -41,7 +41,7 @@ public class RecordAudioPanel extends AudioPanel {
     super(service,
       // use full screen width
       // use keyboard
-      controller, showSpectrogram,null);
+      controller, showSpectrogram, null, 1.0f, 23);
     this.exercisePanel = widgets;
     this.index = index;
     this.exercise = exercise;
