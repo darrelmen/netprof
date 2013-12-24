@@ -2,14 +2,21 @@ package mitll.langtest.server.database.custom;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.shared.ExerciseAnnotation;
-import mitll.langtest.shared.custom.UserExercise;
-import mitll.langtest.shared.custom.UserList;
 import org.apache.log4j.Logger;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Created with IntelliJ IDEA.
@@ -180,17 +187,39 @@ public class AnnotationDAO extends DAO {
           rs.getString("comment"),
           rs.getLong("creatorid"), //
           rs.getTimestamp("modified").getTime()
-
       )
       );
     }
 
-    logger.debug("getUserAnnotations sql " + sql + " yielded " + lists);
+    //logger.debug("getUserAnnotations sql " + sql + " yielded " + lists);
     rs.close();
     statement.close();
     database.closeConnection(connection);
+    return lists;
+  }
 
+  public Set<String> getIncorrectIds()  {
+    Connection connection = database.getConnection();
+    String sql = "SELECT DISTINCT exerciseid from " + ANNOTATION + " order by exerciseid";
 
+    Set<String> lists = Collections.emptySet();
+    try {
+      PreparedStatement statement = connection.prepareStatement(sql);
+      ResultSet rs = statement.executeQuery();
+      lists = new TreeSet<String>();
+
+      while (rs.next()) {
+        lists.add(rs.getString(1));
+
+      }
+
+      //logger.debug("getUserAnnotations sql " + sql + " yielded " + lists);
+      rs.close();
+      statement.close();
+      database.closeConnection(connection);
+    } catch (SQLException e) {
+      logger.error("Got " +e + " doing " + sql,e);
+    }
     return lists;
   }
 }
