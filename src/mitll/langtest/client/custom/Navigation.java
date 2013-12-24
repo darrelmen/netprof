@@ -137,7 +137,6 @@ public class Navigation implements RequiresResize {
 
     if (controller.isReviewMode()) {
       //System.out.println("adding review tab");
-
       review = makeTab(tabPanel, IconType.EDIT, "Review");
       review.tab.addClickHandler(new ClickHandler() {
         @Override
@@ -241,7 +240,7 @@ public class Navigation implements RequiresResize {
             }
           });
         } else {
-          System.out.println("\tshowInitialState show initial state for " + userManager.getUser() + " found " + result.size() + " lists");
+          //System.out.println("\tshowInitialState show initial state for " + userManager.getUser() + " found " + result.size() + " lists");
 
           showMyLists();
         }
@@ -261,11 +260,11 @@ public class Navigation implements RequiresResize {
     viewBrowse();
   }
 
-  private void viewBrowse() {
-    viewLessons(browse.content, true);
-  }
-
   /*To call click() function for Programmatic equivalent of the user clicking the button.*/
+  private class ButtonClickEvent extends ClickEvent {}
+
+  private void viewBrowse() { viewLessons(browse.content, true); }
+
   private void viewLessons(final Panel contentPanel, boolean getAll) {
     contentPanel.clear();
     contentPanel.getElement().setId("contentPanel");
@@ -276,10 +275,10 @@ public class Navigation implements RequiresResize {
     listScrollPanel = new ScrollPanel();
 
     if (getAll) {
-      System.out.println("viewLessons----> getAll = " + getAll);
+     // System.out.println("viewLessons----> getAll = " + getAll);
       service.getUserListsForText("", new UserListCallback(contentPanel, child,listScrollPanel, "lessons"));
     } else {
-      System.out.println("viewLessons for " + userManager.getUser());
+     // System.out.println("viewLessons for " + userManager.getUser());
       service.getListsForUser(userManager.getUser(), false, true, new UserListCallback(contentPanel, child,listScrollPanel, "lessons"));
     }
   }
@@ -291,12 +290,10 @@ public class Navigation implements RequiresResize {
     final Panel child = new DivWidget();
     contentPanel.add(child);
     child.addStyleName("exerciseBackground");
-    System.out.println("\n\nreviewLessons for " + userManager.getUser());
+    //System.out.println("\n\nreviewLessons for " + userManager.getUser());
     service.getReviewList(new AsyncCallback<UserList>() {
       @Override
-      public void onFailure(Throwable caught) {
-        //To change body of implemented methods use File | Settings | File Templates.
-      }
+      public void onFailure(Throwable caught) {}
 
       @Override
       public void onSuccess(UserList result) {
@@ -310,10 +307,6 @@ public class Navigation implements RequiresResize {
     setScrollPanelWidth(listScrollPanel);
     npfHelper.onResize();
     avpHelper.onResize();
-  }
-
-  private class ButtonClickEvent extends ClickEvent {
-
   }
 
   private boolean createdByYou(UserList ul) {
@@ -601,7 +594,7 @@ public class Navigation implements RequiresResize {
       r1.add(getUserListText2(ul.getClassMarker()));
     }
 
-    if (createdByYou(ul) && !ul.getName().equals(UserListManager.MY_LIST)) {
+    if (createdByYou(ul) && !ul.getName().equals(UserList.MY_LIST)) {
       r1 = new FluidRow();
       w.add(r1);
       r1.add(new HTML("<b>Created by you.</b>"));
