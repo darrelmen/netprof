@@ -16,15 +16,12 @@ import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
@@ -33,7 +30,6 @@ import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseFormatter;
 
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -60,11 +56,11 @@ public class CommentNPFExercise extends NPFExercise {
    */
   @Override
   protected Widget getQuestionContent(Exercise e, String content) {
+    clickedFields = new HashSet<String>();
+
     Panel column = new FlowPanel();
     column.getElement().setId("QuestionContent");
     column.setWidth("100%");
-
-    clickedFields = new HashSet<String>();
 
     column.add(getEntry(e, "foreignLanguage", ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getRefSentence()));
     column.add(getEntry(e, "transliteration", ExerciseFormatter.TRANSLITERATION, e.getTranslitSentence()));
@@ -73,20 +69,23 @@ public class CommentNPFExercise extends NPFExercise {
     return column;
   }
 
+  /**
+   * @see #getScoringAudioPanel(mitll.langtest.shared.Exercise, String)
+   * @param audioPanel
+   * @param exercise
+   * @param audioRef
+   * @return
+   */
   protected Widget getAudioPanelContent(ASRScoringAudioPanel audioPanel, Exercise exercise, String audioRef) {
-    ExerciseAnnotation audioAnnotation = exercise.getAnnotation(audioRef);
-
-    return getEntry(audioRef, audioPanel, audioAnnotation);
+    return getEntry(audioRef, audioPanel, exercise.getAnnotation(audioRef),true);
   }
 
   private Widget getEntry(Exercise e, final String field, final String label, String value) {
-    ExerciseAnnotation currentAnnotation = e.getAnnotation(field);
-    return getEntry(field, label, value, currentAnnotation);
+    return getEntry(field, label, value, e.getAnnotation(field));
   }
 
   private Widget getEntry(final String field, final String label, String value, ExerciseAnnotation annotation) {
-    Panel nameValueRow = getContentWidget(label, value);
-    return getEntry(field, nameValueRow, annotation);
+    return getEntry(field, getContentWidget(label, value, true), annotation,false);
   }
 
   /**
@@ -99,15 +98,16 @@ public class CommentNPFExercise extends NPFExercise {
    * @paramx label
    * @paramx value
    */
-  private Widget getEntry(final String field, Widget content, ExerciseAnnotation annotation) {
+  private Widget getEntry(final String field, Widget content, ExerciseAnnotation annotation, boolean isAudio) {
     final Panel commentRow = new FlowPanel();
     final Button commentButton = new Button();
+    final TextBox commentEntryText = new TextBox();
 
-    final FocusWidget commentEntry = makeCommentEntry(field, annotation,commentRow,commentButton);
+    FieldInfo fieldInfo = new FieldInfo(field);
+    final FocusWidget commentEntry = makeCommentEntry(fieldInfo, annotation,commentEntryText,commentRow,commentButton);
 
-    boolean alreadyMarkedCorrect = annotation == null || annotation.status == null || annotation.status.equals("correct");
-    System.out.println("field " +  field+
-        " annotation " + annotation + " correct " + alreadyMarkedCorrect);
+    boolean alreadyMarkedCorrect = annotation == null || annotation.status == null || annotation.isCorrect();
+    System.out.println("getEntry : field " +  field+ " annotation " + annotation + " correct " + alreadyMarkedCorrect);
     getQCWidget(commentButton,field, commentEntry, alreadyMarkedCorrect, commentRow,
         !alreadyMarkedCorrect ? annotation.comment : "");
 
@@ -124,23 +124,8 @@ public class CommentNPFExercise extends NPFExercise {
     row.add(commentButton);
 
     FocusPanel focusWidget = new FocusPanel(row);
-    focusWidget.addMouseOverHandler(new MouseOverHandler() {
-      @Override
-      public void onMouseOver(MouseOverEvent event) {
-        if (!clickedFields.contains(field)) {
-          showQC(commentButton);
-
-        }
-      }
-    });
-    focusWidget.addMouseOutHandler(new MouseOutHandler() {
-      @Override
-      public void onMouseOut(MouseOutEvent event) {
-        if (!clickedFields.contains(field)) {
-          hideQC(commentButton);
-        }
-      }
-    });
+    HandlerRegistration mouseOver = getMouseOver(field, commentButton, focusWidget);
+    HandlerRegistration mouseOut = getMouseOut(field, commentButton, focusWidget);
 
     Panel rowContainer = new FlowPanel();
     rowContainer.addStyleName("topFiveMargin");
@@ -149,14 +134,96 @@ public class CommentNPFExercise extends NPFExercise {
     rowContainer.add(commentRow);
     rowContainer.setWidth("100%");
 
+    showOrHideCommentButton(field, commentButton, alreadyMarkedCorrect);
+    if (isAudio) audioInfo = new AudioInfo(field, commentEntryText, commentButton,focusWidget,mouseOver,mouseOut,fieldInfo);
+    return rowContainer;
+  }
+
+  private HandlerRegistration getMouseOut(final String field, final Button commentButton, FocusPanel focusWidget) {
+    return focusWidget.addMouseOutHandler(new MouseOutHandler() {
+        @Override
+        public void onMouseOut(MouseOutEvent event) {
+          if (!inClickedFields(field)) {
+            hideQC(commentButton);
+          }
+        }
+      });
+  }
+
+  private HandlerRegistration getMouseOver(final String field, final Button commentButton, FocusPanel focusWidget) {
+    return focusWidget.addMouseOverHandler(new MouseOverHandler() {
+        @Override
+        public void onMouseOver(MouseOverEvent event) {
+          if (!inClickedFields(field)) {
+            System.out.println("getMouseOver : can't find " + field + " in " + clickedFields);
+            showQC(commentButton);
+          }
+        }
+      });
+  }
+
+  private boolean inClickedFields(String field) {
+    return clickedFields.contains(field) || clickedFields.contains(field.replaceAll(".wav",".mp3"));
+  }
+
+  @Override
+  protected void setAudioRef(String audioRef) {
+    if (!audioRef.equals(audioInfo.audioRef)) {
+      ExerciseAnnotation annotation = exercise.getAnnotation(audioRef);
+      boolean alreadyMarkedCorrect = annotation == null || annotation.status == null || annotation.isCorrect();
+
+      showOrHideCommentButton(audioRef, audioInfo.commentButton, alreadyMarkedCorrect);
+      String comment = annotation == null ? "" : annotation.comment;
+      setButtonTitle(audioInfo.commentButton, alreadyMarkedCorrect, comment);
+      audioInfo.commentEntryText.setText(comment);
+
+      audioInfo.mouseOver.removeHandler();
+      audioInfo.mouseOut.removeHandler();
+
+      audioInfo.mouseOver = getMouseOver(audioRef, audioInfo.commentButton, audioInfo.focusWidget);
+      audioInfo.mouseOut  = getMouseOut(audioRef, audioInfo.commentButton, audioInfo.focusWidget);
+      audioInfo.fieldInfo.field = audioRef;
+      System.out.println("clickedFields now "+ clickedFields);
+    }
+  }
+
+  private AudioInfo audioInfo;
+
+  private static class AudioInfo {
+    String audioRef;
+    TextBox commentEntryText;
+    Button commentButton;
+    FocusPanel focusWidget;
+    HandlerRegistration mouseOver;
+    HandlerRegistration mouseOut;
+    FieldInfo fieldInfo;
+
+    public AudioInfo(String audioRef, TextBox commentEntryText, Button commentButton, FocusPanel focusWidget,
+                     HandlerRegistration mouseOver, HandlerRegistration mouseOut, FieldInfo fieldInfo) {
+      this.audioRef = audioRef;
+      this.commentEntryText = commentEntryText;
+      this.commentButton = commentButton;
+      this.focusWidget = focusWidget;
+      this.mouseOut = mouseOut;
+      this.mouseOver = mouseOver;
+      this.fieldInfo = fieldInfo;
+    }
+  }
+
+  private static class FieldInfo {
+    String field;
+    public FieldInfo(String field) { this.field = field;}
+  }
+
+  private void showOrHideCommentButton(String field, Button commentButton, boolean alreadyMarkedCorrect) {
     if (alreadyMarkedCorrect) {
       hideQC(commentButton);
+      clickedFields.remove(field);
     }
     else {
       showQCHasComment(commentButton);
       clickedFields.add(field);
     }
-    return rowContainer;
   }
 
   private Button getQCWidget(final Button child,final String field, final FocusWidget commentEntry,
@@ -173,19 +240,22 @@ public class CommentNPFExercise extends NPFExercise {
       }
     });
 
+    setButtonTitle(child, alreadyMarkedCorrect, comment);
+    return child;
+  }
+
+  private void setButtonTitle(Button child, boolean alreadyMarkedCorrect, String comment) {
     if (alreadyMarkedCorrect) {
       child.setTitle("Add a comment");
     } else {
       child.setTitle(comment);
     }
-    return child;
   }
 
   private void showQC(Panel qcCol) {
     qcCol.removeStyleName("comment-button-group-new-hide");
     qcCol.addStyleName("comment-button-group-new");
   }
-
 
   private void hideQC(Panel qcCol) {
     qcCol.addStyleName("comment-button-group-new-hide");
@@ -199,24 +269,13 @@ public class CommentNPFExercise extends NPFExercise {
 
   private void populateCommentRow(FocusWidget commentEntry, Panel commentRow) {
     commentRow.setVisible(false);
-
-    final Label commentLabel = getCommentLabel();
-
-    commentRow.add(commentLabel);
+    commentRow.add(getCommentLabel());
     commentRow.add(commentEntry);
   }
 
-  private Label getCommentLabel() {
-    final Label commentLabel = new Label("comment?");
-    DOM.setStyleAttribute(commentLabel.getElement(), "backgroundColor", "#ff0000");
-    commentLabel.setVisible(true);
-    commentLabel.addStyleName("ImageOverlay");
-    return commentLabel;
-  }
-
-  private FocusWidget makeCommentEntry(final String field, ExerciseAnnotation annotation, final Panel commentRow,
+  private FocusWidget makeCommentEntry(final FieldInfo fieldInfo, ExerciseAnnotation annotation,
+                                       final TextBox commentEntry,final Panel commentRow,
                                        final Button commentButton) {
-    final TextBox commentEntry = new TextBox();
     commentEntry.addStyleName("topFiveMargin");
     if (annotation != null) {
       commentEntry.setText(annotation.comment);
@@ -226,26 +285,23 @@ public class CommentNPFExercise extends NPFExercise {
     commentEntry.addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
-        postIncorrect(commentEntry, field);
+        postIncorrect(commentEntry, fieldInfo.field);
         commentButton.setTitle(commentEntry.getText());
       }
     });
     commentEntry.addKeyPressHandler(new KeyPressHandler() {
       @Override
       public void onKeyPress(KeyPressEvent event) {
-        char keyPress = event.getCharCode();
-        int key = (int) keyPress;
-        if (keyPress == KeyCodes.KEY_ENTER || key == 0) {
-       //   System.out.println("\tGot enter key " + keyPress);
-          postIncorrect(commentEntry, field);
+        int keyCode = event.getNativeEvent ().getKeyCode();
+        if (keyCode == KeyCodes.KEY_ENTER) {
+//          System.out.println("\tGot enter key '" + keyCode + "'");
           commentRow.setVisible(false);
-          commentEntry.setFocus(false);
+          postIncorrect(commentEntry, fieldInfo.field);
           commentButton.setTitle(commentEntry.getText());
         }
-      /*  else {
-          System.out.println("\tdid not get enter key '" + keyPress + "' (" +key+
-            ") vs " + KeyCodes.KEY_ENTER  + " event " + event );
-        }*/
+        else {
+//          System.out.println("\tdid not get enter key '" + keyCode + " " +KeyCodes.KEY_ENTER  + " event " + event );
+        }
       }
     });
     return commentEntry;
@@ -256,44 +312,11 @@ public class CommentNPFExercise extends NPFExercise {
     addIncorrectComment(commentToPost, field);
   }
 
-  protected void addIncorrectComment(final String commentToPost, final String field) {
-    System.out.println(new Date() + " : post to server " + exercise.getID() +
-      " field " + field + " commentLabel " + commentToPost + " is incorrect");
-    final long then = System.currentTimeMillis();
-    service.addAnnotation(exercise.getID(), field, "incorrect", commentToPost, controller.getUser(),new AsyncCallback<Void>() {
-      @Override
-      public void onFailure(Throwable caught) {
-      }
-
-      @Override
-      public void onSuccess(Void result) {
-        long now = System.currentTimeMillis();
-        System.out.println("\t" + new Date() + " : posted to server " + exercise.getID() +
-          " field " + field + " commentLabel " + commentToPost + " is incorrect, took " + (now - then) + " millis");
-
-      }
-    });
-  }
-
-  private void reactToClick( Panel commentRow, FocusWidget commentEntry) {
+  private void reactToClick(Panel commentRow, FocusWidget commentEntry) {
     boolean visible = commentRow.isVisible();
     commentRow.setVisible(!visible);
-    commentEntry.setFocus(!visible);
-  }
-
-  private Panel getContentWidget(String label, String value) {
-    Panel nameValueRow = new FlowPanel();
-    nameValueRow.getElement().setId("nameValueRow_" + label);
-    nameValueRow.addStyleName("Instruction");
-
-    InlineHTML foreignPhrase = new InlineHTML(label);
-    foreignPhrase.addStyleName("Instruction-title");
-    nameValueRow.add(foreignPhrase);
-
-    InlineHTML englishPhrase = new InlineHTML(value);
-    englishPhrase.addStyleName("Instruction-data-with-wrap");
-    nameValueRow.add(englishPhrase);
-    englishPhrase.addStyleName("leftFiveMargin");
-    return nameValueRow;
+    if (!visible) {
+      commentEntry.setFocus(!visible);
+    }
   }
 }
