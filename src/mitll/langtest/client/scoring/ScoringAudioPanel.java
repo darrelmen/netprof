@@ -31,29 +31,30 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   private boolean showOnlyOneExercise = false; // true for when called from the headstart website
 
   /**
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, int, boolean, mitll.langtest.client.exercise.ExerciseController, ScoreListener)
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, int, mitll.langtest.client.exercise.ExerciseController, ScoreListener)
    * @param service
    * @param numRepeats
    * @param gaugePanel
    */
   public ScoringAudioPanel(LangTestDatabaseAsync service,
                            int numRepeats, ExerciseController controller, ScoreListener gaugePanel) {
-    this(null, null, service, numRepeats, controller, SHOW_SPECTROGRAM, gaugePanel);
+    this(null, null, service, numRepeats, controller, SHOW_SPECTROGRAM, gaugePanel, 23);
   }
 
   /**
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener)
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener, int)
    * @param path
    * @param refSentence
    * @param service
    * @param numRepeats
    * @param showSpectrogram
    * @param gaugePanel
+   * @param rightMargin
    */
   public ScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
                            int numRepeats, ExerciseController controller,
-                           boolean showSpectrogram, ScoreListener gaugePanel) {
-    super(path, service, controller, showSpectrogram, gaugePanel);
+                           boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin) {
+    super(path, service, controller, showSpectrogram, gaugePanel, rightMargin);
     this.refSentence = refSentence;
     showOnlyOneExercise = controller.showOnlyOneExercise();
     addClickHandlers(numRepeats);
