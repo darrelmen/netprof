@@ -27,10 +27,10 @@ import java.util.Set;
  */
 public class UserListManager {
   private static Logger logger = Logger.getLogger(UserListManager.class);
-
-  public static final String MY_LIST = "Favorites";
+  private static final String MY_FAVORITES = "My Favorites";
 
   private final UserDAO userDAO;
+  private final ReviewedDAO reviewedDAO;
   private int i = 0;
 
   private UserExerciseDAO userExerciseDAO;
@@ -39,11 +39,21 @@ public class UserListManager {
   private UserListExerciseJoinDAO userListExerciseJoinDAO;
   private AnnotationDAO annotationDAO;
 
-  public UserListManager(UserDAO userDAO, UserListDAO userListDAO,UserListExerciseJoinDAO userListExerciseJoinDAO,AnnotationDAO annotationDAO ) {
+  // TODO : DAO for  reviewed
+  private Set<String> reviewedExercises = new HashSet<String>();
+  private Set<String> incorrect = new HashSet<String>();
+
+  public UserListManager(UserDAO userDAO, UserListDAO userListDAO,UserListExerciseJoinDAO userListExerciseJoinDAO,
+                         AnnotationDAO annotationDAO,ReviewedDAO reviewedDAO ) {
     this.userDAO = userDAO;
     this.userListDAO = userListDAO;
     this.userListExerciseJoinDAO = userListExerciseJoinDAO;
     this.annotationDAO = annotationDAO;
+    this.reviewedDAO = reviewedDAO;
+
+    incorrect = annotationDAO.getIncorrectIds();
+    reviewedExercises = reviewedDAO.getReviewed();
+
   }
 
   /**
@@ -69,7 +79,7 @@ public class UserListManager {
     } else {
       UserList e = new UserList(i++, userWhere, name, description, dliClass, System.currentTimeMillis(), isPrivate);
       userListDAO.add(e);
-      logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists for " + userid);
+      logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists total, for " + userid);
       return e;
     }
   }
@@ -106,9 +116,7 @@ public class UserListManager {
     }
 
     if (listsForUser.isEmpty()) {
-      UserList userList = createUserList(userid, MY_LIST, "My Favorites", "", true);
-      if (userList == null) return Collections.emptyList();
-      else return Collections.singletonList(userList);
+      logger.error("getListsForUser - list is empty?? " + listsForUser.size() + "(" +listsForUser+ ") for " + userid);
     }
     else {
       listsForUser.remove(favorite);
@@ -120,8 +128,13 @@ public class UserListManager {
     return listsForUser;
   }
 
+  public UserList createFavorites(long userid) {
+    logger.debug("createFavorites for " + userid);
+    return createUserList(userid, UserList.MY_LIST, MY_FAVORITES, "", true);
+  }
+
   private boolean isFavorite(UserList userList) {
-    return userList.getName().equals(MY_LIST);
+    return userList.getName().equals(UserList.MY_LIST);
   }
 
   /**
@@ -129,15 +142,23 @@ public class UserListManager {
    * @return
    */
   public UserList getReviewList() {
-    UserList e = new UserList(i++, new User(-1,89,0,0,"","",false),
-        "Review", "Items to review", "Review", System.currentTimeMillis(), false);
-
-    List<UserExercise> onList = new ArrayList<UserExercise>();
     List<UserExercise> allKnown = userExerciseDAO.getWhere(incorrect);
 
     Map<String, UserExercise> idToUser = new HashMap<String, UserExercise>();
-    for (UserExercise ue : allKnown) idToUser.put(ue.getID(),ue);
+    for (UserExercise ue : allKnown) idToUser.put(ue.getID(), ue);
 
+    List<UserExercise> onList = getReviewedUserExercises(idToUser, incorrect);
+
+    logger.debug("getReviewList ids #=" + incorrect.size() + " yielded " + onList.size());
+
+    UserList userList = new UserList(i++, new User(-1,89,0,0,"","",false),
+      "Review", "Items to review", "Review", System.currentTimeMillis(), false);
+    userList.setExercises(onList);
+    return userList;
+  }
+
+  private List<UserExercise> getReviewedUserExercises(Map<String, UserExercise> idToUser, Set<String> incorrect) {
+    List<UserExercise> onList = new ArrayList<UserExercise>();
     for (String id : incorrect) {
       if (!id.startsWith(UserExercise.CUSTOM_PREFIX)) {
         Exercise byID = userExerciseDAO.getExercise(id);
@@ -150,11 +171,7 @@ public class UserListManager {
         if (idToUser.containsKey(id)) onList.add(idToUser.get(id));
       }
     }
-
-    logger.debug("getReviewList ids #=" + incorrect.size() + " yielded " + onList.size() + " : " + onList);
-
-    e.setExercises(onList);
-    return e;
+    return onList;
   }
 
   /**
@@ -226,12 +243,8 @@ public class UserListManager {
     }
   }
 
-  // TODO : replace with DAO for this
- // private List<UserAnnotation> annotations = new ArrayList<UserAnnotation>();
-
   public void addAnnotation(String exerciseID, String field, String status, String comment, long userID) {
-    logger.info("write to database! " +exerciseID + " " + field + " " + status + " " + comment);
-  //  annotations.add(new UserAnnotation(-1,exerciseID, field, status, comment, userID,System.currentTimeMillis()));
+    logger.info("addAnnotation write to database! " +exerciseID + " " + field + " " + status + " " + comment);
     annotationDAO.add(new UserAnnotation(-1,exerciseID, field, status, comment, userID,System.currentTimeMillis()));
 
     if (status.equalsIgnoreCase("incorrect")) {
@@ -251,16 +264,18 @@ public class UserListManager {
       logger.debug("addAnnotations : found " + latestByExerciseID + " for " + exercise.getID());
       for (Map.Entry<String, ExerciseAnnotation> pair : latestByExerciseID.entrySet()) {
         exercise.addAnnotation(pair.getKey(), pair.getValue().status, pair.getValue().comment);
-
       }
     }
   }
 
-  // TODO : DAO for incorrect & reviewed
-  Set<String> reviewedExercises = new HashSet<String>();
-  Set<String> incorrect = new HashSet<String>();
-  public void markReviewed(String id) {
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#markReviewed
+   * @param id
+   * @param creatorID
+   */
+  public void markReviewed(String id, long creatorID) {
     reviewedExercises.add(id);
+    reviewedDAO.add(id,creatorID);
     logger.debug("markReviewed now " + reviewedExercises.size() + " reviewed exercises");
   }
   public Set<String> getReviewedExercises() { return reviewedExercises; }
