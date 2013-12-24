@@ -161,7 +161,7 @@ public interface LangTestDatabase extends RemoteService {
   void editItem(UserExercise userExercise);
 
   void addAnnotation(String exerciseID, String field, String status, String comment, long userID);
-  void markReviewed(String exid, boolean isCorrect);
+  void markReviewed(String exid, boolean isCorrect, long creatorID);
 
   UserList getReviewList();
 }
