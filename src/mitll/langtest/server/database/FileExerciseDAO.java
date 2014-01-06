@@ -534,7 +534,7 @@ public class FileExerciseDAO implements ExerciseDAO {
    */
   private String getRefSentence(String contentSentence) {
     String e1 = contentSentence.trim();
-    if (processSemicolons && e1.contains(";")) {
+/*    if (processSemicolons && e1.contains(";")) {
       logger.warn("found semi " + e1);
       String[] split = e1.split(";");
 
@@ -546,7 +546,7 @@ public class FileExerciseDAO implements ExerciseDAO {
       else {
         e1 = firstPhrase;
       }
-    }
+    }*/
     return e1.trim().replaceAll("-", " ");
   }
 
