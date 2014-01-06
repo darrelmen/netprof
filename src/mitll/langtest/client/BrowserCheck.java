@@ -28,8 +28,9 @@ public class BrowserCheck {
   public BrowserCheck checkForCompatibleBrowser() {
     if (browser.equals("Unknown")) getBrowserAndVersion();
     Integer min = browserToVersion.get(browser);
-    if (browser.equals("IE")) {
+    if (browser.toLowerCase().contains("ie")) { // just skip IE
       //Window.alert("Your browser is " + browser + ".<br></br>We recommend using either Firefox, Safari, or Chrome.");
+      return this;
     }
     if (min == null) {
       Window.alert("Your browser is " + browser + " version " + version + ". We strongly recommend any of " + browserToVersion.keySet());
@@ -45,7 +46,7 @@ public class BrowserCheck {
   }
 
   public boolean isIE7() { return getBrowserAndVersion().equals("IE 7"); }
-  public boolean isIE() { return browser.equals("IE"); }
+  //public boolean isIE() { return browser.equals("IE"); }
 
   /**
    * @see mitll.langtest.client.LangTest#getReleaseStatus()
@@ -85,7 +86,7 @@ public class BrowserCheck {
     return browser + " " + ver;
   }
 
-  public boolean isFirefox() { return browser.equals(FIREFOX); }
+ // public boolean isFirefox() { return browser.equals(FIREFOX); }
 
   private static native String getUserAgent() /*-{
     return navigator.userAgent.toLowerCase();
