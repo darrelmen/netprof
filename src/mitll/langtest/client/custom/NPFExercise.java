@@ -53,7 +53,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
   }
 
   /**
-   * @see #addQuestionContentRow(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.HorizontalPanel)
+   * @see #addQuestionContentRow
    * @param e
    * @param controller
    * @return
@@ -151,9 +151,10 @@ public class NPFExercise extends GoodwaveExercisePanel {
   }
 
   private void showPopup(String html, Widget target) {
+    Widget content = new HTML(html);
     final PopupPanel pleaseWait = new DecoratedPopupPanel();
     pleaseWait.setAutoHideEnabled(true);
-    pleaseWait.add(new HTML(html));
+    pleaseWait.add(content);
     pleaseWait.showRelativeTo(target);
    // pleaseWait.center();
 
