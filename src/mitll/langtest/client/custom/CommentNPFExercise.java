@@ -1,9 +1,11 @@
 package mitll.langtest.client.custom;
 
 import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.TextBox;
+import com.github.gwtbootstrap.client.ui.Tooltip;
+import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
@@ -12,16 +14,14 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
-import com.google.gwt.event.dom.client.MouseOutEvent;
-import com.google.gwt.event.dom.client.MouseOutHandler;
-import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
@@ -29,9 +29,6 @@ import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseFormatter;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -41,7 +38,8 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class CommentNPFExercise extends NPFExercise {
-  private Set<String> clickedFields;
+  //private Map<String,AudioInfo> fieldToAudioInfo = new HashMap<String, AudioInfo>();
+  private AudioInfo audioInfo;
 
   public CommentNPFExercise(Exercise e, ExerciseController controller, ListInterface listContainer,
                             float screenPortion, boolean addKeyHandler, String instance) {
@@ -56,8 +54,6 @@ public class CommentNPFExercise extends NPFExercise {
    */
   @Override
   protected Widget getQuestionContent(Exercise e, String content) {
-    clickedFields = new HashSet<String>();
-
     Panel column = new FlowPanel();
     column.getElement().setId("QuestionContent");
     column.setWidth("100%");
@@ -94,76 +90,65 @@ public class CommentNPFExercise extends NPFExercise {
    * @param field
    * @param annotation
    * @return
-   * @paramx commentToLeft
-   * @paramx label
-   * @paramx value
    */
   private Widget getEntry(final String field, Widget content, ExerciseAnnotation annotation, boolean isAudio) {
-    final Panel commentRow = new FlowPanel();
     final Button commentButton = new Button();
     final TextBox commentEntryText = new TextBox();
+    final PopupPanel commentPopup = new DecoratedPopupPanel();
+    commentPopup.setAutoHideEnabled(true);
+
+    HorizontalPanel hp = new HorizontalPanel();
+
+    hp.add(commentEntryText);
+    Button ok = new Button("OK");
+    ok.setType(ButtonType.PRIMARY);
+    ok.addStyleName("leftTenMargin");
+    ok.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        commentPopup.hide();
+      }
+    });
+    hp.add(ok);
+
+    Button clear = new Button("Clear");
+    clear.setType(ButtonType.INFO);
+    clear.addStyleName("leftFiveMargin");
+    clear.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        commentEntryText.setText("");
+        commentComplete(commentEntryText, field, commentButton);
+        commentPopup.hide();
+      }
+    });
+    hp.add(clear);
+    commentPopup.add(hp);
 
     FieldInfo fieldInfo = new FieldInfo(field);
-    final FocusWidget commentEntry = makeCommentEntry(fieldInfo, annotation,commentEntryText,commentRow,commentButton);
+    final FocusWidget commentEntry =
+      configureCommentTextBox(fieldInfo.field, annotation, commentEntryText, commentPopup, commentButton);
 
     boolean alreadyMarkedCorrect = annotation == null || annotation.status == null || annotation.isCorrect();
     System.out.println("getEntry : field " +  field+ " annotation " + annotation + " correct " + alreadyMarkedCorrect);
-    getQCWidget(commentButton,field, commentEntry, alreadyMarkedCorrect, commentRow,
-        !alreadyMarkedCorrect ? annotation.comment : "");
+    String comment = !alreadyMarkedCorrect ? annotation.comment : "";
+    getQCWidget(commentButton,
+      alreadyMarkedCorrect, commentPopup,
+      comment,commentEntry);
 
-    populateCommentRow(commentEntry, commentRow);
-
-    // comment to left, content to right
+    // content on left side, comment button on right
 
     Panel row = new HorizontalPanel();
-    row.setWidth("100%");
-    commentButton.addStyleName("floatRight");
     row.add(content);
-    content.setWidth("100%");
-
     row.add(commentButton);
-
     FocusPanel focusWidget = new FocusPanel(row);
-    HandlerRegistration mouseOver = getMouseOver(field, commentButton, focusWidget);
-    HandlerRegistration mouseOut = getMouseOut(field, commentButton, focusWidget);
-
-    Panel rowContainer = new FlowPanel();
-    rowContainer.addStyleName("topFiveMargin");
-    rowContainer.addStyleName("blockStyle");
-    rowContainer.add(focusWidget);
-    rowContainer.add(commentRow);
-    rowContainer.setWidth("100%");
-
-    showOrHideCommentButton(field, commentButton, alreadyMarkedCorrect);
-    if (isAudio) audioInfo = new AudioInfo(field, commentEntryText, commentButton,focusWidget,mouseOver,mouseOut,fieldInfo);
-    return rowContainer;
-  }
-
-  private HandlerRegistration getMouseOut(final String field, final Button commentButton, FocusPanel focusWidget) {
-    return focusWidget.addMouseOutHandler(new MouseOutHandler() {
-        @Override
-        public void onMouseOut(MouseOutEvent event) {
-          if (!inClickedFields(field)) {
-            hideQC(commentButton);
-          }
-        }
-      });
-  }
-
-  private HandlerRegistration getMouseOver(final String field, final Button commentButton, FocusPanel focusWidget) {
-    return focusWidget.addMouseOverHandler(new MouseOverHandler() {
-        @Override
-        public void onMouseOver(MouseOverEvent event) {
-          if (!inClickedFields(field)) {
-            System.out.println("getMouseOver : can't find " + field + " in " + clickedFields);
-            showQC(commentButton);
-          }
-        }
-      });
-  }
-
-  private boolean inClickedFields(String field) {
-    return clickedFields.contains(field) || clickedFields.contains(field.replaceAll(".wav",".mp3"));
+      showOrHideCommentButton(commentButton, alreadyMarkedCorrect);
+    if (isAudio) {
+      // TODO fixx this
+      // fieldToAudioInfo.put(field,new AudioInfo(field, commentEntryText, commentButton, focusWidget, fieldInfo));
+      audioInfo = new AudioInfo(field, commentEntryText, commentButton, /*focusWidget, */fieldInfo);
+    }
+    return row;
   }
 
   @Override
@@ -172,40 +157,29 @@ public class CommentNPFExercise extends NPFExercise {
       ExerciseAnnotation annotation = exercise.getAnnotation(audioRef);
       boolean alreadyMarkedCorrect = annotation == null || annotation.status == null || annotation.isCorrect();
 
-      showOrHideCommentButton(audioRef, audioInfo.commentButton, alreadyMarkedCorrect);
+      showOrHideCommentButton(audioInfo.commentButton, alreadyMarkedCorrect);
       String comment = annotation == null ? "" : annotation.comment;
       setButtonTitle(audioInfo.commentButton, alreadyMarkedCorrect, comment);
       audioInfo.commentEntryText.setText(comment);
-
-      audioInfo.mouseOver.removeHandler();
-      audioInfo.mouseOut.removeHandler();
-
-      audioInfo.mouseOver = getMouseOver(audioRef, audioInfo.commentButton, audioInfo.focusWidget);
-      audioInfo.mouseOut  = getMouseOut(audioRef, audioInfo.commentButton, audioInfo.focusWidget);
       audioInfo.fieldInfo.field = audioRef;
-      System.out.println("clickedFields now "+ clickedFields);
     }
   }
 
-  private AudioInfo audioInfo;
+  // TODO : handle multiple audio infos!
 
   private static class AudioInfo {
     String audioRef;
     TextBox commentEntryText;
     Button commentButton;
-    FocusPanel focusWidget;
-    HandlerRegistration mouseOver;
-    HandlerRegistration mouseOut;
+   // FocusPanel focusWidget;
     FieldInfo fieldInfo;
 
-    public AudioInfo(String audioRef, TextBox commentEntryText, Button commentButton, FocusPanel focusWidget,
-                     HandlerRegistration mouseOver, HandlerRegistration mouseOut, FieldInfo fieldInfo) {
+    public AudioInfo(String audioRef, TextBox commentEntryText, Button commentButton,// FocusPanel focusWidget,
+                     FieldInfo fieldInfo) {
       this.audioRef = audioRef;
       this.commentEntryText = commentEntryText;
       this.commentButton = commentButton;
-      this.focusWidget = focusWidget;
-      this.mouseOut = mouseOut;
-      this.mouseOver = mouseOver;
+     // this.focusWidget = focusWidget;
       this.fieldInfo = fieldInfo;
     }
   }
@@ -215,68 +189,62 @@ public class CommentNPFExercise extends NPFExercise {
     public FieldInfo(String field) { this.field = field;}
   }
 
-  private void showOrHideCommentButton(String field, Button commentButton, boolean alreadyMarkedCorrect) {
-    if (alreadyMarkedCorrect) {
-      hideQC(commentButton);
-      clickedFields.remove(field);
+  private void showOrHideCommentButton(UIObject commentButton, boolean isCorrect) {
+    if (isCorrect) {
+      showQC(commentButton);
     }
     else {
       showQCHasComment(commentButton);
-      clickedFields.add(field);
     }
   }
 
-  private Button getQCWidget(final Button child,final String field, final FocusWidget commentEntry,
-                            final boolean alreadyMarkedCorrect, final Panel commentRow, String comment) {
-    child.setIcon(IconType.COMMENT);
-    child.setSize(ButtonSize.MINI);
-    child.addStyleName("rightFiveMargin");
-    child.addClickHandler(new ClickHandler() {
+  private Button getQCWidget(final Button commentButton,
+                            final boolean alreadyMarkedCorrect, final PopupPanel commentPopup, String comment,
+                            final FocusWidget commentEntry) {
+    commentButton.setIcon(IconType.COMMENT);
+    commentButton.setSize(ButtonSize.MINI);
+    commentButton.addStyleName("leftFiveMargin");
+    final Tooltip tooltip = setButtonTitle(commentButton, alreadyMarkedCorrect, comment);
+    commentButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        clickedFields.add(field);
-        showQCHasComment(child);
-        reactToClick( commentRow, commentEntry);
+        commentPopup.showRelativeTo(commentButton);
+        commentEntry.setFocus(true);
+        tooltip.hide();
       }
     });
 
-    setButtonTitle(child, alreadyMarkedCorrect, comment);
-    return child;
+    showQC(commentButton);
+    return commentButton;
   }
 
-  private void setButtonTitle(Button child, boolean alreadyMarkedCorrect, String comment) {
-    if (alreadyMarkedCorrect) {
-      child.setTitle("Add a comment");
-    } else {
-      child.setTitle(comment);
-    }
+  private Tooltip setButtonTitle(Widget button, boolean isCorrect, String comment) {
+    String tip = isCorrect ? "Add a comment" : "\""+ comment + "\"";
+    return createAddTooltip(button, tip, Placement.RIGHT);
   }
 
-  private void showQC(Panel qcCol) {
-    qcCol.removeStyleName("comment-button-group-new-hide");
+  private void showQC(UIObject qcCol) {
     qcCol.addStyleName("comment-button-group-new");
   }
 
-  private void hideQC(Panel qcCol) {
-    qcCol.addStyleName("comment-button-group-new-hide");
-    qcCol.removeStyleName("comment-button-group-new");
-  }
-
-  private void showQCHasComment(Button child) {
-    child.removeStyleName("comment-button-group-new-hide");
+  private void showQCHasComment(UIObject child) {
     child.removeStyleName("comment-button-group-new");
   }
 
-  private void populateCommentRow(FocusWidget commentEntry, Panel commentRow) {
-    commentRow.setVisible(false);
-    commentRow.add(getCommentLabel());
-    commentRow.add(commentEntry);
-  }
-
-  private FocusWidget makeCommentEntry(final FieldInfo fieldInfo, ExerciseAnnotation annotation,
-                                       final TextBox commentEntry,final Panel commentRow,
-                                       final Button commentButton) {
-    commentEntry.addStyleName("topFiveMargin");
+  /**
+   * For this field configure the commentEntry box to post annotation on blur and enter
+   *
+   * @param field for this field
+   * @param annotation fill in with existing annotation, if there is one
+   * @param commentEntry comment box to configure
+   * @paramx commentRow
+   * @param commentButton
+   * @return
+   */
+  private FocusWidget configureCommentTextBox(final String field, ExerciseAnnotation annotation,
+                                              final TextBox commentEntry,
+                                              final PopupPanel popup,
+                                              final Widget commentButton) {
     if (annotation != null) {
       commentEntry.setText(annotation.comment);
     }
@@ -285,8 +253,7 @@ public class CommentNPFExercise extends NPFExercise {
     commentEntry.addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
-        postIncorrect(commentEntry, fieldInfo.field);
-        commentButton.setTitle(commentEntry.getText());
+        commentComplete(commentEntry, field, commentButton);
       }
     });
     commentEntry.addKeyPressHandler(new KeyPressHandler() {
@@ -294,29 +261,29 @@ public class CommentNPFExercise extends NPFExercise {
       public void onKeyPress(KeyPressEvent event) {
         int keyCode = event.getNativeEvent ().getKeyCode();
         if (keyCode == KeyCodes.KEY_ENTER) {
-//          System.out.println("\tGot enter key '" + keyCode + "'");
-          commentRow.setVisible(false);
-          postIncorrect(commentEntry, fieldInfo.field);
-          commentButton.setTitle(commentEntry.getText());
-        }
-        else {
-//          System.out.println("\tdid not get enter key '" + keyCode + " " +KeyCodes.KEY_ENTER  + " event " + event );
+          commentComplete(commentEntry, field, commentButton);
+          popup.hide();
         }
       }
     });
     return commentEntry;
   }
 
+  private void commentComplete(TextBox commentEntry, String field, Widget commentButton) {
+    String comment = commentEntry.getText();
+    boolean isCorrect = comment.length() == 0;
+    if (isCorrect) {
+      addCorrectComment(field);
+    } else {
+      postIncorrect(commentEntry, field);
+    }
+    setButtonTitle(commentButton, isCorrect, comment);
+    showOrHideCommentButton(commentButton,isCorrect);
+    exercise.addAnnotation(field, isCorrect ? "correct" : "incorrect", comment);
+  }
+
   private void postIncorrect(TextBox commentEntry, String field) {
     final String commentToPost = commentEntry.getText();
     addIncorrectComment(commentToPost, field);
-  }
-
-  private void reactToClick(Panel commentRow, FocusWidget commentEntry) {
-    boolean visible = commentRow.isVisible();
-    commentRow.setVisible(!visible);
-    if (!visible) {
-      commentEntry.setFocus(!visible);
-    }
   }
 }

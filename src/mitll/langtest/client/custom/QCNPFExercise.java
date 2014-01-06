@@ -246,7 +246,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
         Boolean isIncorrect = checkBox.getValue();
         if (!isIncorrect) {
           incorrectSet.remove(field);
-          addCorrectAnnotation(field);
+          addCorrectComment(field);
         }
         commentRow.setVisible(isIncorrect);
         commentEntry.setFocus(isIncorrect);
@@ -257,7 +257,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     return checkBox;
   }
 
-  private void addCorrectAnnotation(String field) {
+/*  private void addCorrectAnnotation(String field) {
     System.out.println(new Date() +" : post to server " + exercise.getID() + " field " + field + " is correct");
     service.addAnnotation(exercise.getID(), field, "correct", "", controller.getUser(), new AsyncCallback<Void>() {
       @Override
@@ -268,5 +268,5 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
       public void onSuccess(Void result) {
       }
     });
-  }
+  }*/
 }
