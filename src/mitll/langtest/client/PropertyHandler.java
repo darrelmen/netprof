@@ -29,6 +29,7 @@ public class PropertyHandler {
   private static final String CRT_DATA_COLLECT_MODE = "crtDataCollect";
   private static final String COLLECT_AUDIO= "collectAudio";
   private static final String RECORD_TIMEOUT = "recordTimeout";
+  private static final String SHORT_RECORD_TIMEOUT = "shortRecordTimeout";
   private static final String TEACHER_VIEW = "teacherView";
   private static final String ADMIN_VIEW = "adminView";
   private static final String DATA_COLLECT_ADMIN_VIEW = "dataCollectAdminView";
@@ -72,6 +73,7 @@ public class PropertyHandler {
   private static final boolean DEFAULT_SHOW_TURK_TOKEN = false;
   private static final int DEFAULT_SEGMENT_REPEATS = 0;
   private static final int DEFAULT_TIMEOUT = 45000;
+  private static final int DEFAULT_SHORT_TIMEOUT = 15000;
   private static final int DEFAULT_GAME_TIME_SECONDS = 60;
   private static final String DEFAULT_EXERCISE = null;
   private static final int NUM_GRADES_TO_COLLECT_DEFAULT = 1;
@@ -120,6 +122,8 @@ public class PropertyHandler {
   private boolean timedGame = false;
   private String releaseDate;
   private int recordTimeout = DEFAULT_TIMEOUT;
+  private int shortRecordTimeout = DEFAULT_SHORT_TIMEOUT;
+
   private int gameTimeSeconds = DEFAULT_GAME_TIME_SECONDS;
   private float screenPortion = 1.0f;
   private boolean CRTDataCollectMode;
@@ -171,6 +175,7 @@ public class PropertyHandler {
       else if (key.equals(DATA_COLLECT_MODE)) dataCollectMode = getBoolean(value);
       else if (key.equals(CRT_DATA_COLLECT_MODE)) CRTDataCollectMode = getBoolean(value);
       else if (key.equals(RECORD_TIMEOUT)) recordTimeout = getInt(value, DEFAULT_TIMEOUT, RECORD_TIMEOUT);
+      else if (key.equals(SHORT_RECORD_TIMEOUT)) shortRecordTimeout = getInt(value, DEFAULT_SHORT_TIMEOUT, SHORT_RECORD_TIMEOUT);
       else if (key.equals(COLLECT_AUDIO)) collectAudio = getBoolean(value);
       else if (key.equals(ADMIN_VIEW)) adminView = getBoolean(value);
       else if (key.equals(MINIMAL_UI)) minimalUI = getBoolean(value);
@@ -415,7 +420,7 @@ public class PropertyHandler {
   }
 
   public int getRecordTimeout() {
-    return recordTimeout;
+    return isDataCollectMode() ? recordTimeout : shortRecordTimeout;
   }
 
   public float getScreenPortion() {
