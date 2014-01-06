@@ -290,18 +290,29 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   protected void addIncorrectComment(final String commentToPost, final String field) {
     System.out.println(new Date() + " : post to server " + exercise.getID() +
       " field " + field + " commentLabel " + commentToPost + " is incorrect");
-    final long then = System.currentTimeMillis();
-    service.addAnnotation(exercise.getID(), field, "incorrect", commentToPost, controller.getUser(),new AsyncCallback<Void>() {
+    //  final long then = System.currentTimeMillis();
+    String status = "incorrect";
+    addAnnotation(field, status, commentToPost);
+  }
+
+  protected void addCorrectComment(final String field) {
+    System.out.println(new Date() + " : post to server " + exercise.getID() +
+      " field " + field + " is correct");
+    //  final long then = System.currentTimeMillis();
+    String status = "correct";
+    addAnnotation(field, status, "");
+  }
+
+  private void addAnnotation(final String field, final String status, final String commentToPost) {
+    service.addAnnotation(exercise.getID(), field, status, commentToPost, controller.getUser(), new AsyncCallback<Void>() {
       @Override
-      public void onFailure(Throwable caught) {
-      }
+      public void onFailure(Throwable caught) {}
 
       @Override
       public void onSuccess(Void result) {
-        long now = System.currentTimeMillis();
-        System.out.println("\t" + new Date() + " : posted to server " + exercise.getID() +
-          " field " + field + " commentLabel " + commentToPost + " is incorrect, took " + (now - then) + " millis");
-
+        //long now = System.currentTimeMillis();
+        System.out.println("\t" + new Date() + " : onSuccess : posted to server " + exercise.getID() +
+          " field " + field + " commentLabel " + commentToPost + " is " + status);//, took " + (now - then) + " millis");
       }
     });
   }
@@ -330,6 +341,13 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     return commentLabel;
   }
 
+  /**
+   * @see mitll.langtest.client.custom.NPFExercise#makeAddToList(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController)
+   * @param w
+   * @param tip
+   * @param placement
+   * @return
+   */
   protected Tooltip createAddTooltip(Widget w, String tip, Placement placement) {
     Tooltip tooltip = new Tooltip();
     tooltip.setWidget(w);
