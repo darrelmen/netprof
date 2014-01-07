@@ -289,7 +289,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
   protected void addIncorrectComment(final String commentToPost, final String field) {
     System.out.println(new Date() + " : post to server " + exercise.getID() +
-      " field " + field + " commentLabel " + commentToPost + " is incorrect");
+      " field " + field + " commentLabel '" + commentToPost + "' is incorrect");
     //  final long then = System.currentTimeMillis();
     String status = "incorrect";
     addAnnotation(field, status, commentToPost);
