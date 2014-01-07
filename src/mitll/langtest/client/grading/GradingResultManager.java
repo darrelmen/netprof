@@ -98,7 +98,7 @@ public class GradingResultManager extends ResultManager {
   }
 
   /**
-   * @see mitll.langtest.client.result.ResultManager#getTable
+   * @see mitll.langtest.client.result.ResultManager#addColumnsToTable
    * @param table
    * @return
    */
@@ -108,7 +108,7 @@ public class GradingResultManager extends ResultManager {
   }
 
   /**
-   * @see mitll.langtest.client.result.ResultManager#getTable
+   * @see mitll.langtest.client.result.ResultManager#addColumnsToTable(boolean, java.util.Collection, int, int, com.google.gwt.user.cellview.client.CellTable)
    * @param grades
    * @param grader
    * @param numGrades
@@ -130,7 +130,7 @@ public class GradingResultManager extends ResultManager {
    * <br></br>
    * Accepts adding a second grade if first isn't done yet.
    *
-   * @see #getTable
+   * @see #addResultColumn
    * @param grades
    * @param grader who is grading
    * @param editable only the last column is editable
