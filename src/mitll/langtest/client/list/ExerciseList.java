@@ -563,7 +563,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param result
    */
   public Panel makeExercisePanel(Exercise result) {
-    System.out.println("ExerciseList.makeExercisePanel : " +result.getID());
+   // System.out.println("ExerciseList.makeExercisePanel : " +result.getID());
 
     Panel exercisePanel = factory.getExercisePanel(result);
     innerContainer.setWidget(exercisePanel);

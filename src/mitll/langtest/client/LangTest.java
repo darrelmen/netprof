@@ -186,7 +186,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
-            //Window.alert("logMessage : Couldn't contact server.  Please check your network connection.");
+            // what do we do on failure?
           }
 
           @Override
@@ -264,35 +264,18 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     // second row ---------------
     secondRow = new FluidRow();
-/*    verticalContainer.add(secondRow);
     secondRow.getElement().setId("secondRow");
+
     // third row ---------------
 
     Panel thirdRow = new HorizontalPanel();
-    thirdRow.getElement().setId("thirdRow");
-
-    Panel leftColumn = new SimplePanel();
-    thirdRow.add(leftColumn);
-    leftColumn.getElement().setId("leftColumn");
-
-    verticalContainer.add(thirdRow);*/
-  //  widgets.add(secondRow);
-    secondRow.getElement().setId("secondRow");
-   // secondRow.addStyleName("overflowStyle");
-
-    // third row ---------------
-
-   Panel thirdRow = new HorizontalPanel();
-//    Panel thirdRow = new FluidRow();
     Panel leftColumn = new SimplePanel();
     thirdRow.add(leftColumn);
     thirdRow.getElement().setId("outerThirdRow");
 
-  //  widgets.add(thirdRow);
     FluidContainer bothSecondAndThird = new FluidContainer();
     bothSecondAndThird.add(secondRow);
     bothSecondAndThird.add(thirdRow);
-  //  widgets.add(bothSecondAndThird);
 
     if ((isCRTDataCollectMode() || props.isDataCollectMode()) && !props.isFlashcardTeacherView()) {
       addProgressBar(verticalContainer);
@@ -310,7 +293,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     ListInterface listInterface = makeExerciseList(secondRow, leftColumn);
     if (getProps().isClassroomMode()) {
       navigation = new Navigation(service, userManager, this, listInterface);
-      //   belowFirstRow.add(navigation.getNav(secondRow,/*belowFirstRow,*/thirdRow, this, getProps()));
       belowFirstRow.add(navigation.getNav(bothSecondAndThird, this));
     }
     else {
@@ -330,14 +312,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     // don't do flash if we're doing text only collection
 
-    //System.out.println("user agent " + Window.Navigator.getUserAgent());
     if (shouldCollectAudio()) {
       makeFlashContainer();
-  //    currentExerciseVPanel.add(flashRecordPanel);
       belowFirstRow.add(flashRecordPanel);
-    }
-    else {
-      System.out.println("*not* allowing recording of audio.");
     }
 
     setPageTitle();
@@ -659,6 +636,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private ListInterface makeExerciseList(FluidRow secondRow, Panel leftColumn) {
     this.exerciseList = new ExerciseListLayout(props).makeExerciseList(secondRow, leftColumn, this, currentExerciseVPanel,service,this);
+    setFactory(exerciseList);
     return exerciseList;
   }
 
@@ -715,7 +693,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         checkLogin();
       }
 
-      public void gotDenial() {  showPopupOnDenial();   }
+      public void gotDenial() {
+        showPopupOnDenial();
+      }
 
       /**
        * @see mitll.langtest.client.recorder.FlashRecordPanelHeadless#noMicrophoneFound()
@@ -738,9 +718,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   /**
    * This determines which kind of exercise we're going to do.
-   * @see #gotUser(long)
+   * @see #makeExerciseList
    */
-  private void setFactory(final long userID) {
+  private void setFactory(ListInterface exerciseList) {
     final LangTest outer = this;
     if (props.isGoodwaveMode() && !props.isGrading()) {
       exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer, exerciseList, getScreenPortion()), userManager, 1);
@@ -774,7 +754,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     } else {
       exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer, exerciseList), userManager, 1);
     }
-    doEverythingAfterFactory(userID);
   }
 
   /**
@@ -932,7 +911,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (props.isDataCollectAdminView()) {
       checkForAdminUser();
     } else {
-      setFactory(userID);
+      doEverythingAfterFactory(userID);
     }
   }
 
