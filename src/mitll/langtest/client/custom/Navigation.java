@@ -155,7 +155,7 @@ public class Navigation implements RequiresResize {
             " ' target name '" + showEvent.getTarget().getName() + "'");*/
         String targetName = showEvent.getTarget() == null ? "" : showEvent.getTarget().toString();
 
-        System.out.println("getButtonRow2 : got shown event : '" +showEvent + "' target '" + targetName + "'");
+       // System.out.println("getButtonRow2 : got shown event : '" +showEvent + "' target '" + targetName + "'");
 
         boolean wasChapters = targetName.contains(CHAPTERS);
         Panel createdPanel = listInterface.getCreatedPanel();
