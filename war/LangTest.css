@@ -878,7 +878,7 @@ fieldset > legend {
         float: left;
     */
 
-    border-radius: 0px 0px 3px 0px;
+    border-radius: 0 0 3px 0;
     border-bottom: inset rgba(0, 0, 0, 0.1);
 }
 
@@ -888,14 +888,14 @@ fieldset > legend {
 }
 
 .comment-button-group-new {
-    opacity:0.50;
-    filter:alpha(opacity=50);
+    opacity:0.70;
+    filter:alpha(opacity=70);
 }
 
-.comment-button-group-new-hide {
+/*.comment-button-group-new-hide {
     opacity:0.00;
     filter:alpha(opacity=0);
-}
+}*/
 
 .questionContentPadding {
     padding-right: 93px;
