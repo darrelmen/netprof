@@ -91,11 +91,13 @@ public class AudioExercise extends ExerciseShell {
         return exerciseAnnotation;
       }
       else {
-        System.out.println("Can't find " + field + " in "+ fieldToAnnotation.keySet());
+        System.out.println("getAnnotation : Can't find " + field + " in "+ fieldToAnnotation.keySet());
       }
     }
     return fieldToAnnotation.get(field);
   }
+
+  public Collection<String> getFields() { return fieldToAnnotation.keySet(); }
 
   public String toString() {
     return super.toString() +" audio attr (" +getAudioAttributes().size()+
