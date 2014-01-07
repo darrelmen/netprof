@@ -92,12 +92,12 @@ public class ExerciseListLayout {
               props.isShowTurkToken(), props.showExercisesInOrder(), controller, props.isCRTDataCollectMode(), "response");
           } else {
             return new FlexSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
-              props.isShowTurkToken(), props.showExercisesInOrder(), controller, /*props.isCRTDataCollectMode()*/"flex");
+              props.isShowTurkToken(), props.showExercisesInOrder(), controller, "flex");
           }
         }
       } else {
         return new PagingExerciseList(currentExerciseVPanel, service, feedback,
-          props.isShowTurkToken(), props.showExercisesInOrder(), controller, /*props.isCRTDataCollectMode(), */"paging");
+          props.isShowTurkToken(), props.showExercisesInOrder(), controller, "paging");
       }
     }
   }
