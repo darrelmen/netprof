@@ -2,8 +2,6 @@ package mitll.langtest.client.custom;
 
 import com.github.gwtbootstrap.client.ui.DropdownButton;
 import com.github.gwtbootstrap.client.ui.NavLink;
-import com.github.gwtbootstrap.client.ui.SplitDropdownButton;
-import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.base.DropdownBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
@@ -14,7 +12,6 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -61,7 +58,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
   protected Panel makeAddToList(Exercise e, ExerciseController controller) {
     addToList = new DropdownButton("");
     addToList.setRightDropdown(true);
-    createAddTooltip(addToList,"Add Item to List",Placement.BOTTOM);
+    createAddTooltip(addToList,"Add Item to List",Placement.RIGHT);
     addToList.setIcon(IconType.PLUS_SIGN);
 
   //  System.out.println("makeAddToList : populate list choices for " + controller.getUser());
@@ -106,8 +103,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
               public void onClick(ClickEvent event) {
                 service.addItemToUserList(ul.getUniqueID(), new UserExercise(e, controller.getUser()), new AsyncCallback<Void>() {
                   @Override
-                  public void onFailure(Throwable caught) {
-                  }
+                  public void onFailure(Throwable caught) {}
 
                   @Override
                   public void onSuccess(Void result) {
