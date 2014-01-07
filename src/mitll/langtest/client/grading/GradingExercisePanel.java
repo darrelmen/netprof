@@ -100,7 +100,7 @@ public class GradingExercisePanel extends ExercisePanel {
    * <br></br>
    * Uses a result manager table (simple pager).  {@link mitll.langtest.client.result.ResultManager#getTable}<br></br>
    * If the controller says this is an English only grading mode, then only show english answers.
-   * @see ExercisePanel#ExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.exercise.ListInterface)
+   * @see ExercisePanel#getQuestionPanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int, java.util.List, java.util.List, int, mitll.langtest.shared.Exercise.QAPair, com.google.gwt.user.client.ui.HasWidgets)
    * @param exercise
    * @param service
    * @param controller
@@ -140,7 +140,7 @@ public class GradingExercisePanel extends ExercisePanel {
                 String prompt = getPrompt(isSpoken, isForeign, outer);
                 System.out.println("\tgetResultsForExercise add answer group for results (index = " + index+ ") size = " + results.size());
 
-                vp.add(addAnswerGroup(resultsAndGrades.grades, results, bigPage, prompt, outer, service, controller.getProps(), n, index));
+                vp.add(addAnswerGroup(resultsAndGrades.grades, results, bigPage, prompt, service, controller.getProps(), n, index));
               }
               else {
                 System.out.println("\tspoken : " +isSpoken + " isFLQ " + isForeign);
@@ -171,7 +171,6 @@ public class GradingExercisePanel extends ExercisePanel {
    * @param results
    * @param bigPage
    * @param prompt
-   * @param outer
    * @param service
    * @param propertyHandler
    * @param n
@@ -180,7 +179,7 @@ public class GradingExercisePanel extends ExercisePanel {
    */
   private Widget addAnswerGroup(Collection<Grade> grades,
                                 List<Result> results, boolean bigPage, String prompt,
-                                GradingExercisePanel outer, LangTestDatabaseAsync service, PropertyHandler propertyHandler, int n, int index) {
+                                LangTestDatabaseAsync service, PropertyHandler propertyHandler, int n, int index) {
     VerticalPanel vp = new VerticalPanel();
 
     int oneQuestionPageSize = bigPage ? BIG_ONE_QUESTION_PAGE_SIZE : ONE_QUESTION_PAGE_SIZE;
