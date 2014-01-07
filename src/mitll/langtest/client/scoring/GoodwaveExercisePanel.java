@@ -111,19 +111,18 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
     HorizontalPanel horizontalPanel = new HorizontalPanel();
     horizontalPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
-    Panel hp = horizontalPanel;
 
     if (controller.getProps().isClassroomMode()) {
-      hp.getElement().setId("GoodwaveHorizontalPanel");
+      horizontalPanel.getElement().setId("GoodwaveHorizontalPanel");
       Panel addToList = makeAddToList(e, controller);
       Widget questionContent = getQuestionContent(e, addToList);
       questionContent.addStyleName("floatLeft");
-      hp.add(questionContent);
+      horizontalPanel.add(questionContent);
     } else {
-      hp.add(getQuestionContent(e, null));
+      horizontalPanel.add(getQuestionContent(e, null));
     }
 
-    center.add(hp);
+    center.add(horizontalPanel);
     add(center);
 
     if (e.isRepeat() && widgets != null) {
@@ -260,7 +259,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     String content = e.getContent();
     String path = null;
 
-    System.err.println("getQuestionContent content '" + content + "'");
+   // System.out.println("getQuestionContent content '" + content + "'");
 
     if (e.isRepeat()) {
       this.refAudio = e.getRefAudio() != null ? e.getRefAudio() : e.getSlowAudioRef();
@@ -391,7 +390,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
      * @param toAdd
      * @param audioType
      * @return
-     * @see AudioPanel#getPlayButtons(com.google.gwt.user.client.ui.Widget)
+     * @see AudioPanel#getPlayButtons
      */
     @Override
     protected PlayAudioPanel makePlayAudioPanel(Widget toAdd, String audioType) {
