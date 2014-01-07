@@ -2,15 +2,10 @@ package mitll.langtest.client.user;
 
 import com.github.gwtbootstrap.client.ui.AccordionGroup;
 import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.ControlGroup;
-import com.github.gwtbootstrap.client.ui.ControlLabel;
-import com.github.gwtbootstrap.client.ui.Controls;
 import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.Modal;
 import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.TextBox;
-import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
-import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.github.gwtbootstrap.client.ui.event.ShowEvent;
@@ -24,7 +19,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
-import mitll.langtest.shared.Result;
 
 /**
  * Created with IntelliJ IDEA.
