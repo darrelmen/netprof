@@ -50,6 +50,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private static final boolean WARN_ABOUT_MISSING_AUDIO = false;
   private static final int WINDOW_SIZE_CHANGE_THRESHOLD = 50;
   private static final int IMAGE_WIDTH_SLOP = 70 + WINDOW_SIZE_CHANGE_THRESHOLD/2;
+  private static final boolean DEBUG_GET_IMAGES = false;
 
   private final ScoreListener gaugePanel;
   protected String audioPath;
@@ -300,7 +301,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     }
     int width = (int) ((screenPortion * ((float) Window.getClientWidth())) - leftColumnWidth) - rightSide;
 
-    if (true) {
+    if (DEBUG_GET_IMAGES) {
       System.out.println("AudioPanel.getImages : leftColumnWidth " + leftColumnWidth + "(" +leftColumnWidth1+
         ") width " + width + " (screen portion = " + screenPortion +
         ") vs window width " + Window.getClientWidth() + " right side " + rightSide);
@@ -310,7 +311,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     if (lastWidth == 0 || diff > WINDOW_SIZE_CHANGE_THRESHOLD) {
       lastWidth = Window.getClientWidth();
 
-      if (true) {
+      if (DEBUG_GET_IMAGES) {
         System.out.println("\tAudioPanel.getImages : offset width " + getOffsetWidth() + " request width " + width + " path " + audioPath);
       }
       getEachImage(width);
