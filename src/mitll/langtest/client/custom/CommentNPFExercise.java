@@ -7,16 +7,15 @@ import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
-import com.google.gwt.event.dom.client.BlurEvent;
-import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
@@ -38,7 +37,6 @@ import mitll.langtest.shared.ExerciseFormatter;
  * To change this template use File | Settings | File Templates.
  */
 public class CommentNPFExercise extends NPFExercise {
-  //private Map<String,AudioInfo> fieldToAudioInfo = new HashMap<String, AudioInfo>();
   private AudioInfo audioInfo;
 
   public CommentNPFExercise(Exercise e, ExerciseController controller, ListInterface listContainer,
@@ -91,24 +89,30 @@ public class CommentNPFExercise extends NPFExercise {
    * @param annotation
    * @return
    */
-  private Widget getEntry(final String field, Widget content, ExerciseAnnotation annotation, boolean isAudio) {
+  private Widget getEntry(String field, Widget content, ExerciseAnnotation annotation, boolean isAudio) {
     final Button commentButton = new Button();
-    final MyTextBox commentEntryText = new MyTextBox(field);
-    final PopupPanel commentPopup = new DecoratedPopupPanel();
+    if (field.endsWith(".mp3")) field = field.replaceAll(".mp3",".wav");
+    final MyTextBox commentEntryText = new MyTextBox();
+    final MyPopup commentPopup = new MyPopup();
     commentPopup.setAutoHideEnabled(true);
+    commentPopup.configure(commentEntryText, commentButton);
+    commentPopup.setField(field);
 
     HorizontalPanel hp = new HorizontalPanel();
     hp.add(commentEntryText);
     hp.add(getOKButton(commentPopup));
-    hp.add(getClearButton(field, commentButton, commentEntryText, commentPopup));
+    MyButton clearButton = getClearButton(commentEntryText, commentPopup);
+    hp.add(clearButton);
     commentPopup.add(hp);
 
-    FieldInfo fieldInfo = new FieldInfo(field);
-    configureCommentTextBox(annotation, commentEntryText, commentPopup, commentButton);
+    configureCommentTextBox(annotation, commentEntryText, commentPopup);
 
     boolean alreadyMarkedCorrect = annotation == null || annotation.status == null || annotation.isCorrect();
-    System.out.println("getEntry : field " + field + " annotation " + annotation + " correct " + alreadyMarkedCorrect);
     String comment = !alreadyMarkedCorrect ? annotation.comment : "";
+    System.out.println("getEntry : field " + field + " annotation " + annotation +
+      " correct " + alreadyMarkedCorrect + " comment '" + comment+
+      "', fields " + exercise.getFields());
+
     getQCWidget(commentButton,
       alreadyMarkedCorrect, commentPopup,
       comment, commentEntryText);
@@ -122,7 +126,7 @@ public class CommentNPFExercise extends NPFExercise {
     row.add(commentButton);
     showOrHideCommentButton(commentButton, alreadyMarkedCorrect);
     if (isAudio) {
-      audioInfo = new AudioInfo(field, commentEntryText, commentButton, fieldInfo);
+      audioInfo = new AudioInfo(field, commentEntryText, commentButton, commentPopup);
     }
     return row;
   }
@@ -140,60 +144,86 @@ public class CommentNPFExercise extends NPFExercise {
     return ok;
   }
 
-  private Button getClearButton(final String field, final Button commentButton, final MyTextBox commentEntryText,
-                                final PopupPanel commentPopup) {
-    Button clear = new Button("Clear");
+  private MyButton getClearButton(final MyTextBox commentEntryText,
+                                  final PopupPanel commentPopup) {
+    MyButton clear = new MyButton("Clear");
     clear.setType(ButtonType.INFO);
     clear.addStyleName("leftFiveMargin");
-    clear.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        commentEntryText.setText("");
-        commentComplete(commentEntryText, field, commentButton);
-        commentPopup.hide();
-      }
-    });
+    clear.configure(commentEntryText, commentPopup);
     return clear;
+  }
+
+  private class MyButton extends Button {
+    public MyButton(String title) {
+      super(title);
+    }
+
+    public void configure( final MyTextBox commentEntryText,
+                          final PopupPanel commentPopup) {
+      addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          commentEntryText.setText("");
+          commentPopup.hide();
+        }
+      });
+    }
+  }
+
+  public class MyPopup extends DecoratedPopupPanel {
+    private String field;
+
+    public void setField(String field) {
+      this.field = field;
+    }
+
+    public void configure(final TextBox commentBox, final Widget commentButton) {
+      addCloseHandler(new CloseHandler<PopupPanel>() {
+        @Override
+        public void onClose(CloseEvent<PopupPanel> event) {
+          System.out.println("onClose for " + field);
+          commentComplete(commentBox, field, commentButton);
+        }
+      });
+    }
   }
 
   @Override
   protected void setAudioRef(String audioRef) {
-    System.out.println("set audio ref " +audioRef);
-    if (!audioRef.equals(audioInfo.audioRef)) {
+    String audioRef1 = audioInfo.audioRef;
+    //System.out.println("set audio ref '" +audioRef +"' vs " + audioRef1);
+    if (!audioRef.equals(audioRef1)) {
 
       ExerciseAnnotation annotation = exercise.getAnnotation(audioRef);
       boolean alreadyMarkedCorrect = annotation == null || annotation.status == null || annotation.isCorrect();
 
       showOrHideCommentButton(audioInfo.commentButton, alreadyMarkedCorrect);
       String comment = annotation == null ? "" : annotation.comment;
-      System.out.println("\t new audio ref " +audioRef + " comment " +comment);
+
+/*      System.out.println("\t new audio ref " + audioRef +
+        " comment '" + comment +"' correct " + alreadyMarkedCorrect + " anno " + annotation +
+        " fields " + exercise.getFields());*/
+
       setButtonTitle(audioInfo.commentButton, alreadyMarkedCorrect, comment);
       audioInfo.commentEntryText.setText(comment);
-      audioInfo.commentEntryText.setField(audioRef);
-      audioInfo.fieldInfo.field = audioRef;
+      audioInfo.popup.setField(audioRef);
+      audioInfo.audioRef = audioRef;
     }
   }
-
-  // TODO : handle multiple audio infos!
 
   private static class AudioInfo {
     String audioRef;
     MyTextBox commentEntryText;
     Button commentButton;
-    FieldInfo fieldInfo;
+    MyPopup popup;
 
     public AudioInfo(String audioRef, MyTextBox commentEntryText, Button commentButton,
-                     FieldInfo fieldInfo) {
+                     MyPopup popup) {
       this.audioRef = audioRef;
       this.commentEntryText = commentEntryText;
       this.commentButton = commentButton;
-      this.fieldInfo = fieldInfo;
+      this.popup = popup;
     }
-  }
-
-  private static class FieldInfo {
-    String field;
-    public FieldInfo(String field) { this.field = field;}
   }
 
   private void showOrHideCommentButton(UIObject commentButton, boolean isCorrect) {
@@ -240,52 +270,31 @@ public class CommentNPFExercise extends NPFExercise {
   /**
    * For this field configure the commentEntry box to post annotation on blur and enter
    *
-   * @paramx field for this field
    * @param annotation fill in with existing annotation, if there is one
    * @param commentEntry comment box to configure
-   * @paramx commentRow
-   * @param commentButton
    * @return
    */
   private FocusWidget configureCommentTextBox(ExerciseAnnotation annotation,
                                               final MyTextBox commentEntry,
-                                              final PopupPanel popup,
-                                              final Widget commentButton) {
+                                              final PopupPanel popup) {
     if (annotation != null) {
       commentEntry.setText(annotation.comment);
     }
 
     commentEntry.addStyleName("leftFiveMargin");
-    commentEntry.configure(popup,commentButton);
+    commentEntry.configure(popup);
 
     return commentEntry;
   }
 
   private class MyTextBox extends TextBox {
-    private String field;
+    public void configure( final PopupPanel popup) {
 
-    public MyTextBox(String field) {
-      this.field = field;
-
-    }
-
-    public void setField(String field) { this.field = field; }
-
-    public void configure( final PopupPanel popup,
-                            final Widget commentButton) {
-      final MyTextBox outer = this;
-      addBlurHandler(new BlurHandler() {
-        @Override
-        public void onBlur(BlurEvent event) {
-          commentComplete(outer, field, commentButton);
-        }
-      });
       addKeyPressHandler(new KeyPressHandler() {
         @Override
         public void onKeyPress(KeyPressEvent event) {
           int keyCode = event.getNativeEvent().getKeyCode();
           if (keyCode == KeyCodes.KEY_ENTER) {
-            commentComplete(outer, field, commentButton);
             popup.hide();
           }
         }
@@ -296,6 +305,9 @@ public class CommentNPFExercise extends NPFExercise {
   private <T extends TextBox> void commentComplete(T commentEntry, String field, Widget commentButton) {
     String comment = commentEntry.getText();
     boolean isCorrect = comment.length() == 0;
+
+    //System.out.println("commentComplete " + field + " comment '" + comment +"' correct = " +isCorrect);
+
     if (isCorrect) {
       addCorrectComment(field);
     } else {
@@ -304,6 +316,8 @@ public class CommentNPFExercise extends NPFExercise {
     setButtonTitle(commentButton, isCorrect, comment);
     showOrHideCommentButton(commentButton,isCorrect);
     exercise.addAnnotation(field, isCorrect ? "correct" : "incorrect", comment);
+
+   // System.out.println("\t annotations now " + exercise.getFields());
   }
 
   private void postIncorrect(TextBox commentEntry, String field) {
