@@ -2,13 +2,10 @@ package mitll.langtest.client.exercise;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
-import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -17,8 +14,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.Exercise;
-
-import java.util.Date;
 
 /**
  * A row with prev/next buttons.  Key bindings for keys too.
@@ -138,7 +133,7 @@ public class NavigationHelper extends HorizontalPanel {
   /**
    * Ignore clicks or keyboard activity when the widget is not enabled.
    * @see #getNextAndPreviousButtons
-   * @see #addKeyHandler
+   * @seex #addKeyHandler
    * @param controller
    * @param e
    */
@@ -208,11 +203,11 @@ public class NavigationHelper extends HorizontalPanel {
 
   /**
    * Enter key advances to next item, left arrow goes to previous
-   * @param e
-   * @param controller
-   * @param useKeyHandler
+   * @paramx e
+   * @paramx controller
+   * @paramx useKeyHandler
    */
-  private void addKeyHandler(final Exercise e, final ExerciseController controller, final boolean useKeyHandler) {
+/*  private void addKeyHandler(final Exercise e, final ExerciseController controller, final boolean useKeyHandler) {
     keyHandler = Event.addNativePreviewHandler(new
                                                  Event.NativePreviewHandler() {
 
@@ -248,7 +243,7 @@ public class NavigationHelper extends HorizontalPanel {
                                                    }
                                                  });
    // System.out.println("addKeyHandler made click handler " + keyHandler);
-  }
+  }*/
 
   public void removeKeyHandler() {
    // System.out.println("removeKeyHandler : " + keyHandler);
