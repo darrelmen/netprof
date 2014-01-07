@@ -20,6 +20,7 @@ import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.ExerciseShell;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -34,9 +35,9 @@ import java.util.Set;
 public class PagingExerciseList extends ExerciseList implements RequiresResize {
   protected ExerciseController controller;
   protected PagingContainer<? extends ExerciseShell> pagingContainer;
-  private Set<String> completed;
-  boolean showCompleted = false;
-  boolean showTypeAhead = true;
+  private Set<String> completed = new HashSet<String>();
+  protected boolean showCompleted = false;
+  private boolean showTypeAhead = true;
   protected TextBox typeAhead = null;
   private String lastValue = "";
 
@@ -126,7 +127,6 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
       typeAhead.addKeyUpHandler(new KeyUpHandler() {
         public void onKeyUp(KeyUpEvent event) {
           String text = typeAhead.getText();
-          //  text = text.trim();
           if (!text.equals(lastValue)) {
             System.out.println("looking for '" + text + "' (" + text.length() + " chars)");
             loadExercises(getHistoryToken(""), text);
@@ -183,8 +183,6 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   @Override
   protected ExerciseShell findFirstExercise() {
     if (showCompleted) {
-      System.out.println("getFirstNotCompleted : ");
-
       return getFirstNotCompleted();
     }
     else {
