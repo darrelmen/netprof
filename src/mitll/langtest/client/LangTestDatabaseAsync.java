@@ -109,7 +109,7 @@ public interface LangTestDatabaseAsync {
 
   void getGradeCountPerExercise(AsyncCallback<Map<Integer, Map<String, Map<String, Integer>>>> async);
 
-  void getExerciseIds(int reqID, long userID, AsyncCallback<ExerciseListWrapper> async);
+  void getExerciseIds(int reqID, long userID, boolean unansweredFirst, AsyncCallback<ExerciseListWrapper> async);
 
   /**
    * @param reqID
