@@ -46,7 +46,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
   @Override
   protected void addQuestionContentRow(Exercise e, ExerciseController controller, Panel hp) {
-    super.addQuestionContentRow(e,controller,hp);
+    super.addQuestionContentRow(e, controller, hp);
     hp.addStyleName("questionContentPadding");
   }
 
@@ -63,12 +63,14 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   private void markReviewed(Exercise completedExercise) {
     service.markReviewed(completedExercise.getID(), incorrectSet.isEmpty(), controller.getUser(),
       new AsyncCallback<Void>() {
-      @Override
-      public void onFailure(Throwable caught) {}
+        @Override
+        public void onFailure(Throwable caught) {
+        }
 
-      @Override
-      public void onSuccess(Void result) {}
-    });
+        @Override
+        public void onSuccess(Void result) {
+        }
+      });
   }
 
   /**
@@ -201,6 +203,12 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     return qcCol;
   }
 
+  /**
+   * @see #getEntry(String, com.google.gwt.user.client.ui.Widget, mitll.langtest.shared.ExerciseAnnotation)
+   * @param commentEntry
+   * @param alreadyMarkedCorrect
+   * @param commentRow
+   */
   private void populateCommentRow(FocusWidget commentEntry, boolean alreadyMarkedCorrect, Panel commentRow) {
     commentRow.setVisible(!alreadyMarkedCorrect);
 
@@ -256,17 +264,4 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     checkBox.setValue(!alreadyMarkedCorrect);
     return checkBox;
   }
-
-/*  private void addCorrectAnnotation(String field) {
-    System.out.println(new Date() +" : post to server " + exercise.getID() + " field " + field + " is correct");
-    service.addAnnotation(exercise.getID(), field, "correct", "", controller.getUser(), new AsyncCallback<Void>() {
-      @Override
-      public void onFailure(Throwable caught) {
-      }
-
-      @Override
-      public void onSuccess(Void result) {
-      }
-    });
-  }*/
 }
