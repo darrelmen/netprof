@@ -16,8 +16,10 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Focusable;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -44,6 +46,18 @@ public class BasicDialog {
     return getFormField(dialogBox, label, user, minLength);
   }
 
+  protected FormField addControlFormField(Panel dialogBox, String label, boolean isPassword, int minLength, Widget rightSide) {
+    final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
+    Panel row = new HorizontalPanel();
+    //row.addStyleName("trueInlineStyle");
+    row.add(user);
+    row.add(rightSide);
+    final ControlGroup userGroup = addControlGroupEntry(dialogBox, label, row);
+    FormField formField = new FormField(user, userGroup, minLength);
+    formField.setRightSide(rightSide);
+    return formField;
+  }
+
   protected FormField getFormField(Panel dialogBox, String label, TextBoxBase user, int minLength) {
     final ControlGroup userGroup = addControlGroupEntry(dialogBox, label, user);
     return new FormField(user, userGroup,minLength);
@@ -54,12 +68,12 @@ public class BasicDialog {
     return new ListBoxFormField(user);
   }
 
-  protected ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget user) {
+  protected ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget widget) {
     final ControlGroup userGroup = new ControlGroup();
     userGroup.addStyleName("leftFiveMargin");
     userGroup.add(new ControlLabel(label));
-    user.addStyleName("leftFiveMargin");
-    userGroup.add(user);
+    widget.addStyleName("leftFiveMargin");
+    userGroup.add(widget);
 
     dialogBox.add(userGroup);
     return userGroup;
@@ -77,9 +91,9 @@ public class BasicDialog {
     markError(dialectGroup.group, dialectGroup.box, dialectGroup.box, "Try Again", message);
   }
 
-  protected void markError(ControlGroup dialectGroup, Widget dialect, String header, String message) {
+/*  protected void markError(ControlGroup dialectGroup, Widget dialect, String header, String message) {
     markError(dialectGroup, dialect, (Focusable) dialect, header, message);
-  }
+  }*/
 
   protected void markError(ControlGroup dialectGroup, Widget dialect, Focusable focusable, String header, String message) {
     dialectGroup.setType(ControlGroupType.ERROR);
@@ -197,6 +211,7 @@ public class BasicDialog {
   protected class FormField {
     public final TextBoxBase box;
     public final ControlGroup group;
+    public Widget rightSide;
 
     public FormField(final TextBoxBase box, final ControlGroup group, final int minLength) {
       this.box = box;
@@ -225,6 +240,9 @@ public class BasicDialog {
     public String getText() {
       return box.getText();
     }
+
+    public void setRightSide(Widget rightSide) { this.rightSide = rightSide; }
+    public Widget getRightSide() { return rightSide; }
 
 /*    protected void markSimpleError(String message) {
       markError(group, box, "Try Again", message);
