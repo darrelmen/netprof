@@ -690,11 +690,9 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   public void onResize() {
     super.onResize();
 
-   // setScrollPanelWidth();
-
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
-        System.out.println("deferred set scroll panel width");
+        //System.out.println("FlexSectionExerciseList : deferred set scroll panel width");
         setScrollPanelWidth();
       }
     });
