@@ -168,7 +168,7 @@ public class SoundManager {
 	}
 
 	public static void songLoaded(Sound sound, double duration){
-    if (true) System.out.println("songLoaded sound " +sound + " with dur " +duration);
+    if (debug) System.out.println("songLoaded sound " +sound + " with dur " +duration);
 
     sound.parent.songLoaded(duration);
 	}
