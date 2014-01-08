@@ -21,6 +21,7 @@ import java.util.Collection;
  * To change this template use File | Settings | File Templates.
  */
 public class WaveformExercisePanel extends ExercisePanel {
+  public static final String REPEAT_TWICE = "<i>Record the word or phrase twice, first at normal speed, then again at slow speed.</i>";
   private boolean isBusy = false;
   private Collection<RecordAudioPanel> audioPanels;
 
@@ -92,7 +93,11 @@ public class WaveformExercisePanel extends ExercisePanel {
   @Override
   protected String getInstructions() {
     String prefix = "<br/>" + THREE_SPACES;
-    return prefix +"<i>Record the word or phrase twice, first at normal speed, then again at slow speed.</i>";
+    String prompt = REPEAT_TWICE;
+    if (controller.getAudioType().equals(Result.AUDIO_TYPE_REGULAR)) {
+      prompt = REPEAT_ONCE;
+    }
+    return prefix + prompt;
   }
 
   @Override
