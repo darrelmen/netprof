@@ -14,40 +14,41 @@ import mitll.langtest.shared.ExerciseShell;
  */
 public class UserExercise extends AudioExercise {
   public static final String CUSTOM_PREFIX = "Custom_";
-  private static int globalCount  = 0;
+  private static int globalCount = 0;
   private int count = 0;
   private long uniqueID = -1; //set by database
+
   private String english;
   private String foreignLanguage;
+  private String transliteration;
   private long creator;
-/*  String meaning;
-  String context;
-  String comment;*/
-
-  boolean isPredef;
+  private boolean isPredef;
 
   public UserExercise() {}  // just for serialization
 
-  public UserExercise(ExerciseShell shell,long creator) {
-    super(shell.getID(),shell.getTooltip());
+  public UserExercise(ExerciseShell shell, long creator) {
+    super(shell.getID(), shell.getTooltip());
     isPredef = true;
     this.creator = creator;
   }
 
   /**
-   * @see mitll.langtest.server.database.custom.UserListManager#createNewItem(long, String, String)
+   * @see mitll.langtest.server.database.custom.UserListManager#createNewItem(long, String, String, String)
    * @param uniqueID
    * @param exerciseID
    * @param creator
    * @param english
    * @param foreignLanguage
+   * @param transliteration
    */
-  public UserExercise(long uniqueID, String exerciseID, long creator, String english, String foreignLanguage) {
+  public UserExercise(long uniqueID, String exerciseID, long creator, String english, String foreignLanguage,
+                      String transliteration) {
     super(exerciseID,english);
     this.creator = creator;
     this.uniqueID = uniqueID;
     this.english = english;
     this.foreignLanguage = foreignLanguage;
+    this.transliteration = transliteration;
     count = globalCount++;
     isPredef = !exerciseID.startsWith(CUSTOM_PREFIX);
   }
@@ -59,18 +60,19 @@ public class UserExercise extends AudioExercise {
    * @param creator
    * @param english
    * @param foreignLanguage
+   * @param transliteration
    * @param refAudio
    * @param slowAudioRef
    */
   public UserExercise(long uniqueID, String exerciseID, long creator, String english, String foreignLanguage,
-                      String refAudio, String slowAudioRef) {
-    this(uniqueID, exerciseID, creator, english, foreignLanguage);
+                      String transliteration, String refAudio, String slowAudioRef) {
+    this(uniqueID, exerciseID, creator, english, foreignLanguage, transliteration);
     setRefAudio(refAudio);
     setSlowRefAudio(slowAudioRef);
   }
 
     /**
-     * @see mitll.langtest.client.custom.NPFExercise#populateListChoices(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController, com.github.gwtbootstrap.client.ui.SplitDropdownButton)
+     * @see mitll.langtest.client.custom.NPFExercise#populateListChoices
      * @param exercise
      */
   public UserExercise(Exercise exercise) {
@@ -78,7 +80,11 @@ public class UserExercise extends AudioExercise {
 
     this.isPredef = true;
     this.english = exercise.getEnglishSentence();
-    this.foreignLanguage = exercise.getContent();
+    this.foreignLanguage = exercise.getRefSentence();
+    this.transliteration = exercise.getTranslitSentence();
+    setRefAudio(exercise.getRefAudio());
+    setSlowRefAudio(exercise.getSlowAudioRef());
+    setFieldToAnnotation(exercise.getFieldToAnnotation());
   }
 
   /**
@@ -87,6 +93,7 @@ public class UserExercise extends AudioExercise {
    */
   public Exercise toExercise() {
     Exercise exercise = new Exercise("plan", CUSTOM_PREFIX + uniqueID, getEnglish(), getRefAudio(), getForeignLanguage(), getEnglish());
+    exercise.setTranslitSentence(getTransliteration());
     exercise.setSlowRefAudio(getSlowAudioRef());
     return exercise;
   }
@@ -113,19 +120,18 @@ public class UserExercise extends AudioExercise {
     imported.setType(Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW);
     imported.setRefSentence(getForeignLanguage());
     imported.setEnglishSentence(english);
+    imported.setTranslitSentence(getTransliteration());
     return imported;
   }
 
-  public String getEnglish() {
-    return english;
-  }
-
-  public String getForeignLanguage() {
-    return foreignLanguage;
-  }
-
+  public String getEnglish() { return english; }
+  public String getForeignLanguage() { return foreignLanguage;  }
+  public String getTransliteration() { return transliteration;  }
   public long getCreator() {
     return creator;
+  }
+  public void setCreator(long id) {
+    creator = id;
   }
 
   /**
@@ -144,14 +150,20 @@ public class UserExercise extends AudioExercise {
     this.foreignLanguage = foreignLanguage;
   }
 
+  public void setTransliteration(String transliteration) {
+    this.transliteration = transliteration;
+  }
+
   public boolean isPredefined() {
     return isPredef;
   }
 
   public String toString() {
-    return "UserExercise (" +count+
-      ") #" + uniqueID + "/" + getID()+ (isPredef ? " <Predef>" :  " <User>")+  " creator " + getCreator()+
-        " : " + getEnglish() + " = " + getForeignLanguage() + " audio attr (" +getAudioAttributes().size()+
+    return "UserExercise" +
+      //" (" +count+ ")" +
+      " #" + uniqueID + "/" + getID()+ (isPredef ? " <Predef>" :  " <User>")+  " creator " + getCreator()+
+        " : " + getEnglish() + " = " + getForeignLanguage() + " (" +getTransliteration()+
+      ") audio attr (" +getAudioAttributes().size()+
       ") :" + getAudioAttributes();
   }
 }
