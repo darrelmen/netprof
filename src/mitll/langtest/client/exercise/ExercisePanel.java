@@ -53,7 +53,7 @@ import java.util.Set;
 public class ExercisePanel extends VerticalPanel implements
   BusyPanel, ExerciseQuestionState, PostAnswerProvider, ProvidesResize, RequiresResize {
   private static final String ANSWER_BOX_WIDTH = "400px";
-  private static final String REPEAT_ONCE = "<i>Repeat the phrase once at normal speed.</i>";
+  protected static final String REPEAT_ONCE = "<i>Repeat the phrase once at normal speed.</i>";
   private static final String REPEAT_TWICE = "<i>Repeat the phrase twice, first at normal and then at slow speed.</i>";
   private static final String TWO_SPACES = "&nbsp;&nbsp;";
   protected static final String THREE_SPACES = "&nbsp;&nbsp;&nbsp;";
