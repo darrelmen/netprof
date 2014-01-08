@@ -147,7 +147,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       getExercisesInOrder();
     } else {
       lastReqID++;
-      service.getExerciseIds(lastReqID, userID, new SetExercisesCallback());
+      service.getExerciseIds(lastReqID, userID, controller.showUnansweredFirst(), new SetExercisesCallback());
     }
   }
 
@@ -270,7 +270,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see mitll.langtest.client.list.HistoryExerciseList.MySetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
    */
   protected void gotEmptyExerciseList() {
-    System.out.println(new Date() +" gotEmptyExerciseList : ------  ------------ ");
+    System.out.println(new Date() + " gotEmptyExerciseList : ------  ------------ ");
   }
 
   /**
