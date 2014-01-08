@@ -76,9 +76,6 @@ public class DatabaseImpl implements Database {
   private DatabaseConnection connection = null;
   private MonitoringSupport monitoringSupport;
 
-  /**
-   * TODO : consider making proper v2 database!
-   */
   private String lessonPlanFile;
   private boolean isWordPairs;
   private boolean useFile;
@@ -643,7 +640,7 @@ public class DatabaseImpl implements Database {
    *
    *
    * @return unmodifiable list of exercises
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesInModeDependentOrder(long)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesInModeDependentOrder
    */
   public List<Exercise> getUnmodExercises() {
     List<Exercise> exercises = getExercises(useFile, lessonPlanFile);
@@ -653,7 +650,7 @@ public class DatabaseImpl implements Database {
   /**
    * Show unanswered questions first, then ones with 1, then 2, then 3,... answers
    * Also be aware of the user's gender -- if you're female, show questions that have no female answers first.
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesInModeDependentOrder(long)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesInModeDependentOrder
    * @see #getNextExercise(long, boolean, boolean)
    * @param userID so we can show gender aware orderings (i.e. show entries with fewer female responses to females, etc.)
    * @return ordered list of exercises
@@ -727,7 +724,7 @@ public class DatabaseImpl implements Database {
    *
    * A one-off thing only.
    *
-   * @see mitll.langtest.server.LangTestDatabaseImpl#useOutsideResultCounts(long)
+   * @seex mitll.langtest.server.LangTestDatabaseImpl#useOutsideResultCounts
    * @param userID
    * @param outsideFile
    * @param useWeights
@@ -742,8 +739,8 @@ public class DatabaseImpl implements Database {
     populateInitialExerciseIDToCount(rawExercises, idToExercise, idToCount,idToWeight,useWeights);
     //logger.info("initial map of online counts is size = " + idToCount.size() +" " + idToCount.values().size());
 
+/*
     boolean isMale = userDAO.isUserMale(userID);
-
     Map<String, Integer> idToCountOutside =
         new OutsideCount().getExerciseIDToOutsideCount(isMale, outsideFile, getExercises());
 
@@ -752,7 +749,7 @@ public class DatabaseImpl implements Database {
       Integer count = idToCount.get(pair.getKey());
       if (count == null) logger.warn("missing exercise id " + pair.getKey());
       else idToCount.put(pair.getKey(),count+pair.getValue());
-    }
+    }*/
 
     // only find answers that are for the gender
     List<ResultDAO.SimpleResult> results = getSimpleResults();
@@ -1021,7 +1018,7 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesInModeDependentOrder(long)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesInModeDependentOrder
    * @param userID
    * @param firstNInOrder
    * @return
@@ -1181,10 +1178,17 @@ public class DatabaseImpl implements Database {
   public List<Result> getResultsWithGrades() {
     List<Result> results = resultDAO.getResults();
     Map<Integer,Result> idToResult = new HashMap<Integer, Result>();
-    for (Result r : results) idToResult.put(r.uniqueID, r);
-    for (Grade g : gradeDAO.getGrades()) {
+    for (Result r : results) {
+      idToResult.put(r.uniqueID, r);
+      r.clearGradeInfo();
+    }
+    Collection<Grade> grades = gradeDAO.getGrades();
+    logger.debug("found " + grades.size() + " grades");
+    for (Grade g : grades) {
       Result result = idToResult.get(g.resultID);
-      result.addGrade(g);
+      if (result != null) {
+        result.addGrade(g);
+      }
     }
     return results;
   }
