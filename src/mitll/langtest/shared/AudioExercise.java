@@ -68,11 +68,8 @@ public class AudioExercise extends ExerciseShell {
     fieldToAnnotation.put(field, new ExerciseAnnotation(status,comment));
   }
 
-/*
-  public Map<String, ExerciseAnnotation> getFieldToAnnotation() {
-    return fieldToAnnotation;
-  }
-*/
+  public Map<String, ExerciseAnnotation> getFieldToAnnotation() {  return fieldToAnnotation;  }
+  public void setFieldToAnnotation(Map<String, ExerciseAnnotation> fieldToAnnotation) { this.fieldToAnnotation = fieldToAnnotation; }
 
   public ExerciseAnnotation getAnnotation(String field) {
     if (!fieldToAnnotation.containsKey(field)) {
