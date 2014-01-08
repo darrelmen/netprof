@@ -38,7 +38,7 @@ public interface LangTestDatabase extends RemoteService {
   boolean WRITE_ALTERNATE_COMPRESSED_AUDIO = false;
 
   // exerciseDAO
-  ExerciseListWrapper getExerciseIds(int reqID, long userID);
+  ExerciseListWrapper getExerciseIds(int reqID, long userID, boolean unansweredFirst);
   ExerciseListWrapper getExerciseIds(int reqID);
   Exercise getExercise(String id);
 
