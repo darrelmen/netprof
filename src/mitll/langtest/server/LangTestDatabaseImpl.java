@@ -141,14 +141,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     getMailSupport().email(serverProps.getEmailAddress(),"Server Exception on " + pathHelper.getInstallPath(), prefixedMessage);
   }
 
-  public Site getSiteByID(long id) {
-    return db.getSiteByID(id);
-  }
-
-  @Override
-  public List<Site> getSites() {
-    return db.getDeployedSites();
-  }
+  public Site getSiteByID(long id) { return db.getSiteByID(id); }
+  public List<Site> getSites() { return db.getDeployedSites();  }
 
   /**
    * Copy template to something named by site name
@@ -156,7 +150,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * set fields in config.properties
    *   - apptitle
    *   - release date
-   *    - lesson plan file
+   *   - lesson plan file
    *
    *    then copy to install path/../name
    *
@@ -170,8 +164,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public boolean deploySite(long id, String name, String language, String notes) {
     logger.debug("deploy site id=" +id + " name " + name);
-    SiteDeployer siteDeployer = new SiteDeployer();
-    return siteDeployer.deploySite(db, getMailSupport(), getThreadLocalRequest(), configDir,
+    return new SiteDeployer().deploySite(db, getMailSupport(), getThreadLocalRequest(), configDir,
       pathHelper.getInstallPath(), id, name, language, notes);
   }
 
@@ -179,11 +172,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.list.ExerciseList#getExercises
    * @param reqID
    * @param userID
+   * @param unansweredFirst
    * @return
    */
-  public ExerciseListWrapper getExerciseIds(int reqID, long userID) {
+  public ExerciseListWrapper getExerciseIds(int reqID, long userID, boolean unansweredFirst) {
     logger.debug("getExerciseIds : getting exercise ids for User id=" + userID + " config " + relativeConfigDir);
-    List<Exercise> exercises = getExercises(userID);
+    List<Exercise> exercises = getExercises(userID, unansweredFirst);
     ExerciseListWrapper exerciseListWrapper = getExerciseListWrapper(reqID, exercises);
     logger.debug("\tgetExerciseIds : found " + exerciseListWrapper.getExercises().size() +
         " exercise ids for User id=" + userID);
@@ -214,7 +208,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public ExerciseListWrapper getExerciseIds(int reqID, long userID, String prefix) {
     logger.debug("getExerciseIds : getting exercise ids for User id=" + userID + " config " + relativeConfigDir);
-    ExerciseTrie trie = new ExerciseTrie(getExercises(userID), !serverProps.getLanguage().equals("English"));
+    ExerciseTrie trie = new ExerciseTrie(getExercises(userID, false), !serverProps.getLanguage().equals("English"));
     List<Exercise> exercisesForPrefix = trie.getExercises(prefix);
 
     return getExerciseListWrapper(reqID, exercisesForPrefix);
@@ -501,29 +495,30 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    *
    *
    * @param userID
+   * @param unansweredFirst
    * @return exercises for user id
    * @see mitll.langtest.client.list.ListInterface#getExercises(long, boolean)
    */
-  private List<Exercise> getExercises(long userID) {
-    List<Exercise> exercises = getExercisesInModeDependentOrder(userID);
+  private List<Exercise> getExercises(long userID, boolean unansweredFirst) {
+    List<Exercise> exercises = getExercisesInModeDependentOrder(userID, unansweredFirst);
     if (serverProps.isCRTDataCollect()) {
       setPromptAndRecordOnExercises(exercises);
     }
     return exercises;
   }
 
-  private List<Exercise> getExercisesInModeDependentOrder(long userID) {
+  private List<Exercise> getExercisesInModeDependentOrder(long userID, boolean unansweredFirst) {
     List<Exercise> exercises;
     if (serverProps.dataCollectMode) {
       logger.debug("getExercisesInModeDependentOrder in data collect mode");
-      if (serverProps.biasTowardsUnanswered) {
+      if (serverProps.biasTowardsUnanswered || unansweredFirst) {
         //logger.debug("in biasTowardsUnanswered mode : user " +userID);
 
-        if (serverProps.useOutsideResultCounts) {
+/*        if (serverProps.useOutsideResultCounts) {
           exercises = useOutsideResultCounts(userID);
-        } else {
-          exercises = db.getExercisesBiasTowardsUnanswered(userID,serverProps.shouldUseWeights());
-        }
+        } else {*/
+          exercises = db.getExercisesBiasTowardsUnanswered(userID, serverProps.shouldUseWeights());
+  //      }
       } else {
         exercises = db.getUnmodExercises();
         if (serverProps.isCRTDataCollect()) {
@@ -543,6 +538,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param userID
    * @return
    */
+/*
   private List<Exercise> useOutsideResultCounts(long userID) {
     List<Exercise> exercises;
     String outsideFileOverride = serverProps.outsideFile;
@@ -556,6 +552,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db.setOutsideFile(outsideFileOverride);
     return exercises;
   }
+*/
 
   /**
    * Set the prompt in english/foreign language and text/audio answer bits.
@@ -566,7 +563,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * <p></p>
    * Uses the user id as a random seed so we get repeatable behavior per user.
    *
-   * @see #getExercises(long)
+   * @see #getExercises(long, boolean)
    * @param exercises to alter
    */
   private void setPromptAndRecordOnExercises(List<Exercise> exercises) {
@@ -632,10 +629,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return nextExercise;
   }
 
-  @Override
   public void resetUserState(long userID) {  db.resetUserState(userID); }
-
-  @Override
   public void clearUserState(long userID) {  db.clearUserState(userID); }
 
   /**
@@ -683,18 +677,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       userToExerciseID.put(user, id);
       logger.debug("checkoutExerciseID : after adding " + user + "->" + id +
           " active exercise map now " + userToExerciseID.asMap());
-    }
-  }
-
-  /**
-   * @see #getExercise(String)
-   * @see #getFlashcardResponse(long, mitll.langtest.shared.flashcard.FlashcardResponse)
-   * @param wavFile
-   */
-  private void ensureMP3(String wavFile) {
-    if (wavFile != null && (wavFile.endsWith(".mp3") || new File(wavFile).exists())) {
-      logger.debug("ensureMP3 " + wavFile);
-      new AudioConversion().ensureWriteMP3(wavFile, pathHelper.getInstallPath());
     }
   }
 
@@ -766,13 +748,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private String removeSuffix(String audioFile) {
     return audioFile.substring(0, audioFile.length() - ".mp3".length());
   }
-
-  /**
-   * Get properties (first time called read properties file -- e.g. see war/config/levantine/config.properties).
-   * @see mitll.langtest.client.LangTest#onModuleLoad
-   * @return
-   */
-  private Map<String, String> getProperties() { return serverProps.getProperties();  }
 
   @Override
   public StartupInfo getStartupInfo() {
@@ -851,6 +826,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
+  /**
+   * @see #getExercise(String)
+   * @see #getFlashcardResponse(long, mitll.langtest.shared.flashcard.FlashcardResponse)
+   * @param wavFile
+   */
+  private void ensureMP3(String wavFile) {
+    if (wavFile != null && (wavFile.endsWith(".mp3") || new File(wavFile).exists())) {
+      logger.debug("ensureMP3 " + wavFile);
+      new AudioConversion().ensureWriteMP3(wavFile, pathHelper.getInstallPath());
+    }
+  }
+
   // Answers ---------------------
 
   /**
@@ -891,21 +878,22 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param exerciseID
    * @return
    */
-  public CountAndGradeID addGrade(String exerciseID, Grade toAdd) {
-    return db.addGrade(exerciseID, toAdd);
-  }
+  public CountAndGradeID addGrade(String exerciseID, Grade toAdd) { return db.addGrade(exerciseID, toAdd);  }
 
   /**
    * @see mitll.langtest.client.grading.GradingResultManager#changeGrade(mitll.langtest.shared.grade.Grade)
    * @param toChange
    */
-  public void changeGrade(Grade toChange) {
-    db.changeGrade(toChange);
-  }
+  public void changeGrade(Grade toChange) { db.changeGrade(toChange);  }
 
+  /**
+   * Get properties (first time called read properties file -- e.g. see war/config/levantine/config.properties).
+   * @see mitll.langtest.client.LangTest#onModuleLoad
+   * @return
+   */
   @Override
   public synchronized int userExists(String login) {
-    if (db == null) getProperties();
+    if (db == null) serverProps.getProperties();
     return db.userExists(login);
   }
 
@@ -1009,10 +997,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   *
-   *
-   *
-   *
    * @param age
    * @param gender
    * @param experience
