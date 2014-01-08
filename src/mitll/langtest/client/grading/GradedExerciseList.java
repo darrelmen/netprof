@@ -55,6 +55,11 @@ public class GradedExerciseList extends PagingExerciseList {
     getNextUngraded(true);
     pagingContainer.selectFirst();
   }
+
+  protected int getVerticalUnaccountedFor() {
+    return 150;
+  }
+
   /**
    * @see #loadExercise(mitll.langtest.shared.ExerciseShell)
    * @param exerciseShell
@@ -84,15 +89,7 @@ public class GradedExerciseList extends PagingExerciseList {
     getNextUngraded(false);
   }
 
-  protected void loadExercises(String selectionState, String prefix) {
-/*    Map<String, Collection<String>> typeToSection = getSelectionState(selectionState).getTypeToSection();
-    lastReqID++;
-    if (typeToSection.isEmpty()) {
-      service.getExerciseIds(lastReqID, userID,prefix, new SetExercisesCallback());
-    } else {
-      service.getExercisesForSelectionState(lastReqID, typeToSection, userID, prefix, new MySetExercisesCallback(null));
-    }*/
-  }
+  //protected void loadExercises(String selectionState, String prefix) {}
 
   private void getNextUngraded(final boolean showFirstIfNoneToGrade) {
     final PopupPanel popup = getPopup2("Please wait...");
@@ -151,7 +148,7 @@ public class GradedExerciseList extends PagingExerciseList {
   private PopupPanel getPopup2(String toShow) {
     final PopupPanel popupImage = new PopupPanel(true);
     popupImage.add(new HTML(toShow));
-    popupImage.setPopupPosition(Window.getClientWidth()/2,Window.getClientHeight()/2);
+    popupImage.setPopupPosition(Window.getClientWidth() / 2, Window.getClientHeight() / 2);
     return popupImage;
   }
 }
