@@ -25,6 +25,9 @@ public class UserExerciseDAO extends DAO {
     super(database);
     try {
       createUserTable(database);
+      if (getNumColumns(database.getConnection(), USEREXERCISE) < 8) {
+        addColumnToTable(database.getConnection());
+      }
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
@@ -42,19 +45,18 @@ public class UserExerciseDAO extends DAO {
 
     try {
       // there are much better ways of doing this...
-      logger.info("UserExerciseDAO.add :userExercise " + userExercise);
+      logger.info("UserExerciseDAO.add : userExercise " + userExercise);
 
       Connection connection = database.getConnection();
-      PreparedStatement statement;
-
-      statement = connection.prepareStatement(
+      PreparedStatement statement = connection.prepareStatement(
         "INSERT INTO " + USEREXERCISE +
-          "(exerciseid,english,foreignLanguage,creatorid,refAudio,slowAudioRef) " +
-          "VALUES(?,?,?,?,?,?);");
+          "(exerciseid,english,foreignLanguage,transliteration,creatorid,refAudio,slowAudioRef) " +
+          "VALUES(?,?,?,?,?,?,?);");
       int i = 1;
       statement.setString(i++, userExercise.getID());
       statement.setString(i++, userExercise.getEnglish());
       statement.setString(i++, userExercise.getForeignLanguage());
+      statement.setString(i++, userExercise.getTransliteration());
       statement.setLong(i++, userExercise.getCreator());
 
       String refAudio = userExercise.getRefAudio();
@@ -114,6 +116,7 @@ public class UserExerciseDAO extends DAO {
       "exerciseid VARCHAR, " +
       "english VARCHAR, " +
       "foreignLanguage VARCHAR, " +
+      "transliteration VARCHAR, " +
       "creatorid LONG, " +
       "refAudio VARCHAR, " +
       "slowAudioRef VARCHAR, " +
@@ -245,10 +248,11 @@ public class UserExerciseDAO extends DAO {
 
     while (rs.next()) {
       UserExercise e = new UserExercise(rs.getLong("uniqueid"), //id
-        rs.getString("exerciseid"), rs.getLong("creatorid"), // age
-        rs.getString("english"), // exp
-        rs.getString("foreignLanguage"), // exp
-        rs.getString("refAudio"), // exp
+        rs.getString("exerciseid"), rs.getLong("creatorid"),
+        rs.getString("english"),
+        rs.getString("foreignLanguage"),
+        rs.getString("transliteration"),
+        rs.getString("refAudio"),
         rs.getString("slowAudioRef"));
       exercises.add(e);
     }
@@ -259,7 +263,12 @@ public class UserExerciseDAO extends DAO {
     return exercises;
   }
 
-  public void update(UserExercise userExercise) {
+  /**
+   * @see UserListManager#editItem(mitll.langtest.shared.custom.UserExercise, boolean)
+   * @param userExercise
+   * @param createIfDoesntExist
+   */
+  public void update(UserExercise userExercise, boolean createIfDoesntExist) {
     try {
       Connection connection = database.getConnection();
 
@@ -270,6 +279,7 @@ public class UserExerciseDAO extends DAO {
         "SET " +
         "english='" + userExercise.getEnglish() + "', " +
         "foreignLanguage='" + userExercise.getForeignLanguage() + "', " +
+        "transliteration='" + userExercise.getTransliteration() + "', " +
         "refAudio='" + userExercise.getRefAudio() + "', " +
         "slowAudioRef='" + userExercise.getSlowAudioRef() + "' " +
         "WHERE uniqueid=" + userExercise.getUniqueID();
@@ -278,7 +288,12 @@ public class UserExerciseDAO extends DAO {
       int i = statement.executeUpdate();
 
       if (i == 0) {
-        logger.error("huh? didn't update the userExercise for " + userExercise + " sql " + sql);
+        if (createIfDoesntExist) {
+          add(userExercise);
+        }
+        else {
+          logger.error("huh? didn't update the userExercise for " + userExercise + "\n\tsql " + sql);
+        }
       }
 
       statement.close();
@@ -286,6 +301,14 @@ public class UserExerciseDAO extends DAO {
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
+  }
+
+  private void addColumnToTable(Connection connection) throws SQLException {
+    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " +
+      USEREXERCISE +
+      " ADD transliteration VARCHAR");
+    statement.execute();
+    statement.close();
   }
 
   public void setExerciseDAO(ExerciseDAO exerciseDAO) {
