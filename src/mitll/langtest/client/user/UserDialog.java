@@ -149,6 +149,19 @@ public abstract class UserDialog extends BasicDialog {
     System.out.println("UserManager.addKeyHandler made click handler " + keyHandler);
   }
 
+  protected ListBox getListBox2(List<String> values) {
+    return getListBox2(values,80);
+  }
+
+  protected ListBox getListBox2(List<String> values,int ilrChoiceWidth) {
+    final ListBox genderBox = new ListBox(false);
+    for (String s : values) {
+      genderBox.addItem(s);
+    }
+    genderBox.setWidth(ilrChoiceWidth + "px");
+    return genderBox;
+  }
+
   private class ButtonClickEvent extends ClickEvent {
         /*To call click() function for Programmatic equivalent of the user clicking the button.*/
   }
