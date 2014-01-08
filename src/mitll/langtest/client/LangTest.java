@@ -105,6 +105,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private StartupInfo startupInfo;
 
   Navigation navigation;
+  private boolean showUnansweredFirst = false;
 
   /**
    * Make an exception handler that displays the exception.
@@ -980,14 +981,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   @Override
-  public void rememberAudioType(String audioType) {
-    this.audioType = audioType;
-  }
+  public void rememberAudioType(String audioType) { this.audioType = audioType;  }
 
   @Override
   public String getAudioType() {
     return audioType;
   }
+
+  public void setShowUnansweredFirst(boolean val) { this.showUnansweredFirst = val; }
+  public boolean showUnansweredFirst() { return showUnansweredFirst; }
 
   /**
    * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers
@@ -995,7 +997,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @return
    */
   public int getUser() { return userManager.getUser(); }
-  public void pingAliveUser() { userManager.userAlive(); }
   public PropertyHandler getProps() { return props; }
   public boolean getEnglishOnly() { return props.isEnglishOnlyMode(); }
   public int getNumGradesToCollect() { return props.getNumGradesToCollect(); }
@@ -1014,9 +1015,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public String getLanguage() {  return props.getLanguage(); }
   public boolean isPromptBeforeNextItem() {  return props.isPromptBeforeNextItem(); }
   public boolean isRightAlignContent() {  return props.isRightAlignContent(); }
-  public boolean isFlashCard() {  return props.isFlashCard(); }
   public boolean isGoodwaveMode() {  return props.isGoodwaveMode(); }
-  public boolean shouldAddRecordKeyBinding() { return props.shouldAddRecordKeyBinding(); }
   public int getFlashcardPreviewFrameHeight() { return props.getFlashcardPreviewFrameHeight(); }
   public LangTestDatabaseAsync getService() { return service; }
   public UserFeedback getFeedback() { return this; }
