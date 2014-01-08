@@ -640,7 +640,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   List<Exercise> getExercises() {
     List<Exercise> exercises = db.getExercises();
     makeAutoCRT();   // side effect of db.getExercises is to make the exercise DAO which is needed here...
-    logger.debug("getExercises found " + exercises.size() + " exercises");
+   // logger.debug("getExercises found " + exercises.size() + " exercises");
     return exercises;
   }
 
