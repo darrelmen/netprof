@@ -162,7 +162,7 @@ public class NPFHelper implements RequiresResize {
   public void onResize() {
     if (npfContentPanel != null) {
       float v = (Window.getClientWidth() * 0.8f) - 100;
-      System.out.println("content width is " + v);
+      //System.out.println("content width is " + v);
     //  npfContentPanel.setWidth(v + "px");
     }
   }
