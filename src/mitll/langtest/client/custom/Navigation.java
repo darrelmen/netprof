@@ -136,7 +136,6 @@ public class Navigation implements RequiresResize {
     chapters.content.add(secondAndThird);
 
     if (controller.isReviewMode()) {
-      //System.out.println("adding review tab");
       review = makeTab(tabPanel, IconType.EDIT, "Review");
       review.tab.addClickHandler(new ClickHandler() {
         @Override
@@ -170,8 +169,7 @@ public class Navigation implements RequiresResize {
     return tabPanel;
   }
 
-  public void checkMode() {
-  }
+ // public void checkMode() {}
 
   private TabAndContent makeTab(TabPanel toAddTo, IconType iconType, String label) {
     Tab create = new Tab();
@@ -216,7 +214,7 @@ public class Navigation implements RequiresResize {
   public void showInitialState() {
     System.out.println("showInitialState show initial state for " + userManager.getUser() +
       " : getting user lists " + controller.isReviewMode());
-    checkMode();
+    //checkMode();
     service.getListsForUser(userManager.getUser(), false, true, new AsyncCallback<Collection<UserList>>() {
       @Override
       public void onFailure(Throwable caught) {}
@@ -249,7 +247,8 @@ public class Navigation implements RequiresResize {
   }
 
   private void showMyLists() {
-    tabPanel.selectTab(0);
+    int tabToSelect =/* controller.isReviewMode() ? 4:*/ 0;
+    tabPanel.selectTab(tabToSelect);
     yourItems.fireEvent(new ButtonClickEvent());
     refreshViewLessons();
   }
@@ -283,6 +282,10 @@ public class Navigation implements RequiresResize {
     }
   }
 
+  /**
+   * @see #getButtonRow2(com.google.gwt.user.client.ui.Panel)
+   * @param contentPanel
+   */
   private void viewReview(final Panel contentPanel) {
     contentPanel.clear();
     contentPanel.getElement().setId("viewReview_contentPanel");
@@ -290,14 +293,16 @@ public class Navigation implements RequiresResize {
     final Panel child = new DivWidget();
     contentPanel.add(child);
     child.addStyleName("exerciseBackground");
-    //System.out.println("\n\nreviewLessons for " + userManager.getUser());
+    System.out.println("\nviewReview : reviewLessons for " + userManager.getUser());
     service.getReviewList(new AsyncCallback<UserList>() {
       @Override
       public void onFailure(Throwable caught) {}
 
       @Override
       public void onSuccess(UserList result) {
-        new UserListCallback(contentPanel,child,new ScrollPanel(), "review").onSuccess(Collections.singleton(result));
+        System.out.println("\tviewReview : reviewLessons for " + userManager.getUser() + " got " + result);
+
+        new UserListCallback(contentPanel, child, new ScrollPanel(), "review").onSuccess(Collections.singleton(result));
       }
     });
   }
@@ -319,8 +324,7 @@ public class Navigation implements RequiresResize {
    * @param contentPanel
    */
   private void showList(final UserList ul, Panel contentPanel, final String instanceName) {
-
-    System.out.println("showList " +ul);
+    System.out.println("showList " +ul + " instance " + instanceName);
 
     FluidContainer container = new FluidContainer();
     contentPanel.clear();
@@ -349,11 +353,7 @@ public class Navigation implements RequiresResize {
       container.add(child);
       child.add(new Heading(3, "<b>Created by you.</b>"));
     }
-    //final FluidContainer listContent = new FluidContainer();
-
-    Panel operations = getListOperations(ul, created, instanceName);
-    container.add(operations);
-    //container.add(listContent);
+    container.add(getListOperations(ul, created, instanceName));
 
     service.addVisitor(ul, (long)controller.getUser(), new AsyncCallback<Void>() {
       @Override
@@ -363,19 +363,27 @@ public class Navigation implements RequiresResize {
     });
   }
 
+  /**
+   * @see #showList(mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.Panel, String)
+   * @param ul
+   * @param created
+   * @param instanceName
+   * @return
+   */
   private Panel getListOperations(final UserList ul, final boolean created, final String instanceName) {
     final TabPanel tabPanel = new TabPanel();
-    System.out.println("getListOperations : '" + instanceName);
+    System.out.println("getListOperations : '" + instanceName + " for list " +ul);
+
+    // add learn tab
     final TabAndContent learn = makeTab(tabPanel, IconType.LIGHTBULB, "Learn Pronunciation");
     learn.tab.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        System.out.println("\t\tgetListOperations : '" + instanceName +"'");
-
         npfHelper.showNPF(ul, learn, instanceName.equals("review") ? "review" : "learn");
       }
     });
 
+    // add practice tab
     final TabAndContent practice = makeTab(tabPanel, IconType.CHECK, PRACTICE);
     practice.tab.addClickHandler(new ClickHandler() {
       @Override
@@ -384,6 +392,7 @@ public class Navigation implements RequiresResize {
       }
     });
 
+    // add add item and edit tabs (conditionally)
     TabAndContent addItem = null;
     if (created && !ul.isPrivate()) {
       if (!instanceName.equals("review")) {
@@ -406,6 +415,7 @@ public class Navigation implements RequiresResize {
       });
     }
 
+    // select the initial tab -- either add if an empt
     final TabAndContent finalAddItem = addItem;
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
@@ -428,8 +438,14 @@ public class Navigation implements RequiresResize {
     addItem.content.add(widgets);
   }
 
+  /**
+   * @see #getListOperations(mitll.langtest.shared.custom.UserList, boolean, String)
+   * @param ul
+   * @param addItem
+   */
   private void showEditItem(UserList ul, TabAndContent addItem) {
     addItem.content.clear();
+    System.out.println("\tshowEditItem for " +ul);
     Panel widgets = editItem.editItem(ul, listToMarker.get(ul));
     addItem.content.add(widgets);
   }
@@ -468,7 +484,7 @@ public class Navigation implements RequiresResize {
     private final Panel contentPanel;
     private final Panel child;
     private final ScrollPanel listScrollPanel;
-    String instanceName;
+    private String instanceName;
 
     public UserListCallback(Panel contentPanel, Panel child, ScrollPanel listScrollPanel, String instanceName) {
       this.contentPanel = contentPanel;
@@ -478,8 +494,7 @@ public class Navigation implements RequiresResize {
     }
 
     @Override
-    public void onFailure(Throwable caught) {
-    }
+    public void onFailure(Throwable caught) {}
 
     @Override
     public void onSuccess(Collection<UserList> result) {
