@@ -24,7 +24,6 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class Result implements IsSerializable {
-  //userid INT, plan VARCHAR, id VARCHAR, qid INT, answer VARCHAR, audioFile VARCHAR, valid BOOLEAN, timestamp
   public int uniqueID;
   public long userid;
   public String plan;
@@ -35,7 +34,6 @@ public class Result implements IsSerializable {
   public long timestamp;
   public boolean flq;
   public boolean spoken;
-  //private AudioType audioType; // so having another object in here seemed to slow down serialization a lot
   public String audioType;
   public String gradeInfo = "";
   public int durationInMillis;
@@ -49,14 +47,6 @@ public class Result implements IsSerializable {
   public static final String AUDIO_TYPE_FAST_AND_SLOW = "fastAndSlow";
   public static final String AUDIO_TYPE_DEMO = "demo";
   public static final String AUDIO_TYPE_PRACTICE = "practice";
-
-/*  public enum AudioType implements IsSerializable {
-    UNSET,
-    REGULAR,
-    FAST_AND_SLOW;
-
-    AudioType() {} // for gwt serialization
-  }*/
 
   public Result() {}
 
