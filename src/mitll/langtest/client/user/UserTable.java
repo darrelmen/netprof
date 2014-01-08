@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.table.PagerTable;
 import mitll.langtest.shared.User;
 
@@ -26,9 +27,11 @@ public class UserTable extends PagerTable {
   private static final int PAGE_SIZE = 5;
   private Widget lastTable = null;
   private Button closeButton;
+  private PropertyHandler props;
 
+  public UserTable(PropertyHandler props) { this.props = props; }
   /**
-   * @see mitll.langtest.client.LangTest#getLogout()
+   * @see mitll.langtest.client.LangTest#makeUsersAnchor(boolean)
    */
   public void showUsers(final LangTestDatabaseAsync service, int userid) {
     showDialog(service);
@@ -174,7 +177,7 @@ public class UserTable extends PagerTable {
       }
     };
     items.setSortable(true);
-    table.addColumn(items, "Num Results");
+    table.addColumn(items, "Num " + props.getNameForAnswer() +"s");
 
     TextColumn<User> rate = new TextColumn<User>() {
       @Override
@@ -198,15 +201,6 @@ public class UserTable extends PagerTable {
 
     ipaddr.setSortable(true);
     table.addColumn(ipaddr, "IP Addr");
-
-/*    TextColumn<User> password = new TextColumn<User>() {
-      @Override
-      public String getValue(User contact) {
-        return "" + contact.password;
-      }
-    };
-    password.setSortable(true);
-    table.addColumn(password, "Password");*/
 
     TextColumn<User> date = new TextColumn<User>() {
       @Override
