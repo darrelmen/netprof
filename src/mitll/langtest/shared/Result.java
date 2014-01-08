@@ -100,17 +100,16 @@ public class Result implements IsSerializable {
     this.spoken = v;
   }
 
-  // public boolean isRegularAudio() { return audioType == null || audioType.equals(AUDIO_TYPE_UNSET) || audioType.equals(AUDIO_TYPE_REGULAR); }
-  public boolean isFastAndSlowAudio() {
-    return audioType != null && audioType.equals(AUDIO_TYPE_FAST_AND_SLOW);
-  }
-
   public String getAudioType() {
     return audioType;
   }
 
   public void addGrade(Grade g) {
     gradeInfo += g.grade +",";
+  }
+
+  public void clearGradeInfo() {
+    gradeInfo = "";
   }
 
   public boolean isCorrect() {
@@ -157,7 +156,13 @@ public class Result implements IsSerializable {
             if (comp != 0) return asc ? comp : -1 * comp;
 
             if (field.equals("id")) {
-              comp = o1.id.compareTo(o2.id);
+              try {   // this could be slow
+                int i = Integer.parseInt(o1.id);
+                int j = Integer.parseInt(o2.id);
+                comp = i < j ? -1 : i > j ? +1 : 0;
+              } catch (NumberFormatException e) {
+                comp = o1.id.compareTo(o2.id);
+              }
             }
             if (comp != 0) return asc ? comp : -1 * comp;
 
