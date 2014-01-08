@@ -1,6 +1,5 @@
 package mitll.langtest.client.result;
 
-import com.github.gwtbootstrap.client.ui.Modal;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -124,7 +123,7 @@ public class ResultManager extends PagerTable {
 
   /**
    * Experimental
-   * @deprecated not ready
+   * @xdeprecated not ready
    */
 /*  private void showResultsNew() {
     // Create the popup dialog box
@@ -198,14 +197,14 @@ public class ResultManager extends PagerTable {
     dialogBox.show();
   }
 
-  private void populateTable(int numResults, //Panel dialogVPanel,
+/*  private void populateTable(int numResults, //Panel dialogVPanel,
                              //   DialogBox dialogBox
                              Modal dialogBox
   ) {
-   /* if (lastTable != null) {
+   *//* if (lastTable != null) {
       dialogVPanel.remove(lastTable);
       dialogVPanel.remove(closeButton);
-    }*/
+    }*//*
 
     Widget table = getAsyncTable(numResults, true, new ArrayList<Grade>(),-1, 1);
 //    dialogVPanel.add(table);
@@ -215,7 +214,7 @@ public class ResultManager extends PagerTable {
 
     dialogBox.add(table);
     dialogBox.show();
-  }
+  }*/
 
   /**
    * @see GradingExercisePanel#showResults
