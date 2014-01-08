@@ -141,7 +141,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   }
 
   protected void addQuestionContentRow(Exercise e, ExerciseController controller, Panel hp) {
-     hp.add(getQuestionContent(e, (Panel)null));
+     hp.add(getQuestionContent(e, (Panel) null));
   }
 
   public void setBusy(boolean v) {  this.isBusy = v;  }
@@ -306,7 +306,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   private void addAnnotation(final String field, final String status, final String commentToPost) {
     service.addAnnotation(exercise.getID(), field, status, commentToPost, controller.getUser(), new AsyncCallback<Void>() {
       @Override
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+      }
 
       @Override
       public void onSuccess(Void result) {
@@ -333,6 +334,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     return nameValueRow;
   }
 
+  /**
+   * @see mitll.langtest.client.custom.QCNPFExercise#populateCommentRow(com.google.gwt.user.client.ui.FocusWidget, boolean, com.google.gwt.user.client.u.Panel)
+   * @return
+   */
   protected Label getCommentLabel() {
     final Label commentLabel = new Label("comment?");
     DOM.setStyleAttribute(commentLabel.getElement(), "backgroundColor", "#ff0000");
@@ -575,11 +580,11 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
       if (regular != null) {
         regular.setValue(true);
-        System.out.println("selecting regular speed ");
+        //System.out.println("selecting regular speed ");
 
       } else if (first != null) {
         first.setValue(true);
-        System.out.println("selecting first ");
+        //System.out.println("selecting first ");
 
       } else {
         System.err.println("no radio choice got selected??? ");
