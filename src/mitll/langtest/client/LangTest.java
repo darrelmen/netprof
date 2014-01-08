@@ -859,7 +859,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     users = new Anchor("Users");
     users.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        userTable = isDataCollectAdminView ? new AdminUserTable() : new UserTable();
+        userTable = isDataCollectAdminView ? new AdminUserTable(props) : new UserTable(props);
         userTable.showUsers(service, userManager.getUser());
       }
     });
