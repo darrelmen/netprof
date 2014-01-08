@@ -2,7 +2,6 @@ package mitll.langtest.client.user;
 
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Cookies;
-import com.google.gwt.user.client.Timer;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.shared.Result;
@@ -38,19 +37,16 @@ public class UserManager {
   private static final String USER_CHOSEN_ID = "userChosenID";
   private static final String AUDIO_TYPE = "audioType";
   private static final String LOGIN_TYPE = "loginType";
-  private static final int INACTIVE_PERIOD_MILLIS = 1000 * 60 * 10; // ten minutes
 
   private final LangTestDatabaseAsync service;
-  private final UserNotification langTest;
-  private final boolean useCookie = false;
+  private final UserNotification userNotification;
+  private final static boolean USE_COOKIE = false;
   private long userID = NO_USER_SET;
   private String userChosenID = "";
 
   private final PropertyHandler.LOGIN_TYPE loginType;
   private final String appTitle;
   private final PropertyHandler props;
-
-  private Timer userTimer;
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
@@ -61,7 +57,7 @@ public class UserManager {
    * @param props
    */
   public UserManager(UserNotification lt, LangTestDatabaseAsync service, PropertyHandler props) {
-    this.langTest = lt;
+    this.userNotification = lt;
     this.service = service;
     this.props = props;
     this.loginType = props.getLoginType();
@@ -88,11 +84,6 @@ public class UserManager {
    * @see #checkLogin()
    */
   private void loginDifferentTypes() {
-/*    System.out.println("loginType " + loginType +
-      " data collect mode " + props.isDataCollectMode() +
-      " crt data collect " + props.isCRTDataCollectMode() +
-      " teacher " + props.isTeacherView() + " grading " + props.isGrading());*/
-
     if (loginType.equals(PropertyHandler.LOGIN_TYPE.STUDENT)) {
       login();
     }
@@ -112,88 +103,6 @@ public class UserManager {
       login();
     }
   }
-  // user tracking
-
-  /**
-   * Somebody should call this when the user does something in taboo
-   * @see mitll.langtest.client.LangTest#pingAliveUser()
-   */
-  public void userAlive() {
-    updateUserSessionExpires();
-    if (!isActive()) System.err.println("huh? user is not active...\n\n\n");
-    // System.out.println(new Date() +" --------> userAlive : " + user);
-    //userOnline(user, true);
-    waitThenInactivate();
-  }
-
-  private void userInactive() {
-    int user = getUser();
-    System.out.println(new Date() + " --------> userInactive : " + user);
-  }
-
-  public boolean isActive() {
-    return getUser() != NO_USER_SET;
-  }
-
-  private void waitThenInactivate() {
-    if (userTimer != null) userTimer.cancel();
-    userTimer = new Timer() {
-      @Override
-      public void run() {
-        userInactive();
-      }
-    };
-    userTimer.schedule(INACTIVE_PERIOD_MILLIS);
-  }
-
-  /**
-   * @see #userExpired(String)
-   * @param futureMoment
-   */
-  private void rememberUserSessionEnd(long futureMoment) {
-    if (Storage.isLocalStorageSupported()) {
-      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-      rememberUserSessionEnd(localStorageIfSupported, futureMoment);
-    }
-  }
-
-  private void updateUserSessionExpires() {
-    final long DURATION = getUserSessionDuration();
-    long futureMoment = getUserSessionEnd(DURATION);
-    if (Storage.isLocalStorageSupported()) {
-      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-      rememberUserSessionEnd(localStorageIfSupported, futureMoment);
-    }
-  }
-
-  /**
-   * @see #storeUser(long, String, String, mitll.langtest.client.PropertyHandler.LOGIN_TYPE)
-   * @see #rememberUserSessionEnd(long)
-   * @param localStorageIfSupported
-   * @param futureMoment
-   */
-  private void rememberUserSessionEnd(Storage localStorageIfSupported, long futureMoment) {
-    localStorageIfSupported.setItem(getExpires(), "" + futureMoment);
-  }
-
-  private long getUserSessionEnd() {
-    return getUserSessionEnd(getUserSessionDuration());
-  }
-
-  private long getUserSessionEnd(long DURATION) {
-    return System.currentTimeMillis() + DURATION;
-  }
-
-  /**
-   * If we have lots of students moving through stations quickly, we want to auto logout once a day, once an hour?
-   * TODO : add another parameter for default session length
-   * @return
-   */
-  private long getUserSessionDuration() {
-    boolean useShortExpiration = loginType.equals(PropertyHandler.LOGIN_TYPE.STUDENT);
-    return HOUR_IN_MILLIS * (
-      (useShortExpiration ? SHORT_EXPIRATION_HOURS : EXPIRATION_HOURS));
-  }
 
   /**
    * @see #loginDifferentTypes()
@@ -203,14 +112,9 @@ public class UserManager {
     if (user != NO_USER_SET) {
       System.out.println("UserManager.login : current user : " + user);
       rememberAudioType();
-      langTest.gotUser(user);
-    }
-/*    else if (isFlashcard) {
-      System.out.println("UserManager.login : adding anonymous user");
-      addAnonymousUser();
-    }*/
-    else {
-      StudentDialog studentDialog = new StudentDialog(service,props,this, langTest);
+      userNotification.gotUser(user);
+    } else {
+      StudentDialog studentDialog = new StudentDialog(service,props,this, userNotification);
       studentDialog.displayLoginBox();
     }
   }
@@ -218,23 +122,22 @@ public class UserManager {
   /**
    * @see mitll.langtest.client.LangTest#checkLogin
    */
-  protected void anonymousLogin() {
+  private void anonymousLogin() {
     int user = getUser();
     if (user != NO_USER_SET) {
-      System.out.println("UserManager.anonymousLogin : current user : " + user);
+      //System.out.println("UserManager.anonymousLogin : current user : " + user);
       rememberAudioType();
-      langTest.gotUser(user);
+      userNotification.gotUser(user);
     }
     else {
-      System.out.println("UserManager.anonymousLogin : make new user, since user = " + user);
-
+      //System.out.println("UserManager.anonymousLogin : make new user, since user = " + user);
       addAnonymousUser();
     }
   }
 
   private void addAnonymousUser() {
-    StudentDialog studentDialog = new StudentDialog(service,props,this,langTest);
-    System.out.println("UserManager.addAnonymousUser : adding anonymous user");
+    StudentDialog studentDialog = new StudentDialog(service,props,this, userNotification);
+    //System.out.println("UserManager.addAnonymousUser : adding anonymous user");
 
     studentDialog.addUser(89, "male", 0,"");
   }
@@ -259,8 +162,49 @@ public class UserManager {
       if (audioType == null) {
         audioType = Result.AUDIO_TYPE_FAST_AND_SLOW;
       }
-      langTest.rememberAudioType(audioType);
+      userNotification.rememberAudioType(audioType);
     }
+    rememberShowUnansweredFirst();
+  }
+
+  /**
+   * When the user does the login dialog
+   * @param val
+   */
+  public void setShowUnansweredFirst(boolean val) {
+    String unansweredKey = getUnansweredKey();
+    Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+    localStorageIfSupported.setItem(unansweredKey, val ? "true" : "false");
+    userNotification.setShowUnansweredFirst(val);
+
+    getShowUnanswered();
+  }
+
+  private void rememberShowUnansweredFirst() {
+    if (Storage.isLocalStorageSupported()) {
+      boolean showUnansweredFirst = getShowUnanswered();
+      userNotification.setShowUnansweredFirst(showUnansweredFirst);
+    }
+  }
+
+  private boolean getShowUnanswered() {
+    Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+
+    boolean showUnansweredFirst = false;
+    String unansweredKey = getUnansweredKey();
+    String unanswered = localStorageIfSupported.getItem(unansweredKey);
+    if (unanswered != null) {
+      //System.out.println("found key " +unansweredKey + " = " + unanswered);
+      showUnansweredFirst = unanswered.equalsIgnoreCase("true");
+    }
+    else {
+      //System.out.println("===> no key " +unansweredKey);
+    }
+    return showUnansweredFirst;
+  }
+
+  private String getUnansweredKey() {
+    return getShowUnansweredKey() + "_" +getUserID();
   }
 
   /**
@@ -268,7 +212,7 @@ public class UserManager {
    * @see mitll.langtest.client.LangTest#getUser
    */
   public int getUser() {
-    if (useCookie) {
+    if (USE_COOKIE) {
       String sid = Cookies.getCookie("sid");
       if (sid == null || sid.equals("" + NO_USER_SET)) {
         return NO_USER_SET;
@@ -296,10 +240,9 @@ public class UserManager {
    * @return
    */
   private boolean checkUserExpired(String sid) {
-    int userID1 = Integer.parseInt(sid);
     boolean expired = false;
     if (userExpired(sid)) {
-      clearUser(userID1);
+      clearUser();
       expired = true;
     }
     // this seems like a bad idea if we can login as data collector or as anonymous...
@@ -329,6 +272,9 @@ public class UserManager {
   }
   private String getExpires() {
     return appTitle + ":" + "expires";
+  }
+  private String getShowUnansweredKey() {
+    return appTitle + ":" + "showUnanswered";
   }
 
   /**
@@ -387,18 +333,12 @@ public class UserManager {
    * @see mitll.langtest.client.LangTest#getLogout()
    */
   public void clearUser() {
-    userInactive();
-    clearCookieState();
-  }
-
-  private void clearUser(int userID) {
-    //userOnline(userID, false);
     clearCookieState();
   }
 
   private void clearCookieState() {
-    langTest.rememberAudioType(Result.AUDIO_TYPE_UNSET);
-    if (useCookie) {
+    userNotification.rememberAudioType(Result.AUDIO_TYPE_UNSET);
+    if (USE_COOKIE) {
       Cookies.setCookie("sid", "" + NO_USER_SET);
     } else if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
@@ -420,9 +360,9 @@ public class UserManager {
     if (user != NO_USER_SET) {
       System.out.println("teacherLogin: got cached user : " + user);
       rememberAudioType();
-      langTest.gotUser(user);
+      userNotification.gotUser(user);
     } else {
-      DataCollectorDialog dataCollectorDialog = new DataCollectorDialog(service, props, langTest, this);
+      DataCollectorDialog dataCollectorDialog = new DataCollectorDialog(service, props, userNotification, this);
       dataCollectorDialog.displayTeacherLogin("Data Collector Login");
     }
   }
@@ -433,15 +373,15 @@ public class UserManager {
    * @param sessionID    from database
    * @param audioType
    * @param userChosenID
-   * @see DataCollectorDialog#addTeacher(int, com.github.gwtbootstrap.client.ui.ListBox, com.github.gwtbootstrap.client.ui.ListBox, com.github.gwtbootstrap.client.ui.TextBox, com.github.gwtbootstrap.client.ui.TextBox, com.github.gwtbootstrap.client.ui.TextBox, com.github.gwtbootstrap.client.ui.Modal, com.github.gwtbootstrap.client.ui.Button, boolean)
+   * @see DataCollectorDialog#addFullUser(com.github.gwtbootstrap.client.ui.Modal, com.github.gwtbootstrap.client.ui.Button, UserManager, String, String, String, String, int, int)
+   * @see DataCollectorDialog#userExists
    * @see StudentDialog#addUser
-   * @see DataCollectorDialog#displayTeacherLogin
    */
   void storeUser(long sessionID, String audioType, String userChosenID, PropertyHandler.LOGIN_TYPE userType) {
     System.out.println("storeUser : user now " + sessionID + " audio type '" + audioType +"'");
     final long DURATION = getUserSessionDuration();
     long futureMoment = getUserSessionEnd(DURATION);
-    if (useCookie) {
+    if (USE_COOKIE) {
       Date expires = new Date(futureMoment);
       Cookies.setCookie("sid", "" + sessionID, expires);
     } else if (Storage.isLocalStorageSupported()) {
@@ -457,6 +397,56 @@ public class UserManager {
       userID = sessionID;
       this.userChosenID = userChosenID;
     }
-    langTest.gotUser(sessionID);
+    userNotification.gotUser(sessionID);
+  }
+
+
+  /**
+   * @see #userExpired(String)
+   * @param futureMoment
+   */
+  private void rememberUserSessionEnd(long futureMoment) {
+    if (Storage.isLocalStorageSupported()) {
+      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+      rememberUserSessionEnd(localStorageIfSupported, futureMoment);
+    }
+  }
+
+/*
+  private void updateUserSessionExpires() {
+    final long DURATION = getUserSessionDuration();
+    long futureMoment = getUserSessionEnd(DURATION);
+    if (Storage.isLocalStorageSupported()) {
+      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+      rememberUserSessionEnd(localStorageIfSupported, futureMoment);
+    }
+  }
+*/
+
+  /**
+   * @see #storeUser(long, String, String, mitll.langtest.client.PropertyHandler.LOGIN_TYPE)
+   * @see #rememberUserSessionEnd(long)
+   * @param localStorageIfSupported
+   * @param futureMoment
+   */
+  private void rememberUserSessionEnd(Storage localStorageIfSupported, long futureMoment) {
+    localStorageIfSupported.setItem(getExpires(), "" + futureMoment);
+  }
+
+  private long getUserSessionEnd() {
+    return getUserSessionEnd(getUserSessionDuration());
+  }
+
+  private long getUserSessionEnd(long DURATION) {
+    return System.currentTimeMillis() + DURATION;
+  }
+
+  /**
+   * If we have lots of students moving through stations quickly, we want to auto logout once a day, once an hour?
+   * @return
+   */
+  private long getUserSessionDuration() {
+    boolean useShortExpiration = loginType.equals(PropertyHandler.LOGIN_TYPE.STUDENT);
+    return HOUR_IN_MILLIS * (useShortExpiration ? SHORT_EXPIRATION_HOURS : EXPIRATION_HOURS);
   }
 }
