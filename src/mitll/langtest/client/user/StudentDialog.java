@@ -9,7 +9,6 @@ import com.github.gwtbootstrap.client.ui.Controls;
 import com.github.gwtbootstrap.client.ui.Fieldset;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Form;
-import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.Modal;
 import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
@@ -47,10 +46,10 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class StudentDialog extends UserDialog {
+  private static final int ILR_CHOICE_WIDTH = 80;
   private static final int MIN_WEEKS = 0;
   private static final int MAX_WEEKS = 104;
-  public static final int ILR_CHOICE_WIDTH = 80;
-  public static final int MIN_LENGTH_USER_ID = 4;
+  private static final int MIN_LENGTH_USER_ID = 4;
   private final UserManager userManager;
   private final UserNotification langTest;
   private List<String> purposes;
@@ -83,7 +82,7 @@ public class StudentDialog extends UserDialog {
     Fieldset fieldset = new Fieldset();
     form.add(fieldset);
     dialogBox.add(form);
-    final ListBoxFormField purpose = getListBoxFormField(fieldset, "Purpose", getListBox2(purposes));
+    final ListBoxFormField purpose = getListBoxFormField(fieldset, "Purpose", getListBox2(purposes,ILR_CHOICE_WIDTH));
 
     final FormField user = addControlFormField(fieldset, "User ID", MIN_LENGTH_USER_ID);
     user.setVisible(purpose.getValue().equals("Data Collection"));
@@ -290,16 +289,6 @@ public class StudentDialog extends UserDialog {
       }
     });
     return dialectGroup;
-  }
-
-  protected ListBox getListBox2(List<String> values) {
-    final ListBox genderBox = new ListBox(false);
-    for (String s : values) {
-      genderBox.addItem(s);
-    }
-    genderBox.setWidth(ILR_CHOICE_WIDTH +
-      "px");
-    return genderBox;
   }
 
   /**
