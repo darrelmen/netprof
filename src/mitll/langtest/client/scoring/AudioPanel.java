@@ -312,16 +312,18 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       lastWidth = Window.getClientWidth();
 
       if (DEBUG_GET_IMAGES) {
-        System.out.println("\tAudioPanel.getImages : offset width " + getOffsetWidth() + " request width " + width + " path " + audioPath);
+        System.out.println("\tAudioPanel.getImages : offset width " + getOffsetWidth() +
+          " request width " + width + " path " + audioPath);
       }
       getEachImage(width);
     } else {
-      System.out.println("AudioPanel.getImages : not updating, offset width " + getOffsetWidth() + " width " + width + " path " + audioPath + " diff " + diff + " last " + lastWidth);
+      if (DEBUG_GET_IMAGES) System.out.println("\tAudioPanel.getImages : not updating, offset width " +
+        getOffsetWidth() + " width " + width + " path " + audioPath + " diff " + diff + " last " + lastWidth);
     }
   }
 
   protected void getEachImage(int width) {
-    System.out.println("AudioPanel.getEachImage : " + getElement().getId()+ " path " + audioPath);
+   // System.out.println("AudioPanel.getEachImage : " + getElement().getId()+ " path " + audioPath);
 
     getImageURLForAudio(audioPath, WAVEFORM, width, getWaveform());
     if (showSpectrogram) {
@@ -346,7 +348,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       int reqid = getReqID(type);
       final long then = System.currentTimeMillis();
 
-      System.out.println("getImageURLForAudio : req " + reqid + " path " + path + " type " + type + " width " + width);
+      //System.out.println("getImageURLForAudio : req " + reqid + " path " + path + " type " + type + " width " + width);
       service.getImageForAudioFile(reqid, path, type, toUse, height, new AsyncCallback<ImageResponse>() {
         public void onFailure(Throwable caught) {
           long now = System.currentTimeMillis();
