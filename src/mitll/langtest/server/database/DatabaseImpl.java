@@ -838,12 +838,15 @@ public class DatabaseImpl implements Database {
   private void populateInitialExerciseIDToCount(Collection<Exercise> rawExercises,
                                                 Map<String, Exercise> idToExercise, Map<String, Integer> idToCount,
                                                 Map<String, Double> idToWeight, boolean useWeights) {
+    boolean foundWeights = false;
     for (Exercise e : rawExercises) {
       idToCount.put(e.getID(), 0);
       double weight = !useWeights || e.getWeight() == 0 ? 1 : Math.max(1, Math.log(e.getWeight())); // 1->n
+      if (weight > 0) foundWeights = true;
       idToWeight.put(e.getID(), weight);
       idToExercise.put(e.getID(), e);
     }
+    if (foundWeights) logger.debug("NOTE : using weights!");
   }
 
   /**
