@@ -467,7 +467,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * TODO : join with annotation data when doing QC.
+   * Joins with annotation data when doing QC.
    *
    * @see mitll.langtest.client.list.ExerciseList#askServerForExercise
    * @param id
@@ -476,9 +476,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public Exercise getExercise(String id) {
     long then = System.currentTimeMillis();
     List<Exercise> exercises = getExercises();
-    Exercise byID = db.getExercise(id);
+  /*  Exercise byID = db.getExercise(id);
     if (byID == null) {
       byID = db.getUserExerciseWhere(id);
+    }*/
+    Exercise byID = db.getUserExerciseWhere(id);  // allow custom items to mask out non-custom items
+    if (byID == null) {
+      byID = db.getExercise(id);
     }
     addAnnotations(byID);
     logger.debug("getExercise : returning " +byID);
@@ -1017,7 +1021,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public void addAnnotation(String exerciseID, String field, String status, String comment, long userID) {
-    db.getUserListManager().addAnnotation(exerciseID,field,status,comment, userID);
+    db.getUserListManager().addAnnotation(exerciseID, field, status, comment, userID);
   }
 
   /**
@@ -1033,6 +1037,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
+  /**
+   * @see mitll.langtest.client.custom.Navigation#viewReview
+   * @return
+   */
   @Override
   public UserList getReviewList() { return db.getUserListManager().getReviewList(); }
 
@@ -1041,12 +1049,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param userid
    * @param english
    * @param foreign
+   * @param transliteration
    * @return
    */
-  public UserExercise createNewItem(long userid, String english, String foreign) {
-    logger.debug("create new item - " +foreign);
+  public UserExercise createNewItem(long userid, String english, String foreign, String transliteration) {
+    logger.debug("create new item - " + foreign);
     if (!audioFileHelper.checkLTS(foreign)) return null;
-    return db.getUserListManager().createNewItem(userid, english, foreign);
+    return db.getUserListManager().createNewItem(userid, english, foreign, transliteration);
   }
 
   /**
@@ -1060,16 +1069,20 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public UserExercise reallyCreateNewItem(long userListID, UserExercise userExercise) {
     db.getUserListManager().reallyCreateNewItem(userListID, userExercise);
     fixAudioPaths(userExercise, true); // do this after the id has been made
-    db.getUserListManager().editItem(userExercise);
+    db.getUserListManager().editItem(userExercise, false);
     logger.debug("reallyCreateNewItem : made user exercise " + userExercise);
 
     return userExercise;
   }
 
+  /**
+   * @see mitll.langtest.client.custom.EditItem.EditableExercise#onClick(mitll.langtest.shared.custom.UserList, mitll.langtest.client.exercise.PagingContainer, com.google.gwt.user.client.ui.Panel 
+   * @param userExercise
+   */
   @Override
   public void editItem(UserExercise userExercise) {
-    fixAudioPaths(userExercise,true);
-    db.getUserListManager().editItem(userExercise);
+    fixAudioPaths(userExercise, true);
+    db.getUserListManager().editItem(userExercise, true);
     logger.debug("editItem : now user exercise " + userExercise);
   }
 
@@ -1079,14 +1092,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String fast = FAST + "_"+ now +"_.wav";
     String refAudio = getRefAudioPath(userExercise, fileRef, fast, overwrite);
     userExercise.setRefAudio(refAudio);
-    logger.debug("for " + userExercise.getID() + " fast is " + fast + " size " + FileUtils.size(refAudio));
+    logger.debug("fixAudioPaths : for " + userExercise.getID() + " fast is " + fast + " size " + FileUtils.size(refAudio));
 
     if (userExercise.getSlowAudioRef() != null && !userExercise.getSlowAudioRef().isEmpty()) {
       fileRef = pathHelper.getAbsoluteFile(userExercise.getSlowAudioRef());
       String slow = SLOW + "_"+ now+"_.wav";
 
       refAudio = getRefAudioPath(userExercise, fileRef, slow, overwrite);
-      logger.debug("for " + userExercise.getID()+ "slow is " + refAudio + " size " + FileUtils.size(refAudio));
+      logger.debug("fixAudioPaths : for " + userExercise.getID()+ "slow is " + refAudio + " size " + FileUtils.size(refAudio));
 
       userExercise.setSlowRefAudio(refAudio);
     }
