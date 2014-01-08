@@ -22,7 +22,6 @@ public interface ExerciseController {
   void showProgress();
 
   int getUser();
-  void pingAliveUser();
 
   void startRecording();
   void stopRecording();
@@ -54,11 +53,10 @@ public interface ExerciseController {
   String getLanguage();
   boolean isPromptBeforeNextItem();
   boolean isRightAlignContent();
-  boolean isFlashCard();
   boolean isGoodwaveMode();
   int getLeftColumnWidth();
   int getHeightOfTopRows();
-  boolean shouldAddRecordKeyBinding();
+  boolean showUnansweredFirst();
 
   int getFlashcardPreviewFrameHeight();
 
