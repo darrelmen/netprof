@@ -140,7 +140,7 @@ public interface LangTestDatabaseAsync {
 
   void addItemToUserList(long userListID, UserExercise userExercise, AsyncCallback<Void> async);
 
-  void createNewItem(long userid, String english, String foreign, AsyncCallback<UserExercise> async);
+  void createNewItem(long userid, String english, String foreign, String transliteration, AsyncCallback<UserExercise> async);
 
   void reallyCreateNewItem(long userListID, UserExercise userExercise,AsyncCallback<UserExercise> async);
 
