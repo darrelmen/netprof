@@ -116,7 +116,9 @@ public class ExcelImport implements ExerciseDAO {
       }
 
     } else {
-      logger.debug("Can't find " + file + " under " + relativeConfigDir + " abs path " + missingSlow.getAbsolutePath());
+      if (serverProps.isGoodwaveMode()) {
+        logger.debug("Can't find " + file + " under " + relativeConfigDir + " abs path " + missingSlow.getAbsolutePath());
+      }
     }
     return missingSlow.exists();
   }
