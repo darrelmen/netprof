@@ -138,6 +138,7 @@ public class UserListManager {
   }
 
   /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getReviewList()
    * @see #markIncorrect(String)
    * @return
    */
@@ -157,6 +158,12 @@ public class UserListManager {
     return userList;
   }
 
+  /**
+   * @see #getReviewList()
+   * @param idToUser
+   * @param incorrect
+   * @return
+   */
   private List<UserExercise> getReviewedUserExercises(Map<String, UserExercise> idToUser, Set<String> incorrect) {
     List<UserExercise> onList = new ArrayList<UserExercise>();
     for (String id : incorrect) {
@@ -184,9 +191,9 @@ public class UserListManager {
     return listsForUser;
   }
 
-  public UserExercise createNewItem(long userid, String english, String foreign) {
+  public UserExercise createNewItem(long userid, String english, String foreign, String transliteration) {
     int uniqueID = userExerciseCount++;
-    return new UserExercise(uniqueID, UserExercise.CUSTOM_PREFIX+uniqueID, userid, english, foreign);
+    return new UserExercise(uniqueID, UserExercise.CUSTOM_PREFIX+uniqueID, userid, english, foreign, transliteration);
   }
 
   /**
@@ -202,6 +209,7 @@ public class UserListManager {
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#reallyCreateNewItem
+   * @see #addItemToUserList(long, mitll.langtest.shared.custom.UserExercise)
    * @param userListID
    * @param userExercise
    */
@@ -218,8 +226,15 @@ public class UserListManager {
     }
   }
 
-  public void editItem(UserExercise userExercise) {
-    userExerciseDAO.update(userExercise);
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#editItem(mitll.langtest.shared.custom.UserExercise)
+   * @see mitll.langtest.client.custom.EditItem.EditableExercise#onClick(mitll.langtest.shared.custom.UserList, mitll.langtest.client.exercise.PagingContainer, com.google.gwt.user.client.ui.Panel
+   *
+   * @param userExercise
+   * @param createIfDoesntExist
+   */
+  public void editItem(UserExercise userExercise, boolean createIfDoesntExist) {
+    userExerciseDAO.update(userExercise, createIfDoesntExist);
   }
 
   public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
@@ -253,7 +268,7 @@ public class UserListManager {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise(String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addAnnotations(mitll.langtest.shared.Exercise)
    * @param exercise
    * @param <T>
    */
@@ -280,6 +295,10 @@ public class UserListManager {
   }
   public Set<String> getReviewedExercises() { return reviewedExercises; }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#markReviewed(String, boolean, long)
+   * @param id
+   */
   public void markIncorrect(String id) {
     incorrect.add(id);
   }
