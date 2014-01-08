@@ -232,14 +232,14 @@ public class AnswerDAO {
         "SET " +
         ResultDAO.PRON_SCORE+"='" + score + "' " +
         "WHERE id=" + id;
-      if (false) {
+/*      if (false) {
         logger.debug("changeAnswer " + id + " score " +score);
-      }
+      }*/
       PreparedStatement statement = connection.prepareStatement(sql);
 
       int i = statement.executeUpdate();
 
-      if (false) logger.debug("UPDATE " + i);
+    //  if (false) logger.debug("UPDATE " + i);
       if (i == 0) {
         logger.error("huh? didn't update the answer for " + id + " sql " + sql);
       }
