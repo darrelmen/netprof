@@ -94,9 +94,12 @@ public class AudioAttribute implements IsSerializable {
     return attributes;
   }
 
+  public String getKey() { return getAttributes().toString(); }
+/*
   public List<String> getAnnotations() {
     return annotations;
   }
+*/
 
   public String getDisplay() {
     if (hasOnlySpeed()) {
