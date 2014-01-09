@@ -105,6 +105,12 @@ public class ASRScoring extends Scoring {
 
   public boolean checkLTS(String foreignLanguagePhrase) { return checkLTS(letterToSoundClass, foreignLanguagePhrase); }
 
+  /**
+   * So chinese is special -- it doesn't do lts -- it just uses a dictionary
+   * @param lts
+   * @param foreignLanguagePhrase
+   * @return
+   */
   private boolean checkLTS(LTS lts, String foreignLanguagePhrase) {
 
     List<String> tokens = new SmallVocabDecoder().getTokens(foreignLanguagePhrase);
