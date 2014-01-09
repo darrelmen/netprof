@@ -207,7 +207,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       image = new Image();
       image.setVisible(false);
     }
-    public void setVisible(boolean visible) { image.setVisible(visible); }
+    public void setVisible(boolean visible) { image.setVisible(visible); check.setVisible(visible);}
+
     public void setUrl(String url) { image.setUrl(url); }
   }
 
@@ -296,8 +297,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     int rightSide = gaugePanel != null ? gaugePanel.getOffsetWidth() : rightMargin;
     if (gaugePanel != null && rightSide == 0) {
       rightSide = 180; // hack!!!
-    } else {
-     // if (gaugePanel == null) System.out.println("getImages : gauge panel is null");
     }
     int width = (int) ((screenPortion * ((float) Window.getClientWidth())) - leftColumnWidth) - rightSide;
 
@@ -366,7 +365,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
             System.err.println("got error for request for type " + type);
             if (WARN_ABOUT_MISSING_AUDIO) Window.alert("missing audio file on server " + path);
           }
-          else if (isMostRecentRequest(type,result.req)) {
+          else if (isMostRecentRequest(type, result.req)) {
             imageAndCheck.image.setUrl(result.imageURL);
             imageAndCheck.image.setVisible(true);
             audioPositionPopup.reinitialize(result.durationInSeconds);
