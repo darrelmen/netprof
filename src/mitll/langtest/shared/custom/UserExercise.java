@@ -14,8 +14,8 @@ import mitll.langtest.shared.ExerciseShell;
  */
 public class UserExercise extends AudioExercise {
   public static final String CUSTOM_PREFIX = "Custom_";
-  private static int globalCount = 0;
-  private int count = 0;
+//  private static int globalCount = 0;
+  //private int count = 0;
   private long uniqueID = -1; //set by database
 
   private String english;
@@ -28,7 +28,7 @@ public class UserExercise extends AudioExercise {
 
   public UserExercise(ExerciseShell shell, long creator) {
     super(shell.getID(), shell.getTooltip());
-    isPredef = true;
+    isPredef = !shell.getID().startsWith(CUSTOM_PREFIX);
     this.creator = creator;
   }
 
@@ -49,7 +49,7 @@ public class UserExercise extends AudioExercise {
     this.english = english;
     this.foreignLanguage = foreignLanguage;
     this.transliteration = transliteration;
-    count = globalCount++;
+ //   count = globalCount++;
     isPredef = !exerciseID.startsWith(CUSTOM_PREFIX);
   }
 
@@ -92,9 +92,10 @@ public class UserExercise extends AudioExercise {
    * @return
    */
   public Exercise toExercise() {
-    Exercise exercise = new Exercise("plan", CUSTOM_PREFIX + uniqueID, getEnglish(), getRefAudio(), getForeignLanguage(), getEnglish());
+    Exercise exercise = new Exercise("plan", ""+uniqueID, getEnglish(), getRefAudio(), getForeignLanguage(), getEnglish());
     exercise.setTranslitSentence(getTransliteration());
     exercise.setSlowRefAudio(getSlowAudioRef());
+    exercise.setEnglishSentence(getEnglish());
     return exercise;
   }
 
@@ -106,17 +107,10 @@ public class UserExercise extends AudioExercise {
   public Exercise toExercise(String language) {
     String content = ExerciseFormatter.getContent(getForeignLanguage(), "", english, "", language);
     Exercise imported = new Exercise("import", id, content, false, true, english);
-    System.out.println("toExercise : before " + imported + " " + getRefAudio() + " " + getSlowAudioRef());
-    System.out.println("toExercise : before " + imported + " " + imported.getRefAudio() + " " + imported.getSlowAudioRef());
-
     if (getRefAudio() != null)
       imported.setRefAudio(getRefAudio());
     if (getSlowAudioRef() != null)
       imported.setSlowRefAudio(getSlowAudioRef());
-
-    System.out.println("toExercise : after  " +imported + " " + getRefAudio() + " " + getSlowAudioRef());
-    System.out.println("toExercise : after  " + imported + " " + imported.getRefAudio() + " " + imported.getSlowAudioRef());
-
     imported.setType(Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW);
     imported.setRefSentence(getForeignLanguage());
     imported.setEnglishSentence(english);
@@ -154,9 +148,7 @@ public class UserExercise extends AudioExercise {
     this.transliteration = transliteration;
   }
 
-  public boolean isPredefined() {
-    return isPredef;
-  }
+  public boolean isPredefined() {  return isPredef;  }
 
   public String toString() {
     return "UserExercise" +
