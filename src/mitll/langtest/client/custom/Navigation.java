@@ -373,17 +373,20 @@ public class Navigation implements RequiresResize {
   private Panel getListOperations(final UserList ul, final boolean created, final String instanceName) {
     final TabPanel tabPanel = new TabPanel();
     System.out.println("getListOperations : '" + instanceName + " for list " +ul);
+    final boolean isReview = instanceName.equals("review");
 
     // add learn tab
-    final TabAndContent learn = makeTab(tabPanel, IconType.LIGHTBULB, "Learn Pronunciation");
+    String learnTitle = isReview ? "Items to review" : "Learn Pronunciation";
+    final TabAndContent learn = makeTab(tabPanel, IconType.LIGHTBULB, learnTitle);
     learn.tab.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        npfHelper.showNPF(ul, learn, instanceName.equals("review") ? "review" : "learn");
+        npfHelper.showNPF(ul, learn, isReview ? "review" : "learn");
       }
     });
 
     // add practice tab
+    if (!isReview) {
     final TabAndContent practice = makeTab(tabPanel, IconType.CHECK, PRACTICE);
     practice.tab.addClickHandler(new ClickHandler() {
       @Override
@@ -391,11 +394,11 @@ public class Navigation implements RequiresResize {
         avpHelper.showNPF(ul, practice, "practice");
       }
     });
-
+    }
     // add add item and edit tabs (conditionally)
     TabAndContent addItem = null;
     if (created && !ul.isPrivate()) {
-      if (!instanceName.equals("review")) {
+      if (!isReview) {
         addItem = makeTab(tabPanel, IconType.PLUS_SIGN, "Add Item");
         final TabAndContent finalAddItem = addItem;
         addItem.tab.addClickHandler(new ClickHandler() {
@@ -424,7 +427,7 @@ public class Navigation implements RequiresResize {
           showAddItem(ul, finalAddItem);
         } else {
           tabPanel.selectTab(0);
-          npfHelper.showNPF(ul, learn, instanceName.equals("review") ? "review" : "learn");
+          npfHelper.showNPF(ul, learn, isReview ? "review" : "learn");
         }
       }
     });
