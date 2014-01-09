@@ -1,7 +1,9 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.database.custom.UserExerciseDAO;
 import mitll.langtest.server.database.testing.SmallDatabaseImpl;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.custom.UserExercise;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
@@ -134,6 +136,16 @@ public class SQLExerciseDAO implements ExerciseDAO {
 
   @Override
   public SectionHelper getSectionHelper() { return sectionHelper; }
+
+  @Override
+  public void addOverlay(UserExercise userExercise) {
+
+  }
+
+  @Override
+  public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
+
+  }
 
   @Override
   public Exercise getExercise(String id) {
