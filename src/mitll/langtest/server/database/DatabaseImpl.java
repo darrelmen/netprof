@@ -1,6 +1,7 @@
 package mitll.langtest.server.database;
 
 import mitll.flashcard.UserState;
+import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
@@ -64,7 +65,7 @@ import java.util.TreeSet;
 public class DatabaseImpl implements Database {
   private static Logger logger = Logger.getLogger(DatabaseImpl.class);
 
-  private static final boolean DO_SIMPLE_FLASHCARDS = true;
+ // private static final boolean DO_SIMPLE_FLASHCARDS = true;
   private static final boolean DROP_USER = false;
   private static final boolean DROP_RESULT = false;
   private static final int MIN_INCORRECT_ANSWERS = 10;
@@ -106,7 +107,7 @@ public class DatabaseImpl implements Database {
    */
 
   public DatabaseImpl(String configDir, String dbName, String lessonPlanFile) {
-    this(configDir, dbName, "", new ServerProperties());
+    this(configDir, dbName, "", new ServerProperties(),null);
     this.useFile = true;
     this.lessonPlanFile = lessonPlanFile;
   }
@@ -117,7 +118,7 @@ public class DatabaseImpl implements Database {
    * @param dbName
    * @param serverProps
    */
-  public DatabaseImpl(String configDir, String dbName, String relativeConfigDir, ServerProperties serverProps) {
+  public DatabaseImpl(String configDir, String dbName, String relativeConfigDir, ServerProperties serverProps,PathHelper pathHelper) {
     connection = new H2Connection(configDir, dbName);
     absConfigDir = configDir;
     this.configDir = relativeConfigDir;
@@ -137,14 +138,14 @@ public class DatabaseImpl implements Database {
       logger.error("couldn't open connection to database, got " + e.getMessage(),e);
       return;
     }
-    initializeDAOs();
+    initializeDAOs(pathHelper);
     monitoringSupport = getMonitoringSupport();
   }
 
   /**
    * Create or alter tables as needed.
    */
-  private void initializeDAOs() {
+  private void initializeDAOs(PathHelper pathHelper) {
     userDAO = new UserDAO(this);
     UserListDAO userListDAO = new UserListDAO(this, userDAO);
 
@@ -155,7 +156,7 @@ public class DatabaseImpl implements Database {
     answerDAO = new AnswerDAO(this, resultDAO);
     gradeDAO = new GradeDAO(this,userDAO, resultDAO);
     siteDAO = new SiteDAO(this, userDAO);
-    userListManager = new UserListManager( userDAO,userListDAO,userListExerciseJoinDAO, new AnnotationDAO(this), new ReviewedDAO(this));
+    userListManager = new UserListManager( userDAO,userListDAO,userListExerciseJoinDAO, new AnnotationDAO(this), new ReviewedDAO(this), pathHelper);
 
 
     if (DROP_USER) {
@@ -177,12 +178,8 @@ public class DatabaseImpl implements Database {
     }
 
     try {
-      // gradeDAO.dropGrades();
       gradeDAO.createGradesTable(getConnection());
-      //graderDAO.createGraderTable(getConnection());
-      //userDAO.dropUserTable(this);
       userDAO.createUserTable(this);
-   //   dliUserDAO.dropUserTable(this);
       dliUserDAO.createUserTable(this);
 
       siteDAO.createTable(getConnection());
@@ -193,10 +190,13 @@ public class DatabaseImpl implements Database {
   }
 
   @Override
-  public Connection getConnection()/* throws Exception*/ {
-    return connection.getConnection();
-  }
+  public Connection getConnection() { return connection.getConnection();  }
 
+  /**
+   * It seems like this isn't required?
+   * @param connection
+   * @throws SQLException
+   */
   public void closeConnection(Connection connection) throws SQLException {}
 
   public Export getExport() {
@@ -302,7 +302,13 @@ public class DatabaseImpl implements Database {
         this.exerciseDAO = makeExerciseDAO(useFile);
       }
       userExerciseDAO.setExerciseDAO(exerciseDAO);
+      exerciseDAO.setUserExerciseDAO(userExerciseDAO);
     }
+  }
+
+  public void editItem(UserExercise userExercise) {
+    getUserListManager().editItem(userExercise, true);
+    exerciseDAO.addOverlay(userExercise);
   }
 
   /**
@@ -612,7 +618,7 @@ public class DatabaseImpl implements Database {
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
-   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.audio.AudioCheck.ValidityAndDur, String, boolean, mitll.langtest.client.LangTestDatabase)
+   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
    * @param userID
    * @param exerciseID
    * @param isCorrect
@@ -1299,7 +1305,7 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile(String, String, String, int, int, int, boolean, String, boolean)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
    * @param userID
    * @param plan
    * @param exerciseID
