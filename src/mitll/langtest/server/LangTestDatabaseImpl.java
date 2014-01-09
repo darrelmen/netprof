@@ -2,7 +2,6 @@ package mitll.langtest.server;
 
 import audio.image.ImageType;
 import audio.imagewriter.ImageWriter;
-import audio.tools.FileCopier;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.io.Files;
@@ -41,7 +40,6 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
-import org.h2.store.fs.FileUtils;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -202,8 +200,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param reqID
    */
   public ExerciseListWrapper getExerciseIds(int reqID) {
-    List<Exercise> exercises = getExercises();
-    return makeExerciseListWrapper(reqID, exercises);
+    return makeExerciseListWrapper(reqID, getExercises());
   }
 
   /**
@@ -1068,7 +1065,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public UserExercise reallyCreateNewItem(long userListID, UserExercise userExercise) {
     db.getUserListManager().reallyCreateNewItem(userListID, userExercise);
-    fixAudioPaths(userExercise, true); // do this after the id has been made
+   // fixAudioPaths(userExercise, true); // do this after the id has been made
     db.getUserListManager().editItem(userExercise, false);
     logger.debug("reallyCreateNewItem : made user exercise " + userExercise);
 
@@ -1081,22 +1078,28 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public void editItem(UserExercise userExercise) {
-    fixAudioPaths(userExercise, true);
-    db.getUserListManager().editItem(userExercise, true);
+    //fixAudioPaths(userExercise, true);
+    db.editItem(userExercise);
     logger.debug("editItem : now user exercise " + userExercise);
   }
 
+  /**
+   * Remember to copy the audio from the posted location to a more permanent location.
+   * @param userExercise
+   * @param overwrite
+   */
+/*
   private void fixAudioPaths(UserExercise userExercise, boolean overwrite) {
     File fileRef = pathHelper.getAbsoluteFile(userExercise.getRefAudio());
     long now = System.currentTimeMillis();
-    String fast = FAST + "_"+ now +"_.wav";
+    String fast = FAST + "_"+ now +"_by_" +userExercise.getCreator()+".wav";
     String refAudio = getRefAudioPath(userExercise, fileRef, fast, overwrite);
     userExercise.setRefAudio(refAudio);
     logger.debug("fixAudioPaths : for " + userExercise.getID() + " fast is " + fast + " size " + FileUtils.size(refAudio));
 
     if (userExercise.getSlowAudioRef() != null && !userExercise.getSlowAudioRef().isEmpty()) {
       fileRef = pathHelper.getAbsoluteFile(userExercise.getSlowAudioRef());
-      String slow = SLOW + "_"+ now+"_.wav";
+      String slow = SLOW + "_"+ now+"_by_" + userExercise.getCreator()+ ".wav";
 
       refAudio = getRefAudioPath(userExercise, fileRef, slow, overwrite);
       logger.debug("fixAudioPaths : for " + userExercise.getID()+ "slow is " + refAudio + " size " + FileUtils.size(refAudio));
@@ -1104,6 +1107,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       userExercise.setSlowRefAudio(refAudio);
     }
   }
+*/
 
   /**
    * Copying audio from initial recording location to new location.
@@ -1114,7 +1118,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param overwrite
    * @return
    */
-  private String getRefAudioPath(UserExercise userExercise, File fileRef, String fast, boolean overwrite) {
+/*  private String getRefAudioPath(UserExercise userExercise, File fileRef, String fast, boolean overwrite) {
     final File bestDir = pathHelper.getAbsoluteFile("bestAudio");
     bestDir.mkdir();
     File bestDirForExercise = new File(bestDir, userExercise.getID());
@@ -1131,7 +1135,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     ensureMP3(s, overwrite);
     return s;
-  }
+  }*/
 
   /**
    * @param age
@@ -1358,26 +1362,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see AudioFileHelper#makeAutoCRT(String, mitll.langtest.server.scoring.AutoCRTScoring, mitll.langtest.server.database.DatabaseImpl, LangTestDatabaseImpl)
-   * @param useFile
-   * @param db
-   * @return
-   */
-  public String setInstallPath(boolean useFile, DatabaseImpl db) {
-    String lessonPlanFile = getLessonPlan();
-    if (useFile && !new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
-
-    db.setInstallPath(pathHelper.getInstallPath(), lessonPlanFile, serverProps.getLanguage(), useFile,
-      relativeConfigDir+File.separator+serverProps.getMediaDir());
-
-    return lessonPlanFile;
-  }
-
-  private String getLessonPlan() {
-    return configDir + File.separator + serverProps.getLessonPlan();
-  }
-
-  /**
    * The config web.xml file.
    * As a final step, creates the DatabaseImpl!<br></br>
    *
@@ -1402,6 +1386,26 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   private DatabaseImpl makeDatabaseImpl(String h2DatabaseFile) {
     //logger.debug("word pairs " +  serverProps.isWordPairs() + " language " + serverProps.getLanguage() + " config dir " + relativeConfigDir);
-    return new DatabaseImpl(configDir, h2DatabaseFile, relativeConfigDir,  serverProps);
+    return new DatabaseImpl(configDir, h2DatabaseFile, relativeConfigDir,  serverProps, pathHelper);
+  }
+
+  /**
+   * @see AudioFileHelper#makeAutoCRT(String, mitll.langtest.server.scoring.AutoCRTScoring, mitll.langtest.server.database.DatabaseImpl, LangTestDatabaseImpl)
+   * @param useFile
+   * @param db
+   * @return
+   */
+  public String setInstallPath(boolean useFile, DatabaseImpl db) {
+    String lessonPlanFile = getLessonPlan();
+    if (useFile && !new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
+
+    db.setInstallPath(pathHelper.getInstallPath(), lessonPlanFile, serverProps.getLanguage(), useFile,
+      relativeConfigDir+File.separator+serverProps.getMediaDir());
+
+    return lessonPlanFile;
+  }
+
+  private String getLessonPlan() {
+    return configDir + File.separator + serverProps.getLessonPlan();
   }
 }
