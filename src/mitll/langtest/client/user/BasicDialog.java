@@ -6,6 +6,7 @@ import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.PasswordTextBox;
 import com.github.gwtbootstrap.client.ui.Popover;
 import com.github.gwtbootstrap.client.ui.TextBox;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
@@ -48,11 +49,12 @@ public class BasicDialog {
 
   protected FormField addControlFormField(Panel dialogBox, String label, boolean isPassword, int minLength, Widget rightSide) {
     final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
+
     Panel row = new HorizontalPanel();
-    //row.addStyleName("trueInlineStyle");
     row.add(user);
     row.add(rightSide);
     final ControlGroup userGroup = addControlGroupEntry(dialogBox, label, row);
+
     FormField formField = new FormField(user, userGroup, minLength);
     formField.setRightSide(rightSide);
     return formField;
@@ -74,6 +76,23 @@ public class BasicDialog {
     userGroup.add(new ControlLabel(label));
     widget.addStyleName("leftFiveMargin");
     userGroup.add(widget);
+
+    dialogBox.add(userGroup);
+    return userGroup;
+  }
+
+  protected ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget widget, Widget rightSide) {
+    final ControlGroup userGroup = new ControlGroup();
+    userGroup.addStyleName("leftFiveMargin");
+    userGroup.add(new ControlLabel(label));
+    widget.addStyleName("leftFiveMargin");
+
+    Panel row = new DivWidget();
+    row.add(widget);
+    row.add(rightSide);
+   // final ControlGroup userGroup = addControlGroupEntry(dialogBox, label, row);
+
+    userGroup.add(row);
 
     dialogBox.add(userGroup);
     return userGroup;
@@ -138,7 +157,7 @@ public class BasicDialog {
   }
 
   protected void setupPopoverThatHidesItself(final Widget w, String heading, final String message) {
-    System.out.println("\n\n\ntriggering popover on " + w.getTitle() + " with " + heading + "/"+message);
+    System.out.println("\n\n\ntriggering popover on " + w.getTitle() + " with " + heading + "/" + message);
     final MyPopover popover = new MyPopover();
     popover.setWidget(w);
     popover.setText(message);
