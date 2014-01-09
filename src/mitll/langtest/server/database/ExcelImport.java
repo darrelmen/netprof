@@ -1,10 +1,10 @@
 package mitll.langtest.server.database;
 
-import corpus.LTS;
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.scoring.SmallVocabDecoder;
+import mitll.langtest.server.database.custom.UserExerciseDAO;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseFormatter;
+import mitll.langtest.shared.custom.UserExercise;
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
@@ -135,15 +135,56 @@ public class ExcelImport implements ExerciseDAO {
       if (exercises == null) {
         exercises = readExercises(new File(file));
         for (Exercise e : exercises) idToExercise.put(e.getID(), e);
+
+        overlayExercises(userExerciseDAO.getOverrides());
       }
     }
     return exercises;
   }
 
+  private void overlayExercises(Collection<UserExercise> overlay) {
+   // synchronized (this) {
+      for (UserExercise userExercise : overlay) {
+        addOverlay(userExercise);
+      }
+    //}
+  }
+
+  @Override
+  public void addOverlay(UserExercise userExercise) {
+    logger.debug("addOverlay for " +userExercise);
+    Exercise exercise = getExercise(userExercise.getID());
+    logger.debug("\taddOverlay at " +userExercise.getID() + " found " +exercise);
+
+    if (exercise == null) {
+      logger.error("huh? can't find " + userExercise);
+    }
+    else {
+      Exercise over = userExercise.toExercise();
+      synchronized (this) {
+        int i = exercises.indexOf(exercise);
+        if (i == -1) {
+          logger.error ("huh? couldn't find " + exercise);
+        }
+        else {
+          exercises.set(i, over);
+        }
+        idToExercise.put(over.getID(), over);
+      }
+    }
+  }
+
+  private UserExerciseDAO userExerciseDAO;
+
+  @Override
+  public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) { this.userExerciseDAO = userExerciseDAO; }
+
   public Exercise getExercise(String id) {
     if (idToExercise.isEmpty()) logger.warn("huh? couldn't find any exercises..?");
 
-    return idToExercise.get(id);
+    synchronized (this) {
+      return idToExercise.get(id);
+    }
   }
 
   /**
@@ -496,6 +537,7 @@ public class ExcelImport implements ExerciseDAO {
     }
   }*/
 
+/*
   public boolean checkLTS(LTS lts, String foreignLanguagePhrase) {
     List<String> tokens = new SmallVocabDecoder().getTokens(foreignLanguagePhrase);
     try {
@@ -513,6 +555,7 @@ public class ExcelImport implements ExerciseDAO {
     }
     return true;
   }
+*/
 
   /**
    * @param id
@@ -577,10 +620,10 @@ public class ExcelImport implements ExerciseDAO {
     if (chapter.startsWith("'")) chapter = chapter.substring(1);
     if (week.startsWith("'")) week = week.substring(1);
 
-    if (debug && false)
+/*    if (debug && false)
       logger.debug("unit(" +unitName+
         ")" + unitIndex + "/" + unit + " chapter " + chapterIndex + "/(" +chapterName+
-        ")" + chapter + " week (" + weekName+ ") : " + week);
+        ")" + chapter + " week (" + weekName+ ") : " + week);*/
 
     if (unit.length() > 0) {
       pairs.add(sectionHelper.addExerciseToLesson(imported, unitName, unit));

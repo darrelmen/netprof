@@ -317,11 +317,11 @@ public class Exercise extends AudioExercise {
     String questionInfo = langToQuestion == null ? " no questions" : " num questions " + langToQuestion.size() + moreAboutQuestions;
 
     if (isRepeat() || getType() == EXERCISE_TYPE.MULTI_REF) {
-      return "Exercise " + type + " " +plan+"/"+ id + "/" + " content bytes = " + content.length() +
+      return "Exercise " + type + " " +id +  " content bytes = " + content.length() + " english " + getEnglishSentence() +
           " ref sentence '" + getRefSentence() +"' audio " + getAudioAttributes() + " : " + questionInfo;
     }
     else {
-      return "Exercise " + getType() + " " +plan+"/"+ id + "/" + (isPromptInEnglish() ?"english":"foreign")+
+      return "Exercise " + getType() + " " + id + " " + (isPromptInEnglish() ?"english":"foreign")+
           " : content bytes = " + content.length() + (DEBUG ? " content : " +content : "")+
           " ref '" + getRefSentence() + "' translit '" + getTranslitSentence()+ "'"+
         questionInfo;
