@@ -2,15 +2,8 @@ package mitll.langtest.client.custom;
 
 import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.FluidRow;
-import com.github.gwtbootstrap.client.ui.Label;
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
-import com.google.gwt.event.dom.client.BlurEvent;
-import com.google.gwt.event.dom.client.BlurHandler;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
@@ -186,20 +179,6 @@ public class EditItem {
       });*/
     }
 
-    /**
-     * TODO : Check if audio is dirty before blowing it away!
-     * @param listener
-     * @return
-     */
-    private boolean checkForForeignChange(DialogHelper.CloseListener listener) {
-      if (!foreignLang.box.getText().equals(originalForeign)) {
-        new DialogHelper(true).show("Invalidate audio?", Arrays.asList("The " + controller.getLanguage() +
-          " has changed - should the audio be re-recorded?"), listener);
-        return true;
-      }
-      else return false;
-    }
-
     @Override
     protected void makeTranslitRow(Panel container) {
       FluidRow row = new FluidRow();
@@ -244,9 +223,19 @@ public class EditItem {
         @Override
         public void gotYes() {
           System.out.println("invalidate the audio...");
-          newUserExercise.clearAudio();
-          rap.getWaveform().setVisible(false);
-          rapSlow.getWaveform().setVisible(false);
+
+          if (refAudioUnchanged()) {
+            newUserExercise.clearRefAudio();
+            rap.getWaveform().setVisible(false);
+          }
+          if (slowRefAudioUnchanged()) {
+            newUserExercise.clearSlowRefAudio();
+            rapSlow.getWaveform().setVisible(false);
+          }
+          if (translitUnchanged()) {
+            markError(translit, "Is transliteration consistent with "+controller.getLanguage()+"?");
+          }
+
           originalForeign = foreignLang.box.getText();
         }
 
@@ -259,6 +248,36 @@ public class EditItem {
       if (!checkForForeignChange(listener)) {
         reallyChange(pagingContainer);
       }
+    }
+
+    /**
+     * TODO : Check if audio is dirty before blowing it away!
+     * So check if the audio is the original audio and the translation has changed.
+     * If the translation is new but the audio isn't, ask and clear
+     * @param listener
+     * @return
+     */
+    private boolean checkForForeignChange(DialogHelper.CloseListener listener) {
+      if (!foreignLang.box.getText().equals(originalForeign) &&
+        (refAudioUnchanged() || slowRefAudioUnchanged())) {
+        new DialogHelper(true).show("Invalidate audio?",
+          Arrays.asList("The " + controller.getLanguage() +
+          " has changed - should the audio be re-recorded?"), listener);
+        return true;
+      }
+      else return false;
+    }
+
+    private boolean refAudioUnchanged() {
+      return newUserExercise.getRefAudio().equals(originalRefAudio);
+    }
+
+    private boolean slowRefAudioUnchanged() {
+      return newUserExercise.getSlowAudioRef().equals(originalSlowRefAudio);
+    }
+
+    private boolean translitUnchanged() {
+      return newUserExercise.getTransliteration().equals(originalTransliteration);
     }
 
     private void reallyChange(final PagingContainer<?> pagingContainer) {
@@ -279,38 +298,52 @@ public class EditItem {
       });
     }
 
+    private String originalRefAudio;
+    private String originalSlowRefAudio;
+    private String originalTransliteration;
+
     /**
      * @see mitll.langtest.client.custom.EditItem#editItem(mitll.langtest.shared.custom.UserExercise, com.google.gwt.user.client.ui.SimplePanel, mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.HTML, mitll.langtest.shared.custom.UserExercise)
      */
     private void setFields() {
       System.out.println("setFields : setting fields with " + newUserExercise);
-      TextBoxBase box = english.box;
-      box.setText(newUserExercise.getEnglish());
 
-      // add annotation if it's there
+       // english
+      english.box.setText(newUserExercise.getEnglish());
       useAnnotation(newUserExercise,"english",englishAnno);
 
-      translit.box.setText(newUserExercise.getTransliteration());
-      useAnnotation(newUserExercise,"transliteration",translitAnno);
-
+      // foreign lang
       String foreignLanguage = newUserExercise.getForeignLanguage();
       foreignLanguage = foreignLanguage.trim();
       foreignLang.box.setText(originalForeign = foreignLanguage);
       useAnnotation(newUserExercise, "foreignLanguage", foreignAnno);
 
+      // translit
+      translit.box.setText(originalTransliteration = newUserExercise.getTransliteration());
+      useAnnotation(newUserExercise,"transliteration",translitAnno);
+
       Exercise exercise = newUserExercise.toExercise();
+
+      // regular speed audio
       rap.getPostAudioButton().setExercise(exercise);
-      useAnnotation(newUserExercise,newUserExercise.getRefAudio(),fastAnno);
+      String refAudio = exercise.getRefAudio();
+      useAnnotation(newUserExercise, refAudio, fastAnno);
 
-      if (exercise.getRefAudio() != null) {
-        rap.getImagesForPath(exercise.getRefAudio());
+      if (refAudio != null) {
+        rap.getImagesForPath(refAudio);
+        originalRefAudio = refAudio;
       }
+
+      // slow speed audio
       rapSlow.getPostAudioButton().setExercise(exercise);
-      useAnnotation(newUserExercise, newUserExercise.getSlowAudioRef(), slowAnno);
+      String slowAudioRef = exercise.getSlowAudioRef();
+      useAnnotation(newUserExercise, slowAudioRef, slowAnno);
 
-      if (exercise.getSlowAudioRef() != null) {
-        rapSlow.getImagesForPath(exercise.getSlowAudioRef());
+      if (slowAudioRef != null) {
+        rapSlow.getImagesForPath(slowAudioRef);
+        originalSlowRefAudio = slowAudioRef;
       }
+
       submit.setText("Change");
     }
 
@@ -318,7 +351,7 @@ public class EditItem {
       ExerciseAnnotation anno = userExercise.getAnnotation(field);
       boolean isIncorrect = anno != null && !anno.isCorrect();
       if (isIncorrect) {
-        annoField.setText("\""+anno.comment + "\n");
+        annoField.setHTML("<i>\"" + anno.comment + "\"</i>");
       }
       annoField.setVisible(isIncorrect);
     }
