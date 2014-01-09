@@ -223,7 +223,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
 
     String title = lastCorrect == 0 ? "Try again?" : lastCorrect < 5 ? "Good job" : "Congratulations!";
 
-    new DialogHelper(true).showErrorMessage(title, msgs, "Yes", new DialogHelper.CloseListener() {
+    new DialogHelper(true).show(title, msgs, "Yes", new DialogHelper.CloseListener() {
       @Override
       public void gotYes() {
 // better than last time? worse?
