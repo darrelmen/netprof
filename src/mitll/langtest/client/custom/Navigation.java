@@ -293,7 +293,7 @@ public class Navigation implements RequiresResize {
     final Panel child = new DivWidget();
     contentPanel.add(child);
     child.addStyleName("exerciseBackground");
-    System.out.println("\nviewReview : reviewLessons for " + userManager.getUser());
+    //System.out.println("\nviewReview : reviewLessons for " + userManager.getUser());
     service.getReviewList(new AsyncCallback<UserList>() {
       @Override
       public void onFailure(Throwable caught) {}
