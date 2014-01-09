@@ -46,13 +46,13 @@ public class AudioExercise extends ExerciseShell {
     }
   }
 
-  public void clearAudio() { clearRefAudio(); clearSlowRefAudio(); }
-  private void clearRefAudio() {
+ // public void clearAudio() { clearRefAudio(); clearSlowRefAudio(); }
+  public void clearRefAudio() {
     AudioAttribute audio = getAudio("speed", "regular");
     if (audio != null) audioAttributes.remove(audio.getKey());
   }
 
-  private void clearSlowRefAudio() {
+  public void clearSlowRefAudio() {
     AudioAttribute audio = getAudio("speed", "slow");
     if (audio != null) audioAttributes.remove(audio.getKey());
   }
