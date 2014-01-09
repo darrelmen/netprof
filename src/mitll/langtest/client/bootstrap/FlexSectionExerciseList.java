@@ -20,7 +20,6 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SectionWidget;
@@ -32,7 +31,6 @@ import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.SectionNode;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -313,12 +311,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     this.scrollPanel = new ScrollPanel(panelInside);
     this.scrollPanel.addStyleName("leftFiveMargin");
     this.scrollPanel.getElement().setId("scrollPanel");
-
-/*    DivWidget div = new DivWidget();
-    div.addStyleName("positionAbsolute");
-    div.add(scrollPanel);*/
     firstTypeRow.setWidget(0, 2, scrollPanel);
-   // setScrollPanelWidth();
   }
 
   private void populateButtonGroups(Collection<String> types) {
@@ -703,8 +696,8 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
       int leftSideWidth = labelColumn.getOffsetWidth() + clearColumnContainer.getOffsetWidth();
       if (leftSideWidth == 0) leftSideWidth = 130;
       int width = Window.getClientWidth() - leftSideWidth - UNACCOUNTED_WIDTH;
-      System.out.println("FlexSectionExeciseList.setScrollPanelWidth : scrollPanel width is " + width +" client " +Window.getClientWidth() +
-        " label col " +labelColumn.getOffsetWidth() + " clear " +clearColumnContainer.getOffsetWidth() + " unacct "+UNACCOUNTED_WIDTH);
+/*      System.out.println("FlexSectionExeciseList.setScrollPanelWidth : scrollPanel width is " + width +" client " +Window.getClientWidth() +
+        " label col " +labelColumn.getOffsetWidth() + " clear " +clearColumnContainer.getOffsetWidth() + " unacct "+UNACCOUNTED_WIDTH);*/
       scrollPanel.setWidth(Math.max(300, width) + "px");
     }
     else {
