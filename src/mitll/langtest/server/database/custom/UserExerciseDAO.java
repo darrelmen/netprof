@@ -13,6 +13,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 public class UserExerciseDAO extends DAO {
@@ -25,8 +26,12 @@ public class UserExerciseDAO extends DAO {
     super(database);
     try {
       createUserTable(database);
-      if (getNumColumns(database.getConnection(), USEREXERCISE) < 8) {
+      int numColumns = getNumColumns(database.getConnection(), USEREXERCISE);
+      if (numColumns < 8) {
         addColumnToTable(database.getConnection());
+      }
+      if (numColumns < 9) {
+        addColumnToTable2(database.getConnection());
       }
     } catch (SQLException e) {
       logger.error("got " + e, e);
@@ -39,8 +44,9 @@ public class UserExerciseDAO extends DAO {
    * Uses return generated keys to get the user id
    *
    * @see mitll.langtest.server.database.custom.UserListManager#reallyCreateNewItem(long, mitll.langtest.shared.custom.UserExercise)
+   * @see #update(mitll.langtest.shared.custom.UserExercise, boolean)
    */
-  public void add(UserExercise userExercise) {
+  public void add(UserExercise userExercise, boolean isOverride) {
     long id = 0;
 
     try {
@@ -50,8 +56,8 @@ public class UserExerciseDAO extends DAO {
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement(
         "INSERT INTO " + USEREXERCISE +
-          "(exerciseid,english,foreignLanguage,transliteration,creatorid,refAudio,slowAudioRef) " +
-          "VALUES(?,?,?,?,?,?,?);");
+          "(exerciseid,english,foreignLanguage,transliteration,creatorid,refAudio,slowAudioRef,override) " +
+          "VALUES(?,?,?,?,?,?,?,?);");
       int i = 1;
       statement.setString(i++, userExercise.getID());
       statement.setString(i++, userExercise.getEnglish());
@@ -62,8 +68,9 @@ public class UserExerciseDAO extends DAO {
       String refAudio = userExercise.getRefAudio();
       statement.setString(i++, refAudio == null ? "" : refAudio);
       String slowAudioRef = userExercise.getSlowAudioRef();
-      String aNull = slowAudioRef == null || slowAudioRef.equals("null") ? "" : slowAudioRef;
-      statement.setString(i++, aNull);
+      String slowRefNullCheck = slowAudioRef == null || slowAudioRef.equals("null") ? "" : slowAudioRef;
+      statement.setString(i++, slowRefNullCheck);
+      statement.setBoolean(i++, isOverride);
 
       int j = statement.executeUpdate();
 
@@ -120,6 +127,7 @@ public class UserExerciseDAO extends DAO {
       "creatorid LONG, " +
       "refAudio VARCHAR, " +
       "slowAudioRef VARCHAR, " +
+      "override BOOLEAN, " +
       "FOREIGN KEY(creatorid) REFERENCES " +
       "USERS" +
       "(ID)" +
@@ -176,14 +184,14 @@ public class UserExerciseDAO extends DAO {
     return new ArrayList<UserExercise>();
   }
 
-  private Exercise getExercise(UserExercise ue) {
-    String id = ue.getID();
-    return getExercise(id);
-  }
+  private Exercise getExercise(UserExercise ue) { return getExercise(ue.getID());  }
 
-  Exercise getExercise(String id) {
-    return exerciseDAO.getExercise(id);
-  }
+  /**
+   * @see UserListManager#getReviewedExercises()
+   * @param id
+   * @return
+   */
+  Exercise getExercise(String id) { return exerciseDAO.getExercise(id); }
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#getUserExerciseWhere(String)
@@ -204,7 +212,22 @@ public class UserExerciseDAO extends DAO {
     return null;
   }
 
-  public List<UserExercise> getWhere(Collection<String> exids) {
+  public Collection<UserExercise> getOverrides() {
+    String sql = "SELECT * from " + USEREXERCISE + " where override=true";
+    try {
+      return getUserExercises(sql);
+    } catch (SQLException e) {
+      logger.error("got " + e, e);
+    }
+    return Collections.emptyList();
+  }
+
+  /**
+   * @see UserListManager#getReviewList()
+   * @param exids
+   * @return
+   */
+  List<UserExercise> getWhere(Collection<String> exids) {
     if (exids.isEmpty()) return new ArrayList<UserExercise>();
     StringBuilder builder = new StringBuilder();
     for (String id : exids) builder.append("'"+id+"'").append(",");
@@ -289,7 +312,7 @@ public class UserExerciseDAO extends DAO {
 
       if (i == 0) {
         if (createIfDoesntExist) {
-          add(userExercise);
+          add(userExercise, true);
         }
         else {
           logger.error("huh? didn't update the userExercise for " + userExercise + "\n\tsql " + sql);
@@ -307,6 +330,14 @@ public class UserExerciseDAO extends DAO {
     PreparedStatement statement = connection.prepareStatement("ALTER TABLE " +
       USEREXERCISE +
       " ADD transliteration VARCHAR");
+    statement.execute();
+    statement.close();
+  }
+
+  private void addColumnToTable2(Connection connection) throws SQLException {
+    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " +
+      USEREXERCISE +
+      " ADD override BOOLEAN");
     statement.execute();
     statement.close();
   }
