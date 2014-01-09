@@ -21,7 +21,14 @@ public class UserDAO extends DAO {
   private static Logger logger = Logger.getLogger(UserDAO.class);
   public static final String USERS = "users";
 
-  public UserDAO(Database database) { super(database); }
+  public UserDAO(Database database) {
+    super(database);
+    try {
+      createUserTable(database);
+    } catch (Exception e) {
+      logger.error("got "+e,e);
+    }
+  }
 
   /**
    * Somehow on subsequent runs, the ids skip by 30 or so?
