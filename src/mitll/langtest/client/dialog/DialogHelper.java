@@ -5,13 +5,12 @@ import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.Modal;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.DialogBox;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class DialogHelper {
@@ -32,26 +31,30 @@ public class DialogHelper {
   }
 
   public void showErrorMessage(String title, List<String> msgs) {
-    showErrorMessage(title, msgs, "Close", null);
+    show(title, msgs, "Close", null);
   }
 
-  public void showErrorMessage(String title, String msg, String buttonName, final CloseListener listener) {
-    showErrorMessage(title, Collections.singletonList(msg), buttonName, listener);
+/*  public void show(String title, String msg, String buttonName, final CloseListener listener) {
+    show(title, Collections.singletonList(msg), buttonName, listener);
+  }*/
+
+  public void show(String title, List<String> msgs, final CloseListener listener) {
+    show(title,msgs,"Yes",listener);
   }
 
-  /**
-   * Note : depends on bootstrap
-   *
-   * @param title
-     * @param msgs
-     */
-  public void showErrorMessage(String title, List<String> msgs, String buttonName, final CloseListener listener) {
-    final DialogBox dialogBox;
+    /**
+     * Note : depends on bootstrap
+     *
+     * @param title
+       * @param msgs
+       */
+  public void show(String title, List<String> msgs, String buttonName, final CloseListener listener) {
+    //final DialogBox dialogBox = new DialogBox();
+    final Modal dialogBox = new Modal();
     Button closeButton;
 
-    dialogBox = new DialogBox();
    // dialogBox.setGlassEnabled(true);
-    dialogBox.setHTML("<b>" + title + "</b>");
+    dialogBox.setTitle("<b>" + title + "</b>");
 
     closeButton = new Button(buttonName);
     closeButton.setType(ButtonType.PRIMARY);
@@ -103,7 +106,9 @@ public class DialogHelper {
       }
     });
 
-    dialogBox.setWidget(container);
-    dialogBox.center();
+   /* dialogBox.setWidget(container);
+    dialogBox.center();*/
+    dialogBox.add(container);
+    dialogBox.show();
   }
 }
