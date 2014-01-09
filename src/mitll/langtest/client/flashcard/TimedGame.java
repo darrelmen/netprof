@@ -35,7 +35,7 @@ public class TimedGame {
     msgs.add("Release to stop recording.");
     msgs.add("Ready to start the clock?");
     DialogHelper dialogHelper = new DialogHelper(false);
-    dialogHelper.showErrorMessage("Beat the clock!", msgs, "Yes!", new DialogHelper.CloseListener() {
+    dialogHelper.show("Beat the clock!", msgs, "Yes!", new DialogHelper.CloseListener() {
       @Override
       public void gotYes() {
         langTest.gotUser(-1);
