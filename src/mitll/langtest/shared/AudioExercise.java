@@ -31,7 +31,7 @@ public class AudioExercise extends ExerciseShell {
   public void setRefAudio(String s) {
     if (s != null && s.length() > 0 && !s.equals("null")) {
       AudioAttribute audioAttribute = new AudioAttribute(s).markFast();
-      audioAttributes.put(audioAttribute.getAttributes().toString(),audioAttribute);
+      audioAttributes.put(audioAttribute.getKey(),audioAttribute);
     }
   }
 
@@ -42,8 +42,19 @@ public class AudioExercise extends ExerciseShell {
   public void setSlowRefAudio(String s) {
     if (s != null && s.length() > 0 && !s.equals("null")) {
       AudioAttribute audioAttribute = new AudioAttribute(s).markSlow();
-      audioAttributes.put(audioAttribute.getAttributes().toString(), audioAttribute);
+      audioAttributes.put(audioAttribute.getKey(), audioAttribute);
     }
+  }
+
+  public void clearAudio() { clearRefAudio(); clearSlowRefAudio(); }
+  private void clearRefAudio() {
+    AudioAttribute audio = getAudio("speed", "regular");
+    if (audio != null) audioAttributes.remove(audio.getKey());
+  }
+
+  private void clearSlowRefAudio() {
+    AudioAttribute audio = getAudio("speed", "slow");
+    if (audio != null) audioAttributes.remove(audio.getKey());
   }
 
   public AudioAttribute getAudio(String name, String value) {
