@@ -477,15 +477,15 @@ fieldset > legend {
     font-size: 18px;
     font-weight: bold;
     word-wrap: break-word;       /* Internet Explorer 5.5+ */
-    word-break: break-all;
-    white-space: nowrap;
+    word-break: keep-all;
+    white-space: normal;
 }
 .Instruction-data-with-wrap  {
     color: #CC6600;
     font-size: 18px;
     font-weight: bold;
     word-wrap: break-word;       /* Internet Explorer 5.5+ */
-    word-break: break-all;
+    word-break: keep-all;
     white-space: normal;
 }
 
