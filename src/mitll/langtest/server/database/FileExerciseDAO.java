@@ -1,7 +1,9 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.database.custom.UserExerciseDAO;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseFormatter;
+import mitll.langtest.shared.custom.UserExercise;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
@@ -72,6 +74,16 @@ public class FileExerciseDAO implements ExerciseDAO {
   @Override
   public SectionHelper getSectionHelper() {
     return sectionHelper;
+  }
+
+  @Override
+  public void addOverlay(UserExercise userExercise) {
+
+  }
+
+  @Override
+  public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
+
   }
 
   public Exercise getExercise(String id) {
