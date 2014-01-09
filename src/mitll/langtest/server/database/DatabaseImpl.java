@@ -498,7 +498,7 @@ public class DatabaseImpl implements Database {
                                                  boolean getNext) {
     UserStateWrapper userStateWrapper = createOrGetUserState(userID, exercises);
 
-    if (isTimedGame || DO_SIMPLE_FLASHCARDS) {
+    //if (isTimedGame || DO_SIMPLE_FLASHCARDS) {
       FlashcardResponse flashcardResponse;
       if (userStateWrapper.isComplete()) {
         userStateWrapper.shuffle();
@@ -515,12 +515,12 @@ public class DatabaseImpl implements Database {
 
       logger.debug("returning " + flashcardResponse);
       return flashcardResponse;
-    }
-    else {
+    //}
+/*    else {
       Map<String, Exercise> idToExercise = new HashMap<String, Exercise>();
       for (Exercise e : exercises) idToExercise.put(e.getID(), e);
       return getFlashcardResponse(idToExercise, userStateWrapper);
-    }
+    }*/
   }
 
   private UserStateWrapper createOrGetUserState(long userID, List<Exercise> exercises) {
@@ -1330,7 +1330,7 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getCompletedExercises(int)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getCompletedExercises
    * @param userID
    * @return
    */
