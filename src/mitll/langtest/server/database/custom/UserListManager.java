@@ -1,5 +1,8 @@
 package mitll.langtest.server.database.custom;
 
+import audio.tools.FileCopier;
+import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.shared.AudioExercise;
 import mitll.langtest.shared.Exercise;
@@ -8,7 +11,9 @@ import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import org.apache.log4j.Logger;
+import org.h2.store.fs.FileUtils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,6 +32,8 @@ import java.util.Set;
  */
 public class UserListManager {
   private static Logger logger = Logger.getLogger(UserListManager.class);
+  private static final String FAST = "Fast";
+  private static final String SLOW = "Slow";
   private static final String MY_FAVORITES = "My Favorites";
 
   private final UserDAO userDAO;
@@ -39,12 +46,11 @@ public class UserListManager {
   private UserListExerciseJoinDAO userListExerciseJoinDAO;
   private AnnotationDAO annotationDAO;
 
-  // TODO : DAO for  reviewed
   private Set<String> reviewedExercises = new HashSet<String>();
   private Set<String> incorrect = new HashSet<String>();
-
-  public UserListManager(UserDAO userDAO, UserListDAO userListDAO,UserListExerciseJoinDAO userListExerciseJoinDAO,
-                         AnnotationDAO annotationDAO,ReviewedDAO reviewedDAO ) {
+  private final PathHelper pathHelper;
+  public UserListManager(UserDAO userDAO, UserListDAO userListDAO, UserListExerciseJoinDAO userListExerciseJoinDAO,
+                         AnnotationDAO annotationDAO, ReviewedDAO reviewedDAO, PathHelper pathHelper) {
     this.userDAO = userDAO;
     this.userListDAO = userListDAO;
     this.userListExerciseJoinDAO = userListExerciseJoinDAO;
@@ -53,6 +59,7 @@ public class UserListManager {
 
     incorrect = annotationDAO.getIncorrectIds();
     reviewedExercises = reviewedDAO.getReviewed();
+    this.pathHelper = pathHelper ;
 
   }
 
@@ -191,6 +198,15 @@ public class UserListManager {
     return listsForUser;
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#createNewItem(long, String, String, String)
+   * @see mitll.langtest.client.custom.NewUserExercise.CreateFirstRecordAudioPanel#makePostAudioRecordButton()
+   * @param userid
+   * @param english
+   * @param foreign
+   * @param transliteration
+   * @return
+   */
   public UserExercise createNewItem(long userid, String english, String foreign, String transliteration) {
     int uniqueID = userExerciseCount++;
     return new UserExercise(uniqueID, UserExercise.CUSTOM_PREFIX+uniqueID, userid, english, foreign, transliteration);
@@ -214,7 +230,7 @@ public class UserListManager {
    * @param userExercise
    */
   public void reallyCreateNewItem(long userListID, UserExercise userExercise) {
-    userExerciseDAO.add(userExercise);
+    userExerciseDAO.add(userExercise, false);
 
     UserList where = userListDAO.getWhere(userListID);
     if (where != null) {
@@ -224,6 +240,7 @@ public class UserListManager {
     if (where == null) {
       logger.error("\n\nreallyCreateNewItem : couldn't find ul with id " + userListID);
     }
+    fixAudioPaths(userExercise, true); // do this after the id has been made
   }
 
   /**
@@ -234,7 +251,67 @@ public class UserListManager {
    * @param createIfDoesntExist
    */
   public void editItem(UserExercise userExercise, boolean createIfDoesntExist) {
+    fixAudioPaths(userExercise,true);
     userExerciseDAO.update(userExercise, createIfDoesntExist);
+  }
+
+
+  /**
+   * Remember to copy the audio from the posted location to a more permanent location.
+   * @param userExercise
+   * @param overwrite
+   */
+  private void fixAudioPaths(UserExercise userExercise, boolean overwrite) {
+    File fileRef = pathHelper.getAbsoluteFile(userExercise.getRefAudio());
+    long now = System.currentTimeMillis();
+    String fast = FAST + "_"+ now +"_by_" +userExercise.getCreator()+".wav";
+    String refAudio = getRefAudioPath(userExercise, fileRef, fast, overwrite);
+    userExercise.setRefAudio(refAudio);
+    logger.debug("fixAudioPaths : for " + userExercise.getID() + " fast is " + fast + " size " + FileUtils.size(refAudio));
+
+    if (userExercise.getSlowAudioRef() != null && !userExercise.getSlowAudioRef().isEmpty()) {
+      fileRef = pathHelper.getAbsoluteFile(userExercise.getSlowAudioRef());
+      String slow = SLOW + "_"+ now+"_by_" + userExercise.getCreator()+ ".wav";
+
+      refAudio = getRefAudioPath(userExercise, fileRef, slow, overwrite);
+      logger.debug("fixAudioPaths : for " + userExercise.getID()+ "slow is " + refAudio + " size " + FileUtils.size(refAudio));
+
+      userExercise.setSlowRefAudio(refAudio);
+    }
+  }
+
+  /**
+   * Copying audio from initial recording location to new location.
+   *
+   * @param userExercise
+   * @param fileRef
+   * @param fast
+   * @param overwrite
+   * @return
+   */
+  private String getRefAudioPath(UserExercise userExercise, File fileRef, String fast, boolean overwrite) {
+    final File bestDir = pathHelper.getAbsoluteFile("bestAudio");
+    bestDir.mkdir();
+    File bestDirForExercise = new File(bestDir, userExercise.getID());
+    bestDirForExercise.mkdir();
+    File destination = new File(bestDirForExercise, fast);
+    logger.debug("getRefAudioPath : copying from " + fileRef +  " to " + destination.getAbsolutePath());
+    String s = "bestAudio" + File.separator + userExercise.getID() + File.separator + fast;
+    logger.debug("getRefAudioPath : dest path    " + bestDirForExercise.getPath() + " vs " +s);
+    if (!fileRef.equals(destination)) {
+      new FileCopier().copy(fileRef.getAbsolutePath(), destination.getAbsolutePath());
+    }
+    else {
+      if (FileUtils.size(destination.getAbsolutePath()) == 0) logger.error("\ngetRefAudioPath : huh? " + destination + " is empty???");
+    }
+    ensureMP3(s, overwrite);
+    return s;
+  }
+
+  private void ensureMP3(String wavFile, boolean overwrite) {
+    if (wavFile != null) {
+      new AudioConversion().ensureWriteMP3(wavFile, pathHelper.getInstallPath(), overwrite);
+    }
   }
 
   public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
