@@ -81,11 +81,9 @@ public class NewUserExercise extends BasicDialog {
     FluidRow row = new FluidRow();
     container.add(row);
 
-    rap = makeRecordAudioPanel(row, english, foreignLang, true);
-    final ControlGroup normalSpeedRecording = addControlGroupEntry(row, "Normal speed reference recording", rap);
+    final ControlGroup normalSpeedRecording = makeRegularAudioPanel(row);
 
-    rapSlow = makeRecordAudioPanel(row, english, foreignLang, false);
-    addControlGroupEntry(row, "Slow speed reference recording (optional)", rapSlow);
+    makeSlowAudioPanel(row);
     rap.setOtherRAP(rapSlow.getPostAudioButton());
     rapSlow.setOtherRAP(rap.getPostAudioButton());
 
@@ -93,6 +91,16 @@ public class NewUserExercise extends BasicDialog {
     row.add(column);
 
     return container;
+  }
+
+  protected void makeSlowAudioPanel(FluidRow row) {
+    rapSlow = makeRecordAudioPanel(row, english, foreignLang, false);
+    addControlGroupEntry(row, "Slow speed reference recording (optional)", rapSlow);
+  }
+
+  protected ControlGroup makeRegularAudioPanel(FluidRow row) {
+    rap = makeRecordAudioPanel(row, english, foreignLang, true);
+    return addControlGroupEntry(row, "Normal speed reference recording", rap);
   }
 
   protected Panel makeEnglishRow(Panel container) {
@@ -160,6 +168,9 @@ public class NewUserExercise extends BasicDialog {
     newUserExercise.setEnglish(english.getText());
     newUserExercise.setForeignLanguage(foreignLang.getText());
     newUserExercise.setTransliteration(translit.getText());
+
+    System.out.println("createButtonClicked : now " + newUserExercise);
+
     onClick(ul, pagingContainer, toAddTo);
   }
 
@@ -182,7 +193,7 @@ public class NewUserExercise extends BasicDialog {
     });
   }
 
-  private CreateFirstRecordAudioPanel makeRecordAudioPanel(final FluidRow row, final FormField english,
+  protected CreateFirstRecordAudioPanel makeRecordAudioPanel(final FluidRow row, final FormField english,
                                                            final FormField foreignLang,
                                                            boolean recordRegularSpeed) {
     return new CreateFirstRecordAudioPanel(row, english, foreignLang, recordRegularSpeed);
