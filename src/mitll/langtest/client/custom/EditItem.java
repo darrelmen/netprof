@@ -1,9 +1,12 @@
 package mitll.langtest.client.custom;
 
+import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -15,6 +18,7 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.user.BasicDialog;
@@ -23,6 +27,8 @@ import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
+
+import java.util.Arrays;
 
 /**
  * Created with IntelliJ IDEA.
@@ -91,7 +97,6 @@ public class EditItem {
       showPopup("No editable items yet.",contentOnRight);
     }
     else {
-//      editItem(exerciseShell, contentOnRight, ul, itemMarker);
       showItem(exerciseShell, contentOnRight, ul, itemMarker);
     }
   }
@@ -111,9 +116,9 @@ public class EditItem {
   private void editItem(final UserExercise exercise, SimplePanel right, UserList ul, HTML itemMarker,UserExercise exerciseShell) {
     right.clear();
 
-    EditableExercise newUserExercise = new EditableExercise(itemMarker, exercise,exerciseShell);
+    EditableExercise newUserExercise = new EditableExercise(itemMarker, exercise, exerciseShell);
     right.add(newUserExercise.addNew(ul, pagingContainer, right));
-    newUserExercise.setFields(exercise);
+    newUserExercise.setFields();
   }
 
   private void showPopup(String toShow, Widget over) {
@@ -128,23 +133,25 @@ public class EditItem {
   }
 
   private class EditableExercise extends NewUserExercise {
-    private final UserExercise changedUserExercise;
     UserExercise exerciseShell;
     HTML englishAnno = new HTML();
     HTML translitAnno = new HTML();
     HTML foreignAnno = new HTML();
     HTML fastAnno = new HTML();  // TODO add these
     HTML slowAnno = new HTML();
+    String originalForeign = "";
 
     /**
      * @see EditItem#editItem(mitll.langtest.shared.custom.UserExercise, com.google.gwt.user.client.ui.SimplePanel, mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.HTML, mitll.langtest.shared.custom.UserExercise)
      * @param itemMarker
      * @param changedUserExercise
      */
-    public EditableExercise(HTML itemMarker, UserExercise changedUserExercise,UserExercise exerciseShell) {
+    public EditableExercise(HTML itemMarker, UserExercise changedUserExercise, UserExercise exerciseFromList) {
       super(EditItem.this.service, EditItem.this.userManager, EditItem.this.controller, itemMarker);
-      this.changedUserExercise = changedUserExercise;
-      this.exerciseShell = exerciseShell;
+      this.newUserExercise = changedUserExercise;
+      this.exerciseShell = exerciseFromList;
+      fastAnno.addStyleName("editComment");
+      slowAnno.addStyleName("editComment");
     }
 
     /**
@@ -156,7 +163,7 @@ public class EditItem {
     protected Panel makeEnglishRow(Panel container) {
       FluidRow row = new FluidRow();
       container.add(row);
-      english = makeBoxAndAnno(row, "English",englishAnno);
+      english = makeBoxAndAnno(row, "English", englishAnno);
       focusOnEnglish(english);
       return row;
     }
@@ -170,7 +177,27 @@ public class EditItem {
       FluidRow row = new FluidRow();
       container.add(row);
       foreignLang = makeBoxAndAnno(row, controller.getLanguage(), foreignAnno);
-      foreignLang.box.setDirectionEstimator(true);   // automatically detect whether text is RTL 
+      foreignLang.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
+ /*     foreignLang.box.addBlurHandler(new BlurHandler() {
+        @Override
+        public void onBlur(BlurEvent event) {
+          checkForForeignChange();
+        }
+      });*/
+    }
+
+    /**
+     * TODO : Check if audio is dirty before blowing it away!
+     * @param listener
+     * @return
+     */
+    private boolean checkForForeignChange(DialogHelper.CloseListener listener) {
+      if (!foreignLang.box.getText().equals(originalForeign)) {
+        new DialogHelper(true).show("Invalidate audio?", Arrays.asList("The " + controller.getLanguage() +
+          " has changed - should the audio be re-recorded?"), listener);
+        return true;
+      }
+      else return false;
     }
 
     @Override
@@ -178,8 +205,22 @@ public class EditItem {
       FluidRow row = new FluidRow();
       container.add(row);
       translit = makeBoxAndAnno(row, "Transliteration (optional)", translitAnno);
-    } 
-    
+    }
+
+    @Override
+    protected ControlGroup makeRegularAudioPanel(FluidRow row) {
+      rap = makeRecordAudioPanel(row, english, foreignLang, true);
+      fastAnno.addStyleName("topFiveMargin");
+      return addControlGroupEntry(row, "Normal speed reference recording", rap, fastAnno);
+    }
+
+    @Override
+    protected void makeSlowAudioPanel(FluidRow row) {
+      rapSlow = makeRecordAudioPanel(row, english, foreignLang, false);
+      slowAnno.addStyleName("topFiveMargin");
+
+      addControlGroupEntry(row, "Slow speed reference recording (optional)", rapSlow, slowAnno);
+    }
 
     private BasicDialog.FormField makeBoxAndAnno(FluidRow row,  String label, HTML englishAnno) {
       BasicDialog.FormField formField = addControlFormField(row, label, false, 1, englishAnno);
@@ -190,71 +231,94 @@ public class EditItem {
 
     /**
      * TODO : update tool tip as well
+     * TODO : check to see if the foreign language is valid before commiting change!
      * @param ul
      * @param pagingContainer
      * @param toAddTo
      */
     @Override
     protected void onClick(final UserList ul, final PagingContainer<?> pagingContainer, Panel toAddTo) {
-      changedUserExercise.setCreator(controller.getUser());
-      service.editItem(changedUserExercise, new AsyncCallback<Void>() {
+      System.out.println("onClick : editing " + newUserExercise);
+
+      DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
+        @Override
+        public void gotYes() {
+          System.out.println("invalidate the audio...");
+          newUserExercise.clearAudio();
+          rap.getWaveform().setVisible(false);
+          rapSlow.getWaveform().setVisible(false);
+          originalForeign = foreignLang.box.getText();
+        }
+
+        @Override
+        public void gotNo() {
+          reallyChange(pagingContainer);
+        }
+      };
+
+      if (!checkForForeignChange(listener)) {
+        reallyChange(pagingContainer);
+      }
+    }
+
+    private void reallyChange(final PagingContainer<?> pagingContainer) {
+      newUserExercise.setCreator(controller.getUser());
+      service.editItem(newUserExercise, new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
         }
 
         @Override
         public void onSuccess(Void newExercise) {
-          exerciseShell.setEnglish(changedUserExercise.getEnglish());
+          exerciseShell.setEnglish(newUserExercise.getEnglish());
+          exerciseShell.setForeignLanguage(newUserExercise.getForeignLanguage());
           pagingContainer.refresh();
-          showPopup(changedUserExercise.getTooltip() + " has been updated.", submit);
+          originalForeign = newUserExercise.getForeignLanguage();
+          showPopup(newUserExercise.getTooltip() + " has been updated.", submit);
         }
       });
     }
 
     /**
      * @see mitll.langtest.client.custom.EditItem#editItem(mitll.langtest.shared.custom.UserExercise, com.google.gwt.user.client.ui.SimplePanel, mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.HTML, mitll.langtest.shared.custom.UserExercise)
-     * @param userExercise
      */
-    public void setFields(UserExercise userExercise) {
-      newUserExercise = userExercise;
-      System.out.println("NewUserExercise : setting fields with " + userExercise);
+    private void setFields() {
+      System.out.println("setFields : setting fields with " + newUserExercise);
       TextBoxBase box = english.box;
-      box.setText(userExercise.getEnglish());
+      box.setText(newUserExercise.getEnglish());
 
       // add annotation if it's there
-      useAnnotation(userExercise,"english",englishAnno);
+      useAnnotation(newUserExercise,"english",englishAnno);
 
-      translit.box.setText(userExercise.getTransliteration());
-      useAnnotation(userExercise,"transliteration",translitAnno);
+      translit.box.setText(newUserExercise.getTransliteration());
+      useAnnotation(newUserExercise,"transliteration",translitAnno);
 
-      foreignLang.box.setText(userExercise.getForeignLanguage());
-      useAnnotation(userExercise, "foreignLanguage", foreignAnno);
+      String foreignLanguage = newUserExercise.getForeignLanguage();
+      foreignLanguage = foreignLanguage.trim();
+      foreignLang.box.setText(originalForeign = foreignLanguage);
+      useAnnotation(newUserExercise, "foreignLanguage", foreignAnno);
 
       Exercise exercise = newUserExercise.toExercise();
       rap.getPostAudioButton().setExercise(exercise);
+      useAnnotation(newUserExercise,newUserExercise.getRefAudio(),fastAnno);
 
       if (exercise.getRefAudio() != null) {
         rap.getImagesForPath(exercise.getRefAudio());
-      } else {
-        System.err.println("no regular audio ref on " + userExercise);
       }
-
       rapSlow.getPostAudioButton().setExercise(exercise);
+      useAnnotation(newUserExercise, newUserExercise.getSlowAudioRef(), slowAnno);
 
       if (exercise.getSlowAudioRef() != null) {
         rapSlow.getImagesForPath(exercise.getSlowAudioRef());
       }
-      else {
-        System.err.println("no slow audio ref on " + userExercise);
-      }
       submit.setText("Change");
     }
 
-    private void useAnnotation(UserExercise userExercise,String field, HTML annoField) {
-      ExerciseAnnotation englishAnnotation = userExercise.getAnnotation(field);
-      boolean isIncorrect = englishAnnotation != null && !englishAnnotation.isCorrect();
+    private void useAnnotation(UserExercise userExercise, String field, HTML annoField) {
+      ExerciseAnnotation anno = userExercise.getAnnotation(field);
+      boolean isIncorrect = anno != null && !anno.isCorrect();
       if (isIncorrect) {
-        annoField.setText(englishAnnotation.comment);
+        annoField.setText("\""+anno.comment + "\n");
       }
       annoField.setVisible(isIncorrect);
     }
@@ -267,5 +331,4 @@ public class EditItem {
    // commentLabel.addStyleName("ImageOverlay");
     return commentLabel;
   }*/
-
 }
