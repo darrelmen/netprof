@@ -78,7 +78,7 @@ public class NPFHelper implements RequiresResize {
 
   private Panel doNPF(UserList ul, String instanceName) {
     Panel hp = new HorizontalPanel();
-    SimplePanel left = new SimplePanel();
+    Panel left = new SimplePanel();
     hp.add(left);
     left.addStyleName("floatLeft");
     npfContentPanel = new SimplePanel();
@@ -102,12 +102,12 @@ public class NPFHelper implements RequiresResize {
         @Override
         public void onSuccess(Set<String> result) {
           npfExerciseList.setCompleted(result);
-          npfExerciseList.setUserList(ul);
+          npfExerciseList.setUserListID(ul.getUniqueID());
           npfExerciseList.rememberAndLoadFirst(new ArrayList<UserExercise>(ul.getExercises()), null);
         }
       });
     } else {
-      npfExerciseList.setUserList(ul);
+      npfExerciseList.setUserListID(ul.getUniqueID());
       npfExerciseList.rememberAndLoadFirst(new ArrayList<UserExercise>(ul.getExercises()), null);
     }
   }
@@ -116,7 +116,13 @@ public class NPFHelper implements RequiresResize {
     return npfContentPanel;
   }
 
-  private PagingExerciseList makeNPFExerciseList(SimplePanel right, String instanceName) {
+  /**
+   * @see #doNPF
+   * @param right
+   * @param instanceName
+   * @return
+   */
+  private PagingExerciseList makeNPFExerciseList(Panel right, String instanceName) {
     boolean showTypeAhead = !controller.getProps().isCRTDataCollectMode();
     PagingExerciseList exerciseList = new PagingExerciseList(right, service, feedback, false, false, controller,
       showTypeAhead, instanceName) {
