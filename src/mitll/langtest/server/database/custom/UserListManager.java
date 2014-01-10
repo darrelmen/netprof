@@ -179,7 +179,7 @@ public class UserListManager {
     for (String id : incorrect) {
       if (!id.startsWith(UserExercise.CUSTOM_PREFIX)) {
         Exercise byID = userExerciseDAO.getExercise(id);
-
+        logger.debug("found " + byID + " tooltip " + byID.getTooltip());
         if (byID != null) {
           onList.add(new UserExercise(byID)); // all predefined references
         }
