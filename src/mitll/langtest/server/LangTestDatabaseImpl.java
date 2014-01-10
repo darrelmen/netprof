@@ -69,9 +69,6 @@ import java.util.concurrent.TimeUnit;
 @SuppressWarnings("serial")
 public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase, AutoCRTScoring {
   private static final Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
-  private static final String FAST = "Fast";
-  private static final String SLOW = "Slow";
-
   private static final int MB = (1024 * 1024);
   private static final int TIMEOUT = 30;
 
@@ -199,7 +196,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    * @param reqID
    */
-  public ExerciseListWrapper getExerciseIds(int reqID) {
+  public ExerciseListWrapper<? extends ExerciseShell> getExerciseIds(int reqID) {
     return makeExerciseListWrapper(reqID, getExercises());
   }
 
@@ -209,7 +206,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param userID
    * @return
    */
-  public ExerciseListWrapper getExerciseIds(int reqID, long userID) {
+  public ExerciseListWrapper<? extends ExerciseShell> getExerciseIds(int reqID, long userID) {
     logger.debug("getExerciseIds : getting exercise ids for User id=" + userID + " config " + relativeConfigDir);
     List<Exercise> exercises = getExercises(userID);
     return getExerciseListWrapper(reqID, exercises);
@@ -224,7 +221,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   @Override
-  public ExerciseListWrapper getExerciseIds(int reqID, long userID, String prefix, long userListID) {
+  public ExerciseListWrapper<? extends ExerciseShell> getExerciseIds(int reqID, long userID, String prefix, long userListID) {
     List<Exercise> exercises = getExercises(userID);
     logger.debug("getExerciseIds : getting exercise ids for User id=" + userID + " config " + relativeConfigDir +
       " and user list id " +userListID + " full list size is " + exercises.size());
@@ -250,12 +247,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return getExerciseListWrapper(reqID, exercisesForPrefix);
   }
 
-  private ExerciseListWrapper getExerciseListWrapper(int reqID, List<Exercise> exercisesForPrefix) {
+  private ExerciseListWrapper<ExerciseShell> getExerciseListWrapper(int reqID, List<Exercise> exercisesForPrefix) {
     if (serverProps.isGoodwaveMode() && !serverProps.dataCollectMode) {
       exercisesForPrefix = getSortedExercises(exercisesForPrefix);
-      if (!exercisesForPrefix.isEmpty()) {
+/*      if (!exercisesForPrefix.isEmpty()) {
         //logger.debug("sorting by id -- first is " + exercisesForPrefix.get(0).getID());
-      }
+      }*/
     }
 
     logMemory();
@@ -272,7 +269,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   @Override
-  public ExerciseListWrapper getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID) {
+  public ExerciseListWrapper<ExerciseShell> getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID) {
     List<Exercise> exercisesForState = getExercisesForState(reqID, typeToSection, userID);
     return makeExerciseListWrapper(reqID, exercisesForState);
   }
@@ -286,7 +283,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   @Override
-  public ExerciseListWrapper getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID, String prefix) {
+  public ExerciseListWrapper<ExerciseShell> getExercisesForSelectionState(int reqID,
+                                                                          Map<String, Collection<String>> typeToSection, long userID, String prefix) {
     List<Exercise> exercisesForState = getExercisesForState(reqID, typeToSection, userID);
 
     ExerciseTrie trie = new ExerciseTrie(exercisesForState, !serverProps.getLanguage().equals("English"));
@@ -295,12 +293,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return makeExerciseListWrapper(reqID, exercises);
   }
 
-  private ExerciseListWrapper makeExerciseListWrapper(int reqID, List<Exercise> exercises) {
+  private ExerciseListWrapper<ExerciseShell> makeExerciseListWrapper(int reqID, List<Exercise> exercises) {
     if (!exercises.isEmpty()) {
       ensureMP3s(exercises.get(0));
       addAnnotations(exercises.get(0)); // todo do this in a better way
     }
-    return new ExerciseListWrapper(reqID, getExerciseShells(exercises), exercises.isEmpty() ? null : exercises.get(0));
+    return new ExerciseListWrapper<ExerciseShell>(reqID, getExerciseShells(exercises),
+      exercises.isEmpty() ? null : exercises.get(0));
   }
 
   private List<Exercise> getExercisesForState(int reqID, Map<String, Collection<String>> typeToSection, long userID) {
@@ -1080,64 +1079,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public void editItem(UserExercise userExercise) {
-    //fixAudioPaths(userExercise, true);
     db.editItem(userExercise);
     logger.debug("editItem : now user exercise " + userExercise);
   }
-
-  /**
-   * Remember to copy the audio from the posted location to a more permanent location.
-   * @param userExercise
-   * @param overwrite
-   */
-/*
-  private void fixAudioPaths(UserExercise userExercise, boolean overwrite) {
-    File fileRef = pathHelper.getAbsoluteFile(userExercise.getRefAudio());
-    long now = System.currentTimeMillis();
-    String fast = FAST + "_"+ now +"_by_" +userExercise.getCreator()+".wav";
-    String refAudio = getRefAudioPath(userExercise, fileRef, fast, overwrite);
-    userExercise.setRefAudio(refAudio);
-    logger.debug("fixAudioPaths : for " + userExercise.getID() + " fast is " + fast + " size " + FileUtils.size(refAudio));
-
-    if (userExercise.getSlowAudioRef() != null && !userExercise.getSlowAudioRef().isEmpty()) {
-      fileRef = pathHelper.getAbsoluteFile(userExercise.getSlowAudioRef());
-      String slow = SLOW + "_"+ now+"_by_" + userExercise.getCreator()+ ".wav";
-
-      refAudio = getRefAudioPath(userExercise, fileRef, slow, overwrite);
-      logger.debug("fixAudioPaths : for " + userExercise.getID()+ "slow is " + refAudio + " size " + FileUtils.size(refAudio));
-
-      userExercise.setSlowRefAudio(refAudio);
-    }
-  }
-*/
-
-  /**
-   * Copying audio from initial recording location to new location.
-   *
-   * @param userExercise
-   * @param fileRef
-   * @param fast
-   * @param overwrite
-   * @return
-   */
-/*  private String getRefAudioPath(UserExercise userExercise, File fileRef, String fast, boolean overwrite) {
-    final File bestDir = pathHelper.getAbsoluteFile("bestAudio");
-    bestDir.mkdir();
-    File bestDirForExercise = new File(bestDir, userExercise.getID());
-    bestDirForExercise.mkdir();
-    File destination = new File(bestDirForExercise, fast);
-    logger.debug("getRefAudioPath : copying from " + fileRef +  " to " + destination.getAbsolutePath());
-    String s = "bestAudio" + File.separator + userExercise.getID() + File.separator + fast;
-    logger.debug("getRefAudioPath : dest path    " + bestDirForExercise.getPath() + " vs " +s);
-    if (!fileRef.equals(destination)) {
-      new FileCopier().copy(fileRef.getAbsolutePath(), destination.getAbsolutePath());
-    }
-    else {
-      if (FileUtils.size(destination.getAbsolutePath()) == 0) logger.error("\ngetRefAudioPath : huh? " + destination + " is empty???");
-    }
-    ensureMP3(s, overwrite);
-    return s;
-  }*/
 
   /**
    * @param age
