@@ -170,7 +170,7 @@ public class PagingContainer<T extends ExerciseShell> {
   }
 
   private void addColumnsToTable() {
-    System.out.println("addColumnsToTable : completed " + controller.showCompleted() +  " now " + getCompleted().size());
+    //System.out.println("addColumnsToTable : completed " + controller.showCompleted() +  " now " + getCompleted().size());
 
     Column<T, SafeHtml> id2 = getExerciseIdColumn2(true);
     table.addColumn(id2);
