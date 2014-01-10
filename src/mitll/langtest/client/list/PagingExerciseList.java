@@ -40,7 +40,6 @@ import java.util.Set;
 public class PagingExerciseList extends ExerciseList implements RequiresResize {
   protected ExerciseController controller;
   protected PagingContainer<? extends ExerciseShell> pagingContainer;
- // protected boolean showCompleted;
   private boolean showTypeAhead;
 
   private TextBox typeAhead = null;
