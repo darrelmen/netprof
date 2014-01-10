@@ -26,6 +26,11 @@ public class UserExercise extends AudioExercise {
 
   public UserExercise() {}  // just for serialization
 
+  /**
+   * @see mitll.langtest.client.custom.NPFExercise#populateListChoices
+   * @param shell
+   * @param creator
+   */
   public UserExercise(ExerciseShell shell, long creator) {
     super(shell.getID(), shell.getTooltip());
     isPredef = !shell.getID().startsWith(CUSTOM_PREFIX);
@@ -92,7 +97,7 @@ public class UserExercise extends AudioExercise {
    * @return
    */
   public Exercise toExercise() {
-    Exercise exercise = new Exercise("plan", ""+uniqueID, getEnglish(), getRefAudio(), getForeignLanguage(), getEnglish());
+    Exercise exercise = new Exercise("plan", getID(), getEnglish(), getRefAudio(), getForeignLanguage(), getEnglish());
     exercise.setTranslitSentence(getTransliteration());
     exercise.setSlowRefAudio(getSlowAudioRef());
     exercise.setEnglishSentence(getEnglish());
@@ -157,7 +162,8 @@ public class UserExercise extends AudioExercise {
       //" (" +count+ ")" +
       " #" + uniqueID + "/" + getID()+ (isPredef ? " <Predef>" :  " <User>")+  " creator " + getCreator()+
         " : " + getEnglish() + " = " + getForeignLanguage() + " (" +getTransliteration()+
-      ") audio attr (" +getAudioAttributes().size()+
+      ") tooltip " + getTooltip()+
+      "audio attr (" +getAudioAttributes().size()+
       ") :" + getAudioAttributes();
   }
 }
