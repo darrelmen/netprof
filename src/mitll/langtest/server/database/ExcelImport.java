@@ -164,7 +164,7 @@ public class ExcelImport implements ExerciseDAO {
       synchronized (this) {
         int i = exercises.indexOf(exercise);
         if (i == -1) {
-          logger.error ("huh? couldn't find " + exercise);
+          logger.error ("addOverlay : huh? couldn't find " + exercise);
         }
         else {
           exercises.set(i, over);
