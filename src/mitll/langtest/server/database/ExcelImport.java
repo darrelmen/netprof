@@ -143,11 +143,9 @@ public class ExcelImport implements ExerciseDAO {
   }
 
   private void overlayExercises(Collection<UserExercise> overlay) {
-   // synchronized (this) {
-      for (UserExercise userExercise : overlay) {
-        addOverlay(userExercise);
-      }
-    //}
+    for (UserExercise userExercise : overlay) {
+      addOverlay(userExercise);
+    }
   }
 
   @Override
