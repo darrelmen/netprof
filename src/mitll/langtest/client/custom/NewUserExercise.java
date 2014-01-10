@@ -30,6 +30,7 @@ import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 
@@ -69,7 +70,7 @@ public class NewUserExercise extends BasicDialog {
     this.userManager = userManager;
   }
 
-  public Panel addNew(final UserList ul, final PagingContainer<?> pagingContainer, final Panel toAddTo) {
+  public <T extends ExerciseShell> Panel addNew(final UserList ul, final PagingContainer<T> pagingContainer, final Panel toAddTo) {
     final FluidContainer container = new FluidContainer();
     container.addStyleName("greenBackground");
 
