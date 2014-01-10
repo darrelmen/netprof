@@ -109,9 +109,9 @@ public class CommentNPFExercise extends NPFExercise {
 
     boolean alreadyMarkedCorrect = annotation == null || annotation.status == null || annotation.isCorrect();
     String comment = !alreadyMarkedCorrect ? annotation.comment : "";
-    System.out.println("getEntry : field " + field + " annotation " + annotation +
+/*    System.out.println("getEntry : field " + field + " annotation " + annotation +
       " correct " + alreadyMarkedCorrect + " comment '" + comment+
-      "', fields " + exercise.getFields());
+      "', fields " + exercise.getFields());*/
 
     getQCWidget(commentButton,
       alreadyMarkedCorrect, commentPopup,
