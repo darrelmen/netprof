@@ -287,7 +287,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   protected void rememberExercises(List<? extends ExerciseShell> result) {
-    System.out.println("ExerciseList : remembering " + result.size() + " exercises");
+    //System.out.println("ExerciseList : remembering " + result.size() + " exercises");
     currentExercises = result; // remember current exercises
     currentExercise = 0;
     idToExercise = new HashMap<String, ExerciseShell>();
