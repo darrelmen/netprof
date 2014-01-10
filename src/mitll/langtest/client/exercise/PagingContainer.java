@@ -57,21 +57,36 @@ public class PagingContainer<T extends ExerciseShell> {
     this.verticalUnaccountedFor = verticalUnaccountedFor;
   }
 
-  public void addCompleted(String id) {
-    completed.add(id);
-    refresh();
-
-    System.out.println("addCompleted : completed " + id +  " now " + getCompleted().size());
-
-  }
-  public void refresh() {
-    table.redraw();
+  /**
+   * @see mitll.langtest.client.recorder.FeedbackRecordPanel#enableNext()
+   * @param completed
+   */
+  public void setCompleted(Set<String> completed) {
+    this.completed = completed;
+    if (table != null) table.redraw(); // todo check this...
   }
 
   public Set<String> getCompleted() { return completed; }
 
-  public int getSize() {
-    return dataProvider.getList().size();
+  public void addCompleted(String id) {
+    completed.add(id);
+    refresh();
+  }
+
+  public void refresh() {  table.redraw();  }
+
+  public int getSize() { return getList().size(); }
+
+  private List<T> getList() { return dataProvider.getList();  }
+
+  public T getByID(String id) {
+    for (T t : getList()) {
+      if (t.getID().equals(id)) {
+        System.out.println("PagingContainer.getByID : Found " + t);
+        return t;
+      }
+    }
+    return null;
   }
 
   public interface TableResources extends CellTable.Resources {
@@ -187,15 +202,6 @@ public class PagingContainer<T extends ExerciseShell> {
     };*/
   }
 
-  /**
-   * @see mitll.langtest.client.recorder.FeedbackRecordPanel#enableNext()
-   * @param completed
-   */
-  public void setCompleted(Set<String> completed) {
-    this.completed = completed;
-    if (table != null) table.redraw(); // todo check this...
-  }
-
   protected Column<T, SafeHtml> getExerciseIdColumn2(final boolean consumeClicks) {
     return new Column<T, SafeHtml>(new MySafeHtmlCell(consumeClicks)) {
 
@@ -237,16 +243,16 @@ public class PagingContainer<T extends ExerciseShell> {
   protected void gotClickOnItem(final T e) {}
   private T current = null;
   public T selectFirst() {
-    if (dataProvider.getList().isEmpty()) return null;
+    if (getList().isEmpty()) return null;
     return selectItem(0);
   }
 
   public boolean isFirst(T test) {
-    return dataProvider.getList().isEmpty() || dataProvider.getList().get(0).getID().equals(test.getID());
+    return getList().isEmpty() || getList().get(0).getID().equals(test.getID());
   }
 
   public boolean isLast(T test) {
-    List<T> list = dataProvider.getList();
+    List<T> list = getList();
     return list.isEmpty() || list.get(list.size()-1).getID().equals(test.getID());
   }
 
@@ -259,7 +265,7 @@ public class PagingContainer<T extends ExerciseShell> {
       return true;
     }
     else {
-      List<T> list = dataProvider.getList();
+      List<T> list = getList();
       int index = list.indexOf(current);
       if (index == list.size()-1) return false;
       T t = selectItem(index + 1);
@@ -274,7 +280,7 @@ public class PagingContainer<T extends ExerciseShell> {
       return true;
     }
     else {
-      List<T> list = dataProvider.getList();
+      List<T> list = getList();
       int index = list.indexOf(current);
       if (index == 0) return false;
       T t = selectItem(index-1);
@@ -284,9 +290,8 @@ public class PagingContainer<T extends ExerciseShell> {
     }
   }
 
-
   private T selectItem(int index) {
-    T first = dataProvider.getList().get(index);
+    T first = getList().get(index);
 
     table.getSelectionModel().setSelected(first, true);
     table.redraw();
@@ -296,7 +301,7 @@ public class PagingContainer<T extends ExerciseShell> {
   }
 
   public void clear() {
-    List<T> list = dataProvider.getList();
+    List<T> list = getList();
     List<T> copy = new ArrayList<T>();
 
     for (T es : list) copy.add(es);
@@ -306,7 +311,7 @@ public class PagingContainer<T extends ExerciseShell> {
 
   public void flush() {
     dataProvider.flush();
-    table.setRowCount(dataProvider.getList().size());
+    table.setRowCount(getList().size());
   }
 
   public <S extends ExerciseShell> void addAndFlush(S exercise) {
@@ -315,7 +320,7 @@ public class PagingContainer<T extends ExerciseShell> {
   }
 
   public <S extends ExerciseShell> void addExerciseToList2(S exercise) {
-    List<T> list = dataProvider.getList();
+    List<T> list = getList();
     list.add((T) exercise);  // TODO : can't remember how I avoid this
   }
 
@@ -343,9 +348,9 @@ public class PagingContainer<T extends ExerciseShell> {
     // System.out.println("left over " + leftOver + " raw " + rawRatio + " table ratio " + tableRatio);
 
     float ratio = DEFAULT_PAGE_SIZE * tableRatio;
-    if (dataProvider != null && dataProvider.getList() != null) {
-      if (!dataProvider.getList().isEmpty()) {
-        T toLoad = dataProvider.getList().get(0);
+    if (dataProvider != null && getList() != null) {
+      if (!getList().isEmpty()) {
+        T toLoad = getList().get(0);
 
         if (toLoad.getID().length() > ID_LINE_WRAP_LENGTH) {
           ratio /= 2; // hack for long ids
@@ -371,8 +376,8 @@ public class PagingContainer<T extends ExerciseShell> {
    * @see mitll.langtest.client.list.PagingExerciseList#markCurrentExercise(int)
    */
   public void markCurrentExercise(int i) {
-    if (dataProvider.getList() == null || dataProvider.getList().isEmpty()) return;
-    T itemToSelect = dataProvider.getList().get(i);
+    if (getList() == null || getList().isEmpty()) return;
+    T itemToSelect = getList().get(i);
     if (DEBUG) System.out.println(new Date() + " markCurrentExercise : Comparing selected " + itemToSelect.getID());
     table.getSelectionModel().setSelected(itemToSelect, true);
     if (DEBUG) {
