@@ -212,9 +212,9 @@ public class Navigation implements RequiresResize {
   private void refreshViewLessons() { viewLessons(yourItemsContent, false);  }
 
   public void showInitialState() {
-    System.out.println("showInitialState show initial state for " + userManager.getUser() +
-      " : getting user lists " + controller.isReviewMode());
-    //checkMode();
+/*    System.out.println("showInitialState show initial state for " + userManager.getUser() +
+      " : getting user lists " + controller.isReviewMode());*/
+
     service.getListsForUser(userManager.getUser(), false, true, new AsyncCallback<Collection<UserList>>() {
       @Override
       public void onFailure(Throwable caught) {}
@@ -348,11 +348,11 @@ public class Navigation implements RequiresResize {
     r1.add(new Column(3, itemMarker));
 
     boolean created = createdByYou(ul) || instanceName.equals("review");
-    if (created && SHOW_CREATED) {
+/*    if (created && SHOW_CREATED) {
       child = new FluidRow();
       container.add(child);
       child.add(new Heading(3, "<b>Created by you.</b>"));
-    }
+    }*/
     container.add(getListOperations(ul, created, instanceName));
 
     service.addVisitor(ul, (long)controller.getUser(), new AsyncCallback<Void>() {
