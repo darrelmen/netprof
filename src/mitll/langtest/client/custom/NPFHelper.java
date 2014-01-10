@@ -123,9 +123,8 @@ public class NPFHelper implements RequiresResize {
    * @return
    */
   private PagingExerciseList makeNPFExerciseList(Panel right, String instanceName) {
-    boolean showTypeAhead = !controller.getProps().isCRTDataCollectMode();
     PagingExerciseList exerciseList = new PagingExerciseList(right, service, feedback, false, false, controller,
-      showTypeAhead, instanceName) {
+      true, instanceName) {
       @Override
       protected void onLastItem() {
         new ModalInfoDialog("Complete","List complete!", new HiddenHandler() {
