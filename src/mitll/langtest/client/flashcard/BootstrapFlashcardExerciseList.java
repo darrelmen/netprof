@@ -44,9 +44,9 @@ import java.util.Set;
  * Time: 5:32 PM
  * To change this template use File | Settings | File Templates.
  */
-public class BootstrapFlashcardExerciseList implements ListInterface {
+public class BootstrapFlashcardExerciseList<T extends ExerciseShell> implements ListInterface<T> {
   private static final int SIZE = 12;
-  public static final float HALF = (1f / 4f);
+  //public static final float HALF = (1f / 4f);
   private final Column exercisePanelColumn;
   private final LeaderboardPlot leaderboardPlot = new LeaderboardPlot();
   private final boolean allowPlusInURL;
@@ -383,8 +383,8 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
     correct.setText(correctCount + "/" + (correctCount + incorrectCount));
   }
 
-  @Override
-  public void setSelectionState(Map<String, Collection<String>> selectionState) {}
+  //@Override
+  //public void setSelectionState(Map<String, Collection<String>> selectionState) {}
 
   @Override
   public void hideExerciseList() {}
@@ -395,7 +395,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
     return null;
   }
 
-  public void rememberAndLoadFirst(List<? extends ExerciseShell> exercises, Exercise first){}
+  public void rememberAndLoadFirst(List<T> exercises, Exercise first){}
 
   private class MyTimer extends Timer {
     private final int numSteps;
@@ -442,9 +442,26 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
     }
   }
 
-@Override
-public void addCompleted(String id) {
-	// TODO Auto-generated method stub
-	
-}
+  @Override
+  public void addCompleted(String id) {}
+
+  @Override
+  public void reload() {
+
+  }
+
+  @Override
+  public boolean loadNext() {
+    return false;
+  }
+
+  @Override
+  public boolean loadPrev() {
+    return false;
+  }
+
+  @Override
+  public boolean onFirst() {
+    return false;
+  }
 }
