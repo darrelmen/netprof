@@ -27,7 +27,7 @@ import java.util.Set;
  * Time: 3:21 PM
  * To change this template use File | Settings | File Templates.
  */
-public class HistoryExerciseList extends PagingExerciseList {
+public class HistoryExerciseList<T extends ExerciseShell> extends PagingExerciseList<T> {
   public static final String ANY = "Clear";
   protected final Map<String,SectionWidget> typeToBox = new HashMap<String, SectionWidget>();
   /**
@@ -444,7 +444,7 @@ public class HistoryExerciseList extends PagingExerciseList {
     public MySetExercisesCallback(String item) {  this.item = item;  }
 
     @Override
-    public void onSuccess(ExerciseListWrapper result) {
+    public void onSuccess(ExerciseListWrapper<T> result) {
       System.out.println("MySetExercisesCallback : onSuccess " + result.getExercises().size() + " items and item " +item);
 
       if (isStaleResponse(result)) {
