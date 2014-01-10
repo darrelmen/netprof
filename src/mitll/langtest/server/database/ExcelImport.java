@@ -159,6 +159,9 @@ public class ExcelImport implements ExerciseDAO {
     }
     else {
       Exercise over = userExercise.toExercise();
+
+      logger.debug("\taddOverlay replacing with " +over + " and " +over.getTooltip());
+
       synchronized (this) {
         int i = exercises.indexOf(exercise);
         if (i == -1) {
@@ -168,6 +171,8 @@ public class ExcelImport implements ExerciseDAO {
           exercises.set(i, over);
         }
         idToExercise.put(over.getID(), over);
+
+        logger.debug("After " + getExercise(userExercise.getID()));
       }
     }
   }
