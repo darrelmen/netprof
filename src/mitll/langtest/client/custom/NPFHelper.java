@@ -2,7 +2,6 @@ package mitll.langtest.client.custom;
 
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
@@ -55,19 +54,19 @@ public class NPFHelper implements RequiresResize {
    * @param instanceName
    */
   public void showNPF(UserList ul, Navigation.TabAndContent learn,String instanceName) {
-    System.out.println(getClass() + " : adding npf content instanceName = " + instanceName);
+    //System.out.println(getClass() + " : adding npf content instanceName = " + instanceName);
 
     int widgetCount = learn.content.getWidgetCount();
     if (!madeNPFContent || widgetCount == 0) {
-      System.out.println(getClass() + " : adding npf content widget count = " + widgetCount);
+      //System.out.println(getClass() + " : adding npf content widget count = " + widgetCount);
       addNPFToContent(ul, learn.content,instanceName);
-      System.out.println(getClass() + " : after adding npf content widget count = " + learn.content.getWidgetCount());
+      //System.out.println(getClass() + " : after adding npf content widget count = " + learn.content.getWidgetCount());
 
       madeNPFContent = true;
     } else {
-      System.out.println(getClass() + " : *NOT* adding npf content widget count = " + widgetCount);
+      //System.out.println(getClass() + " : *NOT* adding npf content widget count = " + widgetCount);
       rememberAndLoadFirst(ul);
-      System.out.println(getClass() + " : *NOT* after adding npf content widget count = " + learn.content.getWidgetCount());
+      //System.out.println(getClass() + " : *NOT* after adding npf content widget count = " + learn.content.getWidgetCount());
     }
   }
 
