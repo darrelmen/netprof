@@ -84,7 +84,7 @@ public class UserListManager {
       logger.error("huh? no user with id " + userid);
       return null;
     } else {
-      UserList e = new UserList(i++, userWhere, name, description, dliClass, System.currentTimeMillis(), isPrivate);
+      UserList e = new UserList(i++, userWhere, name, description, dliClass, isPrivate);
       userListDAO.add(e);
       logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists total, for " + userid);
       return e;
@@ -145,6 +145,8 @@ public class UserListManager {
   }
 
   /**
+   * TODO : probably a bad idea to do a massive where in ... ids.
+   *
    * @see mitll.langtest.server.LangTestDatabaseImpl#getReviewList()
    * @see #markIncorrect(String)
    * @return
@@ -159,8 +161,9 @@ public class UserListManager {
 
     logger.debug("getReviewList ids #=" + incorrect.size() + " yielded " + onList.size());
 
-    UserList userList = new UserList(i++, new User(-1,89,0,0,"","",false),
-      "Review", "Items to review", "Review", System.currentTimeMillis(), false);
+    UserList userList = new UserList(Long.MAX_VALUE, new User(-1,89,0,0,"","",false),
+      "Review", "Items to review", "Review", false);
+    userList.setReview(true);
     userList.setExercises(onList);
     return userList;
   }
@@ -328,7 +331,7 @@ public class UserListManager {
    * @return
    */
   public UserList getUserListByID(long id) {
-    return userListDAO.getWithExercises(id);
+    return id == Long.MAX_VALUE ? getReviewList() : userListDAO.getWithExercises(id);
   }
 
   public void addVisitor(UserList userList, long user) {
@@ -339,7 +342,7 @@ public class UserListManager {
   }
 
   public void addAnnotation(String exerciseID, String field, String status, String comment, long userID) {
-    logger.info("addAnnotation write to database! " +exerciseID + " " + field + " " + status + " " + comment);
+    //logger.info("addAnnotation write to database! " +exerciseID + " " + field + " " + status + " " + comment);
     annotationDAO.add(new UserAnnotation(-1,exerciseID, field, status, comment, userID,System.currentTimeMillis()));
 
     if (status.equalsIgnoreCase("incorrect")) {
@@ -356,7 +359,7 @@ public class UserListManager {
     if (exercise != null) {
       Map<String, ExerciseAnnotation> latestByExerciseID = annotationDAO.getLatestByExerciseID(exercise.getID());
 
-      logger.debug("addAnnotations : found " + latestByExerciseID + " for " + exercise.getID());
+      if (!latestByExerciseID.isEmpty()) logger.debug("addAnnotations : found " + latestByExerciseID + " for " + exercise.getID());
       for (Map.Entry<String, ExerciseAnnotation> pair : latestByExerciseID.entrySet()) {
         exercise.addAnnotation(pair.getKey(), pair.getValue().status, pair.getValue().comment);
       }
