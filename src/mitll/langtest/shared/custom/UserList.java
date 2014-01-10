@@ -28,6 +28,7 @@ public class UserList extends ExerciseShell {
   private String classMarker;
   //private long modified;
   private boolean isPrivate;
+  private boolean isReview;
   private Collection<UserExercise> exercises = new ArrayList<UserExercise>();
 
   public UserList(){}
@@ -40,7 +41,7 @@ public class UserList extends ExerciseShell {
    * @param description
    * @param classMarker
    */
-  public UserList(long uniqueID, User user, String name, String description, String classMarker, long modified, boolean isPrivate){
+  public UserList(long uniqueID, User user, String name, String description, String classMarker, boolean isPrivate){
     super(""+uniqueID,name);
     this.uniqueID = uniqueID;
     this.creator = user;
@@ -59,7 +60,7 @@ public class UserList extends ExerciseShell {
   }
 
   /**
-   * @see #UserList(long, mitll.langtest.shared.User, String, String, String, long, boolean)
+   * @see #UserList(long, mitll.langtest.shared.User, String, String, String, boolean)
    * @param user
    */
   public void addVisitor(User user) { visitorIDs.add(user.id); }
@@ -124,10 +125,18 @@ public class UserList extends ExerciseShell {
     return getName().equals(MY_LIST);
   }
 
+  public boolean isReview() {
+    return isReview;
+  }
+
+  public void setReview(boolean isReview) {
+    this.isReview = isReview;
+  }
+
   @Override
   public String toString() {
-    return "UserList #" + getUniqueID() + " '"+name + "' by " + creator.id+ " visited by " + visitorIDs+
-        " :"+
-        " with " + getExercises().size() + " exercises.";
+    return "UserList #" + getUniqueID() + " '"+name + "' by " + creator.id+ " visited by " + visitorIDs+ " : " + (isReview ? " REVIEW " : "")+
+      " :"+
+      " with " + getExercises().size() + " exercises.";
   }
 }
