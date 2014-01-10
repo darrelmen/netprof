@@ -22,10 +22,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.ExerciseShell;
-import mitll.langtest.shared.custom.UserList;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -44,7 +41,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
 
   private TextBox typeAhead = null;
   private String lastValue = "";
-  private UserList userList;
+  private long userListID = -1;
 
   /**
    * @see mitll.langtest.client.ExerciseListLayout#makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, boolean, mitll.langtest.client.user.UserFeedback, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController)
@@ -116,7 +113,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
    */
   protected void loadExercises(String selectionState, String prefix) {
     lastReqID++;
-    long listID = userList == null ? -1 : userList.getUniqueID();
+    long listID = userListID;
     System.out.println("PagingExerciseList.loadExercises : looking for '" + prefix + "' (" + prefix.length() + " chars) in list id "+listID);
 
     service.getExerciseIds(lastReqID, controller.getUser(), prefix, listID, new SetExercisesCallback());
@@ -271,7 +268,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
    pagingContainer.markCurrentExercise(i);
  }
 
-  public void setUserList(UserList userList) {
-    this.userList = userList;
+  public void setUserListID(long userListID) {
+    this.userListID = userListID;
   }
 }
