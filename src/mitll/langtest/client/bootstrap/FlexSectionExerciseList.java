@@ -71,8 +71,9 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @param showTurkToken
    * @param showInOrder
    * @param controller
-   * @param showTypeAhead @paramx showListBox
-   * @param instance          */
+   * @param showTypeAhead
+   * @param instance
+   * */
   public FlexSectionExerciseList(FluidRow secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                  UserFeedback feedback,
                                  boolean showTurkToken, boolean showInOrder,
