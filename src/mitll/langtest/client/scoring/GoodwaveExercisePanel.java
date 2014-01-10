@@ -169,8 +169,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   }
 
   public void onResize() {
-    //System.out.println("GoodwaveExercisePanel : got resize " + getOffsetWidth());
-    if (contentAudio != null) contentAudio.onResize();
+    if (contentAudio != null) {
+      contentAudio.onResize();
+    }
     if (answerAudio != null) answerAudio.onResize();
   }
 
@@ -335,7 +336,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   }
 
   /**
-   * @see mitll.langtest.client.custom.QCNPFExercise#populateCommentRow(com.google.gwt.user.client.ui.FocusWidget, boolean, com.google.gwt.user.client.u.Panel)
+   * @see mitll.langtest.client.custom.QCNPFExercise#populateCommentRow
    * @return
    */
   protected Label getCommentLabel() {
@@ -417,11 +418,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
      * @see GoodwaveExercisePanel#getAnswerWidget
      */
     public ASRRecordAudioPanel(LangTestDatabaseAsync service, int index, ExerciseController controller) {
-      super(service, controller.getSegmentRepeats(),
-        // no keyboard
-        controller, scorePanel);
+      super(service, controller.getSegmentRepeats(), controller, scorePanel);
       this.index = index;
-
+      getElement().setId("ASRRecordAudioPanel");
     }
 
     /**
@@ -554,11 +553,13 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     @Override
     protected Widget getBeforePlayWidget() {
       VerticalPanel vp = new VerticalPanel();
-
+      vp.getElement().setId("beforePlayWidget_verticalPanel");
       Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
       RadioButton first = null;
 
-      //System.out.println("getBeforePlayWidget : for " + audioPath + "Attributes were " + audioAttributes);
+/*      System.out.println("getBeforePlayWidget : for exercise " +exercise.getID() +
+        " path "+ audioPath + " attributes were " + audioAttributes);*/
+
       RadioButton regular = null;
       for (final AudioAttribute audioAttribute : audioAttributes) {
         RadioButton fast = new RadioButton(GROUP + "_" + audioPath + "_"+instance, audioAttribute.getDisplay());
