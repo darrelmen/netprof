@@ -9,6 +9,7 @@ import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
@@ -106,7 +107,16 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     System.out.println("ExerciseList : got instance  " + instance);
 
     // Add history listener
-    History.addValueChangeHandler(this);
+     handlerRegistration = History.addValueChangeHandler(this);
+  }
+
+  private HandlerRegistration handlerRegistration;
+
+  @Override
+  protected void onUnload() {
+    super.onUnload();
+
+    handlerRegistration.removeHandler();
   }
 
   private void addWidgets(final Panel currentExerciseVPanel) {
@@ -267,6 +277,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param exercises
    */
   public void rememberAndLoadFirst(List<? extends ExerciseShell> exercises, Exercise firstExercise) {
+    System.out.println("ExerciseList : rememberAndLoadFirst " + firstExercise);
+
     rememberExercises(exercises);
     if (firstExercise != null) {
       ExerciseShell firstExerciseShell = findFirstExercise();
@@ -287,7 +299,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   protected void rememberExercises(List<? extends ExerciseShell> result) {
-    //System.out.println("ExerciseList : remembering " + result.size() + " exercises");
+    System.out.println("ExerciseList : remembering " + result.size() + " exercises");
     currentExercises = result; // remember current exercises
     currentExercise = 0;
     idToExercise = new HashMap<String, ExerciseShell>();
