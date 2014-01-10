@@ -119,7 +119,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @return
    */
   public void addWidgets(String path) {
-    System.out.println("AudioPanel.addWidgets audio path = " + path);
+    //System.out.println("AudioPanel.addWidgets audio path = " + path);
     imageContainer = new VerticalPanel();
 
     HorizontalPanel hp = new HorizontalPanel();
