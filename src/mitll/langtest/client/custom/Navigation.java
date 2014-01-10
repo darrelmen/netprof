@@ -27,8 +27,8 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 
 import java.util.Collection;
@@ -54,21 +54,20 @@ public class Navigation implements RequiresResize {
   private long userListID;
 
   private ScrollPanel listScrollPanel;
-  private UserFeedback feedback;
   private ListInterface listInterface;
   private NPFHelper npfHelper;
   private NPFHelper avpHelper;
   private EditItem editItem;
 
   public Navigation(final LangTestDatabaseAsync service, final UserManager userManager,
-                    final ExerciseController controller, final ListInterface listInterface) {
+                    final ExerciseController controller, final ListInterface listInterface,UserFeedback feedback) {
     this.service = service;
     this.userManager = userManager;
     this.controller = controller;
     this.listInterface = listInterface;
     npfHelper = new NPFHelper(service, feedback, userManager, controller);
-    avpHelper = new AVPHelper(feedback,service, userManager, controller);
-    editItem = new EditItem(service,userManager,controller, listInterface);
+    avpHelper = new AVPHelper(service, feedback, userManager, controller);
+    editItem = new EditItem(service,userManager,controller, listInterface, feedback);
   }
 
   /**
@@ -76,10 +75,9 @@ public class Navigation implements RequiresResize {
    * @paramx thirdRow
    * @see mitll.langtest.client.LangTest#onModuleLoad2
    */
-  public Widget getNav(final Panel secondAndThird, final UserFeedback feedback) {
+  public Widget getNav(final Panel secondAndThird) {
     Panel container = new FlowPanel();
     container.getElement().setId("getNav_container");
-    this.feedback = feedback;
     Panel buttonRow = getButtonRow2(secondAndThird);
     buttonRow.getElement().setId("getNav_buttonRow");
 
@@ -457,21 +455,21 @@ public class Navigation implements RequiresResize {
    * @return
    * @see #showAddItem(mitll.langtest.shared.custom.UserList, mitll.langtest.client.custom.Navigation.TabAndContent)
    */
-  private Panel addItem(UserList ul) {
+  private <T extends ExerciseShell> Panel addItem(UserList ul) {
     HorizontalPanel hp = new HorizontalPanel();
     SimplePanel left = new SimplePanel();
     hp.add(left);
     SimplePanel right = new SimplePanel();
     hp.add(right);
 
-    PagingContainer<ExerciseShell> pagingContainer = new PagingContainer<ExerciseShell>(controller, 100); // todo fix hack
+    PagingContainer<T> pagingContainer = new PagingContainer<T>(controller, 100); // todo fix hack
     Panel container = pagingContainer.getTableWithPager();
     left.add(container);
     for (ExerciseShell es : ul.getExercises()) {
       pagingContainer.addExerciseToList2(es);
     }
     pagingContainer.flush();
-    right.add(new NewUserExercise(service,userManager,controller, listToMarker.get(ul)).addNew(ul, pagingContainer, right));
+    right.add(new NewUserExercise<T>(service,userManager,controller, listToMarker.get(ul)).addNew(ul, pagingContainer, right));
     return hp;
   }
 
