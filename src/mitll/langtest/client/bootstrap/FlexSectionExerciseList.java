@@ -106,7 +106,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @see mitll.langtest.client.LangTest#doEverythingAfterFactory
    */
   public void getExercises(final long userID, boolean getNext) {
-    System.out.println("FlexSectionExerciseList : getExercises : Get exercises for user=" + userID + " crt mode " + allowPlusInURL);
+    //System.out.println("FlexSectionExerciseList : getExercises : Get exercises for user=" + userID + " crt mode " + allowPlusInURL);
     this.userID = userID;
 
     if (controller.showCompleted()) {
@@ -562,7 +562,6 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
 
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
-        System.out.println("deferred set scroll panel width");
         setScrollPanelWidth();
       }
     });
