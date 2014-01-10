@@ -5,6 +5,7 @@ import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.DLIUser;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseListWrapper;
+import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.Site;
@@ -30,7 +31,7 @@ import java.util.Set;
  */
 public interface LangTestDatabaseAsync {
   void addTextAnswer(int usedID, Exercise exercise, int questionID, String answer, AsyncCallback<Void> async);
-  void addUser(int age, String gender, int experience, String dialect, AsyncCallback<Long> async);
+  //void addUser(int age, String gender, int experience, String dialect, AsyncCallback<Long> async);
   void userExists(String login, AsyncCallback<Integer> async);
   void addUser(int age, String gender, int experience, String nativeLang, String dialect, String userID, AsyncCallback<Long> async);
   void getUsers(AsyncCallback<List<User>> async);
@@ -109,11 +110,12 @@ public interface LangTestDatabaseAsync {
 
   void getGradeCountPerExercise(AsyncCallback<Map<Integer, Map<String, Map<String, Integer>>>> async);
 
-  void getExerciseIds(int reqID, AsyncCallback<ExerciseListWrapper> async);
+  <T extends ExerciseShell> void getExerciseIds(int reqID, AsyncCallback<ExerciseListWrapper<T>> async);
 
-  void getExerciseIds(int reqID, long userID, AsyncCallback<ExerciseListWrapper> async);
+  <T extends ExerciseShell> void getExerciseIds(int reqID, long userID, AsyncCallback<ExerciseListWrapper<T>> async);
 
-  void getExerciseIds(int reqID, long userID, String prefix, long userListID, AsyncCallback<ExerciseListWrapper> async);
+  <T extends ExerciseShell> void getExerciseIds(int reqID, long userID, String prefix, long userListID,
+                                                AsyncCallback<ExerciseListWrapper<T>> async);
 
   /**
    * @param reqID
@@ -121,7 +123,8 @@ public interface LangTestDatabaseAsync {
    * @param userID
    * @return
    */
-  void getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID, AsyncCallback<ExerciseListWrapper> async);
+  <T extends ExerciseShell> void getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection,
+                                                               long userID, AsyncCallback<ExerciseListWrapper<T>> async);
 
 
   void postTimesUp(long userid, long timeTaken, Map<String, Collection<String>> selectionState, AsyncCallback<Leaderboard> async);
@@ -130,7 +133,9 @@ public interface LangTestDatabaseAsync {
 
   void getCompletedExercises(int user, boolean isReviewMode, AsyncCallback<Set<String>> async);
 
-  void getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID, String prefix, AsyncCallback<ExerciseListWrapper> async);
+  <T extends ExerciseShell> void getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection,
+                                                               long userID, String prefix,
+                                                               AsyncCallback<ExerciseListWrapper<T>> async);
 
   void getStartupInfo(AsyncCallback<StartupInfo> async);
 
