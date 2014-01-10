@@ -93,4 +93,5 @@ public interface ListInterface extends RequiresResize {
   void hideExerciseList();
 
   Panel getCreatedPanel();
+  void reload();
 }
