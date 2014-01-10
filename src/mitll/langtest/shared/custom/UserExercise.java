@@ -96,6 +96,8 @@ public class UserExercise extends AudioExercise {
     exercise.setTranslitSentence(getTransliteration());
     exercise.setSlowRefAudio(getSlowAudioRef());
     exercise.setEnglishSentence(getEnglish());
+    exercise.setType(Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW);
+
     return exercise;
   }
 
