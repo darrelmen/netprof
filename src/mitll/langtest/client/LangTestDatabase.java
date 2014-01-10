@@ -6,6 +6,7 @@ import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.DLIUser;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseListWrapper;
+import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.Site;
@@ -38,9 +39,9 @@ public interface LangTestDatabase extends RemoteService {
   boolean WRITE_ALTERNATE_COMPRESSED_AUDIO = false;
 
   // exerciseDAO
-  ExerciseListWrapper getExerciseIds(int reqID);
-  ExerciseListWrapper getExerciseIds(int reqID, long userID);
-  ExerciseListWrapper getExerciseIds(int reqID, long userID, String prefix, long userListID);
+  ExerciseListWrapper<? extends ExerciseShell> getExerciseIds(int reqID);
+  ExerciseListWrapper<? extends ExerciseShell> getExerciseIds(int reqID, long userID);
+  ExerciseListWrapper<? extends ExerciseShell> getExerciseIds(int reqID, long userID, String prefix, long userListID);
   Exercise getExercise(String id);
 
   ResultsAndGrades getResultsForExercise(String exid, boolean arabicTextDataCollect);
@@ -50,7 +51,7 @@ public interface LangTestDatabase extends RemoteService {
   void changeGrade(Grade toChange);
 
   // user DAO
-  long addUser(int age, String gender, int experience, String dialect);
+  //long addUser(int age, String gender, int experience, String dialect);
   long addUser(int age, String gender, int experience, String nativeLang, String dialect, String userID);
 
   List<User> getUsers();
@@ -112,7 +113,8 @@ public interface LangTestDatabase extends RemoteService {
    * @param userID
    * @return
    * */
-  ExerciseListWrapper getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID);
+  ExerciseListWrapper<? extends ExerciseShell> getExercisesForSelectionState(int reqID, Map<String,
+    Collection<String>> typeToSection, long userID);
 
   // flashcard support ------------------------------------------
 
@@ -147,7 +149,9 @@ public interface LangTestDatabase extends RemoteService {
 
   Set<String> getCompletedExercises(int user, boolean isReviewMode);
 
-  ExerciseListWrapper getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID, String prefix);
+  ExerciseListWrapper<? extends ExerciseShell> getExercisesForSelectionState(int reqID,
+                                                                             Map<String, Collection<String>> typeToSection,
+                                                                             long userID, String prefix);
 
   StartupInfo getStartupInfo();
   long addUserList(long userid, String name, String description, String dliClass);
