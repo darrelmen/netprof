@@ -253,7 +253,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private ExerciseListWrapper getExerciseListWrapper(int reqID, List<Exercise> exercisesForPrefix) {
     if (serverProps.isGoodwaveMode() && !serverProps.dataCollectMode) {
       exercisesForPrefix = getSortedExercises(exercisesForPrefix);
-      if (!exercisesForPrefix.isEmpty()) logger.debug("sorting by id -- first is " + exercisesForPrefix.get(0).getID());
+      if (!exercisesForPrefix.isEmpty()) {
+        //logger.debug("sorting by id -- first is " + exercisesForPrefix.get(0).getID());
+      }
     }
 
     logMemory();

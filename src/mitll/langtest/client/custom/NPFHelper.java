@@ -85,7 +85,7 @@ public class NPFHelper implements RequiresResize {
     npfContentPanel = new SimplePanel();
     hp.add(npfContentPanel);
     npfContentPanel.addStyleName("floatRight");
-    npfExerciseList = makeNPFExerciseList(npfContentPanel,instanceName);
+    npfExerciseList = makeNPFExerciseList(npfContentPanel, instanceName);
 
     left.add(npfExerciseList.getExerciseListOnLeftSide(controller.getProps()));
     rememberAndLoadFirst(ul);
@@ -161,9 +161,10 @@ public class NPFHelper implements RequiresResize {
   @Override
   public void onResize() {
     if (npfContentPanel != null) {
-      float v = (Window.getClientWidth() * 0.8f) - 100;
-      //System.out.println("content width is " + v);
-    //  npfContentPanel.setWidth(v + "px");
+      //float v = (Window.getClientWidth() * 0.8f) - 100;
+      //System.out.println("NPFHelper : onResize content width is " + v);
+      //npfContentPanel.setWidth(v + "px");
+      npfExerciseList.onResize();
     }
   }
 }
