@@ -99,9 +99,9 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
         if (isMostRecentRequest("score", result.getReqid())) {
           useResult(result, wordTranscript, phoneTranscript, tested.contains(path));
           tested.add(path);
-        } else {
-          System.out.println("ignoring " + path + " with req " + result.getReqid());
-        }
+        }/* else {
+          //System.out.println("ignoring " + path + " with req " + result.getReqid());
+        }*/
       }
     });
   }
