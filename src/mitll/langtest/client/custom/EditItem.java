@@ -1,9 +1,15 @@
 package mitll.langtest.client.custom;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.FluidRow;
+import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
@@ -13,11 +19,14 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.exercise.PagingContainer;
+import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseAnnotation;
+import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 
@@ -110,8 +119,79 @@ public class EditItem {
     right.clear();
 
     EditableExercise newUserExercise = new EditableExercise(itemMarker, exercise, exerciseShell);
-    right.add(newUserExercise.addNew(ul, pagingContainer, right));
+    Panel vert = new FlowPanel();
+    SimplePanel top = new SimplePanel();
+    vert.add(top);
+    vert.add(new PrevNext(exercise));
+    right.add(newUserExercise.addNew(ul, pagingContainer, top));
+
+    right.add(vert);
     newUserExercise.setFields();
+  }
+
+  private static class PrevNext extends HorizontalPanel {
+    Button prev, next;
+    ListInterface listContainer;
+    public PrevNext(final ExerciseShell exerciseShell) {
+      makePrevButton(exerciseShell);
+      makeNextButton(exerciseShell);
+    }
+    private void makePrevButton(final ExerciseShell exercise) {
+      this.prev = new Button("Previous");
+      prev.addClickHandler(new ClickHandler() {
+        public void onClick(ClickEvent event) {
+          clickPrev(exercise);
+        }
+      });
+      boolean onFirst = !listContainer.onFirst(exercise);
+      prev.setEnabled(onFirst);
+      prev.setType(ButtonType.SUCCESS);
+
+      add(prev);
+    }
+
+    private void makeNextButton(final ExerciseShell exercise) {
+      this.next = new Button("Next");
+      next.setType(ButtonType.SUCCESS);
+      next.setEnabled(!listContainer.onLast(exercise));
+
+      add(next);
+
+      DOM.setElementAttribute(next.getElement(), "id", "nextButton");
+
+      next.addClickHandler(new ClickHandler() {
+        public void onClick(ClickEvent event) {
+          clickNext(exercise);
+        }
+      });
+    }
+
+    private void clickPrev(ExerciseShell e) {
+      if (prev.isEnabled() && prev.isVisible()) {
+        boolean onFirst = listContainer.loadPreviousExercise(e);
+        prev.setEnabled(!onFirst);
+      }
+    }
+
+    /**
+     * @param exercise
+     */
+    protected void clickNext(final ExerciseShell exercise) {
+      if (next.isEnabled() && next.isVisible()) {
+        boolean onLast = listContainer.loadNextExercise(exercise);
+        next.setEnabled(!onLast);
+      }
+    }
+/*    public void enableNextButton(boolean val) { next.setEnabled(val); }
+    public void enablePrevButton(boolean val) { prev.setEnabled(val); }
+
+    public void setButtonsEnabled(boolean val) {
+      getPrev().setEnabled(val);
+      next.setEnabled(val);
+    }*/
+
+   // public Widget getNext() { return next; }
+   // public Button getPrev() { return prev; }
   }
 
   private void showPopup(String toShow, Widget over) {
