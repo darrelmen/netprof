@@ -32,7 +32,7 @@ class AVPHelper extends NPFHelper {
   private UserFeedback feedback;
   private BootstrapExercisePanel bootstrapPanel;
 
-  public AVPHelper(UserFeedback feedback, LangTestDatabaseAsync service, UserManager userManager, ExerciseController controller) {
+  public AVPHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager, ExerciseController controller) {
     super(service, feedback, userManager, controller);
     this.service = service;
     this.userManager = userManager;
