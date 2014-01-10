@@ -54,7 +54,7 @@ public class NPFHelper implements RequiresResize {
    * @param instanceName
    */
   public void showNPF(UserList ul, Navigation.TabAndContent learn,String instanceName) {
-    //System.out.println(getClass() + " : adding npf content instanceName = " + instanceName);
+     System.out.println(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul);
 
     int widgetCount = learn.content.getWidgetCount();
     if (!madeNPFContent || widgetCount == 0) {
