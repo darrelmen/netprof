@@ -61,7 +61,6 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
                             boolean showTypeAhead, String instance) {
     super(currentExerciseVPanel, service, feedback, null, controller, showTurkToken, showInOrder, instance);
     this.controller = controller;
-   // this.showCompleted = showCompleted;
     this.showTypeAhead = showTypeAhead;
     addComponents();
   }
@@ -71,8 +70,6 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
    * @param completed
    */
   public void setCompleted(Set<String> completed) {
-    //System.out.println("PagingExerciseList.setCompleted : now " + getCompleted().size());
-
     pagingContainer.setCompleted(completed);
   }
 
@@ -119,10 +116,10 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
    */
   protected void loadExercises(String selectionState, String prefix) {
     lastReqID++;
-    System.out.println("PagingExerciseList.loadExercises : looking for '" + prefix + "' (" + prefix.length() + " chars)");
+    long listID = userList == null ? -1 : userList.getUniqueID();
+    System.out.println("PagingExerciseList.loadExercises : looking for '" + prefix + "' (" + prefix.length() + " chars) in list id "+listID);
 
-    long l = userList == null ? -1 : userList.getUniqueID();
-    service.getExerciseIds(lastReqID, controller.getUser(), prefix, l, new SetExercisesCallback());
+    service.getExerciseIds(lastReqID, controller.getUser(), prefix, listID, new SetExercisesCallback());
   }
 
   protected String getPrefix() { return typeAhead == null ? "" : typeAhead.getText(); }
