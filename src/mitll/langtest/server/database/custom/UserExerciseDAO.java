@@ -60,9 +60,9 @@ public class UserExerciseDAO extends DAO {
           "VALUES(?,?,?,?,?,?,?,?);");
       int i = 1;
       statement.setString(i++, userExercise.getID());
-      statement.setString(i++, userExercise.getEnglish());
-      statement.setString(i++, userExercise.getForeignLanguage());
-      statement.setString(i++, userExercise.getTransliteration());
+      statement.setString(i++, fixSingleQuote(userExercise.getEnglish()));
+      statement.setString(i++, fixSingleQuote(userExercise.getForeignLanguage()));
+      statement.setString(i++, fixSingleQuote(userExercise.getTransliteration()));
       statement.setLong(i++, userExercise.getCreator());
 
       String refAudio = userExercise.getRefAudio();
@@ -110,6 +110,10 @@ public class UserExerciseDAO extends DAO {
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
+  }
+
+  private String fixSingleQuote(String s) {
+    return s.replaceAll("'","''");
   }
 
   void createUserTable(Database database) throws SQLException {
@@ -300,9 +304,9 @@ public class UserExerciseDAO extends DAO {
       String sql = "UPDATE " + USEREXERCISE +
         " " +
         "SET " +
-        "english='" + userExercise.getEnglish() + "', " +
-        "foreignLanguage='" + userExercise.getForeignLanguage() + "', " +
-        "transliteration='" + userExercise.getTransliteration() + "', " +
+        "english='" + fixSingleQuote(userExercise.getEnglish()) + "', " +
+        "foreignLanguage='" + fixSingleQuote(userExercise.getForeignLanguage()) + "', " +
+        "transliteration='" + fixSingleQuote(userExercise.getTransliteration()) + "', " +
         "refAudio='" + userExercise.getRefAudio() + "', " +
         "slowAudioRef='" + userExercise.getSlowAudioRef() + "' " +
         "WHERE exerciseid='" + userExercise.getID() +"'";
