@@ -258,11 +258,11 @@ public class UserListDAO extends DAO {
    */
   private void populateList(UserList where) {
     Collection<UserExercise> onList = userExerciseDAO.getOnList(where.getUniqueID());
-    logger.debug("populateList : got " + onList.size() + " for list "+where.getUniqueID());
+    //logger.debug("populateList : got " + onList.size() + " for list "+where.getUniqueID());
     where.setExercises(onList);
     where.setVisitors(userListVisitorJoinDAO.getWhere(where.getUniqueID()));
 
-    logger.debug("\tlist now "+where);
+    logger.debug("populateList : got " + onList.size() + " for list " + where.getUniqueID() + " = " + where);
   }
 
   public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
