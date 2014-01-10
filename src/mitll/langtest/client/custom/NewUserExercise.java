@@ -63,13 +63,20 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
    * @param itemMarker
    */
   public NewUserExercise(final LangTestDatabaseAsync service, final UserManager userManager,
-                         ExerciseController controller,HTML itemMarker) {
+                         ExerciseController controller, HTML itemMarker) {
     this.controller = controller;
     this.service = service;
     this.itemMarker = itemMarker;
     this.userManager = userManager;
   }
 
+  /**
+   * @see #onClick(mitll.langtest.shared.custom.UserList, mitll.langtest.client.exercise.PagingContainer, com.google.gwt.user.client.ui.Panel)
+   * @param ul
+   * @param pagingContainer
+   * @param toAddTo
+   * @return
+   */
   public Panel addNew(final UserList ul, final PagingContainer<T> pagingContainer, final Panel toAddTo) {
     final FluidContainer container = new FluidContainer();
     container.addStyleName("greenBackground");
@@ -169,8 +176,6 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     newUserExercise.setEnglish(english.getText());
     newUserExercise.setForeignLanguage(foreignLang.getText());
     newUserExercise.setTransliteration(translit.getText());
-
-    //System.out.println("createButtonClicked : now " + newUserExercise);
 
     onClick(ul, pagingContainer, toAddTo);
   }
