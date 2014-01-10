@@ -68,7 +68,7 @@ public class Navigation implements RequiresResize {
     this.listInterface = listInterface;
     npfHelper = new NPFHelper(service, feedback, userManager, controller);
     avpHelper = new AVPHelper(feedback,service, userManager, controller);
-    editItem = new EditItem(service,userManager,controller);
+    editItem = new EditItem(service,userManager,controller, listInterface);
   }
 
   /**
@@ -330,7 +330,6 @@ public class Navigation implements RequiresResize {
     contentPanel.clear();
     contentPanel.add(container);
     container.getElement().setId("showListContainer");
-    //container.addStyleName("fullWidth2");
     DOM.setStyleAttribute(container.getElement(), "paddingLeft", "2px");
     DOM.setStyleAttribute(container.getElement(), "paddingRight", "2px");
 
@@ -387,13 +386,13 @@ public class Navigation implements RequiresResize {
 
     // add practice tab
     if (!isReview) {
-    final TabAndContent practice = makeTab(tabPanel, IconType.CHECK, PRACTICE);
-    practice.tab.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        avpHelper.showNPF(ul, practice, "practice");
-      }
-    });
+      final TabAndContent practice = makeTab(tabPanel, IconType.CHECK, PRACTICE);
+      practice.tab.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          avpHelper.showNPF(ul, practice, "practice");
+        }
+      });
     }
     // add add item and edit tabs (conditionally)
     TabAndContent addItem = null;
