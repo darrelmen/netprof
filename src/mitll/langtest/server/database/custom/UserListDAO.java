@@ -191,12 +191,18 @@ public class UserListDAO extends DAO {
     return Collections.emptyList();
   }*/
 
+  /**
+   * @see #getWithExercises(long)
+   * @see mitll.langtest.server.database.custom.UserListManager#reallyCreateNewItem(long, mitll.langtest.shared.custom.UserExercise)
+   * @param unique
+   * @return
+   */
   public UserList getWhere(long unique) {
     String sql = "SELECT * from " + USER_EXERCISE_LIST + " where uniqueid=" + unique + " order by modified";
     try {
       List<UserList> lists = getUserLists(sql,-1);
       if (lists.isEmpty()) {
-        logger.error("huh? no custom exercise with id " + unique);
+        logger.error("huh? no user list with id " + unique);
         return null;
       } else {
         return lists.iterator().next();
@@ -232,7 +238,6 @@ public class UserListDAO extends DAO {
         rs.getString("name"), // exp
         rs.getString("description"), // exp
         rs.getString("classmarker"), // exp
-        rs.getTimestamp("modified").getTime(),
         rs.getBoolean("isprivate")
       )
       );
