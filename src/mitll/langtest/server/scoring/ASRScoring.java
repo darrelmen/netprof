@@ -48,6 +48,7 @@ import java.util.TreeSet;
  */
 public class ASRScoring extends Scoring {
   private static Logger logger = Logger.getLogger(ASRScoring.class);
+  private static final boolean DEBUG = false;
 
   private static final int FOREGROUND_VOCAB_LIMIT = 100;
   private static final int VOCAB_SIZE_LIMIT = 200;
@@ -319,7 +320,7 @@ public class ASRScoring extends Scoring {
       audioToScore.put(key, scores);
     }
     else {
-      logger.debug("found cached score for file '" + key + "'");
+      if (DEBUG) logger.debug("found cached score for file '" + key + "'");
     }
     return scores;
   }
