@@ -2,7 +2,6 @@ package mitll.langtest.server.audio;
 
 import audio.imagewriter.AudioConverter;
 import audio.tools.FileCopier;
-import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.server.ProcessRunner;
 import mitll.langtest.shared.AudioAnswer;
 import org.apache.commons.codec.binary.Base64;
