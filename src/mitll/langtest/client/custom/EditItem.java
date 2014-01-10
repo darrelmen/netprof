@@ -2,6 +2,7 @@ package mitll.langtest.client.custom;
 
 import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.FluidRow;
+import com.github.gwtbootstrap.client.ui.TextBox;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
@@ -241,7 +242,7 @@ public class EditItem {
             rapSlow.getWaveform().setVisible(false);
           }
           if (translitUnchanged()) {
-            markError(translit, "Is transliteration consistent with "+controller.getLanguage()+"?");
+            markError(translit, "Is transliteration consistent with " + controller.getLanguage() + "?");
           }
 
           originalForeign = foreignLang.box.getText();
@@ -254,7 +255,11 @@ public class EditItem {
       };
 
       if (!checkForForeignChange(listener)) {
-        reallyChange(pagingContainer);
+        if (foreignChanged() && translitUnchanged()) {
+          markError(translit, "Is transliteration consistent with " + controller.getLanguage() + "?");
+        } else {
+          reallyChange(pagingContainer);
+        }
       }
     }
 
@@ -266,7 +271,7 @@ public class EditItem {
      * @return
      */
     private boolean checkForForeignChange(DialogHelper.CloseListener listener) {
-      if (!foreignLang.box.getText().equals(originalForeign) &&
+      if (foreignChanged() &&
         (refAudioUnchanged() || slowRefAudioUnchanged())) {
         new DialogHelper(true).show("Invalidate audio?",
           Arrays.asList("The " + controller.getLanguage() +
@@ -276,12 +281,18 @@ public class EditItem {
       else return false;
     }
 
+    private boolean foreignChanged() {
+      return !foreignLang.box.getText().equals(originalForeign);
+    }
+
     private boolean refAudioUnchanged() {
-      return newUserExercise.getRefAudio().equals(originalRefAudio);
+      String refAudio = newUserExercise.getRefAudio();
+      return refAudio != null && refAudio.equals(originalRefAudio);
     }
 
     private boolean slowRefAudioUnchanged() {
-      return newUserExercise.getSlowAudioRef().equals(originalSlowRefAudio);
+      String slowAudioRef = newUserExercise.getSlowAudioRef();
+      return slowAudioRef != null && slowAudioRef.equals(originalSlowRefAudio);
     }
 
     private boolean translitUnchanged() {
@@ -318,7 +329,9 @@ public class EditItem {
 
        // english
       english.box.setText(newUserExercise.getEnglish());
-      useAnnotation(newUserExercise,"english",englishAnno);
+      ((TextBox)english.box).setVisibleLength(60);
+      ((TextBox)english.box).setWidth("500px");
+      useAnnotation(newUserExercise, "english", englishAnno);
 
       // foreign lang
       String foreignLanguage = newUserExercise.getForeignLanguage();
@@ -335,9 +348,10 @@ public class EditItem {
       // regular speed audio
       rap.getPostAudioButton().setExercise(exercise);
       String refAudio = exercise.getRefAudio();
-      useAnnotation(newUserExercise, refAudio, fastAnno);
+
 
       if (refAudio != null) {
+        useAnnotation(newUserExercise, refAudio, fastAnno);
         rap.getImagesForPath(refAudio);
         originalRefAudio = refAudio;
       }
@@ -345,9 +359,9 @@ public class EditItem {
       // slow speed audio
       rapSlow.getPostAudioButton().setExercise(exercise);
       String slowAudioRef = exercise.getSlowAudioRef();
-      useAnnotation(newUserExercise, slowAudioRef, slowAnno);
 
       if (slowAudioRef != null) {
+        useAnnotation(newUserExercise, slowAudioRef, slowAnno);
         rapSlow.getImagesForPath(slowAudioRef);
         originalSlowRefAudio = slowAudioRef;
       }
