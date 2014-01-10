@@ -21,7 +21,7 @@ import java.util.Set;
  * Time: 5:25 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface ListInterface extends RequiresResize {
+public interface ListInterface<T extends ExerciseShell> extends RequiresResize {
   /**
    * @see mitll.langtest.client.LangTest#setFactory
    * @param factory
@@ -30,7 +30,7 @@ public interface ListInterface extends RequiresResize {
    */
   void setFactory(ExercisePanelFactory factory, UserManager user, int expectedGrades);
 
-  void rememberAndLoadFirst(List<? extends ExerciseShell> exercises, Exercise firstExercise);
+  void rememberAndLoadFirst(List<T> exercises, Exercise firstExercise);
 
     /**
      * @see mitll.langtest.client.LangTest#gotUser(long)
@@ -55,20 +55,26 @@ public interface ListInterface extends RequiresResize {
   Widget getExerciseListOnLeftSide(PropertyHandler props);
 
   void loadExercise(ExerciseShell exerciseShell);
+
+  boolean loadNext();
+
   /**
    * @param current
    * @return
-   * @see mitll.langtest.client.LangTest#loadNextExercise
+   * @see mitll.langtest.client.list.ExerciseList#loadNextExercise
    */
   boolean loadNextExercise(ExerciseShell current);
 
   boolean loadNextExercise(String id);
   Panel makeExercisePanel(Exercise result);
 
+  boolean loadPrev();
+
   boolean loadPreviousExercise(ExerciseShell current);
 
   public String getCurrentExerciseID();
 
+  boolean onFirst();
   boolean onFirst(ExerciseShell current);
   boolean onLast(ExerciseShell current);
   /**
@@ -88,7 +94,7 @@ public interface ListInterface extends RequiresResize {
   void setCompleted(Set<String> completed);
   void addCompleted(String id);
 
-  void setSelectionState(Map<String,Collection<String>> selectionState);
+//  void setSelectionState(Map<String,Collection<String>> selectionState);
 
   void hideExerciseList();
 
