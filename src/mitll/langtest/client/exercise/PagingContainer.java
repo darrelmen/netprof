@@ -70,6 +70,10 @@ public class PagingContainer<T extends ExerciseShell> {
 
   public Set<String> getCompleted() { return completed; }
 
+  public int getSize() {
+    return dataProvider.getList().size();
+  }
+
   public interface TableResources extends CellTable.Resources {
     /**
      * The styles applied to the table.
@@ -168,13 +172,7 @@ public class PagingContainer<T extends ExerciseShell> {
   private void addColumnsToTable() {
     System.out.println("addColumnsToTable : completed " + controller.showCompleted() +  " now " + getCompleted().size());
 
-    Column<T, SafeHtml> id2;
-  //  if (controller.showCompleted()) {
-      id2 = getExerciseIdColumn2(true);
-  //  } else {
-   //   id2 = getExerciseIdColumn(true);
-   //   id2.setCellStyleNames("alignLeft");
-   // }
+    Column<T, SafeHtml> id2 = getExerciseIdColumn2(true);
     table.addColumn(id2);
 
     // this would be better, but want to consume clicks
@@ -198,50 +196,6 @@ public class PagingContainer<T extends ExerciseShell> {
     if (table != null) table.redraw(); // todo check this...
   }
 
-  /**
-   * @return
-   * @see #addColumnsToTable
-   */
-/*
-  private Column<T, SafeHtml> getExerciseIdColumn(final boolean consumeClicks) {
-    return new Column<T, SafeHtml>(new SafeHtmlCell() {
-      @Override
-      public Set<String> getConsumedEvents() {
-        Set<String> events = new HashSet<String>();
-        if (consumeClicks) events.add(BrowserEvents.CLICK);
-        return events;
-      }
-    }) {
-      @Override
-      public SafeHtml getValue(T object) {
-        return getColumnToolTip(object.getTooltip());
-      }
-
-      @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
-        super.onBrowserEvent(context, elem, object, event);
-        if (BrowserEvents.CLICK.equals(event.getType())) {
-          System.out.println("getExerciseIdColumn.onBrowserEvent : got click " + event);
-          final T e = object;
-       */
-/*   if (isExercisePanelBusy()) {
-            tellUserPanelIsBusy();
-            markCurrentExercise(currentExercise);
-          } else {*//*
-
-          gotClickOnItem(e);
-          // }
-        }
-      }
-
-      private SafeHtml getColumnToolTip(String columnText) {
-        if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
-        return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
-      }
-    };
-  }
-*/
-
   protected Column<T, SafeHtml> getExerciseIdColumn2(final boolean consumeClicks) {
     return new Column<T, SafeHtml>(new MySafeHtmlCell(consumeClicks)) {
 
@@ -249,9 +203,9 @@ public class PagingContainer<T extends ExerciseShell> {
       public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
         if (BrowserEvents.CLICK.equals(event.getType())) {
-          System.out.println("getExerciseIdColumn.onBrowserEvent : got click " + event);
-          final T e = object;
-          gotClickOnItem(e);
+          //System.out.println("getExerciseIdColumn.onBrowserEvent : got click " + event);
+          current = object;
+          gotClickOnItem(object);
         }
       }
 
@@ -281,13 +235,63 @@ public class PagingContainer<T extends ExerciseShell> {
   }
 
   protected void gotClickOnItem(final T e) {}
-
+  private T current = null;
   public T selectFirst() {
     if (dataProvider.getList().isEmpty()) return null;
-    T first = dataProvider.getList().get(0);
+    return selectItem(0);
+  }
+
+  public boolean isFirst(T test) {
+    return dataProvider.getList().isEmpty() || dataProvider.getList().get(0).getID().equals(test.getID());
+  }
+
+  public boolean isLast(T test) {
+    List<T> list = dataProvider.getList();
+    return list.isEmpty() || list.get(list.size()-1).getID().equals(test.getID());
+  }
+
+  /**
+   *
+   * @return true if on last item
+   */
+  public boolean loadNext() {
+    if (current == null) {
+      return true;
+    }
+    else {
+      List<T> list = dataProvider.getList();
+      int index = list.indexOf(current);
+      if (index == list.size()-1) return false;
+      T t = selectItem(index + 1);
+      gotClickOnItem(t);
+
+      return index + 1 == list.size() - 1;
+    }
+  }
+
+  public boolean loadPrev() {
+    if (current == null) {
+      return true;
+    }
+    else {
+      List<T> list = dataProvider.getList();
+      int index = list.indexOf(current);
+      if (index == 0) return false;
+      T t = selectItem(index-1);
+      gotClickOnItem(t);
+
+      return index -1 == 0;
+    }
+  }
+
+
+  private T selectItem(int index) {
+    T first = dataProvider.getList().get(index);
+
     table.getSelectionModel().setSelected(first, true);
     table.redraw();
-    onResize(0);
+    onResize(index);
+    current = first;
     return first;
   }
 
@@ -363,7 +367,8 @@ public class PagingContainer<T extends ExerciseShell> {
    * not sure how this happens, but need Math.max(0,...)
    *
    * @param i
-   * @seex ExerciseList#useExercise(mitll.langtest.shared.Exercise, mitll.langtest.shared.ExerciseShell)
+   * @see #onResize(int)
+   * @see mitll.langtest.client.list.PagingExerciseList#markCurrentExercise(int)
    */
   public void markCurrentExercise(int i) {
     if (dataProvider.getList() == null || dataProvider.getList().isEmpty()) return;
