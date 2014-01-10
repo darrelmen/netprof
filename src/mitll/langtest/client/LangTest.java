@@ -925,8 +925,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       if (navigation != null) {
         belowFirstRow.remove(navigation.getContainer());
       }
-      navigation = new Navigation(service, userManager, this, exerciseList);
-      belowFirstRow.add(navigation.getNav(bothSecondAndThird, this));
+      navigation = new Navigation(service, userManager, this, exerciseList, this);
+      belowFirstRow.add(navigation.getNav(bothSecondAndThird));
       showInitialState();
     }
   }
