@@ -15,11 +15,11 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
+import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseAnnotation;
-import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 
@@ -37,17 +37,19 @@ public class EditItem {
   private LangTestDatabaseAsync service;
   private UserManager userManager;
   private PagingContainer<UserExercise> pagingContainer;
-
+  ListInterface predefinedContentList;
   /**
    * @see mitll.langtest.client.custom.Navigation#Navigation
    * @param service
    * @param userManager
    * @param controller
    */
-  public EditItem(final LangTestDatabaseAsync service, final UserManager userManager, ExerciseController controller) {
+  public EditItem(final LangTestDatabaseAsync service, final UserManager userManager, ExerciseController controller,
+                  ListInterface listInterface) {
     this.controller = controller;
     this.service = service;
     this.userManager = userManager;
+    this.predefinedContentList = listInterface;
   }
 
   /**
@@ -127,7 +129,7 @@ public class EditItem {
     t.schedule(3000);
   }
 
-  private class EditableExercise extends NewUserExercise {
+  private class EditableExercise extends NewUserExercise<UserExercise> {
     UserExercise exerciseShell;
     HTML englishAnno = new HTML();
     HTML translitAnno = new HTML();
@@ -150,9 +152,9 @@ public class EditItem {
     }
 
     @Override
-    public <T extends ExerciseShell> Panel addNew(UserList ul, PagingContainer<T> pagingContainer, Panel toAddTo) {
+    public Panel addNew(UserList ul, PagingContainer<UserExercise> pagingContainer, Panel toAddTo) {
       Panel widgets = super.addNew(ul, pagingContainer, toAddTo);
-      widgets.add(new PrevNext(exerciseShell,pagingContainer));
+      widgets.add(new PrevNext<UserExercise>(exerciseShell,pagingContainer));
       return widgets;
     }
 
@@ -171,7 +173,6 @@ public class EditItem {
     }
 
     /**
-     * TODO : on blur - check if we need to re-record the audio!
      * @param container
      */
     @Override
@@ -225,7 +226,7 @@ public class EditItem {
      * @param toAddTo
      */
     @Override
-    protected void onClick(final UserList ul, final PagingContainer<?> pagingContainer, Panel toAddTo) {
+    protected void onClick(final UserList ul, final PagingContainer<UserExercise> pagingContainer, Panel toAddTo) {
       System.out.println("onClick : editing " + newUserExercise);
 
       DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
@@ -312,7 +313,10 @@ public class EditItem {
           exerciseShell.setForeignLanguage(newUserExercise.getForeignLanguage());
           pagingContainer.refresh();
           originalForeign = newUserExercise.getForeignLanguage();
-          showPopup(newUserExercise.getTooltip() + " has been updated.", submit);
+          String tooltip = newUserExercise.getTooltip();
+          if (tooltip.length() > 30) tooltip = tooltip.substring(0,30)+"...";
+          showPopup(tooltip + " has been updated.", submit);
+          predefinedContentList.reload();
         }
       });
     }
@@ -329,8 +333,10 @@ public class EditItem {
 
        // english
       english.box.setText(newUserExercise.getEnglish());
-      ((TextBox)english.box).setVisibleLength(60);
-      ((TextBox)english.box).setWidth("500px");
+      ((TextBox)english.box).setVisibleLength(newUserExercise.getEnglish().length()+4);
+      if (newUserExercise.getEnglish().length() > 20) {
+        english.box.setWidth("500px");
+      }
       useAnnotation(newUserExercise, "english", englishAnno);
 
       // foreign lang
