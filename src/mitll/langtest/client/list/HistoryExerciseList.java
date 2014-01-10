@@ -36,7 +36,7 @@ public class HistoryExerciseList extends PagingExerciseList {
    * I.e. when a new user logs in, we want them to do all of their items in the order we've chosen
    * for them (least answered/recorded first), and not let them skip forward in the list.
    */
-  private final boolean includeItemInBookmark = false;
+  private static final boolean INCLUDE_ITEM_IN_BOOKMARK = false;
   protected long userID;
 
   public HistoryExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
@@ -91,7 +91,7 @@ public class HistoryExerciseList extends PagingExerciseList {
         builder.append(type + "=" + section + ";");
       }
     }
-/*    if (id != null && includeItemInBookmark) {
+/*    if (id != null && INCLUDE_ITEM_IN_BOOKMARK) {
       String historyToken = super.getHistoryToken(id);
       //System.out.println("getHistoryToken for " + id + " would add " +historyToken);
 
@@ -202,7 +202,7 @@ public class HistoryExerciseList extends PagingExerciseList {
   @Override
   protected void gotClickOnItem(ExerciseShell e) {
     System.out.println("----------- got click on " + e.getID() + " -------------- ");
-    if (!includeItemInBookmark) {
+    if (!INCLUDE_ITEM_IN_BOOKMARK) {
       loadByID(e.getID());
     }
   }
@@ -348,7 +348,7 @@ public class HistoryExerciseList extends PagingExerciseList {
     String item = selectionState1.getItem();
 
     if (item != null && item.length() > 0 && hasExercise(item)) {
-    //  if (includeItemInBookmark) {
+    //  if (INCLUDE_ITEM_IN_BOOKMARK) {
         loadByIDFromToken(item);
   /*    }
       else {
@@ -400,7 +400,7 @@ public class HistoryExerciseList extends PagingExerciseList {
 
   private void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection, String prefix) {
     if (prefix.isEmpty()) {
-      reallyLoadExercises(typeToSection, null);
+      reallyLoadExercises(typeToSection);
     } else {
       lastReqID++;
       System.out.println("HistoryExerciseList.loadExercisesUsingPrefix looking for '" + prefix + "' (" + prefix.length() + " chars) in context of " + typeToSection);
@@ -413,25 +413,32 @@ public class HistoryExerciseList extends PagingExerciseList {
     }
   }
 
-  private void reallyLoadExercises(Map<String, Collection<String>> typeToSection, String item) {
-    System.out.println("reallyLoadExercises looking for '" + item + "' in context of " + typeToSection);
+  /**
+   * @see #loadExercisesUsingPrefix(java.util.Map, String)
+   * @param typeToSection
+   */
+  private void reallyLoadExercises(Map<String, Collection<String>> typeToSection) {
+    System.out.println("reallyLoadExercises looking for exercises in context of " + typeToSection);
 
-    if (typeToSection.isEmpty() && item == null) {
+    if (typeToSection.isEmpty()) {
       noSectionsGetExercises(userID);
     } else {
       lastReqID++;
-      service.getExercisesForSelectionState(lastReqID, typeToSection, userID, new MySetExercisesCallback(item));
+      service.getExercisesForSelectionState(lastReqID, typeToSection, userID, new MySetExercisesCallback(null));
     }
   }
 
   /**
    * Ask the server for the items for the type->item map.  Remember the results and select the first one.
+   *
+   * More complicated, since we might want to remember selected item history... but that doesn't work NOW.
    */
   protected class MySetExercisesCallback extends SetExercisesCallback {
     private final String item;
 
     /**
-     * @see HistoryExerciseList#loadExercises(java.util.Map, String)
+     * @see HistoryExerciseList#loadExercisesUsingPrefix(java.util.Map, String)
+     * @see #reallyLoadExercises(java.util.Map)
      * @param item
      */
     public MySetExercisesCallback(String item) {  this.item = item;  }
@@ -461,9 +468,9 @@ public class HistoryExerciseList extends PagingExerciseList {
               System.out.println("\tMySetExercisesCallback.onSuccess : loading first exercise since couldn't load item=" + item);
               loadFirstExercise();
             }
-            else {
+  /*          else {
               //System.out.println("\tMySetExercisesCallback.onSuccess :");
-            }
+            }*/
           } else {
             System.out.println("\tMySetExercisesCallback.onSuccess : item is null");
 
