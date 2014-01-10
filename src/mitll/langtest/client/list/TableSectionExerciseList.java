@@ -56,7 +56,7 @@ import java.util.Map;
  * Time: 4:21 PM
  * To change this template use File | Settings | File Templates.
  */
-public class TableSectionExerciseList extends FlexSectionExerciseList {
+public class TableSectionExerciseList/*<T extends Exercise>*/ extends FlexSectionExerciseList<Exercise> {
   private static final String FLASHCARD = "audio vocabulary practice";
   private static final String USER_PROMPT = "Choose a lesson, preview, and share " + FLASHCARD + " exercises.";
 
@@ -70,7 +70,6 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   private Button timedFlashcardCopy;
   private TextBox urlInputBox = new TextBox();
   private TextBox urlInputBox2 = new TextBox();
- // private int tries = 10;
   private String token = "";
   private int frameHeight = FRAME_HEIGHT;
   private CellTable<? extends ExerciseShell> table;
@@ -89,7 +88,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   public void clear() {  removeComponents();  }
 
   @Override
-  protected void addTypeAhead(FlowPanel column) {}
+  protected void addTypeAhead(Panel column) {}
 
   protected void noSectionsGetExercises(long userID) {
     Map<String, Collection<String>> objectObjectMap = Collections.emptyMap();
@@ -465,11 +464,11 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     CellTable.Style cellTableStyle();
   }
 
-  PagingContainer<Exercise> exercisePagingContainer;
+ // PagingContainer<Exercise> exercisePagingContainer;
   @Override
-  protected PagingContainer<? extends ExerciseShell> makePagingContainer() {
+  protected PagingContainer<Exercise> makePagingContainer() {
     final TableSectionExerciseList outer = this;
-    exercisePagingContainer = new PagingContainer<Exercise>(controller, 100) {
+    PagingContainer<Exercise> exercisePagingContainer = new PagingContainer<Exercise>(controller, 100) {
       /**
        * @see mitll.langtest.client.list.TableSectionExerciseList#getAsyncTable(java.util.Map, int)
        * @return
@@ -605,7 +604,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   private Widget getAsyncTable(Map<String, Collection<String>> typeToSection,int numResults) {
     Resources resources = GWT.create(Resources.class);
 
-    CellTable<Exercise> table = exercisePagingContainer.makeBootstrapCellTable(resources);
+    CellTable<Exercise> table = pagingContainer.makeBootstrapCellTable(resources);
     table.setStriped(true);
     table.setBordered(false);
     table.setWidth("100%");
