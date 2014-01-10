@@ -626,7 +626,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void setupSoundManager() {
-    System.out.println("setupSoundManager " );
     soundManager = new SoundManagerStatic();
     soundManager.exportStaticMethods();
     soundManager.initialize();
@@ -932,8 +931,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private void resetClassroomState() {
     if (getProps().isClassroomMode()) {
-     // System.out.println("\n\n\nreset classroom state : " + isReviewMode());
-      //belowFirstRow.clear();
       if (navigation != null) {
         belowFirstRow.remove(navigation.getContainer());
       }
@@ -969,7 +966,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
-  boolean everShownInitialState =false;
+  private boolean everShownInitialState =false;
   private boolean doEverythingAfterFactory(long userID) {
 
     if (userID != lastUser || (props.isGoodwaveMode() || props.isFlashCard() && !props.isTimedGame())) {
@@ -983,7 +980,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           System.out.println("\tdoEverythingAfterFactory : " + userID + " exercise list is null???");
         }
 
-       // showInitialState();
         resetClassroomState();
       }
       else {
@@ -1000,7 +996,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private void showInitialState() {
     if (navigation != null) {
-      System.out.println("showInitialState : " + getUser());
       navigation.showInitialState();
     }
   }
@@ -1011,8 +1006,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   // TODO : refactor all this into mode objects that decide whether we need flash or not, etc.
   private void checkInitFlash() {
     if (shouldCollectAudio() && !flashRecordPanel.gotPermission()) {
-      System.out.println("checkInitFlash : initFlash");
-
+      //System.out.println("checkInitFlash : initFlash");
       flashRecordPanel.initFlash();
     }
     else {
@@ -1038,15 +1032,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   @Override
-  public void rememberAudioType(String audioType) {
-    this.audioType = audioType;
-    System.out.println("audio type " + audioType + " review " + isReviewMode());
-  }
+  public void rememberAudioType(String audioType) { this.audioType = audioType;  }
 
   public boolean showCompleted() {
     boolean b = isReviewMode() || isCRTDataCollectMode();
-    //System.out.println("showCompleted " + b);
-
     return b;
   }
 
