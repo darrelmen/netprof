@@ -255,7 +255,6 @@ public class UserListManager {
     userExerciseDAO.update(userExercise, createIfDoesntExist);
   }
 
-
   /**
    * Remember to copy the audio from the posted location to a more permanent location.
    * @param userExercise
@@ -283,6 +282,8 @@ public class UserListManager {
   /**
    * Copying audio from initial recording location to new location.
    *
+   * Also normalizes the audio level.
+   *
    * @param userExercise
    * @param fileRef
    * @param fast
@@ -300,6 +301,8 @@ public class UserListManager {
     logger.debug("getRefAudioPath : dest path    " + bestDirForExercise.getPath() + " vs " +s);
     if (!fileRef.equals(destination)) {
       new FileCopier().copy(fileRef.getAbsolutePath(), destination.getAbsolutePath());
+
+      new AudioConversion().normalizeLevels(destination);
     }
     else {
       if (FileUtils.size(destination.getAbsolutePath()) == 0) logger.error("\ngetRefAudioPath : huh? " + destination + " is empty???");
