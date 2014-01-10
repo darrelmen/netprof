@@ -258,8 +258,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     // third row ---------------
 
-  Panel thirdRow = new HorizontalPanel();
-   // Panel thirdRow = new FlowPanel();
+    Panel thirdRow = new HorizontalPanel();
     Panel leftColumn = new SimplePanel();
     thirdRow.add(leftColumn);
     leftColumn.addStyleName("floatLeft");
@@ -281,8 +280,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // set up center panel, initially with flash record panel
     currentExerciseVPanel = new FlowPanel();
     currentExerciseVPanel.getElement().setId("currentExercisePanel");
-/*    DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingLeft", "5px");
-    DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingRight", "2px");*/
 
     reallyMakeExerciseList(belowFirstRow, leftColumn, bothSecondAndThird);
 
@@ -299,10 +296,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     // don't do flash if we're doing text only collection
 
-    //System.out.println("user agent " + Window.Navigator.getUserAgent());
     if (shouldCollectAudio()) {
       makeFlashContainer();
-  //    currentExerciseVPanel.add(flashRecordPanel);
       belowFirstRow.add(flashRecordPanel);
     }
     else {
@@ -342,12 +337,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void reallyMakeExerciseList(Panel belowFirstRow, Panel leftColumn, Panel bothSecondAndThird) {
-    ListInterface listInterface = makeExerciseList(secondRow, leftColumn);
-    if (getProps().isClassroomMode()) {
-      //navigation = new Navigation(service, userManager, this, listInterface);
-      //belowFirstRow.add(navigation.getNav(bothSecondAndThird, this));
-    }
-    else {
+    makeExerciseList(secondRow, leftColumn);
+    if (!getProps().isClassroomMode()) {
       belowFirstRow.add(bothSecondAndThird);
     }
   }
@@ -360,7 +351,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void loadVisualizationPackages() {
-    System.out.println("loadVisualizationPackages...");
+    //System.out.println("loadVisualizationPackages...");
 
     VisualizationUtils.loadVisualizationApi(new Runnable() {
       @Override
