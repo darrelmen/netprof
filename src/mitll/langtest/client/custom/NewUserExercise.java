@@ -41,7 +41,7 @@ import mitll.langtest.shared.custom.UserList;
  * Time: 5:59 PM
  * To change this template use File | Settings | File Templates.
  */
-public class NewUserExercise extends BasicDialog {
+public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   public static final String FOREIGN_LANGUAGE = "Foreign Language";
   protected UserExercise newUserExercise = null;
   private final ExerciseController controller;
@@ -70,7 +70,7 @@ public class NewUserExercise extends BasicDialog {
     this.userManager = userManager;
   }
 
-  public <T extends ExerciseShell> Panel addNew(final UserList ul, final PagingContainer<T> pagingContainer, final Panel toAddTo) {
+  public Panel addNew(final UserList ul, final PagingContainer<T> pagingContainer, final Panel toAddTo) {
     final FluidContainer container = new FluidContainer();
     container.addStyleName("greenBackground");
 
@@ -135,7 +135,7 @@ public class NewUserExercise extends BasicDialog {
     });
   }
 
-  private Column getCreateButton(UserList ul, PagingContainer<?> pagingContainer, Panel toAddTo, ControlGroup normalSpeedRecording) {
+  private Column getCreateButton(UserList ul, PagingContainer<T> pagingContainer, Panel toAddTo, ControlGroup normalSpeedRecording) {
     Button submit = makeCreateButton(ul, pagingContainer, toAddTo, english, foreignLang, rap, normalSpeedRecording);
     DOM.setStyleAttribute(submit.getElement(), "marginBottom", "5px");
     DOM.setStyleAttribute(submit.getElement(), "marginRight", "15px");
@@ -145,7 +145,7 @@ public class NewUserExercise extends BasicDialog {
     return column;
   }
 
-  private Button makeCreateButton(final UserList ul, final PagingContainer<?> pagingContainer, final Panel toAddTo,
+  private Button makeCreateButton(final UserList ul, final PagingContainer<T> pagingContainer, final Panel toAddTo,
                                   final FormField english, final FormField foreignLang,
                                   final RecordAudioPanel rap, final ControlGroup normalSpeedRecording) {
     submit = new Button("Create");
@@ -153,7 +153,7 @@ public class NewUserExercise extends BasicDialog {
     submit.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        System.out.println("makeCreateButton : creating new item for " + english + " " + foreignLang);
+        //System.out.println("makeCreateButton : creating new item for " + english + " " + foreignLang);
 
         if (validateForm(english, foreignLang, rap, normalSpeedRecording)) {
           createButtonClicked(english, foreignLang, ul, pagingContainer, toAddTo);
@@ -165,17 +165,17 @@ public class NewUserExercise extends BasicDialog {
   }
 
   private void createButtonClicked(FormField english, FormField foreignLang, UserList ul,
-                                   PagingContainer<?> pagingContainer, Panel toAddTo) {
+                                   PagingContainer<T> pagingContainer, Panel toAddTo) {
     newUserExercise.setEnglish(english.getText());
     newUserExercise.setForeignLanguage(foreignLang.getText());
     newUserExercise.setTransliteration(translit.getText());
 
-    System.out.println("createButtonClicked : now " + newUserExercise);
+    //System.out.println("createButtonClicked : now " + newUserExercise);
 
     onClick(ul, pagingContainer, toAddTo);
   }
 
-  protected void onClick(final UserList ul, final PagingContainer<?> pagingContainer, final Panel toAddTo) {
+  protected void onClick(final UserList ul, final PagingContainer<T> pagingContainer, final Panel toAddTo) {
     System.out.println("onClick : adding " + newUserExercise + " to " +ul);
 
     service.reallyCreateNewItem(ul.getUniqueID(), newUserExercise, new AsyncCallback<UserExercise>() {
