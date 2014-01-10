@@ -93,7 +93,7 @@ public class ExerciseListLayout {
             return new ResponseExerciseList(secondRow, currentExerciseVPanel, service, feedback,
               props.isShowTurkToken(), props.showExercisesInOrder(), controller, props.isCRTDataCollectMode(), "response");
           } else {
-            System.out.println("makeExerciseList : show completed " + showCompleted + " flex");
+            //System.out.println("makeExerciseList : show completed " + showCompleted + " flex");
             return new FlexSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
               props.isShowTurkToken(), props.showExercisesInOrder(), controller, showTypeAhead, "flex");
           }

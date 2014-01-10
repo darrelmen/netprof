@@ -157,6 +157,11 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
   }
 
+  public void reload() {
+    System.out.println("ExerciseList.reload for user " + controller.getUser());
+    service.getExerciseIds(lastReqID, controller.getUser(), new SetExercisesCallback());
+  }
+
   /**
    * So we have a catch-22 -
    *
