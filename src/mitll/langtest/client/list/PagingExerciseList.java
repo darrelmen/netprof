@@ -34,9 +34,9 @@ import java.util.Set;
  * Time: 5:35 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PagingExerciseList extends ExerciseList implements RequiresResize {
+public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T> implements RequiresResize {
   protected ExerciseController controller;
-  protected PagingContainer<? extends ExerciseShell> pagingContainer;
+  protected PagingContainer<T> pagingContainer;
   private boolean showTypeAhead;
 
   private TextBox typeAhead = null;
@@ -107,7 +107,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   }
 
   /**
-   * @see #addTypeAhead(com.google.gwt.user.client.ui.FlowPanel)
+   * @see #addTypeAhead(com.google.gwt.user.client.ui.Panel)
    * @param selectionState
    * @param prefix
    */
@@ -134,10 +134,10 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     return userGroup;
   }
 
-  protected PagingContainer<? extends ExerciseShell> makePagingContainer() {
+  protected PagingContainer<T> makePagingContainer() {
     final PagingExerciseList outer = this;
-    PagingContainer<ExerciseShell> pagingContainer1 =
-      new PagingContainer<ExerciseShell>(controller, getVerticalUnaccountedFor()) {
+    PagingContainer<T> pagingContainer1 =
+      new PagingContainer<T>(controller, getVerticalUnaccountedFor()) {
       @Override
       protected void gotClickOnItem(ExerciseShell e) {  outer.gotClickOnItem(e);  }
     };
@@ -174,7 +174,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     add(container);
   }
 
-  protected void addTypeAhead(FlowPanel column) {
+  protected void addTypeAhead(Panel column) {
     if (showTypeAhead) {
       typeAhead = new TextBox();
       typeAhead.setDirectionEstimator(true);   // automatically detect whether text is RTL
@@ -199,9 +199,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     }
   }
 
-
   public void showEmptySelection() {
-
    // List<String> strings = Arrays.asList("No items match the selection and search.", "Try clearing one of your selections or changing the search.");
 
     showPopup("No items match the selection and search.","Try clearing one of your selections or changing the search.",typeAhead);
@@ -270,5 +268,9 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
 
   public void setUserListID(long userListID) {
     this.userListID = userListID;
+  }
+
+  public PagingContainer<T> getPagingContainer() {
+    return pagingContainer;
   }
 }
