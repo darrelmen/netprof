@@ -21,7 +21,7 @@ public class UserExerciseDAO extends DAO {
 
   public static final String USEREXERCISE = "userexercise";
   private ExerciseDAO exerciseDAO;
-
+  private boolean DEBUG = false;
   public UserExerciseDAO(Database database) {
     super(database);
     try {
@@ -172,10 +172,10 @@ public class UserExerciseDAO extends DAO {
       }
 
       if (userExercises2.isEmpty()) {
-        logger.info("getOnList : no exercises on list id " + listID);
+        if (DEBUG) logger.debug("\tgetOnList : no exercises on list id " + listID);
         return new ArrayList<UserExercise>();
       } else {
-        logger.debug("\tgetOnList for " + listID+ "  got " + userExercises2.size());
+        if (DEBUG) logger.debug("\tgetOnList for " + listID+ "  got " + userExercises2.size());
         return userExercises2;
       }
     } catch (SQLException e) {
@@ -305,7 +305,7 @@ public class UserExerciseDAO extends DAO {
         "transliteration='" + userExercise.getTransliteration() + "', " +
         "refAudio='" + userExercise.getRefAudio() + "', " +
         "slowAudioRef='" + userExercise.getSlowAudioRef() + "' " +
-        "WHERE uniqueid=" + userExercise.getUniqueID();
+        "WHERE exerciseid='" + userExercise.getID() +"'";
 
       PreparedStatement statement = connection.prepareStatement(sql);
       int i = statement.executeUpdate();
