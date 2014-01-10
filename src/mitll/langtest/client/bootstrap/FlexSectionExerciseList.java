@@ -45,7 +45,7 @@ import java.util.Set;
  * Time: 5:32 PM
  * To change this template use File | Settings | File Templates.
  */
-public class FlexSectionExerciseList extends HistoryExerciseList {
+public class FlexSectionExerciseList<T extends ExerciseShell> extends HistoryExerciseList<T> {
   private static final int HEADING_FOR_LABEL = 4;
  // public static final int PANEL_INSIDE_SCROLL_MIN_HEIGHT = 50;
  // public static final int PANEL_INSIDE_SCROLL_MIN_HEIGHT_SMALL = 30;
