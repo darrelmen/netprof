@@ -68,7 +68,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   }
 
   /**
-   * @see GoodwaveExercisePanel#getAnswerWidget(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @see GoodwaveExercisePanel#getAnswerWidget
    * @param l
    */
   public void addScoreListener(ScoreListener l) { this.scoreListener = l;}
@@ -100,7 +100,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
       getTranscriptImageURLForAudio(audioPath, refAudio, refSentence, width,words,phones);
     }
     else {
-      System.out.println("ScoringAudioPanel.getEachImage : no ref audio for id " + getElement().getId());
+      //System.out.println("ScoringAudioPanel.getEachImage : no ref audio for id '" + getElement().getId()+"'");
     }
   }
 
