@@ -24,7 +24,7 @@ import mitll.langtest.shared.ExerciseShell;
  * Date: 7/9/12
  * Time: 5:59 PM
  */
-public class GradedExerciseList extends PagingExerciseList {
+public class GradedExerciseList<T extends ExerciseShell> extends PagingExerciseList<T> {
   private final boolean englishOnly;
   private int expectedGrades = 1;
 
@@ -112,7 +112,7 @@ public class GradedExerciseList extends PagingExerciseList {
         popup.hide();
 
         if (result != null) {
-          for (ExerciseShell e : currentExercises) {
+          for (T e : currentExercises) {
             if (e.getID().equals(result.getID())) {
               loadExercise(e);
               break;
@@ -122,7 +122,7 @@ public class GradedExerciseList extends PagingExerciseList {
         else {
           if (showFirstIfNoneToGrade) {
             System.out.println("showing first exercise...");
-            ExerciseShell toLoad = currentExercises.get(0);
+            T toLoad = currentExercises.get(0);
             loadExercise(toLoad);
           }
           else {
