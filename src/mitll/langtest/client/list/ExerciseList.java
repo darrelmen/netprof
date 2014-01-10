@@ -54,12 +54,12 @@ import java.util.Set;
  * Time: 5:59 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class ExerciseList extends VerticalPanel implements ListInterface, ProvidesResize,
+public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPanel implements ListInterface<T>, ProvidesResize,
   ValueChangeHandler<String> {
   private static final int NUM_QUESTIONS_FOR_TOKEN = 5;
   public static final String ITEMS = "Items";
-  protected List<? extends ExerciseShell> currentExercises = null;
-  private Map<String,ExerciseShell> idToExercise = null;
+  protected List<T> currentExercises = null;
+  private Map<String,T> idToExercise = null;
   protected int currentExercise = 0;
   private final List<HTML> progressMarkers = new ArrayList<HTML>();
 
@@ -249,14 +249,14 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   /**
    * @see ListInterface#getExercises(long, boolean)
    */
-  protected class SetExercisesCallback implements AsyncCallback<ExerciseListWrapper> {
+  protected class SetExercisesCallback implements AsyncCallback<ExerciseListWrapper<T>> {
     public void onFailure(Throwable caught) {
       if (!caught.getMessage().trim().equals("0")) {
         feedback.showErrorMessage("Server error", "SetExercisesCallback : Server error - couldn't get exercises.");
       }
       System.out.println("Got exception '" +caught.getMessage() + "' " +caught);
     }
-    public void onSuccess(ExerciseListWrapper result) {
+    public void onSuccess(ExerciseListWrapper<T> result) {
       System.out.println("ExerciseList.SetExercisesCallback Got " + result.getExercises().size() + " results");
       if (isStaleResponse(result)) {
         System.out.println("----> SetExercisesCallback.onSuccess ignoring result " + result.getReqID() + " b/c before latest " + lastReqID);
@@ -281,7 +281,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see ExerciseList.SetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
    * @param exercises
    */
-  public void rememberAndLoadFirst(List<? extends ExerciseShell> exercises, Exercise firstExercise) {
+  public void rememberAndLoadFirst(List<T> exercises, Exercise firstExercise) {
     System.out.println("ExerciseList : rememberAndLoadFirst " + firstExercise);
 
     rememberExercises(exercises);
@@ -303,20 +303,28 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     return result.getReqID() < lastReqID;
   }
 
-  protected void rememberExercises(List<? extends ExerciseShell> result) {
+  protected void rememberExercises(List<T> result) {
     System.out.println("ExerciseList : remembering " + result.size() + " exercises");
     currentExercises = result; // remember current exercises
     currentExercise = 0;
-    idToExercise = new HashMap<String, ExerciseShell>();
+    idToExercise = new HashMap<String, T>();
     clear();
-    for (final ExerciseShell es : result) {
-      idToExercise.put(es.getID(),es);
-      addExerciseToList(es);
+    for (final T es : result) {
+      rememberExercise(es);
     }
     flush();
   }
 
-  public void setSelectionState(Map<String, Collection<String>> selectionState) {}
+/*  public void addNewExercise(T es) {
+    currentExercises.add(es);
+  }*/
+
+  private void rememberExercise(T es) {
+    idToExercise.put(es.getID(),es);
+    addExerciseToList(es);
+  }
+
+  //public void setSelectionState(Map<String, Collection<String>> selectionState) {}
 
   @Override
   public void hideExerciseList() {
@@ -556,7 +564,11 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     currentExercise = i;
   }
 
-  public String getCurrentExerciseID() { return currentExercises != null ? currentExercises.get(currentExercise).getID() : "Unknown"; }
+  public String getCurrentExerciseID() { return currentExercises != null ? getCurrent().getID() : "Unknown"; }
+
+  private T getCurrent() {
+    return currentExercises.get(currentExercise);
+  }
 
   /**
    * @see #useExercise(mitll.langtest.shared.Exercise, mitll.langtest.shared.ExerciseShell)
@@ -643,6 +655,9 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     html.setStyleDependentName("highlighted", false);
   }
 
+  @Override
+  public boolean loadNext() { return loadNextExercise(getCurrent()); }
+
   /**
    * @seex NavigationHelper#loadNextExercise
    * @param current
@@ -715,6 +730,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     simplePopup.show();
   }
 
+  @Override
+  public boolean loadPrev() { return loadPreviousExercise(getCurrent()); }
   /**
    * @seex NavigationHelper#loadPreviousExercise
    * @param current
@@ -754,6 +771,11 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   @Override
   public Widget getWidget() {   return this;  }
 
+  @Override
+  public boolean onFirst() {
+    return onFirst(getCurrent());
+  }
+
   /**
    * @see mitll.langtest.client.exercise.NavigationHelper#makePrevButton
    * @param current
@@ -761,7 +783,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   @Override
   public boolean onFirst(ExerciseShell current) {
-    System.out.println("onFirst : of " +currentExercises.size() +", on first is " + current);
+    //System.out.println("onFirst : of " +currentExercises.size() +", on first is " + current);
     return current == null || currentExercises.size() == 1 || getIndex(current) == 0;
   }
 
