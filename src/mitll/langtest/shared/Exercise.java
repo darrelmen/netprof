@@ -242,7 +242,7 @@ public class Exercise extends AudioExercise {
   }
 
   /**
-   * @see mitll.langtest.server.database.ExcelImport#getExercise(String, mitll.langtest.server.database.FileExerciseDAO, int, org.apache.poi.ss.usermodel.Row, String, String, String, String, String, String, boolean, String)
+   * @see mitll.langtest.server.database.ExcelImport#getExercise(String, int, org.apache.poi.ss.usermodel.Row, String, String, String, String, String, boolean, String)
    * @param sentenceRefs
    */
   public void setRefSentences(List<String> sentenceRefs) {
@@ -317,8 +317,8 @@ public class Exercise extends AudioExercise {
     String questionInfo = langToQuestion == null ? " no questions" : " num questions " + langToQuestion.size() + moreAboutQuestions;
 
     if (isRepeat() || getType() == EXERCISE_TYPE.MULTI_REF) {
-      return "Exercise " + type + " " +id +  " content bytes = " + content.length() + " english " + getEnglishSentence() +
-          " ref sentence '" + getRefSentence() +"' audio " + getAudioAttributes() + " : " + questionInfo;
+      return "Exercise " + type + " " +id +  " content bytes = " + content.length() + " english '" + getEnglishSentence() +
+          "' ref sentence '" + getRefSentence() +"' audio " + getAudioAttributes() + " : " + questionInfo;
     }
     else {
       return "Exercise " + getType() + " " + id + " " + (isPromptInEnglish() ?"english":"foreign")+
