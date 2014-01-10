@@ -50,7 +50,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private static final boolean WARN_ABOUT_MISSING_AUDIO = false;
   private static final int WINDOW_SIZE_CHANGE_THRESHOLD = 50;
   private static final int IMAGE_WIDTH_SLOP = 70 + WINDOW_SIZE_CHANGE_THRESHOLD/2;
-  private static final boolean DEBUG_GET_IMAGES = false;
 
   private final ScoreListener gaugePanel;
   protected String audioPath;
@@ -72,8 +71,9 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private final boolean logMessages;
   protected ExerciseController controller;
   private boolean showSpectrogram = false;
-  int rightMargin;
-  private final boolean debug = false;
+  private int rightMargin;
+  private static final boolean debug = false;
+  private static final boolean DEBUG_GET_IMAGES = false;
 
   /**
    * @see ScoringAudioPanel#ScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, int, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener, int)
@@ -121,11 +121,10 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   public void addWidgets(String path) {
     System.out.println("AudioPanel.addWidgets audio path = " + path);
     imageContainer = new VerticalPanel();
-    imageContainer.getElement().setId("AudioPanel_imageContainer_"+path);
 
     HorizontalPanel hp = new HorizontalPanel();
     hp.setVerticalAlignment(ALIGN_MIDDLE);
-
+    hp.getElement().setId("AudioPanel_hp");
     Widget beforePlayWidget = getBeforePlayWidget();
     playAudio = getPlayButtons(beforePlayWidget);
     hp.add(playAudio);
@@ -168,7 +167,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * This is sort of a hack -- so we can get left justify...
    * @return
    */
-  protected Widget getBeforePlayWidget() { return null; }
+  protected Widget getBeforePlayWidget() { return null;  }
 
   @Override
   public void onLoad() {
@@ -207,7 +206,11 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       image = new Image();
       image.setVisible(false);
     }
-    public void setVisible(boolean visible) { image.setVisible(visible); check.setVisible(visible);}
+
+    public void setVisible(boolean visible) {
+      image.setVisible(visible);
+      if (check != null) check.setVisible(visible);
+    }
 
     public void setUrl(String url) { image.setUrl(url); }
   }
@@ -311,7 +314,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       lastWidth = Window.getClientWidth();
 
       if (DEBUG_GET_IMAGES) {
-        System.out.println("\tAudioPanel.getImages : offset width " + getOffsetWidth() +
+        System.out.println("\t---> AudioPanel.getImages : offset width " + getOffsetWidth() +
           " request width " + width + " path " + audioPath);
       }
       getEachImage(width);
@@ -366,6 +369,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
             if (WARN_ABOUT_MISSING_AUDIO) Window.alert("missing audio file on server " + path);
           }
           else if (isMostRecentRequest(type, result.req)) {
+            //System.out.println("\tgetImageURLForAudio : using new url " + result.imageURL);
+
             imageAndCheck.image.setUrl(result.imageURL);
             imageAndCheck.image.setVisible(true);
             audioPositionPopup.reinitialize(result.durationInSeconds);
@@ -380,7 +385,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
             t.schedule(50);
           }
           else {
-            System.out.println("getImageURLForAudio : ignoring out of sync response " + result.req + " for " + type);
+            //System.out.println("\tgetImageURLForAudio : ignoring out of sync response " + result.req + " for " + type);
           }
           if (logMessages) {
             logMessage(result, roundtrip);
@@ -413,7 +418,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     }
   }
 
-  protected boolean isMostRecentRequest(String type,int responseReqID) {
+  protected boolean isMostRecentRequest(String type, int responseReqID) {
     synchronized (this) {
       Integer mostRecentIDForType = reqs.get(type);
       if (mostRecentIDForType == null) {
@@ -421,7 +426,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
         return false;
       }
       else {
-        //System.out.println("req for " + type + " = " + mostRecentIDForType + " compared to " + responseReqID);
+        //System.out.println("\tisMostRecentRequest: req for " + type + " = " + mostRecentIDForType + " compared to " + responseReqID);
         return mostRecentIDForType == responseReqID;
       }
     }
