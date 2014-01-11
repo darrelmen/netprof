@@ -130,11 +130,11 @@ public interface LangTestDatabase extends RemoteService {
    * @deprecated
    * @return
    */
-  Map<String, Map<String,Integer>> getTypeToSectionToCount();
+  //Map<String, Map<String,Integer>> getTypeToSectionToCount();
 
   int getNumExercisesForSelectionState(Map<String, Collection<String>> typeToSection);
 
-  List<Exercise> getFullExercisesForSelectionState(Map<String, Collection<String>> typeToSection, int start, int end);
+  List<? extends ExerciseShell> getFullExercisesForSelectionState(Map<String, Collection<String>> typeToSection, int start, int end);
 
   /**
    * Game is over notification...
