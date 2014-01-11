@@ -392,7 +392,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   @Override
-  public List<Exercise> getFullExercisesForSelectionState(Map<String, Collection<String>> typeToSection, int start, int end) {
+  public List<? extends ExerciseShell> getFullExercisesForSelectionState(Map<String, Collection<String>> typeToSection,
+                                                                         int start, int end) {
     try {
       List<Exercise> exercises;
       //logger.debug("getFullExercisesForSelectionState req = " + typeToSection);
@@ -451,10 +452,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getSectionHelper().getSectionNodes();
   }
 
+/*
   @Override
   public Map<String, Map<String,Integer>> getTypeToSectionToCount() {
     return db.getSectionHelper().getTypeToSectionToCount();
   }
+*/
 
   private void logMemory() {
     Runtime rt = Runtime.getRuntime();
