@@ -56,7 +56,7 @@ import java.util.Map;
  * Time: 4:21 PM
  * To change this template use File | Settings | File Templates.
  */
-public class TableSectionExerciseList/*<T extends Exercise>*/ extends FlexSectionExerciseList<Exercise> {
+public class TableSectionExerciseList<T extends ExerciseShell> extends FlexSectionExerciseList<T> {
   private static final String FLASHCARD = "audio vocabulary practice";
   private static final String USER_PROMPT = "Choose a lesson, preview, and share " + FLASHCARD + " exercises.";
 
@@ -128,17 +128,17 @@ public class TableSectionExerciseList/*<T extends Exercise>*/ extends FlexSectio
    * @param table
    * @return
    */
-  private AsyncDataProvider<Exercise> createProvider(final Map<String, Collection<String>> typeToSection,
-                                                     final int numResults, CellTable<Exercise> table) {
-    AsyncDataProvider<Exercise> dataProvider = new AsyncDataProvider<Exercise>() {
+  private AsyncDataProvider<T> createProvider(final Map<String, Collection<String>> typeToSection,
+                                                     final int numResults, CellTable<T> table) {
+    AsyncDataProvider<T> dataProvider = new AsyncDataProvider<T>() {
       @Override
-      protected void onRangeChanged(HasData<Exercise> display) {
+      protected void onRangeChanged(HasData<T> display) {
         final int start = display.getVisibleRange().getStart();
         int end = start + display.getVisibleRange().getLength();
         end = end >= numResults ? numResults : end;
         //System.out.println("createProvider : asking for " + start +"->" + end);
         final int fend = end;
-        service.getFullExercisesForSelectionState(typeToSection, start, end, new AsyncCallback<List<Exercise>>() {
+        service.getFullExercisesForSelectionState(typeToSection, start, end, new AsyncCallback<List<T>>() {
           @Override
           public void onFailure(Throwable caught) {
             if (!caught.getMessage().trim().equals("0")) {
@@ -147,7 +147,7 @@ public class TableSectionExerciseList/*<T extends Exercise>*/ extends FlexSectio
           }
 
           @Override
-          public void onSuccess(List<Exercise> result) {
+          public void onSuccess(List<T> result) {
             System.out.println("TableSectionExerciseList.createProvider : onSuccess for " + start + "->" + fend + " got " + result.size());
             updateRowData(start, result);
           }
@@ -403,7 +403,7 @@ public class TableSectionExerciseList/*<T extends Exercise>*/ extends FlexSectio
   }-*/;
 
   /**
-   * @see mitll.langtest.client.list.section.SectionExerciseList#pushNewSectionHistoryToken()
+   * @seex mitll.langtest.client.list.section.SectionExerciseList#pushNewSectionHistoryToken()
    * @param historyToken
    */
   protected void setModeLinks(String historyToken) {
@@ -466,17 +466,17 @@ public class TableSectionExerciseList/*<T extends Exercise>*/ extends FlexSectio
 
  // PagingContainer<Exercise> exercisePagingContainer;
   @Override
-  protected PagingContainer<Exercise> makePagingContainer() {
+  protected PagingContainer<T> makePagingContainer() {
     final TableSectionExerciseList outer = this;
-    PagingContainer<Exercise> exercisePagingContainer = new PagingContainer<Exercise>(controller, 100) {
+    PagingContainer<T> exercisePagingContainer = new PagingContainer<T>(controller, 100) {
       /**
        * @see mitll.langtest.client.list.TableSectionExerciseList#getAsyncTable(java.util.Map, int)
        * @return
        */
       @Override
-      public CellTable<Exercise> makeBootstrapCellTable(CellTable.Resources resources) {
+      public CellTable<T> makeBootstrapCellTable(CellTable.Resources resources) {
         //Resources resources = GWT.create(Resources.class);
-        CellTable<Exercise> table = new CellTable<Exercise>(PAGE_SIZE, resources);
+        CellTable<T> table = new CellTable<T>(PAGE_SIZE, resources);
         DOM.setStyleAttribute(table.getElement(), "marginBottom", "2px");
 
         table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
@@ -485,7 +485,7 @@ public class TableSectionExerciseList/*<T extends Exercise>*/ extends FlexSectio
         table.setHeight("auto");
 
         // Add a selection model to handle user selection.
-        final SingleSelectionModel<Exercise> selectionModel = new SingleSelectionModel<Exercise>();
+        final SingleSelectionModel<T> selectionModel = new SingleSelectionModel<T>();
         table.setSelectionModel(selectionModel);
 
         outer.addColumnsToTable(table);
@@ -604,7 +604,7 @@ public class TableSectionExerciseList/*<T extends Exercise>*/ extends FlexSectio
   private Widget getAsyncTable(Map<String, Collection<String>> typeToSection,int numResults) {
     Resources resources = GWT.create(Resources.class);
 
-    CellTable<Exercise> table = pagingContainer.makeBootstrapCellTable(resources);
+    CellTable<T> table = pagingContainer.makeBootstrapCellTable(resources);
     table.setStriped(true);
     table.setBordered(false);
     table.setWidth("100%");
