@@ -81,7 +81,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     final FluidContainer container = new FluidContainer();
     container.addStyleName("greenBackground");
 
-    makeEnglishRow(container);
+    makeEnglishRow(container, true);
     makeForeignLangRow(container);
     makeTranslitRow(container);
 
@@ -111,12 +111,12 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     return addControlGroupEntry(row, "Normal speed reference recording", rap);
   }
 
-  protected Panel makeEnglishRow(Panel container) {
+  protected Panel makeEnglishRow(Panel container, boolean grabFocus) {
     FluidRow row = new FluidRow();
     container.add(row);
     english = addControlFormField(row, "English", false,1);
 
-    focusOnEnglish(english);
+    if (grabFocus) focusOnEnglish(english);
     return row;
   }
 
