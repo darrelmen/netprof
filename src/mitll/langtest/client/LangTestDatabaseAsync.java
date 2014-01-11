@@ -102,11 +102,12 @@ public interface LangTestDatabaseAsync {
 
   void clearUserState(long userID, AsyncCallback<Void> async);
 
-  void getTypeToSectionToCount(AsyncCallback<Map<String, Map<String, Integer>>> async);
+  //void getTypeToSectionToCount(AsyncCallback<Map<String, Map<String, Integer>>> async);
 
   void getNumExercisesForSelectionState(Map<String, Collection<String>> typeToSection, AsyncCallback<Integer> async);
 
-  void getFullExercisesForSelectionState(Map<String, Collection<String>> typeToSection, int start, int end, AsyncCallback<List<Exercise>> async);
+  <T extends ExerciseShell> void getFullExercisesForSelectionState(Map<String, Collection<String>> typeToSection,
+                                                                   int start, int end, AsyncCallback<List<T>> async);
 
   void getGradeCountPerExercise(AsyncCallback<Map<Integer, Map<String, Map<String, Integer>>>> async);
 
