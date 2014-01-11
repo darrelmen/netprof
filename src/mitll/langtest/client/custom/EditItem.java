@@ -26,11 +26,13 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseAnnotation;
+import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -39,11 +41,10 @@ import java.util.Arrays;
  * Time: 4:58 PM
  * To change this template use File | Settings | File Templates.
  */
-public class EditItem {
+public class EditItem<T extends ExerciseShell> {
   private final ExerciseController controller;
   private LangTestDatabaseAsync service;
   private UserManager userManager;
-  //private PagingContainer<UserExercise> pagingContainer;
   private ListInterface predefinedContentList;
   private UserFeedback feedback = null;
 
@@ -62,34 +63,8 @@ public class EditItem {
     this.feedback = feedback;
   }
 
-  /**
-   * @see mitll.langtest.client.custom.Navigation#showEditItem(mitll.langtest.shared.custom.UserList, mitll.langtest.client.custom.Navigation.TabAndContent)
-   * @param ul
-   * @param itemMarker
-   * @return
-   */
-/*  public Panel editItemOld(final UserList ul, final HTML itemMarker) {
-    Panel hp = new HorizontalPanel();
-    SimplePanel pagerOnLeft = new SimplePanel();
-    hp.add(pagerOnLeft);
-    pagerOnLeft.addStyleName("rightFiveMargin");
-    final SimplePanel contentOnRight = new SimplePanel();
-    hp.add(contentOnRight);
-
-    pagingContainer = new PagingContainer<UserExercise>(controller, 100) {
-      @Override
-      protected void gotClickOnItem(UserExercise exerciseShell) {
-        showItem(exerciseShell, contentOnRight, ul, itemMarker);
-      }
-    };
-
-    pagerOnLeft.add(getPager(ul));
-    showInitialItem(ul, itemMarker, contentOnRight);
-    return hp;
-  }*/
-
   HTML itemMarker;
-  PagingExerciseList<UserExercise> exerciseList;
+  PagingExerciseList<T> exerciseList;
   public Panel editItem(final UserList ul, final HTML itemMarker) {
     Panel hp = new HorizontalPanel();
     SimplePanel pagerOnLeft = new SimplePanel();
@@ -98,26 +73,17 @@ public class EditItem {
     final SimplePanel contentOnRight = new SimplePanel();
     hp.add(contentOnRight);
 
-/*    pagingContainer = new PagingContainer<UserExercise>(controller, 100) {
-      @Override
-      protected void gotClickOnItem(UserExercise exerciseShell) {
-        showItem(exerciseShell, contentOnRight, ul, itemMarker);
-      }
-    };*/
-
-  //  pagerOnLeft.add(getPager(ul));
-
     this.itemMarker = itemMarker; // TODO : something less awkward
     exerciseList = makeExerciseList(contentOnRight, "editItem",ul);
     pagerOnLeft.add(exerciseList.getExerciseListOnLeftSide(controller.getProps()));
 
-    //showInitialItem(ul, itemMarker, contentOnRight);
     rememberAndLoadFirst(ul, exerciseList);
     return hp;
   }
 
-  private PagingExerciseList<UserExercise> makeExerciseList(Panel right, String instanceName,UserList ul) {
-    PagingExerciseList<UserExercise> exerciseList = new PagingExerciseList<UserExercise>(right, service, feedback, false, false, controller,
+  private PagingExerciseList<T> makeExerciseList(Panel right, String instanceName,UserList ul) {
+    PagingExerciseList<T> exerciseList =
+        new PagingExerciseList<T>(right, service, feedback, false, false, controller,
       true, instanceName) {
       @Override
       protected void onLastItem() {
@@ -133,8 +99,8 @@ public class EditItem {
     return exerciseList;
   }
 
-  protected void setFactory(final PagingExerciseList<UserExercise> exerciseList, final UserList ul) {
-    final PagingExerciseList<UserExercise> outer = exerciseList;
+  protected void setFactory(final PagingExerciseList<T> exerciseList, final UserList ul) {
+    final PagingExerciseList<T> outer = exerciseList;
     exerciseList.setFactory(new ExercisePanelFactory(service, feedback, controller, exerciseList) {
       @Override
       public Panel getExercisePanel(Exercise e) {
@@ -147,54 +113,18 @@ public class EditItem {
     },userManager,1);
   }
 
-  private void rememberAndLoadFirst(final UserList ul, PagingExerciseList<UserExercise> npfExerciseList) {
+  private void rememberAndLoadFirst(final UserList ul, PagingExerciseList<T> npfExerciseList) {
     npfExerciseList.setUserListID(ul.getUniqueID());
-    npfExerciseList.rememberAndLoadFirst(new ArrayList<UserExercise>(ul.getExercises()), null);
+    List<T> userExercises = new ArrayList<T>();
+    for (UserExercise e : ul.getExercises()) {
+       userExercises.add((T) e);  // TODO something better here
+    }
+    npfExerciseList.rememberAndLoadFirst(userExercises, null);
   }
 
-/*  private Panel getPager(UserList ul) {
-    Panel container = pagingContainer.getTableWithPager();
-    for (UserExercise es : ul.getExercises()) {
-       pagingContainer.addExerciseToList2(es);
-    }
-    pagingContainer.flush();
-    return container;
-  }*/
-
-/*  private void showInitialItem(UserList ul, HTML itemMarker, SimplePanel contentOnRight) {
-    UserExercise exerciseShell = pagingContainer.selectFirst();
-    if (exerciseShell == null) {
-      System.err.println("huh? nothing first?");
-      showPopup("No editable items yet.",contentOnRight);
-    }
-    else {
-      showItem(exerciseShell, contentOnRight, ul, itemMarker);
-    }
-  }*/
-
-/*  private void showItem(final UserExercise exerciseShell, final SimplePanel contentOnRight, final UserList ul, final HTML itemMarker) {
-    service.getExercise(exerciseShell.getID(), new AsyncCallback<Exercise>() {
-      @Override
-      public void onFailure(Throwable caught) {}
-
-      @Override
-      public void onSuccess(Exercise result) {
-        editItem(new UserExercise(result), contentOnRight, ul, itemMarker, exerciseShell);
-      }
-    });
-  }*/
-
-/*  private void editItem(final UserExercise exercise, SimplePanel right, UserList ul, HTML itemMarker,UserExercise exerciseShell) {
-    right.clear();
-
-    populatePanel(exercise, right, ul, itemMarker, exerciseShell);
-  }*/
-
   private void populatePanel(UserExercise exercise, Panel right, UserList ul, HTML itemMarker,
-                             //UserExercise exerciseShell,
-                             PagingContainer<UserExercise> pagingContainer) {
+                             PagingContainer<T> pagingContainer) {
     EditableExercise newUserExercise = new EditableExercise(itemMarker, exercise
-    //  , exerciseShell
     );
     right.add(newUserExercise.addNew(ul, pagingContainer, right));
     newUserExercise.setFields();
@@ -211,12 +141,11 @@ public class EditItem {
     t.schedule(3000);
   }
 
-  private class EditableExercise extends NewUserExercise<UserExercise> {
-    //UserExercise exerciseFromList;
+  private class EditableExercise extends NewUserExercise<T> {
     HTML englishAnno = new HTML();
     HTML translitAnno = new HTML();
     HTML foreignAnno = new HTML();
-    HTML fastAnno = new HTML();  // TODO add these
+    HTML fastAnno = new HTML();
     HTML slowAnno = new HTML();
     String originalForeign = "";
 
@@ -225,41 +154,42 @@ public class EditItem {
      * @param itemMarker
      * @param changedUserExercise
      */
-    public EditableExercise(HTML itemMarker, UserExercise changedUserExercise/*, UserExercise exerciseFromList*/) {
+    public EditableExercise(HTML itemMarker, UserExercise changedUserExercise) {
       super(EditItem.this.service, EditItem.this.userManager, EditItem.this.controller, itemMarker);
       this.newUserExercise = changedUserExercise;
-     // this.exerciseFromList = exerciseFromList;
       fastAnno.addStyleName("editComment");
       slowAnno.addStyleName("editComment");
     }
 
     /**
-     * TODO : consider relaxing restriction on type of pagingcontainer
      * @param ul
      * @param pagingContainer
      * @param toAddTo
      * @return
      */
     @Override
-    public Panel addNew(UserList ul, PagingContainer<UserExercise> pagingContainer, Panel toAddTo) {
-      Panel widgets = super.addNew(ul, pagingContainer, toAddTo);
-      UserExercise byID = pagingContainer.getByID(newUserExercise.getID());
-      System.out.println("addNew : Found " + byID);
-      widgets.add(new PrevNextList<UserExercise>(byID, exerciseList)); // TODO : dies here when we do prefix search!
+    public Panel addNew(UserList ul, PagingContainer<T> pagingContainer, Panel toAddTo) {
+      final Panel widgets = super.addNew(ul, pagingContainer, toAddTo);
+      final T exerciseShell = pagingContainer.getByID(newUserExercise.getID());
+      widgets.add(new PrevNextList<T>(exerciseShell, exerciseList));
+
+     // System.out.println("addNew : Found " + exerciseShell);
       return widgets;
     }
 
     /**
      *
+     *
      * @param container
+     * @param grabFocus
      * @return
      */
     @Override
-    protected Panel makeEnglishRow(Panel container) {
+    protected Panel makeEnglishRow(Panel container, boolean grabFocus) {
       FluidRow row = new FluidRow();
       container.add(row);
       english = makeBoxAndAnno(row, "English", englishAnno);
-      focusOnEnglish(english);
+      //focusOnEnglish(english);
       return row;
     }
 
@@ -311,18 +241,21 @@ public class EditItem {
 
     /**
      * TODO : check to see if the foreign language is valid before commiting change!
+     *
+     * TODO : add call on change to check if in the dictionary (or can be segmented)
+     * TODO : add done editing button, which when clicked, removes the entry from the list and clears the annotations
      * @param ul
      * @param pagingContainer
      * @param toAddTo
      */
     @Override
-    protected void onClick(final UserList ul, final PagingContainer<UserExercise> pagingContainer, Panel toAddTo) {
+    protected void onClick(final UserList ul, final PagingContainer<T> pagingContainer, Panel toAddTo) {
       System.out.println("onClick : editing " + newUserExercise);
 
       DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
         @Override
         public void gotYes() {
-          System.out.println("invalidate the audio...");
+          //System.out.println("invalidate the audio...");
 
           if (refAudioUnchanged()) {
             newUserExercise.clearRefAudio();
@@ -389,7 +322,7 @@ public class EditItem {
       return newUserExercise.getTransliteration().equals(originalTransliteration);
     }
 
-    private void reallyChange(final PagingContainer<UserExercise> pagingContainer) {
+    private void reallyChange(final PagingContainer<T> pagingContainer) {
       newUserExercise.setCreator(controller.getUser());
       service.editItem(newUserExercise, new AsyncCallback<Void>() {
         @Override
@@ -407,14 +340,14 @@ public class EditItem {
       });
     }
 
-    private void changeTooltip(PagingContainer<UserExercise> pagingContainer) {
-      UserExercise byID = pagingContainer.getByID(newUserExercise.getID());
+    private void changeTooltip(PagingContainer<T> pagingContainer) {
+      T byID = pagingContainer.getByID(newUserExercise.getID());
       if (byID == null) {
         System.err.println("huh? can't find exercise with id " +newUserExercise.getID());
       }
       else {
-        byID.setEnglish(newUserExercise.getEnglish());
-        byID.setForeignLanguage(newUserExercise.getForeignLanguage());
+        byID.setTooltip(newUserExercise.getEnglish());
+       // byID.setForeignLanguage(newUserExercise.getForeignLanguage());
         pagingContainer.refresh();   // show change to tooltip!
       }
     }
@@ -482,13 +415,4 @@ public class EditItem {
       annoField.setVisible(isIncorrect);
     }
   }
-
-/*
-  protected Label getCommentLabel() {
-    final Label commentLabel = new Label("comment : ");
-   // DOM.setStyleAttribute(commentLabel.getElement(), "backgroundColor", "#ff0000");
-    commentLabel.setVisible(true);
-   // commentLabel.addStyleName("ImageOverlay");
-    return commentLabel;
-  }*/
 }
