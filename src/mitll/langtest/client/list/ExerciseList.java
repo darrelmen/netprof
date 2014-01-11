@@ -299,7 +299,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     }
   }
 
-  protected boolean isStaleResponse(ExerciseListWrapper result) {
+  protected boolean isStaleResponse(ExerciseListWrapper<T> result) {
     return result.getReqID() < lastReqID;
   }
 
@@ -320,11 +320,10 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   }*/
 
   private void rememberExercise(T es) {
+    System.out.println("remember " + es + " class " +es.getClass());
     idToExercise.put(es.getID(),es);
     addExerciseToList(es);
   }
-
-  //public void setSelectionState(Map<String, Collection<String>> selectionState) {}
 
   @Override
   public void hideExerciseList() {
@@ -418,7 +417,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     return currentExercises.get(0);
   }
 
-  private ExerciseShell byID(String name) {
+  public ExerciseShell byID(String name) {
     return idToExercise == null ? null : idToExercise.get(name);
   }
 
