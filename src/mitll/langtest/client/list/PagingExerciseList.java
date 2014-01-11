@@ -135,7 +135,7 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
   }
 
   protected PagingContainer<T> makePagingContainer() {
-    final PagingExerciseList outer = this;
+    final PagingExerciseList<T> outer = this;
     PagingContainer<T> pagingContainer1 =
       new PagingContainer<T>(controller, getVerticalUnaccountedFor()) {
       @Override
