@@ -24,7 +24,7 @@ public class ExerciseTrie extends Trie<Exercise> {
   private static final int MB = (1024 * 1024);
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds(int, long, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds
    * @param exercisesForState
    * @param includeForeign
    */
@@ -58,7 +58,7 @@ public class ExerciseTrie extends Trie<Exercise> {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds(int, long, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesForSelectionState(int, java.util.Map, long, String)
    * @param prefix
    * @return
