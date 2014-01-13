@@ -108,7 +108,7 @@ public class HistoryExerciseList<T extends ExerciseShell> extends PagingExercise
   }
 
   /**
-   * @see #loadExercise(mitll.langtest.shared.ExerciseShell)
+   * @see ListInterface#loadExercise(mitll.langtest.shared.ExerciseShell)
    * @see #pushFirstSelection(String)
    * @param exerciseID
    */
