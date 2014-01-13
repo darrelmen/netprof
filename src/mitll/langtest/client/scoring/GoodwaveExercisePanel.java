@@ -36,6 +36,7 @@ import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.ExerciseShell;
 
 import java.util.Collection;
 import java.util.Date;
@@ -64,9 +65,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   protected final LangTestDatabaseAsync service;
   protected ScoreListener scorePanel;
   private AudioPanel contentAudio, answerAudio;
-  private NavigationHelper navigationHelper;
+  private NavigationHelper<Exercise> navigationHelper;
   private final float screenPortion;
-  String instance;
+  private String instance;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -79,7 +80,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * @param instance
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
    */
-  public GoodwaveExercisePanel(final Exercise e, final ExerciseController controller, final ListInterface listContainer,
+  public GoodwaveExercisePanel(final Exercise e, final ExerciseController controller,
+                               final ListInterface<Exercise> listContainer,
                                float screenPortion, boolean addKeyHandler, String instance) {
     this.exercise = e;
     this.controller = controller;
@@ -114,9 +116,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     }
     addUserRecorder(service, controller, center, screenPortion); // todo : revisit screen portion...
 
-    this.navigationHelper = new NavigationHelper(exercise, controller, new PostAnswerProvider() {
+    this.navigationHelper = new NavigationHelper<Exercise>(exercise, controller, new PostAnswerProvider/*<Exercise>*/() {
       @Override
-      public void postAnswers(ExerciseController controller, Exercise completedExercise) {
+      public void postAnswers(ExerciseController controller, ExerciseShell completedExercise) {
         nextWasPressed(listContainer, completedExercise);
       }
     }, listContainer, true, addKeyHandler);
@@ -136,8 +138,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     return widgets;
   }
 
-  protected void nextWasPressed(ListInterface listContainer, Exercise completedExercise) {
-    listContainer.loadNextExercise(completedExercise);
+  protected void nextWasPressed(ListInterface<? extends ExerciseShell> listContainer, ExerciseShell completedExercise) {
+   // T ref = completedExercise;
+    listContainer.loadNextExercise(completedExercise.getID());
   }
 
   protected void addQuestionContentRow(Exercise e, ExerciseController controller, Panel hp) {
