@@ -30,6 +30,7 @@ import mitll.langtest.client.flashcard.AudioExerciseContent;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.Result;
 
 import java.util.ArrayList;
@@ -50,7 +51,7 @@ import java.util.Set;
  * Time: 1:39 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ExercisePanel extends VerticalPanel implements
+public class ExercisePanel<T extends ExerciseShell> extends VerticalPanel implements
   BusyPanel, ExerciseQuestionState, PostAnswerProvider, ProvidesResize, RequiresResize {
   private static final String ANSWER_BOX_WIDTH = "400px";
   private static final String REPEAT_ONCE = "<i>Repeat the phrase once at normal speed.</i>";
@@ -73,13 +74,13 @@ public class ExercisePanel extends VerticalPanel implements
   protected UserFeedback feedback;
   protected NavigationHelper navigationHelper;
   protected Map<Integer,Set<Object>> indexToWidgets = new HashMap<Integer, Set<Object>>();
-  protected ListInterface exerciseList;
+  protected ListInterface<Exercise> exerciseList;
   private TabPanel tabPanel = null;
   private Map<Integer,Tab> indexToTab = new HashMap<Integer, Tab>();
 
   /**
    * @see ExercisePanelFactory#getExercisePanel
-   * @see mitll.langtest.client.list.ExerciseList#loadExercise
+   * @see mitll.langtest.client.list.ListInterface#loadExercise
    * @param e
    * @param service
    * @param userFeedback
@@ -87,7 +88,7 @@ public class ExercisePanel extends VerticalPanel implements
    * @param exerciseList
    */
   public ExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
-                       final ExerciseController controller, ListInterface exerciseList) {
+                       final ExerciseController controller, ListInterface<Exercise> exerciseList) {
     this.exercise = e;
     System.out.println("\n\nexercise is " + exercise.getID());
     this.controller = controller;
@@ -124,9 +125,19 @@ public class ExercisePanel extends VerticalPanel implements
     getElement().setId("ExercisePanel");
   }
 
-  protected NavigationHelper getNavigationHelper(ExerciseController controller) {
-    return new NavigationHelper(exercise,controller, this, exerciseList, true, true);
+  protected NavigationHelper<Exercise> getNavigationHelper(ExerciseController controller) {
+    return new NavigationHelper<Exercise>(exercise,controller, this, exerciseList, true, true);
   }
+
+  /**
+   *     final ExercisePanel<T> outer = this;
+   return new NavigationHelper<Exercise>(exercise,controller, new PostAnswerProvider<ExerciseShell>() {
+  @Override
+  public void postAnswers(ExerciseController controller, ExerciseShell completedExercise) {
+  outer.postAnswers(controller, completedExercise);
+  }
+  }, exerciseList, true, true);
+   */
 
   protected void addInstructions() {
     add(new Heading(4, "Read the following text and answer the question or questions below."));
@@ -392,7 +403,7 @@ public class ExercisePanel extends VerticalPanel implements
    * @param completedExercise
    */
   @Override
-  public void postAnswers(final ExerciseController controller, final Exercise completedExercise) {
+  public void postAnswers(final ExerciseController controller, final ExerciseShell completedExercise) {
     int i = 1;
     int user = controller.getUser();
     final Set<Widget> incomplete = new HashSet<Widget>();
@@ -419,7 +430,7 @@ public class ExercisePanel extends VerticalPanel implements
           public void onSuccess(Void result) {
             incomplete.remove(tb);
             if (incomplete.isEmpty()) {
-              exerciseList.loadNextExercise(completedExercise);
+              exerciseList.loadNextExercise(completedExercise.getID());
             }
           }
         }
