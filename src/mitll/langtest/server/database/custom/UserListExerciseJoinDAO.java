@@ -10,9 +10,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -125,7 +122,7 @@ public class UserListExerciseJoinDAO extends DAO {
     return Collections.emptyList();
   }*/
 
-  private List<String> getUserExercises(String sql, Set<String> exclude) throws SQLException {
+/*  private List<String> getUserExercises(String sql, Set<String> exclude) throws SQLException {
     Connection connection = database.getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
     ResultSet rs = statement.executeQuery();
@@ -140,5 +137,5 @@ public class UserListExerciseJoinDAO extends DAO {
     database.closeConnection(connection);
 
     return exercises;
-  }
+  }*/
 }
