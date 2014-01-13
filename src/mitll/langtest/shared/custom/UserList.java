@@ -125,9 +125,11 @@ public class UserList extends ExerciseShell {
     return getName().equals(MY_LIST);
   }
 
+/*
   public boolean isReview() {
     return isReview;
   }
+*/
 
   public void setReview(boolean isReview) {
     this.isReview = isReview;
