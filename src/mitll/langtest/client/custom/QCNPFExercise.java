@@ -20,6 +20,7 @@ import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseFormatter;
+import mitll.langtest.shared.ExerciseShell;
 
 import java.util.*;
 
@@ -35,7 +36,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   private String instance;
   private Set<String> incorrectSet = new HashSet<String>();
   private List<RequiresResize> toResize;
-  public QCNPFExercise(Exercise e, ExerciseController controller, ListInterface listContainer,
+  public QCNPFExercise(Exercise e, ExerciseController controller, ListInterface<Exercise> listContainer,
                        float screenPortion, boolean addKeyHandler, String instance) {
     super(e, controller, listContainer, screenPortion, addKeyHandler, instance);
     this.instance = instance;
@@ -51,7 +52,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   }
 
   @Override
-  protected void nextWasPressed(ListInterface listContainer, Exercise completedExercise) {
+  protected void nextWasPressed(ListInterface<? extends ExerciseShell> listContainer, ExerciseShell completedExercise) {
     //System.out.println("nextWasPressed : load next exercise " + completedExercise.getID() + " instance " +instance);
     super.nextWasPressed(listContainer, completedExercise);
     if (!instance.equals("review")) {
@@ -60,7 +61,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     }
   }
 
-  private void markReviewed(Exercise completedExercise) {
+  private void markReviewed(ExerciseShell completedExercise) {
     service.markReviewed(completedExercise.getID(), incorrectSet.isEmpty(), controller.getUser(),
       new AsyncCallback<Void>() {
         @Override
