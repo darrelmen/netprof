@@ -244,8 +244,15 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
   }
 
   @Override
-  protected void addExerciseToList(ExerciseShell exercise) {
+  protected void addExerciseToList(T exercise) {
     pagingContainer.addExerciseToList2(exercise);
+  }
+
+  @Override
+  public /*<S extends ExerciseShell>*/ void forgetExercise(T es) {
+    super.forgetExercise(es);
+
+    pagingContainer.forgetExercise(es);
   }
 
   @Override
