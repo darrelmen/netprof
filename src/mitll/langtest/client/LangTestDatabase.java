@@ -159,13 +159,21 @@ public interface LangTestDatabase extends RemoteService {
   Collection<UserList> getListsForUser(long userid, boolean onlyCreated, boolean getExercises);
   Collection<UserList> getUserListsForText(String search);
   void addItemToUserList(long userListID, UserExercise userExercise);
+
+  UserList getCommentedList();
+
   UserExercise createNewItem(long userid, String english, String foreign, String transliteration);
+
+  boolean isValidForeignPhrase(String foreign);
+
   UserExercise reallyCreateNewItem(long userListID, UserExercise userExercise);
 
   void editItem(UserExercise userExercise);
 
   void addAnnotation(String exerciseID, String field, String status, String comment, long userID);
   void markReviewed(String exid, boolean isCorrect, long creatorID);
+
+  void removeReviewed(String id);
 
   UserList getReviewList();
 }
