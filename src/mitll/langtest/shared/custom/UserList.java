@@ -85,6 +85,9 @@ public class UserList extends ExerciseShell {
     this.exercises = exercises;
   }
 
+  public boolean remove(UserExercise newUserExercise) {
+   return exercises.remove(newUserExercise);
+  }
   public User getCreator() {
     return creator;
   }
@@ -141,4 +144,5 @@ public class UserList extends ExerciseShell {
       " :"+
       " with " + getExercises().size() + " exercises.";
   }
+
 }
