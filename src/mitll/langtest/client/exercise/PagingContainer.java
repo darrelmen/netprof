@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.custom.UserExercise;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -87,6 +88,11 @@ public class PagingContainer<T extends ExerciseShell> {
       }
     }
     return null;
+  }
+
+  public /*<S extends ExerciseShell>*/ void forgetExercise(T es) {
+    getList().remove(es);
+    refresh();
   }
 
   public interface TableResources extends CellTable.Resources {
