@@ -1,10 +1,17 @@
 package mitll.langtest.client.custom;
 
+import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.TextBox;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
@@ -32,6 +39,7 @@ import mitll.langtest.shared.custom.UserList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -45,7 +53,7 @@ public class EditItem<T extends ExerciseShell> {
   private final ExerciseController controller;
   private LangTestDatabaseAsync service;
   private UserManager userManager;
-  private ListInterface predefinedContentList;
+  private ListInterface<T> predefinedContentList;
   private UserFeedback feedback = null;
 
   /**
@@ -55,7 +63,7 @@ public class EditItem<T extends ExerciseShell> {
    * @param controller
    */
   public EditItem(final LangTestDatabaseAsync service, final UserManager userManager, ExerciseController controller,
-                  ListInterface listInterface, UserFeedback feedback) {
+                  ListInterface<T> listInterface, UserFeedback feedback) {
     this.controller = controller;
     this.service = service;
     this.userManager = userManager;
@@ -63,8 +71,8 @@ public class EditItem<T extends ExerciseShell> {
     this.feedback = feedback;
   }
 
-  HTML itemMarker;
-  PagingExerciseList<T> exerciseList;
+  private HTML itemMarker;
+  private PagingExerciseList<T> exerciseList;
   public Panel editItem(final UserList ul, final HTML itemMarker) {
     Panel hp = new HorizontalPanel();
     SimplePanel pagerOnLeft = new SimplePanel();
@@ -105,9 +113,7 @@ public class EditItem<T extends ExerciseShell> {
       @Override
       public Panel getExercisePanel(Exercise e) {
         Panel panel = new SimplePanel();
-        populatePanel(new UserExercise(e),panel,ul,itemMarker,
-          //e,
-          outer.getPagingContainer());
+        populatePanel(new UserExercise(e),panel,ul,itemMarker, outer.getPagingContainer());
         return panel;
       }
     },userManager,1);
@@ -124,8 +130,7 @@ public class EditItem<T extends ExerciseShell> {
 
   private void populatePanel(UserExercise exercise, Panel right, UserList ul, HTML itemMarker,
                              PagingContainer<T> pagingContainer) {
-    EditableExercise newUserExercise = new EditableExercise(itemMarker, exercise
-    );
+    EditableExercise newUserExercise = new EditableExercise(itemMarker, exercise);
     right.add(newUserExercise.addNew(ul, pagingContainer, right));
     newUserExercise.setFields();
   }
@@ -160,6 +165,61 @@ public class EditItem<T extends ExerciseShell> {
       fastAnno.addStyleName("editComment");
       slowAnno.addStyleName("editComment");
     }
+
+    @Override
+    protected Panel getCreateButton(final UserList ul, final PagingContainer<T> pagingContainer, final Panel toAddTo, final ControlGroup normalSpeedRecording) {
+      if (!controller.isReviewMode()) {
+        return super.getCreateButton(ul, pagingContainer, toAddTo, normalSpeedRecording);
+      } else {
+        Button submit = makeCreateButton(ul, pagingContainer, toAddTo, english, foreignLang, rap, normalSpeedRecording);
+
+        Panel row = new DivWidget();
+        row.addStyleName("marginBottomTen");
+        row.add(submit);
+        submit.addStyleName("floatRight");
+
+        Button fixed = new Button("Fixed");
+        DOM.setStyleAttribute(fixed.getElement(), "marginRight", "5px");
+        fixed.setType(ButtonType.PRIMARY);
+        fixed.addStyleName("floatRight");
+
+        row.add(fixed);
+        fixed.addClickHandler(new ClickHandler() {
+          @Override
+          public void onClick(ClickEvent event) {
+            validateThenPost(english, foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo);
+
+           // clearAnnotations();
+            exerciseList.forgetExercise(exerciseList.byID(newUserExercise.getID()));
+            service.removeReviewed(newUserExercise.getID(), new AsyncCallback<Void>() {
+              @Override
+              public void onFailure(Throwable caught) {}
+
+              @Override
+              public void onSuccess(Void result) {}
+            });
+          }
+        });
+        return row;
+      }
+    }
+
+/*    private void clearAnnotations() {
+      for (String field : newUserExercise.getFields()) {
+        ExerciseAnnotation annotation1 = newUserExercise.getAnnotation(field);
+        if (!annotation1.isCorrect()) {
+          service.addAnnotation(newUserExercise.getID(), field, "correct", "fixed", controller.getUser(), new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+            }
+          });
+        }
+      }
+    }*/
 
     /**
      * @param ul
