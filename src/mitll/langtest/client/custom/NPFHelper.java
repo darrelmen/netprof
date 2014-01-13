@@ -15,6 +15,7 @@ import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
@@ -37,7 +38,7 @@ public class NPFHelper implements RequiresResize {
   private UserManager userManager;
 
   private UserFeedback feedback;
-  private PagingExerciseList npfExerciseList;
+  private PagingExerciseList<UserExercise> npfExerciseList;
   private SimplePanel npfContentPanel;
 
   public NPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager, ExerciseController controller) {
@@ -122,8 +123,8 @@ public class NPFHelper implements RequiresResize {
    * @param instanceName
    * @return
    */
-  private PagingExerciseList makeNPFExerciseList(Panel right, String instanceName) {
-    PagingExerciseList exerciseList = new PagingExerciseList(right, service, feedback, false, false, controller,
+  private PagingExerciseList<UserExercise> makeNPFExerciseList(Panel right, String instanceName) {
+    PagingExerciseList<UserExercise> exerciseList = new PagingExerciseList<UserExercise>(right, service, feedback, false, false, controller,
       true, instanceName) {
       @Override
       protected void onLastItem() {
@@ -139,7 +140,7 @@ public class NPFHelper implements RequiresResize {
     return exerciseList;
   }
 
-  protected void setFactory(final PagingExerciseList exerciseList, final String instanceName) {
+  protected void setFactory(final PagingExerciseList<UserExercise> exerciseList, final String instanceName) {
     exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, feedback, controller, exerciseList, 1.0f) {
       @Override
       public Panel getExercisePanel(Exercise e) {
