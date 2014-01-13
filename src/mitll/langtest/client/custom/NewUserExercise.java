@@ -71,7 +71,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   }
 
   /**
-   * @see #onClick(mitll.langtest.shared.custom.UserList, mitll.langtest.client.exercise.PagingContainer, com.google.gwt.user.client.ui.Panel)
+   * @see #onClick
    * @param ul
    * @param pagingContainer
    * @param toAddTo
@@ -95,7 +95,12 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     rap.setOtherRAP(rapSlow.getPostAudioButton());
     rapSlow.setOtherRAP(rap.getPostAudioButton());
 
-    Panel column = getCreateButton(ul, pagingContainer, toAddTo, normalSpeedRecording);
+    Panel column = getCreateButton(ul, pagingContainer, toAddTo, normalSpeedRecording, new WillChangeListener() {
+      @Override
+      public void afterChange() {
+
+      }
+    });
     row.add(column);
 
     return container;
@@ -142,8 +147,9 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     });
   }
 
-  protected Panel getCreateButton(UserList ul, PagingContainer<T> pagingContainer, Panel toAddTo, ControlGroup normalSpeedRecording) {
-    Button submit = makeCreateButton(ul, pagingContainer, toAddTo, english, foreignLang, rap, normalSpeedRecording);
+  protected Panel getCreateButton(UserList ul, PagingContainer<T> pagingContainer, Panel toAddTo, ControlGroup normalSpeedRecording
+    , final WillChangeListener afterChange) {
+    Button submit = makeCreateButton(ul, pagingContainer, toAddTo, english, foreignLang, rap, normalSpeedRecording,afterChange);
     DOM.setStyleAttribute(submit.getElement(), "marginBottom", "5px");
     DOM.setStyleAttribute(submit.getElement(), "marginRight", "15px");
 
@@ -154,7 +160,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
 
   protected Button makeCreateButton(final UserList ul, final PagingContainer<T> pagingContainer, final Panel toAddTo,
                                   final FormField english, final FormField foreignLang,
-                                  final RecordAudioPanel rap, final ControlGroup normalSpeedRecording) {
+                                  final RecordAudioPanel rap, final ControlGroup normalSpeedRecording, final WillChangeListener afterChange) {
     submit = new Button("Create");
     submit.setType(ButtonType.SUCCESS);
     submit.addClickHandler(new ClickHandler() {
@@ -162,29 +168,35 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
       public void onClick(ClickEvent event) {
         //System.out.println("makeCreateButton : creating new item for " + english + " " + foreignLang);
 
-        validateThenPost(english, foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo);
+        validateThenPost(english, foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo,afterChange);
       }
     });
     submit.addStyleName("rightFiveMargin");
     return submit;
   }
 
-  protected void validateThenPost(FormField english, FormField foreignLang, RecordAudioPanel rap, ControlGroup normalSpeedRecording, UserList ul, PagingContainer<T> pagingContainer, Panel toAddTo) {
+  protected void validateThenPost(FormField english, FormField foreignLang, RecordAudioPanel rap,
+                                  ControlGroup normalSpeedRecording, UserList ul, PagingContainer<T> pagingContainer,
+                                  Panel toAddTo, WillChangeListener afterChange) {
     if (validateForm(english, foreignLang, rap, normalSpeedRecording)) {
-      createButtonClicked(english, foreignLang, ul, pagingContainer, toAddTo);
+      createButtonClicked(english, foreignLang, ul, pagingContainer, toAddTo, afterChange);
+    }
+    else {
+      System.out.println("Form invalid!!!\\n\n\n");
     }
   }
 
   private void createButtonClicked(FormField english, FormField foreignLang, UserList ul,
-                                   PagingContainer<T> pagingContainer, Panel toAddTo) {
+                                   PagingContainer<T> pagingContainer, Panel toAddTo, WillChangeListener afterChange) {
     newUserExercise.setEnglish(english.getText());
     newUserExercise.setForeignLanguage(foreignLang.getText());
     newUserExercise.setTransliteration(translit.getText());
 
-    onClick(ul, pagingContainer, toAddTo);
+    onClick(ul, pagingContainer, toAddTo, true, afterChange);
   }
 
-  protected void onClick(final UserList ul, final PagingContainer<T> pagingContainer, final Panel toAddTo) {
+  protected void onClick(final UserList ul, final PagingContainer<T> pagingContainer, final Panel toAddTo, boolean showFeedback,
+                         final WillChangeListener afterChange) {
     System.out.println("onClick : adding " + newUserExercise + " to " +ul);
 
     service.reallyCreateNewItem(ul.getUniqueID(), newUserExercise, new AsyncCallback<UserExercise>() {
@@ -193,6 +205,8 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
 
       @Override
       public void onSuccess(UserExercise newExercise) {
+        System.out.println("\tonClick : adding " + newUserExercise + " to " +ul);
+
         ul.addExercise(newExercise);
         itemMarker.setText(ul.getExercises().size() + " items");
         pagingContainer.addAndFlush(newExercise);
@@ -201,6 +215,11 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
         newUserExercise = null;
       }
     });
+  }
+
+
+  public static interface WillChangeListener {
+    void afterChange();
   }
 
   protected CreateFirstRecordAudioPanel makeRecordAudioPanel(final FluidRow row, final FormField english,
