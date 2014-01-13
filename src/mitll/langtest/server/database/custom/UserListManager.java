@@ -179,12 +179,12 @@ public class UserListManager {
 
     List<UserExercise> onList = getReviewedUserExercises(idToUser);
 
-    logger.debug("getReviewList ids #=" + incorrect.size() + " yielded " + onList.size());
+    logger.debug("getReviewList ids #=" + allKnown.size() + " yielded " + onList.size());
 
    // String name = "Review";
     // String description = "Items to review";
-    UserList userList = new UserList(Long.MAX_VALUE, new User(-1,89,0,0,"","",false),
-      name, description, name, false);
+    User user = new User(-1, 89, 0, 0, "", "", false);
+    UserList userList = new UserList(Long.MAX_VALUE, user, name, description, name, false);
     userList.setReview(true);
     userList.setExercises(onList);
     return userList;
@@ -277,7 +277,7 @@ public class UserListManager {
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#editItem(mitll.langtest.shared.custom.UserExercise)
-   * @see mitll.langtest.client.custom.EditItem.EditableExercise#onClick(mitll.langtest.shared.custom.UserList, mitll.langtest.client.exercise.PagingContainer, com.google.gwt.user.client.ui.Panel
+   * @see mitll.langtest.client.custom.NewUserExercise#onClick(mitll.langtest.shared.custom.UserList, mitll.langtest.client.exercise.PagingContainer, com.google.gwt.user.client.ui.Panel, boolean)
    *
    * @param userExercise
    * @param createIfDoesntExist
@@ -371,7 +371,7 @@ public class UserListManager {
   }
 
   public void addAnnotation(String exerciseID, String field, String status, String comment, long userID) {
-    //logger.info("addAnnotation write to database! " +exerciseID + " " + field + " " + status + " " + comment);
+    logger.info("addAnnotation write to database! " +exerciseID + " " + field + " " + status + " " + comment);
     annotationDAO.add(new UserAnnotation(-1,exerciseID, field, status, comment, userID,System.currentTimeMillis()));
 
     if (status.equalsIgnoreCase("incorrect")) {
@@ -417,11 +417,18 @@ public class UserListManager {
     reviewedDAO.remove(exerciseid);
 
     if (toRemove.isEmpty()) {
-      logger.error("huh? couldn't find " + exerciseid);
+      logger.error("removeReviewed couldn't find " + exerciseid);
+      if (incorrect.contains(exerciseid)) {
+        incorrect.remove(exerciseid);
+        logger.debug("now " + incorrect.size() + " commented items.");
+      }
     }
     else {
       UserExercise newUserExercise = toRemove.get(0);
-      for (String field : newUserExercise.getFields()) {
+      Collection<String> fields = newUserExercise.getFields();
+      logger.debug("removeReviewed " + newUserExercise  + "  has " + fields);
+
+      for (String field : fields) {
         ExerciseAnnotation annotation1 = newUserExercise.getAnnotation(field);
         if (!annotation1.isCorrect()) {
           addAnnotation(newUserExercise.getID(), field, "correct", "fixed", newUserExercise.getCreator());
