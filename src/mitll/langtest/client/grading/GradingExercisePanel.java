@@ -15,6 +15,7 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.result.ResultManager;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.grade.ResultsAndGrades;
@@ -51,7 +52,7 @@ public class GradingExercisePanel extends ExercisePanel {
    * @param listContainer
    */
   public GradingExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
-                              final ExerciseController controller, ListInterface listContainer) {
+                              final ExerciseController controller, ListInterface<Exercise> listContainer) {
     super(e,service,userFeedback,controller, listContainer);
     this.userFeedback = userFeedback;
     enableNextButton(true);
@@ -100,7 +101,7 @@ public class GradingExercisePanel extends ExercisePanel {
    * <br></br>
    * Uses a result manager table (simple pager).  {@link mitll.langtest.client.result.ResultManager#getTable}<br></br>
    * If the controller says this is an English only grading mode, then only show english answers.
-   * @see ExercisePanel#ExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.exercise.ListInterface)
+   * @see ExercisePanel#ExercisePanel
    * @param exercise
    * @param service
    * @param controller
@@ -256,13 +257,13 @@ public class GradingExercisePanel extends ExercisePanel {
    * @param completedExercise
    */
   @Override
-  public void postAnswers(ExerciseController controller, Exercise completedExercise) {
+  public void postAnswers(ExerciseController controller, ExerciseShell completedExercise) {
     exerciseList.loadNextExercise(completedExercise);
   }
 
   @Override
-  protected NavigationHelper getNavigationHelper(ExerciseController controller) {
-    return new NavigationHelper(exercise,controller, this, exerciseList, true, true) {
+  protected NavigationHelper<Exercise> getNavigationHelper(ExerciseController controller) {
+    return new NavigationHelper<Exercise>(exercise,controller, this, exerciseList, true, true) {
       @Override
       protected String getNextButtonText() {
         return "Next Ungraded";
