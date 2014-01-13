@@ -155,7 +155,7 @@ public class ExcelImport implements ExerciseDAO {
     //logger.debug("\taddOverlay at " +userExercise.getID() + " found " +exercise);
 
     if (exercise == null) {
-      logger.error("huh? can't find " + userExercise);
+      logger.error("addOverlay : huh? can't find " + userExercise);
     }
     else {
       Exercise over = userExercise.toExercise();
