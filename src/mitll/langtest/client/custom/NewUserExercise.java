@@ -95,7 +95,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     rap.setOtherRAP(rapSlow.getPostAudioButton());
     rapSlow.setOtherRAP(rap.getPostAudioButton());
 
-    Column column = getCreateButton(ul, pagingContainer, toAddTo, normalSpeedRecording);
+    Panel column = getCreateButton(ul, pagingContainer, toAddTo, normalSpeedRecording);
     row.add(column);
 
     return container;
@@ -142,7 +142,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     });
   }
 
-  private Column getCreateButton(UserList ul, PagingContainer<T> pagingContainer, Panel toAddTo, ControlGroup normalSpeedRecording) {
+  protected Panel getCreateButton(UserList ul, PagingContainer<T> pagingContainer, Panel toAddTo, ControlGroup normalSpeedRecording) {
     Button submit = makeCreateButton(ul, pagingContainer, toAddTo, english, foreignLang, rap, normalSpeedRecording);
     DOM.setStyleAttribute(submit.getElement(), "marginBottom", "5px");
     DOM.setStyleAttribute(submit.getElement(), "marginRight", "15px");
@@ -152,7 +152,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     return column;
   }
 
-  private Button makeCreateButton(final UserList ul, final PagingContainer<T> pagingContainer, final Panel toAddTo,
+  protected Button makeCreateButton(final UserList ul, final PagingContainer<T> pagingContainer, final Panel toAddTo,
                                   final FormField english, final FormField foreignLang,
                                   final RecordAudioPanel rap, final ControlGroup normalSpeedRecording) {
     submit = new Button("Create");
@@ -162,13 +162,17 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
       public void onClick(ClickEvent event) {
         //System.out.println("makeCreateButton : creating new item for " + english + " " + foreignLang);
 
-        if (validateForm(english, foreignLang, rap, normalSpeedRecording)) {
-          createButtonClicked(english, foreignLang, ul, pagingContainer, toAddTo);
-        }
+        validateThenPost(english, foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo);
       }
     });
     submit.addStyleName("rightFiveMargin");
     return submit;
+  }
+
+  protected void validateThenPost(FormField english, FormField foreignLang, RecordAudioPanel rap, ControlGroup normalSpeedRecording, UserList ul, PagingContainer<T> pagingContainer, Panel toAddTo) {
+    if (validateForm(english, foreignLang, rap, normalSpeedRecording)) {
+      createButtonClicked(english, foreignLang, ul, pagingContainer, toAddTo);
+    }
   }
 
   private void createButtonClicked(FormField english, FormField foreignLang, UserList ul,
