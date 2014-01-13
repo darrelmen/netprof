@@ -111,6 +111,8 @@ public class ReviewedDAO extends DAO {
 
   public void remove(String exerciseID) {
     try {
+      int before = getCount();
+
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement(
         "DELETE FROM " + REVIEWED +
@@ -133,7 +135,9 @@ public class ReviewedDAO extends DAO {
       statement.close();
       database.closeConnection(connection);
 
-      logger.debug("now " + getCount() + " reviewed");
+      int count = getCount();
+      logger.debug("now " + count + " reviewed");
+      if (count-before != 1) logger.error("ReviewedDAO : huh? there were " +before +" before");
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
