@@ -8,6 +8,7 @@ import mitll.langtest.client.exercise.ExercisePanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.ExerciseShell;
 
 /**
  * Mainly delegates recording to the {@link SimpleRecordPanel}.
@@ -26,7 +27,7 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
    * @param exerciseList
    */
   public SimpleRecordExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
-                                   final ExerciseController controller, ListInterface exerciseList) {
+                                   final ExerciseController controller, ListInterface<Exercise> exerciseList) {
     super(e,service,userFeedback,controller, exerciseList);
   }
 
@@ -34,7 +35,7 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
    * Has a answerPanel mark to indicate when the saved audio has been successfully posted to the server.
    *
    *
-   * @see mitll.langtest.client.exercise.ExercisePanel#ExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.exercise.ListInterface)
+   * @see mitll.langtest.client.exercise.ExercisePanel#ExercisePanel
    * @param exercise
    * @param service
    * @param controller
@@ -71,7 +72,7 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
    * @param completedExercise
    */
   @Override
-  public void postAnswers(ExerciseController controller, Exercise completedExercise) {
+  public void postAnswers(ExerciseController controller, ExerciseShell completedExercise) {
     exerciseList.loadNextExercise(completedExercise);
   }
 }
