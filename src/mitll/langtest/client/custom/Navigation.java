@@ -45,9 +45,11 @@ import java.util.Map;
  */
 public class Navigation implements RequiresResize {
   private static final String CHAPTERS = "Chapters";
-  private static final boolean SHOW_CREATED = false;
+  //private static final boolean SHOW_CREATED = false;
   private static final String YOUR_LISTS = "Your Lists";
-  public static final String PRACTICE = "Practice";
+  private static final String PRACTICE = "Practice";
+  private static final String REVIEW = "review";
+  private static final String COMMENT = "comment";
   private final ExerciseController controller;
   private LangTestDatabaseAsync service;
   private UserManager userManager;
@@ -57,7 +59,7 @@ public class Navigation implements RequiresResize {
   private ListInterface listInterface;
   private NPFHelper npfHelper;
   private NPFHelper avpHelper;
-  private EditItem editItem;
+  private EditItem<? extends ExerciseShell> editItem;
 
   public Navigation(final LangTestDatabaseAsync service, final UserManager userManager,
                     final ExerciseController controller, final ListInterface listInterface,UserFeedback feedback) {
@@ -67,7 +69,7 @@ public class Navigation implements RequiresResize {
     this.listInterface = listInterface;
     npfHelper = new NPFHelper(service, feedback, userManager, controller);
     avpHelper = new AVPHelper(service, feedback, userManager, controller);
-    editItem = new EditItem(service,userManager,controller, listInterface, feedback);
+    editItem = new EditItem<UserExercise>(service,userManager,controller, listInterface, feedback);
   }
 
   /**
@@ -93,7 +95,7 @@ public class Navigation implements RequiresResize {
   private Tab yourItems;
   private Panel yourItemsContent;
   private TabAndContent browse;
-  private TabAndContent review;
+  private TabAndContent review, commented;
 
   private Panel getButtonRow2(Panel secondAndThird) {
     tabPanel = new TabPanel();
@@ -139,6 +141,14 @@ public class Navigation implements RequiresResize {
         @Override
         public void onClick(ClickEvent event) {
           viewReview(review.content);
+        }
+      });
+
+      commented = makeTab(tabPanel, IconType.COMMENT, "Comments");
+      commented.tab.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          viewComments(commented.content);
         }
       });
     }
@@ -291,7 +301,7 @@ public class Navigation implements RequiresResize {
     final Panel child = new DivWidget();
     contentPanel.add(child);
     child.addStyleName("exerciseBackground");
-    //System.out.println("\nviewReview : reviewLessons for " + userManager.getUser());
+     System.out.println("\tviewReview : reviewLessons for " + userManager.getUser());
     service.getReviewList(new AsyncCallback<UserList>() {
       @Override
       public void onFailure(Throwable caught) {}
@@ -300,7 +310,29 @@ public class Navigation implements RequiresResize {
       public void onSuccess(UserList result) {
         System.out.println("\tviewReview : reviewLessons for " + userManager.getUser() + " got " + result);
 
-        new UserListCallback(contentPanel, child, new ScrollPanel(), "review").onSuccess(Collections.singleton(result));
+        new UserListCallback(contentPanel, child, new ScrollPanel(), REVIEW).onSuccess(Collections.singleton(result));
+      }
+    });
+  }
+
+  private void viewComments(final Panel contentPanel) {
+    contentPanel.clear();
+    contentPanel.getElement().setId("commentReview_contentPanel");
+
+    final Panel child = new DivWidget();
+    contentPanel.add(child);
+    child.addStyleName("exerciseBackground");
+    //System.out.println("\nviewReview : reviewLessons for " + userManager.getUser());
+    service.getCommentedList(new AsyncCallback<UserList>() {
+      @Override
+      public void onFailure(Throwable caught) {
+      }
+
+      @Override
+      public void onSuccess(UserList result) {
+        System.out.println("\tviewComments : commented for " + userManager.getUser() + " got " + result);
+
+        new UserListCallback(contentPanel, child, new ScrollPanel(), COMMENT).onSuccess(Collections.singleton(result));
       }
     });
   }
@@ -344,7 +376,7 @@ public class Navigation implements RequiresResize {
     itemMarker.addStyleName("subtitleForeground");
     r1.add(new Column(3, itemMarker));
 
-    boolean created = createdByYou(ul) || instanceName.equals("review");
+    boolean created = createdByYou(ul) || instanceName.equals(REVIEW) || instanceName.equals(COMMENT);
 /*    if (created && SHOW_CREATED) {
       child = new FluidRow();
       container.add(child);
@@ -370,20 +402,22 @@ public class Navigation implements RequiresResize {
   private Panel getListOperations(final UserList ul, final boolean created, final String instanceName) {
     final TabPanel tabPanel = new TabPanel();
     System.out.println("getListOperations : '" + instanceName + " for list " +ul);
-    final boolean isReview = instanceName.equals("review");
+    final boolean isReview = instanceName.equals(REVIEW);
+    final boolean isComment = instanceName.equals(COMMENT);
+    final String instanceName1 = isReview ? REVIEW : isComment ? COMMENT : "learn";
 
     // add learn tab
-    String learnTitle = isReview ? "Items to review" : "Learn Pronunciation";
-    final TabAndContent learn = makeTab(tabPanel, IconType.LIGHTBULB, learnTitle);
+    String learnTitle = isReview ? "Items to review" : isComment ? "Items with comments":"Learn Pronunciation";
+    final TabAndContent learn = makeTab(tabPanel, isReview ? IconType.EDIT_SIGN : IconType.LIGHTBULB, learnTitle);
     learn.tab.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        npfHelper.showNPF(ul, learn, isReview ? "review" : "learn");
+        npfHelper.showNPF(ul, learn, instanceName1);
       }
     });
 
     // add practice tab
-    if (!isReview) {
+    if (!isReview && !isComment) {
       final TabAndContent practice = makeTab(tabPanel, IconType.CHECK, PRACTICE);
       practice.tab.addClickHandler(new ClickHandler() {
         @Override
@@ -395,7 +429,7 @@ public class Navigation implements RequiresResize {
     // add add item and edit tabs (conditionally)
     TabAndContent addItem = null;
     if (created && !ul.isPrivate()) {
-      if (!isReview) {
+      if (!isReview && !isComment) {
         addItem = makeTab(tabPanel, IconType.PLUS_SIGN, "Add Item");
         final TabAndContent finalAddItem = addItem;
         addItem.tab.addClickHandler(new ClickHandler() {
@@ -415,7 +449,7 @@ public class Navigation implements RequiresResize {
       });
     }
 
-    // select the initial tab -- either add if an empt
+    // select the initial tab -- either add if an empty
     final TabAndContent finalAddItem = addItem;
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
@@ -424,7 +458,7 @@ public class Navigation implements RequiresResize {
           showAddItem(ul, finalAddItem);
         } else {
           tabPanel.selectTab(0);
-          npfHelper.showNPF(ul, learn, isReview ? "review" : "learn");
+          npfHelper.showNPF(ul, learn, instanceName1);
         }
       }
     });
@@ -445,7 +479,7 @@ public class Navigation implements RequiresResize {
    */
   private void showEditItem(UserList ul, TabAndContent addItem) {
     addItem.content.clear();
-    System.out.println("\tshowEditItem for " +ul);
+    //System.out.println("\tshowEditItem for " +ul);
     Panel widgets = editItem.editItem(ul, listToMarker.get(ul));
     addItem.content.add(widgets);
   }
