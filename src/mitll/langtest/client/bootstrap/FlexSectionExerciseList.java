@@ -50,6 +50,7 @@ public class FlexSectionExerciseList<T extends ExerciseShell> extends HistoryExe
  // public static final int PANEL_INSIDE_SCROLL_MIN_HEIGHT = 50;
  // public static final int PANEL_INSIDE_SCROLL_MIN_HEIGHT_SMALL = 30;
   private static final int UNACCOUNTED_WIDTH = 150;
+  public static final int VERTICAL_DEFAULT = 160;
 
   private final List<ButtonType> buttonTypes = new ArrayList<ButtonType>();
   private Map<String, ButtonType> typeToButton = new HashMap<String, ButtonType>();
@@ -92,7 +93,7 @@ public class FlexSectionExerciseList<T extends ExerciseShell> extends HistoryExe
     buttonTypes.add(ButtonType.SUCCESS);
     buttonTypes.add(ButtonType.INFO);
     buttonTypes.add(ButtonType.WARNING);
-    setUnaccountedForVertical(160);
+    setUnaccountedForVertical(controller.getProps().isClassroomMode() ? 250: VERTICAL_DEFAULT);
   }
 
   @Override
