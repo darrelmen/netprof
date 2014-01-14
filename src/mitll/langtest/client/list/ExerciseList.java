@@ -102,11 +102,11 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     this.allowPlusInURL = controller.getProps().shouldAllowPlusInURL();
     this.controller = controller;
     this.instance = instance;
-
-    System.out.println("ExerciseList : got instance  " + instance);
+    getElement().setId("ExerciseList");
+    //System.out.println("ExerciseList : got instance  " + instance);
 
     // Add history listener
-     handlerRegistration = History.addValueChangeHandler(this);
+    handlerRegistration = History.addValueChangeHandler(this);
   }
 
   private HandlerRegistration handlerRegistration;
