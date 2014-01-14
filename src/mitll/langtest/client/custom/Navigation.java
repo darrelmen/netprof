@@ -77,7 +77,7 @@ public class Navigation implements RequiresResize {
 
   /**
    * @return
-   * @paramx thirdRow
+   * @param secondAndThird
    * @see mitll.langtest.client.LangTest#onModuleLoad2
    */
   public Widget getNav(final Panel secondAndThird) {
