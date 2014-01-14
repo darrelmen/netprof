@@ -1026,7 +1026,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.custom.QCNPFExercise#markReviewed(mitll.langtest.shared.Exercise)
+   * @see mitll.langtest.client.custom.QCNPFExercise#markReviewed
    * @param id
    * @param isCorrect
    * @param creatorID
@@ -1060,7 +1060,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public UserExercise createNewItem(long userid, String english, String foreign, String transliteration) {
     logger.debug("create new item - " + foreign);
-    if (!isValidForeignPhrase(foreign)) return null;
+   // if (!isValidForeignPhrase(foreign)) return null;
     return db.getUserListManager().createNewItem(userid, english, foreign, transliteration);
   }
 
