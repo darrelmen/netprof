@@ -277,7 +277,7 @@ public class UserListManager {
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#editItem(mitll.langtest.shared.custom.UserExercise)
-   * @see mitll.langtest.client.custom.NewUserExercise#onClick(mitll.langtest.shared.custom.UserList, mitll.langtest.client.exercise.PagingContainer, com.google.gwt.user.client.ui.Panel, boolean)
+   * @see mitll.langtest.client.custom.NewUserExercise#onClick
    *
    * @param userExercise
    * @param createIfDoesntExist
@@ -398,7 +398,7 @@ public class UserListManager {
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#markReviewed
    * @see #addAnnotation(String, String, String, String, long)
-   * @see mitll.langtest.client.custom.QCNPFExercise#markReviewed(mitll.langtest.shared.Exercise)
+   * @see mitll.langtest.client.custom.QCNPFExercise#markReviewed
    * @param id
    * @param creatorID
    */
@@ -427,10 +427,12 @@ public class UserListManager {
       UserExercise newUserExercise = toRemove.get(0);
       Collection<String> fields = newUserExercise.getFields();
       logger.debug("removeReviewed " + newUserExercise  + "  has " + fields);
-
+      addAnnotations(newUserExercise);
       for (String field : fields) {
         ExerciseAnnotation annotation1 = newUserExercise.getAnnotation(field);
         if (!annotation1.isCorrect()) {
+          logger.debug("\tremoveReviewed " + newUserExercise.getID()  + "  has " + annotation1);
+
           addAnnotation(newUserExercise.getID(), field, "correct", "fixed", newUserExercise.getCreator());
         }
       }
@@ -445,10 +447,8 @@ public class UserListManager {
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#markReviewed(String, boolean, long)
-   * @see mitll.langtest.client.custom.QCNPFExercise#markReviewed(mitll.langtest.shared.Exercise)
+   * @see mitll.langtest.client.custom.QCNPFExercise#markReviewed
    * @param id
    */
-  public void markIncorrect(String id) {
-    incorrect.add(id);
-  }
+  public void markIncorrect(String id) { incorrect.add(id);  }
 }
