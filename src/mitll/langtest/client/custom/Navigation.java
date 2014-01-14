@@ -56,20 +56,23 @@ public class Navigation implements RequiresResize {
   private long userListID;
 
   private ScrollPanel listScrollPanel;
-  private ListInterface listInterface;
+  private ListInterface<? extends ExerciseShell> listInterface;
   private NPFHelper npfHelper;
   private NPFHelper avpHelper;
   private EditItem<? extends ExerciseShell> editItem;
+  private EditItem<? extends ExerciseShell> reviewItem;
 
   public Navigation(final LangTestDatabaseAsync service, final UserManager userManager,
-                    final ExerciseController controller, final ListInterface listInterface,UserFeedback feedback) {
+                    final ExerciseController controller, final ListInterface<? extends ExerciseShell> listInterface,
+                    UserFeedback feedback) {
     this.service = service;
     this.userManager = userManager;
     this.controller = controller;
     this.listInterface = listInterface;
     npfHelper = new NPFHelper(service, feedback, userManager, controller);
     avpHelper = new AVPHelper(service, feedback, userManager, controller);
-    editItem = new EditItem<UserExercise>(service,userManager,controller, listInterface, feedback);
+    editItem = new EditItem<UserExercise>(service, userManager, controller, listInterface, feedback);
+    reviewItem = new ReviewEditItem<UserExercise>(service, userManager, controller, listInterface, feedback);
   }
 
   /**
@@ -97,6 +100,11 @@ public class Navigation implements RequiresResize {
   private TabAndContent browse;
   private TabAndContent review, commented;
 
+  /**
+   * @see #getNav(com.google.gwt.user.client.ui.Panel)
+   * @param secondAndThird
+   * @return
+   */
   private Panel getButtonRow2(Panel secondAndThird) {
     tabPanel = new TabPanel();
 
@@ -444,7 +452,7 @@ public class Navigation implements RequiresResize {
       edit.tab.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          showEditItem(ul, edit);
+          showEditItem(ul, edit, (isReview || isComment) ? reviewItem : editItem);
         }
       });
     }
@@ -477,9 +485,8 @@ public class Navigation implements RequiresResize {
    * @param ul
    * @param addItem
    */
-  private void showEditItem(UserList ul, TabAndContent addItem) {
+  private void showEditItem(UserList ul, TabAndContent addItem, EditItem<? extends ExerciseShell> editItem) {
     addItem.content.clear();
-    //System.out.println("\tshowEditItem for " +ul);
     Panel widgets = editItem.editItem(ul, listToMarker.get(ul));
     addItem.content.add(widgets);
   }
