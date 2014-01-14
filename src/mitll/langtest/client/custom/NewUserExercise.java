@@ -43,9 +43,10 @@ import mitll.langtest.shared.custom.UserList;
  */
 public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   public static final String FOREIGN_LANGUAGE = "Foreign Language";
+  public static final String CREATE = "Create";
   protected UserExercise newUserExercise = null;
   private final ExerciseController controller;
-  private LangTestDatabaseAsync service;
+  protected LangTestDatabaseAsync service;
   private UserManager userManager;
   private HTML itemMarker;
   protected BasicDialog.FormField english;
@@ -95,15 +96,14 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     rap.setOtherRAP(rapSlow.getPostAudioButton());
     rapSlow.setOtherRAP(rap.getPostAudioButton());
 
-    Panel column = getCreateButton(ul, pagingContainer, toAddTo, normalSpeedRecording, new WillChangeListener() {
-      @Override
-      public void afterChange() {
-
-      }
-    });
+    Panel column = getCreateButton(ul, pagingContainer, toAddTo, normalSpeedRecording, getButtonName());
     row.add(column);
 
     return container;
+  }
+
+  protected String getButtonName() {
+    return CREATE;
   }
 
   protected void makeSlowAudioPanel(FluidRow row) {
@@ -147,9 +147,19 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     });
   }
 
-  protected Panel getCreateButton(UserList ul, PagingContainer<T> pagingContainer, Panel toAddTo, ControlGroup normalSpeedRecording
-    , final WillChangeListener afterChange) {
-    Button submit = makeCreateButton(ul, pagingContainer, toAddTo, english, foreignLang, rap, normalSpeedRecording,afterChange);
+  /**
+   * @see #addNew
+   * @param ul
+   * @param pagingContainer
+   * @param toAddTo
+   * @param normalSpeedRecording
+   * @return
+   */
+  protected Panel getCreateButton(UserList ul, PagingContainer<T> pagingContainer, Panel toAddTo,
+                                  ControlGroup normalSpeedRecording, String buttonName
+   ) {
+    Button submit = makeCreateButton(ul, pagingContainer, toAddTo, english, foreignLang, rap, normalSpeedRecording,
+      buttonName);
     DOM.setStyleAttribute(submit.getElement(), "marginBottom", "5px");
     DOM.setStyleAttribute(submit.getElement(), "marginRight", "15px");
 
@@ -160,15 +170,14 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
 
   protected Button makeCreateButton(final UserList ul, final PagingContainer<T> pagingContainer, final Panel toAddTo,
                                   final FormField english, final FormField foreignLang,
-                                  final RecordAudioPanel rap, final ControlGroup normalSpeedRecording, final WillChangeListener afterChange) {
-    submit = new Button("Create");
+                                  final RecordAudioPanel rap, final ControlGroup normalSpeedRecording, final String buttonName) {
+    submit = new Button(buttonName);
     submit.setType(ButtonType.SUCCESS);
     submit.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         //System.out.println("makeCreateButton : creating new item for " + english + " " + foreignLang);
-
-        validateThenPost(english, foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo,afterChange);
+        validateThenPost(english, foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo, buttonName);
       }
     });
     submit.addStyleName("rightFiveMargin");
@@ -177,9 +186,9 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
 
   protected void validateThenPost(FormField english, FormField foreignLang, RecordAudioPanel rap,
                                   ControlGroup normalSpeedRecording, UserList ul, PagingContainer<T> pagingContainer,
-                                  Panel toAddTo, WillChangeListener afterChange) {
+                                  Panel toAddTo, String buttonName) {
     if (validateForm(english, foreignLang, rap, normalSpeedRecording)) {
-      createButtonClicked(english, foreignLang, ul, pagingContainer, toAddTo, afterChange);
+      createButtonClicked(english, foreignLang, ul, pagingContainer, toAddTo, buttonName);
     }
     else {
       System.out.println("Form invalid!!!\\n\n\n");
@@ -187,18 +196,48 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   }
 
   private void createButtonClicked(FormField english, FormField foreignLang, UserList ul,
-                                   PagingContainer<T> pagingContainer, Panel toAddTo, WillChangeListener afterChange) {
+                                   PagingContainer<T> pagingContainer, Panel toAddTo, String buttonName) {
     newUserExercise.setEnglish(english.getText());
     newUserExercise.setForeignLanguage(foreignLang.getText());
     newUserExercise.setTransliteration(translit.getText());
 
-    onClick(ul, pagingContainer, toAddTo, true, afterChange);
+    onClick(ul, pagingContainer, toAddTo, buttonName);
   }
+/*
 
   protected void onClick(final UserList ul, final PagingContainer<T> pagingContainer, final Panel toAddTo, boolean showFeedback,
-                         final WillChangeListener afterChange) {
+                         final String buttonName) {
     System.out.println("onClick : adding " + newUserExercise + " to " +ul);
 
+    afterValidForeignPhrase(ul, pagingContainer, toAddTo, buttonName);
+  }
+*/
+
+  protected void onClick(final UserList ul, final PagingContainer<T> pagingContainer, final Panel toAddTo,
+                         final String buttonName) {
+    System.out.println("onClick : editing " + newUserExercise);
+
+    service.isValidForeignPhrase(foreignLang.box.getText(), new AsyncCallback<Boolean>() {
+      @Override
+      public void onFailure(Throwable caught) {
+      }
+
+      @Override
+      public void onSuccess(Boolean result) {
+        if (result) {
+          afterValidForeignPhrase(ul,pagingContainer, toAddTo,buttonName);
+        }
+        else {
+          markError(foreignLang, "The " + FOREIGN_LANGUAGE +
+            " text is not in our " + controller.getLanguage() + " dictionary. Please edit.");
+        }
+      }
+    });
+
+  }
+
+  protected void afterValidForeignPhrase(final UserList ul, final PagingContainer<T> pagingContainer, final Panel toAddTo,
+                                         final String buttonName) {
     service.reallyCreateNewItem(ul.getUniqueID(), newUserExercise, new AsyncCallback<UserExercise>() {
       @Override
       public void onFailure(Throwable caught) {}
@@ -215,11 +254,6 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
         newUserExercise = null;
       }
     });
-  }
-
-
-  public static interface WillChangeListener {
-    void afterChange();
   }
 
   protected CreateFirstRecordAudioPanel makeRecordAudioPanel(final FluidRow row, final FormField english,
@@ -257,7 +291,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
      */
     @Override
     protected WaveformPostAudioRecordButton makePostAudioRecordButton() {
-      final ExerciseController outer = controller;
+     // final ExerciseController outer = controller;
       postAudioButton =
         new WaveformPostAudioRecordButton(exercise, controller, exercisePanel, this, service, 0, false // don't record in results table
         ) {
@@ -276,10 +310,10 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
 
                   @Override
                   public void onSuccess(UserExercise newExercise) {
-                    if (newExercise == null) {
+               /*     if (newExercise == null) {
                       showPopup("The " + FOREIGN_LANGUAGE +
                         " text is not in our " + outer.getLanguage() + " dictionary. Please edit.", foreignLang.box);
-                    } else {
+                    } else {*/
                       newUserExercise = newExercise;
                       System.out.println("\tonSuccess : stopRecording with newUserExercise " + newUserExercise);
 
@@ -287,7 +321,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
                       otherRAP.setExercise(exercise);
                       setExercise(exercise);
                       stopRecording();
-                    }
+                 //   }
                   }
                 });
             } else {
