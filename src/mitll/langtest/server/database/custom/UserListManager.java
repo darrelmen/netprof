@@ -150,13 +150,13 @@ public class UserListManager {
   public UserList getCommentedList() {
     List<UserExercise> allKnown = userExerciseDAO.getWhere(incorrect);
 
-    HashSet<String> allIncorrect = new HashSet<String>(incorrect);
+    Set<String> allIncorrect = new HashSet<String>(incorrect);
     allIncorrect.removeAll(reviewedExercises);
 
     List<UserExercise> include = new ArrayList<UserExercise>();
     for (UserExercise ue : allKnown) if (!reviewedExercises.contains(ue.getID())) include.add(ue);
 
-    return getReviewList(include, "Comments", "All items with comments");
+    return getReviewList(include, "Comments", "All items with comments", allIncorrect);
   }
 
   /**
@@ -168,16 +168,19 @@ public class UserListManager {
    * @return
    */
   public UserList getReviewList() {
-    List<UserExercise> allKnown = userExerciseDAO.getWhere(reviewedExercises);
+    logger.debug("getReviewList ids #=" + reviewedExercises);
 
-    return getReviewList(allKnown, "Review", "Items to review");
+    List<UserExercise> allKnown = userExerciseDAO.getWhere(reviewedExercises);
+    logger.debug("\tgetReviewList ids #=" + allKnown.size());
+
+    return getReviewList(allKnown, "Review", "Items to review",reviewedExercises);
   }
 
-  private UserList getReviewList(List<UserExercise> allKnown, String name, String description) {
+  private UserList getReviewList(List<UserExercise> allKnown, String name, String description, Collection<String> ids) {
     Map<String, UserExercise> idToUser = new HashMap<String, UserExercise>();
     for (UserExercise ue : allKnown) idToUser.put(ue.getID(), ue);
 
-    List<UserExercise> onList = getReviewedUserExercises(idToUser);
+    List<UserExercise> onList = getReviewedUserExercises(idToUser,ids);
 
     logger.debug("getReviewList ids #=" + allKnown.size() + " yielded " + onList.size());
 
@@ -196,10 +199,10 @@ public class UserListManager {
    * @paramx incorrect redundant, but guarantees same order as they are reviewed
    * @return
    */
-  private List<UserExercise> getReviewedUserExercises(Map<String, UserExercise> idToUser) {
+  private List<UserExercise> getReviewedUserExercises(Map<String, UserExercise> idToUser, Collection<String> ids) {
     List<UserExercise> onList = new ArrayList<UserExercise>();
 
-    for (String id : idToUser.keySet()) {
+    for (String id : ids) {
       if (!id.startsWith(UserExercise.CUSTOM_PREFIX)) {
         Exercise byID = userExerciseDAO.getExercise(id);
         logger.debug("found " + byID + " tooltip " + byID.getTooltip());
@@ -211,7 +214,7 @@ public class UserListManager {
         if (idToUser.containsKey(id)) onList.add(idToUser.get(id));
       }
     }
-    Collections.sort(onList,new Comparator<UserExercise>() {
+    Collections.sort(onList, new Comparator<UserExercise>() {
       @Override
       public int compare(UserExercise o1, UserExercise o2) {
         return o1.getID().compareTo(o2.getID());
@@ -283,7 +286,7 @@ public class UserListManager {
    * @param createIfDoesntExist
    */
   public void editItem(UserExercise userExercise, boolean createIfDoesntExist) {
-    fixAudioPaths(userExercise,true);
+    fixAudioPaths(userExercise, true);
     userExerciseDAO.update(userExercise, createIfDoesntExist);
   }
 
@@ -408,6 +411,10 @@ public class UserListManager {
     logger.debug("markReviewed now " + reviewedExercises.size() + " reviewed exercises");
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#markReviewed(String, boolean, long)
+   * @param exerciseid
+   */
   public void removeReviewed(String exerciseid) {
 
     List<UserExercise> toRemove = userExerciseDAO.getWhere(Collections.singletonList(exerciseid));
@@ -443,12 +450,20 @@ public class UserListManager {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getCompletedExercises(int, boolean)
    * @return
    */
-  public Set<String> getReviewedExercises() { return reviewedExercises; }
+  public Set<String> getReviewedExercises() {
+    logger.debug("getReviewedExercises now " + reviewedExercises.size() + " reviewed exercises");
+
+    return reviewedExercises;
+  }
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#markReviewed(String, boolean, long)
    * @see mitll.langtest.client.custom.QCNPFExercise#markReviewed
    * @param id
    */
-  public void markIncorrect(String id) { incorrect.add(id);  }
+  public void markIncorrect(String id) {
+    incorrect.add(id);
+    logger.debug("markIncorrect incorrect now " + incorrect.size());
+
+  }
 }
