@@ -111,7 +111,7 @@ public class ReviewedDAO extends DAO {
 
   public void remove(String exerciseID) {
     try {
-      int before = getCount();
+     // int before = getCount();
 
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement(
@@ -135,9 +135,9 @@ public class ReviewedDAO extends DAO {
       statement.close();
       database.closeConnection(connection);
 
-      int count = getCount();
-      logger.debug("now " + count + " reviewed");
-      if (count-before != 1) logger.error("ReviewedDAO : huh? there were " +before +" before");
+   //   int count = getCount();
+  //    logger.debug("now " + count + " reviewed");
+   //   if (before-count != 1) logger.error("ReviewedDAO : huh? there were " +before +" before");
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
