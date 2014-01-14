@@ -2,42 +2,23 @@ package mitll.langtest.client.custom;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
-import com.github.gwtbootstrap.client.ui.FluidRow;
-import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
-import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
-import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.dialog.DialogHelper;
-import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -124,6 +105,7 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
 
         @Override
         public void onSuccess(Void result) {
+          predefinedContentList.reload();
         }
       });
     }
