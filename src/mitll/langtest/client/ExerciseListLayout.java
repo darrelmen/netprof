@@ -99,7 +99,6 @@ public class ExerciseListLayout {
             //System.out.println("makeExerciseList : show completed " + showCompleted + " flex");
             FlexSectionExerciseList<T> flex = new FlexSectionExerciseList<T>(secondRow, currentExerciseVPanel, service, feedback,
               props.isShowTurkToken(), props.showExercisesInOrder(), controller, showTypeAhead, "flex");
-            flex.setUnaccountedForVertical(250);
             return flex;
           }
         }
