@@ -92,6 +92,7 @@ public class FlexSectionExerciseList<T extends ExerciseShell> extends HistoryExe
     buttonTypes.add(ButtonType.SUCCESS);
     buttonTypes.add(ButtonType.INFO);
     buttonTypes.add(ButtonType.WARNING);
+    setUnaccountedForVertical(160);
   }
 
   @Override
@@ -753,11 +754,6 @@ public class FlexSectionExerciseList<T extends ExerciseShell> extends HistoryExe
     sectionWidgetFinal.addButton(sectionButton);
 
     return sectionButton;
-  }
-
-  @Override
-  protected int getVerticalUnaccountedFor() {
-    return 160;
   }
 
   public static class ButtonWithChildren extends Button {
