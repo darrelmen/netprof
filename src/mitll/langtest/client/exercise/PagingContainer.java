@@ -96,7 +96,9 @@ public class PagingContainer<T extends ExerciseShell> {
   }
 
   public void setUnaccountedForVertical(int v) {
-     verticalUnaccountedFor =v;
+     verticalUnaccountedFor = v;
+    System.out.println("PagingContainer.setUnaccountedForVertical : verticalUnaccountedFor " + v);
+
   }
 
   public interface TableResources extends CellTable.Resources {
@@ -351,7 +353,10 @@ public class PagingContainer<T extends ExerciseShell> {
     int header = getTableHeaderHeight();
     int leftOver = Window.getClientHeight() - header - verticalUnaccountedFor;
 
-    //System.out.println("Got on resize " + Window.getClientHeight() + " " + header + " result = " + leftOver);
+     System.out.println("getNumTableRowsGivenScreenHeight Got on resize " + Window.getClientHeight() +
+       " " + header + " result = " + leftOver + "(" +
+       verticalUnaccountedFor+
+       ")");
 
     float rawRatio = ((float) leftOver) / (float) heightOfCellTableWith15Rows();
     float tableRatio = Math.min(MAX_PAGES, rawRatio);
