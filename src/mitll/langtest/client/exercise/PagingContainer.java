@@ -90,9 +90,13 @@ public class PagingContainer<T extends ExerciseShell> {
     return null;
   }
 
-  public /*<S extends ExerciseShell>*/ void forgetExercise(T es) {
+  public void forgetExercise(T es) {
     getList().remove(es);
     refresh();
+  }
+
+  public void setUnaccountedForVertical(int v) {
+     verticalUnaccountedFor =v;
   }
 
   public interface TableResources extends CellTable.Resources {
