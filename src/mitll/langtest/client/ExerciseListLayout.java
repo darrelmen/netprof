@@ -14,6 +14,7 @@ import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.TableSectionExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
+import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 
 /**
@@ -26,15 +27,15 @@ import mitll.langtest.shared.ExerciseShell;
  */
 public class ExerciseListLayout {
   private final PropertyHandler props;
-  private ListInterface exerciseList;
+  private ListInterface<? extends ExerciseShell> exerciseList;
 
   public ExerciseListLayout(PropertyHandler props) {
     this.props = props;
   }
 
-  public ListInterface makeFlashcardExerciseList(FluidContainer container, LangTestDatabaseAsync service,
+  public ListInterface<? extends ExerciseShell> makeFlashcardExerciseList(FluidContainer container, LangTestDatabaseAsync service,
                                                  UserManager userManager) {
-    this.exerciseList = new BootstrapFlashcardExerciseList(container, service, userManager, props.isTimedGame(),
+    this.exerciseList = new BootstrapFlashcardExerciseList<Exercise>(container, service, userManager, props.isTimedGame(),
       props.getGameTimeSeconds(), props);
     return exerciseList;
   }
@@ -44,7 +45,7 @@ public class ExerciseListLayout {
    *
    * @see LangTest#onModuleLoad2()
    */
-  public ListInterface makeExerciseList(FluidRow secondRow,
+  public ListInterface<? extends ExerciseShell> makeExerciseList(FluidRow secondRow,
                                         Panel leftColumn, UserFeedback feedback,
                                         Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                         ExerciseController controller) {
@@ -96,8 +97,10 @@ public class ExerciseListLayout {
               props.isShowTurkToken(), props.showExercisesInOrder(), controller, props.isCRTDataCollectMode(), "response");
           } else {
             //System.out.println("makeExerciseList : show completed " + showCompleted + " flex");
-            return new FlexSectionExerciseList<T>(secondRow, currentExerciseVPanel, service, feedback,
+            FlexSectionExerciseList<T> flex = new FlexSectionExerciseList<T>(secondRow, currentExerciseVPanel, service, feedback,
               props.isShowTurkToken(), props.showExercisesInOrder(), controller, showTypeAhead, "flex");
+            flex.setUnaccountedForVertical(250);
+            return flex;
           }
         }
       } else {
