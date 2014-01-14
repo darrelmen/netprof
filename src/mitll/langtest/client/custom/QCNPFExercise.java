@@ -53,7 +53,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
   @Override
   protected void nextWasPressed(ListInterface<? extends ExerciseShell> listContainer, ExerciseShell completedExercise) {
-    //System.out.println("nextWasPressed : load next exercise " + completedExercise.getID() + " instance " +instance);
+     System.out.println("nextWasPressed : load next exercise " + completedExercise.getID() + " instance " +instance);
     super.nextWasPressed(listContainer, completedExercise);
     if (!instance.equals("review")) {
       listContainer.addCompleted(completedExercise.getID());
@@ -62,6 +62,8 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   }
 
   private void markReviewed(ExerciseShell completedExercise) {
+    System.out.println("markReviewed : exercise " + completedExercise.getID() + " instance " +instance);
+
     service.markReviewed(completedExercise.getID(), incorrectSet.isEmpty(), controller.getUser(),
       new AsyncCallback<Void>() {
         @Override
@@ -152,9 +154,6 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   }
 
   /**
-   * TODO after edit, clear annotation -- where do we edit? in edit window
-   *
-   *
    * @param field
    * @param annotation
    * @return
@@ -198,7 +197,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     final CheckBox checkBox = makeCheckBox(field, commentRow, commentEntry, alreadyMarkedCorrect);
 
     Panel qcCol = new FlowPanel();
-    qcCol.addStyleName("qcRightBorder");
+//   / qcCol.addStyleName("qcRightBorder");
 
     qcCol.add(checkBox);
     return qcCol;
