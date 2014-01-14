@@ -180,7 +180,6 @@ public class EditItem<T extends ExerciseShell> {
       final T exerciseShell = pagingContainer.getByID(newUserExercise.getID());
       widgets.add(new PrevNextList<T>(exerciseShell, exerciseList));
       this.ul = ul;
-      // System.out.println("addNew : Found " + exerciseShell);
       return widgets;
     }
 
@@ -194,7 +193,6 @@ public class EditItem<T extends ExerciseShell> {
       FluidRow row = new FluidRow();
       container.add(row);
       english = makeBoxAndAnno(row, "English", englishAnno);
-      //focusOnEnglish(english);
       return row;
     }
 
@@ -243,42 +241,6 @@ public class EditItem<T extends ExerciseShell> {
       englishAnno.addStyleName("editComment");
       return formField;
     }
-
-    /**
-     * TODO : check to see if the foreign language is valid before commiting change!
-     * <p/>
-     * TODO : add call on change to check if in the dictionary (or can be segmented)
-     *
-     * @see #createButtonClicked(mitll.langtest.client.user.BasicDialog.FormField, mitll.langtest.client.user.BasicDialog.FormField, mitll.langtest.shared.custom.UserList, mitll.langtest.client.exercise.PagingContainer, com.google.gwt.user.client.ui.Panel, String)
-     * @param ul
-     * @param pagingContainer
-     * @param toAddTo
-     * @param showFeedback
-     * @param buttonName
-     */
-/*    @Override
-    protected void onClick(final UserList ul, final PagingContainer<T> pagingContainer, Panel toAddTo, final boolean showFeedback,
-                           final String buttonName) {
-      System.out.println("onClick : editing " + newUserExercise);
-
-      service.isValidForeignPhrase(foreignLang.box.getText(), new AsyncCallback<Boolean>() {
-        @Override
-        public void onFailure(Throwable caught) {
-        }
-
-        @Override
-        public void onSuccess(Boolean result) {
-           if (result) {
-             afterValidForeignPhrase(ul,pagingContainer, toAddTo,buttonName);
-           }
-          else {
-             markError(foreignLang, "The " + FOREIGN_LANGUAGE +
-               " text is not in our " + controller.getLanguage() + " dictionary. Please edit.");
-           }
-        }
-      });
-
-    }*/
 
     @Override
     protected void afterValidForeignPhrase(final UserList ul, final PagingContainer<T> pagingContainer, final Panel toAddTo,
