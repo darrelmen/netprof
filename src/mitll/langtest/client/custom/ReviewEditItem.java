@@ -94,20 +94,24 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
     }
 
     protected void doAfterEditComplete(PagingContainer<T> pagingContainer, String buttonName) {
-      exerciseList.forgetExercise(exerciseList.byID(newUserExercise.getID()));
-      if (!ul.remove(newUserExercise)) {
-        System.err.println("\n\n\ndoAfterEditComplete : error - didn't remove");
-      }
-      service.removeReviewed(newUserExercise.getID(), new AsyncCallback<Void>() {
-        @Override
-        public void onFailure(Throwable caught) {
+      if (buttonName.equals(FIXED)) {
+        exerciseList.forgetExercise(exerciseList.byID(newUserExercise.getID()));
+        if (!ul.remove(newUserExercise)) {
+          System.err.println("\n\n\ndoAfterEditComplete : error - didn't remove");
         }
+        service.removeReviewed(newUserExercise.getID(), new AsyncCallback<Void>() {
+          @Override
+          public void onFailure(Throwable caught) {
+          }
 
-        @Override
-        public void onSuccess(Void result) {
-          predefinedContentList.reload();
-        }
-      });
+          @Override
+          public void onSuccess(Void result) {
+            predefinedContentList.reload();
+          }
+        });
+      } else {
+        super.doAfterEditComplete(pagingContainer, buttonName);
+      }
     }
   }
 }
