@@ -98,19 +98,22 @@ public class DAO {
 
   protected boolean doSqlOn(String sql, String table) {
     try {
-      // int before = getCount();
+      int before = getCount(table);
 
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement(sql);
       boolean changed = statement.executeUpdate() == 1;
-      if (!changed) logger.error("huh? didn't alter row for " + table);
+
+      if (!changed) {
+        logger.error("huh? didn't alter row for " + table + " sql " + sql);
+      }
 
       statement.close();
       database.closeConnection(connection);
 
-      //   int count = getCount();
-      //    logger.debug("now " + count + " reviewed");
-      //   if (before-count != 1) logger.error("ReviewedDAO : huh? there were " +before +" before");
+      int count = getCount(table);
+      logger.debug("now " + count + " reviewed");
+      if (before - count != 1) logger.error("DAO : huh? there were " + before + " before");
 
       return changed;
     } catch (Exception ee) {
