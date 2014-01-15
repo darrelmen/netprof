@@ -21,6 +21,10 @@ import java.sql.SQLException;
 public class UserListExerciseJoinDAO extends DAO {
   private static Logger logger = Logger.getLogger(UserListExerciseJoinDAO.class);
 
+  public static final String USERLISTID = "userlistid";
+  public static final String EXERCISEID = "exerciseid";
+  public static final String UNIQUEID = "uniqueid";
+
   public static final String USER_EXERCISE_LIST_EXERCISE = "userexerciselist_exercise";
 
   public UserListExerciseJoinDAO(Database database) {
@@ -37,12 +41,19 @@ public class UserListExerciseJoinDAO extends DAO {
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
       USER_EXERCISE_LIST_EXERCISE +
       " (" +
-      "uniqueid IDENTITY, " +
-      "userlistid LONG, " +
-      "exerciseid VARCHAR , " +
-      "FOREIGN KEY(userlistid) REFERENCES " +
+      UNIQUEID +
+      " IDENTITY, " +
+      USERLISTID +
+      " LONG, " +
+      EXERCISEID +
+      " VARCHAR , " +
+      "FOREIGN KEY(" +
+      USERLISTID +
+      ") REFERENCES " +
       UserListDAO.USER_EXERCISE_LIST +
-      "(uniqueid)" +    // user lists can be combinations of predefined and user defined exercises
+      "(" +
+      UNIQUEID +
+      ")" +    // user lists can be combinations of predefined and user defined exercises
  /*       "," +
       "FOREIGN KEY(exerciseid) REFERENCES " +
       UserExerciseDAO.USEREXERCISE +
@@ -58,7 +69,7 @@ public class UserListExerciseJoinDAO extends DAO {
    * <p/>
    * Uses return generated keys to get the user id
    *
-   * @see UserListManager#reallyCreateNewItem(long, mitll.langtest.shared.custom.UserExercise)
+   * @see UserListManager#addItemToList(long, mitll.langtest.shared.custom.UserExercise)
    */
   public void add(UserList userList, String uniqueID) {
     try {
@@ -68,8 +79,10 @@ public class UserListExerciseJoinDAO extends DAO {
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement(
         "INSERT INTO " + USER_EXERCISE_LIST_EXERCISE +
-          "(userlistid," +
-          "exerciseid" +
+          "(" +
+          USERLISTID +
+          "," +
+          EXERCISEID +
           ") " +
           "VALUES(?,?);");
       int i = 1;
@@ -88,5 +101,20 @@ public class UserListExerciseJoinDAO extends DAO {
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
+  }
+
+  public boolean remove(long listid, String exid) {
+    String sql = getRemoveSQL(listid, exid);
+    return doSqlOn(sql,USER_EXERCISE_LIST_EXERCISE);
+  }
+
+  private String getRemoveSQL(long listid, String exid) {
+    return "DELETE FROM " + USER_EXERCISE_LIST_EXERCISE +" WHERE " +
+      USERLISTID +
+      "=" + listid +
+      " AND " +
+      EXERCISEID +
+      "='" + exid +
+      "'; ";
   }
 }
