@@ -10,6 +10,7 @@ import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -42,7 +43,7 @@ public class CheckLTS {
   }
 
   private boolean checkLTS(int id, BufferedWriter writer, SmallVocabDecoder svd, LTS lts, String english, String foreignLanguagePhrase) {
-    List<String> tokens = svd.getTokens(foreignLanguagePhrase);
+    Collection<String> tokens = svd.getTokens(foreignLanguagePhrase);
     boolean error = false;
     try {
 
