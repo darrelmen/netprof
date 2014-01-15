@@ -101,6 +101,7 @@ public class ASRScoring extends Scoring {
     this.letterToSoundClass = new LTSFactory().getLTSClass(language);
 //    logger.info("using LTS " + letterToSoundClass.getClass());
     this.htkDictionary = dict;
+    if (dict != null) logger.debug("htkDictionary size is " + dict.size());
     this.configFileCreator = new ConfigFileCreator(properties, letterToSoundClass, scoringDir);
   }
 
@@ -108,22 +109,22 @@ public class ASRScoring extends Scoring {
 
   /**
    * So chinese is special -- it doesn't do lts -- it just uses a dictionary
+   * @see mitll.langtest.server.LangTestDatabaseImpl#isValidForeignPhrase(String)
    * @param lts
    * @param foreignLanguagePhrase
    * @return
    */
   private boolean checkLTS(LTS lts, String foreignLanguagePhrase) {
+    Collection<String> tokens = new SmallVocabDecoder().getTokens(foreignLanguagePhrase);
 
-    List<String> tokens = new SmallVocabDecoder().getTokens(foreignLanguagePhrase);
-
-    logger.debug("checkLTS " + (isMandarin? " MANDARIN " : "")+      " tokens : " +tokens);
+    logger.debug("checkLTS " + (isMandarin? " MANDARIN " : "")+ " tokens : " +tokens);
 
     try {
-
       for (String token : tokens) {
         if (isMandarin) {
-          scala.collection.immutable.List<String[]> apply = htkDictionary.apply(token);
-          if (apply == null || apply.isEmpty()) {
+         // scala.collection.immutable.List<String[]> apply = htkDictionary.apply(token);
+          String segmentation = segmentation(token.trim());
+          if (segmentation.isEmpty()) {
             logger.debug("checkLTS: mandarin token : " + token + " invalid!");
 
             return false;
@@ -144,6 +145,42 @@ public class ASRScoring extends Scoring {
     logger.debug("checkLTS tokens : " +tokens + " valid!");
 
     return true;
+  }
+
+  public String getSegmented(String longPhrase) {
+    Collection<String> tokens = svDecoderHelper.getTokens(longPhrase);
+    StringBuilder builder = new StringBuilder();
+    for (String token : tokens) {
+      builder.append(segmentation(token.trim()));
+      builder.append(" ");
+    }
+    String s = builder.toString();
+    //logger.debug("getSegmented phrase '" + longPhrase + "' -> '" + s + "'");
+
+    return s;
+  }
+
+  public String segmentation(String phrase){
+    String s = longest_prefix(phrase, 0);
+    //logger.debug("phrase '" + phrase + "' -> '" + s + "'");
+    return s;
+  }
+
+  private String longest_prefix(String phrase, int i){
+    if(i == phrase.length())
+      return "";
+    String prefix = phrase.substring(0, phrase.length() - i);
+    if (inDict(prefix)) {
+      if(i == 0)
+        return phrase;
+      String rest = longest_prefix(phrase.substring(phrase.length()-i, phrase.length()), 0);
+      if(rest.length() > 0)
+        return prefix + " " + rest;
+    }
+    //else {
+      //logger.debug("dict doesn't contain " + prefix);
+    //}
+    return longest_prefix(phrase, i+1);
   }
 
 /*  private Set<String> wordsInDict = new HashSet<String>();
@@ -315,8 +352,12 @@ public class ASRScoring extends Scoring {
                                   boolean decode, String tmpDir, boolean useCache) {
     String key = testAudioDir + File.separator + testAudioFileNoSuffix;
     Scores scores = useCache ? audioToScore.getIfPresent(key) : null;
+
+    if (isMandarin) {
+      sentence = getSegmented(sentence.trim());
+    }
     if (scores == null) {
-      scores = calcScoreForAudio(testAudioDir,testAudioFileNoSuffix,sentence,scoringDir, decode,tmpDir);
+      scores = calcScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir);
       audioToScore.put(key, scores);
     }
     else {
@@ -324,11 +365,6 @@ public class ASRScoring extends Scoring {
     }
     return scores;
   }
-
-/*  public void clearCacheFor(String testAudioDir, String testAudioFileNoSuffix, boolean useCache) {
-    String key = testAudioDir + File.separator + testAudioFileNoSuffix;
-    Scores scores = useCache ? audioToScore.getIfPresent(key) : null;
-  }*/
 
   /**
    * There are two modes you can use to score the audio : align mode and decode mode
@@ -596,28 +632,15 @@ public class ASRScoring extends Scoring {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getValidPhrases(java.util.Collection)
+   * @see mitll.langtest.server.audio.AudioFileHelper#getValidPhrases(java.util.Collection)
    * @param phrases
    * @return
    */
-  public Collection<String> getValidPhrases(Collection<String> phrases) {
-    return getValidSentences(phrases);
- /*   List<String> valid = new ArrayList<String>();
-    for (String phrase : phrases) {
-      try {
-        if (!isPhraseInDict(phrase)) {
-          logger.warn("getValidPhrases : skipped " + phrase);
-        } else {
-          valid.add(phrase);
-        }
-      } catch (Exception e) {
-       logger.warn("skipped " + phrase);
-      }
-    }
-    if (phrases.size() != valid.size()) {
-      logger.warn("started with " + phrases.size() + " phrases, but now have " + valid.size() + " valid phrases.");
-    }
-    return valid;*/
+  public Collection<String> getValidPhrases(Collection<String> phrases) { return getValidSentences(phrases); }
+
+  private boolean inDict(String token) {
+    scala.collection.immutable.List<String[]> apply = htkDictionary.apply(token);
+    return apply != null && !apply.isEmpty();
   }
 
   private boolean isPhraseInDict(String phrase) {
@@ -631,23 +654,10 @@ public class ASRScoring extends Scoring {
    */
   private Collection<String> getValidSentences(Collection<String> sentences) {
     Set<String> filtered = new TreeSet<String>();
-
- /*   BufferedWriter utf8 = null;
-    try {
-      utf8 = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("validTokens_for_" +sentences.size()+
-        "_" +System.currentTimeMillis()+
-        ".txt"), "UTF8"));
-    } catch (UnsupportedEncodingException e) {
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-    }
-*/
-    //Set<String> allValid = new HashSet<String>();
     Set<String> skipped = new TreeSet<String>();
 
     for (String sentence : sentences) {
-      List<String> tokens = svDecoderHelper.getTokens(sentence);
+      Collection<String> tokens = svDecoderHelper.getTokens(sentence);
       boolean valid = true;
       for (String token : tokens) {
         if (!isValid(token)) {
@@ -655,7 +665,6 @@ public class ASRScoring extends Scoring {
 
           valid = false;
         }
-        //else allValid.add(token);
       }
       if (valid) filtered.add(sentence);
       else {
@@ -668,18 +677,14 @@ public class ASRScoring extends Scoring {
       logger.warn("getValidSentences : skipped " + skipped.size() + " sentences : " + skipped  );
     }
 
-/*    try {
-      if (utf8 != null) {
-        for (String t : allValid) utf8.write(t + "\n");
-        utf8.close();
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }*/
-
     return filtered;
   }
 
+  /**
+   * @see #getValidSentences(java.util.Collection)
+   * @param token
+   * @return
+   */
   private boolean isValid(String token) {
     return checkToken(token) && isPhraseInDict(token);
   }
@@ -714,6 +719,4 @@ public class ASRScoring extends Scoring {
     return all;
   }
 */
-
-
 }
