@@ -31,8 +31,6 @@ public class CreateListDialog extends BasicDialog {
    * @seex
    */
   void doCreate(Panel thirdRow) {
-    // fill in the middle panel with a form to allow you to create a list
-    // post the results to the server
     thirdRow.clear();
     final EnterKeyButtonHelper enterKeyButtonHelper = new EnterKeyButtonHelper(true);
     Panel child = new DivWidget() {
@@ -69,13 +67,18 @@ public class CreateListDialog extends BasicDialog {
 
     Button submit = new Button("Create List");
     submit.setType(ButtonType.PRIMARY);
+/*
+    submit.addStyleName("marginBottomTen");
+*/
+
+    DOM.setStyleAttribute(submit.getElement(), "marginBottom", "10px");
+
+    submit.addStyleName("leftFiveMargin");
     submit.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         System.out.println("creating list for " + titleBox + " " + area.getText() + " and " + classBox.getText());
         enterKeyButtonHelper.removeKeyHandler();
-        // TODO : validate
-
         if (validateCreateList(titleBox, description, classBox)) {
           service.addUserList(userManager.getUser(), titleBox.getText(), area.getText(),
             classBox.getText(), new AsyncCallback<Long>() {
@@ -86,9 +89,8 @@ public class CreateListDialog extends BasicDialog {
             @Override
             public void onSuccess(Long result) {
               navigation.setUserListID(result);
-              System.out.println("userListID " + navigation.getUserListID());
+//              System.out.println("userListID " + navigation.getUserListID());
               navigation.showInitialState();
-              // TODO : show enter item panel
             }
           });
         }
@@ -98,12 +100,10 @@ public class CreateListDialog extends BasicDialog {
     row.add(submit);
   }
 
-
   void zeroPadding(Panel createContent) {
     DOM.setStyleAttribute(createContent.getElement(), "paddingLeft", "0px");
     DOM.setStyleAttribute(createContent.getElement(), "paddingRight", "0px");
   }
-
 
   private boolean validateCreateList(BasicDialog.FormField titleBox, BasicDialog.FormField description, BasicDialog.FormField classBox) {
     if (titleBox.getText().isEmpty()) {
