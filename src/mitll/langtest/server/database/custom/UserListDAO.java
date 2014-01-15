@@ -32,7 +32,7 @@ public class UserListDAO extends DAO {
   private UserDAO userDAO;
   private UserExerciseDAO userExerciseDAO;
   private UserListVisitorJoinDAO userListVisitorJoinDAO;
-  private ExerciseDAO exerciseDAO;
+  //private ExerciseDAO exerciseDAO;
   public UserListDAO(Database database, UserDAO userDAO) {
     super(database);
     try {
@@ -41,7 +41,7 @@ public class UserListDAO extends DAO {
       logger.error("got " + e, e);
     }
     this.userDAO = userDAO;
-    userListVisitorJoinDAO = new UserListVisitorJoinDAO(database,userDAO);
+    userListVisitorJoinDAO = new UserListVisitorJoinDAO(database);
     try {
       userListVisitorJoinDAO.createUserListTable(database);
     } catch (SQLException e) {
@@ -50,6 +50,7 @@ public class UserListDAO extends DAO {
   }
 
   public void addVisitor(long listid, long userid) { userListVisitorJoinDAO.add(listid,userid);}
+  public void removeVisitor(long listid) { userListVisitorJoinDAO.remove(listid);}
 
   void createUserListTable(Database database) throws SQLException {
     Connection connection = database.getConnection();
@@ -193,6 +194,11 @@ public class UserListDAO extends DAO {
     return Collections.emptyList();
   }*/
 
+  public boolean remove(long unique) {
+    removeVisitor(unique);
+    return remove(USER_EXERCISE_LIST, "uniqueid", unique);
+  }
+
   /**
    * TODO don't want to always get all the exercises!
    * @see UserListManager#getUserListByID(long)
@@ -276,8 +282,8 @@ public class UserListDAO extends DAO {
   public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
     this.userExerciseDAO = userExerciseDAO;
   }
-
+/*
   public void setExerciseDAO(ExerciseDAO exerciseDAO) {
     this.exerciseDAO = exerciseDAO;
-  }
+  }*/
 }
