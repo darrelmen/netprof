@@ -12,6 +12,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.NavigationHelper;
+import mitll.langtest.client.exercise.PostAnswerProvider;
 import mitll.langtest.client.gauge.ASRScorePanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
@@ -51,11 +53,25 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     hp.addStyleName("questionContentPadding");
   }
 
+  protected NavigationHelper<Exercise> getNavigationHelper(ExerciseController controller,
+                                                           final ListInterface<Exercise> listContainer, boolean addKeyHandler) {
+    return new NavigationHelper<Exercise>(exercise, controller, new PostAnswerProvider() {
+      @Override
+      public void postAnswers(ExerciseController controller, ExerciseShell completedExercise) {
+        nextWasPressed(listContainer, completedExercise);
+      }
+    }, listContainer, true, addKeyHandler) {
+      @Override
+      protected void enableNext(Exercise exercise) {
+      }
+    };
+  }
+
   @Override
   protected void nextWasPressed(ListInterface<? extends ExerciseShell> listContainer, ExerciseShell completedExercise) {
-     System.out.println("nextWasPressed : load next exercise " + completedExercise.getID() + " instance " +instance);
+    System.out.println("nextWasPressed : load next exercise " + completedExercise.getID() + " instance " +instance);
     super.nextWasPressed(listContainer, completedExercise);
-    if (!instance.equals("review")) {
+    if (!instance.equals(Navigation.REVIEW) && !instance.equals(Navigation.COMMENT)) {
       listContainer.addCompleted(completedExercise.getID());
       markReviewed(completedExercise);
     }
