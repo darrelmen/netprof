@@ -5,6 +5,7 @@ import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.google.gwt.core.client.Scheduler;
@@ -157,7 +158,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
    */
   protected Panel getCreateButton(UserList ul, PagingContainer<T> pagingContainer, Panel toAddTo,
                                   ControlGroup normalSpeedRecording, String buttonName
-   ) {
+  ) {
     Button submit = makeCreateButton(ul, pagingContainer, toAddTo, english, foreignLang, rap, normalSpeedRecording,
       buttonName);
     DOM.setStyleAttribute(submit.getElement(), "marginBottom", "5px");
@@ -203,15 +204,6 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
 
     onClick(ul, pagingContainer, toAddTo, buttonName);
   }
-/*
-
-  protected void onClick(final UserList ul, final PagingContainer<T> pagingContainer, final Panel toAddTo, boolean showFeedback,
-                         final String buttonName) {
-    System.out.println("onClick : adding " + newUserExercise + " to " +ul);
-
-    afterValidForeignPhrase(ul, pagingContainer, toAddTo, buttonName);
-  }
-*/
 
   protected void onClick(final UserList ul, final PagingContainer<T> pagingContainer, final Panel toAddTo,
                          final String buttonName) {
