@@ -169,11 +169,13 @@ public class UserListManager {
    */
   public UserList getReviewList() {
     logger.debug("getReviewList ids #=" + reviewedExercises);
+    Set<String> incorrectReviewed = new HashSet<String>(reviewedExercises);
+    boolean b = incorrectReviewed.retainAll(incorrect);
 
-    List<UserExercise> allKnown = userExerciseDAO.getWhere(reviewedExercises);
+    List<UserExercise> allKnown = userExerciseDAO.getWhere(incorrectReviewed);
     logger.debug("\tgetReviewList ids #=" + allKnown.size());
 
-    return getReviewList(allKnown, "Review", "Items to review",reviewedExercises);
+    return getReviewList(allKnown, "Review", "Items to review",incorrectReviewed);
   }
 
   private UserList getReviewList(List<UserExercise> allKnown, String name, String description, Collection<String> ids) {
@@ -183,9 +185,6 @@ public class UserListManager {
     List<UserExercise> onList = getReviewedUserExercises(idToUser,ids);
 
     logger.debug("getReviewList ids #=" + allKnown.size() + " yielded " + onList.size());
-
-   // String name = "Review";
-    // String description = "Items to review";
     User user = new User(-1, 89, 0, 0, "", "", false);
     UserList userList = new UserList(Long.MAX_VALUE, user, name, description, name, false);
     userList.setReview(true);
@@ -411,8 +410,9 @@ public class UserListManager {
    * @param creatorID
    */
   public void markReviewed(String id, long creatorID) {
-    reviewedExercises.add(id);
-    reviewedDAO.add(id,creatorID);
+    if (!reviewedExercises.add(id)) {
+      reviewedDAO.add(id,creatorID);
+    }
     logger.debug("markReviewed now " + reviewedExercises.size() + " reviewed exercises");
   }
 
@@ -421,7 +421,6 @@ public class UserListManager {
    * @param exerciseid
    */
   public void removeReviewed(String exerciseid) {
-
     List<UserExercise> toRemove = userExerciseDAO.getWhere(Collections.singletonList(exerciseid));
 
     reviewedExercises.remove(exerciseid);
@@ -469,6 +468,5 @@ public class UserListManager {
   public void markIncorrect(String id) {
     incorrect.add(id);
     logger.debug("markIncorrect incorrect now " + incorrect.size());
-
   }
 }
