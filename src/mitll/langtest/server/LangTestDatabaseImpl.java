@@ -1069,7 +1069,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public UserExercise reallyCreateNewItem(long userListID, UserExercise userExercise) {
     db.getUserListManager().reallyCreateNewItem(userListID, userExercise);
-   // fixAudioPaths(userExercise, true); // do this after the id has been made
     db.getUserListManager().editItem(userExercise, false);
     logger.debug("reallyCreateNewItem : made user exercise " + userExercise);
 
