@@ -99,13 +99,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
     ASRScorePanel widgets = makeScorePanel(e, instance);
 
-/*    HorizontalPanel hp = new HorizontalPanel();
-    hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
-    hp.getElement().setId("questionContentRowContainer");*/
-
     addQuestionContentRow(e, controller, center);
-
-   // center.add(hp);
 
     // content is on the left side
     add(center);
@@ -116,15 +110,19 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     }
     addUserRecorder(service, controller, center, screenPortion); // todo : revisit screen portion...
 
-    this.navigationHelper = new NavigationHelper<Exercise>(exercise, controller, new PostAnswerProvider/*<Exercise>*/() {
+    this.navigationHelper = getNavigationHelper(controller, listContainer, addKeyHandler);
+    navigationHelper.addStyleName("topBarMargin");
+    center.add(navigationHelper);
+  }
+
+  protected NavigationHelper<Exercise> getNavigationHelper(ExerciseController controller,
+                                                           final ListInterface<Exercise> listContainer, boolean addKeyHandler) {
+    return new NavigationHelper<Exercise>(exercise, controller, new PostAnswerProvider() {
       @Override
       public void postAnswers(ExerciseController controller, ExerciseShell completedExercise) {
         nextWasPressed(listContainer, completedExercise);
       }
     }, listContainer, true, addKeyHandler);
-    navigationHelper.addStyleName("topBarMargin");
-   // center.add(navigationHelper.makeSpacer());
-    center.add(navigationHelper);
   }
 
   public void wasRevealed() {}
@@ -139,7 +137,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   }
 
   protected void nextWasPressed(ListInterface<? extends ExerciseShell> listContainer, ExerciseShell completedExercise) {
-   // T ref = completedExercise;
     listContainer.loadNextExercise(completedExercise.getID());
   }
 
