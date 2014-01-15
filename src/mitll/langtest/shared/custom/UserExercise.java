@@ -161,7 +161,8 @@ public class UserExercise extends AudioExercise {
     return "UserExercise" +
       //" (" +count+ ")" +
       " #" + uniqueID + "/" + getID()+ (isPredef ? " <Predef>" :  " <User>")+  " creator " + getCreator()+
-        " : " + getEnglish() + " = " + getForeignLanguage() + " (" +getTransliteration()+
+        " : English '" + getEnglish() + "', foreign language '" + getForeignLanguage() + "'" +
+        " (" +getTransliteration()+
       ") tooltip " + getTooltip()+
       "audio attr (" +getAudioAttributes().size()+
       ") :" + getAudioAttributes();
