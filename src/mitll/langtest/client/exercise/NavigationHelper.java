@@ -44,10 +44,6 @@ public class NavigationHelper<T extends ExerciseShell> extends HorizontalPanel {
 
   protected ListInterface<T> listContainer;
 
-/*  public NavigationHelper(Exercise exercise, ExerciseController controller, ListInterface listContainer) {
-    this(exercise, controller, null, listContainer, true, false);
-  }*/
-
   /**
    * @see ExercisePanel#getNavigationHelper(ExerciseController)
    * @param exercise
@@ -156,7 +152,7 @@ public class NavigationHelper<T extends ExerciseShell> extends HorizontalPanel {
       }
     }
     else {
-      System.out.println("clickNext " +keyHandler+ " ignoring next");
+      System.out.println("\t\tNavigationHelper.clickNext " +keyHandler+ " ignoring next");
     }
   }
 
