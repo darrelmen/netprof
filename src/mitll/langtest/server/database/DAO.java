@@ -1,6 +1,7 @@
 package mitll.langtest.server.database;
 
 import org.apache.log4j.Logger;
+import scala.tools.nsc.typechecker.TypeDiagnostics;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -24,9 +25,7 @@ public class DAO {
 
   protected final Database database;
 
-  public DAO(Database database) {
-    this.database = database;
-  }
+  public DAO(Database database) { this.database = database;  }
 
   protected int getNumColumns(Connection connection, String table) throws SQLException {
     Statement stmt = connection.createStatement();
@@ -76,6 +75,48 @@ public class DAO {
       e.printStackTrace();
     }
     return 0;
+  }
+
+  protected boolean remove(String table, String idField, long itemId) {
+    String sql = "DELETE FROM " + table +" WHERE " +
+      idField +
+      "=" + itemId +
+      "";
+
+    return doSqlOn(sql, table);
+  }
+
+
+  protected boolean remove(String table, String idField, String itemId) {
+    String sql = "DELETE FROM " + table +" WHERE " +
+      idField +
+      "='" + itemId +
+      "'";
+
+    return doSqlOn(sql, table);
+  }
+
+  protected boolean doSqlOn(String sql, String table) {
+    try {
+      // int before = getCount();
+
+      Connection connection = database.getConnection();
+      PreparedStatement statement = connection.prepareStatement(sql);
+      boolean changed = statement.executeUpdate() == 1;
+      if (!changed) logger.error("huh? didn't alter row for " + table);
+
+      statement.close();
+      database.closeConnection(connection);
+
+      //   int count = getCount();
+      //    logger.debug("now " + count + " reviewed");
+      //   if (before-count != 1) logger.error("ReviewedDAO : huh? there were " +before +" before");
+
+      return changed;
+    } catch (Exception ee) {
+      logger.error("got " + ee, ee);
+    }
+    return false;
   }
 
   public Database getDatabase() { return database; }
