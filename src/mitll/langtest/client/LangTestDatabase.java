@@ -51,7 +51,6 @@ public interface LangTestDatabase extends RemoteService {
   void changeGrade(Grade toChange);
 
   // user DAO
-  //long addUser(int age, String gender, int experience, String dialect);
   long addUser(int age, String gender, int experience, String nativeLang, String dialect, String userID);
 
   List<User> getUsers();
@@ -126,12 +125,6 @@ public interface LangTestDatabase extends RemoteService {
 
   void sendEmail(int userID, String to, String replyTo, String subject, String message, String token);
 
-  /**
-   * @deprecated
-   * @return
-   */
-  //Map<String, Map<String,Integer>> getTypeToSectionToCount();
-
   int getNumExercisesForSelectionState(Map<String, Collection<String>> typeToSection);
 
   List<? extends ExerciseShell> getFullExercisesForSelectionState(Map<String, Collection<String>> typeToSection, int start, int end);
@@ -159,13 +152,21 @@ public interface LangTestDatabase extends RemoteService {
   Collection<UserList> getListsForUser(long userid, boolean onlyCreated, boolean getExercises);
   Collection<UserList> getUserListsForText(String search);
   void addItemToUserList(long userListID, UserExercise userExercise);
+
+  UserList getCommentedList();
+
   UserExercise createNewItem(long userid, String english, String foreign, String transliteration);
+
+  boolean isValidForeignPhrase(String foreign);
+
   UserExercise reallyCreateNewItem(long userListID, UserExercise userExercise);
 
   void editItem(UserExercise userExercise);
 
   void addAnnotation(String exerciseID, String field, String status, String comment, long userID);
   void markReviewed(String exid, boolean isCorrect, long creatorID);
+
+  void removeReviewed(String id);
 
   UserList getReviewList();
 }

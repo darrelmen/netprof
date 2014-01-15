@@ -161,4 +161,10 @@ public interface LangTestDatabaseAsync {
   void markReviewed(String id, boolean isCorrect, long creatorID, AsyncCallback<Void> asyncCallback);
 
   void getReviewList(AsyncCallback<UserList> async);
+
+  void removeReviewed(String id, AsyncCallback<Void> async);
+
+  void getCommentedList(AsyncCallback<UserList> async);
+
+  void isValidForeignPhrase(String foreign, AsyncCallback<Boolean> async);
 }
