@@ -408,7 +408,7 @@ public class ExercisePanel<T extends ExerciseShell> extends VerticalPanel implem
     int user = controller.getUser();
     final Set<Widget> incomplete = new HashSet<Widget>();
 
-    System.out.println("postAnswers " + completedExercise);
+    System.out.println("ExercisePanel.postAnswers " + completedExercise);
 
     boolean allHaveText = true;
     for (final Widget tb : answers) {
@@ -424,13 +424,18 @@ public class ExercisePanel<T extends ExerciseShell> extends VerticalPanel implem
         service.addTextAnswer(user, exercise, i++, text, new AsyncCallback<Void>() {
           public void onFailure(Throwable caught) {
             controller.getFeedback().showErrorMessage("Server error", "Couldn't post answers for exercise.");
-
           }
 
           public void onSuccess(Void result) {
             incomplete.remove(tb);
             if (incomplete.isEmpty()) {
+              System.out.println("ExercisePanel.loadNextExercise " + completedExercise.getID());
+
               exerciseList.loadNextExercise(completedExercise.getID());
+            }
+            else {
+              System.out.println("ExercisePanel.postAnswers " + incomplete.size() + " incomplete...");
+
             }
           }
         }
