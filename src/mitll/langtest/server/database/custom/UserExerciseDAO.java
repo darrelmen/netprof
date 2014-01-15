@@ -154,7 +154,7 @@ public class UserExerciseDAO extends DAO {
       logger.debug("\tusing for user exercise = " +sql);
 
       List<UserExercise> userExercises = getUserExercises(sql);
-      logger.debug("\tfound (" +userExercises.size()+ ") userExercises on list " +listID);
+      logger.debug("\tfound " +userExercises.size()+ " exercises userExercises on list " +listID);
 
       List<UserExercise> userExercises2 = new ArrayList<UserExercise>();
 
@@ -177,7 +177,11 @@ public class UserExerciseDAO extends DAO {
       String join2 = getJoin2(listID);
       logger.debug("\tusing exercise = " +join2);
       for (String exid : getExercises(join2)) {
-        userExercises2.add(new UserExercise(exerciseDAO.getExercise(exid)));
+        Exercise exercise = exerciseDAO.getExercise(exid);
+        if (exercise != null) {
+          userExercises2.add(new UserExercise(exercise));
+        }
+        else logger.info("can't find exercise " + exid);
       }
       if (userExercises2.isEmpty()) {
         if (DEBUG) logger.debug("\tgetOnList : no exercises on list id " + listID);
