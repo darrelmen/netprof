@@ -45,7 +45,6 @@ import java.util.Map;
  */
 public class Navigation implements RequiresResize {
   private static final String CHAPTERS = "Chapters";
-  //private static final boolean SHOW_CREATED = false;
   private static final String YOUR_LISTS = "Your Lists";
   private static final String PRACTICE = "Practice";
   private static final String REVIEW = "review";
