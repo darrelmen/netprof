@@ -83,7 +83,7 @@ public class PagingContainer<T extends ExerciseShell> {
   public T getByID(String id) {
     for (T t : getList()) {
       if (t.getID().equals(id)) {
-        System.out.println("PagingContainer.getByID : Found " + t);
+        //System.out.println("PagingContainer.getByID : Found " + t);
         return t;
       }
     }
@@ -95,11 +95,7 @@ public class PagingContainer<T extends ExerciseShell> {
     refresh();
   }
 
-  public void setUnaccountedForVertical(int v) {
-     verticalUnaccountedFor = v;
-    System.out.println("PagingContainer.setUnaccountedForVertical : verticalUnaccountedFor " + v);
-
-  }
+  public void setUnaccountedForVertical(int v) {  verticalUnaccountedFor = v;  }
 
   public interface TableResources extends CellTable.Resources {
     /**
