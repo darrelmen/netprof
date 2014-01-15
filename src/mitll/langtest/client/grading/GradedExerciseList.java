@@ -56,7 +56,7 @@ public class GradedExerciseList<T extends ExerciseShell> extends PagingExerciseL
     pagingContainer.selectFirst();
   }
   /**
-   * @see #loadExercise(mitll.langtest.shared.ExerciseShell)
+   * @see mitll.langtest.client.list.ListInterface#loadExercise(mitll.langtest.shared.ExerciseShell)
    * @param exerciseShell
    */
   @Override
@@ -76,7 +76,7 @@ public class GradedExerciseList<T extends ExerciseShell> extends PagingExerciseL
   }
 
   /**
-   * @see #loadNextExercise(mitll.langtest.shared.ExerciseShell)
+   * @see mitll.langtest.client.list.ListInterface#loadNextExercise(mitll.langtest.shared.ExerciseShell)
    * @param current
    */
   @Override
