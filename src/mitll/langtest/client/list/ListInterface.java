@@ -9,9 +9,7 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -54,29 +52,30 @@ public interface ListInterface<T extends ExerciseShell> extends RequiresResize {
 
   Widget getExerciseListOnLeftSide(PropertyHandler props);
 
-  void loadExercise(ExerciseShell exerciseShell);
+  <S extends ExerciseShell> void loadExercise(S exerciseShell);
 
   boolean loadNext();
 
   /**
+   *
    * @param current
    * @return
-   * @see mitll.langtest.client.list.ExerciseList#loadNextExercise
+   * @see ListInterface#loadNextExercise
    */
-  boolean loadNextExercise(ExerciseShell current);
+  <S extends ExerciseShell> boolean loadNextExercise(S current);
 
   boolean loadNextExercise(String id);
   Panel makeExercisePanel(Exercise result);
 
   boolean loadPrev();
 
-  boolean loadPreviousExercise(ExerciseShell current);
+  <S extends ExerciseShell> boolean loadPreviousExercise(S current);
 
   public String getCurrentExerciseID();
 
   boolean onFirst();
-  boolean onFirst(ExerciseShell current);
-  boolean onLast(ExerciseShell current);
+  <S extends ExerciseShell> boolean onFirst(S current);
+  <S extends ExerciseShell> boolean onLast(S current);
   /**
    * @see mitll.langtest.client.LangTest#resetState()
    */
@@ -95,6 +94,9 @@ public interface ListInterface<T extends ExerciseShell> extends RequiresResize {
   void addCompleted(String id);
 
 //  void setSelectionState(Map<String,Collection<String>> selectionState);
+
+ // <S extends ExerciseShell> void forgetExercise(S es);
+  void forgetExercise(T es);
 
   void hideExerciseList();
 
