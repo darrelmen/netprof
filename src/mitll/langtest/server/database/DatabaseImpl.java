@@ -80,6 +80,7 @@ public class DatabaseImpl implements Database {
   private SiteDAO siteDAO;
   private UserListManager userListManager;
   private UserExerciseDAO userExerciseDAO;
+  UserListDAO userListDAO;
 
   private DatabaseConnection connection = null;
   private MonitoringSupport monitoringSupport;
@@ -147,7 +148,7 @@ public class DatabaseImpl implements Database {
    */
   private void initializeDAOs(PathHelper pathHelper) {
     userDAO = new UserDAO(this);
-    UserListDAO userListDAO = new UserListDAO(this, userDAO);
+     userListDAO = new UserListDAO(this, userDAO);
 
     userExerciseDAO = new UserExerciseDAO(this);
     UserListExerciseJoinDAO userListExerciseJoinDAO = new UserListExerciseJoinDAO(this);
@@ -303,6 +304,7 @@ public class DatabaseImpl implements Database {
       }
       userExerciseDAO.setExerciseDAO(exerciseDAO);
       exerciseDAO.setUserExerciseDAO(userExerciseDAO);
+      userListDAO.setExerciseDAO(exerciseDAO);
     }
   }
 
@@ -1292,7 +1294,7 @@ public class DatabaseImpl implements Database {
    * @param questionID
    * @param answer
    * @see mitll.langtest.server.LangTestDatabaseImpl#addTextAnswer(int, mitll.langtest.shared.Exercise, int, String)
-   * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers(mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise)
+   * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers
    */
   public void addAnswer(int userID, Exercise e, int questionID, String answer) {
     addAnswer(userID, e, questionID, answer, true);
