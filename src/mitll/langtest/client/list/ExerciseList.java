@@ -102,20 +102,36 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     this.allowPlusInURL = controller.getProps().shouldAllowPlusInURL();
     this.controller = controller;
     this.instance = instance;
-    getElement().setId("ExerciseList");
-    //System.out.println("ExerciseList : got instance  " + instance);
+    getElement().setId("ExerciseList_"+instance);
+    System.out.println("\n\n\tExerciseList : got instance  " + instance);
 
     // Add history listener
-    handlerRegistration = History.addValueChangeHandler(this);
+
+    if (handlerRegistration == null) {
+      handlerRegistration = History.addValueChangeHandler(this);
+    }
   }
 
   private HandlerRegistration handlerRegistration;
 
   @Override
+  protected void onLoad() {
+    super.onLoad();
+    System.out.println("ExerciseList : History onLoad  " + instance);
+
+    if (handlerRegistration == null) {
+    handlerRegistration = History.addValueChangeHandler(this);
+    }
+  }
+
+  @Override
   protected void onUnload() {
     super.onUnload();
 
+    System.out.println("ExerciseList : History onUnload  " + instance);
+
     handlerRegistration.removeHandler();
+    handlerRegistration = null;
   }
 
   private void addWidgets(final Panel currentExerciseVPanel) {
@@ -324,8 +340,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   }
 
   @Override
- // public <S extends ExerciseShell> void forgetExercise(S es) {
-    public void forgetExercise(T es) {
+  public void forgetExercise(T es) {
     String id = es.getID();
     T current = getCurrent();
     if (current.getID().equals(id)) {
@@ -612,12 +627,13 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * @param current
    */
   protected void getNextExercise(ExerciseShell current) {
-    System.out.println("getNextExercise " + current);
+    System.out.println("ExerciseList.getNextExercise " + current);
 
     int i = getIndex(current);
-    if (i == -1)
-      System.err.println("ExerciseList.getNextExercise : huh? couldn't find " + current + " in " + currentExercises.size() + " exercises : " + idToExercise.keySet());
-    else {
+    if (i == -1) {
+      System.err.println("ExerciseList.getNextExercise : huh? couldn't find " + current +
+          " in " + currentExercises.size() + " exercises : " + idToExercise.keySet());
+    } else {
       T next = currentExercises.get(i + 1);
       loadExercise(next);
     }
