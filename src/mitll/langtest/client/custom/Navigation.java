@@ -57,8 +57,8 @@ public class Navigation implements RequiresResize {
   private static final String CHAPTERS = "Chapters";
   private static final String YOUR_LISTS = "Your Lists";
   private static final String PRACTICE = "Practice";
-  private static final String REVIEW = "review";
-  private static final String COMMENT = "comment";
+  public static final String REVIEW = "review";
+  public static final String COMMENT = "comment";
   private final ExerciseController controller;
   private LangTestDatabaseAsync service;
   private UserManager userManager;
@@ -193,8 +193,6 @@ public class Navigation implements RequiresResize {
 
     return tabPanel;
   }
-
- // public void checkMode() {}
 
   private TabAndContent makeTab(TabPanel toAddTo, IconType iconType, String label) {
     Tab create = new Tab();
@@ -656,6 +654,9 @@ public class Navigation implements RequiresResize {
       delete.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(final ClickEvent event) {
+
+          System.out.println("deleteList " + ul.getUniqueID());
+
           service.deleteList(ul.getUniqueID(), new AsyncCallback<Boolean>() {
             @Override
             public void onFailure(Throwable caught) {}
@@ -663,10 +664,11 @@ public class Navigation implements RequiresResize {
             @Override
             public void onSuccess(Boolean result) {
               if (result) {
-/*                w.getParent().removeFromParent();
-                event.stopPropagation();*/
-
                 refreshViewLessons();
+              }
+              else {
+                System.err.println("---> did not do deleteList " + ul.getUniqueID());
+
               }
             }
           });
