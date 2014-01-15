@@ -5,6 +5,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.ExerciseShell;
 
 /**
  * Does fancy flashing record bulb while recording.
@@ -25,7 +26,7 @@ public class WaveformExercisePanel extends ExercisePanel {
    * @param controller
    */
   public WaveformExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
-                                   final ExerciseController controller, ListInterface exerciseList) {
+                                   final ExerciseController controller, ListInterface<Exercise> exerciseList) {
     super(e, service, userFeedback, controller, exerciseList);
     getElement().setId("WaveformExercisePanel");
   }
@@ -77,7 +78,7 @@ public class WaveformExercisePanel extends ExercisePanel {
    * @param completedExercise
    */
   @Override
-  public void postAnswers(ExerciseController controller, Exercise completedExercise) {
+  public void postAnswers(ExerciseController controller, ExerciseShell completedExercise) {
     exerciseList.loadNextExercise(completedExercise);
   }
 }
