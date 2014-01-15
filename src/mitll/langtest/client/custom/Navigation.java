@@ -1,5 +1,6 @@
 package mitll.langtest.client.custom;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
@@ -7,6 +8,7 @@ import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Tab;
 import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
@@ -19,7 +21,15 @@ import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.FocusPanel;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
@@ -70,8 +80,8 @@ public class Navigation implements RequiresResize {
     this.listInterface = listInterface;
     npfHelper = new NPFHelper(service, feedback, userManager, controller);
     avpHelper = new AVPHelper(service, feedback, userManager, controller);
-    editItem = new EditItem<UserExercise>(service, userManager, controller, listInterface, feedback);
-    reviewItem = new ReviewEditItem<UserExercise>(service, userManager, controller, listInterface, feedback);
+    editItem = new EditItem<UserExercise>(service, userManager, controller, listInterface, feedback, npfHelper);
+    reviewItem = new ReviewEditItem<UserExercise>(service, userManager, controller, listInterface, feedback, npfHelper);
   }
 
   /**
@@ -526,6 +536,15 @@ public class Navigation implements RequiresResize {
     private final ScrollPanel listScrollPanel;
     private String instanceName;
 
+    /**
+     * @see #viewComments(com.google.gwt.user.client.ui.Panel)
+     * @see #viewLessons(com.google.gwt.user.client.ui.Panel, boolean)
+     * @see #viewReview(com.google.gwt.user.client.ui.Panel)
+     * @param contentPanel
+     * @param child
+     * @param listScrollPanel
+     * @param instanceName
+     */
     public UserListCallback(Panel contentPanel, Panel child, ScrollPanel listScrollPanel, String instanceName) {
       this.contentPanel = contentPanel;
       this.child = child;
@@ -610,11 +629,10 @@ public class Navigation implements RequiresResize {
     }
   }
 
-  Map<UserList, HTML> listToMarker = new HashMap<UserList, HTML>();
+  private Map<UserList, HTML> listToMarker = new HashMap<UserList, HTML>();
 
-  private void addWidgetsForList(UserList ul, FluidContainer w) {
+  private void addWidgetsForList(final UserList ul, final FluidContainer w) {
     FluidRow r1 = new FluidRow();
-    w.add(r1);
 
 
     //FlowPanel fp = new FlowPanel();
@@ -627,9 +645,35 @@ public class Navigation implements RequiresResize {
     //  itemMarker = new Heading(3, ul.getExercises().size() + " items");
     HTML itemMarker = new HTML(ul.getExercises().size() + " items");
     itemMarker.addStyleName("numItemFont");
-    listToMarker.put(ul,itemMarker);
+    listToMarker.put(ul, itemMarker);
     //   itemMarker.addStyleName("floatRight");
     r1.add(new Column(3, itemMarker));
+    if (isYourList(ul)) {
+      Button delete = new Button("Delete");
+      delete.addStyleName("topMargin");
+      delete.setType(ButtonType.WARNING);
+      r1.add(new Column(3, delete));
+      delete.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(final ClickEvent event) {
+          service.deleteList(ul.getUniqueID(), new AsyncCallback<Boolean>() {
+            @Override
+            public void onFailure(Throwable caught) {}
+
+            @Override
+            public void onSuccess(Boolean result) {
+              if (result) {
+/*                w.getParent().removeFromParent();
+                event.stopPropagation();*/
+
+                refreshViewLessons();
+              }
+            }
+          });
+        }
+      });
+    }
+    w.add(r1);
     //    fp.add(itemMarker);
 /*
         r1 = new FluidRow();
@@ -649,11 +693,15 @@ public class Navigation implements RequiresResize {
       r1.add(getUserListText2(ul.getClassMarker()));
     }
 
-    if (createdByYou(ul) && !ul.getName().equals(UserList.MY_LIST)) {
+    if (isYourList(ul)) {
       r1 = new FluidRow();
       w.add(r1);
       r1.add(new HTML("<b>Created by you.</b>"));
     }
+  }
+
+  private boolean isYourList(UserList ul) {
+    return createdByYou(ul) && !ul.getName().equals(UserList.MY_LIST);
   }
 
   private Widget getUserListText(String content) {
