@@ -20,11 +20,14 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class UserListVisitorJoinDAO extends DAO {
+  public static final String UNIQUEID = "uniqueid";
+  public static final String USERLISTID = "userlistid";
+  public static final String VISITORID = "visitorid";
   private static Logger logger = Logger.getLogger(UserListVisitorJoinDAO.class);
 
   public static final String USER_EXERCISE_LIST_VISITOR = "userexerciselist_visitor";
 
-  public UserListVisitorJoinDAO(Database database, UserDAO userDAO) {
+  public UserListVisitorJoinDAO(Database database) {
     super(database);
     try {
       createUserListTable(database);
@@ -40,13 +43,22 @@ public class UserListVisitorJoinDAO extends DAO {
     statement = connection.prepareStatement("CREATE TABLE if not exists " +
       USER_EXERCISE_LIST_VISITOR +
       " (" +
-      "uniqueid IDENTITY, " +
-      "userlistid LONG, " +
-      "visitorid LONG, " +
-      "FOREIGN KEY(userlistid) REFERENCES " +
+      UNIQUEID +
+      " IDENTITY, " +
+      USERLISTID +
+      " LONG, " +
+      VISITORID +
+      " LONG, " +
+      "FOREIGN KEY(" +
+      USERLISTID +
+      ") REFERENCES " +
       UserListDAO.USER_EXERCISE_LIST +
-      "(uniqueid)," +
-      "FOREIGN KEY(visitorid) REFERENCES " +
+      "(" +
+      UNIQUEID +
+      ")," +
+      "FOREIGN KEY(" +
+      VISITORID +
+      ") REFERENCES " +
       UserDAO.USERS +
       "(ID)" +
       ")");
@@ -81,7 +93,11 @@ public class UserListVisitorJoinDAO extends DAO {
         ") ";*/
       statement = connection.prepareStatement(
         /*prefix +*/ "INSERT INTO " + USER_EXERCISE_LIST_VISITOR +
-          "(userlistid,visitorid) " +
+          "(" +
+        USERLISTID +
+        "," +
+        VISITORID +
+        ") " +
           "VALUES(?,?);");
       int i = 1;
       //     statement.setLong(i++, userList.getUserID());
@@ -172,7 +188,11 @@ public class UserListVisitorJoinDAO extends DAO {
 
   private boolean existsAlready(long uniqueID, long visitor) {
     //String unique = exid.substring("Custom_".length());
-    String sql = "SELECT * from " + USER_EXERCISE_LIST_VISITOR + " where userlistid=" + uniqueID + " AND visitorid="+visitor;
+    String sql = "SELECT * from " + USER_EXERCISE_LIST_VISITOR + " where " +
+      USERLISTID +
+      "=" + uniqueID + " AND " +
+      VISITORID +
+      "="+visitor;
 
     try {
       return !getVisitors(sql).isEmpty();
@@ -185,7 +205,9 @@ public class UserListVisitorJoinDAO extends DAO {
 
   public Set<Long> getWhere(long listid) {
     //String unique = exid.substring("Custom_".length());
-    String sql = "SELECT * from " + USER_EXERCISE_LIST_VISITOR + " where userlistid=" + listid;
+    String sql = "SELECT * from " + USER_EXERCISE_LIST_VISITOR + " where " +
+      USERLISTID +
+      "=" + listid;
     try {
       return getVisitors(sql);
     } catch (SQLException e) {
@@ -199,11 +221,15 @@ public class UserListVisitorJoinDAO extends DAO {
     ResultSet rs = statement.executeQuery();
     Set<Long> visitors = new HashSet<Long>();
 
-    while (rs.next()) { visitors.add(rs.getLong("visitorid")); }
+    while (rs.next()) { visitors.add(rs.getLong(VISITORID)); }
     rs.close();
     statement.close();
     database.closeConnection(connection);
 
     return visitors;
+  }
+
+  public boolean remove(long listid) {
+    return remove(USER_EXERCISE_LIST_VISITOR,USERLISTID,listid);
   }
 }
