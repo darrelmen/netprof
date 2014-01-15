@@ -15,9 +15,12 @@ import mitll.langtest.shared.ExerciseShell;
 class PrevNextList<T extends ExerciseShell> extends HorizontalPanel {
   private Button prev, next;
   private ListInterface<T> container;
+  boolean disableNext = true;
 
-  public PrevNextList(final T exerciseShell, ListInterface<T> listContainer) {
+  public PrevNextList(final T exerciseShell, ListInterface<T> listContainer, boolean disableNext) {
     this.container = listContainer;
+    this.disableNext = disableNext;
+    System.out.println("Disable next " + disableNext);
     makePrevButton(exerciseShell);
     makeNextButton(exerciseShell);
     addStyleName("marginBottomTen");
@@ -39,7 +42,7 @@ class PrevNextList<T extends ExerciseShell> extends HorizontalPanel {
   private void makeNextButton(final T exercise) {
     this.next = new Button("Next");
     next.setType(ButtonType.SUCCESS);
-    next.setEnabled(!container.onLast(exercise));
+    next.setEnabled(!disableNext || !container.onLast(exercise));
 
     add(next);
 
@@ -64,7 +67,7 @@ class PrevNextList<T extends ExerciseShell> extends HorizontalPanel {
   protected void clickNext() {
     if (next.isEnabled() && next.isVisible()) {
       boolean onLast = container.loadNext();
-      next.setEnabled(!onLast);
+      next.setEnabled(!disableNext || !onLast);
       if (!container.onFirst()) prev.setEnabled(true);
     }
   }
