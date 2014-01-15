@@ -31,14 +31,16 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
   private static final String FIXED = "Fixed";
 
   /**
+   *
    * @param service
    * @param userManager
    * @param controller
+   * @param npfHelper
    * @see Navigation#Navigation
    */
   public ReviewEditItem(final LangTestDatabaseAsync service, final UserManager userManager, ExerciseController controller,
-                        ListInterface<? extends ExerciseShell> listInterface, UserFeedback feedback) {
-    super(service, userManager, controller, listInterface, feedback);
+                        ListInterface<? extends ExerciseShell> listInterface, UserFeedback feedback, NPFHelper npfHelper) {
+    super(service, userManager, controller, listInterface, feedback, npfHelper);
   }
 
   /**
@@ -95,11 +97,12 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
 
     protected void doAfterEditComplete(PagingContainer<T> pagingContainer, String buttonName) {
       if (buttonName.equals(FIXED)) {
-        exerciseList.forgetExercise(exerciseList.byID(newUserExercise.getID()));
+        String id = newUserExercise.getID();
+        exerciseList.forgetExercise(id);
         if (!ul.remove(newUserExercise)) {
           System.err.println("\n\n\ndoAfterEditComplete : error - didn't remove");
         }
-        service.removeReviewed(newUserExercise.getID(), new AsyncCallback<Void>() {
+        service.removeReviewed(id, new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
           }
