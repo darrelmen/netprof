@@ -109,7 +109,7 @@ public class AnnotationDAO extends DAO {
       }
       logger.debug("unique id = " + id);
 
-      annotation.setUniqueID(id);
+//      /annotation.setUniqueID(id);
 
       statement.close();
       database.closeConnection(connection);
@@ -179,8 +179,8 @@ public class AnnotationDAO extends DAO {
     List<UserAnnotation> lists = new ArrayList<UserAnnotation>();
 
     while (rs.next()) {
-      long uniqueid = rs.getLong("uniqueid");
-      lists.add(new UserAnnotation(uniqueid, //id
+     // long uniqueid = rs.getLong("uniqueid");
+      lists.add(new UserAnnotation(//uniqueid, //id
           rs.getString("exerciseid"), // exp
           rs.getString("field"), // exp
           rs.getString("status"), // exp
