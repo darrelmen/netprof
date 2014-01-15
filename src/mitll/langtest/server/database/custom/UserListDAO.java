@@ -212,6 +212,7 @@ public class UserListDAO extends DAO {
    * @return
    */
   public UserList getWhere(long unique) {
+    if (unique == Long.MAX_VALUE) return null;
     String sql = "SELECT * from " + USER_EXERCISE_LIST + " where uniqueid=" + unique + " order by modified";
     try {
       List<UserList> lists = getUserLists(sql,-1);
