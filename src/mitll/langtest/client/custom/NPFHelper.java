@@ -145,11 +145,11 @@ public class NPFHelper implements RequiresResize {
       @Override
       public Panel getExercisePanel(Exercise e) {
         if (controller.getAudioType().equalsIgnoreCase(Result.AUDIO_TYPE_REVIEW)) {
-          //System.out.println("\nNPFHelper : making new QCNPFExercise for " +e + " instance " + instanceName);
+          System.out.println("\nNPFHelper : making new QCNPFExercise for " +e + " instance " + instanceName);
           return new QCNPFExercise(e, controller, exerciseList, 1.0f, false, instanceName);
         }
         else {
-          //System.out.println("\nmaking new CommentNPFExercise for " +e + " instance " + instanceName);
+          System.out.println("\nmaking new CommentNPFExercise for " +e + " instance " + instanceName);
           return new CommentNPFExercise(e, controller, exerciseList, 1.0f, false, instanceName);
         }
       }
