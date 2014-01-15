@@ -151,15 +151,15 @@ public class UserExerciseDAO extends DAO {
     String sql = getJoin(listID);
     
     try {
-      logger.debug("\tusing for user exercise = " +sql);
+      if (DEBUG) logger.debug("\tusing for user exercise = " +sql);
 
       List<UserExercise> userExercises = getUserExercises(sql);
-      logger.debug("\tfound " +userExercises.size()+ " exercises userExercises on list " +listID);
+      if (DEBUG) logger.debug("\tfound " +userExercises.size()+ " exercises userExercises on list " +listID);
 
       List<UserExercise> userExercises2 = new ArrayList<UserExercise>();
 
       for (UserExercise ue : userExercises) {
-        logger.debug("\ton list " +listID + " " + ue.getID() + " / " +ue.getUniqueID() + " : " + ue);
+        if (DEBUG) logger.debug("\ton list " +listID + " " + ue.getID() + " / " +ue.getUniqueID() + " : " + ue);
         if (ue.isPredefined()) {
           Exercise byID = getExercise(ue);
 
@@ -175,7 +175,7 @@ public class UserExerciseDAO extends DAO {
       }
 
       String join2 = getJoin2(listID);
-      logger.debug("\tusing exercise = " +join2);
+      if (DEBUG) logger.debug("\tusing exercise = " +join2);
       for (String exid : getExercises(join2)) {
         Exercise exercise = exerciseDAO.getExercise(exid);
         if (exercise != null) {
