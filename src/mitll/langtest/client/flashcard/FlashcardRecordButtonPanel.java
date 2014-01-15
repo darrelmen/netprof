@@ -310,7 +310,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
       Timer t = new Timer() {
         @Override
         public void run() {
-          controller.getExerciseList().loadNextExercise(exercise);
+          loadNext();
         }
       };
       int delay = getFeedbackLengthProportionalDelay(infoToShow);
@@ -370,7 +370,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
       Timer t = new Timer() {
         @Override
         public void run() {
-          controller.getExerciseList().loadNextExercise(exercise);
+          loadNext();
         }
       };
       int incorrectDelay = DELAY_MILLIS_LONG;
@@ -390,12 +390,16 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
         Timer t = new Timer() {
           @Override
           public void run() {
-            controller.getExerciseList().loadNextExercise(exercise);
+            loadNext();
           }
         };
         t.schedule(DELAY_MILLIS);
       }
     }
+  }
+
+  protected void loadNext() {
+    controller.getExerciseList().loadNextExercise(exercise);
   }
 
   /**
