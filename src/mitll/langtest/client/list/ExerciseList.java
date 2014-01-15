@@ -103,7 +103,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     this.controller = controller;
     this.instance = instance;
     getElement().setId("ExerciseList_"+instance);
-    System.out.println("\n\n\tExerciseList : got instance  " + instance);
+    //System.out.println("\n\n\tExerciseList : got instance  " + instance);
 
     // Add history listener
 
@@ -117,10 +117,10 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   @Override
   protected void onLoad() {
     super.onLoad();
-    System.out.println("ExerciseList : History onLoad  " + instance);
+//    System.out.println("ExerciseList : History onLoad  " + instance);
 
     if (handlerRegistration == null) {
-    handlerRegistration = History.addValueChangeHandler(this);
+      handlerRegistration = History.addValueChangeHandler(this);
     }
   }
 
@@ -128,7 +128,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   protected void onUnload() {
     super.onUnload();
 
-    System.out.println("ExerciseList : History onUnload  " + instance);
+  //  System.out.println("ExerciseList : History onUnload  " + instance);
 
     handlerRegistration.removeHandler();
     handlerRegistration = null;
@@ -330,15 +330,15 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     flush();
   }
 
-/*  public void addNewExercise(T es) {
-    currentExercises.add(es);
-  }*/
-
   private void rememberExercise(T es) {
     idToExercise.put(es.getID(),es);
     addExerciseToList(es);
   }
 
+  /**
+   * @see mitll.langtest.client.list.PagingExerciseList#forgetExercise(String)
+   * @param es
+   */
   @Override
   public void forgetExercise(T es) {
     String id = es.getID();
@@ -354,15 +354,13 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
 
     idToExercise.remove(id);
     currentExercises.remove(current);
-    if (currentExercises.isEmpty()) removeCurrentExercise();
+    if (currentExercises.isEmpty()) {
+      removeCurrentExercise();
+    }
   }
-
-  //public void setSelectionState(Map<String, Collection<String>> selectionState) {}
 
   @Override
-  public void hideExerciseList() {
-    getParent().setVisible(false);
-  }
+  public void hideExerciseList() {  getParent().setVisible(false);  }
 
   /**
    * @see #rememberExercises
@@ -453,7 +451,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     return currentExercises.get(0);
   }
 
-  public T byID(String name) {
+  protected T byID(String name) {
     return idToExercise == null ? null : idToExercise.get(name);
   }
 
@@ -661,6 +659,9 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     return visited.size();
   }
 
+  /**
+   * @see #forgetExercise(mitll.langtest.shared.ExerciseShell)
+   */
   @Override
   public void removeCurrentExercise() {
     Widget current = innerContainer.getWidget();
@@ -668,6 +669,9 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
       if (!innerContainer.remove(current)) {
         System.err.println("\tdidn't remove current widget");
       }
+    }
+    else {
+      System.err.println("\tno inner current widget?");
     }
   }
 
