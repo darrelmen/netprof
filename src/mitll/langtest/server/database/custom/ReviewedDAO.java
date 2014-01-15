@@ -35,8 +35,9 @@ public class ReviewedDAO extends DAO {
   }
 
   /**
-   *   String exerciseID; String field; String status; String comment;
-   String userID;
+   * String exerciseID; String field; String status; String comment;
+   * String userID;
+   *
    * @param database
    * @throws java.sql.SQLException
    */
@@ -50,7 +51,7 @@ public class ReviewedDAO extends DAO {
       "uniqueid IDENTITY, " +
       "creatorid LONG, " +
       "exerciseid VARCHAR, " +
-      "modified TIMESTAMP,"+
+      "modified TIMESTAMP," +
       "FOREIGN KEY(creatorid) REFERENCES " +
       "USERS" +
       "(ID)" +
@@ -76,9 +77,7 @@ public class ReviewedDAO extends DAO {
       logger.info("add :reviewed " + exerciseID + " by " + creatorID);
 
       Connection connection = database.getConnection();
-      PreparedStatement statement;
-
-      statement = connection.prepareStatement(
+      PreparedStatement statement = connection.prepareStatement(
         "INSERT INTO " + REVIEWED +
           "(creatorid,exerciseid,modified) " +
           "VALUES(?,?,?);");
@@ -104,15 +103,51 @@ public class ReviewedDAO extends DAO {
       statement.close();
       database.closeConnection(connection);
 
-    logger.debug("now " + getCount() + " reviewed");
+      logger.debug("now " + getCount() + " reviewed");
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
   }
 
-  public int getCount() { return getCount(REVIEWED); }
+  public void remove(String exerciseID) {
+    try {
+     // int before = getCount();
 
-  public Set<String> getReviewed()  {
+      Connection connection = database.getConnection();
+      PreparedStatement statement = connection.prepareStatement(
+        "DELETE FROM " + REVIEWED +
+          " WHERE exerciseid='" + exerciseID +
+          "'");
+
+      int j = statement.executeUpdate();
+
+      if (j != 1)
+        logger.error("huh? didn't insert row for ");// + grade + " grade for " + resultID + " and " + grader + " and " + gradeID + " and " + gradeType);
+/*
+      ResultSet rs = statement.getGeneratedKeys(); // will return the ID in ID_COLUMN
+      if (rs.next()) {
+        id = rs.getLong(1);
+      } else {
+        logger.error("huh? no key was generated?");
+      }
+      logger.debug("unique id = " + id);*/
+
+      statement.close();
+      database.closeConnection(connection);
+
+   //   int count = getCount();
+  //    logger.debug("now " + count + " reviewed");
+   //   if (before-count != 1) logger.error("ReviewedDAO : huh? there were " +before +" before");
+    } catch (Exception ee) {
+      logger.error("got " + ee, ee);
+    }
+  }
+
+  public int getCount() {
+    return getCount(REVIEWED);
+  }
+
+  public Set<String> getReviewed() {
     Connection connection = database.getConnection();
     String sql = "SELECT DISTINCT exerciseid from " + REVIEWED + " order by exerciseid";
 
@@ -126,12 +161,12 @@ public class ReviewedDAO extends DAO {
         lists.add(rs.getString(1));
       }
 
-     // logger.debug("getUserAnnotations sql " + sql + " yielded " + lists);
+      logger.debug("getReviewed sql " + sql + " yielded " + lists.size());
       rs.close();
       statement.close();
       database.closeConnection(connection);
     } catch (SQLException e) {
-      logger.error("Got " +e + " doing " + sql,e);
+      logger.error("Got " + e + " doing " + sql, e);
     }
     return lists;
   }
