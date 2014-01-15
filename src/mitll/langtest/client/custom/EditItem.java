@@ -187,13 +187,17 @@ public class EditItem<T extends ExerciseShell> {
     public Panel addNew(UserList ul, PagingContainer<T> pagingContainer, Panel toAddTo) {
       final Panel widgets = super.addNew(ul, pagingContainer, toAddTo);
       final T exerciseShell = pagingContainer.getByID(newUserExercise.getID());
-      widgets.add(new PrevNextList<T>(exerciseShell, exerciseList));
+      widgets.add(new PrevNextList<T>(exerciseShell, exerciseList, shouldDisableNext()));
       this.ul = ul;
       return widgets;
     }
 
+    protected boolean shouldDisableNext() {
+      return true;
+    }
+
     @Override
-    protected Panel getCreateButton(UserList ul, PagingContainer<T> pagingContainer, Panel toAddTo,
+    protected Panel getCreateButton(final UserList ul, PagingContainer<T> pagingContainer, Panel toAddTo,
                                     ControlGroup normalSpeedRecording, String buttonName
     ) {
       Button submit = makeCreateButton(ul, pagingContainer, toAddTo, english, foreignLang, rap, normalSpeedRecording, buttonName);
@@ -202,7 +206,7 @@ public class EditItem<T extends ExerciseShell> {
       row.addStyleName("marginBottomTen");
       submit.addStyleName("floatRight");
 
-      Button delete = new Button("Delete");
+      Button delete = new Button("Remove from list");
       DOM.setStyleAttribute(delete.getElement(), "marginRight", "5px");
       delete.setType(ButtonType.PRIMARY);
       delete.addStyleName("floatRight");
@@ -222,6 +226,7 @@ public class EditItem<T extends ExerciseShell> {
             @Override
             public void onSuccess(Boolean result) {
               exerciseList.forgetExercise(newUserExercise.getID());
+              ul.remove(newUserExercise.getID());
               npfHelper.reload();
             }
           });
@@ -236,7 +241,7 @@ public class EditItem<T extends ExerciseShell> {
      * @return
      */
     @Override
-    protected Panel makeEnglishRow(Panel container, boolean grabFocus) {
+    protected Panel makeEnglishRow(Panel container) {
       FluidRow row = new FluidRow();
       container.add(row);
       english = makeBoxAndAnno(row, "English", englishAnno);
@@ -247,7 +252,7 @@ public class EditItem<T extends ExerciseShell> {
      * @param container
      */
     @Override
-    protected void makeForeignLangRow(Panel container) {
+    protected FormField makeForeignLangRow(Panel container) {
       FluidRow row = new FluidRow();
       container.add(row);
       foreignLang = makeBoxAndAnno(row, controller.getLanguage(), foreignAnno);
@@ -258,6 +263,7 @@ public class EditItem<T extends ExerciseShell> {
           checkForForeignChange();
         }
       });*/
+      return null;
     }
 
     @Override

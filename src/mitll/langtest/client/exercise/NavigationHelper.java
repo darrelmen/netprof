@@ -109,12 +109,7 @@ public class NavigationHelper<T extends ExerciseShell> extends HorizontalPanel {
   private void makeNextButton(final T exercise, final ExerciseController controller, boolean addButtons) {
     this.next = new Button(getNextButtonText());
     next.setType(ButtonType.SUCCESS);
-    if (enableNextOnlyWhenAllCompleted) { // initially not enabled
-      next.setEnabled(false);
-    }
-    else {
-      next.setEnabled(!listContainer.onLast(exercise));
-    }
+    enableNext(exercise);
 
     if (addButtons)  add(next);
     if (controller.getProps().isBindNextToEnter()) next.setTitle(RIGHT_ARROW_TOOLTIP);
@@ -127,6 +122,15 @@ public class NavigationHelper<T extends ExerciseShell> extends HorizontalPanel {
         clickNext(controller, exercise);
       }
     });
+  }
+
+  protected void enableNext(T exercise) {
+    if (enableNextOnlyWhenAllCompleted) { // initially not enabled
+      next.setEnabled(false);
+    }
+    else {
+      next.setEnabled(!listContainer.onLast(exercise));
+    }
   }
 
   private void clickPrev(T e) {

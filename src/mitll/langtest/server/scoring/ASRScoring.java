@@ -147,7 +147,7 @@ public class ASRScoring extends Scoring {
     return true;
   }
 
-  public String getSegmented(String longPhrase) {
+  private String getSegmented(String longPhrase) {
     Collection<String> tokens = svDecoderHelper.getTokens(longPhrase);
     StringBuilder builder = new StringBuilder();
     for (String token : tokens) {
@@ -155,15 +155,14 @@ public class ASRScoring extends Scoring {
       builder.append(" ");
     }
     String s = builder.toString();
-    //logger.debug("getSegmented phrase '" + longPhrase + "' -> '" + s + "'");
+    logger.debug("getSegmented phrase '" + longPhrase + "' -> '" + s + "'");
 
     return s;
   }
 
-  public String segmentation(String phrase){
-    String s = longest_prefix(phrase, 0);
-    //logger.debug("phrase '" + phrase + "' -> '" + s + "'");
-    return s;
+  private String segmentation(String phrase){
+    return longest_prefix(phrase, 0);
+   // logger.debug("phrase '" + phrase + "' -> '" + s + "'");
   }
 
   private String longest_prefix(String phrase, int i){

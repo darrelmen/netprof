@@ -409,6 +409,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     if (currentExercises.isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
       noMatches();
       System.err.println("loadFirstExercise : current exercises is empty?");
+      removeCurrentExercise();
     } else {
       ExerciseShell toLoad = findFirstExercise();
 
