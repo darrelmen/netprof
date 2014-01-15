@@ -255,6 +255,10 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
     pagingContainer.addExerciseToList2(exercise);
   }
 
+  public void forgetExercise(String id) {
+    forgetExercise(byID(id));
+  }
+
   @Override
   public void forgetExercise(T es) {
     super.forgetExercise(es);

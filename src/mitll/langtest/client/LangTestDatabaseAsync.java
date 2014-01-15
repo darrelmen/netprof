@@ -167,4 +167,8 @@ public interface LangTestDatabaseAsync {
   void getCommentedList(AsyncCallback<UserList> async);
 
   void isValidForeignPhrase(String foreign, AsyncCallback<Boolean> async);
+
+  void deleteList(long id, AsyncCallback<Boolean> async);
+
+  void deleteItemFromList(long listid, String exid, AsyncCallback<Boolean> async);
 }
