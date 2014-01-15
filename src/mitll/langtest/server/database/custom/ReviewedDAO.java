@@ -101,11 +101,12 @@ public class ReviewedDAO extends DAO {
   public void remove(String exerciseID) {
     try {
      // int before = getCount();
-
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement(
           "DELETE FROM " + REVIEWED +
-              " WHERE exerciseid='" + exerciseID +
+              " WHERE " +
+            "exerciseid" +
+            "='" + exerciseID +
               "'");
 
       int j = statement.executeUpdate();
