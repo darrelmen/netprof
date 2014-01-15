@@ -475,10 +475,16 @@ public class UserListManager {
   }
 
   public boolean deleteList(long id) {
-    return listExists(id) && userListDAO.remove(id);
+    logger.debug("deleteList " + id);
+    userListExerciseJoinDAO.removeListRefs(id);
+    boolean b = listExists(id);
+    if (!b) logger.warn("\thuh? no list " + id);
+    return b && userListDAO.remove(id);
   }
 
   public boolean deleteItemFromList(long listid, String exid) {
+    logger.debug("deleteItemFromList " + listid + " " + exid);
+
     UserList userListByID = getUserListByID(listid);
     if (userListByID == null) return false;
     /*boolean remove =*/ userListByID.remove(exid);
