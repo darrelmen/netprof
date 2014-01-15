@@ -229,6 +229,7 @@ public class UserListManager {
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#reallyCreateNewItem
    * @see #addItemToUserList(long, mitll.langtest.shared.custom.UserExercise)
+   * @see mitll.langtest.client.custom.NewUserExercise#onClick(mitll.langtest.shared.custom.UserList, mitll.langtest.client.exercise.PagingContainer, com.google.gwt.user.client.ui.Panel)
    * @param userListID
    * @param userExercise
    */
@@ -237,7 +238,7 @@ public class UserListManager {
 
     UserList where = userListDAO.getWhere(userListID);
     if (where != null) {
-      userListExerciseJoinDAO.add(where, userExercise);
+      userListExerciseJoinDAO.add(where, userExercise.getUniqueID());
       userListDAO.updateModified(userListID);
     }
     if (where == null) {
