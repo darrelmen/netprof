@@ -1,5 +1,7 @@
 package mitll.langtest.server.database.custom;
 
+import java.util.Date;
+
 /**
  * Created with IntelliJ IDEA.
  * User: GO22670
@@ -8,18 +10,34 @@ package mitll.langtest.server.database.custom;
  * To change this template use File | Settings | File Templates.
  */
 public class UserAnnotation {
-  private long uniqueID;
-  private String exerciseID; private String field; private String status; private String comment;
+ // private long uniqueID;
+  private String exerciseID;
+  private String field;
+  private String status;
+  private String comment;
   private long creatorID;
 
-   private long timestamp;
-  public UserAnnotation(long uniqueID,String exerciseID, String field, String status, String comment, long userID, long timestamp) {
-    this.uniqueID = uniqueID;
+  private long timestamp;
+
+  /**
+   * @param uniqueID
+   * @param exerciseID
+   * @param field
+   * @param status
+   * @param comment
+   * @param userID
+   * @param timestamp
+   * @see mitll.langtest.server.database.custom.AnnotationDAO#getUserAnnotations(String)
+   */
+  public UserAnnotation(/*long uniqueID,*/ String exerciseID, String field, String status, String comment, long userID,
+                        long timestamp) {
+  //  this.uniqueID = uniqueID;
     this.exerciseID = exerciseID;
     this.field = field;
     this.status = status;
-    this.comment =comment;
+    this.comment = comment;
     this.creatorID = userID;
+    this.timestamp = timestamp;
   }
 
 
@@ -51,9 +69,14 @@ public class UserAnnotation {
     this.timestamp = timestamp;
   }
 
+/*
   public void setUniqueID(long uniqueID) {
     this.uniqueID = uniqueID;
   }
+*/
 
-  public String toString() { return "Annotation " + getExerciseID() + "/"+ getField() + " : " + getStatus() +"/" + getComment() + " by " + getCreatorID();}
+  public String toString() {
+    return "Annotation " + getExerciseID() + "/" + getField() + " : " + getStatus() + "/" + getComment() +
+      " by " + getCreatorID() + " at " + new Date(getTimestamp());
+  }
 }
