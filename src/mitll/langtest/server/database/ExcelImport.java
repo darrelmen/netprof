@@ -152,15 +152,15 @@ public class ExcelImport implements ExerciseDAO {
   public void addOverlay(UserExercise userExercise) {
     logger.debug("addOverlay for " +userExercise);
     Exercise exercise = getExercise(userExercise.getID());
-    logger.debug("\taddOverlay at " +userExercise.getID() + " found " +exercise);
+    //logger.debug("\taddOverlay at " +userExercise.getID() + " found " +exercise);
 
     if (exercise == null) {
-      logger.error("huh? can't find " + userExercise);
+      logger.error("addOverlay : huh? can't find " + userExercise);
     }
     else {
       Exercise over = userExercise.toExercise();
 
-      logger.debug("\taddOverlay replacing with " +over + " and " +over.getTooltip());
+      //logger.debug("\taddOverlay replacing with " +over + " and " +over.getTooltip());
 
       synchronized (this) {
         int i = exercises.indexOf(exercise);
