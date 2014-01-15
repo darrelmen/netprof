@@ -1,10 +1,16 @@
 package mitll.langtest.client.custom;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.TextBox;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
@@ -44,6 +50,7 @@ import java.util.List;
 public class EditItem<T extends ExerciseShell> {
   public static final String CHANGE = "Change";
   private final ExerciseController controller;
+  private final NPFHelper npfHelper;
   private LangTestDatabaseAsync service;
   private UserManager userManager;
   protected ListInterface<? extends ExerciseShell> predefinedContentList;
@@ -53,15 +60,17 @@ public class EditItem<T extends ExerciseShell> {
    * @param service
    * @param userManager
    * @param controller
+   * @param npfHelper
    * @see mitll.langtest.client.custom.Navigation#Navigation
    */
   public EditItem(final LangTestDatabaseAsync service, final UserManager userManager, ExerciseController controller,
-                  ListInterface<? extends ExerciseShell> listInterface, UserFeedback feedback) {
+                  ListInterface<? extends ExerciseShell> listInterface, UserFeedback feedback, NPFHelper npfHelper) {
     this.controller = controller;
     this.service = service;
     this.userManager = userManager;
     this.predefinedContentList = listInterface;
     this.feedback = feedback;
+    this.npfHelper = npfHelper;
   }
 
   private HTML itemMarker;
@@ -183,6 +192,44 @@ public class EditItem<T extends ExerciseShell> {
       return widgets;
     }
 
+    @Override
+    protected Panel getCreateButton(UserList ul, PagingContainer<T> pagingContainer, Panel toAddTo,
+                                    ControlGroup normalSpeedRecording, String buttonName
+    ) {
+      Button submit = makeCreateButton(ul, pagingContainer, toAddTo, english, foreignLang, rap, normalSpeedRecording, buttonName);
+
+      Panel row = new DivWidget();
+      row.addStyleName("marginBottomTen");
+      submit.addStyleName("floatRight");
+
+      Button delete = new Button("Delete");
+      DOM.setStyleAttribute(delete.getElement(), "marginRight", "5px");
+      delete.setType(ButtonType.PRIMARY);
+      delete.addStyleName("floatRight");
+
+      row.add(delete);
+      row.add(submit);
+
+      final long uniqueID = ul.getUniqueID();
+      delete.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          service.deleteItemFromList(uniqueID, newUserExercise.getID(), new AsyncCallback<Boolean>() {
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+
+            @Override
+            public void onSuccess(Boolean result) {
+              exerciseList.forgetExercise(newUserExercise.getID());
+              npfHelper.reload();
+            }
+          });
+        }
+      });
+      return row;
+    }
+
     /**
      * @param container
      * @param grabFocus
@@ -291,8 +338,7 @@ public class EditItem<T extends ExerciseShell> {
       if (foreignChanged() &&
         (refAudioUnchanged() || slowRefAudioUnchanged())) {
         new DialogHelper(true).show("Invalidate audio?",
-          Arrays.asList("The " + controller.getLanguage() +
-            " has changed - should the audio be re-recorded?"), listener);
+          Arrays.asList("The " + controller.getLanguage() + " has changed - should the audio be re-recorded?"), listener);
         return true;
       } else return false;
     }
@@ -326,7 +372,7 @@ public class EditItem<T extends ExerciseShell> {
 
         @Override
         public void onSuccess(Void newExercise) {
-          System.out.println("\treallyChange : " + newUserExercise.getID() + " button " + buttonName);
+          //  System.out.println("\treallyChange : " + newUserExercise.getID() + " button " + buttonName);
 
           doAfterEditComplete(pagingContainer, buttonName);
         }
@@ -349,7 +395,6 @@ public class EditItem<T extends ExerciseShell> {
         System.err.println("changeTooltip : huh? can't find exercise with id " + newUserExercise.getID());
       } else {
         byID.setTooltip(newUserExercise.getEnglish());
-        // byID.setForeignLanguage(newUserExercise.getForeignLanguage());
         pagingContainer.refresh();   // show change to tooltip!
       }
     }
