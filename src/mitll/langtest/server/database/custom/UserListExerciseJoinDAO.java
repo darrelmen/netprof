@@ -10,9 +10,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -42,14 +39,14 @@ public class UserListExerciseJoinDAO extends DAO {
       " (" +
       "uniqueid IDENTITY, " +
       "userlistid LONG, " +
-      "exerciseid LONG, " +
+      "exerciseid VARCHAR , " +
       "FOREIGN KEY(userlistid) REFERENCES " +
       UserListDAO.USER_EXERCISE_LIST +
       "(uniqueid)" +    // user lists can be combinations of predefined and user defined exercises
-        "," +
+ /*       "," +
       "FOREIGN KEY(exerciseid) REFERENCES " +
       UserExerciseDAO.USEREXERCISE +
-      "(uniqueid)" +
+      "(uniqueid)" +*/
       ")");
     statement.execute();
     statement.close();
@@ -63,19 +60,13 @@ public class UserListExerciseJoinDAO extends DAO {
    *
    * @see UserListManager#reallyCreateNewItem(long, mitll.langtest.shared.custom.UserExercise)
    */
-  public void add(UserList userList, long uniqueID) {
-    long id = 0;
-
+  public void add(UserList userList, String uniqueID) {
     try {
       // there are much better ways of doing this...
-      //logger.info("UserListExerciseJoinDAO.add :userList " + userList + " exercise " + exercise);
-   //   long uniqueID = exercise.getUniqueID();
       logger.info("UserListExerciseJoinDAO.add :userList " + userList.getUniqueID() + " exercise " + uniqueID);
 
       Connection connection = database.getConnection();
-      PreparedStatement statement;
-
-      statement = connection.prepareStatement(
+      PreparedStatement statement = connection.prepareStatement(
         "INSERT INTO " + USER_EXERCISE_LIST_EXERCISE +
           "(userlistid," +
           "exerciseid" +
@@ -83,60 +74,19 @@ public class UserListExerciseJoinDAO extends DAO {
           "VALUES(?,?);");
       int i = 1;
       statement.setLong(i++, userList.getUniqueID());
-      statement.setLong(i++, uniqueID);
+      statement.setString(i++, uniqueID);
 
       int j = statement.executeUpdate();
 
       if (j != 1)
-        logger.error("huh? didn't insert row for ");// + grade + " grade for " + resultID + " and " + grader + " and " + gradeID + " and " + gradeType);
-
-      ResultSet rs = statement.getGeneratedKeys(); // will return the ID in ID_COLUMN
-      if (rs.next()) {
-        id = rs.getLong(1);
-      } else {
-        logger.error("huh? no key was generated?");
-      }
-      logger.debug("unique id = " + id);
+        logger.error("huh? didn't insert row for ");
 
       statement.close();
       database.closeConnection(connection);
 
-      logger.debug("\tUserListExerciseJoinDAO.add : now " + getCount(USER_EXERCISE_LIST_EXERCISE) + " and user exercise is " + userList);
+      //logger.debug("\tUserListExerciseJoinDAO.add : now " + getCount(USER_EXERCISE_LIST_EXERCISE) + " and user exercise is " + userList);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
-  }
-
-  /**
-   * Pulls the list of exercises out of the database.
-   * @see UserExerciseDAO#getOnList(long)
-   * @param exclude skip ones in this set of ids
-   * @return
-   */
-/*  public List<String> getAllFor(long userListID, Set<String> exclude) {
-    try {
-      String sql = "SELECT * from " + USER_EXERCISE_LIST_EXERCISE +" where userlistid=" + userListID ;
-      return getUserExercises(sql,exclude);
-    } catch (Exception ee) {
-      logger.error("got " + ee, ee);
-    }
-    return Collections.emptyList();
-  }*/
-
-  private List<String> getUserExercises(String sql, Set<String> exclude) throws SQLException {
-    Connection connection = database.getConnection();
-    PreparedStatement statement = connection.prepareStatement(sql);
-    ResultSet rs = statement.executeQuery();
-    List<String> exercises = new ArrayList<String>();
-
-    while (rs.next()) {
-      String exerciseid = rs.getString("exerciseid");
-      if (!exclude.contains(exerciseid)) exercises.add(exerciseid);
-    }
-    rs.close();
-    statement.close();
-    database.closeConnection(connection);
-
-    return exercises;
   }
 }
