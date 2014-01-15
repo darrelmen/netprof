@@ -55,7 +55,7 @@ public class SmallVocabDecoder {
       Collection<String> sentencesToUse = new ArrayList<String>(lmSentences);
       sentencesToUse.add(UNKNOWN_MODEL);
       for (String sentence : sentencesToUse) {
-        List<String> tokens = getTokens(sentence);
+        Collection<String> tokens = getTokens(sentence);
         //logger.debug("\tfor " + sentence + " tokens are " + tokens);
         int start = 0;
 
@@ -140,7 +140,7 @@ public class SmallVocabDecoder {
     return all;
   }
 
-  public List<String> getTokens(String sentence) {
+  public Collection<String> getTokens(String sentence) {
     List<String> all = new ArrayList<String>();
 
     for (String untrimedToken : sentence.split("\\p{Z}+")) { // split on spaces
