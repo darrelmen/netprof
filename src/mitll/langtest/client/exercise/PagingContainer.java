@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.custom.UserExercise;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -87,6 +88,17 @@ public class PagingContainer<T extends ExerciseShell> {
       }
     }
     return null;
+  }
+
+  public void forgetExercise(T es) {
+    getList().remove(es);
+    refresh();
+  }
+
+  public void setUnaccountedForVertical(int v) {
+     verticalUnaccountedFor = v;
+    System.out.println("PagingContainer.setUnaccountedForVertical : verticalUnaccountedFor " + v);
+
   }
 
   public interface TableResources extends CellTable.Resources {
@@ -341,7 +353,10 @@ public class PagingContainer<T extends ExerciseShell> {
     int header = getTableHeaderHeight();
     int leftOver = Window.getClientHeight() - header - verticalUnaccountedFor;
 
-    //System.out.println("Got on resize " + Window.getClientHeight() + " " + header + " result = " + leftOver);
+     System.out.println("getNumTableRowsGivenScreenHeight Got on resize " + Window.getClientHeight() +
+       " " + header + " result = " + leftOver + "(" +
+       verticalUnaccountedFor+
+       ")");
 
     float rawRatio = ((float) leftOver) / (float) heightOfCellTableWith15Rows();
     float tableRatio = Math.min(MAX_PAGES, rawRatio);
