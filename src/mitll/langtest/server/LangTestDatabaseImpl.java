@@ -1026,7 +1026,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.custom.QCNPFExercise#markReviewed(mitll.langtest.shared.Exercise)
+   * @see mitll.langtest.client.custom.QCNPFExercise#markReviewed
    * @param id
    * @param isCorrect
    * @param creatorID
@@ -1038,12 +1038,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
+  @Override
+  public void removeReviewed(String id) { db.getUserListManager().removeReviewed(id); }
+
   /**
    * @see mitll.langtest.client.custom.Navigation#viewReview
    * @return
    */
   @Override
   public UserList getReviewList() { return db.getUserListManager().getReviewList(); }
+  @Override
+  public UserList getCommentedList() { return db.getUserListManager().getCommentedList(); }
 
   /**
    * @see mitll.langtest.client.custom.NewUserExercise.CreateFirstRecordAudioPanel#makePostAudioRecordButton()
@@ -1055,15 +1060,20 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public UserExercise createNewItem(long userid, String english, String foreign, String transliteration) {
     logger.debug("create new item - " + foreign);
-    if (!audioFileHelper.checkLTS(foreign)) return null;
+   // if (!isValidForeignPhrase(foreign)) return null;
     return db.getUserListManager().createNewItem(userid, english, foreign, transliteration);
+  }
+
+  @Override
+  public boolean isValidForeignPhrase(String foreign) {
+    return audioFileHelper.checkLTS(foreign);
   }
 
   /**
    * Put the new item in the database,
    * copy the audio under bestAudio
    * assign the item to a user list
-   * @see mitll.langtest.client.custom.NewUserExercise#onClick(mitll.langtest.shared.custom.UserList, mitll.langtest.client.exercise.PagingContainer, com.google.gwt.user.client.ui.Panel)
+   * @see mitll.langtest.client.custom.NewUserExercise#onClick
    * @param userListID
    * @param userExercise
    */
@@ -1076,7 +1086,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.custom.EditItem.EditableExercise#onClick(mitll.langtest.shared.custom.UserList, mitll.langtest.client.exercise.PagingContainer, com.google.gwt.user.client.ui.Panel 
+   * @see mitll.langtest.client.custom.NewUserExercise#onClick(mitll.langtest.shared.custom.UserList, mitll.langtest.client.exercise.PagingContainer, com.google.gwt.user.client.ui.Panel, boolean)
    * @param userExercise
    */
   @Override
