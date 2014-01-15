@@ -118,9 +118,11 @@ public class HistoryExerciseList<T extends ExerciseShell> extends PagingExercise
     System.out.println(new Date() + "------------ HistoryExerciseList.pushNewItem : push history '" + historyToken + "' -------------- ");
 
     String token = History.getToken();
+    System.out.println("\tpushNewItem : current token '" + token + "' vs new id '" + exerciseID +"'");
+
     token = getSelectionFromToken(token);
-    getSelectionState(token);
-    //System.out.println("pushNewItem : current token '" + token + "' vs new id '" + exerciseID +"'");
+    //SelectionState selectionState = getSelectionState(token);
+    System.out.println("\tpushNewItem : current token '" + token + "' vs new id '" + exerciseID +"'");
     if (token != null && (historyToken.equals(token) || trimmedToken.equals(token))) {
       System.out.println("\tpushNewItem : current token '" + token + "' same as new " + historyToken);
       loadByIDFromToken(exerciseID);
@@ -327,6 +329,8 @@ public class HistoryExerciseList<T extends ExerciseShell> extends PagingExercise
      */
   @Override
   public void onValueChange(ValueChangeEvent<String> event) {
+    System.out.println(new Date() +" HistoryExerciseList.onValueChange : ------ start ----");
+
     String rawToken = getTokenFromEvent(event);
     System.out.println(new Date() +" HistoryExerciseList.onValueChange : ------ start: token is '" + rawToken +"' ----");
     SelectionState selectionState1 = getSelectionState(rawToken);
@@ -337,9 +341,6 @@ public class HistoryExerciseList<T extends ExerciseShell> extends PagingExercise
       System.out.println("onValueChange : skipping event " + rawToken + " for instance '" + instance1 +
           "' that is not mine "+instance);
       if (getCreatedPanel() == null) {
-/*
-        getExercises(controller.getUser(),false);
-*/
         noSectionsGetExercises(controller.getUser());
       }
       return;
