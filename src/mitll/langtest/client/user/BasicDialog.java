@@ -34,7 +34,6 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class BasicDialog {
-  //private EnterKeyButtonHelper enterKeyButtonHelper = new EnterKeyButtonHelper();
   private List<Popover> visiblePopovers = new ArrayList<Popover>();
 
   protected FormField addControlFormField(Panel dialogBox, String label) {
