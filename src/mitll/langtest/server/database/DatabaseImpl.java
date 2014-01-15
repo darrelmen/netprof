@@ -304,7 +304,7 @@ public class DatabaseImpl implements Database {
       }
       userExerciseDAO.setExerciseDAO(exerciseDAO);
       exerciseDAO.setUserExerciseDAO(userExerciseDAO);
-      userListDAO.setExerciseDAO(exerciseDAO);
+      //userListDAO.setExerciseDAO(exerciseDAO);
     }
   }
 
