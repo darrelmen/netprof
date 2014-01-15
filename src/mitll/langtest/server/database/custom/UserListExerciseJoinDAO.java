@@ -63,13 +63,14 @@ public class UserListExerciseJoinDAO extends DAO {
    *
    * @see UserListManager#reallyCreateNewItem(long, mitll.langtest.shared.custom.UserExercise)
    */
-  public void add(UserList userList, UserExercise exercise) {
+  public void add(UserList userList, long uniqueID) {
     long id = 0;
 
     try {
       // there are much better ways of doing this...
-      logger.info("UserListExerciseJoinDAO.add :userList " + userList + " exercise " + exercise);
-      logger.info("UserListExerciseJoinDAO.add :userList " + userList.getUniqueID() + " exercise " + exercise.getUniqueID());
+      //logger.info("UserListExerciseJoinDAO.add :userList " + userList + " exercise " + exercise);
+   //   long uniqueID = exercise.getUniqueID();
+      logger.info("UserListExerciseJoinDAO.add :userList " + userList.getUniqueID() + " exercise " + uniqueID);
 
       Connection connection = database.getConnection();
       PreparedStatement statement;
@@ -78,14 +79,11 @@ public class UserListExerciseJoinDAO extends DAO {
         "INSERT INTO " + USER_EXERCISE_LIST_EXERCISE +
           "(userlistid," +
           "exerciseid" +
-          //"uniqueid" +
           ") " +
           "VALUES(?,?);");
       int i = 1;
-      //     statement.setLong(i++, userList.getUserID());
       statement.setLong(i++, userList.getUniqueID());
-    //  statement.setString(i++, exercise.getID());
-      statement.setLong(i++, exercise.getUniqueID());
+      statement.setLong(i++, uniqueID);
 
       int j = statement.executeUpdate();
 
