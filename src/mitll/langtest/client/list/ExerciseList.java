@@ -38,7 +38,6 @@ import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.ExerciseShell;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -103,11 +102,11 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     this.allowPlusInURL = controller.getProps().shouldAllowPlusInURL();
     this.controller = controller;
     this.instance = instance;
-
-    System.out.println("ExerciseList : got instance  " + instance);
+    getElement().setId("ExerciseList");
+    //System.out.println("ExerciseList : got instance  " + instance);
 
     // Add history listener
-     handlerRegistration = History.addValueChangeHandler(this);
+    handlerRegistration = History.addValueChangeHandler(this);
   }
 
   private HandlerRegistration handlerRegistration;
@@ -203,7 +202,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   /**
    * Calling this will result in an immediate call to onValueChange (reacting to the history change)
    *
-   * @see #loadExercise(mitll.langtest.shared.ExerciseShell)
+   * @see ListInterface#loadExercise(mitll.langtest.shared.ExerciseShell)
    * @see #pushFirstSelection(String)
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    * @param exerciseID
@@ -320,10 +319,30 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   }*/
 
   private void rememberExercise(T es) {
-    System.out.println("remember " + es + " class " +es.getClass());
     idToExercise.put(es.getID(),es);
     addExerciseToList(es);
   }
+
+  @Override
+ // public <S extends ExerciseShell> void forgetExercise(S es) {
+    public void forgetExercise(T es) {
+    String id = es.getID();
+    T current = getCurrent();
+    if (current.getID().equals(id)) {
+      if (!onLast(current)) {
+        loadNextExercise(current);
+      }
+      else if (!onFirst(current)) {
+        loadPreviousExercise(current);
+      }
+    }
+
+    idToExercise.remove(id);
+    currentExercises.remove(current);
+    if (currentExercises.isEmpty()) removeCurrentExercise();
+  }
+
+  //public void setSelectionState(Map<String, Collection<String>> selectionState) {}
 
   @Override
   public void hideExerciseList() {
@@ -337,8 +356,9 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
 
   /**
    * @see #rememberExercises
+   * @param e
    */
-  protected void addExerciseToList(final ExerciseShell e) {
+  protected void addExerciseToList(final T e) {
     final HTML w = makeAndAddExerciseEntry(e);
 
     w.addClickHandler(new ClickHandler() {
@@ -392,7 +412,8 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   /**
    */
   private void noMatches() {
-    final PopupPanel pleaseWait = showPleaseWait("No matches found. Please try a different search.");
+    String message = currentExercises.isEmpty() ? "No items yet." : "No matches found. Please try a different search.";
+    final PopupPanel pleaseWait = showPleaseWait(message);
 
     Timer t = new Timer() {
       @Override
@@ -417,7 +438,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     return currentExercises.get(0);
   }
 
-  public ExerciseShell byID(String name) {
+  public T byID(String name) {
     return idToExercise == null ? null : idToExercise.get(name);
   }
 
@@ -430,7 +451,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * @see #loadPreviousExercise
    * @param exerciseShell
    */
-  public void loadExercise(ExerciseShell exerciseShell) {
+  public <S extends ExerciseShell> void loadExercise(S exerciseShell) {
     pushNewItem(exerciseShell.getID());
   }
 
@@ -490,7 +511,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   }
 
   protected boolean loadByID(String id) {
-    ExerciseShell exerciseShell = byID(id);
+    T exerciseShell = byID(id);
     if (exerciseShell != null) {
       System.out.println("loading exercise " + id);
       loadExercise(exerciseShell);
@@ -587,7 +608,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   }
 
   /**
-   * @see #loadNextExercise(mitll.langtest.shared.ExerciseShell)
+   * @see ListInterface#loadNextExercise(mitll.langtest.shared.ExerciseShell)
    * @param current
    */
   protected void getNextExercise(ExerciseShell current) {
@@ -597,7 +618,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     if (i == -1)
       System.err.println("ExerciseList.getNextExercise : huh? couldn't find " + current + " in " + currentExercises.size() + " exercises : " + idToExercise.keySet());
     else {
-      ExerciseShell next = currentExercises.get(i + 1);
+      T next = currentExercises.get(i + 1);
       loadExercise(next);
     }
   }
@@ -608,7 +629,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * @return
    */
   private int getIndex(ExerciseShell current) {
-    ExerciseShell shell = idToExercise.get(current.getID());
+    T shell = idToExercise.get(current.getID());
     return shell != null ? currentExercises.indexOf(shell) : -1;
   }
 
@@ -663,7 +684,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * @return
    */
   @Override
-  public boolean loadNextExercise(ExerciseShell current) {
+  public <S extends ExerciseShell> boolean loadNextExercise(S current) {
     System.out.println("ExerciseList.loadNextExercise current is : " +current);
     int i = getIndex(current);
 
@@ -687,12 +708,12 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
 
   public boolean loadNextExercise(String id) {
     System.out.println("ExerciseList.loadNextExercise id = " + id);
-    ExerciseShell exerciseByID = getExerciseByID(id);
+    T exerciseByID = getExerciseByID(id);
     return exerciseByID != null && loadNextExercise(exerciseByID);
   }
 
-  private ExerciseShell getExerciseByID(String id) {
-    for (ExerciseShell e : currentExercises) {
+  private T getExerciseByID(String id) {
+    for (T e : currentExercises) {
       if (e.getID().equals(id)) {
         return e;
       }
@@ -701,7 +722,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   }
 
   /**
-   * @see #loadNextExercise(mitll.langtest.shared.ExerciseShell)
+   * @see ListInterface#loadNextExercise(mitll.langtest.shared.ExerciseShell)
    */
   protected void onLastItem() {
     PropertyHandler props = controller.getProps();
@@ -737,7 +758,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * @return
    */
   @Override
-  public boolean loadPreviousExercise(ExerciseShell current) {
+  public <S extends ExerciseShell> boolean loadPreviousExercise(S current) {
     int i = getIndex(current);
     boolean onFirst = i == 0;
     if (!onFirst) {
@@ -781,13 +802,13 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * @return
    */
   @Override
-  public boolean onFirst(ExerciseShell current) {
+  public <S extends ExerciseShell> boolean onFirst(S current) {
     //System.out.println("onFirst : of " +currentExercises.size() +", on first is " + current);
     return current == null || currentExercises.size() == 1 || getIndex(current) == 0;
   }
 
   @Override
-  public boolean onLast(ExerciseShell current) {
+  public <S extends ExerciseShell> boolean onLast(S current) {
     return current == null || currentExercises.size() == 1 || isOnLastItem(getIndex(current));
   }
 
