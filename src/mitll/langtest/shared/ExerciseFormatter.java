@@ -40,7 +40,7 @@ public class ExerciseFormatter {
     String translitHTML = translit.length() > 0 ?
       getSpanWrapper(TRANSLITERATION, translit)
       : "";
-    String translationHTML = english.length() > 0 ?//(!isEnglish && english.length() > 0) ?
+    String translationHTML = english != null && english.length() > 0 ?
       getSpanWrapper("Translation:", english) : "";
     String meaningHTML = (isEnglish && meaning.length() > 0) ?
       getSpanWrapper(ENGLISH_PROMPT, meaning) : "";
