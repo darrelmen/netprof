@@ -326,7 +326,7 @@ public class EditItem<T extends ExerciseShell> {
 
         @Override
         public void onSuccess(Void newExercise) {
-          System.err.println("\treallyChange : " + newUserExercise.getID());
+          System.out.println("\treallyChange : " + newUserExercise.getID() + " button " + buttonName);
 
           doAfterEditComplete(pagingContainer, buttonName);
         }
