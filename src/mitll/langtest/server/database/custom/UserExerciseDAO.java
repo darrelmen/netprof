@@ -285,22 +285,6 @@ public class UserExerciseDAO extends DAO {
     return null;
   }
 
-
-  /**
-   * Pulls the list of users out of the database.
-   *
-   * @return
-   */
-/*  public List<UserExercise> getAll() {
-    try {
-      String sql = "SELECT * from " + USEREXERCISE;
-      return getUserExercises(sql);
-    } catch (Exception ee) {
-      logger.error("got " + ee, ee);
-    }
-    return Collections.emptyList();
-  }*/
-
   private List<UserExercise> getUserExercises(String sql) throws SQLException {
     Connection connection = database.getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
