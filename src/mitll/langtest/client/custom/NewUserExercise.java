@@ -5,7 +5,6 @@ import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.google.gwt.core.client.Scheduler;
@@ -14,14 +13,10 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
@@ -83,9 +78,10 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     final FluidContainer container = new FluidContainer();
     container.addStyleName("greenBackground");
 
-    makeForeignLangRow(container);
+    FormField formField = makeForeignLangRow(container);
+    //focusOn(formField); // TODO put this back
     makeTranslitRow(container);
-    makeEnglishRow(container, true);
+    makeEnglishRow(container);
 
     // make audio row
     FluidRow row = new FluidRow();
@@ -117,20 +113,20 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     return addControlGroupEntry(row, "Normal speed reference recording", rap);
   }
 
-  protected Panel makeEnglishRow(Panel container, boolean grabFocus) {
+  protected Panel makeEnglishRow(Panel container) {
     FluidRow row = new FluidRow();
     container.add(row);
-    english = addControlFormField(row, "English", false,1);
+    english = addControlFormField(row, "English", false, 1);
 
-    if (grabFocus) focusOnEnglish(english);
     return row;
   }
 
-  protected void makeForeignLangRow(Panel container) {
+  protected FormField makeForeignLangRow(Panel container) {
     FluidRow row = new FluidRow();
     container.add(row);
     foreignLang = addControlFormField(row, controller.getLanguage(),false,1);
     foreignLang.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
+    return foreignLang;
   }
 
   protected void makeTranslitRow(Panel container) {
@@ -140,10 +136,10 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
  //   translit.box.setDirectionEstimator(false);   // automatically detect whether text is RTL
   }
 
-  protected void focusOnEnglish(final FormField english) {
+  private void focusOn(final FormField form) {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
-        english.box.setFocus(true);
+        form.box.setFocus(true);
       }
     });
   }
