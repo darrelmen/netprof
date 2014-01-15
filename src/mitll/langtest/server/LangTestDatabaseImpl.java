@@ -929,17 +929,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param exerciseID
    * @return
    */
-  public CountAndGradeID addGrade(String exerciseID, Grade toAdd) {
-    return db.addGrade(exerciseID, toAdd);
-  }
+  public CountAndGradeID addGrade(String exerciseID, Grade toAdd) {  return db.addGrade(exerciseID, toAdd);  }
 
   /**
    * @see mitll.langtest.client.grading.GradingResultManager#changeGrade(mitll.langtest.shared.grade.Grade)
    * @param toChange
    */
-  public void changeGrade(Grade toChange) {
-    db.changeGrade(toChange);
-  }
+  public void changeGrade(Grade toChange) { db.changeGrade(toChange);  }
 
   @Override
   public synchronized int userExists(String login) {
@@ -1047,6 +1043,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public UserList getReviewList() { return db.getUserListManager().getReviewList(); }
+
+  @Override
+  public boolean deleteList(long id) {
+    return db.getUserListManager().deleteList(id);
+  }
+
+  @Override
+  public boolean deleteItemFromList(long listid, String exid) {
+    return db.getUserListManager().deleteItemFromList(listid,exid);
+  }
+
   @Override
   public UserList getCommentedList() { return db.getUserListManager().getCommentedList(); }
 
