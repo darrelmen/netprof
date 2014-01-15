@@ -9,6 +9,8 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ResponseChoice;
 import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.ExerciseShell;
 
 /**
  * Created with IntelliJ IDEA.
@@ -17,7 +19,7 @@ import mitll.langtest.client.user.UserFeedback;
  * Time: 4:17 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ResponseExerciseList extends FlexSectionExerciseList {
+public class ResponseExerciseList<T extends ExerciseShell> extends FlexSectionExerciseList<T> {
   private ResponseChoice responseChoice;
 
   /**
