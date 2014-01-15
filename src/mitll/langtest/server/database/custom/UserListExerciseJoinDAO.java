@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
 
 /**
  * Created with IntelliJ IDEA.
@@ -27,6 +28,10 @@ public class UserListExerciseJoinDAO extends DAO {
 
   public static final String USER_EXERCISE_LIST_EXERCISE = "userexerciselist_exercise";
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(mitll.langtest.server.PathHelper)
+   * @param database
+   */
   public UserListExerciseJoinDAO(Database database) {
     super(database);
     try {
@@ -101,6 +106,10 @@ public class UserListExerciseJoinDAO extends DAO {
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
+  }
+
+  public void removeListRefs(long listid) {
+    remove(USER_EXERCISE_LIST_EXERCISE, USERLISTID, listid);
   }
 
   public boolean remove(long listid, String exid) {
