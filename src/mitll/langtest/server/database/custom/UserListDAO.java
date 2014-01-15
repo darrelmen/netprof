@@ -2,6 +2,7 @@ package mitll.langtest.server.database.custom;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.ExerciseDAO;
 import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
@@ -31,6 +32,7 @@ public class UserListDAO extends DAO {
   private UserDAO userDAO;
   private UserExerciseDAO userExerciseDAO;
   private UserListVisitorJoinDAO userListVisitorJoinDAO;
+  private ExerciseDAO exerciseDAO;
   public UserListDAO(Database database, UserDAO userDAO) {
     super(database);
     try {
@@ -192,6 +194,18 @@ public class UserListDAO extends DAO {
   }*/
 
   /**
+   * TODO don't want to always get all the exercises!
+   * @see UserListManager#getUserListByID(long)
+   * @param unique
+   * @return
+   */
+  public UserList getWithExercises(long unique) {
+    UserList where = getWhere(unique);
+    populateList(where);
+    return where;
+  }
+
+  /**
    * @see #getWithExercises(long)
    * @see mitll.langtest.server.database.custom.UserListManager#reallyCreateNewItem(long, mitll.langtest.shared.custom.UserExercise)
    * @param unique
@@ -211,18 +225,6 @@ public class UserListDAO extends DAO {
       logger.error("got " + e, e);
     }
     return null;
-  }
-
-  /**
-   * TODO don't want to always get all the exercises!
-   * @see UserListManager#getUserListByID(long)
-   * @param unique
-   * @return
-   */
-  public UserList getWithExercises(long unique) {
-    UserList where = getWhere(unique);
-    populateList(where);
-    return where;
   }
 
   private List<UserList> getUserLists(String sql,long userid) throws SQLException {
@@ -272,5 +274,9 @@ public class UserListDAO extends DAO {
 
   public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
     this.userExerciseDAO = userExerciseDAO;
+  }
+
+  public void setExerciseDAO(ExerciseDAO exerciseDAO) {
+    this.exerciseDAO = exerciseDAO;
   }
 }
