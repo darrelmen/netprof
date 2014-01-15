@@ -60,7 +60,6 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
   }
 
   private class ReviewEditableExercise extends EditableExercise {
-
     /**
      * @param itemMarker
      * @param changedUserExercise
@@ -69,6 +68,9 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
     public ReviewEditableExercise(HTML itemMarker, UserExercise changedUserExercise) {
       super(itemMarker, changedUserExercise);
     }
+
+    @Override
+    protected boolean shouldDisableNext() { return false; }
 
     @Override
     protected Panel getCreateButton(final UserList ul, final PagingContainer<T> pagingContainer, final Panel toAddTo,
