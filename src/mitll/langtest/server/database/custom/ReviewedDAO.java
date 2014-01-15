@@ -67,11 +67,9 @@ public class ReviewedDAO extends DAO {
    * <p/>
    * Uses return generated keys to get the user id
    *
-   * @see UserListManager#reallyCreateNewItem(long, mitll.langtest.shared.custom.UserExercise)
+   * @see UserListManager#markReviewed(String, long)
    */
   public void add(String exerciseID, long creatorID) {
-    long id = 0;
-
     try {
       // there are much better ways of doing this...
       logger.info("add :reviewed " + exerciseID + " by " + creatorID);
@@ -82,7 +80,6 @@ public class ReviewedDAO extends DAO {
           "(creatorid,exerciseid,modified) " +
           "VALUES(?,?,?);");
       int i = 1;
-      //     statement.setLong(i++, annotation.getUserID());
       statement.setLong(i++, creatorID);
       statement.setString(i++, exerciseID);
       statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));
@@ -90,15 +87,7 @@ public class ReviewedDAO extends DAO {
       int j = statement.executeUpdate();
 
       if (j != 1)
-        logger.error("huh? didn't insert row for ");// + grade + " grade for " + resultID + " and " + grader + " and " + gradeID + " and " + gradeType);
-/*
-      ResultSet rs = statement.getGeneratedKeys(); // will return the ID in ID_COLUMN
-      if (rs.next()) {
-        id = rs.getLong(1);
-      } else {
-        logger.error("huh? no key was generated?");
-      }
-      logger.debug("unique id = " + id);*/
+        logger.error("huh? didn't insert row for ");
 
       statement.close();
       database.closeConnection(connection);
@@ -115,22 +104,14 @@ public class ReviewedDAO extends DAO {
 
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement(
-        "DELETE FROM " + REVIEWED +
-          " WHERE exerciseid='" + exerciseID +
-          "'");
+          "DELETE FROM " + REVIEWED +
+              " WHERE exerciseid='" + exerciseID +
+              "'");
 
       int j = statement.executeUpdate();
 
       if (j != 1)
-        logger.error("huh? didn't insert row for ");// + grade + " grade for " + resultID + " and " + grader + " and " + gradeID + " and " + gradeType);
-/*
-      ResultSet rs = statement.getGeneratedKeys(); // will return the ID in ID_COLUMN
-      if (rs.next()) {
-        id = rs.getLong(1);
-      } else {
-        logger.error("huh? no key was generated?");
-      }
-      logger.debug("unique id = " + id);*/
+        logger.error("huh? didn't insert row for ");
 
       statement.close();
       database.closeConnection(connection);
