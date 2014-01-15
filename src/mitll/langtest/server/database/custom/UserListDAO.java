@@ -32,7 +32,7 @@ public class UserListDAO extends DAO {
   private UserDAO userDAO;
   private UserExerciseDAO userExerciseDAO;
   private UserListVisitorJoinDAO userListVisitorJoinDAO;
-  //private ExerciseDAO exerciseDAO;
+
   public UserListDAO(Database database, UserDAO userDAO) {
     super(database);
     try {
@@ -196,6 +196,8 @@ public class UserListDAO extends DAO {
 
   public boolean remove(long unique) {
     removeVisitor(unique);
+//    userExerciseDAO.remove();
+    //removeListRefs(unique);
     return remove(USER_EXERCISE_LIST, "uniqueid", unique);
   }
 
@@ -223,7 +225,7 @@ public class UserListDAO extends DAO {
     try {
       List<UserList> lists = getUserLists(sql,-1);
       if (lists.isEmpty()) {
-        logger.error("huh? no user list with id " + unique);
+        logger.error("getWhere : huh? no user list with id " + unique + " and sql " + sql);
         return null;
       } else {
         return lists.iterator().next();
@@ -233,6 +235,34 @@ public class UserListDAO extends DAO {
     }
     return null;
   }
+
+/*  public Collection<UserList> listsWithout(long listid, String exerciseID) {
+    try {
+      // there are much better ways of doing this...
+      logger.info("UserListExerciseJoinDAO.listsWithout :userList " + listid + " exercise " + exerciseID);
+
+      Connection connection = database.getConnection();
+      PreparedStatement statement = connection.prepareStatement(
+        "SELECT ul." +USER_EXERCISE_LIST+
+          " FROM " + USER_EXERCISE_LIST + " ul, " + UserListExerciseJoinDAO.USER_EXERCISE_LIST_EXERCISE + " ule "+
+          "WHERE ");
+      int i = 1;
+      statement.setLong(i++, userList.getUniqueID());
+      statement.setString(i++, uniqueID);
+
+      int j = statement.executeUpdate();
+
+      if (j != 1)
+        logger.error("huh? didn't insert row for ");
+
+      statement.close();
+      database.closeConnection(connection);
+
+      //logger.debug("\tUserListExerciseJoinDAO.add : now " + getCount(USER_EXERCISE_LIST_EXERCISE) + " and user exercise is " + userList);
+    } catch (Exception ee) {
+      logger.error("got " + ee, ee);
+    }
+  }*/
 
   private List<UserList> getUserLists(String sql,long userid) throws SQLException {
     Connection connection = database.getConnection();
