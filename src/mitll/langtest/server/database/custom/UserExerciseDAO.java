@@ -21,7 +21,8 @@ public class UserExerciseDAO extends DAO {
 
   public static final String USEREXERCISE = "userexercise";
   private ExerciseDAO exerciseDAO;
-  private boolean DEBUG = false;
+  private static final boolean DEBUG = false;
+
   public UserExerciseDAO(Database database) {
     super(database);
     try {
@@ -147,34 +148,37 @@ public class UserExerciseDAO extends DAO {
    * @return
    */
   public Collection<UserExercise> getOnList(long listID) {
-    String sql = "SELECT " +
-      "ue.* from " + USEREXERCISE + " ue, " + UserListExerciseJoinDAO.USER_EXERCISE_LIST_EXERCISE +" uele "+
-      " where ue." +
-       "uniqueid" +
-      "=uele." +
-      "exerciseid" +
-      " AND uele.userlistid=" + listID + ";";
+    String sql = getJoin(listID);
     
     try {
+      logger.debug("\tusing for user exercise = " +sql);
+
       List<UserExercise> userExercises = getUserExercises(sql);
-//      logger.debug("\tfound (" +userExercises.size()+ ") userExercises on list " +listID);
+      logger.debug("\tfound (" +userExercises.size()+ ") userExercises on list " +listID);
 
       List<UserExercise> userExercises2 = new ArrayList<UserExercise>();
 
       for (UserExercise ue : userExercises) {
-        //logger.debug("\ton list " +listID + " " + ue.getID() + " / " +ue.getUniqueID() + " : " + ue);
+        logger.debug("\ton list " +listID + " " + ue.getID() + " / " +ue.getUniqueID() + " : " + ue);
         if (ue.isPredefined()) {
           Exercise byID = getExercise(ue);
 
           if (byID != null) {
             userExercises2.add(new UserExercise(byID)); // all predefined references
-          } else logger.error("huh can't find '" + ue.getID() +"'");
+          } else {
+            logger.error("getOnList: huh can't find '" + ue.getID() +"'");
+          }
         }
         else {
           userExercises2.add(ue);
         }
       }
 
+      String join2 = getJoin2(listID);
+      logger.debug("\tusing exercise = " +join2);
+      for (String exid : getExercises(join2)) {
+        userExercises2.add(new UserExercise(exerciseDAO.getExercise(exid)));
+      }
       if (userExercises2.isEmpty()) {
         if (DEBUG) logger.debug("\tgetOnList : no exercises on list id " + listID);
         return new ArrayList<UserExercise>();
@@ -182,10 +186,36 @@ public class UserExerciseDAO extends DAO {
         if (DEBUG) logger.debug("\tgetOnList for " + listID+ "  got " + userExercises2.size());
         return userExercises2;
       }
+
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
     return new ArrayList<UserExercise>();
+  }
+
+  private String getJoin(long listID) {
+    return "SELECT " +
+        "ue.* from " + USEREXERCISE + " ue, " + UserListExerciseJoinDAO.USER_EXERCISE_LIST_EXERCISE +" uele "+
+        " where ue." +
+        "exerciseid" +
+        "=" +
+        "uele." +
+        "exerciseid" +
+        " AND uele.userlistid=" + listID + ";";
+  }
+
+  private String getJoin2(long listID) {
+    return "SELECT uele.exerciseid " +
+        "FROM " +
+        UserListExerciseJoinDAO.USER_EXERCISE_LIST_EXERCISE  +
+        " uele " +
+        "LEFT JOIN " +
+        USEREXERCISE +
+        " ue ON ue.exerciseid = uele.exerciseid" +
+        " AND uele.userlistid=" +
+        listID +
+        "    WHERE ue.exerciseid IS NULL and uele.userlistid=" +
+        listID;
   }
 
   private Exercise getExercise(UserExercise ue) { return getExercise(ue.getID());  }
@@ -207,6 +237,7 @@ public class UserExerciseDAO extends DAO {
     try {
       List<UserExercise> userExercises = getUserExercises(sql);
       if (userExercises.isEmpty()) {
+       // Exercise exercise = exerciseDAO.getExercise(exid);
         logger.error("getWhere : huh? no custom exercise with id " + exid);
         return null;
       } else return userExercises.iterator().next();
@@ -282,6 +313,23 @@ public class UserExerciseDAO extends DAO {
         rs.getString("refAudio"),
         rs.getString("slowAudioRef"));
       exercises.add(e);
+    }
+    rs.close();
+    statement.close();
+    database.closeConnection(connection);
+
+    return exercises;
+  }
+
+  private List<String> getExercises(String sql) throws SQLException {
+    Connection connection = database.getConnection();
+    PreparedStatement statement = connection.prepareStatement(sql);
+    //logger.debug("getUserExercises sql = " + sql);
+    ResultSet rs = statement.executeQuery();
+    List<String> exercises = new ArrayList<String>();
+
+    while (rs.next()) {
+      exercises.add(rs.getString("exerciseid"));
     }
     rs.close();
     statement.close();
