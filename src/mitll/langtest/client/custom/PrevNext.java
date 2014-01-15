@@ -11,12 +11,13 @@ import mitll.langtest.shared.ExerciseShell;
 
 /**
 * Created by GO22670 on 1/9/14.
+ * @deprecated
 */
 class PrevNext<T extends ExerciseShell> extends HorizontalPanel {
   private Button prev, next;
   private PagingContainer<T> container;
 
-  public PrevNext(final T exerciseShell, PagingContainer<T> listContainer) {
+  private PrevNext(final T exerciseShell, PagingContainer<T> listContainer) {
     this.container = listContainer;
     makePrevButton(exerciseShell);
     makeNextButton(exerciseShell);
