@@ -146,17 +146,14 @@ public class BasicDialog {
     markError(dialectGroup, dialect, header, message, Placement.RIGHT);
   }
 
-  //List<ControlGroup> marked = new ArrayList<ControlGroup>();
   protected void markError(ControlGroup dialectGroup, FocusWidget dialect, String header, String message, Placement placement) {
     dialectGroup.setType(ControlGroupType.ERROR);
     dialect.setFocus(true);
-    //marked.add(dialectGroup);
-
     setupPopover(dialect, header, message, placement);
   }
 
   protected void setupPopoverThatHidesItself(final Widget w, String heading, final String message) {
-    System.out.println("\n\n\ntriggering popover on " + w.getTitle() + " with " + heading + "/" + message);
+    System.out.println("\ttriggering popover on " + w.getTitle() + " with " + heading + "/" + message);
     final MyPopover popover = new MyPopover();
     popover.setWidget(w);
     popover.setText(message);
@@ -168,12 +165,10 @@ public class BasicDialog {
     Timer t = new Timer() {
       @Override
       public void run() {
-        //System.out.println("hide popover on " + w + " with " + message);
         popover.dontFireAgain();
         popover.setHideDelay(0);
         //  popover.clear();
         //  popover.reconfigure();
-
         //   popover.clear();
       }
     };
