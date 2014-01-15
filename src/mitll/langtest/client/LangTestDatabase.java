@@ -169,4 +169,6 @@ public interface LangTestDatabase extends RemoteService {
   void removeReviewed(String id);
 
   UserList getReviewList();
+  boolean deleteList(long id);
+  boolean deleteItemFromList(long listid, String exid);
 }
