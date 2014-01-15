@@ -377,9 +377,13 @@ public class UserListManager {
     }
   }
 
+  private boolean listExists(long id) {
+    return userListDAO.getWhere(id) != null;
+  }
+
   public void addAnnotation(String exerciseID, String field, String status, String comment, long userID) {
     logger.info("addAnnotation write to database! " + exerciseID + " " + field + " " + status + " " + comment);
-    annotationDAO.add(new UserAnnotation(-1,exerciseID, field, status, comment, userID,System.currentTimeMillis()));
+    annotationDAO.add(new UserAnnotation(exerciseID, field, status, comment, userID,System.currentTimeMillis()));
 
     if (status.equalsIgnoreCase("incorrect")) {
        markIncorrect(exerciseID);
@@ -468,5 +472,18 @@ public class UserListManager {
   public void markIncorrect(String id) {
     incorrect.add(id);
     logger.debug("markIncorrect incorrect now " + incorrect.size());
+  }
+
+  public boolean deleteList(long id) {
+    return listExists(id) && userListDAO.remove(id);
+  }
+
+  public boolean deleteItemFromList(long listid, String exid) {
+    UserList userListByID = getUserListByID(listid);
+    if (userListByID == null) return false;
+    /*boolean remove =*/ userListByID.remove(exid);
+    boolean remove = userListExerciseJoinDAO.remove(listid, exid);
+
+    return remove;
   }
 }
