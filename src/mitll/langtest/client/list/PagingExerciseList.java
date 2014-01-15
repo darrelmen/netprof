@@ -42,6 +42,7 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
   private TextBox typeAhead = null;
   private String lastValue = "";
   private long userListID = -1;
+  private int unaccountedForVertical = 100;
 
   /**
    * @see mitll.langtest.client.ExerciseListLayout#makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, boolean, mitll.langtest.client.user.UserFeedback, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController)
@@ -60,6 +61,7 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
     this.controller = controller;
     this.showTypeAhead = showTypeAhead;
     addComponents();
+    getElement().setId("PagingExerciseList");
   }
 
   /**
@@ -163,7 +165,12 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
   }
 
   protected int getVerticalUnaccountedFor() {
-    return 100;
+    return unaccountedForVertical;
+  }
+
+  public void setUnaccountedForVertical(int v) {
+    unaccountedForVertical = v;
+    pagingContainer.setUnaccountedForVertical(v);
   }
 
   protected void addTableWithPager(PagingContainer<? extends ExerciseShell> pagingContainer) {
@@ -244,8 +251,15 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
   }
 
   @Override
-  protected void addExerciseToList(ExerciseShell exercise) {
+  protected void addExerciseToList(T exercise) {
     pagingContainer.addExerciseToList2(exercise);
+  }
+
+  @Override
+  public void forgetExercise(T es) {
+    super.forgetExercise(es);
+
+    pagingContainer.forgetExercise(es);
   }
 
   @Override
