@@ -67,6 +67,7 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserTable;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.StartupInfo;
 
@@ -79,7 +80,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public static final String LANGTEST_IMAGES = "langtest/images/";
 
   private Panel currentExerciseVPanel = new FluidContainer();
-  private ListInterface exerciseList;
+  private ListInterface<? extends ExerciseShell> exerciseList;
   private final Label status = new Label();
 
   private UserManager userManager;
@@ -426,25 +427,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       progressBar = new ProgressHelper();
       widgets.add(progressBar.getProgressBar());
     }
-  }
-
-  /**
-   * @see mitll.langtest.client.list.section.SectionExerciseList#getEmailWidget()
-   * @param subject
-   * @param linkTitle
-   * @param token
-   */
-  @Override
-  public void showEmail(final String subject, final String linkTitle, final String token) {
-    GWT.runAsync(new RunAsyncCallback() {
-      public void onFailure(Throwable caught) {
-        Window.alert("Code download failed");
-      }
-
-      public void onSuccess() {
-        new MailDialog(service, userManager).showEmail(subject, token);
-      }
-    });
   }
 
   private Widget getTitleWidget() {

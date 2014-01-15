@@ -66,8 +66,6 @@ public class BootstrapFlashcardExerciseList<T extends ExerciseShell> implements 
   }
 
   @Override
-  public void loadExercise(ExerciseShell exerciseShell) {}
-  @Override
   public boolean loadNextExercise(String id) {
     return false;
   }
@@ -289,13 +287,19 @@ public class BootstrapFlashcardExerciseList<T extends ExerciseShell> implements 
     return leftColumn;
   }
 
+  @Override
+  public <S extends ExerciseShell> void loadExercise(S exerciseShell) {
+
+  }
+
   /**
+   *
    * @param current
    * @return
    * @seex mitll.langtest.client.LangTest#loadNextExercise
    */
   @Override
-  public boolean loadNextExercise(ExerciseShell current) {
+  public <S extends ExerciseShell>  boolean loadNextExercise(S current) {
     System.out.println("-------------- loadNextExercise -------- " + current);
     getExercises(user.getUser(), true);
     return true;
@@ -322,7 +326,7 @@ public class BootstrapFlashcardExerciseList<T extends ExerciseShell> implements 
   }
 
   @Override
-  public boolean loadPreviousExercise(ExerciseShell current) {
+  public <S extends ExerciseShell> boolean loadPreviousExercise(S current) {
     getExercises(user.getUser(), false);
     return true;
   }
@@ -333,12 +337,12 @@ public class BootstrapFlashcardExerciseList<T extends ExerciseShell> implements 
   }
 
   @Override
-  public boolean onFirst(ExerciseShell current) {
+  public <S extends ExerciseShell> boolean onFirst(S current) {
     return latestResponse == null || latestResponse.isOnFirst();
   }
 
   @Override
-  public boolean onLast(ExerciseShell current) {
+  public  <S extends ExerciseShell> boolean onLast(S current) {
     return false;
   }
 
@@ -444,6 +448,11 @@ public class BootstrapFlashcardExerciseList<T extends ExerciseShell> implements 
 
   @Override
   public void addCompleted(String id) {}
+
+  @Override
+  public void forgetExercise(T es) {
+
+  }
 
   @Override
   public void reload() {
