@@ -41,6 +41,13 @@ public class NPFHelper implements RequiresResize {
   private PagingExerciseList<UserExercise> npfExerciseList;
   private SimplePanel npfContentPanel;
 
+  /**
+   * @see mitll.langtest.client.custom.Navigation#Navigation(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, mitll.langtest.client.user.UserFeedback)
+   * @param service
+   * @param feedback
+   * @param userManager
+   * @param controller
+   */
   public NPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager, ExerciseController controller) {
     this.service = service;
     this.feedback = feedback;
@@ -54,20 +61,15 @@ public class NPFHelper implements RequiresResize {
    * @param learn
    * @param instanceName
    */
-  public void showNPF(UserList ul, Navigation.TabAndContent learn,String instanceName) {
-     System.out.println(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul);
+  public void showNPF(UserList ul, Navigation.TabAndContent learn, String instanceName) {
+    System.out.println(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul);
 
     int widgetCount = learn.content.getWidgetCount();
     if (!madeNPFContent || widgetCount == 0) {
-      //System.out.println(getClass() + " : adding npf content widget count = " + widgetCount);
-      addNPFToContent(ul, learn.content,instanceName);
-      //System.out.println(getClass() + " : after adding npf content widget count = " + learn.content.getWidgetCount());
-
+      addNPFToContent(ul, learn.content, instanceName);
       madeNPFContent = true;
     } else {
-      //System.out.println(getClass() + " : *NOT* adding npf content widget count = " + widgetCount);
       rememberAndLoadFirst(ul);
-      //System.out.println(getClass() + " : *NOT* after adding npf content widget count = " + learn.content.getWidgetCount());
     }
   }
 
@@ -143,12 +145,11 @@ public class NPFHelper implements RequiresResize {
       @Override
       public Panel getExercisePanel(Exercise e) {
         if (controller.getAudioType().equalsIgnoreCase(Result.AUDIO_TYPE_REVIEW)) {
-          System.out.println("\nNPFHelper : making new QCNPFExercise for " +e + " instance " + instanceName);
+          //System.out.println("\nNPFHelper : making new QCNPFExercise for " +e + " instance " + instanceName);
           return new QCNPFExercise(e, controller, exerciseList, 1.0f, false, instanceName);
         }
         else {
-          System.out.println("\nmaking new CommentNPFExercise for " +e + " instance " + instanceName);
-
+          //System.out.println("\nmaking new CommentNPFExercise for " +e + " instance " + instanceName);
           return new CommentNPFExercise(e, controller, exerciseList, 1.0f, false, instanceName);
         }
       }
@@ -162,7 +163,6 @@ public class NPFHelper implements RequiresResize {
   protected SimplePanel getNpfContentPanel() { return npfContentPanel; }
 
   @Override
-  public void onResize() {
-    if (npfContentPanel != null) {  npfExerciseList.onResize(); }
-  }
+  public void onResize() { if (npfContentPanel != null) {  npfExerciseList.onResize(); } }
+  public void reload() { npfExerciseList.reload(); }
 }
