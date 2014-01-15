@@ -20,6 +20,7 @@ import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseFormatter;
+import mitll.langtest.shared.ExerciseShell;
 
 import java.util.*;
 
@@ -35,7 +36,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   private String instance;
   private Set<String> incorrectSet = new HashSet<String>();
   private List<RequiresResize> toResize;
-  public QCNPFExercise(Exercise e, ExerciseController controller, ListInterface listContainer,
+  public QCNPFExercise(Exercise e, ExerciseController controller, ListInterface<Exercise> listContainer,
                        float screenPortion, boolean addKeyHandler, String instance) {
     super(e, controller, listContainer, screenPortion, addKeyHandler, instance);
     this.instance = instance;
@@ -51,8 +52,8 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   }
 
   @Override
-  protected void nextWasPressed(ListInterface listContainer, Exercise completedExercise) {
-    //System.out.println("nextWasPressed : load next exercise " + completedExercise.getID() + " instance " +instance);
+  protected void nextWasPressed(ListInterface<? extends ExerciseShell> listContainer, ExerciseShell completedExercise) {
+     System.out.println("nextWasPressed : load next exercise " + completedExercise.getID() + " instance " +instance);
     super.nextWasPressed(listContainer, completedExercise);
     if (!instance.equals("review")) {
       listContainer.addCompleted(completedExercise.getID());
@@ -60,7 +61,9 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     }
   }
 
-  private void markReviewed(Exercise completedExercise) {
+  private void markReviewed(ExerciseShell completedExercise) {
+    System.out.println("markReviewed : exercise " + completedExercise.getID() + " instance " +instance);
+
     service.markReviewed(completedExercise.getID(), incorrectSet.isEmpty(), controller.getUser(),
       new AsyncCallback<Void>() {
         @Override
@@ -151,9 +154,6 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   }
 
   /**
-   * TODO after edit, clear annotation -- where do we edit? in edit window
-   *
-   *
    * @param field
    * @param annotation
    * @return
@@ -197,7 +197,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     final CheckBox checkBox = makeCheckBox(field, commentRow, commentEntry, alreadyMarkedCorrect);
 
     Panel qcCol = new FlowPanel();
-    qcCol.addStyleName("qcRightBorder");
+//   / qcCol.addStyleName("qcRightBorder");
 
     qcCol.add(checkBox);
     return qcCol;
