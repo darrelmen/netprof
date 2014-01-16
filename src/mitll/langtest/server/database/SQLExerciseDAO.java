@@ -29,8 +29,12 @@ import java.util.Map;
 import java.util.Set;
 
 public class SQLExerciseDAO implements ExerciseDAO {
-  public static final String HEADER_TAG = "h4";
   private static Logger logger = Logger.getLogger(SQLExerciseDAO.class);
+
+  private static final String HEADER_TAG = "h4";
+  private static final String ILR_LEVEL = "ILR_Level";
+  private static final String TEST_TYPE = "Test type";
+  private static final String VLR_PARLE_PILOT_ITEMS_TXT = "vlr-parle-pilot-items.txt";
 
   private static final String ENCODING = "UTF8";
   private static final boolean DEBUG = false;
@@ -42,6 +46,8 @@ public class SQLExerciseDAO implements ExerciseDAO {
   private SectionHelper sectionHelper = new SectionHelper();
   private Map<String,List<String>> levelToExercises = new HashMap<String,List<String>>();
   private Map<String,String> exerciseToLevel = new HashMap<String,String>();
+  private Collection<String> readingExercises = new ArrayList<String>();
+  private Collection<String> listeningExercises = new ArrayList<String>();
 
   /**
    * @see DatabaseImpl#makeExerciseDAO(boolean)
@@ -53,8 +59,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
     this.database = database;
     this.mediaDir = mediaDir;
     logger.debug("database " + database + " media dir " + mediaDir);
-  //  File ilrMapping = new File(configDir,"autocrt-docids.txt");
-    File ilrMapping = new File(configDir,"vlr-parle-pilot-items.txt");
+    File ilrMapping = new File(configDir, VLR_PARLE_PILOT_ITEMS_TXT);
 
     if (ilrMapping.exists()) {
       readILRMapping2(ilrMapping);
@@ -66,33 +71,10 @@ public class SQLExerciseDAO implements ExerciseDAO {
     if (size != size1) {
       logger.error("huh? there are " + size + " ids from reading the database, but " + size1 + " from reading the mapping file" );
       Set<String> strings = new HashSet<String>(idToExercise.keySet());
-      /*boolean b =*/ strings.removeAll(getMappedExercises());
+      strings.removeAll(getMappedExercises());
       logger.error("unmapped are " + strings);
     }
   }
-
-/*  private void readILRMapping(File ilrMapping) {
-    try {
-      BufferedReader reader = getReader(ilrMapping.getAbsolutePath());
-      String line;
-      reader.readLine(); //read header
-      while ((line = reader.readLine()) != null) {
-        String[] split = line.split("\\|");
-     //   logger.debug("line " + line + " split size " + split.length);
-        if (split.length < 6) continue;
-        String ilr = split[5].trim();
-        String id = split[6].trim();
-        List<String> ids = levelToExercises.get(ilr);
-        if (ids == null) {
-          levelToExercises.put(ilr, ids = new ArrayList<String>());
-        }
-        ids.add(id);
-      }
-      logger.debug("map has size " + levelToExercises.size() + " keys " + levelToExercises.keySet());// + " : " + levelToExercises);
-    } catch (Exception e) {
-      logger.error("got " + e, e);
-    }
-  }*/
 
   private void readILRMapping2(File ilrMapping) {
     try {
@@ -110,16 +92,21 @@ public class SQLExerciseDAO implements ExerciseDAO {
         }
         exerciseToLevel.put(id,ilr);
         ids.add(id);
+
+        String type = split[2].trim();
+        if (type.equals("listening")) {
+          listeningExercises.add(id);
+        }
+        else if (type.equals("reading")) {
+          readingExercises.add(id);
+        }
       }
-      logger.debug("map has size " + levelToExercises.size() + " keys " + levelToExercises.keySet());// + " : " + levelToExercises);
+      logger.debug("level->exercise map has size " + levelToExercises.size() + " keys " + levelToExercises.keySet());
+      logger.debug("listening has size " + listeningExercises.size() + " reading " + readingExercises.size());
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
   }
-
-/*  public List<String> getExercisesForLevel(String level) {
-    return levelToExercises.get(level);
-  }*/
 
   public Set<String> getMappedExercises() {
     Set<String> strings = new HashSet<String>();
@@ -190,7 +177,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
             exercises.add(e);
 
             if (useMapping) {
-              sectionHelper.addAssociations(Collections.singleton(sectionHelper.addExerciseToLesson(e, "ILR_Level", exerciseToLevel.get(exid))));
+              addMappingAssoc(exid, e);
             }
             else {
               recordUnitChapterWeek(e);
@@ -200,15 +187,16 @@ public class SQLExerciseDAO implements ExerciseDAO {
           logger.warn("expecting a { (marking json data), so skipping " + content);
         }
       }
+
       if (useMapping) {
-        sectionHelper.setPredefinedTypeOrder(Arrays.asList("ILR_Level"));
+        sectionHelper.setPredefinedTypeOrder(Arrays.asList(TEST_TYPE, ILR_LEVEL));
       }
       rs.close();
       statement.close();
       database.closeConnection(connection);
 
-      //logger.debug("reporting for " +database);
-      //sectionHelper.report();
+      logger.debug("reporting for " +database);
+      sectionHelper.report();
 
     } catch (Exception e) {
       logger.error("got " + e, e);
@@ -222,6 +210,21 @@ public class SQLExerciseDAO implements ExerciseDAO {
     return exercises;
   }
 
+  private void addMappingAssoc(String exid, Exercise e) {
+    List<SectionHelper.Pair> pairs = new ArrayList<SectionHelper.Pair>();
+
+    String level = exerciseToLevel.get(exid);
+    SectionHelper.Pair ilrAssoc = sectionHelper.addExerciseToLesson(e, ILR_LEVEL, level);
+    pairs.add(ilrAssoc);
+
+    String type = listeningExercises.contains(exid) ? "Listening" : readingExercises.contains(exid) ? "Reading" : "other";
+    SectionHelper.Pair typeAssoc = sectionHelper.addExerciseToLesson(e, TEST_TYPE, type);
+
+    pairs.add(typeAssoc);
+
+    sectionHelper.addAssociations(pairs);
+  }
+
   /**
    * @see #getExercises(String)
    * @param imported
@@ -229,9 +232,9 @@ public class SQLExerciseDAO implements ExerciseDAO {
    */
   private boolean recordUnitChapterWeek(Exercise imported) {
     String[] split = imported.getID().split("-");
-    String unit = split[0];//getCell(next, unitIndex);
-    String chapter = split.length > 1 ? split[1] : "";//getCell(next, chapterIndex);
-    String week = "";//getCell(next, weekIndex);
+    String unit = split[0];
+    String chapter = split.length > 1 ? split[1] : "";
+    String week = "";
     List<SectionHelper.Pair> pairs = new ArrayList<SectionHelper.Pair>();
 
     if (unit.length() == 0 &&
@@ -399,18 +402,6 @@ public class SQLExerciseDAO implements ExerciseDAO {
     return b.toString();
   }
 
-/*  private static String getConfigDir(String language) {
-    String installPath = ".";
-    String dariConfig = File.separator +
-      "war" +
-      File.separator +
-      "config" +
-      File.separator +
-      language +
-      File.separator;  cd w
-    return installPath + dariConfig;
-  }*/
-
 /*  private static void dumpQuestionsAndAnswers(SQLExerciseDAO sqlExerciseDAO) {
     List<Exercise> rawExercises = sqlExerciseDAO.getRawExercises();
     //Exercise next = rawExercises.iterator().next();
@@ -497,22 +488,11 @@ public class SQLExerciseDAO implements ExerciseDAO {
     writer.write("\n");
   }*/
 
-  public static void main(String [] arg) {
-
-
-   // final String configDir = getConfigDir("pilot");
-
-/*    DatabaseImpl unitAndChapter = new DatabaseImpl(
-      configDir,
-      "arabicText",
-      configDir +
-        spreadsheet);*/
-
+/*  public static void main(String [] arg) {
     String configDir = "config" +
       File.separator +
       "pilot";
     SQLExerciseDAO sqlExerciseDAO = new SQLExerciseDAO(new SmallDatabaseImpl("war/config/pilot/avpDemo"), configDir, "war"+File.separator+configDir);
     sqlExerciseDAO.getSectionHelper().getSectionNodes();
-  //  dumpQuestionsAndAnswers(sqlExerciseDAO);
-  }
+  }*/
 }
