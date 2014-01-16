@@ -33,6 +33,7 @@ import java.util.List;
  */
 public abstract class UserDialog extends BasicDialog {
   protected static final int USER_ID_MAX_LENGTH = 80;
+  protected static final String LEAST_RECORDED_FIRST = "Least recorded first";
 
   private static final String GRADING = "grading";
   private static final String TESTING = "testing";  // TODO make these safer
@@ -54,6 +55,7 @@ public abstract class UserDialog extends BasicDialog {
   protected final LangTestDatabaseAsync service;
   protected UserManager userManager;
   protected UserNotification userNotification;
+  protected ListBoxFormField recordingOrder;
 
   public UserDialog(LangTestDatabaseAsync service, PropertyHandler props, UserManager userManager, UserNotification userNotification) {
     this.service = service;
@@ -160,6 +162,15 @@ public abstract class UserDialog extends BasicDialog {
     }
     genderBox.setWidth(ilrChoiceWidth + "px");
     return genderBox;
+  }
+
+  protected ListBoxFormField getRecordingOrder(Modal dialogBox) {
+    return getListBoxFormField(dialogBox, "Recording Order", getListBox2(Arrays.asList("All items", LEAST_RECORDED_FIRST),160));
+  }
+
+  protected void setUnanswered() {
+    boolean unansweredFirst = recordingOrder.getValue().equals(LEAST_RECORDED_FIRST);
+    userManager.setShowUnansweredFirst(unansweredFirst);
   }
 
   private class ButtonClickEvent extends ClickEvent {
