@@ -87,6 +87,8 @@ public class StudentDialog extends UserDialog {
     final FormField user = addControlFormField(fieldset, "User ID", MIN_LENGTH_USER_ID);
     user.setVisible(purpose.getValue().equals("Data Collection"));
 
+   //  recordingOrder = getRecordingOrder(dialogBox);
+
     //final FormField password = addControlFormField(fieldset, "Password", true);
 
     purpose.box.setWidth("150px");
