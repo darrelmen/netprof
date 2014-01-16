@@ -60,9 +60,7 @@ public class SectionHelper {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getSectionNodes()
    * @return
    */
-  public List<SectionNode> getSectionNodes() {
-    return getChildren(getTypeOrder());
-  }
+  public List<SectionNode> getSectionNodes() {  return getChildren(getTypeOrder());  }
 
   private List<SectionNode> getChildren(List<String> typeOrder) {
     if (typeOrder.isEmpty()) return Collections.emptyList();
@@ -155,7 +153,6 @@ public class SectionHelper {
       }
     }
     if (currentList == null) {
-   //   logger.error("couldn't find any valid types given request " + typeToSection);
       currentList = Collections.emptyList();
     }
     if (currentList.isEmpty()) {
@@ -196,32 +193,6 @@ public class SectionHelper {
       return exercises;
     }
   }
-/*
-  public void checkIfSemesters() {
-    if (typeToUnitToLesson.containsKey(unitType) && typeToUnitToLesson.containsKey(SEMESTER)) {
-      int units = typeToUnitToLesson.get(unitType).size();
-      int semesters = typeToUnitToLesson.get(SEMESTER).size();
-      if (units == semesters) {
-        logger.debug("Removing semesters...") ;
-        typeToUnitToLesson.remove(SEMESTER);
-        typeToSectionToTypeToSections.remove(SEMESTER);
-        for (Map.Entry<String, Map<String, Map<String, Set<String>>>> pair : typeToSectionToTypeToSections.entrySet()) {
-          Map<String, Map<String, Set<String>>> sectionToTypeToSections = pair.getValue();
-          for (Map.Entry<String, Map<String, Set<String>>> pair2 : sectionToTypeToSections.entrySet()) {
-            Map<String, Set<String>> typeToSections = pair2.getValue();
-            typeToSections.remove(SEMESTER);
-          }
-        }
-        logger.debug("typeToUnitToLesson "+typeToUnitToLesson) ;
-        logger.debug("typeToSectionToTypeToSections "+typeToSectionToTypeToSections) ;
-
-      }
-      else {
-        logger.debug("not Removing semesters... " + units + " vs " + semesters) ;
-
-      }
-    }
-  }*/
 
   public Pair addUnitToLesson(Exercise exercise, String unitName) { return addExerciseToLesson(exercise, unitType, unitName);}
   public Pair addChapterToLesson(Exercise exercise, String unitName) { return addExerciseToLesson(exercise, chapterType, unitName);}
