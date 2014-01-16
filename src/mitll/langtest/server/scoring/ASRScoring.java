@@ -131,10 +131,20 @@ public class ASRScoring extends Scoring {
           }
         } else {
           String[][] process = lts.process(token);
-          if (process == null) {
+          if (process == null || process.length == 0 || process[0].length == 0 || process[0][0].length() == 0 || process[0][0].equals("aa")) {
             logger.debug("checkLTS token : " + token + " invalid!");
 
             return false;
+          }
+          else {
+            logger.debug("for checkLTS token " + token + " got  process  len " + process.length);
+            if (process.length > 0) {
+              logger.debug("got " + process[0]);
+              if (process[0].length > 0) {
+                logger.debug("got '" + process[0][0] + "'");
+                if (process[0][0].length() > 0) logger.debug("got " + process[0][0]);
+              }
+            }
           }
         }
       }
