@@ -161,12 +161,14 @@ public class UserDAO extends DAO {
     //logger.debug("found " + numColumns + " in users table");
 
     Set<String> expected = new HashSet<String>();
-    expected.addAll(Arrays.asList("id","age","gender","experience","firstname","lastname","ipaddr","nativelang","dialect","userid","timestamp","enabled"));
+    expected.addAll(Arrays.asList("id","age","gender","experience",
+      //"firstname","lastname",
+      "ipaddr","nativelang","dialect","userid","timestamp","enabled"));
     /*boolean users = */expected.removeAll(getColumns(USERS));
     if (!expected.isEmpty()) logger.info("adding columns for " + expected);
     for (String missing : expected) {
-      if (missing.equalsIgnoreCase("firstName")) { addColumn(connection,"firstName","VARCHAR"); }
-      if (missing.equalsIgnoreCase("lastName")) { addColumn(connection,"lastName","VARCHAR"); }
+      //if (missing.equalsIgnoreCase("firstName")) { addColumn(connection,"firstName","VARCHAR"); }
+      //if (missing.equalsIgnoreCase("lastName")) { addColumn(connection,"lastName","VARCHAR"); }
 
       if (missing.equalsIgnoreCase("nativeLang")) { addColumn(connection,"nativeLang","VARCHAR"); }
       if (missing.equalsIgnoreCase("dialect")) { addColumn(connection,"dialect","VARCHAR"); }
