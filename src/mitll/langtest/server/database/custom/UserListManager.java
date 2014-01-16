@@ -331,9 +331,13 @@ public class UserListManager {
    */
   private String getRefAudioPath(UserExercise userExercise, File fileRef, String fast, boolean overwrite) {
     final File bestDir = pathHelper.getAbsoluteFile("bestAudio");
-    bestDir.mkdir();
+    if (!bestDir.exists() && !bestDir.mkdir()) {
+      if (!bestDir.exists()) logger.warn("huh? couldn't make " + bestDir.getAbsolutePath());
+    }
     File bestDirForExercise = new File(bestDir, userExercise.getID());
-    bestDirForExercise.mkdir();
+    if (!bestDirForExercise.exists() && !bestDirForExercise.mkdir()) {
+      if (!bestDirForExercise.exists()) logger.warn("huh? couldn't make " + bestDirForExercise.getAbsolutePath());
+    }
     File destination = new File(bestDirForExercise, fast);
     logger.debug("getRefAudioPath : copying from " + fileRef +  " to " + destination.getAbsolutePath());
     String s = "bestAudio" + File.separator + userExercise.getID() + File.separator + fast;
