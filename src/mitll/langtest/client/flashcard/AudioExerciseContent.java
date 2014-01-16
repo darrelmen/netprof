@@ -214,7 +214,6 @@ public class AudioExerciseContent {
       requireAlignment && rightAlignContent ? HasDirection.Direction.RTL : WordCountDirectionEstimator.get().estimateDirection(content);
 
     HTML html = new HTML(content, direction);
-    //  html.setWidth("100%");
     if (requireAlignment && rightAlignContent) {
       html.addStyleName("rightAlign");
     }
