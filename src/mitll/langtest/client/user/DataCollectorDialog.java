@@ -19,8 +19,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 
-import java.util.Arrays;
-
 /**
  * Created with IntelliJ IDEA.
  * User: GO22670
@@ -29,9 +27,6 @@ import java.util.Arrays;
  * To change this template use File | Settings | File Templates.
  */
 public class DataCollectorDialog extends UserDialog {
-  private ListBoxFormField purpose;
-
-  public static final String LEAST_RECORDED_FIRST = "Least recorded first";
 
   public DataCollectorDialog(LangTestDatabaseAsync service, PropertyHandler props,
                              UserNotification langTest,
@@ -44,7 +39,7 @@ public class DataCollectorDialog extends UserDialog {
    */
   public void displayTeacherLogin(String loginTitle) {
     final Modal dialogBox = getDialog(loginTitle);
-    purpose = getListBoxFormField(dialogBox, "Recording Order", getListBox2(Arrays.asList("All items", LEAST_RECORDED_FIRST),160));
+    recordingOrder = getRecordingOrder(dialogBox);
 
     final FormField user = addControlFormField(dialogBox, "User ID");
     final FormField password = addControlFormField(dialogBox, "Password", true, 0);
@@ -116,11 +111,6 @@ public class DataCollectorDialog extends UserDialog {
     } else {
       markError(password, "Please use password from the email.");
     }
-  }
-
-  private void setUnanswered() {
-    boolean unansweredFirst = purpose.getValue().equals(LEAST_RECORDED_FIRST);
-    userManager.setShowUnansweredFirst(unansweredFirst);
   }
 
   private void userDoesntExist(String userID, FormField password, FormField user,
