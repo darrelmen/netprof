@@ -889,6 +889,11 @@ fieldset > legend {
     margin-right: 25px;
 }
 
+.wideCenteredRadio {
+    margin-left: 35px;
+    margin-right: 35px;
+}
+
 .comment-button-group-new {
     opacity:0.70;
     filter:alpha(opacity=70);
