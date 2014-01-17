@@ -23,6 +23,7 @@ public class UserExercise extends AudioExercise {
   private String transliteration;
   private long creator;
   private boolean isPredef;
+  private boolean isOverride;
 
   public UserExercise() {}  // just for serialization
 
@@ -68,12 +69,14 @@ public class UserExercise extends AudioExercise {
    * @param transliteration
    * @param refAudio
    * @param slowAudioRef
+   * @param isOverride
    */
   public UserExercise(long uniqueID, String exerciseID, long creator, String english, String foreignLanguage,
-                      String transliteration, String refAudio, String slowAudioRef) {
+                      String transliteration, String refAudio, String slowAudioRef, boolean isOverride) {
     this(uniqueID, exerciseID, creator, english, foreignLanguage, transliteration);
     setRefAudio(refAudio);
     setSlowRefAudio(slowAudioRef);
+    this.isOverride = isOverride;
   }
 
     /**
@@ -159,12 +162,14 @@ public class UserExercise extends AudioExercise {
 
   public String toString() {
     return "UserExercise" +
-      //" (" +count+ ")" +
-      " #" + uniqueID + "/" + getID()+ (isPredef ? " <Predef>" :  " <User>")+  " creator " + getCreator()+
-        " : English '" + getEnglish() + "', foreign language '" + getForeignLanguage() + "'" +
-        " (" +getTransliteration()+
-      ") tooltip " + getTooltip()+
-      "audio attr (" +getAudioAttributes().size()+
+      " #" + uniqueID + "/" + getID() +
+      (isPredef ? " <Predef>" : " <User>") +
+      (isOverride ? " <Override>" : "") +
+      " creator " + getCreator() +
+      " : English '" + getEnglish() + "', " +
+      "foreign language '" + getForeignLanguage() + "'" + " (" + getTransliteration() + ") " +
+      "tooltip " + getTooltip() +
+      "audio attr (" + getAudioAttributes().size() +
       ") :" + getAudioAttributes();
   }
 }
