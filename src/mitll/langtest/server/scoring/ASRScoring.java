@@ -66,7 +66,7 @@ public class ASRScoring extends Scoring {
   private LTS letterToSoundClass;
   private final Cache<String, Scores> audioToScore;
   private ConfigFileCreator configFileCreator;
-  boolean isMandarin;
+  private boolean isMandarin;
   /**
    * Normally we delete the tmp dir created by hydec, but if something went wrong, we want to keep it around.
    * If the score was below a threshold, or the magic -1, we keep it around for future study.
@@ -86,12 +86,12 @@ public class ASRScoring extends Scoring {
   }
 
   /**
-   * @see mitll.langtest.server.audio.SplitAudio#getAsrScoring
+   * @seex mitll.langtest.server.audio.SplitAudio#getAsrScoring
    * @param deployPath
    * @param properties
    * @param dict
    */
-  public ASRScoring(String deployPath, Map<String, String> properties, HTKDictionary dict) {
+  private ASRScoring(String deployPath, Map<String, String> properties, HTKDictionary dict) {
     super(deployPath);
     lowScoreThresholdKeepTempDir = 0.2;
     audioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
@@ -118,34 +118,22 @@ public class ASRScoring extends Scoring {
   private boolean checkLTS(LTS lts, String foreignLanguagePhrase) {
     Collection<String> tokens = new SmallVocabDecoder().getTokens(foreignLanguagePhrase);
 
-    logger.debug("checkLTS " + (isMandarin? " MANDARIN " : "")+ " tokens : " +tokens);
+    logger.debug("checkLTS " + (isMandarin? " MANDARIN " : "")+ " tokens : '" +tokens +"'");
 
     try {
       for (String token : tokens) {
         if (isMandarin) {
-         // scala.collection.immutable.List<String[]> apply = htkDictionary.apply(token);
           String segmentation = segmentation(token.trim());
           if (segmentation.isEmpty()) {
             logger.debug("checkLTS: mandarin token : " + token + " invalid!");
-
             return false;
           }
         } else {
           String[][] process = lts.process(token);
-          if (process == null || process.length == 0 || process[0].length == 0 || process[0][0].length() == 0 || process[0][0].equals("aa")) {
+          if (process == null || process.length == 0 || process[0].length == 0 ||
+            process[0][0].length() == 0 || process[0][0].equals("aa")) {
             logger.debug("checkLTS token : " + token + " invalid!");
-
             return false;
-          }
-          else {
-            logger.debug("for checkLTS token " + token + " got  process  len " + process.length);
-            if (process.length > 0) {
-              logger.debug("got " + process[0]);
-              if (process[0].length > 0) {
-                logger.debug("got '" + process[0][0] + "'");
-                if (process[0][0].length() > 0) logger.debug("got " + process[0][0]);
-              }
-            }
           }
         }
       }
@@ -333,17 +321,19 @@ public class ASRScoring extends Scoring {
   }*/
 
   /**
-   * @see mitll.langtest.server.audio.SplitAudio#getAlignmentScores(ASRScoring, String, String, String, String)
-   * @param testAudioDir
-   * @param testAudioFileNoSuffix
-   * @param sentence
+   * @seex mitll.langtest.server.audio.SplitAudio#getAlignmentScores(ASRScoring, String, String, String, String)
+   * @paramx testAudioDir
+   * @paramx testAudioFileNoSuffix
+   * @paramx sentence
    * @return
    */
+/*
   public Scores align(String testAudioDir, String testAudioFileNoSuffix,
                       String sentence) {
     return getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir,
        false, Files.createTempDir().getAbsolutePath(), false);
   }
+*/
 
   /**
    * @see #scoreRepeatExercise
@@ -577,12 +567,6 @@ public class ASRScoring extends Scoring {
   private void readDictionary() { htkDictionary = makeDict(); }
 
   /**
-   * @see mitll.langtest.server.audio.SplitAudio#convertExamples
-   * @return
-   */
-  public HTKDictionary getDict() { return htkDictionary; }
-
-  /**
    * @see #readDictionary()
    * @return
    */
@@ -608,13 +592,13 @@ public class ASRScoring extends Scoring {
    */
   private Scores getScoresFromHydec(Audio testAudio, String sentence, String configFile) {
     sentence = sentence.replaceAll("\\p{Z}+", " ");
-    Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut;
     long then = System.currentTimeMillis();
 
-    //logger.debug("getScoresFromHydec using " + configFile + " to decode " + sentence);
+    logger.debug("getScoresFromHydec decode '" + sentence +"'");
 
     try {
-      jscoreOut = testAudio.jscore(sentence, htkDictionary, letterToSoundClass, configFile);
+      Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut =
+        testAudio.jscore(sentence, htkDictionary, letterToSoundClass, configFile);
       float hydec_score = jscoreOut._1;
       long timeToRunHydec = System.currentTimeMillis() - then;
       logger.debug("getScoresFromHydec : got score " + hydec_score +" and took " + timeToRunHydec + " millis");
@@ -695,9 +679,7 @@ public class ASRScoring extends Scoring {
    * @param token
    * @return
    */
-  private boolean isValid(String token) {
-    return checkToken(token) && isPhraseInDict(token);
-  }
+  private boolean isValid(String token) { return checkToken(token) && isPhraseInDict(token);  }
 
   private boolean checkToken(String token) {
     boolean valid = true;
@@ -713,20 +695,4 @@ public class ASRScoring extends Scoring {
     }
     return valid;
   }
-
-/*
-  public List<String> getTokens(String sentence) {
-    List<String> all = new ArrayList<String>();
-
-    for (String untrimedToken : sentence.split("\\p{Z}+")) { // split on spaces
-      String tt = untrimedToken.replaceAll("\\p{P}", ""); // remove all punct
-      String token = tt.trim();  // necessary?
-      if (token.length() > 0) {
-        all.add(token);
-      }
-    }
-
-    return all;
-  }
-*/
 }
