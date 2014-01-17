@@ -16,12 +16,10 @@ import java.util.Map;
 public class AudioAttribute implements IsSerializable {
   private String audioRef;
   private Map<String, String> attributes;
-  private List<String> annotations;
+ // private List<String> annotations;
   //private long userID; // who recorded it - later
 
-  public AudioAttribute() {
-  }
-
+  public AudioAttribute() {}
   public AudioAttribute(String audioRef) {
     this.audioRef = audioRef;
     if (audioRef == null) throw new IllegalArgumentException("huh audio ref is null?");
