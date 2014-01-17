@@ -42,7 +42,7 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
   private TextBox typeAhead = null;
   private String lastValue = "";
   private long userListID = -1;
-  private int unaccountedForVertical = 100;
+  private int unaccountedForVertical = 160;
 
   /**
    * @see mitll.langtest.client.ExerciseListLayout#makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, boolean, mitll.langtest.client.user.UserFeedback, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController)

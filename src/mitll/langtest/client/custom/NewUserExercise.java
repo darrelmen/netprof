@@ -187,9 +187,9 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     if (validateForm(english, foreignLang, rap, normalSpeedRecording)) {
       createButtonClicked(english, foreignLang, ul, pagingContainer, toAddTo, buttonName);
     }
-    else {
-      System.out.println("Form invalid!!!\\n\n\n");
-    }
+/*    else {
+      System.out.println("Form invalid!!!");
+    }*/
   }
 
   private void createButtonClicked(FormField english, FormField foreignLang, UserList ul,
@@ -281,10 +281,12 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     protected WaveformPostAudioRecordButton makePostAudioRecordButton() {
      // final ExerciseController outer = controller;
       postAudioButton =
-        new WaveformPostAudioRecordButton(exercise, controller, exercisePanel, this, service, 0, false // don't record in results table
+        new WaveformPostAudioRecordButton(exercise, controller, exercisePanel, this, service, recordRegularSpeed ? 0:1,
+          false // don't record in results table
         ) {
           @Override
           public void stopRecording() {
+            otherRAP.setEnabled(true);
             showStop();
             System.out.println("WaveformPostAudioRecordButton.stopRecording with newUserExercise " + newUserExercise + " and exercise " + exercise);
             if (newUserExercise == null) {
@@ -323,6 +325,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
           public void startRecording() {
             super.startRecording();
             showStart();
+            otherRAP.setEnabled(false);
           }
 
           @Override
@@ -349,19 +352,29 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     public void setOtherRAP(PostAudioRecordButton otherRAP) {
       this.otherRAP = otherRAP;
     }
-
     public WaveformPostAudioRecordButton getPostAudioButton() {
       return postAudioButton;
     }
   }
 
+  /**
+   * Validation checks appear from top to bottom on page -- so should be consistent
+   * with how the fields are added.
+   *
+   * @see #validateThenPost(mitll.langtest.client.user.BasicDialog.FormField, mitll.langtest.client.user.BasicDialog.FormField, mitll.langtest.client.exercise.RecordAudioPanel, com.github.gwtbootstrap.client.ui.ControlGroup, mitll.langtest.shared.custom.UserList, mitll.langtest.client.exercise.PagingContainer, com.google.gwt.user.client.ui.Panel, String)
+   * @param english
+   * @param foreignLang
+   * @param rap
+   * @param normalSpeedRecording
+   * @return
+   */
   private boolean validateForm(final FormField english, final FormField foreignLang, final RecordAudioPanel rap,
                                final ControlGroup normalSpeedRecording) {
-    if (english.getText().isEmpty()) {
-      markError(english, "Please enter an english word or phrase.");
-      return false;
-    } else if (foreignLang.getText().isEmpty()) {
+    if (foreignLang.getText().isEmpty()) {
       markError(foreignLang, "Please enter the foreign language phrase.");
+      return false;
+    } else if (english.getText().isEmpty()) {
+      markError(english, "Please enter an english word or phrase.");
       return false;
     } else if (newUserExercise == null || newUserExercise.getRefAudio() == null) {
       System.out.println("validateForm : new user ex " + newUserExercise);
