@@ -12,6 +12,7 @@ import corpus.LTS;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
+import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.commons.io.FileUtils;
@@ -700,7 +701,7 @@ public class ASRScoring extends Scoring {
 
   private boolean checkToken(String token) {
     boolean valid = true;
-    if (token.equalsIgnoreCase(SmallVocabDecoder.UNKNOWN_MODEL)) return true;
+    if (token.equalsIgnoreCase(SLFFile.UNKNOWN_MODEL)) return true;
     for (int i = 0; i < token.length() && valid; i++) {
       char c = token.charAt(i);
       if (Character.isDigit(c)) {
