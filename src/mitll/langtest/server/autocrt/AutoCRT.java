@@ -2,9 +2,9 @@ package mitll.langtest.server.autocrt;
 
 import ag.experiment.AutoGradeExperiment;
 import mira.classifier.Classifier;
+import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.database.Export;
 import mitll.langtest.server.scoring.AutoCRTScoring;
-import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -83,7 +83,7 @@ public class AutoCRT {
 
     String recoSentence = asrScoreForAudio.getRecoSentence();
     boolean lowPronScore = asrScoreForAudio.getHydecScore() < minPronScore;
-    boolean matchedUnknown = recoSentence.equals(SmallVocabDecoder.UNKNOWN_MODEL);
+    boolean matchedUnknown = recoSentence.equals(SLFFile.UNKNOWN_MODEL);
 
     logger.info("for " + exerciseID + " given " +exportedAnswers.size() + " possible matches," +
       " reco sentence was '" + recoSentence + "', score " + asrScoreForAudio.getHydecScore() +
