@@ -26,7 +26,10 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class UserListDAO extends DAO {
+  public static final String CREATORID = "creatorid";
   private static Logger logger = Logger.getLogger(UserListDAO.class);
+
+  private static final String NAME = "name";
 
   public static final String USER_EXERCISE_LIST = "userexerciselist";
   private UserDAO userDAO;
@@ -60,9 +63,13 @@ public class UserListDAO extends DAO {
       USER_EXERCISE_LIST +
       " (" +
       "uniqueid IDENTITY, " +
-      "creatorid LONG, " +
-      "name VARCHAR, description VARCHAR, classmarker VARCHAR, modified TIMESTAMP, isprivate BOOLEAN, " +
-      "FOREIGN KEY(creatorid) REFERENCES " +
+      CREATORID +
+      " LONG, " +
+      NAME +
+      " VARCHAR, description VARCHAR, classmarker VARCHAR, modified TIMESTAMP, isprivate BOOLEAN, " +
+      "FOREIGN KEY(" +
+      CREATORID +
+      ") REFERENCES " +
       "USERS" +
       "(ID)" +
       ")");
@@ -91,7 +98,11 @@ public class UserListDAO extends DAO {
 
       statement = connection.prepareStatement(
         "INSERT INTO " + USER_EXERCISE_LIST +
-          "(creatorid,name,description,classmarker,modified,isprivate) " +
+          "(" +
+          CREATORID +
+          "," +
+          NAME +
+          ",description,classmarker,modified,isprivate) " +
           "VALUES(?,?,?,?,?,?);");
       int i = 1;
       //     statement.setLong(i++, userList.getUserID());
@@ -183,6 +194,22 @@ public class UserListDAO extends DAO {
     return Collections.emptyList();
   }
 
+  public boolean hasByName(String name, long userid) {
+    try {
+      String sql = "SELECT * from " + USER_EXERCISE_LIST + " where " +
+        "NAME" +
+        "=" +
+        "'" +name+
+        "' AND " +
+        CREATORID + "=" + userid;
+      return !getWhere(sql).isEmpty();
+    } catch (Exception ee) {
+      logger.error("got " + ee, ee);
+    }
+    return false;
+  }
+
+
 /*  public List<UserList> getAllOwnedBy(long id) {
     try {
       String sql = "SELECT * from " + USER_EXERCISE_LIST + " where creatorid=" + id+
@@ -196,8 +223,6 @@ public class UserListDAO extends DAO {
 
   public boolean remove(long unique) {
     removeVisitor(unique);
-//    userExerciseDAO.remove();
-    //removeListRefs(unique);
     return remove(USER_EXERCISE_LIST, "uniqueid", unique);
   }
 
@@ -264,26 +289,8 @@ public class UserListDAO extends DAO {
     }
   }*/
 
-  private List<UserList> getUserLists(String sql,long userid) throws SQLException {
-    Connection connection = database.getConnection();
-    PreparedStatement statement = connection.prepareStatement(sql);
-    ResultSet rs = statement.executeQuery();
-    List<UserList> lists = new ArrayList<UserList>();
-
-    while (rs.next()) {
-      long uniqueid = rs.getLong("uniqueid");
-      lists.add(new UserList(uniqueid, //id
-        userDAO.getUserWhere(rs.getLong("creatorid")), // age
-        rs.getString("name"), // exp
-        rs.getString("description"), // exp
-        rs.getString("classmarker"), // exp
-        rs.getBoolean("isprivate")
-      )
-      );
-    }
-    rs.close();
-    statement.close();
-    database.closeConnection(connection);
+  private List<UserList> getUserLists(String sql, long userid) throws SQLException {
+    List<UserList> lists = getWhere(sql);
 
     for (UserList ul : lists) {
       if (userid == -1 || ul.getCreator().id == userid || !ul.isFavorite()) {   // skip other's favorites
@@ -293,6 +300,29 @@ public class UserListDAO extends DAO {
         //logger.info("for " + userid +" skipping " + ul);
       }
     }
+    return lists;
+  }
+
+  private List<UserList> getWhere(String sql) throws SQLException {
+    Connection connection = database.getConnection();
+    PreparedStatement statement = connection.prepareStatement(sql);
+    ResultSet rs = statement.executeQuery();
+    List<UserList> lists = new ArrayList<UserList>();
+
+    while (rs.next()) {
+      long uniqueid = rs.getLong("uniqueid");
+      lists.add(new UserList(uniqueid, //id
+        userDAO.getUserWhere(rs.getLong(CREATORID)), // age
+        rs.getString(NAME), // exp
+        rs.getString("description"), // exp
+        rs.getString("classmarker"), // exp
+        rs.getBoolean("isprivate")
+      )
+      );
+    }
+    rs.close();
+    statement.close();
+    database.closeConnection(connection);
     return lists;
   }
 
@@ -312,8 +342,4 @@ public class UserListDAO extends DAO {
   public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
     this.userExerciseDAO = userExerciseDAO;
   }
-/*
-  public void setExerciseDAO(ExerciseDAO exerciseDAO) {
-    this.exerciseDAO = exerciseDAO;
-  }*/
 }
