@@ -26,6 +26,7 @@ import java.util.Collections;
  */
 public class ModalInfoDialog {
   private EnterKeyButtonHelper enterKeyButtonHelper = new EnterKeyButtonHelper();
+/*
   public ModalInfoDialog(String title, String message) {
     this(title, Collections.singleton(message), null,null);
   }
@@ -33,6 +34,7 @@ public class ModalInfoDialog {
   public ModalInfoDialog(String title, Collection<String> messages) {
     this(title, messages, null);
   }
+*/
 
   public ModalInfoDialog(String title, String message, HiddenHandler handler) {
     this(title, Collections.singleton(message), null, handler);
