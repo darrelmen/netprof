@@ -19,6 +19,9 @@ import java.util.List;
 public class UserExerciseDAO extends DAO {
   private static Logger logger = Logger.getLogger(UserExerciseDAO.class);
 
+  private static final String TRANSLITERATION = "transliteration";
+  private static final String OVERRIDE = "override";
+
   public static final String USEREXERCISE = "userexercise";
   private ExerciseDAO exerciseDAO;
   private static final boolean DEBUG = false;
@@ -28,10 +31,12 @@ public class UserExerciseDAO extends DAO {
     try {
       createUserTable(database);
       int numColumns = getNumColumns(database.getConnection(), USEREXERCISE);
-      if (numColumns < 8) {
+
+      Collection<String> columns = getColumns(USEREXERCISE);
+      if (!columns.contains(TRANSLITERATION)) {
         addColumnToTable(database.getConnection());
       }
-      if (numColumns < 9) {
+      if (!columns.contains(OVERRIDE)) {
         addColumnToTable2(database.getConnection());
       }
     } catch (SQLException e) {
@@ -57,7 +62,7 @@ public class UserExerciseDAO extends DAO {
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement(
         "INSERT INTO " + USEREXERCISE +
-          "(exerciseid,english,foreignLanguage,transliteration,creatorid,refAudio,slowAudioRef,override) " +
+          "(exerciseid,english,foreignLanguage," + TRANSLITERATION + ",creatorid,refAudio,slowAudioRef,override) " +
           "VALUES(?,?,?,?,?,?,?,?);");
       int i = 1;
       statement.setString(i++, userExercise.getID());
@@ -128,11 +133,12 @@ public class UserExerciseDAO extends DAO {
       "exerciseid VARCHAR, " +
       "english VARCHAR, " +
       "foreignLanguage VARCHAR, " +
-      "transliteration VARCHAR, " +
+      TRANSLITERATION + " VARCHAR, " +
       "creatorid LONG, " +
       "refAudio VARCHAR, " +
       "slowAudioRef VARCHAR, " +
-      "override BOOLEAN, " +
+      "override" +
+      " BOOLEAN, " +
       "FOREIGN KEY(creatorid) REFERENCES " +
       "USERS" +
       "(ID)" +
@@ -297,9 +303,10 @@ public class UserExerciseDAO extends DAO {
         rs.getString("exerciseid"), rs.getLong("creatorid"),
         rs.getString("english"),
         rs.getString("foreignLanguage"),
-        rs.getString("transliteration"),
+        rs.getString(TRANSLITERATION),
         rs.getString("refAudio"),
-        rs.getString("slowAudioRef"));
+        rs.getString("slowAudioRef"),
+        rs.getBoolean(OVERRIDE));
       exercises.add(e);
     }
     rs.close();
@@ -342,7 +349,7 @@ public class UserExerciseDAO extends DAO {
         "SET " +
         "english='" + fixSingleQuote(userExercise.getEnglish()) + "', " +
         "foreignLanguage='" + fixSingleQuote(userExercise.getForeignLanguage()) + "', " +
-        "transliteration='" + fixSingleQuote(userExercise.getTransliteration()) + "', " +
+        TRANSLITERATION + "='" + fixSingleQuote(userExercise.getTransliteration()) + "', " +
         "refAudio='" + userExercise.getRefAudio() + "', " +
         "slowAudioRef='" + userExercise.getSlowAudioRef() + "' " +
         "WHERE exerciseid='" + userExercise.getID() +"'";
@@ -368,16 +375,14 @@ public class UserExerciseDAO extends DAO {
 
   private void addColumnToTable(Connection connection) throws SQLException {
     PreparedStatement statement = connection.prepareStatement("ALTER TABLE " +
-      USEREXERCISE +
-      " ADD transliteration VARCHAR");
+      USEREXERCISE + " ADD " + TRANSLITERATION + " VARCHAR");
     statement.execute();
     statement.close();
   }
 
   private void addColumnToTable2(Connection connection) throws SQLException {
     PreparedStatement statement = connection.prepareStatement("ALTER TABLE " +
-      USEREXERCISE +
-      " ADD override BOOLEAN");
+      USEREXERCISE +" ADD " + OVERRIDE + " BOOLEAN");
     statement.execute();
     statement.close();
   }
