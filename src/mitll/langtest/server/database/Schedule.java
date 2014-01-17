@@ -10,6 +10,7 @@ import java.util.Map;
 * Date: 6/26/12
 * Time: 3:45 PM
 * To change this template use File | Settings | File Templates.
+ * @deprecated
 */
 class Schedule {
   public long id;
