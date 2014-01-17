@@ -5,7 +5,6 @@ import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.base.DropdownBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
@@ -58,13 +57,11 @@ public class NPFExercise extends GoodwaveExercisePanel {
   protected Panel makeAddToList(Exercise e, ExerciseController controller) {
     addToList = new DropdownButton("");
     addToList.setRightDropdown(true);
-    createAddTooltip(addToList,"Add Item to List",Placement.RIGHT);
     addToList.setIcon(IconType.PLUS_SIGN);
-
-  //  System.out.println("makeAddToList : populate list choices for " + controller.getUser());
+    addToList.setType(ButtonType.PRIMARY);
+    addTooltip(addToList, "Add Item to List");
 
     populateListChoices(e, controller, addToList);
-    addToList.setType(ButtonType.PRIMARY);
     return addToList;
   }
 
@@ -83,8 +80,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
     //System.out.println("populateListChoices : populate list choices for " + controller.getUser());
     service.getListsForUser(controller.getUser(), true, true, new AsyncCallback<Collection<UserList>>() {
       @Override
-      public void onFailure(Throwable caught) {
-      }
+      public void onFailure(Throwable caught) {}
 
       @Override
       public void onSuccess(Collection<UserList> result) {
@@ -152,8 +148,6 @@ public class NPFExercise extends GoodwaveExercisePanel {
     pleaseWait.setAutoHideEnabled(true);
     pleaseWait.add(content);
     pleaseWait.showRelativeTo(target);
-   // pleaseWait.center();
-
     Timer t = new Timer() {
       @Override
       public void run() {
