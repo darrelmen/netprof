@@ -670,6 +670,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
       if (!innerContainer.remove(current)) {
         System.err.println("\tdidn't remove current widget");
       }
+      else innerContainer.getParent().removeStyleName("shadowBorder");
     }
     else {
       System.err.println("\tno inner current widget?");
