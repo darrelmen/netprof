@@ -8,6 +8,8 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
@@ -25,6 +27,7 @@ import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.PagingContainer;
+import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.BasicDialog;
@@ -138,7 +141,7 @@ public class EditItem<T extends ExerciseShell> {
     newUserExercise.setFields();
   }
 
-  private void showPopup(String toShow, Widget over) {
+/*  private void showPopup(String toShow, Widget over) {
     final PopupPanel popupImage = new PopupPanel(true);
     popupImage.add(new HTML(toShow));
     popupImage.showRelativeTo(over);
@@ -149,7 +152,7 @@ public class EditItem<T extends ExerciseShell> {
       }
     };
     t.schedule(3000);
-  }
+  }*/
 
   protected class EditableExercise extends NewUserExercise<T> {
     HTML englishAnno = new HTML();
@@ -173,6 +176,12 @@ public class EditItem<T extends ExerciseShell> {
     }
 
     @Override
+    protected void gotBlur(FormField english, FormField foreignLang, RecordAudioPanel rap,
+                           ControlGroup normalSpeedRecording, UserList ul, PagingContainer<T> pagingContainer, Panel toAddTo, String buttonName) {
+      validateThenPost(english, foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo, buttonName);
+    }
+
+    @Override
     protected String getButtonName() {
       return CHANGE;
     }
@@ -192,27 +201,34 @@ public class EditItem<T extends ExerciseShell> {
       return widgets;
     }
 
-    protected boolean shouldDisableNext() {
-      return true;
-    }
+    protected boolean shouldDisableNext() {  return true;    }
 
+    /**
+     * Add remove from list button
+     * @param ul
+     * @param pagingContainer
+     * @param toAddTo
+     * @param normalSpeedRecording
+     * @param buttonName
+     * @return
+     */
     @Override
     protected Panel getCreateButton(final UserList ul, PagingContainer<T> pagingContainer, Panel toAddTo,
                                     ControlGroup normalSpeedRecording, String buttonName
     ) {
-      Button submit = makeCreateButton(ul, pagingContainer, toAddTo, english, foreignLang, rap, normalSpeedRecording, buttonName);
+      //Button submit = makeCreateButton(ul, pagingContainer, toAddTo, english, foreignLang, rap, normalSpeedRecording, buttonName);
 
       Panel row = new DivWidget();
       row.addStyleName("marginBottomTen");
-      submit.addStyleName("floatRight");
+      //submit.addStyleName("floatRight");
 
       Button delete = new Button("Remove from list");
       DOM.setStyleAttribute(delete.getElement(), "marginRight", "5px");
-      delete.setType(ButtonType.PRIMARY);
+      delete.setType(ButtonType.WARNING);
       delete.addStyleName("floatRight");
 
       row.add(delete);
-      row.add(submit);
+      //row.add(submit);
 
       final long uniqueID = ul.getUniqueID();
       delete.addClickHandler(new ClickHandler() {
@@ -220,8 +236,7 @@ public class EditItem<T extends ExerciseShell> {
         public void onClick(ClickEvent event) {
           service.deleteItemFromList(uniqueID, newUserExercise.getID(), new AsyncCallback<Boolean>() {
             @Override
-            public void onFailure(Throwable caught) {
-            }
+            public void onFailure(Throwable caught) {}
 
             @Override
             public void onSuccess(Boolean result) {
@@ -237,7 +252,6 @@ public class EditItem<T extends ExerciseShell> {
 
     /**
      * @param container
-     * @param grabFocus
      * @return
      */
     @Override
@@ -253,14 +267,14 @@ public class EditItem<T extends ExerciseShell> {
      */
     @Override
     protected FormField makeForeignLangRow(Panel container) {
-      FluidRow row = new FluidRow();
+      Panel row = new FluidRow();
       container.add(row);
       foreignLang = makeBoxAndAnno(row, controller.getLanguage(), foreignAnno);
       foreignLang.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
- /*     foreignLang.box.addBlurHandler(new BlurHandler() {
+/*      foreignLang.box.addBlurHandler(new BlurHandler() {
         @Override
         public void onBlur(BlurEvent event) {
-          checkForForeignChange();
+          validateThenPost(english, foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo, buttonName);
         }
       });*/
       return null;
@@ -268,33 +282,40 @@ public class EditItem<T extends ExerciseShell> {
 
     @Override
     protected void makeTranslitRow(Panel container) {
-      FluidRow row = new FluidRow();
+      Panel row = new FluidRow();
       container.add(row);
       translit = makeBoxAndAnno(row, "Transliteration (optional)", translitAnno);
     }
 
     @Override
-    protected ControlGroup makeRegularAudioPanel(FluidRow row) {
+    protected ControlGroup makeRegularAudioPanel(Panel row) {
       rap = makeRecordAudioPanel(row, english, foreignLang, true);
       fastAnno.addStyleName("topFiveMargin");
       return addControlGroupEntry(row, "Normal speed reference recording", rap, fastAnno);
     }
 
     @Override
-    protected void makeSlowAudioPanel(FluidRow row) {
+    protected void makeSlowAudioPanel(Panel row) {
       rapSlow = makeRecordAudioPanel(row, english, foreignLang, false);
       slowAnno.addStyleName("topFiveMargin");
 
       addControlGroupEntry(row, "Slow speed reference recording (optional)", rapSlow, slowAnno);
     }
 
-    private BasicDialog.FormField makeBoxAndAnno(FluidRow row, String label, HTML englishAnno) {
+    private BasicDialog.FormField makeBoxAndAnno(Panel row, String label, HTML englishAnno) {
       BasicDialog.FormField formField = addControlFormField(row, label, false, 1, englishAnno);
       englishAnno.addStyleName("leftFiveMargin");
       englishAnno.addStyleName("editComment");
       return formField;
     }
 
+    /**
+     * @see #onClick(mitll.langtest.shared.custom.UserList, mitll.langtest.client.exercise.PagingContainer, com.google.gwt.user.client.ui.Panel, String)
+     * @param ul
+     * @param pagingContainer
+     * @param toAddTo
+     * @param buttonName
+     */
     @Override
     protected void afterValidForeignPhrase(final UserList ul, final PagingContainer<T> pagingContainer, final Panel toAddTo,
                                            final String buttonName) {
@@ -369,7 +390,7 @@ public class EditItem<T extends ExerciseShell> {
 
     private void reallyChange(final PagingContainer<T> pagingContainer, final String buttonName) {
       newUserExercise.setCreator(controller.getUser());
-      System.out.println("reallyChange : " + newUserExercise.getID());
+      //System.out.println("reallyChange : " + newUserExercise.getID());
 
       service.editItem(newUserExercise, new AsyncCallback<Void>() {
         @Override
@@ -389,9 +410,9 @@ public class EditItem<T extends ExerciseShell> {
       changeTooltip(pagingContainer);
       originalForeign = newUserExercise.getForeignLanguage();
 
-      String tooltip = newUserExercise.getTooltip();
+/*      String tooltip = newUserExercise.getTooltip();
       if (tooltip.length() > 30) tooltip = tooltip.substring(0, 30) + "...";
-      showPopup(tooltip + " has been updated.", submit);
+      showPopup(tooltip + " has been updated.", submit);*/
       predefinedContentList.reload();
     }
 
@@ -456,7 +477,7 @@ public class EditItem<T extends ExerciseShell> {
         originalSlowRefAudio = slowAudioRef;
       }
 
-      submit.setText(CHANGE);
+      //submit.setText(CHANGE);
     }
 
     private void useAnnotation(UserExercise userExercise, String field, HTML annoField) {
