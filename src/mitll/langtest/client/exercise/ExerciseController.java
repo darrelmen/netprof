@@ -56,7 +56,6 @@ public interface ExerciseController {
   String getLanguage();
   boolean isPromptBeforeNextItem();
   boolean isRightAlignContent();
- // boolean isFlashCard();
   boolean isGoodwaveMode();
   int getLeftColumnWidth();
   int getHeightOfTopRows();
