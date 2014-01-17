@@ -349,10 +349,10 @@ public class PagingContainer<T extends ExerciseShell> {
     int header = getTableHeaderHeight();
     int leftOver = Window.getClientHeight() - header - verticalUnaccountedFor;
 
-     System.out.println("getNumTableRowsGivenScreenHeight Got on resize " + Window.getClientHeight() +
+/*     System.out.println("getNumTableRowsGivenScreenHeight Got on resize " + Window.getClientHeight() +
        " " + header + " result = " + leftOver + "(" +
        verticalUnaccountedFor+
-       ")");
+       ")");*/
 
     float rawRatio = ((float) leftOver) / (float) heightOfCellTableWith15Rows();
     float tableRatio = Math.min(MAX_PAGES, rawRatio);
