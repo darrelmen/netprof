@@ -67,7 +67,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   private AudioPanel contentAudio, answerAudio;
   private NavigationHelper<Exercise> navigationHelper;
   private final float screenPortion;
-  private String instance;
+  protected String instance;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -270,18 +270,22 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     return audioPanel;
   }
 
-  protected ASRScoringAudioPanel getAudioPanel(Exercise e, String path) {
+  private ASRScoringAudioPanel getAudioPanel(Exercise e, String path) {
     ASRScoringAudioPanel audioPanel;
 
     //System.out.println("getScoringAudioPanel : score panel " + scorePanel);
     if (e.getType() == Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW) {
-      audioPanel = new FastAndSlowASRScoringAudioPanel(exercise, path, service, controller, scorePanel);
+      audioPanel = makeFastAndSlowAudio(path);
     } else {
       audioPanel = new ASRScoringAudioPanel(path, e.getRefSentence(), service, controller, SHOW_SPECTROGRAM, scorePanel, 23);
     }
     audioPanel.getElement().setId("ASRScoringAudioPanel");
     audioPanel.setRefAudio(path, e.getRefSentence());
     return audioPanel;
+  }
+
+  protected ASRScoringAudioPanel makeFastAndSlowAudio(String path) {
+    return new FastAndSlowASRScoringAudioPanel(exercise, path, service, controller, scorePanel);
   }
 
   protected String wavToMP3(String path) {
@@ -291,7 +295,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   protected void addIncorrectComment(final String commentToPost, final String field) {
     System.out.println(new Date() + " : post to server " + exercise.getID() +
       " field " + field + " commentLabel '" + commentToPost + "' is incorrect");
-    //  final long then = System.currentTimeMillis();
     String status = "incorrect";
     addAnnotation(field, status, commentToPost);
   }
@@ -299,7 +302,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   protected void addCorrectComment(final String field) {
     System.out.println(new Date() + " : post to server " + exercise.getID() +
       " field " + field + " is correct");
-    //  final long then = System.currentTimeMillis();
     String status = "correct";
     addAnnotation(field, status, "");
   }
@@ -307,12 +309,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   private void addAnnotation(final String field, final String status, final String commentToPost) {
     service.addAnnotation(exercise.getID(), field, status, commentToPost, controller.getUser(), new AsyncCallback<Void>() {
       @Override
-      public void onFailure(Throwable caught) {
-      }
+      public void onFailure(Throwable caught) {}
 
       @Override
       public void onSuccess(Void result) {
-        //long now = System.currentTimeMillis();
         System.out.println("\t" + new Date() + " : onSuccess : posted to server " + exercise.getID() +
           " field " + field + " commentLabel " + commentToPost + " is " + status);//, took " + (now - then) + " millis");
       }
@@ -347,16 +347,20 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     return commentLabel;
   }
 
-  /**
-   * @see mitll.langtest.client.custom.NPFExercise#makeAddToList(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController)
-   * @param w
-   * @param tip
-   * @param placement
-   * @return
-   */
-  protected Tooltip createAddTooltip(Widget w, String tip, Placement placement) {
+  protected Tooltip addTooltip(Widget w, String tip) {
+    return createAddTooltip(w, tip, Placement.RIGHT);
+  }
+
+    /**
+     * @see mitll.langtest.client.custom.NPFExercise#makeAddToList(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController)
+     * @param w
+     * @param tip
+     * @param placement
+     * @return
+     */
+  private Tooltip createAddTooltip(Widget widget, String tip, Placement placement) {
     Tooltip tooltip = new Tooltip();
-    tooltip.setWidget(w);
+    tooltip.setWidget(widget);
     tooltip.setText(tip);
     tooltip.setAnimation(true);
 // As of 4/22 - bootstrap 2.2.1.0 -
@@ -526,13 +530,13 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
   protected void setAudioRef(String audioRef) {}
 
-  class FastAndSlowASRScoringAudioPanel extends ASRScoringAudioPanel {
+  protected class FastAndSlowASRScoringAudioPanel extends ASRScoringAudioPanel {
     private static final String GROUP = "group";
     /**
      * @param exercise
      * @param path
      * @param service
-     * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#getScoringAudioPanel(mitll.langtest.shared.Exercise, String)
+     * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#getAudioPanel
      */
     public FastAndSlowASRScoringAudioPanel(Exercise exercise,
                                            String path, LangTestDatabaseAsync service, ExerciseController controller1,
@@ -552,7 +556,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
      */
     @Override
     protected Widget getBeforePlayWidget() {
-      VerticalPanel vp = new VerticalPanel();
+      Panel vp = new VerticalPanel();
       vp.getElement().setId("beforePlayWidget_verticalPanel");
       Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
       RadioButton first = null;
@@ -562,16 +566,16 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
       RadioButton regular = null;
       for (final AudioAttribute audioAttribute : audioAttributes) {
-        RadioButton fast = new RadioButton(GROUP + "_" + audioPath + "_"+instance, audioAttribute.getDisplay());
+        RadioButton radio = new RadioButton(GROUP + "_" + exercise.getID() + "_"+instance, audioAttribute.getDisplay());
         if (audioAttribute.isRegularSpeed()) {
-          regular = fast;
+          regular = radio;
         }
         if (first == null) {
-          first = fast;
+          first = radio;
         }
-        vp.add(fast);
+        addAudioRadioButton(vp, radio, audioAttribute.getAudioRef());
 
-        fast.addClickHandler(new ClickHandler() {
+        radio.addClickHandler(new ClickHandler() {
           @Override
           public void onClick(ClickEvent event) {
             showAudio(audioAttribute);
@@ -598,6 +602,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
       hp.add(vp);
       return vp;
+    }
+
+    protected void addAudioRadioButton(Panel vp, RadioButton fast, String audioPath) {
+      vp.add(fast);
     }
 
     private void showAudio(AudioAttribute audioAttribute) {
