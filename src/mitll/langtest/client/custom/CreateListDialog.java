@@ -17,6 +17,8 @@ import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserManager;
 
 public class CreateListDialog extends BasicDialog {
+  private static final String CLASS = "Course Info";
+
   private final Navigation navigation;
   private LangTestDatabaseAsync service;
   private UserManager userManager;
@@ -61,15 +63,12 @@ public class CreateListDialog extends BasicDialog {
     row = new FluidRow();
     child.add(row);
 
-    final BasicDialog.FormField classBox = addControlFormField(row, "Class");
+    final BasicDialog.FormField classBox = addControlFormField(row, CLASS);
     row = new FluidRow();
     child.add(row);
 
     Button submit = new Button("Create List");
     submit.setType(ButtonType.PRIMARY);
-/*
-    submit.addStyleName("marginBottomTen");
-*/
 
     DOM.setStyleAttribute(submit.getElement(), "marginBottom", "10px");
 
@@ -83,14 +82,16 @@ public class CreateListDialog extends BasicDialog {
           service.addUserList(userManager.getUser(), titleBox.getText(), area.getText(),
             classBox.getText(), new AsyncCallback<Long>() {
             @Override
-            public void onFailure(Throwable caught) {
-            }
+            public void onFailure(Throwable caught) {}
 
             @Override
             public void onSuccess(Long result) {
-              navigation.setUserListID(result);
-//              System.out.println("userListID " + navigation.getUserListID());
-              navigation.showInitialState();
+              if (result == -1) {
+                markError(titleBox,"You already have a list named "+ titleBox.getText());
+              } else {
+                navigation.setUserListID(result);
+                navigation.showInitialState();
+              }
             }
           });
         }
