@@ -35,9 +35,11 @@ import java.util.*;
  */
 public class QCNPFExercise extends GoodwaveExercisePanel {
   private static final String CHECKBOX_LABEL = "         ";//"Has defect";
-  private String instance;
+  private static final String CHECKBOX_LABEL2 = "           ";//"Has defect";
+  private static final String DEFECT = "Defect?";
   private Set<String> incorrectSet = new HashSet<String>();
   private List<RequiresResize> toResize;
+
   public QCNPFExercise(Exercise e, ExerciseController controller, ListInterface<Exercise> listContainer,
                        float screenPortion, boolean addKeyHandler, String instance) {
     super(e, controller, listContainer, screenPortion, addKeyHandler, instance);
@@ -62,8 +64,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
       }
     }, listContainer, true, addKeyHandler) {
       @Override
-      protected void enableNext(Exercise exercise) {
-      }
+      protected void enableNext(Exercise exercise) {}
     };
   }
 
@@ -83,12 +84,10 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     service.markReviewed(completedExercise.getID(), incorrectSet.isEmpty(), controller.getUser(),
       new AsyncCallback<Void>() {
         @Override
-        public void onFailure(Throwable caught) {
-        }
+        public void onFailure(Throwable caught) {}
 
         @Override
-        public void onSuccess(Void result) {
-        }
+        public void onSuccess(Void result) {}
       });
   }
 
@@ -115,8 +114,11 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     column.addStyleName("floatLeft");
     column.setWidth("100%");
 
-    Heading heading = new Heading(4, "Defect?");
+    boolean isComment = instance.equals(Navigation.COMMENT);
+    String columnLabel = isComment ? "Comment" : DEFECT;
+    Heading heading = new Heading(4, columnLabel);
     heading.addStyleName("borderBottomQC");
+    if (isComment) heading.setWidth("90px");
     Panel row = new FlowPanel();
     row.add(heading);
 
@@ -181,7 +183,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
     boolean alreadyMarkedCorrect = annotation == null || annotation.status == null || annotation.status.equals("correct");
     final Panel commentRow = new FlowPanel();
-    final Panel qcCol = getQCCheckBox(field, commentEntry, alreadyMarkedCorrect, commentRow);
+    final Widget qcCol = getQCCheckBox(field, commentEntry, alreadyMarkedCorrect, commentRow);
 
     populateCommentRow(commentEntry, alreadyMarkedCorrect, commentRow);
 
@@ -209,14 +211,13 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     return rowContainer;
   }
 
-  private Panel getQCCheckBox(String field, FocusWidget commentEntry, boolean alreadyMarkedCorrect, Panel commentRow) {
+  private Widget getQCCheckBox(String field, FocusWidget commentEntry, boolean alreadyMarkedCorrect, Panel commentRow) {
     final CheckBox checkBox = makeCheckBox(field, commentRow, commentEntry, alreadyMarkedCorrect);
 
-    Panel qcCol = new FlowPanel();
-//   / qcCol.addStyleName("qcRightBorder");
-
+/*    Panel qcCol = new FlowPanel();
     qcCol.add(checkBox);
-    return qcCol;
+    return qcCol;*/
+    return checkBox;
   }
 
   /**
@@ -261,9 +262,12 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
    * @param alreadyMarkedCorrect
    * @return
    */
-  private CheckBox makeCheckBox(final String field, final Panel commentRow, final FocusWidget commentEntry, boolean alreadyMarkedCorrect) {
-    final CheckBox checkBox = new CheckBox(CHECKBOX_LABEL);
-    checkBox.addStyleName("centeredRadio");
+  private CheckBox makeCheckBox(final String field, final Panel commentRow, final FocusWidget commentEntry,
+                                boolean alreadyMarkedCorrect) {
+    boolean isComment = instance.equals(Navigation.COMMENT);
+
+    final CheckBox checkBox = new CheckBox("");//isComment ? CHECKBOX_LABEL2 : CHECKBOX_LABEL);
+    checkBox.addStyleName(isComment? "wideCenteredRadio" :"centeredRadio");
     checkBox.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
