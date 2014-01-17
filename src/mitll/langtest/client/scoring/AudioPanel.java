@@ -125,6 +125,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     HorizontalPanel hp = new HorizontalPanel();
     hp.setVerticalAlignment(ALIGN_MIDDLE);
     hp.getElement().setId("AudioPanel_hp");
+
+    // add widgets to left of play button
     Widget beforePlayWidget = getBeforePlayWidget();
     playAudio = getPlayButtons(beforePlayWidget);
     hp.add(playAudio);
