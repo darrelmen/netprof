@@ -64,9 +64,7 @@ public class RecordButton extends Button {
     this.setRecordingListener(recordingListener);
   }
 
-  protected void removeImage() {
-    StyleHelper.removeStyle(icon, icon.getBaseIconType());
-  }
+  protected void removeImage() {  StyleHelper.removeStyle(icon, icon.getBaseIconType());  }
 
   /**
    * @see #RecordButton(int, mitll.langtest.client.recorder.RecordButton.RecordingListener, boolean)
