@@ -486,9 +486,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       byID = db.getExercise(id);
     }
     addAnnotations(byID);
-    logger.debug("getExercise : returning " +byID);
     if (byID == null) {
       logger.error("getExercise : huh? couldn't find exercise with id " + id + " when examining " + exercises.size() + " items");
+    }
+    else {
+      logger.debug("getExercise : returning " +byID);
     }
     long now = System.currentTimeMillis();
     if (now - then > 50) {
@@ -993,6 +995,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    return db.getUserListManager().getListsForUser(userid, onlyCreated);
   }
 
+  /**
+   * @see mitll.langtest.client.custom.Navigation#showInitialState()
+   * @see mitll.langtest.client.custom.Navigation#viewLessons(com.google.gwt.user.client.ui.Panel, boolean)
+   * @param search
+   * @return
+   */
   @Override
   public Collection<UserList> getUserListsForText(String search) {
     return db.getUserListManager().getUserListsForText(search);
