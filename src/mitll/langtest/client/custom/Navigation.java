@@ -247,8 +247,7 @@ public class Navigation implements RequiresResize {
         if (result.size() == 1 && result.iterator().next().getExercises().isEmpty()) {
           service.getUserListsForText("", new AsyncCallback<Collection<UserList>>() {
             @Override
-            public void onFailure(Throwable caught) {
-            }
+            public void onFailure(Throwable caught) {}
 
             @Override
             public void onSuccess(Collection<UserList> result) {
