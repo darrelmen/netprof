@@ -180,6 +180,9 @@ public class UserDAO extends DAO {
     convertGraders();
   }
 
+  /**
+   * @deprecated lets get rid of this eventually
+   */
   private void convertGraders() {
     GraderDAO graderDAO = new GraderDAO(database);
     Collection<Grader> graders = graderDAO.getGraders();
