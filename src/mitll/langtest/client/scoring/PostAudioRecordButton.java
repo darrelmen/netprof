@@ -82,7 +82,6 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
          * @param toShow
          */
         private void showPopup(String toShow) {
-          System.out.println("\n\n--->show popup " + toShow);
           final PopupPanel popupImage = new PopupPanel(true);
           popupImage.add(new HTML(toShow));
           popupImage.showRelativeTo(getOuter());
