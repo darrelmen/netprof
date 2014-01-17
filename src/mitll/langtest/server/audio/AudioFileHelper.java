@@ -8,7 +8,6 @@ import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.scoring.ASRScoring;
 import mitll.langtest.server.scoring.AutoCRTScoring;
-import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -129,7 +128,7 @@ public class AudioFileHelper {
     } else {
       makeASRScoring();
       List<String> unk = new ArrayList<String>();
-      unk.add(SmallVocabDecoder.UNKNOWN_MODEL); // if  you don't include this dcodr will say : ERROR: word UNKNOWNMODEL is not in the dictionary!
+      unk.add(SLFFile.UNKNOWN_MODEL); // if  you don't include this dcodr will say : ERROR: word UNKNOWNMODEL is not in the dictionary!
       String vocab = asrScoring.getUsedTokens(lmSentences, unk);
       logger.debug("getASRScoreForAudio : vocab " + vocab);
       return getASRScoreForAudio(0, testAudioFile.getPath(), vocab, 128, 128, false, true, tmpDir, serverProps.useScoreCache());
@@ -149,8 +148,7 @@ public class AudioFileHelper {
   }
 
   private String createSLFFile(Collection<String> lmSentences, String tmpDir) {
-    SmallVocabDecoder svDecoderHelper = new SmallVocabDecoder();
-    return svDecoderHelper.createSimpleSLFFile(lmSentences, tmpDir);
+    return new SLFFile().createSimpleSLFFile(lmSentences, tmpDir);
   }
 
   /**
