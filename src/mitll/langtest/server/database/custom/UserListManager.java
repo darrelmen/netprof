@@ -86,10 +86,15 @@ public class UserListManager {
       logger.error("huh? no user with id " + userid);
       return null;
     } else {
-      UserList e = new UserList(i++, userWhere, name, description, dliClass, isPrivate);
-      userListDAO.add(e);
-      logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists total, for " + userid);
-      return e;
+      if (userListDAO.hasByName(name, userid)) {
+        return null;
+      } else {
+        UserList e = new UserList(i++, userWhere, name, description, dliClass, isPrivate);
+
+        userListDAO.add(e);
+        logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists total, for " + userid);
+        return e;
+      }
     }
   }
 
@@ -127,7 +132,7 @@ public class UserListManager {
     if (listsForUser.isEmpty()) {
       logger.error("getListsForUser - list is empty?? " + listsForUser.size() + "(" +listsForUser+ ") for " + userid);
     }
-    else {
+    else if (favorite != null) {
       listsForUser.remove(favorite);
       listsForUser.add(0,favorite);// put at front
     }
@@ -228,8 +233,7 @@ public class UserListManager {
    * @return
    */
   public List<UserList> getUserListsForText(String search) {
-    List<UserList> listsForUser = new ArrayList<UserList>(userListDAO.getAllPublic());
-    return listsForUser;
+    return userListDAO.getAllPublic();
   }
 
   /**
