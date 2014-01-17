@@ -72,6 +72,15 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
     @Override
     protected boolean shouldDisableNext() { return false; }
 
+    /**
+     * @see #addNew(mitll.langtest.shared.custom.UserList, mitll.langtest.client.exercise.PagingContainer, com.google.gwt.user.client.ui.Panel)
+     * @param ul
+     * @param pagingContainer
+     * @param toAddTo
+     * @param normalSpeedRecording
+     * @param buttonName
+     * @return
+     */
     @Override
     protected Panel getCreateButton(final UserList ul, final PagingContainer<T> pagingContainer, final Panel toAddTo,
                                     final ControlGroup normalSpeedRecording, String buttonName) {
