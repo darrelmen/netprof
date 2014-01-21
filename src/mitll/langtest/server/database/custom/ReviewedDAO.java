@@ -87,7 +87,7 @@ public class ReviewedDAO extends DAO {
       int j = statement.executeUpdate();
 
       if (j != 1)
-        logger.error("huh? didn't insert row for ");
+        logger.error("huh? didn't insert row for " + exerciseID + " " + creatorID);
 
       statement.close();
       database.closeConnection(connection);
@@ -98,21 +98,29 @@ public class ReviewedDAO extends DAO {
     }
   }
 
+  /**
+   * @see mitll.langtest.server.database.custom.UserListManager#removeReviewed(String)
+   * @param exerciseID
+   */
   public void remove(String exerciseID) {
     try {
-     // int before = getCount();
+      int before = getCount();
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement(
-          "DELETE FROM " + REVIEWED +
-              " WHERE " +
-            "exerciseid" +
-            "='" + exerciseID +
-              "'");
+        "DELETE FROM " + REVIEWED +
+          " WHERE " +
+          "exerciseid" +
+          "='" + exerciseID +
+          "'");
 
       int j = statement.executeUpdate();
 
-      if (j != 1)
-        logger.error("huh? didn't insert row for ");
+      if (j != 1) {
+        logger.error("remove : huh? didn't remove row for " + exerciseID);
+        int count = getCount();
+        logger.debug("now " + count + " reviewed");
+        if (before-count != 1) logger.error("ReviewedDAO : huh? there were " +before +" before");
+      }
 
       statement.close();
       database.closeConnection(connection);
@@ -125,10 +133,10 @@ public class ReviewedDAO extends DAO {
     }
   }
 
-  public int getCount() {
-    return getCount(REVIEWED);
-  }
-
+  /**
+   * @see mitll.langtest.server.database.custom.UserListManager#UserListManager(mitll.langtest.server.database.UserDAO, UserListDAO, UserListExerciseJoinDAO, AnnotationDAO, ReviewedDAO, mitll.langtest.server.PathHelper)
+   * @return
+   */
   public Set<String> getReviewed() {
     Connection connection = database.getConnection();
     String sql = "SELECT DISTINCT exerciseid from " + REVIEWED + " order by exerciseid";
@@ -152,4 +160,6 @@ public class ReviewedDAO extends DAO {
     }
     return lists;
   }
+
+  public int getCount() { return getCount(REVIEWED);  }
 }
