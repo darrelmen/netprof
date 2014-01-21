@@ -56,7 +56,7 @@ public class ASRScoring extends Scoring {
 
   public static final String SMALL_LM_SLF = "smallLM.slf";
 
-  private final SmallVocabDecoder svDecoderHelper = new SmallVocabDecoder();
+  private final SmallVocabDecoder svDecoderHelper;
   private LangTestDatabaseImpl langTestDatabase;
 
   /**
@@ -102,9 +102,12 @@ public class ASRScoring extends Scoring {
     this.letterToSoundClass = new LTSFactory().getLTSClass(language);
 //    logger.info("using LTS " + letterToSoundClass.getClass());
     this.htkDictionary = dict;
+    svDecoderHelper = new SmallVocabDecoder(htkDictionary);
     if (dict != null) logger.debug("htkDictionary size is " + dict.size());
     this.configFileCreator = new ConfigFileCreator(properties, letterToSoundClass, scoringDir);
   }
+
+  public SmallVocabDecoder getSmallVocabDecoder() { return svDecoderHelper; }
 
   public boolean checkLTS(String foreignLanguagePhrase) { return checkLTS(letterToSoundClass, foreignLanguagePhrase); }
 
@@ -116,7 +119,8 @@ public class ASRScoring extends Scoring {
    * @return
    */
   private boolean checkLTS(LTS lts, String foreignLanguagePhrase) {
-    Collection<String> tokens = new SmallVocabDecoder().getTokens(foreignLanguagePhrase);
+    SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(htkDictionary);
+    Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase);
 
     String language = isMandarin ? " MANDARIN " : "";
     //logger.debug("checkLTS " + language + " tokens : '" +tokens +"'");
@@ -124,7 +128,7 @@ public class ASRScoring extends Scoring {
     try {
       for (String token : tokens) {
         if (isMandarin) {
-          String segmentation = segmentation(token.trim());
+          String segmentation = smallVocabDecoder.segmentation(token.trim());
           if (segmentation.isEmpty()) {
             logger.debug("checkLTS: mandarin token : " + token + " invalid!");
             return false;
@@ -147,39 +151,22 @@ public class ASRScoring extends Scoring {
     return true;
   }
 
+  /**
+   * For chinese, maybe later other languages.
+   * @param longPhrase
+   * @return
+   */
   private String getSegmented(String longPhrase) {
     Collection<String> tokens = svDecoderHelper.getTokens(longPhrase);
     StringBuilder builder = new StringBuilder();
     for (String token : tokens) {
-      builder.append(segmentation(token.trim()));
+      builder.append(svDecoderHelper.segmentation(token.trim()));
       builder.append(" ");
     }
     String s = builder.toString();
     logger.debug("getSegmented phrase '" + longPhrase + "' -> '" + s + "'");
 
     return s;
-  }
-
-  private String segmentation(String phrase){
-    return longest_prefix(phrase, 0);
-   // logger.debug("phrase '" + phrase + "' -> '" + s + "'");
-  }
-
-  private String longest_prefix(String phrase, int i){
-    if(i == phrase.length())
-      return "";
-    String prefix = phrase.substring(0, phrase.length() - i);
-    if (inDict(prefix)) {
-      if(i == 0)
-        return phrase;
-      String rest = longest_prefix(phrase.substring(phrase.length()-i, phrase.length()), 0);
-      if(rest.length() > 0)
-        return prefix + " " + rest;
-    }
-    //else {
-      //logger.debug("dict doesn't contain " + prefix);
-    //}
-    return longest_prefix(phrase, i+1);
   }
 
 /*  private Set<String> wordsInDict = new HashSet<String>();
@@ -633,14 +620,7 @@ public class ASRScoring extends Scoring {
    */
   public Collection<String> getValidPhrases(Collection<String> phrases) { return getValidSentences(phrases); }
 
-  private boolean inDict(String token) {
-    scala.collection.immutable.List<String[]> apply = htkDictionary.apply(token);
-    return apply != null && !apply.isEmpty();
-  }
-
-  private boolean isPhraseInDict(String phrase) {
-    return letterToSoundClass.process(phrase) != null;
-  }
+  private boolean isPhraseInDict(String phrase) {  return letterToSoundClass.process(phrase) != null;  }
 
   /**
    * @see #getValidPhrases(java.util.Collection)
