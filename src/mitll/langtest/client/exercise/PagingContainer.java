@@ -71,16 +71,16 @@ public class PagingContainer<T extends ExerciseShell> {
 
   public void addCompleted(String id) {
     completed.add(id);
-    refresh();
+    redraw();
   }
 
-  public void refresh() {  table.redraw();  }
+  public void redraw() {  table.redraw();  }
 
   public int getSize() { return getList().size(); }
 
   private List<T> getList() { return dataProvider.getList();  }
 
-  public T getByID(String id) {
+/*  public T getByID(String id) {
     for (T t : getList()) {
       if (t.getID().equals(id)) {
         //System.out.println("PagingContainer.getByID : Found " + t);
@@ -88,11 +88,13 @@ public class PagingContainer<T extends ExerciseShell> {
       }
     }
     return null;
-  }
+  }*/
 
   public void forgetExercise(T es) {
-    getList().remove(es);
-    refresh();
+    if (!getList().remove(es)) {
+      System.err.println("forgetExercise couldn't remove " + es);
+    }
+    redraw();
   }
 
   public void setUnaccountedForVertical(int v) {  verticalUnaccountedFor = v;  }
@@ -255,20 +257,20 @@ public class PagingContainer<T extends ExerciseShell> {
     return selectItem(0);
   }
 
-  public boolean isFirst(T test) {
+/*  public boolean isFirst(T test) {
     return getList().isEmpty() || getList().get(0).getID().equals(test.getID());
-  }
+  }*/
 
-  public boolean isLast(T test) {
+/*  public boolean isLast(T test) {
     List<T> list = getList();
     return list.isEmpty() || list.get(list.size()-1).getID().equals(test.getID());
-  }
+  }*/
 
   /**
    *
    * @return true if on last item
    */
-  public boolean loadNext() {
+/*  public boolean loadNext() {
     if (current == null) {
       return true;
     }
@@ -296,7 +298,7 @@ public class PagingContainer<T extends ExerciseShell> {
 
       return index -1 == 0;
     }
-  }
+  }*/
 
   private T selectItem(int index) {
     T first = getList().get(index);
