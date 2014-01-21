@@ -78,21 +78,26 @@ public class PagingContainer<T extends ExerciseShell> {
 
   public int getSize() { return getList().size(); }
 
-  private List<T> getList() { return dataProvider.getList();  }
-
-/*  public T getByID(String id) {
+  private T getByID(String id) {
     for (T t : getList()) {
       if (t.getID().equals(id)) {
-        //System.out.println("PagingContainer.getByID : Found " + t);
         return t;
       }
     }
     return null;
-  }*/
+  }
 
   public void forgetExercise(T es) {
-    if (!getList().remove(es)) {
-      System.err.println("forgetExercise couldn't remove " + es);
+    List<T> list = getList();
+    System.out.println("forgetExercise " + es);
+
+    if (!list.remove(es)) {
+      if (!list.remove(getByID(es.getID()))) {
+        System.err.println("forgetExercise couldn't remove " + es);
+        for (T t : list) {
+          System.out.println("\tnow has " + t.getID());
+        }
+      }
     }
     redraw();
   }
@@ -416,6 +421,8 @@ public class PagingContainer<T extends ExerciseShell> {
     }
     table.redraw();
   }
+
+  private List<T> getList() { return dataProvider.getList();  }
 
   private static class MySafeHtmlCell extends SafeHtmlCell {
     private final boolean consumeClicks;
