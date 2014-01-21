@@ -247,8 +247,7 @@ public class UserExerciseDAO extends DAO {
     try {
       List<UserExercise> userExercises = getUserExercises(sql);
       if (userExercises.isEmpty()) {
-       // Exercise exercise = exerciseDAO.getExercise(exid);
-        logger.error("getWhere : huh? no custom exercise with id " + exid);
+        logger.warn("getWhere : huh? no custom exercise with id " + exid);
         return null;
       } else return userExercises.iterator().next();
     } catch (SQLException e) {
@@ -319,7 +318,6 @@ public class UserExerciseDAO extends DAO {
   private List<String> getExercises(String sql) throws SQLException {
     Connection connection = database.getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
-    //logger.debug("getUserExercises sql = " + sql);
     ResultSet rs = statement.executeQuery();
     List<String> exercises = new ArrayList<String>();
 
