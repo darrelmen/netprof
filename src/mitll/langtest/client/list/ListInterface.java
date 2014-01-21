@@ -98,7 +98,7 @@ public interface ListInterface<T extends ExerciseShell> extends RequiresResize {
   void addCompleted(String id);
 
   void addExercise(T es);
-  void removeExercise(T es);
+ // void removeExercise(T es);
 
   T simpleRemove(String id);
 
