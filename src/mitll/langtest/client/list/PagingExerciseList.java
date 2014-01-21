@@ -241,29 +241,34 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
     }
   }
 
-  public void clear() {
-    pagingContainer.clear();
-  }
+  public void clear() { pagingContainer.clear(); }
 
   @Override
-  public void flush() {
-    pagingContainer.flush();
-  }
+  public void flush() { pagingContainer.flush();  }
 
+  /**
+   * @see #addExercise(mitll.langtest.shared.ExerciseShell)
+   * @param exercise
+   */
   @Override
-  protected void addExerciseToList(T exercise) {
-    pagingContainer.addExerciseToList2(exercise);
-  }
+  protected void addExerciseToList(T exercise) { pagingContainer.addExerciseToList2(exercise); }
 
   public void forgetExercise(String id) {
-    forgetExercise(byID(id));
+    removeExercise(byID(id));
   }
 
   @Override
-  public void forgetExercise(T es) {
-    super.forgetExercise(es);
+  public void removeExercise(T es) {
+    super.removeExercise(es);
 
     pagingContainer.forgetExercise(es);
+  }
+
+  @Override
+  public T simpleRemove(String id) {
+    T t = super.simpleRemove(id);
+    pagingContainer.forgetExercise(t);
+    return t;
   }
 
   @Override
@@ -280,15 +285,16 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
    * @param i
    */
  @Override
-  protected void markCurrentExercise(int i) {
-   pagingContainer.markCurrentExercise(i);
- }
+  protected void markCurrentExercise(int i) { pagingContainer.markCurrentExercise(i); }
 
   public void setUserListID(long userListID) {
     this.userListID = userListID;
   }
 
+/*
   public PagingContainer<T> getPagingContainer() {
     return pagingContainer;
   }
+*/
+  public void redraw() { pagingContainer.redraw(); }
 }
