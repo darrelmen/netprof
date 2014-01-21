@@ -29,7 +29,6 @@ import mitll.langtest.shared.custom.UserList;
  */
 public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
   private static final String FIXED = "Fixed";
-
   /**
    *
    * @param service
@@ -46,24 +45,30 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
   /**
    * @see #setFactory(mitll.langtest.client.list.PagingExerciseList, mitll.langtest.shared.custom.UserList)
    * @param exercise
-   * @param right
-   * @param ul
+   * @paramx right
+   * @paramx ul
    * @param itemMarker
-   * @param pagingContainer
+   * @paramx pagingContainer
+   * @paramx includeAddItem
    */
-  @Override
+/*  @Override
   protected void populatePanel(UserExercise exercise, Panel right, UserList ul, HTML itemMarker,
                                PagingContainer<T> pagingContainer) {
     ReviewEditableExercise newUserExercise = new ReviewEditableExercise(itemMarker, exercise);
     right.add(newUserExercise.addNew(ul, pagingContainer, right));
     newUserExercise.setFields();
+  }*/
+
+  @Override
+  protected NewUserExercise<T> getAddOrEditPanel(UserExercise exercise, HTML itemMarker) {
+    return new ReviewEditableExercise(itemMarker, exercise);
   }
 
   private class ReviewEditableExercise extends EditableExercise {
     /**
      * @param itemMarker
      * @param changedUserExercise
-     * @see #populatePanel(mitll.langtest.shared.custom.UserExercise, com.google.gwt.user.client.ui.Panel, mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.HTML, mitll.langtest.client.exercise.PagingContainer)
+     * @see EditItem#populatePanel
      */
     public ReviewEditableExercise(HTML itemMarker, UserExercise changedUserExercise) {
       super(itemMarker, changedUserExercise);
@@ -73,7 +78,7 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
     protected boolean shouldDisableNext() { return false; }
 
     /**
-     * @see #addNew(mitll.langtest.shared.custom.UserList, mitll.langtest.client.exercise.PagingContainer, com.google.gwt.user.client.ui.Panel)
+     * @see #addNew
      * @param ul
      * @param pagingContainer
      * @param toAddTo
@@ -82,7 +87,7 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
      * @return
      */
     @Override
-    protected Panel getCreateButton(final UserList ul, final PagingContainer<T> pagingContainer, final Panel toAddTo,
+    protected Panel getCreateButton(final UserList ul, final ListInterface<T> pagingContainer, final Panel toAddTo,
                                     final ControlGroup normalSpeedRecording, String buttonName) {
       Button submit = makeCreateButton(ul, pagingContainer, toAddTo, english, foreignLang, rap, normalSpeedRecording, buttonName);
 
@@ -106,7 +111,13 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
       return row;
     }
 
-    protected void doAfterEditComplete(PagingContainer<T> pagingContainer, String buttonName) {
+    /**
+     * @see #reallyChange
+     * @param pagingContainer
+     * @param buttonName
+     */
+    @Override
+    protected void doAfterEditComplete(ListInterface<T> pagingContainer, String buttonName) {
       if (buttonName.equals(FIXED)) {
         String id = newUserExercise.getID();
         exerciseList.forgetExercise(id);
@@ -115,13 +126,10 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
         }
         service.removeReviewed(id, new AsyncCallback<Void>() {
           @Override
-          public void onFailure(Throwable caught) {
-          }
+          public void onFailure(Throwable caught) {}
 
           @Override
-          public void onSuccess(Void result) {
-            predefinedContentList.reload();
-          }
+          public void onSuccess(Void result) { predefinedContentList.reload(); }
         });
       } else {
         super.doAfterEditComplete(pagingContainer, buttonName);
