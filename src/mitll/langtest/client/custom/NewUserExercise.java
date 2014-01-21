@@ -23,6 +23,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
+import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserManager;
@@ -51,10 +52,9 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   protected BasicDialog.FormField translit;
   protected CreateFirstRecordAudioPanel rap;
   protected CreateFirstRecordAudioPanel rapSlow;
-  //protected Button submit;
 
   /**
-   * @see Navigation#addItem(mitll.langtest.shared.custom.UserList)
+   * @see mitll.langtest.client.custom.EditItem#getAddOrEditPanel(mitll.langtest.shared.custom.UserExercise, com.google.gwt.user.client.ui.HTML)
    * @param service
    * @param userManager
    * @param controller
@@ -68,18 +68,19 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     this.userManager = userManager;
   }
 
-  ControlGroup normalSpeedRecording;
-  UserList ul;
-  PagingContainer<T> pagingContainer;
-  Panel toAddTo;
+  private ControlGroup normalSpeedRecording;
+  private UserList ul;
+  private ListInterface<T> listInterface;
+  private Panel toAddTo;
+
   /**
-   * @see #onClick
+   * @see #afterValidForeignPhrase(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, String)
    * @param ul
-   * @param pagingContainer
+   * @param listInterface
    * @param toAddTo
    * @return
    */
-  public Panel addNew(final UserList ul, final PagingContainer<T> pagingContainer, final Panel toAddTo) {
+  public Panel addNew(final UserList ul, final ListInterface<T> listInterface, final Panel toAddTo) {
     final FluidContainer container = new FluidContainer();
     container.addStyleName("greenBackground");
 
@@ -95,13 +96,13 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
 
     normalSpeedRecording = makeRegularAudioPanel(row);
     this.ul = ul;
-    this.pagingContainer = pagingContainer;
+    this.listInterface = listInterface;
     this.toAddTo = toAddTo;
     makeSlowAudioPanel(row);
     rap.setOtherRAP(rapSlow.getPostAudioButton());
     rapSlow.setOtherRAP(rap.getPostAudioButton());
 
-    Panel column = getCreateButton(ul, pagingContainer, toAddTo, normalSpeedRecording, getButtonName());
+    Panel column = getCreateButton(ul, listInterface, toAddTo, normalSpeedRecording, getButtonName());
     row.add(column);
 
     foreignLang.box.addBlurHandler(new BlurHandler() {
@@ -125,25 +126,19 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
       }
     });
 
-
-
     return container;
   }
 
 
   protected void gotBlur() {
-    gotBlur(english, foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo, getButtonName());
+    gotBlur(english, foreignLang, rap, normalSpeedRecording, ul, listInterface, toAddTo, getButtonName());
   }
 
   protected void gotBlur(FormField english, FormField foreignLang, RecordAudioPanel rap,
-                        ControlGroup normalSpeedRecording, UserList ul, PagingContainer<T> pagingContainer,
-                        Panel toAddTo, String buttonName) {
+                        ControlGroup normalSpeedRecording, UserList ul, ListInterface<T> pagingContainer,
+                        Panel toAddTo, String buttonName) {}
 
-  }
-
-  protected String getButtonName() {
-    return CREATE;
-  }
+  protected String getButtonName() { return CREATE;  }
 
   protected ControlGroup makeRegularAudioPanel(Panel row) {
     rap = makeRecordAudioPanel(row, english, foreignLang, true);
@@ -186,6 +181,8 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     });
   }*/
 
+  protected void setFields() {}
+
   /**
    * @see #addNew
    * @param ul
@@ -194,7 +191,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
    * @param normalSpeedRecording
    * @return
    */
-  protected Panel getCreateButton(UserList ul, PagingContainer<T> pagingContainer, Panel toAddTo,
+  protected Panel getCreateButton(UserList ul, ListInterface<T> pagingContainer, Panel toAddTo,
                                   ControlGroup normalSpeedRecording, String buttonName
   ) {
     Button submit = makeCreateButton(ul, pagingContainer, toAddTo, english, foreignLang, rap, normalSpeedRecording,
@@ -207,7 +204,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     return column;
   }
 
-  protected Button makeCreateButton(final UserList ul, final PagingContainer<T> pagingContainer, final Panel toAddTo,
+  protected Button makeCreateButton(final UserList ul, final ListInterface<T> pagingContainer, final Panel toAddTo,
                                   final FormField english, final FormField foreignLang,
                                   final RecordAudioPanel rap, final ControlGroup normalSpeedRecording, final String buttonName) {
     Button submit = new Button(buttonName);
@@ -224,14 +221,14 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   }
 
   protected void validateThenPost(FormField english, FormField foreignLang, RecordAudioPanel rap,
-                                  ControlGroup normalSpeedRecording, UserList ul, PagingContainer<T> pagingContainer,
+                                  ControlGroup normalSpeedRecording, UserList ul, ListInterface<T> pagingContainer,
                                   Panel toAddTo, String buttonName) {
     if (validateForm(english, foreignLang, rap, normalSpeedRecording)) {
       onClick(ul, pagingContainer, toAddTo, buttonName);
     }
   }
 
-  protected void onClick(final UserList ul, final PagingContainer<T> pagingContainer, final Panel toAddTo,
+  protected void onClick(final UserList ul, final ListInterface<T> pagingContainer, final Panel toAddTo,
                          final String buttonName) {
     System.out.println("onClick : adding/changing " + newUserExercise);
 
@@ -255,7 +252,16 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     });
   }
 
-  protected void afterValidForeignPhrase(final UserList ul, final PagingContainer<T> pagingContainer, final Panel toAddTo,
+  /**
+   * @see #onClick
+   * @param ul
+   * @param exerciseList
+   * @param toAddTo
+   * @param buttonName
+   */
+  protected void afterValidForeignPhrase(final UserList ul,
+                                         final ListInterface<T> exerciseList,
+                                         final Panel toAddTo,
                                          final String buttonName) {
     service.reallyCreateNewItem(ul.getUniqueID(), newUserExercise, new AsyncCallback<UserExercise>() {
       @Override
@@ -263,13 +269,32 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
 
       @Override
       public void onSuccess(UserExercise newExercise) {
-        System.out.println("\tafterValidForeignPhrase - onSuccess : adding " + newUserExercise + " to " +ul);
+     //   System.out.println("\tafterValidForeignPhrase - onSuccess : adding " + newUserExercise + " to " +ul);
+
+        UserExercise newUserExercisePlaceholder = ul.remove(EditItem.NEW_EXERCISE_ID);
+
+      //  System.out.println("\tafterValidForeignPhrase - removed " + newUserExercisePlaceholder);
 
         ul.addExercise(newExercise);
+     //   System.out.println("\tafterValidForeignPhrase - added " + newExercise);
+
+        ul.addExercise(newUserExercisePlaceholder); // make sure the placeholder is always at the end
+
+      //  System.out.println("\tafterValidForeignPhrase - added " + newUserExercisePlaceholder);
+
         itemMarker.setText(ul.getExercises().size() + " items");
-        pagingContainer.addAndFlush(newExercise);
+
+        //T toMoveToEnd = exerciseList.byID(EditItem.NEW_EXERCISE_ID);
+        T toMoveToEnd = exerciseList.simpleRemove(EditItem.NEW_EXERCISE_ID);
+        exerciseList.addExercise((T)newExercise);  // TODO figure out better type safe way of doing this
+        exerciseList.addExercise(toMoveToEnd);
+
+        System.out.println("\tafterValidForeignPhrase - loading " + toMoveToEnd.getID());
+
+        exerciseList.loadExercise(toMoveToEnd); 
+
         toAddTo.clear();
-        toAddTo.add(addNew(ul, pagingContainer, toAddTo));
+        toAddTo.add(addNew(ul, exerciseList, toAddTo));
         newUserExercise = null;
       }
     });
@@ -390,7 +415,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
    * Validation checks appear from top to bottom on page -- so should be consistent
    * with how the fields are added.
    *
-   * @see #validateThenPost(mitll.langtest.client.user.BasicDialog.FormField, mitll.langtest.client.user.BasicDialog.FormField, mitll.langtest.client.exercise.RecordAudioPanel, com.github.gwtbootstrap.client.ui.ControlGroup, mitll.langtest.shared.custom.UserList, mitll.langtest.client.exercise.PagingContainer, com.google.gwt.user.client.ui.Panel, String)
+   * @see #validateThenPost
    * @param english
    * @param foreignLang
    * @param rap
