@@ -59,6 +59,9 @@ public class Navigation implements RequiresResize {
   private static final String PRACTICE = "Practice";
   public static final String REVIEW = "review";
   public static final String COMMENT = "comment";
+  private static final String EDIT = "Edit";
+  private static final String ADD_ITEM = "Add Item";
+  private static final String ADD__OR_EDIT_ITEM = "Add/Edit Item";
   private final ExerciseController controller;
   private LangTestDatabaseAsync service;
   private UserManager userManager;
@@ -431,7 +434,9 @@ public class Navigation implements RequiresResize {
     });
 
     // add practice tab
-    if (!isReview && !isComment) {
+    final boolean isNormalList = !isReview && !isComment;
+    System.out.println("normal list " + isNormalList);
+    if (isNormalList) {
       final TabAndContent practice = makeTab(tabPanel, IconType.CHECK, PRACTICE);
       practice.tab.addClickHandler(new ClickHandler() {
         @Override
@@ -441,35 +446,37 @@ public class Navigation implements RequiresResize {
       });
     }
     // add add item and edit tabs (conditionally)
-    TabAndContent addItem = null;
+    TabAndContent editItem = null;
     if (created && !ul.isPrivate()) {
-      if (!isReview && !isComment) {
-        addItem = makeTab(tabPanel, IconType.PLUS_SIGN, "Add Item");
-        final TabAndContent finalAddItem = addItem;
-        addItem.tab.addClickHandler(new ClickHandler() {
+/*      if (isNormalList) {
+        editItem = makeTab(tabPanel, IconType.PLUS_SIGN, ADD_ITEM);
+        final TabAndContent finalEditItem = editItem;
+        editItem.tab.addClickHandler(new ClickHandler() {
           @Override
           public void onClick(ClickEvent event) {
-            showAddItem(ul, finalAddItem);
+            showAddItem(ul, finalEditItem);
           }
         });
-      }
+      }*/
 
-      final TabAndContent edit = makeTab(tabPanel, IconType.EDIT, "Edit");
+      final TabAndContent edit = makeTab(tabPanel, IconType.EDIT, ADD__OR_EDIT_ITEM);
+      editItem = edit;
       edit.tab.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          showEditItem(ul, edit, (isReview || isComment) ? reviewItem : editItem);
+          showEditItem(ul, edit, (isReview || isComment) ? reviewItem : Navigation.this.editItem, isNormalList);
         }
       });
     }
 
     // select the initial tab -- either add if an empty
-    final TabAndContent finalAddItem = addItem;
+    final TabAndContent finalEditItem = editItem;
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
-        if (created && !ul.isPrivate() && ul.isEmpty() && finalAddItem != null) {
+        if (created && !ul.isPrivate() && ul.isEmpty() && finalEditItem != null) {
           tabPanel.selectTab(2);
-          showAddItem(ul, finalAddItem);
+//          showAddItem(ul, finalEditItem);
+          showEditItem(ul, finalEditItem, (isReview || isComment) ? reviewItem : Navigation.this.editItem, isNormalList);
         } else {
           tabPanel.selectTab(0);
           npfHelper.showNPF(ul, learn, instanceName1);
@@ -480,29 +487,29 @@ public class Navigation implements RequiresResize {
     return tabPanel;
   }
 
-  private void showAddItem(UserList ul, TabAndContent addItem) {
+/*  private void showAddItem(UserList ul, TabAndContent addItem) {
     addItem.content.clear();
     Panel widgets = addItem(ul);
     addItem.content.add(widgets);
-  }
+  }*/
 
   /**
    * @see #getListOperations(mitll.langtest.shared.custom.UserList, boolean, String)
    * @param ul
    * @param addItem
    */
-  private void showEditItem(UserList ul, TabAndContent addItem, EditItem<? extends ExerciseShell> editItem) {
+  private void showEditItem(UserList ul, TabAndContent addItem, EditItem<? extends ExerciseShell> editItem, boolean includeAddItem) {
     addItem.content.clear();
-    Panel widgets = editItem.editItem(ul, listToMarker.get(ul));
+    Widget widgets = editItem.editItem(ul, listToMarker.get(ul), includeAddItem);
     addItem.content.add(widgets);
   }
 
   /**
-   * @param ul
+   * @paramx ul
    * @return
-   * @see #showAddItem(mitll.langtest.shared.custom.UserList, mitll.langtest.client.custom.Navigation.TabAndContent)
+   * @seex #showAddItem(mitll.langtest.shared.custom.UserList, mitll.langtest.client.custom.Navigation.TabAndContent)
    */
-  private <T extends ExerciseShell> Panel addItem(UserList ul) {
+/*  private <T extends ExerciseShell> Panel addItem(UserList ul) {
     HorizontalPanel hp = new HorizontalPanel();
     SimplePanel left = new SimplePanel();
     hp.add(left);
@@ -518,7 +525,7 @@ public class Navigation implements RequiresResize {
     pagingContainer.flush();
     right.add(new NewUserExercise<T>(service,userManager,controller, listToMarker.get(ul)).addNew(ul, pagingContainer, right));
     return hp;
-  }
+  }*/
 
   private void setScrollPanelWidth(ScrollPanel row) {
     if (row != null) {
@@ -555,7 +562,6 @@ public class Navigation implements RequiresResize {
     @Override
     public void onSuccess(Collection<UserList> result) {
       System.out.println("\tUserListCallback : Displaying " + result.size() + " user lists for " + instanceName);
-      // if (result.isEmpty()) System.err.println("\n\nhuh? no results for user");
       if (result.isEmpty()) {
         child.add(new Heading(3, "No lists created yet."));
       } else {
@@ -630,20 +636,11 @@ public class Navigation implements RequiresResize {
 
   private void addWidgetsForList(final UserList ul, final FluidContainer w) {
     FluidRow r1 = new FluidRow();
-
-
-    //FlowPanel fp = new FlowPanel();
-    //  Heading nameInfo = new Heading(2, ul.getName());
     Widget nameInfo = getUserListText(ul.getName());
-    //nameInfo.addStyleName("floatLeft");
-    // r1.add(fp);
-    //fp.add(nameInfo);
     r1.add(new Column(6, nameInfo));
-    //  itemMarker = new Heading(3, ul.getExercises().size() + " items");
     HTML itemMarker = new HTML(ul.getExercises().size() + " items");
     itemMarker.addStyleName("numItemFont");
     listToMarker.put(ul, itemMarker);
-    //   itemMarker.addStyleName("floatRight");
     r1.add(new Column(3, itemMarker));
     if (isYourList(ul)) {
       Button delete = new Button("Delete");
@@ -653,9 +650,7 @@ public class Navigation implements RequiresResize {
       delete.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(final ClickEvent event) {
-
-          System.out.println("deleteList " + ul.getUniqueID());
-
+          //System.out.println("deleteList " + ul.getUniqueID());
           service.deleteList(ul.getUniqueID(), new AsyncCallback<Boolean>() {
             @Override
             public void onFailure(Throwable caught) {}
@@ -667,7 +662,6 @@ public class Navigation implements RequiresResize {
               }
               else {
                 System.err.println("---> did not do deleteList " + ul.getUniqueID());
-
               }
             }
           });
@@ -675,19 +669,9 @@ public class Navigation implements RequiresResize {
       });
     }
     w.add(r1);
-    //    fp.add(itemMarker);
-/*
-        r1 = new FluidRow();
-        w.add(r1);
-        r1.add(new Heading(3, "Description : " + ul.getDescription()));
-        */
     r1 = new FluidRow();
     w.add(r1);
     r1.add(getUserListText2(ul.getDescription()));
-  /*      r1 = new FluidRow();
-        w.add(r1);
-        r1.add(new Heading(3, "Class : " + ul.getClassMarker()));
-*/
     if (!ul.getClassMarker().isEmpty()) {
       r1 = new FluidRow();
       w.add(r1);
