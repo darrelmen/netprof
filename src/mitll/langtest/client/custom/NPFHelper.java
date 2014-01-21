@@ -97,6 +97,7 @@ public class NPFHelper implements RequiresResize {
 
   private void rememberAndLoadFirst(final UserList ul) {
     if (controller.isReviewMode()) {
+      System.out.println("review mode " + controller.isReviewMode());
       service.getCompletedExercises(controller.getUser(), controller.isReviewMode(), new AsyncCallback<Set<String>>() {
         @Override
         public void onFailure(Throwable caught) {
