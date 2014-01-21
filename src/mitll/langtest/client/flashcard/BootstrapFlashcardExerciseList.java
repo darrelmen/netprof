@@ -55,6 +55,7 @@ public class BootstrapFlashcardExerciseList<T extends ExerciseShell> implements 
 
   private UserManager user;
   private Heading correct = new Heading(4);
+
   private ProgressBar bar = new ProgressBar();
   private FlashcardResponse latestResponse;
 
@@ -450,7 +451,7 @@ public class BootstrapFlashcardExerciseList<T extends ExerciseShell> implements 
   public void addCompleted(String id) {}
 
   @Override
-  public void forgetExercise(T es) {
+  public void removeExercise(T es) {
 
   }
 
@@ -472,5 +473,33 @@ public class BootstrapFlashcardExerciseList<T extends ExerciseShell> implements 
   @Override
   public boolean onFirst() {
     return false;
+  }
+
+@Override
+public T byID(String name) {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+@Override
+public void addExercise(T es) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void redraw() {
+	// TODO Auto-generated method stub
+	
+}
+
+  @Override
+  public void reloadWith(String id) {
+
+  }
+
+  @Override
+  public T simpleRemove(String id) {
+
   }
 }
