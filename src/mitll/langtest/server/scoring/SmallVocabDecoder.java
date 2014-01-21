@@ -1,5 +1,6 @@
 package mitll.langtest.server.scoring;
 
+import corpus.HTKDictionary;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
@@ -20,6 +21,12 @@ import java.util.Map;
  */
 public class SmallVocabDecoder {
   private static final Logger logger = Logger.getLogger(ASRScoring.class);
+  HTKDictionary htkDictionary;
+
+  public SmallVocabDecoder() {}
+  public SmallVocabDecoder(HTKDictionary htkDictionary) {
+    this.htkDictionary = htkDictionary;
+  }
 
   /**
    * Get the vocabulary to use when generating a language model. <br></br>
@@ -83,5 +90,33 @@ public class SmallVocabDecoder {
     }
 
     return all;
+  }
+
+
+  public String segmentation(String phrase){
+    return longest_prefix(phrase, 0);
+    // logger.debug("phrase '" + phrase + "' -> '" + s + "'");
+  }
+
+  private String longest_prefix(String phrase, int i){
+    if(i == phrase.length())
+      return "";
+    String prefix = phrase.substring(0, phrase.length() - i);
+    if (inDict(prefix)) {
+      if(i == 0)
+        return phrase;
+      String rest = longest_prefix(phrase.substring(phrase.length()-i, phrase.length()), 0);
+      if(rest.length() > 0)
+        return prefix + " " + rest;
+    }
+    //else {
+    //logger.debug("dict doesn't contain " + prefix);
+    //}
+    return longest_prefix(phrase, i+1);
+  }
+
+  private boolean inDict(String token) {
+    scala.collection.immutable.List<String[]> apply = htkDictionary.apply(token);
+    return apply != null && !apply.isEmpty();
   }
 }
