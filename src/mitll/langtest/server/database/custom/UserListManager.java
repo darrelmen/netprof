@@ -316,7 +316,7 @@ public class UserListManager {
       String slow = SLOW + "_"+ now+"_by_" + userExercise.getCreator()+ ".wav";
 
       refAudio = getRefAudioPath(userExercise, fileRef, slow, overwrite);
-      logger.debug("fixAudioPaths : for " + userExercise.getID()+ "slow is " + refAudio + " size " + FileUtils.size(refAudio));
+      logger.debug("fixAudioPaths : for " + userExercise.getID()+ " slow is " + refAudio + " size " + FileUtils.size(refAudio));
 
       userExercise.setSlowRefAudio(refAudio);
     }
