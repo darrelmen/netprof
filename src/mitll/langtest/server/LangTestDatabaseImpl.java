@@ -241,7 +241,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         exercises = exercises2;
       }
     }
-    ExerciseTrie trie = new ExerciseTrie(exercises, !serverProps.getLanguage().equals("English"));
+    ExerciseTrie trie = new ExerciseTrie(exercises, serverProps.getLanguage(), audioFileHelper.getSmallVocabDecoder());
     List<Exercise> exercisesForPrefix = trie.getExercises(prefix);
 
     return getExerciseListWrapper(reqID, exercisesForPrefix);
@@ -287,7 +287,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
                                                                           Map<String, Collection<String>> typeToSection, long userID, String prefix) {
     List<Exercise> exercisesForState = getExercisesForState(reqID, typeToSection, userID);
 
-    ExerciseTrie trie = new ExerciseTrie(exercisesForState, !serverProps.getLanguage().equals("English"));
+    ExerciseTrie trie = new ExerciseTrie(exercisesForState, serverProps.getLanguage(), audioFileHelper.getSmallVocabDecoder());
     List<Exercise> exercises = trie.getExercises(prefix);
 
     return makeExerciseListWrapper(reqID, exercises);
