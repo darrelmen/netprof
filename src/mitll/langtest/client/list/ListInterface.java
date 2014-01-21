@@ -38,6 +38,8 @@ public interface ListInterface<T extends ExerciseShell> extends RequiresResize {
      */
   void getExercises(long userID, boolean getNext);
 
+  void reloadWith(String id);
+
   /**
    * @see mitll.langtest.client.LangTest#makeExerciseList
    * @param exercise_title
@@ -51,6 +53,8 @@ public interface ListInterface<T extends ExerciseShell> extends RequiresResize {
   Widget getWidget();
 
   Widget getExerciseListOnLeftSide(PropertyHandler props);
+
+  T byID(String name);
 
   <S extends ExerciseShell> void loadExercise(S exerciseShell);
 
@@ -93,13 +97,15 @@ public interface ListInterface<T extends ExerciseShell> extends RequiresResize {
   void setCompleted(Set<String> completed);
   void addCompleted(String id);
 
-//  void setSelectionState(Map<String,Collection<String>> selectionState);
+  void addExercise(T es);
+  void removeExercise(T es);
 
- // <S extends ExerciseShell> void forgetExercise(S es);
-  void forgetExercise(T es);
+  T simpleRemove(String id);
 
   void hideExerciseList();
 
   Panel getCreatedPanel();
   void reload();
+
+  void redraw();
 }
