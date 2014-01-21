@@ -177,6 +177,13 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     service.getExerciseIds(lastReqID, controller.getUser(), new SetExercisesCallback());
   }
 
+  @Override
+  public void reloadWith(String id) {
+    System.out.println("ExerciseList.reloadWith " + id+ " for user " + controller.getUser());
+    service.getExerciseIds(lastReqID, controller.getUser(), new SetExercisesCallback(id));
+  }
+
+
   /**
    * So we have a catch-22 -
    *
@@ -197,7 +204,8 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     System.out.println("ExerciseList.pushFirstSelection : current token '" + token + "' id from token '" + idFromToken +
       "' vs new exercise " +exerciseID);
     if (token != null && idFromToken.equals(exerciseID)) {
-      System.out.println("\tpushFirstSelection :current token " + token + " same as new " +exerciseID);
+      System.out.println("\tpushFirstSelection : (" + instance+
+        ") current token " + token + " same as new " +exerciseID);
       loadByIDFromToken(exerciseID);
     }
     else {
@@ -224,7 +232,8 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * @param exerciseID
    */
   protected void pushNewItem(String exerciseID) {
-    System.out.println("------------ ExerciseList.pushNewItem : push history " + exerciseID + " -------------- ");
+    System.out.println("------------ ExerciseList.pushNewItem : (" + instance+
+      ") push history " + exerciseID + " -------------- ");
     History.newItem("#item=" + exerciseID + ";instance="+instance);
   }
 
@@ -265,6 +274,15 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * @see ListInterface#getExercises(long, boolean)
    */
   protected class SetExercisesCallback implements AsyncCallback<ExerciseListWrapper<T>> {
+    private String id;
+
+    public SetExercisesCallback(String id) {
+      this.id = id;
+    }
+
+    public SetExercisesCallback() {
+
+    }
     public void onFailure(Throwable caught) {
       if (!caught.getMessage().trim().equals("0")) {
         feedback.showErrorMessage("Server error", "SetExercisesCallback : Server error - couldn't get exercises.");
@@ -279,7 +297,13 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
         if (result.getExercises().isEmpty()) {
           gotEmptyExerciseList();
         }
-        rememberAndLoadFirst(result.getExercises(), result.getFirstExercise());
+        if (id != null) {
+          rememberExercises(result.getExercises());
+          pushFirstSelection(id);
+        }
+        else {
+          rememberAndLoadFirst(result.getExercises(), result.getFirstExercise());
+        }
         controller.showProgress();
       }
     }
@@ -292,9 +316,13 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     System.out.println(new Date() +" gotEmptyExerciseList : ------  ------------ ");
   }
 
+  public void rememberAndLoadFirst(List<T> exercises) {
+    rememberAndLoadFirst(exercises, null);
+  }
+
   /**
-   * @see ExerciseList.SetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
    * @param exercises
+   * @see ExerciseList.SetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
    */
   public void rememberAndLoadFirst(List<T> exercises, Exercise firstExercise) {
     System.out.println("ExerciseList : rememberAndLoadFirst " + firstExercise);
@@ -325,22 +353,25 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     idToExercise = new HashMap<String, T>();
     clear();
     for (final T es : result) {
-      rememberExercise(es);
+      addExercise(es);
     }
     flush();
   }
 
-  private void rememberExercise(T es) {
+  @Override
+  public void addExercise(T es) {
     idToExercise.put(es.getID(),es);
     addExerciseToList(es);
   }
 
   /**
+   * Worry about deleting the currently visible item.
+   *
    * @see mitll.langtest.client.list.PagingExerciseList#forgetExercise(String)
    * @param es
    */
   @Override
-  public void forgetExercise(T es) {
+  public void removeExercise(T es) {
     String id = es.getID();
     T current = getCurrent();
     if (current.getID().equals(id)) {
@@ -352,11 +383,21 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
       }
     }
 
-    idToExercise.remove(id);
-    currentExercises.remove(current);
+    simpleRemove(id);
+  }
+
+  @Override
+  public T simpleRemove(String id) {
+    T remove = idToExercise.remove(id);
+    if (remove == null) {
+      System.err.println("simpleRemove : couldn't find " +id);
+      return null;
+    }
+    currentExercises.remove(remove);
     if (currentExercises.isEmpty()) {
       removeCurrentExercise();
     }
+    return remove;
   }
 
   @Override
@@ -452,11 +493,9 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     return currentExercises.get(0);
   }
 
-  protected T byID(String name) {
-    return idToExercise == null ? null : idToExercise.get(name);
-  }
-
   protected boolean hasExercise(String id) { return byID(id) != null; }
+
+  public T byID(String name) {  return idToExercise == null ? null : idToExercise.get(name);  }
 
   /**
    * @see #addExerciseToList(mitll.langtest.shared.ExerciseShell)
@@ -495,7 +534,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
       askServerForExercise(exerciseShell);
     }
     else {
-      System.out.println("can't load " +id + " keys were " + idToExercise.keySet());
+      System.err.println("loadByIDFromToken : can't load " +id + " keys were " + idToExercise.keySet());
     }
   }
 
@@ -514,7 +553,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     if (token.startsWith("#item=") || token.startsWith("item=")) {
       SelectionState selectionState = new SelectionState(token, !allowPlusInURL);
       if (!selectionState.getInstance().equals(instance)) {
-        System.out.println("got history item for another instance '" + selectionState.getInstance() + "' vs me '" + instance +"'");
+        //System.out.println("got history item for another instance '" + selectionState.getInstance() + "' vs me '" + instance +"'");
       } else {
         String item = selectionState.getItem();
         System.out.println("got history item for instance '" + selectionState.getInstance() + " : '" + item+"'");
@@ -584,7 +623,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * @param result
    * @param e
    */
-  private void useExercise(Exercise result, ExerciseShell e) {
+  protected void useExercise(Exercise result, ExerciseShell e) {
     createdPanel = makeExercisePanel(result);
     int i = getIndex(e);
 //  System.out.println("ExerciseList.useExercise : " +e.getID() + " index " +i);
@@ -661,7 +700,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   }
 
   /**
-   * @see #forgetExercise(mitll.langtest.shared.ExerciseShell)
+   * @see #removeExercise(mitll.langtest.shared.ExerciseShell)
    */
   @Override
   public void removeCurrentExercise() {
@@ -834,12 +873,9 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     return current == null || currentExercises.size() == 1 || isOnLastItem(getIndex(current));
   }
 
-  private boolean isOnLastItem(int i) {
-    return i == currentExercises.size() - 1;
-  }
+  private boolean isOnLastItem(int i) { return i == currentExercises.size() - 1;  }
 
   @Override
-  public void reloadExercises() {
-    loadFirstExercise();
-  }
+  public void reloadExercises() { loadFirstExercise();  }
+  public void redraw() {}
 }
