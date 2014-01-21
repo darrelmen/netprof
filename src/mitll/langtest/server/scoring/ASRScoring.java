@@ -118,7 +118,8 @@ public class ASRScoring extends Scoring {
   private boolean checkLTS(LTS lts, String foreignLanguagePhrase) {
     Collection<String> tokens = new SmallVocabDecoder().getTokens(foreignLanguagePhrase);
 
-    logger.debug("checkLTS " + (isMandarin? " MANDARIN " : "")+ " tokens : '" +tokens +"'");
+    String language = isMandarin ? " MANDARIN " : "";
+    //logger.debug("checkLTS " + language + " tokens : '" +tokens +"'");
 
     try {
       for (String token : tokens) {
@@ -138,10 +139,10 @@ public class ASRScoring extends Scoring {
         }
       }
     } catch (Exception e) {
-      logger.error("lts failed on " + foreignLanguagePhrase);
+      logger.error("lts " +language+ " failed on " + foreignLanguagePhrase);
       return false;
     }
-    logger.debug("checkLTS tokens : " +tokens + " valid!");
+    logger.debug("checkLTS " +language+ "tokens : '" +tokens + "' valid!");
 
     return true;
   }
