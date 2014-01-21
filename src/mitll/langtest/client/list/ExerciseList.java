@@ -370,8 +370,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * @see mitll.langtest.client.list.PagingExerciseList#forgetExercise(String)
    * @param es
    */
-  @Override
-  public void removeExercise(T es) {
+  protected void removeExercise(T es) {
     String id = es.getID();
     T current = getCurrent();
     if (current.getID().equals(id)) {
