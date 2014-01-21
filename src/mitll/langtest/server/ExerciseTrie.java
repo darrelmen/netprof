@@ -25,29 +25,40 @@ public class ExerciseTrie extends Trie<Exercise> {
   private static final int MB = (1024 * 1024);
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds(int, long, String, long)
    * @param exercisesForState
-   * @param includeForeign
+   * @param language
    */
-  public ExerciseTrie(Collection<Exercise> exercisesForState, boolean includeForeign) {
+  public ExerciseTrie(Collection<Exercise> exercisesForState, String language,SmallVocabDecoder smallVocabDecoder) {
+    boolean includeForeign = !language.equals("English");
     startMakingNodes();
     Runtime rt = Runtime.getRuntime();
     long free = rt.freeMemory()/ MB ;
     logger.debug("ExerciseTrie : searching over " + exercisesForState.size());
 
     long then = System.currentTimeMillis();
-
-    SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder();
+    boolean isMandarin = language.equalsIgnoreCase("Mandarin");
+    //SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder();
 
     for (Exercise e : exercisesForState) {
       if (e.getEnglishSentence() != null) {
         addEntryToTrie(new ExerciseWrapper(e, true));
-        for (String token : smallVocabDecoder.getTokens(e.getEnglishSentence())) {
-          addEntryToTrie(new ExerciseWrapper(token,e));
+        Collection<String> tokens = smallVocabDecoder.getTokens(e.getEnglishSentence());
+        if (tokens.size() > 1) {
+          for (String token : tokens) {
+            addEntryToTrie(new ExerciseWrapper(token, e));
+          }
         }
       }
       if (includeForeign) {
         addEntryToTrie(new ExerciseWrapper(e, false));
+
+        Collection<String> tokens = isMandarin ? getFLTokens(smallVocabDecoder, e) : smallVocabDecoder.getTokens(e.getRefSentence());
+        if (tokens.size() > 1) {
+          for (String token : tokens) {
+            addEntryToTrie(new ExerciseWrapper(token, e));
+          }
+        }
       }
     }
     endMakingNodes();
@@ -61,6 +72,10 @@ public class ExerciseTrie extends Trie<Exercise> {
     if (freeAfter-free > 10) {
       logMemory();
     }
+  }
+
+  protected Collection<String> getFLTokens(SmallVocabDecoder smallVocabDecoder, Exercise e) {
+    return smallVocabDecoder.getTokens(smallVocabDecoder.segmentation(e.getRefSentence()));
   }
 
   /**
@@ -89,7 +104,7 @@ public class ExerciseTrie extends Trie<Exercise> {
     private Exercise e;
 
     /**
-     * @see ExerciseTrie#ExerciseTrie(java.util.Collection, boolean)
+     * @see ExerciseTrie#ExerciseTrie(java.util.Collection, String)
      * @param e
      * @param useEnglish
      */
