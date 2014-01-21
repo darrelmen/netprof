@@ -449,11 +449,11 @@ public class BootstrapFlashcardExerciseList<T extends ExerciseShell> implements 
 
   @Override
   public void addCompleted(String id) {}
-
+/*
   @Override
   public void removeExercise(T es) {
 
-  }
+  }*/
 
   @Override
   public void reload() {
@@ -500,6 +500,6 @@ public void redraw() {
 
   @Override
   public T simpleRemove(String id) {
-
+    return null;
   }
 }

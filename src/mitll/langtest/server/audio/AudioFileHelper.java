@@ -8,6 +8,7 @@ import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.scoring.ASRScoring;
 import mitll.langtest.server.scoring.AutoCRTScoring;
+import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -43,6 +44,7 @@ public class AudioFileHelper {
   }
 
   public boolean checkLTS(String foreignLanguagePhrase) { return asrScoring.checkLTS(foreignLanguagePhrase); }
+  public SmallVocabDecoder getSmallVocabDecoder() { return asrScoring.getSmallVocabDecoder(); }
 
   /**
    * Record an answer entry in the database.<br></br>
