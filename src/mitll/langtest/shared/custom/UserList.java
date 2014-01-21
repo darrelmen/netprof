@@ -89,14 +89,15 @@ public class UserList extends ExerciseShell {
     return exercises.remove(newUserExercise);
   }
 
-  public boolean remove(String id) {
+  public UserExercise remove(String id) {
     UserExercise toRemove = null;
     for (UserExercise ue : exercises) {
       if (id.equals(ue.getID())) {
         toRemove = ue;
       }
     }
-    return toRemove != null && exercises.remove(toRemove);
+    UserExercise userExercise = toRemove != null && exercises.remove(toRemove) ? toRemove : null;
+    return userExercise;
   }
 
   public User getCreator() {
