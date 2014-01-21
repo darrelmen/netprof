@@ -1,5 +1,6 @@
 package mitll.langtest.server;
 
+import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.trie.EmitValue;
 import mitll.langtest.server.trie.TextEntityValue;
 import mitll.langtest.server.trie.Trie;
@@ -36,9 +37,14 @@ public class ExerciseTrie extends Trie<Exercise> {
 
     long then = System.currentTimeMillis();
 
+    SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder();
+
     for (Exercise e : exercisesForState) {
       if (e.getEnglishSentence() != null) {
         addEntryToTrie(new ExerciseWrapper(e, true));
+        for (String token : smallVocabDecoder.getTokens(e.getEnglishSentence())) {
+          addEntryToTrie(new ExerciseWrapper(token,e));
+        }
       }
       if (includeForeign) {
         addEntryToTrie(new ExerciseWrapper(e, false));
@@ -88,7 +94,13 @@ public class ExerciseTrie extends Trie<Exercise> {
      * @param useEnglish
      */
     public ExerciseWrapper(Exercise e, boolean useEnglish) {
-      value = (useEnglish ? e.getEnglishSentence() : e.getRefSentence());
+ /*     value = (useEnglish ? e.getEnglishSentence() : e.getRefSentence());
+      this.e = e;*/
+      this((useEnglish ? e.getEnglishSentence() : e.getRefSentence()), e);
+    }
+
+    public ExerciseWrapper(String value, Exercise e) {
+      this.value = value;
       this.e = e;
     }
 

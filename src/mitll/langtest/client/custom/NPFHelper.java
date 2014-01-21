@@ -164,5 +164,9 @@ public class NPFHelper implements RequiresResize {
 
   @Override
   public void onResize() { if (npfContentPanel != null) {  npfExerciseList.onResize(); } }
-  public void reload() { npfExerciseList.reload(); }
+  public void reload() {
+    String currentExerciseID = npfExerciseList.getCurrentExerciseID();
+    npfExerciseList.reload();
+
+  }
 }
