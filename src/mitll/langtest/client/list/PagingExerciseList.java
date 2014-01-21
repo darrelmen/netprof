@@ -258,7 +258,7 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
   }
 
   @Override
-  public void removeExercise(T es) {
+  protected void removeExercise(T es) {
     super.removeExercise(es);
 
     pagingContainer.forgetExercise(es);
