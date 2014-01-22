@@ -76,7 +76,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   private AudioPanel contentAudio, answerAudio;
   private NavigationHelper navigationHelper;
   private SplitDropdownButton addToList;
-  private int activeCount = 0;
+//  private int activeCount = 0;
   float screenPortion;
 
   /**
@@ -144,62 +144,13 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   private Panel makeAddToList(Exercise e, ExerciseController controller) {
     addToList = new SplitDropdownButton("Add Item to List");
     addToList.setIcon(IconType.PLUS_SIGN);
-    populateListChoices(e, controller, addToList);
+   // populateListChoices(e, controller, addToList);
     addToList.setType(ButtonType.PRIMARY);
     return addToList;
 
   }
 
-  private void populateListChoices(final Exercise e, ExerciseController controller, final SplitDropdownButton w1) {
-    System.out.println("populateListChoices populate list choices for " + controller.getUser());
-    service.getListsForUser(controller.getUser(), true, new AsyncCallback<Collection<UserList>>() {
-      @Override
-      public void onFailure(Throwable caught) {
-      }
-
-      @Override
-      public void onSuccess(Collection<UserList> result) {
-        w1.clear();
-        activeCount = 0;
-        boolean anyAdded = false;
-        for (final UserList ul : result) {
-          if (!ul.contains(new UserExercise(e))) {
-            activeCount++;
-            anyAdded = true;
-            final NavLink widget = new NavLink(ul.getName());
-            w1.add(widget);
-            widget.addClickHandler(new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                service.addItemToUserList(ul.getUniqueID(), new UserExercise(e), new AsyncCallback<List<UserExercise>>() {
-                  @Override
-                  public void onFailure(Throwable caught) {
-                  }
-
-                  @Override
-                  public void onSuccess(List<UserExercise> result) {
-                    showPopup("Item Added!");
-                    widget.setVisible(false);
-                    activeCount--;
-                    if (activeCount == 0) {
-                      NavLink widget = new NavLink("Exercise already added to your list(s)");
-                      w1.add(widget);
-                    }
-                  }
-                });
-              }
-            });
-          }
-        }
-        if (!anyAdded) {
-          NavLink widget = new NavLink("Exercise already added to your list(s)");
-          w1.add(widget);
-        }
-      }
-    });
-  }
-
-  private void showPopup(String html) {
+/*  private void showPopup(String html) {
     final PopupPanel pleaseWait = new DecoratedPopupPanel();
     pleaseWait.setAutoHideEnabled(true);
     pleaseWait.add(new HTML(html));
@@ -212,7 +163,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       }
     };
     t.schedule(2000);
-  }
+  }*/
 
   public void setBusy(boolean v) {
     this.isBusy = v;
@@ -336,10 +287,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   private String wavToMP3(String path) {
     return (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
   }
-
+/*
   public void wasRevealed() {
     populateListChoices(exercise, controller, addToList);
-  }
+  }*/
 
   /**
    * Has a answerPanel mark to indicate when the saved audio has been successfully posted to the server.
