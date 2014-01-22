@@ -1,6 +1,7 @@
 package mitll.langtest.client.flashcard;
 
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.google.gwt.dom.client.MediaElement;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.i18n.client.HasDirection;
@@ -157,6 +158,11 @@ public class AudioExerciseContent {
     return suffix;
   }
 
+  /**
+   * @see #addAudioRow(mitll.langtest.shared.Exercise, String, boolean, com.google.gwt.user.client.ui.Panel)
+   * @param e
+   * @return
+   */
   private SimplePanel getAudioDiv(Exercise e) {
     SimplePanel simplePanel = new SimplePanel();
     simplePanel.getElement().setId("audioWidgetContainer");
@@ -180,6 +186,8 @@ public class AudioExerciseContent {
     audio.addStyleName("floatRight");
     audio.addStyleName("rightFiveMargin");
 
+    System.out.println("getting audio widget for " + e.getID());
+
     return audio;
   }
 
@@ -200,6 +208,7 @@ public class AudioExerciseContent {
         audio.setFocus(false);
       }
     });
+    audio.setPreload(MediaElement.PRELOAD_AUTO);
     return audio;
   }
 

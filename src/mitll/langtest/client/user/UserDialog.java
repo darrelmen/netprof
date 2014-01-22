@@ -164,11 +164,17 @@ public abstract class UserDialog extends BasicDialog {
     return genderBox;
   }
 
-  protected ListBoxFormField getRecordingOrder(Modal dialogBox) {
-    return getListBoxFormField(dialogBox, "Recording Order", getListBox2(Arrays.asList("All items", LEAST_RECORDED_FIRST),160));
+  protected ListBoxFormField getRecordingOrder(Panel dialogBox) {
+    ListBox listBox2 = getListBox2(Arrays.asList("All items", LEAST_RECORDED_FIRST), 160);
+    listBox2.addStyleName("leftFiveMargin");
+    return getListBoxFormField(dialogBox, "Recording Order", listBox2);
   }
 
-  protected void setUnanswered() {
+  /**
+   * @see mitll.langtest.client.user.DataCollectorDialog#addFullUser(com.github.gwtbootstrap.client.ui.Modal, com.github.gwtbootstrap.client.ui.Button, UserManager, String, String, String, String, int, int)
+   * @see mitll.langtest.client.user.DataCollectorDialog#userExists(Integer, String, mitll.langtest.client.user.BasicDialog.FormField, com.github.gwtbootstrap.client.ui.Modal)
+   */
+  protected void setRecordingOrder() {
     boolean unansweredFirst = recordingOrder.getValue().equals(LEAST_RECORDED_FIRST);
     userManager.setShowUnansweredFirst(unansweredFirst);
   }
