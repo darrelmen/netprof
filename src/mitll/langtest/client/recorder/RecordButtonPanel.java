@@ -63,8 +63,10 @@ public class RecordButtonPanel extends HorizontalPanel implements RecordButton.R
   }
 
   protected RecordButton makeRecordButton(ExerciseController controller) {
-    return new RecordButton(controller.getRecordTimeout(), this, false);
+    return new RecordButton(controller.getRecordTimeout(), this, false, getRecordButtonTitle());
   }
+
+  protected String getRecordButtonTitle() { return RecordButton.RECORD;  }
 
   public void flip(boolean first) {
     recordImage1.setVisible(!first);
@@ -75,14 +77,18 @@ public class RecordButtonPanel extends HorizontalPanel implements RecordButton.R
    * @see RecordButtonPanel#RecordButtonPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseQuestionState, int, boolean)
    */
   private Panel layoutRecordButton(Widget button) {
-    SimplePanel recordButtonContainer = new SimplePanel(button);  // TODO : can we remove wrapper?
-    recordButtonContainer.setWidth("75px");
+    Panel recordButtonContainer = new SimplePanel(button);  // TODO : can we remove wrapper?
+    setRecordButtonWidth(recordButtonContainer);
     recordButtonContainer.getElement().setId("recordButtonContainer");
 
     getElement().setId("recordButtonPanel");
     add(recordButtonContainer);
     addImages(this);
     return this;
+  }
+
+  protected void setRecordButtonWidth(Panel recordButtonContainer) {
+    recordButtonContainer.setWidth("75px");
   }
 
   protected void addImages(Panel container) {
@@ -111,7 +117,6 @@ public class RecordButtonPanel extends HorizontalPanel implements RecordButton.R
    */
   public void stopRecording() {
     //System.out.println("RecordButtonPanel : stopRecording " );
-
     recordImage1.setVisible(false);
     recordImage2.setVisible(false);
     controller.stopRecording();
