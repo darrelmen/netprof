@@ -42,25 +42,27 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
   }
 
   @Override
-  protected NewUserExercise<T> getAddOrEditPanel(UserExercise exercise, HTML itemMarker) {
-    return new ReviewEditableExercise(itemMarker, exercise);
+  protected NewUserExercise<T> getAddOrEditPanel(UserExercise exercise, HTML itemMarker, UserList originalList) {
+    return new ReviewEditableExercise(itemMarker, exercise, originalList);
   }
 
   private class ReviewEditableExercise extends EditableExercise {
     /**
+     *
      * @param itemMarker
      * @param changedUserExercise
+     * @param originalList
      * @see EditItem#populatePanel
      */
-    public ReviewEditableExercise(HTML itemMarker, UserExercise changedUserExercise) {
-      super(itemMarker, changedUserExercise);
+    public ReviewEditableExercise(HTML itemMarker, UserExercise changedUserExercise, UserList originalList) {
+      super(itemMarker, changedUserExercise, originalList);
     }
 
     @Override
     protected boolean shouldDisableNext() { return false; }
 
     /**
-     * @see NewUserExercise#addNew
+     * @see #addNew
      * @param ul
      * @param pagingContainer
      * @param toAddTo
@@ -104,6 +106,9 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
         String id = newUserExercise.getID();
         exerciseList.forgetExercise(id);
         if (!ul.remove(newUserExercise)) {
+          System.err.println("\n\n\ndoAfterEditComplete : error - didn't remove");
+        }
+        if (!originalList.remove(newUserExercise)) {
           System.err.println("\n\n\ndoAfterEditComplete : error - didn't remove");
         }
         service.removeReviewed(id, new AsyncCallback<Void>() {
