@@ -4,7 +4,6 @@ import mitll.flashcard.UserState;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
-import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.flashcard.UserStateWrapper;
 import mitll.langtest.shared.DLIUser;
 import mitll.langtest.shared.Exercise;
@@ -70,7 +69,6 @@ public class DatabaseImpl implements Database {
   private final AnswerDAO answerDAO = new AnswerDAO(this, resultDAO);
   private final GradeDAO gradeDAO = new GradeDAO(this,userDAO, resultDAO);
   private final SiteDAO siteDAO = new SiteDAO(this, userDAO);
-  private final UserListManager userListManager = new UserListManager(userDAO);
   private UserExerciseDAO userExerciseDAO;
 
   private DatabaseConnection connection = null;
@@ -164,7 +162,6 @@ public class DatabaseImpl implements Database {
 
       siteDAO.createTable(getConnection());
       userExerciseDAO = new UserExerciseDAO(this);
-      userListManager.setUserExerciseDAO(userExerciseDAO);
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
     }
@@ -1431,8 +1428,6 @@ public class DatabaseImpl implements Database {
     }
   }
   public void addDLIUser(DLIUser dliUser) throws Exception { dliUserDAO.addUser(dliUser);  }
-
-  public UserListManager getUserListManager() { return userListManager; }
 
   public Exercise getUserExerciseWhere(String id) {
     UserExercise where = userExerciseDAO.getWhere(id);
