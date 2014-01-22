@@ -30,6 +30,7 @@ import java.util.Set;
 public class HistoryExerciseList extends PagingExerciseList {
   public static final String ANY = "Clear";
   protected final Map<String,SectionWidget> typeToBox = new HashMap<String, SectionWidget>();
+
   /**
    * So the concern is that if we allow people to send bookmarks with items, we can allow them to skip
    * forward in a list we're trying to present in a certain order.
@@ -84,7 +85,7 @@ public class HistoryExerciseList extends PagingExerciseList {
     StringBuilder builder = new StringBuilder();
     for (String type : typeToBox.keySet()) {
       String section = getCurrentSelection(type);
-      System.out.println("\tSectionExerciseList.getHistoryToken for " + type + " section = " +section);
+      System.out.println("\tHistoryExerciseList.getHistoryToken for " + type + " section = " +section);
       if (section.equals(HistoryExerciseList.ANY)) {
         //System.out.println("getHistoryToken : Skipping box " + type + " (ANY) ");
       } else {
@@ -232,10 +233,10 @@ public class HistoryExerciseList extends PagingExerciseList {
       Collection<String> selections = selectionState2.get(type);
       if (selections.iterator().next().equals(HistoryExerciseList.ANY)) {
         if (hasNonClearSelection) {
-          System.out.println("restoreListBoxState : skipping type since below a selection = " + type);
+          //System.out.println("restoreListBoxState : skipping type since below a selection = " + type);
         }
         else {
-          System.out.println("restoreListBoxState : clearing " + type);
+          //System.out.println("restoreListBoxState : clearing " + type);
 
           selectItem(type, selections);
         }
@@ -258,7 +259,7 @@ public class HistoryExerciseList extends PagingExerciseList {
       }
     }
 
-    System.out.println("restoreListBoxState :typesWithSelections " + typesWithSelections);
+    //System.out.println("restoreListBoxState :typesWithSelections " + typesWithSelections);
 
     // clear enabled state for all items below first selection...
     if (!typesWithSelections.isEmpty()) {
@@ -270,18 +271,17 @@ public class HistoryExerciseList extends PagingExerciseList {
          if (type.equals(first)) start = true;
       }
 
-     // List<String> afterFirst = typesWithSelections.subList(1, typesWithSelections.size());
-      System.out.println("restoreListBoxState : afterFirst " + afterFirst);
+      //System.out.println("restoreListBoxState : afterFirst " + afterFirst);
 
       for (String type : afterFirst) {
-        System.out.println("restoreListBoxState : clearing enabled on " + type);
+        //System.out.println("restoreListBoxState : clearing enabled on " + type);
 
         clearEnabled(type);
       }
     }
 
     for (String type : typesWithSelections) {
-      System.out.println("restoreListBoxState : selecting items for " + type);
+      //System.out.println("restoreListBoxState : selecting items for " + type);
 
       Collection<String> selections = selectionState2.get(type);
       selectItem(type, selections);
@@ -358,7 +358,7 @@ public class HistoryExerciseList extends PagingExerciseList {
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
   protected void loadExercises(final Map<String, Collection<String>> typeToSection, final String item) {
-    System.out.println("HistoryExerciseList.loadExercises : " + typeToSection + " and item '" + item + "'");
+    //System.out.println("HistoryExerciseList.loadExercises : " + typeToSection + " and item '" + item + "'");
     if (showCompleted) {
       service.getCompletedExercises(controller.getUser(),new AsyncCallback<Set<String>>() {
         @Override
