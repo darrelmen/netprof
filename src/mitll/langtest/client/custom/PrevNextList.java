@@ -20,7 +20,7 @@ class PrevNextList<T extends ExerciseShell> extends HorizontalPanel {
   public PrevNextList(final T exerciseShell, ListInterface<T> listContainer, boolean disableNext) {
     this.container = listContainer;
     this.disableNext = disableNext;
-    System.out.println("Disable next " + disableNext);
+    //System.out.println("Disable next " + disableNext);
     makePrevButton(exerciseShell);
     makeNextButton(exerciseShell);
     addStyleName("topFiveMargin");
