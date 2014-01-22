@@ -12,7 +12,6 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
@@ -42,23 +41,6 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
     super(service, userManager, controller, listInterface, feedback, npfHelper);
   }
 
-  /**
-   * @see #setFactory(mitll.langtest.client.list.PagingExerciseList, mitll.langtest.shared.custom.UserList)
-   * @param exercise
-   * @paramx right
-   * @paramx ul
-   * @param itemMarker
-   * @paramx pagingContainer
-   * @paramx includeAddItem
-   */
-/*  @Override
-  protected void populatePanel(UserExercise exercise, Panel right, UserList ul, HTML itemMarker,
-                               PagingContainer<T> pagingContainer) {
-    ReviewEditableExercise newUserExercise = new ReviewEditableExercise(itemMarker, exercise);
-    right.add(newUserExercise.addNew(ul, pagingContainer, right));
-    newUserExercise.setFields();
-  }*/
-
   @Override
   protected NewUserExercise<T> getAddOrEditPanel(UserExercise exercise, HTML itemMarker) {
     return new ReviewEditableExercise(itemMarker, exercise);
@@ -78,7 +60,7 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
     protected boolean shouldDisableNext() { return false; }
 
     /**
-     * @see #addNew
+     * @see NewUserExercise#addNew
      * @param ul
      * @param pagingContainer
      * @param toAddTo
