@@ -27,7 +27,7 @@ import com.google.gwt.user.client.Timer;
  */
 public class RecordButton extends Button {
   private static final int PERIOD_MILLIS = 500;
-  private static final String RECORD = "Record";
+  public static final String RECORD = "Record";
   private static final String STOP = "Stop";
 
   private boolean recording = false;
@@ -35,6 +35,7 @@ public class RecordButton extends Button {
   private final int autoStopDelay;
   private boolean doClickAndHold;
   protected boolean mouseDown = false;
+  private String recordText;
 
   private RecordingListener recordingListener;
 
@@ -44,23 +45,33 @@ public class RecordButton extends Button {
     void stopRecording();
   }
 
+    /**
+     * @param delay
+     * @param recordingListener
+     * @param doClickAndHold
+     */
+  public RecordButton(int delay, RecordingListener recordingListener, boolean doClickAndHold) {
+    this(delay, recordingListener, doClickAndHold, RECORD);
+    this.setRecordingListener(recordingListener);
+  }
+
+  public RecordButton(int delay, RecordingListener recordingListener, boolean doClickAndHold, String title) {
+    this(delay, doClickAndHold, title);
+    this.setRecordingListener(recordingListener);
+  }
+
   public RecordButton(int delay, boolean doClickAndHold) {
-    super(RECORD);
+    this(delay, doClickAndHold, RECORD);
+  }
+
+  private RecordButton(int delay, boolean doClickAndHold, String title) {
+    super(title);
+    recordText = title;
     this.doClickAndHold = doClickAndHold;
     this.autoStopDelay = delay;
     setType(ButtonType.PRIMARY);
     setupRecordButton();
     getElement().setId("record_button");
-  }
-
-  /**
-   * @param delay
-   * @param recordingListener
-   * @param doClickAndHold
-   */
-  public RecordButton(int delay, RecordingListener recordingListener, boolean doClickAndHold) {
-    this(delay, doClickAndHold);
-    this.setRecordingListener(recordingListener);
   }
 
   protected void removeImage() {
@@ -177,13 +188,8 @@ public class RecordButton extends Button {
   protected void showFirstRecordImage() {}
   protected void showSecondRecordImage() {}
 
-  protected void hideBothRecordImages() {
-    setText(RECORD);
-  }
-
-  public void initRecordButton() {
-    setVisible(true);
-  }
+  protected void hideBothRecordImages() { setText(recordText);  }
+  public void initRecordButton() { setVisible(true);  }
 
   /**
    * Add a timer to automatically stop recording after 20 seconds.
