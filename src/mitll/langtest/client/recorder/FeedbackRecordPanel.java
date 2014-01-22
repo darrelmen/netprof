@@ -2,6 +2,7 @@ package mitll.langtest.client.recorder;
 
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -14,6 +15,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.BootstrapExercisePanel;
 import mitll.langtest.client.flashcard.ScoreFeedback;
 import mitll.langtest.client.flashcard.TextResponse;
+import mitll.langtest.client.list.ResponseChoice;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
@@ -57,32 +59,41 @@ public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
     } else return "";
   }
 
+  /**
+   * @see #getQuestionPanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int, java.util.List, java.util.List, int, mitll.langtest.shared.Exercise.QAPair, com.google.gwt.user.client.ui.HasWidgets)
+   * @param exercise
+   * @param service
+   * @param controller
+   * @param index
+   * @return
+   */
   @Override
   protected Widget getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller,
                                    final int index) {
     if (textResponses == null) textResponses = new ArrayList<TextResponse>();
-
-    AutoCRTRecordPanel autoCRTRecordPanel = new AutoCRTRecordPanel(service, controller, exercise, this, index, FEEDBACK_WIDTH);
     String responseType = controller.getProps().getResponseType();
+    String secondResponseType = controller.getProps().getSecondResponseType();
+    final boolean isNone = secondResponseType.equals(ResponseChoice.NONE);
+
+    AutoCRTRecordPanel autoCRTRecordPanel = new AutoCRTRecordPanel(service, controller, exercise, this, index, FEEDBACK_WIDTH) {
+      @Override
+      protected String getRecordButtonTitle() {
+        return isNone ? super.getRecordButtonTitle() : super.getRecordButtonTitle() + " in Arabic";
+      }
+      @Override
+      protected void setRecordButtonWidth(Panel recordButtonContainer) {
+        if (isNone) super.setRecordButtonWidth(recordButtonContainer);
+      }
+    };
 
     if (responseType.equalsIgnoreCase(AUDIO)) {
-      autoCRTRecordPanel.setWidth("100%");
-      addAnswerWidget(index, autoCRTRecordPanel);
-      FluidContainer outerContainer = new FluidContainer();
-      outerContainer.add(autoCRTRecordPanel);
-      outerContainer.addStyleName("floatLeft");
-      outerContainer.getElement().setId("FeedbackRecordPanel_outerContainer");
-
-      ScoreFeedback scoreFeedback = new ScoreFeedback(true);
-      addScoreFeedback(outerContainer, scoreFeedback);
-      getFeedbackContainer(outerContainer, scoreFeedback, autoCRTRecordPanel);
-      return outerContainer;
+      return addAudioAnswer(index, autoCRTRecordPanel);
     }
     else if (responseType.equalsIgnoreCase(TEXT)){
       return doText(exercise, service, controller, index,autoCRTRecordPanel);
     }
     else {  // both
-      Panel row = new FlowPanel();
+      Panel row = new DivWidget();
       row.addStyleName("trueInlineStyle");
       row.getElement().setId("FeedbackRecordPanel_getAnswerWidget_Row");
 
@@ -95,19 +106,40 @@ public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
 
       addAnswerWidget(index, autoCRTRecordPanel);
 
-      Panel outerContainer = new FlowPanel();
-      outerContainer.addStyleName("floatRight");
-      outerContainer.addStyleName("blockStyle");
-      outerContainer.getElement().setId("FeedbackRecordPanel_outerContainer_both");
-      outerContainer.add(autoCRTRecordPanel);
-      ScoreFeedback scoreFeedback = new ScoreFeedback(true);
-      addScoreFeedback(outerContainer, scoreFeedback);
-
-      getFeedbackContainer(outerContainer, scoreFeedback, autoCRTRecordPanel);
+      Panel outerContainer = getRightSideAudioWidget(autoCRTRecordPanel);
       row.add(textWidget);
       row.add(outerContainer);
       return row;
     }
+  }
+
+  private FluidContainer addAudioAnswer(int index, AutoCRTRecordPanel autoCRTRecordPanel) {
+    autoCRTRecordPanel.setWidth("100%");
+    addAnswerWidget(index, autoCRTRecordPanel);
+    FluidContainer outerContainer = new FluidContainer();
+    outerContainer.add(autoCRTRecordPanel);
+    outerContainer.addStyleName("floatLeft");
+    outerContainer.getElement().setId("FeedbackRecordPanel_outerContainer");
+
+    addScoreFeedback(autoCRTRecordPanel, outerContainer);
+    return outerContainer;
+  }
+
+  private Panel getRightSideAudioWidget(AutoCRTRecordPanel autoCRTRecordPanel) {
+    Panel outerContainer = new FlowPanel();
+    outerContainer.addStyleName("floatRight");
+    outerContainer.addStyleName("blockStyle");
+    outerContainer.getElement().setId("FeedbackRecordPanel_outerContainer_both");
+    outerContainer.add(autoCRTRecordPanel);
+    addScoreFeedback(autoCRTRecordPanel, outerContainer);
+    return outerContainer;
+  }
+
+  private void addScoreFeedback(AutoCRTRecordPanel autoCRTRecordPanel, Panel outerContainer) {
+    ScoreFeedback scoreFeedback = new ScoreFeedback(true);
+    addScoreFeedback(outerContainer, scoreFeedback);
+
+    getFeedbackContainer(outerContainer, scoreFeedback, autoCRTRecordPanel);
   }
 
   private Panel doText(Exercise exercise, final LangTestDatabaseAsync service, final ExerciseController controller,
