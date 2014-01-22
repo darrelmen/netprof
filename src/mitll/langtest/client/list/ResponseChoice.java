@@ -23,13 +23,25 @@ import com.google.gwt.user.client.ui.Panel;
  * To change this template use File | Settings | File Templates.
  */
 public class ResponseChoice {
+  public static final String BOTH = "Both";
+  public static final String TEXT = "Text";
+  public static final String AUDIO = "Audio";
   private String responseType;
-  ChoiceMade choiceMade = null;
+  private ChoiceMade choiceMade = null;
 
+  /**
+   * @see mitll.langtest.client.list.TableSectionExerciseList#TableSectionExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, boolean, boolean, mitll.langtest.client.exercise.ExerciseController, String)
+   * @param responseType
+   */
   public ResponseChoice(String responseType) {
     this.responseType = responseType;
   }
 
+  /**
+   * @see mitll.langtest.client.bootstrap.ResponseExerciseList#ResponseExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, boolean, boolean, mitll.langtest.client.exercise.ExerciseController, String)
+   * @param responseType
+   * @param choiceMade
+   */
   public ResponseChoice(String responseType, ChoiceMade choiceMade) {
     this.responseType = responseType;
     this.choiceMade = choiceMade;
@@ -43,9 +55,13 @@ public class ResponseChoice {
     return responseType;
   }
 
+  /**
+   * @see mitll.langtest.client.bootstrap.ResponseExerciseList#addBottomText(com.github.gwtbootstrap.client.ui.FluidContainer)
+   * @return
+   */
   public Panel getResponseTypeWidget() {
     Panel instructions = new FluidRow();
-    instructions.addStyleName("inlineStyle");
+    instructions.addStyleName("trueInlineStyle");
     Nav div = new Nav();
     DOM.setStyleAttribute(div.getElement(), "marginBottom", "0px");
 
@@ -55,29 +71,29 @@ public class ResponseChoice {
     DOM.setStyleAttribute(responseTypeDisplay.getElement(), "marginTop", "0px");
 
     setDisplay(responseType, responseTypeDisplay);
-    NavLink audio = new NavLink("Audio");
+    NavLink audio = new NavLink(AUDIO);
     audio.setIcon(IconType.MICROPHONE);
     audio.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        responseType = "Audio";
+        responseType = AUDIO;
         setDisplay(responseType, responseTypeDisplay);
       }
     });
     menu.add(audio);
 
-    NavLink text = new NavLink("Text");
+    NavLink text = new NavLink(TEXT);
     text.setIcon(IconType.PENCIL);
     text.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        responseType = "Text";
+        responseType = TEXT;
         setDisplay(responseType, responseTypeDisplay);
       }
     });
     menu.add(text);
 
-    NavLink both = new NavLink("Both");
+    NavLink both = new NavLink(BOTH);
     IconAnchor anchor = both.getAnchor();
     anchor.setIconPosition(IconPosition.LEFT);
     anchor.add(new Icon(IconType.MICROPHONE));
@@ -87,7 +103,7 @@ public class ResponseChoice {
     both.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        responseType = "Both";
+        responseType = BOTH;
         setDisplay(responseType, responseTypeDisplay);
       }
     });
@@ -102,16 +118,15 @@ public class ResponseChoice {
   }
 
   private void setDisplay(String responseType, Heading responseTypeDisplay) {
-    if(responseType.equals("Both")) {
+    if(responseType.equals(BOTH)) {
       responseTypeDisplay.setText("<i class='icon-microphone'></i><i class='icon-pencil'></i>&nbsp;"+responseType);
-    } else if(responseType.equals("Text")) {
+    } else if(responseType.equals(TEXT)) {
       responseTypeDisplay.setText("<i class='icon-pencil'></i>&nbsp;"+responseType);
-    } else if(responseType.equals("Audio")) {
+    } else if(responseType.equals(AUDIO)) {
       responseTypeDisplay.setText("<i class='icon-microphone'></i>&nbsp;"+responseType);
     } else {
       responseTypeDisplay.setText(responseType);
     }
     if (choiceMade != null) choiceMade.choiceMade(responseType);
-
   }
 }
