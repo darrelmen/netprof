@@ -89,7 +89,7 @@ public class ExerciseListLayout {
         } else {
           if (props.isCRTDataCollectMode()) {
             return new ResponseExerciseList(secondRow, currentExerciseVPanel, service, feedback,
-              props.isShowTurkToken(), props.showExercisesInOrder(), controller, props.isCRTDataCollectMode(), "response");
+              props.isShowTurkToken(), props.showExercisesInOrder(), controller, "response");
           } else {
             return new FlexSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
               props.isShowTurkToken(), props.showExercisesInOrder(), controller, "flex");
