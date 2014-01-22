@@ -62,6 +62,9 @@ public class Navigation implements RequiresResize {
   private static final String EDIT = "Edit";
   private static final String ADD_ITEM = "Add Item";
   private static final String ADD__OR_EDIT_ITEM = "Add/Edit Item";
+  public static final String ITEMS_TO_REVIEW = "Items to review";
+  public static final String ITEMS_WITH_COMMENTS = "Items with comments";
+  public static final String LEARN_PRONUNCIATION = "Learn Pronunciation";
   private final ExerciseController controller;
   private LangTestDatabaseAsync service;
   private UserManager userManager;
@@ -424,7 +427,7 @@ public class Navigation implements RequiresResize {
     final String instanceName1 = isReview ? REVIEW : isComment ? COMMENT : "learn";
 
     // add learn tab
-    String learnTitle = isReview ? "Items to review" : isComment ? "Items with comments":"Learn Pronunciation";
+    String learnTitle = isReview ? ITEMS_TO_REVIEW : isComment ? ITEMS_WITH_COMMENTS : LEARN_PRONUNCIATION;
     final TabAndContent learn = makeTab(tabPanel, isReview ? IconType.EDIT_SIGN : IconType.LIGHTBULB, learnTitle);
     learn.tab.addClickHandler(new ClickHandler() {
       @Override
@@ -448,17 +451,6 @@ public class Navigation implements RequiresResize {
     // add add item and edit tabs (conditionally)
     TabAndContent editItem = null;
     if (created && !ul.isPrivate()) {
-/*      if (isNormalList) {
-        editItem = makeTab(tabPanel, IconType.PLUS_SIGN, ADD_ITEM);
-        final TabAndContent finalEditItem = editItem;
-        editItem.tab.addClickHandler(new ClickHandler() {
-          @Override
-          public void onClick(ClickEvent event) {
-            showAddItem(ul, finalEditItem);
-          }
-        });
-      }*/
-
       final TabAndContent edit = makeTab(tabPanel, IconType.EDIT, ADD__OR_EDIT_ITEM);
       editItem = edit;
       edit.tab.addClickHandler(new ClickHandler() {
@@ -474,8 +466,7 @@ public class Navigation implements RequiresResize {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
         if (created && !ul.isPrivate() && ul.isEmpty() && finalEditItem != null) {
-          tabPanel.selectTab(2);
-//          showAddItem(ul, finalEditItem);
+          tabPanel.selectTab(1);
           showEditItem(ul, finalEditItem, (isReview || isComment) ? reviewItem : Navigation.this.editItem, isNormalList);
         } else {
           tabPanel.selectTab(0);
@@ -487,12 +478,6 @@ public class Navigation implements RequiresResize {
     return tabPanel;
   }
 
-/*  private void showAddItem(UserList ul, TabAndContent addItem) {
-    addItem.content.clear();
-    Panel widgets = addItem(ul);
-    addItem.content.add(widgets);
-  }*/
-
   /**
    * @see #getListOperations(mitll.langtest.shared.custom.UserList, boolean, String)
    * @param ul
@@ -503,29 +488,6 @@ public class Navigation implements RequiresResize {
     Widget widgets = editItem.editItem(ul, listToMarker.get(ul), includeAddItem);
     addItem.content.add(widgets);
   }
-
-  /**
-   * @paramx ul
-   * @return
-   * @seex #showAddItem(mitll.langtest.shared.custom.UserList, mitll.langtest.client.custom.Navigation.TabAndContent)
-   */
-/*  private <T extends ExerciseShell> Panel addItem(UserList ul) {
-    HorizontalPanel hp = new HorizontalPanel();
-    SimplePanel left = new SimplePanel();
-    hp.add(left);
-    SimplePanel right = new SimplePanel();
-    hp.add(right);
-
-    PagingContainer<T> pagingContainer = new PagingContainer<T>(controller, 100); // todo fix hack
-    Panel container = pagingContainer.getTableWithPager();
-    left.add(container);
-    for (ExerciseShell es : ul.getExercises()) {
-      pagingContainer.addExerciseToList2(es);
-    }
-    pagingContainer.flush();
-    right.add(new NewUserExercise<T>(service,userManager,controller, listToMarker.get(ul)).addNew(ul, pagingContainer, right));
-    return hp;
-  }*/
 
   private void setScrollPanelWidth(ScrollPanel row) {
     if (row != null) {
