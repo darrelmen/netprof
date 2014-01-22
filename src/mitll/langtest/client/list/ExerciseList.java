@@ -353,15 +353,24 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     idToExercise = new HashMap<String, T>();
     clear();
     for (final T es : result) {
-      addExercise(es);
+      //addExercise(es);
+
+      idToExercise.put(es.getID(), es);
+      addExerciseToList(es);
     }
     flush();
   }
 
   @Override
   public void addExercise(T es) {
-    idToExercise.put(es.getID(),es);
+    idToExercise.put(es.getID(), es);
     addExerciseToList(es);
+    currentExercises.add(es);
+
+
+    System.out.println("addExercise : idToExercise size " +idToExercise.size() +
+      " vs currentExercises " + currentExercises.size() + " after add " + es.getID());
+
   }
 
   /**
@@ -395,6 +404,12 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     currentExercises.remove(remove);
     if (currentExercises.isEmpty()) {
       removeCurrentExercise();
+    }
+    if (idToExercise.size() != currentExercises.size()) {
+      System.err.println("simpleRemove : idToExercise size " +idToExercise.size() + " vs currentExercises " + currentExercises.size());
+    }
+    else {
+      System.out.println("simpleRemove : idToExercise size " +idToExercise.size() + " vs currentExercises " + currentExercises.size());
     }
     return remove;
   }
@@ -634,6 +649,8 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
 
     markCurrentExercise(i);
     currentExercise = i;
+
+    System.out.println("ExerciseList.useExercise : " +e.getID() + " currentExercise " +currentExercise + " or " + getCurrentExerciseID());
   }
 
   public String getCurrentExerciseID() { return currentExercises != null ? getCurrent().getID() : "Unknown"; }
@@ -745,13 +762,13 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    */
   @Override
   public <S extends ExerciseShell> boolean loadNextExercise(S current) {
-    System.out.println("ExerciseList.loadNextExercise current is : " +current);
+   // System.out.println("ExerciseList.loadNextExercise current is : " +current);
     int i = getIndex(current);
 
     visited.add(i);
 
     boolean onLast = isOnLastItem(i);
-    System.out.println("ExerciseList.loadNextExercise current is : " +current + " index " +i +
+    System.out.println("ExerciseList.loadNextExercise current is : " +current.getID() + " index " +i +
       " of " + currentExercises.size() +" last is " + (currentExercises.size() - 1)+" on last " + onLast);
 
     if (onLast) {
