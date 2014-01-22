@@ -48,7 +48,7 @@ import mitll.langtest.client.flashcard.FlashcardExercisePanelFactory;
 import mitll.langtest.client.flashcard.TextCRTFlashcard;
 import mitll.langtest.client.grading.GradingExercisePanelFactory;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.mail.MailDialog;
+import mitll.langtest.client.list.ResponseChoice;
 import mitll.langtest.client.monitoring.MonitoringManager;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.recorder.MicPermission;
@@ -407,25 +407,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
-  /**
-   * @see mitll.langtest.client.list.section.SectionExerciseList#getEmailWidget()
-   * @param subject
-   * @param linkTitle
-   * @param token
-   */
-  @Override
-  public void showEmail(final String subject, final String linkTitle, final String token) {
-    GWT.runAsync(new RunAsyncCallback() {
-      public void onFailure(Throwable caught) {
-        Window.alert("Code download failed");
-      }
-
-      public void onSuccess() {
-        new MailDialog(service, userManager).showEmail(subject, token);
-      }
-    });
-  }
-
   private Widget getTitleWidget() {
     FluidRow titleRow = new FluidRow();
     titleRow.addStyleName("alignCenter");
@@ -722,17 +703,17 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     } else if (props.getFlashcardNextAndPrev()) {
       String responseType = props.getResponseType();
 
-      //System.out.println("got response type " + responseType);
-      if (responseType.equalsIgnoreCase("Text")) {
+      System.out.println("setFactory : got response type " + responseType + " : " + props.getSecondResponseType());
+      if (responseType.equalsIgnoreCase(ResponseChoice.TEXT)) {
         exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer, exerciseList) {
           @Override
           public Panel getExercisePanel(Exercise e) {
             return new TextCRTFlashcard(e, service, controller);
           }
         }, userManager, 1);
-      } else if (responseType.equalsIgnoreCase("Audio")) {
+      } else if (responseType.equalsIgnoreCase(ResponseChoice.AUDIO)) {
         exerciseList.setFactory(new DataCollectionFlashcardFactory(service, outer, outer, exerciseList), userManager, 1);
-      } else if (responseType.equalsIgnoreCase("Both")) {
+      } else if (responseType.equalsIgnoreCase(ResponseChoice.BOTH)) {
         exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer, exerciseList) {
           @Override
           public Panel getExercisePanel(Exercise e) {
