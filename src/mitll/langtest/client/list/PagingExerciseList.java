@@ -296,5 +296,8 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
     return pagingContainer;
   }
 */
-  public void redraw() { pagingContainer.redraw(); }
+  public void redraw() {
+    pagingContainer.flush();
+    pagingContainer.redraw();
+  }
 }
