@@ -107,7 +107,7 @@ public class DataCollectorDialog extends UserDialog {
       dialogBox.hide();
       storeAudioType(props.getAudioType());
       userManager.storeUser(dbUserID, props.getAudioType(), userID, PropertyHandler.LOGIN_TYPE.DATA_COLLECTOR);
-      setUnanswered();
+      setRecordingOrder();
     } else {
       markError(password, "Please use password from the email.");
     }
@@ -281,7 +281,7 @@ public class DataCollectorDialog extends UserDialog {
           dialogBox.hide();
           storeAudioType(props.getAudioType());
           userManager.storeUser(result, props.getAudioType(), userName, PropertyHandler.LOGIN_TYPE.DATA_COLLECTOR);
-          setUnanswered();
+          setRecordingOrder();
         }
       });
   }
