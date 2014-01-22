@@ -56,7 +56,7 @@ public class ASRScoring extends Scoring {
 
   public static final String SMALL_LM_SLF = "smallLM.slf";
 
-  private final SmallVocabDecoder svDecoderHelper;
+  private SmallVocabDecoder svDecoderHelper = null;
   private LangTestDatabaseImpl langTestDatabase;
 
   /**
@@ -83,6 +83,7 @@ public class ASRScoring extends Scoring {
     this(deployPath, properties, (HTKDictionary)null);
     this.langTestDatabase = langTestDatabase;
     readDictionary();
+    makeDecoder();
   }
 
   /**
@@ -102,9 +103,15 @@ public class ASRScoring extends Scoring {
     this.letterToSoundClass = new LTSFactory().getLTSClass(language);
 //    logger.info("using LTS " + letterToSoundClass.getClass());
     this.htkDictionary = dict;
-    svDecoderHelper = new SmallVocabDecoder(htkDictionary);
+    makeDecoder();
     if (dict != null) logger.debug("htkDictionary size is " + dict.size());
     this.configFileCreator = new ConfigFileCreator(properties, letterToSoundClass, scoringDir);
+  }
+
+  private void makeDecoder() {
+    if (svDecoderHelper == null && htkDictionary != null) {
+      svDecoderHelper = new SmallVocabDecoder(htkDictionary);
+    }
   }
 
   public SmallVocabDecoder getSmallVocabDecoder() { return svDecoderHelper; }
