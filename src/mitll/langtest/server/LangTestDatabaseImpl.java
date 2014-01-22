@@ -268,7 +268,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see #getExerciseIds(int, long)
+   * @see #getExerciseIds
    * @see #getExercisesForSelectionState(int, java.util.Map, long)
    * @see #getFullExercisesForSelectionState(java.util.Map, int, int)
    * @param exercisesForSection
@@ -406,17 +406,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getSectionHelper().getSectionNodes();
   }
 
-  @Override
-  public Map<String, Map<String,Integer>> getTypeToSectionToCount() {
-    return db.getSectionHelper().getTypeToSectionToCount();
-  }
-
   private void logMemory() {
     Runtime rt = Runtime.getRuntime();
     long free = rt.freeMemory();
     long used = rt.totalMemory() - free;
     long max = rt.maxMemory();
-    logger.debug("heap info free " + free / MB + "M used " + used / MB + "M max " + max / MB + "M");
+
+    if (used/MB > 800) {
+      logger.debug("heap info free " + free / MB + "M used " + used / MB + "M max " + max / MB + "M");
+    }
   }
 
   /**
@@ -830,7 +828,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   private void ensureMP3(String wavFile) {
     if (wavFile != null && (wavFile.endsWith(".mp3") || new File(wavFile).exists())) {
-      logger.debug("ensureMP3 " + wavFile);
+      //logger.debug("ensureMP3 " + wavFile);
       new AudioConversion().ensureWriteMP3(wavFile, pathHelper.getInstallPath());
     }
   }
@@ -896,20 +894,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   // Users ---------------------
 
-  /**
-   * @see mitll.langtest.client.user.StudentDialog#addUser
-   * @param age
-   * @param gender
-   * @param experience
-   * @param dialect
-   * @return user id
-   */
-/*
-  public long addUser(int age, String gender, int experience, String dialect) {
-    return db.addUser( getThreadLocalRequest(), age, gender, experience, dialect);
-  }
-*/
-
   public void addDLIUser(DLIUser dliUser) {
     try {
       db.addDLIUser(dliUser);
@@ -944,9 +928,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.user.UserTable#showDialog(mitll.langtest.client.LangTestDatabaseAsync)
    * @return
    */
-  public List<User> getUsers() {
-    return db.getUsers();
-  }
+  public List<User> getUsers() { return db.getUsers();  }
 
   @Override
   public boolean isAdminUser(long id) { return db.isAdminUser(id); }
@@ -1019,31 +1001,20 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   void makeAutoCRT() { audioFileHelper.makeAutoCRT(relativeConfigDir, this, studentAnswersDB, this); }
 
   @Override
-  public Map<User, Integer> getUserToResultCount() {
-    return db.getUserToResultCount();
-  }
-
+  public Map<User, Integer> getUserToResultCount() { return db.getUserToResultCount();  }
   @Override
-  public Map<Integer, Integer> getResultCountToCount() {
-    return db.getResultCountToCount();
-  }
+  public Map<Integer, Integer> getResultCountToCount() { return db.getResultCountToCount();  }
   @Override
-  public Map<String, Integer> getResultByDay() {
-    return db.getResultByDay();
-  }
+  public Map<String, Integer> getResultByDay() {  return db.getResultByDay();  }
   @Override
-  public Map<String, Integer> getResultByHourOfDay() {
-    return db.getResultByHourOfDay();
-  }
+  public Map<String, Integer> getResultByHourOfDay() {  return db.getResultByHourOfDay();  }
 
   /**
    * Map of overall, male, female to list of counts (ex 0 had 7, ex 1, had 5, etc.)
    * @see mitll.langtest.client.monitoring.MonitoringManager#doResultLineQuery
    * @return
    */
-  public Map<String, Map<String, Integer>> getResultPerExercise() {
-    return db.getResultPerExercise();
-  }
+  public Map<String, Map<String, Integer>> getResultPerExercise() { return db.getResultPerExercise(); }
 
   /**
    * @see mitll.langtest.client.monitoring.MonitoringManager#doGenderQuery(com.google.gwt.user.client.ui.Panel)
@@ -1099,25 +1070,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
-  /**
-   * @see mitll.langtest.client.mail.MailDialog.SendClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
-   * @param userID
-   * @param to
-   * @param replyTo
-   * @param subject
-   * @param message
-   * @param token
-   */
-  @Override
-  public void sendEmail(int userID, String to, String replyTo, String subject, String message, String token) {
-    HttpServletRequest threadLocalRequest = getThreadLocalRequest();
-    getMailSupport().sendEmail(threadLocalRequest.getServerName(), new SiteDeployer().getBaseUrl(threadLocalRequest),
-      to, replyTo, subject, message, token);
-  }
-
-  private MailSupport getMailSupport() {
-    return new MailSupport(serverProps.isDebugEMail());
-  }
+  private MailSupport getMailSupport() {  return new MailSupport(serverProps.isDebugEMail());  }
 
   @Override
   public void destroy() {
