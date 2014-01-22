@@ -1,6 +1,7 @@
 package mitll.langtest.client;
 
 import com.google.gwt.user.client.Window;
+import mitll.langtest.client.list.ResponseChoice;
 import mitll.langtest.shared.Result;
 
 import java.util.Map;
@@ -51,6 +52,7 @@ public class PropertyHandler {
   private static final String CONTINUE_PROMPT = "promptBeforeNextItem";
   private static final String RIGHT_ALIGN_CONTENT = "rightAlignContent";
   private static final String RESPONSE_TYPE = "responseType";
+  private static final String SECOND_RESPONSE_TYPE = "secondResponseType";
   private static final String FLASHCARD_NEXT_AND_PREV = "flashcardNextAndPrev";
   private static final String BIND_NEXT_TO_ENTER = "bindNextToEnter";
   private static final String SCREEN_PORTION = "screenPortion";
@@ -140,7 +142,8 @@ public class PropertyHandler {
   private boolean flashcardTextResponse = false;
   private boolean showFlashcardAnswer = true;
   private boolean showExercisesInOrder = false;
-  private String responseType = "Audio";
+  private String responseType = ResponseChoice.AUDIO;
+  private String secondResponseType = "None";
   private boolean allowPlusInURL;
   private String purposeDefault = "Practice";
   private boolean bindNextToEnter;
@@ -202,9 +205,10 @@ public class PropertyHandler {
       else if (key.equals(EXERCISES_IN_ORDER)) showExercisesInOrder = getBoolean(value);
       else if (key.equals(ALLOW_PLUS_IN_URL)) allowPlusInURL = getBoolean(value);
       else if (key.equals(RESPONSE_TYPE)) responseType = value;
+      else if (key.equals(SECOND_RESPONSE_TYPE)) secondResponseType = value;
       else if (key.equals(PURPOSE_DEFAULT)) purposeDefault = value;
       else if (key.equals(BIND_NEXT_TO_ENTER)) bindNextToEnter = getBoolean(value);
-      else if (key.equals(SCREEN_PORTION)) screenPortion = getFloat(value,1.0f,SCREEN_PORTION);
+      else if (key.equals(SCREEN_PORTION)) screenPortion = getFloat(value, 1.0f, SCREEN_PORTION);
       else if (key.equals(CLASSROOM_MODE)) classroomMode = getBoolean(value);
       else if (key.equals(DEFAULT_AUDIO_TYPE)) audioType = value;
       else if (key.equals(LOGIN_TYPE_PARAM)) {
@@ -337,6 +341,9 @@ public class PropertyHandler {
 
     if (Window.Location.getParameter(RESPONSE_TYPE) != null) {
       responseType = Window.Location.getParameter(RESPONSE_TYPE);
+    }
+    if (Window.Location.getParameter(SECOND_RESPONSE_TYPE) != null) {
+      secondResponseType = Window.Location.getParameter(SECOND_RESPONSE_TYPE);
     }
     return grading;
   }
@@ -516,6 +523,13 @@ public class PropertyHandler {
   }
   public void setResponseType(String responseType) {
     this.responseType = responseType;
+  }
+
+  public String getSecondResponseType() {
+    return secondResponseType;
+  }
+  public void setSecondResponseType(String responseType) {
+    this.secondResponseType = responseType;
   }
 
   public boolean shouldAllowPlusInURL() {
