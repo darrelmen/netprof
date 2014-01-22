@@ -29,6 +29,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.bootstrap.ResponseExerciseList;
 import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -185,7 +186,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @return
    */
   protected String getSelectionFromToken(String token) {
-    token = token.contains("###") ? token.split("###")[0] : token; // remove any other parameters
+    //token = token.contains(ResponseExerciseList.RESPONSE_TYPE_DIVIDER) ? token.split(ResponseExerciseList.RESPONSE_TYPE_DIVIDER)[0] : token; // remove any other parameters
+    token = token.split(ResponseExerciseList.RESPONSE_TYPE_DIVIDER)[0]; // remove any other parameters
     return token;
   }
 
