@@ -41,6 +41,13 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
     super(service, userManager, controller, listInterface, feedback, npfHelper);
   }
 
+  /**
+   * @see #populatePanel(mitll.langtest.shared.custom.UserExercise, com.google.gwt.user.client.ui.Panel, mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.HTML, mitll.langtest.client.list.ListInterface)
+   * @param exercise
+   * @param itemMarker
+   * @param originalList
+   * @return
+   */
   @Override
   protected NewUserExercise<T> getAddOrEditPanel(UserExercise exercise, HTML itemMarker, UserList originalList) {
     return new ReviewEditableExercise(itemMarker, exercise, originalList);
@@ -62,65 +69,63 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
     protected boolean shouldDisableNext() { return false; }
 
     /**
+     * Add a fixed button, so we know when to clear the comments and remove this item from the reviewed list.
+     *
      * @see #addNew
      * @param ul
      * @param pagingContainer
      * @param toAddTo
      * @param normalSpeedRecording
-     * @param buttonName
      * @return
      */
     @Override
     protected Panel getCreateButton(final UserList ul, final ListInterface<T> pagingContainer, final Panel toAddTo,
-                                    final ControlGroup normalSpeedRecording, String buttonName) {
-      Button submit = makeCreateButton(ul, pagingContainer, toAddTo, english, foreignLang, rap, normalSpeedRecording, buttonName);
-
+                                    final ControlGroup normalSpeedRecording) {
       Panel row = new DivWidget();
       row.addStyleName("marginBottomTen");
-      row.add(submit);
-      submit.addStyleName("floatRight");
-
-      Button fixed = new Button(FIXED);
-      DOM.setStyleAttribute(fixed.getElement(), "marginRight", "5px");
-      fixed.setType(ButtonType.PRIMARY);
-      fixed.addStyleName("floatRight");
+      Button fixed = makeFixedButton();
 
       row.add(fixed);
       fixed.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          validateThenPost(english, foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo, FIXED);
+          validateThenPost(english, foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo);
         }
       });
       return row;
     }
 
+    private Button makeFixedButton() {
+      Button fixed = new Button(FIXED);
+      DOM.setStyleAttribute(fixed.getElement(), "marginRight", "5px");
+      fixed.setType(ButtonType.PRIMARY);
+      fixed.addStyleName("floatRight");
+      return fixed;
+    }
+
     /**
      * @see #reallyChange
      * @param pagingContainer
-     * @param buttonName
      */
     @Override
-    protected void doAfterEditComplete(ListInterface<T> pagingContainer, String buttonName) {
-      if (buttonName.equals(FIXED)) {
-        String id = newUserExercise.getID();
-        exerciseList.forgetExercise(id);
-        if (!ul.remove(newUserExercise)) {
-          System.err.println("\n\n\ndoAfterEditComplete : error - didn't remove");
-        }
-        if (!originalList.remove(newUserExercise)) {
-          System.err.println("\n\n\ndoAfterEditComplete : error - didn't remove");
-        }
-        service.removeReviewed(id, new AsyncCallback<Void>() {
-          @Override
-          public void onFailure(Throwable caught) {}
-
-          @Override
-          public void onSuccess(Void result) { predefinedContentList.reload(); }
-        });
-      } else {
-        super.doAfterEditComplete(pagingContainer, buttonName);
+    protected void doAfterEditComplete(ListInterface<T> pagingContainer) {
+      String id = newUserExercise.getID();
+      exerciseList.forgetExercise(id);
+      if (!ul.remove(newUserExercise)) {
+        System.err.println("\n\n\ndoAfterEditComplete : error - didn't remove " + id);
       }
+      if (!originalList.remove(newUserExercise)) {
+        System.err.println("\n\n\ndoAfterEditComplete : error - didn't remove " + id);
+      }
+      service.removeReviewed(id, new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {}
+
+        @Override
+        public void onSuccess(Void result) {
+          predefinedContentList.reload();
+        }
+      });
     }
   }
 }
