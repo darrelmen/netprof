@@ -18,10 +18,10 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 class ButtonContainer {
-  private List<Button> buttons = new ArrayList<Button>();
-  private Set<Button> enabled = new HashSet<Button>();
-  private Set<Button> disabled = new HashSet<Button>();
-  private Map<String, Collection<Button>> nameToButton = new HashMap<String, Collection<Button>>();
+  private final List<Button> buttons = new ArrayList<Button>();
+  private final Set<Button> enabled = new HashSet<Button>();
+  private final Set<Button> disabled = new HashSet<Button>();
+  private final Map<String, Collection<Button>> nameToButton = new HashMap<String, Collection<Button>>();
 
   public void add(Button b, String name) {
     buttons.add(b);
@@ -58,13 +58,13 @@ class ButtonContainer {
     return (FlexSectionExerciseList.ButtonWithChildren) buttons.iterator().next();
   }
 
-  public void disableButton(Button button) {
+/*  public void disableButton(Button button) {
     disabled.add(button);
     enabled.remove(button);
-  }
+  }*/
 
   public void enableAll() {
-    System.out.println("----> enableAll for " + this);
+   // System.out.println("----> enableAll for " + this);
     enabled.addAll(buttons);
     disabled.clear();
     showEnabled();

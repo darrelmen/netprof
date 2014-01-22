@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.list.ResponseChoice;
 import mitll.langtest.shared.Exercise;
 
 /**
@@ -83,7 +84,7 @@ public class AudioExerciseContent {
       container.add(child);
     }
     content = content.replaceAll("h2","h4");
-    content = changeAudioPrompt(content,false);
+    content = changeAudioPrompt(content, false);
     HTML contentFromPrefix = getContentFromPrefix(content);
 /*
     ScrollPanel scroller = new ScrollPanel(contentFromPrefix);
@@ -115,6 +116,7 @@ public class AudioExerciseContent {
   private HTML getContentFromPrefix(String prefix) {
     HTML contentPrefix = getMaybeRTLContent(prefix, true);
     contentPrefix.addStyleName("marginRight");
+    contentPrefix.addStyleName("wrapword");
     if (rightAlignContent) contentPrefix.addStyleName("rightAlign");
     return contentPrefix;
   }
@@ -148,11 +150,11 @@ public class AudioExerciseContent {
   }*/
 
   private String changeAudioPrompt(String suffix, boolean addBreak) {
-    if (responseType.equals("Both")) {
+    if (responseType.equals(ResponseChoice.BOTH)) {
       suffix = suffix.replace("answer the question below","answer the question below" +
         (addBreak?  "<br/>": " ") +
         "both written and spoken");
-    } else if (responseType.equals("Text")) {
+    } else if (responseType.equals(ResponseChoice.TEXT)) {
       suffix = suffix.replace("answer the question", "type your answer to the question");
     }
     return suffix;
@@ -186,7 +188,7 @@ public class AudioExerciseContent {
     audio.addStyleName("floatRight");
     audio.addStyleName("rightFiveMargin");
 
-    System.out.println("getting audio widget for " + e.getID());
+    //System.out.println("getting audio widget for " + e.getID());
 
     return audio;
   }
