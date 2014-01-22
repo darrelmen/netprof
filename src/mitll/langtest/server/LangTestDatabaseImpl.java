@@ -69,9 +69,6 @@ import java.util.concurrent.TimeUnit;
 @SuppressWarnings("serial")
 public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase, AutoCRTScoring {
   private static final Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
-  private static final String FAST = "Fast";
-  private static final String SLOW = "Slow";
-
   private static final int MB = (1024 * 1024);
   private static final int TIMEOUT = 30;
 
@@ -907,9 +904,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param dialect
    * @return user id
    */
+/*
   public long addUser(int age, String gender, int experience, String dialect) {
     return db.addUser( getThreadLocalRequest(), age, gender, experience, dialect);
   }
+*/
 
   public void addDLIUser(DLIUser dliUser) {
     try {
@@ -917,83 +916,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     } catch (Exception e) {
       logAndNotifyServerException(e);
     }
-  }
-
-  /**
-   * @see mitll.langtest.client.custom.Navigation#doCreate
-   * @param userid
-   * @param name
-   * @param description
-   * @param dliClass
-   * @return
-   */
-  @Override
-  public int addUserList(long userid, String name, String description, String dliClass) {
-    return db.getUserListManager().addUserList(userid, name, description, dliClass);
-  }
-
-  /**
-   * @see mitll.langtest.client.custom.Navigation#viewLessons
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel
-   * @param userid
-   * @param onlyCreated
-   * @return
-   */
-  public Collection<UserList> getListsForUser(int userid, boolean onlyCreated) {
-   return db.getUserListManager().getListsForUser(userid, onlyCreated);
-  }
-
-  @Override
-  public Collection<UserList> getUserListsForText(String search) {
-    return db.getUserListManager().getUserListsForText(search);
-  }
-
-  public List<UserExercise> addItemToUserList(int userListID, UserExercise userExercise) {
-    return db.getUserListManager().addItemToUserList(userListID, userExercise);
-  }
-
-  public UserExercise createNewItem(long userid, String english, String foreign) {
-    return db.getUserListManager().createNewItem(userid, english, foreign);
-  }
-
-  /**
-   * Put the new item in the database,
-   * copy the audio under bestAudio
-   * assign the item to a user list
-   * @param userExercise
-   */
-  public UserExercise reallyCreateNewItem(UserList userList, UserExercise userExercise) {
-    File fileRef = pathHelper.getAbsoluteFile(userExercise.getRefAudio());
-    String fast = FAST + ".wav";
-    db.getUserListManager().reallyCreateNewItem(userList, userExercise);
-
-    String refAudio = getRefAudioPath(userExercise, fileRef, fast);
-    userExercise.setRefAudio(refAudio);
-
-    if (userExercise.getSlowAudioRef() != null && !userExercise.getSlowAudioRef().isEmpty()) {
-      fileRef = pathHelper.getAbsoluteFile(userExercise.getSlowAudioRef());
-      String slow = SLOW + ".wav";
-
-      refAudio = getRefAudioPath(userExercise, fileRef, slow);
-      userExercise.setSlowAudioRef(refAudio);
-    }
-    logger.debug("exercise now  " + userExercise);
-
-    // TODO do the same thing for slow
-
-
-    return userExercise;
-  }
-
-  private String getRefAudioPath(UserExercise userExercise, File fileRef, String fast) {
-    final File bestDir = pathHelper.getAbsoluteFile("bestAudio");
-    bestDir.mkdir();
-    File bestDirForExercise = new File(bestDir, userExercise.getID());
-    bestDirForExercise.mkdir();
-    File destination = new File(bestDirForExercise, fast);
-    logger.debug("copying from " + fileRef +  " to " + destination.getAbsolutePath());
-    new FileCopier().copy(fileRef.getAbsolutePath(), destination.getAbsolutePath());
-    return "bestAudio" + File.separator + userExercise.getID() + File.separator + fast;
   }
 
   /**
