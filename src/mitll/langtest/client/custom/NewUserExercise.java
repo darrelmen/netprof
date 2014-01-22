@@ -39,13 +39,13 @@ import mitll.langtest.shared.custom.UserList;
  * To change this template use File | Settings | File Templates.
  */
 public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
-  public static final String FOREIGN_LANGUAGE = "Foreign Language";
-  public static final String CREATE = "Create";
+  private static final String FOREIGN_LANGUAGE = "Foreign Language";
+  private static final String CREATE = "Create";
   protected UserExercise newUserExercise = null;
   private final ExerciseController controller;
-  protected LangTestDatabaseAsync service;
-  private UserManager userManager;
-  private HTML itemMarker;
+  protected final LangTestDatabaseAsync service;
+  private final UserManager userManager;
+  private final HTML itemMarker;
   protected BasicDialog.FormField english;
   protected BasicDialog.FormField foreignLang;
   protected BasicDialog.FormField translit;
@@ -74,7 +74,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   private Panel toAddTo;
 
   /**
-   * @see #afterValidForeignPhrase(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, String)
+   * @see #afterValidForeignPhrase(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel)
    * @param ul
    * @param originalList
    * @param listInterface
@@ -104,7 +104,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     rap.setOtherRAP(rapSlow.getPostAudioButton());
     rapSlow.setOtherRAP(rap.getPostAudioButton());
 
-    Panel column = getCreateButton(ul, listInterface, toAddTo, normalSpeedRecording, getButtonName());
+    Panel column = getCreateButton(ul, listInterface, toAddTo, normalSpeedRecording);
     row.add(column);
 
     foreignLang.box.addBlurHandler(new BlurHandler() {
@@ -129,16 +129,13 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     return container;
   }
 
-
-  protected void gotBlur() {
-    gotBlur(english, foreignLang, rap, normalSpeedRecording, ul, listInterface, toAddTo, getButtonName());
+  private void gotBlur() {
+    gotBlur(english, foreignLang, rap, normalSpeedRecording, ul, listInterface, toAddTo);
   }
 
   protected void gotBlur(FormField english, FormField foreignLang, RecordAudioPanel rap,
-                        ControlGroup normalSpeedRecording, UserList ul, ListInterface<T> pagingContainer,
-                        Panel toAddTo, String buttonName) {}
-
-  protected String getButtonName() { return CREATE;  }
+                         ControlGroup normalSpeedRecording, UserList ul, ListInterface<T> pagingContainer,
+                         Panel toAddTo) {}
 
   protected ControlGroup makeRegularAudioPanel(Panel row) {
     rap = makeRecordAudioPanel(row, english, foreignLang, true);
@@ -192,10 +189,10 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
    * @return
    */
   protected Panel getCreateButton(UserList ul, ListInterface<T> pagingContainer, Panel toAddTo,
-                                  ControlGroup normalSpeedRecording, String buttonName
+                                  ControlGroup normalSpeedRecording
   ) {
     Button submit = makeCreateButton(ul, pagingContainer, toAddTo, english, foreignLang, rap, normalSpeedRecording,
-      buttonName);
+      CREATE);
     DOM.setStyleAttribute(submit.getElement(), "marginBottom", "5px");
     DOM.setStyleAttribute(submit.getElement(), "marginRight", "15px");
 
@@ -204,7 +201,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     return column;
   }
 
-  protected Button makeCreateButton(final UserList ul, final ListInterface<T> pagingContainer, final Panel toAddTo,
+  private Button makeCreateButton(final UserList ul, final ListInterface<T> pagingContainer, final Panel toAddTo,
                                   final FormField english, final FormField foreignLang,
                                   final RecordAudioPanel rap, final ControlGroup normalSpeedRecording, final String buttonName) {
     Button submit = new Button(buttonName);
@@ -212,8 +209,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     submit.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        //System.out.println("makeCreateButton : creating new item for " + english + " " + foreignLang);
-        validateThenPost(english, foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo, buttonName);
+        validateThenPost(english, foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo);
       }
     });
     submit.addStyleName("rightFiveMargin");
@@ -222,14 +218,13 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
 
   protected void validateThenPost(FormField english, FormField foreignLang, RecordAudioPanel rap,
                                   ControlGroup normalSpeedRecording, UserList ul, ListInterface<T> pagingContainer,
-                                  Panel toAddTo, String buttonName) {
+                                  Panel toAddTo) {
     if (validateForm(english, foreignLang, rap, normalSpeedRecording)) {
-      onClick(ul, pagingContainer, toAddTo, buttonName);
+      onClick(ul, pagingContainer, toAddTo);
     }
   }
 
-  protected void onClick(final UserList ul, final ListInterface<T> pagingContainer, final Panel toAddTo,
-                         final String buttonName) {
+  private void onClick(final UserList ul, final ListInterface<T> pagingContainer, final Panel toAddTo) {
     System.out.println("onClick : adding/changing " + newUserExercise);
 
     service.isValidForeignPhrase(foreignLang.box.getText(), new AsyncCallback<Boolean>() {
@@ -242,7 +237,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
           newUserExercise.setEnglish(english.getText());
           newUserExercise.setForeignLanguage(foreignLang.getText());
           newUserExercise.setTransliteration(translit.getText());
-          afterValidForeignPhrase(ul, pagingContainer, toAddTo, buttonName);
+          afterValidForeignPhrase(ul, pagingContainer, toAddTo);
         }
         else {
           markError(foreignLang, "The " + FOREIGN_LANGUAGE +
@@ -257,12 +252,10 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
    * @param ul
    * @param exerciseList
    * @param toAddTo
-   * @param buttonName
    */
   protected void afterValidForeignPhrase(final UserList ul,
                                          final ListInterface<T> exerciseList,
-                                         final Panel toAddTo,
-                                         final String buttonName) {
+                                         final Panel toAddTo) {
     service.reallyCreateNewItem(ul.getUniqueID(), newUserExercise, new AsyncCallback<UserExercise>() {
       @Override
       public void onFailure(Throwable caught) {}
