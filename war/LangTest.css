@@ -166,7 +166,7 @@ h1 {
 
 .wrapword {
     word-wrap: break-word;       /* Internet Explorer 5.5+ */
-    word-break: keep-all;
+    word-break: normal;
     white-space: normal;
 }
 
