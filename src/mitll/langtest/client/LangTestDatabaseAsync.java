@@ -30,7 +30,7 @@ import java.util.Set;
  */
 public interface LangTestDatabaseAsync {
   void addTextAnswer(int usedID, Exercise exercise, int questionID, String answer, AsyncCallback<Void> async);
-  void addUser(int age, String gender, int experience, String dialect, AsyncCallback<Long> async);
+//  void addUser(int age, String gender, int experience, String dialect, AsyncCallback<Long> async);
   void userExists(String login, AsyncCallback<Integer> async);
   void addUser(int age, String gender, int experience, String nativeLang, String dialect, String userID, AsyncCallback<Long> async);
   void getUsers(AsyncCallback<List<User>> async);
@@ -132,16 +132,4 @@ public interface LangTestDatabaseAsync {
   void getExerciseIds(int reqID, long userID, String prefix, AsyncCallback<ExerciseListWrapper> async);
 
   void getStartupInfo(AsyncCallback<StartupInfo> async);
-
-  void getUserListsForText(String search, AsyncCallback<Collection<UserList>> async);
-
-  void getListsForUser(int userid, boolean onlyCreated, AsyncCallback<Collection<UserList>> async);
-
-  void addItemToUserList(int userListID, UserExercise userExercise, AsyncCallback<List<UserExercise>> async);
-
-  void createNewItem(long userid, String english, String foreign, AsyncCallback<UserExercise> async);
-
-  void reallyCreateNewItem(UserList userList, UserExercise userExercise,/*, String refAudioPath, String slowRefAudioPath*/AsyncCallback<UserExercise> async);
-
-  void addUserList(long userid, String name, String description, String dliClass, AsyncCallback<Integer> async);
 }
