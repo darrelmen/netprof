@@ -18,7 +18,11 @@ import mitll.langtest.client.user.UserFeedback;
  * To change this template use File | Settings | File Templates.
  */
 public class ResponseExerciseList extends FlexSectionExerciseList {
+  public static final String RESPONSE_TYPE = "responseType";
+  public static final String SECOND_RESPONSE_TYPE = "secondResponseType";
+  public static final String RESPONSE_TYPE_DIVIDER = "###";
   private ResponseChoice responseChoice;
+  private ResponseChoice secondResponseChoice;
 
   /**
    * @see mitll.langtest.client.ExerciseListLayout#makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, boolean, mitll.langtest.client.user.UserFeedback, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
@@ -38,8 +42,17 @@ public class ResponseExerciseList extends FlexSectionExerciseList {
     responseChoice = new ResponseChoice(responseType, new ResponseChoice.ChoiceMade() {
       @Override
       public void choiceMade(String responseType) {
-        setHistoryItem(History.getToken());
         controller.getProps().setResponseType(responseType);
+        setHistoryItem(History.getToken());
+      }
+    });
+
+    String secondResponseType = controller.getProps().getSecondResponseType();
+    secondResponseChoice = new ResponseChoice(secondResponseType, new ResponseChoice.ChoiceMade() {
+      @Override
+      public void choiceMade(String responseType) {
+        controller.getProps().setSecondResponseType(responseType);
+        setHistoryItem(History.getToken());
       }
     });
   }
@@ -49,15 +62,23 @@ public class ResponseExerciseList extends FlexSectionExerciseList {
    * @param historyToken
    */
   protected void setHistoryItem(String historyToken) {
-    historyToken = historyToken.contains("###") ? historyToken.split("###")[0] : historyToken;
-    String historyToken1 =historyToken + "###" +  "responseType=" + responseChoice.getResponseType();
+    historyToken = historyToken.contains(RESPONSE_TYPE_DIVIDER) ? historyToken.split(RESPONSE_TYPE_DIVIDER)[0] : historyToken;
+    String historyToken1 =historyToken +
+      RESPONSE_TYPE_DIVIDER + RESPONSE_TYPE + "=" + responseChoice.getResponseType() +
+    "***" + SECOND_RESPONSE_TYPE + "=" + secondResponseChoice.getResponseType()
+      ;
     History.newItem(historyToken1);
   }
 
   @Override
   protected Widget addBottomText(FluidContainer container) {
     Widget widget = super.addBottomText(container);
-    container.add(responseChoice.getResponseTypeWidget());
+    String caption = (controller.getLanguage().equals("MSA")? "Arabic" : controller.getLanguage()) +" Response Type";
+    String caption2 = "English Response Type";
+    Panel responseTypeWidget = responseChoice.getResponseTypeWidget(caption, false);
+    responseTypeWidget.addStyleName("topFiveMargin");
+    container.add(responseTypeWidget);
+    container.add(secondResponseChoice.getResponseTypeWidget(caption2, true));
     return widget;
   }
 }
