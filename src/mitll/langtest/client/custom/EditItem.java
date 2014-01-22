@@ -21,7 +21,6 @@ import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
@@ -75,7 +74,14 @@ public class EditItem<T extends ExerciseShell> {
     this.npfHelper = npfHelper;
   }
 
-  public Panel editItem(final UserList ul, final HTML itemMarker, boolean includeAddItem) {
+  /**
+   * @see mitll.langtest.client.custom.Navigation#showEditItem(mitll.langtest.shared.custom.UserList, mitll.langtest.client.custom.Navigation.TabAndContent, EditItem, boolean)
+   * @param originalList
+   * @param itemMarker
+   * @param includeAddItem
+   * @return
+   */
+  public Panel editItem(UserList originalList, final HTML itemMarker, boolean includeAddItem) {
     Panel hp = new HorizontalPanel();
     SimplePanel pagerOnLeft = new SimplePanel();
     hp.add(pagerOnLeft);
@@ -86,21 +92,21 @@ public class EditItem<T extends ExerciseShell> {
     this.itemMarker = itemMarker; // TODO : something less awkward
 
     System.out.println("editItem - including add item = " + includeAddItem);
-
-    if (includeAddItem) {
+    UserList copy = new UserList(originalList);  // copy before we add to it!
+    if (includeAddItem/* && !originalList.contains(NEW_EXERCISE_ID)*/) {
       UserExercise newItem = new UserExercise(-1, NEW_EXERCISE_ID, userManager.getUser(), NEW_ITEM, "", "");
-      System.out.println("Adding " + newItem + " with " + newItem.getTooltip());
-      ul.addExercise(newItem);
+      System.out.println("editItem : Adding " + newItem + " with " + newItem.getTooltip());
+      copy.addExercise(newItem);
     }
 
-    exerciseList = makeExerciseList(contentOnRight, "editItem", ul);
+    exerciseList = makeExerciseList(contentOnRight, "editItem", copy,originalList);
     pagerOnLeft.add(exerciseList.getExerciseListOnLeftSide(controller.getProps()));
 
-    rememberAndLoadFirst(ul, exerciseList);
+    rememberAndLoadFirst(copy, exerciseList);
     return hp;
   }
 
-  private PagingExerciseList<T> makeExerciseList(Panel right, String instanceName, UserList ul) {
+  private PagingExerciseList<T> makeExerciseList(Panel right, String instanceName, UserList ul, UserList originalList) {
     PagingExerciseList<T> exerciseList =
       new PagingExerciseList<T>(right, service, feedback, false, false, controller,
         true, instanceName) {
@@ -126,18 +132,18 @@ public class EditItem<T extends ExerciseShell> {
           }
         }
       };
-    setFactory(exerciseList, ul);
+    setFactory(exerciseList, ul, originalList);
     return exerciseList;
   }
 
-  protected void setFactory(final PagingExerciseList<T> exerciseList, final UserList ul) {
+  protected void setFactory(final PagingExerciseList<T> exerciseList, final UserList ul, final UserList originalList) {
     final PagingExerciseList<T> outer = exerciseList;
     exerciseList.setFactory(new ExercisePanelFactory(service, feedback, controller, exerciseList) {
       @Override
       public Panel getExercisePanel(Exercise e) {
         Panel panel = new SimplePanel();
         UserExercise userExerciseWrapper = new UserExercise(e);
-        populatePanel(userExerciseWrapper, panel, ul, itemMarker, outer/*.getPagingContainer()*/);
+        populatePanel(userExerciseWrapper, panel, ul, originalList, itemMarker, outer);
         return panel;
       }
     }, userManager, 1);
@@ -157,18 +163,16 @@ public class EditItem<T extends ExerciseShell> {
     npfExerciseList.rememberAndLoadFirst(userExercises);
   }
 
-  private /*<N extends NewUserExercise<T>>*/ void populatePanel(UserExercise exercise, Panel right, UserList ul, HTML itemMarker,
-                                                                ListInterface<T> pagingContainer) {
+  private void populatePanel(UserExercise exercise, Panel right, UserList ul, UserList originalList, HTML itemMarker,
+                             ListInterface<T> pagingContainer) {
     NewUserExercise<T> editableExercise = getAddOrEditPanel(exercise, itemMarker);
-  //  /*NewUserExercise<T>*/ EditableExercise editableExercise = new EditableExercise(itemMarker, exercise);
-    right.add(editableExercise.addNew(ul, pagingContainer, right));
+    right.add(editableExercise.addNew(ul, originalList, pagingContainer, right));
     editableExercise.setFields();
   }
 
   protected NewUserExercise<T> getAddOrEditPanel(UserExercise exercise, HTML itemMarker) {
-    NewUserExercise<T> editableExercise;// = new EditableExercise(itemMarker, exercise);
+    NewUserExercise<T> editableExercise;
     if (exercise.getID().equals(NEW_EXERCISE_ID)) {
-      System.out.println("making new user for " + exercise);
       editableExercise = new NewUserExercise<T>(service, userManager, controller, itemMarker);
     } else {
       editableExercise = new EditableExercise(itemMarker, exercise);
@@ -208,14 +212,15 @@ public class EditItem<T extends ExerciseShell> {
     protected String getButtonName() { return CHANGE; }
 
     /**
+     *
      * @param ul
-     * @param pagingContainer
-     * @param toAddTo
-     * @return
+     * @param originalList
+     *@param pagingContainer
+     * @param toAddTo   @return
      */
     @Override
-    public Panel addNew(UserList ul, ListInterface<T> pagingContainer, Panel toAddTo) {
-      final Panel widgets = super.addNew(ul, pagingContainer, toAddTo);
+    public Panel addNew(UserList ul, UserList originalList, ListInterface<T> pagingContainer, Panel toAddTo) {
+      final Panel widgets = super.addNew(ul, originalList, pagingContainer, toAddTo);
       final T exerciseShell = pagingContainer.byID(newUserExercise.getID());
       widgets.add(new PrevNextList<T>(exerciseShell, exerciseList, shouldDisableNext()));
       this.ul = ul;
@@ -288,13 +293,7 @@ public class EditItem<T extends ExerciseShell> {
       container.add(row);
       foreignLang = makeBoxAndAnno(row, controller.getLanguage(), foreignAnno);
       foreignLang.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
-/*      foreignLang.box.addBlurHandler(new BlurHandler() {
-        @Override
-        public void onBlur(BlurEvent event) {
-          validateThenPost(english, foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo, buttonName);
-        }
-      });*/
-      return null;
+      return foreignLang;
     }
 
     @Override
@@ -422,9 +421,6 @@ public class EditItem<T extends ExerciseShell> {
     protected void doAfterEditComplete(ListInterface<T> pagingContainer, String buttonName) {
       changeTooltip(pagingContainer);
       originalForeign = newUserExercise.getForeignLanguage();
-/*      String tooltip = newUserExercise.getTooltip();
-      if (tooltip.length() > 30) tooltip = tooltip.substring(0, 30) + "...";
-      showPopup(tooltip + " has been updated.", submit);*/
       predefinedContentList.reloadWith(predefinedContentList.getCurrentExerciseID());
     }
 
@@ -489,8 +485,6 @@ public class EditItem<T extends ExerciseShell> {
         rapSlow.getImagesForPath(slowAudioRef);
         originalSlowRefAudio = slowAudioRef;
       }
-
-      //submit.setText(CHANGE);
     }
 
     private void useAnnotation(UserExercise userExercise, String field, HTML annoField) {
