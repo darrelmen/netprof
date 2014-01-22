@@ -121,14 +121,6 @@ public interface LangTestDatabase extends RemoteService {
   void resetUserState(long userID);
   void clearUserState(long userID);
 
-  void sendEmail(int userID, String to, String replyTo, String subject, String message, String token);
-
-  /**
-   * @deprecated
-   * @return
-   */
-  Map<String, Map<String,Integer>> getTypeToSectionToCount();
-
   int getNumExercisesForSelectionState(Map<String, Collection<String>> typeToSection);
 
   List<Exercise> getFullExercisesForSelectionState(Map<String, Collection<String>> typeToSection, int start, int end);
