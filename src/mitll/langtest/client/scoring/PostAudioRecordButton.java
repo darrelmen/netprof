@@ -33,8 +33,6 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    * @param controller
    * @param service
    * @param index
-   * @paramx record1
-   * @paramx record2
    */
   public PostAudioRecordButton(Exercise exercise, final ExerciseController controller, LangTestDatabaseAsync service,
                                int index) {
