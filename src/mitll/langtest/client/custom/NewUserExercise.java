@@ -20,7 +20,6 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
 import mitll.langtest.client.list.ListInterface;
@@ -70,17 +69,19 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
 
   private ControlGroup normalSpeedRecording;
   private UserList ul;
+  private UserList originalList;
   private ListInterface<T> listInterface;
   private Panel toAddTo;
 
   /**
    * @see #afterValidForeignPhrase(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, String)
    * @param ul
+   * @param originalList
    * @param listInterface
    * @param toAddTo
    * @return
    */
-  public Panel addNew(final UserList ul, final ListInterface<T> listInterface, final Panel toAddTo) {
+  public Panel addNew(final UserList ul, UserList originalList, final ListInterface<T> listInterface, final Panel toAddTo) {
     final FluidContainer container = new FluidContainer();
     container.addStyleName("greenBackground");
 
@@ -96,6 +97,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
 
     normalSpeedRecording = makeRegularAudioPanel(row);
     this.ul = ul;
+    this.originalList = originalList;
     this.listInterface = listInterface;
     this.toAddTo = toAddTo;
     makeSlowAudioPanel(row);
@@ -111,14 +113,12 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
         gotBlur();
       }
     });
-
     translit.box.addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
         gotBlur();
       }
     });
-
     english.box.addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
@@ -277,7 +277,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
 
         ul.addExercise(newExercise);
      //   System.out.println("\tafterValidForeignPhrase - added " + newExercise);
-
+        originalList.addExercise(newExercise);
         ul.addExercise(newUserExercisePlaceholder); // make sure the placeholder is always at the end
 
       //  System.out.println("\tafterValidForeignPhrase - added " + newUserExercisePlaceholder);
@@ -288,13 +288,13 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
         T toMoveToEnd = exerciseList.simpleRemove(EditItem.NEW_EXERCISE_ID);
         exerciseList.addExercise((T)newExercise);  // TODO figure out better type safe way of doing this
         exerciseList.addExercise(toMoveToEnd);
-
+        exerciseList.redraw();
         System.out.println("\tafterValidForeignPhrase - loading " + toMoveToEnd.getID());
 
         exerciseList.loadExercise(toMoveToEnd); 
 
         toAddTo.clear();
-        toAddTo.add(addNew(ul, exerciseList, toAddTo));
+        toAddTo.add(addNew(ul, originalList, exerciseList, toAddTo));
         newUserExercise = null;
       }
     });
