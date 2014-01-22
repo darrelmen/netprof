@@ -13,6 +13,7 @@ import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 
 /**
@@ -26,6 +27,9 @@ public class ResponseChoice {
   public static final String BOTH = "Both";
   public static final String TEXT = "Text";
   public static final String AUDIO = "Audio";
+  public static final String NONE = "None";
+  private static final IconType MICROPHONE = IconType.MICROPHONE;
+  public static final IconType PENCIL = IconType.PENCIL;
   private String responseType;
   private ChoiceMade choiceMade = null;
 
@@ -59,45 +63,68 @@ public class ResponseChoice {
    * @see mitll.langtest.client.bootstrap.ResponseExerciseList#addBottomText(com.github.gwtbootstrap.client.ui.FluidContainer)
    * @return
    */
-  public Panel getResponseTypeWidget() {
-    Panel instructions = new FluidRow();
-    instructions.addStyleName("trueInlineStyle");
+  public Panel getResponseTypeWidget(String caption, boolean addNone) {
     Nav div = new Nav();
     DOM.setStyleAttribute(div.getElement(), "marginBottom", "0px");
-
-    Dropdown menu = new Dropdown("Response type");
+    Dropdown menu = new Dropdown(caption);
 
     final Heading responseTypeDisplay = new Heading(5);
     DOM.setStyleAttribute(responseTypeDisplay.getElement(), "marginTop", "0px");
+    //DOM.setStyleAttribute(responseTypeDisplay.getElement(), "marginLeft", "5px");
 
     setDisplay(responseType, responseTypeDisplay);
-    NavLink audio = new NavLink(AUDIO);
-    audio.setIcon(IconType.MICROPHONE);
+
+    addAudioChoice(menu, responseTypeDisplay);
+    addTextChoice(menu, responseTypeDisplay);
+    addBothChoice(menu, responseTypeDisplay);
+    if (addNone) addNoneChoice (menu, responseTypeDisplay);
+
+    div.add(menu);
+
+    Panel container = new FluidRow();
+    //Panel container = new HorizontalPanel();
+
+    Column child = new Column(3, 5, div);
+    container.add(child);
+   // container.add(div);
+    Column child1 = new Column(1, responseTypeDisplay);
+    container.add(child1);
+    //container.add(responseTypeDisplay);
+    //container.addStyleName("leftFifteenPercentMargin");
+    return container;
+  }
+
+  protected void addAudioChoice(Dropdown menu, final Heading responseTypeDisplay) {
+    addChoice(menu, responseTypeDisplay, AUDIO, MICROPHONE);
+  }
+
+  protected void addTextChoice(Dropdown menu, final Heading responseTypeDisplay) {
+    addChoice(menu, responseTypeDisplay, TEXT, PENCIL);
+  }
+
+  protected void addNoneChoice(Dropdown menu, final Heading responseTypeDisplay) {
+    addChoice(menu, responseTypeDisplay, NONE, IconType.REMOVE);
+  }
+
+  private void addChoice(Dropdown menu, final Heading responseTypeDisplay, final String responseType, IconType iconType) {
+    NavLink audio = new NavLink(responseType);
+    audio.setIcon(iconType);
     audio.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        responseType = AUDIO;
-        setDisplay(responseType, responseTypeDisplay);
+        ResponseChoice.this.responseType = responseType;
+        setDisplay(ResponseChoice.this.responseType, responseTypeDisplay);
       }
     });
     menu.add(audio);
+  }
 
-    NavLink text = new NavLink(TEXT);
-    text.setIcon(IconType.PENCIL);
-    text.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        responseType = TEXT;
-        setDisplay(responseType, responseTypeDisplay);
-      }
-    });
-    menu.add(text);
-
+  protected void addBothChoice(Dropdown menu, final Heading responseTypeDisplay) {
     NavLink both = new NavLink(BOTH);
     IconAnchor anchor = both.getAnchor();
     anchor.setIconPosition(IconPosition.LEFT);
-    anchor.add(new Icon(IconType.MICROPHONE));
-    anchor.add(new Icon(IconType.PENCIL));
+    anchor.add(new Icon(MICROPHONE));
+    anchor.add(new Icon(PENCIL));
     anchor.setIconPosition(IconPosition.LEFT);
 
     both.addClickHandler(new ClickHandler() {
@@ -108,25 +135,23 @@ public class ResponseChoice {
       }
     });
     menu.add(both);
-
-    div.add(menu);
-    Column child = new Column(2, 5, div);
-    instructions.add(child);
-    Column child1 = new Column(1, responseTypeDisplay);
-    instructions.add(child1);
-    return instructions;
   }
 
   private void setDisplay(String responseType, Heading responseTypeDisplay) {
     if(responseType.equals(BOTH)) {
-      responseTypeDisplay.setText("<i class='icon-microphone'></i><i class='icon-pencil'></i>&nbsp;"+responseType);
+      responseTypeDisplay.setText(
+        "<i class='icon-microphone'></i>" +
+        "<i class='icon-pencil'></i>&nbsp;"+responseType);
     } else if(responseType.equals(TEXT)) {
       responseTypeDisplay.setText("<i class='icon-pencil'></i>&nbsp;"+responseType);
     } else if(responseType.equals(AUDIO)) {
       responseTypeDisplay.setText("<i class='icon-microphone'></i>&nbsp;"+responseType);
+    } else if(responseType.equals(NONE)) {
+      responseTypeDisplay.setText("<i class='icon-remove'></i>&nbsp;"+responseType);
     } else {
       responseTypeDisplay.setText(responseType);
     }
+
     if (choiceMade != null) choiceMade.choiceMade(responseType);
   }
 }
