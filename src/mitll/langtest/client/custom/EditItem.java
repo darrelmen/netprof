@@ -45,14 +45,13 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class EditItem<T extends ExerciseShell> {
-  public static final String CHANGE = "Change";
-  public static final String NEW_ITEM = "*New Item*";
-  public static final String NEW_EXERCISE_ID = "NewExerciseID";
+  private static final String NEW_ITEM = "*New Item*";
+  protected static final String NEW_EXERCISE_ID = "NewExerciseID";
   private final ExerciseController controller;
   private final NPFHelper npfHelper;
-  private LangTestDatabaseAsync service;
-  private UserManager userManager;
-  protected ListInterface<? extends ExerciseShell> predefinedContentList;
+  private final LangTestDatabaseAsync service;
+  private final UserManager userManager;
+  protected final ListInterface<? extends ExerciseShell> predefinedContentList;
   private UserFeedback feedback = null;
   private HTML itemMarker;
   protected PagingExerciseList<T> exerciseList;
@@ -93,7 +92,7 @@ public class EditItem<T extends ExerciseShell> {
 
     System.out.println("editItem - including add item = " + includeAddItem);
     UserList copy = new UserList(originalList);  // copy before we add to it!
-    if (includeAddItem/* && !originalList.contains(NEW_EXERCISE_ID)*/) {
+    if (includeAddItem) {
       UserExercise newItem = new UserExercise(-1, NEW_EXERCISE_ID, userManager.getUser(), NEW_ITEM, "", "");
       System.out.println("editItem : Adding " + newItem + " with " + newItem.getTooltip());
       copy.addExercise(newItem);
@@ -181,14 +180,14 @@ public class EditItem<T extends ExerciseShell> {
   }
 
   protected class EditableExercise extends NewUserExercise<T> {
-    private HTML englishAnno = new HTML();
-    private HTML translitAnno = new HTML();
-    private HTML foreignAnno = new HTML();
-    private HTML fastAnno = new HTML();
-    private HTML slowAnno = new HTML();
+    private final HTML englishAnno = new HTML();
+    private final HTML translitAnno = new HTML();
+    private final HTML foreignAnno = new HTML();
+    private final HTML fastAnno = new HTML();
+    private final HTML slowAnno = new HTML();
     private String originalForeign = "";
     protected UserList ul;
-    protected UserList originalList;
+    protected final UserList originalList;
 
     /**
      *
@@ -208,12 +207,9 @@ public class EditItem<T extends ExerciseShell> {
     @Override
     protected void gotBlur(FormField english, FormField foreignLang, RecordAudioPanel rap,
                            ControlGroup normalSpeedRecording, UserList ul, ListInterface<T> pagingContainer,
-                           Panel toAddTo, String buttonName) {
-      validateThenPost(english, foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo, buttonName);
+                           Panel toAddTo) {
+      validateThenPost(english, foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo);
     }
-
-    @Override
-    protected String getButtonName() { return CHANGE; }
 
     /**
      *
@@ -236,24 +232,21 @@ public class EditItem<T extends ExerciseShell> {
 
     /**
      * Add remove from list button
+     *
      * @param ul
      * @param pagingContainer
      * @param toAddTo
      * @param normalSpeedRecording
-     * @param buttonName
      * @return
      */
     @Override
     protected Panel getCreateButton(final UserList ul, ListInterface<T> pagingContainer, Panel toAddTo,
-                                    ControlGroup normalSpeedRecording, String buttonName
+                                    ControlGroup normalSpeedRecording
     ) {
       Panel row = new DivWidget();
       row.addStyleName("marginBottomTen");
 
-      Button delete = new Button("Remove from list");
-      DOM.setStyleAttribute(delete.getElement(), "marginRight", "5px");
-      delete.setType(ButtonType.WARNING);
-      delete.addStyleName("floatRight");
+      Button delete = makeDeleteButton();
 
       row.add(delete);
 
@@ -275,6 +268,14 @@ public class EditItem<T extends ExerciseShell> {
         }
       });
       return row;
+    }
+
+    private Button makeDeleteButton() {
+      Button delete = new Button("Remove from list");
+      DOM.setStyleAttribute(delete.getElement(), "marginRight", "5px");
+      delete.setType(ButtonType.WARNING);
+      delete.addStyleName("floatRight");
+      return delete;
     }
 
     /**
@@ -335,21 +336,19 @@ public class EditItem<T extends ExerciseShell> {
      * @param ul
      * @param exerciseList
      * @param toAddTo
-     * @param buttonName
      */
     @Override
-    protected void afterValidForeignPhrase(final UserList ul, final ListInterface<T> exerciseList, final Panel toAddTo,
-                                           final String buttonName) {
-      if (!checkForForeignChange(getCloseListener(exerciseList, buttonName))) {
+    protected void afterValidForeignPhrase(final UserList ul, final ListInterface<T> exerciseList, final Panel toAddTo) {
+      if (!checkForForeignChange(getCloseListener(exerciseList))) {
         if (foreignChanged() && translitUnchanged()) {
           markError(translit, "Is transliteration consistent with " + controller.getLanguage() + "?");
         } else {
-          reallyChange(exerciseList, buttonName);
+          reallyChange(exerciseList);
         }
       }
     }
 
-    protected DialogHelper.CloseListener getCloseListener(final ListInterface<T> pagingContainer, final String buttonName) {
+    protected DialogHelper.CloseListener getCloseListener(final ListInterface<T> pagingContainer) {
       return new DialogHelper.CloseListener() {
         @Override
         public void gotYes() {
@@ -370,7 +369,7 @@ public class EditItem<T extends ExerciseShell> {
 
         @Override
         public void gotNo() {
-          reallyChange(pagingContainer, buttonName);
+          reallyChange(pagingContainer);
         }
       };
     }
@@ -407,10 +406,8 @@ public class EditItem<T extends ExerciseShell> {
       return newUserExercise.getTransliteration().equals(originalTransliteration);
     }
 
-    private void reallyChange(final ListInterface<T> pagingContainer, final String buttonName) {
+    private void reallyChange(final ListInterface<T> pagingContainer) {
       newUserExercise.setCreator(controller.getUser());
-      //System.out.println("reallyChange : " + newUserExercise.getID());
-
       service.editItem(newUserExercise, new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {}
@@ -418,12 +415,12 @@ public class EditItem<T extends ExerciseShell> {
         @Override
         public void onSuccess(Void newExercise) {
           //  System.out.println("\treallyChange : " + newUserExercise.getID() + " button " + buttonName);
-          doAfterEditComplete(pagingContainer, buttonName);
+          doAfterEditComplete(pagingContainer);
         }
       });
     }
 
-    protected void doAfterEditComplete(ListInterface<T> pagingContainer, String buttonName) {
+    protected void doAfterEditComplete(ListInterface<T> pagingContainer) {
       changeTooltip(pagingContainer);
       originalForeign = newUserExercise.getForeignLanguage();
       predefinedContentList.reloadWith(predefinedContentList.getCurrentExerciseID());
