@@ -87,6 +87,11 @@ public class PagingContainer<T extends ExerciseShell> {
     return null;
   }
 
+  /**
+   * @see mitll.langtest.client.list.PagingExerciseList#simpleRemove(String)
+   * @see mitll.langtest.client.list.PagingExerciseList#removeExercise(mitll.langtest.shared.ExerciseShell)
+   * @param es
+   */
   public void forgetExercise(T es) {
     List<T> list = getList();
     System.out.println("forgetExercise " + es);
@@ -98,6 +103,10 @@ public class PagingContainer<T extends ExerciseShell> {
           System.out.println("\tnow has " + t.getID());
         }
       }
+    }
+    else {
+      System.out.println("\tPagingContainer : now has " + list.size() + " items");
+
     }
     redraw();
   }
@@ -329,14 +338,15 @@ public class PagingContainer<T extends ExerciseShell> {
     table.setRowCount(getList().size());
   }
 
-  public <S extends ExerciseShell> void addAndFlush(S exercise) {
+/*  public <S extends ExerciseShell> void addAndFlush(S exercise) {
     addExerciseToList2(exercise);
     flush();
-  }
+  }*/
 
   public <S extends ExerciseShell> void addExerciseToList2(S exercise) {
     List<T> list = getList();
     list.add((T) exercise);  // TODO : can't remember how I avoid this
+   // System.out.println("data now has "+list.size() + " after adding " + exercise.getID());
   }
 
   public void onResize(int currentExercise) {
