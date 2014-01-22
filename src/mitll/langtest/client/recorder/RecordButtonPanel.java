@@ -67,7 +67,6 @@ public class RecordButtonPanel extends HorizontalPanel implements RecordButton.R
   }
 
   public void flip(boolean first) {
-    System.out.println("RecordButtonPanel : flip " + first);
     recordImage1.setVisible(!first);
     recordImage2.setVisible(first);
   }
@@ -94,8 +93,6 @@ public class RecordButtonPanel extends HorizontalPanel implements RecordButton.R
   }
 
   public void startRecording() {
-//    System.out.println("RecordButtonPanel : startRecording " );
-
     recordImage1.setVisible(true);
     controller.startRecording();
   }
