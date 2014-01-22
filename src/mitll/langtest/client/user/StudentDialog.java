@@ -9,6 +9,7 @@ import com.github.gwtbootstrap.client.ui.Controls;
 import com.github.gwtbootstrap.client.ui.Fieldset;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Form;
+import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.Modal;
 import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
@@ -24,6 +25,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -50,6 +52,10 @@ public class StudentDialog extends UserDialog {
   private static final int MIN_WEEKS = 0;
   private static final int MAX_WEEKS = 104;
   private static final int MIN_LENGTH_USER_ID = 4;
+  private static final String DATA_COLLECTION = "Data Collection";
+  private static final String PRACTICE = "Practice";
+  private static final String DEMO = "Demo";
+  private static final String PURPOSE = "Purpose";
   private final UserManager userManager;
   private final UserNotification langTest;
   private List<String> purposes;
@@ -61,7 +67,7 @@ public class StudentDialog extends UserDialog {
     purposes = new ArrayList<String>();
     purposes.add(props.getPurposeDefault());
 
-    for (String purpose : Arrays.asList("Data Collection", "Practice", "Demo")) {
+    for (String purpose : Arrays.asList(DATA_COLLECTION, PRACTICE, DEMO)) {
       if (!purpose.equalsIgnoreCase(props.getPurposeDefault())) purposes.add(purpose);
     }
   }
@@ -74,7 +80,9 @@ public class StudentDialog extends UserDialog {
     final Modal dialogBox = getDialog("Login");
     dialogBox.setAnimation(false);
     dialogBox.setMaxHeigth("760px");
-    DOM.setStyleAttribute(dialogBox.getElement(), "top", "4%");
+    Element element = dialogBox.getElement();
+    element.setId("Student_LoginBoxDialog");
+    DOM.setStyleAttribute(element, "top", "4%");
     Form form = new Form();
     form.addStyleName("form-horizontal");
     DOM.setStyleAttribute(form.getElement(), "marginBottom", "0px");
@@ -82,12 +90,16 @@ public class StudentDialog extends UserDialog {
     Fieldset fieldset = new Fieldset();
     form.add(fieldset);
     dialogBox.add(form);
-    final ListBoxFormField purpose = getListBoxFormField(fieldset, "Purpose", getListBox2(purposes,ILR_CHOICE_WIDTH));
+    ListBox listBox2 = getListBox2(purposes, ILR_CHOICE_WIDTH);
+    listBox2.addStyleName("leftFiveMargin");
+    final ListBoxFormField purpose = getListBoxFormField(fieldset, PURPOSE, listBox2);
+    purpose.box.setFocus(true);
+    recordingOrder = getRecordingOrder(fieldset);
 
     final FormField user = addControlFormField(fieldset, "User ID", MIN_LENGTH_USER_ID);
-    user.setVisible(purpose.getValue().equals("Data Collection"));
+    user.setVisible(purpose.getValue().equals(DATA_COLLECTION));
+    user.box.addStyleName("leftFiveMargin");
 
-   //  recordingOrder = getRecordingOrder(dialogBox);
 
     //final FormField password = addControlFormField(fieldset, "Password", true);
 
@@ -102,7 +114,7 @@ public class StudentDialog extends UserDialog {
       @Override
       public void onChange(ChangeEvent event) {
         boolean b = canSkipRegister(purpose.getValue());
-        user.setVisible(purpose.getValue().equals("Data Collection"));
+        user.setVisible(purpose.getValue().equals(DATA_COLLECTION));
         accordion.setVisible(!canSkipRegister(purpose.getValue()));
 
         if (b) {
@@ -115,8 +127,7 @@ public class StudentDialog extends UserDialog {
             ) {
             service.userExists(userID, new AsyncCallback<Integer>() {
               @Override
-              public void onFailure(Throwable caught) {
-              }
+              public void onFailure(Throwable caught) {}
 
               @Override
               public void onSuccess(Integer result) {
@@ -203,8 +214,7 @@ public class StudentDialog extends UserDialog {
       ) {
       service.userExists(userID, new AsyncCallback<Integer>() {
         @Override
-        public void onFailure(Throwable caught) {
-        }
+        public void onFailure(Throwable caught) {}
 
         @Override
         public void onSuccess(Integer result) {
@@ -217,6 +227,7 @@ public class StudentDialog extends UserDialog {
             accordion.show();
             checkThenRegister(audioType, registrationInfo, dialogBox, userID);
           }
+          setRecordingOrder();
         }
       });
     }
@@ -241,14 +252,14 @@ public class StudentDialog extends UserDialog {
   }
 
   private String getAudioTypeFromPurpose(String purposeValue) {
-    return purposeValue.equalsIgnoreCase("Practice") ?
-      Result.AUDIO_TYPE_PRACTICE : (purposeValue.equalsIgnoreCase("Demo") ?
+    return purposeValue.equalsIgnoreCase(PRACTICE) ?
+      Result.AUDIO_TYPE_PRACTICE : (purposeValue.equalsIgnoreCase(DEMO) ?
       Result.AUDIO_TYPE_DEMO :
       Result.AUDIO_TYPE_REGULAR);
   }
 
   private boolean canSkipRegister(String purposeValue) {
-    return purposeValue.equalsIgnoreCase("Practice") || purposeValue.equalsIgnoreCase("Demo");
+    return purposeValue.equalsIgnoreCase(PRACTICE) || purposeValue.equalsIgnoreCase(DEMO);
   }
 
   private boolean checkValidUser(FormField user) {
