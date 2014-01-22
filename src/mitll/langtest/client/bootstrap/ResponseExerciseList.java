@@ -29,11 +29,10 @@ public class ResponseExerciseList extends FlexSectionExerciseList {
    * @param showTurkToken
    * @param showInOrder
    * @param controller
-   * @param isCRTDataMode
    */
   public ResponseExerciseList(FluidRow secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                               UserFeedback feedback, boolean showTurkToken, boolean showInOrder,
-                              final ExerciseController controller, boolean isCRTDataMode, String instance) {
+                              final ExerciseController controller, String instance) {
     super(secondRow, currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, instance);
     String responseType = controller.getProps().getResponseType();
     responseChoice = new ResponseChoice(responseType, new ResponseChoice.ChoiceMade() {
