@@ -33,6 +33,7 @@ public class SimpleRecordPanel extends RecordButtonPanel {
   private static final String IMAGES_REDX_PNG  = LangTest.LANGTEST_IMAGES +"redx32.png";
   private static final int PLAYBACK_WIDTH = 300;
   public static final int POPUP_TIMEOUT = 3000;
+  public static final String AUDIO_SAVED = "Audio Saved";
   private Image check;
   private SimplePanel playback = new SimplePanel();
   private final AudioTag audioTag = new AudioTag();
@@ -63,7 +64,7 @@ public class SimpleRecordPanel extends RecordButtonPanel {
   protected void addValidityFeedback(int index) {
     this.check = new Image(IMAGES_CHECKMARK);
     check.getElement().setId("checkmark_" +index);
-    check.setAltText("Audio Saved");
+    check.setAltText(AUDIO_SAVED);
     check.setVisible(false);
 
     add(check);
@@ -100,7 +101,7 @@ public class SimpleRecordPanel extends RecordButtonPanel {
     check.setVisible(false);
     if (result == AudioAnswer.Validity.OK) {
       check.setUrl(IMAGES_CHECKMARK);
-      check.setAltText("Audio Saved");
+      check.setAltText(AUDIO_SAVED);
       if (questionState != null) {
         questionState.recordCompleted(outer);
       }

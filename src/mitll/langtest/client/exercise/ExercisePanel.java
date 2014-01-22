@@ -274,7 +274,7 @@ public class ExercisePanel extends VerticalPanel implements
     Set<Object> objects = indexToWidgets.get(index);
     if (objects == null) indexToWidgets.put(index, objects = new HashSet<Object>());
     objects.add(answerWidget);
-    System.out.println("addAnswerWidget : now " +answers.size() + " expected, adding '" + answerWidget.getElement().getId() + "'");
+    //System.out.println("addAnswerWidget : now " +answers.size() + " expected, adding '" + answerWidget.getElement().getId() + "'");
   }
 
   protected boolean shouldShowAnswer() { return controller.isDemoMode();  }
