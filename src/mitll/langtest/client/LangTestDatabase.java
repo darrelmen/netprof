@@ -49,7 +49,7 @@ public interface LangTestDatabase extends RemoteService {
   void changeGrade(Grade toChange);
 
   // user DAO
-  long addUser(int age, String gender, int experience, String dialect);
+//  long addUser(int age, String gender, int experience, String dialect);
   long addUser(int age, String gender, int experience, String nativeLang, String dialect, String userID);
 
   List<User> getUsers();
@@ -151,10 +151,4 @@ public interface LangTestDatabase extends RemoteService {
   ExerciseListWrapper getExerciseIds(int reqID, long userID, String prefix);
 
   StartupInfo getStartupInfo();
-  int addUserList(long userid, String name, String description, String dliClass);
-  Collection<UserList> getListsForUser(int userid, boolean onlyCreated);
-  Collection<UserList> getUserListsForText(String search);
-  List<UserExercise> addItemToUserList(int userListID, UserExercise userExercise);
-  UserExercise createNewItem(long userid, String english, String foreign);
-  UserExercise reallyCreateNewItem(UserList userList, UserExercise userExercise/*, String refAudioPath, String slowRefAudioPath*/);
 }
