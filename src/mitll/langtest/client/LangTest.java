@@ -35,7 +35,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
-import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.ModalInfoDialog;
@@ -104,7 +103,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private HTML releaseStatus;
   private StartupInfo startupInfo;
 
-  Navigation navigation;
+  //Navigation navigation;
   private boolean showUnansweredFirst = false;
 
   /**
@@ -292,13 +291,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingRight", "2px");
 
     ListInterface listInterface = makeExerciseList(secondRow, leftColumn);
-    if (getProps().isClassroomMode()) {
-      navigation = new Navigation(service, userManager, this, listInterface);
-      belowFirstRow.add(navigation.getNav(bothSecondAndThird, this));
-    }
-    else {
-      belowFirstRow.add(bothSecondAndThird);
-    }
+    belowFirstRow.add(bothSecondAndThird);
 
     if (usualLayout) {
       currentExerciseVPanel.addStyleName("floatLeft");
@@ -618,7 +611,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         if (exerciseList != null) {
           exerciseList.onResize();
         }
-        if (navigation != null) navigation.onResize();
         if (flashcard != null) {
           flashcard.onResize();
         }
@@ -927,13 +919,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         }
         else {
           System.out.println("\tdoEverythingAfterFactory : " + userID + " exercise list is null???");
-        }
-
-        if (navigation != null) {
-          if (!everShownInitialState) {
-            navigation.showInitialState();
-            everShownInitialState = true;
-          }
         }
       }
       else {
