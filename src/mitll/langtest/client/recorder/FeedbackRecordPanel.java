@@ -31,6 +31,8 @@ import java.util.Set;
  */
 public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
   public static final int FEEDBACK_WIDTH = 250;
+  private static final String TEXT = "Text";
+  private static final String AUDIO = "Audio";
   private List<TextResponse> textResponses;
 
   private SoundFeedback soundFeedback;
@@ -48,9 +50,9 @@ public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
   @Override
   protected String getQuestionPrompt(boolean promptInEnglish) {
     String responseType = controller.getProps().getResponseType();
-    if (responseType.equalsIgnoreCase("Text")) {
+    if (responseType.equalsIgnoreCase(TEXT)) {
       return getWrittenPrompt(promptInEnglish);
-    } else if (responseType.equals("Audio")) {
+    } else if (responseType.equals(AUDIO)) {
       return getSpokenPrompt(promptInEnglish);
     } else return "";
   }
@@ -63,7 +65,7 @@ public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
     AutoCRTRecordPanel autoCRTRecordPanel = new AutoCRTRecordPanel(service, controller, exercise, this, index, FEEDBACK_WIDTH);
     String responseType = controller.getProps().getResponseType();
 
-    if (responseType.equalsIgnoreCase("Audio")) {
+    if (responseType.equalsIgnoreCase(AUDIO)) {
       autoCRTRecordPanel.setWidth("100%");
       addAnswerWidget(index, autoCRTRecordPanel);
       FluidContainer outerContainer = new FluidContainer();
@@ -76,10 +78,10 @@ public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
       getFeedbackContainer(outerContainer, scoreFeedback, autoCRTRecordPanel);
       return outerContainer;
     }
-    else if (responseType.equalsIgnoreCase("Text")){
+    else if (responseType.equalsIgnoreCase(TEXT)){
       return doText(exercise, service, controller, index,autoCRTRecordPanel);
     }
-    else {
+    else {  // both
       Panel row = new FlowPanel();
       row.addStyleName("trueInlineStyle");
       row.getElement().setId("FeedbackRecordPanel_getAnswerWidget_Row");
@@ -171,8 +173,7 @@ public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
     if (isCompleted()) {
       service.getCompletedExercises(controller.getUser(), new AsyncCallback<Set<String>>() {
         @Override
-        public void onFailure(Throwable caught) {
-        }
+        public void onFailure(Throwable caught) {}
 
         @Override
         public void onSuccess(Set<String> result) {
