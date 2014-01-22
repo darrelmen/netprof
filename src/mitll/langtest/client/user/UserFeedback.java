@@ -10,5 +10,4 @@ package mitll.langtest.client.user;
 public interface UserFeedback {
   void showErrorMessage(String title, String msg);
   void showStatus(String msg);
-  void showEmail(String subject, String linkTitle, String token);
 }
