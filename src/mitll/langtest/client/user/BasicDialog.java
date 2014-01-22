@@ -1,10 +1,8 @@
 package mitll.langtest.client.user;
 
-import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.ControlLabel;
 import com.github.gwtbootstrap.client.ui.ListBox;
-import com.github.gwtbootstrap.client.ui.Modal;
 import com.github.gwtbootstrap.client.ui.PasswordTextBox;
 import com.github.gwtbootstrap.client.ui.Popover;
 import com.github.gwtbootstrap.client.ui.TextBox;
@@ -21,7 +19,6 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.dialog.EnterKeyButtonHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +31,7 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class BasicDialog {
-  private EnterKeyButtonHelper enterKeyButtonHelper = new EnterKeyButtonHelper();
+  //private EnterKeyButtonHelper enterKeyButtonHelper = new EnterKeyButtonHelper();
   private List<Popover> visiblePopovers = new ArrayList<Popover>();
 
   protected FormField addControlFormField(Panel dialogBox, String label) {
@@ -66,9 +63,9 @@ public class BasicDialog {
     return userGroup;
   }
 
-  protected void addKeyHandler(final Button send, Modal dialog) {
+/*  protected void addKeyHandler(final Button send, Modal dialog) {
     enterKeyButtonHelper.addKeyHandler(send, dialog);
-  }
+  }*/
 
  /* protected void removeKeyHandler() {
     enterKeyButtonHelper.removeKeyHandler();
