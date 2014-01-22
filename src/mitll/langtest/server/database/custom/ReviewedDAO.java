@@ -21,9 +21,9 @@ import java.util.TreeSet;
  * To change this template use File | Settings | File Templates.
  */
 public class ReviewedDAO extends DAO {
-  private static Logger logger = Logger.getLogger(ReviewedDAO.class);
+  private static final Logger logger = Logger.getLogger(ReviewedDAO.class);
 
-  public static final String REVIEWED = "reviewed";
+  private static final String REVIEWED = "reviewed";
 
   public ReviewedDAO(Database database) {
     super(database);
@@ -151,7 +151,7 @@ public class ReviewedDAO extends DAO {
         lists.add(rs.getString(1));
       }
 
-      logger.debug("getReviewed sql " + sql + " yielded " + lists.size());
+     // logger.debug("getReviewed sql " + sql + " yielded " + lists.size());
       rs.close();
       statement.close();
       database.closeConnection(connection);
