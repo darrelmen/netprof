@@ -26,7 +26,6 @@ public class UserList extends ExerciseShell {
   private String name;
   private String description;
   private String classMarker;
-  //private long modified;
   private boolean isPrivate;
   private boolean isReview;
   private Collection<UserExercise> exercises = new ArrayList<UserExercise>();
@@ -51,13 +50,14 @@ public class UserList extends ExerciseShell {
     this.isPrivate = isPrivate;
     visitorIDs = new HashSet<Long>();
     if (user != null) addVisitor(user);
-    //this.modified = modified;
   }
 
-  public void addExercise(UserExercise toAdd) {
-    exercises.add(toAdd);
-    //modified = System.currentTimeMillis();
+  public UserList(UserList ul) {
+    this(ul.uniqueID,ul.getCreator(),ul.getName(),ul.getDescription(),ul.getClassMarker(),ul.isPrivate());
+    for (UserExercise ue : ul.getExercises()) { addExercise(ue); }
   }
+
+  public void addExercise(UserExercise toAdd) { exercises.add(toAdd);  }
 
   /**
    * @see #UserList(long, mitll.langtest.shared.User, String, String, String, boolean)
@@ -127,6 +127,14 @@ public class UserList extends ExerciseShell {
   public boolean contains(UserExercise userExercise) {
     return getExercises().contains(userExercise);
   }
+  public boolean contains(String id) {
+    for (UserExercise ue : exercises) {
+      if (id.equals(ue.getID())) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   public boolean isPrivate() {
     return isPrivate;
@@ -139,12 +147,6 @@ public class UserList extends ExerciseShell {
   public boolean isFavorite() {
     return getName().equals(MY_LIST);
   }
-
-/*
-  public boolean isReview() {
-    return isReview;
-  }
-*/
 
   public void setReview(boolean isReview) {
     this.isReview = isReview;
