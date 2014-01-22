@@ -34,7 +34,7 @@ public class AutoCRTRecordPanel extends SimpleRecordPanel {
   public AutoCRTRecordPanel(final LangTestDatabaseAsync service, final ExerciseController controller,
                             final Exercise exercise, final ExerciseQuestionState questionState, final int index, int feedbackWidth) {
     super(service, controller, exercise, questionState, index);
-    /*getPanel().*/getElement().setId("AutoCRTRecordPanel");
+    getElement().setId("AutoCRTRecordPanel");
     this.feedbackWidth = feedbackWidth;
   }
 
