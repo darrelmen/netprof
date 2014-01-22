@@ -165,17 +165,17 @@ public class EditItem<T extends ExerciseShell> {
 
   private void populatePanel(UserExercise exercise, Panel right, UserList ul, UserList originalList, HTML itemMarker,
                              ListInterface<T> pagingContainer) {
-    NewUserExercise<T> editableExercise = getAddOrEditPanel(exercise, itemMarker);
+    NewUserExercise<T> editableExercise = getAddOrEditPanel(exercise, itemMarker, originalList);
     right.add(editableExercise.addNew(ul, originalList, pagingContainer, right));
     editableExercise.setFields();
   }
 
-  protected NewUserExercise<T> getAddOrEditPanel(UserExercise exercise, HTML itemMarker) {
+  protected NewUserExercise<T> getAddOrEditPanel(UserExercise exercise, HTML itemMarker, UserList originalList) {
     NewUserExercise<T> editableExercise;
     if (exercise.getID().equals(NEW_EXERCISE_ID)) {
       editableExercise = new NewUserExercise<T>(service, userManager, controller, itemMarker);
     } else {
-      editableExercise = new EditableExercise(itemMarker, exercise);
+      editableExercise = new EditableExercise(itemMarker, exercise, originalList);
     }
     return editableExercise;
   }
@@ -188,17 +188,21 @@ public class EditItem<T extends ExerciseShell> {
     private HTML slowAnno = new HTML();
     private String originalForeign = "";
     protected UserList ul;
+    protected UserList originalList;
 
     /**
+     *
      * @param itemMarker
      * @param changedUserExercise
+     * @param originalList
      * @seex EditItem#editItem(mitll.langtest.shared.custom.UserExercise, com.google.gwt.user.client.ui.SimplePanel, mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.HTML, mitll.langtest.shared.custom.UserExercise)
      */
-    public EditableExercise(HTML itemMarker, UserExercise changedUserExercise) {
+    public EditableExercise(HTML itemMarker, UserExercise changedUserExercise, UserList originalList) {
       super(EditItem.this.service, EditItem.this.userManager, EditItem.this.controller, itemMarker);
       this.newUserExercise = changedUserExercise;
       fastAnno.addStyleName("editComment");
       slowAnno.addStyleName("editComment");
+      this.originalList = originalList;
     }
 
     @Override
@@ -216,7 +220,8 @@ public class EditItem<T extends ExerciseShell> {
      * @param ul
      * @param originalList
      *@param pagingContainer
-     * @param toAddTo   @return
+     * @param toAddTo
+     * @return
      */
     @Override
     public Panel addNew(UserList ul, UserList originalList, ListInterface<T> pagingContainer, Panel toAddTo) {
