@@ -53,7 +53,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   protected CreateFirstRecordAudioPanel rapSlow;
 
   /**
-   * @see mitll.langtest.client.custom.EditItem#getAddOrEditPanel(mitll.langtest.shared.custom.UserExercise, com.google.gwt.user.client.ui.HTML)
+   * @see EditItem#getAddOrEditPanel(mitll.langtest.shared.custom.UserExercise, com.google.gwt.user.client.ui.HTML, mitll.langtest.shared.custom.UserList)
    * @param service
    * @param userManager
    * @param controller
