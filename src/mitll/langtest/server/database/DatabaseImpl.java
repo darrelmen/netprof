@@ -1255,25 +1255,24 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * Creates the result table if it's not there.
-   *
    *
    * @param userID
    * @param e
    * @param questionID
    * @param answer
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addTextAnswer(int, mitll.langtest.shared.Exercise, int, String)
+   * @param answerType
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addTextAnswer
    * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers(mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise)
    */
-  public void addAnswer(int userID, Exercise e, int questionID, String answer) {
-    addAnswer(userID, e, questionID, answer, true);
+  public void addAnswer(int userID, Exercise e, int questionID, String answer, String answerType) {
+    addAnswer(userID, e, questionID, answer, true, answerType);
+  }
+
+  private void addAnswer(int userID, Exercise e, int questionID, String answer, boolean correct, String answerType) {
+    answerDAO.addAnswer(userID, e, questionID, answer, "", !e.isPromptInEnglish(), false, answerType, correct, 0);
   }
 
   public AnswerDAO getAnswerDAO() { return answerDAO; }
-
-  private void addAnswer(int userID, Exercise e, int questionID, String answer, boolean correct) {
-    answerDAO.addAnswer(userID, e, questionID, answer, "", !e.isPromptInEnglish(), false, Result.AUDIO_TYPE_UNSET, correct, 0);
-  }
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile(String, String, String, int, int, int, boolean, String, boolean)
