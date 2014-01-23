@@ -134,7 +134,7 @@ public class RecordButtonPanel extends HorizontalPanel implements RecordButton.R
       controller.getUser(),
       reqid,
       !exercise.isPromptInEnglish(),
-      controller.getAudioType(),
+      getAudioType(),
       doFlashcardAudio,
       new AsyncCallback<AudioAnswer>() {
         public void onFailure(Throwable caught) {
@@ -160,6 +160,8 @@ public class RecordButtonPanel extends HorizontalPanel implements RecordButton.R
         }
       });
   }
+
+  protected String getAudioType() { return controller.getAudioType();  }
 
   public Widget getRecordButton() { return recordButton; }
   protected void receivedAudioAnswer(AudioAnswer result, final ExerciseQuestionState questionState, final Panel outer) {}
