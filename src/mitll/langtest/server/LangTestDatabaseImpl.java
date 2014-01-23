@@ -2,7 +2,6 @@ package mitll.langtest.server;
 
 import audio.image.ImageType;
 import audio.imagewriter.ImageWriter;
-import audio.tools.FileCopier;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.io.Files;
@@ -26,8 +25,6 @@ import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.Site;
 import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.User;
-import mitll.langtest.shared.custom.UserExercise;
-import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.FlashcardResponse;
 import mitll.langtest.shared.flashcard.Leaderboard;
 import mitll.langtest.shared.flashcard.ScoreInfo;
@@ -222,45 +219,37 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * Don't randomize order if we're in netProF (formerly goodwave) mode.
-   *
-   * @see mitll.langtest.client.list.HistoryExerciseList#loadExercises
-   * @param reqID
-   * @param typeToSection
-   * @param userID
-   * @return
-   */
-  @Override
-  public ExerciseListWrapper getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID) {
-    List<Exercise> exercisesForState = getExercisesForState(reqID, typeToSection, userID);
-    return makeExerciseListWrapper(reqID, exercisesForState);
-  }
-
-  /**
    * @see mitll.langtest.client.list.HistoryExerciseList#loadExercises(String, String)
    * @param reqID
    * @param typeToSection
    * @param userID
    * @param prefix
+   * @param showUnansweredFirst
    * @return
    */
   @Override
-  public ExerciseListWrapper getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID, String prefix) {
-    List<Exercise> exercisesForState = getExercisesForState(reqID, typeToSection, userID);
+  public ExerciseListWrapper getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection,
+                                                           long userID, String prefix, boolean showUnansweredFirst) {
+    List<Exercise> exercisesForState = getExercisesForState(reqID, typeToSection, userID, showUnansweredFirst);
 
-    ExerciseTrie trie = new ExerciseTrie(exercisesForState, !serverProps.getLanguage().equals("English"));
-    List<Exercise> exercises = trie.getExercises(prefix);
+    if (prefix == null || prefix.isEmpty()) {
+      return makeExerciseListWrapper(reqID, exercisesForState);
+    } else {
+      ExerciseTrie trie = new ExerciseTrie(exercisesForState, !serverProps.getLanguage().equals("English"));
+      List<Exercise> exercises = trie.getExercises(prefix);
 
-    return makeExerciseListWrapper(reqID, exercises);
+      return makeExerciseListWrapper(reqID, exercises);
+    }
   }
 
-  private List<Exercise> getExercisesForState(int reqID, Map<String, Collection<String>> typeToSection, long userID) {
+  private List<Exercise> getExercisesForState(int reqID, Map<String, Collection<String>> typeToSection, long userID,
+                                              boolean showUnansweredFirst) {
     logger.debug("getExercisesForState req " + reqID+ " for " + typeToSection + " and " +userID);
     Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
     if (exercisesForSection.isEmpty()) {
       exercisesForSection = getExercises();
     }
-    if (serverProps.sortExercises() || serverProps.isGoodwaveMode() || serverProps.isFlashcardTeacherView()) {
+    if (serverProps.sortExercises() || serverProps.isGoodwaveMode() || serverProps.isFlashcardTeacherView() || !showUnansweredFirst) {
       return getSortedExercises(exercisesForSection);
     } else {
       return db.getExercisesBiasTowardsUnanswered(userID, exercisesForSection, serverProps.shouldUseWeights());
@@ -269,7 +258,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * @see #getExerciseIds
-   * @see #getExercisesForSelectionState(int, java.util.Map, long)
+   * @see #getExercisesForSelectionState
    * @see #getFullExercisesForSelectionState(java.util.Map, int, int)
    * @param exercisesForSection
    * @return
@@ -836,16 +825,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   // Answers ---------------------
 
   /**
-   *
-   *
    * @param userID
    * @param exercise
    * @param questionID
    * @param answer
+   * @param answerType
    * @see mitll.langtest.client.exercise.ExercisePanel#postAnswers
    */
-  public void addTextAnswer(int userID, Exercise exercise, int questionID, String answer) {
-    db.addAnswer(userID, exercise, questionID, answer);
+  public void addTextAnswer(int userID, Exercise exercise, int questionID, String answer, String answerType) {
+    db.addAnswer(userID, exercise, questionID, answer, answerType);
+    db.addCompleted(userID,exercise.getID());
   }
 
   /**
