@@ -89,6 +89,7 @@ public class PropertyHandler {
   private static final String PURPOSE_DEFAULT = "purposeDefault";
   private static final String CLASSROOM_MODE = "classroomMode";
   private static final String DEFAULT_AUDIO_TYPE = "audioType";
+  private static final String INCLUDE_FEEDBACK = "includeFeedback";
   private String audioType = Result.AUDIO_TYPE_FAST_AND_SLOW;
 
   public enum LOGIN_TYPE { UNDEFINED, ANONYMOUS, STUDENT, DATA_COLLECTOR, SIMPLE }
@@ -148,6 +149,7 @@ public class PropertyHandler {
   private String purposeDefault = "Practice";
   private boolean bindNextToEnter;
   private boolean classroomMode = false;
+  private boolean includeFeedback = true;
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad()
@@ -211,6 +213,7 @@ public class PropertyHandler {
       else if (key.equals(SCREEN_PORTION)) screenPortion = getFloat(value, 1.0f, SCREEN_PORTION);
       else if (key.equals(CLASSROOM_MODE)) classroomMode = getBoolean(value);
       else if (key.equals(DEFAULT_AUDIO_TYPE)) audioType = value;
+      else if (key.equals(INCLUDE_FEEDBACK)) includeFeedback = getBoolean(value);
       else if (key.equals(LOGIN_TYPE_PARAM)) {
         try {
           loginType = LOGIN_TYPE.valueOf(value.toUpperCase());
@@ -532,9 +535,7 @@ public class PropertyHandler {
     this.secondResponseType = responseType;
   }
 
-  public boolean shouldAllowPlusInURL() {
-    return allowPlusInURL;
-  }
+  public boolean shouldAllowPlusInURL() { return allowPlusInURL;  }
 
   public String getPurposeDefault() {
     return purposeDefault;
@@ -546,4 +547,5 @@ public class PropertyHandler {
 
   public boolean isClassroomMode() { return classroomMode; }
   public String getAudioType() { return audioType; }
+  public boolean isIncludeFeedback () { return includeFeedback; }
 }
