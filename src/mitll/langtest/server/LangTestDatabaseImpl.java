@@ -244,12 +244,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   private List<Exercise> getExercisesForState(int reqID, Map<String, Collection<String>> typeToSection, long userID,
                                               boolean showUnansweredFirst) {
-    logger.debug("getExercisesForState req " + reqID+ " for " + typeToSection + " and " +userID);
+    logger.debug("getExercisesForState req " + reqID+ " for " + typeToSection + " and " +userID + " show unanswered " + showUnansweredFirst);
     Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
     if (exercisesForSection.isEmpty()) {
       exercisesForSection = getExercises();
     }
-    if (serverProps.sortExercises() || serverProps.isGoodwaveMode() || serverProps.isFlashcardTeacherView() || !showUnansweredFirst) {
+    if (showUnansweredFirst) {
+      return db.getExercisesBiasTowardsUnanswered(userID, exercisesForSection, serverProps.shouldUseWeights());
+    } else if (serverProps.sortExercises() || serverProps.isGoodwaveMode() || serverProps.isFlashcardTeacherView()) {
       return getSortedExercises(exercisesForSection);
     } else {
       return db.getExercisesBiasTowardsUnanswered(userID, exercisesForSection, serverProps.shouldUseWeights());
