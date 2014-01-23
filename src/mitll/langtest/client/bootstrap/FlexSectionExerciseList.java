@@ -702,7 +702,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
       scrollPanel.setWidth(Math.max(300, width) + "px");
     }
     else {
-      System.out.println("setScrollPanelWidth : labelColumn is null");
+      //System.out.println("setScrollPanelWidth : labelColumn is null");
     }
   }
 
