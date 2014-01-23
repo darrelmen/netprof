@@ -27,6 +27,8 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   private static MicPermission micPermission;
   private boolean didPopup = false;
   private static boolean permissionReceived;
+  private static boolean webAudioMicAvailable;
+  private static FlashRecordPanelHeadless selfRef;
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad2
@@ -40,6 +42,12 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     flashContent.add(inner);
     add(flashContent);
     hide();
+
+    advertise();
+    //initWebaudio();
+
+    System.out.println("got to end of  FlashRecordPanelHeadless");
+    selfRef = this;
   }
 
   public native boolean checkIfFlashInstalled() /*-{
@@ -70,7 +78,8 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    * @see mitll.langtest.client.LangTest#showPopupOnDenial()
    */
   public void initFlash() {
-    rememberInstallFlash();
+    initWebaudio();
+    //rememberInstallFlash();
   }
 
   private void rememberInstallFlash() {
@@ -82,19 +91,67 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     }
   }
 
+  /**
+   * @see mitll.langtest.client.LangTest#makeFlashContainer
+   * @param micPermission
+   */
   public static void setMicPermission(MicPermission micPermission) {
     FlashRecordPanelHeadless.micPermission = micPermission;
   }
 
-  public native void recordOnClick() /*-{
+  public native void initWebaudio() /*-{
+      $wnd.initWebAudio();
+  }-*/;
+
+  private native void advertise() /*-{
+
+      $wnd.webAudioMicAvailable = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::webAudioMicAvailable());
+      $wnd.webAudioMicNotAvailable = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::webAudioMicNotAvailable());
+  }-*/;
+
+  public void recordOnClick() {
+    if (webAudioMicAvailable) {
+      webAudioRecordOnClick();
+    }
+    else {
+      flashRecordOnClick();
+    }
+  }
+
+  public native void webAudioRecordOnClick() /*-{
+        $wnd.Recorder.record('audio', 'audio.wav');
+    }-*/;
+
+  public native void flashRecordOnClick() /*-{
     $wnd.Recorder.record('audio', 'audio.wav');
   }-*/;
 
-  public native void stopRecording() /*-{
-    $wnd.Recorder.stop();
+  public void stopRecording() {
+    if (webAudioMicAvailable) {
+      webAudioStopRecording();
+    } else {
+      flashStopRecording();
+    }
+  }
+
+  public native void webAudioStopRecording() /*-{
+      $wnd.Recorder.stop();
   }-*/;
 
-  public native void hide2() /*-{
+  public native void flashStopRecording() /*-{
+      $wnd.Recorder.stop();
+  }-*/;
+
+  public void hide2() {
+    if (webAudioMicAvailable) {
+
+    } else {
+      flashHide2();
+    }
+  }
+
+
+  public native void flashHide2() /*-{
     $wnd.Recorder.hide2();
   }-*/;
 
@@ -121,6 +178,9 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     }
   }
 
+  /**
+   * @see mitll.langtest.client.LangTest#removeAndReloadFlash()
+   */
   public void removeFlash() {
     removeFlash(id);
   }
@@ -179,4 +239,19 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   }
 
   public boolean gotPermission() { return permissionReceived; }
+
+  public static void webAudioMicAvailable() {
+    System.out.println("webAudioMicAvailable!");
+    webAudioMicAvailable = true;
+
+    System.out.println("webAudioMicAvailable -- connected!");
+    permissionReceived = true;
+    micPermission.gotPermission();
+  }
+
+  public static void webAudioMicNotAvailable() {
+    System.out.println("webAudioMicNotAvailable!");
+    webAudioMicAvailable = false;
+    selfRef.rememberInstallFlash();
+  }
 }
