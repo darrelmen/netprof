@@ -385,9 +385,13 @@ public class SQLExerciseDAO implements ExerciseDAO {
         JSONObject qaForLang = (JSONObject) o.get(lang);
         String answerKey = (String) qaForLang.get("answerKey");
         List<String> alternateAnswers = Arrays.asList(answerKey.split("\\|\\|"));
-        exercise.addQuestion(lang.toString(), (String) qaForLang.get("question"), answerKey, alternateAnswers);
+        String lang1 = lang.toString();
+        String question = (String) qaForLang.get("question");
+     //   logger.debug("\tFor " + exercise.getID() + " " + lang1 + " : " + question);
+        exercise.addQuestion(lang1, question, answerKey, alternateAnswers);
       }
     }
+   // logger.debug("For " + exercise.getID() + " "+exercise.getQuestions());
   }
 
   private String getStringFromClob(Clob clob) throws SQLException, IOException {
