@@ -406,7 +406,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @see #addButtonRow
    */
   protected Widget addBottomText(FluidContainer container) {
-    FluidRow status = new FluidRow();
+    Panel status = new FluidRow();
     status.getElement().setId("statusRow");
     status.addStyleName("alignCenter");
     status.addStyleName("inlineBlockStyle");
@@ -698,7 +698,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   protected void setScrollPanelWidth() {
     if (labelColumn != null) {
       int width = Window.getClientWidth() - labelColumn.getOffsetWidth() - clearColumnContainer.getOffsetWidth() - UNACCOUNTED_WIDTH;
-      System.out.println("setScrollPanelWidth : scrollPanel width is " + width);
+     // System.out.println("setScrollPanelWidth : scrollPanel width is " + width);
       scrollPanel.setWidth(Math.max(300, width) + "px");
     }
     else {
