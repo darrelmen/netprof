@@ -290,7 +290,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingLeft", "5px");
     DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingRight", "2px");
 
-    ListInterface listInterface = makeExerciseList(secondRow, leftColumn);
+    makeExerciseList(secondRow, leftColumn);
     belowFirstRow.add(bothSecondAndThird);
 
     if (usualLayout) {
@@ -310,6 +310,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       makeFlashContainer();
       belowFirstRow.add(flashRecordPanel);
     }
+    Label child = new Label();
+    child.getElement().setId("status");
+    belowFirstRow.add(child);
 
     setPageTitle();
     browserCheck.checkForCompatibleBrowser();
