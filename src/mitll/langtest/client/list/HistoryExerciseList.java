@@ -392,7 +392,7 @@ public class HistoryExerciseList extends PagingExerciseList {
       if (typeToSection.isEmpty()) {
         service.getExerciseIds(lastReqID, userID, prefix, new SetExercisesCallback());
       } else {
-        service.getExercisesForSelectionState(lastReqID, typeToSection, userID, prefix, new MySetExercisesCallback(null));
+        service.getExercisesForSelectionState(lastReqID, typeToSection, userID, prefix, false, new MySetExercisesCallback(null));
       }
     }
   }
@@ -404,7 +404,7 @@ public class HistoryExerciseList extends PagingExerciseList {
       noSectionsGetExercises(userID);
     } else {
       lastReqID++;
-      service.getExercisesForSelectionState(lastReqID, typeToSection, userID, new MySetExercisesCallback(item));
+      service.getExercisesForSelectionState(lastReqID, typeToSection, userID, "", false, new MySetExercisesCallback(item));
     }
   }
 
