@@ -24,8 +24,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -67,7 +66,7 @@ public class ComboRecordPanel extends SimpleRecordExercisePanel {
     } else return "";
   }
 
-  private boolean showedEnglishQuestion;
+  private Set<Integer> showedEnglishQuestion = new HashSet<Integer>();
 
   /**
    * @see #getQuestionPanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int, int, java.util.List, java.util.List, mitll.langtest.shared.Exercise.QAPair, com.google.gwt.user.client.ui.HasWidgets)
@@ -80,7 +79,11 @@ public class ComboRecordPanel extends SimpleRecordExercisePanel {
    * @param toAddTo
    */
   @Override
-  protected void getQuestionHeader(int i, int total, Exercise.QAPair qaPair, Exercise.QAPair englishPair, Exercise.QAPair flQAPair, boolean showAnswer, HasWidgets toAddTo) {
+  protected void getQuestionHeader(final int i, int total,
+                                   Exercise.QAPair qaPair,
+                                   Exercise.QAPair englishPair,
+                                   Exercise.QAPair flQAPair,
+                                   boolean showAnswer, HasWidgets toAddTo) {
     String prefix = (total == 1) ? ("Question : ") : "";
 
     HTML maybeRTLContent = getMaybeRTLContent("<h4>" + prefix + qaPair.getQuestion() + "</h4>", false);
@@ -105,7 +108,7 @@ public class ComboRecordPanel extends SimpleRecordExercisePanel {
       public void onClick(ClickEvent event) {
         if (!maybeRTLContentEnglish.isVisible()) {
           maybeRTLContentEnglish.setVisible(true);
-          showedEnglishQuestion = true;
+          showedEnglishQuestion.add(i);
         }
       }
     });
@@ -161,8 +164,7 @@ public class ComboRecordPanel extends SimpleRecordExercisePanel {
 
       @Override
       protected String getAudioType() {
-        String answer = (showedEnglishQuestion ? SAW_ENGLISH_Q : "") + (isEnglish ? " english audio" : "arabic audio");
-        System.out.println("\n\n\n"+exercise.getID() + "posting  " + answer);
+        String answer = (showedEnglishQuestion.contains(index) ? SAW_ENGLISH_Q : "") + (isEnglish ? " english audio" : "arabic audio");
         return answer;
       }
 
@@ -239,13 +241,11 @@ public class ComboRecordPanel extends SimpleRecordExercisePanel {
   }
 
   private Panel doText(final Exercise exercise, final LangTestDatabaseAsync service, final ExerciseController controller,
-                       int index, boolean getFocus, final String answerType, String prompt) {
+                       final int index, boolean getFocus, final String answerType, String prompt) {
     final SimpleTextResponse textResponse = new SimpleTextResponse(controller.getUser()) {
       @Override
       protected String getAnswerType() {
-
-        String answer = (showedEnglishQuestion ? SAW_ENGLISH_Q : "") + answerType;
-        System.out.println("\n\n\n"+exercise.getID() + "posting  " + answer);
+        String answer = (showedEnglishQuestion.contains(index) ? SAW_ENGLISH_Q : "") + answerType;
         return answer;
       }
     };
@@ -253,7 +253,7 @@ public class ComboRecordPanel extends SimpleRecordExercisePanel {
       new SimpleTextResponse.AnswerPosted() {
         @Override
         public void answerTyped() {
-          enableNextButton(true);
+          recordCompleted(textResponse.getTextResponseWidget());
         }
 
         @Override
