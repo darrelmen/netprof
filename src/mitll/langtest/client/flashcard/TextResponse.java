@@ -32,7 +32,7 @@ import mitll.langtest.shared.Exercise;
  */
 public class TextResponse {
   private static final int FEEDBACK_HEIGHT = 40;
-  private static final String CHECK = "Check";
+  public static final String CHECK = "Check";
 
   private EnterKeyButtonHelper enterKeyButtonHelper;
   private ScoreFeedback textScoreFeedback;
@@ -80,17 +80,27 @@ public class TextResponse {
    * @param useWhite
    * @param addKeyBinding
    * @param questionID
+   * @param buttonTitle
+   * @param getFocus
    * @return
    */
   public Widget addWidgets(Panel toAddTo, Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller,
-                           boolean centered, boolean useWhite, boolean addKeyBinding, int questionID) {
+                           boolean centered, boolean useWhite, boolean addKeyBinding, int questionID,
+                           String buttonTitle, boolean getFocus) {
     textScoreFeedback = new ScoreFeedback(useWhite);
 
-    textResponseWidget = getTextResponseWidget(exercise, service, controller, getTextScoreFeedback(), centered, addKeyBinding, questionID);
+    textResponseWidget = getTextResponseWidget(exercise, service, controller, getTextScoreFeedback(), centered,
+      addKeyBinding, questionID, buttonTitle, getFocus);
     toAddTo.add(textResponseWidget);
     textResponseWidget.addStyleName("floatLeft");
     Panel scoreFeedbackRow = getTextScoreFeedback().getScoreFeedbackRow(FEEDBACK_HEIGHT, width, true);
-    toAddTo.add(scoreFeedbackRow);
+
+    Panel hp = new HorizontalPanel();
+    hp.add(getTextScoreFeedback().getFeedbackImage());
+    hp.add(scoreFeedbackRow);
+
+    //toAddTo.add(scoreFeedbackRow);
+    toAddTo.add(hp);
 
     return textResponseWidget;
   }
@@ -112,14 +122,18 @@ public class TextResponse {
    * @param centered
    * @param addEnterKeyBinding
    * @param questionID
+   * @param buttonTitle
+   * @param getFocus
    * @return
-   * @see #addWidgets(com.google.gwt.user.client.ui.Panel, mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, boolean, boolean, int)
+   * @see #addWidgets(com.google.gwt.user.client.ui.Panel, mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, boolean, boolean, int, String, boolean)
    */
   private Widget getTextResponseWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller,
-                                       ScoreFeedback scoreFeedback, boolean centered, boolean addEnterKeyBinding, int questionID) {
+                                       ScoreFeedback scoreFeedback, boolean centered, boolean addEnterKeyBinding,
+                                       int questionID, String buttonTitle, boolean getFocus) {
     boolean allowPaste = controller.isDemoMode();
-    final Button check = new Button(CHECK);
-    final TextBox noPasteAnswer = getAnswerBox(controller, allowPaste, check);
+    final Button check = new Button(buttonTitle);
+    check.getElement().setId("check_"+buttonTitle);
+    final TextBox noPasteAnswer = getAnswerBox(controller, allowPaste, check, getFocus);
     String answerType = controller.getAudioType();
     setupSubmitButton(exercise, service, check, noPasteAnswer, scoreFeedback, answerType, addEnterKeyBinding, questionID);
 
@@ -129,7 +143,7 @@ public class TextResponse {
     row.add(check);
 
     // TODO : move this down to feedback row...!
-    row.add(scoreFeedback.getFeedbackImage());
+    //row.add(scoreFeedback.getFeedbackImage());
 
     return centered ? getRecordButtonRow(row) : row;
   }
@@ -167,7 +181,7 @@ public class TextResponse {
     });
   }
 
-  private TextBox getAnswerBox(ExerciseController controller, boolean allowPaste, final Button check) {
+  private TextBox getAnswerBox(ExerciseController controller, boolean allowPaste, final Button check, boolean getFocus) {
     final TextBox noPasteAnswer = allowPaste ? new TextBox() : new NoPasteTextBox();
     if (controller.isRightAlignContent()) {
       noPasteAnswer.addStyleName("rightAlign");
@@ -179,12 +193,14 @@ public class TextResponse {
       }
     });
 
-    Scheduler.get().scheduleDeferred(new Command() {
-      public void execute() {
-        noPasteAnswer.setFocus(true);
-      }
-    });
-
+    if (getFocus) {
+      Scheduler.get().scheduleDeferred(new Command() {
+        public void execute() {
+          //System.out.println("grabbing focus for " + check.getElement().getId());
+          noPasteAnswer.setFocus(true);
+        }
+      });
+    }
     return noPasteAnswer;
   }
 
