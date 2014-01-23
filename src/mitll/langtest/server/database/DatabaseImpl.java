@@ -54,7 +54,7 @@ import java.util.TreeSet;
  * To change this template use File | Settings | File Templates.
  */
 public class DatabaseImpl implements Database {
-  private static Logger logger = Logger.getLogger(DatabaseImpl.class);
+  private static final Logger logger = Logger.getLogger(DatabaseImpl.class);
 
   private static final boolean DO_SIMPLE_FLASHCARDS = true;
   private static final boolean DROP_USER = false;
@@ -75,15 +75,15 @@ public class DatabaseImpl implements Database {
   private MonitoringSupport monitoringSupport;
 
   private String lessonPlanFile;
-  private boolean isWordPairs;
+  private final boolean isWordPairs;
   private boolean useFile;
-  private boolean isFlashcard;
+  private final boolean isFlashcard;
   private String language = "";
-  private boolean doImages;
+  private final boolean doImages;
   private final String configDir;
   private final String absConfigDir;
   private String mediaDir;
-  private ServerProperties serverProps;
+  private final ServerProperties serverProps;
 
   private final Map<Long,UserStateWrapper> userToState = new HashMap<Long,UserStateWrapper>();
 
@@ -93,7 +93,7 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#readProperties(javax.servlet.ServletContext)
    */
 
-  public DatabaseImpl(String configDir, String dbName, String lessonPlanFile) {
+  private DatabaseImpl(String configDir, String dbName, String lessonPlanFile) {
     this(configDir, dbName, "", new ServerProperties());
     this.useFile = true;
     this.lessonPlanFile = lessonPlanFile;
@@ -179,7 +179,7 @@ public class DatabaseImpl implements Database {
     return new Export(exerciseDAO,resultDAO,gradeDAO);
   }
 
-  public MonitoringSupport getMonitoringSupport() {
+  MonitoringSupport getMonitoringSupport() {
     return new MonitoringSupport(userDAO, resultDAO,gradeDAO);
   }
 
@@ -208,8 +208,6 @@ public class DatabaseImpl implements Database {
     this.useFile = useFile;
     this.language = language;
   }
-
-  public void setOutsideFile(String outsideFile) { monitoringSupport.setOutsideFile(outsideFile); }
 
   public SectionHelper getSectionHelper() {
     getExercises();
@@ -511,7 +509,7 @@ public class DatabaseImpl implements Database {
     return userStateWrapper;
   }
 
-  private Map<Long, Integer> userToCorrect = new HashMap<Long, Integer>();
+  private final Map<Long, Integer> userToCorrect = new HashMap<Long, Integer>();
 
   public ScoreInfo getScoreInfo(long userID, long timeTaken, Map<String, Collection<String>> selection) {
     UserStateWrapper userStateWrapper = userToState.get(userID);
@@ -727,7 +725,7 @@ public class DatabaseImpl implements Database {
    * @param useWeights
    * @return
    */
-  public List<Exercise> getExercisesBiasTowardsUnanswered(long userID, String outsideFile, boolean useWeights) {
+/*  public List<Exercise> getExercisesBiasTowardsUnanswered(long userID, String outsideFile, boolean useWeights) {
     Map<String,Integer> idToCount = new HashMap<String, Integer>();
     Map<String, Exercise> idToExercise = new HashMap<String, Exercise>();
     Map<String,Double> idToWeight = new HashMap<String, Double>();
@@ -736,7 +734,7 @@ public class DatabaseImpl implements Database {
     populateInitialExerciseIDToCount(rawExercises, idToExercise, idToCount,idToWeight,useWeights);
     //logger.info("initial map of online counts is size = " + idToCount.size() +" " + idToCount.values().size());
 
-/*
+*//*
     boolean isMale = userDAO.isUserMale(userID);
     Map<String, Integer> idToCountOutside =
         new OutsideCount().getExerciseIDToOutsideCount(isMale, outsideFile, getExercises());
@@ -746,7 +744,7 @@ public class DatabaseImpl implements Database {
       Integer count = idToCount.get(pair.getKey());
       if (count == null) logger.warn("missing exercise id " + pair.getKey());
       else idToCount.put(pair.getKey(),count+pair.getValue());
-    }*/
+    }*//*
 
     // only find answers that are for the gender
     List<ResultDAO.SimpleResult> results = getSimpleResults();
@@ -757,7 +755,7 @@ public class DatabaseImpl implements Database {
     SortedMap<Integer, List<String>> countToIds = getCountToExerciseIDs(idToCount);
 
     return getResultsRandomizedPerUser(userID, idToExercise, countToIds,idToWeight);
-  }
+  }*/
 
   /**
    * Given a map of answer counts to exercise ids at those counts, randomize the order based on the
@@ -1023,7 +1021,7 @@ public class DatabaseImpl implements Database {
    * @param firstNInOrder
    * @return
    */
-  public List<Exercise> getExercisesFirstNInOrder(long userID, int firstNInOrder) {
+/*  public List<Exercise> getExercisesFirstNInOrder(long userID, int firstNInOrder) {
     List<Exercise> rawExercises = getExercises();
     int numInOrder = Math.min(firstNInOrder, rawExercises.size());
     List<Exercise> newList = new ArrayList<Exercise>(rawExercises.subList(0, numInOrder));
@@ -1055,7 +1053,7 @@ public class DatabaseImpl implements Database {
       assert(newList.size() == back.size());//, "huh? sizes aren't equal " + newList.size() + " vs " + back.size());
     }
     return newList;
-  }
+  }*/
 
   public boolean isAdminUser(long id) {
     User user = getUser(id);
@@ -1071,13 +1069,8 @@ public class DatabaseImpl implements Database {
     return user != null && user.enabled;
   }
 
-  public User getUser(long id) {
+  User getUser(long id) {
     return userDAO.getUserMap().get(id);
-  }
-
-  public long addUser(HttpServletRequest request, int age, String gender, int experience, String dialect) {
-    String ip = getIPInfo(request);
-    return addUser(age, gender, experience, ip,dialect);
   }
 
   /**
@@ -1093,9 +1086,9 @@ public class DatabaseImpl implements Database {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#addUser
    */
-  private long addUser(int age, String gender, int experience, String ipAddr, String dialect) {
+/*  private long addUser(int age, String gender, int experience, String ipAddr, String dialect) {
     return userDAO.addUser(age, gender, experience, ipAddr, "", dialect, "", false);
-  }
+  }*/
 
   public long addUser(HttpServletRequest request,
                       int age, String gender, int experience,
@@ -1152,7 +1145,7 @@ public class DatabaseImpl implements Database {
     return idToCount;
   }
 
-  public Collection<User> joinWithDLIUsers(List<User> users) {
+  Collection<User> joinWithDLIUsers(List<User> users) {
     List<DLIUser> users1 = dliUserDAO.getUsers();
     Map<Long, User> userMap = userDAO.getMap(users);
 
@@ -1166,13 +1159,6 @@ public class DatabaseImpl implements Database {
     return userMap.values();
   }
 
-  /**
-   * Pulls the list of results out of the database.
-   *
-   * @return
-   * @see mitll.langtest.server.audio.SplitAudio#getIDToResultsMap(DatabaseImpl, java.util.Set)
-   */
-  public List<Result> getResults() { return resultDAO.getResults(); }
   private List<ResultDAO.SimpleResult> getSimpleResults() { return resultDAO.getSimpleResults(); }
 
   public List<Result> getResultsWithGrades() {
@@ -1183,7 +1169,7 @@ public class DatabaseImpl implements Database {
       r.clearGradeInfo();
     }
     Collection<Grade> grades = gradeDAO.getGrades();
-    logger.debug("found " + grades.size() + " grades");
+   // logger.debug("found " + grades.size() + " grades");
     for (Grade g : grades) {
       Result result = idToResult.get(g.resultID);
       if (result != null) {
