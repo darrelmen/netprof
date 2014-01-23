@@ -128,7 +128,9 @@ public abstract class SimpleTextResponse {
       @Override
       public void onKeyPress(KeyPressEvent event) {
         if (answerPosted != null) {
-          answerPosted.answerTyped();
+          if (noPasteAnswer.getText().length() > 0) {
+            answerPosted.answerTyped();
+          }
         }
       }
     });
