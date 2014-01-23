@@ -301,6 +301,10 @@ fieldset {
     margin-left: 15%;
 }
 
+.leftFiftyPercentMargin {
+     margin-left: 43%;
+ }
+
 .dialogExpandedTopMargin {
     margin-top: -70px;
 }
