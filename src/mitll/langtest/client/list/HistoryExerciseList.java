@@ -387,24 +387,26 @@ public class HistoryExerciseList extends PagingExerciseList {
     } else {
       lastReqID++;
       System.out.println("HistoryExerciseList.loadExercisesUsingPrefix looking " +
-        "for '" + prefix + "' (" + prefix.length() + " chars) in context of " + typeToSection);
+        "for '" + prefix + "' (" + prefix.length() + " chars) in context of " + typeToSection +
+        " show unanswered " +controller.showUnansweredFirst());
 
       if (typeToSection.isEmpty()) {
         service.getExerciseIds(lastReqID, userID, prefix, new SetExercisesCallback());
       } else {
-        service.getExercisesForSelectionState(lastReqID, typeToSection, userID, prefix, false, new MySetExercisesCallback(null));
+        service.getExercisesForSelectionState(lastReqID, typeToSection, userID, prefix, controller.showUnansweredFirst(), new MySetExercisesCallback(null));
       }
     }
   }
 
   private void reallyLoadExercises(Map<String, Collection<String>> typeToSection, String item) {
-    System.out.println("reallyLoadExercises looking for '" + item + "' in context of " + typeToSection);
+    System.out.println("reallyLoadExercises looking for '" + item + "' in context of " + typeToSection +
+      " show unanswered " +controller.showUnansweredFirst());
 
     if (typeToSection.isEmpty() && item == null) {
       noSectionsGetExercises(userID);
     } else {
       lastReqID++;
-      service.getExercisesForSelectionState(lastReqID, typeToSection, userID, "", false, new MySetExercisesCallback(item));
+      service.getExercisesForSelectionState(lastReqID, typeToSection, userID, "", controller.showUnansweredFirst(), new MySetExercisesCallback(item));
     }
   }
 
