@@ -63,12 +63,13 @@ public class GradingExercisePanel extends ExercisePanel {
    * @param i
    * @param total
    * @param engQAPair
+   * @param englishPair
    * @param flQAPair
    * @param showAnswer
    * @param toAddTo
    */
   @Override
-  protected void getQuestionHeader(int i, int total, Exercise.QAPair engQAPair, Exercise.QAPair flQAPair, boolean showAnswer, HasWidgets toAddTo) {
+  protected void getQuestionHeader(int i, int total, Exercise.QAPair engQAPair, Exercise.QAPair englishPair, Exercise.QAPair flQAPair, boolean showAnswer, HasWidgets toAddTo) {
     String english = engQAPair.getQuestion();
     String prefix = "Question" +
         (total > 1 ? " #" + i : "") +

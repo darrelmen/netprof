@@ -56,6 +56,11 @@ public class TextResponse {
     this.answerPosted = answerPosted;
   }
 
+  /**
+   * @see mitll.langtest.client.recorder.FeedbackRecordPanel#doText(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int, mitll.langtest.client.recorder.AutoCRTRecordPanel, String, boolean)
+   * @param user
+   * @param soundFeedback
+   */
   public TextResponse(int user, SoundFeedback soundFeedback) {
     this.user = user;
     this.soundFeedback = soundFeedback;
