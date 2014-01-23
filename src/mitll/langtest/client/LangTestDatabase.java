@@ -11,8 +11,6 @@ import mitll.langtest.shared.Result;
 import mitll.langtest.shared.Site;
 import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.User;
-import mitll.langtest.shared.custom.UserExercise;
-import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.FlashcardResponse;
 import mitll.langtest.shared.flashcard.Leaderboard;
 import mitll.langtest.shared.grade.CountAndGradeID;
@@ -40,6 +38,8 @@ public interface LangTestDatabase extends RemoteService {
   // exerciseDAO
   ExerciseListWrapper getExerciseIds(int reqID, long userID, boolean unansweredFirst);
   ExerciseListWrapper getExerciseIds(int reqID);
+  ExerciseListWrapper getExerciseIds(int reqID, long userID, String prefix);
+
   Exercise getExercise(String id);
 
   ResultsAndGrades getResultsForExercise(String exid, boolean arabicTextDataCollect);
@@ -56,7 +56,7 @@ public interface LangTestDatabase extends RemoteService {
   int userExists(String login);
 
   // answer DAO
-  void addTextAnswer(int userID, Exercise exercise, int questionID, String answer);
+  void addTextAnswer(int userID, Exercise exercise, int questionID, String answer, String answerType);
   AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int question, int user,
                              int reqid, boolean flq, String audioType, boolean doFlashcard);
   double getScoreForAnswer(long userID, Exercise e, int questionID, String answer, String answerType);
@@ -105,14 +105,6 @@ public interface LangTestDatabase extends RemoteService {
 
   void logMessage(String message);
 
-  /**
-   * @param reqID
-   * @param typeToSection
-   * @param userID
-   * @return
-   * */
-  ExerciseListWrapper getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID);
-
   // flashcard support ------------------------------------------
 
   FlashcardResponse getNextExercise(long userID, boolean getNext);
@@ -138,9 +130,7 @@ public interface LangTestDatabase extends RemoteService {
 
   Set<String> getCompletedExercises(int user);
 
-  ExerciseListWrapper getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID, String prefix);
-
-  ExerciseListWrapper getExerciseIds(int reqID, long userID, String prefix);
+  ExerciseListWrapper getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID, String prefix, boolean showUnansweredFirst);
 
   StartupInfo getStartupInfo();
 }
