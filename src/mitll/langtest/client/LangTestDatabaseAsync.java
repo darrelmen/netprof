@@ -29,7 +29,7 @@ import java.util.Set;
  * The async counterpart of <code>LangTestDatabase</code>.
  */
 public interface LangTestDatabaseAsync {
-  void addTextAnswer(int usedID, Exercise exercise, int questionID, String answer, AsyncCallback<Void> async);
+  void addTextAnswer(int usedID, Exercise exercise, int questionID, String answer, String answerType, AsyncCallback<Void> async);
 
   void userExists(String login, AsyncCallback<Integer> async);
   void addUser(int age, String gender, int experience, String nativeLang, String dialect, String userID, AsyncCallback<Long> async);
@@ -105,25 +105,17 @@ public interface LangTestDatabaseAsync {
 
   void getGradeCountPerExercise(AsyncCallback<Map<Integer, Map<String, Map<String, Integer>>>> async);
 
-  void getExerciseIds(int reqID, long userID, boolean unansweredFirst, AsyncCallback<ExerciseListWrapper> async);
-
-  /**
-   * @param reqID
-   * @param typeToSection
-   * @param userID
-   * @return
-   */
-  void getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID, AsyncCallback<ExerciseListWrapper> async);
-
-  void getExerciseIds(int reqID, AsyncCallback<ExerciseListWrapper> async);
-
   void postTimesUp(long userid, long timeTaken, Map<String, Collection<String>> selectionState, AsyncCallback<Leaderboard> async);
 
   void addDLIUser(DLIUser dliUser, AsyncCallback<Void> async);
 
   void getCompletedExercises(int user, AsyncCallback<Set<String>> async);
 
-  void getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID, String prefix, AsyncCallback<ExerciseListWrapper> async);
+  void getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID, String prefix, boolean showUnansweredFirst, AsyncCallback<ExerciseListWrapper> async);
+
+  void getExerciseIds(int reqID, long userID, boolean unansweredFirst, AsyncCallback<ExerciseListWrapper> async);
+
+  void getExerciseIds(int reqID, AsyncCallback<ExerciseListWrapper> async);
 
   void getExerciseIds(int reqID, long userID, String prefix, AsyncCallback<ExerciseListWrapper> async);
 
