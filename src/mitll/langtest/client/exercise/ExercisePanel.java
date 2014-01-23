@@ -65,14 +65,14 @@ public class ExercisePanel extends VerticalPanel implements
   private static final int ITEM_HEADER = 5;
   private static final int CONTENT_SCROLL_HEIGHT = 240;
   private List<Widget> answers = new ArrayList<Widget>();
-  protected Set<Object> completed = new HashSet<Object>();
+  protected Set<Widget> completed = new HashSet<Widget>();
   protected Exercise exercise = null;
   protected ExerciseController controller;
   private boolean enableNextOnlyWhenAllCompleted = true;
   protected LangTestDatabaseAsync service;
   protected UserFeedback feedback;
   protected NavigationHelper navigationHelper;
-  protected Map<Integer,Set<Object>> indexToWidgets = new HashMap<Integer, Set<Object>>();
+  protected Map<Integer,Set<Widget>> indexToWidgets = new HashMap<Integer, Set<Widget>>();
   protected ListInterface exerciseList;
   private TabPanel tabPanel = null;
   private Map<Integer,Tab> indexToTab = new HashMap<Integer, Tab>();
@@ -162,7 +162,7 @@ public class ExercisePanel extends VerticalPanel implements
     return scroller;
   }
 
-  private HTML getMaybeRTLContent(String content, boolean requireAlignment) {
+  protected HTML getMaybeRTLContent(String content, boolean requireAlignment) {
     boolean rightAlignContent = controller.isRightAlignContent();
     HasDirection.Direction direction =
       requireAlignment && rightAlignContent ? HasDirection.Direction.RTL : WordCountDirectionEstimator.get().estimateDirection(content);
@@ -209,19 +209,21 @@ public class ExercisePanel extends VerticalPanel implements
   private void addQuestions(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, int questionNumber) {
     List<Exercise.QAPair> englishQuestions = e.getEnglishQuestions();
     List<Exercise.QAPair> flQuestions = e.getForeignLanguageQuestions();
-    List<Exercise.QAPair> questionsToShow = e.isPromptInEnglish() ? englishQuestions : flQuestions;
     int n = englishQuestions.size();
     if (e.getQuestions().size() == 1) {
-      add(getQuestionPanel(e, service, controller, questionNumber, flQuestions, questionsToShow, n, e.getQuestions().iterator().next(),this));
+      Exercise.QAPair questionToShow = e.getQuestions().iterator().next();
+      add(getQuestionPanel(e, service, controller, questionNumber, n, englishQuestions, flQuestions, questionToShow,this));
     }
     else {
-      makeTabPanel(e, service, controller, questionNumber, flQuestions, questionsToShow, n);
+      makeTabPanel(e, service, controller, questionNumber, englishQuestions, flQuestions, n);
       add(tabPanel);
     }
   }
 
   private void makeTabPanel(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, int questionNumber,
-                            List<Exercise.QAPair> flQuestions, List<Exercise.QAPair> questionsToShow, int n) {
+                            List<Exercise.QAPair> englishQuestions,
+                            List<Exercise.QAPair> flQuestions,
+                            /*List<Exercise.QAPair> questionsToShow,*/ int n) {
     tabPanel = new TabPanel();
     DOM.setStyleAttribute(tabPanel.getWidget(0).getElement(), "marginBottom", "0px");
 
@@ -231,35 +233,41 @@ public class ExercisePanel extends VerticalPanel implements
       tabPanel.add(tabPane);
       indexToTab.put(questionNumber,tabPane);
 
-      tabPane.add(getQuestionPanel(e, service, controller, questionNumber, flQuestions, questionsToShow, n, pair,tabPane));
+      tabPane.add(getQuestionPanel(e, service, controller, questionNumber, n, englishQuestions, flQuestions, pair, tabPane));
 
       questionNumber++;
     }
     tabPanel.selectTab(0);
   }
 
-  private VerticalPanel getQuestionPanel(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller,
-                                         int questionNumber, List<Exercise.QAPair> flQuestions,
-                                         List<Exercise.QAPair> questionsToShow, int n, Exercise.QAPair pair, HasWidgets toAddTo) {
-    Exercise.QAPair engQAPair = questionNumber - 1 < n ? questionsToShow.get(questionNumber - 1) : null;
+  private Panel getQuestionPanel(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller,
+                                 int questionNumber,
+                                 int n,
+                                 List<Exercise.QAPair> englishQuestions,
+                                 List<Exercise.QAPair> flQuestions,
+                                 Exercise.QAPair pair,
+                                 HasWidgets toAddTo) {
+    Exercise.QAPair engQAPair = questionNumber - 1 < n ? englishQuestions.get(questionNumber - 1) : null;
+    Exercise.QAPair flQAPair  = questionNumber - 1 < n ? flQuestions.get(questionNumber - 1) : null;
 
     if (engQAPair != null) {
-      getQuestionHeader(n, engQAPair, shouldShowAnswer(),!controller.isDemoMode(),toAddTo);
+      //getQuestionHeader(n, engQAPair, shouldShowAnswer(),!controller.isDemoMode(),toAddTo);
+      getQuestionHeader(questionNumber,n, pair, engQAPair, flQAPair, false,toAddTo);
     }
     else {
       toAddTo.add(new Heading(6, ""));
     }
-    if (controller.isDemoMode()) {
-      Exercise.QAPair flQAPair  = flQuestions.get(questionNumber - 1);
+/*    if (controller.isDemoMode()) {
       getQuestionHeader(questionNumber, n, flQAPair, pair, shouldShowAnswer(), toAddTo);
-    }
+     // getQuestionHeader(questionNumber,n, engQAPair, flQAPair,false,toAddTo);
+
+    }*/
     // add question prompt
-    VerticalPanel vp = new VerticalPanel();
+    Panel vp = new VerticalPanel();
     addQuestionPrompt(vp, exercise);
 
     // add answer widget
-    Widget answerWidget = getAnswerWidget(exercise, service, controller, questionNumber);
-    vp.add(answerWidget);
+    vp.add(getAnswerWidget(exercise, service, controller, questionNumber));
     vp.addStyleName("userNPFContent2");
     return vp;
   }
@@ -271,21 +279,35 @@ public class ExercisePanel extends VerticalPanel implements
    */
   protected void addAnswerWidget(int index, Widget answerWidget) {
     answers.add(answerWidget);
-    Set<Object> objects = indexToWidgets.get(index);
-    if (objects == null) indexToWidgets.put(index, objects = new HashSet<Object>());
+    Set<Widget> objects = indexToWidgets.get(index);
+    if (objects == null) indexToWidgets.put(index, objects = new HashSet<Widget>());
     objects.add(answerWidget);
-    //System.out.println("addAnswerWidget : now " +answers.size() + " expected, adding '" + answerWidget.getElement().getId() + "'");
+    System.out.println("addAnswerWidget : now " + answers.size() + " expected, adding '" + answerWidget.getElement().getId() + "'");
   }
 
   protected boolean shouldShowAnswer() { return controller.isDemoMode();  }
 
-  protected void getQuestionHeader(int i, int total, Exercise.QAPair qaPair, Exercise.QAPair flQAPair, boolean showAnswer, HasWidgets toAddTo) {
-    getQuestionHeader(total,qaPair,showAnswer,true, toAddTo);
+  /**
+   * @see #getQuestionPanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int, int, java.util.List, java.util.List, mitll.langtest.shared.Exercise.QAPair, com.google.gwt.user.client.ui.HasWidgets)
+   * @param i
+   * @param total
+   * @param qaPair
+   * @param englishPair
+   * @param flQAPair
+   * @param showAnswer
+   * @param toAddTo
+   */
+  protected void getQuestionHeader(int i, int total,
+                                   Exercise.QAPair qaPair,
+                                   Exercise.QAPair englishPair,
+                                   Exercise.QAPair flQAPair,
+                                   boolean showAnswer, HasWidgets toAddTo) {
+    getQuestionHeader(total, qaPair, showAnswer, true, toAddTo);
   }
 
   /**
    * @see #addQuestions(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
-   * @see #getQuestionHeader(int, int, mitll.langtest.shared.Exercise.QAPair, mitll.langtest.shared.Exercise.QAPair, boolean, HasWidgets)
+   * @see #getQuestionHeader
    * @param total
    * @param qaPair
    * @param showAnswer
@@ -412,7 +434,7 @@ public class ExercisePanel extends VerticalPanel implements
       incomplete.addAll(answers);
       for (final Widget tb : answers) {
         String text = ((HasValue<String>) tb).getValue();
-        service.addTextAnswer(user, exercise, i++, text, new AsyncCallback<Void>() {
+        service.addTextAnswer(user, exercise, i++, text, controller.getAudioType(), new AsyncCallback<Void>() {
           public void onFailure(Throwable caught) {
             controller.getFeedback().showErrorMessage("Server error", "Couldn't post answers for exercise.");
 
@@ -493,26 +515,35 @@ public class ExercisePanel extends VerticalPanel implements
     }
   }
 
-  public void recordIncomplete(Object answer) {
-    int before = completed.size();
-    completed.remove(answer);
-    int after = completed.size();
-    if (after - before != 1 && before > 0) {
-      System.err.println("\n\n\nhuh? answer is not on list?");
+  /**
+   * @see mitll.langtest.client.recorder.SimpleRecordPanel#showAudioValidity(mitll.langtest.shared.AudioAnswer.Validity, ExerciseQuestionState, com.google.gwt.user.client.ui.Widget)
+   * @param answer
+   */
+  public void recordIncomplete(Widget answer) {
+    if (!completed.remove(answer) && !completed.isEmpty()) {
+      System.err.println("recordIncomplete : huh? answer " + answer.getElement().getId() +
+        " is not on list of size " + completed.size());
+      for (Widget widget : completed) {
+        System.err.println("recordIncomplete : known : " + widget.getElement().getId());
+      }
     }
    // System.out.println("recordIncomplete : completed " + completed.size() + " vs total " + answers.size());
 
     enableNext();
   }
 
-  public void recordCompleted(Object answer) {
+  public void recordCompleted(Widget answer) {
     completed.add(answer);
 
-    System.out.println("recordCompleted : id " + ((Widget)answer).getElement().getId()+
+    System.out.println("recordCompleted : id " + answer.getElement().getId()+
       " completed " + completed.size() + " vs total " + answers.size());
 
-    for (Object complete : completed) {
-      System.out.println("\trecordCompleted : complete " + ((Widget)complete).getElement().getId());
+    if (completed.size() > answers.size()) {
+      System.err.println("recordCompleted huh? more complete " + completed.size() + " than answers " + answers.size());
+    }
+
+    for (Widget complete : completed) {
+      System.out.println("\trecordCompleted : complete " + complete.getElement().getId());
     }
 
     markTabsComplete();
@@ -524,20 +555,20 @@ public class ExercisePanel extends VerticalPanel implements
    * on the tab to indicate it's complete.
    */
   private void markTabsComplete() {
-    for (Map.Entry<Integer, Set<Object>> indexWidgetsPair : indexToWidgets.entrySet()) {
+    for (Map.Entry<Integer, Set<Widget>> indexWidgetsPair : indexToWidgets.entrySet()) {
       boolean allComplete = true;
-      Set<Object> widgetsForTab = indexWidgetsPair.getValue();
+      Set<Widget> widgetsForTab = indexWidgetsPair.getValue();
       Integer tabIndex = indexWidgetsPair.getKey();
       System.out.println("\trecordCompleted : checking " + tabIndex + " and " + widgetsForTab.size());
 
-      for (Object widget : widgetsForTab) {
+      for (Widget widget : widgetsForTab) {
         if (!completed.contains(widget)) {
-          System.out.println("\trecordCompleted : tab# " + tabIndex + " is *not* complete : " + ((Widget)widget).getElement().getId());
+          System.out.println("\trecordCompleted : tab# " + tabIndex + " is *not* complete : " + widget.getElement().getId());
           allComplete = false;
           break;
         }
         else {
-          System.out.println("\trecordCompleted : tab# " + tabIndex + " is      complete : " + ((Widget)widget).getElement().getId());
+          System.out.println("\trecordCompleted : tab# " + tabIndex + " is      complete : " + widget.getElement().getId());
         }
       }
       if (allComplete) {
@@ -550,7 +581,7 @@ public class ExercisePanel extends VerticalPanel implements
   }
 
   protected void enableNext() {
-    //System.out.println("enableNext : answered " + completed.size() + " vs total " + answers.size());
+    System.out.println("enableNext : answered " + completed.size() + " vs total " + answers.size());
     boolean isComplete = isCompleted();
     navigationHelper.enableNextButton(isComplete);
   }
