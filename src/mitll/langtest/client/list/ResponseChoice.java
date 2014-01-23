@@ -1,8 +1,6 @@
 package mitll.langtest.client.list;
 
-import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.Dropdown;
-import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Icon;
 import com.github.gwtbootstrap.client.ui.Nav;
@@ -13,7 +11,6 @@ import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 
 /**
@@ -63,7 +60,7 @@ public class ResponseChoice {
    * @see mitll.langtest.client.bootstrap.ResponseExerciseList#addBottomText(com.github.gwtbootstrap.client.ui.FluidContainer)
    * @return
    */
-  public Panel getResponseTypeWidget(String caption, boolean addNone) {
+  public LeftRight getResponseTypeWidget(String caption, boolean addNone) {
     Nav div = new Nav();
     DOM.setStyleAttribute(div.getElement(), "marginBottom", "0px");
     Dropdown menu = new Dropdown(caption);
@@ -81,17 +78,23 @@ public class ResponseChoice {
 
     div.add(menu);
 
-    Panel container = new FluidRow();
+    //Panel container = new FluidRow();
     //Panel container = new HorizontalPanel();
-
-    Column child = new Column(3, 5, div);
-    container.add(child);
+    //Column child = new Column(3, 5, div);
+    //container.add(child);
    // container.add(div);
-    Column child1 = new Column(1, responseTypeDisplay);
-    container.add(child1);
+    //grid.add()
+    //Column child1 = new Column(1, responseTypeDisplay);
+    //container.add(child1);
     //container.add(responseTypeDisplay);
     //container.addStyleName("leftFifteenPercentMargin");
-    return container;
+    return new LeftRight(div,responseTypeDisplay);
+  }
+
+  public static class LeftRight {
+    public Panel left;
+    public Panel right;
+    LeftRight(Panel left, Panel right) { this.left = left; this.right = right; }
   }
 
   protected void addAudioChoice(Dropdown menu, final Heading responseTypeDisplay) {
