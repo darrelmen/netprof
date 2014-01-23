@@ -40,6 +40,13 @@ public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
 
   private SoundFeedback soundFeedback;
 
+  /**
+   * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
+   * @param e
+   * @param service
+   * @param userFeedback
+   * @param controller
+   */
   public FeedbackRecordPanel(Exercise e, LangTestDatabaseAsync service, UserFeedback userFeedback, ExerciseController controller) {
     super(e, service, userFeedback, controller, controller.getExerciseList());
     getElement().setId("FeedbackRecordPanel");
