@@ -3,6 +3,7 @@ package mitll.langtest.client.bootstrap;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -70,15 +71,37 @@ public class ResponseExerciseList extends FlexSectionExerciseList {
     History.newItem(historyToken1);
   }
 
+  /**
+   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#addButtonRow(java.util.List, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection, boolean)
+   * @param container
+   * @return
+   */
   @Override
   protected Widget addBottomText(FluidContainer container) {
     Widget widget = super.addBottomText(container);
     String caption = (controller.getLanguage().equals("MSA")? "Arabic" : controller.getLanguage()) +" Response Type";
     String caption2 = "English Response Type";
-    Panel responseTypeWidget = responseChoice.getResponseTypeWidget(caption, false);
-    responseTypeWidget.addStyleName("topFiveMargin");
-    container.add(responseTypeWidget);
-    container.add(secondResponseChoice.getResponseTypeWidget(caption2, true));
+
+    Grid grid = new Grid(2,2);
+
+    ResponseChoice.LeftRight leftRight1 = responseChoice.getResponseTypeWidget(caption, false);
+    //responseTypeWidget.addStyleName("topFiveMargin");
+    //container.add(responseTypeWidget);
+    grid.setWidget(0, 0, leftRight1.left);
+    grid.setWidget(0, 1, leftRight1.right);
+    ResponseChoice.LeftRight leftRight2 = secondResponseChoice.getResponseTypeWidget(caption2, true);
+   // container.add(leftRight2);
+
+    grid.setWidget(1, 0, leftRight2.left);
+    grid.setWidget(1, 1, leftRight2.right);
+    container.add(grid);
+
+/*    Panel outer = new FluidRow();
+    outer.addStyleName("alignCenter");
+    outer.addStyleName("inlineBlockStyle");
+    outer.add(grid);
+    container.add(outer);*/
+    grid.addStyleName("leftFiftyPercentMargin");
     return widget;
   }
 }
