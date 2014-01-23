@@ -100,11 +100,13 @@ public class AudioFileHelper {
    * @param useScoreToColorBkg
    * @return
    */
+/*
   public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
                                           int width, int height, boolean useScoreToColorBkg) {
     return getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
       false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache());
   }
+*/
 
   /**
    * Get score when doing autoCRT on an audio file.
@@ -301,7 +303,7 @@ public class AudioFileHelper {
       }
       db.updateFlashcardState(user, exercise, audioAnswer.isCorrect());
       return audioAnswer;
-    } else if (serverProps.isAutoCRT() && !exercise1.isPromptInEnglish()) { // TODO : hack -- don't do CRT on english
+    } else if (serverProps.isAutoCRT() && !exercise1.isPromptInEnglish() && serverProps.isIncludeFeedback()) { // TODO : hack -- don't do CRT on english
       autoCRT.getAutoCRTDecodeOutput(exercise, questionID, file, audioAnswer);
     }
     return audioAnswer;
@@ -329,7 +331,7 @@ public class AudioFileHelper {
       }
       autoCRT = new AutoCRT(exportDB.getExport(), crtScoring, pathHelper.getInstallPath(), relativeConfigDir,
         serverProps.getMinPronScore());
-      if (serverProps.isAutoCRT()) {
+      if (serverProps.isAutoCRT() && serverProps.isIncludeFeedback()) {
         autoCRT.makeClassifier();
       }
     }
