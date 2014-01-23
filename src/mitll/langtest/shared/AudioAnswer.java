@@ -110,6 +110,8 @@ public class AudioAnswer implements IsSerializable {
     this.saidAnswer = saidAnswer;
   }
 
+  public boolean isValid() { return validity == Validity.OK; }
+
   public String toString() {
     return "Answer id " + getResultID() + " : Path " + path + " id " + reqid + " validity " + validity +
       " correct " + correct + " score " + score + " said answer " + saidAnswer;
