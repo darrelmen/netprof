@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -75,10 +76,30 @@ public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
     String secondResponseType = controller.getProps().getSecondResponseType();
     final boolean isNone = secondResponseType.equals(ResponseChoice.NONE);
 
+    final String recordButtonTitle = isNone ? "Record" : "Record in Arabic";
+    final String textButtonTitle = isNone ? "Answer" : "Answer in Arabic";
+
+    Widget widget = addComboAnswer(exercise, service, controller, index, responseType, isNone, recordButtonTitle, textButtonTitle, true,false);
+
+    if (isNone) {
+      return widget;
+    }
+    else {
+      Panel vert = new VerticalPanel();
+      vert.add(widget);
+      vert.add(addComboAnswer(exercise,service,controller,index,secondResponseType,false, "Record in English", "Answer in English",false,true));
+      return vert;
+    }
+  }
+
+  private Widget addComboAnswer(final Exercise exercise, final LangTestDatabaseAsync service,
+                                final ExerciseController controller, final int index, String responseType, final boolean isNone,
+                                final String recordButtonTitle,
+                                String buttonTitle,boolean getFocus, boolean isEnglish) {
     AutoCRTRecordPanel autoCRTRecordPanel = new AutoCRTRecordPanel(service, controller, exercise, this, index, FEEDBACK_WIDTH) {
       @Override
       protected String getRecordButtonTitle() {
-        return isNone ? super.getRecordButtonTitle() : super.getRecordButtonTitle() + " in Arabic";
+        return recordButtonTitle;
       }
       @Override
       protected void setRecordButtonWidth(Panel recordButtonContainer) {
@@ -87,30 +108,43 @@ public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
     };
 
     if (responseType.equalsIgnoreCase(AUDIO)) {
-      return addAudioAnswer(index, autoCRTRecordPanel);
+      Panel widgets ;
+      if (isEnglish) {
+        widgets = getRightSideAudioWidget(autoCRTRecordPanel);
+      }
+      else {
+        widgets = addAudioAnswer(index, autoCRTRecordPanel);
+      }
+      return widgets;
     }
     else if (responseType.equalsIgnoreCase(TEXT)){
-      return doText(exercise, service, controller, index,autoCRTRecordPanel);
+      return doText(exercise, service, controller, index,autoCRTRecordPanel,buttonTitle, getFocus);
     }
     else {  // both
-      Panel row = new DivWidget();
-      row.addStyleName("trueInlineStyle");
-      row.getElement().setId("FeedbackRecordPanel_getAnswerWidget_Row");
-
-      // add text widget to left side
-      Panel textWidget = doText(exercise, service, controller, index, autoCRTRecordPanel);
-      textWidget.addStyleName("floatLeft");
-
-      // add audio record widget to right side
-      autoCRTRecordPanel.getElement().setId("recordButtonPanel_"+index);
-
-      addAnswerWidget(index, autoCRTRecordPanel);
-
-      Panel outerContainer = getRightSideAudioWidget(autoCRTRecordPanel);
-      row.add(textWidget);
-      row.add(outerContainer);
-      return row;
+      return getBothAudioAndText(exercise, service, controller, index, autoCRTRecordPanel, buttonTitle, getFocus);
     }
+  }
+
+  private Widget getBothAudioAndText(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller,
+                                     int index, AutoCRTRecordPanel autoCRTRecordPanel,
+                                     String buttonTitle,boolean getFocus) {
+    Panel row = new DivWidget();
+    row.addStyleName("trueInlineStyle");
+    row.getElement().setId("FeedbackRecordPanel_getAnswerWidget_Row");
+
+    // add text widget to left side
+    Panel textWidget = doText(exercise, service, controller, index, autoCRTRecordPanel, buttonTitle, getFocus);
+    textWidget.addStyleName("floatLeft");
+
+    // add audio record widget to right side
+    autoCRTRecordPanel.getElement().setId("recordButtonPanel_"+index);
+
+    addAnswerWidget(index, autoCRTRecordPanel);
+
+    Panel outerContainer = getRightSideAudioWidget(autoCRTRecordPanel);
+    row.add(textWidget);
+    row.add(outerContainer);
+    return row;
   }
 
   private FluidContainer addAudioAnswer(int index, AutoCRTRecordPanel autoCRTRecordPanel) {
@@ -143,7 +177,8 @@ public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
   }
 
   private Panel doText(Exercise exercise, final LangTestDatabaseAsync service, final ExerciseController controller,
-                       int index, AutoCRTRecordPanel autoCRTRecordPanel ) {
+                       int index, AutoCRTRecordPanel autoCRTRecordPanel,
+                       String buttonTitle, boolean getFocus) {
     final TextResponse textResponse = new TextResponse(controller.getUser(), soundFeedback);
     textResponse.setAnswerPostedCallback(
       new TextResponse.AnswerPosted() {
@@ -156,11 +191,11 @@ public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
 
     FluidContainer outerContainer = new FluidContainer();
 
-    Panel row1 = new FlowPanel();
+    Panel row1 = new VerticalPanel();
     row1.getElement().setId("text_row1");
     outerContainer.add(row1);
     outerContainer.addStyleName("floatLeft");
-    Widget widget = textResponse.addWidgets(row1, exercise, service, controller, false, true, false, index);
+    Widget widget = textResponse.addWidgets(row1, exercise, service, controller, false, true, false, index, buttonTitle, getFocus);
     widget.getElement().setId("textResponse_"+index);
     addAnswerWidget(index, widget);
 
