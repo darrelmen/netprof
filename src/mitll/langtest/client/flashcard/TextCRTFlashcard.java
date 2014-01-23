@@ -43,7 +43,7 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
   @Override
   protected void addRecordingAndFeedbackWidgets(Exercise e, LangTestDatabaseAsync service, ExerciseController controller,
                                                 int feedbackHeight) {
-    textResponse.addWidgets(this, e, service, controller, true, false, true, 1);
+    textResponse.addWidgets(this, e, service, controller, true, false, true, 1, TextResponse.CHECK, true);
   }
 
   @Override
