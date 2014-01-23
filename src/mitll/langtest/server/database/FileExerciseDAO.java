@@ -307,10 +307,10 @@ public class FileExerciseDAO implements ExerciseDAO {
             }
           }
         } catch (Exception e) {
-          logger.error("Got " + e + ".Skipping line -- couldn't parse line #"+count + " : " +line2,e);
+          logger.error("Got " + e + ".Skipping line -- couldn't parse line #"+count + " : " +line2);
           errors++;
           if (errors > MAX_ERRORS) {
-            logger.error("too many errors, giving up...");
+            logger.error("too many errors (" + errors + "), giving up...");
             break;
           }
         }
