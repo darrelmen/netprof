@@ -8,6 +8,8 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.SimplePanel;
+import mitll.langtest.client.WavCallback;
+import sun.net.www.content.audio.wav;
 
 /**
  * Somewhat related to Cykod example at <a href='https://github.com/cykod/FlashWavRecorder/blob/master/html/index.html'>Cykod example html</a><p></p>
@@ -107,6 +109,10 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
 
       $wnd.webAudioMicAvailable = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::webAudioMicAvailable());
       $wnd.webAudioMicNotAvailable = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::webAudioMicNotAvailable());
+      $wnd.startBuffer = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::startBuffer(I));
+      $wnd.setBuf = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::setBuf(IS));
+      $wnd.endBuffer = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::endBuffer());
+      $wnd.getBase64 = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::getBase64(Ljava/lang/String;));
   }-*/;
 
   public void recordOnClick() {
@@ -119,7 +125,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   }
 
   public native void webAudioRecordOnClick() /*-{
-        $wnd.Recorder.record('audio', 'audio.wav');
+        $wnd.startRecording();
     }-*/;
 
   public native void flashRecordOnClick() /*-{
@@ -135,7 +141,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   }
 
   public native void webAudioStopRecording() /*-{
-      $wnd.Recorder.stop();
+      return $wnd.stopRecording();
   }-*/;
 
   public native void flashStopRecording() /*-{
@@ -150,18 +156,29 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     }
   }
 
-
   public native void flashHide2() /*-{
     $wnd.Recorder.hide2();
   }-*/;
 
   /**
+   * @see mitll.langtest.client.LangTest#getBase64EncodedWavFile()
+   * @return
+   */
+  public String getWav() {
+    if (webAudioMicAvailable) {
+      return "";
+    } else {
+      return flashGetWav();
+    }
+  }
+
+  /**
    * Base64 encoded byte array from action script.
    * @return
    */
-  public native String getWav() /*-{
-    return $wnd.Recorder.getWav();
-  }-*/;
+  public native String flashGetWav() /*-{
+        return $wnd.Recorder.getWav();
+    }-*/;
 
   /**
    * @see mitll.langtest.client.recorder.FlashRecordPanelHeadless#rememberInstallFlash()
@@ -253,5 +270,40 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     System.out.println("webAudioMicNotAvailable!");
     webAudioMicAvailable = false;
     selfRef.rememberInstallFlash();
+  }
+
+  static short[] buf;
+   public static void startBuffer(int size) {
+    System.out.println("startBuffer " + size);
+    buf = new short[size];
+  }
+
+  public static void setBuf(int offset, short value) {
+    buf[offset] = value;
+  }
+
+  public static void endBuffer() {
+    System.out.println("endBuffer ");
+    for (int i = 0; i < 44; i++) System.out.println("i " + i + " " + buf[i]);
+  }
+
+
+  public static void getBase64(String encoded) {
+    System.out.println("getBase64 " + encoded.length());
+    if (FlashRecordPanelHeadless.wavCallback == null) {
+      System.err.println("getBase64 no callback?");
+    } else {
+      FlashRecordPanelHeadless.wavCallback.getBase64EncodedWavFile(encoded);
+      FlashRecordPanelHeadless.wavCallback = null;
+    }
+  }
+
+  static WavCallback wavCallback = null;
+  public void stopRecording(WavCallback wavCallback) {
+    FlashRecordPanelHeadless.wavCallback = wavCallback;
+    stopRecording();
+    if (!webAudioMicAvailable) {
+      wavCallback.getBase64EncodedWavFile(getWav());
+    }
   }
 }
