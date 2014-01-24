@@ -1,25 +1,90 @@
 function __log(e, data) {
     //log.innerHTML += "\n" + e + " " + (data || '');
-   // $('#status').append("<p>"+e + "  at " + new Date().getTime());
+    $('#status').append("<p>"+e + "  at " + new Date().getTime());
 }
 
 var audio_context;
 var recorder;
+var rememberedInput;
 
 function startUserMedia(stream) {
     var input = audio_context.createMediaStreamSource(stream);
     __log('Media stream created.');
 
-    input.connect(audio_context.destination);
+    //input.connect(audio_context.destination);
     __log('Input connected to audio context destination.');
 
     recorder = new Recorder(input);
     __log('Recorder initialised.');
 
+    rememberedInput = input;
     webAudioMicAvailable();
+    document.addEventListener('webkitvisibilitychange', onVisibilityChange);
+}
+/*
+function gotStreamOld(stream) {
+    var inputPoint = audio_context.createGain();
+    __log('inputPoint gain ' + inputPoint);
+
+    // Create an AudioNode from the stream.
+    var realAudioInput = audio_context.createMediaStreamSource(stream);
+    __log('Media stream created.');
+
+    inputPoint.connect(realAudioInput);
+    rememberedInput = realAudioInput;
+
+    recorder = new Recorder( inputPoint );
+    __log('Recorder initialised.');
+
+    webAudioMicAvailable();
+    document.addEventListener('webkitvisibilitychange', onVisibilityChange);
+}*/
+
+/*
+function gotStream(stream) {
+    //var inputPoint = audio_context.createGain();
+
+    // Create an AudioNode from the stream.
+    var realAudioInput = audio_context.createMediaStreamSource(stream);
+    var  audioInput = realAudioInput;
+
+    //audioInput.connect(audioInput);
+    //audioInput.connect(audio_context.destination);
+
+
+//    audioInput = convertToMono( input );
+
+    //analyserNode = audioContext.createAnalyser();
+    // analyserNode.fftSize = 2048;
+    //inputPoint.connect( analyserNode );
+
+    recorder = new Recorder( audioInput );
+    __log('Recorder initialised.');
+
+    var zeroGain = audio_context.createGain();
+    zeroGain.gain.value = 0.0;
+    audioInput.connect( zeroGain );
+    zeroGain.connect( audio_context.destination );
+
+    webAudioMicAvailable();
+}
+*/
+
+
+function onVisibilityChange() {
+    if (document.webkitHidden) {
+        __log('webkitHidden');
+
+        rememberedInput.stop(0);
+    } else {
+        __log('webkitRevealed');
+
+        rememberedInput.start(0);
+    }
 }
 
 function startRecording() {
+    recorder.clear();
     recorder && recorder.record();
     __log('Recording...');
 }
@@ -31,7 +96,6 @@ function stopRecording() {
     // get WAV from audio data blob
     grabWav();
 
-    recorder.clear();
 }
 
 function uint6ToB64 (nUint6) {
@@ -127,6 +191,7 @@ function initWebAudio() {
 
     navigator.getMedia({audio: true}, startUserMedia, function(e) {
         __log('No live audio input: ' + e);
+        console.error(e);
         webAudioMicNotAvailable();
     });
 }
