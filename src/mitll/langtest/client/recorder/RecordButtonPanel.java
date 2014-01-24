@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.WavCallback;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseQuestionState;
@@ -119,15 +120,21 @@ public class RecordButtonPanel extends HorizontalPanel implements RecordButton.R
     //System.out.println("RecordButtonPanel : stopRecording " );
     recordImage1.setVisible(false);
     recordImage2.setVisible(false);
-    controller.stopRecording();
-    postAudioFile(this, 1);
+    final Panel outer = this;
+    controller.stopRecording(new WavCallback() {
+      @Override
+      public void getBase64EncodedWavFile(String bytes) {
+        postAudioFile(outer, 1, bytes);
+      }
+    });
   }
 
-  private void postAudioFile(final Panel outer, final int tries) {
+  private void postAudioFile(final Panel outer, final int tries, final String base64EncodedWavFile) {
     //System.out.println("RecordButtonPanel : postAudioFile " );
 
     reqid++;
-    service.writeAudioFile(controller.getBase64EncodedWavFile(),
+    //String base64EncodedWavFile = controller.getBase64EncodedWavFile();
+    service.writeAudioFile(base64EncodedWavFile,
       exercise.getPlan(),
       exercise.getID(),
       index,
@@ -140,7 +147,7 @@ public class RecordButtonPanel extends HorizontalPanel implements RecordButton.R
         public void onFailure(Throwable caught) {
           controller.logException(caught);
           if (tries > 0) {
-            postAudioFile(outer, tries - 1); // try one more time...
+            postAudioFile(outer, tries - 1,base64EncodedWavFile); // try one more time...
           } else {
             recordButton.setEnabled(true);
             receivedAudioFailure();
