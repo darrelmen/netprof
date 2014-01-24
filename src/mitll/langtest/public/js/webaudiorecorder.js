@@ -1,6 +1,6 @@
 function __log(e, data) {
     //log.innerHTML += "\n" + e + " " + (data || '');
-    $('#status').append("<p>"+e + "  at " + new Date().getTime());
+   // $('#status').append("<p>"+e + "  at " + new Date().getTime());
 }
 
 var audio_context;
@@ -28,12 +28,10 @@ function stopRecording() {
     recorder && recorder.stop();
     __log('Stopped recording.');
 
-    // create WAV download link using audio data blob
-    var grabWav2 = grabWav();
+    // get WAV from audio data blob
+    grabWav();
 
     recorder.clear();
-
-    return grabWav2;
 }
 
 function uint6ToB64 (nUint6) {
@@ -75,11 +73,6 @@ function grabWav() {
     recorder && recorder.exportWAV(function (blob) {
         __log('Got ... wav data!');
         try {
-            __log('2 Got ... wav data!' + blob);
-            __log('2 Got ... wav data!' + blob.byteLength);
-            __log('3 Got ... wav data!' + blob.buffer);
-            //__log('3 Got ... wav data!' + dataview.buffer.byteLength);
-
             var reader = new FileReader();
 
             var arrayBuffer;
@@ -89,11 +82,8 @@ function grabWav() {
                 var myArray = new Uint8Array(arrayBuffer);
 
                 __log('5 Got ... array ' + myArray);
-                __log('6 Got ... array len!' + myArray.length);
 
                 var bytes = bytesToBase64(myArray);
-                //__log('7 Got ... wav data!' + bytes);
-
                 var length = bytes.length;
 
                 __log('8 Got ... wav data!' + length);
@@ -102,34 +92,6 @@ function grabWav() {
             }
 
             reader.readAsArrayBuffer(blob);
-
-            /*     var number = dataview.byteLength / 2;
-             __log('4 Got ... wav data!' + number);
-             */
-            /*      startBuffer(number);
-
-             __log('5 Got ... wav data!' + number);
-
-             for (i = 0; i < blob.byteLength/2; i++) {
-             var x = blob.getInt16(i);
-             setBuf(i,x);
-             }
-             endBuffer();
-             */
-
-            /*
-             var myArray = new Uint8Array(dataview.buffer);
-
-             __log('5 Got ... wav data!' + myArray.length);
-
-             var bytesToBase64 = bytesToBase64(myArray);
-             __log('6 Got ... wav data!' + bytesToBase64);
-
-             var length = bytesToBase64.length;
-
-             __log('7 Got ... wav data!' + length);*/
-
-            return "";
         } catch (e) {
             __log('Bad call to blob');
 
