@@ -2,6 +2,7 @@ package mitll.langtest.client.exercise;
 
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.WavCallback;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
@@ -24,8 +25,9 @@ public interface ExerciseController {
   int getUser();
 
   void startRecording();
-  void stopRecording();
-  String getBase64EncodedWavFile();
+  //void stopRecording();
+  void stopRecording(WavCallback wavCallback);
+  //String getBase64EncodedWavFile();
 
   boolean getEnglishOnly();
   int getNumGradesToCollect();
