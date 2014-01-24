@@ -72,6 +72,7 @@ import java.util.Date;
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   public static final String LANGTEST_IMAGES = "langtest/images/";
+  public static final boolean SHOW_STATUS = false;
 
   private Panel currentExerciseVPanel = new FluidContainer();
   private ListInterface exerciseList;
@@ -310,7 +311,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       belowFirstRow.add(flashRecordPanel);
     }
 
-    if (true) {
+    if (SHOW_STATUS) {
       Label child = new Label();
       child.getElement().setId("status");
       belowFirstRow.add(child);
