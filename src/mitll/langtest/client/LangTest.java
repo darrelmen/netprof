@@ -103,7 +103,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private HTML releaseStatus;
   private StartupInfo startupInfo;
 
-  //Navigation navigation;
   private boolean showUnansweredFirst = false;
 
   /**
@@ -310,9 +309,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       makeFlashContainer();
       belowFirstRow.add(flashRecordPanel);
     }
-    Label child = new Label();
-    child.getElement().setId("status");
-    belowFirstRow.add(child);
+
+    if (true) {
+      Label child = new Label();
+      child.getElement().setId("status");
+      belowFirstRow.add(child);
+    }
 
     setPageTitle();
     browserCheck.checkForCompatibleBrowser();
@@ -1001,17 +1003,25 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   /**
    * Recording interface
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
+   * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
    */
-  public void stopRecording() {
+/*  public void stopRecording() {
     flashRecordPanel.stopRecording();
+  }*/
+
+  public void stopRecording(WavCallback wavCallback) {
+    flashRecordPanel.stopRecording(wavCallback);
   }
 
   /**
    * Recording interface
    */
+/*
   public String getBase64EncodedWavFile() {
     return flashRecordPanel.getWav();
   }
+*/
 
   public SoundManagerAPI getSoundManager() {
     return soundManager;
