@@ -3,9 +3,11 @@ package mitll.langtest.client.scoring;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.WavCallback;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.shared.AudioAnswer;
@@ -51,10 +53,18 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    * @see mitll.langtest.client.recorder.RecordButton#stop()
    */
   public void stopRecording() {
-    controller.stopRecording();
+    controller.stopRecording(new WavCallback() {
+      @Override
+      public void getBase64EncodedWavFile(String bytes) {
+        postAudioFile(bytes);
+      }
+    });
+  }
+
+  protected void postAudioFile(String base64EncodedWavFile) {
     reqid++;
     final long then = System.currentTimeMillis();
-    service.writeAudioFile(controller.getBase64EncodedWavFile(),
+    service.writeAudioFile(base64EncodedWavFile,
       exercise.getPlan(),
       exercise.getID(),
       index,
