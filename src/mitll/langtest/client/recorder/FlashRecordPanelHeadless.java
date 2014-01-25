@@ -46,9 +46,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     hide();
 
     advertise();
-    //initWebaudio();
 
-    System.out.println("got to end of  FlashRecordPanelHeadless");
     selfRef = this;
   }
 
@@ -77,11 +75,16 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   /**
    * Show this widget (make it big enough to accommodate the permission dialog) and install the flash player.
    * @see mitll.langtest.client.LangTest#checkInitFlash()
+   */
+  public void initRecorder() {
+    initWebaudio();
+  }
+
+  /**
    * @see mitll.langtest.client.LangTest#showPopupOnDenial()
    */
   public void initFlash() {
-    initWebaudio();
-    //rememberInstallFlash();
+    rememberInstallFlash();
   }
 
   private void rememberInstallFlash() {
@@ -106,12 +109,8 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   }-*/;
 
   private native void advertise() /*-{
-
       $wnd.webAudioMicAvailable = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::webAudioMicAvailable());
       $wnd.webAudioMicNotAvailable = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::webAudioMicNotAvailable());
-      $wnd.startBuffer = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::startBuffer(I));
-      $wnd.setBuf = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::setBuf(IS));
-      $wnd.endBuffer = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::endBuffer());
       $wnd.getBase64 = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::getBase64(Ljava/lang/String;));
   }-*/;
 
@@ -161,10 +160,10 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   }-*/;
 
   /**
-   * @see mitll.langtest.client.LangTest#getBase64EncodedWavFile()
+   * @see mitll.langtest.client.WavCallback#getBase64EncodedWavFile
    * @return
    */
-  public String getWav() {
+  private String getWav() {
     if (webAudioMicAvailable) {
       return "";
     } else {
@@ -258,7 +257,6 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   public boolean gotPermission() { return permissionReceived; }
 
   public static void webAudioMicAvailable() {
-    System.out.println("webAudioMicAvailable!");
     webAudioMicAvailable = true;
 
     System.out.println("webAudioMicAvailable -- connected!");
@@ -272,22 +270,6 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     selfRef.rememberInstallFlash();
   }
 
-  static short[] buf;
-   public static void startBuffer(int size) {
-    System.out.println("startBuffer " + size);
-    buf = new short[size];
-  }
-
-  public static void setBuf(int offset, short value) {
-    buf[offset] = value;
-  }
-
-  public static void endBuffer() {
-    System.out.println("endBuffer ");
-    for (int i = 0; i < 44; i++) System.out.println("i " + i + " " + buf[i]);
-  }
-
-
   public static void getBase64(String encoded) {
     System.out.println("getBase64 " + encoded.length());
     if (FlashRecordPanelHeadless.wavCallback == null) {
@@ -298,6 +280,9 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     }
   }
 
+  /**
+   * @see mitll.langtest.client.LangTest#stopRecording(mitll.langtest.client.WavCallback)
+   */
   static WavCallback wavCallback = null;
   public void stopRecording(WavCallback wavCallback) {
     FlashRecordPanelHeadless.wavCallback = wavCallback;
