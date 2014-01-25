@@ -12,6 +12,9 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.LZW;
+
+import java.util.List;
 
 /**
  * This binds a record button with the act of posting recorded audio to the server.
@@ -64,7 +67,8 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   protected void postAudioFile(String base64EncodedWavFile) {
     reqid++;
     final long then = System.currentTimeMillis();
-    service.writeAudioFile(base64EncodedWavFile,
+    List<Integer> compressed = LZW.compress(base64EncodedWavFile);
+    service.writeAudioFile(compressed,
       exercise.getPlan(),
       exercise.getID(),
       index,
