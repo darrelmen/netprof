@@ -16,6 +16,9 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseQuestionState;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.LZW;
+
+import java.util.List;
 
 /**
  * Just a single record button for the UI component.
@@ -131,10 +134,10 @@ public class RecordButtonPanel extends HorizontalPanel implements RecordButton.R
 
   private void postAudioFile(final Panel outer, final int tries, final String base64EncodedWavFile) {
     //System.out.println("RecordButtonPanel : postAudioFile " );
-
     reqid++;
-    //String base64EncodedWavFile = controller.getBase64EncodedWavFile();
-    service.writeAudioFile(base64EncodedWavFile,
+    List<Integer> compressed = LZW.compress(base64EncodedWavFile);
+
+    service.writeAudioFile(compressed,
       exercise.getPlan(),
       exercise.getID(),
       index,
@@ -147,7 +150,7 @@ public class RecordButtonPanel extends HorizontalPanel implements RecordButton.R
         public void onFailure(Throwable caught) {
           controller.logException(caught);
           if (tries > 0) {
-            postAudioFile(outer, tries - 1,base64EncodedWavFile); // try one more time...
+            postAudioFile(outer, tries - 1, base64EncodedWavFile); // TODO : try one more time...  ???
           } else {
             recordButton.setEnabled(true);
             receivedAudioFailure();
