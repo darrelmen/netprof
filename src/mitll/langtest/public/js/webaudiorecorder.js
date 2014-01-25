@@ -59,7 +59,7 @@ function uint6ToB64 (nUint6) {
         :
         65;
 
-};
+}
 
 function bytesToBase64(aBytes) {
 
@@ -77,7 +77,7 @@ function bytesToBase64(aBytes) {
 
     return sB64Enc.replace(/A(?=A$|$)/g, "=");
 
-};
+}
 
 function grabWav() {
     recorder && recorder.exportWAV(function (blob) {
@@ -128,9 +128,20 @@ function initWebAudio() {
         webAudioMicNotAvailable();
     }
 
-    navigator.getMedia({audio: true}, startUserMedia, function(e) {
-        __log('No live audio input: ' + e);
+    try {
+        if (navigator.getMedia) {
+            navigator.getMedia({audio: true}, startUserMedia, function (e) {
+                __log('No live audio input: ' + e);
+                console.error(e);
+                webAudioMicNotAvailable();
+            });
+        }
+        else {
+            webAudioMicNotAvailable();
+        }
+    } catch (e) {
+        __log('No navigator.getMedia in this browser!');
         console.error(e);
         webAudioMicNotAvailable();
-    });
+    }
 }
