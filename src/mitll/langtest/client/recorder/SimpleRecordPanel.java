@@ -31,6 +31,7 @@ import mitll.langtest.shared.Exercise;
 public class SimpleRecordPanel extends RecordButtonPanel {
   private static final String IMAGES_CHECKMARK = LangTest.LANGTEST_IMAGES +"checkmark32.png";
   private static final String IMAGES_REDX_PNG  = LangTest.LANGTEST_IMAGES +"redx32.png";
+  private static final String IMAGES_WAIT = LangTest.LANGTEST_IMAGES +"animated_progress.gif";
   private static final int PLAYBACK_WIDTH = 300;
   public static final int POPUP_TIMEOUT = 3000;
   public static final String AUDIO_SAVED = "Audio Saved";
@@ -77,6 +78,26 @@ public class SimpleRecordPanel extends RecordButtonPanel {
     if (check != null) check.setVisible(false);
   }
 
+  @Override
+  public void stopRecording() {
+    if (check != null) {
+      check.setUrl(IMAGES_WAIT);
+      check.setVisible(true);
+    }
+
+    super.stopRecording();
+  }
+
+  @Override
+  protected void receivedAudioFailure() {
+    super.receivedAudioFailure();
+
+    if (check != null) {
+      check.setUrl(IMAGES_REDX_PNG);
+      check.setVisible(true);
+    }
+  }
+
   /**
    * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
    * @param result from server about the audio we just posted
@@ -85,6 +106,11 @@ public class SimpleRecordPanel extends RecordButtonPanel {
    */
   @Override
   protected void receivedAudioAnswer(AudioAnswer result, final ExerciseQuestionState questionState, final Panel outer) {
+    if (check != null) {
+      check.setUrl(IMAGES_CHECKMARK);
+      check.setVisible(true);
+    }
+
     showAudioValidity(result.validity, questionState, outer);
     setAudioTag(result.path);
   }
