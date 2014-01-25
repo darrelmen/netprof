@@ -928,7 +928,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (shouldCollectAudio() && !flashRecordPanel.gotPermission()) {
       System.out.println("checkInitFlash : initFlash");
 
-      flashRecordPanel.initFlash();
+      flashRecordPanel.initRecorder();
     }
     else {
       boolean gotPermission = flashRecordPanel != null && flashRecordPanel.gotPermission();
