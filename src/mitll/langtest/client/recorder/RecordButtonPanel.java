@@ -132,7 +132,7 @@ public class RecordButtonPanel extends HorizontalPanel implements RecordButton.R
     });
   }
 
-  private void postAudioFile(final Panel outer, final int tries, final String base64EncodedWavFile) {
+  protected void postAudioFile(final Panel outer, final int tries, final String base64EncodedWavFile) {
     //System.out.println("RecordButtonPanel : postAudioFile " );
     reqid++;
     List<Integer> compressed = LZW.compress(base64EncodedWavFile);
