@@ -1,5 +1,4 @@
 function __log(e, data) {
-    //log.innerHTML += "\n" + e + " " + (data || '');
     $('#status').append("<p>"+e + "  at " + new Date().getTime());
 }
 
@@ -11,9 +10,6 @@ function startUserMedia(stream) {
     var input = audio_context.createMediaStreamSource(stream);
     __log('Media stream created.');
 
-    //input.connect(audio_context.destination);
-    __log('Input connected to audio context destination.');
-
     recorder = new Recorder(input);
     __log('Recorder initialised.');
 
@@ -21,55 +17,6 @@ function startUserMedia(stream) {
     webAudioMicAvailable();
     document.addEventListener('webkitvisibilitychange', onVisibilityChange);
 }
-/*
-function gotStreamOld(stream) {
-    var inputPoint = audio_context.createGain();
-    __log('inputPoint gain ' + inputPoint);
-
-    // Create an AudioNode from the stream.
-    var realAudioInput = audio_context.createMediaStreamSource(stream);
-    __log('Media stream created.');
-
-    inputPoint.connect(realAudioInput);
-    rememberedInput = realAudioInput;
-
-    recorder = new Recorder( inputPoint );
-    __log('Recorder initialised.');
-
-    webAudioMicAvailable();
-    document.addEventListener('webkitvisibilitychange', onVisibilityChange);
-}*/
-
-/*
-function gotStream(stream) {
-    //var inputPoint = audio_context.createGain();
-
-    // Create an AudioNode from the stream.
-    var realAudioInput = audio_context.createMediaStreamSource(stream);
-    var  audioInput = realAudioInput;
-
-    //audioInput.connect(audioInput);
-    //audioInput.connect(audio_context.destination);
-
-
-//    audioInput = convertToMono( input );
-
-    //analyserNode = audioContext.createAnalyser();
-    // analyserNode.fftSize = 2048;
-    //inputPoint.connect( analyserNode );
-
-    recorder = new Recorder( audioInput );
-    __log('Recorder initialised.');
-
-    var zeroGain = audio_context.createGain();
-    zeroGain.gain.value = 0.0;
-    audioInput.connect( zeroGain );
-    zeroGain.connect( audio_context.destination );
-
-    webAudioMicAvailable();
-}
-*/
-
 
 function onVisibilityChange() {
     if (document.webkitHidden) {
@@ -95,7 +42,6 @@ function stopRecording() {
 
     // get WAV from audio data blob
     grabWav();
-
 }
 
 function uint6ToB64 (nUint6) {
@@ -135,7 +81,6 @@ function bytesToBase64(aBytes) {
 
 function grabWav() {
     recorder && recorder.exportWAV(function (blob) {
-        __log('Got ... wav data!');
         try {
             var reader = new FileReader();
 
@@ -144,14 +89,7 @@ function grabWav() {
                 arrayBuffer = reader.result;
 
                 var myArray = new Uint8Array(arrayBuffer);
-
-                __log('5 Got ... array ' + myArray);
-
                 var bytes = bytesToBase64(myArray);
-                var length = bytes.length;
-
-                __log('8 Got ... wav data!' + length);
-
                 getBase64(bytes);
             }
 
@@ -185,7 +123,8 @@ function initWebAudio() {
         __log('Audio context set up.');
         __log('navigator.getUserMedia ' + (navigator.getMedia ? 'available.' : 'not present!'));
     } catch (e) {
-        alert('No web audio support in this browser!');
+        __log('No web audio support in this browser!');
+        console.error(e);
         webAudioMicNotAvailable();
     }
 
