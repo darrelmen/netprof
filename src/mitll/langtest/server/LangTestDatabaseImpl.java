@@ -981,11 +981,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     long now = System.currentTimeMillis();
 
     if(now-then > 100) {
-      logger.debug("writeAudioFile : took " + (now-then) + " millis to decompress " + compressedBase64EncodedString.size());
+      logger.debug("writeAudioFile : took " + (now - then) + " millis to decompress " + compressedBase64EncodedString.size());
     }
     return audioFileHelper.writeAudioFile(decompress, plan, exercise, questionID, user, reqid, flq,
       audioType, doFlashcard, this);
   }
+
+  @Override
+  public AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int questionID,
+                                    int user, int reqid, boolean flq, String audioType, boolean doFlashcard) {
+    return audioFileHelper.writeAudioFile(base64EncodedString, plan, exercise, questionID, user, reqid, flq,
+      audioType, doFlashcard, this);
+  }
+
 
   /**
    * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#getExercises(long, boolean)
