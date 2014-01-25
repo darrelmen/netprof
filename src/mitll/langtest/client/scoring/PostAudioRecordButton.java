@@ -67,8 +67,8 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   protected void postAudioFile(String base64EncodedWavFile) {
     reqid++;
     final long then = System.currentTimeMillis();
-    List<Integer> compressed = LZW.compress(base64EncodedWavFile);
-    service.writeAudioFile(compressed,
+   // List<Integer> compressed = LZW.compress(base64EncodedWavFile);
+    service.writeAudioFile(base64EncodedWavFile,
       exercise.getPlan(),
       exercise.getID(),
       index,
