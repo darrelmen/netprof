@@ -128,6 +128,9 @@ public interface LangTestDatabase extends RemoteService {
 
   void addDLIUser(DLIUser dliUser);
 
+  AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int questionID,
+                             int user, int reqid, boolean flq, String audioType, boolean doFlashcard);
+
   Set<String> getCompletedExercises(int user);
 
   ExerciseListWrapper getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID, String prefix, boolean showUnansweredFirst);
