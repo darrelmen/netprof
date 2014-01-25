@@ -91,7 +91,6 @@ public class RecordAudioPanel extends AudioPanel {
   @Override
   protected void onUnload() {
     super.onUnload();
-    //postAudioRecordButton.onUnload();
   }
 
   public Button getButton() { return postAudioRecordButton; }
