@@ -120,4 +120,7 @@ public interface LangTestDatabaseAsync {
   void getExerciseIds(int reqID, long userID, String prefix, AsyncCallback<ExerciseListWrapper> async);
 
   void getStartupInfo(AsyncCallback<StartupInfo> async);
+
+  void writeAudioFile(String base64EncodedString, String plan, String exercise, int questionID,
+                      int user, int reqid, boolean flq, String audioType, boolean doFlashcard, AsyncCallback<AudioAnswer> async);
 }
