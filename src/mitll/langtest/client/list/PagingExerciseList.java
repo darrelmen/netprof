@@ -23,6 +23,7 @@ import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.ExerciseShell;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -64,6 +65,11 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
     getElement().setId("PagingExerciseList");
   }
 
+  @Override
+  protected Set<String> getKeys() {
+    return pagingContainer.getKeys();
+  }
+
   /**
    * @see mitll.langtest.client.recorder.FeedbackRecordPanel#enableNext()
    * @param completed
@@ -82,9 +88,9 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
   @Override
   public int getPercentComplete() {
     if (controller.showCompleted()) {
-      int i = (int) Math.ceil(100f * ((float) getCompleted().size() / (float) currentExercises.size()));
+      int i = (int) Math.ceil(100f * ((float) getCompleted().size() / (float) getSize()));
       if (i > 100) i = 100;
-      System.out.println("completed " + getCompleted().size() + " current " + currentExercises.size() + " " + i);
+      System.out.println("completed " + getCompleted().size() + " current " + getSize() + " " + i);
       return i;
     } else {
       return super.getPercentComplete();
@@ -148,7 +154,7 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
   }
 
   @Override
-  protected ExerciseShell findFirstExercise() {
+  protected T findFirstExercise() {
     if (controller.showCompleted()) {
       return getFirstNotCompleted();
     }
@@ -157,8 +163,8 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
     }
   }
 
-  private ExerciseShell getFirstNotCompleted() {
-    for (ExerciseShell es : currentExercises) {
+  private T getFirstNotCompleted() {
+    for (T es : pagingContainer.getExercises()) {
       if (!getCompleted().contains(es.getID())) return es;
     }
     return super.findFirstExercise();
@@ -207,8 +213,6 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
   }
 
   public void showEmptySelection() {
-   // List<String> strings = Arrays.asList("No items match the selection and search.", "Try clearing one of your selections or changing the search.");
-
     showPopup("No items match the selection and search.","Try clearing one of your selections or changing the search.",typeAhead);
   }
 
@@ -235,7 +239,7 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
   protected void gotClickOnItem(final ExerciseShell e) {
     if (isExercisePanelBusy()) {
       tellUserPanelIsBusy();
-      markCurrentExercise(currentExercise);
+      markCurrentExercise(pagingContainer.getCurrentSelection());
     } else {
       pushNewItem(e.getID());
     }
@@ -243,59 +247,86 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
 
   public void clear() { pagingContainer.clear(); }
 
-  @Override
   public void flush() { pagingContainer.flush();  }
 
-  /**
-   * @see #addExercise(mitll.langtest.shared.ExerciseShell)
-   * @param exercise
-   */
   @Override
-  protected void addExerciseToList(T exercise) { pagingContainer.addExerciseToList2(exercise); }
+  protected void rememberExercises(List<T> result) {
+    clear();
+    for (final T es : result) {
+      addExercise(es);
+    }
+    flush();
+  }
+
+  @Override
+  protected int getSize() {
+    return pagingContainer.getSize();
+  }
+
+  @Override
+  protected boolean isEmpty() {
+    return pagingContainer.isEmpty();
+  }
+
+  @Override
+  protected T getFirst() {
+    return pagingContainer.getFirst();
+  }
+
+  @Override
+  public T byID(String name) {
+    return pagingContainer.byID(name);
+  }
+
+  @Override
+  protected T getCurrentExercise() {
+    return pagingContainer.getCurrentSelection();
+  }
+
+  @Override
+  protected int getRealIndex(T t) {
+    return pagingContainer.getIndex(t);
+  }
+
+  @Override
+  protected T getAt(int i) {
+    return pagingContainer.getAt(i);
+  }
+
+  @Override
+  public void addExercise(T es) {
+      pagingContainer.addExerciseToList2(es);
+  }
 
   public void forgetExercise(String id) {
+    System.out.println("forgetExercise " + id + " on " + getElement().getId() + " ul " +userListID);
     removeExercise(byID(id));
   }
 
   @Override
-  protected void removeExercise(T es) {
-    super.removeExercise(es);
-
-    pagingContainer.forgetExercise(es);
-  }
-
-  @Override
   public T simpleRemove(String id) {
-    T t = super.simpleRemove(id);
-    pagingContainer.forgetExercise(t);
-    return t;
+    T es = byID(id);
+    pagingContainer.forgetExercise(es);
+
+    if (isEmpty()) {
+      removeCurrentExercise();
+    }
+    return es;
   }
 
   @Override
   public void onResize() {
     super.onResize();
 
-    pagingContainer.onResize(currentExercise);
+    pagingContainer.onResize(getCurrentExercise());
   }
 
-  /**
-   * not sure how this happens, but need Math.max(0,...)
-   *
-   * @see ExerciseList#useExercise(mitll.langtest.shared.Exercise, mitll.langtest.shared.ExerciseShell)
-   * @param i
-   */
- @Override
-  protected void markCurrentExercise(int i) { pagingContainer.markCurrentExercise(i); }
+  protected void markCurrentExercise(T t) { pagingContainer.markCurrentExercise(t); }
 
   public void setUserListID(long userListID) {
     this.userListID = userListID;
   }
 
-/*
-  public PagingContainer<T> getPagingContainer() {
-    return pagingContainer;
-  }
-*/
   public void redraw() {
     pagingContainer.flush();
     pagingContainer.redraw();
