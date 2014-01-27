@@ -250,9 +250,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private ExerciseListWrapper<ExerciseShell> getExerciseListWrapper(int reqID, List<Exercise> exercisesForPrefix) {
     if (serverProps.isGoodwaveMode() && !serverProps.dataCollectMode) {
       exercisesForPrefix = getSortedExercises(exercisesForPrefix);
-/*      if (!exercisesForPrefix.isEmpty()) {
-        //logger.debug("sorting by id -- first is " + exercisesForPrefix.get(0).getID());
-      }*/
     }
 
     logMemory();
@@ -452,19 +449,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getSectionHelper().getSectionNodes();
   }
 
-/*
-  @Override
-  public Map<String, Map<String,Integer>> getTypeToSectionToCount() {
-    return db.getSectionHelper().getTypeToSectionToCount();
-  }
-*/
-
   private void logMemory() {
     Runtime rt = Runtime.getRuntime();
     long free = rt.freeMemory();
     long used = rt.totalMemory() - free;
     long max = rt.maxMemory();
-    logger.debug("heap info free " + free / MB + "M used " + used / MB + "M max " + max / MB + "M");
+    if (used/MB > 500) {
+      logger.debug("heap info free " + free / MB + "M used " + used / MB + "M max " + max / MB + "M");
+    }
   }
 
   /**
@@ -477,10 +469,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public Exercise getExercise(String id) {
     long then = System.currentTimeMillis();
     List<Exercise> exercises = getExercises();
-  /*  Exercise byID = db.getExercise(id);
-    if (byID == null) {
-      byID = db.getUserExerciseWhere(id);
-    }*/
+
     Exercise byID = db.getUserExerciseWhere(id);  // allow custom items to mask out non-custom items
     if (byID == null) {
       byID = db.getExercise(id);
