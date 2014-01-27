@@ -1,4 +1,4 @@
-package mitll.langtest.client.list;
+package mitll.langtest.client.flashcard;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.CellTable;
@@ -39,6 +39,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
+import mitll.langtest.client.list.ResponseChoice;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
@@ -439,7 +440,7 @@ public class TableSectionExerciseList<T extends ExerciseShell> extends FlexSecti
   }*/
 
   private native void registerCallback() /*-{
-      $wnd.feedback = $entry(@mitll.langtest.client.list.TableSectionExerciseList::feedback(Ljava/lang/String;));
+      $wnd.feedback = $entry(@mitll.langtest.client.flashcard.TableSectionExerciseList::feedback(Ljava/lang/String;));
   }-*/;
 
   /**
@@ -470,7 +471,7 @@ public class TableSectionExerciseList<T extends ExerciseShell> extends FlexSecti
     final TableSectionExerciseList outer = this;
     PagingContainer<T> exercisePagingContainer = new PagingContainer<T>(controller, 100) {
       /**
-       * @see mitll.langtest.client.list.TableSectionExerciseList#getAsyncTable(java.util.Map, int)
+       * @see TableSectionExerciseList#getAsyncTable(java.util.Map, int)
        * @return
        */
       @Override
