@@ -29,6 +29,9 @@ import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseFormatter;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created with IntelliJ IDEA.
  * User: GO22670
@@ -80,20 +83,19 @@ public class CommentNPFExercise extends NPFExercise {
   }
 
   /**
-   * TODO after edit, clear annotation -- where do we edit? in edit window
-   *
    * @param field
    * @param annotation
    * @return
    */
   private Widget getEntry(String field, Widget content, ExerciseAnnotation annotation) {
     final Button commentButton = new Button();
+
     if (field.endsWith(".mp3")) field = field.replaceAll(".mp3",".wav");
     final MyTextBox commentEntryText = new MyTextBox();
     Button clearButton = getClearButton(commentEntryText, commentButton, field);
 
     final MyPopup commentPopup = makeCommentPopup(field, commentButton, commentEntryText, clearButton);
-
+    commentPopup.addAutoHidePartner(commentButton.getElement()); // fix for bug Wade found where click didn't toggle comment
     configureCommentTextBox(annotation, commentEntryText, commentPopup);
 
     boolean isCorrect = annotation == null || annotation.status == null || annotation.isCorrect();
@@ -102,11 +104,9 @@ public class CommentNPFExercise extends NPFExercise {
       " correct " + isCorrect + " comment '" + comment+
       "', fields " + exercise.getFields());*/
 
-    getQCWidget(commentButton,
+    configureCommentButton(commentButton,
       isCorrect, commentPopup,
       comment, commentEntryText);
-
-    commentButton.addStyleName(/*isAudio ? "leftFiveMargin" :*/ "leftTenMargin");
 
     // content on left side, comment button on right
 
@@ -119,6 +119,14 @@ public class CommentNPFExercise extends NPFExercise {
     return row;
   }
 
+  /**
+   * @see #getEntry(String, com.google.gwt.user.client.ui.Widget, mitll.langtest.shared.ExerciseAnnotation)
+   * @param field
+   * @param commentButton
+   * @param commentEntryText
+   * @param clearButton
+   * @return
+   */
   private MyPopup makeCommentPopup(String field, Button commentButton, MyTextBox commentEntryText, Button clearButton) {
     final MyPopup commentPopup = new MyPopup();
     commentPopup.setAutoHideEnabled(true);
@@ -203,19 +211,31 @@ public class CommentNPFExercise extends NPFExercise {
     clearButton.setVisible(!isCorrect);
   }
 
-  private Button getQCWidget(final Button commentButton,
-                            final boolean alreadyMarkedCorrect, final PopupPanel commentPopup, String comment,
-                            final FocusWidget commentEntry) {
+  /**
+   * @see #getEntry(String, com.google.gwt.user.client.ui.Widget, mitll.langtest.shared.ExerciseAnnotation)
+   * @param commentButton
+   * @param alreadyMarkedCorrect
+   * @param commentPopup
+   * @param comment
+   * @param commentEntry
+   * @return
+   */
+  private void configureCommentButton(final Button commentButton,
+                                      final boolean alreadyMarkedCorrect, final PopupPanel commentPopup, String comment,
+                                      final FocusWidget commentEntry) {
     commentButton.setIcon(IconType.COMMENT);
     commentButton.setSize(ButtonSize.MINI);
+    commentButton.addStyleName("leftTenMargin");
+
     final Tooltip tooltip = setButtonTitle(commentButton, alreadyMarkedCorrect, comment);
     commentButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        boolean visible = commentPopup.isVisible();
+        boolean visible = commentPopup.isShowing();
 
-        System.out.println("popup visible " + visible);
-        if (visible) {
+        if (visible) {// fix for bug that Wade found -- if we click off of popup, it dismisses it,
+                      // but if that click is on the button, it would immediately shows it again
+          //System.out.println("popup visible " + visible);
           commentPopup.hide();
         } else {
           commentPopup.showRelativeTo(commentButton);
@@ -226,7 +246,6 @@ public class CommentNPFExercise extends NPFExercise {
     });
 
     showQC(commentButton);
-    return commentButton;
   }
 
   private Tooltip setButtonTitle(Widget button, boolean isCorrect, String comment) {
@@ -276,6 +295,8 @@ public class CommentNPFExercise extends NPFExercise {
     }
   }
 
+  private Map<String,String> fieldToComment = new HashMap<String,String>();
+
   /**
    * @see mitll.langtest.client.custom.CommentNPFExercise.MyPopup#configure(com.github.gwtbootstrap.client.ui.TextBox, com.google.gwt.user.client.ui.Widget, com.google.gwt.user.client.ui.Widget)
    * @param commentEntry
@@ -285,20 +306,27 @@ public class CommentNPFExercise extends NPFExercise {
    */
   private <T extends TextBox> void commentComplete(T commentEntry, String field, Widget commentButton, Widget clearButton) {
     String comment = commentEntry.getText();
-    boolean isCorrect = comment.length() == 0;
+    String previous = fieldToComment.get(field);
+    if (previous == null || !previous.equals(comment)) {
+      fieldToComment.put(field, comment);
+      boolean isCorrect = comment.length() == 0;
 
-    // System.out.println("commentComplete " + field + " comment '" + comment +"' correct = " +isCorrect);
+      System.out.println("commentComplete " + field + " comment '" + comment +"' correct = " +isCorrect);
 
-    if (isCorrect) {
-      addCorrectComment(field);
-    } else {
-      postIncorrect(commentEntry, field);
+      if (isCorrect) {
+        addCorrectComment(field);
+      } else {
+        postIncorrect(commentEntry, field);
+      }
+      setButtonTitle(commentButton, isCorrect, comment);
+      showOrHideCommentButton(commentButton, clearButton, isCorrect);
+      exercise.addAnnotation(field, isCorrect ? "correct" : "incorrect", comment);
+      System.out.println("\t commentComplete : annotations now " + exercise.getFields());
     }
-    setButtonTitle(commentButton, isCorrect, comment);
-    showOrHideCommentButton(commentButton, clearButton, isCorrect);
-    exercise.addAnnotation(field, isCorrect ? "correct" : "incorrect", comment);
+    else {
+      System.out.println("commentComplete " + field + " comment '" + comment +"' same as previous, so ignoring");
 
-    //System.out.println("\t annotations now " + exercise.getFields());
+    }
   }
 
   private void postIncorrect(TextBox commentEntry, String field) {
