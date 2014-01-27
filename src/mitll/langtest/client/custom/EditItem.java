@@ -120,7 +120,7 @@ public class EditItem<T extends ExerciseShell> {
         }
 
         @Override
-        protected void askServerForExercise(ExerciseShell exerciseShell) {
+        protected void askServerForExercise(T exerciseShell) {
           if (exerciseShell.getID().equals(NEW_EXERCISE_ID)) {
             UserExercise newItem = new UserExercise(-1, NEW_EXERCISE_ID, userManager.getUser(), NEW_ITEM, "", "");
 
@@ -254,14 +254,26 @@ public class EditItem<T extends ExerciseShell> {
       delete.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          service.deleteItemFromList(uniqueID, newUserExercise.getID(), new AsyncCallback<Boolean>() {
+
+          final String id = newUserExercise.getID();
+          System.out.println("getCreateButton removing item " + id);
+          service.deleteItemFromList(uniqueID, id, new AsyncCallback<Boolean>() {
             @Override
             public void onFailure(Throwable caught) {}
 
             @Override
             public void onSuccess(Boolean result) {
-              exerciseList.forgetExercise(newUserExercise.getID());
-              ul.remove(newUserExercise.getID());
+              if (!result)  System.err.println("getCreateButton huh? id " + id + " not in list " + uniqueID);
+
+              exerciseList.forgetExercise(id);
+              UserExercise remove = ul.remove(id);
+              if (remove == null) {
+                System.err.println("getCreateButton huh? didn't remove the item " + id);
+              }
+            //  npfHelper.reload();
+              if (originalList.remove(id) == null) {
+                System.err.println("getCreateButton huh? didn't remove the item " + id + " from " + originalList);
+              }
               npfHelper.reload();
             }
           });
