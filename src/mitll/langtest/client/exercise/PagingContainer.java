@@ -352,7 +352,7 @@ public class PagingContainer<T extends ExerciseShell> {
 
   public T byID(String id) { return idToExercise.get(id); }
 
-  public <S extends ExerciseShell> void addExerciseToList2(S exercise) {
+  public <S extends ExerciseShell> void addExercise(S exercise) {
     List<T> list = getList();
     String id = exercise.getID();
     T exercise1 = (T) exercise;
