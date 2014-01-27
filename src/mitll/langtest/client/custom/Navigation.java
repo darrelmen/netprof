@@ -486,6 +486,7 @@ public class Navigation implements RequiresResize {
    * @param addItem
    */
   private void showEditItem(UserList ul, TabAndContent addItem, EditItem<? extends ExerciseShell> editItem, boolean includeAddItem) {
+    System.out.println("\n\n\nshowEditItem --- " + ul);
     addItem.content.clear();
     Widget widgets = editItem.editItem(ul, listToMarker.get(ul), includeAddItem);
     addItem.content.add(widgets);
