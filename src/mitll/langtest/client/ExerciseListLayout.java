@@ -80,7 +80,6 @@ public class ExerciseListLayout {
   private <T extends ExerciseShell> ListInterface<T> makeExerciseList(FluidRow secondRow, boolean isGrading, final UserFeedback feedback,
                                          Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                          ExerciseController controller) {
-    //boolean showCompleted =  props.isCRTDataCollectMode() || controller.isReviewMode();
     boolean showTypeAhead = !props.isCRTDataCollectMode();
     if (isGrading) {
       return new GradedExerciseList<T>(currentExerciseVPanel, service, feedback,
