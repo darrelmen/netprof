@@ -60,7 +60,7 @@ public class GradedExerciseList<T extends ExerciseShell> extends PagingExerciseL
    * @param exerciseShell
    */
   @Override
-  protected void askServerForExercise(final ExerciseShell exerciseShell) {
+  protected void askServerForExercise(final T exerciseShell) {
     service.checkoutExerciseID(""+user.getUser(),exerciseShell.getID(), new AsyncCallback<Void>() {
       public void onFailure(Throwable caught) { Window.alert("couldn't checkout " + exerciseShell.getID());}
       public void onSuccess(Void result) {
@@ -84,15 +84,7 @@ public class GradedExerciseList<T extends ExerciseShell> extends PagingExerciseL
     getNextUngraded(false);
   }
 
-  protected void loadExercises(String selectionState, String prefix) {
-/*    Map<String, Collection<String>> typeToSection = getSelectionState(selectionState).getTypeToSection();
-    lastReqID++;
-    if (typeToSection.isEmpty()) {
-      service.getExerciseIds(lastReqID, userID,prefix, new SetExercisesCallback());
-    } else {
-      service.getExercisesForSelectionState(lastReqID, typeToSection, userID, prefix, new MySetExercisesCallback(null));
-    }*/
-  }
+  protected void loadExercises(String selectionState, String prefix) {}
 
   private void getNextUngraded(final boolean showFirstIfNoneToGrade) {
     final PopupPanel popup = getPopup2("Please wait...");
@@ -112,17 +104,16 @@ public class GradedExerciseList<T extends ExerciseShell> extends PagingExerciseL
         popup.hide();
 
         if (result != null) {
-          for (T e : currentExercises) {
-            if (e.getID().equals(result.getID())) {
-              loadExercise(e);
-              break;
-            }
+          if (!loadByID(result.getID())) {
+            System.out.println("showing first exercise...");
+            T toLoad = getFirst();
+            loadExercise(toLoad);
           }
         }
         else {
           if (showFirstIfNoneToGrade) {
             System.out.println("showing first exercise...");
-            T toLoad = currentExercises.get(0);
+            T toLoad = getFirst();
             loadExercise(toLoad);
           }
           else {
