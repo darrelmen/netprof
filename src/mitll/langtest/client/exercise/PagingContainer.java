@@ -18,12 +18,14 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.shared.ExerciseShell;
-import mitll.langtest.shared.custom.UserExercise;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -47,6 +49,7 @@ public class PagingContainer<T extends ExerciseShell> {
   protected ExerciseController controller;
   private int verticalUnaccountedFor = 100;
   private Set<String> completed = new HashSet<String>();
+  private Map<String,T> idToExercise = new HashMap<String, T>();
 
   /**
    * @see mitll.langtest.client.list.PagingExerciseList#makePagingContainer()
@@ -76,8 +79,6 @@ public class PagingContainer<T extends ExerciseShell> {
 
   public void redraw() {  table.redraw();  }
 
-  public int getSize() { return getList().size(); }
-
   private T getByID(String id) {
     for (T t : getList()) {
       if (t.getID().equals(id)) {
@@ -103,15 +104,25 @@ public class PagingContainer<T extends ExerciseShell> {
           System.out.println("\tnow has " + t.getID());
         }
       }
+      else {
+        idToExercise.remove(es.getID());
+      }
     }
     else {
       System.out.println("\tPagingContainer : now has " + list.size() + " items");
-
+      idToExercise.remove(es.getID());
     }
     redraw();
   }
 
   public void setUnaccountedForVertical(int v) {  verticalUnaccountedFor = v;  }
+
+  public List<T> getExercises() {  return getList();  }
+  public int getSize() { return getList().size(); }
+  public boolean isEmpty() { return getList().isEmpty();  }
+  public T getFirst() {  return getAt(0);  }
+  public int getIndex(T t) {  return getList().indexOf(t); }
+  public T getAt(int i) { return getList().get(i);  }
 
   public interface TableResources extends CellTable.Resources {
     /**
@@ -187,18 +198,21 @@ public class PagingContainer<T extends ExerciseShell> {
     return bootstrapCellTable;
   }
 
+  private SingleSelectionModel<T> selectionModel;
   private void configureTable() {
     table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
     table.setWidth("100%");
     table.setHeight("auto");
 
     // Add a selection model to handle user selection.
-    final SingleSelectionModel<T> selectionModel = new SingleSelectionModel<T>();
+    selectionModel = new SingleSelectionModel<T>();
     table.setSelectionModel(selectionModel);
     // we don't want to listen for changes in the selection model, since that happens on load too -- we just want clicks
 
     addColumnsToTable();
   }
+
+  public T getCurrentSelection() { return selectionModel.getSelectedObject(); }
 
   private CellTable<T> makeCellTable(CellTable.Resources o) {
     return new CellTable<T>(PAGE_SIZE, o);
@@ -234,7 +248,7 @@ public class PagingContainer<T extends ExerciseShell> {
         super.onBrowserEvent(context, elem, object, event);
         if (BrowserEvents.CLICK.equals(event.getType())) {
           //System.out.println("getExerciseIdColumn.onBrowserEvent : got click " + event);
-          current = object;
+          //current = object;
           gotClickOnItem(object);
         }
       }
@@ -265,7 +279,6 @@ public class PagingContainer<T extends ExerciseShell> {
   }
 
   protected void gotClickOnItem(final T e) {}
-  private T current = null;
   public T selectFirst() {
     if (getList().isEmpty()) return null;
     return selectItem(0);
@@ -319,18 +332,17 @@ public class PagingContainer<T extends ExerciseShell> {
 
     table.getSelectionModel().setSelected(first, true);
     table.redraw();
-    onResize(index);
-    current = first;
+    onResize(first);
     return first;
   }
 
   public void clear() {
     List<T> list = getList();
-    List<T> copy = new ArrayList<T>();
+    list.clear();
+    idToExercise.clear();
 
-    for (T es : list) copy.add(es);
-    for (T es : copy) list.remove(es);
     table.setRowCount(list.size());
+
   }
 
   public void flush() {
@@ -338,19 +350,20 @@ public class PagingContainer<T extends ExerciseShell> {
     table.setRowCount(getList().size());
   }
 
-/*  public <S extends ExerciseShell> void addAndFlush(S exercise) {
-    addExerciseToList2(exercise);
-    flush();
-  }*/
+  public T byID(String id) { return idToExercise.get(id); }
 
   public <S extends ExerciseShell> void addExerciseToList2(S exercise) {
     List<T> list = getList();
-    list.add((T) exercise);  // TODO : can't remember how I avoid this
+    String id = exercise.getID();
+    T exercise1 = (T) exercise;
+    idToExercise.put(id, exercise1);
+    list.add(exercise1);  // TODO : can't remember how I avoid this
    // System.out.println("data now has "+list.size() + " after adding " + exercise.getID());
   }
 
-  public void onResize(int currentExercise) {
-    // super.onResize();
+  public Set<String> getKeys() { return idToExercise.keySet(); }
+
+  public void onResize(T currentExercise) {
 /*    System.out.println("Got on resize " + Window.getClientHeight() + " " +
         getOffsetHeight() + " bodyheight = " + table.getBodyHeight() + " table offset height " + table.getOffsetHeight() + " parent height " + getParent().getOffsetHeight());*/
     int numRows = getNumTableRowsGivenScreenHeight();
@@ -396,16 +409,15 @@ public class PagingContainer<T extends ExerciseShell> {
     return controller.getHeightOfTopRows();
   }
 
-  /**
-   * not sure how this happens, but need Math.max(0,...)
-   *
-   * @param i
-   * @see #onResize(int)
-   * @see mitll.langtest.client.list.PagingExerciseList#markCurrentExercise(int)
-   */
-  public void markCurrentExercise(int i) {
+  public void markCurrentExercise(T itemToSelect) {
     if (getList() == null || getList().isEmpty()) return;
-    T itemToSelect = getList().get(i);
+
+    T t = idToExercise.get(itemToSelect.getID());
+    int i = getList().indexOf(t);
+    markCurrent(i,t);
+  }
+
+  protected void markCurrent(int i, T itemToSelect) {
     if (DEBUG) System.out.println(new Date() + " markCurrentExercise : Comparing selected " + itemToSelect.getID());
     table.getSelectionModel().setSelected(itemToSelect, true);
     if (DEBUG) {
