@@ -216,9 +216,11 @@ public class Navigation implements RequiresResize {
     DOM.setStyleAttribute(createContent.getElement(), "paddingRight", "0px");
   }
 
+/*
   public long getUserListID() {
     return userListID;
   }
+*/
 
   public void setUserListID(long userListID) {
     this.userListID = userListID;
@@ -438,7 +440,7 @@ public class Navigation implements RequiresResize {
 
     // add practice tab
     final boolean isNormalList = !isReview && !isComment;
-    System.out.println("normal list " + isNormalList);
+    //System.out.println("normal list " + isNormalList);
     if (isNormalList) {
       final TabAndContent practice = makeTab(tabPanel, IconType.CHECK, PRACTICE);
       practice.tab.addClickHandler(new ClickHandler() {
@@ -466,7 +468,7 @@ public class Navigation implements RequiresResize {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
         if (created && !ul.isPrivate() && ul.isEmpty() && finalEditItem != null) {
-          tabPanel.selectTab(1);
+          tabPanel.selectTab(2);    // 2 = add/edit item
           showEditItem(ul, finalEditItem, (isReview || isComment) ? reviewItem : Navigation.this.editItem, isNormalList);
         } else {
           tabPanel.selectTab(0);
