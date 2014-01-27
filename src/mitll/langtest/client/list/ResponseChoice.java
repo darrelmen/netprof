@@ -24,7 +24,7 @@ import com.google.gwt.user.client.ui.Panel;
  */
 public class ResponseChoice {
   private String responseType;
-  ChoiceMade choiceMade = null;
+  private ChoiceMade choiceMade = null;
 
   public ResponseChoice(String responseType) {
     this.responseType = responseType;
@@ -45,7 +45,7 @@ public class ResponseChoice {
 
   public Panel getResponseTypeWidget() {
     Panel instructions = new FluidRow();
-    instructions.addStyleName("inlineStyle");
+    instructions.addStyleName("trueInlineStyle");
     Nav div = new Nav();
     DOM.setStyleAttribute(div.getElement(), "marginBottom", "0px");
 
