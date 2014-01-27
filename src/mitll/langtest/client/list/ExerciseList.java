@@ -280,9 +280,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   protected class SetExercisesCallback implements AsyncCallback<ExerciseListWrapper<T>> {
     private String id;
 
-    public SetExercisesCallback(String id) {
-      this.id = id;
-    }
+    public SetExercisesCallback(String id) { this.id = id;  }
 
     public SetExercisesCallback() {
 
@@ -329,7 +327,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * @see ExerciseList.SetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
    */
   public void rememberAndLoadFirst(List<T> exercises, Exercise firstExercise) {
-    System.out.println("ExerciseList : rememberAndLoadFirst " + firstExercise);
+    System.out.println("ExerciseList : rememberAndLoadFirst remembering " + exercises.size() + " : " +firstExercise);
 
     rememberExercises(exercises);
     if (firstExercise != null) {
