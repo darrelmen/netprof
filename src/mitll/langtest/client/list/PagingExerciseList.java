@@ -62,13 +62,11 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
     this.controller = controller;
     this.showTypeAhead = showTypeAhead;
     addComponents();
-    getElement().setId("PagingExerciseList");
+    getElement().setId("PagingExerciseList_" + instance);
   }
 
   @Override
-  protected Set<String> getKeys() {
-    return pagingContainer.getKeys();
-  }
+  protected Set<String> getKeys() {  return pagingContainer.getKeys();  }
 
   /**
    * @see mitll.langtest.client.recorder.FeedbackRecordPanel#enableNext()
@@ -249,13 +247,20 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
 
   public void flush() { pagingContainer.flush();  }
 
+  /**
+   * @see mitll.langtest.client.list.ExerciseList#rememberAndLoadFirst(java.util.List, mitll.langtest.shared.Exercise)
+   * @param result
+   */
   @Override
   protected void rememberExercises(List<T> result) {
+    System.out.println("PagingExerciseList : rememberAndLoadFirst remembering " + result.size());
+
     clear();
     for (final T es : result) {
       addExercise(es);
     }
     flush();
+    System.out.println("PagingExerciseList : size " + getSize());
   }
 
   @Override
@@ -294,9 +299,7 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
   }
 
   @Override
-  public void addExercise(T es) {
-      pagingContainer.addExerciseToList2(es);
-  }
+  public void addExercise(T es) { pagingContainer.addExercise(es);  }
 
   public void forgetExercise(String id) {
     System.out.println("forgetExercise " + id + " on " + getElement().getId() + " ul " +userListID);
