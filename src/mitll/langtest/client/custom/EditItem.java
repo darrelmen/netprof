@@ -90,22 +90,32 @@ public class EditItem<T extends ExerciseShell> {
 
     this.itemMarker = itemMarker; // TODO : something less awkward
 
-    System.out.println("editItem - including add item = " + includeAddItem);
+    //System.out.println("\n\n\neditItem - including add item = " + includeAddItem + " list " + originalList.getName());
     UserList copy = new UserList(originalList);  // copy before we add to it!
-    if (includeAddItem) {
-      UserExercise newItem = new UserExercise(-1, NEW_EXERCISE_ID, userManager.getUser(), NEW_ITEM, "", "");
+ /*   if (includeAddItem) {
+      UserExercise newItem = getNewItem();
       System.out.println("editItem : Adding " + newItem + " with " + newItem.getTooltip());
       copy.addExercise(newItem);
-    }
+    }*/
 
-    exerciseList = makeExerciseList(contentOnRight, "editItem", copy,originalList);
+    exerciseList = makeExerciseList(contentOnRight, "editItem", copy, originalList, includeAddItem);
     pagerOnLeft.add(exerciseList.getExerciseListOnLeftSide(controller.getProps()));
 
     rememberAndLoadFirst(copy, exerciseList);
     return hp;
   }
 
-  private PagingExerciseList<T> makeExerciseList(Panel right, String instanceName, UserList ul, UserList originalList) {
+  private PagingExerciseList<T> makeExerciseList(Panel right, String instanceName, UserList ul, UserList originalList,
+                                                 final boolean includeAddItem) {
+
+    //System.out.println("makeExerciseList - ul = " + ul.getName() + " " + includeAddItem);
+
+    if (includeAddItem) {
+      UserExercise newItem = getNewItem();
+      System.out.println("makeExerciseList : Adding " + newItem + " with " + newItem.getTooltip());
+      ul.addExercise(newItem);
+    }
+
     PagingExerciseList<T> exerciseList =
       new PagingExerciseList<T>(right, service, feedback, false, false, controller,
         true, instanceName) {
@@ -122,7 +132,7 @@ public class EditItem<T extends ExerciseShell> {
         @Override
         protected void askServerForExercise(T exerciseShell) {
           if (exerciseShell.getID().equals(NEW_EXERCISE_ID)) {
-            UserExercise newItem = new UserExercise(-1, NEW_EXERCISE_ID, userManager.getUser(), NEW_ITEM, "", "");
+            UserExercise newItem = getNewItem();
 
             useExercise(newItem.toExercise(),exerciseShell);
           }
@@ -130,9 +140,36 @@ public class EditItem<T extends ExerciseShell> {
             super.askServerForExercise(exerciseShell);
           }
         }
+
+        @Override
+        protected void rememberExercises(List<T> result) {
+          //System.out.println("rememberExercises - result = " + result.size());
+
+          clear();
+          boolean addNewItem = true;
+
+          for (final T es : result) {
+            addExercise(es);
+            if (includeAddItem && es.getID().equals(NEW_EXERCISE_ID)) {
+              addNewItem = false;
+            }
+          }
+
+          if (addNewItem) {
+            addExercise((T)getNewItem());  // TODO : fix this
+          }
+
+          //System.out.println("\trememberExercises - size = " + getSize());
+
+          flush();
+        }
       };
     setFactory(exerciseList, ul, originalList);
     return exerciseList;
+  }
+
+  protected UserExercise getNewItem() {
+    return new UserExercise(-1, NEW_EXERCISE_ID, userManager.getUser(), NEW_ITEM, "", "");
   }
 
   protected void setFactory(final PagingExerciseList<T> exerciseList, final UserList ul, final UserList originalList) {
@@ -270,7 +307,6 @@ public class EditItem<T extends ExerciseShell> {
               if (remove == null) {
                 System.err.println("getCreateButton huh? didn't remove the item " + id);
               }
-            //  npfHelper.reload();
               if (originalList.remove(id) == null) {
                 System.err.println("getCreateButton huh? didn't remove the item " + id + " from " + originalList);
               }
@@ -296,7 +332,7 @@ public class EditItem<T extends ExerciseShell> {
      */
     @Override
     protected Panel makeEnglishRow(Panel container) {
-      FluidRow row = new FluidRow();
+      Panel row = new FluidRow();
       container.add(row);
       english = makeBoxAndAnno(row, "English", englishAnno);
       return row;
