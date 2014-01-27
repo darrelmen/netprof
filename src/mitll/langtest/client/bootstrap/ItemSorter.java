@@ -1,4 +1,4 @@
-package mitll.langtest.client.list;
+package mitll.langtest.client.bootstrap;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,6 +14,11 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class ItemSorter {
+  /**
+   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList
+   * @param sections
+   * @return
+   */
   public List<String> getSortedItems(Collection<String> sections) {
     List<String> items = new ArrayList<String>(sections);
     boolean isInt = true;
