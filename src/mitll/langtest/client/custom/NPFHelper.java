@@ -62,7 +62,7 @@ public class NPFHelper implements RequiresResize {
    * @param instanceName
    */
   public void showNPF(UserList ul, Navigation.TabAndContent learn, String instanceName) {
-    System.out.println(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul);
+    System.out.println(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul/* + " " + getElement().getID()*/);
 
     int widgetCount = learn.content.getWidgetCount();
     if (!madeNPFContent || widgetCount == 0) {
@@ -107,12 +107,12 @@ public class NPFHelper implements RequiresResize {
         public void onSuccess(Set<String> result) {
           npfExerciseList.setCompleted(result);
           npfExerciseList.setUserListID(ul.getUniqueID());
-          npfExerciseList.rememberAndLoadFirst(new ArrayList<UserExercise>(ul.getExercises()), null);
+          npfExerciseList.rememberAndLoadFirst(new ArrayList<UserExercise>(ul.getExercises()));
         }
       });
     } else {
       npfExerciseList.setUserListID(ul.getUniqueID());
-      npfExerciseList.rememberAndLoadFirst(new ArrayList<UserExercise>(ul.getExercises()), null);
+      npfExerciseList.rememberAndLoadFirst(new ArrayList<UserExercise>(ul.getExercises()));
     }
   }
 
@@ -165,9 +165,13 @@ public class NPFHelper implements RequiresResize {
 
   @Override
   public void onResize() { if (npfContentPanel != null) {  npfExerciseList.onResize(); } }
+
+  /**
+   * @see mitll.langtest.client.custom.EditItem.EditableExercise#getCreateButton(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, com.github.gwtbootstrap.client.ui.ControlGroup)
+   */
   public void reload() {
-    String currentExerciseID = npfExerciseList.getCurrentExerciseID();
-    npfExerciseList.reload();
+    //String currentExerciseID = npfExerciseList.getCurrentExerciseID();
+    npfExerciseList.redraw();
 
   }
 }
