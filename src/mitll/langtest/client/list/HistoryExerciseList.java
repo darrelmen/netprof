@@ -170,9 +170,9 @@ public class HistoryExerciseList<T extends ExerciseShell> extends PagingExercise
 
     setModeLinks(historyToken);
     if (currentToken.equals(historyToken)) {
-      if (currentExercises == null || currentExercises.isEmpty() || historyToken.isEmpty()) {
+      if (isEmpty() || historyToken.isEmpty()) {
         System.out.println("pushNewSectionHistoryToken : noSectionsGetExercises for token '" + historyToken +
-          "' " + (currentExercises !=null ? "current has " +currentExercises.size() :""));
+          "' " + "current has " + getSize());
 
         noSectionsGetExercises(userID);
       } else {
