@@ -90,20 +90,9 @@ public class CommentNPFExercise extends NPFExercise {
     final Button commentButton = new Button();
     if (field.endsWith(".mp3")) field = field.replaceAll(".mp3",".wav");
     final MyTextBox commentEntryText = new MyTextBox();
-    final MyPopup commentPopup = new MyPopup();
-    commentPopup.setAutoHideEnabled(true);
     Button clearButton = getClearButton(commentEntryText, commentButton, field);
-    commentPopup.configure(commentEntryText, commentButton, clearButton);
-    commentPopup.setField(field);
 
-    HorizontalPanel hp = new HorizontalPanel();
-    // add content
-    hp.add(commentEntryText);
-    // add OK
-    hp.add(getOKButton(commentPopup));
-
-   // hp.add(clearButton);
-    commentPopup.add(hp);
+    final MyPopup commentPopup = makeCommentPopup(field, commentButton, commentEntryText, clearButton);
 
     configureCommentTextBox(annotation, commentEntryText, commentPopup);
 
@@ -121,13 +110,30 @@ public class CommentNPFExercise extends NPFExercise {
 
     // content on left side, comment button on right
 
-    HorizontalPanel row = new HorizontalPanel();
+    Panel row = new HorizontalPanel();
     row.add(content);
     row.add(commentButton);
     row.add(clearButton);
 
     showOrHideCommentButton(commentButton, clearButton, isCorrect);
     return row;
+  }
+
+  private MyPopup makeCommentPopup(String field, Button commentButton, MyTextBox commentEntryText, Button clearButton) {
+    final MyPopup commentPopup = new MyPopup();
+    commentPopup.setAutoHideEnabled(true);
+    commentPopup.configure(commentEntryText, commentButton, clearButton);
+    commentPopup.setField(field);
+
+    Panel hp = new HorizontalPanel();
+    // add content
+    hp.add(commentEntryText);
+    // add OK
+    hp.add(getOKButton(commentPopup));
+
+    // hp.add(clearButton);
+    commentPopup.add(hp);
+    return commentPopup;
   }
 
   private Button getOKButton(final PopupPanel commentPopup) {
@@ -172,7 +178,7 @@ public class CommentNPFExercise extends NPFExercise {
     }
 
     /**
-     * @see mitll.langtest.client.custom.CommentNPFExercise#getEntry(String, com.google.gwt.user.client.ui.Widget, mitll.langtest.shared.ExerciseAnnotation, boolean)
+     * @see mitll.langtest.client.custom.CommentNPFExercise#getEntry
      * @param commentBox
      * @param commentButton
      * @param clearButton
@@ -206,9 +212,16 @@ public class CommentNPFExercise extends NPFExercise {
     commentButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        commentPopup.showRelativeTo(commentButton);
-        commentEntry.setFocus(true);
-        tooltip.hide();
+        boolean visible = commentPopup.isVisible();
+
+        System.out.println("popup visible " + visible);
+        if (visible) {
+          commentPopup.hide();
+        } else {
+          commentPopup.showRelativeTo(commentButton);
+          commentEntry.setFocus(true);
+          tooltip.hide();
+        }
       }
     });
 
