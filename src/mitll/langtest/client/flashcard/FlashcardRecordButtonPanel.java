@@ -62,7 +62,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
   public FlashcardRecordButtonPanel(BootstrapExercisePanel exercisePanel, LangTestDatabaseAsync service,
                                     ExerciseController controller, Exercise exercise, int index,
                                     boolean warnUserWhenNotSpace) {
-    super(service, controller, exercise, null, index, true);
+    super(service, controller, exercise, null, index, true, RecordButton.RECORD);
 
     this.exercisePanel = exercisePanel;
     this.exercise = exercise;
@@ -103,7 +103,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
     return hp;
   }
 
-  protected RecordButton makeRecordButton(ExerciseController controller) {
+  protected RecordButton makeRecordButton(ExerciseController controller, String buttonTitle) {
     return new FlashcardRecordButton(controller.getRecordTimeout(), this, true);  // TODO : fix later in classroom?
   }
 
@@ -169,27 +169,12 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
     } else if (correct) {
       showCorrectFeedback(score);
     } else {   // incorrect!!
-      if (hasRefAudio) {
-        ensureMP3(result, score, hasRefAudio);
-      } else {
-        feedback = showIncorrectFeedback(result, score, hasRefAudio);
-      }
+      feedback = showIncorrectFeedback(result, score, hasRefAudio);
     }
     if (!badAudioRecording && (correct || !hasRefAudio)) {
       System.out.println("receivedAudioAnswer: correct " + correct + " pron score : " + score + " has ref " + hasRefAudio);
       nextAfterDelay(correct, feedback);
     }
-  }
-
-  /**
-   * Make sure all the mp3s we may play exist on the server.
-   *
-   * @param result
-   * @param score
-   * @param hasRefAudio
-   */
-  private void ensureMP3(final AudioAnswer result, final double score, final boolean hasRefAudio) {
-    showIncorrectFeedback(result, score, hasRefAudio);
   }
 
   private void showCorrectFeedback(double score) {
