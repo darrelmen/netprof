@@ -68,7 +68,7 @@ public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
   }
 
   /**
-   * @see #getQuestionPanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int, java.util.List, java.util.List, int, mitll.langtest.shared.Exercise.QAPair, com.google.gwt.user.client.ui.HasWidgets)
+   * @see #getQuestionPanel
    * @param exercise
    * @param service
    * @param controller
@@ -103,12 +103,9 @@ public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
                                 final ExerciseController controller, final int index, String responseType, final boolean isNone,
                                 final String recordButtonTitle,
                                 String buttonTitle,boolean getFocus, boolean isEnglish) {
-    AutoCRTRecordPanel autoCRTRecordPanel = new AutoCRTRecordPanel(service, controller, exercise, this, index, FEEDBACK_WIDTH) {
-      @Override
-      protected String getRecordButtonTitle() {
-        return recordButtonTitle;
-      }
-      @Override
+    AutoCRTRecordPanel autoCRTRecordPanel = new AutoCRTRecordPanel(service, controller, exercise, this, index,
+      FEEDBACK_WIDTH, recordButtonTitle) {
+       @Override
       protected void setRecordButtonWidth(Panel recordButtonContainer) {
         if (isNone) super.setRecordButtonWidth(recordButtonContainer);
       }
