@@ -223,7 +223,7 @@ public class ExercisePanel extends VerticalPanel implements
   private void makeTabPanel(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, int questionNumber,
                             List<Exercise.QAPair> englishQuestions,
                             List<Exercise.QAPair> flQuestions,
-                            /*List<Exercise.QAPair> questionsToShow,*/ int n) {
+                            int n) {
     tabPanel = new TabPanel();
     DOM.setStyleAttribute(tabPanel.getWidget(0).getElement(), "marginBottom", "0px");
 
@@ -251,17 +251,11 @@ public class ExercisePanel extends VerticalPanel implements
     Exercise.QAPair flQAPair  = questionNumber - 1 < n ? flQuestions.get(questionNumber - 1) : null;
 
     if (engQAPair != null) {
-      //getQuestionHeader(n, engQAPair, shouldShowAnswer(),!controller.isDemoMode(),toAddTo);
       getQuestionHeader(questionNumber,n, pair, engQAPair, flQAPair, false,toAddTo);
     }
     else {
       toAddTo.add(new Heading(6, ""));
     }
-/*    if (controller.isDemoMode()) {
-      getQuestionHeader(questionNumber, n, flQAPair, pair, shouldShowAnswer(), toAddTo);
-     // getQuestionHeader(questionNumber,n, engQAPair, flQAPair,false,toAddTo);
-
-    }*/
     // add question prompt
     Panel vp = new VerticalPanel();
     addQuestionPrompt(vp, exercise);
@@ -542,9 +536,9 @@ public class ExercisePanel extends VerticalPanel implements
       System.err.println("recordCompleted huh? more complete " + completed.size() + " than answers " + answers.size());
     }
 
-    for (Widget complete : completed) {
+/*    for (Widget complete : completed) {
       System.out.println("\trecordCompleted : complete " + complete.getElement().getId());
-    }
+    }*/
 
     markTabsComplete();
     enableNext();
@@ -559,20 +553,20 @@ public class ExercisePanel extends VerticalPanel implements
       boolean allComplete = true;
       Set<Widget> widgetsForTab = indexWidgetsPair.getValue();
       Integer tabIndex = indexWidgetsPair.getKey();
-      System.out.println("\trecordCompleted : checking " + tabIndex + " and " + widgetsForTab.size());
+      //System.out.println("\trecordCompleted : checking " + tabIndex + " and " + widgetsForTab.size());
 
       for (Widget widget : widgetsForTab) {
         if (!completed.contains(widget)) {
-          System.out.println("\trecordCompleted : tab# " + tabIndex + " is *not* complete : " + widget.getElement().getId());
+          //System.out.println("\trecordCompleted : tab# " + tabIndex + " is *not* complete : " + widget.getElement().getId());
           allComplete = false;
           break;
         }
         else {
-          System.out.println("\trecordCompleted : tab# " + tabIndex + " is      complete : " + widget.getElement().getId());
+          //System.out.println("\trecordCompleted : tab# " + tabIndex + " is      complete : " + widget.getElement().getId());
         }
       }
       if (allComplete) {
-        System.out.println("\trecordCompleted : tab# " + tabIndex + " is complete");
+        //System.out.println("\trecordCompleted : tab# " + tabIndex + " is complete");
         if (!indexToTab.isEmpty()) {
           indexToTab.get(tabIndex).setIcon(IconType.CHECK);
         }
@@ -581,14 +575,14 @@ public class ExercisePanel extends VerticalPanel implements
   }
 
   protected void enableNext() {
-    System.out.println("enableNext : answered " + completed.size() + " vs total " + answers.size());
+    //System.out.println("enableNext : answered " + completed.size() + " vs total " + answers.size());
     boolean isComplete = isCompleted();
     navigationHelper.enableNextButton(isComplete);
   }
 
   protected boolean isCompleted() {
     boolean b = completed.size() == answers.size();
-    System.out.println("isCompleted : answered " + completed.size() + " vs total " + answers.size() + " : " + b);
+    //System.out.println("isCompleted : answered " + completed.size() + " vs total " + answers.size() + " : " + b);
     return b;
   }
 
