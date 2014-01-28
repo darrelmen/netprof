@@ -155,8 +155,8 @@ public class Exercise extends AudioExercise {
     if (refSentence.length() > 15) {
       refSentence = refSentence.substring(0, 15);
     }
-    boolean equals = getTooltip().trim().equals(getRefSentence().trim());
-    String combined = equals ? getTooltip() : getTooltip() + (refSentence.isEmpty() ? "": " / " + refSentence);
+    boolean refSentenceEqualsTooltip = getTooltip().trim().equals(getRefSentence().trim());
+    String combined = refSentenceEqualsTooltip ? getTooltip() : getTooltip() + (refSentence.isEmpty() ? "": " / " + refSentence);
     if (getTooltip().isEmpty()) combined = refSentence;
 
     return new ExerciseShell(getID(), combined);
