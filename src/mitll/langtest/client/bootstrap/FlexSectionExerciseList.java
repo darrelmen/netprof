@@ -50,10 +50,7 @@ import java.util.Set;
  */
 public class FlexSectionExerciseList extends HistoryExerciseList {
   private static final int HEADING_FOR_LABEL = 4;
- // public static final int PANEL_INSIDE_SCROLL_MIN_HEIGHT = 50;
- // public static final int PANEL_INSIDE_SCROLL_MIN_HEIGHT_SMALL = 30;
   private static final int UNACCOUNTED_WIDTH = 120;
-
 
   private final List<ButtonType> buttonTypes = new ArrayList<ButtonType>();
   private Map<String, ButtonType> typeToButton = new HashMap<String, ButtonType>();
@@ -81,7 +78,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    */
   public FlexSectionExerciseList(FluidRow secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                  UserFeedback feedback,
-                                 boolean showTurkToken, boolean showInOrder,/* boolean showListBox, */ExerciseController controller, String instance) {
+                                 boolean showTurkToken, boolean showInOrder, ExerciseController controller, String instance) {
     super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, controller.isCRTDataCollectMode(),instance);
     showCompleted = controller.isCRTDataCollectMode() || controller.isDataCollectMode();
     sectionPanel = new FluidContainer();
@@ -100,7 +97,6 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   @Override
   protected void addComponents() {
     PagingContainer<? extends ExerciseShell> exerciseShellPagingContainer = makePagingContainer();
-    //System.out.println("addComponents made container " + exerciseShellPagingContainer);
     addTableWithPager(exerciseShellPagingContainer);
   }
 
