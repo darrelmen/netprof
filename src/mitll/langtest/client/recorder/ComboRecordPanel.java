@@ -134,7 +134,9 @@ public class ComboRecordPanel extends SimpleRecordExercisePanel {
     final String recordButtonTitle = isNone ? "Record" : "Record in Arabic";
     final String textButtonTitle   = isNone ? "Answer" : "Answer in Arabic";
 
-    Widget widget = addComboAnswer(exercise, service, controller, index, responseType, isNone, recordButtonTitle, textButtonTitle, true, false);
+    MySimpleRecordPanel autoCRTRecordPanel = makeRecordPanel(exercise, service, controller, index, isNone, recordButtonTitle, false);
+
+    Widget widget = getComboAnswer(exercise, service, controller, index, responseType, textButtonTitle, true, false, true, autoCRTRecordPanel);
 
     if (isNone) {
       return widget;
@@ -142,60 +144,52 @@ public class ComboRecordPanel extends SimpleRecordExercisePanel {
     else {
       Panel vert = new VerticalPanel();
       vert.add(widget);
-      vert.add(addComboAnswer(exercise, service, controller, index, secondResponseType, false, "Record in English", "Answer in English", false, true));
+      MySimpleRecordPanel autoCRTRecordPanel2 = makeRecordPanel(exercise, service, controller, index, false, "Record in English", true);
+
+      // they need to know about each other so we can prevent both recording at the same time
+      autoCRTRecordPanel2.setOtherRecordPanel(autoCRTRecordPanel);
+      autoCRTRecordPanel.setOtherRecordPanel(autoCRTRecordPanel2);
+
+      Widget child = getComboAnswer(exercise, service, controller, index, secondResponseType, "Answer in English", false, true,
+        !responseType.equals(ResponseChoice.BOTH), autoCRTRecordPanel2);
+      child.addStyleName("topFiveMargin");
+
+      vert.add(child);
       return vert;
     }
   }
 
-  private Widget addComboAnswer(final Exercise exercise, final LangTestDatabaseAsync service,
-                                final ExerciseController controller, final int index, String responseType, final boolean isNone,
-                                final String recordButtonTitle,
-                                String buttonTitle,boolean getFocus,final boolean isEnglish) {
-    String answerType = isEnglish ? "english text" : "arabic text";
-    SimpleRecordPanel autoCRTRecordPanel = new SimpleRecordPanel(service, controller, exercise, this, index) {
-      @Override
-      protected String getRecordButtonTitle() {
-        return recordButtonTitle;
-      }
-      @Override
-      protected void setRecordButtonWidth(Panel recordButtonContainer) {
-        if (isNone) super.setRecordButtonWidth(recordButtonContainer);
-      }
-
-      @Override
-      protected String getAudioType() {
-        String answer = (showedEnglishQuestion.contains(index) ? SAW_ENGLISH_Q : "") + (isEnglish ? " english audio" : "arabic audio");
-        return answer;
-      }
-
-      @Override
-      protected void receivedAudioAnswer(AudioAnswer result, ExerciseQuestionState questionState, Panel outer) {
-        super.receivedAudioAnswer(result, questionState, outer);
-        if (result.isValid()) {
-          recordCompleted(this);
-        }
-        else {
-          recordIncomplete(this);
-        }
-      }
-    };
-
+  private Widget getComboAnswer(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, int index,
+                                String responseType, String buttonTitle,
+                                boolean getFocus,
+                                boolean isEnglish,
+                                boolean leftAlignAudio,
+                                SimpleRecordPanel autoCRTRecordPanel) {
     if (responseType.equalsIgnoreCase(AUDIO)) {
       Panel widgets ;
-      if (isEnglish) {
-        widgets = getRightSideAudioWidget(index, autoCRTRecordPanel);
-      }
-      else {
+      if (leftAlignAudio) {
         widgets = addAudioAnswer(index, autoCRTRecordPanel);
       }
+      else {
+        widgets = getRightSideAudioWidget(index, autoCRTRecordPanel);
+      }
+
       return widgets;
     }
     else if (responseType.equalsIgnoreCase(TEXT)){
+      String answerType = isEnglish ? "english text" : "arabic text";
       return doText(exercise, service, controller, index, getFocus, answerType, buttonTitle);
     }
     else {  // both
+      String answerType = isEnglish ? "english text" : "arabic text";
       return getBothAudioAndText(exercise, service, controller, index, autoCRTRecordPanel, buttonTitle, getFocus, answerType);
     }
+  }
+
+  private MySimpleRecordPanel makeRecordPanel(final Exercise exercise, final LangTestDatabaseAsync service,
+                                            final ExerciseController controller, final int index, final boolean isNone,
+                                            final String recordButtonTitle, final boolean isEnglish) {
+    return new MySimpleRecordPanel(service, controller, exercise, index, recordButtonTitle, isNone, isEnglish,this);
   }
 
   private Widget getBothAudioAndText(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller,
@@ -229,6 +223,13 @@ public class ComboRecordPanel extends SimpleRecordExercisePanel {
     return outerContainer;
   }
 
+  /**
+   * @see #getBothAudioAndText(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int, com.google.gwt.user.client.ui.Panel, String, boolean, String)
+   * @see #getComboAnswer(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int, String, String, boolean, boolean, boolean, SimpleRecordPanel)
+   * @param index
+   * @param autoCRTRecordPanel
+   * @return
+   */
   private Panel getRightSideAudioWidget(int index, Panel autoCRTRecordPanel) {
     addAnswerWidget(index, autoCRTRecordPanel);
 
@@ -245,8 +246,7 @@ public class ComboRecordPanel extends SimpleRecordExercisePanel {
     final SimpleTextResponse textResponse = new SimpleTextResponse(controller.getUser()) {
       @Override
       protected String getAnswerType() {
-        String answer = (showedEnglishQuestion.contains(index) ? SAW_ENGLISH_Q : "") + answerType;
-        return answer;
+        return (showedEnglishQuestion.contains(index) ? SAW_ENGLISH_Q : "") + answerType;
       }
     };
     textResponse.setAnswerPostedCallback(
@@ -277,8 +277,9 @@ public class ComboRecordPanel extends SimpleRecordExercisePanel {
   }
 
   @Override
-  protected void enableNext() {
-    super.enableNext();
+  public void postAnswers(final ExerciseController controller, Exercise completedExercise) {
+    super.postAnswers(controller, completedExercise);
+
     if (isCompleted()) {
       service.getCompletedExercises(controller.getUser(), new AsyncCallback<Set<String>>() {
         @Override
@@ -295,4 +296,58 @@ public class ComboRecordPanel extends SimpleRecordExercisePanel {
 
   @Override
   protected String getInstructions() {  return "";  }
+
+  private class MySimpleRecordPanel extends SimpleRecordPanel {
+    private final int index;
+    private final boolean isNone;
+    private final boolean isEnglish;
+    private  SimpleRecordPanel otherRecordPanel;
+
+    public MySimpleRecordPanel(LangTestDatabaseAsync service, ExerciseController controller, Exercise exercise,
+                               int index, String recordButtonTitle, boolean isNone, boolean isEnglish,
+                               ExerciseQuestionState questionState) {
+      super(service, controller, exercise, questionState, index, recordButtonTitle);
+      this.index = index;
+      this.isNone = isNone;
+      this.isEnglish = isEnglish;
+      getElement().setId("SimpleRecordPanel_panel_" + index + (isEnglish ? "english":"arabic"));
+    }
+
+    @Override
+    protected void setRecordButtonWidth(Panel recordButtonContainer) {
+      if (isNone) super.setRecordButtonWidth(recordButtonContainer);
+    }
+
+    @Override
+    protected String getAudioType() {
+      return (showedEnglishQuestion.contains(index) ? SAW_ENGLISH_Q : "") + (isEnglish ? " english audio" : "arabic audio");
+    }
+
+    @Override
+    protected void receivedAudioAnswer(AudioAnswer result, ExerciseQuestionState questionState, Panel outer) {
+      super.receivedAudioAnswer(result, questionState, outer);
+      if (result.isValid()) {
+        recordCompleted(this);
+      }
+      else {
+        recordIncomplete(this);
+      }
+    }
+
+    @Override
+    public void startRecording() {
+      super.startRecording();
+      if (otherRecordPanel != null) otherRecordPanel.setRecordButtonEnabled(false);
+    }
+
+    @Override
+    public void stopRecording() {
+      super.stopRecording();
+      if (otherRecordPanel != null) otherRecordPanel.setRecordButtonEnabled(true);
+    }
+
+    public void setOtherRecordPanel(SimpleRecordPanel otherRecordPanel) {
+      this.otherRecordPanel = otherRecordPanel;
+    }
+  }
 }
