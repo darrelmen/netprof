@@ -90,13 +90,7 @@ public class EditItem<T extends ExerciseShell> {
 
     this.itemMarker = itemMarker; // TODO : something less awkward
 
-    //System.out.println("\n\n\neditItem - including add item = " + includeAddItem + " list " + originalList.getName());
     UserList copy = new UserList(originalList);  // copy before we add to it!
- /*   if (includeAddItem) {
-      UserExercise newItem = getNewItem();
-      System.out.println("editItem : Adding " + newItem + " with " + newItem.getTooltip());
-      copy.addExercise(newItem);
-    }*/
 
     exerciseList = makeExerciseList(contentOnRight, "editItem", copy, originalList, includeAddItem);
     pagerOnLeft.add(exerciseList.getExerciseListOnLeftSide(controller.getProps()));
