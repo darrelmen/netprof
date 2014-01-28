@@ -12,6 +12,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseQuestionState;
 import mitll.langtest.client.recorder.AutoCRTRecordPanel;
+import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
@@ -60,7 +61,7 @@ public class CombinedResponseFlashcard extends TextCRTFlashcard implements Exerc
   protected void addRecordingAndFeedbackWidgets(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller,
                                                 int feedbackHeight) {
     super.addRecordingAndFeedbackWidgets(exercise,service,controller,feedbackHeight);
-    autoCRTRecordPanel = new AutoCRTRecordPanel(service, controller, exercise, this, 1, 300) {
+    autoCRTRecordPanel = new AutoCRTRecordPanel(service, controller, exercise, this, 1, 300, RecordButton.RECORD) {
       @Override
       protected void receivedAudioAnswer(AudioAnswer result, final ExerciseQuestionState questionState, final Panel outer) {
         super.receivedAudioAnswer(result, questionState, outer);
