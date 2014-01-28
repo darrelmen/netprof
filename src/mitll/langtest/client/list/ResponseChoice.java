@@ -34,9 +34,7 @@ public class ResponseChoice {
    * @see mitll.langtest.client.list.TableSectionExerciseList#TableSectionExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, boolean, boolean, mitll.langtest.client.exercise.ExerciseController, String)
    * @param responseType
    */
-  public ResponseChoice(String responseType) {
-    this.responseType = responseType;
-  }
+  public ResponseChoice(String responseType) { this.responseType = responseType; }
 
   /**
    * @see mitll.langtest.client.bootstrap.ResponseExerciseList#ResponseExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, boolean, boolean, mitll.langtest.client.exercise.ExerciseController, String)
@@ -44,8 +42,12 @@ public class ResponseChoice {
    * @param choiceMade
    */
   public ResponseChoice(String responseType, ChoiceMade choiceMade) {
-    this.responseType = responseType;
+    this(responseType);
     this.choiceMade = choiceMade;
+  }
+
+  public static boolean knownChoice(String choice) {
+    return BOTH.equals(choice) || TEXT.equals(choice) || AUDIO.equals(choice) || NONE.equals(choice);
   }
 
   public static interface ChoiceMade {
