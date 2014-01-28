@@ -44,8 +44,8 @@ public class SimpleRecordPanel extends RecordButtonPanel {
    * @see SimpleRecordExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    */
 	public SimpleRecordPanel(final LangTestDatabaseAsync service, final ExerciseController controller,
-                           final Exercise exercise, final ExerciseQuestionState questionState, final int index){
-    super(service, controller, exercise, questionState, index, false);
+                           final Exercise exercise, final ExerciseQuestionState questionState, final int index, String buttonTitle){
+    super(service, controller, exercise, questionState, index, false, buttonTitle);
     setSpacing(10);
 
     getElement().setId("SimpleRecordPanel_panel");
