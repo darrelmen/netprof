@@ -21,6 +21,7 @@ import mitll.langtest.shared.Exercise;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class PostAudioRecordButton extends RecordButton implements RecordButton.RecordingListener {
+  private static final int LOG_ROUNDTRIP_THRESHOLD = 3000;
   private int index;
   private int reqid = 0;
   private Exercise exercise;
@@ -67,6 +68,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
           long now = System.currentTimeMillis();
           System.out.println("PostAudioRecordButton : (failure) posting audio took " + (now - then) + " millis");
 
+          logMessage("failed to post audio for " + controller.getUser() + " exercise " + exercise.getID());
           showPopup(AudioAnswer.Validity.INVALID.getPrompt());
         }
 
@@ -91,7 +93,6 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
           long now = System.currentTimeMillis();
           long roundtrip = now - then;
 
-          //System.out.println("PostAudioRecordButton : Got audio answer " + result);
           if (result.reqid != reqid) {
             System.out.println("ignoring old response " + result);
             return;
@@ -102,16 +103,14 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
             showPopup(result.validity.getPrompt());
             useInvalidResult(result);
           }
-          if (controller.isLogClientMessages() || roundtrip > 7000) {
+          if (controller.isLogClientMessages() || roundtrip > LOG_ROUNDTRIP_THRESHOLD) {
             logRoundtripTime(result, roundtrip);
           }
         }
       });
   }
 
-  protected String getAudioType() {
-    return controller.getAudioType();
-  }
+  protected String getAudioType() { return controller.getAudioType(); }
 
   private Widget getOuter() { return this; }
 
@@ -120,13 +119,18 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
       " post audio took " + roundtrip + " millis, audio dur " +
       result.durationInMillis + " millis, " +
       " " + ((float) roundtrip / (float) result.durationInMillis) + " roundtrip/audio duration ratio.";
-    //System.out.println(message);
+    logMessage(message);
+  }
+
+  private void logMessage(String message) {
     service.logMessage(message, new AsyncCallback<Void>() {
       @Override
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+      }
 
       @Override
-      public void onSuccess(Void result) {}
+      public void onSuccess(Void result) {
+      }
     });
   }
 
