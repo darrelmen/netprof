@@ -473,7 +473,9 @@ public class EditItem<T extends ExerciseShell> {
       if (byID == null) {
         System.err.println("changeTooltip : huh? can't find exercise with id " + newUserExercise.getID());
       } else {
-        byID.setTooltip(newUserExercise.getEnglish());
+        String english1 = newUserExercise.getEnglish();
+        byID.setTooltip(english1.isEmpty() ? newUserExercise.getForeignLanguage() : english1);
+
         pagingContainer.redraw();   // show change to tooltip!
       }
     }
