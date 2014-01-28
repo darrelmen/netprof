@@ -342,13 +342,37 @@ public class PropertyHandler {
       showExercisesInOrder = !Window.Location.getParameter(EXERCISES_IN_ORDER).equals("false");
     }
 
-    if (Window.Location.getParameter(RESPONSE_TYPE) != null) {
-      responseType = Window.Location.getParameter(RESPONSE_TYPE);
-    }
-    if (Window.Location.getParameter(SECOND_RESPONSE_TYPE) != null) {
-      secondResponseType = Window.Location.getParameter(SECOND_RESPONSE_TYPE);
-    }
+    setResponseType();
+
     return grading;
+  }
+
+  /**
+   * Parse URL to extract the responseType values
+   */
+  private void setResponseType() {
+    String href = Window.Location.getHref();
+    if (href.contains("responseType=")) {
+      String s = href.split("responseType=")[1];
+      String candidate = s.split("\\*\\*\\*")[0];
+      if (ResponseChoice.knownChoice(candidate)) {
+        responseType = candidate;
+        System.out.println("responseType " + responseType);
+      }
+      else {
+        System.err.println("responseType unknown " + candidate);
+      }
+      if (s.contains("secondResponseType=")) {
+        String candidate2 = s.split("secondResponseType=")[1];
+        if (ResponseChoice.knownChoice(candidate2)) {
+          secondResponseType = candidate2;
+          System.out.println("secondResponseType " + secondResponseType);
+        }
+        else {
+          System.err.println("secondResponseType unknown " + candidate2);
+        }
+      }
+    }
   }
 
   public boolean isArabicTextDataCollect() {
