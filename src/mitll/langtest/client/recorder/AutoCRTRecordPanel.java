@@ -32,8 +32,9 @@ public class AutoCRTRecordPanel extends SimpleRecordPanel {
    * @see mitll.langtest.client.flashcard.CombinedResponseFlashcard
    */
   public AutoCRTRecordPanel(final LangTestDatabaseAsync service, final ExerciseController controller,
-                            final Exercise exercise, final ExerciseQuestionState questionState, final int index, int feedbackWidth) {
-    super(service, controller, exercise, questionState, index);
+                            final Exercise exercise, final ExerciseQuestionState questionState, final int index,
+                            int feedbackWidth, String buttonTitle) {
+    super(service, controller, exercise, questionState, index, buttonTitle);
     getElement().setId("AutoCRTRecordPanel");
     this.feedbackWidth = feedbackWidth;
   }
