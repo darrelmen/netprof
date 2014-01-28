@@ -603,35 +603,12 @@ public class Navigation implements RequiresResize {
     FluidRow r1 = new FluidRow();
     Widget nameInfo = getUserListText(ul.getName());
     r1.add(new Column(6, nameInfo));
-    HTML itemMarker = new HTML(ul.getExercises().size() + " items");
-    itemMarker.addStyleName("numItemFont");
-    listToMarker.put(ul, itemMarker);
+
+    Widget itemMarker = makeItemMarker(ul);
+
     r1.add(new Column(3, itemMarker));
     if (isYourList(ul)) {
-      Button delete = new Button("Delete");
-      delete.addStyleName("topMargin");
-      delete.setType(ButtonType.WARNING);
-      r1.add(new Column(3, delete));
-      delete.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(final ClickEvent event) {
-          //System.out.println("deleteList " + ul.getUniqueID());
-          service.deleteList(ul.getUniqueID(), new AsyncCallback<Boolean>() {
-            @Override
-            public void onFailure(Throwable caught) {}
-
-            @Override
-            public void onSuccess(Boolean result) {
-              if (result) {
-                refreshViewLessons();
-              }
-              else {
-                System.err.println("---> did not do deleteList " + ul.getUniqueID());
-              }
-            }
-          });
-        }
-      });
+      makeDeleteButton(ul, r1);
     }
     w.add(r1);
     r1 = new FluidRow();
@@ -648,6 +625,39 @@ public class Navigation implements RequiresResize {
       w.add(r1);
       r1.add(new HTML("<b>Created by you.</b>"));
     }
+  }
+
+  private Widget makeItemMarker(UserList ul) {
+    HTML itemMarker = new HTML(ul.getExercises().size() + " items");
+    itemMarker.addStyleName("numItemFont");
+    listToMarker.put(ul, itemMarker);
+    return itemMarker;
+  }
+
+  private void makeDeleteButton(final UserList ul, FluidRow r1) {
+    Button delete = new Button("Delete");
+    delete.addStyleName("topMargin");
+    delete.setType(ButtonType.WARNING);
+    r1.add(new Column(3, delete));
+    delete.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(final ClickEvent event) {
+        service.deleteList(ul.getUniqueID(), new AsyncCallback<Boolean>() {
+          @Override
+          public void onFailure(Throwable caught) {}
+
+          @Override
+          public void onSuccess(Boolean result) {
+            if (result) {
+              refreshViewLessons();
+            }
+            else {
+              System.err.println("---> did not do deleteList " + ul.getUniqueID());
+            }
+          }
+        });
+      }
+    });
   }
 
   private boolean isYourList(UserList ul) {
