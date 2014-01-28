@@ -41,6 +41,7 @@ import mitll.langtest.shared.custom.UserList;
 public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   private static final String FOREIGN_LANGUAGE = "Foreign Language";
   private static final String CREATE = "Create";
+  public static final boolean REQUIRE_ENGLISH = false;
   protected UserExercise newUserExercise = null;
   private final ExerciseController controller;
   protected final LangTestDatabaseAsync service;
@@ -262,27 +263,17 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
 
       @Override
       public void onSuccess(UserExercise newExercise) {
-     //   System.out.println("\tafterValidForeignPhrase - onSuccess : adding " + newUserExercise + " to " +ul);
-
         UserExercise newUserExercisePlaceholder = ul.remove(EditItem.NEW_EXERCISE_ID);
-
-      //  System.out.println("\tafterValidForeignPhrase - removed " + newUserExercisePlaceholder);
-
+        System.out.println("tooltip "+ newExercise.getTooltip());
         ul.addExercise(newExercise);
-     //   System.out.println("\tafterValidForeignPhrase - added " + newExercise);
         originalList.addExercise(newExercise);
         ul.addExercise(newUserExercisePlaceholder); // make sure the placeholder is always at the end
-
-      //  System.out.println("\tafterValidForeignPhrase - added " + newUserExercisePlaceholder);
-
         itemMarker.setText(ul.getExercises().size() + " items");
 
-        //T toMoveToEnd = exerciseList.byID(EditItem.NEW_EXERCISE_ID);
         T toMoveToEnd = exerciseList.simpleRemove(EditItem.NEW_EXERCISE_ID);
         exerciseList.addExercise((T)newExercise);  // TODO figure out better type safe way of doing this
         exerciseList.addExercise(toMoveToEnd);
         exerciseList.redraw();
-        System.out.println("\tafterValidForeignPhrase - loading " + toMoveToEnd.getID());
 
         exerciseList.loadExercise(toMoveToEnd); 
 
@@ -420,7 +411,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     if (foreignLang.getText().isEmpty()) {
       markError(foreignLang, "Enter the foreign language phrase.");
       return false;
-    } else if (english.getText().isEmpty()) {
+    } else if (REQUIRE_ENGLISH && english.getText().isEmpty()) {
       markError(english, "Enter an english word or phrase.");
       return false;
     } else if (newUserExercise == null || newUserExercise.getRefAudio() == null) {
