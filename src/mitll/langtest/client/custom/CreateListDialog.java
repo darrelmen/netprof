@@ -18,10 +18,13 @@ import mitll.langtest.client.user.UserManager;
 
 public class CreateListDialog extends BasicDialog {
   private static final String CLASS = "Course Info";
+  private static final boolean REQUIRE_DESC = false;
+  private static final boolean REQUIRE_CLASS = false;
 
   private final Navigation navigation;
   private LangTestDatabaseAsync service;
   private UserManager userManager;
+
   public CreateListDialog(Navigation navigation, LangTestDatabaseAsync service,UserManager userManager) {
     this.navigation = navigation;
     this.service = service;
@@ -76,7 +79,7 @@ public class CreateListDialog extends BasicDialog {
     submit.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        System.out.println("creating list for " + titleBox + " " + area.getText() + " and " + classBox.getText());
+        //System.out.println("creating list for " + titleBox + " " + area.getText() + " and " + classBox.getText());
         enterKeyButtonHelper.removeKeyHandler();
         if (validateCreateList(titleBox, description, classBox)) {
           service.addUserList(userManager.getUser(), titleBox.getText(), area.getText(),
@@ -110,11 +113,11 @@ public class CreateListDialog extends BasicDialog {
     if (titleBox.getText().isEmpty()) {
       markError(titleBox, "Please fill in a title");
       return false;
-    } else if (description.getText().isEmpty()) {
+    } else if (REQUIRE_DESC && description.getText().isEmpty()) {
       markError(description, "Please fill in a description");
       return false;
-    } else if (classBox.getText().isEmpty()) {
-      markError(classBox, "Please fill in a class");
+    } else if (REQUIRE_CLASS && classBox.getText().isEmpty()) {
+      markError(classBox, "Please fill in course information");
       return false;
     }
     return true;
