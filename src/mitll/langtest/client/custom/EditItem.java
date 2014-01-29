@@ -5,7 +5,6 @@ import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.base.InlineLabel;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
@@ -125,13 +124,13 @@ public class EditItem<T extends ExerciseShell> {
         }
 
         @Override
-        protected void askServerForExercise(T exerciseShell) {
-          if (exerciseShell.getID().equals(NEW_EXERCISE_ID)) {
+        protected void askServerForExercise(String itemID) {
+          if (itemID.equals(NEW_EXERCISE_ID)) {
             UserExercise newItem = getNewItem();
-            useExercise(newItem.toExercise(),exerciseShell);
+            useExercise(newItem.toExercise());
           }
           else {
-            super.askServerForExercise(exerciseShell);
+            super.askServerForExercise(itemID);
           }
         }
 
@@ -280,7 +279,6 @@ public class EditItem<T extends ExerciseShell> {
       delete.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-
           final String id = newUserExercise.getID();
           System.out.println("getCreateButton removing item " + id);
           service.deleteItemFromList(uniqueID, id, new AsyncCallback<Boolean>() {
@@ -323,7 +321,7 @@ public class EditItem<T extends ExerciseShell> {
     protected Panel makeEnglishRow(Panel container) {
       Panel row = new FluidRow();
       container.add(row);
-      english = makeBoxAndAnno(row, "English", englishAnno);
+      english = makeBoxAndAnno(row, ENGLISH_LABEL, englishAnno);
       return row;
     }
 
