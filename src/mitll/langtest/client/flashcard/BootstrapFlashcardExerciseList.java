@@ -61,16 +61,6 @@ public class BootstrapFlashcardExerciseList<T extends ExerciseShell> implements 
 
   private Timer timer;
 
-  @Override
-  public Panel makeExercisePanel(Exercise result) {
-    return null;
-  }
-
-  @Override
-  public boolean loadNextExercise(String id) {
-    return false;
-  }
-
   private boolean expired = false;
   private boolean timerRunning = false;
 
@@ -289,9 +279,7 @@ public class BootstrapFlashcardExerciseList<T extends ExerciseShell> implements 
   }
 
   @Override
-  public <S extends ExerciseShell> void loadExercise(S exerciseShell) {
-
-  }
+  public void loadExercise(String itemID) {}
 
   /**
    *
@@ -317,14 +305,10 @@ public class BootstrapFlashcardExerciseList<T extends ExerciseShell> implements 
   }
 
   @Override
-  public int getPercentComplete() {
-    return 0;
-  }
+  public int getPercentComplete() { return 0;  }
 
   @Override
-  public int getComplete() {
-    return 0;
-  }
+  public int getComplete() { return 0; }
 
   @Override
   public <S extends ExerciseShell> boolean loadPreviousExercise(S current) {
@@ -333,9 +317,7 @@ public class BootstrapFlashcardExerciseList<T extends ExerciseShell> implements 
   }
 
   @Override
-  public String getCurrentExerciseID() {
-    return "";
-  }
+  public String getCurrentExerciseID() { return ""; }
 
   @Override
   public <S extends ExerciseShell> boolean onFirst(S current) {
@@ -343,9 +325,7 @@ public class BootstrapFlashcardExerciseList<T extends ExerciseShell> implements 
   }
 
   @Override
-  public  <S extends ExerciseShell> boolean onLast(S current) {
-    return false;
-  }
+  public  <S extends ExerciseShell> boolean onLast(S current) { return false; }
 
   @Override
   public void clear() {
@@ -388,17 +368,12 @@ public class BootstrapFlashcardExerciseList<T extends ExerciseShell> implements 
     correct.setText(correctCount + "/" + (correctCount + incorrectCount));
   }
 
-  //@Override
-  //public void setSelectionState(Map<String, Collection<String>> selectionState) {}
-
   @Override
   public void hideExerciseList() {}
   public void setCompleted(Set<String> completed) {}
 
   @Override
-  public Panel getCreatedPanel() {
-    return null;
-  }
+  public Panel getCreatedPanel() { return null; }
 
   public void rememberAndLoadFirst(List<T> exercises, Exercise first){}
 
@@ -449,57 +424,52 @@ public class BootstrapFlashcardExerciseList<T extends ExerciseShell> implements 
 
   @Override
   public void addCompleted(String id) {}
-/*
-  @Override
-  public void removeExercise(T es) {
-
-  }*/
 
   @Override
-  public void reload() {
+  public void reload() {}
 
+  @Override
+  public boolean loadNext() { return false; }
+
+  @Override
+  public boolean loadPrev() { return false; }
+
+  @Override
+  public boolean onFirst() {  return false;  }
+
+  @Override
+  public T byID(String name) {
+    return null;
   }
 
   @Override
-  public boolean loadNext() {
-    return false;
+  public void addExercise(T es) {
   }
 
   @Override
-  public boolean loadPrev() {
-    return false;
+  public void redraw() {
   }
 
   @Override
-  public boolean onFirst() {
-    return false;
-  }
-
-@Override
-public T byID(String name) {
-	// TODO Auto-generated method stub
-	return null;
-}
-
-@Override
-public void addExercise(T es) {
-	// TODO Auto-generated method stub
-	
-}
-
-@Override
-public void redraw() {
-	// TODO Auto-generated method stub
-	
-}
-
-  @Override
-  public void reloadWith(String id) {
-
-  }
+  public void reloadWith(String id) {  }
 
   @Override
   public T simpleRemove(String id) {
     return null;
+  }
+
+  @Override
+  public Panel makeExercisePanel(Exercise result) {
+    return null;
+  }
+
+  @Override
+  public boolean loadNextExercise(String id) {
+    return false;
+  }
+
+  @Override
+  public void checkAndAskServer(String id) {
+
   }
 }
