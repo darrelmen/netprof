@@ -8,6 +8,7 @@ import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Tab;
 import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.base.InlineLabel;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.Scheduler;
@@ -24,15 +25,15 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.ScrollPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.user.UserFeedback;
@@ -41,9 +42,11 @@ import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -216,12 +219,6 @@ public class Navigation implements RequiresResize {
     DOM.setStyleAttribute(createContent.getElement(), "paddingRight", "0px");
   }
 
-/*
-  public long getUserListID() {
-    return userListID;
-  }
-*/
-
   public void setUserListID(long userListID) {
     this.userListID = userListID;
   }
@@ -371,7 +368,7 @@ public class Navigation implements RequiresResize {
   }
 
   /**
-   * @see Navigation.UserListCallback#getDisplayRowPerList(mitll.langtest.shared.custom.UserList)
+   * @see Navigation.UserListCallback#getDisplayRowPerList(mitll.langtest.shared.custom.UserList, boolean)
    * @param ul
    * @param contentPanel
    */
@@ -392,7 +389,10 @@ public class Navigation implements RequiresResize {
     child.add(r1);
     child.addStyleName("userListDarkerBlueColor");
 
-    r1.add(new Column(3, new Heading(1, ul.getName())));
+    String subtext = ul.getDescription() + " " + ul.getClassMarker();
+    Heading widgets = new Heading(1, ul.getName(), subtext);    // TODO : better color for subtext h1->small
+
+    r1.add(new Column(3, widgets));
     HTML itemMarker = new HTML(ul.getExercises().size() + " items");
     listToMarker.put(ul,itemMarker);
     itemMarker.addStyleName("subtitleForeground");
@@ -539,10 +539,22 @@ public class Navigation implements RequiresResize {
 
         listScrollPanel.add(insideScroll);
         boolean anyAdded = false;
+        Map<String,List<UserList>> nameToLists = new HashMap<String, List<UserList>>();
+
         for (final UserList ul : result) {
+          List<UserList> userLists = nameToLists.get(ul.getName());
+          if (userLists == null) nameToLists.put(ul.getName(), userLists = new ArrayList<UserList>());
+          userLists.add(ul);
+        }
+        for (final UserList ul : result) {
+          List<UserList> collisions = nameToLists.get(ul.getName());
+          boolean showMore = false;
+          if (collisions.size() > 1) {
+            if (collisions.indexOf(ul) > 0) showMore = true;
+          }
           if (!ul.isEmpty() || !ul.isPrivate()) {
             anyAdded = true;
-            insideScroll.add(getDisplayRowPerList(ul));
+            insideScroll.add(getDisplayRowPerList(ul, showMore));
           }
         }
         if (!anyAdded) {
@@ -558,7 +570,7 @@ public class Navigation implements RequiresResize {
       }
     }
 
-    private Panel getDisplayRowPerList(final UserList ul) {
+    private Panel getDisplayRowPerList(final UserList ul, boolean showMore) {
       final FocusPanel widgets = new FocusPanel();
 
       widgets.addStyleName("userListContent");
@@ -592,53 +604,125 @@ public class Navigation implements RequiresResize {
       FluidContainer w = new FluidContainer();
       widgets.add(w);
 
-      addWidgetsForList(ul, w);
+      addWidgetsForList(ul, showMore, w);
       return widgets;
     }
   }
 
-  private Map<UserList, HTML> listToMarker = new HashMap<UserList, HTML>();
+  private Map<UserList, HasText> listToMarker = new HashMap<UserList, HasText>();
 
-  private void addWidgetsForList(final UserList ul, final FluidContainer w) {
-    FluidRow r1 = new FluidRow();
-    Widget nameInfo = getUserListText(ul.getName());
-    r1.add(new Column(6, nameInfo));
+  /**
+   * @see mitll.langtest.client.custom.Navigation.UserListCallback#getDisplayRowPerList(mitll.langtest.shared.custom.UserList, boolean)
+   * @param ul
+   * @param showMore
+   * @param container
+   */
+  private void addWidgetsForList(final UserList ul, boolean showMore, final FluidContainer container) {
+   // FluidRow r1 = new FluidRow();
+    Panel r1 = new FlowPanel();
+    r1.addStyleName("trueInlineStyle");
+    String name = ul.getName();
+   // Widget nameInfo = ul.isFavorite() ? getFavoriteUserListText(name) : getUserListText(name);
 
-    Widget itemMarker = makeItemMarker(ul);
+   // Panel fp = new HorizontalPanel();
+    //fp.addStyleName("trueInlineStyle");
 
-    r1.add(new Column(3, itemMarker));
-    if (isYourList(ul)) {
-      makeDeleteButton(ul, r1);
+ //   fp.add(nameInfo);
+    Widget child = makeItemMarker2(ul);
+    child.addStyleName("leftFiveMargin");
+    //child.addStyleName("floatRight");
+  //  fp.add(child);
+  //  r1.add(new Column(6, nameInfo));
+
+    Heading h4 = new Heading(4,name,ul.getExercises().size() + " items");
+    h4.addStyleName("floatLeft");
+    if (!ul.isFavorite()) h4.addStyleName("niceBlue");
+/*    h4.add(child);
+    h4.add(nameInfo);*/
+   // r1.add(new Column(6, h4));
+    r1.add(h4);
+   // Widget itemMarker = makeItemMarker(ul);
+
+   // r1.add(new Column(3, itemMarker));
+    boolean yourList = isYourList(ul);
+    if (yourList) {
+      Button deleteButton = makeDeleteButton(ul);
+      deleteButton.addStyleName("floatRight");
+      deleteButton.addStyleName("leftFiveMargin");
+      r1.add(deleteButton);
     }
-    w.add(r1);
-    r1 = new FluidRow();
-    w.add(r1);
-    r1.add(getUserListText2(ul.getDescription()));
+
+    if (!ul.isFavorite()) {
+      //String html1 = "by " + (yourList ? "<b>" : "") + ul.getCreator().userID + (yourList ? "</b>" : "");
+      String html1 = "by " +  ul.getCreator().userID;
+      //HTML html = new HTML(html1);
+
+      Heading h4Again;//
+     //h4Again.setSubtext(html1);
+      if (yourList) {
+        h4Again = new Heading(5,html1);
+       // h4Again.setSubtext(html1);
+      }
+      else {
+        h4Again = new Heading(4,"",html1);
+        //h4Again.setSubtext(html1);
+      }
+
+      //r1.add(new Column(2, html));
+      h4Again.addStyleName("floatRight");
+      r1.add(h4Again);
+    }
+
+    container.add(r1);
+
+    if (showMore && !ul.getDescription().isEmpty()) {
+      Panel r2 = new FluidRow();
+      container.add(r2);
+      r2.add(getUserListText2(ul.getDescription()));
+    }
+/*    r1 = new FluidRow();
+    container.add(r1);
+    r1.add(getUserListText2(ul.getDescription()));*/
+
+/*
     if (!ul.getClassMarker().isEmpty()) {
       r1 = new FluidRow();
-      w.add(r1);
+      container.add(r1);
       r1.add(getUserListText2(ul.getClassMarker()));
     }
+*/
 
-    if (isYourList(ul)) {
-      r1 = new FluidRow();
-      w.add(r1);
-      r1.add(new HTML("<b>Created by you.</b>"));
+    if (yourList) {
+   /*   r1 = new FluidRow();
+      container.add(r1);
+      r1.add(new HTML("<b>Created by you.</b>"));*/
     }
   }
 
+/*
   private Widget makeItemMarker(UserList ul) {
     HTML itemMarker = new HTML(ul.getExercises().size() + " items");
     itemMarker.addStyleName("numItemFont");
     listToMarker.put(ul, itemMarker);
     return itemMarker;
   }
+*/
 
-  private void makeDeleteButton(final UserList ul, FluidRow r1) {
+  private Widget makeItemMarker2(UserList ul) {
+    InlineLabel itemMarker = new InlineLabel(ul.getExercises().size() + " items");
+    itemMarker.addStyleName("numItemFont");
+    listToMarker.put(ul, itemMarker);
+    return itemMarker;
+  }
+
+  private Button makeDeleteButton(final UserList ul) {
     Button delete = new Button("Delete");
     delete.addStyleName("topMargin");
+//    /delete.addStyleName("bottomFiveMargin");
+    DOM.setStyleAttribute(delete.getElement(), "marginBottom", "5px");
+
     delete.setType(ButtonType.WARNING);
-    r1.add(new Column(3, delete));
+    //r1.add(new Column(1, delete));
     delete.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(final ClickEvent event) {
@@ -658,6 +742,7 @@ public class Navigation implements RequiresResize {
         });
       }
     });
+    return delete;
   }
 
   private boolean isYourList(UserList ul) {
@@ -665,6 +750,12 @@ public class Navigation implements RequiresResize {
   }
 
   private Widget getUserListText(String content) {
+    Widget nameInfo = new HTML(content);
+    nameInfo.addStyleName("userListFontBlue");
+    return nameInfo;
+  }
+
+  private Widget getFavoriteUserListText(String content) {
     Widget nameInfo = new HTML(content);
     nameInfo.addStyleName("userListFont");
     return nameInfo;
