@@ -5,6 +5,7 @@ import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.base.InlineLabel;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
@@ -13,6 +14,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -53,7 +55,7 @@ public class EditItem<T extends ExerciseShell> {
   private final UserManager userManager;
   protected final ListInterface<? extends ExerciseShell> predefinedContentList;
   private UserFeedback feedback = null;
-  private HTML itemMarker;
+  private HasText itemMarker;
   protected PagingExerciseList<T> exerciseList;
 
   /**
@@ -80,7 +82,7 @@ public class EditItem<T extends ExerciseShell> {
    * @param includeAddItem
    * @return
    */
-  public Panel editItem(UserList originalList, final HTML itemMarker, boolean includeAddItem) {
+  public Panel editItem(UserList originalList, final HasText itemMarker, boolean includeAddItem) {
     Panel hp = new HorizontalPanel();
     SimplePanel pagerOnLeft = new SimplePanel();
     hp.add(pagerOnLeft);
@@ -101,7 +103,6 @@ public class EditItem<T extends ExerciseShell> {
 
   private PagingExerciseList<T> makeExerciseList(Panel right, String instanceName, UserList ul, UserList originalList,
                                                  final boolean includeAddItem) {
-
     //System.out.println("makeExerciseList - ul = " + ul.getName() + " " + includeAddItem);
 
     if (includeAddItem) {
@@ -127,7 +128,6 @@ public class EditItem<T extends ExerciseShell> {
         protected void askServerForExercise(T exerciseShell) {
           if (exerciseShell.getID().equals(NEW_EXERCISE_ID)) {
             UserExercise newItem = getNewItem();
-
             useExercise(newItem.toExercise(),exerciseShell);
           }
           else {
@@ -137,8 +137,6 @@ public class EditItem<T extends ExerciseShell> {
 
         @Override
         protected void rememberExercises(List<T> result) {
-          //System.out.println("rememberExercises - result = " + result.size());
-
           clear();
           boolean addNewItem = true;
 
@@ -152,9 +150,6 @@ public class EditItem<T extends ExerciseShell> {
           if (addNewItem) {
             addExercise((T)getNewItem());  // TODO : fix this
           }
-
-          //System.out.println("\trememberExercises - size = " + getSize());
-
           flush();
         }
       };
@@ -180,7 +175,7 @@ public class EditItem<T extends ExerciseShell> {
   }
 
   /**
-   * @see #editItem(mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.HTML, boolean)
+   * @see #editItem
    * @param ul
    * @param npfExerciseList
    */
@@ -193,14 +188,14 @@ public class EditItem<T extends ExerciseShell> {
     npfExerciseList.rememberAndLoadFirst(userExercises);
   }
 
-  private void populatePanel(UserExercise exercise, Panel right, UserList ul, UserList originalList, HTML itemMarker,
+  private void populatePanel(UserExercise exercise, Panel right, UserList ul, UserList originalList, HasText itemMarker,
                              ListInterface<T> pagingContainer) {
     NewUserExercise<T> editableExercise = getAddOrEditPanel(exercise, itemMarker, originalList);
     right.add(editableExercise.addNew(ul, originalList, pagingContainer, right));
     editableExercise.setFields();
   }
 
-  protected NewUserExercise<T> getAddOrEditPanel(UserExercise exercise, HTML itemMarker, UserList originalList) {
+  protected NewUserExercise<T> getAddOrEditPanel(UserExercise exercise, HasText itemMarker, UserList originalList) {
     NewUserExercise<T> editableExercise;
     if (exercise.getID().equals(NEW_EXERCISE_ID)) {
       editableExercise = new NewUserExercise<T>(service, userManager, controller, itemMarker);
@@ -227,7 +222,7 @@ public class EditItem<T extends ExerciseShell> {
      * @param originalList
      * @seex EditItem#editItem(mitll.langtest.shared.custom.UserExercise, com.google.gwt.user.client.ui.SimplePanel, mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.HTML, mitll.langtest.shared.custom.UserExercise)
      */
-    public EditableExercise(HTML itemMarker, UserExercise changedUserExercise, UserList originalList) {
+    public EditableExercise(HasText itemMarker, UserExercise changedUserExercise, UserList originalList) {
       super(EditItem.this.service, EditItem.this.userManager, EditItem.this.controller, itemMarker);
       this.newUserExercise = changedUserExercise;
       fastAnno.addStyleName("editComment");
