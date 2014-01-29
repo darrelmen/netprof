@@ -7,7 +7,9 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * A play button, and an interface with the SoundManagerAPI to call off into the soundmanager.js
@@ -32,7 +34,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   private final HTML warnNoFlash = new HTML("<font color='red'>Flash is not activated. Do you have a flashblocker? " +
     "Please add this site to its whitelist.</font>");
   private AudioControl listener;
-  private PlayListener playListener;
+  private List<PlayListener> playListeners = new ArrayList<PlayListener>();
   private static int counter = 0;
   private final int id;
   private static final boolean DEBUG = false;
@@ -58,8 +60,10 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    */
   public PlayAudioPanel(SoundManagerAPI soundManager, PlayListener playListener) {
     this(soundManager);
-    this.playListener = playListener;
+    addPlayListener(playListener);
   }
+
+  public void addPlayListener(PlayListener playListener) {  this.playListeners.add(playListener);  }
 
   /**
    * Remember to destroy a sound once we are done with it, otherwise SoundManager
@@ -96,7 +100,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
         pause();
       }
       else {
-        if (playListener != null) playListener.playStarted();
+        for (PlayListener playListener : playListeners) playListener.playStarted();
         play();
       }
     }
@@ -136,9 +140,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     if (DEBUG) System.out.println(new Date() + " setPlayLabel");
 
     playButton.setText(PLAY_LABEL);
-    if (playListener != null) {
-      playListener.playStopped();
-    }
+    for (PlayListener playListener : playListeners) playListener.playStopped();
   }
 
   // --- playing audio ---
