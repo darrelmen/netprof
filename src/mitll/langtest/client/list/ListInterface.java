@@ -56,7 +56,7 @@ public interface ListInterface<T extends ExerciseShell> extends RequiresResize {
 
   T byID(String name);
 
-  <S extends ExerciseShell> void loadExercise(S exerciseShell);
+  void loadExercise(String itemID);
 
   boolean loadNext();
 
@@ -74,6 +74,8 @@ public interface ListInterface<T extends ExerciseShell> extends RequiresResize {
   boolean loadPrev();
 
   <S extends ExerciseShell> boolean loadPreviousExercise(S current);
+
+  void checkAndAskServer(String id);
 
   public String getCurrentExerciseID();
 
