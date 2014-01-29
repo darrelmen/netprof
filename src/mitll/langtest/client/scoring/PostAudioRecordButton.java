@@ -20,6 +20,7 @@ import mitll.langtest.shared.Exercise;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class PostAudioRecordButton extends RecordButton implements RecordButton.RecordingListener {
+  private boolean validAudio = false;
   private int index;
   private int reqid = 0;
   private Exercise exercise;
@@ -104,8 +105,10 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
             return;
           }
           if (result.validity == AudioAnswer.Validity.OK) {
+            validAudio = true;
             useResult(result);
           } else {
+            validAudio = false;
             showPopup(result.validity.getPrompt());
             useInvalidResult(result);
           }
@@ -135,4 +138,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
 
   protected abstract void useInvalidResult(AudioAnswer result);
   public abstract void useResult(AudioAnswer result);
+
+  public boolean hasValidAudio() { return validAudio; }
+
 }
