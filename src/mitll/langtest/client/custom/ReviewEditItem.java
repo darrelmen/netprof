@@ -9,6 +9,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -42,14 +43,14 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
   }
 
   /**
-   * @see #populatePanel(mitll.langtest.shared.custom.UserExercise, com.google.gwt.user.client.ui.Panel, mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.HTML, mitll.langtest.client.list.ListInterface)
+   * @see #populatePanel
    * @param exercise
    * @param itemMarker
    * @param originalList
    * @return
    */
   @Override
-  protected NewUserExercise<T> getAddOrEditPanel(UserExercise exercise, HTML itemMarker, UserList originalList) {
+  protected NewUserExercise<T> getAddOrEditPanel(UserExercise exercise, HasText itemMarker, UserList originalList) {
     return new ReviewEditableExercise(itemMarker, exercise, originalList);
   }
 
@@ -61,7 +62,7 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
      * @param originalList
      * @see EditItem#populatePanel
      */
-    public ReviewEditableExercise(HTML itemMarker, UserExercise changedUserExercise, UserList originalList) {
+    public ReviewEditableExercise(HasText itemMarker, UserExercise changedUserExercise, UserList originalList) {
       super(itemMarker, changedUserExercise, originalList);
     }
 
