@@ -9,7 +9,7 @@ import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
 
 /**
-* Created with IntelliJ IDEA.
+* Tells playAudioPanel to be enabled/disabled in response to recording states
 * User: go22670
 * Date: 10/4/13
 * Time: 11:46 PM
@@ -47,7 +47,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
       ((BusyPanel) parentPanel).setBusy(true);
     }
     super.startRecording();
-    playAudioPanel.setPlayEnabled(false);
+    setPlayEnabled(false);
   }
 
   /**
@@ -62,7 +62,6 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     recordAudioPanel.getWaveform().setUrl(LangTest.LANGTEST_IMAGES + "animated_progress.gif");
 
     super.stopRecording();
-
   }
 
   @Override
@@ -71,7 +70,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     if (parentPanel instanceof ExercisePanel) {
       ((ExercisePanel) parentPanel).recordCompleted(recordAudioPanel);
     }
-    playAudioPanel.setPlayEnabled(true);
+    setPlayEnabled(true);
   }
 
   @Override
@@ -82,9 +81,15 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     if (parentPanel instanceof ExercisePanel) {
       ((ExercisePanel) parentPanel).recordIncomplete(recordAudioPanel);
     }
-    playAudioPanel.setPlayEnabled(false);
+    setPlayEnabled(false);
   }
 
+  public void setPlayEnabled(boolean val) {  playAudioPanel.setEnabled(val); }
+
+  /**
+   * @see mitll.langtest.client.exercise.RecordAudioPanel#makePlayAudioPanel(com.google.gwt.user.client.ui.Widget)
+   * @param playAudioPanel
+   */
   public void setPlayAudioPanel(PlayAudioPanel playAudioPanel) {
     this.playAudioPanel = playAudioPanel;
   }
