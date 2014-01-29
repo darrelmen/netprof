@@ -353,7 +353,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
     /**
      * @see mitll.langtest.client.custom.NPFExercise#makeAddToList(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController)
-     * @param w
+     * @param widget
      * @param tip
      * @param placement
      * @return
@@ -495,7 +495,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
       @Override
       public void startRecording() {
-        playAudioPanel.setPlayEnabled(false);
+        playAudioPanel.setEnabled(false);
         isBusy = true;
         super.startRecording();
         recordImage1.setVisible(true);
@@ -503,7 +503,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
       @Override
       public void stopRecording() {
-        playAudioPanel.setPlayEnabled(true);
+        playAudioPanel.setEnabled(true);
         isBusy = false;
         super.stopRecording();
         recordImage1.setVisible(false);
@@ -552,7 +552,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
      * Add radio button choices to control which audio cut is chosen/gets played.
      *
      * @return
-     * @see mitll.langtest.client.scoring.AudioPanel#addWidgets(String)
+     * @see AudioPanel#addWidgets()
      */
     @Override
     protected Widget getBeforePlayWidget() {
