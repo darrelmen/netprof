@@ -265,7 +265,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     else {
       System.out.println("PlayAudioPanel :songFirstLoaded - no listener");
     }
-    setPlayEnabled(true);
+    setEnabled(true);
   }
 
   /**
@@ -280,7 +280,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     } else {
       System.out.println("no listener for song loaded " + duration);
     }
-    setPlayEnabled(true);
+    setEnabled(true);
     reinitialize();
   }
 
@@ -294,7 +294,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     }
   }
 
-  public void setPlayEnabled(boolean val) { playButton.setEnabled(val); }
+  public void setEnabled(boolean val) { playButton.setEnabled(val); }
 
   public String toString() { return "PlayAudioPanel #" +id; }
 }
