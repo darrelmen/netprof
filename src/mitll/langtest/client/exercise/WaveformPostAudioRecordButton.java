@@ -81,10 +81,14 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     if (parentPanel instanceof ExercisePanel) {
       ((ExercisePanel) parentPanel).recordIncomplete(recordAudioPanel);
     }
+
     setPlayEnabled(false);
   }
 
-  public void setPlayEnabled(boolean val) {  playAudioPanel.setEnabled(val); }
+  public void setPlayEnabled(boolean val) {
+    System.out.println("setPlayEnabled -- " + getElement().getId() + " : valid audio ? " + hasValidAudio() );
+    playAudioPanel.setEnabled(val && hasValidAudio());
+  }
 
   /**
    * @see mitll.langtest.client.exercise.RecordAudioPanel#makePlayAudioPanel(com.google.gwt.user.client.ui.Widget)
