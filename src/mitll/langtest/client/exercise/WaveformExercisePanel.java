@@ -52,7 +52,6 @@ public class WaveformExercisePanel extends ExercisePanel {
   protected Widget getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
     audioPanel = new RecordAudioPanel(exercise,controller,this,service, index, true);
     addAnswerWidget(index,this);
-   // audioPanel = new RecordAudioPanel(exercise, controller, this, service, index, true);
     return audioPanel;
   }
 
@@ -65,9 +64,7 @@ public class WaveformExercisePanel extends ExercisePanel {
    * @return
    */
   @Override
-  protected String getQuestionPrompt(boolean promptInEnglish) {
-    return getSpokenPrompt(promptInEnglish);
-  }
+  protected String getQuestionPrompt(boolean promptInEnglish) { return getSpokenPrompt(promptInEnglish);  }
 
   /**
    * on the server, notice which audio posts have arrived, and take the latest ones...
