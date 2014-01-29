@@ -237,7 +237,7 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
   protected void gotClickOnItem(final ExerciseShell e) {
     if (isExercisePanelBusy()) {
       tellUserPanelIsBusy();
-      markCurrentExercise(pagingContainer.getCurrentSelection());
+      markCurrentExercise(pagingContainer.getCurrentSelection().getID());
     } else {
       pushNewItem(e.getID());
     }
@@ -306,6 +306,12 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
     removeExercise(byID(id));
   }
 
+  /**
+   * @see mitll.langtest.client.custom.NewUserExercise#afterValidForeignPhrase(mitll.langtest.shared.custom.UserList, ListInterface, com.google.gwt.user.client.ui.Panel)
+   * @see mitll.langtest.client.list.ExerciseList#removeExercise(mitll.langtest.shared.ExerciseShell)
+   * @param id
+   * @return
+   */
   @Override
   public T simpleRemove(String id) {
     T es = byID(id);
@@ -324,7 +330,7 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
     pagingContainer.onResize(getCurrentExercise());
   }
 
-  protected void markCurrentExercise(T t) { pagingContainer.markCurrentExercise(t); }
+  protected void markCurrentExercise(String itemID) { pagingContainer.markCurrentExercise(itemID); }
 
   public void setUserListID(long userListID) {
     this.userListID = userListID;
