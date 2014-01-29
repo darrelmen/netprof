@@ -392,11 +392,13 @@ public class Navigation implements RequiresResize {
     String subtext = ul.getDescription() + " " + ul.getClassMarker();
     Heading widgets = new Heading(1, ul.getName(), subtext);    // TODO : better color for subtext h1->small
 
-    r1.add(new Column(3, widgets));
+    //r1.add(new Column(6, widgets));
+    r1.add(widgets);
+    widgets.addStyleName("floatLeft");
     HTML itemMarker = new HTML(ul.getExercises().size() + " items");
     listToMarker.put(ul,itemMarker);
-    itemMarker.addStyleName("subtitleForeground");
-    r1.add(new Column(3, itemMarker));
+    //itemMarker.addStyleName("subtitleForeground");
+   // r1.add(new Column(3, itemMarker));
 
     boolean created = createdByYou(ul) || instanceName.equals(REVIEW) || instanceName.equals(COMMENT);
 /*    if (created && SHOW_CREATED) {
@@ -618,33 +620,20 @@ public class Navigation implements RequiresResize {
    * @param container
    */
   private void addWidgetsForList(final UserList ul, boolean showMore, final FluidContainer container) {
-   // FluidRow r1 = new FluidRow();
     Panel r1 = new FlowPanel();
     r1.addStyleName("trueInlineStyle");
     String name = ul.getName();
-   // Widget nameInfo = ul.isFavorite() ? getFavoriteUserListText(name) : getUserListText(name);
-
-   // Panel fp = new HorizontalPanel();
-    //fp.addStyleName("trueInlineStyle");
-
- //   fp.add(nameInfo);
     Widget child = makeItemMarker2(ul);
     child.addStyleName("leftFiveMargin");
-    //child.addStyleName("floatRight");
-  //  fp.add(child);
-  //  r1.add(new Column(6, nameInfo));
 
     Heading h4 = new Heading(4,name,ul.getExercises().size() + " items");
     h4.addStyleName("floatLeft");
-    if (!ul.isFavorite()) h4.addStyleName("niceBlue");
-/*    h4.add(child);
-    h4.add(nameInfo);*/
-   // r1.add(new Column(6, h4));
-    r1.add(h4);
-   // Widget itemMarker = makeItemMarker(ul);
-
-   // r1.add(new Column(3, itemMarker));
     boolean yourList = isYourList(ul);
+  //  if (!ul.isFavorite()) h4.addStyleName("niceBlue");
+  //  if (yourList) h4.addStyleName("niceBlue");
+
+    r1.add(h4);
+
     if (yourList) {
       Button deleteButton = makeDeleteButton(ul);
       deleteButton.addStyleName("floatRight");
@@ -653,22 +642,15 @@ public class Navigation implements RequiresResize {
     }
 
     if (!ul.isFavorite()) {
-      //String html1 = "by " + (yourList ? "<b>" : "") + ul.getCreator().userID + (yourList ? "</b>" : "");
       String html1 = "by " +  ul.getCreator().userID;
-      //HTML html = new HTML(html1);
-
-      Heading h4Again;//
-     //h4Again.setSubtext(html1);
+      Heading h4Again;
       if (yourList) {
         h4Again = new Heading(5,html1);
-       // h4Again.setSubtext(html1);
       }
       else {
         h4Again = new Heading(4,"",html1);
-        //h4Again.setSubtext(html1);
       }
 
-      //r1.add(new Column(2, html));
       h4Again.addStyleName("floatRight");
       r1.add(h4Again);
     }
@@ -680,17 +662,6 @@ public class Navigation implements RequiresResize {
       container.add(r2);
       r2.add(getUserListText2(ul.getDescription()));
     }
-/*    r1 = new FluidRow();
-    container.add(r1);
-    r1.add(getUserListText2(ul.getDescription()));*/
-
-/*
-    if (!ul.getClassMarker().isEmpty()) {
-      r1 = new FluidRow();
-      container.add(r1);
-      r1.add(getUserListText2(ul.getClassMarker()));
-    }
-*/
 
     if (yourList) {
    /*   r1 = new FluidRow();
@@ -698,15 +669,6 @@ public class Navigation implements RequiresResize {
       r1.add(new HTML("<b>Created by you.</b>"));*/
     }
   }
-
-/*
-  private Widget makeItemMarker(UserList ul) {
-    HTML itemMarker = new HTML(ul.getExercises().size() + " items");
-    itemMarker.addStyleName("numItemFont");
-    listToMarker.put(ul, itemMarker);
-    return itemMarker;
-  }
-*/
 
   private Widget makeItemMarker2(UserList ul) {
     InlineLabel itemMarker = new InlineLabel(ul.getExercises().size() + " items");
@@ -718,11 +680,9 @@ public class Navigation implements RequiresResize {
   private Button makeDeleteButton(final UserList ul) {
     Button delete = new Button("Delete");
     delete.addStyleName("topMargin");
-//    /delete.addStyleName("bottomFiveMargin");
     DOM.setStyleAttribute(delete.getElement(), "marginBottom", "5px");
 
     delete.setType(ButtonType.WARNING);
-    //r1.add(new Column(1, delete));
     delete.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(final ClickEvent event) {
@@ -749,6 +709,7 @@ public class Navigation implements RequiresResize {
     return createdByYou(ul) && !ul.getName().equals(UserList.MY_LIST);
   }
 
+/*
   private Widget getUserListText(String content) {
     Widget nameInfo = new HTML(content);
     nameInfo.addStyleName("userListFontBlue");
@@ -760,6 +721,7 @@ public class Navigation implements RequiresResize {
     nameInfo.addStyleName("userListFont");
     return nameInfo;
   }
+*/
 
   private Widget getUserListText2(String content) {
     Widget nameInfo = new HTML(content);
