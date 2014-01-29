@@ -87,7 +87,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     this(service, controller, showSpectrogram, gaugePanel, 1.0f, rightMargin);
     this.audioPath = path;
 
-    addWidgets(path);
+    addWidgets();
   }
 
   public AudioPanel(LangTestDatabaseAsync service,
@@ -115,10 +115,9 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * Replace the html 5 audio tag with our fancy waveform widget.
    * @see #AudioPanel(String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener, int)
    * @see mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, int, boolean)
-   * @param path
    * @return
    */
-  public void addWidgets(String path) {
+  public void addWidgets() {
     //System.out.println("AudioPanel.addWidgets audio path = " + path);
     imageContainer = new VerticalPanel();
 
@@ -264,7 +263,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   }
 
     /**
-    * @see #addWidgets(String)
+    * @see #addWidgets()
     * @return PlayAudioPanel
     */
   private PlayAudioPanel getPlayButtons(Widget toTheLeftWidget) {
