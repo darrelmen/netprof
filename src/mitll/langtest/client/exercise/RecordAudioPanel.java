@@ -14,7 +14,7 @@ import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.Exercise;
 
 /**
- * An ASR scoring panel with a record button.
+ * A waveform record button and a play audio button.
  */
 public class RecordAudioPanel extends AudioPanel {
   private final int index;
@@ -41,11 +41,13 @@ public class RecordAudioPanel extends AudioPanel {
     super(service,
       // use full screen width
       // use keyboard
-      controller, showSpectrogram, null, 1.0f, 23);
+      controller, showSpectrogram,
+      null // no gauge panel
+      , 1.0f, 23);
     this.exercisePanel = widgets;
     this.index = index;
     this.exercise = exercise;
-    addWidgets(null);
+    addWidgets();
   }
 
   /**
@@ -100,6 +102,19 @@ public class RecordAudioPanel extends AudioPanel {
 
   public Button getButton() { return postAudioRecordButton; }
 
+  public void setEnabled(boolean val) {
+    postAudioRecordButton.setEnabled(val);
+    playAudioPanel.setEnabled(val);
+  }
+
+  public void setExercise(Exercise exercise) {
+    this.exercise = exercise;
+    postAudioRecordButton.setExercise(exercise);
+  }
+
+  /**
+   * A play button that controls the state of the record button.
+   */
   private class MyPlayAudioPanel extends PlayAudioPanel {
     public MyPlayAudioPanel(Image recordImage1, Image recordImage2, final Panel panel) {
       super(RecordAudioPanel.this.soundManager, new PlayListener() {
@@ -121,6 +136,8 @@ public class RecordAudioPanel extends AudioPanel {
       recordImage1.setVisible(false);
       add(recordImage2);
       recordImage2.setVisible(false);
+      getElement().setId("MyPlayAudioPanel");
+
       //System.out.println("MyPlayAudioPanel : adding images to " + getElement().getId());
     }
 
