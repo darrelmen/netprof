@@ -17,6 +17,7 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -46,7 +47,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   private final ExerciseController controller;
   protected final LangTestDatabaseAsync service;
   private final UserManager userManager;
-  private final HTML itemMarker;
+  private final HasText itemMarker;
   protected BasicDialog.FormField english;
   protected BasicDialog.FormField foreignLang;
   protected BasicDialog.FormField translit;
@@ -54,14 +55,14 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   protected CreateFirstRecordAudioPanel rapSlow;
 
   /**
-   * @see EditItem#getAddOrEditPanel(mitll.langtest.shared.custom.UserExercise, com.google.gwt.user.client.ui.HTML, mitll.langtest.shared.custom.UserList)
+   * @see EditItem#getAddOrEditPanel
    * @param service
    * @param userManager
    * @param controller
    * @param itemMarker
    */
   public NewUserExercise(final LangTestDatabaseAsync service, final UserManager userManager,
-                         ExerciseController controller, HTML itemMarker) {
+                         ExerciseController controller, HasText itemMarker) {
     this.controller = controller;
     this.service = service;
     this.itemMarker = itemMarker;
@@ -102,8 +103,11 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     this.listInterface = listInterface;
     this.toAddTo = toAddTo;
     makeSlowAudioPanel(row);
-    rap.setOtherRAP(rapSlow.getPostAudioButton());
-    rapSlow.setOtherRAP(rap.getPostAudioButton());
+    //rap.setOtherRAP(rapSlow.getPostAudioButton());
+    //rapSlow.setOtherRAP(rap.getPostAudioButton());
+
+    rap.setOtherRAP(rapSlow);
+    rapSlow.setOtherRAP(rap);
 
     Panel column = getCreateButton(ul, listInterface, toAddTo, normalSpeedRecording);
     row.add(column);
@@ -151,7 +155,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   protected Panel makeEnglishRow(Panel container) {
     FluidRow row = new FluidRow();
     container.add(row);
-    english = addControlFormField(row, "English", false, 1);
+    english = addControlFormField(row, "English (optional)", false, 1);
 
     return row;
   }
@@ -294,7 +298,8 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     private final FormField english;
     private final FormField foreignLang;
     boolean recordRegularSpeed = true;
-    private PostAudioRecordButton otherRAP;
+   // private PostAudioRecordButton otherRAP;
+    private RecordAudioPanel otherRAP;
     private WaveformPostAudioRecordButton postAudioButton;
 
     public CreateFirstRecordAudioPanel(Panel row, FormField english, FormField foreignLang, boolean recordRegularSpeed) {
@@ -383,7 +388,14 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
       return postAudioButton;
     }
 
-    public void setOtherRAP(PostAudioRecordButton otherRAP) {
+    /**
+     * @see #addNew(mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel)
+     * @param otherRAP
+     */
+/*    public void setOtherRAP(PostAudioRecordButton otherRAP) {
+      this.otherRAP = otherRAP;
+    }*/
+    public void setOtherRAP(RecordAudioPanel otherRAP) {
       this.otherRAP = otherRAP;
     }
     public WaveformPostAudioRecordButton getPostAudioButton() {
