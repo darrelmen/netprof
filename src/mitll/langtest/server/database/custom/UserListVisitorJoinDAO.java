@@ -137,7 +137,7 @@ public class UserListVisitorJoinDAO extends DAO {
     }
   }
 
-  private boolean existsAlready(long uniqueID, long visitor) {
+/*  private boolean existsAlready(long uniqueID, long visitor) {
     String sql = "SELECT * from " + USER_EXERCISE_LIST_VISITOR + " where " +
       USERLISTID +
       "=" + uniqueID + " AND " +
@@ -150,12 +150,12 @@ public class UserListVisitorJoinDAO extends DAO {
       logger.error("got " + e, e);
     }
     return false;
-  }
+  }*/
 
   public Set<Long> getWhere(long listid) {
     String sql = "SELECT * from " + USER_EXERCISE_LIST_VISITOR + " where " +
       USERLISTID +
-    "=" + listid + " ORDER BY DESC " +MODIFIED;
+    "=" + listid + " ORDER BY " +MODIFIED + " DESC";
     try {
       return getVisitors(sql);
     } catch (SQLException e) {
