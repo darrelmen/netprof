@@ -14,7 +14,6 @@ import mitll.langtest.shared.Exercise;
 /**
  * This binds a record button with the act of posting recorded audio to the server.
  *
- * This is not a widget itself, but a helper.
  * User: GO22670
  * Date: 12/18/12
  * Time: 6:51 PM
@@ -51,6 +50,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   public void flip(boolean first) {}
 
   public void setExercise(Exercise exercise) { this.exercise = exercise; }
+  public Exercise getExercise() { return exercise; }
 
   private Widget getOuter() { return this; }
 
@@ -132,6 +132,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   }
 
   public void startRecording() {  controller.startRecording();  }
+
   protected abstract void useInvalidResult(AudioAnswer result);
   public abstract void useResult(AudioAnswer result);
 }
