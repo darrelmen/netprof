@@ -25,6 +25,7 @@ import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
+import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.AudioAnswer;
@@ -43,6 +44,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   private static final String FOREIGN_LANGUAGE = "Foreign Language";
   private static final String CREATE = "Create";
   public static final boolean REQUIRE_ENGLISH = false;
+  protected static final String ENGLISH_LABEL = "English (optional)";
   protected UserExercise newUserExercise = null;
   private final ExerciseController controller;
   protected final LangTestDatabaseAsync service;
@@ -155,7 +157,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   protected Panel makeEnglishRow(Panel container) {
     FluidRow row = new FluidRow();
     container.add(row);
-    english = addControlFormField(row, "English (optional)", false, 1);
+    english = addControlFormField(row, ENGLISH_LABEL, false, 1);
 
     return row;
   }
@@ -279,7 +281,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
         exerciseList.addExercise(toMoveToEnd);
         exerciseList.redraw();
 
-        exerciseList.loadExercise(toMoveToEnd); 
+        exerciseList.checkAndAskServer(toMoveToEnd.getID());
 
         toAddTo.clear();
         toAddTo.add(addNew(ul, originalList, exerciseList, toAddTo));
@@ -298,7 +300,6 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     private final FormField english;
     private final FormField foreignLang;
     boolean recordRegularSpeed = true;
-   // private PostAudioRecordButton otherRAP;
     private RecordAudioPanel otherRAP;
     private WaveformPostAudioRecordButton postAudioButton;
 
@@ -307,6 +308,20 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
       this.english = english;
       this.foreignLang = foreignLang;
       this.recordRegularSpeed = recordRegularSpeed;
+
+      addPlayListener(new PlayListener() {
+        @Override
+        public void playStarted() {
+          otherRAP.setEnabled(false);
+        }
+
+        @Override
+        public void playStopped() {
+          System.out.println("CreateFirstRecordAudioPanel.playStopped on " + getElement().getId());
+
+          otherRAP.setEnabled(true);
+        }
+      });
     }
 
     @Override
