@@ -103,9 +103,12 @@ public class RecordAudioPanel extends AudioPanel {
   public Button getButton() { return postAudioRecordButton; }
 
   public void setEnabled(boolean val) {
+    System.out.println("RecordAudioPanel.setEnabled " + val);
     postAudioRecordButton.setEnabled(val);
-    playAudioPanel.setEnabled(val);
+    if (postAudioRecordButton.hasValidAudio()) playAudioPanel.setEnabled(val);
   }
+
+  public void addPlayListener(PlayListener playListener) {  playAudioPanel.addPlayListener(playListener);  }
 
   public void setExercise(Exercise exercise) {
     this.exercise = exercise;
@@ -137,8 +140,6 @@ public class RecordAudioPanel extends AudioPanel {
       add(recordImage2);
       recordImage2.setVisible(false);
       getElement().setId("MyPlayAudioPanel");
-
-      //System.out.println("MyPlayAudioPanel : adding images to " + getElement().getId());
     }
 
     /**
