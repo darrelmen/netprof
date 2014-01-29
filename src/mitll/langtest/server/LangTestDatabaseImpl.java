@@ -969,6 +969,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getUserListManager().addUserList(userid, name, description, dliClass);
   }
 
+  /**
+   * @see mitll.langtest.client.custom.Navigation#showList(mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.Panel, String)
+   * @param ul
+   * @param user
+   */
   public void addVisitor(UserList ul, long user) { db.getUserListManager().addVisitor(ul,user); }
 
   /**
