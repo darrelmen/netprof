@@ -52,6 +52,11 @@ public class UserListDAO extends DAO {
     }
   }
 
+  /**
+   * @see mitll.langtest.server.database.custom.UserListManager#addVisitor(mitll.langtest.shared.custom.UserList, long)
+   * @param listid
+   * @param userid
+   */
   public void addVisitor(long listid, long userid) { userListVisitorJoinDAO.add(listid,userid);}
   public void removeVisitor(long listid) { userListVisitorJoinDAO.remove(listid);}
 
