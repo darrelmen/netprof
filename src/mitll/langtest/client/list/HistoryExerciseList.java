@@ -108,7 +108,7 @@ public class HistoryExerciseList<T extends ExerciseShell> extends PagingExercise
   }
 
   /**
-   * @see ListInterface#loadExercise(mitll.langtest.shared.ExerciseShell)
+   * @see ListInterface#loadExercise(String)
    * @see #pushFirstSelection(String)
    * @param exerciseID
    */
@@ -125,7 +125,7 @@ public class HistoryExerciseList<T extends ExerciseShell> extends PagingExercise
     System.out.println("\tpushNewItem : current token '" + token + "' vs new id '" + exerciseID +"'");
     if (token != null && (historyToken.equals(token) || trimmedToken.equals(token))) {
       System.out.println("\tpushNewItem : current token '" + token + "' same as new " + historyToken);
-      loadByIDFromToken(exerciseID);
+      checkAndAskServer(exerciseID);
     } else {
       System.out.println("\tpushNewItem : current token '" + token + "' different menu state '" +historyToken+ "' from new " + exerciseID);
       setHistoryItem(historyToken);
@@ -350,7 +350,7 @@ public class HistoryExerciseList<T extends ExerciseShell> extends PagingExercise
 
     if (item != null && item.length() > 0 && hasExercise(item)) {
     //  if (INCLUDE_ITEM_IN_BOOKMARK) {
-        loadByIDFromToken(item);
+        checkAndAskServer(item);
   /*    }
       else {
         System.out.println("onValueChange : skipping item " + item);
