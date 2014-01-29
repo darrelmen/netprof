@@ -819,7 +819,7 @@ fieldset > legend {
 }
 
 .niceBlue {
-    color: #3339d9;
+    color: #0088CC;
 }
 
 .userListFont2 {
@@ -872,28 +872,20 @@ fieldset > legend {
     margin-bottom : 2px;
 }
 
-/*#QuestionContent .checkbox {
-    padding-left: 2px;
-}*/
+#showListContainer h1 small {
+     color: #333333;
+ }
+
 
 .borderTopQC {
     margin-top: 5px;
-/*
-    float: left;
-*/
-
     border-radius: 0px 0px 3px 0px;
     border-top: inset rgba(0, 0, 0, 0.1);
 }
 
-
 .borderBottomQC {
     margin-bottom: 5px;
     width: 70px;
-    /*
-        float: left;
-    */
-
     border-radius: 0 0 3px 0;
     border-bottom: inset rgba(0, 0, 0, 0.1);
 }

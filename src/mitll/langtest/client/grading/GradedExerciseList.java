@@ -56,16 +56,16 @@ public class GradedExerciseList<T extends ExerciseShell> extends PagingExerciseL
     pagingContainer.selectFirst();
   }
   /**
-   * @see mitll.langtest.client.list.ListInterface#loadExercise(mitll.langtest.shared.ExerciseShell)
-   * @param exerciseShell
+   * @see mitll.langtest.client.list.ListInterface#loadExercise(String)
+   * @param itemID
    */
   @Override
-  protected void askServerForExercise(final T exerciseShell) {
-    service.checkoutExerciseID(""+user.getUser(),exerciseShell.getID(), new AsyncCallback<Void>() {
-      public void onFailure(Throwable caught) { Window.alert("couldn't checkout " + exerciseShell.getID());}
+  protected void askServerForExercise(final String itemID) {
+    service.checkoutExerciseID(""+user.getUser(), itemID, new AsyncCallback<Void>() {
+      public void onFailure(Throwable caught) { Window.alert("couldn't checkout " + itemID);}
       public void onSuccess(Void result) {
         feedback.showStatus("");
-        GradedExerciseList.super.askServerForExercise(exerciseShell);
+        GradedExerciseList.super.askServerForExercise(itemID);
       }
     });
   }
@@ -107,14 +107,14 @@ public class GradedExerciseList<T extends ExerciseShell> extends PagingExerciseL
           if (!loadByID(result.getID())) {
             System.out.println("showing first exercise...");
             T toLoad = getFirst();
-            loadExercise(toLoad);
+            loadExercise(toLoad.getID());
           }
         }
         else {
           if (showFirstIfNoneToGrade) {
             System.out.println("showing first exercise...");
             T toLoad = getFirst();
-            loadExercise(toLoad);
+            loadExercise(toLoad.getID());
           }
           else {
             showPopup("<h5>All answers graded.</h5>");
