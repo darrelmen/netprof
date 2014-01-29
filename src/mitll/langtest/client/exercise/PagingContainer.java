@@ -19,11 +19,9 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.shared.ExerciseShell;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -90,7 +88,6 @@ public class PagingContainer<T extends ExerciseShell> {
 
   /**
    * @see mitll.langtest.client.list.PagingExerciseList#simpleRemove(String)
-   * @see mitll.langtest.client.list.PagingExerciseList#removeExercise(mitll.langtest.shared.ExerciseShell)
    * @param es
    */
   public void forgetExercise(T es) {
@@ -371,7 +368,9 @@ public class PagingContainer<T extends ExerciseShell> {
       //System.out.println("num rows now " + numRows);
       table.setPageSize(numRows);
       table.redraw();
-      markCurrentExercise(currentExercise);
+      if (currentExercise != null) {
+        markCurrentExercise(currentExercise.getID());
+      }
     }
   }
 
@@ -409,10 +408,11 @@ public class PagingContainer<T extends ExerciseShell> {
     return controller.getHeightOfTopRows();
   }
 
-  public void markCurrentExercise(T itemToSelect) {
+  public void markCurrentExercise(String itemID) {
     if (getList() == null || getList().isEmpty()) return;
 
-    T t = idToExercise.get(itemToSelect.getID());
+    //String id = itemID.getID();
+    T t = idToExercise.get(itemID);
     int i = getList().indexOf(t);
     markCurrent(i,t);
   }
