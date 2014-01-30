@@ -16,7 +16,7 @@ public class ExerciseShell implements IsSerializable {
   public ExerciseShell() {}
   public ExerciseShell(String id, String tooltip) {
     this.id = id;
-    this.tooltip = tooltip;
+    setTooltip(tooltip);
   }
 
   public String getID() { return id; }
@@ -24,6 +24,7 @@ public class ExerciseShell implements IsSerializable {
   public String getTooltip() { return tooltip; }
   public void setTooltip(String tooltip) {
     this.tooltip = tooltip;
+    if (tooltip.isEmpty()) throw new IllegalArgumentException("tooltip is empty for " + id);
   }
   @Override
   public boolean equals(Object other) {
