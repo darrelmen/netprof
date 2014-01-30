@@ -395,6 +395,7 @@ public class Navigation implements RequiresResize {
     //r1.add(new Column(6, widgets));
     r1.add(widgets);
     widgets.addStyleName("floatLeft");
+    widgets.addStyleName("leftFiveMargin");
     HTML itemMarker = new HTML(ul.getExercises().size() + " items");
     listToMarker.put(ul,itemMarker);
     //itemMarker.addStyleName("subtitleForeground");
@@ -554,7 +555,7 @@ public class Navigation implements RequiresResize {
           if (collisions.size() > 1) {
             if (collisions.indexOf(ul) > 0) showMore = true;
           }
-          if (!ul.isEmpty() || !ul.isPrivate()) {
+          if (!ul.isEmpty() || (!ul.isPrivate()/* && !ul.isEmpty()*/) ) {
             anyAdded = true;
             insideScroll.add(getDisplayRowPerList(ul, showMore));
           }
@@ -663,11 +664,11 @@ public class Navigation implements RequiresResize {
       r2.add(getUserListText2(ul.getDescription()));
     }
 
-    if (yourList) {
+   // if (yourList) {
    /*   r1 = new FluidRow();
       container.add(r1);
       r1.add(new HTML("<b>Created by you.</b>"));*/
-    }
+   // }
   }
 
   private Widget makeItemMarker2(UserList ul) {
