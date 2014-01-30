@@ -85,8 +85,16 @@ public class ServerProperties {
   private double minPronScore;
   int maxNumExercises = Integer.MAX_VALUE;
 
-  public void readPropertiesFile(ServletContext servletContext, String configDir) {
-   String configFile = servletContext.getInitParameter("configFile");
+  public ServerProperties(ServletContext servletContext, String configDir) {
+    this(servletContext, configDir, servletContext.getInitParameter("configFile"));
+  }
+
+  public ServerProperties(String configDir, String configFile) {
+    this(null, configDir, configFile);
+  }
+
+  public ServerProperties(ServletContext servletContext, String configDir, String configFile) {
+    String dateFromManifest = getDateFromManifest(servletContext);
     if (configFile == null) configFile = DEFAULT_PROPERTIES_FILE;
     String configFileFullPath = configDir + File.separator + configFile;
     if (!new File(configFileFullPath).exists()) {
@@ -95,7 +103,7 @@ public class ServerProperties {
       try {
         props = new Properties();
         props.load(new FileInputStream(configFileFullPath));
-        readProperties(servletContext);
+        readProperties(dateFromManifest);
       } catch (IOException e) {
         logger.error("got " + e, e);
       }
@@ -262,9 +270,9 @@ public class ServerProperties {
    *
    * Note that this will only ever be called once.
    * @see
-   * @param servletContext
+   * @param dateFromManifest
    */
-  private void readProperties(ServletContext servletContext) {
+  private void readProperties(String dateFromManifest) {
     try {
       firstNInOrder = Integer.parseInt(props.getProperty(FIRST_N_IN_ORDER, "" + Integer.MAX_VALUE));
     } catch (NumberFormatException e) {
@@ -279,7 +287,6 @@ public class ServerProperties {
     isDataCollectAdminView = !props.getProperty("dataCollectAdminView", "false").equals("false");
     outsideFile = props.getProperty(OUTSIDE_FILE, OUTSIDE_FILE_DEFAULT);
 
-    String dateFromManifest = getDateFromManifest(servletContext);
     if (dateFromManifest != null && dateFromManifest.length() > 0) {
       //logger.debug("Date from manifest " + dateFromManifest);
       props.setProperty("releaseDate",dateFromManifest);
@@ -307,9 +314,8 @@ public class ServerProperties {
   }
 
   private String getDateFromManifest(ServletContext servletContext) {
-    InputStream inputStream = servletContext.getResourceAsStream("/META-INF/MANIFEST.MF");
-
     try {
+      InputStream inputStream = servletContext.getResourceAsStream("/META-INF/MANIFEST.MF");
       Manifest manifest = new Manifest(inputStream);
       Attributes attributes = manifest.getMainAttributes();
       return attributes.getValue("Built-Date");
