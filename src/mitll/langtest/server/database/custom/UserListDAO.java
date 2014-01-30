@@ -2,7 +2,6 @@ package mitll.langtest.server.database.custom;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.ExerciseDAO;
 import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
@@ -58,7 +57,15 @@ public class UserListDAO extends DAO {
    * @param userid
    */
   public void addVisitor(long listid, long userid) { userListVisitorJoinDAO.add(listid,userid);}
-  public void removeVisitor(long listid) { userListVisitorJoinDAO.remove(listid);}
+
+  /**
+   * @see UserListDAO#remove
+   * @param listid
+   */
+  public void removeVisitor(long listid) {
+    logger.debug("remove visitor reference " + listid);
+    userListVisitorJoinDAO.remove(listid);
+  }
 
   void createUserListTable(Database database) throws SQLException {
     Connection connection = database.getConnection();
@@ -228,6 +235,7 @@ public class UserListDAO extends DAO {
 
   public boolean remove(long unique) {
     removeVisitor(unique);
+    logger.debug("remove from " + USER_EXERCISE_LIST + " = " +unique);
     return remove(USER_EXERCISE_LIST, "uniqueid", unique);
   }
 
@@ -238,7 +246,7 @@ public class UserListDAO extends DAO {
    * @return
    */
   public UserList getWithExercises(long unique) {
-    UserList where = getWhere(unique);
+    UserList where = getWhere(unique, true);
     populateList(where);
     return where;
   }
@@ -247,15 +255,16 @@ public class UserListDAO extends DAO {
    * @see #getWithExercises(long)
    * @see mitll.langtest.server.database.custom.UserListManager#reallyCreateNewItem(long, mitll.langtest.shared.custom.UserExercise)
    * @param unique
+   * @param warnIfMissing
    * @return
    */
-  public UserList getWhere(long unique) {
+  public UserList getWhere(long unique, boolean warnIfMissing) {
     if (unique == Long.MAX_VALUE) return null;
     String sql = "SELECT * from " + USER_EXERCISE_LIST + " where uniqueid=" + unique + " order by modified";
     try {
       List<UserList> lists = getUserLists(sql,-1);
       if (lists.isEmpty()) {
-        logger.error("getWhere : huh? no user list with id " + unique + " and sql " + sql);
+        if (warnIfMissing) logger.error("getWhere : huh? no user list with id " + unique + " and sql " + sql);
         return null;
       } else {
         return lists.iterator().next();
@@ -294,15 +303,21 @@ public class UserListDAO extends DAO {
     }
   }*/
 
+  /**
+   * @see #getAll(long)
+   * @see #getAllPublic()
+   * @see #getWhere(long, boolean)
+   * @param sql
+   * @param userid
+   * @return
+   * @throws SQLException
+   */
   private List<UserList> getUserLists(String sql, long userid) throws SQLException {
     List<UserList> lists = getWhere(sql);
 
     for (UserList ul : lists) {
       if (userid == -1 || ul.getCreator().id == userid || !ul.isFavorite()) {   // skip other's favorites
         populateList(ul);
-      }
-      else {
-        //logger.info("for " + userid +" skipping " + ul);
       }
     }
     return lists;
@@ -333,6 +348,8 @@ public class UserListDAO extends DAO {
 
   /**
    * TODO : This is going to get slow?
+   * @see #getUserLists(String, long)
+   * @see #getWithExercises(long)
    * @param where
    */
   private void populateList(UserList where) {
