@@ -22,34 +22,40 @@ public class H2Connection implements DatabaseConnection {
   private Connection conn;
   private int cacheSizeKB;
   private int queryCacheSize;
-  private int maxMemoryRows = 50000;
+  private static final int maxMemoryRows = 50000;
 
   public H2Connection(String configDir, String dbName) {
-    this(configDir, dbName, 50000, 8);
+    this(configDir, dbName, 50000, 8, true);
+  }
+
+  public H2Connection(String configDir, String dbName, boolean mustAlreadyExist) {
+    this(configDir, dbName, 50000, 8, mustAlreadyExist);
   }
     /**
      * @see mitll.langtest.server.database.DatabaseImpl#DatabaseImpl
      * @param configDir
      * @param dbName
      */
-  public H2Connection(String configDir, String dbName, int cacheSizeKB, int queryCacheSize) {
+    private H2Connection(String configDir, String dbName, int cacheSizeKB, int queryCacheSize, boolean mustAlreadyExist) {
     this.cacheSizeKB = cacheSizeKB;
     this.queryCacheSize = queryCacheSize;
-    connect(configDir, dbName);
+    connect(configDir, dbName, mustAlreadyExist);
   }
 
-  private void connect(String configDir, String database) {
+  private void connect(String configDir, String database, boolean mustAlreadyExist) {
     String h2FilePath = configDir +File.separator+ database;
-    connect(h2FilePath);
+    connect(h2FilePath, mustAlreadyExist);
   }
 
   /**
    *   //jdbc:h2:file:/Users/go22670/DLITest/clean/netPron2/war/config/urdu/vlr-parle;IFEXISTS=TRUE;CACHE_SIZE=30000
    * @param h2FilePath
+   * @param mustAlreadyExist
    */
-  private void connect(String h2FilePath) {
+  private void connect(String h2FilePath, boolean mustAlreadyExist) {
     String url = "jdbc:h2:file:" + h2FilePath +
-      ";IFEXISTS=TRUE;" +
+      ";" +
+      (mustAlreadyExist ? "IFEXISTS=TRUE;" :"") +
       "QUERY_CACHE_SIZE=" + queryCacheSize + ";" +
       "CACHE_SIZE="       + cacheSizeKB + ";" +
       "MAX_MEMORY_ROWS="  +maxMemoryRows
