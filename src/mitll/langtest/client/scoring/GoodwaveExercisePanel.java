@@ -208,14 +208,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
     Widget questionContent = getQuestionContent(e, content);
 
-
-    //Panel rowForContent = new FlowPanel();
-
     if (addToList != null) {
       Panel rowForContent = new HorizontalPanel();
       rowForContent.setWidth("100%");
       rowForContent.getElement().setId("getQuestionContent_rowForContent");
-      //rowForContent.addStyleName("trueInlineStyle");
       rowForContent.add(questionContent);
       rowForContent.add(addToList);
       addToList.addStyleName("floatRight");
@@ -528,8 +524,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
   public boolean isBusy() { return isBusy;  }
 
-  protected void setAudioRef(String audioRef) {}
-
   protected class FastAndSlowASRScoringAudioPanel extends ASRScoringAudioPanel {
     private static final String GROUP = "group";
     /**
@@ -613,8 +607,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       String audioRef = audioAttribute.getAudioRef();
       setRefAudio(audioRef);
       getImagesForPath(audioRef);
-
-      setAudioRef(audioRef);
     }
   }
 }
