@@ -316,7 +316,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * @see ExerciseList.SetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
    */
   public void rememberAndLoadFirst(List<T> exercises, Exercise firstExercise) {
-    System.out.println("ExerciseList : rememberAndLoadFirst remembering " + exercises.size() + " : " +firstExercise);
+    System.out.println("ExerciseList : rememberAndLoadFirst remembering " + exercises.size() + " : first = " +firstExercise);
 
     rememberExercises(exercises);
     if (firstExercise != null) {
@@ -338,7 +338,6 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   }
 
   protected abstract void rememberExercises(List<T> result);
-
   protected abstract int getSize();
 
   /**
@@ -638,9 +637,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   protected void removeComponents() { super.clear();  }
 
   @Override
-  public void clear() {
-    removeComponents();
-  }
+  public void clear() { removeComponents(); }
 
   protected abstract void markCurrentExercise(String itemID);
 
