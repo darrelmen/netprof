@@ -409,6 +409,10 @@ public class Navigation implements RequiresResize {
     }*/
     container.add(getListOperations(ul, created, instanceName));
 
+    addVisitor(ul);
+  }
+
+  private void addVisitor(UserList ul) {
     service.addVisitor(ul, (long)controller.getUser(), new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {}
