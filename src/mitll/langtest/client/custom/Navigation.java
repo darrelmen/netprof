@@ -1,7 +1,6 @@
 package mitll.langtest.client.custom;
 
 import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
@@ -26,8 +25,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasText;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -62,8 +59,6 @@ public class Navigation implements RequiresResize {
   private static final String PRACTICE = "Practice";
   public static final String REVIEW = "review";
   public static final String COMMENT = "comment";
-  private static final String EDIT = "Edit";
-  private static final String ADD_ITEM = "Add Item";
   private static final String ADD__OR_EDIT_ITEM = "Add/Edit Item";
   public static final String ITEMS_TO_REVIEW = "Items to review";
   public static final String ITEMS_WITH_COMMENTS = "Items with comments";
@@ -71,7 +66,6 @@ public class Navigation implements RequiresResize {
   private final ExerciseController controller;
   private LangTestDatabaseAsync service;
   private UserManager userManager;
-  private long userListID;
 
   private ScrollPanel listScrollPanel;
   private ListInterface<? extends ExerciseShell> listInterface;
@@ -188,7 +182,7 @@ public class Navigation implements RequiresResize {
             " ' target name '" + showEvent.getTarget().getName() + "'");*/
         String targetName = showEvent.getTarget() == null ? "" : showEvent.getTarget().toString();
 
-       // System.out.println("getButtonRow2 : got shown event : '" +showEvent + "' target '" + targetName + "'");
+        System.out.println("getButtonRow2 : got shown event : '" +showEvent + "' target '" + targetName + "'");
 
         boolean wasChapters = targetName.contains(CHAPTERS);
         Panel createdPanel = listInterface.getCreatedPanel();
@@ -199,6 +193,14 @@ public class Navigation implements RequiresResize {
         }
       }
     });
+
+/*    tabPanel.addShowHandler(new TabPanel.ShowEvent.Handler() {
+      @Override
+      public void onShow(TabPanel.ShowEvent showEvent) {
+        System.out.println("onShow : got shown event : '" +showEvent + "' target '" + targetName + "'");
+
+      }
+    });*/
 
     return tabPanel;
   }
@@ -217,10 +219,6 @@ public class Navigation implements RequiresResize {
   void zeroPadding(Panel createContent) {
     DOM.setStyleAttribute(createContent.getElement(), "paddingLeft", "0px");
     DOM.setStyleAttribute(createContent.getElement(), "paddingRight", "0px");
-  }
-
-  public void setUserListID(long userListID) {
-    this.userListID = userListID;
   }
 
   public static class TabAndContent {
@@ -372,7 +370,7 @@ public class Navigation implements RequiresResize {
    * @param ul
    * @param contentPanel
    */
-  private void showList(final UserList ul, Panel contentPanel, final String instanceName) {
+  private TabPanel showList(final UserList ul, Panel contentPanel, final String instanceName) {
     System.out.println("showList " +ul + " instance " + instanceName);
 
     FluidContainer container = new FluidContainer();
@@ -407,9 +405,12 @@ public class Navigation implements RequiresResize {
       container.add(child);
       child.add(new Heading(3, "<b>Created by you.</b>"));
     }*/
-    container.add(getListOperations(ul, created, instanceName));
+    TabPanel listOperations = getListOperations(ul, created, instanceName);
+    container.add(listOperations);
 
     addVisitor(ul);
+
+    return listOperations;
   }
 
   private void addVisitor(UserList ul) {
@@ -428,7 +429,7 @@ public class Navigation implements RequiresResize {
    * @param instanceName
    * @return
    */
-  private Panel getListOperations(final UserList ul, final boolean created, final String instanceName) {
+  private TabPanel getListOperations(final UserList ul, final boolean created, final String instanceName) {
     final TabPanel tabPanel = new TabPanel();
     System.out.println("getListOperations : '" + instanceName + " for list " +ul);
     final boolean isReview = instanceName.equals(REVIEW);
@@ -447,7 +448,6 @@ public class Navigation implements RequiresResize {
 
     // add practice tab
     final boolean isNormalList = !isReview && !isComment;
-    //System.out.println("normal list " + isNormalList);
     if (isNormalList) {
       final TabAndContent practice = makeTab(tabPanel, IconType.CHECK, PRACTICE);
       practice.tab.addClickHandler(new ClickHandler() {
@@ -506,6 +506,7 @@ public class Navigation implements RequiresResize {
     }
   }
 
+  TabPanel innerTabs;
   private class UserListCallback implements AsyncCallback<Collection<UserList>> {
     private final Panel contentPanel;
     private final Panel child;
@@ -588,7 +589,7 @@ public class Navigation implements RequiresResize {
       widgets.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          showList(ul, contentPanel, instanceName);
+          innerTabs = showList(ul, contentPanel, instanceName);
         }
       });
       widgets.addMouseOverHandler(new MouseOverHandler() {
