@@ -105,15 +105,17 @@ public class DAO {
       boolean changed = statement.executeUpdate() == 1;
 
       if (!changed) {
-        logger.error("huh? didn't alter row for " + table + " sql " + sql);
+        logger.warn("doSqlOn : didn't alter row for " + table + " sql " + sql);
       }
 
       statement.close();
       database.closeConnection(connection);
 
       int count = getCount(table);
-      logger.debug("now " + count + " reviewed");
-      if (before - count != 1) logger.error("DAO : huh? there were " + before + " before");
+      logger.debug("now " + count + " in " + table);
+      if (before - count != 1) {
+        logger.warn("DAO.doSqlOn : there were " + before + " before for " + table);
+      }
 
       return changed;
     } catch (Exception ee) {
