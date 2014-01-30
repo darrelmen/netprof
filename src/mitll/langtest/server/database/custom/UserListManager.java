@@ -51,6 +51,16 @@ public class UserListManager {
   private Set<String> reviewedExercises = new TreeSet<String>();
   private Set<String> incorrect = new TreeSet<String>();
   private final PathHelper pathHelper;
+
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(mitll.langtest.server.PathHelper)
+   * @param userDAO
+   * @param userListDAO
+   * @param userListExerciseJoinDAO
+   * @param annotationDAO
+   * @param reviewedDAO
+   * @param pathHelper
+   */
   public UserListManager(UserDAO userDAO, UserListDAO userListDAO, UserListExerciseJoinDAO userListExerciseJoinDAO,
                          AnnotationDAO annotationDAO, ReviewedDAO reviewedDAO, PathHelper pathHelper) {
     this.userDAO = userDAO;
@@ -276,7 +286,7 @@ public class UserListManager {
   }
 
   private void addItemToList(long userListID, UserExercise userExercise) {
-    UserList where = userListDAO.getWhere(userListID);
+    UserList where = userListDAO.getWhere(userListID, true);
     if (where != null) {
       userListExerciseJoinDAO.add(where, userExercise.getID());
       userListDAO.updateModified(userListID);
@@ -379,15 +389,13 @@ public class UserListManager {
   }
 
   public void addVisitor(UserList userList, long user) {
-    UserList where = userListDAO.getWhere(userList.getUniqueID());
+    UserList where = userListDAO.getWhere(userList.getUniqueID(), true);
     if (where != null) {
       userListDAO.addVisitor(where.getUniqueID(), user);
     }
   }
 
-  private boolean listExists(long id) {
-    return userListDAO.getWhere(id) != null;
-  }
+  private boolean listExists(long id) {  return userListDAO.getWhere(id, false) != null; }
 
   public void addAnnotation(String exerciseID, String field, String status, String comment, long userID) {
     logger.info("addAnnotation write to database! " + exerciseID + " " + field + " " + status + " " + comment);
