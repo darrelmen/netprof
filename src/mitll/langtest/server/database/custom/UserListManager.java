@@ -90,6 +90,15 @@ public class UserListManager {
     else return userList.getUniqueID();
   }
 
+  /**
+   *
+   * @param userid
+   * @param name
+   * @param description
+   * @param dliClass
+   * @param isPrivate
+   * @return null if user already has a list with this name
+   */
   private UserList createUserList(long userid, String name, String description, String dliClass, boolean isPrivate) {
     User userWhere = userDAO.getUserWhere(userid);
     if (userWhere == null) {
@@ -108,7 +117,14 @@ public class UserListManager {
     }
   }
 
-  public boolean hasByName(long userid, String name) { return userListDAO.hasByName(userid, name);}
+  public boolean hasByName(long userid, String name) {
+    return userListDAO.hasByName(userid, name);
+  }
+
+  public UserList getByName(long userid, String name) {
+    List<UserList> byName = userListDAO.getByName(userid, name);
+    return byName == null ? null : byName.iterator().next();
+  }
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getListsForUser
@@ -315,7 +331,12 @@ public class UserListManager {
    * @param overwrite
    */
   private void fixAudioPaths(UserExercise userExercise, boolean overwrite) {
-    File fileRef = pathHelper.getAbsoluteFile(userExercise.getRefAudio());
+    String refAudio1 = userExercise.getRefAudio();
+    if (refAudio1 == null) {
+      logger.warn("huh? no ref audio for " + userExercise);
+      return;
+    }
+    File fileRef = pathHelper.getAbsoluteFile(refAudio1);
     long now = System.currentTimeMillis();
     String fast = FAST + "_"+ now +"_by_" +userExercise.getCreator()+".wav";
     String refAudio = getRefAudioPath(userExercise, fileRef, fast, overwrite);
@@ -386,6 +407,10 @@ public class UserListManager {
    * @return
    */
   public UserList getUserListByID(long id) {
+    if (id == -1) {
+      logger.error("getUserListByID : huh? asking for id " + id);
+      return null;
+    }
     return id == Long.MAX_VALUE ? getReviewList() : userListDAO.getWithExercises(id);
   }
 
