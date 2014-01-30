@@ -112,6 +112,12 @@ public class UserListExerciseJoinDAO extends DAO {
     remove(USER_EXERCISE_LIST_EXERCISE, USERLISTID, listid);
   }
 
+  /**
+   * @see mitll.langtest.server.database.custom.UserListManager#deleteItemFromList(long, String)
+   * @param listid
+   * @param exid
+   * @return
+   */
   public boolean remove(long listid, String exid) {
     String sql = getRemoveSQL(listid, exid);
     return doSqlOn(sql,USER_EXERCISE_LIST_EXERCISE);
