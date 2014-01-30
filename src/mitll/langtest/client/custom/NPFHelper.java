@@ -87,7 +87,7 @@ public class NPFHelper implements RequiresResize {
     npfContentPanel = new SimplePanel();
     hp.add(npfContentPanel);
     npfContentPanel.addStyleName("floatRight");
-    npfExerciseList = makeNPFExerciseList(npfContentPanel, instanceName);
+    npfExerciseList = makeNPFExerciseList(npfContentPanel, instanceName + "_"+ul.getName());
 
     left.add(npfExerciseList.getExerciseListOnLeftSide(controller.getProps()));
     rememberAndLoadFirst(ul);
@@ -169,9 +169,5 @@ public class NPFHelper implements RequiresResize {
   /**
    * @see mitll.langtest.client.custom.EditItem.EditableExercise#getCreateButton(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, com.github.gwtbootstrap.client.ui.ControlGroup)
    */
-  public void reload() {
-    //String currentExerciseID = npfExerciseList.getCurrentExerciseID();
-    npfExerciseList.redraw();
-
-  }
+  public void reload() {   npfExerciseList.redraw();  }
 }
