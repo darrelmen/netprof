@@ -210,30 +210,27 @@ public class UserListDAO extends DAO {
 
   public boolean hasByName(long userid, String name) {
     try {
-      String sql = "SELECT * from " + USER_EXERCISE_LIST + " where " +
-        "NAME" +
-        "=" +
-        "'" +name+
-        "' AND " +
-        CREATORID + "=" + userid;
-      return !getWhere(sql).isEmpty();
+      return !getByName(userid,name).isEmpty();
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
     return false;
   }
 
-
-/*  public List<UserList> getAllOwnedBy(long id) {
+  public List<UserList> getByName(long userid, String name) {
     try {
-      String sql = "SELECT * from " + USER_EXERCISE_LIST + " where creatorid=" + id+
-        " order by modified";
-      return getUserLists(sql);
+      String sql = "SELECT * from " + USER_EXERCISE_LIST + " where " +
+        NAME +
+        "=" +
+        "'" +name+
+        "' AND " +
+        CREATORID + "=" + userid;
+      return getWhere(sql);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
     return Collections.emptyList();
-  }*/
+  }
 
   public boolean remove(long unique) {
     removeVisitor(unique);
@@ -276,34 +273,6 @@ public class UserListDAO extends DAO {
     }
     return null;
   }
-
-/*  public Collection<UserList> listsWithout(long listid, String exerciseID) {
-    try {
-      // there are much better ways of doing this...
-      logger.info("UserListExerciseJoinDAO.listsWithout :userList " + listid + " exercise " + exerciseID);
-
-      Connection connection = database.getConnection();
-      PreparedStatement statement = connection.prepareStatement(
-        "SELECT ul." +USER_EXERCISE_LIST+
-          " FROM " + USER_EXERCISE_LIST + " ul, " + UserListExerciseJoinDAO.USER_EXERCISE_LIST_EXERCISE + " ule "+
-          "WHERE ");
-      int i = 1;
-      statement.setLong(i++, userList.getUniqueID());
-      statement.setString(i++, uniqueID);
-
-      int j = statement.executeUpdate();
-
-      if (j != 1)
-        logger.error("huh? didn't insert row for ");
-
-      statement.close();
-      database.closeConnection(connection);
-
-      //logger.debug("\tUserListExerciseJoinDAO.add : now " + getCount(USER_EXERCISE_LIST_EXERCISE) + " and user exercise is " + userList);
-    } catch (Exception ee) {
-      logger.error("got " + ee, ee);
-    }
-  }*/
 
   /**
    * @see #getAll(long)
