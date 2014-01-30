@@ -106,21 +106,38 @@ public class DatabaseImpl implements Database {
    * @param configDir
    * @see mitll.langtest.server.LangTestDatabaseImpl#readProperties(javax.servlet.ServletContext)
    */
-
+/*
   public DatabaseImpl(String configDir, String dbName, String lessonPlanFile) {
-    this(configDir, dbName, "", new ServerProperties(),null);
-    this.useFile = true;
-    this.lessonPlanFile = lessonPlanFile;
+    this(configDir, dbName, "", new ServerProperties((ServletContext)null, configDir), null);
+  }*/
+
+  public DatabaseImpl(String configDir, String configFile, String dbName, boolean mustAlreadyExist) {
+    this(configDir, "", dbName, new ServerProperties(configDir, configFile), null, mustAlreadyExist);
+    this.lessonPlanFile = serverProps.getLessonPlan();
+    this.useFile = lessonPlanFile != null;
   }
 
+/*  private DatabaseImpl(String configDir,
+                       String relativeConfigDir, ServerProperties serverProps,
+                       PathHelper pathHelper) {
+    this(configDir, serverProps.getH2Database(), relativeConfigDir, serverProps, pathHelper);
+  }
+  */
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#makeDatabaseImpl
    * @param configDir
-   * @param dbName
    * @param serverProps
-   */
-  public DatabaseImpl(String configDir, String dbName, String relativeConfigDir, ServerProperties serverProps,PathHelper pathHelper) {
-    connection = new H2Connection(configDir, dbName);
+/*
+   * @param mustAlreadyExist  *//*
+  private DatabaseImpl(String configDir,
+                      String relativeConfigDir, ServerProperties serverProps,
+                      PathHelper pathHelper) {
+    this(configDir, relativeConfigDir, serverProps.getH2Database(), serverProps, pathHelper);
+  }*/
+
+  public DatabaseImpl(String configDir, String relativeConfigDir, String dbName, ServerProperties serverProps,
+                      PathHelper pathHelper, boolean mustAlreadyExist) {
+    connection = new H2Connection(configDir, dbName, mustAlreadyExist);
     absConfigDir = configDir;
     this.configDir = relativeConfigDir;
 
@@ -157,7 +174,8 @@ public class DatabaseImpl implements Database {
     answerDAO = new AnswerDAO(this, resultDAO);
     gradeDAO = new GradeDAO(this,userDAO, resultDAO);
     siteDAO = new SiteDAO(this, userDAO);
-    userListManager = new UserListManager( userDAO,userListDAO,userListExerciseJoinDAO, new AnnotationDAO(this), new ReviewedDAO(this), pathHelper);
+    userListManager = new UserListManager( userDAO,userListDAO,userListExerciseJoinDAO, new AnnotationDAO(this),
+      new ReviewedDAO(this), pathHelper);
 
 
     if (DROP_USER) {
@@ -199,6 +217,10 @@ public class DatabaseImpl implements Database {
    * @throws SQLException
    */
   public void closeConnection(Connection connection) throws SQLException {}
+  public void closeConnection() throws SQLException {
+
+    connection.getConnection().close();
+  }
 
   public Export getExport() {
     //if (exerciseDAO == null) logger.error("huh? exercise dao is null?");
@@ -1141,7 +1163,7 @@ public class DatabaseImpl implements Database {
     return l;
   }
 
-  private long addUser(int age, String gender, int experience, String ipAddr,
+  public long addUser(int age, String gender, int experience, String ipAddr,
                        String nativeLang, String dialect, String userID) {
     long l = userDAO.addUser(age, gender, experience, ipAddr, nativeLang, dialect, userID, false);
     userListManager.createFavorites(l);
@@ -1204,13 +1226,6 @@ public class DatabaseImpl implements Database {
     if (users1.isEmpty()) logger.info("no dli users.");
   }
 
-  /**
-   * Pulls the list of results out of the database.
-   *
-   * @return
-   * @see mitll.langtest.server.audio.SplitAudio#getIDToResultsMap(DatabaseImpl, java.util.Set)
-   */
-  public List<Result> getResults() { return resultDAO.getResults(); }
   private List<ResultDAO.SimpleResult> getSimpleResults() { return resultDAO.getSimpleResults(); }
 
   public List<Result> getResultsWithGrades() {
