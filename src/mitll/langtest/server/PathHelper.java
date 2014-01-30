@@ -20,10 +20,16 @@ public class PathHelper {
   public static final String ANSWERS = "answers";
   private static final String IMAGE_WRITER_IMAGES = "audioimages";
 
+  private String realContextPathTest;
   private final ServletContext context;
 
   public PathHelper(ServletContext context) {
     this.context = context;
+  }
+
+  public PathHelper(String realContextPathTest) {
+    this((ServletContext)null);
+    this.realContextPathTest = realContextPathTest;
   }
 
   public String ensureForwardSlashes(String wavPath) {
@@ -47,12 +53,12 @@ public class PathHelper {
    */
   public String getInstallPath() {
    // ServletContext context = servlet.getServletContext();
-    if (context == null) {
+    if (context == null && realContextPathTest == null) {
       logger.error("no servlet context.");
       return "";
     }
 
-    String realContextPath = context.getRealPath(context.getContextPath());
+    String realContextPath = context == null ? realContextPathTest : context.getRealPath(context.getContextPath());
 
     List<String> pathElements = Arrays.asList(realContextPath.split(realContextPath.contains("\\") ? "\\\\" : "/"));
 
@@ -131,5 +137,9 @@ public class PathHelper {
 
     }
     return imageOutdir;
+  }
+
+  public void setRealContextPathTest(String realContextPathTest) {
+    this.realContextPathTest = realContextPathTest;
   }
 }
