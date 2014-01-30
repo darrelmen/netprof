@@ -203,7 +203,9 @@ public class UserListVisitorJoinDAO extends DAO {
       statement.close();
       database.closeConnection(connection);
       boolean b = i > 0;
-      if (b) logger.info("did update for " + uniqueID + " and " + visitor);
+      if (b) {
+        logger.info("did update for " + uniqueID + " and " + visitor + " in " + USER_EXERCISE_LIST_VISITOR);
+      }
       return b;
     } catch (Exception e) {
       logger.error("got " + e, e);
@@ -211,5 +213,7 @@ public class UserListVisitorJoinDAO extends DAO {
     return false;
   }
 
-  public boolean remove(long listid) {  return remove(USER_EXERCISE_LIST_VISITOR, USERLISTID, listid); }
+  public boolean remove(long listid) {
+    return remove(USER_EXERCISE_LIST_VISITOR, USERLISTID, listid);
+  }
 }
