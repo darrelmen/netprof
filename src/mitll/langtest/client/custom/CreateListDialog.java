@@ -82,26 +82,29 @@ public class CreateListDialog extends BasicDialog {
         //System.out.println("creating list for " + titleBox + " " + area.getText() + " and " + classBox.getText());
         enterKeyButtonHelper.removeKeyHandler();
         if (validateCreateList(titleBox, description, classBox)) {
-          service.addUserList(userManager.getUser(), titleBox.getText(), area.getText(),
-            classBox.getText(), new AsyncCallback<Long>() {
-            @Override
-            public void onFailure(Throwable caught) {}
-
-            @Override
-            public void onSuccess(Long result) {
-              if (result == -1) {
-                markError(titleBox,"You already have a list named "+ titleBox.getText());
-              } else {
-                navigation.setUserListID(result);
-                navigation.showInitialState();
-              }
-            }
-          });
+          addUserList(titleBox, area, classBox);
         }
       }
     });
     enterKeyButtonHelper.addKeyHandler(submit);
     row.add(submit);
+  }
+
+  public void addUserList(final FormField titleBox, TextArea area, FormField classBox) {
+    service.addUserList(userManager.getUser(), titleBox.getText(), area.getText(),
+      classBox.getText(), new AsyncCallback<Long>() {
+      @Override
+      public void onFailure(Throwable caught) {}
+
+      @Override
+      public void onSuccess(Long result) {
+        if (result == -1) {
+          markError(titleBox,"You already have a list named "+ titleBox.getText());
+        } else {
+          navigation.showInitialState();
+        }
+      }
+    });
   }
 
   void zeroPadding(Panel createContent) {
