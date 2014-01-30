@@ -14,8 +14,8 @@ class AudioPositionPopup implements AudioControl {
 
   private PopupPanel imageOverlay;
   private float durationInMillis;
-  private final boolean debugPartial = false;
-  private final boolean debug = false;
+  private static final boolean debugPartial = false;
+  private static final boolean debug = false;
   private Panel imageContainer;
 
   /**
