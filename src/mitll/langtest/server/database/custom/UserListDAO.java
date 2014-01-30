@@ -56,7 +56,9 @@ public class UserListDAO extends DAO {
    * @param listid
    * @param userid
    */
-  public void addVisitor(long listid, long userid) { userListVisitorJoinDAO.add(listid,userid);}
+  public void addVisitor(long listid, long userid) {
+    userListVisitorJoinDAO.add(listid, userid);
+  }
 
   /**
    * @see UserListDAO#remove
@@ -137,7 +139,7 @@ public class UserListDAO extends DAO {
       } else {
         logger.error("huh? no key was generated?");
       }
-      logger.debug("unique id = " + id);
+     // logger.debug("unique id = " + id);
 
       userList.setUniqueID(id);
 
@@ -206,7 +208,7 @@ public class UserListDAO extends DAO {
     return Collections.emptyList();
   }
 
-  public boolean hasByName(String name, long userid) {
+  public boolean hasByName(long userid, String name) {
     try {
       String sql = "SELECT * from " + USER_EXERCISE_LIST + " where " +
         "NAME" +
