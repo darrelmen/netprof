@@ -30,7 +30,7 @@ public class UserExerciseDAO extends DAO {
     super(database);
     try {
       createUserTable(database);
-      int numColumns = getNumColumns(database.getConnection(), USEREXERCISE);
+      //int numColumns = getNumColumns(database.getConnection(), USEREXERCISE);
 
       Collection<String> columns = getColumns(USEREXERCISE);
       if (!columns.contains(TRANSLITERATION)) {
@@ -298,8 +298,10 @@ public class UserExerciseDAO extends DAO {
     List<UserExercise> exercises = new ArrayList<UserExercise>();
 
     while (rs.next()) {
-      UserExercise e = new UserExercise(rs.getLong("uniqueid"), //id
-        rs.getString("exerciseid"), rs.getLong("creatorid"),
+      UserExercise e = new UserExercise(
+        rs.getLong("uniqueid"), //id
+        rs.getString("exerciseid"),
+        rs.getLong("creatorid"),
         rs.getString("english"),
         rs.getString("foreignLanguage"),
         rs.getString(TRANSLITERATION),
