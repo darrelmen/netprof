@@ -39,6 +39,8 @@ public class UserExercise extends AudioExercise {
   }
 
   /**
+   * Tooltip is the english phrase, but if it's empty, use the foreign language.
+   *
    * @see mitll.langtest.server.database.custom.UserListManager#createNewItem(long, String, String, String)
    * @param uniqueID
    * @param exerciseID
@@ -49,13 +51,12 @@ public class UserExercise extends AudioExercise {
    */
   public UserExercise(long uniqueID, String exerciseID, long creator, String english, String foreignLanguage,
                       String transliteration) {
-    super(exerciseID,english);
+    super(exerciseID,english.isEmpty() ? foreignLanguage : english);
     this.creator = creator;
     this.uniqueID = uniqueID;
     this.english = english;
     this.foreignLanguage = foreignLanguage;
     this.transliteration = transliteration;
- //   count = globalCount++;
     isPredef = !exerciseID.startsWith(CUSTOM_PREFIX);
   }
 
@@ -84,7 +85,7 @@ public class UserExercise extends AudioExercise {
      * @param exercise
      */
   public UserExercise(Exercise exercise) {
-    super(exercise.getID(), exercise.getEnglishSentence());
+    super(exercise.getID(), exercise.getEnglishSentence().isEmpty() ? exercise.getRefSentence() : exercise.getEnglishSentence());
 
     this.isPredef = true;
     this.english = exercise.getEnglishSentence();
@@ -100,7 +101,8 @@ public class UserExercise extends AudioExercise {
    * @return
    */
   public Exercise toExercise() {
-    Exercise exercise = new Exercise("plan", getID(), getEnglish(), getRefAudio(), getForeignLanguage(), getEnglish());
+    String tooltip = getEnglish().isEmpty() ? getForeignLanguage() : getEnglish();
+    Exercise exercise = new Exercise("plan", getID(), getEnglish(), getRefAudio(), getForeignLanguage(), tooltip);
     exercise.setTranslitSentence(getTransliteration());
     exercise.setSlowRefAudio(getSlowAudioRef());
     exercise.setEnglishSentence(getEnglish());
@@ -116,7 +118,8 @@ public class UserExercise extends AudioExercise {
    */
   public Exercise toExercise(String language) {
     String content = ExerciseFormatter.getContent(getForeignLanguage(), "", english, "", language);
-    Exercise imported = new Exercise("import", id, content, false, true, english);
+    String tooltip = english.isEmpty() ? getForeignLanguage() : english;
+    Exercise imported = new Exercise("import", id, content, false, true, tooltip);
     if (getRefAudio() != null)
       imported.setRefAudio(getRefAudio());
     if (getSlowAudioRef() != null)
