@@ -152,6 +152,11 @@ public class UserListVisitorJoinDAO extends DAO {
     return false;
   }*/
 
+  /**
+   * @see mitll.langtest.server.database.custom.UserListDAO#populateList(mitll.langtest.shared.custom.UserList)
+   * @param listid
+   * @return
+   */
   public Set<Long> getWhere(long listid) {
     String sql = "SELECT * from " + USER_EXERCISE_LIST_VISITOR + " where " +
       USERLISTID +
@@ -176,13 +181,6 @@ public class UserListVisitorJoinDAO extends DAO {
     database.closeConnection(connection);
 
     return visitors;
-  }
-
-  private void addColumnToTable(Connection connection) throws SQLException {
-    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " +
-      USER_EXERCISE_LIST_VISITOR + " ADD " + MODIFIED + " TIMESTAMP ");
-    statement.execute();
-    statement.close();
   }
 
   private boolean update(long uniqueID, long visitor) {
@@ -215,5 +213,12 @@ public class UserListVisitorJoinDAO extends DAO {
 
   public boolean remove(long listid) {
     return remove(USER_EXERCISE_LIST_VISITOR, USERLISTID, listid);
+  }
+
+  private void addColumnToTable(Connection connection) throws SQLException {
+    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " +
+      USER_EXERCISE_LIST_VISITOR + " ADD " + MODIFIED + " TIMESTAMP ");
+    statement.execute();
+    statement.close();
   }
 }
