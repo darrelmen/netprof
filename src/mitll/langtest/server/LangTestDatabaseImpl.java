@@ -76,7 +76,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private AudioFileHelper audioFileHelper;
   private String relativeConfigDir;
   private String configDir;
-  private final ServerProperties serverProps = new ServerProperties();
+  private ServerProperties serverProps;
   private PathHelper pathHelper;
   private Random rand = new Random();
 
@@ -1095,7 +1095,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.custom.NewUserExercise#onClick(mitll.langtest.shared.custom.UserList, mitll.langtest.client.exercise.PagingContainer, com.google.gwt.user.client.ui.Panel, boolean)
+   * @see mitll.langtest.client.custom.NewUserExercise#onClick
    * @param userExercise
    */
   @Override
@@ -1342,7 +1342,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     this.relativeConfigDir = "config" + File.separator + config;
     this.configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
 
-    serverProps.readPropertiesFile(servletContext, configDir);
+    serverProps = new ServerProperties(servletContext, configDir);
     String h2DatabaseFile = serverProps.getH2Database();
 
     db = makeDatabaseImpl(h2DatabaseFile);
@@ -1354,7 +1354,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   private DatabaseImpl makeDatabaseImpl(String h2DatabaseFile) {
     //logger.debug("word pairs " +  serverProps.isWordPairs() + " language " + serverProps.getLanguage() + " config dir " + relativeConfigDir);
-    return new DatabaseImpl(configDir, h2DatabaseFile, relativeConfigDir,  serverProps, pathHelper);
+    return new DatabaseImpl(configDir, relativeConfigDir, h2DatabaseFile, serverProps, pathHelper, true);
   }
 
   /**
