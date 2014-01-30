@@ -103,37 +103,16 @@ public class DatabaseImpl implements Database {
 
   /**
    * Just for testing
+   *
    * @param configDir
+   * @param pathHelper
    * @see mitll.langtest.server.LangTestDatabaseImpl#readProperties(javax.servlet.ServletContext)
    */
-/*
-  public DatabaseImpl(String configDir, String dbName, String lessonPlanFile) {
-    this(configDir, dbName, "", new ServerProperties((ServletContext)null, configDir), null);
-  }*/
-
-  public DatabaseImpl(String configDir, String configFile, String dbName, boolean mustAlreadyExist) {
-    this(configDir, "", dbName, new ServerProperties(configDir, configFile), null, mustAlreadyExist);
+  public DatabaseImpl(String configDir, String configFile, String dbName, PathHelper pathHelper, boolean mustAlreadyExist) {
+    this(configDir, "", dbName, new ServerProperties(configDir, configFile), pathHelper, mustAlreadyExist);
     this.lessonPlanFile = serverProps.getLessonPlan();
     this.useFile = lessonPlanFile != null;
   }
-
-/*  private DatabaseImpl(String configDir,
-                       String relativeConfigDir, ServerProperties serverProps,
-                       PathHelper pathHelper) {
-    this(configDir, serverProps.getH2Database(), relativeConfigDir, serverProps, pathHelper);
-  }
-  */
-  /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#makeDatabaseImpl
-   * @param configDir
-   * @param serverProps
-/*
-   * @param mustAlreadyExist  *//*
-  private DatabaseImpl(String configDir,
-                      String relativeConfigDir, ServerProperties serverProps,
-                      PathHelper pathHelper) {
-    this(configDir, relativeConfigDir, serverProps.getH2Database(), serverProps, pathHelper);
-  }*/
 
   public DatabaseImpl(String configDir, String relativeConfigDir, String dbName, ServerProperties serverProps,
                       PathHelper pathHelper, boolean mustAlreadyExist) {
@@ -289,6 +268,7 @@ public class DatabaseImpl implements Database {
       logger.error("huh? lesson plan file is null???", new Exception());
       return Collections.emptyList();
     }
+    logger.debug("using lesson plan file " +lessonPlanFile);
     boolean isExcel = lessonPlanFile.endsWith(".xlsx");
     makeDAO(useFile, lessonPlanFile, isExcel, mediaDir);
 
@@ -326,7 +306,6 @@ public class DatabaseImpl implements Database {
       }
       userExerciseDAO.setExerciseDAO(exerciseDAO);
       exerciseDAO.setUserExerciseDAO(userExerciseDAO);
-      //userListDAO.setExerciseDAO(exerciseDAO);
     }
   }
 
