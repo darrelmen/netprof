@@ -96,7 +96,7 @@ public class UserListManager {
       logger.error("huh? no user with id " + userid);
       return null;
     } else {
-      if (userListDAO.hasByName(name, userid)) {
+      if (hasByName(userid, name)) {
         return null;
       } else {
         UserList e = new UserList(i++, userWhere, name, description, dliClass, isPrivate);
@@ -107,6 +107,8 @@ public class UserListManager {
       }
     }
   }
+
+  public boolean hasByName(long userid, String name) { return userListDAO.hasByName(userid, name);}
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getListsForUser
@@ -153,14 +155,13 @@ public class UserListManager {
   }
 
   public UserList createFavorites(long userid) {
-    logger.debug("createFavorites for " + userid);
+    //logger.debug("createFavorites for " + userid);
     return createUserList(userid, UserList.MY_LIST, MY_FAVORITES, "", true);
   }
 
   private boolean isFavorite(UserList userList) {
     return userList.getName().equals(UserList.MY_LIST);
   }
-
 
   public UserList getCommentedList() {
     List<UserExercise> allKnown = userExerciseDAO.getWhere(incorrect);
@@ -395,7 +396,7 @@ public class UserListManager {
     }
   }
 
-  private boolean listExists(long id) {  return userListDAO.getWhere(id, false) != null; }
+  public boolean listExists(long id) {  return userListDAO.getWhere(id, false) != null; }
 
   public void addAnnotation(String exerciseID, String field, String status, String comment, long userID) {
     logger.info("addAnnotation write to database! " + exerciseID + " " + field + " " + status + " " + comment);
