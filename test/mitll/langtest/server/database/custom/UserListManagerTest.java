@@ -1,8 +1,10 @@
 package mitll.langtest.server.database.custom;
 
-import mitll.langtest.server.database.Database;
+import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.User;
+import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import org.apache.log4j.Logger;
 import org.junit.AfterClass;
@@ -21,17 +23,19 @@ import static org.junit.Assert.*;
  * Created by GO22670 on 1/30/14.
  */
 public class UserListManagerTest {
+  public static final String CHANGED = "changed";
+  public static final String ENGLISH = "english";
   private static Logger logger = Logger.getLogger(UserListManagerTest.class);
   private static DatabaseImpl database;
   private static String test;
 
   @BeforeClass
   public static void setup() {
-    File file = new File("war" + File.separator + "config" + File.separator + "english" + File.separator + "quizlet.properties");
+    File file = new File("war" + File.separator + "config" + File.separator + ENGLISH + File.separator + "quizlet.properties");
     logger.debug("config dir " + file.getParent());
     logger.debug("config     " + file.getName());
     test = "test";
-    database = new DatabaseImpl(file.getParent(), file.getName(), test, false);
+    database = new DatabaseImpl(file.getParent(), file.getName(), test, new PathHelper("war"), false);
   }
 
   @AfterClass
@@ -53,7 +57,7 @@ public class UserListManagerTest {
   }
 
   private static String getConfigDir() {
-    return "war" + File.separator + "config" + File.separator + "english";
+    return "war" + File.separator + "config" + File.separator + ENGLISH;
   }
 
   @Test
@@ -83,10 +87,9 @@ public class UserListManagerTest {
     // remove again
     removeList(user, userListManager, listid, false);
 
-    // make sure we can remove lists that have been visited
-    // testAddVisitor(user, userListManager);
   }
 
+  // make sure we can remove lists that have been visited
   @Test
   public void testAddVisitor() {
     List<User> users = addAndGetUsers("test2");
@@ -98,6 +101,10 @@ public class UserListManagerTest {
     UserListManager userListManager = database.getUserListManager();
 
     long listid = addListCheck(user.id, userListManager, "test");
+    if (listid == -1) {
+      UserList test1 = userListManager.getByName(user.id, "test");
+      listid = test1.getUniqueID();
+    }
     assertTrue(userListManager.getUserListsForText("").contains(userListManager.getUserListByID(listid)));
 
     Iterator<UserList> iterator = userListManager.getListsForUser(user.id, false).iterator();
@@ -175,6 +182,65 @@ public class UserListManagerTest {
     assertTrue(!listsForUser.contains(testList));
   }
 
+  @Test
+  public void testAddExercise() {
+    List<User> users = addAndGetUsers("test2");
+    User owner = users.iterator().next();
+
+    UserListManager userListManager = database.getUserListManager();
+
+    long listid = addListCheck(owner.id, userListManager, "test");
+    logger.debug("list id " +listid);
+    UserList testList = userListManager.getUserListByID(listid);
+    assertTrue(userListManager.getUserListsForText("").contains(testList));
+
+    UserExercise english = userListManager.createNewItem(owner.id, ENGLISH, "", "");
+    assertTrue(!english.getTooltip().isEmpty());
+    userListManager.reallyCreateNewItem(listid, english);
+
+    // have to go back to database to get user list
+    assertTrue(!testList.getExercises().contains(english));
+
+    // OK, database should show it now
+    testList = userListManager.getUserListByID(listid);
+    Collection<UserExercise> exercises = testList.getExercises();
+    assertTrue(exercises.contains(english));
+    // tooltip should never be empty
+    for (UserExercise ue : exercises) {
+      logger.debug("\t" + ue.getTooltip());
+      assertTrue(!ue.getTooltip().isEmpty());
+    }
+
+    boolean b = userListManager.deleteItemFromList(listid, english.getID());
+    assertTrue(b);
+
+    // after delete, it should be gone
+    testList = userListManager.getUserListByID(listid);
+    assertTrue(!testList.getExercises().contains(english));
+
+    userListManager.reallyCreateNewItem(listid, english);
+    testList = userListManager.getUserListByID(listid);
+    UserExercise next = testList.getExercises().iterator().next();
+    assertTrue(next.getEnglish().equals(ENGLISH));
+
+    List<Exercise> exercises1 = database.getExercises();
+    assertTrue(!exercises1.isEmpty());
+    Exercise exercise = database.getExercise(next.getID());
+    assertTrue(exercise.getEnglishSentence().equals(ENGLISH));
+    assertTrue(exercise.getTooltip().equals(ENGLISH));
+
+    next.setEnglish(CHANGED);
+    assertTrue(next.getEnglish().equals(CHANGED));
+    assertTrue(!next.getTooltip().isEmpty());
+    assertTrue(next.getTooltip().equals(CHANGED));
+
+    userListManager.editItem(next,false);
+
+    testList = userListManager.getUserListByID(listid);
+    next = testList.getExercises().iterator().next();
+    assertTrue(next.getEnglish().equals(CHANGED));
+  }
+
   private List<User> addAndGetUsers(String test2) {
     List<User> users;
     long l = getUser(test2);
@@ -187,7 +253,7 @@ public class UserListManagerTest {
   private long getUser(String test2) {
     long l = database.userExists(test2);
     if (l == -1) {
-      l = database.addUser(89, "male", 1, "", "english", "boston", test2);
+      l = database.addUser(89, "male", 1, "", ENGLISH, "boston", test2);
     }
     return l;
   }
@@ -199,11 +265,14 @@ public class UserListManagerTest {
   private long addListCheck(long user, UserListManager userListManager, String name, boolean expectSuccess) {
     long listid = addList(user, userListManager, name);
     if (expectSuccess) {
-      assertTrue(listid != -1);
-      assertTrue("got list id " + listid, userListManager.listExists(listid));
-      assertTrue(userListManager.hasByName(user, name));
-      UserList userListByID = userListManager.getUserListByID(listid);
-      assertNotNull(userListByID);
+      if (listid == -1) {
+        assertTrue(userListManager.hasByName(user, name));
+      } else {
+        assertTrue("got list id " + listid, userListManager.listExists(listid));
+        assertTrue(userListManager.hasByName(user, name));
+        UserList userListByID = userListManager.getUserListByID(listid);
+        assertNotNull(userListByID);
+      }
     } else {
       assertTrue(listid == -1);
     }
