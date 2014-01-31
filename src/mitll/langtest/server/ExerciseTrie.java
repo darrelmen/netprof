@@ -38,10 +38,9 @@ public class ExerciseTrie extends Trie<Exercise> {
 
     long then = System.currentTimeMillis();
     boolean isMandarin = language.equalsIgnoreCase("Mandarin");
-    //SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder();
 
     for (Exercise e : exercisesForState) {
-      if (e.getEnglishSentence() != null) {
+      if (e.getEnglishSentence() != null && !e.getEnglishSentence().isEmpty()) {
         addEntryToTrie(new ExerciseWrapper(e, true));
         Collection<String> tokens = smallVocabDecoder.getTokens(e.getEnglishSentence());
         if (tokens.size() > 1) {
@@ -51,12 +50,14 @@ public class ExerciseTrie extends Trie<Exercise> {
         }
       }
       if (includeForeign) {
-        addEntryToTrie(new ExerciseWrapper(e, false));
+        if (e.getRefSentence() != null && !e.getRefSentence().isEmpty()) {
+          addEntryToTrie(new ExerciseWrapper(e, false));
 
-        Collection<String> tokens = isMandarin ? getFLTokens(smallVocabDecoder, e) : smallVocabDecoder.getTokens(e.getRefSentence());
-        if (tokens.size() > 1) {
-          for (String token : tokens) {
-            addEntryToTrie(new ExerciseWrapper(token, e));
+          Collection<String> tokens = isMandarin ? getFLTokens(smallVocabDecoder, e) : smallVocabDecoder.getTokens(e.getRefSentence());
+          if (tokens.size() > 1) {
+            for (String token : tokens) {
+              addEntryToTrie(new ExerciseWrapper(token, e));
+            }
           }
         }
       }
@@ -104,13 +105,11 @@ public class ExerciseTrie extends Trie<Exercise> {
     private Exercise e;
 
     /**
-     * @see ExerciseTrie#ExerciseTrie(java.util.Collection, String)
+     * @see ExerciseTrie#ExerciseTrie
      * @param e
      * @param useEnglish
      */
     public ExerciseWrapper(Exercise e, boolean useEnglish) {
- /*     value = (useEnglish ? e.getEnglishSentence() : e.getRefSentence());
-      this.e = e;*/
       this((useEnglish ? e.getEnglishSentence() : e.getRefSentence()), e);
     }
 
