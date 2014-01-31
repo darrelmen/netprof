@@ -268,7 +268,7 @@ public class DatabaseImpl implements Database {
       logger.error("huh? lesson plan file is null???", new Exception());
       return Collections.emptyList();
     }
-    logger.debug("using lesson plan file " +lessonPlanFile);
+    //logger.debug("using lesson plan file " +lessonPlanFile);
     boolean isExcel = lessonPlanFile.endsWith(".xlsx");
     makeDAO(useFile, lessonPlanFile, isExcel, mediaDir);
 
@@ -1465,5 +1465,14 @@ public class DatabaseImpl implements Database {
     return where != null ? where.toExercise(language) : null;
   }
 
+  public Exercise getCustomOrPredefExercise(String id) {
+    Exercise byID = getUserExerciseWhere(id);  // allow custom items to mask out non-custom items
+    if (byID == null) {
+      byID = getExercise(id);
+    }
+    return byID;
+  }
+
+  public ServerProperties getServerProps() { return serverProps; }
   public String toString() { return "Database : "+ connection.getConnection(); }
 }
