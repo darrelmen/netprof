@@ -280,29 +280,33 @@ public class EditItem<T extends ExerciseShell> {
         @Override
         public void onClick(ClickEvent event) {
           final String id = newUserExercise.getID();
-          System.out.println("getCreateButton removing item " + id);
-          service.deleteItemFromList(uniqueID, id, new AsyncCallback<Boolean>() {
-            @Override
-            public void onFailure(Throwable caught) {}
-
-            @Override
-            public void onSuccess(Boolean result) {
-              if (!result)  System.err.println("getCreateButton huh? id " + id + " not in list " + uniqueID);
-
-              exerciseList.forgetExercise(id);
-              UserExercise remove = ul.remove(id);
-              if (remove == null) {
-                System.err.println("getCreateButton huh? didn't remove the item " + id);
-              }
-              if (originalList.remove(id) == null) {
-                System.err.println("getCreateButton huh? didn't remove the item " + id + " from " + originalList);
-              }
-              npfHelper.reload();
-            }
-          });
+         // System.out.println("getCreateButton removing item " + id);
+          deleteItem(id, uniqueID, ul);
         }
       });
       return row;
+    }
+
+    private void deleteItem(final String id, final long uniqueID, final UserList ul) {
+      service.deleteItemFromList(uniqueID, id, new AsyncCallback<Boolean>() {
+        @Override
+        public void onFailure(Throwable caught) {}
+
+        @Override
+        public void onSuccess(Boolean result) {
+          if (!result)  System.err.println("deleteItem huh? id " + id + " not in list " + uniqueID);
+
+          exerciseList.forgetExercise(id);
+          UserExercise remove = ul.remove(id);
+          if (remove == null) {
+            System.err.println("deleteItem huh? didn't remove the item " + id);
+          }
+          if (originalList.remove(id) == null) {
+            System.err.println("deleteItem huh? didn't remove the item " + id + " from " + originalList);
+          }
+          npfHelper.reload();
+        }
+      });
     }
 
     private Button makeDeleteButton() {
