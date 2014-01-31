@@ -169,5 +169,12 @@ public class NPFHelper implements RequiresResize {
   /**
    * @see mitll.langtest.client.custom.EditItem.EditableExercise#getCreateButton(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, com.github.gwtbootstrap.client.ui.ControlGroup)
    */
-  public void reload() {   npfExerciseList.redraw();  }
+  public void reload() {
+    if (npfExerciseList == null) {
+      System.err.println("how can npfExerciseList be null?");
+    }
+    else {
+      npfExerciseList.redraw();
+    }
+  }
 }
