@@ -36,6 +36,7 @@ public class UserListManagerTest {
     logger.debug("config     " + file.getName());
     test = "test";
     database = new DatabaseImpl(file.getParent(), file.getName(), test, new PathHelper("war"), false);
+    database.setInstallPath(".",file.getParent()+File.separator+database.getServerProps().getLessonPlan(),"english",true,".");
   }
 
   @AfterClass
@@ -72,7 +73,7 @@ public class UserListManagerTest {
 
     Collection<UserList> listsForUser = userListManager.getListsForUser(user, false);
     int size = listsForUser.size();
-    assertTrue("size is " + size, size == 1);
+    assertTrue("size is " + size, size >= 1);
     assertTrue("first is favorite", listsForUser.iterator().next().isFavorite());
 
     // add
@@ -194,6 +195,48 @@ public class UserListManagerTest {
     UserList testList = userListManager.getUserListByID(listid);
     assertTrue(userListManager.getUserListsForText("").contains(testList));
 
+    UserExercise english = addAndDelete(owner, userListManager, listid, testList);
+
+    // after delete, it should be gone
+    testList = userListManager.getUserListByID(listid);
+    assertTrue(!testList.getExercises().contains(english));
+
+    userListManager.reallyCreateNewItem(listid, english);
+    testList = userListManager.getUserListByID(listid);
+    UserExercise next = testList.getExercises().iterator().next();
+    assertTrue(next.getEnglish().equals(ENGLISH));
+
+    List<Exercise> exercises1 = database.getExercises();
+    assertTrue(!exercises1.isEmpty());
+    Exercise exercise = database.getCustomOrPredefExercise(next.getID());
+    assertNotNull("huh? no exercise by id " + next.getID()+"?",exercise);
+
+    String englishSentence = exercise.getEnglishSentence();
+    assertNotNull("huh? exercise " + exercise + " has no english?",englishSentence);
+    assertTrue("english is " + englishSentence, englishSentence.equals(ENGLISH));
+    assertTrue(exercise.getTooltip().equals(ENGLISH));
+
+    next.setEnglish(CHANGED);
+    assertTrue(next.getEnglish().equals(CHANGED));
+    assertTrue(!next.getTooltip().isEmpty());
+    assertTrue(next.getTooltip().equals(CHANGED));
+
+    userListManager.editItem(next,false);
+
+    testList = userListManager.getUserListByID(listid);
+    next = testList.getExercises().iterator().next();
+    assertTrue(next.getEnglish().equals(CHANGED));
+  }
+
+  public UserExercise addAndDelete(User owner, UserListManager userListManager, long listid, UserList testList) {
+    UserExercise english = addExercise(owner, userListManager, listid, testList);
+
+    boolean b = userListManager.deleteItemFromList(listid, english.getID());
+    assertTrue(b);
+    return english;
+  }
+
+  public UserExercise addExercise(User owner, UserListManager userListManager, long listid, UserList testList) {
     UserExercise english = userListManager.createNewItem(owner.id, ENGLISH, "", "");
     assertTrue(!english.getTooltip().isEmpty());
     userListManager.reallyCreateNewItem(listid, english);
@@ -207,38 +250,29 @@ public class UserListManagerTest {
     assertTrue(exercises.contains(english));
     // tooltip should never be empty
     for (UserExercise ue : exercises) {
-      logger.debug("\t" + ue.getTooltip());
+      //logger.debug("\t" + ue.getTooltip());
       assertTrue(!ue.getTooltip().isEmpty());
     }
+    return english;
+  }
 
-    boolean b = userListManager.deleteItemFromList(listid, english.getID());
-    assertTrue(b);
+  /**
+   * TODO exercise other methods
+   */
+  @Test
+  public void testReview() {
+    UserListManager userListManager = database.getUserListManager();
+    UserList reviewList = userListManager.getReviewList();
+    userListManager.getReviewedExercises();
 
-    // after delete, it should be gone
-    testList = userListManager.getUserListByID(listid);
-    assertTrue(!testList.getExercises().contains(english));
 
-    userListManager.reallyCreateNewItem(listid, english);
-    testList = userListManager.getUserListByID(listid);
-    UserExercise next = testList.getExercises().iterator().next();
-    assertTrue(next.getEnglish().equals(ENGLISH));
+    //UserExercise english = addExercise(owner, userListManager, listid, testList);
 
-    List<Exercise> exercises1 = database.getExercises();
-    assertTrue(!exercises1.isEmpty());
-    Exercise exercise = database.getExercise(next.getID());
-    assertTrue(exercise.getEnglishSentence().equals(ENGLISH));
-    assertTrue(exercise.getTooltip().equals(ENGLISH));
+    //boolean b = userListManager.deleteItemFromList(listid, english.getID());
+   // assertTrue(b);
 
-    next.setEnglish(CHANGED);
-    assertTrue(next.getEnglish().equals(CHANGED));
-    assertTrue(!next.getTooltip().isEmpty());
-    assertTrue(next.getTooltip().equals(CHANGED));
 
-    userListManager.editItem(next,false);
-
-    testList = userListManager.getUserListByID(listid);
-    next = testList.getExercises().iterator().next();
-    assertTrue(next.getEnglish().equals(CHANGED));
+    //    userListManager.markReviewed();
   }
 
   private List<User> addAndGetUsers(String test2) {
