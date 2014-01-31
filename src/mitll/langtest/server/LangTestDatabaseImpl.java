@@ -470,10 +470,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     long then = System.currentTimeMillis();
     List<Exercise> exercises = getExercises();
 
-    Exercise byID = db.getUserExerciseWhere(id);  // allow custom items to mask out non-custom items
-    if (byID == null) {
-      byID = db.getExercise(id);
-    }
+    Exercise byID = db.getCustomOrPredefExercise(id);  // allow custom items to mask out non-custom items
     addAnnotations(byID);
     if (byID == null) {
       logger.error("getExercise : huh? couldn't find exercise with id " + id + " when examining " + exercises.size() + " items");
