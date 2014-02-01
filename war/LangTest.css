@@ -873,6 +873,14 @@ fieldset > legend {
 }
 
 #showListContainer h1 small {
+    color: #333333;
+}
+
+#desc small {
+    color: #333333;
+}
+
+#course small {
      color: #333333;
  }
 
