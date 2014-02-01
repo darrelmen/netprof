@@ -264,17 +264,17 @@ public class UserListManager {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#createNewItem(long, String, String, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#createNewItem
    * @see mitll.langtest.client.custom.NewUserExercise.CreateFirstRecordAudioPanel#makePostAudioRecordButton()
    * @param userid
-   * @param english
-   * @param foreign
-   * @param transliteration
+   * @paramx english
+   * @paramx foreign
+   * @paramx transliteration
    * @return
    */
-  public UserExercise createNewItem(long userid, String english, String foreign, String transliteration) {
+  public UserExercise createNewItem(long userid) {//}, String english, String foreign, String transliteration) {
     int uniqueID = userExerciseCount++;
-    return new UserExercise(uniqueID, UserExercise.CUSTOM_PREFIX+uniqueID, userid, english, foreign, transliteration);
+    return new UserExercise(uniqueID, UserExercise.CUSTOM_PREFIX+uniqueID, userid, " ", "", "");
   }
 
   /**
@@ -299,7 +299,9 @@ public class UserListManager {
     userExerciseDAO.add(userExercise, false);
 
     addItemToList(userListID, userExercise);
-    fixAudioPaths(userExercise, true); // do this after the id has been made
+    //fixAudioPaths(userExercise, true); // do this after the id has been made
+
+    editItem(userExercise, false);
   }
 
   private void addItemToList(long userListID, UserExercise userExercise) {
