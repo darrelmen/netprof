@@ -8,7 +8,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -47,10 +46,11 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
    * @param exercise
    * @param itemMarker
    * @param originalList
+   * @param doNewExercise
    * @return
    */
   @Override
-  protected NewUserExercise<T> getAddOrEditPanel(UserExercise exercise, HasText itemMarker, UserList originalList) {
+  protected NewUserExercise<T> getAddOrEditPanel(UserExercise exercise, HasText itemMarker, UserList originalList, boolean doNewExercise) {
     return new ReviewEditableExercise(itemMarker, exercise, originalList);
   }
 
