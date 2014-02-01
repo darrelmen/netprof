@@ -155,7 +155,7 @@ public interface LangTestDatabase extends RemoteService {
 
   UserList getCommentedList();
 
-  UserExercise createNewItem(long userid, String english, String foreign, String transliteration);
+  UserExercise createNewItem(long userid);
 
   boolean isValidForeignPhrase(String foreign);
 
