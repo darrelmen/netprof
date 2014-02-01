@@ -254,7 +254,7 @@ public class BasicDialog {
     }
 
     public void setRightSide(Widget rightSide) { this.rightSide = rightSide; }
-    public Widget getRightSide() { return rightSide; }
+    //public Widget getRightSide() { return rightSide; }
 
 /*    protected void markSimpleError(String message) {
       markError(group, box, "Try Again", message);
