@@ -193,40 +193,27 @@ public class EditItem<T extends ExerciseShell> {
                              final ListInterface<T> pagingContainer) {
     if (exercise.getID().equals(NEW_EXERCISE_ID)) {
       if (newExercise == null) {
-        final EditItem outer = this;
-
         System.out.println("\n\npopulatePanel: make new item ");
 
-        service.createNewItem(userManager.getUser(), new AsyncCallback<UserExercise>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            //System.out.println("onFailure : stopRecording  " + caught);
-          }
+        newExercise = createNewItem(userManager.getUser());
+        addEditOrAddPanel(newExercise, itemMarker, originalList, right, ul, pagingContainer, true, false);
 
-          @Override
-          public void onSuccess(UserExercise newExercise) {
-            outer.newExercise = newExercise;
-
-            System.out.println("\tpopulatePanel: made new item  " + newExercise);
-
-
-            addEditOrAddPanel(newExercise, itemMarker, originalList, right, ul, pagingContainer, true, false);
-          }
-        });
-      }
-      else {
+      } else {
         addEditOrAddPanel(newExercise, itemMarker, originalList, right, ul, pagingContainer, true, true);
       }
-    }
-    else {
+    } else {
       addEditOrAddPanel(exercise, itemMarker, originalList, right, ul, pagingContainer, false, true);
     }
+  }
+
+  public UserExercise createNewItem(long userid) {
+    return new UserExercise(-1, UserExercise.CUSTOM_PREFIX+Long.MAX_VALUE, userid, "", "", "");
   }
 
   protected void addEditOrAddPanel(UserExercise newExercise, HasText itemMarker, UserList originalList,
                                    Panel right, UserList ul, ListInterface<T> pagingContainer, boolean doNewExercise, boolean setFields) {
 
-    System.out.println("\taddEditOrAddPanel: for item  " + newExercise);
+    //System.out.println("\taddEditOrAddPanel: for item  " + newExercise);
 
     NewUserExercise<T> editableExercise = getAddOrEditPanel(newExercise, itemMarker, originalList, doNewExercise);
     right.add(editableExercise.addNew(ul, originalList, pagingContainer, right));
