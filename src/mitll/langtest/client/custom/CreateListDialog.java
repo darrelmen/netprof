@@ -6,6 +6,7 @@ import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.TextArea;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
@@ -88,6 +89,12 @@ public class CreateListDialog extends BasicDialog {
     });
     enterKeyButtonHelper.addKeyHandler(submit);
     row.add(submit);
+
+    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      public void execute() {
+        titleBox.box.setFocus(true);
+      }
+    });
   }
 
   public void addUserList(final FormField titleBox, TextArea area, FormField classBox) {
