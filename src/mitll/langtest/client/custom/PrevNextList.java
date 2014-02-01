@@ -17,6 +17,12 @@ class PrevNextList<T extends ExerciseShell> extends HorizontalPanel {
   private ListInterface<T> container;
   boolean disableNext = true;
 
+  /**
+   * @see mitll.langtest.client.custom.EditItem.EditableExercise#addNew(mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel)
+   * @param exerciseShell
+   * @param listContainer
+   * @param disableNext
+   */
   public PrevNextList(final T exerciseShell, ListInterface<T> listContainer, boolean disableNext) {
     this.container = listContainer;
     this.disableNext = disableNext;
