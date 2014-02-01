@@ -87,6 +87,16 @@
         </webroots>
       </configuration>
     </facet>
+    <facet type="web" name="Web2">
+      <configuration>
+        <descriptors>
+          <deploymentDescriptor name="web.xml" url="file://$MODULE_DIR$/war/WEB-INF/web.xml" />
+        </descriptors>
+        <webroots>
+          <root url="file://$MODULE_DIR$/war" relative="/" />
+        </webroots>
+      </configuration>
+    </facet>
   </component>
   <component name="NewModuleRootManager" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/war/WEB-INF/classes" />
@@ -95,6 +105,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/gwt-unitCache" />
+      <excludeFolder url="file://$MODULE_DIR$/jmh-fd83add52cba" />
       <excludeFolder url="file://$MODULE_DIR$/splitScripts" />
       <excludeFolder url="file://$MODULE_DIR$/tmp" />
       <excludeFolder url="file://$MODULE_DIR$/war/WEB-INF/deploy" />
@@ -180,9 +191,6 @@
     </orderEntry>
     <orderEntry type="library" name="mira" level="project" />
     <orderEntry type="library" name="poi-3.9-20121203" level="project" />
-    <orderEntry type="library" name="xmlbeans-2.3.0" level="project" />
-    <orderEntry type="library" name="dom4j-1.6.1" level="project" />
-    <orderEntry type="library" name="mail" level="project" />
     <orderEntry type="library" name="gwt-visualization" level="project" />
     <orderEntry type="library" name="pronz" level="project" />
     <orderEntry type="library" name="org.moxieapps.gwt.highcharts-1.5.0 (2)" level="project" />
@@ -194,8 +202,8 @@
     <orderEntry type="library" name="poi-3.9-20121203" level="project" />
     <orderEntry type="library" name="pronz" level="project" />
     <orderEntry type="library" name="mira" level="project" />
-    <orderEntry type="library" name="poi-ooxml-3.9-20121203 (3)" level="project" />
     <orderEntry type="library" name="org.moxieapps.gwt.highcharts-1.5.0" level="project" />
+    <orderEntry type="library" name="junit-4.11" level="project" />
   </component>
 </module>
 
