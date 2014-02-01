@@ -634,12 +634,39 @@ public class Navigation implements RequiresResize {
 
     Heading h4 = new Heading(4,name,ul.getExercises().size() + " items");
     h4.addStyleName("floatLeft");
-    boolean yourList = isYourList(ul);
   //  if (!ul.isFavorite()) h4.addStyleName("niceBlue");
   //  if (yourList) h4.addStyleName("niceBlue");
 
     r1.add(h4);
 
+    h4 = new Heading(4,"",ul.getDescription()+",");
+    h4.addStyleName("floatLeft");
+    h4.addStyleName("leftFiveMargin");
+    h4.getElement().setId("desc");
+    //h4.addStyleName("listSubtitle");
+
+    //Widget widget = h4.getWidget(0);
+   // System.out.println("small is " + widget);
+   // DOM.setStyleAttribute(widget.getElement(), "color", "#333333");
+
+    //  if (!ul.isFavorite()) h4.addStyleName("niceBlue");
+    //  if (yourList) h4.addStyleName("niceBlue");
+
+    r1.add(h4);
+    h4 = new Heading(4,"",ul.getClassMarker());
+    h4.addStyleName("floatLeft");
+    h4.addStyleName("leftFiveMargin");
+    h4.getElement().setId("course");
+
+    //h4.addStyleName("listSubtitle");
+
+    //  if (!ul.isFavorite()) h4.addStyleName("niceBlue");
+    //  if (yourList) h4.addStyleName("niceBlue");
+
+    r1.add(h4);
+
+
+    boolean yourList = isYourList(ul);
     if (yourList) {
       Button deleteButton = makeDeleteButton(ul);
       deleteButton.addStyleName("floatRight");
