@@ -237,7 +237,7 @@ public class UserListManagerTest {
   }
 
   public UserExercise addExercise(User owner, UserListManager userListManager, long listid, UserList testList) {
-    UserExercise english = userListManager.createNewItem(owner.id, ENGLISH, "", "");
+    UserExercise english = userListManager.createNewItem(owner.id);
     assertTrue(!english.getTooltip().isEmpty());
     userListManager.reallyCreateNewItem(listid, english);
 
