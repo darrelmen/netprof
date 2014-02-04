@@ -63,7 +63,7 @@ public class AudioExerciseContent {
     Exercise.QAPair qaPair = e.getForeignLanguageQuestions().get(0);
 
     Panel container = new FlowPanel();
-
+    container.getElement().setId("makeFlashcardForCRT_container");
     //addThreeRow(e, content, includeExerciseID, container);
     addAudioRow(e, content, includeExerciseID, container);
 
@@ -78,19 +78,21 @@ public class AudioExerciseContent {
   }
 
   private void addAudioRow(Exercise e, String content, boolean includeExerciseID, Panel container) {
+    Panel horiz = new FlowPanel();
+    horiz.getElement().setId("item_and_content");
+    container.add(horiz);
     if (includeExerciseID) {
-      Heading child = new Heading(5, "Exercise " + e.getID());
+      Heading child = new Heading(5, "Item " + e.getID());
       child.addStyleName("leftTenMargin");
-      container.add(child);
+      horiz.add(child);
+      child.addStyleName("floatLeft");
+
     }
     content = content.replaceAll("h2","h4");
     content = changeAudioPrompt(content, false);
     HTML contentFromPrefix = getContentFromPrefix(content);
-/*
-    ScrollPanel scroller = new ScrollPanel(contentFromPrefix);
-    scroller.getElement().setId("scroller");
-    container.add(scroller);*/
-    container.add(contentFromPrefix);
+    contentFromPrefix.addStyleName("floatRight");
+    horiz.add(contentFromPrefix);
 
     if (e.getRefAudio() != null && e.getRefAudio().length() > 0) {
       container.add(getAudioDiv(e));
@@ -113,6 +115,11 @@ public class AudioExerciseContent {
     }
   }*/
 
+  /**
+   * @see #addAudioRow(mitll.langtest.shared.Exercise, String, boolean, com.google.gwt.user.client.ui.Panel)
+   * @param prefix
+   * @return
+   */
   private HTML getContentFromPrefix(String prefix) {
     HTML contentPrefix = getMaybeRTLContent(prefix, true);
     contentPrefix.addStyleName("marginRight");
@@ -231,7 +238,7 @@ public class AudioExerciseContent {
     html.addStyleName("rightTenMargin");
 
     html.addStyleName("wrapword");
-    html.getElement().setId("textContent");
+    html.getElement().setId("maybeRTL_textContent");
     return html;
   }
 }
