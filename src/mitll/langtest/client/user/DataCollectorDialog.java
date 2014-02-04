@@ -28,6 +28,8 @@ import mitll.langtest.client.PropertyHandler;
  */
 public class DataCollectorDialog extends UserDialog {
 
+  public static final double HEIGHT_PERCENTAGE = 0.99;
+
   public DataCollectorDialog(LangTestDatabaseAsync service, PropertyHandler props,
                              UserNotification langTest,
                              UserManager userManager) {
@@ -46,7 +48,7 @@ public class DataCollectorDialog extends UserDialog {
     final RegistrationInfo registrationInfo = getRegistrationInfo();
     Panel register = registrationInfo.getRegister();
 
-    dialogBox.setMaxHeigth(Window.getClientHeight() * 0.95 + "px");
+    dialogBox.setMaxHeigth(Window.getClientHeight() * HEIGHT_PERCENTAGE + "px");
     AccordionGroup accordion = null;
     if (!props.isDataCollectAdminView()) {
       accordion = getAccordion(dialogBox, register);
@@ -56,27 +58,7 @@ public class DataCollectorDialog extends UserDialog {
     final Button login = addLoginButton(dialogBox);
     login.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        final String userID = user.box.getText();
-        if (userID.length() > USER_ID_MAX_LENGTH) {
-          markError(user, "Please enter a user id of reasonable length.");
-        } else if (userID.length() == 0) {
-          markError(user, "Please enter a user id.");
-        } else {
-          service.userExists(userID, new AsyncCallback<Integer>() {
-            public void onFailure(Throwable caught) {
-              Window.alert("userExists : Couldn't contact server");
-            }
-
-            public void onSuccess(Integer result) {
-              boolean exists = result != -1;
-              if (exists) {
-                userExists(result, userID, password, dialogBox);
-              } else {
-                userDoesntExist(userID, password, user, registrationInfo, dialogBox, login, accordionFinal);
-              }
-            }
-          });
-        }
+        onLogin(user, password, dialogBox, registrationInfo, login, accordionFinal);
       }
     });
     dialogBox.addHiddenHandler(new HiddenHandler() {
@@ -99,6 +81,31 @@ public class DataCollectorDialog extends UserDialog {
     });
 
     dialogBox.show();
+  }
+
+  protected void onLogin(final FormField user, final FormField password, final Modal dialogBox,
+                         final RegistrationInfo registrationInfo, final Button login, final AccordionGroup accordionFinal) {
+    final String userID = user.box.getText();
+    if (userID.length() > USER_ID_MAX_LENGTH) {
+      markError(user, "Please enter a user id of reasonable length.");
+    } else if (userID.length() == 0) {
+      markError(user, "Please enter a user id.");
+    } else {
+      service.userExists(userID, new AsyncCallback<Integer>() {
+        public void onFailure(Throwable caught) {
+          Window.alert("userExists : Couldn't contact server");
+        }
+
+        public void onSuccess(Integer result) {
+          boolean exists = result != -1;
+          if (exists) {
+            userExists(result, userID, password, dialogBox);
+          } else {
+            userDoesntExist(userID, password, user, registrationInfo, dialogBox, login, accordionFinal);
+          }
+        }
+      });
+    }
   }
 
   private void userExists(Integer dbUserID, String userID, FormField password, Modal dialogBox) {
@@ -125,9 +132,7 @@ public class DataCollectorDialog extends UserDialog {
     }
   }
 
-  private RegistrationInfo getRegistrationInfo() {
-    return new RegistrationInfo().invoke();
-  }
+  private RegistrationInfo getRegistrationInfo() { return new RegistrationInfo().invoke(); }
 
   /**
    *
