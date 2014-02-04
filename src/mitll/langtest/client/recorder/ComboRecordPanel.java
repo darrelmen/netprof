@@ -51,6 +51,8 @@ public class ComboRecordPanel extends SimpleRecordExercisePanel {
     getElement().setId("ComboRecordPanel");
   }
 
+  protected void addItemHeader(Exercise e) {}
+
   /**
    * @see #addQuestionPrompt(com.google.gwt.user.client.ui.Panel, mitll.langtest.shared.Exercise)
    * @param promptInEnglish
