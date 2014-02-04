@@ -62,7 +62,7 @@ public class ExercisePanel extends VerticalPanel implements
   private static final String ENGLISH = "English";
   private static final String TYPE_YOUR_ANSWER_IN = "Type your answer in ";
   private static final String SPEAK_AND_RECORD_YOUR_ANSWER_IN = "Speak and record your answer in ";
-  private static final int ITEM_HEADER = 5;
+  protected static final int ITEM_HEADER = 5;
   private static final int CONTENT_SCROLL_HEIGHT = 240;
   private List<Widget> answers = new ArrayList<Widget>();
   protected Set<Widget> completed = new HashSet<Widget>();
@@ -109,7 +109,7 @@ public class ExercisePanel extends VerticalPanel implements
       setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
     }
     hp.setHorizontalAlignment(rightAlignContent ? HasHorizontalAlignment.ALIGN_RIGHT : HasHorizontalAlignment.ALIGN_LEFT);
-    hp.add(getQuestionContent(e));
+    hp.add(getQuestionContent(e, true));
     boolean showInstructions = !(e.getContent().toLowerCase().contains("listen") || controller.isDataCollectMode());   // hack
     if (showInstructions) {
       addInstructions();
@@ -136,12 +136,12 @@ public class ExercisePanel extends VerticalPanel implements
      add(new Heading(ITEM_HEADER,"Item #" + e.getID()));
   }
 
-  private Widget getQuestionContent(Exercise e) {
+  private Widget getQuestionContent(Exercise e, boolean includeItemID) {
     String content = e.getContent();
 
     //System.out.println("getQuestionContent : content is " + content);
     if (content.contains("Listen")) {
-      return new AudioExerciseContent().getQuestionContent(e, controller, false, false);
+      return new AudioExerciseContent().getQuestionContent(e, controller, includeItemID, false);
     }
     else {
       HTML maybeRTLContent = getMaybeRTLContent(content, true);
