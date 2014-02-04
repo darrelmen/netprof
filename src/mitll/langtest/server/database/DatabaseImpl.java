@@ -93,11 +93,11 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#readProperties(javax.servlet.ServletContext)
    */
 
-  private DatabaseImpl(String configDir, String dbName, String lessonPlanFile) {
+/*  private DatabaseImpl(String configDir, String dbName, String lessonPlanFile) {
     this(configDir, dbName, "", new ServerProperties());
     this.useFile = true;
     this.lessonPlanFile = lessonPlanFile;
-  }
+  }*/
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#makeDatabaseImpl
