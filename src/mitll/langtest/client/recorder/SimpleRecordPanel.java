@@ -57,6 +57,7 @@ public class SimpleRecordPanel extends RecordButtonPanel {
     playback.setHeight("30px"); // for audio controls to show
     playback.addStyleName("leftFiveMargin");
     playback.setWidth(PLAYBACK_WIDTH + "px");
+    // audio tag can only be 300 pixels wide, when controls is set (at least I can't figure out how to make it narrower)
     playback.getElement().setId("SimpleRecordPanel_playback");
     add(playback);
   }
