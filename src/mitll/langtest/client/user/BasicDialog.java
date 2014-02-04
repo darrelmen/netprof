@@ -31,6 +31,7 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class BasicDialog {
+  public static final String TRY_AGAIN = "Try Again";
   //private EnterKeyButtonHelper enterKeyButtonHelper = new EnterKeyButtonHelper();
   private List<Popover> visiblePopovers = new ArrayList<Popover>();
 
@@ -57,6 +58,7 @@ public class BasicDialog {
     final ControlGroup userGroup = new ControlGroup();
     userGroup.addStyleName("leftFiveMargin");
     userGroup.add(new ControlLabel(label));
+    user.addStyleName("leftFiveMargin");
     userGroup.add(user);
 
     dialogBox.add(userGroup);
@@ -76,17 +78,16 @@ public class BasicDialog {
     for (String s : values) {
       genderBox.addItem(s);
     }
-    // genderBox.ensureDebugId("cwListBox-dropBox");
     return genderBox;
   }
 
   protected void markError(FormField dialectGroup, String message) {
-    markError(dialectGroup.group, dialectGroup.box, dialectGroup.box, "Try Again", message);
+    markError(dialectGroup.group, dialectGroup.box, dialectGroup.box, TRY_AGAIN, message);
   }
 
-  protected void markError(ControlGroup dialectGroup, Widget dialect, String header, String message) {
+/*  protected void markError(ControlGroup dialectGroup, Widget dialect, String header, String message) {
     markError(dialectGroup, dialect, (Focusable) dialect, header, message);
-  }
+  }*/
 
   protected void markError(ControlGroup dialectGroup, Widget dialect, Focusable focusable, String header, String message) {
     dialectGroup.setType(ControlGroupType.ERROR);
@@ -95,30 +96,22 @@ public class BasicDialog {
     setupPopover(dialect, header, message);
   }
 
-  protected void setupPopover(final Widget w, String heading, final String message) {
-     System.out.println("\n\n\ntriggering popover on " + w.getTitle() + " with " + heading + "/"+message);
-    final MyPopover popover = new MyPopover();
-    popover.setWidget(w);
-    popover.setText(message);
-    popover.setHeading(heading);
-    popover.setPlacement(Placement.RIGHT);
-    popover.reconfigure();
-    popover.show();
 
-    Timer t = new Timer() {
-      @Override
-      public void run() {
-        //System.out.println("hide popover on " + w + " with " + message);
-        popover.dontFireAgain();
-        popover.setHideDelay(0);
-        popover.clear();
-        popover.reconfigure();
-
-        //   popover.clear();
-      }
-    };
-    t.schedule(3000);
+  protected void markError(ControlGroup dialectGroup, FocusWidget dialect, String header, String message) {
+    markError(dialectGroup, dialect, header, message, Placement.RIGHT);
   }
+
+  protected void markError(FormField dialectGroup, String message, Placement placement) {
+    markError(dialectGroup.group, dialectGroup.box, TRY_AGAIN, message,placement);
+  }
+
+  protected void markError(ControlGroup dialectGroup, FocusWidget dialect, String header, String message, Placement placement) {
+    dialectGroup.setType(ControlGroupType.ERROR);
+    dialect.setFocus(true);
+
+    setupPopover(dialect, header, message, placement);
+  }
+
 
   protected boolean highlightIntegerBox(FormField ageEntryGroup, int min, int max) {
     return highlightIntegerBox(ageEntryGroup, min, max, Integer.MAX_VALUE);
@@ -132,7 +125,7 @@ public class BasicDialog {
     } else {
       try {
         int age = Integer.parseInt(text);
-        validAge = (age >= min && age < max) || age == exception;
+        validAge = (age >= min && age <= max) || age == exception;
         ageEntryGroup.group.setType(validAge ? ControlGroupType.NONE : ControlGroupType.ERROR);
       } catch (NumberFormatException e) {
         ageEntryGroup.group.setType(ControlGroupType.ERROR);
@@ -142,35 +135,41 @@ public class BasicDialog {
     return validAge;
   }
 
-  protected void markError(ControlGroup dialectGroup, FocusWidget dialect, String header, String message) {
-    markError(dialectGroup, dialect, header, message, Placement.RIGHT);
-  }
+  /**
+   * @see #markError(com.github.gwtbootstrap.client.ui.ControlGroup, com.google.gwt.user.client.ui.FocusWidget, String, String, com.github.gwtbootstrap.client.ui.constants.Placement)
+   * @param w
+   * @param heading
+   * @param message
+   */
+  protected void setupPopover(final Widget w, String heading, final String message) {
+    System.out.println("--> triggering popover on " + w.getTitle() + " with " + heading + "/"+message);
+    final MyPopover popover = new MyPopover();
+    showPopover(popover, w, heading, message, Placement.RIGHT);
 
-  //List<ControlGroup> marked = new ArrayList<ControlGroup>();
-  protected void markError(ControlGroup dialectGroup, FocusWidget dialect, String header, String message, Placement placement) {
-    dialectGroup.setType(ControlGroupType.ERROR);
-    dialect.setFocus(true);
-    //marked.add(dialectGroup);
+    hidePopover(popover);
 
-    setupPopover(dialect, header, message, placement);
+    Scheduler.get().scheduleDeferred(new Command() {
+      public void execute() {
+        if (w instanceof FocusWidget) {
+          ((FocusWidget)w).setFocus(true);
+        }
+      }
+    });
   }
 
   /**
    * TODO : bug - once shown these never really go away
+   *
+   * @see #markError(com.github.gwtbootstrap.client.ui.ControlGroup, com.google.gwt.user.client.ui.FocusWidget, String, String, com.github.gwtbootstrap.client.ui.constants.Placement)
+   * @see mitll.langtest.client.user.BasicDialog.ListBoxFormField#markSimpleError
    * @param w
    * @param heading
    * @param message
    * @param placement
    */
   protected void setupPopover(final FocusWidget w, String heading, final String message, Placement placement) {
-    // System.out.println("triggering popover on " + w + " with " + message);
-    final Popover popover = new Popover();
-    popover.setWidget(w);
-    popover.setText(message);
-    popover.setHeading(heading);
-    popover.setPlacement(placement);
-    popover.reconfigure();
-    popover.show();
+    System.out.println("triggering popover on " + w + " with " + message);
+    final MyPopover popover = makePopover(w, heading, message, placement);
     visiblePopovers.add(popover);
 /*
     Timer t = new Timer() {
@@ -182,6 +181,8 @@ public class BasicDialog {
     };
     t.schedule(3000);*/
 
+    hidePopover(popover);
+
     Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
         w.setFocus(true);
@@ -189,9 +190,43 @@ public class BasicDialog {
     });
   }
 
+  private void hidePopover(final MyPopover popover) {
+    Timer t = new Timer() {
+      @Override
+      public void run() {
+        //System.out.println("hide popover on " + w + " with " + message);
+        popover.dontFireAgain();
+        popover.setHideDelay(0);
+        //popover.clear();
+       // popover.reconfigure();
+      }
+    };
+    t.schedule(3000);
+  }
+
+  private MyPopover makePopover(FocusWidget w, String heading, String message, Placement placement) {
+    final MyPopover popover = new MyPopover();
+    showPopover(popover, w, heading, message, placement);
+    return popover;
+  }
+
+  private void showPopover(Popover popover, Widget w, String heading, String message, Placement placement) {
+    popover.setWidget(w);
+    popover.setText(message);
+    popover.setHeading(heading);
+    popover.setPlacement(placement);
+    popover.reconfigure();
+    popover.show();
+  }
+
+  /**
+   * @see mitll.langtest.client.user.BasicDialog.FormField#clearError()
+   */
   public void hidePopovers() {
-    for (Popover popover : visiblePopovers) popover.hide();
-    visiblePopovers.clear();
+/*   for (Popover popover : visiblePopovers) {
+      popover.hide();
+    }
+    visiblePopovers.clear();*/
   }
 
   private static class MyPopover extends Popover {
@@ -201,7 +236,12 @@ public class BasicDialog {
     }
   }
 
-  protected class FormField {
+  protected static interface FormItem {
+    ControlGroup getGroup();
+    Widget getWidget();
+  }
+
+  protected class FormField implements FormItem {
     public final TextBox box;
     public final ControlGroup group;
 
@@ -233,9 +273,19 @@ public class BasicDialog {
       return box.getText();
     }
 
-    protected void markSimpleError(String message) {
-      markError(group, box, "Try Again", message);
+    @Override
+    public ControlGroup getGroup() {
+      return group;
     }
+
+    @Override
+    public Widget getWidget() {
+      return box;
+    }
+
+/*    protected void markSimpleError(String message) {
+      markError(group, box, TRY_AGAIN, message);
+    }*/
   }
 
   protected class ListBoxFormField {
@@ -255,13 +305,17 @@ public class BasicDialog {
       return box.getItemText(box.getSelectedIndex());
     }
 
-    public String toString() {
-      return "Box: " + getValue();
+    protected void markSimpleError(String message) {
+      markSimpleError(message, Placement.RIGHT);
     }
 
-    protected void markSimpleError(String message) {
+    protected void markSimpleError(String message, Placement placement) {
       box.setFocus(true);
-      setupPopover(box, "Try Again", message, Placement.RIGHT);
+      setupPopover(box, TRY_AGAIN, message, placement);
+    }
+
+    public String toString() {
+      return "Box: " + getValue();
     }
   }
 }
