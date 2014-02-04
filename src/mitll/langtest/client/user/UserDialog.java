@@ -50,6 +50,10 @@ public abstract class UserDialog extends BasicDialog {
     "16+ months",
     "Native speaker");
   protected static final int NATIVE_MONTHS = 20 * 12;
+  protected static final String MALE = "Male";
+  protected static final String FEMALE = "Female";
+  protected static final String UNSET = "Unset";
+
   protected final PropertyHandler props;
 
   protected final LangTestDatabaseAsync service;
@@ -189,7 +193,7 @@ public abstract class UserDialog extends BasicDialog {
   }
 
   protected ListBox getGenderBox() {
-    List<String> values = Arrays.asList("Male", "Female");
+    List<String> values = Arrays.asList(UNSET, MALE, FEMALE);
     return getListBox(values);
   }
 
