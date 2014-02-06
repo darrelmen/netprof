@@ -22,6 +22,7 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.BusyPanel;
@@ -51,11 +52,10 @@ import java.util.Date;
 public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel, RequiresResize, ProvidesResize {
   protected static final String NATIVE_REFERENCE_SPEAKER = "Native Reference Speaker";
   private static final String USER_RECORDER = "User Recorder";
-  private static final boolean SHOW_SPECTROGRAM = false;
   private boolean isBusy = false;
 
   private static final String WAV = ".wav";
-  private static final String MP3 = ".mp3";
+  private static final String MP3 = "." + AudioTag.COMPRESSED_TYPE;
   private Image recordImage1;
   private Image recordImage2;
   private String refAudio;
@@ -268,12 +268,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
   private ASRScoringAudioPanel getAudioPanel(Exercise e, String path) {
     ASRScoringAudioPanel audioPanel;
-
-    //System.out.println("getScoringAudioPanel : score panel " + scorePanel);
     if (e.getType() == Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW) {
       audioPanel = makeFastAndSlowAudio(path);
     } else {
-      audioPanel = new ASRScoringAudioPanel(path, e.getRefSentence(), service, controller, SHOW_SPECTROGRAM, scorePanel, 23);
+      audioPanel = new ASRScoringAudioPanel(path, e.getRefSentence(), service, controller, controller.getProps().showSpectrogram(), scorePanel, 23);
     }
     audioPanel.getElement().setId("ASRScoringAudioPanel");
     audioPanel.setRefAudio(path, e.getRefSentence());
@@ -539,7 +537,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         exercise.getRefSentence(),
         service,
         controller1,
-        SHOW_SPECTROGRAM, scoreListener, 23);
+        controller1.getProps().showSpectrogram(), scoreListener, 23);
     }
 
     /**
