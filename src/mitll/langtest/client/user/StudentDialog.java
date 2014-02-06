@@ -13,10 +13,7 @@ import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.Modal;
 import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
-import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
-import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
-import com.github.gwtbootstrap.client.ui.event.ShowEvent;
-import com.github.gwtbootstrap.client.ui.event.ShowHandler;
+import com.github.gwtbootstrap.client.ui.event.*;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -31,7 +28,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
-import java_cup.parse_reduce_row;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.shared.DLIUser;
@@ -40,7 +36,6 @@ import mitll.langtest.shared.Result;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -152,12 +147,24 @@ public class StudentDialog extends UserDialog {
 
     configureKeyHandler(dialogBox, closeButton);
 
-    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+    dialogBox.addShownHandler(new ShownHandler() {
+
+      @Override
+      public void onShown(ShownEvent shownEvent) {
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+          public void execute() {
+            user.box.setFocus(true);
+          }
+        });
+
+      }
+    });
+ /*   Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
         user.box.setFocus(true);
       }
     });
-
+*/
     dialogBox.show();
   }
 
