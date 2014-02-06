@@ -13,9 +13,10 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
  */
 public class AudioTag {
   private static final boolean INCLUDE_ALTERNATE_COMPRESSED = LangTestDatabase.WRITE_ALTERNATE_COMPRESSED_AUDIO;
-  private static final String ALTERNATE_TYPE = "webm";
+  private static final String ALTERNATE_TYPE = "ogg";
   private static final boolean INCLUDE_ALTERNATE_AUDIO = true;
   private static final String PRELOAD_HINT = "auto";
+  public static final String COMPRESSED_TYPE = "ogg";//"mp3";
 
   /**
    * @see mitll.langtest.client.result.ResultManager#getTable
@@ -28,7 +29,10 @@ public class AudioTag {
         "<source type=\"audio/" + (INCLUDE_ALTERNATE_COMPRESSED ? ALTERNATE_TYPE : "wav") + "\" " +
            "src=\"" + (INCLUDE_ALTERNATE_COMPRESSED ? result.replace(".wav", "." +ALTERNATE_TYPE) : result) + "\">" +
         "</source>\n" : "";
-    String secondSource = "<source type=\"audio/mp3\" src=\"" + result.replace(".wav", ".mp3") + "\"></source>\n";
+    String secondSource = "<source type=\"audio/" +
+        COMPRESSED_TYPE +
+        "\" src=\"" + result.replace(".wav", "." +
+        COMPRESSED_TYPE) + "\"></source>\n";
 
     SafeHtmlBuilder sb = new SafeHtmlBuilder();
     sb.appendHtmlConstant("<audio preload=\"" + PRELOAD_HINT + "\" controls=\"controls\" tabindex=\"0\">\n" +
