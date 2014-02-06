@@ -29,16 +29,16 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   private ScoreListener scoreListener;
   private PretestScore result;
   private boolean showOnlyOneExercise = false; // true for when called from the headstart website
+  private static final boolean debug = true;
+  public static float MP3_HEADER_OFFSET = 0f;//0.048f;
 
   /**
    * @see ASRScoringAudioPanel#ASRScoringAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, int, mitll.langtest.client.exercise.ExerciseController, ScoreListener)
    * @param service
-   * @param numRepeats
    * @param gaugePanel
    */
-  public ScoringAudioPanel(LangTestDatabaseAsync service,
-                           int numRepeats, ExerciseController controller, ScoreListener gaugePanel) {
-    this(null, null, service, numRepeats, controller, SHOW_SPECTROGRAM, gaugePanel, 23);
+  public ScoringAudioPanel(LangTestDatabaseAsync service, ExerciseController controller, ScoreListener gaugePanel) {
+    this(null, null, service, controller, SHOW_SPECTROGRAM, gaugePanel, 23);
   }
 
   /**
@@ -46,25 +46,24 @@ public abstract class ScoringAudioPanel extends AudioPanel {
    * @param path
    * @param refSentence
    * @param service
-   * @param numRepeats
    * @param showSpectrogram
    * @param gaugePanel
    * @param rightMargin
    */
   public ScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
-                           int numRepeats, ExerciseController controller,
+                           ExerciseController controller,
                            boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin) {
     super(path, service, controller, showSpectrogram, gaugePanel, rightMargin);
     this.refSentence = refSentence;
     showOnlyOneExercise = controller.showOnlyOneExercise();
-    addClickHandlers(numRepeats);
+    addClickHandlers();
   }
 
-  private void addClickHandlers(int numRepeats) {
+  private void addClickHandlers() {
     this.phones.image.getElement().getStyle().setCursor(Style.Cursor.POINTER);
-    this.phones.image.addClickHandler(new TranscriptEventClickHandler(NetPronImageType.PHONE_TRANSCRIPT, numRepeats));
+    this.phones.image.addClickHandler(new TranscriptEventClickHandler(NetPronImageType.PHONE_TRANSCRIPT));
     this.words.image.getElement().getStyle().setCursor(Style.Cursor.POINTER);
-    this.words.image.addClickHandler(new TranscriptEventClickHandler(NetPronImageType.WORD_TRANSCRIPT, numRepeats));
+    this.words.image.addClickHandler(new TranscriptEventClickHandler(NetPronImageType.WORD_TRANSCRIPT));
   }
 
   /**
@@ -173,18 +172,16 @@ public abstract class ScoringAudioPanel extends AudioPanel {
    * @see #addClickHandlers
    */
   private class TranscriptEventClickHandler implements ClickHandler {
-    private final boolean debug = false;
     private final NetPronImageType type;
-    private final int numRepeats;
+    //private final int numRepeats;
 
     /**
      * @see mitll.langtest.client.scoring.ScoringAudioPanel#addClickHandlers
      * @param type
-     * @param numRepeats
      */
-    public TranscriptEventClickHandler(NetPronImageType type, int numRepeats) {
+    public TranscriptEventClickHandler(NetPronImageType type) {
       this.type = type;
-      this.numRepeats = numRepeats;
+     // this.numRepeats = numRepeats;
     }
 
     /**
@@ -198,20 +195,21 @@ public abstract class ScoringAudioPanel extends AudioPanel {
      * @param event
      */
     public void onClick(ClickEvent event) {
-      float i = (float) event.getX() / (float) phones.image.getWidth();
+      float horizOffset = (float) event.getX() / (float) phones.image.getWidth();
       if (result != null) {
         int index = 0;
         List<Float> endTimes = result.getsTypeToEndTimes().get(type);
         float wavFileLengthInSeconds = result.getWavFileLengthInSeconds();//endTimes.get(endTimes.size() - 1);
-        float mouseClickTime = wavFileLengthInSeconds * i;
-        if (debug) System.out.println("got client at " + event.getX() + " or " + i + " or time " + mouseClickTime +
+        float mouseClickTime = wavFileLengthInSeconds * horizOffset;
+        if (debug) System.out.println("got client at " + event.getX() + " or " + horizOffset + " or time " + mouseClickTime +
             " duration " + wavFileLengthInSeconds + " secs or " + wavFileLengthInSeconds * 1000 + " millis");
         for (Float endTime : endTimes) {
           float next = endTimes.get(Math.min(endTimes.size() - 1, index + 1));
           if (mouseClickTime > endTime && mouseClickTime <= next) {
             if (debug) System.out.println("\t playing from " + endTime + " to " + next);
 
-            playSegment(endTime, next);
+            playSegment(MP3_HEADER_OFFSET+endTime, MP3_HEADER_OFFSET+next);
+            break;
           }
           index++;
         }
