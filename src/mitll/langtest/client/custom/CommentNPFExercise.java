@@ -22,6 +22,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
@@ -90,7 +91,8 @@ public class CommentNPFExercise extends NPFExercise {
   private Widget getEntry(String field, Widget content, ExerciseAnnotation annotation) {
     final Button commentButton = new Button();
 
-    if (field.endsWith(".mp3")) field = field.replaceAll(".mp3",".wav");
+    if (field.endsWith(AudioTag.COMPRESSED_TYPE)) field = field.replaceAll("." +
+        AudioTag.COMPRESSED_TYPE,".wav");
     final MyTextBox commentEntryText = new MyTextBox();
     Button clearButton = getClearButton(commentEntryText, commentButton, field);
 
