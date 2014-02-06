@@ -1,7 +1,6 @@
 package mitll.langtest.server.database;
 
 import org.apache.log4j.Logger;
-import scala.tools.nsc.typechecker.TypeDiagnostics;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
