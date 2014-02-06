@@ -6,6 +6,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.io.Files;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
@@ -774,7 +775,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private String getWavAudioFile(String audioFile) {
-    if (audioFile.endsWith(".mp3")) {
+    if (audioFile.endsWith("." +
+        AudioTag.COMPRESSED_TYPE)) {
       String wavFile = removeSuffix(audioFile) +".wav";
       File test = pathHelper.getAbsoluteFile(wavFile);
       audioFile = test.exists() ? test.getAbsolutePath() : audioFileHelper.getWavForMP3(audioFile);
