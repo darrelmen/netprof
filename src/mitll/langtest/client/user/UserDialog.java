@@ -41,7 +41,9 @@ public abstract class UserDialog extends BasicDialog {
   protected static final int MIN_AGE = 12;
   protected static final int MAX_AGE = 90;
   protected static final int TEST_AGE = 100;
+  protected static final String UNSET = "Unset";
   protected static final List<String> EXPERIENCE_CHOICES = Arrays.asList(
+      UNSET,
     "0-3 months (Semester 1)",
     "4-6 months (Semester 1)",
     "7-9 months (Semester 2)",
@@ -52,7 +54,6 @@ public abstract class UserDialog extends BasicDialog {
   protected static final int NATIVE_MONTHS = 20 * 12;
   protected static final String MALE = "Male";
   protected static final String FEMALE = "Female";
-  protected static final String UNSET = "Unset";
 
   protected final PropertyHandler props;
 
