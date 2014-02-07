@@ -5,6 +5,7 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.Modal;
 import com.github.gwtbootstrap.client.ui.TextBox;
+import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.github.gwtbootstrap.client.ui.event.ShowEvent;
@@ -187,6 +188,18 @@ public class DataCollectorDialog extends UserDialog {
           }
         } catch (NumberFormatException e) {
           markError(ageEntryGroup, "age '" + ageEntryGroup.getText() + "' is invalid.");
+          valid = false;
+        }
+      }
+      if (valid) {
+        if (registrationInfo.genderGroup.getValue().equals(UNSET)) {
+          registrationInfo.genderGroup.markSimpleError("Please select a gender.", Placement.RIGHT);
+          valid = false;
+        }
+      }
+      if (valid) {
+        if (registrationInfo.experienceGroup.getValue().equals(UNSET)) {
+          registrationInfo.experienceGroup.markSimpleError("Please select an experience level.", Placement.RIGHT);
           valid = false;
         }
       }
