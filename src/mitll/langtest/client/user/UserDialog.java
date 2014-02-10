@@ -54,6 +54,8 @@ public abstract class UserDialog extends BasicDialog {
   protected static final int NATIVE_MONTHS = 20 * 12;
   protected static final String MALE = "Male";
   protected static final String FEMALE = "Female";
+  private static final String ALL_ITEMS = "Sequential Order";
+  private static final String RECORDING_ORDER = "Item Order";
 
   protected final PropertyHandler props;
 
@@ -123,7 +125,7 @@ public abstract class UserDialog extends BasicDialog {
   }
 
   private FormField getFormField(Panel dialogBox, String label, TextBox user, int minLength) {
-    final ControlGroup userGroup = addControlGroupEntry(dialogBox, label, user);
+    final ControlGroup userGroup = addControlGroupEntry(dialogBox, label, user, false);
     return new FormField(user, userGroup, minLength);
   }
 
@@ -169,10 +171,10 @@ public abstract class UserDialog extends BasicDialog {
     return genderBox;
   }
 
-  protected ListBoxFormField getRecordingOrder(Panel dialogBox) {
-    ListBox listBox2 = getListBox2(Arrays.asList("All items", LEAST_RECORDED_FIRST), 160);
-    listBox2.addStyleName("leftFiveMargin");
-    return getListBoxFormField(dialogBox, "Recording Order", listBox2);
+  protected ListBoxFormField getRecordingOrder(Panel dialogBox, boolean leftAlignLabel) {
+    ListBox listBox2 = getListBox2(Arrays.asList(ALL_ITEMS, LEAST_RECORDED_FIRST), 160);
+    if (!leftAlignLabel) listBox2.addStyleName("leftFiveMargin");
+    return getListBoxFormField(dialogBox, RECORDING_ORDER, listBox2, leftAlignLabel);
   }
 
   /**
