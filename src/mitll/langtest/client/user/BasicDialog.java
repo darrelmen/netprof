@@ -14,6 +14,7 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Focusable;
@@ -45,34 +46,42 @@ public class BasicDialog {
   }
 
   private FormField getFormField(Panel dialogBox, String label, TextBox user, int minLength) {
-    final ControlGroup userGroup = addControlGroupEntry(dialogBox, label, user);
-    return new FormField(user, userGroup,minLength);
+    final ControlGroup userGroup = addControlGroupEntry(dialogBox, label, user, false);
+    return new FormField(user, userGroup, minLength);
   }
 
   protected ListBoxFormField getListBoxFormField(Panel dialogBox, String label, ListBox user) {
-    addControlGroupEntry(dialogBox, label, user);
-    return new ListBoxFormField(user);
+    return getListBoxFormField(dialogBox, label, user,false);
   }
 
-  protected ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget user) {
+  protected ListBoxFormField getListBoxFormField(Panel dialogBox, String label, ListBox user, boolean leftAlignLabel) {
+    ControlGroup group = addControlGroupEntry(dialogBox, label, user, leftAlignLabel);
+    return new ListBoxFormField(user, group);
+  }
+
+  protected ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget user, boolean leftAlign) {
     final ControlGroup userGroup = new ControlGroup();
     userGroup.addStyleName("leftFiveMargin");
-    userGroup.add(new ControlLabel(label));
-    user.addStyleName("leftFiveMargin");
+    ControlLabel widget = new ControlLabel(label);
+
+    if (leftAlign) {
+      DOM.setStyleAttribute(widget.getElement(), "textAlign", "left");
+      DOM.setStyleAttribute(widget.getElement(), "width", "80px");
+    }
+
+    userGroup.add(widget);
+    if (!leftAlign) {
+      user.addStyleName("leftFiveMargin");
+    }
+    else {
+      user.addStyleName("floatRight");
+    }
     userGroup.add(user);
 
     dialogBox.add(userGroup);
     return userGroup;
   }
 
-/*  protected void addKeyHandler(final Button send, Modal dialog) {
-    enterKeyButtonHelper.addKeyHandler(send, dialog);
-  }*/
-
- /* protected void removeKeyHandler() {
-    enterKeyButtonHelper.removeKeyHandler();
-  }
-*/
   protected ListBox getListBox(List<String> values) {
     final ListBox genderBox = new ListBox(false);
     for (String s : values) {
@@ -282,17 +291,15 @@ public class BasicDialog {
     public Widget getWidget() {
       return box;
     }
-
-/*    protected void markSimpleError(String message) {
-      markError(group, box, TRY_AGAIN, message);
-    }*/
   }
 
   protected class ListBoxFormField {
     public final ListBox box;
+    public final ControlGroup group;
 
-    public ListBoxFormField(final ListBox box) {
+    public ListBoxFormField(final ListBox box, ControlGroup group) {
       this.box = box;
+      this.group = group;
       box.addChangeHandler(new ChangeHandler() {
         @Override
         public void onChange(ChangeEvent event) {
