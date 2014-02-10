@@ -1,21 +1,13 @@
 package mitll.langtest.client.flashcard;
 
-import com.github.gwtbootstrap.client.ui.Column;
-import com.github.gwtbootstrap.client.ui.Dropdown;
-import com.github.gwtbootstrap.client.ui.FluidContainer;
-import com.github.gwtbootstrap.client.ui.FluidRow;
-import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.Nav;
-import com.github.gwtbootstrap.client.ui.NavLink;
-import com.github.gwtbootstrap.client.ui.Paragraph;
+import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.github.gwtbootstrap.client.ui.constants.ToggleType;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.FlashcardRecordButton;
@@ -53,8 +45,8 @@ public class BootstrapExercisePanel extends FluidContainer {
   public BootstrapExercisePanel(final Exercise e, final LangTestDatabaseAsync service,
                                 final ExerciseController controller, int feedbackHeight, boolean addKeyBinding) {
     this.addKeyBinding = addKeyBinding;
-    setStyleName("exerciseBackground");
-    addStyleName("cardBorder");
+    //setStyleName("exerciseBackground");
+   // addStyleName("cardBorder");
     HTML warnNoFlash = new HTML(WARN_NO_FLASH);
     soundFeedback = new SoundFeedback(controller.getSoundManager(), warnNoFlash);
 
@@ -62,9 +54,52 @@ public class BootstrapExercisePanel extends FluidContainer {
     if (helpRow != null) add(helpRow);
     cardPrompt = getCardPrompt(e, controller);
     cardPrompt.getElement().setId("cardPrompt");
-    add(cardPrompt);
-    //System.out.println("height " +feedbackHeight);
-    addRecordingAndFeedbackWidgets(e, service, controller, feedbackHeight);
+    //add(cardPrompt);
+    Panel horiz = new FlowPanel();
+    add(horiz);
+    cardPrompt.addStyleName("floatLeft");
+    VerticalPanel controls = new VerticalPanel();
+    controls.addStyleName("floatRight");
+
+    ControlGroup group = new ControlGroup("AUDIO");
+    ButtonToolbar w = new ButtonToolbar();
+    group.add(w);
+    controls.add(group);
+    ButtonGroup widget = new ButtonGroup();
+    widget.setToggle(ToggleType.RADIO);
+    w.add(widget);
+    Button widget2 = new Button("On" + "");
+    widget.add(widget2);
+    w.add(widget);
+    Button widget1 = new Button("Off" + "");
+    widget.add(widget1);
+    widget1.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+
+      }
+    });
+    widget2.setActive(true);
+    widget2.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+
+      }
+    });
+
+    controls.addStyleName("leftTenMargin");
+    controls.addStyleName("floatRight");
+
+    VerticalPanel leftColumn = new VerticalPanel();
+    leftColumn.addStyleName("exerciseBackground");
+    leftColumn.addStyleName("cardBorder");
+    leftColumn.addStyleName("floatLeft");
+    leftColumn.add(cardPrompt);
+
+    horiz.add(leftColumn);
+    horiz.add(controls);
+
+    addRecordingAndFeedbackWidgets(e, service, controller, feedbackHeight, leftColumn);
     warnNoFlash.setVisible(false);
     add(warnNoFlash);
     getElement().setId("BootstrapExercisePanel");
@@ -120,8 +155,9 @@ public class BootstrapExercisePanel extends FluidContainer {
    */
   protected FlowPanel getCardPrompt(Exercise e, ExerciseController controller) {
     FluidRow questionRow = new FluidRow();
+    //FlowPanel questionRow = new FlowPanel();
     Widget questionContent = getQuestionContent(e);
-    Column contentContainer = new Column(12, questionContent);
+   Column contentContainer = new Column(12, questionContent);
     questionRow.add(contentContainer);
     return questionRow;
   }
@@ -145,23 +181,26 @@ public class BootstrapExercisePanel extends FluidContainer {
    * reco feedback - whether the recorded audio was correct/incorrect, etc.  <br></br>
    * score feedback - pron score
    *
+   *
+   *
    * @param e
    * @param service
    * @param controller used in subclasses for audio control
+   * @param toAddTo
    * @see #BootstrapExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int, boolean)
    */
   protected void addRecordingAndFeedbackWidgets(Exercise e, LangTestDatabaseAsync service, ExerciseController controller,
-                                              int feedbackHeight) {
+                                                int feedbackHeight, Panel toAddTo) {
     // add answer widget to do the recording
-    add(getAnswerAndRecordButtonRow(e, service, controller));
+    toAddTo.add(getAnswerAndRecordButtonRow(e, service, controller));
 
     if (controller.getProps().showFlashcardAnswer()) {
-      add(getRecoOutputRow());
+      toAddTo.add(getRecoOutputRow());
     }
 
     boolean classroomMode = controller.getProps().isClassroomMode();
     System.out.println("classroom mode " + classroomMode);
-    add(audioScoreFeedback.getScoreFeedbackRow(feedbackHeight, classroomMode));
+    toAddTo.add(audioScoreFeedback.getScoreFeedbackRow(feedbackHeight, classroomMode));
   }
 
   protected Widget getAnswerAndRecordButtonRow(Exercise e, LangTestDatabaseAsync service, ExerciseController controller) {
@@ -175,7 +214,7 @@ public class BootstrapExercisePanel extends FluidContainer {
    * @param recordButton
    * @return
    * @see #getAnswerAndRecordButtonRow(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
-   * @see CombinedResponseFlashcard#addRecordingAndFeedbackWidgets(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @see BootstrapExercisePanel#addRecordingAndFeedbackWidgets(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int, com.google.gwt.user.client.ui.Panel)
    */
   protected FluidRow getRecordButtonRow(Widget recordButton) {
     FluidRow recordButtonRow = new FluidRow();
