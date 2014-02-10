@@ -315,8 +315,13 @@ fieldset {
 .topBarMargin {
      margin-top: 18px;
  }
+
 .topFiveMargin {
-     margin-top: 5px;
+    margin-top: 5px;
+}
+
+.topTwentyMargin {
+     margin-top: 20px;
  }
 
 .leftFiveMargin {
@@ -828,4 +833,8 @@ td > h5 {
 
 .englishQuestionRightMargin {
    margin-right : 131px;
+}
+
+#Student_LoginBoxDialog > .modal-body {
+    padding-top : 5px;
 }
