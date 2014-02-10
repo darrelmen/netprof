@@ -886,7 +886,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   @Override
   public void resetState() {
-    everShownInitialState = false;
+    //everShownInitialState = false;
     History.newItem(""); // clear history!
     userManager.clearUser();
     exerciseList.removeCurrentExercise();
@@ -933,7 +933,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
-  private boolean everShownInitialState =false;
+  //private boolean everShownInitialState =false;
   private boolean doEverythingAfterFactory(long userID) {
 
     if (userID != lastUser || (props.isGoodwaveMode() || props.isFlashCard() && !props.isTimedGame())) {
@@ -977,11 +977,16 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       flashRecordPanel.initFlash();
     }
     else {
-      boolean gotPermission = flashRecordPanel != null && flashRecordPanel.gotPermission();
-      System.out.println("checkInitFlash : skip init flash, just checkLogin (got permission = " + gotPermission+")");
+      gotMicPermission();
 
       checkLogin();
     }
+  }
+
+  public boolean gotMicPermission() {
+    boolean gotPermission = flashRecordPanel != null && flashRecordPanel.gotPermission();
+    System.out.println("checkInitFlash : skip init flash, just checkLogin (got permission = " + gotPermission+")");
+    return gotPermission;
   }
 
   /**
