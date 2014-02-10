@@ -230,8 +230,7 @@ public class AudioFileHelper {
    * @return
    */
   private String dealWithMP3Audio(String testAudioFile) {
-    if (testAudioFile.endsWith("." +
-        AudioTag.COMPRESSED_TYPE)) {
+    if (testAudioFile.endsWith("." + AudioTag.COMPRESSED_TYPE)) {
       String noSuffix = removeSuffix(testAudioFile);
       String wavFile = noSuffix +".wav";
       File test = pathHelper.getAbsoluteFile(wavFile);
