@@ -30,10 +30,7 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.shared.DLIUser;
@@ -81,8 +78,10 @@ public class StudentDialog extends UserDialog {
 
   public void displayLoginBox() {
     final Modal dialogBox = getDialog("Login");
+    dialogBox.setWidth("700px");
     dialogBox.setAnimation(false);
     dialogBox.setMaxHeigth("760px");
+
     Element element = dialogBox.getElement();
     element.setId("Student_LoginBoxDialog");
     DOM.setStyleAttribute(element, "top", "1%");
@@ -94,14 +93,32 @@ public class StudentDialog extends UserDialog {
     form.add(fieldset);
     dialogBox.add(form);
     ListBox listBox2 = getListBox2(purposes, ILR_CHOICE_WIDTH);
-    listBox2.addStyleName("leftFiveMargin");
-    final ListBoxFormField purpose = getListBoxFormField(fieldset, PURPOSE, listBox2);
+    //listBox2.addStyleName("leftFiveMargin");
+
+
+
+   // DivWidget row = new DivWidget();
+    //Panel hp = new HorizontalPanel();
+    Panel hp = new DivWidget();
+    fieldset.add(hp);
+   // divLeft.addStyleName("floatLeft");
+
+   // divRight.addStyleName("floatRight");
+
+    //dialogBox.add(hp);
+
+    final ListBoxFormField purpose = getListBoxFormField(hp, PURPOSE, listBox2, true);
     purpose.box.setFocus(true);
-    recordingOrder = getRecordingOrder(fieldset);
+    purpose.group.addStyleName("floatLeft");
+
+    recordingOrder = getRecordingOrder(hp, true);
+    recordingOrder.group.addStyleName("floatRight");
 
     final FormField user = addControlFormField(fieldset, "User ID", MIN_LENGTH_USER_ID);
+
     user.setVisible(purpose.getValue().equals(DATA_COLLECTION));
     user.box.addStyleName("leftFiveMargin");
+    user.group.addStyleName("floatLeft");
 
     //final FormField password = addControlFormField(fieldset, "Password", true);
 
@@ -294,7 +311,7 @@ public class StudentDialog extends UserDialog {
 
   private FormField getDialect(Panel dialogBox) {
     final FormField dialectGroup = addControlFormField(dialogBox, "Dialect");
-    //dialectGroup.box.addStyleName("topMargin");
+    dialectGroup.group.addStyleName("topTwentyMargin");
 
     dialectGroup.box.addKeyUpHandler(new KeyUpHandler() {
       public void onKeyUp(KeyUpEvent event) {
