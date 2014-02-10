@@ -42,7 +42,7 @@ public class DataCollectorDialog extends UserDialog {
    */
   public void displayTeacherLogin(String loginTitle) {
     final Modal dialogBox = getDialog(loginTitle);
-    recordingOrder = getRecordingOrder(dialogBox);
+    recordingOrder = getRecordingOrder(dialogBox, false);
 
     final FormField user = addControlFormField(dialogBox, "User ID");
     final FormField password = addControlFormField(dialogBox, "Password", true, 0);
@@ -342,8 +342,8 @@ public class DataCollectorDialog extends UserDialog {
       nativeLangGroup = addControlFormField(register, "Native Lang (L1)");
       dialectGroup = addControlFormField(register, "Dialect");
       ageEntryGroup = addControlFormField(register, "Your age");
-      genderGroup = getListBoxFormField(register, "Select gender", getGenderBox());
-      experienceGroup = getListBoxFormField(register, "Select months of experience", getExperienceBox());
+      genderGroup = getListBoxFormField(register, "Select gender", getGenderBox(), false);
+      experienceGroup = getListBoxFormField(register, "Select months of experience", getExperienceBox(), false);
       return this;
     }
   }
