@@ -1,12 +1,15 @@
 package mitll.langtest.client.custom;
 
+import com.github.gwtbootstrap.client.ui.FluidContainer;
+import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Tab;
 import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
+import mitll.langtest.client.ExerciseListLayout;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.flashcard.FlashcardExercisePanelFactory;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.user.UserFeedback;
@@ -17,15 +20,27 @@ import mitll.langtest.shared.ExerciseShell;
  * Created by go22670 on 2/10/14.
  */
 public class Combined extends TabContainer {
-
   private Tab yourItems;
   private Panel yourItemsContent;
   private Navigation.TabAndContent browse;
   private Navigation.TabAndContent review, commented;
+  private final ExerciseController controller;
+  private LangTestDatabaseAsync service;
+  private UserManager userManager;
+
+  private ScrollPanel listScrollPanel;
+  private ListInterface<? extends ExerciseShell> listInterface;
+  UserFeedback feedback;
 
   public Combined(final LangTestDatabaseAsync service, final UserManager userManager,
                   final ExerciseController controller, final ListInterface<? extends ExerciseShell> listInterface,
-                  UserFeedback feedback) {}
+                  UserFeedback feedback) {
+    this.service = service;
+    this.userManager = userManager;
+    this.controller = controller;
+    this.listInterface = listInterface;
+    this.feedback = feedback;
+  }
 
   public Panel getButtonRow2(Panel secondAndThird) {
     tabPanel = new TabPanel();
@@ -33,6 +48,47 @@ public class Combined extends TabContainer {
     // chapter tab
     final Navigation.TabAndContent chapters = makeTab(tabPanel, IconType.LIGHTBULB, LEARN_PRONUNCIATION);
     chapters.content.add(secondAndThird);
+
+    final Navigation.TabAndContent practice = makeTab(tabPanel, IconType.CHECK,  PRACTICE);
+
+
+
+
+    ExerciseListLayout layout = new ExerciseListLayout(controller.getProps());
+
+    //VerticalPanel vp = new VerticalPanel();
+    Panel currentExerciseVPanel = new FluidContainer();
+
+    Panel thirdRow = new HorizontalPanel();
+    Panel leftColumn = new SimplePanel();
+    thirdRow.add(leftColumn);
+    leftColumn.addStyleName("floatLeft");
+    thirdRow.getElement().setId("outerThirdRow");
+    thirdRow.setWidth("100%");
+    thirdRow.addStyleName("trueInlineStyle");
+
+    Panel bothSecondAndThird = new FlowPanel();
+    FluidRow secondRow = new FluidRow();
+
+    bothSecondAndThird.add(secondRow);
+    bothSecondAndThird.add(thirdRow);
+   // this.bothSecondAndThird = bothSecondAndThird;
+
+    //reallyMakeExerciseList(belowFirstRow, leftColumn, bothSecondAndThird);
+
+    currentExerciseVPanel.addStyleName("floatLeftList");
+    thirdRow.add(currentExerciseVPanel);
+
+    practice.content.add(bothSecondAndThird);
+
+
+    ListInterface<? extends ExerciseShell> listInterface1 = layout.makeExerciseList(secondRow, leftColumn, feedback, currentExerciseVPanel, service, controller);
+
+    listInterface1.setFactory(new MyFlashcardExercisePanelFactory(service, feedback, controller, listInterface1), userManager, 1);
+
+    if (controller.gotMicPermission()) {
+      listInterface1.getExercises(controller.getUser(),true);
+    }
 
     // so we can know when chapters is revealed and tell it to update it's lists
     tabPanel.addShowHandler(new TabPanel.ShowEvent.Handler() {
@@ -60,7 +116,7 @@ public class Combined extends TabContainer {
 
   @Override
   public void showInitialState() {
-    tabPanel.selectTab(0);
+    tabPanel.selectTab(1);
 
   }
 
