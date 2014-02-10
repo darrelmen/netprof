@@ -38,7 +38,7 @@ public class ScoreFeedback {
    * Holds the pron score feedback.
    * Initially made with a placeholder.
    *
-   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#addRecordingAndFeedbackWidgets(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @see BootstrapExercisePanel#addRecordingAndFeedbackWidgets(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int, com.google.gwt.user.client.ui.Panel)
    * @return
    */
   public FluidRow getScoreFeedbackRow(int height, boolean useShortWidth) {
