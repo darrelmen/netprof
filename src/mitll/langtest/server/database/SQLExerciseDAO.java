@@ -303,15 +303,15 @@ public class SQLExerciseDAO implements ExerciseDAO {
    * @return
    */
   private String convertTableMarkup(String content) {
+    content = content.replaceAll("<td width=\"20%\"> &nbsp; </td>","");
     if (content.contains("<td dir=\"rtl\">")) {
       content = content.replaceAll("Orientation :","Question Scenario");
       content = content.replaceAll("Orientation:","Question Scenario");
-      content = content.replaceAll("<td width=\"20%\"> &nbsp; </td>","");
       content = content.replaceAll("td", HEADER_TAG);
       content = content.replaceAll("br", HEADER_TAG);
-      if (content.contains(":")) {
-        content = content.replaceAll(":", " ");
-      }
+      //if (content.contains(":")) {
+      //  content = content.replaceAll(":", " ");
+      //}
       content += "</h3>";
     }
     content = content.replaceAll("dir=\"rtl\"","dir=\"rtl\" style=\"text-align:right\"");
