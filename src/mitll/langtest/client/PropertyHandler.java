@@ -44,6 +44,7 @@ public class PropertyHandler {
   //private static final String DEBUG_EMAIL = "debugEmail";
   private static final String FLASHCARD = "flashcard";
   private static final String FLASHCARD_TEACHER_VIEW = "flashcardTeacherView";
+  private static final String COMBINED_MODE = "combinedMode";
 
   private static final String TIMED_GAME = "timedGame";
   private static final String GAME_TIME = "gameTimeSeconds";
@@ -89,6 +90,7 @@ public class PropertyHandler {
   private static final String CLASSROOM_MODE = "classroomMode";
   private static final String SHOW_SPECTROGRAM = "spectrogram";
   private boolean spectrogram = false;
+  private boolean combinedMode = false;
 
   public enum LOGIN_TYPE { UNDEFINED, ANONYMOUS, STUDENT, DATA_COLLECTOR, SIMPLE }
 
@@ -191,6 +193,7 @@ public class PropertyHandler {
       else if (key.equals(SHOW_SECTIONS)) showSections = getBoolean(value);
      // else if (key.equals(SHOW_SECTION_WIDGETS)) showSectionWidgets = getBoolean(value);
       else if (key.equals(FLASHCARD_TEACHER_VIEW)) flashcardTeacherView = getBoolean(value);
+      else if (key.equals(COMBINED_MODE)) combinedMode = getBoolean(value);
       else if (key.equals(FLASHCARD)) flashCard = getBoolean(value);
       else if (key.equals(LANGUAGE)) language = value;
       else if (key.equals(SPLASH_TITLE)) splashTitle = value;
@@ -208,7 +211,7 @@ public class PropertyHandler {
       else if (key.equals(RESPONSE_TYPE)) responseType = value;
       else if (key.equals(PURPOSE_DEFAULT)) purposeDefault = value;
       else if (key.equals(BIND_NEXT_TO_ENTER)) bindNextToEnter = getBoolean(value);
-      else if (key.equals(SCREEN_PORTION)) screenPortion = getFloat(value,1.0f,SCREEN_PORTION);
+      else if (key.equals(SCREEN_PORTION)) screenPortion = getFloat(value, 1.0f, SCREEN_PORTION);
       else if (key.equals(CLASSROOM_MODE)) classroomMode = getBoolean(value);
       else if (key.equals(SHOW_SPECTROGRAM)) spectrogram = getBoolean(value);
       else if (key.equals(LOGIN_TYPE_PARAM)) {
@@ -536,4 +539,9 @@ public class PropertyHandler {
 
   public boolean isClassroomMode() { return classroomMode; }
   public boolean showSpectrogram() { return spectrogram; }
+
+  public boolean isCombinedMode() {
+    return combinedMode;
+  }
+
 }
