@@ -53,16 +53,14 @@ import java.util.Map;
  * Time: 8:50 PM
  * To change this template use File | Settings | File Templates.
  */
-public class Navigation implements RequiresResize {
+public class Navigation extends TabContainer implements RequiresResize {
   private static final String CHAPTERS = "Chapters";
   private static final String YOUR_LISTS = "Your Lists";
-  private static final String PRACTICE = "Practice";
   public static final String REVIEW = "review";
   public static final String COMMENT = "comment";
   private static final String ADD__OR_EDIT_ITEM = "Add/Edit Item";
   public static final String ITEMS_TO_REVIEW = "Items to review";
   public static final String ITEMS_WITH_COMMENTS = "Items with comments";
-  public static final String LEARN_PRONUNCIATION = "Learn Pronunciation";
   private final ExerciseController controller;
   private LangTestDatabaseAsync service;
   private UserManager userManager;
@@ -87,26 +85,7 @@ public class Navigation implements RequiresResize {
     reviewItem = new ReviewEditItem<UserExercise>(service, userManager, controller, listInterface, feedback, npfHelper);
   }
 
-  /**
-   * @return
-   * @param secondAndThird
-   * @see mitll.langtest.client.LangTest#onModuleLoad2
-   */
-  public Widget getNav(final Panel secondAndThird) {
-    Panel container = new FlowPanel();
-    container.getElement().setId("getNav_container");
-    Panel buttonRow = getButtonRow2(secondAndThird);
-    buttonRow.getElement().setId("getNav_buttonRow");
-
-    container.add(buttonRow);
-    this.container = container;
-    return container;
-  }
-
-  public Widget getContainer() { return container; }
-
-  private Widget container;
-  private TabPanel tabPanel;
+  //private TabPanel tabPanel;
   private Tab yourItems;
   private Panel yourItemsContent;
   private TabAndContent browse;
@@ -117,42 +96,47 @@ public class Navigation implements RequiresResize {
    * @param secondAndThird
    * @return
    */
-  private Panel getButtonRow2(Panel secondAndThird) {
+  protected Panel getButtonRow2(Panel secondAndThird) {
     tabPanel = new TabPanel();
 
+    boolean combinedMode = controller.getProps().isCombinedMode();
+
     // your list tab
-    final TabAndContent yourStuff = makeTab(tabPanel, IconType.FOLDER_CLOSE, YOUR_LISTS);
-    yourItems = yourStuff.tab;
-    yourItemsContent = yourStuff.content;
-    yourItems.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        refreshViewLessons();
-      }
-    });
-    refreshViewLessons();
+    if (!combinedMode) {
+      final TabAndContent yourStuff = makeTab(tabPanel, IconType.FOLDER_CLOSE, YOUR_LISTS);
+      yourItems = yourStuff.tab;
+      yourItemsContent = yourStuff.content;
+      yourItems.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          refreshViewLessons();
+        }
+      });
+      refreshViewLessons();
 
-    // create tab
-    final TabAndContent create = makeTab(tabPanel, IconType.PLUS_SIGN, "Create");
-    final CreateListDialog createListDialog = new CreateListDialog(this,service,userManager);
-    create.tab.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        createListDialog.doCreate(create.content);
-      }
-    });
 
-    // browse tab
-    browse = makeTab(tabPanel, IconType.TH_LIST, "Browse");
-    browse.tab.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        viewBrowse();
-      }
-    });
+      // create tab
+      final TabAndContent create = makeTab(tabPanel, IconType.PLUS_SIGN, "Create");
+      final CreateListDialog createListDialog = new CreateListDialog(this, service, userManager);
+      create.tab.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          createListDialog.doCreate(create.content);
+        }
+      });
+
+      // browse tab
+      browse = makeTab(tabPanel, IconType.TH_LIST, "Browse");
+      browse.tab.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          viewBrowse();
+        }
+      });
+    }
 
     // chapter tab
-    final TabAndContent chapters = makeTab(tabPanel, IconType.TH_LIST, CHAPTERS);
+    final TabAndContent chapters = makeTab(tabPanel, combinedMode ? IconType.LIGHTBULB : IconType.TH_LIST, !combinedMode ? CHAPTERS : LEARN_PRONUNCIATION);
     chapters.content.add(secondAndThird);
 
     if (controller.isReviewMode()) {
@@ -197,38 +181,13 @@ public class Navigation implements RequiresResize {
     return tabPanel;    // TODO - consider how to tell panels when they are hidden by tab changes
   }
 
-  private TabAndContent makeTab(TabPanel toAddTo, IconType iconType, String label) {
-    Tab create = new Tab();
-    create.setIcon(iconType);
-    create.setHeading(label);
-    toAddTo.add(create.asTabLink());
-    final FluidContainer createContent = new FluidContainer();
-    create.add(createContent);
-    zeroPadding(createContent);
-    return new TabAndContent(create, createContent);
-  }
-
-  void zeroPadding(Panel createContent) {
-    DOM.setStyleAttribute(createContent.getElement(), "paddingLeft", "0px");
-    DOM.setStyleAttribute(createContent.getElement(), "paddingRight", "0px");
-  }
-
-  public static class TabAndContent {
-    public Tab tab;
-    public FluidContainer content;
-
-    public TabAndContent(Tab tab, FluidContainer panel) {
-      this.tab = tab;
-      this.content = panel;
-    }
-  }
-
   /**
    * @see #getButtonRow2(com.google.gwt.user.client.ui.Panel)
    * @see #showMyLists()
    */
   private void refreshViewLessons() { viewLessons(yourItemsContent, false);  }
 
+  @Override
   public void showInitialState() {
 /*    System.out.println("showInitialState show initial state for " + userManager.getUser() +
       " : getting user lists " + controller.isReviewMode());*/
@@ -331,11 +290,9 @@ public class Navigation implements RequiresResize {
     final Panel child = new DivWidget();
     contentPanel.add(child);
     child.addStyleName("exerciseBackground");
-    //System.out.println("\nviewReview : reviewLessons for " + userManager.getUser());
     service.getCommentedList(new AsyncCallback<UserList>() {
       @Override
-      public void onFailure(Throwable caught) {
-      }
+      public void onFailure(Throwable caught) {}
 
       @Override
       public void onSuccess(UserList result) {
@@ -382,21 +339,14 @@ public class Navigation implements RequiresResize {
     String subtext = ul.getDescription() + " " + ul.getClassMarker();
     Heading widgets = new Heading(1, ul.getName(), subtext);    // TODO : better color for subtext h1->small
 
-    //r1.add(new Column(6, widgets));
     r1.add(widgets);
     widgets.addStyleName("floatLeft");
     widgets.addStyleName("leftFiveMargin");
     HTML itemMarker = new HTML(ul.getExercises().size() + " items");
     listToMarker.put(ul,itemMarker);
-    //itemMarker.addStyleName("subtitleForeground");
-   // r1.add(new Column(3, itemMarker));
 
     boolean created = createdByYou(ul) || instanceName.equals(REVIEW) || instanceName.equals(COMMENT);
-/*    if (created && SHOW_CREATED) {
-      child = new FluidRow();
-      container.add(child);
-      child.add(new Heading(3, "<b>Created by you.</b>"));
-    }*/
+
     TabPanel listOperations = getListOperations(ul, created, instanceName);
     container.add(listOperations);
 
@@ -687,12 +637,6 @@ public class Navigation implements RequiresResize {
       container.add(r2);
       r2.add(getUserListText2(ul.getDescription()));
     }
-
-   // if (yourList) {
-   /*   r1 = new FluidRow();
-      container.add(r1);
-      r1.add(new HTML("<b>Created by you.</b>"));*/
-   // }
   }
 
   private Widget makeItemMarker2(UserList ul) {
