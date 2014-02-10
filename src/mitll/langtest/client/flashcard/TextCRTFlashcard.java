@@ -1,5 +1,6 @@
 package mitll.langtest.client.flashcard;
 
+import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.NavigationHelper;
@@ -42,7 +43,7 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
 
   @Override
   protected void addRecordingAndFeedbackWidgets(Exercise e, LangTestDatabaseAsync service, ExerciseController controller,
-                                                int feedbackHeight) {
+                                                int feedbackHeight, Panel toAddTo) {
     textResponse.addWidgets(this, e, service, controller, true, false, true, 1);
   }
 
