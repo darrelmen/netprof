@@ -9,7 +9,6 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ResponseChoice;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 
 /**

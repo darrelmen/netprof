@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseQuestionState;
@@ -41,7 +42,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
   private static final String PRONUNCIATION_SCORE = "Pronunciation score ";
 
   private static final String WAV = ".wav";
-  private static final String MP3 = ".mp3";
+  private static final String MP3 = "." + AudioTag.COMPRESSED_TYPE;
 
   private final boolean isDemoMode;
 
