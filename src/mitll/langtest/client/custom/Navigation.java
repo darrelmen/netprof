@@ -182,7 +182,7 @@ public class Navigation implements RequiresResize {
             " ' target name '" + showEvent.getTarget().getName() + "'");*/
         String targetName = showEvent.getTarget() == null ? "" : showEvent.getTarget().toString();
 
-        System.out.println("getButtonRow2 : got shown event : '" +showEvent + "' target '" + targetName + "'");
+        //System.out.println("getButtonRow2 : got shown event : '" +showEvent + "' target '" + targetName + "'");
 
         boolean wasChapters = targetName.contains(CHAPTERS);
         Panel createdPanel = listInterface.getCreatedPanel();
@@ -194,15 +194,7 @@ public class Navigation implements RequiresResize {
       }
     });
 
-/*    tabPanel.addShowHandler(new TabPanel.ShowEvent.Handler() {
-      @Override
-      public void onShow(TabPanel.ShowEvent showEvent) {
-        System.out.println("onShow : got shown event : '" +showEvent + "' target '" + targetName + "'");
-
-      }
-    });*/
-
-    return tabPanel;
+    return tabPanel;    // TODO - consider how to tell panels when they are hidden by tab changes
   }
 
   private TabAndContent makeTab(TabPanel toAddTo, IconType iconType, String label) {
@@ -634,12 +626,39 @@ public class Navigation implements RequiresResize {
 
     Heading h4 = new Heading(4,name,ul.getExercises().size() + " items");
     h4.addStyleName("floatLeft");
-    boolean yourList = isYourList(ul);
   //  if (!ul.isFavorite()) h4.addStyleName("niceBlue");
   //  if (yourList) h4.addStyleName("niceBlue");
 
     r1.add(h4);
 
+    h4 = new Heading(4,"",ul.getDescription()+",");
+    h4.addStyleName("floatLeft");
+    h4.addStyleName("leftFiveMargin");
+    h4.getElement().setId("desc");
+    //h4.addStyleName("listSubtitle");
+
+    //Widget widget = h4.getWidget(0);
+   // System.out.println("small is " + widget);
+   // DOM.setStyleAttribute(widget.getElement(), "color", "#333333");
+
+    //  if (!ul.isFavorite()) h4.addStyleName("niceBlue");
+    //  if (yourList) h4.addStyleName("niceBlue");
+
+    r1.add(h4);
+    h4 = new Heading(4,"",ul.getClassMarker());
+    h4.addStyleName("floatLeft");
+    h4.addStyleName("leftFiveMargin");
+    h4.getElement().setId("course");
+
+    //h4.addStyleName("listSubtitle");
+
+    //  if (!ul.isFavorite()) h4.addStyleName("niceBlue");
+    //  if (yourList) h4.addStyleName("niceBlue");
+
+    r1.add(h4);
+
+
+    boolean yourList = isYourList(ul);
     if (yourList) {
       Button deleteButton = makeDeleteButton(ul);
       deleteButton.addStyleName("floatRight");
