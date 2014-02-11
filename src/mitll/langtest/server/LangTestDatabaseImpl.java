@@ -6,6 +6,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.io.Files;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
@@ -774,7 +775,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private String getWavAudioFile(String audioFile) {
-    if (audioFile.endsWith(".mp3")) {
+    if (audioFile.endsWith("." +
+        AudioTag.COMPRESSED_TYPE)) {
       String wavFile = removeSuffix(audioFile) +".wav";
       File test = pathHelper.getAbsoluteFile(wavFile);
       audioFile = test.exists() ? test.getAbsolutePath() : audioFileHelper.getWavForMP3(audioFile);
@@ -1059,15 +1061,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * @see mitll.langtest.client.custom.NewUserExercise.CreateFirstRecordAudioPanel#makePostAudioRecordButton()
    * @param userid
-   * @param english
-   * @param foreign
-   * @param transliteration
    * @return
    */
-  public UserExercise createNewItem(long userid, String english, String foreign, String transliteration) {
-    logger.debug("create new item - " + foreign);
+  public UserExercise createNewItem(long userid) {
+  //  logger.debug("create new item - " + foreign);
    // if (!isValidForeignPhrase(foreign)) return null;
-    return db.getUserListManager().createNewItem(userid, english, foreign, transliteration);
+    return db.getUserListManager().createNewItem(userid);//, english, foreign, transliteration);
   }
 
   @Override
@@ -1085,7 +1084,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public UserExercise reallyCreateNewItem(long userListID, UserExercise userExercise) {
     db.getUserListManager().reallyCreateNewItem(userListID, userExercise);
-    db.getUserListManager().editItem(userExercise, false);
+    //db.getUserListManager().editItem(userExercise, false);
     logger.debug("reallyCreateNewItem : made user exercise " + userExercise);
 
     return userExercise;
