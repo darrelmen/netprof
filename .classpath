@@ -27,17 +27,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/imagewriter"/>
 	<classpathentry kind="lib" path="gwt/validation-api-1.0.0.GA-sources.jar"/>
 	<classpathentry kind="lib" path="gwt/validation-api-1.0.0.GA.jar"/>
-	<classpathentry kind="lib" path="C:/Users/go22670/gwt-2.5.1/gwt-user.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="file:/C:/Users/go22670/gwt-2.5.1/doc/javadoc/"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/go22670/gwt-2.5.1/gwt-dev.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="file:/C:/Users/go22670/gwt-2.5.1/doc/javadoc/"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/go22670/gwt-2.5.1/validation-api-1.0.0.GA-sources.jar"/>
-	<classpathentry kind="lib" path="C:/Users/go22670/gwt-2.5.1/validation-api-1.0.0.GA.jar" sourcepath="C:/Users/go22670/gwt-2.5.1/validation-api-1.0.0.GA-sources.jar"/>
+	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
