@@ -65,6 +65,14 @@ public class RecordAudioPanel extends AudioPanel {
     return playAudioPanel;
   }
 
+  public void clickStop() {
+    postAudioRecordButton.clickStop();
+  }
+
+  public boolean isRecording() {
+    return postAudioRecordButton.isRecording();
+  }
+
   protected WaveformPostAudioRecordButton makePostAudioRecordButton() {
     return new WaveformPostAudioRecordButton(exercise, controller, exercisePanel, this, service, index, true) {
       @Override
@@ -89,7 +97,14 @@ public class RecordAudioPanel extends AudioPanel {
   protected void showStop() {
     recordImage1.setVisible(false);
     recordImage2.setVisible(false);
+    if (stopListener != null) stopListener.stopped();
   }
+  private StopListener stopListener = null;
+
+  public void addStopListener(StopListener stopListener) { this.stopListener = stopListener;}
+  public void removeStopListener() { stopListener = null; }
+
+  public static interface StopListener { public void stopped(); }
 
   protected void showStart() {
     recordImage1.setVisible(true);
@@ -103,7 +118,7 @@ public class RecordAudioPanel extends AudioPanel {
   public Button getButton() { return postAudioRecordButton; }
 
   public void setEnabled(boolean val) {
-    System.out.println("RecordAudioPanel.setEnabled " + val);
+    //System.out.println("RecordAudioPanel.setEnabled " + val);
     postAudioRecordButton.setEnabled(val);
     if (postAudioRecordButton.hasValidAudio()) playAudioPanel.setEnabled(val);
   }
