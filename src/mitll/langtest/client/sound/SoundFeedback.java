@@ -27,6 +27,9 @@ public class SoundFeedback {
     });
   }
 
+  /**
+   * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#showIncorrectFeedback(mitll.langtest.shared.AudioAnswer, double, boolean)
+   */
   public void playIncorrect() {
     startSong("langtest/sounds/incorrect1.mp3", new EndListener() {
       @Override
@@ -48,10 +51,14 @@ public class SoundFeedback {
     }
   }
 
-  /**
-   * @param song
-   * @see #startSong
-   */
+  public void createSound(final String song) { createSound(song, null); }
+
+    /**
+     * @param song
+     * @see #startSong
+     * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#playAllAudio(String, java.util.List)
+     * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#playRefAndGoToNext(String, String)
+     */
   public void createSound(final String song, final EndListener endListener) {
     currentSound = new Sound(new AudioControl() {
       @Override
@@ -66,7 +73,7 @@ public class SoundFeedback {
       @Override
       public void songFinished() {
         destroySound();
-        endListener.songEnded();
+        if (endListener != null) endListener.songEnded();
       }
 
       @Override
