@@ -47,7 +47,6 @@ public class RecordButton extends Button {
   public RecordButton(int delay, boolean doClickAndHold, boolean addKeyBinding) {
     super(RECORD);
     this.doClickAndHold = doClickAndHold;
-    //if (doClickAndHold) setText("Click and hold to record");
     this.autoStopDelay = delay;
     setType(ButtonType.PRIMARY);
     setupRecordButton(addKeyBinding);
@@ -65,6 +64,19 @@ public class RecordButton extends Button {
   }
 
   protected void removeImage() {  StyleHelper.removeStyle(icon, icon.getBaseIconType());  }
+
+  public boolean isRecording() {
+    return recording;
+  }
+
+  public void clickStop() {
+    if (isRecording()) {
+      fireEvent(new ButtonClickEvent());
+    }
+  }
+
+  /*To call click() function for Programmatic equivalent of the user clicking the button.*/
+  private class ButtonClickEvent extends ClickEvent {}
 
   /**
    * @see #RecordButton(int, mitll.langtest.client.recorder.RecordButton.RecordingListener, boolean)
@@ -111,7 +123,7 @@ public class RecordButton extends Button {
   }
 
   private void startOrStopRecording() {
-    if (recording) {
+    if (isRecording()) {
       cancelTimer();
       stop();
     } else {
@@ -192,7 +204,7 @@ public class RecordButton extends Button {
     recordTimer = new Timer() {
       @Override
       public void run() {
-        if (recording) {
+        if (isRecording()) {
           stop();
         }
       }
