@@ -87,7 +87,7 @@ public class Combined extends TabContainer {
     listInterface1.setFactory(new MyFlashcardExercisePanelFactory(service, feedback, controller, listInterface1), userManager, 1);
 
     if (controller.gotMicPermission()) {
-      listInterface1.getExercises(controller.getUser(),true);
+      listInterface1.getExercises(controller.getUser(), true);
     }
 
     // so we can know when chapters is revealed and tell it to update it's lists
