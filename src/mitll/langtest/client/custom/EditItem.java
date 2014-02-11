@@ -187,17 +187,57 @@ public class EditItem<T extends ExerciseShell> {
     npfExerciseList.rememberAndLoadFirst(userExercises);
   }
 
-  private void populatePanel(UserExercise exercise, Panel right, UserList ul, UserList originalList, HasText itemMarker,
-                             ListInterface<T> pagingContainer) {
-    NewUserExercise<T> editableExercise = getAddOrEditPanel(exercise, itemMarker, originalList);
-    right.add(editableExercise.addNew(ul, originalList, pagingContainer, right));
-    editableExercise.setFields();
+  private UserExercise newExercise;
+
+  private void populatePanel(UserExercise exercise, final Panel right, final UserList ul, final UserList originalList, final HasText itemMarker,
+                             final ListInterface<T> pagingContainer) {
+    if (exercise.getID().equals(NEW_EXERCISE_ID)) {
+      if (newExercise == null) {
+        System.out.println("\n\npopulatePanel: make new item ");
+
+        newExercise = createNewItem(userManager.getUser());
+        addEditOrAddPanel(newExercise, itemMarker, originalList, right, ul, pagingContainer, true, false);
+
+      } else {
+        addEditOrAddPanel(newExercise, itemMarker, originalList, right, ul, pagingContainer, true, true);
+      }
+    } else {
+      addEditOrAddPanel(exercise, itemMarker, originalList, right, ul, pagingContainer, false, true);
+    }
   }
 
-  protected NewUserExercise<T> getAddOrEditPanel(UserExercise exercise, HasText itemMarker, UserList originalList) {
+  public UserExercise createNewItem(long userid) {
+    return new UserExercise(-1, UserExercise.CUSTOM_PREFIX+Long.MAX_VALUE, userid, "", "", "");
+  }
+
+  protected void addEditOrAddPanel(UserExercise newExercise, HasText itemMarker, UserList originalList,
+                                   Panel right, UserList ul, ListInterface<T> pagingContainer, boolean doNewExercise, boolean setFields) {
+
+    //System.out.println("\taddEditOrAddPanel: for item  " + newExercise);
+
+    NewUserExercise<T> editableExercise = getAddOrEditPanel(newExercise, itemMarker, originalList, doNewExercise);
+    right.add(editableExercise.addNew(ul, originalList, pagingContainer, right));
+    if (setFields) editableExercise.setFields(newExercise);
+  }
+
+  public void clearNewExercise() {
+    this.newExercise = null;
+    System.out.println("\tclearNewExercise: ----> ");
+
+  }
+
+  /**
+   * @see #populatePanel(mitll.langtest.shared.custom.UserExercise, com.google.gwt.user.client.ui.Panel, mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.HasText, mitll.langtest.client.list.ListInterface)
+   * @param exercise
+   * @param itemMarker
+   * @param originalList
+   * @param doNewExercise
+   * @return
+   */
+  protected NewUserExercise<T> getAddOrEditPanel(UserExercise exercise, HasText itemMarker, UserList originalList, boolean doNewExercise) {
     NewUserExercise<T> editableExercise;
-    if (exercise.getID().equals(NEW_EXERCISE_ID)) {
-      editableExercise = new NewUserExercise<T>(service, userManager, controller, itemMarker);
+    if (doNewExercise) {//exercise.getID().equals(NEW_EXERCISE_ID)) {
+      editableExercise = new NewUserExercise<T>(service, controller, itemMarker, this, exercise);
     } else {
       editableExercise = new EditableExercise(itemMarker, exercise, originalList);
     }
@@ -219,14 +259,15 @@ public class EditItem<T extends ExerciseShell> {
      * @param itemMarker
      * @param changedUserExercise
      * @param originalList
-     * @seex EditItem#editItem(mitll.langtest.shared.custom.UserExercise, com.google.gwt.user.client.ui.SimplePanel, mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.HTML, mitll.langtest.shared.custom.UserExercise)
+     * @see #getAddOrEditPanel(mitll.langtest.shared.custom.UserExercise, com.google.gwt.user.client.ui.HasText, mitll.langtest.shared.custom.UserList, boolean)
      */
     public EditableExercise(HasText itemMarker, UserExercise changedUserExercise, UserList originalList) {
-      super(EditItem.this.service, EditItem.this.userManager, EditItem.this.controller, itemMarker);
-      this.newUserExercise = changedUserExercise;
+      super(EditItem.this.service, EditItem.this.controller, itemMarker, EditItem.this, changedUserExercise);
       fastAnno.addStyleName("editComment");
       slowAnno.addStyleName("editComment");
       this.originalList = originalList;
+      System.out.println("\n\n--->  making EditableExercise");
+
     }
 
     @Override
@@ -350,14 +391,18 @@ public class EditItem<T extends ExerciseShell> {
 
     @Override
     protected ControlGroup makeRegularAudioPanel(Panel row) {
-      rap = makeRecordAudioPanel(row, english, foreignLang, true);
+      rap = makeRecordAudioPanel(row,
+          //english, foreignLang,
+          true);
       fastAnno.addStyleName("topFiveMargin");
       return addControlGroupEntry(row, "Normal speed reference recording", rap, fastAnno);
     }
 
     @Override
     protected void makeSlowAudioPanel(Panel row) {
-      rapSlow = makeRecordAudioPanel(row, english, foreignLang, false);
+      rapSlow = makeRecordAudioPanel(row,
+          //english, foreignLang,
+          false);
       slowAnno.addStyleName("topFiveMargin");
 
       addControlGroupEntry(row, "Slow speed reference recording (optional)", rapSlow, slowAnno);
@@ -453,7 +498,6 @@ public class EditItem<T extends ExerciseShell> {
 
         @Override
         public void onSuccess(Void newExercise) {
-          //  System.out.println("\treallyChange : " + newUserExercise.getID() + " button " + buttonName);
           doAfterEditComplete(pagingContainer);
         }
       });
@@ -482,10 +526,10 @@ public class EditItem<T extends ExerciseShell> {
     private String originalTransliteration;
 
     /**
-     * @see EditItem#populatePanel
-     * @see EditItem#populatePanel
+     * @see #populatePanel
+     * @param newUserExercise
      */
-    protected void setFields() {
+    protected void setFields(UserExercise newUserExercise) {
       System.out.println("setFields : setting fields with " + newUserExercise);
 
       // english
