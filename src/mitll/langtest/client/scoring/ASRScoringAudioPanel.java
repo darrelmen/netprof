@@ -30,7 +30,7 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
    */
   public ASRScoringAudioPanel(LangTestDatabaseAsync service,
                               int numRepeats, ExerciseController controller, ScoreListener gaugePanel) {
-    super(service, numRepeats, controller, gaugePanel);
+    super(service, controller, gaugePanel);
   }
 
   /**
@@ -45,7 +45,7 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
    */
   public ASRScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
                               ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin) {
-    super(path, refSentence, service, controller.getSegmentRepeats(), controller, showSpectrogram, gaugePanel, rightMargin);
+    super(path, refSentence, service, controller, showSpectrogram, gaugePanel, rightMargin);
     this.useScoreToColorBkg = controller.useBkgColorForRef();
   }
 
