@@ -44,7 +44,6 @@ public class ScoreFeedback {
   public FluidRow getScoreFeedbackRow(int height, boolean useShortWidth) {
     this.useShortWidth = useShortWidth;
 
-
     System.out.println("getScoreFeedbackRow mode " + useShortWidth);
 
     FluidRow feedbackRow = new FluidRow();
