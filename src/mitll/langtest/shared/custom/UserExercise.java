@@ -51,7 +51,7 @@ public class UserExercise extends AudioExercise {
    */
   public UserExercise(long uniqueID, String exerciseID, long creator, String english, String foreignLanguage,
                       String transliteration) {
-    super(exerciseID,english.isEmpty() ? foreignLanguage : english);
+    super(exerciseID,english.trim().isEmpty() ? foreignLanguage : english);
     this.creator = creator;
     this.uniqueID = uniqueID;
     this.english = english;
@@ -85,7 +85,7 @@ public class UserExercise extends AudioExercise {
      * @param exercise
      */
   public UserExercise(Exercise exercise) {
-    super(exercise.getID(), exercise.getEnglishSentence().isEmpty() ? exercise.getRefSentence() : exercise.getEnglishSentence());
+    super(exercise.getID(), exercise.getEnglishSentence().trim().isEmpty() ? exercise.getRefSentence() : exercise.getEnglishSentence());
 
     this.isPredef = true;
     this.english = exercise.getEnglishSentence();
@@ -101,7 +101,7 @@ public class UserExercise extends AudioExercise {
    * @return
    */
   public Exercise toExercise() {
-    String tooltip = getEnglish().isEmpty() ? getForeignLanguage() : getEnglish();
+    String tooltip = getEnglish().trim().isEmpty() ? getForeignLanguage() : getEnglish();
     Exercise exercise = new Exercise("plan", getID(), getEnglish(), getRefAudio(), getForeignLanguage(), tooltip);
     exercise.setTranslitSentence(getTransliteration());
     exercise.setSlowRefAudio(getSlowAudioRef());
@@ -118,7 +118,7 @@ public class UserExercise extends AudioExercise {
    */
   public Exercise toExercise(String language) {
     String content = ExerciseFormatter.getContent(getForeignLanguage(), "", english, "", language);
-    String tooltip = english.isEmpty() ? getForeignLanguage() : english;
+    String tooltip = english.trim().isEmpty() ? getForeignLanguage() : english;
     Exercise imported = new Exercise("import", id, content, false, true, tooltip);
     if (getRefAudio() != null)
       imported.setRefAudio(getRefAudio());
