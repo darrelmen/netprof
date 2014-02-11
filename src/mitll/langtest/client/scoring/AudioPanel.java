@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.sound.PlayAudioPanel;
@@ -45,7 +46,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   public static final String WAVEFORM_TOOLTIP = "The waveform should only be used to determine when periods of silence" +
     " and speech occur, or whether the mic is working properly.";
   private static final String WAV = ".wav";
-  private static final String MP3 = ".mp3";
+  private static final String MP3 = "." + AudioTag.COMPRESSED_TYPE;
 
   private static final boolean WARN_ABOUT_MISSING_AUDIO = false;
   private static final int WINDOW_SIZE_CHANGE_THRESHOLD = 50;
@@ -76,7 +77,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private static final boolean DEBUG_GET_IMAGES = false;
 
   /**
-   * @see ScoringAudioPanel#ScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, int, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener, int)
+   * @see ScoringAudioPanel#ScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener, int)
    * @param service
    * @param showSpectrogram
    * @param gaugePanel
@@ -258,6 +259,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       System.err.println("bad segment " + start + "-" + end);
     }
     else {
+      System.out.println("playSegment segment " + start + "-" + end);
+
       playAudio.repeatSegment(start,end);
     }
   }
