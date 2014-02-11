@@ -146,14 +146,13 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   // --- playing audio ---
 
   /**
-   * Repeat the segment 2 or 3 times, depending on length
    * @see mitll.langtest.client.scoring.AudioPanel#playSegment
-   * @param start
-   * @param end
+   * @param startInSeconds
+   * @param endInSeconds
    */
-  public void repeatSegment(float start, float end) {
+  public void repeatSegment(float startInSeconds, float endInSeconds) {
     setPlayButtonText();
-    playSegment(start,end);
+    playSegment(startInSeconds,endInSeconds);
   }
 
   /**
@@ -169,6 +168,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
       int s = (int) start1;
       int e = (int) end1;
 
+      System.out.println("playing from " + s + " to " + e);
       soundManager.playInterval(currentSound, s, e);
     }
   }
