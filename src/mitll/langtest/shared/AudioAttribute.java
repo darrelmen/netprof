@@ -3,7 +3,6 @@ package mitll.langtest.shared;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
