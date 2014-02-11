@@ -14,8 +14,8 @@ class AudioPositionPopup implements AudioControl {
 
   private PopupPanel imageOverlay;
   private float durationInMillis;
-  private static final boolean debugPartial = false;
-  private static final boolean debug = false;
+  private static final boolean debugPartial = true;
+  private static final boolean debug = true;
   private Panel imageContainer;
 
   /**
@@ -35,9 +35,9 @@ class AudioPositionPopup implements AudioControl {
    * @see mitll.langtest.client.scoring.AudioPanel#getImageURLForAudio(String, String, int, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck)
    */
   public void reinitialize(double durationInSeconds) {
-    if (debugPartial) System.out.println(this + "  : AudioPositionPopup.reinitialize dur = " + durationInSeconds);
 
     setWavDurationInSeconds(durationInSeconds);
+    if (debugPartial) System.out.println(this + "  : AudioPositionPopup.reinitialize dur = " + durationInSeconds + "/" + durationInMillis);
     reinitialize();
   }
 
@@ -102,14 +102,17 @@ class AudioPositionPopup implements AudioControl {
   private void showAt(double positionInMillis) {
     setHeightFromContainer();
 
-    float horizontalFraction = (float) positionInMillis / durationInMillis;
+    //positionInMillis -= (double)ScoringAudioPanel.MP3_HEADER_OFFSET;
+    float positionInMillisF = (float)positionInMillis - ScoringAudioPanel.MP3_HEADER_OFFSET*1000;
+    float horizontalFraction = positionInMillisF / durationInMillis;
     if (horizontalFraction > 1f) horizontalFraction = 1f;
     int pixelProgress = (int) (((float) imageContainer.getOffsetWidth()) * horizontalFraction);
     int left = imageContainer.getAbsoluteLeft() + pixelProgress;
     int top = imageContainer.getAbsoluteTop();
     imageOverlay.setPopupPosition(left, top);
 
-    if (debug) System.out.println(this + " showAt " + imageOverlay.isShowing() + " vis " + imageOverlay.isVisible() +
+    if (debug) System.out.println(this + " showAt " + positionInMillis+ "/" +positionInMillisF+
+        " millis " +imageOverlay.isShowing() + " vis " + imageOverlay.isVisible() +
         " x " + imageOverlay.getPopupLeft() + " y " + imageOverlay.getPopupTop() + " dim x " +
         imageOverlay.getOffsetWidth() + " y " + imageOverlay.getOffsetHeight());
   }
