@@ -6,7 +6,6 @@ import audio.image.TranscriptEvent;
 import audio.imagewriter.ImageWriter;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.io.Files;
 import corpus.HTKDictionary;
 import corpus.LTS;
 import mitll.langtest.server.LangTestDatabaseImpl;
@@ -48,6 +47,7 @@ import java.util.TreeSet;
  * To change this template use File | Settings | File Templates.
  */
 public class ASRScoring extends Scoring {
+  private static final double KEEP_THRESHOLD = 0.3;
   private static Logger logger = Logger.getLogger(ASRScoring.class);
   private static final boolean DEBUG = false;
 
@@ -67,11 +67,12 @@ public class ASRScoring extends Scoring {
   private final Cache<String, Scores> audioToScore;
   private ConfigFileCreator configFileCreator;
   private boolean isMandarin;
+
   /**
    * Normally we delete the tmp dir created by hydec, but if something went wrong, we want to keep it around.
    * If the score was below a threshold, or the magic -1, we keep it around for future study.
    */
-  private double lowScoreThresholdKeepTempDir = 0.3;
+  private double lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
@@ -94,7 +95,7 @@ public class ASRScoring extends Scoring {
    */
   private ASRScoring(String deployPath, Map<String, String> properties, HTKDictionary dict) {
     super(deployPath);
-    lowScoreThresholdKeepTempDir = 0.2;
+    lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
     audioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
 
     String language = properties.get("language") != null ? properties.get("language") : "";
