@@ -1,17 +1,15 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.shared.grade.Grader;
-import org.apache.log4j.Logger;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+
+import mitll.langtest.shared.grade.Grader;
+
+import org.apache.log4j.Logger;
 
 /**
  * @deprecated there are no graders, just users
