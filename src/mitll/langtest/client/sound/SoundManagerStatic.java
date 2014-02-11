@@ -9,9 +9,15 @@ package mitll.langtest.client.sound;
  */
 public class SoundManagerStatic implements SoundManagerAPI {
   private boolean debug = false;
-
+    boolean webaudio = false;
   public void initialize() {
     SoundManager.initialize();
+
+    boolean b = WebAudio.checkIfWebAudioInstalled();
+    if (b) {
+      System.out.println("got web audio!");
+      webaudio = true;
+    }
   }
 
   /**
@@ -48,6 +54,20 @@ public class SoundManagerStatic implements SoundManagerAPI {
   public void createSound(Sound sound, String title, String file) {
     if (debug) System.out.println("SoundManagerStatic.createSound " + sound);
     SoundManager.createSound(sound, title, file);
+
+    if (webaudio) {
+      WebAudio.setLoadedCallback(new WebAudio.Loaded() {
+        @Override
+        public void audioLoaded() {
+          System.out.println("got web audio loaded!");
+
+        }
+      });
+      WebAudio.loadSound(file);
+    }
+    else {
+
+    }
   }
 
   /**
