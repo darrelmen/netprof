@@ -1,6 +1,7 @@
 package mitll.langtest.server.audio;
 
 import com.google.common.io.Files;
+import mitll.langtest.client.AudioTag;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
@@ -219,7 +220,8 @@ public class AudioFileHelper {
   }
 
   private String removeSuffix(String audioFile) {
-    return audioFile.substring(0, audioFile.length() - ".mp3".length());
+    return audioFile.substring(0, audioFile.length() - ("." +
+        AudioTag.COMPRESSED_TYPE).length());
   }
 
   /**
@@ -228,7 +230,8 @@ public class AudioFileHelper {
    * @return
    */
   private String dealWithMP3Audio(String testAudioFile) {
-    if (testAudioFile.endsWith(".mp3")) {
+    if (testAudioFile.endsWith("." +
+        AudioTag.COMPRESSED_TYPE)) {
       String noSuffix = removeSuffix(testAudioFile);
       String wavFile = noSuffix +".wav";
       File test = pathHelper.getAbsoluteFile(wavFile);
