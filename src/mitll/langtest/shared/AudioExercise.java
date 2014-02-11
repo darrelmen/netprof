@@ -67,7 +67,7 @@ public class AudioExercise extends ExerciseShell {
   public boolean hasRefAudio() { return !audioAttributes.isEmpty(); }
 
   public Collection<AudioAttribute> getAudioAttributes() { return audioAttributes.values();  }
-  public void forgetAllAudio() { audioAttributes.clear(); }
+  //public void forgetAllAudio() { audioAttributes.clear(); }
 
   /**
    * @see mitll.langtest.server.database.custom.UserListManager#addAnnotations
