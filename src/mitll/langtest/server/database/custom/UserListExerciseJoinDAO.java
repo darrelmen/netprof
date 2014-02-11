@@ -1,16 +1,14 @@
 package mitll.langtest.server.database.custom;
 
-import mitll.langtest.server.database.DAO;
-import mitll.langtest.server.database.Database;
-import mitll.langtest.shared.custom.UserExercise;
-import mitll.langtest.shared.custom.UserList;
-import org.apache.log4j.Logger;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
+
+import mitll.langtest.server.database.DAO;
+import mitll.langtest.server.database.Database;
+import mitll.langtest.shared.custom.UserList;
+
+import org.apache.log4j.Logger;
 
 /**
  * Created with IntelliJ IDEA.
