@@ -1,10 +1,6 @@
 package mitll.langtest.client.custom;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.Column;
-import com.github.gwtbootstrap.client.ui.ControlGroup;
-import com.github.gwtbootstrap.client.ui.FluidContainer;
-import com.github.gwtbootstrap.client.ui.FluidRow;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.google.gwt.event.dom.client.BlurEvent;
@@ -16,7 +12,6 @@ import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -24,11 +19,10 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.user.BasicDialog;
-import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
@@ -43,12 +37,11 @@ import mitll.langtest.shared.custom.UserList;
 public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   private static final String FOREIGN_LANGUAGE = "Foreign Language";
   private static final String CREATE = "Create";
-  public static final boolean REQUIRE_ENGLISH = false;
   protected static final String ENGLISH_LABEL = "English (optional)";
-  protected UserExercise newUserExercise = null;
+  private final EditItem editItem;
+  protected final UserExercise newUserExercise;
   private final ExerciseController controller;
   protected final LangTestDatabaseAsync service;
-  private final UserManager userManager;
   private final HasText itemMarker;
   protected BasicDialog.FormField english;
   protected BasicDialog.FormField foreignLang;
@@ -56,29 +49,35 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   protected CreateFirstRecordAudioPanel rap;
   protected CreateFirstRecordAudioPanel rapSlow;
 
-  /**
-   * @see EditItem#getAddOrEditPanel
-   * @param service
-   * @param userManager
-   * @param controller
-   * @param itemMarker
-   */
-  public NewUserExercise(final LangTestDatabaseAsync service, final UserManager userManager,
-                         ExerciseController controller, HasText itemMarker) {
-    this.controller = controller;
-    this.service = service;
-    this.itemMarker = itemMarker;
-    this.userManager = userManager;
-  }
-
   private ControlGroup normalSpeedRecording;
   private UserList ul;
   private UserList originalList;
   private ListInterface<T> listInterface;
   private Panel toAddTo;
+  boolean clickedCreate = false;
+
+  /**
+   * @see EditItem#getAddOrEditPanel
+   * @param service
+   * @param controller
+   * @param itemMarker
+   * @param editItem
+   * @param newExercise
+   */
+  public NewUserExercise(final LangTestDatabaseAsync service,
+                         ExerciseController controller, HasText itemMarker, EditItem editItem, UserExercise newExercise) {
+    this.controller = controller;
+    this.service = service;
+    this.itemMarker = itemMarker;
+    this.editItem = editItem;
+    this.newUserExercise = newExercise;
+  }
+
 
   /**
    * @see #afterValidForeignPhrase(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel)
+   * @see EditItem#populatePanel(mitll.langtest.shared.custom.UserExercise, com.google.gwt.user.client.ui.Panel, mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.HasText, mitll.langtest.client.list.ListInterface)
+   *
    * @param ul
    * @param originalList
    * @param listInterface
@@ -105,8 +104,6 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     this.listInterface = listInterface;
     this.toAddTo = toAddTo;
     makeSlowAudioPanel(row);
-    //rap.setOtherRAP(rapSlow.getPostAudioButton());
-    //rapSlow.setOtherRAP(rap.getPostAudioButton());
 
     rap.setOtherRAP(rapSlow);
     rapSlow.setOtherRAP(rap);
@@ -142,20 +139,26 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
 
   protected void gotBlur(FormField english, FormField foreignLang, RecordAudioPanel rap,
                          ControlGroup normalSpeedRecording, UserList ul, ListInterface<T> pagingContainer,
-                         Panel toAddTo) {}
+                         Panel toAddTo) {
+    newUserExercise.setTransliteration(translit.getText());
+    newUserExercise.setForeignLanguage(foreignLang.getText());
+    newUserExercise.setEnglish(english.getText());
+  }
 
   protected ControlGroup makeRegularAudioPanel(Panel row) {
-    rap = makeRecordAudioPanel(row, english, foreignLang, true);
+    rap = makeRecordAudioPanel(row,
+        true);
     return addControlGroupEntry(row, "Normal speed reference recording", rap);
   }
 
   protected void makeSlowAudioPanel(Panel row) {
-    rapSlow = makeRecordAudioPanel(row, english, foreignLang, false);
+    rapSlow = makeRecordAudioPanel(row,
+        false);
     addControlGroupEntry(row, "Slow speed reference recording (optional)", rapSlow);
   }
 
   protected Panel makeEnglishRow(Panel container) {
-    FluidRow row = new FluidRow();
+    Panel row = new FluidRow();
     container.add(row);
     english = addControlFormField(row, ENGLISH_LABEL, false, 1);
 
@@ -163,19 +166,19 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   }
 
   protected FormField makeForeignLangRow(Panel container) {
-    FluidRow row = new FluidRow();
+    Panel row = new FluidRow();
     container.add(row);
-    foreignLang = addControlFormField(row, controller.getLanguage(),false,1);
+    foreignLang = addControlFormField(row, controller.getLanguage(), false, 1);
     foreignLang.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
     return foreignLang;
   }
 
   protected void makeTranslitRow(Panel container) {
-    FluidRow row = new FluidRow();
+    Panel row = new FluidRow();
     container.add(row);
     translit = addControlFormField(row, "Transliteration (optional)",false,0);
- //   translit.box.setDirectionEstimator(false);   // automatically detect whether text is RTL
   }
+
 /*
   private void focusOn(final FormField form) {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -185,7 +188,43 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     });
   }*/
 
-  protected void setFields() {}
+  protected void setFields(UserExercise newUserExercise) {
+    System.out.println("setFields : setting fields with " + newUserExercise);
+
+    // english
+    english.box.setText(newUserExercise.getEnglish());
+    ((TextBox) english.box).setVisibleLength(newUserExercise.getEnglish().length() + 4);
+    if (newUserExercise.getEnglish().length() > 20) {
+      english.box.setWidth("500px");
+    }
+
+    // foreign lang
+    String foreignLanguage = newUserExercise.getForeignLanguage();
+    foreignLanguage = foreignLanguage.trim();
+    foreignLang.box.setText(foreignLanguage);
+
+    // translit
+    translit.box.setText(newUserExercise.getTransliteration());
+
+    Exercise exercise = newUserExercise.toExercise();
+
+    // regular speed audio
+    rap.getPostAudioButton().setExercise(exercise);
+    String refAudio = exercise.getRefAudio();
+
+
+    if (refAudio != null) {
+      rap.getImagesForPath(refAudio);
+    }
+
+    // slow speed audio
+    rapSlow.getPostAudioButton().setExercise(exercise);
+    String slowAudioRef = exercise.getSlowAudioRef();
+
+    if (slowAudioRef != null) {
+      rapSlow.getImagesForPath(slowAudioRef);
+    }
+  }
 
   /**
    * @see #addNew
@@ -216,7 +255,30 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     submit.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        validateThenPost(english, foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo);
+        if (rap.isRecording()) {
+        /*  rap.addStopListener(new RecordAudioPanel.StopListener() {
+            @Override
+            public void stopped() {
+              rap.removeStopListener();
+              validateThenPost(english, foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo);
+            }
+          });*/
+          clickedCreate = true;
+          rap.clickStop();
+        } else if (rapSlow.isRecording()) {
+          /*rapSlow.addStopListener(new RecordAudioPanel.StopListener() {
+            @Override
+            public void stopped() {
+              rapSlow.removeStopListener();
+              validateThenPost(english, foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo);
+            }
+          });*/
+          clickedCreate = true;
+
+          rapSlow.clickStop();
+        } else {
+          validateThenPost(english, foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo);
+        }
       }
     });
     submit.addStyleName("rightFiveMargin");
@@ -269,45 +331,56 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
 
       @Override
       public void onSuccess(UserExercise newExercise) {
-        UserExercise newUserExercisePlaceholder = ul.remove(EditItem.NEW_EXERCISE_ID);
-        System.out.println("tooltip "+ newExercise.getTooltip());
-        ul.addExercise(newExercise);
-        originalList.addExercise(newExercise);
-        ul.addExercise(newUserExercisePlaceholder); // make sure the placeholder is always at the end
-        itemMarker.setText(ul.getExercises().size() + " items");
-
-        T toMoveToEnd = exerciseList.simpleRemove(EditItem.NEW_EXERCISE_ID);
-        exerciseList.addExercise((T)newExercise);  // TODO figure out better type safe way of doing this
-        exerciseList.addExercise(toMoveToEnd);
-        exerciseList.redraw();
-
-        exerciseList.checkAndAskServer(toMoveToEnd.getID());
-
-        toAddTo.clear();
-        toAddTo.add(addNew(ul, originalList, exerciseList, toAddTo));
-        newUserExercise = null;
+        afterItemCreated(newExercise, ul, exerciseList, toAddTo);
       }
     });
   }
 
-  protected CreateFirstRecordAudioPanel makeRecordAudioPanel(final Panel row, final FormField english,
-                                                           final FormField foreignLang,
+  protected void afterItemCreated(UserExercise newExercise, UserList ul, ListInterface<T> exerciseList, Panel toAddTo) {
+    editItem.clearNewExercise(); // success -- don't remember it
+
+    UserExercise newUserExercisePlaceholder = ul.remove(EditItem.NEW_EXERCISE_ID);
+    ul.addExercise(newExercise);
+    originalList.addExercise(newExercise);
+    ul.addExercise(newUserExercisePlaceholder); // make sure the placeholder is always at the end
+    itemMarker.setText(ul.getExercises().size() + " items");
+
+    T toMoveToEnd = exerciseList.simpleRemove(EditItem.NEW_EXERCISE_ID);
+    exerciseList.addExercise((T)newExercise);  // TODO figure out better type safe way of doing this
+    exerciseList.addExercise(toMoveToEnd);
+    exerciseList.redraw();
+
+    exerciseList.checkAndAskServer(toMoveToEnd.getID());
+
+    toAddTo.clear();
+    toAddTo.add(addNew(ul, originalList, exerciseList, toAddTo));
+  }
+
+  /**
+   * @see #makeRegularAudioPanel(com.google.gwt.user.client.ui.Panel)
+   * @param row
+   * @paramxx english
+   * @paramx foreignLang
+   * @param recordRegularSpeed
+   * @return
+   */
+  protected CreateFirstRecordAudioPanel makeRecordAudioPanel(
+                                                             final Panel row,
                                                            boolean recordRegularSpeed) {
-    return new CreateFirstRecordAudioPanel(row, english, foreignLang, recordRegularSpeed);
+    return new CreateFirstRecordAudioPanel(newUserExercise.toExercise(), row,
+        recordRegularSpeed);
   }
 
   protected class CreateFirstRecordAudioPanel extends RecordAudioPanel {
-    private final FormField english;
-    private final FormField foreignLang;
     boolean recordRegularSpeed = true;
     private RecordAudioPanel otherRAP;
     private WaveformPostAudioRecordButton postAudioButton;
 
-    public CreateFirstRecordAudioPanel(Panel row, FormField english, FormField foreignLang, boolean recordRegularSpeed) {
-      super(null, NewUserExercise.this.controller, row, NewUserExercise.this.service, 0, false);
-      this.english = english;
-      this.foreignLang = foreignLang;
+    public CreateFirstRecordAudioPanel(Exercise newExercise, Panel row,
+                                       boolean recordRegularSpeed) {
+      super(newExercise, NewUserExercise.this.controller, row, NewUserExercise.this.service, 0, false);
       this.recordRegularSpeed = recordRegularSpeed;
+      setExercise(newExercise);
 
       addPlayListener(new PlayListener() {
         @Override
@@ -317,8 +390,6 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
 
         @Override
         public void playStopped() {
-          System.out.println("CreateFirstRecordAudioPanel.playStopped on " + getElement().getId());
-
           otherRAP.setEnabled(true);
         }
       });
@@ -347,31 +418,9 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
           public void stopRecording() {
             otherRAP.setEnabled(true);
             showStop();
-            System.out.println("WaveformPostAudioRecordButton.stopRecording with newUserExercise " + newUserExercise + " and exercise " + exercise);
-            if (newUserExercise == null) {
-              // first we need to create an item to attach audio to it
-              NewUserExercise.this.service.createNewItem(userManager.getUser(), english.getText(), foreignLang.getText(),
-                "", new AsyncCallback<UserExercise>() {
-                @Override
-                public void onFailure(Throwable caught) { System.out.println("onFailure : stopRecording  " + caught); }
 
-                @Override
-                public void onSuccess(UserExercise newExercise) {
-                  newUserExercise = newExercise;
-                  System.out.println("\tonSuccess : stopRecording with newUserExercise " + newUserExercise);
+            super.stopRecording();
 
-                  exercise = newExercise.toExercise();
-                  otherRAP.setExercise(exercise);
-                  setExercise(exercise);
-                  stopRecording();
-                }
-              });
-            } else {
-              System.out.println("\t\tonSuccess : stopRecording with newUserExercise " + newUserExercise +
-                " and exercise " + exercise);
-
-              super.stopRecording();
-            }
           }
 
           @Override
@@ -395,21 +444,26 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
             } else {
               newUserExercise.setSlowRefAudio(result.path);
             }
-            System.out.println("newUserExercise " + newUserExercise + " path " + result.path);
             audioPosted();
           }
-      };
+
+          @Override
+          protected void useInvalidResult(AudioAnswer result) {
+            super.useInvalidResult(result);
+
+            if (recordRegularSpeed) {
+              newUserExercise.clearRefAudio();
+            } else {
+              newUserExercise.clearSlowRefAudio();
+            }
+
+            audioPosted();
+          }
+        };
       postAudioButton.getElement().setId("NewUserExercise_WaveformPostAudioRecordButton");
       return postAudioButton;
     }
 
-    /**
-     * @see #addNew(mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel)
-     * @param otherRAP
-     */
-/*    public void setOtherRAP(PostAudioRecordButton otherRAP) {
-      this.otherRAP = otherRAP;
-    }*/
     public void setOtherRAP(RecordAudioPanel otherRAP) {
       this.otherRAP = otherRAP;
     }
@@ -419,6 +473,8 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   }
 
   private void audioPosted() {
+    if (clickedCreate) validateThenPost(english, foreignLang, rap, normalSpeedRecording, ul, listInterface, toAddTo);
+
     gotBlur();
   }
 
@@ -438,9 +494,9 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     if (foreignLang.getText().isEmpty()) {
       markError(foreignLang, "Enter the foreign language phrase.");
       return false;
-    } else if (REQUIRE_ENGLISH && english.getText().isEmpty()) {
-      markError(english, "Enter an english word or phrase.");
-      return false;
+    //} else if (REQUIRE_ENGLISH && english.getText().isEmpty()) {
+    //  markError(english, "Enter an english word or phrase.");
+    //  return false;
     } else if (newUserExercise == null || newUserExercise.getRefAudio() == null) {
       System.out.println("validateForm : new user ex " + newUserExercise);
 
