@@ -31,6 +31,7 @@ import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.ExerciseShell;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -289,7 +290,9 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
           gotEmptyExerciseList();
         }
         if (id != null) {
-          rememberExercises(result.getExercises());
+          List<T> exercises = result.getExercises();
+          rememberExercises(exercises);
+          for (ListChangeListener<T> listener : listeners) listener.listChanged(exercises);
           pushFirstSelection(id);
         }
         else {
@@ -319,6 +322,8 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     System.out.println("ExerciseList : rememberAndLoadFirst remembering " + exercises.size() + " : first = " +firstExercise);
 
     rememberExercises(exercises);
+    for (ListChangeListener<T> listener : listeners) listener.listChanged(exercises);
+
     if (firstExercise != null) {
       T firstExerciseShell = findFirstExercise();
       if (firstExerciseShell.getID().equals(firstExercise.getID())) {
@@ -597,7 +602,10 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    */
   private int getIndex(String currentID) {
     T shell = byID(currentID);
-    return shell != null ? getRealIndex(shell) : -1;
+    int i = shell != null ? getRealIndex(shell) : -1;
+    System.out.println("getIndex " + currentID + " = " +i);
+
+    return i;
   }
 
   protected abstract int getRealIndex(T t);
@@ -651,7 +659,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    */
   @Override
   public <S extends ExerciseShell> boolean loadNextExercise(S current) {
-   // System.out.println("ExerciseList.loadNextExercise current is : " +current);
+    System.out.println("ExerciseList.loadNextExercise current is : " +current);
     String id = current.getID();
     int i = getIndex(id);
 
@@ -710,10 +718,11 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
 
   @Override
   public boolean loadPrev() { return loadPreviousExercise(getCurrentExercise()); }
+
   /**
    * @seex NavigationHelper#loadPreviousExercise
    * @param current
-   * @return
+   * @return true if on first
    */
   @Override
   public <S extends ExerciseShell> boolean loadPreviousExercise(S current) {
@@ -750,9 +759,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   public Widget getWidget() {   return this;  }
 
   @Override
-  public boolean onFirst() {
-    return onFirst(getCurrentExercise());
-  }
+  public boolean onFirst() {  return onFirst(getCurrentExercise());  }
 
   /**
    * @see mitll.langtest.client.exercise.NavigationHelper#makePrevButton
@@ -761,13 +768,20 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    */
   @Override
   public <S extends ExerciseShell> boolean onFirst(S current) {
-    //System.out.println("onFirst : of " +currentExercises.size() +", on first is " + current);
-    return current == null || getSize() == 1 || getIndex(current.getID()) == 0;
+    boolean b = current == null || getSize() == 1 || getIndex(current.getID()) == 0;
+    System.out.println("onFirst : of " +getSize() +", on checking " + current + " = " + b);
+    return b;
   }
+
+
+  public boolean onLast() { return onLast(getCurrentExercise());  }
 
   @Override
   public <S extends ExerciseShell> boolean onLast(S current) {
-    return current == null || getSize() == 1 || isOnLastItem(getIndex(current.getID()));
+
+    boolean b = current == null || getSize() == 1 || isOnLastItem(getIndex(current.getID()));
+    System.out.println("onLast : of " +getSize() +", on checking " + current + " = " + b);
+    return b;
   }
 
   private boolean isOnLastItem(int i) { return i == getSize() - 1;  }
@@ -775,4 +789,10 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   @Override
   public void reloadExercises() { loadFirstExercise();  }
   public void redraw() {}
+
+ private  List<ListChangeListener<T>> listeners = new ArrayList<ListChangeListener<T>>();
+  @Override
+  public void addListChangedListener(ListChangeListener<T> listener) {
+    listeners.add(listener);
+  }
 }
