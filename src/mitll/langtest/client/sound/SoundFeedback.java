@@ -24,7 +24,7 @@ public class SoundFeedback {
     startSong("langtest/sounds/correct4.mp3", new EndListener() {
       @Override
       public void songEnded() {}
-    });
+    }, false);
   }
 
   /**
@@ -34,16 +34,16 @@ public class SoundFeedback {
     startSong("langtest/sounds/incorrect1.mp3", new EndListener() {
       @Override
       public void songEnded() {}
-    });
+    }, true);
   }
 
 
-  private void startSong(String path, EndListener endListener) {
+  private void startSong(String path, EndListener endListener, boolean soft) {
     // System.out.println("PlayAudioPanel : start song : " + path);
     if (soundManager.isReady()) {
       if (soundManager.isOK()) {
         destroySound();
-        createSound(path, endListener);
+        createSound(path, endListener, soft);
       } else {
         System.out.println(new Date() + " Sound manager is not OK!.");
         warnNoFlash.setVisible(true);
@@ -51,15 +51,17 @@ public class SoundFeedback {
     }
   }
 
-  public void createSound(final String song) { createSound(song, null); }
+  public void createSound(final String song) { createSound(song, null, false); }
 
     /**
+     *
      * @param song
+     * @param soft
      * @see #startSong
      * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#playAllAudio(String, java.util.List)
      * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#playRefAndGoToNext(String, String)
      */
-  public void createSound(final String song, final EndListener endListener) {
+  public void createSound(final String song, final EndListener endListener, final boolean soft) {
     currentSound = new Sound(new AudioControl() {
       @Override
       public void reinitialize() {}
@@ -68,7 +70,14 @@ public class SoundFeedback {
       public void songFirstLoaded(double durationEstimate) {}
 
       @Override
-      public void songLoaded(double duration) { soundManager.play(currentSound); }
+      public void songLoaded(double duration) {
+        if (soft) {
+          System.out.println(new Date() + " setVolume !\n\n\n");
+
+          soundManager.setVolume(song,50);
+        }
+        soundManager.play(currentSound);
+      }
 
       @Override
       public void songFinished() {
@@ -79,7 +88,13 @@ public class SoundFeedback {
       @Override
       public void update(double position) {}
     });
-    soundManager.createSound(currentSound, song, song);
+
+/*    if (soft) {
+      soundManager.createSoftSound(currentSound, song, song);
+    }
+    else {*/
+      soundManager.createSound(currentSound, song, song);
+  //  }
   }
 
   private void destroySound() {
