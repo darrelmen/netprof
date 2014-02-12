@@ -4,7 +4,6 @@ import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
@@ -67,7 +66,7 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
    * @param controller
    * @return
    */
-  protected FlowPanel getCardPrompt(Exercise e, ExerciseController controller) {
+  protected Panel getCardPrompt(Exercise e, ExerciseController controller) {
     FluidRow questionRow = new FluidRow();
     Widget questionContent = new AudioExerciseContent().getQuestionContent(e, controller, true, true);
     Column contentContainer = new Column(8, questionContent);
