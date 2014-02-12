@@ -228,8 +228,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * @param exerciseID
    */
   protected void pushNewItem(String exerciseID) {
-    System.out.println("------------ ExerciseList.pushNewItem : (" + instance+
-      ") push history " + exerciseID + " -------------- ");
+    System.out.println("------------ ExerciseList.pushNewItem : (" + instance+ ") push history " + exerciseID + " - ");
     History.newItem("#item=" + exerciseID + ";instance="+instance);
   }
 
@@ -565,11 +564,11 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * @param result
    */
   public Panel makeExercisePanel(Exercise result) {
-    System.out.println("ExerciseList.makeExercisePanel : " +result);
+  //  System.out.println("ExerciseList.makeExercisePanel : " +result);
 
     Panel exercisePanel = factory.getExercisePanel(result);
     innerContainer.setWidget(exercisePanel);
-    innerContainer.getParent().addStyleName("shadowBorder");
+    //innerContainer.getParent().addStyleName("shadowBorder");
     return exercisePanel;
   }
 
@@ -583,7 +582,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * @param current
    */
   protected void getNextExercise(ExerciseShell current) {
-    System.out.println("ExerciseList.getNextExercise " + current);
+   // System.out.println("ExerciseList.getNextExercise " + current);
 
     int i = getIndex(current.getID());
     if (i == -1) {
@@ -603,7 +602,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   private int getIndex(String currentID) {
     T shell = byID(currentID);
     int i = shell != null ? getRealIndex(shell) : -1;
-    System.out.println("getIndex " + currentID + " = " +i);
+    //System.out.println("getIndex " + currentID + " = " +i);
 
     return i;
   }
