@@ -24,17 +24,17 @@ import mitll.langtest.shared.ExerciseShell;
  * Time: 1:37 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ExerciseListLayout {
+public class ExerciseListLayout<T extends ExerciseShell> {
   private final PropertyHandler props;
-  private ListInterface<? extends ExerciseShell> exerciseList;
+  private ListInterface<T> exerciseList;
 
   public ExerciseListLayout(PropertyHandler props) {
     this.props = props;
   }
 
-  public ListInterface<? extends ExerciseShell> makeFlashcardExerciseList(FluidContainer container, LangTestDatabaseAsync service,
+  public ListInterface<T> makeFlashcardExerciseList(FluidContainer container, LangTestDatabaseAsync service,
                                                  UserManager userManager) {
-    this.exerciseList = new BootstrapFlashcardExerciseList<Exercise>(container, service, userManager, props.isTimedGame(),
+    this.exerciseList = new BootstrapFlashcardExerciseList<T>(container, service, userManager, props.isTimedGame(),
       props.getGameTimeSeconds(), props);
     return exerciseList;
   }
@@ -44,7 +44,7 @@ public class ExerciseListLayout {
    *
    * @see LangTest#onModuleLoad2()
    */
-  public ListInterface<? extends ExerciseShell> makeExerciseList(FluidRow secondRow,
+  public ListInterface<T> makeExerciseList(FluidRow secondRow,
                                         Panel leftColumn, UserFeedback feedback,
                                         Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                         ExerciseController controller) {
@@ -77,7 +77,7 @@ public class ExerciseListLayout {
    * @param controller
    * @return
    */
-  private <T extends ExerciseShell> ListInterface<T> makeExerciseList(FluidRow secondRow, boolean isGrading, final UserFeedback feedback,
+  private ListInterface<T> makeExerciseList(FluidRow secondRow, boolean isGrading, final UserFeedback feedback,
                                          Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                          ExerciseController controller) {
     boolean showTypeAhead = !props.isCRTDataCollectMode();
