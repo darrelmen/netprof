@@ -24,6 +24,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.ExerciseList;
+import mitll.langtest.client.list.ListChangeListener;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.user.UserManager;
@@ -325,6 +326,11 @@ public class BootstrapFlashcardExerciseList<T extends ExerciseShell> implements 
   }
 
   @Override
+  public boolean onLast() {
+    return false;
+  }
+
+  @Override
   public  <S extends ExerciseShell> boolean onLast(S current) { return false; }
 
   @Override
@@ -470,6 +476,11 @@ public class BootstrapFlashcardExerciseList<T extends ExerciseShell> implements 
 
   @Override
   public void checkAndAskServer(String id) {
+
+  }
+
+  @Override
+  public void addListChangedListener(ListChangeListener<T> listener) {
 
   }
 }
