@@ -411,7 +411,6 @@ public class PagingContainer<T extends ExerciseShell> {
   public void markCurrentExercise(String itemID) {
     if (getList() == null || getList().isEmpty()) return;
 
-    //String id = itemID.getID();
     T t = idToExercise.get(itemID);
     int i = getList().indexOf(t);
     markCurrent(i,t);
