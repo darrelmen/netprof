@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.shared.ExerciseShell;
 
 /**
  * Created by go22670 on 2/10/14.
@@ -56,7 +57,7 @@ public abstract class TabContainer implements RequiresResize {
 
     public Widget getContainer() { return container; }
 
-  protected abstract Panel getButtonRow2(Panel secondAndThird);
+  protected abstract /* <T extends ExerciseShell>*/ Panel getButtonRow2(Panel secondAndThird);
 
   public static class TabAndContent {
     public Tab tab;
