@@ -20,6 +20,6 @@ public class ControlState {
   public boolean showBoth() { return  showState.equals(BOTH);}
 
   public String toString() {
-    return "id " + id + " audio " + audioOn + " show " + showState;
+    return "ControlState : id " + id + " audio " + audioOn + " show " + showState;
   }
 }
