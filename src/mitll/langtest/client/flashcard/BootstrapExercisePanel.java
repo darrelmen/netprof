@@ -67,6 +67,7 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
 
   private static final String WAV = ".wav";
   private static final String MP3 = "." + AudioTag.COMPRESSED_TYPE;
+  public static final int CONTENT_COLUMNS = 12;
 
   private final Exercise exercise;
 
@@ -96,11 +97,8 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
     this.exercise = e;
     this.controller = controller;
     this.controlState = controlState;
-    System.out.println("got " + controlState);
+    //System.out.println("got " + controlState);
 
-    //continueToNext = !controller.getProps().getFlashcardNextAndPrev();
-    //setStyleName("exerciseBackground");
-   // addStyleName("cardBorder");
     HTML warnNoFlash = new HTML(WARN_NO_FLASH);
     soundFeedback = new SoundFeedback(controller.getSoundManager(), warnNoFlash);
 
@@ -108,8 +106,7 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
     if (helpRow != null) add(helpRow);
     cardPrompt = getCardPrompt(e, controller);
     cardPrompt.getElement().setId("cardPrompt");
-    //add(cardPrompt);
-    //Panel horiz = new FlowPanel();
+
     Panel horiz = new HorizontalPanel();
     add(horiz);
     cardPrompt.addStyleName("floatLeft");
@@ -129,6 +126,7 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
     leftColumn.addStyleName("cardBorder");
     leftColumn.addStyleName("floatLeft");
     leftColumn.add(cardPrompt);
+   // leftColumn.setWidth("50%");
 
     horiz.add(leftColumn);
     horiz.add(controls);
@@ -138,9 +136,15 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
     add(warnNoFlash);
     getElement().setId("BootstrapExercisePanel");
 
+    addWidgetsBelow();
     if (controlState.audioOn) {
       playRefLater();
     }
+
+  }
+
+  protected void addWidgetsBelow() {
+
   }
 
   private void playRefLater() {
@@ -308,8 +312,9 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
   protected FlowPanel getCardPrompt(Exercise e, ExerciseController controller) {
     FluidRow questionRow = new FluidRow();
     Widget questionContent = getQuestionContent(e);
-    Column contentContainer = new Column(4, questionContent);
+    Column contentContainer = new Column(CONTENT_COLUMNS, questionContent);
     questionRow.add(contentContainer);
+   // questionRow.setWidth("50%");
     return questionRow;
   }
 
@@ -321,10 +326,13 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
     DivWidget div = new DivWidget();
     div.addStyleName("blockStyle");
     english = new Heading(1, e.getEnglishSentence());
+   // english.setWidth("50%");
     div.add(english);
 
     Heading widgets = new Heading(1, foreignSentence);
     foreign = widgets;
+   // foreign.setWidth("50%");
+
     widgets.addDomHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -407,8 +415,10 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
     }
 
     boolean classroomMode = controller.getProps().isClassroomMode();
-    System.out.println("classroom mode " + classroomMode);
-    toAddTo.add(audioScoreFeedback.getScoreFeedbackRow(feedbackHeight, classroomMode));
+    //System.out.println("classroom mode " + classroomMode);
+    FluidRow scoreFeedbackRow = audioScoreFeedback.getScoreFeedbackRow(feedbackHeight, classroomMode);
+    //scoreFeedbackRow.setWidth("50%");
+    toAddTo.add(scoreFeedbackRow);
   }
 
   private RecordButtonPanel answerWidget;
@@ -429,6 +439,7 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
    */
   protected FluidRow getRecordButtonRow(Widget recordButton) {
     FluidRow recordButtonRow = new FluidRow();
+   // recordButtonRow.setWidth("50%");
     Paragraph recordButtonContainer = new Paragraph();
     recordButtonContainer.addStyleName("alignCenter");
     recordButtonContainer.add(recordButton);
@@ -455,6 +466,8 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
 
     recoOutputContainer.add(recoOutput);
     recoOutputRow.getElement().setId("recoOutputRow");
+   // recoOutputRow.setWidth("50%");
+
     return recoOutputRow;
   }
 
@@ -623,17 +636,17 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
 
   private String getRefAudioToPlay() {
     String path = exercise.getRefAudio();
-    System.out.println("getRefAudioToPlay : regular " + path);
+    //System.out.println("getRefAudioToPlay : regular " + path);
     if (path == null) {
       path = exercise.getSlowAudioRef(); // fall back to slow audio
-      System.out.println("\tgetRefAudioToPlay : slow " + path);
+      //System.out.println("\tgetRefAudioToPlay : slow " + path);
     }
     return path;
   }
 
   private void playRefAndGoToNext(String correctPrompt, String path) {
     path = getPath(path);
-    System.out.println("playRefAndGoToNext : playing " + path);
+   // System.out.println("playRefAndGoToNext : playing " + path);
 
     final String fcorrectPrompt = correctPrompt;
 
@@ -657,7 +670,7 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
 
   private void playRef(String path) {
     path = getPath(path);
-    System.out.println("showIncorrectFeedback : playing " + path);
+    //System.out.println("showIncorrectFeedback : playing " + path);
 
     getSoundFeedback().createSound(path);
   }
@@ -671,8 +684,6 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
   private void tryAgain() {
     getSoundFeedback().playIncorrect();
 
-    //System.out.println("doing nextAfterDelay");
-    // Schedule the timer to run once in 1 seconds.
     Timer t = new Timer() {
       @Override
       public void run() {
