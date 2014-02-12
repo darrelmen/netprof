@@ -60,7 +60,11 @@ public class SoundManager {
 	}-*/;
 
   public static native boolean isOK()/*-{
-    return $wnd.soundManager.ok();
+      return $wnd.soundManager.ok();
+  }-*/;
+
+  public static native void setVolume(String title, int volume)/*-{
+      $wnd.soundManager.setVolume(title,volume);
   }-*/;
 
   /**
