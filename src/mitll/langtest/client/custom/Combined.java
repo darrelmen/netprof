@@ -4,6 +4,7 @@ import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Tab;
 import com.github.gwtbootstrap.client.ui.TabPanel;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.ExerciseListLayout;
@@ -53,7 +54,8 @@ public class Combined<T extends ExerciseShell> extends TabContainer {
 
     ExerciseListLayout<T> layout = new ExerciseListLayout<T>(controller.getProps());
 
-    Panel currentExerciseVPanel = new FluidContainer();
+    //Panel currentExerciseVPanel = new FluidContainer();
+    DivWidget currentExerciseVPanel = new DivWidget();
 
     Panel thirdRow = new HorizontalPanel();
     Panel leftColumn = new SimplePanel();
@@ -74,9 +76,7 @@ public class Combined<T extends ExerciseShell> extends TabContainer {
 
     practice.content.add(bothSecondAndThird);
 
-
-   // ListInterface<T> listInterface1 =
-     listInterface1 =
+    listInterface1 =
       layout.makeExerciseList(secondRow, leftColumn, feedback, currentExerciseVPanel, service, controller);
 
     listInterface1.setFactory(
