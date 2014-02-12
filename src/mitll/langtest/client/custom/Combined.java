@@ -19,18 +19,18 @@ import mitll.langtest.shared.ExerciseShell;
 /**
  * Created by go22670 on 2/10/14.
  */
-public class Combined extends TabContainer {
-  private Tab yourItems;
-  private Panel yourItemsContent;
-  private Navigation.TabAndContent browse;
-  private Navigation.TabAndContent review, commented;
+public class Combined<T extends ExerciseShell> extends TabContainer {
+//  private Tab yourItems;
+ // private Panel yourItemsContent;
+//  private Navigation.TabAndContent browse;
+ // private Navigation.TabAndContent review, commented;
   private final ExerciseController controller;
   private LangTestDatabaseAsync service;
   private UserManager userManager;
-
-  private ScrollPanel listScrollPanel;
-  private ListInterface<? extends ExerciseShell> listInterface;
-  UserFeedback feedback;
+  ListInterface<T> listInterface1;
+  //private ScrollPanel listScrollPanel;
+//  private ListInterface<? extends ExerciseShell> listInterface;
+  private UserFeedback feedback;
 
   public Combined(final LangTestDatabaseAsync service, final UserManager userManager,
                   final ExerciseController controller, final ListInterface<? extends ExerciseShell> listInterface,
@@ -38,11 +38,11 @@ public class Combined extends TabContainer {
     this.service = service;
     this.userManager = userManager;
     this.controller = controller;
-    this.listInterface = listInterface;
+  //  this.listInterface = listInterface;
     this.feedback = feedback;
   }
 
-  public Panel getButtonRow2(Panel secondAndThird) {
+  public /*<T extends ExerciseShell> */Panel getButtonRow2(Panel secondAndThird) {
     tabPanel = new TabPanel();
 
     // chapter tab
@@ -51,12 +51,8 @@ public class Combined extends TabContainer {
 
     final Navigation.TabAndContent practice = makeTab(tabPanel, IconType.CHECK,  PRACTICE);
 
+    ExerciseListLayout<T> layout = new ExerciseListLayout<T>(controller.getProps());
 
-
-
-    ExerciseListLayout layout = new ExerciseListLayout(controller.getProps());
-
-    //VerticalPanel vp = new VerticalPanel();
     Panel currentExerciseVPanel = new FluidContainer();
 
     Panel thirdRow = new HorizontalPanel();
@@ -72,9 +68,6 @@ public class Combined extends TabContainer {
 
     bothSecondAndThird.add(secondRow);
     bothSecondAndThird.add(thirdRow);
-   // this.bothSecondAndThird = bothSecondAndThird;
-
-    //reallyMakeExerciseList(belowFirstRow, leftColumn, bothSecondAndThird);
 
     currentExerciseVPanel.addStyleName("floatLeftList");
     thirdRow.add(currentExerciseVPanel);
@@ -82,9 +75,12 @@ public class Combined extends TabContainer {
     practice.content.add(bothSecondAndThird);
 
 
-    ListInterface<? extends ExerciseShell> listInterface1 = layout.makeExerciseList(secondRow, leftColumn, feedback, currentExerciseVPanel, service, controller);
+   // ListInterface<T> listInterface1 =
+     listInterface1 =
+      layout.makeExerciseList(secondRow, leftColumn, feedback, currentExerciseVPanel, service, controller);
 
-    listInterface1.setFactory(new MyFlashcardExercisePanelFactory(service, feedback, controller, listInterface1), userManager, 1);
+    listInterface1.setFactory(
+      new MyFlashcardExercisePanelFactory<T>(service, feedback, controller, listInterface1), userManager, 1);
 
     if (controller.gotMicPermission()) {
       listInterface1.getExercises(controller.getUser(), true);
@@ -116,12 +112,11 @@ public class Combined extends TabContainer {
 
   @Override
   public void showInitialState() {
-    tabPanel.selectTab(1);
-
+    tabPanel.selectTab(1); // for now
   }
 
   @Override
   public void onResize() {
-
+    listInterface1.onResize();
   }
 }
