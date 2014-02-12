@@ -35,7 +35,7 @@ import java.util.Set;
  * Time: 5:35 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T> implements RequiresResize {
+public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T> {
   protected ExerciseController controller;
   protected PagingContainer<T> pagingContainer;
   private boolean showTypeAhead;
@@ -253,14 +253,14 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
    */
   @Override
   protected void rememberExercises(List<T> result) {
-    System.out.println("PagingExerciseList : rememberAndLoadFirst remembering " + result.size());
+    System.out.println("PagingExerciseList : rememberExercises remembering " + result.size());
 
     clear();
     for (final T es : result) {
       addExercise(es);
     }
     flush();
-    System.out.println("PagingExerciseList : size " + getSize());
+    //System.out.println("PagingExerciseList : size " + getSize());
   }
 
   @Override
