@@ -11,12 +11,10 @@
   <!-- the theme of your GWT application by uncommenting          -->
   <!-- any one of the following lines.                            -->
   <inherits name='com.google.gwt.user.theme.clean.Clean'/>
-<!--
-  <inherits name='com.googlecode.gchart.GChart'/>
--->
   <inherits name='com.google.gwt.visualization.Visualization'/>
-  <inherits name ="com.github.gwtbootstrap.Bootstrap"/>
+  <inherits name="com.github.gwtbootstrap.Bootstrap"/>
   <inherits name="org.moxieapps.gwt.highcharts.Highcharts"/>
+  <inherits name="com.google.common.collect.Collect"/>
 
   <set-property name="bootstrap.responsiveDesign" value="true"/>
 <!--
