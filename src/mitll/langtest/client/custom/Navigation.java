@@ -96,7 +96,7 @@ public class Navigation extends TabContainer implements RequiresResize {
    * @param secondAndThird
    * @return
    */
-  protected Panel getButtonRow2(Panel secondAndThird) {
+  protected /*<T extends ExerciseShell>*/ Panel getButtonRow2(Panel secondAndThird) {
     tabPanel = new TabPanel();
 
     boolean combinedMode = controller.getProps().isCombinedMode();
