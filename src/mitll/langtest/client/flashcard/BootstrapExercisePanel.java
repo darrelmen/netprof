@@ -6,13 +6,14 @@ import com.github.gwtbootstrap.client.ui.ButtonToolbar;
 import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.Dropdown;
-import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Nav;
 import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.Paragraph;
+import com.github.gwtbootstrap.client.ui.ProgressBar;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
 import com.google.gwt.core.client.Scheduler;
@@ -28,7 +29,6 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -53,7 +53,7 @@ import java.util.List;
  * Time: 3:07 PM
  * To change this template use File | Settings | File Templates.
  */
-public class BootstrapExercisePanel extends FluidContainer implements AudioAnswerListener {
+public class BootstrapExercisePanel extends DivWidget implements AudioAnswerListener {
   public static final String WARN_NO_FLASH = "<font color='red'>Flash is not activated. Do you have a flashblocker? Please add this site to its whitelist.</font>";
 
   private static final int DELAY_MILLIS = 1000;
@@ -67,14 +67,13 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
 
   private static final String WAV = ".wav";
   private static final String MP3 = "." + AudioTag.COMPRESSED_TYPE;
-  public static final int CONTENT_COLUMNS = 12;
+ // public static final int CONTENT_COLUMNS = 12;
 
   private final Exercise exercise;
 
   private Heading recoOutput;
   protected SoundFeedback soundFeedback;
   protected final Widget cardPrompt;
-  protected ScoreFeedback audioScoreFeedback = new ScoreFeedback(false);
   protected Panel recoOutputContainer;
   private final boolean addKeyBinding;
   private ExerciseController controller;
@@ -98,6 +97,8 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
     this.controller = controller;
     this.controlState = controlState;
     //System.out.println("got " + controlState);
+    // addStyleName("cardDisplayTable");
+  //  addStyleName("minWidth");
 
     HTML warnNoFlash = new HTML(WARN_NO_FLASH);
     soundFeedback = new SoundFeedback(controller.getSoundManager(), warnNoFlash);
@@ -107,29 +108,47 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
     cardPrompt = getCardPrompt(e, controller);
     cardPrompt.getElement().setId("cardPrompt");
 
-    Panel horiz = new HorizontalPanel();
+    //  Panel horiz = new HorizontalPanel();
+    DivWidget horiz = new DivWidget();
+    // DivWidget horiz = new FluidRow();
+    //horiz.addStyleName("displayTableRow");
+    horiz.addStyleName("positionRelative");
+    //horiz.addStyleName("minWidthFifty");
     add(horiz);
     cardPrompt.addStyleName("floatLeft");
-    VerticalPanel controls = new VerticalPanel();
+    Panel rightColumn = new VerticalPanel();
 
-    controls.add(getAudioGroup(controlState));
-
+    rightColumn.addStyleName("rightColumn");
     if (!controller.getLanguage().equalsIgnoreCase("English")) {
-      controls.add(getShowGroup(controlState));
+      rightColumn.add(getShowGroup(controlState));
     }
+    rightColumn.add(getAudioGroup(controlState));
+    rightColumn.add(getFeedbackGroup(controlState));
 
-    controls.addStyleName("leftTenMargin");
-    controls.addStyleName("floatRight");
+    rightColumn.addStyleName("leftTenMargin");
+    //rightColumn.addStyleName("floatRight");
+    // rightColumn.addStyleName("twoDivsRow");
 
-    VerticalPanel leftColumn = new VerticalPanel();
-    leftColumn.addStyleName("exerciseBackground");
-    leftColumn.addStyleName("cardBorder");
-    leftColumn.addStyleName("floatLeft");
-    leftColumn.add(cardPrompt);
-   // leftColumn.setWidth("50%");
+    // Panel leftColumn = new VerticalPanel();
+    DivWidget leftColumn = new DivWidget();
+    //leftColumn.addStyleName("exerciseBackground");
+    leftColumn.addStyleName("cardBorderShadow");
+    //leftColumn.addStyleName("floatLeft");
+    // leftColumn.addStyleName("twoDivsRow");
+    leftColumn.addStyleName("leftColumn");
+    leftColumn.addStyleName("minWidthFifty");
+
+    //  Panel wrapper = getCenteredWrapper(cardPrompt);
+
+    leftColumn.add(getCentered(cardPrompt));
+    // leftColumn.setWidth("100%");
+
+    //horiz.add(new Column(8,leftColumn));
+    //horiz.add(new Column(2,rightColumn));
 
     horiz.add(leftColumn);
-    horiz.add(controls);
+    horiz.add(rightColumn);
+
 
     addRecordingAndFeedbackWidgets(e, service, controller, feedbackHeight, leftColumn);
     warnNoFlash.setVisible(false);
@@ -140,7 +159,6 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
     if (controlState.audioOn) {
       playRefLater();
     }
-
   }
 
   protected void addWidgetsBelow() {
@@ -156,7 +174,7 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
   }
 
   public ControlGroup getAudioGroup(final ControlState controlState) {
-    ControlGroup group = new ControlGroup("AUDIO");
+    ControlGroup group = new ControlGroup("PLAY " +controller.getLanguage().toUpperCase());
     ButtonToolbar w = new ButtonToolbar();
     group.add(w);
     ButtonGroup buttonGroup = new ButtonGroup();
@@ -193,6 +211,43 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
     });
     offButton.setActive(!controlState.audioOn);
 
+    return group;
+  }
+
+  public ControlGroup getFeedbackGroup(final ControlState controlState) {
+    ControlGroup group = new ControlGroup("FEEDBACK");
+    ButtonToolbar w = new ButtonToolbar();
+    group.add(w);
+    ButtonGroup buttonGroup = new ButtonGroup();
+    buttonGroup.setToggle(ToggleType.RADIO);
+    w.add(buttonGroup);
+
+    Button onButton = new Button("On" + "");
+    buttonGroup.add(onButton);
+
+    onButton.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+         controlState.audioFeedbackOn = true;
+        System.out.println("now on " + controlState);
+
+      }
+    });
+    onButton.setActive(controlState.audioFeedbackOn);
+
+
+    Button offButton = new Button("Off" + "");
+    buttonGroup.add(offButton);
+
+    offButton.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        controlState.audioFeedbackOn = false;
+        System.out.println("now off " + controlState);
+
+      }
+    });
+    offButton.setActive(!controlState.audioFeedbackOn);
 
     return group;
   }
@@ -202,6 +257,7 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
     ButtonToolbar w = new ButtonToolbar();
     group.add(w);
     ButtonGroup buttonGroup = new ButtonGroup();
+    buttonGroup.setVertical(true);
     buttonGroup.setToggle(ToggleType.RADIO);
     w.add(buttonGroup);
 
@@ -309,23 +365,27 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
    * @param e
    * @return
    */
-  protected FlowPanel getCardPrompt(Exercise e, ExerciseController controller) {
-    FluidRow questionRow = new FluidRow();
-    Widget questionContent = getQuestionContent(e);
-    Column contentContainer = new Column(CONTENT_COLUMNS, questionContent);
-    questionRow.add(contentContainer);
+  protected Panel getCardPrompt(Exercise e, ExerciseController controller) {
+   // FluidRow questionRow = new FluidRow();
+    //DivWidget questionRow = new DivWidget();
+   // questionRow.addStyleName("cardDisplayTable");
+    Panel questionContent = getQuestionContent(e);
+    questionContent.addStyleName("cardContent");
+    //Column contentContainer = new Column(CONTENT_COLUMNS, questionContent);
+    //questionRow.add(questionContent);
    // questionRow.setWidth("50%");
-    return questionRow;
+    return questionContent;
   }
 
-  private Heading english;
+  private Widget english;
   private Widget foreign;
 
-  protected Widget getQuestionContent(Exercise e) {
+  protected Panel getQuestionContent(Exercise e) {
     String foreignSentence = e.getRefSentences().iterator().next();
     DivWidget div = new DivWidget();
     div.addStyleName("blockStyle");
     english = new Heading(1, e.getEnglishSentence());
+  //  english = new HTML(e.getEnglishSentence());
    // english.setWidth("50%");
     div.add(english);
 
@@ -390,6 +450,7 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
     foreign.setVisible(true);
   }
 
+  DivWidget scoreFeedbackRow = new DivWidget();
   /**
    * Three rows below the stimulus word/expression:<p></p>
    * record space bar image <br></br>
@@ -414,10 +475,13 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
       toAddTo.add(getRecoOutputRow());
     }
 
-    boolean classroomMode = controller.getProps().isClassroomMode();
+    //boolean classroomMode = controller.getProps().isClassroomMode();
     //System.out.println("classroom mode " + classroomMode);
-    FluidRow scoreFeedbackRow = audioScoreFeedback.getScoreFeedbackRow(feedbackHeight, classroomMode);
+   // DivWidget scoreFeedbackRow = audioScoreFeedback.getScoreFeedbackRow(feedbackHeight, classroomMode);
+    //Heading pronunciation = new Heading(5, "Pronunciation");
+    //Panel scoreFeedbackRow = audioScoreFeedback.getSimpleRow(pronunciation);
     //scoreFeedbackRow.setWidth("50%");
+    scoreFeedbackRow.addStyleName("bottomFiveMargin");
     toAddTo.add(scoreFeedbackRow);
   }
 
@@ -437,16 +501,36 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
    * @see #getAnswerAndRecordButtonRow(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
    * @see BootstrapExercisePanel#addRecordingAndFeedbackWidgets(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int, com.google.gwt.user.client.ui.Panel)
    */
-  protected FluidRow getRecordButtonRow(Widget recordButton) {
-    FluidRow recordButtonRow = new FluidRow();
-   // recordButtonRow.setWidth("50%");
+  protected Panel getRecordButtonRow(Widget recordButton) {
+    Panel recordButtonRow = getCenteredWrapper(recordButton);
+
+    recordButtonRow.getElement().setId("recordButtonRow");
+
+    recordButtonRow.addStyleName("leftTenMargin");
+    recordButtonRow.addStyleName("rightTenMargin");
+    DOM.setStyleAttribute(recordButtonRow.getElement(), "marginRight", "10px");
+
+    return recordButtonRow;
+  }
+
+  private Panel getCenteredWrapper(Widget recordButton) {
+    Panel recordButtonRow = new FluidRow();
+    // recordButtonRow.setWidth("50%");
     Paragraph recordButtonContainer = new Paragraph();
     recordButtonContainer.addStyleName("alignCenter");
     recordButtonContainer.add(recordButton);
     recordButton.addStyleName("alignCenter");
     recordButtonRow.add(new Column(12, recordButtonContainer));
-    recordButtonRow.getElement().setId("recordButtonRow");
     return recordButtonRow;
+  }
+
+  private Panel getCentered(Widget toAdd) {
+    Panel row = new FluidRow();
+   // Paragraph paragraph = new Paragraph();
+   // paragraph.addStyleName("alignCenter");
+    row.add(new Column(12, toAdd));
+   // paragraph.add(toAdd);
+    return row;
   }
 
   /**
@@ -454,15 +538,18 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
    *
    * @return
    */
-  private FluidRow getRecoOutputRow() {
-    FluidRow recoOutputRow = new FluidRow();
+  private Panel getRecoOutputRow() {
+
+
+    recoOutput = new Heading(3, "Answer");
+    recoOutput.addStyleName("cardHiddenText2");   // same color as background so text takes up space but is invisible
+    DOM.setStyleAttribute(recoOutput.getElement(), "color", "#ffffff");
+
+    Panel recoOutputRow = new FluidRow();
     recoOutputContainer = new Paragraph();
     recoOutputContainer.addStyleName("alignCenter");
 
     recoOutputRow.add(new Column(12, recoOutputContainer));
-    recoOutput = new Heading(3, "Answer");
-    recoOutput.addStyleName("cardHiddenText");   // same color as background so text takes up space but is invisible
-    DOM.setStyleAttribute(recoOutput.getElement(), "color", "#ebebec");
 
     recoOutputContainer.add(recoOutput);
     recoOutputRow.getElement().setId("recoOutputRow");
@@ -505,11 +592,51 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
    * @see
    */
   protected void showPronScoreFeedback(double score, String scorePrefix) {
-    audioScoreFeedback.showScoreFeedback(scorePrefix, score, false, !addKeyBinding);
+   // audioScoreFeedback.showScoreFeedback(scorePrefix, score, false, !addKeyBinding);
+
+
+    scoreFeedbackRow.add(showScoreFeedback("Score ", score));
+  }
+
+
+  /**
+   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#showPronScoreFeedback(double, String)
+   * @seex #showCRTFeedback(Double, mitll.langtest.client.sound.SoundFeedback, String, boolean)
+   * @param pronunciationScore
+   * @param score
+   * @param centerVertically
+   * @param useShortWidth
+   */
+  public ProgressBar showScoreFeedback(String pronunciationScore, double score){//}}, boolean centerVertically, boolean useShortWidth) {
+    if (score < 0) score = 0;
+    double percent = 100 * score;
+
+    ProgressBar scoreFeedback = new ProgressBar();
+ //   scoreFeedbackColumn.clear();
+   // scoreFeedbackColumn.add(scoreFeedback);
+    //double val = useShortWidth ? 300 : Math.min(Window.getClientWidth() * 0.8, Window.getClientWidth() * 0.5);
+    //scoreFeedback.setWidth((int)val + "px");
+
+    int percent1 = (int) percent;
+    scoreFeedback.setPercent(percent1 < 40 ? 40 : percent1);   // just so the words will show up
+
+    scoreFeedback.setText(pronunciationScore + (int) percent + "%");
+    scoreFeedback.setVisible(true);
+    scoreFeedback.setColor(
+      score > 0.8 ? ProgressBarBase.Color.SUCCESS :
+        score > 0.6 ? ProgressBarBase.Color.DEFAULT :
+          score > 0.4 ? ProgressBarBase.Color.WARNING : ProgressBarBase.Color.DANGER);
+
+/*    if (centerVertically) {
+      DOM.setStyleAttribute(scoreFeedback.getElement(), "marginTop", "18px");
+      DOM.setStyleAttribute(scoreFeedback.getElement(), "marginBottom", "10px");
+    }
+    DOM.setStyleAttribute(scoreFeedback.getElement(), "marginLeft", "10px");*/
+    return scoreFeedback;
   }
 
   private void clearFeedback() {
-    audioScoreFeedback.clearFeedback();
+    scoreFeedbackRow.clear();
   }
 
   private Heading getRecoOutput() {
@@ -526,9 +653,7 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
     boolean correct = result.isCorrect();
     final double score = result.getScore();
 
-
     System.out.println("receivedAudioAnswer: correct " + correct + " pron score : " + score + " has ref " + hasRefAudio);
-
 
     String feedback = "";
     boolean badAudioRecording = result.validity != AudioAnswer.Validity.OK;
@@ -580,7 +705,7 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
    * @see #receivedAudioAnswer
    */
   private String showIncorrectFeedback(AudioAnswer result, double score, boolean hasRefAudio) {
-    if (result.isSaidAnswer()) { // if they said the right answer, but poorly, show pron score
+    if (result.isSaidAnswer() && result.isCorrect()) { // if they said the right answer, but poorly, show pron score
       showPronScoreFeedback(score, PRONUNCIATION_SCORE);
     }
     boolean hasSynonymAudio = !exercise.getSynonymAudioRefs().isEmpty();
@@ -594,30 +719,49 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
       if (hasSynonymAudio) {
         List<String> toPlay = new ArrayList<String>(exercise.getSynonymAudioRefs());
         //  System.out.println("showIncorrectFeedback : playing " + toPlay);
-        if (controlState.audioOn) {
-          playAllAudio(correctPrompt, toPlay);
-        } else {
-          if (controlState.showEnglish()) {
+      //  if (controlState.audioOn) {
+          if (controlState.audioFeedbackOn) {
+            playAllAudio(correctPrompt, toPlay);
+          }
+          else {
+            nextAfterDelay(result.isCorrect(),correctPrompt);
+          }
+      //  } else {
+          //if (controlState.showEnglish()) {
            // showBoth();
-          }
-          goToNextItem(correctPrompt);
-        }
+          //}
+        //  if (!controlState.audioFeedbackOn) {
+       //     loadNext();
+        //  }
+          //goToNextItem(correctPrompt);
+       // }
       } else {
-        if (controlState.audioOn) {
-
-          String path = getRefAudioToPlay();
-
-          if (path == null) {
-            getSoundFeedback().playIncorrect(); // this should never happen
+       // if (controlState.audioOn) {
+          if (controlState.audioFeedbackOn) {
+            String path = getRefAudioToPlay();
+            if (path == null) {
+              getSoundFeedback().playIncorrect(); // this should never happen
+            } else {
+              playRefAndGoToNext(correctPrompt, path);
+            }
           } else {
-            playRefAndGoToNext(correctPrompt, path);
+            getSoundFeedback().playIncorrect(); // this should never happen
+
+            goToNextAfter(1000);
+            //loadNext();
           }
-        } else {
-          if (controlState.showEnglish()) {
+      //  } else {
+          //  if (controlState.showEnglish()) {
           //  showBoth();
-          }
-          goToNextItem(correctPrompt);
-        }
+          // }
+       //   if (controlState.audioFeedbackOn) {
+      //      goToNextItem(correctPrompt);
+        //  } else {
+//            loadNext();
+       //     goToNextAfter(1000);
+
+       //   }
+     //   }
       }
     } else {
       tryAgain();
@@ -627,7 +771,7 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
       correctPrompt = "Heard: " + result.decodeOutput + "<p>" + correctPrompt;
     }
     Heading recoOutput = getRecoOutput();
-    if (recoOutput != null) {
+    if (recoOutput != null && controlState.audioFeedbackOn) {
       recoOutput.setText(correctPrompt);
       DOM.setStyleAttribute(recoOutput.getElement(), "color", "#000000");
     }
@@ -655,7 +799,7 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
       public void songEnded() {
         goToNextItem(fcorrectPrompt);
       }
-    });
+    }, false);
   }
 
   private void playRef() {
@@ -688,7 +832,7 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
       @Override
       public void run() {
         initRecordButton();
-        clearFeedback();
+        //clearFeedback();
       }
     };
     int incorrectDelay = DELAY_MILLIS_LONG;
@@ -722,7 +866,7 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
           goToNextItem(infoToShow);
         }
       }
-    });
+    }, false);
   }
 
   /**
@@ -730,20 +874,24 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
    * @see #playAllAudio(String, java.util.List)
    * @see #showIncorrectFeedback(mitll.langtest.shared.AudioAnswer, double, boolean)
    */
-  private void goToNextItem(String infoToShow) {
+  protected void goToNextItem(String infoToShow) {
     if (continueToNext) {
-      Timer t = new Timer() {
-        @Override
-        public void run() {
-          loadNext();
-        }
-      };
       int delay = getFeedbackLengthProportionalDelay(infoToShow);
       System.out.println("goToNextItem : using delay " + delay + " info " + infoToShow);
-      t.schedule(controller.getProps().isDemoMode() ? LONG_DELAY_MILLIS : delay);
+      goToNextAfter(delay);
     } else {
       initRecordButton();
     }
+  }
+
+  private void goToNextAfter(int delay) {
+    Timer t = new Timer() {
+      @Override
+      public void run() {
+        loadNext();
+      }
+    };
+    t.schedule(controller.getProps().isDemoMode() ? LONG_DELAY_MILLIS : delay);
   }
 
   private int getFeedbackLengthProportionalDelay(String feedback) {
@@ -789,7 +937,12 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
     } else return "";
   }
 
-  private void nextAfterDelay(boolean correct, String feedback) {
+  /**
+   * @see #receivedAudioAnswer(mitll.langtest.shared.AudioAnswer)
+   * @param correct
+   * @param feedback
+   */
+  protected void nextAfterDelay(boolean correct, String feedback) {
     if (NEXT_ON_BAD_AUDIO) {
       System.out.println("doing nextAfterDelay : correct " + correct + " feedback " + feedback);
       // Schedule the timer to run once in 1 seconds.
@@ -803,15 +956,11 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
       if (!feedback.isEmpty()) {
         int delay = getFeedbackLengthProportionalDelay(feedback);
         incorrectDelay += delay;
-
         System.out.println("nextAfterDelay Delay is " + incorrectDelay + " len " + feedback.length());
       }
       t.schedule(controller.getProps().isDemoMode() ? LONG_DELAY_MILLIS : correct ? DELAY_MILLIS : incorrectDelay);
     } else {
-      if (!correct) {
-        initRecordButton();
-        clearFeedback();
-      } else {
+      if (correct) {
         // go to next item
         Timer t = new Timer() {
           @Override
@@ -820,17 +969,17 @@ public class BootstrapExercisePanel extends FluidContainer implements AudioAnswe
           }
         };
         t.schedule(DELAY_MILLIS);
+      } else {
+        initRecordButton();
+        clearFeedback();
       }
     }
   }
 
-  private void initRecordButton() {
-    answerWidget.initRecordButton();
-  }
+  private void initRecordButton() {  answerWidget.initRecordButton();  }
 
   protected void loadNext() {
     System.out.println("loadNext after " + exercise.getID());
-
     controller.getExerciseList().loadNextExercise(exercise);
   }
 }
