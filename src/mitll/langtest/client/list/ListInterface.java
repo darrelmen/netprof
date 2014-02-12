@@ -81,6 +81,8 @@ public interface ListInterface<T extends ExerciseShell> extends RequiresResize {
 
   boolean onFirst();
   <S extends ExerciseShell> boolean onFirst(S current);
+
+  boolean onLast();
   <S extends ExerciseShell> boolean onLast(S current);
   /**
    * @see mitll.langtest.client.LangTest#resetState()
@@ -109,4 +111,6 @@ public interface ListInterface<T extends ExerciseShell> extends RequiresResize {
   void reload();
 
   void redraw();
+
+  void addListChangedListener(ListChangeListener<T> listener);
 }
