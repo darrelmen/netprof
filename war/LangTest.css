@@ -72,6 +72,10 @@ h1 {
     color: #e8eaea;
 }
 
+.cardHiddenText2 {
+     color: white;
+ }
+
 .cardText {
     padding: 55px;
     margin: 20px 0 30px;
@@ -924,4 +928,64 @@ fieldset > legend {
 .mouseOverHighlight {
     background-color: yellow;
     cursor: pointer;
+}
+
+.cardBorderShadow {
+    background-color: #FFFFFF;
+    border-radius: 4px 4px 4px 4px;
+    box-shadow: 1px 1px 0 #CAC3B8, 5px 5px 16px #D4CEC5;
+}
+
+/*
+.cardDisplayTable {
+    display : table;
+}
+*/
+
+.cardContent {
+    word-wrap: break-word;
+    left: 0;
+    text-align: center;
+    display: table-cell;
+    vertical-align: middle;
+    width:100%;
+}
+/*
+
+.displayTableRow {
+    display: table-row;
+}
+
+.displayTableCol {
+    display: table-column;
+}
+*/
+
+/*
+.twoDivsRow {
+    display:inline;
+    float:left;
+}*/
+
+.leftColumn {
+    position:relative;
+    left:0px;
+    top:0px;
+    margin-right: 120px;
+    min-width: 50%;
+}
+
+.rightColumn {
+    position:absolute;
+    right: 10px;
+    top:0px;
+    padding-left: 10px;
+}
+
+.positionRelative {
+    position:relative;
+}
+
+.minWidthFifty {
+    min-width: 500px;
 }
