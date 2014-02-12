@@ -78,10 +78,27 @@ public class ScoreFeedback {
    * @return
    */
   public Panel getSimpleRow(Widget left, int height) {
-    FlowPanel feedbackRow = new FlowPanel();
+    Panel feedbackRow = new FlowPanel();
     feedbackRow.add(left);
     feedbackDummyPanel = new SimplePanel();
     feedbackDummyPanel.setHeight(height + "px");
+    feedbackDummyPanel.addStyleName("floatLeft");
+
+    scoreFeedbackColumn = new SimplePanel(feedbackDummyPanel);
+    double width = useShortWidth ? 300 : Math.min(300, Window.getClientWidth() * 0.5);
+    scoreFeedbackColumn.setWidth((int)width + "px");
+    scoreFeedbackColumn.addStyleName("floatRight");
+
+    feedbackRow.add(scoreFeedbackColumn);
+    feedbackRow.getElement().setId("feedbackRowSimple");
+    return feedbackRow;
+  }
+
+  public Panel getSimpleRow(Widget left) {
+    Panel feedbackRow = new FlowPanel();
+    feedbackRow.add(left);
+    feedbackDummyPanel = new SimplePanel();
+//    feedbackDummyPanel.setHeight(height + "px");
     feedbackDummyPanel.addStyleName("floatLeft");
 
     scoreFeedbackColumn = new SimplePanel(feedbackDummyPanel);
