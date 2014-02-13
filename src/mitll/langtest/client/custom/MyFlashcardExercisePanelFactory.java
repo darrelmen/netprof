@@ -33,12 +33,12 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
   ControlState controlState;
   List<List<T>> sets = new ArrayList<List<T>>();
   int setIndex = 0;
-  //Pager pager = new Pager("<",">");
   float totalScore;
   int totalCorrect;
   float totalDone;
   List<T> currentSet = new ArrayList<T>();
-  int size = 3;
+  int size = 10;
+  List<T> allExercises;
 
   public MyFlashcardExercisePanelFactory(LangTestDatabaseAsync service, UserFeedback feedback, ExerciseController controller,
                                          ListInterface<T> exerciseList) {
@@ -48,12 +48,16 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
     exerciseList.addListChangedListener(new ListChangeListener<T>() {
       @Override
       public void listChanged(List<T> items) {
-        sets = Lists.partition(items, size);
-       // currentSet = new ArrayList<T>(sets.get(setIndex = 0));
-        currentSet = new ArrayList<T>(sets.get(setIndex = 0));
-        System.out.println("====> new set : currentSet " + currentSet + " set index " + setIndex);
+        allExercises = items;
+        partition(items);
+//        System.out.println("====> new set : currentSet " + currentSet + " set index " + setIndex);
       }
     });
+  }
+
+  public void partition(List<T> items) {
+    sets = Lists.partition(items, size);
+    currentSet = new ArrayList<T>(sets.get(setIndex = 0));
   }
 
   @Override
@@ -68,12 +72,9 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
 
     if (current != null) {
       currentSet.remove(current);
-    //  System.out.println("========> after removing " + current.getID()+" currentSet " + currentSet.size()+ " : " + currentSet);
-
     }
     else {
-     // System.err.println("========> couldn't find " + e.getID()+" in currentSet " + currentSet.size()+ " : " + currentSet);
-
+      System.err.println("========> couldn't find " + e.getID()+" in currentSet " + currentSet.size()+ " : " + currentSet);
     }
 
     return new BootstrapExercisePanel(e, service, controller, 40, false, controlState) {
@@ -89,10 +90,8 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
           super.receivedAudioAnswer(result);
           return;
         }
-       // if (result.validity == AudioAnswer.Validity.OK) {
-          totalDone++;
-          if (result.isCorrect()) totalScore += result.getScore();
-       // }
+        totalDone++;
+        if (result.isCorrect()) totalScore += result.getScore();
         if (result.isCorrect()) {
           totalCorrect++;
         }
@@ -103,10 +102,8 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
 
         if (currentSet.isEmpty()) {
           navigationHelper.setVisible(false);
-         // String suffix = totalDone != 10 ? " over " + totalDone + " answered." : "";
           add(new Heading(2, totalCorrect + " Correct - Average Score " + ((int) ((totalScore * 100f) / totalDone)) + "%"));
           HorizontalPanel w = new HorizontalPanel();
-         // w.setSpacing(5);
           Button w1 = new Button("Repeat this set");
           w1.setType(ButtonType.PRIMARY);
           w.add(w1);
@@ -115,9 +112,7 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
             public void onClick(ClickEvent event) {
               currentSet = new ArrayList<T>(sets.get(setIndex));
 
-              totalDone = 0;
-              totalCorrect = 0;
-              totalScore = 0;
+              reset();
 
               System.out.println("====> repeat set : currentSet " + currentSet+ " set index " + setIndex);
               navigationHelper.setVisible(true);
@@ -139,11 +134,8 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
 
                 System.out.println("====> next set : currentSet " + currentSet+ " set index " + setIndex);
                 navigationHelper.setVisible(true);
-                totalDone = 0;
-                totalCorrect = 0;
-                totalScore = 0;
+                reset();
               } catch (Exception e1) {
-             //   currentSet = sets.get(setIndex = 0);
                 currentSet = new ArrayList<T>(sets.get(setIndex = 0));
               }
               exerciseList.loadExercise(currentSet.iterator().next().getID());
@@ -161,11 +153,18 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
         }
       }
 
-/*      @Override
-      protected void goToNextItem(String infoToShow) {
-      }*/
+      protected void setSetSize(int i) {
+        if (i != size) {
+          reset();
 
-      NavigationHelper<Exercise> navigationHelper;
+          size = i;
+          partition(allExercises);
+          exerciseList.loadExercise(currentSet.iterator().next().getID());
+        }
+      }
+
+      private NavigationHelper<Exercise> navigationHelper;
+
       @Override
       protected void addWidgetsBelow() {
         navigationHelper = new NavigationHelper<Exercise>(currentExercise, controller, null, exerciseList, true, false) {
@@ -182,11 +181,9 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
     };
   }
 
-
-  // TODO : pass these in
-  // TODO : how do we do a sublist of the larger list
-  // TODO : keep track of scores for sublist
-  // TODO : display score when complete
-  // TODO : when set done, do we do it again or go on to next set?
-
+  public void reset() {
+    totalDone = 0;
+    totalCorrect = 0;
+    totalScore = 0;
+  }
 }
