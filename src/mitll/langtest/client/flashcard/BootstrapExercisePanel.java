@@ -124,6 +124,7 @@ public class BootstrapExercisePanel extends DivWidget implements AudioAnswerList
     }
     rightColumn.add(getAudioGroup(controlState));
     rightColumn.add(getFeedbackGroup(controlState));
+    rightColumn.add(getSizes(controlState));
 
     rightColumn.addStyleName("leftTenMargin");
     //rightColumn.addStyleName("floatRight");
@@ -161,9 +162,36 @@ public class BootstrapExercisePanel extends DivWidget implements AudioAnswerList
     }
   }
 
-  protected void addWidgetsBelow() {
+  protected void addWidgetsBelow() {}
 
+  public Widget getSizes(final ControlState controlState) {
+    ControlGroup group = new ControlGroup("SET SIZE");
+    ButtonToolbar w = new ButtonToolbar();
+    group.add(w);
+    ButtonGroup buttonGroup = new ButtonGroup();
+    w.add(buttonGroup);
+
+    buttonGroup.setToggle(ToggleType.RADIO);
+
+    for ( int i = 10; i < 50; i += 10) {
+      final int ii = i;
+      Button onButton = new Button("" + i);
+      buttonGroup.add(onButton);
+
+      onButton.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          controlState.setSetSize(ii);
+          setSetSize(ii);
+        }
+      });
+      onButton.setActive(controlState.getSetSize() == i);
+    }
+
+    return group;
   }
+
+  protected void setSetSize(int i) {}
 
   private void playRefLater() {
     Scheduler.get().scheduleDeferred(new Command() {
@@ -178,9 +206,9 @@ public class BootstrapExercisePanel extends DivWidget implements AudioAnswerList
     ButtonToolbar w = new ButtonToolbar();
     group.add(w);
     ButtonGroup buttonGroup = new ButtonGroup();
-    buttonGroup.setToggle(ToggleType.RADIO);
     w.add(buttonGroup);
 
+    buttonGroup.setToggle(ToggleType.RADIO);
     Button onButton = new Button("On" + "");
     buttonGroup.add(onButton);
 
@@ -604,8 +632,8 @@ public class BootstrapExercisePanel extends DivWidget implements AudioAnswerList
    * @seex #showCRTFeedback(Double, mitll.langtest.client.sound.SoundFeedback, String, boolean)
    * @param pronunciationScore
    * @param score
-   * @param centerVertically
-   * @param useShortWidth
+   * @paramx centerVertically
+   * @paramx useShortWidth
    */
   public ProgressBar showScoreFeedback(String pronunciationScore, double score){//}}, boolean centerVertically, boolean useShortWidth) {
     if (score < 0) score = 0;
