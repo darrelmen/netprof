@@ -49,6 +49,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   ValueChangeHandler<String> {
   private static final int NUM_QUESTIONS_FOR_TOKEN = 5;
   public static final String ITEMS = "Items";
+  private static final boolean ADD_ITEM_HEADER = false;
 
   private SimplePanel innerContainer;
   protected final LangTestDatabaseAsync service;
@@ -745,7 +746,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     leftColumn.addStyleName("minWidth");
     DOM.setStyleAttribute(leftColumn.getElement(), "paddingRight", "10px");
 
-    if (!props.isFlashcardTeacherView() && !props.isMinimalUI()) {
+    if (!props.isFlashcardTeacherView() && !props.isMinimalUI() && ADD_ITEM_HEADER) {
       Heading items = new Heading(4, ITEMS);
       items.addStyleName("center");
       leftColumn.add(items);
