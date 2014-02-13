@@ -37,7 +37,8 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
     super(service, controller, exercise, null, index, true);
 
     this.exercisePanel = exercisePanel;
-    recordButton.setTitle("Press and hold the space bar or mouse button to record");
+   // recordButton.setTitle("Press and hold the space bar or mouse button to record");
+    recordButton.setTitle("Press and hold the mouse button to record");
   }
 
   private IconAnchor waiting;
