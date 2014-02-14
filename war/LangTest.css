@@ -934,45 +934,22 @@ fieldset > legend {
     background-color: #FFFFFF;
     border-radius: 4px 4px 4px 4px;
     box-shadow: 1px 1px 0 #CAC3B8, 5px 5px 16px #D4CEC5;
+    padding:10px;
 }
-
-/*
-.cardDisplayTable {
-    display : table;
-}
-*/
 
 .cardContent {
     word-wrap: break-word;
     left: 0;
     text-align: center;
-    display: table-cell;
     vertical-align: middle;
     width:100%;
 }
-/*
 
-.displayTableRow {
-    display: table-row;
-}
-
-.displayTableCol {
-    display: table-column;
-}
-*/
-
-/*
-.twoDivsRow {
-    display:inline;
-    float:left;
-}*/
-
-.leftColumn {
-    position:relative;
-    left:0px;
+.middleColumn {
+    position:absolute;
     top:0px;
-    margin-right: 120px;
-    min-width: 50%;
+    margin-right: 185px;
+    margin-left: 185px;
 }
 
 .rightColumn {
@@ -980,6 +957,20 @@ fieldset > legend {
     right: 10px;
     top:0px;
     padding-left: 10px;
+}
+
+.leftColumn {
+    position:absolute;
+    left: 0px;
+    top:0px;
+
+    padding-right: 10px;
+}
+.bottomColumn {
+    position:absolute;
+    bottom:0px;
+    text-align:center;
+    padding-right: 10px;
 }
 
 .positionRelative {
