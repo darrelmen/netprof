@@ -3,6 +3,7 @@ package mitll.langtest.client.custom;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.Tab;
 import com.github.gwtbootstrap.client.ui.TabPanel;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -25,7 +26,8 @@ public abstract class TabContainer implements RequiresResize {
     create.setIcon(iconType);
     create.setHeading(label);
     toAddTo.add(create.asTabLink());
-    final FluidContainer createContent = new FluidContainer();
+    final DivWidget createContent = new DivWidget();
+    createContent.addStyleName("positionRelative");
     create.add(createContent);
     zeroPadding(createContent);
     return new TabAndContent(create, createContent);
@@ -61,9 +63,14 @@ public abstract class TabContainer implements RequiresResize {
 
   public static class TabAndContent {
     public Tab tab;
-    public FluidContainer content;
+    public DivWidget content;
 
-    public TabAndContent(Tab tab, FluidContainer panel) {
+    /**
+     * @see mitll.langtest.client.custom.TabContainer#makeTab(com.github.gwtbootstrap.client.ui.TabPanel, com.github.gwtbootstrap.client.ui.constants.IconType, String)
+     * @param tab
+     * @param panel
+     */
+    public TabAndContent(Tab tab, DivWidget panel) {
       this.tab = tab;
       this.content = panel;
     }
