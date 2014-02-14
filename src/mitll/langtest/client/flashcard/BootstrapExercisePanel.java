@@ -17,6 +17,7 @@ import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseOutEvent;
@@ -27,12 +28,16 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import java_cup.version;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -53,7 +58,7 @@ import java.util.List;
  * Time: 3:07 PM
  * To change this template use File | Settings | File Templates.
  */
-public class BootstrapExercisePanel extends DivWidget implements AudioAnswerListener {
+public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnswerListener {
   public static final String WARN_NO_FLASH = "<font color='red'>Flash is not activated. Do you have a flashblocker? Please add this site to its whitelist.</font>";
 
   private static final int DELAY_MILLIS = 1000;
@@ -67,7 +72,9 @@ public class BootstrapExercisePanel extends DivWidget implements AudioAnswerList
 
   private static final String WAV = ".wav";
   private static final String MP3 = "." + AudioTag.COMPRESSED_TYPE;
- // public static final int CONTENT_COLUMNS = 12;
+  private static final int SET_SIZE = 10;
+  private static final int MAX_SET_SIZE = 50;
+  // public static final int CONTENT_COLUMNS = 12;
 
   private final Exercise exercise;
 
@@ -107,18 +114,114 @@ public class BootstrapExercisePanel extends DivWidget implements AudioAnswerList
     if (helpRow != null) add(helpRow);
     cardPrompt = getCardPrompt(e, controller);
     cardPrompt.getElement().setId("cardPrompt");
-
-    //  Panel horiz = new HorizontalPanel();
-    DivWidget horiz = new DivWidget();
+              //          addStyleName("floatLeft");
+      Panel horiz = new HorizontalPanel();
+    //DivWidget horiz = new DivWidget();
+    //horiz.addStyleName("trueInlineStyle");
     // DivWidget horiz = new FluidRow();
     //horiz.addStyleName("displayTableRow");
-    horiz.addStyleName("positionRelative");
+ //   horiz.addStyleName("positionRelative");
+   // addStyleName("positionRelative");
     //horiz.addStyleName("minWidthFifty");
+   // add(horiz);
+    //cardPrompt.addStyleName("floatLeft");
+    Panel rightColumn = getRightColumn(controller, controlState);
+    //rightColumn.addStyleName("floatRight");
+    // rightColumn.addStyleName("twoDivsRow");
+
+    // Panel leftColumn = new VerticalPanel();
+    DivWidget contentMiddle = new DivWidget();
+    DivWidget belowDiv = new DivWidget();
+   // Panel contentMiddle = new VerticalPanel();
+
+    //leftColumn.addStyleName("exerciseBackground");
+    contentMiddle.addStyleName("cardBorderShadow");
+    //leftColumn.addStyleName("floatLeft");
+    // leftColumn.addStyleName("twoDivsRow");
+   // contentMiddle.addStyleName("middleColumn");
+    contentMiddle.addStyleName("minWidthFifty");
+
+    //  Panel wrapper = getCenteredWrapper(cardPrompt);
+
+   // contentMiddle.add(getCentered(cardPrompt));
+    contentMiddle.add(cardPrompt);
+    // leftColumn.setWidth("100%");
+
+    //horiz.add(new Column(8,leftColumn));
+    //horiz.add(new Column(2,rightColumn));
+    Panel leftState = getLeftState();
+    //leftState.addStyleName("leftColumn");
+    horiz.add(leftState);
+    Grid grid = new Grid(2,1);
+    grid.setWidget(0,0,contentMiddle);
+    grid.setWidget(1,0,belowDiv);
+    horiz.add(grid);
+    horiz.add(rightColumn);
     add(horiz);
-    cardPrompt.addStyleName("floatLeft");
+
+    //doDockLayout();
+  //  setWidth("100%");
+
+   // Panel leftState = getLeftState();
+    addRecordingAndFeedbackWidgets(e, service, controller, feedbackHeight, contentMiddle);
+    warnNoFlash.setVisible(false);
+    add(warnNoFlash);
+    getElement().setId("BootstrapExercisePanel");
+
+    addWidgetsBelow(belowDiv);
+    if (controlState.audioOn) {
+      playRefLater();
+    }
+  }
+
+  public void doDockLayout() {
+    DockLayoutPanel dockLayoutPanel = new DockLayoutPanel(Style.Unit.PX);
+    //dockLayoutPanel.addNorth(new Heading(6,"Try this set"), 2);
+    //dockLayoutPanel.addSouth(new Heading(6, "Footer"), 2);
+    //dockLayoutPanel.addEast(rightColumn, 4);
+    DivWidget div = new DivWidget();
+    div.setWidth("100px");
+    div.setHeight("100px");
+    div.add(new Heading(6,"East"));
+    dockLayoutPanel.addEast(div, 400);
+    //  Panel leftState = getLeftState();
+    div = new DivWidget();
+    div.setWidth("100px");
+    div.setHeight("100px");
+
+    div.add(new Heading(6,"West"));
+    dockLayoutPanel.addWest(div,400);
+//    dockLayoutPanel.add(leftColumn);
+    div = new DivWidget();
+    div.setWidth("100px");
+    div.setHeight("100px");
+
+    div.add(new Heading(6,"Center"));
+    dockLayoutPanel.add(div);
+    //dockLayoutPanel.setWidth("500px");
+    addStyleName("positionRelative");
+    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      @Override
+      public void execute() {
+        getParent().addStyleName("positionRelative");
+        getParent().getParent().addStyleName("positionRelative");
+      }
+    });
+
+
+    // DivWidget dockContainer = new DivWidget();
+    // DivWidget horiz = new FluidRow();
+    //horiz.addStyleName("displayTableRow");
+    //dockContainer.addStyleName("positionRelative");
+    //dockContainer.add(dockLayoutPanel);
+//    dockLayoutPanel.forceLayout();
+    add(dockLayoutPanel);
+  }
+
+  public Panel getRightColumn(ExerciseController controller, ControlState controlState) {
     Panel rightColumn = new VerticalPanel();
 
-    rightColumn.addStyleName("rightColumn");
+   // rightColumn.addStyleName("rightColumn");
     if (!controller.getLanguage().equalsIgnoreCase("English")) {
       rightColumn.add(getShowGroup(controlState));
     }
@@ -127,42 +230,20 @@ public class BootstrapExercisePanel extends DivWidget implements AudioAnswerList
     rightColumn.add(getSizes(controlState));
 
     rightColumn.addStyleName("leftTenMargin");
-    //rightColumn.addStyleName("floatRight");
-    // rightColumn.addStyleName("twoDivsRow");
-
-    // Panel leftColumn = new VerticalPanel();
-    DivWidget leftColumn = new DivWidget();
-    //leftColumn.addStyleName("exerciseBackground");
-    leftColumn.addStyleName("cardBorderShadow");
-    //leftColumn.addStyleName("floatLeft");
-    // leftColumn.addStyleName("twoDivsRow");
-    leftColumn.addStyleName("leftColumn");
-    leftColumn.addStyleName("minWidthFifty");
-
-    //  Panel wrapper = getCenteredWrapper(cardPrompt);
-
-    leftColumn.add(getCentered(cardPrompt));
-    // leftColumn.setWidth("100%");
-
-    //horiz.add(new Column(8,leftColumn));
-    //horiz.add(new Column(2,rightColumn));
-
-    horiz.add(leftColumn);
-    horiz.add(rightColumn);
-
-
-    addRecordingAndFeedbackWidgets(e, service, controller, feedbackHeight, leftColumn);
-    warnNoFlash.setVisible(false);
-    add(warnNoFlash);
-    getElement().setId("BootstrapExercisePanel");
-
-    addWidgetsBelow();
-    if (controlState.audioOn) {
-      playRefLater();
-    }
+    return rightColumn;
   }
 
-  protected void addWidgetsBelow() {}
+/*  protected void addLeftColumn(DockLayoutPanel dockLayoutPanel) {
+    //Panel panel = getLeftState();
+    //dockLayoutPanel.addWest(panel, 4);
+   dockLayoutPanel.addWest(new Heading(6,"West"), 4);
+  }*/
+
+  protected Panel getLeftState() {
+    return new Heading(6,"");
+  }
+
+  protected void addWidgetsBelow(Panel toAddTo) {}
 
   public Widget getSizes(final ControlState controlState) {
     ControlGroup group = new ControlGroup("SET SIZE");
@@ -173,7 +254,7 @@ public class BootstrapExercisePanel extends DivWidget implements AudioAnswerList
 
     buttonGroup.setToggle(ToggleType.RADIO);
 
-    for ( int i = 10; i < 50; i += 10) {
+    for ( int i = SET_SIZE; i < MAX_SET_SIZE; i += SET_SIZE) {
       final int ii = i;
       Button onButton = new Button("" + i);
       buttonGroup.add(onButton);
