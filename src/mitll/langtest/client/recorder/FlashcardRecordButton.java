@@ -34,6 +34,7 @@ public class FlashcardRecordButton extends RecordButton {
   private static final String NO_SPACE_WARNING = "Press and hold space bar or mouse button to begin recording, release to stop.";
   //public static final String PROMPT = "Click and hold mouse button to record.";
   private static final String PROMPT = "Click and hold to record";
+  public static final int WIDTH_FOR_BUTTON = 360;
 
   private boolean warnUserWhenNotSpace = true;
   private final boolean addKeyBinding;
@@ -50,7 +51,8 @@ public class FlashcardRecordButton extends RecordButton {
     this.addKeyBinding = addKeyBinding;
     this.warnUserWhenNotSpace = addKeyBinding && warnNotASpace;
    // setText(addKeyBinding ? getButtonText() : "Click and hold mouse button to record, release to stop.");
-    DOM.setStyleAttribute(getElement(), "width", "460px");
+    DOM.setStyleAttribute(getElement(), "width", WIDTH_FOR_BUTTON +
+      "px");
     DOM.setStyleAttribute(getElement(), "height", "48px");
     DOM.setStyleAttribute(getElement(), "fontSize", "x-large");
     DOM.setStyleAttribute(getElement(), "fontFamily", "Arial Unicode MS, Arial, sans-serif");
