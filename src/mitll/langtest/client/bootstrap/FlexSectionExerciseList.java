@@ -46,7 +46,7 @@ import java.util.Set;
  */
 public class FlexSectionExerciseList<T extends ExerciseShell> extends HistoryExerciseList<T> {
   private static final int HEADING_FOR_LABEL = 4;
-  private static final int UNACCOUNTED_WIDTH = 150;
+  private static final int UNACCOUNTED_WIDTH = 60;
   public static final int VERTICAL_DEFAULT = 160;
 
   private final List<ButtonType> buttonTypes = new ArrayList<ButtonType>();

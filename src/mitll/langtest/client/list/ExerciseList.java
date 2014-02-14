@@ -129,9 +129,12 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    */
   private void addWidgets(final Panel currentExerciseVPanel) {
     this.innerContainer = new SimplePanel();
-    this.innerContainer.setWidth("100%");
-    this.innerContainer.setHeight("100%");
+    innerContainer.getElement().setId("ExerciseList_innerContainer");
+   // this.innerContainer.setWidth("100%");
+   // this.innerContainer.setHeight("100%");
     currentExerciseVPanel.add(innerContainer);
+    innerContainer.addStyleName("floatLeft");
+    currentExerciseVPanel.addStyleName("floatLeft");
   //  currentExerciseVPanel.addStyleName("shadowBorder");
   }
 
