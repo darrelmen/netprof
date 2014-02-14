@@ -45,14 +45,14 @@ public class ExerciseListLayout<T extends ExerciseShell> {
    * @see LangTest#onModuleLoad2()
    */
   public ListInterface<T> makeExerciseList(FluidRow secondRow,
-                                        Panel leftColumn, UserFeedback feedback,
+                                        Panel exerciseListContainer, UserFeedback feedback,
                                         Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                         ExerciseController controller) {
     boolean isGrading = props.isGrading();
     this.exerciseList = makeExerciseList(secondRow, isGrading, feedback, currentExerciseVPanel, service, controller);
 
     boolean hideExerciseList = (props.isMinimalUI() && !props.isGrading()) && !props.isAdminView();
-    useExerciseList(leftColumn);
+    useExerciseList(exerciseListContainer);
     if (hideExerciseList) {
       exerciseList.hideExerciseList();
     }
@@ -60,11 +60,11 @@ public class ExerciseListLayout<T extends ExerciseShell> {
     return exerciseList;
   }
 
-  private void useExerciseList(Panel leftColumn) {
+  private void useExerciseList(Panel exerciseListContainer) {
     if (showOnlyOneExercise()) {
       exerciseList.setExercise_title(props.getExercise_title());
     }
-    addExerciseListOnLeftSide(leftColumn);
+    addExerciseListOnLeftSide(exerciseListContainer);
   }
 
   /**
@@ -109,15 +109,15 @@ public class ExerciseListLayout<T extends ExerciseShell> {
 
   /**
    * @see #useExerciseList
-   * @param leftColumnContainer
+   * @param exerciseListContainer
    */
-  private void addExerciseListOnLeftSide(Panel leftColumnContainer) {
-   // leftColumnContainer.clear();
+  private void addExerciseListOnLeftSide(Panel exerciseListContainer) {
+   // exerciseListContainer.clear();
     if (props.isTeacherView()) {
-      leftColumnContainer.add(exerciseList.getWidget());
+      exerciseListContainer.add(exerciseList.getWidget());
     } else {
-      leftColumnContainer.addStyleName("inlineBlockStyle");
-      leftColumnContainer.add(exerciseList.getExerciseListOnLeftSide(props));
+      //exerciseListContainer.addStyleName("inlineBlockStyle");
+      exerciseListContainer.add(exerciseList.getExerciseListOnLeftSide(props));
     }
   }
 
