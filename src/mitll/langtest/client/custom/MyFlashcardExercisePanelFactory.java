@@ -1,13 +1,18 @@
 package mitll.langtest.client.custom;
 
 import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.github.gwtbootstrap.client.ui.constants.LabelType;
 import com.google.common.collect.Lists;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -26,8 +31,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
-* Created by go22670 on 2/10/14.
-*/
+ * Created by go22670 on 2/10/14.
+ */
 class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends FlashcardExercisePanelFactory {
   private Exercise currentExercise;
   ControlState controlState;
@@ -35,6 +40,7 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
   int setIndex = 0;
   float totalScore;
   int totalCorrect;
+  int totalIncorrect;
   float totalDone;
   List<T> currentSet = new ArrayList<T>();
   int size = 10;
@@ -50,7 +56,6 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
       public void listChanged(List<T> items) {
         allExercises = items;
         partition(items);
-//        System.out.println("====> new set : currentSet " + currentSet + " set index " + setIndex);
       }
     });
   }
@@ -58,24 +63,13 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
   public void partition(List<T> items) {
     sets = Lists.partition(items, size);
     currentSet = new ArrayList<T>(sets.get(setIndex = 0));
+
   }
 
   @Override
   public Panel getExercisePanel(Exercise e) {
     currentExercise = e;
-    T current = null;
-    for (T t : currentSet) {
-      if (t.getID().equals(e.getID())) {
-        current = t; break;
-      }
-    }
-
-    if (current != null) {
-      currentSet.remove(current);
-    }
-    else {
-      System.err.println("========> couldn't find " + e.getID()+" in currentSet " + currentSet.size()+ " : " + currentSet);
-    }
+    findAndRemoveCurrent(e);
 
     return new BootstrapExercisePanel(e, service, controller, 40, false, controlState) {
       @Override
@@ -95,6 +89,10 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
         if (result.isCorrect()) {
           totalCorrect++;
         }
+        else {
+          totalIncorrect++;
+        }
+        setStateFeedback(false);
 
         super.receivedAudioAnswer(result);
 
@@ -114,7 +112,7 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
 
               reset();
 
-              System.out.println("====> repeat set : currentSet " + currentSet+ " set index " + setIndex);
+              System.out.println("====> repeat set : currentSet " + currentSet + " set index " + setIndex);
               navigationHelper.setVisible(true);
 
               exerciseList.loadExercise(currentSet.iterator().next().getID());
@@ -132,7 +130,7 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
               try {
                 currentSet = new ArrayList<T>(sets.get(++setIndex));
 
-                System.out.println("====> next set : currentSet " + currentSet+ " set index " + setIndex);
+                System.out.println("====> next set : currentSet " + currentSet + " set index " + setIndex);
                 navigationHelper.setVisible(true);
                 reset();
               } catch (Exception e1) {
@@ -149,7 +147,7 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
 
       protected void nextAfterDelay(boolean correct, String feedback) {
         if (!currentSet.isEmpty()) {
-          super.nextAfterDelay(correct,feedback);
+          super.nextAfterDelay(correct, feedback);
         }
       }
 
@@ -166,24 +164,91 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
       private NavigationHelper<Exercise> navigationHelper;
 
       @Override
-      protected void addWidgetsBelow() {
+      protected void addWidgetsBelow(Panel toAddTo) {
         navigationHelper = new NavigationHelper<Exercise>(currentExercise, controller, null, exerciseList, true, false) {
           @Override
           protected void clickNext(ExerciseController controller, Exercise exercise) {
             loadNext();
           }
         };
-        add(navigationHelper);
+     //   navigationHelper.addStyleName("bottomColumn");
+        toAddTo.add(navigationHelper);
       }
 
       @Override
-      protected Widget getHelpRow(ExerciseController controller) { return null; }
+      protected Widget getHelpRow(ExerciseController controller) {
+        return null;
+      }
+
+      Label remain, incorrectBox, correctBox;
+
+      protected Panel getLeftState() {
+        Grid g = new Grid(3, 2);
+        ControlGroup remaining = new ControlGroup("Remaining");
+        remaining.addStyleName("topFiveMargin");
+        remain = new Label();
+        remain.setType(LabelType.INFO);
+        g.setWidget(0, 0, remaining);
+        g.setWidget(0, 1, remain);
+
+        ControlGroup incorrect = new ControlGroup("Incorrect");
+        incorrect.addStyleName("topFiveMargin");
+
+        incorrectBox = new Label();
+        incorrectBox.setType(LabelType.WARNING);
+
+        g.setWidget(1, 0, incorrect);
+        g.setWidget(1, 1, incorrectBox);
+
+        ControlGroup correct = new ControlGroup("Correct");
+        correct.addStyleName("topFiveMargin");
+
+        correctBox = new Label();
+        correctBox.setType(LabelType.SUCCESS);
+
+        g.setWidget(2, 0, correct);
+        g.setWidget(2, 1, correctBox);
+
+        setStateFeedback(true);
+        g.addStyleName("rightTenMargin");
+        return g;
+      }
+
+      private void setStateFeedback(boolean initial) {
+        int remaining = currentSet.size();
+        if (initial) ++remaining;
+        remain.setText(remaining + "");
+        incorrectBox.setText(totalIncorrect + "");
+        correctBox.setText(totalCorrect + "");
+      }
     };
+  }
+
+  public void findAndRemoveCurrent(Exercise e) {
+    T current = findCurrent(e);
+
+    if (current != null) {
+      currentSet.remove(current);
+    } else {
+      System.err.println("========> couldn't find " + e.getID() + " in currentSet " + currentSet.size() + " : " + currentSet);
+    }
+  }
+
+  public T findCurrent(Exercise e) {
+    T current = null;
+    for (T t : currentSet) {
+      if (t.getID().equals(e.getID())) {
+        current = t;
+        break;
+      }
+    }
+    return current;
   }
 
   public void reset() {
     totalDone = 0;
     totalCorrect = 0;
     totalScore = 0;
+    totalIncorrect = 0;
   }
 }
