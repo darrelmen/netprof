@@ -36,7 +36,8 @@
         <path refid="GWT SDK [GWT - 2.5.0].libraryclasspath"/>
         <pathelement location="war/WEB-INF/lib/json-lib-2.4-jdk15.jar"/>
         <pathelement location="war/WEB-INF/lib/commons-codec-1.6.jar"/>
-        <pathelement location="war/WEB-INF/lib/guava-13.0.jar"/>
+        <pathelement location="war/WEB-INF/lib/guava-15.0.jar"/>
+        <pathelement location="war/WEB-INF/lib/guava-gwt-15.0.jar"/>
         <pathelement location="war/WEB-INF/lib/gchart.jar"/>
         <pathelement location="war/WEB-INF/lib/log4j-1.2.17.jar"/>
         <path refid="imagewriter.classpath"/>
@@ -133,14 +134,6 @@
       </jar>
     </target>
 
-<!--    <target depends="build" name="warArabicVLL">
-        <jar destfile="npArabicVLL2.war" basedir="war" excludes="WEB-INF/lib/pronz.jar,answers/**,audioimages/**,scoring/**,config/first/**,config/urdu/**,config/autoCRT/**,config/msa/**,config/msa/**,config/levantine/**,config/eqyptian/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
-            <manifest>
-                <attribute name="Built-Date" value="${current.time}"/>
-            </manifest>
-        </jar>
-    </target>-->
-
     <target depends="build" name="flashcard">
         <jar destfile="npEnglishFlashcard.war" basedir="war"
              excludes="answers/**,audioimages/**,config/first/**,config/crtDari/**,config/dataCollectAdmin/**,config/egyptian/**,config/pashto/**,config/pilot/**,config/urdu/**,config/autoCRT/**,config/msa/**,config/msa/**,config/levantine/**,config/eqyptian/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.dli-pashto/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
@@ -170,16 +163,6 @@
             </manifest>
         </jar>
     </target>
-
-<!--
-    <target depends="build" name="dataCollectAdmin">
-        <jar destfile="dataCollectAdmin.war" basedir="war" excludes="WEB-INF/lib/pronz.jar,WEB-INF/lib/mira.jar,media/**,config/dataCollectAdmin/uploads/**,config/pilot/**,answers/**,fastAndSlowRef/**,audioimages/**,scoring/**,config/first/**,config/urdu/**,config/autoCRT/**,config/msa/**,config/msa/**,config/levantine/**,config/eqyptian/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
-            <manifest>
-                <attribute name="Built-Date" value="${current.time}"/>
-            </manifest>
-        </jar>
-    </target>
--->
 
     <target depends="build" name="warArabicVLL2">
         <jar destfile="npArabicVLL.war" basedir="war"
@@ -385,17 +368,6 @@
     <target depends="build" name="customNPF">
         <jar destfile="customNPF.war" basedir="war"
              includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/english/**,scoring/bin.linux64/**,scoring/configurations/**,scoring/models.wsj01-16/**"
-                >
-
-            <manifest>
-                <attribute name="Built-Date" value="${current.time}"/>
-            </manifest>
-        </jar>
-    </target>
-
-    <target depends="build" name="taboo">
-        <jar destfile="taboo.war" basedir="war"
-             includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/taboo/**"
                 >
 
             <manifest>
