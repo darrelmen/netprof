@@ -4,6 +4,7 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Label;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
 import com.google.common.collect.Lists;
@@ -99,50 +100,54 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
         System.out.println("receivedAudioAnswer : currentSet " + currentSet.size() + " : " + currentSet + " total done " + totalDone);
 
         if (currentSet.isEmpty()) {
-          navigationHelper.setVisible(false);
-          add(new Heading(2, totalCorrect + " Correct - Average Score " + ((int) ((totalScore * 100f) / totalDone)) + "%"));
-          HorizontalPanel w = new HorizontalPanel();
-          Button w1 = new Button("Repeat this set");
-          w1.setType(ButtonType.PRIMARY);
-          w.add(w1);
-          w1.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-              currentSet = new ArrayList<T>(sets.get(setIndex));
-
-              reset();
-
-              System.out.println("====> repeat set : currentSet " + currentSet + " set index " + setIndex);
-              navigationHelper.setVisible(true);
-
-              exerciseList.loadExercise(currentSet.iterator().next().getID());
-            }
-          });
-
-          Button w2 = new Button("Next set");
-          w.add(w2);
-          w2.addStyleName("leftFiveMargin");
-          w2.setType(ButtonType.SUCCESS);
-
-          w2.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-              try {
-                currentSet = new ArrayList<T>(sets.get(++setIndex));
-
-                System.out.println("====> next set : currentSet " + currentSet + " set index " + setIndex);
-                navigationHelper.setVisible(true);
-                reset();
-              } catch (Exception e1) {
-                currentSet = new ArrayList<T>(sets.get(setIndex = 0));
-              }
-              exerciseList.loadExercise(currentSet.iterator().next().getID());
-            }
-          });
-          add(w);
-          // TODO : maybe add table showing results per word
-          // TODO : do we do aggregate scores
+          onSetComplete();
         }
+      }
+
+      public void onSetComplete() {
+        navigationHelper.setVisible(false);
+        belowContentDiv.add(new Heading(2, totalCorrect + " Correct - Average Score " + ((int) ((totalScore * 100f) / totalDone)) + "%"));
+        HorizontalPanel w = new HorizontalPanel();
+        Button w1 = new Button("Repeat this set");
+        w1.setType(ButtonType.PRIMARY);
+        w.add(w1);
+        w1.addClickHandler(new ClickHandler() {
+          @Override
+          public void onClick(ClickEvent event) {
+            currentSet = new ArrayList<T>(sets.get(setIndex));
+
+            reset();
+
+            System.out.println("====> repeat set : currentSet " + currentSet + " set index " + setIndex);
+            navigationHelper.setVisible(true);
+
+            exerciseList.loadExercise(currentSet.iterator().next().getID());
+          }
+        });
+
+        Button w2 = new Button("Next set");
+        w.add(w2);
+        w2.addStyleName("leftFiveMargin");
+        w2.setType(ButtonType.SUCCESS);
+
+        w2.addClickHandler(new ClickHandler() {
+          @Override
+          public void onClick(ClickEvent event) {
+            try {
+              currentSet = new ArrayList<T>(sets.get(++setIndex));
+
+              System.out.println("====> next set : currentSet " + currentSet + " set index " + setIndex);
+              navigationHelper.setVisible(true);
+              reset();
+            } catch (Exception e1) {
+              currentSet = new ArrayList<T>(sets.get(setIndex = 0));
+            }
+            exerciseList.loadExercise(currentSet.iterator().next().getID());
+          }
+        });
+        belowContentDiv.add(w);
+        // TODO : maybe add table showing results per word
+        // TODO : do we do aggregate scores
       }
 
       protected void nextAfterDelay(boolean correct, String feedback) {
@@ -163,6 +168,8 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
 
       private NavigationHelper<Exercise> navigationHelper;
 
+      private Panel belowContentDiv;
+
       @Override
       protected void addWidgetsBelow(Panel toAddTo) {
         navigationHelper = new NavigationHelper<Exercise>(currentExercise, controller, null, exerciseList, true, false) {
@@ -173,6 +180,7 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
         };
      //   navigationHelper.addStyleName("bottomColumn");
         toAddTo.add(navigationHelper);
+        belowContentDiv = toAddTo;
       }
 
       @Override
