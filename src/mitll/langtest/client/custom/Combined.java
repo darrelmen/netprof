@@ -43,9 +43,9 @@ public class Combined<T extends ExerciseShell> extends TabContainer {
     this.feedback = feedback;
   }
 
-  public /*<T extends ExerciseShell> */Panel getButtonRow2(Panel secondAndThird) {
+  public Panel getButtonRow2(Panel secondAndThird) {
     tabPanel = new TabPanel();
-
+    tabPanel.getElement().setId("Combined_tabPanel");
     // chapter tab
     final Navigation.TabAndContent chapters = makeTab(tabPanel, IconType.LIGHTBULB, LEARN_PRONUNCIATION);
     chapters.content.add(secondAndThird);
@@ -55,29 +55,38 @@ public class Combined<T extends ExerciseShell> extends TabContainer {
     ExerciseListLayout<T> layout = new ExerciseListLayout<T>(controller.getProps());
 
     //Panel currentExerciseVPanel = new FluidContainer();
+  //  DivWidget currentExerciseVPanel = new DivWidget();
     DivWidget currentExerciseVPanel = new DivWidget();
+    currentExerciseVPanel.getElement().setId("exercisePanel");
+    //Panel listAndPanelRow = new HorizontalPanel();
+   // Panel listAndPanelRow = new DivWidget();
+    Panel listAndPanelRow = new HorizontalPanel();
+    listAndPanelRow.addStyleName("positionRelative");
+   // Panel exerciseListContainer = new SimplePanel();
+    Panel exerciseListContainer = new DivWidget();
+    exerciseListContainer.getElement().setId("exerciseListContainer");
 
-    Panel thirdRow = new HorizontalPanel();
-    Panel leftColumn = new SimplePanel();
-    thirdRow.add(leftColumn);
-    leftColumn.addStyleName("floatLeft");
-    thirdRow.getElement().setId("outerThirdRow");
-    thirdRow.setWidth("100%");
-    thirdRow.addStyleName("trueInlineStyle");
+    listAndPanelRow.add(exerciseListContainer);
+   // exerciseListContainer.addStyleName("floatLeft");
+    listAndPanelRow.getElement().setId("listAndPanelRow");
+    //listAndPanelRow.setWidth("100%");
+    //listAndPanelRow.addStyleName("trueInlineStyle");
 
-    Panel bothSecondAndThird = new FlowPanel();
-    FluidRow secondRow = new FluidRow();
+    Panel bothSecondAndThird = new DivWidget();
+    bothSecondAndThird.addStyleName("positionRelative");
+    bothSecondAndThird.getElement().setId("secondAndThirdRow");
+    FluidRow unitAndLessonRow = new FluidRow();
 
-    bothSecondAndThird.add(secondRow);
-    bothSecondAndThird.add(thirdRow);
+    bothSecondAndThird.add(unitAndLessonRow);
+    bothSecondAndThird.add(listAndPanelRow);
 
-    currentExerciseVPanel.addStyleName("floatLeftList");
-    thirdRow.add(currentExerciseVPanel);
+  //  currentExerciseVPanel.addStyleName("floatLeftList");
+    listAndPanelRow.add(currentExerciseVPanel);
 
     practice.content.add(bothSecondAndThird);
 
     listInterface1 =
-      layout.makeExerciseList(secondRow, leftColumn, feedback, currentExerciseVPanel, service, controller);
+      layout.makeExerciseList(unitAndLessonRow, exerciseListContainer, feedback, currentExerciseVPanel, service, controller);
 
     listInterface1.setFactory(
       new MyFlashcardExercisePanelFactory<T>(service, feedback, controller, listInterface1), userManager, 1);
