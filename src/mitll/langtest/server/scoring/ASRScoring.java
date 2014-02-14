@@ -172,7 +172,7 @@ public class ASRScoring extends Scoring {
       builder.append(" ");
     }
     String s = builder.toString();
-    logger.debug("getSegmented phrase '" + longPhrase + "' -> '" + s + "'");
+   // logger.debug("getSegmented phrase '" + longPhrase + "' -> '" + s + "'");
 
     return s;
   }
