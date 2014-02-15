@@ -9,12 +9,15 @@ package mitll.langtest.client.sound;
  */
 public class SoundManagerStatic implements SoundManagerAPI {
   private boolean debug = false;
-    boolean webaudio = false;
+  boolean webaudio = false;
+
+  private static final boolean USE_WEBAUDIO=false;
+
   public void initialize() {
     SoundManager.initialize();
 
     boolean b = WebAudio.checkIfWebAudioInstalled();
-    if (b) {
+    if (b && USE_WEBAUDIO) {
       System.out.println("got web audio!");
       webaudio = true;
     }

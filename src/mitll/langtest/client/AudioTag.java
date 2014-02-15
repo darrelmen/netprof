@@ -16,7 +16,7 @@ public class AudioTag {
   private static final String ALTERNATE_TYPE = "ogg";
   private static final boolean INCLUDE_ALTERNATE_AUDIO = true;
   private static final String PRELOAD_HINT = "auto";
-  public static final String COMPRESSED_TYPE = "ogg";//"mp3";
+  public static final String COMPRESSED_TYPE = "mp3";//"ogg";//"mp3";
 
   /**
    * @see mitll.langtest.client.result.ResultManager#getTable
