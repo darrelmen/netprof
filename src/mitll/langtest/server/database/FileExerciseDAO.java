@@ -10,6 +10,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -53,6 +54,7 @@ public class FileExerciseDAO implements ExerciseDAO {
   private final boolean processSemicolons = false;
   private boolean isPashto;
   private SectionHelper sectionHelper = new SectionHelper();
+  private List<String> errors = new ArrayList<String>();
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#makeExerciseDAO
@@ -80,6 +82,11 @@ public class FileExerciseDAO implements ExerciseDAO {
        logger.warn("couldn't find " +id + " in " +idToExercise.size() + " exercises...");
     }
     return idToExercise.get(id);
+  }
+
+  @Override
+  public List<String> getErrors() {
+    return errors;
   }
 
   public void readWordPairs(String lessonPlanFile, String language, boolean doImages) {
@@ -136,7 +143,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     } else {
       logger.debug("found " + exercises.size() + " exercises, first is " + exercises.iterator().next());
     }
-    populateIDToExercise();
+    populateIDToExercise(exercises);
   }
 
   /**
@@ -157,7 +164,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     return id;
   }
 
-  private void populateIDToExercise() {
+  private void populateIDToExercise(List<Exercise> exercises) {
     for (Exercise e : exercises) idToExercise.put(e.getID(),e);
   }
 
@@ -249,23 +256,40 @@ public class FileExerciseDAO implements ExerciseDAO {
    */
   public void readFastAndSlowExercises(final String installPath, String configDir, String lessonPlanFile) {
     if (exercises != null) return;
-
+    InputStream resourceAsStream;
     try {
       File file = new File(lessonPlanFile);
       if (!file.exists()) {
         logger.error("can't find '" + file +"'");
         return;
       }
-      else {
-       // logger.debug("found file at " + file.getAbsolutePath());
-      }
-      BufferedReader reader = getReader(lessonPlanFile);
+     // else {
+        // logger.debug("found file at " + file.getAbsolutePath());
+    //  }
+      resourceAsStream = new FileInputStream(lessonPlanFile);
+    } catch (FileNotFoundException e) {
+      logger.error("Couldn't find " + lessonPlanFile);
+      return;
+    }
+
+    exercises = readExercises(installPath, configDir, lessonPlanFile, resourceAsStream);
+  }
+
+  public List<Exercise> readExercises(InputStream resourceAsStream) {
+   return readExercises(null, null, "inputStream", resourceAsStream);
+  }
+
+  public List<Exercise> readExercises(String installPath, String configDir, String lessonPlanFile, InputStream resourceAsStream) {
+    List<Exercise> exercises = new ArrayList<Exercise>();
+
+    try {
+      BufferedReader reader = getBufferedReader(resourceAsStream);
       String line2;
       int count = 0;
       //logger.debug("using install path " + installPath + " lesson " + lessonPlanFile + " isurdu " +isUrdu);
-      exercises = new ArrayList<Exercise>();
+      //exercises = new ArrayList<Exercise>();
       Pattern pattern = Pattern.compile("^\\d+\\.(.+)");
-      int errors = 0;
+    //  int errors = 0;
       int id = 0;
 
       String lastID = "";
@@ -308,9 +332,10 @@ public class FileExerciseDAO implements ExerciseDAO {
           }
         } catch (Exception e) {
           logger.error("Got " + e + ".Skipping line -- couldn't parse line #"+count + " : " +line2);
-          errors++;
-          if (errors > MAX_ERRORS) {
-            logger.error("too many errors (" + errors + "), giving up...");
+          errors.add("line #"+count + " : " +line2);
+          //errors++;
+          if (errors.size() > MAX_ERRORS) {
+            logger.error("too many errors (" + errors.size() + "), giving up...");
             break;
           }
         }
@@ -325,11 +350,12 @@ public class FileExerciseDAO implements ExerciseDAO {
     else {
       logger.debug("found " + exercises.size() + " exercises, first is " + exercises.iterator().next());
     }
-    if (CONFIRM_AUDIO_REFS) confirmAudioRefs(exercises,mediaDir);
-    populateIDToExercise();
+    if (CONFIRM_AUDIO_REFS) confirmAudioRefs(exercises/*,mediaDir*/);
+    populateIDToExercise(exercises);
+    return exercises;
   }
 
-  private void confirmAudioRefs(List<Exercise> exercises, String mediaDir) {
+  private void confirmAudioRefs(List<Exercise> exercises/*, String mediaDir*/) {
     int c = 0;
     try {
       FileWriter writer = new FileWriter("missingAudio.txt");
@@ -350,7 +376,11 @@ public class FileExerciseDAO implements ExerciseDAO {
 
   private BufferedReader getReader(String lessonPlanFile) throws FileNotFoundException, UnsupportedEncodingException {
     FileInputStream resourceAsStream = new FileInputStream(lessonPlanFile);
-    return new BufferedReader(new InputStreamReader(resourceAsStream,ENCODING));
+    return getBufferedReader(resourceAsStream);
+  }
+
+  private BufferedReader getBufferedReader(InputStream resourceAsStream) throws UnsupportedEncodingException {
+    return new BufferedReader(new InputStreamReader(resourceAsStream, ENCODING));
   }
 
   /**
