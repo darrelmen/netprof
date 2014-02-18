@@ -39,10 +39,14 @@ public class DataCollectorDialog extends UserDialog {
 
   /**
    * Really should be named data collector (audio recorder) login
+   * @see UserManager#teacherLogin()
    */
   public void displayTeacherLogin(String loginTitle) {
+    System.out.println("display teacher login " + loginTitle);
     final Modal dialogBox = getDialog(loginTitle);
-    recordingOrder = getRecordingOrder(dialogBox, false);
+    if (!props.isDataCollectAdminView()) {
+      recordingOrder = getRecordingOrder(dialogBox, false);
+    }
 
     final FormField user = addControlFormField(dialogBox, "User ID");
     final FormField password = addControlFormField(dialogBox, "Password", true, 0);
@@ -192,13 +196,13 @@ public class DataCollectorDialog extends UserDialog {
         }
       }
       if (valid) {
-        if (registrationInfo.genderGroup.getValue().equals(UNSET)) {
+        if (registrationInfo.genderGroup.getValue().equals(UNSET) && !props.isDataCollectAdminView()) {
           registrationInfo.genderGroup.markSimpleError("Please select a gender.", Placement.RIGHT);
           valid = false;
         }
       }
       if (valid) {
-        if (registrationInfo.experienceGroup.getValue().equals(UNSET)) {
+        if (registrationInfo.experienceGroup.getValue().equals(UNSET) && !props.isDataCollectAdminView()) {
           registrationInfo.experienceGroup.markSimpleError("Please select an experience level.", Placement.RIGHT);
           valid = false;
         }
