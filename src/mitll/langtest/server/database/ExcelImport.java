@@ -85,7 +85,7 @@ public class ExcelImport implements ExerciseDAO {
     this.mediaDir = mediaDir;
     boolean missingExists = getMissing(relativeConfigDir, "missingSlow.txt", missingSlowSet);
     missingExists &= getMissing(relativeConfigDir, "missingFast.txt", missingFastSet);
-    shouldHaveRefAudio = missingExists;
+    shouldHaveRefAudio = missingExists && !serverProps.isClassroomMode();
     this.usePredefinedTypeOrder = serverProps.usePredefinedTypeOrder();
     this.language = serverProps.getLanguage();
     this.skipSemicolons = serverProps.shouldSkipSemicolonEntries();
@@ -358,8 +358,14 @@ public class ExcelImport implements ExerciseDAO {
             }
           }
           if (english.length() == 0) {
+            if (serverProps.isClassroomMode()) {
+              english = "NO ENGLISH";
+              // TODO : add defect
+            }
             //logger.info("-------- > for row " + next.getRowNum() + " english is blank ");
-            englishSkipped++;
+            else {
+              englishSkipped++;
+            }
           }
           if (gotHeader && english.length() > 0) {
             if (inMergedRow) logger.info("got merged row ------------ ");
@@ -389,6 +395,9 @@ public class ExcelImport implements ExerciseDAO {
                   //logger.info("for row " + next.getRowNum() + " for translit using " + translit);
                 }
               }
+
+              boolean markSemiDefect = foreignLanguagePhrase.contains(";") || translit.contains(";") || english.contains(";");
+              // TODO : mark defect
 
               boolean expectFastAndSlow = idIndex == -1;
               String idToUse = expectFastAndSlow ? "" + id++ : givenIndex;
@@ -654,6 +663,7 @@ public class ExcelImport implements ExerciseDAO {
    * @param context
    * @param refAudioIndex
    * @return
+   * @see #getExercise(String, int, org.apache.poi.ss.usermodel.Row, String, String, String, String, String, boolean, String)
    */
   private Exercise getExercise(String id,
                                String english, String foreignLanguagePhrase, String translit, String meaning,
