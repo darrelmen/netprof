@@ -72,6 +72,7 @@ public class ServerProperties {
   //private static final String EXERCISES_IN_ORDER = "exercisesInOrder";
   private static final String FOREIGN_LANGUAGE_QUESTIONS_ONLY = "foreignLanguageQuestionsOnly";
   private static final String MAX_NUM_EXERCISES = "maxNumExercises";
+  private static final String CLASSROOM_MODE = "classroomMode";
 
   private Properties props = new Properties();
 
@@ -213,7 +214,7 @@ public class ServerProperties {
   }
 
   public boolean shouldSkipSemicolonEntries() {
-    return getDefaultTrue(SKIP_SEMICOLONS);
+    return getDefaultTrue(SKIP_SEMICOLONS) && !isClassroomMode();
   }
 
   public boolean sortExercises() {
@@ -223,7 +224,9 @@ public class ServerProperties {
   public boolean showForeignLanguageQuestionsOnly() {
     return getDefaultFalse(FOREIGN_LANGUAGE_QUESTIONS_ONLY);
   }
-  
+
+  public boolean isClassroomMode() { return getDefaultFalse(CLASSROOM_MODE); }
+
   public boolean getCollectSynonyms() {
     return props.getProperty(COLLECT_SYNONYMS, "true").equals("true");
   }
