@@ -33,7 +33,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   public static float MP3_HEADER_OFFSET = 0f;//0.048f;
 
   /**
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, int, mitll.langtest.client.exercise.ExerciseController, ScoreListener)
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, ScoreListener)
    * @param service
    * @param gaugePanel
    */
@@ -98,9 +98,9 @@ public abstract class ScoringAudioPanel extends AudioPanel {
     if (refAudio != null) {
       getTranscriptImageURLForAudio(audioPath, refAudio, refSentence, width,words,phones);
     }
-    else {
+   // else {
       //System.out.println("ScoringAudioPanel.getEachImage : no ref audio for id '" + getElement().getId()+"'");
-    }
+   // }
   }
 
   /**
@@ -173,7 +173,6 @@ public abstract class ScoringAudioPanel extends AudioPanel {
    */
   private class TranscriptEventClickHandler implements ClickHandler {
     private final NetPronImageType type;
-    //private final int numRepeats;
 
     /**
      * @see mitll.langtest.client.scoring.ScoringAudioPanel#addClickHandlers
@@ -181,7 +180,6 @@ public abstract class ScoringAudioPanel extends AudioPanel {
      */
     public TranscriptEventClickHandler(NetPronImageType type) {
       this.type = type;
-     // this.numRepeats = numRepeats;
     }
 
     /**
