@@ -42,12 +42,14 @@ public class SQLExerciseDAO implements ExerciseDAO {
   private final Database database;
   private String mediaDir;
   private List<Exercise> exercises;
+
   private Map<String,Exercise> idToExercise = new HashMap<String,Exercise>();
   private SectionHelper sectionHelper = new SectionHelper();
   private Map<String,List<String>> levelToExercises = new HashMap<String,List<String>>();
   private Map<String,String> exerciseToLevel = new HashMap<String,String>();
   private Collection<String> readingExercises = new ArrayList<String>();
   private Collection<String> listeningExercises = new ArrayList<String>();
+  private List<String> errors = new ArrayList<String>();
 
   /**
    * @see DatabaseImpl#makeExerciseDAO(boolean)
@@ -404,6 +406,11 @@ public class SQLExerciseDAO implements ExerciseDAO {
       b.append(cbuf, 0, c);
     }
     return b.toString();
+  }
+
+  @Override
+  public List<String> getErrors() {
+    return errors;
   }
 
 /*  private static void dumpQuestionsAndAnswers(SQLExerciseDAO sqlExerciseDAO) {
