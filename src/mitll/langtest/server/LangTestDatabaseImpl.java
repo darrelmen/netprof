@@ -1010,7 +1010,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.custom.QCNPFExercise#makeCheckBox(String, com.google.gwt.user.client.ui.Panel, com.google.gwt.user.client.ui.FocusWidget, boolean)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addAnnotation(String, String, String)
    * @param exerciseID
    * @param field
    * @param status
