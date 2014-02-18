@@ -33,6 +33,9 @@ import java.util.TreeSet;
  * To change this template use File | Settings | File Templates.
  */
 public class UserListManager {
+  public static final String CORRECT = "correct";
+  public static final String FIXED = "fixed";
+  public static final String INCORRECT = "incorrect";
   private static Logger logger = Logger.getLogger(UserListManager.class);
   private static final String FAST = "Fast";
   private static final String SLOW = "Slow";
@@ -214,7 +217,7 @@ public class UserListManager {
     Map<String, UserExercise> idToUser = new HashMap<String, UserExercise>();
     for (UserExercise ue : allKnown) idToUser.put(ue.getID(), ue);
 
-    List<UserExercise> onList = getReviewedUserExercises(idToUser,ids);
+    List<UserExercise> onList = getReviewedUserExercises(idToUser, ids);
 
     logger.debug("getReviewList ids #=" + allKnown.size() + " yielded " + onList.size());
     User user = new User(-1, 89, 0, 0, "", "", false);
@@ -425,12 +428,24 @@ public class UserListManager {
 
   public boolean listExists(long id) {  return userListDAO.getWhere(id, false) != null; }
 
+  /**
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addAnnotation(String, String, String)
+   *
+   * @param exerciseID
+   * @param field
+   * @param status
+   * @param comment
+   * @param userID
+   */
   public void addAnnotation(String exerciseID, String field, String status, String comment, long userID) {
-    logger.info("addAnnotation write to database! " + exerciseID + " " + field + " " + status + " " + comment);
-    annotationDAO.add(new UserAnnotation(exerciseID, field, status, comment, userID,System.currentTimeMillis()));
+    logger.info("addAnnotation add to db exercise id " + exerciseID + " field " + field + " status " + status + " comment " + comment);
+    annotationDAO.add(new UserAnnotation(exerciseID, field, status, comment, userID, System.currentTimeMillis()));
 
-    if (status.equalsIgnoreCase("incorrect")) {
+    if (status.equalsIgnoreCase(INCORRECT)) {
        markIncorrect(exerciseID);
+    }
+    else if (status.equalsIgnoreCase(CORRECT)) {
+      incorrect.remove(exerciseID);
     }
   }
 
@@ -492,7 +507,7 @@ public class UserListManager {
         if (!annotation1.isCorrect()) {
           logger.debug("\tremoveReviewed " + newUserExercise.getID()  + "  has " + annotation1);
 
-          addAnnotation(newUserExercise.getID(), field, "correct", "fixed", newUserExercise.getCreator());
+          addAnnotation(newUserExercise.getID(), field, CORRECT, FIXED, newUserExercise.getCreator());
         }
       }
     }
