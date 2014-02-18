@@ -182,7 +182,7 @@ public abstract class UserDialog extends BasicDialog {
    * @see mitll.langtest.client.user.DataCollectorDialog#userExists(Integer, String, mitll.langtest.client.user.BasicDialog.FormField, com.github.gwtbootstrap.client.ui.Modal)
    */
   protected void setRecordingOrder() {
-    boolean unansweredFirst = recordingOrder.getValue().equals(LEAST_RECORDED_FIRST);
+    boolean unansweredFirst = recordingOrder != null && recordingOrder.getValue().equals(LEAST_RECORDED_FIRST);
     userManager.setShowUnansweredFirst(unansweredFirst);
   }
 
