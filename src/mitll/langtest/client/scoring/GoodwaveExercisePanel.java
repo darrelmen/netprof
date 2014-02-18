@@ -416,7 +416,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
      * @see GoodwaveExercisePanel#getAnswerWidget
      */
     public ASRRecordAudioPanel(LangTestDatabaseAsync service, int index, ExerciseController controller) {
-      super(service, controller.getSegmentRepeats(), controller, scorePanel);
+      super(service, controller, scorePanel);
       this.index = index;
       getElement().setId("ASRRecordAudioPanel");
     }
@@ -594,6 +594,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
       hp.add(vp);
       return vp;
+    }
+
+    protected boolean hasAudio() {
+      return !exercise.getAudioAttributes().isEmpty();
     }
 
     protected void addAudioRadioButton(Panel vp, RadioButton fast, String audioPath) {
