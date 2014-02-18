@@ -680,10 +680,11 @@ public class ExcelImport implements ExerciseDAO {
     return sectionHelper.getSections();
   }
 
-  public Map<String, Lesson> getSection(String type) {
+/*  public Map<String, Lesson> getSection(String type) {
     return sectionHelper.getSection(type);
-  }
+  }*/
 
+  @Override
   public List<String> getErrors() {
     return errors;
   }
