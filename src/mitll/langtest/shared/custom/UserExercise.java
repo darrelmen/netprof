@@ -41,7 +41,7 @@ public class UserExercise extends AudioExercise {
   /**
    * Tooltip is the english phrase, but if it's empty, use the foreign language.
    *
-   * @see mitll.langtest.server.database.custom.UserListManager#createNewItem(long, String, String, String)
+   * @see mitll.langtest.server.database.custom.UserListManager#createNewItem
    * @param uniqueID
    * @param exerciseID
    * @param creator
