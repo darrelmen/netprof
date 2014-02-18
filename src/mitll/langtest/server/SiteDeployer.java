@@ -2,6 +2,8 @@ package mitll.langtest.server;
 
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.ExcelImport;
+import mitll.langtest.server.database.ExerciseDAO;
+import mitll.langtest.server.database.FileExerciseDAO;
 import mitll.langtest.server.database.Lesson;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.Exercise;
@@ -330,8 +332,17 @@ public class SiteDeployer {
   }
 
   private void readExercisesPopulateSite(Site site, String fileName, InputStream inputStream) {
-    ExcelImport importer = new ExcelImport();
-    List<Exercise> exercises = importer.readExercises(inputStream);
+    List<Exercise> exercises;
+    ExerciseDAO importer;
+    if (fileName.endsWith(".txt")) {
+      FileExerciseDAO fileImporter = new FileExerciseDAO("", "", false);
+      exercises = fileImporter.readExercises(inputStream);
+      importer = fileImporter;
+    } else {
+      ExcelImport excelImport = new ExcelImport();
+      exercises = excelImport.readExercises(inputStream);
+      importer = excelImport;
+    }
     site.setExercises(exercises);
     String sectionInfo = getSectionInfo(importer);
 
@@ -341,10 +352,10 @@ public class SiteDeployer {
     site.setExerciseFile(fileName);
   }
 
-  private String getSectionInfo(ExcelImport importer) {
+  private String getSectionInfo(ExerciseDAO importer) {
     StringBuilder builder = new StringBuilder();
-    for (String section : importer.getSections()) {
-      Map<String,Lesson> section1 = importer.getSection(section);
+    for (String section : importer.getSectionHelper().getSections()) {
+      Map<String,Lesson> section1 = importer.getSectionHelper().getSection(section);
       if (!section1.isEmpty()) {
         builder.append(section1.keySet().size()).append(" ").append(section).append("s, ");
       }
