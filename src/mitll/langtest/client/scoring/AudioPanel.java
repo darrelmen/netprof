@@ -128,10 +128,16 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
     // add widgets to left of play button
     Widget beforePlayWidget = getBeforePlayWidget();
-    playAudio = getPlayButtons(beforePlayWidget);
-    hp.add(playAudio);
-    hp.setCellHorizontalAlignment(playAudio,HorizontalPanel.ALIGN_LEFT);
+    audioPositionPopup = new AudioPositionPopup(imageContainer);
 
+    if (hasAudio()) {
+      playAudio = getPlayButtons(beforePlayWidget);
+      hp.add(playAudio);
+      hp.setCellHorizontalAlignment(playAudio, HorizontalPanel.ALIGN_LEFT);
+    }
+    else {
+      hp.add(beforePlayWidget);
+    }
     HorizontalPanel controlPanel = new HorizontalPanel();
 
     waveform = new ImageAndCheck();
@@ -161,6 +167,10 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     add(new Heading(6));
 
     add(imageContainer);
+  }
+
+  protected boolean hasAudio() {
+    return true;
   }
 
   public void doPause() { playAudio.doPause(); }
@@ -271,7 +281,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     */
   private PlayAudioPanel getPlayButtons(Widget toTheLeftWidget) {
     PlayAudioPanel playAudio = makePlayAudioPanel(toTheLeftWidget);
-    audioPositionPopup = new AudioPositionPopup(imageContainer);
     playAudio.addListener(audioPositionPopup);
     return playAudio;
   }
