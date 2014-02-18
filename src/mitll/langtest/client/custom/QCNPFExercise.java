@@ -34,8 +34,8 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class QCNPFExercise extends GoodwaveExercisePanel {
-  private static final String CHECKBOX_LABEL = "         ";//"Has defect";
-  private static final String CHECKBOX_LABEL2 = "           ";//"Has defect";
+ // private static final String CHECKBOX_LABEL = "         ";//"Has defect";
+ // private static final String CHECKBOX_LABEL2 = "           ";//"Has defect";
   private static final String DEFECT = "Defect?";
   private Set<String> incorrectSet = new HashSet<String>();
   private List<RequiresResize> toResize;
@@ -266,7 +266,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
                                 boolean alreadyMarkedCorrect) {
     boolean isComment = instance.equals(Navigation.COMMENT);
 
-    final CheckBox checkBox = new CheckBox("");//isComment ? CHECKBOX_LABEL2 : CHECKBOX_LABEL);
+    final CheckBox checkBox = new CheckBox("");
     checkBox.addStyleName(isComment? "wideCenteredRadio" :"centeredRadio");
     checkBox.addClickHandler(new ClickHandler() {
       @Override
