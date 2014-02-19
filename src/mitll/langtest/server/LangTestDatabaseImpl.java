@@ -1327,7 +1327,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
 
     if (SCORE_RESULTS) {
-      List<Result> resultsThatNeedScore = db.getResultDAO().getResultsThatNeedScore();
+      List<Result> resultsThatNeedScore = db.getResultDAO().getResultsFor();
       //resultsThatNeedScore = resultsThatNeedScore.subList(0,20);
       getExercises();
       logger.debug("doing scoring on " + resultsThatNeedScore.size() + " results");
