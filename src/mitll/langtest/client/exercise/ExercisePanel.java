@@ -337,7 +337,7 @@ public class ExercisePanel<T extends ExerciseShell> extends VerticalPanel implem
    * @param vp
    * @param e
    */
-  private void addQuestionPrompt(Panel vp, Exercise e) {
+  protected void addQuestionPrompt(Panel vp, Exercise e) {
     HTML prompt = new HTML(getQuestionPrompt(e.isPromptInEnglish()));
     prompt.getElement().setId("questionPrompt");
     prompt.addStyleName("marginBottomTen");
