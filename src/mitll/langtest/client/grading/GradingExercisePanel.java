@@ -1,11 +1,10 @@
 package mitll.langtest.client.grading;
 
+import com.github.gwtbootstrap.client.ui.Heading;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasWidgets;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
+import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -61,6 +60,7 @@ public class GradingExercisePanel extends ExercisePanel {
   /**
    * If controller is english only, then show the answer too.
    *
+   * @see #getQuestionPanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int, java.util.List, java.util.List, int, mitll.langtest.shared.Exercise.QAPair, com.google.gwt.user.client.ui.HasWidgets)
    * @param i
    * @param total
    * @param engQAPair
@@ -86,10 +86,28 @@ public class GradingExercisePanel extends ExercisePanel {
     }
   }
 
-  /**
-   * If controller is english only, then show the answer too.
-   * @return true if in english only mode
-   */
+  @Override
+  protected void addQuestionPrompt(Panel vp, Exercise e) {
+
+    vp.add(new Heading(5, "Reference Audio:"));
+    String refAudio = e.getRefAudio();
+    AudioTag audioTag = new AudioTag();
+    if (refAudio == null || refAudio.isEmpty()) refAudio = e.getSlowAudioRef();
+    if (refAudio.endsWith(".wav")) {
+      vp.add(new HTML(audioTag.getAudioTag(refAudio)));
+    }
+    else {
+      SafeHtmlBuilder sb = new SafeHtmlBuilder();
+      sb.appendHtmlConstant(refAudio);
+      vp.add(new HTML(sb.toSafeHtml()));
+    }
+    super.addQuestionPrompt(vp,e);
+  }
+
+    /**
+     * If controller is english only, then show the answer too.
+     * @return true if in english only mode
+     */
   @Override
   protected boolean shouldShowAnswer() {
     return super.shouldShowAnswer() || controller.getEnglishOnly();
@@ -141,7 +159,7 @@ public class GradingExercisePanel extends ExercisePanel {
                 String prompt = getPrompt(isSpoken, isForeign, outer);
                 System.out.println("\tgetResultsForExercise add answer group for results (index = " + index+ ") size = " + results.size());
 
-                vp.add(addAnswerGroup(resultsAndGrades.grades, results, bigPage, prompt, outer, service, controller.getProps(), n, index));
+                vp.add(addAnswerGroup(resultsAndGrades.grades, results, bigPage, prompt, service, controller.getProps(), n, index));
               }
               else {
                 System.out.println("\tspoken : " +isSpoken + " isFLQ " + isForeign);
@@ -172,7 +190,6 @@ public class GradingExercisePanel extends ExercisePanel {
    * @param results
    * @param bigPage
    * @param prompt
-   * @param outer
    * @param service
    * @param propertyHandler
    * @param n
@@ -181,7 +198,7 @@ public class GradingExercisePanel extends ExercisePanel {
    */
   private Widget addAnswerGroup(Collection<Grade> grades,
                                 List<Result> results, boolean bigPage, String prompt,
-                                GradingExercisePanel outer, LangTestDatabaseAsync service, PropertyHandler propertyHandler, int n, int index) {
+                                LangTestDatabaseAsync service, PropertyHandler propertyHandler, int n, int index) {
     VerticalPanel vp = new VerticalPanel();
 
     int oneQuestionPageSize = bigPage ? BIG_ONE_QUESTION_PAGE_SIZE : ONE_QUESTION_PAGE_SIZE;
