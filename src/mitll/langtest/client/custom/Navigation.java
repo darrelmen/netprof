@@ -467,7 +467,7 @@ public class Navigation implements RequiresResize {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
         if (created && !ul.isPrivate() && ul.isEmpty() && finalEditItem != null) {
-          tabPanel.selectTab(2);    // 2 = add/edit item
+          tabPanel.selectTab(0);    // 2 = add/edit item
           showEditItem(ul, finalEditItem, (isReview || isComment) ? reviewItem : Navigation.this.editItem, isNormalList);
         } else {
           tabPanel.selectTab(0);
