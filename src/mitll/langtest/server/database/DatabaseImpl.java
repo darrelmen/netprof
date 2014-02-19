@@ -185,7 +185,14 @@ public class DatabaseImpl implements Database {
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
     }
+
+    //if (getServerProps().isGoodwaveMode()) {
+     // List<ResultDAO.SimpleResult> resultsThatNeedScore = resultDAO.getResultsThatNeedScore();
+     // logger.info("results that need a score "  +resultsThatNeedScore.size());
+    //}
   }
+
+  public ResultDAO getResultDAO() { return resultDAO; }
 
   @Override
   public Connection getConnection() { return connection.getConnection();  }
@@ -202,7 +209,6 @@ public class DatabaseImpl implements Database {
   }
 
   public Export getExport() {
-    //if (exerciseDAO == null) logger.error("huh? exercise dao is null?");
     return new Export(exerciseDAO,resultDAO,gradeDAO);
   }
 
