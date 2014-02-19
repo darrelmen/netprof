@@ -79,6 +79,17 @@ public class ResultDAO extends DAO {
     return Collections.emptyList();
   }
 
+  public List<Result> getResultsFor() {
+    try {
+      String sql = "SELECT * FROM " + RESULTS + " where " + USERID+
+          "=" + 326 + " and " + ANSWER + " like '%07980%'";
+      return getResultsSQL(sql);
+    } catch (SQLException e) {
+      logger.error("got " +e,e);
+    }
+    return Collections.emptyList();
+  }
+
   private List<SimpleResult> getSimpleResults(String whereClause) {
     try {
       String sql = "SELECT " +
@@ -143,7 +154,7 @@ public class ResultDAO extends DAO {
 
   /**
    * Pulls the list of results out of the database.
-   * @see mitll.langtest.server.database.DatabaseImpl#getResults()
+   * @see DatabaseImpl#getResultsWithGrades()
    * @return
    */
   public List<Result> getResults() {
