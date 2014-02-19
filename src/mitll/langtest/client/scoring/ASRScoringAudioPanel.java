@@ -54,7 +54,6 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
    * @see ScoringAudioPanel#getTranscriptImageURLForAudio
    * @param path to audio file on server
    * @param resultID
-   * @param refAudio IGNORED HERE
    * @param refSentence what should be aligned
    * @param wordTranscript image panel that needs a URL pointing to an image generated on the server
    * @param phoneTranscript image panel that needs a URL pointing to an image generated on the server
@@ -62,7 +61,7 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
    * @param height of images returned
    * @param reqid so if many requests are made quickly and the returns are out of order, we can ignore older requests
    */
-  protected void scoreAudio(final String path, long resultID, String refAudio, String refSentence,
+  protected void scoreAudio(final String path, long resultID, String refSentence,
                             final ImageAndCheck wordTranscript, final ImageAndCheck phoneTranscript,
                             int toUse, int height, int reqid) {
     //System.out.println("scoring audio " + path +" with ref sentence " + refSentence + " reqid " + reqid);
