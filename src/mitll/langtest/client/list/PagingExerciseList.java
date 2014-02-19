@@ -194,7 +194,7 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
           String text = typeAhead.getText();
           //  text = text.trim();
           if (!text.equals(lastValue)) {
-            System.out.println("looking for '" + text + "' (" + text.length() + " chars)");
+            System.out.println("addTypeAhead : looking for '" + text + "' (" + text.length() + " chars)");
             loadExercises(getHistoryToken(""), text);
             lastValue = text;
           }
