@@ -101,6 +101,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     this.gaugePanel = gaugePanel;
     if (debug) System.out.println("AudioPanel : gauge panel " + gaugePanel);
     this.showSpectrogram = showSpectrogram;
+    if (showSpectrogram) System.out.println("AudioPanel : showSpectrogram! ");
     this.rightMargin = rightMargin;
   }
 
