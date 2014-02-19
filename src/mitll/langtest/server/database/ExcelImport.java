@@ -186,7 +186,9 @@ public class ExcelImport implements ExerciseDAO {
     if (idToExercise.isEmpty()) logger.warn("huh? couldn't find any exercises..?");
 
     synchronized (this) {
-      return idToExercise.get(id);
+      Exercise exercise = idToExercise.get(id);
+      //if (exercise == null) logger.warn("no '" +id+"'  in " + idToExercise.keySet());
+      return exercise;
     }
   }
 
