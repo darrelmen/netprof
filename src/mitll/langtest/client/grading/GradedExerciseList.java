@@ -84,7 +84,7 @@ public class GradedExerciseList<T extends ExerciseShell> extends PagingExerciseL
     getNextUngraded(false);
   }
 
-  protected void loadExercises(String selectionState, String prefix) {}
+  //protected void loadExercises(String selectionState, String prefix) {}
 
   private void getNextUngraded(final boolean showFirstIfNoneToGrade) {
     final PopupPanel popup = getPopup2("Please wait...");
