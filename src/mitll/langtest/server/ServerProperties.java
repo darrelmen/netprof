@@ -73,6 +73,7 @@ public class ServerProperties {
   private static final String FOREIGN_LANGUAGE_QUESTIONS_ONLY = "foreignLanguageQuestionsOnly";
   private static final String MAX_NUM_EXERCISES = "maxNumExercises";
   private static final String CLASSROOM_MODE = "classroomMode";
+  private static final String GRADING_PROP = "grading";
 
   private Properties props = new Properties();
 
@@ -226,6 +227,7 @@ public class ServerProperties {
   }
 
   public boolean isClassroomMode() { return getDefaultFalse(CLASSROOM_MODE); }
+  public boolean isGrading() { return getDefaultFalse(GRADING_PROP); }
 
   public boolean getCollectSynonyms() {
     return props.getProperty(COLLECT_SYNONYMS, "true").equals("true");
