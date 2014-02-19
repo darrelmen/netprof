@@ -263,7 +263,8 @@ public class ASRScoring extends Scoring {
     String pathname = noSuffix + ".wav";
     File wavFile = new File(pathname);
     boolean mustPrepend = false;
-    if (!wavFile.exists()) {
+    if (!wavFile.exists() && deployPath != null) {
+      logger.debug("trying new path for " + pathname + " under " + deployPath);
       wavFile = new File(deployPath + File.separator + pathname);
       mustPrepend = true;
     }
@@ -551,7 +552,7 @@ public class ASRScoring extends Scoring {
     double hydecScore = scoresFromHydec.hydecScore;
     if (/*hydecScore != -1 ||*/ hydecScore > lowScoreThresholdKeepTempDir) {   // keep really bad scores for now
       try {
-        logger.debug("deleting " + tmpDir + " since score is " +hydecScore);
+        //logger.debug("deleting " + tmpDir + " since score is " +hydecScore);
         FileUtils.deleteDirectory(new File(tmpDir));
       } catch (IOException e) {
         logger.error("Deleting dir " + tmpDir + " got " +e,e);
