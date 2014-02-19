@@ -16,7 +16,7 @@ public class SoundManagerStatic implements SoundManagerAPI {
   public void initialize() {
     SoundManager.initialize();
 
-    boolean b = WebAudio.checkIfWebAudioInstalled();
+    boolean b = true || WebAudio.checkIfWebAudioInstalled(); // for now -- note console seems to be undefined in IE
     if (b && USE_WEBAUDIO) {
       System.out.println("got web audio!");
       webaudio = true;
