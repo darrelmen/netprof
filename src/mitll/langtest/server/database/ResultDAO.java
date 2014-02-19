@@ -51,7 +51,6 @@ public class ResultDAO extends DAO {
   private final GradeDAO gradeDAO;
   private final ScheduleDAO scheduleDAO ;
   private final boolean debug = false;
-  //private long lastWriteTime = Long.MIN_VALUE;
 
   public ResultDAO(Database database, UserDAO userDAO) {
     super(database);
@@ -66,6 +65,18 @@ public class ResultDAO extends DAO {
 
   public List<SimpleResult> getResultsForUser(long userid) {
     return getSimpleResults(" where userid=" +userid);
+  }
+
+
+  public List<Result> getResultsThatNeedScore() {
+    try {
+      String sql = "SELECT * FROM " + RESULTS + " where " + PRON_SCORE+
+          "=-1 AND " +VALID +"=true";
+      return getResultsSQL(sql);
+    } catch (SQLException e) {
+      logger.error("got " +e,e);
+    }
+    return Collections.emptyList();
   }
 
   private List<SimpleResult> getSimpleResults(String whereClause) {
@@ -142,10 +153,8 @@ public class ResultDAO extends DAO {
           return cachedResultsForQuery;
         }
       }
-      Connection connection = database.getConnection();
-      PreparedStatement statement = connection.prepareStatement("SELECT * FROM " +RESULTS+";");
-
-      List<Result> resultsForQuery = getResultsForQuery(connection, statement);
+      String sql = "SELECT * FROM " + RESULTS + ";";
+      List<Result> resultsForQuery = getResultsSQL(sql);
 
       synchronized(this) {
         cachedResultsForQuery = resultsForQuery;
@@ -155,6 +164,13 @@ public class ResultDAO extends DAO {
       ee.printStackTrace();
     }
     return new ArrayList<Result>();
+  }
+
+  protected List<Result> getResultsSQL(String sql) throws SQLException {
+    Connection connection = database.getConnection();
+    PreparedStatement statement = connection.prepareStatement(sql);
+
+    return getResultsForQuery(connection, statement);
   }
 
   public synchronized void invalidateCachedResults() {
@@ -601,7 +617,7 @@ public class ResultDAO extends DAO {
   /**
    * No op if table exists and has the current number of columns.
    *
-   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs()
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    * @param connection
    * @throws SQLException
    */
@@ -611,24 +627,24 @@ public class ResultDAO extends DAO {
 
     int numColumns = getNumColumns(connection, RESULTS);
     if (numColumns == 8) {
-      logger.info(RESULTS + " table had num columns = " + numColumns);
+      //logger.info(RESULTS + " table had num columns = " + numColumns);
       addColumnToTable(connection);
       enrichResults();
     }
     if (numColumns <= 11) {//!columnExists(connection,RESULTS, AUDIO_TYPE)) {
-      logger.info(RESULTS + " table had num columns = " + numColumns);
+      //logger.info(RESULTS + " table had num columns = " + numColumns);
       addTypeColumnToTable(connection);
     }
     if (numColumns < 12) {
-      logger.info(RESULTS + " table had num columns = " + numColumns);
+      //logger.info(RESULTS + " table had num columns = " + numColumns);
       addDurationColumnToTable(connection);
     }
     if (numColumns < 14) {
-      logger.info(RESULTS + " table had num columns = " + numColumns);
+      //logger.info(RESULTS + " table had num columns = " + numColumns);
       addFlashcardColumnsToTable(connection);
     }
     if (numColumns < 15) {
-      logger.info(RESULTS + " table had num columns = " + numColumns);
+      //logger.info(RESULTS + " table had num columns = " + numColumns);
       addStimulus(connection);
     }
    // enrichResults();
