@@ -117,10 +117,10 @@ public abstract class ScoringAudioPanel extends AudioPanel {
                                              final ImageAndCheck phoneTranscript) {
     int widthToUse = Math.max(MIN_WIDTH, width);
     int reqid = getReqID("score");
-    scoreAudio(path, resultID, refAudio, refSentence, wordTranscript, phoneTranscript, widthToUse, ANNOTATION_HEIGHT, reqid);
+    scoreAudio(path, resultID, refSentence, wordTranscript, phoneTranscript, widthToUse, ANNOTATION_HEIGHT, reqid);
   }
 
-  protected abstract void scoreAudio(final String path, long resultID, String refAudio, String refSentence,
+  protected abstract void scoreAudio(final String path, long resultID, String refSentence,
                                      final ImageAndCheck wordTranscript, final ImageAndCheck phoneTranscript,
                                      int toUse, int height, int reqid);
 
@@ -128,7 +128,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
 
   /**
    * Record the image URLs in the Image widgets and enable the check boxes
-   * @see ScoringAudioPanel#scoreAudio(String, long, String, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
+   * @see ScoringAudioPanel#scoreAudio(String, long, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
    * @param result
    * @param wordTranscript
    * @param phoneTranscript
