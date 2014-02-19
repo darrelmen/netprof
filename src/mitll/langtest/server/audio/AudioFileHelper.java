@@ -99,7 +99,7 @@ public class AudioFileHelper {
 
 
   /**
-   * @see mitll.langtest.client.scoring.ScoringAudioPanel#scoreAudio(String, long, String, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
+   * @see mitll.langtest.client.scoring.ScoringAudioPanel#scoreAudio(String, long, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
    * @param reqid
    * @param testAudioFile
    * @param sentence
@@ -169,7 +169,7 @@ public class AudioFileHelper {
    *
    * @see #getASRScoreForAudio(int, String, String, int, int, boolean)
    * @see mitll.langtest.server.scoring.AutoCRTScoring#getASRScoreForAudio
-   * @see mitll.langtest.client.scoring.ScoringAudioPanel#scoreAudio(String, long, String, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
+   * @see mitll.langtest.client.scoring.ScoringAudioPanel#scoreAudio(String, long, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
    * @param reqid
    * @param testAudioFile
    * @param sentence empty string when using lmSentences non empty and vice-versa
@@ -196,6 +196,9 @@ public class AudioFileHelper {
     DirAndName testDirAndName = new DirAndName(testAudioFile, installPath).invoke();
     String testAudioName = testDirAndName.getName();
     String testAudioDir = testDirAndName.getDir();
+
+    //logger.debug("test audio dir " + testAudioDir);
+    //logger.debug("test audio name " + testAudioName);
 
     if (serverProps.getLanguage().equalsIgnoreCase("English")) sentence = sentence.toUpperCase();  // hack for English
     PretestScore pretestScore = asrScoring.scoreRepeat(
@@ -366,14 +369,18 @@ public class AudioFileHelper {
       return testAudioName;
     }
 
-    public String getDir() {
-      return testAudioDir;
-    }
+    public String getDir() { return testAudioDir; }
 
     public DirAndName invoke() {
       File testAudio = new File(testAudioFile);
       testAudioName = testAudio.getName();
-      testAudioDir = testAudio.getParent().substring(installPath.length());
+      if (testAudio.getParent().startsWith(installPath)) {
+        testAudioDir = testAudio.getParent().substring(installPath.length());
+      }
+      else {
+        testAudioDir = testAudio.getParent();
+      }
+
       return this;
     }
   }
