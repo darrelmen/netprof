@@ -342,6 +342,10 @@ public class PropertyHandler {
     if (Window.Location.getParameter(RESPONSE_TYPE) != null) {
       responseType = Window.Location.getParameter(RESPONSE_TYPE);
     }
+    if (Window.Location.getParameter(SHOW_SPECTROGRAM) != null) {
+      spectrogram = !Window.Location.getParameter(SHOW_SPECTROGRAM).equals("false");
+      if (spectrogram) System.out.println("spectrogram is " + spectrogram);
+    }
     return grading;
   }
 
