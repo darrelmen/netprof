@@ -56,7 +56,7 @@ public class ResultManager extends PagerTable {
   protected int pageSize = PAGE_SIZE;
   protected LangTestDatabaseAsync service;
   protected UserFeedback feedback;
-  private final AudioTag audioTag = new AudioTag();
+  protected final AudioTag audioTag = new AudioTag();
   private String nameForAnswer;
   private Map<Column<?,?>,String> colToField = new HashMap<Column<?,?>, String>();
 
@@ -303,6 +303,22 @@ public class ResultManager extends PagerTable {
 
     table.addColumn(audioFile, nameForAnswer);
     colToField.put(audioFile,"answer");
+
+    TextColumn<Result> score = new TextColumn<Result>() {
+      @Override
+      public String getValue(Result answer) {
+        if (answer == null) {
+          System.err.println("huh? answer is null??");
+          return "";
+        }
+        else {
+          return "" + roundToHundredth(answer.getPronScore());
+        }
+      }
+    };
+    score.setSortable(true);
+    table.addColumn(score, "Score");
+    colToField.put(score, "score");
 
     addResultColumn(grades, grader, numGrades, table);
     return id;
