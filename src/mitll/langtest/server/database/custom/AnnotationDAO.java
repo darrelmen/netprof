@@ -128,7 +128,7 @@ public class AnnotationDAO extends DAO {
    *
    * @return
    */
-  public List<UserAnnotation> getAll() {
+  private List<UserAnnotation> getAll() {
     try {
       String sql = "SELECT * from " + ANNOTATION + " order by modified desc";
       return getUserAnnotations(sql);
@@ -198,6 +198,10 @@ public class AnnotationDAO extends DAO {
     return lists;
   }
 
+  /**
+   * @see mitll.langtest.server.database.custom.UserListManager#UserListManager(mitll.langtest.server.database.UserDAO, UserListDAO, UserListExerciseJoinDAO, AnnotationDAO, ReviewedDAO, mitll.langtest.server.PathHelper)
+   * @return
+   */
   public Set<String> getIncorrectIds()  {
     Connection connection = database.getConnection();
     String sql = "SELECT DISTINCT exerciseid from " + ANNOTATION + " order by exerciseid";
@@ -210,7 +214,6 @@ public class AnnotationDAO extends DAO {
 
       while (rs.next()) {
         lists.add(rs.getString(1));
-
       }
 
       //logger.debug("getUserAnnotations sql " + sql + " yielded " + lists);
