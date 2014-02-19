@@ -19,6 +19,7 @@ import java.util.List;
 public class UserExerciseDAO extends DAO {
   private static Logger logger = Logger.getLogger(UserExerciseDAO.class);
 
+  private static final String EXERCISEID = "exerciseid";
   private static final String TRANSLITERATION = "transliteration";
   private static final String OVERRIDE = "override";
 
@@ -30,14 +31,17 @@ public class UserExerciseDAO extends DAO {
     super(database);
     try {
       createUserTable(database);
-      //int numColumns = getNumColumns(database.getConnection(), USEREXERCISE);
 
       Collection<String> columns = getColumns(USEREXERCISE);
+      Connection connection = database.getConnection();
       if (!columns.contains(TRANSLITERATION)) {
-        addColumnToTable(database.getConnection());
+        addColumnToTable(connection);
       }
       if (!columns.contains(OVERRIDE)) {
-        addColumnToTable2(database.getConnection());
+        addColumnToTable2(connection);
+      }
+      if (!columns.contains(EXERCISEID)) {
+        addExerciseIDColumnToTable(connection);
       }
     } catch (SQLException e) {
       logger.error("got " + e, e);
@@ -62,7 +66,9 @@ public class UserExerciseDAO extends DAO {
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement(
         "INSERT INTO " + USEREXERCISE +
-          "(exerciseid,english,foreignLanguage," + TRANSLITERATION + ",creatorid,refAudio,slowAudioRef,override) " +
+          "(" +
+            EXERCISEID +
+            ",english,foreignLanguage," + TRANSLITERATION + ",creatorid,refAudio,slowAudioRef,override) " +
           "VALUES(?,?,?,?,?,?,?,?);");
       int i = 1;
       statement.setString(i++, userExercise.getID());
@@ -99,7 +105,8 @@ public class UserExerciseDAO extends DAO {
         String sql = "UPDATE " + USEREXERCISE +
           " " +
           "SET " +
-          "exerciseid='" + customID + "' " +
+            EXERCISEID +
+            "='" + customID + "' " +
           "WHERE uniqueid=" + userExercise.getUniqueID();
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.executeUpdate();
@@ -130,7 +137,7 @@ public class UserExerciseDAO extends DAO {
       USEREXERCISE +
       " (" +
       "uniqueid IDENTITY, " +
-      "exerciseid VARCHAR, " +
+        EXERCISEID +" VARCHAR, " +
       "english VARCHAR, " +
       "foreignLanguage VARCHAR, " +
       TRANSLITERATION + " VARCHAR, " +
@@ -207,10 +214,10 @@ public class UserExerciseDAO extends DAO {
     return "SELECT " +
         "ue.* from " + USEREXERCISE + " ue, " + UserListExerciseJoinDAO.USER_EXERCISE_LIST_EXERCISE +" uele "+
         " where ue." +
-        "exerciseid" +
+        EXERCISEID +
         "=" +
         "uele." +
-        "exerciseid" +
+        EXERCISEID +
         " AND uele.userlistid=" + listID + ";";
   }
 
@@ -224,7 +231,9 @@ public class UserExerciseDAO extends DAO {
         " ue ON ue.exerciseid = uele.exerciseid" +
         " AND uele.userlistid=" +
         listID +
-        "    WHERE ue.exerciseid IS NULL and uele.userlistid=" +
+        "    WHERE ue." +
+        EXERCISEID +
+        " IS NULL and uele.userlistid=" +
         listID;
   }
 
@@ -243,11 +252,13 @@ public class UserExerciseDAO extends DAO {
    * @return
    */
   public UserExercise getWhere(String exid) {
-    String sql = "SELECT * from " + USEREXERCISE + " where exerciseid='" + exid + "'";
+    String sql = "SELECT * from " + USEREXERCISE + " where " +
+        EXERCISEID +
+        "='" + exid + "'";
     try {
       List<UserExercise> userExercises = getUserExercises(sql);
       if (userExercises.isEmpty()) {
-        logger.warn("getWhere : huh? no custom exercise with id " + exid);
+        //logger.debug("getWhere : no custom exercise with id " + exid);
         return null;
       } else return userExercises.iterator().next();
     } catch (SQLException e) {
@@ -277,7 +288,9 @@ public class UserExerciseDAO extends DAO {
     for (String id : exids) builder.append("'"+id+"'").append(",");
     String s = builder.toString();
     s = s.substring(0,s.length()-1);
-    String sql = "SELECT * from " + USEREXERCISE + " where exerciseid in (" + s+ ")";
+    String sql = "SELECT * from " + USEREXERCISE + " where " +
+        EXERCISEID +
+        " in (" + s+ ")";
     try {
       List<UserExercise> userExercises = getUserExercises(sql);
       if (userExercises.isEmpty()) {
@@ -300,7 +313,7 @@ public class UserExerciseDAO extends DAO {
     while (rs.next()) {
       UserExercise e = new UserExercise(
         rs.getLong("uniqueid"), //id
-        rs.getString("exerciseid"),
+        rs.getString(EXERCISEID),
         rs.getLong("creatorid"),
         rs.getString("english"),
         rs.getString("foreignLanguage"),
@@ -324,7 +337,7 @@ public class UserExerciseDAO extends DAO {
     List<String> exercises = new ArrayList<String>();
 
     while (rs.next()) {
-      exercises.add(rs.getString("exerciseid"));
+      exercises.add(rs.getString(EXERCISEID));
     }
     rs.close();
     statement.close();
@@ -352,7 +365,9 @@ public class UserExerciseDAO extends DAO {
         TRANSLITERATION + "='" + fixSingleQuote(userExercise.getTransliteration()) + "', " +
         "refAudio='" + userExercise.getRefAudio() + "', " +
         "slowAudioRef='" + userExercise.getSlowAudioRef() + "' " +
-        "WHERE exerciseid='" + userExercise.getID() +"'";
+        "WHERE " +
+          EXERCISEID +
+          "='" + userExercise.getID() +"'";
 
       PreparedStatement statement = connection.prepareStatement(sql);
       int i = statement.executeUpdate();
@@ -375,7 +390,14 @@ public class UserExerciseDAO extends DAO {
 
   private void addColumnToTable(Connection connection) throws SQLException {
     PreparedStatement statement = connection.prepareStatement("ALTER TABLE " +
-      USEREXERCISE + " ADD " + TRANSLITERATION + " VARCHAR");
+        USEREXERCISE + " ADD " + TRANSLITERATION + " VARCHAR");
+    statement.execute();
+    statement.close();
+  }
+
+  private void addExerciseIDColumnToTable(Connection connection) throws SQLException {
+    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " +
+        USEREXERCISE + " ADD " + EXERCISEID + " VARCHAR");
     statement.execute();
     statement.close();
   }
