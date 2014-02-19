@@ -12,6 +12,7 @@ import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.ResultDAO;
 import mitll.langtest.server.database.SectionHelper;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.AutoCRTScoring;
@@ -72,6 +73,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private static final Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
   private static final int MB = (1024 * 1024);
   private static final int TIMEOUT = 30;
+  private static final boolean SCORE_RESULTS = false;
 
   private DatabaseImpl db, studentAnswersDB;
   private AudioFileHelper audioFileHelper;
@@ -808,7 +810,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.scoring.ScoringAudioPanel#scoreAudio(String, long, String, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
+   * @see mitll.langtest.client.scoring.ScoringAudioPanel#scoreAudio(String, long, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
    * @param reqid
    * @param resultID
    * @param testAudioFile
@@ -1322,6 +1324,23 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     if (!serverProps.dataCollectMode && !serverProps.isArabicTextDataCollect()) {
       db.getUnmodExercises();
+    }
+
+    if (SCORE_RESULTS) {
+      List<Result> resultsThatNeedScore = db.getResultDAO().getResultsThatNeedScore();
+      //resultsThatNeedScore = resultsThatNeedScore.subList(0,20);
+      getExercises();
+      logger.debug("doing scoring on " + resultsThatNeedScore.size() + " results");
+      for (Result result : resultsThatNeedScore) {
+        String trim = result.id.trim();
+        Exercise exercise = db.getExercise(trim);
+        if (exercise != null) {
+          logger.info("getting score for " + result);
+          getASRScoreForAudio(0, result.uniqueID, pathHelper.getInstallPath() + File.separator + result.answer, exercise.getRefSentence(), 100, 100, false);
+        }
+        //else logger.warn("no exercises for '" + trim + "' : " + result);
+        //if (true) break;
+      }
     }
   }
 
