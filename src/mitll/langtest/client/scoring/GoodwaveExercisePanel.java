@@ -255,14 +255,14 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     }
     ASRScoringAudioPanel audioPanel = getAudioPanel(e, path);
     ResizableCaptionPanel cp = new ResizableCaptionPanel(NATIVE_REFERENCE_SPEAKER);
-    cp.setContentWidget(getAudioPanelContent(audioPanel,e,path));
+    cp.setContentWidget(getAudioPanelContent(audioPanel));
 
     contentAudio = audioPanel;
     contentAudio.setScreenPortion(screenPortion);
     return cp;
   }
 
-  protected Widget getAudioPanelContent(ASRScoringAudioPanel audioPanel, Exercise exercise, String audioRef) {
+  private Widget getAudioPanelContent(ASRScoringAudioPanel audioPanel) {
     return audioPanel;
   }
 
@@ -538,6 +538,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         service,
         controller1,
         controller1.getProps().showSpectrogram(), scoreListener, 23);
+
+      System.out.println("FastAndSlowASRScoringAudioPanel spect " + controller1.getProps().showSpectrogram());
     }
 
     /**
