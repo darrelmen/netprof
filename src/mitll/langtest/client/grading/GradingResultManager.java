@@ -51,7 +51,7 @@ public class GradingResultManager extends ResultManager {
    * @param propertyHandler
    */
   public GradingResultManager(LangTestDatabaseAsync s, UserFeedback feedback, boolean englishOnlyMode, PropertyHandler propertyHandler) {
-    super(s,feedback, "Answer",propertyHandler);
+    super(s, feedback, "Answer",propertyHandler);
     this.englishOnlyMode = englishOnlyMode;
   }
 
