@@ -54,6 +54,7 @@ public class UserListManager {
   private Set<String> reviewedExercises = new TreeSet<String>();
   private Set<String> incorrect = new TreeSet<String>();
   private final PathHelper pathHelper;
+  private long defectDetector;
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(mitll.langtest.server.PathHelper)
@@ -75,8 +76,11 @@ public class UserListManager {
     incorrect = annotationDAO.getIncorrectIds();
     logger.debug("incorrect are " + incorrect);
     reviewedExercises = reviewedDAO.getReviewed();
-    this.pathHelper = pathHelper ;
-
+    this.pathHelper = pathHelper;
+    defectDetector = userDAO.userExists("defectDetector");
+    if (defectDetector == -1) {
+      defectDetector = userDAO.addUser(89, "male", 0, "", "unknown", "unknown", "defectDetector", false);
+    }
   }
 
   /**
@@ -175,7 +179,6 @@ public class UserListManager {
   }
 
   public UserList createFavorites(long userid) {
-    //logger.debug("createFavorites for " + userid);
     return createUserList(userid, UserList.MY_LIST, MY_FAVORITES, "", true);
   }
 
@@ -240,7 +243,7 @@ public class UserListManager {
     for (String id : ids) {
       if (!id.startsWith(UserExercise.CUSTOM_PREFIX)) {
         Exercise byID = userExerciseDAO.getExercise(id);
-        logger.debug("found " + byID + " tooltip " + byID.getTooltip());
+        logger.debug("getReviewedUserExercises : found " + byID + " tooltip " + byID.getTooltip());
         if (byID != null) {
           onList.add(new UserExercise(byID)); // all predefined references
         }
@@ -333,6 +336,7 @@ public class UserListManager {
 
   /**
    * Remember to copy the audio from the posted location to a more permanent location.
+   * @see #editItem(mitll.langtest.shared.custom.UserExercise, boolean)
    * @param userExercise
    * @param overwrite
    */
@@ -347,7 +351,7 @@ public class UserListManager {
     String fast = FAST + "_"+ now +"_by_" +userExercise.getCreator()+".wav";
     String refAudio = getRefAudioPath(userExercise, fileRef, fast, overwrite);
     userExercise.setRefAudio(refAudio);
-    logger.debug("fixAudioPaths : for " + userExercise.getID() + " fast is " + fast + " size " + FileUtils.size(refAudio));
+    //logger.debug("fixAudioPaths : for " + userExercise.getID() + " fast is " + fast + " size " + FileUtils.size(refAudio));
 
     if (userExercise.getSlowAudioRef() != null && !userExercise.getSlowAudioRef().isEmpty()) {
       fileRef = pathHelper.getAbsoluteFile(userExercise.getSlowAudioRef());
@@ -381,9 +385,9 @@ public class UserListManager {
       if (!bestDirForExercise.exists()) logger.warn("huh? couldn't make " + bestDirForExercise.getAbsolutePath());
     }
     File destination = new File(bestDirForExercise, fast);
-    logger.debug("getRefAudioPath : copying from " + fileRef +  " to " + destination.getAbsolutePath());
+    //logger.debug("getRefAudioPath : copying from " + fileRef +  " to " + destination.getAbsolutePath());
     String s = "bestAudio" + File.separator + userExercise.getID() + File.separator + fast;
-    logger.debug("getRefAudioPath : dest path    " + bestDirForExercise.getPath() + " vs " +s);
+    //logger.debug("getRefAudioPath : dest path    " + bestDirForExercise.getPath() + " vs " +s);
     if (!fileRef.equals(destination)) {
       new FileCopier().copy(fileRef.getAbsolutePath(), destination.getAbsolutePath());
 
@@ -429,6 +433,13 @@ public class UserListManager {
 
   public boolean listExists(long id) {  return userListDAO.getWhere(id, false) != null; }
 
+  public void addDefect(String exerciseID, String field, String comment) {
+    if (!annotationDAO.hasAnnotation(exerciseID, field, INCORRECT, comment, defectDetector)) {
+      addAnnotation(exerciseID, field, INCORRECT, comment, defectDetector);
+    }
+    markReviewed(exerciseID, defectDetector);
+  }
+
   /**
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addAnnotation(String, String, String)
    *
@@ -459,7 +470,9 @@ public class UserListManager {
     if (exercise != null) {
       Map<String, ExerciseAnnotation> latestByExerciseID = annotationDAO.getLatestByExerciseID(exercise.getID());
 
-      if (!latestByExerciseID.isEmpty()) logger.debug("addAnnotations : found " + latestByExerciseID + " for " + exercise.getID());
+      if (!latestByExerciseID.isEmpty()) {
+        logger.debug("addAnnotations : found " + latestByExerciseID + " for " + exercise.getID());
+      }
       for (Map.Entry<String, ExerciseAnnotation> pair : latestByExerciseID.entrySet()) {
         exercise.addAnnotation(pair.getKey(), pair.getValue().status, pair.getValue().comment);
       }
@@ -474,8 +487,8 @@ public class UserListManager {
    * @param creatorID
    */
   public void markReviewed(String id, long creatorID) {
-    if (!reviewedExercises.add(id)) {
-      reviewedDAO.add(id,creatorID);
+    if (reviewedExercises.add(id)) {
+      reviewedDAO.add(id, creatorID);
     }
     logger.debug("markReviewed now " + reviewedExercises.size() + " reviewed exercises");
   }
