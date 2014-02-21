@@ -467,7 +467,9 @@ public class Navigation implements RequiresResize {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
         if (created && !ul.isPrivate() && ul.isEmpty() && finalEditItem != null) {
-          tabPanel.selectTab(0);    // 2 = add/edit item
+          String name = ul.getName();
+          System.out.println("name " + name);
+          tabPanel.selectTab(name.equals("Review") ? 0 : 2);    // 2 = add/edit item
           showEditItem(ul, finalEditItem, (isReview || isComment) ? reviewItem : Navigation.this.editItem, isNormalList);
         } else {
           tabPanel.selectTab(0);
@@ -485,7 +487,7 @@ public class Navigation implements RequiresResize {
    * @param addItem
    */
   private void showEditItem(UserList ul, TabAndContent addItem, EditItem<? extends ExerciseShell> editItem, boolean includeAddItem) {
-    System.out.println("\n\n\nshowEditItem --- " + ul);
+   // System.out.println("\n\n\nshowEditItem --- " + ul);
     addItem.content.clear();
     Widget widgets = editItem.editItem(ul, listToMarker.get(ul), includeAddItem);
     addItem.content.add(widgets);
@@ -498,7 +500,7 @@ public class Navigation implements RequiresResize {
     }
   }
 
-  TabPanel innerTabs;
+ //private TabPanel innerTabs;
   private class UserListCallback implements AsyncCallback<Collection<UserList>> {
     private final Panel contentPanel;
     private final Panel child;
@@ -570,6 +572,12 @@ public class Navigation implements RequiresResize {
       }
     }
 
+   /**
+    * When you click on the panel, show the list.
+    * @param ul
+    * @param showMore
+    * @return
+    */
     private Panel getDisplayRowPerList(final UserList ul, boolean showMore) {
       final FocusPanel widgets = new FocusPanel();
 
@@ -581,7 +589,7 @@ public class Navigation implements RequiresResize {
       widgets.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          innerTabs = showList(ul, contentPanel, instanceName);
+          /*innerTabs =*/ showList(ul, contentPanel, instanceName);
         }
       });
       widgets.addMouseOverHandler(new MouseOverHandler() {
@@ -617,7 +625,7 @@ public class Navigation implements RequiresResize {
    * @param showMore
    * @param container
    */
-  private void addWidgetsForList(final UserList ul, boolean showMore, final FluidContainer container) {
+  private void addWidgetsForList(final UserList ul, boolean showMore, final Panel container) {
     Panel r1 = new FlowPanel();
     r1.addStyleName("trueInlineStyle");
     String name = ul.getName();
@@ -626,37 +634,30 @@ public class Navigation implements RequiresResize {
 
     Heading h4 = new Heading(4,name,ul.getExercises().size() + " items");
     h4.addStyleName("floatLeft");
-  //  if (!ul.isFavorite()) h4.addStyleName("niceBlue");
-  //  if (yourList) h4.addStyleName("niceBlue");
-
     r1.add(h4);
 
-    h4 = new Heading(4,"",ul.getDescription()+",");
-    h4.addStyleName("floatLeft");
-    h4.addStyleName("leftFiveMargin");
-    h4.getElement().setId("desc");
-    //h4.addStyleName("listSubtitle");
+    boolean empty = ul.getDescription().trim().isEmpty();
+    boolean cmempty = ul.getClassMarker().trim().isEmpty();
+    String subtext = empty ? "" : ul.getDescription() + (cmempty ? "":",");
 
-    //Widget widget = h4.getWidget(0);
-   // System.out.println("small is " + widget);
-   // DOM.setStyleAttribute(widget.getElement(), "color", "#333333");
+    if (!empty) {
+      h4 = new Heading(4, "", subtext);
+      h4.addStyleName("floatLeft");
+      h4.addStyleName("leftFiveMargin");
+      h4.getElement().setId("desc");
 
-    //  if (!ul.isFavorite()) h4.addStyleName("niceBlue");
-    //  if (yourList) h4.addStyleName("niceBlue");
+      r1.add(h4);
+    }
 
-    r1.add(h4);
-    h4 = new Heading(4,"",ul.getClassMarker());
-    h4.addStyleName("floatLeft");
-    h4.addStyleName("leftFiveMargin");
-    h4.getElement().setId("course");
+    if (!cmempty) {
+      String classMarker = ul.getClassMarker();
+      h4 = new Heading(4, "", classMarker);
+      h4.addStyleName("floatLeft");
+      h4.addStyleName("leftFiveMargin");
+      h4.getElement().setId("course");
 
-    //h4.addStyleName("listSubtitle");
-
-    //  if (!ul.isFavorite()) h4.addStyleName("niceBlue");
-    //  if (yourList) h4.addStyleName("niceBlue");
-
-    r1.add(h4);
-
+      r1.add(h4);
+    }
 
     boolean yourList = isYourList(ul);
     if (yourList) {
