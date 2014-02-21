@@ -10,17 +10,17 @@
     <welcome-file>LangTest.html</welcome-file>
   </welcome-file-list>
 
-<!--    <filter>
-        <filter-name>gwtCacheControlFilter</filter-name>
-        <filter-class>mitll.langtest.server.filter.GWTFilter</filter-class>
-    </filter>
+  <filter>
+    <filter-name>forceNocacheFilter</filter-name>
+    <filter-class>mitll.langtest.server.filter.ForceNocacheFilter</filter-class>
+  </filter>
 
-    <filter-mapping>
-        <filter-name>gwtCacheControlFilter</filter-name>
-        <url-pattern>/*</url-pattern>
-    </filter-mapping>-->
+  <filter-mapping>
+    <filter-name>forceNocacheFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
 
- <servlet>
+  <servlet>
     <servlet-name>databaseServlet</servlet-name>
     <servlet-class>mitll.langtest.server.LangTestDatabaseImpl</servlet-class>
   </servlet>
@@ -37,7 +37,7 @@
 
   <context-param>
      <param-name>config</param-name>
-     <param-value>english</param-value>
+     <param-value>mandarin</param-value>
   </context-param>
 
   <context-param>
