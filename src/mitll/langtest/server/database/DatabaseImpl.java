@@ -304,7 +304,7 @@ public class DatabaseImpl implements Database {
     if (exerciseDAO == null) {
       if (useFile && excel) {
         synchronized (this) {
-          this.exerciseDAO = new ExcelImport(lessonPlanFile, mediaDir, absConfigDir, serverProps);
+          this.exerciseDAO = new ExcelImport(lessonPlanFile, mediaDir, absConfigDir, serverProps, userListManager);
         }
       }
       else {
@@ -315,6 +315,10 @@ public class DatabaseImpl implements Database {
     }
   }
 
+  /**
+   *
+   * @param userExercise
+   */
   public void editItem(UserExercise userExercise) {
     getUserListManager().editItem(userExercise, true);
     exerciseDAO.addOverlay(userExercise);
