@@ -487,10 +487,13 @@ public class UserListManager {
    * @param creatorID
    */
   public void markReviewed(String id, long creatorID) {
+    int before = reviewedExercises.size();
     if (reviewedExercises.add(id)) {
       reviewedDAO.add(id, creatorID);
     }
-    logger.debug("markReviewed now " + reviewedExercises.size() + " reviewed exercises");
+    if (before != reviewedExercises.size()){
+      logger.debug("markReviewed now " + reviewedExercises.size() + " reviewed exercises");
+    }
   }
 
   /**
