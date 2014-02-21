@@ -20,7 +20,7 @@ public class UserAnnotation {
   private long timestamp;
 
   /**
-   * @param uniqueID
+   * @paramx uniqueID
    * @param exerciseID
    * @param field
    * @param status
