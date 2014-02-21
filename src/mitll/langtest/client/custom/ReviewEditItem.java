@@ -6,6 +6,8 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasText;
@@ -90,7 +92,7 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
       fixed.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          validateThenPost(english, foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo);
+          validateThenPost(foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo, true);
         }
       });
       return row;
@@ -101,32 +103,46 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
       DOM.setStyleAttribute(fixed.getElement(), "marginRight", "5px");
       fixed.setType(ButtonType.PRIMARY);
       fixed.addStyleName("floatRight");
+      fixed.addMouseOverHandler(new MouseOverHandler() {
+        @Override
+        public void onMouseOver(MouseOverEvent event) {
+            checkForForeignChange();
+        }
+      });
       return fixed;
     }
 
+    @Override
+    protected void audioPosted() {  reallyChange(listInterface, false);  }
+
+    @Override
+    protected void checkIfNeedsRefAudio() {}
+
     /**
-     * @see #reallyChange
      * @param pagingContainer
+     * @param buttonClicked
+     * @see #reallyChange
      */
     @Override
-    protected void doAfterEditComplete(ListInterface<T> pagingContainer) {
-      String id = newUserExercise.getID();
-      exerciseList.forgetExercise(id);
-      if (!ul.remove(newUserExercise)) {
-        System.err.println("\n\n\ndoAfterEditComplete : error - didn't remove " + id);
-      }
-      if (!originalList.remove(newUserExercise)) {
-        System.err.println("\n\n\ndoAfterEditComplete : error - didn't remove " + id);
-      }
-      service.removeReviewed(id, new AsyncCallback<Void>() {
-        @Override
-        public void onFailure(Throwable caught) {}
-
-        @Override
-        public void onSuccess(Void result) {
-          predefinedContentList.reload();
+    protected void doAfterEditComplete(ListInterface<T> pagingContainer, boolean buttonClicked) {
+      if (buttonClicked) {
+        String id = newUserExercise.getID();
+        System.out.println("doAfterEditComplete : forgetting " + id);
+        exerciseList.forgetExercise(id);
+        if (!ul.remove(newUserExercise)) {
+          System.err.println("\n\n\ndoAfterEditComplete : error - didn't remove " + id);
         }
-      });
+        if (!originalList.remove(newUserExercise)) {
+          System.err.println("\n\n\ndoAfterEditComplete : error - didn't remove " + id);
+        }
+        service.removeReviewed(id, new AsyncCallback<Void>() {
+          @Override
+          public void onFailure(Throwable caught) {}
+
+          @Override
+          public void onSuccess(Void result) { predefinedContentList.reload(); }
+        });
+      }
     }
   }
 }
