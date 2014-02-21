@@ -78,7 +78,7 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
 
   public void addCompleted(String id) {
     pagingContainer.addCompleted(id);
-    System.out.println("PagingExerciseList.addCompleted : completed " + id + " now " + getCompleted().size());
+    //System.out.println("PagingExerciseList.addCompleted : completed " + id + " now " + getCompleted().size());
   }
 
   private Set<String> getCompleted() { return pagingContainer.getCompleted(); }
@@ -253,14 +253,14 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
    */
   @Override
   protected void rememberExercises(List<T> result) {
-    System.out.println("PagingExerciseList : rememberAndLoadFirst remembering " + result.size());
+    //System.out.println("PagingExerciseList : rememberAndLoadFirst remembering " + result.size());
 
     clear();
     for (final T es : result) {
       addExercise(es);
     }
     flush();
-    System.out.println("PagingExerciseList : size " + getSize());
+    //System.out.println("PagingExerciseList : size " + getSize());
   }
 
   @Override
@@ -302,12 +302,12 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
   public void addExercise(T es) { pagingContainer.addExercise(es);  }
 
   public void forgetExercise(String id) {
-    System.out.println("forgetExercise " + id + " on " + getElement().getId() + " ul " +userListID);
+    System.out.println("PagingExerciseList.forgetExercise " + id + " on " + getElement().getId() + " ul " +userListID);
     removeExercise(byID(id));
   }
 
   /**
-   * @see mitll.langtest.client.custom.NewUserExercise#afterValidForeignPhrase(mitll.langtest.shared.custom.UserList, ListInterface, com.google.gwt.user.client.ui.Panel)
+   * @see mitll.langtest.client.custom.NewUserExercise#afterValidForeignPhrase(mitll.langtest.shared.custom.UserList, ListInterface, com.google.gwt.user.client.ui.Panel, boolean)
    * @see mitll.langtest.client.list.ExerciseList#removeExercise(mitll.langtest.shared.ExerciseShell)
    * @param id
    * @return
