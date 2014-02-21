@@ -2,6 +2,7 @@ package mitll.langtest.client.custom;
 
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
@@ -124,7 +125,7 @@ public class NPFHelper implements RequiresResize {
    * @return
    */
   private PagingExerciseList<UserExercise> makeNPFExerciseList(Panel right, String instanceName) {
-    PagingExerciseList<UserExercise> exerciseList = new PagingExerciseList<UserExercise>(right, service, feedback, false, false, controller,
+    final PagingExerciseList<UserExercise> exerciseList = new PagingExerciseList<UserExercise>(right, service, feedback, false, false, controller,
       true, instanceName) {
       @Override
       protected void onLastItem() {
@@ -137,6 +138,13 @@ public class NPFHelper implements RequiresResize {
       }
     };
     setFactory(exerciseList, instanceName);
+    exerciseList.setUnaccountedForVertical(320);
+    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      @Override
+      public void execute() {
+        exerciseList.onResize();
+      }
+    });
     return exerciseList;
   }
 
