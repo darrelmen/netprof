@@ -11,6 +11,7 @@ import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.BackdropType;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -122,7 +123,7 @@ public abstract class UserDialog extends BasicDialog {
   }
 
   protected void markError(FormField dialectGroup, String message) {
-    markError(dialectGroup.group, dialectGroup.box, "Try Again", message);
+    markError(dialectGroup.group, dialectGroup.box, "Try Again", message, Placement.TOP);
   }
 
   private HandlerRegistration keyHandler;
@@ -148,6 +149,37 @@ public abstract class UserDialog extends BasicDialog {
                                                    }
                                                  });
     System.out.println("UserManager.addKeyHandler made click handler " + keyHandler);
+  }
+
+  protected boolean checkValidPassword(FormField password) {
+    final String userID = password.box.getText();
+    if (userID.length() > USER_ID_MAX_LENGTH) {
+      markError(password, "Please enter a password of reasonable length.");
+      return false;
+    } else if (userID.length() == 0) {
+      markError(password, "Please enter the usual password that you've been told.");
+      return false;
+    } else if (!checkPassword(password)) {
+      markError(password, "Please enter the usual password for this kind of user.");
+      return false;
+    }
+    return true;
+  }
+
+  protected boolean checkValidUser(FormField user) {
+    final String userID = user.box.getText();
+    if (userID.length() > USER_ID_MAX_LENGTH) {
+      markError(user, "Please enter a user id of reasonable length.");
+      return false;
+    } else if (userID.length() == 0) {
+      markError(user, "Please enter a user id.");
+      return false;
+    } else if (userID.length() < StudentDialog.MIN_LENGTH_USER_ID) {
+      markError(user, "Please enter a user of a reasonable length.");
+      return false;
+    }
+    user.clearError();
+    return true;
   }
 
   private class ButtonClickEvent extends ClickEvent {

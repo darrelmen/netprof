@@ -102,11 +102,11 @@ public class AudioExercise extends ExerciseShell {
 
         return exerciseAnnotation;
       }
-      else {
-        if (!fieldToAnnotation.isEmpty()) {
-          System.out.println("getAnnotation : Can't find " + field + " in "+ fieldToAnnotation.keySet());
-        }
-      }
+    //  else {
+      //  if (!fieldToAnnotation.isEmpty()) {
+//          /System.out.println("getAnnotation : Can't find " + field + " in "+ fieldToAnnotation.keySet());
+     //   }
+    //  }
     }
     return fieldToAnnotation.get(field);
   }
