@@ -1,7 +1,9 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.client.custom.QCNPFExercise;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.custom.UserExerciseDAO;
+import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.custom.UserExercise;
@@ -61,7 +63,7 @@ public class ExcelImport implements ExerciseDAO {
   private int audioOffset = 0;
   private final int maxExercises;
   private ServerProperties serverProps;
-
+  private UserListManager userListManager;
   /**
    * @see mitll.langtest.server.SiteDeployer#readExercisesPopulateSite(mitll.langtest.shared.Site, String, java.io.InputStream)
    */
@@ -73,11 +75,13 @@ public class ExcelImport implements ExerciseDAO {
   }
 
   /**
+   *
    * @param file
    * @param relativeConfigDir
+   * @param userListManager
    * @see DatabaseImpl#makeDAO
    */
-  public ExcelImport(String file, String mediaDir, String relativeConfigDir, ServerProperties serverProps) {
+  public ExcelImport(String file, String mediaDir, String relativeConfigDir, ServerProperties serverProps, UserListManager userListManager) {
     this.file = file;
     this.serverProps = serverProps;
     this.isFlashcard = serverProps.isFlashcard();
@@ -90,7 +94,7 @@ public class ExcelImport implements ExerciseDAO {
     this.language = serverProps.getLanguage();
     this.skipSemicolons = serverProps.shouldSkipSemicolonEntries();
     this.audioOffset = serverProps.getAudioOffset();
-
+    this.userListManager = userListManager;
 /*    logger.debug("\n\n\n\n ---> ExcelImport : config " + relativeConfigDir +
       " media dir " +mediaDir + " slow missing " +missingSlowSet.size() + " fast " + missingFastSet.size());*/
   }
@@ -148,9 +152,13 @@ public class ExcelImport implements ExerciseDAO {
     }
   }
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#editItem(mitll.langtest.shared.custom.UserExercise)
+   * @param userExercise
+   */
   @Override
   public void addOverlay(UserExercise userExercise) {
-    logger.debug("addOverlay for " +userExercise);
+    //logger.debug("addOverlay for " +userExercise);
     Exercise exercise = getExercise(userExercise.getID());
     //logger.debug("\taddOverlay at " +userExercise.getID() + " found " +exercise);
 
@@ -172,7 +180,7 @@ public class ExcelImport implements ExerciseDAO {
         }
         idToExercise.put(over.getID(), over);
 
-        logger.debug("After " + getExercise(userExercise.getID()));
+        logger.debug("addOverlay : after " + getExercise(userExercise.getID()));
       }
     }
   }
@@ -247,6 +255,16 @@ public class ExcelImport implements ExerciseDAO {
     return exercises;
   }
 
+  public List<Exercise> getExercises() { return exercises; }
+
+  public Set<String> getSections() { return sectionHelper.getSections(); }
+
+  public Map<String, Lesson> getSection(String type) { return sectionHelper.getSection(type); }
+
+  public List<String> getErrors() {
+    return errors;
+  }
+
   /**
    * @param sheet
    * @return
@@ -282,10 +300,10 @@ public class ExcelImport implements ExerciseDAO {
       Map<Integer, CellRangeAddress> rowToRange = getRowToRange(sheet);
       for (; iter.hasNext(); ) {
         Row next = iter.next();
-        if (id > maxExercises) break;     // TODO make this an adult option
+        if (id > maxExercises) break;
         //    logger.warn("------------ Row # " + next.getRowNum() + " --------------- ");
         boolean inMergedRow = rowToRange.keySet().contains(next.getRowNum());
-
+        Map<String,String> fieldToDefect = new HashMap<String, String>();
         List<String> columns = new ArrayList<String>();
         if (!gotHeader) {
           Iterator<Cell> cellIterator = next.cellIterator();
@@ -362,7 +380,7 @@ public class ExcelImport implements ExerciseDAO {
           if (english.length() == 0) {
             if (serverProps.isClassroomMode()) {
               english = "NO ENGLISH";
-              // TODO : add defect
+              fieldToDefect.put("english", "missing english");
             }
             //logger.info("-------- > for row " + next.getRowNum() + " english is blank ");
             else {
@@ -389,32 +407,29 @@ public class ExcelImport implements ExerciseDAO {
               String meaning = getCell(next, meaningIndex);
               String givenIndex = getCell(next, idIndex);
               String context = getCell(next, contextIndex);
-              //String segmentedChinese = getCell(next, segmentedIndex);
 
               if (inMergedRow && !lastRowValues.isEmpty()) {
                 if (translit.length() == 0) {
                   translit = lastRowValues.get(2);
-                  //logger.info("for row " + next.getRowNum() + " for translit using " + translit);
                 }
               }
 
-              boolean markSemiDefect = foreignLanguagePhrase.contains(";") || translit.contains(";") || english.contains(";");
-              // TODO : mark defect
+              checkForSemicolons(fieldToDefect, english, foreignLanguagePhrase, translit);
 
               boolean expectFastAndSlow = idIndex == -1;
               String idToUse = expectFastAndSlow ? "" + id++ : givenIndex;
               Exercise imported = getExercise(idToUse, weightIndex, next, english, foreignLanguagePhrase, translit,
                 meaning, context, false, (audioIndex != -1) ? getCell(next, audioIndex) : "");
               if (imported.hasRefAudio() || !shouldHaveRefAudio) {  // skip items without ref audio, for now.
-                boolean valid = true;
-                if (valid) {
-                  recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported, unitName, chapterName, weekName);
+                recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported, unitName, chapterName, weekName);
 
-                  // keep track of synonyms (or better term)
-                  rememberExercise(exercises, englishToExercises, imported);
-                } else {
-                  if (SHOW_SKIPS)
-                    logger.debug("skipping exercise " + imported.getID() + " : '" + imported.getEnglishSentence() + "' since no sample sentences");
+                // keep track of synonyms (or better term)
+                rememberExercise(exercises, englishToExercises, imported);
+                if (!imported.hasRefAudio()) {
+                  fieldToDefect.put("refAudio", "missing reference audio");
+                }
+                for (Map.Entry<String, String> pair : fieldToDefect.entrySet()) {
+                  userListManager.addDefect(imported.getID(), pair.getKey(), pair.getValue());
                 }
               } else {
                 if (logging++ < 3) {
@@ -452,6 +467,18 @@ public class ExcelImport implements ExerciseDAO {
       logger.info("Skipped " + semis + " entries with semicolons or " + (100f * ((float) semis) / (float) id) + "%");
     }
     return exercises;
+  }
+
+  private void checkForSemicolons(Map<String, String> fieldToDefect, String english, String foreignLanguagePhrase, String translit) {
+    if (foreignLanguagePhrase.contains(";")) {
+      fieldToDefect.put(QCNPFExercise.FOREIGN_LANGUAGE,"contains semicolon - should this item be split?");
+    }
+    if (translit.contains(";")) {
+      fieldToDefect.put(QCNPFExercise.TRANSLITERATION,"contains semicolon - should this item be split?");
+    }
+    if (english.contains(";")) {
+      fieldToDefect.put(QCNPFExercise.ENGLISH,"contains semicolon - should this item be split?");
+    }
   }
 
   private Map<Integer, CellRangeAddress> getRowToRange(Sheet sheet) {
@@ -737,21 +764,5 @@ public class ExcelImport implements ExerciseDAO {
     Cell cell = next.getCell(col);
     if (cell == null) return -1;
     return (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) ? cell.getNumericCellValue() : -1;
-  }
-
-  public List<Exercise> getExercises() {
-    return exercises;
-  }
-
-  public Set<String> getSections() {
-    return sectionHelper.getSections();
-  }
-
-  public Map<String, Lesson> getSection(String type) {
-    return sectionHelper.getSection(type);
-  }
-
-  public List<String> getErrors() {
-    return errors;
   }
 }
