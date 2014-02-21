@@ -190,7 +190,7 @@ public class AnnotationDAO extends DAO {
       for (Map.Entry<String, UserAnnotation> pair : fieldToAnno.entrySet()) {
         fieldToAnnotation.put(pair.getKey(),new ExerciseAnnotation(pair.getValue().getStatus(),pair.getValue().getComment()));
       }
-      logger.debug("field->anno " + fieldToAnno);
+      //logger.debug("field->anno " + fieldToAnno);
       return fieldToAnnotation;
     }
   }
