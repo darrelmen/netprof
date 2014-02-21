@@ -46,9 +46,9 @@ import java.util.List;
 public class EditItem<T extends ExerciseShell> {
   private static final String NEW_ITEM = "*New Item*";
   protected static final String NEW_EXERCISE_ID = "NewExerciseID";
-  private final ExerciseController controller;
+  protected final ExerciseController controller;
   private final NPFHelper npfHelper;
-  private final LangTestDatabaseAsync service;
+  protected final LangTestDatabaseAsync service;
   private final UserManager userManager;
   protected final ListInterface<? extends ExerciseShell> predefinedContentList;
   private UserFeedback feedback = null;
