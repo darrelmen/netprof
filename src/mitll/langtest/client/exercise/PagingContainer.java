@@ -92,7 +92,7 @@ public class PagingContainer<T extends ExerciseShell> {
    */
   public void forgetExercise(T es) {
     List<T> list = getList();
-    System.out.println("forgetExercise " + es);
+    System.out.println("PagingContainer.forgetExercise " + es);
 
     if (!list.remove(es)) {
       if (!list.remove(getByID(es.getID()))) {
