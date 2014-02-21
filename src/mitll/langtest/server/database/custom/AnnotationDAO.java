@@ -29,6 +29,7 @@ public class AnnotationDAO extends DAO {
   private static Logger logger = Logger.getLogger(AnnotationDAO.class);
 
   public static final String ANNOTATION = "annotation";
+  private static final String CREATORID = "creatorid";
 
   public AnnotationDAO(Database database) {
     super(database);
@@ -37,7 +38,6 @@ public class AnnotationDAO extends DAO {
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
-
   }
 
   /**
@@ -54,9 +54,12 @@ public class AnnotationDAO extends DAO {
         ANNOTATION +
       " (" +
       "uniqueid IDENTITY, " +
-      "creatorid LONG, " +
+      CREATORID +
+      " LONG, " +
       "exerciseid VARCHAR, field VARCHAR, status VARCHAR, modified TIMESTAMP, comment VARCHAR, " +
-      "FOREIGN KEY(creatorid) REFERENCES " +
+      "FOREIGN KEY(" +
+      CREATORID +
+      ") REFERENCES " +
       "USERS" +
       "(ID)" +
       ")");
@@ -85,7 +88,9 @@ public class AnnotationDAO extends DAO {
 
       statement = connection.prepareStatement(
         "INSERT INTO " + ANNOTATION +
-          "(creatorid,exerciseid,field,status,modified,comment) " +
+          "(" +
+          CREATORID +
+          ",exerciseid,field,status,modified,comment) " +
           "VALUES(?,?,?,?,?,?);");
       int i = 1;
       //     statement.setLong(i++, annotation.getUserID());
@@ -138,6 +143,20 @@ public class AnnotationDAO extends DAO {
     return Collections.emptyList();
   }
 
+  public boolean hasAnnotation(String exerciseID, String field, String status, String comment, long userID) {
+    String sql = "SELECT * from " + ANNOTATION + " where exerciseid='" + exerciseID + "' AND " + CREATORID +"="+userID+
+      " order by field,modified desc";
+
+    try {
+      Map<String, ExerciseAnnotation> latestByExerciseID = getFieldToAnnotationMap(sql);
+      ExerciseAnnotation annotation = latestByExerciseID.get(field);
+      return (annotation != null) && (annotation.status.equals(status) && annotation.comment.equals(comment));
+    } catch (SQLException e) {
+      logger.error("got " +e + " doing " + sql,e);
+    }
+    return false;
+  }
+
   /**
    * @see UserListManager#addAnnotations(mitll.langtest.shared.AudioExercise)
    * @param exerciseID
@@ -146,30 +165,34 @@ public class AnnotationDAO extends DAO {
   public Map<String,ExerciseAnnotation> getLatestByExerciseID(String exerciseID) {
     String sql = "SELECT * from " + ANNOTATION + " where exerciseid='" + exerciseID + "' order by field,modified desc";
     try {
-      Map<String,UserAnnotation> fieldToAnno = new HashMap<String, UserAnnotation>();
-      List<UserAnnotation> lists = getUserAnnotations(sql);
-      for (UserAnnotation annotation : lists) {
-        UserAnnotation annotation1 = fieldToAnno.get(annotation.getField());
-        if (annotation1 == null) fieldToAnno.put(annotation.getField(),annotation);
-        else if (annotation1.getTimestamp() < annotation.getTimestamp()) {
-          fieldToAnno.put(annotation.getField(),annotation);
-        }
-      }
-      if (lists.isEmpty()) {
-        //logger.error("huh? no annotation with id " + unique);
-        return Collections.emptyMap();
-      } else {
-        Map<String,ExerciseAnnotation>  fieldToAnnotation = new HashMap<String, ExerciseAnnotation>();
-        for (Map.Entry<String, UserAnnotation> pair : fieldToAnno.entrySet()) {
-          fieldToAnnotation.put(pair.getKey(),new ExerciseAnnotation(pair.getValue().getStatus(),pair.getValue().getComment()));
-        }
-        logger.debug("field->anno " + fieldToAnno);
-        return fieldToAnnotation;
-      }
+      return getFieldToAnnotationMap(sql);
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
     return null;
+  }
+
+  private Map<String, ExerciseAnnotation> getFieldToAnnotationMap(String sql) throws SQLException {
+    Map<String,UserAnnotation> fieldToAnno = new HashMap<String, UserAnnotation>();
+    List<UserAnnotation> lists = getUserAnnotations(sql);
+    for (UserAnnotation annotation : lists) {
+      UserAnnotation annotation1 = fieldToAnno.get(annotation.getField());
+      if (annotation1 == null) fieldToAnno.put(annotation.getField(),annotation);
+      else if (annotation1.getTimestamp() < annotation.getTimestamp()) {
+        fieldToAnno.put(annotation.getField(),annotation);
+      }
+    }
+    if (lists.isEmpty()) {
+      //logger.error("huh? no annotation with id " + unique);
+      return Collections.emptyMap();
+    } else {
+      Map<String,ExerciseAnnotation>  fieldToAnnotation = new HashMap<String, ExerciseAnnotation>();
+      for (Map.Entry<String, UserAnnotation> pair : fieldToAnno.entrySet()) {
+        fieldToAnnotation.put(pair.getKey(),new ExerciseAnnotation(pair.getValue().getStatus(),pair.getValue().getComment()));
+      }
+      logger.debug("field->anno " + fieldToAnno);
+      return fieldToAnnotation;
+    }
   }
 
   private List<UserAnnotation> getUserAnnotations(String sql) throws SQLException {
@@ -185,7 +208,7 @@ public class AnnotationDAO extends DAO {
           rs.getString("field"), // exp
           rs.getString("status"), // exp
           rs.getString("comment"),
-          rs.getLong("creatorid"), //
+          rs.getLong(CREATORID), //
           rs.getTimestamp("modified").getTime()
       )
       );
@@ -199,6 +222,8 @@ public class AnnotationDAO extends DAO {
   }
 
   /**
+   * TODO : this can't be right!
+   *
    * @see mitll.langtest.server.database.custom.UserListManager#UserListManager(mitll.langtest.server.database.UserDAO, UserListDAO, UserListExerciseJoinDAO, AnnotationDAO, ReviewedDAO, mitll.langtest.server.PathHelper)
    * @return
    */
