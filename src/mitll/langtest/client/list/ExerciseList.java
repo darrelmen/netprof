@@ -165,7 +165,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
 
   /**
    * @see mitll.langtest.client.custom.NPFHelper#reload()
-   * @see mitll.langtest.client.custom.ReviewEditItem.ReviewEditableExercise#doAfterEditComplete(ListInterface)
+   * @see mitll.langtest.client.custom.EditItem.EditableExercise#doAfterEditComplete(ListInterface, boolean)
    */
   public void reload() {
     System.out.println("ExerciseList.reload for user " + controller.getUser() + " instance " + instance + " id " + getElement().getId());
