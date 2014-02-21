@@ -58,9 +58,9 @@ public class CommentNPFExercise extends NPFExercise {
     column.getElement().setId("QuestionContent");
     column.setWidth("100%");
 
-    column.add(getEntry(e, "foreignLanguage", ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getRefSentence()));
-    column.add(getEntry(e, "transliteration", ExerciseFormatter.TRANSLITERATION, e.getTranslitSentence()));
-    column.add(getEntry(e, "english", ExerciseFormatter.ENGLISH_PROMPT, e.getEnglishSentence()));
+    column.add(getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getRefSentence()));
+    column.add(getEntry(e, QCNPFExercise.TRANSLITERATION, ExerciseFormatter.TRANSLITERATION, e.getTranslitSentence()));
+    column.add(getEntry(e, QCNPFExercise.ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, e.getEnglishSentence()));
 
     return column;
   }
@@ -80,25 +80,35 @@ public class CommentNPFExercise extends NPFExercise {
       protected void addAudioRadioButton(Panel vp, RadioButton fast, String audioPath) {
         vp.add(getEntry(audioPath, fast, exercise.getAnnotation(audioPath)));
       }
+
+      @Override
+      protected void addNoRefAudioWidget(Panel vp) {
+        vp.add(getEntry("refAudio", "ReferenceAudio", "", exercise.getAnnotation("refAudio")));
+      }
     };
   }
 
+
+
   /**
-   * @param field
-   * @param annotation
-   * @return
+   * @param field of the exercise to comment on
+   * @param content to wrap
+   * @param annotation to get current comment from
+   * @return three part widget -- content, comment button, and clear button
    */
   private Widget getEntry(String field, Widget content, ExerciseAnnotation annotation) {
     final Button commentButton = new Button();
 
-    if (field.endsWith(AudioTag.COMPRESSED_TYPE)) field = field.replaceAll("." +
-        AudioTag.COMPRESSED_TYPE,".wav");
+    if (field.endsWith(AudioTag.COMPRESSED_TYPE)) {
+      field = field.replaceAll("." + AudioTag.COMPRESSED_TYPE,".wav");
+    }
     final MyTextBox commentEntryText = new MyTextBox();
+    commentEntryText.setVisibleLength(60);
     Button clearButton = getClearButton(commentEntryText, commentButton, field);
 
     final MyPopup commentPopup = makeCommentPopup(field, commentButton, commentEntryText, clearButton);
     commentPopup.addAutoHidePartner(commentButton.getElement()); // fix for bug Wade found where click didn't toggle comment
-    configureCommentTextBox(annotation, commentEntryText, commentPopup);
+    configureCommentTextBox(annotation != null ? annotation.comment : null, commentEntryText, commentPopup);
 
     boolean isCorrect = annotation == null || annotation.status == null || annotation.isCorrect();
     String comment = !isCorrect ? annotation.comment : "";
@@ -263,15 +273,19 @@ public class CommentNPFExercise extends NPFExercise {
   /**
    * For this field configure the commentEntry box to post annotation on blur and enter
    *
-   * @param annotation fill in with existing annotation, if there is one
+   * @param currentComment fill in with existing annotation, if there is one
    * @param commentEntry comment box to configure
    * @return
    */
-  private FocusWidget configureCommentTextBox(ExerciseAnnotation annotation,
+  private FocusWidget configureCommentTextBox( String currentComment,//ExerciseAnnotation annotation,
                                               final MyTextBox commentEntry,
                                               final PopupPanel popup) {
-    if (annotation != null) {
-      commentEntry.setText(annotation.comment);
+    if (currentComment != null) {
+      //String currentComment = annotation.comment;
+      commentEntry.setText(currentComment);
+      if (commentEntry.getVisibleLength() < currentComment.length()) {
+        commentEntry.setVisibleLength(70);
+      }
     }
 
     commentEntry.addStyleName("leftFiveMargin");
