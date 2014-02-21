@@ -5,7 +5,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.list.HistoryExerciseList;
-//import mitll.langtest.client.list.section.SectionExerciseList;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,6 +12,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+//import mitll.langtest.client.list.section.SectionExerciseList;
 
 /**
  * A group of buttons that need to maintain
