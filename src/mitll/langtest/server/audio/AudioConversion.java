@@ -332,7 +332,7 @@ public class AudioConversion {
     String mp3File = absolutePathToWav.getAbsolutePath().replace(".wav",".mp3");
     File mp3 = new File(mp3File);
     if (!mp3.exists() || overwrite) {
-      logger.debug("doing mp3 conversion for " + absolutePathToWav);
+      //logger.debug("doing mp3 conversion for " + absolutePathToWav);
 
       String binPath = getBinPath();
       File tempFile;
