@@ -45,7 +45,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   protected static final String ENGLISH_LABEL = "English (optional)";
   private final EditItem editItem;
   protected final UserExercise newUserExercise;
-  private final ExerciseController controller;
+  protected final ExerciseController controller;
   protected final LangTestDatabaseAsync service;
   private final HasText itemMarker;
   protected BasicDialog.FormField english;
@@ -93,6 +93,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     final FluidContainer container = new FluidContainer();
     container.addStyleName("greenBackground");
 
+    addItemsAtTop(container);
     /*FormField formField =*/ makeForeignLangRow(container);
 
     //focusOn(formField); // TODO put this back
@@ -136,6 +137,10 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     });
 
     return container;
+  }
+
+  protected void addItemsAtTop(Panel container) {
+
   }
 
   private void gotBlur() {
@@ -294,7 +299,6 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
                                   Panel toAddTo, boolean onClick) {
     if (foreignLang.getText().isEmpty()) {
       markError(foreignLang, "Enter the foreign language phrase.");
-     // return false;
     }
     else if (validateForm(foreignLang, rap, normalSpeedRecording)) {
       checkValidForeignPhrase(ul, pagingContainer, toAddTo, onClick);
