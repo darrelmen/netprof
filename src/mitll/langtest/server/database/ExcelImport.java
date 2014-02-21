@@ -44,7 +44,7 @@ import java.util.Set;
 public class ExcelImport implements ExerciseDAO {
   private static Logger logger = Logger.getLogger(ExcelImport.class);
 
-  private static final boolean SHOW_SKIPS = false;
+//  private static final boolean SHOW_SKIPS = false;
   private final boolean isFlashcard;
 
   private List<Exercise> exercises = null;
@@ -87,8 +87,9 @@ public class ExcelImport implements ExerciseDAO {
     this.isFlashcard = serverProps.isFlashcard();
     maxExercises = serverProps.getMaxNumExercises();
     this.mediaDir = mediaDir;
-    boolean missingExists = getMissing(relativeConfigDir, "missingSlow.txt", missingSlowSet);
-    missingExists &= getMissing(relativeConfigDir, "missingFast.txt", missingFastSet);
+    // turn off missing fast/slow for classroom
+    boolean missingExists = serverProps.isClassroomMode() || getMissing(relativeConfigDir, "missingSlow.txt", missingSlowSet);
+    missingExists &= serverProps.isClassroomMode() || getMissing(relativeConfigDir, "missingFast.txt", missingFastSet);
     shouldHaveRefAudio = missingExists && !serverProps.isClassroomMode();
     this.usePredefinedTypeOrder = serverProps.usePredefinedTypeOrder();
     this.language = serverProps.getLanguage();
@@ -711,10 +712,22 @@ public class ExcelImport implements ExerciseDAO {
     imported.setType(Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW);
 
     if (!missingFastSet.contains(audioDir)) {
-      imported.setRefAudio(ensureForwardSlashes(fastAudioRef));
+      File test = new File(fastAudioRef);
+      if (test.exists()) {
+        imported.setRefAudio(ensureForwardSlashes(fastAudioRef));
+      }
+      else {
+       // logger.debug("missing fast " + test.getAbsolutePath());
+      }
     }
     if (!missingSlowSet.contains(audioDir)) {
-      imported.setSlowRefAudio(ensureForwardSlashes(slowAudioRef));
+      File test = new File(slowAudioRef);
+      if (test.exists()) {
+        imported.setSlowRefAudio(ensureForwardSlashes(slowAudioRef));
+      }
+      else {
+      //  logger.debug("missing slow " + test.getAbsolutePath());
+      }
     }
 
     return imported;
