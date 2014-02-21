@@ -313,6 +313,14 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     });
   }
 
+  /**
+   * @see mitll.langtest.client.custom.CommentNPFExercise#getEntry
+   * @see mitll.langtest.client.custom.QCNPFExercise#getEntry
+   * @param label
+   * @param value
+   * @param withWrap
+   * @return
+   */
   protected Panel getContentWidget(String label, String value, boolean withWrap) {
     Panel nameValueRow = new FlowPanel();
     nameValueRow.getElement().setId("nameValueRow_" + label);
@@ -589,7 +597,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         System.err.println("no radio choice got selected??? ");
       }
       if (audioAttributes.isEmpty()) {
-        vp.add(new Label("No reference audio."));
+        addNoRefAudioWidget(vp);
+       // noRefAudio();
       }
 
       HorizontalPanel hp = new HorizontalPanel();
@@ -597,6 +606,14 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       hp.add(vp);
       return vp;
     }
+
+    protected void addNoRefAudioWidget(Panel vp) {
+      vp.add(new Label("No reference audio."));
+    }
+/*
+    protected void noRefAudio() {
+
+    }*/
 
     protected boolean hasAudio() {
       return !exercise.getAudioAttributes().isEmpty();
