@@ -501,9 +501,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       ensureMP3(audioAttribute.getAudioRef(), false);
     }
 
-    if (audioAttributes.isEmpty()) {
-      logger.warn("huh? no ref audio for " + byID);
-    }
+    if (audioAttributes.isEmpty()) { logger.warn("ensureMP3s : no ref audio for " + byID); }
 
     for (String spath : byID.getSynonymAudioRefs()) {
       ensureMP3(spath, false);
@@ -1093,7 +1091,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.custom.NewUserExercise#onClick
+   * @see mitll.langtest.client.custom.EditItem.EditableExercise#postEditItem(mitll.langtest.client.list.ListInterface, boolean)
    * @param userExercise
    */
   @Override
