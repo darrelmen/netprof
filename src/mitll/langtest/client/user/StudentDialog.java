@@ -13,7 +13,12 @@ import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.Modal;
 import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
-import com.github.gwtbootstrap.client.ui.event.*;
+import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
+import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
+import com.github.gwtbootstrap.client.ui.event.ShowEvent;
+import com.github.gwtbootstrap.client.ui.event.ShowHandler;
+import com.github.gwtbootstrap.client.ui.event.ShownEvent;
+import com.github.gwtbootstrap.client.ui.event.ShownHandler;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -58,6 +63,9 @@ public class StudentDialog extends UserDialog {
   private static final String REVIEW = "Review";
   private static final String[] ROLES = new String[]{DATA_COLLECTION, PRACTICE, DEMO, REVIEW};
   private static final Map<String, String> displayToRoles = new TreeMap<String, String>();
+  private static final String STUDENT = "Student";
+  private static final String STUDENT_DATA_COLLECTION = "Student - Data Collection";
+  private static final String TEACHER_REVIEWER = "Teacher/Reviewer";
 
   private final UserManager userManager;
   private final UserNotification langTest;
@@ -74,9 +82,9 @@ public class StudentDialog extends UserDialog {
       if (!purpose.equalsIgnoreCase(props.getPurposeDefault())) purposes.add(purpose);
     }
 
-    displayToRoles.put("Student", PRACTICE);
-    displayToRoles.put("Teacher/Reviewer", REVIEW);
-    displayToRoles.put("Student - Data Collection", DATA_COLLECTION);
+    displayToRoles.put(STUDENT, PRACTICE);
+    displayToRoles.put(STUDENT_DATA_COLLECTION, DATA_COLLECTION);
+    displayToRoles.put(TEACHER_REVIEWER, REVIEW);
   }
 
   /**
@@ -99,8 +107,8 @@ public class StudentDialog extends UserDialog {
 
     final FormField user = addControlFormField(fieldset, "User ID", MIN_LENGTH_USER_ID);
     user.setVisible(isDataCollection(purpose) || isPractice(purpose));
-    //final FormField password = addControlFormField(fieldset, "Password", true);
-
+    final FormField password = addControlFormField(fieldset, "Password",true, 30);
+    password.setVisible(false);
     purpose.box.setWidth("150px");
 
     Panel register = new FlowPanel();
@@ -116,18 +124,18 @@ public class StudentDialog extends UserDialog {
         user.setVisible(needUserID);
         accordion.setVisible(!canSkipRegister(purpose));
         registrationInfo.showOrHideILR(!isReview(purpose));
+        password.setVisible(isReview(purpose));
 
         if (b) {
           accordion.hide();
         } else {
           final String userID = user.box.getText();
           if (!userID.isEmpty()
-            //&& checkValidPassword(password)
+            && (!isReview(purpose) || checkValidPassword(password))
             ) {
             service.userExists(userID, new AsyncCallback<Integer>() {
               @Override
-              public void onFailure(Throwable caught) {
-              }
+              public void onFailure(Throwable caught) {}
 
               @Override
               public void onSuccess(Integer result) {
@@ -143,7 +151,7 @@ public class StudentDialog extends UserDialog {
     });
 
     final Button closeButton = addLoginButton(dialogBox);
-    closeButton.addClickHandler(makeCloseHandler(dialogBox, registrationInfo, user, /*password,*/ purpose, accordion));
+    closeButton.addClickHandler(makeCloseHandler(dialogBox, registrationInfo, user, password, purpose, accordion));
 
     configureKeyHandler(dialogBox, closeButton);
 
@@ -210,6 +218,7 @@ public class StudentDialog extends UserDialog {
   private ClickHandler makeCloseHandler(final Modal dialogBox,
                                         final RegistrationInfo registrationInfo,
                                         final FormField user,
+                                        final FormField password,
                                         final ListBoxFormField purpose,
                                         final AccordionGroup accordion) {
     // Create a handler for the sendButton and nameField
@@ -220,7 +229,7 @@ public class StudentDialog extends UserDialog {
        */
       public void onClick(ClickEvent event) {
 
-        System.out.println("makeCloseHandler : got click " + event);
+        //System.out.println("makeCloseHandler : got click " + event);
 
         String purposeSetting = getRole(purpose);
         final String audioType = getAudioTypeFromPurpose(purposeSetting);
@@ -232,7 +241,7 @@ public class StudentDialog extends UserDialog {
         } else {
           System.out.println("\tcheckUserAndMaybeRegister for " + purposeSetting);
 
-          checkUserAndMaybeRegister(audioType, user, dialogBox, accordion, registrationInfo, purposeSetting);
+          checkUserAndMaybeRegister(audioType, user, password, dialogBox, accordion, registrationInfo, purposeSetting);
         }
       }
     };
@@ -243,12 +252,17 @@ public class StudentDialog extends UserDialog {
     return purposeSetting.equalsIgnoreCase(DEMO);
   }
 
-  private void checkUserAndMaybeRegister(final String audioType, FormField user, final Modal dialogBox,
+  private void checkUserAndMaybeRegister(final String audioType, FormField user,
+                                         final FormField password,
+                                         final Modal dialogBox,
                                          final AccordionGroup accordion, final RegistrationInfo registrationInfo,
                                          final String purposeSetting) {
     final String userID = user.box.getText();
+    boolean isReview = purposeSetting.equals(REVIEW);
+
+    System.out.println("checkUserAndMaybeRegister " + purposeSetting + " review " + isReview);
     if (checkValidUser(user)
-      //&& checkValidPassword(password)
+      && (!isReview || (checkValidPassword(password) /*&& checkPassword(password)*/))
       ) {
       service.userExists(userID, new AsyncCallback<Integer>() {
         @Override
@@ -334,34 +348,6 @@ public class StudentDialog extends UserDialog {
     return purposeValue.equalsIgnoreCase(PRACTICE) ||
       purposeValue.equalsIgnoreCase(DEMO);
   }
-
-  private boolean checkValidUser(FormField user) {
-    final String userID = user.box.getText();
-    if (userID.length() > USER_ID_MAX_LENGTH) {
-      markError(user, "Please enter a user id of reasonable length.");
-      return false;
-    } else if (userID.length() == 0) {
-      markError(user, "Please enter a user id.");
-      return false;
-    } else if (userID.length() < MIN_LENGTH_USER_ID) {
-      markError(user, "Please enter a user of a reasonable length.");
-      return false;
-    }
-    user.clearError();
-    return true;
-  }
-
-/*  private boolean checkValidPassword(FormField password) {
-    final String userID = password.box.getText();
-    if (userID.length() > USER_ID_MAX_LENGTH) {
-      markError(password, "Please enter a password of reasonable length.");
-      return false;
-    } else if (userID.length() == 0) {
-      markError(password, "Please enter the password that you've been told.");
-      return false;
-    }
-    return true;
-  }*/
 
   private FormField getDialect(Panel dialogBox) {
     final FormField dialectGroup = addControlFormField(dialogBox, "Dialect");
@@ -491,7 +477,7 @@ public class StudentDialog extends UserDialog {
   }
 
   private boolean highlightIntegerBox(FormField ageEntryGroup) {
-    return highlightIntegerBox(ageEntryGroup, MIN_AGE, MAX_AGE, TEST_AGE);
+    return highlightIntegerBox(ageEntryGroup, MIN_AGE, MAX_AGE+1, TEST_AGE);
   }
 
   private class RegistrationInfo {
