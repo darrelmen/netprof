@@ -151,7 +151,8 @@ public class ReviewedDAO extends DAO {
         lists.add(rs.getString(1));
       }
 
-     // logger.debug("getReviewed sql " + sql + " yielded " + lists.size());
+      // logger.debug("getReviewed sql " + sql + " yielded " + lists.size());
+        logger.debug("getReviewed yielded " + lists.size());
       rs.close();
       statement.close();
       database.closeConnection(connection);
