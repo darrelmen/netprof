@@ -8,6 +8,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
@@ -100,7 +101,7 @@ public class EditItem<T extends ExerciseShell> {
 
   private PagingExerciseList<T> makeExerciseList(Panel right, String instanceName, UserList ul, UserList originalList,
                                                  final boolean includeAddItem) {
-    //System.out.println("makeExerciseList - ul = " + ul.getName() + " " + includeAddItem);
+    System.out.println("makeExerciseList - ul = " + ul.getName() + " " + includeAddItem);
 
     if (includeAddItem) {
       UserExercise newItem = getNewItem();
@@ -108,7 +109,7 @@ public class EditItem<T extends ExerciseShell> {
       ul.addExercise(newItem);
     }
 
-    PagingExerciseList<T> exerciseList =
+    final PagingExerciseList<T> exerciseList =
       new PagingExerciseList<T>(right, service, feedback, false, false, controller,
         true, instanceName) {
         @Override
@@ -151,6 +152,14 @@ public class EditItem<T extends ExerciseShell> {
         }
       };
     setFactory(exerciseList, ul, originalList);
+    exerciseList.setUnaccountedForVertical(320);
+   // System.out.println("setting vertical on " +exerciseList.getElement().getId());
+    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      @Override
+      public void execute() {
+        exerciseList.onResize();
+      }
+    });
     return exerciseList;
   }
 
