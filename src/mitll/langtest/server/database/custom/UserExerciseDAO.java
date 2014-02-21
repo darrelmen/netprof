@@ -95,7 +95,7 @@ public class UserExerciseDAO extends DAO {
       } else {
         logger.error("huh? no key was generated?");
       }
-      logger.debug("unique id = " + id);
+      //logger.debug("unique id = " + id);
 
       userExercise.setUniqueID(id);
 
