@@ -1,7 +1,7 @@
 package mitll.langtest.client.custom;
 
 import com.github.gwtbootstrap.client.ui.CheckBox;
-import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.google.gwt.event.dom.client.BlurEvent;
@@ -9,7 +9,11 @@ import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.NavigationHelper;
@@ -24,7 +28,10 @@ import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.ExerciseShell;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -34,9 +41,13 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class QCNPFExercise extends GoodwaveExercisePanel {
- // private static final String CHECKBOX_LABEL = "         ";//"Has defect";
- // private static final String CHECKBOX_LABEL2 = "           ";//"Has defect";
   private static final String DEFECT = "Defect?";
+
+  public static final String FOREIGN_LANGUAGE = "foreignLanguage";
+  public static final String TRANSLITERATION = "transliteration";
+  public static final String ENGLISH = "english";
+  public static final String REF_AUDIO = "refAudio";
+
   private Set<String> incorrectSet = new HashSet<String>();
   private List<RequiresResize> toResize;
 
@@ -123,9 +134,9 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     row.add(heading);
 
     column.add(row);
-    column.add(getEntry(e, "foreignLanguage", ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getRefSentence()));
-    column.add(getEntry(e, "transliteration", ExerciseFormatter.TRANSLITERATION, e.getTranslitSentence()));
-    column.add(getEntry(e, "english", ExerciseFormatter.ENGLISH_PROMPT, e.getEnglishSentence()));
+    column.add(getEntry(e, FOREIGN_LANGUAGE, ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getRefSentence()));
+    column.add(getEntry(e, TRANSLITERATION, ExerciseFormatter.TRANSLITERATION, e.getTranslitSentence()));
+    column.add(getEntry(e, ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, e.getEnglishSentence()));
 
     return column;
   }
@@ -160,6 +171,10 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
       column.add(getEntry(audio.getAudioRef(), cp, audioAnnotation)); // TODO add unique audio attribute id
     }
+    if (!e.hasRefAudio()) {
+      ExerciseAnnotation refAudio = e.getAnnotation(REF_AUDIO);
+      column.add(getEntry(REF_AUDIO, new Label("No Audio Recorded."), refAudio));
+    }
     return column;
   }
 
@@ -175,8 +190,6 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
    * @param field
    * @param annotation
    * @return
-   * @paramx label
-   * @paramx value
    */
   private Widget getEntry(final String field, Widget content, ExerciseAnnotation annotation) {
     final FocusWidget commentEntry = makeCommentEntry(field, annotation);
@@ -195,11 +208,11 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
       row.addStyleName("greenBackground");
     }*/
 
-      row = new FlowPanel();
-      row.addStyleName("trueInlineStyle");
-      qcCol.addStyleName("floatLeft");
-      row.add(qcCol);
-      row.add(content);
+    row = new FlowPanel();
+    row.addStyleName("trueInlineStyle");
+    qcCol.addStyleName("floatLeft");
+    row.add(qcCol);
+    row.add(content);
 
 
     Panel rowContainer = new FlowPanel();
@@ -212,12 +225,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   }
 
   private Widget getQCCheckBox(String field, FocusWidget commentEntry, boolean alreadyMarkedCorrect, Panel commentRow) {
-    final CheckBox checkBox = makeCheckBox(field, commentRow, commentEntry, alreadyMarkedCorrect);
-
-/*    Panel qcCol = new FlowPanel();
-    qcCol.add(checkBox);
-    return qcCol;*/
-    return checkBox;
+    return makeCheckBox(field, commentRow, commentEntry, alreadyMarkedCorrect);
   }
 
   /**
@@ -235,20 +243,21 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     commentRow.add(commentEntry);
   }
 
-  private FocusWidget makeCommentEntry(final String field,ExerciseAnnotation annotation) {
+  private FocusWidget makeCommentEntry(final String field, ExerciseAnnotation annotation) {
     final TextBox commentEntry = new TextBox();
+    commentEntry.getElement().setId("QCNPFExercise_Comment_TextBox_"+field);
     commentEntry.addStyleName("topFiveMargin");
     if (annotation != null) {
       commentEntry.setText(annotation.comment);
     }
+    commentEntry.setVisibleLength(100);
+    commentEntry.setWidth("400px");
 
     commentEntry.addStyleName("leftFiveMargin");
     commentEntry.addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
-
-        final String comment = commentEntry.getText();
-        addIncorrectComment(comment, field);
+        addIncorrectComment(commentEntry.getText(), field);
       }
     });
     return commentEntry;
