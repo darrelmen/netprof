@@ -243,7 +243,7 @@ public class UserListManager {
     for (String id : ids) {
       if (!id.startsWith(UserExercise.CUSTOM_PREFIX)) {
         Exercise byID = userExerciseDAO.getExercise(id);
-        logger.debug("getReviewedUserExercises : found " + byID + " tooltip " + byID.getTooltip());
+        //logger.debug("getReviewedUserExercises : found " + byID + " tooltip " + byID.getTooltip());
         if (byID != null) {
           onList.add(new UserExercise(byID)); // all predefined references
         }
