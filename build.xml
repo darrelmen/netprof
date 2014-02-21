@@ -53,7 +53,7 @@
         <pathelement location="war/WEB-INF/lib/dom4j-1.6.1.jar"/>
         <pathelement location="war/WEB-INF/lib/commons-fileupload-1.2.2.jar"/>
         <pathelement location="war/WEB-INF/lib/flashcard.jar"/>
-        <pathelement location="war/WEB-INF/lib/gwt-bootstrap-2.3.2.0-SNAPSHOT.jar"/>
+        <pathelement location="war/WEB-INF/lib/gwt-bootstrap-2.3.2.1-SNAPSHOT.jar"/>
         <pathelement location="war/WEB-INF/lib/org.moxieapps.gwt.highcharts-1.5.0.jar"/>
     </path>
     <target name="init" depends="clean">
@@ -170,16 +170,6 @@
             </manifest>
         </jar>
     </target>
-
-<!--
-    <target depends="build" name="dataCollectAdmin">
-        <jar destfile="dataCollectAdmin.war" basedir="war" excludes="WEB-INF/lib/pronz.jar,WEB-INF/lib/mira.jar,media/**,config/dataCollectAdmin/uploads/**,config/pilot/**,answers/**,fastAndSlowRef/**,audioimages/**,scoring/**,config/first/**,config/urdu/**,config/autoCRT/**,config/msa/**,config/msa/**,config/levantine/**,config/eqyptian/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
-            <manifest>
-                <attribute name="Built-Date" value="${current.time}"/>
-            </manifest>
-        </jar>
-    </target>
--->
 
     <target depends="build" name="warArabicVLL2">
         <jar destfile="npArabicVLL.war" basedir="war"
@@ -374,28 +364,6 @@
     <target depends="build" name="avpESL">
         <jar destfile="avpESLTimedFeedback.war" basedir="war"
              includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/english/**,scoring/bin.linux64/**,scoring/configurations/**,scoring/models.wsj01-16/**"
-                >
-
-            <manifest>
-                <attribute name="Built-Date" value="${current.time}"/>
-            </manifest>
-        </jar>
-    </target>
-
-    <target depends="build" name="customNPF">
-        <jar destfile="customNPF.war" basedir="war"
-             includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/english/**,scoring/bin.linux64/**,scoring/configurations/**,scoring/models.wsj01-16/**"
-                >
-
-            <manifest>
-                <attribute name="Built-Date" value="${current.time}"/>
-            </manifest>
-        </jar>
-    </target>
-
-    <target depends="build" name="taboo">
-        <jar destfile="taboo.war" basedir="war"
-             includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/taboo/**"
                 >
 
             <manifest>
