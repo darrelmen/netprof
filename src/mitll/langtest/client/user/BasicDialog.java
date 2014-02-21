@@ -10,6 +10,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.github.gwtbootstrap.client.ui.constants.Trigger;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -88,8 +89,6 @@ public class BasicDialog {
     Panel row = new DivWidget();
     row.add(widget);
     row.add(rightSide);
-   // final ControlGroup userGroup = addControlGroupEntry(dialogBox, label, row);
-
     userGroup.add(row);
 
     dialogBox.add(userGroup);
@@ -141,6 +140,16 @@ public class BasicDialog {
     return validAge;
   }
 
+  protected void markError(ControlGroup dialectGroup, String header, String message) {
+    dialectGroup.setType(ControlGroupType.ERROR);
+    setupPopoverThatHidesItself(dialectGroup.getWidget(1), header, message);
+  }
+
+  protected void markError(ControlGroup dialectGroup, Widget dialect, String header, String message) {
+    dialectGroup.setType(ControlGroupType.ERROR);
+    setupPopoverThatHidesItself(dialect, header, message);
+  }
+
   protected void markError(ControlGroup dialectGroup, FocusWidget dialect, String header, String message) {
     markError(dialectGroup, dialect, header, message, Placement.RIGHT);
   }
@@ -152,20 +161,17 @@ public class BasicDialog {
   }
 
   protected void setupPopoverThatHidesItself(final Widget w, String heading, final String message) {
-    System.out.println("\ttriggering popover on " + w.getTitle() + " with " + heading + "/" + message);
+    System.out.println("\ttriggering popover on '" + w.getTitle() + "' with " + heading + "/" + message);
     final MyPopover popover = new MyPopover();
-    popover.setWidget(w);
-    popover.setText(message);
-    popover.setHeading(heading);
-    popover.setPlacement(Placement.RIGHT);
-    popover.reconfigure();
-    popover.show();
+
+    configurePopup(popover, w, heading, message, Placement.RIGHT);
 
     Timer t = new Timer() {
       @Override
       public void run() {
         popover.dontFireAgain();
-        popover.setHideDelay(0);
+        //popover.setHideDelay(0);
+     //   popover.remove(w);
         //  popover.clear();
         //  popover.reconfigure();
         //   popover.clear();
@@ -182,14 +188,9 @@ public class BasicDialog {
    * @param placement
    */
   protected void setupPopover(final FocusWidget w, String heading, final String message, Placement placement) {
-    // System.out.println("triggering popover on " + w + " with " + message);
+    System.out.println("setupPopover : triggering popover on " + w + " with " + heading +"/"+message);
     final Popover popover = new Popover();
-    popover.setWidget(w);
-    popover.setText(message);
-    popover.setHeading(heading);
-    popover.setPlacement(placement);
-    popover.reconfigure();
-    popover.show();
+    configurePopup(popover, w, heading, message, placement);
     visiblePopovers.add(popover);
 /*
     Timer t = new Timer() {
@@ -208,6 +209,15 @@ public class BasicDialog {
     });
   }
 
+  private void configurePopup(Popover popover, Widget w, String heading, String message, Placement placement) {
+    popover.setWidget(w);
+    popover.setText(message);
+    popover.setHeading(heading);
+    popover.setPlacement(placement);
+    popover.reconfigure();
+    popover.show();
+  }
+
   public void hidePopovers() {
     for (Popover popover : visiblePopovers) popover.hide();
     visiblePopovers.clear();
@@ -216,7 +226,9 @@ public class BasicDialog {
   private static class MyPopover extends Popover {
     public void dontFireAgain() {
       hide();
-      asWidget();
+      //asWidget();
+      setTrigger(Trigger.MANUAL);
+      reconfigure();
     }
   }
 
@@ -249,16 +261,10 @@ public class BasicDialog {
       group.setVisible(visible);
     }
 
-    public String getText() {
-      return box.getText();
-    }
+    public String getText() { return box.getText(); }
 
     public void setRightSide(Widget rightSide) { this.rightSide = rightSide; }
-    //public Widget getRightSide() { return rightSide; }
 
-/*    protected void markSimpleError(String message) {
-      markError(group, box, "Try Again", message);
-    }*/
     public String toString() { return "FormField value " + getText(); }
   }
 
