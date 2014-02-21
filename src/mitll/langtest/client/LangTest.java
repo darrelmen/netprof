@@ -720,13 +720,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           @Override
           public Panel getExercisePanel(Exercise e) {
             if (isReviewMode()) {
-              System.out.println("\nmaking new QCNPFExercise for " +e + " instance " + "classroom");
-
               return new QCNPFExercise(e, controller, exerciseList, 1.0f, false, "classroom");
             }
             else {
-              System.out.println("\nmaking new CommentNPFExercise for " +e + " instance " + "classroom");
-
               return new CommentNPFExercise(e, controller, exerciseList, 1.0f, false, "classroom");
             }
           }
@@ -738,8 +734,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       exerciseList.setFactory(new GradingExercisePanelFactory(service, outer, outer, exerciseList), userManager, props.getNumGradesToCollect());
     } else if (props.getFlashcardNextAndPrev()) {
       String responseType = props.getResponseType();
-
-      //System.out.println("got response type " + responseType);
       if (responseType.equalsIgnoreCase("Text")) {
         exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer, exerciseList) {
           @Override
