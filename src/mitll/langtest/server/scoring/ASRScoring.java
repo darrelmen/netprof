@@ -154,7 +154,7 @@ public class ASRScoring extends Scoring {
       logger.error("lts " +language+ " failed on " + foreignLanguagePhrase);
       return false;
     }
-    logger.debug("checkLTS " +language+ "tokens : '" +tokens + "' valid!");
+    //logger.debug("checkLTS " +language+ "tokens : '" +tokens + "' valid!");
 
     return true;
   }
@@ -172,7 +172,7 @@ public class ASRScoring extends Scoring {
       builder.append(" ");
     }
     String s = builder.toString();
-    logger.debug("getSegmented phrase '" + longPhrase + "' -> '" + s + "'");
+   // logger.debug("getSegmented phrase '" + longPhrase + "' -> '" + s + "'");
 
     return s;
   }
