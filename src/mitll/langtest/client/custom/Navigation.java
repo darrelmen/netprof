@@ -63,6 +63,7 @@ public class Navigation implements RequiresResize {
   public static final String ITEMS_TO_REVIEW = "Items to review";
   public static final String ITEMS_WITH_COMMENTS = "Items with comments";
   public static final String LEARN_PRONUNCIATION = "Learn Pronunciation";
+  private static final String REVIEW1 = "Review";
   private final ExerciseController controller;
   private LangTestDatabaseAsync service;
   private UserManager userManager;
@@ -156,7 +157,7 @@ public class Navigation implements RequiresResize {
     chapters.content.add(secondAndThird);
 
     if (controller.isReviewMode()) {
-      review = makeTab(tabPanel, IconType.EDIT, "Review");
+      review = makeTab(tabPanel, IconType.EDIT, REVIEW1);
       review.tab.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
@@ -310,7 +311,7 @@ public class Navigation implements RequiresResize {
     final Panel child = new DivWidget();
     contentPanel.add(child);
     child.addStyleName("exerciseBackground");
-     System.out.println("\tviewReview : reviewLessons for " + userManager.getUser());
+   //  System.out.println("\tviewReview : reviewLessons for " + userManager.getUser());
     service.getReviewList(new AsyncCallback<UserList>() {
       @Override
       public void onFailure(Throwable caught) {}
@@ -469,7 +470,7 @@ public class Navigation implements RequiresResize {
         if (created && !ul.isPrivate() && ul.isEmpty() && finalEditItem != null) {
           String name = ul.getName();
           System.out.println("name " + name);
-          tabPanel.selectTab(name.equals("Review") ? 0 : 2);    // 2 = add/edit item
+          tabPanel.selectTab(name.equals(REVIEW1) ? 0 : 2);    // 2 = add/edit item
           showEditItem(ul, finalEditItem, (isReview || isComment) ? reviewItem : Navigation.this.editItem, isNormalList);
         } else {
           tabPanel.selectTab(0);
