@@ -363,14 +363,6 @@ public class StudentDialog extends UserDialog {
     return dialectGroup;
   }
 
-  protected ListBox getListBox2(Collection<String> values) {
-    final ListBox listBox = new ListBox(false);
-    for (String s : values) {
-      listBox.addItem(s);
-    }
-    listBox.setWidth(ILR_CHOICE_WIDTH + "px");
-    return listBox;
-  }
 
   /**
    * Send the name from the nameField to the server and wait for a response.
