@@ -490,7 +490,7 @@ public class Navigation implements RequiresResize {
    * @param addItem
    */
   private void showEditItem(UserList ul, TabAndContent addItem, EditItem<? extends ExerciseShell> editItem, boolean includeAddItem) {
-   // System.out.println("\n\n\nshowEditItem --- " + ul);
+    System.out.println("showEditItem --- " + ul + " : " + includeAddItem);
     addItem.content.clear();
     Widget widgets = editItem.editItem(ul, listToMarker.get(ul), includeAddItem);
     addItem.content.add(widgets);
@@ -503,7 +503,6 @@ public class Navigation implements RequiresResize {
     }
   }
 
- //private TabPanel innerTabs;
   private class UserListCallback implements AsyncCallback<Collection<UserList>> {
     private final Panel contentPanel;
     private final Panel child;
