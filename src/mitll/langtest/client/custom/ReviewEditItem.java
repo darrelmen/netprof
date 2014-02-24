@@ -54,11 +54,11 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
   @Override
   protected NewUserExercise<T> getAddOrEditPanel(UserExercise exercise, HasText itemMarker, UserList originalList, boolean doNewExercise) {
     NewUserExercise<T> editableExercise;
-/*    if (doNewExercise) {
+   if (doNewExercise) {
       editableExercise = new ChapterNewExercise<T>(service, controller, itemMarker, this, exercise);
-    } else {*/
+    } else {
       editableExercise = new ReviewEditableExercise(itemMarker, exercise, originalList);
-  //  }
+    }
     return editableExercise;
   }
 
