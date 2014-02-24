@@ -505,6 +505,10 @@ public class ExcelImport implements ExerciseDAO {
     exercises.add(imported);
   }
 
+  /**
+   * @see #readFromSheet(org.apache.poi.ss.usermodel.Sheet)
+   * @param englishToExercises
+   */
   private void addSynonyms(Map<String, List<Exercise>> englishToExercises) {
     for (List<Exercise> exercises2 : englishToExercises.values()) {
       if (exercises2.size() > 1) {
@@ -519,14 +523,18 @@ public class ExcelImport implements ExerciseDAO {
               String ref = e.getRefSentences().get(i);
               String transLower = ref.toLowerCase().trim();
 
-              if (!e.getTranslitSentences().isEmpty()) {
-                String translit = e.getTranslitSentences().get(i);
+              List<String> translitSentences = e.getTranslitSentences();
+              if (translitSentences.size() > i) {
+                String translit = translitSentences.get(i);
                 if (!translationSet.contains(transLower)) {
                   translations.add(ref);
                   transliterations.add(translit);
                   translationSet.add(transLower);
                   audioRefs.add(e.getRefAudio());
                 }
+              }
+              else {
+                logger.warn("no translit sentence at " + i + " for " + e);
               }
             } catch (Exception e1) {
               logger.error("got " + e1 + " on " + e, e1);
