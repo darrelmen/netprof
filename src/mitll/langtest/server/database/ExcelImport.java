@@ -43,8 +43,8 @@ import java.util.Set;
  */
 public class ExcelImport implements ExerciseDAO {
   private static Logger logger = Logger.getLogger(ExcelImport.class);
+  private static final boolean INCLUDE_ENGLISH_SEMI_AS_DEFECT = false;
 
-//  private static final boolean SHOW_SKIPS = false;
   private final boolean isFlashcard;
 
   private List<Exercise> exercises = null;
@@ -477,7 +477,7 @@ public class ExcelImport implements ExerciseDAO {
     if (translit.contains(";")) {
       fieldToDefect.put(QCNPFExercise.TRANSLITERATION,"contains semicolon - should this item be split?");
     }
-    if (english.contains(";")) {
+    if (INCLUDE_ENGLISH_SEMI_AS_DEFECT && english.contains(";")) {
       fieldToDefect.put(QCNPFExercise.ENGLISH,"contains semicolon - should this item be split?");
     }
   }
