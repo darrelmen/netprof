@@ -7,6 +7,7 @@ import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.custom.UserExercise;
 import org.apache.log4j.Logger;
 
+import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,7 +15,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class UserExerciseDAO extends DAO {
   private static Logger logger = Logger.getLogger(UserExerciseDAO.class);
@@ -22,6 +25,8 @@ public class UserExerciseDAO extends DAO {
   private static final String EXERCISEID = "exerciseid";
   private static final String TRANSLITERATION = "transliteration";
   private static final String OVERRIDE = "override";
+  private static final String UNIT = "unit";
+  private static final String LESSON = "lesson";
 
   public static final String USEREXERCISE = "userexercise";
   private ExerciseDAO exerciseDAO;
@@ -43,6 +48,12 @@ public class UserExerciseDAO extends DAO {
       if (!columns.contains(EXERCISEID)) {
         addExerciseIDColumnToTable(connection);
       }
+      if (!columns.contains(UNIT)) {
+        addColumn(connection, UNIT);
+      }
+      if (!columns.contains(LESSON)) {
+        addColumn(connection, LESSON);
+      }
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
@@ -59,6 +70,8 @@ public class UserExerciseDAO extends DAO {
   public void add(UserExercise userExercise, boolean isOverride) {
     long id = 0;
 
+    List<String> typeOrder = exerciseDAO.getSectionHelper().getTypeOrder();
+
     try {
       // there are much better ways of doing this...
       logger.info("UserExerciseDAO.add : userExercise " + userExercise);
@@ -68,8 +81,9 @@ public class UserExerciseDAO extends DAO {
         "INSERT INTO " + USEREXERCISE +
           "(" +
             EXERCISEID +
-            ",english,foreignLanguage," + TRANSLITERATION + ",creatorid,refAudio,slowAudioRef,override) " +
-          "VALUES(?,?,?,?,?,?,?,?);");
+            ",english,foreignLanguage," + TRANSLITERATION + ",creatorid,refAudio,slowAudioRef,override," + UNIT+","+LESSON+
+          ") " +
+          "VALUES(?,?,?,?,?,?,?,?,?,?);");
       int i = 1;
       statement.setString(i++, userExercise.getID());
       statement.setString(i++, fixSingleQuote(userExercise.getEnglish()));
@@ -83,6 +97,20 @@ public class UserExerciseDAO extends DAO {
       String slowRefNullCheck = slowAudioRef == null || slowAudioRef.equals("null") ? "" : slowAudioRef;
       statement.setString(i++, slowRefNullCheck);
       statement.setBoolean(i++, isOverride);
+
+      Map<String,String> unitToValue = userExercise.getUnitToValue();
+
+      logger.warn("type order " + typeOrder + " and " +unitToValue);
+
+      if (typeOrder.size() > 0) {
+        String s = typeOrder.get(0);
+        statement.setString(i++, unitToValue.containsKey(s) ? unitToValue.get(s) : "");
+      }
+
+      if (typeOrder.size() > 1) {
+        String s = typeOrder.get(1);
+        statement.setString(i++, unitToValue.containsKey(s) ? unitToValue.get(s) : "");
+      }
 
       int j = statement.executeUpdate();
 
@@ -146,6 +174,10 @@ public class UserExerciseDAO extends DAO {
       "slowAudioRef VARCHAR, " +
       "override" +
       " BOOLEAN, " +
+      UNIT +
+      " VARCHAR, " +
+      LESSON +
+      " VARCHAR, " +
       "FOREIGN KEY(creatorid) REFERENCES " +
       "USERS" +
       "(ID)" +
@@ -310,7 +342,21 @@ public class UserExerciseDAO extends DAO {
     ResultSet rs = statement.executeQuery();
     List<UserExercise> exercises = new ArrayList<UserExercise>();
 
+    List<String> typeOrder = exerciseDAO.getSectionHelper().getTypeOrder();
     while (rs.next()) {
+      String first = rs.getString(UNIT);
+      String second = rs.getString(LESSON);
+      Map<String,String> unitToValue = new HashMap<String, String>();
+      if (typeOrder.size() > 0) {
+        String s = typeOrder.get(0);
+        unitToValue.put(s,first);
+      }
+
+      if (typeOrder.size() > 1) {
+        String s = typeOrder.get(1);
+        unitToValue.put(s, second);
+      }
+
       UserExercise e = new UserExercise(
         rs.getLong("uniqueid"), //id
         rs.getString(EXERCISEID),
@@ -320,7 +366,9 @@ public class UserExerciseDAO extends DAO {
         rs.getString(TRANSLITERATION),
         rs.getString("refAudio"),
         rs.getString("slowAudioRef"),
-        rs.getBoolean(OVERRIDE));
+        rs.getBoolean(OVERRIDE),
+        unitToValue);
+
       exercises.add(e);
     }
     rs.close();
@@ -389,15 +437,17 @@ public class UserExerciseDAO extends DAO {
   }
 
   private void addColumnToTable(Connection connection) throws SQLException {
-    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " +
-        USEREXERCISE + " ADD " + TRANSLITERATION + " VARCHAR");
-    statement.execute();
-    statement.close();
+    addColumn(connection, TRANSLITERATION);
   }
 
   private void addExerciseIDColumnToTable(Connection connection) throws SQLException {
+    String exerciseid = EXERCISEID;
+    addColumn(connection, exerciseid);
+  }
+
+  private void addColumn(Connection connection, String exerciseid) throws SQLException {
     PreparedStatement statement = connection.prepareStatement("ALTER TABLE " +
-        USEREXERCISE + " ADD " + EXERCISEID + " VARCHAR");
+        USEREXERCISE + " ADD " + exerciseid + " VARCHAR");
     statement.execute();
     statement.close();
   }
@@ -410,6 +460,8 @@ public class UserExerciseDAO extends DAO {
   }
 
   public void setExerciseDAO(ExerciseDAO exerciseDAO) {
+
     this.exerciseDAO = exerciseDAO;
+    // exerciseDAO.getSectionHelper().getTypeOrder();
   }
 }

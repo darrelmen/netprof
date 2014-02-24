@@ -1,5 +1,6 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.UserExerciseDAO;
 import mitll.langtest.server.database.testing.SmallDatabaseImpl;
 import mitll.langtest.shared.Exercise;
@@ -139,6 +140,21 @@ public class SQLExerciseDAO implements ExerciseDAO {
 
   @Override
   public void addOverlay(UserExercise userExercise) {
+
+  }
+
+  @Override
+  public void setAddRemoveDAO(AddRemoveDAO addRemoveDAO) {
+
+  }
+
+  @Override
+  public boolean remove(String id) {
+    return false;
+  }
+
+  @Override
+  public void add(UserExercise userExercise) {
 
   }
 
