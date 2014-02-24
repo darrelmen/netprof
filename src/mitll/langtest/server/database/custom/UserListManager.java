@@ -33,10 +33,12 @@ import java.util.TreeSet;
  * To change this template use File | Settings | File Templates.
  */
 public class UserListManager {
-  public static final String CORRECT = "correct";
-  public static final String FIXED = "fixed";
-  public static final String INCORRECT = "incorrect";
   private static Logger logger = Logger.getLogger(UserListManager.class);
+
+  private static final String CORRECT = "correct";
+  private static final String FIXED = "fixed";
+  private static final String INCORRECT = "incorrect";
+
   private static final String FAST = "Fast";
   private static final String SLOW = "Slow";
   private static final String MY_FAVORITES = "My Favorites";
@@ -46,7 +48,6 @@ public class UserListManager {
   private int i = 0;
 
   private UserExerciseDAO userExerciseDAO;
-  private int userExerciseCount = 0;
   private UserListDAO userListDAO;
   private UserListExerciseJoinDAO userListExerciseJoinDAO;
   private AnnotationDAO annotationDAO;
@@ -271,20 +272,6 @@ public class UserListManager {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#createNewItem
-   * @see mitll.langtest.client.custom.NewUserExercise.CreateFirstRecordAudioPanel#makePostAudioRecordButton()
-   * @param userid
-   * @paramx english
-   * @paramx foreign
-   * @paramx transliteration
-   * @return
-   */
-  public UserExercise createNewItem(long userid) {//}, String english, String foreign, String transliteration) {
-    int uniqueID = userExerciseCount++;
-    return new UserExercise(uniqueID, UserExercise.CUSTOM_PREFIX+uniqueID, userid, " ", "", "");
-  }
-
-  /**
    * @see mitll.langtest.client.custom.NPFExercise#populateListChoices
    * @see mitll.langtest.server.LangTestDatabaseImpl#addItemToUserList(long, mitll.langtest.shared.custom.UserExercise)
    * @param userListID
@@ -298,7 +285,7 @@ public class UserListManager {
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#reallyCreateNewItem
    * @see #addItemToUserList(long, mitll.langtest.shared.custom.UserExercise)
-   * @see mitll.langtest.client.custom.NewUserExercise#onClick
+   * @see mitll.langtest.client.custom.NewUserExercise#afterValidForeignPhrase
    * @param userListID
    * @param userExercise
    */
@@ -306,8 +293,6 @@ public class UserListManager {
     userExerciseDAO.add(userExercise, false);
 
     addItemToList(userListID, userExercise);
-    //fixAudioPaths(userExercise, true); // do this after the id has been made
-
     editItem(userExercise, false);
   }
 
@@ -324,7 +309,7 @@ public class UserListManager {
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#editItem(mitll.langtest.shared.custom.UserExercise)
-   * @see mitll.langtest.client.custom.NewUserExercise#onClick
+   * @see mitll.langtest.client.custom.EditItem.EditableExercise#postEditItem(mitll.langtest.client.list.ListInterface, boolean)
    *
    * @param userExercise
    * @param createIfDoesntExist
