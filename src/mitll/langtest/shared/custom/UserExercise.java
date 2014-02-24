@@ -5,6 +5,8 @@ import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.ExerciseShell;
 
+import java.util.Map;
+
 /**
  * Created with IntelliJ IDEA.
  * User: GO22670
@@ -72,10 +74,12 @@ public class UserExercise extends AudioExercise {
    * @param isOverride
    */
   public UserExercise(long uniqueID, String exerciseID, long creator, String english, String foreignLanguage,
-                      String transliteration, String refAudio, String slowAudioRef, boolean isOverride) {
+                      String transliteration, String refAudio, String slowAudioRef, boolean isOverride,
+                      Map<String,String> unitToValue) {
     this(uniqueID, exerciseID, creator, english, foreignLanguage, transliteration);
     setRefAudio(refAudio);
     setSlowRefAudio(slowAudioRef);
+    setUnitToValue(unitToValue);
     this.isOverride = isOverride;
   }
 
