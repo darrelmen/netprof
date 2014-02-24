@@ -24,6 +24,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 /**
