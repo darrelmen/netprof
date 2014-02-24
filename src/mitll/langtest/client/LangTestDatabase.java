@@ -159,6 +159,8 @@ public interface LangTestDatabase extends RemoteService {
 
   UserExercise reallyCreateNewItem(long userListID, UserExercise userExercise);
 
+  UserExercise duplicateExercise(UserExercise id);
+
   void editItem(UserExercise userExercise);
 
   void addAnnotation(String exerciseID, String field, String status, String comment, long userID);
