@@ -1,9 +1,11 @@
 package mitll.langtest.client.custom;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.TextBox;
+import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -46,7 +48,9 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   public static final String FOREIGN_LANGUAGE = "foreignLanguage";
   public static final String TRANSLITERATION = "transliteration";
   public static final String ENGLISH = "english";
-  public static final String REF_AUDIO = "refAudio";
+
+  private static final String REF_AUDIO = "refAudio";
+  private static final String APPROVED = "Approved";
 
   private Set<String> incorrectSet = new HashSet<String>();
   private List<RequiresResize> toResize;
@@ -68,21 +72,42 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
   protected NavigationHelper<Exercise> getNavigationHelper(ExerciseController controller,
                                                            final ListInterface<Exercise> listContainer, boolean addKeyHandler) {
-    return new NavigationHelper<Exercise>(exercise, controller, new PostAnswerProvider() {
+    NavigationHelper<Exercise> widgets = new NavigationHelper<Exercise>(exercise, controller, new PostAnswerProvider() {
       @Override
       public void postAnswers(ExerciseController controller, ExerciseShell completedExercise) {
         nextWasPressed(listContainer, completedExercise);
       }
     }, listContainer, true, addKeyHandler) {
       @Override
-      protected void enableNext(Exercise exercise) {}
+      protected void enableNext(Exercise exercise) {
+      }
     };
+
+    addApprovedButton(listContainer, widgets);
+    return widgets;
+  }
+
+  private void addApprovedButton(final ListInterface<Exercise> listContainer, NavigationHelper<Exercise> widgets) {
+    Button approved = new Button(APPROVED);
+    approved.addStyleName("leftFiveMargin");
+    widgets.add(approved);
+    approved.setType(ButtonType.PRIMARY);
+    approved.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        markReviewed(listContainer, exercise);
+      }
+    });
   }
 
   @Override
   protected void nextWasPressed(ListInterface<? extends ExerciseShell> listContainer, ExerciseShell completedExercise) {
-    System.out.println("nextWasPressed : load next exercise " + completedExercise.getID() + " instance " +instance);
+    //System.out.println("nextWasPressed : load next exercise " + completedExercise.getID() + " instance " +instance);
     super.nextWasPressed(listContainer, completedExercise);
+    markReviewed(listContainer, completedExercise);
+  }
+
+  private void markReviewed(ListInterface<? extends ExerciseShell> listContainer, ExerciseShell completedExercise) {
     if (!instance.equals(Navigation.REVIEW) && !instance.equals(Navigation.COMMENT)) {
       listContainer.addCompleted(completedExercise.getID());
       markReviewed(completedExercise);
