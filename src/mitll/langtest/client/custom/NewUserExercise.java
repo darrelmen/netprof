@@ -322,9 +322,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
       public void onSuccess(Boolean result) {
         if (result) {
           checkIfNeedsRefAudio();
-          newUserExercise.setEnglish(english.getText());
-          newUserExercise.setForeignLanguage(foreignLang.getText());
-          newUserExercise.setTransliteration(translit.getText());
+          setFields();
           afterValidForeignPhrase(ul, pagingContainer, toAddTo, onClick);
         } else {
           markError(foreignLang, "The " + FOREIGN_LANGUAGE +
@@ -332,6 +330,12 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
         }
       }
     });
+  }
+
+  protected void setFields() {
+    newUserExercise.setEnglish(english.getText());
+    newUserExercise.setForeignLanguage(foreignLang.getText());
+    newUserExercise.setTransliteration(translit.getText());
   }
 
   protected void checkIfNeedsRefAudio() {
