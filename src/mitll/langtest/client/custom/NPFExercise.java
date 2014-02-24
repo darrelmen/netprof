@@ -129,7 +129,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
    */
   @Override
   public void wasRevealed() {
-    System.out.println("wasRevealed : populate list choices for " + controller.getUser() + "\n\n");
+    //System.out.println("wasRevealed : populate list choices for " + controller.getUser() + "\n\n");
     populateListChoices(exercise, controller, addToList);
   }
 
