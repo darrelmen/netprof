@@ -48,6 +48,7 @@ public class FlexSectionExerciseList<T extends ExerciseShell> extends HistoryExe
   private static final int HEADING_FOR_LABEL = 4;
   private static final int UNACCOUNTED_WIDTH = 60;
   public static final int VERTICAL_DEFAULT = 160;
+  public static final int CLASSROOM_VERTICAL_EXTRA = 320;
 
   private final List<ButtonType> buttonTypes = new ArrayList<ButtonType>();
   private Map<String, ButtonType> typeToButton = new HashMap<String, ButtonType>();
@@ -90,7 +91,7 @@ public class FlexSectionExerciseList<T extends ExerciseShell> extends HistoryExe
     buttonTypes.add(ButtonType.SUCCESS);
     buttonTypes.add(ButtonType.INFO);
     buttonTypes.add(ButtonType.WARNING);
-    setUnaccountedForVertical(controller.getProps().isClassroomMode() ? 250: VERTICAL_DEFAULT);
+    setUnaccountedForVertical(controller.getProps().isClassroomMode() ? CLASSROOM_VERTICAL_EXTRA : VERTICAL_DEFAULT);
   }
 
   @Override
@@ -700,7 +701,7 @@ public class FlexSectionExerciseList<T extends ExerciseShell> extends HistoryExe
       scrollPanel.setWidth(Math.max(300, width) + "px");
     }
     else {
-      System.out.println("setScrollPanelWidth : labelColumn is null");
+      //System.out.println("setScrollPanelWidth : labelColumn is null");
     }
   }
 
