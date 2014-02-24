@@ -319,6 +319,22 @@ public class UserListManager {
     userExerciseDAO.update(userExercise, createIfDoesntExist);
   }
 
+  public UserExercise duplicate(UserExercise userExercise) {
+    String id = userExercise.getID();
+    String newid;
+    if (id.contains("dup")) {
+       newid = id.split("dup")[0] + "_dup_" +System.currentTimeMillis();
+    }
+    else {
+       newid = id + "_dup_" +System.currentTimeMillis();
+    }
+
+    logger.warn("duplicating " + userExercise + " with id " + newid);
+    userExercise.setID(newid);
+    userExerciseDAO.add(userExercise, true);
+    return userExercise;
+  }
+
   /**
    * Remember to copy the audio from the posted location to a more permanent location.
    * @see #editItem(mitll.langtest.shared.custom.UserExercise, boolean)
