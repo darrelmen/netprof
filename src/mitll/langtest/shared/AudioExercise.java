@@ -13,6 +13,7 @@ import java.util.Map;
  */
 public class AudioExercise extends ExerciseShell {
   protected Map<String,AudioAttribute> audioAttributes = new HashMap<String, AudioAttribute>();
+  protected Map<String,String> unitToValue = new HashMap<String, String>();
   private Map<String,ExerciseAnnotation> fieldToAnnotation = new HashMap<String, ExerciseAnnotation>();
 
   public AudioExercise() {}
@@ -46,7 +47,6 @@ public class AudioExercise extends ExerciseShell {
     }
   }
 
- // public void clearAudio() { clearRefAudio(); clearSlowRefAudio(); }
   public void clearRefAudio() {
     AudioAttribute audio = getAudio("speed", "regular");
     if (audio != null) audioAttributes.remove(audio.getKey());
@@ -65,9 +65,7 @@ public class AudioExercise extends ExerciseShell {
   }
 
   public boolean hasRefAudio() { return !audioAttributes.isEmpty(); }
-
   public Collection<AudioAttribute> getAudioAttributes() { return audioAttributes.values();  }
-  //public void forgetAllAudio() { audioAttributes.clear(); }
 
   /**
    * @see mitll.langtest.server.database.custom.UserListManager#addAnnotations
@@ -113,8 +111,13 @@ public class AudioExercise extends ExerciseShell {
 
   public Collection<String> getFields() { return fieldToAnnotation.keySet(); }
 
+  public Map<String, String> getUnitToValue() { return unitToValue; }
+
+  public void addUnitToValue(String unit, String value) {  this.getUnitToValue().put(unit, value);  }
+  public void setUnitToValue(Map<String, String> unitToValue) {  this.unitToValue = unitToValue;  }
+
   public String toString() {
     return super.toString() +" audio attr (" +getAudioAttributes().size()+
-      ") :" + getAudioAttributes() + " and " +fieldToAnnotation + " annotations";
+      ") :" + getAudioAttributes() + " and " +fieldToAnnotation + " annotations, unit/lesson " + unitToValue;
   }
 }
