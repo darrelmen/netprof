@@ -11,6 +11,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * To change this template use File | Settings | File Templates.
  */
 public class User implements IsSerializable, Comparable<User> {
+  public static final String NOT_SET = "NOT_SET";
   public long id;
   public int age;
   public int gender;
@@ -40,7 +41,7 @@ public class User implements IsSerializable, Comparable<User> {
    */
   public User(long id, int age, int gender, int experience, String ipaddr, String password,
                boolean enabled) {
-     this(id,age,gender,experience,ipaddr,password, "NOT_SET","NOT_SET","NOT_SET",0,enabled,false);
+     this(id,age,gender,experience,ipaddr,password, NOT_SET, NOT_SET, NOT_SET,0,enabled,false);
   }
   /**
    * @see mitll.langtest.server.database.UserDAO#getUsers()
