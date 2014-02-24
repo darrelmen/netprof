@@ -166,4 +166,6 @@ public interface LangTestDatabaseAsync {
   void deleteList(long id, AsyncCallback<Boolean> async);
 
   void deleteItemFromList(long listid, String exid, AsyncCallback<Boolean> async);
+
+  void duplicateExercise(UserExercise id, AsyncCallback<UserExercise> async);
 }
