@@ -350,12 +350,14 @@ public class PagingContainer<T extends ExerciseShell> {
   public T byID(String id) { return idToExercise.get(id); }
 
   public <S extends ExerciseShell> void addExercise(S exercise) {
+    System.out.println("addExercise adding " + exercise);
+
     List<T> list = getList();
     String id = exercise.getID();
     T exercise1 = (T) exercise;
     idToExercise.put(id, exercise1);
     list.add(exercise1);  // TODO : can't remember how I avoid this
-   // System.out.println("data now has "+list.size() + " after adding " + exercise.getID());
+    System.out.println("data now has "+list.size() + " after adding " + exercise.getID());
   }
 
   public Set<String> getKeys() { return idToExercise.keySet(); }
