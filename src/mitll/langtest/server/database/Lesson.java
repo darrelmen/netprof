@@ -16,21 +16,15 @@ import java.util.List;
  */
 public class Lesson {
   private List<Exercise> exerciseList = new ArrayList<Exercise>();
-  public long timestamp;
-  public String unit;
-  public String chapter;
-  public String week;
+  private String unit;
 
   public Lesson(){}
-  public Lesson(String unit, String chapter, String week) { this.unit = unit; this.chapter = chapter; this.week = week; }
+  public Lesson(String unit) { this.unit = unit; }
   public void addExercise(Exercise e) { exerciseList.add(e); }
-
-  public Collection<Exercise> getExercises() {
-    return Collections.unmodifiableList(exerciseList);  //To change body of created methods use File | Settings | File Templates.
-  }
+  public Collection<Exercise> getExercises() { return Collections.unmodifiableList(exerciseList); }
 
   public String toString() {
-    return "Lesson '" + unit + "/" + chapter + "/" + week + "' " + exerciseList.size() + " exercises" +
+    return "Lesson '" + unit + "' " + exerciseList.size() + " exercises" +
         (exerciseList.isEmpty() ? "" :
         ", first is " + exerciseList.iterator().next());
   }
