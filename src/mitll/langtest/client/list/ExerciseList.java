@@ -276,7 +276,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
 
     public void onFailure(Throwable caught) {
       if (!caught.getMessage().trim().equals("0")) {
-        feedback.showErrorMessage("Server error", "SetExercisesCallback : Server error - couldn't get exercises.");
+        feedback.showErrorMessage("Server error", "Please clear your cache and reload the page.");
       }
       System.out.println("Got exception '" +caught.getMessage() + "' " +caught);
     }
