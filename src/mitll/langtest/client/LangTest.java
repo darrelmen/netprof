@@ -177,29 +177,33 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     else {
       lastWasStackOverflow = isStackOverflow;
     }
+    String prefix = "got browser exception : ";
+    logMessageOnServer(exceptionAsString, prefix);
+    return exceptionAsString;
+  }
+
+  private void logMessageOnServer(String message, String prefix) {
     int user = userManager != null ? userManager.getUser() : -1;
     String exerciseID = exerciseList != null ? exerciseList.getCurrentExerciseID() : "Unknown";
-    logMessageOnServer("got browser exception : user #" + user +
-      " exercise " + exerciseID + " browser " + browserCheck.getBrowserAndVersion()+
-    " : " + exceptionAsString);
-    return exceptionAsString;
+    logMessageOnServer(prefix +
+      "user #" + user +
+      " exercise " + exerciseID + " browser " + browserCheck.getBrowserAndVersion() +
+      " : " + message);
   }
 
   private void logMessageOnServer(String message) {
     service.logMessage(message,
         new AsyncCallback<Void>() {
           @Override
-          public void onFailure(Throwable caught) {
-            //Window.alert("logMessage : Couldn't contact server.  Please check your network connection.");
-          }
+          public void onFailure(Throwable caught) {}
 
           @Override
-          public void onSuccess(Void result) {
-          }
+          public void onSuccess(Void result) {}
         });
   }
-  Panel belowFirstRow;
-  Panel bothSecondAndThird;
+
+  private Panel belowFirstRow;
+  private Panel bothSecondAndThird;
 
   /**
    * Use DockLayout to put a header at the top, exercise list on the left, and eventually
@@ -627,7 +631,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   /**
    * Supports different flavors of exercise list -- Paging, Grading, and vanilla.
    *
-   * @see #onModuleLoad2()
+   * @see #reallyMakeExerciseList
    */
   private ListInterface makeExerciseList(FluidRow secondRow, Panel leftColumn) {
     this.exerciseList = new ExerciseListLayout(props).makeExerciseList(secondRow, leftColumn, this, currentExerciseVPanel,service,this);
@@ -1070,9 +1074,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return soundManager;
   }
 
-  public void showErrorMessage(String title,String msg) {
+  public void showErrorMessage(String title, String msg) {
     DialogHelper dialogHelper = new DialogHelper(false);
     dialogHelper.showErrorMessage(title, msg);
+    logMessageOnServer("Showing error message", title + " : " + msg);
   }
 
   public void showStatus(String msg) {
@@ -1084,12 +1089,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 //    System.err.println("todo : fix this!");
   }
 
-  // TODO fix thsi
-  public void showProgress(ListInterface exerciseList) {
+  // TODO fix this
+/*  public void showProgress(ListInterface exerciseList) {
     if (progressBar != null) {
       progressBar.showAdvance(exerciseList);
     }
-  }
+  }*/
 
   public ListInterface getExerciseList() { return exerciseList; }
 }
