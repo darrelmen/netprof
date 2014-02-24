@@ -18,6 +18,12 @@ public class SectionNode implements IsSerializable {
   private List<SectionNode> children = new ArrayList<SectionNode>();
 
   public SectionNode() {}   // required for serialization
+
+  /**
+   * @see mitll.langtest.server.database.SectionHelper#addChildren(java.util.List, SectionNode, java.util.Map)
+   * @param type
+   * @param name
+   */
   public SectionNode(String type, String name) { this.type = type; this.name = name; }
   public void addChild(SectionNode node) { children.add(node);}
 
