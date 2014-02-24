@@ -36,6 +36,7 @@ import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 
@@ -64,6 +65,7 @@ public class Navigation implements RequiresResize {
   public static final String ITEMS_WITH_COMMENTS = "Items with comments";
   public static final String LEARN_PRONUNCIATION = "Learn Pronunciation";
   private static final String REVIEW1 = "Review";
+  public static final String REVIEWERS = "Reviewers";
   private final ExerciseController controller;
   private LangTestDatabaseAsync service;
   private UserManager userManager;
@@ -669,7 +671,7 @@ public class Navigation implements RequiresResize {
     }
 
     if (!ul.isFavorite()) {
-      String html1 = "by " +  ul.getCreator().userID;
+      String html1 = "by " +  (ul.getCreator().userID.equals(User.NOT_SET) ? REVIEWERS : ul.getCreator().userID);
       Heading h4Again;
       if (yourList) {
         h4Again = new Heading(5,html1);
