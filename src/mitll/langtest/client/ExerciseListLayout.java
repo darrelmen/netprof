@@ -42,7 +42,7 @@ public class ExerciseListLayout {
   /**
    * Supports different flavors of exercise list -- Paging, Grading, and vanilla.
    *
-   * @see LangTest#onModuleLoad2()
+   * @see LangTest#makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, com.google.gwt.user.client.ui.Panel)
    */
   public ListInterface<? extends ExerciseShell> makeExerciseList(FluidRow secondRow,
                                         Panel leftColumn, UserFeedback feedback,
