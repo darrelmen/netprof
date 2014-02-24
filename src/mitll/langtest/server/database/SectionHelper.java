@@ -33,6 +33,10 @@ public class SectionHelper {
   // e.g. "week"->"week 5"->[unit->["unit A","unit B"]],[chapter->["chapter 3","chapter 5"]]
   private final Map<String, Map<String, Map<String, Collection<String>>>> typeToSectionToTypeToSections = new HashMap<String, Map<String, Map<String, Collection<String>>>>();
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getTypeOrder()
+   * @return
+   */
   public List<String> getTypeOrder() {
     if (predefinedTypeOrder.isEmpty()) {
       List<String> types = new ArrayList<String>();
@@ -116,7 +120,7 @@ public class SectionHelper {
     }
   }
 
-  public Map<String, Map<String,Integer>> getTypeToSectionToCount() {
+/*  public Map<String, Map<String,Integer>> getTypeToSectionToCount() {
     Map<String,Map<String,Integer>> typeToSectionToCount = new HashMap<String, Map<String, Integer>>();
     for (String key : typeToUnitToLesson.keySet()) {
       Map<String, Lesson> stringLessonMap = typeToUnitToLesson.get(key);
@@ -127,14 +131,14 @@ public class SectionHelper {
       }
     }
     return typeToSectionToCount;
-  }
+  }*/
 
     /**
      * Return an overlap of all the type=section exercise sets (think venn diagram overlap).
      *
      * @param typeToSection
      * @return
-     * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesForSelectionState(int, java.util.Map, long)
+     * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesForState(int, java.util.Map, long)
      */
   public Collection<Exercise> getExercisesForSelectionState(Map<String, Collection<String>> typeToSection) {
     Collection<Exercise> currentList = null;
@@ -196,32 +200,6 @@ public class SectionHelper {
       return exercises;
     }
   }
-/*
-  public void checkIfSemesters() {
-    if (typeToUnitToLesson.containsKey(unitType) && typeToUnitToLesson.containsKey(SEMESTER)) {
-      int units = typeToUnitToLesson.get(unitType).size();
-      int semesters = typeToUnitToLesson.get(SEMESTER).size();
-      if (units == semesters) {
-        logger.debug("Removing semesters...") ;
-        typeToUnitToLesson.remove(SEMESTER);
-        typeToSectionToTypeToSections.remove(SEMESTER);
-        for (Map.Entry<String, Map<String, Map<String, Set<String>>>> pair : typeToSectionToTypeToSections.entrySet()) {
-          Map<String, Map<String, Set<String>>> sectionToTypeToSections = pair.getValue();
-          for (Map.Entry<String, Map<String, Set<String>>> pair2 : sectionToTypeToSections.entrySet()) {
-            Map<String, Set<String>> typeToSections = pair2.getValue();
-            typeToSections.remove(SEMESTER);
-          }
-        }
-        logger.debug("typeToUnitToLesson "+typeToUnitToLesson) ;
-        logger.debug("typeToSectionToTypeToSections "+typeToSectionToTypeToSections) ;
-
-      }
-      else {
-        logger.debug("not Removing semesters... " + units + " vs " + semesters) ;
-
-      }
-    }
-  }*/
 
   public Pair addUnitToLesson(Exercise exercise, String unitName) { return addExerciseToLesson(exercise, unitType, unitName);}
   public Pair addChapterToLesson(Exercise exercise, String unitName) { return addExerciseToLesson(exercise, chapterType, unitName);}
@@ -237,11 +215,13 @@ public class SectionHelper {
   public Pair addExerciseToLesson(Exercise exercise, String type, String unitName) {
     Map<String, Lesson> unit = getSectionToLesson(type);
 
-    Lesson even = unit.get(unitName);
-    if (even == null) {
-      unit.put(unitName, even = new Lesson(unitName, "", ""));
+    Lesson unitForName = unit.get(unitName);
+    if (unitForName == null) {
+      unit.put(unitName, unitForName = new Lesson(unitName));
     }
-    even.addExercise(exercise);
+    unitForName.addExercise(exercise);
+
+    exercise.addUnitToValue(type,unitName);
 
     return new Pair(type,unitName);
   }
@@ -300,11 +280,8 @@ public class SectionHelper {
     sections.add(otherSection);
   }
 
-
   public Set<String> getSections() { return typeToUnitToLesson.keySet(); }
-  public Map<String, Lesson> getSection(String type) {
-    return typeToUnitToLesson.get(type);
-  }
+  public Map<String, Lesson> getSection(String type) { return typeToUnitToLesson.get(type);  }
 
   public void report() {
     logger.debug("type order " + getTypeOrder());
