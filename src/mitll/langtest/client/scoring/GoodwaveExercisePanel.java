@@ -1,5 +1,6 @@
 package mitll.langtest.client.scoring;
 
+import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.RadioButton;
@@ -303,7 +304,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   private void addAnnotation(final String field, final String status, final String commentToPost) {
     service.addAnnotation(exercise.getID(), field, status, commentToPost, controller.getUser(), new AsyncCallback<Void>() {
       @Override
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+      }
 
       @Override
       public void onSuccess(Void result) {

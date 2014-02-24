@@ -25,6 +25,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -64,7 +65,12 @@ public class BasicDialog {
     return new FormField(user, userGroup,minLength);
   }
 
-  protected ListBoxFormField getListBoxFormField(Panel dialogBox, String label, ListBox user) {
+
+  public ListBoxFormField getListBoxFormField(Panel dialogBox, String label, List<String> values) {
+    return getListBoxFormField(dialogBox, label, getListBox2(values));
+  }
+
+  public ListBoxFormField getListBoxFormField(Panel dialogBox, String label, ListBox user) {
     addControlGroupEntry(dialogBox, label, user);
     return new ListBoxFormField(user);
   }
@@ -93,6 +99,20 @@ public class BasicDialog {
 
     dialogBox.add(userGroup);
     return userGroup;
+  }
+
+  protected ListBox getListBox2(Collection<String> values) {
+    return getListBox2(values, StudentDialog.ILR_CHOICE_WIDTH);
+  }
+
+  protected ListBox getListBox2(Collection<String> values,int ilrChoiceWidth) {
+    final ListBox listBox = new ListBox(false);
+    for (String s : values) {
+      listBox.addItem(s);
+    }
+    //int ilrChoiceWidth = ;
+    listBox.setWidth(ilrChoiceWidth + "px");
+    return listBox;
   }
 
   protected ListBox getListBox(List<String> values) {
