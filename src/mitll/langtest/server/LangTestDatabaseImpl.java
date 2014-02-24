@@ -1079,6 +1079,30 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return userExercise;
   }
 
+  @Override
+  public UserExercise duplicateExercise(UserExercise exercise) {
+    UserExercise duplicate = db.getUserListManager().duplicate(exercise);
+
+    if (!exercise.isPredefined()) {
+      logger.warn("huh? got non-predef " + exercise);
+    }
+    // if (exercise.isPredefined()) {
+    SectionHelper sectionHelper = db.getSectionHelper();
+    Exercise ex = duplicate.toExercise();
+    for (Map.Entry<String, String> pair : exercise.getUnitToValue().entrySet()) {
+      sectionHelper.addExerciseToLesson(ex, pair.getKey(), pair.getValue());
+    }
+    db.getAddRemoveDAO().add(duplicate.getID(), "ADD");
+    db.getExerciseDAO().add(duplicate);
+    //}
+    return duplicate;
+  }
+
+  public boolean removeExercise(UserExercise exercise) {
+    db.getAddRemoveDAO().add(exercise.getID(), "REMOVE");
+    return db.getExerciseDAO().remove(exercise.getID());
+  }
+
   /**
    * @see mitll.langtest.client.custom.EditItem.EditableExercise#postEditItem(mitll.langtest.client.list.ListInterface, boolean)
    * @param userExercise
