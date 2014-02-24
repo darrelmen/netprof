@@ -1475,6 +1475,11 @@ public class DatabaseImpl implements Database {
     return where != null ? where.toExercise(language) : null;
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise(String)
+   * @param id
+   * @return
+   */
   public Exercise getCustomOrPredefExercise(String id) {
     Exercise byID = getUserExerciseWhere(id);  // allow custom items to mask out non-custom items
     if (byID == null) {
