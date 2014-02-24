@@ -13,6 +13,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
@@ -58,7 +59,6 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   public QCNPFExercise(Exercise e, ExerciseController controller, ListInterface<Exercise> listContainer,
                        float screenPortion, boolean addKeyHandler, String instance) {
     super(e, controller, listContainer, screenPortion, addKeyHandler, instance);
-    this.instance = instance;
   }
 
   @Override
@@ -146,24 +146,50 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   @Override
   protected Widget getQuestionContent(Exercise e, String content) {
     Panel column = new FlowPanel();
-    column.getElement().setId("QuestionContent");
+    column.getElement().setId("QCNPFExercise_QuestionContent");
     column.addStyleName("floatLeft");
     column.setWidth("100%");
 
-    boolean isComment = instance.equals(Navigation.COMMENT);
-    String columnLabel = isComment ? "Comment" : DEFECT;
-    Heading heading = new Heading(4, columnLabel);
-    heading.addStyleName("borderBottomQC");
-    if (isComment) heading.setWidth("90px");
     Panel row = new FlowPanel();
-    row.add(heading);
+    row.add(getComment());
 
+    if (instance.contains("review")) {
+      addItemsAtTop(column);
+    }
     column.add(row);
     column.add(getEntry(e, FOREIGN_LANGUAGE, ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getRefSentence()));
     column.add(getEntry(e, TRANSLITERATION, ExerciseFormatter.TRANSLITERATION, e.getTranslitSentence()));
     column.add(getEntry(e, ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, e.getEnglishSentence()));
 
     return column;
+  }
+
+  private Heading getComment() {
+    boolean isComment = instance.equals(Navigation.COMMENT);
+    String columnLabel = isComment ? "Comment" : DEFECT;
+    Heading heading = new Heading(4, columnLabel);
+    heading.addStyleName("borderBottomQC");
+    if (isComment) heading.setWidth("90px");
+    return heading;
+  }
+
+  protected void addItemsAtTop(Panel container) {
+    if (!exercise.getUnitToValue().isEmpty()) {
+      Panel flow = new HorizontalPanel();
+      for (String type : controller.getStartupInfo().getTypeOrder()) {
+        //  container.add(new Label(type + " " + newUserExercise.getUnitToValue().get(type)));
+        flow.getElement().setId("unitLesson");
+        flow.addStyleName("leftFiveMargin");
+        Heading child = new Heading(4, type, exercise.getUnitToValue().get(type));
+        child.addStyleName("rightFiveMargin");
+        flow.add(child);
+        // container.add(new Label(type + " " + newUserExercise.getUnitToValue().get(type)));
+      }
+      container.add(flow);
+    }
+    else {
+      //container.add(new com.google.gwt.user.client.ui.Label("List "+ul.getName()));
+    }
   }
 
   public void onResize() {
@@ -227,18 +253,11 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
     // comment to left, content to right
 
-    Panel row;
-    //if (count == 0) rowContainer.addStyleName("borderTopQC");
-/*    if (count++ % 2 == 0) {
-      row.addStyleName("greenBackground");
-    }*/
-
-    row = new FlowPanel();
+    Panel row = new FlowPanel();
     row.addStyleName("trueInlineStyle");
     qcCol.addStyleName("floatLeft");
     row.add(qcCol);
     row.add(content);
-
 
     Panel rowContainer = new FlowPanel();
     rowContainer.addStyleName("topFiveMargin");
