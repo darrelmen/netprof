@@ -2,6 +2,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.client.custom.QCNPFExercise;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.UserExerciseDAO;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.Exercise;
@@ -64,6 +65,8 @@ public class ExcelImport implements ExerciseDAO {
   private final int maxExercises;
   private ServerProperties serverProps;
   private UserListManager userListManager;
+  AddRemoveDAO addRemoveDAO;
+
   /**
    * @see mitll.langtest.server.SiteDeployer#readExercisesPopulateSite(mitll.langtest.shared.Site, String, java.io.InputStream)
    */
@@ -141,7 +144,38 @@ public class ExcelImport implements ExerciseDAO {
         exercises = readExercises(new File(file));
         for (Exercise e : exercises) idToExercise.put(e.getID(), e);
 
-        overlayExercises(userExerciseDAO.getOverrides());
+        Set<String> removes = addRemoveDAO.getRemoves();
+
+      //  exercises.removeAll(removes);
+        for (String id : removes) {
+          Exercise remove = idToExercise.remove(id);
+          exercises.remove(remove);
+        }
+
+        Collection<UserExercise> overrides = userExerciseDAO.getOverrides();
+
+        for (UserExercise userExercise : overrides) {
+          if (removes.contains(userExercise.getID())) {
+
+          }
+          else {
+            addOverlay(userExercise);
+          }
+        }
+
+        for (String id : addRemoveDAO.getAdds()) {
+          UserExercise where = userExerciseDAO.getWhere(id);
+          if (where == null) {
+            logger.error("huh? couldn't find user exercise dup " + id);
+          } else {
+            add(where);
+            Exercise exercise = where.toExercise();
+            for (Map.Entry<String, String> pair : exercise.getUnitToValue().entrySet()) {
+              sectionHelper.addExerciseToLesson(exercise, pair.getKey(), pair.getValue());
+            }
+          }
+        }
+
       }
     }
     return exercises;
@@ -186,10 +220,30 @@ public class ExcelImport implements ExerciseDAO {
     }
   }
 
+  public void add(UserExercise ue) {
+    synchronized (this) {
+      Exercise exercise = ue.toExercise();
+      exercises.add(exercise);
+      idToExercise.put(exercise.getID(), exercise);
+    }
+  }
+
+  @Override
+  public boolean remove(String id) {
+    synchronized (this) {
+      if (!idToExercise.containsKey(id)) return false;
+      Exercise remove = idToExercise.remove(id);
+      exercises.remove(remove);
+      return true;
+    }
+  }
+
   private UserExerciseDAO userExerciseDAO;
 
   @Override
   public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) { this.userExerciseDAO = userExerciseDAO; }
+  @Override
+  public void setAddRemoveDAO(AddRemoveDAO addRemoveDAO) { this.addRemoveDAO = addRemoveDAO; }
 
   public Exercise getExercise(String id) {
     if (idToExercise.isEmpty()) logger.warn("huh? couldn't find any exercises..?");
