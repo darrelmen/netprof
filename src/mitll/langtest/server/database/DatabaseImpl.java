@@ -5,6 +5,7 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
+import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.AnnotationDAO;
 import mitll.langtest.server.database.custom.ReviewedDAO;
 import mitll.langtest.server.database.custom.UserExerciseDAO;
@@ -65,7 +66,6 @@ import java.util.TreeSet;
 public class DatabaseImpl implements Database {
   private static Logger logger = Logger.getLogger(DatabaseImpl.class);
 
- // private static final boolean DO_SIMPLE_FLASHCARDS = true;
   private static final boolean DROP_USER = false;
   private static final boolean DROP_RESULT = false;
   private static final int MIN_INCORRECT_ANSWERS = 10;
@@ -81,6 +81,7 @@ public class DatabaseImpl implements Database {
   private UserListManager userListManager;
   private UserExerciseDAO userExerciseDAO;
   UserListDAO userListDAO;
+  private AddRemoveDAO addRemoveDAO;
 
   private DatabaseConnection connection = null;
   private MonitoringSupport monitoringSupport;
@@ -144,7 +145,8 @@ public class DatabaseImpl implements Database {
    */
   private void initializeDAOs(PathHelper pathHelper) {
     userDAO = new UserDAO(this);
-     userListDAO = new UserListDAO(this, userDAO);
+    userListDAO = new UserListDAO(this, userDAO);
+    addRemoveDAO = new AddRemoveDAO(this);
 
     userExerciseDAO = new UserExerciseDAO(this);
     UserListExerciseJoinDAO userListExerciseJoinDAO = new UserListExerciseJoinDAO(this);
@@ -312,11 +314,12 @@ public class DatabaseImpl implements Database {
       }
       userExerciseDAO.setExerciseDAO(exerciseDAO);
       exerciseDAO.setUserExerciseDAO(userExerciseDAO);
+      exerciseDAO.setAddRemoveDAO(addRemoveDAO);
     }
   }
 
   /**
-   *
+   * @see mitll.langtest.server.LangTestDatabaseImpl#editItem(mitll.langtest.shared.custom.UserExercise)
    * @param userExercise
    */
   public void editItem(UserExercise userExercise) {
@@ -1490,4 +1493,12 @@ public class DatabaseImpl implements Database {
 
   public ServerProperties getServerProps() { return serverProps; }
   public String toString() { return "Database : "+ connection.getConnection(); }
+
+  public AddRemoveDAO getAddRemoveDAO() {
+    return addRemoveDAO;
+  }
+
+  public ExerciseDAO getExerciseDAO() {
+    return exerciseDAO;
+  }
 }
