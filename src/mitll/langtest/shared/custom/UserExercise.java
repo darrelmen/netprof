@@ -14,8 +14,6 @@ import mitll.langtest.shared.ExerciseShell;
  */
 public class UserExercise extends AudioExercise {
   public static final String CUSTOM_PREFIX = "Custom_";
-//  private static int globalCount = 0;
-  //private int count = 0;
   private long uniqueID = -1; //set by database
 
   private String english;
@@ -41,7 +39,8 @@ public class UserExercise extends AudioExercise {
   /**
    * Tooltip is the english phrase, but if it's empty, use the foreign language.
    *
-   * @see mitll.langtest.server.database.custom.UserListManager#createNewItem
+   * @see mitll.langtest.client.custom.EditItem#createNewItem(long)
+   * @see mitll.langtest.client.custom.EditItem#getNewItem() (long)
    * @param uniqueID
    * @param exerciseID
    * @param creator
@@ -94,6 +93,7 @@ public class UserExercise extends AudioExercise {
     setRefAudio(exercise.getRefAudio());
     setSlowRefAudio(exercise.getSlowAudioRef());
     setFieldToAnnotation(exercise.getFieldToAnnotation());
+    setUnitToValue(exercise.getUnitToValue());
   }
 
   /**
@@ -107,6 +107,7 @@ public class UserExercise extends AudioExercise {
     exercise.setSlowRefAudio(getSlowAudioRef());
     exercise.setEnglishSentence(getEnglish());
     exercise.setType(Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW);
+    exercise.setUnitToValue(getUnitToValue());
 
     return exercise;
   }
@@ -126,8 +127,9 @@ public class UserExercise extends AudioExercise {
       imported.setSlowRefAudio(getSlowAudioRef());
     imported.setType(Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW);
     imported.setRefSentence(getForeignLanguage());
-    imported.setEnglishSentence(english);
+    imported.setEnglishSentence(getEnglish());
     imported.setTranslitSentence(getTransliteration());
+    imported.setUnitToValue(getUnitToValue());
     return imported;
   }
 
@@ -173,6 +175,6 @@ public class UserExercise extends AudioExercise {
       "foreign language '" + getForeignLanguage() + "'" + " (" + getTransliteration() + ") " +
       "tooltip " + getTooltip() +
       "audio attr (" + getAudioAttributes().size() +
-      ") :" + getAudioAttributes();
+      ") :" + getAudioAttributes() + " unit/lesson " + getUnitToValue();
   }
 }
