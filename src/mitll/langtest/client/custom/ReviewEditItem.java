@@ -54,11 +54,11 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
   @Override
   protected NewUserExercise<T> getAddOrEditPanel(UserExercise exercise, HasText itemMarker, UserList originalList, boolean doNewExercise) {
     NewUserExercise<T> editableExercise;
-   if (doNewExercise) {
+/*   if (doNewExercise) {
       editableExercise = new ChapterNewExercise<T>(service, controller, itemMarker, this, exercise);
-    } else {
+    } else {*/
       editableExercise = new ReviewEditableExercise(itemMarker, exercise, originalList);
-    }
+  //  }
     return editableExercise;
   }
 
@@ -92,6 +92,7 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
                                     final ControlGroup normalSpeedRecording) {
       Panel row = new DivWidget();
       row.addStyleName("marginBottomTen");
+
       Button fixed = makeFixedButton();
 
       row.add(fixed);
@@ -101,6 +102,35 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
           validateThenPost(foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo, true);
         }
       });
+
+      if (false) {
+        Button duplicate = new Button("Duplicate");
+        duplicate.setType(ButtonType.SUCCESS);
+
+        row.add(duplicate);
+        duplicate.addClickHandler(new ClickHandler() {
+          @Override
+          public void onClick(ClickEvent event) {
+            newUserExercise.setCreator(controller.getUser());
+            service.duplicateExercise(newUserExercise, new AsyncCallback<UserExercise>() {
+              @Override
+              public void onFailure(Throwable caught) {
+
+              }
+
+              @Override
+              public void onSuccess(UserExercise result) {
+
+                System.out.println("Got back " + result);
+                T result1 = (T) result;
+                exerciseList.addExercise(result1);
+                exerciseList.redraw();
+              }
+            });
+          }
+        });
+      }
+
       return row;
     }
 
