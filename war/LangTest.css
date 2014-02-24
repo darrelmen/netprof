@@ -881,6 +881,10 @@ fieldset > legend {
 }
 
 #course small {
+    color: #333333;
+}
+
+#unitLesson small {
      color: #333333;
  }
 
