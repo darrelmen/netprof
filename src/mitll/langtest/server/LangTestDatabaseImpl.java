@@ -234,12 +234,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       if (userListByID != null) { // defensive!
         List<Exercise> exercises2 = new ArrayList<Exercise>();
         Collection<UserExercise> exercises1 = userListByID.getExercises();
-        logger.debug("getExerciseIds " + exercises1);
+        logger.debug("getExerciseIds size - " + exercises1.size());
         for (UserExercise ue : exercises1) {
-          Exercise exercise = getExercise(ue.getID());
-          if (exercise != null) exercises2.add(exercise);
+        //  Exercise exercise = getExercise(ue.getID());
+          Exercise exercise = ue.toExercise();
+          if (exercise != null) {
+            exercises2.add(exercise);
+          }
         }
-        logger.debug("getExerciseIds " + exercises2);
+        logger.debug("getExerciseIds size - " + exercises2.size());
 
         exercises = exercises2;
       }
