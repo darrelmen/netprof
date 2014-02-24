@@ -1,5 +1,6 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.UserExerciseDAO;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.custom.UserExercise;
@@ -18,7 +19,13 @@ public interface ExerciseDAO {
   SectionHelper getSectionHelper();
 
   void addOverlay(UserExercise userExercise);
+  void add(UserExercise userExercise);
+
+  boolean remove(String id);
 
   void setUserExerciseDAO(UserExerciseDAO userExerciseDAO);
+
+  void setAddRemoveDAO(AddRemoveDAO addRemoveDAO);
+
   Exercise getExercise(String id);
 }
