@@ -1058,33 +1058,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public UserList getCommentedList() { return db.getUserListManager().getCommentedList(); }
 
-  /**
-   * @see mitll.langtest.client.custom.NewUserExercise.CreateFirstRecordAudioPanel#makePostAudioRecordButton()
-   * @param userid
-   * @return
-   */
-  public UserExercise createNewItem(long userid) {
-  //  logger.debug("create new item - " + foreign);
-   // if (!isValidForeignPhrase(foreign)) return null;
-    return db.getUserListManager().createNewItem(userid);//, english, foreign, transliteration);
-  }
-
   @Override
-  public boolean isValidForeignPhrase(String foreign) {
-    return audioFileHelper.checkLTS(foreign);
-  }
+  public boolean isValidForeignPhrase(String foreign) {  return audioFileHelper.checkLTS(foreign); }
 
   /**
    * Put the new item in the database,
    * copy the audio under bestAudio
    * assign the item to a user list
-   * @see mitll.langtest.client.custom.NewUserExercise#onClick
+   * @see mitll.langtest.client.custom.NewUserExercise#afterValidForeignPhrase
    * @param userListID
    * @param userExercise
    */
   public UserExercise reallyCreateNewItem(long userListID, UserExercise userExercise) {
     db.getUserListManager().reallyCreateNewItem(userListID, userExercise);
-    //db.getUserListManager().editItem(userExercise, false);
     logger.debug("reallyCreateNewItem : made user exercise " + userExercise);
 
     return userExercise;
