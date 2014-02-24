@@ -31,7 +31,6 @@ import java.util.Set;
  */
 public interface LangTestDatabaseAsync {
   void addTextAnswer(int usedID, Exercise exercise, int questionID, String answer, AsyncCallback<Void> async);
-  //void addUser(int age, String gender, int experience, String dialect, AsyncCallback<Long> async);
   void userExists(String login, AsyncCallback<Integer> async);
   void addUser(int age, String gender, int experience, String nativeLang, String dialect, String userID, AsyncCallback<Long> async);
   void getUsers(AsyncCallback<List<User>> async);
@@ -101,8 +100,6 @@ public interface LangTestDatabaseAsync {
   void resetUserState(long userID, AsyncCallback<Void> async);
 
   void clearUserState(long userID, AsyncCallback<Void> async);
-
-  //void getTypeToSectionToCount(AsyncCallback<Map<String, Map<String, Integer>>> async);
 
   void getNumExercisesForSelectionState(Map<String, Collection<String>> typeToSection, AsyncCallback<Integer> async);
 
