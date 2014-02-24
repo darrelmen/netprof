@@ -457,7 +457,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
       askServerForExercise(id);
     }
     else {
-      System.err.println("checkAndAskServer : can't load " +id + " keys were " + getKeys());
+      System.err.println("checkAndAskServer : can't load " +id);// + " keys were " + getKeys());
     }
   }
 
