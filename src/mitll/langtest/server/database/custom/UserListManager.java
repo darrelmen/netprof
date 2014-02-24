@@ -208,7 +208,7 @@ public class UserListManager {
    * @return
    */
   public UserList getReviewList() {
-    logger.debug("getReviewList ids #=" + reviewedExercises);
+    logger.debug("getReviewList ids #=" + reviewedExercises.size());
     Set<String> incorrectReviewed = new HashSet<String>(reviewedExercises);
     boolean b = incorrectReviewed.retainAll(incorrect);
 
