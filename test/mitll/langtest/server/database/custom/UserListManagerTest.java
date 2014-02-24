@@ -237,7 +237,7 @@ public class UserListManagerTest {
   }
 
   public UserExercise addExercise(User owner, UserListManager userListManager, long listid, UserList testList) {
-    UserExercise english = userListManager.createNewItem(owner.id);
+    UserExercise english = createNewItem(owner.id);
     assertTrue(!english.getTooltip().isEmpty());
     userListManager.reallyCreateNewItem(listid, english);
 
@@ -254,6 +254,12 @@ public class UserListManagerTest {
       assertTrue(!ue.getTooltip().isEmpty());
     }
     return english;
+  }
+  private int userExerciseCount = 0;
+
+  private UserExercise createNewItem(long userid) {
+    int uniqueID = userExerciseCount++;
+    return new UserExercise(uniqueID, UserExercise.CUSTOM_PREFIX+uniqueID, userid, " ", "", "");
   }
 
   /**
