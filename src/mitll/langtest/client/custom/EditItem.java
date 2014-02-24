@@ -3,6 +3,7 @@ package mitll.langtest.client.custom;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.FluidRow;
+import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
@@ -13,9 +14,11 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -47,6 +50,8 @@ import java.util.List;
 public class EditItem<T extends ExerciseShell> {
   private static final String NEW_ITEM = "*New Item*";
   protected static final String NEW_EXERCISE_ID = "NewExerciseID";
+  private static final String EDIT_ITEM = "editItem";
+
   protected final ExerciseController controller;
   private final NPFHelper npfHelper;
   protected final LangTestDatabaseAsync service;
@@ -92,7 +97,7 @@ public class EditItem<T extends ExerciseShell> {
 
     UserList copy = new UserList(originalList);  // copy before we add to it!
 
-    exerciseList = makeExerciseList(contentOnRight, "editItem", copy, originalList, includeAddItem);
+    exerciseList = makeExerciseList(contentOnRight, EDIT_ITEM, copy, originalList, includeAddItem);
     pagerOnLeft.add(exerciseList.getExerciseListOnLeftSide(controller.getProps()));
 
     rememberAndLoadFirst(copy, exerciseList);
@@ -136,7 +141,7 @@ public class EditItem<T extends ExerciseShell> {
         @Override
         protected void rememberExercises(List<T> result) {
           clear();
-          boolean addNewItem = true;
+          boolean addNewItem = includeAddItem;
 
           for (final T es : result) {
             addExercise(es);
@@ -163,11 +168,11 @@ public class EditItem<T extends ExerciseShell> {
     return exerciseList;
   }
 
-  protected UserExercise getNewItem() {
+  private UserExercise getNewItem() {
     return new UserExercise(-1, NEW_EXERCISE_ID, userManager.getUser(), NEW_ITEM, "", "");
   }
 
-  protected void setFactory(final PagingExerciseList<T> exerciseList, final UserList ul, final UserList originalList) {
+  private void setFactory(final PagingExerciseList<T> exerciseList, final UserList ul, final UserList originalList) {
     final PagingExerciseList<T> outer = exerciseList;
     exerciseList.setFactory(new ExercisePanelFactory(service, feedback, controller, exerciseList) {
       @Override
@@ -200,7 +205,7 @@ public class EditItem<T extends ExerciseShell> {
                              final ListInterface<T> pagingContainer) {
     if (exercise.getID().equals(NEW_EXERCISE_ID)) {
       if (newExercise == null) {
-        //System.out.println("EditItem.populatePanel: make new item ");
+        System.out.println("EditItem.populatePanel: make new item ");
 
         newExercise = createNewItem(userManager.getUser());
         addEditOrAddPanel(newExercise, itemMarker, originalList, right, ul, pagingContainer, true, false);
@@ -213,11 +218,11 @@ public class EditItem<T extends ExerciseShell> {
     }
   }
 
-  public UserExercise createNewItem(long userid) {
+  private UserExercise createNewItem(long userid) {
     return new UserExercise(-1, UserExercise.CUSTOM_PREFIX+Long.MAX_VALUE, userid, "", "", "");
   }
 
-  protected void addEditOrAddPanel(UserExercise newExercise, HasText itemMarker, UserList originalList,
+  private void addEditOrAddPanel(UserExercise newExercise, HasText itemMarker, UserList originalList,
                                    Panel right, UserList ul, ListInterface<T> pagingContainer, boolean doNewExercise, boolean setFields) {
     NewUserExercise<T> editableExercise = getAddOrEditPanel(newExercise, itemMarker, originalList, doNewExercise);
     right.add(editableExercise.addNew(ul, originalList, pagingContainer, right));
@@ -273,7 +278,6 @@ public class EditItem<T extends ExerciseShell> {
     protected void gotBlur(FormField english, FormField foreignLang, RecordAudioPanel rap,
                            ControlGroup normalSpeedRecording, UserList ul, ListInterface<T> pagingContainer,
                            Panel toAddTo) {
-      System.out.println("EditItem.gotBlur ");
       validateThenPost(foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo, false);
     }
 
@@ -292,6 +296,25 @@ public class EditItem<T extends ExerciseShell> {
       widgets.add(new PrevNextList<T>(exerciseShell, exerciseList, shouldDisableNext()));
       this.ul = ul;
       return widgets;
+    }
+
+    @Override
+    protected void addItemsAtTop(Panel container) {
+      if (!newUserExercise.getUnitToValue().isEmpty()) {
+        Panel flow = new HorizontalPanel();
+        for (String type : controller.getStartupInfo().getTypeOrder()) {
+          flow.getElement().setId("unitLesson");
+          flow.addStyleName("leftFiveMargin");
+
+          Heading child = new Heading(4, type, newUserExercise.getUnitToValue().get(type));
+          child.addStyleName("rightFiveMargin");
+          flow.add(child);
+        }
+        container.add(flow);
+      }
+      else if (ul != null) {
+        container.add(new Label("List "+ul.getName()));
+      }
     }
 
     protected boolean shouldDisableNext() {  return true; }
