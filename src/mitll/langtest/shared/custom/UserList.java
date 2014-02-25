@@ -3,10 +3,7 @@ package mitll.langtest.shared.custom;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.User;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -28,7 +25,7 @@ public class UserList extends ExerciseShell {
   private String classMarker;
   private boolean isPrivate;
   private boolean isReview;
-  private Collection<UserExercise> exercises = new ArrayList<UserExercise>();
+  private List<UserExercise> exercises = new ArrayList<UserExercise>();
 
   public UserList(){}
 
@@ -58,6 +55,15 @@ public class UserList extends ExerciseShell {
   }
 
   public void addExercise(UserExercise toAdd) { exercises.add(toAdd);  }
+  public void addExerciseAfter(UserExercise after, UserExercise toAdd) {
+    int index = exercises.indexOf(after);
+    if (index == -1) {
+      exercises.add(toAdd);
+    }
+    else {
+      exercises.add(index+1,toAdd);
+    }
+  }
 
   /**
    * @see #UserList(long, mitll.langtest.shared.User, String, String, String, boolean)
@@ -81,7 +87,7 @@ public class UserList extends ExerciseShell {
     return exercises;
   }
 
-  public void setExercises(Collection<UserExercise> exercises) {
+  public void setExercises(List<UserExercise> exercises) {
     this.exercises = exercises;
   }
 
