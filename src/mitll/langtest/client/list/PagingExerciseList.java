@@ -300,6 +300,7 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
 
   @Override
   public void addExercise(T es) { pagingContainer.addExercise(es);  }
+  public void addExerciseAfter(T after,T es) { pagingContainer.addExerciseAfter(after, es);  }
 
   public void forgetExercise(String id) {
     System.out.println("PagingExerciseList.forgetExercise " + id + " on " + getElement().getId() + " ul " +userListID);
