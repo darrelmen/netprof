@@ -89,7 +89,7 @@ public class AddRemoveDAO extends DAO {
       statement.close();
       database.closeConnection(connection);
 
-      logger.debug("now " + getCount() + " reviewed");
+      logger.debug("now " + getCount() + " add/remove");
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
