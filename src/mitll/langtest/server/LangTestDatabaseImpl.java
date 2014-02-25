@@ -1086,28 +1086,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public UserExercise duplicateExercise(UserExercise exercise) {
-    logger.debug("anno before " + exercise.getFieldToAnnotation());
-    UserExercise duplicate = db.getUserListManager().duplicate(exercise);
-
-    if (!exercise.isPredefined()) {
-      logger.warn("huh? got non-predef " + exercise);
-    }
-
-    SectionHelper sectionHelper = db.getSectionHelper();
-    Exercise ex = duplicate.toExercise();
-    for (Map.Entry<String, String> pair : exercise.getUnitToValue().entrySet()) {
-      sectionHelper.addExerciseToLesson(ex, pair.getKey(), pair.getValue());
-    }
-    db.getAddRemoveDAO().add(duplicate.getID(), "ADD");
-    db.getExerciseDAO().add(duplicate);
-
-    logger.debug("anno after " + duplicate.getFieldToAnnotation());
-    return duplicate;
+    return db.duplicateExercise(exercise);
   }
 
-  public boolean removeExercise(UserExercise exercise) {
-    db.getAddRemoveDAO().add(exercise.getID(), "REMOVE");
-    return db.getExerciseDAO().remove(exercise.getID());
+  public boolean deleteItem(String id ) {
+    return db.deleteItem(id);
   }
 
   /**
