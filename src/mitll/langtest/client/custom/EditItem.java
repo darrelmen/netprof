@@ -322,6 +322,7 @@ public class EditItem<T extends ExerciseShell> {
     /**
      * Add remove from list button
      *
+     * @see mitll.langtest.client.custom.NewUserExercise#addNew(mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel)
      * @param ul
      * @param pagingContainer
      * @param toAddTo
