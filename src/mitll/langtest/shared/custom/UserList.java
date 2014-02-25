@@ -85,9 +85,7 @@ public class UserList extends ExerciseShell {
     this.exercises = exercises;
   }
 
-  public boolean remove(UserExercise newUserExercise) {
-    return exercises.remove(newUserExercise);
-  }
+  public boolean remove(UserExercise newUserExercise) {  return exercises.remove(newUserExercise); }
 
   public UserExercise remove(String id) {
     UserExercise toRemove = null;
@@ -119,10 +117,6 @@ public class UserList extends ExerciseShell {
   public void setUniqueID(long uniqueID) {
     this.uniqueID = uniqueID;
   }
-
-/*  public long getModified() {
-    return modified;
-  }*/
 
   public boolean contains(UserExercise userExercise) {
     return getExercises().contains(userExercise);
