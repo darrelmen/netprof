@@ -192,7 +192,7 @@ public class UserExerciseDAO extends DAO {
    * @param listID
    * @return
    */
-  public Collection<UserExercise> getOnList(long listID) {
+  public List<UserExercise> getOnList(long listID) {
     String sql = getJoin(listID);
     
     try {
