@@ -118,10 +118,9 @@ public class HistoryExerciseList<T extends ExerciseShell> extends PagingExercise
     System.out.println(new Date() + "------------ HistoryExerciseList.pushNewItem : push history '" + historyToken + "' -------------- ");
 
     String token = History.getToken();
-    System.out.println("\tpushNewItem : current token '" + token + "' vs new id '" + exerciseID +"'");
+    //System.out.println("\tpushNewItem : current token '" + token + "' vs new id '" + exerciseID +"'");
 
     token = getSelectionFromToken(token);
-    //SelectionState selectionState = getSelectionState(token);
     System.out.println("\tpushNewItem : current token '" + token + "' vs new id '" + exerciseID +"'");
     if (token != null && (historyToken.equals(token) || trimmedToken.equals(token))) {
       System.out.println("\tpushNewItem : current token '" + token + "' same as new " + historyToken);
