@@ -324,7 +324,7 @@ public class UserListDAO extends DAO {
    * @param where
    */
   private void populateList(UserList where) {
-    Collection<UserExercise> onList = userExerciseDAO.getOnList(where.getUniqueID());
+    List<UserExercise> onList = userExerciseDAO.getOnList(where.getUniqueID());
     //logger.debug("populateList : got " + onList.size() + " for list "+where.getUniqueID());
     where.setExercises(onList);
     where.setVisitors(userListVisitorJoinDAO.getWhere(where.getUniqueID()));
