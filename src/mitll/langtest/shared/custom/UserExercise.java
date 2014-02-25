@@ -107,11 +107,7 @@ public class UserExercise extends AudioExercise {
   public Exercise toExercise() {
     String tooltip = getEnglish().trim().isEmpty() ? getForeignLanguage() : getEnglish();
     Exercise exercise = new Exercise("plan", getID(), getEnglish(), getRefAudio(), getForeignLanguage(), tooltip);
-    exercise.setTranslitSentence(getTransliteration());
-    exercise.setSlowRefAudio(getSlowAudioRef());
-    exercise.setEnglishSentence(getEnglish());
-    exercise.setType(Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW);
-    exercise.setUnitToValue(getUnitToValue());
+    copyFields(exercise);
 
     return exercise;
   }
@@ -127,14 +123,21 @@ public class UserExercise extends AudioExercise {
     Exercise imported = new Exercise("import", id, content, false, true, tooltip);
     if (getRefAudio() != null)
       imported.setRefAudio(getRefAudio());
+
+    imported.setRefSentence(getForeignLanguage());
+
+    copyFields(imported);
+    return imported;
+  }
+
+  protected void copyFields(Exercise imported) {
     if (getSlowAudioRef() != null)
       imported.setSlowRefAudio(getSlowAudioRef());
     imported.setType(Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW);
-    imported.setRefSentence(getForeignLanguage());
     imported.setEnglishSentence(getEnglish());
     imported.setTranslitSentence(getTransliteration());
     imported.setUnitToValue(getUnitToValue());
-    return imported;
+    imported.setFieldToAnnotation(getFieldToAnnotation());
   }
 
   public String getEnglish() { return english; }
