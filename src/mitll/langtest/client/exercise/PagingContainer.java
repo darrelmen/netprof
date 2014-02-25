@@ -350,14 +350,29 @@ public class PagingContainer<T extends ExerciseShell> {
   public T byID(String id) { return idToExercise.get(id); }
 
   public <S extends ExerciseShell> void addExercise(S exercise) {
-    System.out.println("addExercise adding " + exercise);
+    //System.out.println("addExercise adding " + exercise);
 
     List<T> list = getList();
     String id = exercise.getID();
-    T exercise1 = (T) exercise;
+    T exercise1 = (T) exercise; // TODO : can't remember how I avoid this
     idToExercise.put(id, exercise1);
-    list.add(exercise1);  // TODO : can't remember how I avoid this
-    System.out.println("data now has "+list.size() + " after adding " + exercise.getID());
+    list.add(exercise1);
+    //System.out.println("data now has "+list.size() + " after adding " + exercise.getID());
+  }
+
+  public <S extends ExerciseShell> void addExerciseAfter(S afterThisOne, S exercise) {
+    System.out.println("addExercise adding " + exercise);
+
+    List<T> list = getList();
+    int before= list.size();
+    String id = exercise.getID();
+    T exercise1 = (T) exercise; // TODO : can't remember how I avoid this
+    idToExercise.put(id, exercise1);
+    int i = list.indexOf((T)afterThisOne);
+    list.add(i+1,exercise1);
+    int after = list.size();
+    System.out.println("data now has "+ after + " after adding " + exercise.getID());
+    if (before +1!=after) System.err.println("didn't add " + exercise.getID());
   }
 
   public Set<String> getKeys() { return idToExercise.keySet(); }
