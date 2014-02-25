@@ -28,4 +28,8 @@ public class Lesson {
         (exerciseList.isEmpty() ? "" :
         ", first is " + exerciseList.iterator().next());
   }
+
+  public boolean remove(Exercise exercise) {
+   return exerciseList.remove(exercise);
+  }
 }
