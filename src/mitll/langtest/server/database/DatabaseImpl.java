@@ -1468,6 +1468,43 @@ public class DatabaseImpl implements Database {
 
   public UserListManager getUserListManager() { return userListManager; }
 
+  public UserExercise duplicateExercise(UserExercise exercise) {
+    //logger.debug("anno before " + exercise.getFieldToAnnotation());
+    UserExercise duplicate = getUserListManager().duplicate(exercise);
+
+    if (!exercise.isPredefined()) {
+      logger.warn("huh? got non-predef " + exercise);
+    }
+
+    SectionHelper sectionHelper = getSectionHelper();
+    Exercise ex = duplicate.toExercise();
+    List<SectionHelper.Pair> pairs = new ArrayList<SectionHelper.Pair>();
+    for (Map.Entry<String, String> pair : exercise.getUnitToValue().entrySet()) {
+      pairs.add(sectionHelper.addExerciseToLesson(ex, pair.getKey(), pair.getValue()));
+    }
+    sectionHelper.addAssociations(pairs);
+
+    getAddRemoveDAO().add(duplicate.getID(), "ADD");
+    getExerciseDAO().add(duplicate);
+
+    //logger.debug("anno after " + duplicate.getFieldToAnnotation());
+    return duplicate;
+  }
+
+  public boolean deleteItem(String id ) {
+    getAddRemoveDAO().add(id, "REMOVE");
+
+    getUserListManager().removeReviewed(id);
+
+    SectionHelper sectionHelper = getSectionHelper();
+    Exercise exercise = getExercise(id);
+    for (Map.Entry<String, String> pair : exercise.getUnitToValue().entrySet()) {
+      sectionHelper.removeExerciseToLesson(exercise, pair.getKey(), pair.getValue());
+    }
+    //TODO remove pairs?
+    return getExerciseDAO().remove(id);
+  }
+
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise(String)
    * @param id
