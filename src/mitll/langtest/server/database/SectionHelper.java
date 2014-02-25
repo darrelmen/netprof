@@ -215,16 +215,27 @@ public class SectionHelper {
   public Pair addExerciseToLesson(Exercise exercise, String type, String unitName) {
     Map<String, Lesson> unit = getSectionToLesson(type);
 
+    addUnitNameEntry(exercise, unitName, unit);
+
+    exercise.addUnitToValue(type, unitName);
+
+    return new Pair(type,unitName);
+  }
+
+  protected void addUnitNameEntry(Exercise exercise, String unitName, Map<String, Lesson> unit) {
     Lesson unitForName = unit.get(unitName);
     if (unitForName == null) {
       unit.put(unitName, unitForName = new Lesson(unitName));
     }
     unitForName.addExercise(exercise);
-
-    exercise.addUnitToValue(type,unitName);
-
-    return new Pair(type,unitName);
   }
+
+  public boolean removeExerciseToLesson(Exercise exercise, String type, String unitName) {
+    Map<String, Lesson> unit = getSectionToLesson(type);
+    Lesson unitForName = unit.get(unitName);
+    return unitForName.remove(exercise);
+  }
+
 
   private Map<String, Lesson> getSectionToLesson( String section) {
     Map<String, Lesson> unit = typeToUnitToLesson.get(section);
