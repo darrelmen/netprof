@@ -319,7 +319,13 @@ public class UserListManager {
     userExerciseDAO.update(userExercise, createIfDoesntExist);
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#duplicateExercise(mitll.langtest.shared.custom.UserExercise)
+   * @param userExercise
+   * @return
+   */
   public UserExercise duplicate(UserExercise userExercise) {
+    boolean onReviewedList = reviewedExercises.contains(userExercise.getID());
     String id = userExercise.getID();
     String newid;
     if (id.contains("dup")) {
@@ -332,6 +338,19 @@ public class UserListManager {
     logger.warn("duplicating " + userExercise + " with id " + newid);
     userExercise.setID(newid);
     userExerciseDAO.add(userExercise, true);
+    String assignedID = userExercise.getID();
+
+    //add to review list if it was on the review list
+    if (onReviewedList) {
+      markReviewed(assignedID, userExercise.getCreator());
+    }
+
+    // copy the annotations
+    for (Map.Entry<String, ExerciseAnnotation> pair : userExercise.getFieldToAnnotation().entrySet()) {
+      ExerciseAnnotation value = pair.getValue();
+      addAnnotation(assignedID, pair.getKey(), value.status, value.comment, userExercise.getCreator());
+    }
+
     return userExercise;
   }
 
