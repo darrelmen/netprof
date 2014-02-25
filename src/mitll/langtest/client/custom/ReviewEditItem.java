@@ -13,6 +13,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.user.UserFeedback;
@@ -20,6 +21,8 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
+
+import java.util.Arrays;
 
 /**
  * Created with IntelliJ IDEA.
@@ -102,6 +105,39 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
         }
       });
 
+      Button remove = new Button("Remove");
+      remove.setType(ButtonType.WARNING);
+      remove.addStyleName("floatRight");
+      remove.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          DialogHelper dialogHelper = new DialogHelper(true);
+          dialogHelper.show("Are you sure?", Arrays.asList("Really delete item?"), new DialogHelper.CloseListener() {
+            @Override
+            public void gotYes() {
+              service.deleteItem(newUserExercise.getID(), new AsyncCallback<Boolean>() {
+                @Override
+                public void onFailure(Throwable caught) {
+
+                }
+
+                @Override
+                public void onSuccess(Boolean result) {
+                  exerciseList.removeExercise((T)newUserExercise);
+                  originalList.remove(newUserExercise.getID());
+                  //exerciseList.redraw();
+                }
+              });
+            }
+
+            @Override
+            public void gotNo() {
+
+            }
+          });
+        }
+      });
+      row.add(remove);
       row.add(getDuplicate());
       row.add(fixed);
 
@@ -116,26 +152,30 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
       duplicate.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          newUserExercise.setCreator(controller.getUser());
-          service.duplicateExercise(newUserExercise, new AsyncCallback<UserExercise>() {
-            @Override
-            public void onFailure(Throwable caught) {
-
-            }
-
-            @Override
-            public void onSuccess(UserExercise result) {
-
-              System.out.println("Got back " + result);
-              T result1 = (T) result;
-              exerciseList.addExerciseAfter((T)newUserExercise,result1);
-              exerciseList.redraw();
-              originalList.addExercise(result);
-            }
-          });
+          duplicateExercise();
         }
       });
       return duplicate;
+    }
+
+    protected void duplicateExercise() {
+      newUserExercise.setCreator(controller.getUser());
+      service.duplicateExercise(newUserExercise, new AsyncCallback<UserExercise>() {
+        @Override
+        public void onFailure(Throwable caught) {
+
+        }
+
+        @Override
+        public void onSuccess(UserExercise result) {
+
+          System.out.println("Got back " + result);
+          T result1 = (T) result;
+          exerciseList.addExerciseAfter((T)newUserExercise,result1);
+          exerciseList.redraw();
+          originalList.addExerciseAfter(newUserExercise, result);
+        }
+      });
     }
 
     private Button makeFixedButton() {
