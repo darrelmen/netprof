@@ -1055,7 +1055,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   @Override
   public boolean deleteItemFromList(long listid, String exid) {
-    return db.getUserListManager().deleteItemFromList(listid,exid);
+    return db.getUserListManager().deleteItemFromList(listid, exid);
   }
 
   @Override
@@ -1079,14 +1079,20 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return userExercise;
   }
 
+  /**
+   * @see mitll.langtest.client.custom.ReviewEditItem.ReviewEditableExercise#getCreateButton(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, com.github.gwtbootstrap.client.ui.ControlGroup 
+   * @param exercise
+   * @return
+   */
   @Override
   public UserExercise duplicateExercise(UserExercise exercise) {
+    logger.debug("anno before " + exercise.getFieldToAnnotation());
     UserExercise duplicate = db.getUserListManager().duplicate(exercise);
 
     if (!exercise.isPredefined()) {
       logger.warn("huh? got non-predef " + exercise);
     }
-    // if (exercise.isPredefined()) {
+
     SectionHelper sectionHelper = db.getSectionHelper();
     Exercise ex = duplicate.toExercise();
     for (Map.Entry<String, String> pair : exercise.getUnitToValue().entrySet()) {
@@ -1094,7 +1100,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     db.getAddRemoveDAO().add(duplicate.getID(), "ADD");
     db.getExerciseDAO().add(duplicate);
-    //}
+
+    logger.debug("anno after " + duplicate.getFieldToAnnotation());
     return duplicate;
   }
 
