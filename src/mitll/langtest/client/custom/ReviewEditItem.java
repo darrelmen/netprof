@@ -95,7 +95,6 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
 
       Button fixed = makeFixedButton();
 
-      row.add(fixed);
       fixed.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
@@ -103,35 +102,40 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
         }
       });
 
-      if (false) {
-        Button duplicate = new Button("Duplicate");
-        duplicate.setType(ButtonType.SUCCESS);
-
-        row.add(duplicate);
-        duplicate.addClickHandler(new ClickHandler() {
-          @Override
-          public void onClick(ClickEvent event) {
-            newUserExercise.setCreator(controller.getUser());
-            service.duplicateExercise(newUserExercise, new AsyncCallback<UserExercise>() {
-              @Override
-              public void onFailure(Throwable caught) {
-
-              }
-
-              @Override
-              public void onSuccess(UserExercise result) {
-
-                System.out.println("Got back " + result);
-                T result1 = (T) result;
-                exerciseList.addExercise(result1);
-                exerciseList.redraw();
-              }
-            });
-          }
-        });
-      }
+      row.add(getDuplicate());
+      row.add(fixed);
 
       return row;
+    }
+
+    private Button getDuplicate() {
+      Button duplicate = new Button("Duplicate");
+      duplicate.setType(ButtonType.SUCCESS);
+      duplicate.addStyleName("floatRight");
+
+      duplicate.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          newUserExercise.setCreator(controller.getUser());
+          service.duplicateExercise(newUserExercise, new AsyncCallback<UserExercise>() {
+            @Override
+            public void onFailure(Throwable caught) {
+
+            }
+
+            @Override
+            public void onSuccess(UserExercise result) {
+
+              System.out.println("Got back " + result);
+              T result1 = (T) result;
+              exerciseList.addExerciseAfter((T)newUserExercise,result1);
+              exerciseList.redraw();
+              originalList.addExercise(result);
+            }
+          });
+        }
+      });
+      return duplicate;
     }
 
     private Button makeFixedButton() {
