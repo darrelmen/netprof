@@ -1,10 +1,6 @@
 package mitll.langtest.client.custom;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.ControlGroup;
-import com.github.gwtbootstrap.client.ui.FluidRow;
-import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.TextBox;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
@@ -51,6 +47,7 @@ public class EditItem<T extends ExerciseShell> {
   private static final String NEW_ITEM = "*New Item*";
   protected static final String NEW_EXERCISE_ID = "NewExerciseID";
   private static final String EDIT_ITEM = "editItem";
+  private static final String REMOVE_FROM_LIST = "Remove from list";
 
   protected final ExerciseController controller;
   private final NPFHelper npfHelper;
@@ -337,6 +334,8 @@ public class EditItem<T extends ExerciseShell> {
 
       Button delete = makeDeleteButton();
 
+
+      configureButtonRow(row);
       row.add(delete);
 
       final long uniqueID = ul.getUniqueID();
@@ -374,7 +373,7 @@ public class EditItem<T extends ExerciseShell> {
     }
 
     private Button makeDeleteButton() {
-      Button delete = new Button("Remove from list");
+      Button delete = new Button(REMOVE_FROM_LIST);
       DOM.setStyleAttribute(delete.getElement(), "marginRight", "5px");
       delete.setType(ButtonType.WARNING);
       delete.addStyleName("floatRight");
@@ -421,7 +420,7 @@ public class EditItem<T extends ExerciseShell> {
     protected ControlGroup makeRegularAudioPanel(Panel row) {
       rap = makeRecordAudioPanel(row, true);
       fastAnno.addStyleName("topFiveMargin");
-      return addControlGroupEntry(row, "Normal speed reference recording", rap, fastAnno);
+      return addControlGroupEntrySimple(row, "Normal speed reference recording", rap, fastAnno);
     }
 
     /**
@@ -433,7 +432,7 @@ public class EditItem<T extends ExerciseShell> {
       rapSlow = makeRecordAudioPanel(row, false);
       slowAnno.addStyleName("topFiveMargin");
 
-      return addControlGroupEntry(row, "Slow speed reference recording (optional)", rapSlow, slowAnno);
+      return addControlGroupEntrySimple(row, "Slow speed reference recording (optional)", rapSlow, slowAnno);
     }
 
     private BasicDialog.FormField makeBoxAndAnno(Panel row, String label, HTML englishAnno) {
@@ -486,9 +485,20 @@ public class EditItem<T extends ExerciseShell> {
       } else return false;
     }
 
-    private boolean englishChanged() { return !english.box.getText().equals(originalEnglish);  }
-    private boolean foreignChanged() { return !foreignLang.box.getText().equals(originalForeign);  }
-    private boolean translitChanged() { return !newUserExercise.getTransliteration().equals(originalTransliteration); }
+    private boolean englishChanged() {
+      return !english.box.getText().equals(originalEnglish);
+    }
+
+    private boolean foreignChanged() {
+      boolean b = !foreignLang.box.getText().equals(originalForeign);
+      if (!b)
+        System.out.println("foreignChanged : foreign " + foreignLang.box.getText() + " vs original " + originalForeign);
+
+      return b;
+    }
+
+    private boolean translitChanged() {
+      return !newUserExercise.getTransliteration().equals(originalTransliteration); }
 
     private boolean refAudioChanged() {
       String refAudio = newUserExercise.getRefAudio();
