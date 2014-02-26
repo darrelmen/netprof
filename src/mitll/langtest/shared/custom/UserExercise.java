@@ -171,6 +171,7 @@ public class UserExercise extends AudioExercise {
   }
 
   public boolean isPredefined() {  return isPredef;  }
+  public boolean checkPredef() {  return !getID().startsWith(CUSTOM_PREFIX);  }
 
   public String toString() {
     return "UserExercise" +
