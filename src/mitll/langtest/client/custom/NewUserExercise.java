@@ -1,11 +1,7 @@
 package mitll.langtest.client.custom;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.Column;
-import com.github.gwtbootstrap.client.ui.ControlGroup;
-import com.github.gwtbootstrap.client.ui.FluidContainer;
-import com.github.gwtbootstrap.client.ui.FluidRow;
-import com.github.gwtbootstrap.client.ui.TextBox;
+import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.google.gwt.event.dom.client.BlurEvent;
@@ -105,11 +101,13 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     container.add(row);
 
     normalSpeedRecording = makeRegularAudioPanel(row);
+    normalSpeedRecording.addStyleName("buttonGroupInset3");
     this.ul = ul;
     this.originalList = originalList;
     this.listInterface = listInterface;
     this.toAddTo = toAddTo;
     slowSpeedRecording = makeSlowAudioPanel(row);
+    slowSpeedRecording.addStyleName("buttonGroupInset3");
 
     rap.setOtherRAP(rapSlow);
     rapSlow.setOtherRAP(rap);
@@ -162,12 +160,21 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
    */
   protected ControlGroup makeRegularAudioPanel(Panel row) {
     rap = makeRecordAudioPanel(row, true);
-    return addControlGroupEntry(row, "Normal speed reference recording", rap);
+    return addControlGroupEntrySimple(row, "Normal speed reference recording", rap);
   }
 
   protected ControlGroup makeSlowAudioPanel(Panel row) {
     rapSlow = makeRecordAudioPanel(row, false);
-    return addControlGroupEntry(row, "Slow speed reference recording (optional)", rapSlow);
+    return addControlGroupEntrySimple(row, "Slow speed reference recording (optional)", rapSlow);
+  }
+
+  protected void configureButtonRow(Panel row) {
+    ControlLabel child = new ControlLabel("Actions");
+    child.addStyleName("floatLeft");
+    child.addStyleName("rightFiveMargin");
+    child.addStyleName("leftFiveMargin");
+    //row.add(child);
+    row.addStyleName("buttonGroupInset");
   }
 
   protected Panel makeEnglishRow(Panel container) {
@@ -255,19 +262,25 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     DOM.setStyleAttribute(submit.getElement(), "marginBottom", "5px");
     DOM.setStyleAttribute(submit.getElement(), "marginRight", "15px");
 
-    Column column = new Column(2, 9, submit);
-    column.addStyleName("topMargin");
-    return column;
+    Panel row = new DivWidget();
+    row.addStyleName("marginBottomTen");
+
+    //Column column = new Column(2, 9, submit);
+    //column.addStyleName("topMargin");
+    configureButtonRow(row);
+    row.add(submit);
+    return row;
   }
 
   private Button makeCreateButton(final UserList ul, final ListInterface<T> pagingContainer, final Panel toAddTo,
                                   final FormField foreignLang,
                                   final RecordAudioPanel rap, final ControlGroup normalSpeedRecording, final String buttonName) {
-    Button submit = new Button(buttonName);
+    final Button submit = new Button(buttonName);
     submit.setType(ButtonType.SUCCESS);
     submit.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
+        submit.setEnabled(false);
         if (rap.isRecording()) {
           clickedCreate = true;
           rap.clickStop();
@@ -280,6 +293,8 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
       }
     });
     submit.addStyleName("rightFiveMargin");
+    submit.addStyleName("floatRight");
+
     return submit;
   }
 
