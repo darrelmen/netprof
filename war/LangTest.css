@@ -924,3 +924,23 @@ fieldset > legend {
     font-size: 1.8em;
     font-weight: bold;
 }
+
+.buttonGroupInsetFirst {
+ /*
+    background-color: #F5F5F5;
+    */
+    background-color: #89B0D5;
+    border: 1px solid #E3E3E3;
+    border-radius: 4px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05) inset;
+    min-height: 30px;
+    padding: 5px;
+}
+
+.buttonGroupInset {
+    background-color: #89B0D5;
+    border-radius: 3px 3px 3px 3px;
+    box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
+    min-height: 30px;
+    padding: 5px;
+}
