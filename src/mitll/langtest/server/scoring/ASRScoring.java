@@ -264,7 +264,7 @@ public class ASRScoring extends Scoring {
     File wavFile = new File(pathname);
     boolean mustPrepend = false;
     if (!wavFile.exists() && deployPath != null) {
-      logger.debug("trying new path for " + pathname + " under " + deployPath);
+      //logger.debug("trying new path for " + pathname + " under " + deployPath);
       wavFile = new File(deployPath + File.separator + pathname);
       mustPrepend = true;
     }
