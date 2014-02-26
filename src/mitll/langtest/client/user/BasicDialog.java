@@ -75,7 +75,7 @@ public class BasicDialog {
     return new ListBoxFormField(user);
   }
 
-  protected ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget widget) {
+  public ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget widget) {
     final ControlGroup userGroup = new ControlGroup();
     userGroup.addStyleName("leftFiveMargin");
     userGroup.add(new ControlLabel(label));
