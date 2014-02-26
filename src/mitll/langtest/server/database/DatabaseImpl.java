@@ -278,7 +278,7 @@ public class DatabaseImpl implements Database {
     }
     //logger.debug("using lesson plan file " +lessonPlanFile);
     boolean isExcel = lessonPlanFile.endsWith(".xlsx");
-    makeDAO(useFile, lessonPlanFile, isExcel, mediaDir);
+    makeDAO(useFile, lessonPlanFile, isExcel, mediaDir, installPath);
 
     if (useFile && !isExcel) {
       if (isWordPairs) {
@@ -302,11 +302,11 @@ public class DatabaseImpl implements Database {
    * @param excel
    * @param mediaDir
    */
-  private void makeDAO(boolean useFile, String lessonPlanFile, boolean excel, String mediaDir) {
+  private void makeDAO(boolean useFile, String lessonPlanFile, boolean excel, String mediaDir, String installPath) {
     if (exerciseDAO == null) {
       if (useFile && excel) {
         synchronized (this) {
-          this.exerciseDAO = new ExcelImport(lessonPlanFile, mediaDir, absConfigDir, serverProps, userListManager);
+          this.exerciseDAO = new ExcelImport(lessonPlanFile, mediaDir, absConfigDir, serverProps, userListManager, installPath);
         }
       }
       else {
