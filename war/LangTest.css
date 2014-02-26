@@ -944,3 +944,9 @@ fieldset > legend {
     min-height: 30px;
     padding: 5px;
 }
+.buttonGroupInset3 {
+     border-radius: 3px 3px 3px 3px;
+     box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
+     min-height: 30px;
+     padding: 5px;
+ }

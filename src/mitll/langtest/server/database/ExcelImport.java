@@ -778,8 +778,6 @@ public class ExcelImport implements ExerciseDAO {
     String fastAudioRef = mediaDir + File.separator + audioDir + File.separator + "Fast" + ".wav";
     String slowAudioRef = mediaDir + File.separator + audioDir + File.separator + "Slow" + ".wav";
 
-
-
     imported.setType(Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW);
 
     if (!missingFastSet.contains(audioDir)) {
@@ -792,7 +790,7 @@ public class ExcelImport implements ExerciseDAO {
       if (exists) {
         imported.setRefAudio(ensureForwardSlashes(fastAudioRef));
       } else {
-        logger.debug("missing fast " + test.getAbsolutePath());
+        //logger.debug("missing fast " + test.getAbsolutePath());
       }
     }
     if (!missingSlowSet.contains(audioDir)) {
@@ -806,7 +804,7 @@ public class ExcelImport implements ExerciseDAO {
         imported.setSlowRefAudio(ensureForwardSlashes(slowAudioRef));
       }
       else {
-      logger.debug("missing slow " + test.getAbsolutePath());
+        //logger.debug("missing slow " + test.getAbsolutePath());
       }
     }
 
