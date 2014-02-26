@@ -226,7 +226,7 @@ public class UserListManager {
 
     logger.debug("getReviewList ids #=" + allKnown.size() + " yielded " + onList.size());
     User user = new User(-1, 89, 0, 0, "", "", false);
-    UserList userList = new UserList(Long.MAX_VALUE, user, name, description, name, false);
+    UserList userList = new UserList(Long.MAX_VALUE, user, name, description, "", false);
     userList.setReview(true);
     userList.setExercises(onList);
     return userList;
