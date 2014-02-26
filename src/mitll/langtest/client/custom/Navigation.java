@@ -60,7 +60,8 @@ public class Navigation implements RequiresResize {
   private static final String PRACTICE = "Practice";
   public static final String REVIEW = "review";
   public static final String COMMENT = "comment";
-  private static final String ADD__OR_EDIT_ITEM = "Add/Edit Item";
+  private static final String ADD_OR_EDIT_ITEM = "Add/Edit Item";
+  private static final String ADD_DELETE_EDIT_ITEM = "Duplicate/Delete/Edit Item";
   public static final String ITEMS_TO_REVIEW = "Items to review";
   public static final String ITEMS_WITH_COMMENTS = "Items with comments";
   public static final String LEARN_PRONUNCIATION = "Learn Pronunciation";
@@ -455,7 +456,7 @@ public class Navigation implements RequiresResize {
     // add add item and edit tabs (conditionally)
     TabAndContent editItem = null;
     if (created && !ul.isPrivate()) {
-      final TabAndContent edit = makeTab(tabPanel, IconType.EDIT, ADD__OR_EDIT_ITEM);
+      final TabAndContent edit = makeTab(tabPanel, IconType.EDIT, isReview ? ADD_DELETE_EDIT_ITEM :ADD_OR_EDIT_ITEM);
       editItem = edit;
       edit.tab.addClickHandler(new ClickHandler() {
         @Override
