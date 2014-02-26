@@ -3,6 +3,7 @@ package mitll.langtest.client.custom;
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
@@ -11,6 +12,7 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -115,14 +117,38 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
 
       row.add(fixed);
 
-      ControlLabel child = new ControlLabel("Actions");
-      child.addStyleName("floatLeft");
-      child.addStyleName("rightFiveMargin");
-      child.addStyleName("leftFiveMargin");
-      row.add(child);
-      row.addStyleName("buttonGroupInset");
+      configureButtonRow(row);
 
       return row;
+    }
+
+    protected Tooltip addTooltip(Widget w, String tip) {
+      return createAddTooltip(w, tip, Placement.RIGHT);
+    }
+
+    /**
+     * @see mitll.langtest.client.custom.NPFExercise#makeAddToList(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController)
+     * @param widget
+     * @param tip
+     * @param placement
+     * @return
+     */
+    private Tooltip createAddTooltip(Widget widget, String tip, Placement placement) {
+      Tooltip tooltip = new Tooltip();
+      tooltip.setWidget(widget);
+      tooltip.setText(tip);
+      tooltip.setAnimation(true);
+// As of 4/22 - bootstrap 2.2.1.0 -
+// Tooltips have an bug which causes the cursor to
+// toggle between finger and normal when show delay
+// is configured.
+
+      tooltip.setShowDelay(500);
+      tooltip.setHideDelay(500);
+
+      tooltip.setPlacement(placement);
+      tooltip.reconfigure();
+      return tooltip;
     }
 
     private Button getRemove() {
@@ -130,6 +156,8 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
       remove.setType(ButtonType.WARNING);
       remove.addStyleName("floatRight");
       remove.addStyleName("leftFiveMargin");
+      addTooltip(remove,"Delete this item.");
+
       remove.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
@@ -161,6 +189,8 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
       Button duplicate = new Button(DUPLICATE);
       duplicate.setType(ButtonType.SUCCESS);
       duplicate.addStyleName("floatRight");
+      addTooltip(duplicate,"Copy this item.");
+
 
       duplicate.addClickHandler(new ClickHandler() {
         @Override
@@ -202,6 +232,7 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
           checkForForeignChange();
         }
       });
+      addTooltip(fixed,"Mark item as fixed, clear comments, and remove it from the review list.");
       return fixed;
     }
 
