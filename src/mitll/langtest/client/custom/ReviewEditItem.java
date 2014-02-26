@@ -105,9 +105,22 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
         }
       });
 
+      System.out.println("newUser " + newUserExercise + " predef " + newUserExercise.checkPredef());
+      if (newUserExercise.checkPredef()) {   // only the owner of the list can remove or add to their list
+        row.add(getRemove());
+        row.add(getDuplicate());
+      }
+
+      row.add(fixed);
+
+      return row;
+    }
+
+    private Button getRemove() {
       Button remove = new Button("Remove");
       remove.setType(ButtonType.WARNING);
       remove.addStyleName("floatRight");
+      remove.addStyleName("leftFiveMargin");
       remove.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
@@ -123,9 +136,8 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
 
                 @Override
                 public void onSuccess(Boolean result) {
-                  exerciseList.removeExercise((T)newUserExercise);
+                  exerciseList.removeExercise((T) newUserExercise);
                   originalList.remove(newUserExercise.getID());
-                  //exerciseList.redraw();
                 }
               });
             }
@@ -137,11 +149,7 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
           });
         }
       });
-      row.add(remove);
-      row.add(getDuplicate());
-      row.add(fixed);
-
-      return row;
+      return remove;
     }
 
     private Button getDuplicate() {
