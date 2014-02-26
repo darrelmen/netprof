@@ -44,7 +44,7 @@ import java.util.Set;
  */
 public class ExcelImport implements ExerciseDAO {
   private static Logger logger = Logger.getLogger(ExcelImport.class);
-  private static final boolean INCLUDE_ENGLISH_SEMI_AS_DEFECT = false;
+  private static final boolean INCLUDE_ENGLISH_SEMI_AS_DEFECT = true;
 
   private final boolean isFlashcard;
 
@@ -65,7 +65,8 @@ public class ExcelImport implements ExerciseDAO {
   private final int maxExercises;
   private ServerProperties serverProps;
   private UserListManager userListManager;
-  AddRemoveDAO addRemoveDAO;
+  private AddRemoveDAO addRemoveDAO;
+  private File installPath;
 
   /**
    * @see mitll.langtest.server.SiteDeployer#readExercisesPopulateSite(mitll.langtest.shared.Site, String, java.io.InputStream)
@@ -84,12 +85,18 @@ public class ExcelImport implements ExerciseDAO {
    * @param userListManager
    * @see DatabaseImpl#makeDAO
    */
-  public ExcelImport(String file, String mediaDir, String relativeConfigDir, ServerProperties serverProps, UserListManager userListManager) {
+  public ExcelImport(String file, String mediaDir, String relativeConfigDir, ServerProperties serverProps,
+                     UserListManager userListManager,
+                     String installPath) {
     this.file = file;
     this.serverProps = serverProps;
     this.isFlashcard = serverProps.isFlashcard();
     maxExercises = serverProps.getMaxNumExercises();
     this.mediaDir = mediaDir;
+    this.installPath = new File(installPath);
+    if (!this.installPath.exists()) {
+      logger.warn("\n\n\nhuh? install path " + this.installPath.getAbsolutePath() + " doesn't exist???");
+    }
     // turn off missing fast/slow for classroom
     boolean missingExists = serverProps.isClassroomMode() || getMissing(relativeConfigDir, "missingSlow.txt", missingSlowSet);
     missingExists &= serverProps.isClassroomMode() || getMissing(relativeConfigDir, "missingFast.txt", missingFastSet);
@@ -771,24 +778,35 @@ public class ExcelImport implements ExerciseDAO {
     String fastAudioRef = mediaDir + File.separator + audioDir + File.separator + "Fast" + ".wav";
     String slowAudioRef = mediaDir + File.separator + audioDir + File.separator + "Slow" + ".wav";
 
+
+
     imported.setType(Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW);
 
     if (!missingFastSet.contains(audioDir)) {
       File test = new File(fastAudioRef);
-      if (test.exists()) {
-        imported.setRefAudio(ensureForwardSlashes(fastAudioRef));
+      boolean exists = test.exists();
+      if (!exists) {
+        test = new File(installPath, fastAudioRef);
+        exists = test.exists();
       }
-      else {
-       // logger.debug("missing fast " + test.getAbsolutePath());
+      if (exists) {
+        imported.setRefAudio(ensureForwardSlashes(fastAudioRef));
+      } else {
+        logger.debug("missing fast " + test.getAbsolutePath());
       }
     }
     if (!missingSlowSet.contains(audioDir)) {
       File test = new File(slowAudioRef);
-      if (test.exists()) {
+      boolean exists = test.exists();
+      if (!exists) {
+        test = new File(installPath, slowAudioRef);
+        exists = test.exists();
+      }
+      if (exists) {
         imported.setSlowRefAudio(ensureForwardSlashes(slowAudioRef));
       }
       else {
-      //  logger.debug("missing slow " + test.getAbsolutePath());
+      logger.debug("missing slow " + test.getAbsolutePath());
       }
     }
 
