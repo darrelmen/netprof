@@ -85,10 +85,32 @@ public class BasicDialog {
     dialogBox.add(userGroup);
     return userGroup;
   }
+  public ControlGroup addControlGroupEntrySimple(Panel dialogBox, String label, Widget widget) {
+    final ControlGroup userGroup = new ControlGroup();
+    userGroup.add(new ControlLabel(label));
+    widget.addStyleName("leftFiveMargin");
+    userGroup.add(widget);
+
+    dialogBox.add(userGroup);
+    return userGroup;
+  }
 
   protected ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget widget, Widget rightSide) {
     final ControlGroup userGroup = new ControlGroup();
     userGroup.addStyleName("leftFiveMargin");
+    userGroup.add(new ControlLabel(label));
+    widget.addStyleName("leftFiveMargin");
+
+    Panel row = new DivWidget();
+    row.add(widget);
+    row.add(rightSide);
+    userGroup.add(row);
+
+    dialogBox.add(userGroup);
+    return userGroup;
+  }
+  protected ControlGroup addControlGroupEntrySimple(Panel dialogBox, String label, Widget widget, Widget rightSide) {
+    final ControlGroup userGroup = new ControlGroup();
     userGroup.add(new ControlLabel(label));
     widget.addStyleName("leftFiveMargin");
 
