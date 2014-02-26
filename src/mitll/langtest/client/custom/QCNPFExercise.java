@@ -51,7 +51,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   public static final String ENGLISH = "english";
 
   private static final String REF_AUDIO = "refAudio";
-  private static final String APPROVED = "Approved";
+  private static final String APPROVED = "Mark Reviewed";
 
   private Set<String> incorrectSet = new HashSet<String>();
   private List<RequiresResize> toResize;
@@ -70,6 +70,13 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     hp.addStyleName("questionContentPadding");
   }
 
+  /**
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, float, boolean, String)
+   * @param controller
+   * @param listContainer
+   * @param addKeyHandler
+   * @return
+   */
   protected NavigationHelper<Exercise> getNavigationHelper(ExerciseController controller,
                                                            final ListInterface<Exercise> listContainer, boolean addKeyHandler) {
     NavigationHelper<Exercise> widgets = new NavigationHelper<Exercise>(exercise, controller, new PostAnswerProvider() {
@@ -83,7 +90,10 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
       }
     };
 
-    addApprovedButton(listContainer, widgets);
+    //if (instance.contains("review")) {
+      addApprovedButton(listContainer, widgets);
+    //}
+
     return widgets;
   }
 
@@ -115,16 +125,18 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   }
 
   private void markReviewed(ExerciseShell completedExercise) {
-    System.out.println("markReviewed : exercise " + completedExercise.getID() + " instance " +instance);
+    System.out.println("markReviewed : exercise " + completedExercise.getID() + " instance " + instance);
 
     service.markReviewed(completedExercise.getID(), incorrectSet.isEmpty(), controller.getUser(),
-      new AsyncCallback<Void>() {
-        @Override
-        public void onFailure(Throwable caught) {}
+        new AsyncCallback<Void>() {
+          @Override
+          public void onFailure(Throwable caught) {
+          }
 
-        @Override
-        public void onSuccess(Void result) {}
-      });
+          @Override
+          public void onSuccess(Void result) {
+          }
+        });
   }
 
   /**
