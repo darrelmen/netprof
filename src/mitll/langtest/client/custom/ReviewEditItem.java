@@ -1,7 +1,6 @@
 package mitll.langtest.client.custom;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.ControlGroup;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -16,6 +15,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.ExerciseShell;
@@ -32,7 +32,10 @@ import java.util.Arrays;
  * To change this template use File | Settings | File Templates.
  */
 public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
-  private static final String FIXED = "Fixed";
+  private static final String FIXED = "Mark Fixed";
+  private static final String DUPLICATE = "Duplicate";
+  private static final String DELETE = "Delete";
+
   /**
    *
    * @param service
@@ -105,7 +108,6 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
         }
       });
 
-      System.out.println("newUser " + newUserExercise + " predef " + newUserExercise.checkPredef());
       if (newUserExercise.checkPredef()) {   // only the owner of the list can remove or add to their list
         row.add(getRemove());
         row.add(getDuplicate());
@@ -113,11 +115,18 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
 
       row.add(fixed);
 
+      ControlLabel child = new ControlLabel("Actions");
+      child.addStyleName("floatLeft");
+      child.addStyleName("rightFiveMargin");
+      child.addStyleName("leftFiveMargin");
+      row.add(child);
+      row.addStyleName("buttonGroupInset");
+
       return row;
     }
 
     private Button getRemove() {
-      Button remove = new Button("Remove");
+      Button remove = new Button(DELETE);
       remove.setType(ButtonType.WARNING);
       remove.addStyleName("floatRight");
       remove.addStyleName("leftFiveMargin");
@@ -130,9 +139,7 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
             public void gotYes() {
               service.deleteItem(newUserExercise.getID(), new AsyncCallback<Boolean>() {
                 @Override
-                public void onFailure(Throwable caught) {
-
-                }
+                public void onFailure(Throwable caught) {}
 
                 @Override
                 public void onSuccess(Boolean result) {
@@ -143,9 +150,7 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
             }
 
             @Override
-            public void gotNo() {
-
-            }
+            public void gotNo() {}
           });
         }
       });
@@ -153,7 +158,7 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
     }
 
     private Button getDuplicate() {
-      Button duplicate = new Button("Duplicate");
+      Button duplicate = new Button(DUPLICATE);
       duplicate.setType(ButtonType.SUCCESS);
       duplicate.addStyleName("floatRight");
 
@@ -177,7 +182,7 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
         @Override
         public void onSuccess(UserExercise result) {
 
-          System.out.println("Got back " + result);
+          //System.out.println("Got back " + result);
           T result1 = (T) result;
           exerciseList.addExerciseAfter((T)newUserExercise,result1);
           exerciseList.redraw();
