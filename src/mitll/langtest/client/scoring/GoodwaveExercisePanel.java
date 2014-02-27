@@ -526,7 +526,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
        * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
        */
       @Override
-      protected void useInvalidResult(AudioAnswer result) {}
+      protected void useInvalidResult(AudioAnswer result) {
+        playAudioPanel.setEnabled(false);
+      }
     }
   }
 
