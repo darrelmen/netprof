@@ -22,6 +22,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.custom.EditItem;
 import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -346,7 +347,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * @see mitll.langtest.client.list.PagingExerciseList#forgetExercise(String)
    * @param es
    */
-  public void removeExercise(T es) {
+  public T removeExercise(T es) {
     String id = es.getID();
     T current = getCurrentExercise();
     if (current.getID().equals(id)) {
@@ -358,7 +359,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
       }
     }
 
-    simpleRemove(id);
+    return simpleRemove(id);
   }
 
   @Override
@@ -447,7 +448,8 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     if (id.length() > 0) {
       checkAndAskServer(id);
     } else {
-      System.out.println("ExerciseList.onValueChange : got invalid event " + event + " value " + token);
+/*      System.out.println("ExerciseList.onValueChange : got invalid event " + event + " value " + token + " id '" + id+
+          "'");*/
     }
   }
 
@@ -456,7 +458,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     if (hasExercise(id)) {
       askServerForExercise(id);
     }
-    else {
+    else if (!id.equals(EditItem.NEW_EXERCISE_ID)) {
       System.err.println("checkAndAskServer : can't load " +id);// + " keys were " + getKeys());
     }
   }

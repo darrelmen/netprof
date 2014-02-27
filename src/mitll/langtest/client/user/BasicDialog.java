@@ -149,10 +149,6 @@ public class BasicDialog {
     markError(dialectGroup.group, dialectGroup.box, dialectGroup.box, "Try Again", message);
   }
 
-/*  protected void markError(ControlGroup dialectGroup, Widget dialect, String header, String message) {
-    markError(dialectGroup, dialect, (Focusable) dialect, header, message);
-  }*/
-
   protected void markError(ControlGroup dialectGroup, Widget dialect, Focusable focusable, String header, String message) {
     dialectGroup.setType(ControlGroupType.ERROR);
     focusable.setFocus(true);
