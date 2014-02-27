@@ -51,7 +51,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   protected CreateFirstRecordAudioPanel rapSlow;
 
   protected ControlGroup normalSpeedRecording, slowSpeedRecording;
-  private UserList ul;
+  protected UserList ul;
   private UserList originalList;
   protected ListInterface<T> listInterface;
   private Panel toAddTo;
@@ -87,18 +87,23 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
    */
   public Panel addNew(final UserList ul, UserList originalList, final ListInterface<T> listInterface, final Panel toAddTo) {
     final FluidContainer container = new FluidContainer();
+    DivWidget upper = new DivWidget();
+
+    container.getElement().setId("NewUserExercise_container");
+    upper.addStyleName("buttonGroupInset4");
     container.addStyleName("greenBackground");
 
     addItemsAtTop(container);
-    /*FormField formField =*/ makeForeignLangRow(container);
+    container.add(upper);
+    /*FormField formField =*/ makeForeignLangRow(upper);
 
     //focusOn(formField); // TODO put this back
-    makeTranslitRow(container);
-    makeEnglishRow(container);
+    makeTranslitRow(upper);
+    makeEnglishRow(upper);
 
     // make audio row
     FluidRow row = new FluidRow();
-    container.add(row);
+    upper.add(row);
 
     normalSpeedRecording = makeRegularAudioPanel(row);
     normalSpeedRecording.addStyleName("buttonGroupInset3");
@@ -107,13 +112,13 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     this.listInterface = listInterface;
     this.toAddTo = toAddTo;
     slowSpeedRecording = makeSlowAudioPanel(row);
-    slowSpeedRecording.addStyleName("buttonGroupInset3");
+    slowSpeedRecording.addStyleName("buttonGroupInset5");
 
     rap.setOtherRAP(rapSlow);
     rapSlow.setOtherRAP(rap);
 
     Panel column = getCreateButton(ul, listInterface, toAddTo, normalSpeedRecording);
-    row.add(column);
+    container.add(column);
 
     foreignLang.box.addBlurHandler(new BlurHandler() {
       @Override
@@ -148,9 +153,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   protected void gotBlur(FormField english, FormField foreignLang, RecordAudioPanel rap,
                          ControlGroup normalSpeedRecording, UserList ul, ListInterface<T> pagingContainer,
                          Panel toAddTo) {
-    newUserExercise.setTransliteration(translit.getText());
-    newUserExercise.setForeignLanguage(foreignLang.getText());
-    newUserExercise.setEnglish(english.getText());
+    grabInfoFromFormAndStuffInfoExercise();
   }
 
   /**
@@ -169,10 +172,10 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   }
 
   protected void configureButtonRow(Panel row) {
-    ControlLabel child = new ControlLabel("Actions");
-    child.addStyleName("floatLeft");
-    child.addStyleName("rightFiveMargin");
-    child.addStyleName("leftFiveMargin");
+    //ControlLabel child = new ControlLabel("Actions");
+    //child.addStyleName("floatLeft");
+    //child.addStyleName("rightFiveMargin");
+    //child.addStyleName("leftFiveMargin");
     //row.add(child);
     row.addStyleName("buttonGroupInset");
   }
@@ -209,7 +212,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   }*/
 
   protected void setFields(UserExercise newUserExercise) {
-    System.out.println("setFields : setting fields with " + newUserExercise);
+    System.out.println("grabInfoFromFormAndStuffInfoExercise : setting fields with " + newUserExercise);
 
     // english
     english.box.setText(newUserExercise.getEnglish());
@@ -319,8 +322,13 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
       checkValidForeignPhrase(ul, pagingContainer, toAddTo, onClick);
     }
     else {
+      formInvalid();
       System.out.println("NewUserExercise.validateThenPost : form not valid");
     }
+  }
+
+  protected void formInvalid() {
+
   }
 
   private void checkValidForeignPhrase(final UserList ul, final ListInterface<T> pagingContainer, final Panel toAddTo,
@@ -337,7 +345,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
       public void onSuccess(Boolean result) {
         if (result) {
           checkIfNeedsRefAudio();
-          setFields();
+          grabInfoFromFormAndStuffInfoExercise();
           afterValidForeignPhrase(ul, pagingContainer, toAddTo, onClick);
         } else {
           markError(foreignLang, "The " + FOREIGN_LANGUAGE +
@@ -347,7 +355,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     });
   }
 
-  protected void setFields() {
+  protected void grabInfoFromFormAndStuffInfoExercise() {
     newUserExercise.setEnglish(english.getText());
     newUserExercise.setForeignLanguage(foreignLang.getText());
     newUserExercise.setTransliteration(translit.getText());
@@ -554,7 +562,6 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
       recordButton.addMouseOverHandler(new MouseOverHandler() {
         @Override
         public void onMouseOver(MouseOverEvent event) {
-
           normalSpeedRecording.setType(ControlGroupType.NONE);
         }
       });
