@@ -1199,7 +1199,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public Set<String> getCompletedExercises(int user, boolean isReviewMode) {
-    return isReviewMode ? db.getUserListManager().getReviewedExercises() : db.getCompletedExercises(user);
+    Set<String> reviewed = isReviewMode ? db.getUserListManager().getReviewedExercises() : db.getCompletedExercises(user);
+    logger.debug("request " + user + " review mode " + isReviewMode + " reviewed num = " + reviewed.size());
+    return reviewed;
   }
 
   void makeAutoCRT() { audioFileHelper.makeAutoCRT(relativeConfigDir, this, studentAnswersDB, this); }
