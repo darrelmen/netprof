@@ -326,7 +326,7 @@ public class UserExerciseDAO extends DAO {
     try {
       List<UserExercise> userExercises = getUserExercises(sql);
       if (userExercises.isEmpty()) {
-        logger.warn("getWhere : no user exercises in " + exids);
+        logger.warn("getWhere : no user exercises in " + exids.size() + " exercise ids");
       }
       return userExercises;
     } catch (SQLException e) {
