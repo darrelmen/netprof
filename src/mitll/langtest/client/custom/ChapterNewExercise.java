@@ -90,8 +90,8 @@ public class ChapterNewExercise<T extends ExerciseShell> extends NewUserExercise
   }
 
   @Override
-  protected void setFields() {
-    super.setFields();
+  protected void grabInfoFromFormAndStuffInfoExercise() {
+    super.grabInfoFromFormAndStuffInfoExercise();
     for (Map.Entry<String, ListBoxFormField> pair : nameToWidget.entrySet()) {
       newUserExercise.addUnitToValue(pair.getKey(), pair.getValue().getValue());
 
