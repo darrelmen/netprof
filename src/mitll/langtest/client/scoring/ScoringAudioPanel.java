@@ -95,9 +95,9 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   @Override
   protected void getEachImage(int width) {
     super.getEachImage(width);
-    if (refAudio != null) {
-      getTranscriptImageURLForAudio(audioPath, refAudio, refSentence, width,words,phones);
-    }
+    //if (refAudio != null) {
+      getTranscriptImageURLForAudio(audioPath, refSentence, width,words,phones);
+    //}
    // else {
       //System.out.println("ScoringAudioPanel.getEachImage : no ref audio for id '" + getElement().getId()+"'");
    // }
@@ -112,7 +112,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
    * @param wordTranscript
    * @param phoneTranscript
    */
-  private void getTranscriptImageURLForAudio(final String path, final String refAudio, String refSentence, int width,
+  private void getTranscriptImageURLForAudio(final String path, String refSentence, int width,
                                              final ImageAndCheck wordTranscript,
                                              final ImageAndCheck phoneTranscript) {
     int widthToUse = Math.max(MIN_WIDTH, width);
