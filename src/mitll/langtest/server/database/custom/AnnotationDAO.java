@@ -2,6 +2,7 @@ package mitll.langtest.server.database.custom;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.shared.ExerciseAnnotation;
 import org.apache.log4j.Logger;
 
@@ -31,10 +32,12 @@ public class AnnotationDAO extends DAO {
   public static final String ANNOTATION = "annotation";
   private static final String CREATORID = "creatorid";
 
-  public AnnotationDAO(Database database) {
+
+  public AnnotationDAO(Database database, UserDAO userDAO) {
     super(database);
     try {
       createTable(database);
+      populate(userDAO.getDefectDetector());
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
@@ -127,15 +130,28 @@ public class AnnotationDAO extends DAO {
 
   public int getCount() { return getCount(ANNOTATION); }
 
+  private Map<String,List<UserAnnotation>> exerciseToAnnos = new HashMap<String, List<UserAnnotation>>();
+
+  private void populate(long userid) {
+    List<UserAnnotation> all = getAll(userid);
+    for (UserAnnotation userAnnotation : all) {
+      List<UserAnnotation> userAnnotations = exerciseToAnnos.get(userAnnotation.getExerciseID());
+      if (userAnnotations == null) {
+        exerciseToAnnos.put(userAnnotation.getExerciseID(),userAnnotations = new ArrayList<UserAnnotation>());
+      }
+      userAnnotations.add(userAnnotation);
+    }
+  }
 
   /**
    * Pulls the list of users out of the database.
    *
    * @return
    */
-  private List<UserAnnotation> getAll() {
+  private List<UserAnnotation> getAll(long userid) {
     try {
-      String sql = "SELECT * from " + ANNOTATION + " order by modified desc";
+      String sql = "SELECT * from " + ANNOTATION + " where " + CREATORID +"="+userid;
+
       return getUserAnnotations(sql);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
@@ -143,7 +159,24 @@ public class AnnotationDAO extends DAO {
     return Collections.emptyList();
   }
 
-  public boolean hasAnnotation(String exerciseID, String field, String status, String comment, long userID) {
+  public boolean hasAnnotation(String exerciseID, String field, String status, String comment) {
+    List<UserAnnotation> userAnnotations = exerciseToAnnos.get(exerciseID);
+
+    Map<String, ExerciseAnnotation> latestByExerciseID = getFieldToAnnotationMap(userAnnotations);
+    ExerciseAnnotation annotation = latestByExerciseID.get(field);
+    return (annotation != null) && (annotation.status.equals(status) && annotation.comment.equals(comment));
+  }
+
+  /**
+   * @see mitll.langtest.server.database.custom.UserListManager#addDefect(String, String, String)
+   * @param exerciseID
+   * @param field
+   * @param status
+   * @param comment
+   * @param userID
+   * @return
+   */
+  public boolean hasAnnotationOld(String exerciseID, String field, String status, String comment, long userID) {
     String sql = "SELECT * from " + ANNOTATION + " where exerciseid='" + exerciseID + "' AND " + CREATORID +"="+userID+
       " order by field,modified desc";
 
@@ -173,8 +206,13 @@ public class AnnotationDAO extends DAO {
   }
 
   private Map<String, ExerciseAnnotation> getFieldToAnnotationMap(String sql) throws SQLException {
-    Map<String,UserAnnotation> fieldToAnno = new HashMap<String, UserAnnotation>();
     List<UserAnnotation> lists = getUserAnnotations(sql);
+    return getFieldToAnnotationMap(lists);
+  }
+
+  private Map<String, ExerciseAnnotation> getFieldToAnnotationMap(List<UserAnnotation> lists) {
+    Map<String,UserAnnotation> fieldToAnno = new HashMap<String, UserAnnotation>();
+
     for (UserAnnotation annotation : lists) {
       UserAnnotation annotation1 = fieldToAnno.get(annotation.getField());
       if (annotation1 == null) fieldToAnno.put(annotation.getField(),annotation);
@@ -202,13 +240,12 @@ public class AnnotationDAO extends DAO {
     List<UserAnnotation> lists = new ArrayList<UserAnnotation>();
 
     while (rs.next()) {
-     // long uniqueid = rs.getLong("uniqueid");
-      lists.add(new UserAnnotation(//uniqueid, //id
-          rs.getString("exerciseid"), // exp
-          rs.getString("field"), // exp
-          rs.getString("status"), // exp
+      lists.add(new UserAnnotation(
+          rs.getString("exerciseid"),
+          rs.getString("field"),
+          rs.getString("status"),
           rs.getString("comment"),
-          rs.getLong(CREATORID), //
+          rs.getLong(CREATORID),
           rs.getTimestamp("modified").getTime()
       )
       );
