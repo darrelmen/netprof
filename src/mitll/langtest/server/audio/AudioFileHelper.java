@@ -45,7 +45,10 @@ public class AudioFileHelper {
   }
 
   public boolean checkLTS(String foreignLanguagePhrase) { return asrScoring.checkLTS(foreignLanguagePhrase); }
-  public SmallVocabDecoder getSmallVocabDecoder() { return asrScoring.getSmallVocabDecoder(); }
+  public SmallVocabDecoder getSmallVocabDecoder() {
+    makeASRScoring();
+    return asrScoring.getSmallVocabDecoder();
+  }
 
   /**
    * Record an answer entry in the database.<br></br>
