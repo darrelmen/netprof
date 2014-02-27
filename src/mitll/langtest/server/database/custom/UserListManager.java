@@ -523,7 +523,10 @@ public class UserListManager {
   public void removeReviewed(String exerciseid) {
     List<UserExercise> toRemove = userExerciseDAO.getWhere(Collections.singletonList(exerciseid));
 
-    reviewedExercises.remove(exerciseid);
+    if (!reviewedExercises.remove(exerciseid)) {
+      logger.error("huh? couldn't find " + exerciseid + " in set of " + reviewedExercises.size());
+      getReviewedExercises();
+    }
     incorrect.remove(exerciseid);
     reviewedDAO.remove(exerciseid);
 
