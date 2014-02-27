@@ -55,7 +55,6 @@ public class UserListManager {
   private Set<String> reviewedExercises = new TreeSet<String>();
   private Set<String> incorrect = new TreeSet<String>();
   private final PathHelper pathHelper;
-  private long defectDetector;
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(mitll.langtest.server.PathHelper)
@@ -78,10 +77,6 @@ public class UserListManager {
     logger.debug("incorrect are " + incorrect);
     reviewedExercises = reviewedDAO.getReviewed();
     this.pathHelper = pathHelper;
-    defectDetector = userDAO.userExists("defectDetector");
-    if (defectDetector == -1) {
-      defectDetector = userDAO.addUser(89, "male", 0, "", "unknown", "unknown", "defectDetector", false);
-    }
   }
 
   /**
@@ -454,10 +449,11 @@ public class UserListManager {
   public boolean listExists(long id) {  return userListDAO.getWhere(id, false) != null; }
 
   public void addDefect(String exerciseID, String field, String comment) {
-    if (!annotationDAO.hasAnnotation(exerciseID, field, INCORRECT, comment, defectDetector)) {
+    if (!annotationDAO.hasAnnotation(exerciseID, field, INCORRECT, comment)) {
+      long defectDetector = userDAO.getDefectDetector();
       addAnnotation(exerciseID, field, INCORRECT, comment, defectDetector);
+      markReviewed(exerciseID, defectDetector);
     }
-    markReviewed(exerciseID, defectDetector);
   }
 
   /**
