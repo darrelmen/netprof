@@ -425,6 +425,11 @@ public class BootstrapFlashcardExerciseList<T extends ExerciseShell> implements 
   public void addCompleted(String id) {}
 
   @Override
+  public void removeCompleted(String id) {
+
+  }
+
+  @Override
   public void reload() {}
 
   @Override
