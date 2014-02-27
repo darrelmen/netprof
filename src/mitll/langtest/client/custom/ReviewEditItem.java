@@ -101,16 +101,21 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
       Panel row = new DivWidget();
       row.addStyleName("marginBottomTen");
 
-      Button fixed = makeFixedButton();
+      PrevNextList<T> prevNext = getPrevNext(pagingContainer);
+      prevNext.addStyleName("floatLeft");
+      row.add(prevNext);
+
+      final Button fixed = makeFixedButton();
 
       fixed.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
+          //fixed.setEnabled(false);
           validateThenPost(foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo, true);
         }
       });
 
-      if (newUserExercise.checkPredef()) {   // only the owner of the list can remove or add to their list
+      if (newUserExercise.checkPredef()) {   // for now, only the owner of the list can remove or add to their list
         row.add(getRemove());
         row.add(getDuplicate());
       }
@@ -223,9 +228,10 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
 
     private Button makeFixedButton() {
       Button fixed = new Button(FIXED);
-      DOM.setStyleAttribute(fixed.getElement(), "marginRight", "5px");
+      fixed.addStyleName("leftFiveMargin");
       fixed.setType(ButtonType.PRIMARY);
-      fixed.addStyleName("floatRight");
+      fixed.addStyleName("floatLeft");
+      fixed.addStyleName("marginRight");
       fixed.addMouseOverHandler(new MouseOverHandler() {
         @Override
         public void onMouseOver(MouseOverEvent event) {
@@ -249,22 +255,29 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
      */
     @Override
     protected void doAfterEditComplete(ListInterface<T> pagingContainer, boolean buttonClicked) {
+      super.doAfterEditComplete(pagingContainer,buttonClicked);
+
       if (buttonClicked) {
-        String id = newUserExercise.getID();
+        final String id = newUserExercise.getID();
         System.out.println("doAfterEditComplete : forgetting " + id);
-        exerciseList.forgetExercise(id);
+        T t = exerciseList.forgetExercise(id);
+        System.out.println("\tdoAfterEditComplete : forgot " + t);
+
         if (!ul.remove(newUserExercise)) {
-          System.err.println("\n\n\ndoAfterEditComplete : error - didn't remove " + id);
+          System.err.println("\ndoAfterEditComplete : error - didn't remove " + id + " from ul " + ul);
         }
         if (!originalList.remove(newUserExercise)) {
-          System.err.println("\n\n\ndoAfterEditComplete : error - didn't remove " + id);
+          System.err.println("\ndoAfterEditComplete : error - didn't remove " + id + " from original " +originalList);
         }
         service.removeReviewed(id, new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {}
 
           @Override
-          public void onSuccess(Void result) { predefinedContentList.reload(); }
+          public void onSuccess(Void result) {
+            predefinedContentList.removeCompleted(id);
+            predefinedContentList.reload();
+          }
         });
       }
     }
