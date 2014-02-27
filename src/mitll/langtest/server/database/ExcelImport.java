@@ -441,7 +441,7 @@ public class ExcelImport implements ExerciseDAO {
           }
           if (english.length() == 0) {
             if (serverProps.isClassroomMode()) {
-              english = "NO ENGLISH";
+              //english = "NO ENGLISH";    // DON'T DO THIS - it messes up the indexing.
               fieldToDefect.put("english", "missing english");
             }
             //logger.info("-------- > for row " + next.getRowNum() + " english is blank ");
@@ -769,6 +769,7 @@ public class ExcelImport implements ExerciseDAO {
                                String context, boolean promptInEnglish, String refAudioIndex) {
     String content = ExerciseFormatter.getContent(foreignLanguagePhrase, translit, english, meaning, context);
     Exercise imported = new Exercise("import", id, content, promptInEnglish, true, english);
+    imported.setMeaning(meaning);
     imported.addQuestion();   // TODO : needed?
 
     String audioDir = refAudioIndex.length() > 0 ? findBest(refAudioIndex) : id;
