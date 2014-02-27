@@ -61,7 +61,7 @@ public class Navigation implements RequiresResize {
   public static final String REVIEW = "review";
   public static final String COMMENT = "comment";
   private static final String ADD_OR_EDIT_ITEM = "Add/Edit Item";
-  private static final String ADD_DELETE_EDIT_ITEM = "Duplicate/Delete/Edit Item";
+  private static final String ADD_DELETE_EDIT_ITEM = "Fix Items";
   public static final String ITEMS_TO_REVIEW = "Items to review";
   public static final String ITEMS_WITH_COMMENTS = "Items with comments";
   public static final String LEARN_PRONUNCIATION = "Learn Pronunciation";
@@ -78,6 +78,14 @@ public class Navigation implements RequiresResize {
   private EditItem<? extends ExerciseShell> editItem;
   private EditItem<? extends ExerciseShell> reviewItem;
 
+  /**
+   *  @see mitll.langtest.client.LangTest#resetClassroomState()
+   * @param service
+   * @param userManager
+   * @param controller
+   * @param listInterface
+   * @param feedback
+   */
   public Navigation(final LangTestDatabaseAsync service, final UserManager userManager,
                     final ExerciseController controller, final ListInterface<? extends ExerciseShell> listInterface,
                     UserFeedback feedback) {
@@ -192,7 +200,7 @@ public class Navigation implements RequiresResize {
         Panel createdPanel = listInterface.getCreatedPanel();
         boolean hasCreated = createdPanel != null;
         if (hasCreated && wasChapters) {
-          System.out.println("\tgot chapters! created panel :  has created " + hasCreated + " was revealed  " + createdPanel.getClass());
+          //System.out.println("\tgot chapters! created panel :  has created " + hasCreated + " was revealed  " + createdPanel.getClass());
           ((GoodwaveExercisePanel) createdPanel).wasRevealed();
         }
       }
