@@ -328,7 +328,7 @@ public class HistoryExerciseList<T extends ExerciseShell> extends PagingExercise
      */
   @Override
   public void onValueChange(ValueChangeEvent<String> event) {
-    System.out.println(new Date() +" HistoryExerciseList.onValueChange : ------ start ----");
+    //System.out.println(new Date() +" HistoryExerciseList.onValueChange : ------ start ----");
 
     String rawToken = getTokenFromEvent(event);
     System.out.println(new Date() +" HistoryExerciseList.onValueChange : ------ start: token is '" + rawToken +"' ----");
