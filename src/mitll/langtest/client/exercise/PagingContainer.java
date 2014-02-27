@@ -75,6 +75,11 @@ public class PagingContainer<T extends ExerciseShell> {
     redraw();
   }
 
+  public void removeCompleted(String id) {
+    completed.remove(id);
+    redraw();
+  }
+
   public void redraw() {  table.redraw();  }
 
   private T getByID(String id) {
@@ -92,7 +97,8 @@ public class PagingContainer<T extends ExerciseShell> {
    */
   public void forgetExercise(T es) {
     List<T> list = getList();
-    System.out.println("PagingContainer.forgetExercise " + es);
+    int before = getList().size();
+    System.out.println("PagingContainer.forgetExercise, before size = " + before + " : "+ es);
 
     if (!list.remove(es)) {
       if (!list.remove(getByID(es.getID()))) {
@@ -106,7 +112,12 @@ public class PagingContainer<T extends ExerciseShell> {
       }
     }
     else {
-      System.out.println("\tPagingContainer : now has " + list.size() + " items");
+      if (list.size() == before -1) {
+        System.out.println("\tPagingContainer : now has " + list.size()+ " items");
+      }
+      else {
+        System.err.println("\tPagingContainer : now has " + list.size() + " items vs " +before);
+      }
       idToExercise.remove(es.getID());
     }
     redraw();
