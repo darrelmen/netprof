@@ -215,7 +215,7 @@ public class ServerProperties {
   }
 
   public boolean shouldSkipSemicolonEntries() {
-    return getDefaultTrue(SKIP_SEMICOLONS) && !isClassroomMode();
+    return getDefaultTrue(SKIP_SEMICOLONS);
   }
 
   public boolean sortExercises() {
