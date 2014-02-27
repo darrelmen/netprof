@@ -60,7 +60,7 @@ public class CommentNPFExercise extends NPFExercise {
 
     column.add(getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getRefSentence()));
     column.add(getEntry(e, QCNPFExercise.TRANSLITERATION, ExerciseFormatter.TRANSLITERATION, e.getTranslitSentence()));
-    column.add(getEntry(e, QCNPFExercise.ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, e.getEnglishSentence()));
+    column.add(getEntry(e, QCNPFExercise.ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, e.getMeaning() != null? e.getMeaning() : e.getEnglishSentence()));
 
     return column;
   }
