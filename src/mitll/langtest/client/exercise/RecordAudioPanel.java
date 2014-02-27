@@ -97,12 +97,12 @@ public class RecordAudioPanel extends AudioPanel {
   protected void showStop() {
     recordImage1.setVisible(false);
     recordImage2.setVisible(false);
-    if (stopListener != null) stopListener.stopped();
+   // if (stopListener != null) stopListener.stopped();
   }
-  private StopListener stopListener = null;
+ // private StopListener stopListener = null;
 
-  public void addStopListener(StopListener stopListener) { this.stopListener = stopListener;}
-  public void removeStopListener() { stopListener = null; }
+/*  public void addStopListener(StopListener stopListener) { this.stopListener = stopListener;}
+  public void removeStopListener() { stopListener = null; }*/
 
   public static interface StopListener { public void stopped(); }
 
