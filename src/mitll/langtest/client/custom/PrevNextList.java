@@ -29,8 +29,9 @@ class PrevNextList<T extends ExerciseShell> extends HorizontalPanel {
     //System.out.println("Disable next " + disableNext);
     makePrevButton(exerciseShell);
     makeNextButton(exerciseShell);
-    addStyleName("topFiveMargin");
+    //addStyleName("topFiveMargin");
     addStyleName("marginBottomTen");
+    getElement().setId("PrevNextList");
   }
 
   private void makePrevButton(final T exercise) {
