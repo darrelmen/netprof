@@ -64,6 +64,7 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
   protected void scoreAudio(final String path, long resultID, String refSentence,
                             final ImageAndCheck wordTranscript, final ImageAndCheck phoneTranscript,
                             int toUse, int height, int reqid) {
+    if (path == null) return;
     //System.out.println("scoring audio " + path +" with ref sentence " + refSentence + " reqid " + reqid);
     boolean wasVisible = wordTranscript.image.isVisible();
 
@@ -82,7 +83,6 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
 
     //System.out.println("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " type " + "score" + " width " + toUse);
 
-    if (path != null) {
       service.getASRScoreForAudio(reqid, resultID, path, refSentence, toUse, height, useScoreToColorBkg, new AsyncCallback<PretestScore>() {
         public void onFailure(Throwable caught) {
           if (!caught.getMessage().trim().equals("0")) {
@@ -103,10 +103,5 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
         }*/
         }
       });
-    }
-    else {
-      System.out.println("ASRScoringAudioPanel.scoreAudio : NOT SCORING NULL PATH : req " + reqid + " type " + "score" + " width " + toUse);
-
-    }
   }
 }
