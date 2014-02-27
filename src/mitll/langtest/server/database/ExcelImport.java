@@ -595,7 +595,7 @@ public class ExcelImport implements ExerciseDAO {
                 }
               }
               else {
-                logger.warn("no translit sentence at " + i + " for " + e);
+                //logger.warn("no translit sentence at " + i + " for " + e);
               }
             } catch (Exception e1) {
               logger.error("got " + e1 + " on " + e, e1);
