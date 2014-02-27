@@ -74,7 +74,7 @@ public class UserListManager {
     this.reviewedDAO = reviewedDAO;
 
     incorrect = annotationDAO.getIncorrectIds();
-    logger.debug("incorrect are " + incorrect);
+   // logger.debug("incorrect are " + incorrect.size());
     reviewedExercises = reviewedDAO.getReviewed();
     this.pathHelper = pathHelper;
   }
