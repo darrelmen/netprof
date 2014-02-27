@@ -90,9 +90,9 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
       }
     };
 
-    //if (instance.contains("review")) {
+    if (!instance.contains("review")) {
       addApprovedButton(listContainer, widgets);
-    //}
+    }
 
     return widgets;
   }
