@@ -98,6 +98,7 @@ public interface ListInterface<T extends ExerciseShell> extends RequiresResize {
   int getComplete();
   void setCompleted(Set<String> completed);
   void addCompleted(String id);
+  void removeCompleted(String id);
 
   void addExercise(T es);
 
