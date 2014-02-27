@@ -76,9 +76,15 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
     pagingContainer.setCompleted(completed);
   }
 
+  @Override
+  public void removeCompleted(String id) {
+    pagingContainer.removeCompleted(id);
+
+  }
+
   public void addCompleted(String id) {
     pagingContainer.addCompleted(id);
-    //System.out.println("PagingExerciseList.addCompleted : completed " + id + " now " + getCompleted().size());
+    System.out.println("PagingExerciseList.addCompleted : completed " + id + " now " + getCompleted().size());
   }
 
   private Set<String> getCompleted() { return pagingContainer.getCompleted(); }
@@ -302,9 +308,9 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
   public void addExercise(T es) { pagingContainer.addExercise(es);  }
   public void addExerciseAfter(T after,T es) { pagingContainer.addExerciseAfter(after, es);  }
 
-  public void forgetExercise(String id) {
+  public T forgetExercise(String id) {
     System.out.println("PagingExerciseList.forgetExercise " + id + " on " + getElement().getId() + " ul " +userListID);
-    removeExercise(byID(id));
+    return removeExercise(byID(id));
   }
 
   /**
