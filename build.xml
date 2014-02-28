@@ -45,15 +45,15 @@
         <pathelement location="war/WEB-INF/lib/javamelody-1.42.0.jar"/>
         <pathelement location="war/WEB-INF/lib/jrobin-1.5.9.jar"/>
         <pathelement location="war/WEB-INF/lib/gwt-visualization.jar"/>
-        <pathelement location="war/WEB-INF/lib/poi-3.9-20121203.jar"/>
-        <pathelement location="war/WEB-INF/lib/poi-ooxml-3.9-20121203.jar"/>
-        <pathelement location="war/WEB-INF/lib/poi-ooxml-schemas-3.9-20121203.jar"/>
+        <pathelement location="war/WEB-INF/lib/poi-3.10-FINAL-20140208.jar"/>
+        <pathelement location="war/WEB-INF/lib/poi-ooxml-3.10-FINAL-20140208.jar"/>
+        <pathelement location="war/WEB-INF/lib/poi-ooxml-schemas-3.10-FINAL-20140208.jar"/>
         <pathelement location="war/WEB-INF/lib/stax-api-1.0.1.jar"/>
         <pathelement location="war/WEB-INF/lib/xmlbeans-2.3.0.jar"/>
         <pathelement location="war/WEB-INF/lib/dom4j-1.6.1.jar"/>
         <pathelement location="war/WEB-INF/lib/commons-fileupload-1.2.2.jar"/>
         <pathelement location="war/WEB-INF/lib/flashcard.jar"/>
-        <pathelement location="war/WEB-INF/lib/gwt-bootstrap-2.3.2.0-SNAPSHOT.jar"/>
+        <pathelement location="war/WEB-INF/lib/gwt-bootstrap-2.3.2.1-SNAPSHOT.jar"/>
         <pathelement location="war/WEB-INF/lib/org.moxieapps.gwt.highcharts-1.5.0.jar"/>
     </path>
     <target name="init" depends="clean">
@@ -516,7 +516,7 @@
 
     <target depends="build" name="fullPatch">
         <jar destfile="npPatch.war" basedir="war"
-             excludes="WEB-INF/web.xml,WEB-INF/lib/poi*.jar,config/**,config/*/vlr-parle.*,answers/**,audioimages/**,scoring/**,config/first/**,config/autocrt/**,config/msa/**,config/msa/**,config/levantine/**,config/pilot/**,config/dari/**,config/pashto/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
+             excludes="WEB-INF/web.xml,config/**,config/*/vlr-parle.*,answers/**,audioimages/**,scoring/**,config/first/**,config/autocrt/**,config/msa/**,config/msa/**,config/levantine/**,config/pilot/**,config/dari/**,config/pashto/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
 
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
@@ -527,7 +527,7 @@
     <!-- Makes a jar of just the .class files and the javascript, so you can overlay it on an active webapp -->
     <target depends="build" name="patch">
         <jar destfile="npPatch.war" basedir="war"
-             excludes="bestAudio/**,WEB-INF/web.xml,WEB-INF/lib/pronz.jar,WEB-INF/lib/poi*.jar,config/**,config/*/vlr-parle.*,answers/**,audioimages/**,scoring/**,config/first/**,config/autocrt/**,config/msa/**,config/msa/**,config/levantine/**,config/pilot/**,config/dari/**,config/pashto/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
+             excludes="bestAudio/**,WEB-INF/web.xml,WEB-INF/lib/pronz.jar,config/**,config/*/vlr-parle.*,answers/**,audioimages/**,scoring/**,config/first/**,config/autocrt/**,config/msa/**,config/msa/**,config/levantine/**,config/pilot/**,config/dari/**,config/pashto/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
 
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
