@@ -762,7 +762,7 @@ public class DatabaseImpl implements Database {
    * user id, then return a list of Exercises with those ids.
    *
    * @see #getExercisesBiasTowardsUnanswered(long,boolean)
-   * @see #getExercisesBiasTowardsUnanswered(long, String, boolean)
+   * @see #getExercisesGradeBalancing(long) (long, String, boolean)
    * @param userID for this user
    * @param idToExercise so we can go from id to exercise
    * @param countToIds statistics about answers for each exercise
@@ -809,7 +809,6 @@ public class DatabaseImpl implements Database {
   /**
    * Reverse the map -- make a map of result count->list of ids at that count
    * @see #getExercisesBiasTowardsUnanswered(long,boolean)
-   * @see #getExercisesBiasTowardsUnanswered(long, String, boolean)
    * @param idToCount
    * @return
    */
@@ -826,7 +825,6 @@ public class DatabaseImpl implements Database {
 
   /**
    * @see #getExercisesBiasTowardsUnanswered(long,boolean)
-   * @see #getExercisesBiasTowardsUnanswered(long, String, boolean)
    * @param idToExercise
    * @param idToCount
    */
@@ -848,7 +846,6 @@ public class DatabaseImpl implements Database {
    * multiple responses by the same user count as one in count->id map.
    *
    * @see #getExercisesBiasTowardsUnanswered(long,boolean)
-   * @see #getExercisesBiasTowardsUnanswered(long, String, boolean)
    * @param userID
    * @paramx userMale
    * @param idToCount exercise id->count
@@ -1017,8 +1014,8 @@ public class DatabaseImpl implements Database {
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesInModeDependentOrder
-   * @param userID
-   * @param firstNInOrder
+   * @paramxx userID
+   * @paramx firstNInOrder
    * @return
    */
 /*  public List<Exercise> getExercisesFirstNInOrder(long userID, int firstNInOrder) {
@@ -1081,15 +1078,10 @@ public class DatabaseImpl implements Database {
    * @param age
    * @param gender
    * @param experience
-   * @param ipAddr user agent info
    * @param dialect speaker dialect
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#addUser
    */
-/*  private long addUser(int age, String gender, int experience, String ipAddr, String dialect) {
-    return userDAO.addUser(age, gender, experience, ipAddr, "", dialect, "", false);
-  }*/
-
   public long addUser(HttpServletRequest request,
                       int age, String gender, int experience,
                       String nativeLang, String dialect, String userID) {
@@ -1117,32 +1109,53 @@ public class DatabaseImpl implements Database {
    */
   public List<User> getUsers() {
     Map<Long, Float> userToRate = resultDAO.getSessions().userToRate;
-    Map<Long, Integer> idToCount = populateUserToNumAnswers();
-    List<User> users = userDAO.getUsers();
+    List<User> users = null;
+    try {
+      Pair idToCount = populateUserToNumAnswers();
+      users = userDAO.getUsers();
+      int total = exerciseDAO.getRawExercises().size();
+      for (User u : users) {
+        Integer numResults = idToCount.idToCount.get(u.id);
+        if (numResults != null) {
+          u.setNumResults(numResults);
 
-    for (User u : users) {
-      Integer numResults = idToCount.get(u.id);
-      if (numResults != null) {
-        u.setNumResults(numResults);
-
-        if (userToRate.containsKey(u.id)) {
-          u.setRate(userToRate.get(u.id));
+          if (userToRate.containsKey(u.id)) {
+            u.setRate(userToRate.get(u.id));
+          }
+          u.setComplete(idToCount.idToUniqueCount.get(u.id).size() == total);
         }
       }
+    } catch (Exception e) {
+      logger.error("Got " +e,e);
     }
 
     joinWithDLIUsers(users);
     return users;
   }
 
-  private Map<Long, Integer> populateUserToNumAnswers() {
-    Map<Long,Integer> idToCount = new HashMap<Long, Integer>();
+  private Pair populateUserToNumAnswers() {
+    Map<Long, Integer> idToCount = new HashMap<Long, Integer>();
+    Map<Long, Set<String>> idToUniqueCount = new HashMap<Long, Set<String>>();
+   // Set<String> unique = new HashSet<String>();
     for (Result r : resultDAO.getResults()) {
       Integer count = idToCount.get(r.userid);
       if (count == null) idToCount.put(r.userid, 1);
-      else idToCount.put(r.userid, count+1);
+      else idToCount.put(r.userid, count + 1);
+
+      Set<String> uniqueForUser = idToUniqueCount.get(r.userid);
+      if (uniqueForUser == null) idToUniqueCount.put(r.userid, uniqueForUser = new HashSet<String>());
+      uniqueForUser.add(r.id);
     }
-    return idToCount;
+    return new Pair(idToCount, idToUniqueCount);
+  }
+
+  private static class Pair {
+    Map<Long, Integer> idToCount;
+    Map<Long, Set<String>> idToUniqueCount;
+    public Pair(Map<Long, Integer> idToCount, Map<Long, Set<String>> idToUniqueCount) {
+      this.idToCount = idToCount;
+      this.idToUniqueCount = idToUniqueCount;
+    }
   }
 
   Collection<User> joinWithDLIUsers(List<User> users) {
