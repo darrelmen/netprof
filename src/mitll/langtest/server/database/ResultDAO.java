@@ -12,6 +12,7 @@ import org.apache.poi.ss.usermodel.DataFormat;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.IOException;
@@ -791,8 +792,12 @@ public class ResultDAO extends DAO {
     }
   }
 
+  /**
+   * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+   * @param out
+   */
   public void toXLSX(OutputStream out) {
-    Workbook wb = new XSSFWorkbook();
+    SXSSFWorkbook wb = new SXSSFWorkbook(100); // keep 100 rows in memory, exceeding rows will be flushed to disk
     Sheet sheet = wb.createSheet("Results");
     int rownum = 0;
 
@@ -862,6 +867,7 @@ public class ResultDAO extends DAO {
       }
       then = now;
       out.close();
+      wb.dispose();
     } catch (IOException e) {
       logger.error("got " + e, e);
     }
