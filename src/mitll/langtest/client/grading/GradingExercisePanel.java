@@ -174,7 +174,9 @@ public class GradingExercisePanel extends ExercisePanel {
             System.out.println("\tlabel " +label+
               " spoken : " + isSpoken + " isFLQ " + isForeign + " has " + toUse.size() + " results");
             anyAnswers = true;
-            String prompt = getPrompt(isSpoken, isForeign, outer) + " (" + label+ " response)";
+            boolean englishOrForeign = isForeign;
+            if (label.contains("english")) englishOrForeign = false;
+            String prompt = getPrompt(isSpoken, englishOrForeign, outer) + " (" + label+ " response)";
             System.out.println("\tgetResultsForExercise add answer group for results (index = " + index + ") size = " + toUse.size());
 
             vp.add(addAnswerGroup(resultsAndGrades.grades, toUse, bigPage, prompt, service, controller.getProps(), n, index));
@@ -185,6 +187,12 @@ public class GradingExercisePanel extends ExercisePanel {
         }
         return anyAnswers;
       }
+
+    /*  public String getLocalPrompt(boolean isSpoken, boolean isForeign) {
+        boolean isEnglish = !isForeign;
+        return isSpoken ? outer.getSpokenPrompt(isEnglish) : outer.getWrittenPrompt(isEnglish);
+        return getPrompt(isSpoken, isForeign, outer);
+      }*/
     });
     addAnswerWidget(index, vp);
 
