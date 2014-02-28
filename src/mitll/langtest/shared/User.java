@@ -26,6 +26,7 @@ public class User implements IsSerializable, Comparable<User> {
   private Demographics demographics;
   private float rate = 0.0f;
   private boolean complete;
+  private float completePercent;
 
   public User() {} // for serialization
 
@@ -142,5 +143,13 @@ public class User implements IsSerializable, Comparable<User> {
 
   public String toString() {
     return "user " + id + " age " + age + " gender " + gender + " native " + nativeLang + " dialect " + dialect+ " demographics " + demographics;
+  }
+
+  public float getCompletePercent() {
+    return completePercent;
+  }
+
+  public void setCompletePercent(float completePercent) {
+    this.completePercent = completePercent;
   }
 }
