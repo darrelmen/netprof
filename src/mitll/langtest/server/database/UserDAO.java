@@ -11,6 +11,7 @@ import org.apache.poi.ss.usermodel.DataFormat;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.IOException;
@@ -30,9 +31,9 @@ import java.util.Map;
 import java.util.Set;
 
 public class UserDAO extends DAO {
-  public static final List<String> COLUMNS = Arrays.asList("id", "age", "gender", "experience", "ipaddr", "nativelang", "dialect", "userid", "timestamp", "enabled");
-  public static final List<String> COLUMNS2 = Arrays.asList("id", "age", "gender", "experience", "ipaddr", "nativelang", "dialect", "userid", "timestamp", "demographics");
-  private static Logger logger = Logger.getLogger(UserDAO.class);
+  private static final List<String> COLUMNS = Arrays.asList("id", "age", "gender", "experience", "ipaddr", "nativelang", "dialect", "userid", "timestamp", "enabled");
+  private static final List<String> COLUMNS2 = Arrays.asList("id", "age", "gender", "experience", "ipaddr", "nativelang", "dialect", "userid", "timestamp", "demographics");
+  private static final Logger logger = Logger.getLogger(UserDAO.class);
 
   public UserDAO(Database database) { super(database); }
 
@@ -221,7 +222,7 @@ public class UserDAO extends DAO {
    * @param userid
    * @return
    */
-  public User getUserWhere(long userid) {
+/*  public User getUserWhere(long userid) {
     String sql = "SELECT * from users where id=" +userid+";";
     List<User> users = getUsers(sql);
     if (users.isEmpty()) {
@@ -235,7 +236,7 @@ public class UserDAO extends DAO {
     }
 
     return users.iterator().next();
-  }
+  }*/
 
   private List<User> getUsers(String sql) {
     try {
@@ -297,10 +298,10 @@ public class UserDAO extends DAO {
     return users;
   }
 
-  public boolean isUserMale(long userID) {
+/*  public boolean isUserMale(long userID) {
     List<User> users = getUsers();
     return isUserMale(userID, users);
-  }
+  }*/
 
   public boolean isUserMale(long userID, List<User> users) {
     User thisUser = null;
@@ -341,7 +342,7 @@ public class UserDAO extends DAO {
     return idToUser;
   }
 
-  public Map<Long, User> getNativeUserMap() {
+/*  public Map<Long, User> getNativeUserMap() {
     List<User> users = getUsers();
     Map<Long, User> idToUser = new HashMap<Long, User>();
     for (User u : users) {
@@ -350,12 +351,19 @@ public class UserDAO extends DAO {
       }
     }
     return idToUser;
-  }
+  }*/
 
+/*
   public Set<Long> getNativeUsers() {
     return getNativeUserMap().keySet();
   }
+*/
 
+  /**
+   * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+   * @param out
+   * @param dliUserDAO
+   */
   public void toXLSX(OutputStream out,DLIUserDAO dliUserDAO) {
     long then = System.currentTimeMillis();
 
@@ -365,7 +373,9 @@ public class UserDAO extends DAO {
       " users from database");
     then = now;
 
-    Workbook wb = new XSSFWorkbook();
+    //Workbook wb = new XSSFWorkbook();
+    SXSSFWorkbook wb = new SXSSFWorkbook(100); // keep 100 rows in memory, exceeding rows will be flushed to disk
+
     Sheet sheet = wb.createSheet("Users");
     int rownum = 0;
     Row headerRow = sheet.createRow(rownum++);
@@ -419,6 +429,7 @@ public class UserDAO extends DAO {
       }
       then = now;
       out.close();
+      wb.dispose();
     } catch (IOException e) {
       logger.error("got " +e,e);
     }
