@@ -1,5 +1,6 @@
 package mitll.langtest.client.grading;
 
+import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasWidgets;
@@ -22,8 +23,11 @@ import mitll.langtest.shared.grade.ResultsAndGrades;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * Allows a grader to grade answers entered in the default mode.
@@ -112,6 +116,7 @@ public class GradingExercisePanel extends ExercisePanel {
   protected Widget getAnswerWidget(final Exercise exercise, final LangTestDatabaseAsync service,
                                    final ExerciseController controller, final int index) {
     final VerticalPanel vp = new VerticalPanel();
+
     final int n = exercise.getNumQuestions();
     final GradingExercisePanel outer = this;
     final boolean englishOnly = controller.getEnglishOnly();
@@ -127,33 +132,58 @@ public class GradingExercisePanel extends ExercisePanel {
         for (boolean isSpoken : BOOLEANS) {
           Map<Boolean, List<Result>> langToResult = resultsAndGrades.spokenToLangToResult.get(isSpoken);
           if (langToResult != null) { // there might not be any written types
-            System.out.println("spoken : " +isSpoken + " has " +langToResult.size() + " results");
-            for (boolean isForeign : BOOLEANS) {
-              if (englishOnly && isForeign) {
-                System.out.println("\tskipping! spoken : " +isSpoken + " isFLQ " + isForeign +" has " +langToResult.size() + " results");
-
-                continue; // skip non-english
-              }
-              List<Result> results = langToResult.get(isForeign);
-              if (results != null) {
-                System.out.println("\tspoken : " +isSpoken + " isFLQ " + isForeign +" has " +results.size() + " results");
-                anyAnswers = true;
-                String prompt = getPrompt(isSpoken, isForeign, outer);
-                System.out.println("\tgetResultsForExercise add answer group for results (index = " + index+ ") size = " + results.size());
-
-                vp.add(addAnswerGroup(resultsAndGrades.grades, results, bigPage, prompt, service, controller.getProps(), n, index));
-              }
-              else {
-                System.out.println("\tspoken : " +isSpoken + " isFLQ " + isForeign);
-              }
-            }
+            anyAnswers = addResultSet(resultsAndGrades, anyAnswers, bigPage, isSpoken, langToResult);
           }
           else {
-            System.out.println("spoken : " +isSpoken + " has " +langToResult + " results");
+          //  System.out.println("spoken : " +isSpoken + " has " +langToResult + " results");
           }
         }
         if (!anyAnswers) vp.add(new HTML("<b><i>No answers yet.</i></b>"));
         // if (result.isEmpty()) recordCompleted(outer);
+      }
+
+      public boolean addResultSet(ResultsAndGrades resultsAndGrades, boolean anyAnswers, boolean bigPage,
+                                  boolean isSpoken, Map<Boolean, List<Result>> langToResult) {
+        System.out.println("spoken : " +isSpoken + " has " +langToResult.size() + " results");
+        for (boolean isForeign : BOOLEANS) {
+          if (englishOnly && isForeign) {
+            System.out.println("\tskipping! spoken : " +isSpoken + " isFLQ " + isForeign +" has " +langToResult.size() + " results");
+
+            continue; // skip non-english
+          }
+          anyAnswers = addResults(resultsAndGrades, anyAnswers, bigPage, isSpoken, langToResult, isForeign);
+        }
+        return anyAnswers;
+      }
+
+      public boolean addResults(ResultsAndGrades resultsAndGrades, boolean anyAnswers, boolean bigPage,
+                                boolean isSpoken, Map<Boolean, List<Result>> langToResult, boolean isForeign) {
+        List<Result> results = langToResult.get(isForeign);
+        if (results != null) {
+          SortedSet<String> labels = new TreeSet<String>();
+          Map<String,List<Result>> labelToResults = new HashMap<String, List<Result>>();
+          for (Result r : results) {
+            String audioType = r.getAudioType().trim();
+            labels.add(audioType);
+            List<Result> results1 = labelToResults.get(audioType);
+            if (results1 == null) labelToResults.put(audioType,results1 = new ArrayList<Result>());
+            results1.add(r);
+          }
+          for (String label : labels) {
+            List<Result> toUse = labelToResults.get(label);
+            System.out.println("\tlabel " +label+
+              " spoken : " + isSpoken + " isFLQ " + isForeign + " has " + toUse.size() + " results");
+            anyAnswers = true;
+            String prompt = getPrompt(isSpoken, isForeign, outer) + " (" + label+ " response)";
+            System.out.println("\tgetResultsForExercise add answer group for results (index = " + index + ") size = " + toUse.size());
+
+            vp.add(addAnswerGroup(resultsAndGrades.grades, toUse, bigPage, prompt, service, controller.getProps(), n, index));
+          }
+        }
+        else {
+          System.out.println("\tspoken : " +isSpoken + " isFLQ " + isForeign);
+        }
+        return anyAnswers;
       }
     });
     addAnswerWidget(index, vp);
