@@ -69,7 +69,7 @@ public class UserManager {
     if (loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS)) { // explicit setting of login type
       anonymousLogin();
     } else if (loginType.equals(PropertyHandler.LOGIN_TYPE.UNDEFINED) && // no explicit setting, so it's dependent on the mode
-      (props.isGoodwaveMode() || props.isAutocrt() || isInitialFlashcardTeacherView())) {   // no login for pron mode
+      (props.isGoodwaveMode() || isInitialFlashcardTeacherView())) {   // no login for pron mode
       anonymousLogin();
     } else {
       loginDifferentTypes();
@@ -123,6 +123,8 @@ public class UserManager {
    * @see mitll.langtest.client.LangTest#checkLogin
    */
   private void anonymousLogin() {
+    System.err.println("\n\n---> UserManager.anonymousLogin : anonymous Login");
+
     int user = getUser();
     if (user != NO_USER_SET) {
       //System.out.println("UserManager.anonymousLogin : current user : " + user);
@@ -130,16 +132,9 @@ public class UserManager {
       userNotification.gotUser(user);
     }
     else {
-      //System.out.println("UserManager.anonymousLogin : make new user, since user = " + user);
-      addAnonymousUser();
-    }
-  }
-
-  private void addAnonymousUser() {
-    StudentDialog studentDialog = new StudentDialog(service,props,this, userNotification);
-    //System.out.println("UserManager.addAnonymousUser : adding anonymous user");
-
-    studentDialog.addUser(89, "male", 0,"");
+      System.out.println("UserManager.anonymousLogin : make new user, since user = " + user);
+      StudentDialog studentDialog = new StudentDialog(service,props,this, userNotification);
+      studentDialog.addUser(89, "male", 0,"");    }
   }
 
   /**
