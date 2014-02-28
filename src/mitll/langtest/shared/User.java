@@ -25,6 +25,7 @@ public class User implements IsSerializable, Comparable<User> {
   private int numResults;
   private Demographics demographics;
   private float rate = 0.0f;
+  private boolean complete;
 
   public User() {} // for serialization
 
@@ -94,9 +95,7 @@ public class User implements IsSerializable, Comparable<User> {
    * @see mitll.langtest.server.database.DatabaseImpl#getUsers
    * @param numResults
    */
-  public void setNumResults(int numResults) {
-    this.numResults = numResults;
-  }
+  public void setNumResults(int numResults) { this.numResults = numResults; }
 
   public Demographics getDemographics() {
     return demographics;
@@ -131,6 +130,14 @@ public class User implements IsSerializable, Comparable<User> {
   @Override
   public int hashCode() {
     return new Long(id).hashCode();
+  }
+
+  public boolean isComplete() {
+    return complete;
+  }
+
+  public void setComplete(boolean complete) {
+    this.complete = complete;
   }
 
   public String toString() {
