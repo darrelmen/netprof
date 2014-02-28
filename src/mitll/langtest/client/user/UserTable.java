@@ -173,7 +173,8 @@ public class UserTable extends PagerTable {
     TextColumn<User> complete = new TextColumn<User>() {
       @Override
       public String getValue(User contact) {
-        return contact.isComplete() ? "Yes":"No";
+        return contact.isComplete() ? "Yes":("No (" +Math.round(100*contact.getCompletePercent())+
+          "%)");
       }
     };
     complete.setSortable(true);
