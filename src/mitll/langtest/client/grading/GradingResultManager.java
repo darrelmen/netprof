@@ -55,6 +55,15 @@ public class GradingResultManager extends ResultManager {
     this.englishOnlyMode = englishOnlyMode;
   }
 
+  /**
+   * @see #getResultCellTable(java.util.Collection, boolean, java.util.Collection, int, int)
+   * @param result
+   * @param showQuestionColumn
+   * @param grades
+   * @param grader
+   * @param numGrades
+   * @return
+   */
   @Override
   protected CellTable<Result> getResultCellTable(Collection<Result> result,
                                                  boolean showQuestionColumn, Collection<Grade> grades,
@@ -75,6 +84,22 @@ public class GradingResultManager extends ResultManager {
    * @param resultCellTable
    */
   private void showPageWithUngraded(Collection<Result> result, Collection<Grade> grades, int numGrades, CellTable<Result> resultCellTable) {
+    int index = getIndexOfFirstUngraded(result, grades, numGrades);
+
+    int page = index / pageSize;
+    // System.out.println("getResultCellTable last graded " + index + " page " + page + " page size " + pageSize);
+    resultCellTable.setVisibleRange(page * pageSize, Math.min(result.size(), (page + 1) * pageSize));
+  }
+
+  /**
+   * If there are two grades per result, numGrades would be 1 and 2...
+   *
+   * @param result
+   * @param grades
+   * @param numGrades - index of grade when doing multiple grades per result
+   * @return
+   */
+  private int getIndexOfFirstUngraded(Collection<Result> result, Collection<Grade> grades, int numGrades) {
     Set<Integer> gradedResults = new HashSet<Integer>();
     for (Grade g : grades) {
       if (g.gradeIndex == numGrades-1) {
@@ -91,10 +116,7 @@ public class GradingResultManager extends ResultManager {
       }
       else { break; }
     }
-
-    int page = index / pageSize;
-    // System.out.println("getResultCellTable last graded " + index + " page " + page + " page size " + pageSize);
-    resultCellTable.setVisibleRange(page * pageSize, Math.min(result.size(),(page+1)* pageSize));
+    return index;
   }
 
   /**
