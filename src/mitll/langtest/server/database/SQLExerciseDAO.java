@@ -1,6 +1,5 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.server.database.testing.SmallDatabaseImpl;
 import mitll.langtest.shared.Exercise;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -21,7 +20,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
