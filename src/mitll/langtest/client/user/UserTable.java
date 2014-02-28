@@ -170,6 +170,15 @@ public class UserTable extends PagerTable {
     experience.setSortable(true);
     table.addColumn(experience, "Experience");
 
+    TextColumn<User> complete = new TextColumn<User>() {
+      @Override
+      public String getValue(User contact) {
+        return contact.isComplete() ? "Yes":"No";
+      }
+    };
+    complete.setSortable(true);
+    table.addColumn(complete, "Items Complete?");
+
     TextColumn<User> items = new TextColumn<User>() {
       @Override
       public String getValue(User contact) {
