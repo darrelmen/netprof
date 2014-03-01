@@ -498,13 +498,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (serverProps.dataCollectMode) {
       logger.debug("getExercisesInModeDependentOrder in data collect mode");
       if (serverProps.biasTowardsUnanswered || unansweredFirst) {
-        //logger.debug("in biasTowardsUnanswered mode : user " +userID);
-
-/*        if (serverProps.useOutsideResultCounts) {
-          exercises = useOutsideResultCounts(userID);
-        } else {*/
-          exercises = db.getExercisesBiasTowardsUnanswered(userID, serverProps.shouldUseWeights());
-  //      }
+        exercises = db.getExercisesBiasTowardsUnanswered(userID, serverProps.shouldUseWeights());
       } else {
         exercises = db.getUnmodExercises();
         if (serverProps.isCRTDataCollect()) {
