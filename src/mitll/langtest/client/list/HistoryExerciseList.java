@@ -327,7 +327,7 @@ public class HistoryExerciseList extends PagingExerciseList {
   @Override
   public void onValueChange(ValueChangeEvent<String> event) {
     String rawToken = getTokenFromEvent(event);
-    System.out.println(new Date() +" onValueChange : ------ start: token is '" + rawToken +"' ------------ ");
+    System.out.println(new Date() +" HistoryExerciseList.onValueChange : ------ start: token is '" + rawToken +"' ------------ ");
     String item = getSelectionState(rawToken).getItem();
 
     if (item != null && item.length() > 0 && hasExercise(item)) {
@@ -335,7 +335,7 @@ public class HistoryExerciseList extends PagingExerciseList {
         loadByIDFromToken(item);
       }
       else {
-        System.out.println("onValueChange : skipping item " + item);
+        System.out.println("HistoryExerciseList.onValueChange : skipping item '" + item +"' " + (currentExercises != null ? currentExercises.size() : "null exercises"));
       }
     } else {
       String token = event.getValue();
@@ -344,7 +344,7 @@ public class HistoryExerciseList extends PagingExerciseList {
         restoreListBoxState(selectionState);
         loadExercises(selectionState.getTypeToSection(), selectionState.getItem());
       } catch (Exception e) {
-        System.out.println("onValueChange " + token + " badly formed. Got " + e);
+        System.out.println("HistoryExerciseList.onValueChange " + token + " badly formed. Got " + e);
         e.printStackTrace();
       }
     }

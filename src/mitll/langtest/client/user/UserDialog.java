@@ -34,6 +34,7 @@ import java.util.List;
 public abstract class UserDialog extends BasicDialog {
   protected static final int USER_ID_MAX_LENGTH = 80;
   protected static final String LEAST_RECORDED_FIRST = "Least recorded first";
+  protected static final String LOW_GRADES_ONLY = "Redo items";
 
   private static final String GRADING = "grading";
   private static final String TESTING = "testing";  // TODO make these safer
@@ -172,7 +173,7 @@ public abstract class UserDialog extends BasicDialog {
   }
 
   protected ListBoxFormField getRecordingOrder(Panel dialogBox, boolean leftAlignLabel) {
-    ListBox listBox2 = getListBox2(Arrays.asList(ALL_ITEMS, LEAST_RECORDED_FIRST), 160);
+    ListBox listBox2 = getListBox2(Arrays.asList(ALL_ITEMS, LEAST_RECORDED_FIRST, LOW_GRADES_ONLY), 160);
     if (!leftAlignLabel) listBox2.addStyleName("leftFiveMargin");
     return getListBoxFormField(dialogBox, RECORDING_ORDER, listBox2, leftAlignLabel);
   }
@@ -184,6 +185,7 @@ public abstract class UserDialog extends BasicDialog {
   protected void setRecordingOrder() {
     boolean unansweredFirst = recordingOrder != null && recordingOrder.getValue().equals(LEAST_RECORDED_FIRST);
     userManager.setShowUnansweredFirst(unansweredFirst);
+    userManager.setShowRerecord(recordingOrder.getValue().equals(LOW_GRADES_ONLY));
   }
 
   private class ButtonClickEvent extends ClickEvent {
