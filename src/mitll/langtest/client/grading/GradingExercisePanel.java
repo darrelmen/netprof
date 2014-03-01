@@ -1,7 +1,9 @@
 package mitll.langtest.client.grading;
 
+import com.github.gwtbootstrap.client.ui.Popover;
 import com.github.gwtbootstrap.client.ui.Tab;
 import com.github.gwtbootstrap.client.ui.TabPanel;
+import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasWidgets;
@@ -131,7 +133,7 @@ public class GradingExercisePanel extends ExercisePanel {
       }
 
       public void onSuccess(ResultsAndGrades resultsAndGrades) {
-        System.out.println("getResultsForExercise (success) : " + exercise.getID() + " : " + resultsAndGrades);
+        //System.out.println("getResultsForExercise (success) : " + exercise.getID() + " : " + resultsAndGrades);
 
         boolean anyAnswers = false;
         int count = countDistinctTypes(resultsAndGrades);
@@ -148,6 +150,10 @@ public class GradingExercisePanel extends ExercisePanel {
           tab.setHeading("No answers yet.");
           vp.add(tab);
         }
+        selectTab(graded);
+      }
+
+      private void selectTab(List<Boolean> graded) {
         boolean anySelected = false;
         for (int i = 0; i < graded.size(); i++) {
           if (!graded.get(i)) {
@@ -164,10 +170,9 @@ public class GradingExercisePanel extends ExercisePanel {
       public boolean addResultSet(ResultsAndGrades resultsAndGrades, boolean anyAnswers, boolean bigPage,
                                   boolean isSpoken, Map<Boolean, List<Result>> langToResult, Panel toAddTo,
                                   List<Boolean> graded) {
-        //System.out.println("spoken : " + isSpoken + " has " + langToResult.size() + " results");
         for (boolean isForeign : BOOLEANS) {
           if (englishOnly && isForeign) {
-            System.out.println("\tskipping! spoken : " + isSpoken + " isFLQ " + isForeign + " has " + langToResult.size() + " results");
+            //System.out.println("\tskipping! spoken : " + isSpoken + " isFLQ " + isForeign + " has " + langToResult.size() + " results");
 
             continue; // skip non-english
           }
@@ -270,8 +275,11 @@ public class GradingExercisePanel extends ExercisePanel {
     HTML child = new HTML(prompt);
     vp.add(child);
 
+    String responseType = "either";
+    if (isText) responseType = "text";
+    else if (tabHeading.contains("audio")) responseType = "audio";
     Widget child1 = showResults(results, grades, service, propertyHandler, numQuestions > 1, index,
-      oneQuestionPageSize, twoQuestionPageSize, controller.getUser());
+      oneQuestionPageSize, twoQuestionPageSize, controller.getUser(), responseType);
 
     vp.add(child1);
     return tab;
@@ -315,15 +323,67 @@ public class GradingExercisePanel extends ExercisePanel {
    */
   private Widget showResults(Collection<Result> results, Collection<Grade> grades,
                              LangTestDatabaseAsync service, PropertyHandler propertyHandler,
-                             boolean moreThanOneQuestion, int index, int pageSize, int twoQPageSize, int grader) {
-    ResultManager rm = new GradingResultManager(service, userFeedback, false, propertyHandler);
+                             boolean moreThanOneQuestion, int index, int pageSize, int twoQPageSize, int grader,
+                             String responseType) {
+    boolean isText = responseType.equals("text");
+    ResultManager rm = new GradingResultManager(service, userFeedback, false, propertyHandler, isText);
     rm.setPageSize(pageSize);
     if (moreThanOneQuestion) {
       results = getResultsForThisQuestion(results, index);
       rm.setPageSize(twoQPageSize);
     }
 
-    return rm.getTable(results, false, grades, grader, controller.getNumGradesToCollect());
+    Widget table = rm.getTable(results, false, grades, grader, controller.getNumGradesToCollect());
+
+    String tip;
+    boolean isAudio = responseType.equals("audio");
+
+    if (isText) {
+      tip = "(1) Indicates a wrong answer.<br/>" +
+        "(2) Indicates a partial answer with one or more spelling or grammatical errors.<br/>" +
+        "(3) Indicates a partial answer.<br/>" +
+        "(4) Indicates a correct answer with one or more spelling or grammatical errors.<br/>" +
+        "(5) Indicates a correct yet (grammatically or structurally) incomplete answer: <br/>" +
+        "The meaning expressed by the answer provided is correct but the way it was phrased is not grammatically or structurally perfect (the phrase or sentence structure is not complete; it is not how a native speaker would normally answer it).<br/>" +
+        "(6) Indicates a correct and complete answer. (The answer is perfect: it is error-free and structurally/ grammatically complete.)";
+    } else {
+      if (isAudio) {
+        tip = "(1) Indicates a wrong answer.<br/>" +
+          "(2) Indicates a partial answer with one or more pronunciation errors (one or more sounds that are mispronounced).<br/>" +
+          "(3) Indicates a partial answer (no pronunciation errors).<br/>" +
+          "(4) Indicates a correct answer with one or more pronunciation errors (one or more sounds that are mispronounced).<br/>" +
+          "(5) Indicates a correct answer (no pronunciation errors).";
+      } else {
+        tip = "Text responses :" + "(1) Indicates a wrong answer.<br/>" +
+          "(2) Indicates a partial answer with one or more spelling or grammatical errors.<br/>" +
+          "(3) Indicates a partial answer.<br/>" +
+          "(4) Indicates a correct answer with one or more spelling or grammatical errors.<br/>" +
+          "(5) Indicates a correct yet (grammatically or structurally) incomplete answer: <br/>" +
+          "The meaning expressed by the answer provided is correct but the way it was phrased is not grammatically or structurally perfect (the phrase or sentence structure is not complete; it is not how a native speaker would normally answer it).<br/>" +
+          "(6) Indicates a correct and complete answer. (The answer is perfect: it is error-free and structurally/ grammatically complete.)<br/>" +
+          "Audio responses:<br/>" +
+          "(1) Indicates a wrong answer.<br/>" +
+          "(2) Indicates a partial answer with one or more pronunciation errors (one or more sounds that are mispronounced).<br/>" +
+          "(3) Indicates a partial answer (no pronunciation errors).<br/>" +
+          "(4) Indicates a correct answer with one or more pronunciation errors (one or more sounds that are mispronounced).<br/>" +
+          "(5) Indicates a correct answer (no pronunciation errors).<br/>";
+      }
+    }
+
+    Popover popover = new Popover();
+    showPopover(popover,table,"Grade Guidance",tip,Placement.RIGHT);
+
+    return table;
+  }
+
+  private void showPopover(Popover popover, Widget w, String heading, String message, Placement placement) {
+    popover.setWidget(w);
+    popover.setText(message);
+    popover.setHtml(true);
+    popover.setHeading(heading);
+    popover.setPlacement(placement);
+    popover.reconfigure();
+    popover.show();
   }
 
   private List<Result> getResultsForThisQuestion(Collection<Result> results, int index) {
@@ -333,9 +393,7 @@ public class GradingExercisePanel extends ExercisePanel {
   }
 
   @Override
-  protected String getQuestionPrompt(boolean promptInEnglish) {
-    return "";
-  }
+  protected String getQuestionPrompt(boolean promptInEnglish) { return ""; }
 
   /**
    * Consider : on the server, notice which audio posts have arrived, and take the latest ones...
