@@ -1126,8 +1126,8 @@ public class DatabaseImpl implements Database {
           boolean complete = size >= total;
           u.setComplete(complete);
           u.setCompletePercent(Math.min(1.0f,(float)size/(float)total));
-          logger.debug("user " +u + " : results "+numResults + " unique " + size +
-            " vs total exercises " + total + " complete " + complete);
+/*          logger.debug("user " +u + " : results "+numResults + " unique " + size +
+            " vs total exercises " + total + " complete " + complete);*/
         }
       }
     } catch (Exception e) {
