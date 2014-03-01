@@ -41,8 +41,9 @@ public class GradingResultManager extends ResultManager {
   private static final String GRADE_TYPE_ANY = "any";
 
   private static final List<String> GRADING_OPTIONS = Arrays.asList(UNGRADED, "1", "2", "3", "4", "5", SKIP);
+  private static final List<String> GRADING_OPTIONS_LONG = Arrays.asList(UNGRADED, "1", "2", "3", "4", "5", "6", SKIP);
   private final boolean englishOnlyMode;
-
+  boolean longGrades;
   /**
    * @see mitll.langtest.client.grading.GradingExercisePanel#showResults
    * @param s
@@ -50,13 +51,15 @@ public class GradingResultManager extends ResultManager {
    * @param englishOnlyMode
    * @param propertyHandler
    */
-  public GradingResultManager(LangTestDatabaseAsync s, UserFeedback feedback, boolean englishOnlyMode, PropertyHandler propertyHandler) {
+  public GradingResultManager(LangTestDatabaseAsync s, UserFeedback feedback, boolean englishOnlyMode,
+                              PropertyHandler propertyHandler, boolean longGrades) {
     super(s,feedback, "Answer",propertyHandler);
     this.englishOnlyMode = englishOnlyMode;
+    this.longGrades = longGrades;
   }
 
   /**
-   * @see #getResultCellTable(java.util.Collection, boolean, java.util.Collection, int, int)
+   * @see #getTable(java.util.Collection, boolean, java.util.Collection, int, int)
    * @param result
    * @param showQuestionColumn
    * @param grades
@@ -83,7 +86,8 @@ public class GradingResultManager extends ResultManager {
    * @param numGrades
    * @param resultCellTable
    */
-  private void showPageWithUngraded(Collection<Result> result, Collection<Grade> grades, int numGrades, CellTable<Result> resultCellTable) {
+  private void showPageWithUngraded(Collection<Result> result, Collection<Grade> grades, int numGrades,
+                                    CellTable<Result> resultCellTable) {
     int index = getIndexOfFirstUngraded(result, grades, numGrades);
 
     int page = index / pageSize;
@@ -139,7 +143,7 @@ public class GradingResultManager extends ResultManager {
   @Override
   protected void addResultColumn(Collection<Grade> grades, int grader, int numGrades, CellTable<Result> table) {
     for (int i = 0; i < numGrades; i++) {
-      Column<Result, String> col = getGradingColumn(grades, grader, i, i == numGrades - 1);
+      Column<Result, String> col = getGradingColumn(grades, grader, i, i == numGrades - 1, longGrades);
       String columnHeader = numGrades > 1 ? "Grade #" + (i + 1) : "Grade";
       table.addColumn(col, columnHeader);
     }
@@ -152,18 +156,19 @@ public class GradingResultManager extends ResultManager {
    * <br></br>
    * Accepts adding a second grade if first isn't done yet.
    *
-   * @see #addResultColumn
+   * @see ResultManager ResultManager#addResultColumn
    * @param grades
    * @param grader who is grading
    * @param editable only the last column is editable
+   * @param longGrades
    * @return
    */
   private Column<Result, String> getGradingColumn(Collection<Grade> grades,
                                                   final int grader, final int gradingColumnIndex,
-                                                  final boolean editable) {
+                                                  final boolean editable, boolean longGrades) {
     final Map<Integer, Grade> resultToGrade = getResultToGrade(grades, gradingColumnIndex);
 
-    AbstractCell<String> selectionCell = editable ? new SelectionCell(GRADING_OPTIONS) : new TextCell();
+    AbstractCell<String> selectionCell = editable ? new SelectionCell(longGrades ? GRADING_OPTIONS_LONG :GRADING_OPTIONS ) : new TextCell();
     Column<Result, String> col = new Column<Result, String>(selectionCell) {
       @Override
       public String getValue(Result result) {
@@ -173,8 +178,7 @@ public class GradingResultManager extends ResultManager {
           return UNGRADED;
         }
         else {
-          Integer grade = choice.grade;
-          return (editable ? getStringForGrade(grade) : "--");
+          return (editable ? getStringForGrade(choice.grade) : "--");
         }
       }
     };
@@ -223,7 +227,7 @@ public class GradingResultManager extends ResultManager {
 
   /**
    * Make a map of result id -> grade to display for that result
-   * @see #getGradingColumn(java.util.Collection, int, int, boolean)
+   * @see #getGradingColumn(java.util.Collection, int, int, boolean, boolean)
    * @param grades
    * @param gradingColumnIndex controls whether to show "any" or "english-only" grades.
    * @return
@@ -316,7 +320,7 @@ public class GradingResultManager extends ResultManager {
 
   /**
    * Add a new grade -- note that the Grade object that is sent doesn't have a unique id until the response returns.
-   * @see #getGradingColumn(java.util.Collection, int, int, boolean)
+   * @see #getGradingColumn(java.util.Collection, int, int, boolean, boolean)
    * @param exerciseID
    * @param toAdd
    * @param resultID
