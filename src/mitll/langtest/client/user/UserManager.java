@@ -164,29 +164,44 @@ public class UserManager {
 
   /**
    * When the user does the login dialog
+   * @see UserDialog#setRecordingOrder()
    * @param val
    */
   public void setShowUnansweredFirst(boolean val) {
-    String unansweredKey = getUnansweredKey();
-    Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-    localStorageIfSupported.setItem(unansweredKey, val ? "true" : "false");
+    addBinaryKey(val, getUnansweredKey());
     userNotification.setShowUnansweredFirst(val);
 
-    getShowUnanswered();
+    //getShowUnanswered();
+  }
+
+  public void setShowRerecord(boolean val) {
+    String showRerecordKey = getShowRerecordKey();
+    addBinaryKey(val, showRerecordKey);
+    userNotification.setShowRerecord(val);
+
+    //getBinaryKey(showRerecordKey);
+  }
+
+  private void addBinaryKey(boolean val, String unansweredKey) {
+    Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+    localStorageIfSupported.setItem(unansweredKey, val ? "true" : "false");
   }
 
   private void rememberShowUnansweredFirst() {
     if (Storage.isLocalStorageSupported()) {
-      boolean showUnansweredFirst = getShowUnanswered();
-      userNotification.setShowUnansweredFirst(showUnansweredFirst);
+      userNotification.setShowUnansweredFirst(getShowUnanswered());
+      userNotification.setShowRerecord(getBinaryKey(getShowRerecordKey()));
     }
   }
 
   private boolean getShowUnanswered() {
+    return getBinaryKey(getUnansweredKey());
+  }
+
+  private boolean getBinaryKey(String unansweredKey) {
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
 
     boolean showUnansweredFirst = false;
-    String unansweredKey = getUnansweredKey();
     String unanswered = localStorageIfSupported.getItem(unansweredKey);
     if (unanswered != null) {
       //System.out.println("found key " +unansweredKey + " = " + unanswered);
@@ -200,6 +215,9 @@ public class UserManager {
 
   private String getUnansweredKey() {
     return getShowUnansweredKey() + "_" +getUserID();
+  }
+  private String getShowRerecordKey() {
+    return getShowRerecordRoot() + "_" +getUserID();
   }
 
   /**
@@ -270,6 +288,9 @@ public class UserManager {
   }
   private String getShowUnansweredKey() {
     return appTitle + ":" + "showUnanswered";
+  }
+  private String getShowRerecordRoot() {
+    return appTitle + ":" + "showRerecord";
   }
 
   /**
