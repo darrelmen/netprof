@@ -406,7 +406,6 @@ public class ResultManager extends PagerTable {
   /**
    *
    * @param grader used in GradingResultManager subclass
-   * @param grader used in GradingResultManager subclass
    * @param numGrades used in GradingResultManager subclass
    * @param table to add columns to
    */
