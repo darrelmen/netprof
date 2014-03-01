@@ -103,8 +103,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private HTML releaseStatus;
   private StartupInfo startupInfo;
 
-  //Navigation navigation;
   private boolean showUnansweredFirst = false;
+  private boolean showRerecord = false;
 
   /**
    * Make an exception handler that displays the exception.
@@ -955,7 +955,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   public void setShowUnansweredFirst(boolean val) { this.showUnansweredFirst = val; }
+
+  @Override
+  public void setShowRerecord(boolean v) { showRerecord = v; }
+
   public boolean showUnansweredFirst() { return showUnansweredFirst; }
+  public boolean showRerecord() { return showRerecord; }
 
   /**
    * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers
