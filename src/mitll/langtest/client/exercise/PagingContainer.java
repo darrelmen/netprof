@@ -151,6 +151,7 @@ public class PagingContainer<T extends ExerciseShell> {
   }
 
   private void addColumnsToTable(boolean consumeClicks) {
+    //System.out.println("PagingContainer.addColumnsToTable : show completed " +showCompleted + " completed " +completed.size());
     if (showCompleted) {
       Column<T, SafeHtml> id2 = getExerciseIdColumn2(consumeClicks);
       table.addColumn(id2);
@@ -173,10 +174,13 @@ public class PagingContainer<T extends ExerciseShell> {
   }
 
   /**
-   * @see mitll.langtest.client.recorder.FeedbackRecordPanel#enableNext()
+   * @see mitll.langtest.client.list.PagingExerciseList#addCompleted(String)
+   * @see mitll.langtest.client.list.PagingExerciseList#setCompleted(java.util.Set)
    * @param completed
    */
   public void setCompleted(Set<String> completed) {
+    //System.out.println("PagingContainer.setCompleted : show completed " +showCompleted + " completed " +completed.size());
+
     this.completed = completed;
     if (table != null) table.redraw(); // todo check this...
   }
