@@ -11,4 +11,5 @@ public interface UserNotification {
   void gotUser(long userID);
   void rememberAudioType(String audioType);
   void setShowUnansweredFirst(boolean v);
+  void setShowRerecord(boolean v);
 }
