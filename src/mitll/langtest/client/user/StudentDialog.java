@@ -61,30 +61,41 @@ public class StudentDialog extends UserDialog {
   private static final String DEMO = "Demo";
   private static final String DATA_COLLECTION = "Data Collection";
   private static final String REVIEW = "Review";
-  private static final String[] ROLES = new String[]{DATA_COLLECTION, PRACTICE, DEMO, REVIEW};
+  //private static final String[] ROLES = new String[]{DATA_COLLECTION, PRACTICE, DEMO, REVIEW};
   private static final Map<String, String> displayToRoles = new TreeMap<String, String>();
   private static final String STUDENT = "Student";
-  private static final String STUDENT_DATA_COLLECTION = "Student - Data Collection";
-  private static final String TEACHER_REVIEWER = "Teacher/Reviewer";
+ // private static final String STUDENT_DATA_COLLECTION = "Student - Data Collection";
+  private static final String TEACHER_REVIEWER = "Reviewer";
+  private static final String TEACHER = "Teacher";
+  private static final List<String> ROLES = Arrays.asList(STUDENT, TEACHER,TEACHER_REVIEWER);
 
   private final UserManager userManager;
   private final UserNotification langTest;
-  private List<String> purposes;
+ // private List<String> purposes;
 
   public StudentDialog(LangTestDatabaseAsync service, PropertyHandler props, UserManager userManager, UserNotification userNotification) {
     super(service, props, userManager, userNotification);
     this.userManager = userManager;
     this.langTest = userNotification;
-    purposes = new ArrayList<String>();
+/*    purposes = new ArrayList<String>();
     purposes.add(props.getPurposeDefault());
 
     for (String purpose : Arrays.asList(ROLES)) {
       if (!purpose.equalsIgnoreCase(props.getPurposeDefault())) purposes.add(purpose);
-    }
+    }*/
 
+    populateRoles();
+  }
+
+  private void populateRoles() {
     displayToRoles.put(STUDENT, PRACTICE);
-    displayToRoles.put(STUDENT_DATA_COLLECTION, DATA_COLLECTION);
+   // displayToRoles.put(STUDENT_DATA_COLLECTION, DATA_COLLECTION);
     displayToRoles.put(TEACHER_REVIEWER, REVIEW);
+    displayToRoles.put(TEACHER, PRACTICE);
+  }
+
+  private String getRole(ListBoxFormField purpose) {
+    return displayToRoles.get(purpose.getValue());
   }
 
   /**
@@ -103,7 +114,7 @@ public class StudentDialog extends UserDialog {
     Fieldset fieldset = new Fieldset();
     form.add(fieldset);
     dialogBox.add(form);
-    final ListBoxFormField purpose = getListBoxFormField(fieldset, "Are you a", getListBox2(displayToRoles.keySet()));
+    final ListBoxFormField purpose = getListBoxFormField(fieldset, "Are you a", getListBox2(ROLES));
 
     final FormField user = addControlFormField(fieldset, "User ID", MIN_LENGTH_USER_ID);
     user.setVisible(isDataCollection(purpose) || isPractice(purpose));
@@ -186,10 +197,6 @@ public class StudentDialog extends UserDialog {
 
   private boolean isReview(ListBoxFormField purpose) {
     return getRole(purpose).equals(REVIEW);
-  }
-
-  private String getRole(ListBoxFormField purpose) {
-    return displayToRoles.get(purpose.getValue());
   }
 
   private void configureKeyHandler(Modal dialogBox, final Button closeButton) {
