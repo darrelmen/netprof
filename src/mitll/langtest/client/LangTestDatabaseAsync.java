@@ -137,9 +137,9 @@ public interface LangTestDatabaseAsync {
 
   void getStartupInfo(AsyncCallback<StartupInfo> async);
 
-  void getUserListsForText(String search, AsyncCallback<Collection<UserList>> async);
+  void getUserListsForText(String search, long userid, AsyncCallback<Collection<UserList>> async);
 
-  void getListsForUser(long userid, boolean onlyCreated, boolean getExercises, AsyncCallback<Collection<UserList>> async);
+  void getListsForUser(long userid, boolean onlyCreated, boolean visited, AsyncCallback<Collection<UserList>> async);
 
   void addItemToUserList(long userListID, UserExercise userExercise, AsyncCallback<Void> async);
 
