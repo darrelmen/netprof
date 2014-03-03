@@ -24,9 +24,11 @@ import java.util.List;
  */
 public class Flashcard implements RequiresResize {
   private static final String AVP = "AUDIO VOCAB PRACTICE";
-  private static final String PRONUNCIATION_FEEDBACK = "PRONUNCIATION FEEDBACK";
+  public static final String PRONUNCIATION_FEEDBACK = "PRONUNCIATION FEEDBACK";
   private static final double MAX_FONT_EM = 1.8d;
   public static final int SLOP = 55;
+  private static final String NEW_PRO_F1_PNG = "NewProF1.png";
+  private static final String NEW_PRO_F2_PNG = "NewProF2.png";
   private Paragraph appName;
   private Image flashcardImage;
   private Image collab;
@@ -44,8 +46,8 @@ public class Flashcard implements RequiresResize {
    * @return
    */
   public HorizontalPanel makeFlashcardHeaderRow(String splashText) {
-    String appIcon = "NewProF2.png";
-    return getHeaderRow(splashText, appIcon, AVP);
+    String appIcon = NEW_PRO_F2_PNG;
+    return getHeaderRow(splashText, appIcon, AVP, false);
   }
 
   /**
@@ -53,16 +55,19 @@ public class Flashcard implements RequiresResize {
    * @param splashText
    * @return
    */
-  public HorizontalPanel makeNPFHeaderRow(String splashText) {
+/*  public HorizontalPanel makeNPFHeaderRow(String splashText) {
     return makeNPFHeaderRow(splashText,PRONUNCIATION_FEEDBACK);
+  }*/
+  public HorizontalPanel makeNPFHeaderRow(String splashText, boolean isBeta) {
+    return getHeaderRow(splashText, NEW_PRO_F1_PNG, PRONUNCIATION_FEEDBACK, isBeta);
   }
 
   public HorizontalPanel makeNPFHeaderRow(String splashText, String appTitle) {
-    String appIcon = "NewProF1.png";
-    return getHeaderRow(splashText, appIcon, appTitle);
+    String appIcon = NEW_PRO_F1_PNG;
+    return getHeaderRow(splashText, appIcon, appTitle, false);
   }
 
-  public HorizontalPanel getHeaderRow(String splashText, String appIcon, String appTitle) {
+  public HorizontalPanel getHeaderRow(String splashText, String appIcon, String appTitle, boolean isBeta) {
     HorizontalPanel headerRow = new HorizontalPanel();
     headerRow.setWidth("100%");
     headerRow.addStyleName("headerBackground");
@@ -75,7 +80,7 @@ public class Flashcard implements RequiresResize {
     flashcard.addStyleName("inlineBlockStyle");
     flashcard.addStyleName("headerBackground");
     flashcard.addStyleName("leftAlign");
-    appName = new Paragraph("<span>" + appTitle + "</span>");
+    appName = new Paragraph("<span>" + appTitle + "</span>" +(isBeta?("<span><font color='yellow'>" + "&nbsp;BETA" + "</font></span>"):""));
     appName.addStyleName("bigFont");
 
     flashcard.add(appName);
