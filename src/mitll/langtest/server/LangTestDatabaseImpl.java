@@ -12,7 +12,6 @@ import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.ResultDAO;
 import mitll.langtest.server.database.SectionHelper;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.AutoCRTScoring;
@@ -972,7 +971,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.custom.Navigation#showList(mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.Panel, String)
+   * @see mitll.langtest.client.custom.Navigation#addVisitor(mitll.langtest.shared.custom.UserList)
    * @param ul
    * @param user
    */
@@ -984,22 +983,24 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.custom.NPFExercise#populateListChoices
    * @param userid
    * @param onlyCreated
-   * @param getExercises
+   * @param visited
    * @return
    */
-  public Collection<UserList> getListsForUser(long userid, boolean onlyCreated, boolean getExercises) {
-   return db.getUserListManager().getListsForUser(userid, onlyCreated);
+  public Collection<UserList> getListsForUser(long userid, boolean onlyCreated, boolean visited) {
+    if (!onlyCreated && !visited) logger.error("huh? asking for neither your lists nor  your visited lists.");
+    return db.getUserListManager().getListsForUser(userid, onlyCreated, visited);
   }
 
   /**
    * @see mitll.langtest.client.custom.Navigation#showInitialState()
-   * @see mitll.langtest.client.custom.Navigation#viewLessons(com.google.gwt.user.client.ui.Panel, boolean)
+   * @see mitll.langtest.client.custom.Navigation#viewLessons
    * @param search
+   * @param userid
    * @return
    */
   @Override
-  public Collection<UserList> getUserListsForText(String search) {
-    return db.getUserListManager().getUserListsForText(search);
+  public Collection<UserList> getUserListsForText(String search, long userid) {
+    return db.getUserListManager().getUserListsForText(search, userid);
   }
 
   /**
