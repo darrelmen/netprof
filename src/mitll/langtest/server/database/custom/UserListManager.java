@@ -131,45 +131,74 @@ public class UserListManager {
   }
 
   /**
+   * TODO : expensive -- could just be a query against your own lists and/or against visited lists...
    * @see mitll.langtest.server.LangTestDatabaseImpl#getListsForUser
    * @param userid
-   * @param onlyCreated
+   * @param listsICreated
+   * @param visitedLists
    * @return
    */
-  public Collection<UserList> getListsForUser(long userid, boolean onlyCreated) {
-    if (userid == -1) return Collections.emptyList();
-    logger.debug("getListsForUser for user #" + userid);
+  public Collection<UserList> getListsForUser(long userid, boolean listsICreated, boolean visitedLists) {
+    if (userid == -1) {
+      return Collections.emptyList();
+    }
+    logger.debug("getListsForUser for user #" + userid + " only created " + listsICreated + " visited " +visitedLists);
 
     List<UserList> listsForUser = new ArrayList<UserList>();
     UserList favorite = null;
-    for (UserList userList : userListDAO.getAll(userid)) {
-      boolean isCreator = userList.getCreator().id == userid;
-      if (isCreator || !isFavorite(userList)) {
-        if (onlyCreated) {
-          logger.debug("\tgetListsForUser  list " + userList);
-          if (isCreator) {
-            if (isFavorite(userList)) favorite = userList;
-            listsForUser.add(userList);
-          }
-        } else {
-          logger.debug("\tgetListsForUser  list " + userList);
-          if (userList.getVisitorIDs().contains(userid) || isCreator) {
-            if (isFavorite(userList)) favorite = userList;
-            listsForUser.add(userList);
-          }
+    Set<Long> ids = new HashSet<Long>();
+    if (listsICreated) {
+      listsForUser = userListDAO.getAllByUser(userid);
+      for (UserList userList : listsForUser) {
+        if (isFavorite(userList)) {
+          favorite = userList;
+          //break;
+        }
+        ids.add(userList.getUniqueID());
+      }
+
+    }
+    if (visitedLists) {
+      for (UserList userList : userListDAO.getListsForUser(userid)) {
+        if (!ids.contains(userList.getUniqueID())) {
+          listsForUser.add(userList);
         }
       }
+
+    /*    for (UserList userList : userListDAO.getAll(userid)) {
+        boolean isCreator = userList.getCreator().id == userid;
+        boolean added = false;
+        if (isCreator || !isFavorite(userList)) {
+          if (listsICreated) {
+            //logger.debug("\tgetListsForUser  list " + userList);
+            if (isCreator) {
+              if (isFavorite(userList)) favorite = userList;
+              listsForUser.add(userList);
+              added = true;
+            }
+          }
+
+          if (visitedLists && !added) {
+            //logger.debug("\tgetListsForUser  list " + userList);
+            if (userList.getVisitorIDs().contains(userid)) {
+              if (isFavorite(userList)) favorite = userList;
+              listsForUser.add(userList);
+            }
+          }
+        }
+      }  */
     }
 
     if (listsForUser.isEmpty()) {
-      logger.error("getListsForUser - list is empty?? " + listsForUser.size() + "(" +listsForUser+ ") for " + userid);
+      logger.warn("getListsForUser - list is empty for " + userid + " only created " + listsICreated + " visited " +visitedLists);
     }
     else if (favorite != null) {
       listsForUser.remove(favorite);
       listsForUser.add(0,favorite);// put at front
     }
 
-    logger.debug("getListsForUser " + listsForUser.size() + "(" +listsForUser+ ") for " + userid);
+    logger.debug("getListsForUser " + listsForUser.size() + //"(" +listsForUser+ ")" +
+      " for user #" + userid + " only created " + listsICreated + " visited " +visitedLists);
 
     return listsForUser;
   }
@@ -210,7 +239,7 @@ public class UserListManager {
     List<UserExercise> allKnown = userExerciseDAO.getWhere(incorrectReviewed);
     logger.debug("\tgetReviewList ids #=" + allKnown.size());
 
-    return getReviewList(allKnown, "Review", "Items to review",incorrectReviewed);
+    return getReviewList(allKnown, "Review", "Items to review", incorrectReviewed);
   }
 
   private UserList getReviewList(List<UserExercise> allKnown, String name, String description, Collection<String> ids) {
@@ -259,11 +288,13 @@ public class UserListManager {
 
   /**
    * TODO : do a search over the list fields to find matches
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getUserListsForText(String)
    * @param search
+   * @param userid
    * @return
    */
-  public List<UserList> getUserListsForText(String search) {
-    return userListDAO.getAllPublic();
+  public List<UserList> getUserListsForText(String search, long userid) {
+    return userListDAO.getAllPublic(userid);
   }
 
   /**
@@ -273,9 +304,7 @@ public class UserListManager {
    * @param userExercise
    * @return
    */
-  public void addItemToUserList(long userListID, UserExercise userExercise) {
-    addItemToList(userListID, userExercise);
-  }
+  public void addItemToUserList(long userListID, UserExercise userExercise) { addItemToList(userListID, userExercise); }
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#reallyCreateNewItem
@@ -439,6 +468,12 @@ public class UserListManager {
     return id == Long.MAX_VALUE ? getReviewList() : userListDAO.getWithExercises(id);
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addVisitor(mitll.langtest.shared.custom.UserList, long
+   * @see mitll.langtest.client.custom.Navigation#addVisitor(mitll.langtest.shared.custom.UserList)
+   * @param userList
+   * @param user
+   */
   public void addVisitor(UserList userList, long user) {
     UserList where = userListDAO.getWhere(userList.getUniqueID(), true);
     if (where != null) {
