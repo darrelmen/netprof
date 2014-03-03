@@ -149,8 +149,8 @@ public interface LangTestDatabase extends RemoteService {
   StartupInfo getStartupInfo();
   long addUserList(long userid, String name, String description, String dliClass);
   void addVisitor(UserList ul, long user);
-  Collection<UserList> getListsForUser(long userid, boolean onlyCreated, boolean getExercises);
-  Collection<UserList> getUserListsForText(String search);
+  Collection<UserList> getListsForUser(long userid, boolean onlyCreated, boolean visited);
+  Collection<UserList> getUserListsForText(String search, long userid);
   void addItemToUserList(long userListID, UserExercise userExercise);
 
   UserList getCommentedList();
