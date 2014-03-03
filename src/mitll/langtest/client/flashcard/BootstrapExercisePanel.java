@@ -201,7 +201,7 @@ public class BootstrapExercisePanel extends FluidContainer {
     recoOutputRow.add(new Column(12, recoOutputContainer));
     recoOutput = new Heading(3, "Answer");
     recoOutput.addStyleName("cardHiddenText");   // same color as background so text takes up space but is invisible
-    DOM.setStyleAttribute(recoOutput.getElement(), "color", "#ebebec");
+    recoOutput.getElement().getStyle().setProperty("color", "#ebebec");
 
     recoOutputContainer.add(recoOutput);
     recoOutputRow.getElement().setId("recoOutputRow");
