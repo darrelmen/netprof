@@ -78,7 +78,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
    */
   private void populateListChoices(final Exercise e, final ExerciseController controller, final DropdownBase w1) {
     //System.out.println("populateListChoices : populate list choices for " + controller.getUser());
-    service.getListsForUser(controller.getUser(), true, true, new AsyncCallback<Collection<UserList>>() {
+    service.getListsForUser(controller.getUser(), true, false, new AsyncCallback<Collection<UserList>>() {
       @Override
       public void onFailure(Throwable caught) {}
 
