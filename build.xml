@@ -42,7 +42,9 @@
         <path refid="imagewriter.classpath"/>
         <pathelement location="war/WEB-INF/lib/pronz.jar"/>
         <pathelement location="war/WEB-INF/lib/mira.jar"/>
+<!--
         <pathelement location="war/WEB-INF/lib/javamelody-1.42.0.jar"/>
+-->
         <pathelement location="war/WEB-INF/lib/jrobin-1.5.9.jar"/>
         <pathelement location="war/WEB-INF/lib/gwt-visualization.jar"/>
         <pathelement location="war/WEB-INF/lib/poi-3.10-FINAL-20140208.jar"/>
