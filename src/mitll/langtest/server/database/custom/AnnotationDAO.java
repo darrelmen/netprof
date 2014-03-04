@@ -143,6 +143,15 @@ public class AnnotationDAO extends DAO {
     return Collections.emptyList();
   }
 
+  /**
+   * @see mitll.langtest.server.database.custom.UserListManager#addDefect(String, String, String)
+   * @param exerciseID
+   * @param field
+   * @param status
+   * @param comment
+   * @param userID
+   * @return
+   */
   public boolean hasAnnotation(String exerciseID, String field, String status, String comment, long userID) {
     String sql = "SELECT * from " + ANNOTATION + " where exerciseid='" + exerciseID + "' AND " + CREATORID +"="+userID+
       " order by field,modified desc";
