@@ -57,7 +57,7 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
    */
   @Override
   protected RecordButtonPanel getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, int index, boolean addKeyBinding) {
-    return new FlashcardRecordButtonPanel(this, service, controller, exercise, index);
+    return new FlashcardRecordButtonPanel(this, service, controller, exercise, index, controller.getAudioType());
   }
 
   /**
