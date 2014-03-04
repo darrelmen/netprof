@@ -51,7 +51,7 @@ public class SoundFeedback {
     }
   }
 
-  public void createSound(final String song) { createSound(song, null, false); }
+  //public void createSound(final String song) { createSound(song, null, false); }
   public void createSound(final String song, EndListener endListener) { createSound(song, endListener, false); }
 
     /**
@@ -63,6 +63,7 @@ public class SoundFeedback {
      * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#playRefAndGoToNext(String, String)
      */
   public void createSound(final String song, final EndListener endListener, final boolean soft) {
+    System.out.println("playing " +song);
     currentSound = new Sound(new AudioControl() {
       @Override
       public void reinitialize() {}
