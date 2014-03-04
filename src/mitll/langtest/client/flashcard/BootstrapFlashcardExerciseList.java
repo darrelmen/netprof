@@ -23,6 +23,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.ExerciseList;
+import mitll.langtest.client.list.ListChangeListener;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.user.UserManager;
@@ -45,6 +46,7 @@ import java.util.Set;
  */
 public class BootstrapFlashcardExerciseList<T extends ExerciseShell> implements ListInterface<T> {
   private static final int SIZE = 12;
+  public static final boolean ADD_ITEMS_HEADER = false;
   //public static final float HALF = (1f / 4f);
   private final Column exercisePanelColumn;
   private final LeaderboardPlot leaderboardPlot = new LeaderboardPlot();
@@ -264,11 +266,11 @@ public class BootstrapFlashcardExerciseList<T extends ExerciseShell> implements 
   public Widget getWidget() { return new SimplePanel(); }
 
   public Widget getExerciseListOnLeftSide(PropertyHandler props) {
-    FlowPanel leftColumn = new FlowPanel();
+    Panel leftColumn = new FlowPanel();
     leftColumn.addStyleName("floatLeft");
     DOM.setStyleAttribute(leftColumn.getElement(), "paddingRight", "10px");
 
-    if (!props.isFlashcardTeacherView() && !props.isMinimalUI()) {
+    if (!props.isFlashcardTeacherView() && !props.isMinimalUI() && ADD_ITEMS_HEADER) {
       Heading items = new Heading(4, ExerciseList.ITEMS);
       items.addStyleName("center");
       leftColumn.add(items);
@@ -321,6 +323,11 @@ public class BootstrapFlashcardExerciseList<T extends ExerciseShell> implements 
   @Override
   public <S extends ExerciseShell> boolean onFirst(S current) {
     return latestResponse == null || latestResponse.isOnFirst();
+  }
+
+  @Override
+  public boolean onLast() {
+    return false;
   }
 
   @Override
@@ -474,6 +481,11 @@ public class BootstrapFlashcardExerciseList<T extends ExerciseShell> implements 
 
   @Override
   public void checkAndAskServer(String id) {
+
+  }
+
+  @Override
+  public void addListChangedListener(ListChangeListener<T> listener) {
 
   }
 }
