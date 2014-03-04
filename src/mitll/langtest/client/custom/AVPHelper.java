@@ -1,25 +1,15 @@
 package mitll.langtest.client.custom;
 
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.NavigationHelper;
-import mitll.langtest.client.exercise.PostAnswerProvider;
 import mitll.langtest.client.flashcard.BootstrapExercisePanel;
-import mitll.langtest.client.flashcard.FlashcardExercisePanelFactory;
-import mitll.langtest.client.flashcard.FlashcardRecordButtonPanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.client.recorder.FlashcardRecordButton;
-import mitll.langtest.client.recorder.RecordButton;
-import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.custom.UserExercise;
 
 /**
@@ -33,10 +23,10 @@ class AVPHelper extends NPFHelper {
   private final LangTestDatabaseAsync service;
   private final UserManager userManager;
   private final ExerciseController controller;
-  private ListInterface<UserExercise> outerExerciseList;
-  private Exercise currentExercise;
+  //private ListInterface<UserExercise> outerExerciseList;
+ // private Exercise currentExercise;
   private UserFeedback feedback;
-  private BootstrapExercisePanel bootstrapPanel;
+  //private BootstrapExercisePanel bootstrapPanel;
 
   public AVPHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager, ExerciseController controller) {
     super(service, feedback, userManager, controller);
@@ -48,56 +38,8 @@ class AVPHelper extends NPFHelper {
 
   @Override
   protected void setFactory(final PagingExerciseList<UserExercise> exerciseList, final String instanceName) {
-    outerExerciseList = exerciseList;
-    exerciseList.setFactory(new FlashcardExercisePanelFactory(service, feedback, controller, exerciseList) {
-      @Override
-      public Panel getExercisePanel(Exercise e) {
-        currentExercise = e;
-
-        bootstrapPanel = new BootstrapExercisePanel(e, service, controller, 40, false) {
-          NavigationHelper<UserExercise> navigationHelper;
-
-          protected RecordButtonPanel getAnswerWidget(final Exercise exercise, LangTestDatabaseAsync service,
-                                                      ExerciseController controller, final int index, boolean addKeyBinding) {
-
-              return new FlashcardRecordButtonPanel(this, service, controller, exercise, index) {
-
-                @Override
-                protected RecordButton makeRecordButton(ExerciseController controller) {
-                  return new FlashcardRecordButton(controller.getRecordTimeout(), this, true, false);
-                }
-
-                @Override
-                protected void loadNext() {
-                  exerciseList.loadNext();
-                }
-              };
-
-          }
-
-          @Override
-          protected FlowPanel getCardPrompt(Exercise e, ExerciseController controller) {
-            FlowPanel cardPrompt = super.getCardPrompt(e, controller);
-            UserExercise currentExercise1 = new UserExercise(currentExercise);
-            navigationHelper = new NavigationHelper<UserExercise>(currentExercise1, controller, new PostAnswerProvider() {
-              @Override
-              public void postAnswers(ExerciseController controller, ExerciseShell completedExercise) {
-                outerExerciseList.loadNextExercise(completedExercise.getID());
-              }
-            }, outerExerciseList, false, false);
-
-            cardPrompt.insert(navigationHelper.getPrev(), 0);
-            cardPrompt.add(navigationHelper.getNext());
-            return cardPrompt;
-          }
-
-          @Override
-          protected Widget getHelpRow(ExerciseController controller) { return null; }
-        };
-
-        return bootstrapPanel;
-      }
-    }, userManager, 1);
+  //  outerExerciseList = exerciseList;
+    exerciseList.setFactory(new MyFlashcardExercisePanelFactory(service, feedback,controller,exerciseList), userManager, 1);
   }
 
   @Override
@@ -113,4 +55,5 @@ class AVPHelper extends NPFHelper {
   public void onResize() {
     if (getNpfContentPanel() != null) getNpfContentPanel().setWidth(((Window.getClientWidth() * 0.6f) - 100) + "px");
   }
+
 }
