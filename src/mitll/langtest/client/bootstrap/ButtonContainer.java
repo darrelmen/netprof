@@ -58,13 +58,13 @@ class ButtonContainer {
     return (FlexSectionExerciseList.ButtonWithChildren) buttons.iterator().next();
   }
 
-  public void disableButton(Button button) {
+/*  public void disableButton(Button button) {
     disabled.add(button);
     enabled.remove(button);
-  }
+  }*/
 
   public void enableAll() {
-    System.out.println("----> enableAll for " + this);
+   // System.out.println("----> enableAll for " + this);
     enabled.addAll(buttons);
     disabled.clear();
     showEnabled();
@@ -106,17 +106,16 @@ class ButtonContainer {
   /**
    * @see mitll.langtest.client.bootstrap.ButtonGroupSectionWidget#clearEnabled()
    * @see FlexSectionExerciseList#clearEnabled(String)
-   * @see mitll.langtest.client.list.section.SectionExerciseList#restoreListBoxState
    */
   public void clearEnabled() {
-    System.out.println(this + " : clearEnabled ");
+   // System.out.println(this + " : clearEnabled ");
 
     enabled.clear();
     disabled.addAll(buttons);
   }
 
   public void showEnabled() {
-    System.out.println(this + " : showEnabled ");
+   // System.out.println(this + " : showEnabled ");
 
     for (Button b : enabled) {
       b.setEnabled(true);
