@@ -74,7 +74,7 @@ public class UserExerciseDAO extends DAO {
 
     try {
       // there are much better ways of doing this...
-      logger.info("UserExerciseDAO.add : userExercise " + userExercise);
+      logger.debug("UserExerciseDAO.add : userExercise " + userExercise);
 
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement(
@@ -100,16 +100,21 @@ public class UserExerciseDAO extends DAO {
 
       Map<String,String> unitToValue = userExercise.getUnitToValue();
 
-      logger.warn("type order " + typeOrder + " and " +unitToValue);
+      //logger.warn("type order " + typeOrder + " and " +unitToValue);
 
       if (typeOrder.size() > 0) {
         String s = typeOrder.get(0);
-        statement.setString(i++, unitToValue.containsKey(s) ? unitToValue.get(s) : "");
+        String x = unitToValue.containsKey(s) ? unitToValue.get(s) : "";
+        statement.setString(i++, x);
+      } else {
+        statement.setString(i++, "");
       }
 
       if (typeOrder.size() > 1) {
         String s = typeOrder.get(1);
         statement.setString(i++, unitToValue.containsKey(s) ? unitToValue.get(s) : "");
+      } else {
+        statement.setString(i++, "");
       }
 
       int j = statement.executeUpdate();
@@ -153,9 +158,7 @@ public class UserExerciseDAO extends DAO {
     }
   }
 
-  private String fixSingleQuote(String s) {
-    return s.replaceAll("'","''");
-  }
+  private String fixSingleQuote(String s) { return s.replaceAll("'","''"); }
 
   void createUserTable(Database database) throws SQLException {
     Connection connection = database.getConnection();
@@ -290,7 +293,7 @@ public class UserExerciseDAO extends DAO {
     try {
       List<UserExercise> userExercises = getUserExercises(sql);
       if (userExercises.isEmpty()) {
-        //logger.debug("getWhere : no custom exercise with id " + exid);
+        //logger.debug("getVisitorsOfList : no custom exercise with id " + exid);
         return null;
       } else return userExercises.iterator().next();
     } catch (SQLException e) {
@@ -326,7 +329,7 @@ public class UserExerciseDAO extends DAO {
     try {
       List<UserExercise> userExercises = getUserExercises(sql);
       if (userExercises.isEmpty()) {
-        logger.warn("getWhere : no user exercises in " + exids);
+        logger.warn("getVisitorsOfList : no user exercises in " + exids.size() + " exercise ids");
       }
       return userExercises;
     } catch (SQLException e) {
