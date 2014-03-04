@@ -52,6 +52,7 @@ public class SoundFeedback {
   }
 
   public void createSound(final String song) { createSound(song, null, false); }
+  public void createSound(final String song, EndListener endListener) { createSound(song, endListener, false); }
 
     /**
      *
