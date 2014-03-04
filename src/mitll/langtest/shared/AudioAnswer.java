@@ -51,20 +51,6 @@ public class AudioAnswer implements IsSerializable {
     this.durationInMillis = duration;
   }
 
-  /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
-   * @param path
-   * @param validity
-   * @param decodeOutput
-   * @param score
-   * @param reqid
-   */
-  public AudioAnswer(String path, Validity validity, String decodeOutput, double score, int reqid, int duration) {
-    this(path, validity, reqid, duration);
-    this.decodeOutput = decodeOutput;
-    this.score = score;
-  }
-
   public void setDecodeOutput(String decodeOutput) { this.decodeOutput = decodeOutput; }
 
   /**
