@@ -48,7 +48,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener{
    */
   public RecordButtonPanel(final LangTestDatabaseAsync service, final ExerciseController controller,
                            final Exercise exercise, final ExerciseQuestionState questionState, final int index,
-                           boolean doFlashcardAudio, boolean addKeyBinding){
+                           boolean doFlashcardAudio){
     this.service = service;
     this.controller = controller;
     this.exercise = exercise;
@@ -68,7 +68,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener{
   }
 
   /**
-   * @see RecordButtonPanel#RecordButtonPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseQuestionState, int, boolean, boolean)
+   * @see RecordButtonPanel#RecordButtonPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseQuestionState, int, boolean)
    */
   protected void layoutRecordButton(Widget button) {
     SimplePanel recordButtonContainer = new SimplePanel(button);
@@ -78,6 +78,10 @@ public class RecordButtonPanel implements RecordButton.RecordingListener{
     this.panel = hp;
     panel.getElement().setId("recordButtonPanel");
     addImages();
+  }
+
+  public void initRecordButton() {
+    recordButton.initRecordButton();
   }
 
   protected void addImages() {
@@ -110,7 +114,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener{
    * Once audio is posted to the server, two pieces of information come back in the AudioAnswer: the audio validity<br></br>
    *  (false if it's too short, etc.) and a URL to the stored audio on the server. <br></br>
    *   This is used to make the audio playback widget.
-   * @see #RecordButtonPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseQuestionState, int, boolean, boolean)
+   * @see #RecordButtonPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseQuestionState, int, boolean)
    */
   public void stopRecording() {
     recordImage1.setVisible(false);

@@ -71,4 +71,5 @@ public interface ExerciseController {
 
   void resetState();
   StartupInfo getStartupInfo();
+  boolean gotMicPermission();
 }
