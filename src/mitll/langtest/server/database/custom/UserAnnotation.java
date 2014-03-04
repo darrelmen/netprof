@@ -10,13 +10,11 @@ import java.util.Date;
  * To change this template use File | Settings | File Templates.
  */
 public class UserAnnotation {
- // private long uniqueID;
   private String exerciseID;
   private String field;
   private String status;
   private String comment;
   private long creatorID;
-
   private long timestamp;
 
   /**
@@ -29,9 +27,7 @@ public class UserAnnotation {
    * @param timestamp
    * @see mitll.langtest.server.database.custom.AnnotationDAO#getUserAnnotations(String)
    */
-  public UserAnnotation(/*long uniqueID,*/ String exerciseID, String field, String status, String comment, long userID,
-                        long timestamp) {
-  //  this.uniqueID = uniqueID;
+  public UserAnnotation(String exerciseID, String field, String status, String comment, long userID, long timestamp) {
     this.exerciseID = exerciseID;
     this.field = field;
     this.status = status;
@@ -44,36 +40,24 @@ public class UserAnnotation {
   public String getExerciseID() {
     return exerciseID;
   }
-
   public String getField() {
     return field;
   }
-
   public String getStatus() {
     return status;
   }
-
   public String getComment() {
     return comment;
   }
-
   public long getCreatorID() {
     return creatorID;
   }
-
   public long getTimestamp() {
     return timestamp;
   }
-
   public void setTimestamp(long timestamp) {
     this.timestamp = timestamp;
   }
-
-/*
-  public void setUniqueID(long uniqueID) {
-    this.uniqueID = uniqueID;
-  }
-*/
 
   public String toString() {
     return "Annotation " + getExerciseID() + "/" + getField() + " : " + getStatus() + "/" + getComment() +
