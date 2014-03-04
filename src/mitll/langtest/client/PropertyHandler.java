@@ -136,7 +136,7 @@ public class PropertyHandler {
   // do we bind the record key to space -- problematic if we have text entry anywhere else on the page, say in a search
   // box
   private boolean addRecordKeyBinding = false;
-  private LOGIN_TYPE loginType = LOGIN_TYPE.STUDENT;
+  private LOGIN_TYPE loginType = LOGIN_TYPE.ANONYMOUS;
   private int flashcardPreviewHeight = DEFAULT_FLASHCARD_PREVIEW_HEIGHT;
 
   private boolean flashcardNextAndPrev;
