@@ -32,36 +32,23 @@ h1 {
 
 
 .headerLowerBorder {
-    border-style:solid;
-    border-width: 2px;
-    border-top-color: #404141;
+    border: 2px solid #404141;
     border-bottom-color: #269cce;
-    border-left-color: #404141;
-    border-right-color: #404141;
 }
 
 .cardBorder {
-     border-style:solid;
-     border-width: 2px;
-    border-top-width: 0;
-    border-bottom-width: 0;
-     border-bottom-color: #404141;
+    border: 0 solid;
+    border-right-width: 2px;
+    border-bottom-color: #404141;
+    border-left-width: 2px;
 
     padding-right: 0px;
  }
 
 
 .qcBorder {
-    border-style:solid;
-    border-width: 2px;
-    border-top-width: 0;
-    border-left-width: 0;
-    border-right-width: 0;
-
-    border-top-color: #404141;
-    border-bottom-color: #269cce;
-    border-left-color: #404141;
-    border-right-color: #404141;
+    border: 0 solid #404141;
+    border-bottom: 2px #269cce;
 }
 
 .cardBackground {
@@ -71,6 +58,10 @@ h1 {
 .cardHiddenText {
     color: #e8eaea;
 }
+
+.cardHiddenText2 {
+     color: white;
+ }
 
 .cardText {
     padding: 55px;
@@ -950,7 +941,9 @@ fieldset > legend {
     box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
     min-height: 30px;
     padding: 5px;
-}.buttonGroupInset5 {
+}
+
+.buttonGroupInset5 {
      border-radius: 3px 3px 3px 3px;
      box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
      min-height: 30px;
@@ -964,4 +957,60 @@ fieldset > legend {
     box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
     padding: 5px;
     margin-bottom:5px;
+}
+
+.mouseOverHighlight {
+    background-color: yellow;
+    cursor: pointer;
+}
+
+.cardBorderShadow {
+    background-color: #FFFFFF;
+    border-radius: 4px 4px 4px 4px;
+    box-shadow: 1px 1px 0 #CAC3B8, 5px 5px 16px #D4CEC5;
+    padding:10px;
+}
+
+.cardContent {
+    word-wrap: break-word;
+    left: 0;
+    text-align: center;
+    vertical-align: middle;
+    width:100%;
+}
+
+.middleColumn {
+    position:absolute;
+    top:0px;
+    margin-right: 185px;
+    margin-left: 185px;
+}
+
+.rightColumn {
+    position:absolute;
+    right: 10px;
+    top:0px;
+    padding-left: 10px;
+}
+
+.leftColumn {
+    position:absolute;
+    left: 0px;
+    top:0px;
+    padding-right: 10px;
+}
+
+.bottomColumn {
+    position:absolute;
+    bottom:0px;
+    text-align:center;
+    padding-right: 10px;
+}
+
+.positionRelative {
+    position:relative;
+}
+
+.minWidthFifty {
+    min-width: 500px;
 }
