@@ -453,6 +453,12 @@ public class UserListManager {
 
   public boolean listExists(long id) {  return userListDAO.getWhere(id, false) != null; }
 
+  /**
+   *
+   * @param exerciseID
+   * @param field
+   * @param comment
+   */
   public void addDefect(String exerciseID, String field, String comment) {
     if (!annotationDAO.hasAnnotation(exerciseID, field, INCORRECT, comment, defectDetector)) {
       addAnnotation(exerciseID, field, INCORRECT, comment, defectDetector);
