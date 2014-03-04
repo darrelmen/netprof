@@ -92,7 +92,7 @@ public class ReviewedDAO extends DAO {
       statement.close();
       database.closeConnection(connection);
 
-      logger.debug("now " + getCount() + " reviewed");
+      //logger.debug("now " + getCount() + " reviewed");
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
