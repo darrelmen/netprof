@@ -17,7 +17,6 @@ import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseOutEvent;
@@ -28,7 +27,6 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
-import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
@@ -616,7 +614,6 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
    */
   protected Panel getRecordButtonRow(Widget recordButton) {
     Panel recordButtonRow = getCenteredWrapper(recordButton);
-
     recordButtonRow.getElement().setId("recordButtonRow");
 
     recordButtonRow.addStyleName("leftTenMargin");
@@ -685,10 +682,9 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
   protected RecordButtonPanel getAnswerWidget(final Exercise exercise, LangTestDatabaseAsync service,
                                               ExerciseController controller, final int index, boolean addKeyBinding) {
     if (addKeyBinding) {
-      return new FlashcardRecordButtonPanel(this, service, controller, exercise, index);
+      return new FlashcardRecordButtonPanel(this, service, controller, exercise, index, "avp");
     } else {
-      return new FlashcardRecordButtonPanel(this, service, controller, exercise, index) {
-
+      return new FlashcardRecordButtonPanel(this, service, controller, exercise, index, "avp") {
         @Override
         protected RecordButton makeRecordButton(ExerciseController controller) {
           return new FlashcardRecordButton(controller.getRecordTimeout(), this, true, false);  // TODO : fix later in classroom?
@@ -957,24 +953,33 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
    * @see #showIncorrectFeedback(mitll.langtest.shared.AudioAnswer, double, boolean)
    */
   private void playAllAudio(final String infoToShow, final List<String> toPlay) {
-    String path = toPlay.get(0);
-    path = (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
+    if (toPlay.isEmpty()) {
+      goToNextItem(infoToShow);
+    } else {
+      String path = toPlay.get(0);
+      if (path == null) {
+        System.err.println("skipping first null audio!");
+        goToNextItem(infoToShow);
+      } else {
+        path = (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
 
-    System.out.println("playAllAudio : " + toPlay.size() + " playing " + path);
-    getSoundFeedback().createSound(path, new SoundFeedback.EndListener() {
-      @Override
-      public void songEnded() {
-        toPlay.remove(0);
+        System.out.println("playAllAudio : " + toPlay.size() + " playing " + path);
+        getSoundFeedback().createSound(path, new SoundFeedback.EndListener() {
+          @Override
+          public void songEnded() {
+            toPlay.remove(0);
 
-        System.out.println("\tplayAllAudio : songEnded " + toPlay.size() + " items left.");
+            System.out.println("\tplayAllAudio : songEnded " + toPlay.size() + " items left.");
 
-        if (!toPlay.isEmpty()) {
-          playAllAudio(infoToShow, toPlay);
-        } else {
-          goToNextItem(infoToShow);
-        }
+            if (!toPlay.isEmpty()) {
+              playAllAudio(infoToShow, toPlay);
+            } else {
+              goToNextItem(infoToShow);
+            }
+          }
+        }, false);
       }
-    }, false);
+    }
   }
 
   /**
