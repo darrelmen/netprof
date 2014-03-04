@@ -18,17 +18,27 @@ import java.util.Map;
 import java.util.Set;
 
 public class UserDAO extends DAO {
+  public static final String DEFECT_DETECTOR = "defectDetector";
   private static Logger logger = Logger.getLogger(UserDAO.class);
   public static final String USERS = "users";
+  private long defectDetector;
 
   public UserDAO(Database database) {
     super(database);
     try {
       createUserTable(database);
+
+      defectDetector = userExists(DEFECT_DETECTOR);
+      if (defectDetector == -1) {
+        defectDetector = addUser(89, "male", 0, "", "unknown", "unknown", DEFECT_DETECTOR, false);
+      }
+
     } catch (Exception e) {
       logger.error("got "+e,e);
     }
   }
+
+  public long getDefectDetector() { return defectDetector; }
 
   /**
    * Somehow on subsequent runs, the ids skip by 30 or so?

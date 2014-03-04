@@ -57,6 +57,7 @@ import java.util.Map;
 public class Navigation implements RequiresResize {
   private static final String CHAPTERS = "Chapters";
   private static final String YOUR_LISTS = "Your Lists";
+  private static final String OTHERS_LISTS = "Other's Lists";
   private static final String PRACTICE = "Practice";
   public static final String REVIEW = "review";
   public static final String COMMENT = "comment";
@@ -67,6 +68,12 @@ public class Navigation implements RequiresResize {
   public static final String LEARN_PRONUNCIATION = "Learn Pronunciation";
   private static final String REVIEW1 = "Review";
   public static final String REVIEWERS = "Reviewers";
+  private static final String CREATE = "Create";
+  private static final String BROWSE = "Browse";
+  private static final String COMMENTS = "Comments";
+  private static final String LESSONS = "lessons";
+  private static final String DELETE = "Delete";
+  public static final String NO_LISTS_CREATED_YET = "No lists created yet.";
   private final ExerciseController controller;
   private LangTestDatabaseAsync service;
   private UserManager userManager;
@@ -119,8 +126,7 @@ public class Navigation implements RequiresResize {
 
   private Widget container;
   private TabPanel tabPanel;
-  private Tab yourItems;
-  private Panel yourItemsContent;
+  private TabAndContent yourStuff, othersStuff;
   private TabAndContent browse;
   private TabAndContent review, commented;
 
@@ -133,19 +139,25 @@ public class Navigation implements RequiresResize {
     tabPanel = new TabPanel();
 
     // your list tab
-    final TabAndContent yourStuff = makeTab(tabPanel, IconType.FOLDER_CLOSE, YOUR_LISTS);
-    yourItems = yourStuff.tab;
-    yourItemsContent = yourStuff.content;
-    yourItems.addClickHandler(new ClickHandler() {
+    yourStuff = makeTab(tabPanel, IconType.FOLDER_CLOSE, YOUR_LISTS);
+    yourStuff.tab.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        refreshViewLessons();
+        refreshViewLessons(true, false);
       }
     });
-    refreshViewLessons();
+
+    // visited lists
+    othersStuff = makeTab(tabPanel, IconType.FOLDER_CLOSE, OTHERS_LISTS);
+    othersStuff.tab.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        refreshViewLessons(false, true);
+      }
+    });
 
     // create tab
-    final TabAndContent create = makeTab(tabPanel, IconType.PLUS_SIGN, "Create");
+    final TabAndContent create = makeTab(tabPanel, IconType.PLUS_SIGN, CREATE);
     final CreateListDialog createListDialog = new CreateListDialog(this,service,userManager);
     create.tab.addClickHandler(new ClickHandler() {
       @Override
@@ -155,7 +167,7 @@ public class Navigation implements RequiresResize {
     });
 
     // browse tab
-    browse = makeTab(tabPanel, IconType.TH_LIST, "Browse");
+    browse = makeTab(tabPanel, IconType.TH_LIST, BROWSE);
     browse.tab.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -176,7 +188,7 @@ public class Navigation implements RequiresResize {
         }
       });
 
-      commented = makeTab(tabPanel, IconType.COMMENT, "Comments");
+      commented = makeTab(tabPanel, IconType.COMMENT, COMMENTS);
       commented.tab.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
@@ -237,22 +249,32 @@ public class Navigation implements RequiresResize {
 
   /**
    * @see #getButtonRow2(com.google.gwt.user.client.ui.Panel)
-   * @see #showMyLists()
+   * @see #showMyLists(boolean, boolean)
+   * @param onlyMine
+   * @param onlyVisited
    */
-  private void refreshViewLessons() { viewLessons(yourItemsContent, false);  }
+  private void refreshViewLessons(boolean onlyMine, boolean onlyVisited) {
+    viewLessons(onlyMine ? yourStuff.content : othersStuff.content, false, onlyMine, onlyVisited);
+  }
 
+  /**
+   * TODO : streamline this -- there are three requests in sequence...
+   * @see mitll.langtest.client.LangTest#showInitialState()
+   */
   public void showInitialState() {
-/*    System.out.println("showInitialState show initial state for " + userManager.getUser() +
-      " : getting user lists " + controller.isReviewMode());*/
+    final int user = userManager.getUser();
+    System.out.println("showInitialState show initial state for " + user +
+      " : getting user lists " + controller.isReviewMode());
 
-    service.getListsForUser(userManager.getUser(), false, true, new AsyncCallback<Collection<UserList>>() {
+    service.getListsForUser(user, true, true, new AsyncCallback<Collection<UserList>>() {
       @Override
       public void onFailure(Throwable caught) {}
 
       @Override
       public void onSuccess(Collection<UserList> result) {
-        if (result.size() == 1 && result.iterator().next().getExercises().isEmpty()) {
-          service.getUserListsForText("", new AsyncCallback<Collection<UserList>>() {
+        if (result.size() == 1 && // if only one empty list - one you've created
+          result.iterator().next().getExercises().isEmpty()) {
+          service.getUserListsForText("", user, new AsyncCallback<Collection<UserList>>() {
             @Override
             public void onFailure(Throwable caught) {}
 
@@ -269,17 +291,31 @@ public class Navigation implements RequiresResize {
         } else {
           //System.out.println("\tshowInitialState show initial state for " + userManager.getUser() + " found " + result.size() + " lists");
 
-          showMyLists();
+          boolean foundCreated = false;
+          for (UserList ul : result) {
+            if (createdByYou(ul)) {
+              foundCreated = true;
+              break;
+            }
+          }
+          showMyLists(foundCreated, !foundCreated);
         }
       }
     });
   }
 
-  private void showMyLists() {
-    int tabToSelect =/* controller.isReviewMode() ? 4:*/ 0;
+  /**
+   * @see #showInitialState()
+   * @param onlyCreated
+   * @param onlyVisited
+   */
+  private void showMyLists(boolean onlyCreated, boolean onlyVisited) {
+    int tabToSelect =/* controller.isReviewMode() ? 4:*/ onlyCreated ? 0 : 1;
     tabPanel.selectTab(tabToSelect);
-    yourItems.fireEvent(new ButtonClickEvent());
-    refreshViewLessons();
+
+    TabAndContent toUse = onlyCreated ? yourStuff : othersStuff;
+    toUse.tab.fireEvent(new ButtonClickEvent());
+    refreshViewLessons(onlyCreated, onlyVisited);
   }
 
   private void showBrowse() {
@@ -291,9 +327,17 @@ public class Navigation implements RequiresResize {
   /*To call click() function for Programmatic equivalent of the user clicking the button.*/
   private class ButtonClickEvent extends ClickEvent {}
 
-  private void viewBrowse() { viewLessons(browse.content, true); }
+  private void viewBrowse() { viewLessons(browse.content, true, false, false); }
 
-  private void viewLessons(final Panel contentPanel, boolean getAll) {
+  /**
+   * @see #viewBrowse()
+   * @see #refreshViewLessons(boolean, boolean)
+   * @param contentPanel
+   * @param getAll
+   * @param onlyMine
+   * @param onlyVisited
+   */
+  private void viewLessons(final Panel contentPanel, boolean getAll, boolean onlyMine, boolean onlyVisited) {
     contentPanel.clear();
     contentPanel.getElement().setId("contentPanel");
 
@@ -304,10 +348,12 @@ public class Navigation implements RequiresResize {
 
     if (getAll) {
      // System.out.println("viewLessons----> getAll = " + getAll);
-      service.getUserListsForText("", new UserListCallback(contentPanel, child,listScrollPanel, "lessons"));
+      service.getUserListsForText("", controller.getUser(),
+        new UserListCallback(contentPanel, child, listScrollPanel, LESSONS + "_All", false, true));
     } else {
      // System.out.println("viewLessons for " + userManager.getUser());
-      service.getListsForUser(userManager.getUser(), false, true, new UserListCallback(contentPanel, child,listScrollPanel, "lessons"));
+      service.getListsForUser(userManager.getUser(), onlyMine,
+        onlyVisited, new UserListCallback(contentPanel, child, listScrollPanel, LESSONS + (onlyMine ? "_Mine":"_Others"), onlyMine, false));
     }
   }
 
@@ -322,7 +368,6 @@ public class Navigation implements RequiresResize {
     final Panel child = new DivWidget();
     contentPanel.add(child);
     child.addStyleName("exerciseBackground");
-   //  System.out.println("\tviewReview : reviewLessons for " + userManager.getUser());
     service.getReviewList(new AsyncCallback<UserList>() {
       @Override
       public void onFailure(Throwable caught) {}
@@ -331,7 +376,7 @@ public class Navigation implements RequiresResize {
       public void onSuccess(UserList result) {
         System.out.println("\tviewReview : reviewLessons for " + userManager.getUser() + " got " + result);
 
-        new UserListCallback(contentPanel, child, new ScrollPanel(), REVIEW).onSuccess(Collections.singleton(result));
+        new UserListCallback(contentPanel, child, new ScrollPanel(), REVIEW, false, false).onSuccess(Collections.singleton(result));
       }
     });
   }
@@ -353,7 +398,7 @@ public class Navigation implements RequiresResize {
       public void onSuccess(UserList result) {
         System.out.println("\tviewComments : commented for " + userManager.getUser() + " got " + result);
 
-        new UserListCallback(contentPanel, child, new ScrollPanel(), COMMENT).onSuccess(Collections.singleton(result));
+        new UserListCallback(contentPanel, child, new ScrollPanel(), COMMENT, false, false).onSuccess(Collections.singleton(result));
       }
     });
   }
@@ -365,12 +410,10 @@ public class Navigation implements RequiresResize {
     avpHelper.onResize();
   }
 
-  private boolean createdByYou(UserList ul) {
-    return ul.getCreator().id == userManager.getUser();
-  }
+  private boolean createdByYou(UserList ul) { return ul.getCreator().id == userManager.getUser(); }
 
   /**
-   * @see Navigation.UserListCallback#getDisplayRowPerList(mitll.langtest.shared.custom.UserList, boolean)
+   * @see Navigation.UserListCallback#getDisplayRowPerList(mitll.langtest.shared.custom.UserList, boolean, boolean)
    * @param ul
    * @param contentPanel
    */
@@ -417,13 +460,24 @@ public class Navigation implements RequiresResize {
     return listOperations;
   }
 
+  /**
+   * Avoid marking lists that you have created as also visited by you.
+   * @see #showList(mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.Panel, String)
+   * @param ul
+   */
   private void addVisitor(UserList ul) {
-    service.addVisitor(ul, (long)controller.getUser(), new AsyncCallback<Void>() {
-      @Override
-      public void onFailure(Throwable caught) {}
-      @Override
-      public void onSuccess(Void result) {}
-    });
+    long user = (long) controller.getUser();
+    if (ul.getCreator().id != user) {
+      service.addVisitor(ul, user, new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {
+        }
+
+        @Override
+        public void onSuccess(Void result) {
+        }
+      });
+    }
   }
 
   /**
@@ -516,22 +570,29 @@ public class Navigation implements RequiresResize {
     private final Panel contentPanel;
     private final Panel child;
     private final ScrollPanel listScrollPanel;
+    private final boolean allLists;
     private String instanceName;
+    boolean onlyMyLists;
 
     /**
      * @see #viewComments(com.google.gwt.user.client.ui.Panel)
-     * @see #viewLessons(com.google.gwt.user.client.ui.Panel, boolean)
+     * @see #viewLessons(com.google.gwt.user.client.ui.Panel, boolean, boolean, boolean)
      * @see #viewReview(com.google.gwt.user.client.ui.Panel)
      * @param contentPanel
      * @param child
      * @param listScrollPanel
      * @param instanceName
+     * @param onlyMyLists
+     * @param allLists
      */
-    public UserListCallback(Panel contentPanel, Panel child, ScrollPanel listScrollPanel, String instanceName) {
+    public UserListCallback(Panel contentPanel, Panel child, ScrollPanel listScrollPanel, String instanceName,
+                            boolean onlyMyLists, boolean allLists) {
       this.contentPanel = contentPanel;
       this.child = child;
       this.listScrollPanel = listScrollPanel;
       this.instanceName = instanceName;
+      this.onlyMyLists = onlyMyLists;
+      this.allLists = allLists;
     }
 
     @Override
@@ -541,7 +602,7 @@ public class Navigation implements RequiresResize {
     public void onSuccess(Collection<UserList> result) {
       System.out.println("\tUserListCallback : Displaying " + result.size() + " user lists for " + instanceName);
       if (result.isEmpty()) {
-        child.add(new Heading(3, "No lists created yet."));
+        child.add(new Heading(3, allLists ? "No lists created yet that you haven't seen.":NO_LISTS_CREATED_YET));
       } else {
         listScrollPanel.getElement().setId("scrollPanel");
 
@@ -567,7 +628,7 @@ public class Navigation implements RequiresResize {
           }
           if (!ul.isEmpty() || (!ul.isPrivate()/* && !ul.isEmpty()*/) ) {
             anyAdded = true;
-            insideScroll.add(getDisplayRowPerList(ul, showMore));
+            insideScroll.add(getDisplayRowPerList(ul, showMore, onlyMyLists));
           }
         }
         if (!anyAdded) {
@@ -585,11 +646,13 @@ public class Navigation implements RequiresResize {
 
    /**
     * When you click on the panel, show the list.
+    *
     * @param ul
     * @param showMore
+    * @param onlyMyLists
     * @return
     */
-    private Panel getDisplayRowPerList(final UserList ul, boolean showMore) {
+    private Panel getDisplayRowPerList(final UserList ul, boolean showMore, boolean onlyMyLists) {
       final FocusPanel widgets = new FocusPanel();
 
       widgets.addStyleName("userListContent");
@@ -600,7 +663,7 @@ public class Navigation implements RequiresResize {
       widgets.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          /*innerTabs =*/ showList(ul, contentPanel, instanceName);
+          showList(ul, contentPanel, instanceName);
         }
       });
       widgets.addMouseOverHandler(new MouseOverHandler() {
@@ -623,7 +686,7 @@ public class Navigation implements RequiresResize {
       FluidContainer w = new FluidContainer();
       widgets.add(w);
 
-      addWidgetsForList(ul, showMore, w);
+      addWidgetsForList(ul, showMore, w, onlyMyLists);
       return widgets;
     }
   }
@@ -631,12 +694,13 @@ public class Navigation implements RequiresResize {
   private Map<UserList, HasText> listToMarker = new HashMap<UserList, HasText>();
 
   /**
-   * @see mitll.langtest.client.custom.Navigation.UserListCallback#getDisplayRowPerList(mitll.langtest.shared.custom.UserList, boolean)
+   * @see mitll.langtest.client.custom.Navigation.UserListCallback#getDisplayRowPerList(mitll.langtest.shared.custom.UserList, boolean, boolean)
    * @param ul
    * @param showMore
    * @param container
+   * @param onlyMyLists
    */
-  private void addWidgetsForList(final UserList ul, boolean showMore, final Panel container) {
+  private void addWidgetsForList(final UserList ul, boolean showMore, final Panel container, boolean onlyMyLists) {
     Panel r1 = new FlowPanel();
     r1.addStyleName("trueInlineStyle");
     String name = ul.getName();
@@ -672,7 +736,7 @@ public class Navigation implements RequiresResize {
 
     boolean yourList = isYourList(ul);
     if (yourList) {
-      Button deleteButton = makeDeleteButton(ul);
+      Button deleteButton = makeDeleteButton(ul, onlyMyLists);
       deleteButton.addStyleName("floatRight");
       deleteButton.addStyleName("leftFiveMargin");
       r1.add(deleteButton);
@@ -714,8 +778,14 @@ public class Navigation implements RequiresResize {
     return itemMarker;
   }
 
-  private Button makeDeleteButton(final UserList ul) {
-    Button delete = new Button("Delete");
+  /**
+   * @see #addWidgetsForList(mitll.langtest.shared.custom.UserList, boolean, com.google.gwt.user.client.ui.Panel, boolean)
+   * @param ul
+   * @param onlyMyLists
+   * @return
+   */
+  private Button makeDeleteButton(final UserList ul, final boolean onlyMyLists) {
+    Button delete = new Button(DELETE);
     delete.addStyleName("topMargin");
     DOM.setStyleAttribute(delete.getElement(), "marginBottom", "5px");
 
@@ -730,7 +800,7 @@ public class Navigation implements RequiresResize {
           @Override
           public void onSuccess(Boolean result) {
             if (result) {
-              refreshViewLessons();
+              refreshViewLessons(onlyMyLists, false);
             }
             else {
               System.err.println("---> did not do deleteList " + ul.getUniqueID());
@@ -745,20 +815,6 @@ public class Navigation implements RequiresResize {
   private boolean isYourList(UserList ul) {
     return createdByYou(ul) && !ul.getName().equals(UserList.MY_LIST);
   }
-
-/*
-  private Widget getUserListText(String content) {
-    Widget nameInfo = new HTML(content);
-    nameInfo.addStyleName("userListFontBlue");
-    return nameInfo;
-  }
-
-  private Widget getFavoriteUserListText(String content) {
-    Widget nameInfo = new HTML(content);
-    nameInfo.addStyleName("userListFont");
-    return nameInfo;
-  }
-*/
 
   private Widget getUserListText2(String content) {
     Widget nameInfo = new HTML(content);
