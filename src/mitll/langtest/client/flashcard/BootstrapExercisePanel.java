@@ -37,7 +37,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import java_cup.version;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -72,20 +71,20 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
 
   private static final String WAV = ".wav";
   private static final String MP3 = "." + AudioTag.COMPRESSED_TYPE;
-  private static final int SET_SIZE = 10;
-  private static final int MAX_SET_SIZE = 50;
+ // private static final int SET_SIZE = 10;
+ // private static final int MAX_SET_SIZE = 50;
   // public static final int CONTENT_COLUMNS = 12;
 
   private final Exercise exercise;
 
   private Heading recoOutput;
-  protected SoundFeedback soundFeedback;
+  protected final SoundFeedback soundFeedback;
   protected final Widget cardPrompt;
-  protected Panel recoOutputContainer;
+  private Panel recoOutputContainer;
   private final boolean addKeyBinding;
-  private ExerciseController controller;
-  private boolean continueToNext = true;
-  private ControlState controlState;
+  private final ExerciseController controller;
+  private final boolean continueToNext = true;
+  private final ControlState controlState;
 
   /**
    * @param e
@@ -173,7 +172,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     }
   }
 
-  public void doDockLayout() {
+/*  public void doDockLayout() {
     DockLayoutPanel dockLayoutPanel = new DockLayoutPanel(Style.Unit.PX);
     //dockLayoutPanel.addNorth(new Heading(6,"Try this set"), 2);
     //dockLayoutPanel.addSouth(new Heading(6, "Footer"), 2);
@@ -215,9 +214,9 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     //dockContainer.add(dockLayoutPanel);
 //    dockLayoutPanel.forceLayout();
     add(dockLayoutPanel);
-  }
+  }*/
 
-  public Panel getRightColumn(ExerciseController controller, ControlState controlState) {
+  private Panel getRightColumn(ExerciseController controller, ControlState controlState) {
     Panel rightColumn = new VerticalPanel();
 
     // rightColumn.addStyleName("rightColumn");
@@ -226,7 +225,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     }
     rightColumn.add(getAudioGroup(controlState));
     rightColumn.add(getFeedbackGroup(controlState));
-    rightColumn.add(getSizes(controlState));
+    //rightColumn.add(getSizes(controlState));
 
     rightColumn.addStyleName("leftTenMargin");
     return rightColumn;
@@ -242,10 +241,14 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     return new Heading(6, "");
   }
 
-  protected void addWidgetsBelow(Panel toAddTo) {
-  }
+  protected void addWidgetsBelow(Panel toAddTo) {}
 
-  public Widget getSizes(final ControlState controlState) {
+  /**
+   * @see #getRightColumn(mitll.langtest.client.exercise.ExerciseController, ControlState)
+   * @paramx controlState
+   * @return
+   */
+/*  private Widget getSizes(final ControlState controlState) {
     ControlGroup group = new ControlGroup("SET SIZE");
     ButtonToolbar w = new ButtonToolbar();
     group.add(w);
@@ -270,11 +273,14 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     }
 
     return group;
-  }
+  }*/
 
-  protected void setSetSize(int i) {
-  }
+  //protected void setSetSize(int i) {}
 
+  /**
+   * @see #getAudioGroup(ControlState)
+   * @see #getQuestionContent(mitll.langtest.shared.Exercise)
+   */
   private void playRefLater() {
     Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
@@ -283,7 +289,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     });
   }
 
-  public ControlGroup getAudioGroup(final ControlState controlState) {
+  private ControlGroup getAudioGroup(final ControlState controlState) {
     ControlGroup group = new ControlGroup("PLAY " + controller.getLanguage().toUpperCase());
     ButtonToolbar w = new ButtonToolbar();
     group.add(w);
@@ -324,7 +330,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     return group;
   }
 
-  public ControlGroup getFeedbackGroup(final ControlState controlState) {
+  private ControlGroup getFeedbackGroup(final ControlState controlState) {
     ControlGroup group = new ControlGroup("FEEDBACK");
     ButtonToolbar w = new ButtonToolbar();
     group.add(w);
@@ -362,7 +368,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     return group;
   }
 
-  public ControlGroup getShowGroup(final ControlState controlState) {
+  private ControlGroup getShowGroup(final ControlState controlState) {
     ControlGroup group = new ControlGroup("SHOW");
     ButtonToolbar w = new ButtonToolbar();
     group.add(w);
@@ -490,7 +496,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
   private Widget english;
   private Widget foreign;
 
-  protected Panel getQuestionContent(Exercise e) {
+  Panel getQuestionContent(Exercise e) {
     String foreignSentence = e.getRefSentences().iterator().next();
     DivWidget div = new DivWidget();
     div.addStyleName("blockStyle");
@@ -558,7 +564,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     foreign.setVisible(true);
   }
 
-  DivWidget scoreFeedbackRow = new DivWidget();
+  private final DivWidget scoreFeedbackRow = new DivWidget();
 
   /**
    * Three rows below the stimulus word/expression:<p></p>
@@ -701,8 +707,6 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
    */
   protected void showPronScoreFeedback(double score, String scorePrefix) {
     // audioScoreFeedback.showScoreFeedback(scorePrefix, score, false, !addKeyBinding);
-
-
     scoreFeedbackRow.add(showScoreFeedback("Score ", score));
   }
 
@@ -715,7 +719,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
    * @paramx useShortWidth
    * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#showPronScoreFeedback(double, String)
    */
-  public ProgressBar showScoreFeedback(String pronunciationScore, double score) {//}}, boolean centerVertically, boolean useShortWidth) {
+  private ProgressBar showScoreFeedback(String pronunciationScore, double score) {
     if (score < 0) score = 0;
     double percent = 100 * score;
 
@@ -822,28 +826,17 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
       " hasSynonymAudio " + hasSynonymAudio);
 
     String correctPrompt = getCorrectDisplay();
-    if (hasRefAudio && continueToNext) {
+    if (hasRefAudio) {
       //System.out.println("has ref " + continueToNext);
       if (hasSynonymAudio) {
         List<String> toPlay = new ArrayList<String>(exercise.getSynonymAudioRefs());
         //  System.out.println("showIncorrectFeedback : playing " + toPlay);
-        //  if (controlState.audioOn) {
         if (controlState.audioFeedbackOn) {
           playAllAudio(correctPrompt, toPlay);
         } else {
           nextAfterDelay(result.isCorrect(), correctPrompt);
         }
-        //  } else {
-        //if (controlState.showEnglish()) {
-        // showBoth();
-        //}
-        //  if (!controlState.audioFeedbackOn) {
-        //     loadNext();
-        //  }
-        //goToNextItem(correctPrompt);
-        // }
       } else {
-        // if (controlState.audioOn) {
         if (controlState.audioFeedbackOn) {
           String path = getRefAudioToPlay();
           if (path == null) {
@@ -855,20 +848,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
           getSoundFeedback().playIncorrect(); // this should never happen
 
           goToNextAfter(1000);
-          //loadNext();
         }
-        //  } else {
-        //  if (controlState.showEnglish()) {
-        //  showBoth();
-        // }
-        //   if (controlState.audioFeedbackOn) {
-        //      goToNextItem(correctPrompt);
-        //  } else {
-//            loadNext();
-        //     goToNextAfter(1000);
-
-        //   }
-        //   }
       }
     } else {
       tryAgain();
@@ -895,6 +875,11 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     return path;
   }
 
+  /**
+   * @see #showIncorrectFeedback(mitll.langtest.shared.AudioAnswer, double, boolean)
+   * @param correctPrompt
+   * @param path
+   */
   private void playRefAndGoToNext(String correctPrompt, String path) {
     path = getPath(path);
     // System.out.println("playRefAndGoToNext : playing " + path);
@@ -909,21 +894,34 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     }, false);
   }
 
+  /**
+   * @see #playRefLater()
+   */
   private void playRef() {
     String refAudioToPlay = getRefAudioToPlay();
 
     if (refAudioToPlay == null) {
-      getSoundFeedback().playIncorrect(); // this should never happen
+      //getSoundFeedback().playIncorrect(); // this should never happen
     } else {
       playRef(refAudioToPlay);
     }
   }
 
+  /**
+   * @see #playRef()
+   * @param path
+   */
   private void playRef(String path) {
     path = getPath(path);
-    //System.out.println("showIncorrectFeedback : playing " + path);
+    foreign.addStyleName("mouseOverHighlight");
 
-    getSoundFeedback().createSound(path);
+    //System.out.println("showIncorrectFeedback : playing " + path);
+    getSoundFeedback().createSound(path, new SoundFeedback.EndListener() {
+      @Override
+      public void songEnded() {
+        foreign.removeStyleName("mouseOverHighlight");
+      }
+    });
   }
 
   private String getPath(String path) {
@@ -932,6 +930,9 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     return path;
   }
 
+  /**
+   * @see #showIncorrectFeedback(mitll.langtest.shared.AudioAnswer, double, boolean)
+   */
   private void tryAgain() {
     getSoundFeedback().playIncorrect();
 
@@ -981,7 +982,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
    * @see #playAllAudio(String, java.util.List)
    * @see #showIncorrectFeedback(mitll.langtest.shared.AudioAnswer, double, boolean)
    */
-  protected void goToNextItem(String infoToShow) {
+  void goToNextItem(String infoToShow) {
     if (continueToNext) {
       int delay = getFeedbackLengthProportionalDelay(infoToShow);
       System.out.println("goToNextItem : using delay " + delay + " info " + infoToShow);
