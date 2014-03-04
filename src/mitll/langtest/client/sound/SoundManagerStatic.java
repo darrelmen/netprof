@@ -9,18 +9,18 @@ package mitll.langtest.client.sound;
  */
 public class SoundManagerStatic implements SoundManagerAPI {
   private boolean debug = false;
-  boolean webaudio = false;
-
-  private static final boolean USE_WEBAUDIO=false;
-
+  private boolean webaudio = false;
+  private static final boolean PREFER_WEBAUDIO = false;
   public void initialize() {
     SoundManager.initialize();
 
-    boolean b = true || WebAudio.checkIfWebAudioInstalled(); // for now -- note console seems to be undefined in IE
-    if (b && USE_WEBAUDIO) {
+  /*  boolean b = PREFER_WEBAUDIO || WebAudio.checkIfWebAudioInstalled(); // for now -- note console seems to be undefined in IE
+    if (b && PREFER_WEBAUDIO) {
       System.out.println("got web audio!");
-      webaudio = true;
-    }
+      if (PREFER_WEBAUDIO) {
+        webaudio = true;
+      }
+    }*/
   }
 
   /**
@@ -52,7 +52,7 @@ public class SoundManagerStatic implements SoundManagerAPI {
    * @param title
    * @param file
    * @see mitll.langtest.client.sound.PlayAudioPanel#createSound
-   * @see SoundFeedback#createSound(String, mitll.langtest.client.sound.SoundFeedback.EndListener)
+   * @see SoundFeedback#createSound(String, mitll.langtest.client.sound.SoundFeedback.EndListener, boolean)
    */
   public void createSound(Sound sound, String title, String file) {
     if (debug) System.out.println("SoundManagerStatic.createSound " + sound);
@@ -73,11 +73,22 @@ public class SoundManagerStatic implements SoundManagerAPI {
     }
   }
 
+  @Override
+  public void createSoftSound(Sound sound, String title, String file) {
+ //   setVolume(title);
+    createSound(sound,title,file);
+  }
+
+  @Override
+  public void setVolume(String title, int vol) {
+    SoundManager.setVolume(title, vol);
+  }
+
   /**
-   * @param sound
-   * @see mitll.langtest.client.sound.PlayAudioPanel#destroySound()
-   * @see mitll.langtest.client.sound.SoundFeedback#destroySound()
-   */
+     * @param sound
+     * @see mitll.langtest.client.sound.PlayAudioPanel#destroySound()
+     * @see mitll.langtest.client.sound.SoundFeedback#destroySound()
+     */
   public void destroySound(Sound sound) {
     if (debug) System.out.println("SoundManagerStatic.destroy " + sound);
     SoundManager.destroySound(sound);
