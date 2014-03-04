@@ -4,7 +4,6 @@ import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
@@ -34,7 +33,7 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
    * @param controller
    */
   public DataCollectionFlashcard(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, int feedbackHeight) {
-    super(e, service, controller, feedbackHeight, controller.shouldAddRecordKeyBinding());
+    super(e, service, controller, feedbackHeight, controller.shouldAddRecordKeyBinding(), new ControlState());
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand () {
       public void execute () {
         int offsetHeight = cardPrompt.getOffsetHeight();
@@ -62,12 +61,12 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
   }
 
   /**
-   * @see BootstrapExercisePanel#BootstrapExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int, boolean)
+   * @see BootstrapExercisePanel#BootstrapExercisePanel
    * @param e
    * @param controller
    * @return
    */
-  protected FlowPanel getCardPrompt(Exercise e, ExerciseController controller) {
+  protected Panel getCardPrompt(Exercise e, ExerciseController controller) {
     FluidRow questionRow = new FluidRow();
     Widget questionContent = new AudioExerciseContent().getQuestionContent(e, controller, true, true);
     Column contentContainer = new Column(8, questionContent);
@@ -108,13 +107,13 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
   }
 
   /**
-   * @see FlashcardRecordButtonPanel#showCorrectFeedback(double)
-   * @see FlashcardRecordButtonPanel#showIncorrectFeedback(mitll.langtest.shared.AudioAnswer, double, boolean)
+   * @see #showCorrectFeedback(double)
+   * @see #showIncorrectFeedback(mitll.langtest.shared.AudioAnswer, double, boolean)
    * @param score
    * @param scorePrefix
    */
   @Override
-  public void showPronScoreFeedback(double score, String scorePrefix) {
+  protected void showPronScoreFeedback(double score, String scorePrefix) {
     super.showPronScoreFeedback(score, scorePrefix);
     navigationHelper.enableNextButton(true);
   }
