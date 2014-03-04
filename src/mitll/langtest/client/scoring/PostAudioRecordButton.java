@@ -1,8 +1,16 @@
 package mitll.langtest.client.scoring;
 
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -20,6 +28,8 @@ import mitll.langtest.shared.Exercise;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class PostAudioRecordButton extends RecordButton implements RecordButton.RecordingListener {
+  private static final String WARNING = "Scores are only meaningful if you read the words as they are written.<br/> " +
+    "Saying something different or adding/omitting words would make the score meaningless and inaccurate.";
   private boolean validAudio = false;
   private int index;
   private int reqid = 0;
@@ -27,6 +37,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   private final ExerciseController controller;
   private final LangTestDatabaseAsync service;
   private final boolean recordInResults;
+
   /**
    * @see GoodwaveExercisePanel.ASRRecordAudioPanel.MyPostAudioRecordButton
    * @param exercise
@@ -45,6 +56,59 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     this.service = service;
     this.recordInResults = recordInResults;
     getElement().setId("PostAudioRecordButton");
+    doOneTimeWarning();
+  }
+
+  public void doOneTimeWarning() {
+    if (showMessage()) {
+      final DecoratedPopupPanel commentPopup = new DecoratedPopupPanel();
+      commentPopup.setAutoHideEnabled(true);
+
+      Panel hp = new HorizontalPanel();
+      //  Label child = new Label(WARNING);
+      //  child.setType(LabelType.WARNING);
+      HTML child = new HTML(WARNING);
+      hp.add(child);
+
+      commentPopup.add(hp);
+      final Widget outer = this;
+      addMouseOverHandler(new MouseOverHandler() {
+        @Override
+        public void onMouseOver(MouseOverEvent event) {
+          if (showMessage()) {
+            commentPopup.showRelativeTo(outer);
+          }
+        }
+      });
+
+      commentPopup.addCloseHandler(new CloseHandler<PopupPanel>() {
+        @Override
+        public void onClose(CloseEvent<PopupPanel> event) {
+          if (Storage.isLocalStorageSupported()) {
+            Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+
+            localStorageIfSupported.setItem(getLocalStorageKey(), "shown");
+            if (showMessage()) {
+              System.err.println("----------------> huh? should not show again");
+            }
+          }
+        }
+      });
+    }
+  }
+
+  private boolean showMessage() {
+    if (Storage.isLocalStorageSupported()) {
+      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+
+      String memory = localStorageIfSupported.getItem(getLocalStorageKey());
+      return (memory == null);
+    }
+    return false;
+  }
+
+  private String getLocalStorageKey() {
+    return "PostAudioRecordButton_" + controller.getLanguage() + "_" + controller.getUser();
   }
 
   @Override

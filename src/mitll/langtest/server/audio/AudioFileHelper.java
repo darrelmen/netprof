@@ -45,7 +45,10 @@ public class AudioFileHelper {
   }
 
   public boolean checkLTS(String foreignLanguagePhrase) { return asrScoring.checkLTS(foreignLanguagePhrase); }
-  public SmallVocabDecoder getSmallVocabDecoder() { return asrScoring.getSmallVocabDecoder(); }
+  public SmallVocabDecoder getSmallVocabDecoder() {
+    makeASRScoring();
+    return asrScoring.getSmallVocabDecoder();
+  }
 
   /**
    * Record an answer entry in the database.<br></br>
@@ -186,10 +189,14 @@ public class AudioFileHelper {
                                            boolean decode, String tmpDir, boolean useCache) {
     logger.info("getASRScoreForAudio scoring " + testAudioFile + " with sentence '" + sentence + "' req# " + reqid);
 
-    assert(testAudioFile != null && sentence != null && sentence.length() > 0);
     makeASRScoring();
+    if (testAudioFile == null) {
+      return new PretestScore(); // very defensive
+    }
     testAudioFile = dealWithMP3Audio(testAudioFile);
-    if (!new File(testAudioFile).exists()) return new PretestScore();
+    if (!new File(testAudioFile).exists()) {
+      return new PretestScore();
+    }
 
     String installPath = pathHelper.getInstallPath();
 
@@ -197,10 +204,9 @@ public class AudioFileHelper {
     String testAudioName = testDirAndName.getName();
     String testAudioDir = testDirAndName.getDir();
 
-    //logger.debug("test audio dir " + testAudioDir);
-    //logger.debug("test audio name " + testAudioName);
-
-    if (serverProps.getLanguage().equalsIgnoreCase("English")) sentence = sentence.toUpperCase();  // hack for English
+    if (serverProps.getLanguage().equalsIgnoreCase("English")) {
+      sentence = sentence.toUpperCase();  // hack for English
+    }
     PretestScore pretestScore = asrScoring.scoreRepeat(
       testAudioDir, removeSuffix(testAudioName),
       sentence,
@@ -223,8 +229,7 @@ public class AudioFileHelper {
   }
 
   private String removeSuffix(String audioFile) {
-    return audioFile.substring(0, audioFile.length() - ("." +
-        AudioTag.COMPRESSED_TYPE).length());
+    return audioFile.substring(0, audioFile.length() - ("." + AudioTag.COMPRESSED_TYPE).length());
   }
 
   /**
