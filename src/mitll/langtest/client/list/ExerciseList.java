@@ -32,6 +32,7 @@ import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.ExerciseShell;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -49,6 +50,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   ValueChangeHandler<String> {
   private static final int NUM_QUESTIONS_FOR_TOKEN = 5;
   public static final String ITEMS = "Items";
+  private static final boolean ADD_ITEM_HEADER = false;
 
   private SimplePanel innerContainer;
   protected final LangTestDatabaseAsync service;
@@ -128,9 +130,12 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    */
   private void addWidgets(final Panel currentExerciseVPanel) {
     this.innerContainer = new SimplePanel();
-    this.innerContainer.setWidth("100%");
-    this.innerContainer.setHeight("100%");
+    innerContainer.getElement().setId("ExerciseList_innerContainer");
+   // this.innerContainer.setWidth("100%");
+   // this.innerContainer.setHeight("100%");
     currentExerciseVPanel.add(innerContainer);
+    innerContainer.addStyleName("floatLeft");
+    currentExerciseVPanel.addStyleName("floatLeft");
   //  currentExerciseVPanel.addStyleName("shadowBorder");
   }
 
@@ -228,8 +233,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * @param exerciseID
    */
   protected void pushNewItem(String exerciseID) {
-    System.out.println("------------ ExerciseList.pushNewItem : (" + instance+
-      ") push history " + exerciseID + " -------------- ");
+    System.out.println("------------ ExerciseList.pushNewItem : (" + instance+ ") push history " + exerciseID + " - ");
     History.newItem("#item=" + exerciseID + ";instance="+instance);
   }
 
@@ -290,7 +294,9 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
           gotEmptyExerciseList();
         }
         if (id != null) {
-          rememberExercises(result.getExercises());
+          List<T> exercises = result.getExercises();
+          rememberExercises(exercises);
+          for (ListChangeListener<T> listener : listeners) listener.listChanged(exercises);
           pushFirstSelection(id);
         }
         else {
@@ -320,6 +326,8 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     System.out.println("ExerciseList : rememberAndLoadFirst remembering " + exercises.size() + " : first = " +firstExercise);
 
     rememberExercises(exercises);
+    for (ListChangeListener<T> listener : listeners) listener.listChanged(exercises);
+
     if (firstExercise != null) {
       T firstExerciseShell = findFirstExercise();
       if (firstExerciseShell.getID().equals(firstExercise.getID())) {
@@ -562,11 +570,11 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * @param result
    */
   public Panel makeExercisePanel(Exercise result) {
-    System.out.println("ExerciseList.makeExercisePanel : " +result);
+  //  System.out.println("ExerciseList.makeExercisePanel : " +result);
 
     Panel exercisePanel = factory.getExercisePanel(result);
     innerContainer.setWidget(exercisePanel);
-    innerContainer.getParent().addStyleName("shadowBorder");
+    //innerContainer.getParent().addStyleName("shadowBorder");
     return exercisePanel;
   }
 
@@ -580,7 +588,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * @param current
    */
   protected void getNextExercise(ExerciseShell current) {
-    System.out.println("ExerciseList.getNextExercise " + current);
+   // System.out.println("ExerciseList.getNextExercise " + current);
 
     int i = getIndex(current.getID());
     if (i == -1) {
@@ -599,7 +607,10 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    */
   private int getIndex(String currentID) {
     T shell = byID(currentID);
-    return shell != null ? getRealIndex(shell) : -1;
+    int i = shell != null ? getRealIndex(shell) : -1;
+    //System.out.println("getIndex " + currentID + " = " +i);
+
+    return i;
   }
 
   protected abstract int getRealIndex(T t);
@@ -653,7 +664,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    */
   @Override
   public <S extends ExerciseShell> boolean loadNextExercise(S current) {
-   // System.out.println("ExerciseList.loadNextExercise current is : " +current);
+    System.out.println("ExerciseList.loadNextExercise current is : " +current);
     String id = current.getID();
     int i = getIndex(id);
 
@@ -712,10 +723,11 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
 
   @Override
   public boolean loadPrev() { return loadPreviousExercise(getCurrentExercise()); }
+
   /**
    * @seex NavigationHelper#loadPreviousExercise
    * @param current
-   * @return
+   * @return true if on first
    */
   @Override
   public <S extends ExerciseShell> boolean loadPreviousExercise(S current) {
@@ -739,7 +751,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     leftColumn.addStyleName("minWidth");
     DOM.setStyleAttribute(leftColumn.getElement(), "paddingRight", "10px");
 
-    if (!props.isFlashcardTeacherView() && !props.isMinimalUI()) {
+    if (!props.isFlashcardTeacherView() && !props.isMinimalUI() && ADD_ITEM_HEADER) {
       Heading items = new Heading(4, ITEMS);
       items.addStyleName("center");
       leftColumn.add(items);
@@ -752,9 +764,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   public Widget getWidget() {   return this;  }
 
   @Override
-  public boolean onFirst() {
-    return onFirst(getCurrentExercise());
-  }
+  public boolean onFirst() {  return onFirst(getCurrentExercise());  }
 
   /**
    * @see mitll.langtest.client.exercise.NavigationHelper#makePrevButton
@@ -763,13 +773,20 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    */
   @Override
   public <S extends ExerciseShell> boolean onFirst(S current) {
-    //System.out.println("onFirst : of " +currentExercises.size() +", on first is " + current);
-    return current == null || getSize() == 1 || getIndex(current.getID()) == 0;
+    boolean b = current == null || getSize() == 1 || getIndex(current.getID()) == 0;
+    System.out.println("onFirst : of " +getSize() +", on checking " + current + " = " + b);
+    return b;
   }
+
+
+  public boolean onLast() { return onLast(getCurrentExercise());  }
 
   @Override
   public <S extends ExerciseShell> boolean onLast(S current) {
-    return current == null || getSize() == 1 || isOnLastItem(getIndex(current.getID()));
+
+    boolean b = current == null || getSize() == 1 || isOnLastItem(getIndex(current.getID()));
+    System.out.println("onLast : of " +getSize() +", on checking " + current + " = " + b);
+    return b;
   }
 
   private boolean isOnLastItem(int i) { return i == getSize() - 1;  }
@@ -777,4 +794,10 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   @Override
   public void reloadExercises() { loadFirstExercise();  }
   public void redraw() {}
+
+ private  List<ListChangeListener<T>> listeners = new ArrayList<ListChangeListener<T>>();
+  @Override
+  public void addListChangedListener(ListChangeListener<T> listener) {
+    listeners.add(listener);
+  }
 }
