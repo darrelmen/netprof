@@ -31,6 +31,7 @@ public class Exercise extends AudioExercise {
   private boolean promptInEnglish = true;
   private Map<String,List<QAPair>> langToQuestion = null;
   private String englishSentence;
+  private String meaning;
   private List<String> refSentences = new ArrayList<String>();
   private List<String> synonymSentences = new ArrayList<String>();
   private List<String> synonymTransliterations = new ArrayList<String>();
@@ -311,6 +312,14 @@ public class Exercise extends AudioExercise {
    */
   public void setPromptInEnglish(boolean b) { this.promptInEnglish = b;  }
   public boolean isPromptInEnglish() { return promptInEnglish;  }
+
+  public String getMeaning() {
+    return meaning;
+  }
+
+  public void setMeaning(String meaning) {
+    this.meaning = meaning;
+  }
 
   public String toString() {
     String moreAboutQuestions = DEBUG ? " : " +  getQuestionToString() : "";
