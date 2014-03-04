@@ -176,7 +176,7 @@ h1 {
 
 .wrapword {
     word-wrap: break-word;       /* Internet Explorer 5.5+ */
-    word-break: break-all;
+    word-break: keep-all;
     white-space: normal;
 }
 
@@ -1014,3 +1014,7 @@ fieldset > legend {
 .minWidthFifty {
     min-width: 500px;
 }
+
+.maxWidth {
+     max-width: 145px;
+ }
