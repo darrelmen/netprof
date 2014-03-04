@@ -43,7 +43,7 @@ public class SimpleRecordPanel extends RecordButtonPanel {
    */
 	public SimpleRecordPanel(final LangTestDatabaseAsync service, final ExerciseController controller,
                            final Exercise exercise, final ExerciseQuestionState questionState, final int index){
-    super(service, controller, exercise, questionState, index, false, true);
+    super(service, controller, exercise, questionState, index, false);
     Panel widget = getPanel();
     if (widget instanceof HorizontalPanel) {
       ((HorizontalPanel)widget).setSpacing(10);
