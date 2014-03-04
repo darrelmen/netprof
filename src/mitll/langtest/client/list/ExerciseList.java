@@ -778,14 +778,12 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     return b;
   }
 
-
   public boolean onLast() { return onLast(getCurrentExercise());  }
 
   @Override
   public <S extends ExerciseShell> boolean onLast(S current) {
-
     boolean b = current == null || getSize() == 1 || isOnLastItem(getIndex(current.getID()));
-    System.out.println("onLast : of " +getSize() +", on checking " + current + " = " + b);
+    System.out.println("onLast  : of " +getSize() +", on checking " + current + " = " + b);
     return b;
   }
 
@@ -795,9 +793,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   public void reloadExercises() { loadFirstExercise();  }
   public void redraw() {}
 
- private  List<ListChangeListener<T>> listeners = new ArrayList<ListChangeListener<T>>();
+  private  List<ListChangeListener<T>> listeners = new ArrayList<ListChangeListener<T>>();
   @Override
-  public void addListChangedListener(ListChangeListener<T> listener) {
-    listeners.add(listener);
-  }
+  public void addListChangedListener(ListChangeListener<T> listener) {  listeners.add(listener);  }
 }
