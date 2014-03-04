@@ -37,13 +37,17 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   private static final String INSTRUCTIONS = "The ASR method uses a speech recognizer to compare the student " +
     "recording to a model trained with hundreds of native speakers. " +
       "It generates scores for each word and phonetic unit (see the color-coded transcript for details).";
-  private static final String LISTENER_INSTRUCTIONS = "Listen to the Native Reference Speaker say the words shown. " +
-      "Record yourself saying the words. Your score will be displayed on the gauge in the Scores section." +
-      "You may record yourself multiple times." +
-   //   "You will see your scores for each recording in the Exercise History section.</p>";
-  "";
+/*  private static final String LISTENER_INSTRUCTIONS = "Listen to the Native Reference Speaker say the words shown. " +
+    "Record yourself saying the words. Your score will be displayed on the gauge in the Scores section." +
+    "You may record yourself multiple times." +
+    //   "You will see your scores for each recording in the Exercise History section.</p>";
+    "";*/
+/*  private static final String WARNING_OLD= "Scores are only meaningful if you read the words as they are written.<br/> " +
+    "Saying something different or adding/omitting words would make the score meaningless and inaccurate.";*/
+  private static final String WARNING = "Repeat the phrase exactly as it is written.<br/> " +
+    "Saying something different or adding/omitting words invalidates the score.";
   public static final int CHART_HEIGHT = 120;
-  private static final boolean SHOW_HELP = false;
+ // private static final boolean SHOW_HELP = true;
 
   private final PretestGauge ASRGauge;
   private Panel phoneList;
@@ -74,7 +78,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     add(captionPanel);
 
     CaptionPanel gaugeCaptionPanel = new CaptionPanel("Score");
-    FlowPanel gaugePanel = new FlowPanel();
+    Panel gaugePanel = new FlowPanel();
 		gaugePanel.setHeight("100%");
 		gaugePanel.setWidth("100%");
     ASRGauge = new PretestGauge("ASR_"+parent, "ASR", INSTRUCTIONS);
@@ -83,15 +87,13 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     gaugeCaptionPanel.add(gaugePanel);
 		add(gaugeCaptionPanel);
 
-    CaptionPanel instructionsCaptionPanel = new CaptionPanel("Help");
-    FlowPanel instructionsPanel = new FlowPanel();
-
-    Label instructions = new Label(LISTENER_INSTRUCTIONS);
-    instructions.addStyleName("leftAlign");
-    instructionsPanel.add(instructions);
-    instructionsCaptionPanel.add(instructionsPanel);
-    if (SHOW_HELP) add(instructionsCaptionPanel);
-	}
+    Panel instructionsPanel = new FlowPanel();
+    add(instructionsPanel);
+    HTML child = new HTML(WARNING);
+    instructionsPanel.add(child);
+    child.addStyleName("wrapword");
+    child.addStyleName("maxWidth");
+  }
 
   //call this after adding the widget to the page
   @Override
