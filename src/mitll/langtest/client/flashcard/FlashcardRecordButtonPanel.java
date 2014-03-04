@@ -25,16 +25,18 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
 
   /**
    *
+   *
    * @param exercisePanel
    * @param service
    * @param controller
    * @param exercise
    * @param index
+   * @param audioType
    * @see BootstrapExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int, boolean)
    */
   public FlashcardRecordButtonPanel(AudioAnswerListener exercisePanel, LangTestDatabaseAsync service,
-                                    ExerciseController controller, Exercise exercise, int index) {
-    super(service, controller, exercise, null, index, true);
+                                    ExerciseController controller, Exercise exercise, int index, String audioType) {
+    super(service, controller, exercise, null, index, true, audioType);
 
     this.exercisePanel = exercisePanel;
    // recordButton.setTitle("Press and hold the space bar or mouse button to record");
@@ -100,7 +102,6 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
   @Override
   protected void receivedAudioAnswer(final AudioAnswer result, ExerciseQuestionState questionState, Panel outer) {
     boolean correct = result.isCorrect();
-    //final double score = result.getScore();
     recordButton.setVisible(false);
     waiting.setVisible(false);
     if (correct) {
