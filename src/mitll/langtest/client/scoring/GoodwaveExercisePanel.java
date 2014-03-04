@@ -123,7 +123,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       public void postAnswers(ExerciseController controller, ExerciseShell completedExercise) {
         nextWasPressed(listContainer, completedExercise);
       }
-    }, listContainer, true, addKeyHandler);
+    }, listContainer, true, addKeyHandler,false);
   }
 
   public void wasRevealed() {}
