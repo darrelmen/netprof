@@ -339,7 +339,7 @@ class ButtonGroupSectionWidget implements SectionWidget {
    * @see #selectItem(java.util.Collection)
    */
   private void clearAll() {
-    System.out.println("clearAll : ---------> disable clear button for type " + type + " checking " + buttons + " buttons <----------- ");
+    //System.out.println("clearAll : ---------> disable clear button for type " + type + " checking " + buttons + " buttons <----------- ");
 
     // manager the selected set
     clearSelection();
