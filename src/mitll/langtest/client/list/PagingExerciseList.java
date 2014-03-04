@@ -35,7 +35,7 @@ import java.util.Set;
  * Time: 5:35 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T> implements RequiresResize {
+public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T> {
   protected ExerciseController controller;
   protected PagingContainer<T> pagingContainer;
   private boolean showTypeAhead;
