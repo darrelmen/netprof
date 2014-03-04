@@ -27,6 +27,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/imagewriter"/>
 	<classpathentry kind="lib" path="gwt/validation-api-1.0.0.GA-sources.jar"/>
 	<classpathentry kind="lib" path="gwt/validation-api-1.0.0.GA.jar"/>
-	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
+	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER/gwt2.6"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
