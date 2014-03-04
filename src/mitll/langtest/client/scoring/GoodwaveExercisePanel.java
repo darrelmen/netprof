@@ -526,7 +526,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
        * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
        */
       @Override
-      protected void useInvalidResult(AudioAnswer result) {}
+      protected void useInvalidResult(AudioAnswer result) {
+        playAudioPanel.setEnabled(false);
+      }
     }
   }
 
@@ -548,8 +550,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         service,
         controller1,
         controller1.getProps().showSpectrogram(), scoreListener, 23);
-
-      System.out.println("FastAndSlowASRScoringAudioPanel spect " + controller1.getProps().showSpectrogram());
     }
 
     /**
@@ -589,18 +589,13 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
       if (regular != null) {
         regular.setValue(true);
-        //System.out.println("selecting regular speed ");
-
       } else if (first != null) {
         first.setValue(true);
-        //System.out.println("selecting first ");
-
       } else {
         System.err.println("no radio choice got selected??? ");
       }
       if (audioAttributes.isEmpty()) {
         addNoRefAudioWidget(vp);
-       // noRefAudio();
       }
 
       HorizontalPanel hp = new HorizontalPanel();
@@ -612,18 +607,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     protected void addNoRefAudioWidget(Panel vp) {
       vp.add(new Label("No reference audio."));
     }
-/*
-    protected void noRefAudio() {
 
-    }*/
+    protected boolean hasAudio() {   return !exercise.getAudioAttributes().isEmpty();   }
 
-    protected boolean hasAudio() {
-      return !exercise.getAudioAttributes().isEmpty();
-    }
-
-    protected void addAudioRadioButton(Panel vp, RadioButton fast, String audioPath) {
-      vp.add(fast);
-    }
+    protected void addAudioRadioButton(Panel vp, RadioButton fast, String audioPath) { vp.add(fast); }
 
     private void showAudio(AudioAttribute audioAttribute) {
       doPause();    // if the audio is playing, stop it
