@@ -486,7 +486,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
     private class MyPostAudioRecordButton extends PostAudioRecordButton {
       public MyPostAudioRecordButton(ExerciseController controller) {
-        super(exercise, controller, ASRRecordAudioPanel.this.service, ASRRecordAudioPanel.this.index, true);
+        super(exercise, controller, ASRRecordAudioPanel.this.service, ASRRecordAudioPanel.this.index, true,
+          instance);
       }
 
       @Override
