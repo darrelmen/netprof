@@ -14,6 +14,10 @@ public interface SoundManagerAPI {
 
   void createSound(Sound sound, String title, String file);
 
+  void createSoftSound(Sound sound, String title, String file);
+
+  void setVolume(String title, int vol);
+
   void destroySound(Sound sound);
 
   void pause(Sound sound);
