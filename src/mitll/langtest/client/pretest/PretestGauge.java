@@ -84,6 +84,9 @@ public class PretestGauge extends HTML{
     return colors[idx];
   }*/
 
+  /**
+   * @see mitll.langtest.client.gauge.ASRScorePanel#onLoad()
+   */
 	public native void createCanvasElement() /*-{
         var wrapper = $doc.getElementById(this.@mitll.langtest.client.pretest.PretestGauge::id + "Container");
 		this.@mitll.langtest.client.pretest.PretestGauge::canvasObject = $doc.createElement('canvas');
