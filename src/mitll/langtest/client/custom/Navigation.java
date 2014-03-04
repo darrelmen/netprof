@@ -4,7 +4,6 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.Tab;
 import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.InlineLabel;
@@ -18,6 +17,7 @@ import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -135,7 +135,7 @@ public class Navigation extends TabContainer implements RequiresResize {
    * @param secondAndThird
    * @return
    */
-  protected /*<T extends ExerciseShell>*/ Panel getButtonRow2(Panel secondAndThird) {
+  protected Panel getButtonRow2(Panel secondAndThird) {
     tabPanel = new TabPanel();
 
     boolean combinedMode = controller.getProps().isCombinedMode();
@@ -255,6 +255,51 @@ public class Navigation extends TabContainer implements RequiresResize {
     });
 
     return tabPanel;    // TODO - consider how to tell panels when they are hidden by tab changes
+  }
+
+  private void storeValue(String name, String toStore) {
+    if (Storage.isLocalStorageSupported()) {
+      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+
+      localStorageIfSupported.setItem(getLocalStorageKey(name), toStore);
+      System.out.println("storeValue " + name + "="+toStore);
+
+      //if (showMessage()) {
+      //   System.err.println("----------------> huh? should not show again");
+      // }
+    }
+  }
+
+  private String getValue(String name) {
+    if (Storage.isLocalStorageSupported()) {
+      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+
+      String item = localStorageIfSupported.getItem(getLocalStorageKey(name));
+      System.out.println("name " + name + "=" +item);
+      return item;
+    }
+    else {
+      return "";
+    }
+  }
+
+  private void removeValue(String name) {
+    if (Storage.isLocalStorageSupported()) {
+      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+
+      localStorageIfSupported.removeItem(getLocalStorageKey(name));
+      System.out.println("removeValue " + name);
+
+    }
+    else {
+      //return "";
+    }
+  }
+
+
+
+  private String getLocalStorageKey(String name) {
+    return "Navigation_" + controller.getLanguage() + "_" + controller.getUser() + "_" +name;
   }
 
   /**
@@ -426,9 +471,19 @@ public class Navigation extends TabContainer implements RequiresResize {
    * @param ul
    * @param contentPanel
    */
-  private TabPanel showList(final UserList ul, Panel contentPanel, final String instanceName) {
+  private void showList(final UserList ul, Panel contentPanel, final String instanceName) {
     System.out.println("showList " +ul + " instance " + instanceName);
 
+    String previousList = getValue("clickedUserList");
+    String currentValue = "" + ul.getUniqueID();
+    storeValue("clickedUserList", currentValue);
+
+    // if select a new list, clear the subtab selection
+    if (previousList != null && !previousList.equals(currentValue)) {
+      System.out.println("showList " +previousList + " vs " + currentValue);
+
+      removeValue("subTab");
+    }
     FluidContainer container = new FluidContainer();
     contentPanel.clear();
     contentPanel.add(container);
@@ -459,7 +514,7 @@ public class Navigation extends TabContainer implements RequiresResize {
 
     addVisitor(ul);
 
-    return listOperations;
+    //return listOperations;
   }
 
   /**
@@ -502,18 +557,24 @@ public class Navigation extends TabContainer implements RequiresResize {
     learn.tab.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
+        storeValue("subTab","learn");
         npfHelper.showNPF(ul, learn, instanceName1);
       }
     });
 
     // add practice tab
     final boolean isNormalList = !isReview && !isComment;
+    TabAndContent practice = null;
     if (isNormalList) {
-      final TabAndContent practice = makeTab(tabPanel, IconType.CHECK, PRACTICE);
+      practice = makeTab(tabPanel, IconType.CHECK, PRACTICE);
+      final TabAndContent fpractice = practice;
       practice.tab.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          avpHelper.showNPF(ul, practice, "practice");
+          storeValue("subTab","practice");
+          System.out.println("getListOperations : got click on practice");
+
+          avpHelper.showNPF(ul, fpractice, "practice");
         }
       });
     }
@@ -525,28 +586,67 @@ public class Navigation extends TabContainer implements RequiresResize {
       edit.tab.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
+          storeValue("subTab","editItem");
           showEditItem(ul, edit, (isReview || isComment) ? reviewItem : Navigation.this.editItem, isNormalList);
         }
       });
     }
 
     // select the initial tab -- either add if an empty
+    selectInitialTab(ul, created, tabPanel, isReview, isComment, instanceName1, learn,
+      practice, editItem, isNormalList, editItem);
+
+    return tabPanel;
+  }
+
+  private void selectInitialTab(final UserList ul, final boolean created, final TabPanel tabPanel,
+                                final boolean isReview, final boolean isComment, final String instanceName1,
+                                final TabAndContent learn,
+                                final TabAndContent practice,
+                                final TabAndContent edit,
+                                final boolean isNormalList, TabAndContent editItem) {
     final TabAndContent finalEditItem = editItem;
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
-        if (created && !ul.isPrivate() && ul.isEmpty() && finalEditItem != null) {
-          String name = ul.getName();
-          System.out.println("name " + name);
-          tabPanel.selectTab(name.equals(REVIEW1) ? 0 : 2);    // 2 = add/edit item
-          showEditItem(ul, finalEditItem, (isReview || isComment) ? reviewItem : Navigation.this.editItem, isNormalList);
-        } else {
-          tabPanel.selectTab(0);
-          npfHelper.showNPF(ul, learn, instanceName1);
+        String subTab = getValue("subTab");
+        System.out.println("subtab " +subTab);
+        boolean chosePrev = false;
+        if (subTab != null) {
+          chosePrev = true;
+          if (subTab.equals("learn")) {
+
+            tabPanel.selectTab(0);
+            learn.tab.fireEvent(new ButtonClickEvent());
+
+            npfHelper.showNPF(ul, learn, instanceName1);
+          } else if (subTab.equals("practice")) {
+            System.out.println("\tsubtab " +subTab);
+
+            tabPanel.selectTab(1);
+            practice.tab.fireEvent(new ButtonClickEvent());
+            avpHelper.showNPF(ul, practice, "practice");
+
+          } else if (subTab.equals("editItem")) {
+            tabPanel.selectTab(2);
+
+            edit.tab.fireEvent(new ButtonClickEvent());
+
+            showEditItem(ul, edit, (isReview || isComment) ? reviewItem : Navigation.this.editItem, isNormalList);
+          } else chosePrev = false;
+        }
+        if (!chosePrev) {
+          if (created && !ul.isPrivate() && ul.isEmpty() && finalEditItem != null) {
+            String name = ul.getName();
+            //System.out.println("name " + name);
+            tabPanel.selectTab(name.equals(REVIEW1) ? 0 : 2);    // 2 = add/edit item
+            showEditItem(ul, finalEditItem, (isReview || isComment) ? reviewItem : Navigation.this.editItem, isNormalList);
+          } else {
+            tabPanel.selectTab(0);
+            npfHelper.showNPF(ul, learn, instanceName1);
+          }
         }
       }
     });
-
-    return tabPanel;
   }
 
   /**
@@ -601,7 +701,7 @@ public class Navigation extends TabContainer implements RequiresResize {
     public void onFailure(Throwable caught) {}
 
     @Override
-    public void onSuccess(Collection<UserList> result) {
+    public void onSuccess(final Collection<UserList> result) {
       System.out.println("\tUserListCallback : Displaying " + result.size() + " user lists for " + instanceName);
       if (result.isEmpty()) {
         child.add(new Heading(3, allLists ? "No lists created yet that you haven't seen.":NO_LISTS_CREATED_YET));
@@ -609,35 +709,70 @@ public class Navigation extends TabContainer implements RequiresResize {
         listScrollPanel.getElement().setId("scrollPanel");
 
         setScrollPanelWidth(listScrollPanel);
+
         final Panel insideScroll = new DivWidget();
         insideScroll.getElement().setId("insideScroll");
         insideScroll.addStyleName("userListContainer");
-
         listScrollPanel.add(insideScroll);
-        boolean anyAdded = false;
-        Map<String,List<UserList>> nameToLists = new HashMap<String, List<UserList>>();
 
-        for (final UserList ul : result) {
-          List<UserList> userLists = nameToLists.get(ul.getName());
-          if (userLists == null) nameToLists.put(ul.getName(), userLists = new ArrayList<UserList>());
-          userLists.add(ul);
-        }
-        for (final UserList ul : result) {
-          List<UserList> collisions = nameToLists.get(ul.getName());
-          boolean showMore = false;
-          if (collisions.size() > 1) {
-            if (collisions.indexOf(ul) > 0) showMore = true;
-          }
-          if (!ul.isEmpty() || (!ul.isPrivate()/* && !ul.isEmpty()*/) ) {
-            anyAdded = true;
-            insideScroll.add(getDisplayRowPerList(ul, showMore, onlyMyLists));
-          }
-        }
+        Map<String, List<UserList>> nameToLists = populateNameToList(result);
+
+        boolean anyAdded = addUserListsToDisplay(result, insideScroll, nameToLists);
         if (!anyAdded) {
           insideScroll.add(new Heading(3, "No lists created or visited yet."));
         }
         child.add(listScrollPanel);
+
+        selectThePreviousList(result);
       }
+    }
+
+    /**
+     * Remember the last list we were on and and select that one automatically
+     * @param result
+     */
+    private void selectThePreviousList(final Collection<UserList> result) {
+      Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+        public void execute() {
+          String clickedUserList = getValue("clickedUserList");
+          if (clickedUserList != null && !clickedUserList.isEmpty()) {
+            long id = Long.parseLong(clickedUserList);
+            for (UserList ul : result) {
+               if (ul.getUniqueID() == id) {
+                 showList(ul,contentPanel,instanceName);
+                 break;
+               }
+            }
+          }
+        }
+      });
+    }
+
+    private Map<String, List<UserList>> populateNameToList(Collection<UserList> result) {
+      Map<String,List<UserList>> nameToLists = new HashMap<String, List<UserList>>();
+
+      for (final UserList ul : result) {
+        List<UserList> userLists = nameToLists.get(ul.getName());
+        if (userLists == null) nameToLists.put(ul.getName(), userLists = new ArrayList<UserList>());
+        userLists.add(ul);
+      }
+      return nameToLists;
+    }
+
+    private boolean addUserListsToDisplay(Collection<UserList> result, Panel insideScroll, Map<String, List<UserList>> nameToLists) {
+      boolean anyAdded = false;
+      for (final UserList ul : result) {
+        List<UserList> collisions = nameToLists.get(ul.getName());
+        boolean showMore = false;
+        if (collisions.size() > 1) {
+          if (collisions.indexOf(ul) > 0) showMore = true;
+        }
+        if (!ul.isEmpty() || (!ul.isPrivate()/* && !ul.isEmpty()*/) ) {
+          anyAdded = true;
+          insideScroll.add(getDisplayRowPerList(ul, showMore, onlyMyLists));
+        }
+      }
+      return anyAdded;
     }
 
     private void setScrollPanelWidth(ScrollPanel row) {
@@ -649,6 +784,7 @@ public class Navigation extends TabContainer implements RequiresResize {
    /**
     * When you click on the panel, show the list.
     *
+    * @see mitll.langtest.client.custom.Navigation.UserListCallback#onSuccess(java.util.Collection)
     * @param ul
     * @param showMore
     * @param onlyMyLists
