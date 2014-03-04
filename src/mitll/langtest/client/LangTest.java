@@ -379,10 +379,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     Widget title;
     if (isGoodwaveMode()) {
       flashcard = new Flashcard();
-      title = flashcard.makeNPFHeaderRow(props.getSplash());
+      title = flashcard.makeNPFHeaderRow(props.getSplash(),props.isClassroomMode());
     } else if (props.isFlashcardTeacherView() || props.isAutocrt()) {
       flashcard = new Flashcard();
-      title = flashcard.getHeaderRow(props.getSplash(), "NewProF2.png",props.getAppTitle());
+      title = flashcard.getHeaderRow(props.getSplash(), "NewProF2.png",props.getAppTitle(), false);
     }
     else {
       title = getTitleWidget();
@@ -691,7 +691,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         checkLogin();
       }
 
-      public void gotDenial() {  showPopupOnDenial();   }
+      public void gotDenial() {
+        showPopupOnDenial();
+      }
 
       /**
        * @see mitll.langtest.client.recorder.FlashRecordPanelHeadless#noMicrophoneFound()
