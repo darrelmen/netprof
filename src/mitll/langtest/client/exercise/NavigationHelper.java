@@ -60,8 +60,8 @@ public class NavigationHelper<T extends ExerciseShell> extends HorizontalPanel {
   }
 
   public NavigationHelper(T exercise, ExerciseController controller, PostAnswerProvider provider,
-                                ListInterface<T> listContainer, boolean addButtons, boolean addKeyHandler,
-                                boolean enableNextOnlyWhenAllCompleted) {
+                          ListInterface<T> listContainer, boolean addButtons, boolean addKeyHandler,
+                          boolean enableNextOnlyWhenAllCompleted) {
     this.provider = provider;
     this.listContainer = listContainer;
     this.enableNextOnlyWhenAllCompleted = enableNextOnlyWhenAllCompleted;
@@ -152,7 +152,9 @@ public class NavigationHelper<T extends ExerciseShell> extends HorizontalPanel {
       if (controller.isMinimalUI() && !controller.isGrading() && controller.isPromptBeforeNextItem()) {
         showConfirmNextDialog(controller, exercise);
       } else {
-        provider.postAnswers(controller, exercise);
+        if (provider != null) {
+          provider.postAnswers(controller, exercise);
+        }
       }
     }
     else {
