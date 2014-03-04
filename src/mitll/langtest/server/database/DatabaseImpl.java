@@ -155,7 +155,7 @@ public class DatabaseImpl implements Database {
     answerDAO = new AnswerDAO(this, resultDAO);
     gradeDAO = new GradeDAO(this,userDAO, resultDAO);
     siteDAO = new SiteDAO(this, userDAO);
-    userListManager = new UserListManager( userDAO,userListDAO,userListExerciseJoinDAO, new AnnotationDAO(this),
+    userListManager = new UserListManager( userDAO,userListDAO,userListExerciseJoinDAO, new AnnotationDAO(this,userDAO),
       new ReviewedDAO(this), pathHelper);
 
 
@@ -600,7 +600,7 @@ public class DatabaseImpl implements Database {
 /*    if (userState.finished()) {
       logger.info("-------------- user " + userID + " is finished ---------------- ");
     }*/
-    logger.debug("getUserStateWrapper : making user state for " + userID + " with " + strings.length + " exercises");
+   // logger.debug("getUserStateWrapper : making user state for " + userID + " with " + strings.length + " exercises");
     userStateWrapper = new UserStateWrapper(userState, userID, exercises);
     List<ResultDAO.SimpleResult> resultsForUser = resultDAO.getResultsForUser(userID);
     //logger.debug("getUserStateWrapper : found existing " + resultsForUser.size() + " results");
@@ -613,7 +613,7 @@ public class DatabaseImpl implements Database {
     return userStateWrapper;
   }
 
-  private FlashcardResponse getFlashcardResponse(Map<String, Exercise> idToExercise, UserStateWrapper userState) {
+/*  private FlashcardResponse getFlashcardResponse(Map<String, Exercise> idToExercise, UserStateWrapper userState) {
     try {
       UserState state = userState.state;
       if (state.finished()) {
@@ -630,7 +630,7 @@ public class DatabaseImpl implements Database {
         userState.getCorrect(),
         userState.getIncorrect());
     }
-  }
+  }*/
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
