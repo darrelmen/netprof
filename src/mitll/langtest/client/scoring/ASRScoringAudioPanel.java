@@ -64,6 +64,7 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
   protected void scoreAudio(final String path, long resultID, String refSentence,
                             final ImageAndCheck wordTranscript, final ImageAndCheck phoneTranscript,
                             int toUse, int height, int reqid) {
+    if (path == null) return;
     //System.out.println("scoring audio " + path +" with ref sentence " + refSentence + " reqid " + reqid);
     boolean wasVisible = wordTranscript.image.isVisible();
 
@@ -82,24 +83,25 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
 
     //System.out.println("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " type " + "score" + " width " + toUse);
 
-    service.getASRScoreForAudio(reqid, resultID, path, refSentence, toUse, height, useScoreToColorBkg, new AsyncCallback<PretestScore>() {
-      public void onFailure(Throwable caught) {
-        if (!caught.getMessage().trim().equals("0")) {
-          Window.alert("Server error -- couldn't contact server.");
+      service.getASRScoreForAudio(reqid, resultID, path, refSentence, toUse, height, useScoreToColorBkg, new AsyncCallback<PretestScore>() {
+        public void onFailure(Throwable caught) {
+          if (!caught.getMessage().trim().equals("0")) {
+            Window.alert("Server error -- couldn't contact server.");
+          }
+          wordTranscript.image.setVisible(false);
+          phoneTranscript.image.setVisible(false);
         }
-        wordTranscript.image.setVisible(false);
-        phoneTranscript.image.setVisible(false);
-      }
-      public void onSuccess(PretestScore result) {
-        t.cancel();
 
-        if (isMostRecentRequest("score", result.getReqid())) {
-          useResult(result, wordTranscript, phoneTranscript, tested.contains(path));
-          tested.add(path);
-        }/* else {
+        public void onSuccess(PretestScore result) {
+          t.cancel();
+
+          if (isMostRecentRequest("score", result.getReqid())) {
+            useResult(result, wordTranscript, phoneTranscript, tested.contains(path));
+            tested.add(path);
+          }/* else {
           //System.out.println("ignoring " + path + " with req " + result.getReqid());
         }*/
-      }
-    });
+        }
+      });
   }
 }
