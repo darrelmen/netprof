@@ -3,6 +3,7 @@ package mitll.langtest.server.database.custom;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.UserDAO;
+import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import org.apache.log4j.Logger;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -181,6 +183,24 @@ public class UserListDAO extends DAO {
 
   public int getCount() { return getCount(USER_EXERCISE_LIST); }
 
+  public List<UserList> getAllByUser(long userid) {
+    try {
+      String sql = "SELECT * from " + USER_EXERCISE_LIST + " where " +
+        CREATORID + "=" + userid+
+        " order by modified desc";
+
+      List<UserList> lists = getWhere(sql);
+
+      for (UserList ul : lists) {
+        populateList(ul);
+      }
+      return lists;
+
+    } catch (Exception ee) {
+      logger.error("got " + ee, ee);
+    }
+    return Collections.emptyList();
+  }
 
   /**
    * Pulls the list of users out of the database.
@@ -198,10 +218,35 @@ public class UserListDAO extends DAO {
     return Collections.emptyList();
   }
 
-  public List<UserList> getAllPublic() {
+  /**
+   * Get lists by others that have not yet been visited.
+   * Since your lists will appear under your lists, and visited lists will appear under other's lists.
+   * @param userid
+   * @return
+   */
+  public List<UserList> getAllPublic(long userid) {
     try {
-      String sql = "SELECT * from " + USER_EXERCISE_LIST + " where isprivate=false order by modified";
-      return getUserLists(sql,-1);
+      String sql = "SELECT * from " + USER_EXERCISE_LIST + " where isprivate=false and " + CREATORID + "<>" +userid+
+        " order by modified ";
+
+      Set<Long> listsForVisitor = getListsForVisitor(userid);
+
+    //  logger.debug("getAllPublic : lists for " + userid + " : " +listsForVisitor);
+
+      List<UserList> userLists = getUserLists(sql, userid);
+
+   //   logger.debug("userLists for " + userid + " : " +userLists);
+
+      List<UserList> toReturn = new ArrayList<UserList>();
+      for (UserList ul : userLists) {
+        if (!listsForVisitor.contains(ul.getUniqueID())) {
+           toReturn.add(ul);
+        }
+      }
+
+   //   logger.debug("toReturn for " + userid + " : " +toReturn);
+
+      return toReturn;
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
@@ -263,7 +308,7 @@ public class UserListDAO extends DAO {
     try {
       List<UserList> lists = getUserLists(sql,-1);
       if (lists.isEmpty()) {
-        if (warnIfMissing) logger.error("getWhere : huh? no user list with id " + unique + " and sql " + sql);
+        if (warnIfMissing) logger.error("getVisitorsOfList : huh? no user list with id " + unique + " and sql " + sql);
         return null;
       } else {
         return lists.iterator().next();
@@ -274,9 +319,29 @@ public class UserListDAO extends DAO {
     return null;
   }
 
+  public Collection<UserList> getIn(Set<Long> ids) {
+    String s = ids.toString();
+    s = s.replaceAll("\\[","").replaceAll("\\]","");
+    String sql = "SELECT * from " + USER_EXERCISE_LIST + " where uniqueid in (" + s + ") order by modified";
+    logger.debug("sql for get in " + sql);
+    try {
+      List<UserList> lists = getUserLists(sql,-1);
+      if (lists.isEmpty()) {
+      //  if (warnIfMissing) logger.error("getVisitorsOfList : huh? no user list with id " + unique + " and sql " + sql);
+        return Collections.emptyList();
+      } else {
+        return lists;
+      }
+    } catch (SQLException e) {
+      logger.error("got " + e, e);
+    }
+    return null;
+  }
+
+
   /**
    * @see #getAll(long)
-   * @see #getAllPublic()
+   * @see #getAllPublic
    * @see #getWhere(long, boolean)
    * @param sql
    * @param userid
@@ -325,13 +390,21 @@ public class UserListDAO extends DAO {
    */
   private void populateList(UserList where) {
     List<UserExercise> onList = userExerciseDAO.getOnList(where.getUniqueID());
-    //logger.debug("populateList : got " + onList.size() + " for list "+where.getUniqueID());
     where.setExercises(onList);
-    where.setVisitors(userListVisitorJoinDAO.getWhere(where.getUniqueID()));
+    where.setVisitors(userListVisitorJoinDAO.getVisitorsOfList(where.getUniqueID()));
 
-    logger.debug("populateList : got " + onList.size() + " for list " + where.getUniqueID() + " = " + where);
+    if (!onList.isEmpty()) {
+      logger.debug("populateList : got " + onList.size() + " for list " + where.getUniqueID() + " = " + where);
+    }
   }
 
+  public Collection<UserList> getListsForUser(long userid) {
+    Set<Long> listsForVisitor = userListVisitorJoinDAO.getListsForVisitor(userid);
+    if (listsForVisitor.isEmpty()) return Collections.emptyList();
+    else return getIn(listsForVisitor);
+  }
+
+  private Set<Long> getListsForVisitor(long userid) { return userListVisitorJoinDAO.getListsForVisitor(userid);  }
   public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
     this.userExerciseDAO = userExerciseDAO;
   }

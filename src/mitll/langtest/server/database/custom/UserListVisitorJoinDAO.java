@@ -82,13 +82,11 @@ public class UserListVisitorJoinDAO extends DAO {
    *
    * @see UserListDAO#addVisitor(long, long)
    */
-  public void add(long uniqueID, long visitor) {
-    //long id = 0;
-
-    if (!update(uniqueID, visitor)) {
+  public void add(long listID, long visitor) {
+    if (!update(listID, visitor)) {
       try {
         // there are much better ways of doing this...
-        logger.info("add :visitor " + visitor + " to " + uniqueID);
+        logger.info("add :visitor " + visitor + " to " + listID);
 
         Connection connection = database.getConnection();
         PreparedStatement statement;
@@ -96,27 +94,26 @@ public class UserListVisitorJoinDAO extends DAO {
  /*     String prefix = "IF NOT EXISTS (SELECT visitorid" +
         " FROM " + USER_EXERCISE_LIST_VISITOR +
         " WHERE visitorid = " + visitor +
-        " AND userlistid = " + uniqueID +
+        " AND userlistid = " + listID +
         ") ";*/
         statement = connection.prepareStatement(
           "INSERT INTO " + USER_EXERCISE_LIST_VISITOR +
             "(" +
-            USERLISTID +
-            "," +
+            USERLISTID + "," +
             VISITORID + "," +
             MODIFIED +
             ") " +
             "VALUES(?,?,?);");
         int i = 1;
 
-        statement.setLong(i++, uniqueID);
+        statement.setLong(i++, listID);
         statement.setLong(i++, visitor);
         statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));  // smarter way to do this...?
 
         int j = statement.executeUpdate();
 
         if (j != 1)
-          logger.error("huh? didn't insert row for " + uniqueID + " and " + visitor);
+          logger.error("huh? didn't insert row for " + listID + " and " + visitor);
 
 /*      ResultSet rs = statement.getGeneratedKeys(); // will return the ID in ID_COLUMN
       if (rs.next()) {
@@ -129,7 +126,7 @@ public class UserListVisitorJoinDAO extends DAO {
         statement.close();
         database.closeConnection(connection);
 
-        logger.debug("add: now " + getCount(USER_EXERCISE_LIST_VISITOR) + " in " + USER_EXERCISE_LIST_VISITOR);
+        logger.debug("UserListVisitorJoinDAO.add: now " + getCount(USER_EXERCISE_LIST_VISITOR) + " in " + USER_EXERCISE_LIST_VISITOR);
       } catch (Exception ee) {
         logger.error("got " + ee, ee);
       }
@@ -152,29 +149,42 @@ public class UserListVisitorJoinDAO extends DAO {
   }*/
 
   /**
+   *
    * @see mitll.langtest.server.database.custom.UserListDAO#populateList(mitll.langtest.shared.custom.UserList)
    * @param listid
    * @return
    */
-  public Set<Long> getWhere(long listid) {
+  public Set<Long> getVisitorsOfList(long listid) {
     String sql = "SELECT * from " + USER_EXERCISE_LIST_VISITOR + " where " +
       USERLISTID +
     "=" + listid + " ORDER BY " +MODIFIED + " DESC";
     try {
-      return getVisitors(sql);
+      return getVisitors(sql,VISITORID);
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
     return null;
   }
 
-  private Set<Long> getVisitors(String sql) throws SQLException {
+  public Set<Long> getListsForVisitor(long userid) {
+    String sql = "SELECT * from " + USER_EXERCISE_LIST_VISITOR + " where " +
+      VISITORID +
+      "=" + userid + " ORDER BY " +MODIFIED + " DESC";
+    try {
+      return getVisitors(sql,USERLISTID);
+    } catch (SQLException e) {
+      logger.error("got " + e, e);
+    }
+    return null;
+  }
+
+  private Set<Long> getVisitors(String sql, String column) throws SQLException {
     Connection connection = database.getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
     ResultSet rs = statement.executeQuery();
     Set<Long> visitors = new HashSet<Long>();
 
-    while (rs.next()) { visitors.add(rs.getLong(VISITORID)); }
+    while (rs.next()) { visitors.add(rs.getLong(column)); }
     rs.close();
     statement.close();
     database.closeConnection(connection);
@@ -182,15 +192,21 @@ public class UserListVisitorJoinDAO extends DAO {
     return visitors;
   }
 
-  private boolean update(long uniqueID, long visitor) {
+  /**
+   * @see #add
+   * @param userListID
+   * @param visitor
+   * @return
+   */
+  private boolean update(long userListID, long visitor) {
     try {
       Connection connection = database.getConnection();
       String sql = "UPDATE " + USER_EXERCISE_LIST_VISITOR +
         " " +
         "SET " +
         "modified=?" +
-        "WHERE " +UNIQUEID +
-        "=" + uniqueID+
+        "WHERE " +USERLISTID +
+        "=" + userListID+
         " AND " +VISITORID + "=" +visitor;
 
       PreparedStatement statement = connection.prepareStatement(sql);
@@ -201,7 +217,10 @@ public class UserListVisitorJoinDAO extends DAO {
       database.closeConnection(connection);
       boolean b = i > 0;
       if (b) {
-        logger.info("did update for " + uniqueID + " and " + visitor + " in " + USER_EXERCISE_LIST_VISITOR);
+        logger.debug("did update for list " + userListID + " and " + visitor + " in " + USER_EXERCISE_LIST_VISITOR);
+      }
+      else {
+        logger.info("did NOT update for list " + userListID + " and " + visitor + " in " + USER_EXERCISE_LIST_VISITOR);
       }
       return b;
     } catch (Exception e) {
