@@ -24,17 +24,17 @@ import mitll.langtest.shared.ExerciseShell;
  * Time: 1:37 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ExerciseListLayout {
+public class ExerciseListLayout<T extends ExerciseShell> {
   private final PropertyHandler props;
-  private ListInterface<? extends ExerciseShell> exerciseList;
+  private ListInterface<T> exerciseList;
 
   public ExerciseListLayout(PropertyHandler props) {
     this.props = props;
   }
 
-  public ListInterface<? extends ExerciseShell> makeFlashcardExerciseList(FluidContainer container, LangTestDatabaseAsync service,
+  public ListInterface<T> makeFlashcardExerciseList(FluidContainer container, LangTestDatabaseAsync service,
                                                  UserManager userManager) {
-    this.exerciseList = new BootstrapFlashcardExerciseList<Exercise>(container, service, userManager, props.isTimedGame(),
+    this.exerciseList = new BootstrapFlashcardExerciseList<T>(container, service, userManager, props.isTimedGame(),
       props.getGameTimeSeconds(), props);
     return exerciseList;
   }
@@ -44,15 +44,15 @@ public class ExerciseListLayout {
    *
    * @see LangTest#makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, com.google.gwt.user.client.ui.Panel)
    */
-  public ListInterface<? extends ExerciseShell> makeExerciseList(FluidRow secondRow,
-                                        Panel leftColumn, UserFeedback feedback,
+  public ListInterface<T> makeExerciseList(FluidRow secondRow,
+                                        Panel exerciseListContainer, UserFeedback feedback,
                                         Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                         ExerciseController controller) {
     boolean isGrading = props.isGrading();
     this.exerciseList = makeExerciseList(secondRow, isGrading, feedback, currentExerciseVPanel, service, controller);
 
     boolean hideExerciseList = (props.isMinimalUI() && !props.isGrading()) && !props.isAdminView();
-    useExerciseList(leftColumn);
+    useExerciseList(exerciseListContainer);
     if (hideExerciseList) {
       exerciseList.hideExerciseList();
     }
@@ -60,11 +60,11 @@ public class ExerciseListLayout {
     return exerciseList;
   }
 
-  private void useExerciseList(Panel leftColumn) {
+  private void useExerciseList(Panel exerciseListContainer) {
     if (showOnlyOneExercise()) {
       exerciseList.setExercise_title(props.getExercise_title());
     }
-    addExerciseListOnLeftSide(leftColumn);
+    addExerciseListOnLeftSide(exerciseListContainer);
   }
 
   /**
@@ -77,7 +77,7 @@ public class ExerciseListLayout {
    * @param controller
    * @return
    */
-  private <T extends ExerciseShell> ListInterface<T> makeExerciseList(FluidRow secondRow, boolean isGrading, final UserFeedback feedback,
+  private ListInterface<T> makeExerciseList(FluidRow secondRow, boolean isGrading, final UserFeedback feedback,
                                          Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                          ExerciseController controller) {
     boolean showTypeAhead = !props.isCRTDataCollectMode();
@@ -109,15 +109,15 @@ public class ExerciseListLayout {
 
   /**
    * @see #useExerciseList
-   * @param leftColumnContainer
+   * @param exerciseListContainer
    */
-  private void addExerciseListOnLeftSide(Panel leftColumnContainer) {
-   // leftColumnContainer.clear();
+  private void addExerciseListOnLeftSide(Panel exerciseListContainer) {
+   // exerciseListContainer.clear();
     if (props.isTeacherView()) {
-      leftColumnContainer.add(exerciseList.getWidget());
+      exerciseListContainer.add(exerciseList.getWidget());
     } else {
-      leftColumnContainer.addStyleName("inlineBlockStyle");
-      leftColumnContainer.add(exerciseList.getExerciseListOnLeftSide(props));
+      //exerciseListContainer.addStyleName("inlineBlockStyle");
+      exerciseListContainer.add(exerciseList.getExerciseListOnLeftSide(props));
     }
   }
 
