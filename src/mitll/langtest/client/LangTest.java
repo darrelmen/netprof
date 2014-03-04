@@ -36,9 +36,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
-import mitll.langtest.client.custom.CommentNPFExercise;
-import mitll.langtest.client.custom.Navigation;
-import mitll.langtest.client.custom.QCNPFExercise;
+import mitll.langtest.client.custom.*;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.ModalInfoDialog;
@@ -107,7 +105,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private HTML releaseStatus;
   private StartupInfo startupInfo;
 
-  private Navigation navigation;
+  private TabContainer navigation;
 
   /**
    * Make an exception handler that displays the exception.
@@ -237,7 +235,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     boolean usualLayout = !showOnlyOneExercise();
     Container verticalContainer = new FluidContainer();
-    //verticalContainer.addStyleName("rootContainer");
     if (usualLayout) {
       RootPanel.get().add(verticalContainer);
     }
@@ -354,8 +351,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void loadVisualizationPackages() {
-    //System.out.println("loadVisualizationPackages...");
-
     VisualizationUtils.loadVisualizationApi(new Runnable() {
       @Override
       public void run() {
@@ -891,7 +886,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   @Override
   public void resetState() {
-    everShownInitialState = false;
+    //everShownInitialState = false;
     History.newItem(""); // clear history!
     userManager.clearUser();
     exerciseList.removeCurrentExercise();
@@ -905,7 +900,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       if (navigation != null) {
         belowFirstRow.remove(navigation.getContainer());
       }
-      navigation = new Navigation(service, userManager, this, exerciseList, this);
+      navigation = getProps().isCombinedMode() ? new Combined(service, userManager, this, exerciseList, this) :
+          new Navigation(service, userManager, this, exerciseList, this);
       belowFirstRow.add(navigation.getNav(bothSecondAndThird));
       showInitialState();
     }
@@ -937,7 +933,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
-  private boolean everShownInitialState =false;
+  //private boolean everShownInitialState =false;
   private boolean doEverythingAfterFactory(long userID) {
 
     if (userID != lastUser || (props.isGoodwaveMode() || props.isFlashCard() && !props.isTimedGame())) {
@@ -981,11 +977,16 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       flashRecordPanel.initFlash();
     }
     else {
-      boolean gotPermission = flashRecordPanel != null && flashRecordPanel.gotPermission();
-      System.out.println("checkInitFlash : skip init flash, just checkLogin (got permission = " + gotPermission+")");
+      gotMicPermission();
 
       checkLogin();
     }
+  }
+
+  public boolean gotMicPermission() {
+    boolean gotPermission = flashRecordPanel != null && flashRecordPanel.gotPermission();
+    System.out.println("checkInitFlash : skip init flash, just checkLogin (got permission = " + gotPermission+")");
+    return gotPermission;
   }
 
   /**
