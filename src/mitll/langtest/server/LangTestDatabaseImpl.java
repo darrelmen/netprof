@@ -1268,9 +1268,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getGradeCountPerExercise();
   }
 
+  /**
+   * @see mitll.langtest.client.custom.MyFlashcardExercisePanelFactory.StatsPracticePanel#onSetComplete()
+   * @param userid
+   * @param listid
+   * @param lastID
+   * @return
+   */
   @Override
   public List<Session> getUserHistoryForList(long userid, long listid, String lastID) {
-    return db.getUserHistoryForList(userid,listid,lastID);
+    return db.getUserHistoryForList(listid,lastID);
   }
 
   private final Leaderboard leaderboard = new Leaderboard();
