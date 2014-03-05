@@ -18,7 +18,7 @@ import java.util.Set;
 public class Session implements IsSerializable, SetScore {
   private int numAnswers;
   public long duration;
-  private int correct;
+  //private int correct;
   private long userid;
   Map<String,Boolean> exidToCorrect = new HashMap<String,Boolean>();
 
@@ -50,9 +50,9 @@ public class Session implements IsSerializable, SetScore {
     return count;
   }
 
-  public void setCorrect(int correct) {
+/*  public void setCorrect(int correct) {
     this.correct = correct;
-  }
+  }*/
 
   public void incrementCorrect(String id,boolean correct) {
     exidToCorrect.put(id,correct);
@@ -67,5 +67,8 @@ public class Session implements IsSerializable, SetScore {
     this.userid = userid;
   }
 
-  public String toString() { return "num " + getNumAnswers() + " dur " + duration/(60*1000) + " minutes, avg " + getAverage()/1000 + " secs"; }
+  public String toString() {
+    return "user " + userid+
+      " num " + getNumAnswers() + " dur " + duration/(60*1000) + " minutes, avg " + getAverage()/1000 +
+      " secs " + getCorrect() + " correct"; }
 }
