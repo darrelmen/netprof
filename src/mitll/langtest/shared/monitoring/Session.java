@@ -70,5 +70,5 @@ public class Session implements IsSerializable, SetScore {
   public String toString() {
     return "user " + userid+
       " num " + getNumAnswers() + " dur " + duration/(60*1000) + " minutes, avg " + getAverage()/1000 +
-      " secs " + getCorrect() + " correct"; }
+      " secs " + getCorrect() + " correct : " + exidToCorrect; }
 }
