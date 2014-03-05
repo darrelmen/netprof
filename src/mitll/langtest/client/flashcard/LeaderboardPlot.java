@@ -27,7 +27,6 @@ public class LeaderboardPlot {
   public static final String AVERAGE = "Average";
   public static final String TOP_SCORE = "Top Score";
   public static final String PERSONAL_BEST = "Personal Best";
-  // public static final int AUTO_HIDE_DELAY = 3000;
 
   /**
    * @deprecated  for now
@@ -87,7 +86,7 @@ public class LeaderboardPlot {
       currentSelection.toString().replace("{", "").replace("}", "").replace("=", " ").replace("[", "").replace("]", "");
     String title = "Leaderboard";
 
-    Chart chart = getChart(scores, userID, gameTimeSeconds, title, hashMapToStringCleaned);
+    Chart chart = getChart(scores, userID, gameTimeSeconds, title, hashMapToStringCleaned, true );
 
     modal.setMaxHeigth("650px");
     modal.setHeight("550px");
@@ -126,64 +125,52 @@ public class LeaderboardPlot {
    * @param gameTimeSeconds
    * @param title
    * @param subtitle
-   * @param <T>
+   * @param useCorrect
    * @return
    */
-  public <T extends SetScore> Chart getChart(List<T> scores, long userID, int gameTimeSeconds, String title, String subtitle) {
-    int pbCorrect = 0;
-    int top = 0;
-    float totalCorrect = 0;
-    System.out.println("getChart : for user " +userID + " scores " + scores.size());
-
-    List<Float> yValuesForUser = new ArrayList<Float>();
-    for (SetScore score : scores) {
-      if (score.getUserid() == userID) {
-        if (score.getCorrect() > pbCorrect) pbCorrect = score.getCorrect();
-        yValuesForUser.add((float) score.getCorrect());
-        System.out.println("showLeaderboardPlot : for user " +userID + " got " + score);
-      }
-      else {
-        System.out.println("\tshowLeaderboardPlot : for user " +userID + " got " + score);
-      }
-      if (score.getCorrect() > top) {
-        top = score.getCorrect();
-      }
-      totalCorrect += score.getCorrect();
-    }
-
-    return getChart(scores, gameTimeSeconds, pbCorrect, top, totalCorrect, yValuesForUser, title,subtitle);
+  public <T extends SetScore> Chart getChart(List<T> scores, long userID, int gameTimeSeconds,
+                                             String title, String subtitle, boolean useCorrect) {
+    System.out.println("getChart : for user " +userID + " scores " + scores.size() + " use correct " +useCorrect);
+    GetPlotValues getPlotValues = new GetPlotValues<T>(scores, userID, useCorrect).invoke();
+    return getChart(scores, gameTimeSeconds, getPlotValues, title, subtitle, useCorrect ? "Correct" : "Score", !useCorrect);
   }
 
   private <T extends SetScore> Chart getChart(List<T> scores, int gameTimeSeconds,
-                         int pbCorrect, int top, float total, List<Float> yValuesForUser,String title, String subtitle) {
+                                              GetPlotValues getPlotValues,
+                                              String title, String subtitle, String seriesName,
+                                              boolean topIs100) {
+
+    float pbCorrect = getPlotValues.getPbCorrect();
+    float top = getPlotValues.getTop();
+    float total = getPlotValues.getTotalCorrect();
+    List<Float> yValuesForUser = getPlotValues.getyValuesForUser();
+
     Chart chart = new Chart()
       .setType(Series.Type.SPLINE)
       .setChartTitleText(title)
       .setChartSubtitleText(subtitle)
       .setMarginRight(10);
 
-    addSeries(gameTimeSeconds, yValuesForUser, chart, "Correct");
+    addSeries(gameTimeSeconds, yValuesForUser, chart, seriesName);
 
     PlotBand personalBest = getPersonalBest(pbCorrect, chart);
     PlotBand topScore = getTopScore(top, chart);
     PlotBand avgScore = getAvgScore(scores, total, chart);
 
-    if (total > 2) {
-      if (top != pbCorrect) {
-        chart.getYAxis().setPlotBands(
-          avgScore,
-          personalBest,
-          topScore
-        );
-      } else {
-        chart.getYAxis().setPlotBands(
-          avgScore,
-          personalBest
-        );
-      }
+    if (top != pbCorrect) {
+      chart.getYAxis().setPlotBands(
+        avgScore,
+        personalBest,
+        topScore
+      );
+    } else {
+      chart.getYAxis().setPlotBands(
+        avgScore,
+        personalBest
+      );
     }
 
-    configureChart(top, chart);
+    configureChart(topIs100 ? 100f : top, chart, subtitle);
     return chart;
   }
 
@@ -197,12 +184,12 @@ public class LeaderboardPlot {
     chart.addSeries(series);
   }
 
-  private void configureChart(int top, Chart chart) {
-    chart.getYAxis().setAxisTitleText("# Correct");
+  private void configureChart(float top, Chart chart,String title) {
+    chart.getYAxis().setAxisTitleText(title);
     chart.getXAxis().setAllowDecimals(false);
     chart.getYAxis().setAllowDecimals(true);
     chart.getYAxis().setMin(0);
-    chart.getYAxis().setMax(top + 1);
+    chart.getYAxis().setMax(top == 100f ? top : top + 1);
   }
 
   private <T extends SetScore> PlotBand getAvgScore(List<T> scores, float total, Chart chart) {
@@ -216,7 +203,7 @@ public class LeaderboardPlot {
     return avgScore;
   }
 
-  private PlotBand getTopScore(int top, Chart chart) {
+  private PlotBand getTopScore(float top, Chart chart) {
     PlotBand topScore = chart.getYAxis().createPlotBand()
       .setColor("#46bf00")
       .setFrom(under(top))
@@ -226,9 +213,9 @@ public class LeaderboardPlot {
     return topScore;
   }
 
-  private PlotBand getPersonalBest(int pbCorrect, Chart chart) {
+  private PlotBand getPersonalBest(float pbCorrect, Chart chart) {
     float from = under(pbCorrect);
-    float to = over(pbCorrect);
+    float to   = over (pbCorrect);
     PlotBand personalBest = chart.getYAxis().createPlotBand()
       .setColor("#f18d24")
       .setFrom(from)
@@ -276,4 +263,65 @@ public class LeaderboardPlot {
 
   private float over(float pbCorrect) { return pbCorrect + HALF;  }
   private float under(float pbCorrect) { return pbCorrect - HALF;  }
+
+  private static class GetPlotValues<T extends SetScore> {
+    private List<T> scores;
+    private long userID;
+    private float pbCorrect;
+    private float top;
+    private float totalCorrect;
+    private List<Float> yValuesForUser;
+    boolean useCorrect = true;
+
+    public GetPlotValues(List<T> scores, long userID, boolean useCorrect) {
+      this.scores = scores;
+      this.userID = userID;
+      this.useCorrect = useCorrect;
+    }
+
+    public float getPbCorrect() {
+      return pbCorrect;
+    }
+
+    public float getTop() {
+      return top;
+    }
+
+    public float getTotalCorrect() {
+      return totalCorrect;
+    }
+
+    public List<Float> getyValuesForUser() {
+      return yValuesForUser;
+    }
+
+    public GetPlotValues invoke() {
+      pbCorrect = 0;
+      top = 0;
+      totalCorrect = 0;
+
+      yValuesForUser = new ArrayList<Float>();
+      for (SetScore score : scores) {
+        float value = getValue(score);
+
+        if (score.getUserid() == userID) {
+          if (value > pbCorrect) pbCorrect = value;
+          yValuesForUser.add(value);
+          System.out.println("showLeaderboardPlot : for user " +userID + " got " + score);
+        }
+        else {
+          System.out.println("\tshowLeaderboardPlot : for user " +score.getUserid() + " got " + score);
+        }
+        if (value > top) {
+          top = value;
+          System.out.println("\tshowLeaderboardPlot : new top score for user " +score.getUserid() + " got " + score);
+        }
+        totalCorrect += value;
+      }
+      return this;
+    }
+    private float getValue(SetScore score) {
+      return  useCorrect ? score.getCorrect() : Math.round(100f*score.getAvgScore());
+    }
+  }
 }
