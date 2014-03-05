@@ -2,7 +2,6 @@ package mitll.langtest.client.custom;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
-import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
@@ -10,6 +9,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -95,7 +95,8 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
   }
 
   private class StatsPracticePanel extends BootstrapExercisePanel {
-    private Chart chart;
+    //private Chart chart, chart2;
+    private Panel container;
     public StatsPracticePanel(Exercise e) {
       super(e, MyFlashcardExercisePanelFactory.this.service,
         MyFlashcardExercisePanelFactory.this.controller, 40, false, MyFlashcardExercisePanelFactory.this.controlState);
@@ -137,15 +138,6 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
 
     public void onSetComplete() {
       navigationHelper.setVisible(false);
-      //System.out.println("onSetComplete : total done " + totalDone);
-      int totalCorrect = getCorrect();
-      int totalIncorrect = getIncorrect();
-      double totalScore = getScore();
-      belowContentDiv.add(new Heading(2, totalCorrect +
-        " Correct (" +toPercent(totalCorrect,totalCorrect+totalIncorrect)+
-        ")",
-        "Pronunciation " + toPercent(totalScore,totalCorrect)));
-
       final int user = controller.getUser();
       service.getUserHistoryForList(user,userListID,lastExercise.getID(),new AsyncCallback<List<Session>>() {
         @Override
@@ -155,16 +147,31 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
 
         @Override
         public void onSuccess(List<Session> result) {
-           System.out.println("onSetComplete.onSuccess : result " + result.size());
-
-          setMainContentVisible(false);
-          chart = new LeaderboardPlot().getChart(result, user, -1, "Progress", "# correct");
-          belowContentDiv.add(chart);
-          belowContentDiv.add(getRepeatButton());
+          showFeedbackCharts(result, user);
         }
       });
       // TODO : maybe add table showing results per word
-      // TODO : do we do aggregate scores
+    }
+
+    private void showFeedbackCharts(List<Session> result, int user) {
+      System.out.println("onSetComplete.onSuccess : result " + result.size());
+
+      setMainContentVisible(false);
+      int totalCorrect = getCorrect();
+      int totalIncorrect = getIncorrect();
+      double totalScore = getScore();
+      int all = totalCorrect + totalIncorrect;
+      String correct = totalCorrect +" Correct (" + toPercent(totalCorrect, all) + ")";
+      String pronunciation = "Pronunciation " + toPercent(totalScore, all);
+
+      Chart chart  = new LeaderboardPlot().getChart(result, user, -1, correct, "# correct", true);
+      Chart chart2 = new LeaderboardPlot().getChart(result, user, -1, pronunciation, "score %", false);
+      container = new HorizontalPanel();
+      container.add(chart);
+      container.add(chart2);
+      belowContentDiv.add(container);
+      belowContentDiv.add(getRepeatButton());
+      exerciseList.hide();
     }
 
     private int getCorrect() {
@@ -205,8 +212,9 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
         @Override
         public void onClick(ClickEvent event) {
           setMainContentVisible(true);
-          belowContentDiv.remove(chart);
-//          belowContentDiv.remove(chart);
+          belowContentDiv.remove(container);
+          exerciseList.show();
+
           reset();
 
           navigationHelper.setVisible(true);
