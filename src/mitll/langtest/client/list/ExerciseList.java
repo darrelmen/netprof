@@ -371,7 +371,8 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   }
 
   @Override
-  public void hideExerciseList() {  getParent().setVisible(false);  }
+  public void hide() {  getParent().setVisible(false);  }
+  public void show() {  getParent().setVisible(true);  }
 
   /**
    * @see #rememberAndLoadFirst
