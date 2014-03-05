@@ -6,6 +6,7 @@ import mitll.langtest.shared.grade.Grade;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -224,7 +225,8 @@ public class Result implements IsSerializable {
   @Override
   public String toString() {
     return "Result #" + uniqueID + "\t\tby user " + userid + "\texid " + id + " " +
-        (flq ? "flq" : "english") + "  ans " +answer+
+        (flq ? "flq" : "english") + " at " + new Date(timestamp)+
+      "  ans " +answer+
       " " + (spoken ? "spoken" : "written") + " audioType : " + audioType +
         " valid " + valid + " " + (correct ? "correct":"incorrect") + " score " + pronScore;
   }
