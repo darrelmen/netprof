@@ -21,7 +21,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   private Panel parentPanel;
 
   /**
-   * @see RecordAudioPanel#makePlayAudioPanel(com.google.gwt.user.client.ui.Widget)
+   * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel(com.google.gwt.user.client.ui.Widget, String)
    * @param exercise
    * @param controller
    * @param widgets
@@ -35,7 +35,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
                                        Panel widgets,
                                        RecordAudioPanel recordAudioPanel, LangTestDatabaseAsync service, int index,
                                        boolean recordInResults) {
-    super(exercise, controller, service, index, recordInResults, controller.getAudioType());
+    super(exercise, controller, service, index, recordInResults, controller.getAudioType(), "Record", "Stop");
     this.recordAudioPanel = recordAudioPanel;
     this.parentPanel = widgets;
     getElement().setId("WaveformPostAudioRecordButton_" +index);
@@ -91,7 +91,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   }
 
   /**
-   * @see mitll.langtest.client.exercise.RecordAudioPanel#makePlayAudioPanel(com.google.gwt.user.client.ui.Widget)
+   * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel(com.google.gwt.user.client.ui.Widget, String)
    * @param playAudioPanel
    */
   public void setPlayAudioPanel(PlayAudioPanel playAudioPanel) {
