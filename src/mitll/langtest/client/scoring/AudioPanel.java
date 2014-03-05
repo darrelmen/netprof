@@ -77,18 +77,19 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private static final boolean DEBUG_GET_IMAGES = false;
 
   /**
-   * @see ScoringAudioPanel#ScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener, int)
+   * @see ScoringAudioPanel#ScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener, int, String)
    * @param service
    * @param showSpectrogram
    * @param gaugePanel
    * @param rightMargin
+   * @param playButtonSuffix
    */
   public AudioPanel(String path, LangTestDatabaseAsync service,
-                    ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin) {
+                    ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin, String playButtonSuffix) {
     this(service, controller, showSpectrogram, gaugePanel, 1.0f, rightMargin);
     this.audioPath = path;
 
-    addWidgets();
+    addWidgets(playButtonSuffix);
   }
 
   public AudioPanel(LangTestDatabaseAsync service,
@@ -115,12 +116,13 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
   /**
    * Replace the html 5 audio tag with our fancy waveform widget.
-   * @see #AudioPanel(String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener, int)
+   * @see #AudioPanel(String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener, int, String)
    * @see mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, int, boolean)
    * @return
+   * @param playButtonSuffix
    */
-  public void addWidgets() {
-    //System.out.println("AudioPanel.addWidgets audio path = " + path);
+  public void addWidgets(String playButtonSuffix) {
+    System.out.println("AudioPanel.addWidgets playButtonSuffix = " + playButtonSuffix);
     imageContainer = new VerticalPanel();
 
     HorizontalPanel hp = new HorizontalPanel();
@@ -132,7 +134,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     audioPositionPopup = new AudioPositionPopup(imageContainer);
 
     if (hasAudio()) {
-      playAudio = getPlayButtons(beforePlayWidget);
+      playAudio = getPlayButtons(beforePlayWidget, playButtonSuffix);
       hp.add(playAudio);
       hp.setCellHorizontalAlignment(playAudio, HorizontalPanel.ALIGN_LEFT);
     }
@@ -170,9 +172,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     add(imageContainer);
   }
 
-  protected boolean hasAudio() {
-    return true;
-  }
+  protected boolean hasAudio() {  return true;  }
 
   public void doPause() { playAudio.doPause(); }
 
@@ -207,7 +207,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   public ImageAndCheck getWaveform() {
     return waveform;
   }
-
   public ImageAndCheck getSpectrogram() {
     return spectrogram;
   }
@@ -270,24 +269,23 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       System.err.println("bad segment " + start + "-" + end);
     }
     else {
-      System.out.println("playSegment segment " + start + "-" + end);
-
+      //System.out.println("playSegment segment " + start + "-" + end);
       playAudio.repeatSegment(start,end);
     }
   }
 
     /**
-    * @see #addWidgets()
+    * @see #addWidgets(String)
     * @return PlayAudioPanel
     */
-  private PlayAudioPanel getPlayButtons(Widget toTheLeftWidget) {
-    PlayAudioPanel playAudio = makePlayAudioPanel(toTheLeftWidget);
+  private PlayAudioPanel getPlayButtons(Widget toTheLeftWidget, String playButtonSuffix) {
+    PlayAudioPanel playAudio = makePlayAudioPanel(toTheLeftWidget, playButtonSuffix);
     playAudio.addListener(audioPositionPopup);
     return playAudio;
   }
 
-  protected PlayAudioPanel makePlayAudioPanel(final Widget toTheLeftWidget) {
-    return new PlayAudioPanel(soundManager) {
+  protected PlayAudioPanel makePlayAudioPanel(final Widget toTheLeftWidget, String playButtonSuffix) {
+    return new PlayAudioPanel(soundManager, playButtonSuffix) {
       @Override
       protected void addButtons() {
         if (toTheLeftWidget != null) {
