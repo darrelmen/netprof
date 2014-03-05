@@ -588,21 +588,20 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * TODO : expand to include all users.
-   * @param userid
+   * TODO : do all average calc on server!
+   *
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getUserHistoryForList(long, long, String)
+   * @see mitll.langtest.client.custom.MyFlashcardExercisePanelFactory.StatsPracticePanel#onSetComplete
    * @param listid
    * @param lastID
    * @return
    */
-  public List<Session> getUserHistoryForList(long userid, long listid, String lastID) {
+  public List<Session> getUserHistoryForList(long listid, String lastID) {
     UserList userListByID = getUserListManager().getUserListByID(listid);
     Collection<UserExercise> exercises = userListByID.getExercises();
     Set<String> ids = new HashSet<String>();
     for (UserExercise ue : exercises) ids.add(ue.getID());
-   // List<Session> sessionsForUserIn = resultDAO.getSessionsForUserIn(userid, ids, lastID);
-    List<Session> sessionsForUserIn = resultDAO.getSessionsForUserIn2(ids, lastID);
-    return sessionsForUserIn;
-
+    return resultDAO.getSessionsForUserIn2(ids, lastID);
   }
 
   /**
