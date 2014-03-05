@@ -61,7 +61,7 @@ public class LeaderboardPlot {
     return showLeaderboardPlot(scores, userID, gameTimeSeconds, currentSelection, prompt, null, null, autoHideDelay);
   }*/
 
-  private Modal showLeaderboardPlot(List<SetScore> scores, final long userID, int gameTimeSeconds,
+/*  private Modal showLeaderboardPlot(List<SetScore> scores, final long userID, int gameTimeSeconds,
                                   Map<String, Collection<String>> currentSelection,
                                   String prompt,
                                   final ClickHandler onYes, final ClickHandler onNo, int autoHideDelay) {
@@ -73,7 +73,7 @@ public class LeaderboardPlot {
 
     modal.show();
     return modal;
-  }
+  }*/
 
   private void makeChart(List<SetScore> scores, long userID, int gameTimeSeconds,
                          Map<String, Collection<String>> currentSelection,
@@ -122,12 +122,17 @@ public class LeaderboardPlot {
     float totalCorrect = 0;
     List<Float> yValuesForUser = new ArrayList<Float>();
     for (SetScore score : scores) {
-      if (score.getUserid() == userID /*|| score.getGiverID() == userID*/) {
+      if (score.getUserid() == userID) {
         if (score.getCorrect() > pbCorrect) pbCorrect = score.getCorrect();
         yValuesForUser.add((float) score.getCorrect());
-        System.out.println("showLeaderboardPlot : for " +userID + " got " + score);
+        System.out.println("showLeaderboardPlot : for user " +userID + " got " + score);
       }
-      if (score.getCorrect() > top) top = score.getCorrect();
+      else {
+        System.out.println("\tshowLeaderboardPlot : for user " +userID + " got " + score);
+      }
+      if (score.getCorrect() > top) {
+        top = score.getCorrect();
+      }
       totalCorrect += score.getCorrect();
     }
 
@@ -142,7 +147,7 @@ public class LeaderboardPlot {
       .setChartSubtitleText(subtitle)
       .setMarginRight(10);
 
-    addSeries(gameTimeSeconds, yValuesForUser, chart);
+    addSeries(gameTimeSeconds, yValuesForUser, chart, "Correct");
 
     PlotBand personalBest = getPersonalBest(pbCorrect, chart);
     PlotBand topScore = getTopScore(top, chart);
@@ -167,10 +172,10 @@ public class LeaderboardPlot {
     return chart;
   }
 
-  private void addSeries(int gameTimeSeconds, List<Float> yValuesForUser, Chart chart) {
+  private void addSeries(int gameTimeSeconds, List<Float> yValuesForUser, Chart chart, String seriesTitle) {
     Float[] yValues = yValuesForUser.toArray(new Float[0]);
 
-    String seriesLabel = gameTimeSeconds > 0 ? "Correct in " + gameTimeSeconds + " seconds" : "Score";
+    String seriesLabel = gameTimeSeconds > 0 ? "Correct in " + gameTimeSeconds + " seconds" : seriesTitle;
     Series series = chart.createSeries()
       .setName(seriesLabel)
       .setPoints(yValues);
