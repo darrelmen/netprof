@@ -516,11 +516,15 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
   }
 
   private RecordButtonPanel answerWidget;
+  Widget button;
 
   private Widget getAnswerAndRecordButtonRow(Exercise e, LangTestDatabaseAsync service, ExerciseController controller) {
     RecordButtonPanel answerWidget = getAnswerWidget(e, service, controller, 1, controller.getProps().shouldAddRecordKeyBinding() || addKeyBinding);
     this.answerWidget = answerWidget;
-    return getRecordButtonRow(answerWidget.getRecordButton());
+   // button = answerWidget.getActualRecordButton();
+    Widget recordButton = answerWidget.getRecordButton();
+    button = recordButton;
+    return getRecordButtonRow(recordButton);
   }
 
   /**
@@ -664,6 +668,10 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     return soundFeedback;
   }
 
+  /**
+   * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#receivedAudioAnswer
+   * @param result
+   */
   public void receivedAudioAnswer(final AudioAnswer result) {
     String path = exercise.getRefAudio() != null ? exercise.getRefAudio() : exercise.getSlowAudioRef();
     final boolean hasRefAudio = path != null;
@@ -676,7 +684,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
 
     String feedback = "";
     if (badAudioRecording) {
-      showPopup(result.validity.getPrompt());
+      showPopup(result.validity.getPrompt(), button);
       nextAfterDelay(correct, "");
     } else if (correct) {
       showCorrectFeedback(score);
@@ -693,11 +701,12 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
    * @param html
    * @see #receivedAudioAnswer
    */
-  private void showPopup(String html) {
+  private void showPopup(String html, Widget button) {
     final PopupPanel pleaseWait = new DecoratedPopupPanel();
     pleaseWait.setAutoHideEnabled(true);
     pleaseWait.add(new HTML(html));
-    pleaseWait.center();
+  //  pleaseWait.center();
+    pleaseWait.showRelativeTo(button);
 
     Timer t = new Timer() {
       @Override
@@ -712,7 +721,6 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     showPronScoreFeedback(score, PRONUNCIATION_SCORE);
     getSoundFeedback().playCorrect();
   }
-
 
   /**
    * If there's reference audio, play it and wait for it to finish.
@@ -894,13 +902,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
   }
 
   private void goToNextAfter(int delay) {
-    Timer t = new Timer() {
-      @Override
-      public void run() {
-        loadNext();
-      }
-    };
-    t.schedule(controller.getProps().isDemoMode() ? LONG_DELAY_MILLIS : delay);
+    loadNextOnTimer(controller.getProps().isDemoMode() ? LONG_DELAY_MILLIS : delay);
   }
 
   private int getFeedbackLengthProportionalDelay(String feedback) {
@@ -945,6 +947,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     } else return "";
   }
 
+  private Timer currentTimer = null;
   /**
    * @param correct
    * @param feedback
@@ -968,15 +971,11 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
       }
       t.schedule(controller.getProps().isDemoMode() ? LONG_DELAY_MILLIS : correct ? DELAY_MILLIS : incorrectDelay);
     } else {
+      System.out.println("doing nextAfterDelay : correct " + correct + " feedback " + feedback);
+
       if (correct) {
         // go to next item
-        Timer t = new Timer() {
-          @Override
-          public void run() {
-            loadNext();
-          }
-        };
-        t.schedule(DELAY_MILLIS);
+        loadNextOnTimer(DELAY_MILLIS);
       } else {
         initRecordButton();
         clearFeedback();
@@ -984,8 +983,27 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     }
   }
 
+  private void loadNextOnTimer(final int delay) {
+    Timer t = new Timer() {
+      @Override
+      public void run() {
+        currentTimer = null;
+        loadNext();
+      }
+    };
+    currentTimer = t;
+    t.schedule(delay);
+  }
+
+  protected void cancelTimer() {
+    if (currentTimer != null) currentTimer.cancel();
+  }
+
   protected void initRecordButton() {  answerWidget.initRecordButton();  }
 
+  /**
+   * @see #nextAfterDelay(boolean, String)
+   */
   protected void loadNext() {
     System.out.println("loadNext after " + exercise.getID());
     controller.getExerciseList().loadNextExercise(exercise);
