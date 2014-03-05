@@ -24,7 +24,10 @@ import java.util.Map;
 
 public class LeaderboardPlot {
   public static final float HALF = (1f / 4f);
- // public static final int AUTO_HIDE_DELAY = 3000;
+  public static final String AVERAGE = "Average";
+  public static final String TOP_SCORE = "Top Score";
+  public static final String PERSONAL_BEST = "Personal Best";
+  // public static final int AUTO_HIDE_DELAY = 3000;
 
   /**
    * @deprecated  for now
@@ -116,10 +119,22 @@ public class LeaderboardPlot {
     }
   }
 
+  /**
+   * @see mitll.langtest.client.custom.MyFlashcardExercisePanelFactory.StatsPracticePanel#onSetComplete()
+   * @param scores
+   * @param userID
+   * @param gameTimeSeconds
+   * @param title
+   * @param subtitle
+   * @param <T>
+   * @return
+   */
   public <T extends SetScore> Chart getChart(List<T> scores, long userID, int gameTimeSeconds, String title, String subtitle) {
     int pbCorrect = 0;
     int top = 0;
     float totalCorrect = 0;
+    System.out.println("getChart : for user " +userID + " scores " + scores.size());
+
     List<Float> yValuesForUser = new ArrayList<Float>();
     for (SetScore score : scores) {
       if (score.getUserid() == userID) {
@@ -187,7 +202,7 @@ public class LeaderboardPlot {
     chart.getXAxis().setAllowDecimals(false);
     chart.getYAxis().setAllowDecimals(true);
     chart.getYAxis().setMin(0);
-    chart.getYAxis().setMax(top + 2);
+    chart.getYAxis().setMax(top + 1);
   }
 
   private <T extends SetScore> PlotBand getAvgScore(List<T> scores, float total, Chart chart) {
@@ -197,7 +212,7 @@ public class LeaderboardPlot {
       .setFrom(under(avg))
       .setTo(over(avg));
 
-    avgScore.setLabel(new PlotBandLabel().setAlign(PlotBandLabel.Align.LEFT).setText("Course Average"));
+    avgScore.setLabel(new PlotBandLabel().setAlign(PlotBandLabel.Align.LEFT).setText(AVERAGE));
     return avgScore;
   }
 
@@ -207,7 +222,7 @@ public class LeaderboardPlot {
       .setFrom(under(top))
       .setTo(over(top));
 
-    topScore.setLabel(new PlotBandLabel().setAlign(PlotBandLabel.Align.LEFT).setText("Top Score"));
+    topScore.setLabel(new PlotBandLabel().setAlign(PlotBandLabel.Align.LEFT).setText(TOP_SCORE));
     return topScore;
   }
 
@@ -219,7 +234,7 @@ public class LeaderboardPlot {
       .setFrom(from)
       .setTo(to);
 
-    personalBest.setLabel(new PlotBandLabel().setAlign(PlotBandLabel.Align.LEFT).setText("Personal Best"));
+    personalBest.setLabel(new PlotBandLabel().setAlign(PlotBandLabel.Align.LEFT).setText(PERSONAL_BEST));
     return personalBest;
   }
 
@@ -259,11 +274,6 @@ public class LeaderboardPlot {
     return yesButton;
   }
 
-  private float over(float pbCorrect) {
-    return pbCorrect + HALF;
-  }
-
-  private float under(float pbCorrect) {
-    return pbCorrect - HALF;
-  }
+  private float over(float pbCorrect) { return pbCorrect + HALF;  }
+  private float under(float pbCorrect) { return pbCorrect - HALF;  }
 }
