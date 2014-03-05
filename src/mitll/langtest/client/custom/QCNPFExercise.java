@@ -220,10 +220,10 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
         audioRef = wavToMP3(audioRef);   // todo why do we have to do this?
       }
       ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel(audioRef, e.getRefSentence(), service, controller,
-        controller.getProps().showSpectrogram(), scorePanel, 93);
+        controller.getProps().showSpectrogram(), scorePanel, 93, "");
       audioPanel.setShowColor(true);
       audioPanel.getElement().setId("ASRScoringAudioPanel");
-      audioPanel.setRefAudio(audioRef, e.getRefSentence());
+      audioPanel.setRefAudio(e.getRefSentence());
       String name = "Reference" + " : " + audio.getDisplay();
       if (audio.isFast()) name = "Regular speed audio example";
       else if (audio.isSlow()) name = "Slow speed audio example";
@@ -246,7 +246,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   }
 
   private Widget getEntry(final String field, final String label, String value, ExerciseAnnotation annotation) {
-    return getEntry(field, getContentWidget(label, value, true), annotation);
+    return getEntry(field, getContentWidget(label, value, true, false), annotation);
   }
 
   /**
