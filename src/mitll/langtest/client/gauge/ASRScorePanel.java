@@ -46,7 +46,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     "Saying something different or adding/omitting words would make the score meaningless and inaccurate.";*/
   private static final String WARNING = "Repeat the phrase exactly as it is written.<br/> " +
     "Saying something different or adding/omitting words invalidates the score.";
-  public static final int CHART_HEIGHT = 120;
+  public static final int CHART_HEIGHT = 100;
  // private static final boolean SHOW_HELP = true;
 
   private final PretestGauge ASRGauge;
