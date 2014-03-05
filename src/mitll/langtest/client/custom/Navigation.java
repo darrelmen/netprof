@@ -74,6 +74,9 @@ public class Navigation extends TabContainer implements RequiresResize {
   private static final String LESSONS = "lessons";
   private static final String DELETE = "Delete";
   public static final String NO_LISTS_CREATED_YET = "No lists created yet.";
+  public static final String CLICKED_USER_LIST = "clickedUserList";
+  public static final String CLICKED_TAB = "clickedTab";
+  public static final String SUB_TAB = "subTab";
   private final ExerciseController controller;
   private LangTestDatabaseAsync service;
   private UserManager userManager;
@@ -145,6 +148,7 @@ public class Navigation extends TabContainer implements RequiresResize {
     yourStuff.tab.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
+        checkAndMaybeClearTab(YOUR_LISTS);
         refreshViewLessons(true, false);
       }
     });
@@ -154,6 +158,7 @@ public class Navigation extends TabContainer implements RequiresResize {
     othersStuff.tab.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
+        checkAndMaybeClearTab(OTHERS_LISTS);
         refreshViewLessons(false, true);
       }
     });
@@ -173,6 +178,7 @@ public class Navigation extends TabContainer implements RequiresResize {
     browse.tab.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
+        checkAndMaybeClearTab(BROWSE);
         viewBrowse();
       }
     });
@@ -223,6 +229,17 @@ public class Navigation extends TabContainer implements RequiresResize {
     return tabPanel;    // TODO - consider how to tell panels when they are hidden by tab changes
   }
 
+  private void checkAndMaybeClearTab(String value) {
+    String value1 = getValue(CLICKED_TAB);
+
+    if (!value1.equals(value)) {
+      System.out.println("checkAndMaybeClearTab " + value1 + " vs "+value);
+
+      removeValue(CLICKED_USER_LIST);
+    }
+    storeValue(CLICKED_TAB,value);
+  }
+
   private void storeValue(String name, String toStore) {
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
@@ -242,6 +259,7 @@ public class Navigation extends TabContainer implements RequiresResize {
 
       String item = localStorageIfSupported.getItem(getLocalStorageKey(name));
       System.out.println("name " + name + "=" +item);
+      if (item == null) item = "";
       return item;
     }
     else {
@@ -330,6 +348,19 @@ public class Navigation extends TabContainer implements RequiresResize {
    * @param onlyVisited
    */
   private void showMyLists(boolean onlyCreated, boolean onlyVisited) {
+
+    String value = getValue(CLICKED_TAB);
+    System.out.println("showMyLists " + value);
+    if (!value.isEmpty()) {
+      if (value.equals(YOUR_LISTS)) {
+        onlyCreated = true;
+        onlyVisited = false;
+      }
+      else if (value.equals(OTHERS_LISTS)) {
+        onlyCreated = false;
+        onlyVisited = true;
+      }
+    }
     int tabToSelect =/* controller.isReviewMode() ? 4:*/ onlyCreated ? 0 : 1;
     tabPanel.selectTab(tabToSelect);
 
@@ -438,15 +469,15 @@ public class Navigation extends TabContainer implements RequiresResize {
   private void showList(final UserList ul, Panel contentPanel, final String instanceName) {
     System.out.println("showList " +ul + " instance " + instanceName);
 
-    String previousList = getValue("clickedUserList");
+    String previousList = getValue(CLICKED_USER_LIST);
     String currentValue = "" + ul.getUniqueID();
-    storeValue("clickedUserList", currentValue);
+    storeValue(CLICKED_USER_LIST, currentValue);
 
     // if select a new list, clear the subtab selection
     if (previousList != null && !previousList.equals(currentValue)) {
       System.out.println("showList " +previousList + " vs " + currentValue);
 
-      removeValue("subTab");
+      removeValue(SUB_TAB);
     }
     FluidContainer container = new FluidContainer();
     contentPanel.clear();
@@ -521,7 +552,7 @@ public class Navigation extends TabContainer implements RequiresResize {
     learn.tab.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        storeValue("subTab","learn");
+        storeValue(SUB_TAB,"learn");
         npfHelper.showNPF(ul, learn, instanceName1);
       }
     });
@@ -535,7 +566,7 @@ public class Navigation extends TabContainer implements RequiresResize {
       practice.tab.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          storeValue("subTab","practice");
+          storeValue(SUB_TAB,"practice");
          // System.out.println("getListOperations : got click on practice");
 
           avpHelper.showNPF(ul, fpractice, "practice");
@@ -550,7 +581,7 @@ public class Navigation extends TabContainer implements RequiresResize {
       edit.tab.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          storeValue("subTab","editItem");
+          storeValue(SUB_TAB,"editItem");
           showEditItem(ul, edit, (isReview || isComment) ? reviewItem : Navigation.this.editItem, isNormalList);
         }
       });
@@ -572,7 +603,7 @@ public class Navigation extends TabContainer implements RequiresResize {
     final TabAndContent finalEditItem = editItem;
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
-        String subTab = getValue("subTab");
+        String subTab = getValue(SUB_TAB);
         System.out.println("subtab " +subTab);
         boolean chosePrev = false;
         if (subTab != null) {
@@ -698,7 +729,7 @@ public class Navigation extends TabContainer implements RequiresResize {
     private void selectThePreviousList(final Collection<UserList> result) {
       Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
         public void execute() {
-          String clickedUserList = getValue("clickedUserList");
+          String clickedUserList = getValue(CLICKED_USER_LIST);
           if (clickedUserList != null && !clickedUserList.isEmpty()) {
             long id = Long.parseLong(clickedUserList);
             for (UserList ul : result) {
