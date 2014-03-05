@@ -17,14 +17,15 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Create, drop, alter, read from the results table.
  * Note that writing to the table takes place in the {@link AnswerDAO}. Not sure if that's a good idea or not. :)
- *
  */
 public class ResultDAO extends DAO {
   private static final Logger logger = Logger.getLogger(ResultDAO.class);
@@ -49,7 +50,7 @@ public class ResultDAO extends DAO {
   static final String STIMULUS = "stimulus";
 
   private final GradeDAO gradeDAO;
-  private final ScheduleDAO scheduleDAO ;
+  private final ScheduleDAO scheduleDAO;
   private final boolean debug = false;
 
   public ResultDAO(Database database, UserDAO userDAO) {
@@ -64,11 +65,11 @@ public class ResultDAO extends DAO {
   }
 
   public List<SimpleResult> getResultsForUser(long userid) {
-    return getSimpleResults(" where userid=" +userid);
+    return getSimpleResults(" where userid=" + userid);
   }
 
 
-  public List<Result> getResultsThatNeedScore() {
+/*  public List<Result> getResultsThatNeedScore() {
     try {
       String sql = "SELECT * FROM " + RESULTS + " where " + PRON_SCORE+
           "=-1 AND " +VALID +"=true";
@@ -77,15 +78,19 @@ public class ResultDAO extends DAO {
       logger.error("got " +e,e);
     }
     return Collections.emptyList();
-  }
+  }*/
 
+  /**
+   * @return
+   * @deprecated just an experiment...
+   */
   public List<Result> getResultsFor() {
     try {
-      String sql = "SELECT * FROM " + RESULTS + " where " + USERID+
-          "=" + 326 + " and " + ANSWER + " like '%07980%'";
+      String sql = "SELECT * FROM " + RESULTS + " where " + USERID +
+        "=" + 326 + " and " + ANSWER + " like '%07980%'";
       return getResultsSQL(sql);
     } catch (SQLException e) {
-      logger.error("got " +e,e);
+      logger.error("got " + e, e);
     }
     return Collections.emptyList();
   }
@@ -112,6 +117,7 @@ public class ResultDAO extends DAO {
 
   /**
    * Get a list of Results for this Query.
+   *
    * @param connection
    * @param statement
    * @return
@@ -142,11 +148,15 @@ public class ResultDAO extends DAO {
     private final int qid;
     public final long userid;
 
-
-    public SimpleResult(int uniqueID, String id, int qid, long userid) { this.uniqueID = uniqueID; this.id = id; this.qid = qid; this.userid = userid;}
+    public SimpleResult(int uniqueID, String id, int qid, long userid) {
+      this.uniqueID = uniqueID;
+      this.id = id;
+      this.qid = qid;
+      this.userid = userid;
+    }
 
     public String getID() {
-      return id + "/" +qid;
+      return id + "/" + qid;
     }
   }
 
@@ -154,12 +164,13 @@ public class ResultDAO extends DAO {
 
   /**
    * Pulls the list of results out of the database.
-   * @see DatabaseImpl#getResultsWithGrades()
+   *
    * @return
+   * @see DatabaseImpl#getResultsWithGrades()
    */
   public List<Result> getResults() {
     try {
-      synchronized(this) {
+      synchronized (this) {
         if (cachedResultsForQuery != null) {
           return cachedResultsForQuery;
         }
@@ -167,12 +178,35 @@ public class ResultDAO extends DAO {
       String sql = "SELECT * FROM " + RESULTS + ";";
       List<Result> resultsForQuery = getResultsSQL(sql);
 
-      synchronized(this) {
+      synchronized (this) {
         cachedResultsForQuery = resultsForQuery;
       }
       return resultsForQuery;
     } catch (Exception ee) {
-      ee.printStackTrace();
+      logger.error("got " + ee, ee);
+    }
+    return new ArrayList<Result>();
+  }
+
+  public List<Session> getSessionsForUserIn(long userid, Set<String> ids, String lastID) {
+    List<Session> sessions = partitionIntoSessions2(getResultsForUserIn(userid, ids), lastID);
+    logger.debug("found " +sessions.size() + " sessions for " + userid + " and " +ids + " last " + lastID);
+
+    return sessions;
+  }
+
+  public List<Result> getResultsForUserIn(long userid, Set<String> ids) {
+    try {
+      String list = getInList(ids);
+
+      String sql = "SELECT * FROM " + RESULTS + " where " + USERID + "=" + userid + " AND " + Database.EXID + " in (" +
+        list +
+        ") order by " + Database.TIME + " asc";
+      List<Result> resultsSQL = getResultsSQL(sql);
+      logger.debug("got " + resultsSQL.size() + " for " + userid);
+      return resultsSQL;
+    } catch (Exception ee) {
+      logger.error("got " + ee, ee);
     }
     return new ArrayList<Result>();
   }
@@ -185,7 +219,7 @@ public class ResultDAO extends DAO {
   }
 
   public synchronized void invalidateCachedResults() {
-     cachedResultsForQuery = null;
+    cachedResultsForQuery = null;
   }
 
   public int getNumResults() {
@@ -194,18 +228,21 @@ public class ResultDAO extends DAO {
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) FROM " + RESULTS + ";");
       ResultSet rs = statement.executeQuery();
-      if (rs.next()) { numResults = rs.getInt(1); }
+      if (rs.next()) {
+        numResults = rs.getInt(1);
+      }
       rs.close();
       statement.close();
       database.closeConnection(connection);
     } catch (Exception ee) {
-      ee.printStackTrace();
+      logger.error("got " + ee, ee);
     }
     return numResults;
   }
 
   /**
    * Get a list of Results for this Query.
+   *
    * @param connection
    * @param statement
    * @return
@@ -259,11 +296,11 @@ public class ResultDAO extends DAO {
   }
 
   /**
-   * @see DatabaseImpl#getNextUngradedExerciseSlow
    * @param e
    * @param expected
    * @param englishOnly
    * @return
+   * @see DatabaseImpl#getNextUngradedExerciseSlow
    */
   public boolean areAnyResultsLeftToGradeFor(Exercise e, int expected, boolean englishOnly) {
     String exerciseID = e.getID();
@@ -273,20 +310,21 @@ public class ResultDAO extends DAO {
 
   /**
    * Return true if all results have been graded at the grade number
-   *
+   * <p/>
    * Does some fancy filtering for english --
-   * @see #areAnyResultsLeftToGradeFor
+   *
    * @param exerciseID
    * @param gradedResults
-   * @param expected if > 1 remove flq results (hack!), if = 2 assumes english-only
+   * @param expected         if > 1 remove flq results (hack!), if = 2 assumes english-only
    * @param useEnglishGrades true if we should only look at english grades...
    * @return ungraded answers
+   * @see #areAnyResultsLeftToGradeFor
    */
   private boolean areAllResultsGraded(String exerciseID, Collection<Grade> gradedResults, int expected, boolean useEnglishGrades) {
     List<Result> resultsForExercise = getAllResultsForExercise(exerciseID);
     if (debug && !resultsForExercise.isEmpty()) {
-    	logger.debug("for " + exerciseID + " expected " + expected +
-    		      " grades/item before " + resultsForExercise.size() + " results, and " + gradedResults.size() + " grades");
+      logger.debug("for " + exerciseID + " expected " + expected +
+        " grades/item before " + resultsForExercise.size() + " results, and " + gradedResults.size() + " grades");
     }
     if (resultsForExercise.isEmpty()) {
       return true;
@@ -297,7 +335,7 @@ public class ResultDAO extends DAO {
     for (Iterator<Result> iter = resultsForExercise.iterator(); iter.hasNext(); ) {
       Result next = iter.next();
       if (useEnglishGrades && next.flq || next.userid == -1) {
-       // logger.debug("removing result " + next + " since userid is " + next.userid);
+        // logger.debug("removing result " + next + " since userid is " + next.userid);
         iter.remove();
       }
     }
@@ -324,16 +362,16 @@ public class ResultDAO extends DAO {
   }
 
   /**
-   * @see DatabaseImpl#getExercisesFirstNInOrder(long, int)
    * @param userid
    * @return
+   * @see DatabaseImpl#getExercisesFirstNInOrder(long, int)
    */
   public String getExerciseIDLastResult(long userid) {
     try {
       Connection connection = database.getConnection();
       String sql = "SELECT exid FROM results WHERE TIME IN (SELECT MAX(TIME) FROM results WHERE userid = " +
-          userid +
-          ");";
+        userid +
+        ");";
       PreparedStatement statement = connection.prepareStatement(sql);
 
       ResultSet rs = statement.executeQuery();
@@ -347,15 +385,15 @@ public class ResultDAO extends DAO {
       return exid;
 
     } catch (Exception ee) {
-      ee.printStackTrace();
+      logger.error("got " + ee, ee);
     }
     return "INVALID";
   }
 
   /**
-   * @see DatabaseImpl#getResultsForExercise(String, boolean, boolean, boolean)
    * @param exerciseID
    * @return
+   * @see DatabaseImpl#getResultsForExercise(String, boolean, boolean, boolean)
    */
   public List<Result> getAllResultsForExercise(String exerciseID) {
     try {
@@ -364,42 +402,48 @@ public class ResultDAO extends DAO {
       PreparedStatement statement = connection.prepareStatement(sql);
       return getResultsForQuery(connection, statement);
     } catch (Exception ee) {
-      ee.printStackTrace();
+      logger.error("got " + ee, ee);
     }
     return new ArrayList<Result>();
   }
 
   /**
-   * @see DatabaseImpl#getNextUngradedExerciseQuick(java.util.Collection, int, boolean, boolean, boolean)
    * @param toExclude
    * @return
+   * @see DatabaseImpl#getNextUngradedExerciseQuick(java.util.Collection, int, boolean, boolean, boolean)
    */
   public Collection<Result> getResultExcludingExercises(Collection<String> toExclude) {
     // select results.* from results where results.exid not in ('ac-R0P-006','ac-LOP-001','ac-L0P-013')
     try {
       Connection connection = database.getConnection();
 
-      StringBuilder b = new StringBuilder();
-      for (String id : toExclude) b.append("'").append(id).append("'").append(",");
-      String list = b.toString();
-      list = list.substring(0,Math.max(0,list.length()-1));
+      String list = getInList(toExclude);
       String sql = "SELECT * FROM results WHERE EXID NOT IN (" + list + ")";
 
       PreparedStatement statement = connection.prepareStatement(sql);
       return getResultsForQuery(connection, statement);
     } catch (Exception ee) {
-      ee.printStackTrace();
+      logger.error("got " + ee, ee);
     }
     return new ArrayList<Result>();
 
+  }
+
+  private String getInList(Collection<String> toExclude) {
+    StringBuilder b = new StringBuilder();
+    for (String id : toExclude) b.append("'").append(id).append("'").append(",");
+    String list = b.toString();
+    list = list.substring(0, Math.max(0, list.length() - 1));
+    return list;
   }
 
   /**
    * Determine sessions per user.  If two consecutive items are more than {@link #SESSION_GAP} seconds
    * apart, then we've reached a session boundary.
    * Remove all sessions that have just one answer - must be test sessions.
-   *
+   * <p/>
    * Multiple answers to the same exercise count as one answer.
+   *
    * @return list of duration and numAnswer pairs
    */
   public SessionInfo getSessions() {
@@ -412,24 +456,7 @@ public class ResultDAO extends DAO {
     Map<Long, Float> userToRate = new HashMap<Long, Float>();
 
     for (Map.Entry<Long, List<Result>> userToAnswersEntry : userToAnswers.entrySet()) {
-      List<Result> answersForUser = userToAnswersEntry.getValue();
-      sortByTime(answersForUser);
-
-      Session s = null;
-      long last = 0;
-      for (Result r : answersForUser) {
-        if (s == null || r.timestamp - last > SESSION_GAP) {
-          s = new Session();
-          sessions.add(s);
-          List<Session> sessions1 = userToSessions.get(userToAnswersEntry.getKey());
-          if (sessions1 == null) userToSessions.put(userToAnswersEntry.getKey(), sessions1 = new ArrayList<Session>());
-          sessions1.add(s);
-        } else {
-          s.duration += r.timestamp - last;
-        }
-        s.addExerciseID(r.id);
-        last = r.timestamp;
-      }
+      sessions.addAll(makeSessionsForUser(userToSessions, userToAnswersEntry));
     }
     for (Session session : sessions) session.setNumAnswers();
     removeShortSessions(sessions);
@@ -452,13 +479,104 @@ public class ResultDAO extends DAO {
       }
     }
 
-    return new SessionInfo(sessions,userToRate);
+    return new SessionInfo(sessions, userToRate);
   }
+
+  private List<Session>  makeSessionsForUser(//List<Session> sessions,
+                                   Map<Long, List<Session>> userToSessions,
+                                   Map.Entry<Long, List<Result>> userToAnswersEntry) {
+    Long userid = userToAnswersEntry.getKey();
+    List<Result> answersForUser = userToAnswersEntry.getValue();
+
+    return makeSessionsForUser(//sessions,
+      userToSessions, userid, answersForUser);
+  }
+
+  private List<Session>  makeSessionsForUser(//List<Session> sessions,
+                                   Map<Long, List<Session>> userToSessions,
+                                   Long userid,
+                                   List<Result> answersForUser) {
+    sortByTime(answersForUser);
+
+    return partitionIntoSessions(userToSessions, userid, answersForUser);
+  }
+
+  private List<Session> partitionIntoSessions(//List<Session> sessions,
+                                     Map<Long, List<Session>> userToSessions, Long userid, List<Result> answersForUser) {
+    Session s = null;
+    long last = 0;
+
+    List<Session> sessions = new ArrayList<Session>();
+
+
+  //  Set<String> seenAlready = new HashSet<String>();
+    for (Result r : answersForUser) {
+      if (s == null || r.timestamp - last > SESSION_GAP) {
+        s = new Session();
+        sessions.add(s);
+
+        List<Session> sessions1 = userToSessions.get(userid);
+        if (sessions1 == null) userToSessions.put(userid, sessions1 = new ArrayList<Session>());
+        sessions1.add(s);
+      } else {
+        s.duration += r.timestamp - last;
+      }
+      s.addExerciseID(r.id);
+     // seenAlready.add(r.id);
+      last = r.timestamp;
+    }
+    return sessions;
+  }
+
+
+  private List<Session> partitionIntoSessions2(
+                                               //Map<Long, List<Session>> userToSessions,
+                                               /*Long userid,*/ List<Result> answersForUser,
+                                               String lastExerciseID) {
+    Session s = null;
+    long last = 0;
+
+    List<Session> sessions = new ArrayList<Session>();
+
+    //Set<String> seenAlready = new HashSet<String>();
+    for (Result r : answersForUser) {
+      //if (seenAlready.contains(r.id)) {
+      //  logger.debug("\tskipping " + r + " since already saw " + r.id);
+      //}
+     // logger.debug("\ttaking " +r);
+      if (s == null || r.timestamp - last > SESSION_GAP) {
+        s = new Session(r.userid);
+        sessions.add(s);
+
+/*        List<Session> sessions1 = userToSessions.get(userid);
+        if (sessions1 == null) userToSessions.put(userid, sessions1 = new ArrayList<Session>());
+        sessions1.add(s);*/
+      } else {
+        s.duration += r.timestamp - last;
+      }
+      s.addExerciseID(r.id);
+      if (r.isCorrect()) {
+        s.incrementCorrect(r.id,r.isCorrect());
+      }
+      //seenAlready.add(r.id);
+      last = r.timestamp;
+
+      if (r.id.equals(lastExerciseID)) {
+        // start a new session
+        s = null;
+      }
+    }
+    for (Session session : sessions) session.setNumAnswers();
+
+    return sessions;
+  }
+
 
   public static class SessionInfo {
     public List<Session> sessions;
     public Map<Long, Float> userToRate;
-    public SessionInfo(List<Session> sessions, Map<Long,Float> userToRate) {
+
+    public SessionInfo(List<Session> sessions, Map<Long, Float> userToRate) {
       this.sessions = sessions;
       this.userToRate = userToRate;
     }
@@ -475,11 +593,11 @@ public class ResultDAO extends DAO {
 
   private void removeShortSessions(List<Session> sessions) {
     Iterator<Session> iter = sessions.iterator();
-    while(iter.hasNext()) if (iter.next().getNumAnswers() < 2) iter.remove();
+    while (iter.hasNext()) if (iter.next().getNumAnswers() < 2) iter.remove();
   }
 
   private Map<Long, List<Result>> populateUserToAnswers(List<Result> results) {
-    Map<Long,List<Result>> userToAnswers = new HashMap<Long, List<Result>>();
+    Map<Long, List<Result>> userToAnswers = new HashMap<Long, List<Result>>();
     for (Result r : results) {
       List<Result> results1 = userToAnswers.get(r.userid);
       if (results1 == null) userToAnswers.put(r.userid, results1 = new ArrayList<Result>());
@@ -491,11 +609,12 @@ public class ResultDAO extends DAO {
 
   /**
    * This should only be run once, on an old result table to update it.
+   *
    * @see #createResultTable(java.sql.Connection)
    */
   private void enrichResults() {
     List<Result> results = getResults();
-    Map<String,List<Result>> exidToResult = new HashMap<String, List<Result>>();
+    Map<String, List<Result>> exidToResult = new HashMap<String, List<Result>>();
 
     for (Result r : results) {
       List<Result> resultsForExercise = exidToResult.get(r.id);
@@ -512,7 +631,7 @@ public class ResultDAO extends DAO {
         if (schedules != null) {
           for (Schedule schedule : schedules) {
             if (schedule.exid.equals(exid)) {
-           //   System.out.println("found schedule " + schedule + " for " + exid + " and result " + r);
+              //   System.out.println("found schedule " + schedule + " for " + exid + " and result " + r);
               r.setFLQ(schedule.flQ);
               r.setSpoken(schedule.spoken);
               enrichResult(r);
@@ -551,8 +670,8 @@ public class ResultDAO extends DAO {
   }*/
 
   /**
-   * @see #enrichResults
    * @param toChange
+   * @see #enrichResults
    */
   private void enrichResult(Result toChange) {
     try {
@@ -560,10 +679,10 @@ public class ResultDAO extends DAO {
       PreparedStatement statement;
 
       String sql = "UPDATE " + RESULTS + " " +
-          "SET " +
-          "flq='" + toChange.flq + "', " +
-          "spoken='" + toChange.spoken + "' " +
-          "WHERE id=" + toChange.uniqueID;
+        "SET " +
+        "flq='" + toChange.flq + "', " +
+        "spoken='" + toChange.spoken + "' " +
+        "WHERE id=" + toChange.uniqueID;
       if (debug) System.out.println("enrichResult " + toChange);
       statement = connection.prepareStatement(sql);
 
@@ -583,6 +702,7 @@ public class ResultDAO extends DAO {
 
   /**
    * Set the duration for one entry.
+   *
    * @paramx toChange
    */
 /*  private void enrichDur(Result toChange) {
@@ -628,9 +748,9 @@ public class ResultDAO extends DAO {
   /**
    * No op if table exists and has the current number of columns.
    *
-   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    * @param connection
    * @throws SQLException
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
   void createResultTable(Connection connection) throws SQLException {
     createTable(connection);
@@ -658,9 +778,9 @@ public class ResultDAO extends DAO {
       //logger.info(RESULTS + " table had num columns = " + numColumns);
       addStimulus(connection);
     }
-   // enrichResults();
+    // enrichResults();
     //removeValidDefault(connection);
-   // addValidDefault(connection);
+    // addValidDefault(connection);
   }
 
   /**
@@ -701,8 +821,8 @@ public class ResultDAO extends DAO {
   private void addColumnToTable(Connection connection) {
     try {
       PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
-          FLQ +
-          " BOOLEAN");
+        FLQ +
+        " BOOLEAN");
       statement.execute();
       statement.close();
     } catch (SQLException e) {
@@ -711,8 +831,8 @@ public class ResultDAO extends DAO {
 
     try {
       PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
-          SPOKEN +
-          " BOOLEAN");
+        SPOKEN +
+        " BOOLEAN");
       statement.execute();
       statement.close();
     } catch (SQLException e) {
@@ -725,9 +845,9 @@ public class ResultDAO extends DAO {
 
     try {
       statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
-          AUDIO_TYPE +
-          " " +
-          "VARCHAR");
+        AUDIO_TYPE +
+        " " +
+        "VARCHAR");
       statement.execute();
       statement.close();
     } catch (SQLException e) {
@@ -737,8 +857,8 @@ public class ResultDAO extends DAO {
 
   private void removeTimeDefault(Connection connection) throws SQLException {
     //logger.info("removing time default value - current_timestamp steps on all values with NOW.");
-    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ALTER COLUMN " + Database.TIME+
-        " DROP DEFAULT");
+    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ALTER COLUMN " + Database.TIME +
+      " DROP DEFAULT");
     statement.execute();
     statement.close();
   }
@@ -746,9 +866,9 @@ public class ResultDAO extends DAO {
   private void addDurationColumnToTable(Connection connection) {
     try {
       PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
-          DURATION +
-          " " +
-          "INT");
+        DURATION +
+        " " +
+        "INT");
       statement.execute();
       statement.close();
     } catch (SQLException e) {
@@ -792,26 +912,4 @@ public class ResultDAO extends DAO {
       logger.warn("addStimulus : got " + e);
     }
   }
-
-  /**
-   * So it seems like if I alter an existing table and remove a default boolean value, h2 throws an exception
-   * on subsequent inserts.
-   * @param connection
-   * @throws SQLException
-   */
-/*  private void removeValidDefault(Connection connection) throws SQLException {
-    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ALTER COLUMN " +"valid"+
-        " DROP DEFAULT");
-    statement.execute();
-    statement.close();
-  }*/
-
-/*
-  private void addValidDefault(Connection connection) throws SQLException {
-    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ALTER COLUMN " +"valid"+
-        " set DEFAULT true");
-    statement.execute();
-    statement.close();
-  }
-*/
 }
