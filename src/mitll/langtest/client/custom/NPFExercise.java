@@ -133,9 +133,15 @@ public class NPFExercise extends GoodwaveExercisePanel {
     populateListChoices(exercise, controller, addToList);
   }
 
+  /**
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, float, boolean, String)
+   * @param e
+   * @param controller
+   * @param hp
+   */
   @Override
   protected void addQuestionContentRow(Exercise e, ExerciseController controller, Panel hp) {
-    hp.getElement().setId("GoodwaveHorizontalPanel");
+    hp.getElement().setId("NPFExercise_addQuestionContentRow");
     Panel addToList = makeAddToList(e, controller);
     Widget questionContent = getQuestionContent(e, addToList);
     questionContent.addStyleName("floatLeft");
