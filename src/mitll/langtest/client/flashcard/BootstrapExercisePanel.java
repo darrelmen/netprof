@@ -673,10 +673,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     return scoreFeedback;
   }
 
-  private void clearFeedback() {
-    scoreFeedbackRow.clear();
-  }
-
+  protected void clearFeedback() {  scoreFeedbackRow.clear(); }
   private Heading getRecoOutput() {
     return recoOutput;
   }
@@ -918,15 +915,15 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
    * @see #playAllAudio(String, java.util.List)
    * @see #showIncorrectFeedback(mitll.langtest.shared.AudioAnswer, double, boolean)
    */
-  void goToNextItem(String infoToShow) {
-    boolean continueToNext = true;
-    if (continueToNext) {
+  protected void goToNextItem(String infoToShow) {
+    //boolean continueToNext = true;
+    //if (continueToNext) {
       int delay = getFeedbackLengthProportionalDelay(infoToShow);
       System.out.println("goToNextItem : using delay " + delay + " info " + infoToShow);
       goToNextAfter(delay);
-    } else {
-      initRecordButton();
-    }
+   // } else {
+   //   initRecordButton();
+   // }
   }
 
   private void goToNextAfter(int delay) {
@@ -1024,7 +1021,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     }
   }
 
-  private void initRecordButton() {
+  protected void initRecordButton() {
     answerWidget.initRecordButton();
   }
 
