@@ -16,7 +16,7 @@ public class KeyStorage {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
 
       localStorageIfSupported.setItem(getLocalStorageKey(name), toStore);
-      System.out.println("storeValue " + name + "="+toStore + " : " + getValue(name));
+    //  System.out.println("storeValue " + name + "="+toStore + " : " + getValue(name));
 
       //if (showMessage()) {
       //   System.err.println("----------------> huh? should not show again");
@@ -29,7 +29,7 @@ public class KeyStorage {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
 
       String item = localStorageIfSupported.getItem(getLocalStorageKey(name));
-      System.out.println("name " + name + "=" +item);
+    //  System.out.println("name " + name + "=" +item);
       if (item == null) item = "";
       return item;
     }
@@ -43,16 +43,12 @@ public class KeyStorage {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
 
       localStorageIfSupported.removeItem(getLocalStorageKey(name));
-      System.out.println("removeValue " + name);
+     // System.out.println("removeValue " + name);
 
-    }
-    else {
-      //return "";
     }
   }
 
   protected String getLocalStorageKey(String name) {
     return "Navigation_" + controller.getLanguage() + "_" + controller.getUser() + "_" +name;
   }
-
 }
