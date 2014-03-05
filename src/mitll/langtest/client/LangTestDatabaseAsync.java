@@ -171,4 +171,5 @@ public interface LangTestDatabaseAsync {
 
   void deleteItem(String exid, AsyncCallback<Boolean> async);
 
+  void getUserHistoryForList(long userid, long listid, String lastID, AsyncCallback<List<Session>> async);
 }
