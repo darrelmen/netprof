@@ -53,7 +53,7 @@ public class ExerciseListLayout<T extends ExerciseShell> {
     boolean hideExerciseList = (props.isMinimalUI() && !props.isGrading()) && !props.isAdminView();
     useExerciseList(exerciseListContainer);
     if (hideExerciseList) {
-      exerciseList.hideExerciseList();
+      exerciseList.hide();
     }
 
     return exerciseList;
