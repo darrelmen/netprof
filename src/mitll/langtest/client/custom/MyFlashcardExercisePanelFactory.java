@@ -129,18 +129,36 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
 
       //System.out.println("receivedAudioAnswer : currentSet " + currentSet.size() + " : " + currentSet + " total done " + totalDone);
 
-      if (exerciseList.onLast()) {
+ /*     if (exerciseList.onLast()) {
         onSetComplete();
+      }*/
+    }
+
+    @Override
+    protected void goToNextItem(String infoToShow) {
+
+      System.out.println("goToNextItem : infoToShow " + infoToShow);
+
+      if (exerciseList.onLast()) {
+        System.out.println("\tgoToNextItem : onLast ");
+
+        onSetComplete();
+      }
+      else {
+        System.out.println("\tgoToNextItem : NOT on last ");
+
+        super.goToNextItem(infoToShow);
       }
     }
 
     public void onSetComplete() {
       navigationHelper.setVisible(false);
-      //System.out.println("receivedAudioAnswer : currentSet " + currentSet.size() + " : " + currentSet + " total done " + totalDone);
+      //System.out.println("onSetComplete : total done " + totalDone);
 
       belowContentDiv.add(new Heading(2, totalCorrect +
         " Correct (" +toPercent(totalCorrect,totalCorrect+totalIncorrect)+
-        ")- Pronunciation " + toPercent(totalScore,totalCorrect)));
+        ")",
+        "Pronunciation " + toPercent(totalScore,totalCorrect)));
 
       final int user = controller.getUser();
       service.getUserHistoryForList(user,userListID,lastExercise.getID(),new AsyncCallback<List<Session>>() {
@@ -150,7 +168,7 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
         @Override
         public void onSuccess(List<Session> result) {
           setMainContentVisible(false);
-          chart = new LeaderboardPlot().getChart(result, user, -1, "Progress", "subtitle");
+          chart = new LeaderboardPlot().getChart(result, user, -1, "Progress", "# correct");
           belowContentDiv.add(chart);
           belowContentDiv.add(getRepeatButton());
         }
@@ -175,6 +193,7 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
         public void onClick(ClickEvent event) {
           setMainContentVisible(true);
           belowContentDiv.remove(chart);
+//          belowContentDiv.remove(chart);
           reset();
 
           navigationHelper.setVisible(true);
@@ -187,6 +206,13 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
     protected void nextAfterDelay(boolean correct, String feedback) {
       if (!exerciseList.onLast()) {
         super.nextAfterDelay(correct, feedback);
+      }
+      else if (!correct) {
+        initRecordButton();
+        clearFeedback();
+      }
+      else if (exerciseList.onLast()) {
+        onSetComplete();
       }
     }
 
