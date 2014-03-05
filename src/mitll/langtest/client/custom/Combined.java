@@ -86,7 +86,7 @@ public class Combined<T extends ExerciseShell> extends TabContainer {
       layout.makeExerciseList(unitAndLessonRow, exerciseListContainer, feedback, currentExerciseVPanel, service, controller);
 
     listInterface1.setFactory(
-      new MyFlashcardExercisePanelFactory<T>(service, feedback, controller, listInterface1), userManager, 1);
+      new MyFlashcardExercisePanelFactory<T>(service, feedback, controller, listInterface1,-1), userManager, 1);
 
     if (controller.gotMicPermission()) {
       listInterface1.getExercises(controller.getUser(), true);
