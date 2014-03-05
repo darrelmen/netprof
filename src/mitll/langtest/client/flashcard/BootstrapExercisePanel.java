@@ -37,6 +37,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.FlashcardRecordButton;
 import mitll.langtest.client.recorder.RecordButton;
@@ -76,13 +77,13 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
   private Heading recoOutput;
   protected final SoundFeedback soundFeedback;
   protected final Widget cardPrompt;
-  private Panel recoOutputContainer;
   private final boolean addKeyBinding;
   private final ExerciseController controller;
   private final ControlState controlState;
   private final Panel mainContainer;
-  Panel leftState;
-  Panel rightColumn;
+  private Panel leftState;
+  private Panel rightColumn;
+
   /**
    * @param e
    * @param service
@@ -98,9 +99,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     this.exercise = e;
     this.controller = controller;
     this.controlState = controlState;
-    //System.out.println("got " + controlState);
-    // addStyleName("cardDisplayTable");
-    //  addStyleName("minWidth");
+    controlState.setStorage(new KeyStorage(controller));
 
     HTML warnNoFlash = new HTML(WARN_NO_FLASH);
     soundFeedback = new SoundFeedback(controller.getSoundManager(), warnNoFlash);
@@ -133,7 +132,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     getElement().setId("BootstrapExercisePanel");
 
     addWidgetsBelow(belowDiv);
-    if (controlState.audioOn) {
+    if (controlState.isAudioOn()) {
       playRefLater();
     }
   }
@@ -165,10 +164,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
    dockLayoutPanel.addWest(new Heading(6,"West"), 4);
   }*/
 
-  protected Panel getLeftState() {
-    return new Heading(6, "");
-  }
-
+  protected Panel getLeftState() { return new Heading(6, ""); }
   protected void addWidgetsBelow(Panel toAddTo) {}
 
   /**
@@ -231,15 +227,15 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     onButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        if (!controlState.audioOn) {
+        if (!controlState.isAudioOn()) {
           playRefLater();
         }
-        controlState.audioOn = true;
-        System.out.println("now on " + controlState);
+        controlState.setAudioOn(true);
+       // System.out.println("now on " + controlState);
 
       }
     });
-    onButton.setActive(controlState.audioOn);
+    onButton.setActive(controlState.isAudioOn());
 
 
     Button offButton = new Button("Off" + "");
@@ -248,12 +244,12 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     offButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        controlState.audioOn = false;
-        System.out.println("now off " + controlState);
+        controlState.setAudioOn(false);
+       // System.out.println("now off " + controlState);
 
       }
     });
-    offButton.setActive(!controlState.audioOn);
+    offButton.setActive(!controlState.isAudioOn());
 
     return group;
   }
@@ -272,13 +268,12 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     onButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        controlState.audioFeedbackOn = true;
-        System.out.println("now on " + controlState);
+        controlState.setAudioFeedbackOn(true);
+        //System.out.println("now on " + controlState);
 
       }
     });
-    onButton.setActive(controlState.audioFeedbackOn);
-
+    onButton.setActive(controlState.isAudioFeedbackOn());
 
     Button offButton = new Button("Off" + "");
     buttonGroup.add(offButton);
@@ -286,12 +281,12 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     offButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        controlState.audioFeedbackOn = false;
-        System.out.println("now off " + controlState);
+        controlState.setAudioFeedbackOn(false);
+        //System.out.println("now off " + controlState);
 
       }
     });
-    offButton.setActive(!controlState.audioFeedbackOn);
+    offButton.setActive(!controlState.isAudioFeedbackOn());
 
     return group;
   }
@@ -311,9 +306,9 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     onButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        if (!controlState.showState.equals(ControlState.FOREIGN)) {
-          controlState.showState = ControlState.FOREIGN;
-          System.out.println("now on " + controlState);
+        if (!controlState.getShowState().equals(ControlState.FOREIGN)) {
+          controlState.setShowState(ControlState.FOREIGN);
+          //System.out.println("now on " + controlState);
           showEnglishOrForeign();
         }
 
@@ -328,9 +323,9 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     offButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        if (!controlState.showState.equals(ControlState.ENGLISH)) {
+        if (!controlState.getShowState().equals(ControlState.ENGLISH)) {
 
-          controlState.showState = ControlState.ENGLISH;
+          controlState.setShowState(ControlState.ENGLISH);
           System.out.println("now  " + controlState);
           showEnglishOrForeign();
 
@@ -345,9 +340,9 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     both.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        if (!controlState.showState.equals(ControlState.BOTH)) {
+        if (!controlState.getShowState().equals(ControlState.BOTH)) {
 
-          controlState.showState = ControlState.BOTH;
+          controlState.setShowState(ControlState.BOTH);
           System.out.println("now  " + controlState);
           showEnglishOrForeign();
 
@@ -516,12 +511,6 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
       toAddTo.add(getRecoOutputRow());
     }
 
-    //boolean classroomMode = controller.getProps().isClassroomMode();
-    //System.out.println("classroom mode " + classroomMode);
-    // DivWidget scoreFeedbackRow = audioScoreFeedback.getScoreFeedbackRow(feedbackHeight, classroomMode);
-    //Heading pronunciation = new Heading(5, "Pronunciation");
-    //Panel scoreFeedbackRow = audioScoreFeedback.getSimpleRow(pronunciation);
-    //scoreFeedbackRow.setWidth("50%");
     scoreFeedbackRow.addStyleName("bottomFiveMargin");
     toAddTo.add(scoreFeedbackRow);
   }
@@ -584,7 +573,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     DOM.setStyleAttribute(recoOutput.getElement(), "color", "#ffffff");
 
     Panel recoOutputRow = new FluidRow();
-    recoOutputContainer = new Paragraph();
+    Panel recoOutputContainer = new Paragraph();
     recoOutputContainer.addStyleName("alignCenter");
 
     recoOutputRow.add(new Column(12, recoOutputContainer));
@@ -595,7 +584,6 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
 
     recoOutputContainer.add(recoOutput);
     recoOutputRow.getElement().setId("recoOutputRow");
-    // recoOutputRow.setWidth("50%");
 
     return recoOutputRow;
   }
@@ -632,7 +620,6 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
    * @see
    */
   protected void showPronScoreFeedback(double score, String scorePrefix) {
-    // audioScoreFeedback.showScoreFeedback(scorePrefix, score, false, !addKeyBinding);
     scoreFeedbackRow.add(showScoreFeedback("Score ", score));
   }
 
@@ -650,11 +637,6 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     double percent = 100 * score;
 
     ProgressBar scoreFeedback = new ProgressBar();
-    //   scoreFeedbackColumn.clear();
-    // scoreFeedbackColumn.add(scoreFeedback);
-    //double val = useShortWidth ? 300 : Math.min(Window.getClientWidth() * 0.8, Window.getClientWidth() * 0.5);
-    //scoreFeedback.setWidth((int)val + "px");
-
     int percent1 = (int) percent;
     scoreFeedback.setPercent(percent1 < 40 ? 40 : percent1);   // just so the words will show up
 
@@ -751,17 +733,16 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
 
     String correctPrompt = getCorrectDisplay();
     if (hasRefAudio) {
-      //System.out.println("has ref " + continueToNext);
       if (hasSynonymAudio) {
         List<String> toPlay = new ArrayList<String>(exercise.getSynonymAudioRefs());
         //  System.out.println("showIncorrectFeedback : playing " + toPlay);
-        if (controlState.audioFeedbackOn) {
+        if (controlState.isAudioFeedbackOn()) {
           playAllAudio(correctPrompt, toPlay);
         } else {
           nextAfterDelay(result.isCorrect(), correctPrompt);
         }
       } else {
-        if (controlState.audioFeedbackOn) {
+        if (controlState.isAudioFeedbackOn()) {
           String path = getRefAudioToPlay();
           if (path == null) {
             getSoundFeedback().playIncorrect(); // this should never happen
@@ -782,7 +763,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
       correctPrompt = "Heard: " + result.decodeOutput + "<p>" + correctPrompt;
     }
     Heading recoOutput = getRecoOutput();
-    if (recoOutput != null && controlState.audioFeedbackOn) {
+    if (recoOutput != null && controlState.isAudioFeedbackOn()) {
       recoOutput.setText(correctPrompt);
       DOM.setStyleAttribute(recoOutput.getElement(), "color", "#000000");
     }
@@ -791,10 +772,8 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
 
   private String getRefAudioToPlay() {
     String path = exercise.getRefAudio();
-    //System.out.println("getRefAudioToPlay : regular " + path);
     if (path == null) {
       path = exercise.getSlowAudioRef(); // fall back to slow audio
-      //System.out.println("\tgetRefAudioToPlay : slow " + path);
     }
     return path;
   }
@@ -806,8 +785,6 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
    */
   private void playRefAndGoToNext(String correctPrompt, String path) {
     path = getPath(path);
-    // System.out.println("playRefAndGoToNext : playing " + path);
-
     final String fcorrectPrompt = correctPrompt;
 
     getSoundFeedback().createSound(path, new SoundFeedback.EndListener() {
@@ -824,9 +801,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
   private void playRef() {
     String refAudioToPlay = getRefAudioToPlay();
 
-    if (refAudioToPlay == null) {
-      //getSoundFeedback().playIncorrect(); // this should never happen
-    } else {
+    if (refAudioToPlay != null) {
       playRef(refAudioToPlay);
     }
   }
@@ -838,8 +813,6 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
   private void playRef(String path) {
     path = getPath(path);
     foreign.addStyleName("mouseOverHighlight");
-
-    //System.out.println("showIncorrectFeedback : playing " + path);
     getSoundFeedback().createSound(path, new SoundFeedback.EndListener() {
       @Override
       public void songEnded() {
@@ -864,7 +837,6 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
       @Override
       public void run() {
         initRecordButton();
-        //clearFeedback();
       }
     };
     int incorrectDelay = DELAY_MILLIS_LONG;
@@ -916,14 +888,9 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
    * @see #showIncorrectFeedback(mitll.langtest.shared.AudioAnswer, double, boolean)
    */
   protected void goToNextItem(String infoToShow) {
-    //boolean continueToNext = true;
-    //if (continueToNext) {
-      int delay = getFeedbackLengthProportionalDelay(infoToShow);
-      System.out.println("goToNextItem : using delay " + delay + " info " + infoToShow);
-      goToNextAfter(delay);
-   // } else {
-   //   initRecordButton();
-   // }
+    int delay = getFeedbackLengthProportionalDelay(infoToShow);
+    System.out.println("goToNextItem : using delay " + delay + " info " + infoToShow);
+    goToNextAfter(delay);
   }
 
   private void goToNextAfter(int delay) {
@@ -962,8 +929,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
       }
       refSentence = refSentence.substring(0, refSentence.length() - " or ".length());
     }
-    return //"Answer: " +
-      refSentence + (hasSynonyms ? "" : translit);
+    return refSentence + (hasSynonyms ? "" : translit);
   }
 
   private String getAltAnswers(List<Exercise.QAPair> questions) {
@@ -1012,18 +978,13 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
         };
         t.schedule(DELAY_MILLIS);
       } else {
-
-        System.out.println("doing nextAfterDelay : correct " + correct + " feedback " + feedback);
-
         initRecordButton();
         clearFeedback();
       }
     }
   }
 
-  protected void initRecordButton() {
-    answerWidget.initRecordButton();
-  }
+  protected void initRecordButton() {  answerWidget.initRecordButton();  }
 
   protected void loadNext() {
     System.out.println("loadNext after " + exercise.getID());
