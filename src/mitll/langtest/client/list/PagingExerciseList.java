@@ -177,6 +177,10 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
     return unaccountedForVertical;
   }
 
+  /**
+   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#FlexSectionExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, boolean, boolean, mitll.langtest.client.exercise.ExerciseController, boolean, String)
+   * @param v
+   */
   public void setUnaccountedForVertical(int v) {
     unaccountedForVertical = v;
     pagingContainer.setUnaccountedForVertical(v);
@@ -216,7 +220,7 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
   }
 
   public void showEmptySelection() {
-    showPopup("No items match the selection and search.","Try clearing one of your selections or changing the search.",typeAhead);
+    showPopup("No items match the selection and search.", "Try clearing one of your selections or changing the search.", typeAhead);
   }
 
   private void showPopup(String toShow,String toShow2, Widget over) {
