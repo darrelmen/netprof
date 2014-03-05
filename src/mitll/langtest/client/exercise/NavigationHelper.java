@@ -133,7 +133,7 @@ public class NavigationHelper<T extends ExerciseShell> extends HorizontalPanel {
     }
   }
 
-  private void clickPrev(T e) {
+  protected void clickPrev(T e) {
     if (getPrev().isEnabled() && getPrev().isVisible()) {
       System.out.println("clickPrev " +keyHandler+ " click on prev " + getPrev());
       listContainer.loadPreviousExercise(e);
