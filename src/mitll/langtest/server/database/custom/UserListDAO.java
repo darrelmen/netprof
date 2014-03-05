@@ -226,10 +226,11 @@ public class UserListDAO extends DAO {
    */
   public List<UserList> getAllPublic(long userid) {
     try {
-      String sql = "SELECT * from " + USER_EXERCISE_LIST + " where isprivate=false and " + CREATORID + "<>" +userid+
+      String sql = "SELECT * from " + USER_EXERCISE_LIST + " where isprivate=false" +
+        //" and " + CREATORID + "<>" +userid+
         " order by modified ";
 
-      Set<Long> listsForVisitor = getListsForVisitor(userid);
+      //Set<Long> listsForVisitor = getListsForVisitor(userid);
 
     //  logger.debug("getAllPublic : lists for " + userid + " : " +listsForVisitor);
 
@@ -237,16 +238,16 @@ public class UserListDAO extends DAO {
 
    //   logger.debug("userLists for " + userid + " : " +userLists);
 
-      List<UserList> toReturn = new ArrayList<UserList>();
+   /*   List<UserList> toReturn = new ArrayList<UserList>();
       for (UserList ul : userLists) {
         if (!listsForVisitor.contains(ul.getUniqueID())) {
            toReturn.add(ul);
         }
       }
-
+*/
    //   logger.debug("toReturn for " + userid + " : " +toReturn);
 
-      return toReturn;
+      return userLists;
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
@@ -323,7 +324,7 @@ public class UserListDAO extends DAO {
     String s = ids.toString();
     s = s.replaceAll("\\[","").replaceAll("\\]","");
     String sql = "SELECT * from " + USER_EXERCISE_LIST + " where uniqueid in (" + s + ") order by modified";
-    logger.debug("sql for get in " + sql);
+    //logger.debug("sql for get in " + sql);
     try {
       List<UserList> lists = getUserLists(sql,-1);
       if (lists.isEmpty()) {
