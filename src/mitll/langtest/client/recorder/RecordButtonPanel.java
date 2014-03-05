@@ -28,7 +28,7 @@ import mitll.langtest.shared.Exercise;
  * Time: 4:34 PM
  * To change this template use File | Settings | File Templates.
  */
-public class RecordButtonPanel implements RecordButton.RecordingListener{
+public class RecordButtonPanel implements RecordButton.RecordingListener {
   protected RecordButton recordButton;
   protected LangTestDatabaseAsync service;
   protected ExerciseController controller;
@@ -126,6 +126,8 @@ public class RecordButtonPanel implements RecordButton.RecordingListener{
   }
 
   private void postAudioFile(final Panel outer, final int tries) {
+    System.out.println("postAudioFile... ");
+
     reqid++;
     service.writeAudioFile(controller.getBase64EncodedWavFile(),
       exercise.getPlan(),
@@ -151,6 +153,8 @@ public class RecordButtonPanel implements RecordButton.RecordingListener{
         }
 
         public void onSuccess(AudioAnswer result) {
+          System.out.println("postAudioFile : onSuccess " + result);
+
           if (reqid != result.reqid) {
             System.out.println("ignoring old answer " + result);
             return;
@@ -162,6 +166,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener{
   }
 
   public Widget getRecordButton() { return recordButton; }
+  public Widget getActualRecordButton() { return recordButton; }
   protected void receivedAudioAnswer(AudioAnswer result, final ExerciseQuestionState questionState, final Panel outer) {}
   protected void receivedAudioFailure() {}
 }

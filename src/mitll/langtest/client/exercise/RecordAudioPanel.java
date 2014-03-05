@@ -47,19 +47,20 @@ public class RecordAudioPanel extends AudioPanel {
     this.exercisePanel = widgets;
     this.index = index;
     this.exercise = exercise;
-    addWidgets();
+    addWidgets("");
   }
 
   /**
    * @see mitll.langtest.client.scoring.AudioPanel#getPlayButtons(com.google.gwt.user.client.ui.Widget)
    * @param toAdd
+   * @param playButtonSuffix
    * @return
    */
   @Override
-  protected PlayAudioPanel makePlayAudioPanel(Widget toAdd) {
+  protected PlayAudioPanel makePlayAudioPanel(Widget toAdd, String playButtonSuffix) {
     WaveformPostAudioRecordButton myPostAudioRecordButton = makePostAudioRecordButton();
     postAudioRecordButton = myPostAudioRecordButton;
-    playAudioPanel = new MyPlayAudioPanel(recordImage1, recordImage2, exercisePanel);
+    playAudioPanel = new MyPlayAudioPanel(recordImage1, recordImage2, exercisePanel, playButtonSuffix);
     myPostAudioRecordButton.setPlayAudioPanel(playAudioPanel);
 
     return playAudioPanel;
@@ -134,7 +135,7 @@ public class RecordAudioPanel extends AudioPanel {
    * A play button that controls the state of the record button.
    */
   private class MyPlayAudioPanel extends PlayAudioPanel {
-    public MyPlayAudioPanel(Image recordImage1, Image recordImage2, final Panel panel) {
+    public MyPlayAudioPanel(Image recordImage1, Image recordImage2, final Panel panel, String suffix) {
       super(RecordAudioPanel.this.soundManager, new PlayListener() {
         public void playStarted() {
           if (panel instanceof BusyPanel) {
@@ -149,7 +150,7 @@ public class RecordAudioPanel extends AudioPanel {
           }
           postAudioRecordButton.setEnabled(true);
         }
-      });
+      }, suffix);
       add(recordImage1);
       recordImage1.setVisible(false);
       add(recordImage2);
@@ -158,7 +159,7 @@ public class RecordAudioPanel extends AudioPanel {
     }
 
     /**
-     * @see mitll.langtest.client.sound.PlayAudioPanel#PlayAudioPanel(mitll.langtest.client.sound.SoundManagerAPI)
+     * @see mitll.langtest.client.sound.PlayAudioPanel#PlayAudioPanel(mitll.langtest.client.sound.SoundManagerAPI, String)
      */
     @Override
     protected void addButtons() {
