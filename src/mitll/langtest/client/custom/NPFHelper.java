@@ -87,7 +87,7 @@ public class NPFHelper implements RequiresResize {
     npfContentPanel = new SimplePanel();
     hp.add(npfContentPanel);
     npfContentPanel.addStyleName("floatRight");
-    npfExerciseList = makeNPFExerciseList(npfContentPanel, instanceName + "_"+ul.getName());
+    npfExerciseList = makeNPFExerciseList(npfContentPanel, instanceName + "_"+ul.getName(),ul.getUniqueID());
 
     left.add(npfExerciseList.getExerciseListOnLeftSide(controller.getProps()));
     rememberAndLoadFirst(ul);
@@ -124,7 +124,7 @@ public class NPFHelper implements RequiresResize {
    * @param instanceName
    * @return
    */
-  private PagingExerciseList<UserExercise> makeNPFExerciseList(Panel right, String instanceName) {
+  private PagingExerciseList<UserExercise> makeNPFExerciseList(Panel right, String instanceName, long userListID) {
     final PagingExerciseList<UserExercise> exerciseList = new PagingExerciseList<UserExercise>(right, service, feedback, false, false, controller,
       true, instanceName) {
       @Override
@@ -137,7 +137,7 @@ public class NPFHelper implements RequiresResize {
         });
       }
     };
-    setFactory(exerciseList, instanceName);
+    setFactory(exerciseList, instanceName, userListID);
     exerciseList.setUnaccountedForVertical(320);
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       @Override
@@ -148,7 +148,13 @@ public class NPFHelper implements RequiresResize {
     return exerciseList;
   }
 
-  protected void setFactory(final PagingExerciseList<UserExercise> exerciseList, final String instanceName) {
+  /**
+   * @see #makeNPFExerciseList(com.google.gwt.user.client.ui.Panel, String, long)
+   * @param exerciseList
+   * @param instanceName
+   * @param userListID
+   */
+  protected void setFactory(final PagingExerciseList<UserExercise> exerciseList, final String instanceName, long userListID) {
     exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, feedback, controller, exerciseList, 1.0f) {
       @Override
       public Panel getExercisePanel(Exercise e) {
