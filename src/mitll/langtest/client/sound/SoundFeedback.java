@@ -12,6 +12,10 @@ import java.util.Date;
  * To change this template use File | Settings | File Templates.
  */
 public class SoundFeedback {
+  private static final String CORRECT   = "langtest/sounds/correct4.mp3";
+  private static final String INCORRECT = "langtest/sounds/incorrect1.mp3";
+  private static final int SOFT_VOL = 50;
+
   private final HTML warnNoFlash;
   private Sound currentSound = null;
   private SoundManagerAPI soundManager;
@@ -21,17 +25,17 @@ public class SoundFeedback {
     this.warnNoFlash = warnNoFlash;
   }
   public void playCorrect() {
-    startSong("langtest/sounds/correct4.mp3", new EndListener() {
+    startSong(CORRECT, new EndListener() {
       @Override
       public void songEnded() {}
     }, false);
   }
 
   /**
-   * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#showIncorrectFeedback(mitll.langtest.shared.AudioAnswer, double, boolean)
+   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#showIncorrectFeedback(mitll.langtest.shared.AudioAnswer, double, boolean)
    */
   public void playIncorrect() {
-    startSong("langtest/sounds/incorrect1.mp3", new EndListener() {
+    startSong(INCORRECT, new EndListener() {
       @Override
       public void songEnded() {}
     }, true);
@@ -51,7 +55,6 @@ public class SoundFeedback {
     }
   }
 
-  //public void createSound(final String song) { createSound(song, null, false); }
   public void createSound(final String song, EndListener endListener) { createSound(song, endListener, false); }
 
     /**
@@ -59,11 +62,11 @@ public class SoundFeedback {
      * @param song
      * @param soft
      * @see #startSong
-     * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#playAllAudio(String, java.util.List)
-     * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#playRefAndGoToNext(String, String)
+     * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#playAllAudio
+     * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#playRefAndGoToNext
      */
   public void createSound(final String song, final EndListener endListener, final boolean soft) {
-    System.out.println("playing " +song);
+    //System.out.println("playing " +song);
     currentSound = new Sound(new AudioControl() {
       @Override
       public void reinitialize() {}
@@ -74,9 +77,7 @@ public class SoundFeedback {
       @Override
       public void songLoaded(double duration) {
         if (soft) {
-          System.out.println(new Date() + " setVolume !\n\n\n");
-
-          soundManager.setVolume(song,50);
+          soundManager.setVolume(song, SOFT_VOL);
         }
         soundManager.play(currentSound);
       }
@@ -91,12 +92,7 @@ public class SoundFeedback {
       public void update(double position) {}
     });
 
-/*    if (soft) {
-      soundManager.createSoftSound(currentSound, song, song);
-    }
-    else {*/
-      soundManager.createSound(currentSound, song, song);
-  //  }
+     soundManager.createSound(currentSound, song, song);
   }
 
   private void destroySound() {
