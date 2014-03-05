@@ -91,19 +91,10 @@ public class FlashcardRecordButton extends RecordButton {
     getFocus();
   }
 
-  private void getFocus() {
-    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-      public void execute() {
-        setFocus(true);
-      }
-    });
-  }
 
-  protected void warnNotASpace() {
-    showPopup(NO_SPACE_WARNING);
-  }
+  private void warnNotASpace() { showPopup(NO_SPACE_WARNING);  }
 
-  public void showPopup(String html) {
+  private void showPopup(String html) {
     final PopupPanel pleaseWait = new DecoratedPopupPanel();
     pleaseWait.setAutoHideEnabled(true);
     pleaseWait.add(new HTML(html));
@@ -143,5 +134,13 @@ public class FlashcardRecordButton extends RecordButton {
     setText(addKeyBinding ? SPACE_BAR : PROMPT);
     setType(ButtonType.PRIMARY);
     getFocus();
+  }
+
+  private void getFocus() {
+    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      public void execute() {
+        setFocus(true);
+      }
+    });
   }
 }
