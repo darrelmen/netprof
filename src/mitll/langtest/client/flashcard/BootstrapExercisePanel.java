@@ -56,7 +56,8 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnswerListener {
-  public static final String WARN_NO_FLASH = "<font color='red'>Flash is not activated. Do you have a flashblocker? Please add this site to its whitelist.</font>";
+  public static final String WARN_NO_FLASH = "<font color='red'>Flash is not activated. " +
+    "Do you have a flashblocker? Please add this site to its whitelist.</font>";
 
   private static final int DELAY_MILLIS = 1000;
   private static final int DELAY_MILLIS_LONG = 3000;
@@ -69,9 +70,6 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
 
   private static final String WAV = ".wav";
   private static final String MP3 = "." + AudioTag.COMPRESSED_TYPE;
- // private static final int SET_SIZE = 10;
- // private static final int MAX_SET_SIZE = 50;
-  // public static final int CONTENT_COLUMNS = 12;
 
   private final Exercise exercise;
 
@@ -81,16 +79,17 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
   private Panel recoOutputContainer;
   private final boolean addKeyBinding;
   private final ExerciseController controller;
-  private final boolean continueToNext = true;
   private final ControlState controlState;
-
+  private final Panel mainContainer;
+  Panel leftState;
+  Panel rightColumn;
   /**
    * @param e
    * @param service
    * @param controller
    * @param addKeyBinding
    * @see mitll.langtest.client.flashcard.FlashcardExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
-   * @see mitll.langtest.client.custom.NPFHelper#setFactory(mitll.langtest.client.list.PagingExerciseList, String)
+   * @see mitll.langtest.client.custom.NPFHelper#setFactory(mitll.langtest.client.list.PagingExerciseList, String, long)
    */
   public BootstrapExercisePanel(final Exercise e, final LangTestDatabaseAsync service,
                                 final ExerciseController controller, int feedbackHeight, boolean addKeyBinding,
@@ -110,43 +109,15 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     if (helpRow != null) add(helpRow);
     cardPrompt = getCardPrompt(e, controller);
     cardPrompt.getElement().setId("cardPrompt");
-    //          addStyleName("floatLeft");
     Panel horiz = new HorizontalPanel();
-    //DivWidget horiz = new DivWidget();
-    //horiz.addStyleName("trueInlineStyle");
-    // DivWidget horiz = new FluidRow();
-    //horiz.addStyleName("displayTableRow");
-    //   horiz.addStyleName("positionRelative");
-    // addStyleName("positionRelative");
-    //horiz.addStyleName("minWidthFifty");
-    // add(horiz);
-    //cardPrompt.addStyleName("floatLeft");
-    Panel rightColumn = getRightColumn(controller, controlState);
-    //rightColumn.addStyleName("floatRight");
-    // rightColumn.addStyleName("twoDivsRow");
-
-    // Panel leftColumn = new VerticalPanel();
+    rightColumn = getRightColumn(controller, controlState);
     DivWidget contentMiddle = new DivWidget();
     DivWidget belowDiv = new DivWidget();
-    // Panel contentMiddle = new VerticalPanel();
-
-    //leftColumn.addStyleName("exerciseBackground");
     contentMiddle.addStyleName("cardBorderShadow");
-    //leftColumn.addStyleName("floatLeft");
-    // leftColumn.addStyleName("twoDivsRow");
-    // contentMiddle.addStyleName("middleColumn");
     contentMiddle.addStyleName("minWidthFifty");
-
-    //  Panel wrapper = getCenteredWrapper(cardPrompt);
-
-    // contentMiddle.add(getCentered(cardPrompt));
     contentMiddle.add(cardPrompt);
-    // leftColumn.setWidth("100%");
 
-    //horiz.add(new Column(8,leftColumn));
-    //horiz.add(new Column(2,rightColumn));
-    Panel leftState = getLeftState();
-    //leftState.addStyleName("leftColumn");
+    leftState = getLeftState();
     horiz.add(leftState);
     Grid grid = new Grid(2, 1);
     grid.setWidget(0, 0, contentMiddle);
@@ -154,11 +125,8 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     horiz.add(grid);
     horiz.add(rightColumn);
     add(horiz);
+    mainContainer = contentMiddle;
 
-    //doDockLayout();
-    //  setWidth("100%");
-
-    // Panel leftState = getLeftState();
     addRecordingAndFeedbackWidgets(e, service, controller, feedbackHeight, contentMiddle);
     warnNoFlash.setVisible(false);
     add(warnNoFlash);
@@ -170,49 +138,11 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     }
   }
 
-/*  public void doDockLayout() {
-    DockLayoutPanel dockLayoutPanel = new DockLayoutPanel(Style.Unit.PX);
-    //dockLayoutPanel.addNorth(new Heading(6,"Try this set"), 2);
-    //dockLayoutPanel.addSouth(new Heading(6, "Footer"), 2);
-    //dockLayoutPanel.addEast(rightColumn, 4);
-    DivWidget div = new DivWidget();
-    div.setWidth("100px");
-    div.setHeight("100px");
-    div.add(new Heading(6, "East"));
-    dockLayoutPanel.addEast(div, 400);
-    //  Panel leftState = getLeftState();
-    div = new DivWidget();
-    div.setWidth("100px");
-    div.setHeight("100px");
-
-    div.add(new Heading(6, "West"));
-    dockLayoutPanel.addWest(div, 400);
-//    dockLayoutPanel.add(leftColumn);
-    div = new DivWidget();
-    div.setWidth("100px");
-    div.setHeight("100px");
-
-    div.add(new Heading(6, "Center"));
-    dockLayoutPanel.add(div);
-    //dockLayoutPanel.setWidth("500px");
-    addStyleName("positionRelative");
-    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-      @Override
-      public void execute() {
-        getParent().addStyleName("positionRelative");
-        getParent().getParent().addStyleName("positionRelative");
-      }
-    });
-
-
-    // DivWidget dockContainer = new DivWidget();
-    // DivWidget horiz = new FluidRow();
-    //horiz.addStyleName("displayTableRow");
-    //dockContainer.addStyleName("positionRelative");
-    //dockContainer.add(dockLayoutPanel);
-//    dockLayoutPanel.forceLayout();
-    add(dockLayoutPanel);
-  }*/
+  protected void setMainContentVisible(boolean vis) {
+    leftState.setVisible(vis);
+    mainContainer.setVisible(vis);
+    rightColumn.setVisible(vis);
+  }
 
   private Panel getRightColumn(ExerciseController controller, ControlState controlState) {
     Panel rightColumn = new VerticalPanel();
@@ -761,10 +691,11 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     boolean correct = result.isCorrect();
     final double score = result.getScore();
 
-    System.out.println("receivedAudioAnswer: correct " + correct + " pron score : " + score + " has ref " + hasRefAudio);
+    boolean badAudioRecording = result.validity != AudioAnswer.Validity.OK;
+    System.out.println("receivedAudioAnswer: correct " + correct + " pron score : " + score +
+      " has ref " + hasRefAudio + " bad audio " + badAudioRecording);
 
     String feedback = "";
-    boolean badAudioRecording = result.validity != AudioAnswer.Validity.OK;
     if (badAudioRecording) {
       showPopup(result.validity.getPrompt());
       nextAfterDelay(correct, "");
@@ -774,7 +705,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
       feedback = showIncorrectFeedback(result, score, hasRefAudio);
     }
     if (!badAudioRecording && (correct || !hasRefAudio)) {
-      System.out.println("receivedAudioAnswer: correct " + correct + " pron score : " + score + " has ref " + hasRefAudio);
+      System.out.println("\treceivedAudioAnswer: correct " + correct + " pron score : " + score + " has ref " + hasRefAudio);
       nextAfterDelay(correct, feedback);
     }
   }
@@ -988,6 +919,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
    * @see #showIncorrectFeedback(mitll.langtest.shared.AudioAnswer, double, boolean)
    */
   void goToNextItem(String infoToShow) {
+    boolean continueToNext = true;
     if (continueToNext) {
       int delay = getFeedbackLengthProportionalDelay(infoToShow);
       System.out.println("goToNextItem : using delay " + delay + " info " + infoToShow);
@@ -1083,6 +1015,9 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
         };
         t.schedule(DELAY_MILLIS);
       } else {
+
+        System.out.println("doing nextAfterDelay : correct " + correct + " feedback " + feedback);
+
         initRecordButton();
         clearFeedback();
       }
