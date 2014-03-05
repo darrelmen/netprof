@@ -35,7 +35,7 @@ import java.util.Set;
  */
 public class PagingContainer<T extends ExerciseShell> {
   private static final int MAX_LENGTH_ID = 27;
-  protected static final int PAGE_SIZE = 15;   // TODO : make this sensitive to vertical real estate?
+  protected static final int PAGE_SIZE = 10;   // TODO : make this sensitive to vertical real estate?
   private ListDataProvider<T> dataProvider;
   private static final boolean DEBUG = false;
   private static final int ID_LINE_WRAP_LENGTH = 20;
@@ -223,11 +223,15 @@ public class PagingContainer<T extends ExerciseShell> {
   public T getCurrentSelection() { return selectionModel.getSelectedObject(); }
 
   private CellTable<T> makeCellTable(CellTable.Resources o) {
-    return new CellTable<T>(PAGE_SIZE, o);
+    int pageSize = PAGE_SIZE;
+    //int pageSize = getNumTableRowsGivenScreenHeight();
+    return new CellTable<T>(pageSize, o);
   }
 
   private com.github.gwtbootstrap.client.ui.CellTable<T> createBootstrapCellTable(com.github.gwtbootstrap.client.ui.CellTable.Resources o) {
-    return new com.github.gwtbootstrap.client.ui.CellTable<T>(PAGE_SIZE, o);
+     int pageSize = PAGE_SIZE;
+    //int pageSize = getNumTableRowsGivenScreenHeight();
+    return new com.github.gwtbootstrap.client.ui.CellTable<T>(pageSize, o);
   }
 
   private void addColumnsToTable() {
@@ -402,20 +406,23 @@ public class PagingContainer<T extends ExerciseShell> {
     }
   }
 
+  boolean debug = false;
   public int getNumTableRowsGivenScreenHeight() {
     int header = getTableHeaderHeight();
     int leftOver = Window.getClientHeight() - header - verticalUnaccountedFor;
 
-/*     System.out.println("getNumTableRowsGivenScreenHeight Got on resize " + Window.getClientHeight() +
-       " " + header + " result = " + leftOver + "(" +
+    if (debug) System.out.println("getNumTableRowsGivenScreenHeight Got on resize window height " + Window.getClientHeight() +
+       " header " + header + " result = " + leftOver + "( vert unaccount " +
        verticalUnaccountedFor+
-       ")");*/
+       ")");
 
     float rawRatio = ((float) leftOver) / (float) heightOfCellTableWith15Rows();
     float tableRatio = Math.min(MAX_PAGES, rawRatio);
-    // System.out.println("left over " + leftOver + " raw " + rawRatio + " table ratio " + tableRatio);
-
     float ratio = DEFAULT_PAGE_SIZE * tableRatio;
+
+    if (debug) System.out.println("getNumTableRowsGivenScreenHeight : left over " + leftOver + " raw " + rawRatio +
+      " table ratio " + tableRatio + " ratio " + ratio);
+
     if (dataProvider != null && getList() != null) {
       if (!getList().isEmpty()) {
         T toLoad = getList().get(0);
@@ -425,16 +432,14 @@ public class PagingContainer<T extends ExerciseShell> {
         }
       }
     }
-    return Math.max(MIN_PAGE_SIZE, Math.round(ratio));
+    int rows = Math.max(MIN_PAGE_SIZE, Math.round(ratio));
+
+    if (debug) System.out.println("getNumTableRowsGivenScreenHeight : rows " + rows);
+    return rows;
   }
 
-  protected int heightOfCellTableWith15Rows() {
-    return HEIGHT_OF_CELL_TABLE_WITH_15_ROWS;
-  }
-
-  protected int getTableHeaderHeight() {
-    return controller.getHeightOfTopRows();
-  }
+  protected int heightOfCellTableWith15Rows() { return HEIGHT_OF_CELL_TABLE_WITH_15_ROWS;  }
+  protected int getTableHeaderHeight() { return controller.getHeightOfTopRows(); }
 
   public void markCurrentExercise(String itemID) {
     if (getList() == null || getList().isEmpty()) return;
