@@ -386,6 +386,7 @@ public class UserListDAO extends DAO {
    * TODO : This is going to get slow?
    * @see #getUserLists(String, long)
    * @see #getWithExercises(long)
+   * @see #getAllByUser(long)
    * @param where
    */
   private void populateList(UserList where) {
