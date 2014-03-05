@@ -6,6 +6,7 @@ import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Row;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.core.client.EntryPoint;
@@ -251,7 +252,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     verticalContainer.add(headerRow = makeHeaderRow());
     headerRow.getElement().setId("headerRow");
 
-    Panel belowFirstRow = new FluidRow();
+    Panel belowFirstRow = new DivWidget();
     verticalContainer.add(belowFirstRow);
     this.belowFirstRow = belowFirstRow;
     belowFirstRow.getElement().setId("belowFirstRow");
@@ -373,24 +374,16 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @return
    */
   private Panel makeHeaderRow() {
-    FluidRow headerRow = new FluidRow();
 
-    Widget title;
-    if (isGoodwaveMode()) {
-      flashcard = new Flashcard();
-      title = flashcard.makeNPFHeaderRow(props.getSplash(),props.isClassroomMode());
-    } else if (props.isFlashcardTeacherView() || props.isAutocrt()) {
-      flashcard = new Flashcard();
-      title = flashcard.getHeaderRow(props.getSplash(), "NewProF2.png",props.getAppTitle(), false);
-    }
-    else {
-      title = getTitleWidget();
-    }
 
     boolean isStudent = getLoginType().equals(PropertyHandler.LOGIN_TYPE.STUDENT) ||  getLoginType().equals(PropertyHandler.LOGIN_TYPE.SIMPLE);
     boolean takeWholeWidth = isStudent || props.isFlashcardTeacherView() || props.isShowSections() || props.isGoodwaveMode();
 
-    Column titleColumn = new Column(takeWholeWidth ? 12 : 10, title);
+    Panel headerRow = /*takeWholeWidth ? new DivWidget() :*/ new FluidRow();
+
+    Panel title = getTitle();
+   // Panel titleColumn = takeWholeWidth ? title :new Column(takeWholeWidth ? 12 : 10, title);
+    Panel titleColumn = new Column(takeWholeWidth ? 12 : 10, title);
     headerRow.add(titleColumn);
     makeLogoutParts();
     if (!takeWholeWidth) {
@@ -421,6 +414,21 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return headerRow;
   }
 
+  private Panel getTitle() {
+    Panel title;
+    if (isGoodwaveMode()) {
+      flashcard = new Flashcard();
+      title = flashcard.makeNPFHeaderRow(props.getSplash(),props.isClassroomMode());
+    } else if (props.isFlashcardTeacherView() || props.isAutocrt()) {
+      flashcard = new Flashcard();
+      title = flashcard.getHeaderRow(props.getSplash(), "NewProF2.png",props.getAppTitle(), false);
+    }
+    else {
+      title = getTitleWidget();
+    }
+    return title;
+  }
+
   private void addProgressBar(Panel widgets) {
     if (props.isGrading()) {
       widgets.add(status);
@@ -430,8 +438,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
-  private Widget getTitleWidget() {
-    FluidRow titleRow = new FluidRow();
+  private Panel getTitleWidget() {
+    Panel titleRow = new FluidRow();
     titleRow.addStyleName("alignCenter");
     titleRow.addStyleName("inlineBlockStyle");
     Heading pageTitle = new Heading(2, props.getAppTitle());
