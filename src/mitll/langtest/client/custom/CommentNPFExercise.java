@@ -71,7 +71,7 @@ public class CommentNPFExercise extends NPFExercise {
   }
 
   private Widget getEntry(final String field, final String label, String value, ExerciseAnnotation annotation) {
-    return getEntry(field, getContentWidget(label, value, true), annotation);
+    return getEntry(field, getContentWidget(label, value, true, false), annotation);
   }
 
   @Override
