@@ -55,7 +55,7 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class Navigation extends TabContainer implements RequiresResize {
-  private static final String CHAPTERS = "Chapters";
+  private static final String CHAPTERS = "Course Content";
   private static final String YOUR_LISTS = "Your Lists";
   private static final String OTHERS_LISTS = "Other's Lists";
   private static final String PRACTICE = "Practice";
@@ -63,20 +63,21 @@ public class Navigation extends TabContainer implements RequiresResize {
   public static final String COMMENT = "comment";
   private static final String ADD_OR_EDIT_ITEM = "Add/Edit Item";
   private static final String ADD_DELETE_EDIT_ITEM = "Fix Items";
-  public static final String ITEMS_TO_REVIEW = "Items to review";
-  public static final String ITEMS_WITH_COMMENTS = "Items with comments";
-  public static final String LEARN_PRONUNCIATION = "Learn Pronunciation";
+  private static final String ITEMS_TO_REVIEW = "Items to review";
+  private static final String ITEMS_WITH_COMMENTS = "Items with comments";
+  private static final String LEARN_PRONUNCIATION = "Learn Pronunciation";
   private static final String REVIEW1 = "Review";
-  public static final String REVIEWERS = "Reviewers";
-  private static final String CREATE = "Create";
-  private static final String BROWSE = "Browse";
+  private static final String REVIEWERS = "Reviewers";
+  private static final String CREATE = "Create a New List";
+  private static final String BROWSE = "Browse Lists";
   private static final String COMMENTS = "Comments";
   private static final String LESSONS = "lessons";
   private static final String DELETE = "Delete";
-  public static final String NO_LISTS_CREATED_YET = "No lists created yet.";
-  public static final String CLICKED_USER_LIST = "clickedUserList";
-  public static final String CLICKED_TAB = "clickedTab";
-  public static final String SUB_TAB = "subTab";
+  private static final String NO_LISTS_CREATED_YET = "No lists created yet.";
+  private static final String CLICKED_USER_LIST = "clickedUserList";
+  private static final String CLICKED_TAB = "clickedTab";
+  private static final String SUB_TAB = "subTab";
+  public static final String NO_LISTS_CREATED_OR_VISITED_YET = "No lists created or visited yet.";
   private final ExerciseController controller;
   private LangTestDatabaseAsync service;
   private UserManager userManager;
@@ -671,7 +672,7 @@ public class Navigation extends TabContainer implements RequiresResize {
 
         boolean anyAdded = addUserListsToDisplay(result, insideScroll, nameToLists);
         if (!anyAdded) {
-          insideScroll.add(new Heading(3, "No lists created or visited yet."));
+          insideScroll.add(new Heading(3, allLists ? NO_LISTS_CREATED_OR_VISITED_YET:NO_LISTS_CREATED_YET));
         }
         child.add(listScrollPanel);
 
