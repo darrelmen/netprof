@@ -375,7 +375,7 @@ public class BootstrapFlashcardExerciseList<T extends ExerciseShell> implements 
   }
 
   @Override
-  public void hideExerciseList() {}
+  public void hide() {}
   public void setCompleted(Set<String> completed) {}
 
   @Override
@@ -486,6 +486,11 @@ public class BootstrapFlashcardExerciseList<T extends ExerciseShell> implements 
 
   @Override
   public void addListChangedListener(ListChangeListener<T> listener) {
+
+  }
+
+  @Override
+  public void show() {
 
   }
 }
