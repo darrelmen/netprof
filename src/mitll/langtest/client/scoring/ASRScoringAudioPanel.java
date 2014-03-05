@@ -26,9 +26,11 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.ASRRecordAudioPanel#ASRRecordAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, int, mitll.langtest.client.exercise.ExerciseController)
    * @param service
    * @param gaugePanel
+   * @param playButtonSuffix
    */
-  public ASRScoringAudioPanel(LangTestDatabaseAsync service, ExerciseController controller, ScoreListener gaugePanel) {
-    super(service, controller, gaugePanel);
+  public ASRScoringAudioPanel(LangTestDatabaseAsync service, ExerciseController controller, ScoreListener gaugePanel,
+                              String playButtonSuffix) {
+    super(service, controller, gaugePanel, playButtonSuffix);
   }
 
   /**
@@ -40,10 +42,12 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
    * @param showSpectrogram
    * @param gaugePanel
    * @param rightMargin
+   * @param playButtonSuffix
    */
   public ASRScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
-                              ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin) {
-    super(path, refSentence, service, controller, showSpectrogram, gaugePanel, rightMargin);
+                              ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel,
+                              int rightMargin, String playButtonSuffix) {
+    super(path, refSentence, service, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix);
     this.useScoreToColorBkg = controller.useBkgColorForRef();
   }
 
@@ -72,7 +76,7 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
     final Timer t = new Timer() {
       @Override
       public void run() {
-        wordTranscript.image.setUrl(LangTest.LANGTEST_IMAGES +"animated_progress44.gif");
+        wordTranscript.image.setUrl(LangTest.LANGTEST_IMAGES + "animated_progress44.gif");
         wordTranscript.image.setVisible(true);
         phoneTranscript.image.setVisible(false);
       }
@@ -83,25 +87,23 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
 
     //System.out.println("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " type " + "score" + " width " + toUse);
 
-      service.getASRScoreForAudio(reqid, resultID, path, refSentence, toUse, height, useScoreToColorBkg, new AsyncCallback<PretestScore>() {
-        public void onFailure(Throwable caught) {
-          if (!caught.getMessage().trim().equals("0")) {
-            Window.alert("Server error -- couldn't contact server.");
-          }
-          wordTranscript.image.setVisible(false);
-          phoneTranscript.image.setVisible(false);
+    service.getASRScoreForAudio(reqid, resultID, path, refSentence, toUse, height, useScoreToColorBkg, new AsyncCallback<PretestScore>() {
+      public void onFailure(Throwable caught) {
+        if (!caught.getMessage().trim().equals("0")) {
+          Window.alert("Server error -- couldn't contact server.");
         }
+        wordTranscript.image.setVisible(false);
+        phoneTranscript.image.setVisible(false);
+      }
 
-        public void onSuccess(PretestScore result) {
-          t.cancel();
+      public void onSuccess(PretestScore result) {
+        t.cancel();
 
-          if (isMostRecentRequest("score", result.getReqid())) {
-            useResult(result, wordTranscript, phoneTranscript, tested.contains(path));
-            tested.add(path);
-          }/* else {
-          //System.out.println("ignoring " + path + " with req " + result.getReqid());
-        }*/
+        if (isMostRecentRequest("score", result.getReqid())) {
+          useResult(result, wordTranscript, phoneTranscript, tested.contains(path));
+          tested.add(path);
         }
-      });
+      }
+    });
   }
 }
