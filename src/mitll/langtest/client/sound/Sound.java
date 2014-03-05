@@ -10,10 +10,14 @@ import com.google.gwt.core.client.JavaScriptObject;
  *
  */
 public class Sound {
-	public AudioControl parent;
+	private AudioControl parent;
 	public JavaScriptObject sound;
 	
 	public Sound(AudioControl parent){
 		this.parent = parent;
 	}
+
+  public AudioControl getParent() {
+    return parent;
+  }
 }
