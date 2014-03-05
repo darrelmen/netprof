@@ -365,6 +365,17 @@
         </jar>
     </target>
 
+    <target depends="build" name="ESL">
+        <jar destfile="npfESL.war" basedir="war"
+             includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/english/**,scoring/bin.linux64/**,scoring/configurations/**,scoring/models.wsj01-16/**"
+                >
+
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
+    </target>
+
     <target depends="build" name="npfCM">
         <jar destfile="npfCM.war" basedir="war"
              includes="npfIcon.png,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/mandarin/**,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-mandarin/**"
