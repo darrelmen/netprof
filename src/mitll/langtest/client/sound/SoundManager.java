@@ -162,23 +162,23 @@ public class SoundManager {
 
 	public static void songFinished(Sound sound){
     if (debug) System.out.println("sound finished " +sound);
-		sound.parent.songFinished();
+		sound.getParent().songFinished();
 	}
 
 	public static void songFirstLoaded(Sound sound, double durationEstimate){
     if (debug) System.out.println("songFirstLoaded sound " +sound);
 
-    sound.parent.songFirstLoaded(durationEstimate);
+    sound.getParent().songFirstLoaded(durationEstimate);
 	}
 
 	public static void songLoaded(Sound sound, double duration){
     if (debug) System.out.println("songLoaded sound " +sound + " with dur " +duration);
 
-    sound.parent.songLoaded(duration);
+    sound.getParent().songLoaded(duration);
 	}
 
 	public static void update(Sound sound, double position){
-		sound.parent.update(position);
+		sound.getParent().update(position);
 	}
 
   /**
