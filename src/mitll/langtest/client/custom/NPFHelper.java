@@ -129,7 +129,7 @@ public class NPFHelper implements RequiresResize {
       true, instanceName) {
       @Override
       protected void onLastItem() {
-        new ModalInfoDialog("Complete","List complete!", new HiddenHandler() {
+        new ModalInfoDialog("Complete", "List complete!", new HiddenHandler() {
           @Override
           public void onHidden(HiddenEvent hiddenEvent) {
             reloadExercises();
@@ -138,7 +138,7 @@ public class NPFHelper implements RequiresResize {
       }
     };
     setFactory(exerciseList, instanceName, userListID);
-    exerciseList.setUnaccountedForVertical(320);
+    //exerciseList.setUnaccountedForVertical(320);
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       @Override
       public void execute() {
