@@ -21,6 +21,7 @@ import mitll.langtest.shared.Exercise;
  * To change this template use File | Settings | File Templates.
  */
 public class FlashcardRecordButtonPanel extends RecordButtonPanel implements RecordButton.RecordingListener {
+  public static final String PRESS_AND_HOLD_THE_MOUSE_BUTTON_TO_RECORD = "Press and hold the mouse button to record";
   private final AudioAnswerListener exercisePanel;
 
   /**
@@ -40,7 +41,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
 
     this.exercisePanel = exercisePanel;
    // recordButton.setTitle("Press and hold the space bar or mouse button to record");
-    recordButton.setTitle("Press and hold the mouse button to record");
+    recordButton.setTitle(PRESS_AND_HOLD_THE_MOUSE_BUTTON_TO_RECORD);
   }
 
   private IconAnchor waiting;
@@ -101,6 +102,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
    */
   @Override
   protected void receivedAudioAnswer(final AudioAnswer result, ExerciseQuestionState questionState, Panel outer) {
+    System.out.println("receivedAudioAnswer " + result);
     boolean correct = result.isCorrect();
     recordButton.setVisible(false);
     waiting.setVisible(false);
