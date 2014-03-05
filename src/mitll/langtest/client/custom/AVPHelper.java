@@ -20,10 +20,7 @@ class AVPHelper extends NPFHelper {
   private final LangTestDatabaseAsync service;
   private final UserManager userManager;
   private final ExerciseController controller;
-  //private ListInterface<UserExercise> outerExerciseList;
- // private Exercise currentExercise;
   private UserFeedback feedback;
-  //private BootstrapExercisePanel bootstrapPanel;
 
   public AVPHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager, ExerciseController controller) {
     super(service, feedback, userManager, controller);
@@ -33,24 +30,29 @@ class AVPHelper extends NPFHelper {
     this.feedback = feedback;
   }
 
+  /**
+   * @see mitll.langtest.client.custom.NPFHelper#makeNPFExerciseList
+   * @param exerciseList
+   * @param instanceName
+   * @param userListID
+   */
   @Override
-  protected void setFactory(final PagingExerciseList<UserExercise> exerciseList, final String instanceName) {
-  //  outerExerciseList = exerciseList;
-    exerciseList.setFactory(new MyFlashcardExercisePanelFactory(service, feedback,controller,exerciseList), userManager, 1);
+  protected void setFactory(final PagingExerciseList<UserExercise> exerciseList, final String instanceName, long userListID) {
+    exerciseList.setFactory(new MyFlashcardExercisePanelFactory<UserExercise>(service, feedback,controller,exerciseList,userListID), userManager, 1);
   }
 
   @Override
   protected Panel setupContent(Panel hp) {
     Panel widgets = super.setupContent(hp);
     float v = Window.getClientWidth() * 0.5f;
-  //  System.out.println("Avp width " + v);
     widgets.setWidth(v + "px");
     return widgets;
   }
 
   @Override
   public void onResize() {
-    if (getNpfContentPanel() != null) getNpfContentPanel().setWidth(((Window.getClientWidth() * 0.6f) - 100) + "px");
+    if (getNpfContentPanel() != null) {
+      getNpfContentPanel().setWidth(((Window.getClientWidth() * 0.6f) - 100) + "px");
+    }
   }
-
 }
