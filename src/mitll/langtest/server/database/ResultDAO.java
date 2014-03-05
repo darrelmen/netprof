@@ -29,7 +29,8 @@ import java.util.Set;
 public class ResultDAO extends DAO {
   private static final Logger logger = Logger.getLogger(ResultDAO.class);
 
-  private static final int SESSION_GAP = 5 * 60 * 1000;
+  private static final int MINUTE = 60 * 1000;
+  private static final int SESSION_GAP = 5 * MINUTE;  // 5 minutes
 
   private static final String ID = "id";
   private static final String USERID = "userid";
@@ -59,14 +60,8 @@ public class ResultDAO extends DAO {
     scheduleDAO = new ScheduleDAO(database);
   }
 
-  public List<SimpleResult> getSimpleResults() {
-    return getSimpleResults("");
-  }
-
-  public List<SimpleResult> getResultsForUser(long userid) {
-    return getSimpleResults(" where userid=" + userid);
-  }
-
+  public List<SimpleResult> getSimpleResults() { return getSimpleResults("");  }
+  public List<SimpleResult> getResultsForUser(long userid) {  return getSimpleResults(" where userid=" + userid);  }
 
 /*  public List<Result> getResultsThatNeedScore() {
     try {
@@ -557,9 +552,7 @@ public class ResultDAO extends DAO {
     return sessions;
   }
 
-
-  private List<Session> partitionIntoSessions2( List<Result> answersForUser,
-                                               String lastExerciseID) {
+  private List<Session> partitionIntoSessions2(List<Result> answersForUser, String lastExerciseID) {
     Session s = null;
     long last = 0;
 
@@ -574,8 +567,10 @@ public class ResultDAO extends DAO {
       }
       s.addExerciseID(r.id);
       if (r.isCorrect()) {
-        s.incrementCorrect(r.id,r.isCorrect());
+        s.incrementCorrect(r.id, r.isCorrect());
       }
+      s.setScore(r.id, r.getPronScore());
+
       last = r.timestamp;
 
       if (r.id.equals(lastExerciseID)) {
