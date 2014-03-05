@@ -176,40 +176,6 @@ public class Navigation extends TabContainer implements RequiresResize {
         viewBrowse();
       }
     });
-/*
-    if (!combinedMode) {
-      final TabAndContent yourStuff = makeTab(tabPanel, IconType.FOLDER_CLOSE, YOUR_LISTS);
-      yourItems = yourStuff.tab;
-      yourItemsContent = yourStuff.content;
-      yourItems.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          refreshViewLessons();
-        }
-      });
-      refreshViewLessons();
-
-
-      // create tab
-      final TabAndContent create = makeTab(tabPanel, IconType.PLUS_SIGN, "Create");
-      final CreateListDialog createListDialog = new CreateListDialog(this, service, userManager);
-      create.tab.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          createListDialog.doCreate(create.content);
-        }
-      });
-
-      // browse tab
-      browse = makeTab(tabPanel, IconType.TH_LIST, "Browse");
-      browse.tab.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          viewBrowse();
-        }
-      });
-    }
-*/
 
     // chapter tab
     final TabAndContent chapters = makeTab(tabPanel, combinedMode ? IconType.LIGHTBULB : IconType.TH_LIST, !combinedMode ? CHAPTERS : LEARN_PRONUNCIATION);
@@ -262,7 +228,7 @@ public class Navigation extends TabContainer implements RequiresResize {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
 
       localStorageIfSupported.setItem(getLocalStorageKey(name), toStore);
-      System.out.println("storeValue " + name + "="+toStore);
+      //System.out.println("storeValue " + name + "="+toStore);
 
       //if (showMessage()) {
       //   System.err.println("----------------> huh? should not show again");
@@ -295,8 +261,6 @@ public class Navigation extends TabContainer implements RequiresResize {
       //return "";
     }
   }
-
-
 
   private String getLocalStorageKey(String name) {
     return "Navigation_" + controller.getLanguage() + "_" + controller.getUser() + "_" +name;
@@ -572,7 +536,7 @@ public class Navigation extends TabContainer implements RequiresResize {
         @Override
         public void onClick(ClickEvent event) {
           storeValue("subTab","practice");
-          System.out.println("getListOperations : got click on practice");
+         // System.out.println("getListOperations : got click on practice");
 
           avpHelper.showNPF(ul, fpractice, "practice");
         }
