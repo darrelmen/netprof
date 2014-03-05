@@ -26,11 +26,13 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
-  private static final String PLAY_LABEL = "\u25ba play";
   private static final String PAUSE_LABEL = "|| pause";
   private Sound currentSound = null;
   private final SoundManagerAPI soundManager;
-  private final Button playButton = new Button(PLAY_LABEL);
+
+  private final String PLAY_LABEL;
+  private final Button playButton;
+
   private final HTML warnNoFlash = new HTML("<font color='red'>Flash is not activated. Do you have a flashblocker? " +
     "Please add this site to its whitelist.</font>");
   private AudioControl listener;
@@ -42,24 +44,28 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   /**
    * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel
    * @param soundManager
+   * @param suffix
    */
-  public PlayAudioPanel(SoundManagerAPI soundManager) {
+  public PlayAudioPanel(SoundManagerAPI soundManager, String suffix) {
     this.soundManager = soundManager;
     setSpacing(10);
     setVerticalAlignment(ALIGN_MIDDLE);
+    PLAY_LABEL = "\u25ba Play" + suffix;
+    playButton = new Button(PLAY_LABEL);
     addButtons();
     id = counter++;
     getElement().setId("PlayAudioPanel_"+id);
   }
 
   /**
-   * @see mitll.langtest.client.exercise.RecordAudioPanel.MyPlayAudioPanel#MyPlayAudioPanel(com.github.gwtbootstrap.client.ui.Image, com.github.gwtbootstrap.client.ui.Image, com.google.gwt.user.client.ui.Panel)
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.ASRRecordAudioPanel#makePlayAudioPanel(com.google.gwt.user.client.ui.Widget)
+   * @see mitll.langtest.client.exercise.RecordAudioPanel.MyPlayAudioPanel#MyPlayAudioPanel(com.github.gwtbootstrap.client.ui.Image, com.github.gwtbootstrap.client.ui.Image, com.google.gwt.user.client.ui.Panel, String)
+   * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel(com.google.gwt.user.client.ui.Widget, String)
    * @param soundManager
    * @param playListener
+   * @param suffix
    */
-  public PlayAudioPanel(SoundManagerAPI soundManager, PlayListener playListener) {
-    this(soundManager);
+  public PlayAudioPanel(SoundManagerAPI soundManager, PlayListener playListener, String suffix) {
+    this(soundManager, suffix);
     addPlayListener(playListener);
   }
 

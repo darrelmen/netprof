@@ -10,6 +10,7 @@ import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.user.client.Timer;
+import mitll.langtest.client.flashcard.FlashcardRecordButtonPanel;
 
 /**
  * Basically a click handler and a timer to click stop recording, if the user doesn't.
@@ -27,8 +28,8 @@ import com.google.gwt.user.client.Timer;
  */
 public class RecordButton extends Button {
   private static final int PERIOD_MILLIS = 500;
-  private static final String RECORD = "Record";
-  private static final String STOP = "Stop";
+  private final String RECORD;
+  private final String STOP;
 
   private boolean recording = false;
   private Timer recordTimer;
@@ -44,9 +45,20 @@ public class RecordButton extends Button {
     void stopRecording();
   }
 
-  public RecordButton(int delay, boolean doClickAndHold, boolean addKeyBinding) {
-    super(RECORD);
+  /**
+   * @see mitll.langtest.client.scoring.PostAudioRecordButton#PostAudioRecordButton(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.LangTestDatabaseAsync, int, boolean, String, String, String)
+   * @param delay
+   * @param doClickAndHold
+   * @param addKeyBinding
+   * @param buttonText
+   * @param stopButtonText
+   */
+  public RecordButton(int delay, boolean doClickAndHold, boolean addKeyBinding, String buttonText, String stopButtonText) {
+    super(buttonText);
+    RECORD = buttonText;
+    STOP = stopButtonText;
     this.doClickAndHold = doClickAndHold;
+    if (doClickAndHold) setTitle(FlashcardRecordButtonPanel.PRESS_AND_HOLD_THE_MOUSE_BUTTON_TO_RECORD);
     this.autoStopDelay = delay;
     setType(ButtonType.PRIMARY);
     setupRecordButton(addKeyBinding);
@@ -59,7 +71,7 @@ public class RecordButton extends Button {
    * @param doClickAndHold
    */
   public RecordButton(int delay, RecordingListener recordingListener, boolean doClickAndHold) {
-    this(delay, doClickAndHold, true);
+    this(delay, doClickAndHold, true, "Record", "Stop");
     this.setRecordingListener(recordingListener);
   }
 
