@@ -41,7 +41,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
    * @param screenPortion
    * @param addKeyHandler
    * @param instance
-   * @see NPFHelper#setFactory(mitll.langtest.client.list.PagingExerciseList, String)
+   * @see NPFHelper#setFactory(mitll.langtest.client.list.PagingExerciseList, String, long)
    */
   public NPFExercise(Exercise e, ExerciseController controller, ListInterface listContainer, float screenPortion,
                      boolean addKeyHandler, String instance) {
