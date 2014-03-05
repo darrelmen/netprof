@@ -6,5 +6,7 @@ package mitll.langtest.shared.flashcard;
 public interface SetScore {
   int getCorrect();
 
+  float getAvgScore();
+
   long getUserid();
 }
