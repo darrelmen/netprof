@@ -130,7 +130,7 @@ public class LeaderboardPlot {
    */
   public <T extends SetScore> Chart getChart(List<T> scores, long userID, int gameTimeSeconds,
                                              String title, String subtitle, boolean useCorrect) {
-    System.out.println("getChart : for user " +userID + " scores " + scores.size() + " use correct " +useCorrect);
+    //System.out.println("getChart : for user " +userID + " scores " + scores.size() + " use correct " +useCorrect);
     GetPlotValues getPlotValues = new GetPlotValues<T>(scores, userID, useCorrect).invoke();
     return getChart(scores, gameTimeSeconds, getPlotValues, title, subtitle, useCorrect ? "Correct" : "Score", !useCorrect);
   }
@@ -307,14 +307,14 @@ public class LeaderboardPlot {
         if (score.getUserid() == userID) {
           if (value > pbCorrect) pbCorrect = value;
           yValuesForUser.add(value);
-          System.out.println("showLeaderboardPlot : for user " +userID + " got " + score);
+          //System.out.println("showLeaderboardPlot : for user " +userID + " got " + score);
         }
         else {
-          System.out.println("\tshowLeaderboardPlot : for user " +score.getUserid() + " got " + score);
+         // System.out.println("\tshowLeaderboardPlot : for user " +score.getUserid() + " got " + score);
         }
         if (value > top) {
           top = value;
-          System.out.println("\tshowLeaderboardPlot : new top score for user " +score.getUserid() + " got " + score);
+          //System.out.println("\tshowLeaderboardPlot : new top score for user " +score.getUserid() + " got " + score);
         }
         totalCorrect += value;
       }
