@@ -19,6 +19,7 @@ import mitll.langtest.shared.Result;
 import mitll.langtest.shared.Site;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
+import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.FlashcardResponse;
 import mitll.langtest.shared.flashcard.ScoreInfo;
 import mitll.langtest.shared.grade.CountAndGradeID;
@@ -565,6 +566,13 @@ public class DatabaseImpl implements Database {
 
   private Map<Long, Integer> userToCorrect = new HashMap<Long, Integer>();
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#postTimesUp(long, long, java.util.Map)
+   * @param userID
+   * @param timeTaken
+   * @param selection
+   * @return
+   */
   public ScoreInfo getScoreInfo(long userID, long timeTaken, Map<String, Collection<String>> selection) {
     UserStateWrapper userStateWrapper = userToState.get(userID);
     int incorrect = userStateWrapper.getPincorrect();
@@ -577,6 +585,23 @@ public class DatabaseImpl implements Database {
 
     userToCorrect.put(userID, 0);
     return scoreInfo;
+  }
+
+  /**
+   * TODO : expand to include all users.
+   * @param userid
+   * @param listid
+   * @param lastID
+   * @return
+   */
+  public List<Session> getUserHistoryForList(long userid, long listid, String lastID) {
+    UserList userListByID = getUserListManager().getUserListByID(listid);
+    Collection<UserExercise> exercises = userListByID.getExercises();
+    Set<String> ids = new HashSet<String>();
+    for (UserExercise ue : exercises) ids.add(ue.getID());
+    List<Session> sessionsForUserIn = resultDAO.getSessionsForUserIn(userid, ids, lastID);
+    return sessionsForUserIn;
+
   }
 
   /**
