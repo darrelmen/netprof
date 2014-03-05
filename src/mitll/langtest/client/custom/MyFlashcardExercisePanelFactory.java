@@ -6,15 +6,11 @@ import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
-import com.google.common.collect.Lists;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.storage.client.Storage;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -22,14 +18,16 @@ import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.flashcard.BootstrapExercisePanel;
 import mitll.langtest.client.flashcard.ControlState;
 import mitll.langtest.client.flashcard.FlashcardExercisePanelFactory;
+import mitll.langtest.client.flashcard.LeaderboardPlot;
 import mitll.langtest.client.list.ListChangeListener;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.monitoring.Session;
+import org.moxieapps.gwt.highcharts.client.Chart;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -46,68 +44,46 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
   private static final String REPEAT_THIS_SET = "Start Over";
   private Exercise currentExercise;
   private final ControlState controlState;
-  //private List<List<T>> sets = new ArrayList<List<T>>();
-  //private int setIndex = 0;
   private  float totalScore;
   private int totalCorrect;
   private int totalIncorrect;
   private float totalDone;
-  //private List<T> currentSet = new ArrayList<T>();
- // private int size = 10;
- private List<T> allExercises;
+  private List<T> allExercises;
+  private final long userListID;
+  private T lastExercise;
 
+  /**
+   * @see NPFHelper#setFactory(mitll.langtest.client.list.PagingExerciseList, String, long)
+   * @param service
+   * @param feedback
+   * @param controller
+   * @param exerciseList
+   */
   public MyFlashcardExercisePanelFactory(LangTestDatabaseAsync service, UserFeedback feedback, ExerciseController controller,
-                                         ListInterface<T> exerciseList) {
+                                         ListInterface<T> exerciseList, long userListID) {
     super(service, feedback, controller, exerciseList);
     controlState = new ControlState();
+    this.userListID = userListID;
     System.out.println("========> MyFlashcardExercisePanelFactory made!\n\n\n");
 
     exerciseList.addListChangedListener(new ListChangeListener<T>() {
       @Override
       public void listChanged(List<T> items) {
-     allExercises = items;
-      //  partition(items);
-       // currentSet.addAll(items);
+        allExercises = items;
+        lastExercise = allExercises.get(allExercises.size() - 1);
         System.out.println("got new set of items from list." + items.size());
+        reset();
       }
     });
   }
 
-/*  private void partition(List<T> items) {
-    sets = Lists.partition(items, size);
-    currentSet = new ArrayList<T>(sets.get(setIndex = 0));
-  }*/
-
   @Override
   public Panel getExercisePanel(Exercise e) {
     currentExercise = e;
-   // findAndRemoveCurrent(e);
-
     System.out.println("========> getExercisePanel = called!\n\n\n");
 
     return new StatsPracticePanel(e);
   }
-
-/*  private void findAndRemoveCurrent(Exercise e) {
-    T current = findCurrent(e);
-
-    if (current != null) {
-      currentSet.remove(current);
-    } else {
-      System.err.println("========> couldn't find " + e.getID() + " in currentSet " + currentSet.size() + " : " + currentSet);
-    }
-  }*/
-
-/*  private T findCurrent(Exercise e) {
-    T current = null;
-    for (T t : currentSet) {
-      if (t.getID().equals(e.getID())) {
-        current = t;
-        break;
-      }
-    }
-    return current;
-  }*/
 
   private void reset() {
     totalDone = 0;
@@ -117,13 +93,13 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
   }
 
   private class StatsPracticePanel extends BootstrapExercisePanel {
+    Chart chart;
     public StatsPracticePanel(Exercise e) {
       super(e, MyFlashcardExercisePanelFactory.this.service, MyFlashcardExercisePanelFactory.this.controller, 40, false, MyFlashcardExercisePanelFactory.this.controlState);
     }
 
     @Override
     protected void loadNext() {
-    //  if (!currentSet.isEmpty()) {
       if (!exerciseList.onLast()) {
         exerciseList.loadNextExercise(currentExercise.getID());
       }
@@ -138,20 +114,21 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
         return;
       }
       totalDone++;
-      if (result.isCorrect()) totalScore += result.getScore();
+      if (result.isCorrect()) {
+        totalScore += result.getScore();
+      }
       if (result.isCorrect()) {
         totalCorrect++;
       }
       else {
         totalIncorrect++;
       }
-      setStateFeedback(false);
+      setStateFeedback();
 
       super.receivedAudioAnswer(result);
 
       //System.out.println("receivedAudioAnswer : currentSet " + currentSet.size() + " : " + currentSet + " total done " + totalDone);
 
-      // if (currentSet.isEmpty()) {
       if (exerciseList.onLast()) {
         onSetComplete();
       }
@@ -159,39 +136,36 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
 
     public void onSetComplete() {
       navigationHelper.setVisible(false);
-      belowContentDiv.add(new Heading(2, totalCorrect + " Correct - Average Score " + ((int) ((totalScore * 100f) / totalDone)) + "%"));
-      Panel w = new HorizontalPanel();
-      w.add(getRepeatButton());
+      //System.out.println("receivedAudioAnswer : currentSet " + currentSet.size() + " : " + currentSet + " total done " + totalDone);
 
-//        Button w2 = getNextSetButton();
-//      w.add(w2);
-      belowContentDiv.add(w);
+      belowContentDiv.add(new Heading(2, totalCorrect +
+        " Correct (" +toPercent(totalCorrect,totalCorrect+totalIncorrect)+
+        ")- Pronunciation " + toPercent(totalScore,totalCorrect)));
+
+      final int user = controller.getUser();
+      service.getUserHistoryForList(user,userListID,lastExercise.getID(),new AsyncCallback<List<Session>>() {
+        @Override
+        public void onFailure(Throwable caught) {}
+
+        @Override
+        public void onSuccess(List<Session> result) {
+          setMainContentVisible(false);
+          chart = new LeaderboardPlot().getChart(result, user, -1, "Progress", "subtitle");
+          belowContentDiv.add(chart);
+          belowContentDiv.add(getRepeatButton());
+        }
+      });
       // TODO : maybe add table showing results per word
       // TODO : do we do aggregate scores
     }
 
- /*     private Button getNextSetButton() {
-        Button w2 = new Button("Next set");
-        w2.addStyleName("leftFiveMargin");
-        w2.setType(ButtonType.SUCCESS);
+    private String toPercent(int numer, int denom) {
+      return ((int) ((((float)numer) * 100f) / denom)) + "%";
+    }
 
-        w2.addClickHandler(new ClickHandler() {
-          @Override
-          public void onClick(ClickEvent event) {
-            try {
-              currentSet = new ArrayList<T>(sets.get(++setIndex));
-
-             // System.out.println("====> next set : currentSet " + currentSet + " set index " + setIndex);
-              navigationHelper.setVisible(true);
-              reset();
-            } catch (Exception e1) {
-              currentSet = new ArrayList<T>(sets.get(setIndex = 0));
-            }
-            exerciseList.loadExercise(currentSet.iterator().next().getID());
-          }
-        });
-        return w2;
-      }*/
+    private String toPercent(float numer, int denom) {
+      return ((int) ((numer * 100f) / denom)) + "%";
+    }
 
     private Button getRepeatButton() {
       Button w1 = new Button(REPEAT_THIS_SET);
@@ -199,15 +173,11 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
       w1.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          //List<T> ts = sets.get(setIndex);
-          //currentSet = new ArrayList<T>(ts);
-
+          setMainContentVisible(true);
+          belowContentDiv.remove(chart);
           reset();
 
-          // System.out.println("====> repeat set : currentSet " + currentSet + " set index " + setIndex);
           navigationHelper.setVisible(true);
-
-         // exerciseList.loadExercise(currentSet.iterator().next().getID());
           exerciseList.loadExercise(allExercises.iterator().next().getID());
         }
       });
@@ -220,20 +190,13 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
       }
     }
 
-/*    protected void setSetSize(int i) {
-      if (i != size) {
-        reset();
-
-        size = i;
-        partition(allExercises);
-        exerciseList.loadExercise(currentSet.iterator().next().getID());
-      }
-    }*/
-
     private NavigationHelper<Exercise> navigationHelper;
-
     private Panel belowContentDiv;
 
+    /**
+     * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#BootstrapExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int, boolean, mitll.langtest.client.flashcard.ControlState)
+     * @param toAddTo
+     */
     @Override
     protected void addWidgetsBelow(Panel toAddTo) {
       navigationHelper = new NavigationHelper<Exercise>(currentExercise, controller, null, exerciseList, true, false) {
@@ -242,7 +205,6 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
           loadNext();
         }
       };
-   //   navigationHelper.addStyleName("bottomColumn");
       toAddTo.add(navigationHelper);
       belowContentDiv = toAddTo;
     }
@@ -279,14 +241,13 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
       g.setWidget(2, 0, correct);
       g.setWidget(2, 1, correctBox);
 
-      setStateFeedback(true);
+      setStateFeedback();
       g.addStyleName("rightTenMargin");
       return g;
     }
 
-    private void setStateFeedback(boolean initial) {
+    private void setStateFeedback() {
       int remaining = allExercises.size() - totalCorrect - totalIncorrect;
-      //if (initial) ++remaining;
       remain.setText(remaining + "");
       incorrectBox.setText(totalIncorrect + "");
       correctBox.setText(totalCorrect + "");
