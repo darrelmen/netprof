@@ -12,7 +12,7 @@ import java.util.Map;
  * Time: 7:17 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ScoreInfo implements IsSerializable {
+public class ScoreInfo implements IsSerializable,SetScore {
   private long userid;
   private long giverID;
   private int correct;
