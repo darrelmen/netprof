@@ -28,7 +28,9 @@ import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.monitoring.Session;
 import org.moxieapps.gwt.highcharts.client.Chart;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by go22670 on 2/10/14.
@@ -44,13 +46,15 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
   private static final String REPEAT_THIS_SET = "Start Over";
   private Exercise currentExercise;
   private final ControlState controlState;
-  private  float totalScore;
-  private int totalCorrect;
-  private int totalIncorrect;
-  private float totalDone;
+  //private float totalScore;
+  //private int totalCorrect;
+  //private int totalIncorrect;
+  //private float totalDone;
   private List<T> allExercises;
   private final long userListID;
   private T lastExercise;
+  Map<String,Boolean> exToCorrect = new HashMap<String, Boolean>();
+  Map<String,Double>   exToScore = new HashMap<String, Double>();
 
   /**
    * @see NPFHelper#setFactory(mitll.langtest.client.list.PagingExerciseList, String, long)
@@ -86,16 +90,15 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
   }
 
   private void reset() {
-    totalDone = 0;
-    totalCorrect = 0;
-    totalScore = 0;
-    totalIncorrect = 0;
+    exToCorrect.clear();
+    exToScore.clear();
   }
 
   private class StatsPracticePanel extends BootstrapExercisePanel {
-    Chart chart;
+    private Chart chart;
     public StatsPracticePanel(Exercise e) {
-      super(e, MyFlashcardExercisePanelFactory.this.service, MyFlashcardExercisePanelFactory.this.controller, 40, false, MyFlashcardExercisePanelFactory.this.controlState);
+      super(e, MyFlashcardExercisePanelFactory.this.service,
+        MyFlashcardExercisePanelFactory.this.controller, 40, false, MyFlashcardExercisePanelFactory.this.controlState);
     }
 
     @Override
@@ -109,44 +112,25 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
     }
 
     public void receivedAudioAnswer(final AudioAnswer result) {
+      exToScore.put(currentExercise.getID(),result.getScore());
       if (result.validity != AudioAnswer.Validity.OK) {
         super.receivedAudioAnswer(result);
         return;
       }
-      totalDone++;
-      if (result.isCorrect()) {
-        totalScore += result.getScore();
-      }
-      if (result.isCorrect()) {
-        totalCorrect++;
-      }
-      else {
-        totalIncorrect++;
-      }
+      exToCorrect.put(currentExercise.getID(),result.isCorrect());
       setStateFeedback();
 
       super.receivedAudioAnswer(result);
-
-      //System.out.println("receivedAudioAnswer : currentSet " + currentSet.size() + " : " + currentSet + " total done " + totalDone);
-
- /*     if (exerciseList.onLast()) {
-        onSetComplete();
-      }*/
     }
 
     @Override
     protected void goToNextItem(String infoToShow) {
-
       System.out.println("goToNextItem : infoToShow " + infoToShow);
 
       if (exerciseList.onLast()) {
-        System.out.println("\tgoToNextItem : onLast ");
-
         onSetComplete();
       }
       else {
-        System.out.println("\tgoToNextItem : NOT on last ");
-
         super.goToNextItem(infoToShow);
       }
     }
@@ -154,7 +138,9 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
     public void onSetComplete() {
       navigationHelper.setVisible(false);
       //System.out.println("onSetComplete : total done " + totalDone);
-
+      int totalCorrect = getCorrect();
+      int totalIncorrect = getIncorrect();
+      double totalScore = getScore();
       belowContentDiv.add(new Heading(2, totalCorrect +
         " Correct (" +toPercent(totalCorrect,totalCorrect+totalIncorrect)+
         ")",
@@ -163,10 +149,14 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
       final int user = controller.getUser();
       service.getUserHistoryForList(user,userListID,lastExercise.getID(),new AsyncCallback<List<Session>>() {
         @Override
-        public void onFailure(Throwable caught) {}
+        public void onFailure(Throwable caught) {
+           System.err.println("getUserHistoryForList failure : caught " + caught);
+        }
 
         @Override
         public void onSuccess(List<Session> result) {
+           System.out.println("onSetComplete.onSuccess : result " + result.size());
+
           setMainContentVisible(false);
           chart = new LeaderboardPlot().getChart(result, user, -1, "Progress", "# correct");
           belowContentDiv.add(chart);
@@ -177,11 +167,34 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
       // TODO : do we do aggregate scores
     }
 
+    private int getCorrect() {
+      int count = 0;
+      for (Boolean val : exToCorrect.values()) {
+        if (val) count++;
+      }
+      return count;
+    }
+    private int getIncorrect() {
+      int count = 0;
+      for (Boolean val : exToCorrect.values()) {
+        if (!val) count++;
+      }
+      return count;
+    }
+
+    private double getScore() {
+      double count = 0;
+      for (Double val : exToScore.values()) {
+        count += val;
+      }
+      return count;
+    }
+
     private String toPercent(int numer, int denom) {
       return ((int) ((((float)numer) * 100f) / denom)) + "%";
     }
 
-    private String toPercent(float numer, int denom) {
+    private String toPercent(double numer, int denom) {
       return ((int) ((numer * 100f) / denom)) + "%";
     }
 
@@ -273,6 +286,8 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
     }
 
     private void setStateFeedback() {
+      int totalCorrect = getCorrect();
+      int totalIncorrect = getIncorrect();
       int remaining = allExercises.size() - totalCorrect - totalIncorrect;
       remain.setText(remaining + "");
       incorrectBox.setText(totalIncorrect + "");
