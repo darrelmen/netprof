@@ -46,10 +46,6 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
   private static final String REPEAT_THIS_SET = "Start Over";
   private Exercise currentExercise;
   private final ControlState controlState;
-  //private float totalScore;
-  //private int totalCorrect;
-  //private int totalIncorrect;
-  //private float totalDone;
   private List<T> allExercises;
   private final long userListID;
   private T lastExercise;
@@ -95,7 +91,6 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
   }
 
   private class StatsPracticePanel extends BootstrapExercisePanel {
-    //private Chart chart, chart2;
     private Panel container;
     public StatsPracticePanel(Exercise e) {
       super(e, MyFlashcardExercisePanelFactory.this.service,
@@ -104,36 +99,29 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
 
     @Override
     protected void loadNext() {
-      if (!exerciseList.onLast()) {
+      if (exerciseList.onLast()) {
+        onSetComplete();
+      } else {
         exerciseList.loadNextExercise(currentExercise.getID());
-      }
-      else {
-        System.err.println("loadNext : on last so  not doing anything!");
       }
     }
 
+    /**
+     * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#receivedAudioAnswer(mitll.langtest.shared.AudioAnswer, mitll.langtest.client.exercise.ExerciseQuestionState, com.google.gwt.user.client.ui.Panel)
+     * @param result
+     */
     public void receivedAudioAnswer(final AudioAnswer result) {
+      System.out.println("receivedAudioAnswer: result " + result);
+
       exToScore.put(currentExercise.getID(),result.getScore());
       if (result.validity != AudioAnswer.Validity.OK) {
         super.receivedAudioAnswer(result);
         return;
       }
-      exToCorrect.put(currentExercise.getID(),result.isCorrect());
+      exToCorrect.put(currentExercise.getID(), result.isCorrect());
       setStateFeedback();
 
       super.receivedAudioAnswer(result);
-    }
-
-    @Override
-    protected void goToNextItem(String infoToShow) {
-      System.out.println("goToNextItem : infoToShow " + infoToShow);
-
-      if (exerciseList.onLast()) {
-        onSetComplete();
-      }
-      else {
-        super.goToNextItem(infoToShow);
-      }
     }
 
     public void onSetComplete() {
@@ -249,7 +237,14 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
       navigationHelper = new NavigationHelper<Exercise>(currentExercise, controller, null, exerciseList, true, false) {
         @Override
         protected void clickNext(ExerciseController controller, Exercise exercise) {
+          cancelTimer();
           loadNext();
+        }
+
+        @Override
+        protected void clickPrev(Exercise e) {
+          cancelTimer();
+          super.clickPrev(e);
         }
       };
       toAddTo.add(navigationHelper);
