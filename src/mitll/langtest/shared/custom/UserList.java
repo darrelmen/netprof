@@ -89,6 +89,10 @@ public class UserList extends ExerciseShell {
     return exercises;
   }
 
+  /**
+   * @see mitll.langtest.server.database.custom.UserListDAO#populateList(UserList)
+   * @param exercises
+   */
   public void setExercises(List<UserExercise> exercises) {
     this.exercises = exercises;
   }
