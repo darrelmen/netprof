@@ -87,6 +87,7 @@ public class Navigation extends TabContainer implements RequiresResize {
   private NPFHelper avpHelper;
   private EditItem<? extends ExerciseShell> editItem;
   private EditItem<? extends ExerciseShell> reviewItem;
+  private KeyStorage storage;
 
   /**
    *  @see mitll.langtest.client.LangTest#resetClassroomState()
@@ -103,6 +104,7 @@ public class Navigation extends TabContainer implements RequiresResize {
     this.userManager = userManager;
     this.controller = controller;
     this.listInterface = listInterface;
+    storage = new KeyStorage(controller);
     npfHelper = new NPFHelper(service, feedback, userManager, controller);
     avpHelper = new AVPHelper(service, feedback, userManager, controller);
     editItem = new EditItem<UserExercise>(service, userManager, controller, listInterface, feedback, npfHelper);
@@ -230,58 +232,14 @@ public class Navigation extends TabContainer implements RequiresResize {
   }
 
   private void checkAndMaybeClearTab(String value) {
-    String value1 = getValue(CLICKED_TAB);
+    String value1 = storage.getValue(CLICKED_TAB);
 
     if (!value1.equals(value)) {
       System.out.println("checkAndMaybeClearTab " + value1 + " vs "+value);
 
-      removeValue(CLICKED_USER_LIST);
+      storage.removeValue(CLICKED_USER_LIST);
     }
-    storeValue(CLICKED_TAB,value);
-  }
-
-  private void storeValue(String name, String toStore) {
-    if (Storage.isLocalStorageSupported()) {
-      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-
-      localStorageIfSupported.setItem(getLocalStorageKey(name), toStore);
-      //System.out.println("storeValue " + name + "="+toStore);
-
-      //if (showMessage()) {
-      //   System.err.println("----------------> huh? should not show again");
-      // }
-    }
-  }
-
-  private String getValue(String name) {
-    if (Storage.isLocalStorageSupported()) {
-      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-
-      String item = localStorageIfSupported.getItem(getLocalStorageKey(name));
-      System.out.println("name " + name + "=" +item);
-      if (item == null) item = "";
-      return item;
-    }
-    else {
-      return "";
-    }
-  }
-
-  private void removeValue(String name) {
-    if (Storage.isLocalStorageSupported()) {
-      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-
-      localStorageIfSupported.removeItem(getLocalStorageKey(name));
-      System.out.println("removeValue " + name);
-
-    }
-    else {
-      //return "";
-    }
-  }
-
-  private String getLocalStorageKey(String name) {
-    return "Navigation_" + controller.getLanguage() + "_" + controller.getUser() + "_" +name;
+    storage.storeValue(CLICKED_TAB,value);
   }
 
   /**
@@ -348,9 +306,8 @@ public class Navigation extends TabContainer implements RequiresResize {
    * @param onlyVisited
    */
   private void showMyLists(boolean onlyCreated, boolean onlyVisited) {
-
-    String value = getValue(CLICKED_TAB);
-    System.out.println("showMyLists " + value);
+    String value = storage.getValue(CLICKED_TAB);
+    //System.out.println("showMyLists " + value);
     if (!value.isEmpty()) {
       if (value.equals(YOUR_LISTS)) {
         onlyCreated = true;
@@ -469,15 +426,15 @@ public class Navigation extends TabContainer implements RequiresResize {
   private void showList(final UserList ul, Panel contentPanel, final String instanceName) {
     System.out.println("showList " +ul + " instance " + instanceName);
 
-    String previousList = getValue(CLICKED_USER_LIST);
+    String previousList = storage.getValue(CLICKED_USER_LIST);
     String currentValue = "" + ul.getUniqueID();
-    storeValue(CLICKED_USER_LIST, currentValue);
+    storage.storeValue(CLICKED_USER_LIST, currentValue);
 
     // if select a new list, clear the subtab selection
     if (previousList != null && !previousList.equals(currentValue)) {
       System.out.println("showList " +previousList + " vs " + currentValue);
 
-      removeValue(SUB_TAB);
+      storage.removeValue(SUB_TAB);
     }
     FluidContainer container = new FluidContainer();
     contentPanel.clear();
@@ -552,7 +509,7 @@ public class Navigation extends TabContainer implements RequiresResize {
     learn.tab.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        storeValue(SUB_TAB,"learn");
+        storage.storeValue(SUB_TAB,"learn");
         npfHelper.showNPF(ul, learn, instanceName1);
       }
     });
@@ -566,7 +523,7 @@ public class Navigation extends TabContainer implements RequiresResize {
       practice.tab.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          storeValue(SUB_TAB,"practice");
+          storage.storeValue(SUB_TAB,"practice");
          // System.out.println("getListOperations : got click on practice");
 
           avpHelper.showNPF(ul, fpractice, "practice");
@@ -581,7 +538,7 @@ public class Navigation extends TabContainer implements RequiresResize {
       edit.tab.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          storeValue(SUB_TAB,"editItem");
+          storage.storeValue(SUB_TAB,"editItem");
           showEditItem(ul, edit, (isReview || isComment) ? reviewItem : Navigation.this.editItem, isNormalList);
         }
       });
@@ -603,8 +560,8 @@ public class Navigation extends TabContainer implements RequiresResize {
     final TabAndContent finalEditItem = editItem;
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
-        String subTab = getValue(SUB_TAB);
-        System.out.println("subtab " +subTab);
+        String subTab = storage.getValue(SUB_TAB);
+       // System.out.println("subtab " +subTab);
         boolean chosePrev = false;
         if (subTab != null) {
           chosePrev = true;
@@ -729,7 +686,7 @@ public class Navigation extends TabContainer implements RequiresResize {
     private void selectThePreviousList(final Collection<UserList> result) {
       Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
         public void execute() {
-          String clickedUserList = getValue(CLICKED_USER_LIST);
+          String clickedUserList = storage.getValue(CLICKED_USER_LIST);
           if (clickedUserList != null && !clickedUserList.isEmpty()) {
             long id = Long.parseLong(clickedUserList);
             for (UserList ul : result) {
