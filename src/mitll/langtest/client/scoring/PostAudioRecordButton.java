@@ -1,16 +1,8 @@
 package mitll.langtest.client.scoring;
 
-import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
-import com.google.gwt.event.logical.shared.CloseEvent;
-import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -44,10 +36,12 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    * @param index
    * @param recordInResults
    * @param audioType
+   * @param recordButtonTitle
+   * @param stopButtonTitle
    */
   public PostAudioRecordButton(Exercise exercise, final ExerciseController controller, LangTestDatabaseAsync service,
-                               int index, boolean recordInResults, String audioType) {
-    super(controller.getRecordTimeout(), false, true);
+                               int index, boolean recordInResults, String audioType, String recordButtonTitle, String stopButtonTitle) {
+    super(controller.getRecordTimeout(), true, true, recordButtonTitle, stopButtonTitle);
     setRecordingListener(this);
     this.index = index;
     this.exercise = exercise;
