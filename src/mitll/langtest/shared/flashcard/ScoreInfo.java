@@ -54,6 +54,11 @@ public class ScoreInfo implements IsSerializable,SetScore {
     return correct;
   }
 
+  @Override
+  public float getAvgScore() {
+    return 0;
+  }
+
   public String toString() {
     return "ScoreInfo : user " + getUserid() + " correct " + getCorrect() + " for " + selection;
   }
