@@ -106,8 +106,8 @@ public interface ListInterface<T extends ExerciseShell> extends RequiresResize {
 
   T simpleRemove(String id);
 
-  void hideExerciseList();
-
+  void hide();
+  void show();
   Panel getCreatedPanel();
   void reload();
 
