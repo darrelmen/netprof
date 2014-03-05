@@ -547,7 +547,7 @@ public class FileExerciseDAO implements ExerciseDAO {
    */
   private Exercise getWordListExercise(String contentSentence, String id) {
     contentSentence = getRefSentence(contentSentence);
-    String content = ExerciseFormatter.getArabic(contentSentence, isUrdu, isPashto);
+    String content = ExerciseFormatter.getArabic(contentSentence, isUrdu, isPashto, false);
 
     Exercise exercise = new Exercise("repeat", id, content, false, true, contentSentence);
     exercise.setRefSentence(contentSentence);
@@ -595,7 +595,7 @@ public class FileExerciseDAO implements ExerciseDAO {
 
     String foreignLanguagePhrase = split[0].trim();
     foreignLanguagePhrase = foreignLanguagePhrase.replaceAll("<s>", "").replaceAll("</s>", "").trim();
-    String content = ExerciseFormatter.getArabic(foreignLanguagePhrase,isUrdu,isPashto);
+    String content = ExerciseFormatter.getArabic(foreignLanguagePhrase,isUrdu,isPashto, false);
 
     String audioFileName = split[1].trim();
     String english = "";
