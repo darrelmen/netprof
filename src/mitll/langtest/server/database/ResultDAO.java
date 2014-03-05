@@ -17,7 +17,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -194,6 +193,20 @@ public class ResultDAO extends DAO {
 
     return sessions;
   }
+  public List<Session> getSessionsForUserIn2(Set<String> ids, String lastID) {
+    List<Session> sessions = new ArrayList<Session>();
+    Map<Long, List<Result>> userToAnswers = populateUserToAnswers(getResultsForeExIDIn(ids));
+    for (Map.Entry<Long,List<Result>> userToResults : userToAnswers.entrySet()) {
+      List<Session> c = partitionIntoSessions2(userToResults.getValue(), lastID);
+      logger.debug("\tfound " +c.size() + " sessions for " +userToResults.getKey() + " " +ids + " last " + lastID + " given  " + userToResults.getValue().size());
+
+      sessions.addAll(c);
+    }
+    //List<Session> sessions = partitionIntoSessions2(, lastID);
+    logger.debug("found " +sessions.size() + " sessions for " +ids + " last " + lastID);
+
+    return sessions;
+  }
 
   public List<Result> getResultsForUserIn(long userid, Set<String> ids) {
     try {
@@ -204,6 +217,25 @@ public class ResultDAO extends DAO {
         ") order by " + Database.TIME + " asc";
       List<Result> resultsSQL = getResultsSQL(sql);
       logger.debug("got " + resultsSQL.size() + " for " + userid);
+      return resultsSQL;
+    } catch (Exception ee) {
+      logger.error("got " + ee, ee);
+    }
+    return new ArrayList<Result>();
+  }
+
+  public List<Result> getResultsForeExIDIn(Set<String> ids) {
+    try {
+      String list = getInList(ids);
+
+      String sql = "SELECT * FROM " + RESULTS + " where " +
+        //USERID + "=" + userid + " AND " +
+        AUDIO_TYPE + "='avp' AND " +
+        Database.EXID + " in (" +
+        list +
+        ") order by " + Database.TIME + " asc";
+      List<Result> resultsSQL = getResultsSQL(sql);
+      logger.debug("got " + resultsSQL.size());
       return resultsSQL;
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
@@ -482,17 +514,17 @@ public class ResultDAO extends DAO {
     return new SessionInfo(sessions, userToRate);
   }
 
-  private List<Session>  makeSessionsForUser(//List<Session> sessions,
+  private List<Session>  makeSessionsForUser(
                                    Map<Long, List<Session>> userToSessions,
                                    Map.Entry<Long, List<Result>> userToAnswersEntry) {
     Long userid = userToAnswersEntry.getKey();
     List<Result> answersForUser = userToAnswersEntry.getValue();
 
-    return makeSessionsForUser(//sessions,
+    return makeSessionsForUser(
       userToSessions, userid, answersForUser);
   }
 
-  private List<Session>  makeSessionsForUser(//List<Session> sessions,
+  private List<Session>  makeSessionsForUser(
                                    Map<Long, List<Session>> userToSessions,
                                    Long userid,
                                    List<Result> answersForUser) {
@@ -501,15 +533,13 @@ public class ResultDAO extends DAO {
     return partitionIntoSessions(userToSessions, userid, answersForUser);
   }
 
-  private List<Session> partitionIntoSessions(//List<Session> sessions,
+  private List<Session> partitionIntoSessions(
                                      Map<Long, List<Session>> userToSessions, Long userid, List<Result> answersForUser) {
     Session s = null;
     long last = 0;
 
     List<Session> sessions = new ArrayList<Session>();
 
-
-  //  Set<String> seenAlready = new HashSet<String>();
     for (Result r : answersForUser) {
       if (s == null || r.timestamp - last > SESSION_GAP) {
         s = new Session();
@@ -522,35 +552,23 @@ public class ResultDAO extends DAO {
         s.duration += r.timestamp - last;
       }
       s.addExerciseID(r.id);
-     // seenAlready.add(r.id);
       last = r.timestamp;
     }
     return sessions;
   }
 
 
-  private List<Session> partitionIntoSessions2(
-                                               //Map<Long, List<Session>> userToSessions,
-                                               /*Long userid,*/ List<Result> answersForUser,
+  private List<Session> partitionIntoSessions2( List<Result> answersForUser,
                                                String lastExerciseID) {
     Session s = null;
     long last = 0;
 
     List<Session> sessions = new ArrayList<Session>();
 
-    //Set<String> seenAlready = new HashSet<String>();
     for (Result r : answersForUser) {
-      //if (seenAlready.contains(r.id)) {
-      //  logger.debug("\tskipping " + r + " since already saw " + r.id);
-      //}
-     // logger.debug("\ttaking " +r);
       if (s == null || r.timestamp - last > SESSION_GAP) {
         s = new Session(r.userid);
         sessions.add(s);
-
-/*        List<Session> sessions1 = userToSessions.get(userid);
-        if (sessions1 == null) userToSessions.put(userid, sessions1 = new ArrayList<Session>());
-        sessions1.add(s);*/
       } else {
         s.duration += r.timestamp - last;
       }
@@ -558,7 +576,6 @@ public class ResultDAO extends DAO {
       if (r.isCorrect()) {
         s.incrementCorrect(r.id,r.isCorrect());
       }
-      //seenAlready.add(r.id);
       last = r.timestamp;
 
       if (r.id.equals(lastExerciseID)) {
@@ -567,6 +584,10 @@ public class ResultDAO extends DAO {
       }
     }
     for (Session session : sessions) session.setNumAnswers();
+    if (sessions.isEmpty() && !answersForUser.isEmpty()) {
+      logger.error("huh? no sessions from " + answersForUser.size() + " given " + lastExerciseID);
+    }
+    logger.debug("\tmade " +sessions.size() + " from " + answersForUser.size() + " answers");
 
     return sessions;
   }
