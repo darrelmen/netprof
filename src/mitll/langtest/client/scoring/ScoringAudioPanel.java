@@ -24,7 +24,6 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   private static final boolean SHOW_SPECTROGRAM = false;
 
   private String refSentence;
-  private String refAudio;
   private long resultID = -1;
   private ScoreListener scoreListener;
   private PretestScore result;
@@ -33,27 +32,29 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   public static float MP3_HEADER_OFFSET = 0f;//0.048f;
 
   /**
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, ScoreListener)
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, ScoreListener, String)
    * @param service
    * @param gaugePanel
+   * @param playButtonSuffix
    */
-  public ScoringAudioPanel(LangTestDatabaseAsync service, ExerciseController controller, ScoreListener gaugePanel) {
-    this(null, null, service, controller, SHOW_SPECTROGRAM, gaugePanel, 23);
+  public ScoringAudioPanel(LangTestDatabaseAsync service, ExerciseController controller, ScoreListener gaugePanel, String playButtonSuffix) {
+    this(null, null, service, controller, SHOW_SPECTROGRAM, gaugePanel, 23, playButtonSuffix);
   }
 
   /**
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener, int)
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener, int, String)
    * @param path
    * @param refSentence
    * @param service
    * @param showSpectrogram
    * @param gaugePanel
    * @param rightMargin
+   * @param playButtonSuffix
    */
   public ScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
                            ExerciseController controller,
-                           boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin) {
-    super(path, service, controller, showSpectrogram, gaugePanel, rightMargin);
+                           boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin, String playButtonSuffix) {
+    super(path, service, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix);
     this.refSentence = refSentence;
     showOnlyOneExercise = controller.showOnlyOneExercise();
     addClickHandlers();
@@ -74,16 +75,10 @@ public abstract class ScoringAudioPanel extends AudioPanel {
 
   /**
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#getScoringAudioPanel(mitll.langtest.shared.Exercise, String)
-   * @param path
    * @param refSentence
    */
-  public void setRefAudio(String path, String refSentence) {
-    setRefAudio(path);
+  public void setRefAudio(String refSentence) {
     this.refSentence = refSentence;
-  }
-
-  public void setRefAudio(String path) {
-    this.refAudio = path;
   }
 
   public void setResultID(long resultID) { this.resultID = resultID;}
@@ -95,12 +90,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   @Override
   protected void getEachImage(int width) {
     super.getEachImage(width);
-    //if (refAudio != null) {
-      getTranscriptImageURLForAudio(audioPath, refSentence, width,words,phones);
-    //}
-   // else {
-      //System.out.println("ScoringAudioPanel.getEachImage : no ref audio for id '" + getElement().getId()+"'");
-   // }
+    getTranscriptImageURLForAudio(audioPath, refSentence, width,words,phones);
   }
 
   /**
