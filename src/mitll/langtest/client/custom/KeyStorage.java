@@ -8,6 +8,7 @@ import mitll.langtest.client.exercise.ExerciseController;
  */
 public class KeyStorage {
   private ExerciseController controller;
+  boolean debug = false;
   public KeyStorage(ExerciseController controller) {
     this.controller = controller;
   }
@@ -16,7 +17,7 @@ public class KeyStorage {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
 
       localStorageIfSupported.setItem(getLocalStorageKey(name), toStore);
-    //  System.out.println("storeValue " + name + "="+toStore + " : " + getValue(name));
+      if (debug)System.out.println("storeValue " + name + "="+toStore + " : " + getValue(name));
 
       //if (showMessage()) {
       //   System.err.println("----------------> huh? should not show again");
@@ -29,7 +30,7 @@ public class KeyStorage {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
 
       String item = localStorageIfSupported.getItem(getLocalStorageKey(name));
-    //  System.out.println("name " + name + "=" +item);
+      if (debug) System.out.println("name " + name + "=" +item);
       if (item == null) item = "";
       return item;
     }
@@ -43,7 +44,7 @@ public class KeyStorage {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
 
       localStorageIfSupported.removeItem(getLocalStorageKey(name));
-     // System.out.println("removeValue " + name);
+      if (debug) System.out.println("removeValue " + name);
 
     }
   }
