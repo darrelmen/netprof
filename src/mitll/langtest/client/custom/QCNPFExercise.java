@@ -242,11 +242,11 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   }
 
   private Widget getEntry(Exercise e, final String field, final String label, String value) {
-    return getEntry(field, label, value, e.getAnnotation(field));
+    return getEntry(field, label, value, e.getAnnotation(field), true);
   }
 
-  private Widget getEntry(final String field, final String label, String value, ExerciseAnnotation annotation) {
-    return getEntry(field, getContentWidget(label, value, true, false), annotation);
+  private Widget getEntry(final String field, final String label, String value, ExerciseAnnotation annotation, boolean includeLabel) {
+    return getEntry(field, getContentWidget(label, value, true, includeLabel), annotation);
   }
 
   /**
