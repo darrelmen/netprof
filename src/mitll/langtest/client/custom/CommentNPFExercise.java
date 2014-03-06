@@ -59,7 +59,11 @@ public class CommentNPFExercise extends NPFExercise {
     column.setWidth("100%");
 
     column.add(getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getRefSentence()));
-    column.add(getEntry(e, QCNPFExercise.TRANSLITERATION, ExerciseFormatter.TRANSLITERATION, e.getTranslitSentence()));
+
+    String translitSentence = e.getTranslitSentence();
+    if (!translitSentence.isEmpty()) {
+      column.add(getEntry(e, QCNPFExercise.TRANSLITERATION, ExerciseFormatter.TRANSLITERATION, translitSentence));
+    }
     String english = e.getMeaning() != null && !e.getMeaning().trim().isEmpty() ? e.getMeaning() : e.getEnglishSentence();
     column.add(getEntry(e, QCNPFExercise.ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, english));
 
