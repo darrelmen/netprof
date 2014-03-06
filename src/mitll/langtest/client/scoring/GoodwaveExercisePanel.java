@@ -51,7 +51,7 @@ import java.util.Date;
  */
 public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel, RequiresResize, ProvidesResize {
   // protected static final String NATIVE_REFERENCE_SPEAKER = "Native Reference Speaker";
-  private static final String USER_RECORDER = "User Recorder";
+  //private static final String USER_RECORDER = "User Recorder";
   private static final String REFERENCE = " Reference";
   private static final String RECORD_YOURSELF = "Record Yourself";
   private static final String RELEASE_TO_STOP = "Release to Stop";
@@ -271,10 +271,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     contentAudio.setScreenPortion(screenPortion);
     return audioPanel;
   }
-
+/*
   private Widget getAudioPanelContent(ASRScoringAudioPanel audioPanel) {
     return audioPanel;
-  }
+  }*/
 
   private ASRScoringAudioPanel getAudioPanel(Exercise e, String path) {
     ASRScoringAudioPanel audioPanel;
@@ -282,7 +282,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       audioPanel = makeFastAndSlowAudio(path);
     } else {
       boolean showSpectrogram = controller.getProps().showSpectrogram();
-      audioPanel = new ASRScoringAudioPanel(path, e.getRefSentence(), service, controller, showSpectrogram, scorePanel, 23, "reference");
+      audioPanel = new ASRScoringAudioPanel(path, e.getRefSentence(), service, controller, showSpectrogram, scorePanel, 23, " reference");
     }
     audioPanel.getElement().setId("ASRScoringAudioPanel");
     audioPanel.setRefAudio(e.getRefSentence());
