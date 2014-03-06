@@ -474,7 +474,8 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
       postAudioButton =
         new WaveformPostAudioRecordButton(exercise, controller, exercisePanel, this, service, recordRegularSpeed ? 0:1,
           false // don't record in results table
-        ) {
+            ,
+            "Click and Hold to Record", "Release to Stop") {
           @Override
           public void stopRecording() {
             otherRAP.setEnabled(true);
