@@ -59,7 +59,7 @@ public class Session implements IsSerializable, SetScore {
   private float calcAvgScore() {
     float total = 0f;
     Collection<Float> values = exidToScore.values();
-    System.out.println("scores "+ values);
+    //System.out.println("scores "+ values);
     for (Float score : values) {
       total += Math.max(0f,score);
     }
