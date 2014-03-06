@@ -64,13 +64,13 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
     super(service, feedback, controller, exerciseList);
     controlState = new ControlState();
     this.userListID = userListID;
-    System.out.println("========> MyFlashcardExercisePanelFactory made!\n\n\n");
+   // System.out.println("========> MyFlashcardExercisePanelFactory made!\n\n\n");
 
     exerciseList.addListChangedListener(new ListChangeListener<T>() {
       @Override
       public void listChanged(List<T> items) {
         allExercises = items;
-        lastExercise = allExercises.get(allExercises.size() - 1);
+        if (!allExercises.isEmpty()) lastExercise = allExercises.get(allExercises.size() - 1);
         System.out.println("got new set of items from list." + items.size());
         reset();
       }
@@ -80,7 +80,7 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
   @Override
   public Panel getExercisePanel(Exercise e) {
     currentExercise = e;
-    System.out.println("========> getExercisePanel = called!\n\n\n");
+   // System.out.println("========> getExercisePanel = called!\n\n\n");
 
     return new StatsPracticePanel(e);
   }
@@ -142,7 +142,8 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
     }
 
     private void showFeedbackCharts(List<Session> result, int user) {
-      System.out.println("onSetComplete.onSuccess : result " + result.size());
+      float size = (float) allExercises.size();
+      //System.out.println("onSetComplete.onSuccess : result " + result.size() + " " +size);
 
       setMainContentVisible(false);
       int totalCorrect = getCorrect();
@@ -152,10 +153,12 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
       String correct = totalCorrect +" Correct (" + toPercent(totalCorrect, all) + ")";
       String pronunciation = "Pronunciation " + toPercent(totalScore, all);
 
-      Chart chart  = new LeaderboardPlot().getChart(result, user, -1, correct, "# correct", true);
-      Chart chart2 = new LeaderboardPlot().getChart(result, user, -1, pronunciation, "score %", false);
+      Chart chart  = new LeaderboardPlot().getChart(result, user, -1, correct, "# correct", true, size);
+      Chart chart2 = new LeaderboardPlot().getChart(result, user, -1, pronunciation, "score %", false, -1);
       container = new HorizontalPanel();
       container.add(chart);
+      chart.addStyleName("chartDim");
+      chart2.addStyleName("chartDim");
       container.add(chart2);
       belowContentDiv.add(container);
       belowContentDiv.add(getRepeatButton());
@@ -213,15 +216,12 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
     }
 
     protected void nextAfterDelay(boolean correct, String feedback) {
-      if (!exerciseList.onLast()) {
-        super.nextAfterDelay(correct, feedback);
-      }
-      else if (!correct) {
-        initRecordButton();
-        clearFeedback();
-      }
-      else if (exerciseList.onLast()) {
+      if (exerciseList.onLast()) {
         onSetComplete();
+      }
+      else  {
+        super.nextAfterDelay(correct, feedback);
+
       }
     }
 
