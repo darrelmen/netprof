@@ -66,6 +66,7 @@ public class RecordButton extends Button {
   }
 
   /**
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#makeRecordButton(mitll.langtest.client.exercise.ExerciseController)
    * @param delay
    * @param recordingListener
    * @param doClickAndHold
