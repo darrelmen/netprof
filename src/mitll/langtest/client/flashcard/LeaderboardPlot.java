@@ -24,8 +24,8 @@ import java.util.Map;
 
 public class LeaderboardPlot {
   public static final float HALF = (1f / 4f);
-  public static final String AVERAGE = "Average";
-  public static final String TOP_SCORE = "Top Score";
+  public static final String AVERAGE = "Class Average";
+  public static final String TOP_SCORE = "Class Top Score";
   public static final String PERSONAL_BEST = "Personal Best";
 
   /**
@@ -86,7 +86,7 @@ public class LeaderboardPlot {
       currentSelection.toString().replace("{", "").replace("}", "").replace("=", " ").replace("[", "").replace("]", "");
     String title = "Leaderboard";
 
-    Chart chart = getChart(scores, userID, gameTimeSeconds, title, hashMapToStringCleaned, true );
+    Chart chart = getChart(scores, userID, gameTimeSeconds, title, hashMapToStringCleaned, true, -1);
 
     modal.setMaxHeigth("650px");
     modal.setHeight("550px");
@@ -126,19 +126,20 @@ public class LeaderboardPlot {
    * @param title
    * @param subtitle
    * @param useCorrect
+   * @param topToUse
    * @return
    */
   public <T extends SetScore> Chart getChart(List<T> scores, long userID, int gameTimeSeconds,
-                                             String title, String subtitle, boolean useCorrect) {
+                                             String title, String subtitle, boolean useCorrect, float topToUse) {
     //System.out.println("getChart : for user " +userID + " scores " + scores.size() + " use correct " +useCorrect);
     GetPlotValues getPlotValues = new GetPlotValues<T>(scores, userID, useCorrect).invoke();
-    return getChart(scores, gameTimeSeconds, getPlotValues, title, subtitle, useCorrect ? "Correct" : "Score", !useCorrect);
+    return getChart(scores, gameTimeSeconds, getPlotValues, title, subtitle, useCorrect ? "Correct" : "Score", !useCorrect, topToUse);
   }
 
   private <T extends SetScore> Chart getChart(List<T> scores, int gameTimeSeconds,
                                               GetPlotValues getPlotValues,
                                               String title, String subtitle, String seriesName,
-                                              boolean topIs100) {
+                                              boolean topIs100, float topToUse) {
 
     float pbCorrect = getPlotValues.getPbCorrect();
     float top = getPlotValues.getTop();
@@ -170,7 +171,7 @@ public class LeaderboardPlot {
       );
     }
 
-    configureChart(topIs100 ? 100f : top, chart, subtitle);
+    configureChart(topIs100 ? 100f : topToUse == -1 ? top : topToUse, chart, subtitle);
     return chart;
   }
 
@@ -189,7 +190,7 @@ public class LeaderboardPlot {
     chart.getXAxis().setAllowDecimals(false);
     chart.getYAxis().setAllowDecimals(true);
     chart.getYAxis().setMin(0);
-    chart.getYAxis().setMax(top == 100f ? top : top + 1);
+    chart.getYAxis().setMax(top);// == 100f ? top : top);
   }
 
   private <T extends SetScore> PlotBand getAvgScore(List<T> scores, float total, Chart chart) {
@@ -204,6 +205,7 @@ public class LeaderboardPlot {
   }
 
   private PlotBand getTopScore(float top, Chart chart) {
+    System.out.println("top score "+top);
     PlotBand topScore = chart.getYAxis().createPlotBand()
       .setColor("#46bf00")
       .setFrom(under(top))
@@ -286,6 +288,7 @@ public class LeaderboardPlot {
     public float getTop() {
       return top;
     }
+    public void setTop(float top) { this.top = top;}
 
     public float getTotalCorrect() {
       return totalCorrect;
@@ -295,6 +298,7 @@ public class LeaderboardPlot {
       return yValuesForUser;
     }
 
+    // TODO : don't do this client side
     public GetPlotValues invoke() {
       pbCorrect = 0;
       top = 0;
@@ -307,7 +311,7 @@ public class LeaderboardPlot {
         if (score.getUserid() == userID) {
           if (value > pbCorrect) pbCorrect = value;
           yValuesForUser.add(value);
-          //System.out.println("showLeaderboardPlot : for user " +userID + " got " + score);
+         // System.out.println("showLeaderboardPlot : for user " +userID + " got " + score);
         }
         else {
          // System.out.println("\tshowLeaderboardPlot : for user " +score.getUserid() + " got " + score);
