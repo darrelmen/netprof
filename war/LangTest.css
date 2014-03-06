@@ -959,6 +959,13 @@ fieldset > legend {
     margin-bottom:5px;
 }
 
+.buttonGroupInset6 {
+    border-radius: 3px 3px 3px 3px;
+    box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
+    padding: 5px;
+    margin-top:5px;
+}
+
 .mouseOverHighlight {
     background-color: yellow;
     cursor: pointer;
@@ -1018,3 +1025,7 @@ fieldset > legend {
 .maxWidth {
      max-width: 145px;
  }
+
+#ASRScorePanel fieldset legend {
+    margin-bottom: 5px;
+}
