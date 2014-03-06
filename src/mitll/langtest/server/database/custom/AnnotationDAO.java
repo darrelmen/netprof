@@ -80,11 +80,11 @@ public class AnnotationDAO extends DAO {
    * @see mitll.langtest.server.database.custom.UserListManager#reallyCreateNewItem(long, mitll.langtest.shared.custom.UserExercise)
    */
   public void add(UserAnnotation annotation) {
-    long id = 0;
+   // long id = 0;
 
     try {
       // there are much better ways of doing this...
-      logger.info("add :annotation " + annotation);
+     // logger.info("add :annotation " + annotation);
 
       Connection connection = database.getConnection();
       PreparedStatement statement;
@@ -109,15 +109,13 @@ public class AnnotationDAO extends DAO {
       if (j != 1)
         logger.error("huh? didn't insert row for ");// + grade + " grade for " + resultID + " and " + grader + " and " + gradeID + " and " + gradeType);
 
-      ResultSet rs = statement.getGeneratedKeys(); // will return the ID in ID_COLUMN
+/*      ResultSet rs = statement.getGeneratedKeys(); // will return the ID in ID_COLUMN
       if (rs.next()) {
         id = rs.getLong(1);
       } else {
         logger.error("huh? no key was generated?");
-      }
-      logger.debug("unique id = " + id);
-
-//      /annotation.setUniqueID(id);
+      }*/
+      //logger.debug("unique id = " + id);
 
       statement.close();
       database.closeConnection(connection);
