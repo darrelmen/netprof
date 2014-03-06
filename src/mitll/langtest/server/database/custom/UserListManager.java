@@ -152,7 +152,6 @@ public class UserListManager {
       for (UserList userList : listsForUser) {
         if (isFavorite(userList)) {
           favorite = userList;
-          //break;
         }
         ids.add(userList.getUniqueID());
       }
@@ -197,8 +196,8 @@ public class UserListManager {
       listsForUser.add(0,favorite);// put at front
     }
 
-    logger.debug("getListsForUser " + listsForUser.size() + //"(" +listsForUser+ ")" +
-      " for user #" + userid + " only created " + listsICreated + " visited " +visitedLists);
+    logger.debug("getListsForUser found " + listsForUser.size() + //"(" +listsForUser+ ")" +
+      " lists for user #" + userid + " only created " + listsICreated + " visited " +visitedLists);
 
     return listsForUser;
   }
