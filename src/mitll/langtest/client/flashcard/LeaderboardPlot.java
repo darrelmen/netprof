@@ -13,6 +13,7 @@ import mitll.langtest.shared.flashcard.Leaderboard;
 import mitll.langtest.shared.flashcard.ScoreInfo;
 import mitll.langtest.shared.flashcard.SetScore;
 import org.moxieapps.gwt.highcharts.client.Chart;
+import org.moxieapps.gwt.highcharts.client.Credits;
 import org.moxieapps.gwt.highcharts.client.PlotBand;
 import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.labels.PlotBandLabel;
@@ -44,78 +45,6 @@ public class LeaderboardPlot {
                                   String prompt,
                                   final ClickHandler onYes, final ClickHandler onNo,int autoHideDelay) {
     List<ScoreInfo> scores = leaderboard.getScores(currentSelection);
-
-   // showLeaderboardPlot(scores, userID, gameTimeSeconds, currentSelection, prompt,onYes, onNo,autoHideDelay);
-  }
-
-/*  public Modal showLeaderboardPlot(Leaderboard leaderboard,final long userID, int gameTimeSeconds,
-                                   Map<String, Collection<String>> currentSelection,
-                                   String prompt,int autoHideDelay) {
-    List<ScoreInfo> scores = leaderboard.getScores(currentSelection);
-
-    return showLeaderboardPlot(scores, userID, gameTimeSeconds, currentSelection, prompt, null, null,autoHideDelay);
-  }*/
-
-/*
-  public Modal showLeaderboardPlot(List<ScoreInfo> scores, final long userID, int gameTimeSeconds,
-                                   Map<String, Collection<String>> currentSelection,
-                                   String prompt,int autoHideDelay) {
-    return showLeaderboardPlot(scores, userID, gameTimeSeconds, currentSelection, prompt, null, null, autoHideDelay);
-  }*/
-
-/*  private Modal showLeaderboardPlot(List<SetScore> scores, final long userID, int gameTimeSeconds,
-                                  Map<String, Collection<String>> currentSelection,
-                                  String prompt,
-                                  final ClickHandler onYes, final ClickHandler onNo, int autoHideDelay) {
-    final Modal modal = new Modal();
-    modal.setAnimation(false);
-    modal.setCloseVisible(true);
-
-    makeChart(scores, userID, gameTimeSeconds, currentSelection, prompt, onYes, onNo, autoHideDelay, modal);
-
-    modal.show();
-    return modal;
-  }*/
-
-  private void makeChart(List<SetScore> scores, long userID, int gameTimeSeconds,
-                         Map<String, Collection<String>> currentSelection,
-                         String prompt, final ClickHandler onYes, final ClickHandler onNo,
-                         int autoHideDelay, final Modal modal) {
-    modal.setWidth("720px");
-    String hashMapToStringCleaned =
-      currentSelection.toString().replace("{", "").replace("}", "").replace("=", " ").replace("[", "").replace("]", "");
-    String title = "Leaderboard";
-
-    Chart chart = getChart(scores, userID, gameTimeSeconds, title, hashMapToStringCleaned, true, -1);
-
-    modal.setMaxHeigth("650px");
-    modal.setHeight("550px");
-    modal.add(chart);
-
-    Button yesButton = getYesButton(onYes, modal);
-    Button noButton = getNoButton(onNo, modal);
-
-    FluidRow promptRow = new FluidRow();
-    Column column = new Column(12,new Heading(4, prompt));
-    promptRow.add(column);
-    modal.add(promptRow);
-
-    if (onYes != null || onNo != null) {
-      FluidRow row = new FluidRow();
-      if (yesButton != null) row.add(new Column(4, yesButton));
-      row.add(new Column(4, new Heading(4)));
-      if (noButton != null)  row.add(new Column(4, noButton));
-      modal.add(row);
-    }
-    else {
-      Timer t = new Timer() {
-        @Override
-        public void run() {
-          modal.hide();
-        }
-      };
-      t.schedule(autoHideDelay);
-    }
   }
 
   /**
@@ -131,7 +60,6 @@ public class LeaderboardPlot {
    */
   public <T extends SetScore> Chart getChart(List<T> scores, long userID, int gameTimeSeconds,
                                              String title, String subtitle, boolean useCorrect, float topToUse) {
-    //System.out.println("getChart : for user " +userID + " scores " + scores.size() + " use correct " +useCorrect);
     GetPlotValues getPlotValues = new GetPlotValues<T>(scores, userID, useCorrect).invoke();
     return getChart(scores, gameTimeSeconds, getPlotValues, title, subtitle, useCorrect ? "Correct" : "Score", !useCorrect, topToUse);
   }
@@ -144,13 +72,17 @@ public class LeaderboardPlot {
     float pbCorrect = getPlotValues.getPbCorrect();
     float top = getPlotValues.getTop();
     float total = getPlotValues.getTotalCorrect();
+    float avg = total / (float) scores.size();
+
     List<Float> yValuesForUser = getPlotValues.getyValuesForUser();
 
     Chart chart = new Chart()
       .setType(Series.Type.SPLINE)
       .setChartTitleText(title)
       .setChartSubtitleText(subtitle)
-      .setMarginRight(10);
+      .setMarginRight(10)
+      .setOption("/credits/enabled", false)
+    .setOption("/legend/enabled", false);
 
     addSeries(gameTimeSeconds, yValuesForUser, chart, seriesName);
 
@@ -158,20 +90,39 @@ public class LeaderboardPlot {
     PlotBand topScore = getTopScore(top, chart);
     PlotBand avgScore = getAvgScore(scores, total, chart);
 
-    if (top != pbCorrect) {
-      chart.getYAxis().setPlotBands(
-        avgScore,
-        personalBest,
-        topScore
-      );
-    } else {
+    float verticalRange = topIs100 ? 100f : topToUse == -1 ? top : topToUse;
+    float fivePercent = 0.05f * verticalRange;
+    float topVsPersonalBest = Math.abs(top - pbCorrect);
+    float avgVsPersonalBest = Math.abs(avg - pbCorrect);
+
+    System.out.println(title + " " + subtitle + " top vs pb " + topVsPersonalBest + " avg vs pb " + avgVsPersonalBest);
+
+    if (topVsPersonalBest > fivePercent) {
+      if (avgVsPersonalBest > fivePercent){
+        chart.getYAxis().setPlotBands(
+          avgScore,
+          personalBest,
+          topScore
+        );
+      }
+      else {
+        chart.getYAxis().setPlotBands(
+          personalBest,
+          topScore
+        );
+      }
+    } else if (avgVsPersonalBest > fivePercent){
       chart.getYAxis().setPlotBands(
         avgScore,
         personalBest
       );
+    } else {
+      chart.getYAxis().setPlotBands(
+        personalBest
+      );
     }
 
-    configureChart(topIs100 ? 100f : topToUse == -1 ? top : topToUse, chart, subtitle);
+    configureChart(verticalRange, chart, subtitle);
     return chart;
   }
 
@@ -190,7 +141,7 @@ public class LeaderboardPlot {
     chart.getXAxis().setAllowDecimals(false);
     chart.getYAxis().setAllowDecimals(true);
     chart.getYAxis().setMin(0);
-    chart.getYAxis().setMax(top);// == 100f ? top : top);
+    chart.getYAxis().setMax(top);
   }
 
   private <T extends SetScore> PlotBand getAvgScore(List<T> scores, float total, Chart chart) {
@@ -205,7 +156,7 @@ public class LeaderboardPlot {
   }
 
   private PlotBand getTopScore(float top, Chart chart) {
-    System.out.println("top score "+top);
+    //System.out.println("top score "+top);
     PlotBand topScore = chart.getYAxis().createPlotBand()
       .setColor("#46bf00")
       .setFrom(under(top))
@@ -225,42 +176,6 @@ public class LeaderboardPlot {
 
     personalBest.setLabel(new PlotBandLabel().setAlign(PlotBandLabel.Align.LEFT).setText(PERSONAL_BEST));
     return personalBest;
-  }
-
-  private Button getNoButton(final ClickHandler onNo, final Modal modal) {
-    Button noButton = null;
-    if (onNo != null) {
-      noButton = new Button("No");
-      noButton.setType(ButtonType.INVERSE);
-      noButton.addClickHandler(new ClickHandler() {
-        public void onClick(ClickEvent event) {
-          modal.hide();
-          onNo.onClick(event);
-        }
-      });
-    }
-    return noButton;
-  }
-
-  private Button getYesButton(final ClickHandler onYes, final Modal modal) {
-    Button yesButton = null;
-    if (onYes != null) {
-      yesButton = new Button("Yes");
-      yesButton.setType(ButtonType.PRIMARY);
-      yesButton.addClickHandler(new ClickHandler() {
-        public void onClick(ClickEvent event) {
-          modal.hide();
-          onYes.onClick(event);
-        }
-      });
-      yesButton.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          modal.hide();
-        }
-      });
-    }
-    return yesButton;
   }
 
   private float over(float pbCorrect) { return pbCorrect + HALF;  }
