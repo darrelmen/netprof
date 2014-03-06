@@ -88,7 +88,9 @@ public class CommentNPFExercise extends NPFExercise {
 
       @Override
       protected void addNoRefAudioWidget(Panel vp) {
-        vp.add(getEntry("refAudio", "ReferenceAudio", "", exercise.getAnnotation("refAudio")));
+        Widget entry = getEntry("refAudio", "ReferenceAudio", "No reference audio", exercise.getAnnotation("refAudio"));
+        entry.setWidth("300px");
+        vp.add(entry);
       }
     };
   }
