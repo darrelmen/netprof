@@ -79,6 +79,7 @@ public class Navigation extends TabContainer implements RequiresResize {
   private static final String SUB_TAB = "subTab";
   public static final String NO_LISTS_CREATED_OR_VISITED_YET = "No lists created or visited yet.";
   private static final int CHAPTERS_TAB = 4;
+  public static final int BROWSE_TAB_INDEX = 3;
   private final ExerciseController controller;
   private LangTestDatabaseAsync service;
   private UserManager userManager;
@@ -190,7 +191,12 @@ public class Navigation extends TabContainer implements RequiresResize {
     // chapter tab
     final TabAndContent chapters = makeTab(tabPanel, combinedMode ? IconType.LIGHTBULB : IconType.TH_LIST, !combinedMode ? CHAPTERS : LEARN_PRONUNCIATION);
     chapters.content.add(secondAndThird);
-
+    chapters.tab.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        checkAndMaybeClearTab(CHAPTERS);
+      }
+    });
     if (controller.isReviewMode()) {
       review = makeTab(tabPanel, IconType.EDIT, REVIEW1);
       review.tab.addClickHandler(new ClickHandler() {
@@ -237,11 +243,11 @@ public class Navigation extends TabContainer implements RequiresResize {
     String value1 = storage.getValue(CLICKED_TAB);
 
     if (!value1.equals(value)) {
-      System.out.println("checkAndMaybeClearTab " + value1 + " vs "+value);
+      //System.out.println("checkAndMaybeClearTab " + value1 + " vs "+value);
 
       storage.removeValue(CLICKED_USER_LIST);
     }
-    storage.storeValue(CLICKED_TAB,value);
+    storage.storeValue(CLICKED_TAB, value);
   }
 
   /**
@@ -266,21 +272,39 @@ public class Navigation extends TabContainer implements RequiresResize {
 
     service.getListsForUser(user, true, true, new AsyncCallback<Collection<UserList>>() {
       @Override
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+      }
 
       @Override
       public void onSuccess(Collection<UserList> result) {
         if (result.size() == 1 && // if only one empty list - one you've created
-          result.iterator().next().getExercises().isEmpty()) {
+            result.iterator().next().getExercises().isEmpty()) {
           service.getUserListsForText("", user, new AsyncCallback<Collection<UserList>>() {
             @Override
-            public void onFailure(Throwable caught) {}
+            public void onFailure(Throwable caught) {
+            }
 
             @Override
             public void onSuccess(Collection<UserList> result) {
               if (!result.isEmpty()) {
                 // show site-wide browse list instead
-                showBrowse();
+                String value = storage.getValue(CLICKED_TAB);
+                if (value.equals(CHAPTERS)) {
+                  tabPanel.selectTab(CHAPTERS_TAB);
+                }
+                else if (value.equals(YOUR_LISTS)) {
+                  //tabPanel.selectTab(0);
+                  //yourStuff.tab.fireEvent(new ButtonClickEvent());
+                  showMyLists(true,false);
+                } else if (value.equals(OTHERS_LISTS)) {
+                //  tabPanel.selectTab(1);
+                  showMyLists(false,true);
+
+                } else if (value.equals(CREATE)) {
+                  tabPanel.selectTab(2);
+                } else {
+                  showBrowse();
+                }
               } else { // otherwise show the chapters tab
                 tabPanel.selectTab(CHAPTERS_TAB);
               }
@@ -328,8 +352,11 @@ public class Navigation extends TabContainer implements RequiresResize {
     refreshViewLessons(onlyCreated, onlyVisited);
   }
 
+  /**
+   * @se #showInitialState()
+   */
   private void showBrowse() {
-    tabPanel.selectTab(2);
+    tabPanel.selectTab(BROWSE_TAB_INDEX);
     browse.tab.fireEvent(new ButtonClickEvent());
     viewBrowse();
   }
@@ -400,7 +427,8 @@ public class Navigation extends TabContainer implements RequiresResize {
     child.addStyleName("exerciseBackground");
     service.getCommentedList(new AsyncCallback<UserList>() {
       @Override
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+      }
 
       @Override
       public void onSuccess(UserList result) {
