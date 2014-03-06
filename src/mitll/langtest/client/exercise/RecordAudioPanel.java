@@ -75,7 +75,7 @@ public class RecordAudioPanel extends AudioPanel {
   }
 
   protected WaveformPostAudioRecordButton makePostAudioRecordButton() {
-    return new WaveformPostAudioRecordButton(exercise, controller, exercisePanel, this, service, index, true) {
+    return new WaveformPostAudioRecordButton(exercise, controller, exercisePanel, this, service, index, true, "Record", "Stop") {
       @Override
       public void startRecording() {
         super.startRecording();
