@@ -243,7 +243,7 @@ public class Navigation extends TabContainer implements RequiresResize {
     String value1 = storage.getValue(CLICKED_TAB);
 
     if (!value1.equals(value)) {
-      System.out.println("checkAndMaybeClearTab " + value1 + " vs "+value);
+      //System.out.println("checkAndMaybeClearTab " + value1 + " vs "+value);
 
       storage.removeValue(CLICKED_USER_LIST);
     }
