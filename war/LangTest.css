@@ -1029,3 +1029,8 @@ fieldset > legend {
 #ASRScorePanel fieldset legend {
     margin-bottom: 5px;
 }
+
+.chartDim {
+    min-width: 500px;
+    min-height: 400px;
+}
