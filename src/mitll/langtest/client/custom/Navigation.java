@@ -78,6 +78,7 @@ public class Navigation extends TabContainer implements RequiresResize {
   private static final String CLICKED_TAB = "clickedTab";
   private static final String SUB_TAB = "subTab";
   public static final String NO_LISTS_CREATED_OR_VISITED_YET = "No lists created or visited yet.";
+  private static final int CHAPTERS_TAB = 4;
   private final ExerciseController controller;
   private LangTestDatabaseAsync service;
   private UserManager userManager;
@@ -281,7 +282,7 @@ public class Navigation extends TabContainer implements RequiresResize {
                 // show site-wide browse list instead
                 showBrowse();
               } else { // otherwise show the chapters tab
-                tabPanel.selectTab(3);
+                tabPanel.selectTab(CHAPTERS_TAB);
               }
             }
           });
