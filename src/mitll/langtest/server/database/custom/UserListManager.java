@@ -548,7 +548,7 @@ public class UserListManager {
       reviewedDAO.add(id, creatorID);
     }
     if (before != reviewedExercises.size()){
-      logger.debug("markReviewed now " + reviewedExercises.size() + " reviewed exercises");
+      //logger.debug("markReviewed now " + reviewedExercises.size() + " reviewed exercises");
     }
   }
 
