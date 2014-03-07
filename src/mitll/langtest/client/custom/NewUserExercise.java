@@ -8,6 +8,7 @@ import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -43,6 +44,14 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   private static final String FOREIGN_LANGUAGE = "Foreign Language";
   private static final String CREATE = "Create";
   protected static final String ENGLISH_LABEL = "English (optional)";
+  protected static final String TRANSLITERATION_OPTIONAL = "Transliteration (optional)";
+  protected static final String NORMAL_SPEED_REFERENCE_RECORDING = "Normal speed reference recording";
+  protected static final String SLOW_SPEED_REFERENCE_RECORDING_OPTIONAL = "Slow speed reference recording (optional)";
+  private static final String ENTER_THE_FOREIGN_LANGUAGE_PHRASE = "Enter the foreign language phrase.";
+  private static final String RECORD_REFERENCE_AUDIO_FOR_THE_FOREIGN_LANGUAGE_PHRASE = "Record reference audio for the foreign language phrase.";
+  private static final String CLICK_AND_HOLD_TO_RECORD = "Click and Hold to Record";
+  private static final String RELEASE_TO_STOP = "Release to Stop";
+
   private final EditItem editItem;
   protected final UserExercise newUserExercise;
   protected final ExerciseController controller;
@@ -99,9 +108,9 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
 
     addItemsAtTop(container);
     container.add(upper);
-    /*FormField formField =*/ makeForeignLangRow(upper);
+    FormField formField = makeForeignLangRow(upper);
 
-    //focusOn(formField); // TODO put this back
+    focusOn(formField); // TODO put this back
     makeTranslitRow(upper);
     makeEnglishRow(upper);
 
@@ -167,20 +176,15 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
    */
   protected ControlGroup makeRegularAudioPanel(Panel row) {
     rap = makeRecordAudioPanel(row, true);
-    return addControlGroupEntrySimple(row, "Normal speed reference recording", rap);
+    return addControlGroupEntrySimple(row, NORMAL_SPEED_REFERENCE_RECORDING, rap);
   }
 
   protected ControlGroup makeSlowAudioPanel(Panel row) {
     rapSlow = makeRecordAudioPanel(row, false);
-    return addControlGroupEntrySimple(row, "Slow speed reference recording (optional)", rapSlow);
+    return addControlGroupEntrySimple(row, SLOW_SPEED_REFERENCE_RECORDING_OPTIONAL, rapSlow);
   }
 
   protected void configureButtonRow(Panel row) {
-    //ControlLabel child = new ControlLabel("Actions");
-    //child.addStyleName("floatLeft");
-    //child.addStyleName("rightFiveMargin");
-    //child.addStyleName("leftFiveMargin");
-    //row.add(child);
     row.addStyleName("buttonGroupInset");
   }
 
@@ -203,17 +207,16 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   protected void makeTranslitRow(Panel container) {
     Panel row = new FluidRow();
     container.add(row);
-    translit = addControlFormField(row, "Transliteration (optional)",false,0);
+    translit = addControlFormField(row, TRANSLITERATION_OPTIONAL,false,0);
   }
 
-/*
   private void focusOn(final FormField form) {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
         form.box.setFocus(true);
       }
     });
-  }*/
+  }
 
   protected void setFields(UserExercise newUserExercise) {
     System.out.println("grabInfoFromFormAndStuffInfoExercise : setting fields with " + newUserExercise);
@@ -287,7 +290,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     submit.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        submit.setEnabled(false);
+       // submit.setEnabled(false);
         if (rap.isRecording()) {
           clickedCreate = true;
           rap.clickStop();
@@ -320,7 +323,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
                                   ControlGroup normalSpeedRecording, UserList ul, ListInterface<T> pagingContainer,
                                   Panel toAddTo, boolean onClick) {
     if (foreignLang.getText().isEmpty()) {
-      markError(foreignLang, "Enter the foreign language phrase.");
+      markError(foreignLang, ENTER_THE_FOREIGN_LANGUAGE_PHRASE);
     }
     else if (validateForm(foreignLang, rap, normalSpeedRecording)) {
       checkValidForeignPhrase(ul, pagingContainer, toAddTo, onClick);
@@ -371,7 +374,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
 
       Button recordButton = rap.getButton();
       markError(normalSpeedRecording, recordButton, recordButton, "",
-        "Record reference audio for the foreign language phrase.");
+        RECORD_REFERENCE_AUDIO_FOR_THE_FOREIGN_LANGUAGE_PHRASE);
       recordButton.addMouseOverHandler(new MouseOverHandler() {
         @Override
         public void onMouseOver(MouseOverEvent event) {
@@ -475,7 +478,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
         new WaveformPostAudioRecordButton(exercise, controller, exercisePanel, this, service, recordRegularSpeed ? 0:1,
           false // don't record in results table
             ,
-            "Click and Hold to Record", "Release to Stop") {
+          CLICK_AND_HOLD_TO_RECORD, RELEASE_TO_STOP) {
           @Override
           public void stopRecording() {
             otherRAP.setEnabled(true);
@@ -556,14 +559,14 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   private boolean validateForm(final FormField foreignLang, final RecordAudioPanel rap,
                                final ControlGroup normalSpeedRecording) {
     if (foreignLang.getText().isEmpty()) {
-      markError(foreignLang, "Enter the foreign language phrase.");
+      markError(foreignLang, ENTER_THE_FOREIGN_LANGUAGE_PHRASE);
       return false;
     } else if (newUserExercise == null || newUserExercise.getRefAudio() == null) {
       System.out.println("validateForm : new user ex " + newUserExercise);
 
       Button recordButton = rap.getButton();
       markError(normalSpeedRecording, recordButton, recordButton, "",
-        "Record reference audio for the foreign language phrase.");
+        RECORD_REFERENCE_AUDIO_FOR_THE_FOREIGN_LANGUAGE_PHRASE);
       recordButton.addMouseOverHandler(new MouseOverHandler() {
         @Override
         public void onMouseOver(MouseOverEvent event) {
