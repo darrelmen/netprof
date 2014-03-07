@@ -449,11 +449,7 @@ public class ResultManager extends PagerTable {
     TextColumn<Result> gradeInfo = new TextColumn<Result>() {
       @Override
       public String getValue(Result answer) {
-        if (answer.gradeInfo.endsWith(",")) {
-          return answer.gradeInfo.substring(0, answer.gradeInfo.length() - 1);
-        } else {
-          return answer.gradeInfo;
-        }
+        return answer.getGradeInfo();
       }
     };
     table.addColumn(gradeInfo, "Grades");
