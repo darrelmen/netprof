@@ -104,12 +104,22 @@ public class Result implements IsSerializable {
     return audioType;
   }
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#getResultsWithGrades()
+   * @param g
+   */
   public void addGrade(Grade g) {
     gradeInfo += g.grade +",";
   }
 
-  public void clearGradeInfo() {
-    gradeInfo = "";
+  public void clearGradeInfo() { gradeInfo = "";  }
+
+  public String getGradeInfo() {
+    if (gradeInfo.endsWith(",")) {
+      return gradeInfo.substring(0, gradeInfo.length() - 1);
+    } else {
+      return gradeInfo;
+    }
   }
 
   public boolean isCorrect() {
