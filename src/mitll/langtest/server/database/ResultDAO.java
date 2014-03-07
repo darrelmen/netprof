@@ -794,26 +794,52 @@ public class ResultDAO extends DAO {
    * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    * @param out
    */
+/*
   public void toXLSX(OutputStream out) {
-    SXSSFWorkbook wb = new SXSSFWorkbook(100); // keep 100 rows in memory, exceeding rows will be flushed to disk
-    Sheet sheet = wb.createSheet("Results");
-    int rownum = 0;
-
     long then = System.currentTimeMillis();
     List<Result> results = getResults();
     long now = System.currentTimeMillis();
-    if (now-then > 100) logger.warn("toXLSX : took " + (now-then) + " millis to read " +results.size()+
-      " results from database");
-    then = now;
+    if (now-then > 100) {
+      logger.warn("toXLSX : took " + (now-then) + " millis to read " +results.size()+
+        " results from database");
+    }
 
-    List<String> columns = Arrays.asList("id", "userid", Database.EXID, "qid", Database.TIME, "answer",
-      "valid", FLQ, SPOKEN, AUDIO_TYPE, DURATION, CORRECT, PRON_SCORE, STIMULUS);
+    writeExcelToStream(results, out);
+  }
+*/
 
+  public void writeExcelToStream(List<Result> results, OutputStream out) {
+    SXSSFWorkbook wb = writeExcel(results);
+    long then = System.currentTimeMillis();
+    try {
+      wb.write(out);
+      long now2 = System.currentTimeMillis();
+      if (now2-then > 100) {
+        logger.warn("toXLSX : took " + (now2-then) + " millis to write excel to output stream ");
+      }
+      out.close();
+      wb.dispose();
+    } catch (IOException e) {
+      logger.error("got " + e, e);
+    }
+  }
+
+  private SXSSFWorkbook writeExcel(List<Result> results) {
+    long now;
+    long then = System.currentTimeMillis();
+
+    SXSSFWorkbook wb = new SXSSFWorkbook(1000); // keep 100 rows in memory, exceeding rows will be flushed to disk
+    Sheet sheet = wb.createSheet("Results");
+    int rownum = 0;
     CellStyle cellStyle = wb.createCellStyle();
     DataFormat dataFormat = wb.createDataFormat();
 
     cellStyle.setDataFormat(dataFormat.getFormat("MMM dd HH:mm:ss"));
     Row headerRow = sheet.createRow(rownum++);
+
+    List<String> columns = Arrays.asList("id", "userid", Database.EXID, "qid", Database.TIME, "answer",
+      "valid", "grades", FLQ, SPOKEN, AUDIO_TYPE, DURATION, CORRECT, PRON_SCORE, STIMULUS);
+
     for (int i = 0; i < columns.size(); i++) {
       Cell headerCell = headerRow.createCell(i);
       headerCell.setCellValue(columns.get(i));
@@ -833,10 +859,13 @@ public class ResultDAO extends DAO {
       cell = row.createCell(j++);
       cell.setCellValue(new Date(result.timestamp));
       cell.setCellStyle(cellStyle);
+
       cell = row.createCell(j++);
       cell.setCellValue(result.answer);
       cell = row.createCell(j++);
       cell.setCellValue(result.valid);
+      cell = row.createCell(j++);
+      cell.setCellValue(result.getGradeInfo());
       cell = row.createCell(j++);
       cell.setCellValue(result.flq);
       cell = row.createCell(j++);
@@ -852,23 +881,11 @@ public class ResultDAO extends DAO {
       cell = row.createCell(j++);
       cell.setCellValue(result.getStimulus());
     }
-     now = System.currentTimeMillis();
+    now = System.currentTimeMillis();
     if (now-then > 100) {
       logger.warn("toXLSX : took " + (now-then) + " millis to add " + rownum + " rows to sheet, or " + (now-then)/rownum + " millis/row");
     }
-    then = now;
-    try {
-      wb.write(out);
-      now = System.currentTimeMillis();
-      if (now-then > 100) {
-        logger.warn("toXLSX : took " + (now-then) + " millis to write excel to output stream ");
-      }
-      then = now;
-      out.close();
-      wb.dispose();
-    } catch (IOException e) {
-      logger.error("got " + e, e);
-    }
+    return wb;
   }
 
   /**
