@@ -1440,10 +1440,7 @@ public class DatabaseImpl implements Database {
   public UserDAO getUserDAO() {
     return userDAO;
   }
-
-  public ResultDAO getResultDAO() {
-    return resultDAO;
-  }
+  public ResultDAO getResultDAO() {  return resultDAO;  }
 
   public String toString() { return "Database : "+ connection.getConnection(); }
 
