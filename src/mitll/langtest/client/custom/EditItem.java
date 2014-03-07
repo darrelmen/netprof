@@ -261,7 +261,6 @@ public class EditItem<T extends ExerciseShell> {
     private final HTML slowAnno = new HTML();
     private String originalForeign = "";
     private String originalEnglish = "";
-    //protected UserList ul;
     protected final UserList originalList;
 
     /**
@@ -349,8 +348,7 @@ public class EditItem<T extends ExerciseShell> {
     private void deleteItem(final String id, final long uniqueID, final UserList ul) {
       service.deleteItemFromList(uniqueID, id, new AsyncCallback<Boolean>() {
         @Override
-        public void onFailure(Throwable caught) {
-        }
+        public void onFailure(Throwable caught) {}
 
         @Override
         public void onSuccess(Boolean result) {
@@ -405,7 +403,7 @@ public class EditItem<T extends ExerciseShell> {
     protected void makeTranslitRow(Panel container) {
       Panel row = new FluidRow();
       container.add(row);
-      translit = makeBoxAndAnno(row, "Transliteration (optional)", translitAnno);
+      translit = makeBoxAndAnno(row, TRANSLITERATION_OPTIONAL, translitAnno);
     }
 
     /**
@@ -417,7 +415,7 @@ public class EditItem<T extends ExerciseShell> {
     protected ControlGroup makeRegularAudioPanel(Panel row) {
       rap = makeRecordAudioPanel(row, true);
       fastAnno.addStyleName("topFiveMargin");
-      return addControlGroupEntrySimple(row, "Normal speed reference recording", rap, fastAnno);
+      return addControlGroupEntrySimple(row, NORMAL_SPEED_REFERENCE_RECORDING, rap, fastAnno);
     }
 
     /**
@@ -429,7 +427,7 @@ public class EditItem<T extends ExerciseShell> {
       rapSlow = makeRecordAudioPanel(row, false);
       slowAnno.addStyleName("topFiveMargin");
 
-      return addControlGroupEntrySimple(row, "Slow speed reference recording (optional)", rapSlow, slowAnno);
+      return addControlGroupEntrySimple(row, SLOW_SPEED_REFERENCE_RECORDING_OPTIONAL, rapSlow, slowAnno);
     }
 
     private BasicDialog.FormField makeBoxAndAnno(Panel row, String label, HTML englishAnno) {
