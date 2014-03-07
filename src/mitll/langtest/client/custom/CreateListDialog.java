@@ -18,7 +18,7 @@ import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserManager;
 
 public class CreateListDialog extends BasicDialog {
-  private static final String CLASS = "Course Info";
+  private static final String CLASS = "Course Info (optional)";
   private static final boolean REQUIRE_DESC = false;
   private static final boolean REQUIRE_CLASS = false;
 
@@ -33,6 +33,7 @@ public class CreateListDialog extends BasicDialog {
   }
 
   /**
+   * @see mitll.langtest.client.custom.Navigation#getButtonRow2(com.google.gwt.user.client.ui.Panel)
    * @param thirdRow
    * @seex
    */
@@ -62,7 +63,7 @@ public class CreateListDialog extends BasicDialog {
     row = new FluidRow();
     child.add(row);
     final TextArea area = new TextArea();
-    final BasicDialog.FormField description = getFormField(row, "Description", area, 1);
+    final BasicDialog.FormField description = getFormField(row, "Description (optional)", area, 1);
 
     row = new FluidRow();
     child.add(row);
@@ -97,7 +98,7 @@ public class CreateListDialog extends BasicDialog {
     });
   }
 
-  public void addUserList(final FormField titleBox, TextArea area, FormField classBox) {
+  private void addUserList(final FormField titleBox, TextArea area, FormField classBox) {
     service.addUserList(userManager.getUser(), titleBox.getText(), area.getText(),
       classBox.getText(), new AsyncCallback<Long>() {
       @Override
@@ -108,13 +109,13 @@ public class CreateListDialog extends BasicDialog {
         if (result == -1) {
           markError(titleBox,"You already have a list named "+ titleBox.getText());
         } else {
-          navigation.showInitialState();
+          navigation.clickOnYourLists(result);
         }
       }
     });
   }
 
-  void zeroPadding(Panel createContent) {
+  private void zeroPadding(Panel createContent) {
     DOM.setStyleAttribute(createContent.getElement(), "paddingLeft", "0px");
     DOM.setStyleAttribute(createContent.getElement(), "paddingRight", "0px");
   }
