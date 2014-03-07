@@ -17,7 +17,6 @@ import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
-import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -78,8 +77,13 @@ public class Navigation extends TabContainer implements RequiresResize {
   private static final String CLICKED_TAB = "clickedTab";
   private static final String SUB_TAB = "subTab";
   public static final String NO_LISTS_CREATED_OR_VISITED_YET = "No lists created or visited yet.";
+
   private static final int CHAPTERS_TAB = 4;
   public static final int BROWSE_TAB_INDEX = 3;
+  private static final int CREATE_TAB_INDEX = 2;
+  private static final int YOUR_LIST_INDEX = 0;
+  private static final int OTHERS_LIST_INDEX = 1;
+
   private final ExerciseController controller;
   private LangTestDatabaseAsync service;
   private UserManager userManager;
@@ -174,6 +178,7 @@ public class Navigation extends TabContainer implements RequiresResize {
     create.tab.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
+      //  checkAndMaybeClearTab(CREATE);
         createListDialog.doCreate(create.content);
       }
     });
@@ -281,8 +286,7 @@ public class Navigation extends TabContainer implements RequiresResize {
             result.iterator().next().getExercises().isEmpty()) {
           service.getUserListsForText("", user, new AsyncCallback<Collection<UserList>>() {
             @Override
-            public void onFailure(Throwable caught) {
-            }
+            public void onFailure(Throwable caught) {}
 
             @Override
             public void onSuccess(Collection<UserList> result) {
@@ -291,17 +295,12 @@ public class Navigation extends TabContainer implements RequiresResize {
                 String value = storage.getValue(CLICKED_TAB);
                 if (value.equals(CHAPTERS)) {
                   tabPanel.selectTab(CHAPTERS_TAB);
-                }
-                else if (value.equals(YOUR_LISTS)) {
-                  //tabPanel.selectTab(0);
-                  //yourStuff.tab.fireEvent(new ButtonClickEvent());
-                  showMyLists(true,false);
+                } else if (value.equals(YOUR_LISTS)) {
+                  showMyLists(true, false);
                 } else if (value.equals(OTHERS_LISTS)) {
-                //  tabPanel.selectTab(1);
-                  showMyLists(false,true);
-
+                  showMyLists(false, true);
                 } else if (value.equals(CREATE)) {
-                  tabPanel.selectTab(2);
+                  tabPanel.selectTab(CREATE_TAB_INDEX);
                 } else {
                   showBrowse();
                 }
@@ -333,7 +332,7 @@ public class Navigation extends TabContainer implements RequiresResize {
    */
   private void showMyLists(boolean onlyCreated, boolean onlyVisited) {
     String value = storage.getValue(CLICKED_TAB);
-    //System.out.println("showMyLists " + value);
+    System.out.println("showMyLists " + value);
     if (!value.isEmpty()) {
       if (value.equals(YOUR_LISTS)) {
         onlyCreated = true;
@@ -344,12 +343,25 @@ public class Navigation extends TabContainer implements RequiresResize {
         onlyVisited = true;
       }
     }
-    int tabToSelect =/* controller.isReviewMode() ? 4:*/ onlyCreated ? 0 : 1;
+    int tabToSelect =/* controller.isReviewMode() ? 4:*/ onlyCreated ? YOUR_LIST_INDEX : OTHERS_LIST_INDEX;
     tabPanel.selectTab(tabToSelect);
 
     TabAndContent toUse = onlyCreated ? yourStuff : othersStuff;
-    toUse.tab.fireEvent(new ButtonClickEvent());
+    clickOnTab(toUse);
     refreshViewLessons(onlyCreated, onlyVisited);
+  }
+
+  public void clickOnYourLists(long userListID) {
+    storeCurrentClickedList(userListID);
+    storage.storeValue(SUB_TAB,"editItem");
+
+    tabPanel.selectTab(YOUR_LIST_INDEX);
+    clickOnTab(yourStuff);
+    refreshViewLessons(true, false);
+  }
+
+  private void clickOnTab(TabAndContent toUse) {
+    toUse.tab.fireEvent(new ButtonClickEvent());
   }
 
   /**
@@ -357,7 +369,7 @@ public class Navigation extends TabContainer implements RequiresResize {
    */
   private void showBrowse() {
     tabPanel.selectTab(BROWSE_TAB_INDEX);
-    browse.tab.fireEvent(new ButtonClickEvent());
+    clickOnTab(browse);
     viewBrowse();
   }
 
@@ -390,7 +402,8 @@ public class Navigation extends TabContainer implements RequiresResize {
     } else {
      // System.out.println("viewLessons for " + userManager.getUser());
       service.getListsForUser(userManager.getUser(), onlyMine,
-        onlyVisited, new UserListCallback(contentPanel, child, listScrollPanel, LESSONS + (onlyMine ? "_Mine":"_Others"), onlyMine, false));
+        onlyVisited,
+        new UserListCallback(contentPanel, child, listScrollPanel, LESSONS + (onlyMine ? "_Mine":"_Others"), onlyMine, false));
     }
   }
 
@@ -450,6 +463,7 @@ public class Navigation extends TabContainer implements RequiresResize {
 
   /**
    * @see Navigation.UserListCallback#getDisplayRowPerList(mitll.langtest.shared.custom.UserList, boolean, boolean)
+   * @see mitll.langtest.client.custom.Navigation.UserListCallback#selectThePreviousList(java.util.Collection)
    * @param ul
    * @param contentPanel
    */
@@ -457,8 +471,7 @@ public class Navigation extends TabContainer implements RequiresResize {
     System.out.println("showList " +ul + " instance " + instanceName);
 
     String previousList = storage.getValue(CLICKED_USER_LIST);
-    String currentValue = "" + ul.getUniqueID();
-    storage.storeValue(CLICKED_USER_LIST, currentValue);
+    String currentValue = storeCurrentClickedList(ul);
 
     // if select a new list, clear the subtab selection
     if (previousList != null && !previousList.equals(currentValue)) {
@@ -495,8 +508,17 @@ public class Navigation extends TabContainer implements RequiresResize {
     container.add(listOperations);
 
     addVisitor(ul);
+  }
 
-    //return listOperations;
+  private String storeCurrentClickedList(UserList ul) {
+    long uniqueID = ul.getUniqueID();
+    return storeCurrentClickedList(uniqueID);
+  }
+
+  private String storeCurrentClickedList(long uniqueID) {
+    String currentValue = "" + uniqueID;
+    storage.storeValue(CLICKED_USER_LIST, currentValue);
+    return currentValue;
   }
 
   /**
@@ -581,7 +603,22 @@ public class Navigation extends TabContainer implements RequiresResize {
     return tabPanel;
   }
 
-  private void selectInitialTab(final UserList ul, final boolean created, final TabPanel tabPanel,
+  /**
+   * @see #getListOperations(mitll.langtest.shared.custom.UserList, boolean, String)
+   * @param ul
+   * @param created
+   * @param tabPanel
+   * @param isReview
+   * @param isComment
+   * @param instanceName1
+   * @param learn
+   * @param practice
+   * @param edit
+   * @param isNormalList
+   * @param editItem
+   */
+  private void selectInitialTab(final UserList ul,
+                                final boolean created, final TabPanel tabPanel,
                                 final boolean isReview, final boolean isComment, final String instanceName1,
                                 final TabAndContent learn,
                                 final TabAndContent practice,
@@ -590,37 +627,13 @@ public class Navigation extends TabContainer implements RequiresResize {
     final TabAndContent finalEditItem = editItem;
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
-        String subTab = storage.getValue(SUB_TAB);
-       // System.out.println("subtab " +subTab);
-        boolean chosePrev = false;
-        if (subTab != null) {
-          chosePrev = true;
-          if (subTab.equals("learn")) {
-
-            tabPanel.selectTab(0);
-            learn.tab.fireEvent(new ButtonClickEvent());
-
-            npfHelper.showNPF(ul, learn, instanceName1);
-          } else if (subTab.equals("practice")) {
-            System.out.println("\tsubtab " +subTab);
-
-            tabPanel.selectTab(1);
-            practice.tab.fireEvent(new ButtonClickEvent());
-            avpHelper.showNPF(ul, practice, "practice");
-
-          } else if (subTab.equals("editItem")) {
-            tabPanel.selectTab(2);
-
-            edit.tab.fireEvent(new ButtonClickEvent());
-
-            showEditItem(ul, edit, (isReview || isComment) ? reviewItem : Navigation.this.editItem, isNormalList);
-          } else chosePrev = false;
-        }
+        boolean chosePrev = selectPreviouslyClickedTab(tabPanel, learn, practice, edit,
+          ul, instanceName1, isReview, isComment, isNormalList);
         if (!chosePrev) {
           if (created && !ul.isPrivate() && ul.isEmpty() && finalEditItem != null) {
             String name = ul.getName();
             //System.out.println("name " + name);
-            tabPanel.selectTab(name.equals(REVIEW1) ? 0 : 2);    // 2 = add/edit item
+            tabPanel.selectTab(name.equals(REVIEW1) ? 0 : CREATE_TAB_INDEX);    // 2 = add/edit item
             showEditItem(ul, finalEditItem, (isReview || isComment) ? reviewItem : Navigation.this.editItem, isNormalList);
           } else {
             tabPanel.selectTab(0);
@@ -629,6 +642,39 @@ public class Navigation extends TabContainer implements RequiresResize {
         }
       }
     });
+  }
+
+  private boolean selectPreviouslyClickedTab(TabPanel tabPanel,
+                                             TabAndContent learn, TabAndContent practice, TabAndContent edit,
+                                             UserList ul, String instanceName1,
+                                             boolean isReview, boolean isComment, boolean isNormalList) {
+    String subTab = storage.getValue(SUB_TAB);
+    System.out.println("selectPreviouslyClickedTab : subtab " +subTab);
+
+    boolean chosePrev = false;
+    if (subTab != null) {
+      chosePrev = true;
+      if (subTab.equals("learn")) {
+        tabPanel.selectTab(0);
+        clickOnTab(learn);
+
+        npfHelper.showNPF(ul, learn, instanceName1);
+      } else if (subTab.equals("practice")) {
+        System.out.println("\tsubtab " +subTab);
+
+        tabPanel.selectTab(1);
+        clickOnTab(practice);
+        avpHelper.showNPF(ul, practice, "practice");
+
+      } else if (subTab.equals("editItem")) {
+        tabPanel.selectTab(CREATE_TAB_INDEX);
+
+        clickOnTab(edit);
+
+        showEditItem(ul, edit, (isReview || isComment) ? reviewItem : this.editItem, isNormalList);
+      } else chosePrev = false;
+    }
+    return chosePrev;
   }
 
   /**
