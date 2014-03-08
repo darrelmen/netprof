@@ -72,6 +72,7 @@ public class ServerProperties {
   private static final String FOREIGN_LANGUAGE_QUESTIONS_ONLY = "foreignLanguageQuestionsOnly";
   private static final String MAX_NUM_EXERCISES = "maxNumExercises";
   private static final String INCLUDE_FEEDBACK = "includeFeedback";
+  private static final String MAPPING_FILE = "mappingFile";
 
   private Properties props = new Properties();
 
@@ -229,6 +230,10 @@ public class ServerProperties {
     }
   }
 
+  public String getMappingFile() {
+    return props.getProperty(MAPPING_FILE, "vlr-parle-pilot-items.txt");
+  }
+
   public int getMaxNumExercises() {
     try {
       String property = props.getProperty(MAX_NUM_EXERCISES);
@@ -307,4 +312,6 @@ public class ServerProperties {
     }
     return "";
   }
+
+
 }
