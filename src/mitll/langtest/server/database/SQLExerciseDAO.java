@@ -1,17 +1,14 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.shared.Exercise;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -21,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,11 +26,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
   private static Logger logger = Logger.getLogger(SQLExerciseDAO.class);
 
   private static final String HEADER_TAG = "h4";
-  private static final String ILR_LEVEL = "ILR_Level";
-  private static final String TEST_TYPE = "Test type";
-  private static final String VLR_PARLE_PILOT_ITEMS_TXT = "vlr-parle-pilot-items.txt";
-
-  private static final String ENCODING = "UTF8";
+  public static final String ENCODING = "UTF8";
   private static final boolean DEBUG = false;
 
   private final Database database;
@@ -43,80 +35,24 @@ public class SQLExerciseDAO implements ExerciseDAO {
 
   private Map<String,Exercise> idToExercise = new HashMap<String,Exercise>();
   private SectionHelper sectionHelper = new SectionHelper();
-  private Map<String,List<String>> levelToExercises = new HashMap<String,List<String>>();
-  private Map<String,String> exerciseToLevel = new HashMap<String,String>();
-  private Collection<String> readingExercises = new ArrayList<String>();
-  private Collection<String> listeningExercises = new ArrayList<String>();
   private List<String> errors = new ArrayList<String>();
+  private ILRMapping ilrMapping;
 
   /**
    * @see DatabaseImpl#makeExerciseDAO(boolean)
    * @param database
    * @param mediaDir
    * @param configDir
+   * @param properties
    */
-  public SQLExerciseDAO(Database database, String mediaDir, String configDir) {
+  public SQLExerciseDAO(Database database, String mediaDir, String configDir, ServerProperties properties) {
     this.database = database;
     this.mediaDir = mediaDir;
     logger.debug("database " + database + " media dir " + mediaDir);
-    File ilrMapping = new File(configDir, VLR_PARLE_PILOT_ITEMS_TXT);
 
-    if (ilrMapping.exists()) {
-      readILRMapping2(ilrMapping);
-    }
-    else logger.debug("can't find " + ilrMapping.getAbsolutePath());
+    ilrMapping = new ILRMapping(configDir, sectionHelper, properties.getMappingFile());
     getRawExercises();
-    int size = idToExercise.keySet().size();
-    int size1 = getMappedExercises().size();
-    if (size != size1) {
-      logger.error("huh? there are " + size + " ids from reading the database, but " + size1 + " from reading the mapping file" );
-      Set<String> strings = new HashSet<String>(idToExercise.keySet());
-      strings.removeAll(getMappedExercises());
-      logger.error("unmapped are " + strings);
-    }
-  }
-
-  private void readILRMapping2(File ilrMapping) {
-    try {
-      BufferedReader reader = getReader(ilrMapping.getAbsolutePath());
-      String line;
-      while ((line = reader.readLine()) != null) {
-        String[] split = line.split("\t");
-        if (split.length < 2) continue;
-        String ilr = split[1].trim();
-        ilr = ilr.split("/")[0];
-        String id = split[0].trim();
-        List<String> ids = levelToExercises.get(ilr);
-        if (ids == null) {
-          levelToExercises.put(ilr, ids = new ArrayList<String>());
-        }
-        exerciseToLevel.put(id,ilr);
-        ids.add(id);
-
-        String type = split[2].trim();
-        if (type.equals("listening")) {
-          listeningExercises.add(id);
-        }
-        else if (type.equals("reading")) {
-          readingExercises.add(id);
-        }
-      }
-      logger.debug("level->exercise map has size " + levelToExercises.size() + " keys " + levelToExercises.keySet());
-      logger.debug("listening has size " + listeningExercises.size() + " reading " + readingExercises.size());
-    } catch (Exception e) {
-      logger.error("got " + e, e);
-    }
-  }
-
-  public Set<String> getMappedExercises() {
-    Set<String> strings = new HashSet<String>();
-    for (List<String> ids : levelToExercises.values()) { strings.addAll(ids); }
-    return strings;
-  }
-
-  private BufferedReader getReader(String lessonPlanFile) throws FileNotFoundException, UnsupportedEncodingException {
-    FileInputStream resourceAsStream = new FileInputStream(lessonPlanFile);
-    return new BufferedReader(new InputStreamReader(resourceAsStream,ENCODING));
+    ilrMapping.report(idToExercise);
   }
 
   @Override
@@ -154,14 +90,12 @@ public class SQLExerciseDAO implements ExerciseDAO {
 
   private List<Exercise> getExercises(String sql) {
     List<Exercise> exercises = new ArrayList<Exercise>();
-    //int count = 0;
     try {
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
-      boolean useMapping = !exerciseToLevel.isEmpty();
+      boolean useMapping = ilrMapping.useMapping();
       while (rs.next()) {
-      //  if (count++ > 5) break;
         String plan = rs.getString(1);
         String exid = rs.getString(2);
         String content = getStringFromClob(rs.getClob(5));
@@ -177,7 +111,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
             exercises.add(e);
 
             if (useMapping) {
-              addMappingAssoc(exid, e);
+              ilrMapping.addMappingAssoc(exid, e);
             }
             else {
               recordUnitChapterWeek(e);
@@ -188,9 +122,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
         }
       }
 
-      if (useMapping) {
-        sectionHelper.setPredefinedTypeOrder(Arrays.asList(TEST_TYPE, ILR_LEVEL));
-      }
+      ilrMapping.finalStep();
       rs.close();
       statement.close();
       database.closeConnection(connection);
@@ -208,21 +140,6 @@ public class SQLExerciseDAO implements ExerciseDAO {
       if (DEBUG) logger.debug("getRawExercises : found " + exercises.size() + " exercises.");
     }
     return exercises;
-  }
-
-  private void addMappingAssoc(String exid, Exercise e) {
-    List<SectionHelper.Pair> pairs = new ArrayList<SectionHelper.Pair>();
-
-    String level = exerciseToLevel.get(exid);
-    SectionHelper.Pair ilrAssoc = sectionHelper.addExerciseToLesson(e, ILR_LEVEL, level);
-    pairs.add(ilrAssoc);
-
-    String type = listeningExercises.contains(exid) ? "Listening" : readingExercises.contains(exid) ? "Reading" : "other";
-    SectionHelper.Pair typeAssoc = sectionHelper.addExerciseToLesson(e, TEST_TYPE, type);
-
-    pairs.add(typeAssoc);
-
-    sectionHelper.addAssociations(pairs);
   }
 
   /**
