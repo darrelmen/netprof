@@ -189,7 +189,9 @@ public class DatabaseImpl implements Database {
    * @return
    */
   private ExerciseDAO makeExerciseDAO(boolean useFile) {
-    return useFile ? new FileExerciseDAO(mediaDir, language, isFlashcard) : new SQLExerciseDAO(this, mediaDir, absConfigDir);
+    return useFile ?
+      new FileExerciseDAO(mediaDir, language, isFlashcard, absConfigDir, serverProps.getMappingFile()) :
+      new SQLExerciseDAO(this, mediaDir, absConfigDir, serverProps);
   }
 
   /**
