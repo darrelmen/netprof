@@ -335,7 +335,7 @@ public class SiteDeployer {
     List<Exercise> exercises;
     ExerciseDAO importer;
     if (fileName.endsWith(".txt")) {
-      FileExerciseDAO fileImporter = new FileExerciseDAO("", "", false);
+      FileExerciseDAO fileImporter = new FileExerciseDAO("", "", false, "", "");  //TODO fully support this
       exercises = fileImporter.readExercises(inputStream);
       importer = fileImporter;
     } else {
