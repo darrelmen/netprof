@@ -44,6 +44,7 @@ public class FileExerciseDAO implements ExerciseDAO {
   private static final String SLOW = "Slow";
   private static final int MAX_ERRORS = 100;
   private static final boolean CONFIRM_AUDIO_REFS = false;
+  public static final String PLEASE_RECORD_THE_SENTENCE_ABOVE = "Please record the sentence above.";
   private final String mediaDir;
 
   private List<Exercise> exercises;
@@ -55,13 +56,15 @@ public class FileExerciseDAO implements ExerciseDAO {
   private boolean isPashto;
   private SectionHelper sectionHelper = new SectionHelper();
   private List<String> errors = new ArrayList<String>();
+  private ILRMapping ilrMapping;
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#makeExerciseDAO
    * @param mediaDir
    * @param language
+   * @param mappingFile
    */
-  public FileExerciseDAO(String mediaDir, String language, boolean isFlashcard) {
+  public FileExerciseDAO(String mediaDir, String language, boolean isFlashcard, String configDir, String mappingFile) {
     if (language != null) {
       this.isUrdu = language.equalsIgnoreCase("Urdu");
       this.isEnglish = language.equalsIgnoreCase("English");
@@ -69,6 +72,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     }
     this.mediaDir = mediaDir;
     this.isFlashcard = isFlashcard;
+    ilrMapping = new ILRMapping(configDir,sectionHelper, mappingFile);
   }
 
   @Override
@@ -110,9 +114,7 @@ public class FileExerciseDAO implements ExerciseDAO {
       if (!file.exists()) {
         logger.error("can't find '" + file + "'");
         return;
-      } /*else {
-        // logger.debug("found file at " + file.getAbsolutePath());
-      }*/
+      }
       BufferedReader reader = getReader(lessonPlanFile);
 
       String line;
@@ -242,7 +244,7 @@ public class FileExerciseDAO implements ExerciseDAO {
       String tooltip = doImages ? foreign : translations.get(0);
       if (doImages) translations.add(foreign);
       Exercise repeat = new Exercise("flashcard", "" + (id++), flashcard, translations, tooltip);
-      repeat.addQuestion(Exercise.FL, "Please record the sentence above.","", EMPTY_LIST);
+      repeat.addQuestion(Exercise.FL, PLEASE_RECORD_THE_SENTENCE_ABOVE,"", EMPTY_LIST);
 
       exercises.add(repeat);
     }
@@ -263,9 +265,6 @@ public class FileExerciseDAO implements ExerciseDAO {
         logger.error("can't find '" + file +"'");
         return;
       }
-     // else {
-        // logger.debug("found file at " + file.getAbsolutePath());
-    //  }
       resourceAsStream = new FileInputStream(lessonPlanFile);
     } catch (FileNotFoundException e) {
       logger.error("Couldn't find " + lessonPlanFile);
@@ -287,16 +286,13 @@ public class FileExerciseDAO implements ExerciseDAO {
       String line2;
       int count = 0;
       //logger.debug("using install path " + installPath + " lesson " + lessonPlanFile + " isurdu " +isUrdu);
-      //exercises = new ArrayList<Exercise>();
       Pattern pattern = Pattern.compile("^\\d+\\.(.+)");
-    //  int errors = 0;
       int id = 0;
 
       String lastID = "";
       Exercise lastExercise = null;
       while ((line2 = reader.readLine()) != null) {
         count++;
-     //  if (TESTING && count > 200) break;
 
         Matcher matcher = pattern.matcher(line2.trim());
         boolean wordListOnly = matcher.matches();
@@ -320,10 +316,14 @@ public class FileExerciseDAO implements ExerciseDAO {
               id++;
               if (exercise.getID().equals(lastID)) {
                 //logger.debug("ex " +lastID+ " adding " + exercise.getEnglishQuestions());
-                lastExercise.addQuestions(Exercise.EN, exercise.getEnglishQuestions());
-                lastExercise.addQuestions(Exercise.FL, exercise.getForeignLanguageQuestions());
+                if (lastExercise != null) {
+                  lastExercise.addQuestions(Exercise.EN, exercise.getEnglishQuestions());
+                  lastExercise.addQuestions(Exercise.FL, exercise.getForeignLanguageQuestions());
+                }
               } else {
                 exercises.add(exercise);
+                ilrMapping.addMappingAssoc(exercise.getID(), exercise);
+               // logger.debug("mapping " +exercise.getID());
                 lastExercise = exercise;
               }
 
@@ -340,6 +340,7 @@ public class FileExerciseDAO implements ExerciseDAO {
           }
         }
       }
+      ilrMapping.finalStep();
       reader.close();
     } catch (IOException e) {
      logger.error("reading " +lessonPlanFile+ " got " +e,e);
@@ -350,8 +351,9 @@ public class FileExerciseDAO implements ExerciseDAO {
     else {
       logger.debug("found " + exercises.size() + " exercises, first is " + exercises.iterator().next());
     }
-    if (CONFIRM_AUDIO_REFS) confirmAudioRefs(exercises/*,mediaDir*/);
+    if (CONFIRM_AUDIO_REFS) confirmAudioRefs(exercises);
     populateIDToExercise(exercises);
+    ilrMapping.report(idToExercise);
     return exercises;
   }
 
@@ -429,7 +431,7 @@ public class FileExerciseDAO implements ExerciseDAO {
         String arabicAnswers = split[i++].trim();
         String englishAnswers = split[i++].trim();
 
-        Exercise exercise = new Exercise("plan", id, content, false, false, englishQuestion);
+        Exercise exercise = new Exercise("plan", id, content, false, false, id);
 
         addQuestion(arabicQuestion, arabicAnswers, exercise, true);
         addQuestion(englishQuestion, englishAnswers, exercise, false);
@@ -517,7 +519,9 @@ public class FileExerciseDAO implements ExerciseDAO {
     List<String> alternateAnswers = Arrays.asList(answers.split("\\|\\|"));
     List<String> objects1 = Collections.emptyList();
     List<String> objects = alternateAnswers.size() > 1 ? alternateAnswers.subList(1, alternateAnswers.size()) : objects1;
-    exercise.addQuestion(isFLQ ? Exercise.FL : Exercise.EN, question, alternateAnswers.get(0), new ArrayList<String>(objects));
+    String lang = isFLQ ? Exercise.FL : Exercise.EN;
+   // logger.debug("to " + exercise.getID() + " adding " + question + " lang " + lang);
+    exercise.addQuestion(lang, question, alternateAnswers.get(0), new ArrayList<String>(objects));
   }
 
   /**
@@ -553,7 +557,7 @@ public class FileExerciseDAO implements ExerciseDAO {
 
     Exercise exercise = new Exercise("repeat", id, content, false, true, contentSentence);
     exercise.setRefSentence(contentSentence);
-    exercise.addQuestion(Exercise.FL, "Please record the sentence above.","", EMPTY_LIST);
+    exercise.addQuestion(Exercise.FL, PLEASE_RECORD_THE_SENTENCE_ABOVE,"", EMPTY_LIST);
     return exercise;
   }
 
@@ -623,8 +627,8 @@ public class FileExerciseDAO implements ExerciseDAO {
       Exercise exercise =
         new Exercise("repeat", audioFileName, content, ensureForwardSlashes(audioRef),
           foreignLanguagePhrase, foreignLanguagePhrase);
-      exercise.addQuestion(Exercise.EN, "Please record the sentence above.", "", EMPTY_LIST);  // required for grading view
-      exercise.addQuestion(Exercise.FL, "Please record the sentence above.", "", EMPTY_LIST);
+      exercise.addQuestion(Exercise.EN, PLEASE_RECORD_THE_SENTENCE_ABOVE, "", EMPTY_LIST);  // required for grading view
+      exercise.addQuestion(Exercise.FL, PLEASE_RECORD_THE_SENTENCE_ABOVE, "", EMPTY_LIST);
 
       return exercise;
     }
@@ -708,9 +712,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     return wavPath.replaceAll("\\\\", "/");
   }
 
-  public List<Exercise> getRawExercises() {
-    return exercises;
-  }
+  public List<Exercise> getRawExercises() {  return exercises;  }
 
 /*  private void convertPlan() {
     InputStream resourceAsStream = getExerciseListStream("lesson.plan");
