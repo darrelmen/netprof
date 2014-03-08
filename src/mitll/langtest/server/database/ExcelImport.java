@@ -213,8 +213,6 @@ public class ExcelImport implements ExerciseDAO {
     // logger.debug("for " + sheet.getSheetName() + " regions " +sheet.getNumMergedRegions());
     int id = 0;
     boolean gotHeader = false;
-    FileExerciseDAO dao = new FileExerciseDAO("", language, isFlashcard);
-
     int colIndexOffset = -1;
 
     int transliterationIndex = -1;
