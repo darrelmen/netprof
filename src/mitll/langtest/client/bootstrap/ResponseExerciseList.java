@@ -2,6 +2,7 @@ package mitll.langtest.client.bootstrap;
 
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Panel;
@@ -22,6 +23,8 @@ public class ResponseExerciseList extends FlexSectionExerciseList {
   public static final String RESPONSE_TYPE = "responseType";
   public static final String SECOND_RESPONSE_TYPE = "secondResponseType";
   public static final String RESPONSE_TYPE_DIVIDER = "###";
+  public static final String MSA = "MSA";
+  public static final String ARABIC = "Arabic";
   private ResponseChoice responseChoice;
   private ResponseChoice secondResponseChoice;
 
@@ -78,30 +81,39 @@ public class ResponseExerciseList extends FlexSectionExerciseList {
    */
   @Override
   protected Widget addBottomText(FluidContainer container) {
-    Widget widget = super.addBottomText(container);
-    String caption = (controller.getLanguage().equals("MSA")? "Arabic" : controller.getLanguage()) +" Response Type";
-    String caption2 = "English Response Type";
+    //Widget widget = super.addBottomText(container);
 
+    Panel statusRow = getStatusRow();
+    //statusRow.addStyleName("leftFiftyPercentMargin");
+
+    DivWidget right = new DivWidget();
+    //right.addStyleName("floatRight");
+    right.addStyleName("leftFiftyMargin");
+    right.add(statusRow);
+
+    Widget choiceWidget = getResponseChoiceWidget();
+    //container.add(grid);
+
+    right.add(choiceWidget);
+    container.add(right);
+    return right;
+  }
+
+  private Widget getResponseChoiceWidget() {
     Grid grid = new Grid(2,2);
-
+    grid.getElement().setId("ResponseChoiceWidget");
+    String caption = (controller.getLanguage().equals(MSA)? ARABIC : controller.getLanguage()) +" Response Type";
     ResponseChoice.LeftRight leftRight1 = responseChoice.getResponseTypeWidget(caption, false);
-    //responseTypeWidget.addStyleName("topFiveMargin");
-    //container.add(responseTypeWidget);
     grid.setWidget(0, 0, leftRight1.left);
     grid.setWidget(0, 1, leftRight1.right);
+
+    String caption2 = "English Response Type";
     ResponseChoice.LeftRight leftRight2 = secondResponseChoice.getResponseTypeWidget(caption2, true);
-   // container.add(leftRight2);
 
     grid.setWidget(1, 0, leftRight2.left);
     grid.setWidget(1, 1, leftRight2.right);
-    container.add(grid);
 
-/*    Panel outer = new FluidRow();
-    outer.addStyleName("alignCenter");
-    outer.addStyleName("inlineBlockStyle");
-    outer.add(grid);
-    container.add(outer);*/
-    grid.addStyleName("leftFiftyPercentMargin");
-    return widget;
+    //grid.addStyleName("leftFiftyPercentMargin");
+    return grid;
   }
 }
