@@ -52,10 +52,10 @@ public class ILRMapping {
     int size = idToExercise.keySet().size();
     int size1 = getMappedExercises().size();
     if (size != size1) {
-      logger.error("huh? there are " + size + " ids from reading the database, but " + size1 + " from reading the mapping file" );
+      logger.warn("huh? there are " + size + " ids from reading the database, but " + size1 + " from reading the mapping file" );
       Set<String> strings = new HashSet<String>(idToExercise.keySet());
       strings.removeAll(getMappedExercises());
-      logger.error("unmapped are " + strings);
+      if (!strings.isEmpty()) logger.warn("unmapped are these ids " + strings);
     }
   }
 
