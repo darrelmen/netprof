@@ -2,7 +2,6 @@ package mitll.langtest.server;
 
 import mitll.langtest.server.database.DLIUserDAO;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.shared.Result;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletContext;
@@ -12,7 +11,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
