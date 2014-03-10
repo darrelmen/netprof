@@ -729,7 +729,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   @Override
   public Widget getExerciseListOnLeftSide(PropertyHandler props) {
-    FlowPanel leftColumn = new FlowPanel();
+    Panel leftColumn = new FlowPanel();
+    leftColumn.getElement().setId("ExerciseList_leftColumn");
     leftColumn.addStyleName("floatLeft");
     leftColumn.addStyleName("minWidth");
     DOM.setStyleAttribute(leftColumn.getElement(), "paddingRight", "10px");
