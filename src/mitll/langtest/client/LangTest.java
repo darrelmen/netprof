@@ -190,8 +190,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           }
 
           @Override
-          public void onSuccess(Void result) {
-          }
+          public void onSuccess(Void result) {}
         });
   }
 
@@ -329,8 +328,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void loadVisualizationPackages() {
-    System.out.println("loadVisualizationPackages...");
-
     VisualizationUtils.loadVisualizationApi(new Runnable() {
       @Override
       public void run() {
@@ -354,47 +351,26 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     Widget title;
     if (isGoodwaveMode()) {
       flashcard = new Flashcard();
-      title = flashcard.makeNPFHeaderRow(props.getSplash());
+      title = flashcard.makeNPFHeaderRow(props.getSplash(), getGreeting(), getReleaseStatus(),new LogoutClickHandler(),
+
+        (props.isAdminView()) ? new UsersClickHandler(false) : null,
+        (props.isAdminView()) ? new ResultsClickHandler() : null,
+        (props.isAdminView()) ? new MonitoringClickHandler() : null
+        );
     }
     else if (props.isFlashcardTeacherView() || props.isAutocrt()) {
       flashcard = new Flashcard();
-      title = flashcard.getHeaderRow(props.getSplash(), "NewProF2.png",props.getAppTitle());
+      title = flashcard.getHeaderRow(props.getSplash(), "NewProF2.png",props.getAppTitle(), getGreeting(), getReleaseStatus(), new LogoutClickHandler(),
+
+        (props.isAdminView()) ? new UsersClickHandler(false) : null,
+        (props.isAdminView()) ? new ResultsClickHandler() : null,
+        (props.isAdminView()) ? new MonitoringClickHandler() : null);
     }
     else {
       title = getTitleWidget();
     }
 
-    boolean isStudent = getLoginType().equals(PropertyHandler.LOGIN_TYPE.STUDENT) ||  getLoginType().equals(PropertyHandler.LOGIN_TYPE.SIMPLE);
-    boolean takeWholeWidth = isStudent || props.isFlashcardTeacherView() || props.isShowSections() || props.isGoodwaveMode();
-
-    Column titleColumn = new Column(takeWholeWidth ? 12 : 10, title);
-    headerRow.add(titleColumn);
-    makeLogoutParts();
-    if (!takeWholeWidth) {
-      headerRow.add(new Column(2, getLogout()));
-    } else if (isStudent || props.isAdminView() || props.isDataCollectMode()) {
-      FluidRow adminRow = new FluidRow();
-      adminRow.addStyleName("alignCenter");
-      adminRow.addStyleName("inlineBlockStyle");
-
-      this.userline.setHTML(getUserText());
-      if (props.isAdminView()) {
-        adminRow.add(new Column(2, userline));
-        adminRow.add(new Column(2, logout));
-        adminRow.add(new Column(2, users));
-        adminRow.add(new Column(2, showResults));
-        adminRow.add(new Column(2, monitoring));
-        adminRow.add(new Column(2, releaseStatus));
-      }
-      else {
-        adminRow.add(new Column(2, userline));
-        adminRow.add(new Column(2, releaseStatus));
-        adminRow.add(new Column(6, new SimplePanel()));
-        adminRow.add(new Column(2, logout));
-      }
-
-      titleColumn.add(adminRow);
-    }
+    headerRow.add(new Column(12,title));
     return headerRow;
   }
 
@@ -458,7 +434,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     flashcard = new Flashcard();
 
-    HorizontalPanel headerRow = flashcard.makeFlashcardHeaderRow(props.getSplash());
+    Panel headerRow = flashcard.makeFlashcardHeaderRow(props.getSplash(), getGreeting());
     container.add(headerRow);
 
     userManager = new UserManager(this, service, props);
@@ -520,13 +496,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     userManager = new UserManager(this,service, props);
 
     logout = new Anchor("Logout");
-    logout.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        userManager.clearUser();
-        lastUser = -2;
-        userManager.teacherLogin();
-      }
-    });
+    logout.addClickHandler(new LogoutClickHandler());
     fp1.add(logout);
 
     HTML statusLine = getReleaseStatus();
@@ -643,7 +613,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (showResults != null) showResults.setVisible(isGrading || props.isAdminView());
     if (monitoring != null) monitoring.setVisible(isGrading || props.isAdminView());
 
-    System.out.println("modeSelect : goodwave mode " + props.isGoodwaveMode() + " auto crt mode = " + isAutoCRTMode());
+   // System.out.println("modeSelect : goodwave mode " + props.isGoodwaveMode() + " auto crt mode = " + isAutoCRTMode());
 
     checkInitFlash();
   }
@@ -775,40 +745,16 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void makeLogoutParts() {
-    this.userline = new HTML(getUserText());
+  //  this.userline = new HTML(getUserText());
     logout = getLogoutLink();
 
     makeUsersAnchor(false);
     showResults = new Anchor(props.getNameForAnswer()+"s");
-    showResults.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        GWT.runAsync(new RunAsyncCallback() {
-          public void onFailure(Throwable caught) {
-            Window.alert("Code download failed");
-          }
-
-          public void onSuccess() {
-            resultManager.showResults();
-          }
-        });
-      }
-    });
+    showResults.addClickHandler(new ResultsClickHandler());
     showResults.setVisible(props.isAdminView());
 
     monitoring = new Anchor("Monitoring");
-    monitoring.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        GWT.runAsync(new RunAsyncCallback() {
-          public void onFailure(Throwable caught) {
-            Window.alert("Code download failed");
-          }
-
-          public void onSuccess() {
-            monitoringManager.showResults();
-          }
-        });
-      }
-    });
+    monitoring.addClickHandler(new MonitoringClickHandler());
     monitoring.setVisible(props.isAdminView());
 
     releaseStatus = getReleaseStatus();
@@ -830,12 +776,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private Anchor makeUsersAnchor(final boolean isDataCollectAdminView) {
     users = new Anchor("Users");
-    users.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        userTable = isDataCollectAdminView ? new AdminUserTable(props) : new UserTable(props);
-        userTable.showUsers(service, userManager.getUser());
-      }
-    });
+    users.addClickHandler(new UsersClickHandler(isDataCollectAdminView));
     users.setVisible(props.isAdminView());
     return users;
   }
@@ -846,7 +787,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   public String getGreeting() {
-    return userManager.getUserID() == null ? "" : ("Hello " + userManager.getUserID());
+    return userManager.getUserID() == null ? "" : (
+      //"Hello " +
+        ""+
+        userManager.getUserID());
   }
 
   /**
@@ -879,8 +823,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public void gotUser(long userID) {
     System.out.println("LangTest.gotUser : got user " + userID);
     if (userline != null) {
-      String userText = getUserText();
-      userline.setHTML(userText);
+     // String userText = getUserText();
+      //userline.setHTML(userText);
+      flashcard.setUserName(getGreeting());
     }
     if (props.isDataCollectAdminView()) {
       checkForAdminUser();
@@ -1042,4 +987,53 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   public ListInterface getExerciseList() { return exerciseList; }
+
+  private class LogoutClickHandler implements ClickHandler {
+    public void onClick(ClickEvent event) {
+      userManager.clearUser();
+      lastUser = -2;
+      userManager.teacherLogin();
+    }
+  }
+
+  private class UsersClickHandler implements ClickHandler {
+    private final boolean isDataCollectAdminView;
+
+    public UsersClickHandler(boolean isDataCollectAdminView) {
+      this.isDataCollectAdminView = isDataCollectAdminView;
+    }
+
+    public void onClick(ClickEvent event) {
+      userTable = isDataCollectAdminView ? new AdminUserTable(props) : new UserTable(props);
+      userTable.showUsers(service, userManager.getUser());
+    }
+  }
+
+  private class ResultsClickHandler implements ClickHandler {
+    public void onClick(ClickEvent event) {
+      GWT.runAsync(new RunAsyncCallback() {
+        public void onFailure(Throwable caught) {
+          Window.alert("Code download failed");
+        }
+
+        public void onSuccess() {
+          resultManager.showResults();
+        }
+      });
+    }
+  }
+
+  private class MonitoringClickHandler implements ClickHandler {
+    public void onClick(ClickEvent event) {
+      GWT.runAsync(new RunAsyncCallback() {
+        public void onFailure(Throwable caught) {
+          Window.alert("Code download failed");
+        }
+
+        public void onSuccess() {
+          monitoringManager.showResults();
+        }
+      });
+    }
+  }
 }
