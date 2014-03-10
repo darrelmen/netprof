@@ -63,7 +63,7 @@ public class ExercisePanel extends VerticalPanel implements
   private static final String TYPE_YOUR_ANSWER_IN = "Type your answer in ";
   private static final String SPEAK_AND_RECORD_YOUR_ANSWER_IN = "Speak and record your answer in ";
   protected static final int ITEM_HEADER = 5;
-  private static final int CONTENT_SCROLL_HEIGHT = 240;
+  private static final int CONTENT_SCROLL_HEIGHT = 220;
   private List<Widget> answers = new ArrayList<Widget>();
   protected Set<Widget> completed = new HashSet<Widget>();
   protected Exercise exercise = null;
@@ -276,7 +276,7 @@ public class ExercisePanel extends VerticalPanel implements
     Set<Widget> objects = indexToWidgets.get(index);
     if (objects == null) indexToWidgets.put(index, objects = new HashSet<Widget>());
     objects.add(answerWidget);
-    System.out.println("addAnswerWidget : now " + answers.size() + " expected, adding '" + answerWidget.getElement().getId() + "'");
+ //   System.out.println("addAnswerWidget : now " + answers.size() + " expected, adding '" + answerWidget.getElement().getId() + "'");
   }
 
   protected boolean shouldShowAnswer() { return controller.isDemoMode();  }
