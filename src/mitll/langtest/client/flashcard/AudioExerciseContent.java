@@ -86,7 +86,7 @@ public class AudioExerciseContent {
       child.addStyleName("leftTenMargin");
       horiz.add(child);
       child.addStyleName("floatLeft");
-
+      child.addStyleName("rightFiveMargin");
     }
     content = content.replaceAll("h2","h4");
     content = changeAudioPrompt(content, false);
