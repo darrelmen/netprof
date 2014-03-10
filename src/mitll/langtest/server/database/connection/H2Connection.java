@@ -44,6 +44,8 @@ public class H2Connection implements DatabaseConnection {
   }
 
   /**
+   * h2 db must exist - don't try to make an empty one if it's not there.
+   *
    *   //jdbc:h2:file:/Users/go22670/DLITest/clean/netPron2/war/config/urdu/vlr-parle;IFEXISTS=TRUE;CACHE_SIZE=30000
    * @param h2FilePath
    */
@@ -52,18 +54,23 @@ public class H2Connection implements DatabaseConnection {
       ";IFEXISTS=TRUE;" +
       "QUERY_CACHE_SIZE=" + queryCacheSize + ";" +
       "CACHE_SIZE="       + cacheSizeKB + ";" +
-      "MAX_MEMORY_ROWS="  +maxMemoryRows
+      "MAX_MEMORY_ROWS="  + maxMemoryRows
       ;
 
-    logger.debug("connecting to " + url);
-    org.h2.Driver.load();
-    try {
-      conn = DriverManager.getConnection(url, "", "");
-      conn.setAutoCommit(true);
+    File test = new File(h2FilePath + ".h2.db");
+    if (!test.exists()) {
+      logger.warn("no h2 db file at  " + test.getAbsolutePath() + "");
+    } else {
+      logger.debug("connecting to " + url);
+      org.h2.Driver.load();
+      try {
+        conn = DriverManager.getConnection(url, "", "");
+        conn.setAutoCommit(true);
 
-    } catch (SQLException e) {
-      conn = null;
-      logger.error("got error trying to create h2 connection with URL '" + url + "', exception = " +e,e);
+      } catch (SQLException e) {
+        conn = null;
+        logger.error("got error trying to create h2 connection with URL '" + url + "', exception = " + e, e);
+      }
     }
   }
 
