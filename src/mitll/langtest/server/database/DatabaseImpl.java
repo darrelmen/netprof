@@ -242,7 +242,7 @@ public class DatabaseImpl implements Database {
 
     if (useFile && !isExcel) {
       if (isWordPairs) {
-        ((FileExerciseDAO) exerciseDAO).readWordPairs(lessonPlanFile, language, doImages);
+        ((FileExerciseDAO) exerciseDAO).readWordPairs(lessonPlanFile, doImages);
       }
       else {
         ((FileExerciseDAO) exerciseDAO).readFastAndSlowExercises(installPath, configDir, lessonPlanFile);
