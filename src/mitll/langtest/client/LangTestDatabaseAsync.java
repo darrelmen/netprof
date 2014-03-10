@@ -10,8 +10,6 @@ import mitll.langtest.shared.Result;
 import mitll.langtest.shared.Site;
 import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.User;
-import mitll.langtest.shared.custom.UserExercise;
-import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.FlashcardResponse;
 import mitll.langtest.shared.flashcard.Leaderboard;
 import mitll.langtest.shared.grade.CountAndGradeID;
