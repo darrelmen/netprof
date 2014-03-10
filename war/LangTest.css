@@ -320,6 +320,10 @@ fieldset {
     margin-top: 5px;
 }
 
+.topMinusFiveMargin {
+    margin-top: -13px;
+}
+
 .topTwentyMargin {
      margin-top: 20px;
  }
@@ -720,7 +724,10 @@ fieldset > legend {
     margin-right: 5px;
 }
 .rightTenMargin {
-     margin-right: 10px;
+    margin-right: 10px;
+}
+.rightTwentyMargin {
+     margin-right: 20px;
  }
 
 .minWidth {
