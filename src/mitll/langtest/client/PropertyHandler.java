@@ -357,7 +357,7 @@ public class PropertyHandler {
       String candidate = s.split("\\*\\*\\*")[0];
       if (ResponseChoice.knownChoice(candidate)) {
         responseType = candidate;
-        System.out.println("responseType " + responseType);
+        //System.out.println("responseType " + responseType);
       }
       else {
         System.err.println("responseType unknown " + candidate);
@@ -366,7 +366,7 @@ public class PropertyHandler {
         String candidate2 = s.split("secondResponseType=")[1];
         if (ResponseChoice.knownChoice(candidate2)) {
           secondResponseType = candidate2;
-          System.out.println("secondResponseType " + secondResponseType);
+         // System.out.println("secondResponseType " + secondResponseType);
         }
         else {
           System.err.println("secondResponseType unknown " + candidate2);
