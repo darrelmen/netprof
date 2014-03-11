@@ -24,7 +24,7 @@ public class AnswerDAO {
 
   /**
    *
-   * @see DatabaseImpl#addAnswer(int, mitll.langtest.shared.Exercise, int, String)
+   * @see DatabaseImpl#addAnswer(int, mitll.langtest.shared.Exercise, int, String, String)
    * @param userID
    * @param e
    * @param questionID
@@ -44,10 +44,6 @@ public class AnswerDAO {
     addAnswer(database,userID, plan, id, questionID, answer, audioFile, true,  flq, spoken, audioType, 0, correct, pronScore, "");
   }
 
-/*  public void addAnswer(int userID, String plan, String exerciseID, String stimulus, String answer, boolean correct) {
-    addAnswer(database, userID, plan, exerciseID, 0, answer, "", true, false, false, Result.AUDIO_TYPE_UNSET, 0, correct, 0, stimulus);
-  }*/
-
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAnswer
    * @param userID
@@ -64,44 +60,6 @@ public class AnswerDAO {
                         String answerType, boolean correct, float pronScore) {
     addAnswer(database, userID, plan, exerciseID, questionID, answer, "", true, false, false, answerType, 0, correct, pronScore, stimulus);
   }
-
-  /**
-   * @seex DatabaseImpl#isAnswerValid(int, mitll.langtest.shared.Exercise, int, Database)
-   * @param userID
-   * @param e
-   * @param questionID
-   * @param database
-   * @return
-   */
-/*  public boolean isAnswerValid(int userID, Exercise e, int questionID, Database database) {
-    boolean val = false;
-    try {
-      Connection connection = database.getConnection();
-      PreparedStatement statement = connection.prepareStatement(
-        "SELECT valid, " + Database.TIME +
-        " FROM results " +
-        "WHERE userid = ? AND plan = ? AND " +
-          Database.EXID +
-          " = ? AND qid = ? " +
-        "order by " + Database.TIME+ " desc");
-
-      statement.setInt(1,userID);
-      statement.setString(2, e.getPlan());
-      statement.setString(3, e.getID());
-      statement.setInt(4, questionID);
-
-      ResultSet rs = statement.executeQuery();
-      if (rs.next()) {
-        val = rs.getBoolean(1);
-      }
-      rs.close();
-      statement.close();
-      database.closeConnection(connection);
-    } catch (Exception e1) {
-      e1.printStackTrace();
-    }
-    return val;
-  }*/
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
@@ -162,7 +120,7 @@ public class AnswerDAO {
                                 boolean valid, boolean flq, boolean spoken, String audioType, int durationInMillis,
                                 boolean correct, float pronScore, String stimulus) throws SQLException {
     PreparedStatement statement;
-   // logger.info("adding answer for exid #" + id + " correct " + correct + " score " + pronScore);
+    logger.info("adding answer for exid #" + id + " correct " + correct + " score " + pronScore + " audio type " +audioType + " answer " + answer);
     statement = connection.prepareStatement("INSERT INTO results(" +
       "userid," +
       "plan," +
@@ -232,14 +190,10 @@ public class AnswerDAO {
         "SET " +
         ResultDAO.PRON_SCORE+"='" + score + "' " +
         "WHERE id=" + id;
-/*      if (false) {
-        logger.debug("changeAnswer " + id + " score " +score);
-      }*/
       PreparedStatement statement = connection.prepareStatement(sql);
 
       int i = statement.executeUpdate();
 
-    //  if (false) logger.debug("UPDATE " + i);
       if (i == 0) {
         logger.error("huh? didn't update the answer for " + id + " sql " + sql);
       }
@@ -251,7 +205,5 @@ public class AnswerDAO {
     }
   }
 
-  private String copyStringChar(String plan) {
-    return new String(plan.toCharArray());
-  }
+  private String copyStringChar(String plan) { return new String(plan.toCharArray());  }
 }
