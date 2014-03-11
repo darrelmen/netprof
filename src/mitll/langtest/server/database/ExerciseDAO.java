@@ -28,4 +28,6 @@ public interface ExerciseDAO {
   void setAddRemoveDAO(AddRemoveDAO addRemoveDAO);
 
   Exercise getExercise(String id);
+
+  List<String> getErrors();
 }
