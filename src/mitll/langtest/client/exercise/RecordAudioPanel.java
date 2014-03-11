@@ -34,10 +34,11 @@ public class RecordAudioPanel extends AudioPanel {
    * @param service
    * @param index
    * @param showSpectrogram
+   * @param audioType
    * @see mitll.langtest.client.exercise.WaveformExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    */
   public RecordAudioPanel(Exercise exercise, ExerciseController controller, Panel widgets,
-                          LangTestDatabaseAsync service, int index, boolean showSpectrogram) {
+                          LangTestDatabaseAsync service, int index, boolean showSpectrogram, String audioType) {
     super(service,
       // use full screen width
       // use keyboard
@@ -47,18 +48,18 @@ public class RecordAudioPanel extends AudioPanel {
     this.exercisePanel = widgets;
     this.index = index;
     this.exercise = exercise;
-    addWidgets("");
+    addWidgets("", audioType);
   }
 
   /**
-   * @see mitll.langtest.client.scoring.AudioPanel#getPlayButtons(com.google.gwt.user.client.ui.Widget)
+   * @seex mitll.langtest.client.scoring.AudioPanel#getPlayButtons(com.google.gwt.user.client.ui.Widget)
    * @param toAdd
    * @param playButtonSuffix
    * @return
    */
   @Override
-  protected PlayAudioPanel makePlayAudioPanel(Widget toAdd, String playButtonSuffix) {
-    WaveformPostAudioRecordButton myPostAudioRecordButton = makePostAudioRecordButton();
+  protected PlayAudioPanel makePlayAudioPanel(Widget toAdd, String playButtonSuffix, String audioType) {
+    WaveformPostAudioRecordButton myPostAudioRecordButton = makePostAudioRecordButton(audioType);
     postAudioRecordButton = myPostAudioRecordButton;
     playAudioPanel = new MyPlayAudioPanel(recordImage1, recordImage2, exercisePanel, playButtonSuffix);
     myPostAudioRecordButton.setPlayAudioPanel(playAudioPanel);
@@ -74,8 +75,8 @@ public class RecordAudioPanel extends AudioPanel {
     return postAudioRecordButton.isRecording();
   }
 
-  protected WaveformPostAudioRecordButton makePostAudioRecordButton() {
-    return new WaveformPostAudioRecordButton(exercise, controller, exercisePanel, this, service, index, true, "Record", "Stop") {
+  protected WaveformPostAudioRecordButton makePostAudioRecordButton(String audioType) {
+    return new WaveformPostAudioRecordButton(exercise, controller, exercisePanel, this, service, index, true, "Record", "Stop", audioType) {
       @Override
       public void startRecording() {
         super.startRecording();
