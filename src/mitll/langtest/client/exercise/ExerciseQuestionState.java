@@ -1,5 +1,7 @@
 package mitll.langtest.client.exercise;
 
+import com.google.gwt.user.client.ui.Widget;
+
 /**
  * Created with IntelliJ IDEA.
  * User: GO22670
@@ -8,6 +10,6 @@ package mitll.langtest.client.exercise;
  * To change this template use File | Settings | File Templates.
  */
 public interface ExerciseQuestionState {
-  void recordIncomplete(Object answer);
-  void recordCompleted(Object answer);
+  void recordIncomplete(Widget answer);
+  void recordCompleted(Widget answer);
 }
