@@ -250,8 +250,9 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
 
     if (last != null) setSizesAndPushFirst();
     Widget widget = addBottomText(container);
-    firstTypeRow.setWidget(0, 3, widget);
-
+    if (controller.getProps().isCRTDataCollectMode()) {
+      firstTypeRow.setWidget(0, 3, widget);
+    }
   }
 
   /**
