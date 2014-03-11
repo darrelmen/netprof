@@ -19,6 +19,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   private RecordAudioPanel recordAudioPanel;
   private PlayAudioPanel playAudioPanel;
   private Panel parentPanel;
+  private String audioType;
 
   /**
    * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel(com.google.gwt.user.client.ui.Widget, String)
@@ -36,11 +37,12 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
                                        ExerciseController controller,
                                        Panel widgets,
                                        RecordAudioPanel recordAudioPanel, LangTestDatabaseAsync service, int index,
-                                       boolean recordInResults, String playButtonSuffix, String stopButtonText) {
+                                       boolean recordInResults, String playButtonSuffix, String stopButtonText, String audioType) {
     super(exercise, controller, service, index, recordInResults, controller.getAudioType(), playButtonSuffix, stopButtonText);
     this.recordAudioPanel = recordAudioPanel;
     this.parentPanel = widgets;
     getElement().setId("WaveformPostAudioRecordButton_" +index);
+    this.audioType = audioType;
   }
 
   @Override
@@ -51,6 +53,9 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     super.startRecording();
     setPlayEnabled(false);
   }
+
+  @Override
+  public void flip(boolean first) {} // force not to be abstract
 
   /**
    * @see mitll.langtest.client.recorder.RecordButton#stop()
@@ -64,6 +69,11 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     recordAudioPanel.getWaveform().setUrl(LangTest.LANGTEST_IMAGES + "animated_progress.gif");
 
     super.stopRecording();
+  }
+
+  @Override
+  protected String getAudioType() {
+    return audioType;
   }
 
   @Override
