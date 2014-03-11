@@ -5,6 +5,7 @@ import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -60,12 +61,10 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
    * @param exerciseList
    */
   public MyFlashcardExercisePanelFactory(LangTestDatabaseAsync service, UserFeedback feedback, ExerciseController controller,
-                                         ListInterface<T> exerciseList, long userListID) {
+                                         final ListInterface<T> exerciseList, long userListID) {
     super(service, feedback, controller, exerciseList);
     controlState = new ControlState();
     this.userListID = userListID;
-   // System.out.println("========> MyFlashcardExercisePanelFactory made!\n\n\n");
-
     exerciseList.addListChangedListener(new ListChangeListener<T>() {
       @Override
       public void listChanged(List<T> items) {
@@ -75,13 +74,20 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
         reset();
       }
     });
+
+    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      @Override
+      public void execute() {
+        exerciseList.hide();
+      }
+    });
   }
+
+
 
   @Override
   public Panel getExercisePanel(Exercise e) {
     currentExercise = e;
-   // System.out.println("========> getExercisePanel = called!\n\n\n");
-
     return new StatsPracticePanel(e);
   }
 
@@ -111,13 +117,13 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
      * @param result
      */
     public void receivedAudioAnswer(final AudioAnswer result) {
-      System.out.println("receivedAudioAnswer: result " + result);
+      System.out.println("StatsPracticePanel.receivedAudioAnswer: result " + result);
 
-      exToScore.put(currentExercise.getID(),result.getScore());
       if (result.validity != AudioAnswer.Validity.OK) {
         super.receivedAudioAnswer(result);
         return;
       }
+      exToScore.put(currentExercise.getID(),   result.getScore());
       exToCorrect.put(currentExercise.getID(), result.isCorrect());
       setStateFeedback();
 
@@ -143,18 +149,20 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
 
     private void showFeedbackCharts(List<Session> result, int user) {
       float size = (float) allExercises.size();
-      //System.out.println("onSetComplete.onSuccess : result " + result.size() + " " +size);
 
       setMainContentVisible(false);
       int totalCorrect = getCorrect();
       int totalIncorrect = getIncorrect();
       double totalScore = getScore();
       int all = totalCorrect + totalIncorrect;
+      System.out.println("onSetComplete.onSuccess : result " + result.size() + " " +size +
+        " all " +all + " correct " + totalCorrect + " inc " + totalIncorrect +  " result " + result);
       String correct = totalCorrect +" Correct (" + toPercent(totalCorrect, all) + ")";
       String pronunciation = "Pronunciation " + toPercent(totalScore, all);
 
-      Chart chart  = new LeaderboardPlot().getChart(result, user, -1, correct, "# correct", true, size);
-      Chart chart2 = new LeaderboardPlot().getChart(result, user, -1, pronunciation, "score %", false, -1);
+      Chart chart  = new LeaderboardPlot().getChart(result, user, -1, correct,       "% correct", true, 100f);
+      Chart chart2 = new LeaderboardPlot().getChart(result, user, -1, pronunciation, "score %",   false, 100f);
+
       container = new HorizontalPanel();
       container.add(chart);
       chart.addStyleName("chartDim");
@@ -180,10 +188,14 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
       return count;
     }
 
+    /**
+     * @see #showFeedbackCharts(java.util.List, int)
+     * @return
+     */
     private double getScore() {
       double count = 0;
       for (Double val : exToScore.values()) {
-        count += val;
+        if (val > 0) count += val;
       }
       return count;
     }
@@ -204,7 +216,7 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
         public void onClick(ClickEvent event) {
           setMainContentVisible(true);
           belowContentDiv.remove(container);
-          exerciseList.show();
+      //    exerciseList.show();
 
           reset();
 
