@@ -123,6 +123,8 @@ public class ExerciseTrie extends Trie<Exercise> {
 
     @Override
     public String getNormalizedValue() { return value; }
+
+    public String toString() { return "e " +e.getID() + " : " + value; }
   }
 
   private long logMemory() {

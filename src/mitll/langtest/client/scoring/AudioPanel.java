@@ -85,11 +85,11 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @param playButtonSuffix
    */
   public AudioPanel(String path, LangTestDatabaseAsync service,
-                    ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin, String playButtonSuffix) {
+                    ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin, String playButtonSuffix, String audioType) {
     this(service, controller, showSpectrogram, gaugePanel, 1.0f, rightMargin);
     this.audioPath = path;
 
-    addWidgets(playButtonSuffix);
+    addWidgets(playButtonSuffix, audioType);
   }
 
   public AudioPanel(LangTestDatabaseAsync service,
@@ -121,8 +121,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @return
    * @param playButtonSuffix
    */
-  public void addWidgets(String playButtonSuffix) {
-    System.out.println("AudioPanel.addWidgets playButtonSuffix = " + playButtonSuffix);
+  public void addWidgets(String playButtonSuffix, String audioType) {
+    //System.out.println("addWidgets audio path = " + path);
     imageContainer = new VerticalPanel();
 
     HorizontalPanel hp = new HorizontalPanel();
@@ -134,7 +134,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     audioPositionPopup = new AudioPositionPopup(imageContainer);
 
     if (hasAudio()) {
-      playAudio = getPlayButtons(beforePlayWidget, playButtonSuffix);
+      playAudio = getPlayButtons(beforePlayWidget, playButtonSuffix, audioType);
       hp.add(playAudio);
       hp.setCellHorizontalAlignment(playAudio, HorizontalPanel.ALIGN_LEFT);
     }
@@ -275,16 +275,16 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   }
 
     /**
-    * @see #addWidgets(String)
+    * @see #addWidgets(String, String)
     * @return PlayAudioPanel
     */
-  private PlayAudioPanel getPlayButtons(Widget toTheLeftWidget, String playButtonSuffix) {
-    PlayAudioPanel playAudio = makePlayAudioPanel(toTheLeftWidget, playButtonSuffix);
+  private PlayAudioPanel getPlayButtons(Widget toTheLeftWidget, String playButtonSuffix, String audioType) {
+    PlayAudioPanel playAudio = makePlayAudioPanel(toTheLeftWidget, playButtonSuffix, audioType);
     playAudio.addListener(audioPositionPopup);
     return playAudio;
   }
 
-  protected PlayAudioPanel makePlayAudioPanel(final Widget toTheLeftWidget, String playButtonSuffix) {
+  protected PlayAudioPanel makePlayAudioPanel(final Widget toTheLeftWidget, String playButtonSuffix, String audioType) {
     return new PlayAudioPanel(soundManager, playButtonSuffix) {
       @Override
       protected void addButtons() {
