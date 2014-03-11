@@ -1,5 +1,6 @@
 package mitll.langtest.client.scoring;
 
+import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.RadioButton;
@@ -27,6 +28,7 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.ExercisePanel;
 import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.exercise.PostAnswerProvider;
 import mitll.langtest.client.gauge.ASRScorePanel;
@@ -55,6 +57,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   private static final String REFERENCE = " Reference";
   private static final String RECORD_YOURSELF = "Record Yourself";
   private static final String RELEASE_TO_STOP = "Release to Stop";
+  public static final int HEADING_FOR_UNIT_LESSON = 4;
   private boolean isBusy = false;
 
   private static final String WAV = ".wav";
@@ -93,9 +96,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     setWidth("100%");
     addStyleName("inlineBlockStyle");
     getElement().setId("GoodwaveExercisePanel");
-   // final Panel center = new FlowPanel();
     final Panel center = new VerticalPanel();
-    //center.addStyleName("blockStyle");
     center.getElement().setId("GoodwaveVerticalCenter");
     center.addStyleName("floatLeft");
     // attempt to left justify
@@ -172,10 +173,21 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     DivWidget div = new DivWidget();
     div.add(answerWidget);
 
-    //div.setWidth("100%");
-
     div.addStyleName("buttonGroupInset6");
     toAddTo.add(div);
+  }
+
+  protected HorizontalPanel getUnitLessonForExercise() {
+    HorizontalPanel flow = new HorizontalPanel();
+    flow.getElement().setId("unitLesson");
+    flow.addStyleName("leftFiveMargin");
+
+    for (String type : controller.getStartupInfo().getTypeOrder()) {
+      Heading child = new Heading(HEADING_FOR_UNIT_LESSON, type, exercise.getUnitToValue().get(type));
+      child.addStyleName("rightFiveMargin");
+      flow.add(child);
+    }
+    return flow;
   }
 
   public void onResize() {
@@ -212,6 +224,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
     final VerticalPanel vp = new VerticalPanel();
     vp.getElement().setId("getQuestionContent_verticalContainer");
+
+    HorizontalPanel unitLessonForExercise = getUnitLessonForExercise();
+    unitLessonForExercise.add(getItemHeader(e));
+    vp.add(unitLessonForExercise);
     vp.addStyleName("blockStyle");
 
     Widget questionContent = getQuestionContent(e, content);
@@ -238,6 +254,12 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
     vp.add(div);
     return vp;
+  }
+
+  protected Widget getItemHeader(Exercise e) {
+    Heading w = new Heading(HEADING_FOR_UNIT_LESSON, "Item", e.getID());
+    w.getElement().setId("ItemHeading");
+   return w;
   }
 
   protected Widget getQuestionContent(Exercise e,String content) {
@@ -271,10 +293,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     contentAudio.setScreenPortion(screenPortion);
     return audioPanel;
   }
-/*
-  private Widget getAudioPanelContent(ASRScoringAudioPanel audioPanel) {
-    return audioPanel;
-  }*/
 
   private ASRScoringAudioPanel getAudioPanel(Exercise e, String path) {
     ASRScoringAudioPanel audioPanel;
@@ -347,7 +365,11 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
     InlineHTML englishPhrase = new InlineHTML(value);
     englishPhrase.addStyleName(withWrap ? "Instruction-data-with-wrap" : "Instruction-data");
+    if (label.contains("Meaning")) {
+       englishPhrase.addStyleName("englishFont");
+    }
     nameValueRow.add(englishPhrase);
+    addTooltip(englishPhrase,label.replaceAll(":",""));
     englishPhrase.addStyleName("leftFiveMargin");
     return nameValueRow;
   }
@@ -576,7 +598,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
      * Add radio button choices to control which audio cut is chosen/gets played.
      *
      * @return
-     * @see AudioPanel#addWidgets(String)
+     * @see AudioPanel#addWidgets
      */
     @Override
     protected Widget getBeforePlayWidget() {
