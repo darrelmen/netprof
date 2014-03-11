@@ -7,6 +7,7 @@ public interface SetScore {
   int getCorrect();
 
   float getAvgScore();
+  float getCorrectPercent();
 
   long getUserid();
 }
