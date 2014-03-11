@@ -54,7 +54,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   public ScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
                            ExerciseController controller,
                            boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin, String playButtonSuffix) {
-    super(path, service, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix);
+    super(path, service, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix, controller.getAudioType());
     this.refSentence = refSentence;
     showOnlyOneExercise = controller.showOnlyOneExercise();
     addClickHandlers();
