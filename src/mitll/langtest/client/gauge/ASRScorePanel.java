@@ -3,6 +3,7 @@
  */
 package mitll.langtest.client.gauge;
 
+import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -44,8 +45,9 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   private final PretestGauge ASRGauge;
   private Panel phoneList;
   private final List<Float> scores = new ArrayList<Float>();
-
+  String id;
   private SimplePanel chartPanel;
+  Canvas canvas;
   /**
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel
    */
@@ -70,11 +72,13 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     add(captionPanel);
 
     CaptionPanel gaugeCaptionPanel = new CaptionPanel("Score");
+
     Panel gaugePanel = new FlowPanel();
-		gaugePanel.setHeight("100%");
-		gaugePanel.setWidth("100%");
-    ASRGauge = new PretestGauge("ASR_"+parent, "ASR", INSTRUCTIONS);
+    gaugePanel.setHeight("100%");
+    gaugePanel.setWidth("100%");
+    ASRGauge = new PretestGauge("ASR_"+parent, "ASR", INSTRUCTIONS, null);
     gaugePanel.add(ASRGauge);
+
 
     gaugeCaptionPanel.add(gaugePanel);
 		add(gaugeCaptionPanel);
@@ -90,7 +94,8 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   //call this after adding the widget to the page
   @Override
   public void onLoad() {
-    ASRGauge.createCanvasElement();
+   // System.out.println("looking for dom element id " + id + " width " + canvas.getOffsetWidth() );
+    ASRGauge.createCanvasElementOld();
     initGauge(ASRGauge);
   }
 
