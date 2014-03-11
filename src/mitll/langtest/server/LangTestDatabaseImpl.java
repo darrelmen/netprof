@@ -99,9 +99,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   protected void service(HttpServletRequest request,
                          HttpServletResponse response) throws ServletException, IOException {
-    boolean isMultipart = ServletFileUpload.isMultipartContent(new ServletRequestContext(request));
+    ServletRequestContext ctx = new ServletRequestContext(request);
+    boolean isMultipart = ServletFileUpload.isMultipartContent(ctx);
     if (isMultipart) {
-      logger.debug("Request " + request.getQueryString() + " path "  +request.getPathInfo());
+      logger.debug("isMultipart : Request " + request.getQueryString() + " path "  +request.getPathInfo());
       SiteDeployer siteDeployer = new SiteDeployer();
       SiteDeployer.SiteInfo siteInfo = siteDeployer.getSite(request, configDir, db, pathHelper.getInstallPath());
       Site site = siteInfo.site;
@@ -139,14 +140,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     getMailSupport().email(serverProps.getEmailAddress(),"Server Exception on " + pathHelper.getInstallPath(), prefixedMessage);
   }
 
-  public Site getSiteByID(long id) {
-    return db.getSiteByID(id);
-  }
-
-  @Override
-  public List<Site> getSites() {
-    return db.getDeployedSites();
-  }
+  public Site getSiteByID(long id) { return db.getSiteByID(id); }
+  public List<Site> getSites() { return db.getDeployedSites();  }
 
   /**
    * Copy template to something named by site name
@@ -154,7 +149,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * set fields in config.properties
    *   - apptitle
    *   - release date
-   *    - lesson plan file
+   *   - lesson plan file
    *
    *    then copy to install path/../name
    *
@@ -168,8 +163,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public boolean deploySite(long id, String name, String language, String notes) {
     logger.debug("deploy site id=" +id + " name " + name);
-    SiteDeployer siteDeployer = new SiteDeployer();
-    return siteDeployer.deploySite(db, getMailSupport(), getThreadLocalRequest(), configDir,
+    return new SiteDeployer().deploySite(db, getMailSupport(), getThreadLocalRequest(), configDir,
       pathHelper.getInstallPath(), id, name, language, notes);
   }
 
@@ -292,8 +286,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     ExerciseTrie trie = new ExerciseTrie(exercisesForState, serverProps.getLanguage(), audioFileHelper.getSmallVocabDecoder());
     List<Exercise> exercises = trie.getExercises(prefix);
 
-    return makeExerciseListWrapper(reqID, exercises);
-  }
+      return makeExerciseListWrapper(reqID, exercises);
+    }
 
   private ExerciseListWrapper<ExerciseShell> makeExerciseListWrapper(int reqID, List<Exercise> exercises) {
     if (!exercises.isEmpty()) {
@@ -462,7 +456,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (used/MB > 500) {
       logger.debug("heap info free " + free / MB + "M used " + used / MB + "M max " + max / MB + "M");
     }
-  }
+    }
 
   /**
    * Joins with annotation data when doing QC.
@@ -544,11 +538,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       if (serverProps.biasTowardsUnanswered) {
         //logger.debug("in biasTowardsUnanswered mode : user " +userID);
 
-        if (serverProps.useOutsideResultCounts) {
-          exercises = useOutsideResultCounts(userID);
-        } else {
-          exercises = db.getExercisesBiasTowardsUnanswered(userID,serverProps.shouldUseWeights());
-        }
+        exercises = db.getExercisesBiasTowardsUnanswered(userID, serverProps.shouldUseWeights());
       } else {
         exercises = db.getUnmodExercises();
         if (serverProps.isCRTDataCollect()) {
@@ -559,25 +549,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       //if (!serverProps.isArabicTextDataCollect()) logger.debug("*not* in data collect mode");
       exercises = serverProps.isArabicTextDataCollect() ? db.getExercisesGradeBalancing(userID) : db.getUnmodExercises();
     }
-    return exercises;
-  }
-
-  /**
-   * Just a one-off thing -- never use this again probably
-   * @param userID
-   * @return
-   */
-  private List<Exercise> useOutsideResultCounts(long userID) {
-    List<Exercise> exercises;
-    String outsideFileOverride = serverProps.outsideFile;
-    String lessonPlanFile = getLessonPlan();
-
-    if (lessonPlanFile.contains("farsi")) outsideFileOverride = configDir + File.separator + "farsi.txt";
-    else if (lessonPlanFile.contains("urdu")) outsideFileOverride = configDir + File.separator + "urdu.txt";
-    else if (lessonPlanFile.contains("sudanese"))
-      outsideFileOverride = configDir + File.separator + "sudanese.txt";
-    exercises = db.getExercisesBiasTowardsUnanswered(userID, outsideFileOverride, serverProps.shouldUseWeights());
-    db.setOutsideFile(outsideFileOverride);
     return exercises;
   }
 
@@ -656,10 +627,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return nextExercise;
   }
 
-  @Override
   public void resetUserState(long userID) {  db.resetUserState(userID); }
-
-  @Override
   public void clearUserState(long userID) {  db.clearUserState(userID); }
 
   /**
@@ -892,8 +860,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param answer
    * @see mitll.langtest.client.exercise.ExercisePanel#postAnswers
    */
-  public void addTextAnswer(int userID, Exercise exercise, int questionID, String answer) {
-    db.addAnswer(userID, exercise, questionID, answer);
+  public void addTextAnswer(int userID, Exercise exercise, int questionID, String answer, String answerType) {
+    db.addAnswer(userID, exercise, questionID, answer, answerType);
+    db.addCompleted(userID,exercise.getID());
   }
 
   /**
@@ -1130,9 +1099,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.user.UserTable#showDialog(mitll.langtest.client.LangTestDatabaseAsync)
    * @return
    */
-  public List<User> getUsers() {
-    return db.getUsers();
-  }
+  public List<User> getUsers() { return db.getUsers();  }
 
   @Override
   public boolean isAdminUser(long id) { return db.isAdminUser(id); }
@@ -1208,31 +1175,20 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   void makeAutoCRT() { audioFileHelper.makeAutoCRT(relativeConfigDir, this, studentAnswersDB, this); }
 
   @Override
-  public Map<User, Integer> getUserToResultCount() {
-    return db.getUserToResultCount();
-  }
-
+  public Map<User, Integer> getUserToResultCount() { return db.getUserToResultCount();  }
   @Override
-  public Map<Integer, Integer> getResultCountToCount() {
-    return db.getResultCountToCount();
-  }
+  public Map<Integer, Integer> getResultCountToCount() { return db.getResultCountToCount();  }
   @Override
-  public Map<String, Integer> getResultByDay() {
-    return db.getResultByDay();
-  }
+  public Map<String, Integer> getResultByDay() {  return db.getResultByDay();  }
   @Override
-  public Map<String, Integer> getResultByHourOfDay() {
-    return db.getResultByHourOfDay();
-  }
+  public Map<String, Integer> getResultByHourOfDay() {  return db.getResultByHourOfDay();  }
 
   /**
    * Map of overall, male, female to list of counts (ex 0 had 7, ex 1, had 5, etc.)
    * @see mitll.langtest.client.monitoring.MonitoringManager#doResultLineQuery
    * @return
    */
-  public Map<String, Map<String, Integer>> getResultPerExercise() {
-    return db.getResultPerExercise();
-  }
+  public Map<String, Map<String, Integer>> getResultPerExercise() { return db.getResultPerExercise(); }
 
   /**
    * @see mitll.langtest.client.monitoring.MonitoringManager#doGenderQuery(com.google.gwt.user.client.ui.Panel)
@@ -1307,25 +1263,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
-  /**
-   * @see mitll.langtest.client.mail.MailDialog.SendClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
-   * @param userID
-   * @param to
-   * @param replyTo
-   * @param subject
-   * @param message
-   * @param token
-   */
-  @Override
-  public void sendEmail(int userID, String to, String replyTo, String subject, String message, String token) {
-    HttpServletRequest threadLocalRequest = getThreadLocalRequest();
-    getMailSupport().sendEmail(threadLocalRequest.getServerName(), new SiteDeployer().getBaseUrl(threadLocalRequest),
-      to, replyTo, subject, message, token);
-  }
-
-  private MailSupport getMailSupport() {
-    return new MailSupport(serverProps.isDebugEMail());
-  }
+  private MailSupport getMailSupport() {  return new MailSupport(serverProps.isDebugEMail());  }
 
   @Override
   public void destroy() {
