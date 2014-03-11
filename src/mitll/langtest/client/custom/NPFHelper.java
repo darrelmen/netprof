@@ -146,7 +146,6 @@ public class NPFHelper implements RequiresResize {
       }
     };
     setFactory(exerciseList, instanceName, userListID);
-    //exerciseList.setUnaccountedForVertical(320);
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       @Override
       public void execute() {
