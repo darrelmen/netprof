@@ -221,7 +221,7 @@ public class ResultDAO extends DAO {
         list +
         ") order by " + Database.TIME + " asc";
       List<Result> resultsSQL = getResultsSQL(sql);
-      logger.debug("got " + resultsSQL.size() + " for " + userid);
+      logger.debug("got " + resultsSQL.size() + " results for " + userid);
       return resultsSQL;
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
@@ -576,9 +576,7 @@ public class ResultDAO extends DAO {
         s.duration += r.timestamp - last;
       }
       s.addExerciseID(r.id);
-      if (r.isCorrect()) {
-        s.incrementCorrect(r.id, r.isCorrect());
-      }
+      s.incrementCorrect(r.id, r.isCorrect());
       s.setScore(r.id, r.getPronScore());
 
       last = r.timestamp;
@@ -592,7 +590,7 @@ public class ResultDAO extends DAO {
     if (sessions.isEmpty() && !answersForUser.isEmpty()) {
       logger.error("huh? no sessions from " + answersForUser.size() + " given " + lastExerciseID);
     }
-    logger.debug("\tmade " +sessions.size() + " from " + answersForUser.size() + " answers");
+    logger.debug("\tpartitionIntoSessions2 made " +sessions.size() + " from " + answersForUser.size() + " answers");
 
     return sessions;
   }
