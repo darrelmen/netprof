@@ -35,6 +35,8 @@ import java.util.List;
  */
 public abstract class UserDialog extends BasicDialog {
   protected static final int USER_ID_MAX_LENGTH = 80;
+  protected static final String LEAST_RECORDED_FIRST = "Least recorded first";
+  protected static final String LOW_GRADES_ONLY = "Redo items";
 
   private static final String GRADING = "grading";
   private static final String TESTING = "testing";  // TODO make these safer
@@ -42,7 +44,9 @@ public abstract class UserDialog extends BasicDialog {
   protected static final int MIN_AGE = 12;
   protected static final int MAX_AGE = 90;
   protected static final int TEST_AGE = 100;
+  protected static final String UNSET = "Unset";
   protected static final List<String> EXPERIENCE_CHOICES = Arrays.asList(
+      UNSET,
     "0-3 months (Semester 1)",
     "4-6 months (Semester 1)",
     "7-9 months (Semester 2)",
@@ -51,11 +55,17 @@ public abstract class UserDialog extends BasicDialog {
     "16+ months",
     "Native speaker");
   protected static final int NATIVE_MONTHS = 20 * 12;
+  protected static final String MALE = "Male";
+  protected static final String FEMALE = "Female";
+  private static final String ALL_ITEMS = "Sequential Order";
+  private static final String RECORDING_ORDER = "Item Order";
+
   protected final PropertyHandler props;
 
   protected final LangTestDatabaseAsync service;
   protected UserManager userManager;
   protected UserNotification userNotification;
+  protected ListBoxFormField recordingOrder;
 
   public UserDialog(LangTestDatabaseAsync service, PropertyHandler props, UserManager userManager, UserNotification userNotification) {
     this.service = service;
@@ -182,6 +192,16 @@ public abstract class UserDialog extends BasicDialog {
     return true;
   }
 
+  /**
+   * @see mitll.langtest.client.user.DataCollectorDialog#addFullUser(com.github.gwtbootstrap.client.ui.Modal, com.github.gwtbootstrap.client.ui.Button, UserManager, String, String, String, String, int, int)
+   * @see mitll.langtest.client.user.DataCollectorDialog#userExists(Integer, String, mitll.langtest.client.user.BasicDialog.FormField, com.github.gwtbootstrap.client.ui.Modal)
+   */
+  protected void setRecordingOrder() {
+/*    boolean unansweredFirst = recordingOrder != null && recordingOrder.getValue().equals(LEAST_RECORDED_FIRST);
+    userManager.setShowUnansweredFirst(unansweredFirst);
+    userManager.setShowRerecord(recordingOrder.getValue().equals(LOW_GRADES_ONLY));*/
+  }
+
   private class ButtonClickEvent extends ClickEvent {
         /*To call click() function for Programmatic equivalent of the user clicking the button.*/
   }
@@ -192,7 +212,7 @@ public abstract class UserDialog extends BasicDialog {
   }
 
   protected ListBox getGenderBox() {
-    List<String> values = Arrays.asList("Male", "Female");
+    List<String> values = Arrays.asList(UNSET, MALE, FEMALE);
     return getListBox(values);
   }
 
