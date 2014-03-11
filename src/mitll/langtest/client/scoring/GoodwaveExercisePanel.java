@@ -456,7 +456,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
      * @see AudioPanel#getPlayButtons
      */
     @Override
-    protected PlayAudioPanel makePlayAudioPanel(Widget toAdd, String playButtonSuffix) {
+    protected PlayAudioPanel makePlayAudioPanel(Widget toAdd, String playButtonSuffix, String audioType) {
       recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
       recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
       postAudioRecordButton = new MyPostAudioRecordButton(controller);
