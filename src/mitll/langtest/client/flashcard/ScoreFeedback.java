@@ -122,8 +122,9 @@ public class ScoreFeedback {
    * @param soundFeedback
    * @param pronunciationScore
    * @param centerVertically
+   * @paramx width
    */
-  public void showCRTFeedback(Double result, SoundFeedback soundFeedback, String pronunciationScore, boolean centerVertically) {
+  public void showCRTFeedback(Double result, SoundFeedback soundFeedback, String pronunciationScore, boolean centerVertically/*, int width*/) {
     result = Math.max(0, result);
     result = Math.min(1.0, result);
     if (result > 0.9) result = 1.0; //let's round up when we're almost totally correct 97%->100%
@@ -153,11 +154,12 @@ public class ScoreFeedback {
 
   /**
    * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#showPronScoreFeedback(double, String)
-   * @see #showCRTFeedback(Double, mitll.langtest.client.sound.SoundFeedback, String, boolean)
+   * @seez #showCRTFeedback(Double, mitll.langtest.client.sound.SoundFeedback, String, boolean, int)
    * @param pronunciationScore
    * @param score
    * @param centerVertically
    * @param useShortWidth
+   * @paramz width
    */
   public void showScoreFeedback(String pronunciationScore, double score, boolean centerVertically, boolean useShortWidth) {
     if (score < 0) score = 0;
