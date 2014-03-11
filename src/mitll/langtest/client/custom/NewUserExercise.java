@@ -442,7 +442,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
 
     public CreateFirstRecordAudioPanel(Exercise newExercise, Panel row,
                                        boolean recordRegularSpeed) {
-      super(newExercise, NewUserExercise.this.controller, row, NewUserExercise.this.service, 0, false);
+      super(newExercise, NewUserExercise.this.controller, row, NewUserExercise.this.service, 0, false, NewUserExercise.this.controller.getAudioType());
       this.recordRegularSpeed = recordRegularSpeed;
       setExercise(newExercise);
 
@@ -469,16 +469,16 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
      * Note that we want to post the audio the server, but not record in the results table (since it's not an answer
      * to an exercise...)
      * That's the final "false" on the end of the WaveformPostAudioRecordButton
-     * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel(com.google.gwt.user.client.ui.Widget, String)
+     * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel
      * @return
      */
     @Override
-    protected WaveformPostAudioRecordButton makePostAudioRecordButton() {
+    protected WaveformPostAudioRecordButton makePostAudioRecordButton(String audioType) {
       postAudioButton =
         new WaveformPostAudioRecordButton(exercise, controller, exercisePanel, this, service, recordRegularSpeed ? 0:1,
           false // don't record in results table
             ,
-          CLICK_AND_HOLD_TO_RECORD, RELEASE_TO_STOP) {
+          CLICK_AND_HOLD_TO_RECORD, RELEASE_TO_STOP, audioType) {
           @Override
           public void stopRecording() {
             otherRAP.setEnabled(true);
