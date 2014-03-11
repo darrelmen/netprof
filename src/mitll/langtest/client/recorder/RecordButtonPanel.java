@@ -49,19 +49,19 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
    */
   public RecordButtonPanel(final LangTestDatabaseAsync service, final ExerciseController controller,
                            final Exercise exercise, final ExerciseQuestionState questionState, final int index,
-                           boolean doFlashcardAudio, String audioType){
+                           boolean doFlashcardAudio, String audioType, String recordButtonTitle){
     this.service = service;
     this.controller = controller;
     this.exercise = exercise;
     this.questionState = questionState;
     this.index = index;
     this.doFlashcardAudio = doFlashcardAudio;
-    layoutRecordButton(recordButton = makeRecordButton(controller));
+    layoutRecordButton(recordButton = makeRecordButton(controller,recordButtonTitle));
     this.audioType = audioType;
   }
 
-  protected RecordButton makeRecordButton(ExerciseController controller) {
-    return new RecordButton( controller.getRecordTimeout(),this, false);
+  protected RecordButton makeRecordButton(ExerciseController controller, String buttonTitle) {
+    return new RecordButton(controller.getRecordTimeout(), this, false);
   }
 
   public void flip(boolean first) {
@@ -70,7 +70,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
   }
 
   /**
-   * @see RecordButtonPanel#RecordButtonPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseQuestionState, int, boolean, String)
+   * @see RecordButtonPanel#RecordButtonPanel
    */
   protected void layoutRecordButton(Widget button) {
     SimplePanel recordButtonContainer = new SimplePanel(button);
@@ -116,7 +116,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
    * Once audio is posted to the server, two pieces of information come back in the AudioAnswer: the audio validity<br></br>
    *  (false if it's too short, etc.) and a URL to the stored audio on the server. <br></br>
    *   This is used to make the audio playback widget.
-   * @see #RecordButtonPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseQuestionState, int, boolean, String)
+   * @see #RecordButtonPanel
    */
   public void stopRecording() {
     recordImage1.setVisible(false);
@@ -128,15 +128,19 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
   private void postAudioFile(final Panel outer, final int tries) {
     System.out.println("postAudioFile... ");
 
+    //System.out.println("RecordButtonPanel : postAudioFile " );
+    final long then = System.currentTimeMillis();
     reqid++;
-    service.writeAudioFile(controller.getBase64EncodedWavFile(),
+    String base64EncodedWavFile = controller.getBase64EncodedWavFile();
+    final int len = base64EncodedWavFile.length();
+    service.writeAudioFile(base64EncodedWavFile,
       exercise.getPlan(),
       exercise.getID(),
       index,
       controller.getUser(),
       reqid,
       !exercise.isPromptInEnglish(),
-      audioType,
+      getAudioType(),
       doFlashcardAudio,
       true, new AsyncCallback<AudioAnswer>() {
         public void onFailure(Throwable caught) {
@@ -146,7 +150,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
           } else {
             recordButton.setEnabled(true);
             receivedAudioFailure();
-
+            logMessage("failed to post " + getLog(then));
             Window.alert("writeAudioFile : stopRecording : Couldn't post answers for exercise.");
             new ExceptionHandlerDialog(caught);
           }
@@ -161,12 +165,39 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
           }
           recordButton.setEnabled(true);
           receivedAudioAnswer(result, questionState, outer);
+
+          long now = System.currentTimeMillis();
+          long diff = now - then;
+          if (diff > 1000) {
+            logMessage("posted "+ getLog(then));
+          }
+        }
+
+        private String getLog(long then) {
+          long now = System.currentTimeMillis();
+          long diff = now - then;
+          return "audio for user " + controller.getUser() + " for exercise " + exercise.getID() + " took " + diff + " millis to post " +
+            len + " characters or " + (len / diff) + "char/milli";
         }
       });
   }
 
+  protected void logMessage(String message) {
+    service.logMessage(message,new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {}
+
+      @Override
+      public void onSuccess(Void result) {}
+    });
+  }
+
+  protected String getAudioType() { return controller.getAudioType();  }
+
   public Widget getRecordButton() { return recordButton; }
   public Widget getActualRecordButton() { return recordButton; }
+  public void setRecordButtonEnabled(boolean val) { recordButton.setEnabled(val); }
+
   protected void receivedAudioAnswer(AudioAnswer result, final ExerciseQuestionState questionState, final Panel outer) {}
   protected void receivedAudioFailure() {}
 }

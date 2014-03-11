@@ -311,6 +311,10 @@ fieldset {
     margin-left: 15%;
 }
 
+.leftFiftyPercentMargin {
+     margin-left: 43%;
+ }
+
 .dialogExpandedTopMargin {
     margin-top: -70px;
 }
@@ -321,12 +325,21 @@ fieldset {
 .topBarMargin {
      margin-top: 18px;
  }
+
 .topFiveMargin {
     margin-top: 5px;
 }
 
 .bottomFiveMargin {
      margin-bottom: 5px;
+}
+.topMinusFiveMargin {
+    margin-top: -13px;
+}
+
+.topTwentyMargin {
+     margin-top: 20px;
+>>>>>>> master
  }
 
 .leftFiveMargin {
@@ -738,7 +751,10 @@ fieldset > legend {
     margin-right: 5px;
 }
 .rightTenMargin {
-     margin-right: 10px;
+    margin-right: 10px;
+}
+.rightTwentyMargin {
+     margin-right: 20px;
  }
 
 .minWidth {
@@ -1033,4 +1049,21 @@ fieldset > legend {
 .chartDim {
     min-width: 500px;
     min-height: 400px;
+}
+
+fieldset > legend {
+    margin-bottom: 3px;
+}
+
+td > h5 {
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+.englishQuestionRightMargin {
+   margin-right : 131px;
+}
+
+#Student_LoginBoxDialog > .modal-body {
+    padding-top : 5px;
 }
