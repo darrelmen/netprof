@@ -7,10 +7,12 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseQuestionState;
 import mitll.langtest.client.recorder.AutoCRTRecordPanel;
+import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
@@ -42,12 +44,12 @@ public class CombinedResponseFlashcard extends TextCRTFlashcard implements Exerc
     enableNext();
   }
 
-  public void recordIncomplete(Object answer) {
+  public void recordIncomplete(Widget answer) {
     if (!completed.remove(answer)) System.err.println("huh? answer isn't registered?");
     enableNext();
   }
 
-  public void recordCompleted(Object answer) {
+  public void recordCompleted(Widget answer) {
     completed.add(answer);
     enableNext();
   }
@@ -59,7 +61,7 @@ public class CombinedResponseFlashcard extends TextCRTFlashcard implements Exerc
   protected void addRecordingAndFeedbackWidgets(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller,
                                                 int feedbackHeight, Panel toAddTo) {
     super.addRecordingAndFeedbackWidgets(exercise,service,controller,feedbackHeight, toAddTo);
-    autoCRTRecordPanel = new AutoCRTRecordPanel(service, controller, exercise, this, 1) {
+    autoCRTRecordPanel = new AutoCRTRecordPanel(service, controller, exercise, this, 1,100,"Record") {
       @Override
       protected void receivedAudioAnswer(AudioAnswer result, final ExerciseQuestionState questionState, final Panel outer) {
         super.receivedAudioAnswer(result, questionState, outer);

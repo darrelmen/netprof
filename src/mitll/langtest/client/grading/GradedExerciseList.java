@@ -55,6 +55,11 @@ public class GradedExerciseList<T extends ExerciseShell> extends PagingExerciseL
     getNextUngraded(true);
     pagingContainer.selectFirst();
   }
+
+  protected int getVerticalUnaccountedFor() {
+    return 150;
+  }
+
   /**
    * @see mitll.langtest.client.list.ListInterface#loadExercise(String)
    * @param itemID
@@ -142,7 +147,7 @@ public class GradedExerciseList<T extends ExerciseShell> extends PagingExerciseL
   private PopupPanel getPopup2(String toShow) {
     final PopupPanel popupImage = new PopupPanel(true);
     popupImage.add(new HTML(toShow));
-    popupImage.setPopupPosition(Window.getClientWidth()/2,Window.getClientHeight()/2);
+    popupImage.setPopupPosition(Window.getClientWidth() / 2, Window.getClientHeight() / 2);
     return popupImage;
   }
 }
