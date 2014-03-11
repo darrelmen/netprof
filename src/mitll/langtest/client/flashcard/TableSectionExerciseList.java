@@ -37,6 +37,7 @@ import com.google.gwt.view.client.HasRows;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
+import mitll.langtest.client.bootstrap.ResponseExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.list.ResponseChoice;
@@ -359,7 +360,9 @@ public class TableSectionExerciseList<T extends ExerciseShell> extends FlexSecti
   }
 
   private String getFlashcardURL() {
-    return GWT.getHostPageBaseURL() + "?" + "flashcard" + "=true" +"&responseType="+responseChoice.getResponseType();
+    return GWT.getHostPageBaseURL() + "?" + "flashcard" + "=true" +"&" +
+      ResponseExerciseList.RESPONSE_TYPE +
+      "="+responseChoice.getResponseType();
   }
 
   /**
