@@ -33,7 +33,7 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
    * @param controller
    */
   public DataCollectionFlashcard(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, int feedbackHeight) {
-    super(e, service, controller, feedbackHeight, controller.shouldAddRecordKeyBinding(), new ControlState());
+    super(e, service, controller, feedbackHeight, false, new ControlState());
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand () {
       public void execute () {
         int offsetHeight = cardPrompt.getOffsetHeight();
@@ -43,6 +43,7 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
     });
     navigationHelper.enablePrevButton(!controller.getExerciseList().onFirst(null));
     navigationHelper.enableNextButton(false);
+    navigationHelper.setVisible(true);
     getElement().setId("DataCollectionFlashcard");
   }
 
@@ -103,7 +104,7 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
   @Override
   protected void onUnload() {
     super.onUnload();
-    navigationHelper.removeKeyHandler();
+    //navigationHelper.removeKeyHandler();
   }
 
   /**
