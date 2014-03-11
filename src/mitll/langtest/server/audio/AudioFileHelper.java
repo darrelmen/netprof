@@ -315,14 +315,14 @@ public class AudioFileHelper {
     if (serverProps.isFlashcard()|| doFlashcard) {
       makeASRScoring();
       if (serverProps.isAutoCRT()) {
-        autoCRT.getAutoCRTDecodeOutput(exerciseID, questionID, exercise, file, audioAnswer);
+        autoCRT.getAutoCRTDecodeOutput(exerciseID, questionID, file, audioAnswer);
       } else {
         autoCRT.getFlashcardAnswer(exercise, file, audioAnswer);
       }
       db.updateFlashcardState(user, exerciseID, audioAnswer.isCorrect());
       return audioAnswer;
     } else if (serverProps.isAutoCRT() && !exercise.isPromptInEnglish()) { // TODO : hack -- don't do CRT on english
-      autoCRT.getAutoCRTDecodeOutput(exerciseID, questionID, exercise, file, audioAnswer);
+      autoCRT.getAutoCRTDecodeOutput(exerciseID, questionID, file, audioAnswer);
     }
     return audioAnswer;
   }
@@ -350,7 +350,7 @@ public class AudioFileHelper {
       }
       autoCRT = new AutoCRT(exportDB.getExport(), crtScoring, pathHelper.getInstallPath(), relativeConfigDir,
         serverProps.getMinPronScore());
-      if (serverProps.isAutoCRT()) {
+      if (serverProps.isAutoCRT() && serverProps.isIncludeFeedback()) {
         autoCRT.makeClassifier();
       }
     }

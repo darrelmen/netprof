@@ -1,6 +1,8 @@
 package mitll.langtest.client;
 
 import com.google.gwt.user.client.Window;
+import mitll.langtest.client.list.ResponseChoice;
+import mitll.langtest.shared.Result;
 
 import java.util.Map;
 
@@ -52,6 +54,7 @@ public class PropertyHandler {
   private static final String CONTINUE_PROMPT = "promptBeforeNextItem";
   private static final String RIGHT_ALIGN_CONTENT = "rightAlignContent";
   private static final String RESPONSE_TYPE = "responseType";
+  private static final String SECOND_RESPONSE_TYPE = "secondResponseType";
   private static final String FLASHCARD_NEXT_AND_PREV = "flashcardNextAndPrev";
   private static final String BIND_NEXT_TO_ENTER = "bindNextToEnter";
   private static final String SCREEN_PORTION = "screenPortion";
@@ -91,6 +94,9 @@ public class PropertyHandler {
   private static final String SHOW_SPECTROGRAM = "spectrogram";
   private boolean spectrogram = false;
   private boolean combinedMode = false;
+  private static final String DEFAULT_AUDIO_TYPE = "audioType";
+  private static final String INCLUDE_FEEDBACK = "includeFeedback";
+  private String audioType = Result.AUDIO_TYPE_FAST_AND_SLOW;
 
   public enum LOGIN_TYPE { UNDEFINED, ANONYMOUS, STUDENT, DATA_COLLECTOR, SIMPLE }
 
@@ -145,11 +151,13 @@ public class PropertyHandler {
   private boolean flashcardTextResponse = false;
   private boolean showFlashcardAnswer = true;
   private boolean showExercisesInOrder = false;
-  private String responseType = "Audio";
+  private String responseType = ResponseChoice.AUDIO;
+  private String secondResponseType = "None";
   private boolean allowPlusInURL;
   private String purposeDefault = "Practice";
   private boolean bindNextToEnter;
   private boolean classroomMode = false;
+  private boolean includeFeedback = true;
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad()
@@ -209,11 +217,14 @@ public class PropertyHandler {
       else if (key.equals(EXERCISES_IN_ORDER)) showExercisesInOrder = getBoolean(value);
       else if (key.equals(ALLOW_PLUS_IN_URL)) allowPlusInURL = getBoolean(value);
       else if (key.equals(RESPONSE_TYPE)) responseType = value;
+      else if (key.equals(SECOND_RESPONSE_TYPE)) secondResponseType = value;
       else if (key.equals(PURPOSE_DEFAULT)) purposeDefault = value;
       else if (key.equals(BIND_NEXT_TO_ENTER)) bindNextToEnter = getBoolean(value);
       else if (key.equals(SCREEN_PORTION)) screenPortion = getFloat(value, 1.0f, SCREEN_PORTION);
       else if (key.equals(CLASSROOM_MODE)) classroomMode = getBoolean(value);
       else if (key.equals(SHOW_SPECTROGRAM)) spectrogram = getBoolean(value);
+      else if (key.equals(DEFAULT_AUDIO_TYPE)) audioType = value;
+      else if (key.equals(INCLUDE_FEEDBACK)) includeFeedback = getBoolean(value);
       else if (key.equals(LOGIN_TYPE_PARAM)) {
         try {
           loginType = LOGIN_TYPE.valueOf(value.toUpperCase());
@@ -349,7 +360,37 @@ public class PropertyHandler {
       spectrogram = !Window.Location.getParameter(SHOW_SPECTROGRAM).equals("false");
       if (spectrogram) System.out.println("spectrogram is " + spectrogram);
     }
+    setResponseType();
+
     return grading;
+  }
+
+  /**
+   * Parse URL to extract the responseType values
+   */
+  private void setResponseType() {
+    String href = Window.Location.getHref();
+    if (href.contains("responseType=")) {
+      String s = href.split("responseType=")[1];
+      String candidate = s.split("\\*\\*\\*")[0];
+      if (ResponseChoice.knownChoice(candidate)) {
+        responseType = candidate;
+        //System.out.println("responseType " + responseType);
+      }
+      else {
+        System.err.println("responseType unknown " + candidate);
+      }
+      if (s.contains("secondResponseType=")) {
+        String candidate2 = s.split("secondResponseType=")[1];
+        if (ResponseChoice.knownChoice(candidate2)) {
+          secondResponseType = candidate2;
+         // System.out.println("secondResponseType " + secondResponseType);
+        }
+        else {
+          System.err.println("secondResponseType unknown " + candidate2);
+        }
+      }
+    }
   }
 
   public boolean isArabicTextDataCollect() {
@@ -529,9 +570,14 @@ public class PropertyHandler {
     this.responseType = responseType;
   }
 
-  public boolean shouldAllowPlusInURL() {
-    return allowPlusInURL;
+  public String getSecondResponseType() {
+    return secondResponseType;
   }
+  public void setSecondResponseType(String responseType) {
+    this.secondResponseType = responseType;
+  }
+
+  public boolean shouldAllowPlusInURL() { return allowPlusInURL;  }
 
   public String getPurposeDefault() {
     return purposeDefault;
@@ -548,4 +594,6 @@ public class PropertyHandler {
     return combinedMode;
   }
 
+  public String getAudioType() { return audioType; }
+  public boolean isIncludeFeedback () { return includeFeedback; }
 }
