@@ -1067,3 +1067,7 @@ td > h5 {
 #Student_LoginBoxDialog > .modal-body {
     padding-top : 5px;
 }
+
+.englishFont {
+    font-family: georgia,"times new roman",times,serif;
+}

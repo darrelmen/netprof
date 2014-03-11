@@ -63,7 +63,7 @@ public class ExercisePanel<T extends ExerciseShell> extends VerticalPanel implem
   private static final String ENGLISH = "English";
   private static final String TYPE_YOUR_ANSWER_IN = "Type your answer in ";
   private static final String SPEAK_AND_RECORD_YOUR_ANSWER_IN = "Speak and record your answer in ";
-  protected static final int ITEM_HEADER = 5;
+  public static final int ITEM_HEADER = 5;
   private static final int CONTENT_SCROLL_HEIGHT = 220;
   public static final String PROMPT = "Read the following text and answer the question or questions below.";
   private List<Widget> answers = new ArrayList<Widget>();
