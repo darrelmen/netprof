@@ -42,6 +42,8 @@ public interface LangTestDatabase extends RemoteService {
   ExerciseListWrapper<? extends ExerciseShell> getExerciseIds(int reqID);
   ExerciseListWrapper<? extends ExerciseShell> getExerciseIds(int reqID, long userID);
   ExerciseListWrapper<? extends ExerciseShell> getExerciseIds(int reqID, long userID, String prefix, long userListID);
+ // ExerciseListWrapper getExerciseIds(int reqID, long userID, boolean unansweredFirst);
+
   Exercise getExercise(String id);
 
   ResultsAndGrades getResultsForExercise(String exid, boolean arabicTextDataCollect);
@@ -57,7 +59,7 @@ public interface LangTestDatabase extends RemoteService {
   int userExists(String login);
 
   // answer DAO
-  void addTextAnswer(int userID, Exercise exercise, int questionID, String answer);
+  void addTextAnswer(int userID, Exercise exercise, int questionID, String answer, String answerType);
   AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int question, int user,
                              int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults);
   double getScoreForAnswer(long userID, Exercise e, int questionID, String answer, String answerType);
@@ -123,8 +125,6 @@ public interface LangTestDatabase extends RemoteService {
   void resetUserState(long userID);
   void clearUserState(long userID);
 
-  void sendEmail(int userID, String to, String replyTo, String subject, String message, String token);
-
   int getNumExercisesForSelectionState(Map<String, Collection<String>> typeToSection);
 
   List<? extends ExerciseShell> getFullExercisesForSelectionState(Map<String, Collection<String>> typeToSection, int start, int end);
@@ -175,4 +175,6 @@ public interface LangTestDatabase extends RemoteService {
   boolean deleteItemFromList(long listid, String exid);
 
   boolean deleteItem(String exid);
+
+  //ExerciseListWrapper getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID, String prefix, boolean showUnansweredFirst);
 }
