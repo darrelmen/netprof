@@ -8,6 +8,7 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.shared.User;
 
 /**
@@ -19,6 +20,10 @@ import mitll.langtest.shared.User;
  */
 public class AdminUserTable extends UserTable {
   private boolean showEnabled = false;
+
+  public AdminUserTable(PropertyHandler props) {
+    super(props);
+  }
 
   @Override
   public void showUsers(final LangTestDatabaseAsync service, int userid) {
