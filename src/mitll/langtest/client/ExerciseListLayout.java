@@ -91,7 +91,7 @@ public class ExerciseListLayout<T extends ExerciseShell> {
         } else {
           if (props.isCRTDataCollectMode()) {
             return new ResponseExerciseList(secondRow, currentExerciseVPanel, service, feedback,
-              props.isShowTurkToken(), props.showExercisesInOrder(), controller, props.isCRTDataCollectMode(), "response");
+              props.isShowTurkToken(), props.showExercisesInOrder(), controller, "response");
           } else {
             //System.out.println("makeExerciseList : show completed " + showCompleted + " flex");
             FlexSectionExerciseList<T> flex = new FlexSectionExerciseList<T>(secondRow, currentExerciseVPanel, service, feedback,

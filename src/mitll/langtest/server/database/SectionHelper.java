@@ -64,9 +64,7 @@ public class SectionHelper {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getSectionNodes()
    * @return
    */
-  public List<SectionNode> getSectionNodes() {
-    return getChildren(getTypeOrder());
-  }
+  public List<SectionNode> getSectionNodes() {  return getChildren(getTypeOrder());  }
 
   private List<SectionNode> getChildren(List<String> typeOrder) {
     if (typeOrder.isEmpty()) return Collections.emptyList();
@@ -159,7 +157,6 @@ public class SectionHelper {
       }
     }
     if (currentList == null) {
-   //   logger.error("couldn't find any valid types given request " + typeToSection);
       currentList = Collections.emptyList();
     }
     if (currentList.isEmpty()) {
