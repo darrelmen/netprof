@@ -64,6 +64,7 @@ public class ExercisePanel extends VerticalPanel implements
   private static final String SPEAK_AND_RECORD_YOUR_ANSWER_IN = "Speak and record your answer in ";
   protected static final int ITEM_HEADER = 5;
   private static final int CONTENT_SCROLL_HEIGHT = 220;
+  public static final String PROMPT = "Read the following text and answer the question or questions below.";
   private List<Widget> answers = new ArrayList<Widget>();
   protected Set<Widget> completed = new HashSet<Widget>();
   protected Exercise exercise = null;
@@ -95,9 +96,9 @@ public class ExercisePanel extends VerticalPanel implements
     this.feedback = userFeedback;
     this.exerciseList = exerciseList;
     this.navigationHelper = getNavigationHelper(controller);
-    if (e.getQuestions().size() == 1) {
+    //if (e.getQuestions().size() == 1) {
       addItemHeader(e);
-    }
+    //}
 
     enableNextOnlyWhenAllCompleted = !isPashto();
 
@@ -128,12 +129,16 @@ public class ExercisePanel extends VerticalPanel implements
     return new NavigationHelper(exercise,controller, this, exerciseList, true);
   }
 
-  protected void addInstructions() {
-    add(new Heading(4, "Read the following text and answer the question or questions below."));
-  }
+  protected void addInstructions() {  add(new Heading(4, PROMPT));  }
 
+  /**
+   * @see #ExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, ExerciseController, mitll.langtest.client.list.ListInterface)
+   * @param e
+   */
   protected void addItemHeader(Exercise e) {
-     add(new Heading(ITEM_HEADER,"Item #" + e.getID()));
+    Heading w = new Heading(ITEM_HEADER, "Item " + e.getID());
+    w.getElement().setId("ItemHeading");
+    add(w);
   }
 
   private Widget getQuestionContent(Exercise e, boolean includeItemID) {
