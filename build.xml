@@ -194,18 +194,6 @@
         </jar>
     </target>
 
-    <target depends="build" name="crtDari">
-        <jar destfile="crtDari.war" basedir="war"
-             includes="favicon.ico,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/crtDari/**,soundmanager2.js"
-             excludes="WEB=INF/lib/pronz.jar">
-
-            <manifest>
-                <attribute name="Built-Date" value="${current.time}"/>
-            </manifest>
-        </jar>
-    </target>
-
-
     <target depends="build" name="crtPashto">
         <jar destfile="crtPashto.war" basedir="war"
              includes="favicon.ico,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/crtPashto/**,soundmanager2.js"
@@ -406,17 +394,6 @@
         </jar>
     </target>
 
-    <target depends="build" name="taboo">
-        <jar destfile="taboo.war" basedir="war"
-             includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/taboo/**"
-                >
-
-            <manifest>
-                <attribute name="Built-Date" value="${current.time}"/>
-            </manifest>
-        </jar>
-    </target>
-
     <target depends="build" name="npfCM">
         <jar destfile="npfCM.war" basedir="war"
              includes="npfIcon.png,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/mandarin/**,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-mandarin/**"
@@ -492,6 +469,17 @@
             </manifest>
         </jar>
     </target>
+
+    <target depends="build" name="crtDari">
+    <jar destfile="crtDari.war" basedir="war"
+         includes="*.png,*.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/dari/**,scoring/bin.linux64/**,scoring/configurations/**,scoring/models.dli-dari/**"
+            >
+
+        <manifest>
+            <attribute name="Built-Date" value="${current.time}"/>
+        </manifest>
+    </jar>
+</target>
 
 
     <target depends="build" name="pashtoFlashcard">
