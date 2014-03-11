@@ -67,6 +67,7 @@ public class ExcelImport implements ExerciseDAO {
   private UserListManager userListManager;
   private AddRemoveDAO addRemoveDAO;
   private File installPath;
+  boolean collectSynonyms = true;
 
   /**
    * @see mitll.langtest.server.SiteDeployer#readExercisesPopulateSite(mitll.langtest.shared.Site, String, java.io.InputStream)
@@ -106,6 +107,8 @@ public class ExcelImport implements ExerciseDAO {
     this.skipSemicolons = serverProps.shouldSkipSemicolonEntries();
     this.audioOffset = serverProps.getAudioOffset();
     this.userListManager = userListManager;
+    collectSynonyms = this.serverProps.getCollectSynonyms();
+
 /*    logger.debug("\n\n\n\n ---> ExcelImport : config " + relativeConfigDir +
       " media dir " +mediaDir + " slow missing " +missingSlowSet.size() + " fast " + missingFastSet.size());*/
   }
@@ -131,7 +134,9 @@ public class ExcelImport implements ExerciseDAO {
       }
 
     } else {
-      logger.debug("Can't find " + file + " under " + relativeConfigDir + " abs path " + missingSlow.getAbsolutePath());
+      if (serverProps.isGoodwaveMode()) {
+        logger.debug("Can't find " + file + " under " + relativeConfigDir + " abs path " + missingSlow.getAbsolutePath());
+      }
     }
     return missingSlow.exists();
   }
@@ -512,7 +517,8 @@ public class ExcelImport implements ExerciseDAO {
           }
         }
       }
-      if(this.serverProps.getCollectSynonyms())
+
+      if(collectSynonyms)
          addSynonyms(englishToExercises);
     } catch (Exception e) {
       logger.error("got " + e, e);
