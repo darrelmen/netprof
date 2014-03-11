@@ -22,6 +22,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.bootstrap.ResponseExerciseList;
 import mitll.langtest.client.custom.EditItem;
 import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -220,7 +221,8 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * @return
    */
   protected String getSelectionFromToken(String token) {
-    token = token.contains("###") ? token.split("###")[0] : token; // remove any other parameters
+    //token = token.contains(ResponseExerciseList.RESPONSE_TYPE_DIVIDER) ? token.split(ResponseExerciseList.RESPONSE_TYPE_DIVIDER)[0] : token; // remove any other parameters
+    token = token.split(ResponseExerciseList.RESPONSE_TYPE_DIVIDER)[0]; // remove any other parameters
     return token;
   }
 
@@ -311,7 +313,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * @see mitll.langtest.client.list.HistoryExerciseList.MySetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
    */
   protected void gotEmptyExerciseList() {
-    System.out.println(new Date() +" gotEmptyExerciseList : ------  ------------ ");
+    System.out.println(new Date() + " gotEmptyExerciseList : ------  ------------ ");
   }
 
   public void rememberAndLoadFirst(List<T> exercises) {
@@ -699,7 +701,8 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   protected void onLastItem() {
     PropertyHandler props = controller.getProps();
     if (props.isCRTDataCollectMode() || props.isDataCollectMode()) {
-      feedback.showErrorMessage("Test Complete", "Test Complete! Thank you!");
+      String title = props.isDataCollectMode() ? "Collection Complete" : "Test complete";
+      feedback.showErrorMessage(title, "All Items Complete! Thank you!");
     }
     else {
       loadFirstExercise();
@@ -747,7 +750,8 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    */
   @Override
   public Widget getExerciseListOnLeftSide(PropertyHandler props) {
-    FlowPanel leftColumn = new FlowPanel();
+    Panel leftColumn = new FlowPanel();
+    leftColumn.getElement().setId("ExerciseList_leftColumn");
     leftColumn.addStyleName("floatLeft");
     leftColumn.addStyleName("minWidth");
     DOM.setStyleAttribute(leftColumn.getElement(), "paddingRight", "10px");
