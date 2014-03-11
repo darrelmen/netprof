@@ -16,9 +16,8 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Element;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
@@ -78,7 +77,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private final Label status = new Label();
 
   private UserManager userManager;
-  private UserTable userTable;
   private ResultManager resultManager;
   private MonitoringManager monitoringManager;
   private FlashRecordPanelHeadless flashRecordPanel;
@@ -99,8 +97,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private Anchor logout;
   private Anchor users;
-  private Anchor showResults, monitoring;
-  private HTML releaseStatus;
   private StartupInfo startupInfo;
 
   private boolean showUnansweredFirst = false;
@@ -318,9 +314,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     loadVisualizationPackages();  // Note : this was formerly done in LangTest.html, since it seemed to be intermittently not loaded properly
   }
 
-  private boolean isIPad() {
-    return Window.Navigator.getUserAgent().toLowerCase().contains("ipad");
-  }
+  private boolean isIPad() { return Window.Navigator.getUserAgent().toLowerCase().contains("ipad");  }
 
   private void loadFlashcard() {
     doFlashcard();
@@ -350,7 +344,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     Widget title;
     if (isGoodwaveMode()) {
-      flashcard = new Flashcard();
+      flashcard = new Flashcard(props.getNameForAnswer());
       title = flashcard.makeNPFHeaderRow(props.getSplash(), getGreeting(), getReleaseStatus(),new LogoutClickHandler(),
 
         (props.isAdminView()) ? new UsersClickHandler(false) : null,
@@ -359,7 +353,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         );
     }
     else if (props.isFlashcardTeacherView() || props.isAutocrt()) {
-      flashcard = new Flashcard();
+      flashcard = new Flashcard(props.getNameForAnswer());
       title = flashcard.getHeaderRow(props.getSplash(), "NewProF2.png",props.getAppTitle(), getGreeting(), getReleaseStatus(), new LogoutClickHandler(),
 
         (props.isAdminView()) ? new UsersClickHandler(false) : null,
@@ -432,7 +426,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     RootPanel.get().addStyleName("noPadding");
     currentExerciseVPanel = container;
 
-    flashcard = new Flashcard();
+    flashcard = new Flashcard(props.getNameForAnswer());
 
     Panel headerRow = flashcard.makeFlashcardHeaderRow(props.getSplash(), getGreeting());
     container.add(headerRow);
@@ -451,28 +445,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // setup sound manager
     setupSoundManager();
 
-/*    if (!props.isTimedGame()) {
-      showHelpNewUser();
-    }*/
-
     modeSelect();
   }
-
-  /**
-   * @see #doFlashcard()
-   */
-/*  private void showHelpNewUser() {
-    Storage stockStore = Storage.getLocalStorageIfSupported();
-    boolean showedHelpAlready = false;
-    if (stockStore != null) {
-      showedHelpAlready = stockStore.getItem("showedHelp") != null;
-      stockStore.setItem("showedHelp", "showedHelp");
-    }
-
-    if (!showedHelpAlready) {
-      showFlashHelp();
-    }
-  }*/
 
   @Override
   public void showFlashHelp() { flashcard.showFlashHelp(this, props.isFlashCard()); }
@@ -520,15 +494,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   /**
    * @see #doDataCollectAdminView()
-   * @see #getLogout()
    * @see #makeHeaderRow()
    * @return
    */
   private HTML getReleaseStatus() {
     browserCheck.getBrowserAndVersion();
 
-    String releaseDate = props.getReleaseDate() != null ? " " +
-      props.getReleaseDate() : " 07/19_19";
+    String releaseDate = props.getReleaseDate() != null ? " " + props.getReleaseDate() : "";
     return new HTML("<span><font size=-2>" + browserCheck.browser + " " + browserCheck.ver + releaseDate + "</font></span>");
   }
 
@@ -610,8 +582,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (logout != null) logout.setVisible(showUserLine);
     if (userline != null) userline.setVisible(showUserLine);
     if (users != null) users.setVisible(isGrading || props.isAdminView());
-    if (showResults != null) showResults.setVisible(isGrading || props.isAdminView());
-    if (monitoring != null) monitoring.setVisible(isGrading || props.isAdminView());
 
    // System.out.println("modeSelect : goodwave mode " + props.isGoodwaveMode() + " auto crt mode = " + isAutoCRTMode());
 
@@ -726,54 +696,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     flashRecordPanel.initFlash();
   }
 
-  /**
-   * Has both a logout and a users link and a results link
-   * @return
-   */
-  private Widget getLogout() {
-    VerticalPanel vp = new VerticalPanel();
-
-    vp.add(userline);
-    vp.add(logout);
-    vp.add(users);
-
-    vp.add(showResults);
-    vp.add(monitoring);
-    vp.add(releaseStatus);
-
-    return vp;
-  }
-
-  private void makeLogoutParts() {
-  //  this.userline = new HTML(getUserText());
-    logout = getLogoutLink();
-
-    makeUsersAnchor(false);
-    showResults = new Anchor(props.getNameForAnswer()+"s");
-    showResults.addClickHandler(new ResultsClickHandler());
-    showResults.setVisible(props.isAdminView());
-
-    monitoring = new Anchor("Monitoring");
-    monitoring.addClickHandler(new MonitoringClickHandler());
-    monitoring.setVisible(props.isAdminView());
-
-    releaseStatus = getReleaseStatus();
-  }
-
-  private Anchor getLogoutLink() {
-    SafeHtmlBuilder b = new SafeHtmlBuilder();
-   // String s = "<font size=+1>Sign Out</font>";
-    String s = "Sign Out";
-    b.appendHtmlConstant(s);
-    Anchor logout = new Anchor(b.toSafeHtml());
-    logout.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        resetState();
-      }
-    });
-    return logout;
-  }
-
   private Anchor makeUsersAnchor(final boolean isDataCollectAdminView) {
     users = new Anchor("Users");
     users.addClickHandler(new UsersClickHandler(isDataCollectAdminView));
@@ -787,14 +709,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   public String getGreeting() {
-    return userManager.getUserID() == null ? "" : (
-      //"Hello " +
-        ""+
-        userManager.getUserID());
+    return userManager.getUserID() == null ? "" : (""+  userManager.getUserID());
   }
 
   /**
-   * @see #getLogout()
+   * @seex #getLogout()
    */
   @Override
   public void resetState() {
@@ -822,10 +741,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public void gotUser(long userID) {
     System.out.println("LangTest.gotUser : got user " + userID);
+    flashcard.setUserName(getGreeting());
     if (userline != null) {
-     // String userText = getUserText();
-      //userline.setHTML(userText);
-      flashcard.setUserName(getGreeting());
+      String userText = getUserText();
+      userline.setHTML(userText);
     }
     if (props.isDataCollectAdminView()) {
       checkForAdminUser();
@@ -834,7 +753,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
-  private boolean everShownInitialState =false;
   private boolean doEverythingAfterFactory(long userID) {
     if (userID != lastUser || (props.isGoodwaveMode() || props.isFlashCard() && !props.isTimedGame())) {
       System.out.println("doEverythingAfterFactory : user changed - new " + userID + " vs last " + lastUser);
@@ -990,9 +908,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private class LogoutClickHandler implements ClickHandler {
     public void onClick(ClickEvent event) {
-      userManager.clearUser();
-      lastUser = -2;
-      userManager.teacherLogin();
+      resetState();
     }
   }
 
@@ -1004,7 +920,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
 
     public void onClick(ClickEvent event) {
-      userTable = isDataCollectAdminView ? new AdminUserTable(props) : new UserTable(props);
+      UserTable userTable = isDataCollectAdminView ? new AdminUserTable(props) : new UserTable(props);
       userTable.showUsers(service, userManager.getUser());
     }
   }
