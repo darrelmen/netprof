@@ -1,19 +1,10 @@
 package mitll.langtest.client.flashcard;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.Column;
-import com.github.gwtbootstrap.client.ui.FluidRow;
-import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.Modal;
-import com.github.gwtbootstrap.client.ui.constants.ButtonType;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Timer;
 import mitll.langtest.shared.flashcard.Leaderboard;
 import mitll.langtest.shared.flashcard.ScoreInfo;
 import mitll.langtest.shared.flashcard.SetScore;
 import org.moxieapps.gwt.highcharts.client.Chart;
-import org.moxieapps.gwt.highcharts.client.Credits;
 import org.moxieapps.gwt.highcharts.client.PlotBand;
 import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.labels.PlotBandLabel;
@@ -68,11 +59,11 @@ public class LeaderboardPlot {
                                               GetPlotValues getPlotValues,
                                               String title, String subtitle, String seriesName,
                                               boolean topIs100, float topToUse) {
-
+    System.out.println("title "  +title+ " top is 100 " + topIs100 + " top " + topToUse);
     float pbCorrect = getPlotValues.getPbCorrect();
     float top = getPlotValues.getTop();
     float total = getPlotValues.getTotalCorrect();
-    float avg = total / (float) scores.size();
+    float avg = getPlotValues.getClassAvg();
 
     List<Float> yValuesForUser = getPlotValues.getyValuesForUser();
 
@@ -82,7 +73,7 @@ public class LeaderboardPlot {
       .setChartSubtitleText(subtitle)
       .setMarginRight(10)
       .setOption("/credits/enabled", false)
-    .setOption("/legend/enabled", false);
+      .setOption("/legend/enabled", false);
 
     addSeries(gameTimeSeconds, yValuesForUser, chart, seriesName);
 
@@ -126,8 +117,22 @@ public class LeaderboardPlot {
     return chart;
   }
 
+  /**
+   * @see #getChart(java.util.List, int, mitll.langtest.client.flashcard.LeaderboardPlot.GetPlotValues, String, String, String, boolean, float)
+   * @param gameTimeSeconds
+   * @param yValuesForUser
+   * @param chart
+   * @param seriesTitle
+   */
   private void addSeries(int gameTimeSeconds, List<Float> yValuesForUser, Chart chart, String seriesTitle) {
     Float[] yValues = yValuesForUser.toArray(new Float[0]);
+
+    if (yValuesForUser.isEmpty()) {
+      System.err.println("huh??? addSeries is empty for " + seriesTitle);
+    }
+    else {
+      System.out.println("addSeries " + yValuesForUser);
+    }
 
     String seriesLabel = gameTimeSeconds > 0 ? "Correct in " + gameTimeSeconds + " seconds" : seriesTitle;
     Series series = chart.createSeries()
@@ -156,7 +161,6 @@ public class LeaderboardPlot {
   }
 
   private PlotBand getTopScore(float top, Chart chart) {
-    //System.out.println("top score "+top);
     PlotBand topScore = chart.getYAxis().createPlotBand()
       .setColor("#46bf00")
       .setFrom(under(top))
@@ -194,6 +198,7 @@ public class LeaderboardPlot {
       this.scores = scores;
       this.userID = userID;
       this.useCorrect = useCorrect;
+      if (scores.isEmpty()) System.err.println("huh? scores is empty???");
     }
 
     public float getPbCorrect() {
@@ -208,6 +213,18 @@ public class LeaderboardPlot {
     public float getTotalCorrect() {
       return totalCorrect;
     }
+
+    public float getClassAvg() {
+      if (numNotMe == 0f) {
+        return totalCorrect / (float) scores.size();
+      }
+      else {
+        return totalNotMe / numNotMe;
+      }
+    }
+
+    float totalNotMe = 0f;
+    float numNotMe = 0f;
 
     public List<Float> getyValuesForUser() {
       return yValuesForUser;
@@ -226,10 +243,12 @@ public class LeaderboardPlot {
         if (score.getUserid() == userID) {
           if (value > pbCorrect) pbCorrect = value;
           yValuesForUser.add(value);
-         // System.out.println("showLeaderboardPlot : for user " +userID + " got " + score);
+          //System.out.println("showLeaderboardPlot : for user " +userID + " got " + score);
         }
         else {
-         // System.out.println("\tshowLeaderboardPlot : for user " +score.getUserid() + " got " + score);
+          //System.out.println("\tshowLeaderboardPlot : for user " +score.getUserid() + " got " + score);
+          totalNotMe += value;
+          numNotMe++;
         }
         if (value > top) {
           top = value;
@@ -237,10 +256,14 @@ public class LeaderboardPlot {
         }
         totalCorrect += value;
       }
+
+      if (yValuesForUser.isEmpty()) System.err.println("huh? yValuesForUser (" +userID+
+        ")is empty???");
+
       return this;
     }
     private float getValue(SetScore score) {
-      return  useCorrect ? score.getCorrect() : Math.round(100f*score.getAvgScore());
+      return useCorrect ? Math.round(score.getCorrectPercent()) : Math.round(100f*score.getAvgScore());
     }
   }
 }
