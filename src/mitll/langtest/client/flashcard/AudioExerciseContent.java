@@ -77,16 +77,22 @@ public class AudioExerciseContent {
     return container;
   }
 
+  /**
+   * @see #getContentFromPrefix(String)
+   * @see #getAudioDiv(mitll.langtest.shared.Exercise)
+   * @see #makeFlashcardForCRT(mitll.langtest.shared.Exercise, String, boolean, boolean)
+   * @param e
+   * @param content
+   * @param includeExerciseID
+   * @param container
+   */
   private void addAudioRow(Exercise e, String content, boolean includeExerciseID, Panel container) {
     Panel horiz = new FlowPanel();
     horiz.getElement().setId("item_and_content");
     container.add(horiz);
     if (includeExerciseID) {
-      Heading child = new Heading(5, "Item " + e.getID());
-      child.addStyleName("leftTenMargin");
+      Heading child = getItemHeader(e);
       horiz.add(child);
-      child.addStyleName("floatLeft");
-      child.addStyleName("rightFiveMargin");
     }
     content = content.replaceAll("h2","h4");
     content = changeAudioPrompt(content, false);
@@ -97,6 +103,14 @@ public class AudioExerciseContent {
     if (e.getRefAudio() != null && e.getRefAudio().length() > 0) {
       container.add(getAudioDiv(e));
     }
+  }
+
+  private Heading getItemHeader(Exercise e) {
+    Heading child = new Heading(5, "Item " + e.getID());
+    child.addStyleName("leftTenMargin");
+    child.addStyleName("floatLeft");
+    child.addStyleName("rightFiveMargin");
+    return child;
   }
 
 /*  private void addThreeRow(Exercise e, String content, boolean includeExerciseID, Panel container) {
