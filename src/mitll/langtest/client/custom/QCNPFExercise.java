@@ -51,7 +51,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   public static final String ENGLISH = "english";
 
   private static final String REF_AUDIO = "refAudio";
-  private static final String APPROVED = "Mark Reviewed";
+  private static final String APPROVED = "Approve Item";
 
   private Set<String> incorrectSet = new HashSet<String>();
   private List<RequiresResize> toResize;
@@ -187,17 +187,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
   protected void addItemsAtTop(Panel container) {
     if (!exercise.getUnitToValue().isEmpty()) {
-      Panel flow = new HorizontalPanel();
-      for (String type : controller.getStartupInfo().getTypeOrder()) {
-        //  container.add(new Label(type + " " + newUserExercise.getUnitToValue().get(type)));
-        flow.getElement().setId("unitLesson");
-        flow.addStyleName("leftFiveMargin");
-        Heading child = new Heading(4, type, exercise.getUnitToValue().get(type));
-        child.addStyleName("rightFiveMargin");
-        flow.add(child);
-        // container.add(new Label(type + " " + newUserExercise.getUnitToValue().get(type)));
-      }
-      container.add(flow);
+      container.add(getUnitLessonForExercise());
     }
     else {
       //container.add(new com.google.gwt.user.client.ui.Label("List "+ul.getName()));
