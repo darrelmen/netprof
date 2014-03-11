@@ -30,7 +30,7 @@ import java.util.Set;
  * The async counterpart of <code>LangTestDatabase</code>.
  */
 public interface LangTestDatabaseAsync {
-  void addTextAnswer(int usedID, Exercise exercise, int questionID, String answer, AsyncCallback<Void> async);
+  void addTextAnswer(int usedID, Exercise exercise, int questionID, String answer, String answerType, AsyncCallback<Void> async);
   void userExists(String login, AsyncCallback<Integer> async);
   void addUser(int age, String gender, int experience, String nativeLang, String dialect, String userID, AsyncCallback<Long> async);
   void getUsers(AsyncCallback<List<User>> async);
@@ -91,8 +91,6 @@ public interface LangTestDatabaseAsync {
   void isEnabledUser(long id, AsyncCallback<Boolean> async);
 
   void logMessage(String message, AsyncCallback<Void> async);
-
-  void sendEmail(int userID, String to, String replyTo, String subject, String message, String token, AsyncCallback<Void> async);
 
   void getNextExercise(long userID, boolean getNext, AsyncCallback<FlashcardResponse> async);
   void getNextExercise(long userID, Map<String, Collection<String>> typeToSection, boolean getNext, AsyncCallback<FlashcardResponse> async);
@@ -172,4 +170,15 @@ public interface LangTestDatabaseAsync {
   void deleteItem(String exid, AsyncCallback<Boolean> async);
 
   void getUserHistoryForList(long userid, long listid, String lastID, AsyncCallback<List<Session>> async);
+
+/*  void getCompletedExercises(int user, AsyncCallback<Set<String>> async);
+
+  void getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID, String prefix, boolean showUnansweredFirst, AsyncCallback<ExerciseListWrapper> async);
+
+  void getExerciseIds(int reqID, long userID, boolean unansweredFirst, AsyncCallback<ExerciseListWrapper> async);
+
+  void getExerciseIds(int reqID, AsyncCallback<ExerciseListWrapper> async);
+
+  void getExerciseIds(int reqID, long userID, String prefix, AsyncCallback<ExerciseListWrapper> async);
+ */
 }
