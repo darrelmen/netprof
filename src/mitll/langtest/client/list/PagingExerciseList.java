@@ -253,7 +253,6 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
   }
 
   public void clear() { pagingContainer.clear(); }
-
   public void flush() { pagingContainer.flush();  }
 
   /**
