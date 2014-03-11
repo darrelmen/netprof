@@ -44,8 +44,7 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
    */
   @Override
   protected Widget getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
-    System.out.println("getAnswerWidget : ex " +exercise.getID()+ " index " + index);
-
+    //System.out.println("getAnswerWidget : ex " +exercise.getID()+ " index " + index);
     SimpleRecordExercisePanel questionState = this;
     Panel panel = new SimpleRecordPanel(service, controller, exercise, questionState, index).getPanel();
     addAnswerWidget(index, panel);
