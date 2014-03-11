@@ -18,10 +18,10 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 class ButtonContainer {
-  private List<Button> buttons = new ArrayList<Button>();
-  private Set<Button> enabled = new HashSet<Button>();
-  private Set<Button> disabled = new HashSet<Button>();
-  private Map<String, Collection<Button>> nameToButton = new HashMap<String, Collection<Button>>();
+  private final List<Button> buttons = new ArrayList<Button>();
+  private final Set<Button> enabled = new HashSet<Button>();
+  private final Set<Button> disabled = new HashSet<Button>();
+  private final Map<String, Collection<Button>> nameToButton = new HashMap<String, Collection<Button>>();
 
   public void add(Button b, String name) {
     buttons.add(b);
