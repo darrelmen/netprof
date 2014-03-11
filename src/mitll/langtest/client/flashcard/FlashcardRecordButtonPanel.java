@@ -75,7 +75,11 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
     return hp;
   }
 
-  protected RecordButton makeRecordButton(ExerciseController controller) {
+  @Override
+  protected RecordButton makeRecordButton(ExerciseController controller, String title) {
+
+//    System.out.println("FlashcardRecordButtonPanel.makeRecordButton ");
+
     return new FlashcardRecordButton(controller.getRecordTimeout(), this, true, true);  // TODO : fix later in classroom?
   }
 
@@ -102,11 +106,10 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
    */
   @Override
   protected void receivedAudioAnswer(final AudioAnswer result, ExerciseQuestionState questionState, Panel outer) {
-    System.out.println("receivedAudioAnswer " + result);
-    boolean correct = result.isCorrect();
+    System.out.println("FlashcardRecordButtonPanel.receivedAudioAnswer " + result);
     recordButton.setVisible(false);
     waiting.setVisible(false);
-    if (correct) {
+    if (result.isCorrect()) {
       correctIcon.setVisible(true);
     } else {
       incorrect.setVisible(true);
