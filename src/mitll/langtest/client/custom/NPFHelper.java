@@ -79,6 +79,13 @@ public class NPFHelper implements RequiresResize {
     listContent.addStyleName("userListBackground");
   }
 
+  /**
+   * Make the instance name uses the unique id for the list.
+   *
+   * @param ul
+   * @param instanceName
+   * @return
+   */
   private Panel doNPF(UserList ul, String instanceName) {
     Panel hp = new HorizontalPanel();
     Panel left = new SimplePanel();
@@ -87,7 +94,7 @@ public class NPFHelper implements RequiresResize {
     npfContentPanel = new SimplePanel();
     hp.add(npfContentPanel);
     npfContentPanel.addStyleName("floatRight");
-    npfExerciseList = makeNPFExerciseList(npfContentPanel, instanceName + "_"+ul.getName(),ul.getUniqueID());
+    npfExerciseList = makeNPFExerciseList(npfContentPanel, instanceName + "_"+ul.getUniqueID(),ul.getUniqueID());
 
     left.add(npfExerciseList.getExerciseListOnLeftSide(controller.getProps()));
     rememberAndLoadFirst(ul);
