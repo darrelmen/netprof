@@ -59,6 +59,11 @@ public class FlashcardRecordButton extends RecordButton {
     DOM.setStyleAttribute(getElement(), "lineHeight", "37px");
 
     initRecordButton();
+
+    getElement().setId("FlashcardRecordButton");
+
+    System.out.println("making record button for flashcard! \n\n\n\n");
+
   }
 
   protected void setupRecordButton(boolean addKeyBinding) {

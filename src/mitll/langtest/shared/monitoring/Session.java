@@ -21,6 +21,7 @@ public class Session implements IsSerializable, SetScore {
   public long duration;
   private long userid;
   private int correct;
+  private float correctPercent;
   private float avgScore;
   private Map<String,Boolean> exidToCorrect = new HashMap<String,Boolean>();
   private Map<String,Float> exidToScore = new HashMap<String,Float>();
@@ -28,6 +29,11 @@ public class Session implements IsSerializable, SetScore {
   private Set<String> exids = new HashSet<String>();
 
   public Session(){} // required
+
+  /**
+   * @see mitll.langtest.server.database.ResultDAO#partitionIntoSessions2
+   * @param userid
+   */
   public Session(long userid) { this.userid = userid;  }
 
   public long getAverageDurMillis() { return duration/ getNumAnswers(); }
@@ -43,6 +49,10 @@ public class Session implements IsSerializable, SetScore {
     this.numAnswers = exids.size();
     this.avgScore = calcAvgScore();
     this.correct = calcCorrect();
+    correctPercent = 100f*((float)correct/(float)exidToCorrect.size());
+
+   // System.out.println("setNumAnswers correct "+ correct + "total "  +exidToCorrect.size() + " % = " + correctPercent);
+
     exids = null;
     exidToCorrect = null;
     exidToScore = null;
@@ -59,11 +69,17 @@ public class Session implements IsSerializable, SetScore {
   private float calcAvgScore() {
     float total = 0f;
     Collection<Float> values = exidToScore.values();
-    //System.out.println("scores "+ values);
+    int num = 0;
     for (Float score : values) {
-      total += Math.max(0f,score);
+      if (score > 0f) {
+        num++;
+        total += score;
+      }
     }
-    return total/(float)values.size();
+    float v = num == 0 ? 0f : (total / (float) num);
+    //System.out.println("calcAvgScore scores "+ values + " = "  +v);
+
+    return v;
   }
 
   @Override
@@ -91,9 +107,14 @@ public class Session implements IsSerializable, SetScore {
     exidToScore.put(id, pronScore);
   }
 
+  public float getCorrectPercent() {
+    return correctPercent;
+  }
+
   public String toString() {
     return "user " + userid+
       " num " + getNumAnswers() + " dur " + duration/(60*1000) + " minutes, avg " + getAverageDurMillis()/1000 +
-      " secs " + correct + " avg score : " + avgScore;
+      " secs, correct = " + correct + "(" + correctPercent+
+      "%) avg score : " + avgScore;
   }
 }
