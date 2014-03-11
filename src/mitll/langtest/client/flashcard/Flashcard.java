@@ -1,13 +1,19 @@
 package mitll.langtest.client.flashcard;
 
+import com.github.gwtbootstrap.client.ui.Dropdown;
 import com.github.gwtbootstrap.client.ui.Image;
+import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.Paragraph;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
@@ -32,42 +38,46 @@ public class Flashcard implements RequiresResize {
   private Paragraph appName;
   private Image flashcardImage;
   private Image collab;
-  private int min = 720;
+  private static final int min = 720;
+  private HTML userNameWidget;
+  private String nameForAnswer;
 
   /**
    * @see mitll.langtest.client.LangTest#doFlashcard()
    * @see mitll.langtest.client.LangTest#makeHeaderRow()
    */
-  public Flashcard() {}
+  public Flashcard(String nameForAnswer) { this.nameForAnswer = nameForAnswer; }
 
   /**
    * @see mitll.langtest.client.LangTest#doFlashcard()
    * @param splashText
+   * @param userName
    * @return
    */
-  public HorizontalPanel makeFlashcardHeaderRow(String splashText) {
-    String appIcon = NEW_PRO_F2_PNG;
-    return getHeaderRow(splashText, appIcon, AVP, false);
+  public Panel makeFlashcardHeaderRow(String splashText, String userName) {
+    String appIcon = "NewProF2.png";
+    return getHeaderRow(splashText, false, appIcon, AVP, userName, new HTML(""), null, null, null, null);
   }
 
   /**
-   * @see mitll.langtest.client.LangTest#makeHeaderRow()
    * @param splashText
+   * @param userName
    * @return
+   * @see mitll.langtest.client.LangTest#makeHeaderRow()
    */
-/*  public HorizontalPanel makeNPFHeaderRow(String splashText) {
-    return makeNPFHeaderRow(splashText,PRONUNCIATION_FEEDBACK);
-  }*/
-  public HorizontalPanel makeNPFHeaderRow(String splashText, boolean isBeta) {
-    return getHeaderRow(splashText, NEW_PRO_F1_PNG, PRONUNCIATION_FEEDBACK, isBeta);
+  public Panel makeNPFHeaderRow(String splashText, boolean isBeta, String userName, HTML browserInfo, ClickHandler logoutClickHandler,
+                                ClickHandler users,
+                                ClickHandler results,
+                                ClickHandler monitoring) {
+    return getHeaderRow(splashText, isBeta,"NewProF1.png", PRONUNCIATION_FEEDBACK, userName, browserInfo, logoutClickHandler,
+      users, results, monitoring);
   }
 
-  public HorizontalPanel makeNPFHeaderRow(String splashText, String appTitle) {
-    String appIcon = NEW_PRO_F1_PNG;
-    return getHeaderRow(splashText, appIcon, appTitle, false);
-  }
-
-  public HorizontalPanel getHeaderRow(String splashText, String appIcon, String appTitle, boolean isBeta) {
+  public Panel getHeaderRow(String splashText, boolean isBeta, String appIcon, String appTitle, String userName, HTML browserInfo,
+                            ClickHandler logoutClickHandler,
+                            ClickHandler users,
+                            ClickHandler results,
+                            ClickHandler monitoring) {
     HorizontalPanel headerRow = new HorizontalPanel();
     headerRow.setWidth("100%");
     headerRow.addStyleName("headerBackground");
@@ -98,16 +108,67 @@ public class Flashcard implements RequiresResize {
     headerRow.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
 
     collab = new Image(LangTest.LANGTEST_IMAGES + "collabIcon3.png");
-    headerRow.add(collab);
+    DivWidget widget = new DivWidget();
+    widget.add(collab);
 
-      headerRow.addAttachHandler(new AttachEvent.Handler() {
-        @Override
-        public void onAttachOrDetach(AttachEvent event) {
-          onResize();
-        }
-      });
+    Panel hp = new HorizontalPanel();
+    hp.getElement().setId("UsernameContainer");
+    userNameWidget = new HTML(userName);
+    userNameWidget.getElement().setId("Username");
+
+    userNameWidget.addStyleName("rightTwentyMargin");
+    userNameWidget.addStyleName("blueColor");
+    hp.add(userNameWidget);
+
+    Dropdown w = new Dropdown();
+    w.setRightDropdown(true);
+    w.setIcon(IconType.COG);
+
+    NavLink widget1 = new NavLink("Log Out");
+    widget1.addClickHandler(logoutClickHandler);
+
+    if (users != null) {
+      NavLink widget2 = new NavLink("Users");
+      widget2.addClickHandler(users);
+      w.add(widget2);
+    }
+
+    if (results != null) {
+      NavLink widget2 = new NavLink(nameForAnswer.substring(0,1).toUpperCase()+nameForAnswer.substring(1));
+      widget2.addClickHandler(results);
+      w.add(widget2);
+    }
+
+    if (monitoring != null) {
+      NavLink widget2 = new NavLink("Monitoring");
+      widget2.addClickHandler(monitoring);
+      w.add(widget2);
+    }
+
+    w.add(widget1);
+
+    hp.add(w);
+
+    browserInfo.addStyleName("leftFiveMargin");
+    browserInfo.addStyleName("darkerBlueColor");
+    hp.add(browserInfo);
+    widget.add(hp);
+    hp.addStyleName("topMinusFiveMargin");
+
+    headerRow.add(widget);
+    headerRow.addAttachHandler(new AttachEvent.Handler() {
+      @Override
+      public void onAttachOrDetach(AttachEvent event) {
+        onResize();
+      }
+    });
 
     return headerRow;
+  }
+
+  public void setUserName(String name) {
+    System.out.println("set user name " + name);
+    this.userNameWidget.setText(name);
   }
 
   @Override
