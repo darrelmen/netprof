@@ -126,8 +126,6 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
   }
 
   private void postAudioFile(final Panel outer, final int tries) {
-    System.out.println("postAudioFile... ");
-
     //System.out.println("RecordButtonPanel : postAudioFile " );
     final long then = System.currentTimeMillis();
     reqid++;
@@ -140,7 +138,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
       controller.getUser(),
       reqid,
       !exercise.isPromptInEnglish(),
-      getAudioType(),
+      audioType,
       doFlashcardAudio,
       true, new AsyncCallback<AudioAnswer>() {
         public void onFailure(Throwable caught) {
