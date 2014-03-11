@@ -474,7 +474,6 @@ public class BootstrapFlashcardExerciseList<T extends ExerciseShell> implements 
     return null;
   }
 
-  @Override
   public boolean loadNextExercise(String id) {
     return false;
   }
