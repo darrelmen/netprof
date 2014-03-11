@@ -255,6 +255,9 @@ public class FlexSectionExerciseList<T extends ExerciseShell> extends HistoryExe
     if (controller.getProps().isCRTDataCollectMode()) {
       firstTypeRow.setWidget(0, 3, widget);
     }
+    else {
+      widget.addStyleName("leftFiftyPercentMargin");
+    }
   }
 
   /**
