@@ -6,16 +6,26 @@ import mitll.langtest.shared.Result;
 import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.monitoring.Session;
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -927,5 +937,103 @@ public class ResultDAO extends DAO {
     } catch (SQLException e) {
       logger.warn("addStimulus : got " + e);
     }
+  }
+
+  /**
+   * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+   * @param out
+   */
+/*
+  public void toXLSX(OutputStream out) {
+    long then = System.currentTimeMillis();
+    List<Result> results = getResults();
+    long now = System.currentTimeMillis();
+    if (now-then > 100) {
+      logger.warn("toXLSX : took " + (now-then) + " millis to read " +results.size()+
+        " results from database");
+    }
+
+    writeExcelToStream(results, out);
+  }
+*/
+
+  public void writeExcelToStream(List<Result> results, OutputStream out) {
+    SXSSFWorkbook wb = writeExcel(results);
+    long then = System.currentTimeMillis();
+    try {
+      wb.write(out);
+      long now2 = System.currentTimeMillis();
+      if (now2-then > 100) {
+        logger.warn("toXLSX : took " + (now2-then) + " millis to write excel to output stream ");
+      }
+      out.close();
+      wb.dispose();
+    } catch (IOException e) {
+      logger.error("got " + e, e);
+    }
+  }
+
+  private SXSSFWorkbook writeExcel(List<Result> results) {
+    long now;
+    long then = System.currentTimeMillis();
+
+    SXSSFWorkbook wb = new SXSSFWorkbook(1000); // keep 100 rows in memory, exceeding rows will be flushed to disk
+    Sheet sheet = wb.createSheet("Results");
+    int rownum = 0;
+    CellStyle cellStyle = wb.createCellStyle();
+    DataFormat dataFormat = wb.createDataFormat();
+
+    cellStyle.setDataFormat(dataFormat.getFormat("MMM dd HH:mm:ss"));
+    Row headerRow = sheet.createRow(rownum++);
+
+    List<String> columns = Arrays.asList("id", "userid", Database.EXID, "qid", Database.TIME, "answer",
+      "valid", "grades", FLQ, SPOKEN, AUDIO_TYPE, DURATION, CORRECT, PRON_SCORE, STIMULUS);
+
+    for (int i = 0; i < columns.size(); i++) {
+      Cell headerCell = headerRow.createCell(i);
+      headerCell.setCellValue(columns.get(i));
+    }
+
+    for (Result result : results) {
+      Row row = sheet.createRow(rownum++);
+      int j = 0;
+      Cell cell = row.createCell(j++);
+      cell.setCellValue(result.uniqueID);
+      cell = row.createCell(j++);
+      cell.setCellValue(result.userid);
+      cell = row.createCell(j++);
+      cell.setCellValue(result.id);
+      cell = row.createCell(j++);
+      cell.setCellValue(result.qid);
+      cell = row.createCell(j++);
+      cell.setCellValue(new Date(result.timestamp));
+      cell.setCellStyle(cellStyle);
+
+      cell = row.createCell(j++);
+      cell.setCellValue(result.answer);
+      cell = row.createCell(j++);
+      cell.setCellValue(result.valid);
+      cell = row.createCell(j++);
+      cell.setCellValue(result.getGradeInfo());
+      cell = row.createCell(j++);
+      cell.setCellValue(result.flq);
+      cell = row.createCell(j++);
+      cell.setCellValue(result.spoken);
+      cell = row.createCell(j++);
+      cell.setCellValue(result.audioType);
+      cell = row.createCell(j++);
+      cell.setCellValue(result.durationInMillis);
+      cell = row.createCell(j++);
+      cell.setCellValue(result.isCorrect());
+      cell = row.createCell(j++);
+      cell.setCellValue(result.getPronScore());
+      cell = row.createCell(j++);
+      cell.setCellValue(result.getStimulus());
+    }
+    now = System.currentTimeMillis();
+    if (now-then > 100) {
+      logger.warn("toXLSX : took " + (now-then) + " millis to add " + rownum + " rows to sheet, or " + (now-then)/rownum + " millis/row");
+    }
+    return wb;
   }
 }
