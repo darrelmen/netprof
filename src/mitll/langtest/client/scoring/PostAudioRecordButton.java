@@ -49,7 +49,8 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     this.controller = controller;
     this.service = service;
     this.recordInResults = recordInResults;
-    this.audioType =audioType;
+    this.audioType = audioType;
+    System.out.println("Audio type " + audioType);
     getElement().setId("PostAudioRecordButton");
   }
 
@@ -70,7 +71,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
       controller.getUser(),
       reqid,
       !exercise.isPromptInEnglish(),
-      getAudioType(),
+      audioType,
       false, recordInResults,
       new AsyncCallback<AudioAnswer>() {
         public void onFailure(Throwable caught) {
