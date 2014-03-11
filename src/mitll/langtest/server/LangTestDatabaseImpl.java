@@ -457,7 +457,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     ensureMP3(byID.getRefAudio());
     ensureMP3(byID.getSlowAudioRef());
     if (byID.getRefAudio() == null && byID.getSlowAudioRef() == null) {
-      logger.warn("huh? no ref audio for " + byID);
+      //logger.warn("huh? no ref audio for " + byID);
     }
 
     for (String spath : byID.getSynonymAudioRefs()) {
