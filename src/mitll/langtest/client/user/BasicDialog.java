@@ -36,6 +36,7 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class BasicDialog {
+  public static final String TRY_AGAIN = "Try Again";
   private List<Popover> visiblePopovers = new ArrayList<Popover>();
 
   protected FormField addControlFormField(Panel dialogBox, String label) {
@@ -146,7 +147,7 @@ public class BasicDialog {
   }
 
   protected void markError(FormField dialectGroup, String message) {
-    markError(dialectGroup.group, dialectGroup.box, dialectGroup.box, "Try Again", message);
+    markError(dialectGroup.group, dialectGroup.box, dialectGroup.box, TRY_AGAIN, message);
   }
 
   protected void markError(ControlGroup dialectGroup, Widget dialect, Focusable focusable, String header, String message) {
@@ -168,7 +169,7 @@ public class BasicDialog {
     } else {
       try {
         int age = Integer.parseInt(text);
-        validAge = (age >= min && age < max) || age == exception;
+        validAge = (age >= min && age <= max) || age == exception;
         ageEntryGroup.group.setType(validAge ? ControlGroupType.NONE : ControlGroupType.ERROR);
       } catch (NumberFormatException e) {
         ageEntryGroup.group.setType(ControlGroupType.ERROR);
@@ -259,7 +260,7 @@ public class BasicDialog {
   public void hidePopovers() {
     for (Popover popover : visiblePopovers) popover.hide();
     visiblePopovers.clear();
-  }
+    }
 
   private static class MyPopover extends Popover {
     public void dontFireAgain() {
@@ -304,13 +305,22 @@ public class BasicDialog {
     public void setRightSide(Widget rightSide) { this.rightSide = rightSide; }
 
     public String toString() { return "FormField value " + getText(); }
+    public ControlGroup getGroup() {
+      return group;
+    }
+
+    public Widget getWidget() {
+      return box;
+    }
   }
 
   protected class ListBoxFormField {
     public final ListBox box;
+  //  public final ControlGroup group;
 
     public ListBoxFormField(final ListBox box) {
       this.box = box;
+     // this.group = group;
       box.addChangeHandler(new ChangeHandler() {
         @Override
         public void onChange(ChangeEvent event) {
@@ -323,13 +333,17 @@ public class BasicDialog {
       return box.getItemText(box.getSelectedIndex());
     }
 
-    public String toString() {
-      return "Box: " + getValue();
+    protected void markSimpleError(String message) {
+      markSimpleError(message, Placement.RIGHT);
     }
 
-    protected void markSimpleError(String message) {
+    protected void markSimpleError(String message, Placement placement) {
       box.setFocus(true);
-      setupPopover(box, "Try Again", message, Placement.RIGHT);
+      setupPopover(box, TRY_AGAIN, message, placement);
+    }
+
+    public String toString() {
+      return "Box: " + getValue();
     }
   }
 }
