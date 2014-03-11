@@ -1,6 +1,5 @@
 package mitll.langtest.client.flashcard;
 
-import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.NavigationHelper;
@@ -34,17 +33,17 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
       public void answerPosted() {
         TextCRTFlashcard.this.answerPosted();
       }
-    });
+    }, 300);
   }
 
   protected void answerPosted() {
     navigationHelper.enableNextButton(true);
   }
 
-  @Override
+ // @Override
   protected void addRecordingAndFeedbackWidgets(Exercise e, LangTestDatabaseAsync service, ExerciseController controller,
-                                                int feedbackHeight, Panel toAddTo) {
-    textResponse.addWidgets(this, e, service, controller, true, false, true, 1);
+                                                int feedbackHeight) {
+    textResponse.addWidgets(this, e, service, controller, true, false, true, 1, TextResponse.CHECK, true);
   }
 
   @Override
