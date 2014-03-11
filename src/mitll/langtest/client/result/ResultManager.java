@@ -1,6 +1,5 @@
 package mitll.langtest.client.result;
 
-import com.github.gwtbootstrap.client.ui.Modal;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -14,6 +13,7 @@ import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.Panel;
@@ -78,6 +78,9 @@ public class ResultManager extends PagerTable {
   private Widget lastTable = null;
   private Button closeButton;
 
+  /**
+   * @see mitll.langtest.client.LangTest#makeLogoutParts
+   */
   public void showResults() {
     // Create the popup dialog box
     final DialogBox dialogBox = new DialogBox();
@@ -120,9 +123,9 @@ public class ResultManager extends PagerTable {
 
   /**
    * Experimental
-   * @deprecated not ready
+   * @xdeprecated not ready
    */
-  private void showResultsNew() {
+/*  private void showResultsNew() {
     // Create the popup dialog box
     //   final DialogBox dialogBox = new DialogBox();
     final Modal dialogBox = new Modal(false);
@@ -133,16 +136,16 @@ public class ResultManager extends PagerTable {
     // Enable glass background.
     // dialogBox.setGlassEnabled(true);
 
- /*   closeButton = new Button("Close");
+ *//*   closeButton = new Button("Close");
     closeButton.setEnabled(true);
-    closeButton.getElement().setId("closeButton");*/
+    closeButton.getElement().setId("closeButton");*//*
 
     //final VerticalPanel dialogVPanel = new VerticalPanel();
-/*
+*//*
     int left = (Window.getClientWidth()) / 40;
     int top  = (Window.getClientHeight()) / 160;
     // dialogBox.setPopupPosition(left, top);
-    dialogVPanel.setWidth("100%");*/
+    dialogVPanel.setWidth("100%");*//*
     //  dialogBox.setWidth((int)((float)Window.getClientWidth()*0.9f) + "px");
 
     service.getNumResults(new AsyncCallback<Integer>() {
@@ -150,7 +153,7 @@ public class ResultManager extends PagerTable {
       public void onFailure(Throwable caught) {}
       @Override
       public void onSuccess(Integer result) {
-        populateTable(result, /*dialogVPanel,*/ dialogBox);
+        populateTable(result, *//*dialogVPanel,*//* dialogBox);
       }
     });
 
@@ -158,11 +161,22 @@ public class ResultManager extends PagerTable {
    // dialogBox.add(dialogVPanel);
 
     // Add a handler to send the name to the server
- /*   closeButton.addClickHandler(new ClickHandler() {
+ *//*   closeButton.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         dialogBox.hide();
       }
-    });*/
+    });*//*
+  }*/
+
+  private SafeHtml getURL2() {
+    SafeHtmlBuilder sb = new SafeHtmlBuilder();
+    sb.appendHtmlConstant("<a href='" +
+      "downloadResults" +
+      "'" +
+      ">");
+    sb.appendEscaped("Download Excel");
+    sb.appendHtmlConstant("</a>");
+    return sb.toSafeHtml();
   }
 
   private void populateTableOld(int numResults, Panel dialogVPanel, DialogBox dialogBox) {
@@ -174,6 +188,8 @@ public class ResultManager extends PagerTable {
     Widget table = getAsyncTable(numResults, !textResponse, new ArrayList<Grade>(), -1, 1);
     table.setWidth("100%");
 
+    dialogVPanel.add(new Anchor(getURL2()));
+
     dialogVPanel.add(table);
     dialogVPanel.add(closeButton);
 
@@ -181,23 +197,24 @@ public class ResultManager extends PagerTable {
     dialogBox.show();
   }
 
-  private void populateTable(int numResults, //Panel dialogVPanel,
+/*  private void populateTable(int numResults, //Panel dialogVPanel,
                              //   DialogBox dialogBox
                              Modal dialogBox
   ) {
-   /* if (lastTable != null) {
+   *//* if (lastTable != null) {
       dialogVPanel.remove(lastTable);
       dialogVPanel.remove(closeButton);
-    }*/
+    }*//*
 
     Widget table = getAsyncTable(numResults, true, new ArrayList<Grade>(),-1, 1);
 //    dialogVPanel.add(table);
   //  dialogVPanel.add(closeButton);
 
 //    lastTable = table;
+
     dialogBox.add(table);
     dialogBox.show();
-  }
+  }*/
 
   /**
    * @see GradingExercisePanel#showResults
@@ -405,7 +422,6 @@ public class ResultManager extends PagerTable {
   /**
    *
    * @param grader used in GradingResultManager subclass
-   * @param grader used in GradingResultManager subclass
    * @param numGrades used in GradingResultManager subclass
    * @param table to add columns to
    */
@@ -449,11 +465,7 @@ public class ResultManager extends PagerTable {
     TextColumn<Result> gradeInfo = new TextColumn<Result>() {
       @Override
       public String getValue(Result answer) {
-        if (answer.gradeInfo.endsWith(",")) {
-          return answer.gradeInfo.substring(0, answer.gradeInfo.length() - 1);
-        } else {
-          return answer.gradeInfo;
-        }
+        return answer.getGradeInfo();
       }
     };
     table.addColumn(gradeInfo, "Grades");

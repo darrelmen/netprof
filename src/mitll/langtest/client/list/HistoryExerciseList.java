@@ -234,10 +234,10 @@ public class HistoryExerciseList<T extends ExerciseShell> extends PagingExercise
       Collection<String> selections = selectionState2.get(type);
       if (selections.iterator().next().equals(HistoryExerciseList.ANY)) {
         if (hasNonClearSelection) {
-          System.out.println("restoreListBoxState : skipping type since below a selection = " + type);
+          //System.out.println("restoreListBoxState : skipping type since below a selection = " + type);
         }
         else {
-          System.out.println("restoreListBoxState : clearing " + type);
+          //System.out.println("restoreListBoxState : clearing " + type);
 
           selectItem(type, selections);
         }
@@ -260,7 +260,7 @@ public class HistoryExerciseList<T extends ExerciseShell> extends PagingExercise
       }
     }
 
-    System.out.println("restoreListBoxState :typesWithSelections " + typesWithSelections);
+    //System.out.println("restoreListBoxState :typesWithSelections " + typesWithSelections);
 
     // clear enabled state for all items below first selection...
     if (!typesWithSelections.isEmpty()) {
@@ -272,18 +272,17 @@ public class HistoryExerciseList<T extends ExerciseShell> extends PagingExercise
          if (type.equals(first)) start = true;
       }
 
-     // List<String> afterFirst = typesWithSelections.subList(1, typesWithSelections.size());
-      System.out.println("restoreListBoxState : afterFirst " + afterFirst);
+      //System.out.println("restoreListBoxState : afterFirst " + afterFirst);
 
       for (String type : afterFirst) {
-        System.out.println("restoreListBoxState : clearing enabled on " + type);
+        //System.out.println("restoreListBoxState : clearing enabled on " + type);
 
         clearEnabled(type);
       }
     }
 
     for (String type : typesWithSelections) {
-      System.out.println("restoreListBoxState : selecting items for " + type);
+      //System.out.println("restoreListBoxState : selecting items for " + type);
 
       Collection<String> selections = selectionState2.get(type);
       selectItem(type, selections);
@@ -361,7 +360,7 @@ public class HistoryExerciseList<T extends ExerciseShell> extends PagingExercise
         restoreListBoxState(selectionState);
         loadExercises(selectionState.getTypeToSection(), selectionState.getItem());
       } catch (Exception e) {
-        System.out.println("onValueChange " + token + " badly formed. Got " + e);
+        System.out.println("HistoryExerciseList.onValueChange " + token + " badly formed. Got " + e);
         e.printStackTrace();
       }
     }
