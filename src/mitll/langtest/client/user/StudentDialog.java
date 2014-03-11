@@ -11,7 +11,9 @@ import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Form;
 import com.github.gwtbootstrap.client.ui.Modal;
 import com.github.gwtbootstrap.client.ui.RadioButton;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
+import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.github.gwtbootstrap.client.ui.event.ShowEvent;
@@ -26,6 +28,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -102,9 +105,13 @@ public class StudentDialog extends UserDialog {
 
   public void displayLoginBox() {
     final Modal dialogBox = getDialog("Login");
+    dialogBox.setWidth("700px");
     dialogBox.setAnimation(false);
     dialogBox.setMaxHeigth("760px");
-    DOM.setStyleAttribute(dialogBox.getElement(), "top", "4%");
+
+    Element element = dialogBox.getElement();
+    element.setId("Student_LoginBoxDialog");
+    DOM.setStyleAttribute(element, "top", "1%");
     Form form = new Form();
     form.addStyleName("form-horizontal");
     DOM.setStyleAttribute(form.getElement(), "marginBottom", "0px");
@@ -226,7 +233,6 @@ public class StudentDialog extends UserDialog {
                                         final FormField password,
                                         final ListBoxFormField purpose,
                                         final AccordionGroup accordion) {
-    // Create a handler for the sendButton and nameField
     return new ClickHandler() {
       /**
        * Do validation.
@@ -271,8 +277,7 @@ public class StudentDialog extends UserDialog {
       ) {
       service.userExists(userID, new AsyncCallback<Integer>() {
         @Override
-        public void onFailure(Throwable caught) {
-        }
+        public void onFailure(Throwable caught) {}
 
         @Override
         public void onSuccess(Integer result) {
@@ -291,6 +296,7 @@ public class StudentDialog extends UserDialog {
             }
             checkThenRegister(audioType, registrationInfo, dialogBox, userID);
           }
+          setRecordingOrder();
         }
       });
     } else {
@@ -356,7 +362,7 @@ public class StudentDialog extends UserDialog {
 
   private FormField getDialect(Panel dialogBox) {
     final FormField dialectGroup = addControlFormField(dialogBox, "Dialect");
-    dialectGroup.box.addStyleName("topMargin");
+    dialectGroup.group.addStyleName("topTwentyMargin");
 
     dialectGroup.box.addKeyUpHandler(new KeyUpHandler() {
       public void onKeyUp(KeyUpEvent event) {
@@ -495,13 +501,29 @@ public class StudentDialog extends UserDialog {
       DOM.setStyleAttribute(form.getElement(), "marginBottom", "0px");
 
       form.addStyleName("form-horizontal");
-      Fieldset fieldset = new Fieldset();
-      form.add(fieldset);
-      dialogBox.add(form);
 
-      ageEntryGroup = addControlFormField(fieldset, "Your age");
-      genderGroup = getListBoxFormField(fieldset, "Gender", getGenderBox());
-      weeks = addControlFormField(fieldset, "Weeks of Experience");
+      Fieldset fieldsetLeft = new Fieldset();
+      Fieldset fieldsetRight = new Fieldset();
+
+      DivWidget divLeft = new DivWidget();
+      divLeft.addStyleName("floatLeft");
+
+      DivWidget divRight = new DivWidget();
+      divRight.addStyleName("floatRight");
+
+      divLeft.add(fieldsetLeft);
+      form.add(divLeft);
+
+      divRight.add(fieldsetRight);
+      form.add(divRight);
+
+      dialogBox.add(divLeft);
+      dialogBox.add(divRight);
+
+      ageEntryGroup = addControlFormField(fieldsetLeft, "Your age");
+      genderGroup = getListBoxFormField(fieldsetRight, "Gender", getGenderBox());
+      weeks = addControlFormField(fieldsetLeft, "Weeks of Experience");
+      dialectGroup = getDialect(fieldsetRight);
 
       final ControlGroup ilrLevel = new ControlGroup();
       ilrLevel.addStyleName("leftFiveMargin");
@@ -509,14 +531,16 @@ public class StudentDialog extends UserDialog {
       ilrLevel.add(label);
       this.label = label;
       dialogBox.add(ilrLevel);
+      ilrLevel.addStyleName("floatLeft");
 
       FluidRow row = getILRLevels();
+      row.addStyleName("floatLeft");
+
       dialogBox.add(row);
       ilrLevels = row;
       FluidRow row2 = getEstimating2();
       dialogBox.add(row2);
       estimating = row2;
-      dialectGroup = getDialect(fieldset);
     }
 
     public void showOrHideILR(boolean show) {
@@ -528,11 +552,11 @@ public class StudentDialog extends UserDialog {
 
     public boolean checkValidity() {
       if (!ilrLevels.isVisible()) return true;
-      for (ListBoxFormField f : Arrays.asList(reading, listening, speaking, writing)) {
-        if (f.box.getValue().equals("Unset")) {
-          f.markSimpleError("Choose a level");
-          return false;
-        }
+      for (ListBoxFormField f : Arrays.asList(reading,listening,speaking,writing)) {
+         if (f.box.getValue().equals(UNSET)) {
+           f.markSimpleError("Choose a level", Placement.TOP);
+           return false;
+         }
       }
       return true;
     }
@@ -541,7 +565,7 @@ public class StudentDialog extends UserDialog {
       if (!estimating.isVisible()) return true;
 
       for (YesNo f : ilrs) {
-        if (!f.markSimpleError()) {
+        if (!f.markSimpleError(Placement.TOP)) {
           return false;
         }
       }
@@ -576,8 +600,8 @@ public class StudentDialog extends UserDialog {
       List<String> levels = Arrays.asList("Unset", "0+", "1", "1+", "2", "2+", "3", "3+", "4");
       reading = getListBoxFormField(c1, "Reading", getListBox2(levels));
       listening = getListBoxFormField(c2, "Listening", getListBox2(levels));
-      speaking = getListBoxFormField(c3, "Speaking", getListBox2(levels));
-      writing = getListBoxFormField(c4, "Writing", getListBox2(levels));
+      speaking  = getListBoxFormField(c3, "Speaking", getListBox2(levels));
+      writing   = getListBoxFormField(c4, "Writing", getListBox2(levels));
       return row;
     }
 
@@ -648,18 +672,21 @@ public class StudentDialog extends UserDialog {
     }
 
     public boolean markSimpleError() {
+      return markSimpleError(Placement.RIGHT);
+    }
+
+    public boolean markSimpleError(Placement placement) {
       if (!yes.getValue() && !no.getValue()) {
-        markError(group, yes, "Please choose", "Click yes or no.");
+        markError(group, yes, "Please choose", "Click yes or no.", placement);
         return false;
       } else return true;
     }
 
-    public boolean getValue() {
-      return yes.getValue();
-    }
-
     public String getName() {
       return name;
+    }
+    public boolean getValue() {
+      return yes.getValue();
     }
   }
 }
