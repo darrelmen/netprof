@@ -1,6 +1,7 @@
 package mitll.langtest.client.flashcard;
 
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.google.gwt.dom.client.MediaElement;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.i18n.client.HasDirection;
@@ -12,6 +13,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.list.ResponseChoice;
 import mitll.langtest.shared.Exercise;
 
 /**
@@ -61,7 +63,7 @@ public class AudioExerciseContent {
     Exercise.QAPair qaPair = e.getForeignLanguageQuestions().get(0);
 
     Panel container = new FlowPanel();
-
+    container.getElement().setId("makeFlashcardForCRT_container");
     //addThreeRow(e, content, includeExerciseID, container);
     addAudioRow(e, content, includeExerciseID, container);
 
@@ -75,24 +77,40 @@ public class AudioExerciseContent {
     return container;
   }
 
+  /**
+   * @see #getContentFromPrefix(String)
+   * @see #getAudioDiv(mitll.langtest.shared.Exercise)
+   * @see #makeFlashcardForCRT(mitll.langtest.shared.Exercise, String, boolean, boolean)
+   * @param e
+   * @param content
+   * @param includeExerciseID
+   * @param container
+   */
   private void addAudioRow(Exercise e, String content, boolean includeExerciseID, Panel container) {
+    Panel horiz = new FlowPanel();
+    horiz.getElement().setId("item_and_content");
+    container.add(horiz);
     if (includeExerciseID) {
-      Heading child = new Heading(5, "Exercise " + e.getID());
-      child.addStyleName("leftTenMargin");
-      container.add(child);
+      Heading child = getItemHeader(e);
+      horiz.add(child);
     }
     content = content.replaceAll("h2","h4");
-    content = changeAudioPrompt(content,false);
+    content = changeAudioPrompt(content, false);
     HTML contentFromPrefix = getContentFromPrefix(content);
-/*
-    ScrollPanel scroller = new ScrollPanel(contentFromPrefix);
-    scroller.getElement().setId("scroller");
-    container.add(scroller);*/
-    container.add(contentFromPrefix);
+    contentFromPrefix.addStyleName("floatRight");
+    horiz.add(contentFromPrefix);
 
     if (e.getRefAudio() != null && e.getRefAudio().length() > 0) {
       container.add(getAudioDiv(e));
     }
+  }
+
+  private Heading getItemHeader(Exercise e) {
+    Heading child = new Heading(5, "Item " + e.getID());
+    child.addStyleName("leftTenMargin");
+    child.addStyleName("floatLeft");
+    child.addStyleName("rightFiveMargin");
+    return child;
   }
 
 /*  private void addThreeRow(Exercise e, String content, boolean includeExerciseID, Panel container) {
@@ -111,9 +129,15 @@ public class AudioExerciseContent {
     }
   }*/
 
+  /**
+   * @see #addAudioRow(mitll.langtest.shared.Exercise, String, boolean, com.google.gwt.user.client.ui.Panel)
+   * @param prefix
+   * @return
+   */
   private HTML getContentFromPrefix(String prefix) {
     HTML contentPrefix = getMaybeRTLContent(prefix, true);
     contentPrefix.addStyleName("marginRight");
+    contentPrefix.addStyleName("wrapword");
     if (rightAlignContent) contentPrefix.addStyleName("rightAlign");
     return contentPrefix;
   }
@@ -147,16 +171,21 @@ public class AudioExerciseContent {
   }*/
 
   private String changeAudioPrompt(String suffix, boolean addBreak) {
-    if (responseType.equals("Both")) {
+    if (responseType.equals(ResponseChoice.BOTH)) {
       suffix = suffix.replace("answer the question below","answer the question below" +
         (addBreak?  "<br/>": " ") +
         "both written and spoken");
-    } else if (responseType.equals("Text")) {
+    } else if (responseType.equals(ResponseChoice.TEXT)) {
       suffix = suffix.replace("answer the question", "type your answer to the question");
     }
     return suffix;
   }
 
+  /**
+   * @see #addAudioRow(mitll.langtest.shared.Exercise, String, boolean, com.google.gwt.user.client.ui.Panel)
+   * @param e
+   * @return
+   */
   private SimplePanel getAudioDiv(Exercise e) {
     SimplePanel simplePanel = new SimplePanel();
     simplePanel.getElement().setId("audioWidgetContainer");
@@ -180,6 +209,8 @@ public class AudioExerciseContent {
     audio.addStyleName("floatRight");
     audio.addStyleName("rightFiveMargin");
 
+    //System.out.println("getting audio widget for " + e.getID());
+
     return audio;
   }
 
@@ -200,6 +231,7 @@ public class AudioExerciseContent {
         audio.setFocus(false);
       }
     });
+    audio.setPreload(MediaElement.PRELOAD_AUTO);
     return audio;
   }
 
@@ -214,14 +246,13 @@ public class AudioExerciseContent {
       requireAlignment && rightAlignContent ? HasDirection.Direction.RTL : WordCountDirectionEstimator.get().estimateDirection(content);
 
     HTML html = new HTML(content, direction);
-    //  html.setWidth("100%");
     if (requireAlignment && rightAlignContent) {
       html.addStyleName("rightAlign");
     }
     html.addStyleName("rightTenMargin");
 
     html.addStyleName("wrapword");
-    html.getElement().setId("textContent");
+    html.getElement().setId("maybeRTL_textContent");
     return html;
   }
 }
