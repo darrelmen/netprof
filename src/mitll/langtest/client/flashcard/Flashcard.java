@@ -37,12 +37,14 @@ public class Flashcard implements RequiresResize {
   private Image flashcardImage;
   private Image collab;
   private static final int min = 720;
+  private HTML userNameWidget;
+  private String nameForAnswer;
 
   /**
    * @see mitll.langtest.client.LangTest#doFlashcard()
    * @see mitll.langtest.client.LangTest#makeHeaderRow()
    */
-  public Flashcard() {}
+  public Flashcard(String nameForAnswer) { this.nameForAnswer = nameForAnswer; }
 
   /**
    * @see mitll.langtest.client.LangTest#doFlashcard()
@@ -68,8 +70,6 @@ public class Flashcard implements RequiresResize {
     return getHeaderRow(splashText, "NewProF1.png", PRONUNCIATION_FEEDBACK, userName, browserInfo, logoutClickHandler,
       users, results, monitoring);
   }
-
-  HTML userNameWidget;
 
   public Panel getHeaderRow(String splashText, String appIcon, String appTitle, String userName, HTML browserInfo,
                             ClickHandler logoutClickHandler,
@@ -106,12 +106,14 @@ public class Flashcard implements RequiresResize {
     headerRow.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
 
     collab = new Image(LangTest.LANGTEST_IMAGES + "collabIcon3.png");
-    //headerRow.add(collab);
     DivWidget widget = new DivWidget();
     widget.add(collab);
 
-    HorizontalPanel hp = new HorizontalPanel();
+    Panel hp = new HorizontalPanel();
+    hp.getElement().setId("UsernameContainer");
     userNameWidget = new HTML(userName);
+    userNameWidget.getElement().setId("Username");
+
     userNameWidget.addStyleName("rightTwentyMargin");
     userNameWidget.addStyleName("blueColor");
     hp.add(userNameWidget);
@@ -130,7 +132,7 @@ public class Flashcard implements RequiresResize {
     }
 
     if (results != null) {
-      NavLink widget2 = new NavLink("Results"); // TODO Fix title
+      NavLink widget2 = new NavLink(nameForAnswer.substring(0,1).toUpperCase()+nameForAnswer.substring(1));
       widget2.addClickHandler(results);
       w.add(widget2);
     }
@@ -145,10 +147,9 @@ public class Flashcard implements RequiresResize {
 
     hp.add(w);
 
-    HTML w2 = browserInfo;
-    w2.addStyleName("leftFiveMargin");
-    w2.addStyleName("darkerBlueColor");
-    hp.add(w2);
+    browserInfo.addStyleName("leftFiveMargin");
+    browserInfo.addStyleName("darkerBlueColor");
+    hp.add(browserInfo);
     widget.add(hp);
     hp.addStyleName("topMinusFiveMargin");
 
@@ -163,7 +164,10 @@ public class Flashcard implements RequiresResize {
     return headerRow;
   }
 
-  public void setUserName(String name) { this.userNameWidget.setText(name);}
+  public void setUserName(String name) {
+    System.out.println("set user name " + name);
+    this.userNameWidget.setText(name);
+  }
 
   @Override
   public void onResize() {
