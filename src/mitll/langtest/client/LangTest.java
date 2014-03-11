@@ -17,9 +17,8 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Element;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -55,6 +54,7 @@ import mitll.langtest.client.flashcard.FlashcardExercisePanelFactory;
 import mitll.langtest.client.flashcard.TextCRTFlashcard;
 import mitll.langtest.client.grading.GradingExercisePanelFactory;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.list.ResponseChoice;
 import mitll.langtest.client.monitoring.MonitoringManager;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.recorder.MicPermission;
@@ -85,7 +85,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private final Label status = new Label();
 
   private UserManager userManager;
-  private UserTable userTable;
   private ResultManager resultManager;
   private MonitoringManager monitoringManager;
   private FlashRecordPanelHeadless flashRecordPanel;
@@ -106,11 +105,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private Anchor logout;
   private Anchor users;
-  private Anchor showResults, monitoring;
-  private HTML releaseStatus;
   private StartupInfo startupInfo;
 
   private TabContainer navigation;
+  private boolean showUnansweredFirst = false;
+  private boolean showRerecord = false;
 
   /**
    * Make an exception handler that displays the exception.
@@ -305,9 +304,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       makeFlashContainer();
       belowFirstRow.add(flashRecordPanel);
     }
-    else {
-      System.out.println("*not* allowing recording of audio.");
-    }
 
     setPageTitle();
     browserCheck.checkForCompatibleBrowser();
@@ -374,47 +370,34 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @return
    */
   private Panel makeHeaderRow() {
+    Widget title;
+    if (isGoodwaveMode()) {
+      flashcard = new Flashcard(props.getNameForAnswer());
+      title = flashcard.makeNPFHeaderRow(props.getSplash(), props.isClassroomMode(),getGreeting(), getReleaseStatus(),new LogoutClickHandler(),
 
-
-    boolean isStudent = getLoginType().equals(PropertyHandler.LOGIN_TYPE.STUDENT) ||  getLoginType().equals(PropertyHandler.LOGIN_TYPE.SIMPLE);
-    boolean takeWholeWidth = isStudent || props.isFlashcardTeacherView() || props.isShowSections() || props.isGoodwaveMode();
-
-    Panel headerRow = /*takeWholeWidth ? new DivWidget() :*/ new FluidRow();
-
-    Panel title = getTitle();
-   // Panel titleColumn = takeWholeWidth ? title :new Column(takeWholeWidth ? 12 : 10, title);
-    Panel titleColumn = new Column(takeWholeWidth ? 12 : 10, title);
-    headerRow.add(titleColumn);
-    makeLogoutParts();
-    if (!takeWholeWidth) {
-      headerRow.add(new Column(2, getLogout()));
-    } else if (isStudent || props.isAdminView() || props.isDataCollectMode()) {
-      FluidRow adminRow = new FluidRow();
-      adminRow.addStyleName("alignCenter");
-      adminRow.addStyleName("inlineBlockStyle");
-
-      this.userline.setHTML(getUserText());
-      if (props.isAdminView()) {
-        adminRow.add(new Column(2, userline));
-        adminRow.add(new Column(2, logout));
-        adminRow.add(new Column(2, users));
-        adminRow.add(new Column(2, showResults));
-        adminRow.add(new Column(2, monitoring));
-        adminRow.add(new Column(2, releaseStatus));
-      }
-      else {
-        adminRow.add(new Column(2, userline));
-        adminRow.add(new Column(2, releaseStatus));
-        adminRow.add(new Column(6, new SimplePanel()));
-        adminRow.add(new Column(2, logout));
-      }
-
-      titleColumn.add(adminRow);
+        (props.isAdminView()) ? new UsersClickHandler(false) : null,
+        (props.isAdminView()) ? new ResultsClickHandler() : null,
+        (props.isAdminView()) ? new MonitoringClickHandler() : null
+        );
     }
+    else if (props.isFlashcardTeacherView() || props.isAutocrt()) {
+      flashcard = new Flashcard(props.getNameForAnswer());
+      title = flashcard.getHeaderRow(props.getSplash(), props.isClassroomMode(),"NewProF2.png",props.getAppTitle(), getGreeting(), getReleaseStatus(), new LogoutClickHandler(),
+
+        (props.isAdminView()) ? new UsersClickHandler(false) : null,
+        (props.isAdminView()) ? new ResultsClickHandler() : null,
+        (props.isAdminView()) ? new MonitoringClickHandler() : null);
+    }
+    else {
+      title = getTitleWidget();
+    }
+
+    headerRow = new FluidRow();
+    headerRow.add(new Column(12,title));
     return headerRow;
   }
 
-  private Panel getTitle() {
+/*  private Panel getTitle() {
     Panel title;
     if (isGoodwaveMode()) {
       flashcard = new Flashcard();
@@ -427,7 +410,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       title = getTitleWidget();
     }
     return title;
-  }
+  }*/
 
   private void addProgressBar(Panel widgets) {
     if (props.isGrading()) {
@@ -487,9 +470,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     RootPanel.get().addStyleName("noPadding");
     currentExerciseVPanel = container;
 
-    flashcard = new Flashcard();
+    flashcard = new Flashcard(props.getNameForAnswer());
 
-    HorizontalPanel headerRow = flashcard.makeFlashcardHeaderRow(props.getSplash());
+    Panel headerRow = flashcard.makeFlashcardHeaderRow(props.getSplash(), getGreeting());
     container.add(headerRow);
 
     userManager = new UserManager(this, service, props);
@@ -506,28 +489,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // setup sound manager
     setupSoundManager();
 
-/*    if (!props.isTimedGame()) {
-      showHelpNewUser();
-    }*/
-
     modeSelect();
   }
-
-  /**
-   * @see #doFlashcard()
-   */
-/*  private void showHelpNewUser() {
-    Storage stockStore = Storage.getLocalStorageIfSupported();
-    boolean showedHelpAlready = false;
-    if (stockStore != null) {
-      showedHelpAlready = stockStore.getItem("showedHelp") != null;
-      stockStore.setItem("showedHelp", "showedHelp");
-    }
-
-    if (!showedHelpAlready) {
-      showFlashHelp();
-    }
-  }*/
 
   @Override
   public void showFlashHelp() { flashcard.showFlashHelp(this, props.isFlashCard()); }
@@ -551,13 +514,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     userManager = new UserManager(this,service, props);
 
     logout = new Anchor("Logout");
-    logout.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        userManager.clearUser();
-        lastUser = -2;
-        userManager.teacherLogin();
-      }
-    });
+    logout.addClickHandler(new LogoutClickHandler());
     fp1.add(logout);
 
     HTML statusLine = getReleaseStatus();
@@ -581,15 +538,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   /**
    * @see #doDataCollectAdminView()
-   * @see #getLogout()
    * @see #makeHeaderRow()
    * @return
    */
   private HTML getReleaseStatus() {
     browserCheck.getBrowserAndVersion();
 
-    String releaseDate = props.getReleaseDate() != null ? " " +
-      props.getReleaseDate() : " 07/19_19";
+    String releaseDate = props.getReleaseDate() != null ? " " + props.getReleaseDate() : "";
     return new HTML("<span><font size=-2>" + browserCheck.browser + " " + browserCheck.ver + releaseDate + "</font></span>");
   }
 
@@ -671,10 +626,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (logout != null) logout.setVisible(showUserLine);
     if (userline != null) userline.setVisible(showUserLine);
     if (users != null) users.setVisible(isGrading || props.isAdminView());
-    if (showResults != null) showResults.setVisible(isGrading || props.isAdminView());
-    if (monitoring != null) monitoring.setVisible(isGrading || props.isAdminView());
 
-    System.out.println("modeSelect : goodwave mode " + props.isGoodwaveMode() + " auto crt mode = " + isAutoCRTMode());
+   // System.out.println("modeSelect : goodwave mode " + props.isGoodwaveMode() + " auto crt mode = " + isAutoCRTMode());
 
     checkInitFlash();
   }
@@ -747,16 +700,18 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       exerciseList.setFactory(new GradingExercisePanelFactory(service, outer, outer, exerciseList), userManager, props.getNumGradesToCollect());
     } else if (props.getFlashcardNextAndPrev()) {
       String responseType = props.getResponseType();
-      if (responseType.equalsIgnoreCase("Text")) {
+
+      System.out.println("setFactory : got response type " + responseType + " : " + props.getSecondResponseType());
+      if (responseType.equalsIgnoreCase(ResponseChoice.TEXT)) {
         exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer, exerciseList) {
           @Override
           public Panel getExercisePanel(Exercise e) {
             return new TextCRTFlashcard(e, service, controller);
           }
         }, userManager, 1);
-      } else if (responseType.equalsIgnoreCase("Audio")) {
+      } else if (responseType.equalsIgnoreCase(ResponseChoice.AUDIO)) {
         exerciseList.setFactory(new DataCollectionFlashcardFactory(service, outer, outer, exerciseList), userManager, 1);
-      } else if (responseType.equalsIgnoreCase("Both")) {
+      } else if (responseType.equalsIgnoreCase(ResponseChoice.BOTH)) {
         exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer, exerciseList) {
           @Override
           public Panel getExercisePanel(Exercise e) {
@@ -800,86 +755,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     flashRecordPanel.initFlash();
   }
 
-  /**
-   * Has both a logout and a users link and a results link
-   * @return
-   */
-  private Widget getLogout() {
-    VerticalPanel vp = new VerticalPanel();
-
-    vp.add(userline);
-    vp.add(logout);
-    vp.add(users);
-
-    vp.add(showResults);
-    vp.add(monitoring);
-    vp.add(releaseStatus);
-
-    return vp;
-  }
-
-  private void makeLogoutParts() {
-    this.userline = new HTML(getUserText());
-    logout = getLogoutLink();
-
-    makeUsersAnchor(false);
-    showResults = new Anchor(props.getNameForAnswer()+"s");
-    showResults.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        GWT.runAsync(new RunAsyncCallback() {
-          public void onFailure(Throwable caught) {
-            Window.alert("Code download failed");
-          }
-
-          public void onSuccess() {
-            resultManager.showResults();
-          }
-        });
-      }
-    });
-    showResults.setVisible(props.isAdminView());
-
-    monitoring = new Anchor("Monitoring");
-    monitoring.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        GWT.runAsync(new RunAsyncCallback() {
-          public void onFailure(Throwable caught) {
-            Window.alert("Code download failed");
-          }
-
-          public void onSuccess() {
-            monitoringManager.showResults();
-          }
-        });
-      }
-    });
-    monitoring.setVisible(props.isAdminView());
-
-    releaseStatus = getReleaseStatus();
-  }
-
-  private Anchor getLogoutLink() {
-    SafeHtmlBuilder b = new SafeHtmlBuilder();
-   // String s = "<font size=+1>Sign Out</font>";
-    String s = "Sign Out";
-    b.appendHtmlConstant(s);
-    Anchor logout = new Anchor(b.toSafeHtml());
-    logout.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        resetState();
-      }
-    });
-    return logout;
-  }
-
   private Anchor makeUsersAnchor(final boolean isDataCollectAdminView) {
     users = new Anchor("Users");
-    users.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        userTable = isDataCollectAdminView ? new AdminUserTable() : new UserTable();
-        userTable.showUsers(service, userManager.getUser());
-      }
-    });
+    users.addClickHandler(new UsersClickHandler(isDataCollectAdminView));
     users.setVisible(props.isAdminView());
     return users;
   }
@@ -890,11 +768,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   public String getGreeting() {
-    return userManager.getUserID() == null ? "" : ("Hello " + userManager.getUserID());
+    return userManager.getUserID() == null ? "" : (""+  userManager.getUserID());
   }
 
   /**
-   * @see #getLogout()
+   * @seex #getLogout()
    */
   @Override
   public void resetState() {
@@ -934,6 +812,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public void gotUser(long userID) {
     System.out.println("LangTest.gotUser : got user " + userID);
+    flashcard.setUserName(getGreeting());
     if (userline != null) {
       String userText = getUserText();
       userline.setHTML(userText);
@@ -1029,13 +908,20 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
   public boolean isReviewMode() { return audioType.equals(Result.AUDIO_TYPE_REVIEW); }
 
+  public void setShowUnansweredFirst(boolean val) { this.showUnansweredFirst = val; }
+
+  @Override
+  public void setShowRerecord(boolean v) { showRerecord = v; }
+
+  public boolean showUnansweredFirst() { return showUnansweredFirst; }
+  public boolean showRerecord() { return showRerecord; }
+
   /**
    * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers
    * @see mitll.langtest.client.recorder.SimpleRecordPanel#stopRecording()
    * @return
    */
   public int getUser() { return userManager.getUser(); }
-  public void pingAliveUser() { userManager.userAlive(); }
   public PropertyHandler getProps() { return props; }
   public boolean getEnglishOnly() { return props.isEnglishOnlyMode(); }
   public int getNumGradesToCollect() { return props.getNumGradesToCollect(); }
@@ -1101,15 +987,61 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   @Override
   public void showProgress() {
-//    System.err.println("todo : fix this!");
+    showProgress(exerciseList);
   }
 
-  // TODO fix this
-/*  public void showProgress(ListInterface exerciseList) {
+  private void showProgress(ListInterface exerciseList) {
     if (progressBar != null) {
       progressBar.showAdvance(exerciseList);
     }
-  }*/
+  }
 
   public ListInterface getExerciseList() { return exerciseList; }
+
+  private class LogoutClickHandler implements ClickHandler {
+    public void onClick(ClickEvent event) {
+      resetState();
+    }
+  }
+
+  private class UsersClickHandler implements ClickHandler {
+    private final boolean isDataCollectAdminView;
+
+    public UsersClickHandler(boolean isDataCollectAdminView) {
+      this.isDataCollectAdminView = isDataCollectAdminView;
+    }
+
+    public void onClick(ClickEvent event) {
+      UserTable userTable = isDataCollectAdminView ? new AdminUserTable(props) : new UserTable(props);
+      userTable.showUsers(service, userManager.getUser());
+    }
+  }
+
+  private class ResultsClickHandler implements ClickHandler {
+    public void onClick(ClickEvent event) {
+      GWT.runAsync(new RunAsyncCallback() {
+        public void onFailure(Throwable caught) {
+          Window.alert("Code download failed");
+        }
+
+        public void onSuccess() {
+          resultManager.showResults();
+        }
+      });
+    }
+  }
+
+  private class MonitoringClickHandler implements ClickHandler {
+    public void onClick(ClickEvent event) {
+      GWT.runAsync(new RunAsyncCallback() {
+        public void onFailure(Throwable caught) {
+          Window.alert("Code download failed");
+        }
+
+        public void onSuccess() {
+          monitoringManager.showResults();
+        }
+      });
+    }
+  }
 }
