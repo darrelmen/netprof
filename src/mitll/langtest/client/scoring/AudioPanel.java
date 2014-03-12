@@ -57,7 +57,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   protected String audioPath;
   private final Map<String,Integer> reqs = new HashMap<String, Integer>();
   private int reqid;
-  private boolean useKeyboard = true;
+  private boolean useKeyboard = false;
 
   private ImageAndCheck waveform;
   private ImageAndCheck spectrogram;
@@ -70,11 +70,12 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   protected final LangTestDatabaseAsync service;
   protected final SoundManagerAPI soundManager;
   private PlayAudioPanel playAudio;
-  private final boolean debug = false;
   private float screenPortion = 1.0f;
   private final boolean logMessages;
   protected ExerciseController controller;
   private boolean showSpectrogram = true;
+
+  private final boolean debug = false;
 
   /**
    * @see ScoringAudioPanel#ScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, int, boolean, mitll.langtest.client.exercise.ExerciseController, ScoreListener)
@@ -92,7 +93,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   public AudioPanel(LangTestDatabaseAsync service,
                     boolean useKeyboard, ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel) {
     this.screenPortion = controller.getScreenPortion();
-    System.out.println("Screen portion " + screenPortion);
+    if (debug) System.out.println("Screen portion " + screenPortion);
     this.soundManager = controller.getSoundManager();
     this.service = service;
     this.useKeyboard = useKeyboard;
@@ -100,7 +101,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     this.controller = controller;
     this.gaugePanel = gaugePanel;
     if (debug) System.out.println("gauge panel " + gaugePanel);
-    //addWidgets(path);
     this.showSpectrogram = showSpectrogram;
   }
 
@@ -271,7 +271,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       @Override
       protected void addKeyboardListener() {
         if (useKeyboard) {
-          super.addKeyboardListener();
+          makeKeyHandler();
         }
       }
     };
