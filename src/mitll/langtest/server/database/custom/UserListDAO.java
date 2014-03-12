@@ -194,7 +194,7 @@ public class UserListDAO extends DAO {
       for (UserList ul : lists) {
         populateList(ul);
       }
-      logger.debug("getall by " + userid + " is " + lists.size());
+      //logger.debug("getAllByUser by " + userid + " is " + lists.size());
       return lists;
 
     } catch (Exception ee) {
@@ -378,7 +378,7 @@ public class UserListDAO extends DAO {
       )
       );
     }
-    logger.debug("getWhere : got " + lists);
+    //logger.debug("getWhere : got " + lists);
     rs.close();
     statement.close();
     database.closeConnection(connection);
