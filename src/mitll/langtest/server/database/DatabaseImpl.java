@@ -1,7 +1,9 @@
 package mitll.langtest.server.database;
 
 import mitll.flashcard.UserState;
+import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.server.database.flashcard.UserStateWrapper;
@@ -222,7 +224,53 @@ public class DatabaseImpl implements Database {
    */
   public List<Exercise> getExercises() { return getExercises(useFile, lessonPlanFile); }
 
-  public Exercise getExercise(String id) { return exerciseDAO.getExercise(id); }
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise
+   * @param id
+   * @param userid
+   * @return
+   */
+  public Exercise getExercise(String id, long userid) {
+    Exercise exercise = exerciseDAO.getExercise(id);
+    annotateWithTotalRecordings(id, exercise, userid);
+    return exercise;
+  }
+
+  public void annotateWithTotalRecordings(Exercise exercise, long userid) {
+    annotateWithTotalRecordings(exercise.getID(), exercise, userid);
+  }
+
+  private void annotateWithTotalRecordings(String id, Exercise exercise, long userid) {
+    if (serverProps.isDataCollectMode() && exercise != null) {
+      PathHelper helper = new PathHelper();
+      List<Result> resultsForExercise = resultDAO.getAllResultsForExercise(id);
+      Set<Long> regs = new HashSet<Long>();
+      Set<Long> slows = new HashSet<Long>();
+
+      exercise.setRefAudio(null);
+      exercise.setSlowRefAudio(null);
+
+      for (Result r : resultsForExercise) {
+        if (r.valid) {
+          if (r.getAudioType().equals(Result.AUDIO_TYPE_REGULAR)) {
+            regs.add(r.userid);
+            if (r.userid == userid) {
+               exercise.setRefAudio(helper.ensureForwardSlashes(r.answer));
+              logger.debug("path is " + r.answer);
+            }
+          }
+          else if (r.getAudioType().equals(Result.AUDIO_TYPE_SLOW)) {
+            slows.add(r.userid);
+            if (r.userid == userid) {
+              exercise.setSlowRefAudio(helper.ensureForwardSlashes(r.answer));
+            }
+          }
+        }
+      }
+      exercise.setReg(regs.size());
+      exercise.setSlow(slows.size());
+    }
+  }
 
   /**
    *
@@ -397,7 +445,7 @@ public class DatabaseImpl implements Database {
 
       int skipped2 = 0;
       for (String candidate : exids) {
-        Exercise exerciseForID = getExercise(candidate);
+        Exercise exerciseForID = getExercise(candidate, -1);
         if (exerciseForID != null) {
           now = System.currentTimeMillis();
           if (skipped2 > 0) {
