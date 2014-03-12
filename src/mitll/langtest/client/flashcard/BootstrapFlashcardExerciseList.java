@@ -379,16 +379,8 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   }
 
   @Override
-  public void setSelectionState(Map<String, Collection<String>> selectionState) {}
-
-  @Override
   public void hideExerciseList() {}
   public void setCompleted(Set<String> completed) {}
-
-  @Override
-  public Panel getCreatedPanel() {
-    return null;
-  }
 
   @Override
   public void addCompleted(String id) {}
