@@ -190,7 +190,6 @@ public class PropertyHandler {
       else if (key.equals(NUM_GRADES_TO_COLLECT)) numGradesToCollect = getInt(value, NUM_GRADES_TO_COLLECT_DEFAULT, NUM_GRADES_TO_COLLECT);
       else if (key.equals(LOG_CLIENT_MESSAGES)) logClientMessages = getBoolean(value);
       else if (key.equals(SHOW_SECTIONS)) showSections = getBoolean(value);
-     // else if (key.equals(SHOW_SECTION_WIDGETS)) showSectionWidgets = getBoolean(value);
       else if (key.equals(FLASHCARD_TEACHER_VIEW)) flashcardTeacherView = getBoolean(value);
       else if (key.equals(FLASHCARD)) flashCard = getBoolean(value);
       else if (key.equals(LANGUAGE)) language = value;
@@ -497,7 +496,7 @@ public class PropertyHandler {
   }
 
   public String getSplash() {
-    return splashTitle;
+    return splashTitle == null ? appTitle : splashTitle;
   }
 
   public boolean isCRTDataCollectMode() {
