@@ -303,7 +303,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       audioPanel = new ASRScoringAudioPanel(path, e.getRefSentence(), service, controller, showSpectrogram, scorePanel, 23, " reference");
     }
     audioPanel.getElement().setId("ASRScoringAudioPanel");
-    audioPanel.setRefAudio(e.getRefSentence());
+    //audioPanel.setRefAudio(e.getRefAudio());
     return audioPanel;
   }
 
@@ -532,7 +532,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
       @Override
       public void useResult(AudioAnswer result) {
-        setRefAudio(exercise.getRefSentence());
+        //setRefAudio(exercise.getRefAudio());
         setResultID(result.getResultID());
         getImagesForPath(result.path);
       }
@@ -657,7 +657,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     private void showAudio(AudioAttribute audioAttribute) {
       doPause();    // if the audio is playing, stop it
       String audioRef = audioAttribute.getAudioRef();
-      setRefAudio(audioRef);
+      //setRefAudio(audioRef);
       getImagesForPath(audioRef);
     }
   }
