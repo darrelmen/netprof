@@ -56,6 +56,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
                            boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin, String playButtonSuffix) {
     super(path, service, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix, controller.getAudioType());
     this.refSentence = refSentence;
+    //System.out.println("ScoringAudioPanel : path " + path +" ref sentence " +refSentence);
     showOnlyOneExercise = controller.showOnlyOneExercise();
     addClickHandlers();
   }
@@ -72,15 +73,6 @@ public abstract class ScoringAudioPanel extends AudioPanel {
    * @param l
    */
   public void addScoreListener(ScoreListener l) { this.scoreListener = l;}
-
-  /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#getScoringAudioPanel(mitll.langtest.shared.Exercise, String)
-   * @param refSentence
-   */
-  public void setRefAudio(String refSentence) {
-    this.refSentence = refSentence;
-  }
-
   public void setResultID(long resultID) { this.resultID = resultID;}
 
   /**
@@ -126,7 +118,6 @@ public abstract class ScoringAudioPanel extends AudioPanel {
    */
   protected void useResult(PretestScore result, ImageAndCheck wordTranscript, ImageAndCheck phoneTranscript,
                            boolean scoredBefore) {
-    //System.out.println("useResult got " + result);
     if (result.getsTypeToImage().get(NetPronImageType.WORD_TRANSCRIPT) != null) {
       showImageAndCheck(result.getsTypeToImage().get(NetPronImageType.WORD_TRANSCRIPT), wordTranscript);
     }
@@ -168,9 +159,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
      * @see mitll.langtest.client.scoring.ScoringAudioPanel#addClickHandlers
      * @param type
      */
-    public TranscriptEventClickHandler(NetPronImageType type) {
-      this.type = type;
-    }
+    public TranscriptEventClickHandler(NetPronImageType type) { this.type = type; }
 
     /**
      * The last transcript event end time is guaranteed to be = the length of the wav audio file.<br></br>
