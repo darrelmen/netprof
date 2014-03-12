@@ -22,9 +22,8 @@ public class PathHelper {
 
   private final ServletContext context;
 
-  public PathHelper(ServletContext context) {
-    this.context = context;
-  }
+  public PathHelper() { this.context = null;  }
+  public PathHelper(ServletContext context) { this.context = context;  }
 
   public String ensureForwardSlashes(String wavPath) {
     return wavPath.replaceAll("\\\\", "/");
