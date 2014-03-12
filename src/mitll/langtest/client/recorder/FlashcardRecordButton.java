@@ -32,7 +32,6 @@ public class FlashcardRecordButton extends RecordButton {
   private static final int HIDE_DELAY = 2500;
   private static final String SPACE_BAR = "space bar";
   private static final String NO_SPACE_WARNING = "Press and hold space bar or mouse button to begin recording, release to stop.";
-  //public static final String PROMPT = "Click and hold mouse button to record.";
   private static final String PROMPT = "Click and hold to record";
   public static final int WIDTH_FOR_BUTTON = 360;
 
@@ -40,7 +39,7 @@ public class FlashcardRecordButton extends RecordButton {
   private final boolean addKeyBinding;
 
   /**
-   * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#makeRecordButton(mitll.langtest.client.exercise.ExerciseController)
+   * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#makeRecordButton
    * @param delay
    * @param recordingListener
    * @param warnNotASpace
@@ -61,9 +60,6 @@ public class FlashcardRecordButton extends RecordButton {
     initRecordButton();
 
     getElement().setId("FlashcardRecordButton");
-
-    System.out.println("making record button for flashcard! \n\n\n\n");
-
   }
 
   protected void setupRecordButton(boolean addKeyBinding) {
