@@ -21,6 +21,22 @@ import java.util.Map;
 public class Exercise extends ExerciseShell {
   private static final ArrayList<String> EMPTY_LIST = new ArrayList<String>();
 
+  public int getReg() {
+    return reg;
+  }
+
+  public void setReg(int reg) {
+    this.reg = reg;
+  }
+
+  public int getSlow() {
+    return slow;
+  }
+
+  public void setSlow(int slow) {
+    this.slow = slow;
+  }
+
   public enum EXERCISE_TYPE implements IsSerializable { RECORD, TEXT_RESPONSE, REPEAT, REPEAT_FAST_SLOW, MULTI_REF }
   public static final String EN = "en";
   public static final String FL = "fl";
@@ -39,6 +55,8 @@ public class Exercise extends ExerciseShell {
   private List<String> synonymAudioRefs = new ArrayList<String>();
   private List<String> translitSentences = new ArrayList<String>();
   private double weight;
+  private int reg;
+  private int slow;
 
   public static class QAPair implements IsSerializable {
     private String question;
