@@ -132,19 +132,8 @@ public class NPFHelper implements RequiresResize {
    * @param instanceName
    * @return
    */
-  private PagingExerciseList<UserExercise> makeNPFExerciseList(Panel right, String instanceName, long userListID) {
-    final PagingExerciseList<UserExercise> exerciseList = new PagingExerciseList<UserExercise>(right, service, feedback, false, false, controller,
-      true, instanceName) {
-      @Override
-      protected void onLastItem() {
-        new ModalInfoDialog("Complete", "List complete!", new HiddenHandler() {
-          @Override
-          public void onHidden(HiddenEvent hiddenEvent) {
-            reloadExercises();
-          }
-        });
-      }
-    };
+  protected PagingExerciseList<UserExercise> makeNPFExerciseList(Panel right, String instanceName, long userListID) {
+    final PagingExerciseList<UserExercise> exerciseList = makeExerciseList(right, instanceName);
     setFactory(exerciseList, instanceName, userListID);
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       @Override
@@ -153,6 +142,21 @@ public class NPFHelper implements RequiresResize {
       }
     });
     return exerciseList;
+  }
+
+  protected PagingExerciseList<UserExercise> makeExerciseList(final Panel right, final String instanceName) {
+    return new PagingExerciseList<UserExercise>(right, service, feedback, false, false, controller,
+        true, instanceName) {
+        @Override
+        protected void onLastItem() {
+          new ModalInfoDialog("Complete", "List complete!", new HiddenHandler() {
+            @Override
+            public void onHidden(HiddenEvent hiddenEvent) {
+              reloadExercises();
+            }
+          });
+        }
+      };
   }
 
   /**
