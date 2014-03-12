@@ -96,7 +96,8 @@ public class ExercisePanel extends VerticalPanel implements
     this.feedback = userFeedback;
     this.exerciseList = exerciseList;
     this.navigationHelper = getNavigationHelper(controller);
-    //if (e.getQuestions().size() == 1) {
+
+    //if (!controller.getProps().isDataCollectMode()) {
       addItemHeader(e);
     //}
 
@@ -118,11 +119,23 @@ public class ExercisePanel extends VerticalPanel implements
     add(hp);
 
     addQuestions(e, service, controller, 1);
+    addRecordingStatus(e, controller);
 
     // add next and prev buttons
     add(navigationHelper);
     navigationHelper.addStyleName("topMargin");
     getElement().setId("ExercisePanel");
+  }
+
+  private void addRecordingStatus(Exercise e, ExerciseController controller) {
+    String status = (e.getReg() > 0 || e.getSlow() > 0) ?
+      "Total recordings : " +
+        (e.getReg()  > 0 ? e.getReg()  + " reg " : "") +
+        (e.getSlow() > 0 ? e.getSlow() + " slow " : "") +
+        "" : "";
+    if (!status.isEmpty() && controller.isDataCollectMode() && !controller.isGrading()) {
+      add(new Heading(ITEM_HEADER+1, status));
+    }
   }
 
   protected NavigationHelper getNavigationHelper(ExerciseController controller) {
@@ -136,15 +149,18 @@ public class ExercisePanel extends VerticalPanel implements
    * @param e
    */
   protected void addItemHeader(Exercise e) {
-    Heading w = new Heading(ITEM_HEADER, "Item " + e.getID());
+
+    //HorizontalPanel hp = new HorizontalPanel();
+    //hp.setSpacing(5);
+    Heading w = new Heading(ITEM_HEADER, "Item ",e.getID());
     w.getElement().setId("ItemHeading");
     add(w);
+    //hp.add(new Heading(ITEM_HEADER+1, e.getID()));
+    //add(hp);
   }
 
   private Widget getQuestionContent(Exercise e, boolean includeItemID) {
     String content = e.getContent();
-
-    //System.out.println("getQuestionContent : content is " + content);
     if (content.contains("Listen")) {
       return new AudioExerciseContent().getQuestionContent(e, controller, includeItemID, false);
     }
@@ -152,7 +168,6 @@ public class ExercisePanel extends VerticalPanel implements
       HTML maybeRTLContent = getMaybeRTLContent(content, true);
       maybeRTLContent.addStyleName("rightTenMargin");
       if (content.length() > 200) {
-        //System.out.println("content length " + content.length() + " " + content);
         return getContentScroller(maybeRTLContent);
       } else {
         return maybeRTLContent;
