@@ -325,7 +325,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * @see ExerciseList.SetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
    */
   public void rememberAndLoadFirst(List<T> exercises, Exercise firstExercise) {
-    System.out.println("ExerciseList : rememberAndLoadFirst remembering " + exercises.size() + " : first = " +firstExercise);
+   // System.out.println("ExerciseList : rememberAndLoadFirst remembering " + exercises.size() + " : first = " +firstExercise);
 
     rememberExercises(exercises);
     for (ListChangeListener<T> listener : listeners) listener.listChanged(exercises);
@@ -779,7 +779,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   @Override
   public <S extends ExerciseShell> boolean onFirst(S current) {
     boolean b = current == null || getSize() == 1 || getIndex(current.getID()) == 0;
-    System.out.println("onFirst : of " +getSize() +", on checking " + current + " = " + b);
+    //System.out.println("onFirst : of " +getSize() +", on checking " + current + " = " + b);
     return b;
   }
 
@@ -788,7 +788,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   @Override
   public <S extends ExerciseShell> boolean onLast(S current) {
     boolean b = current == null || getSize() == 1 || isOnLastItem(getIndex(current.getID()));
-    System.out.println("onLast  : of " +getSize() +", on checking " + current + " = " + b);
+    //System.out.println("onLast  : of " +getSize() +", on checking " + current + " = " + b);
     return b;
   }
 
