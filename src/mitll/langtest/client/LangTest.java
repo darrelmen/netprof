@@ -4,20 +4,19 @@ import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.Container;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
-import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Row;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
@@ -352,7 +351,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         (props.isAdminView()) ? new MonitoringClickHandler() : null
         );
     }
-    else if (props.isFlashcardTeacherView() || props.isAutocrt()) {
+    else {//if (props.isFlashcardTeacherView() || props.isAutocrt()) {
       flashcard = new Flashcard(props.getNameForAnswer());
       title = flashcard.getHeaderRow(props.getSplash(), "NewProF2.png",props.getAppTitle(), getGreeting(), getReleaseStatus(), new LogoutClickHandler(),
 
@@ -360,9 +359,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         (props.isAdminView()) ? new ResultsClickHandler() : null,
         (props.isAdminView()) ? new MonitoringClickHandler() : null);
     }
-    else {
+/*    else {
       title = getTitleWidget();
-    }
+    }*/
 
     headerRow.add(new Column(12,title));
     return headerRow;
@@ -377,7 +376,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
-  private Widget getTitleWidget() {
+/*  private Widget getTitleWidget() {
     FluidRow titleRow = new FluidRow();
     titleRow.addStyleName("alignCenter");
     titleRow.addStyleName("inlineBlockStyle");
@@ -386,7 +385,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     titleRow.add(pageTitle);
 
     return titleRow;
-  }
+  }*/
 
   /**
    * Set the page title and favicon.
@@ -636,6 +635,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private void setFactory(ListInterface exerciseList) {
     final LangTest outer = this;
+   // System.out.println("factory " + props.isDataCollectMode() + " " + props.isCollectAudio()+ " " +  !props.isCRTDataCollectMode());
     if (props.isGoodwaveMode() && !props.isGrading()) {
       exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer, exerciseList, getScreenPortion()), userManager, 1);
     } else if (props.isGrading()) {
@@ -643,7 +643,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     } else if (props.getFlashcardNextAndPrev()) {
       String responseType = props.getResponseType();
 
-      System.out.println("setFactory : got response type " + responseType + " : " + props.getSecondResponseType());
+      //System.out.println("setFactory : got response type " + responseType + " : " + props.getSecondResponseType());
       if (responseType.equalsIgnoreCase(ResponseChoice.TEXT)) {
         exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer, exerciseList) {
           @Override
@@ -687,7 +687,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void removeAndReloadFlash() {
-    System.out.println(new Date() + " : removeAndReloadFlash - reloading...");
+    //System.out.println(new Date() + " : removeAndReloadFlash - reloading...");
 
     currentExerciseVPanel.remove(flashRecordPanel);
     flashRecordPanel.removeFlash();
@@ -741,7 +741,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public void gotUser(long userID) {
     System.out.println("LangTest.gotUser : got user " + userID);
-    flashcard.setUserName(getGreeting());
+    if (flashcard != null) {
+      flashcard.setUserName(getGreeting());
+    }
     if (userline != null) {
       String userText = getUserText();
       userline.setHTML(userText);
