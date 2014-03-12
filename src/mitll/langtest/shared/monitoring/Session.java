@@ -39,6 +39,10 @@ public class Session implements IsSerializable, SetScore {
   public long getAverageDurMillis() { return duration/ getNumAnswers(); }
   public long getSecAverage() { return (duration/ getNumAnswers())/1000; }
 
+  /**
+   * @see mitll.langtest.server.database.ResultDAO#partitionIntoSessions2
+   * @param id
+   */
   public void addExerciseID(String id) { exids.add(id);  }
 
   public int getNumAnswers() {
@@ -49,7 +53,7 @@ public class Session implements IsSerializable, SetScore {
     this.numAnswers = exids.size();
     this.avgScore = calcAvgScore();
     this.correct = calcCorrect();
-    correctPercent = 100f*((float)correct/(float)exidToCorrect.size());
+    correctPercent = 100f*((float)correct/(float)numAnswers);
 
    // System.out.println("setNumAnswers correct "+ correct + "total "  +exidToCorrect.size() + " % = " + correctPercent);
 
@@ -90,7 +94,7 @@ public class Session implements IsSerializable, SetScore {
   @Override
   public float getAvgScore() { return avgScore; }
 
-  public void incrementCorrect(String id,boolean correct) {
+  public void incrementCorrect(String id, boolean correct) {
     exidToCorrect.put(id, correct);
   }
 
