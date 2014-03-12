@@ -38,6 +38,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   private static final String PLAY_LABEL = "\u25ba play";
   private static final String PAUSE_LABEL = "|| pause";
   public static final int SPACE_BAR = 32;
+  private static final String PRESS_THE_SPACE_BAR_TO_PLAY_STOP_PLAYING_AUDIO = "Press the space bar to play/stop playing audio.";
   private Sound currentSound = null;
   private SoundManagerAPI soundManager;
   private final Button playButton = new Button(PLAY_LABEL);
@@ -58,10 +59,11 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     setVerticalAlignment(ALIGN_MIDDLE);
     addButtons();
     id = counter++;
+    getElement().setId("PlayAudioPanel");
   }
 
   /**
-   * @see mitll.langtest.client.exercise.WaveformExercisePanel.RecordAudioPanel#makePlayAudioPanel(com.google.gwt.user.client.ui.Widget)
+   * @see mitll.langtest.client.exercise.RecordAudioPanel.MyPlayAudioPanel
    * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel(com.google.gwt.user.client.ui.Widget, String)
    * @param soundManager
    * @param playListener
@@ -93,7 +95,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
         doClick();
       }
     });
-
+    playButton.getElement().setId("PlayButton");
     playButton.addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {
@@ -110,7 +112,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
 
     addKeyboardListener();
     if (keyHandler != null) {
-      playButton.setTitle("Press the space bar to play/stop playing audio.");
+      playButton.setTitle(PRESS_THE_SPACE_BAR_TO_PLAY_STOP_PLAYING_AUDIO);
     }
     playButton.setVisible(false);
     add(playButton);
@@ -119,24 +121,28 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   }
 
   protected void addKeyboardListener() {
+    //makeKeyHandler();
+  }
+
+  protected void makeKeyHandler() {
     keyHandler = Event.addNativePreviewHandler(new
-                                                   Event.NativePreviewHandler() {
+                                                 Event.NativePreviewHandler() {
 
-                                                     @Override
-                                                     public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
-                                                       NativeEvent ne = event.getNativeEvent();
-                                                       if (ne.getCharCode() == SPACE_BAR &&
-                                                           "[object KeyboardEvent]".equals(ne.getString()) &&
-                                                           !hasFocus && playButton.isVisible()) {
-                                                         ne.preventDefault();
+                                                   @Override
+                                                   public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
+                                                     NativeEvent ne = event.getNativeEvent();
+                                                     if (ne.getCharCode() == SPACE_BAR &&
+                                                       "[object KeyboardEvent]".equals(ne.getString()) &&
+                                                       !hasFocus && playButton.isVisible()) {
+                                                       ne.preventDefault();
 
-                                                         System.out.println(new Date() + " : Play click handler : Got " + event + " type int " +
-                                                             event.getTypeInt() + " assoc " + event.getAssociatedType() +
-                                                             " native " + event.getNativeEvent() + " source " + event.getSource());
-                                                         doClick();
-                                                       }
+                                                       System.out.println(new Date() + " : Play click handler : Got " + event + " type int " +
+                                                         event.getTypeInt() + " assoc " + event.getAssociatedType() +
+                                                         " native " + event.getNativeEvent() + " source " + event.getSource());
+                                                       doClick();
                                                      }
-                                                   });
+                                                   }
+                                                 });
   }
 
   private void doClick() {
@@ -218,7 +224,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     setPlayButtonText();
     int times = (end - start > LONG_AUDIO_THRESHOLD) ? numRepeats-1 : numRepeats;
     times = Math.max(0,times);
-    playSegment(start,end, times);
+    playSegment(start, end, times);
   }
 
   private void playSegment(float start, float end, int times) {
@@ -226,7 +232,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     this.start = start;
     this.end = end;
 
-    playSegment(start,end);
+    playSegment(start, end);
   }
 
   /**
