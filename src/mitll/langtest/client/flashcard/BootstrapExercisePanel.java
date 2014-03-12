@@ -479,7 +479,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
   protected void addRecordingAndFeedbackWidgets(Exercise e, LangTestDatabaseAsync service, ExerciseController controller,
                                                 int feedbackHeight, Panel toAddTo) {
     // add answer widget to do the recording
-    System.out.println("BootstrapExercisePanel.addRecordingAndFeedbackWidgets");
+   // System.out.println("BootstrapExercisePanel.addRecordingAndFeedbackWidgets");
     Widget answerAndRecordButtonRow = getAnswerAndRecordButtonRow(e, service, controller);
     toAddTo.add(answerAndRecordButtonRow);
 
@@ -495,7 +495,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
   private Widget button;
 
   private Widget getAnswerAndRecordButtonRow(Exercise e, LangTestDatabaseAsync service, ExerciseController controller) {
-    System.out.println("BootstrapExercisePanel.getAnswerAndRecordButtonRow");
+//    System.out.println("BootstrapExercisePanel.getAnswerAndRecordButtonRow");
 
     RecordButtonPanel answerWidget = getAnswerWidget(e, service, controller, 1,
       controller.getProps().shouldAddRecordKeyBinding() || addKeyBinding);
@@ -671,7 +671,6 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     final PopupPanel pleaseWait = new DecoratedPopupPanel();
     pleaseWait.setAutoHideEnabled(true);
     pleaseWait.add(new HTML(html));
-  //  pleaseWait.center();
     pleaseWait.showRelativeTo(button);
 
     Timer t = new Timer() {
