@@ -595,9 +595,9 @@ public class StudentDialog extends UserDialog {
       group.add(controls);
     }
 
-    public boolean markSimpleError() {
+/*    public boolean markSimpleError() {
       return markSimpleError(Placement.RIGHT);
-    }
+    }*/
 
     public boolean markSimpleError(Placement placement) {
       if (!yes.getValue() && !no.getValue()) {
