@@ -60,6 +60,7 @@ public class Navigation extends TabContainer implements RequiresResize {
   private static final String PRACTICE = "Practice";
   public static final String REVIEW = "review";
   public static final String COMMENT = "comment";
+  private static final String PRACTICE1 = "practice";
   private static final String ADD_OR_EDIT_ITEM = "Add/Edit Item";
   private static final String ADD_DELETE_EDIT_ITEM = "Fix Items";
   private static final String ITEMS_TO_REVIEW = "Items to review";
@@ -249,7 +250,6 @@ public class Navigation extends TabContainer implements RequiresResize {
 
     if (!value1.equals(value)) {
       //System.out.println("checkAndMaybeClearTab " + value1 + " vs "+value);
-
       storage.removeValue(CLICKED_USER_LIST);
     }
     storage.storeValue(CLICKED_TAB, value);
@@ -575,10 +575,10 @@ public class Navigation extends TabContainer implements RequiresResize {
       practice.tab.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          storage.storeValue(SUB_TAB,"practice");
+          storage.storeValue(SUB_TAB, PRACTICE1);
          // System.out.println("getListOperations : got click on practice");
 
-          avpHelper.showNPF(ul, fpractice, "practice");
+          avpHelper.showNPF(ul, fpractice, PRACTICE1);
         }
       });
     }
@@ -591,7 +591,7 @@ public class Navigation extends TabContainer implements RequiresResize {
         @Override
         public void onClick(ClickEvent event) {
           storage.storeValue(SUB_TAB,"editItem");
-          showEditItem(ul, edit, (isReview || isComment) ? reviewItem : Navigation.this.editItem, isNormalList);
+          showEditItem(ul, edit, (isReview || isComment) ? reviewItem : Navigation.this.editItem, isNormalList, isReview);
         }
       });
     }
@@ -634,7 +634,8 @@ public class Navigation extends TabContainer implements RequiresResize {
             String name = ul.getName();
             //System.out.println("name " + name);
             tabPanel.selectTab(name.equals(REVIEW1) ? 0 : CREATE_TAB_INDEX);    // 2 = add/edit item
-            showEditItem(ul, finalEditItem, (isReview || isComment) ? reviewItem : Navigation.this.editItem, isNormalList);
+            EditItem<? extends ExerciseShell> editItem1 = (isReview || isComment) ? reviewItem : Navigation.this.editItem;
+            showEditItem(ul, finalEditItem, editItem1, isNormalList, isReview);
           } else {
             tabPanel.selectTab(0);
             npfHelper.showNPF(ul, learn, instanceName1);
@@ -644,12 +645,25 @@ public class Navigation extends TabContainer implements RequiresResize {
     });
   }
 
+  /**
+   * @see #selectInitialTab(mitll.langtest.shared.custom.UserList, boolean, com.github.gwtbootstrap.client.ui.TabPanel, boolean, boolean, String, mitll.langtest.client.custom.TabContainer.TabAndContent, mitll.langtest.client.custom.TabContainer.TabAndContent, mitll.langtest.client.custom.TabContainer.TabAndContent, boolean, mitll.langtest.client.custom.TabContainer.TabAndContent)
+   * @param tabPanel
+   * @param learn
+   * @param practice
+   * @param edit
+   * @param ul
+   * @param instanceName1
+   * @param isReview
+   * @param isComment
+   * @param isNormalList
+   * @return
+   */
   private boolean selectPreviouslyClickedTab(TabPanel tabPanel,
                                              TabAndContent learn, TabAndContent practice, TabAndContent edit,
                                              UserList ul, String instanceName1,
                                              boolean isReview, boolean isComment, boolean isNormalList) {
     String subTab = storage.getValue(SUB_TAB);
-    System.out.println("selectPreviouslyClickedTab : subtab " +subTab);
+    System.out.println("selectPreviouslyClickedTab : subtab " + subTab);
 
     boolean chosePrev = false;
     if (subTab != null) {
@@ -659,19 +673,17 @@ public class Navigation extends TabContainer implements RequiresResize {
         clickOnTab(learn);
 
         npfHelper.showNPF(ul, learn, instanceName1);
-      } else if (subTab.equals("practice")) {
-        System.out.println("\tsubtab " +subTab);
-
+      } else if (subTab.equals(PRACTICE1)) {
+        //System.out.println("\tsubtab " +subTab);
         tabPanel.selectTab(1);
         clickOnTab(practice);
-        avpHelper.showNPF(ul, practice, "practice");
-
+        avpHelper.showNPF(ul, practice, PRACTICE1);
       } else if (subTab.equals("editItem")) {
         tabPanel.selectTab(CREATE_TAB_INDEX);
 
         clickOnTab(edit);
 
-        showEditItem(ul, edit, (isReview || isComment) ? reviewItem : this.editItem, isNormalList);
+        showEditItem(ul, edit, (isReview || isComment) ? reviewItem : this.editItem, isNormalList, isReview);
       } else chosePrev = false;
     }
     return chosePrev;
@@ -682,10 +694,11 @@ public class Navigation extends TabContainer implements RequiresResize {
    * @param ul
    * @param addItem
    */
-  private void showEditItem(UserList ul, TabAndContent addItem, EditItem<? extends ExerciseShell> editItem, boolean includeAddItem) {
-    System.out.println("showEditItem --- " + ul + " : " + includeAddItem);
+  private void showEditItem(UserList ul, TabAndContent addItem, EditItem<? extends ExerciseShell> editItem,
+                            boolean includeAddItem, boolean isUserReviewer) {
+    System.out.println("showEditItem --- " + ul + " : " + includeAddItem  + " reviewer " + isUserReviewer);
     addItem.content.clear();
-    Widget widgets = editItem.editItem(ul, listToMarker.get(ul), includeAddItem);
+    Widget widgets = editItem.editItem(ul, listToMarker.get(ul), includeAddItem,isUserReviewer);
     addItem.content.add(widgets);
   }
 
@@ -795,7 +808,7 @@ public class Navigation extends TabContainer implements RequiresResize {
         if (collisions.size() > 1) {
           if (collisions.indexOf(ul) > 0) showMore = true;
         }
-        if (!ul.isEmpty() || (!ul.isPrivate()/* && !ul.isEmpty()*/) ) {
+        if (!ul.isEmpty() || (!ul.isPrivate()) ) {
           anyAdded = true;
           insideScroll.add(getDisplayRowPerList(ul, showMore, onlyMyLists));
         }
