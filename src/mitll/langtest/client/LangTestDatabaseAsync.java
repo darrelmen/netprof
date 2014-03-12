@@ -50,7 +50,7 @@ public interface LangTestDatabaseAsync {
 
   void getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, AsyncCallback<ImageResponse> async);
 
-  void getExercise(String id, AsyncCallback<Exercise> async);
+  void getExercise(String id, long userid, AsyncCallback<Exercise> async);
 
   void getScoreForAnswer(long userID, Exercise e, int questionID, String answer, String answerType, AsyncCallback<Double> async);
 
@@ -113,7 +113,7 @@ public interface LangTestDatabaseAsync {
 
   void getExerciseIds(int reqID, long userID, boolean unansweredFirst, AsyncCallback<ExerciseListWrapper> async);
 
-  void getExerciseIds(int reqID, AsyncCallback<ExerciseListWrapper> async);
+  void getExerciseIds(int reqID, int userID, AsyncCallback<ExerciseListWrapper> async);
 
   void getExerciseIds(int reqID, long userID, String prefix, AsyncCallback<ExerciseListWrapper> async);
 
