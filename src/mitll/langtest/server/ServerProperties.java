@@ -32,19 +32,14 @@ public class ServerProperties {
   private static final String USE_WEIGHTS = "useWeights";
 
   private static final String DEFAULT_PROPERTIES_FILE = "config.properties";
-  private static final String FIRST_N_IN_ORDER = "firstNInOrder";
   private static final String DATA_COLLECT_MODE = "dataCollect";
   private static final String COLLECT_AUDIO = "collectAudio";
   private static final String COLLECT_AUDIO_DEFAULT = "true";
   private static final String BIAS_TOWARDS_UNANSWERED = "biasTowardsUnanswered";
-  private static final String USE_OUTSIDE_RESULT_COUNTS = "useOutsideResultCounts";
-  private static final String OUTSIDE_FILE = "outsideFile";
-  private static final String OUTSIDE_FILE_DEFAULT = "distributions.txt";
   private static final String H2_DATABASE = "h2Database";
   private static final String H2_DATABASE_DEFAULT = "vlr-parle";
   private static final String H2_STUDENT_ANSWERS_DATABASE = "h2StudentAnswers";
   private static final String H2_STUDENT_ANSWERS_DATABASE_DEFAULT = "h2StudentAnswers";
-  private static final String URDU = "urdu";
   private static final String READ_FROM_FILE = "readFromFile";
   private static final String FLASHCARD = "flashcard";
   private static final String CRTDATACOLLECT = "crtDataCollect";
@@ -76,7 +71,7 @@ public class ServerProperties {
 
   private Properties props = new Properties();
 
-  public boolean dataCollectMode;
+  private boolean dataCollectMode;
   private boolean collectAudio;
   public boolean biasTowardsUnanswered;
   public boolean isDataCollectAdminView;
@@ -244,6 +239,7 @@ public class ServerProperties {
     }
   }
 
+  public boolean isDataCollectMode() { return dataCollectMode;  }
   public boolean isIncludeFeedback() { return getDefaultFalse(INCLUDE_FEEDBACK);  }
 
   /**
@@ -312,6 +308,4 @@ public class ServerProperties {
     }
     return "";
   }
-
-
 }
