@@ -1,12 +1,17 @@
 package mitll.langtest.client.custom;
 
+import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
+import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
+import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.custom.UserExercise;
 
 /**
@@ -35,6 +40,27 @@ class AVPHelper extends NPFHelper {
     this.userManager = userManager;
     this.controller = controller;
     this.feedback = feedback;
+  }
+
+  @Override
+  protected PagingExerciseList<UserExercise> makeExerciseList(final Panel right, final String instanceName) {
+    return new PagingExerciseList<UserExercise>(right, service, feedback, false, false, controller,
+      true, instanceName) {
+      @Override
+      protected void onLastItem() {
+        new ModalInfoDialog("Complete", "List complete!", new HiddenHandler() {
+          @Override
+          public void onHidden(HiddenEvent hiddenEvent) {
+            reloadExercises();
+          }
+        });
+      }
+
+      @Override
+      protected void addTableWithPager(PagingContainer<? extends ExerciseShell> pagingContainer) {
+        pagingContainer.getTableWithPager();
+      }
+    };
   }
 
   /**
