@@ -44,7 +44,7 @@ public class Flashcard implements RequiresResize {
    * @see mitll.langtest.client.LangTest#doFlashcard()
    * @see mitll.langtest.client.LangTest#makeHeaderRow()
    */
-  public Flashcard(String nameForAnswer) { this.nameForAnswer = nameForAnswer; }
+  public Flashcard(String nameForAnswer) { this.nameForAnswer = nameForAnswer + "s"; }
 
   /**
    * @see mitll.langtest.client.LangTest#doFlashcard()
