@@ -369,8 +369,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
        * No keyboard listener for play button -- since there can be two play buttons -- which one gets the space bar?
        */
       @Override
-      protected void addKeyboardListener() {
-      }
+      protected void addKeyboardListener() {}
     }
 
     private class MyPostAudioRecordButton extends PostAudioRecordButton {
