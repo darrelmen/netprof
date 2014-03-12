@@ -79,13 +79,13 @@ public class EditItem<T extends ExerciseShell> {
   }
 
   /**
-   * @see mitll.langtest.client.custom.Navigation#showEditItem(mitll.langtest.shared.custom.UserList, mitll.langtest.client.custom.Navigation.TabAndContent, EditItem, boolean)
+   * @see mitll.langtest.client.custom.Navigation#showEditItem
    * @param originalList
    * @param itemMarker
    * @param includeAddItem
    * @return
    */
-  public Panel editItem(UserList originalList, final HasText itemMarker, boolean includeAddItem) {
+  public Panel editItem(UserList originalList, final HasText itemMarker, boolean includeAddItem, boolean isUserReviewer) {
     Panel hp = new HorizontalPanel();
     hp.getElement().setId("EditItem_for_"+originalList.getName());
     Panel pagerOnLeft = new SimplePanel();
@@ -99,6 +99,7 @@ public class EditItem<T extends ExerciseShell> {
     this.itemMarker = itemMarker; // TODO : something less awkward
 
     UserList copy = new UserList(originalList);  // copy before we add to it!
+    copy = makeListOfOnlyYourItems(isUserReviewer, copy);
 
     exerciseList = makeExerciseList(contentOnRight, EDIT_ITEM, copy, originalList, includeAddItem);
     pagerOnLeft.add(exerciseList.getExerciseListOnLeftSide(controller.getProps()));
@@ -107,9 +108,22 @@ public class EditItem<T extends ExerciseShell> {
     return hp;
   }
 
+  private UserList makeListOfOnlyYourItems(boolean isUserReviewer, UserList copy) {
+    if (!isUserReviewer) {
+      UserList copy2 = new UserList();
+      for (UserExercise ue : copy.getExercises()) {
+        if (ue.getCreator() == controller.getUser()) {
+            copy2.addExercise(ue);
+        }
+      }
+      copy = copy2;
+    }
+    return copy;
+  }
+
   private PagingExerciseList<T> makeExerciseList(Panel right, String instanceName, UserList ul, UserList originalList,
                                                  final boolean includeAddItem) {
-    System.out.println("makeExerciseList - ul = " + ul.getName() + " " + includeAddItem);
+    System.out.println("EditItem.makeExerciseList - ul = " + ul.getName() + " " + includeAddItem);
 
     if (includeAddItem) {
       UserExercise newItem = getNewItem();
@@ -160,7 +174,7 @@ public class EditItem<T extends ExerciseShell> {
         }
       };
     setFactory(exerciseList, ul, originalList);
-    exerciseList.setUnaccountedForVertical(320);
+    exerciseList.setUnaccountedForVertical(220);   // TODO do something better here
    // System.out.println("setting vertical on " +exerciseList.getElement().getId());
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       @Override
@@ -508,10 +522,9 @@ public class EditItem<T extends ExerciseShell> {
 
     private boolean slowRefAudioChanged() {
       String slowAudioRef = newUserExercise.getSlowAudioRef();
-    //  return slowAudioRef == null || !slowAudioRef.equals(originalSlowRefAudio);
-      //          System.out.println("slowRefAudioChanged " + slowAudioRef + " vs " + originalSlowRefAudio);
-      return (slowAudioRef == null && originalSlowRefAudio != null) || (slowAudioRef != null && !slowAudioRef.equals(originalSlowRefAudio));
-
+      return
+        (slowAudioRef == null && originalSlowRefAudio != null) ||
+        (slowAudioRef != null && !slowAudioRef.equals(originalSlowRefAudio));
     }
 
     /**
@@ -537,8 +550,7 @@ public class EditItem<T extends ExerciseShell> {
 
       service.editItem(newUserExercise, new AsyncCallback<Void>() {
         @Override
-        public void onFailure(Throwable caught) {
-        }
+        public void onFailure(Throwable caught) {}
 
         @Override
         public void onSuccess(Void newExercise) {
