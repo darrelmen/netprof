@@ -595,8 +595,8 @@ public class ExercisePanel extends VerticalPanel implements
   }
 
   protected void enableNext() {
-    //System.out.println("enableNext : answered " + completed.size() + " vs total " + answers.size());
     boolean isComplete = isCompleted();
+    System.out.println("enableNext : answered " + completed.size() + " vs total " + answers.size() + " complete " + isComplete);
     navigationHelper.enableNextButton(isComplete);
   }
 
@@ -607,5 +607,8 @@ public class ExercisePanel extends VerticalPanel implements
   }
 
   protected void enableNextButton(boolean val) {  navigationHelper.enableNextButton(val); }
-  protected void setButtonsEnabled(boolean val) { navigationHelper.setButtonsEnabled(val);}
+  protected void setButtonsEnabled(boolean val) {
+    navigationHelper.enablePrevButton(val);
+    enableNext();
+  }
 }
