@@ -12,6 +12,9 @@ import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.Result;
+
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * An ASR scoring panel with a record button.
@@ -46,7 +49,8 @@ public class RecordAudioPanel extends AudioPanel {
     this.exercisePanel = widgets;
     this.index = index;
     this.exercise = exercise;
-    addWidgets(null, audioType);
+   // System.out.println("audio type " + audioType + " ref " +exercise.getRefAudio());
+    addWidgets(audioType.equals(Result.AUDIO_TYPE_REGULAR) ? exercise.getRefAudio() : audioType.equals(Result.AUDIO_TYPE_SLOW) ? exercise.getSlowAudioRef() : null, audioType);
   }
 
   /**
@@ -60,6 +64,7 @@ public class RecordAudioPanel extends AudioPanel {
     WaveformPostAudioRecordButton myPostAudioRecordButton = makePostAudioRecordButton(audioType);
     postAudioRecordButton = myPostAudioRecordButton;
     PlayAudioPanel playAudioPanel = new MyPlayAudioPanel(recordImage1, recordImage2, exercisePanel);
+    myPostAudioRecordButton.addStyleName("rightFiveMargin");
     myPostAudioRecordButton.setPlayAudioPanel(playAudioPanel);
 
     return playAudioPanel;
@@ -86,12 +91,6 @@ public class RecordAudioPanel extends AudioPanel {
         recordImage2.setVisible(false);
       }
     };
-  }
-
-  @Override
-  protected void onUnload() {
-    super.onUnload();
-    //postAudioRecordButton.onUnload();
   }
 
   public Button getButton() { return postAudioRecordButton; }
