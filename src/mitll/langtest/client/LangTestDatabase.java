@@ -37,10 +37,10 @@ public interface LangTestDatabase extends RemoteService {
 
   // exerciseDAO
   ExerciseListWrapper getExerciseIds(int reqID, long userID, boolean unansweredFirst);
-  ExerciseListWrapper getExerciseIds(int reqID);
+  ExerciseListWrapper getExerciseIds(int reqID, int userID);
   ExerciseListWrapper getExerciseIds(int reqID, long userID, String prefix);
 
-  Exercise getExercise(String id);
+  Exercise getExercise(String id, long userid);
 
   ResultsAndGrades getResultsForExercise(String exid, boolean arabicTextDataCollect);
 
@@ -49,7 +49,6 @@ public interface LangTestDatabase extends RemoteService {
   void changeGrade(Grade toChange);
 
   // user DAO
-//  long addUser(int age, String gender, int experience, String dialect);
   long addUser(int age, String gender, int experience, String nativeLang, String dialect, String userID);
 
   List<User> getUsers();
