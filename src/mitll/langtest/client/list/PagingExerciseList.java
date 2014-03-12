@@ -187,11 +187,10 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
   }
 
   protected void addTableWithPager(PagingContainer<? extends ExerciseShell> pagingContainer) {
-    Panel container = pagingContainer.getTableWithPager();
-    FlowPanel column = new FlowPanel();
+    Panel column = new FlowPanel();
     add(column);
     addTypeAhead(column);
-    add(container);
+    add(pagingContainer.getTableWithPager());
   }
 
   protected void addTypeAhead(Panel column) {
