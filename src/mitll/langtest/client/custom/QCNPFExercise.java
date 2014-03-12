@@ -213,7 +213,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
         controller.getProps().showSpectrogram(), scorePanel, 93, "");
       audioPanel.setShowColor(true);
       audioPanel.getElement().setId("ASRScoringAudioPanel");
-      audioPanel.setRefAudio(e.getRefSentence());
+      //audioPanel.setRefAudio(audioRef);
       String name = "Reference" + " : " + audio.getDisplay();
       if (audio.isFast()) name = "Regular speed audio example";
       else if (audio.isSlow()) name = "Slow speed audio example";
