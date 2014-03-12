@@ -207,7 +207,7 @@ public class PagingContainer<T extends ExerciseShell> {
       public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
         if (BrowserEvents.CLICK.equals(event.getType())) {
-          System.out.println("getExerciseIdColumn.onBrowserEvent : got click " + event);
+          //System.out.println("getExerciseIdColumn.onBrowserEvent : got click " + event);
           final T e = object;
        /*   if (isExercisePanelBusy()) {
             tellUserPanelIsBusy();
@@ -232,7 +232,7 @@ public class PagingContainer<T extends ExerciseShell> {
       public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
         if (BrowserEvents.CLICK.equals(event.getType())) {
-          System.out.println("getExerciseIdColumn.onBrowserEvent : got click " + event);
+         // System.out.println("getExerciseIdColumn.onBrowserEvent : got click " + event);
           final T e = object;
      /*     if (isExercisePanelBusy()) {
             tellUserPanelIsBusy();
