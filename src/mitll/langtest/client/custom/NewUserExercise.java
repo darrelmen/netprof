@@ -334,19 +334,27 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     }
   }
 
-  protected void formInvalid() {
+  protected void formInvalid() {}
 
-  }
-
+  /**
+   * Ask the server if the foreign lang text is in our dictionary and can be run through hydec.
+   *
+   * @see #validateThenPost(mitll.langtest.client.user.BasicDialog.FormField, mitll.langtest.client.exercise.RecordAudioPanel, com.github.gwtbootstrap.client.ui.ControlGroup, mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, boolean)
+   * @param ul
+   * @param pagingContainer
+   * @param toAddTo
+   * @param onClick
+   */
   private void checkValidForeignPhrase(final UserList ul, final ListInterface<T> pagingContainer, final Panel toAddTo,
                                        final boolean onClick) {
     String foreignLangText = foreignLang.getText();
-    System.out.println("checkValidForeignPhrase : checking phrase " +foreignLangText+
+    System.out.println("checkValidForeignPhrase : checking phrase " + foreignLangText +
       " before adding/changing " + newUserExercise);
 
     service.isValidForeignPhrase(foreignLangText, new AsyncCallback<Boolean>() {
       @Override
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+      }
 
       @Override
       public void onSuccess(Boolean result) {

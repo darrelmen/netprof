@@ -75,12 +75,12 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
       }
     });
 
-    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+/*    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       @Override
       public void execute() {
         exerciseList.hide();
       }
-    });
+    });*/
   }
 
 
@@ -170,7 +170,7 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
       container.add(chart2);
       belowContentDiv.add(container);
       belowContentDiv.add(getRepeatButton());
-      exerciseList.hide();
+      //exerciseList.hide();
     }
 
     private int getCorrect() {
