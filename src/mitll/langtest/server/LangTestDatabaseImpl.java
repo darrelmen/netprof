@@ -172,7 +172,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public ExerciseListWrapper getExerciseIds(int reqID, long userID, boolean unansweredFirst) {
     logger.debug("getExerciseIds : getting exercise ids for User id=" + userID + " config " + relativeConfigDir);
     List<Exercise> exercises = getExercises(userID, unansweredFirst);
-    ExerciseListWrapper exerciseListWrapper = getExerciseListWrapper(reqID, exercises);
+    ExerciseListWrapper exerciseListWrapper = getExerciseListWrapper(reqID, userID, exercises);
     logger.debug("\tgetExerciseIds : found " + exerciseListWrapper.getExercises().size() +
         " exercise ids for User id=" + userID);
 
@@ -205,17 +205,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     ExerciseTrie trie = new ExerciseTrie(getExercises(userID, false), !serverProps.getLanguage().equals("English"));
     List<Exercise> exercisesForPrefix = trie.getExercises(prefix);
 
-    return getExerciseListWrapper(reqID, exercisesForPrefix);
+    return getExerciseListWrapper(reqID, userID, exercisesForPrefix);
   }
 
-  private ExerciseListWrapper getExerciseListWrapper(int reqID, List<Exercise> exercisesForPrefix) {
-    if (serverProps.isGoodwaveMode() && !serverProps.dataCollectMode) {
+  private ExerciseListWrapper getExerciseListWrapper(int reqID, long userID, List<Exercise> exercisesForPrefix) {
+    if (serverProps.isGoodwaveMode() && !serverProps.isDataCollectMode()) {
       exercisesForPrefix = getSortedExercises(exercisesForPrefix);
       if (!exercisesForPrefix.isEmpty()) logger.debug("sorting by id -- first is " + exercisesForPrefix.get(0).getID());
     }
 
     logMemory();
-    return makeExerciseListWrapper(reqID, exercisesForPrefix);
+    return makeExerciseListWrapper(reqID, exercisesForPrefix, userID);
   }
 
   /**
@@ -233,12 +233,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     List<Exercise> exercisesForState = getExercisesForState(reqID, typeToSection, userID, showUnansweredFirst);
 
     if (prefix == null || prefix.isEmpty()) {
-      return makeExerciseListWrapper(reqID, exercisesForState);
+      return makeExerciseListWrapper(reqID, exercisesForState, userID);
     } else {
       ExerciseTrie trie = new ExerciseTrie(exercisesForState, !serverProps.getLanguage().equals("English"));
       List<Exercise> exercises = trie.getExercises(prefix);
 
-      return makeExerciseListWrapper(reqID, exercises);
+      return makeExerciseListWrapper(reqID, exercises, userID);
     }
   }
 
@@ -335,6 +335,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param typeToSection
    * @param start
    * @param end
+   * @deprecated we don't do table section list anymore
    * @return
    */
   @Override
@@ -412,31 +413,35 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.list.ExerciseList#getExercisesInOrder()
    * @return
    * @param reqID
+   * @param userID
    */
-  public ExerciseListWrapper getExerciseIds(int reqID) {
+  public ExerciseListWrapper getExerciseIds(int reqID, int userID) {
     List<Exercise> exercises = getExercises();
-    ExerciseListWrapper exerciseListWrapper = makeExerciseListWrapper(reqID, exercises);
+    ExerciseListWrapper exerciseListWrapper = makeExerciseListWrapper(reqID, exercises, userID);
     logger.debug("returning " + exerciseListWrapper.getExercises().size()+ " exercises");
     return exerciseListWrapper;
   }
 
-  private ExerciseListWrapper makeExerciseListWrapper(int reqID, List<Exercise> exercises) {
+  private ExerciseListWrapper makeExerciseListWrapper(int reqID, List<Exercise> exercises, long userid) {
     if (!exercises.isEmpty()) {
       ensureMP3s(exercises.get(0));
     }
 
-    return new ExerciseListWrapper(reqID, getExerciseShells(exercises), exercises.isEmpty() ? null : exercises.get(0));
+    Exercise firstExercise = exercises.isEmpty() ? null : exercises.get(0);
+    if (firstExercise != null) db.annotateWithTotalRecordings(firstExercise,userid);
+    return new ExerciseListWrapper(reqID, getExerciseShells(exercises), firstExercise);
   }
 
   /**
    * @see mitll.langtest.client.list.ExerciseList#askServerForExercise
    * @param id
+   * @param userid
    * @return
    */
-  public Exercise getExercise(String id) {
+  public Exercise getExercise(String id, long userid) {
     long then = System.currentTimeMillis();
     List<Exercise> exercises = getExercises();
-    Exercise byID = db.getExercise(id);
+    Exercise byID = db.getExercise(id, userid);
     if (byID == null) {
       byID = db.getUserExerciseWhere(id);
     }
@@ -456,9 +461,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private void ensureMP3s(Exercise byID) {
     ensureMP3(byID.getRefAudio());
     ensureMP3(byID.getSlowAudioRef());
-    if (byID.getRefAudio() == null && byID.getSlowAudioRef() == null) {
+   // if (byID.getRefAudio() == null && byID.getSlowAudioRef() == null) {
       //logger.warn("huh? no ref audio for " + byID);
-    }
+  //  }
 
     for (String spath : byID.getSynonymAudioRefs()) {
       ensureMP3(spath);
@@ -495,7 +500,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   private List<Exercise> getExercisesInModeDependentOrder(long userID, boolean unansweredFirst) {
     List<Exercise> exercises;
-    if (serverProps.dataCollectMode) {
+    if (serverProps.isDataCollectMode()) {
       logger.debug("getExercisesInModeDependentOrder in data collect mode");
       if (serverProps.biasTowardsUnanswered || unansweredFirst) {
         exercises = db.getExercisesBiasTowardsUnanswered(userID, serverProps.shouldUseWeights());
@@ -1074,7 +1079,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, this);
     new RecoTest(this, serverProps, pathHelper, audioFileHelper);
 
-    if (!serverProps.dataCollectMode && !serverProps.isArabicTextDataCollect()) {
+    if (!serverProps.isDataCollectMode() && !serverProps.isArabicTextDataCollect()) {
       db.getUnmodExercises();
     }
   }
