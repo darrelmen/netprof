@@ -330,19 +330,19 @@ public class HistoryExerciseList<T extends ExerciseShell> extends PagingExercise
     //System.out.println(new Date() +" HistoryExerciseList.onValueChange : ------ start ----");
 
     String rawToken = getTokenFromEvent(event);
-    System.out.println(new Date() +" HistoryExerciseList.onValueChange : ------ start: token is '" + rawToken +"' ----");
     SelectionState selectionState1 = getSelectionState(rawToken);
 
     String instance1 = selectionState1.getInstance();
 
     if (!instance1.equals(instance) && instance1.length() > 0) {
-      System.out.println("onValueChange : skipping event " + rawToken + " for instance '" + instance1 +
-          "' that is not mine "+instance);
+/*      System.out.println("onValueChange : skipping event " + rawToken + " for instance '" + instance1 +
+          "' that is not mine "+instance);*/
       if (getCreatedPanel() == null) {
         noSectionsGetExercises(controller.getUser());
       }
       return;
     }
+    System.out.println(new Date() +" HistoryExerciseList.onValueChange : ------ start: token is '" + rawToken +"' ----");
 
     String item = selectionState1.getItem();
 
