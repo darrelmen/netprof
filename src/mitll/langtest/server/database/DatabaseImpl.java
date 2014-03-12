@@ -255,14 +255,14 @@ public class DatabaseImpl implements Database {
           if (r.getAudioType().equals(Result.AUDIO_TYPE_REGULAR)) {
             regs.add(r.userid);
             if (r.userid == userid) {
-               exercise.setRefAudio(helper.ensureForwardSlashes(r.answer));
-              logger.debug("path is " + r.answer);
+               exercise.setRefAudio(helper.ensureForwardSlashes(r.answer).replaceAll(".wav",".mp3"));
+              //logger.debug("path is " + r.answer);
             }
           }
           else if (r.getAudioType().equals(Result.AUDIO_TYPE_SLOW)) {
             slows.add(r.userid);
             if (r.userid == userid) {
-              exercise.setSlowRefAudio(helper.ensureForwardSlashes(r.answer));
+              exercise.setSlowRefAudio(helper.ensureForwardSlashes(r.answer).replaceAll(".wav",".mp3"));
             }
           }
         }
