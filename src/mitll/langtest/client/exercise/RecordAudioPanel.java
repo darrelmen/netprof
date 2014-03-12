@@ -50,11 +50,15 @@ public class RecordAudioPanel extends AudioPanel {
     this.index = index;
     this.exercise = exercise;
    // System.out.println("audio type " + audioType + " ref " +exercise.getRefAudio());
-    addWidgets(audioType.equals(Result.AUDIO_TYPE_REGULAR) ? exercise.getRefAudio() : audioType.equals(Result.AUDIO_TYPE_SLOW) ? exercise.getSlowAudioRef() : null, audioType);
+    String path =
+      audioType.equals(Result.AUDIO_TYPE_REGULAR) ? exercise.getRefAudio() :
+      audioType.equals(Result.AUDIO_TYPE_SLOW) ?    exercise.getSlowAudioRef() : null;
+
+    addWidgets(path, audioType);
   }
 
   /**
-   * @see mitll.langtest.client.scoring.AudioPanel#getPlayButtons(com.google.gwt.user.client.ui.Widget)
+   * @see mitll.langtest.client.scoring.AudioPanel#getPlayButtons
    * @param toAdd
    * @param audioType
    * @return
