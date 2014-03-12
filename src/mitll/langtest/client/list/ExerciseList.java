@@ -209,7 +209,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   private void getExercisesInOrder() {
     lastReqID++;
-    service.getExerciseIds(lastReqID, new SetExercisesCallback());
+    service.getExerciseIds(lastReqID, -1, new SetExercisesCallback());
   }
 
   public void onResize() {
@@ -463,7 +463,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   protected void askServerForExercise(ExerciseShell exerciseShell) {
     System.out.println("ExerciseList.askServerForExercise id = " + exerciseShell.getID());
-    service.getExercise(exerciseShell.getID(), new ExerciseAsyncCallback(exerciseShell));
+    service.getExercise(exerciseShell.getID(), controller.getUser(), new ExerciseAsyncCallback(exerciseShell));
   }
 
   protected String getTokenFromEvent(ValueChangeEvent<String> event) {
@@ -512,7 +512,11 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
      * @see ExerciseList#askServerForExercise(mitll.langtest.shared.ExerciseShell)
      * @param exerciseShell
      */
-    public ExerciseAsyncCallback(ExerciseShell exerciseShell) { this.exerciseShell = exerciseShell; }
+    public ExerciseAsyncCallback(ExerciseShell exerciseShell) {
+      this.exerciseShell = exerciseShell;
+      System.out.println("ExerciseAsyncCallback exid = " + exerciseShell.getID());
+
+    }
 
     @Override
     public void onFailure(Throwable caught) {
@@ -547,7 +551,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   private void useExercise(Exercise result, ExerciseShell e) {
     createdPanel = makeExercisePanel(result);
     int i = getIndex(e);
-//  System.out.println("ExerciseList.useExercise : " +e.getID() + " index " +i);
+    //System.out.println("ExerciseList.useExercise : " + e.getID() + " index " + i);
     if (i == -1) {
       System.err.println("useExercise can't find " + e + " in list of " + currentExercises.size() +
         " exercises (" +currentExercises+ ")");
@@ -565,7 +569,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param result
    */
   public Panel makeExercisePanel(Exercise result) {
-   // System.out.println("ExerciseList.makeExercisePanel : " +result.getID());
+    //System.out.println("ExerciseList.makeExercisePanel : " +result.getID());
 
     Panel exercisePanel = factory.getExercisePanel(result);
     innerContainer.setWidget(exercisePanel);
