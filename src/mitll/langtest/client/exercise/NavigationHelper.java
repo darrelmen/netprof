@@ -97,6 +97,8 @@ public class NavigationHelper extends HorizontalPanel {
   private void makeNextButton(final Exercise e, final ExerciseController controller, boolean addButtons) {
     this.next = new Button(getNextButtonText());
     next.setType(ButtonType.SUCCESS);
+    System.out.println("makeNextButton " +enableNextOnlyWhenAllCompleted+ " ex id " + e.getID());
+
     if (enableNextOnlyWhenAllCompleted) { // initially not enabled
       next.setEnabled(false);
     }
@@ -251,20 +253,9 @@ public class NavigationHelper extends HorizontalPanel {
     if (keyHandler != null) keyHandler.removeHandler();
   }
 
-  public void enableNextButton(boolean val) {
-    next.setEnabled(val);
-  }
+  public void enableNextButton(boolean val) { next.setEnabled(val); }
+  public void enablePrevButton(boolean val) { prev.setEnabled(val); }
 
-  public void enablePrevButton(boolean val) {
-    prev.setEnabled(val);
-  }
-
-  public void setButtonsEnabled(boolean val) {
-    getPrev().setEnabled(val);
-    next.setEnabled(val);
-  }
-
-  //public Widget getPrev() { return prev; }
   public Widget getNext() { return next; }
   public Button getPrev() { return prev; }
 }
