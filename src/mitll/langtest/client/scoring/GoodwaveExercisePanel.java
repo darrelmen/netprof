@@ -28,7 +28,6 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.ExercisePanel;
 import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.exercise.PostAnswerProvider;
 import mitll.langtest.client.gauge.ASRScorePanel;
@@ -464,7 +463,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
      * @see GoodwaveExercisePanel#getAnswerWidget
      */
     public ASRRecordAudioPanel(LangTestDatabaseAsync service, int index, ExerciseController controller) {
-      super(service, controller, scorePanel, REFERENCE);
+      super(exercise.getRefSentence(), service, controller, scorePanel, REFERENCE);
       this.index = index;
       getElement().setId("ASRRecordAudioPanel");
     }
