@@ -326,6 +326,11 @@ public class BootstrapFlashcardExerciseList<T extends ExerciseShell> implements 
   }
 
   @Override
+  public <S extends ExerciseShell> S getCurrentExercise() {
+    return null;
+  }
+
+  @Override
   public boolean onLast() {
     return false;
   }
