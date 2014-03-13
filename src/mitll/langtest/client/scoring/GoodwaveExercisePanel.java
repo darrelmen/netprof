@@ -173,8 +173,12 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     DivWidget div = new DivWidget();
     div.add(answerWidget);
 
-    div.addStyleName("buttonGroupInset6");
+    addGroupingStyle(div);
     toAddTo.add(div);
+  }
+
+  protected void addGroupingStyle(Widget div) {
+    div.addStyleName("buttonGroupInset6");
   }
 
   protected HorizontalPanel getUnitLessonForExercise() {
@@ -256,7 +260,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
     div.addStyleName("trueInlineStyle");
     div.addStyleName("floatLeft");
-    div.addStyleName("buttonGroupInset6");
+    addGroupingStyle(div);
 
     vp.add(div);
     return vp;
@@ -324,22 +328,18 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   protected void addIncorrectComment(final String commentToPost, final String field) {
     System.out.println(new Date() + " : post to server " + exercise.getID() +
       " field " + field + " commentLabel '" + commentToPost + "' is incorrect");
-    String status = "incorrect";
-    addAnnotation(field, status, commentToPost);
+    addAnnotation(field, "incorrect", commentToPost);
   }
 
   protected void addCorrectComment(final String field) {
-    System.out.println(new Date() + " : post to server " + exercise.getID() +
-      " field " + field + " is correct");
-    String status = "correct";
-    addAnnotation(field, status, "");
+    System.out.println(new Date() + " : post to server " + exercise.getID() + " field " + field + " is correct");
+    addAnnotation(field, "correct", "");
   }
 
   private void addAnnotation(final String field, final String status, final String commentToPost) {
     service.addAnnotation(exercise.getID(), field, status, commentToPost, controller.getUser(), new AsyncCallback<Void>() {
       @Override
-      public void onFailure(Throwable caught) {
-      }
+      public void onFailure(Throwable caught) {}
 
       @Override
       public void onSuccess(Void result) {
