@@ -18,8 +18,6 @@ public class UserList extends ExerciseShell {
   private long uniqueID;
 
   private User creator;
- // private Set<Long> visitorIDs;
-
   private String name;
   private String description;
   private String classMarker;
@@ -45,14 +43,15 @@ public class UserList extends ExerciseShell {
     this.description = description;
     this.classMarker = classMarker;
     this.isPrivate = isPrivate;
-    //visitorIDs = new HashSet<Long>();
-   // if (user != null) addVisitor(user);
   }
 
   public UserList(UserList ul) {
     this(ul.uniqueID,ul.getCreator(),ul.getName(),ul.getDescription(),ul.getClassMarker(),ul.isPrivate());
-    for (UserExercise ue : ul.getExercises()) { addExercise(ue); }
   }
+/*
+  public void addAllExercises(UserList ul) {
+    for (UserExercise ue : ul.getExercises()) { addExercise(ue); }
+  }*/
 
   public void addExercise(UserExercise toAdd) { exercises.add(toAdd);  }
   public void addExerciseAfter(UserExercise after, UserExercise toAdd) {
@@ -64,15 +63,6 @@ public class UserList extends ExerciseShell {
       exercises.add(index+1,toAdd);
     }
   }
-
-  /**
-   * @see #UserList(long, mitll.langtest.shared.User, String, String, String, boolean)
-   * @paramx user
-   */
-/*
-  public void addVisitor(User user) { visitorIDs.add(user.id); }
-*/
-
   public String getName() {
     return name;
   }
@@ -113,19 +103,6 @@ public class UserList extends ExerciseShell {
   public User getCreator() {
     return creator;
   }
-
-/*
-  public Set<Long> getVisitorIDs() {
-    return visitorIDs;
-  }
-*/
-
-/*
-  public void setVisitors(Set<Long> where) {
-    this.visitorIDs = where;
-  }
-*/
-
   public long getUniqueID() { return uniqueID; }
   public void setUniqueID(long uniqueID) {
     this.uniqueID = uniqueID;
@@ -162,7 +139,6 @@ public class UserList extends ExerciseShell {
   @Override
   public String toString() {
     return "UserList #" + getUniqueID() + " '"+name + "' by " + creator.id+
-      //" visited by " + visitorIDs+
       " : " + (isReview ? " REVIEW " : "")+
       " :"+
       " with " + getExercises().size() + " exercises.";
