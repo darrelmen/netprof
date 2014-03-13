@@ -811,7 +811,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param userID
    */
   public void gotUser(long userID) {
-    System.out.println("LangTest.gotUser : got user " + userID);
+    //System.out.println("LangTest.gotUser : got user " + userID);
     flashcard.setUserName(getGreeting());
     if (userline != null) {
       String userText = getUserText();
@@ -824,14 +824,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
-  //private boolean everShownInitialState =false;
   private boolean doEverythingAfterFactory(long userID) {
-
     if (userID != lastUser || (props.isGoodwaveMode() || props.isFlashCard() && !props.isTimedGame())) {
       System.out.println("doEverythingAfterFactory : user changed - new " + userID + " vs last " + lastUser);
       if (!shouldCollectAudio() || flashRecordPanel.gotPermission()) {
         if (exerciseList != null) {
-          System.out.println("\tdoEverythingAfterFactory : " + userID + " get exercises");
+//          System.out.println("\tdoEverythingAfterFactory : " + userID + " get exercises");
           exerciseList.getExercises(userID, true);
         }
         else {
