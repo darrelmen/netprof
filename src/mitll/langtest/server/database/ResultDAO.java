@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -72,17 +73,6 @@ public class ResultDAO extends DAO {
 
   public List<SimpleResult> getSimpleResults() { return getSimpleResults("");  }
   public List<SimpleResult> getResultsForUser(long userid) {  return getSimpleResults(" where userid=" + userid);  }
-
-/*  public List<Result> getResultsThatNeedScore() {
-    try {
-      String sql = "SELECT * FROM " + RESULTS + " where " + PRON_SCORE+
-          "=-1 AND " +VALID +"=true";
-      return getResultsSQL(sql);
-    } catch (SQLException e) {
-      logger.error("got " +e,e);
-    }
-    return Collections.emptyList();
-  }*/
 
   /**
    * @return
@@ -192,28 +182,39 @@ public class ResultDAO extends DAO {
     return new ArrayList<Result>();
   }
 
-  public List<Session> getSessionsForUserIn(long userid, Set<String> ids, String lastID) {
+/*  public List<Session> getSessionsForUserIn(long userid, Set<String> ids, String lastID) {
     List<Session> sessions = partitionIntoSessions2(getResultsForUserIn(userid, ids), lastID);
     logger.debug("found " +sessions.size() + " sessions for " + userid + " and " +ids + " last " + lastID);
 
     return sessions;
-  }
+  }*/
+
+  /**
+   * For a set of exercise ids, find the results for each and make a map of user->results
+   * Then for each user's results, make a list of sessions representing a sequence of grouped results
+   * A session will have statistics - # correct, avg pronunciation score, maybe duration, etc.
+   *
+   * @see mitll.langtest.server.database.DatabaseImpl#getUserHistoryForList
+   * @see mitll.langtest.client.custom.MyFlashcardExercisePanelFactory.StatsPracticePanel#onSetComplete()
+   * @param ids
+   * @param lastID
+   * @return
+   */
   public List<Session> getSessionsForUserIn2(Set<String> ids, String lastID) {
     List<Session> sessions = new ArrayList<Session>();
     Map<Long, List<Result>> userToAnswers = populateUserToAnswers(getResultsForeExIDIn(ids));
     for (Map.Entry<Long,List<Result>> userToResults : userToAnswers.entrySet()) {
-      List<Session> c = partitionIntoSessions2(userToResults.getValue(), lastID);
+      List<Session> c = partitionIntoSessions2(userToResults.getValue(), lastID, ids);
       logger.debug("\tfound " +c.size() + " sessions for " +userToResults.getKey() + " " +ids + " last " + lastID + " given  " + userToResults.getValue().size());
 
       sessions.addAll(c);
     }
-    //List<Session> sessions = partitionIntoSessions2(, lastID);
     logger.debug("found " +sessions.size() + " sessions for " +ids + " last " + lastID);
 
     return sessions;
   }
 
-  public List<Result> getResultsForUserIn(long userid, Set<String> ids) {
+/*  public List<Result> getResultsForUserIn(long userid, Set<String> ids) {
     try {
       String list = getInList(ids);
 
@@ -227,7 +228,7 @@ public class ResultDAO extends DAO {
       logger.error("got " + ee, ee);
     }
     return new ArrayList<Result>();
-  }
+  }*/
 
   public List<Result> getResultsForeExIDIn(Set<String> ids) {
     try {
@@ -240,7 +241,7 @@ public class ResultDAO extends DAO {
         list +
         ") order by " + Database.TIME + " asc";
       List<Result> resultsSQL = getResultsSQL(sql);
-      logger.debug("got " + resultsSQL.size());
+      //logger.debug("got " + resultsSQL.size());
       return resultsSQL;
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
@@ -562,24 +563,36 @@ public class ResultDAO extends DAO {
     return sessions;
   }
 
-  private List<Session> partitionIntoSessions2(List<Result> answersForUser, String lastExerciseID) {
+  /**
+   * @see #getSessionsForUserIn2(java.util.Set, String)
+   * @param answersForUser
+   * @param lastExerciseID also if you see this magic id, end the session
+   * @return
+   */
+  private List<Session> partitionIntoSessions2(List<Result> answersForUser, String lastExerciseID, Set<String> ids) {
     Session s = null;
-    long last = 0;
+    long lastTimestamp = 0;
+
+    Set<String> expected = new HashSet<String>(ids);
 
     List<Session> sessions = new ArrayList<Session>();
 
     for (Result r : answersForUser) {
-      if (s == null || r.timestamp - last > SESSION_GAP) {
+      if (s == null || r.timestamp - lastTimestamp > SESSION_GAP || !expected.contains(r.id)) {
+        //logger.debug("last session was " +s);
         s = new Session(r.userid);
         sessions.add(s);
+        expected = new HashSet<String>(ids); // start a new set of expected items
       } else {
-        s.duration += r.timestamp - last;
+        s.duration += r.timestamp - lastTimestamp;
       }
       s.addExerciseID(r.id);
       s.incrementCorrect(r.id, r.isCorrect());
       s.setScore(r.id, r.getPronScore());
 
-      last = r.timestamp;
+      expected.remove(r.id);
+
+      lastTimestamp = r.timestamp;
 
       if (r.id.equals(lastExerciseID)) {
         // start a new session
