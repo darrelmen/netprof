@@ -599,14 +599,14 @@ public class Navigation extends TabContainer implements RequiresResize {
     }
     // add add item and edit tabs (conditionally)
     TabAndContent editItem = null;
-    if (created && !ul.isPrivate()) {
+    if (created && (!ul.isPrivate() || ul.getCreator().id == controller.getUser())) {
       final TabAndContent edit = makeTab(tabPanel, IconType.EDIT, isReview ? ADD_DELETE_EDIT_ITEM :ADD_OR_EDIT_ITEM);
       editItem = edit;
       edit.tab.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
           storage.storeValue(SUB_TAB, EDIT_ITEM);
-          showEditItem(ul, edit, (isReview || isComment) ? reviewItem : Navigation.this.editItem, isNormalList, isReview);
+          showEditItem(ul, edit, (isReview || isComment) ? reviewItem : Navigation.this.editItem, isNormalList && !ul.isFavorite(), isReview);
         }
       });
     }
@@ -655,10 +655,9 @@ public class Navigation extends TabContainer implements RequiresResize {
     if (!chosePrev) {
       if (created && !ul.isPrivate() && ul.isEmpty() && finalEditItem != null) {
         String name = ul.getName();
-        //System.out.println("name " + name);
         tabPanel.selectTab(name.equals(REVIEW1) ? 0 : CREATE_TAB_INDEX);    // 2 = add/edit item
         EditItem<? extends ExerciseShell> editItem1 = (isReview || isComment) ? reviewItem : this.editItem;
-        showEditItem(ul, finalEditItem, editItem1, isNormalList, isReview);
+        showEditItem(ul, finalEditItem, editItem1, isNormalList && !ul.isFavorite(), isReview);
       } else {
         tabPanel.selectTab(0);
         npfHelper.showNPF(ul, learn, instanceName1);
@@ -701,7 +700,7 @@ public class Navigation extends TabContainer implements RequiresResize {
         boolean reviewOrComment = isReview || isComment;
         tabPanel.selectTab(reviewOrComment ? 1 : CREATE_TAB_INDEX);
         clickOnTab(edit);
-        showEditItem(ul, edit, reviewOrComment ? reviewItem : this.editItem, isNormalList, isReview);
+        showEditItem(ul, edit, reviewOrComment ? reviewItem : this.editItem, isNormalList && !ul.isFavorite(), isReview);
       } else chosePrev = false;
     }
     return chosePrev;
