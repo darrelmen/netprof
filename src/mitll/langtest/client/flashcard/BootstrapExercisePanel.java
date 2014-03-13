@@ -60,7 +60,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
   public static final String WARN_NO_FLASH = "<font color='red'>Flash is not activated. " +
     "Do you have a flashblocker? Please add this site to its whitelist.</font>";
 
-  private static final int DELAY_MILLIS = 1000;
+  protected static final int DELAY_MILLIS = 1000;
   private static final int DELAY_MILLIS_LONG = 3000;
   private static final int LONG_DELAY_MILLIS = 3500;
   private static final int DELAY_CHARACTERS = 40;
@@ -397,9 +397,28 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     String foreignSentence = e.getRefSentences().iterator().next();
     DivWidget div = new DivWidget();
     div.addStyleName("blockStyle");
-    english = new Heading(1, e.getEnglishSentence());
+
+    String englishSentence = e.getEnglishSentence();
+    boolean usedForeign = false;
+    if (englishSentence.isEmpty()) {
+      englishSentence = foreignSentence;
+      usedForeign = true;
+    }
+    english = new Heading(1, englishSentence);
     div.add(english);
 
+    getForeignLanguageContent(foreignSentence);
+
+    if (!usedForeign) {
+      div.add(foreign);
+    }
+
+    showEnglishOrForeign();
+
+    return div;
+  }
+
+  private void getForeignLanguageContent(String foreignSentence) {
     Heading widgets = new Heading(1, foreignSentence);
     foreign = widgets;
 
@@ -429,12 +448,6 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
         foreign.removeStyleName("mouseOverHighlight");
       }
     }, MouseOutEvent.getType());
-
-    div.add(foreign);
-
-    showEnglishOrForeign();
-
-    return div;
   }
 
   private void showEnglishOrForeign() {
@@ -496,7 +509,6 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     RecordButtonPanel answerWidget = getAnswerWidget(e, service, controller, 1,
       controller.getProps().shouldAddRecordKeyBinding() || addKeyBinding);
     this.answerWidget = answerWidget;
-   // button = answerWidget.getActualRecordButton();
     Widget recordButton = answerWidget.getRecordButton();
     button = recordButton;
     return getRecordButtonRow(recordButton);
@@ -523,7 +535,6 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
 
   private Panel getCenteredWrapper(Widget recordButton) {
     Panel recordButtonRow = new FluidRow();
-    // recordButtonRow.setWidth("50%");
     Paragraph recordButtonContainer = new Paragraph();
     recordButtonContainer.addStyleName("alignCenter");
     recordButtonContainer.add(recordButton);
@@ -647,7 +658,8 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     String feedback = "";
     if (badAudioRecording) {
       showPopup(result.validity.getPrompt(), button);
-      nextAfterDelay(correct, "");
+      initRecordButton();
+      clearFeedback();
     } else if (correct) {
       showCorrectFeedback(score);
     } else {   // incorrect!!
@@ -944,7 +956,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     }
   }
 
-  private void loadNextOnTimer(final int delay) {
+  protected void loadNextOnTimer(final int delay) {
     Timer t = new Timer() {
       @Override
       public void run() {
