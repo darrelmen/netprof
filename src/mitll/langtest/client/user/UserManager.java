@@ -110,7 +110,7 @@ public class UserManager {
   private void login() {
     int user = getUser();
     if (user != NO_USER_SET) {
-      System.out.println("UserManager.login : current user : " + user);
+//   System.out.println("UserManager.login : current user : " + user);
       rememberAudioType();
       userNotification.gotUser(user);
     }
