@@ -8,10 +8,9 @@ import mitll.langtest.client.exercise.ExerciseController;
  */
 public class KeyStorage {
   private ExerciseController controller;
-  boolean debug = false;
-  public KeyStorage(ExerciseController controller) {
-    this.controller = controller;
-  }
+  private boolean debug = false;
+  public KeyStorage(ExerciseController controller) {  this.controller = controller;  }
+
   public void storeValue(String name, String toStore) {
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
