@@ -227,7 +227,7 @@ public class UserListManager {
    *
    * @see mitll.langtest.server.LangTestDatabaseImpl#getReviewList()
    * @see mitll.langtest.client.custom.Navigation#viewReview
-   * @see #markIncorrect(String)
+   * @see #markCorrectness(String, boolean)
    * @return
    */
   public UserList getReviewList() {
@@ -514,12 +514,7 @@ public class UserListManager {
     logger.info("addAnnotation add to db exercise id " + exerciseID + " field " + field + " status " + status + " comment " + comment);
     annotationDAO.add(new UserAnnotation(exerciseID, field, status, comment, userID, System.currentTimeMillis()));
 
-    if (status.equalsIgnoreCase(INCORRECT)) {
-       markIncorrect(exerciseID);
-    }
-    else if (status.equalsIgnoreCase(CORRECT)) {
-      incorrect.remove(exerciseID);
-    }
+    markCorrectness(exerciseID, status.equalsIgnoreCase(CORRECT));
   }
 
   /**
@@ -548,13 +543,13 @@ public class UserListManager {
    * @param creatorID
    */
   public void markReviewed(String id, long creatorID) {
-    int before = reviewedExercises.size();
+    //int before = reviewedExercises.size();
     if (reviewedExercises.add(id)) {
       reviewedDAO.add(id, creatorID);
     }
-    if (before != reviewedExercises.size()){
+    //if (before != reviewedExercises.size()){
       //logger.debug("markReviewed now " + reviewedExercises.size() + " reviewed exercises");
-    }
+    //}
   }
 
   /**
@@ -608,10 +603,16 @@ public class UserListManager {
    * @see mitll.langtest.server.LangTestDatabaseImpl#markReviewed(String, boolean, long)
    * @see mitll.langtest.client.custom.QCNPFExercise#markReviewed
    * @param id
+   * @param correct
    */
-  public void markIncorrect(String id) {
-    incorrect.add(id);
-    logger.debug("markIncorrect incorrect now " + incorrect.size());
+  public void markCorrectness(String id, boolean correct) {
+    if (correct) {
+      incorrect.remove(id);
+    }
+    else {
+      incorrect.add(id);
+    }
+    logger.debug("markCorrectness incorrect now " + incorrect.size());
   }
 
   public boolean deleteList(long id) {
