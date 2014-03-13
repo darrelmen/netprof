@@ -78,6 +78,7 @@ public interface ListInterface<T extends ExerciseShell> extends RequiresResize {
   void checkAndAskServer(String id);
 
   public String getCurrentExerciseID();
+  public <S extends ExerciseShell> S getCurrentExercise();
 
   boolean onFirst();
   <S extends ExerciseShell> boolean onFirst(S current);
