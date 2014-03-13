@@ -197,19 +197,18 @@ public class ResultDAO extends DAO {
    * @see mitll.langtest.server.database.DatabaseImpl#getUserHistoryForList
    * @see mitll.langtest.client.custom.MyFlashcardExercisePanelFactory.StatsPracticePanel#onSetComplete()
    * @param ids
-   * @param lastID
    * @return
    */
-  public List<Session> getSessionsForUserIn2(Set<String> ids, String lastID) {
+  public List<Session> getSessionsForUserIn2(Set<String> ids) {
     List<Session> sessions = new ArrayList<Session>();
     Map<Long, List<Result>> userToAnswers = populateUserToAnswers(getResultsForeExIDIn(ids));
     for (Map.Entry<Long,List<Result>> userToResults : userToAnswers.entrySet()) {
-      List<Session> c = partitionIntoSessions2(userToResults.getValue(), lastID, ids);
-      logger.debug("\tfound " +c.size() + " sessions for " +userToResults.getKey() + " " +ids + " last " + lastID + " given  " + userToResults.getValue().size());
+      List<Session> c = partitionIntoSessions2(userToResults.getValue(), ids);
+      //logger.debug("\tfound " +c.size() + " sessions for " +userToResults.getKey() + " " +ids + " given  " + userToResults.getValue().size());
 
       sessions.addAll(c);
     }
-    logger.debug("found " +sessions.size() + " sessions for " +ids + " last " + lastID);
+    logger.debug("found " +sessions.size() + " sessions for " +ids );
 
     return sessions;
   }
@@ -230,18 +229,25 @@ public class ResultDAO extends DAO {
     return new ArrayList<Result>();
   }*/
 
-  public List<Result> getResultsForeExIDIn(Set<String> ids) {
+  /**
+   * Only take avp audio type and valid audio.
+   *
+   * @see #getSessionsForUserIn2(java.util.Set)
+   * @param ids
+   * @return
+   */
+  private List<Result> getResultsForeExIDIn(Set<String> ids) {
     try {
       String list = getInList(ids);
 
       String sql = "SELECT * FROM " + RESULTS + " where " +
-        //USERID + "=" + userid + " AND " +
+        VALID + "=true AND " +
         AUDIO_TYPE + "='avp' AND " +
         Database.EXID + " in (" +
         list +
         ") order by " + Database.TIME + " asc";
       List<Result> resultsSQL = getResultsSQL(sql);
-      //logger.debug("got " + resultsSQL.size());
+     // logger.debug("getResultsForeExIDIn for  " +sql+ " got " + resultsSQL.size());
       return resultsSQL;
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
@@ -249,7 +255,7 @@ public class ResultDAO extends DAO {
     return new ArrayList<Result>();
   }
 
-  protected List<Result> getResultsSQL(String sql) throws SQLException {
+  private List<Result> getResultsSQL(String sql) throws SQLException {
     Connection connection = database.getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
 
@@ -402,9 +408,9 @@ public class ResultDAO extends DAO {
   /**
    * @param userid
    * @return
-   * @see DatabaseImpl#getExercisesFirstNInOrder(long, int)
+   * @see DatabaseImpl#getExercisesFirstNInOrder
    */
-  public String getExerciseIDLastResult(long userid) {
+/*  public String getExerciseIDLastResult(long userid) {
     try {
       Connection connection = database.getConnection();
       String sql = "SELECT exid FROM results WHERE TIME IN (SELECT MAX(TIME) FROM results WHERE userid = " +
@@ -426,7 +432,7 @@ public class ResultDAO extends DAO {
       logger.error("got " + ee, ee);
     }
     return "INVALID";
-  }
+  }*/
 
   /**
    * @param exerciseID
@@ -564,12 +570,11 @@ public class ResultDAO extends DAO {
   }
 
   /**
-   * @see #getSessionsForUserIn2(java.util.Set, String)
+   * @see #getSessionsForUserIn2(java.util.Set)
    * @param answersForUser
-   * @param lastExerciseID also if you see this magic id, end the session
    * @return
    */
-  private List<Session> partitionIntoSessions2(List<Result> answersForUser, String lastExerciseID, Set<String> ids) {
+  private List<Session> partitionIntoSessions2(List<Result> answersForUser, Set<String> ids) {
     Session s = null;
     long lastTimestamp = 0;
 
@@ -578,11 +583,11 @@ public class ResultDAO extends DAO {
     List<Session> sessions = new ArrayList<Session>();
 
     for (Result r : answersForUser) {
+      //logger.debug("got " + r);
       if (s == null || r.timestamp - lastTimestamp > SESSION_GAP || !expected.contains(r.id)) {
-        //logger.debug("last session was " +s);
-        s = new Session(r.userid);
-        sessions.add(s);
+        sessions.add(s = new Session(r.userid));
         expected = new HashSet<String>(ids); // start a new set of expected items
+//        logger.debug("\tpartitionIntoSessions2 expected " +expected.size());
       } else {
         s.duration += r.timestamp - lastTimestamp;
       }
@@ -591,17 +596,13 @@ public class ResultDAO extends DAO {
       s.setScore(r.id, r.getPronScore());
 
       expected.remove(r.id);
+     // logger.debug("\tpartitionIntoSessions2 expected now " + expected.size() + " session " + s);
 
       lastTimestamp = r.timestamp;
-
-      if (r.id.equals(lastExerciseID)) {
-        // start a new session
-        s = null;
-      }
     }
     for (Session session : sessions) session.setNumAnswers();
     if (sessions.isEmpty() && !answersForUser.isEmpty()) {
-      logger.error("huh? no sessions from " + answersForUser.size() + " given " + lastExerciseID);
+      logger.error("huh? no sessions from " + answersForUser.size() + " given " + ids);
     }
     logger.debug("\tpartitionIntoSessions2 made " +sessions.size() + " from " + answersForUser.size() + " answers");
 
@@ -610,8 +611,8 @@ public class ResultDAO extends DAO {
 
 
   public static class SessionInfo {
-    public List<Session> sessions;
-    public Map<Long, Float> userToRate;
+    public final List<Session> sessions;
+    public final Map<Long, Float> userToRate;
 
     public SessionInfo(List<Session> sessions, Map<Long, Float> userToRate) {
       this.sessions = sessions;

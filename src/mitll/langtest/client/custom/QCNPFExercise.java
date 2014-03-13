@@ -13,7 +13,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
@@ -52,6 +51,15 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
   private static final String REF_AUDIO = "refAudio";
   private static final String APPROVED = "Approve Item";
+  private static final String NO_AUDIO_RECORDED = "No Audio Recorded.";
+  private static final String SLOW_SPEED_AUDIO_EXAMPLE = "Slow speed audio example";
+  private static final String REGULAR_SPEED_AUDIO_EXAMPLE = "Regular speed audio example";
+  private static final String REFERENCE = "Reference";
+  private static final String COMMENT = "Comment";
+
+  private static final String COMMENT_TOOLTIP = "Comments are optional.";
+  private static final String CHECKBOX_TOOLTIP = "Check to indicate this field has a defect.";
+  private static final String APPROVED_BUTTON_TOOLTIP = "Indicates item has no defects, if none are marked already.";
 
   private Set<String> incorrectSet = new HashSet<String>();
   private List<RequiresResize> toResize;
@@ -115,7 +123,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
         markReviewed(listContainer, exercise);
       }
     });
-    addTooltip(approved, "Indicate this item has no defects, if none are marked already.");
+    addTooltip(approved, APPROVED_BUTTON_TOOLTIP);
   }
 
   @Override
@@ -195,7 +203,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
   private Heading getComment() {
     boolean isComment = instance.equals(Navigation.COMMENT);
-    String columnLabel = isComment ? "Comment" : DEFECT;
+    String columnLabel = isComment ? COMMENT : DEFECT;
     Heading heading = new Heading(4, columnLabel);
     heading.addStyleName("borderBottomQC");
     if (isComment) heading.setWidth("90px");
@@ -221,9 +229,9 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
         controller.getProps().showSpectrogram(), scorePanel, 93, "");
       audioPanel.setShowColor(true);
       audioPanel.getElement().setId("ASRScoringAudioPanel");
-      String name = "Reference" + " : " + audio.getDisplay();
-      if (audio.isFast()) name = "Regular speed audio example";
-      else if (audio.isSlow()) name = "Slow speed audio example";
+      String name = REFERENCE + " : " + audio.getDisplay();
+      if (audio.isFast()) name = REGULAR_SPEED_AUDIO_EXAMPLE;
+      else if (audio.isSlow()) name = SLOW_SPEED_AUDIO_EXAMPLE;
       ResizableCaptionPanel cp = new ResizableCaptionPanel(name);
       cp.setContentWidget(audioPanel);
       toResize.add(cp);
@@ -233,7 +241,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     }
     if (!e.hasRefAudio()) {
       ExerciseAnnotation refAudio = e.getAnnotation(REF_AUDIO);
-      column.add(getEntry(REF_AUDIO, new Label("No Audio Recorded."), refAudio));
+      column.add(getEntry(REF_AUDIO, new Label(NO_AUDIO_RECORDED), refAudio));
     }
     return column;
   }
@@ -313,7 +321,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
         addIncorrectComment(commentEntry.getText(), field);
       }
     });
-    addTooltip(commentEntry,"Comments are optional.");
+    addTooltip(commentEntry, COMMENT_TOOLTIP);
     return commentEntry;
   }
 
@@ -340,7 +348,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     });
     checkBox.setValue(!alreadyMarkedCorrect);
     if (!isComment) {
-      addTooltip(checkBox,"Check to indicate this field has a defect.");
+      addTooltip(checkBox, CHECKBOX_TOOLTIP);
     }
     return checkBox;
   }
