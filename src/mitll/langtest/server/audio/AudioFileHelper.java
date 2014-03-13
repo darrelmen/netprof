@@ -44,7 +44,11 @@ public class AudioFileHelper {
     this.langTestDatabase = langTestDatabase;
   }
 
-  public boolean checkLTS(String foreignLanguagePhrase) { return asrScoring.checkLTS(foreignLanguagePhrase); }
+  public boolean checkLTS(String foreignLanguagePhrase) {
+    makeASRScoring();
+    return asrScoring.checkLTS(foreignLanguagePhrase);
+  }
+
   public SmallVocabDecoder getSmallVocabDecoder() {
     makeASRScoring();
     return asrScoring.getSmallVocabDecoder();
