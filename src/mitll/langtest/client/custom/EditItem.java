@@ -2,6 +2,7 @@ package mitll.langtest.client.custom;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
+import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.TextBox;
@@ -10,6 +11,8 @@ import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
@@ -110,7 +113,7 @@ public class EditItem<T extends ExerciseShell> {
   private UserList makeListOfOnlyYourItems(boolean isUserReviewer, UserList toCopy) {
     UserList copy2 = new UserList(toCopy);
     for (UserExercise ue : toCopy.getExercises()) {
-      if (isUserReviewer || ue.getCreator() == controller.getUser()) {
+      if (true) {//isUserReviewer || ue.getCreator() == controller.getUser()) {
         copy2.addExercise(ue);
       }
     }
@@ -152,8 +155,7 @@ public class EditItem<T extends ExerciseShell> {
         @Override
         protected void askServerForExercise(String itemID) {
           if (itemID.equals(NEW_EXERCISE_ID)) {
-            UserExercise newItem = getNewItem();
-            useExercise(newItem.toExercise());
+            useExercise(getNewItem().toExercise());
           }
           else {
             super.askServerForExercise(itemID);
@@ -196,13 +198,16 @@ public class EditItem<T extends ExerciseShell> {
 
   private void setFactory(final PagingExerciseList<T> exerciseList, final UserList ul, final UserList originalList) {
     final PagingExerciseList<T> outer = exerciseList;
+    T currentExercise = outer.getCurrentExercise();
+
     exerciseList.setFactory(new ExercisePanelFactory(service, feedback, controller, exerciseList) {
       @Override
       public Panel getExercisePanel(Exercise e) {
         Panel panel = new SimplePanel();
         panel.getElement().setId("EditItemPanel");
-        UserExercise userExerciseWrapper = new UserExercise(e);
-        populatePanel(userExerciseWrapper, panel, ul, originalList, itemMarker, outer);
+        T currentExercise1 = outer.getCurrentExercise();
+  //      currentExercise1.
+        populatePanel(new UserExercise(e), panel, ul, originalList, itemMarker, outer);
         return panel;
       }
     }, userManager, 1);
@@ -228,8 +233,6 @@ public class EditItem<T extends ExerciseShell> {
                              final ListInterface<T> pagingContainer) {
     if (exercise.getID().equals(NEW_EXERCISE_ID)) {
       if (newExercise == null) {
-        //System.out.println("EditItem.populatePanel: make new item ");
-
         newExercise = createNewItem(userManager.getUser());
         addEditOrAddPanel(newExercise, itemMarker, originalList, right, ul, pagingContainer, true, false);
 
@@ -267,9 +270,57 @@ public class EditItem<T extends ExerciseShell> {
     if (doNewExercise) {
       editableExercise = new NewUserExercise<T>(service, controller, itemMarker, this, exercise);
     } else {
-      editableExercise = new EditableExercise(itemMarker, exercise, originalList);
+      String id = exercise.getID();
+      int user = controller.getUser();
+
+      long creator = getCreator(originalList, id);
+      if (creator == user) {
+        editableExercise = new EditableExercise(itemMarker, exercise, originalList);
+      }
+      else {
+        editableExercise = new NewUserExercise<T>(service, controller, itemMarker, this, exercise) {
+          @Override
+          public Panel addNew(final UserList ul, final UserList originalList, ListInterface<T> listInterface, Panel toAddTo) {
+            final FluidContainer container = new FluidContainer();
+
+            this.ul = ul;
+            this.originalList = originalList;
+            this.listInterface = listInterface;
+
+            Button delete = new Button(REMOVE_FROM_LIST);
+            DOM.setStyleAttribute(delete.getElement(), "marginRight", "5px");
+            delete.setType(ButtonType.WARNING);
+            delete.addStyleName("floatRight");
+            container.add(delete);
+
+            delete.addClickHandler(new ClickHandler() {
+              @Override
+              public void onClick(ClickEvent event) {
+                deleteItem(newUserExercise.getID(), originalList.getUniqueID(), ul, exerciseList, npfHelper);
+              }
+            });
+            delete.addStyleName("topFiftyMargin");
+            return container;
+          }
+
+          @Override
+          protected void setFields(UserExercise newUserExercise) {
+
+          }
+        };
+
+      }
     }
     return editableExercise;
+  }
+
+  private long getCreator(UserList originalList, String id) {
+    for (UserExercise ue : originalList.getExercises()) {
+      if (ue.getID().equals(id)) {
+        return ue.getCreator();
+      }
+    }
+    return -1;
   }
 
   protected class EditableExercise extends NewUserExercise<T> {
@@ -312,8 +363,6 @@ public class EditItem<T extends ExerciseShell> {
     @Override
     protected void addItemsAtTop(Panel container) {
       if (!newUserExercise.getUnitToValue().isEmpty()) {
-        //System.out.println("addItemsAtTop : For " + newUserExercise + " " + newUserExercise.getUnitToValue());
-
         Panel flow = new HorizontalPanel();
         flow.getElement().setId("addItemsAtTop_unitLesson");
         flow.addStyleName("leftFiveMargin");
@@ -352,48 +401,27 @@ public class EditItem<T extends ExerciseShell> {
       prevNext.addStyleName("rightFiveMargin");
       row.add(prevNext);
 
-      Button delete = makeDeleteButton();
+      Button delete = makeDeleteButton(ul.getUniqueID());
 
       configureButtonRow(row);
       row.add(delete);
 
-      final long uniqueID = ul.getUniqueID();
-      delete.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          deleteItem(newUserExercise.getID(), uniqueID, ul);
-        }
-      });
       return row;
     }
 
-    private void deleteItem(final String id, final long uniqueID, final UserList ul) {
-      service.deleteItemFromList(uniqueID, id, new AsyncCallback<Boolean>() {
-        @Override
-        public void onFailure(Throwable caught) {}
-
-        @Override
-        public void onSuccess(Boolean result) {
-          if (!result) System.err.println("deleteItem huh? id " + id + " not in list " + uniqueID);
-
-          exerciseList.forgetExercise(id);
-          UserExercise remove = ul.remove(id);
-          if (remove == null) {
-            System.err.println("deleteItem huh? didn't remove the item " + id);
-          }
-          if (originalList.remove(id) == null) {
-            System.err.println("deleteItem huh? didn't remove the item " + id + " from " + originalList);
-          }
-          npfHelper.reload();
-        }
-      });
-    }
-
-    private Button makeDeleteButton() {
+    private Button makeDeleteButton(final long uniqueID) {
       Button delete = new Button(REMOVE_FROM_LIST);
       DOM.setStyleAttribute(delete.getElement(), "marginRight", "5px");
       delete.setType(ButtonType.WARNING);
       delete.addStyleName("floatRight");
+
+      delete.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          deleteItem(newUserExercise.getID(), uniqueID, ul, exerciseList, npfHelper);
+        }
+      });
+
       return delete;
     }
 
