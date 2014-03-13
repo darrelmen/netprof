@@ -293,7 +293,7 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
   }
 
   @Override
-  protected T getCurrentExercise() {
+  public T getCurrentExercise() {
     return pagingContainer.getCurrentSelection();
   }
 
