@@ -100,7 +100,7 @@ public class UserListExerciseJoinDAO extends DAO {
       statement.close();
       database.closeConnection(connection);
 
-      //logger.debug("\tUserListExerciseJoinDAO.add : now " + getCount(USER_EXERCISE_LIST_EXERCISE) + " and user exercise is " + userList);
+      logger.debug("\tUserListExerciseJoinDAO.add : now " + getCount(USER_EXERCISE_LIST_EXERCISE) + " and user exercise is " + userList);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
