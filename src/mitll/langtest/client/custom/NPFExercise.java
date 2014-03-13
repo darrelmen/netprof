@@ -87,7 +87,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
         w1.clear();
         activeCount = 0;
         boolean anyAdded = false;
-        System.out.println("\tpopulateListChoices : found list " + result.size() + " choices");
+        //System.out.println("\tpopulateListChoices : found list " + result.size() + " choices");
         for (final UserList ul : result) {
           if (!ul.contains(new UserExercise(e))) {
             activeCount++;
