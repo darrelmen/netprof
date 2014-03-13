@@ -811,7 +811,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.server.autocrt.AutoCRT#getAutoCRTDecodeOutput(String, int, mitll.langtest.shared.Exercise, java.io.File, mitll.langtest.shared.AudioAnswer)
+   * @see mitll.langtest.server.autocrt.AutoCRT#getAutoCRTDecodeOutput
    * @param phrases
    * @return
    */
@@ -1226,13 +1226,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.custom.MyFlashcardExercisePanelFactory.StatsPracticePanel#onSetComplete()
    * @param userid
    * @param listid
-   * @param lastID
    * @return
    */
   @Override
-  public List<Session> getUserHistoryForList(long userid, long listid, String lastID) {
-    return db.getUserHistoryForList(listid,lastID);
-  }
+  public List<Session> getUserHistoryForList(long userid, long listid) { return db.getUserHistoryForList(listid); }
 
   private final Leaderboard leaderboard = new Leaderboard();
 
@@ -1297,8 +1294,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           logger.info("getting score for " + result);
           getASRScoreForAudio(0, result.uniqueID, pathHelper.getInstallPath() + File.separator + result.answer, exercise.getRefSentence(), 100, 100, false);
         }
-        //else logger.warn("no exercises for '" + trim + "' : " + result);
-        //if (true) break;
       }
     }
   }
