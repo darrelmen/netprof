@@ -100,11 +100,6 @@ public class AudioExercise extends ExerciseShell {
 
         return exerciseAnnotation;
       }
-    //  else {
-      //  if (!fieldToAnnotation.isEmpty()) {
-//          /System.out.println("getAnnotation : Can't find " + field + " in "+ fieldToAnnotation.keySet());
-     //   }
-    //  }
     }
     return fieldToAnnotation.get(field);
   }
@@ -113,8 +108,15 @@ public class AudioExercise extends ExerciseShell {
 
   public Map<String, String> getUnitToValue() { return unitToValue; }
 
-  public void addUnitToValue(String unit, String value) {  this.getUnitToValue().put(unit, value);  }
-  public void setUnitToValue(Map<String, String> unitToValue) {  this.unitToValue = unitToValue;  }
+  public void addUnitToValue(String unit, String value) {
+    if (value.isEmpty()) {
+      System.out.println("addUnitToValue " + unit + " value " + value);
+    }
+    this.getUnitToValue().put(unit, value);
+  }
+  public void setUnitToValue(Map<String, String> unitToValue) {
+    this.unitToValue = unitToValue;
+  }
 
   public String toString() {
     return super.toString() +" audio attr (" +getAudioAttributes().size()+
