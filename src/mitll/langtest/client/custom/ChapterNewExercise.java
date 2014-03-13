@@ -42,16 +42,13 @@ public class ChapterNewExercise<T extends ExerciseShell> extends NewUserExercise
    */
   @Override
   protected void addItemsAtTop(Panel container) {
-    //super.addItemsAtTop(container);
     StartupInfo startupInfo = controller.getStartupInfo();
     Collection<String> typeOrder = controller.getStartupInfo().getTypeOrder();
-//  System.out.println("startup info " + startupInfo);
     if (startupInfo.getTypeOrder().isEmpty()) return;
 
     BasicDialog basicDialog = new BasicDialog();
 
     List<SectionNode> sectionNodes = controller.getStartupInfo().getSectionNodes();
-   // List<String> values = new ArrayList<String>();
     Map<String,List<String>> typeToValues = new HashMap<String, List<String>>();
     String first = typeOrder.iterator().next();
 
@@ -62,19 +59,11 @@ public class ChapterNewExercise<T extends ExerciseShell> extends NewUserExercise
     }
 
     ItemSorter sorter = new ItemSorter();
-  //  Collections.sort(values);
 
     for (String type : typeOrder) {
-//        flow.getElement().setId("unitLesson");
-      //      flow.addStyleName("leftFiveMargin");
-
-      //String value = newUserExercise.getUnitToValue().get(type);
       List<String> sortedItems = sorter.getSortedItems(typeToValues.get(type));
       ListBoxFormField listBoxFormField = basicDialog.getListBoxFormField(container, type, sortedItems);
       nameToWidget.put(type, listBoxFormField);
-      //Heading child = new Heading(4, type, value);
-      // child.addStyleName("rightFiveMargin");
-      // flow.add(child);
     }
   }
 
@@ -93,7 +82,11 @@ public class ChapterNewExercise<T extends ExerciseShell> extends NewUserExercise
   protected void grabInfoFromFormAndStuffInfoExercise() {
     super.grabInfoFromFormAndStuffInfoExercise();
     for (Map.Entry<String, ListBoxFormField> pair : nameToWidget.entrySet()) {
-      newUserExercise.addUnitToValue(pair.getKey(), pair.getValue().getValue());
+      String value = pair.getValue().getValue();
+      if (!value.isEmpty()) {
+        System.out.println("adding " + pair.getKey() + " " + value);
+        newUserExercise.addUnitToValue(pair.getKey(), value);
+      }
 
     }
   }
