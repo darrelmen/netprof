@@ -129,7 +129,7 @@ public interface LangTestDatabase extends RemoteService {
 
   List<? extends ExerciseShell> getFullExercisesForSelectionState(Map<String, Collection<String>> typeToSection, int start, int end);
 
-  List<Session> getUserHistoryForList(long userid, long listid, String lastID);
+  List<Session> getUserHistoryForList(long userid, long listid);
 
   /**
    * Game is over notification...
