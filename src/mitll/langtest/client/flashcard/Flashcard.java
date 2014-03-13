@@ -46,7 +46,7 @@ public class Flashcard implements RequiresResize {
    * @see mitll.langtest.client.LangTest#doFlashcard()
    * @see mitll.langtest.client.LangTest#makeHeaderRow()
    */
-  public Flashcard(String nameForAnswer) { this.nameForAnswer = nameForAnswer; }
+  public Flashcard(String nameForAnswer) { this.nameForAnswer = nameForAnswer + "s"; }
 
   /**
    * @see mitll.langtest.client.LangTest#doFlashcard()
@@ -55,8 +55,7 @@ public class Flashcard implements RequiresResize {
    * @return
    */
   public Panel makeFlashcardHeaderRow(String splashText, String userName) {
-    String appIcon = "NewProF2.png";
-    return getHeaderRow(splashText, false, appIcon, AVP, userName, new HTML(""), null, null, null, null);
+    return getHeaderRow(splashText, false, NEW_PRO_F2_PNG, AVP, userName, new HTML(""), null, null, null, null);
   }
 
   /**
@@ -69,7 +68,7 @@ public class Flashcard implements RequiresResize {
                                 ClickHandler users,
                                 ClickHandler results,
                                 ClickHandler monitoring) {
-    return getHeaderRow(splashText, isBeta,"NewProF1.png", PRONUNCIATION_FEEDBACK, userName, browserInfo, logoutClickHandler,
+    return getHeaderRow(splashText, isBeta,NEW_PRO_F1_PNG, PRONUNCIATION_FEEDBACK, userName, browserInfo, logoutClickHandler,
       users, results, monitoring);
   }
 
