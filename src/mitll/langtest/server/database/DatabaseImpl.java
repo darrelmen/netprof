@@ -598,7 +598,9 @@ public class DatabaseImpl implements Database {
     UserList userListByID = getUserListManager().getUserListByID(listid);
     Collection<UserExercise> exercises = userListByID.getExercises();
     Set<String> ids = new HashSet<String>();
-    for (UserExercise ue : exercises) ids.add(ue.getID());
+    for (UserExercise ue : exercises) {
+      ids.add(ue.getID());
+    }
     return resultDAO.getSessionsForUserIn2(ids, lastID);
   }
 
