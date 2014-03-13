@@ -166,10 +166,11 @@ public class Flashcard implements RequiresResize {
     return headerRow;
   }
 
-  public void setUserName(String name) {
-    System.out.println("set user name " + name);
-    this.userNameWidget.setText(name);
-  }
+  /**
+   * @see mitll.langtest.client.LangTest#gotUser(long)
+   * @param name
+   */
+  public void setUserName(String name) {  this.userNameWidget.setText(name);  }
 
   @Override
   public void onResize() {
