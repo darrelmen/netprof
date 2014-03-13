@@ -591,17 +591,16 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getUserHistoryForList(long, long, String)
    * @see mitll.langtest.client.custom.MyFlashcardExercisePanelFactory.StatsPracticePanel#onSetComplete
    * @param listid
-   * @param lastID
    * @return
    */
-  public List<Session> getUserHistoryForList(long listid, String lastID) {
+  public List<Session> getUserHistoryForList(long listid) {
     UserList userListByID = getUserListManager().getUserListByID(listid);
     Collection<UserExercise> exercises = userListByID.getExercises();
     Set<String> ids = new HashSet<String>();
     for (UserExercise ue : exercises) {
       ids.add(ue.getID());
     }
-    return resultDAO.getSessionsForUserIn2(ids, lastID);
+    return resultDAO.getSessionsForUserIn2(ids);
   }
 
   /**
