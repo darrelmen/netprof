@@ -319,6 +319,11 @@ public class UserListManager {
     editItem(userExercise, false);
   }
 
+  /**
+   * @see #addItemToUserList(long, mitll.langtest.shared.custom.UserExercise)
+   * @param userListID
+   * @param userExercise
+   */
   private void addItemToList(long userListID, UserExercise userExercise) {
     UserList where = userListDAO.getWhere(userListID, true);
     if (where != null) {
