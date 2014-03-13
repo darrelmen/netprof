@@ -98,7 +98,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   }
 
   public void setPlayEnabled(boolean val) {
-    System.out.println("setPlayEnabled -- " + getElement().getId() + " : valid audio ? " + hasValidAudio() + " enable " + val);
+    //System.out.println("setPlayEnabled -- " + getElement().getId() + " : valid audio ? " + hasValidAudio() + " enable " + val);
     playAudioPanel.setEnabled(val && hasValidAudio());
   }
 
