@@ -625,24 +625,30 @@ public class Navigation extends TabContainer implements RequiresResize {
                                 final TabAndContent edit,
                                 final boolean isNormalList, TabAndContent editItem) {
     final TabAndContent finalEditItem = editItem;
-    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+/*    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
-        boolean chosePrev = selectPreviouslyClickedTab(tabPanel, learn, practice, edit,
-          ul, instanceName1, isReview, isComment, isNormalList);
-        if (!chosePrev) {
-          if (created && !ul.isPrivate() && ul.isEmpty() && finalEditItem != null) {
-            String name = ul.getName();
-            //System.out.println("name " + name);
-            tabPanel.selectTab(name.equals(REVIEW1) ? 0 : CREATE_TAB_INDEX);    // 2 = add/edit item
-            EditItem<? extends ExerciseShell> editItem1 = (isReview || isComment) ? reviewItem : Navigation.this.editItem;
-            showEditItem(ul, finalEditItem, editItem1, isNormalList, isReview);
-          } else {
-            tabPanel.selectTab(0);
-            npfHelper.showNPF(ul, learn, instanceName1);
-          }
-        }
+        selectTabGivenHistory(tabPanel, learn, practice, edit, ul, instanceName1, isReview, isComment, isNormalList, created, finalEditItem);
       }
-    });
+    });*/
+    selectTabGivenHistory(tabPanel, learn, practice, edit, ul, instanceName1, isReview, isComment, isNormalList, created, finalEditItem);
+
+  }
+
+  private void selectTabGivenHistory(TabPanel tabPanel, TabAndContent learn, TabAndContent practice, TabAndContent edit, UserList ul, String instanceName1, boolean isReview, boolean isComment, boolean isNormalList, boolean created, TabAndContent finalEditItem) {
+    boolean chosePrev = selectPreviouslyClickedTab(tabPanel, learn, practice, edit,
+      ul, instanceName1, isReview, isComment, isNormalList);
+    if (!chosePrev) {
+      if (created && !ul.isPrivate() && ul.isEmpty() && finalEditItem != null) {
+        String name = ul.getName();
+        //System.out.println("name " + name);
+        tabPanel.selectTab(name.equals(REVIEW1) ? 0 : CREATE_TAB_INDEX);    // 2 = add/edit item
+        EditItem<? extends ExerciseShell> editItem1 = (isReview || isComment) ? reviewItem : this.editItem;
+        showEditItem(ul, finalEditItem, editItem1, isNormalList, isReview);
+      } else {
+        tabPanel.selectTab(0);
+        npfHelper.showNPF(ul, learn, instanceName1);
+      }
+    }
   }
 
   /**
@@ -663,7 +669,7 @@ public class Navigation extends TabContainer implements RequiresResize {
                                              UserList ul, String instanceName1,
                                              boolean isReview, boolean isComment, boolean isNormalList) {
     String subTab = storage.getValue(SUB_TAB);
-    System.out.println("selectPreviouslyClickedTab : subtab " + subTab);
+    //System.out.println("selectPreviouslyClickedTab : subtab " + subTab);
 
     boolean chosePrev = false;
     if (subTab != null) {
@@ -671,10 +677,8 @@ public class Navigation extends TabContainer implements RequiresResize {
       if (subTab.equals("learn")) {
         tabPanel.selectTab(0);
         clickOnTab(learn);
-
         npfHelper.showNPF(ul, learn, instanceName1);
       } else if (subTab.equals(PRACTICE1)) {
-        //System.out.println("\tsubtab " +subTab);
         tabPanel.selectTab(1);
         clickOnTab(practice);
         avpHelper.showNPF(ul, practice, PRACTICE1);
@@ -696,7 +700,7 @@ public class Navigation extends TabContainer implements RequiresResize {
    */
   private void showEditItem(UserList ul, TabAndContent addItem, EditItem<? extends ExerciseShell> editItem,
                             boolean includeAddItem, boolean isUserReviewer) {
-    System.out.println("showEditItem --- " + ul + " : " + includeAddItem  + " reviewer " + isUserReviewer);
+    //System.out.println("showEditItem --- " + ul + " : " + includeAddItem  + " reviewer " + isUserReviewer);
     addItem.content.clear();
     Widget widgets = editItem.editItem(ul, listToMarker.get(ul), includeAddItem,isUserReviewer);
     addItem.content.add(widgets);
@@ -773,20 +777,27 @@ public class Navigation extends TabContainer implements RequiresResize {
      * @param result
      */
     private void selectThePreviousList(final Collection<UserList> result) {
+/*
       Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
         public void execute() {
-          String clickedUserList = storage.getValue(CLICKED_USER_LIST);
-          if (clickedUserList != null && !clickedUserList.isEmpty()) {
-            long id = Long.parseLong(clickedUserList);
-            for (UserList ul : result) {
-               if (ul.getUniqueID() == id) {
-                 showList(ul,contentPanel,instanceName);
-                 break;
-               }
-            }
-          }
+          selectPreviousList(result);
         }
       });
+*/
+      selectPreviousList(result);
+    }
+
+    private void selectPreviousList(Collection<UserList> result) {
+      String clickedUserList = storage.getValue(CLICKED_USER_LIST);
+      if (clickedUserList != null && !clickedUserList.isEmpty()) {
+        long id = Long.parseLong(clickedUserList);
+        for (UserList ul : result) {
+           if (ul.getUniqueID() == id) {
+             showList(ul,contentPanel,instanceName);
+             break;
+           }
+        }
+      }
     }
 
     private Map<String, List<UserList>> populateNameToList(Collection<UserList> result) {
