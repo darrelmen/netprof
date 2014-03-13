@@ -98,8 +98,7 @@ public class EditItem<T extends ExerciseShell> {
 
     this.itemMarker = itemMarker; // TODO : something less awkward
 
-    UserList copy = new UserList(originalList);  // copy before we add to it!
-    copy = makeListOfOnlyYourItems(isUserReviewer, copy);
+    UserList copy = makeListOfOnlyYourItems(isUserReviewer, originalList);
 
     exerciseList = makeExerciseList(contentOnRight, EDIT_ITEM, copy, originalList, includeAddItem);
     pagerOnLeft.add(exerciseList.getExerciseListOnLeftSide(controller.getProps()));
@@ -108,19 +107,25 @@ public class EditItem<T extends ExerciseShell> {
     return hp;
   }
 
-  private UserList makeListOfOnlyYourItems(boolean isUserReviewer, UserList copy) {
-    if (!isUserReviewer) {
-      UserList copy2 = new UserList();
-      for (UserExercise ue : copy.getExercises()) {
-        if (ue.getCreator() == controller.getUser()) {
-            copy2.addExercise(ue);
-        }
+  private UserList makeListOfOnlyYourItems(boolean isUserReviewer, UserList toCopy) {
+    UserList copy2 = new UserList(toCopy);
+    for (UserExercise ue : toCopy.getExercises()) {
+      if (isUserReviewer || ue.getCreator() == controller.getUser()) {
+        copy2.addExercise(ue);
       }
-      copy = copy2;
     }
-    return copy;
+    return copy2;
   }
 
+  /**
+   * @see #editItem(mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.HasText, boolean, boolean)
+   * @param right
+   * @param instanceName
+   * @param ul
+   * @param originalList
+   * @param includeAddItem
+   * @return
+   */
   private PagingExerciseList<T> makeExerciseList(Panel right, String instanceName, UserList ul, UserList originalList,
                                                  final boolean includeAddItem) {
     System.out.println("EditItem.makeExerciseList - ul = " + ul.getName() + " " + includeAddItem);
@@ -295,7 +300,8 @@ public class EditItem<T extends ExerciseShell> {
     protected void gotBlur(FormField english, FormField foreignLang, RecordAudioPanel rap,
                            ControlGroup normalSpeedRecording, UserList ul, ListInterface<T> pagingContainer,
                            Panel toAddTo) {
-      validateThenPost(foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo, false);
+      boolean changed = foreignChanged();
+      validateThenPost(foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo, false, changed);
     }
 
     protected PrevNextList<T> getPrevNext(ListInterface<T> pagingContainer) {
@@ -306,19 +312,21 @@ public class EditItem<T extends ExerciseShell> {
     @Override
     protected void addItemsAtTop(Panel container) {
       if (!newUserExercise.getUnitToValue().isEmpty()) {
-        Panel flow = new HorizontalPanel();
-        for (String type : controller.getStartupInfo().getTypeOrder()) {
-          flow.getElement().setId("unitLesson");
-          flow.addStyleName("leftFiveMargin");
+        //System.out.println("addItemsAtTop : For " + newUserExercise + " " + newUserExercise.getUnitToValue());
 
+        Panel flow = new HorizontalPanel();
+        flow.getElement().setId("addItemsAtTop_unitLesson");
+        flow.addStyleName("leftFiveMargin");
+
+        for (String type : controller.getStartupInfo().getTypeOrder()) {
           Heading child = new Heading(4, type, newUserExercise.getUnitToValue().get(type));
           child.addStyleName("rightFiveMargin");
           flow.add(child);
         }
+
         container.add(flow);
-      }
-      else if (ul != null) {        // when could this happen???
-        container.add(new Label("List "+ul.getName()));
+      } else if (ul != null) {        // when could this happen???
+        container.add(new Label("List " + ul.getName()));
       }
     }
 
@@ -567,12 +575,14 @@ public class EditItem<T extends ExerciseShell> {
     }
 
     /**
+     * Tell predefined list to update itself... since maybe a pre def item changed...
+     *
      * @see #reallyChange(mitll.langtest.client.list.ListInterface, boolean)
      * @param pagingContainer
      * @param buttonClicked
      */
     protected void doAfterEditComplete(ListInterface<T> pagingContainer, boolean buttonClicked) {
-      System.out.println("doAfterEditComplete : change tooltip " + buttonClicked);
+      System.out.println("doAfterEditComplete : change tooltip " + buttonClicked + " id " + predefinedContentList.getCurrentExerciseID());
 
       changeTooltip(pagingContainer);
       predefinedContentList.reloadWith(predefinedContentList.getCurrentExerciseID());
@@ -585,7 +595,7 @@ public class EditItem<T extends ExerciseShell> {
       } else {
         String english1 = newUserExercise.getEnglish();
         byID.setTooltip(english1.isEmpty() ? newUserExercise.getForeignLanguage() : english1);
-        System.out.println("changeTooltip : for " + newUserExercise.getID() + " now " + byID.getTooltip());
+        //System.out.println("changeTooltip : for " + newUserExercise.getID() + " now " + byID.getTooltip());
 
         pagingContainer.redraw();   // show change to tooltip!
       }
@@ -600,7 +610,7 @@ public class EditItem<T extends ExerciseShell> {
      * @param newUserExercise
      */
     protected void setFields(UserExercise newUserExercise) {
-      System.out.println("grabInfoFromFormAndStuffInfoExercise : setting fields with " + newUserExercise);
+      //System.out.println("grabInfoFromFormAndStuffInfoExercise : setting fields with " + newUserExercise);
 
       // english
       english.box.setText(originalEnglish = newUserExercise.getEnglish());
