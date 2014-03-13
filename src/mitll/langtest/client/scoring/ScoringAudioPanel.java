@@ -32,13 +32,14 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   public static float MP3_HEADER_OFFSET = 0f;//0.048f;
 
   /**
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, ScoreListener, String)
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, ScoreListener, String)
+   * @param refSentence
    * @param service
    * @param gaugePanel
    * @param playButtonSuffix
    */
-  public ScoringAudioPanel(LangTestDatabaseAsync service, ExerciseController controller, ScoreListener gaugePanel, String playButtonSuffix) {
-    this(null, null, service, controller, SHOW_SPECTROGRAM, gaugePanel, 23, playButtonSuffix);
+  public ScoringAudioPanel(String refSentence, LangTestDatabaseAsync service, ExerciseController controller, ScoreListener gaugePanel, String playButtonSuffix) {
+    this(null, refSentence, service, controller, SHOW_SPECTROGRAM, gaugePanel, 23, playButtonSuffix);
   }
 
   /**
@@ -56,7 +57,6 @@ public abstract class ScoringAudioPanel extends AudioPanel {
                            boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin, String playButtonSuffix) {
     super(path, service, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix, controller.getAudioType());
     this.refSentence = refSentence;
-    //System.out.println("ScoringAudioPanel : path " + path +" ref sentence " +refSentence);
     showOnlyOneExercise = controller.showOnlyOneExercise();
     addClickHandlers();
   }
@@ -131,7 +131,6 @@ public abstract class ScoringAudioPanel extends AudioPanel {
       phoneTranscript.image.setUrl(IMAGES_REDX_PNG);
     }
     if (!scoredBefore && scoreListener != null) {
-      System.out.println("new score returned " + result);
       scoreListener.gotScore(result, showOnlyOneExercise);
     }
     this.result = result;
