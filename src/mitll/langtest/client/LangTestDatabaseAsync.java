@@ -170,15 +170,4 @@ public interface LangTestDatabaseAsync {
   void deleteItem(String exid, AsyncCallback<Boolean> async);
 
   void getUserHistoryForList(long userid, long listid, String lastID, AsyncCallback<List<Session>> async);
-
-/*  void getCompletedExercises(int user, AsyncCallback<Set<String>> async);
-
-  void getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID, String prefix, boolean showUnansweredFirst, AsyncCallback<ExerciseListWrapper> async);
-
-  void getExerciseIds(int reqID, long userID, boolean unansweredFirst, AsyncCallback<ExerciseListWrapper> async);
-
-  void getExerciseIds(int reqID, AsyncCallback<ExerciseListWrapper> async);
-
-  void getExerciseIds(int reqID, long userID, String prefix, AsyncCallback<ExerciseListWrapper> async);
- */
 }
