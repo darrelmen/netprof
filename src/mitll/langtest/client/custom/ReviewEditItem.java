@@ -110,8 +110,7 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
       fixed.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          //fixed.setEnabled(false);
-          validateThenPost(foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo, true);
+          validateThenPost(foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo, true, true);
         }
       });
 
