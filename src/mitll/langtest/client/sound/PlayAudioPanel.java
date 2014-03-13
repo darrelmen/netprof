@@ -100,6 +100,17 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     add(warnNoFlash);
   }
 
+  /**
+   * Make sure play button doesn't squish down when it says "pause"
+   */
+  @Override
+  protected void onLoad() {
+    super.onLoad();
+
+  //  System.out.println("onLoad button width " + playButton.getOffsetWidth());
+    playButton.setWidth(playButton.getOffsetWidth() +"px");
+  }
+
   private void doClick() {
     if (playButton.isVisible() && playButton.isEnabled()) {
       if (isPlaying()) {
