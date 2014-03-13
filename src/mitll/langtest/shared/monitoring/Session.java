@@ -81,7 +81,7 @@ public class Session implements IsSerializable, SetScore {
       }
     }
     float v = num == 0 ? 0f : (total / (float) num);
-    //System.out.println("calcAvgScore scores "+ values + " = "  +v);
+    //System.out.println("calcAvgScore scores "+ values + " = total " + total + " num " + num + " = "  +v);
 
     return v;
   }
