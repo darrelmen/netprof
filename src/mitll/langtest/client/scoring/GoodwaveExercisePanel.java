@@ -179,8 +179,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
   protected HorizontalPanel getUnitLessonForExercise() {
     HorizontalPanel flow = new HorizontalPanel();
-    flow.getElement().setId("unitLesson");
+    flow.getElement().setId("getUnitLessonForExercise_unitLesson");
     flow.addStyleName("leftFiveMargin");
+    System.out.println("getUnitLessonForExercise " + exercise + " unit value " +exercise.getUnitToValue());
 
     for (String type : controller.getStartupInfo().getTypeOrder()) {
       Heading child = new Heading(HEADING_FOR_UNIT_LESSON, type, exercise.getUnitToValue().get(type));
@@ -225,9 +226,14 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     final VerticalPanel vp = new VerticalPanel();
     vp.getElement().setId("getQuestionContent_verticalContainer");
 
-    HorizontalPanel unitLessonForExercise = getUnitLessonForExercise();
-    unitLessonForExercise.add(getItemHeader(e));
-    vp.add(unitLessonForExercise);
+
+    if (!e.getUnitToValue().isEmpty()) {
+      System.out.println("e " +e + " unit " + e.getUnitToValue());
+
+      HorizontalPanel unitLessonForExercise = getUnitLessonForExercise();
+      unitLessonForExercise.add(getItemHeader(e));
+      vp.add(unitLessonForExercise);
+    }
     vp.addStyleName("blockStyle");
 
     Widget questionContent = getQuestionContent(e, content);
