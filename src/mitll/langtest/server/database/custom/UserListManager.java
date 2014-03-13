@@ -142,7 +142,7 @@ public class UserListManager {
     if (userid == -1) {
       return Collections.emptyList();
     }
-    logger.debug("getListsForUser for user #" + userid + " only created " + listsICreated + " visited " +visitedLists);
+    //logger.debug("getListsForUser for user #" + userid + " only created " + listsICreated + " visited " +visitedLists);
 
     List<UserList> listsForUser = new ArrayList<UserList>();
     UserList favorite = null;
@@ -163,29 +163,6 @@ public class UserListManager {
           listsForUser.add(userList);
         }
       }
-
-    /*    for (UserList userList : userListDAO.getAll(userid)) {
-        boolean isCreator = userList.getCreator().id == userid;
-        boolean added = false;
-        if (isCreator || !isFavorite(userList)) {
-          if (listsICreated) {
-            //logger.debug("\tgetListsForUser  list " + userList);
-            if (isCreator) {
-              if (isFavorite(userList)) favorite = userList;
-              listsForUser.add(userList);
-              added = true;
-            }
-          }
-
-          if (visitedLists && !added) {
-            //logger.debug("\tgetListsForUser  list " + userList);
-            if (userList.getVisitorIDs().contains(userid)) {
-              if (isFavorite(userList)) favorite = userList;
-              listsForUser.add(userList);
-            }
-          }
-        }
-      }  */
     }
 
     if (listsForUser.isEmpty()) {
@@ -196,7 +173,7 @@ public class UserListManager {
       listsForUser.add(0,favorite);// put at front
     }
 
-    logger.debug("getListsForUser found " + listsForUser.size() + //"(" +listsForUser+ ")" +
+    logger.debug("getListsForUser found " + listsForUser.size() +
       " lists for user #" + userid + " only created " + listsICreated + " visited " +visitedLists);
 
     return listsForUser;
@@ -206,9 +183,7 @@ public class UserListManager {
     return createUserList(userid, UserList.MY_LIST, MY_FAVORITES, "", true);
   }
 
-  private boolean isFavorite(UserList userList) {
-    return userList.getName().equals(UserList.MY_LIST);
-  }
+  private boolean isFavorite(UserList userList) { return userList.getName().equals(UserList.MY_LIST); }
 
   public UserList getCommentedList() {
     List<UserExercise> allKnown = userExerciseDAO.getWhere(incorrect);
@@ -287,7 +262,7 @@ public class UserListManager {
 
   /**
    * TODO : do a search over the list fields to find matches
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getUserListsForText(String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getUserListsForText
    * @param search
    * @param userid
    * @return
@@ -526,12 +501,15 @@ public class UserListManager {
     if (exercise != null) {
       Map<String, ExerciseAnnotation> latestByExerciseID = annotationDAO.getLatestByExerciseID(exercise.getID());
 
-      if (!latestByExerciseID.isEmpty()) {
-        logger.debug("addAnnotations : found " + latestByExerciseID + " for " + exercise.getID());
-      }
+      //if (!latestByExerciseID.isEmpty()) {
+      //  logger.debug("addAnnotations : found " + latestByExerciseID + " for " + exercise.getID());
+      //}
       for (Map.Entry<String, ExerciseAnnotation> pair : latestByExerciseID.entrySet()) {
         exercise.addAnnotation(pair.getKey(), pair.getValue().status, pair.getValue().comment);
       }
+    }
+    else {
+      logger.warn("addAnnotations : on an empty exercise?");
     }
   }
 
