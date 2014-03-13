@@ -184,6 +184,8 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
   public void setUnaccountedForVertical(int v) {
     unaccountedForVertical = v;
     pagingContainer.setUnaccountedForVertical(v);
+    System.out.println("setUnaccountedForVertical : vert " + v + " for " +getElement().getId());
+
   }
 
   protected void addTableWithPager(PagingContainer<? extends ExerciseShell> pagingContainer) {
