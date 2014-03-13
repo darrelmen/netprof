@@ -46,12 +46,8 @@ public class UserList extends ExerciseShell {
   }
 
   public UserList(UserList ul) {
-    this(ul.uniqueID,ul.getCreator(),ul.getName(),ul.getDescription(),ul.getClassMarker(),ul.isPrivate());
+    this(ul.uniqueID, ul.getCreator(), ul.getName(), ul.getDescription(), ul.getClassMarker(), ul.isPrivate());
   }
-/*
-  public void addAllExercises(UserList ul) {
-    for (UserExercise ue : ul.getExercises()) { addExercise(ue); }
-  }*/
 
   public void addExercise(UserExercise toAdd) { exercises.add(toAdd);  }
   public void addExerciseAfter(UserExercise after, UserExercise toAdd) {
@@ -96,8 +92,7 @@ public class UserList extends ExerciseShell {
         toRemove = ue;
       }
     }
-    UserExercise userExercise = toRemove != null && exercises.remove(toRemove) ? toRemove : null;
-    return userExercise;
+    return toRemove != null && exercises.remove(toRemove) ? toRemove : null;
   }
 
   public User getCreator() {
@@ -124,13 +119,9 @@ public class UserList extends ExerciseShell {
     return isPrivate;
   }
 
-  public boolean isEmpty() {
-    return getExercises().isEmpty();
-  }
+  public boolean isEmpty() { return getExercises().isEmpty();  }
 
-  public boolean isFavorite() {
-    return getName().equals(MY_LIST);
-  }
+  public boolean isFavorite() { return getName().equals(MY_LIST);  }
 
   public void setReview(boolean isReview) {
     this.isReview = isReview;
