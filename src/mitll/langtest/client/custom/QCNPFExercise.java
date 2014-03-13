@@ -55,14 +55,22 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
   private Set<String> incorrectSet = new HashSet<String>();
   private List<RequiresResize> toResize;
+  private ListInterface<Exercise> listContainer;
 
   public QCNPFExercise(Exercise e, ExerciseController controller, ListInterface<Exercise> listContainer,
                        float screenPortion, boolean addKeyHandler, String instance) {
     super(e, controller, listContainer, screenPortion, addKeyHandler, instance);
+
+    this.listContainer = listContainer;
   }
 
   @Override
   protected ASRScorePanel makeScorePanel(Exercise e, String instance) { return null;  }
+
+  @Override
+  protected void addGroupingStyle(Widget div) {
+    div.addStyleName("buttonGroupInset7");
+  }
 
   @Override
   protected void addQuestionContentRow(Exercise e, ExerciseController controller, Panel hp) {
@@ -90,7 +98,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
       }
     };
 
-    if (!instance.contains("review")) {
+    if (!instance.contains(Navigation.REVIEW)) {
       addApprovedButton(listContainer, widgets);
     }
 
@@ -117,25 +125,37 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     markReviewed(listContainer, completedExercise);
   }
 
+  /**
+   * @see #addApprovedButton(mitll.langtest.client.list.ListInterface, mitll.langtest.client.exercise.NavigationHelper)
+   * @see #nextWasPressed(mitll.langtest.client.list.ListInterface, mitll.langtest.shared.ExerciseShell)
+   * @param listContainer
+   * @param completedExercise
+   */
   private void markReviewed(ListInterface<? extends ExerciseShell> listContainer, ExerciseShell completedExercise) {
-    if (!instance.equals(Navigation.REVIEW) && !instance.equals(Navigation.COMMENT)) {
+    if (isCourseContent()) {
       listContainer.addCompleted(completedExercise.getID());
       markReviewed(completedExercise);
     }
   }
 
+  private boolean isCourseContent() {
+    return !instance.equals(Navigation.REVIEW) && !instance.equals(Navigation.COMMENT);
+  }
+
+  /**
+   * @see #markReviewed(mitll.langtest.client.list.ListInterface, mitll.langtest.shared.ExerciseShell)
+   * @param completedExercise
+   */
   private void markReviewed(ExerciseShell completedExercise) {
     System.out.println("markReviewed : exercise " + completedExercise.getID() + " instance " + instance);
 
     service.markReviewed(completedExercise.getID(), incorrectSet.isEmpty(), controller.getUser(),
         new AsyncCallback<Void>() {
           @Override
-          public void onFailure(Throwable caught) {
-          }
+          public void onFailure(Throwable caught) {}
 
           @Override
-          public void onSuccess(Void result) {
-          }
+          public void onSuccess(Void result) {}
         });
   }
 
@@ -165,9 +185,6 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     Panel row = new FlowPanel();
     row.add(getComment());
 
-/*    if (instance.contains("review")) {
-      addItemsAtTop(column);
-    }*/
     column.add(row);
     column.add(getEntry(e, FOREIGN_LANGUAGE, ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getRefSentence()));
     column.add(getEntry(e, TRANSLITERATION, ExerciseFormatter.TRANSLITERATION, e.getTranslitSentence()));
@@ -183,12 +200,6 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     heading.addStyleName("borderBottomQC");
     if (isComment) heading.setWidth("90px");
     return heading;
-  }
-
-  protected void addItemsAtTop(Panel container) {
-    if (!exercise.getUnitToValue().isEmpty()) {
-      container.add(getUnitLessonForExercise());
-    }
   }
 
   public void onResize() {
@@ -210,7 +221,6 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
         controller.getProps().showSpectrogram(), scorePanel, 93, "");
       audioPanel.setShowColor(true);
       audioPanel.getElement().setId("ASRScoringAudioPanel");
-      //audioPanel.setRefAudio(audioRef);
       String name = "Reference" + " : " + audio.getDisplay();
       if (audio.isFast()) name = "Regular speed audio example";
       else if (audio.isSlow()) name = "Slow speed audio example";
@@ -303,6 +313,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
         addIncorrectComment(commentEntry.getText(), field);
       }
     });
+    addTooltip(commentEntry,"Comments are optional.");
     return commentEntry;
   }
 
@@ -319,21 +330,39 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     boolean isComment = instance.equals(Navigation.COMMENT);
 
     final CheckBox checkBox = new CheckBox("");
+    checkBox.getElement().setId("CheckBox_"+field);
     checkBox.addStyleName(isComment? "wideCenteredRadio" :"centeredRadio");
     checkBox.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        Boolean isIncorrect = checkBox.getValue();
-        if (!isIncorrect) {
-          incorrectSet.remove(field);
-          addCorrectComment(field);
-        }
-        commentRow.setVisible(isIncorrect);
-        commentEntry.setFocus(isIncorrect);
-        if (isIncorrect) incorrectSet.add(field);
+        checkBoxWasClicked(checkBox.getValue(), field, commentRow, commentEntry);
       }
     });
     checkBox.setValue(!alreadyMarkedCorrect);
     return checkBox;
+  }
+
+  private void checkBoxWasClicked(boolean isIncorrect, String field, Panel commentRow, FocusWidget commentEntry) {
+    commentRow.setVisible(isIncorrect);
+    commentEntry.setFocus(isIncorrect);
+
+    if (isIncorrect) {
+      incorrectSet.add(field);
+    }
+    else {
+      incorrectSet.remove(field);
+      addCorrectComment(field);
+    }
+
+    if (isCourseContent()) {
+      String id = exercise.getID();
+      if (incorrectSet.isEmpty()) {
+        //listContainer.removeCompleted(id);
+      }
+      else {
+        listContainer.addCompleted(id);
+      }
+      markReviewed(exercise);
+    }
   }
 }
