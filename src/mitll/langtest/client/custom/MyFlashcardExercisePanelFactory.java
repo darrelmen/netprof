@@ -5,7 +5,6 @@ import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -50,8 +49,8 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
   private List<T> allExercises;
   private final long userListID;
   private T lastExercise;
-  Map<String,Boolean> exToCorrect = new HashMap<String, Boolean>();
-  Map<String,Double>   exToScore = new HashMap<String, Double>();
+  private Map<String,Boolean> exToCorrect = new HashMap<String, Boolean>();
+  private Map<String,Double>   exToScore = new HashMap<String, Double>();
 
   /**
    * @see NPFHelper#setFactory(mitll.langtest.client.list.PagingExerciseList, String, long)
@@ -82,8 +81,6 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
       }
     });*/
   }
-
-
 
   @Override
   public Panel getExercisePanel(Exercise e) {
@@ -153,12 +150,15 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
       setMainContentVisible(false);
       int totalCorrect = getCorrect();
       int totalIncorrect = getIncorrect();
-      double totalScore = getScore();
+      double avgScore = getAvgScore();
       int all = totalCorrect + totalIncorrect;
       System.out.println("onSetComplete.onSuccess : result " + result.size() + " " +size +
-        " all " +all + " correct " + totalCorrect + " inc " + totalIncorrect +  " result " + result);
+        " all " +all + " correct " + totalCorrect + " inc " + totalIncorrect);
+      for (Session s : result) {
+        System.out.println("\tonSetComplete.onSuccess : result " + s);
+      }
       String correct = totalCorrect +" Correct (" + toPercent(totalCorrect, all) + ")";
-      String pronunciation = "Pronunciation " + toPercent(totalScore, all);
+      String pronunciation = "Pronunciation " + toPercent(avgScore);
 
       Chart chart  = new LeaderboardPlot().getChart(result, user, -1, correct,       "% correct", true, 100f);
       Chart chart2 = new LeaderboardPlot().getChart(result, user, -1, pronunciation, "score %",   false, 100f);
@@ -192,12 +192,17 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
      * @see #showFeedbackCharts(java.util.List, int)
      * @return
      */
-    private double getScore() {
+    private double getAvgScore() {
       double count = 0;
+      float num = 0f;
       for (Double val : exToScore.values()) {
-        if (val > 0) count += val;
+        if (val > 0) {
+          count += val;
+          num++;
+        }
       }
-      return count;
+      //System.out.println("Scores " + exToScore + " total " + count + " items " + exToScore.size() + " avg " + (count/(float)exToScore.size()));
+      return count/num;
     }
 
     private String toPercent(int numer, int denom) {
@@ -206,6 +211,10 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
 
     private String toPercent(double numer, int denom) {
       return ((int) ((numer * 100f) / denom)) + "%";
+    }
+
+    private String toPercent(double num) {
+      return ((int) (num * 100f)) + "%";
     }
 
     private Button getRepeatButton() {
