@@ -94,8 +94,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
       }
     }, listContainer, true, addKeyHandler) {
       @Override
-      protected void enableNext(Exercise exercise) {
-      }
+      protected void enableNext(Exercise exercise) {}
     };
 
     if (!instance.contains(Navigation.REVIEW)) {
@@ -116,6 +115,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
         markReviewed(listContainer, exercise);
       }
     });
+    addTooltip(approved, "Indicate this item has no defects, if none are marked already.");
   }
 
   @Override
@@ -339,6 +339,9 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
       }
     });
     checkBox.setValue(!alreadyMarkedCorrect);
+    if (!isComment) {
+      addTooltip(checkBox,"Check to indicate this field has a defect.");
+    }
     return checkBox;
   }
 
