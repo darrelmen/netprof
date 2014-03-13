@@ -133,6 +133,7 @@ public class UserListManager {
   /**
    * TODO : expensive -- could just be a query against your own lists and/or against visited lists...
    * @see mitll.langtest.server.LangTestDatabaseImpl#getListsForUser
+   * @see mitll.langtest.client.custom.NPFExercise#populateListChoices
    * @param userid
    * @param listsICreated
    * @param visitedLists
@@ -150,8 +151,11 @@ public class UserListManager {
     if (listsICreated) {
       listsForUser = userListDAO.getAllByUser(userid);
       for (UserList userList : listsForUser) {
-        if (isFavorite(userList)) {
+        if (userList.isFavorite()) {
           favorite = userList;
+        }
+        else {
+          logger.debug("not favorite " + userList + " " + userList.getName());
         }
         ids.add(userList.getUniqueID());
       }
@@ -170,11 +174,12 @@ public class UserListManager {
     }
     else if (favorite != null) {
       listsForUser.remove(favorite);
-      listsForUser.add(0,favorite);// put at front
+      listsForUser.add(0, favorite);// put at front
     }
 
     logger.debug("getListsForUser found " + listsForUser.size() +
-      " lists for user #" + userid + " only created " + listsICreated + " visited " +visitedLists);
+      " lists for user #" + userid + " only created " + listsICreated + " visited " +visitedLists +
+      "\n\tfavorite " + favorite);
 
     return listsForUser;
   }
@@ -182,8 +187,6 @@ public class UserListManager {
   public UserList createFavorites(long userid) {
     return createUserList(userid, UserList.MY_LIST, MY_FAVORITES, "", true);
   }
-
-  private boolean isFavorite(UserList userList) { return userList.getName().equals(UserList.MY_LIST); }
 
   public UserList getCommentedList() {
     List<UserExercise> allKnown = userExerciseDAO.getWhere(incorrect);
