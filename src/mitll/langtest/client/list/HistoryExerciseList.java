@@ -55,10 +55,12 @@ public class HistoryExerciseList<T extends ExerciseShell> extends PagingExercise
     return listBox.getCurrentSelection();
   }
 
+/*
   protected String getFirstItem(String type) {
     SectionWidget listBox = typeToBox.get(type);
     return listBox.getFirstItem();  // first is Any
   }
+*/
 
   /**
    * @see mitll.langtest.client.list.HistoryExerciseList#loadExercises(String, String)
@@ -84,7 +86,7 @@ public class HistoryExerciseList<T extends ExerciseShell> extends PagingExercise
     StringBuilder builder = new StringBuilder();
     for (String type : typeToBox.keySet()) {
       String section = getCurrentSelection(type);
-      System.out.println("\tHistoryExerciseList.getHistoryToken for " + type + " section = " +section);
+      //System.out.println("\tHistoryExerciseList.getHistoryToken for " + type + " section = " +section);
       if (section.equals(HistoryExerciseList.ANY)) {
         //System.out.println("getHistoryToken : Skipping box " + type + " (ANY) ");
       } else {
@@ -97,7 +99,7 @@ public class HistoryExerciseList<T extends ExerciseShell> extends PagingExercise
 
       builder.append(historyToken);
     }*/
-    System.out.println("\tgetHistoryToken for " + id + " is '" +builder.toString() + "'");
+    //System.out.println("\tgetHistoryToken for " + id + " is '" +builder.toString() + "'");
     if (id != null && id.length() > 0 && builder.toString().isEmpty()) return super.getHistoryToken(id);
     return builder.toString();
   }
@@ -467,9 +469,6 @@ public class HistoryExerciseList<T extends ExerciseShell> extends PagingExercise
               System.out.println("\tMySetExercisesCallback.onSuccess : loading first exercise since couldn't load item=" + item);
               loadFirstExercise();
             }
-  /*          else {
-              //System.out.println("\tMySetExercisesCallback.onSuccess :");
-            }*/
           } else {
             System.out.println("\tMySetExercisesCallback.onSuccess : item is null");
 
