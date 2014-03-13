@@ -73,13 +73,6 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
         reset();
       }
     });
-
-/*    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-      @Override
-      public void execute() {
-        exerciseList.hide();
-      }
-    });*/
   }
 
   @Override
@@ -128,7 +121,7 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
     }
 
     public void onSetComplete() {
-      navigationHelper.setVisible(false);
+      skip.setVisible(false);
       final int user = controller.getUser();
       service.getUserHistoryForList(user,userListID,lastExercise.getID(),new AsyncCallback<List<Session>>() {
         @Override
@@ -229,7 +222,7 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
 
           reset();
 
-          navigationHelper.setVisible(true);
+          skip.setVisible(true);
           exerciseList.loadExercise(allExercises.iterator().next().getID());
         }
       });
@@ -246,7 +239,8 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
       }
     }
 
-    private NavigationHelper<Exercise> navigationHelper;
+    //private NavigationHelper<Exercise> navigationHelper;
+    Button skip;
     private Panel belowContentDiv;
 
     /**
@@ -255,7 +249,7 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
      */
     @Override
     protected void addWidgetsBelow(Panel toAddTo) {
-      navigationHelper = new NavigationHelper<Exercise>(currentExercise, controller, null, exerciseList, true, false) {
+/*      navigationHelper = new NavigationHelper<Exercise>(currentExercise, controller, null, exerciseList, true, false) {
         @Override
         protected void clickNext(ExerciseController controller, Exercise exercise) {
           cancelTimer();
@@ -267,8 +261,17 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
           cancelTimer();
           super.clickPrev(e);
         }
-      };
-      toAddTo.add(navigationHelper);
+      };*/
+      skip = new Button("Skip this item");
+      skip.setType(ButtonType.INFO);
+      skip.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          cancelTimer();
+          loadNext();
+        }
+      });
+      toAddTo.add(skip);
       belowContentDiv = toAddTo;
     }
 
