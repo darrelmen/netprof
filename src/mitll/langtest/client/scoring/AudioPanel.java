@@ -63,7 +63,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   protected ImageAndCheck words;
 
   private int lastWidth = 0;
-  private Panel imageContainer;
   private AudioPositionPopup audioPositionPopup;
   protected final LangTestDatabaseAsync service;
   protected final SoundManagerAPI soundManager;
@@ -123,7 +122,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    */
   public void addWidgets(String playButtonSuffix, String audioType) {
     //System.out.println("addWidgets audio path = " + path);
-    imageContainer = new VerticalPanel();
+    Panel imageContainer = new VerticalPanel();
 
     HorizontalPanel hp = new HorizontalPanel();
     hp.setVerticalAlignment(ALIGN_MIDDLE);
@@ -288,10 +287,10 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     return new PlayAudioPanel(soundManager, playButtonSuffix) {
       @Override
       protected void addButtons() {
+        super.addButtons();
         if (toTheLeftWidget != null) {
           add(toTheLeftWidget);
         }
-        super.addButtons();
       }
     };
   }
