@@ -25,6 +25,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.shared.AudioAnswer;
@@ -65,7 +66,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
 
   protected ControlGroup normalSpeedRecording, slowSpeedRecording;
   protected UserList ul;
-  private UserList originalList;
+  protected UserList originalList;
   protected ListInterface<T> listInterface;
   private Panel toAddTo;
   private boolean clickedCreate = false;
@@ -186,6 +187,29 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
 
   protected void configureButtonRow(Panel row) {
     row.addStyleName("buttonGroupInset");
+  }
+
+  protected void deleteItem(final String id, final long uniqueID, final UserList ul,
+                            final PagingExerciseList<T> exerciseList, final NPFHelper npfHelper) {
+    service.deleteItemFromList(uniqueID, id, new AsyncCallback<Boolean>() {
+      @Override
+      public void onFailure(Throwable caught) {}
+
+      @Override
+      public void onSuccess(Boolean result) {
+        if (!result) System.err.println("deleteItem huh? id " + id + " not in list " + uniqueID);
+
+        exerciseList.forgetExercise(id);
+        UserExercise remove = ul.remove(id);
+        if (remove == null) {
+          System.err.println("deleteItem huh? didn't remove the item " + id);
+        }
+        if (originalList.remove(id) == null) {
+          System.err.println("deleteItem huh? didn't remove the item " + id + " from " + originalList);
+        }
+        npfHelper.reload();
+      }
+    });
   }
 
   protected Panel makeEnglishRow(Panel container) {
