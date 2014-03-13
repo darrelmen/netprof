@@ -9,7 +9,6 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.InlineLabel;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -79,11 +78,16 @@ public class Navigation extends TabContainer implements RequiresResize {
   private static final String SUB_TAB = "subTab";
   public static final String NO_LISTS_CREATED_OR_VISITED_YET = "No lists created or visited yet.";
 
-  private static final int CHAPTERS_TAB = 4;
-  public static final int BROWSE_TAB_INDEX = 3;
-  private static final int CREATE_TAB_INDEX = 2;
   private static final int YOUR_LIST_INDEX = 0;
   private static final int OTHERS_LIST_INDEX = 1;
+  private static final int CREATE_TAB_INDEX = 2;
+  private static final int BROWSE_TAB_INDEX = 3;
+  private static final int CHAPTERS_TAB = 4;
+  private static final int REVIEW_TAB_INDEX = 5;
+  private static final int COMMENT_TAB_INDEX = 6;
+
+  private static final String EDIT_ITEM = "editItem";
+  private static final String LEARN = "learn";
 
   private final ExerciseController controller;
   private LangTestDatabaseAsync service;
@@ -203,11 +207,13 @@ public class Navigation extends TabContainer implements RequiresResize {
         checkAndMaybeClearTab(CHAPTERS);
       }
     });
+
     if (controller.isReviewMode()) {
       review = makeTab(tabPanel, IconType.EDIT, REVIEW1);
       review.tab.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
+          checkAndMaybeClearTab(REVIEW1);
           viewReview(review.content);
         }
       });
@@ -216,6 +222,7 @@ public class Navigation extends TabContainer implements RequiresResize {
       commented.tab.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
+          checkAndMaybeClearTab(COMMENTS);
           viewComments(commented.content);
         }
       });
@@ -274,55 +281,63 @@ public class Navigation extends TabContainer implements RequiresResize {
     final int user = userManager.getUser();
     System.out.println("showInitialState show initial state for " + user +
       " : getting user lists " + controller.isReviewMode());
+    String value = storage.getValue(CLICKED_TAB);
+    if (value.isEmpty()) {   // no previous tab
+      service.getListsForUser(user, true, true, new AsyncCallback<Collection<UserList>>() {
+        @Override
+        public void onFailure(Throwable caught) {
+        }
 
-    service.getListsForUser(user, true, true, new AsyncCallback<Collection<UserList>>() {
-      @Override
-      public void onFailure(Throwable caught) {
-      }
-
-      @Override
-      public void onSuccess(Collection<UserList> result) {
-        if (result.size() == 1 && // if only one empty list - one you've created
-            result.iterator().next().getExercises().isEmpty()) {
-          service.getUserListsForText("", user, new AsyncCallback<Collection<UserList>>() {
-            @Override
-            public void onFailure(Throwable caught) {}
-
-            @Override
-            public void onSuccess(Collection<UserList> result) {
-              if (!result.isEmpty()) {
-                // show site-wide browse list instead
-                String value = storage.getValue(CLICKED_TAB);
-                if (value.equals(CHAPTERS)) {
-                  tabPanel.selectTab(CHAPTERS_TAB);
-                } else if (value.equals(YOUR_LISTS)) {
-                  showMyLists(true, false);
-                } else if (value.equals(OTHERS_LISTS)) {
-                  showMyLists(false, true);
-                } else if (value.equals(CREATE)) {
-                  tabPanel.selectTab(CREATE_TAB_INDEX);
-                } else {
-                  showBrowse();
-                }
-              } else { // otherwise show the chapters tab
-                tabPanel.selectTab(CHAPTERS_TAB);
+        @Override
+        public void onSuccess(Collection<UserList> result) {
+          if (result.size() == 1 && // if only one empty list - one you've created
+            result.iterator().next().isEmpty()) {
+            tabPanel.selectTab(CHAPTERS_TAB);
+          } else {
+            boolean foundCreated = false;
+            for (UserList ul : result) {
+              if (createdByYou(ul)) {
+                foundCreated = true;
+                break;
               }
             }
-          });
-        } else {
-          //System.out.println("\tshowInitialState show initial state for " + userManager.getUser() + " found " + result.size() + " lists");
-
-          boolean foundCreated = false;
-          for (UserList ul : result) {
-            if (createdByYou(ul)) {
-              foundCreated = true;
-              break;
-            }
+            showMyLists(foundCreated, !foundCreated);
           }
-          showMyLists(foundCreated, !foundCreated);
         }
+      });
+    }
+    else {
+      selectPreviousTab();
+    }
+  }
+
+  private void selectPreviousTab() {
+    String value = storage.getValue(CLICKED_TAB);
+    try {
+      if (value.equals(CHAPTERS)) {
+        tabPanel.selectTab(CHAPTERS_TAB);
+      } else if (value.equals(YOUR_LISTS)) {
+        showMyLists(true, false);
+      } else if (value.equals(OTHERS_LISTS)) {
+        showMyLists(false, true);
+      } else if (value.equals(CREATE)) {
+        tabPanel.selectTab(CREATE_TAB_INDEX);
+      } else if (value.equals(BROWSE)) {
+        showBrowse();
+      } else if (value.equals(REVIEW1)) {
+        tabPanel.selectTab(REVIEW_TAB_INDEX);
+        viewReview(review.content);
+      } else if (value.equals(COMMENTS)) {
+        tabPanel.selectTab(COMMENT_TAB_INDEX);
+        viewComments(commented.content);
+      } else {
+        System.err.println("huh? value is unexpected " + value);
+        //showBrowse();
       }
-    });
+    } catch (Exception e) {
+      storage.removeValue(CLICKED_TAB);
+      showBrowse();
+    }
   }
 
   /**
@@ -343,7 +358,7 @@ public class Navigation extends TabContainer implements RequiresResize {
         onlyVisited = true;
       }
     }
-    int tabToSelect =/* controller.isReviewMode() ? 4:*/ onlyCreated ? YOUR_LIST_INDEX : OTHERS_LIST_INDEX;
+    int tabToSelect = onlyCreated ? YOUR_LIST_INDEX : OTHERS_LIST_INDEX;
     tabPanel.selectTab(tabToSelect);
 
     TabAndContent toUse = onlyCreated ? yourStuff : othersStuff;
@@ -353,7 +368,7 @@ public class Navigation extends TabContainer implements RequiresResize {
 
   public void clickOnYourLists(long userListID) {
     storeCurrentClickedList(userListID);
-    storage.storeValue(SUB_TAB,"editItem");
+    storage.storeValue(SUB_TAB, EDIT_ITEM);
 
     tabPanel.selectTab(YOUR_LIST_INDEX);
     clickOnTab(yourStuff);
@@ -553,7 +568,7 @@ public class Navigation extends TabContainer implements RequiresResize {
     System.out.println("getListOperations : '" + instanceName + " for list " +ul);
     final boolean isReview = instanceName.equals(REVIEW);
     final boolean isComment = instanceName.equals(COMMENT);
-    final String instanceName1 = isReview ? REVIEW : isComment ? COMMENT : "learn";
+    final String instanceName1 = isReview ? REVIEW : isComment ? COMMENT : LEARN;
 
     // add learn tab
     String learnTitle = isReview ? ITEMS_TO_REVIEW : isComment ? ITEMS_WITH_COMMENTS : LEARN_PRONUNCIATION;
@@ -561,7 +576,7 @@ public class Navigation extends TabContainer implements RequiresResize {
     learn.tab.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        storage.storeValue(SUB_TAB,"learn");
+        storage.storeValue(SUB_TAB, LEARN);
         npfHelper.showNPF(ul, learn, instanceName1);
       }
     });
@@ -590,7 +605,7 @@ public class Navigation extends TabContainer implements RequiresResize {
       edit.tab.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          storage.storeValue(SUB_TAB,"editItem");
+          storage.storeValue(SUB_TAB, EDIT_ITEM);
           showEditItem(ul, edit, (isReview || isComment) ? reviewItem : Navigation.this.editItem, isNormalList, isReview);
         }
       });
@@ -635,7 +650,7 @@ public class Navigation extends TabContainer implements RequiresResize {
   }
 
   private void selectTabGivenHistory(TabPanel tabPanel, TabAndContent learn, TabAndContent practice, TabAndContent edit, UserList ul, String instanceName1, boolean isReview, boolean isComment, boolean isNormalList, boolean created, TabAndContent finalEditItem) {
-    boolean chosePrev = selectPreviouslyClickedTab(tabPanel, learn, practice, edit,
+    boolean chosePrev = selectPreviouslyClickedSubTab(tabPanel, learn, practice, edit,
       ul, instanceName1, isReview, isComment, isNormalList);
     if (!chosePrev) {
       if (created && !ul.isPrivate() && ul.isEmpty() && finalEditItem != null) {
@@ -664,17 +679,17 @@ public class Navigation extends TabContainer implements RequiresResize {
    * @param isNormalList
    * @return
    */
-  private boolean selectPreviouslyClickedTab(TabPanel tabPanel,
-                                             TabAndContent learn, TabAndContent practice, TabAndContent edit,
-                                             UserList ul, String instanceName1,
-                                             boolean isReview, boolean isComment, boolean isNormalList) {
+  private boolean selectPreviouslyClickedSubTab(TabPanel tabPanel,
+                                                TabAndContent learn, TabAndContent practice, TabAndContent edit,
+                                                UserList ul, String instanceName1,
+                                                boolean isReview, boolean isComment, boolean isNormalList) {
     String subTab = storage.getValue(SUB_TAB);
-    //System.out.println("selectPreviouslyClickedTab : subtab " + subTab);
+    //System.out.println("selectPreviouslyClickedSubTab : subtab " + subTab);
 
     boolean chosePrev = false;
     if (subTab != null) {
       chosePrev = true;
-      if (subTab.equals("learn")) {
+      if (subTab.equals(LEARN)) {
         tabPanel.selectTab(0);
         clickOnTab(learn);
         npfHelper.showNPF(ul, learn, instanceName1);
@@ -682,12 +697,11 @@ public class Navigation extends TabContainer implements RequiresResize {
         tabPanel.selectTab(1);
         clickOnTab(practice);
         avpHelper.showNPF(ul, practice, PRACTICE1);
-      } else if (subTab.equals("editItem")) {
-        tabPanel.selectTab(CREATE_TAB_INDEX);
-
+      } else if (subTab.equals(EDIT_ITEM)) {
+        boolean reviewOrComment = isReview || isComment;
+        tabPanel.selectTab(reviewOrComment ? 1 : CREATE_TAB_INDEX);
         clickOnTab(edit);
-
-        showEditItem(ul, edit, (isReview || isComment) ? reviewItem : this.editItem, isNormalList, isReview);
+        showEditItem(ul, edit, reviewOrComment ? reviewItem : this.editItem, isNormalList, isReview);
       } else chosePrev = false;
     }
     return chosePrev;
