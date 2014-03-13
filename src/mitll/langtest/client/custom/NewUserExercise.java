@@ -290,7 +290,6 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     submit.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-       // submit.setEnabled(false);
         if (rap.isRecording()) {
           clickedCreate = true;
           rap.clickStop();
@@ -298,7 +297,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
           clickedCreate = true;
           rapSlow.clickStop();
         } else {
-          validateThenPost(foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo, true);
+          validateThenPost(foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo, true, true);
         }
       }
     });
@@ -318,14 +317,15 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
    * @param pagingContainer
    * @param toAddTo
    * @param onClick
+   * @param foreignChanged
    */
   protected void validateThenPost(FormField foreignLang, RecordAudioPanel rap,
                                   ControlGroup normalSpeedRecording, UserList ul, ListInterface<T> pagingContainer,
-                                  Panel toAddTo, boolean onClick) {
+                                  Panel toAddTo, boolean onClick, boolean foreignChanged) {
     if (foreignLang.getText().isEmpty()) {
       markError(foreignLang, ENTER_THE_FOREIGN_LANGUAGE_PHRASE);
     }
-    else if (validateForm(foreignLang, rap, normalSpeedRecording)) {
+    else if (validateForm(foreignLang, rap, normalSpeedRecording, foreignChanged)) {
       checkValidForeignPhrase(ul, pagingContainer, toAddTo, onClick);
     }
     else {
@@ -339,7 +339,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   /**
    * Ask the server if the foreign lang text is in our dictionary and can be run through hydec.
    *
-   * @see #validateThenPost(mitll.langtest.client.user.BasicDialog.FormField, mitll.langtest.client.exercise.RecordAudioPanel, com.github.gwtbootstrap.client.ui.ControlGroup, mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, boolean)
+   * @see #validateThenPost(mitll.langtest.client.user.BasicDialog.FormField, mitll.langtest.client.exercise.RecordAudioPanel, com.github.gwtbootstrap.client.ui.ControlGroup, mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, boolean, boolean)
    * @param ul
    * @param pagingContainer
    * @param toAddTo
@@ -414,6 +414,8 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   }
 
   protected void afterItemCreated(UserExercise newExercise, UserList ul, ListInterface<T> exerciseList, Panel toAddTo) {
+    //System.out.println("afterItemCreated " + newExercise);
+
     editItem.clearNewExercise(); // success -- don't remember it
 
     UserExercise newUserExercisePlaceholder = ul.remove(EditItem.NEW_EXERCISE_ID);
@@ -422,15 +424,20 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     ul.addExercise(newUserExercisePlaceholder); // make sure the placeholder is always at the end
     itemMarker.setText(ul.getExercises().size() + " items");
 
-    T toMoveToEnd = exerciseList.simpleRemove(EditItem.NEW_EXERCISE_ID);
-    exerciseList.addExercise((T)newExercise);  // TODO figure out better type safe way of doing this
-    exerciseList.addExercise(toMoveToEnd);
-    exerciseList.redraw();
+    T toMoveToEnd = moveNewExerciseToEndOfList((T) newExercise, exerciseList);
 
     exerciseList.checkAndAskServer(toMoveToEnd.getID());
 
     toAddTo.clear();
     toAddTo.add(addNew(ul, originalList, exerciseList, toAddTo));
+  }
+
+  private T moveNewExerciseToEndOfList(T newExercise, ListInterface<T> exerciseList) {
+    T toMoveToEnd = exerciseList.simpleRemove(EditItem.NEW_EXERCISE_ID);
+    exerciseList.addExercise(newExercise);  // TODO figure out better type safe way of doing this
+    exerciseList.addExercise(toMoveToEnd);
+    exerciseList.redraw();
+    return toMoveToEnd;
   }
 
   /**
@@ -548,7 +555,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   protected void audioPosted() {
     if (clickedCreate) {
       clickedCreate = false;
-      validateThenPost(foreignLang, rap, normalSpeedRecording, ul, listInterface, toAddTo, false);
+      validateThenPost(foreignLang, rap, normalSpeedRecording, ul, listInterface, toAddTo, false, true);
     }
 
     gotBlur();
@@ -562,25 +569,28 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
    * @param foreignLang
    * @param rap
    * @param normalSpeedRecording
+   * @param foreignChanged
    * @return
    */
   private boolean validateForm(final FormField foreignLang, final RecordAudioPanel rap,
-                               final ControlGroup normalSpeedRecording) {
+                               final ControlGroup normalSpeedRecording, boolean foreignChanged) {
     if (foreignLang.getText().isEmpty()) {
       markError(foreignLang, ENTER_THE_FOREIGN_LANGUAGE_PHRASE);
       return false;
     } else if (newUserExercise == null || newUserExercise.getRefAudio() == null) {
       System.out.println("validateForm : new user ex " + newUserExercise);
 
-      Button recordButton = rap.getButton();
-      markError(normalSpeedRecording, recordButton, recordButton, "",
-        RECORD_REFERENCE_AUDIO_FOR_THE_FOREIGN_LANGUAGE_PHRASE);
-      recordButton.addMouseOverHandler(new MouseOverHandler() {
-        @Override
-        public void onMouseOver(MouseOverEvent event) {
-          normalSpeedRecording.setType(ControlGroupType.NONE);
-        }
-      });
+      if (foreignChanged) {
+        Button recordButton = rap.getButton();
+        markError(normalSpeedRecording, recordButton, recordButton, "",
+          RECORD_REFERENCE_AUDIO_FOR_THE_FOREIGN_LANGUAGE_PHRASE);
+        recordButton.addMouseOverHandler(new MouseOverHandler() {
+          @Override
+          public void onMouseOver(MouseOverEvent event) {
+            normalSpeedRecording.setType(ControlGroupType.NONE);
+          }
+        });
+      }
       return false;
     }
     return true;
