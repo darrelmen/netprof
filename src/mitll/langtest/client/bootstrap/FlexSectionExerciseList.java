@@ -64,7 +64,7 @@ public class FlexSectionExerciseList<T extends ExerciseShell> extends HistoryExe
   private Heading statusHeader = new Heading(4);
   private Collection<String> typeOrder;
   private Panel sectionPanel;
-  boolean showCompleted = false;
+  //boolean showCompleted = false;
 
   /**
    * @see mitll.langtest.client.ExerciseListLayout#makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, boolean, mitll.langtest.client.user.UserFeedback, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
