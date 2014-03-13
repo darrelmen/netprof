@@ -100,8 +100,6 @@ public class UserExerciseDAO extends DAO {
 
       Map<String,String> unitToValue = userExercise.getUnitToValue();
 
-      //logger.warn("type order " + typeOrder + " and " +unitToValue);
-
       if (typeOrder.size() > 0) {
         String s = typeOrder.get(0);
         String x = unitToValue.containsKey(s) ? unitToValue.get(s) : "";
@@ -350,14 +348,14 @@ public class UserExerciseDAO extends DAO {
       String first = rs.getString(UNIT);
       String second = rs.getString(LESSON);
       Map<String,String> unitToValue = new HashMap<String, String>();
-      if (typeOrder.size() > 0) {
+      if (typeOrder.size() > 0 && first != null) {
         String s = typeOrder.get(0);
-        unitToValue.put(s,first);
+        if (!first.isEmpty()) unitToValue.put(s,first);
       }
 
-      if (typeOrder.size() > 1) {
+      if (typeOrder.size() > 1 && second != null) {
         String s = typeOrder.get(1);
-        unitToValue.put(s, second);
+        if (!second.isEmpty()) unitToValue.put(s, second);
       }
 
       UserExercise e = new UserExercise(
