@@ -46,7 +46,7 @@ public class Session implements IsSerializable, SetScore {
   public void addExerciseID(String id) { exids.add(id);  }
 
   public int getNumAnswers() {
-    return numAnswers;
+    return exids == null? numAnswers : exids.size();
   }
 
   public void setNumAnswers() {
