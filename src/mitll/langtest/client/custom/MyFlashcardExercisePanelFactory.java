@@ -14,7 +14,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.flashcard.BootstrapExercisePanel;
 import mitll.langtest.client.flashcard.ControlState;
 import mitll.langtest.client.flashcard.FlashcardExercisePanelFactory;
@@ -47,8 +46,8 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
   private Exercise currentExercise;
   private final ControlState controlState;
   private List<T> allExercises;
+  int totalExercises = 0;
   private final long userListID;
-  private T lastExercise;
   private Map<String,Boolean> exToCorrect = new HashMap<String, Boolean>();
   private Map<String,Double>   exToScore = new HashMap<String, Double>();
 
@@ -68,8 +67,8 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
       @Override
       public void listChanged(List<T> items) {
         allExercises = items;
-        if (!allExercises.isEmpty()) lastExercise = allExercises.get(allExercises.size() - 1);
-        System.out.println("got new set of items from list." + items.size());
+        totalExercises = allExercises.size();
+//        System.out.println("got new set of items from list." + items.size());
         reset();
       }
     });
@@ -84,6 +83,7 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
   private void reset() {
     exToCorrect.clear();
     exToScore.clear();
+    totalExercises = allExercises.size();
   }
 
   private class StatsPracticePanel extends BootstrapExercisePanel {
@@ -123,7 +123,7 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
     public void onSetComplete() {
       skip.setVisible(false);
       final int user = controller.getUser();
-      service.getUserHistoryForList(user,userListID,lastExercise.getID(),new AsyncCallback<List<Session>>() {
+      service.getUserHistoryForList(user,userListID, new AsyncCallback<List<Session>>() {
         @Override
         public void onFailure(Throwable caught) {
            System.err.println("getUserHistoryForList failure : caught " + caught);
@@ -138,7 +138,7 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
     }
 
     private void showFeedbackCharts(List<Session> result, int user) {
-      float size = (float) allExercises.size();
+      float size = (float) totalExercises;
 
       setMainContentVisible(false);
       int totalCorrect = getCorrect();
@@ -147,9 +147,9 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
       int all = totalCorrect + totalIncorrect;
       System.out.println("onSetComplete.onSuccess : result " + result.size() + " " +size +
         " all " +all + " correct " + totalCorrect + " inc " + totalIncorrect);
-      for (Session s : result) {
+/*      for (Session s : result) {
         System.out.println("\tonSetComplete.onSuccess : result " + s);
-      }
+      }*/
       String correct = totalCorrect +" Correct (" + toPercent(totalCorrect, all) + ")";
       String pronunciation = "Pronunciation " + toPercent(avgScore);
 
@@ -163,7 +163,6 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
       container.add(chart2);
       belowContentDiv.add(container);
       belowContentDiv.add(getRepeatButton());
-      //exerciseList.hide();
     }
 
     private int getCorrect() {
@@ -202,9 +201,9 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
       return ((int) ((((float)numer) * 100f) / denom)) + "%";
     }
 
-    private String toPercent(double numer, int denom) {
+/*    private String toPercent(double numer, int denom) {
       return ((int) ((numer * 100f) / denom)) + "%";
-    }
+    }*/
 
     private String toPercent(double num) {
       return ((int) (num * 100f)) + "%";
@@ -234,13 +233,11 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
         onSetComplete();
       }
       else  {
-        super.nextAfterDelay(correct, feedback);
-
+        loadNextOnTimer(DELAY_MILLIS);
       }
     }
 
-    //private NavigationHelper<Exercise> navigationHelper;
-    Button skip;
+    private Button skip;
     private Panel belowContentDiv;
 
     /**
@@ -249,26 +246,16 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
      */
     @Override
     protected void addWidgetsBelow(Panel toAddTo) {
-/*      navigationHelper = new NavigationHelper<Exercise>(currentExercise, controller, null, exerciseList, true, false) {
-        @Override
-        protected void clickNext(ExerciseController controller, Exercise exercise) {
-          cancelTimer();
-          loadNext();
-        }
-
-        @Override
-        protected void clickPrev(Exercise e) {
-          cancelTimer();
-          super.clickPrev(e);
-        }
-      };*/
       skip = new Button("Skip this item");
       skip.setType(ButtonType.INFO);
       skip.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
+          skip.setEnabled(false);
+          totalExercises--;
           cancelTimer();
           loadNext();
+          skip.setEnabled(true);
         }
       });
       toAddTo.add(skip);
@@ -315,7 +302,7 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
     private void setStateFeedback() {
       int totalCorrect = getCorrect();
       int totalIncorrect = getIncorrect();
-      int remaining = allExercises.size() - totalCorrect - totalIncorrect;
+      int remaining = totalExercises - totalCorrect - totalIncorrect;
       remain.setText(remaining + "");
       incorrectBox.setText(totalIncorrect + "");
       correctBox.setText(totalCorrect + "");
