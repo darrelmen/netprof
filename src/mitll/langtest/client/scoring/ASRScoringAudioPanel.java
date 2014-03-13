@@ -24,13 +24,14 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
 
   /**
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.ASRRecordAudioPanel#ASRRecordAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, int, mitll.langtest.client.exercise.ExerciseController)
+   * @param refSentence
    * @param service
    * @param gaugePanel
    * @param playButtonSuffix
    */
-  public ASRScoringAudioPanel(LangTestDatabaseAsync service, ExerciseController controller, ScoreListener gaugePanel,
+  public ASRScoringAudioPanel(String refSentence, LangTestDatabaseAsync service, ExerciseController controller, ScoreListener gaugePanel,
                               String playButtonSuffix) {
-    super(service, controller, gaugePanel, playButtonSuffix);
+    super(refSentence, service, controller, gaugePanel, playButtonSuffix);
   }
 
   /**
@@ -69,7 +70,7 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
                             final ImageAndCheck wordTranscript, final ImageAndCheck phoneTranscript,
                             int toUse, int height, int reqid) {
     if (path == null) return;
-    //System.out.println("scoring audio " + path +" with ref sentence " + refSentence + " reqid " + reqid);
+    System.out.println("scoring audio " + path +" with ref sentence " + refSentence + " reqid " + reqid);
     boolean wasVisible = wordTranscript.image.isVisible();
 
     // only show the spinning icon if it's going to take awhile
