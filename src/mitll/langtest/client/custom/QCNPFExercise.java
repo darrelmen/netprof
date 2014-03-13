@@ -165,9 +165,9 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     Panel row = new FlowPanel();
     row.add(getComment());
 
-    if (instance.contains("review")) {
+/*    if (instance.contains("review")) {
       addItemsAtTop(column);
-    }
+    }*/
     column.add(row);
     column.add(getEntry(e, FOREIGN_LANGUAGE, ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getRefSentence()));
     column.add(getEntry(e, TRANSLITERATION, ExerciseFormatter.TRANSLITERATION, e.getTranslitSentence()));
@@ -188,9 +188,6 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   protected void addItemsAtTop(Panel container) {
     if (!exercise.getUnitToValue().isEmpty()) {
       container.add(getUnitLessonForExercise());
-    }
-    else {
-      //container.add(new com.google.gwt.user.client.ui.Label("List "+ul.getName()));
     }
   }
 
