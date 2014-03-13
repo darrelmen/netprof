@@ -64,8 +64,11 @@ public class CommentNPFExercise extends NPFExercise {
     if (!translitSentence.isEmpty()) {
       column.add(getEntry(e, QCNPFExercise.TRANSLITERATION, ExerciseFormatter.TRANSLITERATION, translitSentence));
     }
+
     String english = e.getMeaning() != null && !e.getMeaning().trim().isEmpty() ? e.getMeaning() : e.getEnglishSentence();
-    column.add(getEntry(e, QCNPFExercise.ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, english));
+    if (!english.isEmpty()) {
+      column.add(getEntry(e, QCNPFExercise.ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, english));
+    }
 
     return column;
   }
