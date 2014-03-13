@@ -670,7 +670,12 @@ public class EditItem<T extends ExerciseShell> {
     private void useAnnotation(ExerciseAnnotation anno, HTML annoField) {
       boolean isIncorrect = anno != null && !anno.isCorrect();
       if (isIncorrect) {
-        annoField.setHTML("<i>\"" + anno.comment + "\"</i>");
+        if (anno.comment.isEmpty()) {
+          annoField.setHTML("<i>Empty Comment</i>");
+        }
+        else {
+          annoField.setHTML("<i>\"" + anno.comment+ "\"</i>");
+        }
       }
       annoField.setVisible(isIncorrect);
     }
