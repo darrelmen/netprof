@@ -217,8 +217,6 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
           playRefLater();
         }
         controlState.setAudioOn(true);
-       // System.out.println("now on " + controlState);
-
       }
     });
     onButton.setActive(controlState.isAudioOn());
@@ -231,8 +229,6 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
       @Override
       public void onClick(ClickEvent event) {
         controlState.setAudioOn(false);
-       // System.out.println("now off " + controlState);
-
       }
     });
     offButton.setActive(!controlState.isAudioOn());
