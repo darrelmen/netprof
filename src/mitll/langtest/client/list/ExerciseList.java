@@ -132,12 +132,9 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   private void addWidgets(final Panel currentExerciseVPanel) {
     this.innerContainer = new SimplePanel();
     innerContainer.getElement().setId("ExerciseList_innerContainer");
-   // this.innerContainer.setWidth("100%");
-   // this.innerContainer.setHeight("100%");
     currentExerciseVPanel.add(innerContainer);
     innerContainer.addStyleName("floatLeft");
     currentExerciseVPanel.addStyleName("floatLeft");
-  //  currentExerciseVPanel.addStyleName("shadowBorder");
   }
 
   /**
@@ -181,7 +178,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
 
   @Override
   public void reloadWith(String id) {
-    System.out.println("ExerciseList.reloadWith " + id+ " for user " + controller.getUser());
+    System.out.println("ExerciseList.reloadWith id = " + id+ " for user " + controller.getUser());
     service.getExerciseIds(lastReqID, controller.getUser(), new SetExercisesCallback(id));
   }
 
@@ -278,7 +275,11 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   protected class SetExercisesCallback implements AsyncCallback<ExerciseListWrapper<T>> {
     private String id;
 
-    public SetExercisesCallback(String id) { this.id = id;  }
+    public SetExercisesCallback(String id) {
+      this.id = id;
+      System.out.println("ExerciseList.SetExercisesCallback id = " + id);
+
+    }
     public SetExercisesCallback() {}
 
     public void onFailure(Throwable caught) {
@@ -288,7 +289,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
       System.out.println("Got exception '" +caught.getMessage() + "' " +caught);
     }
     public void onSuccess(ExerciseListWrapper<T> result) {
-      System.out.println("ExerciseList.SetExercisesCallback Got " + result.getExercises().size() + " results");
+      System.out.println("\tExerciseList.SetExercisesCallback Got " + result.getExercises().size() + " results, id = " + id);
       if (isStaleResponse(result)) {
         System.out.println("----> SetExercisesCallback.onSuccess ignoring result " + result.getReqID() + " b/c before latest " + lastReqID);
       } else {
@@ -522,12 +523,6 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   }
 
   private class ExerciseAsyncCallback implements AsyncCallback<Exercise> {
-    /**
-     * @see ExerciseList#askServerForExercise(String)
-     * @paramx exerciseShell
-     */
-    //public ExerciseAsyncCallback(T exerciseShell) { this.exerciseShell = exerciseShell; }
-
     @Override
     public void onFailure(Throwable caught) {
       if (caught instanceof IncompatibleRemoteServiceException) {
@@ -561,7 +556,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     createdPanel = makeExercisePanel(result);
     String itemID = result.getID();
     markCurrentExercise(itemID);
-    System.out.println("ExerciseList.useExercise : " + itemID + " currentExercise " +getCurrentExercise() + " or " + getCurrentExerciseID());
+    System.out.println("ExerciseList.useExercise : item id " + itemID + " currentExercise " +getCurrentExercise() + " or " + getCurrentExerciseID());
   }
 
   public String getCurrentExerciseID() { return getCurrentExercise() != null ? getCurrentExercise().getID() : "Unknown"; }
