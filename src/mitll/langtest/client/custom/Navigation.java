@@ -761,7 +761,7 @@ public class Navigation extends TabContainer implements RequiresResize {
 
     @Override
     public void onSuccess(final Collection<UserList> result) {
-      System.out.println("\tUserListCallback : Displaying " + result.size() + " user lists for " + instanceName);
+      //System.out.println("\tUserListCallback : Displaying " + result.size() + " user lists for " + instanceName);
       if (result.isEmpty()) {
         child.add(new Heading(3, allLists ? "No lists created yet that you haven't seen.":NO_LISTS_CREATED_YET));
       } else {
