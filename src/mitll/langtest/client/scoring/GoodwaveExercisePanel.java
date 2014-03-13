@@ -185,7 +185,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     HorizontalPanel flow = new HorizontalPanel();
     flow.getElement().setId("getUnitLessonForExercise_unitLesson");
     flow.addStyleName("leftFiveMargin");
-    System.out.println("getUnitLessonForExercise " + exercise + " unit value " +exercise.getUnitToValue());
+    //System.out.println("getUnitLessonForExercise " + exercise + " unit value " +exercise.getUnitToValue());
 
     for (String type : controller.getStartupInfo().getTypeOrder()) {
       Heading child = new Heading(HEADING_FOR_UNIT_LESSON, type, exercise.getUnitToValue().get(type));
@@ -232,8 +232,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
 
     if (!e.getUnitToValue().isEmpty()) {
-      System.out.println("e " +e + " unit " + e.getUnitToValue());
-
       HorizontalPanel unitLessonForExercise = getUnitLessonForExercise();
       unitLessonForExercise.add(getItemHeader(e));
       vp.add(unitLessonForExercise);
@@ -313,7 +311,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       audioPanel = new ASRScoringAudioPanel(path, e.getRefSentence(), service, controller, showSpectrogram, scorePanel, 23, " reference");
     }
     audioPanel.getElement().setId("ASRScoringAudioPanel");
-    //audioPanel.setRefAudio(e.getRefAudio());
     return audioPanel;
   }
 
@@ -538,7 +535,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
       @Override
       public void useResult(AudioAnswer result) {
-        //setRefAudio(exercise.getRefAudio());
         setResultID(result.getResultID());
         getImagesForPath(result.path);
       }
@@ -610,6 +606,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     protected Widget getBeforePlayWidget() {
       Panel vp = new VerticalPanel();
       vp.getElement().setId("beforePlayWidget_verticalPanel");
+      vp.addStyleName("leftFiveMargin");
       Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
       RadioButton first = null;
 
@@ -639,32 +636,23 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         regular.setValue(true);
       } else if (first != null) {
         first.setValue(true);
-      } else {
+      } else if (!audioAttributes.isEmpty()) {
         System.err.println("no radio choice got selected??? ");
       }
       if (audioAttributes.isEmpty()) {
         addNoRefAudioWidget(vp);
       }
 
-      //HorizontalPanel hp = new HorizontalPanel();
-      //hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
-     // hp.add(vp);
       return vp;
     }
 
-    protected void addNoRefAudioWidget(Panel vp) {
-      vp.add(new Label(NO_REFERENCE_AUDIO));
-    }
-
+    protected void addNoRefAudioWidget(Panel vp) { vp.add(new Label(NO_REFERENCE_AUDIO)); }
     protected boolean hasAudio() {   return !exercise.getAudioAttributes().isEmpty();   }
-
     protected void addAudioRadioButton(Panel vp, RadioButton fast, String audioPath) { vp.add(fast); }
 
     private void showAudio(AudioAttribute audioAttribute) {
       doPause();    // if the audio is playing, stop it
-      String audioRef = audioAttribute.getAudioRef();
-      //setRefAudio(audioRef);
-      getImagesForPath(audioRef);
+      getImagesForPath(audioAttribute.getAudioRef());
     }
   }
 }
