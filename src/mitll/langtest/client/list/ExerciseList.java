@@ -326,7 +326,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * @see ExerciseList.SetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
    */
   public void rememberAndLoadFirst(List<T> exercises, Exercise firstExercise) {
-   // System.out.println("ExerciseList : rememberAndLoadFirst remembering " + exercises.size() + " : first = " +firstExercise);
+    System.out.println("ExerciseList : rememberAndLoadFirst remembering " + exercises.size() + " : first = " +firstExercise);
 
     rememberExercises(exercises);
     for (ListChangeListener<T> listener : listeners) listener.listChanged(exercises);
@@ -553,6 +553,8 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * @param result
    */
   protected void useExercise(Exercise result) {
+    System.out.println("ExerciseList.useExercise : result " +result);
+
     createdPanel = makeExercisePanel(result);
     String itemID = result.getID();
     markCurrentExercise(itemID);
@@ -561,18 +563,17 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
 
   public String getCurrentExerciseID() { return getCurrentExercise() != null ? getCurrentExercise().getID() : "Unknown"; }
 
-  protected abstract  T getCurrentExercise();
+  public abstract T getCurrentExercise();
 
   /**
    * @see #useExercise(mitll.langtest.shared.Exercise)
-   * @param result
+   * @param exercise
    */
-  public Panel makeExercisePanel(Exercise result) {
-  //  System.out.println("ExerciseList.makeExercisePanel : " +result);
+  public Panel makeExercisePanel(Exercise exercise) {
+    System.out.println("ExerciseList.makeExercisePanel : " +exercise);
 
-    Panel exercisePanel = factory.getExercisePanel(result);
+    Panel exercisePanel = factory.getExercisePanel(exercise);
     innerContainer.setWidget(exercisePanel);
-    //innerContainer.getParent().addStyleName("shadowBorder");
     return exercisePanel;
   }
 
