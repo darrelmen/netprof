@@ -5,6 +5,7 @@ import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.TextBox;
+import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
@@ -59,11 +60,14 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
   private static final String COMMENT_TOOLTIP = "Comments are optional.";
   private static final String CHECKBOX_TOOLTIP = "Check to indicate this field has a defect.";
-  private static final String APPROVED_BUTTON_TOOLTIP = "Indicates item has no defects, if none are marked already.";
+  private static final String APPROVED_BUTTON_TOOLTIP = "Indicate item has no defects.";
+  private static final String APPROVED_BUTTON_TOOLTIP2 = "Item has been marked with a defect";
 
   private Set<String> incorrectSet = new HashSet<String>();
   private List<RequiresResize> toResize;
   private ListInterface<Exercise> listContainer;
+  private Button approvedButton;
+  Tooltip approvedTooltip;
 
   public QCNPFExercise(Exercise e, ExerciseController controller, ListInterface<Exercise> listContainer,
                        float screenPortion, boolean addKeyHandler, String instance) {
@@ -106,13 +110,13 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     };
 
     if (!instance.contains(Navigation.REVIEW)) {
-      addApprovedButton(listContainer, widgets);
+      approvedButton = addApprovedButton(listContainer, widgets);
     }
 
     return widgets;
   }
 
-  private void addApprovedButton(final ListInterface<Exercise> listContainer, NavigationHelper<Exercise> widgets) {
+  private Button addApprovedButton(final ListInterface<Exercise> listContainer, NavigationHelper<Exercise> widgets) {
     Button approved = new Button(APPROVED);
     approved.addStyleName("leftFiveMargin");
     widgets.add(approved);
@@ -123,7 +127,8 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
         markReviewed(listContainer, exercise);
       }
     });
-    addTooltip(approved, APPROVED_BUTTON_TOOLTIP);
+     approvedTooltip = addTooltip(approved, APPROVED_BUTTON_TOOLTIP);
+    return approved;
   }
 
   @Override
@@ -368,10 +373,17 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     if (isCourseContent()) {
       String id = exercise.getID();
       if (incorrectSet.isEmpty()) {
-        //listContainer.removeCompleted(id);
+        listContainer.removeCompleted(id);
       }
       else {
         listContainer.addCompleted(id);
+      }
+
+      if (approvedButton != null) {
+        approvedButton.setEnabled(incorrectSet.isEmpty());
+
+        approvedTooltip.setText(incorrectSet.isEmpty() ? APPROVED_BUTTON_TOOLTIP : APPROVED_BUTTON_TOOLTIP2);
+        approvedTooltip.reconfigure();
       }
       markReviewed(exercise);
     }
