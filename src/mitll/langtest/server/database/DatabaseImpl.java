@@ -244,6 +244,7 @@ public class DatabaseImpl implements Database {
     if (serverProps.isDataCollectMode() && exercise != null) {
       PathHelper helper = new PathHelper();
       List<Result> resultsForExercise = resultDAO.getAllResultsForExercise(id);
+     // logger.debug("Annotating " + id + " with " +resultsForExercise.size() + " results");
       Set<Long> regs = new HashSet<Long>();
       Set<Long> slows = new HashSet<Long>();
 
@@ -252,23 +253,32 @@ public class DatabaseImpl implements Database {
 
       for (Result r : resultsForExercise) {
         if (r.valid) {
-          if (r.getAudioType().equals(Result.AUDIO_TYPE_REGULAR)) {
+          String audioType = r.getAudioType();
+          if (audioType.equals(Result.AUDIO_TYPE_REGULAR) || audioType.equals(Result.AUDIO_TYPE_FAST_AND_SLOW)) {
             regs.add(r.userid);
             if (r.userid == userid) {
                exercise.setRefAudio(helper.ensureForwardSlashes(r.answer).replaceAll(".wav",".mp3"));
-              //logger.debug("path is " + r.answer);
+               //logger.debug("now " + id + " ref audio " + exercise.getRefAudio());
             }
           }
-          else if (r.getAudioType().equals(Result.AUDIO_TYPE_SLOW)) {
+          else if (audioType.equals(Result.AUDIO_TYPE_SLOW)) {
             slows.add(r.userid);
             if (r.userid == userid) {
               exercise.setSlowRefAudio(helper.ensureForwardSlashes(r.answer).replaceAll(".wav",".mp3"));
+              //logger.debug("now " + id + " slow ref audio " + exercise.getSlowAudioRef());
+
             }
           }
+        }
+        else {
+          //logger.debug("\t invalid recording " +r + " for " + id);
         }
       }
       exercise.setReg(regs.size());
       exercise.setSlow(slows.size());
+    }
+    else {
+      //logger.debug("not annotating " + id + " since " + serverProps.isDataCollectMode() + " or " + exercise);
     }
   }
 
