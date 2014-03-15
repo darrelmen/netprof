@@ -454,7 +454,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     if (byID != null) {
       ensureMP3s(byID);
+      //if (byID.getRefAudio() != null) {
+        //logger.debug("ref audio for " + id + " is " + byID.getRefAudio());
+      //}
     }
+
     return byID;
   }
 
