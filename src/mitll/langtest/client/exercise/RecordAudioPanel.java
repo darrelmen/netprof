@@ -49,10 +49,11 @@ public class RecordAudioPanel extends AudioPanel {
     this.exercisePanel = widgets;
     this.index = index;
     this.exercise = exercise;
-   // System.out.println("audio type " + audioType + " ref " +exercise.getRefAudio());
     String path =
       audioType.equals(Result.AUDIO_TYPE_REGULAR) ? exercise.getRefAudio() :
       audioType.equals(Result.AUDIO_TYPE_SLOW) ?    exercise.getSlowAudioRef() : null;
+    System.out.println("for " + exercise.getID()+
+      " audio type " + audioType + " ref " +exercise.getRefAudio() + " path " + path);
 
     addWidgets(path, audioType);
   }
