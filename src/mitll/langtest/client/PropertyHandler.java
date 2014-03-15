@@ -41,8 +41,6 @@ public class PropertyHandler {
   private static final String NUM_GRADES_TO_COLLECT = "numGradesToCollect";
   private static final String LOG_CLIENT_MESSAGES = "logClient";
   private static final String SHOW_SECTIONS = "showSections";
-  //private static final String SHOW_SECTION_WIDGETS = "showSectionWidgets";
-  //private static final String DEBUG_EMAIL = "debugEmail";
   private static final String FLASHCARD = "flashcard";
   private static final String FLASHCARD_TEACHER_VIEW = "flashcardTeacherView";
 
@@ -56,6 +54,7 @@ public class PropertyHandler {
   private static final String FLASHCARD_NEXT_AND_PREV = "flashcardNextAndPrev";
   private static final String BIND_NEXT_TO_ENTER = "bindNextToEnter";
   private static final String SCREEN_PORTION = "screenPortion";
+  private static final String DATA_COLLECT_TYPE = "dataCollectType";
 
   // URL parameters that can override above parameters
   private static final String GRADING = GRADING_PROP;
@@ -132,6 +131,7 @@ public class PropertyHandler {
   private String splashTitle;
   private boolean promptBeforeNextItem = false;
   private boolean rightAlignContent;
+  private String dataCollectType = "Both";    // CourseExamples or Data
 
   // do we bind the record key to space -- problematic if we have text entry anywhere else on the page, say in a search
   // box
@@ -213,6 +213,8 @@ public class PropertyHandler {
       else if (key.equals(CLASSROOM_MODE)) classroomMode = getBoolean(value);
       else if (key.equals(DEFAULT_AUDIO_TYPE)) audioType = value;
       else if (key.equals(INCLUDE_FEEDBACK)) includeFeedback = getBoolean(value);
+      else if (key.equals(DATA_COLLECT_TYPE)) dataCollectType = value;
+
       else if (key.equals(LOGIN_TYPE_PARAM)) {
         try {
           loginType = LOGIN_TYPE.valueOf(value.toUpperCase());
@@ -571,4 +573,8 @@ public class PropertyHandler {
   public boolean isClassroomMode() { return classroomMode; }
   public String getAudioType() { return audioType; }
   public boolean isIncludeFeedback () { return includeFeedback; }
+
+  public String getDataCollectType() {
+    return dataCollectType;
+  }
 }
