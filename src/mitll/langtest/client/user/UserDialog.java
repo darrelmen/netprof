@@ -184,8 +184,11 @@ public abstract class UserDialog extends BasicDialog {
    */
   protected void setRecordingOrder() {
     boolean unansweredFirst = recordingOrder != null && recordingOrder.getValue().equals(LEAST_RECORDED_FIRST);
+    if (props.getDataCollectType().equals("CourseExamples")) unansweredFirst = false;
+    else if (props.getDataCollectType().equals("Data")) unansweredFirst = true;
     userManager.setShowUnansweredFirst(unansweredFirst);
-    userManager.setShowRerecord(recordingOrder.getValue().equals(LOW_GRADES_ONLY));
+
+    if (recordingOrder != null) userManager.setShowRerecord(recordingOrder.getValue().equals(LOW_GRADES_ONLY));
   }
 
   private class ButtonClickEvent extends ClickEvent {
