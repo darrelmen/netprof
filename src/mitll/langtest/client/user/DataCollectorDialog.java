@@ -45,7 +45,12 @@ public class DataCollectorDialog extends UserDialog {
     System.out.println("display teacher login " + loginTitle);
     final Modal dialogBox = getDialog(loginTitle);
     if (!props.isDataCollectAdminView()) {
-      recordingOrder = getRecordingOrder(dialogBox, false);
+      String dataCollectType = props.getDataCollectType();
+      if (dataCollectType.equals("CourseExamples")) {
+      } else if (dataCollectType.equals("Data")) {
+      } else {
+        recordingOrder = getRecordingOrder(dialogBox, false);
+      }
     }
 
     final FormField user = addControlFormField(dialogBox, "User ID");
