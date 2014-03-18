@@ -16,6 +16,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -289,7 +290,16 @@ public class ExcelImport implements ExerciseDAO {
   public List<Exercise> readExercises(InputStream inp) {
     List<Exercise> exercises = new ArrayList<Exercise>();
     try {
-      Workbook wb = WorkbookFactory.create(inp);
+      long then = System.currentTimeMillis();
+      //Workbook wb = WorkbookFactory.create(inp);
+      long now = System.currentTimeMillis();
+      logger.debug("took " + (now-then) + " millis to read spreadsheet");
+
+      then = System.currentTimeMillis();
+
+      XSSFWorkbook wb = new XSSFWorkbook(inp);
+       now = System.currentTimeMillis();
+      logger.debug("took " + (now-then) + " millis to read spreadsheet");
 
       for (int i = 0; i < wb.getNumberOfSheets(); i++) {
         Sheet sheet = wb.getSheetAt(i);
@@ -316,9 +326,9 @@ public class ExcelImport implements ExerciseDAO {
       inp.close();
     } catch (IOException e) {
       e.printStackTrace();
-    } catch (InvalidFormatException e) {
+    } /*catch (InvalidFormatException e) {
       e.printStackTrace();
-    }
+    }*/
     return exercises;
   }
 
