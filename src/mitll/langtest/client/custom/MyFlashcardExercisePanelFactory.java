@@ -5,10 +5,15 @@ import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
+import com.github.gwtbootstrap.client.ui.incubator.Table;
+import com.github.gwtbootstrap.client.ui.incubator.TableHeader;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
@@ -208,12 +213,48 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
       Chart chart2 = new LeaderboardPlot().getChart(sessionAVPHistoryForListScore, pronunciation, "score %");
 
       container = new HorizontalPanel();
+
       container.add(chart);
       chart.addStyleName("chartDim");
-      chart2.addStyleName("chartDim");
+
+      Table table = makeTable(sessionAVPHistoryForList);
+      container.add(table);
       container.add(chart2);
+      chart2.addStyleName("chartDim");
+      Table table2 = makeTable(sessionAVPHistoryForListScore);
+      container.add(table2);
       belowContentDiv.add(container);
       belowContentDiv.add(getRepeatButton());
+    }
+
+    private Table makeTable(AVPHistoryForList sessionAVPHistoryForList) {
+      Table table = new Table();
+      table.add(new TableHeader("Rank"));
+      table.add(new TableHeader("Name"));
+      table.add(new TableHeader("Score"));
+
+      List<String> users = sessionAVPHistoryForList.getUsers();
+      List<Float> scores = sessionAVPHistoryForList.getScores();
+      for (int i = 0; i < users.size(); i++) {
+       // String html = "<tr><td>" + (i + 1) + "</td><td>" + users.get(i) + "</td><td>" + Math.round(scores.get(i)) + "</td></tr>";
+      //  SafeHtmlBuilder builder = new SafeHtmlBuilder();
+       // builder.appendEscaped(html);
+       // table.add(new HTML(builder.toSafeHtml()));
+        HTMLPanel row = new HTMLPanel("tr","");
+        HTMLPanel col = new HTMLPanel("td","");
+        col.add(new HTML(""+(i + 1)));
+        row.add(col);
+        col = new HTMLPanel("td","");
+        col.add(new HTML(users.get(i)));
+
+        row.add(col);
+        col = new HTMLPanel("td","");
+        col.add(new HTML(""+ Math.round(scores.get(i))));
+
+        row.add(col);
+        table.add(row);
+      }
+      return table;
     }
 
     private int getCorrect() {
