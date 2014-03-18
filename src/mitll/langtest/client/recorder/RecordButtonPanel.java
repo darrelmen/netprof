@@ -175,7 +175,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
           long now = System.currentTimeMillis();
           long diff = now - then;
           return "audio for user " + controller.getUser() + " for exercise " + exercise.getID() + " took " + diff + " millis to post " +
-            len + " characters or " + (len / diff) + "char/milli";
+            len + " characters or " + (len / diff) + " char/milli";
         }
       });
   }
