@@ -71,6 +71,13 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
 
   private static final String WAV = ".wav";
   private static final String MP3 = "." + AudioTag.COMPRESSED_TYPE;
+  private static final String FEEDBACK = "PLAY WORD ON ERROR";
+  private static final String ON = "On";
+  private static final String OFF = "Off";
+  private static final String SHOW = "SHOW";
+  private static final String ENGLISH = "English";
+  private static final String PLAY = "PLAY";
+  private static final String BOTH = "Both";
 
   private final Exercise exercise;
 
@@ -97,6 +104,9 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
                                 final ExerciseController controller, int feedbackHeight, boolean addKeyBinding,
                                 final ControlState controlState) {
     this.addKeyBinding = addKeyBinding;
+    if (addKeyBinding) {
+      //new Exception().printStackTrace();
+    }
     this.exercise = e;
     this.controller = controller;
     this.controlState = controlState;
@@ -200,14 +210,15 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
   }
 
   private ControlGroup getAudioGroup(final ControlState controlState) {
-    ControlGroup group = new ControlGroup("PLAY " + controller.getLanguage().toUpperCase());
+    ControlGroup group = new ControlGroup(PLAY +
+      " " + controller.getLanguage().toUpperCase());
     ButtonToolbar w = new ButtonToolbar();
     group.add(w);
     ButtonGroup buttonGroup = new ButtonGroup();
     w.add(buttonGroup);
 
     buttonGroup.setToggle(ToggleType.RADIO);
-    Button onButton = new Button("On" + "");
+    Button onButton = new Button(ON);
     buttonGroup.add(onButton);
 
     onButton.addClickHandler(new ClickHandler() {
@@ -222,7 +233,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     onButton.setActive(controlState.isAudioOn());
 
 
-    Button offButton = new Button("Off" + "");
+    Button offButton = new Button(OFF);
     buttonGroup.add(offButton);
 
     offButton.addClickHandler(new ClickHandler() {
@@ -237,14 +248,14 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
   }
 
   private ControlGroup getFeedbackGroup(final ControlState controlState) {
-    ControlGroup group = new ControlGroup("FEEDBACK");
+    ControlGroup group = new ControlGroup(FEEDBACK);
     ButtonToolbar w = new ButtonToolbar();
     group.add(w);
     ButtonGroup buttonGroup = new ButtonGroup();
     buttonGroup.setToggle(ToggleType.RADIO);
     w.add(buttonGroup);
 
-    Button onButton = new Button("On" + "");
+    Button onButton = new Button(ON);
     buttonGroup.add(onButton);
 
     onButton.addClickHandler(new ClickHandler() {
@@ -257,7 +268,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     });
     onButton.setActive(controlState.isAudioFeedbackOn());
 
-    Button offButton = new Button("Off" + "");
+    Button offButton = new Button(OFF);
     buttonGroup.add(offButton);
 
     offButton.addClickHandler(new ClickHandler() {
@@ -274,7 +285,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
   }
 
   private ControlGroup getShowGroup(final ControlState controlState) {
-    ControlGroup group = new ControlGroup("SHOW");
+    ControlGroup group = new ControlGroup(SHOW);
     ButtonToolbar w = new ButtonToolbar();
     group.add(w);
     ButtonGroup buttonGroup = new ButtonGroup();
@@ -298,7 +309,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     onButton.setActive(controlState.showForeign() && !controlState.showBoth());
 
 
-    Button offButton = new Button("English");
+    Button offButton = new Button(ENGLISH);
     buttonGroup.add(offButton);
 
     offButton.addClickHandler(new ClickHandler() {
@@ -314,7 +325,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     });
     offButton.setActive(controlState.showEnglish() && !controlState.showBoth());
 
-    Button both = new Button("Both");
+    Button both = new Button(BOTH);
     buttonGroup.add(both);
 
     both.addClickHandler(new ClickHandler() {
@@ -507,7 +518,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
 //    System.out.println("BootstrapExercisePanel.getAnswerAndRecordButtonRow");
 
     RecordButtonPanel answerWidget = getAnswerWidget(e, service, controller, 1,
-      controller.getProps().shouldAddRecordKeyBinding() || addKeyBinding);
+      /*controller.getProps().shouldAddRecordKeyBinding() ||*/ addKeyBinding);
     this.answerWidget = answerWidget;
     Widget recordButton = answerWidget.getRecordButton();
     button = recordButton;
