@@ -197,13 +197,14 @@ public class ResultDAO extends DAO {
    * @see mitll.langtest.server.database.DatabaseImpl#getUserHistoryForList
    * @see mitll.langtest.client.custom.MyFlashcardExercisePanelFactory.StatsPracticePanel#onSetComplete()
    * @param ids
+   * @param latestResultID
    * @return
    */
-  public List<Session> getSessionsForUserIn2(Collection<String> ids) {
+  public List<Session> getSessionsForUserIn2(Collection<String> ids, long latestResultID) {
     List<Session> sessions = new ArrayList<Session>();
     Map<Long, List<Result>> userToAnswers = populateUserToAnswers(getResultsForeExIDIn(ids));
     for (Map.Entry<Long,List<Result>> userToResults : userToAnswers.entrySet()) {
-      List<Session> c = partitionIntoSessions2(userToResults.getValue(), ids);
+      List<Session> c = partitionIntoSessions2(userToResults.getValue(), ids, latestResultID);
       //logger.debug("\tfound " +c.size() + " sessions for " +userToResults.getKey() + " " +ids + " given  " + userToResults.getValue().size());
 
       sessions.addAll(c);
@@ -574,7 +575,7 @@ public class ResultDAO extends DAO {
    * @param answersForUser
    * @return
    */
-  private List<Session> partitionIntoSessions2(List<Result> answersForUser, Collection<String> ids) {
+  private List<Session> partitionIntoSessions2(List<Result> answersForUser, Collection<String> ids, long latestResultID) {
     Session s = null;
     long lastTimestamp = 0;
 
@@ -591,6 +592,7 @@ public class ResultDAO extends DAO {
       } else {
         s.duration += r.timestamp - lastTimestamp;
       }
+      if (r.uniqueID == latestResultID) s.setLatest(true);
       s.addExerciseID(r.id);
       s.incrementCorrect(r.id, r.isCorrect());
       s.setScore(r.id, r.getPronScore());
