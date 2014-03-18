@@ -13,6 +13,7 @@ import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.flashcard.FlashcardResponse;
 import mitll.langtest.shared.flashcard.Leaderboard;
 import mitll.langtest.shared.grade.CountAndGradeID;
@@ -169,5 +170,5 @@ public interface LangTestDatabaseAsync {
 
   void deleteItem(String exid, AsyncCallback<Boolean> async);
 
-  void getUserHistoryForList(long userid, long listid, AsyncCallback<List<Session>> async);
+  void getUserHistoryForList(long userid, Collection<String> ids, AsyncCallback<List<AVPHistoryForList>> async);
 }
