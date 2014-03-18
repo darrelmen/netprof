@@ -109,9 +109,9 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
 
     addItemsAtTop(container);
     container.add(upper);
-    FormField formField = makeForeignLangRow(upper);
+    /*FormField formField =*/ makeForeignLangRow(upper);
 
-    focusOn(formField); // TODO put this back
+   // focusOn(formField); // Bad idea since steals the focus after search
     makeTranslitRow(upper);
     makeEnglishRow(upper);
 
