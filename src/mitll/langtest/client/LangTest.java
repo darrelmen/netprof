@@ -372,7 +372,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private Panel makeHeaderRow() {
     Widget title;
     if (isGoodwaveMode()) {
-      flashcard = new Flashcard(props.getNameForAnswer());
+      flashcard = new Flashcard(props);
       title = flashcard.makeNPFHeaderRow(props.getSplash(), props.isClassroomMode(),getGreeting(), getReleaseStatus(),new LogoutClickHandler(),
 
         (props.isAdminView()) ? new UsersClickHandler(false) : null,
@@ -381,7 +381,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         );
     }
     else if (props.isFlashcardTeacherView() || props.isAutocrt()) {
-      flashcard = new Flashcard(props.getNameForAnswer());
+      flashcard = new Flashcard(props);
       title = flashcard.getHeaderRow(props.getSplash(), props.isClassroomMode(),"NewProF2.png",props.getAppTitle(), getGreeting(), getReleaseStatus(), new LogoutClickHandler(),
 
         (props.isAdminView()) ? new UsersClickHandler(false) : null,
@@ -470,7 +470,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     RootPanel.get().addStyleName("noPadding");
     currentExerciseVPanel = container;
 
-    flashcard = new Flashcard(props.getNameForAnswer());
+    flashcard = new Flashcard(props);
 
     Panel headerRow = flashcard.makeFlashcardHeaderRow(props.getSplash(), getGreeting());
     container.add(headerRow);
