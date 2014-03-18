@@ -36,6 +36,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -605,14 +606,36 @@ public class DatabaseImpl implements Database {
 */
 
   public List<AVPHistoryForList> getUserHistoryForList(long userid, Collection<String> ids) {
-
-    logger.debug("getUserHistoryForList " +userid + " and " + ids);
+   // logger.debug("getUserHistoryForList " +userid + " and " + ids);
 
     List<Session> sessionsForUserIn2 = resultDAO.getSessionsForUserIn2(ids);
 
-    logger.debug("got " +sessionsForUserIn2);
+    Map<Long, User> userMap = userDAO.getUserMap();
+
     AVPHistoryForList sessionAVPHistoryForList  = new AVPHistoryForList(sessionsForUserIn2, userid, true);
     AVPHistoryForList sessionAVPHistoryForList2 = new AVPHistoryForList(sessionsForUserIn2, userid, false);
+
+    Collections.sort(sessionsForUserIn2, new Comparator<Session>() {
+      @Override
+      public int compare(Session o1, Session o2) {
+        return o1.getCorrectPercent() < o2.getCorrectPercent() ? +1 :o1.getCorrectPercent() > o2.getCorrectPercent() ? -1 :0 ;
+      }
+    });
+    List<Session> sessions = sessionsForUserIn2.subList(0, Math.min(sessionsForUserIn2.size(), 10));
+    for (Session session : sessions) {
+      sessionAVPHistoryForList.addPair(userMap.get(session.getUserid()).userID, session.getCorrectPercent());
+    }
+
+    Collections.sort(sessionsForUserIn2, new Comparator<Session>() {
+      @Override
+      public int compare(Session o1, Session o2) {
+        return o1.getAvgScore() < o2.getAvgScore() ? +1 :o1.getAvgScore() > o2.getAvgScore() ? -1 :0 ;
+      }
+    });
+    sessions = sessionsForUserIn2.subList(0, Math.min(sessionsForUserIn2.size(), 10));
+    for (Session session : sessions) {
+      sessionAVPHistoryForList2.addPair(userMap.get(session.getUserid()).userID, 100f*session.getAvgScore());
+    }
 
     List<AVPHistoryForList> historyForLists = new ArrayList<AVPHistoryForList>();
     historyForLists.add(sessionAVPHistoryForList);
