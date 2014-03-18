@@ -108,6 +108,11 @@ public class AudioExercise extends ExerciseShell {
 
   public Map<String, String> getUnitToValue() { return unitToValue; }
 
+  /**
+   * @see mitll.langtest.server.database.SectionHelper#addExerciseToLesson(Exercise, String, String)
+   * @param unit
+   * @param value
+   */
   public void addUnitToValue(String unit, String value) {
     if (value.isEmpty()) {
       System.out.println("addUnitToValue " + unit + " value " + value);
