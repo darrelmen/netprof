@@ -19,6 +19,8 @@ public class AVPHistoryForList implements IsSerializable {
   private float totalNotMe = 0f;
   private float numNotMe = 0f;
   private int numScores;
+  private List<Float> scores = new ArrayList<Float>();
+  private List<String> users = new ArrayList<String>();
 
   public AVPHistoryForList() {}
   public AVPHistoryForList(List<Session> scores, long userID, boolean useCorrect) {
@@ -56,7 +58,6 @@ public class AVPHistoryForList implements IsSerializable {
     return yValuesForUser;
   }
 
-  // TODO : don't do this client side
   public void calc(List<Session> scores, long userID) {
     pbCorrect = 0;
     top = 0;
@@ -97,6 +98,19 @@ public class AVPHistoryForList implements IsSerializable {
 
   public int getNumScores() {
     return numScores;
+  }
+
+  public void addPair(String userID, float correctPercent) {
+    users.add(userID);
+    scores.add(correctPercent);
+  }
+
+  public List<Float> getScores() {
+    return scores;
+  }
+
+  public List<String> getUsers() {
+    return users;
   }
 
   public String toString() {
