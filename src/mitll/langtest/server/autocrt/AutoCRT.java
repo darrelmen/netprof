@@ -165,7 +165,7 @@ public class AutoCRT {
     }
     if (foreground.size() > n) logger.debug("Added " + e.getSynonymSentences() + " synonyms");
 
-    logger.debug("getFlashcardAnswer : foreground " + foreground);
+    //logger.debug("getFlashcardAnswer : foreground " + foreground);
     PretestScore asrScoreForAudio = db.getASRScoreForAudio(audioFile, foreground);
 
     String recoSentence =
