@@ -46,7 +46,9 @@ public class FlashcardRecordButton extends RecordButton {
    * @param addKeyBinding
    */
   public FlashcardRecordButton(int delay, RecordingListener recordingListener, boolean warnNotASpace, boolean addKeyBinding) {
-    super(delay, recordingListener, true);
+    super(delay, recordingListener, true, addKeyBinding);
+    if (addKeyBinding) {
+    }
     this.addKeyBinding = addKeyBinding;
     this.warnUserWhenNotSpace = addKeyBinding && warnNotASpace;
    // setText(addKeyBinding ? getButtonText() : "Click and hold mouse button to record, release to stop.");
