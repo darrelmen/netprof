@@ -1,9 +1,11 @@
 package mitll.langtest.client.flashcard;
 
 import com.google.gwt.event.dom.client.ClickHandler;
+import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.flashcard.Leaderboard;
 import mitll.langtest.shared.flashcard.ScoreInfo;
 import mitll.langtest.shared.flashcard.SetScore;
+import mitll.langtest.shared.monitoring.Session;
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.PlotBand;
 import org.moxieapps.gwt.highcharts.client.Series;
@@ -15,10 +17,12 @@ import java.util.List;
 import java.util.Map;
 
 public class LeaderboardPlot {
-  public static final float HALF = (1f / 4f);
-  public static final String AVERAGE = "Class Average";
-  public static final String TOP_SCORE = "Class Top Score";
-  public static final String PERSONAL_BEST = "Personal Best";
+  private static final float HALF = (1f / 4f);
+  private static final String AVERAGE = "Class Average";
+  private static final String TOP_SCORE = "Class Top Score";
+  private static final String PERSONAL_BEST = "Personal Best";
+  private static final String CORRECT = "Correct";
+  private static final String SCORE = "Score";
 
   /**
    * @deprecated  for now
@@ -49,13 +53,14 @@ public class LeaderboardPlot {
    * @param topToUse
    * @return
    */
+/*
   public <T extends SetScore> Chart getChart(List<T> scores, long userID, int gameTimeSeconds,
                                              String title, String subtitle, boolean useCorrect, float topToUse) {
     GetPlotValues getPlotValues = new GetPlotValues<T>(scores, userID, useCorrect).invoke();
-    return getChart(scores, gameTimeSeconds, getPlotValues, title, subtitle, useCorrect ? "Correct" : "Score", !useCorrect, topToUse);
+    return getChart(scores.size(), gameTimeSeconds, getPlotValues, title, subtitle, useCorrect ? CORRECT : SCORE, !useCorrect, topToUse);
   }
 
-  private <T extends SetScore> Chart getChart(List<T> scores, int gameTimeSeconds,
+  private <T extends SetScore> Chart getChart(int numScores, int gameTimeSeconds,
                                               GetPlotValues getPlotValues,
                                               String title, String subtitle, String seriesName,
                                               boolean topIs100, float topToUse) {
@@ -67,6 +72,24 @@ public class LeaderboardPlot {
 
     List<Float> yValuesForUser = getPlotValues.getyValuesForUser();
 
+    return getChart(numScores, gameTimeSeconds, title, subtitle, seriesName, topIs100, topToUse, pbCorrect, top, total, avg, yValuesForUser);
+  }
+*/
+
+  public Chart getChart(AVPHistoryForList historyForList, String title, String subtitle) {
+    boolean useCorrect = historyForList.isUseCorrect();
+    return getChart(historyForList.getNumScores(),0,title, subtitle, useCorrect ? CORRECT : SCORE, !useCorrect, 100f,
+      historyForList.getPbCorrect(),
+      historyForList.getTop(),
+      historyForList.getTotalCorrect(),
+      historyForList.getClassAvg(),
+      historyForList.getyValuesForUser()
+      );
+  }
+
+  private Chart getChart(int numScores, int gameTimeSeconds, String title, String subtitle, String seriesName,
+                         boolean topIs100, float topToUse,
+                         float pbCorrect, float top, float total, float avg, List<Float> yValuesForUser) {
     Chart chart = new Chart()
       .setType(Series.Type.SPLINE)
       .setChartTitleText(title)
@@ -77,9 +100,16 @@ public class LeaderboardPlot {
 
     addSeries(gameTimeSeconds, yValuesForUser, chart, seriesName);
 
+    float verticalRange = setPlotBands(numScores, title, subtitle, topIs100, topToUse, pbCorrect, top, total, avg, chart);
+
+    configureChart(verticalRange, chart, subtitle);
+    return chart;
+  }
+
+  private float setPlotBands(int numScores, String title, String subtitle, boolean topIs100, float topToUse, float pbCorrect, float top, float total, float avg, Chart chart) {
     PlotBand personalBest = getPersonalBest(pbCorrect, chart);
     PlotBand topScore = getTopScore(top, chart);
-    PlotBand avgScore = getAvgScore(scores, total, chart);
+    PlotBand avgScore = getAvgScore(numScores, total, chart);
 
     float verticalRange = topIs100 ? 100f : topToUse == -1 ? top : topToUse;
     float fivePercent = 0.05f * verticalRange;
@@ -88,6 +118,11 @@ public class LeaderboardPlot {
 
     System.out.println(title + " " + subtitle + " top vs pb " + topVsPersonalBest + " avg vs pb " + avgVsPersonalBest);
 
+    setPlotPands(chart, personalBest, topScore, avgScore, fivePercent, topVsPersonalBest, avgVsPersonalBest);
+    return verticalRange;
+  }
+
+  private void setPlotPands(Chart chart, PlotBand personalBest, PlotBand topScore, PlotBand avgScore, float fivePercent, float topVsPersonalBest, float avgVsPersonalBest) {
     if (topVsPersonalBest > fivePercent) {
       if (avgVsPersonalBest > fivePercent){
         chart.getYAxis().setPlotBands(
@@ -112,13 +147,10 @@ public class LeaderboardPlot {
         personalBest
       );
     }
-
-    configureChart(verticalRange, chart, subtitle);
-    return chart;
   }
 
   /**
-   * @see #getChart(java.util.List, int, mitll.langtest.client.flashcard.LeaderboardPlot.GetPlotValues, String, String, String, boolean, float)
+   * @see #getChart
    * @param gameTimeSeconds
    * @param yValuesForUser
    * @param chart
@@ -149,8 +181,8 @@ public class LeaderboardPlot {
     chart.getYAxis().setMax(top);
   }
 
-  private <T extends SetScore> PlotBand getAvgScore(List<T> scores, float total, Chart chart) {
-    float avg = total / (float) scores.size();
+  private <T extends SetScore> PlotBand getAvgScore(int numScores, float total, Chart chart) {
+    float avg = total / (float) numScores;
     PlotBand avgScore = chart.getYAxis().createPlotBand()
       .setColor("#2031ff")
       .setFrom(under(avg))
@@ -185,7 +217,7 @@ public class LeaderboardPlot {
   private float over(float pbCorrect) { return pbCorrect + HALF;  }
   private float under(float pbCorrect) { return pbCorrect - HALF;  }
 
-  private static class GetPlotValues<T extends SetScore> {
+/*  private static class GetPlotValues<T extends SetScore> {
     private List<T> scores;
     private long userID;
     private float pbCorrect;
@@ -265,5 +297,5 @@ public class LeaderboardPlot {
     private float getValue(SetScore score) {
       return useCorrect ? Math.round(score.getCorrectPercent()) : Math.round(100f*score.getAvgScore());
     }
-  }
+  }*/
 }

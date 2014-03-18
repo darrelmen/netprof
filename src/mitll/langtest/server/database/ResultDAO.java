@@ -199,7 +199,7 @@ public class ResultDAO extends DAO {
    * @param ids
    * @return
    */
-  public List<Session> getSessionsForUserIn2(Set<String> ids) {
+  public List<Session> getSessionsForUserIn2(Collection<String> ids) {
     List<Session> sessions = new ArrayList<Session>();
     Map<Long, List<Result>> userToAnswers = populateUserToAnswers(getResultsForeExIDIn(ids));
     for (Map.Entry<Long,List<Result>> userToResults : userToAnswers.entrySet()) {
@@ -232,11 +232,11 @@ public class ResultDAO extends DAO {
   /**
    * Only take avp audio type and valid audio.
    *
-   * @see #getSessionsForUserIn2(java.util.Set)
+   * @see #getSessionsForUserIn2
    * @param ids
    * @return
    */
-  private List<Result> getResultsForeExIDIn(Set<String> ids) {
+  private List<Result> getResultsForeExIDIn(Collection<String> ids) {
     try {
       String list = getInList(ids);
 
@@ -570,11 +570,11 @@ public class ResultDAO extends DAO {
   }
 
   /**
-   * @see #getSessionsForUserIn2(java.util.Set)
+   * @see #getSessionsForUserIn2
    * @param answersForUser
    * @return
    */
-  private List<Session> partitionIntoSessions2(List<Result> answersForUser, Set<String> ids) {
+  private List<Session> partitionIntoSessions2(List<Result> answersForUser, Collection<String> ids) {
     Session s = null;
     long lastTimestamp = 0;
 

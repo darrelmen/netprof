@@ -38,15 +38,14 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   private static final String INSTRUCTIONS = "Your speech is scored by a speech recognizer trained on speech from many native speakers. " +
       "The recognizer generates scores for each word and phonetic unit (see the color-coded transcript for details).";
   private static final String WARNING = "<b>Repeat the phrase exactly as it is written. " +
-    "Saying something different or adding/ omitting words could result in incorrect scores.</b>";
+    "Saying something different or adding/omitting words could result in incorrect scores.</b>";
   public static final int CHART_HEIGHT = 100;
 
   private final PretestGauge ASRGauge;
   private Panel phoneList;
   private final List<Float> scores = new ArrayList<Float>();
-  //String id;
   private SimplePanel chartPanel;
- // Canvas canvas;
+
   /**
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel
    */
