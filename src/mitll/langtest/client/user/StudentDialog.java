@@ -37,6 +37,8 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.custom.KeyStorage;
+import mitll.langtest.client.flashcard.ControlState;
 import mitll.langtest.shared.DLIUser;
 import mitll.langtest.shared.Result;
 
@@ -62,7 +64,6 @@ public class StudentDialog extends UserDialog {
   private static final String DEMO = "Demo";
   private static final String DATA_COLLECTION = "Data Collection";
   private static final String REVIEW = "Review";
-  //private static final String[] ROLES = new String[]{DATA_COLLECTION, PRACTICE, DEMO, REVIEW};
   private static final Map<String, String> displayToRoles = new TreeMap<String, String>();
   private static final String STUDENT = "Student";
  // private static final String STUDENT_DATA_COLLECTION = "Student - Data Collection";
@@ -72,19 +73,12 @@ public class StudentDialog extends UserDialog {
 
   private final UserManager userManager;
   private final UserNotification langTest;
- // private List<String> purposes;
 
-  public StudentDialog(LangTestDatabaseAsync service, PropertyHandler props, UserManager userManager, UserNotification userNotification) {
+  public StudentDialog(LangTestDatabaseAsync service, PropertyHandler props, UserManager userManager,
+                       UserNotification userNotification) {
     super(service, props, userManager, userNotification);
     this.userManager = userManager;
     this.langTest = userNotification;
-/*    purposes = new ArrayList<String>();
-    purposes.add(props.getPurposeDefault());
-
-    for (String purpose : Arrays.asList(ROLES)) {
-      if (!purpose.equalsIgnoreCase(props.getPurposeDefault())) purposes.add(purpose);
-    }*/
-
     populateRoles();
   }
 
@@ -273,7 +267,7 @@ public class StudentDialog extends UserDialog {
 
     System.out.println("checkUserAndMaybeRegister " + purposeSetting + " review " + isReview);
     if (checkValidUser(user)
-      && (!isReview || (checkValidPassword(password) /*&& checkPassword(password)*/))
+      && (!isReview || (checkValidPassword(password)))
       ) {
       service.userExists(userID, new AsyncCallback<Integer>() {
         @Override
@@ -464,6 +458,7 @@ public class StudentDialog extends UserDialog {
 
       public void onSuccess(Long result) {
         System.out.println("addUser : server result is " + result);
+        setDefaultControlValues(result.intValue());
         userManager.storeUser(result, audioType, "" + result, loginType);
       }
     };
@@ -472,11 +467,18 @@ public class StudentDialog extends UserDialog {
 
   private void addUser(int age, String gender, int monthsOfExperience, String dialect, String nativeLang, String userID,
                        AsyncCallback<Long> async) {
-    System.out.println("\n\naddUser : userID is " + userID);
+    System.out.println("addUser : userID is " + userID);
 
     service.addUser(age,
       gender,
       monthsOfExperience, nativeLang, dialect, userID, async);
+  }
+
+  private void setDefaultControlValues(int user) {
+    ControlState controlState = new ControlState();
+    controlState.setStorage(new KeyStorage(props.getLanguage(),user));
+    controlState.setAudioOn(true);
+    controlState.setAudioFeedbackOn(true);
   }
 
   private boolean highlightIntegerBox(FormField ageEntryGroup) {
