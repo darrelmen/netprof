@@ -20,17 +20,16 @@ import mitll.langtest.shared.Site;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.flashcard.FlashcardResponse;
 import mitll.langtest.shared.flashcard.ScoreInfo;
 import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.grade.ResultsAndGrades;
 import mitll.langtest.shared.monitoring.Session;
-
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -81,7 +80,7 @@ public class DatabaseImpl implements Database {
   private SiteDAO siteDAO;
   private UserListManager userListManager;
   private UserExerciseDAO userExerciseDAO;
-  UserListDAO userListDAO;
+  private UserListDAO userListDAO;
   private AddRemoveDAO addRemoveDAO;
 
   private DatabaseConnection connection = null;
@@ -588,11 +587,12 @@ public class DatabaseImpl implements Database {
   /**
    * TODO : do all average calc on server!
    *
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getUserHistoryForList(long, long, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getUserHistoryForList
    * @see mitll.langtest.client.custom.MyFlashcardExercisePanelFactory.StatsPracticePanel#onSetComplete
-   * @param listid
+   * @paramx listid
    * @return
    */
+/*
   public List<Session> getUserHistoryForList(long listid) {
     UserList userListByID = getUserListManager().getUserListByID(listid);
     Collection<UserExercise> exercises = userListByID.getExercises();
@@ -602,6 +602,27 @@ public class DatabaseImpl implements Database {
     }
     return resultDAO.getSessionsForUserIn2(ids);
   }
+*/
+
+  public List<AVPHistoryForList> getUserHistoryForList(long userid, Collection<String> ids) {
+
+    logger.debug("getUserHistoryForList " +userid + " and " + ids);
+
+    List<Session> sessionsForUserIn2 = resultDAO.getSessionsForUserIn2(ids);
+
+    logger.debug("got " +sessionsForUserIn2);
+    AVPHistoryForList sessionAVPHistoryForList  = new AVPHistoryForList(sessionsForUserIn2, userid, true);
+    AVPHistoryForList sessionAVPHistoryForList2 = new AVPHistoryForList(sessionsForUserIn2, userid, false);
+
+    List<AVPHistoryForList> historyForLists = new ArrayList<AVPHistoryForList>();
+    historyForLists.add(sessionAVPHistoryForList);
+    historyForLists.add(sessionAVPHistoryForList2);
+
+    logger.debug("returning " +historyForLists);
+
+    return historyForLists;
+  }
+
 
   /**
    * @see #getFlashcardResponse
@@ -797,13 +818,13 @@ public class DatabaseImpl implements Database {
    *
    * A one-off thing only.
    *
-   * @see mitll.langtest.server.LangTestDatabaseImpl#useOutsideResultCounts(long)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#useOutsideResultCounts
    * @param userID
    * @param outsideFile
    * @param useWeights
    * @return
    */
-  public List<Exercise> getExercisesBiasTowardsUnanswered(long userID, String outsideFile, boolean useWeights) {
+/*  public List<Exercise> getExercisesBiasTowardsUnanswered(long userID, String outsideFile, boolean useWeights) {
     Map<String,Integer> idToCount = new HashMap<String, Integer>();
     Map<String, Exercise> idToExercise = new HashMap<String, Exercise>();
     Map<String,Double> idToWeight = new HashMap<String, Double>();
@@ -833,14 +854,13 @@ public class DatabaseImpl implements Database {
     SortedMap<Integer, List<String>> countToIds = getCountToExerciseIDs(idToCount);
 
     return getResultsRandomizedPerUser(userID, idToExercise, countToIds,idToWeight);
-  }
+  }*/
 
   /**
    * Given a map of answer counts to exercise ids at those counts, randomize the order based on the
    * user id, then return a list of Exercises with those ids.
    *
    * @see #getExercisesBiasTowardsUnanswered(long,boolean)
-   * @see #getExercisesBiasTowardsUnanswered(long, String, boolean)
    * @param userID for this user
    * @param idToExercise so we can go from id to exercise
    * @param countToIds statistics about answers for each exercise
@@ -887,7 +907,6 @@ public class DatabaseImpl implements Database {
   /**
    * Reverse the map -- make a map of result count->list of ids at that count
    * @see #getExercisesBiasTowardsUnanswered(long,boolean)
-   * @see #getExercisesBiasTowardsUnanswered(long, String, boolean)
    * @param idToCount
    * @return
    */
@@ -904,7 +923,6 @@ public class DatabaseImpl implements Database {
 
   /**
    * @see #getExercisesBiasTowardsUnanswered(long,boolean)
-   * @see #getExercisesBiasTowardsUnanswered(long, String, boolean)
    * @param idToExercise
    * @param idToCount
    */
@@ -923,7 +941,6 @@ public class DatabaseImpl implements Database {
    * multiple responses by the same user count as one in count->id map.
    *
    * @see #getExercisesBiasTowardsUnanswered(long,boolean)
-   * @see #getExercisesBiasTowardsUnanswered(long, String, boolean)
    * @param userID
    * @paramx userMale
    * @param idToCount exercise id->count
@@ -1144,7 +1161,7 @@ public class DatabaseImpl implements Database {
     return user != null && user.enabled;
   }
 
-  public User getUser(long id) {
+  private User getUser(long id) {
     return userDAO.getUserMap().get(id);
   }
 
@@ -1247,8 +1264,8 @@ public class DatabaseImpl implements Database {
   }
 
   private static class Pair {
-    Map<Long, Integer> idToCount;
-    Map<Long, Set<String>> idToUniqueCount;
+    final Map<Long, Integer> idToCount;
+    final Map<Long, Set<String>> idToUniqueCount;
     public Pair(Map<Long, Integer> idToCount, Map<Long, Set<String>> idToUniqueCount) {
       this.idToCount = idToCount;
       this.idToUniqueCount = idToUniqueCount;
@@ -1358,7 +1375,7 @@ public class DatabaseImpl implements Database {
    * @param e
    * @param questionID
    * @param answer
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addTextAnswer(int, mitll.langtest.shared.Exercise, int, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addTextAnswer
    * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers
    */
   public void addAnswer(int userID, Exercise e, int questionID, String answer, String answerType) {
@@ -1568,7 +1585,7 @@ public class DatabaseImpl implements Database {
    * @param id
    * @return
    */
-  public Exercise getUserExerciseWhere(String id) {
+  private Exercise getUserExerciseWhere(String id) {
     UserExercise where = userExerciseDAO.getWhere(id);
     return where != null ? where.toExercise(language) : null;
   }
@@ -1587,13 +1604,8 @@ public class DatabaseImpl implements Database {
   }
 
   public ServerProperties getServerProps() { return serverProps; }
+  private AddRemoveDAO getAddRemoveDAO() { return addRemoveDAO;  }
+  private ExerciseDAO getExerciseDAO() {  return exerciseDAO;  }
+
   public String toString() { return "Database : "+ connection.getConnection(); }
-
-  public AddRemoveDAO getAddRemoveDAO() {
-    return addRemoveDAO;
-  }
-
-  public ExerciseDAO getExerciseDAO() {
-    return exerciseDAO;
-  }
 }

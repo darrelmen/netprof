@@ -1057,7 +1057,7 @@ fieldset > legend {
 }
 
 .chartDim {
-    min-width: 500px;
+    min-width: 400px;
     min-height: 400px;
 }
 
