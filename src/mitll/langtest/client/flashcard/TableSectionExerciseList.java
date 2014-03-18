@@ -57,6 +57,7 @@ import java.util.Map;
  * Date: 4/23/13
  * Time: 4:21 PM
  * To change this template use File | Settings | File Templates.
+ * @deprecated
  */
 public class TableSectionExerciseList<T extends ExerciseShell> extends FlexSectionExerciseList<T> {
   private static final String FLASHCARD = "audio vocabulary practice";
