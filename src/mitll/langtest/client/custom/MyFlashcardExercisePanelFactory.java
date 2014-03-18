@@ -24,18 +24,21 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.monitoring.Session;
 import org.moxieapps.gwt.highcharts.client.Chart;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by go22670 on 2/10/14.
- * TODO : store state -- how many items have been done, where are we in the list
- * TODO : so we can skip around in the list...? if get to end - get score of all the ones we've answered.
- * TODO : concept of rounds explicit?
+ * TODOx : store state -- how many items have been done, where are we in the list
+ * TODOx : so we can skip around in the list...? if get to end - get score of all the ones we've answered.
+ * TODOx : concept of rounds explicit?
  * TODO : review table...?
  */
 class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends FlashcardExercisePanelFactory {
@@ -47,7 +50,7 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
   private final ControlState controlState;
   private List<T> allExercises;
   int totalExercises = 0;
-  private final long userListID;
+  //private final long userListID;
   private Map<String,Boolean> exToCorrect = new HashMap<String, Boolean>();
   private Map<String,Double>   exToScore = new HashMap<String, Double>();
 
@@ -62,7 +65,7 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
                                          final ListInterface<T> exerciseList, long userListID) {
     super(service, feedback, controller, exerciseList);
     controlState = new ControlState();
-    this.userListID = userListID;
+   // this.userListID = userListID;
     exerciseList.addListChangedListener(new ListChangeListener<T>() {
       @Override
       public void listChanged(List<T> items) {
@@ -121,22 +124,37 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
     }
 
     public void onSetComplete() {
+      System.out.println("StatsPracticePanel.onSetComplete.");
+
       skip.setVisible(false);
       final int user = controller.getUser();
-      service.getUserHistoryForList(user,userListID, new AsyncCallback<List<Session>>() {
+
+      Set<String> ids = exToCorrect.keySet();
+
+      System.out.println("StatsPracticePanel.onSetComplete. : calling  getUserHistoryForList for " + user +
+        " with " + exToCorrect);
+      Set<String> copies = new HashSet<String>(ids);
+      if (copies.isEmpty()) {
+        for (T t : allExercises) {
+          copies.add(t.getID());
+        }
+      }
+
+      service.getUserHistoryForList(user, copies, new AsyncCallback<List<AVPHistoryForList>>() {
         @Override
         public void onFailure(Throwable caught) {
-           System.err.println("getUserHistoryForList failure : caught " + caught);
+          System.out.println("StatsPracticePanel.onSetComplete. : got failure " + caught);
         }
 
         @Override
-        public void onSuccess(List<Session> result) {
-          showFeedbackCharts(result, user);
+        public void onSuccess(List<AVPHistoryForList> result) {
+          showFeedbackCharts2(result);
         }
       });
       // TODO : maybe add table showing results per word
     }
 
+/*
     private void showFeedbackCharts(List<Session> result, int user) {
       float size = (float) totalExercises;
 
@@ -147,14 +165,47 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
       int all = totalCorrect + totalIncorrect;
       System.out.println("onSetComplete.onSuccess : result " + result.size() + " " +size +
         " all " +all + " correct " + totalCorrect + " inc " + totalIncorrect);
+*/
+/*      for (Session s : result) {
+        System.out.println("\tonSetComplete.onSuccess : result " + s);
+      }*//*
+
+      String correct = totalCorrect +" Correct (" + toPercent(totalCorrect, all) + ")";
+      String pronunciation = "Pronunciation " + toPercent(avgScore);
+
+      Chart chart  = new LeaderboardPlot().getChart(result, user, -1, correct,       "% correct", true, 100f);
+      Chart chart2 = new LeaderboardPlot().getChart(result, user, -1, pronunciation, "score %",   false, 100f);
+
+      container = new HorizontalPanel();
+      container.add(chart);
+      chart.addStyleName("chartDim");
+      chart2.addStyleName("chartDim");
+      container.add(chart2);
+      belowContentDiv.add(container);
+      belowContentDiv.add(getRepeatButton());
+    }
+*/
+
+    private void showFeedbackCharts2(List<AVPHistoryForList> result) {
+      float size = (float) totalExercises;
+
+      setMainContentVisible(false);
+      int totalCorrect = getCorrect();
+      int totalIncorrect = getIncorrect();
+      double avgScore = getAvgScore();
+      int all = totalCorrect + totalIncorrect;
+      System.out.println("onSetComplete.onSuccess : results " + result + " " +size +
+        " all " +all + " correct " + totalCorrect + " inc " + totalIncorrect);
 /*      for (Session s : result) {
         System.out.println("\tonSetComplete.onSuccess : result " + s);
       }*/
       String correct = totalCorrect +" Correct (" + toPercent(totalCorrect, all) + ")";
       String pronunciation = "Pronunciation " + toPercent(avgScore);
 
-      Chart chart  = new LeaderboardPlot().getChart(result, user, -1, correct,       "% correct", true, 100f);
-      Chart chart2 = new LeaderboardPlot().getChart(result, user, -1, pronunciation, "score %",   false, 100f);
+      AVPHistoryForList sessionAVPHistoryForList = result.get(0);
+      AVPHistoryForList sessionAVPHistoryForListScore = result.get(1);
+      Chart chart  = new LeaderboardPlot().getChart(sessionAVPHistoryForList, correct,       "% correct");
+      Chart chart2 = new LeaderboardPlot().getChart(sessionAVPHistoryForListScore, pronunciation, "score %");
 
       container = new HorizontalPanel();
       container.add(chart);
@@ -181,7 +232,7 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
     }
 
     /**
-     * @see #showFeedbackCharts(java.util.List, int)
+     * @see #showFeedbackCharts2(java.util.List)
      * @return
      */
     private double getAvgScore() {
@@ -228,11 +279,20 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
       return w1;
     }
 
+    /**
+     * @see #receivedAudioAnswer(mitll.langtest.shared.AudioAnswer)
+     * @see #showIncorrectFeedback(mitll.langtest.shared.AudioAnswer, double, boolean)
+     * @param correct
+     * @param feedback
+     */
     protected void nextAfterDelay(boolean correct, String feedback) {
+      System.out.println("nextAfterDelay correct " + correct);
       if (exerciseList.onLast()) {
         onSetComplete();
       }
-      else  {
+      else {
+        System.out.println("\tnextAfterDelay not on last");
+
         loadNextOnTimer(DELAY_MILLIS);
       }
     }
@@ -255,7 +315,6 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
           totalExercises--;
           cancelTimer();
           loadNext();
-          skip.setEnabled(true);
         }
       });
       toAddTo.add(skip);
