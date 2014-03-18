@@ -19,7 +19,6 @@ import mitll.langtest.shared.Result;
 import mitll.langtest.shared.Site;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
-import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.flashcard.FlashcardResponse;
 import mitll.langtest.shared.flashcard.ScoreInfo;
@@ -605,10 +604,10 @@ public class DatabaseImpl implements Database {
   }
 */
 
-  public List<AVPHistoryForList> getUserHistoryForList(long userid, Collection<String> ids) {
+  public List<AVPHistoryForList> getUserHistoryForList(long userid, Collection<String> ids, long latestResultID) {
    // logger.debug("getUserHistoryForList " +userid + " and " + ids);
 
-    List<Session> sessionsForUserIn2 = resultDAO.getSessionsForUserIn2(ids);
+    List<Session> sessionsForUserIn2 = resultDAO.getSessionsForUserIn2(ids, latestResultID);
 
     Map<Long, User> userMap = userDAO.getUserMap();
 
@@ -622,7 +621,9 @@ public class DatabaseImpl implements Database {
       }
     });
     List<Session> sessions = sessionsForUserIn2.subList(0, Math.min(sessionsForUserIn2.size(), 10));
+    int i = 0;
     for (Session session : sessions) {
+      if (session.isLatest()) sessionAVPHistoryForList.setLatest(i++);
       sessionAVPHistoryForList.addPair(userMap.get(session.getUserid()).userID, session.getCorrectPercent());
     }
 
@@ -633,7 +634,11 @@ public class DatabaseImpl implements Database {
       }
     });
     sessions = sessionsForUserIn2.subList(0, Math.min(sessionsForUserIn2.size(), 10));
+
+    i = 0;
     for (Session session : sessions) {
+      if (session.isLatest()) sessionAVPHistoryForList2.setLatest(i++);
+
       sessionAVPHistoryForList2.addPair(userMap.get(session.getUserid()).userID, 100f*session.getAvgScore());
     }
 
