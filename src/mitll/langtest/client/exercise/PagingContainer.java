@@ -291,6 +291,11 @@ public class PagingContainer<T extends ExerciseShell> {
   }
 
   protected void gotClickOnItem(final T e) {}
+
+  /**
+   * @see mitll.langtest.client.grading.GradedExerciseList#loadFirstExercise()
+   * @return
+   */
   public T selectFirst() {
     if (getList().isEmpty()) return null;
     return selectItem(0);
@@ -339,6 +344,11 @@ public class PagingContainer<T extends ExerciseShell> {
     }
   }*/
 
+  /**
+   * @see #selectFirst()
+   * @param index
+   * @return
+   */
   private T selectItem(int index) {
     T first = getList().get(index);
 
@@ -392,6 +402,11 @@ public class PagingContainer<T extends ExerciseShell> {
 
   public Set<String> getKeys() { return idToExercise.keySet(); }
 
+  /**
+   * @see #selectItem(int)
+   * @see mitll.langtest.client.list.PagingExerciseList#onResize()
+   * @param currentExercise
+   */
   public void onResize(T currentExercise) {
 /*    System.out.println("Got on resize " + Window.getClientHeight() + " " +
         getOffsetHeight() + " bodyheight = " + table.getBodyHeight() + " table offset height " + table.getOffsetHeight() + " parent height " + getParent().getOffsetHeight());*/
@@ -406,7 +421,7 @@ public class PagingContainer<T extends ExerciseShell> {
     }
   }
 
-  boolean debug = false;
+  private boolean debug = false;
   public int getNumTableRowsGivenScreenHeight() {
     int header = getTableHeaderHeight();
     int leftOver = Window.getClientHeight() - header - verticalUnaccountedFor;
