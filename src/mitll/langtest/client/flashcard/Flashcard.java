@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.dialog.DialogHelper;
@@ -36,6 +37,7 @@ public class Flashcard implements RequiresResize {
   public static final int SLOP = 55;
   private static final String NEW_PRO_F1_PNG = "NewProF1.png";
   private static final String NEW_PRO_F2_PNG = "NewProF2.png";
+  private final boolean isAnonymous;
   private Paragraph appName;
   private Image flashcardImage;
   private Image collab;
@@ -47,7 +49,10 @@ public class Flashcard implements RequiresResize {
    * @see mitll.langtest.client.LangTest#doFlashcard()
    * @see mitll.langtest.client.LangTest#makeHeaderRow()
    */
-  public Flashcard(String nameForAnswer) { this.nameForAnswer = nameForAnswer + "s"; }
+  public Flashcard(PropertyHandler props) {
+    this.nameForAnswer = props.getNameForAnswer() + "s";
+    isAnonymous = props.getLoginType().equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS);
+  }
 
   /**
    * @see mitll.langtest.client.LangTest#doFlashcard()
@@ -73,7 +78,8 @@ public class Flashcard implements RequiresResize {
       users, results, monitoring);
   }
 
-  public Panel getHeaderRow(String splashText, boolean isBeta, String appIcon, String appTitle, String userName, HTML browserInfo,
+  public Panel getHeaderRow(String splashText, boolean isBeta, String appIcon, String appTitle, String userName,
+                            HTML browserInfo,
                             ClickHandler logoutClickHandler,
                             ClickHandler users,
                             ClickHandler results,
@@ -113,21 +119,52 @@ public class Flashcard implements RequiresResize {
 
     Panel hp = new HorizontalPanel();
     hp.getElement().setId("UsernameContainer");
+    userNameWidget = getUserNameWidget(userName);
+    if (!isAnonymous) {
+      hp.add(userNameWidget);
+    }
+    Dropdown w = makeMenu(users, results, monitoring);
+
+    NavLink widget1 = new NavLink("Log Out");
+    widget1.addClickHandler(logoutClickHandler);
+    w.add(widget1);
+
+    if (!isAnonymous) {
+      hp.add(w);
+    }
+
+    browserInfo.addStyleName("leftFiveMargin");
+    browserInfo.addStyleName("darkerBlueColor");
+    hp.add(browserInfo);
+    widget.add(hp);
+    hp.addStyleName("topMinusFiveMargin");
+
+    headerRow.add(widget);
+    headerRow.addAttachHandler(new AttachEvent.Handler() {
+      @Override
+      public void onAttachOrDetach(AttachEvent event) {
+        onResize();
+      }
+    });
+
+    return headerRow;
+  }
+
+  private HTML getUserNameWidget(String userName) {
     userNameWidget = new HTML(userName);
     userNameWidget.getElement().setId("Username");
     userNameWidget.addStyleName("bold");
 
     userNameWidget.addStyleName("rightTwentyMargin");
     userNameWidget.addStyleName("blueColor");
-    hp.add(userNameWidget);
+    return userNameWidget;
+  }
 
+  private Dropdown makeMenu(ClickHandler users, ClickHandler results, ClickHandler monitoring) {
     Dropdown w = new Dropdown();
     w.setRightDropdown(true);
     w.setIcon(IconType.COG);
     w.setIconSize(IconSize.LARGE);
-
-    NavLink widget1 = new NavLink("Log Out");
-    widget1.addClickHandler(logoutClickHandler);
 
     if (users != null) {
       NavLink widget2 = new NavLink("Users");
@@ -146,26 +183,7 @@ public class Flashcard implements RequiresResize {
       widget2.addClickHandler(monitoring);
       w.add(widget2);
     }
-
-    w.add(widget1);
-
-    hp.add(w);
-
-    browserInfo.addStyleName("leftFiveMargin");
-    browserInfo.addStyleName("darkerBlueColor");
-    hp.add(browserInfo);
-    widget.add(hp);
-    hp.addStyleName("topMinusFiveMargin");
-
-    headerRow.add(widget);
-    headerRow.addAttachHandler(new AttachEvent.Handler() {
-      @Override
-      public void onAttachOrDetach(AttachEvent event) {
-        onResize();
-      }
-    });
-
-    return headerRow;
+    return w;
   }
 
   /**
