@@ -9,7 +9,6 @@ import com.github.gwtbootstrap.client.ui.incubator.Table;
 import com.github.gwtbootstrap.client.ui.incubator.TableHeader;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
@@ -30,7 +29,6 @@ import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
-import mitll.langtest.shared.monitoring.Session;
 import org.moxieapps.gwt.highcharts.client.Chart;
 
 import java.util.HashMap;
@@ -110,6 +108,7 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
       }
     }
 
+    long latestResultID;
     /**
      * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#receivedAudioAnswer(mitll.langtest.shared.AudioAnswer, mitll.langtest.client.exercise.ExerciseQuestionState, com.google.gwt.user.client.ui.Panel)
      * @param result
@@ -125,6 +124,7 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
       exToCorrect.put(currentExercise.getID(), result.isCorrect());
       setStateFeedback();
 
+      latestResultID = result.getResultID();
       super.receivedAudioAnswer(result);
     }
 
@@ -145,7 +145,7 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
         }
       }
 
-      service.getUserHistoryForList(user, copies, new AsyncCallback<List<AVPHistoryForList>>() {
+      service.getUserHistoryForList(user, copies, latestResultID, new AsyncCallback<List<AVPHistoryForList>>() {
         @Override
         public void onFailure(Throwable caught) {
           System.out.println("StatsPracticePanel.onSetComplete. : got failure " + caught);
@@ -236,10 +236,6 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
       List<String> users = sessionAVPHistoryForList.getUsers();
       List<Float> scores = sessionAVPHistoryForList.getScores();
       for (int i = 0; i < users.size(); i++) {
-       // String html = "<tr><td>" + (i + 1) + "</td><td>" + users.get(i) + "</td><td>" + Math.round(scores.get(i)) + "</td></tr>";
-      //  SafeHtmlBuilder builder = new SafeHtmlBuilder();
-       // builder.appendEscaped(html);
-       // table.add(new HTML(builder.toSafeHtml()));
         HTMLPanel row = new HTMLPanel("tr","");
         HTMLPanel col = new HTMLPanel("td","");
         col.add(new HTML(""+(i + 1)));
@@ -249,7 +245,12 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
 
         row.add(col);
         col = new HTMLPanel("td","");
-        col.add(new HTML(""+ Math.round(scores.get(i))));
+
+        String html = "" + Math.round(scores.get(i));
+        if (sessionAVPHistoryForList.getLatest() == i) {
+         html = "<b>"+html+"</b>";
+        }
+        col.add(new HTML(html));
 
         row.add(col);
         table.add(row);
