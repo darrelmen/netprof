@@ -145,6 +145,10 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
     return userGroup;
   }
 
+  /**
+   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#addComponents()
+   * @return
+   */
   protected PagingContainer<T> makePagingContainer() {
     final PagingExerciseList<T> outer = this;
     PagingContainer<T> pagingContainer1 =
@@ -254,7 +258,11 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
   }
 
   public void clear() { pagingContainer.clear(); }
-  public void flush() { pagingContainer.flush();  }
+
+  public void flush() {
+    pagingContainer.flush();
+    onResize();
+  }
 
   /**
    * @see mitll.langtest.client.list.ExerciseList#rememberAndLoadFirst(java.util.List, mitll.langtest.shared.Exercise)
