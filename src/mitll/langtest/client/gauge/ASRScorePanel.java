@@ -35,19 +35,18 @@ import java.util.Map;
  * @author gregbramble
  */
 public class ASRScorePanel extends FlowPanel implements ScoreListener {
-  private static final String INSTRUCTIONS = "The ASR method uses a speech recognizer to compare the student " +
-    "recording to a model trained with hundreds of native speakers. " +
-      "It generates scores for each word and phonetic unit (see the color-coded transcript for details).";
-  private static final String WARNING = "Repeat the phrase exactly as it is written.<br/> " +
-    "Saying something different or adding/omitting words could result in incorrect scores.";
+  private static final String INSTRUCTIONS = "Your speech is scored by a speech recognizer trained on speech from many native speakers. " +
+      "The recognizer generates scores for each word and phonetic unit (see the color-coded transcript for details).";
+  private static final String WARNING = "<b>Repeat the phrase exactly as it is written. " +
+    "Saying something different or adding/ omitting words could result in incorrect scores.</b>";
   public static final int CHART_HEIGHT = 100;
 
   private final PretestGauge ASRGauge;
   private Panel phoneList;
   private final List<Float> scores = new ArrayList<Float>();
-  String id;
+  //String id;
   private SimplePanel chartPanel;
-  Canvas canvas;
+ // Canvas canvas;
   /**
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel
    */
