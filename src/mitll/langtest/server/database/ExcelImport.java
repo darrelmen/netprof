@@ -158,7 +158,6 @@ public class ExcelImport implements ExerciseDAO {
 
         Set<String> removes = addRemoveDAO.getRemoves();
 
-      //  exercises.removeAll(removes);
         for (String id : removes) {
           Exercise remove = idToExercise.remove(id);
           exercises.remove(remove);
@@ -193,14 +192,15 @@ public class ExcelImport implements ExerciseDAO {
     return exercises;
   }
 
-  private void overlayExercises(Collection<UserExercise> overlay) {
+/*  private void overlayExercises(Collection<UserExercise> overlay) {
     for (UserExercise userExercise : overlay) {
       addOverlay(userExercise);
     }
-  }
+  }*/
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#editItem(mitll.langtest.shared.custom.UserExercise)
+   * @see #getRawExercises()
    * @param userExercise
    */
   @Override
@@ -214,7 +214,7 @@ public class ExcelImport implements ExerciseDAO {
     }
     else {
       Exercise over = userExercise.toExercise();
-
+      over.setUnitToValue(exercise.getUnitToValue());
       //logger.debug("\taddOverlay replacing with " +over + " and " +over.getTooltip());
 
       synchronized (this) {
@@ -410,8 +410,6 @@ public class ExcelImport implements ExerciseDAO {
               idIndex = columns.indexOf(col);
             } else if (colNormalized.contains("context")) {
               contextIndex = columns.indexOf(col);
-           // } else if (colNormalized.contains("segmented")) {
-             // segmentedIndex = columns.indexOf(col);
             } else if (colNormalized.contains("audio_index")) {
               audioIndex = columns.indexOf(col);
             }
@@ -708,7 +706,6 @@ public class ExcelImport implements ExerciseDAO {
     }
     List<String> inOrderTranslations = new ArrayList<String>(translations);
     imported.setRefSentences(inOrderTranslations);
-    //if (!segmentedChinese.isEmpty()) imported.setSegmented(segmentedChinese);
 
     if (weightIndex != -1) {
       imported.setWeight(getNumericCell(next, weightIndex));
@@ -773,7 +770,7 @@ public class ExcelImport implements ExerciseDAO {
   private Exercise getExercise(String id,
                                String english, String foreignLanguagePhrase, String translit, String meaning,
                                String context, boolean promptInEnglish, String refAudioIndex) {
-    String content = ExerciseFormatter.getContent(foreignLanguagePhrase, translit, english, meaning, context);
+    String content = ExerciseFormatter.getContent(foreignLanguagePhrase, translit, english, meaning, context, language);
     Exercise imported = new Exercise("import", id, content, promptInEnglish, true, english);
     imported.setMeaning(meaning);
     imported.addQuestion();   // TODO : needed?
