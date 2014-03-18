@@ -29,6 +29,7 @@ import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.flashcard.FlashcardResponse;
 import mitll.langtest.shared.flashcard.Leaderboard;
 import mitll.langtest.shared.flashcard.ScoreInfo;
@@ -1225,11 +1226,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * @see mitll.langtest.client.custom.MyFlashcardExercisePanelFactory.StatsPracticePanel#onSetComplete()
    * @param userid
-   * @param listid
    * @return
    */
   @Override
-  public List<Session> getUserHistoryForList(long userid, long listid) { return db.getUserHistoryForList(listid); }
+  public List<AVPHistoryForList> getUserHistoryForList(long userid, Collection<String> ids) {
+    logger.debug("getUserHistoryForList " + userid + " and " + ids);
+
+    return db.getUserHistoryForList(userid, ids);
+  }
 
   private final Leaderboard leaderboard = new Leaderboard();
 
