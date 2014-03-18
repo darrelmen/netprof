@@ -14,6 +14,7 @@ import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.flashcard.FlashcardResponse;
 import mitll.langtest.shared.flashcard.Leaderboard;
 import mitll.langtest.shared.grade.CountAndGradeID;
@@ -129,7 +130,7 @@ public interface LangTestDatabase extends RemoteService {
 
   List<? extends ExerciseShell> getFullExercisesForSelectionState(Map<String, Collection<String>> typeToSection, int start, int end);
 
-  List<Session> getUserHistoryForList(long userid, long listid);
+  List<AVPHistoryForList> getUserHistoryForList(long userid, Collection<String> ids);
 
   /**
    * Game is over notification...
@@ -173,8 +174,5 @@ public interface LangTestDatabase extends RemoteService {
   UserList getReviewList();
   boolean deleteList(long id);
   boolean deleteItemFromList(long listid, String exid);
-
   boolean deleteItem(String exid);
-
-  //ExerciseListWrapper getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID, String prefix, boolean showUnansweredFirst);
 }
