@@ -60,6 +60,9 @@ class AVPHelper extends NPFHelper {
       protected void addTableWithPager(PagingContainer<? extends ExerciseShell> pagingContainer) {
         pagingContainer.getTableWithPager();
       }
+
+      @Override
+      protected void addMinWidthStyle(Panel leftColumn) {}
     };
   }
 

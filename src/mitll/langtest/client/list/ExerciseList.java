@@ -553,7 +553,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * @param result
    */
   protected void useExercise(Exercise result) {
-    System.out.println("ExerciseList.useExercise : result " +result);
+    //System.out.println("ExerciseList.useExercise : result " +result);
 
     createdPanel = makeExercisePanel(result);
     String itemID = result.getID();
@@ -570,7 +570,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * @param exercise
    */
   public Panel makeExercisePanel(Exercise exercise) {
-    System.out.println("ExerciseList.makeExercisePanel : " +exercise);
+    //System.out.println("ExerciseList.makeExercisePanel : " +exercise);
 
     Panel exercisePanel = factory.getExercisePanel(exercise);
     innerContainer.setWidget(exercisePanel);
@@ -749,7 +749,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     Panel leftColumn = new FlowPanel();
     leftColumn.getElement().setId("ExerciseList_leftColumn");
     leftColumn.addStyleName("floatLeft");
-    leftColumn.addStyleName("minWidth");
+    addMinWidthStyle(leftColumn);
     DOM.setStyleAttribute(leftColumn.getElement(), "paddingRight", "10px");
 
     if (!props.isFlashcardTeacherView() && !props.isMinimalUI() && ADD_ITEM_HEADER) {
@@ -759,6 +759,10 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     }
     leftColumn.add(getWidget());
     return leftColumn;
+  }
+
+  protected void addMinWidthStyle(Panel leftColumn) {
+    leftColumn.addStyleName("minWidth");
   }
 
   @Override
