@@ -229,11 +229,13 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     final VerticalPanel vp = new VerticalPanel();
     vp.getElement().setId("getQuestionContent_verticalContainer");
 
-
     if (!e.getUnitToValue().isEmpty()) {
       HorizontalPanel unitLessonForExercise = getUnitLessonForExercise();
       unitLessonForExercise.add(getItemHeader(e));
       vp.add(unitLessonForExercise);
+    }
+    else {
+      System.out.println("no unit->value on " + e);
     }
     vp.addStyleName("blockStyle");
 
@@ -269,7 +271,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    return w;
   }
 
-  protected Widget getQuestionContent(Exercise e,String content) {
+  protected Widget getQuestionContent(Exercise e, String content) {
     Widget questionContent = new HTML(content);
     questionContent.getElement().setId("QuestionContent");
     questionContent.addStyleName("floatLeft");
