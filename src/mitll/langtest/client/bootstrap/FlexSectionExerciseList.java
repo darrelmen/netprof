@@ -64,7 +64,6 @@ public class FlexSectionExerciseList<T extends ExerciseShell> extends HistoryExe
   private Heading statusHeader = new Heading(4);
   private Collection<String> typeOrder;
   private Panel sectionPanel;
-  //boolean showCompleted = false;
 
   /**
    * @see mitll.langtest.client.ExerciseListLayout#makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, boolean, mitll.langtest.client.user.UserFeedback, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
@@ -99,6 +98,9 @@ public class FlexSectionExerciseList<T extends ExerciseShell> extends HistoryExe
     setUnaccountedForVertical(controller.getProps().isClassroomMode() ? CLASSROOM_VERTICAL_EXTRA : VERTICAL_DEFAULT);
   }
 
+  /**
+   * @see mitll.langtest.client.list.PagingExerciseList#PagingExerciseList(com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, boolean, boolean, mitll.langtest.client.exercise.ExerciseController, boolean, String)
+   */
   @Override
   protected void addComponents() {
     PagingContainer<? extends ExerciseShell> exerciseShellPagingContainer = makePagingContainer();
