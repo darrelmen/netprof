@@ -9,7 +9,18 @@ import mitll.langtest.client.exercise.ExerciseController;
 public class KeyStorage {
   private ExerciseController controller;
   private boolean debug = false;
-  public KeyStorage(ExerciseController controller) {  this.controller = controller;  }
+  private String language;
+  private int user;
+
+  public KeyStorage(String language, int user) {
+    this.language = language;
+    this.user = user;
+  }
+
+  public KeyStorage(ExerciseController controller) {
+    this(controller.getLanguage(),controller.getUser());
+    this.controller = controller;
+  }
 
   public void storeValue(String name, String toStore) {
     if (Storage.isLocalStorageSupported()) {
@@ -49,6 +60,11 @@ public class KeyStorage {
   }
 
   protected String getLocalStorageKey(String name) {
-    return "Navigation_" + controller.getLanguage() + "_" + controller.getUser() + "_" +name;
+    if (controller != null) {
+      language = controller.getLanguage();          // necessary???
+      user = controller.getUser();
+    }
+
+    return "Navigation_" + language + "_" + user + "_" +name;
   }
 }
