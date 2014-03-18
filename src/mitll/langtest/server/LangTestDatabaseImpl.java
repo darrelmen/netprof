@@ -1226,13 +1226,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * @see mitll.langtest.client.custom.MyFlashcardExercisePanelFactory.StatsPracticePanel#onSetComplete()
    * @param userid
+   * @param latestResultID
    * @return
    */
   @Override
-  public List<AVPHistoryForList> getUserHistoryForList(long userid, Collection<String> ids) {
+  public List<AVPHistoryForList> getUserHistoryForList(long userid, Collection<String> ids, long latestResultID) {
     logger.debug("getUserHistoryForList " + userid + " and " + ids);
 
-    return db.getUserHistoryForList(userid, ids);
+    return db.getUserHistoryForList(userid, ids, latestResultID);
   }
 
   private final Leaderboard leaderboard = new Leaderboard();
