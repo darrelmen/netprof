@@ -61,6 +61,8 @@ public class RecordButton extends Button {
     if (doClickAndHold) setTitle(FlashcardRecordButtonPanel.PRESS_AND_HOLD_THE_MOUSE_BUTTON_TO_RECORD);
     this.autoStopDelay = delay;
     setType(ButtonType.PRIMARY);
+   // if (addKeyBinding) new Exception().printStackTrace();
+
     setupRecordButton(addKeyBinding);
     getElement().setId("record_button");
   }
@@ -70,9 +72,10 @@ public class RecordButton extends Button {
    * @param delay
    * @param recordingListener
    * @param doClickAndHold
+   * @param addKeyBinding
    */
-  public RecordButton(int delay, RecordingListener recordingListener, boolean doClickAndHold) {
-    this(delay, doClickAndHold, true, "Record", "Stop");
+  public RecordButton(int delay, RecordingListener recordingListener, boolean doClickAndHold, boolean addKeyBinding) {
+    this(delay, doClickAndHold, addKeyBinding, "Record", "Stop");
     this.setRecordingListener(recordingListener);
   }
 
@@ -92,7 +95,7 @@ public class RecordButton extends Button {
   private class ButtonClickEvent extends ClickEvent {}
 
   /**
-   * @see #RecordButton(int, mitll.langtest.client.recorder.RecordButton.RecordingListener, boolean)
+   * @see #RecordButton(int, mitll.langtest.client.recorder.RecordButton.RecordingListener, boolean, boolean)
    * @param recordingListener
    */
   public void setRecordingListener(RecordingListener recordingListener) { this.recordingListener = recordingListener;  }
