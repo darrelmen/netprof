@@ -255,16 +255,16 @@ public class Navigation extends TabContainer implements RequiresResize {
   private void checkAndMaybeClearTab(String value) {
     String value1 = storage.getValue(CLICKED_TAB);
 
-    if (!value1.equals(value)) {
-      //System.out.println("checkAndMaybeClearTab " + value1 + " vs "+value);
-      storage.removeValue(CLICKED_USER_LIST);
-    }
+//      System.out.println("checkAndMaybeClearTab " + value1 + " vs "+value + " clearing " + CLICKED_USER_LIST);
+    storage.removeValue(CLICKED_USER_LIST);
     storage.storeValue(CLICKED_TAB, value);
   }
 
   /**
    * @see #getButtonRow2(com.google.gwt.user.client.ui.Panel)
    * @see #showMyLists(boolean, boolean)
+   * @see #makeDeleteButton(mitll.langtest.shared.custom.UserList, boolean)
+   * @see #clickOnYourLists(long)
    * @param onlyMine
    * @param onlyVisited
    */
@@ -311,6 +311,9 @@ public class Navigation extends TabContainer implements RequiresResize {
     }
   }
 
+  /**
+   * @see #showInitialState()
+   */
   private void selectPreviousTab() {
     String value = storage.getValue(CLICKED_TAB);
     try {
@@ -347,7 +350,7 @@ public class Navigation extends TabContainer implements RequiresResize {
    */
   private void showMyLists(boolean onlyCreated, boolean onlyVisited) {
     String value = storage.getValue(CLICKED_TAB);
-    System.out.println("showMyLists " + value);
+    System.out.println("showMyLists " + value + " created " + onlyCreated + " visited " + onlyVisited);
     if (!value.isEmpty()) {
       if (value.equals(YOUR_LISTS)) {
         onlyCreated = true;
@@ -366,6 +369,10 @@ public class Navigation extends TabContainer implements RequiresResize {
     refreshViewLessons(onlyCreated, onlyVisited);
   }
 
+  /**
+   * @see mitll.langtest.client.custom.CreateListDialog#addUserList(mitll.langtest.client.user.BasicDialog.FormField, com.github.gwtbootstrap.client.ui.TextArea, mitll.langtest.client.user.BasicDialog.FormField)
+   * @param userListID
+   */
   public void clickOnYourLists(long userListID) {
     storeCurrentClickedList(userListID);
     storage.storeValue(SUB_TAB, EDIT_ITEM);
@@ -478,7 +485,7 @@ public class Navigation extends TabContainer implements RequiresResize {
 
   /**
    * @see Navigation.UserListCallback#getDisplayRowPerList(mitll.langtest.shared.custom.UserList, boolean, boolean)
-   * @see mitll.langtest.client.custom.Navigation.UserListCallback#selectThePreviousList(java.util.Collection)
+   * @see mitll.langtest.client.custom.Navigation.UserListCallback#selectPreviousList
    * @param ul
    * @param contentPanel
    */
@@ -781,23 +788,8 @@ public class Navigation extends TabContainer implements RequiresResize {
         }
         child.add(listScrollPanel);
 
-        selectThePreviousList(result);
+        selectPreviousList(result);
       }
-    }
-
-    /**
-     * Remember the last list we were on and and select that one automatically
-     * @param result
-     */
-    private void selectThePreviousList(final Collection<UserList> result) {
-/*
-      Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-        public void execute() {
-          selectPreviousList(result);
-        }
-      });
-*/
-      selectPreviousList(result);
     }
 
     private void selectPreviousList(Collection<UserList> result) {
