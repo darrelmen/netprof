@@ -36,6 +36,19 @@ public class ExerciseFormatter {
     return getContent(foreignPhrase, translit, english, meaning, "", isEnglish, isUrdu, isPashto);
   }
 
+  /**
+   * TODO : This is a bad idea -- the client side should do formatting, etc.
+   *
+   * @param foreignPhrase
+   * @param translit
+   * @param english
+   * @param meaning
+   * @param context
+   * @param isEnglish
+   * @param isUrdu
+   * @param isPashto
+   * @return
+   */
   private static String getContent(String foreignPhrase, String translit, String english, String meaning, String context,
                                   boolean isEnglish, boolean isUrdu, boolean isPashto) {
     String arabicHTML = getArabic(foreignPhrase, isUrdu, isPashto, false);
@@ -59,9 +72,10 @@ public class ExerciseFormatter {
     String prompt = includePrompt ? "<span class=\"Instruction-title\">" +
       rowTitle +
       "</span>\n" : "";
+    String textClasses = "\"Instruction-data" + (rowTitle.equals(CONTEXT) ? " englishFont" : "")+ "\"";
     return "<div class=\"Instruction\">\n" +
       prompt +
-      "<span class=\"Instruction-data\"> " + english +
+      "<span class=" + textClasses + "> " + english +
       "</span>\n" +
       "</div>";
   }
