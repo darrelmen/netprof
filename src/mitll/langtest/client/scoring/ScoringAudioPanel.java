@@ -1,8 +1,18 @@
 package mitll.langtest.client.scoring;
 
+import com.github.gwtbootstrap.client.ui.Icon;
+import com.github.gwtbootstrap.client.ui.Popover;
+import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.MouseEvent;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.PopupPanel;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -61,11 +71,43 @@ public abstract class ScoringAudioPanel extends AudioPanel {
     addClickHandlers();
   }
 
+  PopupPanel popupPanel;
   private void addClickHandlers() {
     this.phones.image.getElement().getStyle().setCursor(Style.Cursor.POINTER);
     this.phones.image.addClickHandler(new TranscriptEventClickHandler(NetPronImageType.PHONE_TRANSCRIPT));
-    this.words.image.getElement().getStyle().setCursor(Style.Cursor.POINTER);
-    this.words.image.addClickHandler(new TranscriptEventClickHandler(NetPronImageType.WORD_TRANSCRIPT));
+    final Image image = this.words.image;
+    image.getElement().getStyle().setCursor(Style.Cursor.POINTER);
+    image.addClickHandler(new TranscriptEventClickHandler(NetPronImageType.WORD_TRANSCRIPT));
+
+    // TODO come back to this
+   /* final PopupPanel popupPanel = new PopupPanel(true);
+    popupPanel.add(new Icon(IconType.BULLHORN));
+
+    image.addMouseOverHandler(new MouseOverHandler() {
+      @Override
+      public void onMouseOver(final MouseOverEvent event) {
+        final int eventXPos = event.getX();
+
+
+        popupPanel.setPopupPosition(event.getClientX()-10,event.getClientY()-10);
+        popupPanel.show();
+
+    *//*    getClickedOnSegment(eventXPos,NetPronImageType.WORD_TRANSCRIPT,new EventSegment() {
+          @Override
+          public void onSegmentClick(float start, float end) {
+
+            popupPanel.setPopupPosition(event.getScreenX(),event.getScreenY());
+            popupPanel.show();
+          }
+        });*//*
+      }
+    });
+    image.addMouseOutHandler(new MouseOutHandler() {
+      @Override
+      public void onMouseOut(MouseOutEvent event) {
+        popupPanel.hide();
+      }
+    });*/
   }
 
   /**
@@ -142,6 +184,75 @@ public abstract class ScoringAudioPanel extends AudioPanel {
     wordTranscript.check.setVisible(true);
   }
 
+  protected void getClickedOnSegment(int eventXPos, NetPronImageType type, EventSegment onClick) {
+    int index = 0;
+    List<Float> endTimes = result.getsTypeToEndTimes().get(type);
+    float wavFileLengthInSeconds = result.getWavFileLengthInSeconds();//endTimes.get(endTimes.size() - 1);
+    float horizOffset = (float) eventXPos / (float) phones.image.getWidth();
+    float mouseClickTime = wavFileLengthInSeconds * horizOffset;
+    if (debug) System.out.println("got client at " + eventXPos + " or " + horizOffset + " or time " + mouseClickTime +
+      " duration " + wavFileLengthInSeconds + " secs or " + wavFileLengthInSeconds * 1000 + " millis");
+    for (Float endTime : endTimes) {
+      float next = endTimes.get(Math.min(endTimes.size() - 1, index + 1));
+      if (mouseClickTime > endTime && mouseClickTime <= next) {
+        if (debug) System.out.println("\t playing from " + endTime + " to " + next);
+
+        onClick.onSegmentClick(endTime, next);
+        break;
+      }
+      index++;
+    }
+  }
+
+  private abstract class MyClickHandler implements ClickHandler, EventSegment {
+    protected final NetPronImageType type;
+
+    private MyClickHandler(NetPronImageType type) {
+      this.type = type;
+    }
+
+    /**
+     * The last transcript event end time is guaranteed to be = the length of the wav audio file.<br></br>
+     * First normalize the click location, then scale it to the audio file length, then find which segment
+     * it's in by looking for a click that falls between the end time of a candidate segment and the
+     * end time of the next segment.  <br></br>
+     * Then plays, the segment - note we have to adjust between the duration of a wav file and an mp3 file, which
+     * will likely be different. (A little surprising to me, initially.)
+     * @see mitll.langtest.client.scoring.AudioPanel#playSegment
+     * @param event
+     */
+    public void onClick(ClickEvent event) {
+      if (result != null) {
+        int eventXPos = event.getX();
+
+        getClickedOnSegment(eventXPos,type,this);
+      } else {
+        System.err.println("no result for to click against?");
+      }
+    }
+
+/*    protected void getClickedOnSegment(MouseEvent<ClickHandler> event) {
+      int index = 0;
+      List<Float> endTimes = result.getsTypeToEndTimes().get(type);
+      float wavFileLengthInSeconds = result.getWavFileLengthInSeconds();//endTimes.get(endTimes.size() - 1);
+      float horizOffset = (float) event.getX() / (float) phones.image.getWidth();
+      float mouseClickTime = wavFileLengthInSeconds * horizOffset;
+      if (debug) System.out.println("got client at " + event.getX() + " or " + horizOffset + " or time " + mouseClickTime +
+          " duration " + wavFileLengthInSeconds + " secs or " + wavFileLengthInSeconds * 1000 + " millis");
+      for (Float endTime : endTimes) {
+        float next = endTimes.get(Math.min(endTimes.size() - 1, index + 1));
+        if (mouseClickTime > endTime && mouseClickTime <= next) {
+          if (debug) System.out.println("\t playing from " + endTime + " to " + next);
+
+          onSegmentClick(endTime, next);
+          break;
+        }
+        index++;
+      }
+    }*/
+
+    public abstract void onSegmentClick(float endTime, float next);
+  }
   /**
    * Find the start-end time period corresponding to the click on either the phone or the word image and then
    * play the segment. <br></br>
@@ -151,47 +262,23 @@ public abstract class ScoringAudioPanel extends AudioPanel {
    * line up with those in the mp3 file.
    * @see #addClickHandlers
    */
-  private class TranscriptEventClickHandler implements ClickHandler {
-    private final NetPronImageType type;
+  private class TranscriptEventClickHandler extends MyClickHandler {
 
     /**
      * @see mitll.langtest.client.scoring.ScoringAudioPanel#addClickHandlers
      * @param type
      */
-    public TranscriptEventClickHandler(NetPronImageType type) { this.type = type; }
-
-    /**
-     * The last transcript event end time is guaranteed to be = the length of the wav audio file.<br></br>
-     * First normalize the click location, then scale it to the audio file length, then find which segment
-     * it's in by looking for a click that falls between the end time of a candidate segment and the
-     * end time of the next segment.  <br></br>
-     * Then plays, the segment - note we have to adjust between the duration of a wav file and an mp3 file, which
-     * will likely be different. (A little surprising to me, initially.)
-     * @see AudioPanel#playSegment
-     * @param event
-     */
-    public void onClick(ClickEvent event) {
-      float horizOffset = (float) event.getX() / (float) phones.image.getWidth();
-      if (result != null) {
-        int index = 0;
-        List<Float> endTimes = result.getsTypeToEndTimes().get(type);
-        float wavFileLengthInSeconds = result.getWavFileLengthInSeconds();//endTimes.get(endTimes.size() - 1);
-        float mouseClickTime = wavFileLengthInSeconds * horizOffset;
-        if (debug) System.out.println("got client at " + event.getX() + " or " + horizOffset + " or time " + mouseClickTime +
-            " duration " + wavFileLengthInSeconds + " secs or " + wavFileLengthInSeconds * 1000 + " millis");
-        for (Float endTime : endTimes) {
-          float next = endTimes.get(Math.min(endTimes.size() - 1, index + 1));
-          if (mouseClickTime > endTime && mouseClickTime <= next) {
-            if (debug) System.out.println("\t playing from " + endTime + " to " + next);
-
-            playSegment(MP3_HEADER_OFFSET+endTime, MP3_HEADER_OFFSET+next);
-            break;
-          }
-          index++;
-        }
-      } else {
-        System.err.println("no result for to click against?");
-      }
+    public TranscriptEventClickHandler(NetPronImageType type) {
+      super(type);
     }
+
+    @Override
+    public void onSegmentClick(float endTime, float next) {
+      playSegment(MP3_HEADER_OFFSET+endTime, MP3_HEADER_OFFSET+next);
+    }
+  }
+
+  private static interface EventSegment {
+    void onSegmentClick(float start, float end);
   }
 }
