@@ -286,16 +286,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     ExerciseTrie trie = new ExerciseTrie(exercisesForState, serverProps.getLanguage(), audioFileHelper.getSmallVocabDecoder());
     List<Exercise> exercises = trie.getExercises(prefix);
 
-      return makeExerciseListWrapper(reqID, exercises);
-    }
+    return makeExerciseListWrapper(reqID, exercises);
+  }
 
   private ExerciseListWrapper<ExerciseShell> makeExerciseListWrapper(int reqID, List<Exercise> exercises) {
     if (!exercises.isEmpty()) {
       ensureMP3s(exercises.get(0));
       addAnnotations(exercises.get(0)); // todo do this in a better way
     }
-    return new ExerciseListWrapper<ExerciseShell>(reqID, getExerciseShells(exercises),
-      exercises.isEmpty() ? null : exercises.get(0));
+    Exercise firstExercise = exercises.isEmpty() ? null : exercises.get(0);
+    return new ExerciseListWrapper<ExerciseShell>(reqID, getExerciseShells(exercises), firstExercise);
   }
 
   private List<Exercise> getExercisesForState(int reqID, Map<String, Collection<String>> typeToSection, long userID) {
