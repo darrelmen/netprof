@@ -118,7 +118,7 @@ public class UserExercise extends AudioExercise {
    * @return
    */
   public Exercise toExercise(String language) {
-    String content = ExerciseFormatter.getContent(getForeignLanguage(), "", english, "", language);
+    String content = ExerciseFormatter.getContent(getForeignLanguage(), transliteration, english, "", "", language);
     String tooltip = english.trim().isEmpty() ? getForeignLanguage() : english;
     Exercise imported = new Exercise("import", id, content, false, true, tooltip);
     if (getRefAudio() != null)
