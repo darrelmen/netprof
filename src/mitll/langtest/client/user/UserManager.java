@@ -381,7 +381,7 @@ public class UserManager {
    * @param userChosenID
    * @see DataCollectorDialog#addFullUser(com.github.gwtbootstrap.client.ui.Modal, com.github.gwtbootstrap.client.ui.Button, UserManager, String, String, String, String, int, int)
    * @see DataCollectorDialog#userExists
-   * @seex StudentDialog#addUser
+   * @see StudentDialog#addUser
    */
   void storeUser(long sessionID, String audioType, String userChosenID, PropertyHandler.LOGIN_TYPE userType) {
     System.out.println("storeUser : user now " + sessionID + " audio type '" + audioType +"'");

@@ -327,7 +327,8 @@ public class Exercise extends AudioExercise {
 
     if (isRepeat() || getType() == EXERCISE_TYPE.MULTI_REF) {
       return "Exercise " + type + " " +id +  " content bytes = " + content.length() + " english '" + getEnglishSentence() +
-          "' ref sentence '" + getRefSentence() +"' audio " + getAudioAttributes() + " : " + questionInfo;
+          "' ref sentence '" + getRefSentence() +"' audio " + getAudioAttributes() + " : " + questionInfo +
+        " unit->lesson " + getUnitToValue();
     }
     else {
       return "Exercise " + getType() + " " + id + " " + (isPromptInEnglish() ?"english":"foreign")+
