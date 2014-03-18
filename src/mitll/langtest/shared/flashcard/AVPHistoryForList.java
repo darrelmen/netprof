@@ -21,6 +21,7 @@ public class AVPHistoryForList implements IsSerializable {
   private int numScores;
   private List<Float> scores = new ArrayList<Float>();
   private List<String> users = new ArrayList<String>();
+  private int latest;
 
   public AVPHistoryForList() {}
   public AVPHistoryForList(List<Session> scores, long userID, boolean useCorrect) {
@@ -115,5 +116,13 @@ public class AVPHistoryForList implements IsSerializable {
 
   public String toString() {
     return "History " + numScores + " correct " + getTotalCorrect() + " pb correct " + getPbCorrect() + " class avg " + getClassAvg();
+  }
+
+  public void setLatest(int latest) {
+    this.latest = latest;
+  }
+
+  public int getLatest() {
+    return latest;
   }
 }
