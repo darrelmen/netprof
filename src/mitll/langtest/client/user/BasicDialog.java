@@ -265,7 +265,6 @@ public class BasicDialog {
   private static class MyPopover extends Popover {
     public void dontFireAgain() {
       hide();
-      //asWidget();
       setTrigger(Trigger.MANUAL);
       reconfigure();
     }
