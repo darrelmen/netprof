@@ -27,6 +27,7 @@ public class Session implements IsSerializable, SetScore {
   private Map<String,Float> exidToScore = new HashMap<String,Float>();
 
   private Set<String> exids = new HashSet<String>();
+  private boolean latest;
 
   public Session(){} // required
 
@@ -120,5 +121,13 @@ public class Session implements IsSerializable, SetScore {
       " num " + getNumAnswers() + " dur " + duration/(60*1000) + " minutes, avg " + getAverageDurMillis()/1000 +
       " secs, correct = " + correct + "(" + correctPercent+
       "%) avg score : " + avgScore;
+  }
+
+  public void setLatest(boolean latest) {
+    this.latest = latest;
+  }
+
+  public boolean isLatest() {
+    return latest;
   }
 }
