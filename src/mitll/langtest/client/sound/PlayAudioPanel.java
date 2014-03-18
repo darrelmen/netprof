@@ -27,6 +27,9 @@ import java.util.List;
  */
 public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   private static final String PAUSE_LABEL = "|| pause";
+  private static final int MIN_WIDTH = 40;
+  private static final boolean DEBUG = false;
+
   private Sound currentSound = null;
   private final SoundManagerAPI soundManager;
 
@@ -39,7 +42,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   private List<PlayListener> playListeners = new ArrayList<PlayListener>();
   private static int counter = 0;
   private final int id;
-  private static final boolean DEBUG = false;
+  private boolean playing = false;
 
   /**
    * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel
@@ -59,7 +62,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
 
   /**
    * @see mitll.langtest.client.exercise.RecordAudioPanel.MyPlayAudioPanel#MyPlayAudioPanel(com.github.gwtbootstrap.client.ui.Image, com.github.gwtbootstrap.client.ui.Image, com.google.gwt.user.client.ui.Panel, String)
-   * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel(com.google.gwt.user.client.ui.Widget, String)
+   * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel
    * @param soundManager
    * @param playListener
    * @param suffix
@@ -108,10 +111,14 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     super.onLoad();
 
     int offsetWidth = playButton.getOffsetWidth();
-    if (offsetWidth < 40) offsetWidth = 40;
-    playButton.setWidth(offsetWidth +"px");
+    if (offsetWidth < MIN_WIDTH) offsetWidth = MIN_WIDTH;
+    playButton.getElement().getStyle().setProperty("minWidth", offsetWidth + "px");
+   // playButton.setWidth(offsetWidth +"px");
   }
 
+  /**
+   * @see #addButtons( 
+   */
   private void doClick() {
     if (playButton.isVisible() && playButton.isEnabled()) {
       if (isPlaying()) {
@@ -131,7 +138,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   }
 
   /**
-   * @see mitll.langtest.client.scoring.AudioPanel#getPlayButtons(com.google.gwt.user.client.ui.Widget)
+   * @see mitll.langtest.client.scoring.AudioPanel#getPlayButtons
    * @param listener
    */
   public void addListener(AudioControl listener) { this.listener = listener;  }
@@ -140,23 +147,24 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    * @see #doClick()
    */
   private void play() {
-    if (DEBUG) System.out.println("PlayAudioPanel :play");
+    if (DEBUG) System.out.println("PlayAudioPanel :play " + playing);
+    playing = true;
     setPlayButtonText();
     soundManager.play(currentSound);
   }
 
   private void setPlayButtonText() {
-    String html = isPlaying() ? PLAY_LABEL : PAUSE_LABEL ;
+    String html = isPlaying() ? PAUSE_LABEL : PLAY_LABEL;
     playButton.setText(html);
   }
 
   private boolean isPlaying() {
-    return playButton.getText().trim().equals(PAUSE_LABEL);
+    return playing;
   }
 
   private void setPlayLabel() {
-    if (DEBUG) System.out.println(new Date() + " setPlayLabel");
-
+    playing = false;
+    if (DEBUG) System.out.println(new Date() + " setPlayLabel playing " +playing);
     playButton.setText(PLAY_LABEL);
     for (PlayListener playListener : playListeners) playListener.playStopped();
   }
@@ -169,6 +177,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    * @param endInSeconds
    */
   public void repeatSegment(float startInSeconds, float endInSeconds) {
+    playing = true;
     setPlayButtonText();
     playSegment(startInSeconds,endInSeconds);
   }
@@ -186,7 +195,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
       int s = (int) start1;
       int e = (int) end1;
 
-      System.out.println("playing from " + s + " to " + e);
+      //System.out.println("playing from " + s + " to " + e);
       soundManager.playInterval(currentSound, s, e);
     }
   }
@@ -196,6 +205,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    */
   private void pause() {
     if (DEBUG) System.out.println("PlayAudioPanel :pause");
+
     setPlayLabel();
     soundManager.pause(currentSound);
   }
