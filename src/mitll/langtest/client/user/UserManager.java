@@ -72,7 +72,7 @@ public class UserManager {
       (props.isGoodwaveMode() || isInitialFlashcardTeacherView())) {   // no login for pron mode
       anonymousLogin();
     } else {
-      loginDifferentTypes();
+      login();
     }
   }
 
@@ -82,30 +82,6 @@ public class UserManager {
 
   /**
    * @see #checkLogin()
-   */
-  private void loginDifferentTypes() {
-    if (loginType.equals(PropertyHandler.LOGIN_TYPE.STUDENT)) {
-      login();
-    }
-    else if (loginType.equals(PropertyHandler.LOGIN_TYPE.DATA_COLLECTOR)) {
-      teacherLogin();
-    } // next has already been done in checkLogin
-  /*  else if (loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS)) {
-      teacherLogin();
-    }*/
-    else if (!props.isFlashCard() && ((props.isDataCollectMode() && !props.isCRTDataCollectMode()) || props.isTeacherView() || props.isGrading())) {
-      System.out.println("doing teacher login");
-      teacherLogin();
-    }
-    else {
-      System.out.println("doing student login");
-
-      login();
-    }
-  }
-
-  /**
-   * @see #loginDifferentTypes()
    */
   private void login() {
     int user = getUser();
@@ -336,7 +312,7 @@ public class UserManager {
   }
 
   /**
-   * @see mitll.langtest.client.LangTest#getLogout()
+   * @see mitll.langtest.client.LangTest#resetState()
    */
   public void clearUser() {
     clearCookieState();
@@ -361,7 +337,7 @@ public class UserManager {
    * @see mitll.langtest.client.LangTest#doDataCollectAdminView
    * @see #loginDifferentTypes()
    */
-  public void teacherLogin() {
+/*  public void teacherLogin() {
     int user = getUser();
     if (user != NO_USER_SET) {
       System.out.println("teacherLogin: got cached user : " + user);
@@ -371,7 +347,7 @@ public class UserManager {
       DataCollectorDialog dataCollectorDialog = new DataCollectorDialog(service, props, userNotification, this);
       dataCollectorDialog.displayTeacherLogin("Data Collector Login");
     }
-  }
+  }*/
 
   /**
    * TODO : move cookie manipulation to separate class
@@ -379,8 +355,8 @@ public class UserManager {
    * @param sessionID    from database
    * @param audioType
    * @param userChosenID
-   * @see DataCollectorDialog#addFullUser(com.github.gwtbootstrap.client.ui.Modal, com.github.gwtbootstrap.client.ui.Button, UserManager, String, String, String, String, int, int)
-   * @see DataCollectorDialog#userExists
+   * @seex DataCollectorDialog#addFullUser(com.github.gwtbootstrap.client.ui.Modal, com.github.gwtbootstrap.client.ui.Button, UserManager, String, String, String, String, int, int)
+   * @seex DataCollectorDialog#userExists
    * @see StudentDialog#addUser
    */
   void storeUser(long sessionID, String audioType, String userChosenID, PropertyHandler.LOGIN_TYPE userType) {

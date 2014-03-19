@@ -126,7 +126,7 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
       return row;
     }
 
-    protected Tooltip addTooltip(Widget w, String tip) {
+    Tooltip addTooltip(Widget w, String tip) {
       return createAddTooltip(w, tip, Placement.RIGHT);
     }
 
@@ -205,7 +205,7 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
       return duplicate;
     }
 
-    protected void duplicateExercise() {
+    void duplicateExercise() {
       newUserExercise.setCreator(controller.getUser());
       service.duplicateExercise(newUserExercise, new AsyncCallback<UserExercise>() {
         @Override

@@ -18,11 +18,11 @@ import org.apache.log4j.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class UserListExerciseJoinDAO extends DAO {
-  private static Logger logger = Logger.getLogger(UserListExerciseJoinDAO.class);
+  private static final Logger logger = Logger.getLogger(UserListExerciseJoinDAO.class);
 
-  public static final String USERLISTID = "userlistid";
-  public static final String EXERCISEID = "exerciseid";
-  public static final String UNIQUEID = "uniqueid";
+  private static final String USERLISTID = "userlistid";
+  private static final String EXERCISEID = "exerciseid";
+  private static final String UNIQUEID = "uniqueid";
 
   public static final String USER_EXERCISE_LIST_EXERCISE = "userexerciselist_exercise";
 

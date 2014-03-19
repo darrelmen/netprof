@@ -27,20 +27,20 @@ import java.util.Map;
 import java.util.Set;
 
 public class SQLExerciseDAO implements ExerciseDAO {
-  private static Logger logger = Logger.getLogger(SQLExerciseDAO.class);
+  private static final Logger logger = Logger.getLogger(SQLExerciseDAO.class);
 
   private static final String HEADER_TAG = "h4";
   public static final String ENCODING = "UTF8";
   private static final boolean DEBUG = false;
 
   private final Database database;
-  private String mediaDir;
+  private final String mediaDir;
   private List<Exercise> exercises;
 
-  private Map<String,Exercise> idToExercise = new HashMap<String,Exercise>();
-  private SectionHelper sectionHelper = new SectionHelper();
-  private List<String> errors = new ArrayList<String>();
-  private ILRMapping ilrMapping;
+  private final Map<String,Exercise> idToExercise = new HashMap<String,Exercise>();
+  private final SectionHelper sectionHelper = new SectionHelper();
+  private final List<String> errors = new ArrayList<String>();
+  private final ILRMapping ilrMapping;
 
   /**
    * @see DatabaseImpl#makeExerciseDAO(boolean)
