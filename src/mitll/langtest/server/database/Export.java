@@ -25,7 +25,7 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class Export {
-  private static Logger logger = Logger.getLogger(Export.class);
+  private static final Logger logger = Logger.getLogger(Export.class);
 
   private ExerciseDAO exerciseDAO = null;
   private ResultDAO resultDAO = null;
@@ -95,9 +95,9 @@ public class Export {
   }
 
   public static class ExerciseExport {
-    public String id;
+    public final String id;
     public List<String> key = new ArrayList<String>();
-    public List<ResponseAndGrade> rgs = new ArrayList<ResponseAndGrade>();
+    public final List<ResponseAndGrade> rgs = new ArrayList<ResponseAndGrade>();
     public ExerciseExport(String id, String key) {
       this.id  = id;
       this.key = Arrays.asList(key.split("\\|\\|"));
@@ -111,8 +111,8 @@ public class Export {
   }
 
   public static class ResponseAndGrade {
-    public String response;
-    public float grade;
+    public final String response;
+    public final float grade;
     public ResponseAndGrade(String response, int grade) {
       this.response = response;
       this.grade = ((float) (grade-1))/4f;  // jacob's stuff wants a 0->1 scale

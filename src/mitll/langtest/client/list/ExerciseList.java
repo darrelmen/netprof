@@ -50,7 +50,7 @@ import java.util.Set;
 public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPanel implements ListInterface<T>, ProvidesResize,
   ValueChangeHandler<String> {
   private static final int NUM_QUESTIONS_FOR_TOKEN = 5;
-  public static final String ITEMS = "Items";
+  private static final String ITEMS = "Items";
   private static final boolean ADD_ITEM_HEADER = false;
 
   private SimplePanel innerContainer;
@@ -65,10 +65,10 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   private final boolean showTurkToken;
   private final boolean showInOrder;
   private int countSincePrompt = 0;
-  protected int lastReqID = 0;
+  int lastReqID = 0;
   private final Set<Integer> visited = new HashSet<Integer>();
-  protected final boolean allowPlusInURL;
-  protected String instance;
+  final boolean allowPlusInURL;
+  final String instance;
 
   /**
    * @see  mitll.langtest.client.LangTest#makeExerciseList
@@ -81,10 +81,10 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * @param showInOrder
    * @param instance
    */
-  public ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                      ExercisePanelFactory factory,
-                      ExerciseController controller,
-                      boolean showTurkToken, boolean showInOrder, String instance) {
+  ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
+               ExercisePanelFactory factory,
+               ExerciseController controller,
+               boolean showTurkToken, boolean showInOrder, String instance) {
     addWidgets(currentExerciseVPanel);
     this.service = service;
     this.feedback = feedback;
@@ -217,7 +217,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * @param token
    * @return
    */
-  protected String getSelectionFromToken(String token) {
+  String getSelectionFromToken(String token) {
     //token = token.contains(ResponseExerciseList.RESPONSE_TYPE_DIVIDER) ? token.split(ResponseExerciseList.RESPONSE_TYPE_DIVIDER)[0] : token; // remove any other parameters
     token = token.split(ResponseExerciseList.RESPONSE_TYPE_DIVIDER)[0]; // remove any other parameters
     return token;
@@ -231,7 +231,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    * @param exerciseID
    */
-  protected void pushNewItem(String exerciseID) {
+  void pushNewItem(String exerciseID) {
     System.out.println("------------ ExerciseList.pushNewItem : (" + instance+ ") push history " + exerciseID + " - ");
     History.newItem("#item=" + exerciseID + ";instance="+instance);
   }
@@ -272,7 +272,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   /**
    * @see ListInterface#getExercises(long, boolean)
    */
-  protected class SetExercisesCallback implements AsyncCallback<ExerciseListWrapper<T>> {
+  class SetExercisesCallback implements AsyncCallback<ExerciseListWrapper<T>> {
     private String id;
 
     public SetExercisesCallback(String id) {
@@ -345,7 +345,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     }
   }
 
-  protected boolean isStaleResponse(ExerciseListWrapper<T> result) {
+  boolean isStaleResponse(ExerciseListWrapper<T> result) {
     return result.getReqID() < lastReqID;
   }
 
@@ -425,13 +425,13 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     return pleaseWait;
   }
 
-  protected T findFirstExercise() {
+  T findFirstExercise() {
     return getFirst();
   }
 
   protected abstract T getFirst();
 
-  protected boolean hasExercise(String id) { return byID(id) != null; }
+  boolean hasExercise(String id) { return byID(id) != null; }
 
   public abstract T byID(String name);
 
@@ -477,7 +477,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
 
   protected abstract Set<String> getKeys();
 
-  protected String getTokenFromEvent(ValueChangeEvent<String> event) {
+  String getTokenFromEvent(ValueChangeEvent<String> event) {
     String token = event.getValue();
     token = allowPlusInURL ? unencodeTokenDontRemovePlus(token) : unencodeToken(token);
     return token;
@@ -577,7 +577,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     return exercisePanel;
   }
 
-  protected boolean isExercisePanelBusy() {
+  boolean isExercisePanelBusy() {
     Widget current = innerContainer.getWidget();
     return current != null && current instanceof BusyPanel && ((BusyPanel) current).isBusy();
   }
@@ -642,11 +642,11 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     }
   }
 
-  protected String report() {
+  String report() {
     return "list " + instance + " id " + getElement().getId();
   }
 
-  protected void removeComponents() { super.clear();  }
+  void removeComponents() { super.clear();  }
 
   @Override
   public void clear() { removeComponents(); }
@@ -798,7 +798,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   public void reloadExercises() { loadFirstExercise();  }
   public void redraw() {}
 
-  private  List<ListChangeListener<T>> listeners = new ArrayList<ListChangeListener<T>>();
+  private final List<ListChangeListener<T>> listeners = new ArrayList<ListChangeListener<T>>();
   @Override
   public void addListChangedListener(ListChangeListener<T> listener) {  listeners.add(listener);  }
 }
