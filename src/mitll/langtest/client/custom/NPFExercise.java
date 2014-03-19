@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.shared.Exercise;
@@ -31,6 +32,8 @@ import java.util.Collection;
  * To change this template use File | Settings | File Templates.
  */
 public class NPFExercise extends GoodwaveExercisePanel {
+  private static final String ADD_ITEM = "Add Item to List";
+
   private DropdownButton addToList;
   private int activeCount = 0;
 
@@ -48,6 +51,14 @@ public class NPFExercise extends GoodwaveExercisePanel {
     super(e, controller, listContainer, screenPortion, addKeyHandler, instance);
   }
 
+  @Override
+  protected NavigationHelper<Exercise> getNavigationHelper(ExerciseController controller,
+                                                           ListInterface<Exercise> listContainer, boolean addKeyHandler) {
+    NavigationHelper<Exercise> navigationHelper = super.getNavigationHelper(controller, listContainer, addKeyHandler);
+    navigationHelper.add(makeAddToList(exercise, controller));
+    return navigationHelper;
+  }
+
   /**
    * @see #addQuestionContentRow
    * @param e
@@ -56,11 +67,11 @@ public class NPFExercise extends GoodwaveExercisePanel {
    */
   Panel makeAddToList(Exercise e, ExerciseController controller) {
     addToList = new DropdownButton("");
-    addToList.setRightDropdown(true);
+    addToList.setDropup(true);
     addToList.setIcon(IconType.PLUS_SIGN);
     addToList.setType(ButtonType.PRIMARY);
-    addTooltip(addToList, "Add Item to List");
-
+    addTooltip(addToList, ADD_ITEM);
+    addToList.addStyleName("leftFiveMargin");
     populateListChoices(e, controller, addToList);
     return addToList;
   }
@@ -80,7 +91,8 @@ public class NPFExercise extends GoodwaveExercisePanel {
     //System.out.println("populateListChoices : populate list choices for " + controller.getUser());
     service.getListsForUser(controller.getUser(), true, false, new AsyncCallback<Collection<UserList>>() {
       @Override
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+      }
 
       @Override
       public void onSuccess(Collection<UserList> result) {
@@ -99,11 +111,12 @@ public class NPFExercise extends GoodwaveExercisePanel {
               public void onClick(ClickEvent event) {
                 service.addItemToUserList(ul.getUniqueID(), new UserExercise(e, controller.getUser()), new AsyncCallback<Void>() {
                   @Override
-                  public void onFailure(Throwable caught) {}
+                  public void onFailure(Throwable caught) {
+                  }
 
                   @Override
                   public void onSuccess(Void result) {
-                    showPopup("Item Added!",w1);
+                    showPopup("Item Added!", w1);
                     widget.setVisible(false);
                     activeCount--;
                     if (activeCount == 0) {
@@ -128,25 +141,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
    * @see Navigation#getButtonRow2(com.google.gwt.user.client.ui.Panel)
    */
   @Override
-  public void wasRevealed() {
-    //System.out.println("wasRevealed : populate list choices for " + controller.getUser() + "\n\n");
-    populateListChoices(exercise, controller, addToList);
-  }
-
-  /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, float, boolean, String)
-   * @param e
-   * @param controller
-   * @param hp
-   */
-  @Override
-  protected void addQuestionContentRow(Exercise e, ExerciseController controller, Panel hp) {
-    hp.getElement().setId("NPFExercise_addQuestionContentRow");
-    Panel addToList = makeAddToList(e, controller);
-    Widget questionContent = getQuestionContent(e, addToList);
-    questionContent.addStyleName("floatLeft");
-    hp.add(questionContent);
-  }
+  public void wasRevealed() { populateListChoices(exercise, controller, addToList);  }
 
   private void showPopup(String html, Widget target) {
     Widget content = new HTML(html);
