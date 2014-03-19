@@ -43,7 +43,7 @@ public class GradingResultManager extends ResultManager {
   private static final List<String> GRADING_OPTIONS = Arrays.asList(UNGRADED, "1", "2", "3", "4", "5", SKIP);
   private static final List<String> GRADING_OPTIONS_LONG = Arrays.asList(UNGRADED, "1", "2", "3", "4", "5", "6", SKIP);
   private final boolean englishOnlyMode;
-  boolean longGrades;
+  private final boolean longGrades;
   /**
    * @see mitll.langtest.client.grading.GradingExercisePanel#showResults
    * @param s
