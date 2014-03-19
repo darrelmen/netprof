@@ -3,7 +3,6 @@ package mitll.langtest.server.database;
 import mitll.langtest.shared.DLIUser;
 import mitll.langtest.shared.Demographics;
 import mitll.langtest.shared.User;
-import mitll.langtest.shared.grade.Grader;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -29,8 +28,8 @@ import java.util.Map;
 import java.util.Set;
 
 public class UserDAO extends DAO {
-  public static final String DEFECT_DETECTOR = "defectDetector";
-  private static Logger logger = Logger.getLogger(UserDAO.class);
+  private static final String DEFECT_DETECTOR = "defectDetector";
+  private static final Logger logger = Logger.getLogger(UserDAO.class);
   public static final String USERS = "users";
   private long defectDetector;
   private static final List<String> COLUMNS = Arrays.asList("id", "age", "gender", "experience", "ipaddr", "nativelang", "dialect", "userid", "timestamp", "enabled");
@@ -200,21 +199,6 @@ public class UserDAO extends DAO {
       if (missing.equalsIgnoreCase("enabled")) { addColumn(connection,"enabled","BOOLEAN"); }
     }
 
-    convertGraders();
-  }
-
-  /**
-   * @deprecated lets get rid of this eventually
-   */
-  private void convertGraders() {
-    GraderDAO graderDAO = new GraderDAO(database);
-    Collection<Grader> graders = graderDAO.getGraders();
-    for (Grader u : graders) {
-      if (userExists(u.name) == -1) {
-        logger.info("adding grader " + u);
-        addUser(0, "male", 240, "", "", "", u.name, true);
-      }
-    }
   }
 
   private void addColumn(Connection connection, String column, String type) throws SQLException {

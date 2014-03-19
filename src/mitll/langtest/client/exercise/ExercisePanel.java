@@ -54,30 +54,29 @@ import java.util.Set;
 public class ExercisePanel<T extends ExerciseShell> extends VerticalPanel implements
   BusyPanel, ExerciseQuestionState, PostAnswerProvider, ProvidesResize, RequiresResize {
   private static final String ANSWER_BOX_WIDTH = "400px";
-  protected static final String REPEAT_ONCE = "<i>Repeat the phrase once at normal speed.</i>";
+  private static final String REPEAT_ONCE = "<i>Repeat the phrase once at normal speed.</i>";
   private static final String REPEAT_TWICE = "<i>Repeat the phrase twice, first at normal and then at slow speed.</i>";
   private static final String TWO_SPACES = "&nbsp;&nbsp;";
-  protected static final String THREE_SPACES = "&nbsp;&nbsp;&nbsp;";
+  private static final String THREE_SPACES = "&nbsp;&nbsp;&nbsp;";
   private static final String TEACHER_PROMPT = "Record the phrase above by clicking the record button, speak, and then stop when finished. ";
   private static final String THE_FOREIGN_LANGUAGE = " the foreign language";
   private static final String ENGLISH = "English";
   private static final String TYPE_YOUR_ANSWER_IN = "Type your answer in ";
   private static final String SPEAK_AND_RECORD_YOUR_ANSWER_IN = "Speak and record your answer in ";
-  public static final int ITEM_HEADER = 5;
+  private static final int ITEM_HEADER = 5;
   private static final int CONTENT_SCROLL_HEIGHT = 220;
-  public static final String PROMPT = "Read the following text and answer the question or questions below.";
-  private List<Widget> answers = new ArrayList<Widget>();
-  protected Set<Widget> completed = new HashSet<Widget>();
+  private static final String PROMPT = "Read the following text and answer the question or questions below.";
+  private final List<Widget> answers = new ArrayList<Widget>();
+  private final Set<Widget> completed = new HashSet<Widget>();
   protected Exercise exercise = null;
-  protected ExerciseController controller;
+  protected final ExerciseController controller;
   private boolean enableNextOnlyWhenAllCompleted = true;
-  protected LangTestDatabaseAsync service;
-  protected UserFeedback feedback;
-  protected NavigationHelper navigationHelper;
-  protected ListInterface<Exercise> exerciseList;
-  protected Map<Integer,Set<Widget>> indexToWidgets = new HashMap<Integer, Set<Widget>>();
+  protected final LangTestDatabaseAsync service;
+  private final NavigationHelper navigationHelper;
+  protected final ListInterface<Exercise> exerciseList;
+  private final Map<Integer,Set<Widget>> indexToWidgets = new HashMap<Integer, Set<Widget>>();
   private TabPanel tabPanel = null;
-  private Map<Integer,Tab> indexToTab = new HashMap<Integer, Tab>();
+  private final Map<Integer,Tab> indexToTab = new HashMap<Integer, Tab>();
 
   /**
    * @see ExercisePanelFactory#getExercisePanel
@@ -94,7 +93,7 @@ public class ExercisePanel<T extends ExerciseShell> extends VerticalPanel implem
     System.out.println("ExercisePanel.ExercisePanel : exercise is " + exercise.getID());
     this.controller = controller;
     this.service = service;
-    this.feedback = userFeedback;
+    UserFeedback feedback = userFeedback;
     this.exerciseList = exerciseList;
     this.navigationHelper = getNavigationHelper(controller);
     //if (e.getQuestions().size() == 1) {
@@ -161,7 +160,7 @@ public class ExercisePanel<T extends ExerciseShell> extends VerticalPanel implem
     }
   }
 
-  protected Widget getContentScroller(HTML maybeRTLContent) {
+  Widget getContentScroller(HTML maybeRTLContent) {
     ScrollPanel scroller = new ScrollPanel(maybeRTLContent);
     scroller.getElement().setId("contentScroller");
     scroller.setHeight(CONTENT_SCROLL_HEIGHT + "px");
@@ -594,5 +593,5 @@ public class ExercisePanel<T extends ExerciseShell> extends VerticalPanel implem
   }
 
   protected void enableNextButton(boolean val) {  navigationHelper.enableNextButton(val); }
-  protected void setButtonsEnabled(boolean val) { navigationHelper.setButtonsEnabled(val);}
+  void setButtonsEnabled(boolean val) { navigationHelper.setButtonsEnabled(val);}
 }
