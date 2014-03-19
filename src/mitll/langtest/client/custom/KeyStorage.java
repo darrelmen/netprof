@@ -8,7 +8,7 @@ import mitll.langtest.client.exercise.ExerciseController;
  */
 public class KeyStorage {
   private ExerciseController controller;
-  private boolean debug = false;
+  private final boolean debug = false;
   private String language;
   private int user;
 
@@ -59,7 +59,7 @@ public class KeyStorage {
     }
   }
 
-  protected String getLocalStorageKey(String name) {
+  String getLocalStorageKey(String name) {
     if (controller != null) {
       language = controller.getLanguage();          // necessary???
       user = controller.getUser();
