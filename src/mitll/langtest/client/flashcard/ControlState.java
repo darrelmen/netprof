@@ -1,17 +1,15 @@
 package mitll.langtest.client.flashcard;
 
-import com.github.gwtbootstrap.client.Bootstrap;
 import mitll.langtest.client.custom.KeyStorage;
-import org.apache.xpath.operations.Bool;
 
 /**
 * Created by go22670 on 2/11/14.
 */
 public class ControlState {
-  public static final String SHOW_STATE = "showState";
-  public static final String AUDIO_ON = "audioOn";
-  public static final String AUDIO_FEEDBACK_ON = "audioFeedbackOn";
-  static int count = 0;
+  private static final String SHOW_STATE = "showState";
+  private static final String AUDIO_ON = "audioOn";
+  private static final String AUDIO_FEEDBACK_ON = "audioFeedbackOn";
+  private static int count = 0;
   private boolean audioOn = true;
   private boolean audioFeedbackOn = true;
   public static final String ENGLISH = "english";
@@ -20,7 +18,7 @@ public class ControlState {
   private String showState = ENGLISH; // english/foreign/both
  // boolean playStateOn = false;
   private KeyStorage storage = null;
-  private int id;
+  private final int id;
 
   public ControlState() { id = count++;}
   public boolean showEnglish() { return showState.equals(ENGLISH) || showState.equals(BOTH);}
