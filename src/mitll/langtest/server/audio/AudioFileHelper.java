@@ -28,13 +28,13 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioFileHelper {
-  private static Logger logger = Logger.getLogger(AudioFileHelper.class);
-  private PathHelper pathHelper;
-  private ServerProperties serverProps;
+  private static final Logger logger = Logger.getLogger(AudioFileHelper.class);
+  private final PathHelper pathHelper;
+  private final ServerProperties serverProps;
   private ASRScoring asrScoring;
   private AutoCRT autoCRT;
-  private DatabaseImpl db;
-  private LangTestDatabaseImpl langTestDatabase;
+  private final DatabaseImpl db;
+  private final LangTestDatabaseImpl langTestDatabase;
 
   public AudioFileHelper(PathHelper pathHelper, ServerProperties serverProperties, DatabaseImpl db,
                          LangTestDatabaseImpl langTestDatabase) {
@@ -115,11 +115,11 @@ public class AudioFileHelper {
    * @param useScoreToColorBkg
    * @return
    */
-  public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
+/*  public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
                                           int width, int height, boolean useScoreToColorBkg) {
     return getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
       false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache());
-  }
+  }*/
 
   /**
    * Get score when doing autoCRT on an audio file.
