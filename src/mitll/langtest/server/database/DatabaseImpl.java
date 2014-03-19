@@ -516,20 +516,8 @@ public class DatabaseImpl implements Database {
    * @paramx listid
    * @return
    */
-/*
-  public List<Session> getUserHistoryForList(long listid) {
-    UserList userListByID = getUserListManager().getUserListByID(listid);
-    Collection<UserExercise> exercises = userListByID.getExercises();
-    Set<String> ids = new HashSet<String>();
-    for (UserExercise ue : exercises) {
-      ids.add(ue.getID());
-    }
-    return resultDAO.getSessionsForUserIn2(ids);
-  }
-*/
-
   public List<AVPHistoryForList> getUserHistoryForList(long userid, Collection<String> ids, long latestResultID) {
-   // logger.debug("getUserHistoryForList " +userid + " and " + ids);
+    logger.debug("getUserHistoryForList " +userid + " and " + ids + " latest " + latestResultID);
 
     List<Session> sessionsForUserIn2 = resultDAO.getSessionsForUserIn2(ids, latestResultID);
 
@@ -538,41 +526,68 @@ public class DatabaseImpl implements Database {
     AVPHistoryForList sessionAVPHistoryForList  = new AVPHistoryForList(sessionsForUserIn2, userid, true);
     AVPHistoryForList sessionAVPHistoryForList2 = new AVPHistoryForList(sessionsForUserIn2, userid, false);
 
+
+    // sort by correct %
     Collections.sort(sessionsForUserIn2, new Comparator<Session>() {
       @Override
       public int compare(Session o1, Session o2) {
-        return o1.getCorrectPercent() < o2.getCorrectPercent() ? +1 :o1.getCorrectPercent() > o2.getCorrectPercent() ? -1 :0 ;
+        return o1.getCorrectPercent() < o2.getCorrectPercent() ? +1 :o1.getCorrectPercent() > o2.getCorrectPercent() ? -1 :
+          compareTimestamps(o1, o2);
       }
     });
-    List<Session> sessions = sessionsForUserIn2.subList(0, Math.min(sessionsForUserIn2.size(), 10));
-    int i = 0;
-    for (Session session : sessions) {
-      if (session.isLatest()) sessionAVPHistoryForList.setLatest(i++);
-      sessionAVPHistoryForList.addPair(userMap.get(session.getUserid()).userID, session.getCorrectPercent());
+
+    int count = 0;
+    List<AVPHistoryForList.UserScore> scores = new ArrayList<AVPHistoryForList.UserScore>();
+
+    for (Session session : sessionsForUserIn2) {
+      if (count++ < 10 || session.isLatest()) {
+        scores.add(makeScore(count, userMap, session, true));
+     }
     }
+    if (scores.size() == 11) {
+      scores.remove(9);
+    }
+    sessionAVPHistoryForList.setScores(scores);
 
     Collections.sort(sessionsForUserIn2, new Comparator<Session>() {
       @Override
       public int compare(Session o1, Session o2) {
-        return o1.getAvgScore() < o2.getAvgScore() ? +1 :o1.getAvgScore() > o2.getAvgScore() ? -1 :0 ;
+        return o1.getAvgScore() < o2.getAvgScore() ? +1 : o1.getAvgScore() > o2.getAvgScore() ? -1 : compareTimestamps(o1, o2);
       }
     });
-    sessions = sessionsForUserIn2.subList(0, Math.min(sessionsForUserIn2.size(), 10));
 
-    i = 0;
-    for (Session session : sessions) {
-      if (session.isLatest()) sessionAVPHistoryForList2.setLatest(i++);
+    count = 0;
+    scores = new ArrayList<AVPHistoryForList.UserScore>();
 
-      sessionAVPHistoryForList2.addPair(userMap.get(session.getUserid()).userID, 100f*session.getAvgScore());
+    for (Session session : sessionsForUserIn2) {
+      if (count++ < 10 || session.isLatest()) {
+        scores.add(makeScore(count, userMap, session, false));
+      }
     }
+    if (scores.size() == 11) {
+      scores.remove(9);
+    }
+    sessionAVPHistoryForList2.setScores(scores);
 
     List<AVPHistoryForList> historyForLists = new ArrayList<AVPHistoryForList>();
     historyForLists.add(sessionAVPHistoryForList);
     historyForLists.add(sessionAVPHistoryForList2);
 
-    logger.debug("returning " +historyForLists);
+    //logger.debug("returning " +historyForLists);
 
     return historyForLists;
+  }
+
+  private int compareTimestamps(Session o1, Session o2) {
+    return o1.getTimestamp() < o2.getTimestamp() ? +1 :o1.getTimestamp() > o2.getTimestamp() ? -1 :0;
+  }
+
+  protected AVPHistoryForList.UserScore makeScore(int count, Map<Long, User> userMap, Session session, boolean useCorrect) {
+    float value = useCorrect ? session.getCorrectPercent() : 100f * session.getAvgScore();
+    return new AVPHistoryForList.UserScore(count,
+      userMap.get(session.getUserid()).userID,
+      value,
+      session.isLatest());
   }
 
 
