@@ -1,16 +1,8 @@
 package mitll.langtest.client.scoring;
 
-import com.github.gwtbootstrap.client.ui.Icon;
-import com.github.gwtbootstrap.client.ui.Popover;
-import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.MouseEvent;
-import com.google.gwt.event.dom.client.MouseOutEvent;
-import com.google.gwt.event.dom.client.MouseOutHandler;
-import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.PopupPanel;
 import mitll.langtest.client.LangTest;
@@ -33,13 +25,13 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   private static final int ANNOTATION_HEIGHT = 20;
   private static final boolean SHOW_SPECTROGRAM = false;
 
-  private String refSentence;
+  private final String refSentence;
   private long resultID = -1;
   private ScoreListener scoreListener;
   private PretestScore result;
   private boolean showOnlyOneExercise = false; // true for when called from the headstart website
   private static final boolean debug = true;
-  public static float MP3_HEADER_OFFSET = 0f;//0.048f;
+  public static final float MP3_HEADER_OFFSET = 0f;//0.048f;
 
   /**
    * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, ScoreListener, String)
@@ -48,7 +40,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
    * @param gaugePanel
    * @param playButtonSuffix
    */
-  public ScoringAudioPanel(String refSentence, LangTestDatabaseAsync service, ExerciseController controller, ScoreListener gaugePanel, String playButtonSuffix) {
+  ScoringAudioPanel(String refSentence, LangTestDatabaseAsync service, ExerciseController controller, ScoreListener gaugePanel, String playButtonSuffix) {
     this(null, refSentence, service, controller, SHOW_SPECTROGRAM, gaugePanel, 23, playButtonSuffix);
   }
 
@@ -62,9 +54,9 @@ public abstract class ScoringAudioPanel extends AudioPanel {
    * @param rightMargin
    * @param playButtonSuffix
    */
-  public ScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
-                           ExerciseController controller,
-                           boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin, String playButtonSuffix) {
+  ScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
+                    ExerciseController controller,
+                    boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin, String playButtonSuffix) {
     super(path, service, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix, controller.getAudioType());
     this.refSentence = refSentence;
     showOnlyOneExercise = controller.showOnlyOneExercise();
@@ -158,8 +150,8 @@ public abstract class ScoringAudioPanel extends AudioPanel {
    * @param phoneTranscript
    * @param scoredBefore
    */
-  protected void useResult(PretestScore result, ImageAndCheck wordTranscript, ImageAndCheck phoneTranscript,
-                           boolean scoredBefore) {
+  void useResult(PretestScore result, ImageAndCheck wordTranscript, ImageAndCheck phoneTranscript,
+                 boolean scoredBefore) {
     if (result.getsTypeToImage().get(NetPronImageType.WORD_TRANSCRIPT) != null) {
       showImageAndCheck(result.getsTypeToImage().get(NetPronImageType.WORD_TRANSCRIPT), wordTranscript);
     }
@@ -184,7 +176,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
     wordTranscript.check.setVisible(true);
   }
 
-  protected void getClickedOnSegment(int eventXPos, NetPronImageType type, EventSegment onClick) {
+  void getClickedOnSegment(int eventXPos, NetPronImageType type, EventSegment onClick) {
     int index = 0;
     List<Float> endTimes = result.getsTypeToEndTimes().get(type);
     float wavFileLengthInSeconds = result.getWavFileLengthInSeconds();//endTimes.get(endTimes.size() - 1);
@@ -205,7 +197,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   }
 
   private abstract class MyClickHandler implements ClickHandler, EventSegment {
-    protected final NetPronImageType type;
+    final NetPronImageType type;
 
     private MyClickHandler(NetPronImageType type) {
       this.type = type;

@@ -55,7 +55,7 @@ import java.util.TreeMap;
  * Time: 5:33 PM
  * To change this template use File | Settings | File Templates.
  */
-public class StudentDialog extends UserDialog {
+class StudentDialog extends UserDialog {
   private static final int MIN_WEEKS = 0;
   private static final int MAX_WEEKS = 104;
   public static final int ILR_CHOICE_WIDTH = 80;
@@ -486,16 +486,17 @@ public class StudentDialog extends UserDialog {
   }
 
   private class RegistrationInfo {
-    private FormField ageEntryGroup;
-    private ListBoxFormField genderGroup;
-    private FormField weeks;
+    private final FormField ageEntryGroup;
+    private final ListBoxFormField genderGroup;
+    private final FormField weeks;
     private ListBoxFormField reading;
     private ListBoxFormField listening;
     private ListBoxFormField speaking;
     private ListBoxFormField writing;
-    private FormField dialectGroup;
-    FluidRow ilrLevels, estimating;
-    Widget label;
+    private final FormField dialectGroup;
+    final FluidRow ilrLevels;
+    final FluidRow estimating;
+    final Widget label;
 
 
     public RegistrationInfo(Panel dialogBox) {
@@ -607,7 +608,7 @@ public class StudentDialog extends UserDialog {
       return row;
     }
 
-    private List<YesNo> ilrs = new ArrayList<YesNo>();
+    private final List<YesNo> ilrs = new ArrayList<YesNo>();
 
     private FluidRow getEstimating2() {
       FluidRow row2 = new FluidRow();
@@ -631,7 +632,7 @@ public class StudentDialog extends UserDialog {
   private class YesNo {
     public final RadioButton yes, no;
     private final String name;
-    public ControlGroup group;
+    public final ControlGroup group;
 
     public YesNo(String name) {
       this.name = name;

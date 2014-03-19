@@ -36,8 +36,8 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class BasicDialog {
-  public static final String TRY_AGAIN = "Try Again";
-  private List<Popover> visiblePopovers = new ArrayList<Popover>();
+  private static final String TRY_AGAIN = "Try Again";
+  private final List<Popover> visiblePopovers = new ArrayList<Popover>();
 
   protected FormField addControlFormField(Panel dialogBox, String label) {
     return addControlFormField(dialogBox, label, false, 0);
@@ -71,12 +71,12 @@ public class BasicDialog {
     return getListBoxFormField(dialogBox, label, getListBox2(values));
   }
 
-  public ListBoxFormField getListBoxFormField(Panel dialogBox, String label, ListBox user) {
+  ListBoxFormField getListBoxFormField(Panel dialogBox, String label, ListBox user) {
     addControlGroupEntry(dialogBox, label, user);
     return new ListBoxFormField(user);
   }
 
-  public ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget widget) {
+  ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget widget) {
     final ControlGroup userGroup = new ControlGroup();
     userGroup.addStyleName("leftFiveMargin");
     userGroup.add(new ControlLabel(label));
@@ -86,7 +86,7 @@ public class BasicDialog {
     dialogBox.add(userGroup);
     return userGroup;
   }
-  public ControlGroup addControlGroupEntrySimple(Panel dialogBox, String label, Widget widget) {
+  protected ControlGroup addControlGroupEntrySimple(Panel dialogBox, String label, Widget widget) {
     final ControlGroup userGroup = new ControlGroup();
     userGroup.add(new ControlLabel(label));
     widget.addStyleName("leftFiveMargin");
@@ -96,7 +96,7 @@ public class BasicDialog {
     return userGroup;
   }
 
-  protected ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget widget, Widget rightSide) {
+/*  protected ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget widget, Widget rightSide) {
     final ControlGroup userGroup = new ControlGroup();
     userGroup.addStyleName("leftFiveMargin");
     userGroup.add(new ControlLabel(label));
@@ -109,7 +109,7 @@ public class BasicDialog {
 
     dialogBox.add(userGroup);
     return userGroup;
-  }
+  }*/
   protected ControlGroup addControlGroupEntrySimple(Panel dialogBox, String label, Widget widget, Widget rightSide) {
     final ControlGroup userGroup = new ControlGroup();
     userGroup.add(new ControlLabel(label));
@@ -124,11 +124,11 @@ public class BasicDialog {
     return userGroup;
   }
 
-  protected ListBox getListBox2(Collection<String> values) {
+  ListBox getListBox2(Collection<String> values) {
     return getListBox2(values, StudentDialog.ILR_CHOICE_WIDTH);
   }
 
-  protected ListBox getListBox2(Collection<String> values,int ilrChoiceWidth) {
+  ListBox getListBox2(Collection<String> values, int ilrChoiceWidth) {
     final ListBox listBox = new ListBox(false);
     for (String s : values) {
       listBox.addItem(s);
@@ -138,13 +138,13 @@ public class BasicDialog {
     return listBox;
   }
 
-  protected ListBox getListBox(List<String> values) {
+/*  protected ListBox getListBox(List<String> values) {
     final ListBox genderBox = new ListBox(false);
     for (String s : values) {
       genderBox.addItem(s);
     }
     return genderBox;
-  }
+  }*/
 
   protected void markError(FormField dialectGroup, String message) {
     markError(dialectGroup.group, dialectGroup.box, dialectGroup.box, TRY_AGAIN, message);
@@ -157,11 +157,11 @@ public class BasicDialog {
     setupPopoverThatHidesItself(dialect, header, message);
   }
 
-  protected boolean highlightIntegerBox(FormField ageEntryGroup, int min, int max) {
+  boolean highlightIntegerBox(FormField ageEntryGroup, int min, int max) {
     return highlightIntegerBox(ageEntryGroup, min, max, Integer.MAX_VALUE);
   }
 
-  protected boolean highlightIntegerBox(FormField ageEntryGroup, int min, int max, int exception) {
+  boolean highlightIntegerBox(FormField ageEntryGroup, int min, int max, int exception) {
     String text = ageEntryGroup.box.getText();
     boolean validAge = false;
     if (text.length() == 0) {
@@ -184,22 +184,22 @@ public class BasicDialog {
     setupPopoverThatHidesItself(dialectGroup.getWidget(1), header, message);
   }
 
-  protected void markError(ControlGroup dialectGroup, Widget dialect, String header, String message) {
+/*  protected void markError(ControlGroup dialectGroup, Widget dialect, String header, String message) {
     dialectGroup.setType(ControlGroupType.ERROR);
     setupPopoverThatHidesItself(dialect, header, message);
-  }
+  }*/
 
-  protected void markError(ControlGroup dialectGroup, FocusWidget dialect, String header, String message) {
+  void markError(ControlGroup dialectGroup, FocusWidget dialect, String header, String message) {
     markError(dialectGroup, dialect, header, message, Placement.RIGHT);
   }
 
-  protected void markError(ControlGroup dialectGroup, FocusWidget dialect, String header, String message, Placement placement) {
+  void markError(ControlGroup dialectGroup, FocusWidget dialect, String header, String message, Placement placement) {
     dialectGroup.setType(ControlGroupType.ERROR);
     dialect.setFocus(true);
     setupPopover(dialect, header, message, placement);
   }
 
-  protected void setupPopoverThatHidesItself(final Widget w, String heading, final String message) {
+  void setupPopoverThatHidesItself(final Widget w, String heading, final String message) {
     System.out.println("\ttriggering popover on '" + w.getTitle() + "' with " + heading + "/" + message);
     final MyPopover popover = new MyPopover();
 
@@ -226,7 +226,7 @@ public class BasicDialog {
    * @param message
    * @param placement
    */
-  protected void setupPopover(final FocusWidget w, String heading, final String message, Placement placement) {
+  void setupPopover(final FocusWidget w, String heading, final String message, Placement placement) {
     System.out.println("setupPopover : triggering popover on " + w + " with " + heading +"/"+message);
     final Popover popover = new Popover();
     configurePopup(popover, w, heading, message, placement);
@@ -257,7 +257,7 @@ public class BasicDialog {
     popover.show();
   }
 
-  public void hidePopovers() {
+  void hidePopovers() {
     for (Popover popover : visiblePopovers) popover.hide();
     visiblePopovers.clear();
     }
@@ -332,11 +332,13 @@ public class BasicDialog {
       return box.getItemText(box.getSelectedIndex());
     }
 
+/*
     protected void markSimpleError(String message) {
       markSimpleError(message, Placement.RIGHT);
     }
+*/
 
-    protected void markSimpleError(String message, Placement placement) {
+    void markSimpleError(String message, Placement placement) {
       box.setFocus(true);
       setupPopover(box, TRY_AGAIN, message, placement);
     }
