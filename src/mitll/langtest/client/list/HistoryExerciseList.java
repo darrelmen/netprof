@@ -39,9 +39,9 @@ public class HistoryExerciseList<T extends ExerciseShell> extends PagingExercise
   private static final boolean INCLUDE_ITEM_IN_BOOKMARK = false;
   protected long userID;
 
-  public HistoryExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                             boolean showTurkToken, boolean showInOrder, ExerciseController controller,
-                             boolean showTypeAhead, String instance) {
+  protected HistoryExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
+                                boolean showTurkToken, boolean showInOrder, ExerciseController controller,
+                                boolean showTypeAhead, String instance) {
     super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, showTypeAhead, instance);
   }
 
@@ -68,7 +68,7 @@ public class HistoryExerciseList<T extends ExerciseShell> extends PagingExercise
    * @param token
    * @return object representing type=value pairs from history token
    */
-  protected SelectionState getSelectionState(String token) {
+  SelectionState getSelectionState(String token) {
     return new SelectionState(token, !allowPlusInURL);
   }
 
@@ -156,7 +156,6 @@ public class HistoryExerciseList<T extends ExerciseShell> extends PagingExercise
       pushNewSectionHistoryToken();
     } else {
       System.out.println("pushFirstListBoxSelection fire history for token from URL: " +initToken);
-      setModeLinks(initToken);
       History.fireCurrentHistoryState();
     }
   }
@@ -169,7 +168,6 @@ public class HistoryExerciseList<T extends ExerciseShell> extends PagingExercise
     String historyToken = getHistoryToken(null);
     String currentToken = History.getToken();
 
-    setModeLinks(historyToken);
     if (currentToken.equals(historyToken)) {
       if (isEmpty() || historyToken.isEmpty()) {
         System.out.println("pushNewSectionHistoryToken : noSectionsGetExercises for token '" + historyToken +
@@ -185,8 +183,6 @@ public class HistoryExerciseList<T extends ExerciseShell> extends PagingExercise
       setHistoryItem(historyToken);
     }
   }
-
-  protected void setModeLinks(String historyToken) {}
 
   /**
    * @see #restoreListBoxState(SelectionState)
@@ -375,7 +371,7 @@ public class HistoryExerciseList<T extends ExerciseShell> extends PagingExercise
    * @param item null is OK
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
-  protected void loadExercises(final Map<String, Collection<String>> typeToSection, final String item) {
+  void loadExercises(final Map<String, Collection<String>> typeToSection, final String item) {
     System.out.println("HistoryExerciseList.loadExercises : " + typeToSection + " and item '" + item + "'");
     if (controller.showCompleted()) {
       service.getCompletedExercises(controller.getUser(), controller.isReviewMode(), new AsyncCallback<Set<String>>() {
