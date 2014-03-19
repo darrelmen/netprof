@@ -76,7 +76,7 @@ public class Navigation extends TabContainer implements RequiresResize {
   private static final String CLICKED_USER_LIST = "clickedUserList";
   private static final String CLICKED_TAB = "clickedTab";
   private static final String SUB_TAB = "subTab";
-  public static final String NO_LISTS_CREATED_OR_VISITED_YET = "No lists created or visited yet.";
+  private static final String NO_LISTS_CREATED_OR_VISITED_YET = "No lists created or visited yet.";
 
   private static final int YOUR_LIST_INDEX = 0;
   private static final int OTHERS_LIST_INDEX = 1;
@@ -90,16 +90,16 @@ public class Navigation extends TabContainer implements RequiresResize {
   private static final String LEARN = "learn";
 
   private final ExerciseController controller;
-  private LangTestDatabaseAsync service;
-  private UserManager userManager;
+  private final LangTestDatabaseAsync service;
+  private final UserManager userManager;
 
   private ScrollPanel listScrollPanel;
-  private ListInterface<? extends ExerciseShell> listInterface;
-  private NPFHelper npfHelper;
-  private NPFHelper avpHelper;
-  private EditItem<? extends ExerciseShell> editItem;
-  private EditItem<? extends ExerciseShell> reviewItem;
-  private KeyStorage storage;
+  private final ListInterface<? extends ExerciseShell> listInterface;
+  private final NPFHelper npfHelper;
+  private final NPFHelper avpHelper;
+  private final EditItem<? extends ExerciseShell> editItem;
+  private final EditItem<? extends ExerciseShell> reviewItem;
+  private final KeyStorage storage;
 
   /**
    *  @see mitll.langtest.client.LangTest#resetClassroomState()
@@ -738,8 +738,8 @@ public class Navigation extends TabContainer implements RequiresResize {
     private final Panel child;
     private final ScrollPanel listScrollPanel;
     private final boolean allLists;
-    private String instanceName;
-    boolean onlyMyLists;
+    private final String instanceName;
+    final boolean onlyMyLists;
 
     /**
      * @see #viewComments(com.google.gwt.user.client.ui.Panel)
@@ -886,7 +886,7 @@ public class Navigation extends TabContainer implements RequiresResize {
     }
   }
 
-  private Map<UserList, HasText> listToMarker = new HashMap<UserList, HasText>();
+  private final Map<UserList, HasText> listToMarker = new HashMap<UserList, HasText>();
 
   /**
    * @see mitll.langtest.client.custom.Navigation.UserListCallback#getDisplayRowPerList(mitll.langtest.shared.custom.UserList, boolean, boolean)
