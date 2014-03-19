@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DialogHelper {
-  private boolean doYesAndNo;
+  private final boolean doYesAndNo;
   public interface CloseListener {
     void gotYes();
     void gotNo();
@@ -48,7 +48,7 @@ public class DialogHelper {
      * @param title
        * @param msgs
        */
-  public void show(String title, List<String> msgs, String buttonName, final CloseListener listener) {
+    void show(String title, List<String> msgs, String buttonName, final CloseListener listener) {
     //final DialogBox dialogBox = new DialogBox();
     final Modal dialogBox = new Modal();
     Button closeButton;
