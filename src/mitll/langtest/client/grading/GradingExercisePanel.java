@@ -10,7 +10,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.AudioTag;
@@ -54,7 +53,7 @@ public class GradingExercisePanel extends ExercisePanel {
   private static final int BIG_ONE_QUESTION_PAGE_SIZE = 8;
   private static final int BIG_TWO_QUESTION_PAGE_SIZE = BIG_ONE_QUESTION_PAGE_SIZE / 2;
   private static final List<Boolean> BOOLEANS = Arrays.asList(true, false);
-  private UserFeedback userFeedback;
+  private final UserFeedback userFeedback;
 
   /**
    * @param e
