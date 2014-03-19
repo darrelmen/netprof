@@ -39,9 +39,9 @@ public class AVPHistoryForList implements IsSerializable {
     return top;
   }
 
-  public void setTop(float top) {
+/*  public void setTop(float top) {
     this.top = top;
-  }
+  }*/
 
   public float getTotalCorrect() {
     return totalCorrect;
