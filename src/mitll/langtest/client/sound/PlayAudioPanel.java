@@ -39,7 +39,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   private final HTML warnNoFlash = new HTML("<font color='red'>Flash is not activated. Do you have a flashblocker? " +
     "Please add this site to its whitelist.</font>");
   private AudioControl listener;
-  private List<PlayListener> playListeners = new ArrayList<PlayListener>();
+  private final List<PlayListener> playListeners = new ArrayList<PlayListener>();
   private static int counter = 0;
   private final int id;
   private boolean playing = false;
