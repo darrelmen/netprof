@@ -44,20 +44,20 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class ExcelImport implements ExerciseDAO {
-  private static Logger logger = Logger.getLogger(ExcelImport.class);
+  private static final Logger logger = Logger.getLogger(ExcelImport.class);
   private static final boolean INCLUDE_ENGLISH_SEMI_AS_DEFECT = true;
 
   private final boolean isFlashcard;
 
   private List<Exercise> exercises = null;
-  private Map<String, Exercise> idToExercise = new HashMap<String, Exercise>();
-  private List<String> errors = new ArrayList<String>();
+  private final Map<String, Exercise> idToExercise = new HashMap<String, Exercise>();
+  private final List<String> errors = new ArrayList<String>();
   private final String file;
-  private SectionHelper sectionHelper = new SectionHelper();
-  private boolean debug = false;
+  private final SectionHelper sectionHelper = new SectionHelper();
+  private final boolean debug = false;
   private String mediaDir;
-  private Set<String> missingSlowSet = new HashSet<String>();
-  private Set<String> missingFastSet = new HashSet<String>();
+  private final Set<String> missingSlowSet = new HashSet<String>();
+  private final Set<String> missingFastSet = new HashSet<String>();
   private boolean shouldHaveRefAudio = false;
   private boolean usePredefinedTypeOrder;
   private final String language;
@@ -68,7 +68,7 @@ public class ExcelImport implements ExerciseDAO {
   private UserListManager userListManager;
   private AddRemoveDAO addRemoveDAO;
   private File installPath;
-  boolean collectSynonyms = true;
+  private boolean collectSynonyms = true;
 
   /**
    * @see mitll.langtest.server.SiteDeployer#readExercisesPopulateSite(mitll.langtest.shared.Site, String, java.io.InputStream)
