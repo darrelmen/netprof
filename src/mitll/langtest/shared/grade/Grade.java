@@ -11,6 +11,19 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * <br></br>
  * For instance, we don't want to show arabic grades to the english only people and vice-versa.
  *
+ * Grader logs in, registering initially.
+ *
+ * On the left, questions sorted (not random), each shows how many have been graded (n graders, # complete) and
+ * how many responses were collected for the item (which could be a multi part question).
+ *
+ * E.g. if 2 graders, each could be part way done with responses and so 0 complete.
+ *
+ * Need a Grade object which will be for each entry in the results table.
+ *
+ * Either 1-5 scale or that + a Correct? Yes/No scale.  Maybe this is an option in the nature of the exercise?
+ *
+ * Show question, with table of responses. Note which have been graded so far.
+ *
  * User: go22670
  * Date: 5/18/12
  * Time: 5:45 PM
