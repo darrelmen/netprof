@@ -23,12 +23,12 @@ public class Combined<T extends ExerciseShell> extends TabContainer {
 //  private Navigation.TabAndContent browse;
  // private Navigation.TabAndContent review, commented;
   private final ExerciseController controller;
-  private LangTestDatabaseAsync service;
-  private UserManager userManager;
-  ListInterface<T> listInterface1;
+  private final LangTestDatabaseAsync service;
+  private final UserManager userManager;
+  private ListInterface<T> listInterface1;
   //private ScrollPanel listScrollPanel;
 //  private ListInterface<? extends ExerciseShell> listInterface;
-  private UserFeedback feedback;
+  private final UserFeedback feedback;
 
   public Combined(final LangTestDatabaseAsync service, final UserManager userManager,
                   final ExerciseController controller, final ListInterface<? extends ExerciseShell> listInterface,
