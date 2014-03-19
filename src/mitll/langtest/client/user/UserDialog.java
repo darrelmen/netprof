@@ -34,9 +34,9 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class UserDialog extends BasicDialog {
-  private static final int USER_ID_MAX_LENGTH = 80;
-  protected static final String LEAST_RECORDED_FIRST = "Least recorded first";
-  protected static final String LOW_GRADES_ONLY = "Redo items";
+  protected static final int USER_ID_MAX_LENGTH = 25;
+/*  protected static final String LEAST_RECORDED_FIRST = "Least recorded first";
+  protected static final String LOW_GRADES_ONLY = "Redo items";*/
 
   private static final String GRADING = "grading";
   private static final String TESTING = "testing";  // TODO make these safer
@@ -45,7 +45,7 @@ public abstract class UserDialog extends BasicDialog {
   static final int MAX_AGE = 90;
   static final int TEST_AGE = 100;
   static final String UNSET = "Unset";
-  private static final List<String> EXPERIENCE_CHOICES = Arrays.asList(
+/*  private static final List<String> EXPERIENCE_CHOICES = Arrays.asList(
       UNSET,
     "0-3 months (Semester 1)",
     "4-6 months (Semester 1)",
@@ -54,11 +54,14 @@ public abstract class UserDialog extends BasicDialog {
     "13-16 months (Semester 3)",
     "16+ months",
     "Native speaker");
-  protected static final int NATIVE_MONTHS = 20 * 12;
+  protected static final int NATIVE_MONTHS = 20 * 12;*/
   private static final String MALE = "Male";
   private static final String FEMALE = "Female";
+  public static final String HIT_ENTER_TO_LOG_IN = "Hit enter to log in.";
+/*
   private static final String ALL_ITEMS = "Sequential Order";
   private static final String RECORDING_ORDER = "Item Order";
+*/
 
   final PropertyHandler props;
 
@@ -67,7 +70,7 @@ public abstract class UserDialog extends BasicDialog {
   private final UserNotification userNotification;
   protected ListBoxFormField recordingOrder;*/
 
-  UserDialog(LangTestDatabaseAsync service, PropertyHandler props, UserManager userManager, UserNotification userNotification) {
+  UserDialog(LangTestDatabaseAsync service, PropertyHandler props) {
     this.service = service;
     this.props = props;
    // this.userManager = userManager;
@@ -103,13 +106,18 @@ public abstract class UserDialog extends BasicDialog {
     return accordionGroup;
   }
 
+  /**
+   * @see StudentDialog#displayLoginBox()
+   * @param dialogBox
+   * @return
+   */
   Button addLoginButton(Modal dialogBox) {
-    FlowPanel hp = new FlowPanel();
+    Panel hp = new FlowPanel();
     hp.getElement().getStyle().setFloat(Style.Float.RIGHT);
     final Button login = new Button("Login");
     login.setType(ButtonType.PRIMARY);
     login.setEnabled(true);
-    login.setTitle("Hit enter to log in.");
+    login.setTitle(HIT_ENTER_TO_LOG_IN);
     login.getElement().setId("login");
     hp.add(login);
 
@@ -118,12 +126,12 @@ public abstract class UserDialog extends BasicDialog {
   }
 
   FormField addControlFormField(Panel dialogBox, String label, int minLength) {
-    return addControlFormField(dialogBox, label, false, minLength);
+    return addControlFormField(dialogBox, label, false, minLength, USER_ID_MAX_LENGTH);
   }
 
-  protected FormField addControlFormField(Panel dialogBox, String label, boolean isPassword, int minLength) {
+  protected FormField addControlFormField(Panel dialogBox, String label, boolean isPassword, int minLength, int maxLength) {
     final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
-
+    user.setMaxLength(maxLength);
     return getFormField(dialogBox, label, user, minLength);
   }
 
@@ -221,7 +229,7 @@ public abstract class UserDialog extends BasicDialog {
     }
     return genderBox;
   }
-
+/*
   protected ListBox getExperienceBox() {
     final ListBox experienceBox = new ListBox(false);
     List<String> choices = EXPERIENCE_CHOICES;
@@ -230,7 +238,7 @@ public abstract class UserDialog extends BasicDialog {
     }
     experienceBox.ensureDebugId("cwListBox-dropBox");
     return experienceBox;
-    }
+    }*/
 
   boolean checkPassword(FormField password) { return checkPassword(password.box);  }
 
