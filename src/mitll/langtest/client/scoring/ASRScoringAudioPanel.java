@@ -19,7 +19,7 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class ASRScoringAudioPanel extends ScoringAudioPanel {
-  protected final Set<String> tested = new HashSet<String>();
+  private final Set<String> tested = new HashSet<String>();
   private boolean useScoreToColorBkg = true;
 
   /**
