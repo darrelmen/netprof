@@ -581,19 +581,26 @@ public class ResultDAO extends DAO {
 
     List<Session> sessions = new ArrayList<Session>();
 
+    int id = 0;
     for (Result r : answersForUser) {
       //logger.debug("got " + r);
       if (s == null || r.timestamp - lastTimestamp > SESSION_GAP || !expected.contains(r.id)) {
-        sessions.add(s = new Session(r.userid));
+        sessions.add(s = new Session(id++, r.userid, r.timestamp));
         expected = new HashSet<String>(ids); // start a new set of expected items
 //        logger.debug("\tpartitionIntoSessions2 expected " +expected.size());
       } else {
         s.duration += r.timestamp - lastTimestamp;
       }
-      if (r.uniqueID == latestResultID) s.setLatest(true);
+
       s.addExerciseID(r.id);
       s.incrementCorrect(r.id, r.isCorrect());
       s.setScore(r.id, r.getPronScore());
+
+      if (r.uniqueID == latestResultID) {
+        logger.debug("\tpartitionIntoSessions2 marked " +s);
+
+        s.setLatest(true);
+      }
 
       expected.remove(r.id);
      // logger.debug("\tpartitionIntoSessions2 expected now " + expected.size() + " session " + s);
