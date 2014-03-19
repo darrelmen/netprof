@@ -27,7 +27,7 @@ public class UserTable extends PagerTable {
   private static final int PAGE_SIZE = 5;
   private Widget lastTable = null;
   private Button closeButton;
-  private PropertyHandler props;
+  private final PropertyHandler props;
 
   public UserTable(PropertyHandler props) { this.props = props; }
   /**
@@ -37,7 +37,7 @@ public class UserTable extends PagerTable {
     showDialog(service);
   }
 
-  protected void showDialog(final LangTestDatabaseAsync service) {
+  void showDialog(final LangTestDatabaseAsync service) {
     // Create the popup dialog box
     final DialogBox dialogBox = new DialogBox();
     dialogBox.setText("Registered Users");
@@ -267,7 +267,7 @@ public class UserTable extends PagerTable {
     return ((float) ((Math.round(totalHours * 100)))) / 100f;
   }
 
-  protected void addUserIDColumns(final LangTestDatabaseAsync service, CellTable<User> table) {
+  void addUserIDColumns(final LangTestDatabaseAsync service, CellTable<User> table) {
     TextColumn<User> userID = new TextColumn<User>() {
       @Override
       public String getValue(User contact) {
