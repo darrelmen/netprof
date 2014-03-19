@@ -12,7 +12,7 @@ import java.sql.SQLException;
  */
 public interface Database {
   Connection getConnection();
-  void closeConnection(Connection connection) throws SQLException;
+  void closeConnection(Connection connection);
 
   String TIME = "time";
   String EXID = "exid";
