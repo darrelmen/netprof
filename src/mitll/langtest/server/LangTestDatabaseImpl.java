@@ -24,22 +24,16 @@ import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.SectionNode;
-import mitll.langtest.shared.Site;
 import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
-import mitll.langtest.shared.flashcard.FlashcardResponse;
-import mitll.langtest.shared.flashcard.Leaderboard;
-import mitll.langtest.shared.flashcard.ScoreInfo;
 import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.grade.ResultsAndGrades;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.scoring.PretestScore;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 
@@ -81,7 +75,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private String configDir;
   private ServerProperties serverProps;
   private PathHelper pathHelper;
-  private Random rand = new Random();
+  private final Random rand = new Random();
 
   private final Cache<String, String> userToExerciseID = CacheBuilder.newBuilder()
       .concurrencyLevel(4)
@@ -89,9 +83,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       .expireAfterWrite(TIMEOUT, TimeUnit.MINUTES).build();
 
   /**
-   * This allows us to upload an exercise file and create a new {@link Site}.
-   * @see mitll.langtest.client.DataCollectAdmin#makeDataCollectNewSiteForm2
-   * @see SiteDeployer
    * @param request
    * @param response
    * @throws ServletException
@@ -100,25 +91,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   protected void service(HttpServletRequest request,
                          HttpServletResponse response) throws ServletException, IOException {
-    ServletRequestContext ctx = new ServletRequestContext(request);
-    boolean isMultipart = ServletFileUpload.isMultipartContent(ctx);
-    if (isMultipart) {
-      logger.debug("isMultipart : Request " + request.getQueryString() + " path "  +request.getPathInfo());
-      SiteDeployer siteDeployer = new SiteDeployer();
-      SiteDeployer.SiteInfo siteInfo = siteDeployer.getSite(request, configDir, db, pathHelper.getInstallPath());
-      Site site = siteInfo.site;
-      if (site == null) {
-        super.service(request, response);
-        return;
-      }
-
-      if (siteInfo.isUpdate) {
-        response.setContentType("text/plain");
-        response.getWriter().write("Spreadsheet updated.");
-      } else {
-        siteDeployer.doSiteResponse(db, response, siteDeployer, site);
-      }
-    } else {
       try {
         super.service(request, response);
       } catch (ServletException e) {
@@ -131,7 +103,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         logAndNotifyServerException(eee);
         throw new ServletException("rethrow exception", eee);
       }
-    }
   }
 
   public void logAndNotifyServerException(Exception e) {
@@ -139,33 +110,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String prefixedMessage = "for " + pathHelper.getInstallPath() + " got " + message;
     logger.debug(prefixedMessage);
     getMailSupport().email(serverProps.getEmailAddress(),"Server Exception on " + pathHelper.getInstallPath(), prefixedMessage);
-  }
-
-  public Site getSiteByID(long id) { return db.getSiteByID(id); }
-  public List<Site> getSites() { return db.getDeployedSites();  }
-
-  /**
-   * Copy template to something named by site name
-   * copy exercise file from media to site/config/template
-   * set fields in config.properties
-   *   - apptitle
-   *   - release date
-   *   - lesson plan file
-   *
-   *    then copy to install path/../name
-   *
-   * @see mitll.langtest.client.DataCollectAdmin#makeDataCollectNewSiteForm2
-   * @param id
-   * @param name
-   * @param language
-   * @param notes
-   * @return
-   */
-  @Override
-  public boolean deploySite(long id, String name, String language, String notes) {
-    logger.debug("deploy site id=" +id + " name " + name);
-    return new SiteDeployer().deploySite(db, getMailSupport(), getThreadLocalRequest(), configDir,
-      pathHelper.getInstallPath(), id, name, language, notes);
   }
 
   private List<ExerciseShell> getExerciseShells(Collection<Exercise> exercises) {
@@ -312,7 +256,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * @see #getExerciseIds(int, long)
    * @see #getExercisesForSelectionState(int, java.util.Map, long)
-   * @see #getFullExercisesForSelectionState(java.util.Map, int, int)
    * @param exercisesForSection
    * @return
    */
@@ -379,55 +322,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         return id1.toLowerCase().compareTo(id2.toLowerCase());
       }
     });
-  }
-
-  /**
-   * @see mitll.langtest.client.flashcard.TableSectionExerciseList#createProvider(java.util.Map, int, com.github.gwtbootstrap.client.ui.CellTable)
-   * @param typeToSection
-   * @param start
-   * @param end
-   * @return
-   */
-  @Override
-  public List<? extends ExerciseShell> getFullExercisesForSelectionState(Map<String, Collection<String>> typeToSection,
-                                                                         int start, int end) {
-    try {
-      List<Exercise> exercises;
-      //logger.debug("getFullExercisesForSelectionState req = " + typeToSection);
-
-      if (typeToSection.isEmpty()) {
-       // logger.debug("getFullExercisesForSelectionState empty type->section");
-        exercises = getSortedExercises(getExercises());
-        logger.debug("getFullExercisesForSelectionState exercises "+ exercises.size() + " start " + start + " end " + end);
-      } else {
-        Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
-        exercises = getSortedExercises(exercisesForSection);
-        logger.debug("getFullExercisesForSelectionState non-empty type->section "+ typeToSection+
-          " start " + start + " end " + end + " yields "+ exercises.size());
-      }
-      List<Exercise> resultList = exercises.subList(start, end);
-
-      return new ArrayList<Exercise>(resultList);
-    } catch (Exception e) {
-      logger.error("Got "+e, e);
-    }
-    return Collections.emptyList();
-  }
-
-  @Override
-  public int getNumExercisesForSelectionState(Map<String, Collection<String>> typeToSection) {
-    if (typeToSection.isEmpty()) {
-      int size = getExercises().size();
-      logger.debug("getNumExercisesForSelectionState num = " + size);
-      return size;
-    } else {
-      //logger.debug("getNumExercisesForSelectionState req = " + typeToSection);
-
-      Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
-      int size = exercisesForSection.size();
-      logger.debug("getNumExercisesForSelectionState req = " + typeToSection + " = " + size);
-      return size;
-    }
   }
 
   /**
@@ -582,56 +476,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.flashcard.BootstrapFlashcardExerciseList#getExercises(long, boolean)
-   *
-   * @param userID
-   * @param typeToSection
-   * @param getNext
-   * @return
-   */
-  @Override
-  public FlashcardResponse getNextExercise(long userID, Map<String, Collection<String>> typeToSection, boolean getNext) {
-    Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
-    List<Exercise> copy = db.getExercisesBiasTowardsUnanswered(userID, exercisesForSection, false);
-    FlashcardResponse nextExercise = db.getNextExercise(copy,userID, serverProps.isTimedGame(), getNext);
-    return getFlashcardResponse(userID, nextExercise);
-  }
-
-  /**
-   * @see mitll.langtest.client.list.ListInterface#getExercises(long, boolean)
-   * @param userID
-   * @param getNext
-   * @return
-   */
-  @Override
-  public FlashcardResponse getNextExercise(long userID, boolean getNext) {
-    FlashcardResponse nextExercise = db.getNextExercise(userID, serverProps.isTimedGame(), getNext);
-    return getFlashcardResponse(userID, nextExercise);
-  }
-
-  /**
-   * Before we return a reference to the next card to do, make sure there's an mp3 to play if they get it wrong
-   * @param userID
-   * @param nextExercise
-   * @return
-   */
-  private FlashcardResponse getFlashcardResponse(long userID, FlashcardResponse nextExercise) {
-    if (nextExercise == null || nextExercise.getNextExercise() == null) {
-      logger.error("huh? no next exercise for user " +userID);
-      return nextExercise;
-    }
-    String refAudio = nextExercise.getNextExercise().getRefAudio();
-    if (refAudio != null && refAudio.length() > 0) {
-      getWavAudioFile(refAudio);
-      ensureMP3(refAudio, false);
-    }
-    return nextExercise;
-  }
-
-  public void resetUserState(long userID) {  db.resetUserState(userID); }
-  public void clearUserState(long userID) {  db.clearUserState(userID); }
-
-  /**
    * Called from the client:
    * @see mitll.langtest.client.list.ExerciseList#getExercises
    * @return
@@ -680,7 +524,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * @see #getExercise(String)
-   * @see #getFlashcardResponse(long, mitll.langtest.shared.flashcard.FlashcardResponse)
    * @param wavFile
    * @param overwrite
    */
@@ -907,18 +750,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   // Users ---------------------
 
-  /**
-   * @see mitll.langtest.client.user.StudentDialog#addUser
-   * @param age
-   * @param gender
-   * @param experience
-   * @param dialect
-   * @return user id
-   */
-  public long addUser(int age, String gender, int experience, String dialect) {
-    return db.addUser( getThreadLocalRequest(), age, gender, experience, dialect);
-  }
-
   public void addDLIUser(DLIUser dliUser) {
     try {
       db.addDLIUser(dliUser);
@@ -1085,13 +916,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public long addUser(int age, String gender, int experience,
                       String nativeLang, String dialect, String userID) {
     logger.debug("Adding user " + userID);
-    long l = db.addUser(getThreadLocalRequest(),age, gender, experience, nativeLang, dialect, userID);
-
-    if (l != 0 && serverProps.isDataCollectAdminView) {
-      new SiteDeployer().sendNewUserEmail(getMailSupport(), getThreadLocalRequest(), userID);
-    }
-
-    return l;
+    return db.addUser(getThreadLocalRequest(),age, gender, experience, nativeLang, dialect, userID);
   }
 
   /**
@@ -1099,13 +924,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   public List<User> getUsers() { return db.getUsers();  }
-
-  @Override
-  public boolean isAdminUser(long id) { return db.isAdminUser(id); }
-  @Override
-  public boolean isEnabledUser(long id) { return db.isEnabledUser(id); }
-  @Override
-  public void setUserEnabled(long id, boolean enabled) { db.setUserEnabled(id, enabled); }
 
   // Results ---------------------
 
@@ -1234,24 +1052,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     logger.debug("getUserHistoryForList " + userid + " and " + ids);
 
     return db.getUserHistoryForList(userid, ids, latestResultID);
-  }
-
-  private final Leaderboard leaderboard = new Leaderboard();
-
-  /**
-   * @see mitll.langtest.client.flashcard.BootstrapFlashcardExerciseList#timesUp(long)
-   * @param userid
-   * @param timeTaken
-   * @param selectionState
-   * @return
-   */
-  @Override
-  public Leaderboard postTimesUp(long userid, long timeTaken, Map<String, Collection<String>> selectionState) {
-    synchronized (leaderboard) {
-      ScoreInfo scoreInfo = db.getScoreInfo(userid, timeTaken, selectionState);
-      leaderboard.addScore(scoreInfo);
-    }
-    return leaderboard;
   }
 
   public void logMessage(String message) {

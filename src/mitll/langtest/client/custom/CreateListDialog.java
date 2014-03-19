@@ -17,14 +17,14 @@ import mitll.langtest.client.dialog.EnterKeyButtonHelper;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserManager;
 
-public class CreateListDialog extends BasicDialog {
+class CreateListDialog extends BasicDialog {
   private static final String CLASS = "Course Info (optional)";
   private static final boolean REQUIRE_DESC = false;
   private static final boolean REQUIRE_CLASS = false;
 
   private final Navigation navigation;
-  private LangTestDatabaseAsync service;
-  private UserManager userManager;
+  private final LangTestDatabaseAsync service;
+  private final UserManager userManager;
 
   public CreateListDialog(Navigation navigation, LangTestDatabaseAsync service,UserManager userManager) {
     this.navigation = navigation;
