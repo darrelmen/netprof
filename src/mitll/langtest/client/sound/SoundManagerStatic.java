@@ -8,8 +8,8 @@ package mitll.langtest.client.sound;
  * To change this template use File | Settings | File Templates.
  */
 public class SoundManagerStatic implements SoundManagerAPI {
-  private boolean debug = false;
-  private boolean webaudio = false;
+  private final boolean debug = false;
+  private final boolean webaudio = false;
   private static final boolean PREFER_WEBAUDIO = false;
   public void initialize() {
     SoundManager.initialize();
