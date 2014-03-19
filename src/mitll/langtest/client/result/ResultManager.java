@@ -51,14 +51,14 @@ public class ResultManager extends PagerTable {
   private static final int PAGE_SIZE = 12;
   protected static final String UNGRADED = "Ungraded";
   protected static final String SKIP = "Skip";
-  public static final int GRADING_WIDTH = 700;
+  protected static final int GRADING_WIDTH = 700;
   private final boolean textResponse;
   protected int pageSize = PAGE_SIZE;
-  protected LangTestDatabaseAsync service;
-  protected UserFeedback feedback;
-  protected final AudioTag audioTag = new AudioTag();
-  private String nameForAnswer;
-  private Map<Column<?,?>,String> colToField = new HashMap<Column<?,?>, String>();
+  protected final LangTestDatabaseAsync service;
+  protected final UserFeedback feedback;
+  private final AudioTag audioTag = new AudioTag();
+  private final String nameForAnswer;
+  private final Map<Column<?,?>,String> colToField = new HashMap<Column<?,?>, String>();
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad2
