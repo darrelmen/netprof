@@ -2,7 +2,6 @@ package mitll.langtest.client;
 
 import com.google.gwt.user.client.Window;
 import mitll.langtest.client.list.ResponseChoice;
-import mitll.langtest.shared.Result;
 
 import java.util.Map;
 
@@ -34,7 +33,6 @@ public class PropertyHandler {
   private static final String SHORT_RECORD_TIMEOUT = "shortRecordTimeout";
   private static final String TEACHER_VIEW = "teacherView";
   private static final String ADMIN_VIEW = "adminView";
-  private static final String DATA_COLLECT_ADMIN_VIEW = "dataCollectAdminView";
   private static final String MINIMAL_UI = "minimalUI";
   private static final String NAME_FOR_ITEM = "nameForItem";
   private static final String NAME_FOR_ANSWER = "nameForAnswer";
@@ -42,8 +40,6 @@ public class PropertyHandler {
   private static final String NUM_GRADES_TO_COLLECT = "numGradesToCollect";
   private static final String LOG_CLIENT_MESSAGES = "logClient";
   private static final String SHOW_SECTIONS = "showSections";
-  //private static final String SHOW_SECTION_WIDGETS = "showSectionWidgets";
-  //private static final String DEBUG_EMAIL = "debugEmail";
   private static final String FLASHCARD = "flashcard";
   private static final String FLASHCARD_TEACHER_VIEW = "flashcardTeacherView";
   private static final String COMBINED_MODE = "combinedMode";
@@ -89,16 +85,13 @@ public class PropertyHandler {
   private static final String FLASHCARD_TEXT_RESPONSE = "flashcardTextResponse";
   private static final String EXERCISES_IN_ORDER = "exercisesInOrder";
   private static final String ALLOW_PLUS_IN_URL = "allowPlusInURL";
-  private static final String PURPOSE_DEFAULT = "purposeDefault";
   private static final String CLASSROOM_MODE = "classroomMode";
   private static final String SHOW_SPECTROGRAM = "spectrogram";
   private boolean spectrogram = false;
   private boolean combinedMode = false;
-  private static final String DEFAULT_AUDIO_TYPE = "audioType";
   private static final String INCLUDE_FEEDBACK = "includeFeedback";
-  private String audioType = Result.AUDIO_TYPE_FAST_AND_SLOW;
 
-  public enum LOGIN_TYPE { UNDEFINED, ANONYMOUS, STUDENT, DATA_COLLECTOR, SIMPLE }
+  public enum LOGIN_TYPE { UNDEFINED, ANONYMOUS, STUDENT }
 
   private final Map<String, String> props;
 
@@ -116,7 +109,6 @@ public class PropertyHandler {
   private boolean dataCollectMode;
   private boolean collectAudio = true;
   private boolean teacherView = false;
-  private boolean dataCollectAdminView = false;
   private boolean adminView = false;
   private boolean logClientMessages = false;
   private boolean minimalUI = false;
@@ -154,7 +146,6 @@ public class PropertyHandler {
   private String responseType = ResponseChoice.AUDIO;
   private String secondResponseType = "None";
   private boolean allowPlusInURL;
-  private String purposeDefault = "Practice";
   private boolean bindNextToEnter;
   private boolean classroomMode = false;
   private boolean includeFeedback = true;
@@ -195,7 +186,6 @@ public class PropertyHandler {
       else if (key.equals(NAME_FOR_ANSWER)) nameForAnswer = value;
       else if (key.equals(NAME_FOR_RECORDER)) nameForRecorder = value;
       else if (key.equals(TEACHER_VIEW)) teacherView = getBoolean(value);
-      else if (key.equals(DATA_COLLECT_ADMIN_VIEW)) dataCollectAdminView = getBoolean(value);
       else if (key.equals(NUM_GRADES_TO_COLLECT)) numGradesToCollect = getInt(value, NUM_GRADES_TO_COLLECT_DEFAULT, NUM_GRADES_TO_COLLECT);
       else if (key.equals(LOG_CLIENT_MESSAGES)) logClientMessages = getBoolean(value);
       else if (key.equals(SHOW_SECTIONS)) showSections = getBoolean(value);
@@ -218,12 +208,10 @@ public class PropertyHandler {
       else if (key.equals(ALLOW_PLUS_IN_URL)) allowPlusInURL = getBoolean(value);
       else if (key.equals(RESPONSE_TYPE)) responseType = value;
       else if (key.equals(SECOND_RESPONSE_TYPE)) secondResponseType = value;
-      else if (key.equals(PURPOSE_DEFAULT)) purposeDefault = value;
       else if (key.equals(BIND_NEXT_TO_ENTER)) bindNextToEnter = getBoolean(value);
       else if (key.equals(SCREEN_PORTION)) screenPortion = getFloat(value, 1.0f, SCREEN_PORTION);
       else if (key.equals(CLASSROOM_MODE)) classroomMode = getBoolean(value);
       else if (key.equals(SHOW_SPECTROGRAM)) spectrogram = getBoolean(value);
-      else if (key.equals(DEFAULT_AUDIO_TYPE)) audioType = value;
       else if (key.equals(INCLUDE_FEEDBACK)) includeFeedback = getBoolean(value);
       else if (key.equals(LOGIN_TYPE_PARAM)) {
         try {
@@ -481,10 +469,10 @@ public class PropertyHandler {
   public String getNameForItem() { return nameForItem; }
   public String getNameForAnswer() { return nameForAnswer; }
   public String getNameForRecorder() { return nameForRecorder; }
-
+/*
   public boolean isDataCollectAdminView() {
     return dataCollectAdminView;
-  }
+  }*/
 
   public int getNumGradesToCollect() {
     return numGradesToCollect;
@@ -526,10 +514,6 @@ public class PropertyHandler {
     return timedGame;
   }
 
-  public int getGameTimeSeconds() {
-    return gameTimeSeconds;
-  }
-
   public boolean isPromptBeforeNextItem() {
     return promptBeforeNextItem;
   }
@@ -537,18 +521,10 @@ public class PropertyHandler {
     return rightAlignContent;
   }
 
-  public boolean shouldAddRecordKeyBinding() {
-    return addRecordKeyBinding || flashCard;
-  }
-
   public LOGIN_TYPE getLoginType() { return loginType; }
 
   public int getFlashcardPreviewFrameHeight() {
     return flashcardPreviewHeight;
-  }
-
-  public boolean getFlashcardNextAndPrev() {
-    return flashcardNextAndPrev;
   }
 
   public boolean isFlashcardTextResponse() {
@@ -579,10 +555,6 @@ public class PropertyHandler {
 
   public boolean shouldAllowPlusInURL() { return allowPlusInURL;  }
 
-  public String getPurposeDefault() {
-    return purposeDefault;
-  }
-
   public boolean isBindNextToEnter() {
     return bindNextToEnter;
   }
@@ -594,6 +566,4 @@ public class PropertyHandler {
     return combinedMode;
   }
 
-  public String getAudioType() { return audioType; }
-  public boolean isIncludeFeedback () { return includeFeedback; }
 }
