@@ -14,8 +14,8 @@ import mitll.langtest.shared.ExerciseShell;
 */
 class PrevNextList<T extends ExerciseShell> extends HorizontalPanel {
   private Button prev, next;
-  private ListInterface<T> container;
-  boolean disableNext = true;
+  private final ListInterface<T> container;
+  private boolean disableNext = true;
 
   /**
    * @see mitll.langtest.client.custom.EditItem.EditableExercise#addNew(mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel)
@@ -72,7 +72,7 @@ class PrevNextList<T extends ExerciseShell> extends HorizontalPanel {
 
   /**
    */
-  protected void clickNext() {
+  void clickNext() {
     if (next.isEnabled() && next.isVisible()) {
       boolean onLast = container.loadNext();
       next.setEnabled(!disableNext || !onLast);

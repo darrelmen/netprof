@@ -17,10 +17,10 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class RecoTest {
-  private static Logger logger = Logger.getLogger(RecoTest.class);
-  private PathHelper pathHelper;
-  private LangTestDatabaseImpl langTest;
-  private AudioFileHelper audioFileHelper;
+  private static final Logger logger = Logger.getLogger(RecoTest.class);
+  private final PathHelper pathHelper;
+  private final LangTestDatabaseImpl langTest;
+  private final AudioFileHelper audioFileHelper;
 
   public RecoTest(LangTestDatabaseImpl langTest,ServerProperties serverProps, PathHelper pathHelper, AudioFileHelper audioFileHelper) {
     this.pathHelper = pathHelper;
