@@ -517,6 +517,20 @@ fieldset > legend {
     background-color: #d4d1cc;
 }
 
+.tableAltRowColor {
+    background-color: #eaf5fb;
+}
+
+.tableRowUserColor {
+    color: #d89374;
+    font-weight: bold;
+}
+
+.tableRowUserCurrentColor {
+    color:green;
+    font-weight: bold;
+}
+
 .correct {
    color:green
 }
@@ -898,6 +912,10 @@ fieldset > legend {
 
 #ASRScorePanel fieldset legend {
     margin-bottom: 5px;
+}
+
+#LeaderboardTable thead th {
+    border-top: 0px solid #DDDDDD;
 }
 
 .chartDim {
