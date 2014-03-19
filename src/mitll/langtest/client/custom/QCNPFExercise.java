@@ -4,6 +4,7 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Label;
+import com.github.gwtbootstrap.client.ui.Nav;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
@@ -109,7 +110,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
       protected void enableNext(Exercise exercise) {}
     };
 
-    if (!instance.contains(Navigation.REVIEW)) {
+    if (!instance.contains(Navigation.REVIEW) && !instance.contains(Navigation.COMMENT)) {
       approvedButton = addApprovedButton(listContainer, widgets);
     }
 
