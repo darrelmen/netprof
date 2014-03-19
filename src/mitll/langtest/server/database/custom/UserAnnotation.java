@@ -10,11 +10,11 @@ import java.util.Date;
  * To change this template use File | Settings | File Templates.
  */
 public class UserAnnotation {
-  private String exerciseID;
-  private String field;
-  private String status;
-  private String comment;
-  private long creatorID;
+  private final String exerciseID;
+  private final String field;
+  private final String status;
+  private final String comment;
+  private final long creatorID;
   private long timestamp;
 
   /**
