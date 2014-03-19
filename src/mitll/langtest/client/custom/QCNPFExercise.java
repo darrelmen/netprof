@@ -63,11 +63,11 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   private static final String APPROVED_BUTTON_TOOLTIP = "Indicate item has no defects.";
   private static final String APPROVED_BUTTON_TOOLTIP2 = "Item has been marked with a defect";
 
-  private Set<String> incorrectSet = new HashSet<String>();
+  private final Set<String> incorrectSet = new HashSet<String>();
   private List<RequiresResize> toResize;
-  private ListInterface<Exercise> listContainer;
+  private final ListInterface<Exercise> listContainer;
   private Button approvedButton;
-  Tooltip approvedTooltip;
+  private Tooltip approvedTooltip;
 
   public QCNPFExercise(Exercise e, ExerciseController controller, ListInterface<Exercise> listContainer,
                        float screenPortion, boolean addKeyHandler, String instance) {

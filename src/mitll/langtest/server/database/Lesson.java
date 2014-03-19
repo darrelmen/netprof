@@ -15,7 +15,7 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class Lesson {
-  private List<Exercise> exerciseList = new ArrayList<Exercise>();
+  private final List<Exercise> exerciseList = new ArrayList<Exercise>();
   private String unit;
 
   public Lesson(){}
