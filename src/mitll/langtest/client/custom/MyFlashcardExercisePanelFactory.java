@@ -49,6 +49,9 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends ExerciseP
   private static final String INCORRECT = "Incorrect";
   private static final String CORRECT = "Correct";
   private static final String REPEAT_THIS_SET = "Start Over";
+  public static final String NAME = "Name";
+  public static final String CORRECT_NBSP = "Correct&nbsp;%";
+  public static final String SKIP_THIS_ITEM = "Skip this item";
   private Exercise currentExercise;
   private final ControlState controlState;
   private List<T> allExercises;
@@ -93,6 +96,8 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends ExerciseP
   }
 
   private class StatsPracticePanel extends BootstrapExercisePanel {
+    public static final String RANK = "Rank";
+    public static final String SCORE = "Score";
     private Panel container;
     public StatsPracticePanel(Exercise e) {
       super(e, MyFlashcardExercisePanelFactory.this.service,
@@ -217,45 +222,61 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends ExerciseP
       container.add(chart);
       chart.addStyleName("chartDim");
 
-      Table table = makeTable(sessionAVPHistoryForList);
+      Table table = makeTable(sessionAVPHistoryForList, CORRECT_NBSP);
       container.add(table);
       container.add(chart2);
       chart2.addStyleName("chartDim");
-      Table table2 = makeTable(sessionAVPHistoryForListScore);
+      Table table2 = makeTable(sessionAVPHistoryForListScore, SCORE);
       container.add(table2);
       belowContentDiv.add(container);
       belowContentDiv.add(getRepeatButton());
     }
 
-    private Table makeTable(AVPHistoryForList sessionAVPHistoryForList) {
+    /**
+     * Make a three column table -- rank, name, and score
+     * @param sessionAVPHistoryForList
+     * @param scoreColHeader
+     * @return
+     */
+    private Table makeTable(AVPHistoryForList sessionAVPHistoryForList, String scoreColHeader) {
       Table table = new Table();
-      table.add(new TableHeader("Rank"));
-      table.add(new TableHeader("Name"));
-      table.add(new TableHeader("Score"));
+      table.getElement().setId("LeaderboardTable");
+      TableHeader w = new TableHeader(RANK);
+      table.add(w);
+      table.add(new TableHeader(NAME));
+      table.add(new TableHeader(scoreColHeader));
 
-      List<String> users = sessionAVPHistoryForList.getUsers();
-      List<Float> scores = sessionAVPHistoryForList.getScores();
-      for (int i = 0; i < users.size(); i++) {
+      List<AVPHistoryForList.UserScore> scores = sessionAVPHistoryForList.getScores();
+      for (int i = 0; i < scores.size(); i++) {
         HTMLPanel row = new HTMLPanel("tr","");
+        if (i % 2 == 0) row.addStyleName("tableAltRowColor");
         HTMLPanel col = new HTMLPanel("td","");
-        col.add(new HTML(""+(i + 1)));
+
+        AVPHistoryForList.UserScore userScore = scores.get(i);
+        col.add(new HTML(bold(userScore,""+userScore.getIndex())));
+      //    ""+(i + 1))));
         row.add(col);
         col = new HTMLPanel("td","");
-        col.add(new HTML(users.get(i)));
+        HTML widget = new HTML("<b>"+ userScore.getUser()+"</b>");
+        widget.addStyleName(userScore.isCurrent()? "tableRowUserCurrentColor":"tableRowUserColor");
+        col.add(widget);
 
         row.add(col);
         col = new HTMLPanel("td","");
 
-        String html = "" + Math.round(scores.get(i));
-        if (sessionAVPHistoryForList.getLatest() == i) {
-         html = "<b>"+html+"</b>";
-        }
+        String html = "" + Math.round(userScore.getScore());
+        html = bold(userScore,html);
         col.add(new HTML(html));
 
         row.add(col);
         table.add(row);
       }
       return table;
+    }
+
+    private String bold(AVPHistoryForList.UserScore score,String html) {
+
+      return score.isCurrent() ? "<b>"+html+"</b>" : html;
     }
 
     private int getCorrect() {
@@ -286,18 +307,12 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends ExerciseP
           num++;
         }
       }
-      //System.out.println("Scores " + exToScore + " total " + count + " items " + exToScore.size() + " avg " + (count/(float)exToScore.size()));
       return count/num;
     }
 
     private String toPercent(int numer, int denom) {
       return ((int) ((((float)numer) * 100f) / denom)) + "%";
     }
-
-/*    private String toPercent(double numer, int denom) {
-      return ((int) ((numer * 100f) / denom)) + "%";
-    }*/
-
     private String toPercent(double num) {
       return ((int) (num * 100f)) + "%";
     }
@@ -310,8 +325,6 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends ExerciseP
         public void onClick(ClickEvent event) {
           setMainContentVisible(true);
           belowContentDiv.remove(container);
-      //    exerciseList.show();
-
           reset();
 
           skip.setVisible(true);
@@ -328,12 +341,12 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends ExerciseP
      * @param feedback
      */
     protected void nextAfterDelay(boolean correct, String feedback) {
-      System.out.println("nextAfterDelay correct " + correct);
+      //System.out.println("nextAfterDelay correct " + correct);
       if (exerciseList.onLast()) {
         onSetComplete();
       }
       else {
-        System.out.println("\tnextAfterDelay not on last");
+        //System.out.println("\tnextAfterDelay not on last");
 
         loadNextOnTimer(DELAY_MILLIS);
       }
@@ -348,7 +361,7 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends ExerciseP
      */
     @Override
     protected void addWidgetsBelow(Panel toAddTo) {
-      skip = new Button("Skip this item");
+      skip = new Button(SKIP_THIS_ITEM);
       skip.setType(ButtonType.INFO);
       skip.addClickHandler(new ClickHandler() {
         @Override
