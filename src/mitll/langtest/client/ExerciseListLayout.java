@@ -1,18 +1,14 @@
 package mitll.langtest.client;
 
-import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.bootstrap.ResponseExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.flashcard.BootstrapFlashcardExerciseList;
-import mitll.langtest.client.flashcard.TableSectionExerciseList;
 import mitll.langtest.client.grading.GradedExerciseList;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.ExerciseShell;
 
 /**
@@ -29,13 +25,6 @@ public class ExerciseListLayout<T extends ExerciseShell> {
 
   public ExerciseListLayout(PropertyHandler props) {
     this.props = props;
-  }
-
-  public ListInterface<T> makeFlashcardExerciseList(FluidContainer container, LangTestDatabaseAsync service,
-                                                 UserManager userManager) {
-    this.exerciseList = new BootstrapFlashcardExerciseList<T>(container, service, userManager, props.isTimedGame(),
-      props.getGameTimeSeconds(), props);
-    return exerciseList;
   }
 
   /**
@@ -85,10 +74,6 @@ public class ExerciseListLayout<T extends ExerciseShell> {
         true, props.isEnglishOnlyMode(), controller,"grading");
     } else {
       if (props.isShowSections()) {
-        if (props.isFlashcardTeacherView()) {
-          return new TableSectionExerciseList<T>(secondRow, currentExerciseVPanel, service, feedback,
-            props.isShowTurkToken(), props.showExercisesInOrder(), controller,"table");
-        } else {
           if (props.isCRTDataCollectMode()) {
             return new ResponseExerciseList(secondRow, currentExerciseVPanel, service, feedback,
               props.isShowTurkToken(), props.showExercisesInOrder(), controller, "response");
@@ -98,7 +83,6 @@ public class ExerciseListLayout<T extends ExerciseShell> {
               props.isShowTurkToken(), props.showExercisesInOrder(), controller, showTypeAhead, "flex");
             return flex;
           }
-        }
       } else {
         return new PagingExerciseList<T>(currentExerciseVPanel, service, feedback,
           props.isShowTurkToken(), props.showExercisesInOrder(), controller, showTypeAhead, "paging");
