@@ -38,12 +38,12 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioPanel extends VerticalPanel implements RequiresResize {
-  protected static final int MIN_WIDTH = 256;
+  static final int MIN_WIDTH = 256;
   private static final float WAVEFORM_HEIGHT = 80f;//96;
   private static final float SPECTROGRAM_HEIGHT = 50f;//96;
-  protected static final String WAVEFORM = "Waveform";
-  protected static final String SPECTROGRAM = "Spectrogram";
-  public static final String WAVEFORM_TOOLTIP = "The waveform should only be used to determine when periods of silence" +
+  private static final String WAVEFORM = "Waveform";
+  private static final String SPECTROGRAM = "Spectrogram";
+  private static final String WAVEFORM_TOOLTIP = "The waveform should only be used to determine when periods of silence" +
     " and speech occur, or whether the mic is working properly.";
   private static final String WAV = ".wav";
   private static final String MP3 = "." + AudioTag.COMPRESSED_TYPE;
@@ -53,14 +53,14 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private static final int IMAGE_WIDTH_SLOP = 70 + WINDOW_SIZE_CHANGE_THRESHOLD/2;
 
   private final ScoreListener gaugePanel;
-  protected String audioPath;
+  String audioPath;
   private final Map<String,Integer> reqs = new HashMap<String, Integer>();
   private int reqid;
 
   private ImageAndCheck waveform;
   private ImageAndCheck spectrogram;
-  protected ImageAndCheck phones;
-  protected ImageAndCheck words;
+  ImageAndCheck phones;
+  ImageAndCheck words;
 
   private int lastWidth = 0;
   private AudioPositionPopup audioPositionPopup;
@@ -69,9 +69,9 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private PlayAudioPanel playAudio;
   private float screenPortion = 1.0f;
   private final boolean logMessages;
-  protected ExerciseController controller;
+  protected final ExerciseController controller;
   private boolean showSpectrogram = false;
-  private int rightMargin;
+  private final int rightMargin;
   private static final boolean debug = false;
   private static final boolean DEBUG_GET_IMAGES = false;
 
@@ -83,16 +83,16 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @param rightMargin
    * @param playButtonSuffix
    */
-  public AudioPanel(String path, LangTestDatabaseAsync service,
-                    ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin, String playButtonSuffix, String audioType) {
+  AudioPanel(String path, LangTestDatabaseAsync service,
+             ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin, String playButtonSuffix, String audioType) {
     this(service, controller, showSpectrogram, gaugePanel, 1.0f, rightMargin);
     this.audioPath = path;
 
     addWidgets(playButtonSuffix, audioType);
   }
 
-  public AudioPanel(LangTestDatabaseAsync service,
-                    ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel, float screenPortion, int rightMargin) {
+  protected AudioPanel(LangTestDatabaseAsync service,
+                       ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel, float screenPortion, int rightMargin) {
     this.screenPortion = screenPortion;
     this.soundManager = controller.getSoundManager();
     this.service = service;
@@ -120,7 +120,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @return
    * @param playButtonSuffix
    */
-  public void addWidgets(String playButtonSuffix, String audioType) {
+  protected void addWidgets(String playButtonSuffix, String audioType) {
     //System.out.println("addWidgets audio path = " + path);
     Panel imageContainer = new VerticalPanel();
 
@@ -171,7 +171,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     add(imageContainer);
   }
 
-  protected boolean hasAudio() {  return true;  }
+  boolean hasAudio() {  return true;  }
 
   public void doPause() { playAudio.doPause(); }
 
@@ -179,7 +179,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * This is sort of a hack -- so we can get left justify...
    * @return
    */
-  protected Widget getBeforePlayWidget() { return null;  }
+  Widget getBeforePlayWidget() { return null;  }
 
   @Override
   public void onLoad() {
@@ -263,7 +263,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @param end
    * @paramx waveDurInSeconds
    */
-  public void playSegment(float start, float end) {
+  void playSegment(float start, float end) {
     if (start >= end) {
       System.err.println("bad segment " + start + "-" + end);
     }
@@ -421,7 +421,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     });
   }
 
-  protected int getReqID(String type) {
+  int getReqID(String type) {
     synchronized (this) {
       int current = reqid++;
       reqs.put(type, current);
@@ -429,7 +429,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     }
   }
 
-  protected boolean isMostRecentRequest(String type, int responseReqID) {
+  boolean isMostRecentRequest(String type, int responseReqID) {
     synchronized (this) {
       Integer mostRecentIDForType = reqs.get(type);
       if (mostRecentIDForType == null) {
