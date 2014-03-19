@@ -11,11 +11,8 @@ import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
-
-import java.util.concurrent.CancellationException;
 
 /**
  * This is evil - easy to get it to draw a gauge that is squished 50% horizontally.
@@ -26,12 +23,12 @@ import java.util.concurrent.CancellationException;
  *
  */
 public class PretestGauge extends HTML{
-  private String id;                      // referenced in native js
-  private String label;                      // referenced in native js
+  private final String id;                      // referenced in native js
+  private final String label;                      // referenced in native js
   private JavaScriptObject canvasObject;  // referenced in native js
   private JavaScriptObject gaugeObject;   // referenced in native js
 
-	private PopupPanel tooltip;
+	private final PopupPanel tooltip;
 
 /*	float[][] colormap = {
       {255f, 0f, 0f},
