@@ -8,10 +8,10 @@ package mitll.langtest.server.trie;
  * To change this template use File | Settings | File Templates.
  */
 public class EmitValue<T> {
-  private int numTokens;
-  private TextEntityValue<T> textEntityDescription;
+  //private int numTokens;
+  private final TextEntityValue<T> textEntityDescription;
   public EmitValue(TextEntityValue<T> textEntityDescription, int n) {
-    this.numTokens = n;
+   // this.numTokens = n;
     this.textEntityDescription = textEntityDescription;
   }
 

@@ -36,13 +36,13 @@ public class NavigationHelper<T extends ExerciseShell> extends HorizontalPanel {
   private Button prev;
   private Button next;
   private HandlerRegistration keyHandler;
-  private boolean debug = false;
+  private final boolean debug = false;
   private boolean enableNextOnlyWhenAllCompleted = true;
-  private PostAnswerProvider provider;
+  private final PostAnswerProvider provider;
 
-  private boolean bindEnterKey = true;
+  private final boolean bindEnterKey = true;
 
-  protected ListInterface<T> listContainer;
+  private final ListInterface<T> listContainer;
 
   /**
    * @see ExercisePanel#getNavigationHelper(ExerciseController)
@@ -133,7 +133,7 @@ public class NavigationHelper<T extends ExerciseShell> extends HorizontalPanel {
     }
   }
 
-  protected void clickPrev(T e) {
+  void clickPrev(T e) {
     if (getPrev().isEnabled() && getPrev().isVisible()) {
       System.out.println("clickPrev " +keyHandler+ " click on prev " + getPrev());
       listContainer.loadPreviousExercise(e);
@@ -147,7 +147,7 @@ public class NavigationHelper<T extends ExerciseShell> extends HorizontalPanel {
    * @param controller
    * @param exercise
    */
-  protected void clickNext(final ExerciseController controller, final T exercise) {
+  void clickNext(final ExerciseController controller, final T exercise) {
     if (next.isEnabled() && next.isVisible()) {
       if (controller.isMinimalUI() && !controller.isGrading() && controller.isPromptBeforeNextItem()) {
         showConfirmNextDialog(controller, exercise);
