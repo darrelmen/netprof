@@ -3,14 +3,12 @@
  */
 package mitll.langtest.client.gauge;
 
-import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -39,12 +37,12 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
       "The recognizer generates scores for each word and phonetic unit (see the color-coded transcript for details).";
   private static final String WARNING = "<b>Repeat the phrase exactly as it is written. " +
     "Saying something different or adding/omitting words could result in incorrect scores.</b>";
-  public static final int CHART_HEIGHT = 100;
+  private static final int CHART_HEIGHT = 100;
 
   private final PretestGauge ASRGauge;
-  private Panel phoneList;
+  private final Panel phoneList;
   private final List<Float> scores = new ArrayList<Float>();
-  private SimplePanel chartPanel;
+  private final SimplePanel chartPanel;
 
   /**
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel
