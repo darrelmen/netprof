@@ -201,6 +201,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     if (answerAudio != null) answerAudio.onResize();
   }
 
+  protected Widget getQuestionContent(Exercise e) {
+    return getQuestionContent(e,(Panel)null);
+  }
+
   /**
    * Show the instructions and the audio panel.<br></br>
    * <p/>
