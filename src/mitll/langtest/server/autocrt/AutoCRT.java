@@ -31,19 +31,19 @@ import java.util.TreeSet;
  * To change this template use File | Settings | File Templates.
  */
 public class AutoCRT {
-  private static Logger logger = Logger.getLogger(AutoCRT.class);
+  private static final Logger logger = Logger.getLogger(AutoCRT.class);
   private static final String SERIALIZED_CLASSIFIER = "serializedClassifier.ser";
 
-  public static final double CORRECT_THRESHOLD = 0.499;
+  private static final double CORRECT_THRESHOLD = 0.499;
   private static final boolean GET_MSA = false;
   private static final boolean TESTING = false; // this doesn't really work
   private Classifier<AutoGradeExperiment.Event> classifier = null;
   private Map<String, Export.ExerciseExport> exerciseIDToExport;
-  private String installPath;
-  private String mediaDir;
+  private final String installPath;
+  private final String mediaDir;
   private final Export exporter;
-  private AutoCRTScoring db;
-  private double minPronScore;
+  private final AutoCRTScoring db;
+  private final double minPronScore;
 
   /**
    * @see mitll.langtest.server.audio.AudioFileHelper#makeAutoCRT

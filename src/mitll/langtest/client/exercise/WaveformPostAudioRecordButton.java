@@ -16,10 +16,10 @@ import mitll.langtest.shared.Exercise;
 * To change this template use File | Settings | File Templates.
 */
 public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
-  private RecordAudioPanel recordAudioPanel;
+  private final RecordAudioPanel recordAudioPanel;
   private PlayAudioPanel playAudioPanel;
-  private Panel parentPanel;
-  private String audioType;
+  private final Panel parentPanel;
+  private final String audioType;
 
   /**
    * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel(com.google.gwt.user.client.ui.Widget, String)
@@ -97,7 +97,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     setPlayEnabled(false);
   }
 
-  public void setPlayEnabled(boolean val) {
+  void setPlayEnabled(boolean val) {
     //System.out.println("setPlayEnabled -- " + getElement().getId() + " : valid audio ? " + hasValidAudio() + " enable " + val);
     playAudioPanel.setEnabled(val && hasValidAudio());
   }
