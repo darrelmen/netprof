@@ -32,19 +32,14 @@ public class ServerProperties {
   private static final String USE_WEIGHTS = "useWeights";
 
   private static final String DEFAULT_PROPERTIES_FILE = "config.properties";
-  private static final String FIRST_N_IN_ORDER = "firstNInOrder";
   private static final String DATA_COLLECT_MODE = "dataCollect";
   private static final String COLLECT_AUDIO = "collectAudio";
   private static final String COLLECT_AUDIO_DEFAULT = "true";
   private static final String BIAS_TOWARDS_UNANSWERED = "biasTowardsUnanswered";
-  private static final String USE_OUTSIDE_RESULT_COUNTS = "useOutsideResultCounts";
-  private static final String OUTSIDE_FILE = "outsideFile";
-  private static final String OUTSIDE_FILE_DEFAULT = "distributions.txt";
   private static final String H2_DATABASE = "h2Database";
   private static final String H2_DATABASE_DEFAULT = "vlr-parle";
   private static final String H2_STUDENT_ANSWERS_DATABASE = "h2StudentAnswers";
   private static final String H2_STUDENT_ANSWERS_DATABASE_DEFAULT = "h2StudentAnswers";
-  private static final String URDU = "urdu";
   private static final String READ_FROM_FILE = "readFromFile";
   private static final String FLASHCARD = "flashcard";
   private static final String CRTDATACOLLECT = "crtDataCollect";
@@ -56,7 +51,6 @@ public class ServerProperties {
   private static final String RECO_TEST2 = "recoTest2";
   private static final String ARABIC_TEXT_DATA_COLLECT = "arabicTextDataCollect";
   private static final String COLLECT_ONLY_AUDIO = "collectAudioOnly";
-  private static final String TIMED_GAME = "timedGame";
   private static final String MIN_PRON_SCORE = "minPronScore";
   private static final String MIN_PRON_SCORE_DEFAULT = "0.20";
   private static final String GOODWAVE_MODE = "goodwaveMode";
@@ -72,7 +66,6 @@ public class ServerProperties {
   private static final String FOREIGN_LANGUAGE_QUESTIONS_ONLY = "foreignLanguageQuestionsOnly";
   private static final String MAX_NUM_EXERCISES = "maxNumExercises";
   private static final String CLASSROOM_MODE = "classroomMode";
-  private static final String GRADING_PROP = "grading";
   private static final String INCLUDE_FEEDBACK = "includeFeedback";
   private static final String MAPPING_FILE = "mappingFile";
 
@@ -81,7 +74,6 @@ public class ServerProperties {
   public boolean dataCollectMode;
   private boolean collectAudio;
   public boolean biasTowardsUnanswered;
-  public boolean isDataCollectAdminView;
   private double minPronScore;
   private final int maxNumExercises = Integer.MAX_VALUE;
 
@@ -95,7 +87,7 @@ public class ServerProperties {
     this(null, configDir, configFile);
   }
 
-  public ServerProperties(ServletContext servletContext, String configDir, String configFile) {
+  private ServerProperties(ServletContext servletContext, String configDir, String configFile) {
     String dateFromManifest = getDateFromManifest(servletContext);
     readProperties(configDir, configFile, dateFromManifest);
   }
@@ -200,10 +192,6 @@ public class ServerProperties {
     return getDefaultFalse(COLLECT_ONLY_AUDIO);
   }
 
-  public boolean isTimedGame() {
-    return getDefaultFalse(TIMED_GAME);
-  }
-
   public boolean isGoodwaveMode() {
     return getDefaultFalse(GOODWAVE_MODE);
   }
@@ -241,7 +229,6 @@ public class ServerProperties {
   }
 
   public boolean isClassroomMode() { return getDefaultFalse(CLASSROOM_MODE); }
-  public boolean isGrading() { return getDefaultFalse(GRADING_PROP); }
 
   public boolean getCollectSynonyms() {
     return getDefaultTrue(COLLECT_SYNONYMS);
@@ -300,7 +287,6 @@ public class ServerProperties {
     dataCollectMode = getDefaultFalse(DATA_COLLECT_MODE);
     collectAudio = !props.getProperty(COLLECT_AUDIO, COLLECT_AUDIO_DEFAULT).equals("false");
     biasTowardsUnanswered = getDefaultFalse(BIAS_TOWARDS_UNANSWERED);
-    isDataCollectAdminView = getDefaultFalse("dataCollectAdminView");
 
     if (dateFromManifest != null && dateFromManifest.length() > 0) {
       //logger.debug("Date from manifest " + dateFromManifest);
