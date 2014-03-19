@@ -12,11 +12,11 @@ class AudioPositionPopup implements AudioControl {
   private static int counter  = 0;
   private int id = 0;
 
-  private PopupPanel imageOverlay;
+  private final PopupPanel imageOverlay;
   private float durationInMillis;
   private static final boolean debugPartial = false;
   private static final boolean debug = false;
-  private Panel imageContainer;
+  private final Panel imageContainer;
 
   /**
    * @see AudioPanel#getPlayButtons
