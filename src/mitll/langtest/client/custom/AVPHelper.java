@@ -25,7 +25,7 @@ class AVPHelper extends NPFHelper {
   private final LangTestDatabaseAsync service;
   private final UserManager userManager;
   private final ExerciseController controller;
-  private UserFeedback feedback;
+  private final UserFeedback feedback;
 
   /**
    * @see Navigation#Navigation(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, mitll.langtest.client.user.UserFeedback)

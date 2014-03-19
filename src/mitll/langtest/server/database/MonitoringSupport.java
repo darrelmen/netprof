@@ -32,18 +32,12 @@ public class MonitoringSupport {
   private static final int MAX_PEOPLE = 21;
   private static final Logger logger = Logger.getLogger(MonitoringSupport.class);
 
-  //private static final int KB = (1024);
-  //private static final int MB = (KB * KB);
-  //private static final int SESSION_GAP = 10 * 60 * 1000;
   private static final int MINUTE_MILLIS = 60 * 1000;
-  //private static final int HOUR_IN_MILLIS = (60 * MINUTE_MILLIS);
-  //private static final float HOUR_IN_MILLIS_FLOAT = (float)HOUR_IN_MILLIS;
   private static final float MINUTE_MILLIS_FLOAT = (float)MINUTE_MILLIS;
 
   private final UserDAO userDAO;
   private final ResultDAO resultDAO;
   private final GradeDAO gradeDAO;
-  private String outsideFile;
 
   private MonitoringSupport() {
     this(null,null,null);
@@ -54,8 +48,6 @@ public class MonitoringSupport {
     this.resultDAO = resultDAO;
     this.gradeDAO = gradeDAO;
   }
-
-  public void setOutsideFile(String outsideFile) { this.outsideFile = outsideFile; }
 
   /**
    * TODO : worry about duplicate userid?
@@ -189,31 +181,7 @@ public class MonitoringSupport {
         } else idToCount.put(key, c + 1);
       }
     }
-/*
 
-    for (Map.Entry<String, Integer> pair : idToCount.entrySet()) {
-      if (pair.getValue() == 0) logger.warn("huh? no results for " + pair.getKey());
-    }
-*/
-
-    if (outsideFile != null) {
-      Map<String, Integer> idToCountOutsideMale = new OutsideCount().getExerciseIDToOutsideCount( true, outsideFile,exercises);
-      Map<String, Integer> idToCountOutsideFemale = new OutsideCount().getExerciseIDToOutsideCount( false, outsideFile,exercises);
-
-      //  logger.info("map of outside counts is size = " + idToCountOutside.size() +" " + idToCountOutside.values().size());
-      for (Map.Entry<String, Integer> pair : idToCountOutsideMale.entrySet()) {
-        String key = pair.getKey() + "/0";
-        Integer count = idToCount.get(key);
-        if (count == null) logger.warn("missing exercise id " + key);
-        else idToCount.put(key,count+pair.getValue());
-      }
-      for (Map.Entry<String, Integer> pair : idToCountOutsideFemale.entrySet()) {
-        String key = pair.getKey() + "/0";
-        Integer count = idToCount.get(key);
-        if (count == null) logger.warn("missing exercise id " + key);
-        else idToCount.put(key,count+pair.getValue());
-      }
-    }
     return idToCount;
   }
 
@@ -303,23 +271,6 @@ public class MonitoringSupport {
       /*boolean b =*/ resultKeys.removeAll(idToCount.keySet());
       if (!resultKeys.isEmpty()) {
         logger.error("some result keys are not in the exercise keys " + resultKeys);
-      }
-    }
-
-    if (outsideFile != null) {
-      Map<String, Integer> idToCountOutsideMale =
-        new OutsideCount().getExerciseIDToOutsideCount(isMale, outsideFile, exercises);
-      if (!idToCountOutsideMale.isEmpty()) {
-        logger.debug("using outside count file " + outsideFile + " of size " +idToCountOutsideMale.size());
-      }
-      for (Map.Entry<String, Integer> pair : idToCountOutsideMale.entrySet()) {
-        String key = pair.getKey() + "/0";
-        Integer count = idToCount.get(key);
-        if (count == null) logger.warn("missing exercise id " + key);
-        else {
-          int value = count + pair.getValue();
-          idToCount.put(key, value);
-        }
       }
     }
 
