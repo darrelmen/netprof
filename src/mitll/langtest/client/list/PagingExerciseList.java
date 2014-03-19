@@ -35,9 +35,9 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T> {
-  protected ExerciseController controller;
+  protected final ExerciseController controller;
   protected PagingContainer<T> pagingContainer;
-  private boolean showTypeAhead;
+  private final boolean showTypeAhead;
 
   private TextBox typeAhead = null;
   private String lastValue = "";
@@ -122,7 +122,7 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
    * @param selectionState
    * @param prefix
    */
-  protected void loadExercises(String selectionState, String prefix) {
+  void loadExercises(String selectionState, String prefix) {
     lastReqID++;
     long listID = userListID;
     System.out.println("PagingExerciseList.loadExercises : looking for '" + prefix + "' (" + prefix.length() + " chars) in list id "+listID);
@@ -130,7 +130,7 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
     service.getExerciseIds(lastReqID, controller.getUser(), prefix, listID, new SetExercisesCallback());
   }
 
-  protected String getPrefix() { return typeAhead == null ? "" : typeAhead.getText(); }
+  String getPrefix() { return typeAhead == null ? "" : typeAhead.getText(); }
 
   private ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget user) {
     final ControlGroup userGroup = new ControlGroup();
@@ -199,7 +199,7 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
     add(pagingContainer.getTableWithPager());
   }
 
-  protected void addTypeAhead(Panel column) {
+  void addTypeAhead(Panel column) {
     if (showTypeAhead) {
       typeAhead = new TextBox();
       typeAhead.setDirectionEstimator(true);   // automatically detect whether text is RTL
@@ -224,7 +224,7 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
     }
   }
 
-  public void showEmptySelection() {
+  protected void showEmptySelection() {
     showPopup("No items match the selection and search.", "Try clearing one of your selections or changing the search.", typeAhead);
   }
 
@@ -242,13 +242,13 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
     t.schedule(3000);
   }
 
-  protected void tellUserPanelIsBusy() {
+  void tellUserPanelIsBusy() {
     Window.alert("Please stop recording before changing items.");
   }
 
-  protected String getHistoryToken(String id) { return "item=" +id; }
+  String getHistoryToken(String id) { return "item=" +id; }
 
-  protected void gotClickOnItem(final ExerciseShell e) {
+  void gotClickOnItem(final ExerciseShell e) {
     if (isExercisePanelBusy()) {
       tellUserPanelIsBusy();
       markCurrentExercise(pagingContainer.getCurrentSelection().getID());
