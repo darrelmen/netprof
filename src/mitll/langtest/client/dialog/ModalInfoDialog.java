@@ -25,26 +25,13 @@ import java.util.Collections;
  * To change this template use File | Settings | File Templates.
  */
 public class ModalInfoDialog {
-  private EnterKeyButtonHelper enterKeyButtonHelper = new EnterKeyButtonHelper();
-/*
-  public ModalInfoDialog(String title, String message) {
-    this(title, Collections.singleton(message), null,null);
-  }
-
-  public ModalInfoDialog(String title, Collection<String> messages) {
-    this(title, messages, null);
-  }
-*/
+  private final EnterKeyButtonHelper enterKeyButtonHelper = new EnterKeyButtonHelper();
 
   public ModalInfoDialog(String title, String message, HiddenHandler handler) {
     this(title, Collections.singleton(message), null, handler);
   }
 
-  public ModalInfoDialog(String title, Collection<String> messages, HiddenHandler handler) {
-    this(title, messages, null, handler);
-  }
-
-  public ModalInfoDialog(String title, Collection<String> messages, Widget widget, HiddenHandler handler) {
+  private ModalInfoDialog(String title, Collection<String> messages, Widget widget, HiddenHandler handler) {
     final Modal modal = new Modal(true);
     modal.setTitle(title);
     for (String m : messages) {
