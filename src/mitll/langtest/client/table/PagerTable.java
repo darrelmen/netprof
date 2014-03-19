@@ -15,7 +15,7 @@ import com.google.gwt.view.client.HasRows;
  * To change this template use File | Settings | File Templates.
  */
 public class PagerTable {
-  public Panel getPagerAndTable(HasRows table, Widget tableAsPanel, int pageSize, int fastForwardRows) {
+/*  public Panel getPagerAndTable(HasRows table, Widget tableAsPanel, int pageSize, int fastForwardRows) {
     com.github.gwtbootstrap.client.ui.SimplePager.Resources DEFAULT_RESOURCES = GWT.create(com.github.gwtbootstrap.client.ui.SimplePager.Resources.class);
     com.github.gwtbootstrap.client.ui.SimplePager pager = new com.github.gwtbootstrap.client.ui.SimplePager(com.github.gwtbootstrap.client.ui.SimplePager.TextLocation.CENTER, DEFAULT_RESOURCES, true, fastForwardRows, true);
 
@@ -28,9 +28,9 @@ public class PagerTable {
     vPanel.add(tableAsPanel);
 
     return vPanel;
-  }
+  }*/
 
-  public Panel getOldSchoolPagerAndTable(HasRows table, Widget tableAsPanel, int pageSize, int fastForwardRows) {
+  protected Panel getOldSchoolPagerAndTable(HasRows table, Widget tableAsPanel, int pageSize, int fastForwardRows) {
     SimplePager.Resources DEFAULT_RESOURCES = GWT.create(SimplePager.Resources.class);
     SimplePager pager = new SimplePager(SimplePager.TextLocation.CENTER, DEFAULT_RESOURCES, true, fastForwardRows, true);
 
