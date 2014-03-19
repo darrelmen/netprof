@@ -21,10 +21,10 @@ public class RecordAudioPanel extends AudioPanel {
 
   private PostAudioRecordButton postAudioRecordButton;
   private PlayAudioPanel playAudioPanel;
-  protected Panel exercisePanel;
+  protected final Panel exercisePanel;
 
-  public Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
-  public Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
+  private final Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
+  private final Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
   protected Exercise exercise;
 
   /**
