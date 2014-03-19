@@ -9,14 +9,11 @@ import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.Site;
 import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
-import mitll.langtest.shared.flashcard.FlashcardResponse;
-import mitll.langtest.shared.flashcard.Leaderboard;
 import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.grade.ResultsAndGrades;
@@ -43,7 +40,6 @@ public interface LangTestDatabase extends RemoteService {
   ExerciseListWrapper<? extends ExerciseShell> getExerciseIds(int reqID);
   ExerciseListWrapper<? extends ExerciseShell> getExerciseIds(int reqID, long userID);
   ExerciseListWrapper<? extends ExerciseShell> getExerciseIds(int reqID, long userID, String prefix, long userListID);
- // ExerciseListWrapper getExerciseIds(int reqID, long userID, boolean unansweredFirst);
 
   Exercise getExercise(String id);
 
@@ -72,18 +68,6 @@ public interface LangTestDatabase extends RemoteService {
   ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height);
 
   PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence, int width, int height, boolean useScoreToColorBkg);
-
-  // data collect admin (site administration) ------------------------------
-
-  Site getSiteByID(long id);
-  boolean deploySite(long id, String name, String language, String notes);
-  List<Site> getSites();
-
-  boolean isAdminUser(long id);
-
-  void setUserEnabled(long id, boolean enabled);
-
-  boolean isEnabledUser(long id);
 
   // monitoring support
 
@@ -118,28 +102,7 @@ public interface LangTestDatabase extends RemoteService {
   ExerciseListWrapper<? extends ExerciseShell> getExercisesForSelectionState(int reqID, Map<String,
     Collection<String>> typeToSection, long userID);
 
-  // flashcard support ------------------------------------------
-
-  FlashcardResponse getNextExercise(long userID, boolean getNext);
-  FlashcardResponse getNextExercise(long userID, Map<String, Collection<String>> typeToSection, boolean getNext);
-
-  void resetUserState(long userID);
-  void clearUserState(long userID);
-
-  int getNumExercisesForSelectionState(Map<String, Collection<String>> typeToSection);
-
-  List<? extends ExerciseShell> getFullExercisesForSelectionState(Map<String, Collection<String>> typeToSection, int start, int end);
-
   List<AVPHistoryForList> getUserHistoryForList(long userid, Collection<String> ids, long latestResultID);
-
-  /**
-   * Game is over notification...
-   * @param userid
-   * @param timeTaken
-   * @param selectionState
-   * @return
-   */
-  Leaderboard postTimesUp(long userid, long timeTaken, Map<String, Collection<String>> selectionState);
 
   void addDLIUser(DLIUser dliUser);
 
