@@ -26,7 +26,7 @@ public class ResponseChoice {
   public static final String AUDIO = "Audio";
   public static final String NONE = "None";
   private static final IconType MICROPHONE = IconType.MICROPHONE;
-  public static final IconType PENCIL = IconType.PENCIL;
+  private static final IconType PENCIL = IconType.PENCIL;
   private String responseType;
   private ChoiceMade choiceMade = null;
 
@@ -34,7 +34,7 @@ public class ResponseChoice {
    * @see mitll.langtest.client.list.TableSectionExerciseList#TableSectionExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, boolean, boolean, mitll.langtest.client.exercise.ExerciseController, String)
    * @param responseType
    */
-  public ResponseChoice(String responseType) { this.responseType = responseType; }
+  private ResponseChoice(String responseType) { this.responseType = responseType; }
 
   /**
    * @see mitll.langtest.client.bootstrap.ResponseExerciseList#ResponseExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, boolean, boolean, mitll.langtest.client.exercise.ExerciseController, String)
@@ -94,20 +94,20 @@ public class ResponseChoice {
   }
 
   public static class LeftRight {
-    public Panel left;
-    public Panel right;
+    public final Panel left;
+    public final Panel right;
     LeftRight(Panel left, Panel right) { this.left = left; this.right = right; }
   }
 
-  protected void addAudioChoice(Dropdown menu, final Heading responseTypeDisplay) {
+  void addAudioChoice(Dropdown menu, final Heading responseTypeDisplay) {
     addChoice(menu, responseTypeDisplay, AUDIO, MICROPHONE);
   }
 
-  protected void addTextChoice(Dropdown menu, final Heading responseTypeDisplay) {
+  void addTextChoice(Dropdown menu, final Heading responseTypeDisplay) {
     addChoice(menu, responseTypeDisplay, TEXT, PENCIL);
   }
 
-  protected void addNoneChoice(Dropdown menu, final Heading responseTypeDisplay) {
+  void addNoneChoice(Dropdown menu, final Heading responseTypeDisplay) {
     addChoice(menu, responseTypeDisplay, NONE, IconType.REMOVE);
   }
 
@@ -124,7 +124,7 @@ public class ResponseChoice {
     menu.add(audio);
   }
 
-  protected void addBothChoice(Dropdown menu, final Heading responseTypeDisplay) {
+  void addBothChoice(Dropdown menu, final Heading responseTypeDisplay) {
     NavLink both = new NavLink(BOTH);
     IconAnchor anchor = both.getAnchor();
     anchor.setIconPosition(IconPosition.LEFT);
