@@ -18,9 +18,9 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.flashcard.BootstrapExercisePanel;
 import mitll.langtest.client.flashcard.ControlState;
-import mitll.langtest.client.flashcard.FlashcardExercisePanelFactory;
 import mitll.langtest.client.flashcard.LeaderboardPlot;
 import mitll.langtest.client.list.ListChangeListener;
 import mitll.langtest.client.list.ListInterface;
@@ -44,7 +44,7 @@ import java.util.Set;
  * TODOx : concept of rounds explicit?
  * TODO : review table...?
  */
-class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends FlashcardExercisePanelFactory {
+class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends ExercisePanelFactory {
   private static final String REMAINING = "Remaining";
   private static final String INCORRECT = "Incorrect";
   private static final String CORRECT = "Correct";
@@ -52,10 +52,10 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends Flashcard
   private Exercise currentExercise;
   private final ControlState controlState;
   private List<T> allExercises;
-  int totalExercises = 0;
+  private int totalExercises = 0;
   //private final long userListID;
-  private Map<String,Boolean> exToCorrect = new HashMap<String, Boolean>();
-  private Map<String,Double>   exToScore = new HashMap<String, Double>();
+  private final Map<String,Boolean> exToCorrect = new HashMap<String, Boolean>();
+  private final Map<String,Double>   exToScore = new HashMap<String, Double>();
 
   /**
    * @see NPFHelper#setFactory(mitll.langtest.client.list.PagingExerciseList, String, long)
