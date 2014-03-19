@@ -29,16 +29,16 @@ import mitll.langtest.shared.Exercise;
  * To change this template use File | Settings | File Templates.
  */
 public class RecordButtonPanel implements RecordButton.RecordingListener {
-  protected RecordButton recordButton;
-  protected LangTestDatabaseAsync service;
-  protected ExerciseController controller;
-  private Exercise exercise;
-  private ExerciseQuestionState questionState;
-  private int index;
+  protected final RecordButton recordButton;
+  private final LangTestDatabaseAsync service;
+  private final ExerciseController controller;
+  private final Exercise exercise;
+  private final ExerciseQuestionState questionState;
+  private final int index;
   private int reqid = 0;
-  protected Panel panel;
-  private Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
-  private Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
+  private Panel panel;
+  private final Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
+  private final Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
   private boolean doFlashcardAudio = false;
   private final String audioType;
 
@@ -47,9 +47,9 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
    *
    * @see SimpleRecordExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    */
-  public RecordButtonPanel(final LangTestDatabaseAsync service, final ExerciseController controller,
-                           final Exercise exercise, final ExerciseQuestionState questionState, final int index,
-                           boolean doFlashcardAudio, String audioType, String recordButtonTitle){
+  protected RecordButtonPanel(final LangTestDatabaseAsync service, final ExerciseController controller,
+                              final Exercise exercise, final ExerciseQuestionState questionState, final int index,
+                              boolean doFlashcardAudio, String audioType, String recordButtonTitle){
     this.service = service;
     this.controller = controller;
     this.exercise = exercise;
@@ -72,7 +72,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
   /**
    * @see RecordButtonPanel#RecordButtonPanel
    */
-  protected void layoutRecordButton(Widget button) {
+  void layoutRecordButton(Widget button) {
     SimplePanel recordButtonContainer = new SimplePanel(button);
     recordButtonContainer.setWidth("75px");
     HorizontalPanel hp = new HorizontalPanel();
@@ -180,7 +180,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
       });
   }
 
-  protected void logMessage(String message) {
+  void logMessage(String message) {
     service.logMessage(message,new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {}

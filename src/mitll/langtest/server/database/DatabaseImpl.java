@@ -16,12 +16,9 @@ import mitll.langtest.server.database.flashcard.UserStateWrapper;
 import mitll.langtest.shared.DLIUser;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.Site;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
-import mitll.langtest.shared.flashcard.FlashcardResponse;
-import mitll.langtest.shared.flashcard.ScoreInfo;
 import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.grade.ResultsAndGrades;
@@ -77,10 +74,8 @@ public class DatabaseImpl implements Database {
   private ResultDAO resultDAO;
   private AnswerDAO answerDAO;
   private GradeDAO gradeDAO;
-  private SiteDAO siteDAO;
   private UserListManager userListManager;
   private UserExerciseDAO userExerciseDAO;
-  private UserListDAO userListDAO;
   private AddRemoveDAO addRemoveDAO;
 
   private DatabaseConnection connection = null;
@@ -142,7 +137,7 @@ public class DatabaseImpl implements Database {
    */
   private void initializeDAOs(PathHelper pathHelper) {
     userDAO = new UserDAO(this);
-    userListDAO = new UserListDAO(this, userDAO);
+    UserListDAO userListDAO = new UserListDAO(this, userDAO);
     addRemoveDAO = new AddRemoveDAO(this);
 
     userExerciseDAO = new UserExerciseDAO(this);
@@ -151,8 +146,7 @@ public class DatabaseImpl implements Database {
     resultDAO = new ResultDAO(this,userDAO);
     answerDAO = new AnswerDAO(this, resultDAO);
     gradeDAO = new GradeDAO(this,userDAO, resultDAO);
-    siteDAO = new SiteDAO(this, userDAO);
-    userListManager = new UserListManager( userDAO,userListDAO,userListExerciseJoinDAO, new AnnotationDAO(this,userDAO),
+    userListManager = new UserListManager( userDAO, userListDAO,userListExerciseJoinDAO, new AnnotationDAO(this,userDAO),
       new ReviewedDAO(this), pathHelper);
 
 
@@ -179,7 +173,6 @@ public class DatabaseImpl implements Database {
       userDAO.createUserTable(this);
       dliUserDAO.createUserTable(this);
 
-      siteDAO.createTable(getConnection());
       userListManager.setUserExerciseDAO(userExerciseDAO);
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
@@ -202,7 +195,7 @@ public class DatabaseImpl implements Database {
    * @param connection
    * @throws SQLException
    */
-  public void closeConnection(Connection connection) throws SQLException {}
+  public void closeConnection(Connection connection) {}
   public void closeConnection() throws SQLException {
 
     connection.getConnection().close();
@@ -495,54 +488,6 @@ public class DatabaseImpl implements Database {
     return idToCount;
   }
 
-  /**
-   * remember state for user so they can resume their flashcard exercise from that point.
-   * synchronize!
-   *
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getNextExercise
-   * @param userID
-   * @param isTimedGame
-   * @param getNext
-   * @return
-   */
-  public FlashcardResponse getNextExercise(List<Exercise> exercises, long userID, boolean isTimedGame, boolean getNext) {
-    return getFlashcardResponse(userID, isTimedGame, exercises, getNext);
-  }
-
-  public FlashcardResponse getNextExercise(long userID, boolean isTimedGame, boolean getNext) {
-    List<Exercise> exercises = getExercises(useFile, lessonPlanFile);
-    return getFlashcardResponse(userID, isTimedGame, exercises, getNext);
-  }
-
-  private FlashcardResponse getFlashcardResponse(long userID, boolean isTimedGame, List<Exercise> exercises,
-                                                 boolean getNext) {
-    UserStateWrapper userStateWrapper = createOrGetUserState(userID, exercises);
-
-    //if (isTimedGame || DO_SIMPLE_FLASHCARDS) {
-      FlashcardResponse flashcardResponse;
-      if (userStateWrapper.isComplete()) {
-        userStateWrapper.shuffle();
-      }
-      Exercise nextExercise = getNext ? userStateWrapper.getNextExercise() : userStateWrapper.getPrevExercise();
-
-      boolean onFirst = userStateWrapper.onFirst();
-      boolean onLast = userStateWrapper.onLast();
-
-      flashcardResponse =
-        new FlashcardResponse(nextExercise,
-          userStateWrapper.getCorrect(),
-          userStateWrapper.getIncorrect(), onFirst, onLast);
-
-      logger.debug("getFlashcardResponse returning " + flashcardResponse);
-      return flashcardResponse;
-    //}
-/*    else {
-      Map<String, Exercise> idToExercise = new HashMap<String, Exercise>();
-      for (Exercise e : exercises) idToExercise.put(e.getID(), e);
-      return getFlashcardResponse(idToExercise, userStateWrapper);
-    }*/
-  }
-
   private UserStateWrapper createOrGetUserState(long userID, List<Exercise> exercises) {
     UserStateWrapper userStateWrapper;
 
@@ -562,27 +507,6 @@ public class DatabaseImpl implements Database {
   }
 
   private final Map<Long, Integer> userToCorrect = new HashMap<Long, Integer>();
-
-  /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#postTimesUp(long, long, java.util.Map)
-   * @param userID
-   * @param timeTaken
-   * @param selection
-   * @return
-   */
-  public ScoreInfo getScoreInfo(long userID, long timeTaken, Map<String, Collection<String>> selection) {
-    UserStateWrapper userStateWrapper = userToState.get(userID);
-    int incorrect = userStateWrapper.getPincorrect();
-
-    int diffI = Math.max(0, userStateWrapper.getIncorrect() - incorrect);
-    logger.debug("getScoreInfo : diff  " + userToCorrect.get(userID) + " inc " + diffI);
-
-    ScoreInfo scoreInfo = new ScoreInfo(userID, -1, userToCorrect.get(userID), 0, timeTaken, selection);
-    userStateWrapper.setPincorrect(userStateWrapper.getIncorrect());
-
-    userToCorrect.put(userID, 0);
-    return scoreInfo;
-  }
 
   /**
    * TODO : do all average calc on server!
@@ -653,7 +577,7 @@ public class DatabaseImpl implements Database {
 
 
   /**
-   * @see #getFlashcardResponse
+   * @seex #getFlashcardResponse
    * @param userID
    * @param exercises
    * @return
@@ -741,24 +665,6 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#resetUserState(long)
-   * @param userID
-   */
-  public void resetUserState(long userID) {
-    synchronized (userToState) {
-      UserStateWrapper userStateWrapper = userToState.get(userID);
-      logger.debug("resetUserState for " + userID);
-      userStateWrapper.reset();     // remember past state
-    }
-  }
-
-  public void clearUserState(long userID) {
-    synchronized (userToState) {
-      userToState.remove(userID);
-    }
-  }
-
-  /**
    *
    *
    * @return unmodifiable list of exercises
@@ -773,7 +679,7 @@ public class DatabaseImpl implements Database {
    * Show unanswered questions first, then ones with 1, then 2, then 3,... answers
    * Also be aware of the user's gender -- if you're female, show questions that have no female answers first.
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesInModeDependentOrder
-   * @see #getNextExercise(long, boolean, boolean)
+   * @seex #getNextExercise(long, boolean, boolean)
    * @param userID so we can show gender aware orderings (i.e. show entries with fewer female responses to females, etc.)
    * @return ordered list of exercises
    */
@@ -1135,69 +1041,6 @@ public class DatabaseImpl implements Database {
     return new ArrayList<ResultAndGrade>(exidToRG.values());
   }
 
-  /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesInModeDependentOrder
-   * @paramxx userID
-   * @paramx firstNInOrder
-   * @return
-   */
-/*  public List<Exercise> getExercisesFirstNInOrder(long userID, int firstNInOrder) {
-    List<Exercise> rawExercises = getExercises();
-    int numInOrder = Math.min(firstNInOrder, rawExercises.size());
-    List<Exercise> newList = new ArrayList<Exercise>(rawExercises.subList(0, numInOrder));
-
-    List<Exercise> randomExercises = rawExercises.size() > numInOrder ? new ArrayList<Exercise>(rawExercises.subList(numInOrder,rawExercises.size())) : new ArrayList<Exercise>();
-
-    Collections.shuffle(randomExercises,new Random(userID));
-    newList.addAll(randomExercises);
-
-    //logger.debug("got " + newList.size());
-    if (newList.isEmpty()) logger.warn("no exercises for " + userID + "?");
-
-    String exerciseIDLastResult = resultDAO.getExerciseIDLastResult(userID);
-    if (!exerciseIDLastResult.equals("INVALID")) {
-      int i = 0;
-      for (Exercise e : newList) {
-        if (e.getID().equals(exerciseIDLastResult)) {
-          break;
-        }
-        else { i++; }
-      }
-      i++;
-      if (i == newList.size()-1) i = 0;
-      List<Exercise> back = newList.subList(i, newList.size());
-      List<Exercise> front = newList.subList(0, i);
-      logger.info("starting from #" + i + " or " + exerciseIDLastResult + " back " + back.size() + " front " + front.size());
-      back.addAll(front);
-      newList = back;
-      assert(newList.size() == back.size());//, "huh? sizes aren't equal " + newList.size() + " vs " + back.size());
-    }
-    return newList;
-  }*/
-
-  public boolean isAdminUser(long id) {
-    User user = getUser(id);
-    return user != null && user.admin;
-  }
-
-  public void setUserEnabled(long id, boolean enabled) {
-    userDAO.enableUser(id,enabled);
-  }
-
-  public boolean isEnabledUser(long id) {
-    User user = getUser(id);
-    return user != null && user.enabled;
-  }
-
-  private User getUser(long id) {
-    return userDAO.getUserMap().get(id);
-  }
-
-  public long addUser(HttpServletRequest request, int age, String gender, int experience, String dialect) {
-    String ip = getIPInfo(request);
-    return addUser(age, gender, experience, ip,dialect);
-  }
-
   public long addUser(HttpServletRequest request,
                       int age, String gender, int experience,
                       String nativeLang, String dialect, String userID) {
@@ -1475,33 +1318,6 @@ public class DatabaseImpl implements Database {
    */
   public void changeGrade(Grade toChange) {  gradeDAO.changeGrade(toChange);  }
   public int userExists(String login) { return userDAO.userExists(login);  }
-
-  /**
-   * @see mitll.langtest.server.SiteDeployer#doSiteResponse(DatabaseImpl, javax.servlet.http.HttpServletResponse, mitll.langtest.server.SiteDeployer, mitll.langtest.shared.Site)
-   * @param site
-   * @return
-   */
-  public Site addSite(Site site) { return siteDAO.addSite(site);  }
-  public boolean siteExists(Site site) { return siteDAO.getSiteWithName(site.name) != null;  }
-  public Site getSiteByID(long id) { return siteDAO.getSiteByID(id); }
-  public List<Site> getDeployedSites() { return siteDAO.getDeployedSites(); }
-  public void deploy(Site site) { siteDAO.deploy(site); }
-
-  /**
-   * @see mitll.langtest.server.SiteDeployer#deploySite(DatabaseImpl, mitll.langtest.server.mail.MailSupport, javax.servlet.http.HttpServletRequest, String, String, long, String, String, String)
-   * @param site
-   * @param name
-   * @param lang
-   * @param notes
-   * @return
-   */
-  public Site updateSite(Site site, String name, String lang, String notes) { return siteDAO.updateSite(site, name, lang, notes); }
-
-  /**
-   * @see mitll.langtest.server.SiteDeployer#updateExerciseFile(mitll.langtest.shared.Site, String, DatabaseImpl)
-   * @param site
-   */
-  public void updateSiteFile(Site site) { siteDAO.updateSiteFileInDB(site); }
 
   /**
    * TODO : worry about duplicate userid?
