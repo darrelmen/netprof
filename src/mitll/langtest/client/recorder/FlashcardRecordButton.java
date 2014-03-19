@@ -33,7 +33,7 @@ public class FlashcardRecordButton extends RecordButton {
   private static final String SPACE_BAR = "space bar";
   private static final String NO_SPACE_WARNING = "Press and hold space bar or mouse button to begin recording, release to stop.";
   private static final String PROMPT = "Click and hold to record";
-  public static final int WIDTH_FOR_BUTTON = 360;
+  private static final int WIDTH_FOR_BUTTON = 360;
 
   private boolean warnUserWhenNotSpace = true;
   private final boolean addKeyBinding;
