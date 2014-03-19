@@ -6,6 +6,7 @@ import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.PasswordTextBox;
 import com.github.gwtbootstrap.client.ui.Popover;
 import com.github.gwtbootstrap.client.ui.TextBox;
+import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
@@ -40,10 +41,10 @@ public class BasicDialog {
   private final List<Popover> visiblePopovers = new ArrayList<Popover>();
 
   protected FormField addControlFormField(Panel dialogBox, String label) {
-    return addControlFormField(dialogBox, label, false, 0);
+    return addControlFormField(dialogBox, label, false, 0, 30);
   }
 
-  protected FormField addControlFormField(Panel dialogBox, String label, boolean isPassword, int minLength) {
+  protected FormField addControlFormField(Panel dialogBox, String label, boolean isPassword, int minLength, int maxLength) {
     final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
     return getFormField(dialogBox, label, user, minLength);
   }
@@ -346,5 +347,35 @@ public class BasicDialog {
     public String toString() {
       return "Box: " + getValue();
     }
+  }
+
+
+  protected Tooltip addTooltip(Widget w, String tip) {
+    return createAddTooltip(w, tip, Placement.RIGHT);
+  }
+
+  /**
+   * @see mitll.langtest.client.custom.NPFExercise#makeAddToList(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController)
+   * @param widget
+   * @param tip
+   * @param placement
+   * @return
+   */
+  private Tooltip createAddTooltip(Widget widget, String tip, Placement placement) {
+    Tooltip tooltip = new Tooltip();
+    tooltip.setWidget(widget);
+    tooltip.setText(tip);
+    tooltip.setAnimation(true);
+// As of 4/22 - bootstrap 2.2.1.0 -
+// Tooltips have an bug which causes the cursor to
+// toggle between finger and normal when show delay
+// is configured.
+
+    tooltip.setShowDelay(500);
+    tooltip.setHideDelay(500);
+
+    tooltip.setPlacement(placement);
+    tooltip.reconfigure();
+    return tooltip;
   }
 }
