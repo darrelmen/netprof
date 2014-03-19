@@ -16,7 +16,7 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class FileReplace {
-  private static Logger logger = Logger.getLogger(FileReplace.class);
+  private static final Logger logger = Logger.getLogger(FileReplace.class);
 
   public void doTemplateReplace(String infile, String outfile, Map<String,String> replaceMap) {
     FileReader file;
