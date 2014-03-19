@@ -7,8 +7,6 @@ import com.github.gwtbootstrap.client.ui.Paragraph;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconSize;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.user.client.DOM;
@@ -19,7 +17,6 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.dialog.DialogHelper;
@@ -31,10 +28,9 @@ import java.util.List;
  * Does fancy font sizing depending on available width...
  */
 public class Flashcard implements RequiresResize {
-  private static final String AVP = "AUDIO VOCAB PRACTICE";
-  public static final String PRONUNCIATION_FEEDBACK = "PRONUNCIATION FEEDBACK";
+  private static final String PRONUNCIATION_FEEDBACK = "PRONUNCIATION FEEDBACK";
   private static final double MAX_FONT_EM = 1.8d;
-  public static final int SLOP = 55;
+  private static final int SLOP = 55;
   private static final String NEW_PRO_F1_PNG = "NewProF1.png";
   private static final String NEW_PRO_F2_PNG = "NewProF2.png";
   private final boolean isAnonymous;
@@ -43,25 +39,14 @@ public class Flashcard implements RequiresResize {
   private Image collab;
   private static final int min = 720;
   private HTML userNameWidget;
-  private String nameForAnswer;
+  private final String nameForAnswer;
 
   /**
-   * @see mitll.langtest.client.LangTest#doFlashcard()
    * @see mitll.langtest.client.LangTest#makeHeaderRow()
    */
   public Flashcard(PropertyHandler props) {
     this.nameForAnswer = props.getNameForAnswer() + "s";
     isAnonymous = props.getLoginType().equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS);
-  }
-
-  /**
-   * @see mitll.langtest.client.LangTest#doFlashcard()
-   * @param splashText
-   * @param userName
-   * @return
-   */
-  public Panel makeFlashcardHeaderRow(String splashText, String userName) {
-    return getHeaderRow(splashText, false, NEW_PRO_F2_PNG, AVP, userName, new HTML(""), null, null, null, null);
   }
 
   /**
@@ -225,30 +210,12 @@ public class Flashcard implements RequiresResize {
 
   public void showFlashHelp(final LangTest langTest, boolean isFlashcard) {
     final PropertyHandler props = langTest.getProps();
-    if (props.isTimedGame()) {
-      GWT.runAsync(new RunAsyncCallback() {
-        public void onFailure(Throwable caught) {
-          Window.alert("Code download failed");
-        }
-
-        public void onSuccess() {
-          showTimedGameHelp(langTest);
-        }
-      });
-    } else {
       List<String> msgs = new ArrayList<String>();
       msgs.add(isFlashcard ? "Practice your vocabulary by saying the matching " + props.getLanguage() + " phrase.":"Listen to the audio, then answer the question below.");
       msgs.add("Press the space bar to begin recording your answer.");
       msgs.add("Release the space bar to end recording.");
       DialogHelper dialogHelper = new DialogHelper(false);
       dialogHelper.showErrorMessage("Help", msgs);
-    }
-  }
-
-  public void showTimedGameHelp(LangTest langTest) {
-    final PropertyHandler props = langTest.getProps();
-    TimedGame timedGame = new TimedGame(langTest);
-    timedGame.showTimedGameHelp(props);
   }
 
   public void setAppTitle(String appTitle) {

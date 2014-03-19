@@ -22,15 +22,15 @@ import java.util.Set;
  * Created by GO22670 on 3/7/14.
  */
 public class ILRMapping {
-  private static Logger logger = Logger.getLogger(ILRMapping.class);
-  public static final String ILR_LEVEL = "ILR Level";
-  public static final String TEST_TYPE = "Test type";
+  private static final Logger logger = Logger.getLogger(ILRMapping.class);
+  private static final String ILR_LEVEL = "ILR Level";
+  private static final String TEST_TYPE = "Test type";
 
-  private Map<String,Set<String>> levelToExercises = new HashMap<String,Set<String>>();
-  private Map<String,String> exerciseToLevel = new HashMap<String,String>();
-  private Collection<String> readingExercises = new ArrayList<String>();
-  private Collection<String> listeningExercises = new ArrayList<String>();
-  private SectionHelper sectionHelper;
+  private final Map<String,Set<String>> levelToExercises = new HashMap<String,Set<String>>();
+  private final Map<String,String> exerciseToLevel = new HashMap<String,String>();
+  private final Collection<String> readingExercises = new ArrayList<String>();
+  private final Collection<String> listeningExercises = new ArrayList<String>();
+  private final SectionHelper sectionHelper;
 
   public ILRMapping(String configDir, SectionHelper sectionHelper, String mappingFile) {
     this.sectionHelper = sectionHelper;
