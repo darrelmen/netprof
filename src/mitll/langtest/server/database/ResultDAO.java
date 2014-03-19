@@ -61,14 +61,12 @@ public class ResultDAO extends DAO {
   static final String STIMULUS = "stimulus";
 
   private final GradeDAO gradeDAO;
-  private final ScheduleDAO scheduleDAO;
   private final boolean debug = false;
 
   public ResultDAO(Database database, UserDAO userDAO) {
     super(database);
 
     gradeDAO = new GradeDAO(database, userDAO, this);
-    scheduleDAO = new ScheduleDAO(database);
   }
 
   public List<SimpleResult> getSimpleResults() { return getSimpleResults("");  }
@@ -646,130 +644,6 @@ public class ResultDAO extends DAO {
     return userToAnswers;
   }
 
-
-  /**
-   * This should only be run once, on an old result table to update it.
-   *
-   * @see #createResultTable(java.sql.Connection)
-   */
-  private void enrichResults() {
-    List<Result> results = getResults();
-    Map<String, List<Result>> exidToResult = new HashMap<String, List<Result>>();
-
-    for (Result r : results) {
-      List<Result> resultsForExercise = exidToResult.get(r.id);
-      if (resultsForExercise == null) {
-        exidToResult.put(r.id, resultsForExercise = new ArrayList<Result>());
-      }
-      resultsForExercise.add(r);
-    }
-
-    Map<Long, List<Schedule>> scheduleForUserAndExercise = scheduleDAO.getSchedule();
-    for (String exid : exidToResult.keySet()) {
-      for (Result r : exidToResult.get(exid)) {
-        List<Schedule> schedules = scheduleForUserAndExercise.get(r.userid);
-        if (schedules != null) {
-          for (Schedule schedule : schedules) {
-            if (schedule.exid.equals(exid)) {
-              //   System.out.println("found schedule " + schedule + " for " + exid + " and result " + r);
-              r.setFLQ(schedule.flQ);
-              r.setSpoken(schedule.spoken);
-              enrichResult(r);
-            }
-          }
-        }
-      }
-    }
-  }
-
-  /**
-   * Add values for the duration field to old collections that don't have them.
-   * @param installPath
-   */
-/*  public void enrichResultDurations(String installPath) {
-    List<Result> results = getResults();
-    AudioCheck check = new AudioCheck();
-    logger.debug("enrichResultDurations checking " + results.size() + " results");
-    int count = 0;
-    for (Result r : results) {
-      if (r.durationInMillis == 0 && r.valid) {
-        File file = new File(installPath +File.separator +r.answer);
-        if (file.exists()) {
-          double durationInSeconds = check.getDurationInSeconds(file);
-          r.durationInMillis = (int)(durationInSeconds*1000d);
-      //    logger.debug("dur for " + file + " is " +r.durationInMillis);
-          enrichDur(r);
-          count++;
-        }
-        else {
-        //  logger.debug("couldn't find " + file.getAbsolutePath());
-        }
-      }
-    }
-    logger.debug("enriched " + count + " items of " + results.size() + " results");
-  }*/
-
-  /**
-   * @param toChange
-   * @see #enrichResults
-   */
-  private void enrichResult(Result toChange) {
-    try {
-      Connection connection = database.getConnection();
-      PreparedStatement statement;
-
-      String sql = "UPDATE " + RESULTS + " " +
-        "SET " +
-        "flq='" + toChange.flq + "', " +
-        "spoken='" + toChange.spoken + "' " +
-        "WHERE id=" + toChange.uniqueID;
-      if (debug) System.out.println("enrichResult " + toChange);
-      statement = connection.prepareStatement(sql);
-
-      int i = statement.executeUpdate();
-
-      if (debug) System.out.println("UPDATE " + i);
-      if (i == 0) {
-        System.err.println("huh? didn't update the grade for " + toChange);
-      }
-
-      statement.close();
-      database.closeConnection(connection);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-  /**
-   * Set the duration for one entry.
-   *
-   * @paramx toChange
-   */
-/*  private void enrichDur(Result toChange) {
-    try {
-      Connection connection = database.getConnection();
-
-      String sql = "UPDATE " + RESULTS + " " +
-          "SET " +
-          DURATION + "=" + toChange.durationInMillis + " " +
-          "WHERE id=" + toChange.uniqueID;
-     // logger.info("enrichResult " + toChange);
-      PreparedStatement statement = connection.prepareStatement(sql);
-
-      int i = statement.executeUpdate();
-
-      if (debug) System.out.println("UPDATE " + i);
-      if (i == 0) {
-        System.err.println("huh? didn't update the grade for " + toChange);
-      }
-
-      statement.close();
-      database.closeConnection(connection);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }*/
-
   void dropResults(Database database) {
     try {
       Connection connection = database.getConnection();
@@ -800,7 +674,6 @@ public class ResultDAO extends DAO {
     if (numColumns == 8) {
       //logger.info(RESULTS + " table had num columns = " + numColumns);
       addColumnToTable(connection);
-      enrichResults();
     }
     if (numColumns <= 11) {//!columnExists(connection,RESULTS, AUDIO_TYPE)) {
       //logger.info(RESULTS + " table had num columns = " + numColumns);
