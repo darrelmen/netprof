@@ -5,7 +5,7 @@ import com.google.gwt.core.client.JavaScriptObject;
 /**
  * Created by go22670 on 2/6/14.
  */
-public class WebAudio {
+class WebAudio {
   public static JavaScriptObject context;
 
   public static native boolean checkIfWebAudioInstalled() /*-{
@@ -74,7 +74,7 @@ public class WebAudio {
               WebAudio.callback = callback;
   }
 
-  static Loaded callback = null;
+  private static Loaded callback = null;
   public static interface Loaded {
     void audioLoaded();
   }
