@@ -21,15 +21,15 @@ import mitll.langtest.shared.ExerciseShell;
  * To change this template use File | Settings | File Templates.
  */
 public class ResponseExerciseList<T extends ExerciseShell> extends FlexSectionExerciseList<T> {
-  public static final String RESPONSE_TYPE = "responseType";
+  private static final String RESPONSE_TYPE = "responseType";
   private static final String SECOND_RESPONSE_TYPE = "secondResponseType";
   public static final String RESPONSE_TYPE_DIVIDER = "###";
   private static final String MSA = "MSA";
   private static final String ARABIC = "Arabic";
   private static final String RESPONSE_TYPE1 = " Response Type";
   private static final String ENGLISH = "English";
-  private ResponseChoice responseChoice;
-  private ResponseChoice secondResponseChoice;
+  private final ResponseChoice responseChoice;
+  private final ResponseChoice secondResponseChoice;
 
   /**
    * @see mitll.langtest.client.ExerciseListLayout#makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, boolean, mitll.langtest.client.user.UserFeedback, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
