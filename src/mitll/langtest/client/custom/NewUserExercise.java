@@ -44,30 +44,31 @@ import mitll.langtest.shared.custom.UserList;
 public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   private static final String FOREIGN_LANGUAGE = "Foreign Language";
   private static final String CREATE = "Create";
-  protected static final String ENGLISH_LABEL = "English (optional)";
-  protected static final String TRANSLITERATION_OPTIONAL = "Transliteration (optional)";
-  protected static final String NORMAL_SPEED_REFERENCE_RECORDING = "Normal speed reference recording";
-  protected static final String SLOW_SPEED_REFERENCE_RECORDING_OPTIONAL = "Slow speed reference recording (optional)";
+  static final String ENGLISH_LABEL = "English (optional)";
+  static final String TRANSLITERATION_OPTIONAL = "Transliteration (optional)";
+  static final String NORMAL_SPEED_REFERENCE_RECORDING = "Normal speed reference recording";
+  static final String SLOW_SPEED_REFERENCE_RECORDING_OPTIONAL = "Slow speed reference recording (optional)";
   private static final String ENTER_THE_FOREIGN_LANGUAGE_PHRASE = "Enter the foreign language phrase.";
   private static final String RECORD_REFERENCE_AUDIO_FOR_THE_FOREIGN_LANGUAGE_PHRASE = "Record reference audio for the foreign language phrase.";
   private static final String CLICK_AND_HOLD_TO_RECORD = "Click and Hold to Record";
   private static final String RELEASE_TO_STOP = "Release to Stop";
 
   private final EditItem editItem;
-  protected final UserExercise newUserExercise;
-  protected final ExerciseController controller;
-  protected final LangTestDatabaseAsync service;
+  final UserExercise newUserExercise;
+  final ExerciseController controller;
+  final LangTestDatabaseAsync service;
   private final HasText itemMarker;
-  protected BasicDialog.FormField english;
-  protected BasicDialog.FormField foreignLang;
-  protected BasicDialog.FormField translit;
-  protected CreateFirstRecordAudioPanel rap;
-  protected CreateFirstRecordAudioPanel rapSlow;
+  BasicDialog.FormField english;
+  BasicDialog.FormField foreignLang;
+  BasicDialog.FormField translit;
+  CreateFirstRecordAudioPanel rap;
+  CreateFirstRecordAudioPanel rapSlow;
 
-  protected ControlGroup normalSpeedRecording, slowSpeedRecording;
-  protected UserList ul;
-  protected UserList originalList;
-  protected ListInterface<T> listInterface;
+  ControlGroup normalSpeedRecording;
+  ControlGroup slowSpeedRecording;
+  UserList ul;
+  UserList originalList;
+  ListInterface<T> listInterface;
   private Panel toAddTo;
   private boolean clickedCreate = false;
 
@@ -156,7 +157,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     return container;
   }
 
-  protected void addItemsAtTop(Panel container) {
+  void addItemsAtTop(Panel container) {
 
   }
 
@@ -164,9 +165,9 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     gotBlur(english, foreignLang, rap, normalSpeedRecording, ul, listInterface, toAddTo);
   }
 
-  protected void gotBlur(FormField english, FormField foreignLang, RecordAudioPanel rap,
-                         ControlGroup normalSpeedRecording, UserList ul, ListInterface<T> pagingContainer,
-                         Panel toAddTo) {
+  void gotBlur(FormField english, FormField foreignLang, RecordAudioPanel rap,
+               ControlGroup normalSpeedRecording, UserList ul, ListInterface<T> pagingContainer,
+               Panel toAddTo) {
     grabInfoFromFormAndStuffInfoExercise();
   }
 
@@ -175,22 +176,22 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
    * @param row
    * @return
    */
-  protected ControlGroup makeRegularAudioPanel(Panel row) {
+  ControlGroup makeRegularAudioPanel(Panel row) {
     rap = makeRecordAudioPanel(row, true);
     return addControlGroupEntrySimple(row, NORMAL_SPEED_REFERENCE_RECORDING, rap);
   }
 
-  protected ControlGroup makeSlowAudioPanel(Panel row) {
+  ControlGroup makeSlowAudioPanel(Panel row) {
     rapSlow = makeRecordAudioPanel(row, false);
     return addControlGroupEntrySimple(row, SLOW_SPEED_REFERENCE_RECORDING_OPTIONAL, rapSlow);
   }
 
-  protected void configureButtonRow(Panel row) {
+  void configureButtonRow(Panel row) {
     row.addStyleName("buttonGroupInset");
   }
 
-  protected void deleteItem(final String id, final long uniqueID, final UserList ul,
-                            final PagingExerciseList<T> exerciseList, final NPFHelper npfHelper) {
+  void deleteItem(final String id, final long uniqueID, final UserList ul,
+                  final PagingExerciseList<T> exerciseList, final NPFHelper npfHelper) {
     service.deleteItemFromList(uniqueID, id, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {}
@@ -212,7 +213,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     });
   }
 
-  protected Panel makeEnglishRow(Panel container) {
+  Panel makeEnglishRow(Panel container) {
     Panel row = new FluidRow();
     container.add(row);
     english = addControlFormField(row, ENGLISH_LABEL, false, 1);
@@ -220,7 +221,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     return row;
   }
 
-  protected FormField makeForeignLangRow(Panel container) {
+  FormField makeForeignLangRow(Panel container) {
     Panel row = new FluidRow();
     container.add(row);
     foreignLang = addControlFormField(row, controller.getLanguage(), false, 1);
@@ -228,7 +229,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     return foreignLang;
   }
 
-  protected void makeTranslitRow(Panel container) {
+  void makeTranslitRow(Panel container) {
     Panel row = new FluidRow();
     container.add(row);
     translit = addControlFormField(row, TRANSLITERATION_OPTIONAL,false,0);
@@ -242,7 +243,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     });
   }
 
-  protected void setFields(UserExercise newUserExercise) {
+  void setFields(UserExercise newUserExercise) {
     System.out.println("grabInfoFromFormAndStuffInfoExercise : setting fields with " + newUserExercise);
 
     // english
@@ -288,8 +289,8 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
    * @param normalSpeedRecording
    * @return
    */
-  protected Panel getCreateButton(UserList ul, ListInterface<T> pagingContainer, Panel toAddTo,
-                                  ControlGroup normalSpeedRecording
+  Panel getCreateButton(UserList ul, ListInterface<T> pagingContainer, Panel toAddTo,
+                        ControlGroup normalSpeedRecording
   ) {
     Button submit = makeCreateButton(ul, pagingContainer, toAddTo, foreignLang, rap, normalSpeedRecording,
       CREATE);
@@ -343,9 +344,9 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
    * @param onClick
    * @param foreignChanged
    */
-  protected void validateThenPost(FormField foreignLang, RecordAudioPanel rap,
-                                  ControlGroup normalSpeedRecording, UserList ul, ListInterface<T> pagingContainer,
-                                  Panel toAddTo, boolean onClick, boolean foreignChanged) {
+  void validateThenPost(FormField foreignLang, RecordAudioPanel rap,
+                        ControlGroup normalSpeedRecording, UserList ul, ListInterface<T> pagingContainer,
+                        Panel toAddTo, boolean onClick, boolean foreignChanged) {
     if (foreignLang.getText().isEmpty()) {
       markError(foreignLang, ENTER_THE_FOREIGN_LANGUAGE_PHRASE);
     }
@@ -358,7 +359,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     }
   }
 
-  protected void formInvalid() {}
+  void formInvalid() {}
 
   /**
    * Ask the server if the foreign lang text is in our dictionary and can be run through hydec.
@@ -394,13 +395,13 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     });
   }
 
-  protected void grabInfoFromFormAndStuffInfoExercise() {
+  void grabInfoFromFormAndStuffInfoExercise() {
     newUserExercise.setEnglish(english.getText());
     newUserExercise.setForeignLanguage(foreignLang.getText());
     newUserExercise.setTransliteration(translit.getText());
   }
 
-  protected void checkIfNeedsRefAudio() {
+  void checkIfNeedsRefAudio() {
     if (newUserExercise == null || newUserExercise.getRefAudio() == null) {
       System.out.println("checkIfNeedsRefAudio : new user ex " + newUserExercise);
 
@@ -423,9 +424,9 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
    * @param toAddTo
    * @param onClick
    */
-  protected void afterValidForeignPhrase(final UserList ul,
-                                         final ListInterface<T> exerciseList,
-                                         final Panel toAddTo, boolean onClick) {
+  void afterValidForeignPhrase(final UserList ul,
+                               final ListInterface<T> exerciseList,
+                               final Panel toAddTo, boolean onClick) {
     service.reallyCreateNewItem(ul.getUniqueID(), newUserExercise, new AsyncCallback<UserExercise>() {
       @Override
       public void onFailure(Throwable caught) {}
@@ -437,7 +438,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     });
   }
 
-  protected void afterItemCreated(UserExercise newExercise, UserList ul, ListInterface<T> exerciseList, Panel toAddTo) {
+  void afterItemCreated(UserExercise newExercise, UserList ul, ListInterface<T> exerciseList, Panel toAddTo) {
     //System.out.println("afterItemCreated " + newExercise);
 
     editItem.clearNewExercise(); // success -- don't remember it
@@ -470,7 +471,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
    * @param recordRegularSpeed
    * @return
    */
-  protected CreateFirstRecordAudioPanel makeRecordAudioPanel(final Panel row, boolean recordRegularSpeed) {
+  CreateFirstRecordAudioPanel makeRecordAudioPanel(final Panel row, boolean recordRegularSpeed) {
     return new CreateFirstRecordAudioPanel(newUserExercise.toExercise(), row,  recordRegularSpeed);
   }
 
@@ -576,7 +577,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     }
   }
 
-  protected void audioPosted() {
+  void audioPosted() {
     if (clickedCreate) {
       clickedCreate = false;
       validateThenPost(foreignLang, rap, normalSpeedRecording, ul, listInterface, toAddTo, false, true);
