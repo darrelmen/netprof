@@ -27,13 +27,13 @@ public class ScoreFeedback {
 
   private IconAnchor feedbackImage;
   private Panel scoreFeedbackColumn;
-  private ProgressBar scoreFeedback = new ProgressBar();
+  private final ProgressBar scoreFeedback = new ProgressBar();
 
   private SimplePanel feedbackDummyPanel;
-  private boolean useWhite;
+  private final boolean useWhite;
 
   public ScoreFeedback(boolean useWhite) {  this.useWhite = useWhite;  }
-  boolean useShortWidth;
+  private boolean useShortWidth;
   /**
    * Holds the pron score feedback.
    * Initially made with a placeholder.
@@ -161,7 +161,7 @@ public class ScoreFeedback {
    * @param useShortWidth
    * @paramz width
    */
-  public void showScoreFeedback(String pronunciationScore, double score, boolean centerVertically, boolean useShortWidth) {
+  void showScoreFeedback(String pronunciationScore, double score, boolean centerVertically, boolean useShortWidth) {
     if (score < 0) score = 0;
     double percent = 100 * score;
 

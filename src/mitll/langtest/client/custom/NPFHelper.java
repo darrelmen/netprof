@@ -30,14 +30,14 @@ import java.util.Set;
  * Time: 3:27 PM
  * To change this template use File | Settings | File Templates.
  */
-public class NPFHelper implements RequiresResize {
+class NPFHelper implements RequiresResize {
   private boolean madeNPFContent = false;
 
-  private LangTestDatabaseAsync service;
+  private final LangTestDatabaseAsync service;
   private final ExerciseController controller;
-  private UserManager userManager;
+  private final UserManager userManager;
 
-  private UserFeedback feedback;
+  private final UserFeedback feedback;
   private PagingExerciseList<UserExercise> npfExerciseList;
   private SimplePanel npfContentPanel;
 
@@ -124,7 +124,7 @@ public class NPFHelper implements RequiresResize {
     }
   }
 
-  protected Panel setupContent(Panel hp) { return npfContentPanel; }
+  Panel setupContent(Panel hp) { return npfContentPanel; }
 
   /**
    * @see #doNPF
@@ -132,7 +132,7 @@ public class NPFHelper implements RequiresResize {
    * @param instanceName
    * @return
    */
-  protected PagingExerciseList<UserExercise> makeNPFExerciseList(Panel right, String instanceName, long userListID) {
+  PagingExerciseList<UserExercise> makeNPFExerciseList(Panel right, String instanceName, long userListID) {
     final PagingExerciseList<UserExercise> exerciseList = makeExerciseList(right, instanceName);
     setFactory(exerciseList, instanceName, userListID);
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -144,7 +144,7 @@ public class NPFHelper implements RequiresResize {
     return exerciseList;
   }
 
-  protected PagingExerciseList<UserExercise> makeExerciseList(final Panel right, final String instanceName) {
+  PagingExerciseList<UserExercise> makeExerciseList(final Panel right, final String instanceName) {
     return new PagingExerciseList<UserExercise>(right, service, feedback, false, false, controller,
         true, instanceName) {
         @Override
@@ -165,7 +165,7 @@ public class NPFHelper implements RequiresResize {
    * @param instanceName
    * @param userListID
    */
-  protected void setFactory(final PagingExerciseList<UserExercise> exerciseList, final String instanceName, long userListID) {
+  void setFactory(final PagingExerciseList<UserExercise> exerciseList, final String instanceName, long userListID) {
     exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, feedback, controller, exerciseList, 1.0f) {
       @Override
       public Panel getExercisePanel(Exercise e) {
@@ -185,7 +185,7 @@ public class NPFHelper implements RequiresResize {
    * @see #doNPF(mitll.langtest.shared.custom.UserList, String)
    * @return
    */
-  protected SimplePanel getNpfContentPanel() { return npfContentPanel; }
+  SimplePanel getNpfContentPanel() { return npfContentPanel; }
 
   @Override
   public void onResize() { if (npfContentPanel != null) {  npfExerciseList.onResize(); } }
