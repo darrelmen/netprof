@@ -33,7 +33,7 @@ import java.util.TreeSet;
  * To change this template use File | Settings | File Templates.
  */
 public class UserListManager {
-  private static Logger logger = Logger.getLogger(UserListManager.class);
+  private static final Logger logger = Logger.getLogger(UserListManager.class);
 
   private static final String CORRECT = "correct";
   private static final String FIXED = "fixed";
@@ -48,9 +48,9 @@ public class UserListManager {
   private int i = 0;
 
   private UserExerciseDAO userExerciseDAO;
-  private UserListDAO userListDAO;
-  private UserListExerciseJoinDAO userListExerciseJoinDAO;
-  private AnnotationDAO annotationDAO;
+  private final UserListDAO userListDAO;
+  private final UserListExerciseJoinDAO userListExerciseJoinDAO;
+  private final AnnotationDAO annotationDAO;
 
   private Set<String> reviewedExercises = new TreeSet<String>();
   private Set<String> incorrect = new TreeSet<String>();

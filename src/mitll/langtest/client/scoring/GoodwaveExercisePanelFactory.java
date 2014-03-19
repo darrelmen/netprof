@@ -16,7 +16,7 @@ import mitll.langtest.shared.Exercise;
  * To change this template use File | Settings | File Templates.
  */
 public class GoodwaveExercisePanelFactory extends ExercisePanelFactory {
-  private float screenPortion;
+  private final float screenPortion;
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad2()

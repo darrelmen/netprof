@@ -27,15 +27,15 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class UserListDAO extends DAO {
-  public static final String CREATORID = "creatorid";
-  private static Logger logger = Logger.getLogger(UserListDAO.class);
+  private static final String CREATORID = "creatorid";
+  private static final Logger logger = Logger.getLogger(UserListDAO.class);
 
   private static final String NAME = "name";
 
   public static final String USER_EXERCISE_LIST = "userexerciselist";
-  private UserDAO userDAO;
+  private final UserDAO userDAO;
   private UserExerciseDAO userExerciseDAO;
-  private UserListVisitorJoinDAO userListVisitorJoinDAO;
+  private final UserListVisitorJoinDAO userListVisitorJoinDAO;
 
   public UserListDAO(Database database, UserDAO userDAO) {
     super(database);
