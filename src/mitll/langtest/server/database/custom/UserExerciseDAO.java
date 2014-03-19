@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 public class UserExerciseDAO extends DAO {
-  private static Logger logger = Logger.getLogger(UserExerciseDAO.class);
+  private static final Logger logger = Logger.getLogger(UserExerciseDAO.class);
 
   private static final String EXERCISEID = "exerciseid";
   private static final String TRANSLITERATION = "transliteration";
@@ -28,7 +28,7 @@ public class UserExerciseDAO extends DAO {
   private static final String UNIT = "unit";
   private static final String LESSON = "lesson";
 
-  public static final String USEREXERCISE = "userexercise";
+  private static final String USEREXERCISE = "userexercise";
   private ExerciseDAO exerciseDAO;
   private static final boolean DEBUG = false;
 

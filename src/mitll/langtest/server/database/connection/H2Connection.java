@@ -17,14 +17,14 @@ import java.sql.Statement;
  * To change this template use File | Settings | File Templates.
  */
 public class H2Connection implements DatabaseConnection {
-  private static Logger logger = Logger.getLogger(H2Connection.class);
+  private static final Logger logger = Logger.getLogger(H2Connection.class);
 
   private Connection conn;
-  private int cacheSizeKB;
-  private int queryCacheSize;
+  private final int cacheSizeKB;
+  private final int queryCacheSize;
   private static final int maxMemoryRows = 50000;
 
-  public H2Connection(String configDir, String dbName) {
+  private H2Connection(String configDir, String dbName) {
     this(configDir, dbName, 50000, 8, true);
   }
 

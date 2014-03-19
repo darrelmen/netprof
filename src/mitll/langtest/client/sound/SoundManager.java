@@ -50,9 +50,9 @@ import java.util.Date;
  * @author gregbramble
  *
  */
-public class SoundManager {
+class SoundManager {
   private static boolean onreadyWasCalled = false;
-  final static boolean   debug = false;
+  private final static boolean   debug = false;
   public static native void initialize() /*-{
     $wnd.soundManager.onload = $wnd.loaded();
     $wnd.soundManager.ontimeout = $wnd.ontimeout();
