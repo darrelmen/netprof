@@ -318,7 +318,7 @@ public class CommentNPFExercise extends NPFExercise {
     }
   }
 
-  private Map<String,String> fieldToComment = new HashMap<String,String>();
+  private final Map<String,String> fieldToComment = new HashMap<String,String>();
 
   /**
    * @see mitll.langtest.client.custom.CommentNPFExercise.MyPopup#configure(com.github.gwtbootstrap.client.ui.TextBox, com.google.gwt.user.client.ui.Widget, com.google.gwt.user.client.ui.Widget)
