@@ -18,7 +18,7 @@ import org.apache.log4j.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class LTSFactory {
-  private static Logger logger = Logger.getLogger(LTSFactory.class);
+  private static final Logger logger = Logger.getLogger(LTSFactory.class);
 
   public LTS getLTSClass(String language) {
     LTS letterToSoundClass = language != null && language.equals("English") ? new EnglishLTS() : new ArabicLTS();

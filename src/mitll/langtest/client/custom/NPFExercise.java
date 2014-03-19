@@ -43,8 +43,8 @@ public class NPFExercise extends GoodwaveExercisePanel {
    * @param instance
    * @see NPFHelper#setFactory(mitll.langtest.client.list.PagingExerciseList, String, long)
    */
-  public NPFExercise(Exercise e, ExerciseController controller, ListInterface listContainer, float screenPortion,
-                     boolean addKeyHandler, String instance) {
+  NPFExercise(Exercise e, ExerciseController controller, ListInterface listContainer, float screenPortion,
+              boolean addKeyHandler, String instance) {
     super(e, controller, listContainer, screenPortion, addKeyHandler, instance);
   }
 
@@ -54,7 +54,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
    * @param controller
    * @return
    */
-  protected Panel makeAddToList(Exercise e, ExerciseController controller) {
+  Panel makeAddToList(Exercise e, ExerciseController controller) {
     addToList = new DropdownButton("");
     addToList.setRightDropdown(true);
     addToList.setIcon(IconType.PLUS_SIGN);

@@ -23,7 +23,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   private static final int WIDTH = 250;
   private static final int HEIGHT = 170;
   private static final String PX = "8px";
-  private String id = "flashcontent";
+  private final String id = "flashcontent";
   private static MicPermission micPermission;
   private boolean didPopup = false;
   private static boolean permissionReceived;
@@ -53,7 +53,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
       return hasFlash;
   }-*/;
 
-  public void show() {
+  void show() {
     setSize(WIDTH + "px", HEIGHT + "px");
   }
 
