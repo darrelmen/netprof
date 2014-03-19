@@ -1,20 +1,13 @@
 package mitll.langtest.client.flashcard;
 
-import com.google.gwt.event.dom.client.ClickHandler;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
-import mitll.langtest.shared.flashcard.Leaderboard;
-import mitll.langtest.shared.flashcard.ScoreInfo;
 import mitll.langtest.shared.flashcard.SetScore;
-import mitll.langtest.shared.monitoring.Session;
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.PlotBand;
 import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.labels.PlotBandLabel;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 public class LeaderboardPlot {
   private static final float HALF = (1f / 4f);
@@ -23,58 +16,6 @@ public class LeaderboardPlot {
   private static final String PERSONAL_BEST = "Personal Best";
   private static final String CORRECT = "Correct";
   private static final String SCORE = "Score";
-
-  /**
-   * @deprecated  for now
-   * @param leaderboard
-   * @param userID
-   * @param gameTimeSeconds
-   * @param currentSelection
-   * @param prompt
-   * @param onYes
-   * @param onNo
-   * @param autoHideDelay
-   */
-  public void showLeaderboardPlot(Leaderboard leaderboard, final long userID, int gameTimeSeconds,
-                                  Map<String, Collection<String>> currentSelection,
-                                  String prompt,
-                                  final ClickHandler onYes, final ClickHandler onNo,int autoHideDelay) {
-    List<ScoreInfo> scores = leaderboard.getScores(currentSelection);
-  }
-
-  /**
-   * @see mitll.langtest.client.custom.MyFlashcardExercisePanelFactory.StatsPracticePanel#onSetComplete()
-   * @param scores
-   * @param userID
-   * @param gameTimeSeconds
-   * @param title
-   * @param subtitle
-   * @param useCorrect
-   * @param topToUse
-   * @return
-   */
-/*
-  public <T extends SetScore> Chart getChart(List<T> scores, long userID, int gameTimeSeconds,
-                                             String title, String subtitle, boolean useCorrect, float topToUse) {
-    GetPlotValues getPlotValues = new GetPlotValues<T>(scores, userID, useCorrect).invoke();
-    return getChart(scores.size(), gameTimeSeconds, getPlotValues, title, subtitle, useCorrect ? CORRECT : SCORE, !useCorrect, topToUse);
-  }
-
-  private <T extends SetScore> Chart getChart(int numScores, int gameTimeSeconds,
-                                              GetPlotValues getPlotValues,
-                                              String title, String subtitle, String seriesName,
-                                              boolean topIs100, float topToUse) {
-    System.out.println("title "  +title+ " top is 100 " + topIs100 + " top " + topToUse);
-    float pbCorrect = getPlotValues.getPbCorrect();
-    float top = getPlotValues.getTop();
-    float total = getPlotValues.getTotalCorrect();
-    float avg = getPlotValues.getClassAvg();
-
-    List<Float> yValuesForUser = getPlotValues.getyValuesForUser();
-
-    return getChart(numScores, gameTimeSeconds, title, subtitle, seriesName, topIs100, topToUse, pbCorrect, top, total, avg, yValuesForUser);
-  }
-*/
 
   public Chart getChart(AVPHistoryForList historyForList, String title, String subtitle) {
     boolean useCorrect = historyForList.isUseCorrect();
