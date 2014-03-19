@@ -14,12 +14,12 @@ import com.google.gwt.user.client.ui.Widget;
  * Created by go22670 on 2/10/14.
  */
 public abstract class TabContainer implements RequiresResize {
-  public static final String LEARN_PRONUNCIATION = "Learn Pronunciation";
-  protected static final String PRACTICE = "Practice";
-  protected Widget container;
-  protected TabPanel tabPanel;
+  static final String LEARN_PRONUNCIATION = "Learn Pronunciation";
+  static final String PRACTICE = "Practice";
+  private Widget container;
+  TabPanel tabPanel;
 
-  protected TabAndContent makeTab(TabPanel toAddTo, IconType iconType, String label) {
+  TabAndContent makeTab(TabPanel toAddTo, IconType iconType, String label) {
     Tab create = new Tab();
     create.setIcon(iconType);
     create.setHeading(label);
@@ -59,8 +59,8 @@ public abstract class TabContainer implements RequiresResize {
   protected abstract /* <T extends ExerciseShell>*/ Panel getButtonRow2(Panel secondAndThird);
 
   public static class TabAndContent {
-    public Tab tab;
-    public DivWidget content;
+    public final Tab tab;
+    public final DivWidget content;
 
     /**
      * @param tab
