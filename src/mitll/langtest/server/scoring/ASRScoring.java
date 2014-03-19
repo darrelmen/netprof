@@ -48,7 +48,7 @@ import java.util.TreeSet;
  */
 public class ASRScoring extends Scoring {
   private static final double KEEP_THRESHOLD = 0.3;
-  private static Logger logger = Logger.getLogger(ASRScoring.class);
+  private static final Logger logger = Logger.getLogger(ASRScoring.class);
   private static final boolean DEBUG = false;
 
   private static final int FOREGROUND_VOCAB_LIMIT = 100;
@@ -63,10 +63,10 @@ public class ASRScoring extends Scoring {
    * By keeping these here, we ensure that we only ever read the dictionary once
    */
   private HTKDictionary htkDictionary;
-  private LTS letterToSoundClass;
+  private final LTS letterToSoundClass;
   private final Cache<String, Scores> audioToScore;
-  private ConfigFileCreator configFileCreator;
-  private boolean isMandarin;
+  private final ConfigFileCreator configFileCreator;
+  private final boolean isMandarin;
 
   /**
    * Normally we delete the tmp dir created by hydec, but if something went wrong, we want to keep it around.
