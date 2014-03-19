@@ -19,9 +19,7 @@ public class AVPHistoryForList implements IsSerializable {
   private float totalNotMe = 0f;
   private float numNotMe = 0f;
   private int numScores;
-  private List<Float> scores = new ArrayList<Float>();
-  private List<String> users = new ArrayList<String>();
-  private int latest;
+  private List<UserScore> scores = new ArrayList<UserScore>();
 
   public AVPHistoryForList() {}
   public AVPHistoryForList(List<Session> scores, long userID, boolean useCorrect) {
@@ -34,15 +32,9 @@ public class AVPHistoryForList implements IsSerializable {
   public float getPbCorrect() {
     return pbCorrect;
   }
-
   public float getTop() {
     return top;
   }
-
-/*  public void setTop(float top) {
-    this.top = top;
-  }*/
-
   public float getTotalCorrect() {
     return totalCorrect;
   }
@@ -101,28 +93,50 @@ public class AVPHistoryForList implements IsSerializable {
     return numScores;
   }
 
-  public void addPair(String userID, float correctPercent) {
-    users.add(userID);
-    scores.add(correctPercent);
-  }
-
-  public List<Float> getScores() {
+  public List<UserScore> getScores() {
     return scores;
   }
 
-  public List<String> getUsers() {
-    return users;
+  public void setScores(List<UserScore> scores) {
+    this.scores = scores;
+  }
+
+  public static class UserScore implements IsSerializable {
+    private String user;
+    private float score;
+    private boolean isCurrent;
+    private int index;
+
+    public UserScore() {}
+    public UserScore(int index,String user, float score, boolean isCurrent) {
+      this.index = index ;
+      this.user = user;
+      this.score = score;
+      this.isCurrent = isCurrent;
+    }
+
+
+    public String getUser() {
+      return user;
+    }
+
+    public float getScore() {
+      return score;
+    }
+
+    public boolean isCurrent() {
+      return isCurrent;
+    }
+
+    public int getIndex() {
+      return index;
+    }
+
+    public String toString() { return "id " + index + " by " + user + " " + getScore() + " current " + isCurrent(); }
   }
 
   public String toString() {
-    return "History " + numScores + " correct " + getTotalCorrect() + " pb correct " + getPbCorrect() + " class avg " + getClassAvg();
-  }
-
-  public void setLatest(int latest) {
-    this.latest = latest;
-  }
-
-  public int getLatest() {
-    return latest;
+    return "History " + numScores + " correct " + getTotalCorrect() + " pb correct " + getPbCorrect() +
+      " class avg " + getClassAvg() + " scores " + scores;
   }
 }
