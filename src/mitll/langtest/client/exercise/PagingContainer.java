@@ -35,7 +35,7 @@ import java.util.Set;
  */
 public class PagingContainer<T extends ExerciseShell> {
   private static final int MAX_LENGTH_ID = 27;
-  protected static final int PAGE_SIZE = 10;   // TODO : make this sensitive to vertical real estate?
+  private static final int PAGE_SIZE = 10;   // TODO : make this sensitive to vertical real estate?
   private ListDataProvider<T> dataProvider;
   private static final boolean DEBUG = false;
   private static final int ID_LINE_WRAP_LENGTH = 20;
@@ -44,10 +44,10 @@ public class PagingContainer<T extends ExerciseShell> {
   private static final int MIN_PAGE_SIZE = 3;
   private static final float DEFAULT_PAGE_SIZE = 15f;
   private CellTable<T> table;
-  protected ExerciseController controller;
+  private final ExerciseController controller;
   private int verticalUnaccountedFor = 100;
   private Set<String> completed = new HashSet<String>();
-  private Map<String,T> idToExercise = new HashMap<String, T>();
+  private final Map<String,T> idToExercise = new HashMap<String, T>();
 
   /**
    * @see mitll.langtest.client.list.PagingExerciseList#makePagingContainer()
@@ -178,13 +178,12 @@ public class PagingContainer<T extends ExerciseShell> {
     return column;
   }
 
-  private CellTable<T> makeCellTable() {
+  private void makeCellTable() {
     CellTable.Resources o = chooseResources();
 
     this.table = makeCellTable(o);
 
     configureTable();
-    return null;
   }
 
   private CellTable.Resources chooseResources() {
@@ -252,7 +251,7 @@ public class PagingContainer<T extends ExerciseShell> {
     };*/
   }
 
-  protected Column<T, SafeHtml> getExerciseIdColumn2(final boolean consumeClicks) {
+  Column<T, SafeHtml> getExerciseIdColumn2(final boolean consumeClicks) {
     return new Column<T, SafeHtml>(new MySafeHtmlCell(consumeClicks)) {
 
       @Override
@@ -393,7 +392,7 @@ public class PagingContainer<T extends ExerciseShell> {
     String id = exercise.getID();
     T exercise1 = (T) exercise; // TODO : can't remember how I avoid this
     idToExercise.put(id, exercise1);
-    int i = list.indexOf((T)afterThisOne);
+    int i = list.indexOf(afterThisOne);
     list.add(i+1,exercise1);
     int after = list.size();
     System.out.println("data now has "+ after + " after adding " + exercise.getID());
@@ -421,8 +420,8 @@ public class PagingContainer<T extends ExerciseShell> {
     }
   }
 
-  private boolean debug = false;
-  public int getNumTableRowsGivenScreenHeight() {
+  private final boolean debug = false;
+  int getNumTableRowsGivenScreenHeight() {
     int header = getTableHeaderHeight();
     int leftOver = Window.getClientHeight() - header - verticalUnaccountedFor;
 
@@ -453,8 +452,8 @@ public class PagingContainer<T extends ExerciseShell> {
     return rows;
   }
 
-  protected int heightOfCellTableWith15Rows() { return HEIGHT_OF_CELL_TABLE_WITH_15_ROWS;  }
-  protected int getTableHeaderHeight() { return controller.getHeightOfTopRows(); }
+  int heightOfCellTableWith15Rows() { return HEIGHT_OF_CELL_TABLE_WITH_15_ROWS;  }
+  int getTableHeaderHeight() { return controller.getHeightOfTopRows(); }
 
   public void markCurrentExercise(String itemID) {
     if (getList() == null || getList().isEmpty()) return;
@@ -464,7 +463,7 @@ public class PagingContainer<T extends ExerciseShell> {
     markCurrent(i,t);
   }
 
-  protected void markCurrent(int i, T itemToSelect) {
+  void markCurrent(int i, T itemToSelect) {
     if (DEBUG) System.out.println(new Date() + " markCurrentExercise : Comparing selected " + itemToSelect.getID());
     table.getSelectionModel().setSelected(itemToSelect, true);
     if (DEBUG) {
