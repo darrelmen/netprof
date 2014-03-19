@@ -45,11 +45,6 @@
         <servlet-name>downloadServet</servlet-name>
         <url-pattern>/downloadResults/*</url-pattern>
     </servlet-mapping>
-<!--
-    <context-param>
-    <param-name>tomcatWriteDirectoryFullPath</param-name>
-    <param-value>answers</param-value>
-  </context-param>-->
 
   <context-param>
      <param-name>config</param-name>
