@@ -22,7 +22,7 @@ import mitll.langtest.shared.Exercise;
 public abstract class PostAudioRecordButton extends RecordButton implements RecordButton.RecordingListener {
   private boolean validAudio = false;
   private static final int LOG_ROUNDTRIP_THRESHOLD = 3000;
-  private int index;
+  private final int index;
   private int reqid = 0;
   private Exercise exercise;
   private final ExerciseController controller;
