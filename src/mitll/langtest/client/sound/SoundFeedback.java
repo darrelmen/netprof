@@ -18,7 +18,7 @@ public class SoundFeedback {
 
   private final HTML warnNoFlash;
   private Sound currentSound = null;
-  private SoundManagerAPI soundManager;
+  private final SoundManagerAPI soundManager;
 
   public SoundFeedback(SoundManagerAPI soundManager,HTML warnNoFlash) {
     this.soundManager = soundManager;
