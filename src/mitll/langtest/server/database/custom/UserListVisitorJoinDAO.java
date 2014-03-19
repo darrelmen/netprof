@@ -26,7 +26,7 @@ public class UserListVisitorJoinDAO extends DAO {
   private static final String VISITORID = "visitorid";
   private static final String MODIFIED = "modified";
 
-  private static Logger logger = Logger.getLogger(UserListVisitorJoinDAO.class);
+  private static final Logger logger = Logger.getLogger(UserListVisitorJoinDAO.class);
 
   private static final String USER_EXERCISE_LIST_VISITOR = "userexerciselist_visitor";
 
