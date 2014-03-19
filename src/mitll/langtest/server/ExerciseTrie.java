@@ -101,8 +101,8 @@ public class ExerciseTrie extends Trie<Exercise> {
   }
 
   private static class ExerciseWrapper implements TextEntityValue<Exercise> {
-    private String value;
-    private Exercise e;
+    private final String value;
+    private final Exercise e;
 
     /**
      * @see ExerciseTrie#ExerciseTrie
