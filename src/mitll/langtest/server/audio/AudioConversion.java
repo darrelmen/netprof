@@ -27,19 +27,19 @@ import java.io.OutputStream;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioConversion {
-  private static Logger logger = Logger.getLogger(AudioConversion.class);
+  private static final Logger logger = Logger.getLogger(AudioConversion.class);
   private static final String LAME_PATH_WINDOWS = "C:\\Users\\go22670\\lame\\lame.exe";
   private static final String LAME_PATH_LINUX = "/usr/local/bin/lame";
 
 /*  private static final String FFMPEG_PATH_WINDOWS = "C:\\Users\\go22670\\ffmpeg\\bin\\ffmpeg.exe";
   private static final String FFMPEG_PATH_LINUX = "/usr/local/bin/ffmpeg";*/
 
-  public static final String LINUX_SOX_BIN_DIR = "/usr/local/bin";
-  public static final String LINUX_SOX_BIN_DIR_2 = "/usr/bin";
-  public static final String WINDOWS_SOX_BIN_DIR = "C:\\Users\\go22670\\sox-14-3-2";
+  private static final String LINUX_SOX_BIN_DIR = "/usr/local/bin";
+  private static final String LINUX_SOX_BIN_DIR_2 = "/usr/bin";
+  private static final String WINDOWS_SOX_BIN_DIR = "C:\\Users\\go22670\\sox-14-3-2";
   public static final String SIXTEEN_K_SUFFIX = "_16K";
-  File oggEncoder;
-  private AudioCheck audioCheck = new AudioCheck();
+  private File oggEncoder;
+  private final AudioCheck audioCheck = new AudioCheck();
 
   public AudioConversion() {
     String os = getOS();
