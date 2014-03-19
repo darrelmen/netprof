@@ -19,9 +19,9 @@ import java.util.Map;
 */
 public class SelectionState {
   private String item;
-  private Map<String, Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
+  private final Map<String, Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
   private String instance = "";
-  private boolean debug = false;
+  private final boolean debug = false;
 
   /**
    * Populated from history token!
