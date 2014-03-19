@@ -11,7 +11,7 @@ import java.util.List;
  */
 class ResultAndGrade implements Comparable<ResultAndGrade> {
   private static final int HIGHEST_INCORRECT_GRADE = 3;
-  private ResultDAO.SimpleResult result;
+  private final ResultDAO.SimpleResult result;
   private List<Grade> grades = new ArrayList<Grade>();
 
   public ResultAndGrade(ResultDAO.SimpleResult result, List<Grade> grades) {
