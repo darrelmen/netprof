@@ -56,7 +56,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   private static final String REFERENCE = " Reference";
   private static final String RECORD_YOURSELF = "Record Yourself";
   private static final String RELEASE_TO_STOP = "Release to Stop";
-  public static final int HEADING_FOR_UNIT_LESSON = 4;
+  private static final int HEADING_FOR_UNIT_LESSON = 4;
   private boolean isBusy = false;
 
   private static final String WAV = ".wav";
@@ -69,9 +69,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   protected final LangTestDatabaseAsync service;
   protected ScoreListener scorePanel;
   private AudioPanel contentAudio, answerAudio;
-  private NavigationHelper<Exercise> navigationHelper;
+  private final NavigationHelper<Exercise> navigationHelper;
   private final float screenPortion;
-  protected String instance;
+  protected final String instance;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -180,7 +180,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     div.addStyleName("buttonGroupInset6");
   }
 
-  protected HorizontalPanel getUnitLessonForExercise() {
+  HorizontalPanel getUnitLessonForExercise() {
     HorizontalPanel flow = new HorizontalPanel();
     flow.getElement().setId("getUnitLessonForExercise_unitLesson");
     flow.addStyleName("leftFiveMargin");
@@ -265,7 +265,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     return vp;
   }
 
-  protected Widget getItemHeader(Exercise e) {
+  Widget getItemHeader(Exercise e) {
     Heading w = new Heading(HEADING_FOR_UNIT_LESSON, "Item", e.getID());
     w.getElement().setId("ItemHeading");
    return w;
