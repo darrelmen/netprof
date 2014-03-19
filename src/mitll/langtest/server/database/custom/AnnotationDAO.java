@@ -27,9 +27,9 @@ import java.util.TreeSet;
  * To change this template use File | Settings | File Templates.
  */
 public class AnnotationDAO extends DAO {
-  private static Logger logger = Logger.getLogger(AnnotationDAO.class);
+  private static final Logger logger = Logger.getLogger(AnnotationDAO.class);
 
-  public static final String ANNOTATION = "annotation";
+  private static final String ANNOTATION = "annotation";
   private static final String CREATORID = "creatorid";
 
 
@@ -126,9 +126,9 @@ public class AnnotationDAO extends DAO {
     }
   }
 
-  public int getCount() { return getCount(ANNOTATION); }
+  //public int getCount() { return getCount(ANNOTATION); }
 
-  private Map<String,List<UserAnnotation>> exerciseToAnnos = new HashMap<String, List<UserAnnotation>>();
+  private final Map<String,List<UserAnnotation>> exerciseToAnnos = new HashMap<String, List<UserAnnotation>>();
 
   private void populate(long userid) {
     List<UserAnnotation> all = getAll(userid);
@@ -176,7 +176,7 @@ public class AnnotationDAO extends DAO {
    * @param userID
    * @return
    */
-  public boolean hasAnnotationOld(String exerciseID, String field, String status, String comment, long userID) {
+/*  public boolean hasAnnotationOld(String exerciseID, String field, String status, String comment, long userID) {
     String sql = "SELECT * from " + ANNOTATION + " where exerciseid='" + exerciseID + "' AND " + CREATORID +"="+userID+
       " order by field,modified desc";
 
@@ -188,7 +188,7 @@ public class AnnotationDAO extends DAO {
       logger.error("got " +e + " doing " + sql,e);
     }
     return false;
-  }
+  }*/
 
   /**
    * @see UserListManager#addAnnotations(mitll.langtest.shared.AudioExercise)
