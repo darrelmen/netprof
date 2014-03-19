@@ -15,10 +15,10 @@ import java.sql.Timestamp;
  * Reading, etc. happens in {@link ResultDAO} - might be a little confusing... :)
  */
 public class AnswerDAO {
-  private static Logger logger = Logger.getLogger(AnswerDAO.class);
+  private static final Logger logger = Logger.getLogger(AnswerDAO.class);
 
   private final Database database;
-  private ResultDAO resultDAO;
+  private final ResultDAO resultDAO;
 
   public AnswerDAO(Database database, ResultDAO resultDAO) { this.database = database; this.resultDAO = resultDAO; }
 
