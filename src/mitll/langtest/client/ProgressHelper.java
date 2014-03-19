@@ -11,8 +11,8 @@ import mitll.langtest.client.list.ListInterface;
  * Time: 12:09 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ProgressHelper {
-  private ProgressBar progressBar;
+class ProgressHelper {
+  private final ProgressBar progressBar;
   public ProgressHelper() {
     progressBar = makeProgressBar();
   }
