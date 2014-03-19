@@ -55,14 +55,14 @@ public class EditItem<T extends ExerciseShell> {
   private static final String EDIT_ITEM = "editItem";
   private static final String REMOVE_FROM_LIST = "Remove from list";
 
-  protected final ExerciseController controller;
+  private final ExerciseController controller;
   private final NPFHelper npfHelper;
-  protected final LangTestDatabaseAsync service;
+  private final LangTestDatabaseAsync service;
   private final UserManager userManager;
-  protected final ListInterface<? extends ExerciseShell> predefinedContentList;
+  final ListInterface<? extends ExerciseShell> predefinedContentList;
   private UserFeedback feedback = null;
   private HasText itemMarker;
-  protected PagingExerciseList<T> exerciseList;
+  PagingExerciseList<T> exerciseList;
 
   /**
    * @param service
@@ -265,7 +265,7 @@ public class EditItem<T extends ExerciseShell> {
    * @param doNewExercise
    * @return
    */
-  protected NewUserExercise<T> getAddOrEditPanel(UserExercise exercise, HasText itemMarker, UserList originalList, boolean doNewExercise) {
+  NewUserExercise<T> getAddOrEditPanel(UserExercise exercise, HasText itemMarker, UserList originalList, boolean doNewExercise) {
     NewUserExercise<T> editableExercise;
     if (doNewExercise) {
       editableExercise = new NewUserExercise<T>(service, controller, itemMarker, this, exercise);
@@ -331,7 +331,7 @@ public class EditItem<T extends ExerciseShell> {
     private final HTML slowAnno = new HTML();
     private String originalForeign = "";
     private String originalEnglish = "";
-    protected final UserList originalList;
+    final UserList originalList;
 
     /**
      *
@@ -355,7 +355,7 @@ public class EditItem<T extends ExerciseShell> {
       validateThenPost(foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo, false, changed);
     }
 
-    protected PrevNextList<T> getPrevNext(ListInterface<T> pagingContainer) {
+    PrevNextList<T> getPrevNext(ListInterface<T> pagingContainer) {
       final T exerciseShell = pagingContainer.byID(newUserExercise.getID());
       return new PrevNextList<T>(exerciseShell, exerciseList, shouldDisableNext());
     }
@@ -379,7 +379,7 @@ public class EditItem<T extends ExerciseShell> {
       }
     }
 
-    protected boolean shouldDisableNext() {  return true; }
+    boolean shouldDisableNext() {  return true; }
 
     /**
      * Add remove from list button
@@ -521,7 +521,7 @@ public class EditItem<T extends ExerciseShell> {
      * @paramx listener
      * @return
      */
-    protected boolean checkForForeignChange() {
+    boolean checkForForeignChange() {
       if (foreignChanged()) {
         if (!refAudioChanged() && newUserExercise.getRefAudio() != null) {
           markError(normalSpeedRecording, "Consistent with " + controller.getLanguage() + "?", "Is the audio consistent with \"" + foreignLang.getText() + "\" ?");
@@ -569,7 +569,7 @@ public class EditItem<T extends ExerciseShell> {
      * @param pagingContainer
      * @param buttonClicked
      */
-    protected void reallyChange(final ListInterface<T> pagingContainer, final boolean buttonClicked) {
+    void reallyChange(final ListInterface<T> pagingContainer, final boolean buttonClicked) {
       newUserExercise.setCreator(controller.getUser());
       postEditItem(pagingContainer, buttonClicked);
     }
@@ -609,7 +609,7 @@ public class EditItem<T extends ExerciseShell> {
      * @param pagingContainer
      * @param buttonClicked
      */
-    protected void doAfterEditComplete(ListInterface<T> pagingContainer, boolean buttonClicked) {
+    void doAfterEditComplete(ListInterface<T> pagingContainer, boolean buttonClicked) {
       System.out.println("doAfterEditComplete : change tooltip " + buttonClicked + " id " + predefinedContentList.getCurrentExerciseID());
 
       changeTooltip(pagingContainer);
