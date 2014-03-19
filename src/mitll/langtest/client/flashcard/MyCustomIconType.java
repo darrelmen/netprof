@@ -24,7 +24,7 @@ public enum MyCustomIconType implements BaseIconType {
   }
 
   private static final String PREFIX = "myBaseIcon_";
-  private String className;
+  private final String className;
 
   MyCustomIconType() {
     this.className = this.name().toLowerCase();
