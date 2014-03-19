@@ -20,11 +20,11 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class DAO {
-  private static Logger logger = Logger.getLogger(DAO.class);
+  private static final Logger logger = Logger.getLogger(DAO.class);
 
   protected final Database database;
 
-  public DAO(Database database) { this.database = database;  }
+  protected DAO(Database database) { this.database = database;  }
 
   protected int getNumColumns(Connection connection, String table) throws SQLException {
     Statement stmt = connection.createStatement();
@@ -38,7 +38,7 @@ public class DAO {
     return numColumns;
   }
 
-  protected Collection<String> getColumns(String table) throws SQLException {
+  protected Collection<String> getColumns(String table) {
     Set<String> columns = new HashSet<String>();
     try {
       Connection connection = database.getConnection();
