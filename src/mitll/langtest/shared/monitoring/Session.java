@@ -25,17 +25,24 @@ public class Session implements IsSerializable, SetScore {
   private float avgScore;
   private Map<String,Boolean> exidToCorrect = new HashMap<String,Boolean>();
   private Map<String,Float> exidToScore = new HashMap<String,Float>();
+  private long timestamp;
 
   private Set<String> exids = new HashSet<String>();
   private boolean latest;
+  private int id;
 
   public Session(){} // required
 
   /**
    * @see mitll.langtest.server.database.ResultDAO#partitionIntoSessions2
    * @param userid
+   * @param timestamp
    */
-  public Session(long userid) { this.userid = userid;  }
+  public Session(int id, long userid, long timestamp) {
+    this.userid = userid;
+    this.id = id;
+    this.timestamp = timestamp;
+  }
 
   public long getAverageDurMillis() { return duration/ getNumAnswers(); }
   public long getSecAverage() { return (duration/ getNumAnswers())/1000; }
@@ -116,18 +123,27 @@ public class Session implements IsSerializable, SetScore {
     return correctPercent;
   }
 
-  public String toString() {
-    return "user " + userid+
-      " num " + getNumAnswers() + " dur " + duration/(60*1000) + " minutes, avg " + getAverageDurMillis()/1000 +
-      " secs, correct = " + correct + "(" + correctPercent+
-      "%) avg score : " + avgScore;
-  }
-
+  /**
+   * @see mitll.langtest.server.database.ResultDAO#partitionIntoSessions2(java.util.List, java.util.Collection, long)
+   * @param latest
+   */
   public void setLatest(boolean latest) {
     this.latest = latest;
   }
 
   public boolean isLatest() {
     return latest;
+  }
+
+  public long getTimestamp() {
+    return timestamp;
+  }
+
+  public String toString() {
+    return "id " + id+
+      " user " + userid+
+      " num " + getNumAnswers() + " dur " + duration/(60*1000) + " minutes, avg " + getAverageDurMillis()/1000 +
+      " secs, correct = " + correct + "(" + correctPercent+
+      "%) avg score : " + avgScore;
   }
 }
