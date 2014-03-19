@@ -52,13 +52,13 @@ public class MonitoringManager {
   private static final int HOUR = (60 * MIN);
   private static final int MIN_COUNT_FOR_BROWSER = 10;
   private static final int MIN_COUNT_FOR_DIALECT = 10;
-  public static final int MIN_SIZE_TO_TRIGGER_FILTER = 15;
-  public static final int ITEM_CHART_ITEM_WIDTH = 1000;
-  public static final int MAX_GRADE_ROUNDS = 3;
+  private static final int MIN_SIZE_TO_TRIGGER_FILTER = 15;
+  private static final int ITEM_CHART_ITEM_WIDTH = 1000;
+  private static final int MAX_GRADE_ROUNDS = 3;
 
-  protected LangTestDatabaseAsync service;
+  private final LangTestDatabaseAsync service;
   private String item = "Item";
-  private String items = item+"s";
+  private final String items = item+"s";
   private String answer = "Answer";
   private String answers = answer +"s";
   private String user = "Recorder";
