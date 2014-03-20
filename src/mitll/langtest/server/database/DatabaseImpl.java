@@ -625,60 +625,6 @@ public class DatabaseImpl implements Database {
     return userStateWrapper;
   }
 
-/*  private FlashcardResponse getFlashcardResponse(Map<String, Exercise> idToExercise, UserStateWrapper userState) {
-    try {
-      UserState state = userState.state;
-      if (state.finished()) {
-        return new FlashcardResponse(true, userState.getCorrect(), userState.getIncorrect());
-      }
-      else {
-        Exercise exercise = idToExercise.get(state.next());
-        return new FlashcardResponse(exercise,
-          userState.getCorrect(),
-          userState.getIncorrect(), false, false);
-      }
-    } catch (Exception e) {
-      return new FlashcardResponse(true,
-        userState.getCorrect(),
-        userState.getIncorrect());
-    }
-  }*/
-
-  /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
-   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
-   * @param userID
-   * @param exerciseID
-   * @param isCorrect
-   */
-  public UserStateWrapper updateFlashcardState(long userID, String exerciseID, boolean isCorrect) {
-    if (isCorrect) {
-      Integer integer = userToCorrect.get(userID);
-      userToCorrect.put(userID, integer == null ? 1 : integer + 1);
-    }
-    UserStateWrapper state = null;
-    synchronized (userToState) {
-      try {
-        state = userToState.get(userID);
-        if (state == null) {
-          logger.error("can't find state for user id " + userID);
-        } else {
-          state.state.update(exerciseID, isCorrect);
-          if (isCorrect) {
-            state.setCorrect(state.getCorrect() + 1);
-          }
-          else {
-            state.setIncorrect(state.getIncorrect() + 1);
-          }
-        }
-      } catch (Exception e) {
-        logger.error("got " + e + " from updating "+ userID + " with " + exerciseID);
-        userToState.remove(userID);
-      }
-    }
-    return state;
-  }
-
   /**
    *
    *
