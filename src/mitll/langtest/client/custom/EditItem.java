@@ -88,7 +88,7 @@ public class EditItem<T extends ExerciseShell> {
    * @param includeAddItem
    * @return
    */
-  public Panel editItem(UserList originalList, final HasText itemMarker, boolean includeAddItem, boolean isUserReviewer) {
+  public Panel editItem(UserList originalList, final HasText itemMarker, boolean includeAddItem/*, boolean isUserReviewer*/) {
     Panel hp = new HorizontalPanel();
     hp.getElement().setId("EditItem_for_"+originalList.getName());
     Panel pagerOnLeft = new SimplePanel();
@@ -101,7 +101,7 @@ public class EditItem<T extends ExerciseShell> {
 
     this.itemMarker = itemMarker; // TODO : something less awkward
 
-    UserList copy = makeListOfOnlyYourItems(isUserReviewer, originalList);
+    UserList copy = makeListOfOnlyYourItems(/*isUserReviewer,*/ originalList);
 
     exerciseList = makeExerciseList(contentOnRight, EDIT_ITEM, copy, originalList, includeAddItem);
     pagerOnLeft.add(exerciseList.getExerciseListOnLeftSide(controller.getProps()));
@@ -110,7 +110,9 @@ public class EditItem<T extends ExerciseShell> {
     return hp;
   }
 
-  private UserList makeListOfOnlyYourItems(boolean isUserReviewer, UserList toCopy) {
+  public void onResize() { if (exerciseList != null) exerciseList.onResize(); }
+
+  private UserList makeListOfOnlyYourItems(/*boolean isUserReviewer,*/ UserList toCopy) {
     UserList copy2 = new UserList(toCopy);
     for (UserExercise ue : toCopy.getExercises()) {
       if (true) {//isUserReviewer || ue.getCreator() == controller.getUser()) {
@@ -181,7 +183,7 @@ public class EditItem<T extends ExerciseShell> {
         }
       };
     setFactory(exerciseList, ul, originalList);
-    exerciseList.setUnaccountedForVertical(220);   // TODO do something better here
+    exerciseList.setUnaccountedForVertical(280);   // TODO do something better here
    // System.out.println("setting vertical on " +exerciseList.getElement().getId());
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       @Override
@@ -198,14 +200,14 @@ public class EditItem<T extends ExerciseShell> {
 
   private void setFactory(final PagingExerciseList<T> exerciseList, final UserList ul, final UserList originalList) {
     final PagingExerciseList<T> outer = exerciseList;
-    T currentExercise = outer.getCurrentExercise();
+  //  T currentExercise = outer.getCurrentExercise();
 
     exerciseList.setFactory(new ExercisePanelFactory(service, feedback, controller, exerciseList) {
       @Override
       public Panel getExercisePanel(Exercise e) {
         Panel panel = new SimplePanel();
         panel.getElement().setId("EditItemPanel");
-        T currentExercise1 = outer.getCurrentExercise();
+    //    T currentExercise1 = outer.getCurrentExercise();
   //      currentExercise1.
         populatePanel(new UserExercise(e), panel, ul, originalList, itemMarker, outer);
         return panel;
