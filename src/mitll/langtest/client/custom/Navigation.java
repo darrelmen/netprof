@@ -61,11 +61,11 @@ public class Navigation extends TabContainer implements RequiresResize {
   public static final String COMMENT = "comment";
   private static final String PRACTICE1 = "practice";
   private static final String ADD_OR_EDIT_ITEM = "Add/Edit Item";
-  private static final String ADD_DELETE_EDIT_ITEM = "Fix Items";
-  private static final String ITEMS_TO_REVIEW = "Items to review";
+  private static final String ADD_DELETE_EDIT_ITEM = "Fix Defects";
+  private static final String ITEMS_TO_REVIEW = "Possible defects";
   private static final String ITEMS_WITH_COMMENTS = "Items with comments";
   private static final String LEARN_PRONUNCIATION = "Learn Pronunciation";
-  private static final String REVIEW1 = "Review";
+  private static final String REVIEW1 = "Defects";
   private static final String REVIEWERS = "Reviewers";
   private static final String CREATE = "Create a New List";
   private static final String BROWSE = "Browse Lists";
@@ -334,7 +334,7 @@ public class Navigation extends TabContainer implements RequiresResize {
         tabPanel.selectTab(COMMENT_TAB_INDEX);
         viewComments(commented.content);
       } else {
-        System.err.println("huh? value is unexpected " + value);
+        System.err.println("selectPreviousTab : huh? value is unexpected " + value);
         //showBrowse();
       }
     } catch (Exception e) {
@@ -479,6 +479,8 @@ public class Navigation extends TabContainer implements RequiresResize {
     setScrollPanelWidth(listScrollPanel);
     npfHelper.onResize();
     avpHelper.onResize();
+    editItem.onResize();
+    reviewItem.onResize();
   }
 
   private boolean createdByYou(UserList ul) { return ul.getCreator().id == userManager.getUser(); }
@@ -613,7 +615,8 @@ public class Navigation extends TabContainer implements RequiresResize {
         @Override
         public void onClick(ClickEvent event) {
           storage.storeValue(SUB_TAB, EDIT_ITEM);
-          showEditItem(ul, edit, (isReview || isComment) ? reviewItem : Navigation.this.editItem, isNormalList && !ul.isFavorite(), isReview);
+          EditItem<? extends ExerciseShell> editItem1 = (isReview || isComment) ? reviewItem : Navigation.this.editItem;
+          showEditItem(ul, edit, editItem1, isNormalList && !ul.isFavorite(), isReview);
         }
       });
     }
@@ -722,7 +725,7 @@ public class Navigation extends TabContainer implements RequiresResize {
                             boolean includeAddItem, boolean isUserReviewer) {
     //System.out.println("showEditItem --- " + ul + " : " + includeAddItem  + " reviewer " + isUserReviewer);
     addItem.content.clear();
-    Widget widgets = editItem.editItem(ul, listToMarker.get(ul), includeAddItem,isUserReviewer);
+    Widget widgets = editItem.editItem(ul, listToMarker.get(ul), includeAddItem/*, isUserReviewer*/);
     addItem.content.add(widgets);
   }
 
