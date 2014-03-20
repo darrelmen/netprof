@@ -39,7 +39,7 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
   protected PagingContainer<T> pagingContainer;
   private final boolean showTypeAhead;
 
-  private TextBox typeAhead = null;
+  private TextBox typeAhead = new TextBox();
   private String lastValue = "";
   private long userListID = -1;
   private int unaccountedForVertical = 160;
@@ -68,7 +68,7 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
   protected Set<String> getKeys() {  return pagingContainer.getKeys();  }
 
   /**
-   * @see mitll.langtest.client.recorder.FeedbackRecordPanel#enableNext()
+   * @seex mitll.langtest.client.recorder.FeedbackRecordPanel#enableNext
    * @param completed
    */
   public void setCompleted(Set<String> completed) {
@@ -130,7 +130,17 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
     service.getExerciseIds(lastReqID, controller.getUser(), prefix, listID, new SetExercisesCallback());
   }
 
-  String getPrefix() { return typeAhead == null ? "" : typeAhead.getText(); }
+  /**
+   * @see mitll.langtest.client.list.HistoryExerciseList#loadExercises(java.util.Map, String)
+   * @return
+   */
+  String getPrefix() { return /*typeAhead == null ? "" :*/ typeAhead.getText(); }
+
+  @Override
+  protected void loadFirstExercise() {
+    super.loadFirstExercise();
+   // typeAhead.setText("");
+  }
 
   private ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget user) {
     final ControlGroup userGroup = new ControlGroup();
@@ -177,6 +187,10 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
     return super.findFirstExercise();
   }
 
+  /**
+   * TODO : Not sure if this is needed anymore
+   * @return
+   */
   protected int getVerticalUnaccountedFor() {
     return unaccountedForVertical;
   }
@@ -188,8 +202,7 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
   public void setUnaccountedForVertical(int v) {
     unaccountedForVertical = v;
     pagingContainer.setUnaccountedForVertical(v);
-    System.out.println("setUnaccountedForVertical : vert " + v + " for " +getElement().getId());
-
+    //System.out.println("setUnaccountedForVertical : vert " + v + " for " +getElement().getId());
   }
 
   protected void addTableWithPager(PagingContainer<? extends ExerciseShell> pagingContainer) {
@@ -201,7 +214,7 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
 
   void addTypeAhead(Panel column) {
     if (showTypeAhead) {
-      typeAhead = new TextBox();
+      //typeAhead = new TextBox();
       typeAhead.setDirectionEstimator(true);   // automatically detect whether text is RTL
       typeAhead.addKeyUpHandler(new KeyUpHandler() {
         public void onKeyUp(KeyUpEvent event) {
