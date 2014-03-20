@@ -732,7 +732,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   @Override
   public void setShowRerecord(boolean v) { showRerecord = v; }
 
+/*
   public boolean showUnansweredFirst() { return showUnansweredFirst; }
+*/
 
   /**
    * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers
@@ -760,11 +762,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public boolean isRightAlignContent() {  return props.isRightAlignContent(); }
 
   public boolean isGoodwaveMode() {  return props.isGoodwaveMode(); }
+/*
   public int getFlashcardPreviewFrameHeight() { return props.getFlashcardPreviewFrameHeight(); }
+*/
   public LangTestDatabaseAsync getService() { return service; }
   public UserFeedback getFeedback() { return this; }
 
+/*
   private PropertyHandler.LOGIN_TYPE getLoginType() { return props.getLoginType(); }
+*/
 
   // recording methods...
   /**
