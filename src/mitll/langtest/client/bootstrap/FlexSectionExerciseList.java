@@ -49,7 +49,7 @@ public class FlexSectionExerciseList<T extends ExerciseShell> extends HistoryExe
   private static final int HEADING_FOR_LABEL = 4;
   private static final int UNACCOUNTED_WIDTH = 60;
   private static final int VERTICAL_DEFAULT = 160;
-  private static final int CLASSROOM_VERTICAL_EXTRA = 210;
+  private static final int CLASSROOM_VERTICAL_EXTRA = 270;
 
   private final List<ButtonType> buttonTypes = new ArrayList<ButtonType>();
   private final Map<String, ButtonType> typeToButton = new HashMap<String, ButtonType>();
