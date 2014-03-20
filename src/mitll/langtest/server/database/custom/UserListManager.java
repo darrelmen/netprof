@@ -42,6 +42,10 @@ public class UserListManager {
   private static final String FAST = "Fast";
   private static final String SLOW = "Slow";
   private static final String MY_FAVORITES = "My Favorites";
+  public static final String COMMENTS = "Comments";
+  public static final String ALL_ITEMS_WITH_COMMENTS = "All items with comments";
+  public static final String REVIEW = "Defects";
+  public static final String ITEMS_TO_REVIEW = "Possible defects to fix";
 
   private final UserDAO userDAO;
   private final ReviewedDAO reviewedDAO;
@@ -197,7 +201,7 @@ public class UserListManager {
     List<UserExercise> include = new ArrayList<UserExercise>();
     for (UserExercise ue : allKnown) if (!reviewedExercises.contains(ue.getID())) include.add(ue);
 
-    return getReviewList(include, "Comments", "All items with comments", allIncorrect);
+    return getReviewList(include, COMMENTS, ALL_ITEMS_WITH_COMMENTS, allIncorrect);
   }
 
   /**
@@ -216,7 +220,7 @@ public class UserListManager {
     List<UserExercise> allKnown = userExerciseDAO.getWhere(incorrectReviewed);
     logger.debug("\tgetReviewList ids #=" + allKnown.size());
 
-    return getReviewList(allKnown, "Review", "Items to review", incorrectReviewed);
+    return getReviewList(allKnown, REVIEW, ITEMS_TO_REVIEW, incorrectReviewed);
   }
 
   private UserList getReviewList(List<UserExercise> allKnown, String name, String description, Collection<String> ids) {
