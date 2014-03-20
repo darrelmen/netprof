@@ -407,11 +407,8 @@ public class PagingContainer<T extends ExerciseShell> {
    * @param currentExercise
    */
   public void onResize(T currentExercise) {
-/*    System.out.println("Got on resize " + Window.getClientHeight() + " " +
-        getOffsetHeight() + " bodyheight = " + table.getBodyHeight() + " table offset height " + table.getOffsetHeight() + " parent height " + getParent().getOffsetHeight());*/
     int numRows = getNumTableRowsGivenScreenHeight();
     if (table.getPageSize() != numRows) {
-      //System.out.println("num rows now " + numRows);
       table.setPageSize(numRows);
       table.redraw();
       if (currentExercise != null) {
@@ -423,11 +420,15 @@ public class PagingContainer<T extends ExerciseShell> {
   private final boolean debug = false;
   int getNumTableRowsGivenScreenHeight() {
     int header = getTableHeaderHeight();
-    int leftOver = Window.getClientHeight() - header - verticalUnaccountedFor;
+    int pixelsAbove = header + verticalUnaccountedFor;
+    if (table.getElement().getAbsoluteTop() > 0) {
+      pixelsAbove = table.getElement().getAbsoluteTop() + 10;
+    }
+    int leftOver = Window.getClientHeight() - pixelsAbove;
 
     if (debug) System.out.println("getNumTableRowsGivenScreenHeight Got on resize window height " + Window.getClientHeight() +
        " header " + header + " result = " + leftOver + "( vert unaccount " +
-       verticalUnaccountedFor+
+       verticalUnaccountedFor+ " vs absolute top " + table.getElement().getAbsoluteTop()+ " pix above " + pixelsAbove+
        ")");
 
     float rawRatio = ((float) leftOver) / (float) heightOfCellTableWith15Rows();
