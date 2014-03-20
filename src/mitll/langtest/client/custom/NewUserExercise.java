@@ -216,7 +216,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   Panel makeEnglishRow(Panel container) {
     Panel row = new FluidRow();
     container.add(row);
-    english = addControlFormField(row, ENGLISH_LABEL, false, 1, USER_ID_MAX_LENGTH);
+    english = addControlFormField(row, ENGLISH_LABEL, false, 1, 100);
 
     return row;
   }
@@ -224,7 +224,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   FormField makeForeignLangRow(Panel container) {
     Panel row = new FluidRow();
     container.add(row);
-    foreignLang = addControlFormField(row, controller.getLanguage(), false, 1, USER_ID_MAX_LENGTH);
+    foreignLang = addControlFormField(row, controller.getLanguage(), false, 1, 150);
     foreignLang.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
     return foreignLang;
   }
@@ -232,7 +232,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   void makeTranslitRow(Panel container) {
     Panel row = new FluidRow();
     container.add(row);
-    translit = addControlFormField(row, TRANSLITERATION_OPTIONAL,false,0, USER_ID_MAX_LENGTH);
+    translit = addControlFormField(row, TRANSLITERATION_OPTIONAL,false,0, 150);
   }
 
   private void focusOn(final FormField form) {
