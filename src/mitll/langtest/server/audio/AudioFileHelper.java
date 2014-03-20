@@ -104,23 +104,6 @@ public class AudioFileHelper {
     return answer;
   }
 
-
-  /**
-   * @see mitll.langtest.client.scoring.ScoringAudioPanel#scoreAudio(String, long, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
-   * @param reqid
-   * @param testAudioFile
-   * @param sentence
-   * @param width
-   * @param height
-   * @param useScoreToColorBkg
-   * @return
-   */
-/*  public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
-                                          int width, int height, boolean useScoreToColorBkg) {
-    return getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
-      false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache());
-  }*/
-
   /**
    * Get score when doing autoCRT on an audio file.
    * @see AutoCRT#getAutoCRTDecodeOutput
@@ -146,7 +129,6 @@ public class AudioFileHelper {
   }
 
   /**
-   * @see mitll.langtest.client.flashcard.TextCRTFlashcard#getAnswerAndRecordButtonRow(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
    * @see LangTestDatabaseImpl#getScoreForAnswer
    * @param e
    * @param questionID
@@ -174,7 +156,7 @@ public class AudioFileHelper {
   /**
    * For now, we don't use a ref audio file, since we aren't comparing against a ref audio file with the DTW/sv pathway.
    *
-   * @see #getASRScoreForAudio(int, String, String, int, int, boolean)
+   * @seex #getASRScoreForAudio(int, String, String, int, int, boolean)
    * @see mitll.langtest.server.scoring.AutoCRTScoring#getASRScoreForAudio
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#scoreAudio(String, long, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
    * @param reqid
@@ -323,7 +305,6 @@ public class AudioFileHelper {
       } else {
         autoCRT.getFlashcardAnswer(exercise, file, audioAnswer);
       }
-      db.updateFlashcardState(user, exerciseID, audioAnswer.isCorrect());
       return audioAnswer;
     } else if (serverProps.isAutoCRT() && !exercise.isPromptInEnglish()) { // TODO : hack -- don't do CRT on english
       autoCRT.getAutoCRTDecodeOutput(exerciseID, questionID, file, audioAnswer);
