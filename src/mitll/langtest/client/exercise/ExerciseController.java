@@ -58,9 +58,13 @@ public interface ExerciseController {
   boolean isGoodwaveMode();
   int getLeftColumnWidth();
   int getHeightOfTopRows();
+/*
   boolean showUnansweredFirst();
+*/
 
+/*
   int getFlashcardPreviewFrameHeight();
+*/
 
   PropertyHandler getProps();
 
