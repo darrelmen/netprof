@@ -119,10 +119,11 @@ public class LeaderboardPlot {
 
   private void configureChart(float top, Chart chart,String title) {
     chart.getYAxis().setAxisTitleText(title);
-    chart.getXAxis().setAllowDecimals(false);
     chart.getYAxis().setAllowDecimals(true);
     chart.getYAxis().setMin(0);
     chart.getYAxis().setMax(top);
+
+    chart.getXAxis().setAllowDecimals(false);
   }
 
   private <T extends SetScore> PlotBand getAvgScore(int numScores, float total, Chart chart) {
