@@ -413,7 +413,7 @@ public class ResultManager extends PagerTable {
       }
     };
     exercise.setSortable(true);
-    table.addColumn(exercise, "Exercise");
+    table.addColumn(exercise, "CommonExercise");
     colToField.put(exercise,"id");
 
     return id;

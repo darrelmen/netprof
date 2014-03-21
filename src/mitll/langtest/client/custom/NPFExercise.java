@@ -18,7 +18,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 
@@ -46,15 +46,15 @@ public class NPFExercise extends GoodwaveExercisePanel {
    * @param instance
    * @see NPFHelper#setFactory(mitll.langtest.client.list.PagingExerciseList, String, long)
    */
-  NPFExercise(Exercise e, ExerciseController controller, ListInterface listContainer, float screenPortion,
+  NPFExercise(CommonExercise e, ExerciseController controller, ListInterface listContainer, float screenPortion,
               boolean addKeyHandler, String instance) {
     super(e, controller, listContainer, screenPortion, addKeyHandler, instance);
   }
 
   @Override
-  protected NavigationHelper<Exercise> getNavigationHelper(ExerciseController controller,
-                                                           ListInterface<Exercise> listContainer, boolean addKeyHandler) {
-    NavigationHelper<Exercise> navigationHelper = super.getNavigationHelper(controller, listContainer, addKeyHandler);
+  protected NavigationHelper getNavigationHelper(ExerciseController controller,
+                                                           ListInterface listContainer, boolean addKeyHandler) {
+    NavigationHelper navigationHelper = super.getNavigationHelper(controller, listContainer, addKeyHandler);
     navigationHelper.add(makeAddToList(exercise, controller));
     return navigationHelper;
   }
@@ -65,7 +65,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
    * @param controller
    * @return
    */
-  Panel makeAddToList(Exercise e, ExerciseController controller) {
+  Panel makeAddToList(CommonExercise e, ExerciseController controller) {
     addToList = new DropdownButton("");
     addToList.setDropup(true);
     addToList.setIcon(IconType.PLUS_SIGN);
@@ -84,10 +84,10 @@ public class NPFExercise extends GoodwaveExercisePanel {
    * @param e
    * @param controller
    * @param w1
-   * @see #makeAddToList(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController)
+   * @see #makeAddToList(mitll.langtest.shared.CommonExercise, mitll.langtest.client.exercise.ExerciseController)
    * @see #wasRevealed()
    */
-  private void populateListChoices(final Exercise e, final ExerciseController controller, final DropdownBase w1) {
+  private void populateListChoices(final CommonExercise e, final ExerciseController controller, final DropdownBase w1) {
     //System.out.println("populateListChoices : populate list choices for " + controller.getUser());
     service.getListsForUser(controller.getUser(), true, false, new AsyncCallback<Collection<UserList>>() {
       @Override
@@ -120,7 +120,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
                     widget.setVisible(false);
                     activeCount--;
                     if (activeCount == 0) {
-                      NavLink widget = new NavLink("Exercise already added to your list(s)");
+                      NavLink widget = new NavLink("CommonExercise already added to your list(s)");
                       w1.add(widget);
                     }
                   }
@@ -130,7 +130,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
           }
         }
         if (!anyAdded) {
-          NavLink widget = new NavLink("Exercise already added to your list(s)");
+          NavLink widget = new NavLink("CommonExercise already added to your list(s)");
           w1.add(widget);
         }
       }

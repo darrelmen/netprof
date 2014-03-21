@@ -4,7 +4,6 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Label;
-import com.github.gwtbootstrap.client.ui.Nav;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
@@ -27,7 +26,8 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.shared.AudioAttribute;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.ExerciseShell;
@@ -66,11 +66,11 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
   private final Set<String> incorrectSet = new HashSet<String>();
   private List<RequiresResize> toResize;
-  private final ListInterface<Exercise> listContainer;
+  private final ListInterface listContainer;
   private Button approvedButton;
   private Tooltip approvedTooltip;
 
-  public QCNPFExercise(Exercise e, ExerciseController controller, ListInterface<Exercise> listContainer,
+  public QCNPFExercise(CommonExercise e, ExerciseController controller, ListInterface listContainer,
                        float screenPortion, boolean addKeyHandler, String instance) {
     super(e, controller, listContainer, screenPortion, addKeyHandler, instance);
 
@@ -78,7 +78,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   }
 
   @Override
-  protected ASRScorePanel makeScorePanel(Exercise e, String instance) { return null;  }
+  protected ASRScorePanel makeScorePanel(CommonExercise e, String instance) { return null;  }
 
   @Override
   protected void addGroupingStyle(Widget div) {
@@ -86,28 +86,28 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   }
 
   @Override
-  protected void addQuestionContentRow(Exercise e, ExerciseController controller, Panel hp) {
+  protected void addQuestionContentRow(CommonExercise e, ExerciseController controller, Panel hp) {
     super.addQuestionContentRow(e, controller, hp);
     hp.addStyleName("questionContentPadding");
   }
 
   /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, float, boolean, String)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, float, boolean, String)
    * @param controller
    * @param listContainer
    * @param addKeyHandler
    * @return
    */
-  protected NavigationHelper<Exercise> getNavigationHelper(ExerciseController controller,
-                                                           final ListInterface<Exercise> listContainer, boolean addKeyHandler) {
-    NavigationHelper<Exercise> widgets = new NavigationHelper<Exercise>(exercise, controller, new PostAnswerProvider() {
+  protected NavigationHelper getNavigationHelper(ExerciseController controller,
+                                                           final ListInterface listContainer, boolean addKeyHandler) {
+    NavigationHelper widgets = new NavigationHelper(exercise, controller, new PostAnswerProvider() {
       @Override
-      public void postAnswers(ExerciseController controller, ExerciseShell completedExercise) {
+      public void postAnswers(ExerciseController controller, CommonExercise completedExercise) {
         nextWasPressed(listContainer, completedExercise);
       }
     }, listContainer, true, addKeyHandler) {
       @Override
-      protected void enableNext(Exercise exercise) {}
+      protected void enableNext(CommonExercise exercise) {}
     };
 
     if (!instance.contains(Navigation.REVIEW) && !instance.contains(Navigation.COMMENT)) {
@@ -117,7 +117,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     return widgets;
   }
 
-  private Button addApprovedButton(final ListInterface<Exercise> listContainer, NavigationHelper<Exercise> widgets) {
+  private Button addApprovedButton(final ListInterface listContainer, NavigationHelper widgets) {
     Button approved = new Button(APPROVED);
     approved.addStyleName("leftFiveMargin");
     widgets.add(approved);
@@ -133,7 +133,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   }
 
   @Override
-  protected void nextWasPressed(ListInterface<? extends ExerciseShell> listContainer, ExerciseShell completedExercise) {
+  protected void nextWasPressed(ListInterface listContainer, CommonShell completedExercise) {
     //System.out.println("nextWasPressed : load next exercise " + completedExercise.getID() + " instance " +instance);
     super.nextWasPressed(listContainer, completedExercise);
     markReviewed(listContainer, completedExercise);
@@ -141,11 +141,11 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
   /**
    * @see #addApprovedButton(mitll.langtest.client.list.ListInterface, mitll.langtest.client.exercise.NavigationHelper)
-   * @see #nextWasPressed(mitll.langtest.client.list.ListInterface, mitll.langtest.shared.ExerciseShell)
+   * @see #nextWasPressed(mitll.langtest.client.list.ListInterface, mitll.langtest.shared.CommonShell)
    * @param listContainer
    * @param completedExercise
    */
-  private void markReviewed(ListInterface<? extends ExerciseShell> listContainer, ExerciseShell completedExercise) {
+  private void markReviewed(ListInterface listContainer, CommonShell completedExercise) {
     if (isCourseContent()) {
       listContainer.addCompleted(completedExercise.getID());
       markReviewed(completedExercise);
@@ -157,10 +157,10 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   }
 
   /**
-   * @see #markReviewed(mitll.langtest.client.list.ListInterface, mitll.langtest.shared.ExerciseShell)
+   * @see #markReviewed(mitll.langtest.client.list.ListInterface, mitll.langtest.shared.CommonShell)
    * @param completedExercise
    */
-  private void markReviewed(ExerciseShell completedExercise) {
+  private void markReviewed(CommonShell completedExercise) {
     System.out.println("markReviewed : exercise " + completedExercise.getID() + " instance " + instance);
 
     service.markReviewed(completedExercise.getID(), incorrectSet.isEmpty(), controller.getUser(),
@@ -190,7 +190,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
    * @return
    */
   @Override
-  protected Widget getQuestionContent(Exercise e, String content) {
+  protected Widget getQuestionContent(CommonExercise e, String content) {
     Panel column = new FlowPanel();
     column.getElement().setId("QCNPFExercise_QuestionContent");
     column.addStyleName("floatLeft");
@@ -201,8 +201,8 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
     column.add(row);
     column.add(getEntry(e, FOREIGN_LANGUAGE, ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getRefSentence()));
-    column.add(getEntry(e, TRANSLITERATION, ExerciseFormatter.TRANSLITERATION, e.getTranslitSentence()));
-    column.add(getEntry(e, ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, e.getEnglishSentence()));
+    column.add(getEntry(e, TRANSLITERATION, ExerciseFormatter.TRANSLITERATION, e.getTransliteration()));
+    column.add(getEntry(e, ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, e.getEnglish()));
 
     return column;
   }
@@ -221,7 +221,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     for (RequiresResize rr : toResize) rr.onResize();
   }
 
-  protected Widget getScoringAudioPanel(final Exercise e, String pathxxxx) {
+  protected Widget getScoringAudioPanel(final CommonExercise e, String pathxxxx) {
     Panel column = new FlowPanel();
     column.addStyleName("blockStyle");
     if (toResize == null) toResize = new ArrayList<RequiresResize>();
@@ -252,7 +252,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     return column;
   }
 
-  private Widget getEntry(Exercise e, final String field, final String label, String value) {
+  private Widget getEntry(CommonExercise e, final String field, final String label, String value) {
     return getEntry(field, label, value, e.getAnnotation(field), true);
   }
 
