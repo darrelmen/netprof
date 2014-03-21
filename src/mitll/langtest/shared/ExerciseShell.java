@@ -9,7 +9,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * Time: 3:00 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ExerciseShell implements IsSerializable {
+public class ExerciseShell implements IsSerializable, CommonShell {
   private String tooltip;
   protected String id;
 
@@ -26,6 +26,9 @@ public class ExerciseShell implements IsSerializable {
     this.tooltip = tooltip;
     //if (tooltip.isEmpty() && !id.equals("-1")) throw new IllegalArgumentException("tooltip is empty for " + id);
   }
+
+  public CommonShell getShell() { return new ExerciseShell(getID(), getTooltip()); }
+
   @Override
   public boolean equals(Object other) {
     return other instanceof ExerciseShell && getID().equals(((ExerciseShell)other).getID());
