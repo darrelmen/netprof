@@ -29,7 +29,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.flashcard.AudioExerciseContent;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.Result;
 
@@ -51,7 +51,7 @@ import java.util.Set;
  * Time: 1:39 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ExercisePanel<T extends ExerciseShell> extends VerticalPanel implements
+public class ExercisePanel extends VerticalPanel implements
   BusyPanel, ExerciseQuestionState, PostAnswerProvider, ProvidesResize, RequiresResize {
   private static final String ANSWER_BOX_WIDTH = "400px";
   private static final String REPEAT_ONCE = "<i>Repeat the phrase once at normal speed.</i>";
@@ -68,12 +68,12 @@ public class ExercisePanel<T extends ExerciseShell> extends VerticalPanel implem
   private static final String PROMPT = "Read the following text and answer the question or questions below.";
   private final List<Widget> answers = new ArrayList<Widget>();
   private final Set<Widget> completed = new HashSet<Widget>();
-  protected Exercise exercise = null;
+  protected CommonExercise exercise = null;
   protected final ExerciseController controller;
   private boolean enableNextOnlyWhenAllCompleted = true;
   protected final LangTestDatabaseAsync service;
   private final NavigationHelper navigationHelper;
-  protected final ListInterface<Exercise> exerciseList;
+  protected final ListInterface exerciseList;
   private final Map<Integer,Set<Widget>> indexToWidgets = new HashMap<Integer, Set<Widget>>();
   private TabPanel tabPanel = null;
   private final Map<Integer,Tab> indexToTab = new HashMap<Integer, Tab>();
@@ -87,13 +87,13 @@ public class ExercisePanel<T extends ExerciseShell> extends VerticalPanel implem
    * @param controller
    * @param exerciseList
    */
-  public ExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
-                       final ExerciseController controller, ListInterface<Exercise> exerciseList) {
+  public ExercisePanel(final CommonExercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
+                       final ExerciseController controller, ListInterface exerciseList) {
     this.exercise = e;
     System.out.println("ExercisePanel.ExercisePanel : exercise is " + exercise.getID());
     this.controller = controller;
     this.service = service;
-    UserFeedback feedback = userFeedback;
+  //  UserFeedback feedback = userFeedback;
     this.exerciseList = exerciseList;
     this.navigationHelper = getNavigationHelper(controller);
     //if (e.getQuestions().size() == 1) {
@@ -117,7 +117,7 @@ public class ExercisePanel<T extends ExerciseShell> extends VerticalPanel implem
     }
     add(hp);
 
-    addQuestions(e, service, controller, 1);
+    //addQuestions(e, service, controller, 1);
 
     // add next and prev buttons
     add(navigationHelper);
@@ -125,30 +125,30 @@ public class ExercisePanel<T extends ExerciseShell> extends VerticalPanel implem
     getElement().setId("ExercisePanel");
   }
 
-  protected NavigationHelper<Exercise> getNavigationHelper(ExerciseController controller) {
-    return new NavigationHelper<Exercise>(exercise,controller, this, exerciseList, true, true);
+  protected NavigationHelper getNavigationHelper(ExerciseController controller) {
+    return new NavigationHelper(exercise,controller, this, exerciseList, true, true);
   }
 
   protected void addInstructions() {  add(new Heading(4, PROMPT));  }
 
   /**
-   * @see #ExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, ExerciseController, mitll.langtest.client.list.ListInterface)
+   * @see #ExercisePanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, ExerciseController, mitll.langtest.client.list.ListInterface)
    * @param e
    */
-  protected void addItemHeader(Exercise e) {
+  protected void addItemHeader(CommonExercise e) {
     Heading w = new Heading(ITEM_HEADER, "Item " + e.getID());
     w.getElement().setId("ItemHeading");
     add(w);
   }
 
-  private Widget getQuestionContent(Exercise e, boolean includeItemID) {
+  private Widget getQuestionContent(CommonExercise e, boolean includeItemID) {
     String content = e.getContent();
 
     //System.out.println("getQuestionContent : content is " + content);
-    if (content.contains("Listen")) {
+ /*   if (content.contains("Listen")) {
       return new AudioExerciseContent().getQuestionContent(e, controller, includeItemID, false);
     }
-    else {
+    else {*/
       HTML maybeRTLContent = getMaybeRTLContent(content, true);
       maybeRTLContent.addStyleName("rightTenMargin");
       if (content.length() > 200) {
@@ -157,7 +157,7 @@ public class ExercisePanel<T extends ExerciseShell> extends VerticalPanel implem
       } else {
         return maybeRTLContent;
       }
-    }
+   // }
   }
 
   Widget getContentScroller(HTML maybeRTLContent) {
@@ -211,28 +211,29 @@ public class ExercisePanel<T extends ExerciseShell> extends VerticalPanel implem
    * @param controller used in subclasses for audio control
    * @param questionNumber
    */
-  private void addQuestions(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, int questionNumber) {
-    List<Exercise.QAPair> englishQuestions = e.getEnglishQuestions();
-    List<Exercise.QAPair> flQuestions = e.getForeignLanguageQuestions();
+/*  private void addQuestions(CommonExercise e, LangTestDatabaseAsync service, ExerciseController controller, int questionNumber) {
+    List<CommonExercise.QAPair> englishQuestions = e.getEnglishQuestions();
+    List<CommonExercise.QAPair> flQuestions = e.getForeignLanguageQuestions();
     int n = englishQuestions.size();
     if (e.getQuestions().size() == 1) {
-      Exercise.QAPair questionToShow = e.getQuestions().iterator().next();
+      CommonExercise.QAPair questionToShow = e.getQuestions().iterator().next();
       add(getQuestionPanel(e, service, controller, questionNumber, n, englishQuestions, flQuestions, questionToShow,this));
     }
     else {
       makeTabPanel(e, service, controller, questionNumber, englishQuestions, flQuestions, n);
       add(tabPanel);
     }
-  }
+  }*/
 
-  private void makeTabPanel(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, int questionNumber,
-                            List<Exercise.QAPair> englishQuestions,
-                            List<Exercise.QAPair> flQuestions,
+/*
+  private void makeTabPanel(CommonExercise e, LangTestDatabaseAsync service, ExerciseController controller, int questionNumber,
+                            List<CommonExercise.QAPair> englishQuestions,
+                            List<CommonExercise.QAPair> flQuestions,
                             int n) {
     tabPanel = new TabPanel();
     DOM.setStyleAttribute(tabPanel.getWidget(0).getElement(), "marginBottom", "0px");
 
-    for (Exercise.QAPair pair : e.getQuestions()) {
+    for (CommonExercise.QAPair pair : e.getQuestions()) {
       Tab tabPane = new Tab();
       tabPane.setHeading("Question #"+questionNumber);
       tabPanel.add(tabPane);
@@ -244,16 +245,18 @@ public class ExercisePanel<T extends ExerciseShell> extends VerticalPanel implem
     }
     tabPanel.selectTab(0);
   }
+*/
 
-  private Panel getQuestionPanel(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller,
+/*
+  private Panel getQuestionPanel(CommonExercise exercise, LangTestDatabaseAsync service, ExerciseController controller,
                                  int questionNumber,
                                  int n,
-                                 List<Exercise.QAPair> englishQuestions,
-                                 List<Exercise.QAPair> flQuestions,
-                                 Exercise.QAPair pair,
+                                 List<CommonExercise.QAPair> englishQuestions,
+                                 List<CommonExercise.QAPair> flQuestions,
+                                 CommonExercise.QAPair pair,
                                  HasWidgets toAddTo) {
-    Exercise.QAPair engQAPair = questionNumber - 1 < n ? englishQuestions.get(questionNumber - 1) : null;
-    Exercise.QAPair flQAPair  = questionNumber - 1 < n ? flQuestions.get(questionNumber - 1) : null;
+    CommonExercise.QAPair engQAPair = questionNumber - 1 < n ? englishQuestions.get(questionNumber - 1) : null;
+    CommonExercise.QAPair flQAPair  = questionNumber - 1 < n ? flQuestions.get(questionNumber - 1) : null;
 
     if (engQAPair != null) {
       getQuestionHeader(questionNumber,n, pair, engQAPair, flQAPair, false,toAddTo);
@@ -270,9 +273,10 @@ public class ExercisePanel<T extends ExerciseShell> extends VerticalPanel implem
     vp.addStyleName("userNPFContent2");
     return vp;
   }
+*/
 
   /**
-   * @see #getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
+   * @see #getAnswerWidget(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
    * @param index
    * @param answerWidget
    */
@@ -287,7 +291,7 @@ public class ExercisePanel<T extends ExerciseShell> extends VerticalPanel implem
   protected boolean shouldShowAnswer() { return controller.isDemoMode();  }
 
   /**
-   * @see #getQuestionPanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int, int, java.util.List, java.util.List, mitll.langtest.shared.Exercise.QAPair, com.google.gwt.user.client.ui.HasWidgets)
+   * @see #getQuestionPanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int, int, java.util.List, java.util.List, mitll.langtest.shared.CommonExercise.QAPair, com.google.gwt.user.client.ui.HasWidgets)
    * @param i
    * @param total
    * @param qaPair
@@ -296,13 +300,13 @@ public class ExercisePanel<T extends ExerciseShell> extends VerticalPanel implem
    * @param showAnswer
    * @param toAddTo
    */
-  protected void getQuestionHeader(int i, int total,
+/*  protected void getQuestionHeader(int i, int total,
                                    Exercise.QAPair qaPair,
                                    Exercise.QAPair englishPair,
                                    Exercise.QAPair flQAPair,
                                    boolean showAnswer, HasWidgets toAddTo) {
     getQuestionHeader(total, qaPair, showAnswer, true, toAddTo);
-  }
+  }*/
 
   /**
    * @see #addQuestions(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
@@ -312,7 +316,7 @@ public class ExercisePanel<T extends ExerciseShell> extends VerticalPanel implem
    * @param showAnswer
    * @param addSpacerAfter
    */
-  private void getQuestionHeader(int total, Exercise.QAPair qaPair, boolean showAnswer, boolean addSpacerAfter, HasWidgets toAddTo) {
+/*  private void getQuestionHeader(int total, Exercise.QAPair qaPair, boolean showAnswer, boolean addSpacerAfter, HasWidgets toAddTo) {
     String question = qaPair.getQuestion();
     String prefix = (total == 1) ? ("Question : ") : "";
 
@@ -342,19 +346,19 @@ public class ExercisePanel<T extends ExerciseShell> extends VerticalPanel implem
 
       toAddTo.add(maybeRTLContent);
     }
-  }
+  }*/
 
   /**
-   * @see #addQuestions(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
-   * @param vp
-   * @param e
+   * @seex #addQuestions(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
+   * @paramx vp
+   * @paramx e
    */
-  protected void addQuestionPrompt(Panel vp, Exercise e) {
+/*  protected void addQuestionPrompt(Panel vp, Exercise e) {
     HTML prompt = new HTML(getQuestionPrompt(e.isPromptInEnglish()));
     prompt.getElement().setId("questionPrompt");
     prompt.addStyleName("marginBottomTen");
     vp.add(prompt);
-  }
+  }*/
 
   protected String getQuestionPrompt(boolean promptInEnglish) {
     return getWrittenPrompt(promptInEnglish);
@@ -415,7 +419,7 @@ public class ExercisePanel<T extends ExerciseShell> extends VerticalPanel implem
    * @param completedExercise
    */
   @Override
-  public void postAnswers(final ExerciseController controller, final ExerciseShell completedExercise) {
+  public void postAnswers(final ExerciseController controller, final CommonExercise completedExercise) {
     int i = 1;
     int user = controller.getUser();
     final Set<Widget> incomplete = new HashSet<Widget>();
@@ -475,14 +479,14 @@ public class ExercisePanel<T extends ExerciseShell> extends VerticalPanel implem
    * If we're in autoCRT mode {@link mitll.langtest.client.exercise.ExerciseController#isAutoCRTMode()} then we
    * add a check answer button after the text box to allow the user to see if they answered correctly.
    *
-   * @see #addQuestions(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
-   * @param exercise here used to determine the prompt language (English/FL)
-   * @param service used in subclasses
-   * @param controller  used in subclasses
-   * @param index of the question (0 for first, 1 for second, etc.) (used in subclasses)
+   * @seex #addQuestions(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
+   * @paramx exercise here used to determine the prompt language (English/FL)
+   * @paramx service used in subclasses
+   * @paramx controller  used in subclasses
+   * @paramx index of the question (0 for first, 1 for second, etc.) (used in subclasses)
    * @return widget that handles the answer
    */
-  protected Widget getAnswerWidget(final Exercise exercise, final LangTestDatabaseAsync service,
+/*  protected Widget getAnswerWidget(final CommonExercise exercise, final LangTestDatabaseAsync service,
                                    ExerciseController controller, final int index) {
     System.out.println("getAnswerWidget for " + exercise.getID() + " and " + index);
     boolean allowPaste = controller.isDemoMode();
@@ -505,7 +509,7 @@ public class ExercisePanel<T extends ExerciseShell> extends VerticalPanel implem
     }
     addAnswerWidget(index, answer);
     return answer;
-  }
+  }*/
 
   @Override
   protected void onLoad() {
