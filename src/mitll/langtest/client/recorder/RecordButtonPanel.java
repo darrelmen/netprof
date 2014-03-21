@@ -14,7 +14,7 @@ import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseQuestionState;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
 
 /**
  * Just a single record button for the UI component.
@@ -32,7 +32,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
   protected final RecordButton recordButton;
   private final LangTestDatabaseAsync service;
   private final ExerciseController controller;
-  private final Exercise exercise;
+  private final CommonExercise exercise;
   private final ExerciseQuestionState questionState;
   private final int index;
   private int reqid = 0;
@@ -45,10 +45,10 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
   /**
    * Has three parts -- record/stop button, audio validity feedback icon, and the audio control widget that allows playback.
    *
-   * @see SimpleRecordExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @see SimpleRecordExercisePanel#getAnswerWidget(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    */
   protected RecordButtonPanel(final LangTestDatabaseAsync service, final ExerciseController controller,
-                              final Exercise exercise, final ExerciseQuestionState questionState, final int index,
+                              final CommonExercise exercise, final ExerciseQuestionState questionState, final int index,
                               boolean doFlashcardAudio, String audioType, String recordButtonTitle){
     this.service = service;
     this.controller = controller;
@@ -94,7 +94,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
   }
 
   /**
-   * @see FeedbackRecordPanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @seex FeedbackRecordPanel#getAnswerWidget
    * @return
    */
   public Panel getPanel() {
@@ -132,12 +132,12 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
     String base64EncodedWavFile = controller.getBase64EncodedWavFile();
     final int len = base64EncodedWavFile.length();
     service.writeAudioFile(base64EncodedWavFile,
-      exercise.getPlan(),
+      "plan",//exercise.getPlan(),
       exercise.getID(),
       index,
       controller.getUser(),
       reqid,
-      !exercise.isPromptInEnglish(),
+      false,//!exercise.isPromptInEnglish(),
       audioType,
       doFlashcardAudio,
       true, new AsyncCallback<AudioAnswer>() {
