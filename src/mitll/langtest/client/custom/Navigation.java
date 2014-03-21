@@ -94,11 +94,11 @@ public class Navigation extends TabContainer implements RequiresResize {
   private final UserManager userManager;
 
   private ScrollPanel listScrollPanel;
-  private final ListInterface<? extends ExerciseShell> listInterface;
+  private final ListInterface listInterface;
   private final NPFHelper npfHelper;
   private final NPFHelper avpHelper;
-  private final EditItem<? extends ExerciseShell> editItem;
-  private final EditItem<? extends ExerciseShell> reviewItem;
+  private final EditItem editItem;
+  private final EditItem reviewItem;
   private final KeyStorage storage;
 
   /**
@@ -110,7 +110,7 @@ public class Navigation extends TabContainer implements RequiresResize {
    * @param feedback
    */
   public Navigation(final LangTestDatabaseAsync service, final UserManager userManager,
-                    final ExerciseController controller, final ListInterface<? extends ExerciseShell> listInterface,
+                    final ExerciseController controller, final ListInterface listInterface,
                     UserFeedback feedback) {
     this.service = service;
     this.userManager = userManager;
@@ -119,8 +119,8 @@ public class Navigation extends TabContainer implements RequiresResize {
     storage = new KeyStorage(controller);
     npfHelper = new NPFHelper(service, feedback, userManager, controller);
     avpHelper = new AVPHelper(service, feedback, userManager, controller);
-    editItem = new EditItem<UserExercise>(service, userManager, controller, listInterface, feedback, npfHelper);
-    reviewItem = new ReviewEditItem<UserExercise>(service, userManager, controller, listInterface, feedback, npfHelper);
+    editItem = new EditItem(service, userManager, controller, listInterface, feedback, npfHelper);
+    reviewItem = new ReviewEditItem(service, userManager, controller, listInterface, feedback, npfHelper);
   }
 
   /**
@@ -615,7 +615,7 @@ public class Navigation extends TabContainer implements RequiresResize {
         @Override
         public void onClick(ClickEvent event) {
           storage.storeValue(SUB_TAB, EDIT_ITEM);
-          EditItem<? extends ExerciseShell> editItem1 = (isReview || isComment) ? reviewItem : Navigation.this.editItem;
+          EditItem editItem1 = (isReview || isComment) ? reviewItem : Navigation.this.editItem;
           showEditItem(ul, edit, editItem1, isNormalList && !ul.isFavorite(), isReview);
         }
       });
@@ -666,7 +666,7 @@ public class Navigation extends TabContainer implements RequiresResize {
       if (created && !ul.isPrivate() && ul.isEmpty() && finalEditItem != null) {
         String name = ul.getName();
         tabPanel.selectTab(name.equals(REVIEW1) ? 0 : CREATE_TAB_INDEX);    // 2 = add/edit item
-        EditItem<? extends ExerciseShell> editItem1 = (isReview || isComment) ? reviewItem : this.editItem;
+        EditItem editItem1 = (isReview || isComment) ? reviewItem : this.editItem;
         showEditItem(ul, finalEditItem, editItem1, isNormalList && !ul.isFavorite(), isReview);
       } else {
         tabPanel.selectTab(0);
@@ -721,7 +721,7 @@ public class Navigation extends TabContainer implements RequiresResize {
    * @param ul
    * @param addItem
    */
-  private void showEditItem(UserList ul, TabAndContent addItem, EditItem<? extends ExerciseShell> editItem,
+  private void showEditItem(UserList ul, TabAndContent addItem, EditItem editItem,
                             boolean includeAddItem, boolean isUserReviewer) {
     //System.out.println("showEditItem --- " + ul + " : " + includeAddItem  + " reviewer " + isUserReviewer);
     addItem.content.clear();
