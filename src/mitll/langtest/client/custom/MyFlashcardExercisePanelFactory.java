@@ -207,16 +207,34 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
     private Chart makePronChart(double avgScore, AVPHistoryForList sessionAVPHistoryForListScore) {
       String pronunciation = "Pronunciation " + toPercent(avgScore);
       Chart chart2 = new LeaderboardPlot().getChart(sessionAVPHistoryForListScore, pronunciation, SCORE_SUBTITLE);
-      chart2.addStyleName("chartDim");
+      scaleCharts(chart2);
       return chart2;
     }
 
     private Chart makeChart(int totalCorrect, int all, AVPHistoryForList sessionAVPHistoryForList) {
       String correct = totalCorrect +" Correct (" + toPercent(totalCorrect, all) + ")";
       Chart chart  = new LeaderboardPlot().getChart(sessionAVPHistoryForList, correct, CORRECT_SUBTITLE);
-      chart.addStyleName("chartDim");
-     // Window.getClientWidth()
+
+      scaleCharts(chart);
+
       return chart;
+    }
+
+    private void scaleCharts(Chart chart) {
+      float ratio = needToScale();
+      if (ratio <1) {
+        chart.setWidth(Math.round(400f*ratio));
+        chart.setHeight(300);
+      }
+      else {
+        chart.addStyleName("chartDim");
+      }
+    }
+
+    private float needToScale() {
+      int constantTables = 2 * 235;
+      float width = (float) Window.getClientWidth()- constantTables;
+      return width/(1250- constantTables);
     }
 
     /**
@@ -232,9 +250,11 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       table.add(w);
       table.add(new TableHeader(NAME));
       table.add(new TableHeader(scoreColHeader));
+      boolean scale =  needToScale() <1;
 
       List<AVPHistoryForList.UserScore> scores = sessionAVPHistoryForList.getScores();
-      for (int i = 0; i < scores.size(); i++) {
+      int size = scale ? Math.min(5,scores.size()):scores.size();
+      for (int i = 0; i < size; i++) {
         HTMLPanel row = new HTMLPanel("tr","");
         if (i % 2 == 0) row.addStyleName("tableAltRowColor");
         HTMLPanel col = new HTMLPanel("td","");
