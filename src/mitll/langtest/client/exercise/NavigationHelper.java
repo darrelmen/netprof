@@ -15,7 +15,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.CommonExercise;
 
 import java.util.Date;
 
@@ -28,10 +28,11 @@ import java.util.Date;
  * Time: 6:36 PM
  * To change this template use File | Settings | File Templates.
  */
-public class NavigationHelper<T extends ExerciseShell> extends HorizontalPanel {
+public class NavigationHelper extends HorizontalPanel {
   private static final String LEFT_ARROW_TOOLTIP = "Press the left arrow key to go to the previous item.";
   private static final String RIGHT_ARROW_TOOLTIP = "Press enter to go to the next item.";
- // private static final String RIGHT_ARROW_TOOLTIP2 = "Press the right arrow key to go to the next item.";
+  public static final String PASHTO = "Pashto";
+  // private static final String RIGHT_ARROW_TOOLTIP2 = "Press the right arrow key to go to the next item.";
 
   private Button prev;
   private Button next;
@@ -42,7 +43,7 @@ public class NavigationHelper<T extends ExerciseShell> extends HorizontalPanel {
 
   private final boolean bindEnterKey = true;
 
-  private final ListInterface<T> listContainer;
+  private final ListInterface listContainer;
 
   /**
    * @see ExercisePanel#getNavigationHelper(ExerciseController)
@@ -53,14 +54,14 @@ public class NavigationHelper<T extends ExerciseShell> extends HorizontalPanel {
    * @param addButtons
    * @param addKeyHandler
    */
-  public NavigationHelper(T exercise, ExerciseController controller, PostAnswerProvider provider,
-                          ListInterface<T> listContainer, boolean addButtons, boolean addKeyHandler) {
+  public NavigationHelper(CommonExercise exercise, ExerciseController controller, PostAnswerProvider provider,
+                          ListInterface listContainer, boolean addButtons, boolean addKeyHandler) {
     this(exercise, controller, provider, listContainer, addButtons, addKeyHandler,
-      !controller.getLanguage().equalsIgnoreCase("Pashto") && !controller.getProps().isClassroomMode());
+      !controller.getLanguage().equalsIgnoreCase(PASHTO) && !controller.getProps().isClassroomMode());
   }
 
-  public NavigationHelper(T exercise, ExerciseController controller, PostAnswerProvider provider,
-                          ListInterface<T> listContainer, boolean addButtons, boolean addKeyHandler,
+  public NavigationHelper(CommonExercise exercise, ExerciseController controller, PostAnswerProvider provider,
+                          ListInterface listContainer, boolean addButtons, boolean addKeyHandler,
                           boolean enableNextOnlyWhenAllCompleted) {
     this.provider = provider;
     this.listContainer = listContainer;
@@ -77,7 +78,7 @@ public class NavigationHelper<T extends ExerciseShell> extends HorizontalPanel {
    * @param addButtons
    * @param addKeyHandler
    */
-  private void getNextAndPreviousButtons(final T e,
+  private void getNextAndPreviousButtons(final CommonExercise e,
                                          final ExerciseController controller, boolean addButtons, boolean addKeyHandler) {
     boolean useKeyHandler = controller.isCollectAudio();
 
@@ -90,7 +91,7 @@ public class NavigationHelper<T extends ExerciseShell> extends HorizontalPanel {
     }
   }
 
-  private void makePrevButton(final T exercise, ExerciseController controller, boolean addButtons, boolean useKeyHandler) {
+  private void makePrevButton(final CommonExercise exercise, ExerciseController controller, boolean addButtons, boolean useKeyHandler) {
     this.prev = new Button("Previous");
     getPrev().addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
@@ -106,7 +107,7 @@ public class NavigationHelper<T extends ExerciseShell> extends HorizontalPanel {
     getPrev().setVisible(!controller.isMinimalUI() || !controller.isPromptBeforeNextItem());
   }
 
-  private void makeNextButton(final T exercise, final ExerciseController controller, boolean addButtons) {
+  private void makeNextButton(final CommonExercise exercise, final ExerciseController controller, boolean addButtons) {
     this.next = new Button(getNextButtonText());
     next.setType(ButtonType.SUCCESS);
     enableNext(exercise);
@@ -124,7 +125,7 @@ public class NavigationHelper<T extends ExerciseShell> extends HorizontalPanel {
     });
   }
 
-  protected void enableNext(T exercise) {
+  protected void enableNext(CommonExercise exercise) {
     if (enableNextOnlyWhenAllCompleted) { // initially not enabled
       next.setEnabled(false);
     }
@@ -133,7 +134,7 @@ public class NavigationHelper<T extends ExerciseShell> extends HorizontalPanel {
     }
   }
 
-  void clickPrev(T e) {
+  void clickPrev(CommonExercise e) {
     if (getPrev().isEnabled() && getPrev().isVisible()) {
       System.out.println("clickPrev " +keyHandler+ " click on prev " + getPrev());
       listContainer.loadPreviousExercise(e);
@@ -147,7 +148,7 @@ public class NavigationHelper<T extends ExerciseShell> extends HorizontalPanel {
    * @param controller
    * @param exercise
    */
-  void clickNext(final ExerciseController controller, final T exercise) {
+  void clickNext(final ExerciseController controller, final CommonExercise exercise) {
     if (next.isEnabled() && next.isVisible()) {
       if (controller.isMinimalUI() && !controller.isGrading() && controller.isPromptBeforeNextItem()) {
         showConfirmNextDialog(controller, exercise);
@@ -170,7 +171,7 @@ public class NavigationHelper<T extends ExerciseShell> extends HorizontalPanel {
    * @param controller
    * @param exercise
    */
-  private void showConfirmNextDialog(final ExerciseController controller, final T exercise) {
+  private void showConfirmNextDialog(final ExerciseController controller, final CommonExercise exercise) {
     final DialogBox dialogBox;
     Button yesButton;
 
@@ -219,7 +220,7 @@ public class NavigationHelper<T extends ExerciseShell> extends HorizontalPanel {
    * @param controller
    * @param useKeyHandler
    */
-  private void addKeyHandler(final T e, final ExerciseController controller, final boolean useKeyHandler) {
+  private void addKeyHandler(final CommonExercise e, final ExerciseController controller, final boolean useKeyHandler) {
     keyHandler = Event.addNativePreviewHandler(new
                                                  Event.NativePreviewHandler() {
 
