@@ -26,7 +26,7 @@ import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseFormatter;
 
@@ -41,7 +41,7 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class CommentNPFExercise extends NPFExercise {
-  public CommentNPFExercise(Exercise e, ExerciseController controller, ListInterface listContainer,
+  public CommentNPFExercise(CommonExercise e, ExerciseController controller, ListInterface listContainer,
                             float screenPortion, boolean addKeyHandler, String instance) {
     super(e, controller, listContainer, screenPortion, addKeyHandler, instance);
   }
@@ -50,22 +50,22 @@ public class CommentNPFExercise extends NPFExercise {
    * @param e
    * @param content
    * @return
-   * @see #getQuestionContent(mitll.langtest.shared.Exercise, com.google.gwt.user.client.ui.Panel)
+   * @see #getQuestionContent(mitll.langtest.shared.CommonExercise, com.google.gwt.user.client.ui.Panel)
    */
   @Override
-  protected Widget getQuestionContent(Exercise e, String content) {
+  protected Widget getQuestionContent(CommonExercise e, String content) {
     Panel column = new FlowPanel();
     column.getElement().setId("QuestionContent");
     column.setWidth("100%");
 
     column.add(getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getRefSentence()));
 
-    String translitSentence = e.getTranslitSentence();
+    String translitSentence = e.getTransliteration();
     if (!translitSentence.isEmpty()) {
       column.add(getEntry(e, QCNPFExercise.TRANSLITERATION, ExerciseFormatter.TRANSLITERATION, translitSentence));
     }
 
-    String english = e.getMeaning() != null && !e.getMeaning().trim().isEmpty() ? e.getMeaning() : e.getEnglishSentence();
+    String english = e.getMeaning() != null && !e.getMeaning().trim().isEmpty() ? e.getMeaning() : e.getEnglish();
     if (!english.isEmpty()) {
       column.add(getEntry(e, QCNPFExercise.ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, english));
     }
@@ -73,7 +73,7 @@ public class CommentNPFExercise extends NPFExercise {
     return column;
   }
 
-  private Widget getEntry(Exercise e, final String field, final String label, String value) {
+  private Widget getEntry(CommonExercise e, final String field, final String label, String value) {
     return getEntry(field, label, value, e.getAnnotation(field));
   }
 
@@ -344,7 +344,7 @@ public class CommentNPFExercise extends NPFExercise {
       setButtonTitle(commentButton, isCorrect, comment);
       showOrHideCommentButton(commentButton, clearButton, isCorrect);
       exercise.addAnnotation(field, isCorrect ? "correct" : "incorrect", comment);
-      System.out.println("\t commentComplete : annotations now " + exercise.getFields());
+      //System.out.println("\t commentComplete : annotations now " + exercise.getFields());
     }
     else {
       System.out.println("commentComplete " + field + " comment '" + comment +"' same as previous, so ignoring");
