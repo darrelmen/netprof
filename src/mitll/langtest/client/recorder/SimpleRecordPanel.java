@@ -17,7 +17,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseQuestionState;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
 
 /**
  *
@@ -42,10 +42,10 @@ public class SimpleRecordPanel extends RecordButtonPanel {
   /**
    * Has three parts -- record/stop button, audio validity feedback icon, and the audio control widget that allows playback.
    *
-   * @see SimpleRecordExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @see SimpleRecordExercisePanel#getAnswerWidget(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    */
 	public SimpleRecordPanel(final LangTestDatabaseAsync service, final ExerciseController controller,
-                           final Exercise exercise, final ExerciseQuestionState questionState, final int index){
+                           final CommonExercise exercise, final ExerciseQuestionState questionState, final int index){
     super(service, controller, exercise, questionState, index, false, controller.getAudioType(), "Record");
     Panel widget = getPanel();
     if (widget instanceof HorizontalPanel) {
