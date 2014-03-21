@@ -8,8 +8,8 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.ExerciseListWrapper;
-import mitll.langtest.shared.ExerciseShell;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,7 +27,7 @@ import java.util.Set;
  * Time: 3:21 PM
  * To change this template use File | Settings | File Templates.
  */
-public class HistoryExerciseList<T extends ExerciseShell> extends PagingExerciseList<T> {
+public class HistoryExerciseList extends PagingExerciseList {
   public static final String ANY = "Clear";
   protected final Map<String,SectionWidget> typeToBox = new HashMap<String, SectionWidget>();
   /**
@@ -42,7 +42,7 @@ public class HistoryExerciseList<T extends ExerciseShell> extends PagingExercise
   protected HistoryExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
                                 boolean showTurkToken, boolean showInOrder, ExerciseController controller,
                                 boolean showTypeAhead, String instance) {
-    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, showTypeAhead, instance);
+    super(currentExerciseVPanel, service, feedback, null, controller, showTurkToken, showInOrder, showTypeAhead, instance);
   }
 
   /**
@@ -199,7 +199,7 @@ public class HistoryExerciseList<T extends ExerciseShell> extends PagingExercise
    * @param e
    */
   @Override
-  protected void gotClickOnItem(ExerciseShell e) {
+  protected void gotClickOnItem(CommonShell e) {
     System.out.println("----------- got click on " + e.getID() + " -------------- ");
     if (!INCLUDE_ITEM_IN_BOOKMARK) {
       loadByID(e.getID());
@@ -441,7 +441,7 @@ public class HistoryExerciseList<T extends ExerciseShell> extends PagingExercise
     public MySetExercisesCallback(String item) {  this.item = item;  }
 
     @Override
-    public void onSuccess(ExerciseListWrapper<T> result) {
+    public void onSuccess(ExerciseListWrapper result) {
       System.out.println("MySetExercisesCallback : onSuccess " + result.getExercises().size() + " items and item " +item);
 
       if (isStaleResponse(result)) {

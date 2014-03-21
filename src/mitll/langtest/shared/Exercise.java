@@ -18,7 +18,7 @@ import java.util.Map;
  * Time: 1:03 PM
  * To change this template use File | Settings | File Templates.
  */
-public class Exercise extends AudioExercise {
+public class Exercise extends AudioExercise implements CommonExercise {
   private static final ArrayList<String> EMPTY_LIST = new ArrayList<String>();
 
   public enum EXERCISE_TYPE implements IsSerializable { RECORD, TEXT_RESPONSE, REPEAT, REPEAT_FAST_SLOW, MULTI_REF }
@@ -149,9 +149,7 @@ public class Exercise extends AudioExercise {
     this.setType(EXERCISE_TYPE.REPEAT_FAST_SLOW);
   }
 
-  public ExerciseShell getShell() { return new ExerciseShell(getID(), getTooltip()); }
-
-  public ExerciseShell getShellCombinedTooltip() {
+  public CommonShell getShellCombinedTooltip() {
     String refSentence = getRefSentence();
     if (refSentence.length() > 15) {
       refSentence = refSentence.substring(0, 15);
@@ -249,7 +247,7 @@ public class Exercise extends AudioExercise {
   public void setRefSentences(List<String> sentenceRefs) {
     this.refSentences = sentenceRefs;
   }
-  public String getTranslitSentence() { return translitSentences.isEmpty() ? "" : translitSentences.get(0); }
+  public String getTransliteration() { return translitSentences.isEmpty() ? "" : translitSentences.get(0); }
   public List<String> getRefSentences() { return refSentences; }
   public List<String> getTranslitSentences() { return translitSentences; }
 
@@ -294,7 +292,7 @@ public class Exercise extends AudioExercise {
   public double getWeight() { return weight;  }
   public void setWeight(double weight) { this.weight = weight;  }
 
-  public String getEnglishSentence() {  return englishSentence;  }
+  public String getEnglish() {  return englishSentence;  }
   public void setType(EXERCISE_TYPE type) { this.type = type;  }
 
   public void setContent(String content) { this.content = content;  }
@@ -313,6 +311,7 @@ public class Exercise extends AudioExercise {
   public void setPromptInEnglish(boolean b) { this.promptInEnglish = b;  }
   public boolean isPromptInEnglish() { return promptInEnglish;  }
 
+  @Override
   public String getMeaning() {
     return meaning;
   }
@@ -321,19 +320,43 @@ public class Exercise extends AudioExercise {
     this.meaning = meaning;
   }
 
+/*  @Override
+  public String getEnglish() {
+    return getEnglish();
+  }*/
+
+  @Override
+  public String getForeignLanguage() {
+    return getRefSentence();
+  }
+/*
+  @Override
+  public String getTransliteration() {
+    return getTransliteration();
+  }*/
+
+  public Exercise toExercise() {
+    return this;
+  }
+
+  @Override
+  public CommonUserExercise toCommonUserExercise() {
+    return null;
+  }
+
   public String toString() {
     String moreAboutQuestions = DEBUG ? " : " +  getQuestionToString() : "";
     String questionInfo = langToQuestion == null ? " no questions" : " num questions " + langToQuestion.size() + moreAboutQuestions;
 
     if (isRepeat() || getType() == EXERCISE_TYPE.MULTI_REF) {
-      return "Exercise " + type + " " +id +  " content bytes = " + content.length() + " english '" + getEnglishSentence() +
+      return "Exercise " + type + " " +id +  " content bytes = " + content.length() + " english '" + getEnglish() +
           "' ref sentence '" + getRefSentence() +"' audio " + getAudioAttributes() + " : " + questionInfo +
         " unit->lesson " + getUnitToValue();
     }
     else {
       return "Exercise " + getType() + " " + id + " " + (isPromptInEnglish() ?"english":"foreign")+
           " : content bytes = " + content.length() + (DEBUG ? " content : " +content : "")+
-          " ref '" + getRefSentence() + "' translit '" + getTranslitSentence()+ "'"+
+          " ref '" + getRefSentence() + "' translit '" + getTransliteration()+ "'"+
         questionInfo;
     }
   }
