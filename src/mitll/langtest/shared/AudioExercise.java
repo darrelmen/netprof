@@ -109,7 +109,7 @@ public class AudioExercise extends ExerciseShell {
   public Map<String, String> getUnitToValue() { return unitToValue; }
 
   /**
-   * @see mitll.langtest.server.database.SectionHelper#addExerciseToLesson(Exercise, String, String)
+   * @see mitll.langtest.server.database.SectionHelper#addExerciseToLesson
    * @param unit
    * @param value
    */
