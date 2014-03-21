@@ -2,8 +2,9 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.UserExerciseDAO;
-import mitll.langtest.server.database.testing.SmallDatabaseImpl;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.custom.UserExercise;
 import net.sf.json.JSONArray;
@@ -35,9 +36,9 @@ public class SQLExerciseDAO implements ExerciseDAO {
 
   private final Database database;
   private final String mediaDir;
-  private List<Exercise> exercises;
+  private List<CommonExercise> exercises;
 
-  private final Map<String,Exercise> idToExercise = new HashMap<String,Exercise>();
+  private final Map<String,CommonExercise> idToExercise = new HashMap<String,CommonExercise>();
   private final SectionHelper sectionHelper = new SectionHelper();
   private final List<String> errors = new ArrayList<String>();
   private final ILRMapping ilrMapping;
@@ -63,7 +64,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
   public SectionHelper getSectionHelper() { return sectionHelper; }
 
   @Override
-  public void addOverlay(UserExercise userExercise) {
+  public void addOverlay(CommonUserExercise userExercise) {
 
   }
 
@@ -78,7 +79,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
   }
 
   @Override
-  public void add(UserExercise userExercise) {
+  public void add(CommonUserExercise userExercise) {
 
   }
 
@@ -88,7 +89,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
   }
 
   @Override
-  public Exercise getExercise(String id) {
+  public CommonExercise getExercise(String id) {
     if (idToExercise.isEmpty()) logger.warn("huh? couldn't find any exercises..?");
     if (!idToExercise.containsKey(id)) {
       logger.warn("couldn't find " +id + " in " +idToExercise.size() + " exercises...");
@@ -104,7 +105,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
    * @return
    * @see mitll.langtest.server.database.DatabaseImpl#getExercises
    */
-  public List<Exercise> getRawExercises() {
+  public List<mitll.langtest.shared.CommonExercise> getRawExercises() {
     if (exercises == null) {
       String sql = "SELECT * FROM exercises";
       exercises = getExercises(sql);
@@ -114,11 +115,11 @@ public class SQLExerciseDAO implements ExerciseDAO {
   }
 
   private void populateIDToExercise() {
-    for (Exercise e : exercises) idToExercise.put(e.getID(),e);
+    for (CommonExercise e : exercises) idToExercise.put(e.getID(),e);
   }
 
-  private List<Exercise> getExercises(String sql) {
-    List<Exercise> exercises = new ArrayList<Exercise>();
+  private List<CommonExercise> getExercises(String sql) {
+    List<CommonExercise> exercises = new ArrayList<CommonExercise>();
     try {
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement(sql);
@@ -131,7 +132,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
 
         if (content.startsWith("{")) {
           JSONObject obj = JSONObject.fromObject(content);
-          Exercise e = getExercise(plan, exid, obj);
+          CommonExercise e = getExercise(plan, exid, obj);
           if (e == null) {
             logger.warn("couldn't find exercise for plan '" + plan + "'");
           } else if (e.getID() == null) {
@@ -176,7 +177,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
    * @param imported
    * @return
    */
-  private boolean recordUnitChapterWeek(Exercise imported) {
+  private boolean recordUnitChapterWeek(CommonExercise imported) {
     String[] split = imported.getID().split("-");
     String unit = split[0];
     String chapter = split.length > 1 ? split[1] : "";
@@ -222,9 +223,9 @@ public class SQLExerciseDAO implements ExerciseDAO {
    * @param plan that this exercise is a part of
    * @param exid id for the exercise
    * @param obj json to get content and questions from
-   * @return Exercise from the json
+   * @return CommonExercise from the json
    */
-  private Exercise getExercise(String plan, String exid, JSONObject obj) {
+  private CommonExercise getExercise(String plan, String exid, JSONObject obj) {
     //String tip = "Item #"+exid; // TODO : have more informative tooltip
     String tip = exid; // TODO : have more informative tooltip
     Exercise exercise = new Exercise(plan, exid, "", false, false, tip);

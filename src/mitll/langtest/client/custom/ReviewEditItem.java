@@ -20,6 +20,8 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
+import mitll.langtest.shared.CommonShell;
+import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
@@ -33,7 +35,7 @@ import java.util.Arrays;
  * Time: 4:58 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
+public class ReviewEditItem extends EditItem {
   private static final String FIXED = "Mark Fixed";
   private static final String DUPLICATE = "Duplicate";
   private static final String DELETE = "Delete";
@@ -47,7 +49,7 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
    * @see Navigation#Navigation
    */
   public ReviewEditItem(final LangTestDatabaseAsync service, final UserManager userManager, ExerciseController controller,
-                        ListInterface<? extends ExerciseShell> listInterface, UserFeedback feedback, NPFHelper npfHelper) {
+                        ListInterface listInterface, UserFeedback feedback, NPFHelper npfHelper) {
     super(service, userManager, controller, listInterface, feedback, npfHelper);
   }
 
@@ -60,8 +62,8 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
    * @return
    */
   @Override
-  protected NewUserExercise<T> getAddOrEditPanel(UserExercise exercise, HasText itemMarker, UserList originalList, boolean doNewExercise) {
-    NewUserExercise<T> editableExercise;
+  protected NewUserExercise getAddOrEditPanel(CommonUserExercise exercise, HasText itemMarker, UserList originalList, boolean doNewExercise) {
+    NewUserExercise editableExercise;
 /*   if (doNewExercise) {
       editableExercise = new ChapterNewExercise<T>(service, controller, itemMarker, this, exercise);
     } else {*/
@@ -78,7 +80,7 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
      * @param originalList
      * @see EditItem#populatePanel
      */
-    public ReviewEditableExercise(HasText itemMarker, UserExercise changedUserExercise, UserList originalList) {
+    public ReviewEditableExercise(HasText itemMarker, CommonUserExercise changedUserExercise, UserList originalList) {
       super(itemMarker, changedUserExercise, originalList);
     }
 
@@ -96,12 +98,12 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
      * @return
      */
     @Override
-    protected Panel getCreateButton(final UserList ul, final ListInterface<T> pagingContainer, final Panel toAddTo,
+    protected Panel getCreateButton(final UserList ul, final ListInterface pagingContainer, final Panel toAddTo,
                                     final ControlGroup normalSpeedRecording) {
       Panel row = new DivWidget();
       row.addStyleName("marginBottomTen");
 
-      PrevNextList<T> prevNext = getPrevNext(pagingContainer);
+      PrevNextList prevNext = getPrevNext(pagingContainer);
       prevNext.addStyleName("floatLeft");
       row.add(prevNext);
 
@@ -146,7 +148,7 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
 
                 @Override
                 public void onSuccess(Boolean result) {
-                  exerciseList.removeExercise((T) newUserExercise);
+                  exerciseList.removeExercise(newUserExercise);
                   originalList.remove(newUserExercise.getID());
                 }
               });
@@ -188,8 +190,8 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
         public void onSuccess(UserExercise result) {
 
           //System.out.println("Got back " + result);
-          T result1 = (T) result;
-          exerciseList.addExerciseAfter((T)newUserExercise,result1);
+          UserExercise result1 = result;
+          exerciseList.addExerciseAfter(newUserExercise,result1);
           exerciseList.redraw();
           originalList.addExerciseAfter(newUserExercise, result);
         }
@@ -224,13 +226,13 @@ public class ReviewEditItem<T extends ExerciseShell> extends EditItem<T> {
      * @see #reallyChange
      */
     @Override
-    protected void doAfterEditComplete(ListInterface<T> pagingContainer, boolean buttonClicked) {
+    protected void doAfterEditComplete(ListInterface pagingContainer, boolean buttonClicked) {
       super.doAfterEditComplete(pagingContainer,buttonClicked);
 
       if (buttonClicked) {
         final String id = newUserExercise.getID();
         System.out.println("doAfterEditComplete : forgetting " + id);
-        T t = exerciseList.forgetExercise(id);
+        CommonShell t = exerciseList.forgetExercise(id);
         System.out.println("\tdoAfterEditComplete : forgot " + t);
 
         if (!ul.remove(newUserExercise)) {
