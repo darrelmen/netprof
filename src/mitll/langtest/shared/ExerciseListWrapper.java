@@ -11,14 +11,14 @@ import java.util.List;
  * Time: 4:19 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ExerciseListWrapper<T extends ExerciseShell> implements IsSerializable {
+public class ExerciseListWrapper implements IsSerializable {
   public ExerciseListWrapper(){}
 
   private int reqID;
-  private List<T> exercises;
-  private Exercise firstExercise;
+  private List<CommonShell> exercises;
+  private CommonExercise firstExercise;
 
-  public ExerciseListWrapper(int reqID, List<T> ids, Exercise firstExercise) {
+  public ExerciseListWrapper(int reqID, List<CommonShell> ids, CommonExercise firstExercise) {
     this.reqID = reqID;
     this.exercises = ids;
     this.firstExercise = firstExercise;
@@ -28,11 +28,11 @@ public class ExerciseListWrapper<T extends ExerciseShell> implements IsSerializa
     return reqID;
   }
 
-  public List<T> getExercises() {
+  public List<CommonShell> getExercises() {
     return exercises;
   }
 
-  public Exercise getFirstExercise() {
+  public CommonExercise getFirstExercise() {
     return firstExercise;
   }
 }
