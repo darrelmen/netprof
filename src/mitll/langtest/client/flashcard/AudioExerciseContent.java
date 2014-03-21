@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ResponseChoice;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
 
 /**
  * Created with IntelliJ IDEA.
@@ -38,17 +38,17 @@ public class AudioExerciseContent {
    * @param showQuestion
    * @return
    */
-  public Widget getQuestionContent(Exercise e, ExerciseController controller, boolean includeExerciseID, boolean showQuestion) {
+/*  public Widget getQuestionContent(CommonExercise e, ExerciseController controller, boolean includeExerciseID, boolean showQuestion) {
     rightAlignContent = controller.isRightAlignContent();
     responseType = controller.getProps().getResponseType();
-    String stimulus = e.getEnglishSentence();
+    String stimulus = e.getEnglish();
     String content = e.getContent();
 
     if (content == null) {
       content = stimulus;
     }
     return makeFlashcardForCRT(e, content,includeExerciseID, showQuestion);
-  }
+  }*/
 
   /**
    * Do hacky stuff to take the content and splice in an html 5 audio widget to play back audio.
@@ -59,8 +59,8 @@ public class AudioExerciseContent {
    * @param showQuestion
    * @return
    */
-  private Panel makeFlashcardForCRT(Exercise e, String content, boolean includeExerciseID, boolean showQuestion) {
-    Exercise.QAPair qaPair = e.getForeignLanguageQuestions().get(0);
+/*  private Panel makeFlashcardForCRT(CommonExercise e, String content, boolean includeExerciseID, boolean showQuestion) {
+    CommonExercise.QAPair qaPair = e.getForeignLanguageQuestions().get(0);
 
     Panel container = new FlowPanel();
     container.getElement().setId("makeFlashcardForCRT_container");
@@ -75,18 +75,19 @@ public class AudioExerciseContent {
         ">", true));
     }
     return container;
-  }
+  }*/
 
   /**
    * @see #getContentFromPrefix(String)
-   * @see #getAudioDiv(mitll.langtest.shared.Exercise)
-   * @see #makeFlashcardForCRT(mitll.langtest.shared.Exercise, String, boolean, boolean)
+   * @see #getAudioDiv(mitll.langtest.shared.CommonExercise)
+   * @see #makeFlashcardForCRT(mitll.langtest.shared.CommonExercise, String, boolean, boolean)
    * @param e
    * @param content
    * @param includeExerciseID
    * @param container
    */
-  private void addAudioRow(Exercise e, String content, boolean includeExerciseID, Panel container) {
+/*
+  private void addAudioRow(CommonExercise e, String content, boolean includeExerciseID, Panel container) {
     Panel horiz = new FlowPanel();
     horiz.getElement().setId("item_and_content");
     container.add(horiz);
@@ -104,14 +105,17 @@ public class AudioExerciseContent {
       container.add(getAudioDiv(e));
     }
   }
+*/
+/*
 
-  private Heading getItemHeader(Exercise e) {
+  private Heading getItemHeader(CommonExercise e) {
     Heading child = new Heading(5, "Item " + e.getID());
     child.addStyleName("leftTenMargin");
     child.addStyleName("floatLeft");
     child.addStyleName("rightFiveMargin");
     return child;
   }
+*/
 
 /*  private void addThreeRow(Exercise e, String content, boolean includeExerciseID, Panel container) {
     if (includeExerciseID) {
@@ -130,17 +134,17 @@ public class AudioExerciseContent {
   }*/
 
   /**
-   * @see #addAudioRow(mitll.langtest.shared.Exercise, String, boolean, com.google.gwt.user.client.ui.Panel)
-   * @param prefix
+   * @seex #addAudioRow(mitll.langtest.shared.CommonExercise, String, boolean, com.google.gwt.user.client.ui.Panel)
+   * @paramx prefix
    * @return
    */
-  private HTML getContentFromPrefix(String prefix) {
+/*  private HTML getContentFromPrefix(String prefix) {
     HTML contentPrefix = getMaybeRTLContent(prefix, true);
     contentPrefix.addStyleName("marginRight");
     contentPrefix.addStyleName("wrapword");
     if (rightAlignContent) contentPrefix.addStyleName("rightAlign");
     return contentPrefix;
-  }
+  }*/
 
 /*  private void makeThreeRowAudio(Exercise e, String suffix, Panel container) {
     Panel container2 = new FlowPanel();
@@ -182,11 +186,11 @@ public class AudioExerciseContent {
   }
 
   /**
-   * @see #addAudioRow(mitll.langtest.shared.Exercise, String, boolean, com.google.gwt.user.client.ui.Panel)
+   * @seex #addAudioRow(mitll.langtest.shared.CommonExercise, String, boolean, com.google.gwt.user.client.ui.Panel)
    * @param e
    * @return
    */
-  private SimplePanel getAudioDiv(Exercise e) {
+  private SimplePanel getAudioDiv(CommonExercise e) {
     SimplePanel simplePanel = new SimplePanel();
     simplePanel.getElement().setId("audioWidgetContainer");
 
@@ -201,7 +205,7 @@ public class AudioExerciseContent {
    * @param e
    * @return
    */
-  private Widget getAudioWidget(Exercise e) {
+  private Widget getAudioWidget(CommonExercise e) {
     String refAudio = e.getRefAudio();
     String type = refAudio.substring(refAudio.length() - 3);
 
@@ -236,7 +240,7 @@ public class AudioExerciseContent {
   }
 
   /**
-   * @see #makeFlashcardForCRT
+   * @seex #makeFlashcardForCRT
    * @param content text we want to align
    * @param requireAlignment so you can override it for certain widgets and not make it RTL
    * @return HTML that has it's text-align set consistent with the language (RTL for arabic, etc.)
