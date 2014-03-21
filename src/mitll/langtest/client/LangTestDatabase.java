@@ -3,10 +3,9 @@ package mitll.langtest.client;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.DLIUser;
-import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseListWrapper;
-import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.StartupInfo;
@@ -37,11 +36,11 @@ public interface LangTestDatabase extends RemoteService {
   boolean WRITE_ALTERNATE_COMPRESSED_AUDIO = false;
 
   // exerciseDAO
-  ExerciseListWrapper<? extends ExerciseShell> getExerciseIds(int reqID);
-  ExerciseListWrapper<? extends ExerciseShell> getExerciseIds(int reqID, long userID);
-  ExerciseListWrapper<? extends ExerciseShell> getExerciseIds(int reqID, long userID, String prefix, long userListID);
+  ExerciseListWrapper getExerciseIds(int reqID);
+  ExerciseListWrapper getExerciseIds(int reqID, long userID);
+  ExerciseListWrapper getExerciseIds(int reqID, long userID, String prefix, long userListID);
 
-  Exercise getExercise(String id);
+  CommonExercise getExercise(String id);
 
   ResultsAndGrades getResultsForExercise(String exid, boolean arabicTextDataCollect);
 
@@ -56,12 +55,12 @@ public interface LangTestDatabase extends RemoteService {
   int userExists(String login);
 
   // answer DAO
-  void addTextAnswer(int userID, Exercise exercise, int questionID, String answer, String answerType);
+  void addTextAnswer(int userID, CommonExercise exercise, int questionID, String answer, String answerType);
   AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int question, int user,
                              int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults);
-  double getScoreForAnswer(long userID, Exercise e, int questionID, String answer, String answerType);
+  double getScoreForAnswer(long userID, CommonExercise e, int questionID, String answer, String answerType);
 
-  Exercise getNextUngradedExercise(String user, int expectedGrades, boolean englishOnly);
+  CommonExercise getNextUngradedExercise(String user, int expectedGrades, boolean englishOnly);
 
   void checkoutExerciseID(String user,String id);
 
@@ -99,8 +98,7 @@ public interface LangTestDatabase extends RemoteService {
    * @param userID
    * @return
    * */
-  ExerciseListWrapper<? extends ExerciseShell> getExercisesForSelectionState(int reqID, Map<String,
-    Collection<String>> typeToSection, long userID);
+  ExerciseListWrapper getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID);
 
   List<AVPHistoryForList> getUserHistoryForList(long userid, Collection<String> ids, long latestResultID);
 
@@ -108,7 +106,7 @@ public interface LangTestDatabase extends RemoteService {
 
   Set<String> getCompletedExercises(int user, boolean isReviewMode);
 
-  ExerciseListWrapper<? extends ExerciseShell> getExercisesForSelectionState(int reqID,
+  ExerciseListWrapper getExercisesForSelectionState(int reqID,
                                                                              Map<String, Collection<String>> typeToSection,
                                                                              long userID, String prefix);
 

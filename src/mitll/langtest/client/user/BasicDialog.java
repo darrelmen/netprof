@@ -355,7 +355,7 @@ public class BasicDialog {
   }
 
   /**
-   * @see mitll.langtest.client.custom.NPFExercise#makeAddToList(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController)
+   * @see mitll.langtest.client.custom.NPFExercise#makeAddToList(mitll.langtest.shared.CommonExercise, mitll.langtest.client.exercise.ExerciseController)
    * @param widget
    * @param tip
    * @param placement
