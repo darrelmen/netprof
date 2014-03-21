@@ -6,7 +6,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
 
 /**
 * Tells playAudioPanel to be enabled/disabled in response to recording states
@@ -33,7 +33,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
    * @param playButtonSuffix
    * @param stopButtonText
    */
-  public WaveformPostAudioRecordButton(Exercise exercise,
+  public WaveformPostAudioRecordButton(CommonExercise exercise,
                                        ExerciseController controller,
                                        Panel widgets,
                                        RecordAudioPanel recordAudioPanel, LangTestDatabaseAsync service, int index,
