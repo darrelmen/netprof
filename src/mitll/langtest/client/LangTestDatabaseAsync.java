@@ -2,10 +2,9 @@ package mitll.langtest.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.DLIUser;
-import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseListWrapper;
-import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.StartupInfo;
@@ -28,7 +27,7 @@ import java.util.Set;
  * The async counterpart of <code>LangTestDatabase</code>.
  */
 public interface LangTestDatabaseAsync {
-  void addTextAnswer(int usedID, Exercise exercise, int questionID, String answer, String answerType, AsyncCallback<Void> async);
+  void addTextAnswer(int usedID, CommonExercise exercise, int questionID, String answer, String answerType, AsyncCallback<Void> async);
   void userExists(String login, AsyncCallback<Integer> async);
   void addUser(int age, String gender, int experience, String nativeLang, String dialect, String userID, AsyncCallback<Long> async);
   void getUsers(AsyncCallback<List<User>> async);
@@ -36,7 +35,7 @@ public interface LangTestDatabaseAsync {
   void writeAudioFile(String base64EncodedString, String plan, String exercise, int question, int user,
                       int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults, AsyncCallback<AudioAnswer> async);
 
-  void getNextUngradedExercise(String user, int expectedGrades, boolean englishOnly, AsyncCallback<Exercise> async);
+  void getNextUngradedExercise(String user, int expectedGrades, boolean englishOnly, AsyncCallback<CommonExercise> async);
 
   void checkoutExerciseID(String user,String id, AsyncCallback<Void> async);
 
@@ -50,9 +49,9 @@ public interface LangTestDatabaseAsync {
 
   void getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, AsyncCallback<ImageResponse> async);
 
-  void getExercise(String id, AsyncCallback<Exercise> async);
+  void getExercise(String id, AsyncCallback<CommonExercise> async);
 
-  void getScoreForAnswer(long userID, Exercise e, int questionID, String answer, String answerType, AsyncCallback<Double> async);
+  void getScoreForAnswer(long userID, CommonExercise e, int questionID, String answer, String answerType, AsyncCallback<Double> async);
 
   void getUserToResultCount(AsyncCallback<Map<User, Integer>> async);
 
@@ -80,12 +79,12 @@ public interface LangTestDatabaseAsync {
 
   void getGradeCountPerExercise(AsyncCallback<Map<Integer, Map<String, Map<String, Integer>>>> async);
 
-  <T extends ExerciseShell> void getExerciseIds(int reqID, AsyncCallback<ExerciseListWrapper<T>> async);
+  void getExerciseIds(int reqID, AsyncCallback<ExerciseListWrapper> async);
 
-  <T extends ExerciseShell> void getExerciseIds(int reqID, long userID, AsyncCallback<ExerciseListWrapper<T>> async);
+  void getExerciseIds(int reqID, long userID, AsyncCallback<ExerciseListWrapper> async);
 
-  <T extends ExerciseShell> void getExerciseIds(int reqID, long userID, String prefix, long userListID,
-                                                AsyncCallback<ExerciseListWrapper<T>> async);
+  void getExerciseIds(int reqID, long userID, String prefix, long userListID,
+                                                AsyncCallback<ExerciseListWrapper> async);
 
   /**
    * @param reqID
@@ -93,17 +92,17 @@ public interface LangTestDatabaseAsync {
    * @param userID
    * @return
    */
-  <T extends ExerciseShell> void getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection,
-                                                               long userID, AsyncCallback<ExerciseListWrapper<T>> async);
+  void getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection,
+                                     long userID, AsyncCallback<ExerciseListWrapper> async);
 
 
   void addDLIUser(DLIUser dliUser, AsyncCallback<Void> async);
 
   void getCompletedExercises(int user, boolean isReviewMode, AsyncCallback<Set<String>> async);
 
-  <T extends ExerciseShell> void getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection,
+  void getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection,
                                                                long userID, String prefix,
-                                                               AsyncCallback<ExerciseListWrapper<T>> async);
+                                                               AsyncCallback<ExerciseListWrapper> async);
 
   void getStartupInfo(AsyncCallback<StartupInfo> async);
 
