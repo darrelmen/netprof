@@ -2,6 +2,8 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.UserExerciseDAO;
+import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.custom.UserExercise;
@@ -51,8 +53,8 @@ public class FileExerciseDAO implements ExerciseDAO {
   private static final String REPEAT = "repeat";
   private final String mediaDir;
 
-  private List<Exercise> exercises;
-  private final Map<String,Exercise> idToExercise = new HashMap<String,Exercise>();
+  private List<CommonExercise> exercises;
+  private final Map<String,CommonExercise> idToExercise = new HashMap<String,CommonExercise>();
   private boolean isUrdu;
   private final boolean isFlashcard;
   private boolean isEnglish;
@@ -85,7 +87,7 @@ public class FileExerciseDAO implements ExerciseDAO {
   }
 
   @Override
-  public void addOverlay(UserExercise userExercise) {
+  public void addOverlay(CommonUserExercise userExercise) {
 
   }
 
@@ -100,7 +102,7 @@ public class FileExerciseDAO implements ExerciseDAO {
   }
 
   @Override
-  public void add(UserExercise userExercise) {
+  public void add(CommonUserExercise userExercise) {
 
   }
 
@@ -109,7 +111,7 @@ public class FileExerciseDAO implements ExerciseDAO {
 
   }
 
-  public Exercise getExercise(String id) {
+  public CommonExercise getExercise(String id) {
     if (idToExercise.isEmpty()) logger.warn("huh? couldn't find any exercises..?");
     if (!idToExercise.containsKey(id)) {
        logger.warn("couldn't find " +id + " in " +idToExercise.size() + " exercises...");
@@ -140,7 +142,7 @@ public class FileExerciseDAO implements ExerciseDAO {
    */
   private void readWordPairs(String lessonPlanFile, boolean doImages, boolean dontExpectHeader) {
     if (exercises != null) return;
-    exercises = new ArrayList<Exercise>();
+    exercises = new ArrayList<CommonExercise>();
     boolean isTSV =  (lessonPlanFile.endsWith(".tsv"));
     try {
       File file = new File(lessonPlanFile);
@@ -198,8 +200,8 @@ public class FileExerciseDAO implements ExerciseDAO {
     return id;
   }
 
-  private void populateIDToExercise(List<Exercise> exercises) {
-    for (Exercise e : exercises) idToExercise.put(e.getID(),e);
+  private void populateIDToExercise(List<CommonExercise> exercises) {
+    for (CommonExercise e : exercises) idToExercise.put(e.getID(),e);
   }
 
   /**
@@ -308,7 +310,7 @@ public class FileExerciseDAO implements ExerciseDAO {
    * @param resourceAsStream
    * @return
    */
-  public List<Exercise> readExercises(InputStream resourceAsStream) {
+  public List<CommonExercise> readExercises(InputStream resourceAsStream) {
    return readExercises(null, null, "inputStream", resourceAsStream);
   }
 
@@ -320,8 +322,8 @@ public class FileExerciseDAO implements ExerciseDAO {
    * @param resourceAsStream
    * @return
    */
-  private List<Exercise> readExercises(String installPath, String configDir, String lessonPlanFile, InputStream resourceAsStream) {
-    List<Exercise> exercises = new ArrayList<Exercise>();
+  private List<CommonExercise> readExercises(String installPath, String configDir, String lessonPlanFile, InputStream resourceAsStream) {
+    List<CommonExercise> exercises = new ArrayList<CommonExercise>();
 
     try {
       BufferedReader reader = getBufferedReader(resourceAsStream);
@@ -397,11 +399,11 @@ public class FileExerciseDAO implements ExerciseDAO {
     return exercises;
   }
 
-  private void confirmAudioRefs(List<Exercise> exercises) {
+  private void confirmAudioRefs(List<CommonExercise> exercises) {
     int c = 0;
     try {
       FileWriter writer = new FileWriter("missingAudio.txt");
-      for (Exercise e : exercises) {
+      for (CommonExercise e : exercises) {
         String refAudio = e.getRefAudio();
         File file = new File(refAudio);
         if (!file.exists()) {
@@ -732,7 +734,7 @@ public class FileExerciseDAO implements ExerciseDAO {
 
   private String ensureForwardSlashes(String wavPath) {  return wavPath.replaceAll("\\\\", "/");  }
 
-  public List<Exercise> getRawExercises() {  return exercises;  }
+  public List<mitll.langtest.shared.CommonExercise> getRawExercises() {  return exercises;  }
 
 /*  private void convertPlan() {
     InputStream resourceAsStream = getExerciseListStream("lesson.plan");
