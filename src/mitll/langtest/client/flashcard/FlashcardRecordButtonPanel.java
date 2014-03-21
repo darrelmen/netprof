@@ -11,7 +11,7 @@ import mitll.langtest.client.recorder.FlashcardRecordButton;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
 
 /**
  * Created with IntelliJ IDEA.
@@ -33,10 +33,10 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
    * @param exercise
    * @param index
    * @param audioType
-   * @see BootstrapExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int, boolean)
+   * @see BootstrapExercisePanel#getAnswerWidget(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int, boolean)
    */
   public FlashcardRecordButtonPanel(AudioAnswerListener exercisePanel, LangTestDatabaseAsync service,
-                                    ExerciseController controller, Exercise exercise, int index, String audioType) {
+                                    ExerciseController controller, CommonExercise exercise, int index, String audioType) {
     super(service, controller, exercise, null, index, true, audioType, "Record");
 
     this.exercisePanel = exercisePanel;
