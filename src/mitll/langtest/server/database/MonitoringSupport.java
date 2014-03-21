@@ -1,6 +1,6 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.grade.Grade;
@@ -103,7 +103,7 @@ public class MonitoringSupport {
    * @param exercises
    * @return # responses->hours to get that number
    */
-/*  public Map<Integer,Float> getHoursToCompletion(List<Exercise> exercises) {
+/*  public Map<Integer,Float> getHoursToCompletion(List<CommonExercise> exercises) {
     long totalTime = 0;
     long total = 0;
     for (Session s: getSessions()) {
@@ -141,7 +141,7 @@ public class MonitoringSupport {
    * TODO : worry about duplicate userid?
    * @return
    */
-  public Map<Integer, Integer> getResultCountToCount(List<Exercise> exercises) {
+  public Map<Integer, Integer> getResultCountToCount(List<CommonExercise> exercises) {
     Map<String, Integer> idToCount = getExToCount(exercises);
     Map<Integer,Integer> resCountToCount = new HashMap<Integer, Integer>();
 
@@ -162,7 +162,7 @@ public class MonitoringSupport {
    * @see #getResultCountToCount
    * @return
    */
-  private Map<String, Integer> getExToCount(List<Exercise> exercises) {
+  private Map<String, Integer> getExToCount(List<CommonExercise> exercises) {
     Map<String, Integer> idToCount = getInitialIdToCount(exercises);
     Map<String, Set<Long>> keyToUsers = new HashMap<String, Set<Long>>();
     List<Result> results = getResults();
@@ -191,7 +191,7 @@ public class MonitoringSupport {
    * @param exercises
    * @return
    */
-  public Map<Integer, Map<String, Map<String,Integer>>> getGradeCountPerExercise(List<Exercise> exercises) {
+  public Map<Integer, Map<String, Map<String,Integer>>> getGradeCountPerExercise(List<CommonExercise> exercises) {
     List<Result> results = getResults();
     Map<Integer, List<Grade>> idToGrade = gradeDAO.getIdToGrade();
     Map<Integer, Map<String, Map<String,Integer>>> roundToGradeToCount = new HashMap<Integer, Map<String, Map<String, Integer>>>();
@@ -232,7 +232,7 @@ public class MonitoringSupport {
    * @param isMale
    * @return
    */
-  private Map<String, Integer> getExToCountMaleOrFemale(List<Exercise> exercises, boolean isMale) {
+  private Map<String, Integer> getExToCountMaleOrFemale(List<CommonExercise> exercises, boolean isMale) {
     Map<String, Integer> idToCount = getInitialIdToCount(exercises);
 
     Map<Long, User> userMap = userDAO.getUserMap(isMale);
@@ -282,19 +282,19 @@ public class MonitoringSupport {
    * @param exercises
    * @return
    */
-  private Map<String, Integer> getInitialIdToCount( List<Exercise> exercises) {
+  private Map<String, Integer> getInitialIdToCount(List<CommonExercise> exercises) {
     Map<String,Integer> idToCount = new HashMap<String, Integer>();
-    for (Exercise e : exercises) {
-      if (e.getNumQuestions() == 0) {
+    for (CommonExercise e : exercises) {
+      //if (e.getNumQuestions() == 0) {
         String key = e.getID() + "/0";
         idToCount.put(key,0);
-      }
+/*      }
       else {
         for (int i = 1; i < e.getNumQuestions()+1; i++) {   // for some reason we start from 1!
           String key = e.getID() + "/" + i;
           idToCount.put(key,0);
         }
-      }
+      }*/
     }
     return idToCount;
   }
@@ -370,7 +370,7 @@ public class MonitoringSupport {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getResultPerExercise
    * @return
    */
-  public Map<String, Map<String, Integer>> getResultPerExercise(List<Exercise> exercises) {
+  public Map<String, Map<String, Integer>> getResultPerExercise(List<CommonExercise> exercises) {
     Map<String,Map<String, Integer>> typeToList = new HashMap<String,Map<String, Integer>>();
     typeToList.put("overall",getExToCount(exercises));
     typeToList.put("male",getExToCountMaleOrFemale(exercises,true));
@@ -384,7 +384,7 @@ public class MonitoringSupport {
    * @param exercises
    * @return
    */
-  public Map<String,Map<Integer,Integer>> getResultCountsByGender(List<Exercise> exercises) {
+  public Map<String,Map<Integer,Integer>> getResultCountsByGender(List<CommonExercise> exercises) {
     //logger.debug("Examining " +exercises.size() + " exercises...");
     Map<String,Map<Integer,Integer>> typeToNumAnswerToCount = new HashMap<String, Map<Integer, Integer>>();
 
@@ -424,7 +424,7 @@ public class MonitoringSupport {
     return typeToNumAnswerToCount;
   }
 
-  public Map<String,Map<Integer, Map<Integer, Integer>>> getDesiredCounts(List<Exercise> exercises) {
+  public Map<String,Map<Integer, Map<Integer, Integer>>> getDesiredCounts(List<CommonExercise> exercises) {
     Map<String,Map<Integer, Map<Integer, Integer>>> typeToNumAnswerToCount = new HashMap<String, Map<Integer, Map<Integer, Integer>>>();
 
     List<Integer> male = getCountArray(getExToCountMaleOrFemale(exercises,true));
