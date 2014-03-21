@@ -6,8 +6,8 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.CommonShell;
 
 import java.util.List;
 import java.util.Set;
@@ -19,7 +19,7 @@ import java.util.Set;
  * Time: 5:25 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface ListInterface<T extends ExerciseShell> extends RequiresResize {
+public interface ListInterface extends RequiresResize {
   /**
    * @see mitll.langtest.client.LangTest#setFactory
    * @param factory
@@ -28,7 +28,7 @@ public interface ListInterface<T extends ExerciseShell> extends RequiresResize {
    */
   void setFactory(ExercisePanelFactory factory, UserManager user, int expectedGrades);
 
-  void rememberAndLoadFirst(List<T> exercises, Exercise firstExercise);
+  void rememberAndLoadFirst(List<CommonShell> exercises, CommonExercise firstExercise);
 
     /**
      * @see mitll.langtest.client.LangTest#gotUser(long)
@@ -54,7 +54,7 @@ public interface ListInterface<T extends ExerciseShell> extends RequiresResize {
 
   Widget getExerciseListOnLeftSide(PropertyHandler props);
 
-  T byID(String name);
+  CommonShell byID(String name);
 
   void loadExercise(String itemID);
 
@@ -66,25 +66,25 @@ public interface ListInterface<T extends ExerciseShell> extends RequiresResize {
    * @return
    * @see ListInterface#loadNextExercise
    */
-  <S extends ExerciseShell> boolean loadNextExercise(S current);
+ boolean loadNextExercise(CommonShell current);
 
   boolean loadNextExercise(String id);
-  Panel makeExercisePanel(Exercise result);
+  Panel makeExercisePanel(CommonExercise result);
 
   boolean loadPrev();
 
-  <S extends ExerciseShell> boolean loadPreviousExercise(S current);
+  boolean loadPreviousExercise(CommonShell current);
 
   void checkAndAskServer(String id);
 
   public String getCurrentExerciseID();
-  public <S extends ExerciseShell> S getCurrentExercise();
+  public CommonShell getCurrentExercise();
 
   boolean onFirst();
-  <S extends ExerciseShell> boolean onFirst(S current);
+  boolean onFirst(CommonShell current);
 
   boolean onLast();
-  <S extends ExerciseShell> boolean onLast(S current);
+  boolean onLast(CommonShell current);
   /**
    * @see mitll.langtest.client.LangTest#resetState()
    */
@@ -103,9 +103,9 @@ public interface ListInterface<T extends ExerciseShell> extends RequiresResize {
   void addCompleted(String id);
   void removeCompleted(String id);
 
-  void addExercise(T es);
+  void addExercise(CommonShell es);
 
-  T simpleRemove(String id);
+  CommonShell simpleRemove(String id);
 
   void hide();
   void show();
@@ -114,5 +114,5 @@ public interface ListInterface<T extends ExerciseShell> extends RequiresResize {
 
   void redraw();
 
-  void addListChangedListener(ListChangeListener<T> listener);
+  void addListChangedListener(ListChangeListener<CommonShell> listener);
 }
