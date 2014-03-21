@@ -9,7 +9,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
 
 /**
  * This binds a record button with the act of posting recorded audio to the server.
@@ -24,7 +24,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   private static final int LOG_ROUNDTRIP_THRESHOLD = 3000;
   private final int index;
   private int reqid = 0;
-  private Exercise exercise;
+  private CommonExercise exercise;
   private final ExerciseController controller;
   private final LangTestDatabaseAsync service;
   private final boolean recordInResults;
@@ -40,7 +40,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    * @param recordButtonTitle
    * @param stopButtonTitle
    */
-  public PostAudioRecordButton(Exercise exercise, final ExerciseController controller, LangTestDatabaseAsync service,
+  public PostAudioRecordButton(CommonExercise exercise, final ExerciseController controller, LangTestDatabaseAsync service,
                                int index, boolean recordInResults, String audioType, String recordButtonTitle, String stopButtonTitle) {
     super(controller.getRecordTimeout(), true, true, recordButtonTitle, stopButtonTitle);
     setRecordingListener(this);
@@ -54,8 +54,8 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     getElement().setId("PostAudioRecordButton");
   }
 
-  public void setExercise(Exercise exercise) { this.exercise = exercise; }
-  public Exercise getExercise() { return exercise; }
+  public void setExercise(CommonExercise exercise) { this.exercise = exercise; }
+  public CommonExercise getExercise() { return exercise; }
 
   /**
    * @see mitll.langtest.client.recorder.RecordButton#stop()
@@ -65,12 +65,12 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     reqid++;
     final long then = System.currentTimeMillis();
     service.writeAudioFile(controller.getBase64EncodedWavFile(),
-      exercise.getPlan(),
+      "plan",//exercise.getPlan(),
       exercise.getID(),
       index,
       controller.getUser(),
       reqid,
-      !exercise.isPromptInEnglish(),
+      true,//!exercise.isPromptInEnglish(),
       audioType,
       false, recordInResults,
       new AsyncCallback<AudioAnswer>() {
