@@ -1,6 +1,6 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
@@ -37,9 +37,9 @@ public class AnswerDAO {
    * @param pronScore
    * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers(mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise)
    */
-  public void addAnswer(int userID, Exercise e, int questionID, String answer, String audioFile,
+  public void addAnswer(int userID, CommonExercise e, int questionID, String answer, String audioFile,
                         boolean flq, boolean spoken, String audioType, boolean correct, float pronScore) {
-    String plan = e.getPlan();
+    String plan = "plan";//e.getPlan();
     String id = e.getID();
     addAnswer(database,userID, plan, id, questionID, answer, audioFile, true,  flq, spoken, audioType, 0, correct, pronScore, "");
   }
