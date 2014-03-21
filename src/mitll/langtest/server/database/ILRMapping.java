@@ -1,6 +1,6 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
@@ -48,7 +48,7 @@ public class ILRMapping {
     }
   }
 
-  public void report(Map<String, Exercise> idToExercise) {
+  public void report(Map<String, CommonExercise> idToExercise) {
     int size = idToExercise.keySet().size();
     int size1 = getMappedExercises().size();
     if (size != size1) {
@@ -98,7 +98,7 @@ public class ILRMapping {
    * @param exid
    * @param e
    */
-  public void addMappingAssoc(String exid, Exercise e) {
+  public void addMappingAssoc(String exid, CommonExercise e) {
     List<SectionHelper.Pair> pairs = new ArrayList<SectionHelper.Pair>();
 
     String level = exerciseToLevel.get(exid);
