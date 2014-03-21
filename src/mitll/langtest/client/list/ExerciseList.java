@@ -749,7 +749,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     leftColumn.getElement().setId("ExerciseList_leftColumn");
     leftColumn.addStyleName("floatLeft");
     addMinWidthStyle(leftColumn);
-    DOM.setStyleAttribute(leftColumn.getElement(), "paddingRight", "10px");
 
     if (!props.isFlashcardTeacherView() && !props.isMinimalUI() && ADD_ITEM_HEADER) {
       Heading items = new Heading(4, ITEMS);
@@ -762,6 +761,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   protected void addMinWidthStyle(Panel leftColumn) {
     leftColumn.addStyleName("minWidth");
+    DOM.setStyleAttribute(leftColumn.getElement(), "paddingRight", "10px");
   }
 
   @Override
