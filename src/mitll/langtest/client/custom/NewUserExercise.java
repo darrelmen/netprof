@@ -29,8 +29,9 @@ import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.CommonShell;
+import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 
@@ -41,7 +42,7 @@ import mitll.langtest.shared.custom.UserList;
  * Time: 5:59 PM
  * To change this template use File | Settings | File Templates.
  */
-public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
+public class NewUserExercise extends BasicDialog {
   private static final String FOREIGN_LANGUAGE = "Foreign Language";
   private static final String CREATE = "Create";
   static final String ENGLISH_LABEL = "English (optional)";
@@ -68,7 +69,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   ControlGroup slowSpeedRecording;
   UserList ul;
   UserList originalList;
-  ListInterface<T> listInterface;
+  ListInterface listInterface;
   private Panel toAddTo;
   private boolean clickedCreate = false;
 
@@ -81,18 +82,17 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
    * @param newExercise
    */
   public NewUserExercise(final LangTestDatabaseAsync service,
-                         ExerciseController controller, HasText itemMarker, EditItem editItem, UserExercise newExercise) {
+                         ExerciseController controller, HasText itemMarker, EditItem editItem, CommonUserExercise newExercise) {
     this.controller = controller;
     this.service = service;
     this.itemMarker = itemMarker;
     this.editItem = editItem;
-    this.newUserExercise = newExercise;
+    this.newUserExercise = newExercise.toUserExercise();
   }
 
-
   /**
-   * @see #afterValidForeignPhrase(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, boolean)
-   * @see EditItem#populatePanel(mitll.langtest.shared.custom.UserExercise, com.google.gwt.user.client.ui.Panel, mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.HasText, mitll.langtest.client.list.ListInterface)
+   * @see #afterValidForeignPhrase
+   * @seex EditItem#populatePanel(mitll.langtest.shared.custom.UserExercise, com.google.gwt.user.client.ui.Panel, mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.HasText, mitll.langtest.client.list.ListInterface)
    *
    * @param ul
    * @param originalList
@@ -100,7 +100,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
    * @param toAddTo
    * @return
    */
-  public Panel addNew(final UserList ul, UserList originalList, final ListInterface<T> listInterface, final Panel toAddTo) {
+  public Panel addNew(final UserList ul, UserList originalList, final ListInterface listInterface, final Panel toAddTo) {
     final FluidContainer container = new FluidContainer();
     DivWidget upper = new DivWidget();
 
@@ -166,7 +166,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   }
 
   void gotBlur(FormField english, FormField foreignLang, RecordAudioPanel rap,
-               ControlGroup normalSpeedRecording, UserList ul, ListInterface<T> pagingContainer,
+               ControlGroup normalSpeedRecording, UserList ul, ListInterface pagingContainer,
                Panel toAddTo) {
     grabInfoFromFormAndStuffInfoExercise();
   }
@@ -191,7 +191,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
   }
 
   void deleteItem(final String id, final long uniqueID, final UserList ul,
-                  final PagingExerciseList<T> exerciseList, final NPFHelper npfHelper) {
+                  final PagingExerciseList exerciseList, final NPFHelper npfHelper) {
     service.deleteItemFromList(uniqueID, id, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {}
@@ -201,7 +201,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
         if (!result) System.err.println("deleteItem huh? id " + id + " not in list " + uniqueID);
 
         exerciseList.forgetExercise(id);
-        UserExercise remove = ul.remove(id);
+        CommonExercise remove = ul.remove(id);
         if (remove == null) {
           System.err.println("deleteItem huh? didn't remove the item " + id);
         }
@@ -243,7 +243,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     });
   }
 
-  void setFields(UserExercise newUserExercise) {
+  void setFields(CommonUserExercise newUserExercise) {
     System.out.println("grabInfoFromFormAndStuffInfoExercise : setting fields with " + newUserExercise);
 
     // english
@@ -261,11 +261,11 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     // translit
     translit.box.setText(newUserExercise.getTransliteration());
 
-    Exercise exercise = newUserExercise.toExercise();
+   // CommonExercise exercise = newUserExercise.toExercise();
 
     // regular speed audio
-    rap.getPostAudioButton().setExercise(exercise);
-    String refAudio = exercise.getRefAudio();
+    rap.getPostAudioButton().setExercise(newUserExercise);
+    String refAudio = newUserExercise.getRefAudio();
 
 
     if (refAudio != null) {
@@ -273,8 +273,8 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     }
 
     // slow speed audio
-    rapSlow.getPostAudioButton().setExercise(exercise);
-    String slowAudioRef = exercise.getSlowAudioRef();
+    rapSlow.getPostAudioButton().setExercise(newUserExercise);
+    String slowAudioRef = newUserExercise.getSlowAudioRef();
 
     if (slowAudioRef != null) {
       rapSlow.getImagesForPath(slowAudioRef);
@@ -289,7 +289,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
    * @param normalSpeedRecording
    * @return
    */
-  Panel getCreateButton(UserList ul, ListInterface<T> pagingContainer, Panel toAddTo,
+  Panel getCreateButton(UserList ul, ListInterface pagingContainer, Panel toAddTo,
                         ControlGroup normalSpeedRecording
   ) {
     Button submit = makeCreateButton(ul, pagingContainer, toAddTo, foreignLang, rap, normalSpeedRecording,
@@ -307,7 +307,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     return row;
   }
 
-  private Button makeCreateButton(final UserList ul, final ListInterface<T> pagingContainer, final Panel toAddTo,
+  private Button makeCreateButton(final UserList ul, final ListInterface pagingContainer, final Panel toAddTo,
                                   final FormField foreignLang,
                                   final RecordAudioPanel rap, final ControlGroup normalSpeedRecording, final String buttonName) {
     final Button submit = new Button(buttonName);
@@ -345,7 +345,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
    * @param foreignChanged
    */
   void validateThenPost(FormField foreignLang, RecordAudioPanel rap,
-                        ControlGroup normalSpeedRecording, UserList ul, ListInterface<T> pagingContainer,
+                        ControlGroup normalSpeedRecording, UserList ul, ListInterface pagingContainer,
                         Panel toAddTo, boolean onClick, boolean foreignChanged) {
     if (foreignLang.getText().isEmpty()) {
       markError(foreignLang, ENTER_THE_FOREIGN_LANGUAGE_PHRASE);
@@ -370,7 +370,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
    * @param toAddTo
    * @param onClick
    */
-  private void checkValidForeignPhrase(final UserList ul, final ListInterface<T> pagingContainer, final Panel toAddTo,
+  private void checkValidForeignPhrase(final UserList ul, final ListInterface pagingContainer, final Panel toAddTo,
                                        final boolean onClick) {
     String foreignLangText = foreignLang.getText();
     System.out.println("checkValidForeignPhrase : checking phrase " + foreignLangText +
@@ -425,7 +425,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
    * @param onClick
    */
   void afterValidForeignPhrase(final UserList ul,
-                               final ListInterface<T> exerciseList,
+                               final ListInterface exerciseList,
                                final Panel toAddTo, boolean onClick) {
     service.reallyCreateNewItem(ul.getUniqueID(), newUserExercise, new AsyncCallback<UserExercise>() {
       @Override
@@ -438,18 +438,18 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     });
   }
 
-  void afterItemCreated(UserExercise newExercise, UserList ul, ListInterface<T> exerciseList, Panel toAddTo) {
+  void afterItemCreated(UserExercise newExercise, UserList ul, ListInterface exerciseList, Panel toAddTo) {
     //System.out.println("afterItemCreated " + newExercise);
 
     editItem.clearNewExercise(); // success -- don't remember it
 
-    UserExercise newUserExercisePlaceholder = ul.remove(EditItem.NEW_EXERCISE_ID);
+    CommonUserExercise newUserExercisePlaceholder = ul.remove(EditItem.NEW_EXERCISE_ID);
     ul.addExercise(newExercise);
     originalList.addExercise(newExercise);
     ul.addExercise(newUserExercisePlaceholder); // make sure the placeholder is always at the end
     itemMarker.setText(ul.getExercises().size() + " items");
 
-    T toMoveToEnd = moveNewExerciseToEndOfList((T) newExercise, exerciseList);
+    CommonShell toMoveToEnd = moveNewExerciseToEndOfList(newExercise, exerciseList);
 
     exerciseList.checkAndAskServer(toMoveToEnd.getID());
 
@@ -457,8 +457,8 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     toAddTo.add(addNew(ul, originalList, exerciseList, toAddTo));
   }
 
-  private T moveNewExerciseToEndOfList(T newExercise, ListInterface<T> exerciseList) {
-    T toMoveToEnd = exerciseList.simpleRemove(EditItem.NEW_EXERCISE_ID);
+  private CommonShell moveNewExerciseToEndOfList(CommonShell newExercise, ListInterface exerciseList) {
+    CommonShell toMoveToEnd = exerciseList.simpleRemove(EditItem.NEW_EXERCISE_ID);
     exerciseList.addExercise(newExercise);  // TODO figure out better type safe way of doing this
     exerciseList.addExercise(toMoveToEnd);
     exerciseList.redraw();
@@ -480,7 +480,7 @@ public class NewUserExercise<T extends ExerciseShell> extends BasicDialog {
     private RecordAudioPanel otherRAP;
     private WaveformPostAudioRecordButton postAudioButton;
 
-    public CreateFirstRecordAudioPanel(Exercise newExercise, Panel row,
+    public CreateFirstRecordAudioPanel(CommonExercise newExercise, Panel row,
                                        boolean recordRegularSpeed) {
       super(newExercise, NewUserExercise.this.controller, row, NewUserExercise.this.service, 0, false, NewUserExercise.this.controller.getAudioType());
       this.recordRegularSpeed = recordRegularSpeed;
