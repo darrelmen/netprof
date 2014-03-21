@@ -6,6 +6,7 @@ import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.database.Export;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.log4j.Logger;
@@ -64,8 +65,8 @@ public class AutoCRT {
   /**
    * Get an auto crt reco output and score given an audio answer.
    *
-   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile(String, String, String, int, int, int, boolean, String, boolean)
-   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.audio.AudioCheck.ValidityAndDur, String, boolean, mitll.langtest.client.LangTestDatabase)
+   * @seex mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile(String, String, String, int, int, int, boolean, String, boolean)
+   * @seex mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.audio.AudioCheck.ValidityAndDur, String, boolean, mitll.langtest.client.LangTestDatabase)
    * @param exerciseID for this exercise
    * @param questionID and this question
    * @param audioFile score this file (
@@ -143,13 +144,13 @@ public class AutoCRT {
    * Allow multiple correct answers from synonym sentence list.
    *
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
-   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.audio.AudioCheck.ValidityAndDur, String, boolean, mitll.langtest.client.LangTestDatabase)
-   * @see mitll.langtest.server.audio.AudioFileHelper#getFlashcardAnswer(mitll.langtest.shared.Exercise, java.io.File, mitll.langtest.shared.AudioAnswer)
+   * @seex mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.audio.AudioCheck.ValidityAndDur, String, boolean, mitll.langtest.client.LangTestDatabase)
+   * @seex mitll.langtest.server.audio.AudioFileHelper#getFlashcardAnswer(mitll.langtest.shared.Exercise, java.io.File, mitll.langtest.shared.AudioAnswer)
    * @param e
    * @param audioFile
    * @param answer
    */
-  public void getFlashcardAnswer(Exercise e,
+  public void getFlashcardAnswer(CommonExercise e,
                                  File audioFile,
                                  AudioAnswer answer) {
     List<String> foregroundSentences = getRefSentences(e);
@@ -157,13 +158,13 @@ public class AutoCRT {
     for (String ref : foregroundSentences) {
       foreground.add(removePunct(ref));
     }
-    int n = foreground.size();
+/*    int n = foreground.size();
     for (String synonym : getRefs(e.getSynonymSentences())) {
       if (!foregroundSentences.contains(synonym)) {
         foreground.add(removePunct(synonym));
       }
     }
-    if (foreground.size() > n) logger.debug("Added " + e.getSynonymSentences() + " synonyms");
+    if (foreground.size() > n) logger.debug("Added " + e.getSynonymSentences() + " synonyms");*/
 
     //logger.debug("getFlashcardAnswer : foreground " + foreground);
     PretestScore asrScoreForAudio = db.getASRScoreForAudio(audioFile, foreground);
@@ -201,8 +202,10 @@ public class AutoCRT {
    * @param other
    * @return
    */
-  private List<String> getRefSentences(Exercise other) {
-    List<String> refSentences = other.getRefSentences();
+  private List<String> getRefSentences(CommonExercise other) {
+   // List<String> refSentences = other.getRefSentences();
+    List<String> refSentences = new ArrayList<String>();
+    refSentences.add(other.getForeignLanguage());
     return getRefs(refSentences);
   }
 
@@ -249,14 +252,14 @@ public class AutoCRT {
    * For this exercise and question, score the answer.<br></br>
    * Do this by getting all other answers to this question and the answer key and given this information
    * and the answer, ask the classifier to score the answer.
-   * @see mitll.langtest.server.audio.AudioFileHelper#getScoreForAnswer(mitll.langtest.shared.Exercise, int, String)
+   * @seex mitll.langtest.server.audio.AudioFileHelper#getScoreForAnswer(mitll.langtest.shared.Exercise, int, String)
    * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAnswer
    * @param e for this exercise
    * @param questionID for this question (when multiple questions in an exercise)
    * @param answer to score (correct->incorrect)
    * @return 0-1
    */
-  public double getScoreForExercise(Exercise e, int questionID, String answer) {
+  public double getScoreForExercise(CommonExercise e, int questionID, String answer) {
     String exerciseID = e.getID();
     if (answer.isEmpty()) {
       logger.warn("huh? for exercise " + exerciseID + " question " + questionID + " answer is empty?");
