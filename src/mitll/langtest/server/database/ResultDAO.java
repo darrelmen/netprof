@@ -1,6 +1,7 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.grade.Grade;
@@ -345,7 +346,7 @@ public class ResultDAO extends DAO {
    * @return
    * @see DatabaseImpl#getNextUngradedExerciseSlow
    */
-  public boolean areAnyResultsLeftToGradeFor(Exercise e, int expected, boolean englishOnly) {
+  public boolean areAnyResultsLeftToGradeFor(CommonExercise e, int expected, boolean englishOnly) {
     String exerciseID = e.getID();
     GradeDAO.GradesAndIDs resultIDsForExercise = gradeDAO.getResultIDsForExercise(exerciseID);
     return !areAllResultsGraded(exerciseID, resultIDsForExercise.grades, expected, englishOnly);
