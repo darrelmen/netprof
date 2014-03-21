@@ -15,9 +15,9 @@ import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 
 import java.util.ArrayList;
@@ -38,11 +38,11 @@ class NPFHelper implements RequiresResize {
   private final UserManager userManager;
 
   private final UserFeedback feedback;
-  private PagingExerciseList<UserExercise> npfExerciseList;
+  private PagingExerciseList npfExerciseList;
   private SimplePanel npfContentPanel;
 
   /**
-   * @see mitll.langtest.client.custom.Navigation#Navigation(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, mitll.langtest.client.user.UserFeedback)
+   * @see mitll.langtest.client.custom.Navigation#Navigation
    * @param service
    * @param feedback
    * @param userManager
@@ -115,12 +115,12 @@ class NPFHelper implements RequiresResize {
         public void onSuccess(Set<String> result) {
           npfExerciseList.setCompleted(result);
           npfExerciseList.setUserListID(ul.getUniqueID());
-          npfExerciseList.rememberAndLoadFirst(new ArrayList<UserExercise>(ul.getExercises()));
+          npfExerciseList.rememberAndLoadFirst(new ArrayList<CommonShell>(ul.getExercises()));
         }
       });
     } else {
       npfExerciseList.setUserListID(ul.getUniqueID());
-      npfExerciseList.rememberAndLoadFirst(new ArrayList<UserExercise>(ul.getExercises()));
+      npfExerciseList.rememberAndLoadFirst(new ArrayList<CommonShell>(ul.getExercises()));
     }
   }
 
@@ -132,8 +132,8 @@ class NPFHelper implements RequiresResize {
    * @param instanceName
    * @return
    */
-  PagingExerciseList<UserExercise> makeNPFExerciseList(Panel right, String instanceName, long userListID) {
-    final PagingExerciseList<UserExercise> exerciseList = makeExerciseList(right, instanceName);
+  PagingExerciseList makeNPFExerciseList(Panel right, String instanceName, long userListID) {
+    final PagingExerciseList exerciseList = makeExerciseList(right, instanceName);
     setFactory(exerciseList, instanceName, userListID);
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       @Override
@@ -144,9 +144,9 @@ class NPFHelper implements RequiresResize {
     return exerciseList;
   }
 
-  PagingExerciseList<UserExercise> makeExerciseList(final Panel right, final String instanceName) {
-    return new PagingExerciseList<UserExercise>(right, service, feedback, false, false, controller,
-        true, instanceName) {
+  PagingExerciseList makeExerciseList(final Panel right, final String instanceName) {
+    return new PagingExerciseList(right, service, feedback, null, controller, false, false,
+      true, instanceName) {
         @Override
         protected void onLastItem() {
           new ModalInfoDialog("Complete", "List complete!", new HiddenHandler() {
@@ -165,10 +165,10 @@ class NPFHelper implements RequiresResize {
    * @param instanceName
    * @param userListID
    */
-  void setFactory(final PagingExerciseList<UserExercise> exerciseList, final String instanceName, long userListID) {
+  void setFactory(final PagingExerciseList exerciseList, final String instanceName, long userListID) {
     exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, feedback, controller, exerciseList, 1.0f) {
       @Override
-      public Panel getExercisePanel(Exercise e) {
+      public Panel getExercisePanel(CommonExercise e) {
         if (controller.getAudioType().equalsIgnoreCase(Result.AUDIO_TYPE_REVIEW)) {
           System.out.println("\nNPFHelper : making new QCNPFExercise for " +e + " instance " + instanceName);
           return new QCNPFExercise(e, controller, exerciseList, 1.0f, false, instanceName);

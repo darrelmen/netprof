@@ -1,5 +1,7 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.shared.AudioExercise;
+import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.SectionNode;
 import org.apache.log4j.Logger;
@@ -138,13 +140,13 @@ public class SectionHelper {
      * @return
      * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesForState(int, java.util.Map, long)
      */
-  public Collection<Exercise> getExercisesForSelectionState(Map<String, Collection<String>> typeToSection) {
-    Collection<Exercise> currentList = null;
+  public Collection<CommonExercise> getExercisesForSelectionState(Map<String, Collection<String>> typeToSection) {
+    Collection<CommonExercise> currentList = null;
 
     for (Map.Entry<String, Collection<String>> pair : typeToSection.entrySet()) {
       String type = pair.getKey();
       if (isKnownType(type)) {
-        Collection<Exercise> exercisesForSection = new HashSet<Exercise>(getExercisesForSection(type, pair.getValue()));
+        Collection<CommonExercise> exercisesForSection = new HashSet<CommonExercise>(getExercisesForSection(type, pair.getValue()));
 
         if (currentList == null) {
           currentList = exercisesForSection;
@@ -175,19 +177,19 @@ public class SectionHelper {
    * @param sections
    * @return
    */
-  private Collection<Exercise> getExercisesForSection(String type, Collection<String> sections) {
+  private Collection<CommonExercise> getExercisesForSection(String type, Collection<String> sections) {
     Map<String, Lesson> sectionToLesson = typeToUnitToLesson.get(type);
     if (sectionToLesson == null) {
       return Collections.emptyList();
     } else {
-      List<Exercise> exercises = new ArrayList<Exercise>();
+      List<CommonExercise> exercises = new ArrayList<CommonExercise>();
       for (String section : sections) {
         Lesson lesson = sectionToLesson.get(section);
         if (lesson == null) {
           logger.error("Couldn't find section " + section);
           return Collections.emptyList();
         } else {
-          Collection<Exercise> exercises1 = lesson.getExercises();
+          Collection<CommonExercise> exercises1 = lesson.getExercises();
           if (exercises1.isEmpty()) {
             logger.warn("getExercisesForSection : huh? section " + section + " has no exercises : " + lesson);
           }
@@ -198,18 +200,18 @@ public class SectionHelper {
     }
   }
 
-  public Pair addUnitToLesson(Exercise exercise, String unitName) { return addExerciseToLesson(exercise, unitType, unitName);}
-  public Pair addChapterToLesson(Exercise exercise, String unitName) { return addExerciseToLesson(exercise, chapterType, unitName);}
-  public Pair addWeekToLesson(Exercise exercise, String unitName) { return addExerciseToLesson(exercise, weekType, unitName);}
+  public Pair addUnitToLesson(CommonExercise exercise, String unitName) { return addExerciseToLesson(exercise, unitType, unitName);}
+  public Pair addChapterToLesson(CommonExercise exercise, String unitName) { return addExerciseToLesson(exercise, chapterType, unitName);}
+  public Pair addWeekToLesson(CommonExercise exercise, String unitName) { return addExerciseToLesson(exercise, weekType, unitName);}
 
   /**
-   * @see ExcelImport#recordUnitChapterWeek(int, int, int, org.apache.poi.ss.usermodel.Row, mitll.langtest.shared.Exercise, String, String, String)
+   * @see ExcelImport#recordUnitChapterWeek
    * @param exercise
    * @param type
    * @param unitName
    * @return
    */
-  public Pair addExerciseToLesson(Exercise exercise, String type, String unitName) {
+  public Pair addExerciseToLesson(CommonExercise exercise, String type, String unitName) {
     Map<String, Lesson> unit = getSectionToLesson(type);
 
     addUnitNameEntry(exercise, unitName, unit);
@@ -219,7 +221,7 @@ public class SectionHelper {
     return new Pair(type,unitName);
   }
 
-  protected void addUnitNameEntry(Exercise exercise, String unitName, Map<String, Lesson> unit) {
+  protected void addUnitNameEntry(CommonExercise exercise, String unitName, Map<String, Lesson> unit) {
     Lesson unitForName = unit.get(unitName);
     if (unitForName == null) {
       unit.put(unitName, unitForName = new Lesson(unitName));
@@ -227,7 +229,7 @@ public class SectionHelper {
     unitForName.addExercise(exercise);
   }
 
-  public boolean removeExerciseToLesson(Exercise exercise, String type, String unitName) {
+  public boolean removeExerciseToLesson(CommonExercise exercise, String type, String unitName) {
     Map<String, Lesson> unit = getSectionToLesson(type);
     Lesson unitForName = unit.get(unitName);
     return unitForName.remove(exercise);
@@ -256,7 +258,7 @@ public class SectionHelper {
   }
 
   /**
-   * @see ExcelImport#recordUnitChapterWeek(int, int, int, org.apache.poi.ss.usermodel.Row, mitll.langtest.shared.Exercise, String, String, String)
+   * @see ExcelImport#recordUnitChapterWeek
    * @param pairs
    */
   public void addAssociations(Collection<Pair> pairs) {
