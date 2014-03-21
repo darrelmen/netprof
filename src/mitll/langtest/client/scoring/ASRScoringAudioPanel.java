@@ -35,7 +35,7 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
   }
 
   /**
-   * @see GoodwaveExercisePanel#getAudioPanel(mitll.langtest.shared.Exercise, String)
+   * @see GoodwaveExercisePanel#getAudioPanel(mitll.langtest.shared.CommonExercise, String)
    * @param path
    * @param refSentence
    * @param service
