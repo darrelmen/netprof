@@ -3,6 +3,7 @@ package mitll.langtest.server.database.custom;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.UserDAO;
+import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
@@ -229,7 +230,7 @@ public class UserListDAO extends DAO {
     try {
       String sql = "SELECT * from " + USER_EXERCISE_LIST + " where isprivate=false" +
         //" and " + CREATORID + "<>" +userid+
-        " order by modified ";
+        " order by modified DESC ";
 
       //Set<Long> listsForVisitor = getListsForVisitor(userid);
 
@@ -239,13 +240,12 @@ public class UserListDAO extends DAO {
 
    //   logger.debug("userLists for " + userid + " : " +userLists);
 
-   /*   List<UserList> toReturn = new ArrayList<UserList>();
+      List<UserList> toReturn = new ArrayList<UserList>();
       for (UserList ul : userLists) {
-        if (!listsForVisitor.contains(ul.getUniqueID())) {
-           toReturn.add(ul);
+        if (!ul.isEmpty()) {
+          toReturn.add(ul);
         }
       }
-*/
    //   logger.debug("toReturn for " + userid + " : " +toReturn);
 
       return userLists;
@@ -393,7 +393,7 @@ public class UserListDAO extends DAO {
    * @param where
    */
   private void populateList(UserList where) {
-    List<UserExercise> onList = userExerciseDAO.getOnList(where.getUniqueID());
+    List<CommonUserExercise> onList = userExerciseDAO.getOnList(where.getUniqueID());
     where.setExercises(onList);
     //where.setVisitors(userListVisitorJoinDAO.getVisitorsOfList(where.getUniqueID()));
 
