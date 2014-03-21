@@ -1,9 +1,12 @@
 package mitll.langtest.shared.custom;
 
+import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.User;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -23,7 +26,7 @@ public class UserList extends ExerciseShell {
   private String classMarker;
   private boolean isPrivate;
   private boolean isReview;
-  private List<UserExercise> exercises = new ArrayList<UserExercise>();
+  private List<CommonUserExercise> exercises = new ArrayList<CommonUserExercise>();
 
   public UserList(){}
 
@@ -49,8 +52,8 @@ public class UserList extends ExerciseShell {
     this(ul.uniqueID, ul.getCreator(), ul.getName(), ul.getDescription(), ul.getClassMarker(), ul.isPrivate());
   }
 
-  public void addExercise(UserExercise toAdd) { exercises.add(toAdd);  }
-  public void addExerciseAfter(UserExercise after, UserExercise toAdd) {
+  public void addExercise(CommonUserExercise toAdd) { exercises.add(toAdd);  }
+  public void addExerciseAfter(CommonUserExercise after, CommonUserExercise toAdd) {
     int index = exercises.indexOf(after);
     if (index == -1) {
       exercises.add(toAdd);
@@ -71,7 +74,7 @@ public class UserList extends ExerciseShell {
     return classMarker;
   }
 
-  public Collection<UserExercise> getExercises() {
+  public Collection<CommonUserExercise> getExercises() {
     return exercises;
   }
 
@@ -79,15 +82,15 @@ public class UserList extends ExerciseShell {
    * @see mitll.langtest.server.database.custom.UserListDAO#populateList(UserList)
    * @param exercises
    */
-  public void setExercises(List<UserExercise> exercises) {
+  public void setExercises(List<CommonUserExercise> exercises) {
     this.exercises = exercises;
   }
 
-  public boolean remove(UserExercise newUserExercise) {  return exercises.remove(newUserExercise); }
+  public boolean remove(CommonUserExercise newUserExercise) {  return exercises.remove(newUserExercise); }
 
-  public UserExercise remove(String id) {
-    UserExercise toRemove = null;
-    for (UserExercise ue : exercises) {
+  public CommonUserExercise remove(String id) {
+    CommonUserExercise toRemove = null;
+    for (CommonUserExercise ue : exercises) {
       if (id.equals(ue.getID())) {
         toRemove = ue;
       }
@@ -103,11 +106,11 @@ public class UserList extends ExerciseShell {
     this.uniqueID = uniqueID;
   }
 
-  public boolean contains(UserExercise userExercise) {
+  public boolean contains(CommonUserExercise userExercise) {
     return getExercises().contains(userExercise);
   }
   public boolean contains(String id) {
-    for (UserExercise ue : exercises) {
+    for (CommonUserExercise ue : exercises) {
       if (id.equals(ue.getID())) {
         return true;
       }
@@ -118,9 +121,7 @@ public class UserList extends ExerciseShell {
   public boolean isPrivate() {
     return isPrivate;
   }
-
   public boolean isEmpty() { return getExercises().isEmpty();  }
-
   public boolean isFavorite() { return getName().equals(MY_LIST);  }
 
   public void setReview(boolean isReview) {
