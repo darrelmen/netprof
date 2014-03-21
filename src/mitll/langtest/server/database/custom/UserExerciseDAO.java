@@ -3,11 +3,12 @@ package mitll.langtest.server.database.custom;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.ExerciseDAO;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.CommonShell;
+import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.custom.UserExercise;
 import org.apache.log4j.Logger;
 
-import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -193,21 +194,21 @@ public class UserExerciseDAO extends DAO {
    * @param listID
    * @return
    */
-  public List<UserExercise> getOnList(long listID) {
+  public List<CommonUserExercise> getOnList(long listID) {
     String sql = getJoin(listID);
     
     try {
       if (DEBUG) logger.debug("\tusing for user exercise = " +sql);
 
-      List<UserExercise> userExercises = getUserExercises(sql);
+      List<CommonUserExercise> userExercises = getUserExercises(sql);
       if (DEBUG) logger.debug("\tfound " +userExercises.size()+ " exercises userExercises on list " +listID);
 
-      List<UserExercise> userExercises2 = new ArrayList<UserExercise>();
+      List<CommonUserExercise> userExercises2 = new ArrayList<CommonUserExercise>();
 
-      for (UserExercise ue : userExercises) {
+      for (CommonUserExercise ue : userExercises) {
         if (DEBUG) logger.debug("\ton list " +listID + " " + ue.getID() + " / " +ue.getUniqueID() + " : " + ue);
         if (ue.isPredefined()) {
-          Exercise byID = getExercise(ue);
+          CommonExercise byID = getExercise(ue);
 
           if (byID != null) {
             userExercises2.add(new UserExercise(byID)); // all predefined references
@@ -223,7 +224,7 @@ public class UserExerciseDAO extends DAO {
       String join2 = getJoin2(listID);
       if (DEBUG) logger.debug("\tusing exercise = " +join2);
       for (String exid : getExercises(join2)) {
-        Exercise exercise = exerciseDAO.getExercise(exid);
+        CommonExercise exercise = exerciseDAO.getExercise(exid);
         if (exercise != null) {
           userExercises2.add(new UserExercise(exercise));
         }
@@ -231,7 +232,7 @@ public class UserExerciseDAO extends DAO {
       }
       if (userExercises2.isEmpty()) {
         if (DEBUG) logger.debug("\tgetOnList : no exercises on list id " + listID);
-        return new ArrayList<UserExercise>();
+        return new ArrayList<CommonUserExercise>();
       } else {
         if (DEBUG) logger.debug("\tgetOnList for " + listID+ "  got " + userExercises2.size());
         return userExercises2;
@@ -240,7 +241,7 @@ public class UserExerciseDAO extends DAO {
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
-    return new ArrayList<UserExercise>();
+    return new ArrayList<CommonUserExercise>();
   }
 
   private String getJoin(long listID) {
@@ -270,26 +271,26 @@ public class UserExerciseDAO extends DAO {
         listID;
   }
 
-  private Exercise getExercise(UserExercise ue) { return getExercise(ue.getID());  }
+  private CommonExercise getExercise(CommonShell ue) { return getExercise(ue.getID());  }
 
   /**
    * @see UserListManager#getReviewedExercises()
    * @param id
    * @return
    */
-  Exercise getExercise(String id) { return exerciseDAO.getExercise(id); }
+  CommonExercise getExercise(String id) { return exerciseDAO.getExercise(id); }
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#getUserExerciseWhere(String)
    * @param exid
    * @return
    */
-  public UserExercise getWhere(String exid) {
+  public CommonUserExercise getWhere(String exid) {
     String sql = "SELECT * from " + USEREXERCISE + " where " +
         EXERCISEID +
         "='" + exid + "'";
     try {
-      List<UserExercise> userExercises = getUserExercises(sql);
+      List<CommonUserExercise> userExercises = getUserExercises(sql);
       if (userExercises.isEmpty()) {
         //logger.debug("getVisitorsOfList : no custom exercise with id " + exid);
         return null;
@@ -300,7 +301,7 @@ public class UserExerciseDAO extends DAO {
     return null;
   }
 
-  public Collection<UserExercise> getOverrides() {
+  public Collection<CommonUserExercise> getOverrides() {
     String sql = "SELECT * from " + USEREXERCISE + " where override=true";
     try {
       return getUserExercises(sql);
@@ -315,8 +316,8 @@ public class UserExerciseDAO extends DAO {
    * @param exids
    * @return
    */
-  List<UserExercise> getWhere(Collection<String> exids) {
-    if (exids.isEmpty()) return new ArrayList<UserExercise>();
+  List<CommonUserExercise> getWhere(Collection<String> exids) {
+    if (exids.isEmpty()) return new ArrayList<CommonUserExercise>();
     StringBuilder builder = new StringBuilder();
     for (String id : exids) builder.append("'"+id+"'").append(",");
     String s = builder.toString();
@@ -325,7 +326,7 @@ public class UserExerciseDAO extends DAO {
         EXERCISEID +
         " in (" + s+ ")";
     try {
-      List<UserExercise> userExercises = getUserExercises(sql);
+      List<CommonUserExercise> userExercises = getUserExercises(sql);
       if (userExercises.isEmpty()) {
         logger.warn("getVisitorsOfList : no user exercises in " + exids.size() + " exercise ids");
       }
@@ -336,12 +337,12 @@ public class UserExerciseDAO extends DAO {
     return null;
   }
 
-  private List<UserExercise> getUserExercises(String sql) throws SQLException {
+  private List<CommonUserExercise> getUserExercises(String sql) throws SQLException {
     Connection connection = database.getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
     //logger.debug("getUserExercises sql = " + sql);
     ResultSet rs = statement.executeQuery();
-    List<UserExercise> exercises = new ArrayList<UserExercise>();
+    List<CommonUserExercise> exercises = new ArrayList<CommonUserExercise>();
 
     List<String> typeOrder = exerciseDAO.getSectionHelper().getTypeOrder();
     while (rs.next()) {
