@@ -35,8 +35,8 @@ import java.util.Map;
 public class ASRScorePanel extends FlowPanel implements ScoreListener {
   private static final String INSTRUCTIONS = "Your speech is scored by a speech recognizer trained on speech from many native speakers. " +
       "The recognizer generates scores for each word and phonetic unit (see the color-coded transcript for details).";
-  private static final String WARNING = "<b>Repeat the phrase exactly as it is written. " +
-    "Saying something different or adding/omitting words could result in incorrect scores.</b>";
+  private static final String WARNING = "Repeat the phrase exactly as it is written. " +
+    "<b>Saying something different or adding/omitting words could result in incorrect scores.</b>";
   private static final int CHART_HEIGHT = 100;
 
   private final PretestGauge ASRGauge;
