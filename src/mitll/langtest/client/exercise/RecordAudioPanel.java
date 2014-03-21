@@ -11,7 +11,7 @@ import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
 
 /**
  * A waveform record button and a play audio button.
@@ -25,7 +25,7 @@ public class RecordAudioPanel extends AudioPanel {
 
   private final Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
   private final Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
-  protected Exercise exercise;
+  protected CommonExercise exercise;
 
   /**
    *
@@ -35,9 +35,9 @@ public class RecordAudioPanel extends AudioPanel {
    * @param index
    * @param showSpectrogram
    * @param audioType
-   * @see mitll.langtest.client.exercise.WaveformExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @see mitll.langtest.client.exercise.WaveformExercisePanel#getAnswerWidget(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    */
-  public RecordAudioPanel(Exercise exercise, ExerciseController controller, Panel widgets,
+  public RecordAudioPanel(CommonExercise exercise, ExerciseController controller, Panel widgets,
                           LangTestDatabaseAsync service, int index, boolean showSpectrogram, String audioType) {
     super(service,
       // use full screen width
@@ -127,7 +127,7 @@ public class RecordAudioPanel extends AudioPanel {
 
   public void addPlayListener(PlayListener playListener) {  playAudioPanel.addPlayListener(playListener);  }
 
-  public void setExercise(Exercise exercise) {
+  public void setExercise(CommonExercise exercise) {
     this.exercise = exercise;
     postAudioRecordButton.setExercise(exercise);
   }
