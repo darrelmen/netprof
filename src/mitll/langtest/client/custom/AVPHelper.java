@@ -28,7 +28,7 @@ class AVPHelper extends NPFHelper {
   private final UserFeedback feedback;
 
   /**
-   * @see Navigation#Navigation(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, mitll.langtest.client.user.UserFeedback)
+   * @see Navigation#Navigation
    * @param service
    * @param feedback
    * @param userManager
@@ -43,8 +43,10 @@ class AVPHelper extends NPFHelper {
   }
 
   @Override
-  protected PagingExerciseList<UserExercise> makeExerciseList(final Panel right, final String instanceName) {
-    return new PagingExerciseList<UserExercise>(right, service, feedback, false, false, controller,
+  protected PagingExerciseList makeExerciseList(final Panel right, final String instanceName) {
+    MyFlashcardExercisePanelFactory factory =
+      new MyFlashcardExercisePanelFactory(service, feedback, controller, null);
+    return new PagingExerciseList(right, service, feedback, factory, controller, false, false,
       true, instanceName) {
       @Override
       protected void onLastItem() {
@@ -57,7 +59,7 @@ class AVPHelper extends NPFHelper {
       }
 
       @Override
-      protected void addTableWithPager(PagingContainer<? extends ExerciseShell> pagingContainer) {
+      protected void addTableWithPager(PagingContainer pagingContainer) {
         pagingContainer.getTableWithPager();
       }
 
@@ -73,8 +75,8 @@ class AVPHelper extends NPFHelper {
    * @param userListID
    */
   @Override
-  protected void setFactory(final PagingExerciseList<UserExercise> exerciseList, final String instanceName, long userListID) {
-    exerciseList.setFactory(new MyFlashcardExercisePanelFactory<UserExercise>(service, feedback,controller,exerciseList,userListID), userManager, 1);
+  protected void setFactory(final PagingExerciseList exerciseList, final String instanceName, long userListID) {
+    exerciseList.setFactory(new MyFlashcardExercisePanelFactory(service, feedback,controller,exerciseList), userManager, 1);
   }
 
   @Override

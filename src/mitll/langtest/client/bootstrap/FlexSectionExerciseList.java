@@ -27,7 +27,6 @@ import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.SectionNode;
 
 import java.util.ArrayList;
@@ -45,7 +44,7 @@ import java.util.Set;
  * Time: 5:32 PM
  * To change this template use File | Settings | File Templates.
  */
-public class FlexSectionExerciseList<T extends ExerciseShell> extends HistoryExerciseList<T> {
+public class FlexSectionExerciseList extends HistoryExerciseList {
   private static final int HEADING_FOR_LABEL = 4;
   private static final int UNACCOUNTED_WIDTH = 60;
   private static final int VERTICAL_DEFAULT = 160;
@@ -96,11 +95,11 @@ public class FlexSectionExerciseList<T extends ExerciseShell> extends HistoryExe
   }
 
   /**
-   * @see mitll.langtest.client.list.PagingExerciseList#PagingExerciseList(com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, boolean, boolean, mitll.langtest.client.exercise.ExerciseController, boolean, String)
+   * @see mitll.langtest.client.list.PagingExerciseList#PagingExerciseList
    */
   @Override
   protected void addComponents() {
-    PagingContainer<? extends ExerciseShell> exerciseShellPagingContainer = makePagingContainer();
+    PagingContainer exerciseShellPagingContainer = makePagingContainer();
     addTableWithPager(exerciseShellPagingContainer);
   }
 

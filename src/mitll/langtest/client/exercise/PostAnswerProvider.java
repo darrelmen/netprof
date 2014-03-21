@@ -1,6 +1,6 @@
 package mitll.langtest.client.exercise;
 
-import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.CommonExercise;
 
 /**
  * Created with IntelliJ IDEA.
@@ -10,5 +10,5 @@ import mitll.langtest.shared.ExerciseShell;
  * To change this template use File | Settings | File Templates.
  */
 public interface PostAnswerProvider {
-  void postAnswers(ExerciseController controller, ExerciseShell completedExercise);
+  void postAnswers(ExerciseController controller, CommonExercise completedExercise);
 }
