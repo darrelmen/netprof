@@ -5,7 +5,9 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.shared.AudioExercise;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
+//import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
@@ -193,13 +195,15 @@ public class UserListManager {
   }
 
   public UserList getCommentedList() {
-    List<UserExercise> allKnown = userExerciseDAO.getWhere(incorrect);
+    List<CommonUserExercise> allKnown = userExerciseDAO.getWhere(incorrect);
 
     Set<String> allIncorrect = new HashSet<String>(incorrect);
     allIncorrect.removeAll(reviewedExercises);
 
-    List<UserExercise> include = new ArrayList<UserExercise>();
-    for (UserExercise ue : allKnown) if (!reviewedExercises.contains(ue.getID())) include.add(ue);
+    List<CommonUserExercise> include = new ArrayList<CommonUserExercise>();
+    for (CommonUserExercise ue : allKnown) {
+      if (!reviewedExercises.contains(ue.getID())) include.add(ue);
+    }
 
     return getReviewList(include, COMMENTS, ALL_ITEMS_WITH_COMMENTS, allIncorrect);
   }
@@ -217,17 +221,17 @@ public class UserListManager {
     Set<String> incorrectReviewed = new HashSet<String>(reviewedExercises);
     boolean b = incorrectReviewed.retainAll(incorrect);
 
-    List<UserExercise> allKnown = userExerciseDAO.getWhere(incorrectReviewed);
+    List<CommonUserExercise> allKnown = userExerciseDAO.getWhere(incorrectReviewed);
     logger.debug("\tgetReviewList ids #=" + allKnown.size());
 
     return getReviewList(allKnown, REVIEW, ITEMS_TO_REVIEW, incorrectReviewed);
   }
 
-  private UserList getReviewList(List<UserExercise> allKnown, String name, String description, Collection<String> ids) {
-    Map<String, UserExercise> idToUser = new HashMap<String, UserExercise>();
-    for (UserExercise ue : allKnown) idToUser.put(ue.getID(), ue);
+  private UserList getReviewList(List<CommonUserExercise> allKnown, String name, String description, Collection<String> ids) {
+    Map<String, CommonUserExercise> idToUser = new HashMap<String, CommonUserExercise>();
+    for (CommonUserExercise ue : allKnown) idToUser.put(ue.getID(), ue);
 
-    List<UserExercise> onList = getReviewedUserExercises(idToUser, ids);
+    List<CommonUserExercise> onList = getReviewedUserExercises(idToUser, ids);
 
     logger.debug("getReviewList ids #=" + allKnown.size() + " yielded " + onList.size());
     User user = new User(-1, 89, 0, 0, "", "", false);
@@ -243,12 +247,12 @@ public class UserListManager {
    * @paramx incorrect redundant, but guarantees same order as they are reviewed
    * @return
    */
-  private List<UserExercise> getReviewedUserExercises(Map<String, UserExercise> idToUser, Collection<String> ids) {
-    List<UserExercise> onList = new ArrayList<UserExercise>();
+  private List<CommonUserExercise> getReviewedUserExercises(Map<String, CommonUserExercise> idToUser, Collection<String> ids) {
+    List<CommonUserExercise> onList = new ArrayList<CommonUserExercise>();
 
     for (String id : ids) {
       if (!id.startsWith(UserExercise.CUSTOM_PREFIX)) {
-        Exercise byID = userExerciseDAO.getExercise(id);
+        CommonExercise byID = userExerciseDAO.getExercise(id);
         //logger.debug("getReviewedUserExercises : found " + byID + " tooltip " + byID.getTooltip());
         if (byID != null) {
           onList.add(new UserExercise(byID)); // all predefined references
@@ -258,9 +262,9 @@ public class UserListManager {
         if (idToUser.containsKey(id)) onList.add(idToUser.get(id));
       }
     }
-    Collections.sort(onList, new Comparator<UserExercise>() {
+    Collections.sort(onList, new Comparator<CommonUserExercise>() {
       @Override
-      public int compare(UserExercise o1, UserExercise o2) {
+      public int compare(CommonUserExercise o1, CommonUserExercise o2) {
         return o1.getID().compareTo(o2.getID());
       }
     });
@@ -500,11 +504,11 @@ public class UserListManager {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addAnnotations(mitll.langtest.shared.Exercise)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addAnnotations
    * @param exercise
-   * @param <T>
+   *
    */
-  public <T extends AudioExercise> void addAnnotations(T exercise) {
+  public void addAnnotations(CommonExercise exercise) {
     if (exercise != null) {
       Map<String, ExerciseAnnotation> latestByExerciseID = annotationDAO.getLatestByExerciseID(exercise.getID());
 
@@ -542,7 +546,7 @@ public class UserListManager {
    * @param exerciseid
    */
   public void removeReviewed(String exerciseid) {
-    List<UserExercise> toRemove = userExerciseDAO.getWhere(Collections.singletonList(exerciseid));
+    List<CommonUserExercise> toRemove = userExerciseDAO.getWhere(Collections.singletonList(exerciseid));
 
     if (!reviewedExercises.remove(exerciseid)) {
       logger.error("huh? couldn't find " + exerciseid + " in set of " + reviewedExercises.size());
@@ -559,7 +563,7 @@ public class UserListManager {
       }
     }
     else {
-      UserExercise newUserExercise = toRemove.get(0);
+      CommonUserExercise newUserExercise = toRemove.get(0);
       Collection<String> fields = newUserExercise.getFields();
       logger.debug("removeReviewed " + newUserExercise  + "  has " + fields);
       addAnnotations(newUserExercise);

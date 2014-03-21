@@ -17,6 +17,9 @@ import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.AudioAttribute;
+import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.CommonShell;
+import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.DLIUser;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseListWrapper;
@@ -112,21 +115,21 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     getMailSupport().email(serverProps.getEmailAddress(),"Server Exception on " + pathHelper.getInstallPath(), prefixedMessage);
   }
 
-  private List<ExerciseShell> getExerciseShells(Collection<Exercise> exercises) {
+  private List<CommonShell> getExerciseShells(Collection<CommonExercise> exercises) {
     return serverProps.getLanguage().equals("English") ? getExerciseShellsShort(exercises) : getExerciseShellsCombined(exercises);
   }
 
-  private List<ExerciseShell> getExerciseShellsShort(Collection<Exercise> exercises) {
-    List<ExerciseShell> ids = new ArrayList<ExerciseShell>();
-    for (Exercise e : exercises) {
+  private List<CommonShell> getExerciseShellsShort(Collection<CommonExercise> exercises) {
+    List<CommonShell> ids = new ArrayList<CommonShell>();
+    for (CommonExercise e : exercises) {
       ids.add(e.getShell());
     }
     return ids;
   }
 
-  private List<ExerciseShell> getExerciseShellsCombined(Collection<Exercise> exercises) {
-    List<ExerciseShell> ids = new ArrayList<ExerciseShell>();
-    for (Exercise e : exercises) {
+  private List<CommonShell> getExerciseShellsCombined(Collection<CommonExercise> exercises) {
+    List<CommonShell> ids = new ArrayList<CommonShell>();
+    for (CommonExercise e : exercises) {
       ids.add(e.getShellCombinedTooltip());
     }
     return ids;
@@ -137,7 +140,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    * @param reqID
    */
-  public ExerciseListWrapper<? extends ExerciseShell> getExerciseIds(int reqID) {
+  public ExerciseListWrapper getExerciseIds(int reqID) {
     return makeExerciseListWrapper(reqID, getExercises());
   }
 
@@ -147,9 +150,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param userID
    * @return
    */
-  public ExerciseListWrapper<? extends ExerciseShell> getExerciseIds(int reqID, long userID) {
+  public ExerciseListWrapper getExerciseIds(int reqID, long userID) {
     logger.debug("getExerciseIds : getting exercise ids for User id=" + userID + " config " + relativeConfigDir);
-    List<Exercise> exercises = getExercises(userID);
+    List<CommonExercise> exercises = getExercises(userID);
     return getExerciseListWrapper(reqID, exercises);
   }
 
@@ -162,23 +165,23 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   @Override
-  public ExerciseListWrapper<? extends ExerciseShell> getExerciseIds(int reqID, long userID, String prefix, long userListID) {
-    List<Exercise> exercises = getExercises(userID);
+  public ExerciseListWrapper getExerciseIds(int reqID, long userID, String prefix, long userListID) {
+    List<CommonExercise> exercises = getExercises(userID);
     logger.debug("getExerciseIds : getting exercise ids for User id=" + userID + " config " + relativeConfigDir +
       " and user list id " +userListID + " full list size is " + exercises.size());
 
     if (userListID != -1) {
       UserList userListByID = db.getUserListManager().getUserListByID(userListID);
       if (userListByID != null) { // defensive!
-        List<Exercise> exercises2 = new ArrayList<Exercise>();
-        Collection<UserExercise> exercises1 = userListByID.getExercises();
+        List<CommonExercise> exercises2 = new ArrayList<CommonExercise>();
+        Collection<CommonUserExercise> exercises1 = userListByID.getExercises();
         logger.debug("getExerciseIds size - " + exercises1.size());
-        for (UserExercise ue : exercises1) {
+        for (CommonExercise ue : exercises1) {
         //  Exercise exercise = getExercise(ue.getID());
-          Exercise exercise = ue.toExercise();
-          if (exercise != null) {
-            exercises2.add(exercise);
-          }
+          //Exercise exercise = ue.toExercise();
+          //if (exercise != null) {
+            exercises2.add(ue);
+         // }
         }
         logger.debug("getExerciseIds size - " + exercises2.size());
 
@@ -186,12 +189,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       }
     }
     ExerciseTrie trie = new ExerciseTrie(exercises, serverProps.getLanguage(), audioFileHelper.getSmallVocabDecoder());
-    List<Exercise> exercisesForPrefix = trie.getExercises(prefix);
+    List<CommonExercise> exercisesForPrefix = trie.getExercises(prefix);
 
     return getExerciseListWrapper(reqID, exercisesForPrefix);
   }
 
-  private ExerciseListWrapper<ExerciseShell> getExerciseListWrapper(int reqID, List<Exercise> exercisesForPrefix) {
+  private ExerciseListWrapper getExerciseListWrapper(int reqID, List<CommonExercise> exercisesForPrefix) {
     if (serverProps.isGoodwaveMode() && !serverProps.dataCollectMode) {
       exercisesForPrefix = getSortedExercises(exercisesForPrefix);
     }
@@ -210,8 +213,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   @Override
-  public ExerciseListWrapper<ExerciseShell> getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID) {
-    List<Exercise> exercisesForState = getExercisesForState(reqID, typeToSection, userID);
+  public ExerciseListWrapper getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID) {
+    List<CommonExercise> exercisesForState = getExercisesForState(reqID, typeToSection, userID);
     return makeExerciseListWrapper(reqID, exercisesForState);
   }
 
@@ -224,28 +227,28 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   @Override
-  public ExerciseListWrapper<ExerciseShell> getExercisesForSelectionState(int reqID,
+  public ExerciseListWrapper getExercisesForSelectionState(int reqID,
                                                                           Map<String, Collection<String>> typeToSection, long userID, String prefix) {
-    List<Exercise> exercisesForState = getExercisesForState(reqID, typeToSection, userID);
+    List<CommonExercise> exercisesForState = getExercisesForState(reqID, typeToSection, userID);
 
     ExerciseTrie trie = new ExerciseTrie(exercisesForState, serverProps.getLanguage(), audioFileHelper.getSmallVocabDecoder());
-    List<Exercise> exercises = trie.getExercises(prefix);
+    List<CommonExercise> exercises = trie.getExercises(prefix);
 
     return makeExerciseListWrapper(reqID, exercises);
   }
 
-  private ExerciseListWrapper<ExerciseShell> makeExerciseListWrapper(int reqID, List<Exercise> exercises) {
+  private ExerciseListWrapper makeExerciseListWrapper(int reqID, List<CommonExercise> exercises) {
     if (!exercises.isEmpty()) {
       ensureMP3s(exercises.get(0));
       addAnnotations(exercises.get(0)); // todo do this in a better way
     }
-    Exercise firstExercise = exercises.isEmpty() ? null : exercises.get(0);
-    return new ExerciseListWrapper<ExerciseShell>(reqID, getExerciseShells(exercises), firstExercise);
+    CommonExercise firstExercise = exercises.isEmpty() ? null : exercises.get(0);
+    return new ExerciseListWrapper(reqID, getExerciseShells(exercises), firstExercise);
   }
 
-  private List<Exercise> getExercisesForState(int reqID, Map<String, Collection<String>> typeToSection, long userID) {
+  private List<CommonExercise> getExercisesForState(int reqID, Map<String, Collection<String>> typeToSection, long userID) {
     logger.debug("getExercisesForSelectionState req " + reqID+ " for " + typeToSection + " and " +userID);
-    Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
+    Collection<CommonExercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
     if (serverProps.sortExercises() || serverProps.isGoodwaveMode() || serverProps.isFlashcardTeacherView()) {
       return getSortedExercises(exercisesForSection);
     } else {
@@ -259,8 +262,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param exercisesForSection
    * @return
    */
-  private List<Exercise> getSortedExercises(Collection<Exercise> exercisesForSection) {
-    List<Exercise> copy = new ArrayList<Exercise>(exercisesForSection);
+  private List<CommonExercise> getSortedExercises(Collection<CommonExercise> exercisesForSection) {
+    List<CommonExercise> copy = new ArrayList<CommonExercise>(exercisesForSection);
     if (serverProps.sortExercisesByID()) {
       sortByID(copy);
     }
@@ -270,7 +273,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return copy;
   }
 
-  private void sortByID(List<Exercise> copy) {
+  private <T extends CommonShell> void sortByID(List<T> copy) {
     boolean allInt = true;
     int size = Math.min(5, copy.size());
     for (int i = 0; i < size && allInt; i++) {
@@ -283,9 +286,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     if (allInt) {
       try {
-        Collections.sort(copy, new Comparator<ExerciseShell>() {
+        Collections.sort(copy, new Comparator<T>() {
           @Override
-          public int compare(ExerciseShell o1, ExerciseShell o2) {
+          public int compare(T o1, T o2) {
             Integer first = Integer.parseInt(o1.getID());
             return first.compareTo(Integer.parseInt(o2.getID()));
           }
@@ -298,10 +301,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
-  private void sortByIDStrings(List<Exercise> copy) {
-    Collections.sort(copy, new Comparator<ExerciseShell>() {
+  private <T extends CommonShell>  void sortByIDStrings(List<T> copy) {
+    Collections.sort(copy, new Comparator<T>() {
       @Override
-      public int compare(ExerciseShell o1, ExerciseShell o2) {
+      public int compare(T o1, T o2) {
         String id1 = o1.getID();
         String id2 = o2.getID();
         return id1.toLowerCase().compareTo(id2.toLowerCase());
@@ -313,10 +316,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * I.e. by the lexicographic order of the displayed words in the word list
    * @param exerciseShells
    */
-  private void sortByTooltip(List<? extends ExerciseShell> exerciseShells) {
-    Collections.sort(exerciseShells, new Comparator<ExerciseShell>() {
+  private  <T extends CommonShell> void sortByTooltip(List<T> exerciseShells) {
+    Collections.sort(exerciseShells, new Comparator<T>() {
       @Override
-      public int compare(ExerciseShell o1, ExerciseShell o2) {
+      public int compare(T o1, T o2) {
         String id1 = o1.getTooltip();
         String id2 = o2.getTooltip();
         return id1.toLowerCase().compareTo(id2.toLowerCase());
@@ -360,11 +363,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param id
    * @return
    */
-  public Exercise getExercise(String id) {
+  public CommonExercise getExercise(String id) {
     long then = System.currentTimeMillis();
-    List<Exercise> exercises = getExercises();
+    List<CommonExercise> exercises = getExercises();
 
-    Exercise byID = db.getCustomOrPredefExercise(id);  // allow custom items to mask out non-custom items
+    CommonExercise byID = db.getCustomOrPredefExercise(id);  // allow custom items to mask out non-custom items
     addAnnotations(byID);
     if (byID == null) {
       logger.error("getExercise : huh? couldn't find exercise with id " + id + " when examining " + exercises.size() + " items");
@@ -382,11 +385,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return byID;
   }
 
-  private void addAnnotations(Exercise byID) {
+  private void addAnnotations(CommonExercise byID) {
     db.getUserListManager().addAnnotations(byID); // TODO nice not to do this when not in classroom...
   }
 
-  private void ensureMP3s(Exercise byID) {
+  private void ensureMP3s(CommonExercise byID) {
     Collection<AudioAttribute> audioAttributes = byID.getAudioAttributes();
     for (AudioAttribute audioAttribute : audioAttributes) {
       ensureMP3(audioAttribute.getAudioRef(), false);
@@ -394,9 +397,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     if (audioAttributes.isEmpty()) { logger.warn("ensureMP3s : no ref audio for " + byID); }
 
-    for (String spath : byID.getSynonymAudioRefs()) {
+/*    for (String spath : byID.getSynonymAudioRefs()) {
       ensureMP3(spath, false);
-    }
+    }*/
   }
 
   /**
@@ -418,16 +421,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return exercises for user id
    * @see mitll.langtest.client.list.ListInterface#getExercises(long, boolean)
    */
-  private List<Exercise> getExercises(long userID) {
-    List<Exercise> exercises = getExercisesInModeDependentOrder(userID);
-    if (serverProps.isCRTDataCollect()) {
+  private List<CommonExercise> getExercises(long userID) {
+    List<CommonExercise> exercises = getExercisesInModeDependentOrder(userID);
+/*    if (serverProps.isCRTDataCollect()) {
       setPromptAndRecordOnExercises(exercises);
-    }
+    }*/
     return exercises;
   }
 
-  private List<Exercise> getExercisesInModeDependentOrder(long userID) {
-    List<Exercise> exercises;
+  private List<CommonExercise> getExercisesInModeDependentOrder(long userID) {
+    List<CommonExercise> exercises;
     if (serverProps.dataCollectMode) {
       logger.debug("in data collect mode");
       if (serverProps.biasTowardsUnanswered) {
@@ -436,9 +439,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         exercises = db.getExercisesBiasTowardsUnanswered(userID, serverProps.shouldUseWeights());
       } else {
         exercises = db.getUnmodExercises();
-        if (serverProps.isCRTDataCollect()) {
+  /*      if (serverProps.isCRTDataCollect()) {
           setPromptAndRecordOnExercises(exercises);
-        }
+        }*/
       }
     } else {
       //if (!serverProps.isArabicTextDataCollect()) logger.debug("*not* in data collect mode");
@@ -459,9 +462,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see #getExercises(long)
    * @param exercises to alter
    */
-  private void setPromptAndRecordOnExercises(List<Exercise> exercises) {
+/*  private void setPromptAndRecordOnExercises(List<CommonExercise> exercises) {
     //logger.debug("setPromptAndRecordOnExercises for  collect audio " + serverProps.isCollectOnlyAudio());
-    for (Exercise e : exercises) {
+    for (CommonExercise e : exercises) {
       if (serverProps.isCollectOnlyAudio()) {
         e.setRecordAnswer(true);
         e.setPromptInEnglish(!serverProps.showForeignLanguageQuestionsOnly() && rand.nextBoolean());
@@ -473,15 +476,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         e.setRecordAnswer(inEnglish || rand.nextBoolean());
       }
     }
-  }
+  }*/
 
   /**
    * Called from the client:
    * @see mitll.langtest.client.list.ExerciseList#getExercises
    * @return
    */
-  List<Exercise> getExercises() {
-    List<Exercise> exercises = db.getExercises();
+  List<CommonExercise> getExercises() {
+    List<CommonExercise> exercises = db.getExercises();
     makeAutoCRT();   // side effect of db.getExercises is to make the exercise DAO which is needed here...
     return exercises;
   }
@@ -495,7 +498,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param englishOnly
    * @return next ungraded exercise
    */
-  public Exercise getNextUngradedExercise(String user, int expectedGrades, boolean englishOnly) {
+  public CommonExercise getNextUngradedExercise(String user, int expectedGrades, boolean englishOnly) {
     synchronized (this) {
       ConcurrentMap<String,String> stringStringConcurrentMap = userToExerciseID.asMap();
       Collection<String> values = stringStringConcurrentMap.values();
@@ -669,7 +672,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param exid
    * @param arabicTextDataCollect
    * @return
-   * @see mitll.langtest.client.grading.GradingExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @seex mitll.langtest.client.grading.GradingExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    */
   public ResultsAndGrades getResultsForExercise(String exid, boolean arabicTextDataCollect) {
     ResultsAndGrades resultsForExercise =
@@ -704,13 +707,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param answer
    * @see mitll.langtest.client.exercise.ExercisePanel#postAnswers
    */
-  public void addTextAnswer(int userID, Exercise exercise, int questionID, String answer, String answerType) {
+  public void addTextAnswer(int userID, CommonExercise exercise, int questionID, String answer, String answerType) {
     db.addAnswer(userID, exercise, questionID, answer, answerType);
     db.addCompleted(userID,exercise.getID());
   }
 
   /**
-   * @see mitll.langtest.client.flashcard.TextResponse#getScoreForGuess
+   * @seex mitll.langtest.client.flashcard.TextResponse#getScoreForGuess
    * @param userID
    * @param exercise
    * @param questionID
@@ -718,7 +721,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param answerType
    * @return
    */
-  public double getScoreForAnswer(long userID, Exercise exercise, int questionID, String answer, String answerType) {
+  public double getScoreForAnswer(long userID, CommonExercise exercise, int questionID, String answer, String answerType) {
     double scoreForAnswer = audioFileHelper.getScoreForAnswer(exercise, questionID, answer);
     boolean correct = scoreForAnswer > 0.5;
     db.getAnswerDAO().addAnswer((int) userID, exercise.getPlan(), exercise.getID(), questionID, "", answer, answerType, correct,
@@ -880,7 +883,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.custom.ReviewEditItem.ReviewEditableExercise#getCreateButton(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, com.github.gwtbootstrap.client.ui.ControlGroup 
+   * @see mitll.langtest.client.custom.ReviewEditItem.ReviewEditableExercise#getCreateButton
    * @param exercise
    * @return
    */
@@ -894,7 +897,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.custom.EditItem.EditableExercise#postEditItem(mitll.langtest.client.list.ListInterface, boolean)
+   * @see mitll.langtest.client.custom.EditItem.EditableExercise#postEditItem
    * @param userExercise
    */
   @Override
@@ -971,7 +974,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int questionID,
                                     int user, int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults) {
-    Exercise exercise1 = getExercise(exercise);
+    CommonExercise exercise1 = getExercise(exercise);
     return audioFileHelper.writeAudioFile(base64EncodedString, plan, exercise, exercise1, questionID, user, reqid,
       flq, audioType, doFlashcard, recordInResults);
   }
@@ -1094,7 +1097,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       logger.debug("doing scoring on " + resultsThatNeedScore.size() + " results");
       for (Result result : resultsThatNeedScore) {
         String trim = result.id.trim();
-        Exercise exercise = db.getExercise(trim);
+        CommonExercise exercise = db.getExercise(trim);
         if (exercise != null) {
           logger.info("getting score for " + result);
           getASRScoreForAudio(0, result.uniqueID, pathHelper.getInstallPath() + File.separator + result.answer, exercise.getRefSentence(), 100, 100, false);
