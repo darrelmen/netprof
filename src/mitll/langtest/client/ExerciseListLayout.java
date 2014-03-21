@@ -3,7 +3,6 @@ package mitll.langtest.client;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
-import mitll.langtest.client.bootstrap.ResponseExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.grading.GradedExerciseList;
 import mitll.langtest.client.list.ListInterface;
@@ -19,9 +18,9 @@ import mitll.langtest.shared.ExerciseShell;
  * Time: 1:37 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ExerciseListLayout<T extends ExerciseShell> {
+public class ExerciseListLayout {
   private final PropertyHandler props;
-  private ListInterface<T> exerciseList;
+  private ListInterface exerciseList;
 
   public ExerciseListLayout(PropertyHandler props) {
     this.props = props;
@@ -32,7 +31,7 @@ public class ExerciseListLayout<T extends ExerciseShell> {
    *
    * @see LangTest#makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, com.google.gwt.user.client.ui.Panel)
    */
-  public ListInterface<T> makeExerciseList(FluidRow secondRow,
+  public ListInterface makeExerciseList(FluidRow secondRow,
                                         Panel exerciseListContainer, UserFeedback feedback,
                                         Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                         ExerciseController controller) {
@@ -65,27 +64,22 @@ public class ExerciseListLayout<T extends ExerciseShell> {
    * @param controller
    * @return
    */
-  private ListInterface<T> makeExerciseList(FluidRow secondRow, boolean isGrading, final UserFeedback feedback,
+  private ListInterface makeExerciseList(FluidRow secondRow, boolean isGrading, final UserFeedback feedback,
                                          Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                          ExerciseController controller) {
     boolean showTypeAhead = !props.isCRTDataCollectMode();
     if (isGrading) {
-      return new GradedExerciseList<T>(currentExerciseVPanel, service, feedback,
+      return new GradedExerciseList(currentExerciseVPanel, service, feedback,
         true, props.isEnglishOnlyMode(), controller,"grading");
     } else {
       if (props.isShowSections()) {
-          if (props.isCRTDataCollectMode()) {
-            return new ResponseExerciseList(secondRow, currentExerciseVPanel, service, feedback,
-              props.isShowTurkToken(), props.showExercisesInOrder(), controller, "response");
-          } else {
             //System.out.println("makeExerciseList : show completed " + showCompleted + " flex");
-            FlexSectionExerciseList<T> flex = new FlexSectionExerciseList<T>(secondRow, currentExerciseVPanel, service, feedback,
+            FlexSectionExerciseList flex = new FlexSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
               props.isShowTurkToken(), props.showExercisesInOrder(), controller, showTypeAhead, "flex");
             return flex;
-          }
       } else {
-        return new PagingExerciseList<T>(currentExerciseVPanel, service, feedback,
-          props.isShowTurkToken(), props.showExercisesInOrder(), controller, showTypeAhead, "paging");
+        return new PagingExerciseList(currentExerciseVPanel, service, feedback,
+          null, controller, props.isShowTurkToken(), props.showExercisesInOrder(), showTypeAhead, "paging");
       }
     }
   }
@@ -95,11 +89,9 @@ public class ExerciseListLayout<T extends ExerciseShell> {
    * @param exerciseListContainer
    */
   private void addExerciseListOnLeftSide(Panel exerciseListContainer) {
-   // exerciseListContainer.clear();
     if (props.isTeacherView()) {
       exerciseListContainer.add(exerciseList.getWidget());
     } else {
-      //exerciseListContainer.addStyleName("inlineBlockStyle");
       exerciseListContainer.add(exerciseList.getExerciseListOnLeftSide(props));
     }
   }
