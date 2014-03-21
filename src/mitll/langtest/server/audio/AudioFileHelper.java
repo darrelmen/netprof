@@ -11,6 +11,7 @@ import mitll.langtest.server.scoring.ASRScoring;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.log4j.Logger;
@@ -74,7 +75,7 @@ public class AudioFileHelper {
    * @param doFlashcard
    * @param recordInResults         @return URL to audio on server and if audio is valid (not too short, etc.)
    */
-  public AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, Exercise exercise1, int questionID,
+  public AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, CommonExercise exercise1, int questionID,
                                     int user, int reqid, boolean flq, String audioType, boolean doFlashcard,
                                     boolean recordInResults
   ) {
@@ -135,7 +136,7 @@ public class AudioFileHelper {
    * @param answer
    * @return
    */
-  public double getScoreForAnswer(Exercise e, int questionID, String answer) {
+  public double getScoreForAnswer(CommonExercise e, int questionID, String answer) {
     return autoCRT.getScoreForExercise(e, questionID, answer);
   }
 
@@ -210,7 +211,7 @@ public class AudioFileHelper {
    * @param audioFile
    * @param answer
    */
-  public void getFlashcardAnswer(Exercise e, File audioFile, AudioAnswer answer) {
+  public void getFlashcardAnswer(CommonExercise e, File audioFile, AudioAnswer answer) {
     this.autoCRT.getFlashcardAnswer(e, audioFile, answer);
   }
 
@@ -294,7 +295,7 @@ public class AudioFileHelper {
    * @param doFlashcard
    * @return
    */
-  private AudioAnswer getAudioAnswer(String exerciseID, Exercise exercise, int questionID, int user, int reqid,
+  private AudioAnswer getAudioAnswer(String exerciseID, CommonExercise exercise, int questionID, int user, int reqid,
                                      File file, AudioCheck.ValidityAndDur validity, String url, boolean doFlashcard
   ) {
     AudioAnswer audioAnswer = new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
@@ -306,7 +307,7 @@ public class AudioFileHelper {
         autoCRT.getFlashcardAnswer(exercise, file, audioAnswer);
       }
       return audioAnswer;
-    } else if (serverProps.isAutoCRT() && !exercise.isPromptInEnglish()) { // TODO : hack -- don't do CRT on english
+    } else if (serverProps.isAutoCRT()) {//!exercise.isPromptInEnglish()) { // TODO : hack -- don't do CRT on english
       autoCRT.getAutoCRTDecodeOutput(exerciseID, questionID, file, audioAnswer);
     }
     return audioAnswer;
