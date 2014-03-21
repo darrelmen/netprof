@@ -4,7 +4,7 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
 
 /**
  * Created with IntelliJ IDEA.
@@ -17,7 +17,7 @@ public abstract class ExercisePanelFactory {
   protected final LangTestDatabaseAsync service;
   protected final UserFeedback userFeedback;
   protected final ExerciseController controller;
-  protected final ListInterface exerciseList;
+  protected ListInterface exerciseList;
 
   /**
    * @see mitll.langtest.client.LangTest#setFactory
@@ -34,10 +34,14 @@ public abstract class ExercisePanelFactory {
     this.exerciseList = exerciseList;
   }
 
+  public void setExerciseList(ListInterface exerciseList) {
+     this.exerciseList = exerciseList;
+  }
+
   /**
    * @see mitll.langtest.client.list.ExerciseList#makeExercisePanel
    * @param e
    * @return
    */
-  public abstract Panel getExercisePanel(Exercise e);
+  public abstract Panel getExercisePanel(CommonExercise e);
 }
