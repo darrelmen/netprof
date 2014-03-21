@@ -9,13 +9,13 @@ import com.github.gwtbootstrap.client.ui.incubator.Table;
 import com.github.gwtbootstrap.client.ui.incubator.TableHeader;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -26,8 +26,8 @@ import mitll.langtest.client.list.ListChangeListener;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import org.moxieapps.gwt.highcharts.client.Chart;
 
@@ -44,37 +44,42 @@ import java.util.Set;
  * TODOx : concept of rounds explicit?
  * TODO : review table...?
  */
-class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends ExercisePanelFactory {
+class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   private static final String REMAINING = "Remaining";
   private static final String INCORRECT = "Incorrect";
   private static final String CORRECT = "Correct";
   private static final String REPEAT_THIS_SET = "Start Over";
-  public static final String NAME = "Name";
-  public static final String CORRECT_NBSP = "Correct&nbsp;%";
-  public static final String SKIP_THIS_ITEM = "Skip this item";
-  private Exercise currentExercise;
+  private static final String CORRECT_NBSP = "Correct&nbsp;%";
+  private static final String SKIP_THIS_ITEM = "Skip this item";
+
+  private static final String RANK = "Rank";
+  private static final String NAME = "Name";
+  private static final String SCORE = "Score";
+  public static final String SCORE_SUBTITLE = "score %";
+  public static final String CORRECT_SUBTITLE = "% correct";
+
+  private CommonExercise currentExercise;
   private final ControlState controlState;
-  private List<T> allExercises;
+  private List<CommonShell> allExercises;
   private int totalExercises = 0;
-  //private final long userListID;
   private final Map<String,Boolean> exToCorrect = new HashMap<String, Boolean>();
   private final Map<String,Double>   exToScore = new HashMap<String, Double>();
 
   /**
-   * @see NPFHelper#setFactory(mitll.langtest.client.list.PagingExerciseList, String, long)
+   * @see NPFHelper#setFactory
    * @param service
    * @param feedback
    * @param controller
    * @param exerciseList
    */
   public MyFlashcardExercisePanelFactory(LangTestDatabaseAsync service, UserFeedback feedback, ExerciseController controller,
-                                         final ListInterface<T> exerciseList, long userListID) {
+                                         ListInterface exerciseList) {
     super(service, feedback, controller, exerciseList);
     controlState = new ControlState();
-   // this.userListID = userListID;
-    exerciseList.addListChangedListener(new ListChangeListener<T>() {
+    if (exerciseList == null) exerciseList = controller.getExerciseList();
+    exerciseList.addListChangedListener(new ListChangeListener<CommonShell>() {
       @Override
-      public void listChanged(List<T> items) {
+      public void listChanged(List<CommonShell> items) {
         allExercises = items;
         totalExercises = allExercises.size();
 //        System.out.println("got new set of items from list." + items.size());
@@ -84,7 +89,7 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends ExerciseP
   }
 
   @Override
-  public Panel getExercisePanel(Exercise e) {
+  public Panel getExercisePanel(CommonExercise e) {
     currentExercise = e;
     return new StatsPracticePanel(e);
   }
@@ -96,10 +101,8 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends ExerciseP
   }
 
   private class StatsPracticePanel extends BootstrapExercisePanel {
-    public static final String RANK = "Rank";
-    public static final String SCORE = "Score";
     private Panel container;
-    public StatsPracticePanel(Exercise e) {
+    public StatsPracticePanel(CommonExercise e) {
       super(e, MyFlashcardExercisePanelFactory.this.service,
         MyFlashcardExercisePanelFactory.this.controller, 40, false, MyFlashcardExercisePanelFactory.this.controlState);
     }
@@ -113,7 +116,7 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends ExerciseP
       }
     }
 
-    long latestResultID;
+    private long latestResultID;
     /**
      * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#receivedAudioAnswer(mitll.langtest.shared.AudioAnswer, mitll.langtest.client.exercise.ExerciseQuestionState, com.google.gwt.user.client.ui.Panel)
      * @param result
@@ -133,9 +136,11 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends ExerciseP
       super.receivedAudioAnswer(result);
     }
 
+    /**
+     * @see #loadNext()
+     * @see #nextAfterDelay(boolean, String)
+     */
     public void onSetComplete() {
-      System.out.println("StatsPracticePanel.onSetComplete.");
-
       skip.setVisible(false);
       final int user = controller.getUser();
 
@@ -145,7 +150,7 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends ExerciseP
         " with " + exToCorrect);
       Set<String> copies = new HashSet<String>(ids);
       if (copies.isEmpty()) {
-        for (T t : allExercises) {
+        for (CommonShell t : allExercises) {
           copies.add(t.getID());
         }
       }
@@ -158,78 +163,60 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends ExerciseP
 
         @Override
         public void onSuccess(List<AVPHistoryForList> result) {
-          showFeedbackCharts2(result);
+          showFeedbackCharts(result);
         }
       });
       // TODO : maybe add table showing results per word
     }
 
-/*
-    private void showFeedbackCharts(List<Session> result, int user) {
-      float size = (float) totalExercises;
-
+    private void showFeedbackCharts(List<AVPHistoryForList> result) {
       setMainContentVisible(false);
-      int totalCorrect = getCorrect();
-      int totalIncorrect = getIncorrect();
-      double avgScore = getAvgScore();
-      int all = totalCorrect + totalIncorrect;
-      System.out.println("onSetComplete.onSuccess : result " + result.size() + " " +size +
-        " all " +all + " correct " + totalCorrect + " inc " + totalIncorrect);
-*/
-/*      for (Session s : result) {
-        System.out.println("\tonSetComplete.onSuccess : result " + s);
-      }*//*
 
-      String correct = totalCorrect +" Correct (" + toPercent(totalCorrect, all) + ")";
-      String pronunciation = "Pronunciation " + toPercent(avgScore);
-
-      Chart chart  = new LeaderboardPlot().getChart(result, user, -1, correct,       "% correct", true, 100f);
-      Chart chart2 = new LeaderboardPlot().getChart(result, user, -1, pronunciation, "score %",   false, 100f);
-
-      container = new HorizontalPanel();
-      container.add(chart);
-      chart.addStyleName("chartDim");
-      chart2.addStyleName("chartDim");
-      container.add(chart2);
-      belowContentDiv.add(container);
-      belowContentDiv.add(getRepeatButton());
-    }
-*/
-
-    private void showFeedbackCharts2(List<AVPHistoryForList> result) {
-      float size = (float) totalExercises;
-
-      setMainContentVisible(false);
-      int totalCorrect = getCorrect();
-      int totalIncorrect = getIncorrect();
-      double avgScore = getAvgScore();
-      int all = totalCorrect + totalIncorrect;
-      System.out.println("onSetComplete.onSuccess : results " + result + " " +size +
-        " all " +all + " correct " + totalCorrect + " inc " + totalIncorrect);
 /*      for (Session s : result) {
         System.out.println("\tonSetComplete.onSuccess : result " + s);
       }*/
-      String correct = totalCorrect +" Correct (" + toPercent(totalCorrect, all) + ")";
-      String pronunciation = "Pronunciation " + toPercent(avgScore);
-
-      AVPHistoryForList sessionAVPHistoryForList = result.get(0);
-      AVPHistoryForList sessionAVPHistoryForListScore = result.get(1);
-      Chart chart  = new LeaderboardPlot().getChart(sessionAVPHistoryForList, correct,       "% correct");
-      Chart chart2 = new LeaderboardPlot().getChart(sessionAVPHistoryForListScore, pronunciation, "score %");
 
       container = new HorizontalPanel();
 
+      // add left chart and table
+      AVPHistoryForList sessionAVPHistoryForList = result.get(0);
+      Chart chart = makeCorrectChart(result, sessionAVPHistoryForList);
       container.add(chart);
-      chart.addStyleName("chartDim");
+      container.add(makeTable(sessionAVPHistoryForList, CORRECT_NBSP));
 
-      Table table = makeTable(sessionAVPHistoryForList, CORRECT_NBSP);
-      container.add(table);
+      // add right chart and table
+      AVPHistoryForList sessionAVPHistoryForListScore = result.get(1);
+      Chart chart2 = makePronChart(getAvgScore(), sessionAVPHistoryForListScore);
       container.add(chart2);
-      chart2.addStyleName("chartDim");
-      Table table2 = makeTable(sessionAVPHistoryForListScore, SCORE);
-      container.add(table2);
+      container.add(makeTable(sessionAVPHistoryForListScore, SCORE));
+
       belowContentDiv.add(container);
       belowContentDiv.add(getRepeatButton());
+    }
+
+    private Chart makeCorrectChart(List<AVPHistoryForList> result, AVPHistoryForList sessionAVPHistoryForList) {
+      int totalCorrect = getCorrect();
+      int totalIncorrect = getIncorrect();
+      int all = totalCorrect + totalIncorrect;
+      System.out.println("onSetComplete.onSuccess : results " + result + " " +totalExercises +
+        " all " +all + " correct " + totalCorrect + " inc " + totalIncorrect);
+
+      return makeChart(totalCorrect, all, sessionAVPHistoryForList);
+    }
+
+    private Chart makePronChart(double avgScore, AVPHistoryForList sessionAVPHistoryForListScore) {
+      String pronunciation = "Pronunciation " + toPercent(avgScore);
+      Chart chart2 = new LeaderboardPlot().getChart(sessionAVPHistoryForListScore, pronunciation, SCORE_SUBTITLE);
+      chart2.addStyleName("chartDim");
+      return chart2;
+    }
+
+    private Chart makeChart(int totalCorrect, int all, AVPHistoryForList sessionAVPHistoryForList) {
+      String correct = totalCorrect +" Correct (" + toPercent(totalCorrect, all) + ")";
+      Chart chart  = new LeaderboardPlot().getChart(sessionAVPHistoryForList, correct, CORRECT_SUBTITLE);
+      chart.addStyleName("chartDim");
+     // Window.getClientWidth()
+      return chart;
     }
 
     /**
@@ -275,7 +262,6 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends ExerciseP
     }
 
     private String bold(AVPHistoryForList.UserScore score,String html) {
-
       return score.isCurrent() ? "<b>"+html+"</b>" : html;
     }
 
@@ -295,7 +281,7 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends ExerciseP
     }
 
     /**
-     * @see #showFeedbackCharts2(java.util.List)
+     * @see #showFeedbackCharts
      * @return
      */
     private double getAvgScore() {
@@ -356,7 +342,7 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends ExerciseP
     private Panel belowContentDiv;
 
     /**
-     * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#BootstrapExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int, boolean, mitll.langtest.client.flashcard.ControlState)
+     * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#BootstrapExercisePanel
      * @param toAddTo
      */
     @Override
@@ -375,9 +361,6 @@ class MyFlashcardExercisePanelFactory<T extends ExerciseShell> extends ExerciseP
       toAddTo.add(skip);
       belowContentDiv = toAddTo;
     }
-
-    @Override
-    protected Widget getHelpRow(ExerciseController controller) { return null;  }
 
     private Label remain, incorrectBox, correctBox;
 
