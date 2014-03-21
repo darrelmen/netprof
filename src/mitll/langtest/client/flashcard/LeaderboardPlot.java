@@ -10,7 +10,7 @@ import org.moxieapps.gwt.highcharts.client.labels.PlotBandLabel;
 import java.util.List;
 
 public class LeaderboardPlot {
-  private static final float HALF = (1f / 4f);
+  private static final float HALF = 3f;
   private static final String AVERAGE = "Class Average";
   private static final String TOP_SCORE = "Class Top Score";
   private static final String PERSONAL_BEST = "Personal Best";
@@ -47,12 +47,14 @@ public class LeaderboardPlot {
     return chart;
   }
 
-  private float setPlotBands(int numScores, String title, String subtitle, boolean topIs100, float topToUse, float pbCorrect, float top, float total, float avg, Chart chart) {
+  private float setPlotBands(int numScores, String title, String subtitle, boolean topIs100,
+                             float topToUse, float pbCorrect, float top, float total, float avg, Chart chart) {
     PlotBand personalBest = getPersonalBest(pbCorrect, chart);
     PlotBand topScore = getTopScore(top, chart);
     PlotBand avgScore = getAvgScore(numScores, total, chart);
 
-    float verticalRange = topIs100 ? 100f : topToUse == -1 ? top : topToUse;
+    float verticalRange = topIs100 ? (100f+HALF) : topToUse == -1 ? top : topToUse;
+
     float fivePercent = 0.05f * verticalRange;
     float topVsPersonalBest = Math.abs(top - pbCorrect);
     float avgVsPersonalBest = Math.abs(avg - pbCorrect);
@@ -63,7 +65,8 @@ public class LeaderboardPlot {
     return verticalRange;
   }
 
-  private void setPlotPands(Chart chart, PlotBand personalBest, PlotBand topScore, PlotBand avgScore, float fivePercent, float topVsPersonalBest, float avgVsPersonalBest) {
+  private void setPlotPands(Chart chart, PlotBand personalBest, PlotBand topScore, PlotBand avgScore,
+                            float fivePercent, float topVsPersonalBest, float avgVsPersonalBest) {
     if (topVsPersonalBest > fivePercent) {
       if (avgVsPersonalBest > fivePercent){
         chart.getYAxis().setPlotBands(
@@ -155,88 +158,6 @@ public class LeaderboardPlot {
     return personalBest;
   }
 
-  private float over(float pbCorrect) { return pbCorrect + HALF;  }
+  private float over (float pbCorrect) { return pbCorrect + HALF;  }
   private float under(float pbCorrect) { return pbCorrect - HALF;  }
-
-/*  private static class GetPlotValues<T extends SetScore> {
-    private List<T> scores;
-    private long userID;
-    private float pbCorrect;
-    private float top;
-    private float totalCorrect;
-    private List<Float> yValuesForUser;
-    boolean useCorrect = true;
-
-    public GetPlotValues(List<T> scores, long userID, boolean useCorrect) {
-      this.scores = scores;
-      this.userID = userID;
-      this.useCorrect = useCorrect;
-      if (scores.isEmpty()) System.err.println("huh? scores is empty???");
-    }
-
-    public float getPbCorrect() {
-      return pbCorrect;
-    }
-
-    public float getTop() {
-      return top;
-    }
-    public void setTop(float top) { this.top = top;}
-
-    public float getTotalCorrect() {
-      return totalCorrect;
-    }
-
-    public float getClassAvg() {
-      if (numNotMe == 0f) {
-        return totalCorrect / (float) scores.size();
-      }
-      else {
-        return totalNotMe / numNotMe;
-      }
-    }
-
-    float totalNotMe = 0f;
-    float numNotMe = 0f;
-
-    public List<Float> getyValuesForUser() {
-      return yValuesForUser;
-    }
-
-    // TODO : don't do this client side
-    public GetPlotValues invoke() {
-      pbCorrect = 0;
-      top = 0;
-      totalCorrect = 0;
-
-      yValuesForUser = new ArrayList<Float>();
-      for (SetScore score : scores) {
-        float value = getValue(score);
-
-        if (score.getUserid() == userID) {
-          if (value > pbCorrect) pbCorrect = value;
-          yValuesForUser.add(value);
-          //System.out.println("showLeaderboardPlot : for user " +userID + " got " + score);
-        }
-        else {
-          //System.out.println("\tshowLeaderboardPlot : for user " +score.getUserid() + " got " + score);
-          totalNotMe += value;
-          numNotMe++;
-        }
-        if (value > top) {
-          top = value;
-          //System.out.println("\tshowLeaderboardPlot : new top score for user " +score.getUserid() + " got " + score);
-        }
-        totalCorrect += value;
-      }
-
-      if (yValuesForUser.isEmpty()) System.err.println("huh? yValuesForUser (" +userID+
-        ")is empty???");
-
-      return this;
-    }
-    private float getValue(SetScore score) {
-      return useCorrect ? Math.round(score.getCorrectPercent()) : Math.round(100f*score.getAvgScore());
-    }
-  }*/
 }

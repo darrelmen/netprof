@@ -1,7 +1,6 @@
 package mitll.langtest.client.list;
 
 import com.google.gwt.user.client.History;
-import mitll.langtest.client.bootstrap.ResponseExerciseList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,7 +24,7 @@ public class SelectionState {
 
   /**
    * Populated from history token!
-   * @see mitll.langtest.client.flashcard.BootstrapFlashcardExerciseList#getExercises(long, boolean)
+   * @seex mitll.langtest.client.flashcard.BootstrapFlashcardExerciseList#getExercises(long, boolean)
    */
   public SelectionState( boolean removePlus) {
     this(History.getToken(), removePlus);
@@ -44,7 +43,7 @@ public class SelectionState {
   }
 
   /**
-   * @see mitll.langtest.client.flashcard.BootstrapFlashcardExerciseList#getExercises(long, boolean)
+   * @seex mitll.langtest.client.flashcard.BootstrapFlashcardExerciseList#getExercises(long, boolean)
    */
   public boolean isEmpty() { return getTypeToSection().isEmpty(); }
 
@@ -65,7 +64,7 @@ public class SelectionState {
    */
   private void parseToken(String token) {
     //token = token.contains("###") ? token.split("###")[0] : token;
-    token = token.split(ResponseExerciseList.RESPONSE_TYPE_DIVIDER)[0]; // remove any other parameters
+   // token = token.split(ResponseExerciseList.RESPONSE_TYPE_DIVIDER)[0]; // remove any other parameters
 
     String[] parts = token.split(";");
 

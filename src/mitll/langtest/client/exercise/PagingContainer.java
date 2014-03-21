@@ -17,6 +17,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
+import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.ExerciseShell;
 
 import java.util.Date;
@@ -33,21 +34,21 @@ import java.util.Set;
  * Time: 7:49 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PagingContainer<T extends ExerciseShell> {
+public class PagingContainer {
   private static final int MAX_LENGTH_ID = 27;
   private static final int PAGE_SIZE = 10;   // TODO : make this sensitive to vertical real estate?
-  private ListDataProvider<T> dataProvider;
+  private ListDataProvider<CommonShell> dataProvider;
   private static final boolean DEBUG = false;
   private static final int ID_LINE_WRAP_LENGTH = 20;
   private static final int HEIGHT_OF_CELL_TABLE_WITH_15_ROWS = 390;
   private static final float MAX_PAGES = 2f;
   private static final int MIN_PAGE_SIZE = 3;
   private static final float DEFAULT_PAGE_SIZE = 15f;
-  private CellTable<T> table;
+  private CellTable<CommonShell> table;
   private final ExerciseController controller;
   private int verticalUnaccountedFor = 100;
   private Set<String> completed = new HashSet<String>();
-  private final Map<String,T> idToExercise = new HashMap<String, T>();
+  private final Map<String,CommonShell> idToExercise = new HashMap<String, CommonShell>();
 
   /**
    * @see mitll.langtest.client.list.PagingExerciseList#makePagingContainer()
@@ -60,7 +61,7 @@ public class PagingContainer<T extends ExerciseShell> {
   }
 
   /**
-   * @see mitll.langtest.client.recorder.FeedbackRecordPanel#enableNext()
+   * @seex mitll.langtest.client.recorder.FeedbackRecordPanel#enableNext()
    * @param completed
    */
   public void setCompleted(Set<String> completed) {
@@ -82,8 +83,8 @@ public class PagingContainer<T extends ExerciseShell> {
 
   public void redraw() {  table.redraw();  }
 
-  private T getByID(String id) {
-    for (T t : getList()) {
+  private CommonShell getByID(String id) {
+    for (CommonShell t : getList()) {
       if (t.getID().equals(id)) {
         return t;
       }
@@ -95,15 +96,15 @@ public class PagingContainer<T extends ExerciseShell> {
    * @see mitll.langtest.client.list.PagingExerciseList#simpleRemove(String)
    * @param es
    */
-  public void forgetExercise(T es) {
-    List<T> list = getList();
+  public void forgetExercise(CommonShell es) {
+    List<CommonShell> list = getList();
     int before = getList().size();
     System.out.println("PagingContainer.forgetExercise, before size = " + before + " : "+ es);
 
     if (!list.remove(es)) {
       if (!list.remove(getByID(es.getID()))) {
         System.err.println("forgetExercise couldn't remove " + es);
-        for (T t : list) {
+        for (CommonShell t : list) {
           System.out.println("\tnow has " + t.getID());
         }
       }
@@ -125,12 +126,12 @@ public class PagingContainer<T extends ExerciseShell> {
 
   public void setUnaccountedForVertical(int v) {  verticalUnaccountedFor = v;  }
 
-  public List<T> getExercises() {  return getList();  }
+  public List<CommonShell> getExercises() {  return getList();  }
   public int getSize() { return getList().size(); }
   public boolean isEmpty() { return getList().isEmpty();  }
-  public T getFirst() {  return getAt(0);  }
-  public int getIndex(T t) {  return getList().indexOf(t); }
-  public T getAt(int i) { return getList().get(i);  }
+  public CommonShell getFirst() {  return getAt(0);  }
+  public int getIndex(CommonShell t) {  return getList().indexOf(t); }
+  public CommonShell getAt(int i) { return getList().get(i);  }
 
   public interface TableResources extends CellTable.Resources {
     /**
@@ -160,7 +161,7 @@ public class PagingContainer<T extends ExerciseShell> {
     makeCellTable();
 
     // Create a data provider.
-    this.dataProvider = new ListDataProvider<T>();
+    this.dataProvider = new ListDataProvider<CommonShell>();
 
     // Connect the table to the data provider.
     dataProvider.addDataDisplay(table);
@@ -197,46 +198,46 @@ public class PagingContainer<T extends ExerciseShell> {
     return o;
   }
 
-  public com.github.gwtbootstrap.client.ui.CellTable<T> makeBootstrapCellTable(com.github.gwtbootstrap.client.ui.CellTable.Resources resources) {
-    com.github.gwtbootstrap.client.ui.CellTable<T> bootstrapCellTable = createBootstrapCellTable(resources);
+  public com.github.gwtbootstrap.client.ui.CellTable<CommonShell> makeBootstrapCellTable(com.github.gwtbootstrap.client.ui.CellTable.Resources resources) {
+    com.github.gwtbootstrap.client.ui.CellTable<CommonShell> bootstrapCellTable = createBootstrapCellTable(resources);
     this.table = bootstrapCellTable;
     configureTable();
 
     return bootstrapCellTable;
   }
 
-  private SingleSelectionModel<T> selectionModel;
+  private SingleSelectionModel<CommonShell> selectionModel;
   private void configureTable() {
     table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
     table.setWidth("100%");
     table.setHeight("auto");
 
     // Add a selection model to handle user selection.
-    selectionModel = new SingleSelectionModel<T>();
+    selectionModel = new SingleSelectionModel<CommonShell>();
     table.setSelectionModel(selectionModel);
     // we don't want to listen for changes in the selection model, since that happens on load too -- we just want clicks
 
     addColumnsToTable();
   }
 
-  public T getCurrentSelection() { return selectionModel.getSelectedObject(); }
+  public CommonShell getCurrentSelection() { return selectionModel.getSelectedObject(); }
 
-  private CellTable<T> makeCellTable(CellTable.Resources o) {
+  private CellTable<CommonShell> makeCellTable(CellTable.Resources o) {
     int pageSize = PAGE_SIZE;
     //int pageSize = getNumTableRowsGivenScreenHeight();
-    return new CellTable<T>(pageSize, o);
+    return new CellTable<CommonShell>(pageSize, o);
   }
 
-  private com.github.gwtbootstrap.client.ui.CellTable<T> createBootstrapCellTable(com.github.gwtbootstrap.client.ui.CellTable.Resources o) {
+  private com.github.gwtbootstrap.client.ui.CellTable<CommonShell> createBootstrapCellTable(com.github.gwtbootstrap.client.ui.CellTable.Resources o) {
      int pageSize = PAGE_SIZE;
     //int pageSize = getNumTableRowsGivenScreenHeight();
-    return new com.github.gwtbootstrap.client.ui.CellTable<T>(pageSize, o);
+    return new com.github.gwtbootstrap.client.ui.CellTable<CommonShell>(pageSize, o);
   }
 
   private void addColumnsToTable() {
     //System.out.println("addColumnsToTable : completed " + controller.showCompleted() +  " now " + getCompleted().size());
 
-    Column<T, SafeHtml> id2 = getExerciseIdColumn2(true);
+    Column<CommonShell, SafeHtml> id2 = getExerciseIdColumn2(true);
     table.addColumn(id2);
 
     // this would be better, but want to consume clicks
@@ -251,11 +252,11 @@ public class PagingContainer<T extends ExerciseShell> {
     };*/
   }
 
-  Column<T, SafeHtml> getExerciseIdColumn2(final boolean consumeClicks) {
-    return new Column<T, SafeHtml>(new MySafeHtmlCell(consumeClicks)) {
+  Column<CommonShell, SafeHtml> getExerciseIdColumn2(final boolean consumeClicks) {
+    return new Column<CommonShell, SafeHtml>(new MySafeHtmlCell(consumeClicks)) {
 
       @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
+      public void onBrowserEvent(Cell.Context context, Element elem, CommonShell object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
         if (BrowserEvents.CLICK.equals(event.getType())) {
           //System.out.println("getExerciseIdColumn.onBrowserEvent : got click " + event);
@@ -265,7 +266,7 @@ public class PagingContainer<T extends ExerciseShell> {
       }
 
       @Override
-      public SafeHtml getValue(ExerciseShell object) {
+      public SafeHtml getValue(CommonShell object) {
         if (!controller.showCompleted()) {
           return getColumnToolTip(object.getTooltip());
         }
@@ -289,23 +290,23 @@ public class PagingContainer<T extends ExerciseShell> {
     };
   }
 
-  protected void gotClickOnItem(final T e) {}
+  protected void gotClickOnItem(final CommonShell e) {}
 
   /**
    * @see mitll.langtest.client.grading.GradedExerciseList#loadFirstExercise()
    * @return
    */
-  public T selectFirst() {
+  public CommonShell selectFirst() {
     if (getList().isEmpty()) return null;
     return selectItem(0);
   }
 
-/*  public boolean isFirst(T test) {
+/*  public boolean isFirst(CommonShell test) {
     return getList().isEmpty() || getList().get(0).getID().equals(test.getID());
   }*/
 
-/*  public boolean isLast(T test) {
-    List<T> list = getList();
+/*  public boolean isLast(CommonShell test) {
+    List<CommonShell> list = getList();
     return list.isEmpty() || list.get(list.size()-1).getID().equals(test.getID());
   }*/
 
@@ -318,10 +319,10 @@ public class PagingContainer<T extends ExerciseShell> {
       return true;
     }
     else {
-      List<T> list = getList();
+      List<CommonShell> list = getList();
       int index = list.indexOf(current);
       if (index == list.size()-1) return false;
-      T t = selectItem(index + 1);
+      CommonShell t = selectItem(index + 1);
       gotClickOnItem(t);
 
       return index + 1 == list.size() - 1;
@@ -333,10 +334,10 @@ public class PagingContainer<T extends ExerciseShell> {
       return true;
     }
     else {
-      List<T> list = getList();
+      List<CommonShell> list = getList();
       int index = list.indexOf(current);
       if (index == 0) return false;
-      T t = selectItem(index-1);
+      CommonShell t = selectItem(index-1);
       gotClickOnItem(t);
 
       return index -1 == 0;
@@ -348,8 +349,8 @@ public class PagingContainer<T extends ExerciseShell> {
    * @param index
    * @return
    */
-  private T selectItem(int index) {
-    T first = getList().get(index);
+  private CommonShell selectItem(int index) {
+    CommonShell first = getList().get(index);
 
     table.getSelectionModel().setSelected(first, true);
     table.redraw();
@@ -358,7 +359,7 @@ public class PagingContainer<T extends ExerciseShell> {
   }
 
   public void clear() {
-    List<T> list = getList();
+    List<CommonShell> list = getList();
     list.clear();
     idToExercise.clear();
 
@@ -371,26 +372,26 @@ public class PagingContainer<T extends ExerciseShell> {
     table.setRowCount(getList().size());
   }
 
-  public T byID(String id) { return idToExercise.get(id); }
+  public CommonShell byID(String id) { return idToExercise.get(id); }
 
-  public <S extends ExerciseShell> void addExercise(S exercise) {
+  public void addExercise(CommonShell exercise) {
     //System.out.println("addExercise adding " + exercise);
 
-    List<T> list = getList();
+    List<CommonShell> list = getList();
     String id = exercise.getID();
-    T exercise1 = (T) exercise; // TODO : can't remember how I avoid this
+    CommonShell exercise1 = (CommonShell) exercise; // TODO : can't remember how I avoid this
     idToExercise.put(id, exercise1);
     list.add(exercise1);
     //System.out.println("data now has "+list.size() + " after adding " + exercise.getID());
   }
 
-  public <S extends ExerciseShell> void addExerciseAfter(S afterThisOne, S exercise) {
+  public void addExerciseAfter(CommonShell afterThisOne, CommonShell exercise) {
     System.out.println("addExercise adding " + exercise);
 
-    List<T> list = getList();
+    List<CommonShell> list = getList();
     int before= list.size();
     String id = exercise.getID();
-    T exercise1 = (T) exercise; // TODO : can't remember how I avoid this
+    CommonShell exercise1 = (CommonShell) exercise; // TODO : can't remember how I avoid this
     idToExercise.put(id, exercise1);
     int i = list.indexOf(afterThisOne);
     list.add(i+1,exercise1);
@@ -406,7 +407,7 @@ public class PagingContainer<T extends ExerciseShell> {
    * @see mitll.langtest.client.list.PagingExerciseList#onResize()
    * @param currentExercise
    */
-  public void onResize(T currentExercise) {
+  public void onResize(CommonShell currentExercise) {
     int numRows = getNumTableRowsGivenScreenHeight();
     if (table.getPageSize() != numRows) {
       table.setPageSize(numRows);
@@ -440,7 +441,7 @@ public class PagingContainer<T extends ExerciseShell> {
 
     if (dataProvider != null && getList() != null) {
       if (!getList().isEmpty()) {
-        T toLoad = getList().get(0);
+        CommonShell toLoad = getList().get(0);
 
         if (toLoad.getID().length() > ID_LINE_WRAP_LENGTH) {
           ratio /= 2; // hack for long ids
@@ -459,12 +460,12 @@ public class PagingContainer<T extends ExerciseShell> {
   public void markCurrentExercise(String itemID) {
     if (getList() == null || getList().isEmpty()) return;
 
-    T t = idToExercise.get(itemID);
+    CommonShell t = idToExercise.get(itemID);
     int i = getList().indexOf(t);
     markCurrent(i,t);
   }
 
-  void markCurrent(int i, T itemToSelect) {
+  void markCurrent(int i, CommonShell itemToSelect) {
     if (DEBUG) System.out.println(new Date() + " markCurrentExercise : Comparing selected " + itemToSelect.getID());
     table.getSelectionModel().setSelected(itemToSelect, true);
     if (DEBUG) {
@@ -491,7 +492,7 @@ public class PagingContainer<T extends ExerciseShell> {
     table.redraw();
   }
 
-  private List<T> getList() { return dataProvider.getList();  }
+  private List<CommonShell> getList() { return dataProvider.getList();  }
 
   private static class MySafeHtmlCell extends SafeHtmlCell {
     private final boolean consumeClicks;
