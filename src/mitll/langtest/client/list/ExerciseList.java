@@ -22,16 +22,15 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
-import mitll.langtest.client.bootstrap.ResponseExerciseList;
 import mitll.langtest.client.custom.EditItem;
 import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.ExerciseListWrapper;
-import mitll.langtest.shared.ExerciseShell;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -47,7 +46,7 @@ import java.util.Set;
  * Time: 5:59 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPanel implements ListInterface<T>, ProvidesResize,
+public abstract class ExerciseList extends VerticalPanel implements ListInterface, ProvidesResize,
   ValueChangeHandler<String> {
   private static final int NUM_QUESTIONS_FOR_TOKEN = 5;
   private static final String ITEMS = "Items";
@@ -169,7 +168,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
 
   /**
    * @see mitll.langtest.client.custom.NPFHelper#reload()
-   * @see mitll.langtest.client.custom.EditItem.EditableExercise#doAfterEditComplete(ListInterface, boolean)
+   * @see mitll.langtest.client.custom.EditItem.EditableExercise#doAfterEditComplete
    */
   public void reload() {
     System.out.println("ExerciseList.reload for user " + controller.getUser() + " instance " + instance + " id " + getElement().getId());
@@ -219,7 +218,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    */
   String getSelectionFromToken(String token) {
     //token = token.contains(ResponseExerciseList.RESPONSE_TYPE_DIVIDER) ? token.split(ResponseExerciseList.RESPONSE_TYPE_DIVIDER)[0] : token; // remove any other parameters
-    token = token.split(ResponseExerciseList.RESPONSE_TYPE_DIVIDER)[0]; // remove any other parameters
+    //token = token.split(ResponseExerciseList.RESPONSE_TYPE_DIVIDER)[0]; // remove any other parameters
     return token;
   }
 
@@ -272,7 +271,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   /**
    * @see ListInterface#getExercises(long, boolean)
    */
-  class SetExercisesCallback implements AsyncCallback<ExerciseListWrapper<T>> {
+  class SetExercisesCallback implements AsyncCallback<ExerciseListWrapper> {
     private String id;
 
     public SetExercisesCallback(String id) {
@@ -288,7 +287,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
       }
       System.out.println("Got exception '" +caught.getMessage() + "' " +caught);
     }
-    public void onSuccess(ExerciseListWrapper<T> result) {
+    public void onSuccess(ExerciseListWrapper result) {
       System.out.println("\tExerciseList.SetExercisesCallback Got " + result.getExercises().size() + " results, id = " + id);
       if (isStaleResponse(result)) {
         System.out.println("----> SetExercisesCallback.onSuccess ignoring result " + result.getReqID() + " b/c before latest " + lastReqID);
@@ -297,9 +296,9 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
           gotEmptyExerciseList();
         }
         if (id != null) {
-          List<T> exercises = result.getExercises();
+          List<CommonShell> exercises = result.getExercises();
           rememberExercises(exercises);
-          for (ListChangeListener<T> listener : listeners) listener.listChanged(exercises);
+          for (ListChangeListener<CommonShell> listener : listeners) listener.listChanged(exercises);
           pushFirstSelection(id);
         }
         else {
@@ -317,7 +316,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     System.out.println(new Date() + " gotEmptyExerciseList : ------  ------------ ");
   }
 
-  public void rememberAndLoadFirst(List<T> exercises) {
+  public void rememberAndLoadFirst(List<CommonShell> exercises) {
     rememberAndLoadFirst(exercises, null);
   }
 
@@ -325,14 +324,14 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * @param exercises
    * @see ExerciseList.SetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
    */
-  public void rememberAndLoadFirst(List<T> exercises, Exercise firstExercise) {
+  public void rememberAndLoadFirst(List<CommonShell> exercises, CommonExercise firstExercise) {
     System.out.println("ExerciseList : rememberAndLoadFirst remembering " + exercises.size() + " : first = " +firstExercise);
 
     rememberExercises(exercises);
-    for (ListChangeListener<T> listener : listeners) listener.listChanged(exercises);
+    for (ListChangeListener<CommonShell> listener : listeners) listener.listChanged(exercises);
 
     if (firstExercise != null) {
-      T firstExerciseShell = findFirstExercise();
+      CommonShell firstExerciseShell = findFirstExercise();
       if (firstExerciseShell.getID().equals(firstExercise.getID())) {
         useExercise(firstExercise);   // allows us to skip another round trip with the server to ask for the first exercise
       }
@@ -345,11 +344,11 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     }
   }
 
-  boolean isStaleResponse(ExerciseListWrapper<T> result) {
+  boolean isStaleResponse(ExerciseListWrapper result) {
     return result.getReqID() < lastReqID;
   }
 
-  protected abstract void rememberExercises(List<T> result);
+  protected abstract void rememberExercises(List<CommonShell> result);
   protected abstract int getSize();
 
   /**
@@ -358,9 +357,9 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * @see mitll.langtest.client.list.PagingExerciseList#forgetExercise(String)
    * @param es
    */
-  public T removeExercise(T es) {
+  public CommonShell removeExercise(CommonShell es) {
     String id = es.getID();
-    T current = getCurrentExercise();
+    CommonShell current = getCurrentExercise();
     if (current.getID().equals(id)) {
       if (!onLast(current)) {
         loadNextExercise(current);
@@ -386,10 +385,10 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
       System.out.println("loadFirstExercise : current exercises is empty?");
       removeCurrentExercise();
     } else {
-      ExerciseShell toLoad = findFirstExercise();
+      CommonShell toLoad = findFirstExercise();
 
       if (exercise_title != null) {
-        ExerciseShell e = byID(exercise_title);
+        CommonShell e = byID(exercise_title);
         if (e != null) toLoad = e;
       }
 
@@ -425,15 +424,15 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     return pleaseWait;
   }
 
-  T findFirstExercise() {
+  CommonShell findFirstExercise() {
     return getFirst();
   }
 
-  protected abstract T getFirst();
+  protected abstract CommonShell getFirst();
 
   boolean hasExercise(String id) { return byID(id) != null; }
 
-  public abstract T byID(String name);
+  public abstract CommonShell byID(String name);
 
   /**
    * @seex #addExerciseToList(mitll.langtest.shared.ExerciseShell)
@@ -522,7 +521,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
     service.getExercise(itemID, new ExerciseAsyncCallback());
   }
 
-  private class ExerciseAsyncCallback implements AsyncCallback<Exercise> {
+  private class ExerciseAsyncCallback implements AsyncCallback<CommonExercise> {
     @Override
     public void onFailure(Throwable caught) {
       if (caught instanceof IncompatibleRemoteServiceException) {
@@ -538,7 +537,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
       }
     }
     @Override
-    public void onSuccess(Exercise result)  {
+    public void onSuccess(CommonExercise result)  {
       if (result == null) {
         Window.alert("Unfortunately there's a configuration error and we can't find this exercise.");
       }
@@ -549,10 +548,10 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   }
 
   /**
-   * @see ExerciseAsyncCallback#onSuccess(mitll.langtest.shared.Exercise)
+   * @see ExerciseAsyncCallback#onSuccess(mitll.langtest.shared.CommonExercise)
    * @param result
    */
-  protected void useExercise(Exercise result) {
+  protected void useExercise(CommonExercise result) {
     //System.out.println("ExerciseList.useExercise : result " +result);
 
     createdPanel = makeExercisePanel(result);
@@ -563,13 +562,13 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
 
   public String getCurrentExerciseID() { return getCurrentExercise() != null ? getCurrentExercise().getID() : "Unknown"; }
 
-  public abstract T getCurrentExercise();
+  public abstract CommonShell getCurrentExercise();
 
   /**
-   * @see #useExercise(mitll.langtest.shared.Exercise)
+   * @see #useExercise(mitll.langtest.shared.CommonExercise)
    * @param exercise
    */
-  public Panel makeExercisePanel(Exercise exercise) {
+  public Panel makeExercisePanel(CommonExercise exercise) {
     //System.out.println("ExerciseList.makeExercisePanel : " +exercise);
 
     Panel exercisePanel = factory.getExercisePanel(exercise);
@@ -583,10 +582,10 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   }
 
   /**
-   * @see ListInterface#loadNextExercise(mitll.langtest.shared.ExerciseShell)
+   * @see ListInterface#loadNextExercise
    * @param current
    */
-  protected void getNextExercise(ExerciseShell current) {
+  protected void getNextExercise(CommonShell current) {
    // System.out.println("ExerciseList.getNextExercise " + current);
 
     int i = getIndex(current.getID());
@@ -594,26 +593,26 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
       System.err.println("ExerciseList.getNextExercise : huh? couldn't find " + current +
           " in " + getSize() + " exercises : " + getKeys());
     } else {
-      T next = getAt(i + 1);
+      CommonShell next = getAt(i + 1);
       loadExercise(next.getID());
     }
   }
 
   /**
-   * @see #useExercise(mitll.langtest.shared.Exercise)
+   * @see #useExercise(mitll.langtest.shared.CommonExercise)
    * @param currentID
    * @return
    */
   private int getIndex(String currentID) {
-    T shell = byID(currentID);
+    CommonShell shell = byID(currentID);
     int i = shell != null ? getRealIndex(shell) : -1;
     //System.out.println("getIndex " + currentID + " = " +i);
 
     return i;
   }
 
-  protected abstract int getRealIndex(T t);
-  protected abstract T getAt(int i);
+  protected abstract int getRealIndex(CommonShell t);
+  protected abstract CommonShell getAt(int i);
 
   @Override
   public int getPercentComplete() {
@@ -626,7 +625,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   public int getComplete() {  return visited.size(); }
 
   /**
-   * @see #removeExercise(mitll.langtest.shared.ExerciseShell)
+   * @see #removeExercise
    */
   @Override
   public void removeCurrentExercise() {
@@ -662,7 +661,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * @return
    */
   @Override
-  public <S extends ExerciseShell> boolean loadNextExercise(S current) {
+  public  boolean loadNextExercise(CommonShell current) {
     System.out.println("ExerciseList.loadNextExercise current is : " +current);
     String id = current.getID();
     int i = getIndex(id);
@@ -687,12 +686,12 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
 
   public boolean loadNextExercise(String id) {
     System.out.println("ExerciseList.loadNextExercise id = " + id);
-    T exerciseByID = byID(id);
+    CommonShell exerciseByID = byID(id);
     return exerciseByID != null && loadNextExercise(exerciseByID);
   }
 
   /**
-   * @see ListInterface#loadNextExercise(mitll.langtest.shared.ExerciseShell)
+   * @see ListInterface#loadNextExercise
    */
   protected void onLastItem() {
     PropertyHandler props = controller.getProps();
@@ -709,7 +708,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * So a turker can get credit for their work.
    * @param current
    */
-  private void showTurkToken(ExerciseShell current) {
+  private void showTurkToken(CommonShell current) {
     String code = user.getUser() + "_" + current.getID();
 
     // Create a basic popup widget
@@ -730,7 +729,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * @return true if on first
    */
   @Override
-  public <S extends ExerciseShell> boolean loadPreviousExercise(S current) {
+  public boolean loadPreviousExercise(CommonShell current) {
     int i = getIndex(current.getID());
     boolean onFirst = i == 0;
     if (!onFirst) {
@@ -776,8 +775,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
    * @param current
    * @return
    */
-  @Override
-  public <S extends ExerciseShell> boolean onFirst(S current) {
+  public boolean onFirst(CommonShell current) {
     boolean b = current == null || getSize() == 1 || getIndex(current.getID()) == 0;
     //System.out.println("onFirst : of " +getSize() +", on checking " + current + " = " + b);
     return b;
@@ -786,7 +784,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   public boolean onLast() { return onLast(getCurrentExercise());  }
 
   @Override
-  public <S extends ExerciseShell> boolean onLast(S current) {
+  public boolean onLast(CommonShell current) {
     boolean b = current == null || getSize() == 1 || isOnLastItem(getIndex(current.getID()));
     //System.out.println("onLast  : of " +getSize() +", on checking " + current + " = " + b);
     return b;
@@ -798,7 +796,7 @@ public abstract class ExerciseList<T extends ExerciseShell> extends VerticalPane
   public void reloadExercises() { loadFirstExercise();  }
   public void redraw() {}
 
-  private final List<ListChangeListener<T>> listeners = new ArrayList<ListChangeListener<T>>();
+  private final List<ListChangeListener<CommonShell>> listeners = new ArrayList<ListChangeListener<CommonShell>>();
   @Override
-  public void addListChangedListener(ListChangeListener<T> listener) {  listeners.add(listener);  }
+  public void addListChangedListener(ListChangeListener<CommonShell> listener) {  listeners.add(listener);  }
 }
