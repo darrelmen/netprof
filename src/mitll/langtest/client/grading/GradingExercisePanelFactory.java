@@ -6,7 +6,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
 
 /**
  * Created with IntelliJ IDEA.
@@ -15,7 +15,7 @@ import mitll.langtest.shared.Exercise;
  * Time: 6:18 PM
  * To change this template use File | Settings | File Templates.
  */
-public class GradingExercisePanelFactory extends ExercisePanelFactory {
+public class GradingExercisePanelFactory/*<T extends Exercise>*/ extends ExercisePanelFactory {
   /**
    * @see mitll.langtest.client.LangTest
    * @param service
@@ -34,7 +34,7 @@ public class GradingExercisePanelFactory extends ExercisePanelFactory {
    * @return
    */
   @Override
-  public Panel getExercisePanel(Exercise e) {
+  public Panel getExercisePanel(CommonExercise e) {
      return new GradingExercisePanel(e, service, userFeedback, controller, exerciseList);
   }
 }
