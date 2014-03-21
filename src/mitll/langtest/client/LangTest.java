@@ -21,7 +21,6 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -56,8 +55,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserTable;
-import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.StartupInfo;
 
@@ -70,7 +68,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public static final String LANGTEST_IMAGES = "langtest/images/";
 
   private Panel currentExerciseVPanel = new FluidContainer();
-  private ListInterface<? extends ExerciseShell> exerciseList;
+  private ListInterface exerciseList;
   private final Label status = new Label();
 
   private UserManager userManager;
@@ -558,7 +556,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       if (props.isClassroomMode()) {
         exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer, exerciseList,1.0f) {
           @Override
-          public Panel getExercisePanel(Exercise e) {
+          public Panel getExercisePanel(CommonExercise e) {
             if (isReviewMode()) {
               return new QCNPFExercise(e, controller, exerciseList, 1.0f, false, "classroom");
             }

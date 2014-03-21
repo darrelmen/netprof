@@ -25,13 +25,13 @@ public class Combined<T extends ExerciseShell> extends TabContainer {
   private final ExerciseController controller;
   private final LangTestDatabaseAsync service;
   private final UserManager userManager;
-  private ListInterface<T> listInterface1;
+  private ListInterface listInterface1;
   //private ScrollPanel listScrollPanel;
 //  private ListInterface<? extends ExerciseShell> listInterface;
   private final UserFeedback feedback;
 
   public Combined(final LangTestDatabaseAsync service, final UserManager userManager,
-                  final ExerciseController controller, final ListInterface<? extends ExerciseShell> listInterface,
+                  final ExerciseController controller, final ListInterface listInterface,
                   UserFeedback feedback) {
     this.service = service;
     this.userManager = userManager;
@@ -49,7 +49,7 @@ public class Combined<T extends ExerciseShell> extends TabContainer {
 
     final Navigation.TabAndContent practice = makeTab(tabPanel, IconType.CHECK,  PRACTICE);
 
-    ExerciseListLayout<T> layout = new ExerciseListLayout<T>(controller.getProps());
+    ExerciseListLayout layout = new ExerciseListLayout(controller.getProps());
 
     //Panel currentExerciseVPanel = new FluidContainer();
   //  DivWidget currentExerciseVPanel = new DivWidget();
@@ -86,7 +86,7 @@ public class Combined<T extends ExerciseShell> extends TabContainer {
       layout.makeExerciseList(unitAndLessonRow, exerciseListContainer, feedback, currentExerciseVPanel, service, controller);
 
     listInterface1.setFactory(
-      new MyFlashcardExercisePanelFactory<T>(service, feedback, controller, listInterface1,-1), userManager, 1);
+      new MyFlashcardExercisePanelFactory(service, feedback, controller, listInterface1), userManager, 1);
 
     if (controller.gotMicPermission()) {
       listInterface1.getExercises(controller.getUser(), true);
