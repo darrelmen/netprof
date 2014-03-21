@@ -21,7 +21,7 @@ import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.result.ResultManager;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.grade.Grade;
@@ -61,22 +61,22 @@ public class GradingExercisePanel extends ExercisePanel {
    * @param userFeedback
    * @param controller
    * @param listContainer
-   * @see GradingExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
+   * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel
    */
-  public GradingExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
-                              final ExerciseController controller, ListInterface<Exercise> listContainer) {
+  public GradingExercisePanel(final CommonExercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
+                              final ExerciseController controller, ListInterface listContainer) {
     super(e,service,userFeedback,controller, listContainer);
     this.userFeedback = userFeedback;
     enableNextButton(true);
   }
 
   @Override
-  protected void addItemHeader(Exercise e) {}
+  protected void addItemHeader(CommonExercise e) {}
 
   /**
    * If controller is english only, then show the answer too.
    *
-   * @see #getQuestionPanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int, java.util.List, java.util.List, int, mitll.langtest.shared.Exercise.QAPair, com.google.gwt.user.client.ui.HasWidgets)
+   * @see #getQuestionPanel
    * @param i
    * @param total
    * @param engQAPair
@@ -85,8 +85,9 @@ public class GradingExercisePanel extends ExercisePanel {
    * @param showAnswer
    * @param toAddTo
    */
+/*
   @Override
-  protected void getQuestionHeader(int i, int total, Exercise.QAPair engQAPair, Exercise.QAPair englishPair,
+  protected void getQuestionHeader(int i, int total, CommonExercise.QAPair engQAPair, Exercise.QAPair englishPair,
                                    Exercise.QAPair flQAPair, boolean showAnswer, HasWidgets toAddTo) {
     String english = engQAPair.getQuestion();
     String prefix = "Question" + (total > 1 ? " #" + i : "") + " : ";
@@ -100,7 +101,9 @@ public class GradingExercisePanel extends ExercisePanel {
       toAddTo.add(new HTML("<h4>" + questionHeader + " / " + english + "</h4>"));
     }
   }
+*/
 
+/*
   @Override
   protected void addQuestionPrompt(Panel vp, Exercise e) {
 
@@ -118,6 +121,7 @@ public class GradingExercisePanel extends ExercisePanel {
     }
     super.addQuestionPrompt(vp,e);
   }
+*/
 
     /**
      * If controller is english only, then show the answer too.
@@ -140,14 +144,15 @@ public class GradingExercisePanel extends ExercisePanel {
    * @param controller
    * @param index      of the question (0 for first, 1 for second, etc.)
    * @return
-   * @see ExercisePanel#getQuestionPanel
+   * @seex ExercisePanel#getQuestionPanel
    */
-  @Override
-  protected Widget getAnswerWidget(final Exercise exercise, final LangTestDatabaseAsync service,
+/*  @Override
+  protected Widget getAnswerWidget(final CommonExercise exercise, final LangTestDatabaseAsync service,
                                    final ExerciseController controller, final int index) {
     final TabPanel vp = new TabPanel();
 
-    final int n = exercise.getNumQuestions();
+    // TODO fix this eventually
+    final int n = 1;//exercise.getNumQuestions();
     final GradingExercisePanel outer = this;
     final boolean englishOnly = controller.getEnglishOnly();
     service.getResultsForExercise(exercise.getID(), controller.isArabicTextDataCollect(), new AsyncCallback<ResultsAndGrades>() {
@@ -240,7 +245,7 @@ public class GradingExercisePanel extends ExercisePanel {
     addAnswerWidget(index, vp);
 
     return vp;
-  }
+  }*/
 
   /**
    * Are all results graded?
@@ -281,7 +286,7 @@ public class GradingExercisePanel extends ExercisePanel {
    * @param index
    * @param tabHeading
    * @return
-   * @see #getAnswerWidget
+   * @seex #getAnswerWidget
    */
   private Tab addAnswerGroup(Collection<Grade> grades,
                              List<Result> results, boolean bigPage, String prompt,
@@ -312,7 +317,7 @@ public class GradingExercisePanel extends ExercisePanel {
    *
    * @param resultsAndGrades
    * @return 1-3
-   * @see #getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @seex #getAnswerWidget(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    */
   private int countDistinctTypes(ResultsAndGrades resultsAndGrades) {
     int count = 0;
@@ -341,7 +346,7 @@ public class GradingExercisePanel extends ExercisePanel {
    * @param twoQPageSize
    * @param grader
    * @return
-   * @see #getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @seex #getAnswerWidget(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    */
   private Widget showResults(Collection<Result> results, Collection<Grade> grades,
                              LangTestDatabaseAsync service, PropertyHandler propertyHandler,
@@ -421,16 +426,16 @@ public class GradingExercisePanel extends ExercisePanel {
    * Consider : on the server, notice which audio posts have arrived, and take the latest ones...
    *
    * @param controller
-   * @param completedExercise
+   * @paramx completedExercise
    */
-  @Override
+/*  @Override
   public void postAnswers(ExerciseController controller, ExerciseShell completedExercise) {
     exerciseList.loadNextExercise(completedExercise);
-  }
+  }*/
 
   @Override
-  protected NavigationHelper<Exercise> getNavigationHelper(ExerciseController controller) {
-    return new NavigationHelper<Exercise>(exercise,controller, this, exerciseList, true, true) {
+  protected NavigationHelper getNavigationHelper(ExerciseController controller) {
+    return new NavigationHelper(exercise,controller, this, exerciseList, true, true) {
       @Override
       protected String getNextButtonText() {
         return "Next Ungraded";
