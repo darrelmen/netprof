@@ -1,10 +1,12 @@
 package mitll.langtest.client.exercise;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.StartupInfo;
 
 
@@ -50,6 +52,8 @@ public interface ExerciseController {
   String getAudioType();
   boolean isReviewMode();
   boolean showCompleted();
+
+  void getImage(int reqid, String path, String type, int toUse, int height, String exerciseID, AsyncCallback<ImageResponse> client);
 
   void showFlashHelp();
   String getLanguage();
