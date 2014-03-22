@@ -47,7 +47,7 @@ public interface LangTestDatabaseAsync {
 
   void getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence, int width, int height, boolean useScoreToColorBkg, AsyncCallback<PretestScore> async);
 
-  void getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, AsyncCallback<ImageResponse> async);
+  void getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, String exerciseID, AsyncCallback<ImageResponse> async);
 
   void getExercise(String id, AsyncCallback<CommonExercise> async);
 
