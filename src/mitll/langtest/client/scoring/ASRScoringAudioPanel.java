@@ -28,10 +28,11 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
    * @param service
    * @param gaugePanel
    * @param playButtonSuffix
+   * @param exerciseID
    */
   public ASRScoringAudioPanel(String refSentence, LangTestDatabaseAsync service, ExerciseController controller, ScoreListener gaugePanel,
-                              String playButtonSuffix) {
-    super(refSentence, service, controller, gaugePanel, playButtonSuffix);
+                              String playButtonSuffix, String exerciseID) {
+    super(refSentence, service, controller, gaugePanel, playButtonSuffix, exerciseID);
   }
 
   /**
@@ -44,11 +45,12 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
    * @param gaugePanel
    * @param rightMargin
    * @param playButtonSuffix
+   * @param exerciseID
    */
   public ASRScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
                               ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel,
-                              int rightMargin, String playButtonSuffix) {
-    super(path, refSentence, service, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix);
+                              int rightMargin, String playButtonSuffix, String exerciseID) {
+    super(path, refSentence, service, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix, exerciseID);
     this.useScoreToColorBkg = controller.useBkgColorForRef();
   }
 
