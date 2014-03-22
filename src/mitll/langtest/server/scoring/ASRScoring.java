@@ -231,7 +231,7 @@ public class ASRScoring extends Scoring {
   /**
    * Use hydec to do scoring<br></br>
    *
-   * Some magic happens in {@link #writeTranscripts(String, int, int, String, boolean)} where .lab files are
+   * Some magic happens in {@link Scoring#writeTranscripts(String, int, int, String, boolean, String)} where .lab files are
    * parsed to determine the start and end times for each event, which lets us both create images that
    * show the location of the words and phonemes, and for decoding, the actual reco sentence returned. <br></br>
    *
@@ -295,7 +295,7 @@ public class ASRScoring extends Scoring {
       Random rand = new Random();
       return new PretestScore(rand.nextBoolean() ? 0.99f : 0.01f);
     }
-    ImageWriter.EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix, useScoreForBkgColor);
+    ImageWriter.EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix, useScoreForBkgColor, "");
     Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
     Map<NetPronImageType, List<Float>> typeToEndTimes = getTypeToEndTimes(wavFile, eventAndFileInfo);
     String recoSentence = getRecoSentence(eventAndFileInfo);

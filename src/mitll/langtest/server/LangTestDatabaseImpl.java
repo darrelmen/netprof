@@ -21,9 +21,7 @@ import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.DLIUser;
-import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseListWrapper;
-import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.SectionNode;
@@ -54,7 +52,6 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
@@ -78,7 +75,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private String configDir;
   private ServerProperties serverProps;
   private PathHelper pathHelper;
-  private final Random rand = new Random();
+  //private final Random rand = new Random();
 
   private final Cache<String, String> userToExerciseID = CacheBuilder.newBuilder()
       .concurrencyLevel(4)
@@ -550,9 +547,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param imageType
    * @param width
    * @param height
+   * @param exerciseID
    * @return path to an image file
    * */
-  public ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height) {
+  public ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, String exerciseID) {
     ImageWriter imageWriter = new ImageWriter();
 
     String wavAudioFile = getWavAudioFile(audioFile);
@@ -567,7 +565,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     logger.debug("getImageForAudioFile : getting images (" + width + " x " + height + ") (" +reqid+ ") type " + imageType+
       " for " + wavAudioFile + "");
     String absolutePathToImage = imageWriter.writeImageSimple(wavAudioFile, pathHelper.getAbsoluteFile(imageOutDir).getAbsolutePath(),
-        width, height, imageType1);
+        width, height, imageType1, exerciseID);
     String installPath = pathHelper.getInstallPath();
     //System.out.println("Absolute path to image is " + absolutePathToImage);
 
