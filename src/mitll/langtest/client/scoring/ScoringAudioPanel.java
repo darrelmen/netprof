@@ -34,18 +34,19 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   public static final float MP3_HEADER_OFFSET = 0f;//0.048f;
 
   /**
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, ScoreListener, String)
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, ScoreListener, String, String)
    * @param refSentence
    * @param service
    * @param gaugePanel
    * @param playButtonSuffix
+   * @param exerciseID
    */
-  ScoringAudioPanel(String refSentence, LangTestDatabaseAsync service, ExerciseController controller, ScoreListener gaugePanel, String playButtonSuffix) {
-    this(null, refSentence, service, controller, SHOW_SPECTROGRAM, gaugePanel, 23, playButtonSuffix);
+  ScoringAudioPanel(String refSentence, LangTestDatabaseAsync service, ExerciseController controller, ScoreListener gaugePanel, String playButtonSuffix, String exerciseID) {
+    this(null, refSentence, service, controller, SHOW_SPECTROGRAM, gaugePanel, 23, playButtonSuffix, exerciseID);
   }
 
   /**
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener, int, String)
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener, int, String, String)
    * @param path
    * @param refSentence
    * @param service
@@ -53,11 +54,12 @@ public abstract class ScoringAudioPanel extends AudioPanel {
    * @param gaugePanel
    * @param rightMargin
    * @param playButtonSuffix
+   * @param exerciseID
    */
   ScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
                     ExerciseController controller,
-                    boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin, String playButtonSuffix) {
-    super(path, service, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix, controller.getAudioType());
+                    boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin, String playButtonSuffix, String exerciseID) {
+    super(path, service, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix, controller.getAudioType(), exerciseID);
     this.refSentence = refSentence;
     showOnlyOneExercise = controller.showOnlyOneExercise();
     addClickHandlers();
