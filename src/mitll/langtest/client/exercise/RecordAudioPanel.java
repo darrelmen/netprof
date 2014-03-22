@@ -44,7 +44,7 @@ public class RecordAudioPanel extends AudioPanel {
       // use keyboard
       controller, showSpectrogram,
       null // no gauge panel
-      , 1.0f, 23);
+      , 1.0f, 23, exercise.getID());
     this.exercisePanel = widgets;
     this.index = index;
     this.exercise = exercise;
