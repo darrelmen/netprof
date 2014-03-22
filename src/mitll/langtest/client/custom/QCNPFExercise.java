@@ -30,7 +30,6 @@ import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseFormatter;
-import mitll.langtest.shared.ExerciseShell;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -232,7 +231,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
         audioRef = wavToMP3(audioRef);   // todo why do we have to do this?
       }
       ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel(audioRef, e.getRefSentence(), service, controller,
-        controller.getProps().showSpectrogram(), scorePanel, 93, "");
+        controller.getProps().showSpectrogram(), scorePanel, 93, "", e.getID());
       audioPanel.setShowColor(true);
       audioPanel.getElement().setId("ASRScoringAudioPanel");
       String name = REFERENCE + " : " + audio.getDisplay();
