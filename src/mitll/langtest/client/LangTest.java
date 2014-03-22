@@ -8,6 +8,8 @@ import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
@@ -56,6 +58,7 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserTable;
 import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.StartupInfo;
 
@@ -66,6 +69,7 @@ import java.util.Date;
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   public static final String LANGTEST_IMAGES = "langtest/images/";
+  public static final String DIVIDER = "|";
 
   private Panel currentExerciseVPanel = new FluidContainer();
   private ListInterface exerciseList;
@@ -191,6 +195,113 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private Panel belowFirstRow;
   private Panel bothSecondAndThird;
 
+/*  static final int MIN_WIDTH = 256;
+  private static final float WAVEFORM_HEIGHT = 80f;//96;
+  private static final float SPECTROGRAM_HEIGHT = 50f;//96;
+  private static final String WAVEFORM = "Waveform";
+  private static final String SPECTROGRAM = "Spectrogram";*/
+
+  @Override
+  public void getImage(int reqid, final String path, final String type, int toUse, int height, String exerciseID, AsyncCallback<ImageResponse> client) {
+/*
+    int toUse = Math.max(MIN_WIDTH, width);
+    float heightForType = type.equals(WAVEFORM) ? WAVEFORM_HEIGHT : SPECTROGRAM_HEIGHT;
+    int height = Math.max(10,(int) (((float)Window.getClientHeight())/1200f * heightForType));*/
+
+    String key = path+ DIVIDER +type+ DIVIDER +toUse+ DIVIDER +height+ DIVIDER+exerciseID;
+
+   // System.out.println("key " + key);
+    getImage(reqid,key, client);
+  }
+
+  private void getImage(int reqid,String key, AsyncCallback<ImageResponse> client) {
+    String[] split = key.split("\\|");
+
+   // System.out.println("split " + split);
+
+    String path = split[0];
+    String type = split[1];
+    int toUse=Integer.parseInt(split[2]);
+    int height=Integer.parseInt(split[3]);
+    String exerciseID = split[4];
+
+    getImage(reqid,key,path,type,toUse,height, exerciseID, client);
+  }
+
+  private void getImage(int reqid, final String key, String path, final String type, int toUse, int height,
+                        String exerciseID, final AsyncCallback<ImageResponse> client) {
+
+    ImageResponse ifPresent = imageCache.getIfPresent(key);
+    if (ifPresent != null) {
+      System.out.println("found  " + ifPresent);
+
+      ifPresent.req = -1;
+      client.onSuccess(ifPresent);
+    }
+    else {
+      //int reqid = getReqID(type);
+      service.getImageForAudioFile(reqid, path, type, toUse, height, exerciseID, new AsyncCallback<ImageResponse>() {
+        public void onFailure(Throwable caught) {
+          //long now = System.currentTimeMillis();
+          // System.out.println("getImageURLForAudio : (failure) took " +(now-then) + " millis");
+          if (!caught.getMessage().trim().equals("0")) {
+            Window.alert("getImageForAudioFile Couldn't contact server. Please check network connection.");
+          }
+          System.out.println("message " + caught.getMessage() + " " + caught);
+          client.onFailure(caught);
+        }
+
+        public void onSuccess(ImageResponse result) {
+
+
+          System.out.println("onSuccess : got " + result);
+
+          // if (!result.successful) {
+           /* System.err.println("got error for request for type " + type);
+            if (WARN_ABOUT_MISSING_AUDIO) Window.alert("missing audio file on server " + path);*/
+        //  }
+        //  else if (isMostRecentRequest(type, result.req)) {
+            imageCache.put(key, result);
+            client.onSuccess(result);
+       //   }
+
+          System.out.println("size " + imageCache.size());
+
+        }
+      });
+    }
+  }
+
+/*  private final Map<String,Integer> reqs = new HashMap<String, Integer>();
+  private int reqid;
+  int getReqID(String type) {
+    synchronized (this) {
+      int current = reqid++;
+      reqs.put(type, current);
+      return current;
+    }
+  }*/
+
+/*  boolean isMostRecentRequest(String type, int responseReqID) {
+    synchronized (this) {
+      Integer mostRecentIDForType = reqs.get(type);
+      if (mostRecentIDForType == null) {
+        System.err.println("huh? couldn't find req " + reqid + " in " +reqs);
+        return false;
+      }
+      else {
+        //System.out.println("\tisMostRecentRequest: req for " + type + " = " + mostRecentIDForType + " compared to " + responseReqID);
+        return mostRecentIDForType == responseReqID;
+      }
+    }
+  }*/
+
+  Cache<String, ImageResponse> imageCache = CacheBuilder.newBuilder()
+    .maximumSize(100)
+      //  .expireAfterWrite(10, TimeUnit.MINUTES)
+      //  .removalListener(MY_LISTENER)
+    .build();
+
   /**
    * Use DockLayout to put a header at the top, exercise list on the left, and eventually
    * the current exercise in the center.  There is also a status on line on the bottom.
@@ -199,6 +310,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private void onModuleLoad2() {
     setupSoundManager();
+
+
+
 
     userManager = new UserManager(this, service, props);
 /*    if (props.isFlashCard()) {
