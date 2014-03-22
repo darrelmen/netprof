@@ -69,10 +69,11 @@ public abstract class Scoring {
    * @param imageHeight
    * @param audioFileNoSuffix
    * @param useScoreToColorBkg
+   * @param suffix
    * @return map of image type to image path, suitable using in setURL on a GWT Image (must be relative to deploy location)
    */
   protected ImageWriter.EventAndFileInfo writeTranscripts(String imageOutDir, int imageWidth, int imageHeight,
-                                                          String audioFileNoSuffix, boolean useScoreToColorBkg) {
+                                                          String audioFileNoSuffix, boolean useScoreToColorBkg, String suffix) {
     String pathname = audioFileNoSuffix + ".wav";
     pathname = prependDeploy(pathname);
     if (!new File(pathname).exists()) {
@@ -107,7 +108,7 @@ public abstract class Scoring {
     }
 
     return new ImageWriter().writeTranscripts(pathname,
-        imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg);
+        imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, suffix);
   }
 
   /**
