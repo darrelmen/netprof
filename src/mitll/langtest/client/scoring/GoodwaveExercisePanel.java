@@ -467,7 +467,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
      * @see GoodwaveExercisePanel#getAnswerWidget
      */
     public ASRRecordAudioPanel(LangTestDatabaseAsync service, int index, ExerciseController controller) {
-      super(exercise.getForeignLanguage(), service, controller, scorePanel, REFERENCE);
+      super(exercise.getForeignLanguage(), service, controller, scorePanel, REFERENCE, exercise.getID());
       this.index = index;
       getElement().setId("ASRRecordAudioPanel");
     }
@@ -596,7 +596,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         exercise.getForeignLanguage(),
         service,
         controller1,
-        controller1.getProps().showSpectrogram(), scoreListener, 23, REFERENCE);
+        controller1.getProps().showSpectrogram(), scoreListener, 23, REFERENCE, exercise.getID());
     }
 
     /**
