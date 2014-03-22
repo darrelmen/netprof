@@ -53,6 +53,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private static final int IMAGE_WIDTH_SLOP = 70 + WINDOW_SIZE_CHANGE_THRESHOLD/2;
 
   private final ScoreListener gaugePanel;
+  private final String exerciseID;
   String audioPath;
   private final Map<String,Integer> reqs = new HashMap<String, Integer>();
   private int reqid;
@@ -76,23 +77,26 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private static final boolean DEBUG_GET_IMAGES = false;
 
   /**
-   * @see ScoringAudioPanel#ScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener, int, String)
+   * @see ScoringAudioPanel#ScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener, int, String, String)
    * @param service
    * @param showSpectrogram
    * @param gaugePanel
    * @param rightMargin
    * @param playButtonSuffix
+   * @param exerciseID
    */
   AudioPanel(String path, LangTestDatabaseAsync service,
-             ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin, String playButtonSuffix, String audioType) {
-    this(service, controller, showSpectrogram, gaugePanel, 1.0f, rightMargin);
+             ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin,
+             String playButtonSuffix, String audioType, String exerciseID) {
+    this(service, controller, showSpectrogram, gaugePanel, 1.0f, rightMargin, exerciseID);
     this.audioPath = path;
 
     addWidgets(playButtonSuffix, audioType);
   }
 
   protected AudioPanel(LangTestDatabaseAsync service,
-                       ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel, float screenPortion, int rightMargin) {
+                       ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel,
+                       float screenPortion, int rightMargin, String exerciseID) {
     this.screenPortion = screenPortion;
     this.soundManager = controller.getSoundManager();
     this.service = service;
@@ -103,6 +107,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     this.showSpectrogram = showSpectrogram;
     if (showSpectrogram) System.out.println("AudioPanel : showSpectrogram! ");
     this.rightMargin = rightMargin;
+    this.exerciseID = exerciseID;
   }
 
   public void onResize() {
@@ -115,8 +120,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
   /**
    * Replace the html 5 audio tag with our fancy waveform widget.
-   * @see #AudioPanel(String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener, int, String)
-   * @see mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, int, boolean)
+   * @seex #AudioPanel(String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener, int, String)
+   * @seex mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, int, boolean)
    * @return
    * @param playButtonSuffix
    */
@@ -344,6 +349,16 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     }
   }
 
+  private static final int TIMEOUT = 30;
+
+  //private final Cache<String, String> userToExerciseID = CacheBuilder.newBuilder();
+/*    .concurrencyLevel(4)
+    .maximumSize(10000)
+    .build();*/
+
+//  .expireAfterWrite(TIMEOUT, TimeUnit.MINUTES).build();
+
+
   /**
    * Worries about responses returning out of order for the same type of image request (as the window is resized)
    * and ignores all but the most recent request.
@@ -361,48 +376,48 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       int reqid = getReqID(type);
       final long then = System.currentTimeMillis();
 
-      //System.out.println("getImageURLForAudio : req " + reqid + " path " + path + " type " + type + " width " + width);
-      service.getImageForAudioFile(reqid, path, type, toUse, height, new AsyncCallback<ImageResponse>() {
-        public void onFailure(Throwable caught) {
-          long now = System.currentTimeMillis();
-          System.out.println("getImageURLForAudio : (failure) took " +(now-then) + " millis");
-          if (!caught.getMessage().trim().equals("0")) {
-            Window.alert("getImageForAudioFile Couldn't contact server. Please check network connection.");
+      System.out.println("getImageURLForAudio : req " + reqid + " path " + path + " type " + type + " width " + width);
+//      service.getImageForAudioFile(reqid, path, type, toUse, height, new AsyncCallback<ImageResponse>() {
+        controller.getImage(reqid, path, type, toUse, height, exerciseID, new AsyncCallback<ImageResponse>() {
+          public void onFailure(Throwable caught) {
+            long now = System.currentTimeMillis();
+            System.out.println("getImageURLForAudio : (failure) took " + (now - then) + " millis");
+            if (!caught.getMessage().trim().equals("0")) {
+              Window.alert("getImageForAudioFile Couldn't contact server. Please check network connection.");
+            }
+            System.out.println("message " + caught.getMessage() + " " + caught);
           }
-          System.out.println("message " + caught.getMessage() + " " + caught);
-        }
-        public void onSuccess(ImageResponse result) {
-          long now = System.currentTimeMillis();
-          long roundtrip = now - then;
 
-          if (!result.successful) {
-            System.err.println("got error for request for type " + type);
-            if (WARN_ABOUT_MISSING_AUDIO) Window.alert("missing audio file on server " + path);
-          }
-          else if (isMostRecentRequest(type, result.req)) {
-            //System.out.println("\tgetImageURLForAudio : using new url " + result.imageURL);
+          public void onSuccess(ImageResponse result) {
+            long now = System.currentTimeMillis();
+            long roundtrip = now - then;
 
-            imageAndCheck.image.setUrl(result.imageURL);
-            imageAndCheck.image.setVisible(true);
-            audioPositionPopup.reinitialize(result.durationInSeconds);
+            if (!result.successful) {
+              System.err.println("got error for request for type " + type);
+              if (WARN_ABOUT_MISSING_AUDIO) Window.alert("missing audio file on server " + path);
+            } else if (result.req == -1 || isMostRecentRequest(type, result.req)) { // could be cached
+              System.out.println("\tgetImageURLForAudio : using new url " + result.imageURL);
 
-            // attempt to have the check not become visible until the image comes back from the server
-            Timer t = new Timer() {
-              public void run() {
-                imageAndCheck.check.setVisible(true);
-              }
-            };
+              imageAndCheck.image.setUrl(result.imageURL);
+              imageAndCheck.image.setVisible(true);
+              audioPositionPopup.reinitialize(result.durationInSeconds);
 
-            t.schedule(50);
+              // attempt to have the check not become visible until the image comes back from the server
+              Timer t = new Timer() {
+                public void run() {
+                  imageAndCheck.check.setVisible(true);
+                }
+              };
+
+              t.schedule(50);
+            } else {
+              System.out.println("\tgetImageURLForAudio : ignoring out of sync response " + result.req + " for " + type);
+            }
+            if (logMessages) {
+              logMessage(result, roundtrip);
+            }
           }
-          else {
-            //System.out.println("\tgetImageURLForAudio : ignoring out of sync response " + result.req + " for " + type);
-          }
-          if (logMessages) {
-            logMessage(result, roundtrip);
-          }
-        }
-      });
+        });
     }
   }
 
@@ -437,7 +452,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
         return false;
       }
       else {
-        //System.out.println("\tisMostRecentRequest: req for " + type + " = " + mostRecentIDForType + " compared to " + responseReqID);
+        System.out.println("\tisMostRecentRequest: req for " + type + " = " + mostRecentIDForType + " compared to " + responseReqID);
         return mostRecentIDForType == responseReqID;
       }
     }
