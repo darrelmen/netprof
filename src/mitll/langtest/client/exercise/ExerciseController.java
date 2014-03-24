@@ -55,28 +55,18 @@ public interface ExerciseController {
 
   void getImage(int reqid, String path, String type, int toUse, int height, String exerciseID, AsyncCallback<ImageResponse> client);
 
-  void showFlashHelp();
   String getLanguage();
   boolean isPromptBeforeNextItem();
   boolean isRightAlignContent();
   boolean isGoodwaveMode();
   int getLeftColumnWidth();
   int getHeightOfTopRows();
-/*
-  boolean showUnansweredFirst();
-*/
-
-/*
-  int getFlashcardPreviewFrameHeight();
-*/
 
   PropertyHandler getProps();
 
   String logException(Throwable throwable);
+  void logMessageOnServer(String message, String prefix);
 
-  String getGreeting();
-
-  void resetState();
   StartupInfo getStartupInfo();
   boolean gotMicPermission();
 }
