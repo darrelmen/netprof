@@ -349,16 +349,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     }
   }
 
-  private static final int TIMEOUT = 30;
-
-  //private final Cache<String, String> userToExerciseID = CacheBuilder.newBuilder();
-/*    .concurrencyLevel(4)
-    .maximumSize(10000)
-    .build();*/
-
-//  .expireAfterWrite(TIMEOUT, TimeUnit.MINUTES).build();
-
-
   /**
    * Worries about responses returning out of order for the same type of image request (as the window is resized)
    * and ignores all but the most recent request.
@@ -369,7 +359,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @param imageAndCheck
    */
   private void getImageURLForAudio(final String path, final String type,int width, final ImageAndCheck imageAndCheck) {
-    int toUse = Math.max(MIN_WIDTH, width);
+    final int toUse = Math.max(MIN_WIDTH, width);
     float heightForType = type.equals(WAVEFORM) ? WAVEFORM_HEIGHT : SPECTROGRAM_HEIGHT;
     int height = Math.max(10,(int) (((float)Window.getClientHeight())/1200f * heightForType));
     if (path != null) {
@@ -383,7 +373,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
             long now = System.currentTimeMillis();
             System.out.println("getImageURLForAudio : (failure) took " + (now - then) + " millis");
             if (!caught.getMessage().trim().equals("0")) {
-              Window.alert("getImageForAudioFile Couldn't contact server. Please check network connection.");
+             // Window.alert("getImageForAudioFile Couldn't contact server. Please check network connection.");
+              controller.logMessageOnServer("getImageFailed for "+ path+" " +type + " width" +toUse,"onFailure");
             }
             System.out.println("message " + caught.getMessage() + " " + caught);
           }
@@ -396,20 +387,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
               System.err.println("got error for request for type " + type);
               if (WARN_ABOUT_MISSING_AUDIO) Window.alert("missing audio file on server " + path);
             } else if (result.req == -1 || isMostRecentRequest(type, result.req)) { // could be cached
-              System.out.println("\tgetImageURLForAudio : using new url " + result.imageURL);
-
-              imageAndCheck.image.setUrl(result.imageURL);
-              imageAndCheck.image.setVisible(true);
-              audioPositionPopup.reinitialize(result.durationInSeconds);
-
-              // attempt to have the check not become visible until the image comes back from the server
-              Timer t = new Timer() {
-                public void run() {
-                  imageAndCheck.check.setVisible(true);
-                }
-              };
-
-              t.schedule(50);
+              showResult(result, imageAndCheck);
             } else {
               System.out.println("\tgetImageURLForAudio : ignoring out of sync response " + result.req + " for " + type);
             }
@@ -419,6 +397,23 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
           }
         });
     }
+  }
+
+  protected void showResult(ImageResponse result, final ImageAndCheck imageAndCheck) {
+   // System.out.println("\tgetImageURLForAudio : using new url " + result.imageURL);
+
+    imageAndCheck.image.setUrl(result.imageURL);
+    imageAndCheck.image.setVisible(true);
+    audioPositionPopup.reinitialize(result.durationInSeconds);
+
+    // attempt to have the check not become visible until the image comes back from the server
+    Timer t = new Timer() {
+      public void run() {
+        imageAndCheck.check.setVisible(true);
+      }
+    };
+
+    t.schedule(50);
   }
 
   private void logMessage(ImageResponse result, long roundtrip) {
@@ -452,12 +447,18 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
         return false;
       }
       else {
-        System.out.println("\tisMostRecentRequest: req for " + type + " = " + mostRecentIDForType + " compared to " + responseReqID);
+        //System.out.println("\tisMostRecentRequest: req for " + type + " = " + mostRecentIDForType + " compared to " + responseReqID);
         return mostRecentIDForType == responseReqID;
       }
     }
   }
 
+  /**
+   * @see #addWidgets(String, String)
+   * @param label
+   * @param widget
+   * @return
+   */
   private Panel addCheckbox(String label, final ImageAndCheck widget) {
     CheckBox w = new CheckBox();
     w.setValue(true);
