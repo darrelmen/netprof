@@ -16,7 +16,6 @@ import mitll.langtest.server.database.flashcard.UserStateWrapper;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.DLIUser;
-import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
@@ -95,6 +94,7 @@ public class DatabaseImpl implements Database {
   private final ServerProperties serverProps;
 
   private final Map<Long,UserStateWrapper> userToState = new HashMap<Long,UserStateWrapper>();
+  private boolean addDefects = true;
 
   /**
    * Just for testing
@@ -107,6 +107,7 @@ public class DatabaseImpl implements Database {
     this(configDir, "", dbName, new ServerProperties(configDir, configFile), pathHelper, mustAlreadyExist);
     this.lessonPlanFile = serverProps.getLessonPlan();
     this.useFile = lessonPlanFile != null;
+    addDefects = false;
   }
 
   public DatabaseImpl(String configDir, String relativeConfigDir, String dbName, ServerProperties serverProps,
@@ -200,7 +201,10 @@ public class DatabaseImpl implements Database {
   public void closeConnection(Connection connection) {}
   public void closeConnection() throws SQLException {
 
-    connection.getConnection().close();
+    Connection connection1 = connection.getConnection();
+    if (connection1 != null) {
+      connection1.close();
+    }
   }
 
   public Export getExport() {
@@ -299,7 +303,7 @@ public class DatabaseImpl implements Database {
     if (exerciseDAO == null) {
       if (useFile && excel) {
         synchronized (this) {
-          this.exerciseDAO = new ExcelImport(lessonPlanFile, mediaDir, absConfigDir, serverProps, userListManager, installPath);
+          this.exerciseDAO = new ExcelImport(lessonPlanFile, mediaDir, absConfigDir, serverProps, userListManager, installPath, addDefects);
         }
       }
       else {
@@ -987,14 +991,15 @@ public class DatabaseImpl implements Database {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#addUser
    */
-  private long addUser(int age, String gender, int experience, String ipAddr, String dialect) {
+/*  private long addUser(int age, String gender, int experience, String ipAddr, String dialect) {
     long l = userDAO.addUser(age, gender, experience, ipAddr, "", dialect, "", false);
     userListManager.createFavorites(l);
     return l;
-  }
+  }*/
 
   public long addUser(int age, String gender, int experience, String ipAddr,
                        String nativeLang, String dialect, String userID) {
+    logger.debug("addUser " + userID);
     long l = userDAO.addUser(age, gender, experience, ipAddr, nativeLang, dialect, userID, false);
     userListManager.createFavorites(l);
     return l;
