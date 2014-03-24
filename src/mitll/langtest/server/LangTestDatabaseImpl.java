@@ -894,6 +894,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.deleteItem(id);
   }
 
+  @Override
+  public void logEvent(String id, String exid, String context, long userid) {
+    db.logEvent(id,exid,context,userid);
+  }
+
   /**
    * @see mitll.langtest.client.custom.EditItem.EditableExercise#postEditItem
    * @param userExercise
