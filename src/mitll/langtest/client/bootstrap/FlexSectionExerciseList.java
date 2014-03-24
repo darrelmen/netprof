@@ -551,7 +551,9 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    */
   private ButtonWithChildren makeOverallButton(String type, String title) {
     ButtonWithChildren overallButton = new ButtonWithChildren(title, type);
-
+    if (controller.getProps().doInstrumentation()) {
+      controller.getButtonFactory().registerButton(overallButton, "unknown", "", user.getUser());
+    }
     overallButton.setWidth("100%");
     DOM.setStyleAttribute(overallButton.getElement(), "paddingLeft", "0px");
     DOM.setStyleAttribute(overallButton.getElement(), "paddingRight", "0px");
@@ -781,6 +783,8 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     public ButtonWithChildren(String caption, String type) {
       super(caption);
       this.type = type;
+      getElement().setId("Button_"+caption+"_"+type);
+
     }
 
     /**
