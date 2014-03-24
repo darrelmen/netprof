@@ -40,6 +40,7 @@ public class Flashcard implements RequiresResize {
   private static final int min = 720;
   private HTML userNameWidget;
   private final String nameForAnswer;
+  private final boolean adminView;
 
   /**
    * @see mitll.langtest.client.LangTest#makeHeaderRow()
@@ -47,6 +48,7 @@ public class Flashcard implements RequiresResize {
   public Flashcard(PropertyHandler props) {
     this.nameForAnswer = props.getNameForAnswer() + "s";
     isAnonymous = props.getLoginType().equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS);
+    adminView = props.isAdminView();
   }
 
   /**
@@ -105,7 +107,7 @@ public class Flashcard implements RequiresResize {
     Panel hp = new HorizontalPanel();
     hp.getElement().setId("UsernameContainer");
     userNameWidget = getUserNameWidget(userName);
-    if (!isAnonymous) {
+    if (!isAnonymous || adminView) {
       hp.add(userNameWidget);
     }
     Dropdown w = makeMenu(users, results, monitoring);
@@ -114,7 +116,7 @@ public class Flashcard implements RequiresResize {
     widget1.addClickHandler(logoutClickHandler);
     w.add(widget1);
 
-    if (!isAnonymous) {
+    if (!isAnonymous || adminView) {
       hp.add(w);
     }
 
@@ -145,6 +147,13 @@ public class Flashcard implements RequiresResize {
     return userNameWidget;
   }
 
+  /**
+   * @see #getHeaderRow(String, boolean, String, String, String, com.google.gwt.user.client.ui.HTML, com.google.gwt.event.dom.client.ClickHandler, com.google.gwt.event.dom.client.ClickHandler, com.google.gwt.event.dom.client.ClickHandler, com.google.gwt.event.dom.client.ClickHandler)
+   * @param users
+   * @param results
+   * @param monitoring
+   * @return
+   */
   private Dropdown makeMenu(ClickHandler users, ClickHandler results, ClickHandler monitoring) {
     Dropdown w = new Dropdown();
     w.setRightDropdown(true);
@@ -208,6 +217,7 @@ public class Flashcard implements RequiresResize {
     DOM.setStyleAttribute(appName.getElement(), "fontSize", fontsize);
   }
 
+/*
   public void showFlashHelp(final LangTest langTest, boolean isFlashcard) {
     final PropertyHandler props = langTest.getProps();
       List<String> msgs = new ArrayList<String>();
@@ -217,10 +227,11 @@ public class Flashcard implements RequiresResize {
       DialogHelper dialogHelper = new DialogHelper(false);
       dialogHelper.showErrorMessage("Help", msgs);
   }
+*/
 
-  public void setAppTitle(String appTitle) {
-    appName.setText(/*"<span>" + */appTitle/* + "</span>"*/);
+/*  public void setAppTitle(String appTitle) {
+    appName.setText(*//*"<span>" + *//*appTitle*//* + "</span>"*//*);
   //  this.appTitle = appTitle;
-  }
+  }*/
 
 }
