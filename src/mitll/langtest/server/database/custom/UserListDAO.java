@@ -243,7 +243,13 @@ public class UserListDAO extends DAO {
       List<UserList> toReturn = new ArrayList<UserList>();
       for (UserList ul : userLists) {
         if (!ul.isEmpty()) {
+          logger.debug("getAllPublic : found userLists for " + userid + " : " +ul);
+
           toReturn.add(ul);
+        }
+        else {
+          logger.info("\tgetAllPublic : skipping for " + userid + " : " +ul);
+
         }
       }
    //   logger.debug("toReturn for " + userid + " : " +toReturn);
@@ -398,7 +404,7 @@ public class UserListDAO extends DAO {
     //where.setVisitors(userListVisitorJoinDAO.getVisitorsOfList(where.getUniqueID()));
 
     if (!onList.isEmpty()) {
-      logger.debug("populateList : got " + onList.size() + " for list " + where.getUniqueID() + " = " + where);
+      //logger.debug("populateList : got " + onList.size() + " for list " + where.getUniqueID() + " = " + where);
     }
   }
 
@@ -408,7 +414,7 @@ public class UserListDAO extends DAO {
     else return getIn(listsForVisitor);
   }
 
-  private Set<Long> getListsForVisitor(long userid) { return userListVisitorJoinDAO.getListsForVisitor(userid);  }
+ // private Set<Long> getListsForVisitor(long userid) { return userListVisitorJoinDAO.getListsForVisitor(userid);  }
   public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
     this.userExerciseDAO = userExerciseDAO;
   }
