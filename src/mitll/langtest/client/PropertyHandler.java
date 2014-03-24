@@ -90,6 +90,12 @@ public class PropertyHandler {
   private boolean spectrogram = false;
   private boolean combinedMode = false;
   private static final String INCLUDE_FEEDBACK = "includeFeedback";
+  private static final String INSTRUMENT = "instrument";
+  private boolean instrument;
+
+  public boolean doInstrumentation() {
+    return instrument;
+  }
 
   public enum LOGIN_TYPE { UNDEFINED, ANONYMOUS, STUDENT }
 
@@ -135,11 +141,9 @@ public class PropertyHandler {
 
   // do we bind the record key to space -- problematic if we have text entry anywhere else on the page, say in a search
   // box
-  private boolean addRecordKeyBinding = false;
   private LOGIN_TYPE loginType = LOGIN_TYPE.ANONYMOUS;
   private int flashcardPreviewHeight = DEFAULT_FLASHCARD_PREVIEW_HEIGHT;
 
-  private boolean flashcardNextAndPrev;
   private boolean flashcardTextResponse = false;
   private boolean showFlashcardAnswer = true;
   private boolean showExercisesInOrder = false;
@@ -148,7 +152,6 @@ public class PropertyHandler {
   private boolean allowPlusInURL;
   private boolean bindNextToEnter;
   private boolean classroomMode = false;
-  private boolean includeFeedback = true;
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad()
@@ -200,8 +203,6 @@ public class PropertyHandler {
       else if (key.equals(FLASHCARD_PREVIEW_HEIGHT)) flashcardPreviewHeight = getInt(value, DEFAULT_FLASHCARD_PREVIEW_HEIGHT, FLASHCARD_PREVIEW_HEIGHT);
       else if (key.equals(CONTINUE_PROMPT)) promptBeforeNextItem = getBoolean(value);
       else if (key.equals(RIGHT_ALIGN_CONTENT)) rightAlignContent = getBoolean(value);
-      else if (key.equals(ADD_RECORD_KEY_BINDING)) addRecordKeyBinding = getBoolean(value);
-      else if (key.equals(FLASHCARD_NEXT_AND_PREV)) flashcardNextAndPrev = getBoolean(value);
       else if (key.equals(FLASHCARD_TEXT_RESPONSE)) flashcardTextResponse = getBoolean(value);
       else if (key.equals(SHOW_FLASHCARD_ANSWER)) showFlashcardAnswer = getBoolean(value);
       else if (key.equals(EXERCISES_IN_ORDER)) showExercisesInOrder = getBoolean(value);
@@ -212,7 +213,7 @@ public class PropertyHandler {
       else if (key.equals(SCREEN_PORTION)) screenPortion = getFloat(value, 1.0f, SCREEN_PORTION);
       else if (key.equals(CLASSROOM_MODE)) classroomMode = getBoolean(value);
       else if (key.equals(SHOW_SPECTROGRAM)) spectrogram = getBoolean(value);
-      else if (key.equals(INCLUDE_FEEDBACK)) includeFeedback = getBoolean(value);
+      else if (key.equals(INSTRUMENT)) instrument = getBoolean(value);
       else if (key.equals(LOGIN_TYPE_PARAM)) {
         try {
           loginType = LOGIN_TYPE.valueOf(value.toUpperCase());

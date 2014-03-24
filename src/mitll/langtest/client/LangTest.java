@@ -45,6 +45,7 @@ import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.Flashcard;
 import mitll.langtest.client.grading.GradingExercisePanelFactory;
+import mitll.langtest.client.instrumentation.ButtonFactory;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.monitoring.MonitoringManager;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
@@ -97,6 +98,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private StartupInfo startupInfo;
 
   private TabContainer navigation;
+  ButtonFactory buttonFactory;
 /*  private boolean showUnansweredFirst = false;
   private boolean showRerecord = false;*/
 
@@ -265,6 +267,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void onModuleLoad2() {
     setupSoundManager();
 
+    if (props.doInstrumentation()) {
+      buttonFactory = new ButtonFactory(service, props);
+    }
     userManager = new UserManager(this, service, props);
 
     checkAdmin();
@@ -733,6 +738,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return gotPermission;
   }
 
+  @Override
+  public ButtonFactory getButtonFactory() {
+    return buttonFactory;
+  }
+
   /**
    * Called after the user clicks "Yes" in flash mic permission dialog.
    *
@@ -760,10 +770,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   @Override
   public void setShowRerecord(boolean v) {/* showRerecord = v;*/ }
-
-/*
-  public boolean showUnansweredFirst() { return showUnansweredFirst; }
-*/
 
   /**
    * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers
