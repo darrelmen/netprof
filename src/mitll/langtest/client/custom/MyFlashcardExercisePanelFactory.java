@@ -48,15 +48,18 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   private static final String REMAINING = "Remaining";
   private static final String INCORRECT = "Incorrect";
   private static final String CORRECT = "Correct";
-  private static final String REPEAT_THIS_SET = "Start Over";
+  public static final String START_OVER = "Start Over";
+  //private static final String REPEAT_THIS_SET = START_OVER;
   private static final String CORRECT_NBSP = "Correct&nbsp;%";
   private static final String SKIP_THIS_ITEM = "Skip this item";
 
   private static final String RANK = "Rank";
   private static final String NAME = "Name";
   private static final String SCORE = "Score";
-  public static final String SCORE_SUBTITLE = "score %";
-  public static final String CORRECT_SUBTITLE = "% correct";
+  private static final String SCORE_SUBTITLE = "score %";
+  private static final String CORRECT_SUBTITLE = "% correct";
+  private static final int ROWS_IN_TABLE = 7;
+  private static final String SKIP_TO_END = "Skip to end";
 
   private CommonExercise currentExercise;
   private final ControlState controlState;
@@ -98,7 +101,10 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
     exToCorrect.clear();
     exToScore.clear();
     totalExercises = allExercises.size();
+    latestResultID = -1;
   }
+
+  private long latestResultID = -1;
 
   private class StatsPracticePanel extends BootstrapExercisePanel {
     private Panel container;
@@ -116,13 +122,12 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       }
     }
 
-    private long latestResultID;
     /**
      * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#receivedAudioAnswer(mitll.langtest.shared.AudioAnswer, mitll.langtest.client.exercise.ExerciseQuestionState, com.google.gwt.user.client.ui.Panel)
      * @param result
      */
     public void receivedAudioAnswer(final AudioAnswer result) {
-      System.out.println("StatsPracticePanel.receivedAudioAnswer: result " + result);
+      //System.out.println("StatsPracticePanel.receivedAudioAnswer: result " + result);
 
       if (result.validity != AudioAnswer.Validity.OK) {
         super.receivedAudioAnswer(result);
@@ -133,6 +138,8 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       setStateFeedback();
 
       latestResultID = result.getResultID();
+      //System.out.println("\tStatsPracticePanel.receivedAudioAnswer: latest now " + latestResultID);
+
       super.receivedAudioAnswer(result);
     }
 
@@ -142,12 +149,13 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
      */
     public void onSetComplete() {
       skip.setVisible(false);
+      startOver.setVisible(false);
+      seeScores.setVisible(false);
+
       final int user = controller.getUser();
 
       Set<String> ids = exToCorrect.keySet();
 
-      System.out.println("StatsPracticePanel.onSetComplete. : calling  getUserHistoryForList for " + user +
-        " with " + exToCorrect);
       Set<String> copies = new HashSet<String>(ids);
       if (copies.isEmpty()) {
         for (CommonShell t : allExercises) {
@@ -155,10 +163,13 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
         }
       }
 
+      System.out.println("StatsPracticePanel.onSetComplete. : calling  getUserHistoryForList for " + user +
+        " with " + exToCorrect + " and latest " + latestResultID + " and ids " +copies);
+
       service.getUserHistoryForList(user, copies, latestResultID, new AsyncCallback<List<AVPHistoryForList>>() {
         @Override
         public void onFailure(Throwable caught) {
-          System.out.println("StatsPracticePanel.onSetComplete. : got failure " + caught);
+          System.err.println("StatsPracticePanel.onSetComplete. : got failure " + caught);
         }
 
         @Override
@@ -212,12 +223,23 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
     }
 
     private Chart makeChart(int totalCorrect, int all, AVPHistoryForList sessionAVPHistoryForList) {
-      String correct = totalCorrect +" Correct (" + toPercent(totalCorrect, all) + ")";
+      String suffix = getSkippedSuffix();
+      String correct = totalCorrect +" Correct (" + toPercent(totalCorrect, all) + ")" + suffix;
       Chart chart  = new LeaderboardPlot().getChart(sessionAVPHistoryForList, correct, CORRECT_SUBTITLE);
 
       scaleCharts(chart);
 
       return chart;
+    }
+
+    private String getSkippedSuffix() {
+      int attempted = getCorrect()+getIncorrect();
+      int skipped =  allExercises.size()-attempted;
+      String suffix = "";
+      if (skipped > 0 && attempted > 0) {
+        suffix += ", "+skipped + " skipped";
+      }
+      return suffix;
     }
 
     private void scaleCharts(Chart chart) {
@@ -253,30 +275,39 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       boolean scale =  needToScale() <1;
 
       List<AVPHistoryForList.UserScore> scores = sessionAVPHistoryForList.getScores();
-      int size = scale ? Math.min(5,scores.size()):scores.size();
-      for (int i = 0; i < size; i++) {
-        HTMLPanel row = new HTMLPanel("tr","");
-        if (i % 2 == 0) row.addStyleName("tableAltRowColor");
-        HTMLPanel col = new HTMLPanel("td","");
+      int size = scale ? Math.min(ROWS_IN_TABLE, scores.size()) : scores.size();
 
+/*      if (scale) System.out.println("scale! client " +Window.getClientWidth()+
+        " : using " + size + " vs " + scores.size());*/
+
+      int used = 0;
+      for (int i = 0; i < scores.size(); i++) {
         AVPHistoryForList.UserScore userScore = scores.get(i);
-        col.add(new HTML(bold(userScore,""+userScore.getIndex())));
-      //    ""+(i + 1))));
-        row.add(col);
-        col = new HTMLPanel("td","");
-        HTML widget = new HTML("<b>"+ userScore.getUser()+"</b>");
-        widget.addStyleName(userScore.isCurrent()? "tableRowUserCurrentColor":"tableRowUserColor");
-        col.add(widget);
+        if (used++ < size || userScore.isCurrent()) {
+          HTMLPanel row = new HTMLPanel("tr", "");
+          if (i % 2 == 0) row.addStyleName("tableAltRowColor");
 
-        row.add(col);
-        col = new HTMLPanel("td","");
+          // add index col
+          HTMLPanel col = new HTMLPanel("td", "");
+          col.add(new HTML(bold(userScore, "" + userScore.getIndex())));
+          row.add(col);
 
-        String html = "" + Math.round(userScore.getScore());
-        html = bold(userScore,html);
-        col.add(new HTML(html));
+          // add user name col
+          col = new HTMLPanel("td", "");
+          HTML widget = new HTML("<b>" + userScore.getUser() + "</b>");
+          widget.addStyleName(userScore.isCurrent() ? "tableRowUserCurrentColor" : "tableRowUserColor");
+          col.add(widget);
+          row.add(col);
 
-        row.add(col);
-        table.add(row);
+          // add score
+          col = new HTMLPanel("td", "");
+          String html = "" + Math.round(userScore.getScore());
+          html = bold(userScore, html);
+          col.add(new HTML(html));
+          row.add(col);
+
+          table.add(row);
+        }
       }
       return table;
     }
@@ -292,6 +323,7 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       }
       return count;
     }
+
     private int getIncorrect() {
       int count = 0;
       for (Boolean val : exToCorrect.values()) {
@@ -323,21 +355,32 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       return ((int) (num * 100f)) + "%";
     }
 
+    /**
+     * @see #showFeedbackCharts(java.util.List)
+     * @return
+     */
     private Button getRepeatButton() {
-      Button w1 = new Button(REPEAT_THIS_SET);
+      final Button w1 = new Button(START_OVER);
       w1.setType(ButtonType.PRIMARY);
       w1.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
+          w1.setVisible(false);
           setMainContentVisible(true);
           belowContentDiv.remove(container);
-          reset();
-
-          skip.setVisible(true);
-          exerciseList.loadExercise(allExercises.iterator().next().getID());
+          startOver();
         }
       });
       return w1;
+    }
+
+    protected void startOver() {
+      reset();
+
+      skip.setVisible(true);
+      startOver.setVisible(true);
+      seeScores.setVisible(true);
+      exerciseList.loadExercise(allExercises.iterator().next().getID());
     }
 
     /**
@@ -347,18 +390,15 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
      * @param feedback
      */
     protected void nextAfterDelay(boolean correct, String feedback) {
-      //System.out.println("nextAfterDelay correct " + correct);
       if (exerciseList.onLast()) {
         onSetComplete();
       }
       else {
-        //System.out.println("\tnextAfterDelay not on last");
-
         loadNextOnTimer(DELAY_MILLIS);
       }
     }
 
-    private Button skip;
+    private Button skip,startOver,seeScores;
     private Panel belowContentDiv;
 
     /**
@@ -367,6 +407,8 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
      */
     @Override
     protected void addWidgetsBelow(Panel toAddTo) {
+     // this.toAddTo = toAddTo;
+
       skip = new Button(SKIP_THIS_ITEM);
       skip.setType(ButtonType.INFO);
       skip.addClickHandler(new ClickHandler() {
@@ -379,6 +421,34 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
         }
       });
       toAddTo.add(skip);
+
+      startOver = new Button(START_OVER);
+      startOver.setType(ButtonType.PRIMARY);
+      startOver.addStyleName("floatRight");
+      startOver.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          startOver.setEnabled(false);
+
+          startOver();
+        }
+      });
+
+      seeScores = new Button(SKIP_TO_END);
+      seeScores.addStyleName("leftFiveMargin");
+      seeScores.setType(ButtonType.PRIMARY);
+      seeScores.addStyleName("floatRight");
+      seeScores.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          seeScores.setEnabled(false);
+
+          onSetComplete();
+        }
+      });
+      toAddTo.add(seeScores);
+      toAddTo.add(startOver);
+
       belowContentDiv = toAddTo;
     }
 
