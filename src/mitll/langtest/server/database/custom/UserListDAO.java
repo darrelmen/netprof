@@ -195,7 +195,7 @@ public class UserListDAO extends DAO {
       for (UserList ul : lists) {
         populateList(ul);
       }
-      //logger.debug("getAllByUser by " + userid + " is " + lists.size());
+      logger.debug("getAllByUser by " + userid + " is " + lists.size());
       return lists;
 
     } catch (Exception ee) {
