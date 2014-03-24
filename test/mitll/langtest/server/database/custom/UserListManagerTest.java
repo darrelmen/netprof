@@ -2,6 +2,8 @@ package mitll.langtest.server.database.custom;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
@@ -31,12 +33,17 @@ public class UserListManagerTest {
 
   @BeforeClass
   public static void setup() {
+    logger.debug("setup called");
+
     File file = new File("war" + File.separator + "config" + File.separator + ENGLISH + File.separator + "quizlet.properties");
     logger.debug("config dir " + file.getParent());
     logger.debug("config     " + file.getName());
     test = "test";
     database = new DatabaseImpl(file.getParent(), file.getName(), test, new PathHelper("war"), false);
+    logger.debug("made " +database);
     database.setInstallPath(".",file.getParent()+File.separator+database.getServerProps().getLessonPlan(),"english",true,".");
+
+    database.getExercises();
   }
 
   @AfterClass
@@ -65,21 +72,23 @@ public class UserListManagerTest {
   public void testAdd() {
     List<User> users = database.getUsers();
     long user;
-    if (users.isEmpty()) {
-      users = addAndGetUsers("test1");
-    }
-    user = users.iterator().next().id;
+    //if (users.isEmpty()) {
+      users = addAndGetUsers("test22");
+    //}
+    user = users.get(users.size()-1).id;
+    logger.debug("Got user " + user);
     UserListManager userListManager = database.getUserListManager();
 
-    Collection<UserList> listsForUser = userListManager.getListsForUser(user, false, false);
+    Collection<UserList> listsForUser = userListManager.getListsForUser(user, true, false);
     int size = listsForUser.size();
     assertTrue("size is " + size, size >= 1);
     assertTrue("first is favorite", listsForUser.iterator().next().isFavorite());
 
     // add
-    long listid = addListCheck(user, userListManager, "test");
+    String test1 = "test";
+    long listid = addListCheck(user, userListManager, test1);
     // what happens if add list a second time?
-    long listid2 = addListCheck(user, userListManager, "test", false);
+    long listid2 = addListCheck(user, userListManager, test1, false);
 
     // remove
     removeList(user, userListManager, listid, true);
@@ -203,25 +212,25 @@ public class UserListManagerTest {
 
     userListManager.reallyCreateNewItem(listid, english);
     testList = userListManager.getUserListByID(listid);
-    UserExercise next = testList.getExercises().iterator().next();
+    CommonUserExercise next = testList.getExercises().iterator().next();
     assertTrue(next.getEnglish().equals(ENGLISH));
 
-    List<Exercise> exercises1 = database.getExercises();
+    List<CommonExercise> exercises1 = database.getExercises();
     assertTrue(!exercises1.isEmpty());
-    Exercise exercise = database.getCustomOrPredefExercise(next.getID());
+    CommonExercise exercise = database.getCustomOrPredefExercise(next.getID());
     assertNotNull("huh? no exercise by id " + next.getID()+"?",exercise);
 
-    String englishSentence = exercise.getEnglishSentence();
+    String englishSentence = exercise.getEnglish();
     assertNotNull("huh? exercise " + exercise + " has no english?",englishSentence);
     assertTrue("english is " + englishSentence, englishSentence.equals(ENGLISH));
     assertTrue(exercise.getTooltip().equals(ENGLISH));
 
-    next.setEnglish(CHANGED);
+    next.toUserExercise().setEnglish(CHANGED);
     assertTrue(next.getEnglish().equals(CHANGED));
     assertTrue(!next.getTooltip().isEmpty());
     assertTrue(next.getTooltip().equals(CHANGED));
 
-    userListManager.editItem(next,false);
+    userListManager.editItem(next.toUserExercise(),false);
 
     testList = userListManager.getUserListByID(listid);
     next = testList.getExercises().iterator().next();
@@ -246,10 +255,10 @@ public class UserListManagerTest {
 
     // OK, database should show it now
     testList = userListManager.getUserListByID(listid);
-    Collection<UserExercise> exercises = testList.getExercises();
+    Collection<CommonUserExercise> exercises = testList.getExercises();
     assertTrue(exercises.contains(english));
     // tooltip should never be empty
-    for (UserExercise ue : exercises) {
+    for (CommonUserExercise ue : exercises) {
       //logger.debug("\t" + ue.getTooltip());
       assertTrue(!ue.getTooltip().isEmpty());
     }
