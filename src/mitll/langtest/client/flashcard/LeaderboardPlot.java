@@ -16,10 +16,12 @@ public class LeaderboardPlot {
   private static final String PERSONAL_BEST = "Personal Best";
   private static final String CORRECT = "Correct";
   private static final String SCORE = "Score";
+  public static final float GRAPH_MAX = 100f;
 
   public Chart getChart(AVPHistoryForList historyForList, String title, String subtitle) {
     boolean useCorrect = historyForList.isUseCorrect();
-    return getChart(historyForList.getNumScores(),0,title, subtitle, useCorrect ? CORRECT : SCORE, !useCorrect, 100f,
+    return getChart(historyForList.getNumScores(),title, subtitle,
+      useCorrect ? CORRECT : SCORE, //!useCorrect, 100f,
       historyForList.getPbCorrect(),
       historyForList.getTop(),
       historyForList.getTotalCorrect(),
@@ -28,8 +30,8 @@ public class LeaderboardPlot {
       );
   }
 
-  private Chart getChart(int numScores, int gameTimeSeconds, String title, String subtitle, String seriesName,
-                         boolean topIs100, float topToUse,
+  private Chart getChart(int numScores, /*int gameTimeSeconds,*/ String title, String subtitle, String seriesName,
+                       //  boolean topIs100, float topToUse,
                          float pbCorrect, float top, float total, float avg, List<Float> yValuesForUser) {
     Chart chart = new Chart()
       .setType(Series.Type.SPLINE)
@@ -37,32 +39,37 @@ public class LeaderboardPlot {
       .setChartSubtitleText(subtitle)
       .setMarginRight(10)
       .setOption("/credits/enabled", false)
+      .setOption("/plotOptions/series/pointStart", 1)
       .setOption("/legend/enabled", false);
 
-    addSeries(gameTimeSeconds, yValuesForUser, chart, seriesName);
+    addSeries(yValuesForUser, chart, seriesName);
 
-    float verticalRange = setPlotBands(numScores, title, subtitle, topIs100, topToUse, pbCorrect, top, total, avg, chart);
+    float verticalRange = setPlotBands(numScores, title, subtitle,
+      //topIs100, topToUse,
+      pbCorrect, top, total, avg, chart);
 
     configureChart(verticalRange, chart, subtitle);
     return chart;
   }
 
-  private float setPlotBands(int numScores, String title, String subtitle, boolean topIs100,
-                             float topToUse, float pbCorrect, float top, float total, float avg, Chart chart) {
+  private float setPlotBands(int numScores, String title, String subtitle,
+                             //boolean topIs100,
+                             //float topToUse,
+                             float pbCorrect, float top, float total, float avg, Chart chart) {
     PlotBand personalBest = getPersonalBest(pbCorrect, chart);
     PlotBand topScore = getTopScore(top, chart);
     PlotBand avgScore = getAvgScore(numScores, total, chart);
 
-    float verticalRange = topIs100 ? (100f+HALF) : topToUse == -1 ? top : topToUse;
+   // float verticalRange = topIs100 ? 100f : topToUse == -1 ? top : topToUse;
 
-    float fivePercent = 0.05f * verticalRange;
+    float fivePercent = 0.05f * GRAPH_MAX;
     float topVsPersonalBest = Math.abs(top - pbCorrect);
     float avgVsPersonalBest = Math.abs(avg - pbCorrect);
 
     System.out.println(title + " " + subtitle + " top vs pb " + topVsPersonalBest + " avg vs pb " + avgVsPersonalBest);
 
     setPlotPands(chart, personalBest, topScore, avgScore, fivePercent, topVsPersonalBest, avgVsPersonalBest);
-    return verticalRange;
+    return GRAPH_MAX;
   }
 
   private void setPlotPands(Chart chart, PlotBand personalBest, PlotBand topScore, PlotBand avgScore,
@@ -95,12 +102,12 @@ public class LeaderboardPlot {
 
   /**
    * @see #getChart
-   * @param gameTimeSeconds
+   * @paramx gameTimeSeconds
    * @param yValuesForUser
    * @param chart
    * @param seriesTitle
    */
-  private void addSeries(int gameTimeSeconds, List<Float> yValuesForUser, Chart chart, String seriesTitle) {
+  private void addSeries( List<Float> yValuesForUser, Chart chart, String seriesTitle) {
     Float[] yValues = yValuesForUser.toArray(new Float[0]);
 
     if (yValuesForUser.isEmpty()) {
@@ -110,18 +117,24 @@ public class LeaderboardPlot {
       System.out.println("addSeries " + yValuesForUser);
     }
 
-    String seriesLabel = gameTimeSeconds > 0 ? "Correct in " + gameTimeSeconds + " seconds" : seriesTitle;
+   // String seriesLabel = gameTimeSeconds > 0 ? "Correct in " + gameTimeSeconds + " seconds" : seriesTitle;
     Series series = chart.createSeries()
-      .setName(seriesLabel)
+      .setName(seriesTitle)
       .setPoints(yValues);
     chart.addSeries(series);
   }
 
+  /**
+   * @see #getChart(int, String, String, String, float, float, float, float, java.util.List)
+   * @param top
+   * @param chart
+   * @param title
+   */
   private void configureChart(float top, Chart chart,String title) {
-    chart.getYAxis().setAxisTitleText(title);
-    chart.getYAxis().setAllowDecimals(true);
-    chart.getYAxis().setMin(0);
-    chart.getYAxis().setMax(top);
+    chart.getYAxis().setAxisTitleText(title)
+      .setAllowDecimals(true)
+      .setMin(0)
+      .setMax(top);
 
     chart.getXAxis().setAllowDecimals(false);
   }
@@ -150,6 +163,10 @@ public class LeaderboardPlot {
   private PlotBand getPersonalBest(float pbCorrect, Chart chart) {
     float from = under(pbCorrect);
     float to   = over (pbCorrect);
+    if (pbCorrect > GRAPH_MAX -HALF) {
+      to = GRAPH_MAX;
+      from = GRAPH_MAX -2*HALF;
+    }
     PlotBand personalBest = chart.getYAxis().createPlotBand()
       .setColor("#f18d24")
       .setFrom(from)
