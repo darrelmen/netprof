@@ -112,7 +112,7 @@ public abstract class Scoring {
     //Map<ImageType, String> typeToImageFile2;
 
     ImageWriter.EventAndFileInfo eventAndFileInfo = new ImageWriter().writeTranscripts(pathname,
-        imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg);
+        imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg,"");
 //    Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
 //    logger.debug("image map is " + sTypeToImage);
     return eventAndFileInfo;
