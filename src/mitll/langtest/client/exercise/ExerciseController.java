@@ -3,6 +3,7 @@ package mitll.langtest.client.exercise;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.instrumentation.ButtonFactory;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
@@ -69,4 +70,5 @@ public interface ExerciseController {
 
   StartupInfo getStartupInfo();
   boolean gotMicPermission();
+  ButtonFactory getButtonFactory();
 }
