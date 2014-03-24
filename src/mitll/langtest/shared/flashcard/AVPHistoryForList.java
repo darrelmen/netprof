@@ -132,7 +132,7 @@ public class AVPHistoryForList implements IsSerializable {
       return index;
     }
 
-    public String toString() { return "id " + index + " by " + user + " " + getScore() + " current " + isCurrent(); }
+    public String toString() { return "id " + index + " by " + user + " " + getScore() + (isCurrent() ? " current! " : ""); }
   }
 
   public String toString() {
