@@ -37,6 +37,8 @@ import java.util.Set;
 public class PagingContainer {
   private static final int MAX_LENGTH_ID = 27;
   private static final int PAGE_SIZE = 10;   // TODO : make this sensitive to vertical real estate?
+  private static final int VERTICAL_SLOP = 25;
+
   private ListDataProvider<CommonShell> dataProvider;
   private static final boolean DEBUG = false;
   private static final int ID_LINE_WRAP_LENGTH = 20;
@@ -252,7 +254,7 @@ public class PagingContainer {
     };*/
   }
 
-  Column<CommonShell, SafeHtml> getExerciseIdColumn2(final boolean consumeClicks) {
+  private Column<CommonShell, SafeHtml> getExerciseIdColumn2(final boolean consumeClicks) {
     return new Column<CommonShell, SafeHtml>(new MySafeHtmlCell(consumeClicks)) {
 
       @Override
@@ -418,12 +420,12 @@ public class PagingContainer {
     }
   }
 
-  private final boolean debug = false;
-  int getNumTableRowsGivenScreenHeight() {
+  private static final boolean debug = false;
+  private int getNumTableRowsGivenScreenHeight() {
     int header = getTableHeaderHeight();
     int pixelsAbove = header + verticalUnaccountedFor;
     if (table.getElement().getAbsoluteTop() > 0) {
-      pixelsAbove = table.getElement().getAbsoluteTop() + 10;
+      pixelsAbove = table.getElement().getAbsoluteTop() + VERTICAL_SLOP;
     }
     int leftOver = Window.getClientHeight() - pixelsAbove;
 
@@ -448,14 +450,14 @@ public class PagingContainer {
         }
       }
     }
-    int rows = Math.max(MIN_PAGE_SIZE, Math.round(ratio));
+    int rows = Math.max(MIN_PAGE_SIZE, (int)Math.floor(ratio));
 
     if (debug) System.out.println("getNumTableRowsGivenScreenHeight : rows " + rows);
     return rows;
   }
 
-  int heightOfCellTableWith15Rows() { return HEIGHT_OF_CELL_TABLE_WITH_15_ROWS;  }
-  int getTableHeaderHeight() { return controller.getHeightOfTopRows(); }
+  private int heightOfCellTableWith15Rows() { return HEIGHT_OF_CELL_TABLE_WITH_15_ROWS;  }
+  private int getTableHeaderHeight() { return controller.getHeightOfTopRows(); }
 
   public void markCurrentExercise(String itemID) {
     if (getList() == null || getList().isEmpty()) return;
@@ -465,7 +467,7 @@ public class PagingContainer {
     markCurrent(i,t);
   }
 
-  void markCurrent(int i, CommonShell itemToSelect) {
+  private void markCurrent(int i, CommonShell itemToSelect) {
     if (DEBUG) System.out.println(new Date() + " markCurrentExercise : Comparing selected " + itemToSelect.getID());
     table.getSelectionModel().setSelected(itemToSelect, true);
     if (DEBUG) {
