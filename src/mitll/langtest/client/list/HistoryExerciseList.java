@@ -319,13 +319,14 @@ public class HistoryExerciseList extends PagingExerciseList {
     return selectionState2.keySet();
   }
 
+  boolean debug = true;
   /**
      * Respond to push a history token.
      * @param event
      */
   @Override
   public void onValueChange(ValueChangeEvent<String> event) {
-    //System.out.println(new Date() +" HistoryExerciseList.onValueChange : ------ start ----");
+    if (debug) System.out.println(new Date() +" HistoryExerciseList.onValueChange : ------ start ----");
 
     String rawToken = getTokenFromEvent(event);
     SelectionState selectionState1 = getSelectionState(rawToken);
@@ -333,14 +334,14 @@ public class HistoryExerciseList extends PagingExerciseList {
     String instance1 = selectionState1.getInstance();
 
     if (!instance1.equals(instance) && instance1.length() > 0) {
-/*      System.out.println("onValueChange : skipping event " + rawToken + " for instance '" + instance1 +
-          "' that is not mine "+instance);*/
+      if (debug)  System.out.println("onValueChange : skipping event " + rawToken + " for instance '" + instance1 +
+          "' that is not mine "+instance);
       if (getCreatedPanel() == null) {
         noSectionsGetExercises(controller.getUser());
       }
       return;
     }
-    System.out.println(new Date() +" HistoryExerciseList.onValueChange : ------ start: token is '" + rawToken +"' ----");
+    if (debug)   System.out.println(new Date() +" HistoryExerciseList.onValueChange : ------ start: token is '" + rawToken +"' ----");
 
     String item = selectionState1.getItem();
 
@@ -358,7 +359,7 @@ public class HistoryExerciseList extends PagingExerciseList {
         restoreListBoxState(selectionState);
         loadExercises(selectionState.getTypeToSection(), selectionState.getItem());
       } catch (Exception e) {
-        System.out.println("HistoryExerciseList.onValueChange " + token + " badly formed. Got " + e);
+        System.err.println("HistoryExerciseList.onValueChange " + token + " badly formed. Got " + e);
         e.printStackTrace();
       }
     }
