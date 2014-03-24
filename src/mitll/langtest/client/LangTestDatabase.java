@@ -107,8 +107,8 @@ public interface LangTestDatabase extends RemoteService {
   Set<String> getCompletedExercises(int user, boolean isReviewMode);
 
   ExerciseListWrapper getExercisesForSelectionState(int reqID,
-                                                                             Map<String, Collection<String>> typeToSection,
-                                                                             long userID, String prefix);
+                                                    Map<String, Collection<String>> typeToSection,
+                                                    long userID, String prefix);
 
   StartupInfo getStartupInfo();
   long addUserList(long userid, String name, String description, String dliClass);
