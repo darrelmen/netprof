@@ -63,6 +63,7 @@ import mitll.langtest.shared.Result;
 import mitll.langtest.shared.StartupInfo;
 
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
@@ -96,8 +97,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private StartupInfo startupInfo;
 
   private TabContainer navigation;
-  private boolean showUnansweredFirst = false;
-  private boolean showRerecord = false;
+/*  private boolean showUnansweredFirst = false;
+  private boolean showRerecord = false;*/
 
   /**
    * Make an exception handler that displays the exception.
@@ -172,7 +173,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return exceptionAsString;
   }
 
-  private void logMessageOnServer(String message, String prefix) {
+  public void logMessageOnServer(String message, String prefix) {
     int user = userManager != null ? userManager.getUser() : -1;
     String exerciseID = exerciseList != null ? exerciseList.getCurrentExerciseID() : "Unknown";
     logMessageOnServer(prefix +
@@ -195,29 +196,24 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private Panel belowFirstRow;
   private Panel bothSecondAndThird;
 
-/*  static final int MIN_WIDTH = 256;
-  private static final float WAVEFORM_HEIGHT = 80f;//96;
-  private static final float SPECTROGRAM_HEIGHT = 50f;//96;
-  private static final String WAVEFORM = "Waveform";
-  private static final String SPECTROGRAM = "Spectrogram";*/
-
+  /**
+   * @see mitll.langtest.client.scoring.AudioPanel#getImageURLForAudio(String, String, int, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck)
+   * @param reqid
+   * @param path
+   * @param type
+   * @param toUse
+   * @param height
+   * @param exerciseID
+   * @param client
+   */
   @Override
   public void getImage(int reqid, final String path, final String type, int toUse, int height, String exerciseID, AsyncCallback<ImageResponse> client) {
-/*
-    int toUse = Math.max(MIN_WIDTH, width);
-    float heightForType = type.equals(WAVEFORM) ? WAVEFORM_HEIGHT : SPECTROGRAM_HEIGHT;
-    int height = Math.max(10,(int) (((float)Window.getClientHeight())/1200f * heightForType));*/
-
     String key = path+ DIVIDER +type+ DIVIDER +toUse+ DIVIDER +height+ DIVIDER+exerciseID;
-
-   // System.out.println("key " + key);
     getImage(reqid,key, client);
   }
 
   private void getImage(int reqid,String key, AsyncCallback<ImageResponse> client) {
     String[] split = key.split("\\|");
-
-   // System.out.println("split " + split);
 
     String path = split[0];
     String type = split[1];
@@ -237,13 +233,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
       ifPresent.req = -1;
       client.onSuccess(ifPresent);
-    }
-    else {
-      //int reqid = getReqID(type);
+    } else {
       service.getImageForAudioFile(reqid, path, type, toUse, height, exerciseID, new AsyncCallback<ImageResponse>() {
         public void onFailure(Throwable caught) {
-          //long now = System.currentTimeMillis();
-          // System.out.println("getImageURLForAudio : (failure) took " +(now-then) + " millis");
           if (!caught.getMessage().trim().equals("0")) {
             Window.alert("getImageForAudioFile Couldn't contact server. Please check network connection.");
           }
@@ -252,54 +244,16 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         }
 
         public void onSuccess(ImageResponse result) {
-
-
-          System.out.println("onSuccess : got " + result);
-
-          // if (!result.successful) {
-           /* System.err.println("got error for request for type " + type);
-            if (WARN_ABOUT_MISSING_AUDIO) Window.alert("missing audio file on server " + path);*/
-        //  }
-        //  else if (isMostRecentRequest(type, result.req)) {
-            imageCache.put(key, result);
-            client.onSuccess(result);
-       //   }
-
-          System.out.println("size " + imageCache.size());
-
+          imageCache.put(key, result);
+          client.onSuccess(result);
         }
       });
     }
   }
 
-/*  private final Map<String,Integer> reqs = new HashMap<String, Integer>();
-  private int reqid;
-  int getReqID(String type) {
-    synchronized (this) {
-      int current = reqid++;
-      reqs.put(type, current);
-      return current;
-    }
-  }*/
-
-/*  boolean isMostRecentRequest(String type, int responseReqID) {
-    synchronized (this) {
-      Integer mostRecentIDForType = reqs.get(type);
-      if (mostRecentIDForType == null) {
-        System.err.println("huh? couldn't find req " + reqid + " in " +reqs);
-        return false;
-      }
-      else {
-        //System.out.println("\tisMostRecentRequest: req for " + type + " = " + mostRecentIDForType + " compared to " + responseReqID);
-        return mostRecentIDForType == responseReqID;
-      }
-    }
-  }*/
-
-  Cache<String, ImageResponse> imageCache = CacheBuilder.newBuilder()
+  private Cache<String, ImageResponse> imageCache = CacheBuilder.newBuilder()
     .maximumSize(100)
-      //  .expireAfterWrite(10, TimeUnit.MINUTES)
-      //  .removalListener(MY_LISTENER)
+    .expireAfterWrite(7, TimeUnit.DAYS)
     .build();
 
   /**
@@ -311,14 +265,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void onModuleLoad2() {
     setupSoundManager();
 
-
-
-
     userManager = new UserManager(this, service, props);
-/*    if (props.isFlashCard()) {
-      loadFlashcard();
-      return;
-    }*/
 
     checkAdmin();
 
@@ -431,11 +378,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private boolean isIPad() { return Window.Navigator.getUserAgent().toLowerCase().contains("ipad");  }
 
-/*  private void loadFlashcard() {
-    doFlashcard();
-    addResizeHandler();
-  }*/
-
   private void loadVisualizationPackages() {
     VisualizationUtils.loadVisualizationApi(new Runnable() {
       @Override
@@ -480,21 +422,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return headerRow;
   }
 
-/*  private Panel getTitle() {
-    Panel title;
-    if (isGoodwaveMode()) {
-      flashcard = new Flashcard();
-      title = flashcard.makeNPFHeaderRow(props.getSplash(),props.isClassroomMode());
-    } else if (props.isFlashcardTeacherView() || props.isAutocrt()) {
-      flashcard = new Flashcard();
-      title = flashcard.getHeaderRow(props.getSplash(), "NewProF2.png",props.getAppTitle(), false);
-    }
-    else {
-      title = getTitleWidget();
-    }
-    return title;
-  }*/
-
   private void addProgressBar(Panel widgets) {
     if (props.isGrading()) {
       widgets.add(status);
@@ -502,17 +429,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       progressBar = new ProgressHelper();
       widgets.add(progressBar.getProgressBar());
     }
-  }
-
-  private Panel getTitleWidget() {
-    Panel titleRow = new FluidRow();
-    titleRow.addStyleName("alignCenter");
-    titleRow.addStyleName("inlineBlockStyle");
-    Heading pageTitle = new Heading(2, props.getAppTitle());
-
-    titleRow.add(pageTitle);
-
-    return titleRow;
   }
 
   /**
@@ -541,9 +457,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       elementById.setInnerText(appTitle);
     }
   }
-
-  @Override
-  public void showFlashHelp() { flashcard.showFlashHelp(this, props.isFlashCard()); }
 
   /**
    * @seex #doDataCollectAdminView()
@@ -591,7 +504,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see #reallyMakeExerciseList
    */
   private ListInterface makeExerciseList(FluidRow secondRow, Panel leftColumn) {
-    this.exerciseList = new ExerciseListLayout(props).makeExerciseList(secondRow, leftColumn, this, currentExerciseVPanel,service,this);
+    this.exerciseList = new ExerciseListLayout(props).makeExerciseList(secondRow, leftColumn, this, currentExerciseVPanel, service, this);
+    reallySetFactory();
     return exerciseList;
   }
 
@@ -665,6 +579,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see #gotUser(long)
    */
   private void setFactory(final long userID) {
+    //reallySetFactory();
+    doEverythingAfterFactory(userID);
+  }
+
+  private void reallySetFactory() {
     final LangTest outer = this;
     if (props.isGoodwaveMode() && !props.isGrading()) {
       if (props.isClassroomMode()) {
@@ -685,7 +604,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     } else if (props.isGrading()) {
       exerciseList.setFactory(new GradingExercisePanelFactory(service, outer, outer, exerciseList), userManager, props.getNumGradesToCollect());
     }
-    doEverythingAfterFactory(userID);
   }
 
   /**
@@ -721,8 +639,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   /**
    * @seex #getLogout()
    */
-  @Override
-  public void resetState() {
+  private void resetState() {
     History.newItem(""); // clear history!
     userManager.clearUser();
     exerciseList.removeCurrentExercise();
@@ -839,10 +756,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
   public boolean isReviewMode() { return audioType.equals(Result.AUDIO_TYPE_REVIEW); }
 
-  public void setShowUnansweredFirst(boolean val) { this.showUnansweredFirst = val; }
+  public void setShowUnansweredFirst(boolean val) {/* this.showUnansweredFirst = val;*/ }
 
   @Override
-  public void setShowRerecord(boolean v) { showRerecord = v; }
+  public void setShowRerecord(boolean v) {/* showRerecord = v;*/ }
 
 /*
   public boolean showUnansweredFirst() { return showUnansweredFirst; }
@@ -874,15 +791,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public boolean isRightAlignContent() {  return props.isRightAlignContent(); }
 
   public boolean isGoodwaveMode() {  return props.isGoodwaveMode(); }
-/*
-  public int getFlashcardPreviewFrameHeight() { return props.getFlashcardPreviewFrameHeight(); }
-*/
   public LangTestDatabaseAsync getService() { return service; }
   public UserFeedback getFeedback() { return this; }
-
-/*
-  private PropertyHandler.LOGIN_TYPE getLoginType() { return props.getLoginType(); }
-*/
 
   // recording methods...
   /**
