@@ -546,6 +546,9 @@ public class DatabaseImpl implements Database {
         scores.add(makeScore(count, userMap, session, true));
      }
     }
+
+    logger.debug("getUserHistoryForList correct scores " + scores);
+
     if (scores.size() == 11) {
       scores.remove(9);
     }
@@ -566,16 +569,19 @@ public class DatabaseImpl implements Database {
         scores.add(makeScore(count, userMap, session, false));
       }
     }
+    logger.debug("getUserHistoryForList pron   scores " + scores);
+
     if (scores.size() == 11) {
       scores.remove(9);
     }
+
     sessionAVPHistoryForList2.setScores(scores);
 
     List<AVPHistoryForList> historyForLists = new ArrayList<AVPHistoryForList>();
     historyForLists.add(sessionAVPHistoryForList);
     historyForLists.add(sessionAVPHistoryForList2);
 
-    //logger.debug("returning " +historyForLists);
+    logger.debug("returning " +historyForLists);
 
     return historyForLists;
   }
