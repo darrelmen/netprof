@@ -13,6 +13,8 @@ import mitll.langtest.server.database.custom.UserListDAO;
 import mitll.langtest.server.database.custom.UserListExerciseJoinDAO;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.flashcard.UserStateWrapper;
+import mitll.langtest.server.database.instrumentation.Event;
+import mitll.langtest.server.database.instrumentation.EventDAO;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.DLIUser;
@@ -78,6 +80,7 @@ public class DatabaseImpl implements Database {
   private UserListManager userListManager;
   private UserExerciseDAO userExerciseDAO;
   private AddRemoveDAO addRemoveDAO;
+  private EventDAO eventDAO;
 
   private DatabaseConnection connection = null;
   private MonitoringSupport monitoringSupport;
@@ -151,7 +154,7 @@ public class DatabaseImpl implements Database {
     gradeDAO = new GradeDAO(this,userDAO, resultDAO);
     userListManager = new UserListManager( userDAO, userListDAO,userListExerciseJoinDAO, new AnnotationDAO(this,userDAO),
       new ReviewedDAO(this), pathHelper);
-
+    eventDAO = new EventDAO(this);
 
     if (DROP_USER) {
       try {
@@ -1063,6 +1066,11 @@ public class DatabaseImpl implements Database {
       uniqueForUser.add(r.id);
     }
     return new Pair(idToCount, idToUniqueCount);
+  }
+
+  public void logEvent(String id, String exid, String context, long userid) {
+     eventDAO.add(new Event(id,exid,context,userid,-1));
+
   }
 
   private static class Pair {
