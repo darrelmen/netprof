@@ -69,7 +69,7 @@ public class ExcelImport implements ExerciseDAO {
   private AddRemoveDAO addRemoveDAO;
   private File installPath;
   private boolean collectSynonyms = true;
-
+  boolean addDefects;
   /**
    * @seex mitll.langtest.server.SiteDeployer#readExercisesPopulateSite(mitll.langtest.shared.Site, String, java.io.InputStream)
    */
@@ -87,16 +87,18 @@ public class ExcelImport implements ExerciseDAO {
    * @param file
    * @param relativeConfigDir
    * @param userListManager
+   * @param addDefects
    * @see DatabaseImpl#makeDAO
    */
   public ExcelImport(String file, String mediaDir, String relativeConfigDir, ServerProperties serverProps,
                      UserListManager userListManager,
-                     String installPath) {
+                     String installPath, boolean addDefects) {
     this.file = file;
     this.serverProps = serverProps;
     this.isFlashcard = serverProps.isFlashcard();
     maxExercises = serverProps.getMaxNumExercises();
     this.mediaDir = mediaDir;
+    this.addDefects = addDefects;
     this.installPath = new File(installPath);
     if (!this.installPath.exists()) {
       logger.warn("\n\n\nhuh? install path " + this.installPath.getAbsolutePath() + " doesn't exist???");
@@ -505,9 +507,7 @@ public class ExcelImport implements ExerciseDAO {
                 if (!imported.hasRefAudio()) {
                   fieldToDefect.put("refAudio", "missing reference audio");
                 }
-                for (Map.Entry<String, String> pair : fieldToDefect.entrySet()) {
-                  userListManager.addDefect(imported.getID(), pair.getKey(), pair.getValue());
-                }
+                addDefects(fieldToDefect, imported);
               } else {
                 if (logging++ < 3) {
                   logger.info("skipping exercise " + imported.getID() + " : '" + imported.getEnglish() + "' since no audio.");
@@ -545,6 +545,14 @@ public class ExcelImport implements ExerciseDAO {
       logger.info("Skipped " + semis + " entries with semicolons or " + (100f * ((float) semis) / (float) id) + "%");
     }
     return exercises;
+  }
+
+  private void addDefects(Map<String, String> fieldToDefect, CommonExercise imported) {
+    if (addDefects) {
+      for (Map.Entry<String, String> pair : fieldToDefect.entrySet()) {
+        userListManager.addDefect(imported.getID(), pair.getKey(), pair.getValue());
+      }
+    }
   }
 
   private void checkForSemicolons(Map<String, String> fieldToDefect, String english, String foreignLanguagePhrase, String translit) {
