@@ -136,4 +136,6 @@ public interface LangTestDatabase extends RemoteService {
   boolean deleteList(long id);
   boolean deleteItemFromList(long listid, String exid);
   boolean deleteItem(String exid);
+
+  void logEvent(String id, String exid, String context, long userid);
 }
