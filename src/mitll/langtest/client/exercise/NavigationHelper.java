@@ -51,7 +51,7 @@ public class NavigationHelper extends HorizontalPanel {
    */
   public NavigationHelper(Exercise exercise, ExerciseController controller, PostAnswerProvider provider,
                           ListInterface listContainer, boolean addButtons) {
-    enableNextOnlyWhenAllCompleted = !getLanguage(controller).equalsIgnoreCase("Pashto");   // hack?
+    enableNextOnlyWhenAllCompleted = true;//!getLanguage(controller).equalsIgnoreCase("Pashto");   // hack?
     this.provider = provider;
     this.listContainer = listContainer;
     setSpacing(5);
