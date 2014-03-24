@@ -238,9 +238,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       unitLessonForExercise.add(getItemHeader(e));
       vp.add(unitLessonForExercise);
     }
-    else {
-      System.out.println("no unit->value on " + e);
-    }
+    //else {
+      //System.out.println("no unit->value on " + e);
+    //}
     vp.addStyleName("blockStyle");
 
     Widget questionContent = getQuestionContent(e, content);
