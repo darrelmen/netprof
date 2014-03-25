@@ -22,7 +22,8 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   private final String audioType;
 
   /**
-   * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel(com.google.gwt.user.client.ui.Widget, String)
+   * @see mitll.langtest.client.exercise.RecordAudioPanel#makePostAudioRecordButton(String)
+   * @see mitll.langtest.client.custom.NewUserExercise.CreateFirstRecordAudioPanel#makePostAudioRecordButton(String)
    * @param exercise
    * @param controller
    * @param widgets
@@ -50,6 +51,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     if (parentPanel instanceof BusyPanel) {
       ((BusyPanel) parentPanel).setBusy(true);
     }
+    controller.logEvent(this,"RecordButton",getExercise().getID(),"startRecording");
     super.startRecording();
     setPlayEnabled(false);
   }
@@ -65,6 +67,8 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     if (parentPanel instanceof BusyPanel) {
       ((BusyPanel) parentPanel).setBusy(false);
     }
+    controller.logEvent(this,"RecordButton",getExercise().getID(),"stopRecording");
+
     recordAudioPanel.getWaveform().setVisible(true);
     recordAudioPanel.getWaveform().setUrl(LangTest.LANGTEST_IMAGES + "animated_progress.gif");
 
