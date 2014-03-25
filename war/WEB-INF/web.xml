@@ -46,6 +46,11 @@
         <url-pattern>/downloadResults/*</url-pattern>
     </servlet-mapping>
 
+    <servlet-mapping>
+        <servlet-name>downloadServet</servlet-name>
+        <url-pattern>/downloadEvents/*</url-pattern>
+    </servlet-mapping>
+
   <context-param>
      <param-name>config</param-name>
      <param-value>english</param-value>
