@@ -25,7 +25,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   private final int index;
   private int reqid = 0;
   private CommonExercise exercise;
-  private final ExerciseController controller;
+  protected final ExerciseController controller;
   private final LangTestDatabaseAsync service;
   private final boolean recordInResults;
   private final String audioType;
@@ -50,8 +50,9 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     this.service = service;
     this.recordInResults = recordInResults;
     this.audioType = audioType;
-    //System.out.println("Audio type " + audioType);
+    System.out.println("PostAudioRecordButton : Audio type " + audioType);
     getElement().setId("PostAudioRecordButton");
+    controller.register(this, exercise.getID());
   }
 
   public void setExercise(CommonExercise exercise) { this.exercise = exercise; }
