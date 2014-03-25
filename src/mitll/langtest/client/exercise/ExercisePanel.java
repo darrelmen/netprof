@@ -3,22 +3,16 @@ package mitll.langtest.client.exercise;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Tab;
 import com.github.gwtbootstrap.client.ui.TabPanel;
-import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasValue;
-import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -26,11 +20,9 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.flashcard.AudioExerciseContent;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.Result;
 
 import java.util.ArrayList;
@@ -53,10 +45,10 @@ import java.util.Set;
  */
 public class ExercisePanel extends VerticalPanel implements
   BusyPanel, ExerciseQuestionState, PostAnswerProvider, ProvidesResize, RequiresResize {
-  private static final String ANSWER_BOX_WIDTH = "400px";
+  //private static final String ANSWER_BOX_WIDTH = "400px";
   private static final String REPEAT_ONCE = "<i>Repeat the phrase once at normal speed.</i>";
   private static final String REPEAT_TWICE = "<i>Repeat the phrase twice, first at normal and then at slow speed.</i>";
-  private static final String TWO_SPACES = "&nbsp;&nbsp;";
+  //private static final String TWO_SPACES = "&nbsp;&nbsp;";
   private static final String THREE_SPACES = "&nbsp;&nbsp;&nbsp;";
   private static final String TEACHER_PROMPT = "Record the phrase above by clicking the record button, speak, and then stop when finished. ";
   private static final String THE_FOREIGN_LANGUAGE = " the foreign language";
@@ -70,12 +62,12 @@ public class ExercisePanel extends VerticalPanel implements
   private final Set<Widget> completed = new HashSet<Widget>();
   protected CommonExercise exercise = null;
   protected final ExerciseController controller;
-  private boolean enableNextOnlyWhenAllCompleted = true;
+  //private boolean enableNextOnlyWhenAllCompleted = true;
   protected final LangTestDatabaseAsync service;
   private final NavigationHelper navigationHelper;
   protected final ListInterface exerciseList;
   private final Map<Integer,Set<Widget>> indexToWidgets = new HashMap<Integer, Set<Widget>>();
-  private TabPanel tabPanel = null;
+  //private TabPanel tabPanel = null;
   private final Map<Integer,Tab> indexToTab = new HashMap<Integer, Tab>();
 
   /**
@@ -100,7 +92,7 @@ public class ExercisePanel extends VerticalPanel implements
       addItemHeader(e);
     //}
 
-    enableNextOnlyWhenAllCompleted = !isPashto();
+    //enableNextOnlyWhenAllCompleted = !isPashto();
 
     // attempt to left justify
     HorizontalPanel hp = new HorizontalPanel();
