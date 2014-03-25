@@ -34,7 +34,6 @@ import mitll.langtest.shared.grade.Grade;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -493,26 +492,24 @@ public class ResultManager extends PagerTable {
   }
 
   private void addNoWrapColumn(CellTable<Result> table) {
+    Column<Result, SafeHtml> dateCol = getDateColumn(table);
+    colToField.put(dateCol,"timestamp");
+  }
+
+  private Column<Result, SafeHtml> getDateColumn(CellTable<Result> table) {
     SafeHtmlCell cell = new SafeHtmlCell();
     Column<Result,SafeHtml> dateCol = new Column<Result, SafeHtml>(cell) {
       @Override
       public SafeHtml getValue(Result answer) {
-        SafeHtmlBuilder sb = new SafeHtmlBuilder();
-        sb.appendHtmlConstant("<div style='white-space: nowrap;'><span>" +
-          new Date(answer.timestamp)+
-          "</span>" );
-
-        sb.appendHtmlConstant("</div>");
-        return sb.toSafeHtml();
+        return getSafeHTMLForTimestamp(answer.timestamp);
       }
     };
     table.addColumn(dateCol, "Time");
     dateCol.setSortable(true);
-    colToField.put(dateCol,"timestamp");
-
+    return dateCol;
   }
 
-/*  private void addNoWrapColumn2(CellTable<Result> table,String label) {
+  /*  private void addNoWrapColumn2(CellTable<Result> table,String label) {
     SafeHtmlCell cell = new SafeHtmlCell();
     Column<Result,SafeHtml> dateCol = new Column<Result, SafeHtml>(cell) {
       @Override
