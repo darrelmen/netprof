@@ -1,6 +1,7 @@
 package mitll.langtest.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.shared.custom.UserExercise;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,9 +34,9 @@ public class Exercise extends AudioExercise implements CommonExercise {
   private String englishSentence;
   private String meaning;
   private List<String> refSentences = new ArrayList<String>();
-  private List<String> synonymSentences = new ArrayList<String>();
+/*  private List<String> synonymSentences = new ArrayList<String>();
   private List<String> synonymTransliterations = new ArrayList<String>();
-  private List<String> synonymAudioRefs = new ArrayList<String>();
+  private List<String> synonymAudioRefs = new ArrayList<String>();*/
   private List<String> translitSentences = new ArrayList<String>();
   private double weight;
 
@@ -169,10 +170,10 @@ public class Exercise extends AudioExercise implements CommonExercise {
    * when not collecting audio, we only collect text, and
    * we only collect fl text (never english text only english audio)
    */
-  public void setTextOnly() {
+ /* public void setTextOnly() {
     setPromptInEnglish(false);
     setRecordAnswer(false);
-  }
+  }*/
 
   /**
    * @param lang
@@ -208,7 +209,7 @@ public class Exercise extends AudioExercise implements CommonExercise {
   public EXERCISE_TYPE getType() { return type; }
   public boolean isRepeat() { return type == EXERCISE_TYPE.REPEAT || type == EXERCISE_TYPE.REPEAT_FAST_SLOW; }
 
-  public List<String> getSynonymSentences() {
+/*  public List<String> getSynonymSentences() {
     return synonymSentences;
   }
 
@@ -230,7 +231,7 @@ public class Exercise extends AudioExercise implements CommonExercise {
 
   public void setSynonymAudioRefs(List<String> synonymAudioRefs) {
     this.synonymAudioRefs = synonymAudioRefs;
-  }
+  }*/
 
   public String getRefSentence() {
     StringBuilder builder = new StringBuilder();
@@ -248,8 +249,8 @@ public class Exercise extends AudioExercise implements CommonExercise {
     this.refSentences = sentenceRefs;
   }
   public String getTransliteration() { return translitSentences.isEmpty() ? "" : translitSentences.get(0); }
-  public List<String> getRefSentences() { return refSentences; }
-  public List<String> getTranslitSentences() { return translitSentences; }
+/*  public List<String> getRefSentences() { return refSentences; }
+  public List<String> getTranslitSentences() { return translitSentences; }*/
 
   public void setRefSentence(String ref) {
     refSentences.clear();
@@ -261,9 +262,11 @@ public class Exercise extends AudioExercise implements CommonExercise {
     translitSentences.add(translitSentence);
   }
 
+/*
   public void setRecordAnswer(boolean spoken) {
     setType(spoken ? EXERCISE_TYPE.RECORD : EXERCISE_TYPE.TEXT_RESPONSE);
   }
+*/
 
   /**
    * @see mitll.langtest.client.exercise.ExercisePanel#addQuestions(Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
@@ -283,11 +286,13 @@ public class Exercise extends AudioExercise implements CommonExercise {
     return qaPairs == null ? new ArrayList<QAPair>() : qaPairs;
   }
 
+/*
   public int getNumQuestions() {
     List<QAPair> en = langToQuestion == null ? new ArrayList<QAPair>() : langToQuestion.get("en");
     if (en == null) return 0; // should never happen
     return en.size();
   }
+*/
 
   public double getWeight() { return weight;  }
   public void setWeight(double weight) { this.weight = weight;  }
@@ -320,20 +325,10 @@ public class Exercise extends AudioExercise implements CommonExercise {
     this.meaning = meaning;
   }
 
-/*  @Override
-  public String getEnglish() {
-    return getEnglish();
-  }*/
-
   @Override
   public String getForeignLanguage() {
     return getRefSentence();
   }
-/*
-  @Override
-  public String getTransliteration() {
-    return getTransliteration();
-  }*/
 
   public Exercise toExercise() {
     return this;
@@ -341,7 +336,7 @@ public class Exercise extends AudioExercise implements CommonExercise {
 
   @Override
   public CommonUserExercise toCommonUserExercise() {
-    return null;
+    return new UserExercise(this);
   }
 
   public String toString() {
