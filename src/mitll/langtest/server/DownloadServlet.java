@@ -38,9 +38,13 @@ public class DownloadServlet extends HttpServlet {
       response.setHeader("Content-Disposition", "attachment; filename=users");
       db.getUserDAO().toXLSX(response.getOutputStream(), new DLIUserDAO(db));
     }
-    else {
+    else if (encodedFileName.toLowerCase().contains("results")) {
       response.setHeader("Content-Disposition", "attachment; filename=results");
       db.getResultDAO().writeExcelToStream(db.getResultsWithGrades(),response.getOutputStream());
+    }
+    else {
+      response.setHeader("Content-Disposition", "attachment; filename=events");
+      db.getEventDAO().toXLSX(response.getOutputStream());
     }
     response.getOutputStream().close();
   }
