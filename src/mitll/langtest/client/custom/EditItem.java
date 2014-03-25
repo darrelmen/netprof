@@ -16,7 +16,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -84,7 +83,7 @@ public class EditItem {
    * @param includeAddItem
    * @return
    */
-  public Panel editItem(UserList originalList, final HasText itemMarker, boolean includeAddItem/*, boolean isUserReviewer*/) {
+  public Panel editItem(UserList originalList, final HasText itemMarker, boolean includeAddItem) {
     Panel hp = new HorizontalPanel();
     hp.getElement().setId("EditItem_for_"+originalList.getName());
     Panel pagerOnLeft = new SimplePanel();
@@ -97,7 +96,7 @@ public class EditItem {
 
     this.itemMarker = itemMarker; // TODO : something less awkward
 
-    UserList copy = makeListOfOnlyYourItems(/*isUserReviewer,*/ originalList);
+    UserList copy = makeListOfOnlyYourItems(originalList);
 
     exerciseList = makeExerciseList(contentOnRight, EDIT_ITEM, copy, originalList, includeAddItem);
     pagerOnLeft.add(exerciseList.getExerciseListOnLeftSide(controller.getProps()));
@@ -108,12 +107,10 @@ public class EditItem {
 
   public void onResize() { if (exerciseList != null) exerciseList.onResize(); }
 
-  private UserList makeListOfOnlyYourItems(/*boolean isUserReviewer,*/ UserList toCopy) {
+  private UserList makeListOfOnlyYourItems(UserList toCopy) {
     UserList copy2 = new UserList(toCopy);
     for (CommonUserExercise ue : toCopy.getExercises()) {
-      //if (true) {//isUserReviewer || ue.getCreator() == controller.getUser()) {
-        copy2.addExercise(ue);
-     // }
+      copy2.addExercise(ue);
     }
     return copy2;
   }
@@ -153,7 +150,7 @@ public class EditItem {
         @Override
         protected void askServerForExercise(String itemID) {
           if (itemID.equals(NEW_EXERCISE_ID)) {
-            useExercise(getNewItem()/*.toExercise()*/);
+            useExercise(getNewItem());
           }
           else {
             super.askServerForExercise(itemID);
@@ -196,16 +193,13 @@ public class EditItem {
 
   private void setFactory(final PagingExerciseList exerciseList, final UserList ul, final UserList originalList) {
     final PagingExerciseList outer = exerciseList;
-  //  T currentExercise = outer.getCurrentExercise();
 
     exerciseList.setFactory(new ExercisePanelFactory(service, feedback, controller, exerciseList) {
       @Override
       public Panel getExercisePanel(CommonExercise e) {
         Panel panel = new SimplePanel();
         panel.getElement().setId("EditItemPanel");
-    //    T currentExercise1 = outer.getCurrentExercise();
-  //      currentExercise1.
-        //UserExercise exercise = new UserExercise(e);
+        // TODO : do something better here than toCommonUserExercise
         populatePanel(e.toCommonUserExercise(), panel, ul, originalList, itemMarker, outer);
         return panel;
       }
@@ -360,7 +354,7 @@ public class EditItem {
 
     PrevNextList getPrevNext(ListInterface pagingContainer) {
       final CommonShell exerciseShell = pagingContainer.byID(newUserExercise.getID());
-      return new PrevNextList(exerciseShell, exerciseList, shouldDisableNext());
+      return new PrevNextList(exerciseShell, exerciseList, shouldDisableNext(), controller);
     }
 
     @Override
@@ -377,9 +371,9 @@ public class EditItem {
         }
 
         container.add(flow);
-      } else if (ul != null) {        // when could this happen???
+      }/* else if (ul != null) {        // when could this happen???
         container.add(new Label("List " + ul.getName()));
-      }
+      }*/
     }
 
     boolean shouldDisableNext() {  return true; }
@@ -658,8 +652,6 @@ public class EditItem {
       // translit
       translit.box.setText(originalTransliteration = newUserExercise.getTransliteration());
       useAnnotation(newUserExercise, "transliteration", translitAnno);
-
-     // CommonExercise exercise = newUserExercise.toExercise();
 
       // regular speed audio
       rap.getPostAudioButton().setExercise(newUserExercise);
