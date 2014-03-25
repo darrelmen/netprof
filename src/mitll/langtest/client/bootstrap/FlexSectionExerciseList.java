@@ -550,10 +550,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @see #addColumnButton
    */
   private ButtonWithChildren makeOverallButton(String type, String title) {
-    ButtonWithChildren overallButton = new ButtonWithChildren(title, type);
-    if (controller.getProps().doInstrumentation()) {
-      controller.getButtonFactory().registerButton(overallButton, "unknown", "", user.getUser());
-    }
+    ButtonWithChildren overallButton = makeButton(title, type);
     overallButton.setWidth("100%");
     DOM.setStyleAttribute(overallButton.getElement(), "paddingLeft", "0px");
     DOM.setStyleAttribute(overallButton.getElement(), "paddingRight", "0px");
@@ -563,8 +560,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   }
 
   private ButtonWithChildren makeClearButton() {
-    ButtonWithChildren clear = new ButtonWithChildren(ANY, ANY);
-
+    ButtonWithChildren clear = makeButton(ANY, ANY);
     DOM.setStyleAttribute(clear.getElement(), "marginTop", "5px");
     DOM.setStyleAttribute(clear.getElement(), "marginBottom", "12px");
 
@@ -749,7 +745,8 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
                                                 final String section,
                                                 ButtonType buttonType, boolean isClear) {
     //System.out.println("making button " + type + "=" + section);
-    ButtonWithChildren sectionButton = new ButtonWithChildren(section, sectionWidgetFinal.getType());
+    ButtonWithChildren sectionButton = makeButton(section, sectionWidgetFinal.getType());
+
     //  System.out.println("made button " + sectionButton);
 
     boolean shrinkHorizontally = numSections > 5;
@@ -774,6 +771,13 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     return sectionButton;
   }
 
+  private ButtonWithChildren makeButton(String caption, String type) {
+    ButtonWithChildren widgets = new ButtonWithChildren(caption, type);
+    controller.register(widgets, "unknown");
+
+    return widgets;
+  }
+
   public static class ButtonWithChildren extends Button {
     private List<ButtonWithChildren> children = new ArrayList<ButtonWithChildren>();
     private final String type;
@@ -784,7 +788,6 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
       super(caption);
       this.type = type;
       getElement().setId("Button_"+caption+"_"+type);
-
     }
 
     /**
