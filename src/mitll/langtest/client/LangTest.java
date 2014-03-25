@@ -761,6 +761,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   @Override
+  public void register(Button button, String exid, String context) {
+    buttonFactory.registerButton(button, exid, context, getUser());
+  }
+
+  @Override
   public void logEvent(UIObject button, String widgetType, String exid, String context) {
     buttonFactory.logEvent(button, widgetType, exid, context, getUser());
   }
