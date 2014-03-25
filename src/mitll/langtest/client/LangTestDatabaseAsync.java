@@ -1,6 +1,7 @@
 package mitll.langtest.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.DLIUser;
@@ -14,7 +15,6 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.grade.Grade;
-import mitll.langtest.shared.grade.ResultsAndGrades;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.scoring.PretestScore;
 
@@ -39,7 +39,9 @@ public interface LangTestDatabaseAsync {
 
   void checkoutExerciseID(String user,String id, AsyncCallback<Void> async);
 
+/*
   void getResultsForExercise(String exid, boolean arabicTextDataCollect, AsyncCallback<ResultsAndGrades> async);
+*/
 
   void addGrade(String exerciseID, Grade grade, AsyncCallback<CountAndGradeID> async);
 
@@ -51,7 +53,9 @@ public interface LangTestDatabaseAsync {
 
   void getExercise(String id, AsyncCallback<CommonExercise> async);
 
+/*
   void getScoreForAnswer(long userID, CommonExercise e, int questionID, String answer, String answerType, AsyncCallback<Double> async);
+*/
 
   void getUserToResultCount(AsyncCallback<Map<User, Integer>> async);
 
@@ -142,5 +146,7 @@ public interface LangTestDatabaseAsync {
 
   void getUserHistoryForList(long userid, Collection<String> ids, long latestResultID, AsyncCallback<List<AVPHistoryForList>> async);
 
-  void logEvent(String id, String exid, String context, long userid, AsyncCallback<Void> async);
+  void logEvent(String id, String widgetType, String exid, String context, long userid, AsyncCallback<Void> async);
+
+  void getEvents(AsyncCallback<List<Event>> async);
 }

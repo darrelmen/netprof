@@ -1,11 +1,15 @@
 package mitll.langtest.client.table;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.HasRows;
+
+import java.util.Date;
 
 /**
  * Created with IntelliJ IDEA.
@@ -43,5 +47,15 @@ public class PagerTable {
     vPanel.add(tableAsPanel);
 
     return vPanel;
+  }
+
+  protected SafeHtml getSafeHTMLForTimestamp(long timestamp) {
+    SafeHtmlBuilder sb = new SafeHtmlBuilder();
+    sb.appendHtmlConstant("<div style='white-space: nowrap;'><span>" +
+      new Date(timestamp)+
+      "</span>" );
+
+    sb.appendHtmlConstant("</div>");
+    return sb.toSafeHtml();
   }
 }
