@@ -95,6 +95,7 @@ public class NavigationHelper extends HorizontalPanel {
 
   private void makePrevButton(final CommonExercise exercise, ExerciseController controller, boolean addButtons, boolean useKeyHandler) {
     this.prev = new Button("Previous");
+    prev.getElement().setId("NavigationHelper_Previous");
     getPrev().addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         clickPrev(exercise);
@@ -111,6 +112,8 @@ public class NavigationHelper extends HorizontalPanel {
 
   private void makeNextButton(final CommonExercise exercise, final ExerciseController controller, boolean addButtons) {
     this.next = new Button(getNextButtonText());
+    next.getElement().setId("NavigationHelper_"+getNextButtonText());
+
     next.setType(ButtonType.SUCCESS);
     enableNext(exercise);
 
