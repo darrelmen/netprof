@@ -1,6 +1,5 @@
 package mitll.langtest.client.list;
 
-import com.github.gwtbootstrap.client.ui.Heading;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -750,11 +749,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     leftColumn.addStyleName("floatLeft");
     addMinWidthStyle(leftColumn);
 
-    if (!props.isFlashcardTeacherView() && !props.isMinimalUI() && ADD_ITEM_HEADER) {
-      Heading items = new Heading(4, ITEMS);
-      items.addStyleName("center");
-      leftColumn.add(items);
-    }
     leftColumn.add(getWidget());
     return leftColumn;
   }
