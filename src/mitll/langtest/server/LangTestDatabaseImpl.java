@@ -13,6 +13,7 @@ import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.SectionHelper;
+import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.shared.AudioAnswer;
@@ -32,7 +33,6 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.grade.Grade;
-import mitll.langtest.shared.grade.ResultsAndGrades;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -672,7 +672,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    * @seex mitll.langtest.client.grading.GradingExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    */
-  public ResultsAndGrades getResultsForExercise(String exid, boolean arabicTextDataCollect) {
+/*  public ResultsAndGrades getResultsForExercise(String exid, boolean arabicTextDataCollect) {
     ResultsAndGrades resultsForExercise =
         arabicTextDataCollect ?
             db.getResultsForExercise(exid, true, true, false) :
@@ -680,7 +680,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     ensureMP3(resultsForExercise.results);
     return resultsForExercise;
-  }
+  }*/
 
   /**
    * Make sure we have mp3 files in results.
@@ -719,6 +719,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param answerType
    * @return
    */
+/*
   public double getScoreForAnswer(long userID, CommonExercise exercise, int questionID, String answer, String answerType) {
     double scoreForAnswer = audioFileHelper.getScoreForAnswer(exercise, questionID, answer);
     boolean correct = scoreForAnswer > 0.5;
@@ -727,6 +728,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db.addCompleted((int) userID,exercise.getID());
     return scoreForAnswer;
   }
+*/
 
   // Grades ---------------------
 
@@ -895,9 +897,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   @Override
-  public void logEvent(String id, String exid, String context, long userid) {
-    db.logEvent(id,exid,context,userid);
+  public void logEvent(String id, String widgetType, String exid, String context, long userid) {
+    db.logEvent(id,widgetType,exid,context,userid);
   }
+
+  public List<Event> getEvents() { return db.getEvents(); }
 
   /**
    * @see mitll.langtest.client.custom.EditItem.EditableExercise#postEditItem
