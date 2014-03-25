@@ -21,6 +21,7 @@ public abstract class TabContainer implements RequiresResize {
 
   TabAndContent makeTab(TabPanel toAddTo, IconType iconType, String label) {
     Tab create = new Tab();
+    create.asWidget().getElement().setId("Tab_"+label);
     create.setIcon(iconType);
     create.setHeading(label);
     toAddTo.add(create.asTabLink());
