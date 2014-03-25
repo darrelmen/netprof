@@ -546,12 +546,16 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       public void startRecording() {
         playAudioPanel.setEnabled(false);
         isBusy = true;
+        controller.logEvent(this,"RecordButton",getExercise().getID(),"startRecording");
+
         super.startRecording();
         recordImage1.setVisible(true);
       }
 
       @Override
       public void stopRecording() {
+        controller.logEvent(this,"RecordButton",getExercise().getID(),"stopRecording");
+
         playAudioPanel.setEnabled(true);
         isBusy = false;
         super.stopRecording();
