@@ -60,9 +60,10 @@ public class Flashcard implements RequiresResize {
   public Panel makeNPFHeaderRow(String splashText, boolean isBeta, String userName, HTML browserInfo, ClickHandler logoutClickHandler,
                                 ClickHandler users,
                                 ClickHandler results,
-                                ClickHandler monitoring) {
+                                ClickHandler monitoring,
+                                ClickHandler events) {
     return getHeaderRow(splashText, isBeta,NEW_PRO_F1_PNG, PRONUNCIATION_FEEDBACK, userName, browserInfo, logoutClickHandler,
-      users, results, monitoring);
+      users, results, monitoring,events);
   }
 
   public Panel getHeaderRow(String splashText, boolean isBeta, String appIcon, String appTitle, String userName,
@@ -70,7 +71,8 @@ public class Flashcard implements RequiresResize {
                             ClickHandler logoutClickHandler,
                             ClickHandler users,
                             ClickHandler results,
-                            ClickHandler monitoring) {
+                            ClickHandler monitoring,
+                            ClickHandler events) {
     HorizontalPanel headerRow = new HorizontalPanel();
     headerRow.setWidth("100%");
     headerRow.addStyleName("headerBackground");
@@ -110,7 +112,7 @@ public class Flashcard implements RequiresResize {
     if (!isAnonymous || adminView) {
       hp.add(userNameWidget);
     }
-    Dropdown w = makeMenu(users, results, monitoring);
+    Dropdown w = makeMenu(users, results, monitoring,events);
 
     NavLink widget1 = new NavLink("Log Out");
     widget1.addClickHandler(logoutClickHandler);
@@ -154,7 +156,7 @@ public class Flashcard implements RequiresResize {
    * @param monitoring
    * @return
    */
-  private Dropdown makeMenu(ClickHandler users, ClickHandler results, ClickHandler monitoring) {
+  private Dropdown makeMenu(ClickHandler users, ClickHandler results, ClickHandler monitoring, ClickHandler events) {
     Dropdown w = new Dropdown();
     w.setRightDropdown(true);
     w.setIcon(IconType.COG);
@@ -175,6 +177,11 @@ public class Flashcard implements RequiresResize {
     if (monitoring != null) {
       NavLink widget2 = new NavLink("Monitoring");
       widget2.addClickHandler(monitoring);
+      w.add(widget2);
+    }
+    if (events != null) {
+      NavLink widget2 = new NavLink("Events");
+      widget2.addClickHandler(events);
       w.add(widget2);
     }
     return w;
