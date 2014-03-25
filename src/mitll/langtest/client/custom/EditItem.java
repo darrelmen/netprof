@@ -7,13 +7,11 @@ import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasText;
@@ -52,7 +50,6 @@ public class EditItem {
   private static final String NEW_ITEM = "*New Item*";
   public static final String NEW_EXERCISE_ID = "NewExerciseID";
   private static final String EDIT_ITEM = "editItem";
-  private static final String REMOVE_FROM_LIST = "Remove from list";
 
   private final ExerciseController controller;
   private final NPFHelper npfHelper;
@@ -289,20 +286,24 @@ public class EditItem {
             this.originalList = originalList;
             this.listInterface = listInterface;
 
-            Button delete = new Button(REMOVE_FROM_LIST);
-            DOM.setStyleAttribute(delete.getElement(), "marginRight", "5px");
-            delete.setType(ButtonType.WARNING);
-            delete.addStyleName("floatRight");
+            Button delete = makeDeleteButton(ul, originalList.getUniqueID());
+
             container.add(delete);
+            return container;
+          }
+
+          public Button makeDeleteButton(final UserList ul,  final long uniqueID) {
+            Button delete = makeDeleteButton(ul);
 
             delete.addClickHandler(new ClickHandler() {
               @Override
               public void onClick(ClickEvent event) {
-                deleteItem(newUserExercise.getID(), originalList.getUniqueID(), ul, exerciseList, npfHelper);
+                deleteItem(newUserExercise.getID(), uniqueID, ul, exerciseList, npfHelper);
               }
             });
+
             delete.addStyleName("topFiftyMargin");
-            return container;
+            return delete;
           }
 
           @Override
@@ -412,10 +413,7 @@ public class EditItem {
     }
 
     private Button makeDeleteButton(final long uniqueID) {
-      Button delete = new Button(REMOVE_FROM_LIST);
-      DOM.setStyleAttribute(delete.getElement(), "marginRight", "5px");
-      delete.setType(ButtonType.WARNING);
-      delete.addStyleName("floatRight");
+      Button delete = makeDeleteButton(ul);
 
       delete.addClickHandler(new ClickHandler() {
         @Override
