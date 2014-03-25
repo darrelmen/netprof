@@ -1,9 +1,13 @@
 package mitll.langtest.client.exercise;
 
+import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.Tab;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.instrumentation.ButtonFactory;
+import mitll.langtest.client.instrumentation.EventLogger;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
@@ -52,6 +56,10 @@ public interface ExerciseController {
   boolean isLogClientMessages();
   String getAudioType();
   boolean isReviewMode();
+
+
+  void logEvent(Tab button, String widgetType, String exid, String context);
+
   boolean showCompleted();
 
   void getImage(int reqid, String path, String type, int toUse, int height, String exerciseID, AsyncCallback<ImageResponse> client);
@@ -70,5 +78,8 @@ public interface ExerciseController {
 
   StartupInfo getStartupInfo();
   boolean gotMicPermission();
-  ButtonFactory getButtonFactory();
+  EventLogger getButtonFactory();
+  void register(Button button, String exid);
+
+  void logEvent(UIObject button, String widgetType, String exid, String context);
 }
