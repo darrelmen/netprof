@@ -1,10 +1,12 @@
 package mitll.langtest.client;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.Container;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.Tab;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
@@ -30,6 +32,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
@@ -46,6 +49,9 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.Flashcard;
 import mitll.langtest.client.grading.GradingExercisePanelFactory;
 import mitll.langtest.client.instrumentation.ButtonFactory;
+import mitll.langtest.client.instrumentation.EventLogger;
+import mitll.langtest.client.instrumentation.EventMock;
+import mitll.langtest.client.instrumentation.EventTable;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.monitoring.MonitoringManager;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
@@ -71,7 +77,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   public static final String LANGTEST_IMAGES = "langtest/images/";
-  public static final String DIVIDER = "|";
+  private static final String DIVIDER = "|";
+  private static final String NEW_PRO_F2_PNG = "NewProF2.png";
 
   private Panel currentExerciseVPanel = new FluidContainer();
   private ListInterface exerciseList;
@@ -98,7 +105,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private StartupInfo startupInfo;
 
   private TabContainer navigation;
-  ButtonFactory buttonFactory;
+  private EventLogger buttonFactory;
 /*  private boolean showUnansweredFirst = false;
   private boolean showRerecord = false;*/
 
@@ -270,6 +277,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (props.doInstrumentation()) {
       buttonFactory = new ButtonFactory(service, props);
     }
+    else {
+      buttonFactory = new EventMock();
+    }
     userManager = new UserManager(this, service, props);
 
     checkAdmin();
@@ -409,16 +419,18 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
         (props.isAdminView()) ? new UsersClickHandler() : null,
         (props.isAdminView()) ? new ResultsClickHandler() : null,
-        (props.isAdminView()) ? new MonitoringClickHandler() : null
+        (props.isAdminView()) ? new MonitoringClickHandler() : null,
+      (props.isAdminView()) ? new EventsClickHandler() : null
         );
     }
     else {
       flashcard = new Flashcard(props);
-      title = flashcard.getHeaderRow(props.getSplash(), props.isClassroomMode(),"NewProF2.png",props.getAppTitle(), getGreeting(), getReleaseStatus(), new LogoutClickHandler(),
+      title = flashcard.getHeaderRow(props.getSplash(), props.isClassroomMode(), NEW_PRO_F2_PNG,props.getAppTitle(), getGreeting(), getReleaseStatus(), new LogoutClickHandler(),
 
         (props.isAdminView()) ? new UsersClickHandler() : null,
         (props.isAdminView()) ? new ResultsClickHandler() : null,
-        (props.isAdminView()) ? new MonitoringClickHandler() : null);
+        (props.isAdminView()) ? new MonitoringClickHandler() : null,
+        (props.isAdminView()) ? new EventsClickHandler() : null);
     }
 
 
@@ -739,8 +751,22 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   @Override
-  public ButtonFactory getButtonFactory() {
+  public EventLogger getButtonFactory() {
     return buttonFactory;
+  }
+
+  @Override
+  public void register(Button button, String exid) {
+    buttonFactory.register(this, button, exid);
+  }
+
+  @Override
+  public void logEvent(UIObject button, String widgetType, String exid, String context) {
+    buttonFactory.logEvent(button, widgetType, exid, context, getUser());
+  }
+  @Override
+  public void logEvent(Tab button, String widgetType, String exid, String context) {
+    buttonFactory.logEvent(button, widgetType, exid, context, getUser());
   }
 
   /**
@@ -773,7 +799,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   /**
    * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers
-   * @see mitll.langtest.client.recorder.SimpleRecordPanel#stopRecording()
    * @return
    */
   public int getUser() { return userManager.getUser(); }
@@ -858,6 +883,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private class UsersClickHandler implements ClickHandler {
     public void onClick(ClickEvent event) {
       new UserTable(props).showUsers(service, userManager.getUser());
+    }
+  }
+
+  private class EventsClickHandler implements ClickHandler {
+    public void onClick(ClickEvent event) {
+      new EventTable(props).show(service);
     }
   }
 
