@@ -28,6 +28,8 @@ import mitll.langtest.client.flashcard.FlashcardRecordButtonPanel;
  */
 public class RecordButton extends Button {
   private static final int PERIOD_MILLIS = 500;
+  private static final String RECORD1 = "Record";
+  private static final String STOP1 = "Stop";
   private final String RECORD;
   private final String STOP;
 
@@ -75,7 +77,7 @@ public class RecordButton extends Button {
    * @param addKeyBinding
    */
   public RecordButton(int delay, RecordingListener recordingListener, boolean doClickAndHold, boolean addKeyBinding) {
-    this(delay, doClickAndHold, addKeyBinding, "Record", "Stop");
+    this(delay, doClickAndHold, addKeyBinding, RECORD1, STOP1);
     this.setRecordingListener(recordingListener);
   }
 
@@ -148,13 +150,13 @@ public class RecordButton extends Button {
     }
   }
 
-  private void start() {
+  protected void start() {
     recording = true;
     showRecording();
     recordingListener.startRecording();
   }
 
-  private void stop() {
+  protected void stop() {
     recording = false;
     showStopped();
     recordingListener.stopRecording();
