@@ -1,4 +1,6 @@
-package mitll.langtest.server.database.instrumentation;
+package mitll.langtest.shared.instrumentation;
+
+import com.google.gwt.user.client.rpc.IsSerializable;
 
 import java.util.Date;
 
@@ -9,12 +11,15 @@ import java.util.Date;
  * Time: 11:35 AM
  * To change this template use File | Settings | File Templates.
  */
-public class Event {
-  private final String widgetID;
-  private final String exerciseID;
-  private final String context;
-  private final long creatorID;
+public class Event implements IsSerializable {
+  private String widgetID;
+  private String widgetType;
+  private String exerciseID;
+  private String context;
+  private long creatorID;
   private long timestamp;
+
+  public Event() {}
 
   /**
    * @paramx uniqueID
@@ -26,8 +31,9 @@ public class Event {
    * @param timestamp
    * @see mitll.langtest.server.database.custom.AnnotationDAO#getUserAnnotations(String)
    */
-  public Event(String widgetID,String exerciseID, String context, long userID, long timestamp) {
+  public Event(String widgetID,String widgetType,String exerciseID, String context, long userID, long timestamp) {
     this.widgetID = widgetID;
+    this.widgetType = widgetType;
     this.exerciseID = exerciseID;
     this.context = context;
     this.creatorID = userID;
@@ -56,5 +62,9 @@ public class Event {
   public String toString() {
     return "Event on " + getWidgetID() + " by " +  getCreatorID() + " at " + new Date(getTimestamp()) + " info " +
       getExerciseID() + "/" + getContext();
+  }
+
+  public String getWidgetType() {
+    return widgetType;
   }
 }
