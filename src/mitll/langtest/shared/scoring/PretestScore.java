@@ -1,6 +1,7 @@
 package mitll.langtest.shared.scoring;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
 
 import java.util.HashMap;
 import java.util.List;
@@ -14,8 +15,9 @@ public class PretestScore implements IsSerializable {
 	private float hydecScore = -1f;
 	private Map<String, Float> phoneScores;
   private Map<NetPronImageType, String> sTypeToImage = new HashMap<NetPronImageType, String>();
-  private Map<NetPronImageType, List<Float>> sTypeToEndTimes = new HashMap<NetPronImageType, List<Float>>();
+  private Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes = new HashMap<NetPronImageType, List<TranscriptSegment>>();
   private String recoSentence;
+  private float wavFileLengthSeconds;
 
   public PretestScore(){} // required for serialization
   public PretestScore(float score) { this.hydecScore = score; }
@@ -34,13 +36,15 @@ public class PretestScore implements IsSerializable {
   public PretestScore(float hydecScore,
                       Map<String, Float> phoneScores,
                       Map<NetPronImageType, String> sTypeToImage,
-                      Map<NetPronImageType, List<Float>> sTypeToEndTimes,
-                      String recoSentence) {
+                      Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes,
+                      String recoSentence,
+                      float wavFileLengthSeconds) {
     this.sTypeToImage = sTypeToImage;
     this.hydecScore = hydecScore;
     this.phoneScores = phoneScores;
     this.sTypeToEndTimes = sTypeToEndTimes;
     this.recoSentence = recoSentence;
+    this.wavFileLengthSeconds = wavFileLengthSeconds;
 	}
 	
   public float getHydecScore() {
@@ -55,11 +59,13 @@ public class PretestScore implements IsSerializable {
     return sTypeToImage;
   }
 
+/*
   public void setsTypeToImage(Map<NetPronImageType, String> sTypeToImage) {
     this.sTypeToImage = sTypeToImage;
   }
+*/
 
-  public Map<NetPronImageType, List<Float>> getsTypeToEndTimes() {
+  public Map<NetPronImageType, List<TranscriptSegment>> getsTypeToEndTimes() {
     return sTypeToEndTimes;
   }
 
@@ -68,7 +74,8 @@ public class PretestScore implements IsSerializable {
   }
 
   public float getWavFileLengthInSeconds() {
-    List<Float> endTimes = getsTypeToEndTimes().get(NetPronImageType.WORD_TRANSCRIPT);
+    return wavFileLengthSeconds;
+/*    List<Float> endTimes = getsTypeToEndTimes().get(NetPronImageType.WORD_TRANSCRIPT);
     if (endTimes == null) {
       endTimes = getsTypeToEndTimes().get(NetPronImageType.PHONE_TRANSCRIPT);
     }
@@ -77,14 +84,18 @@ public class PretestScore implements IsSerializable {
     }
     else {
       return 0f;
-    }
+    }*/
   }
+
+/*  public float getWavFileLengthSeconds() {
+    return wavFileLengthSeconds;
+  }*/
 
   public String toString() {
     return "hydec " + hydecScore +
-        " phones " + getPhoneScores() +
-        " type->image " + getsTypeToImage() +
-        " type->endtimes " + getsTypeToEndTimes()
-        ;
+      " phones " + getPhoneScores() +
+      " type->image " + getsTypeToImage() +
+      " type->endtimes " + getsTypeToEndTimes()
+      ;
   }
 }
