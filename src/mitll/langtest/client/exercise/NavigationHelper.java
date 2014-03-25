@@ -69,6 +69,8 @@ public class NavigationHelper extends HorizontalPanel {
     setSpacing(5);
     getNextAndPreviousButtons(exercise, controller, addButtons, addKeyHandler);
     getElement().setId("NavigationHelper");
+    controller.register(prev, exercise.getID());
+    controller.register(next, exercise.getID());
   }
 
   /**
