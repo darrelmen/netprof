@@ -56,6 +56,7 @@ public class UserListDAO extends DAO {
 
   /**
    * @see mitll.langtest.server.database.custom.UserListManager#addVisitor(mitll.langtest.shared.custom.UserList, long)
+   * @see mitll.langtest.client.custom.Navigation#addVisitor(mitll.langtest.shared.custom.UserList)
    * @param listid
    * @param userid
    */
@@ -401,7 +402,6 @@ public class UserListDAO extends DAO {
   private void populateList(UserList where) {
     List<CommonUserExercise> onList = userExerciseDAO.getOnList(where.getUniqueID());
     where.setExercises(onList);
-    //where.setVisitors(userListVisitorJoinDAO.getVisitorsOfList(where.getUniqueID()));
 
     if (!onList.isEmpty()) {
       //logger.debug("populateList : got " + onList.size() + " for list " + where.getUniqueID() + " = " + where);
@@ -410,11 +410,10 @@ public class UserListDAO extends DAO {
 
   public Collection<UserList> getListsForUser(long userid) {
     Set<Long> listsForVisitor = userListVisitorJoinDAO.getListsForVisitor(userid);
-    if (listsForVisitor.isEmpty()) return Collections.emptyList();
-    else return getIn(listsForVisitor);
+    List<UserList> objects = Collections.emptyList();
+    return listsForVisitor.isEmpty() ? objects : getIn(listsForVisitor);
   }
 
- // private Set<Long> getListsForVisitor(long userid) { return userListVisitorJoinDAO.getListsForVisitor(userid);  }
   public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
     this.userExerciseDAO = userExerciseDAO;
   }
