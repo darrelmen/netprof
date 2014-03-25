@@ -1,18 +1,12 @@
 package mitll.langtest.client.grading;
 
-import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Popover;
 import com.github.gwtbootstrap.client.ui.Tab;
-import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -22,7 +16,6 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.result.ResultManager;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.grade.ResultsAndGrades;
@@ -30,13 +23,10 @@ import mitll.langtest.shared.grade.ResultsAndGrades;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 /**
  * Allows a grader to grade answers entered in the default mode.
