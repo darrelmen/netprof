@@ -2,23 +2,27 @@ package mitll.langtest.server.database.instrumentation;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.UserDAO;
-import mitll.langtest.server.database.custom.UserAnnotation;
-import mitll.langtest.shared.ExerciseAnnotation;
+import mitll.langtest.shared.instrumentation.Event;
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * Created with IntelliJ IDEA.
@@ -32,6 +36,7 @@ public class EventDAO extends DAO {
 
   private static final String EVENT = "event";
   private static final String CREATORID = "creatorid";
+  private static final String WIDGETTYPE = "widgettype";
 
 
   public EventDAO(Database database) {
@@ -57,7 +62,12 @@ public class EventDAO extends DAO {
       "uniqueid IDENTITY, " +
       CREATORID +
       " LONG, " +
-      "exerciseid VARCHAR, context VARCHAR, widgetid VARCHAR, modified TIMESTAMP, " +
+      "exerciseid VARCHAR, " +
+      "context VARCHAR, " +
+      "widgetid VARCHAR, " +
+      WIDGETTYPE +
+      " VARCHAR, " +
+      "modified TIMESTAMP, " +
       "FOREIGN KEY(" +
       CREATORID +
       ") REFERENCES " +
@@ -91,14 +101,19 @@ public class EventDAO extends DAO {
         "INSERT INTO " + EVENT +
           "(" +
           CREATORID +
-          ",exerciseid,context,widgetid,modified) " +
-          "VALUES(?,?,?,?,?);");
+          ",exerciseid,context," +
+          "widgetid," +
+          WIDGETTYPE +
+          "," +
+          "modified) " +
+          "VALUES(?,?,?,?,?,?);");
       int i = 1;
       //     statement.setLong(i++, annotation.getUserID());
       statement.setLong(i++, event.getCreatorID());
       statement.setString(i++, event.getExerciseID());
       statement.setString(i++, event.getContext());
       statement.setString(i++, event.getWidgetID());
+      statement.setString(i++, event.getWidgetType());
       statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));
 
       int j = statement.executeUpdate();
@@ -109,7 +124,7 @@ public class EventDAO extends DAO {
       statement.close();
       database.closeConnection(connection);
 
-    //  logger.debug("now " + getCount(EVENT) + " and user exercise is " + annotation);
+     logger.debug("now " + getCount(EVENT) + " and event is " + event);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
@@ -151,6 +166,7 @@ public class EventDAO extends DAO {
     while (rs.next()) {
       lists.add(new Event(
           rs.getString("widgetid"),
+          rs.getString(WIDGETTYPE),
           rs.getString("exerciseid"),
           rs.getString("context"),
           rs.getLong(CREATORID),
@@ -165,4 +181,71 @@ public class EventDAO extends DAO {
     database.closeConnection(connection);
     return lists;
   }
+
+  private static final List<String> COLUMNS2 = Arrays.asList("id", "type", "exercise", "context", "userid", "timestamp");
+
+  /**
+   * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+   * @param out
+   */
+  public void toXLSX(OutputStream out) {
+    long then = System.currentTimeMillis();
+
+    List<Event> all = getAll();
+    long now = System.currentTimeMillis();
+    if (now-then > 100) logger.info("toXLSX : took " + (now - then) + " millis to read " + all.size() +
+      " events from database");
+    then = now;
+
+    //Workbook wb = new XSSFWorkbook();
+    SXSSFWorkbook wb = new SXSSFWorkbook(1000); // keep 100 rows in memory, exceeding rows will be flushed to disk
+
+    Sheet sheet = wb.createSheet("Events");
+    int rownum = 0;
+    Row headerRow = sheet.createRow(rownum++);
+    for (int i = 0; i < COLUMNS2.size(); i++) {
+      Cell headerCell = headerRow.createCell(i);
+      headerCell.setCellValue(COLUMNS2.get(i));
+    }
+
+    CellStyle cellStyle = wb.createCellStyle();
+    DataFormat dataFormat = wb.createDataFormat();
+
+    cellStyle.setDataFormat(dataFormat.getFormat("MMM dd HH:mm:ss"));
+
+    for (Event event : all) {
+      Row row = sheet.createRow(rownum++);
+      int j = 0;
+      Cell cell = row.createCell(j++);
+      cell.setCellValue(event.getWidgetID());
+      cell = row.createCell(j++);
+      cell.setCellValue(event.getWidgetType());
+      cell = row.createCell(j++);
+      cell.setCellValue(event.getExerciseID());
+      cell = row.createCell(j++);
+      cell.setCellValue(event.getContext());
+      cell = row.createCell(j++);
+      cell.setCellValue(event.getCreatorID());
+      cell = row.createCell(j++);
+      cell.setCellValue(new Date(event.getTimestamp()));
+      cell.setCellStyle(cellStyle);
+      cell = row.createCell(j++);
+    }
+    now = System.currentTimeMillis();
+    if (now-then > 100) logger.warn("toXLSX : took " + (now-then) + " millis to write " + rownum+
+      " rows to sheet, or " + (now-then)/rownum + " millis/row");
+    then = now;
+    try {
+      wb.write(out);
+      now = System.currentTimeMillis();
+      if (now-then > 100) {
+        logger.warn("toXLSX : took " + (now-then) + " millis to write excel to output stream ");
+      }
+      out.close();
+      wb.dispose();
+    } catch (IOException e) {
+      logger.error("got " +e,e);
+    }
+  }
+
 }
