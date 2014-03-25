@@ -172,6 +172,10 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     return "";
   }
 
+  /**
+   * @deprecated  - nobody set this
+   * @return
+   */
   @Override
   public String getContent() {
     return content;
