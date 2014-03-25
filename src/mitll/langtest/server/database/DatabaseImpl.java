@@ -13,7 +13,7 @@ import mitll.langtest.server.database.custom.UserListDAO;
 import mitll.langtest.server.database.custom.UserListExerciseJoinDAO;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.flashcard.UserStateWrapper;
-import mitll.langtest.server.database.instrumentation.Event;
+import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.server.database.instrumentation.EventDAO;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonUserExercise;
@@ -1068,10 +1068,14 @@ public class DatabaseImpl implements Database {
     return new Pair(idToCount, idToUniqueCount);
   }
 
-  public void logEvent(String id, String exid, String context, long userid) {
-     eventDAO.add(new Event(id,exid,context,userid,-1));
-
+  public void logEvent(String id, String widgetID, String exid, String context, long userid) {
+     eventDAO.add(new Event(id,widgetID,exid,context,userid,-1));
   }
+
+  public List<Event> getEvents() {
+    return eventDAO.getAll();
+  }
+  public EventDAO getEventDAO() { return eventDAO; }
 
   private static class Pair {
     final Map<Long, Integer> idToCount;
