@@ -2,6 +2,7 @@ package mitll.langtest.client;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.DLIUser;
@@ -15,7 +16,6 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.grade.Grade;
-import mitll.langtest.shared.grade.ResultsAndGrades;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.scoring.PretestScore;
 
@@ -42,7 +42,9 @@ public interface LangTestDatabase extends RemoteService {
 
   CommonExercise getExercise(String id);
 
+/*
   ResultsAndGrades getResultsForExercise(String exid, boolean arabicTextDataCollect);
+*/
 
   // gradeDAO
   CountAndGradeID addGrade(String exerciseID, Grade grade);
@@ -58,7 +60,9 @@ public interface LangTestDatabase extends RemoteService {
   void addTextAnswer(int userID, CommonExercise exercise, int questionID, String answer, String answerType);
   AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int question, int user,
                              int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults);
+/*
   double getScoreForAnswer(long userID, CommonExercise e, int questionID, String answer, String answerType);
+*/
 
   CommonExercise getNextUngradedExercise(String user, int expectedGrades, boolean englishOnly);
 
@@ -137,5 +141,6 @@ public interface LangTestDatabase extends RemoteService {
   boolean deleteItemFromList(long listid, String exid);
   boolean deleteItem(String exid);
 
-  void logEvent(String id, String exid, String context, long userid);
+  void logEvent(String id, String widgetType, String exid, String context, long userid);
+  List<Event> getEvents();
 }
