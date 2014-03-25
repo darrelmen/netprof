@@ -26,7 +26,7 @@ public class ControlState {
   public boolean showBoth() { return  showState.equals(BOTH);}
 
   /**
-   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#BootstrapExercisePanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int, boolean, ControlState)
+   * @see BootstrapExercisePanel#BootstrapExercisePanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ControlState)
    * @param storage
    */
   public void setStorage(KeyStorage storage) {
