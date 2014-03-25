@@ -115,14 +115,6 @@ public class UserListVisitorJoinDAO extends DAO {
         if (j != 1)
           logger.error("huh? didn't insert row for " + listID + " and " + visitor);
 
-/*      ResultSet rs = statement.getGeneratedKeys(); // will return the ID in ID_COLUMN
-      if (rs.next()) {
-        id = rs.getLong(1);
-      } else {
-        logger.error("huh? no key was generated?");
-      }
-      logger.debug("unique id = " + id);*/
-
         statement.close();
         database.closeConnection(connection);
 
@@ -132,21 +124,6 @@ public class UserListVisitorJoinDAO extends DAO {
       }
     }
   }
-
-/*  private boolean existsAlready(long uniqueID, long visitor) {
-    String sql = "SELECT * from " + USER_EXERCISE_LIST_VISITOR + " where " +
-      USERLISTID +
-      "=" + uniqueID + " AND " +
-      VISITORID +
-      "="+visitor;
-
-    try {
-      return !getVisitors(sql).isEmpty();
-    } catch (SQLException e) {
-      logger.error("got " + e, e);
-    }
-    return false;
-  }*/
 
   /**
    *
@@ -169,7 +146,8 @@ public class UserListVisitorJoinDAO extends DAO {
   public Set<Long> getListsForVisitor(long userid) {
     String sql = "SELECT * from " + USER_EXERCISE_LIST_VISITOR + " where " +
       VISITORID +
-      "=" + userid + " ORDER BY " +MODIFIED + " DESC";
+      "=" + userid +
+      " ORDER BY " +MODIFIED + " DESC";
     try {
       return getVisitors(sql,USERLISTID);
     } catch (SQLException e) {
@@ -184,7 +162,9 @@ public class UserListVisitorJoinDAO extends DAO {
     ResultSet rs = statement.executeQuery();
     Set<Long> visitors = new HashSet<Long>();
 
-    while (rs.next()) { visitors.add(rs.getLong(column)); }
+    while (rs.next()) {
+      visitors.add(rs.getLong(column));
+    }
     rs.close();
     statement.close();
     database.closeConnection(connection);
@@ -220,7 +200,7 @@ public class UserListVisitorJoinDAO extends DAO {
         logger.debug("did update for list " + userListID + " and " + visitor + " in " + USER_EXERCISE_LIST_VISITOR);
       }
       else {
-        logger.info("did NOT update for list " + userListID + " and " + visitor + " in " + USER_EXERCISE_LIST_VISITOR);
+        logger.warn("did NOT update for list " + userListID + " and " + visitor + " in " + USER_EXERCISE_LIST_VISITOR);
       }
       return b;
     } catch (Exception e) {
