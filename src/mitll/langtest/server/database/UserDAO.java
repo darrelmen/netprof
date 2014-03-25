@@ -32,7 +32,7 @@ public class UserDAO extends DAO {
   private static final Logger logger = Logger.getLogger(UserDAO.class);
   public static final String USERS = "users";
   private long defectDetector;
-  private static final List<String> COLUMNS = Arrays.asList("id", "age", "gender", "experience", "ipaddr", "nativelang", "dialect", "userid", "timestamp", "enabled");
+  //private static final List<String> COLUMNS = Arrays.asList("id", "age", "gender", "experience", "ipaddr", "nativelang", "dialect", "userid", "timestamp", "enabled");
   private static final List<String> COLUMNS2 = Arrays.asList("id", "age", "gender", "experience", "ipaddr", "nativelang", "dialect", "userid", "timestamp", "demographics");
 
   public UserDAO(Database database) {
@@ -398,7 +398,6 @@ public class UserDAO extends DAO {
     DataFormat dataFormat = wb.createDataFormat();
 
     cellStyle.setDataFormat(dataFormat.getFormat("MMM dd HH:mm:ss"));
-
 
     for (User user : users) {
       Row row = sheet.createRow(rownum++);
