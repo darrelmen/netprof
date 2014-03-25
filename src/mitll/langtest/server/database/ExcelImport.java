@@ -295,14 +295,8 @@ public class ExcelImport implements ExerciseDAO {
     List<CommonExercise> exercises = new ArrayList<CommonExercise>();
     try {
       long then = System.currentTimeMillis();
-      //Workbook wb = WorkbookFactory.create(inp);
+       XSSFWorkbook wb = new XSSFWorkbook(inp);
       long now = System.currentTimeMillis();
-      logger.debug("took " + (now-then) + " millis to read spreadsheet");
-
-      then = System.currentTimeMillis();
-
-      XSSFWorkbook wb = new XSSFWorkbook(inp);
-       now = System.currentTimeMillis();
       logger.debug("took " + (now-then) + " millis to read spreadsheet");
 
       for (int i = 0; i < wb.getNumberOfSheets(); i++) {
