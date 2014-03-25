@@ -12,6 +12,7 @@ import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.SLFFile;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.commons.io.FileUtils;
@@ -297,18 +298,18 @@ public class ASRScoring extends Scoring {
     }
     ImageWriter.EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix, useScoreForBkgColor, "");
     Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
-    Map<NetPronImageType, List<Float>> typeToEndTimes = getTypeToEndTimes(wavFile, eventAndFileInfo);
+    Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo);
     String recoSentence = getRecoSentence(eventAndFileInfo);
 
+    double duration = new AudioCheck().getDurationInSeconds(wavFile);
     PretestScore pretestScore =
-        new PretestScore(scores.hydecScore, getPhoneToScore(scores), sTypeToImage, typeToEndTimes, recoSentence);
+        new PretestScore(scores.hydecScore, getPhoneToScore(scores), sTypeToImage, typeToEndTimes, recoSentence,(float)duration);
     return pretestScore;
   }
 
-  private Map<NetPronImageType, List<Float>> getTypeToEndTimes(File wavFile, ImageWriter.EventAndFileInfo eventAndFileInfo) {
-    double duration = new AudioCheck().getDurationInSeconds(wavFile);
-    return getTypeToEndTimes(eventAndFileInfo, duration);
-  }
+/*  private Map<NetPronImageType, List<TranscriptSegment>> getTypeToEndTimes(*//*File wavFile,*//* ImageWriter.EventAndFileInfo eventAndFileInfo) {
+    return getTypeToEndTimes(eventAndFileInfo);
+  }*/
 
 /*  public Scores decode(String testAudioDir, String testAudioFileNoSuffix,
                        String scoringDir,
@@ -449,23 +450,25 @@ public class ASRScoring extends Scoring {
    * @param fileDuration
    * @return
    */
-  private Map<NetPronImageType, List<Float>> getTypeToEndTimes(ImageWriter.EventAndFileInfo eventAndFileInfo, double fileDuration) {
-    Map<NetPronImageType, List<Float>> typeToEndTimes = new HashMap<NetPronImageType, List<Float>>();
+  private Map<NetPronImageType, List<TranscriptSegment>> getTypeToEndTimes(ImageWriter.EventAndFileInfo eventAndFileInfo/*, double fileDuration*/) {
+    Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<NetPronImageType, List<TranscriptSegment>>();
     for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.typeToEvent.entrySet()) {
       NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
-      List<Float> endTimes = typeToEndTimes.get(key);
-      if (endTimes == null) { typeToEndTimes.put(key, endTimes = new ArrayList<Float>()); }
+      List<TranscriptSegment> endTimes = typeToEndTimes.get(key);
+      if (endTimes == null) { typeToEndTimes.put(key, endTimes = new ArrayList<TranscriptSegment>()); }
       for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
-        endTimes.add(event.getValue().end);
+        TranscriptEvent value = event.getValue();
+        endTimes.add(new TranscriptSegment(value.start, value.end, value.event, value.score));
       }
     }
-    for ( List<Float> times : typeToEndTimes.values()) {
-      Float lastEndTime = times.isEmpty() ? (float)fileDuration : times.get(times.size() - 1);
+/*    for (List<TranscriptSegment> times : typeToEndTimes.values()) {
+      TranscriptSegment lastEndTime = times.isEmpty() ? (float)fileDuration : times.get(times.size() - 1);
+
       if (lastEndTime < fileDuration && !times.isEmpty()) {
        // logger.debug("setting last segment to end at end of file " + lastEndTime + " vs " + fileDuration);
         times.set(times.size() - 1,(float)fileDuration);
       }
-    }
+    }*/
     return typeToEndTimes;
   }
 
