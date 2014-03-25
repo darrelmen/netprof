@@ -95,7 +95,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
       }
     });
     playButton.setType(ButtonType.INFO);
-    playButton.getElement().setId("playButton");
+    playButton.getElement().setId("PlayAudioPanel_playButton");
     playButton.addStyleName("leftFiveMargin");
     playButton.setEnabled(false);
     add(playButton);
