@@ -621,8 +621,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         " path "+ audioPath + " attributes were " + audioAttributes);*/
 
       RadioButton regular = null;
+
       for (final AudioAttribute audioAttribute : audioAttributes) {
-        RadioButton radio = new RadioButton(GROUP + "_" + exercise.getID() + "_"+instance, audioAttribute.getDisplay());
+        final RadioButton radio = new RadioButton(GROUP + "_" + exercise.getID() + "_"+instance, audioAttribute.getDisplay());
+        radio.getElement().setId("Radio_"+audioAttribute.getDisplay());
         if (audioAttribute.isRegularSpeed()) {
           regular = radio;
         }
@@ -635,6 +637,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
           @Override
           public void onClick(ClickEvent event) {
             showAudio(audioAttribute);
+            controller.logEvent(radio,"RadioButton",exerciseID,"Selected audio " + audioAttribute.getAudioRef());
           }
         });
       }
