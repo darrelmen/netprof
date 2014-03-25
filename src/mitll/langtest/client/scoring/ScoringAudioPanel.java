@@ -5,9 +5,11 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 
@@ -41,7 +43,8 @@ public abstract class ScoringAudioPanel extends AudioPanel {
    * @param playButtonSuffix
    * @param exerciseID
    */
-  ScoringAudioPanel(String refSentence, LangTestDatabaseAsync service, ExerciseController controller, ScoreListener gaugePanel, String playButtonSuffix, String exerciseID) {
+  ScoringAudioPanel(String refSentence, LangTestDatabaseAsync service, ExerciseController controller,
+                    ScoreListener gaugePanel, String playButtonSuffix, String exerciseID) {
     this(null, refSentence, service, controller, SHOW_SPECTROGRAM, gaugePanel, 23, playButtonSuffix, exerciseID);
   }
 
@@ -65,13 +68,13 @@ public abstract class ScoringAudioPanel extends AudioPanel {
     addClickHandlers();
   }
 
-  PopupPanel popupPanel;
+  //PopupPanel popupPanel;
   private void addClickHandlers() {
     this.phones.image.getElement().getStyle().setCursor(Style.Cursor.POINTER);
-    this.phones.image.addClickHandler(new TranscriptEventClickHandler(NetPronImageType.PHONE_TRANSCRIPT));
+    this.phones.image.addClickHandler(new TranscriptEventClickHandler(this.phones.image, NetPronImageType.PHONE_TRANSCRIPT));
     final Image image = this.words.image;
     image.getElement().getStyle().setCursor(Style.Cursor.POINTER);
-    image.addClickHandler(new TranscriptEventClickHandler(NetPronImageType.WORD_TRANSCRIPT));
+    image.addClickHandler(new TranscriptEventClickHandler(image,NetPronImageType.WORD_TRANSCRIPT));
 
     // TODO come back to this
    /* final PopupPanel popupPanel = new PopupPanel(true);
@@ -180,18 +183,19 @@ public abstract class ScoringAudioPanel extends AudioPanel {
 
   void getClickedOnSegment(int eventXPos, NetPronImageType type, EventSegment onClick) {
     int index = 0;
-    List<Float> endTimes = result.getsTypeToEndTimes().get(type);
-    float wavFileLengthInSeconds = result.getWavFileLengthInSeconds();//endTimes.get(endTimes.size() - 1);
+    List<TranscriptSegment> transcriptSegments = result.getsTypeToEndTimes().get(type);
+    float wavFileLengthInSeconds = result.getWavFileLengthInSeconds();//transcriptSegments.get(transcriptSegments.size() - 1);
     float horizOffset = (float) eventXPos / (float) phones.image.getWidth();
     float mouseClickTime = wavFileLengthInSeconds * horizOffset;
     if (debug) System.out.println("got client at " + eventXPos + " or " + horizOffset + " or time " + mouseClickTime +
       " duration " + wavFileLengthInSeconds + " secs or " + wavFileLengthInSeconds * 1000 + " millis");
-    for (Float endTime : endTimes) {
-      float next = endTimes.get(Math.min(endTimes.size() - 1, index + 1));
-      if (mouseClickTime > endTime && mouseClickTime <= next) {
-        if (debug) System.out.println("\t playing from " + endTime + " to " + next);
 
-        onClick.onSegmentClick(endTime, next);
+    for (TranscriptSegment segment : transcriptSegments) {
+     // TranscriptSegment next = transcriptSegments.get(Math.min(transcriptSegments.size() - 1, index + 1));
+      if (mouseClickTime > segment.getStart() && mouseClickTime <= segment.getEnd()) {
+        if (debug) System.out.println("\t playing " + segment);
+     //   result.getsTypeToEndTimes();
+        onClick.onSegmentClick(segment);
         break;
       }
       index++;
@@ -245,7 +249,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
       }
     }*/
 
-    public abstract void onSegmentClick(float endTime, float next);
+    public abstract void onSegmentClick(TranscriptSegment segment);
   }
   /**
    * Find the start-end time period corresponding to the click on either the phone or the word image and then
@@ -257,22 +261,27 @@ public abstract class ScoringAudioPanel extends AudioPanel {
    * @see #addClickHandlers
    */
   private class TranscriptEventClickHandler extends MyClickHandler {
-
+    UIObject widget;
     /**
      * @see mitll.langtest.client.scoring.ScoringAudioPanel#addClickHandlers
      * @param type
      */
-    public TranscriptEventClickHandler(NetPronImageType type) {
+    public TranscriptEventClickHandler(UIObject widget, NetPronImageType type) {
       super(type);
+      this.widget =widget;
     }
 
     @Override
-    public void onSegmentClick(float endTime, float next) {
-      playSegment(MP3_HEADER_OFFSET+endTime, MP3_HEADER_OFFSET+next);
+    public void onSegmentClick(TranscriptSegment segment) {
+      playSegment(MP3_HEADER_OFFSET+segment.getStart(), MP3_HEADER_OFFSET+segment.getEnd());
+      if (controller.getProps().doInstrumentation()) {
+        long user = (long) controller.getUser();
+        controller.getButtonFactory().logEvent(widget, type.toString(), exerciseID, "Clicked on " + segment.getEvent(), user);
+      }
     }
   }
 
   private static interface EventSegment {
-    void onSegmentClick(float start, float end);
+    void onSegmentClick(TranscriptSegment segment);
   }
 }
