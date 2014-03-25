@@ -2,10 +2,8 @@ package mitll.langtest.client.custom;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
-import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
-import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
@@ -13,7 +11,6 @@ import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -22,7 +19,6 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.CommonUserExercise;
-import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 
