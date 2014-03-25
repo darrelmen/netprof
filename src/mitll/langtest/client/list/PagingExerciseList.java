@@ -217,6 +217,7 @@ public class PagingExerciseList extends ExerciseList {
   void addTypeAhead(Panel column) {
     if (showTypeAhead) {
       //typeAhead = new TextBox();
+      typeAhead.getElement().setId("ExerciseList_TypeAhead");
       typeAhead.setDirectionEstimator(true);   // automatically detect whether text is RTL
       typeAhead.addKeyUpHandler(new KeyUpHandler() {
         public void onKeyUp(KeyUpEvent event) {
@@ -224,6 +225,7 @@ public class PagingExerciseList extends ExerciseList {
           //  text = text.trim();
           if (!text.equals(lastValue)) {
             System.out.println("addTypeAhead : looking for '" + text + "' (" + text.length() + " chars)");
+            controller.logEvent(typeAhead,"TypeAhead","UserList_"+userListID,"User search ='" +text+ "'");
             loadExercises(getHistoryToken(""), text);
             lastValue = text;
           }
@@ -268,6 +270,8 @@ public class PagingExerciseList extends ExerciseList {
       tellUserPanelIsBusy();
       markCurrentExercise(pagingContainer.getCurrentSelection().getID());
     } else {
+      controller.logEvent(this,"ExerciseList",e.getID(),"Clicked on item '" + e.getTooltip() +"'");
+
       pushNewItem(e.getID());
     }
   }
