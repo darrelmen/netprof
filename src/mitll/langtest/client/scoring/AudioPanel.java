@@ -53,15 +53,15 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private static final int IMAGE_WIDTH_SLOP = 70 + WINDOW_SIZE_CHANGE_THRESHOLD/2;
 
   private final ScoreListener gaugePanel;
-  private final String exerciseID;
+  protected final String exerciseID;
   String audioPath;
   private final Map<String,Integer> reqs = new HashMap<String, Integer>();
   private int reqid;
 
   private ImageAndCheck waveform;
   private ImageAndCheck spectrogram;
-  ImageAndCheck phones;
   ImageAndCheck words;
+  ImageAndCheck phones;
 
   private int lastWidth = 0;
   private AudioPositionPopup audioPositionPopup;
@@ -92,6 +92,9 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     this.audioPath = path;
 
     addWidgets(playButtonSuffix, audioType);
+    if (playAudio != null) {
+      controller.register(playAudio.getPlayButton(), exerciseID);
+    }
   }
 
   protected AudioPanel(LangTestDatabaseAsync service,
@@ -159,10 +162,12 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     }
     words = new ImageAndCheck();
     imageContainer.add(words.image);
+    words.image.getElement().setId("Transcript_Words");
     controlPanel.add(addCheckbox("words", words));
 
     phones = new ImageAndCheck();
     imageContainer.add(phones.image);
+    phones.image.getElement().setId("Transcript_Phones");
     controlPanel.add(addCheckbox("phones", phones));
 
     hp.add(controlPanel);
