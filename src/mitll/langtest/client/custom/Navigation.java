@@ -571,6 +571,9 @@ public class Navigation extends TabContainer implements RequiresResize {
         }
       });
     }
+    else {
+      System.out.println("not visiting own list..." + ul.getID());
+    }
   }
 
   /**
