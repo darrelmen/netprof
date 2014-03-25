@@ -17,6 +17,8 @@ import mitll.langtest.shared.CommonExercise;
  * A waveform record button and a play audio button.
  */
 public class RecordAudioPanel extends AudioPanel {
+  public static final String RECORD = "Record";
+  public static final String STOP = "Stop";
   private final int index;
 
   private PostAudioRecordButton postAudioRecordButton;
@@ -35,7 +37,7 @@ public class RecordAudioPanel extends AudioPanel {
    * @param index
    * @param showSpectrogram
    * @param audioType
-   * @see mitll.langtest.client.exercise.WaveformExercisePanel#getAnswerWidget(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @see mitll.langtest.client.custom.NewUserExercise.CreateFirstRecordAudioPanel#CreateFirstRecordAudioPanel(mitll.langtest.shared.CommonExercise, com.google.gwt.user.client.ui.Panel, boolean)
    */
   public RecordAudioPanel(CommonExercise exercise, ExerciseController controller, Panel widgets,
                           LangTestDatabaseAsync service, int index, boolean showSpectrogram, String audioType) {
@@ -76,7 +78,10 @@ public class RecordAudioPanel extends AudioPanel {
   }
 
   protected WaveformPostAudioRecordButton makePostAudioRecordButton(String audioType) {
-    return new WaveformPostAudioRecordButton(exercise, controller, exercisePanel, this, service, index, true, "Record", "Stop", audioType) {
+    return new WaveformPostAudioRecordButton(exercise, controller, exercisePanel, this, service, index, true, RECORD, STOP, audioType) {
+      /**
+       * @see mitll.langtest.client.recorder.RecordButton#start()
+       */
       @Override
       public void startRecording() {
         super.startRecording();
@@ -106,7 +111,9 @@ public class RecordAudioPanel extends AudioPanel {
 /*  public void addStopListener(StopListener stopListener) { this.stopListener = stopListener;}
   public void removeStopListener() { stopListener = null; }*/
 
+/*
   public static interface StopListener { public void stopped(); }
+*/
 
   protected void showStart() {
     recordImage1.setVisible(true);
