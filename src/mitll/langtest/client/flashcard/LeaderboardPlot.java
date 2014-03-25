@@ -167,6 +167,10 @@ public class LeaderboardPlot {
       to = GRAPH_MAX;
       from = GRAPH_MAX -2*HALF;
     }
+    if (pbCorrect < HALF) {
+      to = 2*HALF;
+      from = 0;
+    }
     PlotBand personalBest = chart.getYAxis().createPlotBand()
       .setColor("#f18d24")
       .setFrom(from)
