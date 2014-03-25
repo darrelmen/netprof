@@ -81,5 +81,7 @@ public interface ExerciseController {
   EventLogger getButtonFactory();
   void register(Button button, String exid);
 
+  void register(Button button, String exid, String context);
+
   void logEvent(UIObject button, String widgetType, String exid, String context);
 }
