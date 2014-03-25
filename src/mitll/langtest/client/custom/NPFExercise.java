@@ -67,6 +67,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
    */
   Panel makeAddToList(CommonExercise e, ExerciseController controller) {
     addToList = new DropdownButton("");
+    addToList.getElement().setId("NPFExercise_AddToList");
     addToList.setDropup(true);
     addToList.setIcon(IconType.PLUS_SIGN);
     addToList.setType(ButtonType.PRIMARY);
@@ -75,6 +76,12 @@ public class NPFExercise extends GoodwaveExercisePanel {
     populateListChoices(e, controller, addToList);
     return addToList;
   }
+
+  /**
+   * @see Navigation#getButtonRow2(com.google.gwt.user.client.ui.Panel)
+   */
+  @Override
+  public void wasRevealed() { populateListChoices(exercise, controller, addToList);  }
 
   /**
    * Ask server for the set of current lists for this user.
@@ -109,6 +116,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
             widget.addClickHandler(new ClickHandler() {
               @Override
               public void onClick(ClickEvent event) {
+                controller.logEvent(w1,"DropUp",e.getID(),"Adding to list " + ul.getID() +"/"+ul.getName());
                 service.addItemToUserList(ul.getUniqueID(), new UserExercise(e, controller.getUser()), new AsyncCallback<Void>() {
                   @Override
                   public void onFailure(Throwable caught) {
@@ -136,12 +144,6 @@ public class NPFExercise extends GoodwaveExercisePanel {
       }
     });
   }
-
-  /**
-   * @see Navigation#getButtonRow2(com.google.gwt.user.client.ui.Panel)
-   */
-  @Override
-  public void wasRevealed() { populateListChoices(exercise, controller, addToList);  }
 
   private void showPopup(String html, Widget target) {
     Widget content = new HTML(html);
