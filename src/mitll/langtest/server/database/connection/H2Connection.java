@@ -24,9 +24,9 @@ public class H2Connection implements DatabaseConnection {
   private final int queryCacheSize;
   private static final int maxMemoryRows = 50000;
 
-  private H2Connection(String configDir, String dbName) {
+/*  private H2Connection(String configDir, String dbName) {
     this(configDir, dbName, 50000, 8, true);
-  }
+  }*/
 
   public H2Connection(String configDir, String dbName, boolean mustAlreadyExist) {
     this(configDir, dbName, 50000, 8, mustAlreadyExist);
