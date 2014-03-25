@@ -33,9 +33,7 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.User;
-import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 
 import java.util.ArrayList;
@@ -164,6 +162,7 @@ public class Navigation extends TabContainer implements RequiresResize {
       public void onClick(ClickEvent event) {
         checkAndMaybeClearTab(YOUR_LISTS);
         refreshViewLessons(true, false);
+        controller.logEvent(yourStuff.tab.asWidget(), "Tab", "", YOUR_LISTS);
       }
     });
 
@@ -174,17 +173,20 @@ public class Navigation extends TabContainer implements RequiresResize {
       public void onClick(ClickEvent event) {
         checkAndMaybeClearTab(OTHERS_LISTS);
         refreshViewLessons(false, true);
+        controller.logEvent(othersStuff.tab.asWidget(),"Tab","",OTHERS_LISTS);
+
       }
     });
 
     // create tab
     final TabAndContent create = makeTab(tabPanel, IconType.PLUS_SIGN, CREATE);
-    final CreateListDialog createListDialog = new CreateListDialog(this,service,userManager);
+    final CreateListDialog createListDialog = new CreateListDialog(this,service,userManager, controller);
     create.tab.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
       //  checkAndMaybeClearTab(CREATE);
         createListDialog.doCreate(create.content);
+        controller.logEvent(create.tab.asWidget(),"Tab","",CREATE);
       }
     });
 
@@ -194,6 +196,7 @@ public class Navigation extends TabContainer implements RequiresResize {
       @Override
       public void onClick(ClickEvent event) {
         checkAndMaybeClearTab(BROWSE);
+        controller.logEvent(browse.tab.asWidget(),"Tab","",BROWSE);
         viewBrowse();
       }
     });
@@ -205,6 +208,7 @@ public class Navigation extends TabContainer implements RequiresResize {
       @Override
       public void onClick(ClickEvent event) {
         checkAndMaybeClearTab(CHAPTERS);
+        controller.logEvent(chapters.tab.asWidget(),"Tab","",CHAPTERS);
       }
     });
 
@@ -215,6 +219,8 @@ public class Navigation extends TabContainer implements RequiresResize {
         public void onClick(ClickEvent event) {
           checkAndMaybeClearTab(REVIEW1);
           viewReview(review.content);
+          controller.logEvent(review.tab.asWidget(),"Tab","",REVIEW1);
+
         }
       });
 
@@ -224,6 +230,8 @@ public class Navigation extends TabContainer implements RequiresResize {
         public void onClick(ClickEvent event) {
           checkAndMaybeClearTab(COMMENTS);
           viewComments(commented.content);
+          controller.logEvent(commented.tab.asWidget(),"Tab","",COMMENTS);
+
         }
       });
     }
@@ -253,7 +261,7 @@ public class Navigation extends TabContainer implements RequiresResize {
   }
 
   private void checkAndMaybeClearTab(String value) {
-    String value1 = storage.getValue(CLICKED_TAB);
+  //  String value1 = storage.getValue(CLICKED_TAB);
 
 //      System.out.println("checkAndMaybeClearTab " + value1 + " vs "+value + " clearing " + CLICKED_USER_LIST);
     storage.removeValue(CLICKED_USER_LIST);
@@ -587,6 +595,7 @@ public class Navigation extends TabContainer implements RequiresResize {
       public void onClick(ClickEvent event) {
         storage.storeValue(SUB_TAB, LEARN);
         npfHelper.showNPF(ul, learn, instanceName1);
+        controller.logEvent(learn.tab,"Tab","UserList_"+ul.getID(),LEARN);
       }
     });
 
@@ -603,6 +612,8 @@ public class Navigation extends TabContainer implements RequiresResize {
          // System.out.println("getListOperations : got click on practice");
 
           avpHelper.showNPF(ul, fpractice, PRACTICE1);
+          controller.logEvent(fpractice.tab,"Tab","UserList_"+ul.getID(),PRACTICE1);
+
         }
       });
     }
@@ -616,6 +627,8 @@ public class Navigation extends TabContainer implements RequiresResize {
         public void onClick(ClickEvent event) {
           storage.storeValue(SUB_TAB, EDIT_ITEM);
           EditItem editItem1 = (isReview || isComment) ? reviewItem : Navigation.this.editItem;
+          controller.logEvent(edit.tab,"Tab","UserList_"+ul.getID(),EDIT_ITEM);
+
           showEditItem(ul, edit, editItem1, isNormalList && !ul.isFavorite(), isReview);
         }
       });
@@ -862,6 +875,7 @@ public class Navigation extends TabContainer implements RequiresResize {
         @Override
         public void onClick(ClickEvent event) {
           showList(ul, contentPanel, instanceName);
+          controller.logEvent(contentPanel,"Tab","UserList_"+ul.getID(),"Show List");
         }
       });
       widgets.addMouseOverHandler(new MouseOverHandler() {
@@ -977,7 +991,8 @@ public class Navigation extends TabContainer implements RequiresResize {
    * @return
    */
   private Button makeDeleteButton(final UserList ul, final boolean onlyMyLists) {
-    Button delete = new Button(DELETE);
+    final Button delete = new Button(DELETE);
+    delete.getElement().setId("UserList_"+ul.getID()+"_delete");
     delete.addStyleName("topMargin");
     DOM.setStyleAttribute(delete.getElement(), "marginBottom", "5px");
 
@@ -985,6 +1000,7 @@ public class Navigation extends TabContainer implements RequiresResize {
     delete.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(final ClickEvent event) {
+        controller.logEvent(delete,"Button","UserList_"+ul.getID(),"Delete");
         service.deleteList(ul.getUniqueID(), new AsyncCallback<Boolean>() {
           @Override
           public void onFailure(Throwable caught) {}
