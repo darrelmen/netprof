@@ -465,9 +465,14 @@ public class UserListManager {
    * @param user
    */
   public void addVisitor(UserList userList, long user) {
+    logger.debug("addVisitor - user " + user + " visits " + userList.getUniqueID());
+
     UserList where = userListDAO.getWhere(userList.getUniqueID(), true);
     if (where != null) {
       userListDAO.addVisitor(where.getUniqueID(), user);
+    }
+    else {
+      logger.warn("addVisitor - can't find list with id " + userList.getUniqueID());
     }
   }
 
