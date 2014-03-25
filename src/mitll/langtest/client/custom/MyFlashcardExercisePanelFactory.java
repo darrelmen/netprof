@@ -60,6 +60,7 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   private static final String CORRECT_SUBTITLE = "% correct";
   private static final int ROWS_IN_TABLE = 7;
   private static final String SKIP_TO_END = "Skip to end";
+  private static final boolean ADD_KEY_BINDING = false;
 
   private CommonExercise currentExercise;
   private final ControlState controlState;
@@ -110,7 +111,7 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
     private Panel container;
     public StatsPracticePanel(CommonExercise e) {
       super(e, MyFlashcardExercisePanelFactory.this.service,
-        MyFlashcardExercisePanelFactory.this.controller, 40, false, MyFlashcardExercisePanelFactory.this.controlState);
+        MyFlashcardExercisePanelFactory.this.controller, ADD_KEY_BINDING, MyFlashcardExercisePanelFactory.this.controlState);
     }
 
     @Override
@@ -361,6 +362,7 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
      */
     private Button getRepeatButton() {
       final Button w1 = new Button(START_OVER);
+      w1.getElement().setId("AVP_DoWholeSetFromStart");
       w1.setType(ButtonType.PRIMARY);
       w1.addClickHandler(new ClickHandler() {
         @Override
@@ -371,6 +373,7 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
           startOver();
         }
       });
+      controller.register(w1,currentExercise.getID());
       return w1;
     }
 
@@ -410,6 +413,7 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
      // this.toAddTo = toAddTo;
 
       skip = new Button(SKIP_THIS_ITEM);
+      skip.getElement().setId("AVP_Skip_Item");
       skip.setType(ButtonType.INFO);
       skip.addClickHandler(new ClickHandler() {
         @Override
@@ -421,8 +425,11 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
         }
       });
       toAddTo.add(skip);
+      controller.register(skip, currentExercise.getID());
 
       startOver = new Button(START_OVER);
+      startOver.getElement().setId("AVP_StartOver");
+
       startOver.setType(ButtonType.PRIMARY);
       startOver.addStyleName("floatRight");
       startOver.addClickHandler(new ClickHandler() {
@@ -433,8 +440,12 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
           startOver();
         }
       });
+      controller.register(startOver, currentExercise.getID());
 
       seeScores = new Button(SKIP_TO_END);
+      seeScores.getElement().setId("AVP_SkipToEnd");
+      controller.register(seeScores, currentExercise.getID());
+
       seeScores.addStyleName("leftFiveMargin");
       seeScores.setType(ButtonType.PRIMARY);
       seeScores.addStyleName("floatRight");

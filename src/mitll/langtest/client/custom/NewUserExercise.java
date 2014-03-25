@@ -53,6 +53,7 @@ public class NewUserExercise extends BasicDialog {
   private static final String RECORD_REFERENCE_AUDIO_FOR_THE_FOREIGN_LANGUAGE_PHRASE = "Record reference audio for the foreign language phrase.";
   private static final String CLICK_AND_HOLD_TO_RECORD = "Click and Hold to Record";
   private static final String RELEASE_TO_STOP = "Release to Stop";
+  private static final String REMOVE_FROM_LIST = "Remove from list";
 
   private final EditItem editItem;
   final UserExercise newUserExercise;
@@ -101,6 +102,8 @@ public class NewUserExercise extends BasicDialog {
    * @return
    */
   public Panel addNew(final UserList ul, UserList originalList, final ListInterface listInterface, final Panel toAddTo) {
+    this.ul = ul;
+
     final FluidContainer container = new FluidContainer();
     DivWidget upper = new DivWidget();
 
@@ -122,7 +125,6 @@ public class NewUserExercise extends BasicDialog {
 
     normalSpeedRecording = makeRegularAudioPanel(row);
     normalSpeedRecording.addStyleName("buttonGroupInset3");
-    this.ul = ul;
     this.originalList = originalList;
     this.listInterface = listInterface;
     this.toAddTo = toAddTo;
@@ -139,18 +141,23 @@ public class NewUserExercise extends BasicDialog {
       @Override
       public void onBlur(BlurEvent event) {
         gotBlur();
+        controller.logEvent(foreignLang.box,"TextBox","UserList_"+ul.getID(),"ForeignLangBox = " + foreignLang.box.getValue());
       }
     });
     translit.box.addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
         gotBlur();
+        controller.logEvent(translit.box,"TextBox","UserList_"+ul.getID(),"TranslitBox = " + translit.box.getValue());
+
       }
     });
     english.box.addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
         gotBlur();
+        controller.logEvent(english.box, "TextBox", "UserList_" + ul.getID(), "EnglishBox = " + english.box.getValue());
+
       }
     });
 
@@ -213,10 +220,21 @@ public class NewUserExercise extends BasicDialog {
     });
   }
 
+  protected Button makeDeleteButton(UserList ul) {
+    Button delete = new Button(REMOVE_FROM_LIST);
+    delete.getElement().setId("Remove_from_list_" + ul.getID());
+    DOM.setStyleAttribute(delete.getElement(), "marginRight", "5px");
+    delete.setType(ButtonType.WARNING);
+    delete.addStyleName("floatRight");
+    controller.register(delete,newUserExercise.getID());
+    return delete;
+  }
+
   Panel makeEnglishRow(Panel container) {
     Panel row = new FluidRow();
     container.add(row);
     english = addControlFormField(row, ENGLISH_LABEL, false, 1, 100);
+    english.box.getElement().setId("NewUserExercise_English_entry_for_list_"+ul.getID());
 
     return row;
   }
@@ -226,6 +244,8 @@ public class NewUserExercise extends BasicDialog {
     container.add(row);
     foreignLang = addControlFormField(row, controller.getLanguage(), false, 1, 150);
     foreignLang.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
+    String id = "NewUserExercise_ForeignLang_entry_for_list_" +ul.getID();
+    foreignLang.box.getElement().setId(id);
     return foreignLang;
   }
 
@@ -233,8 +253,11 @@ public class NewUserExercise extends BasicDialog {
     Panel row = new FluidRow();
     container.add(row);
     translit = addControlFormField(row, TRANSLITERATION_OPTIONAL,false,0, 150);
+    translit.box.getElement().setId("NewUserExercise_Transliteration_entry_for_list_"+ul.getID());
+
   }
 
+/*
   private void focusOn(final FormField form) {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
@@ -242,6 +265,7 @@ public class NewUserExercise extends BasicDialog {
       }
     });
   }
+*/
 
   void setFields(CommonUserExercise newUserExercise) {
     System.out.println("grabInfoFromFormAndStuffInfoExercise : setting fields with " + newUserExercise);
@@ -312,6 +336,8 @@ public class NewUserExercise extends BasicDialog {
                                   final RecordAudioPanel rap, final ControlGroup normalSpeedRecording, final String buttonName) {
     final Button submit = new Button(buttonName);
     submit.setType(ButtonType.SUCCESS);
+    submit.getElement().setId("CreateButton_NewExercise_for_" + ul.getID());
+    controller.register(submit, "UserList_" + ul.getID());
     submit.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
