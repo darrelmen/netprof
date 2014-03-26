@@ -28,7 +28,7 @@ public interface ListInterface extends RequiresResize {
    */
   void setFactory(ExercisePanelFactory factory, UserManager user, int expectedGrades);
 
-  void rememberAndLoadFirst(List<CommonShell> exercises, CommonExercise firstExercise);
+//  void rememberAndLoadFirst(List<CommonShell> exercises, CommonExercise firstExercise);
 
     /**
      * @see mitll.langtest.client.LangTest#gotUser(long)
@@ -69,7 +69,7 @@ public interface ListInterface extends RequiresResize {
  boolean loadNextExercise(CommonShell current);
 
   boolean loadNextExercise(String id);
-  Panel makeExercisePanel(CommonExercise result);
+ // Panel makeExercisePanel(CommonExercise result);
 
   boolean loadPrev();
 
@@ -78,7 +78,7 @@ public interface ListInterface extends RequiresResize {
   void checkAndAskServer(String id);
 
   public String getCurrentExerciseID();
-  public CommonShell getCurrentExercise();
+  //public CommonShell getCurrentExercise();
 
   boolean onFirst();
   boolean onFirst(CommonShell current);
