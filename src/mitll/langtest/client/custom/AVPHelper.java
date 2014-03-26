@@ -11,8 +11,6 @@ import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.ExerciseShell;
-import mitll.langtest.shared.custom.UserExercise;
 
 /**
 * Created with IntelliJ IDEA.
