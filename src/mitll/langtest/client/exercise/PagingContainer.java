@@ -18,7 +18,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.shared.CommonShell;
-import mitll.langtest.shared.ExerciseShell;
 
 import java.util.Date;
 import java.util.HashMap;
