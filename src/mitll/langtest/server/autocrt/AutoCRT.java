@@ -7,7 +7,6 @@ import mitll.langtest.server.database.Export;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.log4j.Logger;
 
