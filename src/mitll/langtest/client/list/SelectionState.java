@@ -17,6 +17,7 @@ import java.util.Map;
 * To change this template use File | Settings | File Templates.
 */
 public class SelectionState {
+  public static final String INSTANCE = "instance";
   private String item;
   private final Map<String, Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
   private String instance = "";
@@ -26,9 +27,11 @@ public class SelectionState {
    * Populated from history token!
    * @seex mitll.langtest.client.flashcard.BootstrapFlashcardExerciseList#getExercises(long, boolean)
    */
+/*
   public SelectionState( boolean removePlus) {
     this(History.getToken(), removePlus);
   }
+*/
 
   /**
    * @see ExerciseList#getIDFromToken(String)
@@ -88,7 +91,7 @@ public class SelectionState {
             System.err.println("\t\tparseToken : part " + part + " is badly formed ");
           } else {
             if (debug) System.out.println("\t\tparseToken : add " + type + " : " + sections);
-            if (type.equals("instance")) instance = section;
+            if (type.equals(INSTANCE)) instance = section;
             else add(type, sections);
           }
           if (debug) System.out.println("\tparseToken : part " + part + " : " + type + "->" + section);
