@@ -851,9 +851,12 @@ fieldset > legend {
  }
 
 .mouseOverHighlight {
-    background-color: yellow;
     cursor: pointer;
 }
+
+.playingAudioHighlight {
+     background-color: yellow;
+ }
 
 .cardBorderShadow {
     background-color: #FFFFFF;
