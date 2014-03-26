@@ -499,7 +499,8 @@ public class NewUserExercise extends BasicDialog {
    * @return
    */
   CreateFirstRecordAudioPanel makeRecordAudioPanel(final Panel row, boolean recordRegularSpeed) {
-    return new CreateFirstRecordAudioPanel(newUserExercise.toExercise(), row,  recordRegularSpeed);
+    //Exercise newExercise = newUserExercise.toExercise();
+    return new CreateFirstRecordAudioPanel(newUserExercise, row,  recordRegularSpeed);
   }
 
   protected class CreateFirstRecordAudioPanel extends RecordAudioPanel {
@@ -524,6 +525,12 @@ public class NewUserExercise extends BasicDialog {
           otherRAP.setEnabled(true);
         }
       });
+
+      String newUserExercise_waveformPostAudioRecordButton = "NewUserExercise_WaveformPostAudioRecordButton_";
+      String speed = (recordRegularSpeed ? "Regular" : "Slow") + "_speed";
+      getPostAudioButton().getElement().setId(newUserExercise_waveformPostAudioRecordButton + speed);
+      getPlayButton().getElement().setId(newUserExercise_waveformPostAudioRecordButton+ "Play_"+speed);
+      controller.register(getPlayButton(),newExercise.getID());
     }
 
     @Override
@@ -592,7 +599,7 @@ public class NewUserExercise extends BasicDialog {
             audioPosted();
           }
         };
-      postAudioButton.getElement().setId("NewUserExercise_WaveformPostAudioRecordButton");
+      postAudioButton.getElement().setId("NewUserExercise_WaveformPostAudioRecordButton_"+(recordRegularSpeed?"Regular":"Slow")+"_speed");
       return postAudioButton;
     }
 
