@@ -41,7 +41,7 @@ public class PagingExerciseList extends ExerciseList {
   private final boolean showTypeAhead;
 
   private TextBox typeAhead = new TextBox();
-  private String lastValue = "";
+  private String lastTypeAheadValue = "";
   private long userListID = -1;
   private int unaccountedForVertical = 160;
 
@@ -223,11 +223,11 @@ public class PagingExerciseList extends ExerciseList {
         public void onKeyUp(KeyUpEvent event) {
           String text = typeAhead.getText();
           //  text = text.trim();
-          if (!text.equals(lastValue)) {
+          if (!text.equals(lastTypeAheadValue)) {
             System.out.println("addTypeAhead : looking for '" + text + "' (" + text.length() + " chars)");
             controller.logEvent(typeAhead,"TypeAhead","UserList_"+userListID,"User search ='" +text+ "'");
             loadExercises(getHistoryToken(""), text);
-            lastValue = text;
+            lastTypeAheadValue = text;
           }
         }
       });
