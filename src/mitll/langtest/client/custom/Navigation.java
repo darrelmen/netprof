@@ -60,7 +60,7 @@ public class Navigation extends TabContainer implements RequiresResize {
   private static final String PRACTICE1 = "practice";
   private static final String ADD_OR_EDIT_ITEM = "Add/Edit Item";
   private static final String ADD_DELETE_EDIT_ITEM = "Fix Defects";
-  private static final String ITEMS_TO_REVIEW = "Possible defects";
+  private static final String POSSIBLE_DEFECTS = "Possible defects";
   private static final String ITEMS_WITH_COMMENTS = "Items with comments";
   private static final String LEARN_PRONUNCIATION = "Learn Pronunciation";
   private static final String REVIEW1 = "Defects";
@@ -75,6 +75,7 @@ public class Navigation extends TabContainer implements RequiresResize {
   private static final String CLICKED_TAB = "clickedTab";
   private static final String SUB_TAB = "subTab";
   private static final String NO_LISTS_CREATED_OR_VISITED_YET = "No lists created or visited yet.";
+  public static final String NO_LISTS_YET = "No lists created yet that you haven't seen.";
 
   private static final int YOUR_LIST_INDEX = 0;
   private static final int OTHERS_LIST_INDEX = 1;
@@ -94,6 +95,7 @@ public class Navigation extends TabContainer implements RequiresResize {
   private ScrollPanel listScrollPanel;
   private final ListInterface listInterface;
   private final NPFHelper npfHelper;
+  private ChapterNPFHelper defectHelper;
   private final NPFHelper avpHelper;
   private final EditItem editItem;
   private final EditItem reviewItem;
@@ -116,6 +118,9 @@ public class Navigation extends TabContainer implements RequiresResize {
     this.listInterface = listInterface;
     storage = new KeyStorage(controller);
     npfHelper = new NPFHelper(service, feedback, userManager, controller);
+    if (controller.isReviewMode()) {
+      defectHelper = new ChapterNPFHelper(service, feedback, userManager, controller);
+    }
     avpHelper = new AVPHelper(service, feedback, userManager, controller);
     editItem = new EditItem(service, userManager, controller, listInterface, feedback, npfHelper);
     reviewItem = new ReviewEditItem(service, userManager, controller, listInterface, feedback, npfHelper);
@@ -591,14 +596,14 @@ public class Navigation extends TabContainer implements RequiresResize {
     final String instanceName1 = isReview ? REVIEW : isComment ? COMMENT : LEARN;
 
     // add learn tab
-    String learnTitle = isReview ? ITEMS_TO_REVIEW : isComment ? ITEMS_WITH_COMMENTS : LEARN_PRONUNCIATION;
+    String learnTitle = isReview ? POSSIBLE_DEFECTS : isComment ? ITEMS_WITH_COMMENTS : LEARN_PRONUNCIATION;
     final TabAndContent learn = makeTab(tabPanel, isReview ? IconType.EDIT_SIGN : IconType.LIGHTBULB, learnTitle);
     learn.tab.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
+        controller.logEvent(learn.tab, "Tab", "UserList_" + ul.getID(), LEARN);
         storage.storeValue(SUB_TAB, LEARN);
-        npfHelper.showNPF(ul, learn, instanceName1);
-        controller.logEvent(learn.tab,"Tab","UserList_"+ul.getID(),LEARN);
+        showLearnTab(isReview, ul, learn, instanceName1);
       }
     });
 
@@ -613,7 +618,6 @@ public class Navigation extends TabContainer implements RequiresResize {
         public void onClick(ClickEvent event) {
           storage.storeValue(SUB_TAB, PRACTICE1);
          // System.out.println("getListOperations : got click on practice");
-
           avpHelper.showNPF(ul, fpractice, PRACTICE1);
           controller.logEvent(fpractice.tab,"Tab","UserList_"+ul.getID(),PRACTICE1);
 
@@ -632,7 +636,7 @@ public class Navigation extends TabContainer implements RequiresResize {
           EditItem editItem1 = (isReview || isComment) ? reviewItem : Navigation.this.editItem;
           controller.logEvent(edit.tab,"Tab","UserList_"+ul.getID(),EDIT_ITEM);
 
-          showEditItem(ul, edit, editItem1, isNormalList && !ul.isFavorite(), isReview);
+          showEditItem(ul, edit, editItem1, isNormalList && !ul.isFavorite());
         }
       });
     }
@@ -642,6 +646,20 @@ public class Navigation extends TabContainer implements RequiresResize {
       practice, editItem, isNormalList, editItem);
 
     return tabPanel;
+  }
+
+  protected void showLearnTab(boolean isReview, UserList ul, TabAndContent learn, String instanceName1) {
+    if (isReview) {
+
+      System.out.println("getListOperations : onClick using defect helper");
+
+      defectHelper.showNPF(ul, learn, instanceName1);
+    }
+    else {
+      System.out.println("getListOperations : onClick using npf helper");
+
+      npfHelper.showNPF(ul, learn, instanceName1);
+    }
   }
 
   /**
@@ -666,13 +684,7 @@ public class Navigation extends TabContainer implements RequiresResize {
                                 final TabAndContent edit,
                                 final boolean isNormalList, TabAndContent editItem) {
     final TabAndContent finalEditItem = editItem;
-/*    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-      public void execute() {
-        selectTabGivenHistory(tabPanel, learn, practice, edit, ul, instanceName1, isReview, isComment, isNormalList, created, finalEditItem);
-      }
-    });*/
     selectTabGivenHistory(tabPanel, learn, practice, edit, ul, instanceName1, isReview, isComment, isNormalList, created, finalEditItem);
-
   }
 
   private void selectTabGivenHistory(TabPanel tabPanel, TabAndContent learn, TabAndContent practice, TabAndContent edit, UserList ul, String instanceName1, boolean isReview, boolean isComment, boolean isNormalList, boolean created, TabAndContent finalEditItem) {
@@ -683,10 +695,13 @@ public class Navigation extends TabContainer implements RequiresResize {
         String name = ul.getName();
         tabPanel.selectTab(name.equals(REVIEW1) ? 0 : CREATE_TAB_INDEX);    // 2 = add/edit item
         EditItem editItem1 = (isReview || isComment) ? reviewItem : this.editItem;
-        showEditItem(ul, finalEditItem, editItem1, isNormalList && !ul.isFavorite(), isReview);
+        showEditItem(ul, finalEditItem, editItem1, isNormalList && !ul.isFavorite());
       } else {
         tabPanel.selectTab(0);
-        npfHelper.showNPF(ul, learn, instanceName1);
+      //  npfHelper.showNPF(ul, learn, instanceName1);
+
+        showLearnTab(isReview, ul, learn, instanceName1);
+
       }
     }
   }
@@ -726,7 +741,7 @@ public class Navigation extends TabContainer implements RequiresResize {
         boolean reviewOrComment = isReview || isComment;
         tabPanel.selectTab(reviewOrComment ? 1 : CREATE_TAB_INDEX);
         clickOnTab(edit);
-        showEditItem(ul, edit, reviewOrComment ? reviewItem : this.editItem, isNormalList && !ul.isFavorite(), isReview);
+        showEditItem(ul, edit, reviewOrComment ? reviewItem : this.editItem, isNormalList && !ul.isFavorite());
       } else chosePrev = false;
     }
     return chosePrev;
@@ -738,7 +753,7 @@ public class Navigation extends TabContainer implements RequiresResize {
    * @param addItem
    */
   private void showEditItem(UserList ul, TabAndContent addItem, EditItem editItem,
-                            boolean includeAddItem, boolean isUserReviewer) {
+                            boolean includeAddItem) {
     //System.out.println("showEditItem --- " + ul + " : " + includeAddItem  + " reviewer " + isUserReviewer);
     addItem.content.clear();
     Widget widgets = editItem.editItem(ul, listToMarker.get(ul), includeAddItem/*, isUserReviewer*/);
@@ -788,7 +803,7 @@ public class Navigation extends TabContainer implements RequiresResize {
     public void onSuccess(final Collection<UserList> result) {
       //System.out.println("\tUserListCallback : Displaying " + result.size() + " user lists for " + instanceName);
       if (result.isEmpty()) {
-        child.add(new Heading(3, allLists ? "No lists created yet that you haven't seen.":NO_LISTS_CREATED_YET));
+        child.add(new Heading(3, allLists ? NO_LISTS_YET :NO_LISTS_CREATED_YET));
       } else {
         listScrollPanel.getElement().setId("scrollPanel");
 
