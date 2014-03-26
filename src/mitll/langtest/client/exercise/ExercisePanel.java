@@ -2,7 +2,6 @@ package mitll.langtest.client.exercise;
 
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Tab;
-import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
