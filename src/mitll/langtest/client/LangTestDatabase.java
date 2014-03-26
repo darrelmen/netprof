@@ -42,10 +42,6 @@ public interface LangTestDatabase extends RemoteService {
 
   CommonExercise getExercise(String id);
 
-/*
-  ResultsAndGrades getResultsForExercise(String exid, boolean arabicTextDataCollect);
-*/
-
   // gradeDAO
   CountAndGradeID addGrade(String exerciseID, Grade grade);
   void changeGrade(Grade toChange);
@@ -60,9 +56,6 @@ public interface LangTestDatabase extends RemoteService {
   void addTextAnswer(int userID, CommonExercise exercise, int questionID, String answer, String answerType);
   AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int question, int user,
                              int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults);
-/*
-  double getScoreForAnswer(long userID, CommonExercise e, int questionID, String answer, String answerType);
-*/
 
   CommonExercise getNextUngradedExercise(String user, int expectedGrades, boolean englishOnly);
 
