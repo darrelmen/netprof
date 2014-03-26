@@ -71,9 +71,8 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @param showInOrder
    * @param controller
    * @param showTypeAhead
-   * @param instance
-   * */
-  public FlexSectionExerciseList(FluidRow secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
+   * @param instance          */
+  public FlexSectionExerciseList(Panel secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                  UserFeedback feedback,
                                  boolean showTurkToken, boolean showInOrder,
                                  ExerciseController controller,
@@ -110,7 +109,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @see mitll.langtest.client.LangTest#doEverythingAfterFactory
    */
   public void getExercises(final long userID, boolean getNext) {
-    //System.out.println("FlexSectionExerciseList : getExercises : Get exercises for user=" + userID + " crt mode " + allowPlusInURL);
+    System.out.println("FlexSectionExerciseList.getExercises : Get exercises for user=" + userID + " instance " + instance);
     this.userID = userID;
 
     if (controller.showCompleted()) {
@@ -119,7 +118,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
         public void onFailure(Throwable caught) {}
         @Override
         public void onSuccess(Set<String> result) {
-          //System.out.println("FlexSectionExerciseList : getCompletedExercises : completed for user=" + userID + " result " + result.size());
+          System.out.println("FlexSectionExerciseList : getCompletedExercises : completed for user=" + userID + " result " + result.size());
           controller.getExerciseList().setCompleted(result);
           addWidgets();
         }
@@ -130,10 +129,9 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     }
   }
 
-  private void addWidgets() {
+  public void addWidgets() {
     sectionPanel.clear();
-    Panel flexTable = getWidgetsForTypes();
-    sectionPanel.add(flexTable);
+    sectionPanel.add(getWidgetsForTypes());
   }
 
   /**
@@ -141,9 +139,9 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @see #pushNewSectionHistoryToken()
    * @param userID
    */
-  protected void noSectionsGetExercises(long userID) {
+/*  protected void noSectionsGetExercises(long userID) {
     super.getExercises(userID, true);
-  }
+  }*/
 
   /**
    * Assume for the moment that the first type has the largest elements... and every other type nests underneath it.
@@ -515,7 +513,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   protected void selectItem(String type, Collection<String> sections) {
     ButtonGroupSectionWidget listBox = (ButtonGroupSectionWidget) typeToBox.get(type);
     listBox.clearSelectionState();
-    System.out.println("FlexSectionExerciseList.selectItem : selecting " + type + "=" + sections);
+    System.out.println("FlexSectionExerciseList.selectItem : instance " + instance+ " selecting " + type + "=" + sections);
     listBox.selectItem(sections);
   }
 

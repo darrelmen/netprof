@@ -72,7 +72,7 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
                             final ImageAndCheck wordTranscript, final ImageAndCheck phoneTranscript,
                             int toUse, int height, int reqid) {
     if (path == null) return;
-    System.out.println("scoring audio " + path +" with ref sentence " + refSentence + " reqid " + reqid);
+    //System.out.println("scoring audio " + path +" with ref sentence " + refSentence + " reqid " + reqid);
     boolean wasVisible = wordTranscript.image.isVisible();
 
     // only show the spinning icon if it's going to take awhile
