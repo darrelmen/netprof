@@ -308,10 +308,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     // third row ---------------
 
+    Panel exerciseListContainer = new SimplePanel();
+    exerciseListContainer.addStyleName("floatLeft");
+
     Panel thirdRow = new HorizontalPanel();
-    Panel leftColumn = new SimplePanel();
-    thirdRow.add(leftColumn);
-    leftColumn.addStyleName("floatLeft");
+    thirdRow.add(exerciseListContainer);
     thirdRow.getElement().setId("outerThirdRow");
     thirdRow.setWidth("100%");
     thirdRow.addStyleName("trueInlineStyle");
@@ -331,7 +332,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     currentExerciseVPanel = new FlowPanel();
     currentExerciseVPanel.getElement().setId("currentExercisePanel");
 
-    reallyMakeExerciseList(belowFirstRow, leftColumn, bothSecondAndThird);
+    reallyMakeExerciseList(belowFirstRow, exerciseListContainer, bothSecondAndThird);
 
     if (usualLayout) {
       currentExerciseVPanel.addStyleName("floatLeftList");
@@ -383,8 +384,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
-  private void reallyMakeExerciseList(Panel belowFirstRow, Panel leftColumn, Panel bothSecondAndThird) {
-    makeExerciseList(secondRow, leftColumn);
+  private void reallyMakeExerciseList(Panel belowFirstRow, Panel exerciseListContainer, Panel bothSecondAndThird) {
+    makeExerciseList(secondRow, exerciseListContainer);
     if (!getProps().isClassroomMode()) {
       belowFirstRow.add(bothSecondAndThird);
     }
@@ -519,8 +520,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    *
    * @see #reallyMakeExerciseList
    */
-  private ListInterface makeExerciseList(FluidRow secondRow, Panel leftColumn) {
-    this.exerciseList = new ExerciseListLayout(props).makeExerciseList(secondRow, leftColumn, this, currentExerciseVPanel, service, this);
+  private ListInterface makeExerciseList(FluidRow secondRow, Panel exerciseListContainer) {
+    this.exerciseList = new ExerciseListLayout(props).makeExerciseList(secondRow, exerciseListContainer, this, currentExerciseVPanel, service, this);
     reallySetFactory();
     return exerciseList;
   }
