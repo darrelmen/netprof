@@ -41,6 +41,9 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class CommentNPFExercise extends NPFExercise {
+
+  public static final String NO_REFERENCE_AUDIO = "No reference audio";
+
   public CommentNPFExercise(CommonExercise e, ExerciseController controller, ListInterface listContainer,
                             float screenPortion, boolean addKeyHandler, String instance) {
     super(e, controller, listContainer, screenPortion, addKeyHandler, instance);
@@ -81,6 +84,11 @@ public class CommentNPFExercise extends NPFExercise {
     return getEntry(field, getContentWidget(label, value, true, false), annotation);
   }
 
+  /**
+   * @see #getAudioPanel\
+   * @param path
+   * @return
+   */
   @Override
   protected ASRScoringAudioPanel makeFastAndSlowAudio(final String path) {
     return new FastAndSlowASRScoringAudioPanel(exercise, path, service, controller, scorePanel) {
@@ -91,14 +99,12 @@ public class CommentNPFExercise extends NPFExercise {
 
       @Override
       protected void addNoRefAudioWidget(Panel vp) {
-        Widget entry = getEntry("refAudio", "ReferenceAudio", "No reference audio", exercise.getAnnotation("refAudio"));
+        Widget entry = getEntry("refAudio", "ReferenceAudio", CommentNPFExercise.NO_REFERENCE_AUDIO, exercise.getAnnotation("refAudio"));
         entry.setWidth("500px");
         vp.add(entry);
       }
     };
   }
-
-
 
   /**
    * @param field of the exercise to comment on
@@ -115,7 +121,7 @@ public class CommentNPFExercise extends NPFExercise {
     final MyTextBox commentEntryText = new MyTextBox();
     commentEntryText.setVisibleLength(60);
     Button clearButton = getClearButton(commentEntryText, commentButton, field);
-
+    commentEntryText.getElement().setId("CommentEntryTextBox_for_"+field);
     final MyPopup commentPopup = makeCommentPopup(field, commentButton, commentEntryText, clearButton);
     commentPopup.addAutoHidePartner(commentButton.getElement()); // fix for bug Wade found where click didn't toggle comment
     configureCommentTextBox(annotation != null ? annotation.comment : null, commentEntryText, commentPopup);
@@ -179,6 +185,8 @@ public class CommentNPFExercise extends NPFExercise {
   private Button getClearButton(final MyTextBox commentEntryText,
                                   final Widget commentButton, final String field) {
     final Button clear = new Button("");
+    clear.getElement().setId("CommentNPFExercise_"+field);
+    controller.register(clear, exercise.getID(), "clear comment");
     clear.addStyleName("leftFiveMargin");
     addTooltip(clear, "Clear comment");
 
@@ -205,7 +213,7 @@ public class CommentNPFExercise extends NPFExercise {
     }
 
     /**
-     * @see mitll.langtest.client.custom.CommentNPFExercise#getEntry
+     * @see mitll.langtest.client.custom.CommentNPFExercise#makeCommentPopup(String, com.github.gwtbootstrap.client.ui.Button, mitll.langtest.client.custom.CommentNPFExercise.MyTextBox, com.github.gwtbootstrap.client.ui.Button)
      * @param commentBox
      * @param commentButton
      * @param clearButton
@@ -214,6 +222,8 @@ public class CommentNPFExercise extends NPFExercise {
       addCloseHandler(new CloseHandler<PopupPanel>() {
         @Override
         public void onClose(CloseEvent<PopupPanel> event) {
+          controller.logEvent(commentBox,"Comment_TextBox",exercise.getID(),"submit comment '" +commentBox.getValue()+
+            "'");
           commentComplete(commentBox, field, commentButton, clearButton);
         }
       });
@@ -245,6 +255,8 @@ public class CommentNPFExercise extends NPFExercise {
     commentButton.setIcon(IconType.COMMENT);
     commentButton.setSize(ButtonSize.MINI);
     commentButton.addStyleName("leftTenMargin");
+    commentButton.getElement().setId("CommentNPFExercise_comment");
+    controller.register(commentButton, exercise.getID(), "show comment");
 
     final Tooltip tooltip = setButtonTitle(commentButton, alreadyMarkedCorrect, comment);
     commentButton.addClickHandler(new ClickHandler() {
@@ -334,7 +346,7 @@ public class CommentNPFExercise extends NPFExercise {
       fieldToComment.put(field, comment);
       boolean isCorrect = comment.length() == 0;
 
-      System.out.println("commentComplete " + field + " comment '" + comment +"' correct = " +isCorrect);
+  //    System.out.println("commentComplete " + field + " comment '" + comment +"' correct = " +isCorrect);
 
       if (isCorrect) {
         addCorrectComment(field);
@@ -347,7 +359,7 @@ public class CommentNPFExercise extends NPFExercise {
       //System.out.println("\t commentComplete : annotations now " + exercise.getFields());
     }
     else {
-      System.out.println("commentComplete " + field + " comment '" + comment +"' same as previous, so ignoring");
+      //System.out.println("commentComplete " + field + " comment '" + comment +"' same as previous, so ignoring");
 
     }
   }

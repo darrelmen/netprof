@@ -19,10 +19,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.PropertyHandler;
-import mitll.langtest.client.dialog.DialogHelper;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Does fancy font sizing depending on available width...
