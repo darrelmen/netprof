@@ -48,8 +48,8 @@ import java.util.Set;
 public abstract class ExerciseList extends VerticalPanel implements ListInterface, ProvidesResize,
   ValueChangeHandler<String> {
   private static final int NUM_QUESTIONS_FOR_TOKEN = 5;
-  private static final String ITEMS = "Items";
-  private static final boolean ADD_ITEM_HEADER = false;
+/*  private static final String ITEMS = "Items";
+  private static final boolean ADD_ITEM_HEADER = false;*/
 
   private SimplePanel innerContainer;
   protected final LangTestDatabaseAsync service;
