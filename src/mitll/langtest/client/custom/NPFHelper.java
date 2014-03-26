@@ -33,13 +33,13 @@ import java.util.Set;
 class NPFHelper implements RequiresResize {
   private boolean madeNPFContent = false;
 
-  private final LangTestDatabaseAsync service;
-  private final ExerciseController controller;
+  protected final LangTestDatabaseAsync service;
+  protected final ExerciseController controller;
   private final UserManager userManager;
 
-  private final UserFeedback feedback;
-  private PagingExerciseList npfExerciseList;
-  private SimplePanel npfContentPanel;
+  protected final UserFeedback feedback;
+  protected PagingExerciseList npfExerciseList;
+  private Panel npfContentPanel;
 
   /**
    * @see mitll.langtest.client.custom.Navigation#Navigation
@@ -69,7 +69,7 @@ class NPFHelper implements RequiresResize {
       addNPFToContent(ul, learn.content, instanceName);
       madeNPFContent = true;
     } else {
-      rememberAndLoadFirst(ul);
+      rememberAndLoadFirst(ul,instanceName);
     }
   }
 
@@ -87,25 +87,66 @@ class NPFHelper implements RequiresResize {
    * @return
    */
   private Panel doNPF(UserList ul, String instanceName) {
-    Panel hp = new HorizontalPanel();
-    Panel left = new SimplePanel();
-    hp.add(left);
-    left.addStyleName("floatLeft");
-    npfContentPanel = new SimplePanel();
-    hp.add(npfContentPanel);
-    npfContentPanel.addStyleName("floatRight");
-    npfExerciseList = makeNPFExerciseList(npfContentPanel, instanceName + "_"+ul.getUniqueID(),ul.getUniqueID());
+    //System.out.println(getClass() + " : doNPF instanceName = " + instanceName + " for list " + ul);
 
-    left.add(npfExerciseList.getExerciseListOnLeftSide(controller.getProps()));
-    rememberAndLoadFirst(ul);
+    Panel hp = doInternalLayout(ul, instanceName);
+
+    rememberAndLoadFirst(ul,instanceName);
     setupContent(hp);
     return hp;
   }
 
-  private void rememberAndLoadFirst(final UserList ul) {
+  /**
+   * Left and right components
+   * @param ul
+   * @param instanceName
+   * @return
+   */
+  protected Panel doInternalLayout(UserList ul, String instanceName) {
+    System.out.println(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
+
+    Panel hp = new HorizontalPanel();
+    Panel left = new SimplePanel();
+    hp.add(left);
+    left.addStyleName("floatLeft");
+
+    npfContentPanel = getRightSideContent(ul, instanceName);
+
+    hp.add(npfContentPanel);
+
+    left.add(npfExerciseList.getExerciseListOnLeftSide(controller.getProps()));
+    return hp;
+  }
+
+  protected Panel getRightSideContent(UserList ul, String instanceName) {
+    Panel npfContentPanel = new SimplePanel();
+    npfContentPanel.addStyleName("floatRight");
+    npfExerciseList = makeNPFExerciseList(npfContentPanel, instanceName + "_"+ul.getUniqueID(),ul.getUniqueID());
+    return npfContentPanel;
+  }
+
+  /**
+   * @see #doNPF
+   * @param right
+   * @param instanceName
+   * @return
+   */
+  PagingExerciseList makeNPFExerciseList(Panel right, String instanceName, long userListID) {
+    final PagingExerciseList exerciseList = makeExerciseList(right, instanceName);
+    setFactory(exerciseList, instanceName, userListID);
+    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      @Override
+      public void execute() {
+        exerciseList.onResize();
+      }
+    });
+    return exerciseList;
+  }
+
+  private void rememberAndLoadFirst(final UserList ul, String instanceName) {
     npfExerciseList.show();
     if (controller.isReviewMode()) {
-      System.out.println("rememberAndLoadFirst :  review mode " + controller.isReviewMode() + " for " + ul);
+      System.out.println("NPFHelper.rememberAndLoadFirst : review mode " + controller.isReviewMode() + " for " + ul + " instanceName " + instanceName);
       service.getCompletedExercises(controller.getUser(), controller.isReviewMode(), new AsyncCallback<Set<String>>() {
         @Override
         public void onFailure(Throwable caught) {
@@ -125,24 +166,6 @@ class NPFHelper implements RequiresResize {
   }
 
   Panel setupContent(Panel hp) { return npfContentPanel; }
-
-  /**
-   * @see #doNPF
-   * @param right
-   * @param instanceName
-   * @return
-   */
-  PagingExerciseList makeNPFExerciseList(Panel right, String instanceName, long userListID) {
-    final PagingExerciseList exerciseList = makeExerciseList(right, instanceName);
-    setFactory(exerciseList, instanceName, userListID);
-    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-      @Override
-      public void execute() {
-        exerciseList.onResize();
-      }
-    });
-    return exerciseList;
-  }
 
   PagingExerciseList makeExerciseList(final Panel right, final String instanceName) {
     return new PagingExerciseList(right, service, feedback, null, controller, false, false,
@@ -185,7 +208,7 @@ class NPFHelper implements RequiresResize {
    * @see #doNPF(mitll.langtest.shared.custom.UserList, String)
    * @return
    */
-  SimplePanel getNpfContentPanel() { return npfContentPanel; }
+  Panel getNpfContentPanel() { return npfContentPanel; }
 
   @Override
   public void onResize() { if (npfContentPanel != null) {  npfExerciseList.onResize(); } }
