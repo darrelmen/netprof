@@ -8,7 +8,6 @@ import mitll.langtest.client.grading.GradedExerciseList;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.ExerciseShell;
 
 /**
  * Deals with choosing the right exercise list, depending on the property settings.
