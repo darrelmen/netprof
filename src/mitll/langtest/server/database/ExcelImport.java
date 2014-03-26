@@ -6,11 +6,9 @@ import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.UserExerciseDAO;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.CommonExercise;
-//import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseFormatter;
-import mitll.langtest.shared.custom.UserExercise;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -34,6 +32,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+//import mitll.langtest.shared.Exercise;
 
 /**
  * Reads an excel spreadsheet from DLI.
