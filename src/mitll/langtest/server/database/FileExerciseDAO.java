@@ -6,7 +6,6 @@ import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseFormatter;
-import mitll.langtest.shared.custom.UserExercise;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
