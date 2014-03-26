@@ -18,10 +18,17 @@ public class LeaderboardPlot {
   private static final String SCORE = "Score";
   public static final float GRAPH_MAX = 100f;
 
+  /**
+   * @see mitll.langtest.client.custom.MyFlashcardExercisePanelFactory.StatsPracticePanel#makeChart(int, int, mitll.langtest.shared.flashcard.AVPHistoryForList)
+   * @param historyForList
+   * @param title
+   * @param subtitle
+   * @return
+   */
   public Chart getChart(AVPHistoryForList historyForList, String title, String subtitle) {
     boolean useCorrect = historyForList.isUseCorrect();
     return getChart(historyForList.getNumScores(),title, subtitle,
-      useCorrect ? CORRECT : SCORE, //!useCorrect, 100f,
+      useCorrect ? CORRECT : SCORE,
       historyForList.getPbCorrect(),
       historyForList.getTop(),
       historyForList.getTotalCorrect(),
@@ -30,8 +37,7 @@ public class LeaderboardPlot {
       );
   }
 
-  private Chart getChart(int numScores, /*int gameTimeSeconds,*/ String title, String subtitle, String seriesName,
-                       //  boolean topIs100, float topToUse,
+  private Chart getChart(int numScores, String title, String subtitle, String seriesName,
                          float pbCorrect, float top, float total, float avg, List<Float> yValuesForUser) {
     Chart chart = new Chart()
       .setType(Series.Type.SPLINE)
@@ -45,7 +51,6 @@ public class LeaderboardPlot {
     addSeries(yValuesForUser, chart, seriesName);
 
     float verticalRange = setPlotBands(numScores, title, subtitle,
-      //topIs100, topToUse,
       pbCorrect, top, total, avg, chart);
 
     configureChart(verticalRange, chart, subtitle);
@@ -53,14 +58,10 @@ public class LeaderboardPlot {
   }
 
   private float setPlotBands(int numScores, String title, String subtitle,
-                             //boolean topIs100,
-                             //float topToUse,
                              float pbCorrect, float top, float total, float avg, Chart chart) {
     PlotBand personalBest = getPersonalBest(pbCorrect, chart);
     PlotBand topScore = getTopScore(top, chart);
     PlotBand avgScore = getAvgScore(numScores, total, chart);
-
-   // float verticalRange = topIs100 ? 100f : topToUse == -1 ? top : topToUse;
 
     float fivePercent = 0.05f * GRAPH_MAX;
     float topVsPersonalBest = Math.abs(top - pbCorrect);
@@ -141,26 +142,29 @@ public class LeaderboardPlot {
 
   private <T extends SetScore> PlotBand getAvgScore(int numScores, float total, Chart chart) {
     float avg = total / (float) numScores;
-    PlotBand avgScore = chart.getYAxis().createPlotBand()
-      .setColor("#2031ff")
-      .setFrom(under(avg))
-      .setTo(over(avg));
-
-    avgScore.setLabel(new PlotBandLabel().setAlign(PlotBandLabel.Align.LEFT).setText(AVERAGE));
-    return avgScore;
+    return getPlotBand(avg, chart, "#2031ff", AVERAGE);
   }
 
   private PlotBand getTopScore(float top, Chart chart) {
-    PlotBand topScore = chart.getYAxis().createPlotBand()
-      .setColor("#46bf00")
-      .setFrom(under(top))
-      .setTo(over(top));
-
-    topScore.setLabel(new PlotBandLabel().setAlign(PlotBandLabel.Align.LEFT).setText(TOP_SCORE));
-    return topScore;
+    return getPlotBand(top, chart, "#46bf00", TOP_SCORE);
   }
 
   private PlotBand getPersonalBest(float pbCorrect, Chart chart) {
+    return getPlotBand(pbCorrect, chart, "#f18d24", PERSONAL_BEST);
+  }
+
+  private PlotBand getPlotBand(float pbCorrect, Chart chart, String color, String labelText) {
+    Range range = getRange(pbCorrect);
+    PlotBand personalBest = chart.getYAxis().createPlotBand()
+      .setColor(color)
+      .setFrom(range.from)
+      .setTo(range.to);
+
+    personalBest.setLabel(new PlotBandLabel().setAlign(PlotBandLabel.Align.LEFT).setText(labelText));
+    return personalBest;
+  }
+
+  private Range getRange(float pbCorrect) {
     float from = under(pbCorrect);
     float to   = over (pbCorrect);
     if (pbCorrect > GRAPH_MAX -HALF) {
@@ -171,13 +175,15 @@ public class LeaderboardPlot {
       to = 2*HALF;
       from = 0;
     }
-    PlotBand personalBest = chart.getYAxis().createPlotBand()
-      .setColor("#f18d24")
-      .setFrom(from)
-      .setTo(to);
+    return new Range(from,to);
+  }
 
-    personalBest.setLabel(new PlotBandLabel().setAlign(PlotBandLabel.Align.LEFT).setText(PERSONAL_BEST));
-    return personalBest;
+  private static class Range {
+    float from,to;
+    public Range(float from, float to) {
+      this.from = from;
+      this.to = to;
+    }
   }
 
   private float over (float pbCorrect) { return pbCorrect + HALF;  }
