@@ -24,7 +24,6 @@ import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
@@ -798,11 +797,12 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
    */
   private void playRef(String path) {
     path = getPath(path);
-    foreign.addStyleName("mouseOverHighlight");
+    final Widget textWidget = controller.getLanguage().equalsIgnoreCase("English") ? english : foreign;
+    textWidget.addStyleName("playingAudioHighlight");
     getSoundFeedback().createSound(path, new SoundFeedback.EndListener() {
       @Override
       public void songEnded() {
-        foreign.removeStyleName("mouseOverHighlight");
+        textWidget.removeStyleName("playingAudioHighlight");
       }
     });
   }
