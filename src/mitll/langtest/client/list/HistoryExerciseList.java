@@ -1,6 +1,7 @@
 package mitll.langtest.client.list;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.i18n.client.Messages;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
@@ -55,13 +56,6 @@ public class HistoryExerciseList extends PagingExerciseList {
     return listBox.getCurrentSelection();
   }
 
-/*
-  protected String getFirstItem(String type) {
-    SectionWidget listBox = typeToBox.get(type);
-    return listBox.getFirstItem();  // first is Any
-  }
-*/
-
   /**
    * @see mitll.langtest.client.list.HistoryExerciseList#loadExercises(String, String)
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
@@ -93,6 +87,7 @@ public class HistoryExerciseList extends PagingExerciseList {
         builder.append(type + "=" + section + ";");
       }
     }
+
 /*    if (id != null && INCLUDE_ITEM_IN_BOOKMARK) {
       String historyToken = super.getHistoryToken(id);
       //System.out.println("getHistoryToken for " + id + " would add " +historyToken);
@@ -100,8 +95,13 @@ public class HistoryExerciseList extends PagingExerciseList {
       builder.append(historyToken);
     }*/
     //System.out.println("\tgetHistoryToken for " + id + " is '" +builder.toString() + "'");
-    if (id != null && id.length() > 0 && builder.toString().isEmpty()) return super.getHistoryToken(id);
-    return builder.toString();
+    String instanceSuffix = ";" + SelectionState.INSTANCE + "=" + instance;
+    if (id != null && id.length() > 0 && builder.toString().isEmpty()) {
+      return super.getHistoryToken(id) + instanceSuffix;
+    }
+    else {
+      return builder.toString() + instanceSuffix;
+    }
   }
 
   protected void setHistoryItem(String historyToken) {
@@ -171,14 +171,14 @@ public class HistoryExerciseList extends PagingExerciseList {
     if (currentToken.equals(historyToken)) {
       if (isEmpty() || historyToken.isEmpty()) {
         System.out.println("pushNewSectionHistoryToken : noSectionsGetExercises for token '" + historyToken +
-          "' " + "current has " + getSize());
+          "' " + "current has " + getSize() + " instance " + instance);
 
         noSectionsGetExercises(userID);
       } else {
-        System.out.println("pushNewSectionHistoryToken : skipping same token '" + historyToken + "'");
+        System.out.println("pushNewSectionHistoryToken : skipping same token '" + historyToken + "'" + " instance " + instance);
       }
     } else {
-      System.out.println("pushNewSectionHistoryToken : currentToken " + currentToken);
+      System.out.println("pushNewSectionHistoryToken : currentToken " + currentToken + " instance " + instance);
 
       setHistoryItem(historyToken);
     }
@@ -326,7 +326,7 @@ public class HistoryExerciseList extends PagingExerciseList {
      */
   @Override
   public void onValueChange(ValueChangeEvent<String> event) {
-    if (debug) System.out.println(new Date() +" HistoryExerciseList.onValueChange : ------ start ----");
+    if (debug) System.out.println(new Date() +" HistoryExerciseList.onValueChange : ------ start ---- " + instance);
 
     String rawToken = getTokenFromEvent(event);
     SelectionState selectionState1 = getSelectionState(rawToken);
@@ -373,7 +373,7 @@ public class HistoryExerciseList extends PagingExerciseList {
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
   void loadExercises(final Map<String, Collection<String>> typeToSection, final String item) {
-    System.out.println("HistoryExerciseList.loadExercises : " + typeToSection + " and item '" + item + "'");
+    System.out.println("HistoryExerciseList.loadExercises : instance " + instance+ " " + typeToSection + " and item '" + item + "'");
     if (controller.showCompleted()) {
       service.getCompletedExercises(controller.getUser(), controller.isReviewMode(), new AsyncCallback<Set<String>>() {
         @Override
@@ -416,7 +416,7 @@ public class HistoryExerciseList extends PagingExerciseList {
    * @param typeToSection
    */
   private void reallyLoadExercises(Map<String, Collection<String>> typeToSection) {
-    System.out.println("reallyLoadExercises looking for exercises in context of " + typeToSection);
+    System.out.println("reallyLoadExercises looking for exercises in context of " + typeToSection + " instance " + instance);
 
     if (typeToSection.isEmpty()) {
       noSectionsGetExercises(userID);
