@@ -48,8 +48,6 @@ import java.util.Set;
 public abstract class ExerciseList extends VerticalPanel implements ListInterface, ProvidesResize,
   ValueChangeHandler<String> {
   private static final int NUM_QUESTIONS_FOR_TOKEN = 5;
-/*  private static final String ITEMS = "Items";
-  private static final boolean ADD_ITEM_HEADER = false;*/
 
   private SimplePanel innerContainer;
   protected final LangTestDatabaseAsync service;
@@ -66,7 +64,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   int lastReqID = 0;
   private final Set<Integer> visited = new HashSet<Integer>();
   final boolean allowPlusInURL;
-  final String instance;
+  protected final String instance;
 
   /**
    * @see  mitll.langtest.client.LangTest#makeExerciseList
@@ -154,13 +152,13 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param getNext
    */
   public void getExercises(long userID, boolean getNext) {
-  //  System.out.println("ExerciseList.getExercises for user " +userID);
+    System.out.println("ExerciseList.getExercises for user " +userID + " instance " + instance);
     lastReqID++;
 
     if (showInOrder) {
       service.getExerciseIds(lastReqID, new SetExercisesCallback());
     } else {
-      System.out.println("ExerciseList.getExercises for user " +userID);
+      System.out.println("ExerciseList.getExercises for user " +userID + " instance " + instance);
       service.getExerciseIds(lastReqID, userID, new SetExercisesCallback());
     }
   }
@@ -176,7 +174,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   @Override
   public void reloadWith(String id) {
-    System.out.println("ExerciseList.reloadWith id = " + id+ " for user " + controller.getUser());
+    System.out.println("ExerciseList.reloadWith id = " + id+ " for user " + controller.getUser() + " instance " + instance);
     service.getExerciseIds(lastReqID, controller.getUser(), new SetExercisesCallback(id));
   }
 
@@ -199,7 +197,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     token = getSelectionFromToken(token);
     String idFromToken = getIDFromToken(token);
     System.out.println("ExerciseList.pushFirstSelection : current token '" + token + "' id from token '" + idFromToken +
-      "' vs new exercise " +exerciseID);
+      "' vs new exercise " +exerciseID +" instance " + instance);
     if (token != null && idFromToken.equals(exerciseID)) {
       System.out.println("\tpushFirstSelection : (" + instance+
         ") current token " + token + " same as new " +exerciseID);
@@ -324,7 +322,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see ExerciseList.SetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
    */
   public void rememberAndLoadFirst(List<CommonShell> exercises, CommonExercise firstExercise) {
-    System.out.println("ExerciseList : rememberAndLoadFirst remembering " + exercises.size() + " : first = " +firstExercise);
+    System.out.println("ExerciseList : rememberAndLoadFirst " + instance+
+      " remembering " + exercises.size() + " : first = " +firstExercise);
 
     rememberExercises(exercises);
     for (ListChangeListener<CommonShell> listener : listeners) listener.listChanged(exercises);
@@ -391,7 +390,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
         if (e != null) toLoad = e;
       }
 
-      System.out.println("loadFirstExercise ex id =" + toLoad.getID());
+      System.out.println("loadFirstExercise ex id =" + toLoad.getID() + " instance " + instance);
       pushFirstSelection(toLoad.getID());
     }
   }
@@ -453,7 +452,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     String token = getTokenFromEvent(event);
     String id = getIDFromToken(token);
     System.out.println("ExerciseList.onValueChange got " + event.getAssociatedType() +
-      " "+ value + " token " + token + " id '" + id +"'");
+      " "+ value + " token " + token + " id '" + id +"'" + " instance " + instance);
 
     if (id.length() > 0) {
       checkAndAskServer(id);
@@ -516,7 +515,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param itemID
    */
   protected void askServerForExercise(String itemID) {
-    System.out.println("ExerciseList.askServerForExercise id = " + itemID);
+    System.out.println("ExerciseList.askServerForExercise id = " + itemID + " instance " + instance);
     service.getExercise(itemID, new ExerciseAsyncCallback());
   }
 
@@ -556,7 +555,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     createdPanel = makeExercisePanel(result);
     String itemID = result.getID();
     markCurrentExercise(itemID);
-    System.out.println("ExerciseList.useExercise : item id " + itemID + " currentExercise " +getCurrentExercise() + " or " + getCurrentExerciseID());
+    System.out.println("ExerciseList.useExercise : item id " + itemID + " currentExercise " +getCurrentExercise() +
+      " or " + getCurrentExerciseID() + " instance " + instance);
   }
 
   public String getCurrentExerciseID() { return getCurrentExercise() != null ? getCurrentExercise().getID() : "Unknown"; }
@@ -568,7 +568,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param exercise
    */
   public Panel makeExercisePanel(CommonExercise exercise) {
-    System.out.println("ExerciseList.makeExercisePanel : " +exercise);
+    System.out.println("ExerciseList.makeExercisePanel : " +exercise + " instance " + instance);
 
     Panel exercisePanel = factory.getExercisePanel(exercise);
     innerContainer.setWidget(exercisePanel);
@@ -606,7 +606,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     CommonShell shell = byID(currentID);
     int i = shell != null ? getRealIndex(shell) : -1;
     //System.out.println("getIndex " + currentID + " = " +i);
-
     return i;
   }
 
@@ -661,7 +660,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   @Override
   public  boolean loadNextExercise(CommonShell current) {
-    System.out.println("ExerciseList.loadNextExercise current is : " +current);
+    System.out.println("ExerciseList.loadNextExercise current is : " +current + " instance " + instance);
     String id = current.getID();
     int i = getIndex(id);
 
@@ -684,7 +683,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   public boolean loadNextExercise(String id) {
-    System.out.println("ExerciseList.loadNextExercise id = " + id);
+    System.out.println("ExerciseList.loadNextExercise id = " + id + " instance " + instance);
     CommonShell exerciseByID = byID(id);
     return exerciseByID != null && loadNextExercise(exerciseByID);
   }
