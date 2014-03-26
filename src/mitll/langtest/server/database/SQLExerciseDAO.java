@@ -1,12 +1,11 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.UserExerciseDAO;
-import mitll.langtest.server.ServerProperties;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.custom.UserExercise;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
