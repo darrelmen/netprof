@@ -51,7 +51,7 @@ public class ButtonFactory implements EventLogger {
   @Override
   public void registerButton(final Button button, final String exid, final String context, final long userid) {
 
-    System.out.println("registering " + button.getElement().getId());
+    //System.out.println("registering " + button.getElement().getId());
 
     button.addClickHandler(new ClickHandler() {
       @Override
