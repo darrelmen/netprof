@@ -4,9 +4,7 @@ import audio.tools.FileCopier;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.database.UserDAO;
-import mitll.langtest.shared.AudioExercise;
 import mitll.langtest.shared.CommonExercise;
-//import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.User;
@@ -26,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+
+//import mitll.langtest.shared.Exercise;
 
 /**
  * Created with IntelliJ IDEA.
@@ -465,7 +465,7 @@ public class UserListManager {
    * @param user
    */
   public void addVisitor(UserList userList, long user) {
-    logger.debug("addVisitor - user " + user + " visits " + userList.getUniqueID());
+    //logger.debug("addVisitor - user " + user + " visits " + userList.getUniqueID());
 
     UserList where = userListDAO.getWhere(userList.getUniqueID(), true);
     if (where != null) {
