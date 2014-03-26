@@ -378,7 +378,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       int reqid = getReqID(type);
       final long then = System.currentTimeMillis();
 
-      System.out.println("getImageURLForAudio : req " + reqid + " path " + path + " type " + type + " width " + width);
+     // System.out.println("getImageURLForAudio : req " + reqid + " path " + path + " type " + type + " width " + width);
 //      service.getImageForAudioFile(reqid, path, type, toUse, height, new AsyncCallback<ImageResponse>() {
         controller.getImage(reqid, path, type, toUse, height, exerciseID, new AsyncCallback<ImageResponse>() {
           public void onFailure(Throwable caught) {
