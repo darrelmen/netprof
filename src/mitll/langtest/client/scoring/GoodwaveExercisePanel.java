@@ -293,7 +293,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     if (path != null) {
       path = wavToMP3(path);
     }
-    ASRScoringAudioPanel audioPanel = getAudioPanel(e, path);
+    ASRScoringAudioPanel audioPanel = getAudioPanel(path);
   //  ResizableCaptionPanel cp = new ResizableCaptionPanel(NATIVE_REFERENCE_SPEAKER);
    // cp.setContentWidget(getAudioPanelContent(audioPanel));
 
@@ -305,7 +305,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     return audioPanel;
   }
 
-  private ASRScoringAudioPanel getAudioPanel(CommonExercise e, String path) {
+  private ASRScoringAudioPanel getAudioPanel(String path) {
     ASRScoringAudioPanel audioPanel;
   //  if (e.getType() == Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW) {
       audioPanel = makeFastAndSlowAudio(path);
