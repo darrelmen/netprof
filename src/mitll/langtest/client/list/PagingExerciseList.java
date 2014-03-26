@@ -28,7 +28,7 @@ import java.util.Set;
 
 /**
  * Show exercises with a cell table that can handle thousands of rows.
- * Does tooltips using tooltip field on {@link CommonShell#tooltip}
+ * Does tooltips using tooltip field on {@link CommonShell#getTooltip}
  * <p/>
  * User: GO22670
  * Date: 11/27/12
@@ -80,7 +80,6 @@ public class PagingExerciseList extends ExerciseList {
   @Override
   public void removeCompleted(String id) {
     pagingContainer.removeCompleted(id);
-
   }
 
   public void addCompleted(String id) {
@@ -136,13 +135,7 @@ public class PagingExerciseList extends ExerciseList {
    * @see mitll.langtest.client.list.HistoryExerciseList#loadExercises(java.util.Map, String)
    * @return
    */
-  String getPrefix() { return /*typeAhead == null ? "" :*/ typeAhead.getText(); }
-
-  @Override
-  protected void loadFirstExercise() {
-    super.loadFirstExercise();
-   // typeAhead.setText("");
-  }
+  String getPrefix() { return typeAhead.getText(); }
 
   private ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget user) {
     final ControlGroup userGroup = new ControlGroup();
@@ -198,7 +191,7 @@ public class PagingExerciseList extends ExerciseList {
   }
 
   /**
-   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#FlexSectionExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, boolean, boolean, mitll.langtest.client.exercise.ExerciseController, boolean, String)
+   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#FlexSectionExerciseList(com.google.gwt.user.client.ui.Panel, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, boolean, boolean, mitll.langtest.client.exercise.ExerciseController, boolean, String)
    * @param v
    */
   public void setUnaccountedForVertical(int v) {
@@ -216,13 +209,11 @@ public class PagingExerciseList extends ExerciseList {
 
   void addTypeAhead(Panel column) {
     if (showTypeAhead) {
-      //typeAhead = new TextBox();
       typeAhead.getElement().setId("ExerciseList_TypeAhead");
       typeAhead.setDirectionEstimator(true);   // automatically detect whether text is RTL
       typeAhead.addKeyUpHandler(new KeyUpHandler() {
         public void onKeyUp(KeyUpEvent event) {
           String text = typeAhead.getText();
-          //  text = text.trim();
           if (!text.equals(lastTypeAheadValue)) {
             System.out.println("addTypeAhead : looking for '" + text + "' (" + text.length() + " chars)");
             controller.logEvent(typeAhead,"TypeAhead","UserList_"+userListID,"User search ='" +text+ "'");
@@ -259,6 +250,9 @@ public class PagingExerciseList extends ExerciseList {
     t.schedule(3000);
   }
 
+  /**
+   * @deprecated
+   */
   void tellUserPanelIsBusy() {
     Window.alert("Please stop recording before changing items.");
   }
@@ -289,8 +283,7 @@ public class PagingExerciseList extends ExerciseList {
    */
   @Override
   protected void rememberExercises(List<CommonShell> result) {
-    //System.out.println("PagingExerciseList : rememberAndLoadFirst remembering " + result.size());
-
+    System.out.println("PagingExerciseList : rememberAndLoadFirst remembering " + result.size() + " instance " + instance);
     clear();
     for (CommonShell es : result) {
       addExercise(es);

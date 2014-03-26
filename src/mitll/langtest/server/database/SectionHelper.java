@@ -1,8 +1,6 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.shared.AudioExercise;
 import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.SectionNode;
 import org.apache.log4j.Logger;
 
