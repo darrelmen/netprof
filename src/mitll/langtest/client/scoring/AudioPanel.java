@@ -222,7 +222,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
   public static class ImageAndCheck {
     final Image image;
-    Widget check;
+    private Widget check;
     public ImageAndCheck() {
       image = new Image();
       image.setVisible(false);
@@ -234,6 +234,14 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     }
 
     public void setUrl(String url) { image.setUrl(url); }
+
+    public Widget getCheck() {
+      return check;
+    }
+
+    public void setCheck(Widget check) {
+      this.check = check;
+    }
   }
 
   /**
@@ -347,7 +355,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
   protected void getEachImage(int width) {
    // System.out.println("AudioPanel.getEachImage : " + getElement().getId()+ " path " + audioPath);
-
     getImageURLForAudio(audioPath, WAVEFORM, width, getWaveform());
     if (showSpectrogram) {
       getImageURLForAudio(audioPath, SPECTROGRAM, width, getSpectrogram());
@@ -414,7 +421,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     // attempt to have the check not become visible until the image comes back from the server
     Timer t = new Timer() {
       public void run() {
-        imageAndCheck.check.setVisible(true);
+        imageAndCheck.getCheck().setVisible(true);
       }
     };
 
@@ -464,21 +471,23 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @param widget
    * @return
    */
-  private Panel addCheckbox(String label, final ImageAndCheck widget) {
-    CheckBox w = new CheckBox();
-    w.setValue(true);
-    w.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+  private Panel addCheckbox(final String label, final ImageAndCheck widget) {
+    final CheckBox checkBox = new CheckBox();
+    checkBox.getElement().setId("CheckBox_for_"+label);
+    checkBox.setValue(true);
+    checkBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
       public void onValueChange(ValueChangeEvent<Boolean> event) {
         widget.image.setVisible(event.getValue());
         audioPositionPopup.setHeightFromContainer();
+        controller.logEvent(checkBox, "CheckBox", exerciseID, "CheckBox_for_" + label);
       }
     });
     Panel p = new HorizontalPanel();
-    p.add(w);
+    p.add(checkBox);
     p.add(new Label(label));
     p.addStyleName("buttonMargin");
     p.setVisible(false);
-    widget.check = p;
+    widget.setCheck(p);
     return p;
   }
 }
