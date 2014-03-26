@@ -4,7 +4,6 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -178,11 +177,11 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   private void showImageAndCheck(String imageURL, ImageAndCheck wordTranscript) {
     wordTranscript.image.setUrl(imageURL);
     wordTranscript.image.setVisible(true);
-    wordTranscript.check.setVisible(true);
+    wordTranscript.getCheck().setVisible(true);
   }
 
   void getClickedOnSegment(int eventXPos, NetPronImageType type, EventSegment onClick) {
-    int index = 0;
+    //int index = 0;
     List<TranscriptSegment> transcriptSegments = result.getsTypeToEndTimes().get(type);
     float wavFileLengthInSeconds = result.getWavFileLengthInSeconds();//transcriptSegments.get(transcriptSegments.size() - 1);
     float horizOffset = (float) eventXPos / (float) phones.image.getWidth();
@@ -198,7 +197,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
         onClick.onSegmentClick(segment);
         break;
       }
-      index++;
+      //index++;
     }
   }
 
