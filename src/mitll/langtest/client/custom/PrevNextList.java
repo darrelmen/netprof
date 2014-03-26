@@ -9,7 +9,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.CommonShell;
-import mitll.langtest.shared.ExerciseShell;
 
 /**
 * Created by GO22670 on 1/9/14.

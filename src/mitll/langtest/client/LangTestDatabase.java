@@ -2,7 +2,6 @@ package mitll.langtest.client;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.DLIUser;
@@ -16,6 +15,7 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.grade.Grade;
+import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.scoring.PretestScore;
 
