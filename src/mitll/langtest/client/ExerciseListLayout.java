@@ -72,7 +72,7 @@ public class ExerciseListLayout {
         true, props.isEnglishOnlyMode(), controller,"grading");
     } else {
       if (props.isShowSections()) {
-            //System.out.println("makeExerciseList : show completed " + showCompleted + " flex");
+            System.out.println("makeExerciseList : making flex");
             FlexSectionExerciseList flex = new FlexSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
               props.isShowTurkToken(), props.showExercisesInOrder(), controller, showTypeAhead, "flex");
             return flex;
