@@ -2,7 +2,6 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.monitoring.Session;
