@@ -61,6 +61,8 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   private static final int ROWS_IN_TABLE = 7;
   private static final String SKIP_TO_END = "Skip to end";
   private static final boolean ADD_KEY_BINDING = false;
+  public static final int TABLE_WIDTH = 2 * 235;
+  public static final int HORIZ_SPACE_FOR_CHARTS = (1250 - TABLE_WIDTH);
 
   private CommonExercise currentExercise;
   private final ControlState controlState;
@@ -244,20 +246,29 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
     }
 
     private void scaleCharts(Chart chart) {
-      float ratio = needToScale();
-      if (ratio <1) {
-        chart.setWidth(Math.round(400f*ratio));
-        chart.setHeight(300);
+      float yRatio = needToScaleY();
+
+      boolean neither = true;
+
+      int chartWidth = (Window.getClientWidth()-TABLE_WIDTH)/2 -10;
+      chart.setWidth(chartWidth);
+
+      if (yRatio < 1) {
+        chart.setHeight(Math.min(400f, Math.round(400f * yRatio)));
+        neither = false;
       }
-      else {
-        chart.addStyleName("chartDim");
-      }
+
+      if (neither) chart.addStyleName("chartDim");
     }
 
-    private float needToScale() {
-      int constantTables = 2 * 235;
-      float width = (float) Window.getClientWidth()- constantTables;
-      return width/(1250- constantTables);
+    private float needToScaleX() {
+      float width = (float) Window.getClientWidth()- TABLE_WIDTH;
+      return width/ HORIZ_SPACE_FOR_CHARTS;
+    }
+
+    private float needToScaleY() {
+      float height = (float) Window.getClientHeight();
+      return height/(707);
     }
 
     /**
@@ -273,7 +284,7 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       table.add(w);
       table.add(new TableHeader(NAME));
       table.add(new TableHeader(scoreColHeader));
-      boolean scale =  needToScale() <1;
+      boolean scale =  needToScaleX() <1;
 
       List<AVPHistoryForList.UserScore> scores = sessionAVPHistoryForList.getScores();
       int size = scale ? Math.min(ROWS_IN_TABLE, scores.size()) : scores.size();
@@ -334,7 +345,7 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
     }
 
     /**
-     * @see #showFeedbackCharts
+     * @see mitll.langtest.client.custom.MyFlashcardExercisePanelFactory.StatsPracticePanel#showFeedbackCharts
      * @return
      */
     private double getAvgScore() {
@@ -357,7 +368,7 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
     }
 
     /**
-     * @see #showFeedbackCharts(java.util.List)
+     * @see mitll.langtest.client.custom.MyFlashcardExercisePanelFactory.StatsPracticePanel#showFeedbackCharts
      * @return
      */
     private Button getRepeatButton() {
@@ -383,7 +394,7 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       skip.setVisible(true);
       startOver.setVisible(true);
       seeScores.setVisible(true);
-      exerciseList.loadExercise(allExercises.iterator().next().getID());
+      exerciseList.checkAndAskServer(allExercises.iterator().next().getID());
     }
 
     /**
@@ -410,8 +421,6 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
      */
     @Override
     protected void addWidgetsBelow(Panel toAddTo) {
-     // this.toAddTo = toAddTo;
-
       skip = new Button(SKIP_THIS_ITEM);
       skip.getElement().setId("AVP_Skip_Item");
       skip.setType(ButtonType.INFO);
