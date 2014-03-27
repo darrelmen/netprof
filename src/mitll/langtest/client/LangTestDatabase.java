@@ -35,10 +35,7 @@ import java.util.Set;
 public interface LangTestDatabase extends RemoteService {
   boolean WRITE_ALTERNATE_COMPRESSED_AUDIO = false;
 
-  // exerciseDAO
-  ExerciseListWrapper getExerciseIds(int reqID);
-  ExerciseListWrapper getExerciseIds(int reqID, long userID);
-  ExerciseListWrapper getExerciseIds(int reqID, long userID, String prefix, long userListID);
+  ExerciseListWrapper getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix, long userListID);
 
   CommonExercise getExercise(String id);
 
@@ -89,23 +86,12 @@ public interface LangTestDatabase extends RemoteService {
 
   void logMessage(String message);
 
-  /**
-   * @param reqID
-   * @param typeToSection
-   * @param userID
-   * @return
-   * */
-  ExerciseListWrapper getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID);
-
   List<AVPHistoryForList> getUserHistoryForList(long userid, Collection<String> ids, long latestResultID);
 
   void addDLIUser(DLIUser dliUser);
 
   Set<String> getCompletedExercises(int user, boolean isReviewMode);
 
-  ExerciseListWrapper getExercisesForSelectionState(int reqID,
-                                                    Map<String, Collection<String>> typeToSection,
-                                                    long userID, String prefix);
 
   StartupInfo getStartupInfo();
   long addUserList(long userid, String name, String description, String dliClass);
