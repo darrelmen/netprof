@@ -1,7 +1,6 @@
 package mitll.langtest.client.list;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.i18n.client.Messages;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
@@ -47,26 +46,6 @@ public class HistoryExerciseList extends PagingExerciseList {
   }
 
   /**
-   * @see #getHistoryToken(String)
-   * @param type
-   * @return
-   */
-  private String getCurrentSelection(String type) {
-    SectionWidget listBox = typeToBox.get(type);
-    return listBox.getCurrentSelection();
-  }
-
-  /**
-   * @see mitll.langtest.client.list.HistoryExerciseList#loadExercises(String, String)
-   * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
-   * @param token
-   * @return object representing type=value pairs from history token
-   */
-  SelectionState getSelectionState(String token) {
-    return new SelectionState(token, !allowPlusInURL);
-  }
-
-  /**
    * @see #pushNewItem(String)
    * @see #pushNewSectionHistoryToken()
    * @param id
@@ -104,6 +83,16 @@ public class HistoryExerciseList extends PagingExerciseList {
     }
   }
 
+  /**
+   * @see #getHistoryToken(String)
+   * @param type
+   * @return
+   */
+  private String getCurrentSelection(String type) {
+    SectionWidget listBox = typeToBox.get(type);
+    return listBox.getCurrentSelection();
+  }
+
   protected void setHistoryItem(String historyToken) {
     System.out.println("------------ HistoryExerciseList.setHistoryItem '" + historyToken + "' -------------- ");
     History.newItem(historyToken);
@@ -134,16 +123,6 @@ public class HistoryExerciseList extends PagingExerciseList {
   }
 
   /**
-   * @see #loadExercises(java.util.Map, String)
-   * @see #pushNewSectionHistoryToken()
-   * @param userID
-   */
-  protected void noSectionsGetExercises(long userID) {
-    System.out.println("HistoryExerciseList.noSectionsGetExercises for " + userID);
-    super.getExercises(userID, true);
-  }
-
-  /**
    * So if we have an existing history token, use it to set current selection.
    * If not, push the current state of the list boxes and act on it
    * @see mitll.langtest.client.list.ListInterface#getExercises(long, boolean)
@@ -151,11 +130,11 @@ public class HistoryExerciseList extends PagingExerciseList {
   protected void pushFirstListBoxSelection() {
     String initToken = History.getToken();
     if (initToken.length() == 0) {
-      System.out.println("pushFirstListBoxSelection : history token is blank");
+      System.out.println("pushFirstListBoxSelection : history token is blank " + instance);
 
       pushNewSectionHistoryToken();
     } else {
-      System.out.println("pushFirstListBoxSelection fire history for token from URL: " +initToken);
+      System.out.println("pushFirstListBoxSelection fire history for token from URL: " +initToken + " instance " + instance);
       History.fireCurrentHistoryState();
     }
   }
@@ -319,7 +298,7 @@ public class HistoryExerciseList extends PagingExerciseList {
     return selectionState2.keySet();
   }
 
-  boolean debug = true;
+  private boolean debug = false;
   /**
      * Respond to push a history token.
      * @param event
@@ -372,7 +351,7 @@ public class HistoryExerciseList extends PagingExerciseList {
    * @param item null is OK
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
-  void loadExercises(final Map<String, Collection<String>> typeToSection, final String item) {
+  protected void loadExercises(final Map<String, Collection<String>> typeToSection, final String item) {
     System.out.println("HistoryExerciseList.loadExercises : instance " + instance+ " " + typeToSection + " and item '" + item + "'");
     if (controller.showCompleted()) {
       service.getCompletedExercises(controller.getUser(), controller.isReviewMode(), new AsyncCallback<Set<String>>() {
@@ -396,34 +375,59 @@ public class HistoryExerciseList extends PagingExerciseList {
     loadExercisesUsingPrefix(typeToSection, prefix);
   }
 
-  private void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection, String prefix) {
-    if (prefix.isEmpty()) {
+  protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection, String prefix) {
+/*    if (prefix.isEmpty()) {
       reallyLoadExercises(typeToSection);
-    } else {
+    } else {*/
       lastReqID++;
-      System.out.println("HistoryExerciseList.loadExercisesUsingPrefix looking for '" + prefix + "' (" + prefix.length() + " chars) in context of " + typeToSection);
+      System.out.println("HistoryExerciseList.loadExercisesUsingPrefix looking for '" + prefix +
+        "' (" + prefix.length() + " chars) in context of " + typeToSection + " list " + userListID+
+        " instance " + instance);
 
-      if (typeToSection.isEmpty()) {
-        service.getExerciseIds(lastReqID, userID, prefix, -1, new SetExercisesCallback());
-      } else {
-        service.getExercisesForSelectionState(lastReqID, typeToSection, userID, prefix, new MySetExercisesCallback(null));
-      }
-    }
+    //  if (typeToSection.isEmpty()) {
+        service.getExerciseIds(lastReqID, typeToSection, prefix, userListID, new SetExercisesCallback());
+  /*    } else {
+        service.getExercisesForSelectionState(lastReqID, typeToSection, prefix, new MySetExercisesCallback(null));
+      }*/
+  //  }
   }
 
   /**
    * @see #loadExercisesUsingPrefix(java.util.Map, String)
    * @param typeToSection
    */
-  private void reallyLoadExercises(Map<String, Collection<String>> typeToSection) {
+/*  private void reallyLoadExercises(Map<String, Collection<String>> typeToSection) {
     System.out.println("reallyLoadExercises looking for exercises in context of " + typeToSection + " instance " + instance);
 
     if (typeToSection.isEmpty()) {
       noSectionsGetExercises(userID);
     } else {
       lastReqID++;
-      service.getExercisesForSelectionState(lastReqID, typeToSection, userID, new MySetExercisesCallback(null));
+     // service.getExercisesForSelectionState(lastReqID, typeToSection, "", new MySetExercisesCallback(null));
+      service.getExerciseIds(lastReqID, typeToSection, "", -1, new SetExercisesCallback());
+
     }
+  }*/
+
+
+  /**
+   * @see HistoryExerciseList#loadExercises(String, String)
+   * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
+   * @param token
+   * @return object representing type=value pairs from history token
+   */
+  SelectionState getSelectionState(String token) {
+    return new SelectionState(token, !allowPlusInURL);
+  }
+
+  /**
+   * @see #loadExercises(java.util.Map, String)
+   * @see #pushNewSectionHistoryToken()
+   * @param userID
+   */
+  protected void noSectionsGetExercises(long userID) {
+    System.out.println("HistoryExerciseList.noSectionsGetExercises for " + userID + " instance " + instance);
+    super.getExercises(userID, true);
   }
 
   /**
@@ -431,14 +435,14 @@ public class HistoryExerciseList extends PagingExerciseList {
    *
    * More complicated, since we might want to remember selected item history... but that doesn't work NOW.
    */
-  protected class MySetExercisesCallback extends SetExercisesCallback {
+/*  protected class MySetExercisesCallback extends SetExercisesCallback {
     private final String item;
 
-    /**
+    *//**
      * @see HistoryExerciseList#loadExercisesUsingPrefix(java.util.Map, String)
      * @see #reallyLoadExercises(java.util.Map)
      * @param item
-     */
+     *//*
     public MySetExercisesCallback(String item) {  this.item = item;  }
 
     @Override
@@ -474,5 +478,5 @@ public class HistoryExerciseList extends PagingExerciseList {
         }
       }
     }
-  }
+  }*/
 }
