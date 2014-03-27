@@ -23,6 +23,8 @@ import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.CommonShell;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -42,7 +44,7 @@ public class PagingExerciseList extends ExerciseList {
 
   private TextBox typeAhead = new TextBox();
   private String lastTypeAheadValue = "";
-  private long userListID = -1;
+  protected long userListID = -1;
   private int unaccountedForVertical = 160;
 
   /**
@@ -125,17 +127,18 @@ public class PagingExerciseList extends ExerciseList {
    */
   void loadExercises(String selectionState, String prefix) {
     lastReqID++;
-    long listID = userListID;
-    System.out.println("PagingExerciseList.loadExercises : looking for '" + prefix + "' (" + prefix.length() + " chars) in list id "+listID);
+    //long listID = userListID;
+    System.out.println("PagingExerciseList.loadExercises : looking for '" + prefix + "' (" + prefix.length() + " chars) in list id "+userListID);
+    //Map<String, Collection<String>> typeToSection = getSelectionState(selectionState).getTypeToSection();
 
-    service.getExerciseIds(lastReqID, controller.getUser(), prefix, listID, new SetExercisesCallback());
+    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), prefix, userListID, new SetExercisesCallback());
   }
 
   /**
    * @see mitll.langtest.client.list.HistoryExerciseList#loadExercises(java.util.Map, String)
    * @return
    */
-  String getPrefix() { return typeAhead.getText(); }
+  protected String getPrefix() { return typeAhead.getText(); }
 
   private ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget user) {
     final ControlGroup userGroup = new ControlGroup();
@@ -264,7 +267,7 @@ public class PagingExerciseList extends ExerciseList {
       tellUserPanelIsBusy();
       markCurrentExercise(pagingContainer.getCurrentSelection().getID());
     } else {
-      controller.logEvent(this,"ExerciseList",e.getID(),"Clicked on item '" + e.getTooltip() +"'");
+      controller.logEvent(this, "ExerciseList", e.getID(), "Clicked on item '" + e.getTooltip() + "'");
 
       pushNewItem(e.getID());
     }
@@ -283,7 +286,7 @@ public class PagingExerciseList extends ExerciseList {
    */
   @Override
   protected void rememberExercises(List<CommonShell> result) {
-    System.out.println("PagingExerciseList : rememberAndLoadFirst remembering " + result.size() + " instance " + instance);
+    System.out.println("PagingExerciseList : rememberExercises remembering " + result.size() + " instance " + instance);
     clear();
     for (CommonShell es : result) {
       addExercise(es);
@@ -363,6 +366,8 @@ public class PagingExerciseList extends ExerciseList {
   protected void markCurrentExercise(String itemID) { pagingContainer.markCurrentExercise(itemID); }
 
   public void setUserListID(long userListID) {
+    System.out.println("PagingExerciseList.setUserListID " +userListID + " for " +instance);
+
     this.userListID = userListID;
   }
 
