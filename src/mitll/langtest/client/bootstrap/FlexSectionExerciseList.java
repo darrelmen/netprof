@@ -118,7 +118,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
         public void onFailure(Throwable caught) {}
         @Override
         public void onSuccess(Set<String> result) {
-          System.out.println("FlexSectionExerciseList : getCompletedExercises : completed for user=" + userID + " result " + result.size());
+          System.out.println("FlexSectionExerciseList : getCompletedExercises : completed for user=" + userID + " result " + result.size() + " instance " + instance);
           controller.getExerciseList().setCompleted(result);
           addWidgets();
         }
@@ -177,7 +177,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    */
   private void addButtonRow(List<SectionNode> rootNodes, FluidContainer container, Collection<String> types,
                             boolean addInstructions) {
-    //System.out.println("addButtonRow (success) for user = " + userID + " got types " + types + " num root nodes " + rootNodes.size());
+    System.out.println("addButtonRow (success) for user = " + userID + " got types " + types + " num root nodes " + rootNodes.size() + " instance " + instance);
     if (types.isEmpty()) {
       System.err.println("huh? types is empty?");
       return;
@@ -243,7 +243,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
       }
     }
     long now = System.currentTimeMillis();
-    if (now - then > 200) System.out.println("\taddButtonRow took " + (now - then) + " millis");
+    if (now - then > 200) System.out.println("\taddButtonRow took " + (now - then) + " millis" + " instance " + instance);
 
     if (last != null) setSizesAndPushFirst();
     Widget widget = addBottomText(container);
@@ -459,12 +459,12 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     return status;
   }
 
-  Panel getInstructionRow() {
+/*  Panel getInstructionRow() {
     Panel instructions = new FluidRow();
     instructions.addStyleName("alignCenter");
     instructions.addStyleName("inlineBlockStyle");
     return instructions;
-  }
+  }*/
 
   /**
    * @param sectionInFirstType
@@ -513,7 +513,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   protected void selectItem(String type, Collection<String> sections) {
     ButtonGroupSectionWidget listBox = (ButtonGroupSectionWidget) typeToBox.get(type);
     listBox.clearSelectionState();
-    System.out.println("FlexSectionExerciseList.selectItem : instance " + instance+ " selecting " + type + "=" + sections);
+    //System.out.println("FlexSectionExerciseList.selectItem : instance " + instance+ " selecting " + type + "=" + sections);
     listBox.selectItem(sections);
   }
 
@@ -533,7 +533,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   }
 
   /**
-   * @see HistoryExerciseList.MySetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
+   * @seex HistoryExerciseList.MySetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
    */
   protected void gotEmptyExerciseList() {
    // List<String> strings = Arrays.asList("No items match the selection and search.", "Try clearing one of your selections or changing the search.");
@@ -567,9 +567,13 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   }
 
   /**
+   * Actually kick off getting the exercises.
    * @see #addButtonRow(java.util.List, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection, boolean)
    */
   private void setSizesAndPushFirst() {
+
+    System.out.println("setSizesAndPushFirst instance " + instance);
+
     pushFirstListBoxSelection();
 
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
