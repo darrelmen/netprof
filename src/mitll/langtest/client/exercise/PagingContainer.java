@@ -270,17 +270,18 @@ public class PagingContainer {
       public SafeHtml getValue(CommonShell object) {
         if (!controller.showCompleted()) {
           return getColumnToolTip(object.getTooltip());
-        }
-        else {
-        String columnText = object.getTooltip();
-        String html = object.getID();
-        if (columnText != null) {
-          if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
-          boolean complete = completed.contains(object.getID());
-          // System.out.println("check -- " + complete + " for " + object.getID() + " in " + completed.size() + " : " + completed);
-          html = (complete ? "<i class='icon-check'></i>&nbsp;" : "") + columnText;
-        }
-        return new SafeHtmlBuilder().appendHtmlConstant(html).toSafeHtml();
+        } else {
+          String columnText = object.getTooltip();
+          String html = object.getID();
+          if (columnText != null) {
+            if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
+            boolean complete = completed.contains(object.getID());
+
+            // TODO red check for defect, green check for fixed? black for inspected?
+            // System.out.println("check -- " + complete + " for " + object.getID() + " in " + completed.size() + " : " + completed);
+            html = (complete ? "<i class='icon-check'></i>&nbsp;" : "") + columnText;
+          }
+          return new SafeHtmlBuilder().appendHtmlConstant(html).toSafeHtml();
         }
       }
 
@@ -380,9 +381,8 @@ public class PagingContainer {
 
     List<CommonShell> list = getList();
     String id = exercise.getID();
-    CommonShell exercise1 = (CommonShell) exercise; // TODO : can't remember how I avoid this
-    idToExercise.put(id, exercise1);
-    list.add(exercise1);
+    idToExercise.put(id, exercise);
+    list.add(exercise);
     //System.out.println("data now has "+list.size() + " after adding " + exercise.getID());
   }
 
@@ -392,10 +392,9 @@ public class PagingContainer {
     List<CommonShell> list = getList();
     int before= list.size();
     String id = exercise.getID();
-    CommonShell exercise1 = (CommonShell) exercise; // TODO : can't remember how I avoid this
-    idToExercise.put(id, exercise1);
+    idToExercise.put(id, exercise);
     int i = list.indexOf(afterThisOne);
-    list.add(i+1,exercise1);
+    list.add(i+1, exercise);
     int after = list.size();
     System.out.println("data now has "+ after + " after adding " + exercise.getID());
     if (before +1!=after) System.err.println("didn't add " + exercise.getID());
