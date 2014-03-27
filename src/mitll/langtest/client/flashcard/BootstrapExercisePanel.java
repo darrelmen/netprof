@@ -838,7 +838,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
    * @param toPlay
    * @see #showIncorrectFeedback(mitll.langtest.shared.AudioAnswer, double, boolean)
    */
-  private void playAllAudio(final String infoToShow, final List<String> toPlay) {
+/*  private void playAllAudio(final String infoToShow, final List<String> toPlay) {
     if (toPlay.isEmpty()) {
       goToNextItem(infoToShow);
     } else {
@@ -866,7 +866,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
         }, false);
       }
     }
-  }
+  }*/
 
   /**
    * @param infoToShow longer text means longer delay while user reads it
