@@ -48,6 +48,8 @@ public class UserListManager {
   public static final String ALL_ITEMS_WITH_COMMENTS = "All items with comments";
   public static final String REVIEW = "Defects";
   public static final String ITEMS_TO_REVIEW = "Possible defects to fix";
+  public static final long REVIEW_MAGIC_ID = -100;
+  public static final long COMMENT_MAGIC_ID = -200;
 
   private final UserDAO userDAO;
   private final ReviewedDAO reviewedDAO;
@@ -205,7 +207,9 @@ public class UserListManager {
       if (!reviewedExercises.contains(ue.getID())) include.add(ue);
     }
 
-    return getReviewList(include, COMMENTS, ALL_ITEMS_WITH_COMMENTS, allIncorrect);
+    UserList reviewList = getReviewList(include, COMMENTS, ALL_ITEMS_WITH_COMMENTS, allIncorrect);
+    reviewList.setUniqueID(COMMENT_MAGIC_ID);
+    return reviewList;
   }
 
   /**
@@ -224,7 +228,8 @@ public class UserListManager {
     List<CommonUserExercise> allKnown = userExerciseDAO.getWhere(incorrectReviewed);
     logger.debug("\tgetReviewList ids #=" + allKnown.size());
 
-    return getReviewList(allKnown, REVIEW, ITEMS_TO_REVIEW, incorrectReviewed);
+    UserList reviewList = getReviewList(allKnown, REVIEW, ITEMS_TO_REVIEW, incorrectReviewed);
+    return reviewList;
   }
 
   private UserList getReviewList(List<CommonUserExercise> allKnown, String name, String description, Collection<String> ids) {
@@ -235,7 +240,7 @@ public class UserListManager {
 
     logger.debug("getReviewList ids #=" + allKnown.size() + " yielded " + onList.size());
     User user = new User(-1, 89, 0, 0, "", "", false);
-    UserList userList = new UserList(Long.MAX_VALUE, user, name, description, "", false);
+    UserList userList = new UserList(REVIEW_MAGIC_ID, user, name, description, "", false);
     userList.setReview(true);
     userList.setExercises(onList);
     return userList;
@@ -446,7 +451,7 @@ public class UserListManager {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds(int, long, String, long)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds
    * @param id
    * @return
    */
@@ -455,7 +460,9 @@ public class UserListManager {
       logger.error("getUserListByID : huh? asking for id " + id);
       return null;
     }
-    return id == Long.MAX_VALUE ? getReviewList() : userListDAO.getWithExercises(id);
+    return
+      id == REVIEW_MAGIC_ID ?  getReviewList() :
+      id == COMMENT_MAGIC_ID ? getCommentedList() : userListDAO.getWithExercises(id);
   }
 
   /**
