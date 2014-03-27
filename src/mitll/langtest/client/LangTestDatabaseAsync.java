@@ -39,10 +39,6 @@ public interface LangTestDatabaseAsync {
 
   void checkoutExerciseID(String user,String id, AsyncCallback<Void> async);
 
-/*
-  void getResultsForExercise(String exid, boolean arabicTextDataCollect, AsyncCallback<ResultsAndGrades> async);
-*/
-
   void addGrade(String exerciseID, Grade grade, AsyncCallback<CountAndGradeID> async);
 
   void changeGrade(Grade toChange, AsyncCallback<Void> async);
@@ -52,10 +48,6 @@ public interface LangTestDatabaseAsync {
   void getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, String exerciseID, AsyncCallback<ImageResponse> async);
 
   void getExercise(String id, AsyncCallback<CommonExercise> async);
-
-/*
-  void getScoreForAnswer(long userID, CommonExercise e, int questionID, String answer, String answerType, AsyncCallback<Double> async);
-*/
 
   void getUserToResultCount(AsyncCallback<Map<User, Integer>> async);
 
@@ -83,30 +75,12 @@ public interface LangTestDatabaseAsync {
 
   void getGradeCountPerExercise(AsyncCallback<Map<Integer, Map<String, Map<String, Integer>>>> async);
 
-  void getExerciseIds(int reqID, AsyncCallback<ExerciseListWrapper> async);
-
-  void getExerciseIds(int reqID, long userID, AsyncCallback<ExerciseListWrapper> async);
-
-  void getExerciseIds(int reqID, long userID, String prefix, long userListID,
-                                                AsyncCallback<ExerciseListWrapper> async);
-
-  /**
-   * @param reqID
-   * @param typeToSection
-   * @param userID
-   * @return
-   */
-  void getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection,
-                                     long userID, AsyncCallback<ExerciseListWrapper> async);
-
+  void getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix, long userListID,
+                      AsyncCallback<ExerciseListWrapper> async);
 
   void addDLIUser(DLIUser dliUser, AsyncCallback<Void> async);
 
   void getCompletedExercises(int user, boolean isReviewMode, AsyncCallback<Set<String>> async);
-
-  void getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection,
-                                                               long userID, String prefix,
-                                                               AsyncCallback<ExerciseListWrapper> async);
 
   void getStartupInfo(AsyncCallback<StartupInfo> async);
 
