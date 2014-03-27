@@ -32,9 +32,13 @@ import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.ExerciseListWrapper;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -155,12 +159,14 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     System.out.println("ExerciseList.getExercises for user " +userID + " instance " + instance);
     lastReqID++;
 
-    if (showInOrder) {
-      service.getExerciseIds(lastReqID, new SetExercisesCallback());
-    } else {
+  //  if (showInOrder) {
+   //   service.getExerciseIds(lastReqID, new SetExercisesCallback());
+/*    } else {
       System.out.println("ExerciseList.getExercises for user " +userID + " instance " + instance);
       service.getExerciseIds(lastReqID, userID, new SetExercisesCallback());
-    }
+    }*/
+
+    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), "", -1, new SetExercisesCallback());
   }
 
   /**
@@ -169,13 +175,19 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   public void reload() {
     System.out.println("ExerciseList.reload for user " + controller.getUser() + " instance " + instance + " id " + getElement().getId());
-    service.getExerciseIds(lastReqID, controller.getUser(), new SetExercisesCallback());
+    //service.getExerciseIds(lastReqID, /*controller.getUser(),*/ new SetExercisesCallback());
+    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), "", -1, new SetExercisesCallback());
   }
 
+  /**
+   * After re-fetching the ids, select this one.
+   * @param id
+   */
   @Override
   public void reloadWith(String id) {
     System.out.println("ExerciseList.reloadWith id = " + id+ " for user " + controller.getUser() + " instance " + instance);
-    service.getExerciseIds(lastReqID, controller.getUser(), new SetExercisesCallback(id));
+    //service.getExerciseIds(lastReqID, /*controller.getUser(),*/ new SetExercisesCallback(id));
+    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), "", -1, new SetExercisesCallback());
   }
 
 
@@ -214,8 +226,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @return
    */
   String getSelectionFromToken(String token) {
-    //token = token.contains(ResponseExerciseList.RESPONSE_TYPE_DIVIDER) ? token.split(ResponseExerciseList.RESPONSE_TYPE_DIVIDER)[0] : token; // remove any other parameters
-    //token = token.split(ResponseExerciseList.RESPONSE_TYPE_DIVIDER)[0]; // remove any other parameters
     return token;
   }
 
@@ -271,11 +281,11 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   class SetExercisesCallback implements AsyncCallback<ExerciseListWrapper> {
     private String id;
 
-    public SetExercisesCallback(String id) {
+ /*   public SetExercisesCallback(String id) {
       this.id = id;
       System.out.println("ExerciseList.SetExercisesCallback id = " + id);
 
-    }
+    }*/
     public SetExercisesCallback() {}
 
     public void onFailure(Throwable caught) {
