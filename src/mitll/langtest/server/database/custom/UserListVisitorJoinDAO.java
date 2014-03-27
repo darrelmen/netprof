@@ -10,7 +10,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -131,7 +133,7 @@ public class UserListVisitorJoinDAO extends DAO {
    * @param listid
    * @return
    */
-  public Set<Long> getVisitorsOfList(long listid) {
+/*  public Set<Long> getVisitorsOfList(long listid) {
     String sql = "SELECT * from " + USER_EXERCISE_LIST_VISITOR + " where " +
       USERLISTID +
     "=" + listid + " ORDER BY " +MODIFIED + " DESC";
@@ -141,9 +143,14 @@ public class UserListVisitorJoinDAO extends DAO {
       logger.error("got " + e, e);
     }
     return null;
-  }
+  }*/
 
-  public Set<Long> getListsForVisitor(long userid) {
+  /**
+   * @see mitll.langtest.server.database.custom.UserListDAO#getListsForUser(long)
+   * @param userid
+   * @return
+   */
+  public List<Long> getListsForVisitor(long userid) {
     String sql = "SELECT * from " + USER_EXERCISE_LIST_VISITOR + " where " +
       VISITORID +
       "=" + userid +
@@ -156,11 +163,11 @@ public class UserListVisitorJoinDAO extends DAO {
     return null;
   }
 
-  private Set<Long> getVisitors(String sql, String column) throws SQLException {
+  private List<Long> getVisitors(String sql, String column) throws SQLException {
     Connection connection = database.getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
     ResultSet rs = statement.executeQuery();
-    Set<Long> visitors = new HashSet<Long>();
+    List<Long> visitors = new ArrayList<Long>();
 
     while (rs.next()) {
       visitors.add(rs.getLong(column));
