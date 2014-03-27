@@ -77,6 +77,7 @@ class ButtonGroupSectionWidget implements SectionWidget {
   }
 
   /**
+   * @see mitll.langtest.client.list.HistoryExerciseList#getCurrentSelection(String)
    * @return
    */
   @Override
