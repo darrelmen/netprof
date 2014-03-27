@@ -124,7 +124,7 @@ public class EventDAO extends DAO {
       statement.close();
       database.closeConnection(connection);
 
-     logger.debug("now " + getCount(EVENT) + " and event is " + event);
+      //logger.debug("now " + getCount(EVENT) + " and event is " + event);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
