@@ -56,25 +56,32 @@ class NPFHelper implements RequiresResize {
   }
 
   /**
+   * Add npf widget to content of a tab - here marked learn
    * @see Navigation#getListOperations
    * @param ul
    * @param learn
    * @param instanceName
+   * @param loadExercises
    */
-  public void showNPF(UserList ul, Navigation.TabAndContent learn, String instanceName) {
-    System.out.println(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul/* + " " + getElement().getID()*/);
+  public void showNPF(UserList ul, Navigation.TabAndContent learn, String instanceName, boolean loadExercises) {
+    System.out.println(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul);
 
     int widgetCount = learn.content.getWidgetCount();
     if (!madeNPFContent || widgetCount == 0) {
-      addNPFToContent(ul, learn.content, instanceName);
+
+      System.out.println("\t: adding npf content instanceName = " + instanceName + " for list " + ul);
+
+      addNPFToContent(ul, learn.content, instanceName, loadExercises);
       madeNPFContent = true;
     } else {
-      rememberAndLoadFirst(ul,instanceName);
+      System.out.println("\t: rememberAndLoadFirst instanceName = " + instanceName + " for list " + ul);
+
+      rememberAndLoadFirst(ul, instanceName);
     }
   }
 
-  private void addNPFToContent(UserList ul, Panel listContent, String instanceName) {
-    Panel npfContent = doNPF(ul,instanceName);
+  private void addNPFToContent(UserList ul, Panel listContent, String instanceName, boolean loadExercises) {
+    Panel npfContent = doNPF(ul, instanceName, loadExercises);
     listContent.add(npfContent);
     listContent.addStyleName("userListBackground");
   }
@@ -84,14 +91,15 @@ class NPFHelper implements RequiresResize {
    *
    * @param ul
    * @param instanceName
+   * @param loadExercises
    * @return
    */
-  private Panel doNPF(UserList ul, String instanceName) {
-    //System.out.println(getClass() + " : doNPF instanceName = " + instanceName + " for list " + ul);
+  private Panel doNPF(UserList ul, String instanceName, boolean loadExercises) {
+    System.out.println(getClass() + " : doNPF instanceName = " + instanceName + " for list " + ul);
 
     Panel hp = doInternalLayout(ul, instanceName);
 
-    rememberAndLoadFirst(ul,instanceName);
+    if (loadExercises) rememberAndLoadFirst(ul,instanceName);
     setupContent(hp);
     return hp;
   }
@@ -143,8 +151,8 @@ class NPFHelper implements RequiresResize {
     return exerciseList;
   }
 
-  private void rememberAndLoadFirst(final UserList ul, String instanceName) {
-    npfExerciseList.show();
+  protected void rememberAndLoadFirst(final UserList ul, String instanceName) {
+    //npfExerciseList.show();
     if (controller.isReviewMode()) {
       System.out.println("NPFHelper.rememberAndLoadFirst : review mode " + controller.isReviewMode() + " for " + ul + " instanceName " + instanceName);
       service.getCompletedExercises(controller.getUser(), controller.isReviewMode(), new AsyncCallback<Set<String>>() {
@@ -154,6 +162,9 @@ class NPFHelper implements RequiresResize {
 
         @Override
         public void onSuccess(Set<String> result) {
+
+          System.out.println("\tNPFHelper.rememberAndLoadFirst (success) :  for " + ul + " found " + result.size());
+
           npfExerciseList.setCompleted(result);
           npfExerciseList.setUserListID(ul.getUniqueID());
           npfExerciseList.rememberAndLoadFirst(new ArrayList<CommonShell>(ul.getExercises()));
@@ -205,7 +216,7 @@ class NPFHelper implements RequiresResize {
   }
 
   /**
-   * @see #doNPF(mitll.langtest.shared.custom.UserList, String)
+   * @see #doNPF(mitll.langtest.shared.custom.UserList, String, boolean)
    * @return
    */
   Panel getNpfContentPanel() { return npfContentPanel; }
