@@ -237,7 +237,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     ImageResponse ifPresent = imageCache.getIfPresent(key);
     if (ifPresent != null) {
-      System.out.println("found  " + ifPresent);
+      //System.out.println("found  " + ifPresent);
 
       ifPresent.req = -1;
       client.onSuccess(ifPresent);
