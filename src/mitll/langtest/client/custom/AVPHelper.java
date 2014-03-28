@@ -7,6 +7,7 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
@@ -20,10 +21,9 @@ import mitll.langtest.client.user.UserManager;
 * To change this template use File | Settings | File Templates.
 */
 class AVPHelper extends NPFHelper {
-  private final LangTestDatabaseAsync service;
-  private final UserManager userManager;
-  private final ExerciseController controller;
-  private final UserFeedback feedback;
+ // private final LangTestDatabaseAsync service;
+  //private final ExerciseController controller;
+  //private final UserFeedback feedback;
 
   /**
    * @see Navigation#Navigation
@@ -34,16 +34,15 @@ class AVPHelper extends NPFHelper {
    */
   public AVPHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager, ExerciseController controller) {
     super(service, feedback, userManager, controller);
-    this.service = service;
-    this.userManager = userManager;
-    this.controller = controller;
-    this.feedback = feedback;
+   // this.service = service;
+    //UserManager userManager1 = userManager;
+   // this.controller = controller;
+   // this.feedback = feedback;
   }
 
   @Override
   protected PagingExerciseList makeExerciseList(final Panel right, final String instanceName) {
-    MyFlashcardExercisePanelFactory factory =
-      new MyFlashcardExercisePanelFactory(service, feedback, controller, null);
+    ExercisePanelFactory factory = getFactory(null,instanceName);
     return new PagingExerciseList(right, service, feedback, factory, controller, false, false,
       true, instanceName) {
       @Override
@@ -68,13 +67,18 @@ class AVPHelper extends NPFHelper {
 
   /**
    * @see mitll.langtest.client.custom.NPFHelper#makeNPFExerciseList
-   * @param exerciseList
-   * @param instanceName
-   * @param userListID
+   * @paramx exerciseList
+   * @paramx instanceName
+   * @paramx userListID
    */
-  @Override
+/*  @Override
   protected void setFactory(final PagingExerciseList exerciseList, final String instanceName, long userListID) {
-    exerciseList.setFactory(new MyFlashcardExercisePanelFactory(service, feedback,controller,exerciseList), userManager, 1);
+    exerciseList.setFactory(getFactory(exerciseList,instanceName), userManager, 1);
+  }*/
+
+  @Override
+  protected ExercisePanelFactory getFactory(PagingExerciseList exerciseList, final String instanceName) {
+    return new MyFlashcardExercisePanelFactory(service, feedback, controller, exerciseList);
   }
 
   @Override
