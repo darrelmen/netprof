@@ -50,7 +50,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     this.service = service;
     this.recordInResults = recordInResults;
     this.audioType = audioType;
-    System.out.println("PostAudioRecordButton : Audio type " + audioType);
+  //  System.out.println("PostAudioRecordButton : Audio type " + audioType);
     getElement().setId("PostAudioRecordButton");
     controller.register(this, exercise.getID());
   }
