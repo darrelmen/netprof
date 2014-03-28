@@ -1355,6 +1355,11 @@ public class DatabaseImpl implements Database {
     return duplicate;
   }
 
+  /**
+   * @see
+   * @param id
+   * @return
+   */
   public boolean deleteItem(String id ) {
     getAddRemoveDAO().add(id, "REMOVE");
 
