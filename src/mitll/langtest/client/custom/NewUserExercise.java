@@ -201,8 +201,19 @@ public class NewUserExercise extends BasicDialog {
     row.addStyleName("buttonGroupInset");
   }
 
-  void deleteItem(final String id, final long uniqueID, final UserList ul,
-                  final PagingExerciseList exerciseList, final NPFHelper npfHelper) {
+  /**
+   * Removes from 4 lists!
+   *
+   * @param id
+   * @param uniqueID
+   * @param ul
+   * @param exerciseList
+   * @param npfExerciseList
+   */
+  void deleteItem(final String id, final long uniqueID,
+                  final UserList ul,
+                  final PagingExerciseList exerciseList,
+                  final PagingExerciseList npfExerciseList) {
     service.deleteItemFromList(uniqueID, id, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {}
@@ -219,7 +230,9 @@ public class NewUserExercise extends BasicDialog {
         if (originalList.remove(id) == null) {
           System.err.println("deleteItem huh? didn't remove the item " + id + " from " + originalList);
         }
-        npfHelper.reload();
+        if (npfExerciseList != null) {
+          npfExerciseList.redraw();
+        }
       }
     });
   }
@@ -268,7 +281,7 @@ public class NewUserExercise extends BasicDialog {
   }
 */
 
-  void setFields(CommonUserExercise newUserExercise) {
+  void setFields(CommonExercise newUserExercise) {
     System.out.println("grabInfoFromFormAndStuffInfoExercise : setting fields with " + newUserExercise);
 
     // english
@@ -465,6 +478,16 @@ public class NewUserExercise extends BasicDialog {
     });
   }
 
+  /**
+   * Add to the original list, out copy, and the pagin exercise list --- complicated!
+   *
+   * After list manipulation, remove the old panel and put in a new copy.
+   *
+   * @param newExercise
+   * @param ul
+   * @param exerciseList
+   * @param toAddTo
+   */
   void afterItemCreated(UserExercise newExercise, UserList ul, ListInterface exerciseList, Panel toAddTo) {
     //System.out.println("afterItemCreated " + newExercise);
 
