@@ -120,25 +120,6 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
 
   public CommonUserExercise toCommonUserExercise() { return this; }
 
-  /**
-   * @see mitll.langtest.server.database.DatabaseImpl#getUserExerciseWhere(String)
-   * @xdeprecated ideally we shouldn't have to do this
-   * @paramx language
-   * @return
-   */
-/*  public Exercise toExercise(String language) {
-    String content = setContent(language);
-    String tooltip = english.trim().isEmpty() ? getForeignLanguage() : english;
-    Exercise imported = new Exercise("import", id, content, false, true, tooltip);
-    if (getRefAudio() != null)
-      imported.setRefAudio(getRefAudio());
-
-    imported.setRefSentence(getForeignLanguage());
-
-    copyFields(imported);
-    return imported;
-  }*/
-
   private void copyFields(Exercise imported) {
     if (getSlowAudioRef() != null)
       imported.setSlowRefAudio(getSlowAudioRef());
