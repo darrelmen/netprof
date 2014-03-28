@@ -328,7 +328,7 @@ public class UserListManager {
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#editItem(mitll.langtest.shared.custom.UserExercise)
-   * @see mitll.langtest.client.custom.EditItem.EditableExercise#postEditItem(mitll.langtest.client.list.ListInterface, boolean)
+   * @see mitll.langtest.client.custom.EditableExercise#postEditItem(mitll.langtest.client.list.ListInterface, boolean)
    *
    * @param userExercise
    * @param createIfDoesntExist
@@ -555,6 +555,7 @@ public class UserListManager {
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#markReviewed(String, boolean, long)
+   * @see mitll.langtest.client.custom.ReviewEditableExercise#doAfterEditComplete(mitll.langtest.client.list.ListInterface, boolean)
    * @param exerciseid
    */
   public void removeReviewed(String exerciseid) {
@@ -571,7 +572,10 @@ public class UserListManager {
       logger.error("removeReviewed couldn't find " + exerciseid);
       if (incorrect.contains(exerciseid)) {
         incorrect.remove(exerciseid);
-        logger.debug("now " + incorrect.size() + " commented items.");
+        logger.debug("now " + incorrect.size() + " defect items.");
+      }
+      else {
+        logger.error("huh? couldn't find " + exerciseid + " in set of " + incorrect.size() + " incorrect");
       }
     }
     else {
