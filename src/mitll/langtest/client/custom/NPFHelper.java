@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.user.UserFeedback;
@@ -35,7 +36,7 @@ class NPFHelper implements RequiresResize {
 
   protected final LangTestDatabaseAsync service;
   protected final ExerciseController controller;
-  private final UserManager userManager;
+  protected final UserManager userManager;
 
   protected final UserFeedback feedback;
   protected PagingExerciseList npfExerciseList;
@@ -58,10 +59,10 @@ class NPFHelper implements RequiresResize {
   /**
    * Add npf widget to content of a tab - here marked learn
    * @see Navigation#getListOperations
-   * @param ul
-   * @param learn
-   * @param instanceName
-   * @param loadExercises
+   * @param ul show this user list
+   * @param learn in this tab
+   * @param instanceName flex, review, etc.
+   * @param loadExercises should we load exercises initially
    */
   public void showNPF(UserList ul, Navigation.TabAndContent learn, String instanceName, boolean loadExercises) {
     System.out.println(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul);
@@ -200,7 +201,11 @@ class NPFHelper implements RequiresResize {
    * @param userListID
    */
   void setFactory(final PagingExerciseList exerciseList, final String instanceName, long userListID) {
-    exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, feedback, controller, exerciseList, 1.0f) {
+    exerciseList.setFactory(getFactory(exerciseList, instanceName), userManager, 1);
+  }
+
+  protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList, final String instanceName) {
+    return new GoodwaveExercisePanelFactory(service, feedback, controller, exerciseList, 1.0f) {
       @Override
       public Panel getExercisePanel(CommonExercise e) {
         if (controller.getAudioType().equalsIgnoreCase(Result.AUDIO_TYPE_REVIEW)) {
@@ -212,7 +217,7 @@ class NPFHelper implements RequiresResize {
           return new CommentNPFExercise(e, controller, exerciseList, 1.0f, false, instanceName);
         }
       }
-    }, userManager, 1);
+    };
   }
 
   /**
@@ -225,14 +230,14 @@ class NPFHelper implements RequiresResize {
   public void onResize() { if (npfContentPanel != null) {  npfExerciseList.onResize(); } }
 
   /**
-   * @see mitll.langtest.client.custom.EditItem.EditableExercise#getCreateButton(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, com.github.gwtbootstrap.client.ui.ControlGroup)
+   * @see EditableExercise#getCreateButton(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, com.github.gwtbootstrap.client.ui.ControlGroup)
    */
-  public void reload() {
+/*  public void reload() {
     if (npfExerciseList == null) {
       System.err.println("how can npfExerciseList be null?");
     }
     else {
       npfExerciseList.redraw();
     }
-  }
+  }*/
 }
