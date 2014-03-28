@@ -14,6 +14,9 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.custom.UserList;
@@ -26,9 +29,17 @@ import java.util.Set;
  * Created by GO22670 on 3/26/2014.
  */
 public class ChapterNPFHelper extends NPFHelper {
-  public ChapterNPFHelper(LangTestDatabaseAsync service, UserFeedback feedback,
-                          UserManager userManager, ExerciseController controller) {
+  FlexListLayout flexListLayout;
+  public ChapterNPFHelper(final LangTestDatabaseAsync service, final UserFeedback feedback,
+                          final UserManager userManager, final ExerciseController controller) {
     super(service, feedback, userManager, controller);
+    final NPFHelper outer = this;
+    this.flexListLayout = new FlexListLayout(service,feedback,userManager,controller) {
+      @Override
+      protected ExercisePanelFactory getFactory(PagingExerciseList exerciseList, String instanceName) {
+        return outer.getFactory(exerciseList, instanceName);
+      }
+    };
 
     System.out.println(getClass() + " : ChapterNPFHelper " );
   }
@@ -40,45 +51,11 @@ public class ChapterNPFHelper extends NPFHelper {
    * @return
    */
   protected Panel doInternalLayout(UserList ul, String instanceName) {
-    //System.out.println(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
-
-    Panel twoRows = new FlowPanel();
-    twoRows.getElement().setId("twoRows");
-
-    Panel exerciseListContainer = new SimplePanel();
-    exerciseListContainer.addStyleName("floatLeft");
-    exerciseListContainer.getElement().setId("exerciseListContainer");
-
-    // second row ---------------
-    FluidRow topRow = new FluidRow();
-    topRow.getElement().setId("topRow");
-
-    twoRows.add(topRow);
-
-    Panel bottomRow = new HorizontalPanel();
-    bottomRow.add(exerciseListContainer);
-    bottomRow.getElement().setId("bottomRow");
-    bottomRow.setWidth("100%");
-    bottomRow.addStyleName("trueInlineStyle");
-
-    twoRows.add(bottomRow);
-
-    FlowPanel   currentExerciseVPanel = new FlowPanel();
-    currentExerciseVPanel.getElement().setId("defect_currentExercisePanel");
-
-    currentExerciseVPanel.addStyleName("floatLeftList");
-    bottomRow.add(currentExerciseVPanel);
-
-    FlexSectionExerciseList widgets = makeNPFExerciseList(topRow, currentExerciseVPanel, instanceName, ul.getUniqueID());
-    npfExerciseList = widgets;
-
-    Widget exerciseListOnLeftSide = npfExerciseList.getExerciseListOnLeftSide(controller.getProps());
-    exerciseListContainer.add(exerciseListOnLeftSide);
-
-    widgets.addWidgets();
-    return twoRows;
+    Panel widgets = flexListLayout.doInternalLayout(ul, instanceName);
+    npfExerciseList = flexListLayout.npfExerciseList;
+    return widgets;
   }
-
+/*
   private FlexSectionExerciseList makeNPFExerciseList(final Panel topRow,Panel currentExercisePanel, String instanceName, long userListID) {
     final FlexSectionExerciseList exerciseList = makeExerciseList(topRow,currentExercisePanel, instanceName);
     exerciseList.setUserListID(userListID);
@@ -91,9 +68,9 @@ public class ChapterNPFHelper extends NPFHelper {
       }
     });
     return exerciseList;
-  }
+  }*/
 
-  private FlexSectionExerciseList makeExerciseList(final Panel topRow,Panel currentExercisePanel, final String instanceName) {
+/*  private FlexSectionExerciseList makeExerciseList(final Panel topRow,Panel currentExercisePanel, final String instanceName) {
     return new FlexSectionExerciseList(topRow, currentExercisePanel, service, feedback, false, false, controller, true, instanceName) {
       @Override
       protected void onLastItem() {
@@ -117,5 +94,5 @@ public class ChapterNPFHelper extends NPFHelper {
         loadExercisesUsingPrefix(typeToSection, getPrefix());
       }
     };
-  }
+  }*/
 }
