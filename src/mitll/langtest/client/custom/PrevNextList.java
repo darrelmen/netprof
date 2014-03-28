@@ -20,7 +20,7 @@ class PrevNextList extends HorizontalPanel {
   private boolean disableNext = true;
 
   /**
-   * @see mitll.langtest.client.custom.EditItem.EditableExercise#addNew
+   * @see EditableExercise#addNew
    * @param exerciseShell
    * @param listContainer
    * @param disableNext
