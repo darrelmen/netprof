@@ -98,7 +98,8 @@ public class Navigation extends TabContainer implements RequiresResize {
   private ChapterNPFHelper defectHelper;
   private final NPFHelper avpHelper;
   private final EditItem editItem;
-  private final EditItem reviewItem;
+ // private final EditItem reviewItem;
+  private final ReviewItemHelper reviewItem;
   private final KeyStorage storage;
 
   /**
@@ -106,24 +107,25 @@ public class Navigation extends TabContainer implements RequiresResize {
    * @param service
    * @param userManager
    * @param controller
-   * @param listInterface
+   * @param predefinedContentList
    * @param feedback
    */
   public Navigation(final LangTestDatabaseAsync service, final UserManager userManager,
-                    final ExerciseController controller, final ListInterface listInterface,
+                    final ExerciseController controller, final ListInterface predefinedContentList,
                     UserFeedback feedback) {
     this.service = service;
     this.userManager = userManager;
     this.controller = controller;
-    this.listInterface = listInterface;
+    this.listInterface = predefinedContentList;
     storage = new KeyStorage(controller);
     npfHelper = new NPFHelper(service, feedback, userManager, controller);
     if (controller.isReviewMode()) {
       defectHelper = new ChapterNPFHelper(service, feedback, userManager, controller);
     }
     avpHelper = new AVPHelper(service, feedback, userManager, controller);
-    editItem = new EditItem(service, userManager, controller, listInterface, feedback, npfHelper);
-    reviewItem = new ReviewEditItem(service, userManager, controller, listInterface, feedback, npfHelper);
+    editItem = new EditItem(service, userManager, controller, predefinedContentList, feedback, npfHelper);
+   // reviewItem = new ReviewEditItem(service, userManager, controller, predefinedContentList, feedback, npfHelper.npfExerciseList);
+    reviewItem = new ReviewItemHelper(service, feedback, userManager, controller, null,predefinedContentList,npfHelper);
   }
 
   /**
@@ -626,16 +628,27 @@ public class Navigation extends TabContainer implements RequiresResize {
     // add add item and edit tabs (conditionally)
     TabAndContent editItem = null;
     if (created && (!ul.isPrivate() || ul.getCreator().id == controller.getUser())) {
-      final TabAndContent edit = makeTab(tabPanel, IconType.EDIT, isReview ? ADD_DELETE_EDIT_ITEM :ADD_OR_EDIT_ITEM);
-      editItem = edit;
-      edit.tab.addClickHandler(new ClickHandler() {
+      final TabAndContent editTab = makeTab(tabPanel, IconType.EDIT, isReview ? ADD_DELETE_EDIT_ITEM :ADD_OR_EDIT_ITEM);
+      editItem = editTab;
+      editTab.tab.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
           storage.storeValue(SUB_TAB, EDIT_ITEM);
-          EditItem editItem1 = (isReview || isComment) ? reviewItem : Navigation.this.editItem;
-          controller.logEvent(edit.tab,"Tab","UserList_"+ul.getID(),EDIT_ITEM);
+          //EditItem reviewOrEditItem = (isReview || isComment) ? reviewItem : Navigation.this.editItem;
+          controller.logEvent(editTab.tab,"Tab","UserList_"+ul.getID(),EDIT_ITEM);
+/*
+          if ((isReview || isComment)) {
 
-          showEditItem(ul, edit, editItem1, isNormalList && !ul.isFavorite());
+          }
+          else {
+            showEditItem(ul, editTab, Navigation.this.editItem, !ul.isFavorite());
+          }*/
+
+          if ((isReview || isComment)) {
+            reviewItem.showNPF(ul, editTab, "reviewOrComment", false);
+          } else {
+            showEditItem(ul, editTab, Navigation.this.editItem, !ul.isFavorite());
+          }
         }
       });
     }
@@ -709,8 +722,14 @@ public class Navigation extends TabContainer implements RequiresResize {
   }
 
   private void showEditReviewOrComment(UserList ul, boolean isNormalList, TabAndContent finalEditItem, boolean reviewOrComment) {
-    EditItem editItem1 = reviewOrComment ? reviewItem : this.editItem;
-    showEditItem(ul, finalEditItem, editItem1, isNormalList && !ul.isFavorite());
+    //EditItem editItem1 = reviewOrComment ? reviewItem : this.editItem;
+    //showEditItem(ul, finalEditItem, editItem1, isNormalList && !ul.isFavorite());
+
+    if (reviewOrComment) {
+      reviewItem.showNPF(ul, finalEditItem, "reviewOrComment", false);
+    } else {
+      showEditItem(ul, finalEditItem, this.editItem, isNormalList && !ul.isFavorite());
+    }
   }
 
   /**
@@ -718,7 +737,7 @@ public class Navigation extends TabContainer implements RequiresResize {
    * @param tabPanel
    * @param learn
    * @param practice
-   * @param edit
+   * @param editTab
    * @param ul
    * @param instanceName1
    * @param isReview
@@ -727,7 +746,9 @@ public class Navigation extends TabContainer implements RequiresResize {
    * @return
    */
   private boolean selectPreviouslyClickedSubTab(TabPanel tabPanel,
-                                                TabAndContent learn, TabAndContent practice, TabAndContent edit,
+                                                TabAndContent learn,
+                                                TabAndContent practice,
+                                                TabAndContent editTab,
                                                 UserList ul, String instanceName1,
                                                 boolean isReview, boolean isComment, boolean isNormalList) {
     String subTab = storage.getValue(SUB_TAB);
@@ -747,8 +768,13 @@ public class Navigation extends TabContainer implements RequiresResize {
       } else if (subTab.equals(EDIT_ITEM)) {
         boolean reviewOrComment = isReview || isComment;
         tabPanel.selectTab(reviewOrComment ? 1 : CREATE_TAB_INDEX);
-        clickOnTab(edit);
-        showEditItem(ul, edit, reviewOrComment ? reviewItem : this.editItem, isNormalList && !ul.isFavorite());
+        clickOnTab(editTab);
+
+        if (reviewOrComment) {
+          reviewItem.showNPF(ul, editTab, "reviewOrComment", false);
+        } else {
+          showEditItem(ul, editTab, this.editItem, isNormalList && !ul.isFavorite());
+        }
 
       } else chosePrev = false;
     }
@@ -760,12 +786,10 @@ public class Navigation extends TabContainer implements RequiresResize {
    * @param ul
    * @param addItem
    */
-  private void showEditItem(UserList ul, TabAndContent addItem, EditItem editItem,
-                            boolean includeAddItem) {
+  private void showEditItem(UserList ul, TabAndContent addItem, EditItem editItem, boolean includeAddItem) {
     //System.out.println("showEditReviewOrComment --- " + ul + " : " + includeAddItem  + " reviewer " + isUserReviewer);
     addItem.content.clear();
-    Widget widgets = editItem.editItem(ul, listToMarker.get(ul), includeAddItem);
-    addItem.content.add(widgets);
+    addItem.content.add(editItem.editItem(ul, listToMarker.get(ul), includeAddItem));
   }
 
   private void setScrollPanelWidth(ScrollPanel row) {
