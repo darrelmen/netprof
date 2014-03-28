@@ -33,12 +33,10 @@ import mitll.langtest.shared.ExerciseListWrapper;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -63,7 +61,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   protected UserManager user;
   private String exercise_title;
   private final boolean showTurkToken;
-  private final boolean showInOrder;
   private int countSincePrompt = 0;
   int lastReqID = 0;
   private final Set<Integer> visited = new HashSet<Integer>();
@@ -90,7 +87,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     this.feedback = feedback;
     this.factory = factory;
     this.showTurkToken = showTurkToken;
-    this.showInOrder = showInOrder;
     this.allowPlusInURL = controller.getProps().shouldAllowPlusInURL();
     this.controller = controller;
     this.instance = instance;
@@ -171,7 +167,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   /**
    * @see mitll.langtest.client.custom.NPFHelper#reload()
-   * @see mitll.langtest.client.custom.EditItem.EditableExercise#doAfterEditComplete
+   * @see mitll.langtest.client.custom.EditableExercise#doAfterEditComplete
    */
   public void reload() {
     System.out.println("ExerciseList.reload for user " + controller.getUser() + " instance " + instance + " id " + getElement().getId());
