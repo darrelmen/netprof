@@ -715,6 +715,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db.getUserListManager().markCorrectness(id, isCorrect);
   }
 
+  /**
+   * @see mitll.langtest.client.custom.ReviewEditableExercise#doAfterEditComplete(mitll.langtest.client.list.ListInterface, boolean)
+   * @param id
+   */
   @Override
   public void removeReviewed(String id) { db.getUserListManager().removeReviewed(id); }
 
@@ -778,7 +782,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public List<Event> getEvents() { return db.getEvents(); }
 
   /**
-   * @see mitll.langtest.client.custom.EditItem.EditableExercise#postEditItem
+   * @see mitll.langtest.client.custom.EditableExercise#postEditItem
    * @param userExercise
    */
   @Override
