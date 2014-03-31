@@ -25,10 +25,13 @@ public abstract class TabContainer implements RequiresResize {
     create.setIcon(iconType);
     create.setHeading(label);
     toAddTo.add(create.asTabLink());
+
     final DivWidget createContent = new DivWidget();
+    createContent.getElement().setId("Content_"+label);
     createContent.addStyleName("positionRelative");
     create.add(createContent);
     zeroPadding(createContent);
+
     return new TabAndContent(create, createContent);
   }
 
@@ -57,7 +60,7 @@ public abstract class TabContainer implements RequiresResize {
   public Widget getContainer() {
     return container;
   }
-  protected abstract /* <T extends ExerciseShell>*/ Panel getButtonRow2(Panel secondAndThird);
+  protected abstract Panel getButtonRow2(Panel secondAndThird);
 
   public static class TabAndContent {
     public final Tab tab;
