@@ -65,7 +65,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   int lastReqID = 0;
   private final Set<Integer> visited = new HashSet<Integer>();
   final boolean allowPlusInURL;
-  protected final String instance;
+  public final String instance;
 
   /**
    * @see  mitll.langtest.client.LangTest#makeExerciseList
@@ -166,7 +166,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   /**
-   * @see mitll.langtest.client.custom.NPFHelper#reload()
    * @see mitll.langtest.client.custom.EditableExercise#doAfterEditComplete
    */
   public void reload() {
@@ -313,7 +312,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   /**
-   * @see mitll.langtest.client.list.HistoryExerciseList.MySetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
+   * @see mitll.langtest.client.list.ExerciseList.SetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
    */
   protected void gotEmptyExerciseList() {
     System.out.println(new Date() + " gotEmptyExerciseList : ------  ------------ ");
