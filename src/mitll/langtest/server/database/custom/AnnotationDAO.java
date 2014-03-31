@@ -14,6 +14,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,7 +32,7 @@ public class AnnotationDAO extends DAO {
 
   private static final String ANNOTATION = "annotation";
   private static final String CREATORID = "creatorid";
-
+  private static final String STATUS = "status";
 
   public AnnotationDAO(Database database, UserDAO userDAO) {
     super(database);
@@ -191,7 +192,7 @@ public class AnnotationDAO extends DAO {
   }*/
 
   /**
-   * @see UserListManager#addAnnotations(mitll.langtest.shared.AudioExercise)
+   * @see UserListManager#addAnnotations
    * @param exerciseID
    * @return
    */
@@ -243,7 +244,7 @@ public class AnnotationDAO extends DAO {
       lists.add(new UserAnnotation(
           rs.getString("exerciseid"),
           rs.getString("field"),
-          rs.getString("status"),
+          rs.getString(STATUS),
           rs.getString("comment"),
           rs.getLong(CREATORID),
           rs.getTimestamp("modified").getTime()
@@ -259,31 +260,72 @@ public class AnnotationDAO extends DAO {
   }
 
   /**
-   * TODO : this can't be right!
+   * TODOx : this can't be right!
    *
    * @see mitll.langtest.server.database.custom.UserListManager#UserListManager(mitll.langtest.server.database.UserDAO, UserListDAO, UserListExerciseJoinDAO, AnnotationDAO, ReviewedDAO, mitll.langtest.server.PathHelper)
    * @return
    */
   public Set<String> getIncorrectIds()  {
     Connection connection = database.getConnection();
-    String sql = "SELECT DISTINCT exerciseid from " + ANNOTATION + " order by exerciseid";
+/*    String sql = "SELECT DISTINCT exerciseid from " + ANNOTATION + " where " +
+      STATUS +
+      "='' order by exerciseid";*/
+
+    String sql2 = "select exerciseid,field,status" +
+      //",modified" +
+      " from annotation group by exerciseid,field,status,modified order by exerciseid,field,modified;";
 
     Set<String> lists = Collections.emptySet();
     try {
-      PreparedStatement statement = connection.prepareStatement(sql);
+      PreparedStatement statement = connection.prepareStatement(sql2);
       ResultSet rs = statement.executeQuery();
       lists = new TreeSet<String>();
+      String prevExid = "";
 
+      boolean incorrect = false;
+      Map<String,String> fieldToStatus = new HashMap<String, String>();
       while (rs.next()) {
-        lists.add(rs.getString(1));
+        String exid = rs.getString(1);
+        String field = rs.getString(2);
+        String status = rs.getString(3);
+        //long modified = rs.getTimestamp(4).getTime();
+
+
+        if (prevExid.isEmpty()) {
+          prevExid = exid;
+        } else if (!prevExid.equals(exid)) {
+          for (String latest : fieldToStatus.values()) {
+            if (!latest.equals("correct")) {
+              lists.add(prevExid);
+              break;
+            }
+          }
+          fieldToStatus.clear();
+          prevExid = exid;
+        }
+
+        fieldToStatus.put(field, status);
       }
 
-      //logger.debug("getUserAnnotations sql " + sql + " yielded " + lists);
+      for (String latest : fieldToStatus.values()) {
+        if (!latest.equals("correct")) {
+          lists.add(prevExid);
+          break;
+        }
+      }
+      fieldToStatus.clear();
+
+      logger.debug("getUserAnnotations sql " + sql2 + " yielded " + lists.size());
+      if (lists.size() > 20) {
+        Iterator<String> iterator = lists.iterator();
+        for (int i = 0; i < 20;i++) logger.debug("\tgetUserAnnotations e.g. " + iterator.next() );
+      }
+
       rs.close();
       statement.close();
       database.closeConnection(connection);
     } catch (SQLException e) {
-      logger.error("Got " +e + " doing " + sql,e);
+      logger.error("Got " +e + " doing " + sql2,e);
     }
     return lists;
   }
