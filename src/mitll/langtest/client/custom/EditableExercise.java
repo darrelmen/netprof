@@ -31,7 +31,6 @@ import mitll.langtest.shared.custom.UserList;
 * Created by GO22670 on 3/28/2014.
 */
 class EditableExercise extends NewUserExercise {
- // private EditItem editItem;
   private final HTML englishAnno = new HTML();
   private final HTML translitAnno = new HTML();
   private final HTML foreignAnno = new HTML();
@@ -62,7 +61,6 @@ class EditableExercise extends NewUserExercise {
                           ListInterface predefinedContent,
                           NPFHelper npfHelper) {
     super(service, controller, itemMarker, editItem, changedUserExercise);
- //   this.editItem = editItem;
     fastAnno.addStyleName("editComment");
     slowAnno.addStyleName("editComment");
     this.originalList = originalList;
@@ -81,7 +79,7 @@ class EditableExercise extends NewUserExercise {
 
   PrevNextList getPrevNext(ListInterface pagingContainer) {
     final CommonShell exerciseShell = pagingContainer.byID(newUserExercise.getID());
-    System.out.println("Getting shell for " + newUserExercise.getID() + " : " + exerciseShell);
+   // System.out.println("Getting shell for " + newUserExercise.getID() + " : " + exerciseShell);
     return new PrevNextList(exerciseShell, exerciseList, shouldDisableNext(), controller);
   }
 
@@ -144,7 +142,7 @@ class EditableExercise extends NewUserExercise {
     delete.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        System.out.println(getClass() + " : makeDeleteButton npfHelperList " + npfHelper);
+//        System.out.println(getClass() + " : makeDeleteButton npfHelperList " + npfHelper);
 
         deleteItem(newUserExercise.getID(), uniqueID, ul, exerciseList, npfHelper.npfExerciseList);//editItem.npfHelper);
       }
