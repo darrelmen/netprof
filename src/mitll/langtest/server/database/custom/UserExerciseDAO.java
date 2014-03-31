@@ -13,9 +13,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +32,8 @@ public class UserExerciseDAO extends DAO {
   private static final String LESSON = "lesson";
 
   private static final String USEREXERCISE = "userexercise";
+  private static final String MODIFIED = "modified";
+
   private ExerciseDAO exerciseDAO;
   private static final boolean DEBUG = false;
 
@@ -54,6 +58,9 @@ public class UserExerciseDAO extends DAO {
       }
       if (!columns.contains(LESSON)) {
         addColumn(connection, LESSON);
+      }
+      if (!columns.contains(MODIFIED)) {
+        addColumnToTable3(connection);
       }
     } catch (SQLException e) {
       logger.error("got " + e, e);
@@ -82,9 +89,11 @@ public class UserExerciseDAO extends DAO {
         "INSERT INTO " + USEREXERCISE +
           "(" +
             EXERCISEID +
-            ",english,foreignLanguage," + TRANSLITERATION + ",creatorid,refAudio,slowAudioRef,override," + UNIT+","+LESSON+
+            ",english,foreignLanguage," + TRANSLITERATION + ",creatorid,refAudio,slowAudioRef,override," + UNIT+
+          ","+LESSON+
+          ","+MODIFIED+
           ") " +
-          "VALUES(?,?,?,?,?,?,?,?,?,?);");
+          "VALUES(?,?,?,?,?,?,?,?,?,?,?);");
       int i = 1;
       statement.setString(i++, userExercise.getID());
       statement.setString(i++, fixSingleQuote(userExercise.getEnglish()));
@@ -115,6 +124,7 @@ public class UserExerciseDAO extends DAO {
       } else {
         statement.setString(i++, "");
       }
+      statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));
 
       int j = statement.executeUpdate();
 
@@ -180,6 +190,7 @@ public class UserExerciseDAO extends DAO {
       " VARCHAR, " +
       LESSON +
       " VARCHAR, " +
+      "modified TIMESTAMP, " +
       "FOREIGN KEY(creatorid) REFERENCES " +
       "USERS" +
       "(ID)" +
@@ -292,7 +303,7 @@ public class UserExerciseDAO extends DAO {
     try {
       List<CommonUserExercise> userExercises = getUserExercises(sql);
       if (userExercises.isEmpty()) {
-        //logger.debug("getVisitorsOfList : no custom exercise with id " + exid);
+        //logger.debug("getWhere : no custom exercise with id " + exid);
         return null;
       } else return userExercises.iterator().next();
     } catch (SQLException e) {
@@ -359,6 +370,10 @@ public class UserExerciseDAO extends DAO {
         if (!second.isEmpty()) unitToValue.put(s, second);
       }
 
+      Timestamp timestamp = rs.getTimestamp(MODIFIED);
+
+        Date date = (timestamp != null) ? new Date(timestamp.getTime()) : new Date(0);
+
       UserExercise e = new UserExercise(
         rs.getLong("uniqueid"), //id
         rs.getString(EXERCISEID),
@@ -369,7 +384,8 @@ public class UserExerciseDAO extends DAO {
         rs.getString("refAudio"),
         rs.getString("slowAudioRef"),
         rs.getBoolean(OVERRIDE),
-        unitToValue);
+        unitToValue, date
+      );
 
       exercises.add(e);
     }
@@ -406,7 +422,7 @@ public class UserExerciseDAO extends DAO {
       Connection connection = database.getConnection();
 
       // TODO : consider making this an actual prepared statement?
-
+/*
       String sql = "UPDATE " + USEREXERCISE +
         " " +
         "SET " +
@@ -415,11 +431,35 @@ public class UserExerciseDAO extends DAO {
         TRANSLITERATION + "='" + fixSingleQuote(userExercise.getTransliteration()) + "', " +
         "refAudio='" + userExercise.getRefAudio() + "', " +
         "slowAudioRef='" + userExercise.getSlowAudioRef() + "' " +
+      //  "slowAudioRef='" + userExercise.getSlowAudioRef() + "' " +
         "WHERE " +
           EXERCISEID +
-          "='" + userExercise.getID() +"'";
+          "='" + userExercise.getID() +"'";*/
 
+
+      String sql = "UPDATE " + USEREXERCISE +
+        " " +
+        "SET " +
+        "english=?,foreignLanguage=?," + TRANSLITERATION + "=?,refAudio=?,slowAudioRef=?," + MODIFIED +
+        "=? " +
+        "WHERE " +
+        EXERCISEID +
+        "=?"
+       ;
       PreparedStatement statement = connection.prepareStatement(sql);
+
+      int ii = 1;
+
+    //  statement.setString(ii++, fixSingleQuote(userExercise.getEnglish()));
+      statement.setString(ii++, userExercise.getEnglish());
+      statement.setString(ii++, userExercise.getForeignLanguage());
+      statement.setString(ii++, userExercise.getTransliteration());
+      statement.setString(ii++, userExercise.getRefAudio());
+      statement.setString(ii++, userExercise.getSlowAudioRef());
+      statement.setTimestamp(ii++, new Timestamp(System.currentTimeMillis()));
+      statement.setString(ii++, userExercise.getID());
+
+      //PreparedStatement statement = connection.prepareStatement(sql);
       int i = statement.executeUpdate();
 
       if (i == 0) {
@@ -461,9 +501,14 @@ public class UserExerciseDAO extends DAO {
     statement.close();
   }
 
-  public void setExerciseDAO(ExerciseDAO exerciseDAO) {
+  private void addColumnToTable3(Connection connection) throws SQLException {
+    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " +
+      USEREXERCISE +" ADD " + MODIFIED + " TIMESTAMP ");
+    statement.execute();
+    statement.close();
+  }
 
+  public void setExerciseDAO(ExerciseDAO exerciseDAO) {
     this.exerciseDAO = exerciseDAO;
-    // exerciseDAO.getSectionHelper().getTypeOrder();
   }
 }
