@@ -408,6 +408,8 @@ public class PagingContainer {
    * @param currentExercise
    */
   public void onResize(CommonShell currentExercise) {
+    //System.out.println("PagingContainer : onResize");
+
     int numRows = getNumTableRowsGivenScreenHeight();
     if (table.getPageSize() != numRows) {
       table.setPageSize(numRows);
