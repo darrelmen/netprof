@@ -1,5 +1,6 @@
 package mitll.langtest.client.custom;
 
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.core.client.Scheduler;
@@ -57,22 +58,23 @@ class NPFHelper implements RequiresResize {
   }
 
   /**
-   * Add npf widget to content of a tab - here marked learn
+   * Add npf widget to content of a tab - here marked tabAndContent
    * @see Navigation#getListOperations
    * @param ul show this user list
-   * @param learn in this tab
+   * @param tabAndContent in this tab
    * @param instanceName flex, review, etc.
    * @param loadExercises should we load exercises initially
    */
-  public void showNPF(UserList ul, Navigation.TabAndContent learn, String instanceName, boolean loadExercises) {
+  public void showNPF(UserList ul, Navigation.TabAndContent tabAndContent, String instanceName, boolean loadExercises) {
     System.out.println(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul);
 
-    int widgetCount = learn.content.getWidgetCount();
+    DivWidget content = tabAndContent.content;
+    int widgetCount = content.getWidgetCount();
     if (!madeNPFContent || widgetCount == 0) {
 
       System.out.println("\t: adding npf content instanceName = " + instanceName + " for list " + ul);
 
-      addNPFToContent(ul, learn.content, instanceName, loadExercises);
+      addNPFToContent(ul, content, instanceName, loadExercises);
       madeNPFContent = true;
     } else {
       System.out.println("\t: rememberAndLoadFirst instanceName = " + instanceName + " for list " + ul);
@@ -100,7 +102,9 @@ class NPFHelper implements RequiresResize {
 
     Panel hp = doInternalLayout(ul, instanceName);
 
-    if (loadExercises) rememberAndLoadFirst(ul,instanceName);
+    if (loadExercises) {
+      rememberAndLoadFirst(ul,instanceName);
+    }
     setupContent(hp);
     return hp;
   }
@@ -115,21 +119,28 @@ class NPFHelper implements RequiresResize {
     System.out.println(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
 
     Panel hp = new HorizontalPanel();
+    hp.getElement().setId("internalLayout_Row");
+
     Panel left = new SimplePanel();
-    hp.add(left);
+    left.getElement().setId("internalLayout_LeftCol");
     left.addStyleName("floatLeft");
+
+    hp.add(left);
 
     npfContentPanel = getRightSideContent(ul, instanceName);
 
+    left.add(npfExerciseList.getExerciseListOnLeftSide(controller.getProps()));
+
     hp.add(npfContentPanel);
 
-    left.add(npfExerciseList.getExerciseListOnLeftSide(controller.getProps()));
     return hp;
   }
 
   protected Panel getRightSideContent(UserList ul, String instanceName) {
     Panel npfContentPanel = new SimplePanel();
     npfContentPanel.addStyleName("floatRight");
+    npfContentPanel.getElement().setId("internalLayout_RightContent");
+
     npfExerciseList = makeNPFExerciseList(npfContentPanel, instanceName + "_"+ul.getUniqueID(),ul.getUniqueID());
     return npfContentPanel;
   }
@@ -155,7 +166,7 @@ class NPFHelper implements RequiresResize {
   protected void rememberAndLoadFirst(final UserList ul, String instanceName) {
     //npfExerciseList.show();
     if (controller.isReviewMode()) {
-      System.out.println("NPFHelper.rememberAndLoadFirst : review mode " + controller.isReviewMode() + " for " + ul + " instanceName " + instanceName);
+      System.out.println(getClass() + ".rememberAndLoadFirst : review mode " + controller.isReviewMode() + " for " + ul + " instanceName " + instanceName);
       service.getCompletedExercises(controller.getUser(), controller.isReviewMode(), new AsyncCallback<Set<String>>() {
         @Override
         public void onFailure(Throwable caught) {
@@ -164,7 +175,7 @@ class NPFHelper implements RequiresResize {
         @Override
         public void onSuccess(Set<String> result) {
 
-          System.out.println("\tNPFHelper.rememberAndLoadFirst (success) :  for " + ul + " found " + result.size());
+          System.out.println("\t"+getClass() + ".rememberAndLoadFirst (success) :  for " + ul + " found " + result.size());
 
           npfExerciseList.setCompleted(result);
           npfExerciseList.setUserListID(ul.getUniqueID());
@@ -180,6 +191,8 @@ class NPFHelper implements RequiresResize {
   Panel setupContent(Panel hp) { return npfContentPanel; }
 
   PagingExerciseList makeExerciseList(final Panel right, final String instanceName) {
+    System.out.println(getClass() + ".makeExerciseList : instanceName " + instanceName);
+
     return new PagingExerciseList(right, service, feedback, null, controller, false, false,
       true, instanceName) {
         @Override
