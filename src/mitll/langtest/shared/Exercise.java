@@ -4,6 +4,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.shared.custom.UserExercise;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -337,6 +338,11 @@ public class Exercise extends AudioExercise implements CommonExercise {
   @Override
   public CommonUserExercise toCommonUserExercise() {
     return new UserExercise(this);
+  }
+
+  @Override
+  public Date getModifiedDate() {
+    return null;
   }
 
   public String toString() {
