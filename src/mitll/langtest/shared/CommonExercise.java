@@ -1,6 +1,7 @@
 package mitll.langtest.shared;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -46,4 +47,6 @@ public interface CommonExercise extends CommonShell {
   void addUnitToValue(String unit, String value);
 
   void addAnnotation(String field, String status, String comment);
+
+  Date getModifiedDate();
 }
