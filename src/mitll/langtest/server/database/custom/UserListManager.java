@@ -62,6 +62,7 @@ public class UserListManager {
 
   private Set<String> reviewedExercises = new TreeSet<String>();
   private Set<String> incorrect = new TreeSet<String>();
+  private Set<String> fixed = new TreeSet<String>();
   private final PathHelper pathHelper;
 
   /**
