@@ -571,9 +571,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @see #addButtonRow(java.util.List, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection, boolean)
    */
   private void setSizesAndPushFirst() {
-
-    System.out.println("setSizesAndPushFirst instance " + instance);
-
+    //System.out.println("setSizesAndPushFirst instance " + instance);
     pushFirstListBoxSelection();
 
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -700,7 +698,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
 
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
-        //System.out.println("FlexSectionExerciseList : deferred set scroll panel width");
+        //System.out.println("FlexSectionExerciseList : deferred set scroll panel width instance " + instance);
         setScrollPanelWidth();
       }
     });
@@ -718,7 +716,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
       }
     }
     else {
-      //System.out.println("setScrollPanelWidth : labelColumn is null");
+     // System.out.println("\tsetScrollPanelWidth : labelColumn is null instance " + instance);
     }
   }
 
