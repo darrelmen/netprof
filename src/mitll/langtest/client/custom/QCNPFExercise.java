@@ -32,6 +32,7 @@ import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseFormatter;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -127,7 +128,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
         markReviewed(listContainer, exercise);
       }
     });
-     approvedTooltip = addTooltip(approved, APPROVED_BUTTON_TOOLTIP);
+    approvedTooltip = addTooltip(approved, APPROVED_BUTTON_TOOLTIP);
     return approved;
   }
 
@@ -199,6 +200,13 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     row.add(getComment());
 
     column.add(row);
+
+    if (e.getModifiedDate() != null && e.getModifiedDate().getTime() != 0) {
+      Heading widgets = new Heading(5, "Changed",e.getModifiedDate().toString());
+      widgets.addStyleName("floatRight");
+      row.add(widgets);
+    }
+
     column.add(getEntry(e, FOREIGN_LANGUAGE, ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getRefSentence()));
     column.add(getEntry(e, TRANSLITERATION, ExerciseFormatter.TRANSLITERATION, e.getTransliteration()));
     column.add(getEntry(e, ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, e.getEnglish()));
