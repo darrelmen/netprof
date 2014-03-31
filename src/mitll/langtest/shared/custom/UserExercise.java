@@ -8,6 +8,7 @@ import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.ExerciseShell;
 
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -29,6 +30,8 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   private long creator;
   private boolean isPredef;
   private boolean isOverride;
+  //private long modified;
+  private Date modifiedDate;
 
   public UserExercise() {}  // just for serialization
 
@@ -77,15 +80,17 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
    * @param refAudio
    * @param slowAudioRef
    * @param isOverride
+   * @param modified
    */
   public UserExercise(long uniqueID, String exerciseID, long creator, String english, String foreignLanguage,
                       String transliteration, String refAudio, String slowAudioRef, boolean isOverride,
-                      Map<String,String> unitToValue) {
+                      Map<String, String> unitToValue, Date modifiedDate) {
     this(uniqueID, exerciseID, creator, english, foreignLanguage, transliteration);
     setRefAudio(refAudio);
     setSlowRefAudio(slowAudioRef);
     setUnitToValue(unitToValue);
     this.isOverride = isOverride;
+    this.modifiedDate = modifiedDate;
   }
 
     /**
@@ -217,6 +222,11 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
 
   public boolean checkPredef() {  return !getID().startsWith(CUSTOM_PREFIX);  }
 
+  @Override
+  public Date getModifiedDate() {
+    return modifiedDate;
+  }
+
   public String toString() {
     return "UserExercise" +
       " #" + uniqueID + "/" + getID() +
@@ -227,6 +237,6 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
       "foreign language '" + getForeignLanguage() + "'" + " (" + getTransliteration() + ") " +
       "tooltip " + getTooltip() +
       "audio attr (" + getAudioAttributes().size() +
-      ") :" + getAudioAttributes() + " unit/lesson " + getUnitToValue();
+      ") :" + getAudioAttributes() + " unit/lesson " + getUnitToValue() + " modified " + modifiedDate;
   }
 }
