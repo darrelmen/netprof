@@ -7,6 +7,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -25,25 +26,39 @@ import java.util.Map;
 /**
  * Created by GO22670 on 3/28/2014.
  */
-public abstract class FlexListLayout {
+public abstract class FlexListLayout implements RequiresResize {
   protected PagingExerciseList npfExerciseList;
   private final ExerciseController controller;
   private final LangTestDatabaseAsync service;
   private final UserFeedback feedback;
   private final UserManager userManager;
 
+  /**
+   * @see mitll.langtest.client.custom.ChapterNPFHelper#ChapterNPFHelper(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController)
+   * @see mitll.langtest.client.custom.ReviewItemHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
+   * @param service
+   * @param feedback
+   * @param userManager
+   * @param controller
+   */
   public FlexListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
                         UserManager userManager, ExerciseController controller) {
-    //super(service, feedback, userManager, controller);
     this.controller = controller;
     this.service = service;
     this.feedback = feedback;
     this.userManager = userManager;
-    System.out.println(getClass() + " : ChapterNPFHelper ");
+    System.out.println(getClass() + " : FlexListLayout ");
   }
 
+  /**
+   * @see mitll.langtest.client.custom.ChapterNPFHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
+   * @see mitll.langtest.client.custom.ReviewItemHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
+   * @param ul
+   * @param instanceName
+   * @return
+   */
   protected Panel doInternalLayout(UserList ul, String instanceName) {
-    //System.out.println(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
+    System.out.println(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
 
     Panel twoRows = new FlowPanel();
     twoRows.getElement().setId("twoRows");
@@ -86,7 +101,7 @@ public abstract class FlexListLayout {
     final FlexSectionExerciseList exerciseList = makeExerciseList(topRow, currentExercisePanel, instanceName);
     exerciseList.setUserListID(userListID);
 
-    setFactory(exerciseList, instanceName, userListID);
+    exerciseList.setFactory(getFactory(exerciseList, instanceName), userManager, 1);
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       @Override
       public void execute() {
@@ -94,10 +109,6 @@ public abstract class FlexListLayout {
       }
     });
     return exerciseList;
-  }
-
-  void setFactory(final PagingExerciseList exerciseList, final String instanceName, long userListID) {
-    exerciseList.setFactory(getFactory(exerciseList, instanceName), userManager, 1);
   }
 
   protected abstract ExercisePanelFactory getFactory(final PagingExerciseList exerciseList, final String instanceName);
@@ -126,5 +137,13 @@ public abstract class FlexListLayout {
         loadExercisesUsingPrefix(typeToSection, getPrefix());
       }
     };
+  }
+
+  @Override
+  public void onResize() {
+    if (npfExerciseList != null) {
+      System.out.println(getClass() + " : onResize " + npfExerciseList.instance);
+      npfExerciseList.onResize();
+    }
   }
 }
