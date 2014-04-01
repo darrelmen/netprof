@@ -19,8 +19,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class UserExerciseDAO extends DAO {
   private static final Logger logger = Logger.getLogger(UserExerciseDAO.class);
@@ -33,6 +35,7 @@ public class UserExerciseDAO extends DAO {
 
   private static final String USEREXERCISE = "userexercise";
   private static final String MODIFIED = "modified";
+  private static final String STATE = "state";
 
   private ExerciseDAO exerciseDAO;
   private static final boolean DEBUG = false;
@@ -54,13 +57,16 @@ public class UserExerciseDAO extends DAO {
         addExerciseIDColumnToTable(connection);
       }
       if (!columns.contains(UNIT)) {
-        addColumn(connection, UNIT);
+        addVarchar(connection, USEREXERCISE, UNIT);
       }
       if (!columns.contains(LESSON)) {
-        addColumn(connection, LESSON);
+        addVarchar(connection, USEREXERCISE, LESSON);
       }
       if (!columns.contains(MODIFIED)) {
         addColumnToTable3(connection);
+      }
+      if (!columns.contains(STATE)) {
+        addColumnToTable4(connection);
       }
     } catch (SQLException e) {
       logger.error("got " + e, e);
@@ -92,8 +98,9 @@ public class UserExerciseDAO extends DAO {
             ",english,foreignLanguage," + TRANSLITERATION + ",creatorid,refAudio,slowAudioRef,override," + UNIT+
           ","+LESSON+
           ","+MODIFIED+
+          ","+STATE+
           ") " +
-          "VALUES(?,?,?,?,?,?,?,?,?,?,?);");
+          "VALUES(?,?,?,?,?,?,?,?,?,?,?,?)");
       int i = 1;
       statement.setString(i++, userExercise.getID());
       statement.setString(i++, fixSingleQuote(userExercise.getEnglish()));
@@ -125,6 +132,7 @@ public class UserExerciseDAO extends DAO {
         statement.setString(i++, "");
       }
       statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));
+      statement.setString(i++,userExercise.getState());
 
       int j = statement.executeUpdate();
 
@@ -191,6 +199,7 @@ public class UserExerciseDAO extends DAO {
       LESSON +
       " VARCHAR, " +
       "modified TIMESTAMP, " +
+      STATE+" VARCHAR, " +
       "FOREIGN KEY(creatorid) REFERENCES " +
       "USERS" +
       "(ID)" +
@@ -235,7 +244,7 @@ public class UserExerciseDAO extends DAO {
       String join2 = getJoin2(listID);
       if (DEBUG) logger.debug("\tusing exercise = " +join2);
       for (String exid : getExercises(join2)) {
-        CommonExercise exercise = exerciseDAO.getExercise(exid);
+        CommonExercise exercise = getPredefExercise(exid);
         if (exercise != null) {
           userExercises2.add(new UserExercise(exercise));
         }
@@ -282,14 +291,19 @@ public class UserExerciseDAO extends DAO {
         listID;
   }
 
-  private CommonExercise getExercise(CommonShell ue) { return getExercise(ue.getID());  }
+  /**
+   * @see #getOnList(long)
+   * @param ue
+   * @return
+   */
+  private CommonExercise getExercise(CommonShell ue) { return getPredefExercise(ue.getID());  }
 
   /**
    * @see UserListManager#getReviewedExercises()
    * @param id
    * @return
    */
-  CommonExercise getExercise(String id) { return exerciseDAO.getExercise(id); }
+  CommonExercise getPredefExercise(String id) { return exerciseDAO.getExercise(id); }
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#getUserExerciseWhere(String)
@@ -297,15 +311,15 @@ public class UserExerciseDAO extends DAO {
    * @return
    */
   public CommonUserExercise getWhere(String exid) {
-    String sql = "SELECT * from " + USEREXERCISE + " where " +
-        EXERCISEID +
-        "='" + exid + "'";
+    String sql = "SELECT * from " + USEREXERCISE + " where " +  EXERCISEID + "='" + exid + "'";
     try {
       List<CommonUserExercise> userExercises = getUserExercises(sql);
       if (userExercises.isEmpty()) {
         //logger.debug("getWhere : no custom exercise with id " + exid);
         return null;
-      } else return userExercises.iterator().next();
+      } else {
+        return userExercises.iterator().next();
+      }
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
@@ -323,16 +337,13 @@ public class UserExerciseDAO extends DAO {
   }
 
   /**
-   * @see UserListManager#getReviewList()
+   * @see UserListManager#getDefectList()
    * @param exids
    * @return
    */
   List<CommonUserExercise> getWhere(Collection<String> exids) {
     if (exids.isEmpty()) return new ArrayList<CommonUserExercise>();
-    StringBuilder builder = new StringBuilder();
-    for (String id : exids) builder.append("'"+id+"'").append(",");
-    String s = builder.toString();
-    s = s.substring(0,s.length()-1);
+    String s = getIds(exids);
     String sql = "SELECT * from " + USEREXERCISE + " where " +
         EXERCISEID +
         " in (" + s+ ")";
@@ -348,6 +359,23 @@ public class UserExerciseDAO extends DAO {
     return null;
   }
 
+  private String getIds(Collection<String> exids) {
+    StringBuilder builder = new StringBuilder();
+    for (String id : exids) builder.append("'"+id+"'").append(",");
+    String s = builder.toString();
+    s = s.substring(0,s.length()-1);
+    return s;
+  }
+
+  /**
+   * @see #getOnList(long)
+   * @see #getOverrides()
+   * @see #getWhere(java.util.Collection)
+   * @see #getWhere(java.lang.String)
+   * @param sql
+   * @return user exercises without annotations
+   * @throws SQLException
+   */
   private List<CommonUserExercise> getUserExercises(String sql) throws SQLException {
     Connection connection = database.getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
@@ -357,25 +385,14 @@ public class UserExerciseDAO extends DAO {
 
     List<String> typeOrder = exerciseDAO.getSectionHelper().getTypeOrder();
     while (rs.next()) {
-      String first = rs.getString(UNIT);
-      String second = rs.getString(LESSON);
-      Map<String,String> unitToValue = new HashMap<String, String>();
-      if (typeOrder.size() > 0 && first != null) {
-        String s = typeOrder.get(0);
-        if (!first.isEmpty()) unitToValue.put(s,first);
-      }
-
-      if (typeOrder.size() > 1 && second != null) {
-        String s = typeOrder.get(1);
-        if (!second.isEmpty()) unitToValue.put(s, second);
-      }
+      Map<String, String> unitToValue = getUnitToValue(rs, typeOrder);
 
       Timestamp timestamp = rs.getTimestamp(MODIFIED);
 
-        Date date = (timestamp != null) ? new Date(timestamp.getTime()) : new Date(0);
+      Date date = (timestamp != null) ? new Date(timestamp.getTime()) : new Date(0);
 
       UserExercise e = new UserExercise(
-        rs.getLong("uniqueid"), //id
+        rs.getLong("uniqueid"),
         rs.getString(EXERCISEID),
         rs.getLong("creatorid"),
         rs.getString("english"),
@@ -384,7 +401,9 @@ public class UserExerciseDAO extends DAO {
         rs.getString("refAudio"),
         rs.getString("slowAudioRef"),
         rs.getBoolean(OVERRIDE),
-        unitToValue, date
+        unitToValue,
+        date,
+        rs.getString(STATE)
       );
 
       exercises.add(e);
@@ -394,6 +413,23 @@ public class UserExerciseDAO extends DAO {
     database.closeConnection(connection);
 
     return exercises;
+  }
+
+  private Map<String, String> getUnitToValue(ResultSet rs, List<String> typeOrder) throws SQLException {
+    String first = rs.getString(UNIT);
+    String second = rs.getString(LESSON);
+    Map<String,String> unitToValue = new HashMap<String, String>();
+
+    if (typeOrder.size() > 0 && first != null) {
+      String s = typeOrder.get(0);
+      if (!first.isEmpty()) unitToValue.put(s,first);
+    }
+
+    if (typeOrder.size() > 1 && second != null) {
+      String s = typeOrder.get(1);
+      if (!second.isEmpty()) unitToValue.put(s, second);
+    }
+    return unitToValue;
   }
 
   private List<String> getExercises(String sql) throws SQLException {
@@ -410,6 +446,72 @@ public class UserExerciseDAO extends DAO {
     database.closeConnection(connection);
 
     return exercises;
+  }
+
+
+  /**
+   * @see UserListManager#editItem(mitll.langtest.shared.custom.UserExercise, boolean)
+   * @param id
+   * @param state
+   */
+  public void updateState(String id, String state) {
+    try {
+      Connection connection = database.getConnection();
+
+      String sql = "UPDATE " + USEREXERCISE +
+        " " +
+        "SET " +
+        STATE +
+        "=? " +
+        "WHERE " +
+        EXERCISEID +
+        "=?"
+        ;
+      PreparedStatement statement = connection.prepareStatement(sql);
+
+      int ii = 1;
+
+      statement.setString(ii++, state);
+      statement.setString(ii++, id);
+      int i = statement.executeUpdate();
+      if (i == 0) {
+        logger.error("huh? no row updated for " + id);
+      }
+      statement.close();
+      database.closeConnection(connection);
+    } catch (Exception e) {
+      logger.error("got " + e, e);
+    }
+  }
+
+  public Set<String> getAtState(String state) {
+    try {
+      Connection connection = database.getConnection();
+
+      String sql = "SELECT " + EXERCISEID + " from " + USEREXERCISE +
+        "WHERE " +
+        STATE +
+        "=?";
+      PreparedStatement statement = connection.prepareStatement(sql);
+
+      int ii = 1;
+
+      statement.setString(ii++, state);
+
+      ResultSet rs = statement.executeQuery();
+      Set<String> exercises = new HashSet<String>();
+
+      while (rs.next()) {
+        exercises.add(rs.getString(1));
+      }
+      statement.close();
+      database.closeConnection(connection);
+
+      return exercises;
+    } catch (Exception e) {
+      logger.error("got " + e, e);
+    }
+    return Collections.emptySet();
   }
 
   /**
@@ -479,19 +581,11 @@ public class UserExerciseDAO extends DAO {
   }
 
   private void addColumnToTable(Connection connection) throws SQLException {
-    addColumn(connection, TRANSLITERATION);
+    addVarchar(connection, USEREXERCISE, TRANSLITERATION);
   }
 
   private void addExerciseIDColumnToTable(Connection connection) throws SQLException {
-    String exerciseid = EXERCISEID;
-    addColumn(connection, exerciseid);
-  }
-
-  private void addColumn(Connection connection, String exerciseid) throws SQLException {
-    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " +
-        USEREXERCISE + " ADD " + exerciseid + " VARCHAR");
-    statement.execute();
-    statement.close();
+    addVarchar(connection, USEREXERCISE, EXERCISEID);
   }
 
   private void addColumnToTable2(Connection connection) throws SQLException {
@@ -506,6 +600,10 @@ public class UserExerciseDAO extends DAO {
       USEREXERCISE +" ADD " + MODIFIED + " TIMESTAMP ");
     statement.execute();
     statement.close();
+  }
+
+  private void addColumnToTable4(Connection connection) throws SQLException {
+    addVarchar(connection, USEREXERCISE, STATE);
   }
 
   public void setExerciseDAO(ExerciseDAO exerciseDAO) {
