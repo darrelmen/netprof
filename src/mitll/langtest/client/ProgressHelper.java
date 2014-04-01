@@ -28,11 +28,11 @@ class ProgressHelper {
     return progressBar;
   }
 
-  public void showAdvance(ListInterface exerciseList) {
+/*  public void showAdvance(ListInterface exerciseList) {
     int percentComplete = exerciseList.getPercentComplete();
     getProgressBar().setPercent(percentComplete == 0 ? 100 : percentComplete);
     getProgressBar().setText(percentComplete == 0 ? "No items completed." :exerciseList.getComplete() + " complete."); // TODO when is this +1 and when not??
-  }
+  }*/
 
   public ProgressBar getProgressBar() {
     return progressBar;
