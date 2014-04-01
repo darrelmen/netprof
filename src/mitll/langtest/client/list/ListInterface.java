@@ -92,12 +92,12 @@ public interface ListInterface extends RequiresResize {
 
   void reloadExercises();
 
-  int getPercentComplete();
+/*  int getPercentComplete();
 
   int getComplete();
   void setCompleted(Set<String> completed);
   void addCompleted(String id);
-  void removeCompleted(String id);
+  void removeCompleted(String id);*/
 
   void addExercise(CommonShell es);
 
