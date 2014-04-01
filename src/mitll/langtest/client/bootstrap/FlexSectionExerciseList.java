@@ -112,7 +112,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     System.out.println("FlexSectionExerciseList.getExercises : Get exercises for user=" + userID + " instance " + instance);
     this.userID = userID;
 
-    if (controller.showCompleted()) {
+/*    if (controller.showCompleted()) {
       service.getCompletedExercises((int)userID, controller.isReviewMode(), new AsyncCallback<Set<String>>() {
         @Override
         public void onFailure(Throwable caught) {}
@@ -124,9 +124,9 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
         }
       });
     }
-    else {
+    else {*/
       addWidgets();
-    }
+  //  }
   }
 
   public void addWidgets() {
@@ -535,12 +535,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   /**
    * @seex HistoryExerciseList.MySetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
    */
-  protected void gotEmptyExerciseList() {
-   // List<String> strings = Arrays.asList("No items match the selection and search.", "Try clearing one of your selections or changing the search.");
-  //  new ModalInfoDialog("Empty selection", strings);
-
-    showEmptySelection();
-  }
+  protected void gotEmptyExerciseList() { showEmptySelection(); }
 
   /**
    * @param title
