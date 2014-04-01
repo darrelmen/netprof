@@ -165,7 +165,7 @@ class NPFHelper implements RequiresResize {
 
   protected void rememberAndLoadFirst(final UserList ul, String instanceName) {
     //npfExerciseList.show();
-    if (controller.isReviewMode()) {
+/*    if (controller.isReviewMode()) {
       System.out.println(getClass() + ".rememberAndLoadFirst : review mode " + controller.isReviewMode() + " for " + ul + " instanceName " + instanceName);
       service.getCompletedExercises(controller.getUser(), controller.isReviewMode(), new AsyncCallback<Set<String>>() {
         @Override
@@ -182,10 +182,10 @@ class NPFHelper implements RequiresResize {
           npfExerciseList.rememberAndLoadFirst(new ArrayList<CommonShell>(ul.getExercises()));
         }
       });
-    } else {
+    } else {*/
       npfExerciseList.setUserListID(ul.getUniqueID());
       npfExerciseList.rememberAndLoadFirst(new ArrayList<CommonShell>(ul.getExercises()));
-    }
+  //  }
   }
 
   Panel setupContent(Panel hp) { return npfContentPanel; }
