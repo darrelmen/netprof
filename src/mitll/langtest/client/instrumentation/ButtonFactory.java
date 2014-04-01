@@ -41,10 +41,11 @@ public class ButtonFactory implements EventLogger {
     registerButton(button, exid, controller.getUser());
   }
 
-  @Override
-  public void registerButton(final Button button, final String exid, final long userid) {
+  private void registerButton(final Button button, final String exid, final long userid) {
     registerButton(button, exid, button.getText(), userid);
-  } /* public void registerButton(final Button button, final String exid, final long userid) {
+  }
+
+  /* public void registerButton(final Button button, final String exid, final long userid) {
     registerButton(button, exid, button.getText(), userid);
   }*/
 
