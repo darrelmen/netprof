@@ -179,6 +179,7 @@ public class DatabaseImpl implements Database {
       userDAO.createUserTable(this);
       dliUserDAO.createUserTable(this);
 
+     // getExercises();
       userListManager.setUserExerciseDAO(userExerciseDAO);
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
@@ -238,7 +239,7 @@ public class DatabaseImpl implements Database {
    */
   public void setInstallPath(String installPath, String lessonPlanFile, String language,
                              boolean useFile, String mediaDir) {
-   // logger.debug("got install path " + installPath + " media " + mediaDir + " is urdu " +isUrdu);
+    logger.debug("got install path " + installPath + " media " + mediaDir);
     this.installPath = installPath;
     this.lessonPlanFile = lessonPlanFile;
     this.mediaDir = mediaDir;
@@ -659,10 +660,10 @@ public class DatabaseImpl implements Database {
    * @param userID so we can show gender aware orderings (i.e. show entries with fewer female responses to females, etc.)
    * @return ordered list of exercises
    */
-  public List<CommonExercise> getExercisesBiasTowardsUnanswered(long userID, boolean useWeights) {
+/*  public List<CommonExercise> getExercisesBiasTowardsUnanswered(long userID, boolean useWeights) {
     List<CommonExercise> rawExercises = getExercises();
     return getExercisesBiasTowardsUnanswered(userID, rawExercises, useWeights);
-  }
+  }*/
 
   /**
    *
@@ -1381,7 +1382,7 @@ public class DatabaseImpl implements Database {
    */
   private CommonExercise getUserExerciseWhere(String id) {
     CommonUserExercise where = userExerciseDAO.getWhere(id);
-    return where != null ? where/*.toExercise(language)*/ : null;
+    return where != null ? where : null;
   }
 
   /**
