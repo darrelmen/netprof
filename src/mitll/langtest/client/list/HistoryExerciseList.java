@@ -353,7 +353,7 @@ public class HistoryExerciseList extends PagingExerciseList {
    */
   protected void loadExercises(final Map<String, Collection<String>> typeToSection, final String item) {
     System.out.println("HistoryExerciseList.loadExercises : instance " + instance+ " " + typeToSection + " and item '" + item + "'");
-    if (controller.showCompleted()) {
+/*    if (controller.showCompleted()) {
       service.getCompletedExercises(controller.getUser(), controller.isReviewMode(), new AsyncCallback<Set<String>>() {
         @Override
         public void onFailure(Throwable caught) {}
@@ -365,9 +365,9 @@ public class HistoryExerciseList extends PagingExerciseList {
         }
       });
     }
-    else {
+    else {*/
       loadExercisesUsingPrefix(typeToSection, getPrefix());
-    }
+  //  }
   }
 
   protected void loadExercises(String selectionState, String prefix) {
