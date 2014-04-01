@@ -11,12 +11,9 @@ import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.RequiresResize;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.list.ExerciseList;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.shared.CommonShell;
@@ -29,16 +26,17 @@ import java.util.Arrays;
 /**
 * Created by GO22670 on 3/28/2014.
 */
-class ReviewEditableExercise extends EditableExercise /*implements RequiresResize*/ {
+class ReviewEditableExercise extends EditableExercise {
   private static final String FIXED = "Mark Fixed";
   private static final String DUPLICATE = "Duplicate";
   private static final String DELETE = "Delete";
+  public static final String DELETE_THIS_ITEM = "Delete this item.";
+  public static final String ARE_YOU_SURE = "Are you sure?";
+  public static final String REALLY_DELETE_ITEM = "Really delete item?";
+  public static final String COPY_THIS_ITEM = "Copy this item.";
 
- // private ReviewEditItem reviewEditItem;
-  //FlexListLayout flexListLayout;
- // PagingExerciseList npfExerciseList;
-  PagingExerciseList exerciseList;
-  ListInterface predefinedContentList;
+  private PagingExerciseList exerciseList;
+  private ListInterface predefinedContentList;
 
   /**
    * @param itemMarker
@@ -50,7 +48,6 @@ class ReviewEditableExercise extends EditableExercise /*implements RequiresResiz
    */
   public ReviewEditableExercise(LangTestDatabaseAsync service,
                                 ExerciseController controller,
-                                //ReviewEditItem reviewEditItem,
                                 HasText itemMarker,
                                 CommonUserExercise changedUserExercise,
 
@@ -116,13 +113,13 @@ class ReviewEditableExercise extends EditableExercise /*implements RequiresResiz
     remove.setType(ButtonType.WARNING);
     remove.addStyleName("floatRight");
     remove.addStyleName("leftFiveMargin");
-    addTooltip(remove,"Delete this item.");
+    addTooltip(remove, DELETE_THIS_ITEM);
 
     remove.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         DialogHelper dialogHelper = new DialogHelper(true);
-        dialogHelper.show("Are you sure?", Arrays.asList("Really delete item?"), new DialogHelper.CloseListener() {
+        dialogHelper.show(ARE_YOU_SURE, Arrays.asList(REALLY_DELETE_ITEM), new DialogHelper.CloseListener() {
           @Override
           public void gotYes() {
             service.deleteItem(newUserExercise.getID(), new AsyncCallback<Boolean>() {
@@ -149,8 +146,7 @@ class ReviewEditableExercise extends EditableExercise /*implements RequiresResiz
     Button duplicate = new Button(DUPLICATE);
     duplicate.setType(ButtonType.SUCCESS);
     duplicate.addStyleName("floatRight");
-    addTooltip(duplicate,"Copy this item.");
-
+    addTooltip(duplicate, COPY_THIS_ITEM);
 
     duplicate.addClickHandler(new ClickHandler() {
       @Override
@@ -161,7 +157,7 @@ class ReviewEditableExercise extends EditableExercise /*implements RequiresResiz
     return duplicate;
   }
 
-  void duplicateExercise() {
+  private void duplicateExercise() {
     newUserExercise.setCreator(controller.getUser());
     service.duplicateExercise(newUserExercise, new AsyncCallback<UserExercise>() {
       @Override
@@ -169,7 +165,6 @@ class ReviewEditableExercise extends EditableExercise /*implements RequiresResiz
 
       @Override
       public void onSuccess(UserExercise result) {
-        //System.out.println("Got back " + result);
         exerciseList.addExerciseAfter(newUserExercise, result);
         exerciseList.redraw();
         originalList.addExerciseAfter(newUserExercise, result);
@@ -179,10 +174,12 @@ class ReviewEditableExercise extends EditableExercise /*implements RequiresResiz
 
   private Button makeFixedButton() {
     Button fixed = new Button(FIXED);
-    fixed.addStyleName("leftFiveMargin");
     fixed.setType(ButtonType.PRIMARY);
+
+    fixed.addStyleName("leftFiveMargin");
     fixed.addStyleName("floatLeft");
     fixed.addStyleName("marginRight");
+
     fixed.addMouseOverHandler(new MouseOverHandler() {
       @Override
       public void onMouseOver(MouseOverEvent event) {
@@ -200,6 +197,7 @@ class ReviewEditableExercise extends EditableExercise /*implements RequiresResiz
   protected void checkIfNeedsRefAudio() {}
 
   /**
+   * TODO : why do we have to do a sequence of server calls -- how about just one???
    * @param pagingContainer
    * @param buttonClicked
    * @see #reallyChange
@@ -214,22 +212,22 @@ class ReviewEditableExercise extends EditableExercise /*implements RequiresResiz
       final String id = newUserExercise.getID();
       System.out.println("doAfterEditComplete : forgetting " + id);
 
-
       if (!ul.remove(newUserExercise)) {
         System.err.println("\ndoAfterEditComplete : error - didn't remove " + id + " from ul " + ul);
       }
       if (!originalList.remove(newUserExercise)) {
         System.err.println("\ndoAfterEditComplete : error - didn't remove " + id + " from original " +originalList);
       }
-      service.removeReviewed(id, new AsyncCallback<Void>() {
+      service.setExerciseState(id, "fixed", new AsyncCallback<Void>() {
         @Override
-        public void onFailure(Throwable caught) {}
+        public void onFailure(Throwable caught) {
+        }
 
         @Override
         public void onSuccess(Void result) {
-          System.out.println("\tdoAfterEditComplete : predefinedContentList reload " + predefinedContentList);
+          System.out.println("\tdoAfterEditComplete : predefinedContentList reload ");
 
-          predefinedContentList.removeCompleted(id);
+          //predefinedContentList.removeCompleted(id);
           predefinedContentList.reload();
 
           CommonShell t = exerciseList.forgetExercise(id);
