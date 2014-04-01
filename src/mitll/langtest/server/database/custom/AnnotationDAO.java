@@ -259,20 +259,28 @@ public class AnnotationDAO extends DAO {
     return lists;
   }
 
-  /**
-   * TODOx : this can't be right!
-   *
-   * @see mitll.langtest.server.database.custom.UserListManager#UserListManager(mitll.langtest.server.database.UserDAO, UserListDAO, UserListExerciseJoinDAO, AnnotationDAO, ReviewedDAO, mitll.langtest.server.PathHelper)
-   * @return
-   */
-  public Set<String> getIncorrectIds()  {
+  public Set<String> getFixedIds() {
+    return getStateIds(false);
+  }
+
+    /**
+     * TODOx : this can't be right!
+     *
+     * @see mitll.langtest.server.database.custom.UserListManager#UserListManager(mitll.langtest.server.database.UserDAO, UserListDAO, UserListExerciseJoinDAO, AnnotationDAO, ReviewedDAO, mitll.langtest.server.PathHelper)
+     * @return
+     */
+  public Set<String> getDefectIds()  {
+    long then = System.currentTimeMillis();
+    Set<String> stateIds = getStateIds(true);
+    long now = System.currentTimeMillis();
+    logger.debug("took " +(now-then) + " millis to find " + stateIds.size());
+    return stateIds;
+  }
+
+  protected Set<String> getStateIds(boolean forDefects) {
     Connection connection = database.getConnection();
-/*    String sql = "SELECT DISTINCT exerciseid from " + ANNOTATION + " where " +
-      STATUS +
-      "='' order by exerciseid";*/
 
     String sql2 = "select exerciseid,field,status" +
-      //",modified" +
       " from annotation group by exerciseid,field,status,modified order by exerciseid,field,modified;";
 
     Set<String> lists = Collections.emptySet();
@@ -282,7 +290,6 @@ public class AnnotationDAO extends DAO {
       lists = new TreeSet<String>();
       String prevExid = "";
 
-      boolean incorrect = false;
       Map<String,String> fieldToStatus = new HashMap<String, String>();
       while (rs.next()) {
         String exid = rs.getString(1);
@@ -290,15 +297,13 @@ public class AnnotationDAO extends DAO {
         String status = rs.getString(3);
         //long modified = rs.getTimestamp(4).getTime();
 
-
         if (prevExid.isEmpty()) {
           prevExid = exid;
         } else if (!prevExid.equals(exid)) {
-          for (String latest : fieldToStatus.values()) {
-            if (!latest.equals("correct")) {
-              lists.add(prevExid);
-              break;
-            }
+          // go through all the fields -- if the latest is "incorrect" on any field, it's a defect
+          //examineFields(forDefects, lists, prevExid, fieldToStatus);
+          if (examineFields(forDefects, fieldToStatus)) {
+            lists.add(prevExid);
           }
           fieldToStatus.clear();
           prevExid = exid;
@@ -307,19 +312,22 @@ public class AnnotationDAO extends DAO {
         fieldToStatus.put(field, status);
       }
 
-      for (String latest : fieldToStatus.values()) {
-        if (!latest.equals("correct")) {
+/*      for (String latest : fieldToStatus.values()) {
+        if (latest.equals(statusToLookFor)) {
           lists.add(prevExid);
           break;
         }
+      } */
+      if (examineFields(forDefects, fieldToStatus)) {
+        lists.add(prevExid);
       }
-      fieldToStatus.clear();
 
-      logger.debug("getUserAnnotations sql " + sql2 + " yielded " + lists.size());
-      if (lists.size() > 20) {
+      logger.debug("getUserAnnotations forDefects " +forDefects+
+        " sql " + sql2 + " yielded " + lists.size());
+   /*   if (lists.size() > 20) {
         Iterator<String> iterator = lists.iterator();
-        for (int i = 0; i < 20;i++) logger.debug("\tgetUserAnnotations e.g. " + iterator.next() );
-      }
+        //for (int i = 0; i < 20;i++) logger.debug("\tgetUserAnnotations e.g. " + iterator.next() );
+      }*/
 
       rs.close();
       statement.close();
@@ -328,5 +336,29 @@ public class AnnotationDAO extends DAO {
       logger.error("Got " +e + " doing " + sql2,e);
     }
     return lists;
+  }
+
+  private boolean examineFields(boolean forDefects, Map<String, String> fieldToStatus) {
+    String statusToLookFor = "correct";
+    boolean foundIncorrect = false;
+    for (String latest : fieldToStatus.values()) {
+      if (!latest.equals(statusToLookFor)) {
+        //lists.add(prevExid);
+        foundIncorrect = true;
+        break;
+      }
+    }
+    if (forDefects) {
+      if (foundIncorrect) {
+       // lists.add(prevExid);
+        return true;
+      }
+    } else {
+      if (!foundIncorrect) {
+        //lists.add(prevExid);
+        return true;
+      }
+    }
+    return false;
   }
 }
