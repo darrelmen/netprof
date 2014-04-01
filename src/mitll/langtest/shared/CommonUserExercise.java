@@ -14,7 +14,5 @@ public interface CommonUserExercise extends CommonExercise {
 
   boolean isPredefined();
 
-  Collection<String> getFields();
-
   UserExercise toUserExercise();
 }
