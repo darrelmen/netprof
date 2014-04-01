@@ -48,7 +48,7 @@ public class PagingContainer {
   private CellTable<CommonShell> table;
   private final ExerciseController controller;
   private int verticalUnaccountedFor = 100;
-  private Set<String> completed = new HashSet<String>();
+  //private Set<String> completed = new HashSet<String>();
   private final Map<String,CommonShell> idToExercise = new HashMap<String, CommonShell>();
 
   /**
@@ -63,9 +63,9 @@ public class PagingContainer {
 
   /**
    * @seex mitll.langtest.client.recorder.FeedbackRecordPanel#enableNext()
-   * @param completed
+   * @paramx completed
    */
-  public void setCompleted(Set<String> completed) {
+/*  public void setCompleted(Set<String> completed) {
     this.completed = completed;
     if (table != null) table.redraw(); // todo check this...
   }
@@ -80,7 +80,7 @@ public class PagingContainer {
   public void removeCompleted(String id) {
     completed.remove(id);
     redraw();
-  }
+  }*/
 
   public void redraw() {  table.redraw();  }
 
@@ -267,19 +267,22 @@ public class PagingContainer {
       }
 
       @Override
-      public SafeHtml getValue(CommonShell object) {
+      public SafeHtml getValue(CommonShell shell) {
         if (!controller.showCompleted()) {
-          return getColumnToolTip(object.getTooltip());
+          return getColumnToolTip(shell.getTooltip());
         } else {
-          String columnText = object.getTooltip();
-          String html = object.getID();
+          String columnText = shell.getTooltip();
+          String html = shell.getID();
           if (columnText != null) {
             if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
-            boolean complete = completed.contains(object.getID());
+           // boolean complete = completed.contains(shell.getID());
+            boolean approved = shell.getState().equals("approved");
+            System.out.println("shell " + shell.getID() + " state " + shell.getState());
+            // TODO : add rendering for the different states -- approved, defects, commment?, fixed, attn ll
 
             // TODO red check for defect, green check for fixed? black for inspected?
-            // System.out.println("check -- " + complete + " for " + object.getID() + " in " + completed.size() + " : " + completed);
-            html = (complete ? "<i class='icon-check'></i>&nbsp;" : "") + columnText;
+            // System.out.println("check -- " + complete + " for " + shell.getID() + " in " + completed.size() + " : " + completed);
+            html = (approved ? "<i class='icon-check'></i>&nbsp;" : "") + columnText;
           }
           return new SafeHtmlBuilder().appendHtmlConstant(html).toSafeHtml();
         }
