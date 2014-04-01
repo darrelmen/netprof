@@ -510,9 +510,9 @@ public class MonitoringManager {
         " (given the current rate).  How long until completion?");
 
     DataTable data = DataTable.create();
-    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Num " +
+    data.addVarchar(AbstractDataTable.ColumnType.NUMBER, "Num " +
         answers);
-    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Projected Hours");
+    data.addVarchar(AbstractDataTable.ColumnType.NUMBER, "Projected Hours");
 
     data.addRows(rateToCount.size());
 
@@ -1047,8 +1047,8 @@ public class MonitoringManager {
 
     labelAxes(options, "Months experience", "# " + incorrect + " responses");
     DataTable data = DataTable.create();
-    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Experience");
-    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Num " + incorrect);
+    data.addVarchar(AbstractDataTable.ColumnType.NUMBER, "Experience");
+    data.addVarchar(AbstractDataTable.ColumnType.NUMBER, "Num " + incorrect);
 
     int r = 0;
     List<Integer> countsForUsers = getSortedList(expToIncorrect.keySet());
@@ -1074,8 +1074,8 @@ public class MonitoringManager {
 
     labelAxes(options, "", "# " + user);
     DataTable data = DataTable.create();
-    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Num " + answers);
-    data.addColumn(AbstractDataTable.ColumnType.NUMBER, users +
+    data.addVarchar(AbstractDataTable.ColumnType.NUMBER, "Num " + answers);
+    data.addVarchar(AbstractDataTable.ColumnType.NUMBER, users +
       " with this many");
 
     Map<Integer, Integer> usersAtCount = new HashMap<Integer, Integer>();
@@ -1184,8 +1184,8 @@ public class MonitoringManager {
     //DataTable data = getDataTable(slot, dayToCount);
 
     DataTable data = DataTable.create();
-    data.addColumn(AbstractDataTable.ColumnType.DATE, slot);
-    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Items");
+    data.addVarchar(AbstractDataTable.ColumnType.DATE, slot);
+    data.addVarchar(AbstractDataTable.ColumnType.NUMBER, "Items");
     int r = 0;
 
     for (Map.Entry<String, Integer> pair : dayToCount.entrySet()) {
