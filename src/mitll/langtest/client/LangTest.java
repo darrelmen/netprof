@@ -184,21 +184,30 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public void logMessageOnServer(String message, String prefix) {
     int user = userManager != null ? userManager.getUser() : -1;
     String exerciseID = exerciseList != null ? exerciseList.getCurrentExerciseID() : "Unknown";
+    String suffix = " browser " + browserCheck.getBrowserAndVersion() +
+      " : " + message;
     logMessageOnServer(prefix +
       "user #" + user +
-      " exercise " + exerciseID + " browser " + browserCheck.getBrowserAndVersion() +
-      " : " + message);
+      " exercise " + exerciseID +
+      suffix);
+
+    String toSend = prefix + suffix;
+    if (toSend.length() > 100) {
+      toSend = toSend.substring(0,100)+"...";
+    }
+    getButtonFactory().logEvent("unknown","unknown",exerciseID,toSend,user);
   }
 
   private void logMessageOnServer(String message) {
     service.logMessage(message,
-        new AsyncCallback<Void>() {
-          @Override
-          public void onFailure(Throwable caught) {}
+      new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {}
 
-          @Override
-          public void onSuccess(Void result) {}
-        });
+        @Override
+        public void onSuccess(Void result) {}
+      }
+    );
   }
 
   private Panel belowFirstRow;
@@ -873,7 +882,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private void showProgress(ListInterface exerciseList) {
     if (progressBar != null) {
-      progressBar.showAdvance(exerciseList);
+      //progressBar.showAdvance(exerciseList);
     }
   }
 
