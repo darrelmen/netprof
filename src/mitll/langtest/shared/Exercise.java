@@ -35,11 +35,9 @@ public class Exercise extends AudioExercise implements CommonExercise {
   private String englishSentence;
   private String meaning;
   private List<String> refSentences = new ArrayList<String>();
-/*  private List<String> synonymSentences = new ArrayList<String>();
-  private List<String> synonymTransliterations = new ArrayList<String>();
-  private List<String> synonymAudioRefs = new ArrayList<String>();*/
   private List<String> translitSentences = new ArrayList<String>();
   private double weight;
+  private String state;
 
   public static class QAPair implements IsSerializable {
     private String question;
@@ -56,13 +54,11 @@ public class Exercise extends AudioExercise implements CommonExercise {
     private QAPair(String q, String a, List<String> alternateAnswers) { question = q; answer = a; this.alternateAnswers = alternateAnswers;}
 
     /**
-     * @see mitll.langtest.client.exercise.ExercisePanel#addQuestions
      * @return
      */
-    public String getQuestion() { return question; }
+    private String getQuestion() { return question; }
 
     /**
-     * @see mitll.langtest.client.exercise.ExercisePanel#getQuestionHeader
      * @return
      */
     public String getAnswer() { return answer; }
@@ -168,15 +164,6 @@ public class Exercise extends AudioExercise implements CommonExercise {
   }
 
   /**
-   * when not collecting audio, we only collect text, and
-   * we only collect fl text (never english text only english audio)
-   */
- /* public void setTextOnly() {
-    setPromptInEnglish(false);
-    setRecordAnswer(false);
-  }*/
-
-  /**
    * @param lang
    * @param question
    * @param answer
@@ -207,32 +194,8 @@ public class Exercise extends AudioExercise implements CommonExercise {
   public String getPlan() { return plan; }
 
   public String getContent() { return content; }
-  public EXERCISE_TYPE getType() { return type; }
-  public boolean isRepeat() { return type == EXERCISE_TYPE.REPEAT || type == EXERCISE_TYPE.REPEAT_FAST_SLOW; }
-
-/*  public List<String> getSynonymSentences() {
-    return synonymSentences;
-  }
-
-  public void setSynonymSentences(List<String> synonymSentences) {
-    this.synonymSentences = synonymSentences;
-  }
-
-  public List<String> getSynonymTransliterations() {
-    return synonymTransliterations;
-  }
-
-  public void setSynonymTransliterations(List<String> synonymTransliterations) {
-    this.synonymTransliterations = synonymTransliterations;
-  }
-
-  public List<String> getSynonymAudioRefs() {
-    return synonymAudioRefs;
-  }
-
-  public void setSynonymAudioRefs(List<String> synonymAudioRefs) {
-    this.synonymAudioRefs = synonymAudioRefs;
-  }*/
+  private EXERCISE_TYPE getType() { return type; }
+  private boolean isRepeat() { return type == EXERCISE_TYPE.REPEAT || type == EXERCISE_TYPE.REPEAT_FAST_SLOW; }
 
   public String getRefSentence() {
     StringBuilder builder = new StringBuilder();
@@ -250,8 +213,6 @@ public class Exercise extends AudioExercise implements CommonExercise {
     this.refSentences = sentenceRefs;
   }
   public String getTransliteration() { return translitSentences.isEmpty() ? "" : translitSentences.get(0); }
-/*  public List<String> getRefSentences() { return refSentences; }
-  public List<String> getTranslitSentences() { return translitSentences; }*/
 
   public void setRefSentence(String ref) {
     refSentences.clear();
@@ -263,14 +224,7 @@ public class Exercise extends AudioExercise implements CommonExercise {
     translitSentences.add(translitSentence);
   }
 
-/*
-  public void setRecordAnswer(boolean spoken) {
-    setType(spoken ? EXERCISE_TYPE.RECORD : EXERCISE_TYPE.TEXT_RESPONSE);
-  }
-*/
-
   /**
-   * @see mitll.langtest.client.exercise.ExercisePanel#addQuestions(Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    * @return
    */
   public List<QAPair> getQuestions() {
@@ -295,8 +249,8 @@ public class Exercise extends AudioExercise implements CommonExercise {
   }
 */
 
-  public double getWeight() { return weight;  }
-  public void setWeight(double weight) { this.weight = weight;  }
+/*  public double getWeight() { return weight;  }
+  public void setWeight(double weight) { this.weight = weight;  }*/
 
   public String getEnglish() {  return englishSentence;  }
   public void setType(EXERCISE_TYPE type) { this.type = type;  }
@@ -311,11 +265,10 @@ public class Exercise extends AudioExercise implements CommonExercise {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#setPromptAndRecordOnExercises
    * @param b
    */
-  public void setPromptInEnglish(boolean b) { this.promptInEnglish = b;  }
-  public boolean isPromptInEnglish() { return promptInEnglish;  }
+  private void setPromptInEnglish(boolean b) { this.promptInEnglish = b;  }
+  private boolean isPromptInEnglish() { return promptInEnglish;  }
 
   @Override
   public String getMeaning() {
@@ -343,6 +296,16 @@ public class Exercise extends AudioExercise implements CommonExercise {
   @Override
   public Date getModifiedDate() {
     return null;
+  }
+
+  @Override
+  public String getState() {
+    return state;
+  }
+
+  @Override
+  public void setState(String state) {
+    this.state = state;
   }
 
   public String toString() {
