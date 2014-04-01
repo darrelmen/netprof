@@ -13,11 +13,11 @@ public class EventMock implements EventLogger {
   public void register(ExerciseController controller, Button button, String exid) {
 
   }
-
+/*
   @Override
   public void registerButton(Button button, String exid, long userid) {
 
-  }
+  }*/
 
   @Override
   public void registerButton(Button button, String exid, String context, long userid) {
