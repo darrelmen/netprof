@@ -64,7 +64,7 @@ public class AddRemoveDAO extends DAO {
    * <p/>
    * Uses return generated keys to get the user id
    *
-   * @see mitll.langtest.server.database.custom.UserListManager#markReviewed(String, long)
+   * @see mitll.langtest.server.database.custom.UserListManager#markApproved(String, long)
    */
   public void add(String exerciseID, String operation) {
     try {
