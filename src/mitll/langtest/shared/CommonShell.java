@@ -9,4 +9,6 @@ public interface CommonShell extends IsSerializable {
   public String getID();
   public String getTooltip();
   void setTooltip(String tooltip);
+  String getState();
+  void setState(String state);
 }
