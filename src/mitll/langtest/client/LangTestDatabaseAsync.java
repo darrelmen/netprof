@@ -80,7 +80,9 @@ public interface LangTestDatabaseAsync {
 
   void addDLIUser(DLIUser dliUser, AsyncCallback<Void> async);
 
+/*
   void getCompletedExercises(int user, boolean isReviewMode, AsyncCallback<Set<String>> async);
+*/
 
   void getStartupInfo(AsyncCallback<StartupInfo> async);
 
@@ -104,7 +106,7 @@ public interface LangTestDatabaseAsync {
 
   void getReviewList(AsyncCallback<UserList> async);
 
-  void removeReviewed(String id, AsyncCallback<Void> async);
+  void setExerciseState(String id, String state, AsyncCallback<Void> async);
 
   void getCommentedList(AsyncCallback<UserList> async);
 
