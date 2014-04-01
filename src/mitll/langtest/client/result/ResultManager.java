@@ -523,7 +523,7 @@ public class ResultManager extends PagerTable {
         return sb.toSafeHtml();
       }
     };
-    table.addColumn(dateCol, label);
+    table.addVarchar(dateCol, label);
   }*/
 
   private float roundToHundredth(double totalHours) {
