@@ -355,7 +355,13 @@ public class CommentNPFExercise extends NPFExercise {
       }
       setButtonTitle(commentButton, isCorrect, comment);
       showOrHideCommentButton(commentButton, clearButton, isCorrect);
-      exercise.addAnnotation(field, isCorrect ? "correct" : "incorrect", comment);
+      if (isCorrect) {
+        addCorrectComment(field);
+      }
+      else {
+        addIncorrectComment(comment,field);
+      }
+      //exercise.addAnnotation(field, isCorrect ? "correct" : "incorrect", comment);
       //System.out.println("\t commentComplete : annotations now " + exercise.getFields());
     }
     else {
