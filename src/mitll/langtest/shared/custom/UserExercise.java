@@ -80,17 +80,19 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
    * @param refAudio
    * @param slowAudioRef
    * @param isOverride
-   * @param modified
+   * @param modifiedDate
+   * @param state
    */
   public UserExercise(long uniqueID, String exerciseID, long creator, String english, String foreignLanguage,
                       String transliteration, String refAudio, String slowAudioRef, boolean isOverride,
-                      Map<String, String> unitToValue, Date modifiedDate) {
+                      Map<String, String> unitToValue, Date modifiedDate, String state) {
     this(uniqueID, exerciseID, creator, english, foreignLanguage, transliteration);
     setRefAudio(refAudio);
     setSlowRefAudio(slowAudioRef);
     setUnitToValue(unitToValue);
     this.isOverride = isOverride;
     this.modifiedDate = modifiedDate;
+    this.state = state;
   }
 
     /**
@@ -166,10 +168,10 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   public String getContent() {
     return content;
   }
-  public String setContent(String language) {
+/*  public String setContent(String language) {
     this.content = ExerciseFormatter.getContent(getForeignLanguage(), transliteration, english, "", "", language);
     return content;
-  }
+  }*/
 
   public CommonShell getShellCombinedTooltip() {
     String refSentence = getForeignLanguage();
@@ -237,6 +239,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
       "foreign language '" + getForeignLanguage() + "'" + " (" + getTransliteration() + ") " +
       "tooltip " + getTooltip() +
       "audio attr (" + getAudioAttributes().size() +
-      ") :" + getAudioAttributes() + " unit/lesson " + getUnitToValue() + " modified " + modifiedDate;
+      ") :" + getAudioAttributes() + " unit/lesson " + getUnitToValue() +
+      " state " + state+" modified " + modifiedDate;
   }
 }
