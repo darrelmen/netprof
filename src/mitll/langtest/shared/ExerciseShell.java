@@ -12,6 +12,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class ExerciseShell implements IsSerializable, CommonShell {
   private String tooltip;
   protected String id;
+  protected String state = "unset";
 
   public ExerciseShell() {}
   public ExerciseShell(String id, String tooltip) {
@@ -26,6 +27,12 @@ public class ExerciseShell implements IsSerializable, CommonShell {
     this.tooltip = tooltip;
     //if (tooltip.isEmpty() && !id.equals("-1")) throw new IllegalArgumentException("tooltip is empty for " + id);
   }
+
+  @Override
+  public String getState() { return state;  }
+
+  @Override
+  public void setState(String state) { this.state = state;  }
 
   public CommonShell getShell() { return new ExerciseShell(getID(), getTooltip()); }
 
