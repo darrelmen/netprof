@@ -32,7 +32,6 @@ import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseFormatter;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -64,7 +63,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   private static final String APPROVED_BUTTON_TOOLTIP = "Indicate item has no defects.";
   private static final String APPROVED_BUTTON_TOOLTIP2 = "Item has been marked with a defect";
 
-  private final Set<String> incorrectSet = new HashSet<String>();
+  private final Set<String> incorrectFields = new HashSet<String>();
   private List<RequiresResize> toResize;
   private final ListInterface listContainer;
   private Button approvedButton;
@@ -147,8 +146,9 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
    */
   private void markReviewed(ListInterface listContainer, CommonShell completedExercise) {
     if (isCourseContent()) {
-      listContainer.addCompleted(completedExercise.getID());
+      //listContainer.addCompleted(completedExercise.getID());
       markReviewed(completedExercise);
+      listContainer.redraw();
     }
   }
 
@@ -161,9 +161,10 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
    * @param completedExercise
    */
   private void markReviewed(CommonShell completedExercise) {
-    System.out.println("markReviewed : exercise " + completedExercise.getID() + " instance " + instance);
+    boolean allCorrect = incorrectFields.isEmpty();
+    System.out.println("markReviewed : exercise " + completedExercise.getID() + " instance " + instance+ " allCorrect " + allCorrect);
 
-    service.markReviewed(completedExercise.getID(), incorrectSet.isEmpty(), controller.getUser(),
+    service.markReviewed(completedExercise.getID(), allCorrect, controller.getUser(),
         new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {}
@@ -371,26 +372,27 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     commentEntry.setFocus(isIncorrect);
 
     if (isIncorrect) {
-      incorrectSet.add(field);
+      incorrectFields.add(field);
     }
     else {
-      incorrectSet.remove(field);
+      incorrectFields.remove(field);
       addCorrectComment(field);
     }
 
     if (isCourseContent()) {
       String id = exercise.getID();
-      if (incorrectSet.isEmpty()) {
+    /*  if (incorrectFields.isEmpty()) {
         listContainer.removeCompleted(id);
       }
       else {
         listContainer.addCompleted(id);
-      }
-
+      }*/
+      listContainer.redraw();
       if (approvedButton != null) {
-        approvedButton.setEnabled(incorrectSet.isEmpty());
+        boolean allCorrect = incorrectFields.isEmpty();
+        approvedButton.setEnabled(allCorrect);
 
-        approvedTooltip.setText(incorrectSet.isEmpty() ? APPROVED_BUTTON_TOOLTIP : APPROVED_BUTTON_TOOLTIP2);
+        approvedTooltip.setText(allCorrect ? APPROVED_BUTTON_TOOLTIP : APPROVED_BUTTON_TOOLTIP2);
         approvedTooltip.reconfigure();
       }
       markReviewed(exercise);
