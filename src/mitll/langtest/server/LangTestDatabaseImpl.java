@@ -52,7 +52,6 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
@@ -249,7 +248,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       ensureMP3s(firstExercise);
       addAnnotations(firstExercise); // todo do this in a better way
     }
-    return new ExerciseListWrapper(reqID, getExerciseShells(exercises), firstExercise);
+    List<CommonShell> exerciseShells = getExerciseShells(exercises);
+
+    return new ExerciseListWrapper(reqID, exerciseShells, firstExercise);
   }
 
   /**
@@ -711,23 +712,24 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param creatorID
    */
   public void markReviewed(String id, boolean isCorrect, long creatorID) {
-    db.getUserListManager().markReviewed(id, creatorID);
+   // db.getUserListManager().markApproved(id, creatorID);
     db.getUserListManager().markCorrectness(id, isCorrect);
   }
 
   /**
    * @see mitll.langtest.client.custom.ReviewEditableExercise#doAfterEditComplete(mitll.langtest.client.list.ListInterface, boolean)
    * @param id
+   * @param state
    */
   @Override
-  public void removeReviewed(String id) { db.getUserListManager().removeReviewed(id); }
+  public void setExerciseState(String id, String state) { db.getUserListManager().markState(id,state); }
 
   /**
    * @see mitll.langtest.client.custom.Navigation#viewReview
    * @return
    */
   @Override
-  public UserList getReviewList() { return db.getUserListManager().getReviewList(); }
+  public UserList getReviewList() { return db.getUserListManager().getDefectList(); }
 
   @Override
   public boolean deleteList(long id) {
@@ -761,7 +763,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.custom.ReviewEditItem.ReviewEditableExercise#getCreateButton
+   * @see mitll.langtest.client.custom.ReviewEditableExercise#getCreateButton
    * @param exercise
    * @return
    */
@@ -866,16 +868,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#getExercises(long, boolean)
-   * @param user
-   * @param isReviewMode
+   * @paramx user
+   * @paramx isReviewMode
    * @return
    */
-  @Override
+/*  @Override
   public Set<String> getCompletedExercises(int user, boolean isReviewMode) {
     Set<String> reviewed = isReviewMode ? db.getUserListManager().getReviewedExercises() : db.getCompletedExercises(user);
     logger.debug("request " + user + " review mode " + isReviewMode + " reviewed num = " + reviewed.size());
     return reviewed;
-  }
+  }*/
 
   void makeAutoCRT() { audioFileHelper.makeAutoCRT(relativeConfigDir, this, studentAnswersDB, this); }
 
@@ -974,6 +976,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (!serverProps.dataCollectMode && !serverProps.isArabicTextDataCollect()) {
       db.getUnmodExercises();
     }
+
+    db.getUserListManager().setStateOnExercises();
 
     if (SCORE_RESULTS) {
       List<Result> resultsThatNeedScore = db.getResultDAO().getResultsFor();
