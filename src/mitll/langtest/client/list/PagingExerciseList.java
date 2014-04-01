@@ -75,7 +75,7 @@ public class PagingExerciseList extends ExerciseList {
    * @seex mitll.langtest.client.recorder.FeedbackRecordPanel#enableNext
    * @param completed
    */
-  public void setCompleted(Set<String> completed) {
+/*  public void setCompleted(Set<String> completed) {
     pagingContainer.setCompleted(completed);
   }
 
@@ -89,9 +89,9 @@ public class PagingExerciseList extends ExerciseList {
     System.out.println("PagingExerciseList.addCompleted : completed " + id + " now " + getCompleted().size());
   }
 
-  private Set<String> getCompleted() { return pagingContainer.getCompleted(); }
+  private Set<String> getCompleted() { return pagingContainer.getCompleted(); }*/
 
-  @Override
+/*  @Override
   public int getPercentComplete() {
     if (controller.showCompleted()) {
       int i = (int) Math.ceil(100f * ((float) getCompleted().size() / (float) getSize()));
@@ -101,15 +101,15 @@ public class PagingExerciseList extends ExerciseList {
     } else {
       return super.getPercentComplete();
     }
-  }
+  }*/
 
-  public int getComplete() {
+/*  public int getComplete() {
     if (controller.showCompleted()) {
       return getCompleted().size();
     } else {
       return super.getComplete();
     }
-  }
+  }*/
 
   /**
    * Add two rows -- the search box and then the item list
@@ -127,10 +127,7 @@ public class PagingExerciseList extends ExerciseList {
    */
   void loadExercises(String selectionState, String prefix) {
     lastReqID++;
-    //long listID = userListID;
     System.out.println("PagingExerciseList.loadExercises : looking for '" + prefix + "' (" + prefix.length() + " chars) in list id "+userListID);
-    //Map<String, Collection<String>> typeToSection = getSelectionState(selectionState).getTypeToSection();
-
     service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), prefix, userListID, new SetExercisesCallback());
   }
 
@@ -180,7 +177,8 @@ public class PagingExerciseList extends ExerciseList {
 
   private CommonShell getFirstNotCompleted() {
     for (CommonShell es : pagingContainer.getExercises()) {
-      if (!getCompleted().contains(es.getID())) return es;
+     //if (!getCompleted().contains(es.getID())) return es;
+      if (es.getState().equals("unset")) return es;
     }
     return super.findFirstExercise();
   }
