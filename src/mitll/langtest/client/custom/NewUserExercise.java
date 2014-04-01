@@ -443,7 +443,7 @@ public class NewUserExercise extends BasicDialog {
 
   void checkIfNeedsRefAudio() {
     if (newUserExercise == null || newUserExercise.getRefAudio() == null) {
-      System.out.println("checkIfNeedsRefAudio : new user ex " + newUserExercise);
+      //System.out.println("checkIfNeedsRefAudio : new user ex " + newUserExercise);
 
       Button recordButton = rap.getButton();
       markError(normalSpeedRecording, recordButton, recordButton, "",
