@@ -22,7 +22,6 @@ import mitll.langtest.shared.scoring.PretestScore;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -90,7 +89,9 @@ public interface LangTestDatabase extends RemoteService {
 
   void addDLIUser(DLIUser dliUser);
 
+/*
   Set<String> getCompletedExercises(int user, boolean isReviewMode);
+*/
 
 
   StartupInfo getStartupInfo();
@@ -113,7 +114,7 @@ public interface LangTestDatabase extends RemoteService {
   void addAnnotation(String exerciseID, String field, String status, String comment, long userID);
   void markReviewed(String exid, boolean isCorrect, long creatorID);
 
-  void removeReviewed(String id);
+  void setExerciseState(String id, String state);
 
   UserList getReviewList();
   boolean deleteList(long id);
