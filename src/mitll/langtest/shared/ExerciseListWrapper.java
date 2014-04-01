@@ -3,6 +3,7 @@ package mitll.langtest.shared;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -18,6 +19,12 @@ public class ExerciseListWrapper implements IsSerializable {
   private List<CommonShell> exercises;
   private CommonExercise firstExercise;
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#makeExerciseListWrapper(int, java.util.Collection)
+   * @param reqID
+   * @param ids
+   * @param firstExercise
+   */
   public ExerciseListWrapper(int reqID, List<CommonShell> ids, CommonExercise firstExercise) {
     this.reqID = reqID;
     this.exercises = ids;
