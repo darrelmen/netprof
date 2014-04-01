@@ -125,6 +125,13 @@ public class DAO {
 
   public Database getDatabase() { return database; }
 
+  protected void addVarchar(Connection connection, String table, String col) throws SQLException {
+    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " +
+      table + " ADD " + col + " VARCHAR");
+    statement.execute();
+    statement.close();
+  }
+
   /**
    * Does not seem to work with h2
    * @param connection
