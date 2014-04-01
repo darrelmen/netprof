@@ -70,17 +70,6 @@ public class ExcelImport implements ExerciseDAO {
   private File installPath;
   private boolean collectSynonyms = true;
   boolean addDefects;
-  /**
-   * @seex mitll.langtest.server.SiteDeployer#readExercisesPopulateSite(mitll.langtest.shared.Site, String, java.io.InputStream)
-   */
-/*
-  public ExcelImport() {
-    this.file = null;
-    this.isFlashcard = false;
-    this.language = "";
-    maxExercises = Integer.MAX_VALUE;
-  }
-*/
 
   /**
    *
@@ -197,12 +186,6 @@ public class ExcelImport implements ExerciseDAO {
     return exercises;
   }
 
-/*  private void overlayExercises(Collection<UserExercise> overlay) {
-    for (UserExercise userExercise : overlay) {
-      addOverlay(userExercise);
-    }
-  }*/
-
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#editItem(mitll.langtest.shared.custom.UserExercise)
    * @see #getRawExercises()
@@ -232,7 +215,7 @@ public class ExcelImport implements ExerciseDAO {
         }
         idToExercise.put(userExercise.getID(), userExercise);
 
-        logger.debug("addOverlay : after " + getExercise(userExercise.getID()));
+        //logger.debug("addOverlay : after " + getExercise(userExercise.getID()));
       }
     }
   }
@@ -722,7 +705,7 @@ public class ExcelImport implements ExerciseDAO {
     imported.setRefSentences(inOrderTranslations);
 
     if (weightIndex != -1) {
-      imported.setWeight(getNumericCell(next, weightIndex));
+      //imported.setWeight(getNumericCell(next, weightIndex));
     }
     return imported;
   }
