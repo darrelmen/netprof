@@ -49,4 +49,7 @@ public interface CommonExercise extends CommonShell {
   void addAnnotation(String field, String status, String comment);
 
   Date getModifiedDate();
+
+  Collection<String> getFields();
+
 }
