@@ -67,7 +67,9 @@ class NPFHelper implements RequiresResize {
    */
   public void showNPF(UserList ul, Navigation.TabAndContent tabAndContent, String instanceName, boolean loadExercises) {
     System.out.println(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul);
-
+    if (!ul.isEmpty()) {
+      System.out.println(getClass() + " : first is " + ul.getExercises().iterator().next());
+    }
     DivWidget content = tabAndContent.content;
     int widgetCount = content.getWidgetCount();
     if (!madeNPFContent || widgetCount == 0) {
@@ -163,7 +165,7 @@ class NPFHelper implements RequiresResize {
     return exerciseList;
   }
 
-  protected void rememberAndLoadFirst(final UserList ul, String instanceName) {
+  private void rememberAndLoadFirst(final UserList ul, String instanceName) {
     //npfExerciseList.show();
 /*    if (controller.isReviewMode()) {
       System.out.println(getClass() + ".rememberAndLoadFirst : review mode " + controller.isReviewMode() + " for " + ul + " instanceName " + instanceName);
