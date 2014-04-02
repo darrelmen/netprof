@@ -57,6 +57,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   private static final String RECORD_YOURSELF = "Record Yourself";
   private static final String RELEASE_TO_STOP = "Release to Stop";
   private static final int HEADING_FOR_UNIT_LESSON = 4;
+  public static final String CORRECT = "correct";
+  public static final String INCORRECT = "incorrect";
   private boolean isBusy = false;
 
   private static final String WAV = ".wav";
@@ -325,15 +327,20 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     return (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
   }
 
+  /**
+   * @see mitll.langtest.client.custom.QCNPFExercise#makeCommentEntry(String, mitll.langtest.shared.ExerciseAnnotation)
+   * @param commentToPost
+   * @param field
+   */
   protected void addIncorrectComment(final String commentToPost, final String field) {
     System.out.println(new Date() + " : post to server " + exercise.getID() +
       " field " + field + " commentLabel '" + commentToPost + "' is incorrect");
-    addAnnotation(field, "incorrect", commentToPost);
+    addAnnotation(field, INCORRECT, commentToPost);
   }
 
   protected void addCorrectComment(final String field) {
     System.out.println(new Date() + " : post to server " + exercise.getID() + " field " + field + " is correct");
-    addAnnotation(field, "correct", "");
+    addAnnotation(field, CORRECT, "");
   }
 
   private void addAnnotation(final String field, final String status, final String commentToPost) {
@@ -344,7 +351,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       @Override
       public void onSuccess(Void result) {
         System.out.println("\t" + new Date() + " : onSuccess : posted to server " + exercise.getID() +
-          " field " + field + " commentLabel " + commentToPost + " is " + status);//, took " + (now - then) + " millis");
+          " field '" + field + "' commentLabel '" + commentToPost + "' is " + status);//, took " + (now - then) + " millis");
       }
     });
   }
