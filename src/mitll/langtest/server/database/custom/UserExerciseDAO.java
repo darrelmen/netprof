@@ -98,9 +98,11 @@ public class UserExerciseDAO extends DAO {
             ",english,foreignLanguage," + TRANSLITERATION + ",creatorid,refAudio,slowAudioRef,override," + UNIT+
           ","+LESSON+
           ","+MODIFIED+
-          ","+STATE+
+         // ","+STATE+
           ") " +
-          "VALUES(?,?,?,?,?,?,?,?,?,?,?,?)");
+          "VALUES(?,?,?,?,?,?,?,?,?,?,?" +
+          //",?" +
+          ")");
       int i = 1;
       statement.setString(i++, userExercise.getID());
       statement.setString(i++, fixSingleQuote(userExercise.getEnglish()));
@@ -132,7 +134,7 @@ public class UserExerciseDAO extends DAO {
         statement.setString(i++, "");
       }
       statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));
-      statement.setString(i++,userExercise.getState());
+     // statement.setString(i++,userExercise.getState());
 
       int j = statement.executeUpdate();
 
@@ -299,7 +301,7 @@ public class UserExerciseDAO extends DAO {
   private CommonExercise getExercise(CommonShell ue) { return getPredefExercise(ue.getID());  }
 
   /**
-   * @see UserListManager#getReviewedExercises()
+   * @see UserListManager#getReviewedUserExercises(java.util.Map, java.util.Collection)
    * @param id
    * @return
    */
@@ -402,8 +404,9 @@ public class UserExerciseDAO extends DAO {
         rs.getString("slowAudioRef"),
         rs.getBoolean(OVERRIDE),
         unitToValue,
-        date,
-        rs.getString(STATE)
+        date
+        //,
+        //rs.getString(STATE)
       );
 
       exercises.add(e);
@@ -454,7 +457,7 @@ public class UserExerciseDAO extends DAO {
    * @param id
    * @param state
    */
-  public void updateState(String id, String state) {
+/*  public void updateState(String id, String state) {
     try {
       Connection connection = database.getConnection();
 
@@ -482,8 +485,8 @@ public class UserExerciseDAO extends DAO {
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
-  }
-
+  }*/
+/*
   public Set<String> getAtState(String state) {
     try {
       Connection connection = database.getConnection();
@@ -512,7 +515,7 @@ public class UserExerciseDAO extends DAO {
       logger.error("got " + e, e);
     }
     return Collections.emptySet();
-  }
+  }*/
 
   /**
    * @see UserListManager#editItem(mitll.langtest.shared.custom.UserExercise, boolean)
