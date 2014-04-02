@@ -335,6 +335,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   /**
    * @param exercises
    * @see ExerciseList.SetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
+   * @see #rememberAndLoadFirst(java.util.List)
    */
   public void rememberAndLoadFirst(List<CommonShell> exercises, CommonExercise firstExercise) {
     System.out.println("ExerciseList : rememberAndLoadFirst " + instance+
@@ -650,7 +651,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       else innerContainer.getParent().removeStyleName("shadowBorder");
     }
     else {
-      System.err.println("\tno inner current widget for " + report());
+      System.err.println("\tremoveCurrentExercise : no inner current widget for " + report());
     }
   }
 
