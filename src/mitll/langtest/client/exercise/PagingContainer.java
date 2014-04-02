@@ -271,7 +271,7 @@ public class PagingContainer {
               "<i " +
                 (isDefect ? "style='color:red'" :
                   isFixed ? "style='color:green'" :
-                    isLL ? "style='color:yellow'" :
+                    isLL ? "style='color:gold'" :
                       "") +
                 " class='" +
                 icon +
