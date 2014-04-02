@@ -34,6 +34,7 @@ import mitll.langtest.shared.ExerciseFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -63,7 +64,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   private static final String APPROVED_BUTTON_TOOLTIP = "Indicate item has no defects.";
   private static final String APPROVED_BUTTON_TOOLTIP2 = "Item has been marked with a defect";
 
-  private final Set<String> incorrectFields = new HashSet<String>();
+  private Set<String> incorrectFields;
   private List<RequiresResize> toResize;
   private final ListInterface listContainer;
   private Button approvedButton;
@@ -77,7 +78,10 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   }
 
   @Override
-  protected ASRScorePanel makeScorePanel(CommonExercise e, String instance) { return null;  }
+  protected ASRScorePanel makeScorePanel(CommonExercise e, String instance) {
+    incorrectFields = new HashSet<String>();
+    return null;
+  }
 
   @Override
   protected void addGroupingStyle(Widget div) {
@@ -112,12 +116,15 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     if (!instance.contains(Navigation.REVIEW) && !instance.contains(Navigation.COMMENT)) {
       approvedButton = addApprovedButton(listContainer, widgets);
     }
+   // Map<String, ExerciseAnnotation> fieldToAnnotation = exercise.getFieldToAnnotation();
 
+    setApproveButtonState();
     return widgets;
   }
 
   private Button addApprovedButton(final ListInterface listContainer, NavigationHelper widgets) {
     Button approved = new Button(APPROVED);
+    approved.getElement().setId("approve");
     approved.addStyleName("leftFiveMargin");
     widgets.add(approved);
     approved.setType(ButtonType.PRIMARY);
@@ -148,6 +155,9 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     if (isCourseContent()) {
       //listContainer.addCompleted(completedExercise.getID());
       markReviewed(completedExercise);
+      boolean allCorrect = incorrectFields.isEmpty();
+
+      listContainer.setState(completedExercise.getID(), allCorrect ? CommonShell.STATE.APPROVED : CommonShell.STATE.DEFECT);
       listContainer.redraw();
     }
   }
@@ -277,6 +287,9 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     final FocusWidget commentEntry = makeCommentEntry(field, annotation);
 
     boolean alreadyMarkedCorrect = annotation == null || annotation.status == null || annotation.status.equals("correct");
+    if (!alreadyMarkedCorrect) {
+      incorrectFields.add(field);
+    }
     final Panel commentRow = new FlowPanel();
     final Widget qcCol = getQCCheckBox(field, commentEntry, alreadyMarkedCorrect, commentRow);
 
@@ -318,6 +331,12 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     commentRow.add(commentEntry);
   }
 
+  /**
+   * @see #getEntry(String, com.google.gwt.user.client.ui.Widget, mitll.langtest.shared.ExerciseAnnotation)
+   * @param field
+   * @param annotation
+   * @return
+   */
   private FocusWidget makeCommentEntry(final String field, ExerciseAnnotation annotation) {
     final TextBox commentEntry = new TextBox();
     commentEntry.getElement().setId("QCNPFExercise_Comment_TextBox_"+field);
@@ -381,21 +400,27 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
     if (isCourseContent()) {
       String id = exercise.getID();
-    /*  if (incorrectFields.isEmpty()) {
-        listContainer.removeCompleted(id);
+      System.out.println("instance = " +instance);
+      if (instance.equalsIgnoreCase("classroom")) {
+        CommonShell.STATE state = incorrectFields.isEmpty() ? CommonShell.STATE.UNSET : CommonShell.STATE.DEFECT;
+        exercise.setState(state);
+        listContainer.setState(id, state);
       }
-      else {
-        listContainer.addCompleted(id);
-      }*/
-      listContainer.redraw();
-      if (approvedButton != null) {
-        boolean allCorrect = incorrectFields.isEmpty();
-        approvedButton.setEnabled(allCorrect);
 
-        approvedTooltip.setText(allCorrect ? APPROVED_BUTTON_TOOLTIP : APPROVED_BUTTON_TOOLTIP2);
-        approvedTooltip.reconfigure();
-      }
+      listContainer.redraw();
+
+      setApproveButtonState();
       markReviewed(exercise);
+    }
+  }
+
+  private void setApproveButtonState() {
+    if (approvedButton != null) {   // comment tab doesn't have it...!
+      boolean allCorrect = incorrectFields.isEmpty();
+      approvedButton.setEnabled(allCorrect);
+
+      approvedTooltip.setText(allCorrect ? APPROVED_BUTTON_TOOLTIP : APPROVED_BUTTON_TOOLTIP2);
+      approvedTooltip.reconfigure();
     }
   }
 }
