@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -93,7 +94,7 @@ public class PagingExerciseList extends ExerciseList {
    */
   void loadExercises(String selectionState, String prefix) {
     lastReqID++;
-    System.out.println("PagingExerciseList.loadExercises : looking for '" + prefix + "' (" + prefix.length() + " chars) in list id "+userListID);
+    System.out.println("PagingExerciseList.loadExercises : looking for '" + prefix + "' (" + prefix.length() + " chars) in list id "+userListID + " instance " +instance);
     service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), prefix, userListID, new SetExercisesCallback());
   }
 
@@ -200,6 +201,8 @@ public class PagingExerciseList extends ExerciseList {
 
   protected void showEmptySelection() {
     showPopup("No items match the selection and search.", "Try clearing one of your selections or changing the search.", typeAhead);
+    createdPanel = new SimplePanel();
+    createdPanel.getElement().setId("placeHolderWhenNoExercises");
   }
 
   private void showPopup(String toShow,String toShow2, Widget over) {
