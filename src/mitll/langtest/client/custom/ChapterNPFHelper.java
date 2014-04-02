@@ -14,6 +14,14 @@ import mitll.langtest.shared.custom.UserList;
  */
 public class ChapterNPFHelper extends NPFHelper {
   private FlexListLayout flexListLayout;
+
+  /**
+   * @see mitll.langtest.client.custom.Navigation#Navigation(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, mitll.langtest.client.user.UserFeedback)
+   * @param service
+   * @param feedback
+   * @param userManager
+   * @param controller
+   */
   public ChapterNPFHelper(final LangTestDatabaseAsync service, final UserFeedback feedback,
                           final UserManager userManager, final ExerciseController controller) {
     super(service, feedback, userManager, controller);
