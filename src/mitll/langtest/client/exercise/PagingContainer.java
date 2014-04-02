@@ -48,7 +48,6 @@ public class PagingContainer {
   private CellTable<CommonShell> table;
   private final ExerciseController controller;
   private int verticalUnaccountedFor = 100;
-  //private Set<String> completed = new HashSet<String>();
   private final Map<String,CommonShell> idToExercise = new HashMap<String, CommonShell>();
 
   /**
@@ -60,27 +59,6 @@ public class PagingContainer {
     this.controller = controller;
     this.verticalUnaccountedFor = verticalUnaccountedFor;
   }
-
-  /**
-   * @seex mitll.langtest.client.recorder.FeedbackRecordPanel#enableNext()
-   * @paramx completed
-   */
-/*  public void setCompleted(Set<String> completed) {
-    this.completed = completed;
-    if (table != null) table.redraw(); // todo check this...
-  }
-
-  public Set<String> getCompleted() { return completed; }
-
-  public void addCompleted(String id) {
-    completed.add(id);
-    redraw();
-  }
-
-  public void removeCompleted(String id) {
-    completed.remove(id);
-    redraw();
-  }*/
 
   public void redraw() {  table.redraw();  }
 
@@ -261,7 +239,6 @@ public class PagingContainer {
         super.onBrowserEvent(context, elem, object, event);
         if (BrowserEvents.CLICK.equals(event.getType())) {
           //System.out.println("getExerciseIdColumn.onBrowserEvent : got click " + event);
-          //current = object;
           gotClickOnItem(object);
         }
       }
@@ -275,14 +252,35 @@ public class PagingContainer {
           String html = shell.getID();
           if (columnText != null) {
             if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
-           // boolean complete = completed.contains(shell.getID());
-            boolean approved = shell.getState().equals("approved");
-            System.out.println("shell " + shell.getID() + " state " + shell.getState());
-            // TODO : add rendering for the different states -- approved, defects, commment?, fixed, attn ll
+            CommonShell.STATE state = shell.getState();
+            boolean isSet = state != CommonShell.STATE.UNSET;
+            boolean isDefect = state == CommonShell.STATE.DEFECT;
+            boolean isFixed = state == CommonShell.STATE.FIXED;
+            boolean isLL = state == CommonShell.STATE.ATTN_LL;
 
-            // TODO red check for defect, green check for fixed? black for inspected?
-            // System.out.println("check -- " + complete + " for " + shell.getID() + " in " + completed.size() + " : " + completed);
-            html = (approved ? "<i class='icon-check'></i>&nbsp;" : "") + columnText;
+       /*     if (isSet) {
+              System.out.println("shell " + shell.getID() + " state " + state + " defect " +isDefect + " fixed " + isFixed);
+            }*/
+
+            String icon =
+              state == CommonShell.STATE.APPROVED ? "icon-check" :
+                isDefect ? "icon-bug" :
+                  isFixed ? "icon-thumbs-up" : "icon-warning-sign";
+            html = (isSet ?
+              //"<div style='float:left'>" +
+              "<i " +
+                (isDefect ? "style='color:red'" :
+                  isFixed ? "style='color:green'" :
+                    isLL ? "style='color:yellow'" :
+                      "") +
+                " class='" +
+                icon +
+                "'></i>" +
+                //"</div>" +
+                "&nbsp;" : "") + columnText;
+            // if (isSet) {
+            //    System.out.println("html " + html);
+            // }
           }
           return new SafeHtmlBuilder().appendHtmlConstant(html).toSafeHtml();
         }
@@ -381,16 +379,13 @@ public class PagingContainer {
 
   public void addExercise(CommonShell exercise) {
     //System.out.println("addExercise adding " + exercise);
-
-    List<CommonShell> list = getList();
-    String id = exercise.getID();
-    idToExercise.put(id, exercise);
-    list.add(exercise);
+    idToExercise.put(exercise.getID(), exercise);
+    getList().add(exercise);
     //System.out.println("data now has "+list.size() + " after adding " + exercise.getID());
   }
 
   public void addExerciseAfter(CommonShell afterThisOne, CommonShell exercise) {
-    System.out.println("addExercise adding " + exercise);
+    //System.out.println("addExercise adding " + exercise);
 
     List<CommonShell> list = getList();
     int before= list.size();
