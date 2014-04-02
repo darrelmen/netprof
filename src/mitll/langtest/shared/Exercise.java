@@ -36,8 +36,8 @@ public class Exercise extends AudioExercise implements CommonExercise {
   private String meaning;
   private List<String> refSentences = new ArrayList<String>();
   private List<String> translitSentences = new ArrayList<String>();
-  private double weight;
-  private String state;
+//  private double weight;
+  private STATE state;
 
   public static class QAPair implements IsSerializable {
     private String question;
@@ -299,12 +299,12 @@ public class Exercise extends AudioExercise implements CommonExercise {
   }
 
   @Override
-  public String getState() {
+  public STATE getState() {
     return state;
   }
 
   @Override
-  public void setState(String state) {
+  public void setState(STATE state) {
     this.state = state;
   }
 
