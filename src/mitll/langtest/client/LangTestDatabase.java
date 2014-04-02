@@ -4,6 +4,7 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.DLIUser;
 import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.ImageResponse;
@@ -114,7 +115,7 @@ public interface LangTestDatabase extends RemoteService {
   void addAnnotation(String exerciseID, String field, String status, String comment, long userID);
   void markReviewed(String exid, boolean isCorrect, long creatorID);
 
-  void setExerciseState(String id, String state);
+  void setExerciseState(String id, CommonShell.STATE state, long userID);
 
   UserList getReviewList();
   boolean deleteList(long id);
