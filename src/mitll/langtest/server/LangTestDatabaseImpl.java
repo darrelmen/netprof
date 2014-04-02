@@ -249,6 +249,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       addAnnotations(firstExercise); // todo do this in a better way
     }
     List<CommonShell> exerciseShells = getExerciseShells(exercises);
+    db.getUserListManager().markState(exerciseShells);
 
     return new ExerciseListWrapper(reqID, exerciseShells, firstExercise);
   }
@@ -713,16 +714,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public void markReviewed(String id, boolean isCorrect, long creatorID) {
    // db.getUserListManager().markApproved(id, creatorID);
-    db.getUserListManager().markCorrectness(id, isCorrect);
+    db.getUserListManager().markCorrectness(id, isCorrect, creatorID);
   }
 
   /**
    * @see mitll.langtest.client.custom.ReviewEditableExercise#doAfterEditComplete(mitll.langtest.client.list.ListInterface, boolean)
    * @param id
    * @param state
+   * @param userID
    */
   @Override
-  public void setExerciseState(String id, String state) { db.getUserListManager().markState(id,state); }
+  public void setExerciseState(String id, CommonShell.STATE state, long userID) {
+    db.getUserListManager().markState(id, state, userID);
+  }
 
   /**
    * @see mitll.langtest.client.custom.Navigation#viewReview
@@ -763,15 +767,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.custom.ReviewEditableExercise#getCreateButton
+   * @see mitll.langtest.client.custom.ReviewEditableExercise#duplicateExercise()
    * @param exercise
    * @return
    */
   @Override
-  public UserExercise duplicateExercise(UserExercise exercise) {
-    return db.duplicateExercise(exercise);
-  }
-
+  public UserExercise duplicateExercise(UserExercise exercise) { return db.duplicateExercise(exercise);  }
   public boolean deleteItem(String id ) {
     return db.deleteItem(id);
   }
