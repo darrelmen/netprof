@@ -12,7 +12,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class ExerciseShell implements IsSerializable, CommonShell {
   private String tooltip;
   protected String id;
-  protected String state = "unset";
+  protected STATE state = STATE.UNSET;
 
   public ExerciseShell() {}
   public ExerciseShell(String id, String tooltip) {
@@ -29,10 +29,10 @@ public class ExerciseShell implements IsSerializable, CommonShell {
   }
 
   @Override
-  public String getState() { return state;  }
+  public STATE getState() { return state;  }
 
   @Override
-  public void setState(String state) { this.state = state;  }
+  public void setState(STATE state) { this.state = state;  }
 
   public CommonShell getShell() { return new ExerciseShell(getID(), getTooltip()); }
 

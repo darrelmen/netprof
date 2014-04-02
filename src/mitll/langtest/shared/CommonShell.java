@@ -9,6 +9,9 @@ public interface CommonShell extends IsSerializable {
   public String getID();
   public String getTooltip();
   void setTooltip(String tooltip);
-  String getState();
-  void setState(String state);
+  STATE getState();
+  void setState(STATE state);
+
+  public enum STATE implements IsSerializable { UNSET, APPROVED, DEFECT, FIXED, ATTN_LL }
+
 }
