@@ -71,45 +71,11 @@ public class PagingExerciseList extends ExerciseList {
   @Override
   protected Set<String> getKeys() {  return pagingContainer.getKeys();  }
 
-  /**
-   * @seex mitll.langtest.client.recorder.FeedbackRecordPanel#enableNext
-   * @param completed
-   */
-/*  public void setCompleted(Set<String> completed) {
-    pagingContainer.setCompleted(completed);
-  }
-
   @Override
-  public void removeCompleted(String id) {
-    pagingContainer.removeCompleted(id);
+  public void setState(String id, CommonShell.STATE state) {
+    CommonShell commonShell = byID(id);
+    commonShell.setState(state);
   }
-
-  public void addCompleted(String id) {
-    pagingContainer.addCompleted(id);
-    System.out.println("PagingExerciseList.addCompleted : completed " + id + " now " + getCompleted().size());
-  }
-
-  private Set<String> getCompleted() { return pagingContainer.getCompleted(); }*/
-
-/*  @Override
-  public int getPercentComplete() {
-    if (controller.showCompleted()) {
-      int i = (int) Math.ceil(100f * ((float) getCompleted().size() / (float) getSize()));
-      if (i > 100) i = 100;
-      System.out.println("completed " + getCompleted().size() + " current " + getSize() + " " + i);
-      return i;
-    } else {
-      return super.getPercentComplete();
-    }
-  }*/
-
-/*  public int getComplete() {
-    if (controller.showCompleted()) {
-      return getCompleted().size();
-    } else {
-      return super.getComplete();
-    }
-  }*/
 
   /**
    * Add two rows -- the search box and then the item list
@@ -177,8 +143,7 @@ public class PagingExerciseList extends ExerciseList {
 
   private CommonShell getFirstNotCompleted() {
     for (CommonShell es : pagingContainer.getExercises()) {
-     //if (!getCompleted().contains(es.getID())) return es;
-      if (es.getState().equals("unset")) return es;
+      if (es.getState().equals(CommonShell.STATE.UNSET)) return es;
     }
     return super.findFirstExercise();
   }
@@ -287,6 +252,7 @@ public class PagingExerciseList extends ExerciseList {
     System.out.println("PagingExerciseList : rememberExercises remembering " + result.size() + " instance " + instance);
     clear();
     for (CommonShell es : result) {
+      //System.out.println("PagingExerciseList : add " + es);
       addExercise(es);
     }
     flush();
