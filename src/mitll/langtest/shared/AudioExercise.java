@@ -85,9 +85,9 @@ public class AudioExercise extends ExerciseShell {
       if (field.endsWith(".wav")) {
         String key = field.replaceAll(".wav", ".mp3");
         ExerciseAnnotation exerciseAnnotation = fieldToAnnotation.get(key);
-        if (exerciseAnnotation == null && !fieldToAnnotation.isEmpty()) {
-          System.out.println("Can't find " + field + " in "+ fieldToAnnotation.keySet());
-        }
+        //if (exerciseAnnotation == null && !fieldToAnnotation.isEmpty()) {
+        //  System.out.println("getAnnotation : Can't find " + field + " in "+ fieldToAnnotation.keySet());
+        //}
 
         return exerciseAnnotation;
       }
