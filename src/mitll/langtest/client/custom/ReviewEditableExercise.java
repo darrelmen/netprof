@@ -159,9 +159,16 @@ class ReviewEditableExercise extends EditableExercise {
 
   private void duplicateExercise() {
     newUserExercise.setCreator(controller.getUser());
+    CommonShell commonShell = exerciseList.byID(newUserExercise.getID());
+    if (commonShell != null) {
+      newUserExercise.setState(commonShell.getState());
+     // System.out.println("\t using state " + commonShell.getState());
+    }
+    //System.out.println("to duplicate " + newUserExercise + " state " + newUserExercise.getState());
     service.duplicateExercise(newUserExercise, new AsyncCallback<UserExercise>() {
       @Override
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+      }
 
       @Override
       public void onSuccess(UserExercise result) {
@@ -210,7 +217,9 @@ class ReviewEditableExercise extends EditableExercise {
 
     if (buttonClicked) {
       final String id = newUserExercise.getID();
-      System.out.println("doAfterEditComplete : forgetting " + id);
+      int user = controller.getUser();
+
+      System.out.println("doAfterEditComplete : forgetting " + id + " user " +user);
 
       if (!ul.remove(newUserExercise)) {
         System.err.println("\ndoAfterEditComplete : error - didn't remove " + id + " from ul " + ul);
@@ -218,7 +227,8 @@ class ReviewEditableExercise extends EditableExercise {
       if (!originalList.remove(newUserExercise)) {
         System.err.println("\ndoAfterEditComplete : error - didn't remove " + id + " from original " +originalList);
       }
-      service.setExerciseState(id, "fixed", new AsyncCallback<Void>() {
+
+      service.setExerciseState(id, CommonShell.STATE.FIXED, user, new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
         }
