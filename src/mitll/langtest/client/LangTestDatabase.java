@@ -90,11 +90,6 @@ public interface LangTestDatabase extends RemoteService {
 
   void addDLIUser(DLIUser dliUser);
 
-/*
-  Set<String> getCompletedExercises(int user, boolean isReviewMode);
-*/
-
-
   StartupInfo getStartupInfo();
   long addUserList(long userid, String name, String description, String dliClass);
   void addVisitor(UserList ul, long user);
@@ -114,6 +109,7 @@ public interface LangTestDatabase extends RemoteService {
 
   void addAnnotation(String exerciseID, String field, String status, String comment, long userID);
   void markReviewed(String exid, boolean isCorrect, long creatorID);
+  void markState(String id, CommonShell.STATE state, long creatorID);
 
   void setExerciseState(String id, CommonShell.STATE state, long userID);
 
