@@ -7,7 +7,6 @@ import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.CommonUserExercise;
-import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
@@ -25,7 +24,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 //import mitll.langtest.shared.Exercise;
 
@@ -52,6 +50,7 @@ public class UserListManager {
   public static final String ITEMS_TO_REVIEW = "Possible defects to fix";
   public static final long REVIEW_MAGIC_ID = -100;
   public static final long COMMENT_MAGIC_ID = -200;
+  public static final long ATTN_LL_MAGIC_ID = -300;
 
   private final UserDAO userDAO;
   private final ReviewedDAO reviewedDAO;
@@ -61,14 +60,6 @@ public class UserListManager {
   private final UserListDAO userListDAO;
   private final UserListExerciseJoinDAO userListExerciseJoinDAO;
   private final AnnotationDAO annotationDAO;
-
-//  private Set<String> reviewedExercises = new TreeSet<String>();
-//  private Set<String> incorrect = new TreeSet<String>();
-//  private Set<String> fixed = new TreeSet<String>();
-
- // private Set<String> defects = new TreeSet<String>();
- // private Set<String> comments = new TreeSet<String>();
-
   private final PathHelper pathHelper;
 
   /**
@@ -87,63 +78,91 @@ public class UserListManager {
     this.userListExerciseJoinDAO = userListExerciseJoinDAO;
     this.annotationDAO = annotationDAO;
     this.reviewedDAO = reviewedDAO;
-
-//    incorrect = annotationDAO.getDefectIds();
-//    fixed = annotationDAO.getFixedIds();
-   // logger.debug("incorrect are " + incorrect.size());
-//    reviewedExercises = reviewedDAO.getReviewed();
-
-    // set predef exercises state
-    //setStateOnExercises(annotationDAO, reviewedDAO);
-
     this.pathHelper = pathHelper;
   }
 
-  public void setStateOnExercises(AnnotationDAO annotationDAO, ReviewedDAO reviewedDAO) {
-    Map<String, String> stateMap = reviewedDAO.getStateMap();
-    logger.debug("got " + stateMap.size() +" in state map");
-    Set<String> defectIds = annotationDAO.getDefectIds();
-    logger.debug("got " + defectIds.size() +" in defectIds");
+  public void setStateOnExercises() {
+    getAmmendedStateMap();
 
-    for (String exid : defectIds) {   // incorrect - could be defect or comment for now
-      stateMap.put(exid, "defect");
-    }
+    Map<String, ReviewedDAO.StateCreator> exerciseToState = getExerciseToState();
 
-    Set<String> userExercisesRemaining = new HashSet<String>(stateMap.keySet());
-    for (Map.Entry<String, String> pair : stateMap.entrySet()) {
+    // set state on predef exercises
+    logger.debug("found " + exerciseToState.size() + " state markings");
+
+    int count = 0;
+    Set<String> userExercisesRemaining = new HashSet<String>(exerciseToState.keySet());
+    for (Map.Entry<String,  ReviewedDAO.StateCreator> pair : exerciseToState.entrySet()) {
       CommonExercise predefExercise = userExerciseDAO.getPredefExercise(pair.getKey());
       if (predefExercise != null) {
         userExercisesRemaining.remove(pair.getKey());
-        predefExercise.setState(pair.getValue());
+        predefExercise.setState(pair.getValue().state);
+        count++;
       }
     }
-    logger.debug("got " + userExercisesRemaining.size() +" in userExercisesRemaining");
+    logger.debug("got " + userExercisesRemaining.size() +" in userExercisesRemaining, updated " + count + " predef exercises");
 
-    // fix missing states on user exercises -- only should be done when updating old db
+    count = 0;
+    // set states on user exercises
     List<CommonUserExercise> userExercises = userExerciseDAO.getWhere(userExercisesRemaining);
 
     for (CommonShell commonUserExercise : userExercises) {
-      String state = stateMap.get(commonUserExercise.getID());
+      ReviewedDAO.StateCreator state = exerciseToState.get(commonUserExercise.getID());
       if (state == null) {
         logger.error("huh? can't find ex id " + commonUserExercise.getID());
       }
       else {
-        if (commonUserExercise.getState().equals("unset")) {
-        //  commonUserExercise.setState(state);
-       //   userExerciseDAO.updateState(commonUserExercise.getID(), state);
-          setState(commonUserExercise,state,false);
+        commonUserExercise.setState(state.state);
+        count++;
+      }
+    }
+    logger.debug("updated " + count + " user exercises");
+
+  }
+
+  /**
+   * Update an old db where the review table doesn't have a state column.
+   * @paramx annotationDAO
+   * @return
+   */
+  private Map<String, ReviewedDAO.StateCreator> getAmmendedStateMap() {
+    Map<String, ReviewedDAO.StateCreator> stateMap = getExerciseToState();
+    logger.debug("got " + stateMap.size() +" in state map");
+    Map<String,Long> exerciseToCreator = annotationDAO.getDefectIds();
+    logger.debug("got " + exerciseToCreator.size() +" in defectIds");
+
+    int count = 0;
+    Set<String> reviewed = new HashSet<String>(stateMap.keySet());
+    for (String exid : reviewed) {   // incorrect - could be defect or comment for now
+      if (exerciseToCreator.keySet().contains(exid)) {
+        ReviewedDAO.StateCreator stateCreator = stateMap.get(exid);
+        if (stateCreator.state.equals(CommonShell.STATE.UNSET)) { // only happen when we have an old db
+          stateMap.put(exid, new ReviewedDAO.StateCreator(CommonShell.STATE.DEFECT, stateCreator.creatorID));
+          reviewedDAO.setState(exid, CommonShell.STATE.DEFECT, stateCreator.creatorID);
+          count++;
         }
       }
     }
-  }
-/*
-  private void setState(CommonShell shell, String state, boolean isPredef) {
-    shell.setState(state);
-    if (!isPredef) {
-      userExerciseDAO.updateState(shell.getID(), state);
+
+    if (count > 0) {
+      logger.info("updated " + count + " rows in review table");
     }
-    reviewedDAO.setState(shell.getID(), state);
-  }*/
+    return stateMap;
+  }
+
+  private Map<String, ReviewedDAO.StateCreator> getExerciseToState() {
+    return reviewedDAO.getExerciseToState();
+  }
+
+  public void markState(Collection<? extends CommonShell> shells) {
+    Map<String, ReviewedDAO.StateCreator> exerciseToState = reviewedDAO.getExerciseToState();
+
+    for (CommonShell shell : shells) {
+      ReviewedDAO.StateCreator stateCreator = exerciseToState.get(shell.getID());
+      if (stateCreator != null) {
+        shell.setState(stateCreator.state);
+      }
+    }
+  }
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#addUserList(long, String, String, String)
@@ -259,33 +278,37 @@ public class UserListManager {
     return createUserList(userid, UserList.MY_LIST, MY_FAVORITES, "", true);
   }
 
-/*  public Set<String> getFixedIds() {
-    return fixed;
-  }*/
-
+  /**
+   * So comments are items with incorrect annotations on their fields that have not been marked as defects
+   * Also, incorrect annotations are the latest annotations- a field can have a history of correct and incorrect
+   * annotations - only if the latest is incorrect should the item appear on the comment or defect list.
+   * @return
+   */
   public UserList getCommentedList() {
    // Set<String> allKnown = userExerciseDAO.getAtState("incorrect");
 
 
-    Map<String, String> stateMap = reviewedDAO.getStateMap();
-    Set<String> incorrectCommentIds = annotationDAO.getDefectIds();
-    logger.debug("There are " + stateMap.size() + " reviewed items ");
-    logger.debug("There are " + incorrectCommentIds.size() + " incorrectCommentIds items ");
-   // Set<String>  commentedNotDefect = new HashSet<String>(incorrectCommentIds);
-    incorrectCommentIds.removeAll(stateMap.keySet());// what's left are items that are not reviewed
-    logger.debug("After there are " + incorrectCommentIds.size() + " incorrectCommentIds items ");
+    Map<String, ReviewedDAO.StateCreator> exerciseToState = getExerciseToState();
+    Map<String, Long> idToCreator = annotationDAO.getDefectIds();
+    logger.debug("getCommentedList There are " + exerciseToState.size() + " reviewed items ");
+    logger.debug("getCommentedList There are " + idToCreator.size() + " idToCreator items ");
+   // Set<String>  commentedNotDefect = new HashSet<String>(idToCreator);
+    for (String id : exerciseToState.keySet()) {
+      idToCreator.remove(id);// what's left are items that are not reviewed
+    }
+    logger.debug("getCommentedList After there are " + idToCreator.size() + " idToCreator items ");
 
 
     //Set<String> allIncorrect = new HashSet<String>(incorrect);
     //allIncorrect.removeAll(reviewedExercises);
 
     //List<CommonUserExercise> include = new ArrayList<CommonUserExercise>();
-    List<CommonUserExercise> include = userExerciseDAO.getWhere(incorrectCommentIds);
+    List<CommonUserExercise> include = userExerciseDAO.getWhere(idToCreator.keySet());
     //for (CommonUserExercise ue : allKnown) {
     //  if (!reviewedExercises.contains(ue.getID())) include.add(ue);
     //}
 
-    UserList reviewList = getReviewList(include, COMMENTS, ALL_ITEMS_WITH_COMMENTS, incorrectCommentIds);
+    UserList reviewList = getReviewList(include, COMMENTS, ALL_ITEMS_WITH_COMMENTS, idToCreator.keySet());
     reviewList.setUniqueID(COMMENT_MAGIC_ID);
     return reviewList;
   }
@@ -295,14 +318,38 @@ public class UserListManager {
    *
    * @see mitll.langtest.server.LangTestDatabaseImpl#getReviewList()
    * @see mitll.langtest.client.custom.Navigation#viewReview
-   * @see #markCorrectness(String, boolean)
+   * @see #markCorrectness(String, boolean, long)
    * @return
    */
   public UserList getDefectList() {
- //   logger.debug("getDefectList ids #=" + reviewedExercises.size());
-  //  Set<String> incorrectReviewed = new HashSet<String>(reviewedExercises);
-  //  boolean b = incorrectReviewed.retainAll(incorrect);
-    Set<String> defectIds = annotationDAO.getDefectIds();
+    //   logger.debug("getDefectList ids #=" + reviewedExercises.size());
+    //  Set<String> incorrectReviewed = new HashSet<String>(reviewedExercises);
+    //  boolean b = incorrectReviewed.retainAll(incorrect);
+//    Set<String> defectIds = annotationDAO.getDefectIds();
+    //   Map<String, String> stateMap = reviewedDAO.getExerciseToState();
+    Set<String> defectIds = new HashSet<String>();
+
+/*
+    Map<String, ReviewedDAO.StateCreator> stateMap = getAmmendedStateMap(annotationDAO);
+    for (Map.Entry<String, ReviewedDAO.StateCreator> pair : stateMap.entrySet()) {
+      if (pair.getValue().state.equals(CommonShell.STATE.DEFECT)) {
+        defectIds.add(pair.getKey());
+      }
+    }
+*/
+
+
+    Map<String, ReviewedDAO.StateCreator> exerciseToState = reviewedDAO.getExerciseToState();
+
+    for (Map.Entry<String, ReviewedDAO.StateCreator> pair : exerciseToState.entrySet()) {
+      //ReviewedDAO.StateCreator stateCreator = exerciseToState.get(shell.getID());
+    /*  if (stateCreator != null) {
+        shell.setState(stateCreator.state);
+      }*/
+      if (pair.getValue().state.equals(CommonShell.STATE.DEFECT)) {
+        defectIds.add(pair.getKey());
+      }
+    }
 
     List<CommonUserExercise> allKnown = userExerciseDAO.getWhere(defectIds);
     logger.debug("\tgetDefectList ids #=" + allKnown.size());
@@ -321,6 +368,8 @@ public class UserListManager {
     UserList userList = new UserList(REVIEW_MAGIC_ID, user, name, description, "", false);
     userList.setReview(true);
     userList.setExercises(onList);
+
+    markState(onList);
     return userList;
   }
 
@@ -526,14 +575,6 @@ public class UserListManager {
   public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
     this.userExerciseDAO = userExerciseDAO;
     userListDAO.setUserExerciseDAO(userExerciseDAO);
-
-
-  //  setStateOnExercises();
-
-  }
-
-  public void setStateOnExercises() {
-    setStateOnExercises(annotationDAO, reviewedDAO);
   }
 
   /**
@@ -581,8 +622,7 @@ public class UserListManager {
     if (!annotationDAO.hasAnnotation(exerciseID, field, INCORRECT, comment)) {
       long defectDetector = userDAO.getDefectDetector();
       addAnnotation(exerciseID, field, INCORRECT, comment, defectDetector);
-      //markApproved(exerciseID, defectDetector);
-      markState(exerciseID, "defect");
+      markState(exerciseID, CommonShell.STATE.DEFECT, defectDetector);
     }
   }
 
@@ -596,10 +636,10 @@ public class UserListManager {
    * @param userID
    */
   public void addAnnotation(String exerciseID, String field, String status, String comment, long userID) {
-    logger.info("addAnnotation add to db exercise id " + exerciseID + " field " + field + " status " + status + " comment " + comment);
-    annotationDAO.add(new UserAnnotation(exerciseID, field, status, comment, userID, System.currentTimeMillis()));
-
-    markCorrectness(exerciseID, status.equalsIgnoreCase(CORRECT));
+    UserAnnotation annotation = new UserAnnotation(exerciseID, field, status, comment, userID, System.currentTimeMillis());
+    logger.debug("addAnnotation " + annotation);
+    annotationDAO.add(annotation);
+    //markCorrectness(exerciseID, status.equalsIgnoreCase(CORRECT), userID);
   }
 
   /**
@@ -610,7 +650,6 @@ public class UserListManager {
   public void addAnnotations(CommonExercise exercise) {
     if (exercise != null) {
       Map<String, ExerciseAnnotation> latestByExerciseID = annotationDAO.getLatestByExerciseID(exercise.getID());
-
       //if (!latestByExerciseID.isEmpty()) {
       //  logger.debug("addAnnotations : found " + latestByExerciseID + " for " + exercise.getID());
       //}
@@ -628,6 +667,7 @@ public class UserListManager {
    * @see #addAnnotation(String, String, String, String, long)
    * @see mitll.langtest.client.custom.QCNPFExercise#markReviewed
    * @param id
+   * @paramx userID
    * @paramx creatorID
    */
 /*  public void markApproved(String id, long creatorID) {
@@ -641,39 +681,45 @@ public class UserListManager {
       //logger.debug("markApproved now " + reviewedExercises.size() + " reviewed exercises");
     //}
   }*/
-
-  public void markState(String id,  String state) {
-    logger.debug("mark state " + id + " = " + state);
+  public void markState(String id, CommonShell.STATE state, long creatorID) {
+    logger.debug("mark state " + id + " = " + state + " by " +creatorID);
     CommonExercise predefExercise = userExerciseDAO.getPredefExercise(id);
-    //String state = "approved";
+
+    if (predefExercise == null) {
+      predefExercise = userExerciseDAO.getWhere(id);
+    }
     if (predefExercise != null) {
-      //predefExercise.setState("approved");
-      setState(predefExercise, state,true);
-      if (state.equals("fixed")) {
-        markAllFieldsFixed(predefExercise);
+      setState(predefExercise, state, creatorID);
+      if (state.equals(CommonShell.STATE.FIXED)) {
+        markAllFieldsFixed(predefExercise, creatorID);
       }
-    }
-    else {
-      CommonUserExercise where = userExerciseDAO.getWhere(id);
+    } else {
+     /* CommonUserExercise where = userExerciseDAO.getWhere(id);
       if (where != null) {
-        setState(where, state,false);
+        setState(where, state, creatorID);
       }
-      if (state.equals("fixed")) {
-        markAllFieldsFixed(where);
-      }
+      if (state.equals(CommonShell.STATE.FIXED)) {
+        markAllFieldsFixed(where, creatorID);
+      }*/
+      logger.error("huh? couldn't find exercise " + id);
     }
-
   }
 
-  private void setState(CommonShell shell, String state, boolean isPredef) {
+  public void setState(CommonShell shell, CommonShell.STATE state, long creatorID) {
     shell.setState(state);
-    if (!isPredef) {
-      userExerciseDAO.updateState(shell.getID(), state);
-    }
-    reviewedDAO.setState(shell.getID(), state);
+    reviewedDAO.setState(shell.getID(), state, creatorID);
   }
+/*
+  private void dupState(CommonShell shell, CommonShell.STATE state, long creatorID) {
+    shell.setState(state);
+    reviewedDAO.setState(shell.getID(), state, creatorID);
+  }*/
 
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#deleteItem(String)
+   * @param exerciseid
+   */
   public void removeReviewed(String exerciseid) {
     reviewedDAO.remove(exerciseid);
   }
@@ -716,7 +762,7 @@ public class UserListManager {
     }
   }*/
 
-  protected void markAllFieldsFixed(CommonUserExercise userExercise) {
+/*  protected void markAllFieldsFixed(CommonUserExercise userExercise, long userID) {
     Collection<String> fields = userExercise.getFields();
     logger.debug("setExerciseState " + userExercise  + "  has " + fields);
     addAnnotations(userExercise);
@@ -728,18 +774,18 @@ public class UserListManager {
         addAnnotation(userExercise.getID(), field, CORRECT, FIXED, userExercise.getCreator());
       }
     }
-  }
+  }*/
 
-  protected void markAllFieldsFixed(CommonExercise userExercise) {
+  protected void markAllFieldsFixed(CommonExercise userExercise, long userID) {
     Collection<String> fields = userExercise.getFields();
-    logger.debug("setExerciseState " + userExercise  + "  has " + fields);
+    logger.debug("setExerciseState " + userExercise  + "  has " + fields + " user " + userID);
     addAnnotations(userExercise);
     for (String field : fields) {
       ExerciseAnnotation annotation1 = userExercise.getAnnotation(field);
       if (!annotation1.isCorrect()) {
         logger.debug("\tsetExerciseState " + userExercise.getID()  + "  has " + annotation1);
 
-        addAnnotation(userExercise.getID(), field, CORRECT, FIXED, -1);
+        addAnnotation(userExercise.getID(), field, CORRECT, FIXED, userID);
       }
     }
   }
@@ -761,9 +807,10 @@ public class UserListManager {
    * @see mitll.langtest.client.custom.QCNPFExercise#markReviewed
    * @param id
    * @param correct
+   * @param userID
    */
-  public void markCorrectness(String id, boolean correct) {
-    markState(id, correct ? "approved" : "defect");
+  public void markCorrectness(String id, boolean correct, long userID) {
+    markState(id, correct ? CommonShell.STATE.APPROVED : CommonShell.STATE.DEFECT, userID);
     //markApproved();
 /*    if (correct) {
       incorrect.remove(id);
