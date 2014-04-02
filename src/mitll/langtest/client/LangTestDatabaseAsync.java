@@ -3,6 +3,7 @@ package mitll.langtest.client;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.DLIUser;
 import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.ImageResponse;
@@ -106,7 +107,7 @@ public interface LangTestDatabaseAsync {
 
   void getReviewList(AsyncCallback<UserList> async);
 
-  void setExerciseState(String id, String state, AsyncCallback<Void> async);
+  void setExerciseState(String id, CommonShell.STATE state, long userID, AsyncCallback<Void> async);
 
   void getCommentedList(AsyncCallback<UserList> async);
 
