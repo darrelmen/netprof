@@ -57,7 +57,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   private ExercisePanelFactory factory;
   private final ExerciseController controller;
 
-  private Panel createdPanel;
+  protected Panel createdPanel;
   protected UserManager user;
   private String exercise_title;
   private final boolean showTurkToken;
@@ -273,6 +273,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       }
       System.out.println("Got exception '" +caught.getMessage() + "' " +caught);
     }
+
     public void onSuccess(ExerciseListWrapper result) {
       System.out.println("\tExerciseList.SetExercisesCallback Got " + result.getExercises().size() + " results");
       if (isStaleResponse(result)) {
@@ -282,7 +283,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
           gotEmptyExerciseList();
         }
 
-          rememberAndLoadFirst(result.getExercises(), result.getFirstExercise());
+        rememberAndLoadFirst(result.getExercises(), result.getFirstExercise());
 
         controller.showProgress();
       }
@@ -329,6 +330,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   public void rememberAndLoadFirst(List<CommonShell> exercises) {
+    System.out.println(new Date() + " rememberAndLoadFirst : exercises " + exercises.size());
+
     rememberAndLoadFirst(exercises, null);
   }
 
