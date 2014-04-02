@@ -67,21 +67,18 @@ class NPFHelper implements RequiresResize {
    */
   public void showNPF(UserList ul, Navigation.TabAndContent tabAndContent, String instanceName, boolean loadExercises) {
     System.out.println(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul);
-    if (!ul.isEmpty()) {
-      System.out.println(getClass() + " : first is " + ul.getExercises().iterator().next());
-    }
+    //if (!ul.isEmpty()) {
+    //  System.out.println(getClass() + " : first is " + ul.getExercises().iterator().next());
+    //}
     DivWidget content = tabAndContent.content;
     int widgetCount = content.getWidgetCount();
     if (!madeNPFContent || widgetCount == 0) {
-
-      System.out.println("\t: adding npf content instanceName = " + instanceName + " for list " + ul);
-
-      addNPFToContent(ul, content, instanceName, loadExercises);
       madeNPFContent = true;
+      System.out.println("\t: adding npf content instanceName = " + instanceName + " for list " + ul);
+      addNPFToContent(ul, content, instanceName, loadExercises);
     } else {
       System.out.println("\t: rememberAndLoadFirst instanceName = " + instanceName + " for list " + ul);
-
-      rememberAndLoadFirst(ul, instanceName);
+      rememberAndLoadFirst(ul);
     }
   }
 
@@ -105,7 +102,7 @@ class NPFHelper implements RequiresResize {
     Panel hp = doInternalLayout(ul, instanceName);
 
     if (loadExercises) {
-      rememberAndLoadFirst(ul,instanceName);
+      rememberAndLoadFirst(ul);
     }
     setupContent(hp);
     return hp;
@@ -165,47 +162,31 @@ class NPFHelper implements RequiresResize {
     return exerciseList;
   }
 
-  private void rememberAndLoadFirst(final UserList ul, String instanceName) {
-    //npfExerciseList.show();
-/*    if (controller.isReviewMode()) {
-      System.out.println(getClass() + ".rememberAndLoadFirst : review mode " + controller.isReviewMode() + " for " + ul + " instanceName " + instanceName);
-      service.getCompletedExercises(controller.getUser(), controller.isReviewMode(), new AsyncCallback<Set<String>>() {
-        @Override
-        public void onFailure(Throwable caught) {
-        }
+  private void rememberAndLoadFirst(final UserList ul) {
+    System.out.println(getClass() + ".rememberAndLoadFirst : for " +ul);
 
-        @Override
-        public void onSuccess(Set<String> result) {
-
-          System.out.println("\t"+getClass() + ".rememberAndLoadFirst (success) :  for " + ul + " found " + result.size());
-
-          npfExerciseList.setCompleted(result);
-          npfExerciseList.setUserListID(ul.getUniqueID());
-          npfExerciseList.rememberAndLoadFirst(new ArrayList<CommonShell>(ul.getExercises()));
-        }
-      });
-    } else {*/
-      npfExerciseList.setUserListID(ul.getUniqueID());
-      npfExerciseList.rememberAndLoadFirst(new ArrayList<CommonShell>(ul.getExercises()));
-  //  }
+    npfExerciseList.setUserListID(ul.getUniqueID());
+    npfExerciseList.rememberAndLoadFirst(new ArrayList<CommonShell>(ul.getExercises()));
   }
 
-  Panel setupContent(Panel hp) { return npfContentPanel; }
+  Panel setupContent(Panel hp) {
+    return npfContentPanel;
+  }
 
   PagingExerciseList makeExerciseList(final Panel right, final String instanceName) {
     System.out.println(getClass() + ".makeExerciseList : instanceName " + instanceName);
 
     return new PagingExerciseList(right, service, feedback, null, controller, false, false,
       true, instanceName) {
-        @Override
-        protected void onLastItem() {
-          new ModalInfoDialog("Complete", "List complete!", new HiddenHandler() {
-            @Override
-            public void onHidden(HiddenEvent hiddenEvent) {
-              reloadExercises();
-            }
-          });
-        }
+      @Override
+      protected void onLastItem() {
+        new ModalInfoDialog("Complete", "List complete!", new HiddenHandler() {
+          @Override
+          public void onHidden(HiddenEvent hiddenEvent) {
+            reloadExercises();
+          }
+        });
+      }
       };
   }
 
