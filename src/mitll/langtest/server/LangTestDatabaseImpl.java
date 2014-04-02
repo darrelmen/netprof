@@ -717,6 +717,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db.getUserListManager().markCorrectness(id, isCorrect, creatorID);
   }
 
+
+  public void markState(String id, CommonShell.STATE state, long creatorID) {
+    // db.getUserListManager().markApproved(id, creatorID);
+    db.getUserListManager().markState(id, state, creatorID);
+  }
+
+
+
   /**
    * @see mitll.langtest.client.custom.ReviewEditableExercise#doAfterEditComplete(mitll.langtest.client.list.ListInterface, boolean)
    * @param id
