@@ -298,7 +298,7 @@ public class HistoryExerciseList extends PagingExerciseList {
     return selectionState2.keySet();
   }
 
-  private boolean debug = false;
+  private boolean debug = true;
   /**
      * Respond to push a history token.
      * @param event
@@ -353,21 +353,7 @@ public class HistoryExerciseList extends PagingExerciseList {
    */
   protected void loadExercises(final Map<String, Collection<String>> typeToSection, final String item) {
     System.out.println("HistoryExerciseList.loadExercises : instance " + instance+ " " + typeToSection + " and item '" + item + "'");
-/*    if (controller.showCompleted()) {
-      service.getCompletedExercises(controller.getUser(), controller.isReviewMode(), new AsyncCallback<Set<String>>() {
-        @Override
-        public void onFailure(Throwable caught) {}
-
-        @Override
-        public void onSuccess(Set<String> result) {
-          controller.getExerciseList().setCompleted(result);
-          loadExercisesUsingPrefix(typeToSection, getPrefix());
-        }
-      });
-    }
-    else {*/
       loadExercisesUsingPrefix(typeToSection, getPrefix());
-  //  }
   }
 
   protected void loadExercises(String selectionState, String prefix) {
@@ -376,39 +362,14 @@ public class HistoryExerciseList extends PagingExerciseList {
   }
 
   protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection, String prefix) {
-/*    if (prefix.isEmpty()) {
-      reallyLoadExercises(typeToSection);
-    } else {*/
       lastReqID++;
       System.out.println("HistoryExerciseList.loadExercisesUsingPrefix looking for '" + prefix +
         "' (" + prefix.length() + " chars) in context of " + typeToSection + " list " + userListID+
         " instance " + instance);
 
-    //  if (typeToSection.isEmpty()) {
         service.getExerciseIds(lastReqID, typeToSection, prefix, userListID, new SetExercisesCallback());
-  /*    } else {
-        service.getExercisesForSelectionState(lastReqID, typeToSection, prefix, new MySetExercisesCallback(null));
-      }*/
-  //  }
+
   }
-
-  /**
-   * @see #loadExercisesUsingPrefix(java.util.Map, String)
-   * @param typeToSection
-   */
-/*  private void reallyLoadExercises(Map<String, Collection<String>> typeToSection) {
-    System.out.println("reallyLoadExercises looking for exercises in context of " + typeToSection + " instance " + instance);
-
-    if (typeToSection.isEmpty()) {
-      noSectionsGetExercises(userID);
-    } else {
-      lastReqID++;
-     // service.getExercisesForSelectionState(lastReqID, typeToSection, "", new MySetExercisesCallback(null));
-      service.getExerciseIds(lastReqID, typeToSection, "", -1, new SetExercisesCallback());
-
-    }
-  }*/
-
 
   /**
    * @see HistoryExerciseList#loadExercises(String, String)
@@ -429,54 +390,4 @@ public class HistoryExerciseList extends PagingExerciseList {
     System.out.println("HistoryExerciseList.noSectionsGetExercises for " + userID + " instance " + instance);
     super.getExercises(userID, true);
   }
-
-  /**
-   * Ask the server for the items for the type->item map.  Remember the results and select the first one.
-   *
-   * More complicated, since we might want to remember selected item history... but that doesn't work NOW.
-   */
-/*  protected class MySetExercisesCallback extends SetExercisesCallback {
-    private final String item;
-
-    *//**
-     * @see HistoryExerciseList#loadExercisesUsingPrefix(java.util.Map, String)
-     * @see #reallyLoadExercises(java.util.Map)
-     * @param item
-     *//*
-    public MySetExercisesCallback(String item) {  this.item = item;  }
-
-    @Override
-    public void onSuccess(ExerciseListWrapper result) {
-      System.out.println("MySetExercisesCallback : onSuccess " + result.getExercises().size() + " items and item " +item);
-
-      if (isStaleResponse(result)) {
-        System.out.println("\t----> ignoring result " + result.getReqID() + " b/c before latest " + lastReqID);
-      } else {
-        if (result.getExercises().isEmpty()) {
-          System.out.println("\t----> result is empty...");
-
-          if (item != null && item.startsWith("Custom")) {
-            System.out.println("\t----> skip warning about empty list for now "); // TODO revisit this
-          }
-          else {
-            gotEmptyExerciseList();
-          }
-          rememberExercises(result.getExercises());
-        } else {
-          if (item != null) {
-            rememberExercises(result.getExercises());
-            controller.showProgress();
-            if (!loadByID(item)) {
-              System.out.println("\tMySetExercisesCallback.onSuccess : loading first exercise since couldn't load item=" + item);
-              loadFirstExercise();
-            }
-          } else {
-            System.out.println("\tMySetExercisesCallback.onSuccess : item is null");
-
-            super.onSuccess(result);     // remember and load the first one
-          }
-        }
-      }
-    }
-  }*/
 }
