@@ -517,7 +517,8 @@ public class Navigation extends TabContainer implements RequiresResize {
    * @param contentPanel
    */
   private void showList(final UserList ul, Panel contentPanel, final String instanceName) {
-    System.out.println("showList " +ul + " instance " + instanceName);
+    System.out.println("showList " + ul + " instance " + instanceName);
+    if (!ul.isEmpty()) System.out.println("\tfirst" + ul.getExercises().iterator().next());
 
     String previousList = storage.getValue(CLICKED_USER_LIST);
     String currentValue = storeCurrentClickedList(ul);
@@ -536,6 +537,12 @@ public class Navigation extends TabContainer implements RequiresResize {
     addVisitor(ul);
   }
 
+  /**
+   * @see #showList(mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.Panel, String)
+   * @param ul
+   * @param instanceName
+   * @return
+   */
   private Panel makeTabContent(UserList ul, String instanceName) {
     FluidContainer container = new FluidContainer();
     container.getElement().setId("showListContainer");
@@ -689,7 +696,7 @@ public class Navigation extends TabContainer implements RequiresResize {
    */
   protected void showLearnTab(boolean isReview, UserList ul, TabAndContent learn, String instanceName1) {
     if (isReview) {
-      System.out.println("getListOperations : onClick using defect helper " + instanceName1);
+      System.out.println("getListOperations : onClick using defect helper " + instanceName1 + " and " +ul);
       defectHelper.showNPF(ul, learn, instanceName1, false);
     }
     else {
@@ -896,6 +903,13 @@ public class Navigation extends TabContainer implements RequiresResize {
       return nameToLists;
     }
 
+    /**
+     * @see #onSuccess(java.util.Collection)
+     * @param result
+     * @param insideScroll
+     * @param nameToLists
+     * @return
+     */
     private boolean addUserListsToDisplay(Collection<UserList> result, Panel insideScroll, Map<String, List<UserList>> nameToLists) {
       boolean anyAdded = false;
       for (final UserList ul : result) {
@@ -921,7 +935,7 @@ public class Navigation extends TabContainer implements RequiresResize {
    /**
     * When you click on the panel, show the list.
     *
-    * @see mitll.langtest.client.custom.Navigation.UserListCallback#onSuccess(java.util.Collection)
+    * @see mitll.langtest.client.custom.Navigation.UserListCallback#addUserListsToDisplay(java.util.Collection, com.google.gwt.user.client.ui.Panel, java.util.Map)
     * @param ul
     * @param showMore
     * @param onlyMyLists

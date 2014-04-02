@@ -30,7 +30,6 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   private long creator;
   private boolean isPredef;
   private boolean isOverride;
-  //private long modified;
   private Date modifiedDate;
 
   public UserExercise() {}  // just for serialization
@@ -81,18 +80,20 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
    * @param slowAudioRef
    * @param isOverride
    * @param modifiedDate
-   * @param state
+   * @paramx state
    */
   public UserExercise(long uniqueID, String exerciseID, long creator, String english, String foreignLanguage,
                       String transliteration, String refAudio, String slowAudioRef, boolean isOverride,
-                      Map<String, String> unitToValue, Date modifiedDate, String state) {
+                      Map<String, String> unitToValue, Date modifiedDate
+  //  , String state
+  ) {
     this(uniqueID, exerciseID, creator, english, foreignLanguage, transliteration);
     setRefAudio(refAudio);
     setSlowRefAudio(slowAudioRef);
     setUnitToValue(unitToValue);
     this.isOverride = isOverride;
     this.modifiedDate = modifiedDate;
-    this.state = state;
+  //  this.state = state;
   }
 
     /**
@@ -110,6 +111,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     setSlowRefAudio(exercise.getSlowAudioRef());
     setFieldToAnnotation(exercise.getFieldToAnnotation());
     setUnitToValue(exercise.getUnitToValue());
+    setState(getState());
   }
 
   /**
