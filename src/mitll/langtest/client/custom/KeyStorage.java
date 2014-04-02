@@ -27,7 +27,7 @@ public class KeyStorage {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
 
       localStorageIfSupported.setItem(getLocalStorageKey(name), toStore);
-      if (debug || true) System.out.println("storeValue " + name + "="+toStore + " : " + getValue(name));
+      if (debug) System.out.println("storeValue " + name + "="+toStore + " : " + getValue(name));
 
       //if (showMessage()) {
       //   System.err.println("----------------> huh? should not show again");
@@ -54,7 +54,7 @@ public class KeyStorage {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
 
       localStorageIfSupported.removeItem(getLocalStorageKey(name));
-      if (debug || true) System.out.println("removeValue " + name);
+      if (debug) System.out.println("removeValue " + name);
 
     }
   }

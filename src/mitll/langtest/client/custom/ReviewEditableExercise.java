@@ -60,8 +60,6 @@ class ReviewEditableExercise extends EditableExercise {
       itemMarker, changedUserExercise, originalList, exerciseList, predefinedContent, npfHelper);
     this.exerciseList = exerciseList;
     this.predefinedContentList = predefinedContent;
-
-    System.out.println("made ReviewEditableExercise");
   }
 
   @Override
