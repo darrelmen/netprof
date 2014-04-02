@@ -48,7 +48,6 @@ public class ReviewItemHelper extends NPFHelper {
    * Left and right components
    *
    *
-   *  TODO : after fixed -- item isn't removed -- do we need to update the exercise list too?
    * @param ul
    * @param instanceName
    * @return
@@ -62,8 +61,6 @@ public class ReviewItemHelper extends NPFHelper {
         return new ExercisePanelFactory(service,feedback,controller,predefinedContent) {
           @Override
           public Panel getExercisePanel(CommonExercise exercise) {
-            System.out.println(getClass() + " : list ");
-
             ReviewEditableExercise reviewEditableExercise =
               new ReviewEditableExercise(service, controller, itemMarker, exercise.toCommonUserExercise(), ul,
                 pagingExerciseList, predefinedContent, npfHelper);
@@ -82,10 +79,6 @@ public class ReviewItemHelper extends NPFHelper {
 
     Panel widgets = flexListLayout.doInternalLayout(ul, instanceName);
     npfExerciseList = flexListLayout.npfExerciseList;
-
-  //  System.out.println(getClass() + " : doInternalLayout flexListLayout = " + flexListLayout);
-   // System.out.println(getClass() + " : doInternalLayout npfExerciseList = " + npfExerciseList);
-
     return widgets;
   }
 
