@@ -24,6 +24,8 @@ public class AddRemoveDAO extends DAO {
   private static final Logger logger = Logger.getLogger(AddRemoveDAO.class);
 
   private static final String ADDREMOVE = "addremove";
+  public static final String ADD = "ADD";
+  public static final String REMOVE = "REMOVE";
 
   public AddRemoveDAO(Database database) {
     super(database);
@@ -100,13 +102,13 @@ public class AddRemoveDAO extends DAO {
    * @return
    */
   public Set<String> getAdds() {
-    String operation = "ADD";
+    String operation = ADD;
     Set<String> lists = getIds(operation);
     return lists;
   }
 
   public Set<String> getRemoves() {
-    String operation = "REMOVE";
+    String operation = REMOVE;
     Set<String> lists = getIds(operation);
     return lists;
   }
