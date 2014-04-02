@@ -670,17 +670,6 @@ public class UserListManager {
    * @paramx userID
    * @paramx creatorID
    */
-/*  public void markApproved(String id, long creatorID) {
-    //int before = reviewedExercises.size();
- *//*   if (reviewedExercises.add(id)) {
-      reviewedDAO.add(id, creatorID);
-    }*//*
-
-    markState(id,"approved");
-    //if (before != reviewedExercises.size()){
-      //logger.debug("markApproved now " + reviewedExercises.size() + " reviewed exercises");
-    //}
-  }*/
   public void markState(String id, CommonShell.STATE state, long creatorID) {
     logger.debug("mark state " + id + " = " + state + " by " +creatorID);
     CommonExercise predefExercise = userExerciseDAO.getPredefExercise(id);
@@ -694,13 +683,6 @@ public class UserListManager {
         markAllFieldsFixed(predefExercise, creatorID);
       }
     } else {
-     /* CommonUserExercise where = userExerciseDAO.getWhere(id);
-      if (where != null) {
-        setState(where, state, creatorID);
-      }
-      if (state.equals(CommonShell.STATE.FIXED)) {
-        markAllFieldsFixed(where, creatorID);
-      }*/
       logger.error("huh? couldn't find exercise " + id);
     }
   }
@@ -709,12 +691,6 @@ public class UserListManager {
     shell.setState(state);
     reviewedDAO.setState(shell.getID(), state, creatorID);
   }
-/*
-  private void dupState(CommonShell shell, CommonShell.STATE state, long creatorID) {
-    shell.setState(state);
-    reviewedDAO.setState(shell.getID(), state, creatorID);
-  }*/
-
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#deleteItem(String)
@@ -723,58 +699,6 @@ public class UserListManager {
   public void removeReviewed(String exerciseid) {
     reviewedDAO.remove(exerciseid);
   }
-
-    /**
-     * @seex mitll.langtest.server.LangTestDatabaseImpl#setExerciseState(String)
-     * @see mitll.langtest.server.database.DatabaseImpl#deleteItem(String)
-     * @see mitll.langtest.client.custom.ReviewEditableExercise#doAfterEditComplete(mitll.langtest.client.list.ListInterface, boolean)
-     * @paramx exerciseid
-     */
-/*  public void setState(String exerciseid, String state) {
-    CommonUserExercise userExercise = userExerciseDAO.getWhere(exerciseid);
-
-    if (userExercise == null) {
-      CommonExercise predefExercise = userExerciseDAO.getPredefExercise(exerciseid);
-
-      setState(predefExercise,state,true);
-    }
-    if (!reviewedExercises.remove(exerciseid)) {
-      logger.error("huh? couldn't find " + exerciseid + " in set of " + reviewedExercises.size());
-      getReviewedExercises();
-    }
-    incorrect.remove(exerciseid);
-    fixed.add(exerciseid);
-    reviewedDAO.remove(exerciseid);
-
-    if (toRemove.isEmpty()) {
-      logger.error("setExerciseState couldn't find " + exerciseid);
-      if (incorrect.contains(exerciseid)) {
-        incorrect.remove(exerciseid);
-        logger.debug("now " + incorrect.size() + " defect items.");
-      }
-      else {
-        logger.error("huh? couldn't find " + exerciseid + " in set of " + incorrect.size() + " incorrect");
-      }
-    }
-    else {
-    //  CommonUserExercise userExercise = toRemove.get(0);
-      markAllFieldsFixed(userExercise);
-    }
-  }*/
-
-/*  protected void markAllFieldsFixed(CommonUserExercise userExercise, long userID) {
-    Collection<String> fields = userExercise.getFields();
-    logger.debug("setExerciseState " + userExercise  + "  has " + fields);
-    addAnnotations(userExercise);
-    for (String field : fields) {
-      ExerciseAnnotation annotation1 = userExercise.getAnnotation(field);
-      if (!annotation1.isCorrect()) {
-        logger.debug("\tsetExerciseState " + userExercise.getID()  + "  has " + annotation1);
-
-        addAnnotation(userExercise.getID(), field, CORRECT, FIXED, userExercise.getCreator());
-      }
-    }
-  }*/
 
   protected void markAllFieldsFixed(CommonExercise userExercise, long userID) {
     Collection<String> fields = userExercise.getFields();
@@ -791,18 +715,6 @@ public class UserListManager {
   }
 
   /**
-   * @seex mitll.langtest.server.LangTestDatabaseImpl#getCompletedExercises(int, boolean)
-   * @return
-   */
-/*
-  public Set<String> getReviewedExercises() {
-    logger.debug("getReviewedExercises now " + reviewedExercises.size() + " reviewed exercises");
-
-    return reviewedExercises;
-  }
-*/
-
-  /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#markReviewed(String, boolean, long)
    * @see mitll.langtest.client.custom.QCNPFExercise#markReviewed
    * @param id
@@ -811,19 +723,6 @@ public class UserListManager {
    */
   public void markCorrectness(String id, boolean correct, long userID) {
     markState(id, correct ? CommonShell.STATE.APPROVED : CommonShell.STATE.DEFECT, userID);
-    //markApproved();
-/*    if (correct) {
-      incorrect.remove(id);
-    }
-    else {
-      incorrect.add(id);
-    }*/
-/*    CommonExercise exercise = userExerciseDAO.getPredefExercise(id);
-    if (exercise == null) logger.error("couldn't find id " + id);
-    else {
-      setState(correct ? "fixed" : "defect");
-    }*/
-    //logger.debug("markCorrectness incorrect now " + incorrect.size());
   }
 
   public boolean deleteList(long id) {
