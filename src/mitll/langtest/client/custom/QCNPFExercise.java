@@ -115,9 +115,8 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
     if (!instance.contains(Navigation.REVIEW) && !instance.contains(Navigation.COMMENT)) {
       approvedButton = addApprovedButton(listContainer, widgets);
+      addAttnLLButton(listContainer,widgets);
     }
-   // Map<String, ExerciseAnnotation> fieldToAnnotation = exercise.getFieldToAnnotation();
-
     setApproveButtonState();
     return widgets;
   }
@@ -136,6 +135,22 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     });
     approvedTooltip = addTooltip(approved, APPROVED_BUTTON_TOOLTIP);
     return approved;
+  }
+
+  private Button addAttnLLButton(final ListInterface listContainer, NavigationHelper widgets) {
+    Button attention = new Button("Attention LL");
+    attention.getElement().setId("attention");
+    attention.addStyleName("leftFiveMargin");
+    widgets.add(attention);
+    attention.setType(ButtonType.WARNING);
+    attention.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        markAttentionLL(listContainer, exercise);
+      }
+    });
+    /*approvedTooltip = */addTooltip(attention, "Mark for LL review.");
+    return attention;
   }
 
   @Override
@@ -158,6 +173,24 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
       boolean allCorrect = incorrectFields.isEmpty();
 
       listContainer.setState(completedExercise.getID(), allCorrect ? CommonShell.STATE.APPROVED : CommonShell.STATE.DEFECT);
+      listContainer.redraw();
+    }
+  }
+
+  private void markAttentionLL(ListInterface listContainer, CommonShell completedExercise) {
+    if (isCourseContent()) {
+      //listContainer.addCompleted(completedExercise.getID());
+
+      service.markState(completedExercise.getID(), CommonShell.STATE.ATTN_LL, controller.getUser(),
+        new AsyncCallback<Void>() {
+          @Override
+          public void onFailure(Throwable caught) {}
+
+          @Override
+          public void onSuccess(Void result) {}
+        });
+
+      listContainer.setState(completedExercise.getID(), CommonShell.STATE.ATTN_LL);
       listContainer.redraw();
     }
   }
