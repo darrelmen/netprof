@@ -2,6 +2,7 @@ package mitll.langtest.server.database.custom;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.shared.CommonShell;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
@@ -30,6 +31,10 @@ public class ReviewedDAO extends DAO {
 
   private static final String REVIEWED = "reviewed";
   private static final String STATE = "state";
+  private static final String CREATORID = "creatorid";
+  private static final String MODIFIED = "modified";
+  public static final String EXERCISEID = "exerciseid";
+  //public static final String UNSET = "unset";
 
   public ReviewedDAO(Database database) {
     super(database);
@@ -52,7 +57,7 @@ public class ReviewedDAO extends DAO {
    * @param database
    * @throws java.sql.SQLException
    */
-  void createTable(Database database) throws SQLException {
+  private void createTable(Database database) throws SQLException {
     Connection connection = database.getConnection();
     PreparedStatement statement;
 
@@ -60,11 +65,17 @@ public class ReviewedDAO extends DAO {
       REVIEWED +
       " (" +
       "uniqueid IDENTITY, " +
-      "creatorid LONG, " +
-      "exerciseid VARCHAR, " +
-      "state VARCHAR, " +
-      "modified TIMESTAMP," +
-      "FOREIGN KEY(creatorid) REFERENCES " +
+      CREATORID +
+      " LONG, " +
+      EXERCISEID +
+      " VARCHAR, " +
+      STATE +
+      " VARCHAR, " +
+      MODIFIED +
+      " TIMESTAMP," +
+      "FOREIGN KEY(" +
+      CREATORID +
+      ") REFERENCES " +
       "USERS" +
       "(ID)" +
       ")");
@@ -79,24 +90,31 @@ public class ReviewedDAO extends DAO {
    * <p/>
    * Uses return generated keys to get the user id
    *
-   * @see UserListManager#markApproved(String, long)
+   * @see #setState
    */
-  public void add(String exerciseID, long creatorID, String state) {
+  private void add(String exerciseID, CommonShell.STATE state, long creatorID) {
     try {
       // there are much better ways of doing this...
-      logger.info("add :reviewed " + exerciseID + " by " + creatorID);
+      logger.info("add : exid " + exerciseID + " = " + state+ " by " + creatorID);
 
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement(
         "INSERT INTO " + REVIEWED +
-          "(creatorid,exerciseid,modified," +STATE+
+          "(" +
+          CREATORID +
+          "," +
+          EXERCISEID +
+          "," +
+          MODIFIED +
+          "," + STATE +
           ") " +
-          "VALUES(?,?,?,?);");
+          "VALUES(?,?,?,?);"
+      );
       int i = 1;
       statement.setLong(i++, creatorID);
       statement.setString(i++, exerciseID);
       statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));
-      statement.setString(i++, state);
+      statement.setString(i++, state.toString());
 
       int j = statement.executeUpdate();
 
@@ -114,6 +132,7 @@ public class ReviewedDAO extends DAO {
 
   /**
    * @see mitll.langtest.server.database.custom.UserListManager#removeReviewed(String)
+   * @see mitll.langtest.server.database.DatabaseImpl#deleteItem(String)
    * @param exerciseID
    */
   public void remove(String exerciseID) {
@@ -123,7 +142,7 @@ public class ReviewedDAO extends DAO {
       PreparedStatement statement = connection.prepareStatement(
         "DELETE FROM " + REVIEWED +
           " WHERE " +
-          "exerciseid" +
+          EXERCISEID +
           "='" + exerciseID +
           "'");
 
@@ -147,31 +166,41 @@ public class ReviewedDAO extends DAO {
     }
   }
 
-  public void setState(String exerciseID, String state) {
+  public void setState(String exerciseID, CommonShell.STATE state, long creatorID) {
     try {
     //  int before = getCount();
-      Connection connection = database.getConnection();
+/*      Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement(
         "UPDATE " + REVIEWED +
-          " SET STATE='" +state+
-          "' " +
+          " SET " +
+          STATE +"=? AND " +
+          CREATORID +"=? "+
           " WHERE " +
-          "exerciseid" +
-          "='" + exerciseID +
-          "'");
+          EXERCISEID +
+          "=?");
+
+  *//*    String sql =  "MERGE INTO " + REVIEWED+
+        " KEY(ID) VALUES(2, 'World')";*//*
+
+      int i =1;
+      statement.setString(i++,state.toString());
+      statement.setLong(i++, creatorID);
+      statement.setString(i++, exerciseID);
 
       int j = statement.executeUpdate();
 
-      if (j != 1) {
-        logger.error("remove : huh? didn't change row for " + exerciseID);
+      if (j != 1) {*/
+        add(exerciseID, state, creatorID);
+        //logger.error("remove : huh? didn't change row for " + exerciseID + " j " +j);
+
         //int count = getCount();
       //  logger.debug("now " + count + " reviewed");
         //if (before-count != 1) logger.error("ReviewedDAO : huh? there were " +before +" before");
-      }
+  /*    }
 
       statement.close();
       database.closeConnection(connection);
-
+*/
       //   int count = getCount();
       //    logger.debug("now " + count + " reviewed");
       //   if (before-count != 1) logger.error("ReviewedDAO : huh? there were " +before +" before");
@@ -184,7 +213,7 @@ public class ReviewedDAO extends DAO {
    * @see mitll.langtest.server.database.custom.UserListManager#UserListManager(mitll.langtest.server.database.UserDAO, UserListDAO, UserListExerciseJoinDAO, AnnotationDAO, ReviewedDAO, mitll.langtest.server.PathHelper)
    * @return
    */
-  public Set<String> getReviewed() {
+/*  public Set<String> getReviewed() {
     Connection connection = database.getConnection();
     String state = "approved";
     String sql = "SELECT DISTINCT exerciseid from " + REVIEWED + " where " +STATE+"='" +
@@ -211,35 +240,96 @@ public class ReviewedDAO extends DAO {
       logger.error("Got " + e + " doing " + sql, e);
     }
     return lists;
-  }
+  }*/
 
-  public Map<String,String> getStateMap() {
+  /**
+   * @see UserListManager#getDefectList()
+   * @see UserListManager#getExerciseToState()
+   * @see mitll.langtest.server.database.custom.UserListManager#markState(java.util.Collection)
+   * @return
+   */
+  public Map<String, StateCreator> getExerciseToState() {
     Connection connection = database.getConnection();
-    String sql = "SELECT exerciseid," +
-      STATE+
-      " from " + REVIEWED;
+ /*   String sql = "SELECT exerciseid," +
+      STATE +","+CREATORID+
+      " from " + REVIEWED;*/
+
+    String sql2 = "select " +
+      EXERCISEID +
+      "," +
+      STATE +
+      "," +
+      CREATORID +
+      "  from " +
+      REVIEWED +
+      " group by " +
+      EXERCISEID +
+      "," +
+      STATE +
+      "," +
+      MODIFIED +
+      " order by " +
+      EXERCISEID +
+      "," +
+      STATE +
+      "," +
+      MODIFIED;
+
+    String sql3 = "select * from (select " +
+      EXERCISEID +
+      "," +
+      STATE +
+      "," +
+      CREATORID +
+      ",max(" +
+      MODIFIED +
+      ") as latest from " +
+      REVIEWED +
+      " group by " +
+      EXERCISEID +
+      "," +
+      STATE +
+      " order by " +
+      EXERCISEID +
+      ") order by " +
+      EXERCISEID +
+      "," +
+      "latest";
 
     try {
-      PreparedStatement statement = connection.prepareStatement(sql);
+      PreparedStatement statement = connection.prepareStatement(sql3);
       ResultSet rs = statement.executeQuery();
-      Map<String,String> exidToState = new HashMap<String, String>();
+      Map<String,StateCreator> exidToState = new HashMap<String, StateCreator>();
       while (rs.next()) {
-        String string = rs.getString(1);
+        String exerciseID = rs.getString(1);
         String state = rs.getString(2);
-        if (state == null) state = "approved";
-        exidToState.put(string, state);
+        long creator = rs.getLong(3);
+        CommonShell.STATE stateFromTable = (state == null) ? CommonShell.STATE.UNSET : CommonShell.STATE.valueOf(state);
+        exidToState.put(exerciseID, new StateCreator(stateFromTable,creator));
       }
 
       // logger.debug("getReviewed sql " + sql + " yielded " + lists.size());
-      logger.debug("getStateMap yielded " + exidToState.size());
+      logger.debug("getExerciseToState " + sql3+ " yielded " + exidToState.size());
       rs.close();
       statement.close();
       database.closeConnection(connection);
       return exidToState;
     } catch (SQLException e) {
-      logger.error("Got " + e + " doing " + sql, e);
+      logger.error("Got " + e + " doing " + sql2, e);
     }
     return Collections.emptyMap();
+  }
+
+  public static class StateCreator {
+    CommonShell.STATE state; // really should be an enum...
+    //String exID;
+    long creatorID;
+
+    public StateCreator(CommonShell.STATE state, long creatorID) {
+      this.state = state;
+      this.creatorID = creatorID;
+    }
+    public String toString() { return state.toString() + " by " +creatorID; }
   }
 
   public int getCount() { return getCount(REVIEWED);  }
