@@ -91,14 +91,6 @@ public interface ListInterface extends RequiresResize {
   void removeCurrentExercise();
 
   void reloadExercises();
-
-/*  int getPercentComplete();
-
-  int getComplete();
-  void setCompleted(Set<String> completed);
-  void addCompleted(String id);
-  void removeCompleted(String id);*/
-
   void addExercise(CommonShell es);
 
   CommonShell simpleRemove(String id);
