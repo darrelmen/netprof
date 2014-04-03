@@ -298,7 +298,7 @@ public class HistoryExerciseList extends PagingExerciseList {
     return selectionState2.keySet();
   }
 
-  private boolean debug = true;
+  private boolean debug = false;
   /**
      * Respond to push a history token.
      * @param event
