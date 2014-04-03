@@ -63,14 +63,10 @@ public class SQLExerciseDAO implements ExerciseDAO {
   public SectionHelper getSectionHelper() { return sectionHelper; }
 
   @Override
-  public void addOverlay(CommonUserExercise userExercise) {
-
-  }
+  public void addOverlay(CommonUserExercise userExercise) {}
 
   @Override
-  public void setAddRemoveDAO(AddRemoveDAO addRemoveDAO) {
-
-  }
+  public void setAddRemoveDAO(AddRemoveDAO addRemoveDAO) {}
 
   @Override
   public boolean remove(String id) {
@@ -78,14 +74,10 @@ public class SQLExerciseDAO implements ExerciseDAO {
   }
 
   @Override
-  public void add(CommonUserExercise userExercise) {
-
-  }
+  public void add(CommonUserExercise userExercise) {}
 
   @Override
-  public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
-
-  }
+  public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {}
 
   @Override
   public CommonExercise getExercise(String id) {
@@ -227,7 +219,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
   private CommonExercise getExercise(String plan, String exid, JSONObject obj) {
     //String tip = "Item #"+exid; // TODO : have more informative tooltip
     String tip = exid; // TODO : have more informative tooltip
-    Exercise exercise = new Exercise(plan, exid, "", false, false, tip);
+    Exercise exercise = new Exercise(plan, exid, "", false, false, tip, "");
 
     String content = getContent(obj,exercise);
 
@@ -277,7 +269,6 @@ public class SQLExerciseDAO implements ExerciseDAO {
    *
    * If there's an audio tag in the content, make that the ref audio for the exercise.
    * @see Exercise#setRefAudio(String)
-   * @see mitll.langtest.client.flashcard.AudioExerciseContent#getAudioWidget
    *
    * @param obj json to get content from
    * @return content with media paths set
@@ -292,19 +283,11 @@ public class SQLExerciseDAO implements ExerciseDAO {
         String[] split = content.split("<audio");
         String before = split[0];
         String after = split[1];
-
-       // logger.debug("before " + before);
-     //   logger.debug("after " + after);
         String[] split1 = after.split("</audio>");
         String audioTag = split1[0];
         String afterContent = split1.length > 1 ? split1[1] : "";
-
-      //  logger.debug("audioTag " + audioTag);
-
         String[] split2 = audioTag.split("src=\"");
         String audioPathOrig = split2[1];
-     //   logger.debug("audioPathOrig " + audioPathOrig);
-
         String audioPath = audioPathOrig.split("mp3")[0];
         exercise.setRefAudio(audioPath + "mp3");
 
@@ -352,8 +335,8 @@ public class SQLExerciseDAO implements ExerciseDAO {
     return b.toString();
   }
 
-  @Override
+/*  @Override
   public List<String> getErrors() {
     return errors;
-  }
+  }*/
 }
