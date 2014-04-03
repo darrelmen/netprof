@@ -123,9 +123,11 @@ public interface LangTestDatabaseAsync {
 
   void getUserHistoryForList(long userid, Collection<String> ids, long latestResultID, AsyncCallback<List<AVPHistoryForList>> async);
 
-  void logEvent(String id, String widgetType, String exid, String context, long userid, AsyncCallback<Void> async);
+  void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID, AsyncCallback<Void> async);
 
   void getEvents(AsyncCallback<List<Event>> async);
 
   void markState(String id, CommonShell.STATE state, long creatorID, AsyncCallback<Void> async);
+
+  void setAVPSkip(Collection<Long> ids, AsyncCallback<Void> async);
 }
