@@ -11,7 +11,6 @@ import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.custom.UserList;
 
 /**
