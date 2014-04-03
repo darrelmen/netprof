@@ -252,7 +252,7 @@ public class PagingExerciseList extends ExerciseList {
    */
   @Override
   protected void rememberExercises(List<CommonShell> result) {
-    System.out.println("PagingExerciseList : rememberExercises remembering " + result.size() + " instance " + instance);
+    //System.out.println("PagingExerciseList : rememberExercises remembering " + result.size() + " instance " + instance);
     clear();
     for (CommonShell es : result) {
       //System.out.println("PagingExerciseList : add " + es);
