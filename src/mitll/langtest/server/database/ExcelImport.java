@@ -315,9 +315,9 @@ public class ExcelImport implements ExerciseDAO {
 
   public List<CommonExercise> getExercises() { return exercises; }
 
-  public Set<String> getSections() { return sectionHelper.getSections(); }
+ // public Set<String> getSections() { return sectionHelper.getSections(); }
 
-  public Map<String, Lesson> getSection(String type) { return sectionHelper.getSection(type); }
+ // public Map<String, Lesson> getSection(String type) { return sectionHelper.getSection(type); }
 
   public List<String> getErrors() {
     return errors;
@@ -768,7 +768,7 @@ public class ExcelImport implements ExerciseDAO {
                                String english, String foreignLanguagePhrase, String translit, String meaning,
                                String context, boolean promptInEnglish, String refAudioIndex) {
     String content = ExerciseFormatter.getContent(foreignLanguagePhrase, translit, english, meaning, context, language);
-    Exercise imported = new Exercise("import", id, content, promptInEnglish, true, english);
+    Exercise imported = new Exercise("import", id, content, promptInEnglish, true, english, context);
     imported.setMeaning(meaning);
     imported.addQuestion();   // TODO : needed?
 
