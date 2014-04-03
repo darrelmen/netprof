@@ -44,7 +44,7 @@ public class Result implements IsSerializable {
 
   public static final String AUDIO_TYPE_UNSET = "unset";
   public static final String AUDIO_TYPE_REGULAR = "regular";
-  public static final String AUDIO_TYPE_SLOW = "slow";
+ // public static final String AUDIO_TYPE_SLOW = "slow";
   public static final String AUDIO_TYPE_FAST_AND_SLOW = "fastAndSlow";
   public static final String AUDIO_TYPE_DEMO = "demo";
   public static final String AUDIO_TYPE_PRACTICE = "practice";
@@ -53,7 +53,7 @@ public class Result implements IsSerializable {
   public Result() {}
 
   /**
-   * @see mitll.langtest.server.database.ResultDAO#getResults()
+   * @see mitll.langtest.server.database.ResultDAO#getResultsForQuery(java.sql.Connection, java.sql.PreparedStatement)
    * @param userid
    * @param plan
    * @param id
