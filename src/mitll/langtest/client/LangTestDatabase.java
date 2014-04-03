@@ -111,6 +111,8 @@ public interface LangTestDatabase extends RemoteService {
   void markReviewed(String exid, boolean isCorrect, long creatorID);
   void markState(String id, CommonShell.STATE state, long creatorID);
 
+  void setAVPSkip(Collection<Long> ids);
+
   void setExerciseState(String id, CommonShell.STATE state, long userID);
 
   UserList getReviewList();
@@ -118,6 +120,6 @@ public interface LangTestDatabase extends RemoteService {
   boolean deleteItemFromList(long listid, String exid);
   boolean deleteItem(String exid);
 
-  void logEvent(String id, String widgetType, String exid, String context, long userid);
+  void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID);
   List<Event> getEvents();
 }

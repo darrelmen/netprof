@@ -11,8 +11,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 public interface EventLogger {
   void register(ExerciseController controller, Button button, String exid);
 
-  //void registerButton(Button button, String exid, long userid);
-
   void registerButton(Button button, String exid, String context, long userid);
 
   void logEvent(UIObject button, String widgetType, String exid, String context, long userid);
