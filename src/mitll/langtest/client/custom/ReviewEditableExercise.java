@@ -43,8 +43,7 @@ class ReviewEditableExercise extends EditableExercise {
    * @param changedUserExercise
    * @param originalList
    * @param exerciseList
-   * @see mitll.langtest.client.custom.EditItem#populatePanel
-   * @see mitll.langtest.client.custom.ReviewEditItem#getAddOrEditPanel(mitll.langtest.shared.CommonUserExercise, com.google.gwt.user.client.ui.HasText, mitll.langtest.shared.custom.UserList, boolean)
+   * @see mitll.langtest.client.custom.ReviewItemHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
    */
   public ReviewEditableExercise(LangTestDatabaseAsync service,
                                 ExerciseController controller,
@@ -228,13 +227,11 @@ class ReviewEditableExercise extends EditableExercise {
 
       service.setExerciseState(id, CommonShell.STATE.FIXED, user, new AsyncCallback<Void>() {
         @Override
-        public void onFailure(Throwable caught) {
-        }
+        public void onFailure(Throwable caught) {}
 
         @Override
         public void onSuccess(Void result) {
           System.out.println("\tdoAfterEditComplete : predefinedContentList reload ");
-
           //predefinedContentList.removeCompleted(id);
           predefinedContentList.reload();
 
