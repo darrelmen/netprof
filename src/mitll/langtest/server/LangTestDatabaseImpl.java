@@ -247,6 +247,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (firstExercise != null) {
       ensureMP3s(firstExercise);
       addAnnotations(firstExercise); // todo do this in a better way
+      logger.debug("First is " + firstExercise);
     }
     List<CommonShell> exerciseShells = getExerciseShells(exercises);
     db.getUserListManager().markState(exerciseShells);
@@ -540,7 +541,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.LangTest#onModuleLoad
    * @return
    */
-  private Map<String, String> getProperties() { return serverProps.getProperties();  }
+ // private Map<String, String> getProperties() { return serverProps.getProperties();  }
 
   @Override
   public StartupInfo getStartupInfo() {
@@ -623,7 +624,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   @Override
   public synchronized int userExists(String login) {
-    if (db == null) getProperties();
+    //if (db == null) getProperties();
     return db.userExists(login);
   }
 
@@ -713,17 +714,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param creatorID
    */
   public void markReviewed(String id, boolean isCorrect, long creatorID) {
-   // db.getUserListManager().markApproved(id, creatorID);
     db.getUserListManager().markCorrectness(id, isCorrect, creatorID);
   }
 
-
   public void markState(String id, CommonShell.STATE state, long creatorID) {
-    // db.getUserListManager().markApproved(id, creatorID);
     db.getUserListManager().markState(id, state, creatorID);
   }
 
-
+  @Override
+  public void setAVPSkip(Collection<Long> ids) { db.getAnswerDAO().changeType(ids); }
 
   /**
    * @see mitll.langtest.client.custom.ReviewEditableExercise#doAfterEditComplete(mitll.langtest.client.list.ListInterface, boolean)
@@ -786,8 +785,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   @Override
-  public void logEvent(String id, String widgetType, String exid, String context, long userid) {
-    db.logEvent(id,widgetType,exid,context,userid);
+  public void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID) {
+    db.logEvent(id,widgetType,exid,context,userid, hitID);
   }
 
   public List<Event> getEvents() { return db.getEvents(); }
