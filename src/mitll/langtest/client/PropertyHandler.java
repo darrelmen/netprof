@@ -51,7 +51,7 @@ public class PropertyHandler {
   private static final String RIGHT_ALIGN_CONTENT = "rightAlignContent";
   private static final String RESPONSE_TYPE = "responseType";
   private static final String SECOND_RESPONSE_TYPE = "secondResponseType";
-  private static final String FLASHCARD_NEXT_AND_PREV = "flashcardNextAndPrev";
+  //private static final String FLASHCARD_NEXT_AND_PREV = "flashcardNextAndPrev";
   private static final String BIND_NEXT_TO_ENTER = "bindNextToEnter";
   private static final String SCREEN_PORTION = "screenPortion";
 
@@ -65,6 +65,7 @@ public class PropertyHandler {
   private static final String BKG_COLOR_FOR_REF = "bkgColorForRef";
   private static final String EXERCISE_TITLE = "exercise_title";
   private static final String ADMIN_PARAM = "admin";
+  private static final String TURK_PARAM = "turk";
   private static final String NUM_GRADES_TO_COLLECT_PARAM = NUM_GRADES_TO_COLLECT;
 
   private static final String DLI_LANGUAGE_TESTING = "NetProF";
@@ -77,7 +78,7 @@ public class PropertyHandler {
   private static final int DEFAULT_GAME_TIME_SECONDS = 60;
   private static final String DEFAULT_EXERCISE = null;
   private static final int NUM_GRADES_TO_COLLECT_DEFAULT = 1;
-  private static final String ADD_RECORD_KEY_BINDING = "addRecordKeyBinding";
+ // private static final String ADD_RECORD_KEY_BINDING = "addRecordKeyBinding";
   private static final String LOGIN_TYPE_PARAM = "loginType";
   private static final String FLASHCARD_PREVIEW_HEIGHT = "flashcardPreviewHeight";
   private static final int DEFAULT_FLASHCARD_PREVIEW_HEIGHT = 610;
@@ -89,9 +90,9 @@ public class PropertyHandler {
   private static final String SHOW_SPECTROGRAM = "spectrogram";
   private boolean spectrogram = false;
   private boolean combinedMode = false;
-  private static final String INCLUDE_FEEDBACK = "includeFeedback";
+  //private static final String INCLUDE_FEEDBACK = "includeFeedback";
   private static final String INSTRUMENT = "instrument";
-  private boolean instrument;
+  private boolean instrument = true; // by default we instrument for now 4/3/14
 
   public boolean doInstrumentation() {
     return instrument;
@@ -124,11 +125,12 @@ public class PropertyHandler {
   private String nameForRecorder = "Speaker";
   private String language = "";
   private boolean showSections = false;
-  //private boolean showSectionWidgets = true;
   private boolean flashcardTeacherView = false;
   private boolean flashCard = false;
   private boolean timedGame = false;
   private String releaseDate;
+  private String turkID = "";
+
   private int recordTimeout = DEFAULT_TIMEOUT;
   private int shortRecordTimeout = DEFAULT_SHORT_TIMEOUT;
 
@@ -320,6 +322,11 @@ public class PropertyHandler {
     if (adminParam != null) {
       adminView = !adminParam.equals("false");
     }
+
+    String turkParam = Window.Location.getParameter(TURK_PARAM);
+    if (turkParam != null) {
+      turkID = turkParam;
+    }
     gameTimeSeconds = getInt(Window.Location.getParameter(GAME_TIME), gameTimeSeconds, REPEATS);
 
 /*    if (Window.Location.getParameter(SHOW_SECTION_WIDGETS) != null) {
@@ -451,6 +458,7 @@ public class PropertyHandler {
     return adminView;
   }
 
+  public String getTurkID() { return  turkID; }
   public boolean isMinimalUI() {
     return minimalUI;
   }
@@ -524,9 +532,11 @@ public class PropertyHandler {
 
   public LOGIN_TYPE getLoginType() { return loginType; }
 
+/*
   public int getFlashcardPreviewFrameHeight() {
     return flashcardPreviewHeight;
   }
+*/
 
   public boolean isFlashcardTextResponse() {
     return flashcardTextResponse;
@@ -540,7 +550,7 @@ public class PropertyHandler {
     return showExercisesInOrder;
   }
 
-  public String getResponseType() {
+/*  public String getResponseType() {
     return responseType;
   }
   public void setResponseType(String responseType) {
@@ -552,7 +562,7 @@ public class PropertyHandler {
   }
   public void setSecondResponseType(String responseType) {
     this.secondResponseType = responseType;
-  }
+  }*/
 
   public boolean shouldAllowPlusInURL() { return allowPlusInURL;  }
 
