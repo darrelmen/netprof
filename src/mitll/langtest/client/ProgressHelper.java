@@ -2,7 +2,6 @@ package mitll.langtest.client;
 
 import com.github.gwtbootstrap.client.ui.ProgressBar;
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
-import mitll.langtest.client.list.ListInterface;
 
 /**
  * Created with IntelliJ IDEA.
