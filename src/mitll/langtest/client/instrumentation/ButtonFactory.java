@@ -22,7 +22,6 @@ public class ButtonFactory implements EventLogger {
     this.props = props;
   }
 /*
-
   public void register(ExerciseController controller, final Button button, final String exid, final String context, final long userid) {
     if (controller.getProps().doInstrumentation()) {
       registerButton(button, exid, context, userid);
@@ -51,9 +50,7 @@ public class ButtonFactory implements EventLogger {
 
   @Override
   public void registerButton(final Button button, final String exid, final String context, final long userid) {
-
     //System.out.println("registering " + button.getElement().getId());
-
     button.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -76,7 +73,7 @@ public class ButtonFactory implements EventLogger {
 
   @Override
   public void logEvent(final String widgetID, String widgetType, String exid, String context, long userid) {
-    service.logEvent(widgetID, widgetType, exid, context, userid, new AsyncCallback<Void>() {
+    service.logEvent(widgetID, widgetType, exid, context, userid, props.getTurkID(), new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
         System.err.println("FAILED to send event for " + widgetID);
