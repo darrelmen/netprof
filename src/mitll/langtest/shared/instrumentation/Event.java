@@ -18,26 +18,25 @@ public class Event implements IsSerializable {
   private String context;
   private long creatorID;
   private long timestamp;
+  private String hitID;
 
   public Event() {}
 
   /**
-   * @paramx uniqueID
    * @param exerciseID
-   * @paramx field
-   * @paramx status
-   * @paramx comment
    * @param userID
    * @param timestamp
+   * @param hitID
    * @see mitll.langtest.server.database.custom.AnnotationDAO#getUserAnnotations(String)
    */
-  public Event(String widgetID,String widgetType,String exerciseID, String context, long userID, long timestamp) {
+  public Event(String widgetID, String widgetType, String exerciseID, String context, long userID, long timestamp, String hitID) {
     this.widgetID = widgetID;
     this.widgetType = widgetType;
     this.exerciseID = exerciseID;
     this.context = context;
     this.creatorID = userID;
     this.timestamp = timestamp;
+    this.hitID = hitID;
   }
 
   public String getWidgetID() {
@@ -59,12 +58,16 @@ public class Event implements IsSerializable {
     this.timestamp = timestamp;
   }
 
-  public String toString() {
-    return "Event on " + getWidgetID() + " by " +  getCreatorID() + " at " + new Date(getTimestamp()) + " info " +
-      getExerciseID() + "/" + getContext();
-  }
-
   public String getWidgetType() {
     return widgetType;
+  }
+
+  public String getHitID() {
+    return hitID;
+  }
+
+  public String toString() {
+    return "Event on " + getWidgetID() + " by " +  getCreatorID() + " at " + new Date(getTimestamp()) + " info " +
+      getExerciseID() + "/" + getContext() + " hit " + getHitID();
   }
 }

@@ -26,6 +26,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   private String foreignLanguage;
   private String transliteration;
   private String content;
+  private String context;
 
   private long creator;
   private boolean isPredef;
@@ -76,16 +77,16 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
    * @param english
    * @param foreignLanguage
    * @param transliteration
+   * @param context
    * @param refAudio
    * @param slowAudioRef
    * @param isOverride
    * @param modifiedDate
-   * @paramx state
    */
   public UserExercise(long uniqueID, String exerciseID, long creator, String english, String foreignLanguage,
-                      String transliteration, String refAudio, String slowAudioRef, boolean isOverride,
+                      String transliteration, String context,
+                      String refAudio, String slowAudioRef, boolean isOverride,
                       Map<String, String> unitToValue, Date modifiedDate
-  //  , String state
   ) {
     this(uniqueID, exerciseID, creator, english, foreignLanguage, transliteration);
     setRefAudio(refAudio);
@@ -93,7 +94,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     setUnitToValue(unitToValue);
     this.isOverride = isOverride;
     this.modifiedDate = modifiedDate;
-  //  this.state = state;
+    this.context = context;
   }
 
     /**
@@ -111,7 +112,8 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     setSlowRefAudio(exercise.getSlowAudioRef());
     setFieldToAnnotation(exercise.getFieldToAnnotation());
     setUnitToValue(exercise.getUnitToValue());
-    setState(getState());
+    setState(exercise.getState());
+    setContext(exercise.getContext());
   }
 
   /**
@@ -137,6 +139,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     imported.setTranslitSentence(getTransliteration());
     imported.setUnitToValue(getUnitToValue());
     imported.setFieldToAnnotation(getFieldToAnnotation());
+    imported.setContext(getContext());
   }
 
   @Override
@@ -217,6 +220,11 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   }
 
   @Override
+  public String getContext() { return context;  }
+
+  public void setContext(String context) { this.context = context; }
+
+  @Override
   public boolean isPredefined() {  return isPredef;  }
 
   @Override
@@ -239,8 +247,9 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
       " creator " + getCreator() +
       " : English '" + getEnglish() + "', " +
       "foreign language '" + getForeignLanguage() + "'" + " (" + getTransliteration() + ") " +
-      "tooltip " + getTooltip() +
-      "audio attr (" + getAudioAttributes().size() +
+      "context '" + getContext()+ "' " +
+      "tooltip '" + getTooltip() +
+      "' audio attr (" + getAudioAttributes().size() +
       ") :" + getAudioAttributes() + " unit/lesson " + getUnitToValue() +
       " state " + state+" modified " + modifiedDate;
   }
