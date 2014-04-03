@@ -50,6 +50,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   public static final String FOREIGN_LANGUAGE = "foreignLanguage";
   public static final String TRANSLITERATION = "transliteration";
   public static final String ENGLISH = "english";
+  public static final String CONTEXT = "context";
 
   private static final String REF_AUDIO = "refAudio";
   private static final String APPROVED = "Approve Item";
@@ -69,12 +70,14 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   private final ListInterface listContainer;
   private Button approvedButton;
   private Tooltip approvedTooltip;
+  private boolean attentionLL = false;
 
   public QCNPFExercise(CommonExercise e, ExerciseController controller, ListInterface listContainer,
                        float screenPortion, boolean addKeyHandler, String instance) {
     super(e, controller, listContainer, screenPortion, addKeyHandler, instance);
 
     this.listContainer = listContainer;
+    if (e.getState() == CommonShell.STATE.ATTN_LL) attentionLL = true;
   }
 
   @Override
@@ -102,7 +105,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
    * @return
    */
   protected NavigationHelper getNavigationHelper(ExerciseController controller,
-                                                           final ListInterface listContainer, boolean addKeyHandler) {
+                                                 final ListInterface listContainer, boolean addKeyHandler) {
     NavigationHelper widgets = new NavigationHelper(exercise, controller, new PostAnswerProvider() {
       @Override
       public void postAnswers(ExerciseController controller, CommonExercise completedExercise) {
@@ -157,7 +160,9 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   protected void nextWasPressed(ListInterface listContainer, CommonShell completedExercise) {
     //System.out.println("nextWasPressed : load next exercise " + completedExercise.getID() + " instance " +instance);
     super.nextWasPressed(listContainer, completedExercise);
-    markReviewed(listContainer, completedExercise);
+    if (!attentionLL) {
+      markReviewed(listContainer, completedExercise);
+    }
   }
 
   /**
@@ -168,7 +173,6 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
    */
   private void markReviewed(ListInterface listContainer, CommonShell completedExercise) {
     if (isCourseContent()) {
-      //listContainer.addCompleted(completedExercise.getID());
       markReviewed(completedExercise);
       boolean allCorrect = incorrectFields.isEmpty();
 
@@ -177,17 +181,22 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     }
   }
 
+  /**
+   * So if the attention LL button has been pressed, clicking next should not step on that setting
+   * @param listContainer
+   * @param completedExercise
+   */
   private void markAttentionLL(ListInterface listContainer, CommonShell completedExercise) {
     if (isCourseContent()) {
-      //listContainer.addCompleted(completedExercise.getID());
-
       service.markState(completedExercise.getID(), CommonShell.STATE.ATTN_LL, controller.getUser(),
         new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {}
 
           @Override
-          public void onSuccess(Void result) {}
+          public void onSuccess(Void result) {
+            attentionLL = true;
+          }
         });
 
       listContainer.setState(completedExercise.getID(), CommonShell.STATE.ATTN_LL);

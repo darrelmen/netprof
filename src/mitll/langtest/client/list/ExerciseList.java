@@ -326,11 +326,11 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see mitll.langtest.client.list.ExerciseList.SetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
    */
   protected void gotEmptyExerciseList() {
-    System.out.println(new Date() + " gotEmptyExerciseList : ------  ------------ ");
+   // System.out.println(new Date() + " gotEmptyExerciseList : ------  ------------ ");
   }
 
   public void rememberAndLoadFirst(List<CommonShell> exercises) {
-    System.out.println(new Date() + " rememberAndLoadFirst : exercises " + exercises.size());
+    //System.out.println(new Date() + " rememberAndLoadFirst : exercises " + exercises.size());
 
     rememberAndLoadFirst(exercises, null);
   }
@@ -409,7 +409,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
         if (e != null) toLoad = e;
       }
 
-      System.out.println("loadFirstExercise ex id =" + toLoad.getID() + " instance " + instance);
+      //System.out.println("loadFirstExercise ex id =" + toLoad.getID() + " instance " + instance);
       pushFirstSelection(toLoad.getID());
     }
   }
