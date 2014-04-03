@@ -1,6 +1,7 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.Result;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
@@ -9,6 +10,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Does writing to the results table.
@@ -24,7 +29,7 @@ public class AnswerDAO {
 
   /**
    *
-   * @see DatabaseImpl#addAnswer(int, mitll.langtest.shared.Exercise, int, String, String)
+   * @see DatabaseImpl#addAnswer(int, mitll.langtest.shared.CommonExercise, int, String, boolean, String)
    * @param userID
    * @param e
    * @param questionID
@@ -35,7 +40,7 @@ public class AnswerDAO {
    * @param audioType
    * @param correct
    * @param pronScore
-   * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers(mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise)
+   * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers
    */
   public void addAnswer(int userID, CommonExercise e, int questionID, String answer, String audioFile,
                         boolean flq, boolean spoken, String audioType, boolean correct, float pronScore) {
@@ -56,10 +61,10 @@ public class AnswerDAO {
    * @param correct
    * @param pronScore
    */
-  public void addAnswer(int userID, String plan, String exerciseID, int questionID, String stimulus, String answer,
+/*  public void addAnswer(int userID, String plan, String exerciseID, int questionID, String stimulus, String answer,
                         String answerType, boolean correct, float pronScore) {
     addAnswer(database, userID, plan, exerciseID, questionID, answer, "", true, false, false, answerType, 0, correct, pronScore, stimulus);
-  }
+  }*/
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
@@ -203,6 +208,44 @@ public class AnswerDAO {
     } catch (Exception e) {
       logger.error("got " +e,e);
     }
+  }
+
+  public void changeType(Collection<Long> ids) {
+    try {
+      Connection connection = database.getConnection();
+      String list = getInList(ids);
+
+      String sql = "UPDATE " +
+        ResultDAO.RESULTS +
+        " " +
+        "SET " +
+        ResultDAO.AUDIO_TYPE + "='" + "avp_skip" + "' " +
+        " where " + ResultDAO.ID + " in (" +
+        list + ") ";
+      PreparedStatement statement = connection.prepareStatement(sql);
+
+      int i = statement.executeUpdate();
+
+      if (i == 0) {
+        logger.error("huh? didn't update the results for " + ids + " sql " + sql);
+      }
+      else {
+        logger.debug("Altered " + i + " rows, given " + ids.size() + " ids");
+      }
+
+      statement.close();
+      database.closeConnection(connection);
+    } catch (Exception e) {
+      logger.error("got " +e,e);
+    }
+  }
+
+  private String getInList(Collection<Long> ids) {
+    StringBuilder b = new StringBuilder();
+    for (Long id : ids) b.append(id).append(",");
+    String list = b.toString();
+    list = list.substring(0, Math.max(0, list.length() - 1));
+    return list;
   }
 
   private String copyStringChar(String plan) { return new String(plan.toCharArray());  }
