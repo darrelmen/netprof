@@ -39,6 +39,8 @@ public class ReviewedDAO extends DAO {
     super(database);
     try {
       createTable(database);
+
+      // check for missing column
       Collection<String> columns = getColumns(REVIEWED);
       Connection connection = database.getConnection();
       if (!columns.contains(STATE)) {
