@@ -4,7 +4,6 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -23,7 +22,6 @@ import mitll.langtest.shared.Result;
 import mitll.langtest.shared.custom.UserList;
 
 import java.util.ArrayList;
-import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
