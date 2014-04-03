@@ -18,7 +18,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.CommonUserExercise;
