@@ -118,11 +118,11 @@ public class FileExerciseDAO implements ExerciseDAO {
     return idToExercise.get(id);
   }
 
-  @Override
+/*  @Override
   public List<String> getErrors() {
     return errors;
   }
-
+*/
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#getExercises(boolean, String)
    * @param lessonPlanFile
@@ -472,7 +472,7 @@ public class FileExerciseDAO implements ExerciseDAO {
         String arabicAnswers = split[i++].trim();
         String englishAnswers = split[i++].trim();
 
-        Exercise exercise = new Exercise("plan", id, content, false, false, id);
+        Exercise exercise = new Exercise("plan", id, content, false, false, id, "");
 
         addQuestion(arabicQuestion, arabicAnswers, exercise, true);
         addQuestion(englishQuestion, englishAnswers, exercise, false);
@@ -599,7 +599,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     contentSentence = getRefSentence(contentSentence);
     String content = ExerciseFormatter.getArabic(contentSentence, isUrdu, isPashto, false);
 
-    Exercise exercise = new Exercise(REPEAT, id, content, false, true, contentSentence);
+    Exercise exercise = new Exercise(REPEAT, id, content, false, true, contentSentence, "");
     exercise.setRefSentence(contentSentence);
     exercise.addQuestion(Exercise.FL, PLEASE_RECORD_THE_SENTENCE_ABOVE,"", EMPTY_LIST);
     return exercise;
