@@ -33,10 +33,9 @@ public class Exercise extends AudioExercise implements CommonExercise {
   private boolean promptInEnglish = true;
   private Map<String,List<QAPair>> langToQuestion = null;
   private String englishSentence;
-  private String meaning;
+  private String meaning, context;
   private List<String> refSentences = new ArrayList<String>();
   private List<String> translitSentences = new ArrayList<String>();
-//  private double weight;
   private STATE state;
 
   public static class QAPair implements IsSerializable {
@@ -94,13 +93,16 @@ public class Exercise extends AudioExercise implements CommonExercise {
    * @param promptInEnglish
    * @param recordAudio
    * @param tooltip
+   * @param context
    */
-  public Exercise(String plan, String id, String content, boolean promptInEnglish, boolean recordAudio, String tooltip) {
+  public Exercise(String plan, String id, String content, boolean promptInEnglish, boolean recordAudio, String tooltip,
+                  String context) {
     super(id,tooltip);
     this.plan = plan;
     this.setContent(content);
     this.setType(recordAudio ? EXERCISE_TYPE.RECORD : EXERCISE_TYPE.TEXT_RESPONSE);
     this.setPromptInEnglish(promptInEnglish);
+    this.context = context;
   }
 
   /**
@@ -249,9 +251,6 @@ public class Exercise extends AudioExercise implements CommonExercise {
   }
 */
 
-/*  public double getWeight() { return weight;  }
-  public void setWeight(double weight) { this.weight = weight;  }*/
-
   public String getEnglish() {  return englishSentence;  }
   public void setType(EXERCISE_TYPE type) { this.type = type;  }
 
@@ -282,6 +281,15 @@ public class Exercise extends AudioExercise implements CommonExercise {
   @Override
   public String getForeignLanguage() {
     return getRefSentence();
+  }
+
+  @Override
+  public String getContext() {
+    return context;
+  }
+
+  public void setContext(String context) {
+    this.context = context;
   }
 
   public Exercise toExercise() {
