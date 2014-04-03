@@ -110,7 +110,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     add(center);
 
     // score panel with gauge is on the right
-    if (/*e.isRepeat() &&*/ widgets != null) {
+    if (widgets != null) {
       add(widgets);
     }
     addUserRecorder(service, controller, center, screenPortion); // todo : revisit screen portion...
@@ -133,11 +133,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   public void wasRevealed() {}
 
   protected ASRScorePanel makeScorePanel(CommonExercise e, String instance) {
-    ASRScorePanel widgets = null;
-   // if (e.isRepeat()) {
-      widgets = new ASRScorePanel("GoodwaveExercisePanel_"+instance);
-      scorePanel = widgets;
-    //}
+    ASRScorePanel widgets = new ASRScorePanel("GoodwaveExercisePanel_" + instance);
+    scorePanel = widgets;
     return widgets;
   }
 
@@ -218,20 +215,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    */
   protected Widget getQuestionContent(CommonExercise e, Panel addToList) {
     String content = e.getContent();
-    String path = null;
-   // if (e.isRepeat()) {
-      path = e.getRefAudio() != null ? e.getRefAudio() : e.getSlowAudioRef();
- /*   } else if (content.contains("audio")) {  // if we don't have proper REPEAT exercises
-      int i = content.indexOf("source src=");
-      String s = content.substring(i + "source src=".length() + 1).split("\\\"")[0];
-      System.err.println("audio path '" + s + "'");
-      path = s;
+    String path = e.getRefAudio() != null ? e.getRefAudio() : e.getSlowAudioRef();
 
-      int start = content.indexOf("<audio");
-      int end = content.indexOf("audio>");
-      content = content.substring(0, start) + content.substring(end + "audio>".length());
-    }
-*/
     final VerticalPanel vp = new VerticalPanel();
     vp.getElement().setId("getQuestionContent_verticalContainer");
 
@@ -240,9 +225,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       unitLessonForExercise.add(getItemHeader(e));
       vp.add(unitLessonForExercise);
     }
-    //else {
-      //System.out.println("no unit->value on " + e);
-    //}
     vp.addStyleName("blockStyle");
 
     Widget questionContent = getQuestionContent(e, content);
