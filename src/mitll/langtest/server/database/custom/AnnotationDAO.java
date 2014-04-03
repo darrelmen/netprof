@@ -3,7 +3,6 @@ package mitll.langtest.server.database.custom;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.UserDAO;
-import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.ExerciseAnnotation;
 import org.apache.log4j.Logger;
 
@@ -15,11 +14,8 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * Created with IntelliJ IDEA.
