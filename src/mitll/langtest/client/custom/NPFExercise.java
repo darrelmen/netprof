@@ -127,7 +127,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
                     widget.setVisible(false);
                     activeCount--;
                     if (activeCount == 0) {
-                      NavLink widget = new NavLink("CommonExercise already added to your list(s)");
+                      NavLink widget = new NavLink("Item already added to your list(s)");
                       w1.add(widget);
                     }
                   }
