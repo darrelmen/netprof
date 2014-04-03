@@ -78,6 +78,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public static final String LANGTEST_IMAGES = "langtest/images/";
   private static final String DIVIDER = "|";
   private static final String NEW_PRO_F2_PNG = "NewProF2.png";
+  private static final int MAX_EXCEPTION_STRING = 300;
+  private static final int MAX_CACHE_SIZE = 100;
 
   private Panel currentExerciseVPanel = new FluidContainer();
   private ListInterface exerciseList;
@@ -192,8 +194,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       suffix);
 
     String toSend = prefix + suffix;
-    if (toSend.length() > 100) {
-      toSend = toSend.substring(0,100)+"...";
+    if (toSend.length() > MAX_EXCEPTION_STRING) {
+      toSend = toSend.substring(0, MAX_EXCEPTION_STRING)+"...";
     }
     getButtonFactory().logEvent("unknown","unknown",exerciseID,toSend,user);
   }
@@ -269,7 +271,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private Cache<String, ImageResponse> imageCache = CacheBuilder.newBuilder()
-    .maximumSize(100)
+    .maximumSize(MAX_CACHE_SIZE)
     .expireAfterWrite(7, TimeUnit.DAYS)
     .build();
 
