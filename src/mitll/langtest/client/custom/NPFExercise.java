@@ -65,7 +65,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
    * @param controller
    * @return
    */
-  Panel makeAddToList(CommonExercise e, ExerciseController controller) {
+  private Panel makeAddToList(CommonExercise e, ExerciseController controller) {
     addToList = new DropdownButton("");
     addToList.getElement().setId("NPFExercise_AddToList");
     addToList.setDropup(true);
@@ -98,8 +98,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
     //System.out.println("populateListChoices : populate list choices for " + controller.getUser());
     service.getListsForUser(controller.getUser(), true, false, new AsyncCallback<Collection<UserList>>() {
       @Override
-      public void onFailure(Throwable caught) {
-      }
+      public void onFailure(Throwable caught) {}
 
       @Override
       public void onSuccess(Collection<UserList> result) {
