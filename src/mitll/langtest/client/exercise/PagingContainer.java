@@ -253,19 +253,24 @@ public class PagingContainer {
           if (columnText != null) {
             if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
             CommonShell.STATE state = shell.getState();
-            boolean isSet = state != CommonShell.STATE.UNSET;
+
             boolean isDefect = state == CommonShell.STATE.DEFECT;
             boolean isFixed = state == CommonShell.STATE.FIXED;
             boolean isLL = state == CommonShell.STATE.ATTN_LL;
+            boolean approved = state == CommonShell.STATE.APPROVED;
+
+            boolean isSet = isDefect || isFixed || isLL || approved;
 
        /*     if (isSet) {
               System.out.println("shell " + shell.getID() + " state " + state + " defect " +isDefect + " fixed " + isFixed);
             }*/
 
             String icon =
-              state == CommonShell.STATE.APPROVED ? "icon-check" :
+              approved ? "icon-check" :
                 isDefect ? "icon-bug" :
-                  isFixed ? "icon-thumbs-up" : "icon-warning-sign";
+                  isFixed ? "icon-thumbs-up" :
+                    isLL ? "icon-warning-sign" : "";
+
             html = (isSet ?
               //"<div style='float:left'>" +
               "<i " +
