@@ -33,7 +33,6 @@ import mitll.langtest.shared.ExerciseListWrapper;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -476,8 +475,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     if (id.length() > 0) {
       checkAndAskServer(id);
     } else {
-/*      System.out.println("ExerciseList.onValueChange : got invalid event " + event + " value " + token + " id '" + id+
-          "'");*/
+      System.out.println("ExerciseList.onValueChange : got invalid event " + event + " value " + token + " id '" + id+
+          "'");
     }
   }
 
