@@ -97,7 +97,7 @@ public interface LangTestDatabaseAsync {
 
   void addUserList(long userid, String name, String description, String dliClass, AsyncCallback<Long> async);
 
-  void addVisitor(UserList ul, long user, AsyncCallback<Void> asyncCallback);
+  void addVisitor(long userListID, long user, AsyncCallback<Void> asyncCallback);
 
   void editItem(UserExercise userExercise, AsyncCallback<Void> async);
 
