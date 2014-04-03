@@ -96,7 +96,7 @@ public class ReviewedDAO extends DAO {
   private void add(String exerciseID, CommonShell.STATE state, long creatorID) {
     try {
       // there are much better ways of doing this...
-      logger.info("add : exid " + exerciseID + " = " + state+ " by " + creatorID);
+      //logger.info("add : exid " + exerciseID + " = " + state+ " by " + creatorID);
 
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement(
