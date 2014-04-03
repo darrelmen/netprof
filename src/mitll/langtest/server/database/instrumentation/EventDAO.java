@@ -20,6 +20,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -37,12 +38,19 @@ public class EventDAO extends DAO {
   private static final String EVENT = "event";
   private static final String CREATORID = "creatorid";
   private static final String WIDGETTYPE = "widgettype";
-
+  private static final String HITID = "hitid";
 
   public EventDAO(Database database) {
     super(database);
     try {
       createTable(database);
+
+      // check for missing column
+      Collection<String> columns = getColumns(EVENT);
+      Connection connection = database.getConnection();
+      if (!columns.contains(HITID)) {
+        addVarchar(connection, EVENT, HITID);
+      }
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
@@ -68,6 +76,8 @@ public class EventDAO extends DAO {
       WIDGETTYPE +
       " VARCHAR, " +
       "modified TIMESTAMP, " +
+      HITID +
+      " VARCHAR, " +
       "FOREIGN KEY(" +
       CREATORID +
       ") REFERENCES " +
@@ -89,8 +99,6 @@ public class EventDAO extends DAO {
    * @see mitll.langtest.server.database.custom.UserListManager#reallyCreateNewItem(long, mitll.langtest.shared.custom.UserExercise)
    */
   public void add(Event event) {
-   // long id = 0;
-
     try {
       // there are much better ways of doing this...
 
@@ -105,15 +113,18 @@ public class EventDAO extends DAO {
           "widgetid," +
           WIDGETTYPE +
           "," +
+          HITID +
+          "," +
           "modified) " +
-          "VALUES(?,?,?,?,?,?);");
+          "VALUES(?,?,?,?,?,?,?);");
       int i = 1;
-      //     statement.setLong(i++, annotation.getUserID());
+
       statement.setLong(i++, event.getCreatorID());
       statement.setString(i++, event.getExerciseID());
       statement.setString(i++, event.getContext());
       statement.setString(i++, event.getWidgetID());
       statement.setString(i++, event.getWidgetType());
+      statement.setString(i++, event.getHitID());
       statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));
 
       int j = statement.executeUpdate();
@@ -146,7 +157,7 @@ public class EventDAO extends DAO {
    *
    * @return
    */
-  public List<Event> getAllBy(long userid) {
+/*  public List<Event> getAllBy(long userid) {
     try {
       String sql = "SELECT * from " + EVENT + " where " + CREATORID +"="+userid;
 
@@ -155,7 +166,7 @@ public class EventDAO extends DAO {
       logger.error("got " + ee, ee);
     }
     return Collections.emptyList();
-  }
+  }*/
 
   private List<Event> getEvents(String sql) throws SQLException {
     Connection connection = database.getConnection();
@@ -170,8 +181,9 @@ public class EventDAO extends DAO {
           rs.getString("exerciseid"),
           rs.getString("context"),
           rs.getLong(CREATORID),
-          rs.getTimestamp("modified").getTime()
-      )
+          rs.getTimestamp("modified").getTime(),
+          rs.getString(HITID)
+          )
       );
     }
 
@@ -182,7 +194,7 @@ public class EventDAO extends DAO {
     return lists;
   }
 
-  private static final List<String> COLUMNS2 = Arrays.asList("id", "type", "exercise", "context", "userid", "timestamp");
+  private static final List<String> COLUMNS2 = Arrays.asList("id", "type", "exercise", "context", "userid", "timestamp", "hitID");
 
   /**
    * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
@@ -218,18 +230,26 @@ public class EventDAO extends DAO {
       int j = 0;
       Cell cell = row.createCell(j++);
       cell.setCellValue(event.getWidgetID());
+
       cell = row.createCell(j++);
       cell.setCellValue(event.getWidgetType());
+
       cell = row.createCell(j++);
       cell.setCellValue(event.getExerciseID());
+
       cell = row.createCell(j++);
       cell.setCellValue(event.getContext());
+
       cell = row.createCell(j++);
       cell.setCellValue(event.getCreatorID());
+
       cell = row.createCell(j++);
       cell.setCellValue(new Date(event.getTimestamp()));
       cell.setCellStyle(cellStyle);
+
       cell = row.createCell(j++);
+      cell.setCellValue(event.getHitID());
+
     }
     now = System.currentTimeMillis();
     if (now-then > 100) logger.warn("toXLSX : took " + (now-then) + " millis to write " + rownum+
