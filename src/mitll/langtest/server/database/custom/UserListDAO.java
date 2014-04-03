@@ -17,7 +17,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -54,7 +53,7 @@ public class UserListDAO extends DAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.custom.UserListManager#addVisitor(mitll.langtest.shared.custom.UserList, long)
+   * @see UserListManager#addVisitor(long, long)
    * @see mitll.langtest.client.custom.Navigation#addVisitor(mitll.langtest.shared.custom.UserList)
    * @param listid
    * @param userid
