@@ -43,8 +43,6 @@ import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CommonExercise;
 
-import java.util.List;
-
 /**
  * Created with IntelliJ IDEA.
  * User: GO22670
