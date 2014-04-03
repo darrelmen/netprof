@@ -1,7 +1,6 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.Result;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
@@ -10,10 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Does writing to the results table.
