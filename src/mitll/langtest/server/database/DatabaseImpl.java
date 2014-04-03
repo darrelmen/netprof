@@ -740,8 +740,8 @@ public class DatabaseImpl implements Database {
     return new Pair(idToCount, idToUniqueCount);
   }
 
-  public void logEvent(String id, String widgetID, String exid, String context, long userid) {
-     eventDAO.add(new Event(id,widgetID,exid,context,userid,-1));
+  public void logEvent(String id, String widgetID, String exid, String context, long userid, String hitID) {
+     eventDAO.add(new Event(id,widgetID,exid,context,userid,-1, hitID));
   }
 
   public List<Event> getEvents() {
