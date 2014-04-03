@@ -19,10 +19,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class UserExerciseDAO extends DAO {
   private static final Logger logger = Logger.getLogger(UserExerciseDAO.class);
@@ -400,6 +398,7 @@ public class UserExerciseDAO extends DAO {
         rs.getString("english"),
         rs.getString("foreignLanguage"),
         rs.getString(TRANSLITERATION),
+        "",         // TODO complete fill in of context!
         rs.getString("refAudio"),
         rs.getString("slowAudioRef"),
         rs.getBoolean(OVERRIDE),
