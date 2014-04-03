@@ -595,18 +595,19 @@ public class UserListManager {
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#addVisitor(mitll.langtest.shared.custom.UserList, long
    * @see mitll.langtest.client.custom.Navigation#addVisitor(mitll.langtest.shared.custom.UserList)
-   * @param userList
+   * @param userListID
    * @param user
    */
-  public void addVisitor(UserList userList, long user) {
+  public void addVisitor(long userListID, long user) {
     //logger.debug("addVisitor - user " + user + " visits " + userList.getUniqueID());
 
-    UserList where = userListDAO.getWhere(userList.getUniqueID(), true);
+   // long uniqueID = userListID.getUniqueID();
+    UserList where = userListDAO.getWhere(userListID, true);
     if (where != null) {
       userListDAO.addVisitor(where.getUniqueID(), user);
     }
     else {
-      logger.warn("addVisitor - can't find list with id " + userList.getUniqueID());
+      logger.warn("addVisitor - can't find list with id " + userListID);
     }
   }
 
