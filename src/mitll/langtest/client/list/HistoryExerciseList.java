@@ -2,14 +2,12 @@ package mitll.langtest.client.list;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.CommonShell;
-import mitll.langtest.shared.ExerciseListWrapper;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,7 +16,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -298,7 +295,7 @@ public class HistoryExerciseList extends PagingExerciseList {
     return selectionState2.keySet();
   }
 
-  private boolean debug = false;
+  private boolean debug = true;
   /**
      * Respond to push a history token.
      * @param event
