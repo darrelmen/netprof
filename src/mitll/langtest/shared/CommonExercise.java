@@ -14,6 +14,8 @@ public interface CommonExercise extends CommonShell {
 
   String getMeaning();
 
+  String getContext();
+
   String getForeignLanguage();
   String getRefSentence();
 
@@ -30,7 +32,6 @@ public interface CommonExercise extends CommonShell {
   Collection<AudioAttribute> getAudioAttributes();
 
   Map<String, String> getUnitToValue();
-
 
   CommonShell getShell();
 
