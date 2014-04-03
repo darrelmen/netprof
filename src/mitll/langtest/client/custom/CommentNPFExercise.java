@@ -73,10 +73,10 @@ public class CommentNPFExercise extends NPFExercise {
       column.add(getEntry(e, QCNPFExercise.ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, english));
     }
 
-    System.out.println("context is " + e.getContext());
+    //System.out.println("context is " + e.getContext());
     String context = e.getContext() != null && !e.getContext().trim().isEmpty() ? e.getContext() : "";
     if (!context.isEmpty()) {
-      column.add(getEntry(e, QCNPFExercise.CONTEXT, ExerciseFormatter.CONTEXT, context));
+      column.add(getEntry(e, QCNPFExercise.CONTEXT, ExerciseFormatter.CONTEXT, "\""+ context + "\""));
     }
 
     return column;
