@@ -43,14 +43,14 @@ public class ResultDAO extends DAO {
   private static final int MINUTE = 60 * 1000;
   private static final int SESSION_GAP = 5 * MINUTE;  // 5 minutes
 
-  private static final String ID = "id";
+  public static final String ID = "id";
   private static final String USERID = "userid";
   private static final String PLAN = "plan";
   private static final String QID = "qid";
   private static final String ANSWER = "answer";
   private static final String VALID = "valid";
 
-  private static final String RESULTS = "results";
+  public static final String RESULTS = "results";
 
   static final String FLQ = "flq";
   static final String SPOKEN = "spoken";
@@ -69,7 +69,7 @@ public class ResultDAO extends DAO {
     gradeDAO = new GradeDAO(database, userDAO, this);
   }
 
-  public List<SimpleResult> getSimpleResults() { return getSimpleResults("");  }
+  //public List<SimpleResult> getSimpleResults() { return getSimpleResults("");  }
   public List<SimpleResult> getResultsForUser(long userid) {  return getSimpleResults(" where userid=" + userid);  }
 
   /**
