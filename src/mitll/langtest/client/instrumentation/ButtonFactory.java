@@ -82,7 +82,8 @@ public class ButtonFactory implements EventLogger {
 
       @Override
       public void onSuccess(Void result) {
-           System.out.println("sent event for " + widgetID);
+
+        //System.out.println("sent event for " + widgetID);
       }
     });
   }
