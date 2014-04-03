@@ -113,7 +113,6 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     int offsetWidth = playButton.getOffsetWidth();
     if (offsetWidth < MIN_WIDTH) offsetWidth = MIN_WIDTH;
     playButton.getElement().getStyle().setProperty("minWidth", offsetWidth + "px");
-   // playButton.setWidth(offsetWidth +"px");
   }
 
   /**
