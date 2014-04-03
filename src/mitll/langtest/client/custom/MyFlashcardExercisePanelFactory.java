@@ -61,7 +61,7 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   private static final int ROWS_IN_TABLE = 7;
   private static final String SKIP_TO_END = "Skip to end";
   private static final boolean ADD_KEY_BINDING = false;
-  public static final int TABLE_WIDTH = 2 * 235;
+  public static final int TABLE_WIDTH = 2 * 265;
   public static final int HORIZ_SPACE_FOR_CHARTS = (1250 - TABLE_WIDTH);
 
   private CommonExercise currentExercise;
@@ -70,6 +70,7 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   private int totalExercises = 0;
   private final Map<String,Boolean> exToCorrect = new HashMap<String, Boolean>();
   private final Map<String,Double>   exToScore = new HashMap<String, Double>();
+  private Set<Long> resultIDs = new HashSet<Long>();
 
   /**
    * @see NPFHelper#setFactory
@@ -136,6 +137,7 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
         super.receivedAudioAnswer(result);
         return;
       }
+      resultIDs.add(result.getResultID());
       exToScore.put(currentExercise.getID(),   result.getScore());
       exToCorrect.put(currentExercise.getID(), result.isCorrect());
       setStateFeedback();
@@ -395,6 +397,19 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       startOver.setVisible(true);
       seeScores.setVisible(true);
       exerciseList.checkAndAskServer(allExercises.iterator().next().getID());
+
+      System.out.println("set of ids is "+resultIDs.size());
+      service.setAVPSkip(resultIDs,new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {
+
+        }
+
+        @Override
+        public void onSuccess(Void result) {
+          System.out.println("!setAVPSkip success!");
+        }
+      });
     }
 
     /**
@@ -412,7 +427,7 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       }
     }
 
-    private Button skip,startOver,seeScores;
+    private Button skip, startOver, seeScores;
     private Panel belowContentDiv;
 
     /**
