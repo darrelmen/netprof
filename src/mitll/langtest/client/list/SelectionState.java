@@ -1,7 +1,5 @@
 package mitll.langtest.client.list;
 
-import com.google.gwt.user.client.History;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
