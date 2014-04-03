@@ -653,10 +653,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * @see mitll.langtest.client.custom.Navigation#addVisitor(mitll.langtest.shared.custom.UserList)
-   * @param ul
+   * @param userListID
    * @param user
    */
-  public void addVisitor(UserList ul, long user) { db.getUserListManager().addVisitor(ul,user); }
+  public void addVisitor(long userListID, long user) { db.getUserListManager().addVisitor(userListID,user); }
 
   /**
    * @see mitll.langtest.client.custom.Navigation#showInitialState()
