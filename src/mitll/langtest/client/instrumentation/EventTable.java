@@ -27,9 +27,11 @@ public class EventTable extends PagerTable {
   private static final int PAGE_SIZE = 5;
   private Widget lastTable = null;
   private Button closeButton;
-  private final PropertyHandler props;
+ // private final PropertyHandler props;
 
-  public EventTable(PropertyHandler props) { this.props = props; }
+  public EventTable(PropertyHandler props) {
+    //this.props = props;
+  }
   /**
    */
   public void show(final LangTestDatabaseAsync service) {
@@ -57,7 +59,7 @@ public class EventTable extends PagerTable {
     service.getEvents(new AsyncCallback<List<Event>>() {
       public void onFailure(Throwable caught) {
         if (!caught.getMessage().trim().equals("0")) {
-          Window.alert("getUsers couldn't contact server");
+          Window.alert("getEvents couldn't contact server");
         }
       }
 
@@ -91,7 +93,6 @@ public class EventTable extends PagerTable {
     SafeHtmlBuilder sb = new SafeHtmlBuilder();
     sb.appendHtmlConstant("<a href='" +
       "downloadEvents" +
-      //   name +
       "'" +
       ">");
     sb.appendEscaped("Download Excel");
@@ -105,7 +106,6 @@ public class EventTable extends PagerTable {
     int width = (int) (Window.getClientWidth() * 0.9);
     table.setWidth(width + "px");
     TextColumn<Event> id = addColumns(table);
-
 
     // Create a data provider.
     ListDataProvider<Event> dataProvider = new ListDataProvider<Event>();
@@ -138,8 +138,6 @@ public class EventTable extends PagerTable {
     };
     id.setSortable(true);
     table.addColumn(id, "ID");
-
-    //addEventIDColumns(service, table);
 
     TextColumn<Event> lang = new TextColumn<Event>() {
       @Override
@@ -177,13 +175,15 @@ public class EventTable extends PagerTable {
     gender.setSortable(true);
     table.addColumn(gender, "User ID");
 
-/*    TextColumn<Event> date = new TextColumn<Event>() {
+    TextColumn<Event> hit = new TextColumn<Event>() {
       @Override
       public String getValue(Event contact) {
-        return "" + contact.getTimestamp();
+        return "" +contact.getHitID();
       }
     };
-    date.setSortable(true);*/
+    hit.setSortable(true);
+    table.addColumn(hit, "Hit ID");
+
     getDateColumn(table);
     return id;
   }
