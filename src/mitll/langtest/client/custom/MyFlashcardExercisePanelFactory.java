@@ -411,7 +411,9 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       skip.setVisible(true);
       startOver.setVisible(true);
       seeScores.setVisible(true);
-      exerciseList.checkAndAskServer(allExercises.iterator().next().getID());
+      String first = allExercises.iterator().next().getID();
+      exerciseList.checkAndAskServer(first);
+      exerciseList.loadExercise(first);
     }
 
     /**
