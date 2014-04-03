@@ -597,19 +597,19 @@ public class Navigation extends TabContainer implements RequiresResize {
   private void addVisitor(UserList ul) {
     long user = (long) controller.getUser();
     if (ul.getCreator().id != user) {
-      service.addVisitor(ul, user, new AsyncCallback<Void>() {
+      service.addVisitor(ul.getUniqueID(), user, new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
+          //service.logEvent();
         }
 
         @Override
-        public void onSuccess(Void result) {
-        }
+        public void onSuccess(Void result) {}
       });
     }
-    else {
+   // else {
       //System.out.println("addVisitor : not visiting own list..." + ul.getID());
-    }
+  //  }
   }
 
   /**
