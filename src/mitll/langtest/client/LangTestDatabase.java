@@ -115,7 +115,8 @@ public interface LangTestDatabase extends RemoteService {
 
   void setExerciseState(String id, CommonShell.STATE state, long userID);
 
-  UserList getReviewList();
+  UserList getDefectList();
+  UserList getAttentionList();
   boolean deleteList(long id);
   boolean deleteItemFromList(long listid, String exid);
   boolean deleteItem(String exid);
