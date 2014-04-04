@@ -113,6 +113,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     setFieldToAnnotation(exercise.getFieldToAnnotation());
     setUnitToValue(exercise.getUnitToValue());
     setState(exercise.getState());
+    setSecondState(exercise.getSecondState());
     setContext(exercise.getContext());
   }
 
@@ -251,6 +252,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
       "tooltip '" + getTooltip() +
       "' audio attr (" + getAudioAttributes().size() +
       ") :" + getAudioAttributes() + " unit/lesson " + getUnitToValue() +
-      " state " + state+" modified " + modifiedDate;
+      " state " + getState()+"/" +getSecondState()+
+      " modified " + modifiedDate;
   }
 }
