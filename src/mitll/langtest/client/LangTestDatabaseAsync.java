@@ -104,11 +104,11 @@ public interface LangTestDatabaseAsync {
 
   void markReviewed(String id, boolean isCorrect, long creatorID, AsyncCallback<Void> asyncCallback);
 
-  void getReviewList(AsyncCallback<UserList> async);
-
-  void setExerciseState(String id, CommonShell.STATE state, long userID, AsyncCallback<Void> async);
+  void getDefectList(AsyncCallback<UserList> async);
 
   void getCommentedList(AsyncCallback<UserList> async);
+
+  void setExerciseState(String id, CommonShell.STATE state, long userID, AsyncCallback<Void> async);
 
   void isValidForeignPhrase(String foreign, AsyncCallback<Boolean> async);
 
@@ -129,4 +129,6 @@ public interface LangTestDatabaseAsync {
   void markState(String id, CommonShell.STATE state, long creatorID, AsyncCallback<Void> async);
 
   void setAVPSkip(Collection<Long> ids, AsyncCallback<Void> async);
+
+  void getAttentionList(AsyncCallback<UserList> async);
 }
