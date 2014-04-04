@@ -13,6 +13,7 @@ public class ExerciseShell implements IsSerializable, CommonShell {
   private String tooltip;
   protected String id;
   protected STATE state = STATE.UNSET;
+  protected STATE secondState = STATE.UNSET;
 
   public ExerciseShell() {}
   public ExerciseShell(String id, String tooltip) {
@@ -34,6 +35,16 @@ public class ExerciseShell implements IsSerializable, CommonShell {
   @Override
   public void setState(STATE state) { this.state = state;  }
 
+  @Override
+  public STATE getSecondState() {
+    return secondState;
+  }
+
+  @Override
+  public void setSecondState(STATE state) {
+     this.secondState = state;
+  }
+
   public CommonShell getShell() { return new ExerciseShell(getID(), getTooltip()); }
 
   @Override
@@ -41,5 +52,7 @@ public class ExerciseShell implements IsSerializable, CommonShell {
     return other instanceof ExerciseShell && getID().equals(((ExerciseShell)other).getID());
   }
 
-  public String toString() { return "Exercise id = " +id; }
+  public String toString() {
+    return "Exercise id = " + getID() + "/" + getTooltip() + " states " + getState() + "/" + getSecondState();
+  }
 }
