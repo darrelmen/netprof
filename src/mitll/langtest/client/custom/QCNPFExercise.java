@@ -63,20 +63,22 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   private static final String CHECKBOX_TOOLTIP = "Check to indicate this field has a defect.";
   private static final String APPROVED_BUTTON_TOOLTIP = "Indicate item has no defects.";
   private static final String APPROVED_BUTTON_TOOLTIP2 = "Item has been marked with a defect";
+  private static final String ATTENTION_LL = "Attention LL";
+  private static final String MARK_FOR_LL_REVIEW = "Mark for LL review.";
 
   private Set<String> incorrectFields;
   private List<RequiresResize> toResize;
   private final ListInterface listContainer;
   private Button approvedButton;
   private Tooltip approvedTooltip;
-  private boolean attentionLL = false;
+  //private boolean attentionLL = false;
 
   public QCNPFExercise(CommonExercise e, ExerciseController controller, ListInterface listContainer,
                        float screenPortion, boolean addKeyHandler, String instance) {
     super(e, controller, listContainer, screenPortion, addKeyHandler, instance);
 
     this.listContainer = listContainer;
-    if (e.getState() == CommonShell.STATE.ATTN_LL) attentionLL = true;
+    //if (e.getState() == CommonShell.STATE.ATTN_LL) attentionLL = true;
   }
 
   @Override
@@ -140,7 +142,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   }
 
   private Button addAttnLLButton(final ListInterface listContainer, NavigationHelper widgets) {
-    Button attention = new Button("Attention LL");
+    Button attention = new Button(ATTENTION_LL);
     attention.getElement().setId("attention");
     attention.addStyleName("leftFiveMargin");
     widgets.add(attention);
@@ -151,7 +153,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
         markAttentionLL(listContainer, exercise);
       }
     });
-    /*approvedTooltip = */addTooltip(attention, "Mark for LL review.");
+    /*approvedTooltip = */addTooltip(attention, MARK_FOR_LL_REVIEW);
     return attention;
   }
 
@@ -159,9 +161,9 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   protected void nextWasPressed(ListInterface listContainer, CommonShell completedExercise) {
     //System.out.println("nextWasPressed : load next exercise " + completedExercise.getID() + " instance " +instance);
     super.nextWasPressed(listContainer, completedExercise);
-    if (!attentionLL) {
+    //if (!attentionLL) {
       markReviewed(listContainer, completedExercise);
-    }
+    //}
   }
 
   /**
@@ -194,11 +196,11 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
           @Override
           public void onSuccess(Void result) {
-            attentionLL = true;
+            //attentionLL = true;
           }
         });
 
-      listContainer.setState(completedExercise.getID(), CommonShell.STATE.ATTN_LL);
+      listContainer.setSecondState(completedExercise.getID(), CommonShell.STATE.ATTN_LL);
       listContainer.redraw();
     }
   }
