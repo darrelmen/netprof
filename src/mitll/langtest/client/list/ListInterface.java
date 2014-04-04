@@ -98,6 +98,7 @@ public interface ListInterface extends RequiresResize {
 
   void redraw();
   void setState(String id, CommonShell.STATE state);
+  void setSecondState(String id, CommonShell.STATE state);
 
   void addListChangedListener(ListChangeListener<CommonShell> listener);
 }
