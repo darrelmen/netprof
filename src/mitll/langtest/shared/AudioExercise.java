@@ -12,6 +12,12 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioExercise extends ExerciseShell {
+  private static final String SPEED = "speed";
+  private static final String REGULAR = "regular";
+  private static final String SLOW = "slow";
+  private static final String WAV = ".wav";
+  private static final String MP3 = ".mp3";
+
   protected Map<String,AudioAttribute> audioAttributes = new HashMap<String, AudioAttribute>();
   protected Map<String,String> unitToValue = new HashMap<String, String>();
   private Map<String,ExerciseAnnotation> fieldToAnnotation = new HashMap<String, ExerciseAnnotation>();
@@ -20,12 +26,12 @@ public class AudioExercise extends ExerciseShell {
   public AudioExercise(String id, String tooltip) {  super(id,tooltip); }
 
   public String getRefAudio() {
-    AudioAttribute audio = getAudio("speed", "regular");
+    AudioAttribute audio = getAudio(SPEED, REGULAR);
     return audio != null ? audio.getAudioRef() : null;
   }
 
   public String getSlowAudioRef() {
-    AudioAttribute audio = getAudio("speed", "slow");
+    AudioAttribute audio = getAudio(SPEED, SLOW);
     return audio != null ? audio.getAudioRef() : null;
   }
 
@@ -48,12 +54,12 @@ public class AudioExercise extends ExerciseShell {
   }
 
   public void clearRefAudio() {
-    AudioAttribute audio = getAudio("speed", "regular");
+    AudioAttribute audio = getAudio(SPEED, REGULAR);
     if (audio != null) audioAttributes.remove(audio.getKey());
   }
 
   public void clearSlowRefAudio() {
-    AudioAttribute audio = getAudio("speed", "slow");
+    AudioAttribute audio = getAudio(SPEED, SLOW);
     if (audio != null) audioAttributes.remove(audio.getKey());
   }
 
@@ -82,8 +88,8 @@ public class AudioExercise extends ExerciseShell {
 
   public ExerciseAnnotation getAnnotation(String field) {
     if (!fieldToAnnotation.containsKey(field)) {
-      if (field.endsWith(".wav")) {
-        String key = field.replaceAll(".wav", ".mp3");
+      if (field.endsWith(WAV)) {
+        String key = field.replaceAll(WAV, MP3);
         ExerciseAnnotation exerciseAnnotation = fieldToAnnotation.get(key);
         //if (exerciseAnnotation == null && !fieldToAnnotation.isEmpty()) {
         //  System.out.println("getAnnotation : Can't find " + field + " in "+ fieldToAnnotation.keySet());
@@ -91,8 +97,8 @@ public class AudioExercise extends ExerciseShell {
 
         return exerciseAnnotation;
       }
-      else if (field.endsWith(".mp3")) {
-        String key = field.replaceAll(".mp3", ".wav");
+      else if (field.endsWith(MP3)) {
+        String key = field.replaceAll(MP3, WAV);
         ExerciseAnnotation exerciseAnnotation = fieldToAnnotation.get(key);
         if (exerciseAnnotation == null && !fieldToAnnotation.isEmpty()) {
           System.out.println("getAnnotation : Can't find " + field + " in "+ fieldToAnnotation.keySet());
