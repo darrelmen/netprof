@@ -74,9 +74,17 @@ public class PagingExerciseList extends ExerciseList {
 
   @Override
   public void setState(String id, CommonShell.STATE state) {
-    CommonShell commonShell = byID(id);
-    commonShell.setState(state);
+    byID(id).setState(state);
   }
+
+  @Override
+  public void setSecondState(String id, CommonShell.STATE state) {
+    byID(id).setSecondState(state);
+  }
+
+/*  public void setStates(String id,CommonShell.STATE first,CommonShell.STATE second ) {
+
+  }*/
 
   /**
    * Add two rows -- the search box and then the item list
