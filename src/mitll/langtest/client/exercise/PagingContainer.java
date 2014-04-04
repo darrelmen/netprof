@@ -36,7 +36,7 @@ import java.util.Set;
 public class PagingContainer {
   private static final int MAX_LENGTH_ID = 27;
   private static final int PAGE_SIZE = 10;   // TODO : make this sensitive to vertical real estate?
-  private static final int VERTICAL_SLOP = 25;
+  private static final int VERTICAL_SLOP = 35;
 
   private ListDataProvider<CommonShell> dataProvider;
   private static final boolean DEBUG = false;
@@ -256,10 +256,10 @@ public class PagingContainer {
 
             boolean isDefect = state == CommonShell.STATE.DEFECT;
             boolean isFixed = state == CommonShell.STATE.FIXED;
-            boolean isLL = state == CommonShell.STATE.ATTN_LL;
+            boolean isLL = shell.getSecondState() == CommonShell.STATE.ATTN_LL;
             boolean approved = state == CommonShell.STATE.APPROVED;
 
-            boolean isSet = isDefect || isFixed || isLL || approved;
+            boolean isSet = isDefect || isFixed || approved;
 
        /*     if (isSet) {
               System.out.println("shell " + shell.getID() + " state " + state + " defect " +isDefect + " fixed " + isFixed);
@@ -269,23 +269,26 @@ public class PagingContainer {
               approved ? "icon-check" :
                 isDefect ? "icon-bug" :
                   isFixed ? "icon-thumbs-up" :
-                    isLL ? "icon-warning-sign" : "";
+                    //isLL ? "icon-warning-sign" :
+                      "";
 
             html = (isSet ?
-              //"<div style='float:left'>" +
               "<i " +
                 (isDefect ? "style='color:red'" :
                   isFixed ? "style='color:green'" :
-                    isLL ? "style='color:gold'" :
-                      "") +
+                    "") +
                 " class='" +
                 icon +
                 "'></i>" +
                 //"</div>" +
-                "&nbsp;" : "") + columnText;
-            // if (isSet) {
-            //    System.out.println("html " + html);
-            // }
+                "&nbsp;" : "") + columnText + (isLL ?
+              "&nbsp;<i " +
+
+                "style='color:gold'" +
+                " class='" +
+                "icon-warning-sign" +
+                "'></i>" : "");
+
           }
           return new SafeHtmlBuilder().appendHtmlConstant(html).toSafeHtml();
         }
