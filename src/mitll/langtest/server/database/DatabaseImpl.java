@@ -148,8 +148,11 @@ public class DatabaseImpl implements Database {
     resultDAO = new ResultDAO(this,userDAO);
     answerDAO = new AnswerDAO(this, resultDAO);
     gradeDAO = new GradeDAO(this,userDAO, resultDAO);
-    userListManager = new UserListManager( userDAO, userListDAO,userListExerciseJoinDAO, new AnnotationDAO(this,userDAO),
-      new ReviewedDAO(this), pathHelper);
+    userListManager = new UserListManager(userDAO, userListDAO, userListExerciseJoinDAO,
+      new AnnotationDAO(this, userDAO),
+      new ReviewedDAO(this, ReviewedDAO.REVIEWED),
+      new ReviewedDAO(this, ReviewedDAO.SECOND_STATE),
+      pathHelper);
     eventDAO = new EventDAO(this);
 
     if (DROP_USER) {

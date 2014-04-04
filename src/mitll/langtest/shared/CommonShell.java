@@ -12,6 +12,9 @@ public interface CommonShell extends IsSerializable {
   STATE getState();
   void setState(STATE state);
 
+  STATE getSecondState();
+  void setSecondState(STATE state);
+
   public enum STATE implements IsSerializable { UNSET, APPROVED, DEFECT, FIXED, ATTN_LL }
 
 }
