@@ -159,6 +159,7 @@ class ReviewEditableExercise extends EditableExercise {
     CommonShell commonShell = exerciseList.byID(newUserExercise.getID());
     if (commonShell != null) {
       newUserExercise.setState(commonShell.getState());
+      newUserExercise.setSecondState(commonShell.getSecondState());
      // System.out.println("\t using state " + commonShell.getState());
     }
     //System.out.println("to duplicate " + newUserExercise + " state " + newUserExercise.getState());
