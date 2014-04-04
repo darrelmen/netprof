@@ -740,7 +740,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   @Override
-  public UserList getReviewList() { return db.getUserListManager().getDefectList(); }
+  public UserList getDefectList() { return db.getUserListManager().getDefectList(); }
+  public UserList getAttentionList() { return db.getUserListManager().getAttentionList(); }
 
   @Override
   public boolean deleteList(long id) {

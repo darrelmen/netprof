@@ -57,6 +57,7 @@ public class Navigation extends TabContainer implements RequiresResize {
   private static final String PRACTICE = "Practice";
   public static final String REVIEW = "review";
   public static final String COMMENT = "comment";
+  public static final String ATTENTION = "attention";
   private static final String PRACTICE1 = "practice";
   private static final String ADD_OR_EDIT_ITEM = "Add/Edit Item";
   private static final String ADD_DELETE_EDIT_ITEM = "Fix Defects";
@@ -84,6 +85,7 @@ public class Navigation extends TabContainer implements RequiresResize {
   private static final int CHAPTERS_TAB = 4;
   private static final int REVIEW_TAB_INDEX = 5;
   private static final int COMMENT_TAB_INDEX = 6;
+  private static final int ATTENTION_TAB_INDEX = 7;
 
   private static final int SUBTAB_LEARN_INDEX = 0;
   private static final int SUBTAB_PRACTICE_INDEX = 1;
@@ -91,6 +93,7 @@ public class Navigation extends TabContainer implements RequiresResize {
 
   private static final String EDIT_ITEM = "editItem";
   private static final String LEARN = "learn";
+  public static final String ATTENTION_LL = "Attention LL";
 
   private final ExerciseController controller;
   private final LangTestDatabaseAsync service;
@@ -158,7 +161,7 @@ public class Navigation extends TabContainer implements RequiresResize {
   private TabPanel tabPanel;
   private TabAndContent yourStuff, othersStuff;
   private TabAndContent browse;
-  private TabAndContent review, commented;
+  private TabAndContent review, commented, attention;
 
   /**
    * @see #getNav(com.google.gwt.user.client.ui.Panel)
@@ -248,6 +251,17 @@ public class Navigation extends TabContainer implements RequiresResize {
           checkAndMaybeClearTab(COMMENTS);
           viewComments(commented.content);
           controller.logEvent(commented.tab.asWidget(),"Tab","",COMMENTS);
+        }
+      });
+
+
+      attention = makeTab(tabPanel, IconType.WARNING_SIGN, ATTENTION_LL);
+      attention.tab.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          checkAndMaybeClearTab(ATTENTION_LL);
+          viewAttention(attention.content);
+          controller.logEvent(attention.tab.asWidget(),"Tab","", ATTENTION_LL);
         }
       });
     }
@@ -355,9 +369,11 @@ public class Navigation extends TabContainer implements RequiresResize {
       } else if (value.equals(COMMENTS)) {
         tabPanel.selectTab(COMMENT_TAB_INDEX);
         viewComments(commented.content);
+      } else if (value.equals(ATTENTION_LL)) {
+        tabPanel.selectTab(ATTENTION_TAB_INDEX);
+        viewAttention(attention.content);
       } else {
         System.err.println("selectPreviousTab : huh? value is unexpected " + value);
-        //showBrowse();
       }
     } catch (Exception e) {
       storage.removeValue(CLICKED_TAB);
@@ -456,14 +472,11 @@ public class Navigation extends TabContainer implements RequiresResize {
    * @param contentPanel
    */
   private void viewReview(final Panel contentPanel) {
-    contentPanel.clear();
-
-    final Panel child = new DivWidget();
-    contentPanel.add(child);
-    child.addStyleName("exerciseBackground");
-    service.getReviewList(new AsyncCallback<UserList>() {
+    final Panel child = getContentChild(contentPanel,"defectReview_contentPanel");
+    service.getDefectList(new AsyncCallback<UserList>() {
       @Override
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+      }
 
       @Override
       public void onSuccess(UserList result) {
@@ -475,24 +488,45 @@ public class Navigation extends TabContainer implements RequiresResize {
   }
 
   private void viewComments(final Panel contentPanel) {
-    contentPanel.clear();
-    contentPanel.getElement().setId("commentReview_contentPanel");
+    final Panel child = getContentChild(contentPanel,"commentReview_contentPanel");
 
-    final Panel child = new DivWidget();
-    contentPanel.add(child);
-    child.addStyleName("exerciseBackground");
     service.getCommentedList(new AsyncCallback<UserList>() {
+      @Override
+      public void onFailure(Throwable caught) {}
+
+      @Override
+      public void onSuccess(UserList result) {
+        System.out.println("\tviewComments : commented for " + userManager.getUser() + " got " + result);
+        new UserListCallback(contentPanel, child, new ScrollPanel(), COMMENT, false, false).onSuccess(Collections.singleton(result));
+      }
+    });
+  }
+
+  private void viewAttention(final Panel contentPanel) {
+    final Panel child = getContentChild(contentPanel,"attentionReview_contentPanel");
+
+    service.getAttentionList(new AsyncCallback<UserList>() {
       @Override
       public void onFailure(Throwable caught) {
       }
 
       @Override
       public void onSuccess(UserList result) {
-        System.out.println("\tviewComments : commented for " + userManager.getUser() + " got " + result);
-
-        new UserListCallback(contentPanel, child, new ScrollPanel(), COMMENT, false, false).onSuccess(Collections.singleton(result));
+        System.out.println("\tviewAttention : attention LL for " + userManager.getUser() + " got " + result);
+        new UserListCallback(contentPanel, child, new ScrollPanel(), ATTENTION, false, false).onSuccess(Collections.singleton(result));
       }
     });
+  }
+
+  private Panel getContentChild(Panel contentPanel,String id) {
+    contentPanel.clear();
+    //   String id = "defectReview_contentPanel";
+    contentPanel.getElement().setId(id);
+
+    final Panel child = new DivWidget();
+    contentPanel.add(child);
+    child.addStyleName("exerciseBackground");
+    return child;
   }
 
   @Override
@@ -626,18 +660,19 @@ public class Navigation extends TabContainer implements RequiresResize {
     System.out.println("getListOperations : '" + instanceName + " for list " +ul);
     final boolean isReview = instanceName.equals(REVIEW);
     final boolean isComment = instanceName.equals(COMMENT);
-    final String instanceName1 = isReview ? REVIEW : isComment ? COMMENT : LEARN;
+    final boolean isAttention = instanceName.equals(ATTENTION);
+    final String instanceName1 = isReview ? REVIEW : isComment ? COMMENT : isAttention ? ATTENTION : LEARN;
 
     // add learn tab
-    String learnTitle = isReview ? POSSIBLE_DEFECTS : isComment ? ITEMS_WITH_COMMENTS : LEARN_PRONUNCIATION;
+    String learnTitle = isReview ? POSSIBLE_DEFECTS : isComment ? ITEMS_WITH_COMMENTS : isAttention ? "Items for LL" : LEARN_PRONUNCIATION;
     final TabAndContent learn = makeTab(tabPanel, isReview ? IconType.EDIT_SIGN : IconType.LIGHTBULB, learnTitle);
-    final boolean isNormalList = !isReview && !isComment;
+    final boolean isNormalList = !isReview && !isComment && !isAttention;
     learn.tab.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         controller.logEvent(learn.tab, "Tab", "UserList_" + ul.getID(), LEARN);
         storage.storeValue(SUB_TAB, LEARN);
-        showLearnTab(learn, ul, instanceName1, isReview, isComment);
+        showLearnTab(learn, ul, instanceName1, isReview, isComment, isAttention);
       }
     });
 
@@ -680,14 +715,14 @@ public class Navigation extends TabContainer implements RequiresResize {
     // select the initial tab -- either add if an empty
     selectTabGivenHistory(tabPanel, learn, practice, editItemTab,
       ul, instanceName1,
-      isReview, isComment, isNormalList
+      isReview, isComment, isAttention, isNormalList
     );
 
     return tabPanel;
   }
 
-  private void showLearnTab(TabAndContent learnTab, UserList ul, String instanceName1, boolean isReview, boolean isComment) {
-    showLearnTab(isReview || isComment, ul, learnTab, instanceName1);
+  private void showLearnTab(TabAndContent learnTab, UserList ul, String instanceName1, boolean isReview, boolean isComment, boolean isAttention) {
+    showLearnTab(isReview || isComment || isAttention, ul, learnTab, instanceName1);
   }
 
   /**
@@ -719,16 +754,16 @@ public class Navigation extends TabContainer implements RequiresResize {
    * @param instanceName1
    * @param isReview
    * @param isComment
+   * @param isAttention
    * @param isNormalList
    * @paramx editItem
    */
   private void selectTabGivenHistory(TabPanel tabPanel, TabAndContent learn, TabAndContent practice,
                                      TabAndContent edit,
                                      UserList ul, String instanceName1, boolean isReview, boolean isComment,
-                                     boolean isNormalList
-  ) {
+                                     boolean isAttention, boolean isNormalList) {
     boolean chosePrev = selectPreviouslyClickedSubTab(tabPanel, learn, practice, edit,
-      ul, instanceName1, isReview, isComment, isNormalList);
+      ul, instanceName1, isReview, isComment, isAttention, isNormalList);
 
     if (!chosePrev) {
       if (createdByYou(ul) && !ul.isPrivate() && ul.isEmpty() && edit != null) {
@@ -736,7 +771,7 @@ public class Navigation extends TabContainer implements RequiresResize {
         showEditReviewOrComment(ul, isNormalList, edit, isReview,isComment);
       } else {
         tabPanel.selectTab(SUBTAB_LEARN_INDEX);
-        showLearnTab(learn, ul, instanceName1, isReview, isComment);
+        showLearnTab(learn, ul, instanceName1, isReview, isComment, isAttention);
       }
     }
   }
@@ -760,15 +795,15 @@ public class Navigation extends TabContainer implements RequiresResize {
    * @param instanceName1
    * @param isReview
    * @param isComment
-   * @param isNormalList
-   * @return true if we have stored what tab we clicked on before
+   * @param isAttention
+   *@param isNormalList  @return true if we have stored what tab we clicked on before
    */
   private boolean selectPreviouslyClickedSubTab(TabPanel tabPanel,
                                                 TabAndContent learnTab,
                                                 TabAndContent practiceTab,
                                                 TabAndContent editTab,
                                                 UserList ul, String instanceName1,
-                                                boolean isReview, boolean isComment, boolean isNormalList) {
+                                                boolean isReview, boolean isComment, boolean isAttention, boolean isNormalList) {
     String subTab = storage.getValue(SUB_TAB);
     System.out.println("selectPreviouslyClickedSubTab : subtab " + subTab);
 
@@ -778,7 +813,7 @@ public class Navigation extends TabContainer implements RequiresResize {
       if (subTab.equals(LEARN)) {
         tabPanel.selectTab(SUBTAB_LEARN_INDEX);
         clickOnTab(learnTab);
-        showLearnTab(learnTab, ul, instanceName1, isReview, isComment);
+        showLearnTab(learnTab, ul, instanceName1, isReview, isComment, isAttention);
       } else if (subTab.equals(PRACTICE1)) {
         tabPanel.selectTab(SUBTAB_PRACTICE_INDEX);
         clickOnTab(practiceTab);
@@ -840,6 +875,7 @@ public class Navigation extends TabContainer implements RequiresResize {
      */
     public UserListCallback(Panel contentPanel, Panel child, ScrollPanel listScrollPanel, String instanceName,
                             boolean onlyMyLists, boolean allLists) {
+      System.out.println("UserListCallback instance " +instanceName);
       this.contentPanel = contentPanel;
       this.child = child;
       this.listScrollPanel = listScrollPanel;
