@@ -17,8 +17,8 @@ import java.util.Map;
 
 /**
  * Let's us keep track of state of read-only exercises too.
- *
- *
+ * <p/>
+ * <p/>
  * User: GO22670
  * Date: 12/9/13
  * Time: 2:23 PM
@@ -27,22 +27,27 @@ import java.util.Map;
 public class ReviewedDAO extends DAO {
   private static final Logger logger = Logger.getLogger(ReviewedDAO.class);
 
-  private static final String REVIEWED = "reviewed";
+  public static final String REVIEWED = "reviewed";
+  public static final String SECOND_STATE = "secondstate";
+
   private static final String STATE = "state";
   private static final String CREATORID = "creatorid";
   private static final String MODIFIED = "modified";
-  public static final String EXERCISEID = "exerciseid";
+  private static final String EXERCISEID = "exerciseid";
 
-  public ReviewedDAO(Database database) {
+  private final String tableName;
+
+  public ReviewedDAO(Database database,String tableName) {
     super(database);
+    this.tableName = tableName;
     try {
       createTable(database);
 
       // check for missing column
-      Collection<String> columns = getColumns(REVIEWED);
+      Collection<String> columns = getColumns(tableName);
       Connection connection = database.getConnection();
       if (!columns.contains(STATE)) {
-        addVarchar(connection, REVIEWED, STATE);
+        addVarchar(connection, tableName, STATE);
       }
     } catch (SQLException e) {
       logger.error("got " + e, e);
@@ -61,7 +66,7 @@ public class ReviewedDAO extends DAO {
     PreparedStatement statement;
 
     statement = connection.prepareStatement("CREATE TABLE if not exists " +
-      REVIEWED +
+      tableName +
       " (" +
       "uniqueid IDENTITY, " +
       CREATORID +
@@ -83,7 +88,6 @@ public class ReviewedDAO extends DAO {
     database.closeConnection(connection);
   }
 
-
   /**
    * Somehow on subsequent runs, the ids skip by 30 or so?
    * <p/>
@@ -98,7 +102,7 @@ public class ReviewedDAO extends DAO {
 
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement(
-        "INSERT INTO " + REVIEWED +
+        "INSERT INTO " + tableName +
           "(" +
           CREATORID +
           "," +
@@ -130,20 +134,21 @@ public class ReviewedDAO extends DAO {
   }
 
   /**
+   * @param exerciseID
    * @see mitll.langtest.server.database.custom.UserListManager#removeReviewed(String)
    * @see mitll.langtest.server.database.DatabaseImpl#deleteItem(String)
-   * @param exerciseID
    */
   public void remove(String exerciseID) {
     try {
       int before = getCount();
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement(
-        "DELETE FROM " + REVIEWED +
+        "DELETE FROM " + tableName +
           " WHERE " +
           EXERCISEID +
           "='" + exerciseID +
-          "'");
+          "'"
+      );
 
       int j = statement.executeUpdate();
 
@@ -151,15 +156,11 @@ public class ReviewedDAO extends DAO {
         logger.error("remove : huh? didn't remove row for " + exerciseID);
         int count = getCount();
         logger.debug("now " + count + " reviewed");
-        if (before-count != 1) logger.error("ReviewedDAO : huh? there were " +before +" before");
+        if (before - count != 1) logger.error("ReviewedDAO : huh? there were " + before + " before");
       }
 
       statement.close();
       database.closeConnection(connection);
-
-      //   int count = getCount();
-      //    logger.debug("now " + count + " reviewed");
-      //   if (before-count != 1) logger.error("ReviewedDAO : huh? there were " +before +" before");
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
@@ -167,19 +168,17 @@ public class ReviewedDAO extends DAO {
 
   public void setState(String exerciseID, CommonShell.STATE state, long creatorID) {
     try {
-
-        add(exerciseID, state, creatorID);
-
+      add(exerciseID, state, creatorID);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
   }
 
-    /**
+  /**
+   * @return
    * @see UserListManager#getDefectList()
    * @see UserListManager#getExerciseToState()
    * @see mitll.langtest.server.database.custom.UserListManager#markState(java.util.Collection)
-   * @return
    */
   public Map<String, StateCreator> getExerciseToState() {
     Connection connection = database.getConnection();
@@ -193,7 +192,7 @@ public class ReviewedDAO extends DAO {
       ",max(" +
       MODIFIED +
       ") as latest from " +
-      REVIEWED +
+      tableName +
       " group by " +
       EXERCISEID +
       "," +
@@ -208,13 +207,13 @@ public class ReviewedDAO extends DAO {
     try {
       PreparedStatement statement = connection.prepareStatement(sql3);
       ResultSet rs = statement.executeQuery();
-      Map<String,StateCreator> exidToState = new HashMap<String, StateCreator>();
+      Map<String, StateCreator> exidToState = new HashMap<String, StateCreator>();
       while (rs.next()) {
         String exerciseID = rs.getString(1);
         String state = rs.getString(2);
         long creator = rs.getLong(3);
         CommonShell.STATE stateFromTable = (state == null) ? CommonShell.STATE.UNSET : CommonShell.STATE.valueOf(state);
-        exidToState.put(exerciseID, new StateCreator(stateFromTable,creator));
+        exidToState.put(exerciseID, new StateCreator(stateFromTable, creator));
       }
 
       rs.close();
@@ -235,8 +234,11 @@ public class ReviewedDAO extends DAO {
       this.state = state;
       this.creatorID = creatorID;
     }
-    public String toString() { return state.toString() + " by " +creatorID; }
+
+    public String toString() {
+      return "["+state.toString() + " by " + creatorID +"]";
+    }
   }
 
-  public int getCount() { return getCount(REVIEWED);  }
+  public int getCount() { return getCount(tableName); }
 }
