@@ -263,7 +263,6 @@ public class AnnotationDAO extends DAO {
 */
 
     /**
-     * TODOx : this can't be right!
      *
      * @see mitll.langtest.server.database.custom.UserListManager#UserListManager(mitll.langtest.server.database.UserDAO, UserListDAO, UserListExerciseJoinDAO, AnnotationDAO, ReviewedDAO, mitll.langtest.server.PathHelper)
      * @return
@@ -272,7 +271,7 @@ public class AnnotationDAO extends DAO {
     long then = System.currentTimeMillis();
     Map<String,Long> stateIds = getStateIds(true);
     long now = System.currentTimeMillis();
-    logger.debug("took " +(now-then) + " millis to find " + stateIds.size());
+    //logger.debug("took " +(now-then) + " millis to find " + stateIds.size());
     return stateIds;
   }
 
