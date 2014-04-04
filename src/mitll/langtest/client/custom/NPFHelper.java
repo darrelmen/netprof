@@ -64,7 +64,7 @@ class NPFHelper implements RequiresResize {
    * @param loadExercises should we load exercises initially
    */
   public void showNPF(UserList ul, Navigation.TabAndContent tabAndContent, String instanceName, boolean loadExercises) {
-    System.out.println(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul);
+    //System.out.println(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul);
     //if (!ul.isEmpty()) {
     //  System.out.println(getClass() + " : first is " + ul.getExercises().iterator().next());
     //}
@@ -95,7 +95,7 @@ class NPFHelper implements RequiresResize {
    * @return
    */
   private Panel doNPF(UserList ul, String instanceName, boolean loadExercises) {
-    System.out.println(getClass() + " : doNPF instanceName = " + instanceName + " for list " + ul);
+   // System.out.println(getClass() + " : doNPF instanceName = " + instanceName + " for list " + ul);
 
     Panel hp = doInternalLayout(ul, instanceName);
 
