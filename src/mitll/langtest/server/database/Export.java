@@ -1,5 +1,6 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.grade.Grade;
@@ -25,7 +26,7 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class Export {
-  private static Logger logger = Logger.getLogger(Export.class);
+  private static final Logger logger = Logger.getLogger(Export.class);
 
   private ExerciseDAO exerciseDAO = null;
   private ResultDAO resultDAO = null;
@@ -65,11 +66,11 @@ public class Export {
     Map<String, List<Result>> exerciseToResult = populateMapOfExerciseIdToResults();
     logger.debug("getExport : got " +exerciseToResult.size() + " exercise with results");
 
-    List<Exercise> exercises = getExercises();
+    List<CommonExercise> exercises = getExercises();
     logger.debug("getExport : got " +exercises.size() + " exercises");
 
     List<ExerciseExport> names = new ArrayList<ExerciseExport>();
-    for (Exercise e : exercises) {
+    for (CommonExercise e : exercises) {
       List<Result> results1 = exerciseToResult.get(e.getID());
       if (results1 != null) {
         List<ExerciseExport> resultsForExercise = getExports(idToGrade, results1, e, useFLQ, useSpoken);
@@ -95,9 +96,9 @@ public class Export {
   }
 
   public static class ExerciseExport {
-    public String id;
+    public final String id;
     public List<String> key = new ArrayList<String>();
-    public List<ResponseAndGrade> rgs = new ArrayList<ResponseAndGrade>();
+    public final List<ResponseAndGrade> rgs = new ArrayList<ResponseAndGrade>();
     public ExerciseExport(String id, String key) {
       this.id  = id;
       this.key = Arrays.asList(key.split("\\|\\|"));
@@ -111,8 +112,8 @@ public class Export {
   }
 
   public static class ResponseAndGrade {
-    public String response;
-    public float grade;
+    public final String response;
+    public final float grade;
     public ResponseAndGrade(String response, int grade) {
       this.response = response;
       this.grade = ((float) (grade-1))/4f;  // jacob's stuff wants a 0->1 scale
@@ -126,7 +127,7 @@ public class Export {
    * @see #getExport(boolean, boolean)
    * @return
    */
-  private List<Exercise> getExercises() { return exerciseDAO.getRawExercises();  }
+  private List<CommonExercise> getExercises() { return exerciseDAO.getRawExercises();  }
 
   /**
    * Complicated.  To figure out spoken/written, flq/english we have to go back and join against the schedule.
@@ -138,11 +139,11 @@ public class Export {
    * @see #getExport(boolean, boolean)
    */
   private List<ExerciseExport> getExports(Map<Integer, List<Grade>> idToGrade, List<Result> resultsForExercise,
-                                         Exercise exercise, boolean useFLQ, boolean useSpoken) {
+                                          CommonExercise exercise, boolean useFLQ, boolean useSpoken) {
     boolean debug = false;
-    Map<Integer, ExerciseExport> qidToExport = populateIdToExportMap(exercise);
+    Map<Integer, ExerciseExport> qidToExport = populateIdToExportMap(exercise.toExercise());
   //  logger.debug("got qid->export " +qidToExport.size() + " items");
-    addPredefinedAnswers(exercise, useFLQ, qidToExport);
+    addPredefinedAnswers(exercise.toExercise(), useFLQ, qidToExport);
    // logger.debug("got " +resultsForExercise.size() + " resultsForExercise ");
 
     List<ExerciseExport> ret = new ArrayList<ExerciseExport>();
@@ -200,7 +201,8 @@ public class Export {
    * @param qidToExport
    */
   private void addPredefinedAnswers(Exercise exercise, boolean useFLQ, Map<Integer, ExerciseExport> qidToExport) {
-    int qid;List<Exercise.QAPair> qaPairs = useFLQ ? exercise.getForeignLanguageQuestions() : exercise.getEnglishQuestions();
+    int qid;
+    List<Exercise.QAPair> qaPairs = useFLQ ? exercise.getForeignLanguageQuestions() : exercise.getEnglishQuestions();
     qid = 1;
     //int count = 0;
     for (Exercise.QAPair q : qaPairs) {
