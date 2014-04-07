@@ -1,16 +1,25 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.shared.DLIUser;
+import mitll.langtest.shared.Demographics;
 import mitll.langtest.shared.User;
-import mitll.langtest.shared.grade.Grader;
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -18,10 +27,12 @@ import java.util.Map;
 import java.util.Set;
 
 public class UserDAO extends DAO {
-  public static final String DEFECT_DETECTOR = "defectDetector";
-  private static Logger logger = Logger.getLogger(UserDAO.class);
+  private static final String DEFECT_DETECTOR = "defectDetector";
+  private static final Logger logger = Logger.getLogger(UserDAO.class);
   public static final String USERS = "users";
   private long defectDetector;
+  //private static final List<String> COLUMNS = Arrays.asList("id", "age", "gender", "experience", "ipaddr", "nativelang", "dialect", "userid", "timestamp", "enabled");
+  private static final List<String> COLUMNS2 = Arrays.asList("id", "age", "gender", "experience", "ipaddr", "nativelang", "dialect", "userid", "timestamp", "demographics");
 
   public UserDAO(Database database) {
     super(database);
@@ -177,8 +188,8 @@ public class UserDAO extends DAO {
     /*boolean users = */expected.removeAll(getColumns(USERS));
     if (!expected.isEmpty()) logger.info("adding columns for " + expected);
     for (String missing : expected) {
-      //if (missing.equalsIgnoreCase("firstName")) { addColumn(connection,"firstName","VARCHAR"); }
-      //if (missing.equalsIgnoreCase("lastName")) { addColumn(connection,"lastName","VARCHAR"); }
+      //if (missing.equalsIgnoreCase("firstName")) { addVarchar(connection,"firstName","VARCHAR"); }
+      //if (missing.equalsIgnoreCase("lastName")) { addVarchar(connection,"lastName","VARCHAR"); }
 
       if (missing.equalsIgnoreCase("nativeLang")) { addColumn(connection,"nativeLang","VARCHAR"); }
       if (missing.equalsIgnoreCase("dialect")) { addColumn(connection,"dialect","VARCHAR"); }
@@ -187,21 +198,6 @@ public class UserDAO extends DAO {
       if (missing.equalsIgnoreCase("enabled")) { addColumn(connection,"enabled","BOOLEAN"); }
     }
 
-    convertGraders();
-  }
-
-  /**
-   * @deprecated lets get rid of this eventually
-   */
-  private void convertGraders() {
-    GraderDAO graderDAO = new GraderDAO(database);
-    Collection<Grader> graders = graderDAO.getGraders();
-    for (Grader u : graders) {
-      if (userExists(u.name) == -1) {
-        logger.info("adding grader " + u);
-        addUser(0, "male", 240, "", "", "", u.name, true);
-      }
-    }
   }
 
   private void addColumn(Connection connection, String column, String type) throws SQLException {
@@ -355,7 +351,7 @@ public class UserDAO extends DAO {
     return idToUser;
   }
 
-  public Map<Long, User> getNativeUserMap() {
+/*  public Map<Long, User> getNativeUserMap() {
     List<User> users = getUsers();
     Map<Long, User> idToUser = new HashMap<Long, User>();
     for (User u : users) {
@@ -364,9 +360,101 @@ public class UserDAO extends DAO {
       }
     }
     return idToUser;
-  }
+  }*/
 
+/*
   public Set<Long> getNativeUsers() {
     return getNativeUserMap().keySet();
+  }
+*/
+
+  /**
+   * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+   * @param out
+   * @param dliUserDAO
+   */
+  public void toXLSX(OutputStream out,DLIUserDAO dliUserDAO) {
+    long then = System.currentTimeMillis();
+
+    List<User> users = joinWithDLIUsers(dliUserDAO);
+    long now = System.currentTimeMillis();
+    if (now-then > 100) logger.warn("toXLSX : took " + (now-then) + " millis to read " + users.size()+
+      " users from database");
+    then = now;
+
+    //Workbook wb = new XSSFWorkbook();
+    SXSSFWorkbook wb = new SXSSFWorkbook(100); // keep 100 rows in memory, exceeding rows will be flushed to disk
+
+    Sheet sheet = wb.createSheet("Users");
+    int rownum = 0;
+    Row headerRow = sheet.createRow(rownum++);
+    for (int i = 0; i < COLUMNS2.size(); i++) {
+      Cell headerCell = headerRow.createCell(i);
+      headerCell.setCellValue(COLUMNS2.get(i));
+    }
+
+    CellStyle cellStyle = wb.createCellStyle();
+    DataFormat dataFormat = wb.createDataFormat();
+
+    cellStyle.setDataFormat(dataFormat.getFormat("MMM dd HH:mm:ss"));
+
+    for (User user : users) {
+      Row row = sheet.createRow(rownum++);
+      int j = 0;
+      Cell cell = row.createCell(j++);
+      cell.setCellValue(user.id);
+      cell = row.createCell(j++);
+      cell.setCellValue(user.age);
+      cell = row.createCell(j++);
+      cell.setCellValue(user.gender);
+      cell = row.createCell(j++);
+      cell.setCellValue(user.experience);
+      cell = row.createCell(j++);
+      cell.setCellValue(user.ipaddr);
+      cell = row.createCell(j++);
+      cell.setCellValue(user.nativeLang);
+      cell = row.createCell(j++);
+      cell.setCellValue(user.dialect);
+      cell = row.createCell(j++);
+      cell.setCellValue(user.userID);
+      cell = row.createCell(j++);
+      cell.setCellValue(new Date(user.timestamp));
+      cell.setCellStyle(cellStyle);
+      cell = row.createCell(j++);
+      Demographics demographics = user.getDemographics();
+   //   if (demographics == null) logger.warn("no demographics for " + user);
+      cell.setCellValue(demographics == null ? "" :demographics.toString());
+    }
+    now = System.currentTimeMillis();
+    if (now-then > 100) logger.warn("toXLSX : took " + (now-then) + " millis to write " + rownum+
+      " rows to sheet, or " + (now-then)/rownum + " millis/row");
+    then = now;
+    try {
+      wb.write(out);
+      now = System.currentTimeMillis();
+      if (now-then > 100) {
+        logger.warn("toXLSX : took " + (now-then) + " millis to write excel to output stream ");
+      }
+      then = now;
+      out.close();
+      wb.dispose();
+    } catch (IOException e) {
+      logger.error("got " +e,e);
+    }
+  }
+
+  private List<User> joinWithDLIUsers(DLIUserDAO dliUserDAO) {
+    List<User> users = getUsers();
+    List<DLIUser> users1 = dliUserDAO.getUsers();
+    Map<Long, User> userMap = getMap(users);
+
+    for (DLIUser dliUser : users1) {
+      User user = userMap.get(dliUser.getUserID());
+      if (user != null) {
+        user.setDemographics(dliUser);
+      }
+    }
+    if (users1.isEmpty()) logger.info("no dli users.");
+    return users;
   }
 }

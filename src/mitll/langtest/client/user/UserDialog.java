@@ -34,15 +34,19 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class UserDialog extends BasicDialog {
-  protected static final int USER_ID_MAX_LENGTH = 80;
+  protected static final int USER_ID_MAX_LENGTH = 25;
+/*  protected static final String LEAST_RECORDED_FIRST = "Least recorded first";
+  protected static final String LOW_GRADES_ONLY = "Redo items";*/
 
   private static final String GRADING = "grading";
   private static final String TESTING = "testing";  // TODO make these safer
 
-  protected static final int MIN_AGE = 12;
-  protected static final int MAX_AGE = 90;
-  protected static final int TEST_AGE = 100;
-  protected static final List<String> EXPERIENCE_CHOICES = Arrays.asList(
+  static final int MIN_AGE = 12;
+  static final int MAX_AGE = 90;
+  static final int TEST_AGE = 100;
+  static final String UNSET = "Unset";
+/*  private static final List<String> EXPERIENCE_CHOICES = Arrays.asList(
+      UNSET,
     "0-3 months (Semester 1)",
     "4-6 months (Semester 1)",
     "7-9 months (Semester 2)",
@@ -50,31 +54,40 @@ public abstract class UserDialog extends BasicDialog {
     "13-16 months (Semester 3)",
     "16+ months",
     "Native speaker");
-  protected static final int NATIVE_MONTHS = 20 * 12;
-  protected final PropertyHandler props;
+  protected static final int NATIVE_MONTHS = 20 * 12;*/
+  private static final String MALE = "Male";
+  private static final String FEMALE = "Female";
+  public static final String HIT_ENTER_TO_LOG_IN = "Hit enter to log in.";
+/*
+  private static final String ALL_ITEMS = "Sequential Order";
+  private static final String RECORDING_ORDER = "Item Order";
+*/
 
-  protected final LangTestDatabaseAsync service;
-  protected UserManager userManager;
-  protected UserNotification userNotification;
+  final PropertyHandler props;
 
-  public UserDialog(LangTestDatabaseAsync service, PropertyHandler props, UserManager userManager, UserNotification userNotification) {
+  final LangTestDatabaseAsync service;
+/*  private final UserManager userManager;
+  private final UserNotification userNotification;
+  protected ListBoxFormField recordingOrder;*/
+
+  UserDialog(LangTestDatabaseAsync service, PropertyHandler props) {
     this.service = service;
     this.props = props;
-    this.userManager = userManager;
-    this.userNotification =  userNotification;
+   // this.userManager = userManager;
+ //   this.userNotification =  userNotification;
   }
 
-  protected int getAge(TextBoxBase ageEntryBox) {
+  int getAge(TextBoxBase ageEntryBox) {
     int i = 0;
     try {
-      i = props.isDataCollectAdminView() ? MAX_AGE-1 : Integer.parseInt(ageEntryBox.getText());
+      i = Integer.parseInt(ageEntryBox.getText());
     } catch (NumberFormatException e) {
       System.out.println("couldn't parse " + ageEntryBox.getText());
     }
     return i;
   }
 
-  protected Modal getDialog(String title) {
+  Modal getDialog(String title) {
     final Modal dialogBox = new Modal();
     dialogBox.setTitle(title);
     dialogBox.setCloseVisible(false);
@@ -83,7 +96,7 @@ public abstract class UserDialog extends BasicDialog {
     return dialogBox;
   }
 
-  protected AccordionGroup getAccordion(final Modal dialogBox, Panel register) {
+  AccordionGroup getAccordion(final Modal dialogBox, Panel register) {
     Accordion accordion = new Accordion();
     AccordionGroup accordionGroup = new AccordionGroup();
     accordionGroup.setHeading("Registration");
@@ -93,13 +106,18 @@ public abstract class UserDialog extends BasicDialog {
     return accordionGroup;
   }
 
-  protected Button addLoginButton(Modal dialogBox) {
-    FlowPanel hp = new FlowPanel();
+  /**
+   * @see StudentDialog#displayLoginBox()
+   * @param dialogBox
+   * @return
+   */
+  Button addLoginButton(Modal dialogBox) {
+    Panel hp = new FlowPanel();
     hp.getElement().getStyle().setFloat(Style.Float.RIGHT);
     final Button login = new Button("Login");
     login.setType(ButtonType.PRIMARY);
     login.setEnabled(true);
-    login.setTitle("Hit enter to log in.");
+    login.setTitle(HIT_ENTER_TO_LOG_IN);
     login.getElement().setId("login");
     hp.add(login);
 
@@ -107,13 +125,13 @@ public abstract class UserDialog extends BasicDialog {
     return login;
   }
 
-  protected FormField addControlFormField(Panel dialogBox, String label, int minLength) {
-    return addControlFormField(dialogBox, label, false, minLength);
+  FormField addControlFormField(Panel dialogBox, String label, int minLength) {
+    return addControlFormField(dialogBox, label, false, minLength, USER_ID_MAX_LENGTH);
   }
 
-  protected FormField addControlFormField(Panel dialogBox, String label, boolean isPassword, int minLength) {
+  protected FormField addControlFormField(Panel dialogBox, String label, boolean isPassword, int minLength, int maxLength) {
     final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
-
+    user.setMaxLength(maxLength);
     return getFormField(dialogBox, label, user, minLength);
   }
 
@@ -129,7 +147,7 @@ public abstract class UserDialog extends BasicDialog {
   private HandlerRegistration keyHandler;
 
   // TODO : replace with enter key handler
-  protected void addKeyHandler(final Button send) {
+  void addKeyHandler(final Button send) {
     keyHandler = Event.addNativePreviewHandler(new
                                                  Event.NativePreviewHandler() {
 
@@ -151,7 +169,7 @@ public abstract class UserDialog extends BasicDialog {
     System.out.println("UserManager.addKeyHandler made click handler " + keyHandler);
   }
 
-  protected boolean checkValidPassword(FormField password) {
+  boolean checkValidPassword(FormField password) {
     final String userID = password.box.getText();
     if (userID.length() > USER_ID_MAX_LENGTH) {
       markError(password, "Please enter a password of reasonable length.");
@@ -166,7 +184,7 @@ public abstract class UserDialog extends BasicDialog {
     return true;
   }
 
-  protected boolean checkValidUser(FormField user) {
+  boolean checkValidUser(FormField user) {
     final String userID = user.box.getText();
     if (userID.length() > USER_ID_MAX_LENGTH) {
       markError(user, "Please enter a user id of reasonable length.");
@@ -182,17 +200,25 @@ public abstract class UserDialog extends BasicDialog {
     return true;
   }
 
+  /**
+   */
+  void setRecordingOrder() {
+/*    boolean unansweredFirst = recordingOrder != null && recordingOrder.getValue().equals(LEAST_RECORDED_FIRST);
+    userManager.setShowUnansweredFirst(unansweredFirst);
+    userManager.setShowRerecord(recordingOrder.getValue().equals(LOW_GRADES_ONLY));*/
+  }
+
   private class ButtonClickEvent extends ClickEvent {
         /*To call click() function for Programmatic equivalent of the user clicking the button.*/
   }
 
-  protected void removeKeyHandler() {
+  void removeKeyHandler() {
     System.out.println("UserManager.removeKeyHandler : " + keyHandler);
     if (keyHandler != null) keyHandler.removeHandler();
   }
 
-  protected ListBox getGenderBox() {
-    List<String> values = Arrays.asList("Male", "Female");
+  ListBox getGenderBox() {
+    List<String> values = Arrays.asList(UNSET, MALE, FEMALE);
     return getListBox(values);
   }
 
@@ -203,7 +229,7 @@ public abstract class UserDialog extends BasicDialog {
     }
     return genderBox;
   }
-
+/*
   protected ListBox getExperienceBox() {
     final ListBox experienceBox = new ListBox(false);
     List<String> choices = EXPERIENCE_CHOICES;
@@ -212,9 +238,9 @@ public abstract class UserDialog extends BasicDialog {
     }
     experienceBox.ensureDebugId("cwListBox-dropBox");
     return experienceBox;
-    }
+    }*/
 
-  protected boolean checkPassword(FormField password) { return checkPassword(password.box);  }
+  boolean checkPassword(FormField password) { return checkPassword(password.box);  }
 
   private boolean checkPassword(TextBoxBase password) {
     String trim = password.getText().trim();
