@@ -1,6 +1,6 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,13 +15,13 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class Lesson {
-  private List<Exercise> exerciseList = new ArrayList<Exercise>();
+  private final List<CommonExercise> exerciseList = new ArrayList<CommonExercise>();
   private String unit;
 
   public Lesson(){}
   public Lesson(String unit) { this.unit = unit; }
-  public void addExercise(Exercise e) { exerciseList.add(e); }
-  public Collection<Exercise> getExercises() { return Collections.unmodifiableList(exerciseList); }
+  public void addExercise(CommonExercise e) { exerciseList.add(e); }
+  public Collection<CommonExercise> getExercises() { return Collections.unmodifiableList(exerciseList); }
 
   public String toString() {
     return "Lesson '" + unit + "' " + exerciseList.size() + " exercises" +
@@ -29,7 +29,7 @@ public class Lesson {
         ", first is " + exerciseList.iterator().next());
   }
 
-  public boolean remove(Exercise exercise) {
+  public boolean remove(CommonExercise exercise) {
    return exerciseList.remove(exercise);
   }
 }
