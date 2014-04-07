@@ -30,24 +30,26 @@ import mitll.langtest.client.flashcard.MyCustomIconType;
 public class FlashcardRecordButton extends RecordButton {
   private static final int SPACE_CHAR = 32;
   private static final int HIDE_DELAY = 2500;
-  private static final String SPACE_BAR = "space bar";
+  private static final String PROMPT2 = "Click or space and hold to record";
+  private static final String SPACE_BAR = PROMPT2;//"space bar";
   private static final String NO_SPACE_WARNING = "Press and hold space bar or mouse button to begin recording, release to stop.";
-  //public static final String PROMPT = "Click and hold mouse button to record.";
   private static final String PROMPT = "Click and hold to record";
-  public static final int WIDTH_FOR_BUTTON = 360;
+  private static final int WIDTH_FOR_BUTTON = 360;
 
   private boolean warnUserWhenNotSpace = true;
   private final boolean addKeyBinding;
 
   /**
-   * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#makeRecordButton(mitll.langtest.client.exercise.ExerciseController)
+   * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#makeRecordButton
    * @param delay
    * @param recordingListener
    * @param warnNotASpace
    * @param addKeyBinding
    */
   public FlashcardRecordButton(int delay, RecordingListener recordingListener, boolean warnNotASpace, boolean addKeyBinding) {
-    super(delay, recordingListener, true);
+    super(delay, recordingListener, true, addKeyBinding);
+    if (addKeyBinding) {
+    }
     this.addKeyBinding = addKeyBinding;
     this.warnUserWhenNotSpace = addKeyBinding && warnNotASpace;
    // setText(addKeyBinding ? getButtonText() : "Click and hold mouse button to record, release to stop.");
@@ -59,6 +61,8 @@ public class FlashcardRecordButton extends RecordButton {
     DOM.setStyleAttribute(getElement(), "lineHeight", "37px");
 
     initRecordButton();
+
+    getElement().setId("FlashcardRecordButton");
   }
 
   protected void setupRecordButton(boolean addKeyBinding) {
