@@ -3,8 +3,7 @@ package mitll.langtest.server.database.custom;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.UserDAO;
-import mitll.langtest.shared.User;
-import mitll.langtest.shared.custom.UserExercise;
+import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.custom.UserList;
 import org.apache.log4j.Logger;
 
@@ -16,8 +15,8 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -27,15 +26,15 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class UserListDAO extends DAO {
-  public static final String CREATORID = "creatorid";
-  private static Logger logger = Logger.getLogger(UserListDAO.class);
+  private static final String CREATORID = "creatorid";
+  private static final Logger logger = Logger.getLogger(UserListDAO.class);
 
   private static final String NAME = "name";
 
   public static final String USER_EXERCISE_LIST = "userexerciselist";
-  private UserDAO userDAO;
+  private final UserDAO userDAO;
   private UserExerciseDAO userExerciseDAO;
-  private UserListVisitorJoinDAO userListVisitorJoinDAO;
+  private final UserListVisitorJoinDAO userListVisitorJoinDAO;
 
   public UserListDAO(Database database, UserDAO userDAO) {
     super(database);
@@ -54,7 +53,8 @@ public class UserListDAO extends DAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.custom.UserListManager#addVisitor(mitll.langtest.shared.custom.UserList, long)
+   * @see UserListManager#addVisitor(long, long)
+   * @see mitll.langtest.client.custom.Navigation#addVisitor(mitll.langtest.shared.custom.UserList)
    * @param listid
    * @param userid
    */
@@ -66,12 +66,12 @@ public class UserListDAO extends DAO {
    * @see UserListDAO#remove
    * @param listid
    */
-  public void removeVisitor(long listid) {
+  private void removeVisitor(long listid) {
     logger.debug("remove visitor reference " + listid);
     userListVisitorJoinDAO.remove(listid);
   }
 
-  void createUserListTable(Database database) throws SQLException {
+  private void createUserListTable(Database database) throws SQLException {
     Connection connection = database.getConnection();
     PreparedStatement statement;
 
@@ -194,7 +194,7 @@ public class UserListDAO extends DAO {
       for (UserList ul : lists) {
         populateList(ul);
       }
-      logger.debug("getall by " + userid + " is " + lists.size());
+      logger.debug("getAllByUser by " + userid + " is " + lists.size());
       return lists;
 
     } catch (Exception ee) {
@@ -209,6 +209,7 @@ public class UserListDAO extends DAO {
    * @return
    * @param userid
    */
+/*
   public List<UserList> getAll(long userid) {
     try {
       String sql = "SELECT * from " + USER_EXERCISE_LIST + " order by modified desc";
@@ -218,6 +219,7 @@ public class UserListDAO extends DAO {
     }
     return Collections.emptyList();
   }
+*/
 
   /**
    * Get lists by others that have not yet been visited.
@@ -229,7 +231,7 @@ public class UserListDAO extends DAO {
     try {
       String sql = "SELECT * from " + USER_EXERCISE_LIST + " where isprivate=false" +
         //" and " + CREATORID + "<>" +userid+
-        " order by modified ";
+        " order by modified DESC ";
 
       //Set<Long> listsForVisitor = getListsForVisitor(userid);
 
@@ -239,13 +241,18 @@ public class UserListDAO extends DAO {
 
    //   logger.debug("userLists for " + userid + " : " +userLists);
 
-   /*   List<UserList> toReturn = new ArrayList<UserList>();
+      List<UserList> toReturn = new ArrayList<UserList>();
       for (UserList ul : userLists) {
-        if (!listsForVisitor.contains(ul.getUniqueID())) {
-           toReturn.add(ul);
+        if (!ul.isEmpty()) {
+          logger.debug("getAllPublic : found userLists for " + userid + " : " +ul);
+
+          toReturn.add(ul);
+        }
+        else {
+          logger.info("\tgetAllPublic : skipping for " + userid + " : " +ul);
+
         }
       }
-*/
    //   logger.debug("toReturn for " + userid + " : " +toReturn);
 
       return userLists;
@@ -305,7 +312,7 @@ public class UserListDAO extends DAO {
    * @return
    */
   public UserList getWhere(long unique, boolean warnIfMissing) {
-    if (unique == Long.MAX_VALUE) return null;
+    if (unique < 0) return null;
     String sql = "SELECT * from " + USER_EXERCISE_LIST + " where uniqueid=" + unique + " order by modified";
     try {
       List<UserList> lists = getUserLists(sql,-1);
@@ -321,7 +328,27 @@ public class UserListDAO extends DAO {
     return null;
   }
 
-  public Collection<UserList> getIn(Set<Long> ids) {
+  /**
+   * @see mitll.langtest.server.database.custom.UserListManager#getListsForUser(long, boolean, boolean)
+   * @param userid
+   * @return
+   */
+  public Collection<UserList> getListsForUser(long userid) {
+    final List<Long> listsForVisitor = userListVisitorJoinDAO.getListsForVisitor(userid);
+    List<UserList> objects = Collections.emptyList();
+    List<UserList> userLists = listsForVisitor.isEmpty() ? objects : getIn(listsForVisitor);
+    Collections.sort(userLists, new Comparator<UserList>() {
+      @Override
+      public int compare(UserList o1, UserList o2) {
+        int i1 = listsForVisitor.indexOf(o1.getUniqueID());
+        int i2 = listsForVisitor.indexOf(o2.getUniqueID());
+        return i1 < i2 ? -1 : i2 > i1 ? +1 : 0;
+      }
+    });
+    return userLists;
+  }
+
+  private List<UserList> getIn(Collection<Long> ids) {
     String s = ids.toString();
     s = s.replaceAll("\\[","").replaceAll("\\]","");
     String sql = "SELECT * from " + USER_EXERCISE_LIST + " where uniqueid in (" + s + ") order by modified";
@@ -342,7 +369,7 @@ public class UserListDAO extends DAO {
 
 
   /**
-   * @see #getAll(long)
+   * @seex #getAll(long)
    * @see #getAllPublic
    * @see #getWhere(long, boolean)
    * @param sql
@@ -378,7 +405,7 @@ public class UserListDAO extends DAO {
       )
       );
     }
-    logger.debug("getWhere : got " + lists);
+    //logger.debug("getWhere : got " + lists);
     rs.close();
     statement.close();
     database.closeConnection(connection);
@@ -393,22 +420,14 @@ public class UserListDAO extends DAO {
    * @param where
    */
   private void populateList(UserList where) {
-    List<UserExercise> onList = userExerciseDAO.getOnList(where.getUniqueID());
+    List<CommonUserExercise> onList = userExerciseDAO.getOnList(where.getUniqueID());
     where.setExercises(onList);
-    //where.setVisitors(userListVisitorJoinDAO.getVisitorsOfList(where.getUniqueID()));
 
-    if (!onList.isEmpty()) {
-      logger.debug("populateList : got " + onList.size() + " for list " + where.getUniqueID() + " = " + where);
-    }
+    //if (!onList.isEmpty()) {
+      //logger.debug("populateList : got " + onList.size() + " for list " + where.getUniqueID() + " = " + where);
+   // }
   }
 
-  public Collection<UserList> getListsForUser(long userid) {
-    Set<Long> listsForVisitor = userListVisitorJoinDAO.getListsForVisitor(userid);
-    if (listsForVisitor.isEmpty()) return Collections.emptyList();
-    else return getIn(listsForVisitor);
-  }
-
-  private Set<Long> getListsForVisitor(long userid) { return userListVisitorJoinDAO.getListsForVisitor(userid);  }
   public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
     this.userExerciseDAO = userExerciseDAO;
   }

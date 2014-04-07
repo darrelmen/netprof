@@ -1,6 +1,6 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
@@ -9,22 +9,23 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.Collection;
 
 /**
  * Does writing to the results table.
  * Reading, etc. happens in {@link ResultDAO} - might be a little confusing... :)
  */
 public class AnswerDAO {
-  private static Logger logger = Logger.getLogger(AnswerDAO.class);
+  private static final Logger logger = Logger.getLogger(AnswerDAO.class);
 
   private final Database database;
-  private ResultDAO resultDAO;
+  private final ResultDAO resultDAO;
 
   public AnswerDAO(Database database, ResultDAO resultDAO) { this.database = database; this.resultDAO = resultDAO; }
 
   /**
    *
-   * @see DatabaseImpl#addAnswer(int, mitll.langtest.shared.Exercise, int, String)
+   * @see DatabaseImpl#addAnswer(int, mitll.langtest.shared.CommonExercise, int, String, boolean, String)
    * @param userID
    * @param e
    * @param questionID
@@ -35,18 +36,14 @@ public class AnswerDAO {
    * @param audioType
    * @param correct
    * @param pronScore
-   * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers(mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise)
+   * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers
    */
-  public void addAnswer(int userID, Exercise e, int questionID, String answer, String audioFile,
+  public void addAnswer(int userID, CommonExercise e, int questionID, String answer, String audioFile,
                         boolean flq, boolean spoken, String audioType, boolean correct, float pronScore) {
-    String plan = e.getPlan();
+    String plan = "plan";//e.getPlan();
     String id = e.getID();
     addAnswer(database,userID, plan, id, questionID, answer, audioFile, true,  flq, spoken, audioType, 0, correct, pronScore, "");
   }
-
-/*  public void addAnswer(int userID, String plan, String exerciseID, String stimulus, String answer, boolean correct) {
-    addAnswer(database, userID, plan, exerciseID, 0, answer, "", true, false, false, Result.AUDIO_TYPE_UNSET, 0, correct, 0, stimulus);
-  }*/
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAnswer
@@ -60,47 +57,9 @@ public class AnswerDAO {
    * @param correct
    * @param pronScore
    */
-  public void addAnswer(int userID, String plan, String exerciseID, int questionID, String stimulus, String answer,
+/*  public void addAnswer(int userID, String plan, String exerciseID, int questionID, String stimulus, String answer,
                         String answerType, boolean correct, float pronScore) {
     addAnswer(database, userID, plan, exerciseID, questionID, answer, "", true, false, false, answerType, 0, correct, pronScore, stimulus);
-  }
-
-  /**
-   * @seex DatabaseImpl#isAnswerValid(int, mitll.langtest.shared.Exercise, int, Database)
-   * @param userID
-   * @param e
-   * @param questionID
-   * @param database
-   * @return
-   */
-/*  public boolean isAnswerValid(int userID, Exercise e, int questionID, Database database) {
-    boolean val = false;
-    try {
-      Connection connection = database.getConnection();
-      PreparedStatement statement = connection.prepareStatement(
-        "SELECT valid, " + Database.TIME +
-        " FROM results " +
-        "WHERE userid = ? AND plan = ? AND " +
-          Database.EXID +
-          " = ? AND qid = ? " +
-        "order by " + Database.TIME+ " desc");
-
-      statement.setInt(1,userID);
-      statement.setString(2, e.getPlan());
-      statement.setString(3, e.getID());
-      statement.setInt(4, questionID);
-
-      ResultSet rs = statement.executeQuery();
-      if (rs.next()) {
-        val = rs.getBoolean(1);
-      }
-      rs.close();
-      statement.close();
-      database.closeConnection(connection);
-    } catch (Exception e1) {
-      e1.printStackTrace();
-    }
-    return val;
   }*/
 
   /**
@@ -162,7 +121,7 @@ public class AnswerDAO {
                                 boolean valid, boolean flq, boolean spoken, String audioType, int durationInMillis,
                                 boolean correct, float pronScore, String stimulus) throws SQLException {
     PreparedStatement statement;
-   // logger.info("adding answer for exid #" + id + " correct " + correct + " score " + pronScore);
+    logger.info("adding answer for exid #" + id + " correct " + correct + " score " + pronScore + " audio type " +audioType + " answer " + answer);
     statement = connection.prepareStatement("INSERT INTO results(" +
       "userid," +
       "plan," +
@@ -232,14 +191,10 @@ public class AnswerDAO {
         "SET " +
         ResultDAO.PRON_SCORE+"='" + score + "' " +
         "WHERE id=" + id;
-/*      if (false) {
-        logger.debug("changeAnswer " + id + " score " +score);
-      }*/
       PreparedStatement statement = connection.prepareStatement(sql);
 
       int i = statement.executeUpdate();
 
-    //  if (false) logger.debug("UPDATE " + i);
       if (i == 0) {
         logger.error("huh? didn't update the answer for " + id + " sql " + sql);
       }
@@ -251,7 +206,43 @@ public class AnswerDAO {
     }
   }
 
-  private String copyStringChar(String plan) {
-    return new String(plan.toCharArray());
+  public void changeType(Collection<Long> ids) {
+    try {
+      Connection connection = database.getConnection();
+      String list = getInList(ids);
+
+      String sql = "UPDATE " +
+        ResultDAO.RESULTS +
+        " " +
+        "SET " +
+        ResultDAO.AUDIO_TYPE + "='" + "avp_skip" + "' " +
+        " where " + ResultDAO.ID + " in (" +
+        list + ") ";
+      PreparedStatement statement = connection.prepareStatement(sql);
+
+      int i = statement.executeUpdate();
+
+      if (i == 0) {
+        logger.error("huh? didn't update the results for " + ids + " sql " + sql);
+      }
+      else {
+        logger.debug("Altered " + i + " rows, given " + ids.size() + " ids");
+      }
+
+      statement.close();
+      database.closeConnection(connection);
+    } catch (Exception e) {
+      logger.error("got " +e,e);
+    }
   }
+
+  private String getInList(Collection<Long> ids) {
+    StringBuilder b = new StringBuilder();
+    for (Long id : ids) b.append(id).append(",");
+    String list = b.toString();
+    list = list.substring(0, Math.max(0, list.length() - 1));
+    return list;
+  }
+
+  private String copyStringChar(String plan) { return new String(plan.toCharArray());  }
 }
