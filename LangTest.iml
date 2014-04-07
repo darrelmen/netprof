@@ -85,6 +85,9 @@
         <webroots>
           <root url="file://$MODULE_DIR$/war" relative="/" />
         </webroots>
+        <sourceRoots>
+          <root url="file://$MODULE_DIR$/src" />
+        </sourceRoots>
       </configuration>
     </facet>
     <facet type="web" name="Web2">
@@ -105,8 +108,9 @@
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/gwt-unitCache" />
-      <excludeFolder url="file://$MODULE_DIR$/jmh-fd83add52cba" />
+      <excludeFolder url="file://$MODULE_DIR$/out" />
       <excludeFolder url="file://$MODULE_DIR$/splitScripts" />
+      <excludeFolder url="file://$MODULE_DIR$/test-classes" />
       <excludeFolder url="file://$MODULE_DIR$/tmp" />
       <excludeFolder url="file://$MODULE_DIR$/war/WEB-INF/deploy" />
       <excludeFolder url="file://$MODULE_DIR$/war/answers" />
@@ -144,7 +148,9 @@
           <root url="jar://$MODULE_DIR$/war/WEB-INF/lib/guava-13.0.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/guava/guava13/guava-13.0-sources.jar!/" />
+        </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library">
