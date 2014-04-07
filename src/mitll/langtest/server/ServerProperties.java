@@ -24,7 +24,7 @@ import java.util.jar.Manifest;
  * To change this template use File | Settings | File Templates.
  */
 public class ServerProperties {
-  private static Logger logger = Logger.getLogger(ServerProperties.class);
+  private static final Logger logger = Logger.getLogger(ServerProperties.class);
 
   private static final String DEBUG_EMAIL = "debugEmail";
   private static final String DOIMAGES = "doimages";
@@ -32,19 +32,14 @@ public class ServerProperties {
   private static final String USE_WEIGHTS = "useWeights";
 
   private static final String DEFAULT_PROPERTIES_FILE = "config.properties";
-  private static final String FIRST_N_IN_ORDER = "firstNInOrder";
   private static final String DATA_COLLECT_MODE = "dataCollect";
   private static final String COLLECT_AUDIO = "collectAudio";
   private static final String COLLECT_AUDIO_DEFAULT = "true";
   private static final String BIAS_TOWARDS_UNANSWERED = "biasTowardsUnanswered";
-  private static final String USE_OUTSIDE_RESULT_COUNTS = "useOutsideResultCounts";
-  private static final String OUTSIDE_FILE = "outsideFile";
-  private static final String OUTSIDE_FILE_DEFAULT = "distributions.txt";
   private static final String H2_DATABASE = "h2Database";
   private static final String H2_DATABASE_DEFAULT = "vlr-parle";
   private static final String H2_STUDENT_ANSWERS_DATABASE = "h2StudentAnswers";
   private static final String H2_STUDENT_ANSWERS_DATABASE_DEFAULT = "h2StudentAnswers";
-  private static final String URDU = "urdu";
   private static final String READ_FROM_FILE = "readFromFile";
   private static final String FLASHCARD = "flashcard";
   private static final String CRTDATACOLLECT = "crtDataCollect";
@@ -56,7 +51,6 @@ public class ServerProperties {
   private static final String RECO_TEST2 = "recoTest2";
   private static final String ARABIC_TEXT_DATA_COLLECT = "arabicTextDataCollect";
   private static final String COLLECT_ONLY_AUDIO = "collectAudioOnly";
-  private static final String TIMED_GAME = "timedGame";
   private static final String MIN_PRON_SCORE = "minPronScore";
   private static final String MIN_PRON_SCORE_DEFAULT = "0.20";
   private static final String GOODWAVE_MODE = "goodwaveMode";
@@ -69,23 +63,21 @@ public class ServerProperties {
   private static final String DEFAULT_EMAIL = "gordon.vidaver@ll.mit.edu";
   private static final String AUDIO_OFFSET = "audioOffset";
   private static final String COLLECT_SYNONYMS = "collectSynonyms";
-  //private static final String EXERCISES_IN_ORDER = "exercisesInOrder";
   private static final String FOREIGN_LANGUAGE_QUESTIONS_ONLY = "foreignLanguageQuestionsOnly";
   private static final String MAX_NUM_EXERCISES = "maxNumExercises";
   private static final String CLASSROOM_MODE = "classroomMode";
-  private static final String GRADING_PROP = "grading";
+  private static final String INCLUDE_FEEDBACK = "includeFeedback";
+  private static final String MAPPING_FILE = "mappingFile";
 
   private Properties props = new Properties();
 
   public boolean dataCollectMode;
   private boolean collectAudio;
-  public boolean biasTowardsUnanswered, useOutsideResultCounts;
-  public String outsideFile;
-  public boolean isUrdu;
-  public int firstNInOrder;
-  public boolean isDataCollectAdminView;
+  public boolean biasTowardsUnanswered;
   private double minPronScore;
-  int maxNumExercises = Integer.MAX_VALUE;
+  private final int maxNumExercises = Integer.MAX_VALUE;
+
+  public ServerProperties() {}
 
   public ServerProperties(ServletContext servletContext, String configDir) {
     this(servletContext, configDir, servletContext.getInitParameter("configFile"));
@@ -95,9 +87,23 @@ public class ServerProperties {
     this(null, configDir, configFile);
   }
 
-  public ServerProperties(ServletContext servletContext, String configDir, String configFile) {
+  private ServerProperties(ServletContext servletContext, String configDir, String configFile) {
     String dateFromManifest = getDateFromManifest(servletContext);
+    readProperties(configDir, configFile, dateFromManifest);
+  }
+
+  private void readProperties(String configDir, String configFile, String dateFromManifest) {
     if (configFile == null) configFile = DEFAULT_PROPERTIES_FILE;
+    readProps(configDir, configFile, dateFromManifest);
+  }
+
+  public void readPropertiesFile(ServletContext servletContext, String configDir) {
+    String configFile = servletContext.getInitParameter("configFile");
+    String dateFromManifest = getDateFromManifest(servletContext);
+    readProps(configDir,configFile,dateFromManifest);
+  }
+
+  private void readProps(String configDir, String configFile, String dateFromManifest) {
     String configFileFullPath = configDir + File.separator + configFile;
     if (!new File(configFileFullPath).exists()) {
       logger.error("couldn't find config file " + new File(configFileFullPath));
@@ -179,31 +185,27 @@ public class ServerProperties {
     return minPronScore;
   }
   public boolean isArabicTextDataCollect() {
-    return !props.getProperty(ARABIC_TEXT_DATA_COLLECT, "false").equals("false");
+    return getDefaultFalse(ARABIC_TEXT_DATA_COLLECT);
   }
 
   public boolean isCollectOnlyAudio() {
-    return !props.getProperty(COLLECT_ONLY_AUDIO, "false").equals("false");
-  }
-
-  public boolean isTimedGame() {
-    return !props.getProperty(TIMED_GAME, "false").equals("false");
+    return getDefaultFalse(COLLECT_ONLY_AUDIO);
   }
 
   public boolean isGoodwaveMode() {
-    return !props.getProperty(GOODWAVE_MODE, "false").equals("false");
+    return getDefaultFalse(GOODWAVE_MODE);
   }
 
   public boolean isFlashcardTeacherView() {
-    return !props.getProperty(FLASHCARD_TEACHER_VIEW, "false").equals("false");
+    return getDefaultFalse(FLASHCARD_TEACHER_VIEW);
   }
 
   public boolean usePredefinedTypeOrder() {
-    return !props.getProperty(USE_PREDEFINED_TYPE_ORDER, "false").equals("false");
+    return getDefaultFalse(USE_PREDEFINED_TYPE_ORDER);
   }
 
   public boolean shouldUseWeights() {
-    return !props.getProperty(USE_WEIGHTS, "false").equals("false");
+    return getDefaultFalse(USE_WEIGHTS);
   }
 
   public boolean sortExercisesByID() {
@@ -227,10 +229,9 @@ public class ServerProperties {
   }
 
   public boolean isClassroomMode() { return getDefaultFalse(CLASSROOM_MODE); }
-  public boolean isGrading() { return getDefaultFalse(GRADING_PROP); }
 
   public boolean getCollectSynonyms() {
-    return props.getProperty(COLLECT_SYNONYMS, "true").equals("true");
+    return getDefaultTrue(COLLECT_SYNONYMS);
   }
 
   public String getEmailAddress() {
@@ -245,6 +246,10 @@ public class ServerProperties {
     }
   }
 
+  public String getMappingFile() {
+    return props.getProperty(MAPPING_FILE, "vlr-parle-pilot-items.txt");
+  }
+
   public int getMaxNumExercises() {
     try {
       String property = props.getProperty(MAX_NUM_EXERCISES);
@@ -254,6 +259,8 @@ public class ServerProperties {
       return maxNumExercises;
     }
   }
+
+  public boolean isIncludeFeedback() { return getDefaultFalse(INCLUDE_FEEDBACK);  }
 
   /**
    * Get properties (first time called read properties file -- e.g. see war/config/levantine/config.properties).
@@ -271,26 +278,15 @@ public class ServerProperties {
 
   /**
    * The config web.xml file.
-   * As a final step, creates the DatabaseImpl!<br></br>
    *
    * Note that this will only ever be called once.
    * @see
    * @param dateFromManifest
    */
   private void readProperties(String dateFromManifest) {
-    try {
-      firstNInOrder = Integer.parseInt(props.getProperty(FIRST_N_IN_ORDER, "" + Integer.MAX_VALUE));
-    } catch (NumberFormatException e) {
-      logger.error("Couldn't parse property " + FIRST_N_IN_ORDER,e);
-      firstNInOrder = Integer.MAX_VALUE;
-    }
     dataCollectMode = getDefaultFalse(DATA_COLLECT_MODE);
     collectAudio = !props.getProperty(COLLECT_AUDIO, COLLECT_AUDIO_DEFAULT).equals("false");
-    isUrdu = !props.getProperty(URDU, "false").equals("false");
-    biasTowardsUnanswered = !props.getProperty(BIAS_TOWARDS_UNANSWERED, "true").equals("false");
-    useOutsideResultCounts = !props.getProperty(USE_OUTSIDE_RESULT_COUNTS, "false").equals("false");
-    isDataCollectAdminView = !props.getProperty("dataCollectAdminView", "false").equals("false");
-    outsideFile = props.getProperty(OUTSIDE_FILE, OUTSIDE_FILE_DEFAULT);
+    biasTowardsUnanswered = getDefaultFalse(BIAS_TOWARDS_UNANSWERED);
 
     if (dateFromManifest != null && dateFromManifest.length() > 0) {
       //logger.debug("Date from manifest " + dateFromManifest);
@@ -307,15 +303,14 @@ public class ServerProperties {
         e1.printStackTrace();
       }
     }
-
   }
 
   private boolean getDefaultFalse(String param) {
-    return !props.getProperty(param, "false").equals("false");
+    return props.getProperty(param, "false").equals("true");
   }
 
   private boolean getDefaultTrue(String param) {
-    return !props.getProperty(param, "true").equals("false");
+    return props.getProperty(param, "true").equals("true");
   }
 
   private String getDateFromManifest(ServletContext servletContext) {
@@ -330,4 +325,6 @@ public class ServerProperties {
     }
     return "";
   }
+
+
 }
