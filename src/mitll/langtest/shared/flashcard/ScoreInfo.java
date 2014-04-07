@@ -59,6 +59,11 @@ public class ScoreInfo implements IsSerializable,SetScore {
     return 0;
   }
 
+  @Override
+  public float getCorrectPercent() {
+    return 0;
+  }
+
   public String toString() {
     return "ScoreInfo : user " + getUserid() + " correct " + getCorrect() + " for " + selection;
   }
