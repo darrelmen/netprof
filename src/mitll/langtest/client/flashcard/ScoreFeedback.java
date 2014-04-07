@@ -27,18 +27,18 @@ public class ScoreFeedback {
 
   private IconAnchor feedbackImage;
   private Panel scoreFeedbackColumn;
-  private ProgressBar scoreFeedback = new ProgressBar();
+  private final ProgressBar scoreFeedback = new ProgressBar();
 
   private SimplePanel feedbackDummyPanel;
-  private boolean useWhite;
+  private final boolean useWhite;
 
   public ScoreFeedback(boolean useWhite) {  this.useWhite = useWhite;  }
-  boolean useShortWidth;
+  private boolean useShortWidth;
   /**
    * Holds the pron score feedback.
    * Initially made with a placeholder.
    *
-   * @see BootstrapExercisePanel#addRecordingAndFeedbackWidgets(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int, com.google.gwt.user.client.ui.Panel)
+   * @see BootstrapExercisePanel#addRecordingAndFeedbackWidgets(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel)
    * @return
    */
   public FluidRow getScoreFeedbackRow(int height, boolean useShortWidth) {
@@ -122,8 +122,9 @@ public class ScoreFeedback {
    * @param soundFeedback
    * @param pronunciationScore
    * @param centerVertically
+   * @paramx width
    */
-  public void showCRTFeedback(Double result, SoundFeedback soundFeedback, String pronunciationScore, boolean centerVertically) {
+  public void showCRTFeedback(Double result, SoundFeedback soundFeedback, String pronunciationScore, boolean centerVertically/*, int width*/) {
     result = Math.max(0, result);
     result = Math.min(1.0, result);
     if (result > 0.9) result = 1.0; //let's round up when we're almost totally correct 97%->100%
@@ -152,14 +153,15 @@ public class ScoreFeedback {
   }
 
   /**
-   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#showPronScoreFeedback(double, String)
-   * @see #showCRTFeedback(Double, mitll.langtest.client.sound.SoundFeedback, String, boolean)
+   * @see BootstrapExercisePanel#showPronScoreFeedback(double)
+   * @seez #showCRTFeedback(Double, mitll.langtest.client.sound.SoundFeedback, String, boolean, int)
    * @param pronunciationScore
    * @param score
    * @param centerVertically
    * @param useShortWidth
+   * @paramz width
    */
-  public void showScoreFeedback(String pronunciationScore, double score, boolean centerVertically, boolean useShortWidth) {
+  void showScoreFeedback(String pronunciationScore, double score, boolean centerVertically, boolean useShortWidth) {
     if (score < 0) score = 0;
     double percent = 100 * score;
 
