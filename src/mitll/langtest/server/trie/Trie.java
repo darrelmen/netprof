@@ -23,8 +23,8 @@ import java.util.Queue;
 public class Trie<T> {
   private static final boolean USE_SINGLE_TOKEN_MAP = false;
   private static final boolean SPLIT_ON_CHARACTERS = true;
-  private TrieNode<T> root;
-  private Map<String,TextEntityValue<T>> singleTokenMap;
+  private final TrieNode<T> root;
+  private final Map<String,TextEntityValue<T>> singleTokenMap;
   private Map<String,String> tempCache;
   private boolean convertToUpper = true;
 
@@ -32,7 +32,7 @@ public class Trie<T> {
     this(false);
   }
 
-  public Trie(boolean convertToUpper) {
+  private Trie(boolean convertToUpper) {
     this.convertToUpper = convertToUpper;
     this.root = new TrieNode<T>();
     this.singleTokenMap = new HashMap<String,TextEntityValue<T>>();
