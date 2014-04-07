@@ -12,6 +12,7 @@ import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.SLFFile;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.commons.io.FileUtils;
@@ -48,7 +49,7 @@ import java.util.TreeSet;
  */
 public class ASRScoring extends Scoring {
   private static final double KEEP_THRESHOLD = 0.3;
-  private static Logger logger = Logger.getLogger(ASRScoring.class);
+  private static final Logger logger = Logger.getLogger(ASRScoring.class);
   private static final boolean DEBUG = false;
 
   private static final int FOREGROUND_VOCAB_LIMIT = 100;
@@ -63,10 +64,10 @@ public class ASRScoring extends Scoring {
    * By keeping these here, we ensure that we only ever read the dictionary once
    */
   private HTKDictionary htkDictionary;
-  private LTS letterToSoundClass;
+  private final LTS letterToSoundClass;
   private final Cache<String, Scores> audioToScore;
-  private ConfigFileCreator configFileCreator;
-  private boolean isMandarin;
+  private final ConfigFileCreator configFileCreator;
+  private final boolean isMandarin;
 
   /**
    * Normally we delete the tmp dir created by hydec, but if something went wrong, we want to keep it around.
@@ -231,7 +232,7 @@ public class ASRScoring extends Scoring {
   /**
    * Use hydec to do scoring<br></br>
    *
-   * Some magic happens in {@link #writeTranscripts(String, int, int, String, boolean)} where .lab files are
+   * Some magic happens in {@link Scoring#writeTranscripts(String, int, int, String, boolean, String)} where .lab files are
    * parsed to determine the start and end times for each event, which lets us both create images that
    * show the location of the words and phonemes, and for decoding, the actual reco sentence returned. <br></br>
    *
@@ -295,20 +296,20 @@ public class ASRScoring extends Scoring {
       Random rand = new Random();
       return new PretestScore(rand.nextBoolean() ? 0.99f : 0.01f);
     }
-    ImageWriter.EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix, useScoreForBkgColor);
+    ImageWriter.EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix, useScoreForBkgColor, "");
     Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
-    Map<NetPronImageType, List<Float>> typeToEndTimes = getTypeToEndTimes(wavFile, eventAndFileInfo);
+    Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo);
     String recoSentence = getRecoSentence(eventAndFileInfo);
 
+    double duration = new AudioCheck().getDurationInSeconds(wavFile);
     PretestScore pretestScore =
-        new PretestScore(scores.hydecScore, getPhoneToScore(scores), sTypeToImage, typeToEndTimes, recoSentence);
+        new PretestScore(scores.hydecScore, getPhoneToScore(scores), sTypeToImage, typeToEndTimes, recoSentence,(float)duration);
     return pretestScore;
   }
 
-  private Map<NetPronImageType, List<Float>> getTypeToEndTimes(File wavFile, ImageWriter.EventAndFileInfo eventAndFileInfo) {
-    double duration = new AudioCheck().getDurationInSeconds(wavFile);
-    return getTypeToEndTimes(eventAndFileInfo, duration);
-  }
+/*  private Map<NetPronImageType, List<TranscriptSegment>> getTypeToEndTimes(*//*File wavFile,*//* ImageWriter.EventAndFileInfo eventAndFileInfo) {
+    return getTypeToEndTimes(eventAndFileInfo);
+  }*/
 
 /*  public Scores decode(String testAudioDir, String testAudioFileNoSuffix,
                        String scoringDir,
@@ -449,23 +450,25 @@ public class ASRScoring extends Scoring {
    * @param fileDuration
    * @return
    */
-  private Map<NetPronImageType, List<Float>> getTypeToEndTimes(ImageWriter.EventAndFileInfo eventAndFileInfo, double fileDuration) {
-    Map<NetPronImageType, List<Float>> typeToEndTimes = new HashMap<NetPronImageType, List<Float>>();
+  private Map<NetPronImageType, List<TranscriptSegment>> getTypeToEndTimes(ImageWriter.EventAndFileInfo eventAndFileInfo/*, double fileDuration*/) {
+    Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<NetPronImageType, List<TranscriptSegment>>();
     for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.typeToEvent.entrySet()) {
       NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
-      List<Float> endTimes = typeToEndTimes.get(key);
-      if (endTimes == null) { typeToEndTimes.put(key, endTimes = new ArrayList<Float>()); }
+      List<TranscriptSegment> endTimes = typeToEndTimes.get(key);
+      if (endTimes == null) { typeToEndTimes.put(key, endTimes = new ArrayList<TranscriptSegment>()); }
       for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
-        endTimes.add(event.getValue().end);
+        TranscriptEvent value = event.getValue();
+        endTimes.add(new TranscriptSegment(value.start, value.end, value.event, value.score));
       }
     }
-    for ( List<Float> times : typeToEndTimes.values()) {
-      Float lastEndTime = times.isEmpty() ? (float)fileDuration : times.get(times.size() - 1);
+/*    for (List<TranscriptSegment> times : typeToEndTimes.values()) {
+      TranscriptSegment lastEndTime = times.isEmpty() ? (float)fileDuration : times.get(times.size() - 1);
+
       if (lastEndTime < fileDuration && !times.isEmpty()) {
        // logger.debug("setting last segment to end at end of file " + lastEndTime + " vs " + fileDuration);
         times.set(times.size() - 1,(float)fileDuration);
       }
-    }
+    }*/
     return typeToEndTimes;
   }
 
@@ -576,7 +579,9 @@ public class ASRScoring extends Scoring {
     HTKDictionary htkDictionary = new HTKDictionary(dictFile);
     long now = System.currentTimeMillis();
     int size = htkDictionary.size(); // force read from lazy val
-    logger.debug("read dict " + dictFile + " of size " +size + " in " + (now-then) + " millis");
+    if (now-then > 100) {
+      logger.debug("read dict " + dictFile + " of size " +size + " in " + (now-then) + " millis");
+    }
     return htkDictionary;
   }
 
@@ -598,7 +603,8 @@ public class ASRScoring extends Scoring {
         testAudio.jscore(sentence, htkDictionary, letterToSoundClass, configFile);
       float hydec_score = jscoreOut._1;
       long timeToRunHydec = System.currentTimeMillis() - then;
-      logger.debug("getScoresFromHydec : got score " + hydec_score +" and took " + timeToRunHydec + " millis");
+      logger.debug("getScoresFromHydec : scoring sentence " +sentence.length()+" characters long, got score " + hydec_score +
+        " and took " + timeToRunHydec + " millis");
 
       return new Scores(hydec_score, jscoreOut._2);
     } catch (AssertionError e) {
