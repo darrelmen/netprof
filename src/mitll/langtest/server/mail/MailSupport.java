@@ -18,9 +18,9 @@ import java.util.Properties;
 public class MailSupport {
   private static final String RECIPIENT_NAME = "Gordon Vidaver";
   private static final String DATA_COLLECT_WEBMASTER = "Data Collect Webmaster";
-  private static Logger logger = Logger.getLogger(MailSupport.class);
+  private static final Logger logger = Logger.getLogger(MailSupport.class);
   private static final String EMAIL = "gordon.vidaver@ll.mit.edu";
-  private boolean debugEmail;
+  private final boolean debugEmail;
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getMailSupport()
