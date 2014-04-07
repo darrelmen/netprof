@@ -29,7 +29,7 @@ public class GradeDAO extends DAO {
   private static final String GRADES = "grades";
   private final boolean debug = false;
   private final UserDAO userDAO;
-  private ResultDAO resultDAO;
+  private final ResultDAO resultDAO;
 
   public GradeDAO(Database database, UserDAO userDAO, ResultDAO resultDAO) {
     super(database);
