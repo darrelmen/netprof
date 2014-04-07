@@ -12,8 +12,8 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.CommonShell;
 
 /**
  * Handles left side of NetPron2 -- which exercise is the current one, highlighting, etc.
@@ -24,7 +24,7 @@ import mitll.langtest.shared.ExerciseShell;
  * Date: 7/9/12
  * Time: 5:59 PM
  */
-public class GradedExerciseList<T extends ExerciseShell> extends PagingExerciseList<T> {
+public class GradedExerciseList extends PagingExerciseList {
   private final boolean englishOnly;
   private int expectedGrades = 1;
 
@@ -38,7 +38,7 @@ public class GradedExerciseList<T extends ExerciseShell> extends PagingExerciseL
    */
   public GradedExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
                             boolean showInOrder, boolean englishOnly, ExerciseController controller, String instance) {
-    super(currentExerciseVPanel, service, feedback, false, showInOrder, controller, true, instance);
+    super(currentExerciseVPanel, service, feedback, null, controller, false, showInOrder, true, instance);
     this.englishOnly = englishOnly;
   }
 
@@ -55,6 +55,11 @@ public class GradedExerciseList<T extends ExerciseShell> extends PagingExerciseL
     getNextUngraded(true);
     pagingContainer.selectFirst();
   }
+
+  protected int getVerticalUnaccountedFor() {
+    return 150;
+  }
+
   /**
    * @see mitll.langtest.client.list.ListInterface#loadExercise(String)
    * @param itemID
@@ -76,11 +81,11 @@ public class GradedExerciseList<T extends ExerciseShell> extends PagingExerciseL
   }
 
   /**
-   * @see mitll.langtest.client.list.ListInterface#loadNextExercise(mitll.langtest.shared.ExerciseShell)
+   * @seex mitll.langtest.client.list.ListInterface#loadNextExercise(mitll.langtest.shared.ExerciseShell)
    * @param current
    */
   @Override
-  protected void getNextExercise(ExerciseShell current) {
+  protected void getNextExercise(CommonShell current) {
     getNextUngraded(false);
   }
 
@@ -94,26 +99,26 @@ public class GradedExerciseList<T extends ExerciseShell> extends PagingExerciseL
     };
     t.schedule(2000);
 
-    service.getNextUngradedExercise(""+user.getUser(), expectedGrades, englishOnly, new AsyncCallback<Exercise>() {
+    service.getNextUngradedExercise(""+user.getUser(), expectedGrades, englishOnly, new AsyncCallback<CommonExercise>() {
       public void onFailure(Throwable caught) {
         t.cancel();
         popup.hide();
       }
-      public void onSuccess(Exercise result) {
+      public void onSuccess(CommonExercise result) {
         t.cancel();
         popup.hide();
 
         if (result != null) {
           if (!loadByID(result.getID())) {
             System.out.println("showing first exercise...");
-            T toLoad = getFirst();
+            CommonShell toLoad = getFirst();
             loadExercise(toLoad.getID());
           }
         }
         else {
           if (showFirstIfNoneToGrade) {
             System.out.println("showing first exercise...");
-            T toLoad = getFirst();
+            CommonShell toLoad = getFirst();
             loadExercise(toLoad.getID());
           }
           else {
@@ -142,7 +147,7 @@ public class GradedExerciseList<T extends ExerciseShell> extends PagingExerciseL
   private PopupPanel getPopup2(String toShow) {
     final PopupPanel popupImage = new PopupPanel(true);
     popupImage.add(new HTML(toShow));
-    popupImage.setPopupPosition(Window.getClientWidth()/2,Window.getClientHeight()/2);
+    popupImage.setPopupPosition(Window.getClientWidth() / 2, Window.getClientHeight() / 2);
     return popupImage;
   }
 }
