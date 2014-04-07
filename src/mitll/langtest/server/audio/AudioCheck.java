@@ -20,7 +20,7 @@ import java.io.IOException;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioCheck {
-  private static Logger logger = Logger.getLogger(AudioCheck.class);
+  private static final Logger logger = Logger.getLogger(AudioCheck.class);
 
   private static final int MinRecordLength = 1*(10000/2); // 10000 = 0.7 second
   private static final int WinSize = 10;
@@ -164,8 +164,8 @@ public class AudioCheck {
   }
 
   public static class ValidityAndDur {
-    public AudioAnswer.Validity validity;
-    public int durationInMillis;
+    public final AudioAnswer.Validity validity;
+    public final int durationInMillis;
 
     public ValidityAndDur(AudioAnswer.Validity validity) {
       this(validity, 0d);
