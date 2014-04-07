@@ -6,7 +6,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
 
 /**
  * Created with IntelliJ IDEA.
@@ -16,7 +16,7 @@ import mitll.langtest.shared.Exercise;
  * To change this template use File | Settings | File Templates.
  */
 public class GoodwaveExercisePanelFactory extends ExercisePanelFactory {
-  private float screenPortion;
+  private final float screenPortion;
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
@@ -33,7 +33,7 @@ public class GoodwaveExercisePanelFactory extends ExercisePanelFactory {
   }
 
   @Override
-  public Panel getExercisePanel(Exercise e) {
+  public Panel getExercisePanel(CommonExercise e) {
     return new GoodwaveExercisePanel(e, controller, exerciseList, screenPortion,
       !controller.getProps().isClassroomMode() // don't do keybinding stuff in classroom mode... at least for now
       ,
