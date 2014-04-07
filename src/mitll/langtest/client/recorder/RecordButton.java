@@ -28,14 +28,16 @@ import mitll.langtest.client.flashcard.FlashcardRecordButtonPanel;
  */
 public class RecordButton extends Button {
   private static final int PERIOD_MILLIS = 500;
+  private static final String RECORD1 = "Record";
+  private static final String STOP1 = "Stop";
   private final String RECORD;
   private final String STOP;
 
   private boolean recording = false;
   private Timer recordTimer;
   private final int autoStopDelay;
-  private boolean doClickAndHold;
-  protected boolean mouseDown = false;
+  private final boolean doClickAndHold;
+  boolean mouseDown = false;
 
   private RecordingListener recordingListener;
 
@@ -46,14 +48,14 @@ public class RecordButton extends Button {
   }
 
   /**
-   * @see mitll.langtest.client.scoring.PostAudioRecordButton#PostAudioRecordButton(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.LangTestDatabaseAsync, int, boolean, String, String, String)
+   * @see mitll.langtest.client.scoring.PostAudioRecordButton#PostAudioRecordButton(mitll.langtest.shared.CommonExercise, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.LangTestDatabaseAsync, int, boolean, String, String, String)
    * @param delay
    * @param doClickAndHold
    * @param addKeyBinding
    * @param buttonText
    * @param stopButtonText
    */
-  public RecordButton(int delay, boolean doClickAndHold, boolean addKeyBinding, String buttonText, String stopButtonText) {
+  protected RecordButton(int delay, boolean doClickAndHold, boolean addKeyBinding, String buttonText, String stopButtonText) {
     super(buttonText);
     RECORD = buttonText;
     STOP = stopButtonText;
@@ -61,6 +63,8 @@ public class RecordButton extends Button {
     if (doClickAndHold) setTitle(FlashcardRecordButtonPanel.PRESS_AND_HOLD_THE_MOUSE_BUTTON_TO_RECORD);
     this.autoStopDelay = delay;
     setType(ButtonType.PRIMARY);
+   // if (addKeyBinding) new Exception().printStackTrace();
+
     setupRecordButton(addKeyBinding);
     getElement().setId("record_button");
   }
@@ -70,13 +74,14 @@ public class RecordButton extends Button {
    * @param delay
    * @param recordingListener
    * @param doClickAndHold
+   * @param addKeyBinding
    */
-  public RecordButton(int delay, RecordingListener recordingListener, boolean doClickAndHold) {
-    this(delay, doClickAndHold, true, "Record", "Stop");
+  public RecordButton(int delay, RecordingListener recordingListener, boolean doClickAndHold, boolean addKeyBinding) {
+    this(delay, doClickAndHold, addKeyBinding, RECORD1, STOP1);
     this.setRecordingListener(recordingListener);
   }
 
-  protected void removeImage() {  StyleHelper.removeStyle(icon, icon.getBaseIconType());  }
+  void removeImage() {  StyleHelper.removeStyle(icon, icon.getBaseIconType());  }
 
   public boolean isRecording() {
     return recording;
@@ -92,12 +97,12 @@ public class RecordButton extends Button {
   private class ButtonClickEvent extends ClickEvent {}
 
   /**
-   * @see #RecordButton(int, mitll.langtest.client.recorder.RecordButton.RecordingListener, boolean)
+   * @see #RecordButton(int, mitll.langtest.client.recorder.RecordButton.RecordingListener, boolean, boolean)
    * @param recordingListener
    */
-  public void setRecordingListener(RecordingListener recordingListener) { this.recordingListener = recordingListener;  }
+  protected void setRecordingListener(RecordingListener recordingListener) { this.recordingListener = recordingListener;  }
 
-  protected void setupRecordButton(boolean addKeyBinding) {
+  void setupRecordButton(boolean addKeyBinding) {
     if (doClickAndHold) {
       addMouseDownHandler(new MouseDownHandler() {
         @Override
@@ -129,7 +134,7 @@ public class RecordButton extends Button {
   /**
    * @see #setupRecordButton
    */
-  protected void doClick() {
+  void doClick() {
     if (isVisible() && isEnabled()) {
       startOrStopRecording();
     }
@@ -145,19 +150,19 @@ public class RecordButton extends Button {
     }
   }
 
-  private void start() {
+  protected void start() {
     recording = true;
     showRecording();
     recordingListener.startRecording();
   }
 
-  private void stop() {
+  protected void stop() {
     recording = false;
     showStopped();
     recordingListener.stopRecording();
   }
 
-  protected void showRecording() {
+  void showRecording() {
     if (showInitialRecordImage()) {
       flipImage();
     }
@@ -183,7 +188,7 @@ public class RecordButton extends Button {
     t.scheduleRepeating(PERIOD_MILLIS);
   }
 
-  protected void showStopped() {
+  void showStopped() {
     if (t != null) {
       hideBothRecordImages();
       t.cancel();
@@ -193,15 +198,15 @@ public class RecordButton extends Button {
   /**
    * @return if we want to flip images
    */
-  protected boolean showInitialRecordImage() {
+  boolean showInitialRecordImage() {
     setText(STOP);
     return true;
   }
 
-  protected void showFirstRecordImage() {}
-  protected void showSecondRecordImage() {}
+  void showFirstRecordImage() {}
+  void showSecondRecordImage() {}
 
-  protected void hideBothRecordImages() {
+  void hideBothRecordImages() {
     setText(RECORD);
   }
 
