@@ -6,7 +6,7 @@ import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.database.Export;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.log4j.Logger;
 
@@ -31,20 +31,19 @@ import java.util.TreeSet;
  * To change this template use File | Settings | File Templates.
  */
 public class AutoCRT {
-  private static Logger logger = Logger.getLogger(AutoCRT.class);
+  private static final Logger logger = Logger.getLogger(AutoCRT.class);
+  private static final String SERIALIZED_CLASSIFIER = "serializedClassifier.ser";
 
-  public static final double CORRECT_THRESHOLD = 0.499;
+  private static final double CORRECT_THRESHOLD = 0.499;
   private static final boolean GET_MSA = false;
-  //private static final boolean USE_SERIALIZED = true;
-
   private static final boolean TESTING = false; // this doesn't really work
   private Classifier<AutoGradeExperiment.Event> classifier = null;
   private Map<String, Export.ExerciseExport> exerciseIDToExport;
-  private String installPath;
-  private String mediaDir;
+  private final String installPath;
+  private final String mediaDir;
   private final Export exporter;
-  private AutoCRTScoring db;
-  private double minPronScore;
+  private final AutoCRTScoring db;
+  private final double minPronScore;
 
   /**
    * @see mitll.langtest.server.audio.AudioFileHelper#makeAutoCRT
@@ -65,27 +64,26 @@ public class AutoCRT {
   /**
    * Get an auto crt reco output and score given an audio answer.
    *
-   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile(String, String, String, int, int, int, boolean, String, boolean)
-   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.audio.AudioCheck.ValidityAndDur, String, boolean, mitll.langtest.client.LangTestDatabase)
-   * @param exerciseID
-   * @param questionID
-   * @param e
-   * @param audioFile
-   * @param answer
+   * @seex mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile(String, String, String, int, int, int, boolean, String, boolean)
+   * @seex mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.audio.AudioCheck.ValidityAndDur, String, boolean, mitll.langtest.client.LangTestDatabase)
+   * @param exerciseID for this exercise
+   * @param questionID and this question
+   * @param audioFile score this file (
+   * @param answer mark decode output, correctness, and whether they said something in the set of expected sentences
    */
-  public void getAutoCRTDecodeOutput(String exerciseID, int questionID, Exercise e, File audioFile,
-                                     AudioAnswer answer) {
-    Collection<String> exportedAnswers = getExportedAnswers(exerciseID, questionID);
-    exportedAnswers = db.getValidPhrases(exportedAnswers);
-    //logger.info("getAutoCRTDecodeOutput : got answers, num = " + exportedAnswers.size());
+  public void getAutoCRTDecodeOutput(String exerciseID, int questionID, File audioFile, AudioAnswer answer) {
+    PretestScore asrScoreForAudio = getScoreForAudio(exerciseID, questionID, audioFile);
+    markCorrectnessOnAnswer(exerciseID, questionID, asrScoreForAudio, answer);
+  }
 
-    PretestScore asrScoreForAudio = db.getASRScoreForAudio(audioFile, exportedAnswers);
-
+  private void markCorrectnessOnAnswer(String exerciseID, int questionID, PretestScore asrScoreForAudio, AudioAnswer answer) {
     String recoSentence = asrScoreForAudio.getRecoSentence();
     boolean lowPronScore = asrScoreForAudio.getHydecScore() < minPronScore;
     boolean matchedUnknown = recoSentence.equals(SLFFile.UNKNOWN_MODEL);
 
-    logger.info("for " + exerciseID + " given " +exportedAnswers.size() + " possible matches," +
+    logger.info("markCorrectnessOnAnswer: took " + //(now - then) + " millis to get score "+
+      " for " + exerciseID + "/" +questionID+
+      //" given " +exportedAnswers.size() + " possible matches," +
       " reco sentence was '" + recoSentence + "', score " + asrScoreForAudio.getHydecScore() +
       (lowPronScore ? " score too low " : "") +
       (matchedUnknown ? " matched unknown model " : ""));
@@ -99,13 +97,14 @@ public class AutoCRT {
     } else {
       String annotatedResponse = getAnnotatedResponse(exerciseID, questionID, recoSentence);
 
-      double scoreForAnswer = (recoSentence.length() > 0) ? getScoreForExercise(e, questionID, recoSentence) : 0.0d;
+      double scoreForAnswer = (recoSentence.length() > 0) ? getScoreForExercise(exerciseID, questionID, recoSentence) : 0.0d;
 
       answer.setDecodeOutput(annotatedResponse);
       answer.setScore(scoreForAnswer);
       boolean correct = scoreForAnswer > CORRECT_THRESHOLD;
 
-      logger.info("for " + exerciseID + " reco sentence was '" + recoSentence + "' classifier score "+scoreForAnswer +
+      logger.info("markCorrectnessOnAnswer: for " + exerciseID +
+        " reco sentence was '" + recoSentence + "' classifier score "+scoreForAnswer +
         " correct " + correct + " matched answer is "+ !matchedUnknown);
       answer.setCorrect(correct);
       answer.setSaidAnswer(!matchedUnknown);
@@ -113,16 +112,44 @@ public class AutoCRT {
   }
 
   /**
+   * Do decoding on an audio file over a set of possible reco sentences and the UNKNOWN model.
+   * <p></p>
+   * The possible sentences are student responses collected previously (exported answers from the student h2 db).
+   * Filter out student answers that we can't decode given our dictionary (e.g. numbers "222").
+   *
+   * @see #getExportedAnswers(String, int)
+   * @param exerciseID for this exercise
+   * @param questionID for this question
+   * @param audioFile decode this file
+   * @return the reco sentence and the score for this sentence
+   */
+  private PretestScore getScoreForAudio(String exerciseID, int questionID, File audioFile) {
+    Collection<String> exportedAnswers = getExportedAnswers(exerciseID, questionID);
+    exportedAnswers = db.getValidPhrases(exportedAnswers);   // remove phrases that break hydec
+    //logger.info("getAutoCRTDecodeOutput : got answers, num = " + exportedAnswers.size());
+    long then = System.currentTimeMillis();
+
+    PretestScore asrScoreForAudio = db.getASRScoreForAudio(audioFile, exportedAnswers);
+    long now = System.currentTimeMillis();
+    if (now-then > 100) {
+      logger.info("getScoreForAudio : took " + (now - then) + " millis to get score " + asrScoreForAudio +
+        " given" + exportedAnswers.size() +
+        " answers for exercise " + exerciseID + "/" + questionID);
+    }
+    return asrScoreForAudio;
+  }
+
+  /**
    * Allow multiple correct answers from synonym sentence list.
    *
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
-   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.audio.AudioCheck.ValidityAndDur, String, boolean, mitll.langtest.client.LangTestDatabase)
-   * @see mitll.langtest.server.audio.AudioFileHelper#getFlashcardAnswer(mitll.langtest.shared.Exercise, java.io.File, mitll.langtest.shared.AudioAnswer)
+   * @seex mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.audio.AudioCheck.ValidityAndDur, String, boolean, mitll.langtest.client.LangTestDatabase)
+   * @seex mitll.langtest.server.audio.AudioFileHelper#getFlashcardAnswer(mitll.langtest.shared.Exercise, java.io.File, mitll.langtest.shared.AudioAnswer)
    * @param e
    * @param audioFile
    * @param answer
    */
-  public void getFlashcardAnswer(Exercise e,
+  public void getFlashcardAnswer(CommonExercise e,
                                  File audioFile,
                                  AudioAnswer answer) {
     List<String> foregroundSentences = getRefSentences(e);
@@ -130,15 +157,15 @@ public class AutoCRT {
     for (String ref : foregroundSentences) {
       foreground.add(removePunct(ref));
     }
-    int n = foreground.size();
+/*    int n = foreground.size();
     for (String synonym : getRefs(e.getSynonymSentences())) {
       if (!foregroundSentences.contains(synonym)) {
         foreground.add(removePunct(synonym));
       }
     }
-    if (foreground.size() > n) logger.debug("Added " + e.getSynonymSentences() + " synonyms");
+    if (foreground.size() > n) logger.debug("Added " + e.getSynonymSentences() + " synonyms");*/
 
-    logger.debug("getFlashcardAnswer : foreground " + foreground);
+    //logger.debug("getFlashcardAnswer : foreground " + foreground);
     PretestScore asrScoreForAudio = db.getASRScoreForAudio(audioFile, foreground);
 
     String recoSentence =
@@ -174,8 +201,10 @@ public class AutoCRT {
    * @param other
    * @return
    */
-  private List<String> getRefSentences(Exercise other) {
-    List<String> refSentences = other.getRefSentences();
+  private List<String> getRefSentences(CommonExercise other) {
+   // List<String> refSentences = other.getRefSentences();
+    List<String> refSentences = new ArrayList<String>();
+    refSentences.add(other.getForeignLanguage());
     return getRefs(refSentences);
   }
 
@@ -222,19 +251,20 @@ public class AutoCRT {
    * For this exercise and question, score the answer.<br></br>
    * Do this by getting all other answers to this question and the answer key and given this information
    * and the answer, ask the classifier to score the answer.
-   * @see mitll.langtest.server.audio.AudioFileHelper#getScoreForAnswer(mitll.langtest.shared.Exercise, int, String)
+   * @seex mitll.langtest.server.audio.AudioFileHelper#getScoreForAnswer(mitll.langtest.shared.Exercise, int, String)
    * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAnswer
    * @param e for this exercise
    * @param questionID for this question (when multiple questions in an exercise)
    * @param answer to score (correct->incorrect)
    * @return 0-1
    */
-  public double getScoreForExercise(Exercise e, int questionID, String answer) {
+  public double getScoreForExercise(CommonExercise e, int questionID, String answer) {
+    String exerciseID = e.getID();
     if (answer.isEmpty()) {
-      logger.warn("huh? for exercise " + e.getID() + " question " + questionID + " answer is empty?");
+      logger.warn("huh? for exercise " + exerciseID + " question " + questionID + " answer is empty?");
       return 0d;
     }
-    return getScoreForExercise(e.getID(), questionID, answer);
+    return getScoreForExercise(exerciseID, questionID, answer);
   }
 
   private double getScoreForExercise(String id, int questionID, String answer) {
@@ -247,10 +277,14 @@ public class AutoCRT {
       return 0d;
     }
     else {
+      long then = System.currentTimeMillis();
+
       double score = AutoGradeExperiment.getScore(getClassifier(), answer, exerciseExport);
+      long now = System.currentTimeMillis();
+
       DecimalFormat format = new DecimalFormat("#.###");
       logger.info("AutoGradeExperiment : score was " + format.format(score) + " for answer '" +  answer+
-        "' in context of " + exerciseExport );
+        "' in context of " + exerciseExport +" and took " +(now-then) + " millis");
       return score;
     }
   }
@@ -278,6 +312,7 @@ public class AutoCRT {
    */
   private Collection<String> getExportedAnswers(String id, int questionID) {
     getClassifier();
+    long then = System.currentTimeMillis();
 
     Set<String> answers = new TreeSet<String>();
     Export.ExerciseExport exportForExercise = getExportForExercise(id, questionID);
@@ -285,6 +320,12 @@ public class AutoCRT {
       for (Export.ResponseAndGrade resp : exportForExercise.rgs) {
         answers.add(resp.response);
       }
+    }
+
+    long now = System.currentTimeMillis();
+    if (now-then > 100) {
+      logger.info("getExportedAnswers : took " + (now - then) + " millis to get " + answers.size() +
+        " possible answers for exercise " + id);
     }
     return answers;
   }
@@ -313,8 +354,8 @@ public class AutoCRT {
     if (classifier != null) return classifier;
 
     String configDir = (installPath != null ? installPath + File.separator : "") + mediaDir + File.separator;
-    File serializedClassifier = new File(configDir, "serializedClassifier.ser");
-    if (/*USE_SERIALIZED && */serializedClassifier.exists()) {
+    File serializedClassifier = new File(configDir, SERIALIZED_CLASSIFIER);
+    if (serializedClassifier.exists()) {
       classifier = rehydrateClassifier(configDir, serializedClassifier);
       return classifier;
     } else {
@@ -329,20 +370,12 @@ public class AutoCRT {
         List<Export.ExerciseExport> export = getExportedGradedItems();
         readConfigFile(configDir);
 
-  //      if (USE_SERIALIZED) {
-          long then = System.currentTimeMillis();
-          AutoGradeExperiment.saveClassifierAfterExport(export, serializedClassifier.getAbsolutePath());
-          long now = System.currentTimeMillis();
+        long then = System.currentTimeMillis();
+        AutoGradeExperiment.saveClassifierAfterExport(export, serializedClassifier.getAbsolutePath());
+        long now = System.currentTimeMillis();
 
-          logger.info("took " +((now-then)/1000) + " seconds to saved classifier to " + serializedClassifier.getAbsolutePath());
-          classifier = AutoGradeExperiment.getClassifierFromSavedModel(serializedClassifier.getAbsolutePath(), export);
-/*        }
-        else {
-          long then = System.currentTimeMillis();
-          classifier = AutoGradeExperiment.getClassifierFromExport(export);
-          long now = System.currentTimeMillis();
-          logger.debug("took " +((now-then)/1000) + " seconds to train classifier on " + export.size() + " items.");
-        }*/
+        logger.info("took " + ((now - then) / 1000) + " seconds to saved classifier to " + serializedClassifier.getAbsolutePath());
+        classifier = AutoGradeExperiment.getClassifierFromSavedModel(serializedClassifier.getAbsolutePath(), export);
         return classifier;
       }
     }
@@ -355,15 +388,28 @@ public class AutoCRT {
    * @return
    */
   private Classifier<AutoGradeExperiment.Event> rehydrateClassifier(String configDir, File serializedClassifier) {
-    logger.info("using previously calculated classifier.");
-    List<Export.ExerciseExport> export = getExportedGradedItems();
-    readConfigFile(configDir);
+    logger.info("rehydrateClassifier : using previously calculated classifier.");
     long then = System.currentTimeMillis();
+
+    List<Export.ExerciseExport> export = getExportedGradedItems();
+    long now = System.currentTimeMillis();
+    if (now-then > 100) {
+      logger.info("rehydrateClassifier : took " + (now - then) + " millis to export " + export.size() + " items");
+    }
+    readConfigFile(configDir);
+    then = now;
     Classifier<AutoGradeExperiment.Event> classifier =
       AutoGradeExperiment.getClassifierFromSavedModel(serializedClassifier.getAbsolutePath(), export);
-    long now = System.currentTimeMillis();
+     now = System.currentTimeMillis();
     long l = (now - then) / 1000;
-    if (l > 1) logger.debug("took " + l + " seconds to rehydrate classifier");
+    if (l > 60) {
+      long min = l/60;
+      l -= min*60;
+      logger.warn("rehydrateClassifier : took " + min + " minutes, " + l + " seconds to rehydrate classifier");
+    }
+    else if (l > 1) {
+      logger.debug("rehydrateClassifier : took " + l + " seconds to rehydrate classifier");
+    }
     return classifier;
   }
 
@@ -389,8 +435,10 @@ public class AutoCRT {
     populateExportIdToExport(export);
     long now = System.currentTimeMillis();
 
-    logger.debug("took " +((now-then)/1000) + " seconds to do getExportedGradedItems on " + export.size() + " items.");
-
+    if (now - then > 100) {
+      logger.debug("getExportedGradedItems took " + (now - then) + " millis to get " + export.size() +
+        " exported GradedItems items.");
+    }
     return export;
   }
 
