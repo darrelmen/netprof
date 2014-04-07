@@ -9,8 +9,8 @@ import com.google.gwt.core.client.JavaScriptObject;
  * @author gregbramble
  *
  */
-public class Sound {
-	private AudioControl parent;
+class Sound {
+	private final AudioControl parent;
 	public JavaScriptObject sound;
 	
 	public Sound(AudioControl parent){
