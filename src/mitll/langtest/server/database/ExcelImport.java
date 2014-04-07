@@ -5,17 +5,16 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.UserExerciseDAO;
 import mitll.langtest.server.database.custom.UserListManager;
+import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseFormatter;
-import mitll.langtest.shared.custom.UserExercise;
 import org.apache.log4j.Logger;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -34,6 +33,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+//import mitll.langtest.shared.Exercise;
+
 /**
  * Reads an excel spreadsheet from DLI.
  * <p/>
@@ -43,20 +44,20 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class ExcelImport implements ExerciseDAO {
-  private static Logger logger = Logger.getLogger(ExcelImport.class);
+  private static final Logger logger = Logger.getLogger(ExcelImport.class);
   private static final boolean INCLUDE_ENGLISH_SEMI_AS_DEFECT = true;
 
   private final boolean isFlashcard;
 
-  private List<Exercise> exercises = null;
-  private Map<String, Exercise> idToExercise = new HashMap<String, Exercise>();
-  private List<String> errors = new ArrayList<String>();
+  private List<CommonExercise> exercises = null;
+  private final Map<String, CommonExercise> idToExercise = new HashMap<String, CommonExercise>();
+  private final List<String> errors = new ArrayList<String>();
   private final String file;
-  private SectionHelper sectionHelper = new SectionHelper();
-  private boolean debug = false;
+  private final SectionHelper sectionHelper = new SectionHelper();
+  private final boolean debug = false;
   private String mediaDir;
-  private Set<String> missingSlowSet = new HashSet<String>();
-  private Set<String> missingFastSet = new HashSet<String>();
+  private final Set<String> missingSlowSet = new HashSet<String>();
+  private final Set<String> missingFastSet = new HashSet<String>();
   private boolean shouldHaveRefAudio = false;
   private boolean usePredefinedTypeOrder;
   private final String language;
@@ -67,32 +68,26 @@ public class ExcelImport implements ExerciseDAO {
   private UserListManager userListManager;
   private AddRemoveDAO addRemoveDAO;
   private File installPath;
-
-  /**
-   * @see mitll.langtest.server.SiteDeployer#readExercisesPopulateSite(mitll.langtest.shared.Site, String, java.io.InputStream)
-   */
-  public ExcelImport() {
-    this.file = null;
-    this.isFlashcard = false;
-    this.language = "";
-    maxExercises = Integer.MAX_VALUE;
-  }
+  private boolean collectSynonyms = true;
+  boolean addDefects;
 
   /**
    *
    * @param file
    * @param relativeConfigDir
    * @param userListManager
+   * @param addDefects
    * @see DatabaseImpl#makeDAO
    */
   public ExcelImport(String file, String mediaDir, String relativeConfigDir, ServerProperties serverProps,
                      UserListManager userListManager,
-                     String installPath) {
+                     String installPath, boolean addDefects) {
     this.file = file;
     this.serverProps = serverProps;
     this.isFlashcard = serverProps.isFlashcard();
     maxExercises = serverProps.getMaxNumExercises();
     this.mediaDir = mediaDir;
+    this.addDefects = addDefects;
     this.installPath = new File(installPath);
     if (!this.installPath.exists()) {
       logger.warn("\n\n\nhuh? install path " + this.installPath.getAbsolutePath() + " doesn't exist???");
@@ -106,6 +101,8 @@ public class ExcelImport implements ExerciseDAO {
     this.skipSemicolons = serverProps.shouldSkipSemicolonEntries();
     this.audioOffset = serverProps.getAudioOffset();
     this.userListManager = userListManager;
+    collectSynonyms = this.serverProps.getCollectSynonyms();
+
 /*    logger.debug("\n\n\n\n ---> ExcelImport : config " + relativeConfigDir +
       " media dir " +mediaDir + " slow missing " +missingSlowSet.size() + " fast " + missingFastSet.size());*/
   }
@@ -131,7 +128,9 @@ public class ExcelImport implements ExerciseDAO {
       }
 
     } else {
-      logger.debug("Can't find " + file + " under " + relativeConfigDir + " abs path " + missingSlow.getAbsolutePath());
+      if (serverProps.isGoodwaveMode()) {
+        logger.debug("Can't find " + file + " under " + relativeConfigDir + " abs path " + missingSlow.getAbsolutePath());
+      }
     }
     return missingSlow.exists();
   }
@@ -145,23 +144,22 @@ public class ExcelImport implements ExerciseDAO {
    * @return
    * @see mitll.langtest.server.database.DatabaseImpl#getExercises()
    */
-  public List<Exercise> getRawExercises() {
+  public List<CommonExercise> getRawExercises() {
     synchronized (this) {
       if (exercises == null) {
         exercises = readExercises(new File(file));
-        for (Exercise e : exercises) idToExercise.put(e.getID(), e);
+        for (CommonExercise e : exercises) idToExercise.put(e.getID(), e);
 
         Set<String> removes = addRemoveDAO.getRemoves();
 
-      //  exercises.removeAll(removes);
         for (String id : removes) {
-          Exercise remove = idToExercise.remove(id);
+          CommonExercise remove = idToExercise.remove(id);
           exercises.remove(remove);
         }
 
-        Collection<UserExercise> overrides = userExerciseDAO.getOverrides();
+        Collection<CommonUserExercise> overrides = userExerciseDAO.getOverrides();
 
-        for (UserExercise userExercise : overrides) {
+        for (CommonUserExercise userExercise : overrides) {
           if (removes.contains(userExercise.getID())) {
 
           }
@@ -171,14 +169,14 @@ public class ExcelImport implements ExerciseDAO {
         }
 
         for (String id : addRemoveDAO.getAdds()) {
-          UserExercise where = userExerciseDAO.getWhere(id);
+          CommonUserExercise where = userExerciseDAO.getWhere(id);
           if (where == null) {
             logger.error("huh? couldn't find user exercise dup " + id);
           } else {
             add(where);
-            Exercise exercise = where.toExercise();
-            for (Map.Entry<String, String> pair : exercise.getUnitToValue().entrySet()) {
-              sectionHelper.addExerciseToLesson(exercise, pair.getKey(), pair.getValue());
+            //Exercise exercise = where.toExercise();
+            for (Map.Entry<String, String> pair : where.getUnitToValue().entrySet()) {
+              sectionHelper.addExerciseToLesson(where, pair.getKey(), pair.getValue());
             }
           }
         }
@@ -188,28 +186,23 @@ public class ExcelImport implements ExerciseDAO {
     return exercises;
   }
 
-  private void overlayExercises(Collection<UserExercise> overlay) {
-    for (UserExercise userExercise : overlay) {
-      addOverlay(userExercise);
-    }
-  }
-
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#editItem(mitll.langtest.shared.custom.UserExercise)
+   * @see #getRawExercises()
    * @param userExercise
    */
   @Override
-  public void addOverlay(UserExercise userExercise) {
+  public void addOverlay(CommonUserExercise userExercise) {
     //logger.debug("addOverlay for " +userExercise);
-    Exercise exercise = getExercise(userExercise.getID());
+    CommonExercise exercise = getExercise(userExercise.getID());
     //logger.debug("\taddOverlay at " +userExercise.getID() + " found " +exercise);
 
     if (exercise == null) {
       logger.error("addOverlay : huh? can't find " + userExercise);
     }
     else {
-      Exercise over = userExercise.toExercise();
-
+     // Exercise over = userExercise.toExercise();
+   //   over.setUnitToValue(exercise.getUnitToValue());
       //logger.debug("\taddOverlay replacing with " +over + " and " +over.getTooltip());
 
       synchronized (this) {
@@ -218,20 +211,20 @@ public class ExcelImport implements ExerciseDAO {
           logger.error ("addOverlay : huh? couldn't find " + exercise);
         }
         else {
-          exercises.set(i, over);
+          exercises.set(i, userExercise);
         }
-        idToExercise.put(over.getID(), over);
+        idToExercise.put(userExercise.getID(), userExercise);
 
-        logger.debug("addOverlay : after " + getExercise(userExercise.getID()));
+        //logger.debug("addOverlay : after " + getExercise(userExercise.getID()));
       }
     }
   }
 
-  public void add(UserExercise ue) {
+  public void add(CommonUserExercise ue) {
     synchronized (this) {
-      Exercise exercise = ue.toExercise();
-      exercises.add(exercise);
-      idToExercise.put(exercise.getID(), exercise);
+     // Exercise exercise = ue.toExercise();
+      exercises.add(ue);
+      idToExercise.put(ue.getID(), ue);
     }
   }
 
@@ -239,7 +232,7 @@ public class ExcelImport implements ExerciseDAO {
   public boolean remove(String id) {
     synchronized (this) {
       if (!idToExercise.containsKey(id)) return false;
-      Exercise remove = idToExercise.remove(id);
+      CommonExercise remove = idToExercise.remove(id);
       exercises.remove(remove);
       return true;
     }
@@ -252,11 +245,11 @@ public class ExcelImport implements ExerciseDAO {
   @Override
   public void setAddRemoveDAO(AddRemoveDAO addRemoveDAO) { this.addRemoveDAO = addRemoveDAO; }
 
-  public Exercise getExercise(String id) {
+  public CommonExercise getExercise(String id) {
     if (idToExercise.isEmpty()) logger.warn("huh? couldn't find any exercises..?");
 
     synchronized (this) {
-      Exercise exercise = idToExercise.get(id);
+      CommonExercise exercise = idToExercise.get(id);
       //if (exercise == null) logger.warn("no '" +id+"'  in " + idToExercise.keySet());
       return exercise;
     }
@@ -267,35 +260,38 @@ public class ExcelImport implements ExerciseDAO {
    * @return
    * @see #getRawExercises()
    */
-  private List<Exercise> readExercises(File file) {
+  private List<CommonExercise> readExercises(File file) {
     try {
       return readExercises(new FileInputStream(file));
     } catch (FileNotFoundException e) {
       logger.error("looking for " + file.getAbsolutePath() + " got " + e, e);
     }
-    return new ArrayList<Exercise>();
+    return new ArrayList<CommonExercise>();
   }
 
   /**
    * @param inp
    * @return
-   * @see mitll.langtest.server.SiteDeployer#readExercises(mitll.langtest.shared.Site, org.apache.commons.fileupload.FileItem)
+   * @seex mitll.langtest.server.SiteDeployer#readExercises(mitll.langtest.shared.Site, org.apache.commons.fileupload.FileItem)
    */
-  public List<Exercise> readExercises(InputStream inp) {
-    List<Exercise> exercises = new ArrayList<Exercise>();
+  public List<CommonExercise> readExercises(InputStream inp) {
+    List<CommonExercise> exercises = new ArrayList<CommonExercise>();
     try {
-      Workbook wb = WorkbookFactory.create(inp);
+      long then = System.currentTimeMillis();
+       XSSFWorkbook wb = new XSSFWorkbook(inp);
+      long now = System.currentTimeMillis();
+      logger.debug("took " + (now-then) + " millis to read spreadsheet");
 
       for (int i = 0; i < wb.getNumberOfSheets(); i++) {
         Sheet sheet = wb.getSheetAt(i);
         if (sheet.getPhysicalNumberOfRows() > 0) {
           logger.info("------------ reading sheet " + sheet.getSheetName() + " ------------------");
-          Collection<Exercise> exercises1 = readFromSheet(sheet);
+          Collection<CommonExercise> exercises1 = readFromSheet(sheet);
           exercises.addAll(exercises1);
           logger.info("sheet " + sheet.getSheetName() + " had " + exercises1.size() + " items.");
           if (!exercises1.isEmpty()) {
-            Exercise first = exercises1.iterator().next();
-            logger.debug("e.g. " + first + " content  " + first.getContent() + " weight " + first.getWeight());
+            CommonExercise first = exercises1.iterator().next();
+            logger.debug("e.g. " + first + " content  " + first.getContent());// + " weight " + first.getWeight());
           }
         }
       }
@@ -311,17 +307,17 @@ public class ExcelImport implements ExerciseDAO {
       inp.close();
     } catch (IOException e) {
       e.printStackTrace();
-    } catch (InvalidFormatException e) {
+    } /*catch (InvalidFormatException e) {
       e.printStackTrace();
-    }
+    }*/
     return exercises;
   }
 
-  public List<Exercise> getExercises() { return exercises; }
+  public List<CommonExercise> getExercises() { return exercises; }
 
-  public Set<String> getSections() { return sectionHelper.getSections(); }
+ // public Set<String> getSections() { return sectionHelper.getSections(); }
 
-  public Map<String, Lesson> getSection(String type) { return sectionHelper.getSection(type); }
+ // public Map<String, Lesson> getSection(String type) { return sectionHelper.getSection(type); }
 
   public List<String> getErrors() {
     return errors;
@@ -332,8 +328,8 @@ public class ExcelImport implements ExerciseDAO {
    * @return
    * @see #readExercises(java.io.InputStream)
    */
-  private Collection<Exercise> readFromSheet(Sheet sheet) {
-    List<Exercise> exercises = new ArrayList<Exercise>();
+  private Collection<CommonExercise> readFromSheet(Sheet sheet) {
+    List<CommonExercise> exercises = new ArrayList<CommonExercise>();
     // logger.debug("for " + sheet.getSheetName() + " regions " +sheet.getNumMergedRegions());
     int id = 0;
     boolean gotHeader = false;
@@ -351,7 +347,7 @@ public class ExcelImport implements ExerciseDAO {
    // int segmentedIndex = -1;
     int audioIndex = -1;
     List<String> lastRowValues = new ArrayList<String>();
-    Map<String, List<Exercise>> englishToExercises = new HashMap<String, List<Exercise>>();
+    Map<String, List<CommonExercise>> englishToExercises = new HashMap<String, List<CommonExercise>>();
     int semis = 0;
     int logging = 0;
     int skipped = 0;
@@ -405,8 +401,6 @@ public class ExcelImport implements ExerciseDAO {
               idIndex = columns.indexOf(col);
             } else if (colNormalized.contains("context")) {
               contextIndex = columns.indexOf(col);
-           // } else if (colNormalized.contains("segmented")) {
-             // segmentedIndex = columns.indexOf(col);
             } else if (colNormalized.contains("audio_index")) {
               audioIndex = columns.indexOf(col);
             }
@@ -480,7 +474,7 @@ public class ExcelImport implements ExerciseDAO {
 
               boolean expectFastAndSlow = idIndex == -1;
               String idToUse = expectFastAndSlow ? "" + id++ : givenIndex;
-              Exercise imported = getExercise(idToUse, weightIndex, next, english, foreignLanguagePhrase, translit,
+              CommonExercise imported = getExercise(idToUse, weightIndex, next, english, foreignLanguagePhrase, translit,
                 meaning, context, false, (audioIndex != -1) ? getCell(next, audioIndex) : "");
               if (imported.hasRefAudio() || !shouldHaveRefAudio) {  // skip items without ref audio, for now.
                 recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported, unitName, chapterName, weekName);
@@ -490,12 +484,10 @@ public class ExcelImport implements ExerciseDAO {
                 if (!imported.hasRefAudio()) {
                   fieldToDefect.put("refAudio", "missing reference audio");
                 }
-                for (Map.Entry<String, String> pair : fieldToDefect.entrySet()) {
-                  userListManager.addDefect(imported.getID(), pair.getKey(), pair.getValue());
-                }
+                addDefects(fieldToDefect, imported);
               } else {
                 if (logging++ < 3) {
-                  logger.info("skipping exercise " + imported.getID() + " : '" + imported.getEnglishSentence() + "' since no audio.");
+                  logger.info("skipping exercise " + imported.getID() + " : '" + imported.getEnglish() + "' since no audio.");
                 }
                 skipped++;
               }
@@ -512,8 +504,9 @@ public class ExcelImport implements ExerciseDAO {
           }
         }
       }
-      if(this.serverProps.getCollectSynonyms())
-         addSynonyms(englishToExercises);
+
+/*      if(collectSynonyms)
+         addSynonyms(englishToExercises);*/
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
@@ -529,6 +522,14 @@ public class ExcelImport implements ExerciseDAO {
       logger.info("Skipped " + semis + " entries with semicolons or " + (100f * ((float) semis) / (float) id) + "%");
     }
     return exercises;
+  }
+
+  private void addDefects(Map<String, String> fieldToDefect, CommonExercise imported) {
+    if (addDefects) {
+      for (Map.Entry<String, String> pair : fieldToDefect.entrySet()) {
+        userListManager.addDefect(imported.getID(), pair.getKey(), pair.getValue());
+      }
+    }
   }
 
   private void checkForSemicolons(Map<String, String> fieldToDefect, String english, String foreignLanguagePhrase, String translit) {
@@ -556,11 +557,11 @@ public class ExcelImport implements ExerciseDAO {
     return rowToRange;
   }
 
-  private void rememberExercise(List<Exercise> exercises, Map<String, List<Exercise>> englishToExercises, Exercise imported) {
-    String englishSentence = imported.getEnglishSentence();
-    List<Exercise> exercisesForSentence = englishToExercises.get(englishSentence);
+  private void rememberExercise(List<CommonExercise> exercises, Map<String, List<CommonExercise>> englishToExercises, CommonExercise imported) {
+    String englishSentence = imported.getEnglish();
+    List<CommonExercise> exercisesForSentence = englishToExercises.get(englishSentence);
     if (exercisesForSentence == null)
-      englishToExercises.put(englishSentence, exercisesForSentence = new ArrayList<Exercise>());
+      englishToExercises.put(englishSentence, exercisesForSentence = new ArrayList<CommonExercise>());
     exercisesForSentence.add(imported);
 
     exercises.add(imported);
@@ -568,17 +569,17 @@ public class ExcelImport implements ExerciseDAO {
 
   /**
    * @see #readFromSheet(org.apache.poi.ss.usermodel.Sheet)
-   * @param englishToExercises
+   * @paramx englishToExercises
    */
-  private void addSynonyms(Map<String, List<Exercise>> englishToExercises) {
-    for (List<Exercise> exercises2 : englishToExercises.values()) {
+/*  private void addSynonyms(Map<String, List<CommonExercise>> englishToExercises) {
+    for (List<CommonExercise> exercises2 : englishToExercises.values()) {
       if (exercises2.size() > 1) {
         Set<String> translationSet = new HashSet<String>();
 
         List<String> translations = new ArrayList<String>();
         List<String> transliterations = new ArrayList<String>();
         List<String> audioRefs = new ArrayList<String>();
-        for (Exercise e : exercises2) {
+        for (CommonExercise e : exercises2) {
           for (int i = 0; i < e.getRefSentences().size(); i++) {
             try {
               String ref = e.getRefSentences().get(i);
@@ -604,16 +605,16 @@ public class ExcelImport implements ExerciseDAO {
         }
 
         if (translations.size() > 1) {
-          for (Exercise e : exercises2) {
+          for (CommonExercise e : exercises2) {
             e.setSynonymSentences(translations);
             e.setSynonymTransliterations(transliterations);
             e.setSynonymAudioRefs(audioRefs);
-            //logger.debug("e " + e.getID() + " '" + e.getEnglishSentence() + "' has " + e.getSynonymAudioRefs().size() + " audio refs or " + translations);
+            //logger.debug("e " + e.getID() + " '" + e.getEnglish() + "' has " + e.getSynonymAudioRefs().size() + " audio refs or " + translations);
           }
         }
       }
     }
-  }
+  }*/
 
   private String cleanTics(String foreignLanguagePhrase) {
     if (foreignLanguagePhrase.startsWith("\'")) {
@@ -680,7 +681,7 @@ public class ExcelImport implements ExerciseDAO {
    * @return
    * @see #readFromSheet(org.apache.poi.ss.usermodel.Sheet)
    */
-  private Exercise getExercise(String id, int weightIndex, Row next,
+  private CommonExercise getExercise(String id, int weightIndex, Row next,
                                String english, String foreignLanguagePhrase, String translit, String meaning,
                                String context, boolean promptInEnglish, String audioIndex) {
     Exercise imported;
@@ -690,7 +691,7 @@ public class ExcelImport implements ExerciseDAO {
     }
     if (isFlashcard) {
       imported = new Exercise("flashcardStimulus", id, english, translations, english);
-      if (imported.getEnglishSentence() == null && imported.getContent() == null) {
+      if (imported.getEnglish() == null && imported.getContent() == null) {
         logger.warn("both english sentence and content null for exercise " + id);
       }
     } else {
@@ -702,17 +703,16 @@ public class ExcelImport implements ExerciseDAO {
     }
     List<String> inOrderTranslations = new ArrayList<String>(translations);
     imported.setRefSentences(inOrderTranslations);
-    //if (!segmentedChinese.isEmpty()) imported.setSegmented(segmentedChinese);
 
     if (weightIndex != -1) {
-      imported.setWeight(getNumericCell(next, weightIndex));
+      //imported.setWeight(getNumericCell(next, weightIndex));
     }
     return imported;
   }
 
   private boolean recordUnitChapterWeek(int unitIndex, int chapterIndex, int weekIndex,
                                         Row next,
-                                        Exercise imported, String unitName, String chapterName, String weekName) {
+                                        CommonExercise imported, String unitName, String chapterName, String weekName) {
     String unit = getCell(next, unitIndex);
     String chapter = getCell(next, chapterIndex);
     String week = getCell(next, weekIndex);
@@ -767,8 +767,8 @@ public class ExcelImport implements ExerciseDAO {
   private Exercise getExercise(String id,
                                String english, String foreignLanguagePhrase, String translit, String meaning,
                                String context, boolean promptInEnglish, String refAudioIndex) {
-    String content = ExerciseFormatter.getContent(foreignLanguagePhrase, translit, english, meaning, context);
-    Exercise imported = new Exercise("import", id, content, promptInEnglish, true, english);
+    String content = ExerciseFormatter.getContent(foreignLanguagePhrase, translit, english, meaning, context, language);
+    Exercise imported = new Exercise("import", id, content, promptInEnglish, true, english, context);
     imported.setMeaning(meaning);
     imported.addQuestion();   // TODO : needed?
 
