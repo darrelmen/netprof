@@ -15,9 +15,10 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 
@@ -31,6 +32,8 @@ import java.util.Collection;
  * To change this template use File | Settings | File Templates.
  */
 public class NPFExercise extends GoodwaveExercisePanel {
+  private static final String ADD_ITEM = "Add Item to List";
+
   private DropdownButton addToList;
   private int activeCount = 0;
 
@@ -43,9 +46,17 @@ public class NPFExercise extends GoodwaveExercisePanel {
    * @param instance
    * @see NPFHelper#setFactory(mitll.langtest.client.list.PagingExerciseList, String, long)
    */
-  public NPFExercise(Exercise e, ExerciseController controller, ListInterface listContainer, float screenPortion,
-                     boolean addKeyHandler, String instance) {
+  NPFExercise(CommonExercise e, ExerciseController controller, ListInterface listContainer, float screenPortion,
+              boolean addKeyHandler, String instance) {
     super(e, controller, listContainer, screenPortion, addKeyHandler, instance);
+  }
+
+  @Override
+  protected NavigationHelper getNavigationHelper(ExerciseController controller,
+                                                           ListInterface listContainer, boolean addKeyHandler) {
+    NavigationHelper navigationHelper = super.getNavigationHelper(controller, listContainer, addKeyHandler);
+    navigationHelper.add(makeAddToList(exercise, controller));
+    return navigationHelper;
   }
 
   /**
@@ -54,16 +65,23 @@ public class NPFExercise extends GoodwaveExercisePanel {
    * @param controller
    * @return
    */
-  protected Panel makeAddToList(Exercise e, ExerciseController controller) {
+  private Panel makeAddToList(CommonExercise e, ExerciseController controller) {
     addToList = new DropdownButton("");
-    addToList.setRightDropdown(true);
+    addToList.getElement().setId("NPFExercise_AddToList");
+    addToList.setDropup(true);
     addToList.setIcon(IconType.PLUS_SIGN);
     addToList.setType(ButtonType.PRIMARY);
-    addTooltip(addToList, "Add Item to List");
-
+    addTooltip(addToList, ADD_ITEM);
+    addToList.addStyleName("leftFiveMargin");
     populateListChoices(e, controller, addToList);
     return addToList;
   }
+
+  /**
+   * @see Navigation#getButtonRow2(com.google.gwt.user.client.ui.Panel)
+   */
+  @Override
+  public void wasRevealed() { populateListChoices(exercise, controller, addToList);  }
 
   /**
    * Ask server for the set of current lists for this user.
@@ -73,10 +91,10 @@ public class NPFExercise extends GoodwaveExercisePanel {
    * @param e
    * @param controller
    * @param w1
-   * @see #makeAddToList(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController)
+   * @see #makeAddToList(mitll.langtest.shared.CommonExercise, mitll.langtest.client.exercise.ExerciseController)
    * @see #wasRevealed()
    */
-  private void populateListChoices(final Exercise e, final ExerciseController controller, final DropdownBase w1) {
+  private void populateListChoices(final CommonExercise e, final ExerciseController controller, final DropdownBase w1) {
     //System.out.println("populateListChoices : populate list choices for " + controller.getUser());
     service.getListsForUser(controller.getUser(), true, false, new AsyncCallback<Collection<UserList>>() {
       @Override
@@ -87,7 +105,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
         w1.clear();
         activeCount = 0;
         boolean anyAdded = false;
-        System.out.println("\tpopulateListChoices : found list " + result.size() + " choices");
+        //System.out.println("\tpopulateListChoices : found list " + result.size() + " choices");
         for (final UserList ul : result) {
           if (!ul.contains(new UserExercise(e))) {
             activeCount++;
@@ -97,17 +115,19 @@ public class NPFExercise extends GoodwaveExercisePanel {
             widget.addClickHandler(new ClickHandler() {
               @Override
               public void onClick(ClickEvent event) {
+                controller.logEvent(w1,"DropUp",e.getID(),"Adding to list " + ul.getID() +"/"+ul.getName());
                 service.addItemToUserList(ul.getUniqueID(), new UserExercise(e, controller.getUser()), new AsyncCallback<Void>() {
                   @Override
-                  public void onFailure(Throwable caught) {}
+                  public void onFailure(Throwable caught) {
+                  }
 
                   @Override
                   public void onSuccess(Void result) {
-                    showPopup("Item Added!",w1);
+                    showPopup("Item Added!", w1);
                     widget.setVisible(false);
                     activeCount--;
                     if (activeCount == 0) {
-                      NavLink widget = new NavLink("Exercise already added to your list(s)");
+                      NavLink widget = new NavLink("Item already added to your list(s)");
                       w1.add(widget);
                     }
                   }
@@ -117,35 +137,11 @@ public class NPFExercise extends GoodwaveExercisePanel {
           }
         }
         if (!anyAdded) {
-          NavLink widget = new NavLink("Exercise already added to your list(s)");
+          NavLink widget = new NavLink("CommonExercise already added to your list(s)");
           w1.add(widget);
         }
       }
     });
-  }
-
-  /**
-   * @see Navigation#getButtonRow2(com.google.gwt.user.client.ui.Panel)
-   */
-  @Override
-  public void wasRevealed() {
-    //System.out.println("wasRevealed : populate list choices for " + controller.getUser() + "\n\n");
-    populateListChoices(exercise, controller, addToList);
-  }
-
-  /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, float, boolean, String)
-   * @param e
-   * @param controller
-   * @param hp
-   */
-  @Override
-  protected void addQuestionContentRow(Exercise e, ExerciseController controller, Panel hp) {
-    hp.getElement().setId("NPFExercise_addQuestionContentRow");
-    Panel addToList = makeAddToList(e, controller);
-    Widget questionContent = getQuestionContent(e, addToList);
-    questionContent.addStyleName("floatLeft");
-    hp.add(questionContent);
   }
 
   private void showPopup(String html, Widget target) {
