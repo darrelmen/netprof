@@ -6,36 +6,41 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.CommonShell;
 
 /**
 * Created by GO22670 on 1/9/14.
 */
-class PrevNextList<T extends ExerciseShell> extends HorizontalPanel {
+class PrevNextList extends HorizontalPanel {
+  private final ExerciseController controller;
   private Button prev, next;
-  private ListInterface<T> container;
-  boolean disableNext = true;
+  private final ListInterface container;
+  private boolean disableNext = true;
 
   /**
-   * @see mitll.langtest.client.custom.EditItem.EditableExercise#addNew(mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel)
+   * @see EditableExercise#addNew
    * @param exerciseShell
    * @param listContainer
    * @param disableNext
+   * @param controller
    */
-  public PrevNextList(final T exerciseShell, ListInterface<T> listContainer, boolean disableNext) {
+  public PrevNextList(final CommonShell exerciseShell, ListInterface listContainer, boolean disableNext, ExerciseController controller) {
     this.container = listContainer;
     this.disableNext = disableNext;
-    //System.out.println("Disable next " + disableNext);
+    this.controller = controller;
     makePrevButton(exerciseShell);
     makeNextButton(exerciseShell);
-    //addStyleName("topFiveMargin");
     addStyleName("marginBottomTen");
     getElement().setId("PrevNextList");
   }
 
-  private void makePrevButton(final T exercise) {
+  private void makePrevButton(final CommonShell exercise) {
     this.prev = new Button("Previous");
+    prev.getElement().setId("PrevNextList_Previous");
+
+    controller.register(prev,exercise.getID());
     prev.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         clickPrev();
@@ -47,8 +52,11 @@ class PrevNextList<T extends ExerciseShell> extends HorizontalPanel {
     add(prev);
   }
 
-  private void makeNextButton(final T exercise) {
+  private void makeNextButton(final CommonShell exercise) {
     this.next = new Button("Next");
+    next.getElement().setId("PrevNextList_Next");
+    controller.register(next,exercise.getID());
+
     next.setType(ButtonType.SUCCESS);
     next.setEnabled(!disableNext || !container.onLast(exercise));
 
@@ -72,7 +80,7 @@ class PrevNextList<T extends ExerciseShell> extends HorizontalPanel {
 
   /**
    */
-  protected void clickNext() {
+  void clickNext() {
     if (next.isEnabled() && next.isVisible()) {
       boolean onLast = container.loadNext();
       next.setEnabled(!disableNext || !onLast);
