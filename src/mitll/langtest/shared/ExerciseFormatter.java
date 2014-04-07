@@ -17,38 +17,50 @@ public class ExerciseFormatter {
   /**
    * @see mitll.langtest.server.database.ExcelImport#getExercise(String, String, String, String, String, String, boolean, String)
    * @see mitll.langtest.shared.custom.UserExercise#toExercise()
-   * @param arabic
+   * @param foreignPhrase
    * @param translit
    * @param english
    * @param meaning
    * @param language
    * @return
    */
-  public static String getContent(String arabic, String translit, String english, String meaning, String language) {
-    return getContent(arabic, translit, english, meaning, "",
+  public static String getContent(String foreignPhrase, String translit, String english, String meaning, String context, String language) {
+    return getContent(foreignPhrase, translit, english, meaning, context,
       language.equalsIgnoreCase("english"),
       language.equalsIgnoreCase("urdu"),
       language.equalsIgnoreCase("pashto"));
   }
 
-  public static String getContent(String arabic, String translit, String english, String meaning,
+  public static String getContent(String foreignPhrase, String translit, String english, String meaning,
                                   boolean isEnglish, boolean isUrdu, boolean isPashto) {
-    return getContent(arabic, translit, english, meaning, "", isEnglish, isUrdu, isPashto);
+    return getContent(foreignPhrase, translit, english, meaning, "", isEnglish, isUrdu, isPashto);
   }
 
-  private static String getContent(String arabic, String translit, String english, String meaning, String context,
+  /**
+   * TODO : This is a bad idea -- the client side should do formatting, etc.
+   *
+   * @param foreignPhrase
+   * @param translit
+   * @param english
+   * @param meaning
+   * @param context
+   * @param isEnglish
+   * @param isUrdu
+   * @param isPashto
+   * @return
+   */
+  private static String getContent(String foreignPhrase, String translit, String english, String meaning, String context,
                                   boolean isEnglish, boolean isUrdu, boolean isPashto) {
-    String arabicHTML = getArabic(arabic, isUrdu, isPashto, false);
-    String translitHTML = translit.length() > 0 ?
-      getSpanWrapper(TRANSLITERATION, translit, false)
-      : "";
-    String translationHTML = english != null && english.length() > 0 ?
-      getSpanWrapper(TRANSLATION, english, false) : "";
-    String meaningHTML = (isEnglish && meaning.length() > 0) ?
-      getSpanWrapper(ENGLISH_PROMPT, meaning, false) : "";
+    String arabicHTML = getArabic(foreignPhrase, isUrdu, isPashto, false);
+    String translitHTML = translit.length() > 0 ? getSpanWrapper(TRANSLITERATION, translit, false) : "";
 
-    String contextHTML = (context.length() > 0) ?
-      getSpanWrapper(CONTEXT, context, false) : "";
+    String translationHTML = english != null && english.length() > 0 && !english.equals(foreignPhrase) ?
+      getSpanWrapper(TRANSLATION, english, false) : "";
+
+    String meaningHTML = (isEnglish && meaning.length() > 0) ? getSpanWrapper(ENGLISH_PROMPT, meaning, false) : "";
+
+    String contextHTML = (context.length() > 0) ? getSpanWrapper(CONTEXT, "\""+ context + "\"", false) : "";
+
     return arabicHTML +
       translitHTML +
       translationHTML +
@@ -60,9 +72,10 @@ public class ExerciseFormatter {
     String prompt = includePrompt ? "<span class=\"Instruction-title\">" +
       rowTitle +
       "</span>\n" : "";
+    String textClasses = "\"Instruction-data" + (rowTitle.equals(CONTEXT) ? " englishFont" : "")+ "\"";
     return "<div class=\"Instruction\">\n" +
       prompt +
-      "<span class=\"Instruction-data\"> " + english +
+      "<span class=" + textClasses + "> " + english +
       "</span>\n" +
       "</div>";
   }
