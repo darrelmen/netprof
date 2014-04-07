@@ -367,7 +367,7 @@
 
     <target depends="build" name="ESL">
         <jar destfile="npfESL.war" basedir="war"
-             includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/english/**,scoring/bin.linux64/**,scoring/configurations/**,scoring/models.wsj01-16/**"
+             includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/english/**,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/bin.macos/**,scoring/configurations/**,scoring/models.wsj01-16/**"
                 >
 
             <manifest>
