@@ -16,7 +16,7 @@ import java.util.Map;
  */
 public class Scores {
   public float hydecScore;
-  public Map<String, Map<String, Float>> eventScores ;
+  public final Map<String, Map<String, Float>> eventScores ;
 
   public Scores() { eventScores = Collections.emptyMap(); }
   /**
