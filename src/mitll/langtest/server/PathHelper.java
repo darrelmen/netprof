@@ -16,7 +16,7 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class PathHelper {
-  private static Logger logger = Logger.getLogger(PathHelper.class);
+  private static final Logger logger = Logger.getLogger(PathHelper.class);
   public static final String ANSWERS = "answers";
   private static final String IMAGE_WRITER_IMAGES = "audioimages";
 
