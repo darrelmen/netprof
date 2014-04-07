@@ -25,7 +25,6 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class Result implements IsSerializable {
-  //userid INT, plan VARCHAR, id VARCHAR, qid INT, answer VARCHAR, audioFile VARCHAR, valid BOOLEAN, timestamp
   public int uniqueID;
   public long userid;
   public String plan;
@@ -36,7 +35,6 @@ public class Result implements IsSerializable {
   public long timestamp;
   public boolean flq;
   public boolean spoken;
-  //private AudioType audioType; // so having another object in here seemed to slow down serialization a lot
   public String audioType;
   public String gradeInfo = "";
   public int durationInMillis;
@@ -46,23 +44,16 @@ public class Result implements IsSerializable {
 
   public static final String AUDIO_TYPE_UNSET = "unset";
   public static final String AUDIO_TYPE_REGULAR = "regular";
+ // public static final String AUDIO_TYPE_SLOW = "slow";
   public static final String AUDIO_TYPE_FAST_AND_SLOW = "fastAndSlow";
   public static final String AUDIO_TYPE_DEMO = "demo";
   public static final String AUDIO_TYPE_PRACTICE = "practice";
   public static final String AUDIO_TYPE_REVIEW = "review";
 
-/*  public enum AudioType implements IsSerializable {
-    UNSET,
-    REGULAR,
-    FAST_AND_SLOW;
-
-    AudioType() {} // for gwt serialization
-  }*/
-
   public Result() {}
 
   /**
-   * @see mitll.langtest.server.database.ResultDAO#getResults()
+   * @see mitll.langtest.server.database.ResultDAO#getResultsForQuery(java.sql.Connection, java.sql.PreparedStatement)
    * @param userid
    * @param plan
    * @param id
@@ -111,17 +102,26 @@ public class Result implements IsSerializable {
     this.spoken = v;
   }
 
-  // public boolean isRegularAudio() { return audioType == null || audioType.equals(AUDIO_TYPE_UNSET) || audioType.equals(AUDIO_TYPE_REGULAR); }
-  public boolean isFastAndSlowAudio() {
-    return audioType != null && audioType.equals(AUDIO_TYPE_FAST_AND_SLOW);
-  }
-
   public String getAudioType() {
     return audioType;
   }
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#getResultsWithGrades()
+   * @param g
+   */
   public void addGrade(Grade g) {
     gradeInfo += g.grade +",";
+  }
+
+  public void clearGradeInfo() { gradeInfo = "";  }
+
+  public String getGradeInfo() {
+    if (gradeInfo.endsWith(",")) {
+      return gradeInfo.substring(0, gradeInfo.length() - 1);
+    } else {
+      return gradeInfo;
+    }
   }
 
   public boolean isCorrect() {
@@ -168,7 +168,13 @@ public class Result implements IsSerializable {
             if (comp != 0) return asc ? comp : -1 * comp;
 
             if (field.equals("id")) {
-              comp = o1.id.compareTo(o2.id);
+              try {   // this could be slow
+                int i = Integer.parseInt(o1.id);
+                int j = Integer.parseInt(o2.id);
+                comp = i < j ? -1 : i > j ? +1 : 0;
+              } catch (NumberFormatException e) {
+                comp = o1.id.compareTo(o2.id);
+              }
             }
             if (comp != 0) return asc ? comp : -1 * comp;
 
