@@ -37,7 +37,9 @@
 
     <!-- These 2 scripts are so that Sound Manager 2 can be accessed through JSNI -->
       <script type="text/javascript" src="langtest/js/soundmanager2.js"></script>
+<!--
       <script type="text/javascript" src="langtest/js/ZeroClipboard.js"></script>
+-->
       <!--
       <script type="text/javascript" src="langtest/js/highcharts.js"></script>
       -->
@@ -49,7 +51,7 @@
       soundManager.useFastPolling = true;
       soundManager.useHighPerformance = true;
       soundManager.debugMode = false;
-      soundManager.preferFlash = true;
+      soundManager.preferFlash = true; // HTML5 playback doesn't stop on pause! don't set this to false
       soundManager.useConsole = true;
       soundManager.flashPollingInterval = 25;
       soundManager.html5PollingInterval = 25;
