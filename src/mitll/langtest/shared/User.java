@@ -26,6 +26,8 @@ public class User implements IsSerializable, Comparable<User> {
   private int numResults;
   private Demographics demographics;
   private float rate = 0.0f;
+  private boolean complete;
+  private float completePercent;
 
   public User() {} // for serialization
 
@@ -95,14 +97,16 @@ public class User implements IsSerializable, Comparable<User> {
    * @see mitll.langtest.server.database.DatabaseImpl#getUsers
    * @param numResults
    */
-  public void setNumResults(int numResults) {
-    this.numResults = numResults;
-  }
+  public void setNumResults(int numResults) { this.numResults = numResults; }
 
   public Demographics getDemographics() {
     return demographics;
   }
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#joinWithDLIUsers(java.util.List)
+   * @param demographics
+   */
   public void setDemographics(Demographics demographics) {
     this.demographics = demographics;
   }
@@ -130,7 +134,23 @@ public class User implements IsSerializable, Comparable<User> {
     return new Long(id).hashCode();
   }
 
+  public boolean isComplete() {
+    return complete;
+  }
+
+  public void setComplete(boolean complete) {
+    this.complete = complete;
+  }
+
   public String toString() {
     return "user " + id + " age " + age + " gender " + gender + " native " + nativeLang + " dialect " + dialect+ " demographics " + demographics;
+  }
+
+  public float getCompletePercent() {
+    return completePercent;
+  }
+
+  public void setCompletePercent(float completePercent) {
+    this.completePercent = completePercent;
   }
 }
