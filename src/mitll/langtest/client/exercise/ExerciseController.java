@@ -1,10 +1,16 @@
 package mitll.langtest.client.exercise;
 
+import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.Tab;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.instrumentation.EventLogger;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.StartupInfo;
 
 
@@ -22,7 +28,6 @@ public interface ExerciseController {
   void showProgress();
 
   int getUser();
-  void pingAliveUser();
 
   void startRecording();
   void stopRecording();
@@ -50,26 +55,32 @@ public interface ExerciseController {
   boolean isLogClientMessages();
   String getAudioType();
   boolean isReviewMode();
+
+
+  void logEvent(Tab button, String widgetType, String exid, String context);
+
   boolean showCompleted();
 
-  void showFlashHelp();
+  void getImage(int reqid, String path, String type, int toUse, int height, String exerciseID, AsyncCallback<ImageResponse> client);
+
   String getLanguage();
   boolean isPromptBeforeNextItem();
   boolean isRightAlignContent();
   boolean isGoodwaveMode();
   int getLeftColumnWidth();
   int getHeightOfTopRows();
-  boolean shouldAddRecordKeyBinding();
-
-  int getFlashcardPreviewFrameHeight();
 
   PropertyHandler getProps();
 
   String logException(Throwable throwable);
+  void logMessageOnServer(String message, String prefix);
 
-  String getGreeting();
-
-  void resetState();
   StartupInfo getStartupInfo();
   boolean gotMicPermission();
+  EventLogger getButtonFactory();
+  void register(Button button, String exid);
+
+  void register(Button button, String exid, String context);
+
+  void logEvent(UIObject button, String widgetType, String exid, String context);
 }
