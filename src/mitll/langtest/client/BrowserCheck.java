@@ -14,9 +14,9 @@ public class BrowserCheck {
 
   public String browser = "Unknown";
   public int ver = 0;
-  public String version = "";
+  private String version = "";
 
-  private Map<String,Integer> browserToVersion = new HashMap<String,Integer>();
+  private final Map<String,Integer> browserToVersion = new HashMap<String,Integer>();
 
   public BrowserCheck() {
     browserToVersion.put(FIREFOX,14);
