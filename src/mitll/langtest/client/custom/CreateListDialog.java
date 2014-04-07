@@ -7,6 +7,8 @@ import com.github.gwtbootstrap.client.ui.TextArea;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
@@ -14,25 +16,29 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.dialog.EnterKeyButtonHelper;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserManager;
 
-public class CreateListDialog extends BasicDialog {
-  private static final String CLASS = "Course Info";
+class CreateListDialog extends BasicDialog {
+  private static final String CLASS = "Course Info (optional)";
   private static final boolean REQUIRE_DESC = false;
   private static final boolean REQUIRE_CLASS = false;
 
   private final Navigation navigation;
-  private LangTestDatabaseAsync service;
-  private UserManager userManager;
+  private final LangTestDatabaseAsync service;
+  private final UserManager userManager;
+  private final ExerciseController controller;
 
-  public CreateListDialog(Navigation navigation, LangTestDatabaseAsync service,UserManager userManager) {
+  public CreateListDialog(Navigation navigation, LangTestDatabaseAsync service, UserManager userManager, ExerciseController controller) {
     this.navigation = navigation;
     this.service = service;
     this.userManager = userManager;
+    this.controller = controller;
   }
 
   /**
+   * @see mitll.langtest.client.custom.Navigation#getButtonRow2(com.google.gwt.user.client.ui.Panel)
    * @param thirdRow
    * @seex
    */
@@ -58,21 +64,45 @@ public class CreateListDialog extends BasicDialog {
     row = new FluidRow();
     child.add(row);
     final BasicDialog.FormField titleBox = addControlFormField(row, "Title");
-
+    titleBox.box.getElement().setId("CreateListDialog_Title");
+    titleBox.box.addBlurHandler(new BlurHandler() {
+      @Override
+      public void onBlur(BlurEvent event) {
+        controller.logEvent(titleBox.box,"TextBox","Create New List","Title = " + titleBox.box.getValue());
+      }
+    });
     row = new FluidRow();
     child.add(row);
     final TextArea area = new TextArea();
-    final BasicDialog.FormField description = getFormField(row, "Description", area, 1);
+    final BasicDialog.FormField description = getFormField(row, "Description (optional)", area, 1);
+    description.box.getElement().setId("CreateListDialog_Description");
+    description.box.addBlurHandler(new BlurHandler() {
+      @Override
+      public void onBlur(BlurEvent event) {
+        controller.logEvent(description.box,"TextBox","Create New List","Description = " + description.box.getValue());
+      }
+    });
+
 
     row = new FluidRow();
     child.add(row);
 
     final BasicDialog.FormField classBox = addControlFormField(row, CLASS);
+    classBox.box.getElement().setId("CreateListDialog_CourseInfo");
+    classBox.box.addBlurHandler(new BlurHandler() {
+      @Override
+      public void onBlur(BlurEvent event) {
+        controller.logEvent(classBox.box,"TextBox","Create New List","CourseInfo = " + classBox.box.getValue());
+      }
+    });
+
     row = new FluidRow();
     child.add(row);
 
     Button submit = new Button("Create List");
     submit.setType(ButtonType.PRIMARY);
+    submit.getElement().setId("CreateList_Submit");
+    controller.register(submit,"CreateList");
 
     DOM.setStyleAttribute(submit.getElement(), "marginBottom", "10px");
 
@@ -97,7 +127,7 @@ public class CreateListDialog extends BasicDialog {
     });
   }
 
-  public void addUserList(final FormField titleBox, TextArea area, FormField classBox) {
+  private void addUserList(final FormField titleBox, TextArea area, FormField classBox) {
     service.addUserList(userManager.getUser(), titleBox.getText(), area.getText(),
       classBox.getText(), new AsyncCallback<Long>() {
       @Override
@@ -108,13 +138,13 @@ public class CreateListDialog extends BasicDialog {
         if (result == -1) {
           markError(titleBox,"You already have a list named "+ titleBox.getText());
         } else {
-          navigation.showInitialState();
+          navigation.clickOnYourLists(result);
         }
       }
     });
   }
 
-  void zeroPadding(Panel createContent) {
+  private void zeroPadding(Panel createContent) {
     DOM.setStyleAttribute(createContent.getElement(), "paddingLeft", "0px");
     DOM.setStyleAttribute(createContent.getElement(), "paddingRight", "0px");
   }

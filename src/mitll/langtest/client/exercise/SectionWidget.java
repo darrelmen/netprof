@@ -4,7 +4,6 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;
 
 import java.util.Collection;
-import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -16,11 +15,8 @@ import java.util.Map;
 public interface SectionWidget {
   String getCurrentSelection();
   void clearSelectionState();
-  String getFirstItem();
 
   void selectItem(Collection<String> section, boolean doToggle);
-  void populateTypeWidget(Collection<String> items, Map<String, Integer> sectionToCount);
-  public Widget getWidget();
 
   void enableAll();
 
