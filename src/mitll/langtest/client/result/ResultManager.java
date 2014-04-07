@@ -1,6 +1,5 @@
 package mitll.langtest.client.result;
 
-import com.github.gwtbootstrap.client.ui.Modal;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -14,6 +13,7 @@ import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.Panel;
@@ -34,7 +34,6 @@ import mitll.langtest.shared.grade.Grade;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,14 +50,14 @@ public class ResultManager extends PagerTable {
   private static final int PAGE_SIZE = 12;
   protected static final String UNGRADED = "Ungraded";
   protected static final String SKIP = "Skip";
-  public static final int GRADING_WIDTH = 700;
+  protected static final int GRADING_WIDTH = 700;
   private final boolean textResponse;
   protected int pageSize = PAGE_SIZE;
-  protected LangTestDatabaseAsync service;
-  protected UserFeedback feedback;
-  protected final AudioTag audioTag = new AudioTag();
-  private String nameForAnswer;
-  private Map<Column<?,?>,String> colToField = new HashMap<Column<?,?>, String>();
+  protected final LangTestDatabaseAsync service;
+  protected final UserFeedback feedback;
+  private final AudioTag audioTag = new AudioTag();
+  private final String nameForAnswer;
+  private final Map<Column<?,?>,String> colToField = new HashMap<Column<?,?>, String>();
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad2
@@ -78,6 +77,9 @@ public class ResultManager extends PagerTable {
   private Widget lastTable = null;
   private Button closeButton;
 
+  /**
+   * @see mitll.langtest.client.LangTest#makeLogoutParts
+   */
   public void showResults() {
     // Create the popup dialog box
     final DialogBox dialogBox = new DialogBox();
@@ -120,9 +122,9 @@ public class ResultManager extends PagerTable {
 
   /**
    * Experimental
-   * @deprecated not ready
+   * @xdeprecated not ready
    */
-  private void showResultsNew() {
+/*  private void showResultsNew() {
     // Create the popup dialog box
     //   final DialogBox dialogBox = new DialogBox();
     final Modal dialogBox = new Modal(false);
@@ -133,16 +135,16 @@ public class ResultManager extends PagerTable {
     // Enable glass background.
     // dialogBox.setGlassEnabled(true);
 
- /*   closeButton = new Button("Close");
+ *//*   closeButton = new Button("Close");
     closeButton.setEnabled(true);
-    closeButton.getElement().setId("closeButton");*/
+    closeButton.getElement().setId("closeButton");*//*
 
     //final VerticalPanel dialogVPanel = new VerticalPanel();
-/*
+*//*
     int left = (Window.getClientWidth()) / 40;
     int top  = (Window.getClientHeight()) / 160;
     // dialogBox.setPopupPosition(left, top);
-    dialogVPanel.setWidth("100%");*/
+    dialogVPanel.setWidth("100%");*//*
     //  dialogBox.setWidth((int)((float)Window.getClientWidth()*0.9f) + "px");
 
     service.getNumResults(new AsyncCallback<Integer>() {
@@ -150,7 +152,7 @@ public class ResultManager extends PagerTable {
       public void onFailure(Throwable caught) {}
       @Override
       public void onSuccess(Integer result) {
-        populateTable(result, /*dialogVPanel,*/ dialogBox);
+        populateTable(result, *//*dialogVPanel,*//* dialogBox);
       }
     });
 
@@ -158,11 +160,22 @@ public class ResultManager extends PagerTable {
    // dialogBox.add(dialogVPanel);
 
     // Add a handler to send the name to the server
- /*   closeButton.addClickHandler(new ClickHandler() {
+ *//*   closeButton.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         dialogBox.hide();
       }
-    });*/
+    });*//*
+  }*/
+
+  private SafeHtml getURL2() {
+    SafeHtmlBuilder sb = new SafeHtmlBuilder();
+    sb.appendHtmlConstant("<a href='" +
+      "downloadResults" +
+      "'" +
+      ">");
+    sb.appendEscaped("Download Excel");
+    sb.appendHtmlConstant("</a>");
+    return sb.toSafeHtml();
   }
 
   private void populateTableOld(int numResults, Panel dialogVPanel, DialogBox dialogBox) {
@@ -174,6 +187,8 @@ public class ResultManager extends PagerTable {
     Widget table = getAsyncTable(numResults, !textResponse, new ArrayList<Grade>(), -1, 1);
     table.setWidth("100%");
 
+    dialogVPanel.add(new Anchor(getURL2()));
+
     dialogVPanel.add(table);
     dialogVPanel.add(closeButton);
 
@@ -181,23 +196,24 @@ public class ResultManager extends PagerTable {
     dialogBox.show();
   }
 
-  private void populateTable(int numResults, //Panel dialogVPanel,
+/*  private void populateTable(int numResults, //Panel dialogVPanel,
                              //   DialogBox dialogBox
                              Modal dialogBox
   ) {
-   /* if (lastTable != null) {
+   *//* if (lastTable != null) {
       dialogVPanel.remove(lastTable);
       dialogVPanel.remove(closeButton);
-    }*/
+    }*//*
 
     Widget table = getAsyncTable(numResults, true, new ArrayList<Grade>(),-1, 1);
 //    dialogVPanel.add(table);
   //  dialogVPanel.add(closeButton);
 
 //    lastTable = table;
+
     dialogBox.add(table);
     dialogBox.show();
-  }
+  }*/
 
   /**
    * @see GradingExercisePanel#showResults
@@ -396,7 +412,7 @@ public class ResultManager extends PagerTable {
       }
     };
     exercise.setSortable(true);
-    table.addColumn(exercise, "Exercise");
+    table.addColumn(exercise, "CommonExercise");
     colToField.put(exercise,"id");
 
     return id;
@@ -404,7 +420,6 @@ public class ResultManager extends PagerTable {
 
   /**
    *
-   * @param grader used in GradingResultManager subclass
    * @param grader used in GradingResultManager subclass
    * @param numGrades used in GradingResultManager subclass
    * @param table to add columns to
@@ -449,11 +464,7 @@ public class ResultManager extends PagerTable {
     TextColumn<Result> gradeInfo = new TextColumn<Result>() {
       @Override
       public String getValue(Result answer) {
-        if (answer.gradeInfo.endsWith(",")) {
-          return answer.gradeInfo.substring(0, answer.gradeInfo.length() - 1);
-        } else {
-          return answer.gradeInfo;
-        }
+        return answer.getGradeInfo();
       }
     };
     table.addColumn(gradeInfo, "Grades");
@@ -481,26 +492,24 @@ public class ResultManager extends PagerTable {
   }
 
   private void addNoWrapColumn(CellTable<Result> table) {
+    Column<Result, SafeHtml> dateCol = getDateColumn(table);
+    colToField.put(dateCol,"timestamp");
+  }
+
+  private Column<Result, SafeHtml> getDateColumn(CellTable<Result> table) {
     SafeHtmlCell cell = new SafeHtmlCell();
     Column<Result,SafeHtml> dateCol = new Column<Result, SafeHtml>(cell) {
       @Override
       public SafeHtml getValue(Result answer) {
-        SafeHtmlBuilder sb = new SafeHtmlBuilder();
-        sb.appendHtmlConstant("<div style='white-space: nowrap;'><span>" +
-          new Date(answer.timestamp)+
-          "</span>" );
-
-        sb.appendHtmlConstant("</div>");
-        return sb.toSafeHtml();
+        return getSafeHTMLForTimestamp(answer.timestamp);
       }
     };
     table.addColumn(dateCol, "Time");
     dateCol.setSortable(true);
-    colToField.put(dateCol,"timestamp");
-
+    return dateCol;
   }
 
-/*  private void addNoWrapColumn2(CellTable<Result> table,String label) {
+  /*  private void addNoWrapColumn2(CellTable<Result> table,String label) {
     SafeHtmlCell cell = new SafeHtmlCell();
     Column<Result,SafeHtml> dateCol = new Column<Result, SafeHtml>(cell) {
       @Override
@@ -514,7 +523,7 @@ public class ResultManager extends PagerTable {
         return sb.toSafeHtml();
       }
     };
-    table.addColumn(dateCol, label);
+    table.addVarchar(dateCol, label);
   }*/
 
   private float roundToHundredth(double totalHours) {
