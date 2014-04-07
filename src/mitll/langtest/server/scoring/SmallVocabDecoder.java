@@ -21,7 +21,7 @@ import java.util.Map;
  */
 public class SmallVocabDecoder {
   private static final Logger logger = Logger.getLogger(ASRScoring.class);
-  HTKDictionary htkDictionary;
+  private HTKDictionary htkDictionary;
 
   public SmallVocabDecoder() {}
   public SmallVocabDecoder(HTKDictionary htkDictionary) {
