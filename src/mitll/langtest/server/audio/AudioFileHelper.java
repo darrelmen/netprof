@@ -11,7 +11,7 @@ import mitll.langtest.server.scoring.ASRScoring;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.log4j.Logger;
 
@@ -28,13 +28,13 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioFileHelper {
-  private static Logger logger = Logger.getLogger(AudioFileHelper.class);
-  private PathHelper pathHelper;
-  private ServerProperties serverProps;
+  private static final Logger logger = Logger.getLogger(AudioFileHelper.class);
+  private final PathHelper pathHelper;
+  private final ServerProperties serverProps;
   private ASRScoring asrScoring;
   private AutoCRT autoCRT;
-  private DatabaseImpl db;
-  private LangTestDatabaseImpl langTestDatabase;
+  private final DatabaseImpl db;
+  private final LangTestDatabaseImpl langTestDatabase;
 
   public AudioFileHelper(PathHelper pathHelper, ServerProperties serverProperties, DatabaseImpl db,
                          LangTestDatabaseImpl langTestDatabase) {
@@ -44,7 +44,11 @@ public class AudioFileHelper {
     this.langTestDatabase = langTestDatabase;
   }
 
-  public boolean checkLTS(String foreignLanguagePhrase) { return asrScoring.checkLTS(foreignLanguagePhrase); }
+  public boolean checkLTS(String foreignLanguagePhrase) {
+    makeASRScoring();
+    return asrScoring.checkLTS(foreignLanguagePhrase);
+  }
+
   public SmallVocabDecoder getSmallVocabDecoder() {
     makeASRScoring();
     return asrScoring.getSmallVocabDecoder();
@@ -70,7 +74,7 @@ public class AudioFileHelper {
    * @param doFlashcard
    * @param recordInResults         @return URL to audio on server and if audio is valid (not too short, etc.)
    */
-  public AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, Exercise exercise1, int questionID,
+  public AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, CommonExercise exercise1, int questionID,
                                     int user, int reqid, boolean flq, String audioType, boolean doFlashcard,
                                     boolean recordInResults
   ) {
@@ -100,23 +104,6 @@ public class AudioFileHelper {
     return answer;
   }
 
-
-  /**
-   * @see mitll.langtest.client.scoring.ScoringAudioPanel#scoreAudio(String, long, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
-   * @param reqid
-   * @param testAudioFile
-   * @param sentence
-   * @param width
-   * @param height
-   * @param useScoreToColorBkg
-   * @return
-   */
-  public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
-                                          int width, int height, boolean useScoreToColorBkg) {
-    return getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
-      false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache());
-  }
-
   /**
    * Get score when doing autoCRT on an audio file.
    * @see AutoCRT#getAutoCRTDecodeOutput
@@ -136,20 +123,19 @@ public class AudioFileHelper {
       List<String> unk = new ArrayList<String>();
       unk.add(SLFFile.UNKNOWN_MODEL); // if  you don't include this dcodr will say : ERROR: word UNKNOWNMODEL is not in the dictionary!
       String vocab = asrScoring.getUsedTokens(lmSentences, unk);
-      logger.debug("getASRScoreForAudio : vocab " + vocab);
+      //logger.debug("getASRScoreForAudio : vocab " + vocab);
       return getASRScoreForAudio(0, testAudioFile.getPath(), vocab, 128, 128, false, true, tmpDir, serverProps.useScoreCache());
     }
   }
 
   /**
-   * @see mitll.langtest.client.flashcard.TextCRTFlashcard#getAnswerAndRecordButtonRow(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
    * @see LangTestDatabaseImpl#getScoreForAnswer
    * @param e
    * @param questionID
    * @param answer
    * @return
    */
-  public double getScoreForAnswer(Exercise e, int questionID, String answer) {
+  public double getScoreForAnswer(CommonExercise e, int questionID, String answer) {
     return autoCRT.getScoreForExercise(e, questionID, answer);
   }
 
@@ -170,7 +156,7 @@ public class AudioFileHelper {
   /**
    * For now, we don't use a ref audio file, since we aren't comparing against a ref audio file with the DTW/sv pathway.
    *
-   * @see #getASRScoreForAudio(int, String, String, int, int, boolean)
+   * @seex #getASRScoreForAudio(int, String, String, int, int, boolean)
    * @see mitll.langtest.server.scoring.AutoCRTScoring#getASRScoreForAudio
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#scoreAudio(String, long, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
    * @param reqid
@@ -187,7 +173,7 @@ public class AudioFileHelper {
   public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
                                            int width, int height, boolean useScoreToColorBkg,
                                            boolean decode, String tmpDir, boolean useCache) {
-    logger.info("getASRScoreForAudio scoring " + testAudioFile + " with sentence '" + sentence + "' req# " + reqid);
+    //logger.debug("getASRScoreForAudio scoring " + testAudioFile + " with sentence '" + sentence + "' req# " + reqid);
 
     makeASRScoring();
     if (testAudioFile == null) {
@@ -224,7 +210,7 @@ public class AudioFileHelper {
    * @param audioFile
    * @param answer
    */
-  public void getFlashcardAnswer(Exercise e, File audioFile, AudioAnswer answer) {
+  public void getFlashcardAnswer(CommonExercise e, File audioFile, AudioAnswer answer) {
     this.autoCRT.getFlashcardAnswer(e, audioFile, answer);
   }
 
@@ -308,21 +294,20 @@ public class AudioFileHelper {
    * @param doFlashcard
    * @return
    */
-  private AudioAnswer getAudioAnswer(String exerciseID, Exercise exercise, int questionID, int user, int reqid,
+  private AudioAnswer getAudioAnswer(String exerciseID, CommonExercise exercise, int questionID, int user, int reqid,
                                      File file, AudioCheck.ValidityAndDur validity, String url, boolean doFlashcard
   ) {
     AudioAnswer audioAnswer = new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
     if (serverProps.isFlashcard()|| doFlashcard) {
       makeASRScoring();
       if (serverProps.isAutoCRT()) {
-        autoCRT.getAutoCRTDecodeOutput(exerciseID, questionID, exercise, file, audioAnswer);
+        autoCRT.getAutoCRTDecodeOutput(exerciseID, questionID, file, audioAnswer);
       } else {
         autoCRT.getFlashcardAnswer(exercise, file, audioAnswer);
       }
-      db.updateFlashcardState(user, exerciseID, audioAnswer.isCorrect());
       return audioAnswer;
-    } else if (serverProps.isAutoCRT() && !exercise.isPromptInEnglish()) { // TODO : hack -- don't do CRT on english
-      autoCRT.getAutoCRTDecodeOutput(exerciseID, questionID, exercise, file, audioAnswer);
+    } else if (serverProps.isAutoCRT()) {//!exercise.isPromptInEnglish()) { // TODO : hack -- don't do CRT on english
+      autoCRT.getAutoCRTDecodeOutput(exerciseID, questionID, file, audioAnswer);
     }
     return audioAnswer;
   }
@@ -350,7 +335,7 @@ public class AudioFileHelper {
       }
       autoCRT = new AutoCRT(exportDB.getExport(), crtScoring, pathHelper.getInstallPath(), relativeConfigDir,
         serverProps.getMinPronScore());
-      if (serverProps.isAutoCRT()) {
+      if (serverProps.isAutoCRT() && serverProps.isIncludeFeedback()) {
         autoCRT.makeClassifier();
       }
     }
