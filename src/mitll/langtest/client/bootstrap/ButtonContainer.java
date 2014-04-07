@@ -18,10 +18,11 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 class ButtonContainer {
-  private List<Button> buttons = new ArrayList<Button>();
-  private Set<Button> enabled = new HashSet<Button>();
-  private Set<Button> disabled = new HashSet<Button>();
-  private Map<String, Collection<Button>> nameToButton = new HashMap<String, Collection<Button>>();
+  private final List<Button> buttons = new ArrayList<Button>();
+  private final Set<Button> enabled = new HashSet<Button>();
+  private final Set<Button> disabled = new HashSet<Button>();
+  private final Map<String, Collection<Button>> nameToButton = new HashMap<String, Collection<Button>>();
+  boolean debug = false;
 
   public void add(Button b, String name) {
     buttons.add(b);
@@ -76,7 +77,7 @@ class ButtonContainer {
    * @param isEnable
    */
   public void rememberEnabled(Collection<FlexSectionExerciseList.ButtonWithChildren> buttonChildren, boolean isEnable) {
-    System.out.println(this + " rememberEnabled for " + buttonChildren + " : to enable = " + isEnable);
+    if (debug) System.out.println(this + " rememberEnabled for " + buttonChildren + " : to enable = " + isEnable);
 
     if (!buttons.containsAll(buttonChildren)) {
       System.err.println(this + " rememberEnabled  children = " + buttonChildren + " are not part of this set of buttons");
@@ -100,7 +101,7 @@ class ButtonContainer {
     disabled.clear();
     disabled.addAll(buttons);
     disabled.removeAll(enabled);
-    System.out.println(this + " rememberEnabled after ");
+    if (debug) System.out.println(this + " rememberEnabled after ");
   }
 
   /**
@@ -125,6 +126,7 @@ class ButtonContainer {
     }
   }
 
-  public String toString() { return "Buttons Set : " + buttons.size() + " buttons (" + enabled.size() + "/" + disabled.size() + ")"; }
-
+  public String toString() {
+    return "Buttons Set : " + buttons.size() + " buttons (" + enabled.size() + "/" + disabled.size() + ")";
+  }
 }

@@ -1,7 +1,5 @@
 package mitll.langtest.client.list;
 
-import com.google.gwt.user.client.History;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -17,18 +15,21 @@ import java.util.Map;
 * To change this template use File | Settings | File Templates.
 */
 public class SelectionState {
+  public static final String INSTANCE = "instance";
   private String item;
-  private Map<String, Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
+  private final Map<String, Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
   private String instance = "";
-  private boolean debug = false;
+  private final boolean debug = false;
 
   /**
    * Populated from history token!
-   * @see mitll.langtest.client.flashcard.BootstrapFlashcardExerciseList#getExercises(long, boolean)
+   * @seex mitll.langtest.client.flashcard.BootstrapFlashcardExerciseList#getExercises(long, boolean)
    */
+/*
   public SelectionState( boolean removePlus) {
     this(History.getToken(), removePlus);
   }
+*/
 
   /**
    * @see ExerciseList#getIDFromToken(String)
@@ -43,7 +44,7 @@ public class SelectionState {
   }
 
   /**
-   * @see mitll.langtest.client.flashcard.BootstrapFlashcardExerciseList#getExercises(long, boolean)
+   * @seex mitll.langtest.client.flashcard.BootstrapFlashcardExerciseList#getExercises(long, boolean)
    */
   public boolean isEmpty() { return getTypeToSection().isEmpty(); }
 
@@ -63,7 +64,8 @@ public class SelectionState {
    * @param token
    */
   private void parseToken(String token) {
-    token = token.contains("###") ? token.split("###")[0] : token;
+    //token = token.contains("###") ? token.split("###")[0] : token;
+   // token = token.split(ResponseExerciseList.RESPONSE_TYPE_DIVIDER)[0]; // remove any other parameters
 
     String[] parts = token.split(";");
 
@@ -87,7 +89,7 @@ public class SelectionState {
             System.err.println("\t\tparseToken : part " + part + " is badly formed ");
           } else {
             if (debug) System.out.println("\t\tparseToken : add " + type + " : " + sections);
-            if (type.equals("instance")) instance = section;
+            if (type.equals(INSTANCE)) instance = section;
             else add(type, sections);
           }
           if (debug) System.out.println("\tparseToken : part " + part + " : " + type + "->" + section);

@@ -14,34 +14,38 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.CommonShell;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
 /**
  * Show exercises with a cell table that can handle thousands of rows.
- * Does tooltips using tooltip field on {@link ExerciseShell#tooltip}
+ * Does tooltips using tooltip field on {@link CommonShell#getTooltip}
  * <p/>
  * User: GO22670
  * Date: 11/27/12
  * Time: 5:35 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T> {
-  protected ExerciseController controller;
-  protected PagingContainer<T> pagingContainer;
-  private boolean showTypeAhead;
+public class PagingExerciseList extends ExerciseList {
+  protected final ExerciseController controller;
+  protected PagingContainer pagingContainer;
+  private final boolean showTypeAhead;
 
-  private TextBox typeAhead = null;
-  private String lastValue = "";
-  private long userListID = -1;
+  private TextBox typeAhead = new TextBox();
+  private String lastTypeAheadValue = "";
+  protected long userListID = -1;
   private int unaccountedForVertical = 160;
 
   /**
@@ -49,15 +53,16 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
    * @param currentExerciseVPanel
    * @param service
    * @param feedback
-   * @param showTurkToken
+   * @param factory
    * @param controller
+   * @param showTurkToken
    * @param showTypeAhead
    * @param instance
    */
   public PagingExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                            boolean showTurkToken, boolean showInOrder, ExerciseController controller,
+                            ExercisePanelFactory factory, ExerciseController controller, boolean showTurkToken, boolean showInOrder,
                             boolean showTypeAhead, String instance) {
-    super(currentExerciseVPanel, service, feedback, null, controller, showTurkToken, showInOrder, instance);
+    super(currentExerciseVPanel, service, feedback, factory, controller, showTurkToken, showInOrder, instance);
     this.controller = controller;
     this.showTypeAhead = showTypeAhead;
     addComponents();
@@ -67,52 +72,25 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
   @Override
   protected Set<String> getKeys() {  return pagingContainer.getKeys();  }
 
-  /**
-   * @see mitll.langtest.client.recorder.FeedbackRecordPanel#enableNext()
-   * @param completed
-   */
-  public void setCompleted(Set<String> completed) {
-    pagingContainer.setCompleted(completed);
+  @Override
+  public void setState(String id, CommonShell.STATE state) {
+    byID(id).setState(state);
   }
 
   @Override
-  public void removeCompleted(String id) {
-    pagingContainer.removeCompleted(id);
-
+  public void setSecondState(String id, CommonShell.STATE state) {
+    byID(id).setSecondState(state);
   }
 
-  public void addCompleted(String id) {
-    pagingContainer.addCompleted(id);
-    System.out.println("PagingExerciseList.addCompleted : completed " + id + " now " + getCompleted().size());
-  }
+/*  public void setStates(String id,CommonShell.STATE first,CommonShell.STATE second ) {
 
-  private Set<String> getCompleted() { return pagingContainer.getCompleted(); }
-
-  @Override
-  public int getPercentComplete() {
-    if (controller.showCompleted()) {
-      int i = (int) Math.ceil(100f * ((float) getCompleted().size() / (float) getSize()));
-      if (i > 100) i = 100;
-      System.out.println("completed " + getCompleted().size() + " current " + getSize() + " " + i);
-      return i;
-    } else {
-      return super.getPercentComplete();
-    }
-  }
-
-  public int getComplete() {
-    if (controller.showCompleted()) {
-      return getCompleted().size();
-    } else {
-      return super.getComplete();
-    }
-  }
+  }*/
 
   /**
    * Add two rows -- the search box and then the item list
    */
   protected void addComponents() {
-    PagingContainer<? extends ExerciseShell> exerciseShellPagingContainer = makePagingContainer();
+    PagingContainer exerciseShellPagingContainer = makePagingContainer();
 
     addTableWithPager(exerciseShellPagingContainer);
   }
@@ -122,15 +100,17 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
    * @param selectionState
    * @param prefix
    */
-  protected void loadExercises(String selectionState, String prefix) {
+  void loadExercises(String selectionState, String prefix) {
     lastReqID++;
-    long listID = userListID;
-    System.out.println("PagingExerciseList.loadExercises : looking for '" + prefix + "' (" + prefix.length() + " chars) in list id "+listID);
-
-    service.getExerciseIds(lastReqID, controller.getUser(), prefix, listID, new SetExercisesCallback());
+    System.out.println("PagingExerciseList.loadExercises : looking for '" + prefix + "' (" + prefix.length() + " chars) in list id "+userListID + " instance " +instance);
+    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), prefix, userListID, new SetExercisesCallback());
   }
 
-  protected String getPrefix() { return typeAhead == null ? "" : typeAhead.getText(); }
+  /**
+   * @see mitll.langtest.client.list.HistoryExerciseList#loadExercises(java.util.Map, String)
+   * @return
+   */
+  protected String getPrefix() { return typeAhead.getText(); }
 
   private ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget user) {
     final ControlGroup userGroup = new ControlGroup();
@@ -145,19 +125,23 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
     return userGroup;
   }
 
-  protected PagingContainer<T> makePagingContainer() {
-    final PagingExerciseList<T> outer = this;
-    PagingContainer<T> pagingContainer1 =
-      new PagingContainer<T>(controller, getVerticalUnaccountedFor()) {
+  /**
+   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#addComponents()
+   * @return
+   */
+  protected PagingContainer makePagingContainer() {
+    final PagingExerciseList outer = this;
+    PagingContainer pagingContainer1 =
+      new PagingContainer(controller, getVerticalUnaccountedFor()) {
       @Override
-      protected void gotClickOnItem(ExerciseShell e) {  outer.gotClickOnItem(e);  }
+      protected void gotClickOnItem(CommonShell e) {  outer.gotClickOnItem(e);  }
     };
     pagingContainer = pagingContainer1;
     return pagingContainer1;
   }
 
   @Override
-  protected T findFirstExercise() {
+  protected CommonShell findFirstExercise() {
     if (controller.showCompleted()) {
       return getFirstNotCompleted();
     }
@@ -166,46 +150,50 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
     }
   }
 
-  private T getFirstNotCompleted() {
-    for (T es : pagingContainer.getExercises()) {
-      if (!getCompleted().contains(es.getID())) return es;
+  private CommonShell getFirstNotCompleted() {
+    for (CommonShell es : pagingContainer.getExercises()) {
+      if (es.getState().equals(CommonShell.STATE.UNSET)) return es;
     }
     return super.findFirstExercise();
   }
 
+  /**
+   * TODO : Not sure if this is needed anymore
+   * @return
+   */
   protected int getVerticalUnaccountedFor() {
     return unaccountedForVertical;
   }
 
   /**
-   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#FlexSectionExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, boolean, boolean, mitll.langtest.client.exercise.ExerciseController, boolean, String)
+   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#FlexSectionExerciseList(com.google.gwt.user.client.ui.Panel, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, boolean, boolean, mitll.langtest.client.exercise.ExerciseController, boolean, String)
    * @param v
    */
   public void setUnaccountedForVertical(int v) {
     unaccountedForVertical = v;
     pagingContainer.setUnaccountedForVertical(v);
+    //System.out.println("setUnaccountedForVertical : vert " + v + " for " +getElement().getId());
   }
 
-  protected void addTableWithPager(PagingContainer<? extends ExerciseShell> pagingContainer) {
-    Panel container = pagingContainer.getTableWithPager();
-    FlowPanel column = new FlowPanel();
+  protected void addTableWithPager(PagingContainer pagingContainer) {
+    Panel column = new FlowPanel();
     add(column);
     addTypeAhead(column);
-    add(container);
+    add(pagingContainer.getTableWithPager());
   }
 
-  protected void addTypeAhead(Panel column) {
+  void addTypeAhead(Panel column) {
     if (showTypeAhead) {
-      typeAhead = new TextBox();
+      typeAhead.getElement().setId("ExerciseList_TypeAhead");
       typeAhead.setDirectionEstimator(true);   // automatically detect whether text is RTL
       typeAhead.addKeyUpHandler(new KeyUpHandler() {
         public void onKeyUp(KeyUpEvent event) {
           String text = typeAhead.getText();
-          //  text = text.trim();
-          if (!text.equals(lastValue)) {
+          if (!text.equals(lastTypeAheadValue)) {
             System.out.println("addTypeAhead : looking for '" + text + "' (" + text.length() + " chars)");
+            controller.logEvent(typeAhead,"TypeAhead","UserList_"+userListID,"User search ='" +text+ "'");
             loadExercises(getHistoryToken(""), text);
-            lastValue = text;
+            lastTypeAheadValue = text;
           }
         }
       });
@@ -219,8 +207,10 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
     }
   }
 
-  public void showEmptySelection() {
+  protected void showEmptySelection() {
     showPopup("No items match the selection and search.", "Try clearing one of your selections or changing the search.", typeAhead);
+    createdPanel = new SimplePanel();
+    createdPanel.getElement().setId("placeHolderWhenNoExercises");
   }
 
   private void showPopup(String toShow,String toShow2, Widget over) {
@@ -237,35 +227,43 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
     t.schedule(3000);
   }
 
-  protected void tellUserPanelIsBusy() {
+  /**
+   * @deprecated
+   */
+  void tellUserPanelIsBusy() {
     Window.alert("Please stop recording before changing items.");
   }
 
-  protected String getHistoryToken(String id) { return "item=" +id; }
+  String getHistoryToken(String id) { return "item=" +id; }
 
-  protected void gotClickOnItem(final ExerciseShell e) {
+  void gotClickOnItem(final CommonShell e) {
     if (isExercisePanelBusy()) {
       tellUserPanelIsBusy();
       markCurrentExercise(pagingContainer.getCurrentSelection().getID());
     } else {
+      controller.logEvent(this, "ExerciseList", e.getID(), "Clicked on item '" + e.getTooltip() + "'");
+
       pushNewItem(e.getID());
     }
   }
 
   public void clear() { pagingContainer.clear(); }
 
-  public void flush() { pagingContainer.flush();  }
+  public void flush() {
+    pagingContainer.flush();
+    onResize();
+  }
 
   /**
-   * @see mitll.langtest.client.list.ExerciseList#rememberAndLoadFirst(java.util.List, mitll.langtest.shared.Exercise)
+   * @see mitll.langtest.client.list.ExerciseList#rememberAndLoadFirst(java.util.List, mitll.langtest.shared.CommonExercise)
    * @param result
    */
   @Override
-  protected void rememberExercises(List<T> result) {
-    //System.out.println("PagingExerciseList : rememberAndLoadFirst remembering " + result.size());
-
+  protected void rememberExercises(List<CommonShell> result) {
+    //System.out.println("PagingExerciseList : rememberExercises remembering " + result.size() + " instance " + instance);
     clear();
-    for (final T es : result) {
+    for (CommonShell es : result) {
+      //System.out.println("PagingExerciseList : add " + es);
       addExercise(es);
     }
     flush();
@@ -283,48 +281,48 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
   }
 
   @Override
-  protected T getFirst() {
+  protected CommonShell getFirst() {
     return pagingContainer.getFirst();
   }
 
   @Override
-  public T byID(String name) {
+  public CommonShell byID(String name) {
     return pagingContainer.byID(name);
   }
 
   @Override
-  protected T getCurrentExercise() {
+  public CommonShell getCurrentExercise() {
     return pagingContainer.getCurrentSelection();
   }
 
   @Override
-  protected int getRealIndex(T t) {
+  protected int getRealIndex(CommonShell t) {
     return pagingContainer.getIndex(t);
   }
 
   @Override
-  protected T getAt(int i) {
+  protected CommonShell getAt(int i) {
     return pagingContainer.getAt(i);
   }
 
   @Override
-  public void addExercise(T es) { pagingContainer.addExercise(es);  }
-  public void addExerciseAfter(T after,T es) { pagingContainer.addExerciseAfter(after, es);  }
+  public void addExercise(CommonShell es) { pagingContainer.addExercise(es);  }
+  public void addExerciseAfter(CommonShell after,CommonShell es) { pagingContainer.addExerciseAfter(after, es);  }
 
-  public T forgetExercise(String id) {
+  public CommonShell forgetExercise(String id) {
     System.out.println("PagingExerciseList.forgetExercise " + id + " on " + getElement().getId() + " ul " +userListID);
     return removeExercise(byID(id));
   }
 
   /**
-   * @see mitll.langtest.client.custom.NewUserExercise#afterValidForeignPhrase(mitll.langtest.shared.custom.UserList, ListInterface, com.google.gwt.user.client.ui.Panel, boolean)
-   * @see mitll.langtest.client.list.ExerciseList#removeExercise(mitll.langtest.shared.ExerciseShell)
+   * @see mitll.langtest.client.custom.NewUserExercise#afterValidForeignPhrase
+   * @see mitll.langtest.client.list.ExerciseList#removeExercise
    * @param id
    * @return
    */
   @Override
-  public T simpleRemove(String id) {
-    T es = byID(id);
+  public CommonShell simpleRemove(String id) {
+    CommonShell es = byID(id);
     pagingContainer.forgetExercise(es);
 
     if (isEmpty()) {
@@ -343,6 +341,8 @@ public class PagingExerciseList<T extends ExerciseShell> extends ExerciseList<T>
   protected void markCurrentExercise(String itemID) { pagingContainer.markCurrentExercise(itemID); }
 
   public void setUserListID(long userListID) {
+    System.out.println("PagingExerciseList.setUserListID " +userListID + " for " +instance);
+
     this.userListID = userListID;
   }
 
