@@ -43,7 +43,7 @@ public class EnterKeyButtonHelper {
                                                      }
                                                    }
                                                  });
-    System.out.println("addKeyHandler made click handler " + keyHandler);
+    //System.out.println("addKeyHandler made click handler " + keyHandler);
   }
 
   public void addKeyHandler(final Button button, Modal container) {
@@ -66,9 +66,8 @@ public class EnterKeyButtonHelper {
     public void removeKeyHandler() {
     if (keyHandler == null) {
       System.err.println("\nEnterKeyButtonHelper : removeKeyHandler : " + keyHandler);
-
     } else {
-      System.out.println("EnterKeyButtonHelper : removeKeyHandler : " + keyHandler);
+      //System.out.println("EnterKeyButtonHelper : removeKeyHandler : " + keyHandler);
     }
     if (keyHandler != null) {
       keyHandler.removeHandler();
@@ -77,7 +76,7 @@ public class EnterKeyButtonHelper {
   }
 
   private void userHitEnterKey(Button button) {
-    System.out.println("\tEnterKeyButtonHelper.userHitEnterKey " + keyHandler);
+    //System.out.println("\tEnterKeyButtonHelper.userHitEnterKey " + keyHandler);
     if (removeOnEnter) removeKeyHandler();
     button.fireEvent(new ButtonClickEvent());
   }

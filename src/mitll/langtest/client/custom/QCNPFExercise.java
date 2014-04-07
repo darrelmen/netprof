@@ -5,6 +5,7 @@ import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.TextBox;
+import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
@@ -13,7 +14,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
@@ -26,10 +26,10 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.shared.AudioAttribute;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseFormatter;
-import mitll.langtest.shared.ExerciseShell;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -49,56 +49,85 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   public static final String FOREIGN_LANGUAGE = "foreignLanguage";
   public static final String TRANSLITERATION = "transliteration";
   public static final String ENGLISH = "english";
+  public static final String CONTEXT = "context";
 
   private static final String REF_AUDIO = "refAudio";
-  private static final String APPROVED = "Mark Reviewed";
+  private static final String APPROVED = "Approve Item";
+  private static final String NO_AUDIO_RECORDED = "No Audio Recorded.";
+  private static final String SLOW_SPEED_AUDIO_EXAMPLE = "Slow speed audio example";
+  private static final String REGULAR_SPEED_AUDIO_EXAMPLE = "Regular speed audio example";
+  private static final String REFERENCE = "Reference";
+  private static final String COMMENT = "Comment";
 
-  private Set<String> incorrectSet = new HashSet<String>();
+  private static final String COMMENT_TOOLTIP = "Comments are optional.";
+  private static final String CHECKBOX_TOOLTIP = "Check to indicate this field has a defect.";
+  private static final String APPROVED_BUTTON_TOOLTIP = "Indicate item has no defects.";
+  private static final String APPROVED_BUTTON_TOOLTIP2 = "Item has been marked with a defect";
+  private static final String ATTENTION_LL = "Attention LL";
+  private static final String MARK_FOR_LL_REVIEW = "Mark for LL review.";
+
+  private Set<String> incorrectFields;
   private List<RequiresResize> toResize;
+  private final ListInterface listContainer;
+  private Button approvedButton;
+  private Tooltip approvedTooltip;
+  //private boolean attentionLL = false;
 
-  public QCNPFExercise(Exercise e, ExerciseController controller, ListInterface<Exercise> listContainer,
+  public QCNPFExercise(CommonExercise e, ExerciseController controller, ListInterface listContainer,
                        float screenPortion, boolean addKeyHandler, String instance) {
     super(e, controller, listContainer, screenPortion, addKeyHandler, instance);
+
+    this.listContainer = listContainer;
+    //if (e.getState() == CommonShell.STATE.ATTN_LL) attentionLL = true;
   }
 
   @Override
-  protected ASRScorePanel makeScorePanel(Exercise e, String instance) { return null;  }
+  protected ASRScorePanel makeScorePanel(CommonExercise e, String instance) {
+    incorrectFields = new HashSet<String>();
+    return null;
+  }
 
   @Override
-  protected void addQuestionContentRow(Exercise e, ExerciseController controller, Panel hp) {
+  protected void addGroupingStyle(Widget div) {
+    div.addStyleName("buttonGroupInset7");
+  }
+
+  @Override
+  protected void addQuestionContentRow(CommonExercise e, ExerciseController controller, Panel hp) {
     super.addQuestionContentRow(e, controller, hp);
     hp.addStyleName("questionContentPadding");
   }
 
   /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, float, boolean, String)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, float, boolean, String)
    * @param controller
    * @param listContainer
    * @param addKeyHandler
    * @return
    */
-  protected NavigationHelper<Exercise> getNavigationHelper(ExerciseController controller,
-                                                           final ListInterface<Exercise> listContainer, boolean addKeyHandler) {
-    NavigationHelper<Exercise> widgets = new NavigationHelper<Exercise>(exercise, controller, new PostAnswerProvider() {
+  protected NavigationHelper getNavigationHelper(ExerciseController controller,
+                                                 final ListInterface listContainer, boolean addKeyHandler) {
+    NavigationHelper widgets = new NavigationHelper(exercise, controller, new PostAnswerProvider() {
       @Override
-      public void postAnswers(ExerciseController controller, ExerciseShell completedExercise) {
+      public void postAnswers(ExerciseController controller, CommonExercise completedExercise) {
         nextWasPressed(listContainer, completedExercise);
       }
     }, listContainer, true, addKeyHandler) {
       @Override
-      protected void enableNext(Exercise exercise) {
-      }
+      protected void enableNext(CommonExercise exercise) {}
     };
 
-    if (!instance.contains("review")) {
-      addApprovedButton(listContainer, widgets);
+    if (!instance.contains(Navigation.REVIEW) && !instance.contains(Navigation.COMMENT)) {
+      approvedButton = addApprovedButton(listContainer, widgets);
+      addAttnLLButton(listContainer,widgets);
     }
-
+    setApproveButtonState();
     return widgets;
   }
 
-  private void addApprovedButton(final ListInterface<Exercise> listContainer, NavigationHelper<Exercise> widgets) {
+  private Button addApprovedButton(final ListInterface listContainer, NavigationHelper widgets) {
     Button approved = new Button(APPROVED);
+    approved.getElement().setId("approve");
     approved.addStyleName("leftFiveMargin");
     widgets.add(approved);
     approved.setType(ButtonType.PRIMARY);
@@ -108,34 +137,93 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
         markReviewed(listContainer, exercise);
       }
     });
+    approvedTooltip = addTooltip(approved, APPROVED_BUTTON_TOOLTIP);
+    return approved;
+  }
+
+  private Button addAttnLLButton(final ListInterface listContainer, NavigationHelper widgets) {
+    Button attention = new Button(ATTENTION_LL);
+    attention.getElement().setId("attention");
+    attention.addStyleName("leftFiveMargin");
+    widgets.add(attention);
+    attention.setType(ButtonType.WARNING);
+    attention.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        markAttentionLL(listContainer, exercise);
+      }
+    });
+    /*approvedTooltip = */addTooltip(attention, MARK_FOR_LL_REVIEW);
+    return attention;
   }
 
   @Override
-  protected void nextWasPressed(ListInterface<? extends ExerciseShell> listContainer, ExerciseShell completedExercise) {
+  protected void nextWasPressed(ListInterface listContainer, CommonShell completedExercise) {
     //System.out.println("nextWasPressed : load next exercise " + completedExercise.getID() + " instance " +instance);
     super.nextWasPressed(listContainer, completedExercise);
-    markReviewed(listContainer, completedExercise);
+    //if (!attentionLL) {
+      markReviewed(listContainer, completedExercise);
+    //}
   }
 
-  private void markReviewed(ListInterface<? extends ExerciseShell> listContainer, ExerciseShell completedExercise) {
-    if (!instance.equals(Navigation.REVIEW) && !instance.equals(Navigation.COMMENT)) {
-      listContainer.addCompleted(completedExercise.getID());
+  /**
+   * @see #addApprovedButton(mitll.langtest.client.list.ListInterface, mitll.langtest.client.exercise.NavigationHelper)
+   * @see #nextWasPressed(mitll.langtest.client.list.ListInterface, mitll.langtest.shared.CommonShell)
+   * @param listContainer
+   * @param completedExercise
+   */
+  private void markReviewed(ListInterface listContainer, CommonShell completedExercise) {
+    if (isCourseContent()) {
       markReviewed(completedExercise);
+      boolean allCorrect = incorrectFields.isEmpty();
+
+      listContainer.setState(completedExercise.getID(), allCorrect ? CommonShell.STATE.APPROVED : CommonShell.STATE.DEFECT);
+      listContainer.redraw();
     }
   }
 
-  private void markReviewed(ExerciseShell completedExercise) {
-    System.out.println("markReviewed : exercise " + completedExercise.getID() + " instance " + instance);
-
-    service.markReviewed(completedExercise.getID(), incorrectSet.isEmpty(), controller.getUser(),
+  /**
+   * So if the attention LL button has been pressed, clicking next should not step on that setting
+   * @param listContainer
+   * @param completedExercise
+   */
+  private void markAttentionLL(ListInterface listContainer, CommonShell completedExercise) {
+    if (isCourseContent()) {
+      service.markState(completedExercise.getID(), CommonShell.STATE.ATTN_LL, controller.getUser(),
         new AsyncCallback<Void>() {
           @Override
-          public void onFailure(Throwable caught) {
-          }
+          public void onFailure(Throwable caught) {}
 
           @Override
           public void onSuccess(Void result) {
+            //attentionLL = true;
           }
+        });
+
+      listContainer.setSecondState(completedExercise.getID(), CommonShell.STATE.ATTN_LL);
+      listContainer.redraw();
+    }
+  }
+
+  private boolean isCourseContent() {
+    return !instance.equals(Navigation.REVIEW) && !instance.equals(Navigation.COMMENT);
+  }
+
+  /**
+   * @see #markReviewed(mitll.langtest.client.list.ListInterface, mitll.langtest.shared.CommonShell)
+   * @param completedExercise
+   */
+  private void markReviewed(CommonShell completedExercise) {
+    boolean allCorrect = incorrectFields.isEmpty();
+    System.out.println("markReviewed : exercise " + completedExercise.getID() + " instance " + instance+ " allCorrect " + allCorrect);
+
+    service.markReviewed(completedExercise.getID(), allCorrect, controller.getUser(),
+        new AsyncCallback<Void>() {
+          @Override
+          public void onFailure(Throwable caught) {}
+
+          @Override
+          public void onSuccess(Void result) {}
         });
   }
 
@@ -156,7 +244,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
    * @return
    */
   @Override
-  protected Widget getQuestionContent(Exercise e, String content) {
+  protected Widget getQuestionContent(CommonExercise e, String content) {
     Panel column = new FlowPanel();
     column.getElement().setId("QCNPFExercise_QuestionContent");
     column.addStyleName("floatLeft");
@@ -165,43 +253,28 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     Panel row = new FlowPanel();
     row.add(getComment());
 
-    if (instance.contains("review")) {
-      addItemsAtTop(column);
-    }
     column.add(row);
+
+    if (e.getModifiedDate() != null && e.getModifiedDate().getTime() != 0) {
+      Heading widgets = new Heading(5, "Changed",e.getModifiedDate().toString());
+      widgets.addStyleName("floatRight");
+      row.add(widgets);
+    }
+
     column.add(getEntry(e, FOREIGN_LANGUAGE, ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getRefSentence()));
-    column.add(getEntry(e, TRANSLITERATION, ExerciseFormatter.TRANSLITERATION, e.getTranslitSentence()));
-    column.add(getEntry(e, ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, e.getEnglishSentence()));
+    column.add(getEntry(e, TRANSLITERATION, ExerciseFormatter.TRANSLITERATION, e.getTransliteration()));
+    column.add(getEntry(e, ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, e.getEnglish()));
 
     return column;
   }
 
   private Heading getComment() {
     boolean isComment = instance.equals(Navigation.COMMENT);
-    String columnLabel = isComment ? "Comment" : DEFECT;
+    String columnLabel = isComment ? COMMENT : DEFECT;
     Heading heading = new Heading(4, columnLabel);
     heading.addStyleName("borderBottomQC");
     if (isComment) heading.setWidth("90px");
     return heading;
-  }
-
-  protected void addItemsAtTop(Panel container) {
-    if (!exercise.getUnitToValue().isEmpty()) {
-      Panel flow = new HorizontalPanel();
-      for (String type : controller.getStartupInfo().getTypeOrder()) {
-        //  container.add(new Label(type + " " + newUserExercise.getUnitToValue().get(type)));
-        flow.getElement().setId("unitLesson");
-        flow.addStyleName("leftFiveMargin");
-        Heading child = new Heading(4, type, exercise.getUnitToValue().get(type));
-        child.addStyleName("rightFiveMargin");
-        flow.add(child);
-        // container.add(new Label(type + " " + newUserExercise.getUnitToValue().get(type)));
-      }
-      container.add(flow);
-    }
-    else {
-      //container.add(new com.google.gwt.user.client.ui.Label("List "+ul.getName()));
-    }
   }
 
   public void onResize() {
@@ -209,7 +282,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     for (RequiresResize rr : toResize) rr.onResize();
   }
 
-  protected Widget getScoringAudioPanel(final Exercise e, String pathxxxx) {
+  protected Widget getScoringAudioPanel(final CommonExercise e, String pathxxxx) {
     Panel column = new FlowPanel();
     column.addStyleName("blockStyle");
     if (toResize == null) toResize = new ArrayList<RequiresResize>();
@@ -220,13 +293,12 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
         audioRef = wavToMP3(audioRef);   // todo why do we have to do this?
       }
       ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel(audioRef, e.getRefSentence(), service, controller,
-        controller.getProps().showSpectrogram(), scorePanel, 93, "");
+        controller.getProps().showSpectrogram(), scorePanel, 93, "", e.getID());
       audioPanel.setShowColor(true);
       audioPanel.getElement().setId("ASRScoringAudioPanel");
-      audioPanel.setRefAudio(e.getRefSentence());
-      String name = "Reference" + " : " + audio.getDisplay();
-      if (audio.isFast()) name = "Regular speed audio example";
-      else if (audio.isSlow()) name = "Slow speed audio example";
+      String name = REFERENCE + " : " + audio.getDisplay();
+      if (audio.isFast()) name = REGULAR_SPEED_AUDIO_EXAMPLE;
+      else if (audio.isSlow()) name = SLOW_SPEED_AUDIO_EXAMPLE;
       ResizableCaptionPanel cp = new ResizableCaptionPanel(name);
       cp.setContentWidget(audioPanel);
       toResize.add(cp);
@@ -236,12 +308,12 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     }
     if (!e.hasRefAudio()) {
       ExerciseAnnotation refAudio = e.getAnnotation(REF_AUDIO);
-      column.add(getEntry(REF_AUDIO, new Label("No Audio Recorded."), refAudio));
+      column.add(getEntry(REF_AUDIO, new Label(NO_AUDIO_RECORDED), refAudio));
     }
     return column;
   }
 
-  private Widget getEntry(Exercise e, final String field, final String label, String value) {
+  private Widget getEntry(CommonExercise e, final String field, final String label, String value) {
     return getEntry(field, label, value, e.getAnnotation(field), true);
   }
 
@@ -258,6 +330,9 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     final FocusWidget commentEntry = makeCommentEntry(field, annotation);
 
     boolean alreadyMarkedCorrect = annotation == null || annotation.status == null || annotation.status.equals("correct");
+    if (!alreadyMarkedCorrect) {
+      incorrectFields.add(field);
+    }
     final Panel commentRow = new FlowPanel();
     final Widget qcCol = getQCCheckBox(field, commentEntry, alreadyMarkedCorrect, commentRow);
 
@@ -299,6 +374,12 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     commentRow.add(commentEntry);
   }
 
+  /**
+   * @see #getEntry(String, com.google.gwt.user.client.ui.Widget, mitll.langtest.shared.ExerciseAnnotation)
+   * @param field
+   * @param annotation
+   * @return
+   */
   private FocusWidget makeCommentEntry(final String field, ExerciseAnnotation annotation) {
     final TextBox commentEntry = new TextBox();
     commentEntry.getElement().setId("QCNPFExercise_Comment_TextBox_"+field);
@@ -316,6 +397,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
         addIncorrectComment(commentEntry.getText(), field);
       }
     });
+    addTooltip(commentEntry, COMMENT_TOOLTIP);
     return commentEntry;
   }
 
@@ -332,21 +414,56 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     boolean isComment = instance.equals(Navigation.COMMENT);
 
     final CheckBox checkBox = new CheckBox("");
+    checkBox.getElement().setId("CheckBox_"+field);
     checkBox.addStyleName(isComment? "wideCenteredRadio" :"centeredRadio");
     checkBox.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        Boolean isIncorrect = checkBox.getValue();
-        if (!isIncorrect) {
-          incorrectSet.remove(field);
-          addCorrectComment(field);
-        }
-        commentRow.setVisible(isIncorrect);
-        commentEntry.setFocus(isIncorrect);
-        if (isIncorrect) incorrectSet.add(field);
+        checkBoxWasClicked(checkBox.getValue(), field, commentRow, commentEntry);
       }
     });
     checkBox.setValue(!alreadyMarkedCorrect);
+    if (!isComment) {
+      addTooltip(checkBox, CHECKBOX_TOOLTIP);
+    }
     return checkBox;
+  }
+
+  private void checkBoxWasClicked(boolean isIncorrect, String field, Panel commentRow, FocusWidget commentEntry) {
+    commentRow.setVisible(isIncorrect);
+    commentEntry.setFocus(isIncorrect);
+
+    if (isIncorrect) {
+      incorrectFields.add(field);
+    }
+    else {
+      incorrectFields.remove(field);
+      addCorrectComment(field);
+    }
+
+    if (isCourseContent()) {
+      String id = exercise.getID();
+      System.out.println("instance = " +instance);
+      if (instance.equalsIgnoreCase("classroom")) {
+        CommonShell.STATE state = incorrectFields.isEmpty() ? CommonShell.STATE.UNSET : CommonShell.STATE.DEFECT;
+        exercise.setState(state);
+        listContainer.setState(id, state);
+      }
+
+      listContainer.redraw();
+
+      setApproveButtonState();
+      markReviewed(exercise);
+    }
+  }
+
+  private void setApproveButtonState() {
+    if (approvedButton != null) {   // comment tab doesn't have it...!
+      boolean allCorrect = incorrectFields.isEmpty();
+      approvedButton.setEnabled(allCorrect);
+
+      approvedTooltip.setText(allCorrect ? APPROVED_BUTTON_TOOLTIP : APPROVED_BUTTON_TOOLTIP2);
+      approvedTooltip.reconfigure();
+    }
   }
 }
