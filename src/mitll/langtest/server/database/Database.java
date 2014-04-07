@@ -1,7 +1,6 @@
 package mitll.langtest.server.database;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 
 /**
  * Created with IntelliJ IDEA.
@@ -12,7 +11,7 @@ import java.sql.SQLException;
  */
 public interface Database {
   Connection getConnection();
-  void closeConnection(Connection connection) throws SQLException;
+  void closeConnection(Connection connection);
 
   String TIME = "time";
   String EXID = "exid";

@@ -9,7 +9,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
 
 /**
  * This binds a record button with the act of posting recorded audio to the server.
@@ -21,10 +21,11 @@ import mitll.langtest.shared.Exercise;
  */
 public abstract class PostAudioRecordButton extends RecordButton implements RecordButton.RecordingListener {
   private boolean validAudio = false;
-  private int index;
+  private static final int LOG_ROUNDTRIP_THRESHOLD = 3000;
+  private final int index;
   private int reqid = 0;
-  private Exercise exercise;
-  private final ExerciseController controller;
+  private CommonExercise exercise;
+  protected final ExerciseController controller;
   private final LangTestDatabaseAsync service;
   private final boolean recordInResults;
   private final String audioType;
@@ -39,7 +40,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    * @param recordButtonTitle
    * @param stopButtonTitle
    */
-  public PostAudioRecordButton(Exercise exercise, final ExerciseController controller, LangTestDatabaseAsync service,
+  public PostAudioRecordButton(CommonExercise exercise, final ExerciseController controller, LangTestDatabaseAsync service,
                                int index, boolean recordInResults, String audioType, String recordButtonTitle, String stopButtonTitle) {
     super(controller.getRecordTimeout(), true, true, recordButtonTitle, stopButtonTitle);
     setRecordingListener(this);
@@ -48,17 +49,14 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     this.controller = controller;
     this.service = service;
     this.recordInResults = recordInResults;
-    this.audioType =audioType;
+    this.audioType = audioType;
+  //  System.out.println("PostAudioRecordButton : Audio type " + audioType);
     getElement().setId("PostAudioRecordButton");
+    controller.register(this, exercise.getID());
   }
 
-  @Override
-  public void flip(boolean first) {}
-
-  public void setExercise(Exercise exercise) { this.exercise = exercise; }
-  public Exercise getExercise() { return exercise; }
-
-  private Widget getOuter() { return this; }
+  public void setExercise(CommonExercise exercise) { this.exercise = exercise; }
+  public CommonExercise getExercise() { return exercise; }
 
   /**
    * @see mitll.langtest.client.recorder.RecordButton#stop()
@@ -68,18 +66,20 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     reqid++;
     final long then = System.currentTimeMillis();
     service.writeAudioFile(controller.getBase64EncodedWavFile(),
-      exercise.getPlan(),
+      "plan",//exercise.getPlan(),
       exercise.getID(),
       index,
       controller.getUser(),
       reqid,
-      !exercise.isPromptInEnglish(),
+      true,//!exercise.isPromptInEnglish(),
       audioType,
-      false, recordInResults, new AsyncCallback<AudioAnswer>() {
+      false, recordInResults,
+      new AsyncCallback<AudioAnswer>() {
         public void onFailure(Throwable caught) {
           long now = System.currentTimeMillis();
           System.out.println("PostAudioRecordButton : (failure) posting audio took " + (now - then) + " millis");
 
+          logMessage("failed to post audio for " + controller.getUser() + " exercise " + exercise.getID());
           showPopup(AudioAnswer.Validity.INVALID.getPrompt());
         }
 
@@ -117,25 +117,34 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
             showPopup(result.validity.getPrompt());
             useInvalidResult(result);
           }
-          if (controller.isLogClientMessages()) {
+          if (controller.isLogClientMessages() || roundtrip > LOG_ROUNDTRIP_THRESHOLD) {
             logRoundtripTime(result, roundtrip);
           }
         }
       });
   }
 
+  protected String getAudioType() { return controller.getAudioType(); }
+
+  private Widget getOuter() { return this; }
+
   private void logRoundtripTime(AudioAnswer result, long roundtrip) {
     String message = "PostAudioRecordButton : (success) User #" + controller.getUser() +
       " post audio took " + roundtrip + " millis, audio dur " +
       result.durationInMillis + " millis, " +
       " " + ((float) roundtrip / (float) result.durationInMillis) + " roundtrip/audio duration ratio.";
-    //System.out.println(message);
+    logMessage(message);
+  }
+
+  private void logMessage(String message) {
     service.logMessage(message, new AsyncCallback<Void>() {
       @Override
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+      }
 
       @Override
-      public void onSuccess(Void result) {}
+      public void onSuccess(Void result) {
+      }
     });
   }
 
