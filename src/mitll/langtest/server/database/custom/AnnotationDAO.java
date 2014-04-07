@@ -16,8 +16,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * Created with IntelliJ IDEA.
@@ -27,11 +25,11 @@ import java.util.TreeSet;
  * To change this template use File | Settings | File Templates.
  */
 public class AnnotationDAO extends DAO {
-  private static Logger logger = Logger.getLogger(AnnotationDAO.class);
+  private static final Logger logger = Logger.getLogger(AnnotationDAO.class);
 
-  public static final String ANNOTATION = "annotation";
+  private static final String ANNOTATION = "annotation";
   private static final String CREATORID = "creatorid";
-
+  private static final String STATUS = "status";
 
   public AnnotationDAO(Database database, UserDAO userDAO) {
     super(database);
@@ -84,7 +82,7 @@ public class AnnotationDAO extends DAO {
 
     try {
       // there are much better ways of doing this...
-     // logger.info("add :annotation " + annotation);
+     logger.info("add :annotation " + annotation);
 
       Connection connection = database.getConnection();
       PreparedStatement statement;
@@ -126,9 +124,9 @@ public class AnnotationDAO extends DAO {
     }
   }
 
-  public int getCount() { return getCount(ANNOTATION); }
+  //public int getCount() { return getCount(ANNOTATION); }
 
-  private Map<String,List<UserAnnotation>> exerciseToAnnos = new HashMap<String, List<UserAnnotation>>();
+  private final Map<String,List<UserAnnotation>> exerciseToAnnos = new HashMap<String, List<UserAnnotation>>();
 
   private void populate(long userid) {
     List<UserAnnotation> all = getAll(userid);
@@ -176,7 +174,7 @@ public class AnnotationDAO extends DAO {
    * @param userID
    * @return
    */
-  public boolean hasAnnotationOld(String exerciseID, String field, String status, String comment, long userID) {
+/*  public boolean hasAnnotationOld(String exerciseID, String field, String status, String comment, long userID) {
     String sql = "SELECT * from " + ANNOTATION + " where exerciseid='" + exerciseID + "' AND " + CREATORID +"="+userID+
       " order by field,modified desc";
 
@@ -188,10 +186,10 @@ public class AnnotationDAO extends DAO {
       logger.error("got " +e + " doing " + sql,e);
     }
     return false;
-  }
+  }*/
 
   /**
-   * @see UserListManager#addAnnotations(mitll.langtest.shared.AudioExercise)
+   * @see UserListManager#addAnnotations
    * @param exerciseID
    * @return
    */
@@ -243,7 +241,7 @@ public class AnnotationDAO extends DAO {
       lists.add(new UserAnnotation(
           rs.getString("exerciseid"),
           rs.getString("field"),
-          rs.getString("status"),
+          rs.getString(STATUS),
           rs.getString("comment"),
           rs.getLong(CREATORID),
           rs.getTimestamp("modified").getTime()
@@ -258,33 +256,121 @@ public class AnnotationDAO extends DAO {
     return lists;
   }
 
-  /**
-   * TODO : this can't be right!
-   *
-   * @see mitll.langtest.server.database.custom.UserListManager#UserListManager(mitll.langtest.server.database.UserDAO, UserListDAO, UserListExerciseJoinDAO, AnnotationDAO, ReviewedDAO, mitll.langtest.server.PathHelper)
-   * @return
-   */
-  public Set<String> getIncorrectIds()  {
+/*
+  public Set<String> getFixedIds() {
+    return getStateIds(false);
+  }
+*/
+
+    /**
+     *
+     * @see mitll.langtest.server.database.custom.UserListManager#UserListManager(mitll.langtest.server.database.UserDAO, UserListDAO, UserListExerciseJoinDAO, AnnotationDAO, ReviewedDAO, mitll.langtest.server.PathHelper)
+     * @return
+     */
+  public Map<String,Long> getDefectIds()  {
+    long then = System.currentTimeMillis();
+    Map<String,Long> stateIds = getStateIds(true);
+    long now = System.currentTimeMillis();
+    //logger.debug("took " +(now-then) + " millis to find " + stateIds.size());
+    return stateIds;
+  }
+
+  protected Map<String,Long> getStateIds(boolean forDefects) {
     Connection connection = database.getConnection();
-    String sql = "SELECT DISTINCT exerciseid from " + ANNOTATION + " order by exerciseid";
 
-    Set<String> lists = Collections.emptySet();
+    String sql2 = "select exerciseid,field,status,creatorid" +
+      " from annotation group by exerciseid,field,status,modified order by exerciseid,field,modified;";
+
+   // Set<IDCreator> lists = Collections.emptySet();
+    Map<String,Long> exToCreator = Collections.emptyMap();
     try {
-      PreparedStatement statement = connection.prepareStatement(sql);
+      PreparedStatement statement = connection.prepareStatement(sql2);
       ResultSet rs = statement.executeQuery();
-      lists = new TreeSet<String>();
+      exToCreator = new HashMap<String, Long>();
+      String prevExid = "";
+      long prevCreatorid = -1;
 
+      Map<String,String> fieldToStatus = new HashMap<String, String>();
       while (rs.next()) {
-        lists.add(rs.getString(1));
+        String exid = rs.getString(1);
+        String field = rs.getString(2);
+        String status = rs.getString(3);
+        //long modified = rs.getTimestamp(4).getTime();
+        long creatorid = rs.getLong(4);
+
+        if (prevExid.isEmpty()) {
+          prevExid = exid;
+        } else if (!prevExid.equals(exid)) {
+          // go through all the fields -- if the latest is "incorrect" on any field, it's a defect
+          //examineFields(forDefects, lists, prevExid, fieldToStatus);
+          if (examineFields(forDefects, fieldToStatus)) {
+            //lists.add(new IDCreator(prevExid,creatorid));
+            exToCreator.put(prevExid,creatorid);
+          }
+          fieldToStatus.clear();
+          prevExid = exid;
+          prevCreatorid = creatorid;
+        }
+
+        fieldToStatus.put(field, status);
       }
 
-      //logger.debug("getUserAnnotations sql " + sql + " yielded " + lists);
+/*      for (String latest : fieldToStatus.values()) {
+        if (latest.equals(statusToLookFor)) {
+          lists.add(prevExid);
+          break;
+        }
+      } */
+      if (examineFields(forDefects, fieldToStatus)) {
+    //    lists.add(new IDCreator(prevExid, prevCreatorid));
+        exToCreator.put(prevExid,prevCreatorid);
+
+      }
+
+      logger.debug("getUserAnnotations forDefects " +forDefects+
+        " sql " + sql2 + " yielded " + exToCreator.size());
+   /*   if (lists.size() > 20) {
+        Iterator<String> iterator = lists.iterator();
+        //for (int i = 0; i < 20;i++) logger.debug("\tgetUserAnnotations e.g. " + iterator.next() );
+      }*/
+
       rs.close();
       statement.close();
       database.closeConnection(connection);
     } catch (SQLException e) {
-      logger.error("Got " +e + " doing " + sql,e);
+      logger.error("Got " +e + " doing " + sql2,e);
     }
-    return lists;
+    return exToCreator;
+  }
+
+  public static class IDCreator {
+    //CommonShell.STATE state; // really should be an enum...
+    String exID;
+    long creatorID;
+    public IDCreator(String exID,long creatorID) {this.exID = exID; this.creatorID=creatorID;}
+  }
+
+  private boolean examineFields(boolean forDefects, Map<String, String> fieldToStatus) {
+    String statusToLookFor = "correct";
+    boolean foundIncorrect = false;
+    for (String latest : fieldToStatus.values()) {
+      if (!latest.equals(statusToLookFor)) {
+        //lists.add(prevExid);
+        foundIncorrect = true;
+        break;
+      }
+    }
+    if (forDefects) {
+      if (foundIncorrect) {
+       // lists.add(prevExid);
+        return true;
+      }
+    } else {
+      if (!foundIncorrect) {
+        //lists.add(prevExid);
+        return true;
+      }
+    }
+    return false;
   }
 }

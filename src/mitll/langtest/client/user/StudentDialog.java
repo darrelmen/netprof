@@ -11,7 +11,9 @@ import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Form;
 import com.github.gwtbootstrap.client.ui.Modal;
 import com.github.gwtbootstrap.client.ui.RadioButton;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
+import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.github.gwtbootstrap.client.ui.event.ShowEvent;
@@ -26,6 +28,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -34,6 +37,8 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.custom.KeyStorage;
+import mitll.langtest.client.flashcard.ControlState;
 import mitll.langtest.shared.DLIUser;
 import mitll.langtest.shared.Result;
 
@@ -50,7 +55,7 @@ import java.util.TreeMap;
  * Time: 5:33 PM
  * To change this template use File | Settings | File Templates.
  */
-public class StudentDialog extends UserDialog {
+class StudentDialog extends UserDialog {
   private static final int MIN_WEEKS = 0;
   private static final int MAX_WEEKS = 104;
   public static final int ILR_CHOICE_WIDTH = 80;
@@ -59,29 +64,27 @@ public class StudentDialog extends UserDialog {
   private static final String DEMO = "Demo";
   private static final String DATA_COLLECTION = "Data Collection";
   private static final String REVIEW = "Review";
-  //private static final String[] ROLES = new String[]{DATA_COLLECTION, PRACTICE, DEMO, REVIEW};
   private static final Map<String, String> displayToRoles = new TreeMap<String, String>();
   private static final String STUDENT = "Student";
  // private static final String STUDENT_DATA_COLLECTION = "Student - Data Collection";
   private static final String TEACHER_REVIEWER = "Reviewer";
   private static final String TEACHER = "Teacher";
   private static final List<String> ROLES = Arrays.asList(STUDENT, TEACHER,TEACHER_REVIEWER);
+  public static final String ARE_YOU_A = "Are you a";
+  public static final String USER_ID = "User ID";
+  public static final String USER_ID_TOOLTIP = "New users can choose any id and login.";
+  public static final String PASSWORD = "Password";
+  public static final String DIALECT = "Dialect";
+  public static final String CHOOSE_A_GENDER = "Choose a gender.";
 
   private final UserManager userManager;
   private final UserNotification langTest;
- // private List<String> purposes;
 
-  public StudentDialog(LangTestDatabaseAsync service, PropertyHandler props, UserManager userManager, UserNotification userNotification) {
-    super(service, props, userManager, userNotification);
+  public StudentDialog(LangTestDatabaseAsync service, PropertyHandler props, UserManager userManager,
+                       UserNotification userNotification) {
+    super(service, props);
     this.userManager = userManager;
     this.langTest = userNotification;
-/*    purposes = new ArrayList<String>();
-    purposes.add(props.getPurposeDefault());
-
-    for (String purpose : Arrays.asList(ROLES)) {
-      if (!purpose.equalsIgnoreCase(props.getPurposeDefault())) purposes.add(purpose);
-    }*/
-
     populateRoles();
   }
 
@@ -102,9 +105,13 @@ public class StudentDialog extends UserDialog {
 
   public void displayLoginBox() {
     final Modal dialogBox = getDialog("Login");
+    dialogBox.setWidth("700px");
     dialogBox.setAnimation(false);
     dialogBox.setMaxHeigth("760px");
-    DOM.setStyleAttribute(dialogBox.getElement(), "top", "4%");
+
+    Element element = dialogBox.getElement();
+    element.setId("Student_LoginBoxDialog");
+    DOM.setStyleAttribute(element, "top", "1%");
     Form form = new Form();
     form.addStyleName("form-horizontal");
     DOM.setStyleAttribute(form.getElement(), "marginBottom", "0px");
@@ -112,11 +119,12 @@ public class StudentDialog extends UserDialog {
     Fieldset fieldset = new Fieldset();
     form.add(fieldset);
     dialogBox.add(form);
-    final ListBoxFormField purpose = getListBoxFormField(fieldset, "Are you a", getListBox2(ROLES));
+    final ListBoxFormField purpose = getListBoxFormField(fieldset, ARE_YOU_A, getListBox2(ROLES));
 
-    final FormField user = addControlFormField(fieldset, "User ID", MIN_LENGTH_USER_ID);
+    final FormField user = addControlFormField(fieldset, USER_ID, MIN_LENGTH_USER_ID);
     user.setVisible(isDataCollection(purpose) || isPractice(purpose));
-    final FormField password = addControlFormField(fieldset, "Password",true, 30);
+    addTooltip(user.box, USER_ID_TOOLTIP);
+    final FormField password = addControlFormField(fieldset, PASSWORD, true, 30, USER_ID_MAX_LENGTH);
     password.setVisible(false);
     purpose.box.setWidth("150px");
 
@@ -226,14 +234,12 @@ public class StudentDialog extends UserDialog {
                                         final FormField password,
                                         final ListBoxFormField purpose,
                                         final AccordionGroup accordion) {
-    // Create a handler for the sendButton and nameField
     return new ClickHandler() {
       /**
        * Do validation.
        * Fired when the user clicks on the sendButton.
        */
       public void onClick(ClickEvent event) {
-
         //System.out.println("makeCloseHandler : got click " + event);
 
         String purposeSetting = getRole(purpose);
@@ -260,19 +266,19 @@ public class StudentDialog extends UserDialog {
   private void checkUserAndMaybeRegister(final String audioType, FormField user,
                                          final FormField password,
                                          final Modal dialogBox,
-                                         final AccordionGroup accordion, final RegistrationInfo registrationInfo,
+                                         final AccordionGroup accordion,
+                                         final RegistrationInfo registrationInfo,
                                          final String purposeSetting) {
     final String userID = user.box.getText();
     boolean isReview = purposeSetting.equals(REVIEW);
 
     System.out.println("checkUserAndMaybeRegister " + purposeSetting + " review " + isReview);
-    if (checkValidUser(user)
-      && (!isReview || (checkValidPassword(password) /*&& checkPassword(password)*/))
+    if (checkValidUser(user) &&
+      (!isReview || checkValidPassword(password))
       ) {
       service.userExists(userID, new AsyncCallback<Integer>() {
         @Override
-        public void onFailure(Throwable caught) {
-        }
+        public void onFailure(Throwable caught) {}
 
         @Override
         public void onSuccess(Integer result) {
@@ -291,6 +297,7 @@ public class StudentDialog extends UserDialog {
             }
             checkThenRegister(audioType, registrationInfo, dialogBox, userID);
           }
+          setRecordingOrder();
         }
       });
     } else {
@@ -298,6 +305,13 @@ public class StudentDialog extends UserDialog {
     }
   }
 
+  /**
+   * Order of validity checks is important - marks errors moving top to bottom in dialog.
+   * @param audioType
+   * @param registrationInfo
+   * @param dialogBox
+   * @param userID
+   */
   private void checkThenRegister(String audioType, RegistrationInfo registrationInfo, Modal dialogBox, String userID) {
     boolean skipWeekCheck = audioType.toLowerCase().contains(REVIEW.toLowerCase());
     boolean skipChecks = audioType.toLowerCase().contains(PRACTICE.toLowerCase());
@@ -309,17 +323,20 @@ public class StudentDialog extends UserDialog {
       System.out.println("\tcheckThenRegister : age OK skipChecks " + audioType + " skipWeekCheck " + skipWeekCheck);
 
       if (skipWeekCheck || highlightIntegerBox(registrationInfo.weeks, MIN_WEEKS, MAX_WEEKS)) {
-        if (registrationInfo.dialectGroup.getText().isEmpty()) {
-          System.out.println("\tcheckThenRegister : dialectGroup ");
+        // order is important here --
+         if (registrationInfo.checkValidGender()) {
+          if (registrationInfo.dialectGroup.getText().isEmpty()) {
+            System.out.println("\tcheckThenRegister : dialectGroup ");
 
-          markError(registrationInfo.dialectGroup, "Enter a language dialect.");
-        } else if (registrationInfo.checkValidity() && registrationInfo.checkValidity2()) {
-          System.out.println("\tcheckThenRegister : hideAndSend");
+            markError(registrationInfo.dialectGroup, "Enter a language dialect.");
+          } else if (registrationInfo.checkValidity() && registrationInfo.checkValidity2()
+            ) {
+            System.out.println("\tcheckThenRegister : hideAndSend");
 
-          hideAndSend(audioType, registrationInfo, dialogBox, userID);
-        } else {
-          System.out.println("\tcheckThenRegister : skipChecks " + audioType + " user  " + userID);
-
+            hideAndSend(audioType, registrationInfo, dialogBox, userID);
+          } else {
+            System.out.println("\tcheckThenRegister : skipChecks " + audioType + " user  " + userID);
+          }
         }
       } else {
         System.out.println("\tcheckThenRegister : markError weeks ");
@@ -355,8 +372,8 @@ public class StudentDialog extends UserDialog {
   }
 
   private FormField getDialect(Panel dialogBox) {
-    final FormField dialectGroup = addControlFormField(dialogBox, "Dialect");
-    dialectGroup.box.addStyleName("topMargin");
+    final FormField dialectGroup = addControlFormField(dialogBox, DIALECT);
+    dialectGroup.group.addStyleName("topTwentyMargin");
 
     dialectGroup.box.addKeyUpHandler(new KeyUpHandler() {
       public void onKeyUp(KeyUpEvent event) {
@@ -458,6 +475,7 @@ public class StudentDialog extends UserDialog {
 
       public void onSuccess(Long result) {
         System.out.println("addUser : server result is " + result);
+        setDefaultControlValues(result.intValue());
         userManager.storeUser(result, audioType, "" + result, loginType);
       }
     };
@@ -466,11 +484,18 @@ public class StudentDialog extends UserDialog {
 
   private void addUser(int age, String gender, int monthsOfExperience, String dialect, String nativeLang, String userID,
                        AsyncCallback<Long> async) {
-    System.out.println("\n\naddUser : userID is " + userID);
+    System.out.println("addUser : userID is " + userID);
 
     service.addUser(age,
       gender,
       monthsOfExperience, nativeLang, dialect, userID, async);
+  }
+
+  private void setDefaultControlValues(int user) {
+    ControlState controlState = new ControlState();
+    controlState.setStorage(new KeyStorage(props.getLanguage(),user));
+    controlState.setAudioOn(true);
+    controlState.setAudioFeedbackOn(true);
   }
 
   private boolean highlightIntegerBox(FormField ageEntryGroup) {
@@ -478,16 +503,17 @@ public class StudentDialog extends UserDialog {
   }
 
   private class RegistrationInfo {
-    private FormField ageEntryGroup;
-    private ListBoxFormField genderGroup;
-    private FormField weeks;
+    private final FormField ageEntryGroup;
+    private final ListBoxFormField genderGroup;
+    private final FormField weeks;
     private ListBoxFormField reading;
     private ListBoxFormField listening;
     private ListBoxFormField speaking;
     private ListBoxFormField writing;
-    private FormField dialectGroup;
-    FluidRow ilrLevels, estimating;
-    Widget label;
+    private final FormField dialectGroup;
+    final FluidRow ilrLevels;
+    final FluidRow estimating;
+    final Widget label;
 
 
     public RegistrationInfo(Panel dialogBox) {
@@ -495,13 +521,29 @@ public class StudentDialog extends UserDialog {
       DOM.setStyleAttribute(form.getElement(), "marginBottom", "0px");
 
       form.addStyleName("form-horizontal");
-      Fieldset fieldset = new Fieldset();
-      form.add(fieldset);
-      dialogBox.add(form);
 
-      ageEntryGroup = addControlFormField(fieldset, "Your age");
-      genderGroup = getListBoxFormField(fieldset, "Gender", getGenderBox());
-      weeks = addControlFormField(fieldset, "Weeks of Experience");
+      Fieldset fieldsetLeft = new Fieldset();
+      Fieldset fieldsetRight = new Fieldset();
+
+      DivWidget divLeft = new DivWidget();
+      divLeft.addStyleName("floatLeft");
+
+      DivWidget divRight = new DivWidget();
+      divRight.addStyleName("floatRight");
+
+      divLeft.add(fieldsetLeft);
+      form.add(divLeft);
+
+      divRight.add(fieldsetRight);
+      form.add(divRight);
+
+      dialogBox.add(divLeft);
+      dialogBox.add(divRight);
+
+      ageEntryGroup = addControlFormField(fieldsetLeft, "Your age");
+      genderGroup = getListBoxFormField(fieldsetRight, "Gender", getGenderBox());
+      weeks = addControlFormField(fieldsetLeft, "Weeks of Experience");
+      dialectGroup = getDialect(fieldsetRight);
 
       final ControlGroup ilrLevel = new ControlGroup();
       ilrLevel.addStyleName("leftFiveMargin");
@@ -509,14 +551,16 @@ public class StudentDialog extends UserDialog {
       ilrLevel.add(label);
       this.label = label;
       dialogBox.add(ilrLevel);
+      ilrLevel.addStyleName("floatLeft");
 
       FluidRow row = getILRLevels();
+      row.addStyleName("floatLeft");
+
       dialogBox.add(row);
       ilrLevels = row;
       FluidRow row2 = getEstimating2();
       dialogBox.add(row2);
       estimating = row2;
-      dialectGroup = getDialect(fieldset);
     }
 
     public void showOrHideILR(boolean show) {
@@ -528,11 +572,11 @@ public class StudentDialog extends UserDialog {
 
     public boolean checkValidity() {
       if (!ilrLevels.isVisible()) return true;
-      for (ListBoxFormField f : Arrays.asList(reading, listening, speaking, writing)) {
-        if (f.box.getValue().equals("Unset")) {
-          f.markSimpleError("Choose a level");
-          return false;
-        }
+      for (ListBoxFormField f : Arrays.asList(reading,listening,speaking,writing)) {
+         if (f.box.getValue().equals(UNSET)) {
+           f.markSimpleError("Choose a level", Placement.TOP);
+           return false;
+         }
       }
       return true;
     }
@@ -541,12 +585,22 @@ public class StudentDialog extends UserDialog {
       if (!estimating.isVisible()) return true;
 
       for (YesNo f : ilrs) {
-        if (!f.markSimpleError()) {
+        if (!f.markSimpleError(Placement.TOP)) {
           return false;
         }
       }
       return true;
     }
+
+
+    public boolean checkValidGender() {
+      boolean valid = !genderGroup.getValue().equals(UNSET);
+      if (!valid) {
+        genderGroup.markSimpleError(CHOOSE_A_GENDER,Placement.LEFT);
+      }
+      return valid;
+    }
+
 
     public boolean getValue(String ilr) {
       for (YesNo yn : ilrs) {
@@ -576,12 +630,12 @@ public class StudentDialog extends UserDialog {
       List<String> levels = Arrays.asList("Unset", "0+", "1", "1+", "2", "2+", "3", "3+", "4");
       reading = getListBoxFormField(c1, "Reading", getListBox2(levels));
       listening = getListBoxFormField(c2, "Listening", getListBox2(levels));
-      speaking = getListBoxFormField(c3, "Speaking", getListBox2(levels));
-      writing = getListBoxFormField(c4, "Writing", getListBox2(levels));
+      speaking  = getListBoxFormField(c3, "Speaking", getListBox2(levels));
+      writing   = getListBoxFormField(c4, "Writing", getListBox2(levels));
       return row;
     }
 
-    private List<YesNo> ilrs = new ArrayList<YesNo>();
+    private final List<YesNo> ilrs = new ArrayList<YesNo>();
 
     private FluidRow getEstimating2() {
       FluidRow row2 = new FluidRow();
@@ -605,7 +659,7 @@ public class StudentDialog extends UserDialog {
   private class YesNo {
     public final RadioButton yes, no;
     private final String name;
-    public ControlGroup group;
+    public final ControlGroup group;
 
     public YesNo(String name) {
       this.name = name;
@@ -647,19 +701,24 @@ public class StudentDialog extends UserDialog {
       group.add(controls);
     }
 
+/*
     public boolean markSimpleError() {
+      return markSimpleError(Placement.RIGHT);
+    }
+*/
+
+    public boolean markSimpleError(Placement placement) {
       if (!yes.getValue() && !no.getValue()) {
-        markError(group, yes, "Please choose", "Click yes or no.");
+        markError(group, yes, "Please choose", "Click yes or no.", placement);
         return false;
       } else return true;
     }
 
-    public boolean getValue() {
-      return yes.getValue();
-    }
-
     public String getName() {
       return name;
+    }
+    public boolean getValue() {
+      return yes.getValue();
     }
   }
 }
