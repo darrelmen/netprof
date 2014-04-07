@@ -11,7 +11,7 @@ import mitll.langtest.client.recorder.FlashcardRecordButton;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
 
 /**
  * Created with IntelliJ IDEA.
@@ -33,11 +33,11 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
    * @param exercise
    * @param index
    * @param audioType
-   * @see BootstrapExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int, boolean)
+   * @see BootstrapExercisePanel#getAnswerWidget(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int, boolean)
    */
   public FlashcardRecordButtonPanel(AudioAnswerListener exercisePanel, LangTestDatabaseAsync service,
-                                    ExerciseController controller, Exercise exercise, int index, String audioType) {
-    super(service, controller, exercise, null, index, true, audioType);
+                                    ExerciseController controller, CommonExercise exercise, int index, String audioType) {
+    super(service, controller, exercise, null, index, true, audioType, "Record");
 
     this.exercisePanel = exercisePanel;
    // recordButton.setTitle("Press and hold the space bar or mouse button to record");
@@ -75,7 +75,8 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
     return hp;
   }
 
-  protected RecordButton makeRecordButton(ExerciseController controller) {
+  @Override
+  protected RecordButton makeRecordButton(ExerciseController controller, String title) {
     return new FlashcardRecordButton(controller.getRecordTimeout(), this, true, true);  // TODO : fix later in classroom?
   }
 
@@ -102,11 +103,10 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
    */
   @Override
   protected void receivedAudioAnswer(final AudioAnswer result, ExerciseQuestionState questionState, Panel outer) {
-    System.out.println("receivedAudioAnswer " + result);
-    boolean correct = result.isCorrect();
+    System.out.println("FlashcardRecordButtonPanel.receivedAudioAnswer " + result);
     recordButton.setVisible(false);
     waiting.setVisible(false);
-    if (correct) {
+    if (result.isCorrect()) {
       correctIcon.setVisible(true);
     } else {
       incorrect.setVisible(true);
