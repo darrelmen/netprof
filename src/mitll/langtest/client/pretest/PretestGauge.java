@@ -3,6 +3,7 @@
  */
 package mitll.langtest.client.pretest;
 
+import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
@@ -14,16 +15,20 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 
 /**
+ * This is evil - easy to get it to draw a gauge that is squished 50% horizontally.
+ * Only the way it works here allows it to do normal width.
+ * Updating the library to gauge.js 4.6 breaks the coloring...
+ * Sigh.
  * @author gregbramble, sharontam
  *
  */
 public class PretestGauge extends HTML{
-  private String id;                      // referenced in native js
-  private String label;                      // referenced in native js
+  private final String id;                      // referenced in native js
+  private final String label;                      // referenced in native js
   private JavaScriptObject canvasObject;  // referenced in native js
   private JavaScriptObject gaugeObject;   // referenced in native js
 
-	private PopupPanel tooltip;
+	private final PopupPanel tooltip;
 
 /*	float[][] colormap = {
       {255f, 0f, 0f},
@@ -44,12 +49,12 @@ public class PretestGauge extends HTML{
       {0f, 255f, 0f}};*/
 
   /**
-   * @see mitll.langtest.client.gauge.ASRScorePanel
-   * @param id
+   * @see mitll.langtest.client.gauge.ASRScorePanel#ASRScorePanel(String)
+   * @paramx id
    * @param label
    * @param instructions
    */
-	public PretestGauge(String id, String label, String instructions){
+	public PretestGauge(String id, String label, String instructions, Canvas canvas){
 		this.id = id;
     this.label = label;
 
@@ -64,8 +69,8 @@ public class PretestGauge extends HTML{
 
 		tooltip.setWidget(tooltipLabel);
 
-		addMouseOverHandler(new PretestGaugeMouseOverHandler());
-		addMouseOutHandler(new PretestGaugeMouseOutHandler());
+    this.addMouseOverHandler(new PretestGaugeMouseOverHandler());
+    this.addMouseOutHandler(new PretestGaugeMouseOutHandler());
 	}
 
 /*  public String getColor(float score){
@@ -87,8 +92,8 @@ public class PretestGauge extends HTML{
   /**
    * @see mitll.langtest.client.gauge.ASRScorePanel#onLoad()
    */
-	public native void createCanvasElement() /*-{
-        var wrapper = $doc.getElementById(this.@mitll.langtest.client.pretest.PretestGauge::id + "Container");
+	public native void createCanvasElementOld() /*-{
+    var wrapper = $doc.getElementById(this.@mitll.langtest.client.pretest.PretestGauge::id + "Container");
 		this.@mitll.langtest.client.pretest.PretestGauge::canvasObject = $doc.createElement('canvas');
 		this.@mitll.langtest.client.pretest.PretestGauge::canvasObject.setAttribute('width', 110);
 		this.@mitll.langtest.client.pretest.PretestGauge::canvasObject.setAttribute('height', 110);
@@ -99,6 +104,10 @@ public class PretestGauge extends HTML{
 			//var ctx = this.@mitll.langtest.client.pretest.PretestGauge::canvasObject.getContext('2d');
 		}
 	}-*/;
+
+  public native void createCanvasElement(String id) /*-{
+      this.@mitll.langtest.client.pretest.PretestGauge::canvasObject = $doc.getElementById(id);
+  }-*/;
 
   /**
    * Note the colors used here were generated from audioImage:
@@ -187,9 +196,9 @@ public class PretestGauge extends HTML{
 		this.@mitll.langtest.client.pretest.PretestGauge::gaugeObject.setValue(value);
 	}-*/;
 
-	public native float getValue() /*-{
+/*	public native float getValue() *//*-{
 		return this.@mitll.langtest.client.pretest.PretestGauge::gaugeObject.getValue()
-	}-*/;
+	}-*//*;*/
 
 	private class PretestGaugeMouseOverHandler implements MouseOverHandler{
 		/* (non-Javadoc)
