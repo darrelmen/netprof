@@ -27,19 +27,19 @@ import java.io.OutputStream;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioConversion {
-  private static Logger logger = Logger.getLogger(AudioConversion.class);
+  private static final Logger logger = Logger.getLogger(AudioConversion.class);
   private static final String LAME_PATH_WINDOWS = "C:\\Users\\go22670\\lame\\lame.exe";
   private static final String LAME_PATH_LINUX = "/usr/local/bin/lame";
 
 /*  private static final String FFMPEG_PATH_WINDOWS = "C:\\Users\\go22670\\ffmpeg\\bin\\ffmpeg.exe";
   private static final String FFMPEG_PATH_LINUX = "/usr/local/bin/ffmpeg";*/
 
-  public static final String LINUX_SOX_BIN_DIR = "/usr/local/bin";
-  public static final String LINUX_SOX_BIN_DIR_2 = "/usr/bin";
-  public static final String WINDOWS_SOX_BIN_DIR = "C:\\Users\\go22670\\sox-14-3-2";
+  private static final String LINUX_SOX_BIN_DIR = "/usr/local/bin";
+  private static final String LINUX_SOX_BIN_DIR_2 = "/usr/bin";
+  private static final String WINDOWS_SOX_BIN_DIR = "C:\\Users\\go22670\\sox-14-3-2";
   public static final String SIXTEEN_K_SUFFIX = "_16K";
-  File oggEncoder;
-  private AudioCheck audioCheck = new AudioCheck();
+  private File oggEncoder;
+  private final AudioCheck audioCheck = new AudioCheck();
 
   public AudioConversion() {
     String os = getOS();
@@ -62,7 +62,7 @@ public class AudioConversion {
     }
   }
 
-  protected void setOggEncoder(String os, File oggEnc) {
+  private void setOggEncoder(String os, File oggEnc) {
     if (!oggEnc.exists()) {
       logger.error("huh? " + os +
           " can't find oggenc at " + oggEnc.getAbsolutePath());
@@ -86,7 +86,7 @@ public class AudioConversion {
   /**
    * Also writes an MP3 file equivalent.
    *
-   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
+   * @see mitll.langtest.server.audio.AudioFileHelper#writeAudioFile(String, String, String, mitll.langtest.shared.CommonExercise, int, int, int, boolean, String, boolean, boolean)
    * @param base64EncodedString audio bytes from the client
    * @param file where we want to write the wav file to
    * @return true if audio is valid (not too short, not silence)
@@ -208,6 +208,7 @@ public class AudioConversion {
    *
    * @param testAudioDir directory for audio
    * @param testAudioFileNoSuffix name without suffix
+   * @see mitll.langtest.server.scoring.ASRScoring#scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String, boolean)
    * @return
    */
   public String convertTo16Khz(String testAudioDir, String testAudioFileNoSuffix) throws UnsupportedAudioFileException {
@@ -270,10 +271,7 @@ public class AudioConversion {
 
   private boolean writeOGG(String pathToWav) {
     String oggFile = pathToWav.replace(".wav",".ogg");
-    if (oggEncoder != null) {
-      return convertFileAndCheck(oggEncoder.getAbsolutePath(),pathToWav,oggFile);
-    }
-    return false;
+    return oggEncoder != null && convertFileAndCheck(oggEncoder.getAbsolutePath(), pathToWav, oggFile);
 
   }
 
@@ -326,7 +324,7 @@ public class AudioConversion {
     }
   }
 
-  protected void writeMP3(String pathToWav, String realContextPath, boolean overwrite) {
+  private void writeMP3(String pathToWav, String realContextPath, boolean overwrite) {
     File absolutePathToWav = getAbsoluteFile(pathToWav,realContextPath);
 
     String mp3File = absolutePathToWav.getAbsolutePath().replace(".wav",".mp3");
@@ -355,6 +353,10 @@ public class AudioConversion {
     }
   }
 
+  /**
+   * @see mitll.langtest.server.database.custom.UserListManager#getRefAudioPath(mitll.langtest.shared.custom.UserExercise, java.io.File, String, boolean)
+   * @param absolutePathToWav
+   */
   public void normalizeLevels(File absolutePathToWav) {
     // logger.debug("normalizeLevels for " + absolutePathToWav);
 
@@ -398,7 +400,7 @@ public class AudioConversion {
    * Use lame to write an mp3 file.
    * @param pathToWav
    */
-  public void writeMP3(String pathToWav) {
+  private void writeMP3(String pathToWav) {
     String mp3File = pathToWav.replace(".wav",".mp3");
     String lamePath = getLame();
 
@@ -419,6 +421,11 @@ public class AudioConversion {
     return lamePath;
   }
 
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#getWavForMP3(String, String)
+   * @param pathToWav
+   * @return
+   */
   public File convertMP3ToWav(String pathToWav) {
     assert(pathToWav.endsWith(".mp3"));
     String mp3File = pathToWav.replace(".mp3",".wav");
