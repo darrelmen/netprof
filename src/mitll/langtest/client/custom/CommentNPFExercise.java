@@ -26,7 +26,7 @@ import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseFormatter;
 
@@ -41,7 +41,10 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class CommentNPFExercise extends NPFExercise {
-  public CommentNPFExercise(Exercise e, ExerciseController controller, ListInterface listContainer,
+
+  public static final String NO_REFERENCE_AUDIO = "No reference audio";
+
+  public CommentNPFExercise(CommonExercise e, ExerciseController controller, ListInterface listContainer,
                             float screenPortion, boolean addKeyHandler, String instance) {
     super(e, controller, listContainer, screenPortion, addKeyHandler, instance);
   }
@@ -50,27 +53,36 @@ public class CommentNPFExercise extends NPFExercise {
    * @param e
    * @param content
    * @return
-   * @see #getQuestionContent(mitll.langtest.shared.Exercise, com.google.gwt.user.client.ui.Panel)
+   * @see #getQuestionContent(mitll.langtest.shared.CommonExercise, com.google.gwt.user.client.ui.Panel)
    */
   @Override
-  protected Widget getQuestionContent(Exercise e, String content) {
+  protected Widget getQuestionContent(CommonExercise e, String content) {
     Panel column = new FlowPanel();
     column.getElement().setId("QuestionContent");
     column.setWidth("100%");
 
     column.add(getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getRefSentence()));
 
-    String translitSentence = e.getTranslitSentence();
+    String translitSentence = e.getTransliteration();
     if (!translitSentence.isEmpty()) {
       column.add(getEntry(e, QCNPFExercise.TRANSLITERATION, ExerciseFormatter.TRANSLITERATION, translitSentence));
     }
-    String english = e.getMeaning() != null && !e.getMeaning().trim().isEmpty() ? e.getMeaning() : e.getEnglishSentence();
-    column.add(getEntry(e, QCNPFExercise.ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, english));
+
+    String english = e.getMeaning() != null && !e.getMeaning().trim().isEmpty() ? e.getMeaning() : e.getEnglish();
+    if (!english.isEmpty()) {
+      column.add(getEntry(e, QCNPFExercise.ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, english));
+    }
+
+    //System.out.println("context is " + e.getContext());
+    String context = e.getContext() != null && !e.getContext().trim().isEmpty() ? e.getContext() : "";
+    if (!context.isEmpty()) {
+      column.add(getEntry(e, QCNPFExercise.CONTEXT, ExerciseFormatter.CONTEXT, "\""+ context + "\""));
+    }
 
     return column;
   }
 
-  private Widget getEntry(Exercise e, final String field, final String label, String value) {
+  private Widget getEntry(CommonExercise e, final String field, final String label, String value) {
     return getEntry(field, label, value, e.getAnnotation(field));
   }
 
@@ -78,6 +90,11 @@ public class CommentNPFExercise extends NPFExercise {
     return getEntry(field, getContentWidget(label, value, true, false), annotation);
   }
 
+  /**
+   * @see #getAudioPanel\
+   * @param path
+   * @return
+   */
   @Override
   protected ASRScoringAudioPanel makeFastAndSlowAudio(final String path) {
     return new FastAndSlowASRScoringAudioPanel(exercise, path, service, controller, scorePanel) {
@@ -88,14 +105,12 @@ public class CommentNPFExercise extends NPFExercise {
 
       @Override
       protected void addNoRefAudioWidget(Panel vp) {
-        Widget entry = getEntry("refAudio", "ReferenceAudio", "No reference audio", exercise.getAnnotation("refAudio"));
+        Widget entry = getEntry("refAudio", "ReferenceAudio", CommentNPFExercise.NO_REFERENCE_AUDIO, exercise.getAnnotation("refAudio"));
         entry.setWidth("500px");
         vp.add(entry);
       }
     };
   }
-
-
 
   /**
    * @param field of the exercise to comment on
@@ -112,7 +127,7 @@ public class CommentNPFExercise extends NPFExercise {
     final MyTextBox commentEntryText = new MyTextBox();
     commentEntryText.setVisibleLength(60);
     Button clearButton = getClearButton(commentEntryText, commentButton, field);
-
+    commentEntryText.getElement().setId("CommentEntryTextBox_for_"+field);
     final MyPopup commentPopup = makeCommentPopup(field, commentButton, commentEntryText, clearButton);
     commentPopup.addAutoHidePartner(commentButton.getElement()); // fix for bug Wade found where click didn't toggle comment
     configureCommentTextBox(annotation != null ? annotation.comment : null, commentEntryText, commentPopup);
@@ -176,6 +191,8 @@ public class CommentNPFExercise extends NPFExercise {
   private Button getClearButton(final MyTextBox commentEntryText,
                                   final Widget commentButton, final String field) {
     final Button clear = new Button("");
+    clear.getElement().setId("CommentNPFExercise_"+field);
+    controller.register(clear, exercise.getID(), "clear comment");
     clear.addStyleName("leftFiveMargin");
     addTooltip(clear, "Clear comment");
 
@@ -202,7 +219,7 @@ public class CommentNPFExercise extends NPFExercise {
     }
 
     /**
-     * @see mitll.langtest.client.custom.CommentNPFExercise#getEntry
+     * @see mitll.langtest.client.custom.CommentNPFExercise#makeCommentPopup(String, com.github.gwtbootstrap.client.ui.Button, mitll.langtest.client.custom.CommentNPFExercise.MyTextBox, com.github.gwtbootstrap.client.ui.Button)
      * @param commentBox
      * @param commentButton
      * @param clearButton
@@ -211,6 +228,8 @@ public class CommentNPFExercise extends NPFExercise {
       addCloseHandler(new CloseHandler<PopupPanel>() {
         @Override
         public void onClose(CloseEvent<PopupPanel> event) {
+          controller.logEvent(commentBox,"Comment_TextBox",exercise.getID(),"submit comment '" +commentBox.getValue()+
+            "'");
           commentComplete(commentBox, field, commentButton, clearButton);
         }
       });
@@ -242,6 +261,8 @@ public class CommentNPFExercise extends NPFExercise {
     commentButton.setIcon(IconType.COMMENT);
     commentButton.setSize(ButtonSize.MINI);
     commentButton.addStyleName("leftTenMargin");
+    commentButton.getElement().setId("CommentNPFExercise_comment");
+    controller.register(commentButton, exercise.getID(), "show comment");
 
     final Tooltip tooltip = setButtonTitle(commentButton, alreadyMarkedCorrect, comment);
     commentButton.addClickHandler(new ClickHandler() {
@@ -315,7 +336,7 @@ public class CommentNPFExercise extends NPFExercise {
     }
   }
 
-  private Map<String,String> fieldToComment = new HashMap<String,String>();
+  private final Map<String,String> fieldToComment = new HashMap<String,String>();
 
   /**
    * @see mitll.langtest.client.custom.CommentNPFExercise.MyPopup#configure(com.github.gwtbootstrap.client.ui.TextBox, com.google.gwt.user.client.ui.Widget, com.google.gwt.user.client.ui.Widget)
@@ -331,7 +352,7 @@ public class CommentNPFExercise extends NPFExercise {
       fieldToComment.put(field, comment);
       boolean isCorrect = comment.length() == 0;
 
-      System.out.println("commentComplete " + field + " comment '" + comment +"' correct = " +isCorrect);
+  //    System.out.println("commentComplete " + field + " comment '" + comment +"' correct = " +isCorrect);
 
       if (isCorrect) {
         addCorrectComment(field);
@@ -340,11 +361,17 @@ public class CommentNPFExercise extends NPFExercise {
       }
       setButtonTitle(commentButton, isCorrect, comment);
       showOrHideCommentButton(commentButton, clearButton, isCorrect);
-      exercise.addAnnotation(field, isCorrect ? "correct" : "incorrect", comment);
-      System.out.println("\t commentComplete : annotations now " + exercise.getFields());
+      if (isCorrect) {
+        addCorrectComment(field);
+      }
+      else {
+        addIncorrectComment(comment,field);
+      }
+      //exercise.addAnnotation(field, isCorrect ? "correct" : "incorrect", comment);
+      //System.out.println("\t commentComplete : annotations now " + exercise.getFields());
     }
     else {
-      System.out.println("commentComplete " + field + " comment '" + comment +"' same as previous, so ignoring");
+      //System.out.println("commentComplete " + field + " comment '" + comment +"' same as previous, so ignoring");
 
     }
   }
