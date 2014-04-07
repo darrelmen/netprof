@@ -1,6 +1,7 @@
 package mitll.langtest.client;
 
 import com.google.gwt.user.client.Window;
+import mitll.langtest.client.list.ResponseChoice;
 
 import java.util.Map;
 
@@ -32,7 +33,6 @@ public class PropertyHandler {
   private static final String SHORT_RECORD_TIMEOUT = "shortRecordTimeout";
   private static final String TEACHER_VIEW = "teacherView";
   private static final String ADMIN_VIEW = "adminView";
-  private static final String DATA_COLLECT_ADMIN_VIEW = "dataCollectAdminView";
   private static final String MINIMAL_UI = "minimalUI";
   private static final String NAME_FOR_ITEM = "nameForItem";
   private static final String NAME_FOR_ANSWER = "nameForAnswer";
@@ -40,8 +40,6 @@ public class PropertyHandler {
   private static final String NUM_GRADES_TO_COLLECT = "numGradesToCollect";
   private static final String LOG_CLIENT_MESSAGES = "logClient";
   private static final String SHOW_SECTIONS = "showSections";
-  //private static final String SHOW_SECTION_WIDGETS = "showSectionWidgets";
-  //private static final String DEBUG_EMAIL = "debugEmail";
   private static final String FLASHCARD = "flashcard";
   private static final String FLASHCARD_TEACHER_VIEW = "flashcardTeacherView";
   private static final String COMBINED_MODE = "combinedMode";
@@ -52,7 +50,8 @@ public class PropertyHandler {
   private static final String CONTINUE_PROMPT = "promptBeforeNextItem";
   private static final String RIGHT_ALIGN_CONTENT = "rightAlignContent";
   private static final String RESPONSE_TYPE = "responseType";
-  private static final String FLASHCARD_NEXT_AND_PREV = "flashcardNextAndPrev";
+  private static final String SECOND_RESPONSE_TYPE = "secondResponseType";
+  //private static final String FLASHCARD_NEXT_AND_PREV = "flashcardNextAndPrev";
   private static final String BIND_NEXT_TO_ENTER = "bindNextToEnter";
   private static final String SCREEN_PORTION = "screenPortion";
 
@@ -66,6 +65,7 @@ public class PropertyHandler {
   private static final String BKG_COLOR_FOR_REF = "bkgColorForRef";
   private static final String EXERCISE_TITLE = "exercise_title";
   private static final String ADMIN_PARAM = "admin";
+  private static final String TURK_PARAM = "turk";
   private static final String NUM_GRADES_TO_COLLECT_PARAM = NUM_GRADES_TO_COLLECT;
 
   private static final String DLI_LANGUAGE_TESTING = "NetProF";
@@ -78,7 +78,7 @@ public class PropertyHandler {
   private static final int DEFAULT_GAME_TIME_SECONDS = 60;
   private static final String DEFAULT_EXERCISE = null;
   private static final int NUM_GRADES_TO_COLLECT_DEFAULT = 1;
-  private static final String ADD_RECORD_KEY_BINDING = "addRecordKeyBinding";
+ // private static final String ADD_RECORD_KEY_BINDING = "addRecordKeyBinding";
   private static final String LOGIN_TYPE_PARAM = "loginType";
   private static final String FLASHCARD_PREVIEW_HEIGHT = "flashcardPreviewHeight";
   private static final int DEFAULT_FLASHCARD_PREVIEW_HEIGHT = 610;
@@ -86,13 +86,19 @@ public class PropertyHandler {
   private static final String FLASHCARD_TEXT_RESPONSE = "flashcardTextResponse";
   private static final String EXERCISES_IN_ORDER = "exercisesInOrder";
   private static final String ALLOW_PLUS_IN_URL = "allowPlusInURL";
-  private static final String PURPOSE_DEFAULT = "purposeDefault";
   private static final String CLASSROOM_MODE = "classroomMode";
   private static final String SHOW_SPECTROGRAM = "spectrogram";
   private boolean spectrogram = false;
   private boolean combinedMode = false;
+  //private static final String INCLUDE_FEEDBACK = "includeFeedback";
+  private static final String INSTRUMENT = "instrument";
+  private boolean instrument = true; // by default we instrument for now 4/3/14
 
-  public enum LOGIN_TYPE { UNDEFINED, ANONYMOUS, STUDENT, DATA_COLLECTOR, SIMPLE }
+  public boolean doInstrumentation() {
+    return instrument;
+  }
+
+  public enum LOGIN_TYPE { UNDEFINED, ANONYMOUS, STUDENT }
 
   private final Map<String, String> props;
 
@@ -110,7 +116,6 @@ public class PropertyHandler {
   private boolean dataCollectMode;
   private boolean collectAudio = true;
   private boolean teacherView = false;
-  private boolean dataCollectAdminView = false;
   private boolean adminView = false;
   private boolean logClientMessages = false;
   private boolean minimalUI = false;
@@ -120,11 +125,12 @@ public class PropertyHandler {
   private String nameForRecorder = "Speaker";
   private String language = "";
   private boolean showSections = false;
-  //private boolean showSectionWidgets = true;
   private boolean flashcardTeacherView = false;
   private boolean flashCard = false;
   private boolean timedGame = false;
   private String releaseDate;
+  private String turkID = "";
+
   private int recordTimeout = DEFAULT_TIMEOUT;
   private int shortRecordTimeout = DEFAULT_SHORT_TIMEOUT;
 
@@ -137,17 +143,15 @@ public class PropertyHandler {
 
   // do we bind the record key to space -- problematic if we have text entry anywhere else on the page, say in a search
   // box
-  private boolean addRecordKeyBinding = false;
   private LOGIN_TYPE loginType = LOGIN_TYPE.ANONYMOUS;
   private int flashcardPreviewHeight = DEFAULT_FLASHCARD_PREVIEW_HEIGHT;
 
-  private boolean flashcardNextAndPrev;
   private boolean flashcardTextResponse = false;
   private boolean showFlashcardAnswer = true;
   private boolean showExercisesInOrder = false;
-  private String responseType = "Audio";
+  private String responseType = ResponseChoice.AUDIO;
+  private String secondResponseType = "None";
   private boolean allowPlusInURL;
-  private String purposeDefault = "Practice";
   private boolean bindNextToEnter;
   private boolean classroomMode = false;
 
@@ -187,7 +191,6 @@ public class PropertyHandler {
       else if (key.equals(NAME_FOR_ANSWER)) nameForAnswer = value;
       else if (key.equals(NAME_FOR_RECORDER)) nameForRecorder = value;
       else if (key.equals(TEACHER_VIEW)) teacherView = getBoolean(value);
-      else if (key.equals(DATA_COLLECT_ADMIN_VIEW)) dataCollectAdminView = getBoolean(value);
       else if (key.equals(NUM_GRADES_TO_COLLECT)) numGradesToCollect = getInt(value, NUM_GRADES_TO_COLLECT_DEFAULT, NUM_GRADES_TO_COLLECT);
       else if (key.equals(LOG_CLIENT_MESSAGES)) logClientMessages = getBoolean(value);
       else if (key.equals(SHOW_SECTIONS)) showSections = getBoolean(value);
@@ -202,18 +205,17 @@ public class PropertyHandler {
       else if (key.equals(FLASHCARD_PREVIEW_HEIGHT)) flashcardPreviewHeight = getInt(value, DEFAULT_FLASHCARD_PREVIEW_HEIGHT, FLASHCARD_PREVIEW_HEIGHT);
       else if (key.equals(CONTINUE_PROMPT)) promptBeforeNextItem = getBoolean(value);
       else if (key.equals(RIGHT_ALIGN_CONTENT)) rightAlignContent = getBoolean(value);
-      else if (key.equals(ADD_RECORD_KEY_BINDING)) addRecordKeyBinding = getBoolean(value);
-      else if (key.equals(FLASHCARD_NEXT_AND_PREV)) flashcardNextAndPrev = getBoolean(value);
       else if (key.equals(FLASHCARD_TEXT_RESPONSE)) flashcardTextResponse = getBoolean(value);
       else if (key.equals(SHOW_FLASHCARD_ANSWER)) showFlashcardAnswer = getBoolean(value);
       else if (key.equals(EXERCISES_IN_ORDER)) showExercisesInOrder = getBoolean(value);
       else if (key.equals(ALLOW_PLUS_IN_URL)) allowPlusInURL = getBoolean(value);
       else if (key.equals(RESPONSE_TYPE)) responseType = value;
-      else if (key.equals(PURPOSE_DEFAULT)) purposeDefault = value;
+      else if (key.equals(SECOND_RESPONSE_TYPE)) secondResponseType = value;
       else if (key.equals(BIND_NEXT_TO_ENTER)) bindNextToEnter = getBoolean(value);
       else if (key.equals(SCREEN_PORTION)) screenPortion = getFloat(value, 1.0f, SCREEN_PORTION);
       else if (key.equals(CLASSROOM_MODE)) classroomMode = getBoolean(value);
       else if (key.equals(SHOW_SPECTROGRAM)) spectrogram = getBoolean(value);
+      else if (key.equals(INSTRUMENT)) instrument = getBoolean(value);
       else if (key.equals(LOGIN_TYPE_PARAM)) {
         try {
           loginType = LOGIN_TYPE.valueOf(value.toUpperCase());
@@ -320,6 +322,11 @@ public class PropertyHandler {
     if (adminParam != null) {
       adminView = !adminParam.equals("false");
     }
+
+    String turkParam = Window.Location.getParameter(TURK_PARAM);
+    if (turkParam != null) {
+      turkID = turkParam;
+    }
     gameTimeSeconds = getInt(Window.Location.getParameter(GAME_TIME), gameTimeSeconds, REPEATS);
 
 /*    if (Window.Location.getParameter(SHOW_SECTION_WIDGETS) != null) {
@@ -349,7 +356,37 @@ public class PropertyHandler {
       spectrogram = !Window.Location.getParameter(SHOW_SPECTROGRAM).equals("false");
       if (spectrogram) System.out.println("spectrogram is " + spectrogram);
     }
+    setResponseType();
+
     return grading;
+  }
+
+  /**
+   * Parse URL to extract the responseType values
+   */
+  private void setResponseType() {
+    String href = Window.Location.getHref();
+    if (href.contains("responseType=")) {
+      String s = href.split("responseType=")[1];
+      String candidate = s.split("\\*\\*\\*")[0];
+      if (ResponseChoice.knownChoice(candidate)) {
+        responseType = candidate;
+        //System.out.println("responseType " + responseType);
+      }
+      else {
+        System.err.println("responseType unknown " + candidate);
+      }
+      if (s.contains("secondResponseType=")) {
+        String candidate2 = s.split("secondResponseType=")[1];
+        if (ResponseChoice.knownChoice(candidate2)) {
+          secondResponseType = candidate2;
+         // System.out.println("secondResponseType " + secondResponseType);
+        }
+        else {
+          System.err.println("secondResponseType unknown " + candidate2);
+        }
+      }
+    }
   }
 
   public boolean isArabicTextDataCollect() {
@@ -421,6 +458,7 @@ public class PropertyHandler {
     return adminView;
   }
 
+  public String getTurkID() { return  turkID; }
   public boolean isMinimalUI() {
     return minimalUI;
   }
@@ -440,10 +478,10 @@ public class PropertyHandler {
   public String getNameForItem() { return nameForItem; }
   public String getNameForAnswer() { return nameForAnswer; }
   public String getNameForRecorder() { return nameForRecorder; }
-
+/*
   public boolean isDataCollectAdminView() {
     return dataCollectAdminView;
-  }
+  }*/
 
   public int getNumGradesToCollect() {
     return numGradesToCollect;
@@ -485,10 +523,6 @@ public class PropertyHandler {
     return timedGame;
   }
 
-  public int getGameTimeSeconds() {
-    return gameTimeSeconds;
-  }
-
   public boolean isPromptBeforeNextItem() {
     return promptBeforeNextItem;
   }
@@ -496,19 +530,13 @@ public class PropertyHandler {
     return rightAlignContent;
   }
 
-  public boolean shouldAddRecordKeyBinding() {
-    return addRecordKeyBinding || flashCard;
-  }
-
   public LOGIN_TYPE getLoginType() { return loginType; }
 
+/*
   public int getFlashcardPreviewFrameHeight() {
     return flashcardPreviewHeight;
   }
-
-  public boolean getFlashcardNextAndPrev() {
-    return flashcardNextAndPrev;
-  }
+*/
 
   public boolean isFlashcardTextResponse() {
     return flashcardTextResponse;
@@ -522,20 +550,21 @@ public class PropertyHandler {
     return showExercisesInOrder;
   }
 
-  public String getResponseType() {
+/*  public String getResponseType() {
     return responseType;
   }
   public void setResponseType(String responseType) {
     this.responseType = responseType;
   }
 
-  public boolean shouldAllowPlusInURL() {
-    return allowPlusInURL;
+  public String getSecondResponseType() {
+    return secondResponseType;
   }
+  public void setSecondResponseType(String responseType) {
+    this.secondResponseType = responseType;
+  }*/
 
-  public String getPurposeDefault() {
-    return purposeDefault;
-  }
+  public boolean shouldAllowPlusInURL() { return allowPlusInURL;  }
 
   public boolean isBindNextToEnter() {
     return bindNextToEnter;

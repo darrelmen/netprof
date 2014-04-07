@@ -2,7 +2,7 @@ package mitll.langtest.server;
 
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -17,10 +17,10 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class RecoTest {
-  private static Logger logger = Logger.getLogger(RecoTest.class);
-  private PathHelper pathHelper;
-  private LangTestDatabaseImpl langTest;
-  private AudioFileHelper audioFileHelper;
+  private static final Logger logger = Logger.getLogger(RecoTest.class);
+  private final PathHelper pathHelper;
+  private final LangTestDatabaseImpl langTest;
+  private final AudioFileHelper audioFileHelper;
 
   public RecoTest(LangTestDatabaseImpl langTest,ServerProperties serverProps, PathHelper pathHelper, AudioFileHelper audioFileHelper) {
     this.pathHelper = pathHelper;
@@ -39,12 +39,12 @@ public class RecoTest {
    * Ideally these should all or almost all correct.
    */
   private void doRecoTest() {
-    List<Exercise> exercises = langTest.getExercises();
+    List<CommonExercise> exercises = langTest.getExercises();
     langTest.makeAutoCRT();
 
     int incorrect = 0;
     try {
-      for (Exercise exercise : exercises) {
+      for (CommonExercise exercise : exercises) {
         File audioFile = new File(pathHelper.getInstallPath(), exercise.getRefAudio());
         if (audioFile.exists()) {
           boolean isCorrect = isCorrect(exercise);
@@ -61,17 +61,17 @@ public class RecoTest {
 
 
   private void doRecoTest2() {
-    List<Exercise> exercises = langTest.getExercises();
+    List<CommonExercise> exercises = langTest.getExercises();
     langTest.makeAutoCRT();
 
     int incorrect = 0;
     int total = 0;
     try {
-      for (Exercise exercise : exercises) {
-        List<Exercise> others = new ArrayList<Exercise>(exercises);
+      for (CommonExercise exercise : exercises) {
+        List<CommonExercise> others = new ArrayList<CommonExercise>(exercises);
         others.remove(exercise);
 
-        for (Exercise other : others) {
+        for (CommonExercise other : others) {
           File audioFile = new File(pathHelper.getInstallPath(), other.getRefAudio());
           if (audioFile.exists()) {
             boolean isMatch = isMatch(exercise, audioFile);
@@ -91,7 +91,7 @@ public class RecoTest {
     logger.info("out of " + total + " incorrect = " + incorrect + (100f * ((float) incorrect / (float) total)) + "%");
   }
 
-  private boolean isCorrect(Exercise exercise) throws Exception {
+  private boolean isCorrect(CommonExercise exercise) throws Exception {
     File audioFile = new File(pathHelper.getInstallPath(), exercise.getRefAudio());
     return isMatch(exercise, audioFile);
   }
@@ -104,7 +104,7 @@ public class RecoTest {
    * @return true if ref sentence from exercise is in the audio file
    * @throws Exception
    */
-  private boolean isMatch(Exercise exercise, File audioFile) throws Exception {
+  private boolean isMatch(CommonExercise exercise, File audioFile) throws Exception {
     AudioAnswer audioAnswer = new AudioAnswer();
     audioFileHelper.getFlashcardAnswer(exercise, audioFile, audioAnswer);
     if (audioAnswer.getScore() == -1) {
