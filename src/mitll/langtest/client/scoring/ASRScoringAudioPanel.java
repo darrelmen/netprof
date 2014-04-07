@@ -19,22 +19,24 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class ASRScoringAudioPanel extends ScoringAudioPanel {
-  protected final Set<String> tested = new HashSet<String>();
+  private final Set<String> tested = new HashSet<String>();
   private boolean useScoreToColorBkg = true;
 
   /**
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.ASRRecordAudioPanel#ASRRecordAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, int, mitll.langtest.client.exercise.ExerciseController)
+   * @param refSentence
    * @param service
    * @param gaugePanel
    * @param playButtonSuffix
+   * @param exerciseID
    */
-  public ASRScoringAudioPanel(LangTestDatabaseAsync service, ExerciseController controller, ScoreListener gaugePanel,
-                              String playButtonSuffix) {
-    super(service, controller, gaugePanel, playButtonSuffix);
+  public ASRScoringAudioPanel(String refSentence, LangTestDatabaseAsync service, ExerciseController controller, ScoreListener gaugePanel,
+                              String playButtonSuffix, String exerciseID) {
+    super(refSentence, service, controller, gaugePanel, playButtonSuffix, exerciseID);
   }
 
   /**
-   * @see GoodwaveExercisePanel#getAudioPanel(mitll.langtest.shared.Exercise, String)
+   * @see GoodwaveExercisePanel#getAudioPanel(mitll.langtest.shared.CommonExercise, String)
    * @param path
    * @param refSentence
    * @param service
@@ -43,11 +45,12 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
    * @param gaugePanel
    * @param rightMargin
    * @param playButtonSuffix
+   * @param exerciseID
    */
   public ASRScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
                               ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel,
-                              int rightMargin, String playButtonSuffix) {
-    super(path, refSentence, service, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix);
+                              int rightMargin, String playButtonSuffix, String exerciseID) {
+    super(path, refSentence, service, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix, exerciseID);
     this.useScoreToColorBkg = controller.useBkgColorForRef();
   }
 
