@@ -1,14 +1,13 @@
 package mitll.langtest.server.database.custom;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.shared.custom.UserList;
-
 import org.apache.log4j.Logger;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 /**
  * Created with IntelliJ IDEA.
@@ -18,11 +17,11 @@ import org.apache.log4j.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class UserListExerciseJoinDAO extends DAO {
-  private static Logger logger = Logger.getLogger(UserListExerciseJoinDAO.class);
+  private static final Logger logger = Logger.getLogger(UserListExerciseJoinDAO.class);
 
-  public static final String USERLISTID = "userlistid";
-  public static final String EXERCISEID = "exerciseid";
-  public static final String UNIQUEID = "uniqueid";
+  private static final String USERLISTID = "userlistid";
+  private static final String EXERCISEID = "exerciseid";
+  private static final String UNIQUEID = "uniqueid";
 
   public static final String USER_EXERCISE_LIST_EXERCISE = "userexerciselist_exercise";
 
@@ -100,7 +99,7 @@ public class UserListExerciseJoinDAO extends DAO {
       statement.close();
       database.closeConnection(connection);
 
-      //logger.debug("\tUserListExerciseJoinDAO.add : now " + getCount(USER_EXERCISE_LIST_EXERCISE) + " and user exercise is " + userList);
+      logger.debug("\tUserListExerciseJoinDAO.add : now " + getCount(USER_EXERCISE_LIST_EXERCISE) + " and user exercise is " + userList);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
