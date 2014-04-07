@@ -3,29 +3,26 @@ package mitll.langtest.client;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.DLIUser;
-import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseListWrapper;
-import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.Site;
 import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.flashcard.FlashcardResponse;
-import mitll.langtest.shared.flashcard.Leaderboard;
+import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.grade.Grade;
-import mitll.langtest.shared.grade.ResultsAndGrades;
+import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -38,13 +35,9 @@ import java.util.Set;
 public interface LangTestDatabase extends RemoteService {
   boolean WRITE_ALTERNATE_COMPRESSED_AUDIO = false;
 
-  // exerciseDAO
-  ExerciseListWrapper<? extends ExerciseShell> getExerciseIds(int reqID);
-  ExerciseListWrapper<? extends ExerciseShell> getExerciseIds(int reqID, long userID);
-  ExerciseListWrapper<? extends ExerciseShell> getExerciseIds(int reqID, long userID, String prefix, long userListID);
-  Exercise getExercise(String id);
+  ExerciseListWrapper getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix, long userListID);
 
-  ResultsAndGrades getResultsForExercise(String exid, boolean arabicTextDataCollect);
+  CommonExercise getExercise(String id);
 
   // gradeDAO
   CountAndGradeID addGrade(String exerciseID, Grade grade);
@@ -57,30 +50,17 @@ public interface LangTestDatabase extends RemoteService {
   int userExists(String login);
 
   // answer DAO
-  void addTextAnswer(int userID, Exercise exercise, int questionID, String answer);
+  void addTextAnswer(int userID, CommonExercise exercise, int questionID, String answer, String answerType);
   AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int question, int user,
                              int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults);
-  double getScoreForAnswer(long userID, Exercise e, int questionID, String answer, String answerType);
 
-  Exercise getNextUngradedExercise(String user, int expectedGrades, boolean englishOnly);
+  CommonExercise getNextUngradedExercise(String user, int expectedGrades, boolean englishOnly);
 
   void checkoutExerciseID(String user,String id);
 
-  ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height);
+  ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, String exerciseID);
 
   PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence, int width, int height, boolean useScoreToColorBkg);
-
-  // data collect admin (site administration) ------------------------------
-
-  Site getSiteByID(long id);
-  boolean deploySite(long id, String name, String language, String notes);
-  List<Site> getSites();
-
-  boolean isAdminUser(long id);
-
-  void setUserEnabled(long id, boolean enabled);
-
-  boolean isEnabledUser(long id);
 
   // monitoring support
 
@@ -106,51 +86,13 @@ public interface LangTestDatabase extends RemoteService {
 
   void logMessage(String message);
 
-  /**
-   * @param reqID
-   * @param typeToSection
-   * @param userID
-   * @return
-   * */
-  ExerciseListWrapper<? extends ExerciseShell> getExercisesForSelectionState(int reqID, Map<String,
-    Collection<String>> typeToSection, long userID);
-
-  // flashcard support ------------------------------------------
-
-  FlashcardResponse getNextExercise(long userID, boolean getNext);
-  FlashcardResponse getNextExercise(long userID, Map<String, Collection<String>> typeToSection, boolean getNext);
-
-  void resetUserState(long userID);
-  void clearUserState(long userID);
-
-  void sendEmail(int userID, String to, String replyTo, String subject, String message, String token);
-
-  int getNumExercisesForSelectionState(Map<String, Collection<String>> typeToSection);
-
-  List<? extends ExerciseShell> getFullExercisesForSelectionState(Map<String, Collection<String>> typeToSection, int start, int end);
-
-  List<Session> getUserHistoryForList(long userid, long listid, String lastID);
-
-  /**
-   * Game is over notification...
-   * @param userid
-   * @param timeTaken
-   * @param selectionState
-   * @return
-   */
-  Leaderboard postTimesUp(long userid, long timeTaken, Map<String, Collection<String>> selectionState);
+  List<AVPHistoryForList> getUserHistoryForList(long userid, Collection<String> ids, long latestResultID);
 
   void addDLIUser(DLIUser dliUser);
 
-  Set<String> getCompletedExercises(int user, boolean isReviewMode);
-
-  ExerciseListWrapper<? extends ExerciseShell> getExercisesForSelectionState(int reqID,
-                                                                             Map<String, Collection<String>> typeToSection,
-                                                                             long userID, String prefix);
-
   StartupInfo getStartupInfo();
   long addUserList(long userid, String name, String description, String dliClass);
-  void addVisitor(UserList ul, long user);
+  void addVisitor(long userListID, long user);
   Collection<UserList> getListsForUser(long userid, boolean onlyCreated, boolean visited);
   Collection<UserList> getUserListsForText(String search, long userid);
   void addItemToUserList(long userListID, UserExercise userExercise);
@@ -167,12 +109,18 @@ public interface LangTestDatabase extends RemoteService {
 
   void addAnnotation(String exerciseID, String field, String status, String comment, long userID);
   void markReviewed(String exid, boolean isCorrect, long creatorID);
+  void markState(String id, CommonShell.STATE state, long creatorID);
 
-  void removeReviewed(String id);
+  void setAVPSkip(Collection<Long> ids);
 
-  UserList getReviewList();
+  void setExerciseState(String id, CommonShell.STATE state, long userID);
+
+  UserList getDefectList();
+  UserList getAttentionList();
   boolean deleteList(long id);
   boolean deleteItemFromList(long listid, String exid);
-
   boolean deleteItem(String exid);
+
+  void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID);
+  List<Event> getEvents();
 }

@@ -17,16 +17,16 @@ import java.sql.Statement;
  * To change this template use File | Settings | File Templates.
  */
 public class H2Connection implements DatabaseConnection {
-  private static Logger logger = Logger.getLogger(H2Connection.class);
+  private static final Logger logger = Logger.getLogger(H2Connection.class);
 
   private Connection conn;
-  private int cacheSizeKB;
-  private int queryCacheSize;
+  private final int cacheSizeKB;
+  private final int queryCacheSize;
   private static final int maxMemoryRows = 50000;
 
-  public H2Connection(String configDir, String dbName) {
+/*  private H2Connection(String configDir, String dbName) {
     this(configDir, dbName, 50000, 8, true);
-  }
+  }*/
 
   public H2Connection(String configDir, String dbName, boolean mustAlreadyExist) {
     this(configDir, dbName, 50000, 8, mustAlreadyExist);
@@ -48,6 +48,8 @@ public class H2Connection implements DatabaseConnection {
   }
 
   /**
+   * h2 db must exist - don't try to make an empty one if it's not there.
+   *
    *   //jdbc:h2:file:/Users/go22670/DLITest/clean/netPron2/war/config/urdu/vlr-parle;IFEXISTS=TRUE;CACHE_SIZE=30000
    * @param h2FilePath
    * @param mustAlreadyExist
@@ -58,18 +60,23 @@ public class H2Connection implements DatabaseConnection {
       (mustAlreadyExist ? "IFEXISTS=TRUE;" :"") +
       "QUERY_CACHE_SIZE=" + queryCacheSize + ";" +
       "CACHE_SIZE="       + cacheSizeKB + ";" +
-      "MAX_MEMORY_ROWS="  +maxMemoryRows
+      "MAX_MEMORY_ROWS="  + maxMemoryRows
       ;
 
-    logger.debug("connecting to " + url);
-    org.h2.Driver.load();
-    try {
-      conn = DriverManager.getConnection(url, "", "");
-      conn.setAutoCommit(true);
+    File test = new File(h2FilePath + ".h2.db");
+    if (!test.exists()) {
+      logger.warn("no h2 db file at  " + test.getAbsolutePath() + "");
+    } else {
+      logger.debug("connecting to " + url);
+      org.h2.Driver.load();
+      try {
+        conn = DriverManager.getConnection(url, "", "");
+        conn.setAutoCommit(true);
 
-    } catch (SQLException e) {
-      conn = null;
-      logger.error("got error trying to create h2 connection with URL '" + url + "', exception = " +e,e);
+      } catch (SQLException e) {
+        conn = null;
+        logger.error("got error trying to create h2 connection with URL '" + url + "', exception = " + e, e);
+      }
     }
   }
 
