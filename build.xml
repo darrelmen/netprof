@@ -36,19 +36,21 @@
         <path refid="GWT SDK [GWT - 2.5.0].libraryclasspath"/>
         <pathelement location="war/WEB-INF/lib/json-lib-2.4-jdk15.jar"/>
         <pathelement location="war/WEB-INF/lib/commons-codec-1.6.jar"/>
-        <pathelement location="war/WEB-INF/lib/guava-15.0.jar"/>
-        <pathelement location="war/WEB-INF/lib/guava-gwt-15.0.jar"/>
+        <pathelement location="war/WEB-INF/lib/guava-16.0.1.jar"/>
+        <pathelement location="war/WEB-INF/lib/guava-gwt-16.0.1.jar"/>
         <pathelement location="war/WEB-INF/lib/gchart.jar"/>
         <pathelement location="war/WEB-INF/lib/log4j-1.2.17.jar"/>
         <path refid="imagewriter.classpath"/>
         <pathelement location="war/WEB-INF/lib/pronz.jar"/>
         <pathelement location="war/WEB-INF/lib/mira.jar"/>
+<!--
         <pathelement location="war/WEB-INF/lib/javamelody-1.42.0.jar"/>
+-->
         <pathelement location="war/WEB-INF/lib/jrobin-1.5.9.jar"/>
         <pathelement location="war/WEB-INF/lib/gwt-visualization.jar"/>
-        <pathelement location="war/WEB-INF/lib/poi-3.9-20121203.jar"/>
-        <pathelement location="war/WEB-INF/lib/poi-ooxml-3.9-20121203.jar"/>
-        <pathelement location="war/WEB-INF/lib/poi-ooxml-schemas-3.9-20121203.jar"/>
+        <pathelement location="war/WEB-INF/lib/poi-3.10-FINAL-20140208.jar"/>
+        <pathelement location="war/WEB-INF/lib/poi-ooxml-3.10-FINAL-20140208.jar"/>
+        <pathelement location="war/WEB-INF/lib/poi-ooxml-schemas-3.10-FINAL-20140208.jar"/>
         <pathelement location="war/WEB-INF/lib/stax-api-1.0.1.jar"/>
         <pathelement location="war/WEB-INF/lib/xmlbeans-2.3.0.jar"/>
         <pathelement location="war/WEB-INF/lib/dom4j-1.6.1.jar"/>
@@ -175,7 +177,7 @@
         </jar>
     </target>
 
-    <target depends="build" name="crtDari">
+<!--    <target depends="build" name="crtDari">
         <jar destfile="crtDari.war" basedir="war"
              includes="images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/crtDari/**,soundmanager2.js"
              excludes="WEB=INF/lib/pronz.jar">
@@ -184,7 +186,7 @@
                 <attribute name="Built-Date" value="${current.time}"/>
             </manifest>
         </jar>
-    </target>
+    </target>-->
 
 
     <target depends="build" name="crtPashto">
@@ -319,6 +321,17 @@
         </jar>
     </target>
 
+    <target depends="build" name="hsPashto">
+        <jar destfile="hsPashto.war" basedir="war"
+             includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/pashto/headstartAudio/**,config/pashto/*xlsx,config/pashto/pashtoHS.h2*,config/pashto/*.properties,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-pashto/**"
+                >
+
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
+    </target>
+
 
     <target depends="build" name="npMSADC">
         <jar destfile="npMSADC.war" basedir="war"
@@ -365,9 +378,9 @@
         </jar>
     </target>
 
-    <target depends="build" name="ESL">
-        <jar destfile="npfESL.war" basedir="war"
-             includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/english/**,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/bin.macos/**,scoring/configurations/**,scoring/models.wsj01-16/**"
+    <target depends="build" name="classroomEnglish">
+        <jar destfile="npfClassroomEnglish.war" basedir="war"
+             includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/english/**,scoring/bin.linux64/**,scoring/configurations/**,scoring/models.wsj01-16/**"
                 >
 
             <manifest>
@@ -452,6 +465,17 @@
         </jar>
     </target>
 
+    <target depends="build" name="crtDari">
+    <jar destfile="crtDari.war" basedir="war"
+         includes="*.png,*.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/dari/**,scoring/bin.linux64/**,scoring/configurations/**,scoring/models.dli-dari/**"
+            >
+
+        <manifest>
+            <attribute name="Built-Date" value="${current.time}"/>
+        </manifest>
+    </jar>
+</target>
+
 
     <target depends="build" name="pashtoFlashcard">
         <jar destfile="pashtoFlashcard.war" basedir="war"
@@ -477,7 +501,7 @@
 
     <target depends="build" name="fullPatch">
         <jar destfile="npPatch.war" basedir="war"
-             excludes="WEB-INF/web.xml,WEB-INF/lib/poi*.jar,config/**,config/*/vlr-parle.*,answers/**,audioimages/**,scoring/**,config/first/**,config/autocrt/**,config/msa/**,config/msa/**,config/levantine/**,config/pilot/**,config/dari/**,config/pashto/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
+             excludes="WEB-INF/web.xml,config/**,config/*/vlr-parle.*,answers/**,audioimages/**,scoring/**,config/first/**,config/autocrt/**,config/msa/**,config/msa/**,config/levantine/**,config/pilot/**,config/dari/**,config/pashto/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
 
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
@@ -488,7 +512,7 @@
     <!-- Makes a jar of just the .class files and the javascript, so you can overlay it on an active webapp -->
     <target depends="build" name="patch">
         <jar destfile="npPatch.war" basedir="war"
-             excludes="bestAudio/**,WEB-INF/web.xml,WEB-INF/lib/pronz.jar,WEB-INF/lib/poi*.jar,config/**,config/*/vlr-parle.*,answers/**,audioimages/**,scoring/**,config/first/**,config/autocrt/**,config/msa/**,config/msa/**,config/levantine/**,config/pilot/**,config/dari/**,config/pashto/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
+             excludes="bestAudio/**,WEB-INF/web.xml,WEB-INF/lib/pronz.jar,config/**,config/*/vlr-parle.*,answers/**,audioimages/**,scoring/**,config/first/**,config/autocrt/**,config/msa/**,config/msa/**,config/levantine/**,config/pilot/**,config/dari/**,config/pashto/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
 
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
