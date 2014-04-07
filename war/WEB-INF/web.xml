@@ -30,14 +30,30 @@
     <url-pattern>/langtest/langtestdatabase</url-pattern>
   </servlet-mapping>
 
-  <context-param>
-    <param-name>tomcatWriteDirectoryFullPath</param-name>
-    <param-value>answers</param-value>
-  </context-param>
+
+    <servlet>
+        <servlet-name>downloadServet</servlet-name>
+        <servlet-class>mitll.langtest.server.DownloadServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>downloadServet</servlet-name>
+        <url-pattern>/downloadUsers/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>downloadServet</servlet-name>
+        <url-pattern>/downloadResults/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>downloadServet</servlet-name>
+        <url-pattern>/downloadEvents/*</url-pattern>
+    </servlet-mapping>
 
   <context-param>
      <param-name>config</param-name>
-     <param-value>mandarin</param-value>
+     <param-value>english</param-value>
   </context-param>
 
   <context-param>
