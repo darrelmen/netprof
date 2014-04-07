@@ -4,7 +4,7 @@ import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.trie.EmitValue;
 import mitll.langtest.server.trie.TextEntityValue;
 import mitll.langtest.server.trie.Trie;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
@@ -20,7 +20,7 @@ import java.util.Set;
  * Time: 4:42 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ExerciseTrie extends Trie<Exercise> {
+public class ExerciseTrie extends Trie<CommonExercise> {
   private static final Logger logger = Logger.getLogger(ExerciseTrie.class);
   private static final int MB = (1024 * 1024);
 
@@ -29,7 +29,7 @@ public class ExerciseTrie extends Trie<Exercise> {
    * @param exercisesForState
    * @param language
    */
-  public ExerciseTrie(Collection<Exercise> exercisesForState, String language,SmallVocabDecoder smallVocabDecoder) {
+  public ExerciseTrie(Collection<CommonExercise> exercisesForState, String language,SmallVocabDecoder smallVocabDecoder) {
     boolean includeForeign = !language.equals("English");
     startMakingNodes();
     Runtime rt = Runtime.getRuntime();
@@ -39,10 +39,10 @@ public class ExerciseTrie extends Trie<Exercise> {
     long then = System.currentTimeMillis();
     boolean isMandarin = language.equalsIgnoreCase("Mandarin");
 
-    for (Exercise e : exercisesForState) {
-      if (e.getEnglishSentence() != null && !e.getEnglishSentence().isEmpty()) {
+    for (CommonExercise e : exercisesForState) {
+      if (e.getEnglish() != null && !e.getEnglish().isEmpty()) {
         addEntryToTrie(new ExerciseWrapper(e, true));
-        Collection<String> tokens = smallVocabDecoder.getTokens(e.getEnglishSentence());
+        Collection<String> tokens = smallVocabDecoder.getTokens(e.getEnglish());
         if (tokens.size() > 1) {
           for (String token : tokens) {
             addEntryToTrie(new ExerciseWrapper(token, e));
@@ -50,10 +50,10 @@ public class ExerciseTrie extends Trie<Exercise> {
         }
       }
       if (includeForeign) {
-        if (e.getRefSentence() != null && !e.getRefSentence().isEmpty()) {
+        if (e.getForeignLanguage() != null && !e.getForeignLanguage().isEmpty()) {
           addEntryToTrie(new ExerciseWrapper(e, false));
 
-          Collection<String> tokens = isMandarin ? getFLTokens(smallVocabDecoder, e) : smallVocabDecoder.getTokens(e.getRefSentence());
+          Collection<String> tokens = isMandarin ? getFLTokens(smallVocabDecoder, e) : smallVocabDecoder.getTokens(e.getForeignLanguage());
           if (tokens.size() > 1) {
             for (String token : tokens) {
               addEntryToTrie(new ExerciseWrapper(token, e));
@@ -75,8 +75,8 @@ public class ExerciseTrie extends Trie<Exercise> {
     }
   }
 
-  protected Collection<String> getFLTokens(SmallVocabDecoder smallVocabDecoder, Exercise e) {
-    return smallVocabDecoder.getTokens(smallVocabDecoder.segmentation(e.getRefSentence()));
+  protected Collection<String> getFLTokens(SmallVocabDecoder smallVocabDecoder, CommonExercise e) {
+    return smallVocabDecoder.getTokens(smallVocabDecoder.segmentation(e.getForeignLanguage()));
   }
 
   /**
@@ -85,12 +85,12 @@ public class ExerciseTrie extends Trie<Exercise> {
    * @param prefix
    * @return
    */
-  public List<Exercise> getExercises(String prefix) {
-    List<EmitValue<Exercise>> emits = getEmits(prefix);
-    Set<Exercise> unique = new HashSet<Exercise>();
-    List<Exercise> ids = new ArrayList<Exercise>();
-    for (EmitValue<Exercise> ev : emits) {
-      Exercise exercise = ev.getValue();
+  public List<CommonExercise> getExercises(String prefix) {
+    List<EmitValue<CommonExercise>> emits = getEmits(prefix);
+    Set<CommonExercise> unique = new HashSet<CommonExercise>();
+    List<CommonExercise> ids = new ArrayList<CommonExercise>();
+    for (EmitValue<CommonExercise> ev : emits) {
+      CommonExercise exercise = ev.getValue();
       if (!unique.contains(exercise)) {
         ids.add(exercise);
         unique.add(exercise);
@@ -100,29 +100,31 @@ public class ExerciseTrie extends Trie<Exercise> {
     return ids;
   }
 
-  private static class ExerciseWrapper implements TextEntityValue<Exercise> {
-    private String value;
-    private Exercise e;
+  private static class ExerciseWrapper implements TextEntityValue<CommonExercise> {
+    private final String value;
+    private final CommonExercise e;
 
     /**
      * @see ExerciseTrie#ExerciseTrie
      * @param e
      * @param useEnglish
      */
-    public ExerciseWrapper(Exercise e, boolean useEnglish) {
-      this((useEnglish ? e.getEnglishSentence() : e.getRefSentence()), e);
+    public ExerciseWrapper(CommonExercise e, boolean useEnglish) {
+      this((useEnglish ? e.getEnglish() : e.getForeignLanguage()), e);
     }
 
-    public ExerciseWrapper(String value, Exercise e) {
+    public ExerciseWrapper(String value, CommonExercise e) {
       this.value = value;
       this.e = e;
     }
 
     @Override
-    public Exercise getValue() { return e; }
+    public CommonExercise getValue() { return e; }
 
     @Override
     public String getNormalizedValue() { return value; }
+
+    public String toString() { return "e " +e.getID() + " : " + value; }
   }
 
   private long logMemory() {
