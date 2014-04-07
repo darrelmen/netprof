@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DLIUserDAO extends DAO {
-  private static Logger logger = Logger.getLogger(DLIUserDAO.class);
+  private static final Logger logger = Logger.getLogger(DLIUserDAO.class);
 
   private static final String DLIUSERS = "dliusers";
 

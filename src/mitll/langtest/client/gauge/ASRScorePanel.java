@@ -9,7 +9,6 @@ import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -34,26 +33,17 @@ import java.util.Map;
  * @author gregbramble
  */
 public class ASRScorePanel extends FlowPanel implements ScoreListener {
-  private static final String INSTRUCTIONS = "The ASR method uses a speech recognizer to compare the student " +
-    "recording to a model trained with hundreds of native speakers. " +
-      "It generates scores for each word and phonetic unit (see the color-coded transcript for details).";
-/*  private static final String LISTENER_INSTRUCTIONS = "Listen to the Native Reference Speaker say the words shown. " +
-    "Record yourself saying the words. Your score will be displayed on the gauge in the Scores section." +
-    "You may record yourself multiple times." +
-    //   "You will see your scores for each recording in the Exercise History section.</p>";
-    "";*/
-/*  private static final String WARNING_OLD= "Scores are only meaningful if you read the words as they are written.<br/> " +
-    "Saying something different or adding/omitting words would make the score meaningless and inaccurate.";*/
-  private static final String WARNING = "Repeat the phrase exactly as it is written.<br/> " +
-    "Saying something different or adding/omitting words invalidates the score.";
-  public static final int CHART_HEIGHT = 100;
- // private static final boolean SHOW_HELP = true;
+  private static final String INSTRUCTIONS = "Your speech is scored by a speech recognizer trained on speech from many native speakers. " +
+      "The recognizer generates scores for each word and phonetic unit (see the color-coded transcript for details).";
+  private static final String WARNING = "Repeat the phrase exactly as it is written. " +
+    "<b>Saying something different or adding/omitting words could result in incorrect scores.</b>";
+  private static final int CHART_HEIGHT = 100;
 
   private final PretestGauge ASRGauge;
-  private Panel phoneList;
+  private final Panel phoneList;
   private final List<Float> scores = new ArrayList<Float>();
+  private final SimplePanel chartPanel;
 
-  private SimplePanel chartPanel;
   /**
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel
    */
@@ -78,11 +68,13 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     add(captionPanel);
 
     CaptionPanel gaugeCaptionPanel = new CaptionPanel("Score");
+
     Panel gaugePanel = new FlowPanel();
-		gaugePanel.setHeight("100%");
-		gaugePanel.setWidth("100%");
-    ASRGauge = new PretestGauge("ASR_"+parent, "ASR", INSTRUCTIONS);
+    gaugePanel.setHeight("100%");
+    gaugePanel.setWidth("100%");
+    ASRGauge = new PretestGauge("ASR_"+parent, "ASR", INSTRUCTIONS, null);
     gaugePanel.add(ASRGauge);
+
 
     gaugeCaptionPanel.add(gaugePanel);
 		add(gaugeCaptionPanel);
@@ -98,7 +90,8 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   //call this after adding the widget to the page
   @Override
   public void onLoad() {
-    ASRGauge.createCanvasElement();
+   // System.out.println("looking for dom element id " + id + " width " + canvas.getOffsetWidth() );
+    ASRGauge.createCanvasElementOld();
     initGauge(ASRGauge);
   }
 
@@ -120,45 +113,12 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
    */
   public void gotScore(PretestScore score, boolean showOnlyOneExercise) {
     float zeroToHundred = score.getHydecScore() * 100f;
-    //System.out.println("ASRScorePanel : " +score + " hydec " + score.getHydecScore() + " " +zeroToHundred);
     setASRGaugeValue(Math.min(100.0f, zeroToHundred));
     updatePhoneAccuracy(score.getPhoneScores());
     scores.add(score.getHydecScore());
     chartPanel.clear();
     chartPanel.add(doChart(showOnlyOneExercise));
   }
-
-/*  private ColumnChart doChartOld() {
-    Options options = Options.create();
-    options.setLegend(LegendPosition.NONE);
-    options.setGridlineColor("white");
-    AxisOptions options1 = AxisOptions.create();
-    options.setColors("green", "red");
-
-    options1.setMaxValue(1);
-    options.setVAxisOptions(options1);
-   // options.setTitle("ExerciseHistory");
-
-    //labelAxes(options,"Recording","Score");
-
-    DataTable data = DataTable.create();
-    data.addColumn(AbstractDataTable.ColumnType.STRING, "Recording");
-    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Score #0");
-
-    data.addRows(scores.size());
-
-    for (int i = 0; i < scores.size(); i++) {
-      data.addRow();
-      String value = "" + i;
-      if (value.length() > 4) value = value.substring(0,4);
-      data.setValue(i, 0, value);
-      int round = Math.round(scores.get(i) * 100);
-      //Float value1 = round;
-      data.setValue(i,1, round);
-    }
-
-    return new ColumnChart(data,options);
-  }*/
 
   private ColumnChart doChart(boolean showOnlyOneExercise) {
     Options options = Options.create();
@@ -198,64 +158,8 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     if (showOnlyOneExercise) {
       options.setBackgroundColor("#efefef");
     }
-    ColumnChart columnChart = new ColumnChart(data, options);
-
-    return columnChart;
+    return new ColumnChart(data, options);
   }
-
-/*  public Chart doChart2() {
-    final Chart chart = new Chart()
-      .setType(Series.Type.COLUMN)
-    //  .setChartTitleText("Monthly Average Rainfall")
-    //  .setChartSubtitleText("Source: WorldClimate.com")
-      .setColumnPlotOptions(new ColumnPlotOptions()
-        .setPointPadding(0.2)
-        .setBorderWidth(0)
-      )
-  *//*    .setLegend(new Legend()
-        .setLayout(Legend.Layout.VERTICAL)
-        .setAlign(Legend.Align.LEFT)
-        .setVerticalAlign(Legend.VerticalAlign.TOP)
-        .setX(100)
-        .setY(70)
-        .setFloating(true)
-        .setBackgroundColor("#FFFFFF")
-        .setShadow(true)
-      )*//*
-      .setToolTip(new ToolTip()
-        .setFormatter(new ToolTipFormatter() {
-          public String format(ToolTipData toolTipData) {
-            return toolTipData.getXAsString() + " : " + toolTipData.getYAsLong() + "%";
-          }
-        })
-      );
-
-    chart.getXAxis()
-      .setCategories("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec");
-
-    chart.getYAxis()
-      .setAxisTitleText("Rainfall (mm)")
-      .setMin(0);
-
-    chart.addSeries(chart.createSeries()
-      .setName("Tokyo")
-      .setPoints(new Number[] { 49.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4 })
-    );
-    chart.addSeries(chart.createSeries()
-      .setName("New York")
-      .setPoints(new Number[] { 83.6, 78.8, 98.5, 93.4, 106.0, 84.5, 105.0, 104.3, 91.2, 83.5, 106.6, 92.3 })
-    );
-    chart.addSeries(chart.createSeries()
-      .setName("London")
-      .setPoints(new Number[] { 48.9, 38.8, 39.3, 41.4, 47.0, 48.3, 59.0, 59.6, 52.4, 65.2, 59.3, 51.2 })
-    );
-    chart.addSeries(chart.createSeries()
-      .setName("Berlin")
-      .setPoints(new Number[] { 42.4, 33.2, 34.5, 39.7, 52.6, 75.5, 57.4, 60.4, 47.6, 39.1, 46.8, 51.1 })
-    );
-
-    return chart;
-  }*/
 
   /**
    * @see mitll.langtest.client.scoring.ScoreListener#gotScore
