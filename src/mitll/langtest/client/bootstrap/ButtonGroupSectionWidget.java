@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 //import mitll.langtest.client.list.section.SectionExerciseList;
@@ -24,14 +23,14 @@ import java.util.Set;
  */
 class ButtonGroupSectionWidget implements SectionWidget {
   private Button clearButton;
-  private String type;
+  private final String type;
 
   private String currentSelection = null;
-  private List<Panel> rows = new ArrayList<Panel>();
-  private Set<Button> selected = new HashSet<Button>();
-  private ButtonContainer buttons = new ButtonContainer();
+  private final List<Panel> rows = new ArrayList<Panel>();
+  private final Set<Button> selected = new HashSet<Button>();
+  private final ButtonContainer buttons = new ButtonContainer();
   private String color;
-  private boolean debug = true;
+  private final boolean debug = true;
 
   public ButtonGroupSectionWidget(String type) {
     this.type = type;
@@ -78,6 +77,7 @@ class ButtonGroupSectionWidget implements SectionWidget {
   }
 
   /**
+   * @see mitll.langtest.client.list.HistoryExerciseList#getCurrentSelection(String)
    * @return
    */
   @Override
@@ -121,11 +121,6 @@ class ButtonGroupSectionWidget implements SectionWidget {
     } else {
       return HistoryExerciseList.ANY;
     }
-  }
-
-  @Override
-  public String getFirstItem() {
-    return buttons.getFirstButton().getText().trim();
   }
 
   /**
@@ -385,13 +380,6 @@ class ButtonGroupSectionWidget implements SectionWidget {
    */
   public void clearEnabled() {
     buttons.clearEnabled();
-  }
-
-  public void populateTypeWidget(Collection<String> items, Map<String, Integer> sectionToCount) {
-  }
-
-  public Widget getWidget() {
-    return null;
   }
 
   public void selectItem(Collection<String> section, boolean doToggle) {
