@@ -22,17 +22,15 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class Scoring {
-  private static Logger logger = Logger.getLogger(Scoring.class);
+  private static final Logger logger = Logger.getLogger(Scoring.class);
 
   private static final String WINDOWS_CONFIGURATIONS = "windowsConfig";
   private static final String LINUX_CONFIGURATIONS = "mtexConfig";
   protected static final float SCORE_SCALAR = 1.0f;// / 0.15f;
   private static final String SCORING = "scoring";
 
-  protected String scoringDir;
-  protected String os;
-  protected String configFullPath;
-  protected String deployPath;
+  protected final String scoringDir;
+  protected final String deployPath;
 
   /**
    * @see ASRScoring#ASRScoring
@@ -41,15 +39,15 @@ public abstract class Scoring {
    */
   protected Scoring(String deployPath) {
     this.deployPath = deployPath;
-    this.os = getOS();
+    String os = getOS();
     this.scoringDir = getScoringDir(deployPath);
-    this.configFullPath = scoringDir + File.separator +
-        (os.equals("win32") ?
+    String configFullPath = scoringDir + File.separator +
+      (os.equals("win32") ?
         WINDOWS_CONFIGURATIONS :
         LINUX_CONFIGURATIONS);
   }
 
-  public static String getScoringDir(String deployPath) { return deployPath + File.separator + SCORING; }
+  private static String getScoringDir(String deployPath) { return deployPath + File.separator + SCORING; }
 
   private String getOS() {
     String property = System.getProperty("os.name").toLowerCase();
@@ -71,10 +69,11 @@ public abstract class Scoring {
    * @param imageHeight
    * @param audioFileNoSuffix
    * @param useScoreToColorBkg
+   * @param suffix
    * @return map of image type to image path, suitable using in setURL on a GWT Image (must be relative to deploy location)
    */
   protected ImageWriter.EventAndFileInfo writeTranscripts(String imageOutDir, int imageWidth, int imageHeight,
-                                                          String audioFileNoSuffix, boolean useScoreToColorBkg) {
+                                                          String audioFileNoSuffix, boolean useScoreToColorBkg, String suffix) {
     String pathname = audioFileNoSuffix + ".wav";
     pathname = prependDeploy(pathname);
     if (!new File(pathname).exists()) {
@@ -109,7 +108,7 @@ public abstract class Scoring {
     }
 
     return new ImageWriter().writeTranscripts(pathname,
-        imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg);
+        imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, suffix);
   }
 
   /**
