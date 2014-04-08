@@ -247,6 +247,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   /**
    * @see #onLoad()
    * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.FastAndSlowASRScoringAudioPanel#showAudio(mitll.langtest.shared.AudioAttribute)
    * @param path
    */
   public void getImagesForPath(String path) {
