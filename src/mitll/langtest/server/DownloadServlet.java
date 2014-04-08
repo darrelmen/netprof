@@ -20,7 +20,7 @@ import java.io.IOException;
  * To change this template use File | Settings | File Templates.
  */
 @SuppressWarnings("serial")
-public class DownloadServlet extends HttpServlet {
+public class DownloadServlet extends DatabaseServlet {
   private static final Logger logger = Logger.getLogger(DownloadServlet.class);
 
   @Override
@@ -47,26 +47,5 @@ public class DownloadServlet extends HttpServlet {
       db.getEventDAO().toXLSX(response.getOutputStream());
     }
     response.getOutputStream().close();
-  }
-
-  private DatabaseImpl readProperties() {
-    return readProperties(getServletContext());
-  }
-
-  private DatabaseImpl readProperties(ServletContext servletContext) {
-    String config = servletContext.getInitParameter("config");
-    String relativeConfigDir = "config" + File.separator + config;
-    PathHelper pathHelper = new PathHelper(getServletContext());
-    String configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
-    ServerProperties serverProps = new ServerProperties();
-    serverProps.readPropertiesFile(servletContext, configDir);
-    String h2DatabaseFile = serverProps.getH2Database();
-
-    return makeDatabaseImpl(h2DatabaseFile,configDir,relativeConfigDir,serverProps,pathHelper);
-  }
-
-  private DatabaseImpl makeDatabaseImpl(String h2DatabaseFile, String configDir, String relativeConfigDir, ServerProperties serverProperties,PathHelper pathHelper) {
-    //logger.debug("word pairs " +  serverProps.isWordPairs() + " language " + serverProps.getLanguage() + " config dir " + relativeConfigDir);
-    return new DatabaseImpl(configDir, relativeConfigDir, h2DatabaseFile, serverProperties, pathHelper, true);
   }
 }
