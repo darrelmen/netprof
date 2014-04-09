@@ -82,7 +82,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
 
   @Override
   public void useResult(AudioAnswer result) {
-    recordAudioPanel.getImagesForPath(result.path);
+    recordAudioPanel.getImagesForPath(result.getPath());
     if (parentPanel instanceof ExercisePanel) {
       ((ExercisePanel) parentPanel).recordCompleted(recordAudioPanel);
     }
