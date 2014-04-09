@@ -602,9 +602,9 @@ public class NewUserExercise extends BasicDialog {
           public void useResult(AudioAnswer result) {
             super.useResult(result);
             if (recordRegularSpeed) {
-              newUserExercise.setRefAudio(result.path);
+              newUserExercise.setRefAudio(result.getPath());
             } else {
-              newUserExercise.setSlowRefAudio(result.path);
+              newUserExercise.setSlowRefAudio(result.getPath());
             }
             audioPosted();
           }
