@@ -72,7 +72,8 @@ public class AudioFileHelper {
    * @param flq was the prompt a foreign language query
    * @param audioType regular or fast then slow audio recording
    * @param doFlashcard
-   * @param recordInResults         @return URL to audio on server and if audio is valid (not too short, etc.)
+   * @param recordInResults
+   * @return URL to audio on server and if audio is valid (not too short, etc.)
    */
   public AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, CommonExercise exercise1, int questionID,
                                     int user, int reqid, boolean flq, String audioType, boolean doFlashcard,
@@ -91,8 +92,12 @@ public class AudioFileHelper {
 
     String url = pathHelper.ensureForwardSlashes(wavPath);
 
-    AudioAnswer answer = (isValid) ?
-      getAudioAnswer(exercise, exercise1, questionID, user, reqid, file, validity, url, doFlashcard) :
+    AudioAnswer answer = (isValid && !serverProps.isNoModel()) ?
+      getAudioAnswer(
+        //exercise,
+        exercise1,
+       // questionID, user,
+        reqid, file, validity, url, doFlashcard) :
       new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
 
     if (recordInResults) {
@@ -129,15 +134,15 @@ public class AudioFileHelper {
   }
 
   /**
-   * @see LangTestDatabaseImpl#getScoreForAnswer
-   * @param e
-   * @param questionID
-   * @param answer
+   * @seex LangTestDatabaseImpl#getScoreForAnswer
+   * @paramx e
+   * @paramx questionID
+   * @paramx answer
    * @return
    */
-  public double getScoreForAnswer(CommonExercise e, int questionID, String answer) {
+/*  public double getScoreForAnswer(CommonExercise e, int questionID, String answer) {
     return autoCRT.getScoreForExercise(e, questionID, answer);
-  }
+  }*/
 
   private String createSLFFile(Collection<String> lmSentences, String tmpDir) {
     return new SLFFile().createSimpleSLFFile(lmSentences, tmpDir);
@@ -240,7 +245,7 @@ public class AudioFileHelper {
 
   /**
    * @see #dealWithMP3Audio(String)
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getImageForAudioFile(int, String, String, int, int)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getImageForAudioFile
    * @param audioFile
    * @return
    */
@@ -284,9 +289,9 @@ public class AudioFileHelper {
 
   /**
    * @see #writeAudioFile
-   * @param exerciseID
-   * @param questionID
-   * @param user
+   * @paramx exerciseID
+   * @paramx questionID
+   * @paramx user
    * @param reqid
    * @param file
    * @param validity
@@ -294,21 +299,24 @@ public class AudioFileHelper {
    * @param doFlashcard
    * @return
    */
-  private AudioAnswer getAudioAnswer(String exerciseID, CommonExercise exercise, int questionID, int user, int reqid,
+  private AudioAnswer getAudioAnswer(//String exerciseID,
+                                     CommonExercise exercise,
+                                     //int questionID, int user,
+                                     int reqid,
                                      File file, AudioCheck.ValidityAndDur validity, String url, boolean doFlashcard
   ) {
     AudioAnswer audioAnswer = new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
     if (serverProps.isFlashcard()|| doFlashcard) {
       makeASRScoring();
-      if (serverProps.isAutoCRT()) {
+/*      if (serverProps.isAutoCRT()) {
         autoCRT.getAutoCRTDecodeOutput(exerciseID, questionID, file, audioAnswer);
-      } else {
+      } else {*/
         autoCRT.getFlashcardAnswer(exercise, file, audioAnswer);
-      }
+  //    }
       return audioAnswer;
-    } else if (serverProps.isAutoCRT()) {//!exercise.isPromptInEnglish()) { // TODO : hack -- don't do CRT on english
+    }/* else if (serverProps.isAutoCRT()) {//!exercise.isPromptInEnglish()) { // TODO : hack -- don't do CRT on english
       autoCRT.getAutoCRTDecodeOutput(exerciseID, questionID, file, audioAnswer);
-    }
+    }*/
     return audioAnswer;
   }
 
