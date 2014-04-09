@@ -105,16 +105,16 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
           long roundtrip = now - then;
 
           System.out.println("PostAudioRecordButton : Got audio answer " + result);
-          if (result.reqid != reqid) {
+          if (result.getReqid() != reqid) {
             System.out.println("ignoring old response " + result);
             return;
           }
-          if (result.validity == AudioAnswer.Validity.OK) {
+          if (result.getValidity() == AudioAnswer.Validity.OK) {
             validAudio = true;
             useResult(result);
           } else {
             validAudio = false;
-            showPopup(result.validity.getPrompt());
+            showPopup(result.getValidity().getPrompt());
             useInvalidResult(result);
           }
           if (controller.isLogClientMessages() || roundtrip > LOG_ROUNDTRIP_THRESHOLD) {
@@ -131,8 +131,8 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   private void logRoundtripTime(AudioAnswer result, long roundtrip) {
     String message = "PostAudioRecordButton : (success) User #" + controller.getUser() +
       " post audio took " + roundtrip + " millis, audio dur " +
-      result.durationInMillis + " millis, " +
-      " " + ((float) roundtrip / (float) result.durationInMillis) + " roundtrip/audio duration ratio.";
+      result.getDurationInMillis() + " millis, " +
+      " " + ((float) roundtrip / (float) result.getDurationInMillis()) + " roundtrip/audio duration ratio.";
     logMessage(message);
   }
 
