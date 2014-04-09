@@ -528,7 +528,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       @Override
       public void useResult(AudioAnswer result) {
         setResultID(result.getResultID());
-        getImagesForPath(result.path);
+        getImagesForPath(result.getPath());
       }
 
       @Override
