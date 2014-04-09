@@ -49,7 +49,6 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   private static final String INCORRECT = "Incorrect";
   private static final String CORRECT = "Correct";
   public static final String START_OVER = "Start Over";
-  //private static final String REPEAT_THIS_SET = START_OVER;
   private static final String CORRECT_NBSP = "Correct&nbsp;%";
   private static final String SKIP_THIS_ITEM = "Skip this item";
 
@@ -134,7 +133,7 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
     public void receivedAudioAnswer(final AudioAnswer result) {
       //System.out.println("StatsPracticePanel.receivedAudioAnswer: result " + result);
 
-      if (result.validity != AudioAnswer.Validity.OK) {
+      if (result.getValidity() != AudioAnswer.Validity.OK) {
         super.receivedAudioAnswer(result);
         return;
       }
