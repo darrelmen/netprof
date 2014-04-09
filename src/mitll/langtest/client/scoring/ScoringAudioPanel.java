@@ -120,7 +120,9 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   @Override
   protected void getEachImage(int width) {
     super.getEachImage(width);
-    getTranscriptImageURLForAudio(audioPath, refSentence, width,words,phones);
+    if (!controller.getProps().isNoModel()) {
+      getTranscriptImageURLForAudio(audioPath, refSentence, width, words, phones);
+    }
   }
 
   /**
