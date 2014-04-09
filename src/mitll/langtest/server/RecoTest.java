@@ -111,7 +111,7 @@ public class RecoTest {
       logger.error("hydec bad config file, stopping...");
       throw new Exception("hydec bad config file, stopping...");
     }
-    logger.debug("---> exercise #" + exercise.getID() + " reco " + audioAnswer.decodeOutput +
+    logger.debug("---> exercise #" + exercise.getID() + " reco " + audioAnswer.getDecodeOutput() +
       " correct " + audioAnswer.isCorrect() + (audioAnswer.isCorrect() ? "" : " audio = " + audioFile));
     return audioAnswer.isCorrect();
   }
