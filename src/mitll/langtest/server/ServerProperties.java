@@ -68,6 +68,7 @@ public class ServerProperties {
   private static final String CLASSROOM_MODE = "classroomMode";
   private static final String INCLUDE_FEEDBACK = "includeFeedback";
   private static final String MAPPING_FILE = "mappingFile";
+  private static final String NO_MODEL = "noModel";
 
   private Properties props = new Properties();
 
@@ -188,25 +189,31 @@ public class ServerProperties {
     return getDefaultFalse(ARABIC_TEXT_DATA_COLLECT);
   }
 
+/*
   public boolean isCollectOnlyAudio() {
     return getDefaultFalse(COLLECT_ONLY_AUDIO);
   }
+*/
 
   public boolean isGoodwaveMode() {
     return getDefaultFalse(GOODWAVE_MODE);
   }
 
+/*
   public boolean isFlashcardTeacherView() {
     return getDefaultFalse(FLASHCARD_TEACHER_VIEW);
   }
+*/
 
   public boolean usePredefinedTypeOrder() {
     return getDefaultFalse(USE_PREDEFINED_TYPE_ORDER);
   }
 
+/*
   public boolean shouldUseWeights() {
     return getDefaultFalse(USE_WEIGHTS);
   }
+*/
 
   public boolean sortExercisesByID() {
     return getDefaultFalse(SORT_BY_ID);
@@ -224,11 +231,16 @@ public class ServerProperties {
     return getDefaultFalse(SORT_EXERCISES);
   }
 
+/*
   public boolean showForeignLanguageQuestionsOnly() {
     return getDefaultFalse(FOREIGN_LANGUAGE_QUESTIONS_ONLY);
   }
+*/
 
   public boolean isClassroomMode() { return getDefaultFalse(CLASSROOM_MODE); }
+  public boolean isNoModel() {
+    return getDefaultFalse(NO_MODEL);
+  }
 
   public boolean getCollectSynonyms() {
     return getDefaultTrue(COLLECT_SYNONYMS);
