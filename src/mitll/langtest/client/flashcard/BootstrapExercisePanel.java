@@ -651,13 +651,13 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     boolean correct = result.isCorrect();
     final double score = result.getScore();
 
-    boolean badAudioRecording = result.validity != AudioAnswer.Validity.OK;
+    boolean badAudioRecording = result.getValidity() != AudioAnswer.Validity.OK;
     System.out.println("receivedAudioAnswer: correct " + correct + " pron score : " + score +
-      " has ref " + hasRefAudio + " bad audio " + badAudioRecording);
+      " has ref " + hasRefAudio + " bad audio " + badAudioRecording + " result " + result);
 
     String feedback = "";
     if (badAudioRecording) {
-      showPopup(result.validity.getPrompt(), button);
+      showPopup(result.getValidity().getPrompt(), button);
       initRecordButton();
       clearFeedback();
     } else if (correct) {
@@ -743,7 +743,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     }
 
     if (controller.getProps().isDemoMode()) {
-      correctPrompt = "Heard: " + result.decodeOutput + "<p>" + correctPrompt;
+      correctPrompt = "Heard: " + result.getDecodeOutput() + "<p>" + correctPrompt;
     }
     Heading recoOutput = getRecoOutput();
     if (recoOutput != null && controlState.isAudioFeedbackOn()) {
