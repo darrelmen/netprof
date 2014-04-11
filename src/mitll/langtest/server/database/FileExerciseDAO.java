@@ -81,6 +81,11 @@ public class FileExerciseDAO implements ExerciseDAO {
   }
 
   @Override
+  public void setAudioDAO(AudioDAO audioDAO) {
+
+  }
+
+  @Override
   public SectionHelper getSectionHelper() {
     return sectionHelper;
   }

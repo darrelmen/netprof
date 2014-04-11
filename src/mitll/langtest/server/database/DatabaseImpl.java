@@ -26,9 +26,12 @@ import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.grade.ResultsAndGrades;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.monitoring.Session;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -71,6 +74,7 @@ public class DatabaseImpl implements Database {
   private UserDAO userDAO;
   private DLIUserDAO dliUserDAO;
   private ResultDAO resultDAO;
+  private AudioDAO audioDAO;
   private AnswerDAO answerDAO;
   private GradeDAO gradeDAO;
   private UserListManager userListManager;
@@ -146,6 +150,7 @@ public class DatabaseImpl implements Database {
     UserListExerciseJoinDAO userListExerciseJoinDAO = new UserListExerciseJoinDAO(this);
     dliUserDAO = new DLIUserDAO(this);
     resultDAO = new ResultDAO(this,userDAO);
+    audioDAO = new AudioDAO(this,userDAO);
     answerDAO = new AnswerDAO(this, resultDAO);
     gradeDAO = new GradeDAO(this,userDAO, resultDAO);
     userListManager = new UserListManager(userDAO, userListDAO, userListExerciseJoinDAO,
@@ -177,8 +182,6 @@ public class DatabaseImpl implements Database {
       gradeDAO.createGradesTable(getConnection());
       userDAO.createUserTable(this);
       dliUserDAO.createUserTable(this);
-
-     // getExercises();
       userListManager.setUserExerciseDAO(userExerciseDAO);
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
@@ -315,6 +318,7 @@ public class DatabaseImpl implements Database {
       userExerciseDAO.setExerciseDAO(exerciseDAO);
       exerciseDAO.setUserExerciseDAO(userExerciseDAO);
       exerciseDAO.setAddRemoveDAO(addRemoveDAO);
+      exerciseDAO.setAudioDAO(audioDAO);
     }
   }
 
@@ -598,7 +602,7 @@ public class DatabaseImpl implements Database {
   private AVPHistoryForList.UserScore makeScore(int count, Map<Long, User> userMap, Session session, boolean useCorrect) {
     float value = useCorrect ? session.getCorrectPercent() : 100f * session.getAvgScore();
     return new AVPHistoryForList.UserScore(count,
-      userMap.get(session.getUserid()).userID,
+      userMap.get(session.getUserid()).getUserID(),
       value,
       session.isLatest());
   }
@@ -656,6 +660,17 @@ public class DatabaseImpl implements Database {
     return addUser(age, gender, experience, ip, nativeLang, dialect, userID);
   }
 
+
+  public long addUser(User user) {
+    long l;
+    if ((l = userDAO.userExists(user.getUserID())) == -1) {
+      logger.debug("addUser " + user);
+       l = userDAO.addUser(user.getAge(), user.getGender() == 0 ? UserDAO.MALE : UserDAO.FEMALE, user.getExperience(), user.getIpaddr(), user.getNativeLang(), user.getDialect(), user.getUserID(), false);
+    }
+   // userListManager.createFavorites(l);
+    return l;
+  }
+
   /**
    * Somehow on subsequent runs, the ids skip by 30 or so?
    * <p/>
@@ -666,15 +681,9 @@ public class DatabaseImpl implements Database {
    * @param experience
    * @param ipAddr user agent info
    * @param dialect speaker dialect
-   * @return
+   * @return assigned id
    * @see mitll.langtest.server.LangTestDatabaseImpl#addUser
    */
-/*  private long addUser(int age, String gender, int experience, String ipAddr, String dialect) {
-    long l = userDAO.addUser(age, gender, experience, ipAddr, "", dialect, "", false);
-    userListManager.createFavorites(l);
-    return l;
-  }*/
-
   public long addUser(int age, String gender, int experience, String ipAddr,
                        String nativeLang, String dialect, String userID) {
     logger.debug("addUser " + userID);
@@ -704,14 +713,14 @@ public class DatabaseImpl implements Database {
       users = userDAO.getUsers();
       int total = exerciseDAO.getRawExercises().size();
       for (User u : users) {
-        Integer numResults = idToCount.idToCount.get(u.id);
+        Integer numResults = idToCount.idToCount.get(u.getId());
         if (numResults != null) {
           u.setNumResults(numResults);
 
-          if (userToRate.containsKey(u.id)) {
-            u.setRate(userToRate.get(u.id));
+          if (userToRate.containsKey(u.getId())) {
+            u.setRate(userToRate.get(u.getId()));
           }
-          int size = idToCount.idToUniqueCount.get(u.id).size();
+          int size = idToCount.idToUniqueCount.get(u.getId()).size();
           boolean complete = size >= total;
           u.setComplete(complete);
           u.setCompletePercent(Math.min(1.0f,(float)size/(float)total));
@@ -751,6 +760,10 @@ public class DatabaseImpl implements Database {
     return eventDAO.getAll();
   }
   public EventDAO getEventDAO() { return eventDAO; }
+
+  public AudioDAO getAudioDAO() {
+    return audioDAO;
+  }
 
   private static class Pair {
     final Map<Long, Integer> idToCount;
@@ -1075,4 +1088,92 @@ public class DatabaseImpl implements Database {
   private ExerciseDAO getExerciseDAO() {  return exerciseDAO;  }
 
   public String toString() { return "Database : "+ connection.getConnection(); }
+
+  private static DatabaseImpl makeDatabaseImpl(String h2DatabaseFile, String configDir) {
+    ServerProperties serverProps = new ServerProperties(configDir,"quizlet.properties");
+    return new DatabaseImpl(configDir, configDir, h2DatabaseFile, serverProps, null, true);
+  }
+
+  public static void main(String[] arg) {
+    importCourseExamples();
+  }
+
+  protected static void importCourseExamples() {
+    DatabaseImpl russianCourseExamples = makeDatabaseImpl("russianCourseExamples", "war/config/russian");
+    ResultDAO resultDAO1 = russianCourseExamples.getResultDAO();
+    System.out.println("got " + resultDAO1.getNumResults());
+    Map<Long, Map<String, Result>> userToResultsRegular = resultDAO1.getUserToResults(true, russianCourseExamples.getUserDAO());
+    System.out.println("got " + userToResultsRegular.size() + " keys " + userToResultsRegular.keySet());
+
+    // Map<String, Result> stringResultMap = userToResultsRegular.get(23l);
+    //  Result result = stringResultMap.get("1363");
+
+    //  System.out.println("got " + result);
+
+    Map<Long, Map<String, Result>> userToResultsSlow = resultDAO1.getUserToResults(false, russianCourseExamples.getUserDAO());
+    System.out.println("got " + userToResultsSlow.size() + " keys " + userToResultsSlow.keySet());
+
+    // so now we have the latest audio
+    // write to id/regular_or_slow/user_id
+
+    // copy users to real database
+
+    DatabaseImpl npfRussian = makeDatabaseImpl("npfRussian", "war/config/russian");
+    Map<Long, User> userMap = russianCourseExamples.getUserDAO().getUserMap();
+    Map<Long, Long> oldToNew = new HashMap<Long, Long>();
+
+    for (long userid : userToResultsRegular.keySet()) {
+      User user = userMap.get(userid);
+      long l = npfRussian.addUser(user);
+      oldToNew.put(user.getId(), l);
+    }
+
+    for (long userid : userToResultsSlow.keySet()) {
+      User user = userMap.get(userid);
+      long l = npfRussian.addUser(user);
+      oldToNew.put(user.getId(), l);
+    }
+
+    // so now we have the users in the database
+
+    // add a audio reference to the audio ref table for each recording
+    AudioDAO audioDAO = npfRussian.getAudioDAO();
+    audioDAO.drop();
+    copyAudio(userToResultsRegular, oldToNew, audioDAO);
+    copyAudio(userToResultsSlow, oldToNew, audioDAO);
+  }
+
+  protected static void copyAudio(Map<Long, Map<String, Result>> userToResultsRegular, Map<Long, Long> oldToNew, AudioDAO audioDAO) {
+    int count = 0;
+    for (Map.Entry<Long, Map<String, Result>> userToExIdToResult : userToResultsRegular.entrySet()) {
+      //for (Long userid : userToExIdToResult.getKey())
+      logger.debug("USer " +userToExIdToResult.getKey());
+      Map<String, Result> exIdToResult = userToExIdToResult.getValue();
+      logger.debug("num = " + exIdToResult.size() + " exercises->results ");
+      for (Result r : exIdToResult.values()) {
+        logger.debug("\tcount " + count+
+          " result = " + r.uniqueID + " for " +r.getID()+ " type " +r.getAudioType() + " path " +r.answer);
+
+        //  Result next = exIdToResult.values().iterator().next();
+        audioDAO.add(r, oldToNew.get(r.userid).intValue());
+        try {
+          File destFile = new File("war/config/russian/bestAudio",r.answer);
+          destFile.getParentFile().mkdirs();
+          FileUtils.copyFile(new File("war/config/russian/candidateAudio", r.answer), destFile);
+          count++;
+        } catch (IOException e) {
+          logger.error("got " + e, e);
+        }
+      }
+      // if (count > 10) break;
+    }
+    logger.debug("copied " + count + " files.");
+  }
+
+/*
+  private static String trimPathForWebPage(Result r) {
+    int answer = r.answer.indexOf(PathHelper.ANSWERS);
+    if (answer == -1) return r.answer;
+    return r.answer.substring(answer);
+  }*/
 }
