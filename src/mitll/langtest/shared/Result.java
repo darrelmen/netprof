@@ -44,7 +44,7 @@ public class Result implements IsSerializable {
 
   public static final String AUDIO_TYPE_UNSET = "unset";
   public static final String AUDIO_TYPE_REGULAR = "regular";
- // public static final String AUDIO_TYPE_SLOW = "slow";
+  public static final String AUDIO_TYPE_SLOW = "slow";
   public static final String AUDIO_TYPE_FAST_AND_SLOW = "fastAndSlow";
   public static final String AUDIO_TYPE_DEMO = "demo";
   public static final String AUDIO_TYPE_PRACTICE = "practice";
@@ -94,13 +94,13 @@ public class Result implements IsSerializable {
     return id + "/" +qid;
   }
 
-  public void setFLQ(boolean flq) {
+/*  public void setFLQ(boolean flq) {
     this.flq = flq;
   }
 
   public void setSpoken(boolean v) {
     this.spoken = v;
-  }
+  }*/
 
   public String getAudioType() {
     return audioType;
