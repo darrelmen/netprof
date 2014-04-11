@@ -153,13 +153,14 @@ class CreateListDialog extends BasicDialog {
     if (titleBox.getText().isEmpty()) {
       markError(titleBox, "Please fill in a title");
       return false;
-    } else if (REQUIRE_DESC && description.getText().isEmpty()) {
+    } 
+/*    else if (REQUIRE_DESC && description.getText().isEmpty()) {
       markError(description, "Please fill in a description");
       return false;
     } else if (REQUIRE_CLASS && classBox.getText().isEmpty()) {
       markError(classBox, "Please fill in course information");
       return false;
-    }
+    }*/
     return true;
   }
 }
