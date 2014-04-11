@@ -3,6 +3,7 @@ package mitll.langtest.server.database;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.User;
 import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.monitoring.Session;
 import org.apache.log4j.Logger;
@@ -32,6 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Create, drop, alter, read from the results table.
@@ -63,6 +65,11 @@ public class ResultDAO extends DAO {
   private final GradeDAO gradeDAO;
   private final boolean debug = false;
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(mitll.langtest.server.PathHelper)
+   * @param database
+   * @param userDAO
+   */
   public ResultDAO(Database database, UserDAO userDAO) {
     super(database);
 
@@ -403,35 +410,6 @@ public class ResultDAO extends DAO {
 
     return allGraded;
   }
-
-  /**
-   * @param userid
-   * @return
-   * @see DatabaseImpl#getExercisesFirstNInOrder
-   */
-/*  public String getExerciseIDLastResult(long userid) {
-    try {
-      Connection connection = database.getConnection();
-      String sql = "SELECT exid FROM results WHERE TIME IN (SELECT MAX(TIME) FROM results WHERE userid = " +
-        userid +
-        ");";
-      PreparedStatement statement = connection.prepareStatement(sql);
-
-      ResultSet rs = statement.executeQuery();
-      String exid = "INVALID";
-      if (rs.next()) {
-        exid = rs.getString(1);
-      }
-      rs.close();
-      statement.close();
-      database.closeConnection(connection);
-      return exid;
-
-    } catch (Exception ee) {
-      logger.error("got " + ee, ee);
-    }
-    return "INVALID";
-  }*/
 
   /**
    * @param exerciseID
@@ -833,6 +811,30 @@ public class ResultDAO extends DAO {
     }
   }
 
+  public Map<Long,Map<String,Result>> getUserToResults(boolean isRegular, UserDAO userDAO) {
+    List<Result> results = getResults();
+    Map<Long,Map<String,Result>> userToResult = new HashMap<Long, Map<String, Result>>();
+    String typeToUse = isRegular ? Result.AUDIO_TYPE_REGULAR : Result.AUDIO_TYPE_SLOW;
+
+    Map<Long, User> userMap = userDAO.getUserMap();
+
+    for (Result r : results) {
+      if (r.valid && r.audioType.equals(typeToUse)) {
+        User user = userMap.get(r.userid);
+        if (user != null && user.getExperience() == 240) {    // only natives!
+          Map<String, Result> results1 = userToResult.get(r.userid);
+          if (results1 == null)
+            userToResult.put(r.userid, results1 = new HashMap<String, Result>());
+          Result result = results1.get(r.id);
+          if (result == null || (r.timestamp > result.timestamp)) {
+            results1.put(r.id, r);
+          }
+        }
+      }
+    }
+    return userToResult;
+  }
+
   /**
    * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    * @param out
@@ -840,7 +842,7 @@ public class ResultDAO extends DAO {
 /*
   public void toXLSX(OutputStream out) {
     long then = System.currentTimeMillis();
-    List<Result> results = getResults();
+    List<Result> results = getAudioAttributes();
     long now = System.currentTimeMillis();
     if (now-then > 100) {
       logger.warn("toXLSX : took " + (now-then) + " millis to read " +results.size()+
