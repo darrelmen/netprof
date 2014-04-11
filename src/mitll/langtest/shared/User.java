@@ -1,7 +1,5 @@
 package mitll.langtest.shared;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-
 /**
  * Object representing a user.
  *
@@ -10,17 +8,17 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * Time: 3:54 PM
  * To change this template use File | Settings | File Templates.
  */
-public class User implements IsSerializable, Comparable<User> {
+public class User extends MiniUser /*implements Comparable<User>*/ {
   public static final String NOT_SET = "NOT_SET";
-  public long id;
-  public int age;
-  public int gender;
-  public int experience;
-  public String ipaddr;
+ // public long id;
+ // public int age;
+ // public int gender;
+ private int experience;
+  private String ipaddr;
   public String  password;
-  public long timestamp;
-  public String nativeLang,dialect;
-  public String userID;
+  private long timestamp;
+ // public String nativeLang,dialect;
+ // public String userID;
   public boolean enabled;
   public boolean admin;
   private int numResults;
@@ -60,21 +58,14 @@ public class User implements IsSerializable, Comparable<User> {
    */
   public User(long id, int age, int gender, int experience, String ipaddr, String password,
               String nativeLang, String dialect, String userID, long timestamp, boolean enabled, boolean isAdmin) {
-     this.id = id;
-    this.age = age;
-    this.gender = gender;
+    super(id,age,gender,nativeLang,dialect,userID);
     this.experience = experience;
     this.ipaddr = ipaddr;
     this.password = password;
     this.timestamp = timestamp;
-    this.nativeLang = nativeLang;
-    this.dialect = dialect;
-    this.userID = userID;
     this.enabled = enabled;
     this.admin = isAdmin;
   }
-
-  public boolean isMale() { return gender == 0; }
 
   public String getTimestamp() {
 	  if (ipaddr == null) return "";
@@ -84,6 +75,8 @@ public class User implements IsSerializable, Comparable<User> {
     }
     else return "";
   }
+
+  public long getRawTimestamp() { return timestamp; }
 
   /**
    * @see mitll.langtest.client.user.UserTable#getTable
@@ -119,12 +112,12 @@ public class User implements IsSerializable, Comparable<User> {
     return rate;
   }
 
-  @Override
-  public int compareTo(User o) {
+/*  @Override
+  public int compareTo(MiniUser o) {
     return id < o.id ? -1 : id > o.id ? +1 : 0;
-  }
+  }*/
 
-  @Override
+/*  @Override
   public boolean equals(Object obj) {
     return (obj instanceof User) && compareTo((User)obj) == 0;
   }
@@ -132,7 +125,7 @@ public class User implements IsSerializable, Comparable<User> {
   @Override
   public int hashCode() {
     return new Long(id).hashCode();
-  }
+  }*/
 
   public boolean isComplete() {
     return complete;
@@ -142,15 +135,23 @@ public class User implements IsSerializable, Comparable<User> {
     this.complete = complete;
   }
 
-  public String toString() {
-    return "user " + id + " age " + age + " gender " + gender + " native " + nativeLang + " dialect " + dialect+ " demographics " + demographics;
-  }
-
   public float getCompletePercent() {
     return completePercent;
   }
 
   public void setCompletePercent(float completePercent) {
     this.completePercent = completePercent;
+  }
+
+  public String toString() {
+    return "user " + getId() + " age " + getAge() + " gender " + getGender() + " native " + getNativeLang() + " dialect " + getDialect() + " demographics " + demographics;
+  }
+
+  public int getExperience() {
+    return experience;
+  }
+
+  public String getIpaddr() {
+    return ipaddr;
   }
 }
