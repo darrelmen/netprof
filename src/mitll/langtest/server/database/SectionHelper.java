@@ -43,8 +43,7 @@ public class SectionHelper {
       types.addAll(typeToSectionToTypeToSections.keySet());
       if (types.isEmpty()) {
         types.addAll(typeToUnitToLesson.keySet());
-      }
-      else {
+      } else {
         Collections.sort(types, new Comparator<String>() {
           @Override
           public int compare(String o1, String o2) {
@@ -56,7 +55,11 @@ public class SectionHelper {
       }
       return types;
     } else {
-      return predefinedTypeOrder;
+      Set<String> validTypes = typeToUnitToLesson.keySet();
+      logger.debug("Valid types " + validTypes + " vs predef " + predefinedTypeOrder);
+      List<String> valid = new ArrayList<String>(predefinedTypeOrder);
+      valid.retainAll(validTypes);
+      return valid;
     }
   }
 
@@ -100,20 +103,31 @@ public class SectionHelper {
     return firstSet;
   }
 
+  /**
+   * @see #getChildren(java.util.List)
+   * @param typeOrder
+   * @param parent
+   * @param typeToSections
+   */
   private void addChildren(List<String> typeOrder, SectionNode parent, Map<String, Collection<String>> typeToSections) {
     List<String> remainingTypes = typeOrder.subList(1, typeOrder.size());
     String nextType = typeOrder.iterator().next();
 
     Collection<String> children = typeToSections.get(nextType);
-    for (String childSection : children) {
-      SectionNode child = new SectionNode(nextType, childSection);
-      parent.addChild(child);
+    if (children == null) {
+      logger.error("huh? can't find " + nextType + " in " + typeToSections);
+    }
+    else {
+      for (String childSection : children) {
+        SectionNode child = new SectionNode(nextType, childSection);
+        parent.addChild(child);
 
-      Map<String, Map<String, Collection<String>>> sectionToTypeToSections = typeToSectionToTypeToSections.get(nextType);
-      Map<String, Collection<String>> typeToSections2 = sectionToTypeToSections.get(childSection);
+        Map<String, Map<String, Collection<String>>> sectionToTypeToSections = typeToSectionToTypeToSections.get(nextType);
+        Map<String, Collection<String>> typeToSections2 = sectionToTypeToSections.get(childSection);
 
-      if (!remainingTypes.isEmpty()) {
-        addChildren(remainingTypes, child, typeToSections2);
+        if (!remainingTypes.isEmpty()) {
+          addChildren(remainingTypes, child, typeToSections2);
+        }
       }
     }
   }
@@ -242,6 +256,10 @@ public class SectionHelper {
     return unit;
   }
 
+  /**
+   * @see mitll.langtest.server.database.ExcelImport#readFromSheet(org.apache.poi.ss.usermodel.Sheet)
+   * @param predefinedTypeOrder
+   */
   public void setPredefinedTypeOrder(List<String> predefinedTypeOrder) {
     this.predefinedTypeOrder = predefinedTypeOrder;
   }
