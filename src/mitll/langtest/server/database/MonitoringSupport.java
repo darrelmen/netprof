@@ -60,7 +60,7 @@ public class MonitoringSupport {
     Map<User,Integer> idToCount = new HashMap<User, Integer>();
     Map<Long,User> idToUser = new HashMap<Long, User>();
     for (User u : users) {
-      idToUser.put(u.id,u);
+      idToUser.put(u.getId(),u);
       idToCount.put(u,0);
     }
     for (Result r : results) {
@@ -609,7 +609,7 @@ public class MonitoringSupport {
 
     Map<Long,User> idToUser = new HashMap<Long, User>();
     for (User u : users) {
-      idToUser.put(u.id,u);
+      idToUser.put(u.getId(),u);
     }
 
     Map<Integer, Integer> resultIDToExp = new HashMap<Integer, Integer>();
@@ -620,7 +620,7 @@ public class MonitoringSupport {
         unknownUsers.add(r.userid);
         //System.err.println("unknown user " + r.userid);
       }
-      else resultIDToExp.put(r.uniqueID, user.experience);
+      else resultIDToExp.put(r.uniqueID, user.getExperience());
     }
 
     logger.warn("getResultStats : found " + unknownUsers.size() + " unknown users : " + unknownUsers);
