@@ -35,11 +35,19 @@ public class AudioExercise extends ExerciseShell {
     return audio != null ? audio.getAudioRef() : null;
   }
 
+  /**
+   * @see mitll.langtest.server.database.ExcelImport#getExercise(String, String, String, String, String, String, boolean, String)
+   * @param s
+   */
   public void setRefAudio(String s) {
     if (s != null && s.length() > 0 && !s.equals("null")) {
-      AudioAttribute audioAttribute = new AudioAttribute(s).markFast();
-      audioAttributes.put(audioAttribute.getKey(),audioAttribute);
+      AudioAttribute audioAttribute = new AudioAttribute(s).markRegular();
+      addAudio(audioAttribute);
     }
+  }
+
+  public void addAudio(AudioAttribute audioAttribute) {
+    audioAttributes.put(audioAttribute.getKey(),audioAttribute);
   }
 
   /**
@@ -49,7 +57,7 @@ public class AudioExercise extends ExerciseShell {
   public void setSlowRefAudio(String s) {
     if (s != null && s.length() > 0 && !s.equals("null")) {
       AudioAttribute audioAttribute = new AudioAttribute(s).markSlow();
-      audioAttributes.put(audioAttribute.getKey(), audioAttribute);
+      addAudio(audioAttribute);
     }
   }
 
@@ -127,6 +135,10 @@ public class AudioExercise extends ExerciseShell {
   }
   public void setUnitToValue(Map<String, String> unitToValue) {
     this.unitToValue = unitToValue;
+  }
+
+  public int getNumAudio() {
+    return getAudioAttributes().size();
   }
 
   public String toString() {
