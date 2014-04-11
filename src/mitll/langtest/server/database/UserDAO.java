@@ -2,6 +2,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.shared.DLIUser;
 import mitll.langtest.shared.Demographics;
+import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
@@ -30,6 +31,8 @@ public class UserDAO extends DAO {
   private static final String DEFECT_DETECTOR = "defectDetector";
   private static final Logger logger = Logger.getLogger(UserDAO.class);
   public static final String USERS = "users";
+  public static final String MALE = "male";
+  public static final String FEMALE = "female";
   private long defectDetector;
   //private static final List<String> COLUMNS = Arrays.asList("id", "age", "gender", "experience", "ipaddr", "nativelang", "dialect", "userid", "timestamp", "enabled");
   private static final List<String> COLUMNS2 = Arrays.asList("id", "age", "gender", "experience", "ipaddr", "nativelang", "dialect", "userid", "timestamp", "demographics");
@@ -41,7 +44,7 @@ public class UserDAO extends DAO {
 
       defectDetector = userExists(DEFECT_DETECTOR);
       if (defectDetector == -1) {
-        defectDetector = addUser(89, "male", 0, "", "unknown", "unknown", DEFECT_DETECTOR, false);
+        defectDetector = addUser(89, MALE, 0, "", "unknown", "unknown", DEFECT_DETECTOR, false);
       }
 
     } catch (Exception e) {
@@ -72,7 +75,7 @@ public class UserDAO extends DAO {
     try {
       // there are much better ways of doing this...
       long max = 0;
-      for (User u : getUsers()) if (u.id > max) max = u.id;
+      for (User u : getUsers()) if (u.getId() > max) max = u.getId();
       logger.info("addUser : max is " + max + " new user '" + userID + "' age " +age + " gender " + gender);
 
       Connection connection = database.getConnection();
@@ -87,7 +90,7 @@ public class UserDAO extends DAO {
       long newID = max + 1;
       statement.setLong(i++, newID);
       statement.setInt(i++, age);
-      statement.setInt(i++, gender.equalsIgnoreCase("male") ? 0 : 1);
+      statement.setInt(i++, gender.equalsIgnoreCase(MALE) ? 0 : 1);
       statement.setInt(i++, experience);
       statement.setString(i++, ipAddr);
       statement.setString(i++, nativeLang);
@@ -106,6 +109,7 @@ public class UserDAO extends DAO {
     return 0;
   }
 
+/*
   public void enableUser(long id, boolean enabled) {
     try {
       Connection connection = database.getConnection();
@@ -129,6 +133,7 @@ public class UserDAO extends DAO {
       e.printStackTrace();
     }
   }
+*/
 
   /**
    * @see DatabaseImpl#userExists(String)
@@ -224,7 +229,14 @@ public class UserDAO extends DAO {
   public List<User> getUsers() {
     String sql = "SELECT * from users;";
     return getUsers(sql);
-  }  
+  }
+
+  public Map<Long, MiniUser> getMiniUsers() {
+    List<User> users = getUsers();
+    Map<Long, MiniUser> mini = new HashMap<Long, MiniUser>();
+    for (User user : users) mini.put(user.getId(), new MiniUser(user));
+    return mini;
+  }
 
   /**
    * @seex OnlineUsers#getUser(long)
@@ -301,7 +313,10 @@ public class UserDAO extends DAO {
           rs.getBoolean("enabled"),
           userid != null && (userid.equals("gvidaver") | userid.equals("swade")));
         users.add(newUser);
-        if (newUser.userID == null) newUser.userID = ""+newUser.id;
+
+        if (newUser.getUserID() == null) {
+          newUser.setUserID(""+ newUser.getId());
+        }
       }
     }
     return users;
@@ -315,7 +330,7 @@ public class UserDAO extends DAO {
   public boolean isUserMale(long userID, List<User> users) {
     User thisUser = null;
     for (User u : users) {
-      if (u.id == userID) {
+      if (u.getId() == userID) {
         thisUser = u;
         break;
       }
@@ -332,7 +347,7 @@ public class UserDAO extends DAO {
     Map<Long,User> idToUser = new HashMap<Long, User>();
     for (User u : users) {
       if (u.isMale() && getMale || (!u.isMale() && !getMale)) {
-        idToUser.put(u.id, u);
+        idToUser.put(u.getId(), u);
       }
     }
     return idToUser;
@@ -346,7 +361,7 @@ public class UserDAO extends DAO {
   public Map<Long, User> getMap(List<User> users) {
     Map<Long, User> idToUser = new HashMap<Long, User>();
     for (User u : users) {
-      idToUser.put(u.id, u);
+      idToUser.put(u.getId(), u);
     }
     return idToUser;
   }
@@ -402,23 +417,23 @@ public class UserDAO extends DAO {
       Row row = sheet.createRow(rownum++);
       int j = 0;
       Cell cell = row.createCell(j++);
-      cell.setCellValue(user.id);
+      cell.setCellValue(user.getId());
       cell = row.createCell(j++);
-      cell.setCellValue(user.age);
+      cell.setCellValue(user.getAge());
       cell = row.createCell(j++);
-      cell.setCellValue(user.gender);
+      cell.setCellValue(user.getGender());
       cell = row.createCell(j++);
-      cell.setCellValue(user.experience);
+      cell.setCellValue(user.getExperience());
       cell = row.createCell(j++);
-      cell.setCellValue(user.ipaddr);
+      cell.setCellValue(user.getIpaddr());
       cell = row.createCell(j++);
-      cell.setCellValue(user.nativeLang);
+      cell.setCellValue(user.getNativeLang());
       cell = row.createCell(j++);
-      cell.setCellValue(user.dialect);
+      cell.setCellValue(user.getDialect());
       cell = row.createCell(j++);
-      cell.setCellValue(user.userID);
+      cell.setCellValue(user.getUserID());
       cell = row.createCell(j++);
-      cell.setCellValue(new Date(user.timestamp));
+      cell.setCellValue(new Date(user.getTimestamp()));
       cell.setCellStyle(cellStyle);
       cell = row.createCell(j++);
       Demographics demographics = user.getDemographics();
