@@ -851,6 +851,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   /**
    * Recording interface
+   * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
    */
   public void stopRecording() {
     flashRecordPanel.stopRecording();
