@@ -64,9 +64,11 @@ import java.util.concurrent.TimeUnit;
 @SuppressWarnings("serial")
 public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase, AutoCRTScoring {
   private static final Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
-  private static final int MB = (1024 * 1024);
+  //private static final int MB = (1024 * 1024);
   private static final int TIMEOUT = 30;
   private static final boolean SCORE_RESULTS = false;
+  private static final String WAV = ".wav";
+  private static final String MP3 = ".mp3";
 
   private DatabaseImpl db, studentAnswersDB;
   private AudioFileHelper audioFileHelper;
@@ -143,8 +145,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.list.PagingExerciseList#loadExercises(String, String)
    * @param reqID
    * @param typeToSelection
-   *@param prefix
-   * @param userListID   @return
+   * @param prefix
+   * @param userListID
+   * @return
    */
   @Override
   public ExerciseListWrapper getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix, long userListID) {
@@ -345,15 +348,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getSectionHelper().getSectionNodes();
   }
 
-  private void logMemory() {
+/*  private void logMemory() {
     Runtime rt = Runtime.getRuntime();
     long free = rt.freeMemory();
     long used = rt.totalMemory() - free;
     long max = rt.maxMemory();
-    if (used/MB > 500) {
+    if (used / MB > 500) {
       logger.debug("heap info free " + free / MB + "M used " + used / MB + "M max " + max / MB + "M");
     }
-    }
+  }*/
 
   /**
    * Joins with annotation data when doing QC.
@@ -518,7 +521,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private String getWavAudioFile(String audioFile) {
     if (audioFile.endsWith("." +
         AudioTag.COMPRESSED_TYPE)) {
-      String wavFile = removeSuffix(audioFile) +".wav";
+      String wavFile = removeSuffix(audioFile) + WAV;
       File test = pathHelper.getAbsoluteFile(wavFile);
       audioFile = test.exists() ? test.getAbsolutePath() : audioFileHelper.getWavForMP3(audioFile);
     }
@@ -527,13 +530,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private String removeSuffix(String audioFile) {
-    return audioFile.substring(0, audioFile.length() - ".mp3".length());
+    return audioFile.substring(0, audioFile.length() - MP3.length());
   }
 
   private String ensureWAV(String audioFile) {
-    if (!audioFile.endsWith("wav"))
-      return audioFile.substring(0, audioFile.length() - ".mp3".length()) + ".wav";
-    else return audioFile;
+    if (!audioFile.endsWith("wav")) {
+      return audioFile.substring(0, audioFile.length() - MP3.length()) + WAV;
+    } else {
+      return audioFile;
+    }
   }
 
   /**
@@ -541,8 +546,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.LangTest#onModuleLoad
    * @return
    */
- // private Map<String, String> getProperties() { return serverProps.getProperties();  }
-
   @Override
   public StartupInfo getStartupInfo() {
     return new StartupInfo(serverProps.getProperties(), getTypeOrder(), getSectionNodes());
@@ -623,10 +626,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public void changeGrade(Grade toChange) { db.changeGrade(toChange);  }
 
   @Override
-  public synchronized int userExists(String login) {
-    //if (db == null) getProperties();
-    return db.userExists(login);
-  }
+  public synchronized int userExists(String login) { return db.userExists(login);  }
 
   // Users ---------------------
 
@@ -874,19 +874,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return audioFileHelper.writeAudioFile(base64EncodedString, plan, exercise, exercise1, questionID, user, reqid,
       flq, audioType, doFlashcard, recordInResults);
   }
-
-  /**
-   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#getExercises(long, boolean)
-   * @paramx user
-   * @paramx isReviewMode
-   * @return
-   */
-/*  @Override
-  public Set<String> getCompletedExercises(int user, boolean isReviewMode) {
-    Set<String> reviewed = isReviewMode ? db.getUserListManager().getReviewedExercises() : db.getCompletedExercises(user);
-    logger.debug("request " + user + " review mode " + isReviewMode + " reviewed num = " + reviewed.size());
-    return reviewed;
-  }*/
 
   void makeAutoCRT() { audioFileHelper.makeAutoCRT(relativeConfigDir, this, studentAnswersDB, this); }
 
