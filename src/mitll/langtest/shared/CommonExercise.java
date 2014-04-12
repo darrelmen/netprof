@@ -2,6 +2,7 @@ package mitll.langtest.shared;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -30,6 +31,8 @@ public interface CommonExercise extends CommonShell {
   String getSlowAudioRef();
 
   Collection<AudioAttribute> getAudioAttributes();
+  Collection<AudioAttribute> getByGender(boolean isMale);
+  Map<MiniUser, List<AudioAttribute>> getUserMap(boolean isMale);
 
   Map<String, String> getUnitToValue();
 

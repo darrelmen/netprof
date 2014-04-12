@@ -122,7 +122,7 @@ public class UserListDAO extends DAO {
           "VALUES(?,?,?,?,?,?);");
       int i = 1;
       //     statement.setLong(i++, userList.getUserID());
-      statement.setLong(i++, userList.getCreator().id);
+      statement.setLong(i++, userList.getCreator().getId());
       statement.setString(i++, userList.getName());
       statement.setString(i++, userList.getDescription());
       statement.setString(i++, userList.getClassMarker());
@@ -381,7 +381,7 @@ public class UserListDAO extends DAO {
     List<UserList> lists = getWhere(sql);
 
     for (UserList ul : lists) {
-      if (userid == -1 || ul.getCreator().id == userid || !ul.isFavorite()) {   // skip other's favorites
+      if (userid == -1 || ul.getCreator().getId() == userid || !ul.isFavorite()) {   // skip other's favorites
         populateList(ul);
       }
     }
