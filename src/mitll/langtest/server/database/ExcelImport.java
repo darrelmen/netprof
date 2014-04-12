@@ -5,6 +5,7 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.UserExerciseDAO;
 import mitll.langtest.server.database.custom.UserListManager;
+import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.Exercise;
@@ -70,6 +71,7 @@ public class ExcelImport implements ExerciseDAO {
   private File installPath;
   private boolean collectSynonyms = true;
   boolean addDefects;
+  private AudioDAO audioDAO;
 
   /**
    *
@@ -140,6 +142,20 @@ public class ExcelImport implements ExerciseDAO {
     return sectionHelper;
   }
 
+  private Map<String, List<AudioAttribute>> exToAudio;
+  @Override
+  public void setAudioDAO(AudioDAO audioDAO) {
+    this.audioDAO = audioDAO;
+    exToAudio = audioDAO.getExToAudio();
+    int count = 0;
+    logger.debug("extoaudio now " + exToAudio.size());
+    for (String key : exToAudio.keySet()) {
+      logger.debug("\tid '" +key+
+        "'");
+      if (count++ > 10) break;
+    }
+  }
+
   /**
    * @return
    * @see mitll.langtest.server.database.DatabaseImpl#getExercises()
@@ -149,7 +165,7 @@ public class ExcelImport implements ExerciseDAO {
       if (exercises == null) {
         exercises = readExercises(new File(file));
         for (CommonExercise e : exercises) idToExercise.put(e.getID(), e);
-
+        addDefects(idToDefectMap);
         Set<String> removes = addRemoveDAO.getRemoves();
 
         for (String id : removes) {
@@ -174,7 +190,6 @@ public class ExcelImport implements ExerciseDAO {
             logger.error("huh? couldn't find user exercise dup " + id);
           } else {
             add(where);
-            //Exercise exercise = where.toExercise();
             for (Map.Entry<String, String> pair : where.getUnitToValue().entrySet()) {
               sectionHelper.addExerciseToLesson(where, pair.getKey(), pair.getValue());
             }
@@ -245,6 +260,12 @@ public class ExcelImport implements ExerciseDAO {
   @Override
   public void setAddRemoveDAO(AddRemoveDAO addRemoveDAO) { this.addRemoveDAO = addRemoveDAO; }
 
+  /**
+   * @see mitll.langtest.server.database.custom.UserExerciseDAO#getPredefExercise(String)
+   * @see mitll.langtest.server.database.DatabaseImpl#getExercise(String)
+   * @param id
+   * @return
+   */
   public CommonExercise getExercise(String id) {
     if (idToExercise.isEmpty()) logger.warn("huh? couldn't find any exercises..?");
 
@@ -307,9 +328,7 @@ public class ExcelImport implements ExerciseDAO {
       inp.close();
     } catch (IOException e) {
       e.printStackTrace();
-    } /*catch (InvalidFormatException e) {
-      e.printStackTrace();
-    }*/
+    }
     return exercises;
   }
 
@@ -319,9 +338,13 @@ public class ExcelImport implements ExerciseDAO {
 
  // public Map<String, Lesson> getSection(String type) { return sectionHelper.getSection(type); }
 
+/*
   public List<String> getErrors() {
     return errors;
   }
+*/
+
+  private Map<String,Map<String,String>> idToDefectMap = new HashMap<String, Map<String, String>>();
 
   /**
    * @param sheet
@@ -484,7 +507,8 @@ public class ExcelImport implements ExerciseDAO {
                 if (!imported.hasRefAudio()) {
                   fieldToDefect.put("refAudio", "missing reference audio");
                 }
-                addDefects(fieldToDefect, imported);
+                idToDefectMap.put(imported.getID(), fieldToDefect);
+               // addDefects(fieldToDefect, imported);
               } else {
                 if (logging++ < 3) {
                   logger.info("skipping exercise " + imported.getID() + " : '" + imported.getEnglish() + "' since no audio.");
@@ -524,10 +548,21 @@ public class ExcelImport implements ExerciseDAO {
     return exercises;
   }
 
-  private void addDefects(Map<String, String> fieldToDefect, CommonExercise imported) {
+/*  private void addDefects(Map<String, String> fieldToDefect, CommonExercise imported) {
     if (addDefects) {
       for (Map.Entry<String, String> pair : fieldToDefect.entrySet()) {
         userListManager.addDefect(imported.getID(), pair.getKey(), pair.getValue());
+      }
+    }
+  }*/
+
+  private void addDefects(Map<String,Map<String, String>> exTofieldToDefect) {
+    if (addDefects) {
+      logger.debug("Automatically adding " + exTofieldToDefect.size() +" defects");
+      for (Map.Entry<String, Map<String, String>> pair : exTofieldToDefect.entrySet()) {
+        for (Map.Entry<String, String> fieldToDefect: pair.getValue().entrySet()) {
+          userListManager.addDefect(pair.getKey(), fieldToDefect.getKey(), fieldToDefect.getValue());
+        }
       }
     }
   }
@@ -696,6 +731,7 @@ public class ExcelImport implements ExerciseDAO {
       }
     } else {
       imported = getExercise(id, english, foreignLanguagePhrase, translit, meaning, context, promptInEnglish, audioIndex);
+     // if (imported.getNumAudio() > 0) logger.debug("id " + id + " has " + imported.getNumAudio());
     }
     imported.setEnglishSentence(english);
     if (translit.length() > 0) {
@@ -807,6 +843,32 @@ public class ExcelImport implements ExerciseDAO {
       else {
         //logger.debug("missing slow " + test.getAbsolutePath());
       }
+    }
+
+    int c = 0;
+    if (exToAudio.containsKey(id) || exToAudio.containsKey(id+"/1") || exToAudio.containsKey(id+"/2")) {
+      for (String idq : Arrays.asList(id+"/1",id+"/2")) {
+        List<AudioAttribute> audioAttributes = exToAudio.get(idq);
+
+        if (!audioAttributes.isEmpty()) {
+          for (AudioAttribute audio : audioAttributes) {
+            File test = new File(installPath, mediaDir + File.separator + audio.getAudioRef());
+
+            boolean exists = test.exists();
+            if (exists) {
+              audio.setAudioRef(mediaDir + File.separator + audio.getAudioRef());   // remember to prefix the path
+              imported.addAudio(audio);
+            } else {
+              c++;
+              if (c < 10) logger.debug("file " + test.getAbsolutePath() + "does not exist");
+            }
+          }
+        }
+      }
+      //logger.debug("added " + c + " to " + id);
+    }
+    else {
+     // logger.debug("can't find '" + id + "' in " + exToAudio.keySet().size() + " keys, e.g. " + exToAudio.keySet().iterator().next());
     }
 
     return imported;
