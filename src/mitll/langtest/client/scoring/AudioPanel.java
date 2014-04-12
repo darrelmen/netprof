@@ -183,7 +183,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
   boolean hasAudio() {  return true;  }
 
-  public void doPause() { playAudio.doPause(); }
+  public void doPause() { if (playAudio != null) playAudio.doPause(); }
 
   /**
    * This is sort of a hack -- so we can get left justify...
@@ -258,7 +258,9 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       this.audioPath = path;
     }
     lastWidth = 0;
-    playAudio.startSong(path);
+    if (playAudio != null) {
+      playAudio.startSong(path);
+    }
 
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
