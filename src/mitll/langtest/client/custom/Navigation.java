@@ -630,7 +630,7 @@ public class Navigation extends TabContainer implements RequiresResize {
    */
   private void addVisitor(UserList ul) {
     long user = (long) controller.getUser();
-    if (ul.getCreator().id != user) {
+    if (ul.getCreator().getId() != user) {
       service.addVisitor(ul.getUniqueID(), user, new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
@@ -695,7 +695,7 @@ public class Navigation extends TabContainer implements RequiresResize {
 
     // add add item and edit tabs (conditionally)
     TabAndContent editItemTab = null;
-    if (created && (!ul.isPrivate() || ul.getCreator().id == controller.getUser())) {
+    if (created && (!ul.isPrivate() || ul.getCreator().getId() == controller.getUser())) {
       final TabAndContent editTab = makeTab(tabPanel, IconType.EDIT, isReview ? ADD_DELETE_EDIT_ITEM :ADD_OR_EDIT_ITEM);
       editItemTab = editTab;
       editTab.tab.addClickHandler(new ClickHandler() {
@@ -1072,7 +1072,7 @@ public class Navigation extends TabContainer implements RequiresResize {
     }
 
     if (!ul.isFavorite()) {
-      String html1 = "by " +  (ul.getCreator().userID.equals(User.NOT_SET) ? REVIEWERS : ul.getCreator().userID);
+      String html1 = "by " +  (ul.getCreator().getUserID().equals(User.NOT_SET) ? REVIEWERS : ul.getCreator().getUserID());
       Heading h4Again;
       if (yourList) {
         h4Again = new Heading(5,html1);
@@ -1145,7 +1145,7 @@ public class Navigation extends TabContainer implements RequiresResize {
   private boolean isYourList(UserList ul) {
     return createdByYou(ul) && !ul.getName().equals(UserList.MY_LIST);
   }
-  private boolean createdByYou(UserList ul) { return ul.getCreator().id == userManager.getUser(); }
+  private boolean createdByYou(UserList ul) { return ul.getCreator().getId() == userManager.getUser(); }
 
   private Widget getUserListText2(String content) {
     Widget nameInfo = new HTML(content);
