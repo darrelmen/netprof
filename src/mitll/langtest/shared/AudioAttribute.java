@@ -13,61 +13,101 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioAttribute implements IsSerializable {
+  private static final String SPEED = "speed";
+  private static final String SLOW = "slow";
+  private static final String REGULAR = "regular";
+
+/*  private static final String GENDER = "gender";
+  private static final String MALE = "male";
+  private static final String FEMALE = "female";*/
+  private MiniUser user;
+
   private String audioRef;
+  private String exid;
+  private long userid;
+  private long timestamp;
+  private long duration;
   private Map<String, String> attributes;
  // private List<String> annotations;
   //private long userID; // who recorded it - later
 
   public AudioAttribute() {}
+
+  public AudioAttribute(long userid,
+                        String exid,
+                        String audioRef,
+                        long timestamp, long duration, String type, MiniUser user) {
+    this.userid = userid;
+    this.exid = exid;
+    this.audioRef = audioRef;
+    this.timestamp = timestamp;
+    this.duration = duration;
+    this.user = user;
+    if (type.equals(Result.AUDIO_TYPE_REGULAR)) markRegular();
+    else if (type.equals(Result.AUDIO_TYPE_SLOW)) markSlow();
+  }
+
   public AudioAttribute(String audioRef) {
     this.audioRef = audioRef;
     if (audioRef == null) throw new IllegalArgumentException("huh audio ref is null?");
-    markFast();
+    markRegular();
+  }
+
+  public String getExid() {
+    return exid;
+  }
+
+  public void setAudioRef(String audioRef) {
+    this.audioRef = audioRef;
   }
 
   public AudioAttribute markSlow() {
-    addAttribute("speed", "slow");
+    addAttribute(SPEED, SLOW);
     return this;
   }
 
-  public AudioAttribute markFast() {
-    addAttribute("speed", "regular");
+  public AudioAttribute markRegular() {
+    addAttribute(SPEED, REGULAR);
     return this;
   }
 
+/*
   public AudioAttribute markMale() {
-    addAttribute("gender", "male");
+    addAttribute(GENDER, MALE);
     return this;
   }
 
   public AudioAttribute markFemale() {
-    addAttribute("gender", "female");
+    addAttribute(GENDER, FEMALE);
     return this;
   }
+*/
 
   public boolean isFast() {
-    return matches("speed", "regular");
+    return matches(SPEED, REGULAR);
   }
 
   public boolean isSlow() {
-    return matches("speed", "slow");
+    return matches(SPEED, SLOW);
   }
 
   public boolean isMale() {
-    return matches("gender", "male");
+
+    //return matches(GENDER, MALE);
+   return user.isMale();
   }
 
   public boolean isFemale() {
-    return matches("gender", "female");
+    return !isMale();
   }
 
   public boolean isRegularSpeed() {
-    String speed = getAttributes().get("speed");
-    return speed != null && speed.equalsIgnoreCase("regular");
+    String speed = getAttributes().get(SPEED);
+    return speed != null && speed.equalsIgnoreCase(REGULAR);
   }
 
   public boolean hasOnlySpeed() {
-    return attributes.size() == 1 && attributes.containsKey("speed");
+    return attributes.size() == 1 && attributes.containsKey(SPEED);
   }
 
   public boolean matches(String name, String value) {
@@ -78,7 +118,7 @@ public class AudioAttribute implements IsSerializable {
     if (attributes == null) attributes = new HashMap<String, String>();
     if (attributes.containsKey(name)) {
       String s = attributes.get(name);
-      if (!s.equals("regular")) System.out.println("replacing value at " + name + " was " + s + " now " + value);
+      if (!s.equals(REGULAR)) System.out.println("replacing value at " + name + " was " + s + " now " + value);
     }
     attributes.put(name, value);
   }
@@ -91,12 +131,7 @@ public class AudioAttribute implements IsSerializable {
     return attributes;
   }
 
-  public String getKey() { return getAttributes().toString(); }
-/*
-  public List<String> getAnnotations() {
-    return annotations;
-  }
-*/
+  public String getKey() { return "user="+userid+", "+getAttributes().toString(); }
 
   public String getDisplay() {
     if (hasOnlySpeed()) {
@@ -124,4 +159,9 @@ public class AudioAttribute implements IsSerializable {
   public String toString() {
     return "Audio " + audioRef + " attrs " + attributes;
   }
+
+  public MiniUser getUser() {
+    return user;
+  }
+
 }
