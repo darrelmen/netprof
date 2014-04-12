@@ -852,7 +852,8 @@ public class ExcelImport implements ExerciseDAO {
 
         if (!audioAttributes.isEmpty()) {
           for (AudioAttribute audio : audioAttributes) {
-            File test = new File(mediaDir + File.separator + audio.getAudioRef());
+            File test = new File(installPath, mediaDir + File.separator + audio.getAudioRef());
+
             boolean exists = test.exists();
             if (exists) {
               audio.setAudioRef(mediaDir + File.separator + audio.getAudioRef());   // remember to prefix the path
