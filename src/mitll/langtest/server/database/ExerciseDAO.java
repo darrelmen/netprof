@@ -29,5 +29,5 @@ public interface ExerciseDAO {
 
   CommonExercise getExercise(String id);
 
- // List<String> getErrors();
+  void setAudioDAO(AudioDAO audioDAO);
 }
