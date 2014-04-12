@@ -51,7 +51,6 @@ public class PropertyHandler {
   private static final String RIGHT_ALIGN_CONTENT = "rightAlignContent";
   private static final String RESPONSE_TYPE = "responseType";
   private static final String SECOND_RESPONSE_TYPE = "secondResponseType";
-  //private static final String FLASHCARD_NEXT_AND_PREV = "flashcardNextAndPrev";
   private static final String BIND_NEXT_TO_ENTER = "bindNextToEnter";
   private static final String SCREEN_PORTION = "screenPortion";
 
@@ -90,7 +89,7 @@ public class PropertyHandler {
   private static final String SHOW_SPECTROGRAM = "spectrogram";
   private boolean spectrogram = false;
   private boolean combinedMode = false;
-  //private static final String INCLUDE_FEEDBACK = "includeFeedback";
+  private static final String NO_MODEL = "noModel";
   private static final String INSTRUMENT = "instrument";
   private boolean instrument = true; // by default we instrument for now 4/3/14
 
@@ -144,16 +143,14 @@ public class PropertyHandler {
   // do we bind the record key to space -- problematic if we have text entry anywhere else on the page, say in a search
   // box
   private LOGIN_TYPE loginType = LOGIN_TYPE.ANONYMOUS;
-  private int flashcardPreviewHeight = DEFAULT_FLASHCARD_PREVIEW_HEIGHT;
 
   private boolean flashcardTextResponse = false;
   private boolean showFlashcardAnswer = true;
   private boolean showExercisesInOrder = false;
-  private String responseType = ResponseChoice.AUDIO;
-  private String secondResponseType = "None";
   private boolean allowPlusInURL;
   private boolean bindNextToEnter;
   private boolean classroomMode = false;
+  private boolean noModel = false;
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad()
@@ -194,7 +191,6 @@ public class PropertyHandler {
       else if (key.equals(NUM_GRADES_TO_COLLECT)) numGradesToCollect = getInt(value, NUM_GRADES_TO_COLLECT_DEFAULT, NUM_GRADES_TO_COLLECT);
       else if (key.equals(LOG_CLIENT_MESSAGES)) logClientMessages = getBoolean(value);
       else if (key.equals(SHOW_SECTIONS)) showSections = getBoolean(value);
-     // else if (key.equals(SHOW_SECTION_WIDGETS)) showSectionWidgets = getBoolean(value);
       else if (key.equals(FLASHCARD_TEACHER_VIEW)) flashcardTeacherView = getBoolean(value);
       else if (key.equals(COMBINED_MODE)) combinedMode = getBoolean(value);
       else if (key.equals(FLASHCARD)) flashCard = getBoolean(value);
@@ -202,20 +198,18 @@ public class PropertyHandler {
       else if (key.equals(SPLASH_TITLE)) splashTitle = value;
       else if (key.equals(TIMED_GAME)) timedGame = getBoolean(value);
       else if (key.equals(GAME_TIME)) gameTimeSeconds = getInt(value, DEFAULT_GAME_TIME_SECONDS, GAME_TIME);
-      else if (key.equals(FLASHCARD_PREVIEW_HEIGHT)) flashcardPreviewHeight = getInt(value, DEFAULT_FLASHCARD_PREVIEW_HEIGHT, FLASHCARD_PREVIEW_HEIGHT);
       else if (key.equals(CONTINUE_PROMPT)) promptBeforeNextItem = getBoolean(value);
       else if (key.equals(RIGHT_ALIGN_CONTENT)) rightAlignContent = getBoolean(value);
       else if (key.equals(FLASHCARD_TEXT_RESPONSE)) flashcardTextResponse = getBoolean(value);
       else if (key.equals(SHOW_FLASHCARD_ANSWER)) showFlashcardAnswer = getBoolean(value);
       else if (key.equals(EXERCISES_IN_ORDER)) showExercisesInOrder = getBoolean(value);
       else if (key.equals(ALLOW_PLUS_IN_URL)) allowPlusInURL = getBoolean(value);
-      else if (key.equals(RESPONSE_TYPE)) responseType = value;
-      else if (key.equals(SECOND_RESPONSE_TYPE)) secondResponseType = value;
       else if (key.equals(BIND_NEXT_TO_ENTER)) bindNextToEnter = getBoolean(value);
       else if (key.equals(SCREEN_PORTION)) screenPortion = getFloat(value, 1.0f, SCREEN_PORTION);
       else if (key.equals(CLASSROOM_MODE)) classroomMode = getBoolean(value);
       else if (key.equals(SHOW_SPECTROGRAM)) spectrogram = getBoolean(value);
       else if (key.equals(INSTRUMENT)) instrument = getBoolean(value);
+      else if (key.equals(NO_MODEL)) noModel = getBoolean(value);
       else if (key.equals(LOGIN_TYPE_PARAM)) {
         try {
           loginType = LOGIN_TYPE.valueOf(value.toUpperCase());
@@ -329,10 +323,6 @@ public class PropertyHandler {
     }
     gameTimeSeconds = getInt(Window.Location.getParameter(GAME_TIME), gameTimeSeconds, REPEATS);
 
-/*    if (Window.Location.getParameter(SHOW_SECTION_WIDGETS) != null) {
-      showSectionWidgets = !Window.Location.getParameter(SHOW_SECTION_WIDGETS).equals("false");
-    }*/
-
     String flashcardParam = Window.Location.getParameter(FLASHCARD);
     if (flashcardParam != null) {
       flashCard = !flashcardParam.equals("false");
@@ -349,9 +339,6 @@ public class PropertyHandler {
       showExercisesInOrder = !Window.Location.getParameter(EXERCISES_IN_ORDER).equals("false");
     }
 
-    if (Window.Location.getParameter(RESPONSE_TYPE) != null) {
-      responseType = Window.Location.getParameter(RESPONSE_TYPE);
-    }
     if (Window.Location.getParameter(SHOW_SPECTROGRAM) != null) {
       spectrogram = !Window.Location.getParameter(SHOW_SPECTROGRAM).equals("false");
       if (spectrogram) System.out.println("spectrogram is " + spectrogram);
@@ -370,7 +357,7 @@ public class PropertyHandler {
       String s = href.split("responseType=")[1];
       String candidate = s.split("\\*\\*\\*")[0];
       if (ResponseChoice.knownChoice(candidate)) {
-        responseType = candidate;
+        //responseType = candidate;
         //System.out.println("responseType " + responseType);
       }
       else {
@@ -379,7 +366,7 @@ public class PropertyHandler {
       if (s.contains("secondResponseType=")) {
         String candidate2 = s.split("secondResponseType=")[1];
         if (ResponseChoice.knownChoice(candidate2)) {
-          secondResponseType = candidate2;
+          //secondResponseType = candidate2;
          // System.out.println("secondResponseType " + secondResponseType);
         }
         else {
@@ -478,10 +465,6 @@ public class PropertyHandler {
   public String getNameForItem() { return nameForItem; }
   public String getNameForAnswer() { return nameForAnswer; }
   public String getNameForRecorder() { return nameForRecorder; }
-/*
-  public boolean isDataCollectAdminView() {
-    return dataCollectAdminView;
-  }*/
 
   public int getNumGradesToCollect() {
     return numGradesToCollect;
@@ -532,12 +515,6 @@ public class PropertyHandler {
 
   public LOGIN_TYPE getLoginType() { return loginType; }
 
-/*
-  public int getFlashcardPreviewFrameHeight() {
-    return flashcardPreviewHeight;
-  }
-*/
-
   public boolean isFlashcardTextResponse() {
     return flashcardTextResponse;
   }
@@ -549,20 +526,6 @@ public class PropertyHandler {
   public boolean showExercisesInOrder() {
     return showExercisesInOrder;
   }
-
-/*  public String getResponseType() {
-    return responseType;
-  }
-  public void setResponseType(String responseType) {
-    this.responseType = responseType;
-  }
-
-  public String getSecondResponseType() {
-    return secondResponseType;
-  }
-  public void setSecondResponseType(String responseType) {
-    this.secondResponseType = responseType;
-  }*/
 
   public boolean shouldAllowPlusInURL() { return allowPlusInURL;  }
 
@@ -577,4 +540,7 @@ public class PropertyHandler {
     return combinedMode;
   }
 
+  public boolean isNoModel() {
+    return noModel;
+  }
 }

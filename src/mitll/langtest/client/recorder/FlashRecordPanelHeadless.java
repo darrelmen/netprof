@@ -86,10 +86,16 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     FlashRecordPanelHeadless.micPermission = micPermission;
   }
 
+  /**
+   * @see mitll.langtest.client.LangTest#startRecording()
+   */
   public native void recordOnClick() /*-{
     $wnd.Recorder.record('audio', 'audio.wav');
   }-*/;
 
+  /**
+   * @see mitll.langtest.client.LangTest#stopRecording()
+   */
   public native void stopRecording() /*-{
     $wnd.Recorder.stop();
   }-*/;
