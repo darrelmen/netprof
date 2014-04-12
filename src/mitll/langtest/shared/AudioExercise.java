@@ -1,7 +1,11 @@
 package mitll.langtest.shared;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -35,11 +39,19 @@ public class AudioExercise extends ExerciseShell {
     return audio != null ? audio.getAudioRef() : null;
   }
 
+  /**
+   * @see mitll.langtest.server.database.ExcelImport#getExercise(String, String, String, String, String, String, boolean, String)
+   * @param s
+   */
   public void setRefAudio(String s) {
     if (s != null && s.length() > 0 && !s.equals("null")) {
-      AudioAttribute audioAttribute = new AudioAttribute(s).markFast();
-      audioAttributes.put(audioAttribute.getKey(),audioAttribute);
+      AudioAttribute audioAttribute = new AudioAttribute(s).markRegular();
+      addAudio(audioAttribute);
     }
+  }
+
+  public void addAudio(AudioAttribute audioAttribute) {
+    audioAttributes.put(audioAttribute.getKey(),audioAttribute);
   }
 
   /**
@@ -49,7 +61,7 @@ public class AudioExercise extends ExerciseShell {
   public void setSlowRefAudio(String s) {
     if (s != null && s.length() > 0 && !s.equals("null")) {
       AudioAttribute audioAttribute = new AudioAttribute(s).markSlow();
-      audioAttributes.put(audioAttribute.getKey(), audioAttribute);
+      addAudio(audioAttribute);
     }
   }
 
@@ -70,8 +82,49 @@ public class AudioExercise extends ExerciseShell {
     return null;
   }
 
-  public boolean hasRefAudio() { return !audioAttributes.isEmpty(); }
-  public Collection<AudioAttribute> getAudioAttributes() { return audioAttributes.values();  }
+  public boolean hasRefAudio() {
+    return !audioAttributes.isEmpty();
+  }
+
+  public Collection<AudioAttribute> getAudioAttributes() {
+    return audioAttributes.values();
+  }
+
+  public Collection<AudioAttribute> getByGender(boolean isMale) {
+    List<AudioAttribute> males = new ArrayList<AudioAttribute>();
+    for (AudioAttribute audioAttribute : audioAttributes.values()) {
+      if (isMale && audioAttribute.getUser().isMale() || (!isMale && !audioAttribute.getUser().isMale()))
+        males.add(audioAttribute);
+    }
+
+    Collections.sort(males, new Comparator<AudioAttribute>() {
+      @Override
+      public int compare(AudioAttribute o1, AudioAttribute o2) {
+        return o1.getUser().getAge() < o2.getUser().getAge() ? -1 : o1.getUser().getAge() > o2.getUser().getAge() ? +1 : 0;
+      }
+    });
+    return males;
+  }
+
+  public Map<MiniUser, List<AudioAttribute>> getUserMap(boolean isMale) {
+    Map<MiniUser, List<AudioAttribute>> userToAudio = new HashMap<MiniUser, List<AudioAttribute>>();
+    for (AudioAttribute attribute : getByGender(isMale)) {
+      List<AudioAttribute> audioAttributes1 = userToAudio.get(attribute.getUser());
+      if (audioAttributes1 == null)
+        userToAudio.put(attribute.getUser(), audioAttributes1 = new ArrayList<AudioAttribute>());
+      audioAttributes1.add(attribute);
+    }
+
+    for (List<AudioAttribute> lists : userToAudio.values()) {
+      Collections.sort(lists,new Comparator<AudioAttribute>() {
+        @Override
+        public int compare(AudioAttribute o1, AudioAttribute o2) {
+          return o1.isRegularSpeed() && o2.isSlow() ? -1 : o1.isSlow() && o2.isRegularSpeed() ? +1 : 0;
+        }
+      });
+    }
+    return userToAudio;
+  }
 
   /**
    * @see mitll.langtest.server.database.custom.UserListManager#addAnnotations
@@ -127,6 +180,10 @@ public class AudioExercise extends ExerciseShell {
   }
   public void setUnitToValue(Map<String, String> unitToValue) {
     this.unitToValue = unitToValue;
+  }
+
+  public int getNumAudio() {
+    return getAudioAttributes().size();
   }
 
   public String toString() {
