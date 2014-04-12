@@ -1,14 +1,18 @@
 package mitll.langtest.client.scoring;
 
+import com.github.gwtbootstrap.client.ui.Dropdown;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.Label;
+import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.media.client.Audio;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -39,9 +43,16 @@ import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
+import mitll.langtest.shared.MiniUser;
 
+import javax.validation.constraints.Min;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Mainly delegates recording to the {@link mitll.langtest.client.recorder.SimpleRecordPanel}.
@@ -528,7 +539,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       @Override
       public void useResult(AudioAnswer result) {
         setResultID(result.getResultID());
-        getImagesForPath(result.path);
+        getImagesForPath(result.getPath());
       }
 
       @Override
@@ -600,17 +611,89 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
      */
     @Override
     protected Widget getBeforePlayWidget() {
-      Panel vp = new VerticalPanel();
-      vp.getElement().setId("beforePlayWidget_verticalPanel");
-      vp.addStyleName("leftFiveMargin");
+      final Panel rightSide = new VerticalPanel();
+
+      rightSide.getElement().setId("beforePlayWidget_verticalPanel");
+      rightSide.addStyleName("leftFiveMargin");
       Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
+
+/*      System.out.println("getBeforePlayWidget : for exercise " +exercise.getID() +
+        " path "+ audioPath + " attributes were " + audioAttributes);*/
+
+      if (audioAttributes.isEmpty()) {
+        addNoRefAudioWidget(rightSide);
+        return rightSide;
+      }
+      else {
+       // Collection<AudioAttribute> males   = exercise.getByGender(true);
+     //   Collection<AudioAttribute> females = exercise.getByGender(false);
+
+        final Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getUserMap(true);
+        Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getUserMap(false);
+
+        Dropdown dropdown = new Dropdown("Voice");
+        dropdown.addStyleName("leftFiveMargin");
+
+        List<MiniUser> maleUsers = getSortedUsers(malesMap);
+        List<MiniUser> femaleUsers = getSortedUsers(femalesMap);
+
+        addChoices(rightSide, malesMap, dropdown, maleUsers, "Male");
+        addChoices(rightSide, femalesMap, dropdown, femaleUsers, "Female");
+
+
+        final Collection<AudioAttribute> audioAttributes1 = maleUsers.isEmpty() ? femalesMap.get(femaleUsers.get(0)) : malesMap.get(maleUsers.get(0));
+        MiniUser first = maleUsers.isEmpty() ? femaleUsers.get(0) : maleUsers.get(0);
+        dropdown.setText(getChoiceTitle(first.isMale() ? "Male" : "Female", first));
+/*
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+          @Override
+          public void execute() {
+            showAudio(audioAttributes1.iterator().next());
+          }
+        });*/
+
+        addRegularAndSlow(rightSide, audioAttributes1);
+
+        Panel leftAndRight = new HorizontalPanel();
+        leftAndRight.add(dropdown);
+        leftAndRight.add(rightSide);
+        return leftAndRight;
+      }
+    }
+
+    private void addChoices(final Panel rightSide,
+                            final Map<MiniUser, List<AudioAttribute>> malesMap,
+                            final Dropdown dropdown, List<MiniUser> maleUsers, String male1) {
+      for (final MiniUser male : maleUsers) {
+        NavLink widget2 = new NavLink(getChoiceTitle(male1, male));
+        widget2.addClickHandler(new ClickHandler() {
+          @Override
+          public void onClick(ClickEvent event) {
+            rightSide.clear();
+            List<AudioAttribute> audioAttributes = malesMap.get(male);
+            addRegularAndSlow(rightSide, audioAttributes);
+            dropdown.setText(getChoiceTitle(male.isMale() ? "Male" : "Female", male));
+
+          }
+        });
+        dropdown.add(widget2);
+      }
+    }
+
+    private String getChoiceTitle(String male1, MiniUser male) {
+      return male1 +
+        " " + male.getDialect() + " (" + male.getUserID() +
+        ") age " + male.getAge();
+    }
+
+    private void addRegularAndSlow(Panel vp, Collection<AudioAttribute> audioAttributes) {
       RadioButton first = null;
+      AudioAttribute firstAttr = null;
 
 /*      System.out.println("getBeforePlayWidget : for exercise " +exercise.getID() +
         " path "+ audioPath + " attributes were " + audioAttributes);*/
 
       RadioButton regular = null;
-
       for (final AudioAttribute audioAttribute : audioAttributes) {
         final RadioButton radio = new RadioButton(GROUP + "_" + exercise.getID() + "_"+instance, audioAttribute.getDisplay());
         radio.getElement().setId("Radio_"+audioAttribute.getDisplay());
@@ -619,6 +702,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         }
         if (first == null) {
           first = radio;
+          firstAttr = audioAttribute;
         }
         addAudioRadioButton(vp, radio, audioAttribute.getAudioRef());
 
@@ -626,7 +710,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
           @Override
           public void onClick(ClickEvent event) {
             showAudio(audioAttribute);
-            controller.logEvent(radio,"RadioButton",exerciseID,"Selected audio " + audioAttribute.getAudioRef());
+            controller.logEvent(radio, "RadioButton", exerciseID, "Selected audio " + audioAttribute.getAudioRef());
           }
         });
       }
@@ -638,11 +722,14 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       } else if (!audioAttributes.isEmpty()) {
         System.err.println("no radio choice got selected??? ");
       }
-      if (audioAttributes.isEmpty()) {
-        addNoRefAudioWidget(vp);
-      }
 
-      return vp;
+      final AudioAttribute ffirstAttr = firstAttr;
+      Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+        @Override
+        public void execute() {
+          showAudio(ffirstAttr);
+        }
+      });
     }
 
     protected void addNoRefAudioWidget(Panel vp) { vp.add(new Label(NO_REFERENCE_AUDIO)); }
@@ -653,5 +740,15 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       doPause();    // if the audio is playing, stop it
       getImagesForPath(audioAttribute.getAudioRef());
     }
+  }
+
+  private List<MiniUser> getSortedUsers(Map<MiniUser, List<AudioAttribute>> malesMap) {
+    List<MiniUser> maleUsers = new ArrayList<MiniUser>(malesMap.keySet());
+    Collections.sort(maleUsers, new Comparator<MiniUser>() {
+      public int compare(MiniUser o1, MiniUser o2) {
+        return o1.getAge() < o2.getAge() ? -1 : o1.getAge() > o2.getAge() ? +1 : 0;
+      }
+    });
+    return maleUsers;
   }
 }
