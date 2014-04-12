@@ -31,7 +31,7 @@ public class UserTable extends PagerTable {
 
   public UserTable(PropertyHandler props) { this.props = props; }
   /**
-   * @see mitll.langtest.client.LangTest#makeUsersAnchor(boolean)
+   * @see mitll.langtest.client.LangTest.UsersClickHandler
    */
   public void showUsers(final LangTestDatabaseAsync service, int userid) {
     showDialog(service);
@@ -108,7 +108,7 @@ public class UserTable extends PagerTable {
     TextColumn<User> id = new TextColumn<User>() {
       @Override
       public String getValue(User contact) {
-        return "" + contact.id;
+        return "" + contact.getId();
       }
     };
     id.setSortable(true);
@@ -119,7 +119,7 @@ public class UserTable extends PagerTable {
     TextColumn<User> lang = new TextColumn<User>() {
       @Override
       public String getValue(User contact) {
-        return "" + contact.nativeLang;
+        return "" + contact.getNativeLang();
       }
     };
     lang.setSortable(true);
@@ -128,7 +128,7 @@ public class UserTable extends PagerTable {
     TextColumn<User> dialect = new TextColumn<User>() {
       @Override
       public String getValue(User contact) {
-        return "" + contact.dialect;
+        return "" + contact.getDialect();
       }
     };
     dialect.setSortable(true);
@@ -137,7 +137,7 @@ public class UserTable extends PagerTable {
     TextColumn<User> age = new TextColumn<User>() {
       @Override
       public String getValue(User contact) {
-        return "" + contact.age;
+        return "" + contact.getAge();
       }
     };
     age.setSortable(true);
@@ -146,7 +146,7 @@ public class UserTable extends PagerTable {
     TextColumn<User> gender = new TextColumn<User>() {
       @Override
       public String getValue(User contact) {
-        return contact.gender == 0 ? "male" : "female";
+        return contact.getGender() == 0 ? "male" : "female";
       }
     };
     gender.setSortable(true);
@@ -155,12 +155,12 @@ public class UserTable extends PagerTable {
     TextColumn<User> experience = new TextColumn<User>() {
       @Override
       public String getValue(User contact) {
-        int experience1 = contact.experience;
+        int experience1 = contact.getExperience();
         String exp = "" + experience1 + " months";
         if (contact.getDemographics() != null) {
           exp = contact.getDemographics().toString();
         }
-        String prefix = "user id " + contact.id + " has ";
+        String prefix = "user id " + contact.getId() + " has ";
         if (exp.startsWith(prefix)) {
           exp = exp.substring(prefix.length());
         }
@@ -201,7 +201,7 @@ public class UserTable extends PagerTable {
     TextColumn<User> ipaddr = new TextColumn<User>() {
       @Override
       public String getValue(User contact) {
-        String ipaddr1 = contact.ipaddr;
+        String ipaddr1 = contact.getIpaddr();
         int at = ipaddr1.lastIndexOf("at");
 
         ipaddr1 = at == -1 ? "" : ipaddr1.substring(0, at);
@@ -248,7 +248,7 @@ public class UserTable extends PagerTable {
 
           // Compare the name columns.
           if (o1 != null) {
-            return (o2 != null) ? (int) (o1.id - o2.id) : 0;
+            return (o2 != null) ? (int) (o1.getId() - o2.getId()) : 0;
           }
           return -1;
         }
@@ -271,7 +271,7 @@ public class UserTable extends PagerTable {
     TextColumn<User> userID = new TextColumn<User>() {
       @Override
       public String getValue(User contact) {
-        return "" + contact.userID;
+        return "" + contact.getUserID();
       }
     };
     userID.setSortable(true);
