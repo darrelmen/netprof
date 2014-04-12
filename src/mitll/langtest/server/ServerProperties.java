@@ -29,7 +29,7 @@ public class ServerProperties {
   private static final String DEBUG_EMAIL = "debugEmail";
   private static final String DOIMAGES = "doimages";
   private static final String USE_SCORE_CACHE = "useScoreCache";
-  private static final String USE_WEIGHTS = "useWeights";
+//  private static final String USE_WEIGHTS = "useWeights";
 
   private static final String DEFAULT_PROPERTIES_FILE = "config.properties";
   private static final String DATA_COLLECT_MODE = "dataCollect";
@@ -39,10 +39,11 @@ public class ServerProperties {
   private static final String H2_DATABASE = "h2Database";
   private static final String H2_DATABASE_DEFAULT = "vlr-parle";
   private static final String H2_STUDENT_ANSWERS_DATABASE = "h2StudentAnswers";
+  private static final String SECOND_DATABASE = "secondDatabase";
   private static final String H2_STUDENT_ANSWERS_DATABASE_DEFAULT = "h2StudentAnswers";
   private static final String READ_FROM_FILE = "readFromFile";
   private static final String FLASHCARD = "flashcard";
-  private static final String CRTDATACOLLECT = "crtDataCollect";
+ // private static final String CRTDATACOLLECT = "crtDataCollect";
   private static final String LANGUAGE = "language";
   private static final String WORDPAIRS = "wordPairs";
   private static final String AUTOCRT = "autocrt";
@@ -50,11 +51,11 @@ public class ServerProperties {
   private static final String RECO_TEST = "recoTest";
   private static final String RECO_TEST2 = "recoTest2";
   private static final String ARABIC_TEXT_DATA_COLLECT = "arabicTextDataCollect";
-  private static final String COLLECT_ONLY_AUDIO = "collectAudioOnly";
+//  private static final String COLLECT_ONLY_AUDIO = "collectAudioOnly";
   private static final String MIN_PRON_SCORE = "minPronScore";
   private static final String MIN_PRON_SCORE_DEFAULT = "0.20";
   private static final String GOODWAVE_MODE = "goodwaveMode";
-  private static final String FLASHCARD_TEACHER_VIEW = "flashcardTeacherView";
+ // private static final String FLASHCARD_TEACHER_VIEW = "flashcardTeacherView";
   private static final String USE_PREDEFINED_TYPE_ORDER = "usePredefinedTypeOrder";
   private static final String SORT_BY_ID = "sortByID";
   private static final String SKIP_SEMICOLONS = "skipSemicolons";
@@ -63,11 +64,13 @@ public class ServerProperties {
   private static final String DEFAULT_EMAIL = "gordon.vidaver@ll.mit.edu";
   private static final String AUDIO_OFFSET = "audioOffset";
   private static final String COLLECT_SYNONYMS = "collectSynonyms";
-  private static final String FOREIGN_LANGUAGE_QUESTIONS_ONLY = "foreignLanguageQuestionsOnly";
+  //private static final String FOREIGN_LANGUAGE_QUESTIONS_ONLY = "foreignLanguageQuestionsOnly";
   private static final String MAX_NUM_EXERCISES = "maxNumExercises";
   private static final String CLASSROOM_MODE = "classroomMode";
   private static final String INCLUDE_FEEDBACK = "includeFeedback";
   private static final String MAPPING_FILE = "mappingFile";
+  private static final String NO_MODEL = "noModel";
+  public static final String VLR_PARLE_PILOT_ITEMS_TXT = "vlr-parle-pilot-items.txt";
 
   private Properties props = new Properties();
 
@@ -124,6 +127,8 @@ public class ServerProperties {
    */
   public String getH2Database() { return props.getProperty(H2_DATABASE, H2_DATABASE_DEFAULT); }
   public String getH2StudentAnswersDatabase() { return props.getProperty(H2_STUDENT_ANSWERS_DATABASE, H2_STUDENT_ANSWERS_DATABASE_DEFAULT); }
+  public String getSecondH2Database() { return props.getProperty(SECOND_DATABASE, "second"); }
+
   public String getLessonPlan() { return props.getProperty("lessonPlanFile", "lesson.plan"); }
 
   public boolean getUseFile() {
@@ -149,9 +154,11 @@ public class ServerProperties {
     return getDefaultFalse(FLASHCARD);
   }
 
+/*
   public boolean isCRTDataCollect() {
     return getDefaultFalse(CRTDATACOLLECT);
   }
+*/
 
   public boolean isWordPairs() {
     return getDefaultFalse(WORDPAIRS);
@@ -188,25 +195,31 @@ public class ServerProperties {
     return getDefaultFalse(ARABIC_TEXT_DATA_COLLECT);
   }
 
+/*
   public boolean isCollectOnlyAudio() {
     return getDefaultFalse(COLLECT_ONLY_AUDIO);
   }
+*/
 
   public boolean isGoodwaveMode() {
     return getDefaultFalse(GOODWAVE_MODE);
   }
 
+/*
   public boolean isFlashcardTeacherView() {
     return getDefaultFalse(FLASHCARD_TEACHER_VIEW);
   }
+*/
 
   public boolean usePredefinedTypeOrder() {
     return getDefaultFalse(USE_PREDEFINED_TYPE_ORDER);
   }
 
+/*
   public boolean shouldUseWeights() {
     return getDefaultFalse(USE_WEIGHTS);
   }
+*/
 
   public boolean sortExercisesByID() {
     return getDefaultFalse(SORT_BY_ID);
@@ -224,11 +237,16 @@ public class ServerProperties {
     return getDefaultFalse(SORT_EXERCISES);
   }
 
+/*
   public boolean showForeignLanguageQuestionsOnly() {
     return getDefaultFalse(FOREIGN_LANGUAGE_QUESTIONS_ONLY);
   }
+*/
 
   public boolean isClassroomMode() { return getDefaultFalse(CLASSROOM_MODE); }
+  public boolean isNoModel() {
+    return getDefaultFalse(NO_MODEL);
+  }
 
   public boolean getCollectSynonyms() {
     return getDefaultTrue(COLLECT_SYNONYMS);
@@ -247,7 +265,7 @@ public class ServerProperties {
   }
 
   public String getMappingFile() {
-    return props.getProperty(MAPPING_FILE, "vlr-parle-pilot-items.txt");
+    return props.getProperty(MAPPING_FILE, VLR_PARLE_PILOT_ITEMS_TXT);
   }
 
   public int getMaxNumExercises() {
@@ -325,6 +343,4 @@ public class ServerProperties {
     }
     return "";
   }
-
-
 }
