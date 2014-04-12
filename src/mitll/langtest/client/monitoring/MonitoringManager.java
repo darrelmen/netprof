@@ -946,7 +946,7 @@ public class MonitoringManager {
     for (Map.Entry<User,Integer> pair : userToCount.entrySet()) {
       Integer count = pair.getValue();
       User user = pair.getKey();
-      int age = (user.age / 5)*5;
+      int age = (user.getAge() / 5)*5;
       Integer c = ageToCount.get(age);
 
       if (c == null) ageToCount.put(age,count); else ageToCount.put(age,c+count);
@@ -1223,7 +1223,7 @@ public class MonitoringManager {
     for (Map.Entry<User, Integer> pair : userToCount.entrySet()) {
       Integer count = pair.getValue();
       User user = pair.getKey();
-      String nativeLang1 = user.nativeLang;
+      String nativeLang1 = user.getNativeLang();
       if (nativeLang1 != null) {
         String nativeLang = nativeLang1.toLowerCase();
         Integer c = langToCount.get(nativeLang);
@@ -1248,7 +1248,7 @@ public class MonitoringManager {
     for (Map.Entry<User, Integer> pair : userToCount.entrySet()) {
       Integer count = pair.getValue();
       User user = pair.getKey();
-      String dialect = user.dialect;
+      String dialect = user.getDialect();
       if (dialect != null) {
         if (dialect.length() == 0) dialect = "Unknown";
         String slotToUse = dialect.toLowerCase();
@@ -1277,7 +1277,7 @@ public class MonitoringManager {
     for (Map.Entry<User, Integer> pair : userToCount.entrySet()) {
       Integer count = pair.getValue();
       User user = pair.getKey();
-      String ipaddr = user.ipaddr;
+      String ipaddr = user.getIpaddr();
       boolean badIP = ipaddr == null || ipaddr.length() == 0;
 //      if (badIP) {
 //        /System.err.println("huh? no ipaddr for " + user);
@@ -1315,9 +1315,9 @@ public class MonitoringManager {
     for (Map.Entry<User, Integer> pair : userToCount.entrySet()) {
       Integer doneByUser = pair.getValue();
       User user = pair.getKey();
-      String name = user.userID;
+      String name = user.getUserID();
       if (name == null || name.length() == 0) {
-        name = ""+user.id;
+        name = ""+ user.getId();
       }
       name = name.trim();
       Integer count = nameToCount.get(name);
@@ -1388,7 +1388,7 @@ public class MonitoringManager {
     for (Map.Entry<User, Integer> pair : userToCount.entrySet()) {
       Integer count = pair.getValue();
       User user = pair.getKey();
-      Integer slotToUse = user.experience;
+      Integer slotToUse = user.getExperience();
       Integer c = slotToCount.get(slotToUse);
       if (count > 0) {
         if (c == null) slotToCount.put(slotToUse, count);
