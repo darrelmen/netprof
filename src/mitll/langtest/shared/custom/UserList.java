@@ -130,7 +130,7 @@ public class UserList extends ExerciseShell {
 
   @Override
   public String toString() {
-    return "UserList #" + getUniqueID() + " '"+name + "' by " + creator.id+
+    return "UserList #" + getUniqueID() + " '"+name + "' by " + creator.getId() +
       " : " + (isReview ? " REVIEW " : "")+
       " :"+
       " with " + getExercises().size() + " exercises.";
