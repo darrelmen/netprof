@@ -67,8 +67,7 @@ public class PathHelper {
       String last = pathElements.get(pathElements.size() - 1);
       String nextToLast = pathElements.get(pathElements.size() - 2);
       if (last.equals(nextToLast)) {
-        String nodups = realContextPath.substring(0, realContextPath.length() - last.length() -1); // remove trailing slash
-        realContextPath = nodups;
+        realContextPath = realContextPath.substring(0, realContextPath.length() - last.length() -1);
       }
     }
 
@@ -121,7 +120,7 @@ public class PathHelper {
   }
 
   /**
-   * @see LangTestDatabaseImpl#getImageForAudioFile(int, String, String, int, int)
+   * @see LangTestDatabaseImpl#getImageForAudioFile
    * @return path to image output dir
    */
   public String getImageOutDir() {
@@ -139,7 +138,9 @@ public class PathHelper {
     return imageOutdir;
   }
 
+/*
   public void setRealContextPathTest(String realContextPathTest) {
     this.realContextPathTest = realContextPathTest;
   }
+*/
 }
