@@ -56,7 +56,7 @@ public class SectionHelper {
       return types;
     } else {
       Set<String> validTypes = typeToUnitToLesson.keySet();
-      logger.debug("Valid types " + validTypes + " vs predef " + predefinedTypeOrder);
+     // logger.debug("Valid types " + validTypes + " vs predef " + predefinedTypeOrder);
       List<String> valid = new ArrayList<String>(predefinedTypeOrder);
       valid.retainAll(validTypes);
       return valid;
