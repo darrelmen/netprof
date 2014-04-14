@@ -4,12 +4,9 @@ import mitll.langtest.server.database.DLIUserDAO;
 import mitll.langtest.server.database.DatabaseImpl;
 import org.apache.log4j.Logger;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
 import java.io.IOException;
 
 /**
