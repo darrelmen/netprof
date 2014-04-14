@@ -35,9 +35,9 @@ import java.util.Map;
 public interface LangTestDatabase extends RemoteService {
   boolean WRITE_ALTERNATE_COMPRESSED_AUDIO = false;
 
-  ExerciseListWrapper getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix, long userListID);
+  ExerciseListWrapper getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix, long userListID, int userID);
 
-  CommonExercise getExercise(String id);
+  CommonExercise getExercise(String id, long userID);
 
   // gradeDAO
   CountAndGradeID addGrade(String exerciseID, Grade grade);
