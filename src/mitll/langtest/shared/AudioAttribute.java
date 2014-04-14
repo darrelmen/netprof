@@ -30,6 +30,7 @@ public class AudioAttribute implements IsSerializable {
   private Map<String, String> attributes;
  // private List<String> annotations;
   //private long userID; // who recorded it - later
+  private boolean hasBeenPlayed;
 
   public AudioAttribute() {}
 
@@ -155,13 +156,20 @@ public class AudioAttribute implements IsSerializable {
     }
   }
 
-  @Override
-  public String toString() {
-    return "Audio " + audioRef + " attrs " + attributes;
-  }
-
   public MiniUser getUser() {
     return user;
   }
 
+  public boolean isHasBeenPlayed() {
+    return hasBeenPlayed;
+  }
+
+  public void setHasBeenPlayed(boolean hasBeenPlayed) {
+    this.hasBeenPlayed = hasBeenPlayed;
+  }
+
+  @Override
+  public String toString() {
+    return "Audio " + audioRef + " attrs " + attributes;
+  }
 }
