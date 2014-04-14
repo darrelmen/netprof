@@ -5,6 +5,7 @@ import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.NavLink;
+import com.github.gwtbootstrap.client.ui.NavPills;
 import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
@@ -12,7 +13,6 @@ import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.media.client.Audio;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -45,7 +45,6 @@ import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.MiniUser;
 
-import javax.validation.constraints.Min;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -82,9 +81,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   protected final LangTestDatabaseAsync service;
   protected ScoreListener scorePanel;
   private AudioPanel contentAudio, answerAudio;
-  private final NavigationHelper navigationHelper;
+  protected final NavigationHelper navigationHelper;
   private final float screenPortion;
   protected final String instance;
+  private static final boolean DEBUG = true;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -585,7 +585,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
   protected class FastAndSlowASRScoringAudioPanel extends ASRScoringAudioPanel {
     private static final String GROUP = "group";
-    public static final String NO_REFERENCE_AUDIO = "No reference audio.";
+    private static final String NO_REFERENCE_AUDIO = "No reference audio.";
+    private static final String MALE = "Male";
+    private static final String FEMALE = "Female";
 
     /**
      * @param exercise
@@ -617,6 +619,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       rightSide.addStyleName("leftFiveMargin");
       Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
 
+      boolean allSameDialect = allAudioSameDialect(audioAttributes);
 /*      System.out.println("getBeforePlayWidget : for exercise " +exercise.getID() +
         " path "+ audioPath + " attributes were " + audioAttributes);*/
 
@@ -625,54 +628,67 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         return rightSide;
       }
       else {
-       // Collection<AudioAttribute> males   = exercise.getByGender(true);
-     //   Collection<AudioAttribute> females = exercise.getByGender(false);
-
-        final Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getUserMap(true);
+        Map<MiniUser, List<AudioAttribute>> malesMap   = exercise.getUserMap(true);
         Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getUserMap(false);
 
         Dropdown dropdown = new Dropdown("Voice");
         dropdown.addStyleName("leftFiveMargin");
 
-        List<MiniUser> maleUsers = getSortedUsers(malesMap);
+        List<MiniUser> maleUsers   = getSortedUsers(malesMap);
         List<MiniUser> femaleUsers = getSortedUsers(femalesMap);
 
-        addChoices(rightSide, malesMap, dropdown, maleUsers, "Male");
-        addChoices(rightSide, femalesMap, dropdown, femaleUsers, "Female");
+        addChoices(rightSide, malesMap,   dropdown, maleUsers,   MALE,   !allSameDialect);
+        addChoices(rightSide, femalesMap, dropdown, femaleUsers, FEMALE, !allSameDialect);
 
-
-        final Collection<AudioAttribute> audioAttributes1 = maleUsers.isEmpty() ? femalesMap.get(femaleUsers.get(0)) : malesMap.get(maleUsers.get(0));
-        MiniUser first = maleUsers.isEmpty() ? femaleUsers.get(0) : maleUsers.get(0);
-        dropdown.setText(getChoiceTitle(first.isMale() ? "Male" : "Female", first));
-/*
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-          @Override
-          public void execute() {
-            showAudio(audioAttributes1.iterator().next());
-          }
-        });*/
+        final Collection<AudioAttribute> audioAttributes1 =
+          setInitialMenuState(allSameDialect, malesMap, femalesMap, maleUsers, femaleUsers, dropdown);
 
         addRegularAndSlow(rightSide, audioAttributes1);
 
         Panel leftAndRight = new HorizontalPanel();
-        leftAndRight.add(dropdown);
+        NavPills container = new NavPills();
+        container.add(dropdown);
+        leftAndRight.add(container);
         leftAndRight.add(rightSide);
         return leftAndRight;
       }
     }
 
+    private Collection<AudioAttribute> setInitialMenuState(boolean allSameDialect,
+                                                           Map<MiniUser, List<AudioAttribute>> malesMap,
+                                                           Map<MiniUser, List<AudioAttribute>> femalesMap,
+                                                           List<MiniUser> maleUsers, List<MiniUser> femaleUsers, Dropdown dropdown) {
+      final Collection<AudioAttribute> audioAttributes1 = maleUsers.isEmpty() ? femalesMap.get(femaleUsers.get(0)) : malesMap.get(maleUsers.get(0));
+      MiniUser first = maleUsers.isEmpty() ? femaleUsers.get(0) : maleUsers.get(0);
+      dropdown.setText(getChoiceTitle(first.isMale() ? MALE : FEMALE, first, !allSameDialect));
+      return audioAttributes1;
+    }
+
+    private boolean allAudioSameDialect(Collection<AudioAttribute> audioAttributes) {
+      boolean allSameDialect = true;
+      String last = "";
+      for (AudioAttribute audioAttribute : audioAttributes) {
+         if (!last.isEmpty() && !audioAttribute.getUser().getDialect().equalsIgnoreCase(last)) {
+           allSameDialect = false;
+           break;
+         }
+        last = audioAttribute.getUser().getDialect();
+      }
+      return allSameDialect;
+    }
+
     private void addChoices(final Panel rightSide,
                             final Map<MiniUser, List<AudioAttribute>> malesMap,
-                            final Dropdown dropdown, List<MiniUser> maleUsers, String male1) {
+                            final Dropdown dropdown, List<MiniUser> maleUsers, String title, final boolean includeDialect) {
       for (final MiniUser male : maleUsers) {
-        NavLink widget2 = new NavLink(getChoiceTitle(male1, male));
+        NavLink widget2 = new NavLink(getChoiceTitle(title, male,includeDialect));
         widget2.addClickHandler(new ClickHandler() {
           @Override
           public void onClick(ClickEvent event) {
             rightSide.clear();
             List<AudioAttribute> audioAttributes = malesMap.get(male);
             addRegularAndSlow(rightSide, audioAttributes);
-            dropdown.setText(getChoiceTitle(male.isMale() ? "Male" : "Female", male));
+            dropdown.setText(getChoiceTitle(male.isMale() ? MALE : FEMALE, male,includeDialect));
 
           }
         });
@@ -680,10 +696,13 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       }
     }
 
-    private String getChoiceTitle(String male1, MiniUser male) {
-      return male1 +
-        " " + male.getDialect() + " (" + male.getUserID() +
-        ") age " + male.getAge();
+    private String getChoiceTitle(String title, MiniUser male, boolean includeDialect) {
+      return title +
+        " " +
+        (includeDialect ? male.getDialect() :"") +
+        (DEBUG ?" (" + male.getUserID() + ")" :"") +
+        " " +
+        "age " + male.getAge();
     }
 
     private void addRegularAndSlow(Panel vp, Collection<AudioAttribute> audioAttributes) {
@@ -742,7 +761,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     }
   }
 
-  private List<MiniUser> getSortedUsers(Map<MiniUser, List<AudioAttribute>> malesMap) {
+  protected List<MiniUser> getSortedUsers(Map<MiniUser, List<AudioAttribute>> malesMap) {
     List<MiniUser> maleUsers = new ArrayList<MiniUser>(malesMap.keySet());
     Collections.sort(maleUsers, new Comparator<MiniUser>() {
       public int compare(MiniUser o1, MiniUser o2) {
