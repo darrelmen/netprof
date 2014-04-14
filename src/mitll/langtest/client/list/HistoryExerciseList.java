@@ -364,7 +364,7 @@ public class HistoryExerciseList extends PagingExerciseList {
         "' (" + prefix.length() + " chars) in context of " + typeToSection + " list " + userListID+
         " instance " + instance);
 
-        service.getExerciseIds(lastReqID, typeToSection, prefix, userListID, new SetExercisesCallback());
+        service.getExerciseIds(lastReqID, typeToSection, prefix, userListID, controller.getUser(), new SetExercisesCallback());
 
   }
 
