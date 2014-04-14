@@ -39,6 +39,7 @@ public class EventDAO extends DAO {
   private static final String CREATORID = "creatorid";
   private static final String WIDGETTYPE = "widgettype";
   private static final String HITID = "hitid";
+  private static final String EXERCISEID = "exerciseid";
 
   public EventDAO(Database database) {
     super(database);
@@ -68,9 +69,8 @@ public class EventDAO extends DAO {
       EVENT +
       " (" +
       "uniqueid IDENTITY, " +
-      CREATORID +
-      " LONG, " +
-      "exerciseid VARCHAR, " +
+      CREATORID + " LONG, " +
+      EXERCISEID + " VARCHAR, " +
       "context VARCHAR, " +
       "widgetid VARCHAR, " +
       WIDGETTYPE +
@@ -109,7 +109,9 @@ public class EventDAO extends DAO {
         "INSERT INTO " + EVENT +
           "(" +
           CREATORID +
-          ",exerciseid,context," +
+          "," +
+          EXERCISEID +
+          ",context," +
           "widgetid," +
           WIDGETTYPE +
           "," +
@@ -152,6 +154,22 @@ public class EventDAO extends DAO {
     return Collections.emptyList();
   }
 
+  public List<Event> getAllForUserAndExercise(long userid, String exid) {
+    try {
+      String sql = "SELECT * from " + EVENT + " where " +
+        WIDGETTYPE +
+        "='qcPlayAudio' AND " +
+        CREATORID +"="+userid + " and " +
+        EXERCISEID + "='" +exid+
+        "'";
+
+      return getEvents(sql);
+    } catch (Exception ee) {
+      logger.error("got " + ee, ee);
+    }
+    return Collections.emptyList();
+  }
+
   /**
    * Pulls the list of users out of the database.
    *
@@ -178,7 +196,7 @@ public class EventDAO extends DAO {
       lists.add(new Event(
           rs.getString("widgetid"),
           rs.getString(WIDGETTYPE),
-          rs.getString("exerciseid"),
+          rs.getString(EXERCISEID),
           rs.getString("context"),
           rs.getLong(CREATORID),
           rs.getTimestamp("modified").getTime(),

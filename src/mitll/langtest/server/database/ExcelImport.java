@@ -47,6 +47,7 @@ import java.util.Set;
 public class ExcelImport implements ExerciseDAO {
   private static final Logger logger = Logger.getLogger(ExcelImport.class);
   private static final boolean INCLUDE_ENGLISH_SEMI_AS_DEFECT = true;
+  public static final boolean MARK_MISSING_AUDIO_AS_DEFECT = false;
 
   private final boolean isFlashcard;
 
@@ -69,9 +70,9 @@ public class ExcelImport implements ExerciseDAO {
   private UserListManager userListManager;
   private AddRemoveDAO addRemoveDAO;
   private File installPath;
-  private boolean collectSynonyms = true;
+ // private boolean collectSynonyms = true;
   boolean addDefects;
-  private AudioDAO audioDAO;
+  //private AudioDAO audioDAO;
 
   /**
    *
@@ -103,7 +104,7 @@ public class ExcelImport implements ExerciseDAO {
     this.skipSemicolons = serverProps.shouldSkipSemicolonEntries();
     this.audioOffset = serverProps.getAudioOffset();
     this.userListManager = userListManager;
-    collectSynonyms = this.serverProps.getCollectSynonyms();
+  //  collectSynonyms = this.serverProps.getCollectSynonyms();
 
 /*    logger.debug("\n\n\n\n ---> ExcelImport : config " + relativeConfigDir +
       " media dir " +mediaDir + " slow missing " +missingSlowSet.size() + " fast " + missingFastSet.size());*/
@@ -145,15 +146,15 @@ public class ExcelImport implements ExerciseDAO {
   private Map<String, List<AudioAttribute>> exToAudio;
   @Override
   public void setAudioDAO(AudioDAO audioDAO) {
-    this.audioDAO = audioDAO;
+ //   this.audioDAO = audioDAO;
     exToAudio = audioDAO.getExToAudio();
     int count = 0;
     logger.debug("extoaudio now " + exToAudio.size());
-    for (String key : exToAudio.keySet()) {
+/*    for (String key : exToAudio.keySet()) {
       logger.debug("\tid '" +key+
         "'");
       if (count++ > 10) break;
-    }
+    }*/
   }
 
   /**
@@ -504,10 +505,12 @@ public class ExcelImport implements ExerciseDAO {
 
                 // keep track of synonyms (or better term)
                 rememberExercise(exercises, englishToExercises, imported);
-                if (!imported.hasRefAudio()) {
+                if (MARK_MISSING_AUDIO_AS_DEFECT && !imported.hasRefAudio()) {
                   fieldToDefect.put("refAudio", "missing reference audio");
                 }
-                idToDefectMap.put(imported.getID(), fieldToDefect);
+                if (!fieldToDefect.isEmpty()) {
+                  idToDefectMap.put(imported.getID(), fieldToDefect);
+                }
                // addDefects(fieldToDefect, imported);
               } else {
                 if (logging++ < 3) {
@@ -564,6 +567,10 @@ public class ExcelImport implements ExerciseDAO {
           userListManager.addDefect(pair.getKey(), fieldToDefect.getKey(), fieldToDefect.getValue());
         }
       }
+    }
+    else {
+      logger.info("NOT Automatically adding " + exTofieldToDefect.size() + " defects");
+
     }
   }
 
