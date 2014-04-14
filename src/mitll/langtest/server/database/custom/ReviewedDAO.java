@@ -127,7 +127,7 @@ public class ReviewedDAO extends DAO {
       statement.close();
       database.closeConnection(connection);
 
-      //logger.debug("now " + getCount() + " reviewed");
+      logger.debug("now " + getCount() + " reviewed");
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
@@ -219,6 +219,8 @@ public class ReviewedDAO extends DAO {
       rs.close();
       statement.close();
       database.closeConnection(connection);
+      int count = getCount();
+      if (count % 10 == 0) logger.debug("now " + count + " reviewed");
       return exidToState;
     } catch (SQLException e) {
       logger.error("Got " + e + " doing " + sql3, e);

@@ -82,10 +82,6 @@ public class PagingExerciseList extends ExerciseList {
     byID(id).setSecondState(state);
   }
 
-/*  public void setStates(String id,CommonShell.STATE first,CommonShell.STATE second ) {
-
-  }*/
-
   /**
    * Add two rows -- the search box and then the item list
    */
@@ -103,7 +99,7 @@ public class PagingExerciseList extends ExerciseList {
   void loadExercises(String selectionState, String prefix) {
     lastReqID++;
     System.out.println("PagingExerciseList.loadExercises : looking for '" + prefix + "' (" + prefix.length() + " chars) in list id "+userListID + " instance " +instance);
-    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), prefix, userListID, new SetExercisesCallback());
+    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), prefix, userListID, controller.getUser(), new SetExercisesCallback());
   }
 
   /**
