@@ -484,16 +484,15 @@ public class ExcelImport implements ExerciseDAO {
               semis++;
               id++;     // TODO is this the right thing for Dari and Farsi???
             } else {
-              String meaning = getCell(next, meaningIndex);
-              String givenIndex = getCell(next, idIndex);
-              String context = getCell(next, contextIndex);
-
               if (inMergedRow && !lastRowValues.isEmpty()) {
                 if (translit.length() == 0) {
                   translit = lastRowValues.get(2);
                 }
               }
 
+              String meaning = getCell(next, meaningIndex);
+              String givenIndex = getCell(next, idIndex);
+              String context = getCell(next, contextIndex);
               checkForSemicolons(fieldToDefect, english, foreignLanguagePhrase, translit);
 
               boolean expectFastAndSlow = idIndex == -1;
@@ -511,7 +510,6 @@ public class ExcelImport implements ExerciseDAO {
                 if (!fieldToDefect.isEmpty()) {
                   idToDefectMap.put(imported.getID(), fieldToDefect);
                 }
-               // addDefects(fieldToDefect, imported);
               } else {
                 if (logging++ < 3) {
                   logger.info("skipping exercise " + imported.getID() + " : '" + imported.getEnglish() + "' since no audio.");
@@ -531,9 +529,155 @@ public class ExcelImport implements ExerciseDAO {
           }
         }
       }
+    } catch (Exception e) {
+      logger.error("got " + e, e);
+    }
 
-/*      if(collectSynonyms)
-         addSynonyms(englishToExercises);*/
+    logger.info("max exercise id = " + id);
+    if (skipped > 0) {
+      logger.info("Skipped " + skipped + " entries with missing audio. " + (100f * ((float) skipped) / (float) id) + "%");
+    }
+    if (englishSkipped > 0) {
+      logger.info("Skipped " + englishSkipped + " entries with missing english. " + (100f * ((float) englishSkipped) / (float) id) + "%");
+    }
+    if (semis > 0) {
+      logger.info("Skipped " + semis + " entries with semicolons or " + (100f * ((float) semis) / (float) id) + "%");
+    }
+
+    // put the skips at the end
+    if (serverProps.isClassroomMode()) {
+      Collection<CommonExercise> commonExercises = readFromSheetSkips(sheet, id);
+      exercises.addAll(commonExercises);
+    }
+    return exercises;
+  }
+
+  private Collection<CommonExercise> readFromSheetSkips(Sheet sheet, int id) {
+    List<CommonExercise> exercises = new ArrayList<CommonExercise>();
+    boolean gotHeader = false;
+
+    int colIndexOffset = -1;
+
+    int transliterationIndex = -1;
+    int unitIndex = -1;
+    int chapterIndex = -1;
+    int weekIndex = -1;
+    int weightIndex = -1;
+    int meaningIndex = -1;
+    int idIndex = -1;
+    int contextIndex = -1;
+    int audioIndex = -1;
+    Map<String, List<CommonExercise>> englishToExercises = new HashMap<String, List<CommonExercise>>();
+    int semis = 0;
+    int skipped = 0;
+    int englishSkipped = 0;
+    String unitName = null, chapterName = null, weekName = null;
+    try {
+      Iterator<Row> iter = sheet.rowIterator();
+      Map<Integer, CellRangeAddress> rowToRange = getRowToRange(sheet);
+      for (; iter.hasNext(); ) {
+        Row next = iter.next();
+        Map<String,String> fieldToDefect = new HashMap<String, String>();
+        List<String> columns = new ArrayList<String>();
+        if (!gotHeader) {
+          Iterator<Cell> cellIterator = next.cellIterator();
+          while (cellIterator.hasNext()) {
+            Cell next1 = cellIterator.next();
+            columns.add(next1.toString().trim());
+          }
+        }
+
+        if (!gotHeader) {
+          List<String> predefinedTypeOrder = new ArrayList<String>();
+          for (String col : columns) {
+            String colNormalized = col.toLowerCase();
+            //  colNormalized = colNormalized.toLowerCase()
+            if (colNormalized.startsWith("Word".toLowerCase())) {
+              gotHeader = true;
+              colIndexOffset = columns.indexOf(col);
+            } else if (colNormalized.contains("transliteration")) {
+              transliterationIndex = columns.indexOf(col);
+            } else if (colNormalized.contains("unit") || colNormalized.contains("book")) {
+              unitIndex = columns.indexOf(col);
+              predefinedTypeOrder.add(col);
+              unitName = col;
+            } else if (colNormalized.contains("chapter") || colNormalized.contains("lesson")) {
+              chapterIndex = columns.indexOf(col);
+              predefinedTypeOrder.add(col);
+              chapterName = col;
+            } else if (colNormalized.contains("week")) {
+              weekIndex = columns.indexOf(col);
+              predefinedTypeOrder.add(col);
+              weekName = col;
+            } else if (colNormalized.contains("weight")) {
+              weightIndex = columns.indexOf(col);
+            } else if (colNormalized.contains("meaning")) {
+              meaningIndex = columns.indexOf(col);
+            } else if (colNormalized.contains("id")) {
+              idIndex = columns.indexOf(col);
+            } else if (colNormalized.contains("context")) {
+              contextIndex = columns.indexOf(col);
+            } else if (colNormalized.contains("audio_index")) {
+              audioIndex = columns.indexOf(col);
+            }
+          }
+
+          logger.info("columns word index " + colIndexOffset +
+              " week " + weekIndex + " unit " + unitIndex + " chapter " + chapterIndex +
+              " meaning " + meaningIndex +
+              " transliterationIndex " + transliterationIndex +
+              " contextIndex " + contextIndex +
+              " id " + idIndex + " audio " + audioIndex
+          );
+        } else {
+          int colIndex = colIndexOffset;
+          String english = getCell(next, colIndex++).trim();
+          String foreignLanguagePhrase = getCell(next, colIndex).trim();
+          String translit = getCell(next, transliterationIndex);
+
+          // remove starting or ending tics
+          foreignLanguagePhrase = cleanTics(foreignLanguagePhrase);
+
+          //logger.info("for row " + next.getRowNum() + " english = " + english + " in merged " + inMergedRow + " last row " + lastRowValues.size());
+
+
+          if (english.length() == 0) {
+            if (serverProps.isClassroomMode()) {
+              //english = "NO ENGLISH";    // DON'T DO THIS - it messes up the indexing.
+              fieldToDefect.put("english", "missing english");
+            }
+            //logger.info("-------- > for row " + next.getRowNum() + " english is blank ");
+            else {
+              englishSkipped++;
+            }
+          }
+          if (gotHeader && english.length() > 0) {
+             if (skipSemicolons && (foreignLanguagePhrase.contains(";") || translit.contains(";"))) {
+              String meaning = getCell(next, meaningIndex);
+              String givenIndex = getCell(next, idIndex);
+              String context = getCell(next, contextIndex);
+              checkForSemicolons(fieldToDefect, english, foreignLanguagePhrase, translit);
+
+              boolean expectFastAndSlow = idIndex == -1;
+              String idToUse = expectFastAndSlow ? "" + id++ : givenIndex;
+              CommonExercise imported = getExercise(idToUse, weightIndex, next, english, foreignLanguagePhrase, translit,
+                meaning, context, false, (audioIndex != -1) ? getCell(next, audioIndex) : "");
+              if (imported.hasRefAudio() || !shouldHaveRefAudio) {  // skip items without ref audio, for now.
+                recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported, unitName, chapterName, weekName);
+
+                // keep track of synonyms (or better term)
+                rememberExercise(exercises, englishToExercises, imported);
+                if (MARK_MISSING_AUDIO_AS_DEFECT && !imported.hasRefAudio()) {
+                  fieldToDefect.put("refAudio", "missing reference audio");
+                }
+                if (!fieldToDefect.isEmpty()) {
+                  idToDefectMap.put(imported.getID(), fieldToDefect);
+                }
+              }
+            }
+          }
+        }
+      }
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
@@ -576,13 +720,13 @@ public class ExcelImport implements ExerciseDAO {
 
   private void checkForSemicolons(Map<String, String> fieldToDefect, String english, String foreignLanguagePhrase, String translit) {
     if (foreignLanguagePhrase.contains(";")) {
-      fieldToDefect.put(QCNPFExercise.FOREIGN_LANGUAGE,"contains semicolon - should this item be split?");
+      fieldToDefect.put(QCNPFExercise.FOREIGN_LANGUAGE, "contains semicolon - should this item be split?");
     }
     if (translit.contains(";")) {
-      fieldToDefect.put(QCNPFExercise.TRANSLITERATION,"contains semicolon - should this item be split?");
+      fieldToDefect.put(QCNPFExercise.TRANSLITERATION, "contains semicolon - should this item be split?");
     }
     if (INCLUDE_ENGLISH_SEMI_AS_DEFECT && english.contains(";")) {
-      fieldToDefect.put(QCNPFExercise.ENGLISH,"contains semicolon - should this item be split?");
+      fieldToDefect.put(QCNPFExercise.ENGLISH, "contains semicolon - should this item be split?");
     }
   }
 
@@ -729,7 +873,7 @@ public class ExcelImport implements ExerciseDAO {
     Exercise imported;
     List<String> translations = new ArrayList<String>();
     if (foreignLanguagePhrase.length() > 0) {
-      translations.addAll(Arrays.asList(foreignLanguagePhrase.split(";")));
+      translations.add(foreignLanguagePhrase);//Arrays.asList(foreignLanguagePhrase.split(";")));
     }
     if (isFlashcard) {
       imported = new Exercise("flashcardStimulus", id, english, translations, english);
@@ -747,9 +891,9 @@ public class ExcelImport implements ExerciseDAO {
     List<String> inOrderTranslations = new ArrayList<String>(translations);
     imported.setRefSentences(inOrderTranslations);
 
-    if (weightIndex != -1) {
+  //  if (weightIndex != -1) {
       //imported.setWeight(getNumericCell(next, weightIndex));
-    }
+ //   }
     return imported;
   }
 
@@ -921,9 +1065,9 @@ public class ExcelImport implements ExerciseDAO {
     }
   }
 
-  private double getNumericCell(Row next, int col) {
+/*  private double getNumericCell(Row next, int col) {
     Cell cell = next.getCell(col);
     if (cell == null) return -1;
     return (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) ? cell.getNumericCellValue() : -1;
-  }
+  }*/
 }
