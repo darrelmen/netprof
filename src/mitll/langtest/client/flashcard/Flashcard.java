@@ -3,6 +3,7 @@ package mitll.langtest.client.flashcard;
 import com.github.gwtbootstrap.client.ui.Dropdown;
 import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.NavLink;
+import com.github.gwtbootstrap.client.ui.NavPills;
 import com.github.gwtbootstrap.client.ui.Paragraph;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconSize;
@@ -108,14 +109,18 @@ public class Flashcard implements RequiresResize {
     if (!isAnonymous || adminView) {
       hp.add(userNameWidget);
     }
-    Dropdown w = makeMenu(users, results, monitoring,events);
 
+    // add log out/admin options menu
+   // NavPills container = new NavPills();
+    Dropdown menu = makeMenu(users, results, monitoring,events);
+    menu.addStyleName("cogStyle");
+    //container.add(menu);
     NavLink widget1 = new NavLink("Log Out");
     widget1.addClickHandler(logoutClickHandler);
-    w.add(widget1);
+    menu.add(widget1);
 
     if (!isAnonymous || adminView) {
-      hp.add(w);
+      hp.add(menu);
     }
 
     browserInfo.addStyleName("leftFiveMargin");
@@ -146,7 +151,7 @@ public class Flashcard implements RequiresResize {
   }
 
   /**
-   * @see #getHeaderRow(String, boolean, String, String, String, com.google.gwt.user.client.ui.HTML, com.google.gwt.event.dom.client.ClickHandler, com.google.gwt.event.dom.client.ClickHandler, com.google.gwt.event.dom.client.ClickHandler, com.google.gwt.event.dom.client.ClickHandler)
+   * @see #getHeaderRow
    * @param users
    * @param results
    * @param monitoring
