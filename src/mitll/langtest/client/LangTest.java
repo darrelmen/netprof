@@ -45,6 +45,8 @@ import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.exercise.WaveformExercisePanel;
 import mitll.langtest.client.flashcard.Flashcard;
 import mitll.langtest.client.grading.GradingExercisePanelFactory;
 import mitll.langtest.client.instrumentation.ButtonFactory;
@@ -397,7 +399,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private void reallyMakeExerciseList(Panel belowFirstRow, Panel exerciseListContainer, Panel bothSecondAndThird) {
     makeExerciseList(secondRow, exerciseListContainer);
-    if (!getProps().isClassroomMode()) {
+    if (!getProps().isClassroomMode() || getAudioType().equals(Result.AUDIO_TYPE_RECORDER)) {
       belowFirstRow.add(bothSecondAndThird);
     }
   }
@@ -607,7 +609,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see #gotUser(long)
    */
   private void setFactory(final long userID) {
-    //reallySetFactory();
     doEverythingAfterFactory(userID);
   }
 
@@ -615,17 +616,25 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     final LangTest outer = this;
     if (props.isGoodwaveMode() && !props.isGrading()) {
       if (props.isClassroomMode()) {
-        exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer, exerciseList,1.0f) {
-          @Override
-          public Panel getExercisePanel(CommonExercise e) {
-            if (isReviewMode()) {
-              return new QCNPFExercise(e, controller, exerciseList, 1.0f, false, "classroom");
+        if (getAudioType().equals(Result.AUDIO_TYPE_RECORDER)) {
+          exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer, exerciseList) {
+            @Override
+            public Panel getExercisePanel(CommonExercise e) {
+              return new WaveformExercisePanel(e, service, outer, outer, exerciseList);
             }
-            else {
-              return new CommentNPFExercise(e, controller, exerciseList, 1.0f, false, "classroom");
+          }, userManager, 1);
+        } else {
+          exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer, exerciseList, 1.0f) {
+            @Override
+            public Panel getExercisePanel(CommonExercise e) {
+              if (isReviewMode()) {
+                return new QCNPFExercise(e, controller, exerciseList, 1.0f, false, "classroom");
+              } else {
+                return new CommentNPFExercise(e, controller, exerciseList, 1.0f, false, "classroom");
+              }
             }
-          }
-        }, userManager, 1);
+          }, userManager, 1);
+        }
       } else {
         exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer, exerciseList, getScreenPortion()), userManager, 1);
       }
@@ -678,13 +687,16 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private void resetClassroomState() {
     if (getProps().isClassroomMode()) {
-      if (navigation != null) {
-        belowFirstRow.remove(navigation.getContainer());
-      }
-      navigation = getProps().isCombinedMode() ? new Combined(service, userManager, this, exerciseList, this) :
+      System.out.println("audio type " + getAudioType());
+      if (!getAudioType().equals(Result.AUDIO_TYPE_RECORDER)) {
+        if (navigation != null) {
+          belowFirstRow.remove(navigation.getContainer());
+        }
+        navigation = getProps().isCombinedMode() ? new Combined(service, userManager, this, exerciseList, this) :
           new Navigation(service, userManager, this, exerciseList, this);
-      belowFirstRow.add(navigation.getNav(bothSecondAndThird));
-      showInitialState();
+        belowFirstRow.add(navigation.getNav(bothSecondAndThird));
+        showInitialState();
+      }
     }
   }
 
@@ -708,9 +720,19 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private boolean doEverythingAfterFactory(long userID) {
+    final LangTest outer = this;
     if (userID != lastUser || (props.isGoodwaveMode() || props.isFlashCard() && !props.isTimedGame())) {
       System.out.println("doEverythingAfterFactory : user changed - new " + userID + " vs last " + lastUser);
       if (!shouldCollectAudio() || flashRecordPanel.gotPermission()) {
+        if (getAudioType().equals(Result.AUDIO_TYPE_RECORDER)) {
+          exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer, exerciseList) {
+            @Override
+            public Panel getExercisePanel(CommonExercise e) {
+              return new WaveformExercisePanel(e, service, outer, outer, exerciseList);
+            }
+          }, userManager, 1);
+        }
+
         if (exerciseList != null) {
 //          System.out.println("\tdoEverythingAfterFactory : " + userID + " get exercises");
           exerciseList.getExercises(userID, true);
