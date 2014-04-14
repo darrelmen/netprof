@@ -153,7 +153,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   public void getExercises(long userID, boolean getNext) {
     System.out.println("ExerciseList.getExercises for user " +userID + " instance " + instance);
     lastReqID++;
-    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), "", -1, new SetExercisesCallback());
+    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), "", -1, controller.getUser(), new SetExercisesCallback());
   }
 
   /**
@@ -161,7 +161,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   public void reload() {
     System.out.println("ExerciseList.reload for user " + controller.getUser() + " instance " + instance + " id " + getElement().getId());
-    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), "", -1, new SetExercisesCallback());
+    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), "", -1,  controller.getUser(), new SetExercisesCallback());
   }
 
   /**
@@ -172,7 +172,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   @Override
   public void reloadWith(String id) {
     System.out.println("ExerciseList.reloadWith id = " + id+ " for user " + controller.getUser() + " instance " + instance);
-    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), "", -1, new SetExercisesCallbackWithID(id));
+    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), "", -1, controller.getUser(), new SetExercisesCallbackWithID(id));
   }
 
 
@@ -534,7 +534,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   protected void askServerForExercise(String itemID) {
     System.out.println("ExerciseList.askServerForExercise id = " + itemID + " instance " + instance);
-    service.getExercise(itemID, new ExerciseAsyncCallback());
+    service.getExercise(itemID, controller.getUser(), new ExerciseAsyncCallback());
   }
 
   private class ExerciseAsyncCallback implements AsyncCallback<CommonExercise> {
