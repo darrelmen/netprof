@@ -16,6 +16,7 @@ import mitll.langtest.shared.ExerciseShell;
 
 /**
  * Created by go22670 on 2/10/14.
+ * @deprecated just an experiment --
  */
 public class Combined<T extends ExerciseShell> extends TabContainer {
 //  private Tab yourItems;
@@ -44,10 +45,10 @@ public class Combined<T extends ExerciseShell> extends TabContainer {
     tabPanel = new TabPanel();
     tabPanel.getElement().setId("Combined_tabPanel");
     // chapter tab
-    final Navigation.TabAndContent chapters = makeTab(tabPanel, IconType.LIGHTBULB, LEARN_PRONUNCIATION);
+    final TabAndContent chapters = makeTab(tabPanel, IconType.LIGHTBULB, LEARN_PRONUNCIATION);
     chapters.content.add(secondAndThird);
 
-    final Navigation.TabAndContent practice = makeTab(tabPanel, IconType.CHECK,  PRACTICE);
+    final TabAndContent practice = makeTab(tabPanel, IconType.CHECK,  PRACTICE);
 
     ExerciseListLayout layout = new ExerciseListLayout(controller.getProps());
 
