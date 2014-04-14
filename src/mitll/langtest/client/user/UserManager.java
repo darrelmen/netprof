@@ -50,8 +50,6 @@ public class UserManager {
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
-   * @see mitll.langtest.client.LangTest#doFlashcard()
-   * @see mitll.langtest.client.LangTest#doDataCollectAdminView
    * @param lt
    * @param service
    * @param props
