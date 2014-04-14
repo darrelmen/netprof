@@ -137,9 +137,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    * @param reqID
    */
+/*
   public ExerciseListWrapper getExerciseIds(int reqID) {
     return makeExerciseListWrapper(reqID, getExercises());
   }
+*/
 
   /**
    * @see mitll.langtest.client.list.PagingExerciseList#loadExercises(String, String)
@@ -147,10 +149,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param typeToSelection
    * @param prefix
    * @param userListID
+   * @param userID
    * @return
    */
   @Override
-  public ExerciseListWrapper getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix, long userListID) {
+  public ExerciseListWrapper getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix, long userListID, int userID) {
     List<CommonExercise> exercises;
     logger.debug("getExerciseIds : getting exercise ids for " +
       " config " + relativeConfigDir +
@@ -174,7 +177,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         exercises = trie.getExercises(prefix);
       }
 
-      return makeExerciseListWrapper(reqID, exercises);
+      return makeExerciseListWrapper(reqID, exercises, userID);
 
     } else {
       // TODO build unit-lesson hierarchy if non-empty type->selection over user list
@@ -194,9 +197,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         Collection<CommonExercise> exercisesForState = helper.getExercisesForSelectionState(typeToSelection);
         logger.debug("\tafter found " + exercisesForState.size() + " matches to " + typeToSelection);
 
-        return getExerciseListWrapperForPrefix(reqID, prefix, exercisesForState);
+        return getExerciseListWrapperForPrefix(reqID, prefix, exercisesForState, userID);
       } else {
-        return getExercisesForSelectionState(reqID, typeToSelection, prefix);
+        return getExercisesForSelectionState(reqID, typeToSelection, prefix, userID);
       }
     }
   }
@@ -217,16 +220,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param reqID
    * @param typeToSection
    * @param prefix
+   * @param userID
    * @return
    */
   private ExerciseListWrapper getExercisesForSelectionState(int reqID,
-                                                           Map<String, Collection<String>> typeToSection, String prefix) {
+                                                            Map<String, Collection<String>> typeToSection, String prefix, long userID) {
     Collection<CommonExercise> exercisesForState = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
 
-    return getExerciseListWrapperForPrefix(reqID, prefix, exercisesForState);
+    return getExerciseListWrapperForPrefix(reqID, prefix, exercisesForState, userID);
   }
 
-  private ExerciseListWrapper getExerciseListWrapperForPrefix(int reqID, String prefix, Collection<CommonExercise> exercisesForState) {
+  private ExerciseListWrapper getExerciseListWrapperForPrefix(int reqID, String prefix, Collection<CommonExercise> exercisesForState, long userID) {
     boolean hasPrefix = !prefix.isEmpty();
     if (hasPrefix) {
       ExerciseTrie trie = new ExerciseTrie(exercisesForState, serverProps.getLanguage(), audioFileHelper.getSmallVocabDecoder());
@@ -236,26 +240,41 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       exercisesForState = getSortedExercises(exercisesForState);
     }
 
-    return makeExerciseListWrapper(reqID, exercisesForState);
+    return makeExerciseListWrapper(reqID, exercisesForState, userID);
   }
 
   /**
    * Send the first exercise along so we don't have to ask for it after we get the initial list
    * @param reqID
    * @param exercises
+   * @param userID
    * @return
+   * @see #getExerciseIds
+   * @see #getExerciseListWrapperForPrefix(int, String, java.util.Collection, long)
    */
-  private ExerciseListWrapper makeExerciseListWrapper(int reqID, Collection<CommonExercise> exercises) {
+  private ExerciseListWrapper makeExerciseListWrapper(int reqID, Collection<CommonExercise> exercises, long userID) {
     CommonExercise firstExercise = exercises.isEmpty() ? null : exercises.iterator().next();
     if (firstExercise != null) {
       ensureMP3s(firstExercise);
       addAnnotations(firstExercise); // todo do this in a better way
+
+      addPlayedMarkings(userID, firstExercise);
       logger.debug("First is " + firstExercise);
     }
     List<CommonShell> exerciseShells = getExerciseShells(exercises);
     db.getUserListManager().markState(exerciseShells);
 
     return new ExerciseListWrapper(reqID, exerciseShells, firstExercise);
+  }
+
+  private void addPlayedMarkings(long userID, CommonExercise firstExercise) {
+    List<Event> allForUserAndExercise = db.getEventDAO().getAllForUserAndExercise(userID, firstExercise.getID());
+    Map<String,AudioAttribute> audioToAttr = firstExercise.getAudioRefToAttr();
+    for (Event event : allForUserAndExercise) {
+      AudioAttribute audioAttribute = audioToAttr.get(event.getContext());
+      if (audioAttribute == null) logger.error("huh? can't find " +event.getContext());
+      else audioAttribute.setHasBeenPlayed(true);
+    }
   }
 
   /**
@@ -363,14 +382,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    *
    * @see mitll.langtest.client.list.ExerciseList#askServerForExercise
    * @param id
+   * @param userID
    * @return
    */
-  public CommonExercise getExercise(String id) {
+  public CommonExercise getExercise(String id, long userID) {
     long then = System.currentTimeMillis();
     List<CommonExercise> exercises = getExercises();
 
     CommonExercise byID = db.getCustomOrPredefExercise(id);  // allow custom items to mask out non-custom items
     addAnnotations(byID);
+    addPlayedMarkings(userID, byID);
+
     if (byID == null) {
       logger.error("getExercise : huh? couldn't find exercise with id " + id + " when examining " + exercises.size() + " items");
     }
@@ -452,7 +474,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see #getExercise(String)
+   * @see #ensureMP3s(mitll.langtest.shared.CommonExercise)
    * @param wavFile
    * @param overwrite
    */
@@ -870,7 +892,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int questionID,
                                     int user, int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults) {
-    CommonExercise exercise1 = getExercise(exercise);
+    CommonExercise exercise1 = getExercise(exercise,user);
     return audioFileHelper.writeAudioFile(base64EncodedString, plan, exercise, exercise1, questionID, user, reqid,
       flq, audioType, doFlashcard, recordInResults);
   }
