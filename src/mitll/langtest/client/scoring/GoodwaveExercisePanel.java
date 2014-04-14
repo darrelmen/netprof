@@ -359,6 +359,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * @return
    */
   protected Panel getContentWidget(String label, String value, boolean withWrap, boolean includeLabel) {
+    System.out.println("label " + label + " value " + value);
     Panel nameValueRow = new FlowPanel();
     nameValueRow.getElement().setId("nameValueRow_" + label);
     nameValueRow.addStyleName("Instruction");
@@ -421,7 +422,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     return tooltip;
   }
 
-  protected static class ResizableCaptionPanel extends CaptionPanel implements ProvidesResize, RequiresResize {
+/*  protected static class ResizableCaptionPanel extends CaptionPanel implements ProvidesResize, RequiresResize {
     public ResizableCaptionPanel(String name) {
       super(name);
     }
@@ -432,7 +433,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         ((RequiresResize) contentWidget).onResize();
       }
     }
-  }
+  }*/
 
   /**
    * Has a answerPanel mark to indicate when the saved audio has been successfully posted to the server.
