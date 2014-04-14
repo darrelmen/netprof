@@ -90,7 +90,13 @@ public class AudioExercise extends ExerciseShell {
     return audioAttributes.values();
   }
 
-  public Collection<AudioAttribute> getByGender(boolean isMale) {
+  public Map<String, AudioAttribute> getAudioRefToAttr() {
+    Map<String, AudioAttribute> audioToAttr = new HashMap<String, AudioAttribute>();
+    for (AudioAttribute attr : getAudioAttributes()) audioToAttr.put(attr.getAudioRef(), attr);
+    return audioToAttr;
+  }
+
+  private Collection<AudioAttribute> getByGender(boolean isMale) {
     List<AudioAttribute> males = new ArrayList<AudioAttribute>();
     for (AudioAttribute audioAttribute : audioAttributes.values()) {
       if (isMale && audioAttribute.getUser().isMale() || (!isMale && !audioAttribute.getUser().isMale()))
