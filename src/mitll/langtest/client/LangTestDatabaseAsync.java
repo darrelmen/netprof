@@ -47,7 +47,7 @@ public interface LangTestDatabaseAsync {
 
   void getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, String exerciseID, AsyncCallback<ImageResponse> async);
 
-  void getExercise(String id, AsyncCallback<CommonExercise> async);
+  void getExercise(String id, long userID, AsyncCallback<CommonExercise> async);
 
   void getUserToResultCount(AsyncCallback<Map<User, Integer>> async);
 
@@ -76,13 +76,9 @@ public interface LangTestDatabaseAsync {
   void getGradeCountPerExercise(AsyncCallback<Map<Integer, Map<String, Map<String, Integer>>>> async);
 
   void getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix, long userListID,
-                      AsyncCallback<ExerciseListWrapper> async);
+                      int userID, AsyncCallback<ExerciseListWrapper> async);
 
   void addDLIUser(DLIUser dliUser, AsyncCallback<Void> async);
-
-/*
-  void getCompletedExercises(int user, boolean isReviewMode, AsyncCallback<Set<String>> async);
-*/
 
   void getStartupInfo(AsyncCallback<StartupInfo> async);
 
