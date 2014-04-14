@@ -72,6 +72,10 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     addPlayListener(playListener);
   }
 
+  /**
+   * @see mitll.langtest.client.exercise.RecordAudioPanel#addPlayListener(PlayListener)
+   * @param playListener
+   */
   public void addPlayListener(PlayListener playListener) {  this.playListeners.add(playListener);  }
 
   /**
