@@ -124,7 +124,7 @@ public class RecordAudioPanel extends AudioPanel {
     if (postAudioRecordButton.hasValidAudio()) playAudioPanel.setEnabled(val);
   }
 
-  public void addPlayListener(PlayListener playListener) {  playAudioPanel.addPlayListener(playListener);  }
+  //public void addPlayListener(PlayListener playListener) {  playAudioPanel.addPlayListener(playListener);  }
 
   public void setExercise(CommonExercise exercise) {
     this.exercise = exercise;
