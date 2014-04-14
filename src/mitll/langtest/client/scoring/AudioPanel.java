@@ -19,6 +19,7 @@ import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.sound.PlayAudioPanel;
+import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.ImageResponse;
 
@@ -218,6 +219,12 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   }
   public ImageAndCheck getSpectrogram() {
     return spectrogram;
+  }
+
+  public void addPlayListener(PlayListener playListener) {
+    if (playAudio != null) {
+      playAudio.addPlayListener(playListener);
+    }
   }
 
   public static class ImageAndCheck {
