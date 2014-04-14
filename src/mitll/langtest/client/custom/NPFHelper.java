@@ -63,7 +63,7 @@ class NPFHelper implements RequiresResize {
    * @param instanceName flex, review, etc.
    * @param loadExercises should we load exercises initially
    */
-  public void showNPF(UserList ul, Navigation.TabAndContent tabAndContent, String instanceName, boolean loadExercises) {
+  public void showNPF(UserList ul, TabAndContent tabAndContent, String instanceName, boolean loadExercises) {
     //System.out.println(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul);
     //if (!ul.isEmpty()) {
     //  System.out.println(getClass() + " : first is " + ul.getExercises().iterator().next());
