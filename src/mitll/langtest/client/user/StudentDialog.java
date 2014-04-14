@@ -69,7 +69,8 @@ class StudentDialog extends UserDialog {
  // private static final String STUDENT_DATA_COLLECTION = "Student - Data Collection";
   private static final String TEACHER_REVIEWER = "Reviewer";
   private static final String TEACHER = "Teacher";
-  private static final List<String> ROLES = Arrays.asList(STUDENT, TEACHER,TEACHER_REVIEWER);
+  private static final String RECORDER = "Recorder";
+  private static final List<String> ROLES = Arrays.asList(STUDENT, TEACHER, TEACHER_REVIEWER, RECORDER);
   public static final String ARE_YOU_A = "Are you a";
   public static final String USER_ID = "User ID";
   public static final String USER_ID_TOOLTIP = "New users can choose any id and login.";
@@ -93,6 +94,7 @@ class StudentDialog extends UserDialog {
    // displayToRoles.put(STUDENT_DATA_COLLECTION, DATA_COLLECTION);
     displayToRoles.put(TEACHER_REVIEWER, REVIEW);
     displayToRoles.put(TEACHER, PRACTICE);
+    displayToRoles.put(RECORDER, RECORDER);
   }
 
   private String getRole(ListBoxFormField purpose) {
@@ -140,7 +142,7 @@ class StudentDialog extends UserDialog {
         boolean needUserID = isDataCollection(purpose) || isReview(purpose) || isPractice(purpose);
         user.setVisible(needUserID);
         accordion.setVisible(!canSkipRegister(purpose));
-        registrationInfo.showOrHideILR(!isReview(purpose));
+        registrationInfo.showOrHideILR(!isReview(purpose) && !getRole(purpose).equals(RECORDER));
         password.setVisible(isReview(purpose));
 
         if (b) {
@@ -194,7 +196,8 @@ class StudentDialog extends UserDialog {
   }
 
   private boolean isDataCollection(ListBoxFormField purpose) {
-    return getRole(purpose).equals(DATA_COLLECTION);
+    String role = getRole(purpose);
+    return role.equals(DATA_COLLECTION) || role.equals(RECORDER);
   }
 
   private boolean isPractice(ListBoxFormField purpose) {
@@ -360,12 +363,12 @@ class StudentDialog extends UserDialog {
     if (purposeValue.equalsIgnoreCase(PRACTICE)) return Result.AUDIO_TYPE_PRACTICE;
     else if (purposeValue.equalsIgnoreCase(DEMO)) return Result.AUDIO_TYPE_DEMO;
     else if (purposeValue.equalsIgnoreCase(DATA_COLLECTION)) return Result.AUDIO_TYPE_REGULAR;
+    else if (purposeValue.equalsIgnoreCase(RECORDER)) return Result.AUDIO_TYPE_RECORDER;
     else return Result.AUDIO_TYPE_REVIEW;
   }
 
   private boolean canSkipRegister(ListBoxFormField field) { return canSkipRegister(getRole(field));  }
 
-  // TODO : add password field for REVIEW
   private boolean canSkipRegister(String purposeValue) {
     return purposeValue.equalsIgnoreCase(PRACTICE) ||
       purposeValue.equalsIgnoreCase(DEMO);
@@ -700,12 +703,6 @@ class StudentDialog extends UserDialog {
       controls.add(no);
       group.add(controls);
     }
-
-/*
-    public boolean markSimpleError() {
-      return markSimpleError(Placement.RIGHT);
-    }
-*/
 
     public boolean markSimpleError(Placement placement) {
       if (!yes.getValue() && !no.getValue()) {
