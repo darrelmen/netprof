@@ -42,8 +42,15 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     super(exercise, controller, service, index, recordInResults, controller.getAudioType(), playButtonSuffix, stopButtonText);
     this.recordAudioPanel = recordAudioPanel;
     this.parentPanel = widgets;
-    getElement().setId("WaveformPostAudioRecordButton_" +index);
+    getElement().setId("WaveformPostAudioRecordButton_" + index);
     this.audioType = audioType;
+   // System.out.println("WaveformPostAudioRecordButton : audio type " + audioType);
+    addStyleName("minWidthRecordButton");
+  }
+
+  @Override
+  protected boolean shouldAddToAudioTable() {
+    return true;
   }
 
   @Override
@@ -80,6 +87,10 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     return audioType;
   }
 
+  /**
+   * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
+   * @param result
+   */
   @Override
   public void useResult(AudioAnswer result) {
     recordAudioPanel.getImagesForPath(result.getPath());
