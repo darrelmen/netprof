@@ -60,7 +60,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
 
   /**
    * @see mitll.langtest.client.ExerciseListLayout#makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, boolean, mitll.langtest.client.user.UserFeedback, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
-   * @param secondRow
+   * @param secondRow add the section panel to this row
    * @param currentExerciseVPanel
    * @param service
    * @param feedback
@@ -68,7 +68,8 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @param showInOrder
    * @param controller
    * @param showTypeAhead
-   * @param instance          */
+   * @param instance
+   * */
   public FlexSectionExerciseList(Panel secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                  UserFeedback feedback,
                                  boolean showTurkToken, boolean showInOrder,
@@ -77,7 +78,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, showTypeAhead, instance);
 
     sectionPanel = new FluidContainer();
-    sectionPanel.getElement().setId("sectionPanel");
+    sectionPanel.getElement().setId("sectionPanel_"+instance);
 
     DOM.setStyleAttribute(sectionPanel.getElement(), "paddingLeft", "2px");
     DOM.setStyleAttribute(sectionPanel.getElement(), "paddingRight", "2px");
@@ -127,18 +128,15 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   }
 
   public void addWidgets() {
-    sectionPanel.clear();
-    sectionPanel.add(getWidgetsForTypes());
-  }
+    System.out.println("FlexSectionExerciseList.addWidgets " + sectionPanel.getElement().getId() + " : ");
 
-  /**
-   * @see #loadExercises(java.util.Map, String)
-   * @see #pushNewSectionHistoryToken()
-   * @param userID
-   */
-/*  protected void noSectionsGetExercises(long userID) {
-    super.getExercises(userID, true);
-  }*/
+    sectionPanel.clear();
+    System.out.println("FlexSectionExerciseList.addWidgets " + sectionPanel.getElement().getId() + " : " + sectionPanel.getElement().getChildCount());
+
+    sectionPanel.add(getWidgetsForTypes());
+    System.out.println("\tFlexSectionExerciseList.addWidgets " + sectionPanel.getElement().getChildCount());
+
+  }
 
   /**
    * Assume for the moment that the first type has the largest elements... and every other type nests underneath it.
@@ -147,6 +145,8 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @see mitll.langtest.client.list.ListInterface#getExercises(long, boolean)
    */
   private Panel getWidgetsForTypes() {
+    System.out.println("FlexSectionExerciseList.getWidgetsForTypes ");
+
     final FluidContainer container = new FluidContainer();
     container.getElement().setId("typeOrderContainer");
     DOM.setStyleAttribute(container.getElement(), "paddingLeft", "2px");
@@ -159,7 +159,9 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
 
   private void getTypeOrder(final FluidContainer container) {
     typeOrder = controller.getStartupInfo().getTypeOrder();
-    addButtonRow(controller.getStartupInfo().getSectionNodes(), container, typeOrder, !controller.isGoodwaveMode());
+    System.out.println("FlexSectionExerciseList.getTypeOrder typeOrder " + typeOrder);
+
+      addButtonRow(controller.getStartupInfo().getSectionNodes(), container, typeOrder, !controller.isGoodwaveMode());
   }
 
   @Override
@@ -174,7 +176,8 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    */
   private void addButtonRow(List<SectionNode> rootNodes, FluidContainer container, Collection<String> types,
                             boolean addInstructions) {
-    System.out.println("addButtonRow (success) for user = " + userID + " got types " + types + " num root nodes " + rootNodes.size() + " instance " + instance);
+    System.out.println("FlexSectionExerciseList.addButtonRow for user = " + userID + " got types " +
+      types + " num root nodes " + rootNodes.size() + " instance " + instance);
     if (types.isEmpty()) {
       System.err.println("huh? types is empty?");
       return;
