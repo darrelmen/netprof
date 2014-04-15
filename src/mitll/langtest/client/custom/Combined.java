@@ -41,7 +41,7 @@ public class Combined<T extends ExerciseShell> extends TabContainer {
     this.feedback = feedback;
   }
 
-  public Panel getButtonRow2(Panel secondAndThird) {
+  public Panel getTabPanel(Panel secondAndThird) {
     tabPanel = new TabPanel();
     tabPanel.getElement().setId("Combined_tabPanel");
     // chapter tab
@@ -102,7 +102,7 @@ public class Combined<T extends ExerciseShell> extends TabContainer {
             " ' target name '" + showEvent.getTarget().getName() + "'");*/
         String targetName = showEvent.getTarget() == null ? "" : showEvent.getTarget().toString();
 
-        //System.out.println("getButtonRow2 : got shown event : '" +showEvent + "' target '" + targetName + "'");
+        //System.out.println("getTabPanel : got shown event : '" +showEvent + "' target '" + targetName + "'");
 
         //boolean wasChapters = targetName.contains(CHAPTERS);
        /* Panel createdPanel = listInterface.getCreatedPanel();
