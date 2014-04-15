@@ -212,7 +212,7 @@ public class EventDAO extends DAO {
     return lists;
   }
 
-  private static final List<String> COLUMNS2 = Arrays.asList("id", "type", "exercise", "context", "userid", "timestamp", "hitID");
+  private static final List<String> COLUMNS2 = Arrays.asList("id", "type", "exercise", "context", "userid", "timestamp","time_millis", "hitID");
 
   /**
    * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
@@ -264,6 +264,9 @@ public class EventDAO extends DAO {
       cell = row.createCell(j++);
       cell.setCellValue(new Date(event.getTimestamp()));
       cell.setCellStyle(cellStyle);
+
+      cell = row.createCell(j++);
+      cell.setCellValue(event.getTimestamp());
 
       cell = row.createCell(j++);
       cell.setCellValue(event.getHitID());
