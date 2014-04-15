@@ -28,16 +28,20 @@ public class ExerciseListLayout {
   /**
    * Supports different flavors of exercise list -- Paging, Grading, and vanilla.
    *
-   * @see LangTest#makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, com.google.gwt.user.client.ui.Panel)
+   * @param secondRow add the section panel to this row
+
+   * @see LangTest#makeExerciseList
    */
   public ListInterface makeExerciseList(FluidRow secondRow,
                                         Panel exerciseListContainer, UserFeedback feedback,
                                         Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                         ExerciseController controller) {
     boolean isGrading = props.isGrading();
+    System.out.println("ExerciseListLayout.makeExerciseList : ------------->");
+
     this.exerciseList = makeExerciseList(secondRow, isGrading, feedback, currentExerciseVPanel, service, controller);
 
-    boolean hideExerciseList = (props.isMinimalUI() && !props.isGrading()) && !props.isAdminView();
+    boolean hideExerciseList = (props.isMinimalUI() && !isGrading) && !props.isAdminView();
     useExerciseList(exerciseListContainer);
     if (hideExerciseList) {
       exerciseList.hide();
@@ -55,7 +59,7 @@ public class ExerciseListLayout {
 
   /**
    * @see #makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.user.UserFeedback, com.google.gwt.user.client.ui.Panel, LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
-   * @param secondRow
+   * @param secondRow add the section panel to this row
    * @param isGrading
    * @param feedback
    * @param currentExerciseVPanel
@@ -69,13 +73,13 @@ public class ExerciseListLayout {
     boolean showTypeAhead = !props.isCRTDataCollectMode();
     if (isGrading) {
       return new GradedExerciseList(currentExerciseVPanel, service, feedback,
-        true, props.isEnglishOnlyMode(), controller,"grading");
+        true, props.isEnglishOnlyMode(), controller, "grading");
     } else {
       if (props.isShowSections()) {
-            System.out.println("makeExerciseList : making flex");
-            FlexSectionExerciseList flex = new FlexSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
-              props.isShowTurkToken(), props.showExercisesInOrder(), controller, showTypeAhead, "flex");
-            return flex;
+        System.out.println("makeExerciseList : making flex");
+        FlexSectionExerciseList flex = new FlexSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
+          props.isShowTurkToken(), props.showExercisesInOrder(), controller, showTypeAhead, "flex");
+        return flex;
       } else {
         return new PagingExerciseList(currentExerciseVPanel, service, feedback,
           null, controller, props.isShowTurkToken(), props.showExercisesInOrder(), showTypeAhead, "paging");
@@ -85,7 +89,7 @@ public class ExerciseListLayout {
 
   /**
    * @see #useExerciseList
-   * @param exerciseListContainer
+   * @param exerciseListContainer add exercise list inside this
    */
   private void addExerciseListOnLeftSide(Panel exerciseListContainer) {
     if (props.isTeacherView()) {
