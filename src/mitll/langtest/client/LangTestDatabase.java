@@ -52,7 +52,7 @@ public interface LangTestDatabase extends RemoteService {
   // answer DAO
   void addTextAnswer(int userID, CommonExercise exercise, int questionID, String answer, String answerType);
   AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int question, int user,
-                             int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults);
+                             int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults, boolean addToAudioTable);
 
   CommonExercise getNextUngradedExercise(String user, int expectedGrades, boolean englishOnly);
 
