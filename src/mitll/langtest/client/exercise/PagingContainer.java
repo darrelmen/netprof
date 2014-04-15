@@ -257,13 +257,15 @@ public class PagingContainer {
             boolean isDefect = state == CommonShell.STATE.DEFECT;
             boolean isFixed = state == CommonShell.STATE.FIXED;
             boolean isLL = shell.getSecondState() == CommonShell.STATE.ATTN_LL;
-            boolean approved = state == CommonShell.STATE.APPROVED;
+            boolean recorded = state == CommonShell.STATE.RECORDED;
+            boolean approved = state == CommonShell.STATE.APPROVED || recorded;
 
             boolean isSet = isDefect || isFixed || approved;
 
-       /*     if (isSet) {
-              System.out.println("shell " + shell.getID() + " state " + state + " defect " +isDefect + " fixed " + isFixed);
-            }*/
+            if (isSet) {
+              System.out.println("shell " + shell.getID() + " state " + state + " defect " +isDefect +
+                " fixed " + isFixed + " recorded " + recorded);
+            }
 
             String icon =
               approved ? "icon-check" :
