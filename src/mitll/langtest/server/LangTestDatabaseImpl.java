@@ -11,6 +11,7 @@ import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
+import mitll.langtest.server.audio.PathWriter;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.SectionHelper;
 import mitll.langtest.server.mail.MailSupport;
@@ -133,17 +134,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.list.ExerciseList#getExercises(long, boolean)
-   * @return
-   * @param reqID
-   */
-/*
-  public ExerciseListWrapper getExerciseIds(int reqID) {
-    return makeExerciseListWrapper(reqID, getExercises());
-  }
-*/
-
-  /**
+   * Supports lookup by id
+   *
    * @see mitll.langtest.client.list.PagingExerciseList#loadExercises(String, String)
    * @param reqID
    * @param typeToSelection
@@ -170,11 +162,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       } else {
         exercises = getExercises();
       }
-      if (prefix.isEmpty()) {
-
-      } else {           // now do a trie over matches
+      if (!prefix.isEmpty()) {
+             // now do a trie over matches
         ExerciseTrie trie = new ExerciseTrie(exercises, serverProps.getLanguage(), audioFileHelper.getSmallVocabDecoder());
         exercises = trie.getExercises(prefix);
+        if (exercises.isEmpty()) { // allow lookup by id
+          CommonExercise exercise = getExercise(prefix, userID);
+          if (exercise != null) exercises = Collections.singletonList(exercise);
+        }
       }
 
       return makeExerciseListWrapper(reqID, exercises, userID);
@@ -256,15 +251,20 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     CommonExercise firstExercise = exercises.isEmpty() ? null : exercises.iterator().next();
     if (firstExercise != null) {
       ensureMP3s(firstExercise);
-      addAnnotations(firstExercise); // todo do this in a better way
-
-      addPlayedMarkings(userID, firstExercise);
+      addAnnotationsAndAudio(userID, firstExercise);
       logger.debug("First is " + firstExercise);
     }
     List<CommonShell> exerciseShells = getExerciseShells(exercises);
     db.getUserListManager().markState(exerciseShells);
 
     return new ExerciseListWrapper(reqID, exerciseShells, firstExercise);
+  }
+
+  private void addAnnotationsAndAudio(long userID, CommonExercise firstExercise) {
+    addAnnotations(firstExercise); // todo do this in a better way
+    addPlayedMarkings(userID, firstExercise);
+    List<AudioAttribute> audioAttributes = db.getAudioDAO().getAudioAttributes(firstExercise.getID());
+    for (AudioAttribute attr : audioAttributes) firstExercise.addAudio(attr);
   }
 
   private void addPlayedMarkings(long userID, CommonExercise firstExercise) {
@@ -390,8 +390,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     List<CommonExercise> exercises = getExercises();
 
     CommonExercise byID = db.getCustomOrPredefExercise(id);  // allow custom items to mask out non-custom items
-    addAnnotations(byID);
-    addPlayedMarkings(userID, byID);
+    addAnnotationsAndAudio(userID, byID);
 
     if (byID == null) {
       logger.error("getExercise : huh? couldn't find exercise with id " + id + " when examining " + exercises.size() + " items");
@@ -888,13 +887,26 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param audioType regular or fast then slow audio recording
    * @param doFlashcard
    * @param recordInResults
+   * @param addToAudioTable
    * @return URL to audio on server and if audio is valid (not too short, etc.)
    */
   public AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int questionID,
-                                    int user, int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults) {
+                                    int user, int reqid, boolean flq, String audioType, boolean doFlashcard,
+                                    boolean recordInResults, boolean addToAudioTable) {
     CommonExercise exercise1 = getExercise(exercise,user);
-    return audioFileHelper.writeAudioFile(base64EncodedString, plan, exercise, exercise1, questionID, user, reqid,
+    AudioAnswer audioAnswer = audioFileHelper.writeAudioFile(base64EncodedString, plan, exercise, exercise1, questionID, user, reqid,
       flq, audioType, doFlashcard, recordInResults);
+
+    if (addToAudioTable && audioAnswer.isValid()) {
+      // TODO write or overwrite audio table entry
+      File fileRef = pathHelper.getAbsoluteFile(audioAnswer.getPath());
+      String destFileName = audioType + "_" + System.currentTimeMillis() + "_by_" + user + ".wav";
+     // String refAudio = getRefAudioPath(userExercise.getID(), fileRef, fast, overwrite);
+
+      String permanentAudioPath = new PathWriter().getPermanentAudioPath(pathHelper, fileRef, destFileName, true, exercise);
+      db.getAudioDAO().addOrUpdate(user, permanentAudioPath, exercise, System.currentTimeMillis(), audioType, audioAnswer.getDurationInMillis());
+    }
+    return audioAnswer;
   }
 
   void makeAutoCRT() { audioFileHelper.makeAutoCRT(relativeConfigDir, this, studentAnswersDB, this); }
