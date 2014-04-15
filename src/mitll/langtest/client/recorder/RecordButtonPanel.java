@@ -140,7 +140,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
       false,//!exercise.isPromptInEnglish(),
       audioType,
       doFlashcardAudio,
-      true, new AsyncCallback<AudioAnswer>() {
+      true, false, new AsyncCallback<AudioAnswer>() {
         public void onFailure(Throwable caught) {
           controller.logException(caught);
           if (tries > 0) {
