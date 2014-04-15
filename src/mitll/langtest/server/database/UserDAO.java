@@ -136,6 +136,8 @@ public class UserDAO extends DAO {
 */
 
   /**
+   * Not case sensitive.
+   *
    * @see DatabaseImpl#userExists(String)
    * @param id
    * @return
@@ -144,8 +146,8 @@ public class UserDAO extends DAO {
     int val = -1;
     try {
       Connection connection = database.getConnection();
-      PreparedStatement statement = connection.prepareStatement("SELECT id from users where userID='" +
-          id +
+      PreparedStatement statement = connection.prepareStatement("SELECT id from users where UPPER(userID)='" +
+          id.toUpperCase() +
           "'");
       ResultSet rs = statement.executeQuery();
       if (rs.next()) {

@@ -17,7 +17,7 @@ public abstract class TabContainer implements RequiresResize {
   TabPanel tabPanel;
 
   /**
-   * @see mitll.langtest.client.custom.Navigation#getButtonRow2(com.google.gwt.user.client.ui.Panel)
+   * @see mitll.langtest.client.custom.Navigation#getTabPanel(com.google.gwt.user.client.ui.Panel)
    * @see mitll.langtest.client.custom.Navigation#getListOperations(mitll.langtest.shared.custom.UserList, String)
    * @param toAddTo
    * @param iconType
@@ -56,7 +56,7 @@ public abstract class TabContainer implements RequiresResize {
   public Widget getNav(final Panel secondAndThird) {
     Panel container = new FlowPanel();
     container.getElement().setId("getNav_container");
-    Panel buttonRow = getButtonRow2(secondAndThird);
+    Panel buttonRow = getTabPanel(secondAndThird);
     buttonRow.getElement().setId("getNav_buttonRow");
 
     container.add(buttonRow);
@@ -68,6 +68,6 @@ public abstract class TabContainer implements RequiresResize {
   public Widget getContainer() {
     return container;
   }
-  protected abstract Panel getButtonRow2(Panel secondAndThird);
+  protected abstract Panel getTabPanel(Panel secondAndThird);
 
 }
