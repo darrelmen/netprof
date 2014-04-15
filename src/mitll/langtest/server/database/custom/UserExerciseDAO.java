@@ -524,23 +524,6 @@ public class UserExerciseDAO extends DAO {
   public void update(UserExercise userExercise, boolean createIfDoesntExist) {
     try {
       Connection connection = database.getConnection();
-
-      // TODO : consider making this an actual prepared statement?
-/*
-      String sql = "UPDATE " + USEREXERCISE +
-        " " +
-        "SET " +
-        "english='" + fixSingleQuote(userExercise.getEnglish()) + "', " +
-        "foreignLanguage='" + fixSingleQuote(userExercise.getForeignLanguage()) + "', " +
-        TRANSLITERATION + "='" + fixSingleQuote(userExercise.getTransliteration()) + "', " +
-        "refAudio='" + userExercise.getRefAudio() + "', " +
-        "slowAudioRef='" + userExercise.getSlowAudioRef() + "' " +
-      //  "slowAudioRef='" + userExercise.getSlowAudioRef() + "' " +
-        "WHERE " +
-          EXERCISEID +
-          "='" + userExercise.getID() +"'";*/
-
-
       String sql = "UPDATE " + USEREXERCISE +
         " " +
         "SET " +
@@ -554,7 +537,6 @@ public class UserExerciseDAO extends DAO {
 
       int ii = 1;
 
-    //  statement.setString(ii++, fixSingleQuote(userExercise.getEnglish()));
       statement.setString(ii++, userExercise.getEnglish());
       statement.setString(ii++, userExercise.getForeignLanguage());
       statement.setString(ii++, userExercise.getTransliteration());
@@ -563,7 +545,6 @@ public class UserExerciseDAO extends DAO {
       statement.setTimestamp(ii++, new Timestamp(System.currentTimeMillis()));
       statement.setString(ii++, userExercise.getID());
 
-      //PreparedStatement statement = connection.prepareStatement(sql);
       int i = statement.executeUpdate();
 
       if (i == 0) {
