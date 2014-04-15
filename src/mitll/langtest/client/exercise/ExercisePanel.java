@@ -83,7 +83,7 @@ public class ExercisePanel extends VerticalPanel implements
   public ExercisePanel(final CommonExercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                        final ExerciseController controller, ListInterface exerciseList) {
     this.exercise = e;
-    System.out.println("ExercisePanel.ExercisePanel : exercise is " + exercise.getID());
+    //System.out.println("ExercisePanel.ExercisePanel : exercise is " + exercise.getID());
     this.controller = controller;
     this.service = service;
     this.exerciseList = exerciseList;
@@ -99,7 +99,7 @@ public class ExercisePanel extends VerticalPanel implements
     }
     hp.setHorizontalAlignment(rightAlignContent ? HasHorizontalAlignment.ALIGN_RIGHT : HasHorizontalAlignment.ALIGN_LEFT);
     hp.add(getQuestionContent(e, true));
-    boolean showInstructions = !(e.getContent().toLowerCase().contains("listen") || controller.isDataCollectMode());   // hack
+    boolean showInstructions = !(getExerciseContent(e).toLowerCase().contains("listen") || controller.isDataCollectMode());   // hack
     if (showInstructions) {
       addInstructions();
     }
@@ -129,8 +129,8 @@ public class ExercisePanel extends VerticalPanel implements
     add(w);
   }
 
-  private Widget getQuestionContent(CommonExercise e, boolean includeItemID) {
-    String content = e.getContent();
+  protected Widget getQuestionContent(CommonExercise e, boolean includeItemID) {
+    String content = getExerciseContent(e);
 
     //System.out.println("getQuestionContent : content is " + content);
  /*   if (content.contains("Listen")) {
@@ -146,6 +146,10 @@ public class ExercisePanel extends VerticalPanel implements
         return maybeRTLContent;
       }
    // }
+  }
+
+  protected String getExerciseContent(CommonExercise e) {
+    return e.getContent();
   }
 
   Widget getContentScroller(HTML maybeRTLContent) {
