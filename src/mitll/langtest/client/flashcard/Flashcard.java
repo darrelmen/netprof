@@ -3,7 +3,6 @@ package mitll.langtest.client.flashcard;
 import com.github.gwtbootstrap.client.ui.Dropdown;
 import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.NavLink;
-import com.github.gwtbootstrap.client.ui.NavPills;
 import com.github.gwtbootstrap.client.ui.Paragraph;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconSize;
@@ -29,7 +28,7 @@ public class Flashcard implements RequiresResize {
   private static final double MAX_FONT_EM = 1.8d;
   private static final int SLOP = 55;
   private static final String NEW_PRO_F1_PNG = "NewProF1.png";
-  private static final String NEW_PRO_F2_PNG = "NewProF2.png";
+  //private static final String NEW_PRO_F2_PNG = "NewProF2.png";
   private final boolean isAnonymous;
   private Paragraph appName;
   private Image flashcardImage;
