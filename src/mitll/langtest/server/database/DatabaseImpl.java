@@ -1105,9 +1105,6 @@ public class DatabaseImpl implements Database {
     Map<Long, Map<String, Result>> userToResultsRegular = resultDAO1.getUserToResults(true, russianCourseExamples.getUserDAO());
     System.out.println("got " + userToResultsRegular.size() + " keys " + userToResultsRegular.keySet());
 
-    // Map<String, Result> stringResultMap = userToResultsRegular.get(23l);
-    //  Result result = stringResultMap.get("1363");
-
     //  System.out.println("got " + result);
 
     Map<Long, Map<String, Result>> userToResultsSlow = resultDAO1.getUserToResults(false, russianCourseExamples.getUserDAO());
@@ -1123,15 +1120,11 @@ public class DatabaseImpl implements Database {
     Map<Long, Long> oldToNew = new HashMap<Long, Long>();
 
     for (long userid : userToResultsRegular.keySet()) {
-      User user = userMap.get(userid);
-      long l = npfRussian.addUser(user);
-      oldToNew.put(user.getId(), l);
+      copyUser(npfRussian, userMap, oldToNew, userid);
     }
 
     for (long userid : userToResultsSlow.keySet()) {
-      User user = userMap.get(userid);
-      long l = npfRussian.addUser(user);
-      oldToNew.put(user.getId(), l);
+      copyUser(npfRussian, userMap, oldToNew, userid);
     }
 
     // so now we have the users in the database
@@ -1143,6 +1136,19 @@ public class DatabaseImpl implements Database {
     copyAudio(userToResultsSlow, oldToNew, audioDAO);
   }
 
+  private static void copyUser(DatabaseImpl npfRussian, Map<Long, User> userMap, Map<Long, Long> oldToNew, long userid) {
+    User user = userMap.get(userid);
+    int i = npfRussian.userExists(user.getUserID());
+    long l = i != -1 ? i : npfRussian.addUser(user);
+    oldToNew.put(user.getId(), l);
+  }
+
+  /**
+   * TODO : deal with the user ids being the same after toLowerCase
+   * @param userToResultsRegular
+   * @param oldToNew
+   * @param audioDAO
+   */
   protected static void copyAudio(Map<Long, Map<String, Result>> userToResultsRegular, Map<Long, Long> oldToNew, AudioDAO audioDAO) {
     int count = 0;
     for (Map.Entry<Long, Map<String, Result>> userToExIdToResult : userToResultsRegular.entrySet()) {
