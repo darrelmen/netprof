@@ -942,16 +942,14 @@ td > h5 {
     padding-top : 5px;
 }
 
-/*
-#UsernameContainer > .nav {
-    margin-bottom: 0;
-}
-*/
-
 .cogStyle {
     list-style: none outside none;
 }
 
 .englishFont {
     font-family: georgia,"times new roman",times,serif;
+}
+
+.minWidthRecordButton {
+    min-width: 60px;
 }
