@@ -38,7 +38,7 @@ class CreateListDialog extends BasicDialog {
   }
 
   /**
-   * @see mitll.langtest.client.custom.Navigation#getButtonRow2(com.google.gwt.user.client.ui.Panel)
+   * @see mitll.langtest.client.custom.Navigation#getTabPanel(com.google.gwt.user.client.ui.Panel)
    * @param thirdRow
    * @seex
    */
