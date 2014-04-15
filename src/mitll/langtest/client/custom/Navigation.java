@@ -142,16 +142,18 @@ public class Navigation extends TabContainer implements RequiresResize {
   /**
    * @return
    * @param secondAndThird
-   * @see mitll.langtest.client.LangTest#onModuleLoad2
+   * @see mitll.langtest.client.LangTest#resetClassroomState()
    */
   public Widget getNav(final Panel secondAndThird) {
-    Panel container = new FlowPanel();
-    container.getElement().setId("getNav_container");
-    Panel buttonRow = getButtonRow2(secondAndThird);
-    buttonRow.getElement().setId("getNav_buttonRow");
+  //  Panel container = new FlowPanel();
+  //  container.getElement().setId("getNav_container");
+    System.out.println("getNav using " + secondAndThird.getElement().getId());
+    //Panel buttonRow = getTabPanel(secondAndThird);
+   // buttonRow.getElement().setId("getNav_buttonRow");
 
-    container.add(buttonRow);
-    this.container = container;
+    Panel tabPanel1 = getTabPanel(secondAndThird);
+  //  container.add(tabPanel1);
+    this.container = tabPanel1;
     return container;
   }
 
@@ -165,12 +167,12 @@ public class Navigation extends TabContainer implements RequiresResize {
 
   /**
    * @see #getNav(com.google.gwt.user.client.ui.Panel)
-   * @param secondAndThird
+   * @param contentForChaptersTab
    * @return
    */
-  protected Panel getButtonRow2(Panel secondAndThird) {
+  protected Panel getTabPanel(Panel contentForChaptersTab) {
     tabPanel = new TabPanel();
-
+    tabPanel.getElement().setId("tabPanel");
     boolean combinedMode = controller.getProps().isCombinedMode();
 
     // your list tab
@@ -221,7 +223,7 @@ public class Navigation extends TabContainer implements RequiresResize {
 
     // chapter tab
     final TabAndContent chapters = makeTab(tabPanel, combinedMode ? IconType.LIGHTBULB : IconType.TH_LIST, !combinedMode ? CHAPTERS : LEARN_PRONUNCIATION);
-    chapters.content.add(secondAndThird);
+    chapters.content.add(contentForChaptersTab);
     chapters.tab.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -275,13 +277,12 @@ public class Navigation extends TabContainer implements RequiresResize {
             " ' target name '" + showEvent.getTarget().getName() + "'");*/
         String targetName = showEvent.getTarget() == null ? "" : showEvent.getTarget().toString();
 
-        //System.out.println("getButtonRow2 : got shown event : '" +showEvent + "' target '" + targetName + "'");
-
         boolean wasChapters = targetName.contains(CHAPTERS);
         Panel createdPanel = listInterface.getCreatedPanel();
         boolean hasCreated = createdPanel != null;
+        System.out.println("getTabPanel : got shown event : '" +showEvent + "' target '" + targetName + "' hasCreated " + hasCreated);
         if (hasCreated && wasChapters) {
-          //System.out.println("\tgot chapters! created panel :  has created " + hasCreated + " was revealed  " + createdPanel.getClass());
+          System.out.println("\tgot chapters! created panel :  has created " + hasCreated + " was revealed  " + createdPanel.getClass());
           ((GoodwaveExercisePanel) createdPanel).wasRevealed();
         }
       }
@@ -298,7 +299,7 @@ public class Navigation extends TabContainer implements RequiresResize {
   }
 
   /**
-   * @see #getButtonRow2(com.google.gwt.user.client.ui.Panel)
+   * @see #getTabPanel(com.google.gwt.user.client.ui.Panel)
    * @see #showMyLists(boolean, boolean)
    * @see #makeDeleteButton(mitll.langtest.shared.custom.UserList, boolean)
    * @see #clickOnYourLists(long)
@@ -321,8 +322,7 @@ public class Navigation extends TabContainer implements RequiresResize {
     if (value.isEmpty()) {   // no previous tab
       service.getListsForUser(user, true, true, new AsyncCallback<Collection<UserList>>() {
         @Override
-        public void onFailure(Throwable caught) {
-        }
+        public void onFailure(Throwable caught) {}
 
         @Override
         public void onSuccess(Collection<UserList> result) {
@@ -468,7 +468,7 @@ public class Navigation extends TabContainer implements RequiresResize {
   }
 
   /**
-   * @see #getButtonRow2(com.google.gwt.user.client.ui.Panel)
+   * @see #getTabPanel(com.google.gwt.user.client.ui.Panel)
    * @param contentPanel
    */
   private void viewReview(final Panel contentPanel) {
@@ -539,7 +539,7 @@ public class Navigation extends TabContainer implements RequiresResize {
     if (controller.isReviewMode()) {
       defectHelper.onResize();
       reviewItem.onResize();
-    } else {
+    } else if (editItem != null) {
       editItem.onResize();
     }
   }
