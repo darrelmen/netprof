@@ -204,6 +204,10 @@ public class HistoryExerciseList extends PagingExerciseList {
     boolean hasNonClearSelection = false;
     List<String> typesWithSelections = new ArrayList<String>();
     Collection<String> typeOrder = getTypeOrder(selectionState2);
+    if (typeOrder == null) {
+      System.err.println("huh? type order is null for " + selectionState2);
+      typeOrder = Collections.emptyList();
+    }
     for (String type : typeOrder) {
       Collection<String> selections = selectionState2.get(type);
       if (selections.iterator().next().equals(HistoryExerciseList.ANY)) {
@@ -296,13 +300,14 @@ public class HistoryExerciseList extends PagingExerciseList {
   }
 
   private boolean debug = true;
+
   /**
      * Respond to push a history token.
      * @param event
      */
   @Override
   public void onValueChange(ValueChangeEvent<String> event) {
-    if (debug) System.out.println(new Date() +" HistoryExerciseList.onValueChange : ------ start ---- " + instance);
+    if (debug && false) System.out.println(new Date() +" HistoryExerciseList.onValueChange : ------ start ---- " + instance);
 
     String rawToken = getTokenFromEvent(event);
     SelectionState selectionState1 = getSelectionState(rawToken);
