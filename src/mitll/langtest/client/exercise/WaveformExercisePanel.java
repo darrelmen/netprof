@@ -1,5 +1,8 @@
 package mitll.langtest.client.exercise;
 
+import com.github.gwtbootstrap.client.ui.Heading;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.ProvidesResize;
@@ -10,6 +13,8 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.CommonShell;
+import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.Result;
 
 import java.util.ArrayList;
@@ -38,6 +43,12 @@ public class WaveformExercisePanel extends ExercisePanel {
                                final ExerciseController controller, ListInterface exerciseList) {
     super(e, service, userFeedback, controller, exerciseList);
     getElement().setId("WaveformExercisePanel");
+    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      @Override
+      public void execute() {
+        getParent().addStyleName("userNPFContent");
+      }
+    });
   }
 
   public void setBusy(boolean v) {
@@ -48,7 +59,11 @@ public class WaveformExercisePanel extends ExercisePanel {
   public boolean isBusy() {
     return isBusy;
   }
+  protected void addInstructions() {  add(new Heading(4, "Record the word or phrase twice, first at normal speed, then again at slow speed."));  }
 
+  protected String getExerciseContent(CommonExercise e) {
+    return ExerciseFormatter.getArabic(e.getForeignLanguage());
+  }
   /**
    * Has a answerPanel mark to indicate when the saved audio has been successfully posted to the server.
    *
@@ -124,7 +139,7 @@ public class WaveformExercisePanel extends ExercisePanel {
    */
   @Override
   protected String getQuestionPrompt(boolean promptInEnglish) {
-    return getSpokenPrompt(promptInEnglish);
+    return "";//getSpokenPrompt(promptInEnglish);
   }
 
   /**
@@ -138,6 +153,18 @@ public class WaveformExercisePanel extends ExercisePanel {
   @Override
   public void postAnswers(ExerciseController controller, CommonExercise completedExercise) {
     // exerciseList.addCompleted(completedExercise.getID());
+    completedExercise.setState(CommonShell.STATE.RECORDED);
+    exerciseList.setState(completedExercise.getID(), CommonShell.STATE.RECORDED);
+    exerciseList.redraw();
+/*    service.setExerciseState(completedExercise.getID(), CommonShell.STATE.RECORDED, controller.getUser(), new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {
+      }
+
+      @Override
+      public void onSuccess(Void result) {
+      }
+    });*/
     exerciseList.loadNextExercise(completedExercise);
   }
 }
