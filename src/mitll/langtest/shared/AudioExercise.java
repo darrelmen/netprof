@@ -112,6 +112,21 @@ public class AudioExercise extends ExerciseShell {
     return males;
   }
 
+  public AudioAttribute getRecordingsBy(long userID, boolean regularSpeed) {
+    List<AudioAttribute> mine = new ArrayList<AudioAttribute>();
+    for (AudioAttribute attr : getRecordingsBy(userID)) {
+      if (attr.isRegularSpeed() && regularSpeed || (attr.isSlow() && !regularSpeed)) return attr;
+    }
+    return null;
+  }
+  public List<AudioAttribute> getRecordingsBy(long userID) {
+    List<AudioAttribute> mine = new ArrayList<AudioAttribute>();
+    for (AudioAttribute attr : getAudioAttributes()) {
+      if (attr.getUser().getId() == userID) mine.add(attr);
+    }
+    return mine;
+  }
+
   public Map<MiniUser, List<AudioAttribute>> getUserMap(boolean isMale) {
     Map<MiniUser, List<AudioAttribute>> userToAudio = new HashMap<MiniUser, List<AudioAttribute>>();
     for (AudioAttribute attribute : getByGender(isMale)) {
