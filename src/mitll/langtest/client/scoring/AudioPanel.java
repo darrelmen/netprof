@@ -55,7 +55,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
   private final ScoreListener gaugePanel;
   protected final String exerciseID;
-  String audioPath;
+  protected String audioPath;
   private final Map<String,Integer> reqs = new HashMap<String, Integer>();
   private int reqid;
 
@@ -109,7 +109,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     this.gaugePanel = gaugePanel;
     if (debug) System.out.println("AudioPanel : gauge panel " + gaugePanel);
     this.showSpectrogram = showSpectrogram;
-    if (showSpectrogram) System.out.println("AudioPanel : showSpectrogram! ");
+  //  if (showSpectrogram) System.out.println("AudioPanel : showSpectrogram! ");
     this.rightMargin = rightMargin;
     this.exerciseID = exerciseID;
   }
