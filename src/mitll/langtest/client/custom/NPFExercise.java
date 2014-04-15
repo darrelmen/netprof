@@ -78,7 +78,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
   }
 
   /**
-   * @see Navigation#getButtonRow2(com.google.gwt.user.client.ui.Panel)
+   * @see Navigation#getTabPanel(com.google.gwt.user.client.ui.Panel)
    */
   @Override
   public void wasRevealed() { populateListChoices(exercise, controller, addToList);  }
