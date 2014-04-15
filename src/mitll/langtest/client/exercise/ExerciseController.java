@@ -57,7 +57,6 @@ public interface ExerciseController {
   boolean isReviewMode();
 
 
-  void logEvent(Tab button, String widgetType, String exid, String context);
 
   boolean showCompleted();
 
@@ -82,5 +81,6 @@ public interface ExerciseController {
 
   void register(Button button, String exid, String context);
 
+  void logEvent(Tab button, String widgetType, String exid, String context);
   void logEvent(UIObject button, String widgetType, String exid, String context);
 }
