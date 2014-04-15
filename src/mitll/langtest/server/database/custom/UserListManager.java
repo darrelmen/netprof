@@ -3,6 +3,7 @@ package mitll.langtest.server.database.custom;
 import audio.tools.FileCopier;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.AudioConversion;
+import mitll.langtest.server.audio.PathWriter;
 import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
@@ -95,15 +96,21 @@ public class UserListManager {
     setStateOnExercises(secondStateDAO.getExerciseToState(), false);
   }
 
-  protected void setStateOnExercises(Map<String, ReviewedDAO.StateCreator> exerciseToState, boolean firstState) {
+  private void setStateOnExercises(Map<String, ReviewedDAO.StateCreator> exerciseToState, boolean firstState) {
     logger.debug("found " + exerciseToState.size() + " state markings");
 
     Set<String> userExercisesRemaining = setStateOnPredefExercises(exerciseToState, firstState);
     setStateOnUserExercises(exerciseToState, userExercisesRemaining, firstState);
   }
 
+  /**
+   * @see #setStateOnExercises(java.util.Map, boolean)
+   * @param exerciseToState
+   * @param firstState
+   * @return
+   */
   // set state on predef exercises
-  protected Set<String> setStateOnPredefExercises(Map<String, ReviewedDAO.StateCreator> exerciseToState, boolean firstState) {
+  private Set<String> setStateOnPredefExercises(Map<String, ReviewedDAO.StateCreator> exerciseToState, boolean firstState) {
     int count = 0;
     Set<String> userExercisesRemaining = new HashSet<String>(exerciseToState.keySet());
     for (Map.Entry<String,  ReviewedDAO.StateCreator> pair : exerciseToState.entrySet()) {
@@ -183,16 +190,19 @@ public class UserListManager {
 
   /**
    * @see #getReviewList
-   * @see mitll.langtest.server.LangTestDatabaseImpl#makeExerciseListWrapper(int, java.util.Collection)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#makeExerciseListWrapper
    * @param shells
    */
   public void markState(Collection<? extends CommonShell> shells) {
     Map<String, ReviewedDAO.StateCreator> exerciseToState = reviewedDAO.getExerciseToState();
 
+    logger.debug("markState " + shells.size() + " shells, " + exerciseToState.size() + " states");
     for (CommonShell shell : shells) {
       ReviewedDAO.StateCreator stateCreator = exerciseToState.get(shell.getID());
       if (stateCreator != null) {
         shell.setState(stateCreator.state);
+        if (shell.getID().equals("0")) logger.debug("\tmarkState on " +shell + " of " + stateCreator.state);
+
       }
     }
 
@@ -538,7 +548,7 @@ public class UserListManager {
     File fileRef = pathHelper.getAbsoluteFile(refAudio1);
     long now = System.currentTimeMillis();
     String fast = FAST + "_"+ now +"_by_" +userExercise.getCreator()+".wav";
-    String refAudio = getRefAudioPath(userExercise, fileRef, fast, overwrite);
+    String refAudio = getRefAudioPath(userExercise.getID(), fileRef, fast, overwrite);
     userExercise.setRefAudio(refAudio);
     //logger.debug("fixAudioPaths : for " + userExercise.getID() + " fast is " + fast + " size " + FileUtils.size(refAudio));
 
@@ -546,7 +556,7 @@ public class UserListManager {
       fileRef = pathHelper.getAbsoluteFile(userExercise.getSlowAudioRef());
       String slow = SLOW + "_"+ now+"_by_" + userExercise.getCreator()+ ".wav";
 
-      refAudio = getRefAudioPath(userExercise, fileRef, slow, overwrite);
+      refAudio = getRefAudioPath(userExercise.getID(), fileRef, slow, overwrite);
       logger.debug("fixAudioPaths : for " + userExercise.getID()+ " slow is " + refAudio + " size " + FileUtils.size(refAudio));
 
       userExercise.setSlowRefAudio(refAudio);
@@ -558,24 +568,30 @@ public class UserListManager {
    *
    * Also normalizes the audio level.
    *
-   * @param userExercise
+   * @param id
    * @param fileRef
-   * @param fast
+   * @param destFileName
    * @param overwrite
-   * @return
+   * @return new, permanent audio path
+   * @see #fixAudioPaths(mitll.langtest.shared.custom.UserExercise, boolean)
    */
-  private String getRefAudioPath(UserExercise userExercise, File fileRef, String fast, boolean overwrite) {
+  private String getRefAudioPath(String id, File fileRef, String destFileName, boolean overwrite) {
+   // String id = userExercise.getID();
+    return new PathWriter().getPermanentAudioPath(pathHelper, fileRef, destFileName, overwrite, id);
+  }
+
+/*  private String getPermanentAudioPath(File fileRef, String destFileName, boolean overwrite, String id) {
     final File bestDir = pathHelper.getAbsoluteFile("bestAudio");
     if (!bestDir.exists() && !bestDir.mkdir()) {
       if (!bestDir.exists()) logger.warn("huh? couldn't make " + bestDir.getAbsolutePath());
     }
-    File bestDirForExercise = new File(bestDir, userExercise.getID());
+    File bestDirForExercise = new File(bestDir, id);
     if (!bestDirForExercise.exists() && !bestDirForExercise.mkdir()) {
       if (!bestDirForExercise.exists()) logger.warn("huh? couldn't make " + bestDirForExercise.getAbsolutePath());
     }
-    File destination = new File(bestDirForExercise, fast);
+    File destination = new File(bestDirForExercise, destFileName);
     //logger.debug("getRefAudioPath : copying from " + fileRef +  " to " + destination.getAbsolutePath());
-    String s = "bestAudio" + File.separator + userExercise.getID() + File.separator + fast;
+    String s = "bestAudio" + File.separator + id + File.separator + destFileName;
     //logger.debug("getRefAudioPath : dest path    " + bestDirForExercise.getPath() + " vs " +s);
     if (!fileRef.equals(destination)) {
       new FileCopier().copy(fileRef.getAbsolutePath(), destination.getAbsolutePath());
@@ -593,7 +609,7 @@ public class UserListManager {
     if (wavFile != null) {
       new AudioConversion().ensureWriteMP3(wavFile, pathHelper.getInstallPath(), overwrite);
     }
-  }
+  }*/
 
   public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
     this.userExerciseDAO = userExerciseDAO;
@@ -637,7 +653,7 @@ public class UserListManager {
   public boolean listExists(long id) {  return userListDAO.getWhere(id, false) != null; }
 
   /**
-   * @see mitll.langtest.server.database.ExcelImport#addDefects(java.util.Map, mitll.langtest.shared.CommonExercise)
+   * @see mitll.langtest.server.database.ExcelImport#addDefects
    * @param exerciseID
    * @param field
    * @param comment
