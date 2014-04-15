@@ -11,7 +11,11 @@ import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
+import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.Result;
+
+import java.util.List;
 
 /**
  * A waveform record button and a play audio button.
@@ -50,6 +54,16 @@ public class RecordAudioPanel extends AudioPanel {
     this.exercisePanel = widgets;
     this.index = index;
     this.exercise = exercise;
+
+    AudioAttribute attribute =
+      audioType.equals(Result.AUDIO_TYPE_REGULAR) ? exercise.getRecordingsBy(controller.getUser(), true) :
+        audioType.equals(Result.AUDIO_TYPE_SLOW) ? exercise.getRecordingsBy(controller.getUser(), false) : null;
+/*    System.out.println("RecordAudioPanel for " + exercise.getID() +
+      " audio type " + audioType + " ref " + exercise.getRefAudio() + " path " + attribute);*/
+    if (attribute != null) {
+      this.audioPath = attribute.getAudioRef();
+    }
+
     addWidgets("", audioType);
   }
 
