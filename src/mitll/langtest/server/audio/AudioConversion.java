@@ -86,7 +86,7 @@ public class AudioConversion {
   /**
    * Also writes an MP3 file equivalent.
    *
-   * @see mitll.langtest.server.audio.AudioFileHelper#writeAudioFile(String, String, String, mitll.langtest.shared.CommonExercise, int, int, int, boolean, String, boolean, boolean)
+   * @see AudioFileHelper#writeAudioFile(String, String, String, mitll.langtest.shared.CommonExercise, int, int, int, boolean, String, boolean, boolean)
    * @param base64EncodedString audio bytes from the client
    * @param file where we want to write the wav file to
    * @return true if audio is valid (not too short, not silence)
