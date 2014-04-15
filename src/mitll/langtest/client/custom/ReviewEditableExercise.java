@@ -232,12 +232,10 @@ class ReviewEditableExercise extends EditableExercise {
 
         @Override
         public void onSuccess(Void result) {
-          System.out.println("\tdoAfterEditComplete : predefinedContentList reload ");
-          //predefinedContentList.removeCompleted(id);
+          //System.out.println("\tdoAfterEditComplete : predefinedContentList reload ");
           predefinedContentList.reload();
-
-          CommonShell t = exerciseList.forgetExercise(id);
-          System.out.println("\tdoAfterEditComplete : forgot " + t);
+          /*CommonShell t =*/ exerciseList.forgetExercise(id);
+          //System.out.println("\tdoAfterEditComplete : forgot " + t);
         }
       });
     }
