@@ -46,6 +46,9 @@ public class AudioAttribute implements IsSerializable {
     this.user = user;
     if (type.equals(Result.AUDIO_TYPE_REGULAR)) markRegular();
     else if (type.equals(Result.AUDIO_TYPE_SLOW)) markSlow();
+    else {
+      attributes = new HashMap<String, String>();
+    }
   }
 
   public AudioAttribute(String audioRef) {
