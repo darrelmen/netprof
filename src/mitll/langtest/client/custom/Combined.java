@@ -41,8 +41,8 @@ public class Combined<T extends ExerciseShell> extends TabContainer {
     this.feedback = feedback;
   }
 
-  public Panel getTabPanel(Panel secondAndThird) {
-    tabPanel = new TabPanel();
+  public Panel getTabPanel(Panel secondAndThird) {   return null;
+    /*tabPanel = new TabPanel();
     tabPanel.getElement().setId("Combined_tabPanel");
     // chapter tab
     final TabAndContent chapters = makeTab(tabPanel, IconType.LIGHTBULB, LEARN_PRONUNCIATION);
@@ -97,29 +97,29 @@ public class Combined<T extends ExerciseShell> extends TabContainer {
     tabPanel.addShowHandler(new TabPanel.ShowEvent.Handler() {
       @Override
       public void onShow(TabPanel.ShowEvent showEvent) {
-       /* System.out.println("got shown event : '" +showEvent + "'\n" +
+       *//* System.out.println("got shown event : '" +showEvent + "'\n" +
             "\ntarget " + showEvent.getTarget()+
-            " ' target name '" + showEvent.getTarget().getName() + "'");*/
+            " ' target name '" + showEvent.getTarget().getName() + "'");*//*
         String targetName = showEvent.getTarget() == null ? "" : showEvent.getTarget().toString();
 
         //System.out.println("getTabPanel : got shown event : '" +showEvent + "' target '" + targetName + "'");
 
         //boolean wasChapters = targetName.contains(CHAPTERS);
-       /* Panel createdPanel = listInterface.getCreatedPanel();
+       *//* Panel createdPanel = listInterface.getCreatedPanel();
         boolean hasCreated = createdPanel != null;
         if (hasCreated && wasChapters) {
           System.out.println("\tgot chapters! created panel :  has created " + hasCreated + " was revealed  " + createdPanel.getClass());
           ((GoodwaveExercisePanel) createdPanel).wasRevealed();
-        }*/
+        }*//*
       }
     });
 
-    return tabPanel;    // TODO - consider how to tell panels when they are hidden by tab changes
+    return tabPanel;    // TODO - consider how to tell panels when they are hidden by tab changes*/
   }
 
   @Override
   public void showInitialState() {
-    tabPanel.selectTab(1); // for now
+    /*tabPanel.selectTab(1);*/ // for now
   }
 
   @Override
