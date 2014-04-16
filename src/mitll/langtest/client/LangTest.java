@@ -393,8 +393,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     modeSelect();
 
-    navigation = //getProps().isCombinedMode() ? new Combined(service, userManager, this, exerciseList, this) :
-      new Navigation(service, userManager, this, exerciseList, this);
+    navigation = new Navigation(service, userManager, this, exerciseList, this);
+
+    if (getProps().isClassroomMode()) {
+      firstRow.add(navigation.getNav(bothSecondAndThird));
+    }
+    else {
+      firstRow.add(bothSecondAndThird);
+    }
 
     return bothSecondAndThird;
   }
@@ -643,9 +649,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * This determines which kind of exercise we're going to do.
    * @see #gotUser(long)
    */
-  private void setFactory(final long userID) {
+/*  private void setFactory(final long userID) {
     doEverythingAfterFactory(userID);
-  }
+  }*/
 
   private void reallySetFactory() {
     final LangTest outer = this;
@@ -736,23 +742,24 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public void gotUser(long userID) {
     //System.out.println("LangTest.gotUser : got user " + userID);
     flashcard.setUserName(getGreeting());
-    setFactory(userID);
+    doEverythingAfterFactory(userID);
     logEvent("No widget","UserLoging","N/A","User Login");
   }
 
   private boolean doEverythingAfterFactory(long userID) {
-    final LangTest outer = this;
+    //final LangTest outer = this;
     if (userID != lastUser || (props.isGoodwaveMode() || props.isFlashCard() && !props.isTimedGame())) {
       System.out.println("doEverythingAfterFactory : user changed - new " + userID + " vs last " + lastUser + " audio type " +getAudioType());
       if (!shouldCollectAudio() || flashRecordPanel.gotPermission()) {
-        if (getAudioType().equals(Result.AUDIO_TYPE_RECORDER)) {
+   /*     if (getAudioType().equals(Result.AUDIO_TYPE_RECORDER)) {   // hack!
           exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer, exerciseList) {
             @Override
             public Panel getExercisePanel(CommonExercise e) {
               return new WaveformExercisePanel(e, service, outer, outer, exerciseList);
             }
           }, userManager, 1);
-        }
+        }*/
+        reallySetFactory();
 
         if (exerciseList != null) {
 //          System.out.println("\tdoEverythingAfterFactory : " + userID + " get exercises");
@@ -770,45 +777,50 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       lastUser = userID;
 
       return true;
-    } else if (props.isTimedGame()) {
+    } /*else if (props.isTimedGame()) {
       exerciseList.reloadExercises();
       return true;
-    } else return false;
+    }*/
+    else return false;
   }
 
   /**
    * @see #doEverythingAfterFactory(long)
    */
   private void resetClassroomState() {
+    navigation.showInitialState();
+  }
+  /*private void resetClassroomState() {
+
     //if (changeLayout) {
    // Panel bothSecondAndThird = populateRootPanel();
     //  changeLayout = false;
    // }
     System.out.println("resetClassroomState audio type " + getAudioType());
 
-/*    if (navigation != null && navigation.getContainer() != null) {
+*//*    if (navigation != null && navigation.getContainer() != null) {
       firstRow.remove(navigation.getContainer());
       System.out.println("\t2 resetClassroomState  normal nav view " + firstRow.getElement().getId() + " has " + firstRow.getElement().getChildCount());
-    }*/
+    }*//*
 
     firstRow.clear();
 
     if (getProps().isClassroomMode() && !getAudioType().equals(Result.AUDIO_TYPE_RECORDER)) {
-/*
+*//*
       if (getAudioType().equals(Result.AUDIO_TYPE_RECORDER)) {
         System.out.println("\t resetClassroomState  recorder view "+ firstRow.getElement().getId() + " has " + firstRow.getElement().getChildCount());
 
       }
       else {
-*/
+*//*
       System.out.println("\tresetClassroomState  normal nav view " + firstRow.getElement().getId() + " has " + firstRow.getElement().getChildCount());
 
 
    //   firstRow.remove(bothSecondAndThird);
       System.out.println("\t3 resetClassroomState  normal nav view " + firstRow.getElement().getId() + " has " + firstRow.getElement().getChildCount());
 
-/*      navigation = //getProps().isCombinedMode() ? new Combined(service, userManager, this, exerciseList, this) :
-        new Navigation(service, userManager, this, exerciseList, this);*/
+*//*      navigation = //getProps().isCombinedMode() ? new Combined(service, userManager, this, exerciseList, this) :
+        new Navigation(service, userManager, this, exerciseList, this);*//*
 
       firstRow.add(navigation.getNav(bothSecondAndThird));
       System.out.println("\t4 resetClassroomState  normal nav view " + firstRow.getElement().getId() + " has " + firstRow.getElement().getChildCount());
@@ -821,7 +833,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     else {
       firstRow.add(bothSecondAndThird);
     }
-  }
+  }*/
 
 /*  private void showInitialState() {
     if (navigation != null) {
