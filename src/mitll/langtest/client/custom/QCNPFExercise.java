@@ -344,7 +344,10 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
       RememberTabAndContent tabAndContent = new RememberTabAndContent(IconType.QUESTION_SIGN, tabTitle); // TODO : icon state dependent on whether they've listend to all the audio
       tabPanel.add(tabAndContent.tab.asTabLink());
       tabs.add(tabAndContent);
+
+      // TODO : when do we need this???
       tabAndContent.content.getElement().getStyle().setMarginRight(70, Style.Unit.PX);
+
       boolean allHaveBeenPlayed = true;
 
       for (AudioAttribute audio : malesMap.get(user)) {
