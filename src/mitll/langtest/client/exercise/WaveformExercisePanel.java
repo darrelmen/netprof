@@ -46,7 +46,7 @@ public class WaveformExercisePanel extends ExercisePanel {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       @Override
       public void execute() {
-        getParent().addStyleName("userNPFContent");
+        getParent().addStyleName("userNPFContentLightPadding");
       }
     });
   }
