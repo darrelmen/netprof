@@ -359,7 +359,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * @return
    */
   protected Panel getContentWidget(String label, String value, boolean withWrap, boolean includeLabel) {
-    System.out.println("label " + label + " value " + value);
+    //System.out.println("label " + label + " value " + value);
     Panel nameValueRow = new FlowPanel();
     nameValueRow.getElement().setId("nameValueRow_" + label);
     nameValueRow.addStyleName("Instruction");
