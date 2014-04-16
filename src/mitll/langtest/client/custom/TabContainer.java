@@ -7,6 +7,9 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by go22670 on 2/10/14.
  */
@@ -14,39 +17,22 @@ public abstract class TabContainer implements RequiresResize {
   static final String LEARN_PRONUNCIATION = "Learn Pronunciation";
   static final String PRACTICE = "Practice";
   private Widget container;
-  TabPanel tabPanel;
+ // private TabPanel tabPanel;
+  //private List<TabAndContent> tabs = new ArrayList<TabAndContent>();
 
   /**
    * @see mitll.langtest.client.custom.Navigation#getTabPanel(com.google.gwt.user.client.ui.Panel)
    * @see mitll.langtest.client.custom.Navigation#getListOperations(mitll.langtest.shared.custom.UserList, String)
-   * @param toAddTo
+   * @param tabPanel
    * @param iconType
    * @param label
    * @return
    */
-  TabAndContent makeTab(TabPanel toAddTo, IconType iconType, String label) {
+  TabAndContent makeTab(TabPanel tabPanel, IconType iconType, String label) {
     TabAndContent tabAndContent = new TabAndContent(iconType, label);
-    toAddTo.add(tabAndContent.tab.asTabLink());
+    tabPanel.add(tabAndContent.tab.asTabLink());
     return tabAndContent;
-/*    Tab create = new Tab();
-    create.asWidget().getElement().setId("Tab_"+label);
-    create.setIcon(iconType);
-    create.setHeading(label);
-    toAddTo.add(create.asTabLink());
-
-    final DivWidget createContent = new DivWidget();
-    createContent.getElement().setId("Content_"+label);
-    createContent.addStyleName("positionRelative");
-    create.add(createContent);
-    zeroPadding(createContent);
-
-    return new TabAndContent(create, createContent);*/
   }
-
-/*  void zeroPadding(Panel createContent) {
-    DOM.setStyleAttribute(createContent.getElement(), "paddingLeft", "0px");
-    DOM.setStyleAttribute(createContent.getElement(), "paddingRight", "0px");
-  }*/
 
   /**
    * @param secondAndThird
