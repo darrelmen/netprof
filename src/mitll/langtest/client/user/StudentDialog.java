@@ -142,7 +142,7 @@ class StudentDialog extends UserDialog {
         boolean needUserID = isDataCollection(purpose) || isReview(purpose) || isPractice(purpose);
         user.setVisible(needUserID);
         accordion.setVisible(!canSkipRegister(purpose));
-        registrationInfo.showOrHideILR(!isReview(purpose) && !getRole(purpose).equals(RECORDER));
+        registrationInfo.showOrHideILR(!isReview(purpose)/* && !getRole(purpose).equals(RECORDER)*/);
         password.setVisible(isReview(purpose));
 
         if (b) {
@@ -205,7 +205,8 @@ class StudentDialog extends UserDialog {
   }
 
   private boolean isReview(ListBoxFormField purpose) {
-    return getRole(purpose).equals(REVIEW);
+    String role = getRole(purpose);
+    return role.equals(REVIEW) || role.equals(RECORDER);
   }
 
   private void configureKeyHandler(Modal dialogBox, final Button closeButton) {
