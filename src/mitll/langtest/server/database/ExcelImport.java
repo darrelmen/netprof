@@ -568,7 +568,7 @@ public class ExcelImport implements ExerciseDAO {
     String unitName = null, chapterName = null, weekName = null;
     try {
       Iterator<Row> iter = sheet.rowIterator();
-      Map<Integer, CellRangeAddress> rowToRange = getRowToRange(sheet);
+      //Map<Integer, CellRangeAddress> rowToRange = getRowToRange(sheet);
       for (; iter.hasNext(); ) {
         Row next = iter.next();
         Map<String,String> fieldToDefect = new HashMap<String, String>();
@@ -990,22 +990,45 @@ public class ExcelImport implements ExerciseDAO {
       }
     }
 
+    attachAudio(id, imported);
+
+    return imported;
+  }
+
+  /**
+   * TODO : rationalize media path -- don't force hack on bestAudio replacement
+   * Why does it sometimes have the config dir on the front?
+   * @param id
+   * @param imported
+   */
+  private void attachAudio(String id, Exercise imported) {
     int c = 0;
+    String mediaDir1 = mediaDir.replaceAll("bestAudio","");
+    //logger.debug("media dir " + mediaDir1);
+
     if (exToAudio.containsKey(id) || exToAudio.containsKey(id+"/1") || exToAudio.containsKey(id+"/2")) {
-      for (String idq : Arrays.asList(id+"/1",id+"/2")) {
+      for (String idq : Arrays.asList(id)) {
         List<AudioAttribute> audioAttributes = exToAudio.get(idq);
 
         if (!audioAttributes.isEmpty()) {
           for (AudioAttribute audio : audioAttributes) {
-            File test = new File(installPath, mediaDir + File.separator + audio.getAudioRef());
+            String child = mediaDir1 + File.separator + audio.getAudioRef();
+          /*  if (child.contains("bestAudio\bestAudio")) {
+              child = child.replaceAll("bestAudio\\bestAudio","bestAudio");
+            }*/
+            File test = new File(installPath, child);
 
             boolean exists = test.exists();
+            if (!exists) {
+              test = new File(installPath, audio.getAudioRef());
+              child = audio.getAudioRef();
+            }
             if (exists) {
-              audio.setAudioRef(mediaDir + File.separator + audio.getAudioRef());   // remember to prefix the path
+              audio.setAudioRef(child);   // remember to prefix the path
               imported.addAudio(audio);
             } else {
               c++;
-              if (c < 10) logger.debug("file " + test.getAbsolutePath() + "does not exist");
+              if (c < 5) logger.warn("file " + test.getAbsolutePath() + " does not exist - " + audio.getAudioRef());
             }
           }
         }
@@ -1015,8 +1038,6 @@ public class ExcelImport implements ExerciseDAO {
     else {
      // logger.debug("can't find '" + id + "' in " + exToAudio.keySet().size() + " keys, e.g. " + exToAudio.keySet().iterator().next());
     }
-
-    return imported;
   }
 
   /**

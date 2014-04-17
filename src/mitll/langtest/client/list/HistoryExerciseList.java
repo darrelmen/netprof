@@ -299,7 +299,7 @@ public class HistoryExerciseList extends PagingExerciseList {
     return selectionState2.keySet();
   }
 
-  private boolean debug = true;
+  private boolean debug = false;
 
   /**
      * Respond to push a history token.
@@ -369,7 +369,7 @@ public class HistoryExerciseList extends PagingExerciseList {
         "' (" + prefix.length() + " chars) in context of " + typeToSection + " list " + userListID+
         " instance " + instance);
 
-        service.getExerciseIds(lastReqID, typeToSection, prefix, userListID, controller.getUser(), new SetExercisesCallback());
+        service.getExerciseIds(lastReqID, typeToSection, prefix, userListID, controller.getUser(), controller.getAudioType(), new SetExercisesCallback());
 
   }
 
