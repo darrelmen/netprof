@@ -32,7 +32,7 @@ public interface CommonExercise extends CommonShell {
 
   Collection<AudioAttribute> getAudioAttributes();
   AudioAttribute getRecordingsBy(long userID, boolean regularSpeed);
-  List<AudioAttribute> getRecordingsBy(long userID);
+  List<MiniUser> getSortedUsers(Map<MiniUser, List<AudioAttribute>> malesMap);
   Map<String, AudioAttribute> getAudioRefToAttr();
   Map<MiniUser, List<AudioAttribute>> getUserMap(boolean isMale);
   void addAudio(AudioAttribute audioAttribute);
