@@ -99,7 +99,7 @@ public class PagingExerciseList extends ExerciseList {
   void loadExercises(String selectionState, String prefix) {
     lastReqID++;
     System.out.println("PagingExerciseList.loadExercises : looking for '" + prefix + "' (" + prefix.length() + " chars) in list id "+userListID + " instance " +instance);
-    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), prefix, userListID, controller.getUser(), new SetExercisesCallback());
+    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), prefix, userListID, controller.getUser(), controller.getAudioType(), new SetExercisesCallback());
   }
 
   /**
