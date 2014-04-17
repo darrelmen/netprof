@@ -718,21 +718,13 @@ public class ResultDAO extends DAO {
 
   private void addColumnToTable(Connection connection) {
     try {
-      PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
-        FLQ +
-        " BOOLEAN");
-      statement.execute();
-      statement.close();
+      addBoolean(connection, RESULTS, FLQ);
     } catch (SQLException e) {
       logger.warn("addColumnToTable : flq got " + e);
     }
 
     try {
-      PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
-        SPOKEN +
-        " BOOLEAN");
-      statement.execute();
-      statement.close();
+      addBoolean(connection, RESULTS, SPOKEN);
     } catch (SQLException e) {
       logger.warn("addColumnToTable : spoken got " + e);
     }
