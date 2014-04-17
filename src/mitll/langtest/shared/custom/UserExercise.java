@@ -86,12 +86,13 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
    */
   public UserExercise(long uniqueID, String exerciseID, long creator, String english, String foreignLanguage,
                       String transliteration, String context,
-                      String refAudio, String slowAudioRef, boolean isOverride,
+                   //   String refAudio, String slowAudioRef,
+                      boolean isOverride,
                       Map<String, String> unitToValue, Date modifiedDate
   ) {
     this(uniqueID, exerciseID, creator, english, foreignLanguage, transliteration);
-    setRefAudio(refAudio);
-    setSlowRefAudio(slowAudioRef);
+    //setRefAudio(refAudio);
+   // setSlowRefAudio(slowAudioRef);
     setUnitToValue(unitToValue);
     this.isOverride = isOverride;
     this.modifiedDate = modifiedDate;
@@ -109,20 +110,16 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     this.english = exercise.getEnglish();
     this.foreignLanguage = exercise.getRefSentence();
     this.transliteration = exercise.getTransliteration();
-   // setRefAudio(exercise.getRefAudio());
-    //setSlowRefAudio(exercise.getSlowAudioRef());
-
-/*
-    AudioAttribute slowSpeed = exercise.getSlowSpeed();
-    if (slowSpeed != null) {
-      addAudio(slowSpeed);
-    }*/
 
     setFieldToAnnotation(exercise.getFieldToAnnotation());
     setUnitToValue(exercise.getUnitToValue());
     setState(exercise.getState());
     setSecondState(exercise.getSecondState());
     setContext(exercise.getContext());
+    copyAudio(exercise);
+  }
+
+  protected void copyAudio(CommonExercise exercise) {
     for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) addAudio(audioAttribute);
   }
 
@@ -133,8 +130,9 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
    */
   public Exercise toExercise() {
     String tooltip = getEnglish().trim().isEmpty() ? getForeignLanguage() : getEnglish();
-    Exercise exercise = new Exercise("plan", getID(), getEnglish(), getRefAudio(), getForeignLanguage(), tooltip);
+    Exercise exercise = new Exercise("plan", getID(), getEnglish(), null, getForeignLanguage(), tooltip);
     copyFields(exercise);
+    copyAudio(exercise);
 
     return exercise;
   }
