@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.DataFormatException;
 
 /**
  * Create, drop, alter, read from the results table.
@@ -28,15 +29,14 @@ public class AudioDAO extends DAO {
   private static final Logger logger = Logger.getLogger(AudioDAO.class);
 
   public static final String ID = "id";
- // public static final String USERID1 = "userid";
   private static final String USERID = "userid";
-  //public static final String AUDIO_REF1 = "audioRef";
   private static final String AUDIO_REF = "audioRef";
 
   public static final String AUDIO = "audio";
 
   static final String AUDIO_TYPE = "audioType";
   static final String DURATION = "duration";
+  static final String DEFECT = "defect";
 
   private final boolean debug = false;
   private Map<Long, MiniUser> miniUsers;
@@ -47,11 +47,26 @@ public class AudioDAO extends DAO {
     connection = database.getConnection();
 
     miniUsers = userDAO.getMiniUsers();
+    if (!getColumns(AUDIO).contains(DEFECT)) {
+      try {
+        addBoolean(connection,AUDIO,DEFECT);
+      } catch (SQLException e) {
+        logger.error("got "+e,e);
+      }
+    }
     try {
       createTable(database.getConnection());
     } catch (SQLException e) {
       logger.error("Got " +e,e);
     }
+  }
+
+  @Override
+  protected void addBoolean(Connection connection, String table, String col) throws SQLException {
+    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " +
+      table + " ADD " + col + " BOOLEAN DEFAULT FALSE ");
+    statement.execute();
+    statement.close();
   }
 
   public Map<String, List<AudioAttribute>> getExToAudio() {
@@ -71,7 +86,7 @@ public class AudioDAO extends DAO {
    */
   private List<AudioAttribute> getAudioAttributes() {
     try {
-      String sql = "SELECT * FROM " + AUDIO + ";";
+      String sql = "SELECT * FROM " + AUDIO + " WHERE " +DEFECT +"=false";
       return getResultsSQL(sql);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
@@ -81,7 +96,7 @@ public class AudioDAO extends DAO {
 
   public List<AudioAttribute> getAudioAttributes(String exid) {
     try {
-      String sql = "SELECT * FROM " + AUDIO + " WHERE " +Database.EXID +"='" + exid+ "'";
+      String sql = "SELECT * FROM " + AUDIO + " WHERE " +Database.EXID +"='" + exid+ "' AND "+DEFECT +"=false";
       return getResultsSQL(sql);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
@@ -92,29 +107,8 @@ public class AudioDAO extends DAO {
   private List<AudioAttribute> getResultsSQL(String sql) throws SQLException {
     Connection connection = database.getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
-
     return getResultsForQuery(connection, statement);
   }
-
-/*
-  public int getNumResults() {
-    int numResults = 0;
-    try {
-      Connection connection = database.getConnection();
-      PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) FROM " + AUDIO + ";");
-      ResultSet rs = statement.executeQuery();
-      if (rs.next()) {
-        numResults = rs.getInt(1);
-      }
-      rs.close();
-      statement.close();
-      database.closeConnection(connection);
-    } catch (Exception ee) {
-      logger.error("got " + ee, ee);
-    }
-    return numResults;
-  }
-*/
 
   /**
    * Get a list of Results for this Query.
@@ -128,7 +122,7 @@ public class AudioDAO extends DAO {
     ResultSet rs = statement.executeQuery();
     List<AudioAttribute> results = new ArrayList<AudioAttribute>();
     while (rs.next()) {
-      int uniqueID = rs.getInt(ID);
+     // int uniqueID = rs.getInt(ID);
       long userID = rs.getLong(USERID);
       String exid = rs.getString(Database.EXID);
       //int qid = rs.getInt(QID);
@@ -139,15 +133,18 @@ public class AudioDAO extends DAO {
       int dur = rs.getInt(DURATION);
 
 
+      MiniUser user = miniUsers.get(userID);
       AudioAttribute audioAttr = new AudioAttribute(userID, //id
         exid, // id
-       // exid, // id
-       // qid == 1, // qid
+        // exid, // id
+        // qid == 1, // qid
         audioRef, // answer
         timestamp.getTime(),
-          dur,type,
-        miniUsers.get(userID));
-    //  audioAttr.setStimulus(stimulus);
+        dur, type,
+        user);
+      if (user == null) {
+        logger.warn("can't find user for " + audioAttr);
+      }
       trimPathForWebPage(audioAttr);
       results.add(audioAttr);
     }
@@ -165,67 +162,6 @@ public class AudioDAO extends DAO {
 
     r.setAudioRef(audioRef.substring(answer));
   }
-
-  /**
-   * @param exerciseID
-   * @return
-   * @see mitll.langtest.server.database.DatabaseImpl#getResultsForExercise(String, boolean, boolean, boolean)
-   */
-/*
-  public List<AudioAttribute> getAllResultsForExercise(String exerciseID) {
-    try {
-      Connection connection = database.getConnection();
-      String sql = "SELECT * FROM results WHERE EXID='" + exerciseID + "'";
-      PreparedStatement statement = connection.prepareStatement(sql);
-      return getResultsForQuery(connection, statement);
-    } catch (Exception ee) {
-      logger.error("got " + ee, ee);
-    }
-    return new ArrayList<AudioAttribute>();
-  }
-*/
-
-  /**
-   * @param toExclude
-   * @return
-   * @see mitll.langtest.server.database.DatabaseImpl#getNextUngradedExerciseQuick(java.util.Collection, int, boolean, boolean, boolean)
-   */
-/*  public Collection<AudioAttribute> getResultExcludingExercises(Collection<String> toExclude) {
-    // select results.* from results where results.exid not in ('ac-R0P-006','ac-LOP-001','ac-L0P-013')
-    try {
-      Connection connection = database.getConnection();
-
-      String list = getInList(toExclude);
-      String sql = "SELECT * FROM results WHERE EXID NOT IN (" + list + ")";
-
-      PreparedStatement statement = connection.prepareStatement(sql);
-      return getResultsForQuery(connection, statement);
-    } catch (Exception ee) {
-      logger.error("got " + ee, ee);
-    }
-    return new ArrayList<AudioAttribute>();
-
-  }*/
-/*
-  private String getInList(Collection<String> toExclude) {
-    StringBuilder b = new StringBuilder();
-    for (String id : toExclude) b.append("'").append(id).append("'").append(",");
-    String list = b.toString();
-    list = list.substring(0, Math.max(0, list.length() - 1));
-    return list;
-  }*/
-
-/*
-  private void sortByTime(List<Result> answersForUser) {
-    Collections.sort(answersForUser, new Comparator<Result>() {
-      @Override
-      public int compare(Result o1, Result o2) {
-        return o1.timestamp < o2.timestamp ? -1 : o1.timestamp > o2.timestamp ? +1 : 0;
-      }
-    });
-  }
-*/
-
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#copyAudio(java.util.Map, java.util.Map, AudioDAO)
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
@@ -247,7 +183,7 @@ public class AudioDAO extends DAO {
     return -1;
   }
 
-  public long add(int userid, String audioRef, String exerciseID, long timestamp, String audioType, int durationInMillis) {
+  public long add(int userid, String audioRef, String exerciseID, long timestamp, String audioType, long durationInMillis) {
     try {
       long then = System.currentTimeMillis();
       //String audioRef = trimPathForWebPage(result);
@@ -263,14 +199,6 @@ public class AudioDAO extends DAO {
     }
     return -1;
   }
-
-/*  private String trimPathForWebPage(Result r) {
-    String path = r.answer.trim();
-    if (path.startsWith(PathHelper.ANSWERS)) {
-      return path.substring(PathHelper.ANSWERS.length());
-    }
-    else return path;
-  }*/
 
   /**
    * Add a row to the table.
@@ -311,7 +239,8 @@ public class AudioDAO extends DAO {
         "WHERE " +
         Database.EXID + "=?" + " AND " +
         USERID + "=?" + " AND " +
-        AUDIO_TYPE + "=?";
+        AUDIO_TYPE + "=? AND " +
+        DEFECT +"=false";
       PreparedStatement statement = connection.prepareStatement(sql);
 
       int ii = 1;
@@ -340,7 +269,43 @@ public class AudioDAO extends DAO {
     return -1;
   }
 
-  private long addAudio(Connection connection, int userid, String audioRef, String exerciseID, long timestamp, String audioType, int durationInMillis) throws SQLException {
+  public int markDefect(int userid, String exerciseID, String audioType) {
+    try {
+      Connection connection = database.getConnection();
+      String sql = "UPDATE " + AUDIO +
+        " " +
+        "SET " +
+        DEFECT +
+        "=TRUE" +
+        " WHERE " +
+        Database.EXID + "=?" + " AND " +
+        USERID + "=?" + " AND " +
+        AUDIO_TYPE + "=?";
+      PreparedStatement statement = connection.prepareStatement(sql);
+
+      int ii = 1;
+
+      statement.setString(ii++, exerciseID);
+      statement.setInt(ii++, userid);
+      statement.setString(ii++, audioType);
+
+      int i = statement.executeUpdate();
+
+      if (i == 0) {
+        logger.error("huh? couldn't find audio by " + userid + " for ex " +exerciseID + " and " + audioType);
+      }
+
+      statement.close();
+      database.closeConnection(connection);
+      return i;
+    } catch (Exception e) {
+      logger.error("got " + e, e);
+    }
+    return -1;
+  }
+
+  private long addAudio(Connection connection, int userid, String audioRef, String exerciseID, long timestamp,
+                        String audioType, long durationInMillis) throws SQLException {
     PreparedStatement statement;
     statement = connection.prepareStatement("INSERT INTO " +AUDIO+
       "(" +
@@ -351,7 +316,8 @@ public class AudioDAO extends DAO {
       "," +
       ResultDAO.AUDIO_TYPE + "," +
       ResultDAO.DURATION + "," +
-      ") VALUES(?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+      DEFECT + "," +
+      ") VALUES(?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
 
     int i = 1;
 
@@ -360,7 +326,8 @@ public class AudioDAO extends DAO {
     statement.setTimestamp(i++, new Timestamp(timestamp));
     statement.setString(i++, audioRef);
     statement.setString(i++, audioType);
-    statement.setInt(i++, durationInMillis);
+    statement.setLong(i++, durationInMillis);
+    statement.setBoolean(i++, false);
 
     statement.executeUpdate();
 
@@ -378,9 +345,12 @@ public class AudioDAO extends DAO {
     return newID;
   }
 
+  /**
+   *
+   * @see DatabaseImpl#importCourseExamples()
+   */
   void drop() {
     try {
-      //Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement("DROP TABLE if exists "+AUDIO);
       if (!statement.execute()) {
         logger.error("couldn't drop table?");
@@ -415,7 +385,8 @@ public class AudioDAO extends DAO {
       Database.TIME + " TIMESTAMP, " +// " AS CURRENT_TIMESTAMP," +
       "audioRef CLOB," +
       AUDIO_TYPE + " VARCHAR," +
-      DURATION + " INT" +
+      DURATION + " INT, " +
+      DEFECT + " BOOLEAN DEFAULT FALSE" +
       ")");
     statement.execute();
     statement.close();
