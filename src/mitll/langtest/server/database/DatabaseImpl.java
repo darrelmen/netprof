@@ -333,12 +333,8 @@ public class DatabaseImpl implements Database {
     getUserListManager().editItem(userExercise, true);
     Map<String, ExerciseAnnotation> fieldToAnnotation = userExercise.getFieldToAnnotation();
 
-
-
     Set<AudioAttribute> defects = new HashSet<AudioAttribute>();
-
     Set<AudioAttribute> original  = new HashSet<AudioAttribute>(userExercise.getAudioAttributes());
-
 
     for (Map.Entry<String,ExerciseAnnotation> fieldAnno : fieldToAnnotation.entrySet()) {
       if (!fieldAnno.getValue().isCorrect()) {
@@ -348,13 +344,6 @@ public class DatabaseImpl implements Database {
           logger.debug("\tmarking defect on audio");
           defects.add(audioAttribute);
           audioDAO.markDefect(audioAttribute);
-/*          audioDAO.markDefect(
-            (int) userExercise.getCreator(),
-            userExercise.getID(),
-            audioAttribute.isRegularSpeed() ? AudioAttribute.REGULAR : AudioAttribute.SLOW);*/
-        }
-        else {
-
         }
       }
     }
@@ -366,7 +355,9 @@ public class DatabaseImpl implements Database {
 
     original.removeAll(defects);
     for (AudioAttribute toCopy: original) {
-      audioDAO.add((int)toCopy.getUserid(),toCopy.getAudioRef(),overlayID,toCopy.getTimestamp(),toCopy.getAudioType(),toCopy.getDuration());
+      if (toCopy.getUserid() <1) logger.error("bad user id for " + toCopy);
+
+      audioDAO.add((int) toCopy.getUserid(), toCopy.getAudioRef(), overlayID, toCopy.getTimestamp(), toCopy.getAudioType(), toCopy.getDuration());
     }
   }
 
