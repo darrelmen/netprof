@@ -139,7 +139,7 @@ public class WaveformExercisePanel extends ExercisePanel {
    */
   @Override
   protected String getQuestionPrompt(boolean promptInEnglish) {
-    return "";//getSpokenPrompt(promptInEnglish);
+    return "";
   }
 
   /**
@@ -152,19 +152,9 @@ public class WaveformExercisePanel extends ExercisePanel {
    */
   @Override
   public void postAnswers(ExerciseController controller, CommonExercise completedExercise) {
-    // exerciseList.addCompleted(completedExercise.getID());
     completedExercise.setState(CommonShell.STATE.RECORDED);
     exerciseList.setState(completedExercise.getID(), CommonShell.STATE.RECORDED);
     exerciseList.redraw();
-/*    service.setExerciseState(completedExercise.getID(), CommonShell.STATE.RECORDED, controller.getUser(), new AsyncCallback<Void>() {
-      @Override
-      public void onFailure(Throwable caught) {
-      }
-
-      @Override
-      public void onSuccess(Void result) {
-      }
-    });*/
     exerciseList.loadNextExercise(completedExercise);
   }
 }

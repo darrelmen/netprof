@@ -2,7 +2,6 @@ package mitll.langtest.client.custom;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.CheckBox;
-import com.github.gwtbootstrap.client.ui.Dropdown;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.TabPanel;
@@ -314,31 +313,26 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
       column.add(getEntry(REF_AUDIO, new Label(NO_AUDIO_RECORDED), refAudio));
       return column;
     } else {
-      TabPanel tabPanel = new TabPanel();
-
       Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getUserMap(true);
       Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getUserMap(false);
 
-      Dropdown dropdown = new Dropdown();
-      dropdown.addStyleName("leftFiveMargin");
-
-      List<MiniUser> maleUsers = getSortedUsers(malesMap);
-      List<MiniUser> femaleUsers = getSortedUsers(femalesMap);
+      List<MiniUser> maleUsers = exercise.getSortedUsers(malesMap);
+      List<MiniUser> femaleUsers = exercise.getSortedUsers(femalesMap);
 
       tabs = new ArrayList<RememberTabAndContent>();
 
+      TabPanel tabPanel = new TabPanel();
       addTabsForUsers(e, tabPanel, malesMap, maleUsers);
       addTabsForUsers(e, tabPanel, femalesMap, femaleUsers);
 
-      tabPanel.selectTab(0);
-     // int selectedTab = tabPanel.getSelectedTab();
+      if (!maleUsers.isEmpty() || !femaleUsers.isEmpty()) {
+        tabPanel.selectTab(0);
+      }
       return tabPanel;
     }
-   // return column;
   }
 
   private void addTabsForUsers(CommonExercise e, TabPanel tabPanel, Map<MiniUser, List<AudioAttribute>> malesMap, List<MiniUser> maleUsers) {
-   // Map<String, AudioAttribute> audioRefToAttr = e.getAudioRefToAttr();
     for (MiniUser user : maleUsers) {
       String tabTitle =  (user.isMale() ? "Male" :"Female")+ " age " + user.getAge();
       RememberTabAndContent tabAndContent = new RememberTabAndContent(IconType.QUESTION_SIGN, tabTitle); // TODO : icon state dependent on whether they've listend to all the audio
@@ -361,31 +355,6 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
       if (allHaveBeenPlayed) {
         tabAndContent.tab.setIcon(IconType.CHECK_SIGN);
-      }
-    }
-  }
-
-  private static class RememberTabAndContent extends TabAndContent {
-    Set<Widget> widgets = new HashSet<Widget>();
-
-    public RememberTabAndContent(IconType iconType, String label) {
-      super(iconType, label);
-    }
-
-    public void addWidget(Widget widget) {
-      widgets.add(widget);
-    }
-
-    /**
-     * @see #getPanelForAudio
-     * @param allPlayed
-     */
-    public void checkAllPlayed(Set<Widget> allPlayed) {
-     // System.out.println("check " +allPlayed.size() + " against " + widgets.size());
-      if (allPlayed.containsAll(widgets)) {
-    //    System.out.println("\tall played!");
-
-        tab.setIcon(IconType.CHECK_SIGN);
       }
     }
   }
