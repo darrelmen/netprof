@@ -111,17 +111,31 @@ public class BasicDialog {
     dialogBox.add(userGroup);
     return userGroup;
   }*/
-  protected ControlGroup addControlGroupEntrySimple(Panel dialogBox, String label, Widget widget, Widget rightSide) {
-    final ControlGroup userGroup = new ControlGroup();
-    userGroup.add(new ControlLabel(label));
-    widget.addStyleName("leftFiveMargin");
 
-    Panel row = new DivWidget();
-    row.add(widget);
-    row.add(rightSide);
-    userGroup.add(row);
+  /**
+   *
+   * @param dialogBox add to this container
+   * @param label
+   * @param widget
+   * @param rightSide
+   * @return
+   */
+  protected ControlGroup addControlGroupEntrySimple(Panel dialogBox, String label, Widget widget, Widget rightSide) {
+    final ControlGroup userGroup = addControlGroup(label, widget, rightSide);
 
     dialogBox.add(userGroup);
+    return userGroup;
+  }
+
+  protected ControlGroup addControlGroup(String label, Widget leftSide, Widget rightSide) {
+    final ControlGroup userGroup = new ControlGroup();
+    userGroup.add(new ControlLabel(label));
+    leftSide.addStyleName("leftFiveMargin");
+
+    Panel row = new DivWidget();
+    row.add(leftSide);
+    row.add(rightSide);
+    userGroup.add(row);
     return userGroup;
   }
 
