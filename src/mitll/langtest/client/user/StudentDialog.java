@@ -274,11 +274,11 @@ class StudentDialog extends UserDialog {
                                          final RegistrationInfo registrationInfo,
                                          final String purposeSetting) {
     final String userID = user.box.getText();
-    boolean isReview = purposeSetting.equals(REVIEW);
+    boolean needsPassword = purposeSetting.equals(REVIEW) || purposeSetting.equals(RECORDER);
 
-    System.out.println("checkUserAndMaybeRegister " + purposeSetting + " review " + isReview);
+    System.out.println("checkUserAndMaybeRegister " + purposeSetting + " review " + needsPassword);
     if (checkValidUser(user) &&
-      (!isReview || checkValidPassword(password))
+      (!needsPassword || checkValidPassword(password))
       ) {
       service.userExists(userID, new AsyncCallback<Integer>() {
         @Override
