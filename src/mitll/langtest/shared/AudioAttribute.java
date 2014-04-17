@@ -14,12 +14,9 @@ import java.util.Map;
  */
 public class AudioAttribute implements IsSerializable {
   private static final String SPEED = "speed";
-  private static final String SLOW = "slow";
-  private static final String REGULAR = "regular";
+  public static final String SLOW = "slow";
+  public static final String REGULAR = "regular";
 
-/*  private static final String GENDER = "gender";
-  private static final String MALE = "male";
-  private static final String FEMALE = "female";*/
   private MiniUser user;
 
   private String audioRef;
@@ -28,8 +25,6 @@ public class AudioAttribute implements IsSerializable {
   private long timestamp;
   private long duration;
   private Map<String, String> attributes;
- // private List<String> annotations;
-  //private long userID; // who recorded it - later
   private boolean hasBeenPlayed;
 
   public AudioAttribute() {}
@@ -41,7 +36,7 @@ public class AudioAttribute implements IsSerializable {
     this.userid = userid;
     this.exid = exid;
     this.audioRef = audioRef;
-    this.timestamp = timestamp;
+     this.timestamp = timestamp;
     this.duration = duration;
     this.user = user;
     if (type.equals(Result.AUDIO_TYPE_REGULAR)) markRegular();
@@ -49,9 +44,10 @@ public class AudioAttribute implements IsSerializable {
     else {
       attributes = new HashMap<String, String>();
     }
+   // System.out.println("user is " + user);
   }
 
-  public AudioAttribute(String audioRef) {
+  protected AudioAttribute(String audioRef) {
     this.audioRef = audioRef;
     if (audioRef == null) throw new IllegalArgumentException("huh audio ref is null?");
     markRegular();
@@ -75,32 +71,15 @@ public class AudioAttribute implements IsSerializable {
     return this;
   }
 
-/*
-  public AudioAttribute markMale() {
-    addAttribute(GENDER, MALE);
-    return this;
-  }
-
-  public AudioAttribute markFemale() {
-    addAttribute(GENDER, FEMALE);
-    return this;
-  }
-*/
-
   public boolean isFast() {
     return matches(SPEED, REGULAR);
   }
-
   public boolean isSlow() {
     return matches(SPEED, SLOW);
   }
+  public String getAudioType() { return isRegularSpeed() ? REGULAR:SLOW;}
 
-  public boolean isMale() {
-
-    //return matches(GENDER, MALE);
-   return user.isMale();
-  }
-
+  public boolean isMale() { return user != null && user.isMale();  }
   public boolean isFemale() {
     return !isMale();
   }
@@ -163,6 +142,8 @@ public class AudioAttribute implements IsSerializable {
     return user;
   }
 
+  public long getUserid() { return userid; }
+
   public boolean isHasBeenPlayed() {
     return hasBeenPlayed;
   }
@@ -171,8 +152,16 @@ public class AudioAttribute implements IsSerializable {
     this.hasBeenPlayed = hasBeenPlayed;
   }
 
+  public long getTimestamp() {
+    return timestamp;
+  }
+
   @Override
   public String toString() {
-    return "Audio " + audioRef + " attrs " + attributes;
+    return "Audio " + audioRef + " attrs " + attributes + " by " + userid +"/"+user;
+  }
+
+  public long getDuration() {
+    return duration;
   }
 }
