@@ -53,6 +53,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
@@ -144,14 +145,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param prefix
    * @param userListID
    * @param userID
+   * @param role
    * @return
    */
   @Override
-  public ExerciseListWrapper getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix, long userListID, int userID) {
+  public ExerciseListWrapper getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix, long userListID, int userID, String role) {
     List<CommonExercise> exercises;
     logger.debug("getExerciseIds : getting exercise ids for " +
       " config " + relativeConfigDir +
-      " and user list id " + userListID);
+      " prefix " + prefix+
+      " and user list id " + userListID + " user " + userID + " role " + role);
 
     UserList userListByID = userListID != -1 ? db.getUserListManager().getUserListByID(userListID) : null;
 
@@ -174,7 +177,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         }
       }
 
-      return makeExerciseListWrapper(reqID, exercises, userID);
+      return makeExerciseListWrapper(reqID, exercises, userID, role);
 
     } else {
       // TODO build unit-lesson hierarchy if non-empty type->selection over user list
@@ -194,9 +197,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         Collection<CommonExercise> exercisesForState = helper.getExercisesForSelectionState(typeToSelection);
         logger.debug("\tafter found " + exercisesForState.size() + " matches to " + typeToSelection);
 
-        return getExerciseListWrapperForPrefix(reqID, prefix, exercisesForState, userID);
+        return getExerciseListWrapperForPrefix(reqID, prefix, exercisesForState, userID, role);
       } else {
-        return getExercisesForSelectionState(reqID, typeToSelection, prefix, userID);
+        return getExercisesForSelectionState(reqID, typeToSelection, prefix, userID, role);
       }
     }
   }
@@ -218,16 +221,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param typeToSection
    * @param prefix
    * @param userID
+   * @param role
    * @return
    */
   private ExerciseListWrapper getExercisesForSelectionState(int reqID,
-                                                            Map<String, Collection<String>> typeToSection, String prefix, long userID) {
+                                                            Map<String, Collection<String>> typeToSection, String prefix, long userID, String role) {
     Collection<CommonExercise> exercisesForState = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
 
-    return getExerciseListWrapperForPrefix(reqID, prefix, exercisesForState, userID);
+    return getExerciseListWrapperForPrefix(reqID, prefix, exercisesForState, userID, role);
   }
 
-  private ExerciseListWrapper getExerciseListWrapperForPrefix(int reqID, String prefix, Collection<CommonExercise> exercisesForState, long userID) {
+  private ExerciseListWrapper getExerciseListWrapperForPrefix(int reqID, String prefix, Collection<CommonExercise> exercisesForState, long userID, String role) {
     boolean hasPrefix = !prefix.isEmpty();
     if (hasPrefix) {
       ExerciseTrie trie = new ExerciseTrie(exercisesForState, serverProps.getLanguage(), audioFileHelper.getSmallVocabDecoder());
@@ -237,7 +241,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       exercisesForState = getSortedExercises(exercisesForState);
     }
 
-    return makeExerciseListWrapper(reqID, exercisesForState, userID);
+    return makeExerciseListWrapper(reqID, exercisesForState, userID, role);
   }
 
   /**
@@ -245,19 +249,33 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param reqID
    * @param exercises
    * @param userID
+   * @param role
    * @return
    * @see #getExerciseIds
-   * @see #getExerciseListWrapperForPrefix(int, String, java.util.Collection, long)
+   * @see #getExerciseListWrapperForPrefix(int, String, java.util.Collection, long, String)
    */
-  private ExerciseListWrapper makeExerciseListWrapper(int reqID, Collection<CommonExercise> exercises, long userID) {
+  private ExerciseListWrapper makeExerciseListWrapper(int reqID, Collection<CommonExercise> exercises, long userID, String role) {
     CommonExercise firstExercise = exercises.isEmpty() ? null : exercises.iterator().next();
     if (firstExercise != null) {
+      logger.debug("First is " + firstExercise);
+
       ensureMP3s(firstExercise);
       addAnnotationsAndAudio(userID, firstExercise);
-      logger.debug("First is " + firstExercise);
+      logger.debug("after First is " + firstExercise);
     }
     List<CommonShell> exerciseShells = getExerciseShells(exercises);
-    db.getUserListManager().markState(exerciseShells);
+
+    logger.debug("makeExerciseListWrapper : userID " +userID + " Role is " + role);
+    if (role.equals(Result.AUDIO_TYPE_RECORDER)) {
+      Set<String> recordedForUser = db.getAudioDAO().getRecordedForUser(userID);
+      logger.debug("\tfound " + recordedForUser.size() + " recordings by " + userID);
+      for (CommonShell shell : exerciseShells) {
+         if (recordedForUser.contains(shell.getID())) shell.setState(CommonShell.STATE.RECORDED);
+      }
+    }
+    else {
+      db.getUserListManager().markState(exerciseShells, role);
+    }
 
     return new ExerciseListWrapper(reqID, exerciseShells, firstExercise);
   }
@@ -266,9 +284,22 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     addAnnotations(firstExercise); // todo do this in a better way
     addPlayedMarkings(userID, firstExercise);
     List<AudioAttribute> audioAttributes = db.getAudioDAO().getAudioAttributes(firstExercise.getID());
+    AudioConversion audioConversion = new AudioConversion();
+
+    String installPath = pathHelper.getInstallPath();
     for (AudioAttribute attr : audioAttributes) {
       firstExercise.addAudio(attr);
+      if (!audioConversion.exists(attr.getAudioRef(), installPath)) {
+     //   logger.debug("\twas '" + attr.getAudioRef() + "'");
+
+        attr.setAudioRef(relativeConfigDir + File.separator + attr.getAudioRef());
+
+     //   logger.debug("\tnow '" + attr.getAudioRef() + "'");
+
+      }
+   //   logger.debug("\tadding path '" + attr.getAudioRef() + "' "+attr + " to " + firstExercise.getID());
     }
+
     if (!audioAttributes.isEmpty()) {
       logger.debug("Added  " + audioAttributes.size() + " audio attrs to " + firstExercise);
     }
@@ -407,7 +438,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     else {
       addAnnotationsAndAudio(userID, byID);
-      logger.debug("getExercise : returning " +byID);
+      logger.debug("getExercise : returning " + byID);
       ensureMP3s(byID);
     }
     long now = System.currentTimeMillis();
@@ -482,13 +513,24 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
+   * TODO : come back to this!!!
    * @see #ensureMP3s(mitll.langtest.shared.CommonExercise)
    * @param wavFile
    * @param overwrite
    */
   private void ensureMP3(String wavFile, boolean overwrite) {
     if (wavFile != null) {
-        new AudioConversion().ensureWriteMP3(wavFile, pathHelper.getInstallPath(), overwrite);
+      String parent = pathHelper.getInstallPath();
+      //logger.debug("ensureMP3 : wav " + wavFile + " under " + parent);
+
+      AudioConversion audioConversion = new AudioConversion();
+      if (!audioConversion.exists(wavFile, parent)) {
+        parent = configDir;
+      }
+      if (!audioConversion.exists(wavFile, parent)) {
+        logger.error("huh? can't find " + wavFile + " under " + parent);
+      }
+      audioConversion.ensureWriteMP3(wavFile, parent, overwrite);
     }
   }
 
@@ -912,13 +954,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       flq, audioType, doFlashcard, recordInResults);
 
     if (addToAudioTable && audioAnswer.isValid()) {
-      // TODO write or overwrite audio table entry
       File fileRef = pathHelper.getAbsoluteFile(audioAnswer.getPath());
       String destFileName = audioType + "_" + System.currentTimeMillis() + "_by_" + user + ".wav";
-     // String refAudio = getRefAudioPath(userExercise.getID(), fileRef, fast, overwrite);
-
       String permanentAudioPath = new PathWriter().getPermanentAudioPath(pathHelper, fileRef, destFileName, true, exercise);
       db.getAudioDAO().addOrUpdate(user, permanentAudioPath, exercise, System.currentTimeMillis(), audioType, audioAnswer.getDurationInMillis());
+
+      // what state should we mark recorded audio?
+      db.getUserListManager().setState(exercise1, CommonShell.STATE.UNSET, user);
+      db.getUserListManager().setSecondState(exercise1, CommonShell.STATE.RECORDED, user);
     }
     return audioAnswer;
   }
@@ -1023,7 +1066,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     db.getUserListManager().setStateOnExercises();
 
-    if (SCORE_RESULTS) {
+/*    if (SCORE_RESULTS) {
       List<Result> resultsThatNeedScore = db.getResultDAO().getResultsFor();
       //resultsThatNeedScore = resultsThatNeedScore.subList(0,20);
       getExercises();
@@ -1036,7 +1079,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           getASRScoreForAudio(0, result.uniqueID, pathHelper.getInstallPath() + File.separator + result.answer, exercise.getRefSentence(), 100, 100, false);
         }
       }
-    }
+    }*/
   }
 
   /**
@@ -1051,6 +1094,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String config = servletContext.getInitParameter("config");
     this.relativeConfigDir = "config" + File.separator + config;
     this.configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
+
+
+    pathHelper.setConfigDir(configDir);
 
     serverProps = new ServerProperties(servletContext, configDir);
     String h2DatabaseFile = serverProps.getH2Database();
