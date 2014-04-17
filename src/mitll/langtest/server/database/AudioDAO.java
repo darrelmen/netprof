@@ -224,6 +224,12 @@ public class AudioDAO extends DAO {
   public long add(int userid, String audioRef, String exerciseID, long timestamp, String audioType, long durationInMillis) {
     try {
       long then = System.currentTimeMillis();
+
+      if (userid <1) {
+        logger.error("huh? userid is " +userid);
+        new Exception().printStackTrace();
+      }
+
       //  logger.debug("path was " + result.answer + " now '" + audioRef + "'");
       long newid = addAudio(connection, userid, audioRef, exerciseID, timestamp, audioType, durationInMillis);
       database.closeConnection(connection);
@@ -373,6 +379,11 @@ public class AudioDAO extends DAO {
 
   private long addAudio(Connection connection, int userid, String audioRef, String exerciseID, long timestamp,
                         String audioType, long durationInMillis) throws SQLException {
+    if (userid <1) {
+      logger.error("huh? userid is " +userid);
+      new Exception().printStackTrace();
+    }
+
     PreparedStatement statement;
     statement = connection.prepareStatement("INSERT INTO " +AUDIO+
       "(" +
