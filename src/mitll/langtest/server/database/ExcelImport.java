@@ -209,18 +209,13 @@ public class ExcelImport implements ExerciseDAO {
    */
   @Override
   public void addOverlay(CommonUserExercise userExercise) {
-    //logger.debug("addOverlay for " +userExercise);
     CommonExercise exercise = getExercise(userExercise.getID());
-    //logger.debug("\taddOverlay at " +userExercise.getID() + " found " +exercise);
+    logger.debug("\taddOverlay at " +userExercise.getID() + " found " +exercise);
 
     if (exercise == null) {
       logger.error("addOverlay : huh? can't find " + userExercise);
     }
     else {
-     // Exercise over = userExercise.toExercise();
-   //   over.setUnitToValue(exercise.getUnitToValue());
-      //logger.debug("\taddOverlay replacing with " +over + " and " +over.getTooltip());
-
       synchronized (this) {
         int i = exercises.indexOf(exercise);
         if (i == -1) {
@@ -231,14 +226,13 @@ public class ExcelImport implements ExerciseDAO {
         }
         idToExercise.put(userExercise.getID(), userExercise);
 
-        //logger.debug("addOverlay : after " + getExercise(userExercise.getID()));
+        logger.debug("addOverlay : after " + getExercise(userExercise.getID()));
       }
     }
   }
 
   public void add(CommonUserExercise ue) {
     synchronized (this) {
-     // Exercise exercise = ue.toExercise();
       exercises.add(ue);
       idToExercise.put(ue.getID(), ue);
     }
