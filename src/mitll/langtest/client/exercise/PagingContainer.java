@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.shared.CommonShell;
+import mitll.langtest.shared.Result;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -261,11 +262,14 @@ public class PagingContainer {
             boolean approved = state == CommonShell.STATE.APPROVED || recorded;
 
             boolean isSet = isDefect || isFixed || approved;
+            if (controller.getAudioType().equals(Result.AUDIO_TYPE_RECORDER)) {
+              isSet = recorded;
+            }
 
-            if (isSet) {
+        /*    if (isSet) {
               System.out.println("shell " + shell.getID() + " state " + state + " defect " +isDefect +
                 " fixed " + isFixed + " recorded " + recorded);
-            }
+            }*/
 
             String icon =
               approved ? "icon-check" :
