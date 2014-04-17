@@ -258,6 +258,9 @@ public class PagingContainer {
             boolean isDefect = state == CommonShell.STATE.DEFECT;
             boolean isFixed = state == CommonShell.STATE.FIXED;
             boolean isLL = shell.getSecondState() == CommonShell.STATE.ATTN_LL;
+            boolean isRerecord = shell.getSecondState() == CommonShell.STATE.RECORDED;
+
+            boolean hasSecondState = isLL || isRerecord;
             boolean recorded = state == CommonShell.STATE.RECORDED;
             boolean approved = state == CommonShell.STATE.APPROVED || recorded;
 
@@ -286,13 +289,12 @@ public class PagingContainer {
                 " class='" +
                 icon +
                 "'></i>" +
-                //"</div>" +
-                "&nbsp;" : "") + columnText + (isLL ?
-              "&nbsp;<i " +
 
-                "style='color:gold'" +
+                "&nbsp;" : "") + columnText + (hasSecondState ?
+              "&nbsp;<i " +
+                (isLL ? "style='color:gold'" : "") +
                 " class='" +
-                "icon-warning-sign" +
+                (isLL ? "icon-warning-sign" : "icon-microphone") +
                 "'></i>" : "");
 
           }
