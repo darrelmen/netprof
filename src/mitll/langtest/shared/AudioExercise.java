@@ -96,11 +96,21 @@ public class AudioExercise extends ExerciseShell {
     return audioToAttr;
   }
 
+  /**
+   * @see #getUserMap(boolean)
+   * @param isMale
+   * @return
+   */
   private Collection<AudioAttribute> getByGender(boolean isMale) {
     List<AudioAttribute> males = new ArrayList<AudioAttribute>();
     for (AudioAttribute audioAttribute : audioAttributes.values()) {
-      if (isMale && audioAttribute.getUser().isMale() || (!isMale && !audioAttribute.getUser().isMale()))
+      MiniUser user = audioAttribute.getUser();
+      if (user == null) {
+        System.err.println ("getByGender : huh? there's no user attached to " + audioAttribute);
+      }
+      else if (isMale && user.isMale() || (!isMale && !user.isMale())) {
         males.add(audioAttribute);
+      }
     }
 
     Collections.sort(males, new Comparator<AudioAttribute>() {
@@ -113,23 +123,30 @@ public class AudioExercise extends ExerciseShell {
   }
 
   public AudioAttribute getRecordingsBy(long userID, boolean regularSpeed) {
-    List<AudioAttribute> mine = new ArrayList<AudioAttribute>();
+    //List<AudioAttribute> mine = new ArrayList<AudioAttribute>();
     for (AudioAttribute attr : getRecordingsBy(userID)) {
       if (attr.isRegularSpeed() && regularSpeed || (attr.isSlow() && !regularSpeed)) return attr;
     }
     return null;
   }
+
   public List<AudioAttribute> getRecordingsBy(long userID) {
     List<AudioAttribute> mine = new ArrayList<AudioAttribute>();
     for (AudioAttribute attr : getAudioAttributes()) {
-      if (attr.getUser().getId() == userID) mine.add(attr);
+      if (attr.getUser() != null) {
+        if (attr.getUser().getId() == userID) mine.add(attr);
+      }
+      else {
+        System.err.println("getRecordingsBy : Can't find user for " + attr);
+      }
     }
     return mine;
   }
 
   public Map<MiniUser, List<AudioAttribute>> getUserMap(boolean isMale) {
     Map<MiniUser, List<AudioAttribute>> userToAudio = new HashMap<MiniUser, List<AudioAttribute>>();
-    for (AudioAttribute attribute : getByGender(isMale)) {
+    Collection<AudioAttribute> byGender = getByGender(isMale);
+    for (AudioAttribute attribute : byGender) {
       List<AudioAttribute> audioAttributes1 = userToAudio.get(attribute.getUser());
       if (audioAttributes1 == null)
         userToAudio.put(attribute.getUser(), audioAttributes1 = new ArrayList<AudioAttribute>());
@@ -145,6 +162,16 @@ public class AudioExercise extends ExerciseShell {
       });
     }
     return userToAudio;
+  }
+
+  public List<MiniUser> getSortedUsers(Map<MiniUser, List<AudioAttribute>> malesMap) {
+    List<MiniUser> maleUsers = new ArrayList<MiniUser>(malesMap.keySet());
+    Collections.sort(maleUsers, new Comparator<MiniUser>() {
+      public int compare(MiniUser o1, MiniUser o2) {
+        return o1.getAge() < o2.getAge() ? -1 : o1.getAge() > o2.getAge() ? +1 : 0;
+      }
+    });
+    return maleUsers;
   }
 
   /**
