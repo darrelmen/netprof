@@ -1,14 +1,14 @@
 package mitll.langtest.server.database.custom;
 
-import audio.tools.FileCopier;
 import mitll.langtest.server.PathHelper;
-import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.PathWriter;
 import mitll.langtest.server.database.UserDAO;
+import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.ExerciseAnnotation;
+import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
@@ -189,29 +189,36 @@ public class UserListManager {
   }
 
   /**
+   * Mark the exercise with its states -
    * @see #getReviewList
    * @see mitll.langtest.server.LangTestDatabaseImpl#makeExerciseListWrapper
    * @param shells
+   * @param role
    */
-  public void markState(Collection<? extends CommonShell> shells) {
-    Map<String, ReviewedDAO.StateCreator> exerciseToState = reviewedDAO.getExerciseToState();
+  public void markState(Collection<? extends CommonShell> shells, String role) {
+    if (role.equals(Result.AUDIO_TYPE_RECORDER)) {
 
-    logger.debug("markState " + shells.size() + " shells, " + exerciseToState.size() + " states");
-    for (CommonShell shell : shells) {
-      ReviewedDAO.StateCreator stateCreator = exerciseToState.get(shell.getID());
-      if (stateCreator != null) {
-        shell.setState(stateCreator.state);
-     //   if (shell.getID().equals("0")) logger.debug("\tmarkState on " +shell + " of " + stateCreator.state);
-
-      }
     }
+    else {
+      Map<String, ReviewedDAO.StateCreator> exerciseToState = reviewedDAO.getExerciseToState();
 
-    exerciseToState = secondStateDAO.getExerciseToState();
+      logger.debug("markState " + shells.size() + " shells, " + exerciseToState.size() + " states");
+      for (CommonShell shell : shells) {
+        ReviewedDAO.StateCreator stateCreator = exerciseToState.get(shell.getID());
+        if (stateCreator != null) {
+          shell.setState(stateCreator.state);
+          //   if (shell.getID().equals("0")) logger.debug("\tmarkState on " +shell + " of " + stateCreator.state);
 
-    for (CommonShell shell : shells) {
-      ReviewedDAO.StateCreator stateCreator = exerciseToState.get(shell.getID());
-      if (stateCreator != null) {
-        shell.setSecondState(stateCreator.state);
+        }
+      }
+
+      exerciseToState = secondStateDAO.getExerciseToState();
+
+      for (CommonShell shell : shells) {
+        ReviewedDAO.StateCreator stateCreator = exerciseToState.get(shell.getID());
+        if (stateCreator != null) {
+          shell.setSecondState(stateCreator.state);
+        }
       }
     }
   }
@@ -408,7 +415,7 @@ public class UserListManager {
     userList.setReview(true);
     userList.setExercises(onList);
 
-    markState(onList);
+    markState(onList, "");
     return userList;
   }
 
@@ -540,26 +547,34 @@ public class UserListManager {
    * @param overwrite
    */
   private void fixAudioPaths(UserExercise userExercise, boolean overwrite) {
-    String refAudio1 = userExercise.getRefAudio();
-    if (refAudio1 == null) {
+    //String refAudio1 = userExercise.getRefAudio();
+    AudioAttribute regularSpeed = userExercise.getRegularSpeed();
+    if (regularSpeed == null) {
       logger.warn("huh? no ref audio for " + userExercise);
       return;
     }
-    File fileRef = pathHelper.getAbsoluteFile(refAudio1);
     long now = System.currentTimeMillis();
-    String fast = FAST + "_"+ now +"_by_" +userExercise.getCreator()+".wav";
-    String refAudio = getRefAudioPath(userExercise.getID(), fileRef, fast, overwrite);
-    userExercise.setRefAudio(refAudio);
-    //logger.debug("fixAudioPaths : for " + userExercise.getID() + " fast is " + fast + " size " + FileUtils.size(refAudio));
+    {
+      File fileRef = pathHelper.getAbsoluteFile(regularSpeed.getAudioRef());
 
-    if (userExercise.getSlowAudioRef() != null && !userExercise.getSlowAudioRef().isEmpty()) {
-      fileRef = pathHelper.getAbsoluteFile(userExercise.getSlowAudioRef());
+      String fast = FAST + "_" + now + "_by_" + userExercise.getCreator() + ".wav";
+      String refAudio = getRefAudioPath(userExercise.getID(), fileRef, fast, overwrite);
+      regularSpeed.setAudioRef(refAudio);
+    //  userExercise.addAudio(regularSpeed);
+      //logger.debug("fixAudioPaths : for " + userExercise.getID() + " fast is " + fast + " size " + FileUtils.size(refAudio));
+    }
+
+    AudioAttribute slowSpeed = userExercise.getSlowSpeed();
+
+    if (slowSpeed != null && !slowSpeed.getAudioRef().isEmpty()) {
+      File fileRef = pathHelper.getAbsoluteFile(slowSpeed.getAudioRef());
       String slow = SLOW + "_"+ now+"_by_" + userExercise.getCreator()+ ".wav";
 
-      refAudio = getRefAudioPath(userExercise.getID(), fileRef, slow, overwrite);
-      logger.debug("fixAudioPaths : for " + userExercise.getID()+ " slow is " + refAudio + " size " + FileUtils.size(refAudio));
+      String refAudio = getRefAudioPath(userExercise.getID(), fileRef, slow, overwrite);
+      logger.debug("fixAudioPaths : for exid " + userExercise.getID()+ " slow is " + refAudio + " size " + FileUtils.size(refAudio));
+      slowSpeed.setAudioRef(refAudio);
 
-      userExercise.setSlowRefAudio(refAudio);
+      // userExercise.setSlowRefAudio(refAudio);
     }
   }
 
@@ -576,40 +591,8 @@ public class UserListManager {
    * @see #fixAudioPaths(mitll.langtest.shared.custom.UserExercise, boolean)
    */
   private String getRefAudioPath(String id, File fileRef, String destFileName, boolean overwrite) {
-   // String id = userExercise.getID();
     return new PathWriter().getPermanentAudioPath(pathHelper, fileRef, destFileName, overwrite, id);
   }
-
-/*  private String getPermanentAudioPath(File fileRef, String destFileName, boolean overwrite, String id) {
-    final File bestDir = pathHelper.getAbsoluteFile("bestAudio");
-    if (!bestDir.exists() && !bestDir.mkdir()) {
-      if (!bestDir.exists()) logger.warn("huh? couldn't make " + bestDir.getAbsolutePath());
-    }
-    File bestDirForExercise = new File(bestDir, id);
-    if (!bestDirForExercise.exists() && !bestDirForExercise.mkdir()) {
-      if (!bestDirForExercise.exists()) logger.warn("huh? couldn't make " + bestDirForExercise.getAbsolutePath());
-    }
-    File destination = new File(bestDirForExercise, destFileName);
-    //logger.debug("getRefAudioPath : copying from " + fileRef +  " to " + destination.getAbsolutePath());
-    String s = "bestAudio" + File.separator + id + File.separator + destFileName;
-    //logger.debug("getRefAudioPath : dest path    " + bestDirForExercise.getPath() + " vs " +s);
-    if (!fileRef.equals(destination)) {
-      new FileCopier().copy(fileRef.getAbsolutePath(), destination.getAbsolutePath());
-
-      new AudioConversion().normalizeLevels(destination);
-    }
-    else {
-      if (FileUtils.size(destination.getAbsolutePath()) == 0) logger.error("\ngetRefAudioPath : huh? " + destination + " is empty???");
-    }
-    ensureMP3(s, overwrite);
-    return s;
-  }
-
-  private void ensureMP3(String wavFile, boolean overwrite) {
-    if (wavFile != null) {
-      new AudioConversion().ensureWriteMP3(wavFile, pathHelper.getInstallPath(), overwrite);
-    }
-  }*/
 
   public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
     this.userExerciseDAO = userExerciseDAO;
@@ -707,8 +690,8 @@ public class UserListManager {
    * @see #addAnnotation(String, String, String, String, long)
    * @see mitll.langtest.client.custom.QCNPFExercise#markReviewed
    * @param id
-   * @paramx userID
-   * @paramx creatorID
+   * @param state
+   * @param creatorID
    */
   public void markState(String id, CommonShell.STATE state, long creatorID) {
     logger.debug("mark state " + id + " = " + state + " by " +creatorID);
