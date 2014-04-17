@@ -207,7 +207,7 @@ public class Navigation extends TabContainer implements RequiresResize {
 //  private enum USER_STATES { NORMAL, REVIEW, RECORDER }
  // private USER_STATES state;
 
-  private void addTabs(Panel contentForChaptersTab) {
+  private boolean addTabs(Panel contentForChaptersTab) {
     //int num = tabPanel.getSelectedTab()
     tabPanel.clear();
 
@@ -312,6 +312,8 @@ public class Navigation extends TabContainer implements RequiresResize {
         }
       });
     }
+
+    return isRecorder;
   }
 
   Map<String,TabAndContent> nameToTab = new HashMap<String, TabAndContent>();
@@ -363,56 +365,39 @@ public class Navigation extends TabContainer implements RequiresResize {
   public void showInitialState() {
     final int user = userManager.getUser();
 
-    addTabs(chapterContent);
-   /* if (!controller.isReviewMode()) {
-      for (TabAndContent tabAndContent : tabs) {
+    boolean isRecorder = addTabs(chapterContent);
 
-      }
-    }
-
-    if (controller.getAudioType().equals(Result.AUDIO_TYPE_RECORDER)) {
-      for (TabAndContent tabAndContent : tabs) {
-        if (tabAndContent != chapters) {
-          tabPanel.remove(tabAndContent.tab.asTabLink());
-        }
-      }
-    }
-    else if (!controller.isReviewMode()) {
-      for (TabAndContent tabAndContent : tabs) {
-        if (tabAndContent != chapters) {
-          tabPanel.remove(tabAndContent.tab.asTabLink());
-        }
-      }
-    }
-    else {
-
-    }*/
-    System.out.println("showInitialState show initial state for " + user + " : getting user lists " + controller.isReviewMode());
+    System.out.println("\n\n\nshowInitialState show initial state for " + user + " : getting user lists " + controller.isReviewMode());
     String value = storage.getValue(CLICKED_TAB);
     if (value.isEmpty()) {   // no previous tab
-      service.getListsForUser(user, true, true, new AsyncCallback<Collection<UserList>>() {
-        @Override
-        public void onFailure(Throwable caught) {
-        }
-
-        @Override
-        public void onSuccess(Collection<UserList> result) {
-          if (result.size() == 1 && // if only one empty list - one you've created
-            result.iterator().next().isEmpty()) {
-            //Integer tabIndex = nameToIndex.get(CHAPTERS);
-            tabPanel.selectTab(getSafeTabIndexFor(CHAPTERS));
-          } else {
-            boolean foundCreated = false;
-            for (UserList ul : result) {
-              if (createdByYou(ul)) {
-                foundCreated = true;
-                break;
-              }
-            }
-            showMyLists(foundCreated, !foundCreated);
+      if (isRecorder) {
+        tabPanel.selectTab(getSafeTabIndexFor(CHAPTERS));
+      }
+      else {
+        service.getListsForUser(user, true, true, new AsyncCallback<Collection<UserList>>() {
+          @Override
+          public void onFailure(Throwable caught) {
           }
-        }
-      });
+
+          @Override
+          public void onSuccess(Collection<UserList> result) {
+            if (result.size() == 1 && // if only one empty list - one you've created
+              result.iterator().next().isEmpty()) {
+              //Integer tabIndex = nameToIndex.get(CHAPTERS);
+              tabPanel.selectTab(getSafeTabIndexFor(CHAPTERS));
+            } else {
+              boolean foundCreated = false;
+              for (UserList ul : result) {
+                if (createdByYou(ul)) {
+                  foundCreated = true;
+                  break;
+                }
+              }
+              showMyLists(foundCreated, !foundCreated);
+            }
+          }
+        });
+      }
     }
     else {
       selectPreviousTab(value);
@@ -423,10 +408,7 @@ public class Navigation extends TabContainer implements RequiresResize {
    * @see #showInitialState()
    */
   private void selectPreviousTab(String value) {
-    //String value = storage.getValue(CLICKED_TAB);
-   // try {
       TabAndContent tabAndContent = nameToTab.get(value);
-      //int i = tabAndContent == null ? -1 : tabs.indexOf(tabAndContent);
       Integer tabIndex = nameToIndex.get(value);
       if (tabIndex != null) {
         tabPanel.selectTab(tabIndex);
@@ -439,18 +421,12 @@ public class Navigation extends TabContainer implements RequiresResize {
         } else if (value.equals(BROWSE)) {
           viewBrowse();
         } else if (value.equals(REVIEW1)) {
-          //tabPanel.selectTab(REVIEW_TAB_INDEX);
           viewReview(review.content);
         } else if (value.equals(COMMENTS)) {
-          //tabPanel.selectTab(COMMENT_TAB_INDEX);
           viewComments(commented.content);
         } else if (value.equals(ATTENTION_LL)) {
-      //    tabPanel.selectTab(ATTENTION_TAB_INDEX);
           viewAttention(attention.content);
-        } /*else {
-          System.err.println("selectPreviousTab : huh? value is unexpected '" + value + "' " +
-            "I only know about tabs : " + nameToIndex.keySet());
-        }*/
+        }
       }
       else {
         System.out.println("selectPreviousTab : found value  '" + value + "' " +
@@ -458,36 +434,6 @@ public class Navigation extends TabContainer implements RequiresResize {
         Integer integer = nameToIndex.get(CHAPTERS); // always a chapters tab
         tabPanel.selectTab(integer);
       }
-
-/*      if (value.equals(CHAPTERS)) {
-        if (i != -1) {
-          tabPanel.selectTab(CHAPTERS_TAB);
-        }
-      } else if (value.equals(YOUR_LISTS)) {
-        showMyLists(true, false);
-      } else if (value.equals(OTHERS_LISTS)) {
-        showMyLists(false, true);
-      } else if (value.equals(CREATE)) {
-        tabPanel.selectTab(CREATE_TAB_INDEX);
-      } else if (value.equals(BROWSE)) {
-//        showBrowse();
-        viewBrowse();
-      } else if (value.equals(REVIEW1)) {
-        tabPanel.selectTab(REVIEW_TAB_INDEX);
-        viewReview(review.content);
-      } else if (value.equals(COMMENTS)) {
-        tabPanel.selectTab(COMMENT_TAB_INDEX);
-        viewComments(commented.content);
-      } else if (value.equals(ATTENTION_LL)) {
-        tabPanel.selectTab(ATTENTION_TAB_INDEX);
-        viewAttention(attention.content);
-      } else {
-        System.err.println("selectPreviousTab : huh? value is unexpected " + value);
-      }
-    } catch (Exception e) {
-      storage.removeValue(CLICKED_TAB);
-      showBrowse();
-    }*/
   }
 
   /**
@@ -496,6 +442,9 @@ public class Navigation extends TabContainer implements RequiresResize {
    * @param onlyVisited
    */
   private void showMyLists(boolean onlyCreated, boolean onlyVisited) {
+ /*   if (!nameToIndex.containsKey(YOUR_LISTS)) {
+      return; //todo why could this happen?
+    }*/
     String value = storage.getValue(CLICKED_TAB);
     System.out.println("showMyLists " + value + " created " + onlyCreated + " visited " + onlyVisited);
     if (!value.isEmpty()) {
@@ -530,19 +479,14 @@ public class Navigation extends TabContainer implements RequiresResize {
   }
 
   private void clickOnTab(TabAndContent toUse) {
-    toUse.tab.fireEvent(new ButtonClickEvent());
+    if (toUse == null) {
+      System.err.println("huh? toUse is nulll???\n\n");
+    } else if (toUse.tab == null) {
+      System.err.println("huh? toUse has a null tab? " + toUse);
+    } else {
+      toUse.tab.fireEvent(new ButtonClickEvent());
+    }
   }
-
-  /**
-   * @se #showInitialState()
-   */
-/*
-  private void showBrowse() {
-    tabPanel.selectTab(getSafeTabIndexFor(BROWSE));
-    clickOnTab(browse);
-    viewBrowse();
-  }
-*/
 
   /*To call click() function for Programmatic equivalent of the user clicking the button.*/
   private class ButtonClickEvent extends ClickEvent {}
