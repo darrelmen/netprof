@@ -37,8 +37,6 @@ public class ExerciseListLayout {
                                         Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                         ExerciseController controller) {
     boolean isGrading = props.isGrading();
-    System.out.println("ExerciseListLayout.makeExerciseList : ------------->");
-
     this.exerciseList = makeExerciseList(secondRow, isGrading, feedback, currentExerciseVPanel, service, controller);
 
     boolean hideExerciseList = (props.isMinimalUI() && !isGrading) && !props.isAdminView();
@@ -76,7 +74,7 @@ public class ExerciseListLayout {
         true, props.isEnglishOnlyMode(), controller, "grading");
     } else {
       if (props.isShowSections()) {
-        System.out.println("makeExerciseList : making flex");
+       // System.out.println("makeExerciseList : making flex");
         FlexSectionExerciseList flex = new FlexSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
           props.isShowTurkToken(), props.showExercisesInOrder(), controller, showTypeAhead, "flex");
         return flex;
