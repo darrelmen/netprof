@@ -139,14 +139,12 @@ public class Exercise extends AudioExercise implements CommonExercise {
    * @param plan
    * @param id
    * @param content
-   * @param fastAudioRef
-   * @param slowAudioRef
    * @param sentenceRef
    * @param tooltip
    */
-  public Exercise(String plan, String id, String content, String fastAudioRef, String slowAudioRef, String sentenceRef, String tooltip) {
-    this(plan,id,content,fastAudioRef,sentenceRef, tooltip);
-    setSlowRefAudio(slowAudioRef);
+  public Exercise(String plan, String id, String content, String sentenceRef, String tooltip) {
+    this(plan,id,content,null,sentenceRef, tooltip);
+   // setSlowRefAudio(slowAudioRef);
     this.setType(EXERCISE_TYPE.REPEAT_FAST_SLOW);
   }
 
@@ -324,9 +322,14 @@ public class Exercise extends AudioExercise implements CommonExercise {
     if (isRepeat() || getType() == EXERCISE_TYPE.MULTI_REF) {
       Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
       StringBuilder builder = new StringBuilder();
-      for (AudioAttribute attr:audioAttributes1) builder.append("\t").append(attr.toString()).append("\n");
+      for (AudioAttribute attr:audioAttributes1) {
+        if (attr.getUser() == null) {
+          builder.append("\t").append(attr.toString()).append("\n");
+        }
+      }
       return "Exercise " + type + " " +id +  " content bytes = " + content.length() + " english '" + getEnglish() +
-          "' ref sentence '" + getRefSentence() +"'\n\taudio " + builder.toString() + " : " + questionInfo +
+          "' ref sentence '" + getRefSentence() +"' audio count = " + audioAttributes1.size()+
+        " \n\tmissing user audio " + builder.toString() + " : " + questionInfo +
         " unit->lesson " + getUnitToValue();
     }
     else {
