@@ -1,5 +1,6 @@
 package mitll.langtest.server.database;
 
+import com.google.gwt.media.client.Audio;
 import mitll.flashcard.UserState;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
@@ -14,9 +15,11 @@ import mitll.langtest.server.database.custom.UserListExerciseJoinDAO;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.flashcard.UserStateWrapper;
 import mitll.langtest.server.database.instrumentation.EventDAO;
+import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.DLIUser;
+import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
@@ -261,7 +264,7 @@ public class DatabaseImpl implements Database {
   public List<CommonExercise> getExercises() { return getExercises(useFile, lessonPlanFile); }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise(String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise
    * @param id
    * @return
    */
@@ -328,7 +331,40 @@ public class DatabaseImpl implements Database {
    */
   public void editItem(UserExercise userExercise) {
     getUserListManager().editItem(userExercise, true);
+    Map<String, ExerciseAnnotation> fieldToAnnotation = userExercise.getFieldToAnnotation();
+
+
+
+    Set<AudioAttribute> defects = new HashSet<AudioAttribute>();
+
+    Set<AudioAttribute> original  = new HashSet<AudioAttribute>(userExercise.getAudioAttributes());
+
+
+    for (Map.Entry<String,ExerciseAnnotation> fieldAnno : fieldToAnnotation.entrySet()) {
+      if (!fieldAnno.getValue().isCorrect()) {
+        AudioAttribute audioAttribute = userExercise.getAudioRefToAttr().get(fieldAnno.getKey());
+        logger.debug("found defect " + audioAttribute + " anno : " + fieldAnno.getValue() +  " field  " + fieldAnno.getKey());
+        if (audioAttribute != null) {
+          logger.debug("\tmarking defect on audio");
+          defects.add(audioAttribute);
+          audioDAO.markDefect((int) userExercise.getCreator(),
+            userExercise.getID(), audioAttribute.isRegularSpeed() ? AudioAttribute.REGULAR : AudioAttribute.SLOW);
+        }
+        else {
+
+        }
+      }
+    }
+
     exerciseDAO.addOverlay(userExercise);
+
+    CommonExercise exercise = getExercise(userExercise.getID());
+    String overlayID = exercise.getID();
+
+    original.removeAll(defects);
+    for (AudioAttribute toCopy: original) {
+      audioDAO.add((int)toCopy.getUserid(),toCopy.getAudioRef(),overlayID,toCopy.getTimestamp(),toCopy.getAudioType(),toCopy.getDuration());
+    }
   }
 
   /**
@@ -822,8 +858,7 @@ public class DatabaseImpl implements Database {
    *
    * @param exid
    * @return ResultsAndGrades
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getResultsForExercise
-   * @seex mitll.langtest.client.grading.GradingExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @see DatabaseImpl#getResultsForExercise
    */
   private ResultsAndGrades getResultsForExercise(String exid, boolean filterByFLQAndSpoken, boolean useFLQ, boolean useSpoken) {
     GradeDAO.GradesAndIDs gradesAndIDs = gradeDAO.getResultIDsForExercise(exid);
@@ -1061,7 +1096,7 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise(String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise
    * @param id
    * @return
    */
@@ -1071,7 +1106,7 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise(String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise
    * @param id
    * @return
    */
