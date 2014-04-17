@@ -1,6 +1,5 @@
 package mitll.langtest.server.database;
 
-import com.google.gwt.media.client.Audio;
 import mitll.flashcard.UserState;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
@@ -327,6 +326,7 @@ public class DatabaseImpl implements Database {
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#editItem(mitll.langtest.shared.custom.UserExercise)
+   * @see mitll.langtest.client.custom.EditableExercise#postEditItem
    * @param userExercise
    */
   public void editItem(UserExercise userExercise) {
@@ -347,8 +347,11 @@ public class DatabaseImpl implements Database {
         if (audioAttribute != null) {
           logger.debug("\tmarking defect on audio");
           defects.add(audioAttribute);
-          audioDAO.markDefect((int) userExercise.getCreator(),
-            userExercise.getID(), audioAttribute.isRegularSpeed() ? AudioAttribute.REGULAR : AudioAttribute.SLOW);
+          audioDAO.markDefect(audioAttribute);
+/*          audioDAO.markDefect(
+            (int) userExercise.getCreator(),
+            userExercise.getID(),
+            audioAttribute.isRegularSpeed() ? AudioAttribute.REGULAR : AudioAttribute.SLOW);*/
         }
         else {
 
@@ -1134,7 +1137,7 @@ public class DatabaseImpl implements Database {
   }
 
   protected static void importCourseExamples() {
-    DatabaseImpl russianCourseExamples = makeDatabaseImpl("russianCourseExamples", "war/config/russian");
+    DatabaseImpl russianCourseExamples = makeDatabaseImpl("russianCourseExamples_04_16", "war/config/russian");
     ResultDAO resultDAO1 = russianCourseExamples.getResultDAO();
     System.out.println("got " + resultDAO1.getNumResults());
     Map<Long, Map<String, Result>> userToResultsRegular = resultDAO1.getUserToResults(true, russianCourseExamples.getUserDAO());
@@ -1166,7 +1169,7 @@ public class DatabaseImpl implements Database {
 
     // add a audio reference to the audio ref table for each recording
     AudioDAO audioDAO = npfRussian.getAudioDAO();
-    audioDAO.drop();
+   // audioDAO.drop();
     copyAudio(userToResultsRegular, oldToNew, audioDAO);
     copyAudio(userToResultsSlow, oldToNew, audioDAO);
   }
@@ -1174,6 +1177,7 @@ public class DatabaseImpl implements Database {
   private static void copyUser(DatabaseImpl npfRussian, Map<Long, User> userMap, Map<Long, Long> oldToNew, long userid) {
     User user = userMap.get(userid);
     int i = npfRussian.userExists(user.getUserID());
+    if (i > 0) logger.debug("found duplicate " + user);
     long l = i != -1 ? i : npfRussian.addUser(user);
     oldToNew.put(user.getId(), l);
   }
@@ -1188,33 +1192,30 @@ public class DatabaseImpl implements Database {
     int count = 0;
     for (Map.Entry<Long, Map<String, Result>> userToExIdToResult : userToResultsRegular.entrySet()) {
       //for (Long userid : userToExIdToResult.getKey())
-      logger.debug("USer " +userToExIdToResult.getKey());
+      logger.debug("User " +userToExIdToResult.getKey());
       Map<String, Result> exIdToResult = userToExIdToResult.getValue();
       logger.debug("num = " + exIdToResult.size() + " exercises->results ");
       for (Result r : exIdToResult.values()) {
-        logger.debug("\tcount " + count+
-          " result = " + r.uniqueID + " for " +r.getID()+ " type " +r.getAudioType() + " path " +r.answer);
+        if (count %  100 == 0) {
+          logger.debug("\tcount " + count +
+            " result = " + r.uniqueID + " for " + r.getID() + " type " + r.getAudioType() + " path " + r.answer);
+        }
 
-        //  Result next = exIdToResult.values().iterator().next();
-        audioDAO.add(r, oldToNew.get(r.userid).intValue());
+        audioDAO.add(r, oldToNew.get(r.userid).intValue(), "bestAudio/" + r.answer);
+
         try {
-          File destFile = new File("war/config/russian/bestAudio",r.answer);
+          File destFile = new File("war/config/russian/bestAudio", r.answer);
           destFile.getParentFile().mkdirs();
           FileUtils.copyFile(new File("war/config/russian/candidateAudio", r.answer), destFile);
           count++;
+          if (count % 100 == 0)  {
+            logger.debug("\tcount " + count + " copied to " + destFile.getAbsolutePath());
+          }
         } catch (IOException e) {
           logger.error("got " + e, e);
         }
       }
-      // if (count > 10) break;
     }
     logger.debug("copied " + count + " files.");
   }
-
-/*
-  private static String trimPathForWebPage(Result r) {
-    int answer = r.answer.indexOf(PathHelper.ANSWERS);
-    if (answer == -1) return r.answer;
-    return r.answer.substring(answer);
-  }*/
 }
