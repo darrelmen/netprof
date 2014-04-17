@@ -572,10 +572,7 @@ public class UserExerciseDAO extends DAO {
   }
 
   private void addColumnToTable2(Connection connection) throws SQLException {
-    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " +
-      USEREXERCISE +" ADD " + OVERRIDE + " BOOLEAN");
-    statement.execute();
-    statement.close();
+    addBoolean(connection, USEREXERCISE, OVERRIDE);
   }
 
   private void addColumnToTable3(Connection connection) throws SQLException {
