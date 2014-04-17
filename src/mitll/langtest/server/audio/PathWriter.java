@@ -14,14 +14,11 @@ public class PathWriter {
   private static final Logger logger = Logger.getLogger(PathWriter.class);
 
   private static final String BEST_AUDIO = "bestAudio";
-/*
-
-  public PathWriter() {
-  }
-*/
+ // private String configDir;
 
   /**
-   * @see mitll.langtest.server.database.custom.UserListManager#getRefAudioPath(mitll.langtest.shared.custom.UserExercise, java.io.File, String, boolean)
+   * @see mitll.langtest.server.database.custom.UserListManager#getRefAudioPath
+   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile(String, String, String, int, int, int, boolean, String, boolean, boolean, boolean)
    * @param pathHelper
    * @param fileRef
    * @param destFileName
@@ -57,7 +54,18 @@ public class PathWriter {
 
   private void ensureMP3(PathHelper pathHelper, String wavFile, boolean overwrite) {
     if (wavFile != null) {
-      new AudioConversion().ensureWriteMP3(wavFile, pathHelper.getInstallPath(), overwrite);
+      String parent = pathHelper.getInstallPath();
+
+      AudioConversion audioConversion = new AudioConversion();
+      if (!audioConversion.exists(wavFile,parent)) {
+        parent = pathHelper.getConfigDir();
+      }
+      if (!audioConversion.exists(wavFile,parent)) {
+        logger.error("can't find " + wavFile + " under "  +parent);
+      }
+      audioConversion.ensureWriteMP3(wavFile, parent, overwrite);
     }
   }
+
+ // public void setConfigDir(String configDir) { this.configDir =configDir;}
 }
