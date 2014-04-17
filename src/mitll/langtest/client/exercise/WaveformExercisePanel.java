@@ -43,12 +43,13 @@ public class WaveformExercisePanel extends ExercisePanel {
                                final ExerciseController controller, ListInterface exerciseList) {
     super(e, service, userFeedback, controller, exerciseList);
     getElement().setId("WaveformExercisePanel");
-    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-      @Override
-      public void execute() {
-        getParent().addStyleName("userNPFContentLightPadding");
-      }
-    });
+  }
+
+  @Override
+  protected void onLoad() {
+    super.onLoad();
+    getParent().addStyleName("userNPFContentLightPadding");
+
   }
 
   public void setBusy(boolean v) {
