@@ -30,18 +30,27 @@ public class AudioExercise extends ExerciseShell {
   public AudioExercise(String id, String tooltip) {  super(id,tooltip); }
 
   public String getRefAudio() {
-    AudioAttribute audio = getAudio(SPEED, REGULAR);
+    AudioAttribute audio = getRegularSpeed();
     return audio != null ? audio.getAudioRef() : null;
   }
 
+  public AudioAttribute getRegularSpeed() {
+    return getAudio(SPEED, REGULAR);
+  }
+
   public String getSlowAudioRef() {
-    AudioAttribute audio = getAudio(SPEED, SLOW);
+    AudioAttribute audio = getSlowSpeed();
     return audio != null ? audio.getAudioRef() : null;
+  }
+
+  public AudioAttribute getSlowSpeed() {
+    return getAudio(SPEED, SLOW);
   }
 
   /**
    * @see mitll.langtest.server.database.ExcelImport#getExercise(String, String, String, String, String, String, boolean, String)
    * @param s
+   * @deprecated - try to avoid this
    */
   public void setRefAudio(String s) {
     if (s != null && s.length() > 0 && !s.equals("null")) {
@@ -57,6 +66,7 @@ public class AudioExercise extends ExerciseShell {
   /**
    * @see mitll.langtest.server.database.ExcelImport#getExercise(String, String, String, String, String, String, boolean, String)
    * @param s
+   * @deprecated - try to avoid this
    */
   public void setSlowRefAudio(String s) {
     if (s != null && s.length() > 0 && !s.equals("null")) {
@@ -66,12 +76,12 @@ public class AudioExercise extends ExerciseShell {
   }
 
   public void clearRefAudio() {
-    AudioAttribute audio = getAudio(SPEED, REGULAR);
+    AudioAttribute audio = getRegularSpeed();
     if (audio != null) audioAttributes.remove(audio.getKey());
   }
 
   public void clearSlowRefAudio() {
-    AudioAttribute audio = getAudio(SPEED, SLOW);
+    AudioAttribute audio = getSlowSpeed();
     if (audio != null) audioAttributes.remove(audio.getKey());
   }
 
