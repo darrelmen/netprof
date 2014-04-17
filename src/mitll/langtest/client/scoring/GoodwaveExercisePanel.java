@@ -663,11 +663,17 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       boolean allSameDialect = true;
       String last = "";
       for (AudioAttribute audioAttribute : audioAttributes) {
-         if (!last.isEmpty() && !audioAttribute.getUser().getDialect().equalsIgnoreCase(last)) {
-           allSameDialect = false;
-           break;
-         }
-        last = audioAttribute.getUser().getDialect();
+        MiniUser user = audioAttribute.getUser();
+        if (user != null) {
+          if (!last.isEmpty() && !user.getDialect().equalsIgnoreCase(last)) {
+            allSameDialect = false;
+            break;
+          }
+          last = user.getDialect();
+        }
+        else {
+          System.err.println("no user for " + audioAttribute);
+        }
       }
       return allSameDialect;
     }
@@ -695,7 +701,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       return title +
         " " +
         (includeDialect ? male.getDialect() :"") +
-        (DEBUG ?" (" + male.getUserID() + ")" :"") +
+        (controller.getProps().isAdminView() ?" (" + male.getUserID() + ")" :"") +
         " " +
         "age " + male.getAge();
     }
