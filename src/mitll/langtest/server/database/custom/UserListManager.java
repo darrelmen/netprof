@@ -201,7 +201,7 @@ public class UserListManager {
       ReviewedDAO.StateCreator stateCreator = exerciseToState.get(shell.getID());
       if (stateCreator != null) {
         shell.setState(stateCreator.state);
-        if (shell.getID().equals("0")) logger.debug("\tmarkState on " +shell + " of " + stateCreator.state);
+     //   if (shell.getID().equals("0")) logger.debug("\tmarkState on " +shell + " of " + stateCreator.state);
 
       }
     }
