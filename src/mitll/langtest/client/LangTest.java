@@ -102,7 +102,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private Panel headerRow;
   private FluidRow secondRow;
-  private Panel firstRow,flashRecordRow;
+  private Panel firstRow;//,flashRecordRow;
 
   private ProgressHelper progressBar;
 
@@ -273,8 +273,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
-  Panel bothSecondAndThird;
-
   private Cache<String, ImageResponse> imageCache = CacheBuilder.newBuilder()
     .maximumSize(MAX_CACHE_SIZE)
     .expireAfterWrite(7, TimeUnit.DAYS)
@@ -305,22 +303,17 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     if (shouldCollectAudio()) {
       makeFlashContainer();
-      //firstRow.add(flashRecordPanel);
     }
 
-    bothSecondAndThird = populateRootPanel();
-//    populateRootPanel();
+   /* Panel bothSecondAndThird =*/ populateRootPanel();
 
     setPageTitle();
     browserCheck.checkForCompatibleBrowser();
 
-   // modeSelect();
     loadVisualizationPackages();  // Note : this was formerly done in LangTest.html, since it seemed to be intermittently not loaded properly
   }
 
   private Panel populateRootPanel() {
-    System.out.println("-------------> populateRootPanel! ");
-
     Container verticalContainer = new FluidContainer();
     verticalContainer.getElement().setId("root_vertical_container");
 
@@ -330,8 +323,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     headerRow.getElement().setId("headerRow");
 
     Panel firstRow = new DivWidget();
-    flashRecordRow = new DivWidget();
-    verticalContainer.add(flashRecordRow);
+  //  flashRecordRow = new DivWidget();
+   // verticalContainer.add(flashRecordRow);
     verticalContainer.add(firstRow);
     this.firstRow = firstRow;
     firstRow.getElement().setId("firstRow");
@@ -389,7 +382,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     if (shouldCollectAudio()) {
       //makeFlashContainer();
-      flashRecordRow.add(flashRecordPanel);
+      firstRow.add(flashRecordPanel);
     }
     modeSelect();
 
@@ -429,17 +422,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       });
     }
   }
-/*
-  private void reallyMakeExerciseList(Panel firstRow, Panel exerciseListContainer, Panel bothSecondAndThird) {
-    makeExerciseList(secondRow, exerciseListContainer);
-*//*    String audioType1 = getAudioType();
-    System.out.println("reallyMakeExerciseList audio type " + audioType1);
-    if (!getProps().isClassroomMode() || audioType1.equals(Result.AUDIO_TYPE_RECORDER)) {
-      System.out.println("\treallyMakeExerciseList adding second and third container " + bothSecondAndThird);
-
-      firstRow.add(bothSecondAndThird);
-    }*//*
-  }*/
 
   /**
    * Supports different flavors of exercise list -- Paging, Grading, and vanilla.
@@ -447,16 +429,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @seex #reallyMakeExerciseList
    */
   private ListInterface makeExerciseList(FluidRow secondRow, Panel exerciseListContainer, Panel currentExerciseVPanel) {
-    System.out.println("\tmakeExerciseList...");
-
-   // if (exerciseList == null) {
-      this.exerciseList = new ExerciseListLayout(props).makeExerciseList(secondRow, exerciseListContainer, this, currentExerciseVPanel, service, this);
-    //}
+    this.exerciseList = new ExerciseListLayout(props).makeExerciseList(secondRow, exerciseListContainer, this, currentExerciseVPanel, service, this);
     reallySetFactory();
     return exerciseList;
   }
-
-  //private boolean isIPad() { return Window.Navigator.getUserAgent().toLowerCase().contains("ipad");  }
 
   private void loadVisualizationPackages() {
     VisualizationUtils.loadVisualizationApi(new Runnable() {
@@ -639,7 +615,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
                 showingPlugInNotice = false;
                 removeAndReloadFlash();
               }
-            });
+            }
+          );
         }
       }
     });
@@ -649,10 +626,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * This determines which kind of exercise we're going to do.
    * @see #gotUser(long)
    */
-/*  private void setFactory(final long userID) {
-    doEverythingAfterFactory(userID);
-  }*/
-
   private void reallySetFactory() {
     final LangTest outer = this;
     if (props.isGoodwaveMode() && !props.isGrading()) {
@@ -703,10 +676,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void removeAndReloadFlash() {
     System.out.println(new Date() + " : removeAndReloadFlash - reloading...");
 
-    flashRecordRow.remove(flashRecordPanel);
+    firstRow.remove(flashRecordPanel);
     flashRecordPanel.removeFlash();
     makeFlashContainer();
-    flashRecordRow.add(flashRecordPanel);
+    firstRow.add(flashRecordPanel);
     flashRecordPanel.initFlash();
   }
 
@@ -751,18 +724,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (userID != lastUser || (props.isGoodwaveMode() || props.isFlashCard() && !props.isTimedGame())) {
       System.out.println("doEverythingAfterFactory : user changed - new " + userID + " vs last " + lastUser + " audio type " +getAudioType());
       if (!shouldCollectAudio() || flashRecordPanel.gotPermission()) {
-   /*     if (getAudioType().equals(Result.AUDIO_TYPE_RECORDER)) {   // hack!
-          exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer, exerciseList) {
-            @Override
-            public Panel getExercisePanel(CommonExercise e) {
-              return new WaveformExercisePanel(e, service, outer, outer, exerciseList);
-            }
-          }, userManager, 1);
-        }*/
-        reallySetFactory();
+         reallySetFactory();
 
         if (exerciseList != null) {
-//          System.out.println("\tdoEverythingAfterFactory : " + userID + " get exercises");
           exerciseList.getExercises(userID, true);
         }
         else {
@@ -777,10 +741,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       lastUser = userID;
 
       return true;
-    } /*else if (props.isTimedGame()) {
-      exerciseList.reloadExercises();
-      return true;
-    }*/
+    }
     else return false;
   }
 
@@ -790,56 +751,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void resetClassroomState() {
     navigation.showInitialState();
   }
-  /*private void resetClassroomState() {
-
-    //if (changeLayout) {
-   // Panel bothSecondAndThird = populateRootPanel();
-    //  changeLayout = false;
-   // }
-    System.out.println("resetClassroomState audio type " + getAudioType());
-
-*//*    if (navigation != null && navigation.getContainer() != null) {
-      firstRow.remove(navigation.getContainer());
-      System.out.println("\t2 resetClassroomState  normal nav view " + firstRow.getElement().getId() + " has " + firstRow.getElement().getChildCount());
-    }*//*
-
-    firstRow.clear();
-
-    if (getProps().isClassroomMode() && !getAudioType().equals(Result.AUDIO_TYPE_RECORDER)) {
-*//*
-      if (getAudioType().equals(Result.AUDIO_TYPE_RECORDER)) {
-        System.out.println("\t resetClassroomState  recorder view "+ firstRow.getElement().getId() + " has " + firstRow.getElement().getChildCount());
-
-      }
-      else {
-*//*
-      System.out.println("\tresetClassroomState  normal nav view " + firstRow.getElement().getId() + " has " + firstRow.getElement().getChildCount());
-
-
-   //   firstRow.remove(bothSecondAndThird);
-      System.out.println("\t3 resetClassroomState  normal nav view " + firstRow.getElement().getId() + " has " + firstRow.getElement().getChildCount());
-
-*//*      navigation = //getProps().isCombinedMode() ? new Combined(service, userManager, this, exerciseList, this) :
-        new Navigation(service, userManager, this, exerciseList, this);*//*
-
-      firstRow.add(navigation.getNav(bothSecondAndThird));
-      System.out.println("\t4 resetClassroomState  normal nav view " + firstRow.getElement().getId() + " has " + firstRow.getElement().getChildCount());
-
-//      showInitialState();
-      navigation.showInitialState();
-
-//      }
-    }
-    else {
-      firstRow.add(bothSecondAndThird);
-    }
-  }*/
-
-/*  private void showInitialState() {
-    if (navigation != null) {
-      navigation.showInitialState();
-    }
-  }*/
 
   /**
    * @see #modeSelect()
