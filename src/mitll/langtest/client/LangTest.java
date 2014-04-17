@@ -323,8 +323,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     headerRow.getElement().setId("headerRow");
 
     Panel firstRow = new DivWidget();
-  //  flashRecordRow = new DivWidget();
-   // verticalContainer.add(flashRecordRow);
     verticalContainer.add(firstRow);
     this.firstRow = firstRow;
     firstRow.getElement().setId("firstRow");
@@ -349,7 +347,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     bothSecondAndThird.getElement().setId("secondAndThirdRowContainer");
     bothSecondAndThird.add(secondRow);
     bothSecondAndThird.add(thirdRow);
-    //this.bothSecondAndThird = bothSecondAndThird;
 
     if ((isCRTDataCollectMode() || props.isDataCollectMode()) && !props.isFlashcardTeacherView()) {
       addProgressBar(verticalContainer);
@@ -362,7 +359,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     Panel currentExerciseVPanel = new FlowPanel();
     currentExerciseVPanel.getElement().setId("currentExercisePanel");
 
-    //reallyMakeExerciseList(firstRow, exerciseListContainer, bothSecondAndThird);
     makeExerciseList(secondRow, exerciseListContainer, currentExerciseVPanel);
 
     RootPanel.get().clear();
@@ -381,7 +377,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // don't do flash if we're doing text only collection
 
     if (shouldCollectAudio()) {
-      //makeFlashContainer();
       firstRow.add(flashRecordPanel);
     }
     modeSelect();
@@ -456,17 +451,16 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     Widget title;
     if (isGoodwaveMode()) {
       flashcard = new Flashcard(props);
-      title = flashcard.makeNPFHeaderRow(props.getSplash(), props.isClassroomMode(),getGreeting(), getReleaseStatus(),new LogoutClickHandler(),
+      title = flashcard.makeNPFHeaderRow(props.getSplash(), props.isClassroomMode(), getGreeting(), getReleaseStatus(), new LogoutClickHandler(),
 
         (props.isAdminView()) ? new UsersClickHandler() : null,
         (props.isAdminView()) ? new ResultsClickHandler() : null,
         (props.isAdminView()) ? new MonitoringClickHandler() : null,
-      (props.isAdminView()) ? new EventsClickHandler() : null
-        );
-    }
-    else {
+        (props.isAdminView()) ? new EventsClickHandler() : null
+      );
+    } else {
       flashcard = new Flashcard(props);
-      title = flashcard.getHeaderRow(props.getSplash(), props.isClassroomMode(), NEW_PRO_F2_PNG,props.getAppTitle(), getGreeting(), getReleaseStatus(), new LogoutClickHandler(),
+      title = flashcard.getHeaderRow(props.getSplash(), props.isClassroomMode(), NEW_PRO_F2_PNG, props.getAppTitle(), getGreeting(), getReleaseStatus(), new LogoutClickHandler(),
 
         (props.isAdminView()) ? new UsersClickHandler() : null,
         (props.isAdminView()) ? new ResultsClickHandler() : null,
@@ -476,7 +470,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
 
     headerRow = new FluidRow();
-    headerRow.add(new Column(12,title));
+    headerRow.add(new Column(12, title));
     return headerRow;
   }
 
@@ -720,18 +714,19 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private boolean doEverythingAfterFactory(long userID) {
-    //final LangTest outer = this;
-    if (userID != lastUser || (props.isGoodwaveMode() || props.isFlashCard() && !props.isTimedGame())) {
+
+   // if (userID != lastUser || (props.isGoodwaveMode() || props.isFlashCard() && !props.isTimedGame())) {
       System.out.println("doEverythingAfterFactory : user changed - new " + userID + " vs last " + lastUser + " audio type " +getAudioType());
       if (!shouldCollectAudio() || flashRecordPanel.gotPermission()) {
          reallySetFactory();
 
-        if (exerciseList != null) {
+      //  if (exerciseList != null) {
           exerciseList.getExercises(userID, true);
-        }
-        else {
-          System.out.println("\tdoEverythingAfterFactory : " + userID + " exercise list is null???");
-        }
+        exerciseList.reload();
+      //  }
+      //  else {
+      //    System.out.println("\tdoEverythingAfterFactory : " + userID + " exercise list is null???");
+      //  }
 
         resetClassroomState();
       }
@@ -741,8 +736,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       lastUser = userID;
 
       return true;
-    }
-    else return false;
+   // }
+   // else return false;
   }
 
   /**
@@ -758,7 +753,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   // TODO : refactor all this into mode objects that decide whether we need flash or not, etc.
   private void checkInitFlash() {
     if (shouldCollectAudio() && !flashRecordPanel.gotPermission()) {
-      //System.out.println("checkInitFlash : initFlash");
       flashRecordPanel.initFlash();
     }
     else {
@@ -816,7 +810,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public void rememberAudioType(String audioType) {
     changeLayout = audioType.equals(this.audioType);
 
-    if (changeLayout) System.out.println("audio type now " + audioType);
+    if (!changeLayout) System.out.println("audio type now " + audioType);
 
     this.audioType = audioType;
   }
