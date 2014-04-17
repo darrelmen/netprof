@@ -96,7 +96,6 @@ class NPFHelper implements RequiresResize {
    */
   private Panel doNPF(UserList ul, String instanceName, boolean loadExercises) {
    // System.out.println(getClass() + " : doNPF instanceName = " + instanceName + " for list " + ul);
-
     Panel hp = doInternalLayout(ul, instanceName);
 
     if (loadExercises) {
@@ -113,7 +112,7 @@ class NPFHelper implements RequiresResize {
    * @return
    */
   protected Panel doInternalLayout(UserList ul, String instanceName) {
-    System.out.println(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
+    //System.out.println(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
 
     Panel hp = new HorizontalPanel();
     hp.getElement().setId("internalLayout_Row");
