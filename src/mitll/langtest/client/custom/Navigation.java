@@ -175,8 +175,8 @@ public class Navigation extends TabContainer implements RequiresResize {
    */
   protected Panel getTabPanel(Panel contentForChaptersTab) {
     tabPanel = new TabPanel();
+    tabPanel.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
     tabPanel.getElement().setId("tabPanel");
-   // boolean combinedMode = controller.getProps().isCombinedMode();
 
     this.chapterContent = contentForChaptersTab;
     //addTabs(contentForChaptersTab);
