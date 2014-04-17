@@ -184,6 +184,7 @@ class ReviewEditableExercise extends EditableExercise {
     if (audioAnnotation != null && !audioAnnotation.isCorrect()) {
       HTML child = new HTML(audioAnnotation.comment);
       child.getElement().getStyle().setFontSize(14, Style.Unit.PX);
+      child.getElement().getStyle().setFontWeight(Style.FontWeight.BOLD);
       vert.add(child);
     }
 
