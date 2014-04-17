@@ -100,9 +100,7 @@ class EditableExercise extends NewUserExercise {
       flow.add(child);
 
       container.add(flow);
-    }/* else if (ul != null) {        // when could this happen???
-      container.add(new Label("List " + ul.getName()));
-    }*/
+    }
   }
 
   boolean shouldDisableNext() {  return true; }
@@ -141,9 +139,7 @@ class EditableExercise extends NewUserExercise {
     delete.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-//        System.out.println(getClass() + " : makeDeleteButton npfHelperList " + npfHelper);
-
-        deleteItem(newUserExercise.getID(), uniqueID, ul, exerciseList, npfHelper.npfExerciseList);//editItem.npfHelper);
+        deleteItem(newUserExercise.getID(), uniqueID, ul, exerciseList, npfHelper.npfExerciseList);
       }
     });
 
@@ -153,6 +149,7 @@ class EditableExercise extends NewUserExercise {
   /**
    * @param container
    * @return
+   * @see #addNew(mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel)
    */
   @Override
   protected Panel makeEnglishRow(Panel container) {
@@ -205,7 +202,14 @@ class EditableExercise extends NewUserExercise {
     return addControlGroupEntrySimple(row, SLOW_SPEED_REFERENCE_RECORDING_OPTIONAL, rapSlow, slowAnno);
   }
 
-  private FormField makeBoxAndAnno(Panel row, String label, HTML englishAnno) {
+  /**
+   * @see #makeEnglishRow(com.google.gwt.user.client.ui.Panel)
+   * @param row
+   * @param label
+   * @param englishAnno
+   * @return
+   */
+  protected FormField makeBoxAndAnno(Panel row, String label, HTML englishAnno) {
     FormField formField = addControlFormField(row, label, false, 1, englishAnno);
     englishAnno.addStyleName("leftFiveMargin");
     englishAnno.addStyleName("editComment");
@@ -384,33 +388,34 @@ class EditableExercise extends NewUserExercise {
     translit.box.setText(originalTransliteration = newUserExercise.getTransliteration());
     useAnnotation(newUserExercise, "transliteration", translitAnno);
 
-    // regular speed audio
-    rap.getPostAudioButton().setExercise(newUserExercise);
-    String refAudio = newUserExercise.getRefAudio();
+    if (rap != null) {
+      // regular speed audio
+      rap.getPostAudioButton().setExercise(newUserExercise);
+      String refAudio = newUserExercise.getRefAudio();
 
-    if (refAudio != null) {
-      ExerciseAnnotation annotation = newUserExercise.getAnnotation(refAudio);
-      if (annotation == null) {
-        useAnnotation(newUserExercise.getAnnotation("refAudio"), fastAnno);
+      if (refAudio != null) {
+        ExerciseAnnotation annotation = newUserExercise.getAnnotation(refAudio);
+        if (annotation == null) {
+          useAnnotation(newUserExercise.getAnnotation("refAudio"), fastAnno);
+        } else {
+          useAnnotation(newUserExercise, refAudio, fastAnno);
+        }
+        rap.getImagesForPath(refAudio);
+        originalRefAudio = refAudio;
       }
-      else {
-        useAnnotation(newUserExercise, refAudio, fastAnno);
+
+      // slow speed audio
+      rapSlow.getPostAudioButton().setExercise(newUserExercise);
+      String slowAudioRef = newUserExercise.getSlowAudioRef();
+
+      if (slowAudioRef != null) {
+        useAnnotation(newUserExercise, slowAudioRef, slowAnno);
+        rapSlow.getImagesForPath(slowAudioRef);
+        originalSlowRefAudio = slowAudioRef;
       }
-      rap.getImagesForPath(refAudio);
-      originalRefAudio = refAudio;
-    }
-
-    // slow speed audio
-    rapSlow.getPostAudioButton().setExercise(newUserExercise);
-    String slowAudioRef = newUserExercise.getSlowAudioRef();
-
-    if (slowAudioRef != null) {
-      useAnnotation(newUserExercise, slowAudioRef, slowAnno);
-      rapSlow.getImagesForPath(slowAudioRef);
-      originalSlowRefAudio = slowAudioRef;
-    }
-    if (!newUserExercise.hasRefAudio()) {
-      useAnnotation(newUserExercise, "refAudio", fastAnno);
+      if (!newUserExercise.hasRefAudio()) {
+        useAnnotation(newUserExercise, "refAudio", fastAnno);
+      }
     }
   }
 
