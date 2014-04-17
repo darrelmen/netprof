@@ -335,7 +335,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   private void addTabsForUsers(CommonExercise e, TabPanel tabPanel, Map<MiniUser, List<AudioAttribute>> malesMap, List<MiniUser> maleUsers) {
     for (MiniUser user : maleUsers) {
       String tabTitle =  (user.isMale() ? "Male" :"Female")+ " age " + user.getAge();
-      RememberTabAndContent tabAndContent = new RememberTabAndContent(IconType.QUESTION_SIGN, tabTitle); // TODO : icon state dependent on whether they've listend to all the audio
+      RememberTabAndContent tabAndContent = new RememberTabAndContent(IconType.QUESTION_SIGN, tabTitle);
       tabPanel.add(tabAndContent.tab.asTabLink());
       tabs.add(tabAndContent);
 
