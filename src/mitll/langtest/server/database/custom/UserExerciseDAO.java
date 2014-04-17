@@ -404,8 +404,6 @@ public class UserExerciseDAO extends DAO {
         rs.getBoolean(OVERRIDE),
         unitToValue,
         date
-        //,
-        //rs.getString(STATE)
       );
 
       exercises.add(e);
