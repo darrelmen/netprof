@@ -22,8 +22,8 @@ import mitll.langtest.client.user.UserManager;
 
 class CreateListDialog extends BasicDialog {
   private static final String CLASS = "Course Info (optional)";
-  private static final boolean REQUIRE_DESC = false;
-  private static final boolean REQUIRE_CLASS = false;
+/*  private static final boolean REQUIRE_DESC = false;
+  private static final boolean REQUIRE_CLASS = false;*/
 
   private final Navigation navigation;
   private final LangTestDatabaseAsync service;
@@ -112,7 +112,7 @@ class CreateListDialog extends BasicDialog {
       public void onClick(ClickEvent event) {
         //System.out.println("creating list for " + titleBox + " " + area.getText() + " and " + classBox.getText());
         enterKeyButtonHelper.removeKeyHandler();
-        if (validateCreateList(titleBox, description, classBox)) {
+        if (validateCreateList(titleBox/*, description, classBox*/)) {
           addUserList(titleBox, area, classBox);
         }
       }
@@ -149,7 +149,7 @@ class CreateListDialog extends BasicDialog {
     DOM.setStyleAttribute(createContent.getElement(), "paddingRight", "0px");
   }
 
-  private boolean validateCreateList(BasicDialog.FormField titleBox, BasicDialog.FormField description, BasicDialog.FormField classBox) {
+  private boolean validateCreateList(BasicDialog.FormField titleBox/*, BasicDialog.FormField description, BasicDialog.FormField classBox*/) {
     if (titleBox.getText().isEmpty()) {
       markError(titleBox, "Please fill in a title");
       return false;
