@@ -301,13 +301,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   }
 
   private ASRScoringAudioPanel getAudioPanel(String path) {
-    ASRScoringAudioPanel audioPanel;
-  //  if (e.getType() == Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW) {
-      audioPanel = makeFastAndSlowAudio(path);
-/*    } else {
-      boolean showSpectrogram = controller.getProps().showSpectrogram();
-      audioPanel = new ASRScoringAudioPanel(path, e.getRefSentence(), service, controller, showSpectrogram, scorePanel, 23, " reference");
-    }*/
+    ASRScoringAudioPanel audioPanel = makeFastAndSlowAudio(path);
     audioPanel.getElement().setId("ASRScoringAudioPanel");
     return audioPanel;
   }
@@ -635,8 +629,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         Dropdown dropdown = new Dropdown("Voice");
         dropdown.addStyleName("leftFiveMargin");
 
-        List<MiniUser> maleUsers   = getSortedUsers(malesMap);
-        List<MiniUser> femaleUsers = getSortedUsers(femalesMap);
+        List<MiniUser> maleUsers   = exercise.getSortedUsers(malesMap);
+        List<MiniUser> femaleUsers = exercise.getSortedUsers(femalesMap);
 
         addChoices(rightSide, malesMap,   dropdown, maleUsers,   MALE,   !allSameDialect);
         addChoices(rightSide, femalesMap, dropdown, femaleUsers, FEMALE, !allSameDialect);
@@ -761,7 +755,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       getImagesForPath(audioAttribute.getAudioRef());
     }
   }
-
+/*
   protected List<MiniUser> getSortedUsers(Map<MiniUser, List<AudioAttribute>> malesMap) {
     List<MiniUser> maleUsers = new ArrayList<MiniUser>(malesMap.keySet());
     Collections.sort(maleUsers, new Comparator<MiniUser>() {
@@ -770,5 +764,5 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       }
     });
     return maleUsers;
-  }
+  }*/
 }
