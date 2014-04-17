@@ -707,44 +707,25 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param userID
    */
   public void gotUser(long userID) {
-    //System.out.println("LangTest.gotUser : got user " + userID);
     flashcard.setUserName(getGreeting());
     doEverythingAfterFactory(userID);
-    logEvent("No widget","UserLoging","N/A","User Login");
+    logEvent("No widget", "UserLoging", "N/A", "User Login");
   }
 
   private boolean doEverythingAfterFactory(long userID) {
+    System.out.println("doEverythingAfterFactory : user changed - new " + userID + " vs last " + lastUser + " audio type " + getAudioType());
+    if (!shouldCollectAudio() || flashRecordPanel.gotPermission()) {
+      reallySetFactory();
 
-   // if (userID != lastUser || (props.isGoodwaveMode() || props.isFlashCard() && !props.isTimedGame())) {
-      System.out.println("doEverythingAfterFactory : user changed - new " + userID + " vs last " + lastUser + " audio type " +getAudioType());
-      if (!shouldCollectAudio() || flashRecordPanel.gotPermission()) {
-         reallySetFactory();
+      exerciseList.getExercises(userID, true);
+      exerciseList.reload();
+      navigation.showInitialState();
+    } else {
+      System.out.println("\tdoEverythingAfterFactory : " + userID + " NOT getting exercises");
+    }
+    lastUser = userID;
 
-      //  if (exerciseList != null) {
-          exerciseList.getExercises(userID, true);
-        exerciseList.reload();
-      //  }
-      //  else {
-      //    System.out.println("\tdoEverythingAfterFactory : " + userID + " exercise list is null???");
-      //  }
-
-        resetClassroomState();
-      }
-      else {
-        System.out.println("\tdoEverythingAfterFactory : " + userID + " NOT getting exercises");
-      }
-      lastUser = userID;
-
-      return true;
-   // }
-   // else return false;
-  }
-
-  /**
-   * @see #doEverythingAfterFactory(long)
-   */
-  private void resetClassroomState() {
-    navigation.showInitialState();
+    return true;
   }
 
   /**
