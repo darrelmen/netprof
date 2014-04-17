@@ -136,6 +136,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * Supports lookup by id
    *
+   * TODO : add flag if we're in recorder mode -- mark recorded items RECORDED
+   *
    * @see mitll.langtest.client.list.PagingExerciseList#loadExercises(String, String)
    * @param reqID
    * @param typeToSelection
@@ -264,7 +266,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     addAnnotations(firstExercise); // todo do this in a better way
     addPlayedMarkings(userID, firstExercise);
     List<AudioAttribute> audioAttributes = db.getAudioDAO().getAudioAttributes(firstExercise.getID());
-    for (AudioAttribute attr : audioAttributes) firstExercise.addAudio(attr);
+    for (AudioAttribute attr : audioAttributes) {
+      firstExercise.addAudio(attr);
+    }
+    if (!audioAttributes.isEmpty()) {
+      logger.debug("Added  " + audioAttributes.size() + " audio attrs to " + firstExercise);
+    }
   }
 
   private void addPlayedMarkings(long userID, CommonExercise firstExercise) {
@@ -272,8 +279,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     Map<String,AudioAttribute> audioToAttr = firstExercise.getAudioRefToAttr();
     for (Event event : allForUserAndExercise) {
       AudioAttribute audioAttribute = audioToAttr.get(event.getContext());
-      if (audioAttribute == null) logger.error("huh? can't find " +event.getContext());
-      else audioAttribute.setHasBeenPlayed(true);
+      if (audioAttribute == null) {
+        logger.error("addPlayedMarkings huh? can't find " +event.getContext() + " in " + audioToAttr.keySet());
+      }
+      else {
+        audioAttribute.setHasBeenPlayed(true);
+      }
     }
   }
 
@@ -395,8 +406,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       logger.error("getExercise : huh? couldn't find exercise with id " + id + " when examining " + exercises.size() + " items");
     }
     else {
-      logger.debug("getExercise : returning " +byID);
       addAnnotationsAndAudio(userID, byID);
+      logger.debug("getExercise : returning " +byID);
       ensureMP3s(byID);
     }
     long now = System.currentTimeMillis();
@@ -775,8 +786,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public UserList getCommentedList() { return db.getUserListManager().getCommentedList(); }
 
+  /**
+   * Can't check if it's valid if we don't have a model.
+   * @param foreign
+   * @return
+   */
   @Override
-  public boolean isValidForeignPhrase(String foreign) {  return audioFileHelper.checkLTS(foreign); }
+  public boolean isValidForeignPhrase(String foreign) {  return serverProps.isNoModel() || audioFileHelper.checkLTS(foreign); }
 
   /**
    * Put the new item in the database,
