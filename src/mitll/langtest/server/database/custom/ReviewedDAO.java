@@ -178,12 +178,13 @@ public class ReviewedDAO extends DAO {
    * @return
    * @see UserListManager#getDefectList()
    * @see UserListManager#getExerciseToState()
-   * @see mitll.langtest.server.database.custom.UserListManager#markState(java.util.Collection)
+   * @see UserListManager#markState(java.util.Collection, String)
    */
   public Map<String, StateCreator> getExerciseToState() {
     Connection connection = database.getConnection();
 
-    String sql3 = "select * from (select " +
+    String sql3 = "select * from " +
+      "(select " +
       EXERCISEID +
       "," +
       STATE +
@@ -197,6 +198,8 @@ public class ReviewedDAO extends DAO {
       EXERCISEID +
       "," +
       STATE +
+      "," +
+      CREATORID +
       " order by " +
       EXERCISEID +
       ") order by " +
