@@ -33,7 +33,7 @@ public class ChapterNPFHelper extends NPFHelper {
       }
     };
 
-    System.out.println(getClass() + " : ChapterNPFHelper flexListLayout " + flexListLayout );
+    //System.out.println(getClass() + " : ChapterNPFHelper flexListLayout " + flexListLayout );
   }
 
   /**
@@ -43,7 +43,7 @@ public class ChapterNPFHelper extends NPFHelper {
    * @return
    */
   protected Panel doInternalLayout(UserList ul, String instanceName) {
-    System.out.println(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
+   // System.out.println(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
     Panel widgets = flexListLayout.doInternalLayout(ul, instanceName);
     npfExerciseList = flexListLayout.npfExerciseList;
     return widgets;
