@@ -317,8 +317,9 @@ class StudentDialog extends UserDialog {
    * @param userID
    */
   private void checkThenRegister(String audioType, RegistrationInfo registrationInfo, Modal dialogBox, String userID) {
-    boolean skipWeekCheck = audioType.toLowerCase().contains(REVIEW.toLowerCase());
-    boolean skipChecks = audioType.toLowerCase().contains(PRACTICE.toLowerCase());
+    String s = audioType.toLowerCase();
+    boolean skipWeekCheck = s.contains(REVIEW.toLowerCase()) || s.contains(RECORDER.toLowerCase());
+    boolean skipChecks = s.contains(PRACTICE.toLowerCase());
     if (skipChecks) {
       System.out.println("checkThenRegister : skipChecks " + audioType + " user  " + userID);
 
