@@ -218,8 +218,18 @@ public class EditItem {
 
   private UserExercise newExercise;
 
+  /**
+   * @see #setFactory(mitll.langtest.client.list.PagingExerciseList, mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserList)
+   * @param exercise
+   * @param right
+   * @param ul
+   * @param originalList
+   * @param itemMarker
+   * @param pagingContainer
+   */
   private void populatePanel(CommonUserExercise exercise, final Panel right, final UserList ul, final UserList originalList, final HasText itemMarker,
                              final ListInterface pagingContainer) {
+    System.out.println("exercise " + exercise.getAudioAttributes());
     if (exercise.getID().equals(NEW_EXERCISE_ID)) {
       if (newExercise == null) {
         newExercise = createNewItem(userManager.getUser());
@@ -234,9 +244,20 @@ public class EditItem {
   }
 
   private UserExercise createNewItem(long userid) {
-    return new UserExercise(-1, UserExercise.CUSTOM_PREFIX+Long.MAX_VALUE, userid, "", "", "");
+    return new UserExercise(-1, UserExercise.CUSTOM_PREFIX + Long.MAX_VALUE, userid, "", "", "");
   }
 
+  /**
+   * @see #populatePanel(mitll.langtest.shared.CommonUserExercise, com.google.gwt.user.client.ui.Panel, mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.HasText, mitll.langtest.client.list.ListInterface)
+   * @param newExercise
+   * @param itemMarker
+   * @param originalList
+   * @param right
+   * @param ul
+   * @param pagingContainer
+   * @param doNewExercise
+   * @param setFields
+   */
   private void addEditOrAddPanel(CommonUserExercise newExercise, HasText itemMarker, UserList originalList,
                                    Panel right, UserList ul, ListInterface pagingContainer, boolean doNewExercise, boolean setFields) {
     NewUserExercise editableExercise = getAddOrEditPanel(newExercise, itemMarker, originalList, doNewExercise);
@@ -260,7 +281,7 @@ public class EditItem {
    * @param doNewExercise
    * @return
    */
-  NewUserExercise getAddOrEditPanel(CommonUserExercise exercise, HasText itemMarker, UserList originalList, boolean doNewExercise) {
+  private NewUserExercise getAddOrEditPanel(CommonUserExercise exercise, HasText itemMarker, UserList originalList, boolean doNewExercise) {
     NewUserExercise editableExercise;
     if (doNewExercise) {
       editableExercise = new NewUserExercise(service, controller, itemMarker, this, exercise);
@@ -306,9 +327,7 @@ public class EditItem {
           }
 
           @Override
-          protected void setFields(CommonExercise newUserExercise) {
-
-          }
+          protected void setFields(CommonExercise newUserExercise) {}
         };
 
       }
