@@ -1,12 +1,6 @@
 package mitll.langtest.client.custom;
 
-import com.github.gwtbootstrap.client.ui.FluidRow;
-import com.github.gwtbootstrap.client.ui.TabPanel;
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.ExerciseListLayout;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
