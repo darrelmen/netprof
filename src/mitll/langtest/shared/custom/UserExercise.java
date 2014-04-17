@@ -109,8 +109,15 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     this.english = exercise.getEnglish();
     this.foreignLanguage = exercise.getRefSentence();
     this.transliteration = exercise.getTransliteration();
-    setRefAudio(exercise.getRefAudio());
-    setSlowRefAudio(exercise.getSlowAudioRef());
+   // setRefAudio(exercise.getRefAudio());
+    //setSlowRefAudio(exercise.getSlowAudioRef());
+
+/*
+    AudioAttribute slowSpeed = exercise.getSlowSpeed();
+    if (slowSpeed != null) {
+      addAudio(slowSpeed);
+    }*/
+
     setFieldToAnnotation(exercise.getFieldToAnnotation());
     setUnitToValue(exercise.getUnitToValue());
     setState(exercise.getState());
@@ -135,8 +142,10 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   public CommonUserExercise toCommonUserExercise() { return this; }
 
   private void copyFields(Exercise imported) {
-    if (getSlowAudioRef() != null)
-      imported.setSlowRefAudio(getSlowAudioRef());
+    AudioAttribute slowSpeed = getSlowSpeed();
+    if (slowSpeed != null) {
+      imported.addAudio(slowSpeed);
+    }
     imported.setType(Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW);
     imported.setEnglishSentence(getEnglish());
     imported.setTranslitSentence(getTransliteration());
