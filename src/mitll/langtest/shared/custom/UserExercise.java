@@ -1,5 +1,6 @@
 package mitll.langtest.shared.custom;
 
+import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.AudioExercise;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
@@ -97,10 +98,10 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     this.context = context;
   }
 
-    /**
-     * @see mitll.langtest.client.custom.NPFExercise#populateListChoices
-     * @param exercise
-     */
+  /**
+   * @param exercise
+   * @see mitll.langtest.client.custom.NPFExercise#populateListChoices
+   */
   public UserExercise(CommonExercise exercise) {
     super(exercise.getID(), exercise.getEnglish().trim().isEmpty() ? exercise.getRefSentence() : exercise.getEnglish());
 
@@ -115,6 +116,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     setState(exercise.getState());
     setSecondState(exercise.getSecondState());
     setContext(exercise.getContext());
+    for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) addAudio(audioAttribute);
   }
 
   /**
@@ -174,10 +176,6 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   public String getContent() {
     return content;
   }
-/*  public String setContent(String language) {
-    this.content = ExerciseFormatter.getContent(getForeignLanguage(), transliteration, english, "", "", language);
-    return content;
-  }*/
 
   public CommonShell getShellCombinedTooltip() {
     String refSentence = getForeignLanguage();
@@ -222,16 +220,13 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
 
   @Override
   public String getContext() { return context;  }
-
-  public void setContext(String context) { this.context = context; }
+  private void setContext(String context) { this.context = context; }
 
   @Override
   public boolean isPredefined() {  return isPredef;  }
 
   @Override
-  public UserExercise toUserExercise() {
-    return this;
-  }
+  public UserExercise toUserExercise() {  return this;  }
 
   public boolean checkPredef() {  return !getID().startsWith(CUSTOM_PREFIX);  }
 
