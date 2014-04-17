@@ -27,7 +27,8 @@ public class AudioAttribute implements IsSerializable {
   private Map<String, String> attributes;
   private boolean hasBeenPlayed;
 
-  public AudioAttribute() {}
+  public AudioAttribute() {
+  }
 
   public AudioAttribute(long userid,
                         String exid,
@@ -36,7 +37,7 @@ public class AudioAttribute implements IsSerializable {
     this.userid = userid;
     this.exid = exid;
     this.audioRef = audioRef;
-     this.timestamp = timestamp;
+    this.timestamp = timestamp;
     this.duration = duration;
     this.user = user;
     if (type.equals(Result.AUDIO_TYPE_REGULAR)) markRegular();
@@ -44,7 +45,7 @@ public class AudioAttribute implements IsSerializable {
     else {
       attributes = new HashMap<String, String>();
     }
-   // System.out.println("user is " + user);
+    // System.out.println("user is " + user);
   }
 
   protected AudioAttribute(String audioRef) {
