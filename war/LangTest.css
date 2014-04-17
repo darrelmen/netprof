@@ -654,10 +654,17 @@ fieldset > legend {
 }
 
 .userNPFContent {
+     margin-top: 2px;
+     border-radius: 3px 3px 3px 3px;
+     box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
+     padding: 5px 110px 5px 5px;
+ }
+
+.userNPFContentLightPadding {
     margin-top: 2px;
     border-radius: 3px 3px 3px 3px;
     box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
-    padding: 5px 110px 5px 5px;
+    padding: 5px 5px 5px 5px;
 }
 
 .shadowBorder {
