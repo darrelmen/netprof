@@ -4,6 +4,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.shared.custom.UserExercise;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -321,8 +322,11 @@ public class Exercise extends AudioExercise implements CommonExercise {
     String questionInfo = langToQuestion == null ? " no questions" : " num questions " + langToQuestion.size() + moreAboutQuestions;
 
     if (isRepeat() || getType() == EXERCISE_TYPE.MULTI_REF) {
+      Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
+      StringBuilder builder = new StringBuilder();
+      for (AudioAttribute attr:audioAttributes1) builder.append("\t").append(attr.toString()).append("\n");
       return "Exercise " + type + " " +id +  " content bytes = " + content.length() + " english '" + getEnglish() +
-          "' ref sentence '" + getRefSentence() +"' audio " + getAudioAttributes() + " : " + questionInfo +
+          "' ref sentence '" + getRefSentence() +"'\n\taudio " + builder.toString() + " : " + questionInfo +
         " unit->lesson " + getUnitToValue();
     }
     else {
