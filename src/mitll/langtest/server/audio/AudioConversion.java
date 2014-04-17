@@ -31,9 +31,6 @@ public class AudioConversion {
   private static final String LAME_PATH_WINDOWS = "C:\\Users\\go22670\\lame\\lame.exe";
   private static final String LAME_PATH_LINUX = "/usr/local/bin/lame";
 
-/*  private static final String FFMPEG_PATH_WINDOWS = "C:\\Users\\go22670\\ffmpeg\\bin\\ffmpeg.exe";
-  private static final String FFMPEG_PATH_LINUX = "/usr/local/bin/ffmpeg";*/
-
   private static final String LINUX_SOX_BIN_DIR = "/usr/local/bin";
   private static final String LINUX_SOX_BIN_DIR_2 = "/usr/bin";
   private static final String WINDOWS_SOX_BIN_DIR = "C:\\Users\\go22670\\sox-14-3-2";
@@ -252,56 +249,11 @@ public class AudioConversion {
     return name1.substring(0,name1.length()-4);
   }
 
-  /**
-   * @param pathToWav
-   */
-/*
-  private void writeOGG(String pathToWav) {
-    String mp3File = pathToWav.replace(".wav",".ogg");
-    String exePath = FFMPEG_PATH_WINDOWS;    // Windows
-    if (!new File(exePath).exists()) {
-      exePath = FFMPEG_PATH_LINUX;
-    }
-    if (!new File(exePath).exists()) {
-      System.err.println("no lame installed at " + exePath + " or " +FFMPEG_PATH_WINDOWS);
-    }
-    writeWithFFMPEG(exePath, pathToWav, mp3File);
-  }
-*/
-
   private boolean writeOGG(String pathToWav) {
     String oggFile = pathToWav.replace(".wav",".ogg");
     return oggEncoder != null && convertFileAndCheck(oggEncoder.getAbsolutePath(), pathToWav, oggFile);
 
   }
-
-
-  /**
-   * Writes a WEBM file.  This is an open source format supported by Firefox (which doesn't handle mp3).
-   *
-   * @param path
-   */
-/*  private boolean writeCompressed(String path) {
-    String outputFile = path.replace(".wav", ".webm");
-    File ogg = new File(outputFile);
-    return ogg.exists() || writeWEBMM(path);
-  }*/
-
-/*  private boolean writeWEBMM(String pathToWav) {
-    String mp3File = pathToWav.replace(".wav",".webm");
-    String exePath = FFMPEG_PATH_WINDOWS;    // Windows
-    if (!new File(exePath).exists()) {
-      exePath = FFMPEG_PATH_LINUX;
-    }
-    if (!new File(exePath).exists()) {
-      System.err.println("no lame installed at " + exePath + " or " +FFMPEG_PATH_WINDOWS);
-    }
-
-*//*    System.out.println("using " +exePath +" audio :'" +pathToWav +
-        "' mp3 '" +mp3File+
-        "'");*//*
-    return writeWithFFMPEG(exePath, pathToWav, mp3File);
-  }*/
 
   /**
    * Remember to resample wav to 48K before doing lame on it.
@@ -325,12 +277,12 @@ public class AudioConversion {
   }
 
   private void writeMP3(String pathToWav, String realContextPath, boolean overwrite) {
-    File absolutePathToWav = getAbsoluteFile(pathToWav,realContextPath);
+    File absolutePathToWav = getAbsoluteFile(pathToWav, realContextPath);
 
     String mp3File = absolutePathToWav.getAbsolutePath().replace(".wav",".mp3");
     File mp3 = new File(mp3File);
     if (!mp3.exists() || overwrite) {
-      //logger.debug("doing mp3 conversion for " + absolutePathToWav);
+      if (DEBUG) logger.debug("writeMP3 : doing mp3 conversion for " + absolutePathToWav + " path " + pathToWav + " context " + realContextPath);
 
       String binPath = getBinPath();
       File tempFile;
@@ -345,7 +297,7 @@ public class AudioConversion {
         if (!tempFile.exists()) logger.error("didn't make " + tempFile);
 
         String lamePath = getLame();
-      //  logger.info("run lame on " + tempFile + " making " + mp3File);
+        if (DEBUG)  logger.debug("run lame on " + tempFile + " making " + mp3File);
         convertFileAndCheck(lamePath, tempFile.getAbsolutePath(), mp3File);
       } catch (IOException e) {
         logger.error("got " + e,e);
@@ -390,23 +342,28 @@ public class AudioConversion {
     return getAbsolute(filePath, realContextPath);
   }
 
+  public boolean exists(String filePath, String realContextPath) {
+    return getAbsoluteFile(filePath, realContextPath).exists();
+  }
+
   private File getAbsolute(String filePath, String realContextPath) {
     File file = new File(realContextPath, filePath);
     assert(file.exists());
     return file;
   }
 
+  private static boolean DEBUG = false;
   /**
    * Use lame to write an mp3 file.
    * @param pathToWav
    */
   private void writeMP3(String pathToWav) {
-    String mp3File = pathToWav.replace(".wav",".mp3");
+    String mp3File = pathToWav.replace(".wav", ".mp3");
     String lamePath = getLame();
 
-/*    System.out.println("using " +lamePath +" audio :'" +pathToWav +
-        "' mp3 '" +mp3File+
-        "'");*/
+    if (DEBUG) logger.debug("using " + lamePath + " audio :'" + pathToWav +
+      "' mp3 '" + mp3File +
+      "'");
     convertFileAndCheck(lamePath, pathToWav, mp3File);
   }
 
@@ -469,6 +426,7 @@ public class AudioConversion {
    * @return
    */
   private boolean convertFileAndCheck(String lamePath, String pathToAudioFile, String mp3File) {
+    if (DEBUG) logger.debug("convert " + pathToAudioFile + " to " + mp3File);
     ProcessBuilder lameProc = new ProcessBuilder(lamePath, pathToAudioFile, mp3File);
     try {
       //logger.debug("running lame" + lameProc.command());
@@ -488,6 +446,7 @@ public class AudioConversion {
         logger.error("didn't write MP3 : " + testMP3.getAbsolutePath() +
           " exe path " + lamePath +
           " command was " + lameProc.command());
+        new Exception().printStackTrace();
       }
       return false;
     } else {
@@ -495,25 +454,4 @@ public class AudioConversion {
     }
     return true;
   }
-
-/*  private boolean writeWithFFMPEG(String path, String pathToAudioFile, String mp3File) {
-    ProcessBuilder lameProc = new ProcessBuilder(path, "-i", pathToAudioFile, mp3File);
-    try {
-      //System.out.println("writeWithFFMPEG running ffmpeg" + lameProc.command());
-      new ProcessRunner().runProcess(lameProc);
-      //System.out.println("writeWithFFMPEG exited  ffmpeg" + lameProc);
-    } catch (IOException e) {
-      System.err.println("Couldn't run " + lameProc);
-      e.printStackTrace();
-    }
-
-    File testMP3 = new File(mp3File);
-    if (!testMP3.exists()) {
-      System.err.println("didn't write output file : " + testMP3.getAbsolutePath());
-      return false;
-    } else {
-      //   System.out.println("Wrote to " + testMP3);
-      return true;
-    }
-  }*/
 }

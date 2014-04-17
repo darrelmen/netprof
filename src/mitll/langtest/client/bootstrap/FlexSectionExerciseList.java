@@ -109,32 +109,17 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   public void getExercises(final long userID, boolean getNext) {
     System.out.println("FlexSectionExerciseList.getExercises : Get exercises for user=" + userID + " instance " + instance);
     this.userID = userID;
-
-/*    if (controller.showCompleted()) {
-      service.getCompletedExercises((int)userID, controller.isReviewMode(), new AsyncCallback<Set<String>>() {
-        @Override
-        public void onFailure(Throwable caught) {}
-        @Override
-        public void onSuccess(Set<String> result) {
-          System.out.println("FlexSectionExerciseList : getCompletedExercises : completed for user=" + userID + " result " + result.size() + " instance " + instance);
-          controller.getExerciseList().setCompleted(result);
-          addWidgets();
-        }
-      });
-    }
-    else {*/
-      addWidgets();
-  //  }
+    addWidgets();
   }
 
   public void addWidgets() {
-    System.out.println("FlexSectionExerciseList.addWidgets " + sectionPanel.getElement().getId() + " : ");
+//    System.out.println("FlexSectionExerciseList.addWidgets " + sectionPanel.getElement().getId() + " : ");
 
     sectionPanel.clear();
-    System.out.println("FlexSectionExerciseList.addWidgets " + sectionPanel.getElement().getId() + " : " + sectionPanel.getElement().getChildCount());
+  //  System.out.println("FlexSectionExerciseList.addWidgets " + sectionPanel.getElement().getId() + " : " + sectionPanel.getElement().getChildCount());
 
     sectionPanel.add(getWidgetsForTypes());
-    System.out.println("\tFlexSectionExerciseList.addWidgets " + sectionPanel.getElement().getChildCount());
+    //System.out.println("\tFlexSectionExerciseList.addWidgets " + sectionPanel.getElement().getChildCount());
 
   }
 
@@ -159,7 +144,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
 
   private void getTypeOrder(final FluidContainer container) {
     typeOrder = controller.getStartupInfo().getTypeOrder();
-    System.out.println("FlexSectionExerciseList.getTypeOrder typeOrder " + typeOrder);
+   // System.out.println("FlexSectionExerciseList.getTypeOrder typeOrder " + typeOrder);
 
       addButtonRow(controller.getStartupInfo().getSectionNodes(), container, typeOrder, !controller.isGoodwaveMode());
   }
@@ -176,8 +161,8 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    */
   private void addButtonRow(List<SectionNode> rootNodes, FluidContainer container, Collection<String> types,
                             boolean addInstructions) {
-    System.out.println("FlexSectionExerciseList.addButtonRow for user = " + userID + " got types " +
-      types + " num root nodes " + rootNodes.size() + " instance " + instance);
+/*    System.out.println("FlexSectionExerciseList.addButtonRow for user = " + userID + " got types " +
+      types + " num root nodes " + rootNodes.size() + " instance " + instance);*/
     if (types.isEmpty()) {
       System.err.println("huh? types is empty?");
       return;
