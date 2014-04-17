@@ -2,26 +2,47 @@ package mitll.langtest.client.custom;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
+import com.github.gwtbootstrap.client.ui.FluidRow;
+import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.scoring.ASRScoringAudioPanel;
+import mitll.langtest.client.scoring.ScoreListener;
+import mitll.langtest.client.sound.PlayListener;
+import mitll.langtest.shared.AudioAttribute;
+import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.CommonUserExercise;
+import mitll.langtest.shared.ExerciseAnnotation;
+import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.scoring.PretestScore;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
 * Created by GO22670 on 3/28/2014.
@@ -37,7 +58,8 @@ class ReviewEditableExercise extends EditableExercise {
 
   private PagingExerciseList exerciseList;
   private ListInterface predefinedContentList;
-
+  private static final String WAV = ".wav";
+  private static final String MP3 = "." + AudioTag.COMPRESSED_TYPE;
   /**
    * @param itemMarker
    * @param changedUserExercise
@@ -59,6 +81,118 @@ class ReviewEditableExercise extends EditableExercise {
       itemMarker, changedUserExercise, originalList, exerciseList, predefinedContent, npfHelper);
     this.exerciseList = exerciseList;
     this.predefinedContentList = predefinedContent;
+  }
+  private List<RememberTabAndContent> tabs;
+
+  /**
+   * @see #addNew(mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel)
+   * @return
+   */
+  @Override
+  protected Panel makeAudioRow() {
+    System.out.println("making audio row " + newUserExercise);
+    Map<MiniUser, List<AudioAttribute>> malesMap = newUserExercise.getUserMap(true);
+    Map<MiniUser, List<AudioAttribute>> femalesMap = newUserExercise.getUserMap(false);
+
+    List<MiniUser> maleUsers = newUserExercise.getSortedUsers(malesMap);
+    List<MiniUser> femaleUsers = newUserExercise.getSortedUsers(femalesMap);
+
+    tabs = new ArrayList<RememberTabAndContent>();
+
+    TabPanel tabPanel = new TabPanel();
+    addTabsForUsers(newUserExercise, tabPanel, malesMap, maleUsers);
+    addTabsForUsers(newUserExercise, tabPanel, femalesMap, femaleUsers);
+
+    if (!maleUsers.isEmpty() || !femaleUsers.isEmpty()) tabPanel.selectTab(0);
+
+    return tabPanel;
+  }
+
+  private void addTabsForUsers(CommonExercise e, TabPanel tabPanel, Map<MiniUser, List<AudioAttribute>> malesMap, List<MiniUser> maleUsers) {
+    for (MiniUser user : maleUsers) {
+      String tabTitle =  (user.isMale() ? "Male" :"Female")+ " age " + user.getAge();
+      RememberTabAndContent tabAndContent = new RememberTabAndContent(IconType.QUESTION_SIGN, tabTitle); // TODO : icon state dependent on whether they've listend to all the audio
+      tabPanel.add(tabAndContent.tab.asTabLink());
+      tabs.add(tabAndContent);
+
+      // TODO : when do we need this???
+      tabAndContent.content.getElement().getStyle().setMarginRight(70, Style.Unit.PX);
+
+      boolean allHaveBeenPlayed = true;
+
+      for (AudioAttribute audio : malesMap.get(user)) {
+        if (!audio.isHasBeenPlayed()) allHaveBeenPlayed = false;
+        Widget panelForAudio = getPanelForAudio(e, audio, tabAndContent);
+        tabAndContent.content.add(panelForAudio);
+        if (audio.isHasBeenPlayed()) {
+          audioWasPlayed.add(panelForAudio);
+        }
+      }
+
+      if (allHaveBeenPlayed) {
+        tabAndContent.tab.setIcon(IconType.CHECK_SIGN);
+      }
+    }
+  }
+
+  private Set<Widget> audioWasPlayed = new HashSet<Widget>();
+  private Set<Widget> toResize = new HashSet<Widget>();
+
+  private Widget getPanelForAudio(final CommonExercise e, final AudioAttribute audio, RememberTabAndContent tabAndContent) {
+    String audioRef = audio.getAudioRef();
+    if (audioRef != null) {
+      audioRef = wavToMP3(audioRef);   // todo why do we have to do this?
+    }
+    final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel(audioRef, e.getRefSentence(), service, controller,
+      controller.getProps().showSpectrogram(), new ScoreListener() {
+      @Override
+      public void gotScore(PretestScore score, boolean showOnlyOneExercise) {}
+
+      @Override
+      public int getOffsetWidth() {
+        return 0;
+      }
+    }, 70, audio.isFast()?" Regular speed":" Slow speed", e.getID());
+    audioPanel.setShowColor(true);
+    audioPanel.getElement().setId("ASRScoringAudioPanel");
+    audioPanel.addPlayListener(new PlayListener() {
+      @Override
+      public void playStarted() {
+        System.out.println("playing audio " + audio.getAudioRef() + " has " +tabs.size() + " tabs");
+        audioWasPlayed.add(audioPanel);
+        if (audioWasPlayed.size() == toResize.size()) {
+          // all components played  // TODO put this back
+    //      setApproveButtonState();
+        }
+        for (RememberTabAndContent tabAndContent : tabs) {
+          tabAndContent.checkAllPlayed(audioWasPlayed);
+        }
+        controller.logEvent(audioPanel, "qcPlayAudio", e.getID(), audio.getAudioRef());
+      }
+
+      @Override
+      public void playStopped() {
+
+      }
+    });
+    tabAndContent.addWidget(audioPanel);
+    toResize.add(audioPanel);
+
+    Panel vert = new VerticalPanel();
+    vert.add(audioPanel);
+    ExerciseAnnotation audioAnnotation = e.getAnnotation(audio.getAudioRef());
+    if (audioAnnotation != null && !audioAnnotation.isCorrect()) {
+      HTML child = new HTML(audioAnnotation.comment);
+      child.getElement().getStyle().setFontSize(14, Style.Unit.PX);
+      vert.add(child);
+    }
+
+    //  Widget entry = getEntry(audio.getAudioRef(), audioPanel, audioAnnotation);
+    // TODO add unique audio attribute id
+    return vert;
+  }
+  protected String wavToMP3(String path) {
+    return (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
   }
 
   @Override
@@ -177,6 +311,10 @@ class ReviewEditableExercise extends EditableExercise {
     });
   }
 
+  /**
+   * @see #getCreateButton(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, com.github.gwtbootstrap.client.ui.ControlGroup)
+   * @return
+   */
   private Button makeFixedButton() {
     Button fixed = new Button(FIXED);
     fixed.setType(ButtonType.PRIMARY);
@@ -191,7 +329,7 @@ class ReviewEditableExercise extends EditableExercise {
         checkForForeignChange();
       }
     });
-    addTooltip(fixed,"Mark item as fixed, clear comments, and remove it from the review list.");
+    addTooltip(fixed,"Mark item as fixed, removed defective audio, and remove item from the review list.");
     return fixed;
   }
 
@@ -232,10 +370,8 @@ class ReviewEditableExercise extends EditableExercise {
 
         @Override
         public void onSuccess(Void result) {
-          //System.out.println("\tdoAfterEditComplete : predefinedContentList reload ");
           predefinedContentList.reload();
-          /*CommonShell t =*/ exerciseList.forgetExercise(id);
-          //System.out.println("\tdoAfterEditComplete : forgot " + t);
+         exerciseList.forgetExercise(id);
         }
       });
     }
