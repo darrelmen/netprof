@@ -960,3 +960,25 @@ td > h5 {
 .minWidthRecordButton {
     min-width: 60px;
 }
+
+body>.dropdown-popup {
+    border: 1px solid #ddd;
+    background-clip: padding-box;
+    border-radius: 6px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+body>.dropdown-popup a:link {
+    color: black;
+}
+
+body>.dropdown-popup a:HOVER,
+body>.dropdown-popup .nav-list>li.active>a  {
+    background-color: #0081C2;
+    background-image: linear-gradient(to bottom, #0088CC, #0077B3);
+    background-repeat: repeat-x;
+    color: #FFFFFF;
+    outline: 0 none;
+    text-decoration: none;
+    text-shadow: none;
+}
