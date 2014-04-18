@@ -135,8 +135,6 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
       protected void enableNext(CommonExercise exercise) {
         boolean allPlayed = audioWasPlayed.size() == toResize.size();
         next.setEnabled(allPlayed);
-
-       // if (!allPlayed) next.setText("Not all audio has been reviewed");
       }
     };
 
@@ -334,7 +332,10 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
   private void addTabsForUsers(CommonExercise e, TabPanel tabPanel, Map<MiniUser, List<AudioAttribute>> malesMap, List<MiniUser> maleUsers) {
     for (MiniUser user : maleUsers) {
-      String tabTitle =  (user.isMale() ? "Male" :"Female")+ " age " + user.getAge();
+      String tabTitle = (user.isMale() ? "Male" :"Female")+
+        (controller.getProps().isAdminView() ?" (" + user.getUserID() + ")" :"") +
+        " age " + user.getAge();
+
       RememberTabAndContent tabAndContent = new RememberTabAndContent(IconType.QUESTION_SIGN, tabTitle);
       tabPanel.add(tabAndContent.tab.asTabLink());
       tabs.add(tabAndContent);
@@ -551,18 +552,17 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   }
 
   private void setApproveButtonState() {
+    boolean allCorrect = incorrectFields.isEmpty();
+    boolean allPlayed = audioWasPlayed.size() == toResize.size();
     if (approvedButton != null) {   // comment tab doesn't have it...!
-      boolean allCorrect = incorrectFields.isEmpty();
-      boolean allPlayed = audioWasPlayed.size() == toResize.size();
-
       approvedButton.setEnabled(allCorrect && allPlayed);
-      if (navigationHelper != null) {
-        navigationHelper.enableNextButton(allPlayed);
-      }
 
       approvedTooltip.setText(!allPlayed ? "Not all audio has been reviewed" : allCorrect ? APPROVED_BUTTON_TOOLTIP : APPROVED_BUTTON_TOOLTIP2);
       approvedTooltip.reconfigure();
+    }
 
+    if (navigationHelper != null) {
+      navigationHelper.enableNextButton(allPlayed);
       nextTooltip.setText(!allPlayed ? "Not all audio has been reviewed" : allCorrect ? APPROVED_BUTTON_TOOLTIP : APPROVED_BUTTON_TOOLTIP2);
       nextTooltip.reconfigure();
     }
