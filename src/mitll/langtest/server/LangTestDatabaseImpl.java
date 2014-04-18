@@ -298,9 +298,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    //   logger.debug("\tadding path '" + attr.getAudioRef() + "' "+attr + " to " + firstExercise.getID());
     }
 
-    if (!audioAttributes.isEmpty()) {
-      logger.debug("Added  " + audioAttributes.size() + " audio attrs to " + firstExercise);
-    }
+   // if (!audioAttributes.isEmpty()) {
+   //   logger.debug("Added  " + audioAttributes.size() + " audio attrs to " + firstExercise);
+   // }
   }
 
   private void addPlayedMarkings(long userID, CommonExercise firstExercise) {
@@ -850,7 +850,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.custom.ReviewEditableExercise#duplicateExercise()
+   * @see mitll.langtest.client.custom.ReviewEditableExercise#duplicateExercise
    * @param exercise
    * @return
    */
