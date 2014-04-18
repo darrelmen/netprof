@@ -97,8 +97,7 @@ public class UserListManager {
   }
 
   private void setStateOnExercises(Map<String, ReviewedDAO.StateCreator> exerciseToState, boolean firstState) {
-    logger.debug("found " + exerciseToState.size() + " state markings");
-
+    //logger.debug("found " + exerciseToState.size() + " state markings");
     Set<String> userExercisesRemaining = setStateOnPredefExercises(exerciseToState, firstState);
     setStateOnUserExercises(exerciseToState, userExercisesRemaining, firstState);
   }
@@ -161,9 +160,9 @@ public class UserListManager {
    */
   private Map<String, ReviewedDAO.StateCreator> getAmmendedStateMap() {
     Map<String, ReviewedDAO.StateCreator> stateMap = getExerciseToState();
-    logger.debug("got " + stateMap.size() +" in state map");
+   // logger.debug("got " + stateMap.size() +" in state map");
     Map<String,Long> exerciseToCreator = annotationDAO.getDefectIds();
-    logger.debug("got " + exerciseToCreator.size() +" in defectIds");
+    //logger.debug("got " + exerciseToCreator.size() +" in defectIds");
 
     int count = 0;
     Set<String> reviewed = new HashSet<String>(stateMap.keySet());
@@ -189,7 +188,7 @@ public class UserListManager {
   }
 
   /**
-   * Mark the exercise with its states -
+   * Mark the exercise with its states - but not if you're a recorder...
    * @see #getReviewList
    * @see mitll.langtest.server.LangTestDatabaseImpl#makeExerciseListWrapper
    * @param shells
@@ -202,13 +201,11 @@ public class UserListManager {
     else {
       Map<String, ReviewedDAO.StateCreator> exerciseToState = reviewedDAO.getExerciseToState();
 
-      logger.debug("markState " + shells.size() + " shells, " + exerciseToState.size() + " states");
+      //logger.debug("markState " + shells.size() + " shells, " + exerciseToState.size() + " states");
       for (CommonShell shell : shells) {
         ReviewedDAO.StateCreator stateCreator = exerciseToState.get(shell.getID());
         if (stateCreator != null) {
           shell.setState(stateCreator.state);
-          //   if (shell.getID().equals("0")) logger.debug("\tmarkState on " +shell + " of " + stateCreator.state);
-
         }
       }
 
@@ -408,9 +405,8 @@ public class UserListManager {
 
     List<CommonUserExercise> onList = getReviewedUserExercises(idToUser, ids);
 
-    logger.debug("getDefectList ids size = " + allKnown.size() + " yielded " + onList.size());
+    //logger.debug("getDefectList ids size = " + allKnown.size() + " yielded " + onList.size());
     User user = new User(-1, 89, 0, 0, "", "", false);
-    //long userListMaginID = REVIEW_MAGIC_ID;
     UserList userList = new UserList(userListMaginID, user, name, description, "", false);
     userList.setReview(true);
     userList.setExercises(onList);
@@ -475,12 +471,13 @@ public class UserListManager {
    * @see mitll.langtest.client.custom.NewUserExercise#afterValidForeignPhrase
    * @param userListID
    * @param userExercise
+   * @param mediaDir
    */
-  public void reallyCreateNewItem(long userListID, UserExercise userExercise) {
+  public void reallyCreateNewItem(long userListID, UserExercise userExercise, String mediaDir) {
     userExerciseDAO.add(userExercise, false);
 
     addItemToList(userListID, userExercise);
-    editItem(userExercise, false);
+    editItem(userExercise, false, mediaDir);
   }
 
   /**
@@ -502,12 +499,12 @@ public class UserListManager {
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#editItem(mitll.langtest.shared.custom.UserExercise)
    * @see mitll.langtest.client.custom.EditableExercise#postEditItem(mitll.langtest.client.list.ListInterface, boolean)
-   *
-   * @param userExercise
+   *@param userExercise
    * @param createIfDoesntExist
+   * @param mediaDir
    */
-  public void editItem(UserExercise userExercise, boolean createIfDoesntExist) {
-    fixAudioPaths(userExercise, true);
+  public void editItem(UserExercise userExercise, boolean createIfDoesntExist, String mediaDir) {
+    fixAudioPaths(userExercise, true, mediaDir);
     userExerciseDAO.update(userExercise, createIfDoesntExist);
   }
 
@@ -542,39 +539,41 @@ public class UserListManager {
 
   /**
    * Remember to copy the audio from the posted location to a more permanent location.
-   * @see #editItem(mitll.langtest.shared.custom.UserExercise, boolean)
+   *
+   * If it's already under a media directory -- don't change it.
+   * @see #editItem(mitll.langtest.shared.custom.UserExercise, boolean, String)
    * @param userExercise
    * @param overwrite
+   * @param mediaDir
    */
-  private void fixAudioPaths(UserExercise userExercise, boolean overwrite) {
-    //String refAudio1 = userExercise.getRefAudio();
+  private void fixAudioPaths(UserExercise userExercise, boolean overwrite, String mediaDir) {
     AudioAttribute regularSpeed = userExercise.getRegularSpeed();
     if (regularSpeed == null) {
       logger.warn("huh? no ref audio for " + userExercise);
       return;
     }
     long now = System.currentTimeMillis();
-    {
+
+    logger.debug("fixAudioPaths : checking regular '" + regularSpeed.getAudioRef() + "' against '" +mediaDir + "'");
+
+    if (!regularSpeed.getAudioRef().contains(mediaDir)) {
       File fileRef = pathHelper.getAbsoluteFile(regularSpeed.getAudioRef());
 
       String fast = FAST + "_" + now + "_by_" + userExercise.getCreator() + ".wav";
       String refAudio = getRefAudioPath(userExercise.getID(), fileRef, fast, overwrite);
       regularSpeed.setAudioRef(refAudio);
-    //  userExercise.addAudio(regularSpeed);
-      //logger.debug("fixAudioPaths : for " + userExercise.getID() + " fast is " + fast + " size " + FileUtils.size(refAudio));
+      logger.debug("fixAudioPaths : for " + userExercise.getID() + " fast is " + fast + " size " + FileUtils.size(refAudio));
     }
 
     AudioAttribute slowSpeed = userExercise.getSlowSpeed();
 
-    if (slowSpeed != null && !slowSpeed.getAudioRef().isEmpty()) {
+    if (slowSpeed != null && !slowSpeed.getAudioRef().isEmpty() && !slowSpeed.getAudioRef().contains(mediaDir)) {
       File fileRef = pathHelper.getAbsoluteFile(slowSpeed.getAudioRef());
       String slow = SLOW + "_"+ now+"_by_" + userExercise.getCreator()+ ".wav";
 
       String refAudio = getRefAudioPath(userExercise.getID(), fileRef, slow, overwrite);
       logger.debug("fixAudioPaths : for exid " + userExercise.getID()+ " slow is " + refAudio + " size " + FileUtils.size(refAudio));
       slowSpeed.setAudioRef(refAudio);
-
-      // userExercise.setSlowRefAudio(refAudio);
     }
   }
 
@@ -588,7 +587,7 @@ public class UserListManager {
    * @param destFileName
    * @param overwrite
    * @return new, permanent audio path
-   * @see #fixAudioPaths(mitll.langtest.shared.custom.UserExercise, boolean)
+   * @see #fixAudioPaths(mitll.langtest.shared.custom.UserExercise, boolean, String)
    */
   private String getRefAudioPath(String id, File fileRef, String destFileName, boolean overwrite) {
     return new PathWriter().getPermanentAudioPath(pathHelper, fileRef, destFileName, overwrite, id);
@@ -660,9 +659,8 @@ public class UserListManager {
    */
   public void addAnnotation(String exerciseID, String field, String status, String comment, long userID) {
     UserAnnotation annotation = new UserAnnotation(exerciseID, field, status, comment, userID, System.currentTimeMillis());
-    logger.debug("addAnnotation " + annotation);
+    //logger.debug("addAnnotation " + annotation);
     annotationDAO.add(annotation);
-    //markCorrectness(exerciseID, status.equalsIgnoreCase(CORRECT), userID);
   }
 
   /**
@@ -673,9 +671,6 @@ public class UserListManager {
   public void addAnnotations(CommonExercise exercise) {
     if (exercise != null) {
       Map<String, ExerciseAnnotation> latestByExerciseID = annotationDAO.getLatestByExerciseID(exercise.getID());
-      //if (!latestByExerciseID.isEmpty()) {
-      //  logger.debug("addAnnotations : found " + latestByExerciseID + " for " + exercise.getID());
-      //}
       for (Map.Entry<String, ExerciseAnnotation> pair : latestByExerciseID.entrySet()) {
         exercise.addAnnotation(pair.getKey(), pair.getValue().status, pair.getValue().comment);
       }
@@ -694,7 +689,7 @@ public class UserListManager {
    * @param creatorID
    */
   public void markState(String id, CommonShell.STATE state, long creatorID) {
-    logger.debug("mark state " + id + " = " + state + " by " +creatorID);
+    //logger.debug("mark state " + id + " = " + state + " by " +creatorID);
     CommonExercise predefExercise = userExerciseDAO.getPredefExercise(id);
 
     if (predefExercise == null) {
