@@ -87,10 +87,9 @@ public class NewUserExercise extends BasicDialog {
     this.service = service;
     this.itemMarker = itemMarker;
     this.editItem = editItem;
-    System.out.println("got " + newExercise.getAudioAttributes());
+   // System.out.println("got " + newExercise.getAudioAttributes());
     this.newUserExercise = newExercise.toUserExercise();
-    System.out.println("after " + newUserExercise.getAudioAttributes());
-
+    //System.out.println("after " + newUserExercise.getAudioAttributes());
   }
 
   /**
@@ -420,8 +419,8 @@ public class NewUserExercise extends BasicDialog {
   private void checkValidForeignPhrase(final UserList ul, final ListInterface pagingContainer, final Panel toAddTo,
                                        final boolean onClick) {
     String foreignLangText = foreignLang.getText();
-    System.out.println("checkValidForeignPhrase : checking phrase " + foreignLangText +
-      " before adding/changing " + newUserExercise);
+/*    System.out.println("checkValidForeignPhrase : checking phrase " + foreignLangText +
+      " before adding/changing " + newUserExercise);*/
 
     service.isValidForeignPhrase(foreignLangText, new AsyncCallback<Boolean>() {
       @Override
@@ -669,7 +668,7 @@ public class NewUserExercise extends BasicDialog {
     } else if (newUserExercise == null || newUserExercise.getRefAudio() == null) {
       System.out.println("validateForm : new user ex " + newUserExercise);
 
-      if (foreignChanged) {
+      if (foreignChanged && rap != null) {
         Button recordButton = rap.getButton();
         markError(normalSpeedRecording, recordButton, recordButton, "",
           RECORD_REFERENCE_AUDIO_FOR_THE_FOREIGN_LANGUAGE_PHRASE);
