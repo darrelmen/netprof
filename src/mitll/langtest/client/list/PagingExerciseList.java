@@ -337,7 +337,7 @@ public class PagingExerciseList extends ExerciseList {
   protected void markCurrentExercise(String itemID) { pagingContainer.markCurrentExercise(itemID); }
 
   public void setUserListID(long userListID) {
-    System.out.println("PagingExerciseList.setUserListID " +userListID + " for " +instance);
+    //System.out.println("PagingExerciseList.setUserListID " +userListID + " for " +instance);
 
     this.userListID = userListID;
   }
