@@ -274,7 +274,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
 
     public void onSuccess(ExerciseListWrapper result) {
-      System.out.println("\tExerciseList.SetExercisesCallback Got " + result.getExercises().size() + " results");
+      //System.out.println("\tExerciseList.SetExercisesCallback Got " + result.getExercises().size() + " results");
       if (isStaleResponse(result)) {
         System.out.println("----> SetExercisesCallback.onSuccess ignoring result " + result.getReqID() + " b/c before latest " + lastReqID);
       } else {
@@ -283,7 +283,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
         }
 
         rememberAndLoadFirst(result.getExercises(), result.getFirstExercise());
-
         controller.showProgress();
       }
     }
@@ -569,7 +568,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   protected void useExercise(CommonExercise result) {
     //System.out.println("ExerciseList.useExercise : result " +result);
-
     createdPanel = makeExercisePanel(result);
     String itemID = result.getID();
     markCurrentExercise(itemID);
