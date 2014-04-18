@@ -643,6 +643,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         Panel leftAndRight = new HorizontalPanel();
         NavPills container = new NavPills();
         container.add(dropdown);
+
         leftAndRight.add(container);
         leftAndRight.add(rightSide);
         return leftAndRight;
@@ -761,14 +762,4 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       getImagesForPath(audioAttribute.getAudioRef());
     }
   }
-/*
-  protected List<MiniUser> getSortedUsers(Map<MiniUser, List<AudioAttribute>> malesMap) {
-    List<MiniUser> maleUsers = new ArrayList<MiniUser>(malesMap.keySet());
-    Collections.sort(maleUsers, new Comparator<MiniUser>() {
-      public int compare(MiniUser o1, MiniUser o2) {
-        return o1.getAge() < o2.getAge() ? -1 : o1.getAge() > o2.getAge() ? +1 : 0;
-      }
-    });
-    return maleUsers;
-  }*/
 }
