@@ -330,7 +330,9 @@ public class DatabaseImpl implements Database {
    * @param userExercise
    */
   public void editItem(UserExercise userExercise) {
-    getUserListManager().editItem(userExercise, true);
+    logger.debug("editItem " + userExercise.getID() + " mediaDir : " + serverProps.getMediaDir());
+
+    getUserListManager().editItem(userExercise, true, serverProps.getMediaDir());
     Map<String, ExerciseAnnotation> fieldToAnnotation = userExercise.getFieldToAnnotation();
 
     Set<AudioAttribute> defects = new HashSet<AudioAttribute>();
@@ -344,6 +346,10 @@ public class DatabaseImpl implements Database {
           logger.debug("\tmarking defect on audio");
           defects.add(audioAttribute);
           audioDAO.markDefect(audioAttribute);
+        }
+        else {
+          logger.error("\tcan't marking defect on audio! looking for " + fieldAnno.getKey() + " in " + userExercise.getAudioRefToAttr().keySet());
+
         }
       }
     }
