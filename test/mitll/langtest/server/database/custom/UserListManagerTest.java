@@ -4,7 +4,6 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonUserExercise;
-import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
@@ -75,7 +74,7 @@ public class UserListManagerTest {
     //if (users.isEmpty()) {
       users = addAndGetUsers("test22");
     //}
-    user = users.get(users.size()-1).id;
+    user = users.get(users.size()-1).getId();
     logger.debug("Got user " + user);
     UserListManager userListManager = database.getUserListManager();
 
@@ -110,14 +109,14 @@ public class UserListManagerTest {
     User user = users.iterator().next();
     UserListManager userListManager = database.getUserListManager();
 
-    long listid = addListCheck(user.id, userListManager, "test");
+    long listid = addListCheck(user.getId(), userListManager, "test");
     if (listid == -1) {
-      UserList test1 = userListManager.getByName(user.id, "test");
+      UserList test1 = userListManager.getByName(user.getId(), "test");
       listid = test1.getUniqueID();
     }
     assertTrue(userListManager.getUserListsForText("", -1).contains(userListManager.getUserListByID(listid)));
 
-    Iterator<UserList> iterator = userListManager.getListsForUser(user.id, false, false).iterator();
+    Iterator<UserList> iterator = userListManager.getListsForUser(user.getId(), false, false).iterator();
     UserList favorite = iterator.next();
     assertTrue(favorite.isFavorite());
     UserList test = iterator.next();
@@ -131,13 +130,13 @@ public class UserListManagerTest {
     Collection<UserList> listsForUser = userListManager.getListsForUser(visitor, false, false);
     assertTrue(!listsForUser.contains(test));  // haven't visited yet, shouldn't see it
 
-    userListManager.addVisitor(test, visitor);
+    userListManager.addVisitor(test.getUniqueID(), visitor);
     listsForUser = userListManager.getListsForUser(visitor, false, false);
     assertTrue(listsForUser.contains(test));   // now that I visited, I should see it on my list
     Collection<UserList> listsForUser2 = userListManager.getListsForUser(visitor, true, false);
     assertTrue(!listsForUser2.contains(test)); // list isn't mine, I'm just a visitor
 
-    removeList(user.id, userListManager, listid);
+    removeList(user.getId(), userListManager, listid);
 
     // after removing, I shouldn't see it
     Collection<UserList> listsForUser3 = userListManager.getListsForUser(visitor, false, false);
@@ -157,7 +156,7 @@ public class UserListManagerTest {
     User owner = users.iterator().next();
     UserListManager userListManager = database.getUserListManager();
 
-    long listid = addListCheck(owner.id, userListManager, "test");
+    long listid = addListCheck(owner.getId(), userListManager, "test");
     UserList testList = userListManager.getUserListByID(listid);
     assertTrue(userListManager.getUserListsForText("", -1).contains(testList));
 
@@ -165,15 +164,15 @@ public class UserListManagerTest {
     int size = database.getUsers().size();
     assertTrue("size was " +size,size == 2);
 
-    userListManager.addVisitor(testList, visitor);
+    userListManager.addVisitor(testList.getUniqueID(), visitor);
 
     // what happens if the owner adds himself as a visitor
-    userListManager.addVisitor(testList, owner.id);
+    userListManager.addVisitor(testList.getUniqueID(), owner.getId());
 
-    Collection<UserList> listsForUser = userListManager.getListsForUser(owner.id, false, false);
+    Collection<UserList> listsForUser = userListManager.getListsForUser(owner.getId(), false, false);
     assertTrue(listsForUser.contains(testList));   // should be able to see it, it's mine
 
-    listsForUser = userListManager.getListsForUser(owner.id, true, false);
+    listsForUser = userListManager.getListsForUser(owner.getId(), true, false);
     assertTrue(listsForUser.contains(testList));  // should be able to see it, it's mine
 
     listsForUser = userListManager.getListsForUser(visitor, false, false);
@@ -182,13 +181,13 @@ public class UserListManagerTest {
     listsForUser = userListManager.getListsForUser(visitor, true, false);
     assertTrue(!listsForUser.contains(testList));   // should be able to see it, it's mine
 
-    removeList(owner.id, userListManager, listid);
+    removeList(owner.getId(), userListManager, listid);
 
     // after removing, I shouldn't see it
     listsForUser = userListManager.getListsForUser(visitor, false, false);
     assertTrue(!listsForUser.contains(testList));
 
-    listsForUser = userListManager.getListsForUser(owner.id, false, false);
+    listsForUser = userListManager.getListsForUser(owner.getId(), false, false);
     assertTrue(!listsForUser.contains(testList));
   }
 
@@ -199,7 +198,7 @@ public class UserListManagerTest {
 
     UserListManager userListManager = database.getUserListManager();
 
-    long listid = addListCheck(owner.id, userListManager, "test");
+    long listid = addListCheck(owner.getId(), userListManager, "test");
     logger.debug("list id " +listid);
     UserList testList = userListManager.getUserListByID(listid);
     assertTrue(userListManager.getUserListsForText("", -1).contains(testList));
@@ -210,7 +209,7 @@ public class UserListManagerTest {
     testList = userListManager.getUserListByID(listid);
     assertTrue(!testList.getExercises().contains(english));
 
-    userListManager.reallyCreateNewItem(listid, english);
+    userListManager.reallyCreateNewItem(listid, english, "");
     testList = userListManager.getUserListByID(listid);
     CommonUserExercise next = testList.getExercises().iterator().next();
     assertTrue(next.getEnglish().equals(ENGLISH));
@@ -230,7 +229,7 @@ public class UserListManagerTest {
     assertTrue(!next.getTooltip().isEmpty());
     assertTrue(next.getTooltip().equals(CHANGED));
 
-    userListManager.editItem(next.toUserExercise(),false);
+    userListManager.editItem(next.toUserExercise(),false, "");
 
     testList = userListManager.getUserListByID(listid);
     next = testList.getExercises().iterator().next();
@@ -246,9 +245,9 @@ public class UserListManagerTest {
   }
 
   public UserExercise addExercise(User owner, UserListManager userListManager, long listid, UserList testList) {
-    UserExercise english = createNewItem(owner.id);
+    UserExercise english = createNewItem(owner.getId());
     assertTrue(!english.getTooltip().isEmpty());
-    userListManager.reallyCreateNewItem(listid, english);
+    userListManager.reallyCreateNewItem(listid, english, "");
 
     // have to go back to database to get user list
     assertTrue(!testList.getExercises().contains(english));
@@ -277,8 +276,8 @@ public class UserListManagerTest {
   @Test
   public void testReview() {
     UserListManager userListManager = database.getUserListManager();
-    UserList reviewList = userListManager.getReviewList();
-    userListManager.getReviewedExercises();
+    UserList reviewList = userListManager.getDefectList();
+    //userListManager.getReviewedExercises();
 
 
     //UserExercise english = addExercise(owner, userListManager, listid, testList);
@@ -287,7 +286,7 @@ public class UserListManagerTest {
    // assertTrue(b);
 
 
-    //    userListManager.markReviewed();
+    //    userListManager.markApproved();
   }
 
   private List<User> addAndGetUsers(String test2) {
