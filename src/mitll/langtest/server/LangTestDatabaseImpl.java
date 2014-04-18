@@ -207,11 +207,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   protected List<CommonExercise> getCommonExercises(UserList userListByID) {
     List<CommonExercise> exercises2 = new ArrayList<CommonExercise>();
     Collection<CommonUserExercise> exercises1 = userListByID.getExercises();
-    logger.debug("getExerciseIds size - " + exercises1.size() + " for " + userListByID);
+    //logger.debug("getExerciseIds size - " + exercises1.size() + " for " + userListByID);
     for (CommonExercise ue : exercises1) {
       exercises2.add(ue);
     }
-    logger.debug("getExerciseIds size - " + exercises2.size());
+    //logger.debug("getExerciseIds size - " + exercises2.size());
     return exercises2;
   }
 
@@ -257,18 +257,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private ExerciseListWrapper makeExerciseListWrapper(int reqID, Collection<CommonExercise> exercises, long userID, String role) {
     CommonExercise firstExercise = exercises.isEmpty() ? null : exercises.iterator().next();
     if (firstExercise != null) {
-      logger.debug("First is " + firstExercise);
+      //logger.debug("First is " + firstExercise);
 
       ensureMP3s(firstExercise);
       addAnnotationsAndAudio(userID, firstExercise);
-      logger.debug("after First is " + firstExercise);
+      //logger.debug("after First is " + firstExercise);
     }
     List<CommonShell> exerciseShells = getExerciseShells(exercises);
 
-    logger.debug("makeExerciseListWrapper : userID " +userID + " Role is " + role);
+    //logger.debug("makeExerciseListWrapper : userID " +userID + " Role is " + role);
     if (role.equals(Result.AUDIO_TYPE_RECORDER)) {
       Set<String> recordedForUser = db.getAudioDAO().getRecordedForUser(userID);
-      logger.debug("\tfound " + recordedForUser.size() + " recordings by " + userID);
+      //logger.debug("\tfound " + recordedForUser.size() + " recordings by " + userID);
       for (CommonShell shell : exerciseShells) {
          if (recordedForUser.contains(shell.getID())) shell.setState(CommonShell.STATE.RECORDED);
       }
@@ -291,9 +291,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       firstExercise.addAudio(attr);
       if (!audioConversion.exists(attr.getAudioRef(), installPath)) {
      //   logger.debug("\twas '" + attr.getAudioRef() + "'");
-
         attr.setAudioRef(relativeConfigDir + File.separator + attr.getAudioRef());
-
      //   logger.debug("\tnow '" + attr.getAudioRef() + "'");
 
       }
@@ -311,7 +309,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     for (Event event : allForUserAndExercise) {
       AudioAttribute audioAttribute = audioToAttr.get(event.getContext());
       if (audioAttribute == null) {
-        logger.error("addPlayedMarkings huh? can't find " +event.getContext() + " in " + audioToAttr.keySet());
+        logger.warn("addPlayedMarkings huh? can't find " + event.getContext() + " in " + audioToAttr.keySet());
       }
       else {
         audioAttribute.setHasBeenPlayed(true);
@@ -442,7 +440,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       ensureMP3s(byID);
     }
     long now = System.currentTimeMillis();
-    if (now - then > 50) {
+    if (now - then > 200) {
       logger.debug("getExercise : took " + (now - then) + " millis to find " + id);
     }
     return byID;
@@ -845,7 +843,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param userExercise
    */
   public UserExercise reallyCreateNewItem(long userListID, UserExercise userExercise) {
-    db.getUserListManager().reallyCreateNewItem(userListID, userExercise);
+    db.getUserListManager().reallyCreateNewItem(userListID, userExercise, serverProps.getMediaDir());
     logger.debug("reallyCreateNewItem : made user exercise " + userExercise);
 
     return userExercise;
