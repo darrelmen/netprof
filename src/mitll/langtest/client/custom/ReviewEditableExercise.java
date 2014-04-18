@@ -90,7 +90,6 @@ class ReviewEditableExercise extends EditableExercise {
    */
   @Override
   protected Panel makeAudioRow() {
-    System.out.println("making audio row " + newUserExercise);
     Map<MiniUser, List<AudioAttribute>> malesMap = newUserExercise.getUserMap(true);
     Map<MiniUser, List<AudioAttribute>> femalesMap = newUserExercise.getUserMap(false);
 
@@ -110,7 +109,8 @@ class ReviewEditableExercise extends EditableExercise {
 
   private void addTabsForUsers(CommonExercise e, TabPanel tabPanel, Map<MiniUser, List<AudioAttribute>> malesMap, List<MiniUser> maleUsers) {
     for (MiniUser user : maleUsers) {
-      String tabTitle =  (user.isMale() ? "Male" :"Female")+ " age " + user.getAge();
+      String tabTitle = (user.isMale() ? "Male" : "Female") + (controller.getProps().isAdminView() ? " (" + user.getUserID() + ")" : "") +
+        " age " + user.getAge();
       RememberTabAndContent tabAndContent = new RememberTabAndContent(IconType.QUESTION_SIGN, tabTitle); // TODO : icon state dependent on whether they've listend to all the audio
       tabPanel.add(tabAndContent.tab.asTabLink());
       tabs.add(tabAndContent);
@@ -275,7 +275,7 @@ class ReviewEditableExercise extends EditableExercise {
   }
 
   private Button getDuplicate() {
-    Button duplicate = new Button(DUPLICATE);
+    final Button duplicate = new Button(DUPLICATE);
     duplicate.setType(ButtonType.SUCCESS);
     duplicate.addStyleName("floatRight");
     addTooltip(duplicate, COPY_THIS_ITEM);
@@ -283,13 +283,18 @@ class ReviewEditableExercise extends EditableExercise {
     duplicate.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        duplicateExercise();
+        duplicateExercise(duplicate);
       }
     });
     return duplicate;
   }
 
-  private void duplicateExercise() {
+  /**
+   * Disable the button initially so we don't accidentally duplicate twice.
+   * @param duplicate
+   */
+  private void duplicateExercise(final Button duplicate) {
+    duplicate.setEnabled(false);
     newUserExercise.setCreator(controller.getUser());
     CommonShell commonShell = exerciseList.byID(newUserExercise.getID());
     if (commonShell != null) {
@@ -301,10 +306,14 @@ class ReviewEditableExercise extends EditableExercise {
     service.duplicateExercise(newUserExercise, new AsyncCallback<UserExercise>() {
       @Override
       public void onFailure(Throwable caught) {
+        duplicate.setEnabled(true);
+
       }
 
       @Override
       public void onSuccess(UserExercise result) {
+        duplicate.setEnabled(true);
+
         exerciseList.addExerciseAfter(newUserExercise, result);
         exerciseList.redraw();
         originalList.addExerciseAfter(newUserExercise, result);
