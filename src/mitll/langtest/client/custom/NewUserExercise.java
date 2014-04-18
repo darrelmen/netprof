@@ -678,8 +678,11 @@ public class NewUserExercise extends BasicDialog {
             normalSpeedRecording.setType(ControlGroupType.NONE);
           }
         });
+        return false;
       }
-      return false;
+      else {
+        return true;
+      }
     }
     return true;
   }
