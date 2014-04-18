@@ -100,7 +100,7 @@ public class UserListDAO extends DAO {
    * <p/>
    * Uses return generated keys to get the user id
    *
-   * @see UserListManager#reallyCreateNewItem(long, mitll.langtest.shared.custom.UserExercise)
+   * @see UserListManager#reallyCreateNewItem(long, mitll.langtest.shared.custom.UserExercise, String)
    */
   public void add(UserList userList) {
     long id = 0;
@@ -194,7 +194,7 @@ public class UserListDAO extends DAO {
       for (UserList ul : lists) {
         populateList(ul);
       }
-      logger.debug("getAllByUser by " + userid + " is " + lists.size());
+   //   logger.debug("getAllByUser by " + userid + " is " + lists.size());
       return lists;
 
     } catch (Exception ee) {
@@ -202,24 +202,6 @@ public class UserListDAO extends DAO {
     }
     return Collections.emptyList();
   }
-
-  /**
-   * Pulls the list of users out of the database.
-   *
-   * @return
-   * @param userid
-   */
-/*
-  public List<UserList> getAll(long userid) {
-    try {
-      String sql = "SELECT * from " + USER_EXERCISE_LIST + " order by modified desc";
-      return getUserLists(sql,userid);
-    } catch (Exception ee) {
-      logger.error("got " + ee, ee);
-    }
-    return Collections.emptyList();
-  }
-*/
 
   /**
    * Get lists by others that have not yet been visited.
@@ -230,17 +212,9 @@ public class UserListDAO extends DAO {
   public List<UserList> getAllPublic(long userid) {
     try {
       String sql = "SELECT * from " + USER_EXERCISE_LIST + " where isprivate=false" +
-        //" and " + CREATORID + "<>" +userid+
         " order by modified DESC ";
 
-      //Set<Long> listsForVisitor = getListsForVisitor(userid);
-
-    //  logger.debug("getAllPublic : lists for " + userid + " : " +listsForVisitor);
-
       List<UserList> userLists = getUserLists(sql, userid);
-
-   //   logger.debug("userLists for " + userid + " : " +userLists);
-
       List<UserList> toReturn = new ArrayList<UserList>();
       for (UserList ul : userLists) {
         if (!ul.isEmpty()) {
@@ -255,7 +229,7 @@ public class UserListDAO extends DAO {
       }
    //   logger.debug("toReturn for " + userid + " : " +toReturn);
 
-      return userLists;
+      return toReturn;
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
@@ -306,7 +280,7 @@ public class UserListDAO extends DAO {
 
   /**
    * @see #getWithExercises(long)
-   * @see mitll.langtest.server.database.custom.UserListManager#reallyCreateNewItem(long, mitll.langtest.shared.custom.UserExercise)
+   * @see UserListManager#reallyCreateNewItem(long, mitll.langtest.shared.custom.UserExercise, String)
    * @param unique
    * @param warnIfMissing
    * @return
@@ -422,7 +396,6 @@ public class UserListDAO extends DAO {
   private void populateList(UserList where) {
     List<CommonUserExercise> onList = userExerciseDAO.getOnList(where.getUniqueID());
     where.setExercises(onList);
-
     //if (!onList.isEmpty()) {
       //logger.debug("populateList : got " + onList.size() + " for list " + where.getUniqueID() + " = " + where);
    // }
