@@ -160,7 +160,7 @@ class NPFHelper implements RequiresResize {
   }
 
   private void rememberAndLoadFirst(final UserList ul) {
-    System.out.println(getClass() + ".rememberAndLoadFirst : for " +ul);
+    //System.out.println(getClass() + ".rememberAndLoadFirst : for " +ul);
 
     npfExerciseList.setUserListID(ul.getUniqueID());
     npfExerciseList.rememberAndLoadFirst(new ArrayList<CommonShell>(ul.getExercises()));
@@ -171,7 +171,7 @@ class NPFHelper implements RequiresResize {
   }
 
   PagingExerciseList makeExerciseList(final Panel right, final String instanceName) {
-    System.out.println(getClass() + ".makeExerciseList : instanceName " + instanceName);
+    //System.out.println(getClass() + ".makeExerciseList : instanceName " + instanceName);
 
     return new PagingExerciseList(right, service, feedback, null, controller, false, false,
       true, instanceName) {
