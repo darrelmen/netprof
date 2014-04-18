@@ -16,6 +16,7 @@ import mitll.langtest.shared.CommonExercise;
 * To change this template use File | Settings | File Templates.
 */
 public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
+  private static final String RECORD_BUTTON = "RecordButton";
   private final RecordAudioPanel recordAudioPanel;
   private PlayAudioPanel playAudioPanel;
   private final Panel parentPanel;
@@ -44,7 +45,6 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     this.parentPanel = widgets;
     getElement().setId("WaveformPostAudioRecordButton_" + index);
     this.audioType = audioType;
-   // System.out.println("WaveformPostAudioRecordButton : audio type " + audioType);
     addStyleName("minWidthRecordButton");
   }
 
@@ -58,7 +58,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     if (parentPanel instanceof BusyPanel) {
       ((BusyPanel) parentPanel).setBusy(true);
     }
-    controller.logEvent(this,"RecordButton",getExercise().getID(),"startRecording");
+    controller.logEvent(this, RECORD_BUTTON,getExercise().getID(),"startRecording");
     super.startRecording();
     setPlayEnabled(false);
   }
@@ -74,7 +74,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     if (parentPanel instanceof BusyPanel) {
       ((BusyPanel) parentPanel).setBusy(false);
     }
-    controller.logEvent(this,"RecordButton",getExercise().getID(),"stopRecording");
+    controller.logEvent(this, RECORD_BUTTON,getExercise().getID(),"stopRecording");
 
     recordAudioPanel.getWaveform().setVisible(true);
     recordAudioPanel.getWaveform().setUrl(LangTest.LANGTEST_IMAGES + "animated_progress.gif");
