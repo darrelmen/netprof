@@ -97,8 +97,6 @@ public interface LangTestDatabase extends RemoteService {
   Collection<UserList> getUserListsForText(String search, long userid);
   void addItemToUserList(long userListID, UserExercise userExercise);
 
-  UserList getCommentedList();
-
   boolean isValidForeignPhrase(String foreign);
 
   UserExercise reallyCreateNewItem(long userListID, UserExercise userExercise);
@@ -116,6 +114,7 @@ public interface LangTestDatabase extends RemoteService {
   void setExerciseState(String id, CommonShell.STATE state, long userID);
 
   UserList getDefectList();
+  UserList getCommentedList();
   UserList getAttentionList();
   boolean deleteList(long id);
   boolean deleteItemFromList(long listid, String exid);
