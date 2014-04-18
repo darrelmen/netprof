@@ -76,7 +76,7 @@ public class UserExerciseDAO extends DAO {
    * <p/>
    * Uses return generated keys to get the user id
    *
-   * @see mitll.langtest.server.database.custom.UserListManager#reallyCreateNewItem(long, mitll.langtest.shared.custom.UserExercise)
+   * @see UserListManager#reallyCreateNewItem(long, mitll.langtest.shared.custom.UserExercise, String)
    * @see #update(mitll.langtest.shared.custom.UserExercise, boolean)
    */
   public void add(UserExercise userExercise, boolean isOverride) {
@@ -450,7 +450,7 @@ public class UserExerciseDAO extends DAO {
 
 
   /**
-   * @see UserListManager#editItem(mitll.langtest.shared.custom.UserExercise, boolean)
+   * @see UserListManager#editItem(mitll.langtest.shared.custom.UserExercise, boolean, String)
    * @param id
    * @param state
    */
@@ -515,7 +515,7 @@ public class UserExerciseDAO extends DAO {
   }*/
 
   /**
-   * @see UserListManager#editItem(mitll.langtest.shared.custom.UserExercise, boolean)
+   * @see UserListManager#editItem(mitll.langtest.shared.custom.UserExercise, boolean, String)
    * @param userExercise
    * @param createIfDoesntExist
    */
