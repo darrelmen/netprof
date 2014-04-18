@@ -88,7 +88,7 @@ public class ExercisePanel extends VerticalPanel implements
     this.service = service;
     this.exerciseList = exerciseList;
     this.navigationHelper = getNavigationHelper(controller);
-      addItemHeader(e);
+ //   addItemHeader(e);
 
     // attempt to left justify
     HorizontalPanel hp = new HorizontalPanel();
@@ -204,59 +204,13 @@ public class ExercisePanel extends VerticalPanel implements
    * @param questionNumber
    */
   private void addQuestions(CommonExercise e, LangTestDatabaseAsync service, ExerciseController controller, int questionNumber) {
-   // List<CommonExercise.QAPair> englishQuestions = e.getEnglishQuestions();
-   // List<CommonExercise.QAPair> flQuestions = e.getForeignLanguageQuestions();
-   // int n = englishQuestions.size();
-//    if (e.getQuestions().size() == 1) {
-   //   CommonExercise.QAPair questionToShow = e.getQuestions().iterator().next();
       add(getQuestionPanel(e, service, controller, questionNumber,
-     //   n, englishQuestions, flQuestions, questionToShow,
         this));
-   // }
-   // else {
-   //   makeTabPanel(e, service, controller, questionNumber, englishQuestions, flQuestions, n);
-  //    add(tabPanel);
-  //  }
   }
-
-/*
-  private void makeTabPanel(CommonExercise e, LangTestDatabaseAsync service, ExerciseController controller, int questionNumber,
-                            List<CommonExercise.QAPair> englishQuestions,
-                            List<CommonExercise.QAPair> flQuestions,
-                            int n) {
-    tabPanel = new TabPanel();
-    DOM.setStyleAttribute(tabPanel.getWidget(0).getElement(), "marginBottom", "0px");
-
-    for (CommonExercise.QAPair pair : e.getQuestions()) {
-      Tab tabPane = new Tab();
-      tabPane.setHeading("Question #"+questionNumber);
-      tabPanel.add(tabPane);
-      indexToTab.put(questionNumber,tabPane);
-
-      tabPane.add(getQuestionPanel(e, service, controller, questionNumber, n, englishQuestions, flQuestions, pair, tabPane));
-
-      questionNumber++;
-    }
-    tabPanel.selectTab(0);
-  }
-*/
 
   private Panel getQuestionPanel(CommonExercise exercise, LangTestDatabaseAsync service, ExerciseController controller,
                                  int questionNumber,
-                               //  int n,
-                             //    List<CommonExercise.QAPair> englishQuestions,
-                          //       List<CommonExercise.QAPair> flQuestions,
-                          //       CommonExercise.QAPair pair,
                                  HasWidgets toAddTo) {
-    //CommonExercise.QAPair engQAPair = questionNumber - 1 < n ? englishQuestions.get(questionNumber - 1) : null;
-   // CommonExercise.QAPair flQAPair  = questionNumber - 1 < n ? flQuestions.get(questionNumber - 1) : null;
-
-/*    if (engQAPair != null) {
-      getQuestionHeader(questionNumber,n, pair, engQAPair, flQAPair, false,toAddTo);
-    }
-    else {*/
-      toAddTo.add(new Heading(6, ""));
-  //  }
     // add question prompt
     Panel vp = new VerticalPanel();
     addQuestionPrompt(vp);
@@ -277,7 +231,6 @@ public class ExercisePanel extends VerticalPanel implements
     Set<Widget> objects = indexToWidgets.get(index);
     if (objects == null) indexToWidgets.put(index, objects = new HashSet<Widget>());
     objects.add(answerWidget);
- //   System.out.println("addAnswerWidget : now " + answers.size() + " expected, adding '" + answerWidget.getElement().getId() + "'");
   }
 
   protected boolean shouldShowAnswer() { return controller.isDemoMode();  }
