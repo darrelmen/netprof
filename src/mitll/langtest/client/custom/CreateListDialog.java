@@ -128,7 +128,9 @@ class CreateListDialog extends BasicDialog {
   }
 
   private void addUserList(final FormField titleBox, TextArea area, FormField classBox) {
-    service.addUserList(userManager.getUser(), titleBox.getText(), area.getText(),
+    service.addUserList(userManager.getUser(),
+      titleBox.getText(),
+      area.getText(),
       classBox.getText(), new AsyncCallback<Long>() {
       @Override
       public void onFailure(Throwable caught) {}
@@ -149,18 +151,13 @@ class CreateListDialog extends BasicDialog {
     DOM.setStyleAttribute(createContent.getElement(), "paddingRight", "0px");
   }
 
-  private boolean validateCreateList(BasicDialog.FormField titleBox/*, BasicDialog.FormField description, BasicDialog.FormField classBox*/) {
+  private boolean validateCreateList(BasicDialog.FormField titleBox) {
     if (titleBox.getText().isEmpty()) {
       markError(titleBox, "Please fill in a title");
       return false;
-    } 
-/*    else if (REQUIRE_DESC && description.getText().isEmpty()) {
-      markError(description, "Please fill in a description");
-      return false;
-    } else if (REQUIRE_CLASS && classBox.getText().isEmpty()) {
-      markError(classBox, "Please fill in course information");
-      return false;
-    }*/
-    return true;
+    }
+    else {
+      return true;
+    }
   }
 }
