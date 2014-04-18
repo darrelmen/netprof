@@ -300,14 +300,12 @@ class ReviewEditableExercise extends EditableExercise {
     if (commonShell != null) {
       newUserExercise.setState(commonShell.getState());
       newUserExercise.setSecondState(commonShell.getSecondState());
-     // System.out.println("\t using state " + commonShell.getState());
     }
     //System.out.println("to duplicate " + newUserExercise + " state " + newUserExercise.getState());
     service.duplicateExercise(newUserExercise, new AsyncCallback<UserExercise>() {
       @Override
       public void onFailure(Throwable caught) {
         duplicate.setEnabled(true);
-
       }
 
       @Override
