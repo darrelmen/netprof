@@ -275,8 +275,10 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     column.add(row);
 
     if (e.getModifiedDate() != null && e.getModifiedDate().getTime() != 0) {
-      Heading widgets = new Heading(5, "Changed",e.getModifiedDate().toString());
-      widgets.addStyleName("floatRight");
+      Heading widgets = new Heading(5, "Changed", e.getModifiedDate().toString());
+      if (!e.getAudioAttributes().isEmpty()) {
+        widgets.addStyleName("floatRight");
+      }
       row.add(widgets);
     }
 
