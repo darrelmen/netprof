@@ -82,7 +82,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final int MAX_EXCEPTION_STRING = 300;
   private static final int MAX_CACHE_SIZE = 100;
 
- // private Panel currentExerciseVPanel = new FluidContainer();
   private ListInterface exerciseList;
   private final Label status = new Label();
 
@@ -102,7 +101,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private Panel headerRow;
   private FluidRow secondRow;
-  private Panel firstRow;//,flashRecordRow;
+  private Panel firstRow;
 
   private ProgressHelper progressBar;
 
@@ -110,9 +109,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private TabContainer navigation;
   private EventLogger buttonFactory;
-
-/*  private boolean showUnansweredFirst = false;
-  private boolean showRerecord = false;*/
 
   /**
    * Make an exception handler that displays the exception.
