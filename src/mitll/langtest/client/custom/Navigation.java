@@ -193,7 +193,7 @@ public class Navigation extends TabContainer implements RequiresResize {
         boolean wasChapters = targetName.contains(CHAPTERS);
         Panel createdPanel = listInterface.getCreatedPanel();
         boolean hasCreated = createdPanel != null;
-        System.out.println("getTabPanel : got shown event : '" +showEvent + "' target '" + targetName + "' hasCreated " + hasCreated);
+       // System.out.println("getTabPanel : got shown event : '" +showEvent + "' target '" + targetName + "' hasCreated " + hasCreated);
         if (hasCreated && wasChapters && (createdPanel instanceof GoodwaveExercisePanel)) {
           System.out.println("\tgot chapters! created panel :  has created " + hasCreated + " was revealed  " + createdPanel.getClass());
           ((GoodwaveExercisePanel) createdPanel).wasRevealed();
@@ -359,7 +359,7 @@ public class Navigation extends TabContainer implements RequiresResize {
 
   /**
    * TODOs : streamline this -- there are three requests in sequence...
-   * @see mitll.langtest.client.LangTest#resetClassroomState()
+   * @see mitll.langtest.client.LangTest#doEverythingAfterFactory(long)
    */
   @Override
   public void showInitialState() {
@@ -367,7 +367,7 @@ public class Navigation extends TabContainer implements RequiresResize {
 
     boolean isRecorder = addTabs(chapterContent);
 
-    System.out.println("\n\n\nshowInitialState show initial state for " + user + " : getting user lists " + controller.isReviewMode());
+    //System.out.println("\n\n\nshowInitialState show initial state for " + user + " : getting user lists " + controller.isReviewMode());
     String value = storage.getValue(CLICKED_TAB);
     if (value.isEmpty()) {   // no previous tab
       if (isRecorder) {
@@ -383,7 +383,6 @@ public class Navigation extends TabContainer implements RequiresResize {
           public void onSuccess(Collection<UserList> result) {
             if (result.size() == 1 && // if only one empty list - one you've created
               result.iterator().next().isEmpty()) {
-              //Integer tabIndex = nameToIndex.get(CHAPTERS);
               tabPanel.selectTab(getSafeTabIndexFor(CHAPTERS));
             } else {
               boolean foundCreated = false;
@@ -607,7 +606,7 @@ public class Navigation extends TabContainer implements RequiresResize {
    */
   private void showList(final UserList ul, Panel contentPanel, final String instanceName) {
     System.out.println("showList " + ul + " instance " + instanceName);
-    if (!ul.isEmpty()) System.out.println("\tfirst" + ul.getExercises().iterator().next());
+  //  if (!ul.isEmpty()) System.out.println("\tfirst" + ul.getExercises().iterator().next());
 
     String previousList = storage.getValue(CLICKED_USER_LIST);
     String currentValue = storeCurrentClickedList(ul);
