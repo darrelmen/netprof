@@ -33,9 +33,9 @@ public class HistoryExerciseList extends PagingExerciseList {
    * I.e. when a new user logs in, we want them to do all of their items in the order we've chosen
    * for them (least answered/recorded first), and not let them skip forward in the list.
    */
-  private static final boolean INCLUDE_ITEM_IN_BOOKMARK = false;
+ // private static final boolean INCLUDE_ITEM_IN_BOOKMARK = false;
   protected long userID;
-
+  private static final boolean DEBUG = false;
   protected HistoryExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
                                 boolean showTurkToken, boolean showInOrder, ExerciseController controller,
                                 boolean showTypeAhead, String instance) {
@@ -103,13 +103,13 @@ public class HistoryExerciseList extends PagingExerciseList {
   protected void pushNewItem(String exerciseID) {
     String historyToken = getHistoryToken(exerciseID);
     String trimmedToken = historyToken.length() > 2? historyToken.substring(0,historyToken.length()-2) : historyToken;
-    System.out.println(new Date() + "------------ HistoryExerciseList.pushNewItem : push history '" + historyToken + "' -------------- ");
+    if (DEBUG) System.out.println(new Date() + "------------ HistoryExerciseList.pushNewItem : push history '" + historyToken + "' -------------- ");
 
     String token = History.getToken();
     //System.out.println("\tpushNewItem : current token '" + token + "' vs new id '" + exerciseID +"'");
 
     token = getSelectionFromToken(token);
-    System.out.println("\tpushNewItem : current token '" + token + "' vs new id '" + exerciseID +"'");
+    if (DEBUG) System.out.println("\tpushNewItem : current token '" + token + "' vs new id '" + exerciseID +"'");
     if (token != null && (historyToken.equals(token) || trimmedToken.equals(token))) {
       System.out.println("\tpushNewItem : current token '" + token + "' same as new " + historyToken);
       checkAndAskServer(exerciseID);
@@ -176,10 +176,10 @@ public class HistoryExerciseList extends PagingExerciseList {
    */
   @Override
   protected void gotClickOnItem(CommonShell e) {
-    System.out.println("----------- got click on " + e.getID() + " -------------- ");
-    if (!INCLUDE_ITEM_IN_BOOKMARK) {
+    //System.out.println("----------- got click on " + e.getID() + " -------------- ");
+    //if (!INCLUDE_ITEM_IN_BOOKMARK) {
       loadByID(e.getID());
-    }
+   // }
   }
 
   /**
