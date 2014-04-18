@@ -309,7 +309,7 @@ class EditableExercise extends NewUserExercise {
    * @param buttonClicked
    */
   private void postEditItem(final ListInterface pagingContainer, final boolean buttonClicked) {
-    //System.out.println("postEditItem : edit item " + buttonClicked);
+    System.out.println("postEditItem : edit item " + buttonClicked);
 
     grabInfoFromFormAndStuffInfoExercise();
 
