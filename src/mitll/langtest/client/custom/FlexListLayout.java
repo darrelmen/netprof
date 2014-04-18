@@ -142,7 +142,7 @@ public abstract class FlexListLayout implements RequiresResize {
   @Override
   public void onResize() {
     if (npfExerciseList != null) {
-      System.out.println(getClass() + " : onResize " + npfExerciseList.instance);
+      //System.out.println(getClass() + " : onResize " + npfExerciseList.instance);
       npfExerciseList.onResize();
     }
   }
