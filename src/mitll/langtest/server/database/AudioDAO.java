@@ -111,7 +111,7 @@ public class AudioDAO extends DAO {
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement(sql);
       Set<String> exidResultsForQuery = getExidResultsForQuery(connection, statement);
-      logger.debug("sql " + sql + " ids " + exidResultsForQuery.size() + " ");
+     // logger.debug("sql " + sql + " ids " + exidResultsForQuery.size() + " ");
       return exidResultsForQuery;
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
