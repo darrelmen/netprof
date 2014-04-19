@@ -44,8 +44,6 @@ import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.exercise.WaveformExercisePanel;
 import mitll.langtest.client.flashcard.Flashcard;
 import mitll.langtest.client.grading.GradingExercisePanelFactory;
 import mitll.langtest.client.instrumentation.ButtonFactory;
@@ -68,8 +66,12 @@ import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.StartupInfo;
+import mitll.langtest.shared.User;
 
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -436,7 +438,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private boolean shouldCollectAudio() {
-    return /*!isIPad() &&*/ props.isCollectAudio() && !props.isFlashcardTeacherView() || props.isFlashCard()  || props.isGoodwaveMode() ;
+    return props.isCollectAudio() && !props.isFlashcardTeacherView() || props.isFlashCard()  || props.isGoodwaveMode() ;
   }
 
   /**
@@ -620,25 +622,26 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     final LangTest outer = this;
     if (props.isGoodwaveMode() && !props.isGrading()) {
       if (props.isClassroomMode()) {
-        if (getAudioType().equals(Result.AUDIO_TYPE_RECORDER)) {
+  /*      if (getAudioType().equals(Result.AUDIO_TYPE_RECORDER)) {
           exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer, exerciseList) {
             @Override
             public Panel getExercisePanel(CommonExercise e) {
               return new WaveformExercisePanel(e, service, outer, outer, exerciseList);
             }
           }, userManager, 1);
-        } else {
-          exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer, exerciseList, 1.0f) {
-            @Override
-            public Panel getExercisePanel(CommonExercise e) {
-              if (isReviewMode()) {
-                return new QCNPFExercise(e, controller, exerciseList, 1.0f, false, "classroom");
-              } else {
-                return new CommentNPFExercise(e, controller, exerciseList, 1.0f, false, "classroom");
-              }
+        } else {*/
+        exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer, exerciseList, 1.0f) {
+          @Override
+          public Panel getExercisePanel(CommonExercise e) {
+            boolean reviewer = permissions.contains(User.Permission.QUALITY_CONTROL);
+            if (reviewer) {
+              return new QCNPFExercise(e, controller, exerciseList, 1.0f, false, "classroom");
+            } else {
+              return new CommentNPFExercise(e, controller, exerciseList, 1.0f, false, "classroom");
             }
-          }, userManager, 1);
-        }
+          }
+        }, userManager, 1);
+        //    }
       } else {
         exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer, exerciseList, getScreenPortion()), userManager, 1);
       }
@@ -741,7 +744,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   public boolean gotMicPermission() {
     boolean gotPermission = flashRecordPanel != null && flashRecordPanel.gotPermission();
-    System.out.println("checkInitFlash : skip init flash, just checkLogin (got permission = " + gotPermission+")");
+    System.out.println("checkInitFlash : skip init flash, just checkLogin (got permission = " + gotPermission + ")");
     return gotPermission;
   }
 
@@ -782,13 +785,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     userManager.checkLogin();
   }
 
-  boolean changeLayout = false;
+ // private boolean changeLayout = false;
   @Override
   public void rememberAudioType(String audioType) {
-    changeLayout = audioType.equals(this.audioType);
+ //   changeLayout = audioType.equals(this.audioType);
 
-    if (!changeLayout) System.out.println("audio type now " + audioType);
-
+ //   if (!changeLayout) System.out.println("audio type now " + audioType);
+    System.out.println("audio type now " + audioType);
     this.audioType = audioType;
   }
 
@@ -796,16 +799,25 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return isReviewMode() || isCRTDataCollectMode() || getAudioType().equals(Result.AUDIO_TYPE_RECORDER);
   }
 
+  /**
+   * TODO : Hack - don't use audio type like this
+   * @return
+   */
   @Override
   public String getAudioType() {
-    return audioType;
+    if (permissions.contains(User.Permission.RECORD_AUDIO)) return Result.AUDIO_TYPE_RECORDER;
+    else return audioType;
   }
   public boolean isReviewMode() { return audioType.equals(Result.AUDIO_TYPE_REVIEW); }
 
-  public void setShowUnansweredFirst(boolean val) {/* this.showUnansweredFirst = val;*/ }
+  private Set<User.Permission> permissions = new HashSet<User.Permission>();
 
-  @Override
-  public void setShowRerecord(boolean v) {/* showRerecord = v;*/ }
+  public void setPermission(User.Permission permission, boolean on) {
+    if (on) permissions.add(permission);
+    else permissions.remove(permission);
+  }
+
+  public Collection<User.Permission> getPermissions() { return permissions; }
 
   /**
    * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers
