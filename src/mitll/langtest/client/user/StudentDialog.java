@@ -2,6 +2,7 @@ package mitll.langtest.client.user;
 
 import com.github.gwtbootstrap.client.ui.AccordionGroup;
 import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.ControlLabel;
@@ -34,6 +35,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
@@ -41,9 +43,11 @@ import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.flashcard.ControlState;
 import mitll.langtest.shared.DLIUser;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.User;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -70,7 +74,7 @@ class StudentDialog extends UserDialog {
   private static final String TEACHER_REVIEWER = "Reviewer";
   private static final String TEACHER = "Teacher";
   private static final String RECORDER = "Recorder";
-  private static final List<String> ROLES = Arrays.asList(STUDENT, TEACHER, TEACHER_REVIEWER, RECORDER);
+  private static final List<String> ROLES = Arrays.asList(STUDENT, TEACHER/*, TEACHER_REVIEWER, RECORDER*/);
   public static final String ARE_YOU_A = "Are you a";
   public static final String USER_ID = "User ID";
   public static final String USER_ID_TOOLTIP = "New users can choose any id and login.";
@@ -93,7 +97,7 @@ class StudentDialog extends UserDialog {
     displayToRoles.put(STUDENT, PRACTICE);
    // displayToRoles.put(STUDENT_DATA_COLLECTION, DATA_COLLECTION);
     displayToRoles.put(TEACHER_REVIEWER, REVIEW);
-    displayToRoles.put(TEACHER, PRACTICE);
+    displayToRoles.put(TEACHER, REVIEW);
     displayToRoles.put(RECORDER, RECORDER);
   }
 
@@ -130,8 +134,12 @@ class StudentDialog extends UserDialog {
     password.setVisible(false);
     purpose.box.setWidth("150px");
 
+
+    Panel permissions = makePermissions();
+
     Panel register = new FlowPanel();
-    final RegistrationInfo registrationInfo = new RegistrationInfo(register);
+    final RegistrationInfo registrationInfo = new RegistrationInfo(register, permissions);
+
     final AccordionGroup accordion = getAccordion(dialogBox, register);
     accordion.setVisible(!canSkipRegister(purpose));
 
@@ -142,7 +150,7 @@ class StudentDialog extends UserDialog {
         boolean needUserID = isDataCollection(purpose) || isReview(purpose) || isPractice(purpose);
         user.setVisible(needUserID);
         accordion.setVisible(!canSkipRegister(purpose));
-        registrationInfo.showOrHideILR(!isReview(purpose)/* && !getRole(purpose).equals(RECORDER)*/);
+        registrationInfo.showOrHideILR(!isReview(purpose));
         password.setVisible(isReview(purpose));
 
         if (b) {
@@ -170,7 +178,7 @@ class StudentDialog extends UserDialog {
     });
 
     final Button closeButton = addLoginButton(dialogBox);
-    closeButton.addClickHandler(makeCloseHandler(dialogBox, registrationInfo, user, password, purpose, accordion));
+    closeButton.addClickHandler(makeCloseHandler(dialogBox, registrationInfo, user, password, purpose, accordion, langTest.getPermissions()));
 
     configureKeyHandler(dialogBox, closeButton);
 
@@ -186,13 +194,29 @@ class StudentDialog extends UserDialog {
 
       }
     });
- /*   Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-      public void execute() {
-        user.box.setFocus(true);
+
+    dialogBox.show();
+  }
+
+  protected Panel makePermissions() {
+    Panel permissions = new VerticalPanel();
+    final CheckBox qc = new CheckBox("Do Quality Control");
+    qc.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        langTest.setPermission(User.Permission.QUALITY_CONTROL,qc.getValue());
       }
     });
-*/
-    dialogBox.show();
+    permissions.add(qc);
+    final CheckBox refAudio = new CheckBox("Record Reference Audio");
+    refAudio.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        langTest.setPermission(User.Permission.RECORD_AUDIO,refAudio.getValue());
+      }
+    });
+    permissions.add(refAudio);
+    return permissions;
   }
 
   private boolean isDataCollection(ListBoxFormField purpose) {
@@ -230,6 +254,7 @@ class StudentDialog extends UserDialog {
    * @param user
    * @param purpose
    * @param accordion
+   * @param permissions
    * @see #displayLoginBox()
    */
   private ClickHandler makeCloseHandler(final Modal dialogBox,
@@ -237,15 +262,14 @@ class StudentDialog extends UserDialog {
                                         final FormField user,
                                         final FormField password,
                                         final ListBoxFormField purpose,
-                                        final AccordionGroup accordion) {
+                                        final AccordionGroup accordion,
+                                        final Collection<User.Permission> permissions) {
     return new ClickHandler() {
       /**
        * Do validation.
        * Fired when the user clicks on the sendButton.
        */
       public void onClick(ClickEvent event) {
-        //System.out.println("makeCloseHandler : got click " + event);
-
         String purposeSetting = getRole(purpose);
         final String audioType = getAudioTypeFromPurpose(purposeSetting);
         if (canLoginAnonymously(purpose)) {
@@ -256,7 +280,7 @@ class StudentDialog extends UserDialog {
         } else {
           System.out.println("\tcheckUserAndMaybeRegister for " + purposeSetting);
 
-          checkUserAndMaybeRegister(audioType, user, password, dialogBox, accordion, registrationInfo, purposeSetting);
+          checkUserAndMaybeRegister(audioType, user, password, dialogBox, accordion, registrationInfo, purposeSetting,permissions);
         }
       }
     };
@@ -272,7 +296,8 @@ class StudentDialog extends UserDialog {
                                          final Modal dialogBox,
                                          final AccordionGroup accordion,
                                          final RegistrationInfo registrationInfo,
-                                         final String purposeSetting) {
+                                         final String purposeSetting,
+                                         final Collection<User.Permission> permissions) {
     final String userID = user.box.getText();
     boolean needsPassword = purposeSetting.equals(REVIEW) || purposeSetting.equals(RECORDER);
 
@@ -299,7 +324,7 @@ class StudentDialog extends UserDialog {
             if (!canSkipRegister(purposeSetting)) {
               accordion.show();
             }
-            checkThenRegister(audioType, registrationInfo, dialogBox, userID);
+            checkThenRegister(audioType, registrationInfo, dialogBox, userID,permissions);
           }
           setRecordingOrder();
         }
@@ -316,14 +341,14 @@ class StudentDialog extends UserDialog {
    * @param dialogBox
    * @param userID
    */
-  private void checkThenRegister(String audioType, RegistrationInfo registrationInfo, Modal dialogBox, String userID) {
+  private void checkThenRegister(String audioType, RegistrationInfo registrationInfo, Modal dialogBox, String userID, Collection<User.Permission> permissions) {
     String s = audioType.toLowerCase();
     boolean skipWeekCheck = s.contains(REVIEW.toLowerCase()) || s.contains(RECORDER.toLowerCase());
     boolean skipChecks = s.contains(PRACTICE.toLowerCase());
     if (skipChecks) {
       System.out.println("checkThenRegister : skipChecks " + audioType + " user  " + userID);
 
-      hideAndSend(audioType, registrationInfo, dialogBox, userID);
+      hideAndSend(audioType, registrationInfo, dialogBox, userID,permissions);
     } else if (highlightIntegerBox(registrationInfo.ageEntryGroup)) {
       System.out.println("\tcheckThenRegister : age OK skipChecks " + audioType + " skipWeekCheck " + skipWeekCheck);
 
@@ -338,7 +363,7 @@ class StudentDialog extends UserDialog {
             ) {
             System.out.println("\tcheckThenRegister : hideAndSend");
 
-            hideAndSend(audioType, registrationInfo, dialogBox, userID);
+            hideAndSend(audioType, registrationInfo, dialogBox, userID,permissions);
           } else {
             System.out.println("\tcheckThenRegister : skipChecks " + audioType + " user  " + userID);
           }
@@ -354,11 +379,11 @@ class StudentDialog extends UserDialog {
     }
   }
 
-  private void hideAndSend(String audioType, RegistrationInfo registrationInfo, Modal dialogBox, String userID) {
+  private void hideAndSend(String audioType, RegistrationInfo registrationInfo, Modal dialogBox, String userID, Collection<User.Permission> permissions) {
     System.out.println("hideAndSend : audioType " + audioType + " user  " + userID);
 
     dialogBox.hide();
-    sendNameToServer(registrationInfo, audioType, userID);
+    sendNameToServer(registrationInfo, audioType, userID, permissions);
   }
 
   private String getAudioTypeFromPurpose(String purposeValue) {
@@ -396,24 +421,25 @@ class StudentDialog extends UserDialog {
    *
    * @see #makeCloseHandler
    */
-  private void sendNameToServer(RegistrationInfo registrationInfo, String audioType, String userID) {
+  private void sendNameToServer(RegistrationInfo registrationInfo, String audioType, String userID, Collection<User.Permission> permissions) {
     int weeksValue = registrationInfo.weeks.getText().isEmpty() ? 0 : Integer.parseInt(registrationInfo.weeks.getText());
-    addUser(0, weeksValue, registrationInfo, audioType, userID);
+    addUser(0, weeksValue, registrationInfo, audioType, userID, permissions);
   }
 
   /**
    * @param monthsOfExperience
    * @param userID
-   * @see #sendNameToServer(mitll.langtest.client.user.StudentDialog.RegistrationInfo, String, String)
+   * @param permissions
+   * @see #sendNameToServer(mitll.langtest.client.user.StudentDialog.RegistrationInfo, String, String, java.util.Collection)
    */
   private void addUser(int monthsOfExperience, final int weeksOfExperience,
                        final RegistrationInfo registrationInfo,
-                       final String audioType, String userID) {
+                       final String audioType, String userID, Collection<User.Permission> permissions) {
     int age = getAge(registrationInfo.ageEntryGroup.box);
     String gender = registrationInfo.genderGroup.getValue();
 
     AsyncCallback<Long> async = getAddDLIUserCallback(weeksOfExperience, registrationInfo, audioType, userID);
-    addUser(age, gender, monthsOfExperience, registrationInfo.dialectGroup.getText(), "", userID, async);
+    addUser(age, gender, monthsOfExperience, registrationInfo.dialectGroup.getText(), "", userID, permissions, async);
   }
 
   private AsyncCallback<Long> getAddDLIUserCallback(final int weeksOfExperience, final RegistrationInfo registrationInfo,
@@ -449,17 +475,18 @@ class StudentDialog extends UserDialog {
   }
 
   private void addAnonymousUser(String audioType) {
-    addUser(89, "male", 0, audioType);
+    addUser(89, "male", 0, audioType, new ArrayList<User.Permission>());
   }
 
   /**
    * @param age
    * @param gender
    * @param monthsOfExperience
+   * @param permissions
    * @see UserManager#addAnonymousUser()
    */
-  public void addUser(int age, String gender, int monthsOfExperience, String audioType) {
-    addUser(age, gender, monthsOfExperience, "", PropertyHandler.LOGIN_TYPE.ANONYMOUS, audioType);
+  public void addUser(int age, String gender, int monthsOfExperience, String audioType, Collection<User.Permission> permissions) {
+    addUser(age, gender, monthsOfExperience, "", PropertyHandler.LOGIN_TYPE.ANONYMOUS, audioType, permissions);
   }
 
   /**
@@ -468,11 +495,12 @@ class StudentDialog extends UserDialog {
    * @param monthsOfExperience
    * @param dialect
    * @param loginType
-   * @see #addUser(int, String, int, String)
+   * @param permissions
+   * @see #addUser(int, String, int, String, java.util.Collection)
    */
   private void addUser(int age, String gender, int monthsOfExperience, String dialect,
                        final PropertyHandler.LOGIN_TYPE loginType,
-                       final String audioType) {
+                       final String audioType, Collection<User.Permission> permissions) {
     AsyncCallback<Long> async = new AsyncCallback<Long>() {
       public void onFailure(Throwable caught) {
         Window.alert("addUser : Couldn't contact server.");
@@ -484,16 +512,16 @@ class StudentDialog extends UserDialog {
         userManager.storeUser(result, audioType, "" + result, loginType);
       }
     };
-    addUser(age, gender, monthsOfExperience, dialect, "", "", async);
+    addUser(age, gender, monthsOfExperience, dialect, "", "", permissions, async);
   }
 
   private void addUser(int age, String gender, int monthsOfExperience, String dialect, String nativeLang, String userID,
-                       AsyncCallback<Long> async) {
+                       Collection<User.Permission> permissions, AsyncCallback<Long> async) {
     System.out.println("addUser : userID is " + userID);
 
     service.addUser(age,
       gender,
-      monthsOfExperience, nativeLang, dialect, userID, async);
+      monthsOfExperience, nativeLang, dialect, userID, permissions, async);
   }
 
   private void setDefaultControlValues(int user) {
@@ -521,7 +549,7 @@ class StudentDialog extends UserDialog {
     final Widget label;
 
 
-    public RegistrationInfo(Panel dialogBox) {
+    public RegistrationInfo(Panel dialogBox, Panel lowerLeft) {
       Form form = new Form();
       DOM.setStyleAttribute(form.getElement(), "marginBottom", "0px");
 
@@ -547,7 +575,9 @@ class StudentDialog extends UserDialog {
 
       ageEntryGroup = addControlFormField(fieldsetLeft, "Your age");
       genderGroup = getListBoxFormField(fieldsetRight, "Gender", getGenderBox());
-      weeks = addControlFormField(fieldsetLeft, "Weeks of Experience");
+      weeks = addControlFormField(new FlowPanel(), "Weeks of Experience");
+
+      addControlGroupEntrySimple(fieldsetLeft, "Permissions", lowerLeft);
       dialectGroup = getDialect(fieldsetRight);
 
       final ControlGroup ilrLevel = new ControlGroup();
@@ -616,7 +646,7 @@ class StudentDialog extends UserDialog {
 
     /**
      * @return
-     * @see #RegistrationInfo(com.google.gwt.user.client.ui.Panel)
+     * @see #RegistrationInfo
      */
     private FluidRow getILRLevels() {
       FluidRow row = new FluidRow();
