@@ -39,6 +39,7 @@ class NPFHelper implements RequiresResize {
   protected final UserFeedback feedback;
   protected PagingExerciseList npfExerciseList;
   private Panel npfContentPanel;
+  boolean showQC;
 
   /**
    * @see mitll.langtest.client.custom.Navigation#Navigation
@@ -46,12 +47,14 @@ class NPFHelper implements RequiresResize {
    * @param feedback
    * @param userManager
    * @param controller
+   * @param showQC
    */
-  public NPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager, ExerciseController controller) {
+  public NPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager, ExerciseController controller, boolean showQC) {
     this.service = service;
     this.feedback = feedback;
     this.controller = controller;
     this.userManager = userManager;
+    this.showQC = showQC;
   }
 
   /**
@@ -133,7 +136,7 @@ class NPFHelper implements RequiresResize {
     npfContentPanel.addStyleName("floatRight");
     npfContentPanel.getElement().setId("internalLayout_RightContent");
 
-    npfExerciseList = makeNPFExerciseList(npfContentPanel, instanceName + "_"+ul.getUniqueID(),ul.getUniqueID());
+    npfExerciseList = makeNPFExerciseList(npfContentPanel, instanceName + "_"+ul.getUniqueID());
     return npfContentPanel;
   }
 
@@ -143,9 +146,9 @@ class NPFHelper implements RequiresResize {
    * @param instanceName
    * @return
    */
-  PagingExerciseList makeNPFExerciseList(Panel right, String instanceName, long userListID) {
+  PagingExerciseList makeNPFExerciseList(Panel right, String instanceName) {
     final PagingExerciseList exerciseList = makeExerciseList(right, instanceName);
-    setFactory(exerciseList, instanceName, true);
+    setFactory(exerciseList, instanceName, showQC);
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       @Override
       public void execute() {
@@ -185,9 +188,13 @@ class NPFHelper implements RequiresResize {
       }
     };
   }
+/*
+  public void setFactory(final String instanceName, boolean showQC) {
+    setFactory(npfExerciseList, instanceName, showQC);
+  }*/
 
   /**
-   * @see #makeNPFExerciseList(com.google.gwt.user.client.ui.Panel, String, long)
+   * @see #makeNPFExerciseList(com.google.gwt.user.client.ui.Panel, String)
    * @param exerciseList
    * @param instanceName
    * @param showQC
