@@ -265,7 +265,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     List<CommonShell> exerciseShells = getExerciseShells(exercises);
 
-    //logger.debug("makeExerciseListWrapper : userID " +userID + " Role is " + role);
+    logger.debug("makeExerciseListWrapper : userID " +userID + " Role is " + role);
     if (role.equals(Result.AUDIO_TYPE_RECORDER)) {
       Set<String> recordedForUser = db.getAudioDAO().getRecordedForUser(userID);
       //logger.debug("\tfound " + recordedForUser.size() + " recordings by " + userID);
@@ -273,7 +273,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
          if (recordedForUser.contains(shell.getID())) shell.setState(CommonShell.STATE.RECORDED);
       }
     }
-    else {
+    else if (role.equalsIgnoreCase(User.Permission.QUALITY_CONTROL.toString()) || role.equalsIgnoreCase(Result.AUDIO_TYPE_REVIEW)) {
       db.getUserListManager().markState(exerciseShells, role);
     }
 
@@ -406,16 +406,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private List<SectionNode> getSectionNodes() {
     return db.getSectionHelper().getSectionNodes();
   }
-
-/*  private void logMemory() {
-    Runtime rt = Runtime.getRuntime();
-    long free = rt.freeMemory();
-    long used = rt.totalMemory() - free;
-    long max = rt.maxMemory();
-    if (used / MB > 500) {
-      logger.debug("heap info free " + free / MB + "M used " + used / MB + "M max " + max / MB + "M");
-    }
-  }*/
 
   /**
    * Joins with annotation data when doing QC.
@@ -884,13 +874,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param nativeLang
    * @param dialect
    * @param userID
+   * @param permissions
    * @return
    */
   @Override
   public long addUser(int age, String gender, int experience,
-                      String nativeLang, String dialect, String userID) {
+                      String nativeLang, String dialect, String userID, Collection<User.Permission> permissions) {
     logger.debug("Adding user " + userID);
-    return db.addUser(getThreadLocalRequest(),age, gender, experience, nativeLang, dialect, userID);
+    return db.addUser(getThreadLocalRequest(),age, gender, experience, nativeLang, dialect, userID, permissions);
   }
 
   /**
