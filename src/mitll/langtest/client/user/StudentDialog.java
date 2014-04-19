@@ -134,6 +134,7 @@ class StudentDialog extends UserDialog {
     password.setVisible(false);
     purpose.box.setWidth("150px");
 
+    langTest.getPermissions().clear();
 
     Panel permissions = makePermissions();
 
