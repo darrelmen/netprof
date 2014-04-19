@@ -29,7 +29,7 @@ import java.util.Map;
 public interface LangTestDatabaseAsync {
   void addTextAnswer(int usedID, CommonExercise exercise, int questionID, String answer, String answerType, AsyncCallback<Void> async);
   void userExists(String login, AsyncCallback<Integer> async);
-  void addUser(int age, String gender, int experience, String nativeLang, String dialect, String userID, AsyncCallback<Long> async);
+  void addUser(int age, String gender, int experience, String nativeLang, String dialect, String userID, Collection<User.Permission> permissions, AsyncCallback<Long> async);
   void getUsers(AsyncCallback<List<User>> async);
 
   void writeAudioFile(String base64EncodedString, String plan, String exercise, int question, int user,
