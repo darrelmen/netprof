@@ -25,7 +25,7 @@ public class ChapterNPFHelper extends NPFHelper {
    */
   public ChapterNPFHelper(final LangTestDatabaseAsync service, final UserFeedback feedback,
                           final UserManager userManager, final ExerciseController controller, final boolean showQC) {
-    super(service, feedback, userManager, controller);
+    super(service, feedback, userManager, controller, showQC);
     final NPFHelper outer = this;
     this.flexListLayout = new FlexListLayout(service,feedback,userManager,controller) {
       @Override
