@@ -21,10 +21,6 @@ import mitll.langtest.client.user.UserManager;
 * To change this template use File | Settings | File Templates.
 */
 class AVPHelper extends NPFHelper {
- // private final LangTestDatabaseAsync service;
-  //private final ExerciseController controller;
-  //private final UserFeedback feedback;
-
   /**
    * @see Navigation#Navigation
    * @param service
@@ -34,15 +30,11 @@ class AVPHelper extends NPFHelper {
    */
   public AVPHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager, ExerciseController controller) {
     super(service, feedback, userManager, controller);
-   // this.service = service;
-    //UserManager userManager1 = userManager;
-   // this.controller = controller;
-   // this.feedback = feedback;
   }
 
   @Override
   protected PagingExerciseList makeExerciseList(final Panel right, final String instanceName) {
-    ExercisePanelFactory factory = getFactory(null,instanceName);
+    ExercisePanelFactory factory = getFactory(null,instanceName, true);
     return new PagingExerciseList(right, service, feedback, factory, controller, false, false,
       true, instanceName) {
       @Override
@@ -65,19 +57,8 @@ class AVPHelper extends NPFHelper {
     };
   }
 
-  /**
-   * @see mitll.langtest.client.custom.NPFHelper#makeNPFExerciseList
-   * @paramx exerciseList
-   * @paramx instanceName
-   * @paramx userListID
-   */
-/*  @Override
-  protected void setFactory(final PagingExerciseList exerciseList, final String instanceName, long userListID) {
-    exerciseList.setFactory(getFactory(exerciseList,instanceName), userManager, 1);
-  }*/
-
   @Override
-  protected ExercisePanelFactory getFactory(PagingExerciseList exerciseList, final String instanceName) {
+  protected ExercisePanelFactory getFactory(PagingExerciseList exerciseList, final String instanceName, boolean showQC) {
     return new MyFlashcardExercisePanelFactory(service, feedback, controller, exerciseList);
   }
 
