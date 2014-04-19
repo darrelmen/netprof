@@ -176,8 +176,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     hp.setWidth("100%");
 
     add(hp);
-
-    add(new Heading(6));
+    hp.addStyleName("bottomFiveMargin");
+    //add(new Heading(6));
 
     add(imageContainer);
   }
