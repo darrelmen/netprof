@@ -29,7 +29,7 @@ class AVPHelper extends NPFHelper {
    * @param controller
    */
   public AVPHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager, ExerciseController controller) {
-    super(service, feedback, userManager, controller);
+    super(service, feedback, userManager, controller, false);
   }
 
   @Override
