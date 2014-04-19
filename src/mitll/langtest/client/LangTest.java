@@ -622,14 +622,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     final LangTest outer = this;
     if (props.isGoodwaveMode() && !props.isGrading()) {
       if (props.isClassroomMode()) {
-  /*      if (getAudioType().equals(Result.AUDIO_TYPE_RECORDER)) {
-          exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer, exerciseList) {
-            @Override
-            public Panel getExercisePanel(CommonExercise e) {
-              return new WaveformExercisePanel(e, service, outer, outer, exerciseList);
-            }
-          }, userManager, 1);
-        } else {*/
         exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer, exerciseList, 1.0f) {
           @Override
           public Panel getExercisePanel(CommonExercise e) {
@@ -785,12 +777,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     userManager.checkLogin();
   }
 
- // private boolean changeLayout = false;
   @Override
   public void rememberAudioType(String audioType) {
- //   changeLayout = audioType.equals(this.audioType);
-
- //   if (!changeLayout) System.out.println("audio type now " + audioType);
     System.out.println("audio type now " + audioType);
     this.audioType = audioType;
   }
