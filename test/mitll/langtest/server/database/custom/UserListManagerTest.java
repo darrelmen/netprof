@@ -14,6 +14,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -301,7 +302,7 @@ public class UserListManagerTest {
   private long getUser(String test2) {
     long l = database.userExists(test2);
     if (l == -1) {
-      l = database.addUser(89, "male", 1, "", ENGLISH, "boston", test2);
+      l = database.addUser(89, "male", 1, "", ENGLISH, "boston", test2, new ArrayList<User.Permission>());
     }
     return l;
   }
