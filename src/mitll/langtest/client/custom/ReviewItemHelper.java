@@ -36,7 +36,7 @@ public class ReviewItemHelper extends NPFHelper {
                           final HasText itemMarker,
                           final ListInterface predefinedContent,
                           NPFHelper npfHelper) {
-    super(service, feedback, userManager, controller);
+    super(service, feedback, userManager, controller, true);
     this.itemMarker = itemMarker;
     this.predefinedContent = predefinedContent;
     this.npfHelper = npfHelper;
