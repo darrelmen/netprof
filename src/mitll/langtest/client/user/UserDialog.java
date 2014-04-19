@@ -96,11 +96,11 @@ public abstract class UserDialog extends BasicDialog {
     return dialogBox;
   }
 
-  AccordionGroup getAccordion(final Modal dialogBox, Panel register) {
+  AccordionGroup getAccordion(final Panel dialogBox, Panel contents) {
     Accordion accordion = new Accordion();
     AccordionGroup accordionGroup = new AccordionGroup();
     accordionGroup.setHeading("Registration");
-    accordionGroup.add(register);
+    accordionGroup.add(contents);
     accordion.add(accordionGroup);
     dialogBox.add(accordion);
     return accordionGroup;
