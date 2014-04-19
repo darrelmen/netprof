@@ -21,19 +21,18 @@ public class ChapterNPFHelper extends NPFHelper {
    * @param feedback
    * @param userManager
    * @param controller
+   * @param showQC
    */
   public ChapterNPFHelper(final LangTestDatabaseAsync service, final UserFeedback feedback,
-                          final UserManager userManager, final ExerciseController controller) {
+                          final UserManager userManager, final ExerciseController controller, final boolean showQC) {
     super(service, feedback, userManager, controller);
     final NPFHelper outer = this;
     this.flexListLayout = new FlexListLayout(service,feedback,userManager,controller) {
       @Override
       protected ExercisePanelFactory getFactory(PagingExerciseList exerciseList, String instanceName) {
-        return outer.getFactory(exerciseList, instanceName);
+        return outer.getFactory(exerciseList, instanceName, showQC);
       }
     };
-
-    //System.out.println(getClass() + " : ChapterNPFHelper flexListLayout " + flexListLayout );
   }
 
   /**
