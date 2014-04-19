@@ -29,10 +29,14 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
+import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
+import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserList;
 
@@ -51,7 +55,8 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class Navigation extends TabContainer implements RequiresResize {
-  private static final String CHAPTERS = "Course Content";
+  private static final String CHAPTERS = "Learn";
+  private static final String CONTENT = "Course Content";
   private static final String YOUR_LISTS = "Your Lists";
   private static final String OTHERS_LISTS = "Other's Lists";
   private static final String PRACTICE = "Practice";
@@ -61,6 +66,7 @@ public class Navigation extends TabContainer implements RequiresResize {
   private static final String PRACTICE1 = "practice";
   private static final String ADD_OR_EDIT_ITEM = "Add/Edit Item";
   private static final String ADD_DELETE_EDIT_ITEM = "Fix Defects";
+  private static final String MARK_DEFECTS = "Mark Defects";
   private static final String POSSIBLE_DEFECTS = "Review";
   private static final String ITEMS_WITH_COMMENTS = "Items with comments";
   private static final String LEARN_PRONUNCIATION = "Learn Pronunciation";
@@ -109,6 +115,7 @@ public class Navigation extends TabContainer implements RequiresResize {
 
   private ChapterNPFHelper defectHelper;
   private SimpleChapterNPFHelper recorderHelper;
+  private SimpleChapterNPFHelper contentHelper;
   private ReviewItemHelper reviewItem;
 
   private final KeyStorage storage;
@@ -129,18 +136,32 @@ public class Navigation extends TabContainer implements RequiresResize {
     this.controller = controller;
     this.listInterface = predefinedContentList;
     storage = new KeyStorage(controller);
-    npfHelper = new NPFHelper(service, feedback, userManager, controller);
+    npfHelper = new NPFHelper(service, feedback, userManager, controller, false);
     avpHelper = new AVPHelper(service, feedback, userManager, controller);
 
-    //if (controller.isReviewMode()) {
     defectHelper = new ChapterNPFHelper(service, feedback, userManager, controller, true);
     recorderHelper = new SimpleChapterNPFHelper(service, feedback, userManager, controller);
+
+    contentHelper = new SimpleChapterNPFHelper(service, feedback, userManager, controller) {
+      protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
+        return new GoodwaveExercisePanelFactory(service, feedback, controller, exerciseList, 1.0f) {
+          @Override
+          public Panel getExercisePanel(CommonExercise e) {
+
+            return new CommentNPFExercise(e, controller, exerciseList, 1.0f, false, "classroom");
+          }
+        };
+      }
+    };
+
 
       reviewItem = new ReviewItemHelper(service, feedback, userManager, controller, null, predefinedContentList, npfHelper);
    // }
   //  else {
       editItem = new EditItem(service, userManager, controller, predefinedContentList, feedback, npfHelper);
   //  }
+
+
   }
 
   /**
@@ -167,7 +188,7 @@ public class Navigation extends TabContainer implements RequiresResize {
   private TabPanel tabPanel;
   private TabAndContent yourStuff, othersStuff;
   private TabAndContent browse, chapters, create;
-  private TabAndContent review, commented, attention, recorderTab;
+  private TabAndContent review, commented, attention, recorderTab, contentTab;
   private List<TabAndContent> tabs = new ArrayList<TabAndContent>();
   private Panel chapterContent;
 
@@ -192,8 +213,9 @@ public class Navigation extends TabContainer implements RequiresResize {
             "\ntarget " + showEvent.getTarget()+
             " ' target name '" + showEvent.getTarget().getName() + "'");*/
         String targetName = showEvent.getTarget() == null ? "" : showEvent.getTarget().toString();
+        final String chapterNameToUse = getChapterName();
 
-        boolean wasChapters = targetName.contains(CHAPTERS);
+        boolean wasChapters = targetName.contains(chapterNameToUse);
         Panel createdPanel = listInterface.getCreatedPanel();
         boolean hasCreated = createdPanel != null;
        // System.out.println("getTabPanel : got shown event : '" +showEvent + "' target '" + targetName + "' hasCreated " + hasCreated);
@@ -267,18 +289,34 @@ public class Navigation extends TabContainer implements RequiresResize {
       });
   //  }
 
+    boolean isQualityControl = isQC();
+
+    if (isQualityControl) {
+      contentTab = makeFirstLevelTab(tabPanel, IconType.TH_LIST, CONTENT);
+      contentTab.content.getElement().setId("content_contentPanel");
+      contentTab.tab.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          checkAndMaybeClearTab(CONTENT);
+          contentHelper.showNPF(contentTab, "content", false);
+          logEvent(recorderTab,CONTENT);
+        }
+      });
+    }
+
     // chapter tab
-    chapters = makeFirstLevelTab(tabPanel, IconType.TH_LIST, CHAPTERS);
+    final String chapterNameToUse = getChapterName();
+    chapters = makeFirstLevelTab(tabPanel, IconType.TH_LIST, chapterNameToUse);
     chapters.content.add(contentForChaptersTab);
     chapters.tab.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        checkAndMaybeClearTab(CHAPTERS);
-        logEvent(chapters,CHAPTERS);
+        checkAndMaybeClearTab(chapterNameToUse);
+        logEvent(chapters, chapterNameToUse);
       }
     });
 
-    if (controller.getPermissions().contains(User.Permission.QUALITY_CONTROL)) {
+    if (isQualityControl) {
       review = makeFirstLevelTab(tabPanel, IconType.EDIT, REVIEW1);
       review.content.getElement().setId("viewReview_contentPanel");
       review.tab.addClickHandler(new ClickHandler() {
@@ -311,25 +349,35 @@ public class Navigation extends TabContainer implements RequiresResize {
         }
       });
     }
+
     if (controller.getPermissions().contains(User.Permission.RECORD_AUDIO)) {
-      recorderTab = makeFirstLevelTab(tabPanel, IconType.EDIT, RECORD_AUDIO);
+      recorderTab = makeFirstLevelTab(tabPanel, IconType.MICROPHONE, RECORD_AUDIO);
       recorderTab.content.getElement().setId("recorder_contentPanel");
       recorderTab.tab.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
           checkAndMaybeClearTab(RECORD_AUDIO);
-          //viewReview(recorderTab.content);
           recorderHelper.showNPF(recorderTab, "record_Audio", false);
           logEvent(recorderTab,RECORD_AUDIO);
         }
       });
     }
+  }
 
-   // return isRecorder;
+  private String getChapterName() {
+    boolean isQualityControl = isQC();
+
+    return isQualityControl ? MARK_DEFECTS : CHAPTERS;
+  }
+
+  private boolean isQC() {
+    return controller.getPermissions().contains(User.Permission.QUALITY_CONTROL);
   }
 
   protected void logEvent(TabAndContent yourStuff, String context) {
-    controller.logEvent(yourStuff.tab.asWidget(), "Tab", "", context);
+    if (yourStuff != null && yourStuff.tab != null) {
+      controller.logEvent(yourStuff.tab.asWidget(), "Tab", "", context);
+    }
   }
 
   Map<String,TabAndContent> nameToTab = new HashMap<String, TabAndContent>();
@@ -393,7 +441,8 @@ public class Navigation extends TabContainer implements RequiresResize {
           public void onSuccess(Collection<UserList> result) {
             if (result.size() == 1 && // if only one empty list - one you've created
               result.iterator().next().isEmpty()) {
-              tabPanel.selectTab(getSafeTabIndexFor(CHAPTERS));
+              final String chapterNameToUse = getChapterName();
+              tabPanel.selectTab(getSafeTabIndexFor(chapterNameToUse));
             } else {
               boolean foundCreated = false;
               for (UserList ul : result) {
@@ -435,13 +484,18 @@ public class Navigation extends TabContainer implements RequiresResize {
           viewComments(commented.content);
         } else if (value.equals(ATTENTION_LL)) {
           viewAttention(attention.content);
+        } else if (value.equals(RECORD_AUDIO)) {
+          recorderHelper.showNPF(recorderTab, "record_audio", true);
+        } else if (value.equals(CONTENT)) {
+          contentHelper.showNPF(contentTab, "content", true);
         }
       }
       else {
         System.out.println("selectPreviousTab : found value  '" + value + "' " +
           " but I only know about tabs : " + nameToIndex.keySet());
-        Integer integer = nameToIndex.get(CHAPTERS); // always a chapters tab
-        tabPanel.selectTab(integer);
+        final String chapterNameToUse = getChapterName();
+
+        tabPanel.selectTab(getSafeTabIndexFor(chapterNameToUse));
       }
   }
 
@@ -599,6 +653,7 @@ public class Navigation extends TabContainer implements RequiresResize {
     if (controller.isReviewMode()) {
       defectHelper.onResize();
       reviewItem.onResize();
+      recorderHelper.onResize();
     } else if (editItem != null) {
       editItem.onResize();
     }
@@ -773,29 +828,6 @@ public class Navigation extends TabContainer implements RequiresResize {
     return tabPanel;
   }
 
-  private void showLearnTab(TabAndContent learnTab, UserList ul, String instanceName1, boolean isReview, boolean isComment, boolean isAttention) {
-    showLearnTab(isReview || isComment || isAttention, ul, learnTab, instanceName1);
-  }
-
-  /**
-   * @see #getListOperations
-   * @see #selectTabGivenHistory
-   * @param isReview
-   * @param ul
-   * @param learn
-   * @param instanceName1
-   */
-  private void showLearnTab(boolean isReview, UserList ul, TabAndContent learn, String instanceName1) {
-    if (isReview) {
-      System.out.println("showLearnTab : onClick using defect helper " + instanceName1 + " and " +ul);
-      defectHelper.showNPF(ul, learn, instanceName1, false);
-    }
-    else {
-      System.out.println("showLearnTab : onClick using npf helper " + instanceName1);
-      npfHelper.showNPF(ul, learn, instanceName1, true);
-    }
-  }
-
   /**
    * @see #getListOperations
    * @param tabPanel
@@ -828,6 +860,30 @@ public class Navigation extends TabContainer implements RequiresResize {
     }
   }
 
+  private void showLearnTab(TabAndContent learnTab, UserList ul, String instanceName1, boolean isReview, boolean isComment, boolean isAttention) {
+    showLearnTab(isReview || isComment || isAttention, ul, learnTab, instanceName1);
+  }
+
+  /**
+   * @see #getListOperations
+   * @see #selectTabGivenHistory
+   * @param isReview
+   * @param ul
+   * @param learn
+   * @param instanceName1
+   */
+  private void showLearnTab(boolean isReview, UserList ul, TabAndContent learn, String instanceName1) {
+    if (isReview) {
+      System.out.println("showLearnTab : onClick using defect helper " + instanceName1 + " and " +ul);
+      defectHelper.showNPF(ul, learn, instanceName1, false);
+    }
+    else {
+      System.out.println("showLearnTab : onClick using npf helper " + instanceName1 + " and " +ul);
+     // npfHelper.setFactory(instanceName1,false);  // TODO : when would it be QC???
+      npfHelper.showNPF(ul, learn, instanceName1, true);
+    }
+  }
+
   private void showEditReviewOrComment(UserList ul, boolean isNormalList, TabAndContent finalEditItem, boolean isReview, boolean isComment) {
     boolean reviewOrComment = isReview || isComment;
     if (reviewOrComment) {
@@ -848,7 +904,8 @@ public class Navigation extends TabContainer implements RequiresResize {
    * @param isReview
    * @param isComment
    * @param isAttention
-   *@param isNormalList  @return true if we have stored what tab we clicked on before
+   * @param isNormalList
+   * @return true if we have stored what tab we clicked on before
    */
   private boolean selectPreviouslyClickedSubTab(TabPanel tabPanel,
                                                 TabAndContent learnTab,
