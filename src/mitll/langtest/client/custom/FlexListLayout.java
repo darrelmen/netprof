@@ -34,7 +34,7 @@ public abstract class FlexListLayout implements RequiresResize {
   private final UserManager userManager;
 
   /**
-   * @see mitll.langtest.client.custom.ChapterNPFHelper#ChapterNPFHelper(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController)
+   * @see ChapterNPFHelper#ChapterNPFHelper(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, boolean)
    * @see mitll.langtest.client.custom.ReviewItemHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
    * @param service
    * @param feedback
@@ -87,7 +87,8 @@ public abstract class FlexListLayout implements RequiresResize {
     currentExerciseVPanel.addStyleName("floatLeftList");
     bottomRow.add(currentExerciseVPanel);
 
-    FlexSectionExerciseList widgets = makeNPFExerciseList(topRow, currentExerciseVPanel, instanceName, ul.getUniqueID());
+    long uniqueID = ul == null ? -1 : ul.getUniqueID();
+    FlexSectionExerciseList widgets = makeNPFExerciseList(topRow, currentExerciseVPanel, instanceName, uniqueID);
     npfExerciseList = widgets;
 
     Widget exerciseListOnLeftSide = npfExerciseList.getExerciseListOnLeftSide(controller.getProps());
@@ -142,7 +143,7 @@ public abstract class FlexListLayout implements RequiresResize {
   @Override
   public void onResize() {
     if (npfExerciseList != null) {
-      //System.out.println(getClass() + " : onResize " + npfExerciseList.instance);
+      System.out.println(getClass() + " : onResize " + npfExerciseList.instance);
       npfExerciseList.onResize();
     }
   }

@@ -31,6 +31,7 @@ import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Created with IntelliJ IDEA.
@@ -41,7 +42,7 @@ import java.util.Collection;
  */
 public class NPFExercise extends GoodwaveExercisePanel {
   private static final String ADD_ITEM = "Add Item to List";
-  public static final String ITEM_ALREADY_ADDED = "Item already added to your list(s)";
+  private static final String ITEM_ALREADY_ADDED = "Item already added to your list(s)";
 
   private DropdownButton addToList;
   private int activeCount = 0;
@@ -53,7 +54,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
    * @param screenPortion
    * @param addKeyHandler
    * @param instance
-   * @see NPFHelper#setFactory(mitll.langtest.client.list.PagingExerciseList, String, long)
+   * @see NPFHelper#setFactory(mitll.langtest.client.list.PagingExerciseList, String, boolean)
    */
   NPFExercise(CommonExercise e, ExerciseController controller, ListInterface listContainer, float screenPortion,
               boolean addKeyHandler, String instance) {
@@ -105,11 +106,8 @@ public class NPFExercise extends GoodwaveExercisePanel {
   }
 
   /**
-   * @seex #getEntry(String, com.google.gwt.user.client.ui.Widget, mitll.langtest.shared.ExerciseAnnotation)
    * @param popupButton
-   * @paramx alreadyMarkedCorrect
    * @param popup
-   * @paramx comment
    * @param textEntry
    * @return
    */
@@ -169,11 +167,9 @@ public class NPFExercise extends GoodwaveExercisePanel {
    * @paramx clearButton
    * @return
    */
-  private DecoratedPopupPanel makePopupAndButton(/*Button commentButton,*/ TextBox commentEntryText) {
+  private DecoratedPopupPanel makePopupAndButton(TextBox commentEntryText) {
     final DecoratedPopupPanel commentPopup = new DecoratedPopupPanel();
     commentPopup.setAutoHideEnabled(true);
-    //commentPopup.configure(commentEntryText, commentButton, clearButton);
-    // commentPopup.setField(field);
 
     Panel hp = new HorizontalPanel();
     hp.add(commentEntryText);
@@ -230,7 +226,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
   @Override
   public void wasRevealed() { populateListChoices(exercise, controller, addToList);  }
 
-  private Collection<UserList> listsForUser;
+  private Collection<UserList> listsForUser = Collections.emptyList();
   /**
    * Ask server for the set of current lists for this user.
    *
