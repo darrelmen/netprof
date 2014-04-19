@@ -96,75 +96,15 @@ class SimpleChapterNPFHelper implements RequiresResize {
     if (loadExercises) {
       rememberAndLoadFirst();
     }
-    //setupContent(hp);
     return hp;
   }
-
-  /**
-   * Left and right components
-   * @paramx ul
-   * @param instanceName
-   * @return
-   */
-/*
-  private Panel doInternalLayout(String instanceName) {
-    //System.out.println(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
-
-    Panel hp = new HorizontalPanel();
-    hp.getElement().setId("internalLayout_Row");
-
-    Panel left = new SimplePanel();
-    left.getElement().setId("internalLayout_LeftCol");
-    left.addStyleName("floatLeft");
-
-    hp.add(left);
-
-    npfContentPanel = getRightSideContent( instanceName);
-
-    left.add(npfExerciseList.getExerciseListOnLeftSide(controller.getProps()));
-
-    hp.add(npfContentPanel);
-   // npfExerciseList = flexListLayout.npfExerciseList;
-
-    return hp;
-  }
-*/
 
   private FlexListLayout flexListLayout;
 
-
-  protected Panel doInternalLayout(/*UserList ul, */String instanceName) {
-    // System.out.println(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
+  protected Panel doInternalLayout(String instanceName) {
     Panel widgets = flexListLayout.doInternalLayout(null, instanceName);
     npfExerciseList = flexListLayout.npfExerciseList;
     return widgets;
-  }
-
-/*  private Panel getRightSideContent( String instanceName) {
-    Panel npfContentPanel = new SimplePanel();
-    npfContentPanel.addStyleName("floatRight");
-    npfContentPanel.getElement().setId("internalLayout_RightContent");
-
-    npfExerciseList = makeNPFExerciseList(npfContentPanel, instanceName + "_simple");
-    return npfContentPanel;
-  }*/
-
-  /**
-   * @see #doNPF
-   * @param right
-   * @param instanceName
-   * @return
-   */
-  private PagingExerciseList makeNPFExerciseList(Panel right, String instanceName) {
-    final PagingExerciseList exerciseList = makeExerciseList(right, instanceName);
-    setFactory(exerciseList);
-    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-      @Override
-      public void execute() {
-        exerciseList.onResize();
-      }
-    });
-    return exerciseList;
   }
 
   /**
@@ -174,78 +114,17 @@ class SimpleChapterNPFHelper implements RequiresResize {
    */
   private void rememberAndLoadFirst() {
     System.out.println(getClass() + ".rememberAndLoadFirst : for ");
-    //npfExerciseList.rememberAndLoadFirst(new ArrayList<CommonShell>(ul.getExercises()));
     npfExerciseList.reload();
   }
 
-/*
-  private Panel setupContent(Panel hp) {
-    return npfContentPanel;
-  }
-*/
-
-  private PagingExerciseList makeExerciseList(final Panel right, final String instanceName) {
-    //System.out.println(getClass() + ".makeExerciseList : instanceName " + instanceName);
-    return new PagingExerciseList(right, service, feedback, null, controller, false, false,
-      true, instanceName) {
-      @Override
-      protected void onLastItem() {
-        new ModalInfoDialog("Complete", "List complete!", new HiddenHandler() {
-          @Override
-          public void onHidden(HiddenEvent hiddenEvent) {
-            reloadExercises();
-          }
-        });
-      }
-    };
-  }
-
-
- // private FlexListLayout flexListLayout;
-
-/*
-  @Override
-  public void onResize() {
-    if (flexListLayout != null) {
-      flexListLayout.onResize();
-    } else if (npfExerciseList != null) {
-      npfExerciseList.onResize();
-    } else {
-      System.err.println("not sending resize event - flexListLayout is null?");
-    }
-  }
-*/
-
-  /**
-   * @see #makeNPFExerciseList
-   * @param exerciseList
-   * @paramx instanceName
-   * @paramx showQC
-   */
-  private void setFactory(final PagingExerciseList exerciseList) {
-    exerciseList.setFactory(getFactory(exerciseList), userManager, 1);
-  }
-
-  private ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
+  protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
     return new ExercisePanelFactory(service, feedback, controller, exerciseList) {
       @Override
       public Panel getExercisePanel(CommonExercise e) {
-
         return new WaveformExercisePanel(e, service, feedback, controller, exerciseList);
-
       }
     };
   }
-
-  /**
-   * @see #doNPF
-   * @return
-   */
-  //private Panel getNpfContentPanel() { return npfContentPanel; }
-
-/*  @Override
-  public void onResize() { if (npfContentPanel != null) {  npfExerciseList.onResize(); } }*/
-
 
   @Override
   public void onResize() {
