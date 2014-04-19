@@ -33,7 +33,6 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserList;
 
@@ -62,7 +61,7 @@ public class Navigation extends TabContainer implements RequiresResize {
   private static final String PRACTICE1 = "practice";
   private static final String ADD_OR_EDIT_ITEM = "Add/Edit Item";
   private static final String ADD_DELETE_EDIT_ITEM = "Fix Defects";
-  private static final String POSSIBLE_DEFECTS = "Possible defects";
+  private static final String POSSIBLE_DEFECTS = "Review";
   private static final String ITEMS_WITH_COMMENTS = "Items with comments";
   private static final String LEARN_PRONUNCIATION = "Learn Pronunciation";
   private static final String REVIEW1 = "Defects";
@@ -95,6 +94,7 @@ public class Navigation extends TabContainer implements RequiresResize {
   private static final String EDIT_ITEM = "editItem";
   private static final String LEARN = "learn";
   public static final String ATTENTION_LL = "Attention LL";
+  public static final String RECORD_AUDIO = "Record Audio";
 
   private final ExerciseController controller;
   private final LangTestDatabaseAsync service;
@@ -108,12 +108,13 @@ public class Navigation extends TabContainer implements RequiresResize {
   private EditItem editItem;
 
   private ChapterNPFHelper defectHelper;
+  private SimpleChapterNPFHelper recorderHelper;
   private ReviewItemHelper reviewItem;
 
   private final KeyStorage storage;
 
   /**
-   *  @see mitll.langtest.client.LangTest#resetClassroomState()
+   *  @see mitll.langtest.client.LangTest#populateRootPanel()
    * @param service
    * @param userManager
    * @param controller
@@ -132,7 +133,9 @@ public class Navigation extends TabContainer implements RequiresResize {
     avpHelper = new AVPHelper(service, feedback, userManager, controller);
 
     //if (controller.isReviewMode()) {
-      defectHelper = new ChapterNPFHelper(service, feedback, userManager, controller);
+    defectHelper = new ChapterNPFHelper(service, feedback, userManager, controller, true);
+    recorderHelper = new SimpleChapterNPFHelper(service, feedback, userManager, controller);
+
       reviewItem = new ReviewItemHelper(service, feedback, userManager, controller, null, predefinedContentList, npfHelper);
    // }
   //  else {
@@ -143,7 +146,7 @@ public class Navigation extends TabContainer implements RequiresResize {
   /**
    * @return
    * @param secondAndThird
-   * @see mitll.langtest.client.LangTest#resetClassroomState()
+   * @see mitll.langtest.client.LangTest#populateRootPanel()
    */
   public Widget getNav(final Panel secondAndThird) {
   //  Panel container = new FlowPanel();
@@ -164,7 +167,7 @@ public class Navigation extends TabContainer implements RequiresResize {
   private TabPanel tabPanel;
   private TabAndContent yourStuff, othersStuff;
   private TabAndContent browse, chapters, create;
-  private TabAndContent review, commented, attention;
+  private TabAndContent review, commented, attention, recorderTab;
   private List<TabAndContent> tabs = new ArrayList<TabAndContent>();
   private Panel chapterContent;
 
@@ -204,28 +207,29 @@ public class Navigation extends TabContainer implements RequiresResize {
     return tabPanel;    // TODO - consider how to tell panels when they are hidden by tab changes
   }
 
-//  private enum USER_STATES { NORMAL, REVIEW, RECORDER }
- // private USER_STATES state;
-
-  private boolean addTabs(Panel contentForChaptersTab) {
-    //int num = tabPanel.getSelectedTab()
+  /**
+   *
+   * @param contentForChaptersTab the standard npf content
+   * @return
+   */
+  private void addTabs(Panel contentForChaptersTab) {
     tabPanel.clear();
 
-    boolean isRecorder = controller.getAudioType().equals(Result.AUDIO_TYPE_RECORDER);// hack - do this better
+  //  boolean isRecorder = controller.getAudioType().equals(Result.AUDIO_TYPE_RECORDER);// hack - do this better
 
     tabs.clear();
     nameToTab.clear();
     nameToIndex.clear();
 
     // your list tab
-    if (!isRecorder) {
+   // if (!isRecorder) {
       yourStuff = makeFirstLevelTab(tabPanel, IconType.FOLDER_CLOSE, YOUR_LISTS);
       yourStuff.tab.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
           checkAndMaybeClearTab(YOUR_LISTS);
           refreshViewLessons(true, false);
-          controller.logEvent(yourStuff.tab.asWidget(), "Tab", "", YOUR_LISTS);
+          logEvent(yourStuff,YOUR_LISTS);
         }
       });
 
@@ -236,8 +240,7 @@ public class Navigation extends TabContainer implements RequiresResize {
         public void onClick(ClickEvent event) {
           checkAndMaybeClearTab(OTHERS_LISTS);
           refreshViewLessons(false, true);
-          controller.logEvent(othersStuff.tab.asWidget(), "Tab", "", OTHERS_LISTS);
-
+          logEvent(othersStuff, OTHERS_LISTS);
         }
       });
 
@@ -247,9 +250,8 @@ public class Navigation extends TabContainer implements RequiresResize {
       create.tab.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          //  checkAndMaybeClearTab(CREATE);
           createListDialog.doCreate(create.content);
-          controller.logEvent(create.tab.asWidget(), "Tab", "", CREATE);
+          logEvent(create,CREATE);
         }
       });
 
@@ -259,35 +261,32 @@ public class Navigation extends TabContainer implements RequiresResize {
         @Override
         public void onClick(ClickEvent event) {
           checkAndMaybeClearTab(BROWSE);
-          controller.logEvent(browse.tab.asWidget(), "Tab", "", BROWSE);
+          logEvent(browse,BROWSE);
           viewBrowse();
         }
       });
-    }
+  //  }
 
     // chapter tab
-    // final TabAndContent chapters = makeFirstLevelTab(tabPanel, combinedMode ? IconType.LIGHTBULB : IconType.TH_LIST, !combinedMode ? CHAPTERS : LEARN_PRONUNCIATION);
     chapters = makeFirstLevelTab(tabPanel, IconType.TH_LIST, CHAPTERS);
     chapters.content.add(contentForChaptersTab);
     chapters.tab.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         checkAndMaybeClearTab(CHAPTERS);
-        controller.logEvent(chapters.tab.asWidget(), "Tab", "", CHAPTERS);
+        logEvent(chapters,CHAPTERS);
       }
     });
 
-    if (controller.isReviewMode()) {
+    if (controller.getPermissions().contains(User.Permission.QUALITY_CONTROL)) {
       review = makeFirstLevelTab(tabPanel, IconType.EDIT, REVIEW1);
       review.content.getElement().setId("viewReview_contentPanel");
-
       review.tab.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
           checkAndMaybeClearTab(REVIEW1);
           viewReview(review.content);
-          controller.logEvent(review.tab.asWidget(), "Tab", "", REVIEW1);
-
+          logEvent(review,REVIEW1);
         }
       });
 
@@ -297,7 +296,7 @@ public class Navigation extends TabContainer implements RequiresResize {
         public void onClick(ClickEvent event) {
           checkAndMaybeClearTab(COMMENTS);
           viewComments(commented.content);
-          controller.logEvent(commented.tab.asWidget(), "Tab", "", COMMENTS);
+          logEvent(commented,COMMENTS);
         }
       });
 
@@ -308,12 +307,29 @@ public class Navigation extends TabContainer implements RequiresResize {
         public void onClick(ClickEvent event) {
           checkAndMaybeClearTab(ATTENTION_LL);
           viewAttention(attention.content);
-          controller.logEvent(attention.tab.asWidget(), "Tab", "", ATTENTION_LL);
+          logEvent(attention,ATTENTION_LL);
+        }
+      });
+    }
+    if (controller.getPermissions().contains(User.Permission.RECORD_AUDIO)) {
+      recorderTab = makeFirstLevelTab(tabPanel, IconType.EDIT, RECORD_AUDIO);
+      recorderTab.content.getElement().setId("recorder_contentPanel");
+      recorderTab.tab.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          checkAndMaybeClearTab(RECORD_AUDIO);
+          //viewReview(recorderTab.content);
+          recorderHelper.showNPF(recorderTab, "record_Audio", false);
+          logEvent(recorderTab,RECORD_AUDIO);
         }
       });
     }
 
-    return isRecorder;
+   // return isRecorder;
+  }
+
+  protected void logEvent(TabAndContent yourStuff, String context) {
+    controller.logEvent(yourStuff.tab.asWidget(), "Tab", "", context);
   }
 
   Map<String,TabAndContent> nameToTab = new HashMap<String, TabAndContent>();
@@ -325,12 +341,6 @@ public class Navigation extends TabContainer implements RequiresResize {
     nameToTab.put(label,tabAndContent);
     return tabAndContent;
   }
-
-/*  private int getTabIndexFor(String tabName) {
-    Integer integer = nameToIndex.get(tabName);
-    if (integer == null) return -1;
-    else return integer;
-  }*/
 
   private int getSafeTabIndexFor(String tabName) {
     Integer integer = nameToIndex.get(tabName);
@@ -365,15 +375,15 @@ public class Navigation extends TabContainer implements RequiresResize {
   public void showInitialState() {
     final int user = userManager.getUser();
 
-    boolean isRecorder = addTabs(chapterContent);
+    /*boolean isRecorder =*/ addTabs(chapterContent);
 
     //System.out.println("\n\n\nshowInitialState show initial state for " + user + " : getting user lists " + controller.isReviewMode());
     String value = storage.getValue(CLICKED_TAB);
     if (value.isEmpty()) {   // no previous tab
-      if (isRecorder) {
+/*      if (isRecorder) {
         tabPanel.selectTab(getSafeTabIndexFor(CHAPTERS));
       }
-      else {
+      else {*/
         service.getListsForUser(user, true, true, new AsyncCallback<Collection<UserList>>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -396,7 +406,7 @@ public class Navigation extends TabContainer implements RequiresResize {
             }
           }
         });
-      }
+  //    }
     }
     else {
       selectPreviousTab(value);
@@ -441,11 +451,8 @@ public class Navigation extends TabContainer implements RequiresResize {
    * @param onlyVisited
    */
   private void showMyLists(boolean onlyCreated, boolean onlyVisited) {
- /*   if (!nameToIndex.containsKey(YOUR_LISTS)) {
-      return; //todo why could this happen?
-    }*/
     String value = storage.getValue(CLICKED_TAB);
-    System.out.println("showMyLists " + value + " created " + onlyCreated + " visited " + onlyVisited);
+//    System.out.println("showMyLists " + value + " created " + onlyCreated + " visited " + onlyVisited);
     if (!value.isEmpty()) {
       if (value.equals(YOUR_LISTS)) {
         onlyCreated = true;
@@ -529,8 +536,7 @@ public class Navigation extends TabContainer implements RequiresResize {
     final Panel child = getContentChild(contentPanel, "defectReview_contentPanel");
     service.getDefectList(new AsyncCallback<UserList>() {
       @Override
-      public void onFailure(Throwable caught) {
-      }
+      public void onFailure(Throwable caught) {}
 
       @Override
       public void onSuccess(UserList result) {
@@ -685,17 +691,12 @@ public class Navigation extends TabContainer implements RequiresResize {
     if (ul.getCreator().getId() != user) {
       service.addVisitor(ul.getUniqueID(), user, new AsyncCallback<Void>() {
         @Override
-        public void onFailure(Throwable caught) {
-          //service.logEvent();
-        }
+        public void onFailure(Throwable caught) {}
 
         @Override
         public void onSuccess(Void result) {}
       });
     }
-   // else {
-      //System.out.println("addVisitor : not visiting own list..." + ul.getID());
-  //  }
   }
 
   /**
@@ -740,7 +741,6 @@ public class Navigation extends TabContainer implements RequiresResize {
          // System.out.println("getListOperations : got click on practice");
           avpHelper.showNPF(ul, fpractice, PRACTICE1, true);
           controller.logEvent(fpractice.tab,"Tab","UserList_"+ul.getID(),PRACTICE1);
-
         }
       });
     }
