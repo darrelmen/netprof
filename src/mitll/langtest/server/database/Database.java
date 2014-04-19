@@ -12,6 +12,7 @@ import java.sql.Connection;
 public interface Database {
   Connection getConnection();
   void closeConnection(Connection connection);
+  void logEvent(String exid, String context, long userid);
 
   String TIME = "time";
   String EXID = "exid";
