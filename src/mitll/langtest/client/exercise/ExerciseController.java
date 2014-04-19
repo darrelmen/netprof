@@ -77,7 +77,6 @@ public interface ExerciseController {
   void logMessageOnServer(String message, String prefix);
 
   StartupInfo getStartupInfo();
-  //boolean gotMicPermission();
   EventLogger getButtonFactory();
   void register(Button button, String exid);
 
