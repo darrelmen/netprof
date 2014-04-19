@@ -691,9 +691,9 @@ public class DatabaseImpl implements Database {
 
   public long addUser(HttpServletRequest request,
                       int age, String gender, int experience,
-                      String nativeLang, String dialect, String userID) {
+                      String nativeLang, String dialect, String userID, Collection<User.Permission> permissions) {
     String ip = getIPInfo(request);
-    return addUser(age, gender, experience, ip, nativeLang, dialect, userID);
+    return addUser(age, gender, experience, ip, nativeLang, dialect, userID, permissions);
   }
 
 
@@ -701,7 +701,9 @@ public class DatabaseImpl implements Database {
     long l;
     if ((l = userDAO.userExists(user.getUserID())) == -1) {
       logger.debug("addUser " + user);
-       l = userDAO.addUser(user.getAge(), user.getGender() == 0 ? UserDAO.MALE : UserDAO.FEMALE, user.getExperience(), user.getIpaddr(), user.getNativeLang(), user.getDialect(), user.getUserID(), false);
+       l = userDAO.addUser(user.getAge(), user.getGender() == 0 ? UserDAO.MALE : UserDAO.FEMALE,
+         user.getExperience(), user.getIpaddr(), user.getNativeLang(), user.getDialect(), user.getUserID(), false,
+         user.getPermissions());
     }
    // userListManager.createFavorites(l);
     return l;
@@ -717,13 +719,14 @@ public class DatabaseImpl implements Database {
    * @param experience
    * @param ipAddr user agent info
    * @param dialect speaker dialect
+   * @param permissions
    * @return assigned id
    * @see mitll.langtest.server.LangTestDatabaseImpl#addUser
    */
   public long addUser(int age, String gender, int experience, String ipAddr,
-                       String nativeLang, String dialect, String userID) {
+                      String nativeLang, String dialect, String userID, Collection<User.Permission> permissions) {
     logger.debug("addUser " + userID);
-    long l = userDAO.addUser(age, gender, experience, ipAddr, nativeLang, dialect, userID, false);
+    long l = userDAO.addUser(age, gender, experience, ipAddr, nativeLang, dialect, userID, false, permissions);
     userListManager.createFavorites(l);
     return l;
   }
@@ -790,6 +793,11 @@ public class DatabaseImpl implements Database {
 
   public void logEvent(String id, String widgetID, String exid, String context, long userid, String hitID) {
      eventDAO.add(new Event(id,widgetID,exid,context,userid,-1, hitID));
+  }
+
+  public void logEvent(String exid, String context, long userid) {
+    if (context.length()>100) context = context.substring(0,100).replace("\n"," ");
+    logEvent("unknown","server",exid,context,userid,"unknown");
   }
 
   public List<Event> getEvents() {
@@ -1042,7 +1050,7 @@ public class DatabaseImpl implements Database {
   public UserListManager getUserListManager() { return userListManager; }
 
   /**
-   * @see mitll.langtest.client.custom.ReviewEditableExercise#duplicateExercise()
+   * @see mitll.langtest.client.custom.ReviewEditableExercise#duplicateExercise
    * @param exercise
    * @return
    */
