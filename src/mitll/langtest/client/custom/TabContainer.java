@@ -7,9 +7,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Created by go22670 on 2/10/14.
  */
