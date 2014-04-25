@@ -9,6 +9,7 @@ import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.STATE;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
@@ -169,9 +170,9 @@ public class UserListManager {
     for (String exid : reviewed) {   // incorrect - could be defect or comment for now
       if (exerciseToCreator.keySet().contains(exid)) {
         ReviewedDAO.StateCreator stateCreator = stateMap.get(exid);
-        if (stateCreator.state.equals(CommonShell.STATE.UNSET)) { // only happen when we have an old db
-          stateMap.put(exid, new ReviewedDAO.StateCreator(CommonShell.STATE.DEFECT, stateCreator.creatorID));
-          reviewedDAO.setState(exid, CommonShell.STATE.DEFECT, stateCreator.creatorID);
+        if (stateCreator.state.equals(STATE.UNSET)) { // only happen when we have an old db
+          stateMap.put(exid, new ReviewedDAO.StateCreator(STATE.DEFECT, stateCreator.creatorID));
+          reviewedDAO.setState(exid, STATE.DEFECT, stateCreator.creatorID);
           count++;
         }
       }
@@ -364,7 +365,7 @@ public class UserListManager {
 
     Set<String> defectIds = new HashSet<String>();
     for (Map.Entry<String, ReviewedDAO.StateCreator> pair : exerciseToState.entrySet()) {
-      if (pair.getValue().state.equals(CommonShell.STATE.ATTN_LL)) {
+      if (pair.getValue().state.equals(STATE.ATTN_LL)) {
         defectIds.add(pair.getKey());
       }
     }
@@ -388,7 +389,7 @@ public class UserListManager {
     Map<String, ReviewedDAO.StateCreator> exerciseToState = reviewedDAO.getExerciseToState();
 
     for (Map.Entry<String, ReviewedDAO.StateCreator> pair : exerciseToState.entrySet()) {
-      if (pair.getValue().state.equals(CommonShell.STATE.DEFECT)) {
+      if (pair.getValue().state.equals(STATE.DEFECT)) {
         defectIds.add(pair.getKey());
       }
     }
@@ -647,7 +648,7 @@ public class UserListManager {
     if (!annotationDAO.hasAnnotation(exerciseID, field, INCORRECT, comment)) {
       long defectDetector = userDAO.getDefectDetector();
       addAnnotation(exerciseID, field, INCORRECT, comment, defectDetector);
-      markState(exerciseID, CommonShell.STATE.DEFECT, defectDetector);
+      markState(exerciseID, STATE.DEFECT, defectDetector);
     }
   }
 
@@ -691,7 +692,7 @@ public class UserListManager {
    * @param state
    * @param creatorID
    */
-  public void markState(String id, CommonShell.STATE state, long creatorID) {
+  public void markState(String id, STATE state, long creatorID) {
     //logger.debug("mark state " + id + " = " + state + " by " +creatorID);
     CommonExercise predefExercise = userExerciseDAO.getPredefExercise(id);
 
@@ -699,13 +700,13 @@ public class UserListManager {
       predefExercise = userExerciseDAO.getWhere(id);
     }
     if (predefExercise != null) {
-      if (state.equals(CommonShell.STATE.ATTN_LL)) {
+      if (state.equals(STATE.ATTN_LL)) {
         setSecondState(predefExercise, state, creatorID);
       }
       else {
         setState(predefExercise, state, creatorID);
       }
-      if (state.equals(CommonShell.STATE.FIXED)) {
+      if (state.equals(STATE.FIXED)) {
         markAllFieldsFixed(predefExercise, creatorID);
       }
     } else {
@@ -713,12 +714,12 @@ public class UserListManager {
     }
   }
 
-  public void setState(CommonShell shell, CommonShell.STATE state, long creatorID) {
+  public void setState(CommonShell shell, STATE state, long creatorID) {
     shell.setState(state);
     reviewedDAO.setState(shell.getID(), state, creatorID);
   }
 
-  public void setSecondState(CommonShell shell, CommonShell.STATE state, long creatorID) {
+  public void setSecondState(CommonShell shell, STATE state, long creatorID) {
     shell.setSecondState(state);
     secondStateDAO.setState(shell.getID(), state, creatorID);
   }
@@ -753,7 +754,7 @@ public class UserListManager {
    * @param userID
    */
   public void markCorrectness(String id, boolean correct, long userID) {
-    markState(id, correct ? CommonShell.STATE.APPROVED : CommonShell.STATE.DEFECT, userID);
+    markState(id, correct ? STATE.APPROVED : STATE.DEFECT, userID);
   }
 
   public boolean deleteList(long id) {
