@@ -148,7 +148,10 @@ public class PagingExerciseList extends ExerciseList {
 
   private CommonShell getFirstNotCompleted() {
     for (CommonShell es : pagingContainer.getExercises()) {
-      if (es.getState().equals(CommonShell.STATE.UNSET)) return es;
+      CommonShell.STATE state = es.getState();
+      if (state != null && state.equals(CommonShell.STATE.UNSET)) {
+        return es;
+      }
     }
     return super.findFirstExercise();
   }
