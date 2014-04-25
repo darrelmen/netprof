@@ -60,9 +60,6 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   private static final String REF_AUDIO = "refAudio";
   private static final String APPROVED = "Approve Item";
   private static final String NO_AUDIO_RECORDED = "No Audio Recorded.";
-/*  private static final String SLOW_SPEED_AUDIO_EXAMPLE = "Slow speed audio example";
-  private static final String REGULAR_SPEED_AUDIO_EXAMPLE = "Regular speed audio example";
-  private static final String REFERENCE = "Reference";*/
   private static final String COMMENT = "Comment";
 
   private static final String COMMENT_TOOLTIP = "Comments are optional.";
