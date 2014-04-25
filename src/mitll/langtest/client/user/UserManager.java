@@ -174,13 +174,14 @@ public class UserManager {
    * @see UserDialog#setRecordingOrder()
    * @param val
    */
-  public void setShowUnansweredFirst(boolean val) {
+/*  public void setShowUnansweredFirst(boolean val) {
     addBinaryKey(val, getUnansweredKey());
    // userNotification.setShowUnansweredFirst(val);
 
     //getShowUnanswered();
-  }
+  }*/
 
+/*
   public void setShowRerecord(boolean val) {
     String showRerecordKey = getShowRerecordKey();
     addBinaryKey(val, showRerecordKey);
@@ -188,6 +189,7 @@ public class UserManager {
 
     //getBinaryKey(showRerecordKey);
   }
+*/
 
   private void addBinaryKey(boolean val, String unansweredKey) {
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
@@ -201,11 +203,13 @@ public class UserManager {
     }
   }*/
 
+/*
   private boolean getShowUnanswered() {
     return getBinaryKey(getUnansweredKey());
   }
+*/
 
-  private boolean getBinaryKey(String unansweredKey) {
+/*  private boolean getBinaryKey(String unansweredKey) {
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
 
     boolean showUnansweredFirst = false;
@@ -218,14 +222,16 @@ public class UserManager {
       //System.out.println("===> no key " +unansweredKey);
     }
     return showUnansweredFirst;
-  }
+  }*/
 
+/*
   private String getUnansweredKey() {
     return getShowUnansweredKey() + "_" +getUserID();
   }
   private String getShowRerecordKey() {
     return getShowRerecordRoot() + "_" +getUserID();
   }
+*/
 
   /**
    * @return id of user
@@ -293,12 +299,14 @@ public class UserManager {
   private String getExpires() {
     return appTitle + ":" + "expires";
   }
+/*
   private String getShowUnansweredKey() {
     return appTitle + ":" + "showUnanswered";
   }
   private String getShowRerecordRoot() {
     return appTitle + ":" + "showRerecord";
   }
+*/
 
   /**
    * @see #getUser()
@@ -356,22 +364,6 @@ public class UserManager {
       userID = NO_USER_SET;
     }
   }
-
-  /**
-   * @see mitll.langtest.client.LangTest#doDataCollectAdminView
-   * @see #loginDifferentTypes()
-   */
-/*  public void teacherLogin() {
-    int user = getUser();
-    if (user != NO_USER_SET) {
-      System.out.println("teacherLogin: got cached user : " + user);
-      rememberAudioType();
-      userNotification.gotUser(user);
-    } else {
-      DataCollectorDialog dataCollectorDialog = new DataCollectorDialog(service, props, userNotification, this);
-      dataCollectorDialog.displayTeacherLogin("Data Collector Login");
-    }
-  }*/
 
   /**
    * TODO : move cookie manipulation to separate class
