@@ -9,14 +9,15 @@ import com.github.gwtbootstrap.client.ui.NavPills;
 import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.constants.BaseIconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -45,24 +46,18 @@ import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.MiniUser;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Mainly delegates recording to the {@link mitll.langtest.client.recorder.SimpleRecordPanel}.
  * User: GO22670
  * Date: 5/11/12
  * Time: 11:51 AM
  * To change this template use File | Settings | File Templates.
  */
 public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel, RequiresResize, ProvidesResize {
-  // protected static final String NATIVE_REFERENCE_SPEAKER = "Native Reference Speaker";
-  //private static final String USER_RECORDER = "User Recorder";
   private static final String REFERENCE = " Reference";
   private static final String RECORD_YOURSELF = "Record Yourself";
   private static final String RELEASE_TO_STOP = "Release to Stop";
@@ -174,15 +169,12 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * @param screenPortion
    */
   protected void addUserRecorder(LangTestDatabaseAsync service, ExerciseController controller, Panel toAddTo, float screenPortion) {
-    Widget answerWidget = getAnswerWidget(service, controller, 1, screenPortion);
-
-   // ResizableCaptionPanel cp = new ResizableCaptionPanel(USER_RECORDER);
-   // cp.setContentWidget(answerWidget);
-    // toAddTo.add(cp);
     DivWidget div = new DivWidget();
+    Widget answerWidget = getAnswerWidget(service, controller, 1, screenPortion);
     div.add(answerWidget);
 
     addGroupingStyle(div);
+    //addGroupingStyle(answerWidget);
     toAddTo.add(div);
   }
 
@@ -190,7 +182,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     div.addStyleName("buttonGroupInset6");
   }
 
-  HorizontalPanel getUnitLessonForExercise() {
+  private HorizontalPanel getUnitLessonForExercise() {
     HorizontalPanel flow = new HorizontalPanel();
     flow.getElement().setId("getUnitLessonForExercise_unitLesson");
     flow.addStyleName("leftFiveMargin");
@@ -208,7 +200,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     if (contentAudio != null) {
       contentAudio.onResize();
     }
-    if (answerAudio != null) answerAudio.onResize();
+    if (answerAudio != null) {
+      answerAudio.onResize();
+    }
   }
 
   protected Widget getQuestionContent(CommonExercise e) {
@@ -288,16 +282,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     if (path != null) {
       path = wavToMP3(path);
     }
-    ASRScoringAudioPanel audioPanel = getAudioPanel(path);
-  //  ResizableCaptionPanel cp = new ResizableCaptionPanel(NATIVE_REFERENCE_SPEAKER);
-   // cp.setContentWidget(getAudioPanelContent(audioPanel));
-
-/*    DivWidget div = new DivWidget();
-    div.addStyleName("buttonGroupInset6");
-    div.add(audioPanel);*/
-    contentAudio = audioPanel;
+    contentAudio = getAudioPanel(path);
     contentAudio.setScreenPortion(screenPortion);
-    return audioPanel;
+    return contentAudio;
   }
 
   private ASRScoringAudioPanel getAudioPanel(String path) {
@@ -320,13 +307,13 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * @param field
    */
   protected void addIncorrectComment(final String commentToPost, final String field) {
-    System.out.println(new Date() + " : post to server " + exercise.getID() +
-      " field " + field + " commentLabel '" + commentToPost + "' is incorrect");
+/*    System.out.println(new Date() + " : post to server " + exercise.getID() +
+      " field " + field + " commentLabel '" + commentToPost + "' is incorrect");*/
     addAnnotation(field, INCORRECT, commentToPost);
   }
 
   protected void addCorrectComment(final String field) {
-    System.out.println(new Date() + " : post to server " + exercise.getID() + " field " + field + " is correct");
+  //  System.out.println(new Date() + " : post to server " + exercise.getID() + " field " + field + " is correct");
     addAnnotation(field, CORRECT, "");
   }
 
@@ -415,19 +402,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     tooltip.reconfigure();
     return tooltip;
   }
-
-/*  protected static class ResizableCaptionPanel extends CaptionPanel implements ProvidesResize, RequiresResize {
-    public ResizableCaptionPanel(String name) {
-      super(name);
-    }
-
-    public void onResize() {
-      Widget contentWidget = getContentWidget();
-      if (contentWidget instanceof RequiresResize) {
-        ((RequiresResize) contentWidget).onResize();
-      }
-    }
-  }*/
 
   /**
    * Has a answerPanel mark to indicate when the saved audio has been successfully posted to the server.
@@ -626,23 +600,16 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         Map<MiniUser, List<AudioAttribute>> malesMap   = exercise.getUserMap(true);
         Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getUserMap(false);
 
-        Dropdown dropdown = new Dropdown("Voice");
-        dropdown.addStyleName("leftFiveMargin");
-
         List<MiniUser> maleUsers   = exercise.getSortedUsers(malesMap);
         List<MiniUser> femaleUsers = exercise.getSortedUsers(femalesMap);
 
-        addChoices(rightSide, malesMap,   dropdown, maleUsers,   MALE,   !allSameDialect);
-        addChoices(rightSide, femalesMap, dropdown, femaleUsers, FEMALE, !allSameDialect);
+        NavPills container = getDropDown(rightSide, allSameDialect, malesMap, femalesMap, maleUsers, femaleUsers);
 
-        final Collection<AudioAttribute> audioAttributes1 =
-          setInitialMenuState(allSameDialect, malesMap, femalesMap, maleUsers, femaleUsers, dropdown);
+        final Collection<AudioAttribute> initialAudioChoices = maleUsers.isEmpty() ? femalesMap.get(femaleUsers.get(0)) : malesMap.get(maleUsers.get(0));
 
-        addRegularAndSlow(rightSide, audioAttributes1);
+        addRegularAndSlow(rightSide, initialAudioChoices);
 
         Panel leftAndRight = new HorizontalPanel();
-        NavPills container = new NavPills();
-        container.add(dropdown);
 
         leftAndRight.add(container);
         leftAndRight.add(rightSide);
@@ -650,15 +617,31 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       }
     }
 
-    private Collection<AudioAttribute> setInitialMenuState(boolean allSameDialect,
-                                                           Map<MiniUser, List<AudioAttribute>> malesMap,
-                                                           Map<MiniUser, List<AudioAttribute>> femalesMap,
-                                                           List<MiniUser> maleUsers, List<MiniUser> femaleUsers, Dropdown dropdown) {
-      final Collection<AudioAttribute> audioAttributes1 = maleUsers.isEmpty() ? femalesMap.get(femaleUsers.get(0)) : malesMap.get(maleUsers.get(0));
-      MiniUser first = maleUsers.isEmpty() ? femaleUsers.get(0) : maleUsers.get(0);
-      dropdown.setText(getChoiceTitle(first.isMale() ? MALE : FEMALE, first, !allSameDialect));
-      return audioAttributes1;
+    private NavPills getDropDown(Panel rightSide, boolean allSameDialect,
+                                 Map<MiniUser, List<AudioAttribute>> malesMap,
+                                 Map<MiniUser, List<AudioAttribute>> femalesMap,
+                                 List<MiniUser> maleUsers,
+                                 List<MiniUser> femaleUsers) {
+      Dropdown dropdown = new Dropdown("Choose Speaker");
+      dropdown.addStyleName("leftFiveMargin");
+      addChoices(rightSide, malesMap,   dropdown, maleUsers,   MALE,   !allSameDialect);
+      addChoices(rightSide, femalesMap, dropdown, femaleUsers, FEMALE, !allSameDialect);
+
+      // final Collection<AudioAttribute> initialAudioChoices =
+    //  setInitialMenuState(allSameDialect, maleUsers, femaleUsers, dropdown);
+      NavPills container = new NavPills();
+      container.add(dropdown);
+      container.getElement().getStyle().setMarginTop(8, Style.Unit.PX);
+      return container;
     }
+
+/*
+    private void setInitialMenuState(boolean allSameDialect,
+                                     List<MiniUser> maleUsers, List<MiniUser> femaleUsers, Dropdown dropdown) {
+      MiniUser first = maleUsers.isEmpty() ? femaleUsers.get(0) : maleUsers.get(0);
+      dropdown.setText("Choose Speaker " + getChoiceTitle(first.isMale() ? MALE : FEMALE, first, !allSameDialect));
+    }
+*/
 
     private boolean allAudioSameDialect(Collection<AudioAttribute> audioAttributes) {
       boolean allSameDialect = true;
@@ -691,7 +674,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
             List<AudioAttribute> audioAttributes = malesMap.get(male);
             addRegularAndSlow(rightSide, audioAttributes);
             dropdown.setText(getChoiceTitle(male.isMale() ? MALE : FEMALE, male,includeDialect));
-
           }
         });
         dropdown.add(widget2);
