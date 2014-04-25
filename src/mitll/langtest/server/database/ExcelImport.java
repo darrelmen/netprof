@@ -73,6 +73,9 @@ public class ExcelImport implements ExerciseDAO {
  // private boolean collectSynonyms = true;
   boolean addDefects;
   //private AudioDAO audioDAO;
+  private int unitIndex;
+  private int chapterIndex;
+  private int weekIndex;
 
   /**
    *
@@ -104,6 +107,9 @@ public class ExcelImport implements ExerciseDAO {
     this.skipSemicolons = serverProps.shouldSkipSemicolonEntries();
     this.audioOffset = serverProps.getAudioOffset();
     this.userListManager = userListManager;
+    this.unitIndex = serverProps.getUnitChapterWeek()[0];
+    this.chapterIndex = serverProps.getUnitChapterWeek()[1];
+    this.weekIndex = serverProps.getUnitChapterWeek()[2];
   //  collectSynonyms = this.serverProps.getCollectSynonyms();
 
 /*    logger.debug("\n\n\n\n ---> ExcelImport : config " + relativeConfigDir +
@@ -355,9 +361,6 @@ public class ExcelImport implements ExerciseDAO {
     int colIndexOffset = -1;
 
     int transliterationIndex = -1;
-    int unitIndex = -1;
-    int chapterIndex = -1;
-    int weekIndex = -1;
     int weightIndex = -1;
     int meaningIndex = -1;
     int idIndex = -1;
@@ -374,6 +377,7 @@ public class ExcelImport implements ExerciseDAO {
     try {
       Iterator<Row> iter = sheet.rowIterator();
       Map<Integer, CellRangeAddress> rowToRange = getRowToRange(sheet);
+      boolean gotUCW = unitIndex != -1;
       for (; iter.hasNext(); ) {
         Row next = iter.next();
         if (id > maxExercises) break;
@@ -399,6 +403,17 @@ public class ExcelImport implements ExerciseDAO {
               colIndexOffset = columns.indexOf(col);
             } else if (colNormalized.contains("transliteration")) {
               transliterationIndex = columns.indexOf(col);
+            } else if (gotUCW) {
+              if(columns.indexOf(col) == unitIndex){
+                  predefinedTypeOrder.add(col);
+                  unitName = col;
+              } else if(columns.indexOf(col) == chapterIndex){
+                  predefinedTypeOrder.add(col);
+                  chapterName = col;
+              } else if(columns.indexOf(col) == weekIndex){
+                  predefinedTypeOrder.add(col);
+                  weekName = col;
+              }
             } else if (colNormalized.contains("unit") || colNormalized.contains("book")) {
               unitIndex = columns.indexOf(col);
               predefinedTypeOrder.add(col);
@@ -553,9 +568,6 @@ public class ExcelImport implements ExerciseDAO {
     int colIndexOffset = -1;
 
     int transliterationIndex = -1;
-    int unitIndex = -1;
-    int chapterIndex = -1;
-    int weekIndex = -1;
     int weightIndex = -1;
     int meaningIndex = -1;
     int idIndex = -1;
@@ -569,6 +581,7 @@ public class ExcelImport implements ExerciseDAO {
     try {
       Iterator<Row> iter = sheet.rowIterator();
       //Map<Integer, CellRangeAddress> rowToRange = getRowToRange(sheet);
+      boolean gotUCW = unitIndex != -1;
       for (; iter.hasNext(); ) {
         Row next = iter.next();
         Map<String,String> fieldToDefect = new HashMap<String, String>();
@@ -591,6 +604,17 @@ public class ExcelImport implements ExerciseDAO {
               colIndexOffset = columns.indexOf(col);
             } else if (colNormalized.contains("transliteration")) {
               transliterationIndex = columns.indexOf(col);
+            } else if (gotUCW) {
+              if(columns.indexOf(col) == unitIndex){
+                  predefinedTypeOrder.add(col);
+                  unitName = col;
+              } else if(columns.indexOf(col) == chapterIndex){
+                  predefinedTypeOrder.add(col);
+                  chapterName = col;
+              } else if(columns.indexOf(col) == weekIndex){
+                  predefinedTypeOrder.add(col);
+                  weekName = col;
+              }
             } else if (colNormalized.contains("unit") || colNormalized.contains("book")) {
               unitIndex = columns.indexOf(col);
               predefinedTypeOrder.add(col);
