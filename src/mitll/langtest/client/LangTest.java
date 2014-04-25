@@ -83,6 +83,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final String NEW_PRO_F2_PNG = "NewProF2.png";
   private static final int MAX_EXCEPTION_STRING = 300;
   private static final int MAX_CACHE_SIZE = 100;
+  private static final int NO_USER_INITIAL = -2;
 
   private ListInterface exerciseList;
   private final Label status = new Label();
@@ -92,7 +93,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private MonitoringManager monitoringManager;
   private FlashRecordPanelHeadless flashRecordPanel;
 
-  private long lastUser = -2;
+  private long lastUser = NO_USER_INITIAL;
   private String audioType = Result.AUDIO_TYPE_UNSET;
 
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
@@ -463,7 +464,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         (props.isAdminView()) ? new UsersClickHandler() : null,
         (props.isAdminView()) ? new ResultsClickHandler() : null,
         (props.isAdminView()) ? new MonitoringClickHandler() : null,
-        (props.isAdminView()) ? new EventsClickHandler() : null);
+        (props.isAdminView()) ? new EventsClickHandler() : null, permissions);
     }
 
 
@@ -680,7 +681,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     userManager.clearUser();
     exerciseList.removeCurrentExercise();
     exerciseList.clear();
-    lastUser = -2;
+    lastUser = NO_USER_INITIAL;
     modeSelect();
   }
 
@@ -708,8 +709,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (!shouldCollectAudio() || flashRecordPanel.gotPermission()) {
       reallySetFactory();
 
-      exerciseList.getExercises(userID, true);
-      exerciseList.reload();
+      boolean askedForExercises = exerciseList.getExercises(userID);
+      if (!askedForExercises && (lastUser != userID) && lastUser != NO_USER_INITIAL) {
+        System.out.println("\tdoEverythingAfterFactory : " + userID + " initially list and user now " + userID);
+
+        exerciseList.reload();
+      }
       navigation.showInitialState();
     } else {
       System.out.println("\tdoEverythingAfterFactory : " + userID + " NOT getting exercises");
