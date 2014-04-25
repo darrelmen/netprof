@@ -23,6 +23,7 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.CommonShell;
+import mitll.langtest.shared.STATE;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -73,12 +74,12 @@ public class PagingExerciseList extends ExerciseList {
   protected Set<String> getKeys() {  return pagingContainer.getKeys();  }
 
   @Override
-  public void setState(String id, CommonShell.STATE state) {
+  public void setState(String id, STATE state) {
     byID(id).setState(state);
   }
 
   @Override
-  public void setSecondState(String id, CommonShell.STATE state) {
+  public void setSecondState(String id, STATE state) {
     byID(id).setSecondState(state);
   }
 
@@ -148,8 +149,8 @@ public class PagingExerciseList extends ExerciseList {
 
   private CommonShell getFirstNotCompleted() {
     for (CommonShell es : pagingContainer.getExercises()) {
-      CommonShell.STATE state = es.getState();
-      if (state != null && state.equals(CommonShell.STATE.UNSET)) {
+      STATE state = es.getState();
+      if (state != null && state.equals(STATE.UNSET)) {
         return es;
       }
     }
