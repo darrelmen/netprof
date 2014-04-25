@@ -137,11 +137,13 @@ public class AudioDAO extends DAO {
     ResultSet rs = statement.executeQuery();
     List<AudioAttribute> results = new ArrayList<AudioAttribute>();
     Map<Long, MiniUser> miniUsers = userDAO.getMiniUsers();
+
+    logger.debug("users " + miniUsers);
+
     while (rs.next()) {
      // int uniqueID = rs.getInt(ID);
       long userID = rs.getLong(USERID);
       String exid = rs.getString(Database.EXID);
-      //int qid = rs.getInt(QID);
       Timestamp timestamp = rs.getTimestamp(Database.TIME);
       String audioRef = rs.getString(AUDIO_REF);
 
@@ -151,18 +153,13 @@ public class AudioDAO extends DAO {
       MiniUser user = miniUsers.get(userID);
       AudioAttribute audioAttr = new AudioAttribute(userID, //id
         exid, // id
-        // exid, // id
-        // qid == 1, // qid
         audioRef, // answer
         timestamp.getTime(),
         dur, type,
         user);
       if (user == null) {
-        logger.error("can't find user " + userID+ " for " + audioAttr + " in " + miniUsers.keySet());
+        //logger.error("can't find user " + userID+ " for " + audioAttr + " in " + miniUsers.keySet());
       }
-      //if (!audioRef.contains("bestAudio"))  logger.debug("audio ref " + audioRef);
-
-     // trimPathForWebPage(audioAttr);
       results.add(audioAttr);
     }
     rs.close();
