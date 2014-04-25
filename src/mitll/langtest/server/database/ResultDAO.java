@@ -33,7 +33,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * Create, drop, alter, read from the results table.
@@ -372,10 +371,10 @@ public class ResultDAO extends DAO {
    */
   private boolean areAllResultsGraded(String exerciseID, Collection<Grade> gradedResults, int expected, boolean useEnglishGrades) {
     List<Result> resultsForExercise = getAllResultsForExercise(exerciseID);
-    if (debug && !resultsForExercise.isEmpty()) {
+/*    if (debug && !resultsForExercise.isEmpty()) {
       logger.debug("for " + exerciseID + " expected " + expected +
         " grades/item before " + resultsForExercise.size() + " results, and " + gradedResults.size() + " grades");
-    }
+    }*/
     if (resultsForExercise.isEmpty()) {
       return true;
     }
