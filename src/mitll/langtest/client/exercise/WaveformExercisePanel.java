@@ -1,8 +1,6 @@
 package mitll.langtest.client.exercise;
 
 import com.github.gwtbootstrap.client.ui.Heading;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.ProvidesResize;
@@ -13,9 +11,9 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.STATE;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -153,8 +151,8 @@ public class WaveformExercisePanel extends ExercisePanel {
    */
   @Override
   public void postAnswers(ExerciseController controller, CommonExercise completedExercise) {
-    completedExercise.setState(CommonShell.STATE.RECORDED);
-    exerciseList.setState(completedExercise.getID(), CommonShell.STATE.RECORDED);
+    completedExercise.setState(STATE.RECORDED);
+    exerciseList.setState(completedExercise.getID(), STATE.RECORDED);
     exerciseList.redraw();
     exerciseList.loadNextExercise(completedExercise);
   }
