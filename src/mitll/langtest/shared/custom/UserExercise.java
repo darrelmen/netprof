@@ -6,7 +6,6 @@ import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.ExerciseShell;
 
 import java.util.Date;
