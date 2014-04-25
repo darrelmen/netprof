@@ -70,7 +70,6 @@ public class ServerProperties {
   private static final String INCLUDE_FEEDBACK = "includeFeedback";
   private static final String MAPPING_FILE = "mappingFile";
   private static final String NO_MODEL = "noModel";
-  private static final String TIER_INDEX = "tierIndex";
   public static final String VLR_PARLE_PILOT_ITEMS_TXT = "vlr-parle-pilot-items.txt";
 
   private Properties props = new Properties();
@@ -179,22 +178,6 @@ public class ServerProperties {
 
   public String getLanguage() {
     return props.getProperty(LANGUAGE, "English");
-  }
-
-  //specify this in  in config file like: tierIndex=5,4,-1. That
-  //tells us to treat (zero-indexed) column 5 like the "unit" column,
-  //column 4 like the "chapter" column, and that there isn't a "week" column
-  //--note that depending on how many unique elements are in each column, the 
-  //rows that appear on the classroom site may not be in the order 
-  //"unit,chapter,week"
-  public int[] getUnitChapterWeek() {
-    int[] parsedUCW = new int[]{-1,-1,-1};
-    String[] ucw = props.getProperty(TIER_INDEX, "-1,-1,-1").replaceAll("\\s+", "").split(",");
-    if(ucw.length != 3)
-        return parsedUCW;
-    for(int i = 0; i < 3; i++)
-        parsedUCW[i] = Integer.parseInt(ucw[i]);
-    return parsedUCW;
   }
 
   /**
