@@ -329,7 +329,8 @@ public class Exercise extends AudioExercise implements CommonExercise {
       }
       return "Exercise " + type + " " +id +  " content bytes = " + content.length() + " english '" + getEnglish() +
           "' ref sentence '" + getRefSentence() +"' audio count = " + audioAttributes1.size()+
-        " \n\tmissing user audio " + builder.toString() + " : " + questionInfo +
+        (builder.toString().isEmpty() ? "":" \n\tmissing user audio " + builder.toString()) +
+        " : " + questionInfo +
         " unit->lesson " + getUnitToValue();
     }
     else {
