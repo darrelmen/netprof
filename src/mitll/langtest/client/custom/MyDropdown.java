@@ -4,9 +4,6 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ButtonToolbar;
 import com.github.gwtbootstrap.client.ui.NavList;
 import com.github.gwtbootstrap.client.ui.base.IconAnchor;
-import com.github.gwtbootstrap.client.ui.constants.AlertType;
-import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -81,7 +78,7 @@ public class MyDropdown {
       }
     }*/
 
-  private void updateDropdownMenu(Set<String> fids) {
+/*  private void updateDropdownMenu(Set<String> fids) {
     if (!addBtn.isActive()) {
       if (addPopup == null) {
         addPopup = new PopupPanel(true);
@@ -101,9 +98,9 @@ public class MyDropdown {
         NavList theList = new NavList();
 
 
-     /*     for (ValidationFormID fid : fids) {
+     *//*     for (ValidationFormID fid : fids) {
             theList.add(createNavLink(fid.getDisplayName(), null, null, uiHandler));
-          }*/
+          }*//*
 
         addPopup.add(theList);
       }
@@ -111,7 +108,7 @@ public class MyDropdown {
     } else if (addPopup != null) {
       addPopup.hide();
     }
-  }
+  }*/
 
   private class UIHandler implements ClickHandler {
 
