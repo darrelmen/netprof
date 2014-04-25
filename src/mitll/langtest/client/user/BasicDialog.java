@@ -68,9 +68,9 @@ public class BasicDialog {
   }
 
 
-  public ListBoxFormField getListBoxFormField(Panel dialogBox, String label, List<String> values) {
+/*  public ListBoxFormField getListBoxFormField(Panel dialogBox, String label, List<String> values) {
     return getListBoxFormField(dialogBox, label, getListBox2(values));
-  }
+  }*/
 
   ListBoxFormField getListBoxFormField(Panel dialogBox, String label, ListBox user) {
     addControlGroupEntry(dialogBox, label, user);
