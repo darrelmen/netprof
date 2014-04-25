@@ -50,6 +50,12 @@ public class SmallDatabaseImpl implements Database {
     }
   }
 
+
+  @Override
+  public void logEvent(String exid, String context, long userid) {
+
+  }
+
   /**
    * @param s
    * @see mitll.langtest.server.LangTestDatabaseImpl#init

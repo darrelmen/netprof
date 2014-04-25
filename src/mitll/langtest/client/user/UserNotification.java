@@ -1,5 +1,9 @@
 package mitll.langtest.client.user;
 
+import mitll.langtest.shared.User;
+
+import java.util.Collection;
+
 /**
  * Created with IntelliJ IDEA.
  * User: GO22670
@@ -8,8 +12,12 @@ package mitll.langtest.client.user;
  * To change this template use File | Settings | File Templates.
  */
 public interface UserNotification {
+
   void gotUser(long userID);
   void rememberAudioType(String audioType);
-  void setShowUnansweredFirst(boolean v);
-  void setShowRerecord(boolean v);
+  //void setShowUnansweredFirst(boolean v);
+ // void setShowRerecord(boolean v);
+  void setPermission(User.Permission permission, boolean on);
+  Collection<User.Permission> getPermissions();
+
 }
