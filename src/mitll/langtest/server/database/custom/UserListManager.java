@@ -326,7 +326,7 @@ public class UserListManager {
   }
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#addUser(int, String, int, String, String, String, String)
+   * @see mitll.langtest.server.database.DatabaseImpl#addUser(int, String, int, String, String, String, String, java.util.Collection)
    * @param userid
    * @return
    */
@@ -406,7 +406,10 @@ public class UserListManager {
     List<CommonUserExercise> onList = getReviewedUserExercises(idToUser, ids);
 
     //logger.debug("getDefectList ids size = " + allKnown.size() + " yielded " + onList.size());
-    User user = new User(-1, 89, 0, 0, "", "", false);
+    List<User.Permission> permissions = new ArrayList<User.Permission>();
+    permissions.add(User.Permission.QUALITY_CONTROL);
+
+    User user = new User(-1, 89, 0, 0, "", "", false, permissions);
     UserList userList = new UserList(userListMaginID, user, name, description, "", false);
     userList.setReview(true);
     userList.setExercises(onList);
