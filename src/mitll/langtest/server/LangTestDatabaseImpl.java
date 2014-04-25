@@ -25,6 +25,7 @@ import mitll.langtest.shared.DLIUser;
 import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.STATE;
 import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.User;
@@ -176,6 +177,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           if (exercise != null) exercises = Collections.singletonList(exercise);
         }
       }
+      else {
+        exercises = getSortedByUnitThenAlpha(exercises);
+      }
 
       return makeExerciseListWrapper(reqID, exercises, userID, role);
 
@@ -270,7 +274,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       Set<String> recordedForUser = db.getAudioDAO().getRecordedForUser(userID);
       //logger.debug("\tfound " + recordedForUser.size() + " recordings by " + userID);
       for (CommonShell shell : exerciseShells) {
-         if (recordedForUser.contains(shell.getID())) shell.setState(CommonShell.STATE.RECORDED);
+         if (recordedForUser.contains(shell.getID())) shell.setState(STATE.RECORDED);
       }
     }
     else if (role.equalsIgnoreCase(User.Permission.QUALITY_CONTROL.toString()) || role.equalsIgnoreCase(Result.AUDIO_TYPE_REVIEW)) {
@@ -318,8 +322,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @seex #getSortedExerciseListWrapper(int, java.util.List)
-   * @seex #getExercisesForState
+   * @see #getExerciseIds(int, java.util.Map, String, long, int, String)
+   * @see #getExerciseListWrapperForPrefix(int, String, java.util.Collection, long, String)
    * @param exercisesForSection
    * @return
    */
@@ -332,6 +336,45 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       sortByTooltip(copy);
     }
     return copy;
+  }
+
+  private List<CommonExercise> getSortedByUnitThenAlpha(Collection<CommonExercise> exercisesForSection) {
+    List<CommonExercise> copy = new ArrayList<CommonExercise>(exercisesForSection);
+
+    final Collection<String> typeOrder = getTypeOrder();
+    if (typeOrder.isEmpty()) {
+      sortByTooltip(copy);
+      return copy;
+    }
+    else {
+      //final String first = typeOrder.iterator().next();
+      Collections.sort(copy,new Comparator<CommonExercise>() {
+        @Override
+        public int compare(CommonExercise o1, CommonExercise o2) {
+          int i = 0;
+          // compare first by hierarchical order - unit, then chapter, etc.
+          for (String type : typeOrder) {
+            String type1 = o1.getUnitToValue().get(type);
+            String type2 = o2.getUnitToValue().get(type);
+            i = type1.compareTo(type2);
+            if (i != 0) {
+              break;
+            }
+          }
+
+          // items in same chapter alphabetical by tooltip
+          if (i == 0) {
+            String id1 = o1.getTooltip();
+            String id2 = o2.getTooltip();
+            return id1.toLowerCase().compareTo(id2.toLowerCase());
+          }
+          else {
+            return i;
+          }
+        }
+      });
+      return copy;
+    }
   }
 
   private <T extends CommonShell> void sortByID(List<T> copy) {
@@ -447,15 +490,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
 
     if (audioAttributes.isEmpty()) { logger.warn("ensureMP3s : no ref audio for " + byID); }
-
-/*    for (String spath : byID.getSynonymAudioRefs()) {
-      ensureMP3(spath, false);
-    }*/
   }
 
   /**
    * Called from the client:
-   * @see mitll.langtest.client.list.ExerciseList#getExercises
+   * @see mitll.langtest.client.list.ListInterface#getExercises
    * @return
    */
   List<CommonExercise> getExercises() {
@@ -777,7 +816,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db.getUserListManager().markCorrectness(id, isCorrect, creatorID);
   }
 
-  public void markState(String id, CommonShell.STATE state, long creatorID) {
+  public void markState(String id, STATE state, long creatorID) {
     db.getUserListManager().markState(id, state, creatorID);
   }
 
@@ -791,7 +830,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param userID
    */
   @Override
-  public void setExerciseState(String id, CommonShell.STATE state, long userID) {
+  public void setExerciseState(String id, STATE state, long userID) {
     db.getUserListManager().markState(id, state, userID);
   }
 
@@ -949,8 +988,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       db.getAudioDAO().addOrUpdate(user, permanentAudioPath, exercise, System.currentTimeMillis(), audioType, audioAnswer.getDurationInMillis());
 
       // what state should we mark recorded audio?
-      db.getUserListManager().setState(exercise1, CommonShell.STATE.UNSET, user);
-      db.getUserListManager().setSecondState(exercise1, CommonShell.STATE.RECORDED, user);
+      db.getUserListManager().setState(exercise1, STATE.UNSET, user);
+      db.getUserListManager().setSecondState(exercise1, STATE.RECORDED, user);
     }
     return audioAnswer;
   }
