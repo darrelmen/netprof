@@ -15,8 +15,6 @@ import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.Result;
 
-import java.util.List;
-
 /**
  * A waveform record button and a play audio button.
  */
