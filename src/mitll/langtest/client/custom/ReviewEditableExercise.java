@@ -2,7 +2,6 @@ package mitll.langtest.client.custom;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
-import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
@@ -33,6 +32,7 @@ import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.MiniUser;
+import mitll.langtest.shared.STATE;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -372,7 +372,7 @@ class ReviewEditableExercise extends EditableExercise {
         System.err.println("\ndoAfterEditComplete : error - didn't remove " + id + " from original " +originalList);
       }
 
-      service.setExerciseState(id, CommonShell.STATE.FIXED, user, new AsyncCallback<Void>() {
+      service.setExerciseState(id, STATE.FIXED, user, new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {}
 

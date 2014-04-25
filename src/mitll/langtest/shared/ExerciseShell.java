@@ -45,6 +45,10 @@ public class ExerciseShell implements IsSerializable, CommonShell {
      this.secondState = state;
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseShellsShort(java.util.Collection)
+   * @return
+   */
   public CommonShell getShell() { return new ExerciseShell(getID(), getTooltip()); }
 
   @Override
