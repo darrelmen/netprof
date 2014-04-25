@@ -122,7 +122,7 @@ public class HistoryExerciseList extends PagingExerciseList {
   /**
    * So if we have an existing history token, use it to set current selection.
    * If not, push the current state of the list boxes and act on it
-   * @see mitll.langtest.client.list.ListInterface#getExercises(long, boolean)
+   * @see ListInterface#getExercises(long)
    */
   protected void pushFirstListBoxSelection() {
     String initToken = History.getToken();
@@ -322,7 +322,9 @@ public class HistoryExerciseList extends PagingExerciseList {
       }
       return;
     }
-    if (debug)   System.out.println(new Date() +" HistoryExerciseList.onValueChange : ------ start: token is '" + rawToken +"' ----");
+    if (debug) {
+      System.out.println(new Date() + " HistoryExerciseList.onValueChange : ------ start: token is '" + rawToken + "' ----");
+    }
 
     String item = selectionState1.getItem();
 
@@ -338,6 +340,8 @@ public class HistoryExerciseList extends PagingExerciseList {
       try {
         SelectionState selectionState = getSelectionState(token);
         restoreListBoxState(selectionState);
+        System.out.println(new Date() + " HistoryExerciseList.onValueChange : selectionState '" + selectionState + "'");
+
         loadExercises(selectionState.getTypeToSection(), selectionState.getItem());
       } catch (Exception e) {
         System.err.println("HistoryExerciseList.onValueChange " + token + " badly formed. Got " + e);
@@ -355,7 +359,7 @@ public class HistoryExerciseList extends PagingExerciseList {
    */
   protected void loadExercises(final Map<String, Collection<String>> typeToSection, final String item) {
     System.out.println("HistoryExerciseList.loadExercises : instance " + instance+ " " + typeToSection + " and item '" + item + "'");
-      loadExercisesUsingPrefix(typeToSection, getPrefix());
+    loadExercisesUsingPrefix(typeToSection, getPrefix());
   }
 
   protected void loadExercises(String selectionState, String prefix) {
@@ -364,13 +368,12 @@ public class HistoryExerciseList extends PagingExerciseList {
   }
 
   protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection, String prefix) {
-      lastReqID++;
-      System.out.println("HistoryExerciseList.loadExercisesUsingPrefix looking for '" + prefix +
-        "' (" + prefix.length() + " chars) in context of " + typeToSection + " list " + userListID+
-        " instance " + instance);
+    lastReqID++;
+    System.out.println("HistoryExerciseList.loadExercisesUsingPrefix looking for '" + prefix +
+      "' (" + prefix.length() + " chars) in context of " + typeToSection + " list " + userListID +
+      " instance " + instance);
 
-        service.getExerciseIds(lastReqID, typeToSection, prefix, userListID, controller.getUser(), controller.getAudioType(), new SetExercisesCallback());
-
+    service.getExerciseIds(lastReqID, typeToSection, prefix, userListID, controller.getUser(), controller.getAudioType(), new SetExercisesCallback());
   }
 
   /**
@@ -390,6 +393,6 @@ public class HistoryExerciseList extends PagingExerciseList {
    */
   protected void noSectionsGetExercises(long userID) {
     System.out.println("HistoryExerciseList.noSectionsGetExercises for " + userID + " instance " + instance);
-    super.getExercises(userID, true);
+    super.getExercises(userID);
   }
 }
