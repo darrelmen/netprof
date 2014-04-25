@@ -103,6 +103,7 @@ public abstract class UserDialog extends BasicDialog {
     accordionGroup.add(contents);
     accordion.add(accordionGroup);
     dialogBox.add(accordion);
+
     return accordionGroup;
   }
 
@@ -169,16 +170,16 @@ public abstract class UserDialog extends BasicDialog {
     System.out.println("UserManager.addKeyHandler made click handler " + keyHandler);
   }
 
-  boolean checkValidPassword(FormField password) {
+  boolean checkValidPassword(FormField password, boolean markError) {
     final String userID = password.box.getText();
     if (userID.length() > USER_ID_MAX_LENGTH) {
-      markError(password, "Please enter a password of reasonable length.");
+      if (markError) markError(password, "Please enter a password of reasonable length.");
       return false;
     } else if (userID.length() == 0) {
-      markError(password, "Please enter the usual password that you've been told.");
+      if (markError) markError(password, "Please enter the usual password that you've been told.");
       return false;
     } else if (!checkPassword(password)) {
-      markError(password, "Please enter the usual password for this kind of user.");
+      if (markError) markError(password, "Please enter the usual password for this kind of user.");
       return false;
     }
     return true;
