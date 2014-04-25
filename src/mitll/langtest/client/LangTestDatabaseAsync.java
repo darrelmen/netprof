@@ -3,11 +3,11 @@ package mitll.langtest.client;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.DLIUser;
 import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.STATE;
 import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
@@ -104,7 +104,7 @@ public interface LangTestDatabaseAsync {
 
   void getCommentedList(AsyncCallback<UserList> async);
 
-  void setExerciseState(String id, CommonShell.STATE state, long userID, AsyncCallback<Void> async);
+  void setExerciseState(String id, STATE state, long userID, AsyncCallback<Void> async);
 
   void isValidForeignPhrase(String foreign, AsyncCallback<Boolean> async);
 
@@ -122,7 +122,7 @@ public interface LangTestDatabaseAsync {
 
   void getEvents(AsyncCallback<List<Event>> async);
 
-  void markState(String id, CommonShell.STATE state, long creatorID, AsyncCallback<Void> async);
+  void markState(String id, STATE state, long creatorID, AsyncCallback<Void> async);
 
   void setAVPSkip(Collection<Long> ids, AsyncCallback<Void> async);
 
