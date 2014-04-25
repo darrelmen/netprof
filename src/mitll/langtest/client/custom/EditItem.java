@@ -69,7 +69,7 @@ public class EditItem {
     this.predefinedContentList = listInterface;
     this.feedback = feedback;
     this.npfHelper = npfHelper;
-    System.out.println(getClass() + " : npfHelper " + npfHelper);
+    //System.out.println(getClass() + " : npfHelper " + npfHelper);
   }
 
   /**
