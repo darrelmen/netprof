@@ -20,6 +20,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,8 +34,8 @@ public class UserDAO extends DAO {
   public static final String USERS = "users";
   public static final String MALE = "male";
   public static final String FEMALE = "female";
+  public static final String PERMISSIONS = "permissions";
   private long defectDetector;
-  //private static final List<String> COLUMNS = Arrays.asList("id", "age", "gender", "experience", "ipaddr", "nativelang", "dialect", "userid", "timestamp", "enabled");
   private static final List<String> COLUMNS2 = Arrays.asList("id", "age", "gender", "experience", "ipaddr", "nativelang", "dialect", "userid", "timestamp", "demographics");
 
   public UserDAO(Database database) {
@@ -44,11 +45,12 @@ public class UserDAO extends DAO {
 
       defectDetector = userExists(DEFECT_DETECTOR);
       if (defectDetector == -1) {
-        defectDetector = addUser(89, MALE, 0, "", "unknown", "unknown", DEFECT_DETECTOR, false);
+        defectDetector = addUser(89, MALE, 0, "", "unknown", "unknown", DEFECT_DETECTOR, false, new ArrayList<User.Permission>());
       }
 
     } catch (Exception e) {
       logger.error("got "+e,e);
+      database.logEvent("unk","create user table "+e.toString(),0);
     }
   }
 
@@ -68,10 +70,11 @@ public class UserDAO extends DAO {
    * @param dialect
    * @param userID
    * @param enabled
+   * @param permissions
    * @return newly inserted user id, or 0 if something goes horribly wrong
    */
   public long addUser(int age, String gender, int experience, String ipAddr,
-                      String nativeLang, String dialect, String userID, boolean enabled) {
+                      String nativeLang, String dialect, String userID, boolean enabled, Collection<User.Permission> permissions) {
     try {
       // there are much better ways of doing this...
       long max = 0;
@@ -84,8 +87,10 @@ public class UserDAO extends DAO {
       statement = connection.prepareStatement(
           "INSERT INTO " +
             USERS +
-            "(id,age,gender,experience,ipaddr,nativeLang,dialect,userID,enabled) " +
-          "VALUES(?,?,?,?,?,?,?,?,?);");
+            "(id,age,gender,experience,ipaddr,nativeLang,dialect,userID,enabled," +
+            PERMISSIONS +
+            ") " +
+          "VALUES(?,?,?,?,?,?,?,?,?,?);");
       int i = 1;
       long newID = max + 1;
       statement.setLong(i++, newID);
@@ -97,6 +102,10 @@ public class UserDAO extends DAO {
       statement.setString(i++, dialect);
       statement.setString(i++, userID);
       statement.setBoolean(i++, enabled);
+      StringBuilder builder = new StringBuilder();
+      for (User.Permission permission : permissions) builder.append(permission).append(",");
+      statement.setString(i++, builder.toString());
+
       statement.executeUpdate();
 
       statement.close();
@@ -104,36 +113,12 @@ public class UserDAO extends DAO {
 
       return newID;
     } catch (Exception ee) {
-      logger.error("Got " + ee);
+      logger.error("Got " + ee,ee);
+      database.logEvent("unk","adding user: "+ee.toString(),0);
+
     }
     return 0;
   }
-
-/*
-  public void enableUser(long id, boolean enabled) {
-    try {
-      Connection connection = database.getConnection();
-      PreparedStatement statement;
-
-      String sql = "UPDATE users " +
-          "SET enabled=" +enabled+
-          " WHERE id=" + id;
-      logger.debug("enableUser " + id);
-      statement = connection.prepareStatement(sql);
-
-      int i = statement.executeUpdate();
-
-      if (i == 0) {
-        logger.error("huh? didn't update " + id);
-      }
-
-      statement.close();
-      database.closeConnection(connection);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-*/
 
   /**
    * Not case sensitive.
@@ -158,7 +143,8 @@ public class UserDAO extends DAO {
       statement.close();
       database.closeConnection(connection);
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.error("Got " + e,e);
+      database.logEvent(id, "userExists: " + e.toString(), 0);
     }
     return val;
   }
@@ -179,7 +165,9 @@ public class UserDAO extends DAO {
         "dialect VARCHAR, " +
         "userID VARCHAR, " +
         "timestamp TIMESTAMP AS CURRENT_TIMESTAMP, " +
-        "enabled BOOLEAN, " +
+      "enabled BOOLEAN, " +
+      PERMISSIONS +
+      " VARCHAR, " +
         "CONSTRAINT pkusers PRIMARY KEY (id))");
     statement.execute();
     statement.close();
@@ -204,7 +192,9 @@ public class UserDAO extends DAO {
       if (missing.equalsIgnoreCase("timestamp")) { addColumn(connection,"timestamp","TIMESTAMP AS CURRENT_TIMESTAMP"); }
       if (missing.equalsIgnoreCase("enabled")) { addColumn(connection,"enabled","BOOLEAN"); }
     }
-
+    if (!getColumns(USERS).contains(PERMISSIONS)) {
+      addColumn(connection, PERMISSIONS,"VARCHAR");
+    }
   }
 
   private void addColumn(Connection connection, String column, String type) throws SQLException {
@@ -273,7 +263,8 @@ public class UserDAO extends DAO {
 
       return users;
     } catch (Exception ee) {
-      logger.error("Got " + ee);
+      logger.error("Got " + ee,ee);
+      database.logEvent("unk","getUsers: "+ee.toString(),0);
     }
     return new ArrayList<User>();
   }
@@ -292,12 +283,22 @@ public class UserDAO extends DAO {
           rs.getInt(i++), // exp
           rs.getString(i++), // ip
           rs.getString(i++), // password
-          rs.getBoolean(i++)));
+          rs.getBoolean(i++), new ArrayList<User.Permission>()));
       }
     } else {
       while (rs.next()) {
-       // i = 1;
         String userid;
+
+        String perms = rs.getString(PERMISSIONS);
+        Collection<User.Permission> permissions = new ArrayList<User.Permission>();
+
+        if (perms != null) {
+          for (String perm : perms.split(",")) {
+            permissions.add(User.Permission.valueOf(perm));
+          }
+        }
+
+
         User newUser = new User(rs.getLong("id"), //id
           rs.getInt("age"), // age
           rs.getInt("gender"), //gender
@@ -313,7 +314,9 @@ public class UserDAO extends DAO {
           rs.getTimestamp("timestamp").getTime(),
 
           rs.getBoolean("enabled"),
-          userid != null && (userid.equals("gvidaver") | userid.equals("swade")));
+          userid != null && (userid.equals("gvidaver") | userid.equals("swade")),
+          permissions);
+
         users.add(newUser);
 
         if (newUser.getUserID() == null) {
@@ -324,11 +327,12 @@ public class UserDAO extends DAO {
     return users;
   }
 
-  public boolean isUserMale(long userID) {
+/*  public boolean isUserMale(long userID) {
     List<User> users = getUsers();
     return isUserMale(userID, users);
-  }
+  }*/
 
+/*
   public boolean isUserMale(long userID, List<User> users) {
     User thisUser = null;
     for (User u : users) {
@@ -339,6 +343,7 @@ public class UserDAO extends DAO {
     }
     return thisUser != null && thisUser.isMale();
   }
+*/
 
   public Map<Long, User> getUserMap(boolean getMale) {
     List<User> users = getUsers();
@@ -457,6 +462,8 @@ public class UserDAO extends DAO {
       wb.dispose();
     } catch (IOException e) {
       logger.error("got " +e,e);
+      database.logEvent("unk","toXLSX: "+e.toString(),0);
+
     }
   }
 
