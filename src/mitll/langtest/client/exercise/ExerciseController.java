@@ -12,6 +12,9 @@ import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.StartupInfo;
+import mitll.langtest.shared.User;
+
+import java.util.Collection;
 
 
 /**
@@ -55,8 +58,7 @@ public interface ExerciseController {
   boolean isLogClientMessages();
   String getAudioType();
   boolean isReviewMode();
-
-
+  Collection<User.Permission> getPermissions();
 
   boolean showCompleted();
 
@@ -75,7 +77,6 @@ public interface ExerciseController {
   void logMessageOnServer(String message, String prefix);
 
   StartupInfo getStartupInfo();
-  boolean gotMicPermission();
   EventLogger getButtonFactory();
   void register(Button button, String exid);
 
