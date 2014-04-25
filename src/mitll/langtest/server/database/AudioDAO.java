@@ -138,7 +138,7 @@ public class AudioDAO extends DAO {
     List<AudioAttribute> results = new ArrayList<AudioAttribute>();
     Map<Long, MiniUser> miniUsers = userDAO.getMiniUsers();
 
-    logger.debug("users " + miniUsers);
+   // logger.debug("users " + miniUsers);
 
     while (rs.next()) {
      // int uniqueID = rs.getInt(ID);
