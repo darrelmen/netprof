@@ -132,6 +132,12 @@ public class AudioExercise extends ExerciseShell {
     return males;
   }
 
+  /**
+   * @see mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel
+   * @param userID
+   * @param regularSpeed
+   * @return
+   */
   public AudioAttribute getRecordingsBy(long userID, boolean regularSpeed) {
     //List<AudioAttribute> mine = new ArrayList<AudioAttribute>();
     for (AudioAttribute attr : getRecordingsBy(userID)) {
