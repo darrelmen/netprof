@@ -18,13 +18,12 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
-import mitll.langtest.shared.Result;
 import mitll.langtest.shared.custom.UserList;
 
 import java.util.ArrayList;
 
 /**
- * Created with IntelliJ IDEA.
+ * Lets you show a user list with a paging container...
  * User: GO22670
  * Date: 10/8/13
  * Time: 3:27 PM
@@ -40,6 +39,7 @@ class NPFHelper implements RequiresResize {
   protected final UserFeedback feedback;
   protected PagingExerciseList npfExerciseList;
   private Panel npfContentPanel;
+  boolean showQC;
 
   /**
    * @see mitll.langtest.client.custom.Navigation#Navigation
@@ -47,12 +47,14 @@ class NPFHelper implements RequiresResize {
    * @param feedback
    * @param userManager
    * @param controller
+   * @param showQC
    */
-  public NPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager, ExerciseController controller) {
+  public NPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager, ExerciseController controller, boolean showQC) {
     this.service = service;
     this.feedback = feedback;
     this.controller = controller;
     this.userManager = userManager;
+    this.showQC = showQC;
   }
 
   /**
@@ -65,9 +67,6 @@ class NPFHelper implements RequiresResize {
    */
   public void showNPF(UserList ul, TabAndContent tabAndContent, String instanceName, boolean loadExercises) {
     //System.out.println(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul);
-    //if (!ul.isEmpty()) {
-    //  System.out.println(getClass() + " : first is " + ul.getExercises().iterator().next());
-    //}
     DivWidget content = tabAndContent.content;
     int widgetCount = content.getWidgetCount();
     if (!madeNPFContent || widgetCount == 0) {
@@ -137,7 +136,7 @@ class NPFHelper implements RequiresResize {
     npfContentPanel.addStyleName("floatRight");
     npfContentPanel.getElement().setId("internalLayout_RightContent");
 
-    npfExerciseList = makeNPFExerciseList(npfContentPanel, instanceName + "_"+ul.getUniqueID(),ul.getUniqueID());
+    npfExerciseList = makeNPFExerciseList(npfContentPanel, instanceName + "_"+ul.getUniqueID());
     return npfContentPanel;
   }
 
@@ -147,9 +146,9 @@ class NPFHelper implements RequiresResize {
    * @param instanceName
    * @return
    */
-  PagingExerciseList makeNPFExerciseList(Panel right, String instanceName, long userListID) {
+  PagingExerciseList makeNPFExerciseList(Panel right, String instanceName) {
     final PagingExerciseList exerciseList = makeExerciseList(right, instanceName);
-    setFactory(exerciseList, instanceName, userListID);
+    setFactory(exerciseList, instanceName, showQC);
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       @Override
       public void execute() {
@@ -159,9 +158,13 @@ class NPFHelper implements RequiresResize {
     return exerciseList;
   }
 
+  /**
+   * @see #doNPF(mitll.langtest.shared.custom.UserList, String, boolean)
+   * @see #showNPF(mitll.langtest.shared.custom.UserList, TabAndContent, String, boolean)
+   * @param ul
+   */
   private void rememberAndLoadFirst(final UserList ul) {
     //System.out.println(getClass() + ".rememberAndLoadFirst : for " +ul);
-
     npfExerciseList.setUserListID(ul.getUniqueID());
     npfExerciseList.rememberAndLoadFirst(new ArrayList<CommonShell>(ul.getExercises()));
   }
@@ -172,7 +175,6 @@ class NPFHelper implements RequiresResize {
 
   PagingExerciseList makeExerciseList(final Panel right, final String instanceName) {
     //System.out.println(getClass() + ".makeExerciseList : instanceName " + instanceName);
-
     return new PagingExerciseList(right, service, feedback, null, controller, false, false,
       true, instanceName) {
       @Override
@@ -184,24 +186,29 @@ class NPFHelper implements RequiresResize {
           }
         });
       }
-      };
+    };
   }
+/*
+  public void setFactory(final String instanceName, boolean showQC) {
+    setFactory(npfExerciseList, instanceName, showQC);
+  }*/
 
   /**
-   * @see #makeNPFExerciseList(com.google.gwt.user.client.ui.Panel, String, long)
+   * @see #makeNPFExerciseList(com.google.gwt.user.client.ui.Panel, String)
    * @param exerciseList
    * @param instanceName
-   * @param userListID
+   * @param showQC
    */
-  void setFactory(final PagingExerciseList exerciseList, final String instanceName, long userListID) {
-    exerciseList.setFactory(getFactory(exerciseList, instanceName), userManager, 1);
+  void setFactory(final PagingExerciseList exerciseList, final String instanceName, boolean showQC) {
+    exerciseList.setFactory(getFactory(exerciseList, instanceName, showQC), userManager, 1);
   }
 
-  protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList, final String instanceName) {
+  protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList, final String instanceName, final boolean showQC) {
     return new GoodwaveExercisePanelFactory(service, feedback, controller, exerciseList, 1.0f) {
       @Override
       public Panel getExercisePanel(CommonExercise e) {
-        if (controller.getAudioType().equalsIgnoreCase(Result.AUDIO_TYPE_REVIEW)) {
+        //boolean showQC = controller.getAudioType().equalsIgnoreCase(Result.AUDIO_TYPE_REVIEW);
+        if (showQC) {
           System.out.println("\nNPFHelper : making new QCNPFExercise for " +e + " instance " + instanceName);
           return new QCNPFExercise(e, controller, exerciseList, 1.0f, false, instanceName);
         }
@@ -221,16 +228,4 @@ class NPFHelper implements RequiresResize {
 
   @Override
   public void onResize() { if (npfContentPanel != null) {  npfExerciseList.onResize(); } }
-
-  /**
-   * @see EditableExercise#getCreateButton(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, com.github.gwtbootstrap.client.ui.ControlGroup)
-   */
-/*  public void reload() {
-    if (npfExerciseList == null) {
-      System.err.println("how can npfExerciseList be null?");
-    }
-    else {
-      npfExerciseList.redraw();
-    }
-  }*/
 }
