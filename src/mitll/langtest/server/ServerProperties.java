@@ -181,6 +181,12 @@ public class ServerProperties {
     return props.getProperty(LANGUAGE, "English");
   }
 
+  //specify this in  in config file like: tierIndex=5,4,-1. That
+  //tells us to treat (zero-indexed) column 5 like the "unit" column,
+  //column 4 like the "chapter" column, and that there isn't a "week" column
+  //--note that depending on how many unique elements are in each column, the 
+  //rows that appear on the classroom site may not be in the order 
+  //"unit,chapter,week"
   public int[] getUnitChapterWeek() {
     int[] parsedUCW = new int[]{-1,-1,-1};
     String[] ucw = props.getProperty(TIER_INDEX, "-1,-1,-1").replaceAll("\\s+", "").split(",");
