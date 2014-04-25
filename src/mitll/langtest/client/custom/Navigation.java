@@ -172,7 +172,7 @@ public class Navigation extends TabContainer implements RequiresResize {
   public Widget getNav(final Panel secondAndThird) {
   //  Panel container = new FlowPanel();
   //  container.getElement().setId("getNav_container");
-    System.out.println("getNav using " + secondAndThird.getElement().getId());
+  //  System.out.println("getNav using " + secondAndThird.getElement().getId());
     //Panel buttonRow = getTabPanel(secondAndThird);
    // buttonRow.getElement().setId("getNav_buttonRow");
 
@@ -191,7 +191,7 @@ public class Navigation extends TabContainer implements RequiresResize {
   private TabAndContent review, commented, attention, recorderTab, contentTab;
   private List<TabAndContent> tabs = new ArrayList<TabAndContent>();
   private Panel chapterContent;
-
+  boolean useAttention = false;
   /**
    * @see #getNav(com.google.gwt.user.client.ui.Panel)
    * @param contentForChaptersTab
@@ -338,16 +338,18 @@ public class Navigation extends TabContainer implements RequiresResize {
         }
       });
 
+      if (useAttention) {
+        attention = makeFirstLevelTab(tabPanel, IconType.WARNING_SIGN, ATTENTION_LL);
+        attention.tab.addClickHandler(new ClickHandler() {
+          @Override
+          public void onClick(ClickEvent event) {
+            checkAndMaybeClearTab(ATTENTION_LL);
+            viewAttention(attention.content);
+            logEvent(attention, ATTENTION_LL);
+          }
+        });
+      }
 
-      attention = makeFirstLevelTab(tabPanel, IconType.WARNING_SIGN, ATTENTION_LL);
-      attention.tab.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          checkAndMaybeClearTab(ATTENTION_LL);
-          viewAttention(attention.content);
-          logEvent(attention,ATTENTION_LL);
-        }
-      });
     }
 
     if (controller.getPermissions().contains(User.Permission.RECORD_AUDIO)) {
@@ -482,7 +484,7 @@ public class Navigation extends TabContainer implements RequiresResize {
           viewReview(review.content);
         } else if (value.equals(COMMENTS)) {
           viewComments(commented.content);
-        } else if (value.equals(ATTENTION_LL)) {
+        } else if (value.equals(ATTENTION_LL) && useAttention) {
           viewAttention(attention.content);
         } else if (value.equals(RECORD_AUDIO)) {
           recorderHelper.showNPF(recorderTab, "record_audio", true);
