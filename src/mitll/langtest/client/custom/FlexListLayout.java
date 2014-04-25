@@ -47,7 +47,7 @@ public abstract class FlexListLayout implements RequiresResize {
     this.service = service;
     this.feedback = feedback;
     this.userManager = userManager;
-    System.out.println(getClass() + " : FlexListLayout ");
+   // System.out.println(getClass() + " : FlexListLayout ");
   }
 
   /**
