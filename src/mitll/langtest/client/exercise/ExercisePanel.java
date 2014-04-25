@@ -83,12 +83,10 @@ public class ExercisePanel extends VerticalPanel implements
   public ExercisePanel(final CommonExercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                        final ExerciseController controller, ListInterface exerciseList) {
     this.exercise = e;
-    //System.out.println("ExercisePanel.ExercisePanel : exercise is " + exercise.getID());
     this.controller = controller;
     this.service = service;
     this.exerciseList = exerciseList;
     this.navigationHelper = getNavigationHelper(controller);
- //   addItemHeader(e);
 
     // attempt to left justify
     HorizontalPanel hp = new HorizontalPanel();
@@ -114,7 +112,7 @@ public class ExercisePanel extends VerticalPanel implements
   }
 
   protected NavigationHelper getNavigationHelper(ExerciseController controller) {
-    return new NavigationHelper(exercise,controller, this, exerciseList, true, true);
+    return new NavigationHelper(exercise,controller, this, exerciseList, true, true, true);
   }
 
   protected void addInstructions() {  add(new Heading(4, PROMPT));  }
