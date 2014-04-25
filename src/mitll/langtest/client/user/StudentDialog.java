@@ -22,6 +22,8 @@ import com.github.gwtbootstrap.client.ui.event.ShowHandler;
 import com.github.gwtbootstrap.client.ui.event.ShownEvent;
 import com.github.gwtbootstrap.client.ui.event.ShownHandler;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -84,6 +86,7 @@ class StudentDialog extends UserDialog {
 
   private final UserManager userManager;
   private final UserNotification langTest;
+  CheckBox qcCheckBox, recordAudioCheckBox;
 
   public StudentDialog(LangTestDatabaseAsync service, PropertyHandler props, UserManager userManager,
                        UserNotification userNotification) {
@@ -130,8 +133,11 @@ class StudentDialog extends UserDialog {
     final FormField user = addControlFormField(fieldset, USER_ID, MIN_LENGTH_USER_ID);
     user.setVisible(isDataCollection(purpose) || isPractice(purpose));
     addTooltip(user.box, USER_ID_TOOLTIP);
+
     final FormField password = addControlFormField(fieldset, PASSWORD, true, 30, USER_ID_MAX_LENGTH);
     password.setVisible(false);
+
+
     purpose.box.setWidth("150px");
 
     langTest.getPermissions().clear();
@@ -141,35 +147,54 @@ class StudentDialog extends UserDialog {
     Panel register = new FlowPanel();
     final RegistrationInfo registrationInfo = new RegistrationInfo(register, permissions);
 
+    user.box.addBlurHandler(new BlurHandler() {
+      @Override
+      public void onBlur(BlurEvent event) {
+        if (shouldCheckForExistingUser(user.box.getText(), purpose, password, false)) {
+          maybeSetUserValues(user.box.getText(), registrationInfo);
+        }
+      }
+    });
+
     final AccordionGroup accordion = getAccordion(dialogBox, register);
+    accordion.addShowHandler(new ShowHandler() {
+      @Override
+      public void onShow(ShowEvent showEvent) {
+        maybeSetUserValues(user.box.getText(), registrationInfo);
+      }
+    });
     accordion.setVisible(!canSkipRegister(purpose));
 
     purpose.box.addChangeHandler(new ChangeHandler() {
       @Override
       public void onChange(ChangeEvent event) {
-        boolean b = canSkipRegister(purpose);
+        boolean skipRegister = canSkipRegister(purpose);
         boolean needUserID = isDataCollection(purpose) || isReview(purpose) || isPractice(purpose);
         user.setVisible(needUserID);
         accordion.setVisible(!canSkipRegister(purpose));
         registrationInfo.showOrHideILR(!isReview(purpose));
         password.setVisible(isReview(purpose));
 
-        if (b) {
+        if (skipRegister) {
           accordion.hide();
         } else {
           final String userID = user.box.getText();
-          if (!userID.isEmpty()
-            && (!isReview(purpose) || checkValidPassword(password))
+          if (shouldCheckForExistingUser(userID, purpose, password, true)
             ) {
             service.userExists(userID, new AsyncCallback<Integer>() {
               @Override
-              public void onFailure(Throwable caught) {}
+              public void onFailure(Throwable caught) {
+              }
 
               @Override
-              public void onSuccess(Integer result) {
+              public void onSuccess(final Integer result) {
                 boolean exists = result != -1;
                 if (!exists) {
                   accordion.show();
+                } else {
+                  System.out.println("asking for user info");
+                  // TODO : wasteful -- just ask for the user
+                  setUserValues(result, registrationInfo);
                 }
               }
             });
@@ -199,24 +224,76 @@ class StudentDialog extends UserDialog {
     dialogBox.show();
   }
 
+  protected void maybeSetUserValues(String userID, final RegistrationInfo registrationInfo) {
+    service.userExists(userID, new AsyncCallback<Integer>() {
+      @Override
+      public void onFailure(Throwable caught) {
+      }
+
+      @Override
+      public void onSuccess(final Integer result) {
+        boolean exists = result != -1;
+        if (exists) {
+          setUserValues(result, registrationInfo);
+        }
+      }
+    });
+  }
+
+  protected boolean shouldCheckForExistingUser(String userID, ListBoxFormField purpose, FormField password, boolean markError) {
+    return !userID.isEmpty()
+      && (!isReview(purpose) || checkValidPassword(password, markError));
+  }
+
+  protected void setUserValues(final Integer result, final RegistrationInfo registrationInfo) {
+    System.out.println("1 asking for user info");
+    // TODO : wasteful -- just ask for the user
+    service.getUsers(new AsyncCallback<List<User>>() {
+      @Override
+      public void onFailure(Throwable caught) {
+
+      }
+
+      @Override
+      public void onSuccess(List<User> users) {
+        for (User u : users) {
+          if (u.getId() == result.longValue()) {
+            System.out.println("\t 1 user info " + u);
+
+            registrationInfo.setValues(u);
+            break;
+          }
+        }
+      }
+    });
+  }
+
+/*  private void fillInRegistration(User u) {
+
+  }*/
+
   protected Panel makePermissions() {
     Panel permissions = new VerticalPanel();
-    final CheckBox qc = new CheckBox("Do Quality Control");
-    qc.addClickHandler(new ClickHandler() {
+
+    qcCheckBox = new CheckBox("Do Quality Control");
+    qcCheckBox.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        langTest.setPermission(User.Permission.QUALITY_CONTROL,qc.getValue());
+        langTest.setPermission(User.Permission.QUALITY_CONTROL, qcCheckBox.getValue());
       }
     });
-    permissions.add(qc);
-    final CheckBox refAudio = new CheckBox("Record Reference Audio");
-    refAudio.addClickHandler(new ClickHandler() {
+    addTooltip(qcCheckBox,"Mark and fix defects in text and audio");
+    permissions.add(qcCheckBox);
+
+    recordAudioCheckBox = new CheckBox("Record Reference Audio");
+    addTooltip(recordAudioCheckBox,"Record reference audio for course content");
+    recordAudioCheckBox.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        langTest.setPermission(User.Permission.RECORD_AUDIO,refAudio.getValue());
+        langTest.setPermission(User.Permission.RECORD_AUDIO, recordAudioCheckBox.getValue());
       }
     });
-    permissions.add(refAudio);
+    permissions.add(recordAudioCheckBox);
     return permissions;
   }
 
@@ -304,7 +381,7 @@ class StudentDialog extends UserDialog {
 
     System.out.println("checkUserAndMaybeRegister " + purposeSetting + " review " + needsPassword);
     if (checkValidUser(user) &&
-      (!needsPassword || checkValidPassword(password))
+      (!needsPassword || checkValidPassword(password, true))
       ) {
       service.userExists(userID, new AsyncCallback<Integer>() {
         @Override
@@ -599,6 +676,28 @@ class StudentDialog extends UserDialog {
       estimating = row2;
     }
 
+    public void setValues(User user) {
+      int age = user.getAge();
+      ageEntryGroup.box.setText("" + age);
+
+      int gender = user.getGender();
+      genderGroup.box.setSelectedIndex(gender+1); // 0 male 1 female
+
+      dialectGroup.box.setText(user.getDialect());
+
+      Collection<User.Permission> permissions = user.getPermissions();
+      qcCheckBox.setValue(permissions.contains(User.Permission.QUALITY_CONTROL));
+      recordAudioCheckBox.setValue(permissions.contains(User.Permission.RECORD_AUDIO));
+
+      // can't edit after initial registration
+/*      qcCheckBox.setEnabled(false);
+      recordAudioCheckBox.setEnabled(false);
+
+      ageEntryGroup.box.setEnabled(false);
+      genderGroup.box.setEnabled(false);
+      dialectGroup.box.setEnabled(false);*/
+    }
+
     public void showOrHideILR(boolean show) {
       ilrLevels.setVisible(show);
       estimating.setVisible(show);
@@ -627,7 +726,6 @@ class StudentDialog extends UserDialog {
       }
       return true;
     }
-
 
     public boolean checkValidGender() {
       boolean valid = !genderGroup.getValue().equals(UNSET);
