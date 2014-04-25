@@ -7,6 +7,7 @@ import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.CommonShell;
+import mitll.langtest.shared.STATE;
 
 /**
  * Created with IntelliJ IDEA.
@@ -28,9 +29,8 @@ public interface ListInterface extends RequiresResize {
      * @see mitll.langtest.client.LangTest#gotUser(long)
      * @see mitll.langtest.client.LangTest#makeFlashContainer()
      * @param userID
-     * @param getNext
      */
-  void getExercises(long userID, boolean getNext);
+  boolean getExercises(long userID);
 
   void reloadWith(String id);
 
@@ -97,8 +97,8 @@ public interface ListInterface extends RequiresResize {
   void reload();
 
   void redraw();
-  void setState(String id, CommonShell.STATE state);
-  void setSecondState(String id, CommonShell.STATE state);
+  void setState(String id, STATE state);
+  void setSecondState(String id, STATE state);
 
   void addListChangedListener(ListChangeListener<CommonShell> listener);
 }
