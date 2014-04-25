@@ -19,6 +19,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.STATE;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -253,16 +254,16 @@ public class PagingContainer {
           String html = shell.getID();
           if (columnText != null) {
             if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
-            CommonShell.STATE state = shell.getState();
+            STATE state = shell.getState();
 
-            boolean isDefect = state == CommonShell.STATE.DEFECT;
-            boolean isFixed = state == CommonShell.STATE.FIXED;
-            boolean isLL = shell.getSecondState() == CommonShell.STATE.ATTN_LL;
-            boolean isRerecord = shell.getSecondState() == CommonShell.STATE.RECORDED;
+            boolean isDefect = state == STATE.DEFECT;
+            boolean isFixed = state == STATE.FIXED;
+            boolean isLL = shell.getSecondState() == STATE.ATTN_LL;
+            boolean isRerecord = shell.getSecondState() == STATE.RECORDED;
 
             boolean hasSecondState = isLL || isRerecord;
-            boolean recorded = state == CommonShell.STATE.RECORDED;
-            boolean approved = state == CommonShell.STATE.APPROVED || recorded;
+            boolean recorded = state == STATE.RECORDED;
+            boolean approved = state == STATE.APPROVED || recorded;
 
             boolean isSet = isDefect || isFixed || approved;
             if (controller.getAudioType().equals(Result.AUDIO_TYPE_RECORDER)) {
