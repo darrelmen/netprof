@@ -35,6 +35,7 @@ import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.MiniUser;
+import mitll.langtest.shared.STATE;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -195,7 +196,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
       markReviewed(completedExercise);
       boolean allCorrect = incorrectFields.isEmpty();
 
-      listContainer.setState(completedExercise.getID(), allCorrect ? CommonShell.STATE.APPROVED : CommonShell.STATE.DEFECT);
+      listContainer.setState(completedExercise.getID(), allCorrect ? STATE.APPROVED : STATE.DEFECT);
       listContainer.redraw();
     }
   }
@@ -207,7 +208,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
    */
   private void markAttentionLL(ListInterface listContainer, CommonShell completedExercise) {
     if (isCourseContent()) {
-      service.markState(completedExercise.getID(), CommonShell.STATE.ATTN_LL, controller.getUser(),
+      service.markState(completedExercise.getID(), STATE.ATTN_LL, controller.getUser(),
         new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {}
@@ -216,7 +217,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
           public void onSuccess(Void result) { }
         });
 
-      listContainer.setSecondState(completedExercise.getID(), CommonShell.STATE.ATTN_LL);
+      listContainer.setSecondState(completedExercise.getID(), STATE.ATTN_LL);
       listContainer.redraw();
     }
   }
@@ -538,7 +539,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
       String id = exercise.getID();
       System.out.println("instance = " +instance);
       if (instance.equalsIgnoreCase("classroom")) {
-        CommonShell.STATE state = incorrectFields.isEmpty() ? CommonShell.STATE.UNSET : CommonShell.STATE.DEFECT;
+        STATE state = incorrectFields.isEmpty() ? STATE.UNSET : STATE.DEFECT;
         exercise.setState(state);
         listContainer.setState(id, state);
       }
