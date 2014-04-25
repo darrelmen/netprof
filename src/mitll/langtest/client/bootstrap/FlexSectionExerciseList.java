@@ -103,13 +103,13 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   /**
    *
    * @param userID
-   * @param getNext
    * @see mitll.langtest.client.LangTest#doEverythingAfterFactory
    */
-  public void getExercises(final long userID, boolean getNext) {
+  public boolean getExercises(final long userID) {
     System.out.println("FlexSectionExerciseList.getExercises : Get exercises for user=" + userID + " instance " + instance);
     this.userID = userID;
     addWidgets();
+    return false;
   }
 
   public void addWidgets() {
@@ -127,7 +127,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * Assume for the moment that the first type has the largest elements... and every other type nests underneath it.
    *
    * @return
-   * @see mitll.langtest.client.list.ListInterface#getExercises(long, boolean)
+   * @see mitll.langtest.client.list.ListInterface#getExercises(long)
    */
   private Panel getWidgetsForTypes() {
     System.out.println("FlexSectionExerciseList.getWidgetsForTypes ");
