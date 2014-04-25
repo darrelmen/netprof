@@ -70,6 +70,7 @@ public class ServerProperties {
   private static final String INCLUDE_FEEDBACK = "includeFeedback";
   private static final String MAPPING_FILE = "mappingFile";
   private static final String NO_MODEL = "noModel";
+  private static final String TIER_INDEX = "tierIndex";
   public static final String VLR_PARLE_PILOT_ITEMS_TXT = "vlr-parle-pilot-items.txt";
 
   private Properties props = new Properties();
@@ -178,6 +179,16 @@ public class ServerProperties {
 
   public String getLanguage() {
     return props.getProperty(LANGUAGE, "English");
+  }
+
+  public int[] getUnitChapterWeek() {
+    int[] parsedUCW = new int[]{-1,-1,-1};
+    String[] ucw = props.getProperty(TIER_INDEX, "-1,-1,-1").replaceAll("\\s+", "").split(",");
+    if(ucw.length != 3)
+        return parsedUCW;
+    for(int i = 0; i < 3; i++)
+        parsedUCW[i] = Integer.parseInt(ucw[i]);
+    return parsedUCW;
   }
 
   /**
