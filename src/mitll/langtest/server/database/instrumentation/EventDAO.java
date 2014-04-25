@@ -121,7 +121,12 @@ public class EventDAO extends DAO {
           "VALUES(?,?,?,?,?,?,?);");
       int i = 1;
 
-      statement.setLong(i++, event.getCreatorID());
+      long creatorID = event.getCreatorID();
+      if (creatorID == -1) {
+        logger.error("huh? creator is " + creatorID + " for " + event);
+        creatorID = 0;
+      }
+      statement.setLong(i++, creatorID);
       statement.setString(i++, event.getExerciseID());
       statement.setString(i++, event.getContext());
       statement.setString(i++, event.getWidgetID());
