@@ -39,6 +39,7 @@ public class EventDAO extends DAO {
   private static final String CREATORID = "creatorid";
   private static final String WIDGETTYPE = "widgettype";
   private static final String HITID = "hitid";
+  private static final String EXERCISEID = "exerciseid";
 
   public EventDAO(Database database) {
     super(database);
@@ -68,9 +69,8 @@ public class EventDAO extends DAO {
       EVENT +
       " (" +
       "uniqueid IDENTITY, " +
-      CREATORID +
-      " LONG, " +
-      "exerciseid VARCHAR, " +
+      CREATORID + " LONG, " +
+      EXERCISEID + " VARCHAR, " +
       "context VARCHAR, " +
       "widgetid VARCHAR, " +
       WIDGETTYPE +
@@ -96,7 +96,7 @@ public class EventDAO extends DAO {
    * <p/>
    * Uses return generated keys to get the user id
    *
-   * @see mitll.langtest.server.database.custom.UserListManager#reallyCreateNewItem(long, mitll.langtest.shared.custom.UserExercise)
+   * @see mitll.langtest.server.database.custom.UserListManager#reallyCreateNewItem(long, mitll.langtest.shared.custom.UserExercise, String)
    */
   public void add(Event event) {
     try {
@@ -109,7 +109,9 @@ public class EventDAO extends DAO {
         "INSERT INTO " + EVENT +
           "(" +
           CREATORID +
-          ",exerciseid,context," +
+          "," +
+          EXERCISEID +
+          ",context," +
           "widgetid," +
           WIDGETTYPE +
           "," +
@@ -119,7 +121,12 @@ public class EventDAO extends DAO {
           "VALUES(?,?,?,?,?,?,?);");
       int i = 1;
 
-      statement.setLong(i++, event.getCreatorID());
+      long creatorID = event.getCreatorID();
+      if (creatorID == -1) {
+        logger.error("huh? creator is " + creatorID + " for " + event);
+        creatorID = 0;
+      }
+      statement.setLong(i++, creatorID);
       statement.setString(i++, event.getExerciseID());
       statement.setString(i++, event.getContext());
       statement.setString(i++, event.getWidgetID());
@@ -144,6 +151,22 @@ public class EventDAO extends DAO {
   public List<Event> getAll() {
     try {
       String sql = "SELECT * from " + EVENT;
+
+      return getEvents(sql);
+    } catch (Exception ee) {
+      logger.error("got " + ee, ee);
+    }
+    return Collections.emptyList();
+  }
+
+  public List<Event> getAllForUserAndExercise(long userid, String exid) {
+    try {
+      String sql = "SELECT * from " + EVENT + " where " +
+        WIDGETTYPE +
+        "='qcPlayAudio' AND " +
+        CREATORID +"="+userid + " and " +
+        EXERCISEID + "='" +exid+
+        "'";
 
       return getEvents(sql);
     } catch (Exception ee) {
@@ -178,7 +201,7 @@ public class EventDAO extends DAO {
       lists.add(new Event(
           rs.getString("widgetid"),
           rs.getString(WIDGETTYPE),
-          rs.getString("exerciseid"),
+          rs.getString(EXERCISEID),
           rs.getString("context"),
           rs.getLong(CREATORID),
           rs.getTimestamp("modified").getTime(),
@@ -194,7 +217,7 @@ public class EventDAO extends DAO {
     return lists;
   }
 
-  private static final List<String> COLUMNS2 = Arrays.asList("id", "type", "exercise", "context", "userid", "timestamp", "hitID");
+  private static final List<String> COLUMNS2 = Arrays.asList("id", "type", "exercise", "context", "userid", "timestamp","time_millis", "hitID");
 
   /**
    * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
@@ -246,6 +269,9 @@ public class EventDAO extends DAO {
       cell = row.createCell(j++);
       cell.setCellValue(new Date(event.getTimestamp()));
       cell.setCellStyle(cellStyle);
+
+      cell = row.createCell(j++);
+      cell.setCellValue(event.getTimestamp());
 
       cell = row.createCell(j++);
       cell.setCellValue(event.getHitID());
