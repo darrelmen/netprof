@@ -1,10 +1,7 @@
 package mitll.langtest.client.custom;
 
-import com.github.gwtbootstrap.client.ui.Tab;
 import com.github.gwtbootstrap.client.ui.TabPanel;
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -17,38 +14,32 @@ public abstract class TabContainer implements RequiresResize {
   static final String LEARN_PRONUNCIATION = "Learn Pronunciation";
   static final String PRACTICE = "Practice";
   private Widget container;
-  TabPanel tabPanel;
+ // private TabPanel tabPanel;
+  //private List<TabAndContent> tabs = new ArrayList<TabAndContent>();
 
-  TabAndContent makeTab(TabPanel toAddTo, IconType iconType, String label) {
-    Tab create = new Tab();
-    create.asWidget().getElement().setId("Tab_"+label);
-    create.setIcon(iconType);
-    create.setHeading(label);
-    toAddTo.add(create.asTabLink());
-
-    final DivWidget createContent = new DivWidget();
-    createContent.getElement().setId("Content_"+label);
-    createContent.addStyleName("positionRelative");
-    create.add(createContent);
-    zeroPadding(createContent);
-
-    return new TabAndContent(create, createContent);
-  }
-
-  void zeroPadding(Panel createContent) {
-    DOM.setStyleAttribute(createContent.getElement(), "paddingLeft", "0px");
-    DOM.setStyleAttribute(createContent.getElement(), "paddingRight", "0px");
+  /**
+   * @see mitll.langtest.client.custom.Navigation#getTabPanel(com.google.gwt.user.client.ui.Panel)
+   * @see mitll.langtest.client.custom.Navigation#getListOperations(mitll.langtest.shared.custom.UserList, String)
+   * @param tabPanel
+   * @param iconType
+   * @param label
+   * @return
+   */
+  TabAndContent makeTab(TabPanel tabPanel, IconType iconType, String label) {
+    TabAndContent tabAndContent = new TabAndContent(iconType, label);
+    tabPanel.add(tabAndContent.tab.asTabLink());
+    return tabAndContent;
   }
 
   /**
    * @param secondAndThird
    * @return
-   * @see mitll.langtest.client.LangTest#onModuleLoad2
+   * @see mitll.langtest.client.LangTest#resetClassroomState()
    */
   public Widget getNav(final Panel secondAndThird) {
     Panel container = new FlowPanel();
     container.getElement().setId("getNav_container");
-    Panel buttonRow = getButtonRow2(secondAndThird);
+    Panel buttonRow = getTabPanel(secondAndThird);
     buttonRow.getElement().setId("getNav_buttonRow");
 
     container.add(buttonRow);
@@ -60,20 +51,6 @@ public abstract class TabContainer implements RequiresResize {
   public Widget getContainer() {
     return container;
   }
-  protected abstract Panel getButtonRow2(Panel secondAndThird);
+  protected abstract Panel getTabPanel(Panel secondAndThird);
 
-  public static class TabAndContent {
-    public final Tab tab;
-    public final DivWidget content;
-
-    /**
-     * @param tab
-     * @param panel
-     * @see mitll.langtest.client.custom.TabContainer#makeTab(com.github.gwtbootstrap.client.ui.TabPanel, com.github.gwtbootstrap.client.ui.constants.IconType, String)
-     */
-    public TabAndContent(Tab tab, DivWidget panel) {
-      this.tab = tab;
-      this.content = panel;
-    }
-  }
 }
