@@ -56,9 +56,9 @@ import java.util.Map;
  */
 public class Navigation extends TabContainer implements RequiresResize {
   private static final String CHAPTERS = "Learn";
-  private static final String CONTENT = "Course Content";
+  private static final String CONTENT = CHAPTERS;//"Course Content";
   private static final String YOUR_LISTS = "Your Lists";
-  private static final String OTHERS_LISTS = "Other's Lists";
+  private static final String OTHERS_LISTS = "Visited Lists";
   private static final String PRACTICE = "Practice";
   public static final String REVIEW = "review";
   public static final String COMMENT = "comment";
@@ -70,7 +70,7 @@ public class Navigation extends TabContainer implements RequiresResize {
   private static final String POSSIBLE_DEFECTS = "Review";
   private static final String ITEMS_WITH_COMMENTS = "Items with comments";
   private static final String LEARN_PRONUNCIATION = "Learn Pronunciation";
-  private static final String REVIEW1 = "Defects";
+  private static final String REVIEW1 = "Fix Defects";
   private static final String REVIEWERS = "Reviewers";
   private static final String CREATE = "Create a New List";
   private static final String BROWSE = "Browse Lists";
@@ -140,9 +140,9 @@ public class Navigation extends TabContainer implements RequiresResize {
     avpHelper = new AVPHelper(service, feedback, userManager, controller);
 
     defectHelper = new ChapterNPFHelper(service, feedback, userManager, controller, true);
-    recorderHelper = new SimpleChapterNPFHelper(service, feedback, userManager, controller);
+    recorderHelper = new SimpleChapterNPFHelper(service, feedback, userManager, controller, listInterface);
 
-    contentHelper = new SimpleChapterNPFHelper(service, feedback, userManager, controller) {
+    contentHelper = new SimpleChapterNPFHelper(service, feedback, userManager, controller, listInterface) {
       protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
         return new GoodwaveExercisePanelFactory(service, feedback, controller, exerciseList, 1.0f) {
           @Override
