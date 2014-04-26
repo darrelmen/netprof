@@ -188,6 +188,7 @@ public class MailSupport {
     }
   }
 
+/*
   private void secureEmail(String recipientName, String recipientEmail, List<String> ccEmails,
                            String subject, String message, String email_transport, String email_server,
                            String email_username, String email_password) throws Exception {
@@ -202,6 +203,7 @@ public class MailSupport {
     transport.sendMessage(msg, msg.getAllRecipients());
     transport.close();
   }
+*/
 
   private Message makeMessage(Session session,
                               String recipientName, String recipientEmail,
