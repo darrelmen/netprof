@@ -115,7 +115,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     add(center);
 
     // score panel with gauge is on the right
-    if (widgets != null) {
+    if (widgets != null && !controller.getProps().isNoModel()) {
       add(widgets);
     }
     addUserRecorder(service, controller, center, screenPortion); // todo : revisit screen portion...
@@ -144,6 +144,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   }
 
   protected void nextWasPressed(ListInterface listContainer, CommonShell completedExercise) {
+    navigationHelper.enableNextButton(false);
     listContainer.loadNextExercise(completedExercise.getID());
   }
 
