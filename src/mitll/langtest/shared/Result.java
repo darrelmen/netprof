@@ -49,6 +49,7 @@ public class Result implements IsSerializable {
   public static final String AUDIO_TYPE_DEMO = "demo";
   public static final String AUDIO_TYPE_PRACTICE = "practice";
   public static final String AUDIO_TYPE_REVIEW = "review";
+  public static final String AUDIO_TYPE_RECORDER = "recorder";
 
   public Result() {}
 

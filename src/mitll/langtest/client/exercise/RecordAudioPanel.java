@@ -11,7 +11,9 @@ import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
+import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.Result;
 
 /**
  * A waveform record button and a play audio button.
@@ -50,6 +52,16 @@ public class RecordAudioPanel extends AudioPanel {
     this.exercisePanel = widgets;
     this.index = index;
     this.exercise = exercise;
+
+    AudioAttribute attribute =
+      audioType.equals(Result.AUDIO_TYPE_REGULAR) ? exercise.getRecordingsBy(controller.getUser(), true) :
+        audioType.equals(Result.AUDIO_TYPE_SLOW) ? exercise.getRecordingsBy(controller.getUser(), false) : null;
+/*    System.out.println("RecordAudioPanel for " + exercise.getID() +
+      " audio type " + audioType + " ref " + exercise.getRefAudio() + " path " + attribute);*/
+    if (attribute != null) {
+      this.audioPath = attribute.getAudioRef();
+    }
+
     addWidgets("", audioType);
   }
 
@@ -63,6 +75,8 @@ public class RecordAudioPanel extends AudioPanel {
   protected PlayAudioPanel makePlayAudioPanel(Widget toAdd, String playButtonSuffix, String audioType) {
     WaveformPostAudioRecordButton myPostAudioRecordButton = makePostAudioRecordButton(audioType);
     postAudioRecordButton = myPostAudioRecordButton;
+
+    System.out.println("makePlayAudioPanel : audio type " + audioType + " suffix '" +playButtonSuffix +"'");
     playAudioPanel = new MyPlayAudioPanel(recordImage1, recordImage2, exercisePanel, playButtonSuffix);
     myPostAudioRecordButton.setPlayAudioPanel(playAudioPanel);
 
@@ -124,7 +138,7 @@ public class RecordAudioPanel extends AudioPanel {
     if (postAudioRecordButton.hasValidAudio()) playAudioPanel.setEnabled(val);
   }
 
-  public void addPlayListener(PlayListener playListener) {  playAudioPanel.addPlayListener(playListener);  }
+  //public void addPlayListener(PlayListener playListener) {  playAudioPanel.addPlayListener(playListener);  }
 
   public void setExercise(CommonExercise exercise) {
     this.exercise = exercise;
