@@ -2,7 +2,6 @@ package mitll.langtest.server;
 
 import com.google.common.io.Files;
 import mitll.langtest.server.audio.AudioFileHelper;
-import mitll.langtest.server.database.DLIUserDAO;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.log4j.Logger;
