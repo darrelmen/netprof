@@ -723,7 +723,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     String slowAudioRef = mediaDir+File.separator+name+File.separator+ SLOW + ".wav";
 
     return new Exercise(REPEAT, name, content,
-        ensureForwardSlashes(fastAudioRef), ensureForwardSlashes(slowAudioRef), arabic, english);
+      arabic, english);
   }
 
   private String getImageContent(String flPhrase) {

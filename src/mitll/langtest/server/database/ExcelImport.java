@@ -47,6 +47,7 @@ import java.util.Set;
 public class ExcelImport implements ExerciseDAO {
   private static final Logger logger = Logger.getLogger(ExcelImport.class);
   private static final boolean INCLUDE_ENGLISH_SEMI_AS_DEFECT = true;
+  public static final boolean MARK_MISSING_AUDIO_AS_DEFECT = false;
 
   private final boolean isFlashcard;
 
@@ -69,9 +70,12 @@ public class ExcelImport implements ExerciseDAO {
   private UserListManager userListManager;
   private AddRemoveDAO addRemoveDAO;
   private File installPath;
-  private boolean collectSynonyms = true;
+ // private boolean collectSynonyms = true;
   boolean addDefects;
-  private AudioDAO audioDAO;
+  //private AudioDAO audioDAO;
+  private int unitIndex;
+  private int chapterIndex;
+  private int weekIndex;
 
   /**
    *
@@ -103,7 +107,10 @@ public class ExcelImport implements ExerciseDAO {
     this.skipSemicolons = serverProps.shouldSkipSemicolonEntries();
     this.audioOffset = serverProps.getAudioOffset();
     this.userListManager = userListManager;
-    collectSynonyms = this.serverProps.getCollectSynonyms();
+    this.unitIndex = serverProps.getUnitChapterWeek()[0];
+    this.chapterIndex = serverProps.getUnitChapterWeek()[1];
+    this.weekIndex = serverProps.getUnitChapterWeek()[2];
+  //  collectSynonyms = this.serverProps.getCollectSynonyms();
 
 /*    logger.debug("\n\n\n\n ---> ExcelImport : config " + relativeConfigDir +
       " media dir " +mediaDir + " slow missing " +missingSlowSet.size() + " fast " + missingFastSet.size());*/
@@ -145,15 +152,15 @@ public class ExcelImport implements ExerciseDAO {
   private Map<String, List<AudioAttribute>> exToAudio;
   @Override
   public void setAudioDAO(AudioDAO audioDAO) {
-    this.audioDAO = audioDAO;
+ //   this.audioDAO = audioDAO;
     exToAudio = audioDAO.getExToAudio();
     int count = 0;
     logger.debug("extoaudio now " + exToAudio.size());
-    for (String key : exToAudio.keySet()) {
+/*    for (String key : exToAudio.keySet()) {
       logger.debug("\tid '" +key+
         "'");
       if (count++ > 10) break;
-    }
+    }*/
   }
 
   /**
@@ -208,18 +215,13 @@ public class ExcelImport implements ExerciseDAO {
    */
   @Override
   public void addOverlay(CommonUserExercise userExercise) {
-    //logger.debug("addOverlay for " +userExercise);
     CommonExercise exercise = getExercise(userExercise.getID());
-    //logger.debug("\taddOverlay at " +userExercise.getID() + " found " +exercise);
+    logger.debug("\taddOverlay at " +userExercise.getID() + " found " +exercise);
 
     if (exercise == null) {
       logger.error("addOverlay : huh? can't find " + userExercise);
     }
     else {
-     // Exercise over = userExercise.toExercise();
-   //   over.setUnitToValue(exercise.getUnitToValue());
-      //logger.debug("\taddOverlay replacing with " +over + " and " +over.getTooltip());
-
       synchronized (this) {
         int i = exercises.indexOf(exercise);
         if (i == -1) {
@@ -230,14 +232,13 @@ public class ExcelImport implements ExerciseDAO {
         }
         idToExercise.put(userExercise.getID(), userExercise);
 
-        //logger.debug("addOverlay : after " + getExercise(userExercise.getID()));
+        logger.debug("addOverlay : after " + getExercise(userExercise.getID()));
       }
     }
   }
 
   public void add(CommonUserExercise ue) {
     synchronized (this) {
-     // Exercise exercise = ue.toExercise();
       exercises.add(ue);
       idToExercise.put(ue.getID(), ue);
     }
@@ -360,9 +361,6 @@ public class ExcelImport implements ExerciseDAO {
     int colIndexOffset = -1;
 
     int transliterationIndex = -1;
-    int unitIndex = -1;
-    int chapterIndex = -1;
-    int weekIndex = -1;
     int weightIndex = -1;
     int meaningIndex = -1;
     int idIndex = -1;
@@ -379,6 +377,7 @@ public class ExcelImport implements ExerciseDAO {
     try {
       Iterator<Row> iter = sheet.rowIterator();
       Map<Integer, CellRangeAddress> rowToRange = getRowToRange(sheet);
+      boolean gotUCW = unitIndex != -1;
       for (; iter.hasNext(); ) {
         Row next = iter.next();
         if (id > maxExercises) break;
@@ -404,6 +403,17 @@ public class ExcelImport implements ExerciseDAO {
               colIndexOffset = columns.indexOf(col);
             } else if (colNormalized.contains("transliteration")) {
               transliterationIndex = columns.indexOf(col);
+            } else if (gotUCW) {
+              if(columns.indexOf(col) == unitIndex){
+                  predefinedTypeOrder.add(col);
+                  unitName = col;
+              } else if(columns.indexOf(col) == chapterIndex){
+                  predefinedTypeOrder.add(col);
+                  chapterName = col;
+              } else if(columns.indexOf(col) == weekIndex){
+                  predefinedTypeOrder.add(col);
+                  weekName = col;
+              }
             } else if (colNormalized.contains("unit") || colNormalized.contains("book")) {
               unitIndex = columns.indexOf(col);
               predefinedTypeOrder.add(col);
@@ -483,16 +493,15 @@ public class ExcelImport implements ExerciseDAO {
               semis++;
               id++;     // TODO is this the right thing for Dari and Farsi???
             } else {
-              String meaning = getCell(next, meaningIndex);
-              String givenIndex = getCell(next, idIndex);
-              String context = getCell(next, contextIndex);
-
               if (inMergedRow && !lastRowValues.isEmpty()) {
                 if (translit.length() == 0) {
                   translit = lastRowValues.get(2);
                 }
               }
 
+              String meaning = getCell(next, meaningIndex);
+              String givenIndex = getCell(next, idIndex);
+              String context = getCell(next, contextIndex);
               checkForSemicolons(fieldToDefect, english, foreignLanguagePhrase, translit);
 
               boolean expectFastAndSlow = idIndex == -1;
@@ -504,11 +513,12 @@ public class ExcelImport implements ExerciseDAO {
 
                 // keep track of synonyms (or better term)
                 rememberExercise(exercises, englishToExercises, imported);
-                if (!imported.hasRefAudio()) {
+                if (MARK_MISSING_AUDIO_AS_DEFECT && !imported.hasRefAudio()) {
                   fieldToDefect.put("refAudio", "missing reference audio");
                 }
-                idToDefectMap.put(imported.getID(), fieldToDefect);
-               // addDefects(fieldToDefect, imported);
+                if (!fieldToDefect.isEmpty()) {
+                  idToDefectMap.put(imported.getID(), fieldToDefect);
+                }
               } else {
                 if (logging++ < 3) {
                   logger.info("skipping exercise " + imported.getID() + " : '" + imported.getEnglish() + "' since no audio.");
@@ -528,9 +538,164 @@ public class ExcelImport implements ExerciseDAO {
           }
         }
       }
+    } catch (Exception e) {
+      logger.error("got " + e, e);
+    }
 
-/*      if(collectSynonyms)
-         addSynonyms(englishToExercises);*/
+    logger.info("max exercise id = " + id);
+    if (skipped > 0) {
+      logger.info("Skipped " + skipped + " entries with missing audio. " + (100f * ((float) skipped) / (float) id) + "%");
+    }
+    if (englishSkipped > 0) {
+      logger.info("Skipped " + englishSkipped + " entries with missing english. " + (100f * ((float) englishSkipped) / (float) id) + "%");
+    }
+    if (semis > 0) {
+      logger.info("Skipped " + semis + " entries with semicolons or " + (100f * ((float) semis) / (float) id) + "%");
+    }
+
+    // put the skips at the end
+    if (serverProps.isClassroomMode()) {
+      Collection<CommonExercise> commonExercises = readFromSheetSkips(sheet, id);
+      exercises.addAll(commonExercises);
+    }
+    return exercises;
+  }
+
+  private Collection<CommonExercise> readFromSheetSkips(Sheet sheet, int id) {
+    List<CommonExercise> exercises = new ArrayList<CommonExercise>();
+    boolean gotHeader = false;
+
+    int colIndexOffset = -1;
+
+    int transliterationIndex = -1;
+    int weightIndex = -1;
+    int meaningIndex = -1;
+    int idIndex = -1;
+    int contextIndex = -1;
+    int audioIndex = -1;
+    Map<String, List<CommonExercise>> englishToExercises = new HashMap<String, List<CommonExercise>>();
+    int semis = 0;
+    int skipped = 0;
+    int englishSkipped = 0;
+    String unitName = null, chapterName = null, weekName = null;
+    try {
+      Iterator<Row> iter = sheet.rowIterator();
+      //Map<Integer, CellRangeAddress> rowToRange = getRowToRange(sheet);
+      boolean gotUCW = unitIndex != -1;
+      for (; iter.hasNext(); ) {
+        Row next = iter.next();
+        Map<String,String> fieldToDefect = new HashMap<String, String>();
+        List<String> columns = new ArrayList<String>();
+        if (!gotHeader) {
+          Iterator<Cell> cellIterator = next.cellIterator();
+          while (cellIterator.hasNext()) {
+            Cell next1 = cellIterator.next();
+            columns.add(next1.toString().trim());
+          }
+        }
+
+        if (!gotHeader) {
+          List<String> predefinedTypeOrder = new ArrayList<String>();
+          for (String col : columns) {
+            String colNormalized = col.toLowerCase();
+            //  colNormalized = colNormalized.toLowerCase()
+            if (colNormalized.startsWith("Word".toLowerCase())) {
+              gotHeader = true;
+              colIndexOffset = columns.indexOf(col);
+            } else if (colNormalized.contains("transliteration")) {
+              transliterationIndex = columns.indexOf(col);
+            } else if (gotUCW) {
+              if(columns.indexOf(col) == unitIndex){
+                  predefinedTypeOrder.add(col);
+                  unitName = col;
+              } else if(columns.indexOf(col) == chapterIndex){
+                  predefinedTypeOrder.add(col);
+                  chapterName = col;
+              } else if(columns.indexOf(col) == weekIndex){
+                  predefinedTypeOrder.add(col);
+                  weekName = col;
+              }
+            } else if (colNormalized.contains("unit") || colNormalized.contains("book")) {
+              unitIndex = columns.indexOf(col);
+              predefinedTypeOrder.add(col);
+              unitName = col;
+            } else if (colNormalized.contains("chapter") || colNormalized.contains("lesson")) {
+              chapterIndex = columns.indexOf(col);
+              predefinedTypeOrder.add(col);
+              chapterName = col;
+            } else if (colNormalized.contains("week")) {
+              weekIndex = columns.indexOf(col);
+              predefinedTypeOrder.add(col);
+              weekName = col;
+            } else if (colNormalized.contains("weight")) {
+              weightIndex = columns.indexOf(col);
+            } else if (colNormalized.contains("meaning")) {
+              meaningIndex = columns.indexOf(col);
+            } else if (colNormalized.contains("id")) {
+              idIndex = columns.indexOf(col);
+            } else if (colNormalized.contains("context")) {
+              contextIndex = columns.indexOf(col);
+            } else if (colNormalized.contains("audio_index")) {
+              audioIndex = columns.indexOf(col);
+            }
+          }
+
+          logger.info("columns word index " + colIndexOffset +
+              " week " + weekIndex + " unit " + unitIndex + " chapter " + chapterIndex +
+              " meaning " + meaningIndex +
+              " transliterationIndex " + transliterationIndex +
+              " contextIndex " + contextIndex +
+              " id " + idIndex + " audio " + audioIndex
+          );
+        } else {
+          int colIndex = colIndexOffset;
+          String english = getCell(next, colIndex++).trim();
+          String foreignLanguagePhrase = getCell(next, colIndex).trim();
+          String translit = getCell(next, transliterationIndex);
+
+          // remove starting or ending tics
+          foreignLanguagePhrase = cleanTics(foreignLanguagePhrase);
+
+          //logger.info("for row " + next.getRowNum() + " english = " + english + " in merged " + inMergedRow + " last row " + lastRowValues.size());
+
+
+          if (english.length() == 0) {
+            if (serverProps.isClassroomMode()) {
+              //english = "NO ENGLISH";    // DON'T DO THIS - it messes up the indexing.
+              fieldToDefect.put("english", "missing english");
+            }
+            //logger.info("-------- > for row " + next.getRowNum() + " english is blank ");
+            else {
+              englishSkipped++;
+            }
+          }
+          if (gotHeader && english.length() > 0) {
+             if (skipSemicolons && (foreignLanguagePhrase.contains(";") || translit.contains(";"))) {
+              String meaning = getCell(next, meaningIndex);
+              String givenIndex = getCell(next, idIndex);
+              String context = getCell(next, contextIndex);
+              checkForSemicolons(fieldToDefect, english, foreignLanguagePhrase, translit);
+
+              boolean expectFastAndSlow = idIndex == -1;
+              String idToUse = expectFastAndSlow ? "" + id++ : givenIndex;
+              CommonExercise imported = getExercise(idToUse, weightIndex, next, english, foreignLanguagePhrase, translit,
+                meaning, context, false, (audioIndex != -1) ? getCell(next, audioIndex) : "");
+              if (imported.hasRefAudio() || !shouldHaveRefAudio) {  // skip items without ref audio, for now.
+                recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported, unitName, chapterName, weekName);
+
+                // keep track of synonyms (or better term)
+                rememberExercise(exercises, englishToExercises, imported);
+                if (MARK_MISSING_AUDIO_AS_DEFECT && !imported.hasRefAudio()) {
+                  fieldToDefect.put("refAudio", "missing reference audio");
+                }
+                if (!fieldToDefect.isEmpty()) {
+                  idToDefectMap.put(imported.getID(), fieldToDefect);
+                }
+              }
+            }
+          }
+        }
+      }
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
@@ -565,17 +730,21 @@ public class ExcelImport implements ExerciseDAO {
         }
       }
     }
+    else {
+      logger.info("NOT Automatically adding " + exTofieldToDefect.size() + " defects");
+
+    }
   }
 
   private void checkForSemicolons(Map<String, String> fieldToDefect, String english, String foreignLanguagePhrase, String translit) {
     if (foreignLanguagePhrase.contains(";")) {
-      fieldToDefect.put(QCNPFExercise.FOREIGN_LANGUAGE,"contains semicolon - should this item be split?");
+      fieldToDefect.put(QCNPFExercise.FOREIGN_LANGUAGE, "contains semicolon - should this item be split?");
     }
     if (translit.contains(";")) {
-      fieldToDefect.put(QCNPFExercise.TRANSLITERATION,"contains semicolon - should this item be split?");
+      fieldToDefect.put(QCNPFExercise.TRANSLITERATION, "contains semicolon - should this item be split?");
     }
     if (INCLUDE_ENGLISH_SEMI_AS_DEFECT && english.contains(";")) {
-      fieldToDefect.put(QCNPFExercise.ENGLISH,"contains semicolon - should this item be split?");
+      fieldToDefect.put(QCNPFExercise.ENGLISH, "contains semicolon - should this item be split?");
     }
   }
 
@@ -722,7 +891,7 @@ public class ExcelImport implements ExerciseDAO {
     Exercise imported;
     List<String> translations = new ArrayList<String>();
     if (foreignLanguagePhrase.length() > 0) {
-      translations.addAll(Arrays.asList(foreignLanguagePhrase.split(";")));
+      translations.add(foreignLanguagePhrase);//Arrays.asList(foreignLanguagePhrase.split(";")));
     }
     if (isFlashcard) {
       imported = new Exercise("flashcardStimulus", id, english, translations, english);
@@ -740,9 +909,9 @@ public class ExcelImport implements ExerciseDAO {
     List<String> inOrderTranslations = new ArrayList<String>(translations);
     imported.setRefSentences(inOrderTranslations);
 
-    if (weightIndex != -1) {
+  //  if (weightIndex != -1) {
       //imported.setWeight(getNumericCell(next, weightIndex));
-    }
+ //   }
     return imported;
   }
 
@@ -845,22 +1014,45 @@ public class ExcelImport implements ExerciseDAO {
       }
     }
 
+    attachAudio(id, imported);
+
+    return imported;
+  }
+
+  /**
+   * TODO : rationalize media path -- don't force hack on bestAudio replacement
+   * Why does it sometimes have the config dir on the front?
+   * @param id
+   * @param imported
+   */
+  private void attachAudio(String id, Exercise imported) {
     int c = 0;
+    String mediaDir1 = mediaDir.replaceAll("bestAudio","");
+    //logger.debug("media dir " + mediaDir1);
+
     if (exToAudio.containsKey(id) || exToAudio.containsKey(id+"/1") || exToAudio.containsKey(id+"/2")) {
-      for (String idq : Arrays.asList(id+"/1",id+"/2")) {
+      for (String idq : Arrays.asList(id)) {
         List<AudioAttribute> audioAttributes = exToAudio.get(idq);
 
         if (!audioAttributes.isEmpty()) {
           for (AudioAttribute audio : audioAttributes) {
-            File test = new File(installPath, mediaDir + File.separator + audio.getAudioRef());
+            String child = mediaDir1 + File.separator + audio.getAudioRef();
+          /*  if (child.contains("bestAudio\bestAudio")) {
+              child = child.replaceAll("bestAudio\\bestAudio","bestAudio");
+            }*/
+            File test = new File(installPath, child);
 
             boolean exists = test.exists();
+            if (!exists) {
+              test = new File(installPath, audio.getAudioRef());
+              child = audio.getAudioRef();
+            }
             if (exists) {
-              audio.setAudioRef(mediaDir + File.separator + audio.getAudioRef());   // remember to prefix the path
+              audio.setAudioRef(child);   // remember to prefix the path
               imported.addAudio(audio);
             } else {
               c++;
-              if (c < 10) logger.debug("file " + test.getAbsolutePath() + "does not exist");
+              if (c < 5) logger.warn("file " + test.getAbsolutePath() + " does not exist - " + audio.getAudioRef());
             }
           }
         }
@@ -870,8 +1062,6 @@ public class ExcelImport implements ExerciseDAO {
     else {
      // logger.debug("can't find '" + id + "' in " + exToAudio.keySet().size() + " keys, e.g. " + exToAudio.keySet().iterator().next());
     }
-
-    return imported;
   }
 
   /**
@@ -914,9 +1104,9 @@ public class ExcelImport implements ExerciseDAO {
     }
   }
 
-  private double getNumericCell(Row next, int col) {
+/*  private double getNumericCell(Row next, int col) {
     Cell cell = next.getCell(col);
     if (cell == null) return -1;
     return (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) ? cell.getNumericCellValue() : -1;
-  }
+  }*/
 }
