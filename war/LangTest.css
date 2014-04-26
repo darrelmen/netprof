@@ -654,10 +654,17 @@ fieldset > legend {
 }
 
 .userNPFContent {
+     margin-top: 2px;
+     border-radius: 3px 3px 3px 3px;
+     box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
+     padding: 5px 110px 5px 5px;
+ }
+
+.userNPFContentLightPadding {
     margin-top: 2px;
     border-radius: 3px 3px 3px 3px;
     box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
-    padding: 5px 110px 5px 5px;
+    padding: 5px 5px 5px 5px;
 }
 
 .shadowBorder {
@@ -942,6 +949,36 @@ td > h5 {
     padding-top : 5px;
 }
 
+.cogStyle {
+    list-style: none outside none;
+}
+
 .englishFont {
     font-family: georgia,"times new roman",times,serif;
+}
+
+.minWidthRecordButton {
+    min-width: 60px;
+}
+
+body>.dropdown-popup {
+    border: 1px solid #ddd;
+    background-clip: padding-box;
+    border-radius: 6px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+body>.dropdown-popup a:link {
+    color: black;
+}
+
+body>.dropdown-popup a:HOVER,
+body>.dropdown-popup .nav-list>li.active>a  {
+    background-color: #0081C2;
+    background-image: linear-gradient(to bottom, #0088CC, #0077B3);
+    background-repeat: repeat-x;
+    color: #FFFFFF;
+    outline: 0 none;
+    text-decoration: none;
+    text-shadow: none;
 }
