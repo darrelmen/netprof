@@ -908,7 +908,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
       refSentence = refSentence.substring(0, refSentence.length() - " or ".length());
     }*/
   //  return refSentence + (hasSynonyms ? "" : translit);
-    return refSentence + (false ? "" : translit);
+    return refSentence + /*(false ? "" :*/ translit;
   }
 
 /*  private String getAltAnswers(List<Exercise.QAPair> questions) {
