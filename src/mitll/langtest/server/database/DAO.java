@@ -132,6 +132,13 @@ public class DAO {
     statement.close();
   }
 
+  protected void addBoolean(Connection connection, String table, String col) throws SQLException {
+    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " +
+      table + " ADD " + col + " BOOLEAN");
+    statement.execute();
+    statement.close();
+  }
+
   /**
    * Does not seem to work with h2
    * @param connection
