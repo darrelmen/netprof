@@ -21,19 +21,18 @@ public class ChapterNPFHelper extends NPFHelper {
    * @param feedback
    * @param userManager
    * @param controller
+   * @param showQC
    */
   public ChapterNPFHelper(final LangTestDatabaseAsync service, final UserFeedback feedback,
-                          final UserManager userManager, final ExerciseController controller) {
-    super(service, feedback, userManager, controller);
+                          final UserManager userManager, final ExerciseController controller, final boolean showQC) {
+    super(service, feedback, userManager, controller, showQC);
     final NPFHelper outer = this;
     this.flexListLayout = new FlexListLayout(service,feedback,userManager,controller) {
       @Override
       protected ExercisePanelFactory getFactory(PagingExerciseList exerciseList, String instanceName) {
-        return outer.getFactory(exerciseList, instanceName);
+        return outer.getFactory(exerciseList, instanceName, showQC);
       }
     };
-
-    System.out.println(getClass() + " : ChapterNPFHelper flexListLayout " + flexListLayout );
   }
 
   /**
@@ -43,7 +42,7 @@ public class ChapterNPFHelper extends NPFHelper {
    * @return
    */
   protected Panel doInternalLayout(UserList ul, String instanceName) {
-    System.out.println(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
+   // System.out.println(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
     Panel widgets = flexListLayout.doInternalLayout(ul, instanceName);
     npfExerciseList = flexListLayout.npfExerciseList;
     return widgets;
