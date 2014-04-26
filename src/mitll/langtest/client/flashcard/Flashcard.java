@@ -1,6 +1,7 @@
 package mitll.langtest.client.flashcard;
 
 import com.github.gwtbootstrap.client.ui.Dropdown;
+import com.github.gwtbootstrap.client.ui.Icon;
 import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.Paragraph;
@@ -19,6 +20,10 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.shared.User;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Does fancy font sizing depending on available width...
@@ -28,7 +33,7 @@ public class Flashcard implements RequiresResize {
   private static final double MAX_FONT_EM = 1.8d;
   private static final int SLOP = 55;
   private static final String NEW_PRO_F1_PNG = "NewProF1.png";
-  private static final String NEW_PRO_F2_PNG = "NewProF2.png";
+  //private static final String NEW_PRO_F2_PNG = "NewProF2.png";
   private final boolean isAnonymous;
   private Paragraph appName;
   private Image flashcardImage;
@@ -59,16 +64,33 @@ public class Flashcard implements RequiresResize {
                                 ClickHandler monitoring,
                                 ClickHandler events) {
     return getHeaderRow(splashText, isBeta,NEW_PRO_F1_PNG, PRONUNCIATION_FEEDBACK, userName, browserInfo, logoutClickHandler,
-      users, results, monitoring,events);
+      users, results, monitoring,events, new ArrayList<User.Permission>());
   }
 
+  /**
+   * @see mitll.langtest.client.LangTest#makeHeaderRow()
+   * @param splashText
+   * @param isBeta
+   * @param appIcon
+   * @param appTitle
+   * @param userName
+   * @param browserInfo
+   * @param logoutClickHandler
+   * @param users
+   * @param results
+   * @param monitoring
+   * @param events
+   * @param permissions
+   * @return
+   */
   public Panel getHeaderRow(String splashText, boolean isBeta, String appIcon, String appTitle, String userName,
                             HTML browserInfo,
                             ClickHandler logoutClickHandler,
                             ClickHandler users,
                             ClickHandler results,
                             ClickHandler monitoring,
-                            ClickHandler events) {
+                            ClickHandler events,
+                            Collection<User.Permission> permissions) {
     HorizontalPanel headerRow = new HorizontalPanel();
     headerRow.setWidth("100%");
     headerRow.addStyleName("headerBackground");
@@ -108,14 +130,26 @@ public class Flashcard implements RequiresResize {
     if (!isAnonymous || adminView) {
       hp.add(userNameWidget);
     }
-    Dropdown w = makeMenu(users, results, monitoring,events);
 
+    if (permissions.contains(User.Permission.QUALITY_CONTROL)) {
+      hp.add(new Icon(IconType.EDIT));
+    }
+
+    if (permissions.contains(User.Permission.RECORD_AUDIO)) {
+      hp.add(new Icon(IconType.MICROPHONE));
+    }
+
+    // add log out/admin options menu
+   // NavPills container = new NavPills();
+    Dropdown menu = makeMenu(users, results, monitoring,events);
+    menu.addStyleName("cogStyle");
+    //container.add(menu);
     NavLink widget1 = new NavLink("Log Out");
     widget1.addClickHandler(logoutClickHandler);
-    w.add(widget1);
+    menu.add(widget1);
 
     if (!isAnonymous || adminView) {
-      hp.add(w);
+      hp.add(menu);
     }
 
     browserInfo.addStyleName("leftFiveMargin");
@@ -146,7 +180,7 @@ public class Flashcard implements RequiresResize {
   }
 
   /**
-   * @see #getHeaderRow(String, boolean, String, String, String, com.google.gwt.user.client.ui.HTML, com.google.gwt.event.dom.client.ClickHandler, com.google.gwt.event.dom.client.ClickHandler, com.google.gwt.event.dom.client.ClickHandler, com.google.gwt.event.dom.client.ClickHandler)
+   * @see #getHeaderRow
    * @param users
    * @param results
    * @param monitoring
@@ -219,22 +253,4 @@ public class Flashcard implements RequiresResize {
   //  System.out.println("setFontWidth : Setting font size to " + fontsize);
     DOM.setStyleAttribute(appName.getElement(), "fontSize", fontsize);
   }
-
-/*
-  public void showFlashHelp(final LangTest langTest, boolean isFlashcard) {
-    final PropertyHandler props = langTest.getProps();
-      List<String> msgs = new ArrayList<String>();
-      msgs.add(isFlashcard ? "Practice your vocabulary by saying the matching " + props.getLanguage() + " phrase.":"Listen to the audio, then answer the question below.");
-      msgs.add("Press the space bar to begin recording your answer.");
-      msgs.add("Release the space bar to end recording.");
-      DialogHelper dialogHelper = new DialogHelper(false);
-      dialogHelper.showErrorMessage("Help", msgs);
-  }
-*/
-
-/*  public void setAppTitle(String appTitle) {
-    appName.setText(*//*"<span>" + *//*appTitle*//* + "</span>"*//*);
-  //  this.appTitle = appTitle;
-  }*/
-
 }
