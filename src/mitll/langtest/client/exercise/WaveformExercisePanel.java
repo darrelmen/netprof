@@ -148,6 +148,7 @@ public class WaveformExercisePanel extends ExercisePanel {
    *
    * @param controller
    * @param completedExercise
+   * @see mitll.langtest.client.exercise.NavigationHelper#clickNext(ExerciseController, mitll.langtest.shared.CommonExercise)
    */
   @Override
   public void postAnswers(ExerciseController controller, CommonExercise completedExercise) {
