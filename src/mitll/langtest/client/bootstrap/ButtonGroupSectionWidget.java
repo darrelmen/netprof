@@ -30,7 +30,7 @@ class ButtonGroupSectionWidget implements SectionWidget {
   private final Set<Button> selected = new HashSet<Button>();
   private final ButtonContainer buttons = new ButtonContainer();
   private String color;
-  private final boolean debug = true;
+  private final boolean debug = false;
 
   public ButtonGroupSectionWidget(String type) {
     this.type = type;
@@ -218,33 +218,6 @@ class ButtonGroupSectionWidget implements SectionWidget {
     return enabledPath;
   }
 
-  /**
-   * get parent of each selected button
-   * get siblings
-   * get children of siblings
-   * deselect children, recursively
-   *
-   * @paramx buttonsByName
-   */
-/*  private void disableChildrenOfSiblings(Collection<Button> buttonsByName) {
-    if (debug) System.out.println("disableChildrenOfSiblings finding siblings of " + buttonsByName);
-
-    for (Button b : buttonsByName) {
-      List<FlexSectionExerciseList.ButtonWithChildren> siblings = ((FlexSectionExerciseList.ButtonWithChildren) b).getSiblings();
-      if (debug) System.out.println("disableChildrenOfSiblings " + b + " has " + siblings.size() + " siblings");
-      for (FlexSectionExerciseList.ButtonWithChildren sibling : siblings) {
-
-        if (debug) System.out.println("\tdisableChildrenOfSiblings sibling " + sibling);
-        for (FlexSectionExerciseList.ButtonWithChildren toDisable : sibling.getButtonChildren()) {
-          if (debug) System.out.println("\t\tdisableChildrenOfSiblings sibling child " + toDisable);
-
-          disableButton(toDisable);
-        }
-      }
-      //enableParentPath((FlexSectionExerciseList.ButtonWithChildren)b);
-    }
-  }*/
-
   private void clearExistingSelections(Collection<String> sections) {
     Collection<Button> toSelectSet = buttons.getButtonsByName(sections);
     for (Button unselectCandidate : buttons.getButtons()) {
@@ -288,12 +261,12 @@ class ButtonGroupSectionWidget implements SectionWidget {
     List<FlexSectionExerciseList.ButtonWithChildren> buttonChildren = bb.getButtonChildren();
     if (!buttonChildren.isEmpty()) {
       childGroup = buttonChildren.iterator().next().getButtonGroup();
-      System.out.println("enableChildrenButtons : " + this + " child group " + childGroup + " and recursing over " + buttonChildren.size() + " children");
+      if (debug) System.out.println("enableChildrenButtons : " + this + " child group " + childGroup + " and recursing over " + buttonChildren.size() + " children");
       childGroup.buttons.rememberEnabled(buttonChildren, active);
 
       // recurse!
       for (FlexSectionExerciseList.ButtonWithChildren childButton : buttonChildren) {
-        System.out.println("\tenableChildrenButtons : " + this + " recurse " + childButton);
+        if (debug) System.out.println("\tenableChildrenButtons : " + this + " recurse " + childButton);
 
         enableChildrenButtons(childButton, active);
       }
@@ -303,18 +276,6 @@ class ButtonGroupSectionWidget implements SectionWidget {
     return childGroup;
   }
 
-/*  private void disableButton(FlexSectionExerciseList.ButtonWithChildren toDisable) {
-    ButtonGroupSectionWidget buttonGroup = toDisable.getButtonGroup();
-    if (buttonGroup == null) {
-      System.out.println("disableButton : " + this + " huh? " + toDisable + " has no group?");
-    } else {
-      buttonGroup.buttons.disableButton(toDisable);
-    }
-    for (FlexSectionExerciseList.ButtonWithChildren child : toDisable.getButtonChildren()) {
-      disableButton(child);
-    }
-  }*/
-
   private void recurseShowEnabled() {
     buttons.showEnabled();
     FlexSectionExerciseList.ButtonWithChildren firstButton = buttons.getFirstButton();
@@ -323,9 +284,7 @@ class ButtonGroupSectionWidget implements SectionWidget {
       System.out.println("recurseShowEnabled : " + this + " recurse on " + firstButton.getButtonGroup());
 
       firstChild.getButtonGroup().recurseShowEnabled();
-    } /*else {
-      System.out.println("\trecurseShowEnabled : " + this + " has no children.");
-    }*/
+    }
   }
 
   /**
