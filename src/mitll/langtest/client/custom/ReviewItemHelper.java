@@ -36,11 +36,11 @@ public class ReviewItemHelper extends NPFHelper {
                           final HasText itemMarker,
                           final ListInterface predefinedContent,
                           NPFHelper npfHelper) {
-    super(service, feedback, userManager, controller);
+    super(service, feedback, userManager, controller, true);
     this.itemMarker = itemMarker;
     this.predefinedContent = predefinedContent;
     this.npfHelper = npfHelper;
-    System.out.println(getClass() + " : ReviewItemHelper ");
+  //  System.out.println(getClass() + " : ReviewItemHelper ");
   }
 
   /**
@@ -52,7 +52,7 @@ public class ReviewItemHelper extends NPFHelper {
    * @return
    */
   protected Panel doInternalLayout(final UserList ul, String instanceName) {
-    System.out.println(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
+   // System.out.println(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
 
     this.flexListLayout = new FlexListLayout(service,feedback,userManager,controller) {
       @Override
