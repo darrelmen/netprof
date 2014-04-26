@@ -3,20 +3,17 @@ package mitll.langtest.client.list;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.ControlLabel;
 import com.github.gwtbootstrap.client.ui.Controls;
+import com.github.gwtbootstrap.client.ui.Icon;
 import com.github.gwtbootstrap.client.ui.base.TextBox;
+import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -331,6 +328,22 @@ public class PagingExerciseList extends ExerciseList {
     return es;
   }
 
+  protected void askServerForExercise(String itemID) {
+    System.out.println("ExerciseList.askServerForExercise id = " + itemID + " instance " + instance);
+    //RootPanel.get().setStyleName("waitCursor");
+    if (itemID.equals(pagingContainer.getClickedExerciseID())) {
+      waitPopup = new DecoratedPopupPanel();
+      waitPopup.setAutoHideEnabled(false);
+      //waitPopup.add(new Image(LangTest.LANGTEST_IMAGES + "animated_progress.gif"));
+      waitPopup.add(new Icon(IconType.SPINNER));
+
+      waitPopup.setPopupPosition(pagingContainer.getMouseX() + 12, pagingContainer.getMouseY() - 10);
+      waitPopup.show();
+    }
+
+    super.askServerForExercise(itemID);
+  }
+
   @Override
   public void onResize() {
     super.onResize();
@@ -342,7 +355,6 @@ public class PagingExerciseList extends ExerciseList {
 
   public void setUserListID(long userListID) {
     //System.out.println("PagingExerciseList.setUserListID " +userListID + " for " +instance);
-
     this.userListID = userListID;
   }
 
