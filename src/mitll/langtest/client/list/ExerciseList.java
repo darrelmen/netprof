@@ -9,16 +9,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
-import com.google.gwt.user.client.ui.DecoratedPopupPanel;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.ProvidesResize;
-import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.custom.EditItem;
@@ -113,7 +104,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   @Override
   protected void onUnload() {
     super.onUnload();
-
   //  System.out.println("ExerciseList : History onUnload  " + instance);
 
     handlerRegistration.removeHandler();
@@ -133,7 +123,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   /**
-   * @see mitll.langtest.client.LangTest#setFactory
+   * @see mitll.langtest.client.LangTest#reallySetFactory()
    * @param factory
    * @param user
    * @param expectedGrades
@@ -422,7 +412,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   private void noMatches() {
     String message = isEmpty() ? "No items yet." : "No matches found. Please try a different search.";
-    final PopupPanel pleaseWait = showPleaseWait(message);
+    final PopupPanel pleaseWait = showPleaseWait(message, null);
 
     Timer t = new Timer() {
       @Override
@@ -435,11 +425,13 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     t.schedule(3000);
   }
 
-  private PopupPanel showPleaseWait(String message) {
-    final PopupPanel pleaseWait = new PopupPanel();
+  protected PopupPanel showPleaseWait(String message, UIObject widget) {
+    final PopupPanel pleaseWait = new DecoratedPopupPanel();
     pleaseWait.setAutoHideEnabled(false);
     pleaseWait.add(new HTML(message));
-    pleaseWait.center();
+    if (widget == null) {
+      pleaseWait.center();
+    }
     return pleaseWait;
   }
 
@@ -531,6 +523,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
   }
 
+  protected PopupPanel waitPopup;
   /**
    * @see #checkAndAskServer(String)
    * @param itemID
@@ -543,6 +536,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   private class ExerciseAsyncCallback implements AsyncCallback<CommonExercise> {
     @Override
     public void onFailure(Throwable caught) {
+      if (waitPopup != null) waitPopup.hide();
       if (caught instanceof IncompatibleRemoteServiceException) {
         Window.alert("This application has recently been updated.\nPlease refresh this page, or restart your browser." +
           "\nIf you still see this message, clear your cache. (" +caught.getMessage()+
@@ -557,6 +551,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
     @Override
     public void onSuccess(CommonExercise result)  {
+      if (waitPopup != null)  waitPopup.hide();
+
       if (result == null) {
         Window.alert("Unfortunately there's a configuration error and we can't find this exercise.");
       }
