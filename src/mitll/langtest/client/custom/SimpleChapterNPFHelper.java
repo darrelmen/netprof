@@ -7,6 +7,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.WaveformExercisePanel;
+import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
@@ -28,6 +29,7 @@ class SimpleChapterNPFHelper implements RequiresResize {
 
   protected final UserFeedback feedback;
   protected PagingExerciseList npfExerciseList;
+  ListInterface predefinedContentList;
 
   /**
    * @see Navigation#Navigation
@@ -36,11 +38,13 @@ class SimpleChapterNPFHelper implements RequiresResize {
    * @param userManager
    * @param controller
    */
-  public SimpleChapterNPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager, ExerciseController controller) {
+  public SimpleChapterNPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager, ExerciseController controller,
+                                ListInterface predefinedContentList) {
     this.service = service;
     this.feedback = feedback;
     this.controller = controller;
     this.userManager = userManager;
+    this.predefinedContentList = predefinedContentList;
 
     final SimpleChapterNPFHelper outer = this;
     this.flexListLayout = new FlexListLayout(service,feedback,userManager,controller) {
@@ -116,8 +120,18 @@ class SimpleChapterNPFHelper implements RequiresResize {
   protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
     return new ExercisePanelFactory(service, feedback, controller, exerciseList) {
       @Override
-      public Panel getExercisePanel(CommonExercise e) {
-        return new WaveformExercisePanel(e, service, feedback, controller, exerciseList);
+      public Panel getExercisePanel(final CommonExercise e) {
+        return new WaveformExercisePanel(e, service, feedback, controller, exerciseList) {
+          @Override
+          public void postAnswers(ExerciseController controller, CommonExercise completedExercise) {
+            super.postAnswers(controller, completedExercise);
+            if (e.getID().equals(predefinedContentList.getCurrentExerciseID())) {
+              System.out.println( "reloading "+ e.getID());
+
+              predefinedContentList.loadExercise(e.getID());
+            }
+          }
+        };
       }
     };
   }
