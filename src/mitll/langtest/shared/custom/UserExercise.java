@@ -1,11 +1,11 @@
 package mitll.langtest.shared.custom;
 
+import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.AudioExercise;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.ExerciseShell;
 
 import java.util.Date;
@@ -85,22 +85,23 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
    */
   public UserExercise(long uniqueID, String exerciseID, long creator, String english, String foreignLanguage,
                       String transliteration, String context,
-                      String refAudio, String slowAudioRef, boolean isOverride,
+                   //   String refAudio, String slowAudioRef,
+                      boolean isOverride,
                       Map<String, String> unitToValue, Date modifiedDate
   ) {
     this(uniqueID, exerciseID, creator, english, foreignLanguage, transliteration);
-    setRefAudio(refAudio);
-    setSlowRefAudio(slowAudioRef);
+    //setRefAudio(refAudio);
+   // setSlowRefAudio(slowAudioRef);
     setUnitToValue(unitToValue);
     this.isOverride = isOverride;
     this.modifiedDate = modifiedDate;
     this.context = context;
   }
 
-    /**
-     * @see mitll.langtest.client.custom.NPFExercise#populateListChoices
-     * @param exercise
-     */
+  /**
+   * @param exercise
+   * @see mitll.langtest.client.custom.NPFExercise#populateListChoices
+   */
   public UserExercise(CommonExercise exercise) {
     super(exercise.getID(), exercise.getEnglish().trim().isEmpty() ? exercise.getRefSentence() : exercise.getEnglish());
 
@@ -108,13 +109,17 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     this.english = exercise.getEnglish();
     this.foreignLanguage = exercise.getRefSentence();
     this.transliteration = exercise.getTransliteration();
-    setRefAudio(exercise.getRefAudio());
-    setSlowRefAudio(exercise.getSlowAudioRef());
+
     setFieldToAnnotation(exercise.getFieldToAnnotation());
     setUnitToValue(exercise.getUnitToValue());
     setState(exercise.getState());
     setSecondState(exercise.getSecondState());
     setContext(exercise.getContext());
+    copyAudio(exercise);
+  }
+
+  protected void copyAudio(CommonExercise exercise) {
+    for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) addAudio(audioAttribute);
   }
 
   /**
@@ -124,8 +129,9 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
    */
   public Exercise toExercise() {
     String tooltip = getEnglish().trim().isEmpty() ? getForeignLanguage() : getEnglish();
-    Exercise exercise = new Exercise("plan", getID(), getEnglish(), getRefAudio(), getForeignLanguage(), tooltip);
+    Exercise exercise = new Exercise("plan", getID(), getEnglish(), null, getForeignLanguage(), tooltip);
     copyFields(exercise);
+    copyAudio(exercise);
 
     return exercise;
   }
@@ -133,8 +139,10 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   public CommonUserExercise toCommonUserExercise() { return this; }
 
   private void copyFields(Exercise imported) {
-    if (getSlowAudioRef() != null)
-      imported.setSlowRefAudio(getSlowAudioRef());
+    AudioAttribute slowSpeed = getSlowSpeed();
+    if (slowSpeed != null) {
+      imported.addAudio(slowSpeed);
+    }
     imported.setType(Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW);
     imported.setEnglishSentence(getEnglish());
     imported.setTranslitSentence(getTransliteration());
@@ -174,10 +182,6 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   public String getContent() {
     return content;
   }
-/*  public String setContent(String language) {
-    this.content = ExerciseFormatter.getContent(getForeignLanguage(), transliteration, english, "", "", language);
-    return content;
-  }*/
 
   public CommonShell getShellCombinedTooltip() {
     String refSentence = getForeignLanguage();
@@ -222,16 +226,13 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
 
   @Override
   public String getContext() { return context;  }
-
-  public void setContext(String context) { this.context = context; }
+  private void setContext(String context) { this.context = context; }
 
   @Override
   public boolean isPredefined() {  return isPredef;  }
 
   @Override
-  public UserExercise toUserExercise() {
-    return this;
-  }
+  public UserExercise toUserExercise() {  return this;  }
 
   public boolean checkPredef() {  return !getID().startsWith(CUSTOM_PREFIX);  }
 
