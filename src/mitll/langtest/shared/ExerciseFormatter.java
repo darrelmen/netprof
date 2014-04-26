@@ -80,6 +80,10 @@ public class ExerciseFormatter {
       "</div>";
   }
 
+  public static String getArabic(String arabic) {
+    return getArabic(arabic, false, false, false);
+  }
+
   public static String getArabic(String arabic, boolean isUrdu, boolean isPashto, boolean includePrompt) {
     String prompt = includePrompt ? "<span class=\"Instruction-title\">" +
       FOREIGN_LANGUAGE_PROMPT +
