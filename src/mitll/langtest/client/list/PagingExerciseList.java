@@ -13,7 +13,6 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -37,6 +36,7 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class PagingExerciseList extends ExerciseList {
+  public static final boolean SHOW_WAIT_CURSOR = false;
   protected final ExerciseController controller;
   protected PagingContainer pagingContainer;
   private final boolean showTypeAhead;
@@ -331,7 +331,7 @@ public class PagingExerciseList extends ExerciseList {
   protected void askServerForExercise(String itemID) {
     System.out.println("ExerciseList.askServerForExercise id = " + itemID + " instance " + instance);
     //RootPanel.get().setStyleName("waitCursor");
-    if (itemID.equals(pagingContainer.getClickedExerciseID())) {
+    if (SHOW_WAIT_CURSOR && itemID.equals(pagingContainer.getClickedExerciseID())) {
       waitPopup = new DecoratedPopupPanel();
       waitPopup.setAutoHideEnabled(false);
       //waitPopup.add(new Image(LangTest.LANGTEST_IMAGES + "animated_progress.gif"));
