@@ -1,5 +1,9 @@
 package mitll.langtest.shared;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
+
+import java.util.Collection;
+
 /**
  * Object representing a user.
  *
@@ -8,17 +12,12 @@ package mitll.langtest.shared;
  * Time: 3:54 PM
  * To change this template use File | Settings | File Templates.
  */
-public class User extends MiniUser /*implements Comparable<User>*/ {
+public class User extends MiniUser {
   public static final String NOT_SET = "NOT_SET";
- // public long id;
- // public int age;
- // public int gender;
- private int experience;
+  private int experience;
   private String ipaddr;
   public String  password;
-  private long timestamp;
- // public String nativeLang,dialect;
- // public String userID;
+ // private long timestamp;
   public boolean enabled;
   public boolean admin;
   private int numResults;
@@ -26,6 +25,10 @@ public class User extends MiniUser /*implements Comparable<User>*/ {
   private float rate = 0.0f;
   private boolean complete;
   private float completePercent;
+
+  public static enum Permission implements IsSerializable { QUALITY_CONTROL, RECORD_AUDIO }
+
+  private Collection<Permission> permissions;
 
   public User() {} // for serialization
 
@@ -38,10 +41,11 @@ public class User extends MiniUser /*implements Comparable<User>*/ {
    * @param ipaddr
    * @param password
    * @param enabled
+   * @param permissions
    */
   public User(long id, int age, int gender, int experience, String ipaddr, String password,
-               boolean enabled) {
-     this(id,age,gender,experience,ipaddr,password, NOT_SET, NOT_SET, NOT_SET,0,enabled,false);
+              boolean enabled, Collection<Permission> permissions) {
+     this(id,age,gender,experience,ipaddr,password, NOT_SET, NOT_SET, NOT_SET,0,enabled,false, permissions);
   }
   /**
    * @see mitll.langtest.server.database.UserDAO#getUsers()
@@ -55,16 +59,22 @@ public class User extends MiniUser /*implements Comparable<User>*/ {
    * @param timestamp
    * @param enabled
    * @param isAdmin
+   * @param permissions
    */
   public User(long id, int age, int gender, int experience, String ipaddr, String password,
-              String nativeLang, String dialect, String userID, long timestamp, boolean enabled, boolean isAdmin) {
+              String nativeLang, String dialect, String userID, long timestamp, boolean enabled, boolean isAdmin, Collection<Permission> permissions) {
     super(id,age,gender,nativeLang,dialect,userID);
     this.experience = experience;
     this.ipaddr = ipaddr;
     this.password = password;
-    this.timestamp = timestamp;
+  //  this.timestamp = timestamp;
     this.enabled = enabled;
     this.admin = isAdmin;
+    this.permissions = permissions;
+  }
+
+  public Collection<Permission> getPermissions() {
+    return permissions;
   }
 
   public String getTimestamp() {
@@ -76,7 +86,9 @@ public class User extends MiniUser /*implements Comparable<User>*/ {
     else return "";
   }
 
+/*
   public long getRawTimestamp() { return timestamp; }
+*/
 
   /**
    * @see mitll.langtest.client.user.UserTable#getTable
@@ -112,21 +124,6 @@ public class User extends MiniUser /*implements Comparable<User>*/ {
     return rate;
   }
 
-/*  @Override
-  public int compareTo(MiniUser o) {
-    return id < o.id ? -1 : id > o.id ? +1 : 0;
-  }*/
-
-/*  @Override
-  public boolean equals(Object obj) {
-    return (obj instanceof User) && compareTo((User)obj) == 0;
-  }
-
-  @Override
-  public int hashCode() {
-    return new Long(id).hashCode();
-  }*/
-
   public boolean isComplete() {
     return complete;
   }
@@ -143,10 +140,6 @@ public class User extends MiniUser /*implements Comparable<User>*/ {
     this.completePercent = completePercent;
   }
 
-  public String toString() {
-    return "user " + getId() + " age " + getAge() + " gender " + getGender() + " native " + getNativeLang() + " dialect " + getDialect() + " demographics " + demographics;
-  }
-
   public int getExperience() {
     return experience;
   }
@@ -154,4 +147,9 @@ public class User extends MiniUser /*implements Comparable<User>*/ {
   public String getIpaddr() {
     return ipaddr;
   }
+
+  public String toString() {
+    return "user " + getId() + " age " + getAge() + " gender " + getGender() + " native " + getNativeLang() + " dialect " + getDialect() + " demographics " + demographics;
+  }
+
 }
