@@ -23,6 +23,7 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.CommonShell;
+import mitll.langtest.shared.STATE;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -73,18 +74,14 @@ public class PagingExerciseList extends ExerciseList {
   protected Set<String> getKeys() {  return pagingContainer.getKeys();  }
 
   @Override
-  public void setState(String id, CommonShell.STATE state) {
+  public void setState(String id, STATE state) {
     byID(id).setState(state);
   }
 
   @Override
-  public void setSecondState(String id, CommonShell.STATE state) {
+  public void setSecondState(String id, STATE state) {
     byID(id).setSecondState(state);
   }
-
-/*  public void setStates(String id,CommonShell.STATE first,CommonShell.STATE second ) {
-
-  }*/
 
   /**
    * Add two rows -- the search box and then the item list
@@ -103,7 +100,7 @@ public class PagingExerciseList extends ExerciseList {
   void loadExercises(String selectionState, String prefix) {
     lastReqID++;
     System.out.println("PagingExerciseList.loadExercises : looking for '" + prefix + "' (" + prefix.length() + " chars) in list id "+userListID + " instance " +instance);
-    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), prefix, userListID, new SetExercisesCallback());
+    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), prefix, userListID, controller.getUser(), controller.getAudioType(), new SetExercisesCallback());
   }
 
   /**
@@ -152,7 +149,10 @@ public class PagingExerciseList extends ExerciseList {
 
   private CommonShell getFirstNotCompleted() {
     for (CommonShell es : pagingContainer.getExercises()) {
-      if (es.getState().equals(CommonShell.STATE.UNSET)) return es;
+      STATE state = es.getState();
+      if (state != null && state.equals(STATE.UNSET)) {
+        return es;
+      }
     }
     return super.findFirstExercise();
   }
@@ -341,7 +341,7 @@ public class PagingExerciseList extends ExerciseList {
   protected void markCurrentExercise(String itemID) { pagingContainer.markCurrentExercise(itemID); }
 
   public void setUserListID(long userListID) {
-    System.out.println("PagingExerciseList.setUserListID " +userListID + " for " +instance);
+    //System.out.println("PagingExerciseList.setUserListID " +userListID + " for " +instance);
 
     this.userListID = userListID;
   }
