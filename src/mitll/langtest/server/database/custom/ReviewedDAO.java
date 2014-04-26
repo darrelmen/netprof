@@ -2,7 +2,6 @@ package mitll.langtest.server.database.custom;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.shared.CommonShell;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
@@ -95,7 +94,7 @@ public class ReviewedDAO extends DAO {
    *
    * @see #setState
    */
-  private void add(String exerciseID, CommonShell.STATE state, long creatorID) {
+  private void add(String exerciseID, mitll.langtest.shared.STATE state, long creatorID) {
     try {
       // there are much better ways of doing this...
       //logger.info("add : exid " + exerciseID + " = " + state+ " by " + creatorID);
@@ -127,7 +126,7 @@ public class ReviewedDAO extends DAO {
       statement.close();
       database.closeConnection(connection);
 
-      //logger.debug("now " + getCount() + " reviewed");
+    //  logger.debug("now " + getCount() + " reviewed");
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
@@ -166,7 +165,7 @@ public class ReviewedDAO extends DAO {
     }
   }
 
-  public void setState(String exerciseID, CommonShell.STATE state, long creatorID) {
+  public void setState(String exerciseID, mitll.langtest.shared.STATE state, long creatorID) {
     try {
       add(exerciseID, state, creatorID);
     } catch (Exception ee) {
@@ -178,12 +177,13 @@ public class ReviewedDAO extends DAO {
    * @return
    * @see UserListManager#getDefectList()
    * @see UserListManager#getExerciseToState()
-   * @see mitll.langtest.server.database.custom.UserListManager#markState(java.util.Collection)
+   * @see UserListManager#markState(java.util.Collection, String)
    */
   public Map<String, StateCreator> getExerciseToState() {
     Connection connection = database.getConnection();
 
-    String sql3 = "select * from (select " +
+    String sql3 = "select * from " +
+      "(select " +
       EXERCISEID +
       "," +
       STATE +
@@ -197,6 +197,8 @@ public class ReviewedDAO extends DAO {
       EXERCISEID +
       "," +
       STATE +
+      "," +
+      CREATORID +
       " order by " +
       EXERCISEID +
       ") order by " +
@@ -212,13 +214,15 @@ public class ReviewedDAO extends DAO {
         String exerciseID = rs.getString(1);
         String state = rs.getString(2);
         long creator = rs.getLong(3);
-        CommonShell.STATE stateFromTable = (state == null) ? CommonShell.STATE.UNSET : CommonShell.STATE.valueOf(state);
+        mitll.langtest.shared.STATE stateFromTable = (state == null) ? mitll.langtest.shared.STATE.UNSET : mitll.langtest.shared.STATE.valueOf(state);
         exidToState.put(exerciseID, new StateCreator(stateFromTable, creator));
       }
 
       rs.close();
       statement.close();
       database.closeConnection(connection);
+      int count = getCount();
+      if (count % 10 == 0) logger.debug("now " + count + " reviewed");
       return exidToState;
     } catch (SQLException e) {
       logger.error("Got " + e + " doing " + sql3, e);
@@ -227,10 +231,10 @@ public class ReviewedDAO extends DAO {
   }
 
   public static class StateCreator {
-    CommonShell.STATE state;
+    mitll.langtest.shared.STATE state;
     long creatorID;
 
-    public StateCreator(CommonShell.STATE state, long creatorID) {
+    public StateCreator(mitll.langtest.shared.STATE state, long creatorID) {
       this.state = state;
       this.creatorID = creatorID;
     }
