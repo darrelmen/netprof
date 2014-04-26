@@ -4,19 +4,14 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.Tooltip;
-import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyPressEvent;
-import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -73,7 +68,6 @@ public class CommentNPFExercise extends NPFExercise {
       column.add(getEntry(e, QCNPFExercise.ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, english));
     }
 
-    //System.out.println("context is " + e.getContext());
     String context = e.getContext() != null && !e.getContext().trim().isEmpty() ? e.getContext() : "";
     if (!context.isEmpty()) {
       column.add(getEntry(e, QCNPFExercise.CONTEXT, ExerciseFormatter.CONTEXT, "\""+ context + "\""));
@@ -91,7 +85,7 @@ public class CommentNPFExercise extends NPFExercise {
   }
 
   /**
-   * @see #getAudioPanel\
+   * @see #getAudioPanel
    * @param path
    * @return
    */
@@ -124,13 +118,15 @@ public class CommentNPFExercise extends NPFExercise {
     if (field.endsWith(AudioTag.COMPRESSED_TYPE)) {
       field = field.replaceAll("." + AudioTag.COMPRESSED_TYPE,".wav");
     }
-    final MyTextBox commentEntryText = new MyTextBox();
-    commentEntryText.setVisibleLength(60);
-    Button clearButton = getClearButton(commentEntryText, commentButton, field);
+
+    final HidePopupTextBox commentEntryText = new HidePopupTextBox();
     commentEntryText.getElement().setId("CommentEntryTextBox_for_"+field);
+    commentEntryText.setVisibleLength(60);
+
+    Button clearButton = getClearButton(commentEntryText, commentButton, field);
     final MyPopup commentPopup = makeCommentPopup(field, commentButton, commentEntryText, clearButton);
     commentPopup.addAutoHidePartner(commentButton.getElement()); // fix for bug Wade found where click didn't toggle comment
-    configureCommentTextBox(annotation != null ? annotation.comment : null, commentEntryText, commentPopup);
+    configureTextBox(annotation != null ? annotation.comment : null, commentEntryText, commentPopup);
 
     boolean isCorrect = annotation == null || annotation.status == null || annotation.isCorrect();
     String comment = !isCorrect ? annotation.comment : "";
@@ -161,7 +157,7 @@ public class CommentNPFExercise extends NPFExercise {
    * @param clearButton
    * @return
    */
-  private MyPopup makeCommentPopup(String field, Button commentButton, MyTextBox commentEntryText, Button clearButton) {
+  private MyPopup makeCommentPopup(String field, Button commentButton, HidePopupTextBox commentEntryText, Button clearButton) {
     final MyPopup commentPopup = new MyPopup();
     commentPopup.setAutoHideEnabled(true);
     commentPopup.configure(commentEntryText, commentButton, clearButton);
@@ -175,20 +171,14 @@ public class CommentNPFExercise extends NPFExercise {
     return commentPopup;
   }
 
-  private Button getOKButton(final PopupPanel commentPopup) {
-    Button ok = new Button("OK");
-    ok.setType(ButtonType.PRIMARY);
-    ok.addStyleName("leftTenMargin");
-    ok.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        commentPopup.hide();
-      }
-    });
-    return ok;
-  }
-
-  private Button getClearButton(final MyTextBox commentEntryText,
+  /**
+   * Post correct comment to server when clear button is clicked.
+   * @param commentEntryText
+   * @param commentButton
+   * @param field
+   * @return
+   */
+  private Button getClearButton(final HidePopupTextBox commentEntryText,
                                   final Widget commentButton, final String field) {
     final Button clear = new Button("");
     clear.getElement().setId("CommentNPFExercise_"+field);
@@ -219,7 +209,7 @@ public class CommentNPFExercise extends NPFExercise {
     }
 
     /**
-     * @see mitll.langtest.client.custom.CommentNPFExercise#makeCommentPopup(String, com.github.gwtbootstrap.client.ui.Button, mitll.langtest.client.custom.CommentNPFExercise.MyTextBox, com.github.gwtbootstrap.client.ui.Button)
+     * @see mitll.langtest.client.custom.CommentNPFExercise#makeCommentPopup(String, com.github.gwtbootstrap.client.ui.Button, mitll.langtest.client.custom.CommentNPFExercise.HidePopupTextBox, com.github.gwtbootstrap.client.ui.Button)
      * @param commentBox
      * @param commentButton
      * @param clearButton
@@ -257,7 +247,7 @@ public class CommentNPFExercise extends NPFExercise {
    */
   private void configureCommentButton(final Button commentButton,
                                       final boolean alreadyMarkedCorrect, final PopupPanel commentPopup, String comment,
-                                      final FocusWidget commentEntry) {
+                                      final TextBox commentEntry) {
     commentButton.setIcon(IconType.COMMENT);
     commentButton.setSize(ButtonSize.MINI);
     commentButton.addStyleName("leftTenMargin");
@@ -265,22 +255,7 @@ public class CommentNPFExercise extends NPFExercise {
     controller.register(commentButton, exercise.getID(), "show comment");
 
     final Tooltip tooltip = setButtonTitle(commentButton, alreadyMarkedCorrect, comment);
-    commentButton.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        boolean visible = commentPopup.isShowing();
-
-        if (visible) {// fix for bug that Wade found -- if we click off of popup, it dismisses it,
-                      // but if that click is on the button, it would immediately shows it again
-          //System.out.println("popup visible " + visible);
-          commentPopup.hide();
-        } else {
-          commentPopup.showRelativeTo(commentButton);
-          commentEntry.setFocus(true);
-          tooltip.hide();
-        }
-      }
-    });
+    configurePopupButton(commentButton, commentPopup, commentEntry, tooltip);
 
     showQC(commentButton);
   }
@@ -296,44 +271,6 @@ public class CommentNPFExercise extends NPFExercise {
 
   private void showQCHasComment(UIObject child) {
     child.removeStyleName("comment-button-group-new");
-  }
-
-  /**
-   * For this field configure the commentEntry box to post annotation on blur and enter
-   *
-   * @param currentComment fill in with existing annotation, if there is one
-   * @param commentEntry comment box to configure
-   * @return
-   */
-  private FocusWidget configureCommentTextBox( String currentComment,//ExerciseAnnotation annotation,
-                                              final MyTextBox commentEntry,
-                                              final PopupPanel popup) {
-    if (currentComment != null) {
-      //String currentComment = annotation.comment;
-      commentEntry.setText(currentComment);
-      if (commentEntry.getVisibleLength() < currentComment.length()) {
-        commentEntry.setVisibleLength(70);
-      }
-    }
-
-    commentEntry.addStyleName("leftFiveMargin");
-    commentEntry.configure(popup);
-
-    return commentEntry;
-  }
-
-  private class MyTextBox extends TextBox {
-    public void configure( final PopupPanel popup) {
-      addKeyPressHandler(new KeyPressHandler() {
-        @Override
-        public void onKeyPress(KeyPressEvent event) {
-          int keyCode = event.getNativeEvent().getKeyCode();
-          if (keyCode == KeyCodes.KEY_ENTER) {
-            popup.hide();
-          }
-        }
-      });
-    }
   }
 
   private final Map<String,String> fieldToComment = new HashMap<String,String>();
@@ -367,12 +304,7 @@ public class CommentNPFExercise extends NPFExercise {
       else {
         addIncorrectComment(comment,field);
       }
-      //exercise.addAnnotation(field, isCorrect ? "correct" : "incorrect", comment);
       //System.out.println("\t commentComplete : annotations now " + exercise.getFields());
-    }
-    else {
-      //System.out.println("commentComplete " + field + " comment '" + comment +"' same as previous, so ignoring");
-
     }
   }
 
