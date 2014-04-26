@@ -77,7 +77,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     if (!didPopup) {
       show();
       installFlash();
-      System.out.println("initFlash : did   installFlash");
+      //System.out.println("initFlash : did   installFlash");
       didPopup = true;
     }
   }
@@ -118,8 +118,8 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   private void installFlash() {
     if (gotPermission()) {
       micPermission.gotPermission();
-    }
-    else {
+    } else {
+     // System.out.println("didn't get Flash Player permission!");
       if (!checkIfFlashInstalled()) {
         Window.alert("Flash player must be installed to record audio.");
       }
@@ -164,7 +164,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    * Event from flash when user clicks Accept
    */
   public static void micConnected() {
-    System.out.println("micConnected!");
+    //System.out.println("micConnected!");
     permissionReceived = true;
     micPermission.gotPermission();
   }
