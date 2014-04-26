@@ -148,20 +148,22 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see mitll.langtest.client.LangTest#doEverythingAfterFactory(long)
    * @see mitll.langtest.client.list.HistoryExerciseList#noSectionsGetExercises(long)
    * @param userID
-   * @param getNext
+   * @return true if we asked the server for exercises
    */
-  public void getExercises(long userID, boolean getNext) {
+  public boolean getExercises(long userID) {
     System.out.println("ExerciseList.getExercises for user " +userID + " instance " + instance);
     lastReqID++;
-    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), "", -1, new SetExercisesCallback());
+    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), "", -1, controller.getUser(), controller.getAudioType(), new SetExercisesCallback());
+    return true;
   }
 
   /**
    * @see mitll.langtest.client.custom.ReviewEditableExercise#doAfterEditComplete(ListInterface, boolean)
+   * @see mitll.langtest.client.LangTest#doEverythingAfterFactory(long)
    */
   public void reload() {
     System.out.println("ExerciseList.reload for user " + controller.getUser() + " instance " + instance + " id " + getElement().getId());
-    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), "", -1, new SetExercisesCallback());
+    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), "", -1,  controller.getUser(), controller.getAudioType(), new SetExercisesCallback());
   }
 
   /**
@@ -172,7 +174,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   @Override
   public void reloadWith(String id) {
     System.out.println("ExerciseList.reloadWith id = " + id+ " for user " + controller.getUser() + " instance " + instance);
-    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), "", -1, new SetExercisesCallbackWithID(id));
+    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), "", -1, controller.getUser(), controller.getAudioType(), new SetExercisesCallbackWithID(id));
   }
 
 
@@ -261,7 +263,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   /**
-   * @see ListInterface#getExercises(long, boolean)
+   * @see ListInterface#getExercises(long)
    */
   class SetExercisesCallback implements AsyncCallback<ExerciseListWrapper> {
     public SetExercisesCallback() {}
@@ -270,11 +272,12 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       if (!caught.getMessage().trim().equals("0")) {
         feedback.showErrorMessage("Server error", "Please clear your cache and reload the page.");
       }
-      System.out.println("Got exception '" +caught.getMessage() + "' " +caught);
+      System.out.println("SetExercisesCallback.onFailure : Got exception '" +caught.getMessage() + "' " +caught);
+      caught.printStackTrace();
     }
 
     public void onSuccess(ExerciseListWrapper result) {
-      System.out.println("\tExerciseList.SetExercisesCallback Got " + result.getExercises().size() + " results");
+      //System.out.println("\tExerciseList.SetExercisesCallback Got " + result.getExercises().size() + " results");
       if (isStaleResponse(result)) {
         System.out.println("----> SetExercisesCallback.onSuccess ignoring result " + result.getReqID() + " b/c before latest " + lastReqID);
       } else {
@@ -283,7 +286,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
         }
 
         rememberAndLoadFirst(result.getExercises(), result.getFirstExercise());
-
         controller.showProgress();
       }
     }
@@ -301,7 +303,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       if (!caught.getMessage().trim().equals("0")) {
         feedback.showErrorMessage("Server error", "Please clear your cache and reload the page.");
       }
-      System.out.println("Got exception '" + caught.getMessage() + "' " + caught);
+      System.out.println("ExerciseList.SetExercisesCallbackWithID Got exception '" + caught.getMessage() + "' " + caught);
+      caught.printStackTrace();
     }
 
     public void onSuccess(ExerciseListWrapper result) {
@@ -534,7 +537,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   protected void askServerForExercise(String itemID) {
     System.out.println("ExerciseList.askServerForExercise id = " + itemID + " instance " + instance);
-    service.getExercise(itemID, new ExerciseAsyncCallback());
+    service.getExercise(itemID, controller.getUser(), new ExerciseAsyncCallback());
   }
 
   private class ExerciseAsyncCallback implements AsyncCallback<CommonExercise> {
@@ -569,7 +572,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   protected void useExercise(CommonExercise result) {
     //System.out.println("ExerciseList.useExercise : result " +result);
-
     createdPanel = makeExercisePanel(result);
     String itemID = result.getID();
     markCurrentExercise(itemID);
@@ -586,7 +588,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param exercise
    */
   public Panel makeExercisePanel(CommonExercise exercise) {
-    System.out.println("ExerciseList.makeExercisePanel : " +exercise + " instance " + instance);
+    //System.out.println("ExerciseList.makeExercisePanel : " +exercise + " instance " + instance);
 
     Panel exercisePanel = factory.getExercisePanel(exercise);
     innerContainer.setWidget(exercisePanel);
