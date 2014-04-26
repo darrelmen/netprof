@@ -72,11 +72,10 @@ class StudentDialog extends UserDialog {
   private static final String REVIEW = "Review";
   private static final Map<String, String> displayToRoles = new TreeMap<String, String>();
   private static final String STUDENT = "Student";
- // private static final String STUDENT_DATA_COLLECTION = "Student - Data Collection";
   private static final String TEACHER_REVIEWER = "Reviewer";
   private static final String TEACHER = "Teacher";
   private static final String RECORDER = "Recorder";
-  private static final List<String> ROLES = Arrays.asList(STUDENT, TEACHER/*, TEACHER_REVIEWER, RECORDER*/);
+  private static final List<String> ROLES = Arrays.asList(STUDENT, TEACHER);
   public static final String ARE_YOU_A = "Are you a";
   public static final String USER_ID = "User ID";
   public static final String USER_ID_TOOLTIP = "New users can choose any id and login.";
@@ -86,7 +85,8 @@ class StudentDialog extends UserDialog {
 
   private final UserManager userManager;
   private final UserNotification langTest;
-  CheckBox qcCheckBox, recordAudioCheckBox;
+  private CheckBox qcCheckBox, recordAudioCheckBox;
+  Button closeButton;
 
   public StudentDialog(LangTestDatabaseAsync service, PropertyHandler props, UserManager userManager,
                        UserNotification userNotification) {
@@ -203,8 +203,8 @@ class StudentDialog extends UserDialog {
       }
     });
 
-    final Button closeButton = addLoginButton(dialogBox);
-    closeButton.addClickHandler(makeCloseHandler(dialogBox, registrationInfo, user, password, purpose, accordion, langTest.getPermissions()));
+    closeButton = addLoginButton(dialogBox);
+    closeButton.addClickHandler(makeCloseHandler(closeButton,dialogBox, registrationInfo, user, password, purpose, accordion, langTest.getPermissions()));
 
     configureKeyHandler(dialogBox, closeButton);
 
@@ -246,7 +246,7 @@ class StudentDialog extends UserDialog {
   }
 
   protected void setUserValues(final Integer result, final RegistrationInfo registrationInfo) {
-    System.out.println("1 asking for user info");
+    //System.out.println("1 asking for user info");
     // TODO : wasteful -- just ask for the user
     service.getUsers(new AsyncCallback<List<User>>() {
       @Override
@@ -267,10 +267,6 @@ class StudentDialog extends UserDialog {
       }
     });
   }
-
-/*  private void fillInRegistration(User u) {
-
-  }*/
 
   protected Panel makePermissions() {
     Panel permissions = new VerticalPanel();
@@ -335,7 +331,8 @@ class StudentDialog extends UserDialog {
    * @param permissions
    * @see #displayLoginBox()
    */
-  private ClickHandler makeCloseHandler(final Modal dialogBox,
+  private ClickHandler makeCloseHandler(final Button closeButton,
+                                        final Modal dialogBox,
                                         final RegistrationInfo registrationInfo,
                                         final FormField user,
                                         final FormField password,
@@ -348,28 +345,30 @@ class StudentDialog extends UserDialog {
        * Fired when the user clicks on the sendButton.
        */
       public void onClick(ClickEvent event) {
+        closeButton.setEnabled(false);
         String purposeSetting = getRole(purpose);
         final String audioType = getAudioTypeFromPurpose(purposeSetting);
-        if (canLoginAnonymously(purpose)) {
+ /*       if (canLoginAnonymously(purpose)) {
           System.out.println("\tcan login anonymously for " + purposeSetting);
           dialogBox.hide();
           langTest.rememberAudioType(audioType);
           addAnonymousUser(audioType);
-        } else {
+        } else {*/
           System.out.println("\tcheckUserAndMaybeRegister for " + purposeSetting);
 
-          checkUserAndMaybeRegister(audioType, user, password, dialogBox, accordion, registrationInfo, purposeSetting,permissions);
-        }
+          checkUserAndMaybeRegister(closeButton, audioType, user, password, dialogBox, accordion, registrationInfo, purposeSetting, permissions);
+       // }
       }
     };
   }
 
-  private boolean canLoginAnonymously(ListBoxFormField purpose) {
+/*  private boolean canLoginAnonymously(ListBoxFormField purpose) {
     String purposeSetting = getRole(purpose);
     return purposeSetting.equalsIgnoreCase(DEMO);
-  }
+  }*/
 
-  private void checkUserAndMaybeRegister(final String audioType, FormField user,
+  private void checkUserAndMaybeRegister(Button closeButton, final String audioType,
+                                         FormField user,
                                          final FormField password,
                                          final Modal dialogBox,
                                          final AccordionGroup accordion,
@@ -455,6 +454,11 @@ class StudentDialog extends UserDialog {
       markError(registrationInfo.ageEntryGroup.group, registrationInfo.ageEntryGroup.box, "",
         "Enter age between " + MIN_AGE + " and " + MAX_AGE + ".");
     }
+  }
+
+  protected void markError(FormField dialectGroup, String message) {
+    super.markError(dialectGroup,message);
+    closeButton.setEnabled(true);
   }
 
   private void hideAndSend(String audioType, RegistrationInfo registrationInfo, Modal dialogBox, String userID, Collection<User.Permission> permissions) {
@@ -598,8 +602,8 @@ class StudentDialog extends UserDialog {
     System.out.println("addUser : userID is " + userID);
 
     service.addUser(age,
-      gender,
-      monthsOfExperience, nativeLang, dialect, userID, permissions, async);
+        gender,
+        monthsOfExperience, nativeLang, dialect, userID, permissions, async);
   }
 
   private void setDefaultControlValues(int user) {
@@ -690,12 +694,12 @@ class StudentDialog extends UserDialog {
       recordAudioCheckBox.setValue(permissions.contains(User.Permission.RECORD_AUDIO));
 
       // can't edit after initial registration
-/*      qcCheckBox.setEnabled(false);
+      qcCheckBox.setEnabled(false);
       recordAudioCheckBox.setEnabled(false);
 
       ageEntryGroup.box.setEnabled(false);
       genderGroup.box.setEnabled(false);
-      dialectGroup.box.setEnabled(false);*/
+      dialectGroup.box.setEnabled(false);
     }
 
     public void showOrHideILR(boolean show) {
