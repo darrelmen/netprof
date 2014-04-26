@@ -1,12 +1,6 @@
 package mitll.langtest.client.custom;
 
-import com.github.gwtbootstrap.client.ui.FluidRow;
-import com.github.gwtbootstrap.client.ui.TabPanel;
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.ExerciseListLayout;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
@@ -16,6 +10,7 @@ import mitll.langtest.shared.ExerciseShell;
 
 /**
  * Created by go22670 on 2/10/14.
+ * @deprecated just an experiment --
  */
 public class Combined<T extends ExerciseShell> extends TabContainer {
 //  private Tab yourItems;
@@ -40,14 +35,14 @@ public class Combined<T extends ExerciseShell> extends TabContainer {
     this.feedback = feedback;
   }
 
-  public Panel getButtonRow2(Panel secondAndThird) {
-    tabPanel = new TabPanel();
+  public Panel getTabPanel(Panel secondAndThird) {   return null;
+    /*tabPanel = new TabPanel();
     tabPanel.getElement().setId("Combined_tabPanel");
     // chapter tab
-    final Navigation.TabAndContent chapters = makeTab(tabPanel, IconType.LIGHTBULB, LEARN_PRONUNCIATION);
+    final TabAndContent chapters = makeTab(tabPanel, IconType.LIGHTBULB, LEARN_PRONUNCIATION);
     chapters.content.add(secondAndThird);
 
-    final Navigation.TabAndContent practice = makeTab(tabPanel, IconType.CHECK,  PRACTICE);
+    final TabAndContent practice = makeTab(tabPanel, IconType.CHECK,  PRACTICE);
 
     ExerciseListLayout layout = new ExerciseListLayout(controller.getProps());
 
@@ -96,29 +91,29 @@ public class Combined<T extends ExerciseShell> extends TabContainer {
     tabPanel.addShowHandler(new TabPanel.ShowEvent.Handler() {
       @Override
       public void onShow(TabPanel.ShowEvent showEvent) {
-       /* System.out.println("got shown event : '" +showEvent + "'\n" +
+       *//* System.out.println("got shown event : '" +showEvent + "'\n" +
             "\ntarget " + showEvent.getTarget()+
-            " ' target name '" + showEvent.getTarget().getName() + "'");*/
+            " ' target name '" + showEvent.getTarget().getName() + "'");*//*
         String targetName = showEvent.getTarget() == null ? "" : showEvent.getTarget().toString();
 
-        //System.out.println("getButtonRow2 : got shown event : '" +showEvent + "' target '" + targetName + "'");
+        //System.out.println("getTabPanel : got shown event : '" +showEvent + "' target '" + targetName + "'");
 
         //boolean wasChapters = targetName.contains(CHAPTERS);
-       /* Panel createdPanel = listInterface.getCreatedPanel();
+       *//* Panel createdPanel = listInterface.getCreatedPanel();
         boolean hasCreated = createdPanel != null;
         if (hasCreated && wasChapters) {
           System.out.println("\tgot chapters! created panel :  has created " + hasCreated + " was revealed  " + createdPanel.getClass());
           ((GoodwaveExercisePanel) createdPanel).wasRevealed();
-        }*/
+        }*//*
       }
     });
 
-    return tabPanel;    // TODO - consider how to tell panels when they are hidden by tab changes
+    return tabPanel;    // TODO - consider how to tell panels when they are hidden by tab changes*/
   }
 
   @Override
   public void showInitialState() {
-    tabPanel.selectTab(1); // for now
+    /*tabPanel.selectTab(1);*/ // for now
   }
 
   @Override
