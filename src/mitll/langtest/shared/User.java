@@ -17,7 +17,6 @@ public class User extends MiniUser {
   private int experience;
   private String ipaddr;
   public String  password;
- // private long timestamp;
   public boolean enabled;
   public boolean admin;
   private int numResults;
@@ -149,7 +148,9 @@ public class User extends MiniUser {
   }
 
   public String toString() {
-    return "user " + getId() + " age " + getAge() + " gender " + getGender() + " native " + getNativeLang() + " dialect " + getDialect() + " demographics " + demographics;
+    return "user " + getId() +  " is a " + getGender() + " age " + getAge() +
+        " native lang = " + getNativeLang() +
+        " dialect " + getDialect() + " demo " + demographics + " perms " + getPermissions();
   }
 
 }
