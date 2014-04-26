@@ -1,13 +1,15 @@
 package mitll.langtest.server.database.custom;
 
-import audio.tools.FileCopier;
 import mitll.langtest.server.PathHelper;
-import mitll.langtest.server.audio.AudioConversion;
+import mitll.langtest.server.audio.PathWriter;
 import mitll.langtest.server.database.UserDAO;
+import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.ExerciseAnnotation;
+import mitll.langtest.shared.Result;
+import mitll.langtest.shared.STATE;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
@@ -95,15 +97,20 @@ public class UserListManager {
     setStateOnExercises(secondStateDAO.getExerciseToState(), false);
   }
 
-  protected void setStateOnExercises(Map<String, ReviewedDAO.StateCreator> exerciseToState, boolean firstState) {
-    logger.debug("found " + exerciseToState.size() + " state markings");
-
+  private void setStateOnExercises(Map<String, ReviewedDAO.StateCreator> exerciseToState, boolean firstState) {
+    //logger.debug("found " + exerciseToState.size() + " state markings");
     Set<String> userExercisesRemaining = setStateOnPredefExercises(exerciseToState, firstState);
     setStateOnUserExercises(exerciseToState, userExercisesRemaining, firstState);
   }
 
+  /**
+   * @see #setStateOnExercises(java.util.Map, boolean)
+   * @param exerciseToState
+   * @param firstState
+   * @return
+   */
   // set state on predef exercises
-  protected Set<String> setStateOnPredefExercises(Map<String, ReviewedDAO.StateCreator> exerciseToState, boolean firstState) {
+  private Set<String> setStateOnPredefExercises(Map<String, ReviewedDAO.StateCreator> exerciseToState, boolean firstState) {
     int count = 0;
     Set<String> userExercisesRemaining = new HashSet<String>(exerciseToState.keySet());
     for (Map.Entry<String,  ReviewedDAO.StateCreator> pair : exerciseToState.entrySet()) {
@@ -154,18 +161,18 @@ public class UserListManager {
    */
   private Map<String, ReviewedDAO.StateCreator> getAmmendedStateMap() {
     Map<String, ReviewedDAO.StateCreator> stateMap = getExerciseToState();
-    logger.debug("got " + stateMap.size() +" in state map");
+   // logger.debug("got " + stateMap.size() +" in state map");
     Map<String,Long> exerciseToCreator = annotationDAO.getDefectIds();
-    logger.debug("got " + exerciseToCreator.size() +" in defectIds");
+    //logger.debug("got " + exerciseToCreator.size() +" in defectIds");
 
     int count = 0;
     Set<String> reviewed = new HashSet<String>(stateMap.keySet());
     for (String exid : reviewed) {   // incorrect - could be defect or comment for now
       if (exerciseToCreator.keySet().contains(exid)) {
         ReviewedDAO.StateCreator stateCreator = stateMap.get(exid);
-        if (stateCreator.state.equals(CommonShell.STATE.UNSET)) { // only happen when we have an old db
-          stateMap.put(exid, new ReviewedDAO.StateCreator(CommonShell.STATE.DEFECT, stateCreator.creatorID));
-          reviewedDAO.setState(exid, CommonShell.STATE.DEFECT, stateCreator.creatorID);
+        if (stateCreator.state.equals(STATE.UNSET)) { // only happen when we have an old db
+          stateMap.put(exid, new ReviewedDAO.StateCreator(STATE.DEFECT, stateCreator.creatorID));
+          reviewedDAO.setState(exid, STATE.DEFECT, stateCreator.creatorID);
           count++;
         }
       }
@@ -182,26 +189,34 @@ public class UserListManager {
   }
 
   /**
+   * Mark the exercise with its states - but not if you're a recorder...
    * @see #getReviewList
-   * @see mitll.langtest.server.LangTestDatabaseImpl#makeExerciseListWrapper(int, java.util.Collection)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#makeExerciseListWrapper
    * @param shells
+   * @param role
    */
-  public void markState(Collection<? extends CommonShell> shells) {
-    Map<String, ReviewedDAO.StateCreator> exerciseToState = reviewedDAO.getExerciseToState();
+  public void markState(Collection<? extends CommonShell> shells, String role) {
+    if (role.equals(Result.AUDIO_TYPE_RECORDER)) {
 
-    for (CommonShell shell : shells) {
-      ReviewedDAO.StateCreator stateCreator = exerciseToState.get(shell.getID());
-      if (stateCreator != null) {
-        shell.setState(stateCreator.state);
-      }
     }
+    else {
+      Map<String, ReviewedDAO.StateCreator> exerciseToState = reviewedDAO.getExerciseToState();
 
-    exerciseToState = secondStateDAO.getExerciseToState();
+      //logger.debug("markState " + shells.size() + " shells, " + exerciseToState.size() + " states");
+      for (CommonShell shell : shells) {
+        ReviewedDAO.StateCreator stateCreator = exerciseToState.get(shell.getID());
+        if (stateCreator != null) {
+          shell.setState(stateCreator.state);
+        }
+      }
 
-    for (CommonShell shell : shells) {
-      ReviewedDAO.StateCreator stateCreator = exerciseToState.get(shell.getID());
-      if (stateCreator != null) {
-        shell.setSecondState(stateCreator.state);
+      exerciseToState = secondStateDAO.getExerciseToState();
+
+      for (CommonShell shell : shells) {
+        ReviewedDAO.StateCreator stateCreator = exerciseToState.get(shell.getID());
+        if (stateCreator != null) {
+          shell.setSecondState(stateCreator.state);
+        }
       }
     }
   }
@@ -312,7 +327,7 @@ public class UserListManager {
   }
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#addUser(int, String, int, String, String, String, String)
+   * @see mitll.langtest.server.database.DatabaseImpl#addUser(int, String, int, String, String, String, String, java.util.Collection)
    * @param userid
    * @return
    */
@@ -350,7 +365,7 @@ public class UserListManager {
 
     Set<String> defectIds = new HashSet<String>();
     for (Map.Entry<String, ReviewedDAO.StateCreator> pair : exerciseToState.entrySet()) {
-      if (pair.getValue().state.equals(CommonShell.STATE.ATTN_LL)) {
+      if (pair.getValue().state.equals(STATE.ATTN_LL)) {
         defectIds.add(pair.getKey());
       }
     }
@@ -374,7 +389,7 @@ public class UserListManager {
     Map<String, ReviewedDAO.StateCreator> exerciseToState = reviewedDAO.getExerciseToState();
 
     for (Map.Entry<String, ReviewedDAO.StateCreator> pair : exerciseToState.entrySet()) {
-      if (pair.getValue().state.equals(CommonShell.STATE.DEFECT)) {
+      if (pair.getValue().state.equals(STATE.DEFECT)) {
         defectIds.add(pair.getKey());
       }
     }
@@ -391,14 +406,16 @@ public class UserListManager {
 
     List<CommonUserExercise> onList = getReviewedUserExercises(idToUser, ids);
 
-    logger.debug("getDefectList ids size = " + allKnown.size() + " yielded " + onList.size());
-    User user = new User(-1, 89, 0, 0, "", "", false);
-    //long userListMaginID = REVIEW_MAGIC_ID;
+    //logger.debug("getDefectList ids size = " + allKnown.size() + " yielded " + onList.size());
+    List<User.Permission> permissions = new ArrayList<User.Permission>();
+    permissions.add(User.Permission.QUALITY_CONTROL);
+
+    User user = new User(-1, 89, 0, 0, "", "", false, permissions);
     UserList userList = new UserList(userListMaginID, user, name, description, "", false);
     userList.setReview(true);
     userList.setExercises(onList);
 
-    markState(onList);
+    markState(onList, "");
     return userList;
   }
 
@@ -458,12 +475,13 @@ public class UserListManager {
    * @see mitll.langtest.client.custom.NewUserExercise#afterValidForeignPhrase
    * @param userListID
    * @param userExercise
+   * @param mediaDir
    */
-  public void reallyCreateNewItem(long userListID, UserExercise userExercise) {
+  public void reallyCreateNewItem(long userListID, UserExercise userExercise, String mediaDir) {
     userExerciseDAO.add(userExercise, false);
 
     addItemToList(userListID, userExercise);
-    editItem(userExercise, false);
+    editItem(userExercise, false, mediaDir);
   }
 
   /**
@@ -485,12 +503,12 @@ public class UserListManager {
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#editItem(mitll.langtest.shared.custom.UserExercise)
    * @see mitll.langtest.client.custom.EditableExercise#postEditItem(mitll.langtest.client.list.ListInterface, boolean)
-   *
-   * @param userExercise
+   *@param userExercise
    * @param createIfDoesntExist
+   * @param mediaDir
    */
-  public void editItem(UserExercise userExercise, boolean createIfDoesntExist) {
-    fixAudioPaths(userExercise, true);
+  public void editItem(UserExercise userExercise, boolean createIfDoesntExist, String mediaDir) {
+    fixAudioPaths(userExercise, true, mediaDir);
     userExerciseDAO.update(userExercise, createIfDoesntExist);
   }
 
@@ -525,31 +543,41 @@ public class UserListManager {
 
   /**
    * Remember to copy the audio from the posted location to a more permanent location.
-   * @see #editItem(mitll.langtest.shared.custom.UserExercise, boolean)
+   *
+   * If it's already under a media directory -- don't change it.
+   * @see #editItem(mitll.langtest.shared.custom.UserExercise, boolean, String)
    * @param userExercise
    * @param overwrite
+   * @param mediaDir
    */
-  private void fixAudioPaths(UserExercise userExercise, boolean overwrite) {
-    String refAudio1 = userExercise.getRefAudio();
-    if (refAudio1 == null) {
+  private void fixAudioPaths(UserExercise userExercise, boolean overwrite, String mediaDir) {
+    AudioAttribute regularSpeed = userExercise.getRegularSpeed();
+    if (regularSpeed == null) {
       logger.warn("huh? no ref audio for " + userExercise);
       return;
     }
-    File fileRef = pathHelper.getAbsoluteFile(refAudio1);
     long now = System.currentTimeMillis();
-    String fast = FAST + "_"+ now +"_by_" +userExercise.getCreator()+".wav";
-    String refAudio = getRefAudioPath(userExercise, fileRef, fast, overwrite);
-    userExercise.setRefAudio(refAudio);
-    //logger.debug("fixAudioPaths : for " + userExercise.getID() + " fast is " + fast + " size " + FileUtils.size(refAudio));
 
-    if (userExercise.getSlowAudioRef() != null && !userExercise.getSlowAudioRef().isEmpty()) {
-      fileRef = pathHelper.getAbsoluteFile(userExercise.getSlowAudioRef());
+    logger.debug("fixAudioPaths : checking regular '" + regularSpeed.getAudioRef() + "' against '" +mediaDir + "'");
+
+    if (!regularSpeed.getAudioRef().contains(mediaDir)) {
+      File fileRef = pathHelper.getAbsoluteFile(regularSpeed.getAudioRef());
+
+      String fast = FAST + "_" + now + "_by_" + userExercise.getCreator() + ".wav";
+      String refAudio = getRefAudioPath(userExercise.getID(), fileRef, fast, overwrite);
+      regularSpeed.setAudioRef(refAudio);
+      logger.debug("fixAudioPaths : for " + userExercise.getID() + " fast is " + fast + " size " + FileUtils.size(refAudio));
+    }
+
+    AudioAttribute slowSpeed = userExercise.getSlowSpeed();
+
+    if (slowSpeed != null && !slowSpeed.getAudioRef().isEmpty() && !slowSpeed.getAudioRef().contains(mediaDir)) {
+      File fileRef = pathHelper.getAbsoluteFile(slowSpeed.getAudioRef());
       String slow = SLOW + "_"+ now+"_by_" + userExercise.getCreator()+ ".wav";
 
-      refAudio = getRefAudioPath(userExercise, fileRef, slow, overwrite);
-      logger.debug("fixAudioPaths : for " + userExercise.getID()+ " slow is " + refAudio + " size " + FileUtils.size(refAudio));
-
-      userExercise.setSlowRefAudio(refAudio);
+      String refAudio = getRefAudioPath(userExercise.getID(), fileRef, slow, overwrite);
+      logger.debug("fixAudioPaths : for exid " + userExercise.getID()+ " slow is " + refAudio + " size " + FileUtils.size(refAudio));
+      slowSpeed.setAudioRef(refAudio);
     }
   }
 
@@ -558,41 +586,15 @@ public class UserListManager {
    *
    * Also normalizes the audio level.
    *
-   * @param userExercise
+   * @param id
    * @param fileRef
-   * @param fast
+   * @param destFileName
    * @param overwrite
-   * @return
+   * @return new, permanent audio path
+   * @see #fixAudioPaths(mitll.langtest.shared.custom.UserExercise, boolean, String)
    */
-  private String getRefAudioPath(UserExercise userExercise, File fileRef, String fast, boolean overwrite) {
-    final File bestDir = pathHelper.getAbsoluteFile("bestAudio");
-    if (!bestDir.exists() && !bestDir.mkdir()) {
-      if (!bestDir.exists()) logger.warn("huh? couldn't make " + bestDir.getAbsolutePath());
-    }
-    File bestDirForExercise = new File(bestDir, userExercise.getID());
-    if (!bestDirForExercise.exists() && !bestDirForExercise.mkdir()) {
-      if (!bestDirForExercise.exists()) logger.warn("huh? couldn't make " + bestDirForExercise.getAbsolutePath());
-    }
-    File destination = new File(bestDirForExercise, fast);
-    //logger.debug("getRefAudioPath : copying from " + fileRef +  " to " + destination.getAbsolutePath());
-    String s = "bestAudio" + File.separator + userExercise.getID() + File.separator + fast;
-    //logger.debug("getRefAudioPath : dest path    " + bestDirForExercise.getPath() + " vs " +s);
-    if (!fileRef.equals(destination)) {
-      new FileCopier().copy(fileRef.getAbsolutePath(), destination.getAbsolutePath());
-
-      new AudioConversion().normalizeLevels(destination);
-    }
-    else {
-      if (FileUtils.size(destination.getAbsolutePath()) == 0) logger.error("\ngetRefAudioPath : huh? " + destination + " is empty???");
-    }
-    ensureMP3(s, overwrite);
-    return s;
-  }
-
-  private void ensureMP3(String wavFile, boolean overwrite) {
-    if (wavFile != null) {
-      new AudioConversion().ensureWriteMP3(wavFile, pathHelper.getInstallPath(), overwrite);
-    }
+  private String getRefAudioPath(String id, File fileRef, String destFileName, boolean overwrite) {
+    return new PathWriter().getPermanentAudioPath(pathHelper, fileRef, destFileName, overwrite, id);
   }
 
   public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
@@ -637,7 +639,7 @@ public class UserListManager {
   public boolean listExists(long id) {  return userListDAO.getWhere(id, false) != null; }
 
   /**
-   * @see mitll.langtest.server.database.ExcelImport#addDefects(java.util.Map, mitll.langtest.shared.CommonExercise)
+   * @see mitll.langtest.server.database.ExcelImport#addDefects
    * @param exerciseID
    * @param field
    * @param comment
@@ -646,7 +648,7 @@ public class UserListManager {
     if (!annotationDAO.hasAnnotation(exerciseID, field, INCORRECT, comment)) {
       long defectDetector = userDAO.getDefectDetector();
       addAnnotation(exerciseID, field, INCORRECT, comment, defectDetector);
-      markState(exerciseID, CommonShell.STATE.DEFECT, defectDetector);
+      markState(exerciseID, STATE.DEFECT, defectDetector);
     }
   }
 
@@ -661,9 +663,8 @@ public class UserListManager {
    */
   public void addAnnotation(String exerciseID, String field, String status, String comment, long userID) {
     UserAnnotation annotation = new UserAnnotation(exerciseID, field, status, comment, userID, System.currentTimeMillis());
-    logger.debug("addAnnotation " + annotation);
+    //logger.debug("addAnnotation " + annotation);
     annotationDAO.add(annotation);
-    //markCorrectness(exerciseID, status.equalsIgnoreCase(CORRECT), userID);
   }
 
   /**
@@ -674,9 +675,6 @@ public class UserListManager {
   public void addAnnotations(CommonExercise exercise) {
     if (exercise != null) {
       Map<String, ExerciseAnnotation> latestByExerciseID = annotationDAO.getLatestByExerciseID(exercise.getID());
-      //if (!latestByExerciseID.isEmpty()) {
-      //  logger.debug("addAnnotations : found " + latestByExerciseID + " for " + exercise.getID());
-      //}
       for (Map.Entry<String, ExerciseAnnotation> pair : latestByExerciseID.entrySet()) {
         exercise.addAnnotation(pair.getKey(), pair.getValue().status, pair.getValue().comment);
       }
@@ -691,24 +689,24 @@ public class UserListManager {
    * @see #addAnnotation(String, String, String, String, long)
    * @see mitll.langtest.client.custom.QCNPFExercise#markReviewed
    * @param id
-   * @paramx userID
-   * @paramx creatorID
+   * @param state
+   * @param creatorID
    */
-  public void markState(String id, CommonShell.STATE state, long creatorID) {
-    logger.debug("mark state " + id + " = " + state + " by " +creatorID);
+  public void markState(String id, STATE state, long creatorID) {
+    //logger.debug("mark state " + id + " = " + state + " by " +creatorID);
     CommonExercise predefExercise = userExerciseDAO.getPredefExercise(id);
 
     if (predefExercise == null) {
       predefExercise = userExerciseDAO.getWhere(id);
     }
     if (predefExercise != null) {
-      if (state.equals(CommonShell.STATE.ATTN_LL)) {
+      if (state.equals(STATE.ATTN_LL)) {
         setSecondState(predefExercise, state, creatorID);
       }
       else {
         setState(predefExercise, state, creatorID);
       }
-      if (state.equals(CommonShell.STATE.FIXED)) {
+      if (state.equals(STATE.FIXED)) {
         markAllFieldsFixed(predefExercise, creatorID);
       }
     } else {
@@ -716,12 +714,12 @@ public class UserListManager {
     }
   }
 
-  public void setState(CommonShell shell, CommonShell.STATE state, long creatorID) {
+  public void setState(CommonShell shell, STATE state, long creatorID) {
     shell.setState(state);
     reviewedDAO.setState(shell.getID(), state, creatorID);
   }
 
-  public void setSecondState(CommonShell shell, CommonShell.STATE state, long creatorID) {
+  public void setSecondState(CommonShell shell, STATE state, long creatorID) {
     shell.setSecondState(state);
     secondStateDAO.setState(shell.getID(), state, creatorID);
   }
@@ -756,7 +754,7 @@ public class UserListManager {
    * @param userID
    */
   public void markCorrectness(String id, boolean correct, long userID) {
-    markState(id, correct ? CommonShell.STATE.APPROVED : CommonShell.STATE.DEFECT, userID);
+    markState(id, correct ? STATE.APPROVED : STATE.DEFECT, userID);
   }
 
   public boolean deleteList(long id) {
