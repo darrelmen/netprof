@@ -291,10 +291,17 @@ public class UserDAO extends DAO {
 
         String perms = rs.getString(PERMISSIONS);
         Collection<User.Permission> permissions = new ArrayList<User.Permission>();
+        userid = rs.getString("userid"); // userid
 
         if (perms != null) {
           for (String perm : perms.split(",")) {
-            permissions.add(User.Permission.valueOf(perm));
+            try {
+              permissions.add(User.Permission.valueOf(perm));
+            } catch (IllegalArgumentException e) {
+              logger.warn("huh, for user " + userid+
+                  " perm '" + perm+
+                  "' is not a permission?");
+            }
           }
         }
 
@@ -310,7 +317,7 @@ public class UserDAO extends DAO {
           // last
           rs.getString("nativeLang"), // native
           rs.getString("dialect"), // dialect
-          userid = rs.getString("userid"), // userid
+          userid, // userid
           rs.getTimestamp("timestamp").getTime(),
 
           rs.getBoolean("enabled"),
