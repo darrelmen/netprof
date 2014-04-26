@@ -25,7 +25,7 @@ public class ExerciseTrie extends Trie<CommonExercise> {
   private static final int MB = (1024 * 1024);
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds(int, long, String, long)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds
    * @param exercisesForState
    * @param language
    */
@@ -34,7 +34,7 @@ public class ExerciseTrie extends Trie<CommonExercise> {
     startMakingNodes();
     Runtime rt = Runtime.getRuntime();
     long free = rt.freeMemory()/ MB ;
-    logger.debug("ExerciseTrie : searching over " + exercisesForState.size());
+   // logger.debug("ExerciseTrie : searching over " + exercisesForState.size());
 
     long then = System.currentTimeMillis();
     boolean isMandarin = language.equalsIgnoreCase("Mandarin");
@@ -81,7 +81,7 @@ public class ExerciseTrie extends Trie<CommonExercise> {
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesForSelectionState(int, java.util.Map, long, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseListWrapperForPrefix(int, String, java.util.Collection, long, String)
    * @param prefix
    * @return
    */
@@ -123,7 +123,6 @@ public class ExerciseTrie extends Trie<CommonExercise> {
 
     @Override
     public String getNormalizedValue() { return value; }
-
     public String toString() { return "e " +e.getID() + " : " + value; }
   }
 
