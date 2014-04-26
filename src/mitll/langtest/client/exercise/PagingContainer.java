@@ -114,6 +114,18 @@ public class PagingContainer {
   public int getIndex(CommonShell t) {  return getList().indexOf(t); }
   public CommonShell getAt(int i) { return getList().get(i);  }
 
+  public int getMouseX() {
+    return mouseX;
+  }
+
+  public int getMouseY() {
+    return mouseY;
+  }
+
+  public String getClickedExerciseID() {
+    return clickedExerciseID;
+  }
+
   public interface TableResources extends CellTable.Resources {
     /**
      * The styles applied to the table.
@@ -205,13 +217,11 @@ public class PagingContainer {
 
   private CellTable<CommonShell> makeCellTable(CellTable.Resources o) {
     int pageSize = PAGE_SIZE;
-    //int pageSize = getNumTableRowsGivenScreenHeight();
     return new CellTable<CommonShell>(pageSize, o);
   }
 
   private com.github.gwtbootstrap.client.ui.CellTable<CommonShell> createBootstrapCellTable(com.github.gwtbootstrap.client.ui.CellTable.Resources o) {
      int pageSize = PAGE_SIZE;
-    //int pageSize = getNumTableRowsGivenScreenHeight();
     return new com.github.gwtbootstrap.client.ui.CellTable<CommonShell>(pageSize, o);
   }
 
@@ -233,6 +243,10 @@ public class PagingContainer {
     };*/
   }
 
+  private int mouseX;
+  private int mouseY;
+  private String clickedExerciseID = "";
+
   private Column<CommonShell, SafeHtml> getExerciseIdColumn2(final boolean consumeClicks) {
     return new Column<CommonShell, SafeHtml>(new MySafeHtmlCell(consumeClicks)) {
 
@@ -241,6 +255,9 @@ public class PagingContainer {
         super.onBrowserEvent(context, elem, object, event);
         if (BrowserEvents.CLICK.equals(event.getType())) {
           //System.out.println("getExerciseIdColumn.onBrowserEvent : got click " + event);
+          mouseX = event.getClientX();
+          mouseY = event.getClientY();
+          clickedExerciseID = object.getID();
           gotClickOnItem(object);
         }
       }
