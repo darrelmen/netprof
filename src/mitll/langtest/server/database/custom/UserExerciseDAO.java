@@ -76,7 +76,7 @@ public class UserExerciseDAO extends DAO {
    * <p/>
    * Uses return generated keys to get the user id
    *
-   * @see mitll.langtest.server.database.custom.UserListManager#reallyCreateNewItem(long, mitll.langtest.shared.custom.UserExercise)
+   * @see UserListManager#reallyCreateNewItem(long, mitll.langtest.shared.custom.UserExercise, String)
    * @see #update(mitll.langtest.shared.custom.UserExercise, boolean)
    */
   public void add(UserExercise userExercise, boolean isOverride) {
@@ -399,13 +399,11 @@ public class UserExerciseDAO extends DAO {
         rs.getString("foreignLanguage"),
         rs.getString(TRANSLITERATION),
         "",         // TODO complete fill in of context!
-        rs.getString("refAudio"),
-        rs.getString("slowAudioRef"),
+       // rs.getString("refAudio"),
+    //    rs.getString("slowAudioRef"),
         rs.getBoolean(OVERRIDE),
         unitToValue,
         date
-        //,
-        //rs.getString(STATE)
       );
 
       exercises.add(e);
@@ -452,7 +450,7 @@ public class UserExerciseDAO extends DAO {
 
 
   /**
-   * @see UserListManager#editItem(mitll.langtest.shared.custom.UserExercise, boolean)
+   * @see UserListManager#editItem(mitll.langtest.shared.custom.UserExercise, boolean, String)
    * @param id
    * @param state
    */
@@ -517,30 +515,13 @@ public class UserExerciseDAO extends DAO {
   }*/
 
   /**
-   * @see UserListManager#editItem(mitll.langtest.shared.custom.UserExercise, boolean)
+   * @see UserListManager#editItem(mitll.langtest.shared.custom.UserExercise, boolean, String)
    * @param userExercise
    * @param createIfDoesntExist
    */
   public void update(UserExercise userExercise, boolean createIfDoesntExist) {
     try {
       Connection connection = database.getConnection();
-
-      // TODO : consider making this an actual prepared statement?
-/*
-      String sql = "UPDATE " + USEREXERCISE +
-        " " +
-        "SET " +
-        "english='" + fixSingleQuote(userExercise.getEnglish()) + "', " +
-        "foreignLanguage='" + fixSingleQuote(userExercise.getForeignLanguage()) + "', " +
-        TRANSLITERATION + "='" + fixSingleQuote(userExercise.getTransliteration()) + "', " +
-        "refAudio='" + userExercise.getRefAudio() + "', " +
-        "slowAudioRef='" + userExercise.getSlowAudioRef() + "' " +
-      //  "slowAudioRef='" + userExercise.getSlowAudioRef() + "' " +
-        "WHERE " +
-          EXERCISEID +
-          "='" + userExercise.getID() +"'";*/
-
-
       String sql = "UPDATE " + USEREXERCISE +
         " " +
         "SET " +
@@ -554,7 +535,6 @@ public class UserExerciseDAO extends DAO {
 
       int ii = 1;
 
-    //  statement.setString(ii++, fixSingleQuote(userExercise.getEnglish()));
       statement.setString(ii++, userExercise.getEnglish());
       statement.setString(ii++, userExercise.getForeignLanguage());
       statement.setString(ii++, userExercise.getTransliteration());
@@ -563,7 +543,6 @@ public class UserExerciseDAO extends DAO {
       statement.setTimestamp(ii++, new Timestamp(System.currentTimeMillis()));
       statement.setString(ii++, userExercise.getID());
 
-      //PreparedStatement statement = connection.prepareStatement(sql);
       int i = statement.executeUpdate();
 
       if (i == 0) {
@@ -591,10 +570,7 @@ public class UserExerciseDAO extends DAO {
   }
 
   private void addColumnToTable2(Connection connection) throws SQLException {
-    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " +
-      USEREXERCISE +" ADD " + OVERRIDE + " BOOLEAN");
-    statement.execute();
-    statement.close();
+    addBoolean(connection, USEREXERCISE, OVERRIDE);
   }
 
   private void addColumnToTable3(Connection connection) throws SQLException {
