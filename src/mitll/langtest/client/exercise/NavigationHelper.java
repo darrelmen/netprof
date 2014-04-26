@@ -141,7 +141,8 @@ public class NavigationHelper extends HorizontalPanel {
 
   void clickPrev(CommonExercise e) {
     if (getPrev().isEnabled() && getPrev().isVisible()) {
-      System.out.println("clickPrev " +keyHandler+ " click on prev " + getPrev());
+      getPrev().setEnabled(false);
+      //System.out.println("clickPrev " +keyHandler+ " click on prev " + getPrev());
       listContainer.loadPreviousExercise(e);
     }
   }
