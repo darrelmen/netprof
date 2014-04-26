@@ -16,6 +16,7 @@ import mitll.langtest.shared.CommonExercise;
 * To change this template use File | Settings | File Templates.
 */
 public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
+  private static final String RECORD_BUTTON = "RecordButton";
   private final RecordAudioPanel recordAudioPanel;
   private PlayAudioPanel playAudioPanel;
   private final Panel parentPanel;
@@ -42,8 +43,14 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     super(exercise, controller, service, index, recordInResults, controller.getAudioType(), playButtonSuffix, stopButtonText);
     this.recordAudioPanel = recordAudioPanel;
     this.parentPanel = widgets;
-    getElement().setId("WaveformPostAudioRecordButton_" +index);
+    getElement().setId("WaveformPostAudioRecordButton_" + index);
     this.audioType = audioType;
+    addStyleName("minWidthRecordButton");
+  }
+
+  @Override
+  protected boolean shouldAddToAudioTable() {
+    return true;
   }
 
   @Override
@@ -51,7 +58,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     if (parentPanel instanceof BusyPanel) {
       ((BusyPanel) parentPanel).setBusy(true);
     }
-    controller.logEvent(this,"RecordButton",getExercise().getID(),"startRecording");
+    controller.logEvent(this, RECORD_BUTTON,getExercise().getID(),"startRecording");
     super.startRecording();
     setPlayEnabled(false);
   }
@@ -67,7 +74,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     if (parentPanel instanceof BusyPanel) {
       ((BusyPanel) parentPanel).setBusy(false);
     }
-    controller.logEvent(this,"RecordButton",getExercise().getID(),"stopRecording");
+    controller.logEvent(this, RECORD_BUTTON,getExercise().getID(),"stopRecording");
 
     recordAudioPanel.getWaveform().setVisible(true);
     recordAudioPanel.getWaveform().setUrl(LangTest.LANGTEST_IMAGES + "animated_progress.gif");
@@ -80,6 +87,10 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     return audioType;
   }
 
+  /**
+   * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
+   * @param result
+   */
   @Override
   public void useResult(AudioAnswer result) {
     recordAudioPanel.getImagesForPath(result.getPath());

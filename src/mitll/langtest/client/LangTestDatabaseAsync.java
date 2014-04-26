@@ -3,11 +3,11 @@ package mitll.langtest.client;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.DLIUser;
 import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.STATE;
 import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
@@ -29,11 +29,11 @@ import java.util.Map;
 public interface LangTestDatabaseAsync {
   void addTextAnswer(int usedID, CommonExercise exercise, int questionID, String answer, String answerType, AsyncCallback<Void> async);
   void userExists(String login, AsyncCallback<Integer> async);
-  void addUser(int age, String gender, int experience, String nativeLang, String dialect, String userID, AsyncCallback<Long> async);
+  void addUser(int age, String gender, int experience, String nativeLang, String dialect, String userID, Collection<User.Permission> permissions, AsyncCallback<Long> async);
   void getUsers(AsyncCallback<List<User>> async);
 
   void writeAudioFile(String base64EncodedString, String plan, String exercise, int question, int user,
-                      int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults, AsyncCallback<AudioAnswer> async);
+                      int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults, boolean addToAudioTable, AsyncCallback<AudioAnswer> async);
 
   void getNextUngradedExercise(String user, int expectedGrades, boolean englishOnly, AsyncCallback<CommonExercise> async);
 
@@ -47,7 +47,7 @@ public interface LangTestDatabaseAsync {
 
   void getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, String exerciseID, AsyncCallback<ImageResponse> async);
 
-  void getExercise(String id, AsyncCallback<CommonExercise> async);
+  void getExercise(String id, long userID, AsyncCallback<CommonExercise> async);
 
   void getUserToResultCount(AsyncCallback<Map<User, Integer>> async);
 
@@ -76,13 +76,9 @@ public interface LangTestDatabaseAsync {
   void getGradeCountPerExercise(AsyncCallback<Map<Integer, Map<String, Map<String, Integer>>>> async);
 
   void getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix, long userListID,
-                      AsyncCallback<ExerciseListWrapper> async);
+                      int userID, String role, AsyncCallback<ExerciseListWrapper> async);
 
   void addDLIUser(DLIUser dliUser, AsyncCallback<Void> async);
-
-/*
-  void getCompletedExercises(int user, boolean isReviewMode, AsyncCallback<Set<String>> async);
-*/
 
   void getStartupInfo(AsyncCallback<StartupInfo> async);
 
@@ -108,7 +104,7 @@ public interface LangTestDatabaseAsync {
 
   void getCommentedList(AsyncCallback<UserList> async);
 
-  void setExerciseState(String id, CommonShell.STATE state, long userID, AsyncCallback<Void> async);
+  void setExerciseState(String id, STATE state, long userID, AsyncCallback<Void> async);
 
   void isValidForeignPhrase(String foreign, AsyncCallback<Boolean> async);
 
@@ -126,7 +122,7 @@ public interface LangTestDatabaseAsync {
 
   void getEvents(AsyncCallback<List<Event>> async);
 
-  void markState(String id, CommonShell.STATE state, long creatorID, AsyncCallback<Void> async);
+  void markState(String id, STATE state, long creatorID, AsyncCallback<Void> async);
 
   void setAVPSkip(Collection<Long> ids, AsyncCallback<Void> async);
 
