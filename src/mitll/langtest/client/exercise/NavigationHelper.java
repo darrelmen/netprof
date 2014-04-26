@@ -35,7 +35,7 @@ public class NavigationHelper extends HorizontalPanel {
   // private static final String RIGHT_ARROW_TOOLTIP2 = "Press the right arrow key to go to the next item.";
 
   private Button prev;
-  private Button next;
+  protected Button next;
   private HandlerRegistration keyHandler;
   private final boolean debug = false;
   private boolean enableNextOnlyWhenAllCompleted = true;
@@ -269,7 +269,7 @@ public class NavigationHelper extends HorizontalPanel {
   }
 
   public void enableNextButton(boolean val) { next.setEnabled(val); }
-  public void enablePrevButton(boolean val) { prev.setEnabled(val); }
+//  public void enablePrevButton(boolean val) { prev.setEnabled(val); }
 
   public void setButtonsEnabled(boolean val) {
     getPrev().setEnabled(val);
