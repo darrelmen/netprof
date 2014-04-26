@@ -22,6 +22,8 @@ public class PathHelper {
 
   private String realContextPathTest;
   private final ServletContext context;
+  private String configDir;
+
 
   public PathHelper(ServletContext context) {
     this.context = context;
@@ -52,7 +54,6 @@ public class PathHelper {
    * @return path to webapp install location
    */
   public String getInstallPath() {
-   // ServletContext context = servlet.getServletContext();
     if (context == null && realContextPathTest == null) {
       logger.error("no servlet context.");
       return "";
@@ -138,9 +139,11 @@ public class PathHelper {
     return imageOutdir;
   }
 
-/*
-  public void setRealContextPathTest(String realContextPathTest) {
-    this.realContextPathTest = realContextPathTest;
+  public void setConfigDir(String configDir) {
+    this.configDir = configDir;
   }
-*/
+
+  public String getConfigDir() {
+    return configDir;
+  }
 }

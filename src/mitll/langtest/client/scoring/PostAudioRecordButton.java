@@ -72,9 +72,9 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
       controller.getUser(),
       reqid,
       true,//!exercise.isPromptInEnglish(),
-      audioType,
+      getAudioType(),
       false, recordInResults,
-      new AsyncCallback<AudioAnswer>() {
+      shouldAddToAudioTable(), new AsyncCallback<AudioAnswer>() {
         public void onFailure(Throwable caught) {
           long now = System.currentTimeMillis();
           System.out.println("PostAudioRecordButton : (failure) posting audio took " + (now - then) + " millis");
@@ -122,6 +122,10 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
           }
         }
       });
+  }
+
+  protected boolean shouldAddToAudioTable() {
+    return false;
   }
 
   protected String getAudioType() { return controller.getAudioType(); }
