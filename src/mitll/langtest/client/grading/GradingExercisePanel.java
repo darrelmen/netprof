@@ -1,32 +1,12 @@
 package mitll.langtest.client.grading;
 
-import com.github.gwtbootstrap.client.ui.Popover;
-import com.github.gwtbootstrap.client.ui.Tab;
-import com.github.gwtbootstrap.client.ui.constants.Placement;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanel;
 import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.result.ResultManager;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.Result;
-import mitll.langtest.shared.grade.Grade;
-import mitll.langtest.shared.grade.ResultsAndGrades;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Allows a grader to grade answers entered in the default mode.
@@ -37,13 +17,13 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class GradingExercisePanel extends ExercisePanel {
-  private static final int ONE_QUESTION_PAGE_SIZE = 3;
-  private static final int TWO_QUESTION_PAGE_SIZE = ONE_QUESTION_PAGE_SIZE;
+//  private static final int ONE_QUESTION_PAGE_SIZE = 3;
+ // private static final int TWO_QUESTION_PAGE_SIZE = ONE_QUESTION_PAGE_SIZE;
 
-  private static final int BIG_ONE_QUESTION_PAGE_SIZE = 8;
-  private static final int BIG_TWO_QUESTION_PAGE_SIZE = BIG_ONE_QUESTION_PAGE_SIZE / 2;
-  private static final List<Boolean> BOOLEANS = Arrays.asList(true, false);
-  private final UserFeedback userFeedback;
+ // private static final int BIG_ONE_QUESTION_PAGE_SIZE = 8;
+ // private static final int BIG_TWO_QUESTION_PAGE_SIZE = BIG_ONE_QUESTION_PAGE_SIZE / 2;
+ // private static final List<Boolean> BOOLEANS = Arrays.asList(true, false);
+ // private final UserFeedback userFeedback;
 
   /**
    * @param e
@@ -56,7 +36,7 @@ public class GradingExercisePanel extends ExercisePanel {
   public GradingExercisePanel(final CommonExercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                               final ExerciseController controller, ListInterface listContainer) {
     super(e,service,userFeedback,controller, listContainer);
-    this.userFeedback = userFeedback;
+  //  this.userFeedback = userFeedback;
     enableNextButton(true);
   }
 
@@ -239,12 +219,13 @@ public class GradingExercisePanel extends ExercisePanel {
 
   /**
    * Are all results graded?
-   * @param results
-   * @param grades
-   * @param qIndex
-   * @param numGrades
+   * @paramx results
+   * @paramx grades
+   * @paramx qIndex
+   * @paramx numGrades
    * @return
    */
+/*
   private boolean allGraded(Collection<Result> results, Collection<Grade> grades, int qIndex, int numGrades) {
     List<Result> filtered = getResultsForThisQuestion(results, qIndex);
     Set<Integer> expected = new HashSet<Integer>();
@@ -257,11 +238,12 @@ public class GradingExercisePanel extends ExercisePanel {
 
     return expected.isEmpty();
   }
+*/
 
-  private String getPrompt(boolean isSpoken, boolean isForeign, GradingExercisePanel outer) {
+/*  private String getPrompt(boolean isSpoken, boolean isForeign, GradingExercisePanel outer) {
     boolean isEnglish = !isForeign;
     return isSpoken ? outer.getSpokenPrompt(isEnglish) : outer.getWrittenPrompt(isEnglish);
-  }
+  }*/
 
   /**
    * TODO : really hacky trying to determine how big the table should be
@@ -278,7 +260,7 @@ public class GradingExercisePanel extends ExercisePanel {
    * @return
    * @seex #getAnswerWidget
    */
-  private Tab addAnswerGroup(Collection<Grade> grades,
+/*  private Tab addAnswerGroup(Collection<Grade> grades,
                              List<Result> results, boolean bigPage, String prompt,
                              LangTestDatabaseAsync service, PropertyHandler propertyHandler, int numQuestions, int index,
                              String tabHeading) {
@@ -300,7 +282,7 @@ public class GradingExercisePanel extends ExercisePanel {
 
     vp.add(child1);
     return tab;
-  }
+  }*/
 
   /**
    * How many distinct types there are - combinations of spoken/written & flq/english q.
@@ -309,6 +291,7 @@ public class GradingExercisePanel extends ExercisePanel {
    * @return 1-3
    * @seex #getAnswerWidget(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    */
+/*
   private int countDistinctTypes(ResultsAndGrades resultsAndGrades) {
     int count = 0;
     for (boolean s : BOOLEANS) {
@@ -324,21 +307,22 @@ public class GradingExercisePanel extends ExercisePanel {
     }
     return count;
   }
+*/
 
   /**
-   * @param results
-   * @param grades
-   * @param service
-   * @param propertyHandler
-   * @param moreThanOneQuestion
-   * @param index
-   * @param pageSize
-   * @param twoQPageSize
-   * @param grader
+   * @paramx results
+   * @paramx grades
+   * @paramx service
+   * @paramx propertyHandler
+   * @paramx moreThanOneQuestion
+   * @paramx index
+   * @paramx pageSize
+   * @paramx twoQPageSize
+   * @paramx grader
    * @return
    * @seex #getAnswerWidget(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    */
-  private Widget showResults(Collection<Result> results, Collection<Grade> grades,
+/*  private Widget showResults(Collection<Result> results, Collection<Grade> grades,
                              LangTestDatabaseAsync service, PropertyHandler propertyHandler,
                              boolean moreThanOneQuestion, int index, int pageSize, int twoQPageSize, int grader,
                              String responseType) {
@@ -391,8 +375,8 @@ public class GradingExercisePanel extends ExercisePanel {
     showPopover(popover,table,"Grade Guidance",tip, Placement.RIGHT);
 
     return table;
-  }
-
+  }*/
+/*
   private void showPopover(Popover popover, Widget w, String heading, String message, Placement placement) {
     popover.setWidget(w);
     popover.setText(message);
@@ -407,7 +391,7 @@ public class GradingExercisePanel extends ExercisePanel {
     List<Result> filtered = new ArrayList<Result>();
     for (Result r : results) if (r.qid == index) filtered.add(r);
     return filtered;
-  }
+  }*/
 
   @Override
   protected String getQuestionPrompt(boolean promptInEnglish) { return ""; }
