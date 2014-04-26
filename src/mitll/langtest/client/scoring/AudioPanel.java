@@ -1,7 +1,6 @@
 package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.CheckBox;
-import com.github.gwtbootstrap.client.ui.Heading;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -19,6 +18,7 @@ import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.sound.PlayAudioPanel;
+import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.ImageResponse;
 
@@ -54,7 +54,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
   private final ScoreListener gaugePanel;
   protected final String exerciseID;
-  String audioPath;
+  protected String audioPath;
   private final Map<String,Integer> reqs = new HashMap<String, Integer>();
   private int reqid;
 
@@ -108,7 +108,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     this.gaugePanel = gaugePanel;
     if (debug) System.out.println("AudioPanel : gauge panel " + gaugePanel);
     this.showSpectrogram = showSpectrogram;
-    if (showSpectrogram) System.out.println("AudioPanel : showSpectrogram! ");
+  //  if (showSpectrogram) System.out.println("AudioPanel : showSpectrogram! ");
     this.rightMargin = rightMargin;
     this.exerciseID = exerciseID;
   }
@@ -175,8 +175,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     hp.setWidth("100%");
 
     add(hp);
-
-    add(new Heading(6));
+    hp.addStyleName("bottomFiveMargin");
+    //add(new Heading(6));
 
     add(imageContainer);
   }
@@ -218,6 +218,12 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   }
   public ImageAndCheck getSpectrogram() {
     return spectrogram;
+  }
+
+  public void addPlayListener(PlayListener playListener) {
+    if (playAudio != null) {
+      playAudio.addPlayListener(playListener);
+    }
   }
 
   public static class ImageAndCheck {
