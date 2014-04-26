@@ -87,12 +87,13 @@ public class NewUserExercise extends BasicDialog {
     this.service = service;
     this.itemMarker = itemMarker;
     this.editItem = editItem;
+   // System.out.println("got " + newExercise.getAudioAttributes());
     this.newUserExercise = newExercise.toUserExercise();
+    //System.out.println("after " + newUserExercise.getAudioAttributes());
   }
 
   /**
    * @see #afterValidForeignPhrase
-   * @seex EditItem#populatePanel(mitll.langtest.shared.custom.UserExercise, com.google.gwt.user.client.ui.Panel, mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.HasText, mitll.langtest.client.list.ListInterface)
    *
    * @param ul
    * @param originalList
@@ -124,22 +125,13 @@ public class NewUserExercise extends BasicDialog {
     english.box.getElement().setId("NewUserExercise_English_entry_for_list_"+ul.getID());
 
     // make audio row
-    FluidRow row = new FluidRow();
-    upper.add(row);
+    upper.add(makeAudioRow());
 
-    normalSpeedRecording = makeRegularAudioPanel(row);
-    normalSpeedRecording.addStyleName("buttonGroupInset3");
+    this.toAddTo = toAddTo;
     this.originalList = originalList;
     this.listInterface = listInterface;
-    this.toAddTo = toAddTo;
-    slowSpeedRecording = makeSlowAudioPanel(row);
-    slowSpeedRecording.addStyleName("buttonGroupInset5");
 
-    rap.setOtherRAP(rapSlow);
-    rapSlow.setOtherRAP(rap);
-
-    Panel column = getCreateButton(ul, listInterface, toAddTo, normalSpeedRecording);
-    container.add(column);
+    container.add(getCreateButton(ul, listInterface, toAddTo, normalSpeedRecording));
 
     foreignLang.box.addBlurHandler(new BlurHandler() {
       @Override
@@ -166,6 +158,20 @@ public class NewUserExercise extends BasicDialog {
     });
 
     return container;
+  }
+
+  protected Panel makeAudioRow() {
+    FluidRow row = new FluidRow();
+
+    normalSpeedRecording = makeRegularAudioPanel(row);
+    normalSpeedRecording.addStyleName("buttonGroupInset3");
+
+    slowSpeedRecording = makeSlowAudioPanel(row);
+    slowSpeedRecording.addStyleName("buttonGroupInset5");
+
+    rap.setOtherRAP(rapSlow);
+    rapSlow.setOtherRAP(rap);
+    return row;
   }
 
   void addItemsAtTop(Panel container) {
@@ -413,8 +419,8 @@ public class NewUserExercise extends BasicDialog {
   private void checkValidForeignPhrase(final UserList ul, final ListInterface pagingContainer, final Panel toAddTo,
                                        final boolean onClick) {
     String foreignLangText = foreignLang.getText();
-    System.out.println("checkValidForeignPhrase : checking phrase " + foreignLangText +
-      " before adding/changing " + newUserExercise);
+/*    System.out.println("checkValidForeignPhrase : checking phrase " + foreignLangText +
+      " before adding/changing " + newUserExercise);*/
 
     service.isValidForeignPhrase(foreignLangText, new AsyncCallback<Boolean>() {
       @Override
@@ -662,7 +668,7 @@ public class NewUserExercise extends BasicDialog {
     } else if (newUserExercise == null || newUserExercise.getRefAudio() == null) {
       System.out.println("validateForm : new user ex " + newUserExercise);
 
-      if (foreignChanged) {
+      if (foreignChanged && rap != null) {
         Button recordButton = rap.getButton();
         markError(normalSpeedRecording, recordButton, recordButton, "",
           RECORD_REFERENCE_AUDIO_FOR_THE_FOREIGN_LANGUAGE_PHRASE);
@@ -672,8 +678,11 @@ public class NewUserExercise extends BasicDialog {
             normalSpeedRecording.setType(ControlGroupType.NONE);
           }
         });
+        return false;
       }
-      return false;
+      else {
+        return true;
+      }
     }
     return true;
   }

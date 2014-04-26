@@ -2,11 +2,15 @@ package mitll.langtest.client.user;
 
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Cookies;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.User;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Handles storing cookies for users, etc. IF user ids are stored as cookies.
@@ -50,8 +54,6 @@ public class UserManager {
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
-   * @see mitll.langtest.client.LangTest#doFlashcard()
-   * @see mitll.langtest.client.LangTest#doDataCollectAdminView
    * @param lt
    * @param service
    * @param props
@@ -84,17 +86,39 @@ public class UserManager {
    * @see #checkLogin()
    */
   private void login() {
-    int user = getUser();
+    final int user = getUser();
     if (user != NO_USER_SET) {
 //   System.out.println("UserManager.login : current user : " + user);
       rememberAudioType();
-      userNotification.gotUser(user);
+
+      service.getUsers(new AsyncCallback<List<User>>() {
+        @Override
+        public void onFailure(Throwable caught) {
+
+        }
+
+        @Override
+        public void onSuccess(List<User> result) {
+          for (User u : result) {
+            if (((int) u.getId()) == user) {
+              for (User.Permission permission : u.getPermissions()) {
+                userNotification.setPermission(permission, true);
+              }
+              break;
+            }
+          }
+          userNotification.gotUser(user);
+        }
+      });
+
     }
     else {
       StudentDialog studentDialog = new StudentDialog(service,props,this, userNotification);
       studentDialog.displayLoginBox();
     }
   }
+
+
 
   /**
    * @see mitll.langtest.client.LangTest#checkLogin
@@ -117,7 +141,7 @@ public class UserManager {
     StudentDialog studentDialog = new StudentDialog(service,props,this,userNotification);
     System.out.println("UserManager.addAnonymousUser : adding anonymous user");
 
-    studentDialog.addUser(89, "male", 0,"");
+    studentDialog.addUser(89, "male", 0,"", new ArrayList<User.Permission>());
   }
 
   /**
@@ -142,7 +166,7 @@ public class UserManager {
       }
       userNotification.rememberAudioType(audioType);
     }
-    rememberShowUnansweredFirst();
+    //rememberShowUnansweredFirst();
   }
 
   /**
@@ -150,38 +174,42 @@ public class UserManager {
    * @see UserDialog#setRecordingOrder()
    * @param val
    */
-  public void setShowUnansweredFirst(boolean val) {
+/*  public void setShowUnansweredFirst(boolean val) {
     addBinaryKey(val, getUnansweredKey());
-    userNotification.setShowUnansweredFirst(val);
+   // userNotification.setShowUnansweredFirst(val);
 
     //getShowUnanswered();
-  }
+  }*/
 
+/*
   public void setShowRerecord(boolean val) {
     String showRerecordKey = getShowRerecordKey();
     addBinaryKey(val, showRerecordKey);
-    userNotification.setShowRerecord(val);
+  //  userNotification.setShowRerecord(val);
 
     //getBinaryKey(showRerecordKey);
   }
+*/
 
   private void addBinaryKey(boolean val, String unansweredKey) {
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
     localStorageIfSupported.setItem(unansweredKey, val ? "true" : "false");
   }
 
-  private void rememberShowUnansweredFirst() {
+/*  private void rememberShowUnansweredFirst() {
     if (Storage.isLocalStorageSupported()) {
       userNotification.setShowUnansweredFirst(getShowUnanswered());
       userNotification.setShowRerecord(getBinaryKey(getShowRerecordKey()));
     }
-  }
+  }*/
 
+/*
   private boolean getShowUnanswered() {
     return getBinaryKey(getUnansweredKey());
   }
+*/
 
-  private boolean getBinaryKey(String unansweredKey) {
+/*  private boolean getBinaryKey(String unansweredKey) {
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
 
     boolean showUnansweredFirst = false;
@@ -194,14 +222,16 @@ public class UserManager {
       //System.out.println("===> no key " +unansweredKey);
     }
     return showUnansweredFirst;
-  }
+  }*/
 
+/*
   private String getUnansweredKey() {
     return getShowUnansweredKey() + "_" +getUserID();
   }
   private String getShowRerecordKey() {
     return getShowRerecordRoot() + "_" +getUserID();
   }
+*/
 
   /**
    * @return id of user
@@ -269,12 +299,14 @@ public class UserManager {
   private String getExpires() {
     return appTitle + ":" + "expires";
   }
+/*
   private String getShowUnansweredKey() {
     return appTitle + ":" + "showUnanswered";
   }
   private String getShowRerecordRoot() {
     return appTitle + ":" + "showRerecord";
   }
+*/
 
   /**
    * @see #getUser()
@@ -334,29 +366,11 @@ public class UserManager {
   }
 
   /**
-   * @see mitll.langtest.client.LangTest#doDataCollectAdminView
-   * @see #loginDifferentTypes()
-   */
-/*  public void teacherLogin() {
-    int user = getUser();
-    if (user != NO_USER_SET) {
-      System.out.println("teacherLogin: got cached user : " + user);
-      rememberAudioType();
-      userNotification.gotUser(user);
-    } else {
-      DataCollectorDialog dataCollectorDialog = new DataCollectorDialog(service, props, userNotification, this);
-      dataCollectorDialog.displayTeacherLogin("Data Collector Login");
-    }
-  }*/
-
-  /**
    * TODO : move cookie manipulation to separate class
    *
    * @param sessionID    from database
    * @param audioType
    * @param userChosenID
-   * @seex DataCollectorDialog#addFullUser(com.github.gwtbootstrap.client.ui.Modal, com.github.gwtbootstrap.client.ui.Button, UserManager, String, String, String, String, int, int)
-   * @seex DataCollectorDialog#userExists
    * @see StudentDialog#addUser
    */
   void storeUser(long sessionID, String audioType, String userChosenID, PropertyHandler.LOGIN_TYPE userType) {
