@@ -152,9 +152,8 @@ public class ExcelImport implements ExerciseDAO {
   private Map<String, List<AudioAttribute>> exToAudio;
   @Override
   public void setAudioDAO(AudioDAO audioDAO) {
- //   this.audioDAO = audioDAO;
     exToAudio = audioDAO.getExToAudio();
-    int count = 0;
+   // int count = 0;
     logger.debug("extoaudio now " + exToAudio.size());
 /*    for (String key : exToAudio.keySet()) {
       logger.debug("\tid '" +key+
@@ -710,6 +709,7 @@ public class ExcelImport implements ExerciseDAO {
     if (semis > 0) {
       logger.info("Skipped " + semis + " entries with semicolons or " + (100f * ((float) semis) / (float) id) + "%");
     }
+    if (missingExerciseCount > 0) logger.debug("missing ex count " + missingExerciseCount);
     return exercises;
   }
 
@@ -1019,47 +1019,48 @@ public class ExcelImport implements ExerciseDAO {
     return imported;
   }
 
+  int missingExerciseCount = 0;
   /**
    * TODO : rationalize media path -- don't force hack on bestAudio replacement
    * Why does it sometimes have the config dir on the front?
    * @param id
    * @param imported
+   * @see #getExercise(String, String, String, String, String, String, boolean, String)
    */
   private void attachAudio(String id, Exercise imported) {
     int c = 0;
     String mediaDir1 = mediaDir.replaceAll("bestAudio","");
     //logger.debug("media dir " + mediaDir1);
+    if (exToAudio.containsKey(id) || exToAudio.containsKey(id + "/1") || exToAudio.containsKey(id + "/2")) {
+      List<AudioAttribute> audioAttributes = exToAudio.get(id);
 
-    if (exToAudio.containsKey(id) || exToAudio.containsKey(id+"/1") || exToAudio.containsKey(id+"/2")) {
-      for (String idq : Arrays.asList(id)) {
-        List<AudioAttribute> audioAttributes = exToAudio.get(idq);
-
-        if (!audioAttributes.isEmpty()) {
-          for (AudioAttribute audio : audioAttributes) {
-            String child = mediaDir1 + File.separator + audio.getAudioRef();
+      if (audioAttributes == null) {
+        missingExerciseCount++;
+        if (missingExerciseCount < 10) logger.warn("can't find " + id);
+      } else if (!audioAttributes.isEmpty()) {
+        for (AudioAttribute audio : audioAttributes) {
+          String child = mediaDir1 + File.separator + audio.getAudioRef();
           /*  if (child.contains("bestAudio\bestAudio")) {
               child = child.replaceAll("bestAudio\\bestAudio","bestAudio");
             }*/
-            File test = new File(installPath, child);
+          File test = new File(installPath, child);
 
-            boolean exists = test.exists();
-            if (!exists) {
-              test = new File(installPath, audio.getAudioRef());
-              child = audio.getAudioRef();
-            }
-            if (exists) {
-              audio.setAudioRef(child);   // remember to prefix the path
-              imported.addAudio(audio);
-            } else {
-              c++;
-              if (c < 5) logger.warn("file " + test.getAbsolutePath() + " does not exist - " + audio.getAudioRef());
-            }
+          boolean exists = test.exists();
+          if (!exists) {
+            test = new File(installPath, audio.getAudioRef());
+            child = audio.getAudioRef();
+          }
+          if (exists) {
+            audio.setAudioRef(child);   // remember to prefix the path
+            imported.addAudio(audio);
+          } else {
+            c++;
+            if (c < 5) logger.warn("file " + test.getAbsolutePath() + " does not exist - " + audio.getAudioRef());
           }
         }
       }
       //logger.debug("added " + c + " to " + id);
-    }
-    else {
+    } else {
      // logger.debug("can't find '" + id + "' in " + exToAudio.keySet().size() + " keys, e.g. " + exToAudio.keySet().iterator().next());
     }
   }
