@@ -14,9 +14,11 @@ import mitll.langtest.server.database.custom.UserListExerciseJoinDAO;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.flashcard.UserStateWrapper;
 import mitll.langtest.server.database.instrumentation.EventDAO;
+import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.DLIUser;
+import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
@@ -261,7 +263,7 @@ public class DatabaseImpl implements Database {
   public List<CommonExercise> getExercises() { return getExercises(useFile, lessonPlanFile); }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise(String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise
    * @param id
    * @return
    */
@@ -324,11 +326,45 @@ public class DatabaseImpl implements Database {
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#editItem(mitll.langtest.shared.custom.UserExercise)
+   * @see mitll.langtest.client.custom.EditableExercise#postEditItem
    * @param userExercise
    */
   public void editItem(UserExercise userExercise) {
-    getUserListManager().editItem(userExercise, true);
+    logger.debug("editItem " + userExercise.getID() + " mediaDir : " + serverProps.getMediaDir());
+
+    getUserListManager().editItem(userExercise, true, serverProps.getMediaDir());
+    Map<String, ExerciseAnnotation> fieldToAnnotation = userExercise.getFieldToAnnotation();
+
+    Set<AudioAttribute> defects = new HashSet<AudioAttribute>();
+    Set<AudioAttribute> original  = new HashSet<AudioAttribute>(userExercise.getAudioAttributes());
+
+    for (Map.Entry<String,ExerciseAnnotation> fieldAnno : fieldToAnnotation.entrySet()) {
+      if (!fieldAnno.getValue().isCorrect()) {
+        AudioAttribute audioAttribute = userExercise.getAudioRefToAttr().get(fieldAnno.getKey());
+        logger.debug("found defect " + audioAttribute + " anno : " + fieldAnno.getValue() +  " field  " + fieldAnno.getKey());
+        if (audioAttribute != null) {
+          logger.debug("\tmarking defect on audio");
+          defects.add(audioAttribute);
+          audioDAO.markDefect(audioAttribute);
+        }
+        else {
+          logger.error("\tcan't marking defect on audio! looking for " + fieldAnno.getKey() + " in " + userExercise.getAudioRefToAttr().keySet());
+
+        }
+      }
+    }
+
     exerciseDAO.addOverlay(userExercise);
+
+    CommonExercise exercise = getExercise(userExercise.getID());
+    String overlayID = exercise.getID();
+
+    original.removeAll(defects);
+    for (AudioAttribute toCopy: original) {
+      if (toCopy.getUserid() <1) logger.error("bad user id for " + toCopy);
+
+      audioDAO.add((int) toCopy.getUserid(), toCopy.getAudioRef(), overlayID, toCopy.getTimestamp(), toCopy.getAudioType(), toCopy.getDuration());
+    }
   }
 
   /**
@@ -655,9 +691,9 @@ public class DatabaseImpl implements Database {
 
   public long addUser(HttpServletRequest request,
                       int age, String gender, int experience,
-                      String nativeLang, String dialect, String userID) {
+                      String nativeLang, String dialect, String userID, Collection<User.Permission> permissions) {
     String ip = getIPInfo(request);
-    return addUser(age, gender, experience, ip, nativeLang, dialect, userID);
+    return addUser(age, gender, experience, ip, nativeLang, dialect, userID, permissions);
   }
 
 
@@ -665,7 +701,9 @@ public class DatabaseImpl implements Database {
     long l;
     if ((l = userDAO.userExists(user.getUserID())) == -1) {
       logger.debug("addUser " + user);
-       l = userDAO.addUser(user.getAge(), user.getGender() == 0 ? UserDAO.MALE : UserDAO.FEMALE, user.getExperience(), user.getIpaddr(), user.getNativeLang(), user.getDialect(), user.getUserID(), false);
+       l = userDAO.addUser(user.getAge(), user.getGender() == 0 ? UserDAO.MALE : UserDAO.FEMALE,
+         user.getExperience(), user.getIpaddr(), user.getNativeLang(), user.getDialect(), user.getUserID(), false,
+         user.getPermissions());
     }
    // userListManager.createFavorites(l);
     return l;
@@ -681,13 +719,14 @@ public class DatabaseImpl implements Database {
    * @param experience
    * @param ipAddr user agent info
    * @param dialect speaker dialect
+   * @param permissions
    * @return assigned id
    * @see mitll.langtest.server.LangTestDatabaseImpl#addUser
    */
   public long addUser(int age, String gender, int experience, String ipAddr,
-                       String nativeLang, String dialect, String userID) {
+                      String nativeLang, String dialect, String userID, Collection<User.Permission> permissions) {
     logger.debug("addUser " + userID);
-    long l = userDAO.addUser(age, gender, experience, ipAddr, nativeLang, dialect, userID, false);
+    long l = userDAO.addUser(age, gender, experience, ipAddr, nativeLang, dialect, userID, false, permissions);
     userListManager.createFavorites(l);
     return l;
   }
@@ -756,6 +795,11 @@ public class DatabaseImpl implements Database {
      eventDAO.add(new Event(id,widgetID,exid,context,userid,-1, hitID));
   }
 
+  public void logEvent(String exid, String context, long userid) {
+    if (context.length()>100) context = context.substring(0,100).replace("\n"," ");
+    logEvent("unknown","server",exid,context,userid,"unknown");
+  }
+
   public List<Event> getEvents() {
     return eventDAO.getAll();
   }
@@ -822,8 +866,7 @@ public class DatabaseImpl implements Database {
    *
    * @param exid
    * @return ResultsAndGrades
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getResultsForExercise
-   * @seex mitll.langtest.client.grading.GradingExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @see DatabaseImpl#getResultsForExercise
    */
   private ResultsAndGrades getResultsForExercise(String exid, boolean filterByFLQAndSpoken, boolean useFLQ, boolean useSpoken) {
     GradeDAO.GradesAndIDs gradesAndIDs = gradeDAO.getResultIDsForExercise(exid);
@@ -1007,7 +1050,7 @@ public class DatabaseImpl implements Database {
   public UserListManager getUserListManager() { return userListManager; }
 
   /**
-   * @see mitll.langtest.client.custom.ReviewEditableExercise#duplicateExercise()
+   * @see mitll.langtest.client.custom.ReviewEditableExercise#duplicateExercise
    * @param exercise
    * @return
    */
@@ -1061,7 +1104,7 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise(String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise
    * @param id
    * @return
    */
@@ -1071,7 +1114,7 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise(String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise
    * @param id
    * @return
    */
@@ -1099,14 +1142,11 @@ public class DatabaseImpl implements Database {
   }
 
   protected static void importCourseExamples() {
-    DatabaseImpl russianCourseExamples = makeDatabaseImpl("russianCourseExamples", "war/config/russian");
+    DatabaseImpl russianCourseExamples = makeDatabaseImpl("russianCourseExamples_04_16", "war/config/russian");
     ResultDAO resultDAO1 = russianCourseExamples.getResultDAO();
     System.out.println("got " + resultDAO1.getNumResults());
     Map<Long, Map<String, Result>> userToResultsRegular = resultDAO1.getUserToResults(true, russianCourseExamples.getUserDAO());
     System.out.println("got " + userToResultsRegular.size() + " keys " + userToResultsRegular.keySet());
-
-    // Map<String, Result> stringResultMap = userToResultsRegular.get(23l);
-    //  Result result = stringResultMap.get("1363");
 
     //  System.out.println("got " + result);
 
@@ -1123,57 +1163,64 @@ public class DatabaseImpl implements Database {
     Map<Long, Long> oldToNew = new HashMap<Long, Long>();
 
     for (long userid : userToResultsRegular.keySet()) {
-      User user = userMap.get(userid);
-      long l = npfRussian.addUser(user);
-      oldToNew.put(user.getId(), l);
+      copyUser(npfRussian, userMap, oldToNew, userid);
     }
 
     for (long userid : userToResultsSlow.keySet()) {
-      User user = userMap.get(userid);
-      long l = npfRussian.addUser(user);
-      oldToNew.put(user.getId(), l);
+      copyUser(npfRussian, userMap, oldToNew, userid);
     }
 
     // so now we have the users in the database
 
     // add a audio reference to the audio ref table for each recording
     AudioDAO audioDAO = npfRussian.getAudioDAO();
-    audioDAO.drop();
+   // audioDAO.drop();
     copyAudio(userToResultsRegular, oldToNew, audioDAO);
     copyAudio(userToResultsSlow, oldToNew, audioDAO);
   }
 
+  private static void copyUser(DatabaseImpl npfRussian, Map<Long, User> userMap, Map<Long, Long> oldToNew, long userid) {
+    User user = userMap.get(userid);
+    int i = npfRussian.userExists(user.getUserID());
+    if (i > 0) logger.debug("found duplicate " + user);
+    long l = i != -1 ? i : npfRussian.addUser(user);
+    oldToNew.put(user.getId(), l);
+  }
+
+  /**
+   * TODO : deal with the user ids being the same after toLowerCase
+   * @param userToResultsRegular
+   * @param oldToNew
+   * @param audioDAO
+   */
   protected static void copyAudio(Map<Long, Map<String, Result>> userToResultsRegular, Map<Long, Long> oldToNew, AudioDAO audioDAO) {
     int count = 0;
     for (Map.Entry<Long, Map<String, Result>> userToExIdToResult : userToResultsRegular.entrySet()) {
       //for (Long userid : userToExIdToResult.getKey())
-      logger.debug("USer " +userToExIdToResult.getKey());
+      logger.debug("User " +userToExIdToResult.getKey());
       Map<String, Result> exIdToResult = userToExIdToResult.getValue();
       logger.debug("num = " + exIdToResult.size() + " exercises->results ");
       for (Result r : exIdToResult.values()) {
-        logger.debug("\tcount " + count+
-          " result = " + r.uniqueID + " for " +r.getID()+ " type " +r.getAudioType() + " path " +r.answer);
+        if (count %  100 == 0) {
+          logger.debug("\tcount " + count +
+            " result = " + r.uniqueID + " for " + r.getID() + " type " + r.getAudioType() + " path " + r.answer);
+        }
 
-        //  Result next = exIdToResult.values().iterator().next();
-        audioDAO.add(r, oldToNew.get(r.userid).intValue());
+        audioDAO.add(r, oldToNew.get(r.userid).intValue(), "bestAudio/" + r.answer);
+
         try {
-          File destFile = new File("war/config/russian/bestAudio",r.answer);
+          File destFile = new File("war/config/russian/bestAudio", r.answer);
           destFile.getParentFile().mkdirs();
           FileUtils.copyFile(new File("war/config/russian/candidateAudio", r.answer), destFile);
           count++;
+          if (count % 100 == 0)  {
+            logger.debug("\tcount " + count + " copied to " + destFile.getAbsolutePath());
+          }
         } catch (IOException e) {
           logger.error("got " + e, e);
         }
       }
-      // if (count > 10) break;
     }
     logger.debug("copied " + count + " files.");
   }
-
-/*
-  private static String trimPathForWebPage(Result r) {
-    int answer = r.answer.indexOf(PathHelper.ANSWERS);
-    if (answer == -1) return r.answer;
-    return r.answer.substring(answer);
-  }*/
 }
