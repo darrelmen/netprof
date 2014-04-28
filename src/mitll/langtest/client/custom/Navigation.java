@@ -285,7 +285,7 @@ public class Navigation extends TabContainer implements RequiresResize {
     boolean isQualityControl = isQC();
 
     if (isQualityControl) {
-      contentTab = makeFirstLevelTab(tabPanel, IconType.TH_LIST, CONTENT);
+      contentTab = makeFirstLevelTab(tabPanel, IconType.LIGHTBULB, CONTENT);
       contentTab.content.getElement().setId("content_contentPanel");
       contentTab.tab.addClickHandler(new ClickHandler() {
         @Override
@@ -299,7 +299,7 @@ public class Navigation extends TabContainer implements RequiresResize {
 
     // chapter tab
     final String chapterNameToUse = getChapterName();
-    chapters = makeFirstLevelTab(tabPanel, isQualityControl ? IconType.SEARCH : IconType.TH_LIST, chapterNameToUse);
+    chapters = makeFirstLevelTab(tabPanel, isQualityControl ? IconType.FLAG : IconType.TH_LIST, chapterNameToUse);
     chapters.content.add(contentForChaptersTab);
     chapters.tab.addClickHandler(new ClickHandler() {
       @Override
@@ -366,7 +366,9 @@ public class Navigation extends TabContainer implements RequiresResize {
   }
 
   private boolean isQC() {
-    return controller.getPermissions().contains(User.Permission.QUALITY_CONTROL);
+    Collection<User.Permission> permissions = controller.getPermissions();
+    System.out.println("permissions "+permissions);
+    return permissions.contains(User.Permission.QUALITY_CONTROL);
   }
 
   protected void logEvent(TabAndContent yourStuff, String context) {
