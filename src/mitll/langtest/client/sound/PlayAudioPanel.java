@@ -2,6 +2,7 @@ package mitll.langtest.client.sound;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.HTML;
@@ -53,12 +54,19 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     this.soundManager = soundManager;
     setSpacing(10);
     setVerticalAlignment(ALIGN_MIDDLE);
-    PLAY_LABEL = "\u25ba Play" + suffix;
+    PLAY_LABEL =// "\u25ba" +
+      " Play" + suffix;
     playButton = new Button(PLAY_LABEL);
+    playButton.setIcon(IconType.PLAY);
+  //  playButton.getElement().setClassName("icon-play");
     addButtons();
     id = counter++;
     getElement().setId("PlayAudioPanel_"+id);
+
+    //sinkEvents();
   }
+
+
 
   /**
    * @see mitll.langtest.client.exercise.RecordAudioPanel.MyPlayAudioPanel#MyPlayAudioPanel(com.github.gwtbootstrap.client.ui.Image, com.github.gwtbootstrap.client.ui.Image, com.google.gwt.user.client.ui.Panel, String)
@@ -149,7 +157,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   /**
    * @see #doClick()
    */
-  private void play() {
+  protected void play() {
     if (DEBUG) System.out.println("PlayAudioPanel :play " + playing);
     playing = true;
     setPlayButtonText();
