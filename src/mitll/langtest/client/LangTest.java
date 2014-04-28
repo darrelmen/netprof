@@ -805,6 +805,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private Set<User.Permission> permissions = new HashSet<User.Permission>();
 
+  /**
+   * When we login, we ask for permissions for the user from the server.
+   *
+   * @see mitll.langtest.client.user.StudentDialog#makePermissions()
+   * @see mitll.langtest.client.user.UserManager#login()
+   * @param permission
+   * @param on
+   */
   public void setPermission(User.Permission permission, boolean on) {
     if (on) permissions.add(permission);
     else permissions.remove(permission);
