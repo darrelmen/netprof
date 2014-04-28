@@ -64,7 +64,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   ImageAndCheck phones;
 
   private int lastWidth = 0;
-  private AudioPositionPopup audioPositionPopup;
+  protected AudioPositionPopup audioPositionPopup;
   protected final LangTestDatabaseAsync service;
   protected final SoundManagerAPI soundManager;
   private PlayAudioPanel playAudio;
@@ -121,6 +121,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     });
   }
 
+  protected Panel imageContainer;
   /**
    * Replace the html 5 audio tag with our fancy waveform widget.
    * @seex #AudioPanel(String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener, int, String)
@@ -130,7 +131,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    */
   protected void addWidgets(String playButtonSuffix, String audioType) {
     //System.out.println("addWidgets audio path = " + path);
-    Panel imageContainer = new VerticalPanel();
+    imageContainer = new VerticalPanel();
 
     HorizontalPanel hp = new HorizontalPanel();
     hp.setVerticalAlignment(ALIGN_MIDDLE);
@@ -139,6 +140,9 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     // add widgets to left of play button
     Widget beforePlayWidget = getBeforePlayWidget();
     audioPositionPopup = new AudioPositionPopup(imageContainer);
+    imageContainer.add(audioPositionPopup);
+    System.out.println("added " + audioPositionPopup.getElement().getId());
+   // audioPositionPopup = AudioPositionPopup.getSingleton(imageContainer);
 
     if (hasAudio()) {
       playAudio = getPlayButtons(beforePlayWidget, playButtonSuffix, audioType);
@@ -307,6 +311,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private PlayAudioPanel getPlayButtons(Widget toTheLeftWidget, String playButtonSuffix, String audioType) {
     PlayAudioPanel playAudio = makePlayAudioPanel(toTheLeftWidget, playButtonSuffix, audioType);
     playAudio.addListener(audioPositionPopup);
+    playAudio.add(audioPositionPopup);
     return playAudio;
   }
 
@@ -318,6 +323,12 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
         if (toTheLeftWidget != null) {
           add(toTheLeftWidget);
         }
+      }
+
+      @Override
+      protected void play() {
+    //    audioPositionPopup.setImageContainer(imageContainer);
+        super.play();
       }
     };
   }
