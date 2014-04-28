@@ -149,6 +149,11 @@ public class RecordAudioPanel extends AudioPanel {
    * A play button that controls the state of the record button.
    */
   private class MyPlayAudioPanel extends PlayAudioPanel {
+    @Override
+    protected void play() {
+     // audioPositionPopup.setImageContainer(imageContainer);
+      super.play();
+    }
     public MyPlayAudioPanel(Image recordImage1, Image recordImage2, final Panel panel, String suffix) {
       super(RecordAudioPanel.this.soundManager, new PlayListener() {
         public void playStarted() {
