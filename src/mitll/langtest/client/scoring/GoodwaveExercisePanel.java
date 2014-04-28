@@ -470,6 +470,12 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     }
 
     private class MyPlayAudioPanel extends PlayAudioPanel {
+      @Override
+      protected void play() {
+        //audioPositionPopup.setImageContainer(imageContainer);
+        super.play();
+      }
+
       public MyPlayAudioPanel(Image recordImage1, Image recordImage2, SoundManagerAPI soundManager,
                               final PostAudioRecordButton postAudioRecordButton1,
                               final GoodwaveExercisePanel goodwaveExercisePanel, String playSuffix) {
