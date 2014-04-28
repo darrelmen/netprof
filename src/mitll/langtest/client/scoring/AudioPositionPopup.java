@@ -1,5 +1,7 @@
 package mitll.langtest.client.scoring;
 
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -8,27 +10,33 @@ import mitll.langtest.client.sound.AudioControl;
 /**
  * Makes a red line appear on top of the waveform/spectogram,etc. marking playback position.
  */
-class AudioPositionPopup implements AudioControl {
+class AudioPositionPopup extends DivWidget implements AudioControl  {
   private static int counter  = 0;
   private int id = 0;
 
-  private final PopupPanel imageOverlay;
+  //private final PopupPanel imageOverlay;
+ // private final Panel imageOverlay;
   private float durationInMillis;
-  private static final boolean debugPartial = false;
-  private static final boolean debug = false;
+  private static final boolean debugPartial = true;
+  private static final boolean debug = true;
   private final Panel imageContainer;
 
   /**
-   * @see AudioPanel#getPlayButtons
+   * @see AudioPanel#addWidgets(String, String)
    */
   public AudioPositionPopup(Panel imageContainer) {
     id = counter++;
     this.imageContainer = imageContainer;
-    imageOverlay = new PopupPanel(false);
-    imageOverlay.setStyleName("ImageOverlay");
-    SimplePanel w = new SimplePanel();
-    imageOverlay.add(w);
-    w.setStyleName("ImageOverlay");
+   // imageOverlay = new PopupPanel(false);
+    //imageOverlay = new DivWidget();
+    // imageOverlay.setStyleName("ImageOverlay");
+    setStyleName("ImageOverlay");
+    getElement().setId("AudioPositionPopup");
+   SimplePanel w = new SimplePanel();
+    //imageOverlay.add(w);
+    /*imageOverlay.*/
+     add(w);
+   // w.setStyleName("ImageOverlay");
   }
 
   /**
@@ -64,21 +72,28 @@ class AudioPositionPopup implements AudioControl {
       System.out.println(this + " songLoaded " + durationInMillisIgnored + " height " + offsetHeight + " x " + left +
         " y " + top);
     }
-    imageOverlay.setSize("2px", offsetHeight + "px");
-    imageOverlay.setPopupPosition(left, top);
-    if (debug) System.out.println("songLoaded " + imageOverlay.isShowing() + " vis " + imageOverlay.isVisible() +
+    setSize("2px", offsetHeight + "px");
+ //   imageOverlay.setPopupPosition(left, top);
+    getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
+    getElement().getStyle().setLeft(0, Style.Unit.PX);
+    getElement().getStyle().setTop(0, Style.Unit.PX);
+/*    if (debug) System.out.println("songLoaded " + imageOverlay.isShowing() + " vis " + imageOverlay.isVisible() +
         " x " + imageOverlay.getPopupLeft() + " y " + imageOverlay.getPopupTop() + " dim " +
-        imageOverlay.getOffsetWidth() + " x " + imageOverlay.getOffsetHeight());
+        imageOverlay.getOffsetWidth() + " x " + imageOverlay.getOffsetHeight());*/
   }
 
   @Override
   public void songFinished() {
     if (debugPartial) System.out.println(this + "  : AudioPositionPopup.songFinished ");
 
-    imageOverlay.hide();
+    //imageOverlay.hide();
+    setVisible(false);
     int left = imageContainer.getAbsoluteLeft();
     int top  = imageContainer.getAbsoluteTop();
-    imageOverlay.setPopupPosition(left, top);
+    //imageOverlay.setPopupPosition(left, top);
+
+    getElement().getStyle().setLeft(0, Style.Unit.PX);
+    getElement().getStyle().setTop(0, Style.Unit.PX);
   }
 
   /**
@@ -86,9 +101,9 @@ class AudioPositionPopup implements AudioControl {
    * @param position
    */
   public void update(double position) {
-    if (!imageOverlay.isShowing()) {
+/*    if (!imageOverlay.isShowing()) {
       imageOverlay.show();
-    }
+    }*/
     showAt(position);
   }
 
@@ -100,26 +115,38 @@ class AudioPositionPopup implements AudioControl {
    * @param positionInMillis where soundmanager tells us the audio cursor is during playback
    */
   private void showAt(double positionInMillis) {
-    setHeightFromContainer();
+   // setHeightFromContainer();
+
+    int offsetHeight = getParent().getOffsetHeight();
 
     //positionInMillis -= (double)ScoringAudioPanel.MP3_HEADER_OFFSET;
     float positionInMillisF = (float)positionInMillis - ScoringAudioPanel.MP3_HEADER_OFFSET*1000;
     float horizontalFraction = positionInMillisF / durationInMillis;
     if (horizontalFraction > 1f) horizontalFraction = 1f;
     int pixelProgress = (int) (((float) imageContainer.getOffsetWidth()) * horizontalFraction);
-    int left = imageContainer.getAbsoluteLeft() + pixelProgress;
-    int top = imageContainer.getAbsoluteTop();
-    imageOverlay.setPopupPosition(left, top);
+    //int left = imageContainer.getAbsoluteLeft() + pixelProgress;
+    //int top = imageContainer.getAbsoluteTop();
+    //imageOverlay.setPopupPosition(left, top);
 
-    if (debug) System.out.println(this + " showAt " + positionInMillis+ "/" +positionInMillisF+
-        " millis " +imageOverlay.isShowing() + " vis " + imageOverlay.isVisible() +
-        " x " + imageOverlay.getPopupLeft() + " y " + imageOverlay.getPopupTop() + " dim x " +
-        imageOverlay.getOffsetWidth() + " y " + imageOverlay.getOffsetHeight());
+    getElement().getStyle().setLeft(pixelProgress, Style.Unit.PX);
+   // getElement().getStyle().setTop(0, Style.Unit.PX);
+    setSize("2px", offsetHeight + "px");
+
+    if (debug) System.out.println(this + " showAt " + positionInMillis + "/" + positionInMillisF + " parent " +getParent().getElement().getId()+
+      " millis " +//imageOverlay.isShowing() +
+      " vis " + isVisible() +
+      // " x " + imageOverlay.getPopupLeft() +
+      // " y " + imageOverlay.getPopupTop() +
+      " dim x " +
+      getOffsetWidth() +
+      " y " + offsetHeight);
   }
 
   public void setHeightFromContainer() {
     int offsetHeight = imageContainer.getOffsetHeight();
-    imageOverlay.setSize("2px", offsetHeight + "px");
+    System.out.println("Set height to " + offsetHeight);
+    if (offsetHeight > 0)
+      setSize("2px", offsetHeight + "px");
   }
 
   public String toString() { return "popup #" +id + " inside " +imageContainer.getElement().getId(); }
