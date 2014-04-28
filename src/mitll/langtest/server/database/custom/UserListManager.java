@@ -400,7 +400,7 @@ public class UserListManager {
     return getReviewList(allKnown, REVIEW, ITEMS_TO_REVIEW, defectIds,REVIEW_MAGIC_ID);
   }
 
-  private UserList getReviewList(List<CommonUserExercise> allKnown, String name, String description, Collection<String> ids,long userListMaginID) {
+  private UserList getReviewList(List<CommonUserExercise> allKnown, String name, String description, Collection<String> ids, long userListMaginID) {
     Map<String, CommonUserExercise> idToUser = new HashMap<String, CommonUserExercise>();
     for (CommonUserExercise ue : allKnown) idToUser.put(ue.getID(), ue);
 
