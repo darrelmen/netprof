@@ -33,7 +33,7 @@ public class UserTable extends PagerTable {
   /**
    * @see mitll.langtest.client.LangTest.UsersClickHandler
    */
-  public void showUsers(final LangTestDatabaseAsync service, int userid) {
+  public void showUsers(final LangTestDatabaseAsync service) {
     showDialog(service);
   }
 
@@ -169,6 +169,15 @@ public class UserTable extends PagerTable {
     };
     experience.setSortable(true);
     table.addColumn(experience, "Experience");
+
+    TextColumn<User> perm = new TextColumn<User>() {
+      @Override
+      public String getValue(User contact) {
+        return "" + contact.getPermissions();
+      }
+    };
+    perm.setSortable(true);
+    table.addColumn(perm, "Permissions");
 
     TextColumn<User> complete = new TextColumn<User>() {
       @Override
