@@ -140,7 +140,9 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
     if (!instance.contains(Navigation.REVIEW) && !instance.contains(Navigation.COMMENT)) {
       approvedButton = addApprovedButton(listContainer, navHelper);
-      addAttnLLButton(listContainer,navHelper);
+      if (!controller.getProps().isNoModel()) {
+        addAttnLLButton(listContainer, navHelper);
+      }
     }
     setApproveButtonState();
     return navHelper;
