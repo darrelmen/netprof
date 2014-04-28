@@ -700,10 +700,10 @@ class StudentDialog extends UserDialog {
     }
 
     /**
-     * @see #setUserValues(Integer, mitll.langtest.client.user.StudentDialog.RegistrationInfo)
-     * @param user
+     * @seex #setUserValues(Integer, mitll.langtest.client.user.StudentDialog.RegistrationInfo)
+     * @paramx user
      */
-    public void setValues(User user) {
+/*    public void setValues(User user) {
       int age = user.getAge();
       ageEntryGroup.box.setText("" + age);
 
@@ -718,7 +718,7 @@ class StudentDialog extends UserDialog {
 
       // can't edit after initial registration
       enableProps(false);
-    }
+    }*/
 
     protected void enableProps(boolean enabled) {
 
@@ -732,7 +732,7 @@ class StudentDialog extends UserDialog {
 
     }
 
-    public void clearProps() {
+/*    public void clearProps() {
       ageEntryGroup.box.setText("");
 
       genderGroup.box.setSelectedIndex(0); // 1 male 2 female
@@ -743,7 +743,7 @@ class StudentDialog extends UserDialog {
       recordAudioCheckBox.setValue(false);
 
       // can't edit after initial registration
-    }
+    }*/
 
     public void showOrHideILR(boolean show) {
       ilrLevels.setVisible(show);
