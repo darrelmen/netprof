@@ -3,6 +3,7 @@ package mitll.langtest.client.recorder;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.base.StyleHelper;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
@@ -63,6 +64,7 @@ public class RecordButton extends Button {
     if (doClickAndHold) setTitle(FlashcardRecordButtonPanel.PRESS_AND_HOLD_THE_MOUSE_BUTTON_TO_RECORD);
     this.autoStopDelay = delay;
     setType(ButtonType.PRIMARY);
+    setIcon(IconType.MICROPHONE);
    // if (addKeyBinding) new Exception().printStackTrace();
 
     setupRecordButton(addKeyBinding);
