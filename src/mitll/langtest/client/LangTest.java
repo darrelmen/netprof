@@ -901,7 +901,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private class UsersClickHandler implements ClickHandler {
     public void onClick(ClickEvent event) {
-      new UserTable(props).showUsers(service, userManager.getUser());
+      new UserTable(props).showUsers(service);
     }
   }
 
