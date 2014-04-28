@@ -88,7 +88,7 @@ public class UserManager {
   private void login() {
     final int user = getUser();
     if (user != NO_USER_SET) {
-//   System.out.println("UserManager.login : current user : " + user);
+      System.out.println("UserManager.login : current user : " + user);
       rememberAudioType();
 
       service.getUsers(new AsyncCallback<List<User>>() {
@@ -102,6 +102,8 @@ public class UserManager {
           for (User u : result) {
             if (((int) u.getId()) == user) {
               for (User.Permission permission : u.getPermissions()) {
+                System.out.println("\tUserManager.login : found : " + u + " with perm " + permission);
+
                 userNotification.setPermission(permission, true);
               }
               break;
