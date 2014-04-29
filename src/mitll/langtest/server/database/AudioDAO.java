@@ -36,17 +36,15 @@ public class AudioDAO extends DAO {
   static final String DURATION = "duration";
   static final String DEFECT = "defect";
 
-  private final boolean debug = false;
-//  private Map<Long, MiniUser> miniUsers;
+ // private final boolean debug = false;
   private final Connection connection;
-  UserDAO userDAO;
+  private UserDAO userDAO;
 
   public AudioDAO(Database database, UserDAO userDAO) {
     super(database);
     connection = database.getConnection();
 
     this.userDAO = userDAO;
-  //  miniUsers = userDAO.getMiniUsers();
     try {
       createTable(database.getConnection());
     } catch (SQLException e) {
@@ -80,7 +78,7 @@ public class AudioDAO extends DAO {
   }
 
   /**
-   * Pulls the list of results out of the database.
+   * Pulls the list of audio recordings out of the database.
    *
    * @return
    * @see mitll.langtest.server.database.DatabaseImpl#getResultsWithGrades()
