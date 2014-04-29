@@ -78,20 +78,15 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
    * @param foreignLanguage
    * @param transliteration
    * @param context
-   * @param refAudio
-   * @param slowAudioRef
    * @param isOverride
    * @param modifiedDate
    */
   public UserExercise(long uniqueID, String exerciseID, long creator, String english, String foreignLanguage,
                       String transliteration, String context,
-                   //   String refAudio, String slowAudioRef,
                       boolean isOverride,
                       Map<String, String> unitToValue, Date modifiedDate
   ) {
     this(uniqueID, exerciseID, creator, english, foreignLanguage, transliteration);
-    //setRefAudio(refAudio);
-   // setSlowRefAudio(slowAudioRef);
     setUnitToValue(unitToValue);
     this.isOverride = isOverride;
     this.modifiedDate = modifiedDate;
