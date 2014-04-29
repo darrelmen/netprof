@@ -8,6 +8,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.CommonShell;
+import mitll.langtest.shared.Result;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -371,9 +372,9 @@ public class HistoryExerciseList extends PagingExerciseList {
     lastReqID++;
     System.out.println("HistoryExerciseList.loadExercisesUsingPrefix looking for '" + prefix +
       "' (" + prefix.length() + " chars) in context of " + typeToSection + " list " + userListID +
-      " instance " + instance);
+      " instance " + instance + " user " + controller.getUser());
 
-    service.getExerciseIds(lastReqID, typeToSection, prefix, userListID, controller.getUser(), controller.getAudioType(), new SetExercisesCallback());
+    service.getExerciseIds(lastReqID, typeToSection, prefix, userListID, controller.getUser(), getRole(), new SetExercisesCallback());
   }
 
   /**
