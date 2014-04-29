@@ -27,8 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-//import mitll.langtest.shared.Exercise;
-
 /**
  * Created with IntelliJ IDEA.
  * User: GO22670
@@ -91,10 +89,10 @@ public class UserListManager {
   public void setStateOnExercises() {
     getAmmendedStateMap();
 
-    Map<String, ReviewedDAO.StateCreator> exerciseToState = getExerciseToState();
+    Map<String, ReviewedDAO.StateCreator> exerciseToState = getExerciseToState(false);
 
     setStateOnExercises(exerciseToState,true);
-    setStateOnExercises(secondStateDAO.getExerciseToState(), false);
+    setStateOnExercises(secondStateDAO.getExerciseToState(false), false);
   }
 
   private void setStateOnExercises(Map<String, ReviewedDAO.StateCreator> exerciseToState, boolean firstState) {
@@ -160,7 +158,7 @@ public class UserListManager {
    * @return
    */
   private Map<String, ReviewedDAO.StateCreator> getAmmendedStateMap() {
-    Map<String, ReviewedDAO.StateCreator> stateMap = getExerciseToState();
+    Map<String, ReviewedDAO.StateCreator> stateMap = getExerciseToState(false);
    // logger.debug("got " + stateMap.size() +" in state map");
     Map<String,Long> exerciseToCreator = annotationDAO.getDefectIds();
     //logger.debug("got " + exerciseToCreator.size() +" in defectIds");
@@ -184,8 +182,18 @@ public class UserListManager {
     return stateMap;
   }
 
-  private Map<String, ReviewedDAO.StateCreator> getExerciseToState() {
-    return reviewedDAO.getExerciseToState();
+  /**
+   * So this returns a map of exercise id to current (latest) state.  The exercise may have gone through
+   * many states, but this should return the latest one.
+   *
+   * If an item has been recorded, the most recent state will be exercise id->UNSET.
+   *
+   * @see #getCommentedList()
+   * @return
+   * @param skipUnset
+   */
+  private Map<String, ReviewedDAO.StateCreator> getExerciseToState(boolean skipUnset) {
+    return reviewedDAO.getExerciseToState(skipUnset);
   }
 
   /**
@@ -193,30 +201,24 @@ public class UserListManager {
    * @see #getReviewList
    * @see mitll.langtest.server.LangTestDatabaseImpl#makeExerciseListWrapper
    * @param shells
-   * @param role
    */
-  public void markState(Collection<? extends CommonShell> shells, String role) {
-    if (role.equals(Result.AUDIO_TYPE_RECORDER)) {
+  public void markState(Collection<? extends CommonShell> shells) {
+    Map<String, ReviewedDAO.StateCreator> exerciseToState = reviewedDAO.getExerciseToState(false);
 
-    }
-    else {
-      Map<String, ReviewedDAO.StateCreator> exerciseToState = reviewedDAO.getExerciseToState();
-
-      //logger.debug("markState " + shells.size() + " shells, " + exerciseToState.size() + " states");
-      for (CommonShell shell : shells) {
-        ReviewedDAO.StateCreator stateCreator = exerciseToState.get(shell.getID());
-        if (stateCreator != null) {
-          shell.setState(stateCreator.state);
-        }
+    //logger.debug("markState " + shells.size() + " shells, " + exerciseToState.size() + " states");
+    for (CommonShell shell : shells) {
+      ReviewedDAO.StateCreator stateCreator = exerciseToState.get(shell.getID());
+      if (stateCreator != null) {
+        shell.setState(stateCreator.state);
       }
+    }
 
-      exerciseToState = secondStateDAO.getExerciseToState();
+    exerciseToState = secondStateDAO.getExerciseToState(false);
 
-      for (CommonShell shell : shells) {
-        ReviewedDAO.StateCreator stateCreator = exerciseToState.get(shell.getID());
-        if (stateCreator != null) {
-          shell.setSecondState(stateCreator.state);
-        }
+    for (CommonShell shell : shells) {
+      ReviewedDAO.StateCreator stateCreator = exerciseToState.get(shell.getID());
+      if (stateCreator != null) {
+        shell.setSecondState(stateCreator.state);
       }
     }
   }
@@ -342,7 +344,7 @@ public class UserListManager {
    * @return
    */
   public UserList getCommentedList() {
-    Map<String, ReviewedDAO.StateCreator> exerciseToState = getExerciseToState();
+    Map<String, ReviewedDAO.StateCreator> exerciseToState = getExerciseToState(true); // skip unset items!
     Map<String, Long> idToCreator = annotationDAO.getDefectIds();
     logger.debug("getCommentedList There are " + exerciseToState.size() + " reviewed items ");
     logger.debug("getCommentedList There are " + idToCreator.size() + " idToCreator items ");
@@ -359,7 +361,7 @@ public class UserListManager {
   }
 
   public UserList getAttentionList() {
-    Map<String, ReviewedDAO.StateCreator> exerciseToState = secondStateDAO.getExerciseToState();
+    Map<String, ReviewedDAO.StateCreator> exerciseToState = secondStateDAO.getExerciseToState(false);
 
     logger.debug("attention " + exerciseToState);
 
@@ -386,7 +388,7 @@ public class UserListManager {
    */
   public UserList getDefectList() {
     Set<String> defectIds = new HashSet<String>();
-    Map<String, ReviewedDAO.StateCreator> exerciseToState = reviewedDAO.getExerciseToState();
+    Map<String, ReviewedDAO.StateCreator> exerciseToState = reviewedDAO.getExerciseToState(false);
 
     for (Map.Entry<String, ReviewedDAO.StateCreator> pair : exerciseToState.entrySet()) {
       if (pair.getValue().state.equals(STATE.DEFECT)) {
@@ -397,7 +399,7 @@ public class UserListManager {
     List<CommonUserExercise> allKnown = userExerciseDAO.getWhere(defectIds);
     logger.debug("\tgetDefectList ids #=" + allKnown.size() + " vs " + defectIds.size());
 
-    return getReviewList(allKnown, REVIEW, ITEMS_TO_REVIEW, defectIds,REVIEW_MAGIC_ID);
+    return getReviewList(allKnown, REVIEW, ITEMS_TO_REVIEW, defectIds, REVIEW_MAGIC_ID);
   }
 
   private UserList getReviewList(List<CommonUserExercise> allKnown, String name, String description, Collection<String> ids, long userListMaginID) {
@@ -415,7 +417,7 @@ public class UserListManager {
     userList.setReview(true);
     userList.setExercises(onList);
 
-    markState(onList, "");
+    //markState(onList);
     return userList;
   }
 
