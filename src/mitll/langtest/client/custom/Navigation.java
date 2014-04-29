@@ -39,7 +39,6 @@ import mitll.langtest.shared.custom.UserList;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -586,18 +585,6 @@ public class Navigation extends TabContainer implements RequiresResize {
    */
   private void viewReview(final Panel contentPanel) {
     final Panel child = getContentChild(contentPanel, "defectReview_contentPanel");
-/*    service.getDefectList(new AsyncCallback<UserList>() {
-      @Override
-      public void onFailure(Throwable caught) {}
-
-      @Override
-      public void onSuccess(UserList defectList) {
-        System.out.println("\tviewReview : reviewLessons for " + userManager.getUser() + " got " + defectList);
-
-        new UserListCallback(contentPanel, child, new ScrollPanel(), REVIEW, false, false).onSuccess(Collections.singleton(defectList));
-      }
-    });*/
-
     service.getReviewLists(new AsyncCallback<List<UserList>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -613,40 +600,8 @@ public class Navigation extends TabContainer implements RequiresResize {
     });
   }
 
-/*  private void viewComments(final Panel contentPanel) {
-    final Panel child = getContentChild(contentPanel,"commentReview_contentPanel");
-
-    service.getCommentedList(new AsyncCallback<UserList>() {
-      @Override
-      public void onFailure(Throwable caught) {}
-
-      @Override
-      public void onSuccess(UserList commentList) {
-        System.out.println("\tviewComments : commented for " + userManager.getUser() + " got " + commentList);
-        new UserListCallback(contentPanel, child, new ScrollPanel(), COMMENT, false, false).onSuccess(Collections.singleton(commentList));
-      }
-    });
-  }*/
-
-/*  private void viewAttention(final Panel contentPanel) {
-    final Panel child = getContentChild(contentPanel,"attentionReview_contentPanel");
-
-    service.getAttentionList(new AsyncCallback<UserList>() {
-      @Override
-      public void onFailure(Throwable caught) {
-      }
-
-      @Override
-      public void onSuccess(UserList attentionList) {
-        System.out.println("\tviewAttention : attention LL for " + userManager.getUser() + " got " + attentionList);
-        new UserListCallback(contentPanel, child, new ScrollPanel(), ATTENTION, false, false).onSuccess(Collections.singleton(attentionList));
-      }
-    });
-  }*/
-
   private Panel getContentChild(Panel contentPanel, String id) {
     contentPanel.clear();
-    //   String id = "defectReview_contentPanel";
     contentPanel.getElement().setId(id);
 
     final Panel child = new DivWidget();
@@ -658,7 +613,6 @@ public class Navigation extends TabContainer implements RequiresResize {
   @Override
   public void onResize() {
     //System.out.println("\tonResize :");
-
     setScrollPanelWidth(listScrollPanel);
     npfHelper.onResize();
     avpHelper.onResize();
