@@ -418,33 +418,21 @@ fieldset > legend {
 }
 
 .ImageOverlay{
-/*
-    border: none;
-*/
-
-/*
-    border: 1px solid red;
-*/
-
     background-color: red;
 }
 
 .qcRightBorder {
-/*
-    border-right: 3px solid blue;
-*/
     padding-right: 5px;
     margin-right: 5px;
-
 }
 
 .Button{
     font-family: Arial Unicode MS, Arial, sans-serif;
 }
 
-.clickable {
+/*.clickable {
   cursor                      :   pointer;
-}
+}*/
 
 .gwt-Button {
     background: none repeat scroll 0 0 #DDDDDD;
