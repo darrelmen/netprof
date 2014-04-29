@@ -37,7 +37,7 @@ public interface ExerciseController {
   String getBase64EncodedWavFile();
 
   boolean getEnglishOnly();
-  int getNumGradesToCollect();
+//  int getNumGradesToCollect();
 
   SoundManagerAPI getSoundManager();
 
