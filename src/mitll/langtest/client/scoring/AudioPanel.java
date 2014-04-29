@@ -111,6 +111,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   //  if (showSpectrogram) System.out.println("AudioPanel : showSpectrogram! ");
     this.rightMargin = rightMargin;
     this.exerciseID = exerciseID;
+    getElement().setId("AudioPanel_exercise_"+exerciseID);
   }
 
   public void onResize() {
@@ -121,7 +122,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     });
   }
 
-  protected Panel imageContainer;
+  //protected Panel imageContainer;
   /**
    * Replace the html 5 audio tag with our fancy waveform widget.
    * @seex #AudioPanel(String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener, int, String)
@@ -131,7 +132,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    */
   protected void addWidgets(String playButtonSuffix, String audioType) {
     //System.out.println("addWidgets audio path = " + path);
-    imageContainer = new VerticalPanel();
+    Panel imageContainer = new VerticalPanel();
+    imageContainer.getElement().setId("AudioPanel_imageContainer");
 
     HorizontalPanel hp = new HorizontalPanel();
     hp.setVerticalAlignment(ALIGN_MIDDLE);
@@ -141,8 +143,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     Widget beforePlayWidget = getBeforePlayWidget();
     audioPositionPopup = new AudioPositionPopup(imageContainer);
     imageContainer.add(audioPositionPopup);
-    System.out.println("added " + audioPositionPopup.getElement().getId());
-   // audioPositionPopup = AudioPositionPopup.getSingleton(imageContainer);
+    //System.out.println("added " + audioPositionPopup.getElement().getId() + " for " + exerciseID + " audio type " + audioType);
 
     if (hasAudio()) {
       playAudio = getPlayButtons(beforePlayWidget, playButtonSuffix, audioType);
@@ -151,19 +152,25 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     }
     else {
       hp.add(beforePlayWidget);
+      audioPositionPopup.setVisible(false);
     }
-    HorizontalPanel controlPanel = new HorizontalPanel();
+
+    Panel controlPanel = new HorizontalPanel();
+    controlPanel.getElement().setId("AudioPanel_controlPanel");
 
     waveform = new ImageAndCheck();
     imageContainer.add(getWaveform().image);
     controlPanel.add(addCheckbox(WAVEFORM, getWaveform()));
+
     getWaveform().image.setAltText(WAVEFORM_TOOLTIP);
     getWaveform().image.setTitle(WAVEFORM_TOOLTIP);
+
     spectrogram = new ImageAndCheck();
     if (showSpectrogram) {
       imageContainer.add(getSpectrogram().image);
       controlPanel.add(addCheckbox(SPECTROGRAM, getSpectrogram()));
     }
+
     words = new ImageAndCheck();
     imageContainer.add(words.image);
     words.image.getElement().setId("Transcript_Words");
@@ -180,7 +187,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
     add(hp);
     hp.addStyleName("bottomFiveMargin");
-    //add(new Heading(6));
 
     add(imageContainer);
   }
@@ -311,7 +317,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private PlayAudioPanel getPlayButtons(Widget toTheLeftWidget, String playButtonSuffix, String audioType) {
     PlayAudioPanel playAudio = makePlayAudioPanel(toTheLeftWidget, playButtonSuffix, audioType);
     playAudio.addListener(audioPositionPopup);
-    playAudio.add(audioPositionPopup);
     return playAudio;
   }
 
@@ -323,12 +328,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
         if (toTheLeftWidget != null) {
           add(toTheLeftWidget);
         }
-      }
-
-      @Override
-      protected void play() {
-    //    audioPositionPopup.setImageContainer(imageContainer);
-        super.play();
       }
     };
   }
@@ -385,6 +384,9 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * Worries about responses returning out of order for the same type of image request (as the window is resized)
    * and ignores all but the most recent request.
    *
+   * Call to controller getImage checks if the requested image is in the cache before requesting it.
+   *
+   * @see mitll.langtest.client.LangTest#getImage(int, String, String, int, int, String, com.google.gwt.user.client.rpc.AsyncCallback)
    * @param path
    * @param type
    * @param width
