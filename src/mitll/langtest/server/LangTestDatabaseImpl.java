@@ -14,6 +14,7 @@ import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.PathWriter;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.SectionHelper;
+import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.shared.AudioAnswer;
@@ -176,9 +177,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           CommonExercise exercise = getExercise(prefix, userID);
           if (exercise != null) exercises = Collections.singletonList(exercise);
         }
+
+        int i = markRecordedState(userID, role, exercises);
+        logger.debug("marked " + i + " as recorded");
       }
       else {
-        exercises = getSortedByUnitThenAlpha(exercises);
+        int i =  markRecordedState(userID, role, exercises);
+        logger.debug("marked " +i + " as recorded");
+        exercises = getSortedByUnitThenAlpha(exercises, role.equals(Result.AUDIO_TYPE_RECORDER));
       }
 
       return makeExerciseListWrapper(reqID, exercises, userID, role);
@@ -208,7 +214,24 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
-  protected List<CommonExercise> getCommonExercises(UserList userListByID) {
+  private int markRecordedState(int userID, String role, Collection<? extends CommonShell> exercises) {
+    int c = 0;
+    if (role.equals(Result.AUDIO_TYPE_RECORDER)) {
+      Set<String> recordedForUser = db.getAudioDAO().getRecordedForUser(userID);
+      logger.debug("\tfound " + recordedForUser.size() + " recordings by " + userID);
+      for (CommonShell shell : exercises) {
+        if (recordedForUser.contains(shell.getID())) {
+          shell.setState(STATE.RECORDED);c++;
+        }
+      }
+    }
+    else {
+      logger.debug("\tnot marking recorded");
+    }
+    return c;
+  }
+
+  private List<CommonExercise> getCommonExercises(UserList userListByID) {
     List<CommonExercise> exercises2 = new ArrayList<CommonExercise>();
     Collection<CommonUserExercise> exercises1 = userListByID.getExercises();
     //logger.debug("getExerciseIds size - " + exercises1.size() + " for " + userListByID);
@@ -236,13 +259,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private ExerciseListWrapper getExerciseListWrapperForPrefix(int reqID, String prefix, Collection<CommonExercise> exercisesForState, long userID, String role) {
+    logger.debug("getExerciseListWrapperForPrefix userID " +userID + " prefix '" + prefix+ "' role " +role);
     boolean hasPrefix = !prefix.isEmpty();
+
+    int i = markRecordedState((int) userID, role, exercisesForState);
+    logger.debug("marked " +i + " as recorded role " +role);
+
     if (hasPrefix) {
       ExerciseTrie trie = new ExerciseTrie(exercisesForState, serverProps.getLanguage(), audioFileHelper.getSmallVocabDecoder());
       exercisesForState = trie.getExercises(prefix);
     }
     else {
-      exercisesForState = getSortedExercises(exercisesForState);
+//      exercisesForState = getSortedExercises(exercisesForState);
+      exercisesForState = getSortedByUnitThenAlpha(exercisesForState, role.equals(Result.AUDIO_TYPE_RECORDER));
     }
 
     return makeExerciseListWrapper(reqID, exercisesForState, userID, role);
@@ -271,11 +300,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     logger.debug("makeExerciseListWrapper : userID " +userID + " Role is " + role);
     if (role.equals(Result.AUDIO_TYPE_RECORDER)) {
-      Set<String> recordedForUser = db.getAudioDAO().getRecordedForUser(userID);
+   /*   Set<String> recordedForUser = db.getAudioDAO().getRecordedForUser(userID);
       //logger.debug("\tfound " + recordedForUser.size() + " recordings by " + userID);
       for (CommonShell shell : exerciseShells) {
-         if (recordedForUser.contains(shell.getID())) shell.setState(STATE.RECORDED);
-      }
+         if (recordedForUser.contains(shell.getID())) {
+           shell.setState(STATE.RECORDED);
+         }
+      }*/
+      markRecordedState((int)userID,role,exerciseShells);
+    //  getSortedByUnitThenAlpha(exerciseShells,true);
     }
     else if (role.equalsIgnoreCase(User.Permission.QUALITY_CONTROL.toString()) || role.equalsIgnoreCase(Result.AUDIO_TYPE_REVIEW)) {
       db.getUserListManager().markState(exerciseShells, role);
@@ -338,20 +371,28 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return copy;
   }
 
-  private List<CommonExercise> getSortedByUnitThenAlpha(Collection<CommonExercise> exercisesForSection) {
+  private List<CommonExercise> getSortedByUnitThenAlpha(Collection<CommonExercise> exercisesForSection, final boolean recordedLast) {
     List<CommonExercise> copy = new ArrayList<CommonExercise>(exercisesForSection);
 
+    logger.debug("sorting " + exercisesForSection.size() + " recorded last " +recordedLast);
     final Collection<String> typeOrder = getTypeOrder();
     if (typeOrder.isEmpty()) {
       sortByTooltip(copy);
       return copy;
     }
     else {
-      //final String first = typeOrder.iterator().next();
       Collections.sort(copy,new Comparator<CommonExercise>() {
         @Override
         public int compare(CommonExercise o1, CommonExercise o2) {
           int i = 0;
+          if (recordedLast) {
+            if (o1.getState() != STATE.RECORDED && o2.getState() == STATE.RECORDED) {
+              return +1;
+            } else if (o1.getState() == STATE.RECORDED && o2.getState() != STATE.RECORDED) {
+              return -1;
+            }
+          }
+
           // compare first by hierarchical order - unit, then chapter, etc.
           for (String type : typeOrder) {
             String type1 = o1.getUnitToValue().get(type);
@@ -839,9 +880,21 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   @Override
+  @Deprecated
   public UserList getDefectList() { return db.getUserListManager().getDefectList(); }
+  @Deprecated
   public UserList getAttentionList() { return db.getUserListManager().getAttentionList(); }
-
+  @Override
+  public List<UserList> getReviewLists() {
+    List<UserList> lists = new ArrayList<UserList>();
+    UserListManager userListManager = db.getUserListManager();
+    lists.add(userListManager.getDefectList());
+    lists.add(userListManager.getCommentedList());
+    if (!serverProps.isNoModel()) {
+      lists.add(userListManager.getAttentionList());
+    }
+    return lists;
+  }
   @Override
   public boolean deleteList(long id) {
     return db.getUserListManager().deleteList(id);
@@ -853,6 +906,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   @Override
+  @Deprecated
   public UserList getCommentedList() { return db.getUserListManager().getCommentedList(); }
 
   /**
