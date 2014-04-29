@@ -63,6 +63,7 @@ public class RecordAudioPanel extends AudioPanel {
     }
 
     addWidgets("", audioType);
+    getElement().setId("RecordAudioPanel_" + exerciseID + "_" + index + "_" + audioType);
   }
 
   /**
