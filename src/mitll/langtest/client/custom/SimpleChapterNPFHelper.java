@@ -63,17 +63,17 @@ class SimpleChapterNPFHelper implements RequiresResize {
    * @param loadExercises should we load exercises initially
    */
   public void showNPF(TabAndContent tabAndContent, String instanceName, boolean loadExercises) {
-    //System.out.println(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul);
+    System.out.println(getClass() + " : adding npf content instanceName = " + instanceName + " loadExercises " + loadExercises);
     DivWidget content = tabAndContent.content;
     int widgetCount = content.getWidgetCount();
     if (!madeNPFContent || widgetCount == 0) {
       madeNPFContent = true;
-      System.out.println("\t: adding npf content instanceName = " + instanceName);
+      System.out.println("\t: adding npf content instanceName = " + instanceName + " loadExercises " + loadExercises);
       addNPFToContent(content, instanceName, loadExercises);
-    } else {
+    } /*else {
       System.out.println("\t: rememberAndLoadFirst instanceName = " + instanceName);
       rememberAndLoadFirst();
-    }
+    }*/
   }
 
   private void addNPFToContent( Panel listContent, String instanceName, boolean loadExercises) {
@@ -90,12 +90,12 @@ class SimpleChapterNPFHelper implements RequiresResize {
    * @return
    */
   private Panel doNPF(String instanceName, boolean loadExercises) {
-    System.out.println(getClass() + " : doNPF instanceName = " + instanceName + " for list ");
+    System.out.println(getClass() + " : doNPF instanceName = " + instanceName + " for list loadExercises " + loadExercises);
     Panel hp = doInternalLayout(instanceName);
 
-    if (loadExercises) {
+/*    if (loadExercises) {
       rememberAndLoadFirst();
-    }
+    }*/
     return hp;
   }
 
@@ -109,11 +109,10 @@ class SimpleChapterNPFHelper implements RequiresResize {
 
   /**
    * @see #doNPF
-   * @seex #showNPF(mitll.langtest.shared.custom.UserList, mitll.langtest.client.custom.TabAndContent, String, boolean)
-   * @paramx ul
+   * @see #showNPF
    */
   private void rememberAndLoadFirst() {
-    System.out.println(getClass() + ".rememberAndLoadFirst : for ");
+    System.out.println(getClass() + ".rememberAndLoadFirst : let's reload! --------------->");
     npfExerciseList.reload();
   }
 
