@@ -127,4 +127,6 @@ public interface LangTestDatabaseAsync {
   void setAVPSkip(Collection<Long> ids, AsyncCallback<Void> async);
 
   void getAttentionList(AsyncCallback<UserList> async);
+
+  void getReviewLists(AsyncCallback<List<UserList>> async);
 }
