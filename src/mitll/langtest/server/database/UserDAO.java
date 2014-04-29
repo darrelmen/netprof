@@ -1,5 +1,6 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.DLIUser;
 import mitll.langtest.shared.Demographics;
 import mitll.langtest.shared.MiniUser;
@@ -47,10 +48,17 @@ public class UserDAO extends DAO {
       if (defectDetector == -1) {
         defectDetector = addUser(89, MALE, 0, "", "unknown", "unknown", DEFECT_DETECTOR, false, new ArrayList<User.Permission>());
       }
-
     } catch (Exception e) {
       logger.error("got "+e,e);
       database.logEvent("unk","create user table "+e.toString(),0);
+    }
+  }
+
+  public void checkForFavorites(UserListManager manager) {
+    for (User u : getUsers()) {
+      if (manager.getListsForUser(u.getId(), true, false).isEmpty()) {
+        manager.createFavorites(u.getId());
+      }
     }
   }
 
@@ -296,7 +304,9 @@ public class UserDAO extends DAO {
         if (perms != null) {
           for (String perm : perms.split(",")) {
             try {
-              permissions.add(User.Permission.valueOf(perm));
+              if (!perm.isEmpty()) {
+                permissions.add(User.Permission.valueOf(perm));
+              }
             } catch (IllegalArgumentException e) {
               logger.warn("huh, for user " + userid+
                   " perm '" + perm+
