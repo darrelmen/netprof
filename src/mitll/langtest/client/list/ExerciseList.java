@@ -21,6 +21,7 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.ExerciseListWrapper;
+import mitll.langtest.shared.Result;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -143,7 +144,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   public boolean getExercises(long userID) {
     System.out.println("ExerciseList.getExercises for user " +userID + " instance " + instance);
     lastReqID++;
-    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), "", -1, controller.getUser(), controller.getAudioType(), new SetExercisesCallback());
+    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), "", -1, controller.getUser(), getRole(), new SetExercisesCallback());
     return true;
   }
 
@@ -153,7 +154,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   public void reload() {
     System.out.println("ExerciseList.reload for user " + controller.getUser() + " instance " + instance + " id " + getElement().getId());
-    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), "", -1,  controller.getUser(), controller.getAudioType(), new SetExercisesCallback());
+    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), "", -1,  controller.getUser(), getRole(), new SetExercisesCallback());
   }
 
   /**
@@ -164,9 +165,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   @Override
   public void reloadWith(String id) {
     System.out.println("ExerciseList.reloadWith id = " + id+ " for user " + controller.getUser() + " instance " + instance);
-    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), "", -1, controller.getUser(), controller.getAudioType(), new SetExercisesCallbackWithID(id));
+    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), "", -1, controller.getUser(), getRole(), new SetExercisesCallbackWithID(id));
   }
-
 
   /**
    * So we have a catch-22 -
@@ -250,6 +250,13 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   public Panel getCreatedPanel() {
     return createdPanel;
+  }
+
+  protected String getRole() {
+    String audioTypeRecorder = Result.AUDIO_TYPE_RECORDER;
+    String s = instance.equalsIgnoreCase("record_Audio") ? audioTypeRecorder : "";
+    System.out.println("instance " +instance + " role " +s);
+    return s;
   }
 
   /**

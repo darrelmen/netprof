@@ -160,6 +160,7 @@ public class DatabaseImpl implements Database {
       new ReviewedDAO(this, ReviewedDAO.REVIEWED),
       new ReviewedDAO(this, ReviewedDAO.SECOND_STATE),
       pathHelper);
+
     eventDAO = new EventDAO(this);
 
     if (DROP_USER) {
@@ -188,11 +189,6 @@ public class DatabaseImpl implements Database {
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
     }
-
-    //if (getServerProps().isGoodwaveMode()) {
-     // List<ResultDAO.SimpleResult> resultsThatNeedScore = resultDAO.getResultsThatNeedScore();
-     // logger.info("results that need a score "  +resultsThatNeedScore.size());
-    //}
   }
 
   public ResultDAO getResultDAO() { return resultDAO; }
@@ -321,6 +317,8 @@ public class DatabaseImpl implements Database {
       exerciseDAO.setUserExerciseDAO(userExerciseDAO);
       exerciseDAO.setAddRemoveDAO(addRemoveDAO);
       exerciseDAO.setAudioDAO(audioDAO);
+
+      userDAO.checkForFavorites(userListManager);
     }
   }
 
