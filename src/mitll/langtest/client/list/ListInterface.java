@@ -86,6 +86,9 @@ public interface ListInterface extends RequiresResize {
    */
   void removeCurrentExercise();
 
+  /**
+   * @see mitll.langtest.client.custom.NPFHelper#makeExerciseList(com.google.gwt.user.client.ui.Panel, String)
+   */
   void reloadExercises();
   void addExercise(CommonShell es);
 

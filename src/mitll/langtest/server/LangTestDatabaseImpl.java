@@ -179,11 +179,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         }
 
         int i = markRecordedState(userID, role, exercises);
-        logger.debug("marked " + i + " as recorded");
+        //logger.debug("marked " + i + " as recorded");
       }
       else {
         int i =  markRecordedState(userID, role, exercises);
-        logger.debug("marked " +i + " as recorded");
+        //logger.debug("marked " +i + " as recorded");
         exercises = getSortedByUnitThenAlpha(exercises, role.equals(Result.AUDIO_TYPE_RECORDER));
       }
 
@@ -218,7 +218,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     int c = 0;
     if (role.equals(Result.AUDIO_TYPE_RECORDER)) {
       Set<String> recordedForUser = db.getAudioDAO().getRecordedForUser(userID);
-      logger.debug("\tfound " + recordedForUser.size() + " recordings by " + userID);
+      //logger.debug("\tfound " + recordedForUser.size() + " recordings by " + userID);
       for (CommonShell shell : exercises) {
         if (recordedForUser.contains(shell.getID())) {
           shell.setState(STATE.RECORDED);c++;
@@ -226,7 +226,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       }
     }
     else {
-      logger.debug("\tnot marking recorded");
+      //logger.debug("\tnot marking recorded");
     }
     return c;
   }
@@ -263,14 +263,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     boolean hasPrefix = !prefix.isEmpty();
 
     int i = markRecordedState((int) userID, role, exercisesForState);
-    logger.debug("marked " +i + " as recorded role " +role);
+    //logger.debug("marked " +i + " as recorded role " +role);
 
     if (hasPrefix) {
       ExerciseTrie trie = new ExerciseTrie(exercisesForState, serverProps.getLanguage(), audioFileHelper.getSmallVocabDecoder());
       exercisesForState = trie.getExercises(prefix);
     }
     else {
-//      exercisesForState = getSortedExercises(exercisesForState);
       exercisesForState = getSortedByUnitThenAlpha(exercisesForState, role.equals(Result.AUDIO_TYPE_RECORDER));
     }
 
@@ -290,28 +289,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private ExerciseListWrapper makeExerciseListWrapper(int reqID, Collection<CommonExercise> exercises, long userID, String role) {
     CommonExercise firstExercise = exercises.isEmpty() ? null : exercises.iterator().next();
     if (firstExercise != null) {
-      //logger.debug("First is " + firstExercise);
-
       ensureMP3s(firstExercise);
       addAnnotationsAndAudio(userID, firstExercise);
-      //logger.debug("after First is " + firstExercise);
     }
     List<CommonShell> exerciseShells = getExerciseShells(exercises);
 
-    logger.debug("makeExerciseListWrapper : userID " +userID + " Role is " + role);
     if (role.equals(Result.AUDIO_TYPE_RECORDER)) {
-   /*   Set<String> recordedForUser = db.getAudioDAO().getRecordedForUser(userID);
-      //logger.debug("\tfound " + recordedForUser.size() + " recordings by " + userID);
-      for (CommonShell shell : exerciseShells) {
-         if (recordedForUser.contains(shell.getID())) {
-           shell.setState(STATE.RECORDED);
-         }
-      }*/
+//      logger.debug("makeExerciseListWrapper : userID " +userID + " Role is " + role);
       markRecordedState((int)userID,role,exerciseShells);
-    //  getSortedByUnitThenAlpha(exerciseShells,true);
     }
     else if (role.equalsIgnoreCase(User.Permission.QUALITY_CONTROL.toString()) || role.equalsIgnoreCase(Result.AUDIO_TYPE_REVIEW)) {
-      db.getUserListManager().markState(exerciseShells, role);
+      db.getUserListManager().markState(exerciseShells);
     }
 
     return new ExerciseListWrapper(reqID, exerciseShells, firstExercise);
@@ -374,7 +362,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private List<CommonExercise> getSortedByUnitThenAlpha(Collection<CommonExercise> exercisesForSection, final boolean recordedLast) {
     List<CommonExercise> copy = new ArrayList<CommonExercise>(exercisesForSection);
 
-    logger.debug("sorting " + exercisesForSection.size() + " recorded last " +recordedLast);
+    //logger.debug("sorting " + exercisesForSection.size() + " recorded last " +recordedLast);
     final Collection<String> typeOrder = getTypeOrder();
     if (typeOrder.isEmpty()) {
       sortByTooltip(copy);
