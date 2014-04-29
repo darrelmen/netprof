@@ -77,7 +77,7 @@ public class RecordAudioPanel extends AudioPanel {
     WaveformPostAudioRecordButton myPostAudioRecordButton = makePostAudioRecordButton(audioType);
     postAudioRecordButton = myPostAudioRecordButton;
 
-    System.out.println("makePlayAudioPanel : audio type " + audioType + " suffix '" +playButtonSuffix +"'");
+   // System.out.println("makePlayAudioPanel : audio type " + audioType + " suffix '" +playButtonSuffix +"'");
     playAudioPanel = new MyPlayAudioPanel(recordImage1, recordImage2, exercisePanel, playButtonSuffix);
     myPostAudioRecordButton.setPlayAudioPanel(playAudioPanel);
 
