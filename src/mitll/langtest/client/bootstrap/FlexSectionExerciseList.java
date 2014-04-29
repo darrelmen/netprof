@@ -80,8 +80,8 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     sectionPanel = new FluidContainer();
     sectionPanel.getElement().setId("sectionPanel_"+instance);
 
-    DOM.setStyleAttribute(sectionPanel.getElement(), "paddingLeft", "2px");
-    DOM.setStyleAttribute(sectionPanel.getElement(), "paddingRight", "2px");
+    DOM.setStyleAttribute(sectionPanel.getElement(), "paddingLeft", "0px");
+    DOM.setStyleAttribute(sectionPanel.getElement(), "paddingRight", "0px");
     secondRow.add(new Column(12, sectionPanel));
 
     buttonTypes.add(ButtonType.PRIMARY);
