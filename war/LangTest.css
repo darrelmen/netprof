@@ -418,7 +418,14 @@ fieldset > legend {
 }
 
 .ImageOverlay{
+/*
     border: none;
+*/
+
+/*
+    border: 1px solid red;
+*/
+
     background-color: red;
 }
 
