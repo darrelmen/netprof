@@ -13,6 +13,8 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
@@ -43,6 +45,10 @@ import java.util.Collections;
 public class NPFExercise extends GoodwaveExercisePanel {
   private static final String ADD_ITEM = "Add Item to List";
   private static final String ITEM_ALREADY_ADDED = "Item already added to your list(s)";
+  private static final String ADD_TO_LIST = "Add to List";
+  private static final String NEW_LIST = "New List";
+  public static final String ITEM_ADDED = "Item Added!";
+  public static final String ADDING_TO_LIST = "Adding to list ";
 
   private DropdownButton addToList;
   private int activeCount = 0;
@@ -77,7 +83,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
    * @return
    */
   private Panel makeAddToList(CommonExercise e, ExerciseController controller) {
-    addToList = new DropdownButton("Add to List");
+    addToList = new DropdownButton(ADD_TO_LIST);
     addToList.getElement().setId("NPFExercise_AddToList");
     addToList.setDropup(true);
     addToList.setIcon(IconType.PLUS_SIGN);
@@ -89,13 +95,35 @@ public class NPFExercise extends GoodwaveExercisePanel {
   }
 
   private Widget getNextListButton() {
-    final HidePopupTextBox textBox = new HidePopupTextBox();
+    final HidePopupTextBox textBox = new HidePopupTextBox() {
+      @Override
+      protected void onEnter() {
+        makeANewList(this);
+      }
+    };
+    textBox.addKeyUpHandler(new KeyUpHandler() {
+      @Override
+      public void onKeyUp(KeyUpEvent event) {
+        boolean duplicateName = isDuplicateName(textBox.getText());
+        if (duplicateName) {
+          textBox.getElement().getStyle().setColor("red");
+        }
+        else {
+          textBox.getElement().getStyle().setColor("black");
+        }
+      }
+    });
     textBox.getElement().setId("NewList");
     textBox.setVisibleLength(60);
 
-    final DecoratedPopupPanel commentPopup = makePopupAndButton(textBox);
+    final DecoratedPopupPanel commentPopup = makePopupAndButton(textBox, new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        makeANewList(textBox);
+      }
+    });
 
-    final Button newListButton = new Button("New List");
+    final Button newListButton = new Button(NEW_LIST);
     commentPopup.addAutoHidePartner(newListButton.getElement()); // fix for bug Wade found where click didn't toggle comment
     configureTextBox("", textBox, commentPopup);
 
@@ -144,36 +172,42 @@ public class NPFExercise extends GoodwaveExercisePanel {
     });
   }
 
-  protected void makeANewList(TextBox textEntry) {
+  private void makeANewList(TextBox textEntry) {
     String newListName = textEntry.getValue();
-    controller.logEvent(textEntry, "NewList_TextBox", exercise.getID(), "make new list called '" + newListName +
-      "'");
-    boolean addIt = !newListName.isEmpty();
-    for (UserList ul : listsForUser) {
-      if (ul.getName().equals(newListName)) {
-        addIt = false; break;
+    if (!newListName.isEmpty()) {
+      controller.logEvent(textEntry, "NewList_TextBox", exercise.getID(), "make new list called '" + newListName + "'");
+      boolean duplicateName = isDuplicateName(newListName);
+      if (duplicateName) {
+        System.out.println("---> not adding duplicate list " + newListName);
+      } else {
+        addUserList(controller.getUser(), newListName, textEntry);
       }
-    }
-    if (addIt) {
-      addUserList(controller.getUser(), newListName);
     }
   }
 
+  private boolean isDuplicateName(String newListName) {
+    boolean addIt = false;
+    for (UserList ul : listsForUser) {
+      if (ul.getName().equals(newListName)) {
+        addIt = true;
+        break;
+      }
+    }
+    return addIt;
+  }
+
   /**
-   * @seex #getEntry(String, com.google.gwt.user.client.ui.Widget, mitll.langtest.shared.ExerciseAnnotation)
-   * @paramx xfield
-   * @paramx commentButton
    * @param commentEntryText
-   * @paramx clearButton
    * @return
+   * @see mitll.langtest.client.custom.CommentNPFExercise#makeCommentPopup(String, com.github.gwtbootstrap.client.ui.Button, mitll.langtest.client.custom.NPFExercise.HidePopupTextBox, com.github.gwtbootstrap.client.ui.Button)
    */
-  private DecoratedPopupPanel makePopupAndButton(TextBox commentEntryText) {
+  private DecoratedPopupPanel makePopupAndButton(TextBox commentEntryText, ClickHandler clickHandler) {
     final DecoratedPopupPanel commentPopup = new DecoratedPopupPanel();
     commentPopup.setAutoHideEnabled(true);
 
     Panel hp = new HorizontalPanel();
     hp.add(commentEntryText);
-    hp.add(getOKButton(commentPopup));
+    hp.add(getOKButton(commentPopup, clickHandler));
 
     commentPopup.add(hp);
     return commentPopup;
@@ -184,7 +218,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
    * @param commentPopup
    * @return
    */
-  protected Button getOKButton(final PopupPanel commentPopup) {
+  protected Button getOKButton(final PopupPanel commentPopup, ClickHandler clickHandler) {
     Button ok = new Button("OK");
     ok.setType(ButtonType.PRIMARY);
     ok.addStyleName("leftTenMargin");
@@ -194,10 +228,20 @@ public class NPFExercise extends GoodwaveExercisePanel {
         commentPopup.hide();
       }
     });
+    if (clickHandler != null) {
+      ok.addClickHandler(clickHandler);
+    }
     return ok;
   }
 
-  private void addUserList(long userID, String title) {
+  /**
+   * @see #makeANewList(com.github.gwtbootstrap.client.ui.TextBox)
+   * @param userID
+   * @param title
+   * @param textBox
+   */
+  private void addUserList(long userID, String title, final TextBox textBox) {
+    //System.out.println("user " +userID + " adding list " +title);
     service.addUserList(userID,
       title,
       "",
@@ -211,6 +255,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
           if (result == -1) {
             System.err.println("should never happen!");
           } else {
+            textBox.setText("");
             wasRevealed();
           }
         }
@@ -259,7 +304,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
             widget.addClickHandler(new ClickHandler() {
               @Override
               public void onClick(ClickEvent event) {
-                controller.logEvent(w1,"DropUp",e.getID(),"Adding to list " + ul.getID() +"/"+ul.getName());
+                controller.logEvent(w1,"DropUp",e.getID(), ADDING_TO_LIST + ul.getID() +"/"+ul.getName());
                 service.addItemToUserList(ul.getUniqueID(), new UserExercise(e, controller.getUser()), new AsyncCallback<Void>() {
                   @Override
                   public void onFailure(Throwable caught) {
@@ -267,7 +312,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
 
                   @Override
                   public void onSuccess(Void result) {
-                    showPopup("Item Added!", w1);
+                    showPopup(ITEM_ADDED, w1);
                     widget.setVisible(false);
                     activeCount--;
                     if (activeCount == 0) {
@@ -306,16 +351,16 @@ public class NPFExercise extends GoodwaveExercisePanel {
   /**
    * For this field configure the textBox box to post annotation on blur and enter
    *
-   * @param currentComment fill in with existing annotation, if there is one
+   * @param initialText fill in with existing annotation, if there is one
    * @param textBox comment box to configure
    * @return
    */
-  protected FocusWidget configureTextBox(String currentComment,
+  protected FocusWidget configureTextBox(String initialText,
                                          final HidePopupTextBox textBox,
                                          final PopupPanel popup) {
-    if (currentComment != null) {
-      textBox.setText(currentComment);
-      if (textBox.getVisibleLength() < currentComment.length()) {
+    if (initialText != null) {
+      textBox.setText(initialText);
+      if (textBox.getVisibleLength() < initialText.length()) {
         textBox.setVisibleLength(70);
       }
     }
@@ -327,16 +372,20 @@ public class NPFExercise extends GoodwaveExercisePanel {
   }
 
   protected static class HidePopupTextBox extends TextBox {
-    public void configure( final PopupPanel popup) {
+    public void configure(final PopupPanel popup) {
       addKeyPressHandler(new KeyPressHandler() {
         @Override
         public void onKeyPress(KeyPressEvent event) {
           int keyCode = event.getNativeEvent().getKeyCode();
           if (keyCode == KeyCodes.KEY_ENTER) {
+           // System.out.println("HidePopupTextBox : got key press on " + getElement().getId());
             popup.hide();
+            onEnter();
           }
         }
       });
+    }
+    protected void onEnter() {
     }
   }
 }
