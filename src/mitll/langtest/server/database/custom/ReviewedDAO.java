@@ -2,6 +2,7 @@ package mitll.langtest.server.database.custom;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.shared.STATE;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
@@ -29,14 +30,14 @@ public class ReviewedDAO extends DAO {
   public static final String REVIEWED = "reviewed";
   public static final String SECOND_STATE = "secondstate";
 
-  private static final String STATE = "state";
+  private static final String STATE_COL = "state";
   private static final String CREATORID = "creatorid";
   private static final String MODIFIED = "modified";
   private static final String EXERCISEID = "exerciseid";
 
   private final String tableName;
 
-  public ReviewedDAO(Database database,String tableName) {
+  public ReviewedDAO(Database database, String tableName) {
     super(database);
     this.tableName = tableName;
     try {
@@ -45,8 +46,8 @@ public class ReviewedDAO extends DAO {
       // check for missing column
       Collection<String> columns = getColumns(tableName);
       Connection connection = database.getConnection();
-      if (!columns.contains(STATE)) {
-        addVarchar(connection, tableName, STATE);
+      if (!columns.contains(STATE_COL)) {
+        addVarchar(connection, tableName, STATE_COL);
       }
     } catch (SQLException e) {
       logger.error("got " + e, e);
@@ -72,7 +73,7 @@ public class ReviewedDAO extends DAO {
       " LONG, " +
       EXERCISEID +
       " VARCHAR, " +
-      STATE +
+      STATE_COL +
       " VARCHAR, " +
       MODIFIED +
       " TIMESTAMP," +
@@ -88,9 +89,8 @@ public class ReviewedDAO extends DAO {
   }
 
   /**
-   * Somehow on subsequent runs, the ids skip by 30 or so?
+   *
    * <p/>
-   * Uses return generated keys to get the user id
    *
    * @see #setState
    */
@@ -108,7 +108,7 @@ public class ReviewedDAO extends DAO {
           EXERCISEID +
           "," +
           MODIFIED +
-          "," + STATE +
+          "," + STATE_COL +
           ") " +
           "VALUES(?,?,?,?);"
       );
@@ -174,19 +174,23 @@ public class ReviewedDAO extends DAO {
   }
 
   /**
+   * So this returns a map of exercise id to current (latest) state.  The exercise may have gone through
+   * many states, but this should return the latest one.
+   *
    * @return
    * @see UserListManager#getDefectList()
    * @see UserListManager#getExerciseToState()
    * @see UserListManager#markState(java.util.Collection, String)
+   * @param skipUnset
    */
-  public Map<String, StateCreator> getExerciseToState() {
+  public Map<String, StateCreator> getExerciseToState(boolean skipUnset) {
     Connection connection = database.getConnection();
 
     String sql3 = "select * from " +
       "(select " +
       EXERCISEID +
       "," +
-      STATE +
+      STATE_COL +
       "," +
       CREATORID +
       ",max(" +
@@ -196,7 +200,7 @@ public class ReviewedDAO extends DAO {
       " group by " +
       EXERCISEID +
       "," +
-      STATE +
+      STATE_COL +
       "," +
       CREATORID +
       " order by " +
@@ -214,15 +218,22 @@ public class ReviewedDAO extends DAO {
         String exerciseID = rs.getString(1);
         String state = rs.getString(2);
         long creator = rs.getLong(3);
-        mitll.langtest.shared.STATE stateFromTable = (state == null) ? mitll.langtest.shared.STATE.UNSET : mitll.langtest.shared.STATE.valueOf(state);
-        exidToState.put(exerciseID, new StateCreator(stateFromTable, creator));
+        STATE stateFromTable = (state == null) ? STATE.UNSET : STATE.valueOf(state);
+
+        if (skipUnset && stateFromTable == STATE.UNSET) {
+
+        }
+        else {
+          exidToState.put(exerciseID, new StateCreator(stateFromTable, creator));
+        }
       }
 
       rs.close();
       statement.close();
       database.closeConnection(connection);
-      int count = getCount();
-      if (count % 10 == 0) logger.debug("now " + count + " reviewed");
+     // int count = getCount();
+     // if (count % 10 == 0) logger.debug("now " + count + " reviewed");
+      logger.debug("query " + sql3 + " returned " + exidToState.size() + " exercise->state items");
       return exidToState;
     } catch (SQLException e) {
       logger.error("Got " + e + " doing " + sql3, e);
