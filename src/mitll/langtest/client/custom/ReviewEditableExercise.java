@@ -374,12 +374,13 @@ class ReviewEditableExercise extends EditableExercise {
 
       service.setExerciseState(id, STATE.FIXED, user, new AsyncCallback<Void>() {
         @Override
-        public void onFailure(Throwable caught) {}
+        public void onFailure(Throwable caught) {
+        }
 
         @Override
         public void onSuccess(Void result) {
           predefinedContentList.reload();
-         exerciseList.forgetExercise(id);
+          exerciseList.forgetExercise(id);
         }
       });
     }
