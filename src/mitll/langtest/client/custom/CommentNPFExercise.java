@@ -165,7 +165,7 @@ public class CommentNPFExercise extends NPFExercise {
 
     Panel hp = new HorizontalPanel();
     hp.add(commentEntryText);
-    hp.add(getOKButton(commentPopup));
+    hp.add(getOKButton(commentPopup, null));
 
     commentPopup.add(hp);
     return commentPopup;
