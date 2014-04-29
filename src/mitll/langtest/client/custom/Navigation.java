@@ -367,7 +367,7 @@ public class Navigation extends TabContainer implements RequiresResize {
 
   private boolean isQC() {
     Collection<User.Permission> permissions = controller.getPermissions();
-    System.out.println("permissions "+permissions);
+    //System.out.println("permissions "+permissions);
     return permissions.contains(User.Permission.QUALITY_CONTROL);
   }
 
