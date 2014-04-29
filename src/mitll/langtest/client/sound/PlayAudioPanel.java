@@ -54,19 +54,13 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     this.soundManager = soundManager;
     setSpacing(10);
     setVerticalAlignment(ALIGN_MIDDLE);
-    PLAY_LABEL =// "\u25ba" +
-      " Play" + suffix;
+    PLAY_LABEL = " Play" + suffix;
     playButton = new Button(PLAY_LABEL);
     playButton.setIcon(IconType.PLAY);
-  //  playButton.getElement().setClassName("icon-play");
     addButtons();
     id = counter++;
     getElement().setId("PlayAudioPanel_"+id);
-
-    //sinkEvents();
   }
-
-
 
   /**
    * @see mitll.langtest.client.exercise.RecordAudioPanel.MyPlayAudioPanel#MyPlayAudioPanel(com.github.gwtbootstrap.client.ui.Image, com.github.gwtbootstrap.client.ui.Image, com.google.gwt.user.client.ui.Panel, String)
