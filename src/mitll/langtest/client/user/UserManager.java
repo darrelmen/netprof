@@ -91,27 +91,7 @@ public class UserManager {
       System.out.println("UserManager.login : current user : " + user);
       rememberAudioType();
 
-      service.getUsers(new AsyncCallback<List<User>>() {
-        @Override
-        public void onFailure(Throwable caught) {
-
-        }
-
-        @Override
-        public void onSuccess(List<User> result) {
-          for (User u : result) {
-            if (((int) u.getId()) == user) {
-              for (User.Permission permission : u.getPermissions()) {
-                System.out.println("\tUserManager.login : found : " + u + " with perm " + permission);
-
-                userNotification.setPermission(permission, true);
-              }
-              break;
-            }
-          }
-          userNotification.gotUser(user);
-        }
-      });
+      getPermissionsAndSetUser(user);
 
     }
     else {
@@ -120,7 +100,29 @@ public class UserManager {
     }
   }
 
+  private void getPermissionsAndSetUser(final int user) {
+    service.getUsers(new AsyncCallback<List<User>>() {
+      @Override
+      public void onFailure(Throwable caught) {
 
+      }
+
+      @Override
+      public void onSuccess(List<User> result) {
+        for (User u : result) {
+          if (((int) u.getId()) == user) {
+            for (User.Permission permission : u.getPermissions()) {
+              System.out.println("\tUserManager.login : found : " + u + " with perm " + permission);
+
+              userNotification.setPermission(permission, true);
+            }
+            break;
+          }
+        }
+        userNotification.gotUser(user);
+      }
+    });
+  }
 
   /**
    * @see mitll.langtest.client.LangTest#checkLogin
@@ -400,11 +402,14 @@ public class UserManager {
       localStorageIfSupported.setItem(getLoginType(), "" + userType);
       System.out.println("storeUser : user now " + sessionID + " / " + getUser() + " audio '" + audioType+"' expires in " + (DURATION/1000) + " seconds");
       userNotification.rememberAudioType(audioType);
-    } else {
+
+      getPermissionsAndSetUser((int)sessionID);
+
+    } else {  // not sure what we could possibly do here...
       userID = sessionID;
       this.userChosenID = userChosenID;
+      userNotification.gotUser(sessionID);
     }
-    userNotification.gotUser(sessionID);
   }
 
 
