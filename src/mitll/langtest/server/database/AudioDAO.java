@@ -103,19 +103,37 @@ public class AudioDAO extends DAO {
     return new ArrayList<AudioAttribute>();
   }
 
+  /**
+   * Items that are recorded must have both regular and slow speed audio.
+   * @see mitll.langtest.server.LangTestDatabaseImpl#markRecordedState(int, String, java.util.Collection)
+   * @param userid
+   * @return
+   */
   public Set<String> getRecordedForUser(long userid) {
     try {
-      String sql = "SELECT " +Database.EXID+
-        " FROM " + AUDIO + " WHERE " +USERID +"=" + userid+ " AND "+DEFECT +"<>true";
-      Connection connection = database.getConnection();
-      PreparedStatement statement = connection.prepareStatement(sql);
-      Set<String> exidResultsForQuery = getExidResultsForQuery(connection, statement);
-     // logger.debug("sql " + sql + " ids " + exidResultsForQuery.size() + " ");
-      return exidResultsForQuery;
+      //String audioSpeed = "regular";
+      Set<String> validAudioAtReg = getValidAudioAtSpeed(userid, "regular");
+      Set<String> validAudioAtSlow = getValidAudioAtSpeed(userid, "slow");
+      // logger.debug("sql " + sql + " ids " + exidResultsForQuery.size() + " ");
+      boolean b = validAudioAtReg.retainAll(validAudioAtSlow);
+      return validAudioAtReg;
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
     return new HashSet<String>();
+  }
+
+  protected Set<String> getValidAudioAtSpeed(long userid, String audioSpeed) throws SQLException {
+    String sql = "SELECT " + Database.EXID+
+      " FROM " + AUDIO + " WHERE " +USERID +"=" + userid+
+      " AND "+DEFECT +"<>true " +
+      " AND "+AUDIO_TYPE +"='" +
+      audioSpeed +
+      "' "
+      ;
+    Connection connection = database.getConnection();
+    PreparedStatement statement = connection.prepareStatement(sql);
+    return getExidResultsForQuery(connection, statement);
   }
 
   private List<AudioAttribute> getResultsSQL(String sql) throws SQLException {
@@ -380,12 +398,11 @@ public class AudioDAO extends DAO {
       new Exception().printStackTrace();
     }
 
-    PreparedStatement statement;
-    statement = connection.prepareStatement("INSERT INTO " +AUDIO+
+    PreparedStatement statement = connection.prepareStatement("INSERT INTO " + AUDIO +
       "(" +
       "userid," +
       Database.EXID + "," +
-     Database.TIME + "," +
+      Database.TIME + "," +
       AUDIO_REF +
       "," +
       ResultDAO.AUDIO_TYPE + "," +
