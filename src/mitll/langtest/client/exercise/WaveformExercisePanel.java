@@ -3,12 +3,15 @@ package mitll.langtest.client.exercise;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.ExerciseFormatter;
@@ -58,7 +61,15 @@ public class WaveformExercisePanel extends ExercisePanel {
   public boolean isBusy() {
     return isBusy;
   }
-  protected void addInstructions() {  add(new Heading(4, "Record the word or phrase twice, first at normal speed, then again at slow speed."));  }
+  protected void addInstructions() {
+    if (!exercise.getUnitToValue().isEmpty()) {
+      Panel unitLessonForExercise = getUnitLessonForExercise();
+      unitLessonForExercise.add(getItemHeader(exercise));
+      add(unitLessonForExercise);
+    }
+
+    add(new Heading(4, "Record the word or phrase twice, first at normal speed, then again at slow speed."));
+  }
 
   protected String getExerciseContent(CommonExercise e) {
     return ExerciseFormatter.getArabic(e.getForeignLanguage());
@@ -77,6 +88,7 @@ public class WaveformExercisePanel extends ExercisePanel {
     audioPanels = new ArrayList<RecordAudioPanel>();
     VerticalPanel vp = new VerticalPanel();
 
+
     RecordAudioPanel fast = new RecordAudioPanel(exercise, controller, this, service, index, true, Result.AUDIO_TYPE_REGULAR);
     ResizableCaptionPanel cp = new ResizableCaptionPanel("Regular speed recording");
     cp.setContentWidget(fast);
@@ -94,6 +106,26 @@ public class WaveformExercisePanel extends ExercisePanel {
 
     vp.add(cp);
     return vp;
+  }
+
+  private Panel getUnitLessonForExercise() {
+    HorizontalPanel flow = new HorizontalPanel();
+    flow.getElement().setId("getUnitLessonForExercise_unitLesson");
+    flow.addStyleName("leftFiveMargin");
+    //System.out.println("getUnitLessonForExercise " + exercise + " unit value " +exercise.getUnitToValue());
+
+    for (String type : controller.getStartupInfo().getTypeOrder()) {
+      Heading child = new Heading(GoodwaveExercisePanel.HEADING_FOR_UNIT_LESSON, type, exercise.getUnitToValue().get(type));
+      child.addStyleName("rightFiveMargin");
+      flow.add(child);
+    }
+    return flow;
+  }
+
+  Widget getItemHeader(CommonExercise e) {
+    Heading w = new Heading(GoodwaveExercisePanel.HEADING_FOR_UNIT_LESSON, "Item", e.getID());
+    w.getElement().setId("ItemHeading");
+    return w;
   }
 
   protected static class ResizableCaptionPanel extends CaptionPanel implements ProvidesResize, RequiresResize {
