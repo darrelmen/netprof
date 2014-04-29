@@ -116,6 +116,9 @@ public interface LangTestDatabase extends RemoteService {
   UserList getDefectList();
   UserList getCommentedList();
   UserList getAttentionList();
+
+  List<UserList> getReviewLists();
+
   boolean deleteList(long id);
   boolean deleteItemFromList(long listid, String exid);
   boolean deleteItem(String exid);
