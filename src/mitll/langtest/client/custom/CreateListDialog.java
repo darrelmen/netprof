@@ -128,7 +128,8 @@ class CreateListDialog extends BasicDialog {
   }
 
   private void addUserList(final FormField titleBox, TextArea area, FormField classBox) {
-    service.addUserList(userManager.getUser(),
+    int user = userManager.getUser();
+    service.addUserList(user,
       titleBox.getText(),
       area.getText(),
       classBox.getText(), new AsyncCallback<Long>() {
