@@ -321,12 +321,14 @@ public class ExercisePanel extends VerticalPanel implements
    * @param promptInEnglish
    * @return
    */
+/*
   protected String getSpokenPrompt(boolean promptInEnglish) {
     String instructions = getInstructions();
     String studentPrompt = SPEAK_AND_RECORD_YOUR_ANSWER_IN + (promptInEnglish ? ENGLISH : getLanguage()) + " ";
     String teacherPrompt = TEACHER_PROMPT;
     return THREE_SPACES + (controller.isDataCollectMode() && !controller.isCRTDataCollectMode() ? teacherPrompt : studentPrompt) + instructions;
   }
+*/
 
   protected String getInstructions() {
     String instructions = ":";
