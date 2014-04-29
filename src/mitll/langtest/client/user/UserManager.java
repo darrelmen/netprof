@@ -251,15 +251,23 @@ public class UserManager {
       String sid = localStorageIfSupported.getItem(getUserIDCookie());
 
       //System.out.println("user id cookie for " +getUserIDCookie() + " is " + sid);
-      if (sid != null && !sid.equals("" + NO_USER_SET)) {
+ /*     if (sid != null && !sid.equals("" + NO_USER_SET)) {
         boolean expired = checkUserExpired(sid);
         if (expired) checkLogin();
         sid = localStorageIfSupported.getItem(getUserIDCookie());
-      }
+      }*/
       return (sid == null || sid.equals("" + NO_USER_SET)) ? NO_USER_SET : Integer.parseInt(sid);
     } else {
       return (int) userID;
     }
+  }
+
+  public boolean isUserExpired() {
+    Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+    String sid = localStorageIfSupported.getItem(getUserIDCookie());
+
+    //System.out.println("user id cookie for " +getUserIDCookie() + " is " + sid);
+    return !(sid != null && !sid.equals("" + NO_USER_SET)) || checkUserExpired(sid);
   }
 
   /**

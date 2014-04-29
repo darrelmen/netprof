@@ -229,7 +229,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   @Override
   public void getImage(int reqid, final String path, final String type, int toUse, int height, String exerciseID, AsyncCallback<ImageResponse> client) {
-    String key = path+ DIVIDER +type+ DIVIDER +toUse+ DIVIDER +height+ DIVIDER+exerciseID;
+    String key = path + DIVIDER + type + DIVIDER + toUse + DIVIDER + height + DIVIDER + exerciseID;
     getImage(reqid,key, client);
   }
 
@@ -251,7 +251,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     ImageResponse ifPresent = imageCache.getIfPresent(key);
     if (ifPresent != null) {
       //System.out.println("found  " + ifPresent);
-
       ifPresent.req = -1;
       client.onSuccess(ifPresent);
     } else {
@@ -304,7 +303,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       makeFlashContainer();
     }
 
-   /* Panel bothSecondAndThird =*/ populateRootPanel();
+    populateRootPanel();
 
     setPageTitle();
     browserCheck.checkForCompatibleBrowser();
@@ -779,6 +778,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see #makeFlashContainer()
    */
   private void checkLogin() {
+    userManager.isUserExpired();
     userManager.checkLogin();
   }
 
@@ -827,7 +827,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public int getUser() { return userManager.getUser(); }
   public PropertyHandler getProps() { return props; }
   public boolean getEnglishOnly() { return props.isEnglishOnlyMode(); }
-  public int getNumGradesToCollect() { return props.getNumGradesToCollect(); }
+ // public int getNumGradesToCollect() { return props.getNumGradesToCollect(); }
   public int getSegmentRepeats() { return props.getSegmentRepeats(); }
   public boolean isArabicTextDataCollect() {  return props.isArabicTextDataCollect(); }
   public boolean useBkgColorForRef() {  return props.isBkgColorForRef(); }
