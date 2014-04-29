@@ -60,7 +60,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   private static final String REFERENCE = " Reference";
   private static final String RECORD_YOURSELF = "Record Yourself";
   private static final String RELEASE_TO_STOP = "Release to Stop";
-  private static final int HEADING_FOR_UNIT_LESSON = 4;
+  public static final int HEADING_FOR_UNIT_LESSON = 4;
   public static final String CORRECT = "correct";
   public static final String INCORRECT = "incorrect";
   private boolean isBusy = false;
@@ -174,7 +174,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     div.add(answerWidget);
 
     addGroupingStyle(div);
-    //addGroupingStyle(answerWidget);
     toAddTo.add(div);
   }
 
@@ -182,7 +181,11 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     div.addStyleName("buttonGroupInset6");
   }
 
-  private HorizontalPanel getUnitLessonForExercise() {
+  /**
+   * @see #getQuestionContent(mitll.langtest.shared.CommonExercise, com.google.gwt.user.client.ui.Panel)
+   * @return
+   */
+  private Panel getUnitLessonForExercise() {
     HorizontalPanel flow = new HorizontalPanel();
     flow.getElement().setId("getUnitLessonForExercise_unitLesson");
     flow.addStyleName("leftFiveMargin");
@@ -226,7 +229,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     vp.getElement().setId("getQuestionContent_verticalContainer");
 
     if (!e.getUnitToValue().isEmpty()) {
-      HorizontalPanel unitLessonForExercise = getUnitLessonForExercise();
+      Panel unitLessonForExercise = getUnitLessonForExercise();
       unitLessonForExercise.add(getItemHeader(e));
       vp.add(unitLessonForExercise);
     }
