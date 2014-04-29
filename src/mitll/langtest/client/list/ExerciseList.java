@@ -521,7 +521,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   protected boolean loadByID(String id) {
     if (hasExercise(id)) {
-      System.out.println("loading exercise " + id);
+      //System.out.println("loading exercise " + id);
       loadExercise(id);
       return true;
     }
