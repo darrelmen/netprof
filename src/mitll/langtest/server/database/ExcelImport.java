@@ -1045,6 +1045,7 @@ public class ExcelImport implements ExerciseDAO {
           boolean exists = test.exists();
           if (!exists) {
             test = new File(installPath, audio.getAudioRef());
+            exists = test.exists();
             child = audio.getAudioRef();
           }
           if (exists) {
