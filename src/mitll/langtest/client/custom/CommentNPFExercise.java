@@ -289,13 +289,8 @@ public class CommentNPFExercise extends NPFExercise {
       fieldToComment.put(field, comment);
       boolean isCorrect = comment.length() == 0;
 
-  //    System.out.println("commentComplete " + field + " comment '" + comment +"' correct = " +isCorrect);
+//      System.out.println("commentComplete " + field + " comment '" + comment +"' correct = " +isCorrect);
 
-      if (isCorrect) {
-        addCorrectComment(field);
-      } else {
-        postIncorrect(commentEntry, field);
-      }
       setButtonTitle(commentButton, isCorrect, comment);
       showOrHideCommentButton(commentButton, clearButton, isCorrect);
       if (isCorrect) {
@@ -306,10 +301,5 @@ public class CommentNPFExercise extends NPFExercise {
       }
       //System.out.println("\t commentComplete : annotations now " + exercise.getFields());
     }
-  }
-
-  private void postIncorrect(TextBox commentEntry, String field) {
-    final String commentToPost = commentEntry.getText();
-    addIncorrectComment(commentToPost, field);
   }
 }
