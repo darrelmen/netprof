@@ -71,7 +71,7 @@ public class Navigation extends TabContainer implements RequiresResize {
   private static final String REVIEWERS = "Reviewers";
   private static final String CREATE = "Create a New List";
   private static final String BROWSE = "Browse Lists";
-  private static final String COMMENTS = "Comments";
+  //private static final String COMMENTS = "Comments";
   private static final String LESSONS = "lessons";
   private static final String DELETE = "Delete";
   private static final String NO_LISTS_CREATED_YET = "No lists created yet.";
@@ -96,7 +96,7 @@ public class Navigation extends TabContainer implements RequiresResize {
 
   private static final String EDIT_ITEM = "editItem";
   private static final String LEARN = "learn";
-  public static final String ATTENTION_LL = "Attention LL";
+//  public static final String ATTENTION_LL = "Attention LL";
   public static final String RECORD_AUDIO = "Record Audio";
 
   private final ExerciseController controller;
@@ -185,10 +185,10 @@ public class Navigation extends TabContainer implements RequiresResize {
   private TabPanel tabPanel;
   private TabAndContent yourStuff, othersStuff;
   private TabAndContent browse, chapters, create;
-  private TabAndContent review, commented, attention, recorderTab, contentTab;
+  private TabAndContent review, /*commented, attention,*/ recorderTab, contentTab;
   private List<TabAndContent> tabs = new ArrayList<TabAndContent>();
   private Panel chapterContent;
-  boolean useAttention = false;
+ // boolean useAttention = false;
   /**
    * @see #getNav(com.google.gwt.user.client.ui.Panel)
    * @param contentForChaptersTab
@@ -321,7 +321,7 @@ public class Navigation extends TabContainer implements RequiresResize {
         }
       });
 
-      commented = makeFirstLevelTab(tabPanel, IconType.COMMENT, COMMENTS);
+/*      commented = makeFirstLevelTab(tabPanel, IconType.COMMENT, COMMENTS);
       commented.tab.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
@@ -329,8 +329,8 @@ public class Navigation extends TabContainer implements RequiresResize {
           viewComments(commented.content);
           logEvent(commented,COMMENTS);
         }
-      });
-
+      });*/
+/*
       if (useAttention) {
         attention = makeFirstLevelTab(tabPanel, IconType.WARNING_SIGN, ATTENTION_LL);
         attention.tab.addClickHandler(new ClickHandler() {
@@ -341,7 +341,7 @@ public class Navigation extends TabContainer implements RequiresResize {
             logEvent(attention, ATTENTION_LL);
           }
         });
-      }
+      }*/
 
     }
 
@@ -478,10 +478,10 @@ public class Navigation extends TabContainer implements RequiresResize {
           viewBrowse();
         } else if (value.equals(REVIEW1)) {
           viewReview(review.content);
-        } else if (value.equals(COMMENTS)) {
+/*        } else if (value.equals(COMMENTS)) {
           viewComments(commented.content);
         } else if (value.equals(ATTENTION_LL) && useAttention) {
-          viewAttention(attention.content);
+          viewAttention(attention.content);*/
         } else if (value.equals(RECORD_AUDIO)) {
           recorderHelper.showNPF(recorderTab, "record_audio", true);
         } else if (value.equals(CONTENT) && contentTab != null) {
@@ -586,20 +586,34 @@ public class Navigation extends TabContainer implements RequiresResize {
    */
   private void viewReview(final Panel contentPanel) {
     final Panel child = getContentChild(contentPanel, "defectReview_contentPanel");
-    service.getDefectList(new AsyncCallback<UserList>() {
+/*    service.getDefectList(new AsyncCallback<UserList>() {
       @Override
       public void onFailure(Throwable caught) {}
 
       @Override
-      public void onSuccess(UserList result) {
-        System.out.println("\tviewReview : reviewLessons for " + userManager.getUser() + " got " + result);
+      public void onSuccess(UserList defectList) {
+        System.out.println("\tviewReview : reviewLessons for " + userManager.getUser() + " got " + defectList);
 
-        new UserListCallback(contentPanel, child, new ScrollPanel(), REVIEW, false, false).onSuccess(Collections.singleton(result));
+        new UserListCallback(contentPanel, child, new ScrollPanel(), REVIEW, false, false).onSuccess(Collections.singleton(defectList));
+      }
+    });*/
+
+    service.getReviewLists(new AsyncCallback<List<UserList>>() {
+      @Override
+      public void onFailure(Throwable caught) {
+
+      }
+
+      @Override
+      public void onSuccess(List<UserList> reviewLists) {
+        System.out.println("\tviewReview : reviewLessons for " + userManager.getUser() + " got " + reviewLists);
+
+        new UserListCallback(contentPanel, child, new ScrollPanel(), REVIEW, false, false).onSuccess(reviewLists);
       }
     });
   }
 
-  private void viewComments(final Panel contentPanel) {
+/*  private void viewComments(final Panel contentPanel) {
     final Panel child = getContentChild(contentPanel,"commentReview_contentPanel");
 
     service.getCommentedList(new AsyncCallback<UserList>() {
@@ -607,14 +621,14 @@ public class Navigation extends TabContainer implements RequiresResize {
       public void onFailure(Throwable caught) {}
 
       @Override
-      public void onSuccess(UserList result) {
-        System.out.println("\tviewComments : commented for " + userManager.getUser() + " got " + result);
-        new UserListCallback(contentPanel, child, new ScrollPanel(), COMMENT, false, false).onSuccess(Collections.singleton(result));
+      public void onSuccess(UserList commentList) {
+        System.out.println("\tviewComments : commented for " + userManager.getUser() + " got " + commentList);
+        new UserListCallback(contentPanel, child, new ScrollPanel(), COMMENT, false, false).onSuccess(Collections.singleton(commentList));
       }
     });
-  }
+  }*/
 
-  private void viewAttention(final Panel contentPanel) {
+/*  private void viewAttention(final Panel contentPanel) {
     final Panel child = getContentChild(contentPanel,"attentionReview_contentPanel");
 
     service.getAttentionList(new AsyncCallback<UserList>() {
@@ -623,12 +637,12 @@ public class Navigation extends TabContainer implements RequiresResize {
       }
 
       @Override
-      public void onSuccess(UserList result) {
-        System.out.println("\tviewAttention : attention LL for " + userManager.getUser() + " got " + result);
-        new UserListCallback(contentPanel, child, new ScrollPanel(), ATTENTION, false, false).onSuccess(Collections.singleton(result));
+      public void onSuccess(UserList attentionList) {
+        System.out.println("\tviewAttention : attention LL for " + userManager.getUser() + " got " + attentionList);
+        new UserListCallback(contentPanel, child, new ScrollPanel(), ATTENTION, false, false).onSuccess(Collections.singleton(attentionList));
       }
     });
-  }
+  }*/
 
   private Panel getContentChild(Panel contentPanel, String id) {
     contentPanel.clear();
@@ -970,7 +984,7 @@ public class Navigation extends TabContainer implements RequiresResize {
     final boolean onlyMyLists;
 
     /**
-     * @see #viewComments(com.google.gwt.user.client.ui.Panel)
+     * @seex #viewComments(com.google.gwt.user.client.ui.Panel)
      * @see #viewLessons(com.google.gwt.user.client.ui.Panel, boolean, boolean, boolean)
      * @see #viewReview(com.google.gwt.user.client.ui.Panel)
      * @param contentPanel
