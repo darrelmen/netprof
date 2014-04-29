@@ -78,8 +78,6 @@ public class AnnotationDAO extends DAO {
    * @see UserListManager#reallyCreateNewItem(long, mitll.langtest.shared.custom.UserExercise, String)
    */
   public void add(UserAnnotation annotation) {
-   // long id = 0;
-
     try {
       // there are much better ways of doing this...
      logger.info("add :annotation " + annotation);
@@ -123,8 +121,6 @@ public class AnnotationDAO extends DAO {
       logger.error("got " + ee, ee);
     }
   }
-
-  //public int getCount() { return getCount(ANNOTATION); }
 
   private final Map<String,List<UserAnnotation>> exerciseToAnnos = new HashMap<String, List<UserAnnotation>>();
 
@@ -231,6 +227,13 @@ public class AnnotationDAO extends DAO {
     }
   }
 
+  /**
+   * @see #getAll(long)
+   * @see #getFieldToAnnotationMap(String)
+   * @param sql
+   * @return
+   * @throws SQLException
+   */
   private List<UserAnnotation> getUserAnnotations(String sql) throws SQLException {
     Connection connection = database.getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
@@ -256,12 +259,6 @@ public class AnnotationDAO extends DAO {
     return lists;
   }
 
-/*
-  public Set<String> getFixedIds() {
-    return getStateIds(false);
-  }
-*/
-
     /**
      *
      * @see mitll.langtest.server.database.custom.UserListManager#UserListManager(mitll.langtest.server.database.UserDAO, UserListDAO, UserListExerciseJoinDAO, AnnotationDAO, ReviewedDAO, mitll.langtest.server.PathHelper)
@@ -275,7 +272,7 @@ public class AnnotationDAO extends DAO {
     return stateIds;
   }
 
-  protected Map<String,Long> getStateIds(boolean forDefects) {
+  private Map<String, Long> getStateIds(boolean forDefects) {
     Connection connection = database.getConnection();
 
     String sql2 = "select exerciseid,field,status,creatorid" +
@@ -343,12 +340,12 @@ public class AnnotationDAO extends DAO {
     return exToCreator;
   }
 
-  public static class IDCreator {
+/*  public static class IDCreator {
     //CommonShell.STATE state; // really should be an enum...
     String exID;
     long creatorID;
     public IDCreator(String exID,long creatorID) {this.exID = exID; this.creatorID=creatorID;}
-  }
+  }*/
 
   private boolean examineFields(boolean forDefects, Map<String, String> fieldToStatus) {
     String statusToLookFor = "correct";
