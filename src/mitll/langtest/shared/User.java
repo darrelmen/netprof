@@ -135,6 +135,10 @@ public class User extends MiniUser {
     return completePercent;
   }
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#getUsers()
+   * @param completePercent
+   */
   public void setCompletePercent(float completePercent) {
     this.completePercent = completePercent;
   }
