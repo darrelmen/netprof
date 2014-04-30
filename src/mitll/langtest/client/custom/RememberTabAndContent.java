@@ -10,7 +10,7 @@ import java.util.Set;
 * Created by GO22670 on 4/16/2014.
 */
 class RememberTabAndContent extends TabAndContent {
-  Set<Widget> widgets = new HashSet<Widget>();
+  private Set<Widget> widgets = new HashSet<Widget>();
 
   public RememberTabAndContent(IconType iconType, String label) {
     super(iconType, label);
@@ -21,7 +21,7 @@ class RememberTabAndContent extends TabAndContent {
   }
 
   /**
-   * @see #getPanelForAudio
+   * @see mitll.langtest.client.custom.ReviewEditableExercise#getPanelForAudio
    * @param allPlayed
    */
   public void checkAllPlayed(Set<Widget> allPlayed) {
