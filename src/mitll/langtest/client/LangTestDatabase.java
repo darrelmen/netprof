@@ -3,6 +3,7 @@ package mitll.langtest.client;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.DLIUser;
 import mitll.langtest.shared.ExerciseListWrapper;
@@ -42,6 +43,8 @@ public interface LangTestDatabase extends RemoteService {
   // gradeDAO
   CountAndGradeID addGrade(String exerciseID, Grade grade);
   void changeGrade(Grade toChange);
+
+  void markAudioDefect(AudioAttribute audioAttribute, String exid);
 
   // user DAO
   long addUser(int age, String gender, int experience, String nativeLang, String dialect, String userID, Collection<User.Permission> permissions);
@@ -112,10 +115,6 @@ public interface LangTestDatabase extends RemoteService {
   void setAVPSkip(Collection<Long> ids);
 
   void setExerciseState(String id, STATE state, long userID);
-
-  UserList getDefectList();
-  UserList getCommentedList();
-  UserList getAttentionList();
 
   List<UserList> getReviewLists();
 
