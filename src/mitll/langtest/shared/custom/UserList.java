@@ -48,6 +48,10 @@ public class UserList extends ExerciseShell {
     this.isPrivate = isPrivate;
   }
 
+  /**
+   * @see mitll.langtest.client.custom.EditItem#makeListOfOnlyYourItems(UserList)
+   * @param ul
+   */
   public UserList(UserList ul) {
     this(ul.uniqueID, ul.getCreator(), ul.getName(), ul.getDescription(), ul.getClassMarker(), ul.isPrivate());
   }
