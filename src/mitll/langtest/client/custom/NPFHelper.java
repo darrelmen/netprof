@@ -72,9 +72,11 @@ class NPFHelper implements RequiresResize {
     if (!madeNPFContent || widgetCount == 0) {
       madeNPFContent = true;
       System.out.println("\t: adding npf content instanceName = " + instanceName + " for list " + ul);
+      System.out.println("\t: first is = " + instanceName + "  " + ul.getExercises().iterator().next().getID());
       addNPFToContent(ul, content, instanceName, loadExercises);
     } else {
       System.out.println("\t: rememberAndLoadFirst instanceName = " + instanceName + " for list " + ul);
+      System.out.println("\t: first is = " + instanceName + "  " + ul.getExercises().iterator().next().getID());
       rememberAndLoadFirst(ul);
     }
   }
@@ -164,7 +166,7 @@ class NPFHelper implements RequiresResize {
    * @param ul
    */
   private void rememberAndLoadFirst(final UserList ul) {
-    //System.out.println(getClass() + ".rememberAndLoadFirst : for " +ul);
+    System.out.println(getClass() + ".rememberAndLoadFirst : for " +ul);
     npfExerciseList.setUserListID(ul.getUniqueID());
     npfExerciseList.rememberAndLoadFirst(new ArrayList<CommonShell>(ul.getExercises()));
   }
@@ -188,10 +190,6 @@ class NPFHelper implements RequiresResize {
       }
     };
   }
-/*
-  public void setFactory(final String instanceName, boolean showQC) {
-    setFactory(npfExerciseList, instanceName, showQC);
-  }*/
 
   /**
    * @see #makeNPFExerciseList(com.google.gwt.user.client.ui.Panel, String)

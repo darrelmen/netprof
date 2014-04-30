@@ -268,7 +268,7 @@ public class UserListDAO extends DAO {
 
   /**
    * TODO don't want to always get all the exercises!
-   * @see UserListManager#getUserListByID(long)
+   * @see UserListManager#getUserListByID(long, java.util.Collection)
    * @param unique
    * @return
    */
