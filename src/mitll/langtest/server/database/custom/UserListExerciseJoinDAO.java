@@ -110,7 +110,7 @@ public class UserListExerciseJoinDAO extends DAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.custom.UserListManager#deleteItemFromList(long, String)
+   * @see UserListManager#deleteItemFromList(long, String, java.util.Collection)
    * @param listid
    * @param exid
    * @return

@@ -2,6 +2,7 @@ package mitll.langtest.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.DLIUser;
 import mitll.langtest.shared.ExerciseListWrapper;
@@ -100,10 +101,6 @@ public interface LangTestDatabaseAsync {
 
   void markReviewed(String id, boolean isCorrect, long creatorID, AsyncCallback<Void> asyncCallback);
 
-  void getDefectList(AsyncCallback<UserList> async);
-
-  void getCommentedList(AsyncCallback<UserList> async);
-
   void setExerciseState(String id, STATE state, long userID, AsyncCallback<Void> async);
 
   void isValidForeignPhrase(String foreign, AsyncCallback<Boolean> async);
@@ -126,7 +123,7 @@ public interface LangTestDatabaseAsync {
 
   void setAVPSkip(Collection<Long> ids, AsyncCallback<Void> async);
 
-  void getAttentionList(AsyncCallback<UserList> async);
-
   void getReviewLists(AsyncCallback<List<UserList>> async);
+
+  void markAudioDefect(AudioAttribute audioAttribute, String exid, AsyncCallback<Void> async);
 }
