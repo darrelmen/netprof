@@ -7,6 +7,7 @@ import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
@@ -80,8 +81,8 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     sectionPanel = new FluidContainer();
     sectionPanel.getElement().setId("sectionPanel_"+instance);
 
-    DOM.setStyleAttribute(sectionPanel.getElement(), "paddingLeft", "0px");
-    DOM.setStyleAttribute(sectionPanel.getElement(), "paddingRight", "0px");
+    sectionPanel.getElement().getStyle().setPaddingLeft(0, Style.Unit.PX);
+    sectionPanel.getElement().getStyle().setPaddingRight(0, Style.Unit.PX);
     secondRow.add(new Column(12, sectionPanel));
 
     buttonTypes.add(ButtonType.PRIMARY);
