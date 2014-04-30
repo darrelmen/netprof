@@ -66,11 +66,10 @@ public class Navigation extends TabContainer implements RequiresResize {
   private static final String POSSIBLE_DEFECTS = "Review";
   private static final String ITEMS_WITH_COMMENTS = "Items with comments";
   private static final String LEARN_PRONUNCIATION = "Learn Pronunciation";
-  private static final String REVIEW1 = "Fix Defects";
+  private static final String FIX_DEFECTS = "Fix Defects";
   private static final String REVIEWERS = "Reviewers";
   private static final String CREATE = "Create a New List";
   private static final String BROWSE = "Browse Lists";
-  //private static final String COMMENTS = "Comments";
   private static final String LESSONS = "lessons";
   private static final String DELETE = "Delete";
   private static final String NO_LISTS_CREATED_YET = "No lists created yet.";
@@ -97,6 +96,7 @@ public class Navigation extends TabContainer implements RequiresResize {
   private static final String LEARN = "learn";
 //  public static final String ATTENTION_LL = "Attention LL";
   public static final String RECORD_AUDIO = "Record Audio";
+  public static final String CONTENT1 = "content";
 
   private final ExerciseController controller;
   private final LangTestDatabaseAsync service;
@@ -117,12 +117,12 @@ public class Navigation extends TabContainer implements RequiresResize {
   private final KeyStorage storage;
 
   /**
-   *  @see mitll.langtest.client.LangTest#populateRootPanel()
    * @param service
    * @param userManager
    * @param controller
    * @param predefinedContentList
    * @param feedback
+   * @see mitll.langtest.client.LangTest#populateRootPanel()
    */
   public Navigation(final LangTestDatabaseAsync service, final UserManager userManager,
                     final ExerciseController controller, final ListInterface predefinedContentList,
@@ -151,13 +151,8 @@ public class Navigation extends TabContainer implements RequiresResize {
     };
 
 
-      reviewItem = new ReviewItemHelper(service, feedback, userManager, controller, null, predefinedContentList, npfHelper);
-   // }
-  //  else {
-      editItem = new EditItem(service, userManager, controller, predefinedContentList, feedback, npfHelper);
-  //  }
-
-
+    reviewItem = new ReviewItemHelper(service, feedback, userManager, controller, null, predefinedContentList, npfHelper);
+    editItem = new EditItem(service, userManager, controller, predefinedContentList, feedback, npfHelper);
   }
 
   /**
@@ -166,15 +161,7 @@ public class Navigation extends TabContainer implements RequiresResize {
    * @see mitll.langtest.client.LangTest#populateRootPanel()
    */
   public Widget getNav(final Panel secondAndThird) {
-  //  Panel container = new FlowPanel();
-  //  container.getElement().setId("getNav_container");
-  //  System.out.println("getNav using " + secondAndThird.getElement().getId());
-    //Panel buttonRow = getTabPanel(secondAndThird);
-   // buttonRow.getElement().setId("getNav_buttonRow");
-
-    Panel tabPanel1 = getTabPanel(secondAndThird);
-  //  container.add(tabPanel1);
-    this.container = tabPanel1;
+    this.container = getTabPanel(secondAndThird);
     return container;
   }
 
@@ -184,10 +171,10 @@ public class Navigation extends TabContainer implements RequiresResize {
   private TabPanel tabPanel;
   private TabAndContent yourStuff, othersStuff;
   private TabAndContent browse, chapters, create;
-  private TabAndContent review, /*commented, attention,*/ recorderTab, contentTab;
+  private TabAndContent review, recorderTab, contentTab;
   private List<TabAndContent> tabs = new ArrayList<TabAndContent>();
   private Panel chapterContent;
- // boolean useAttention = false;
+
   /**
    * @see #getNav(com.google.gwt.user.client.ui.Panel)
    * @param contentForChaptersTab
@@ -226,13 +213,12 @@ public class Navigation extends TabContainer implements RequiresResize {
   }
 
   /**
-   *
+   * @see #showInitialState()
    * @param contentForChaptersTab the standard npf content
    * @return
    */
   private void addTabs(Panel contentForChaptersTab) {
     tabPanel.clear();
-    System.out.println("adding tabs --------> ");
     tabs.clear();
     nameToTab.clear();
     nameToIndex.clear();
@@ -290,7 +276,7 @@ public class Navigation extends TabContainer implements RequiresResize {
         @Override
         public void onClick(ClickEvent event) {
           checkAndMaybeClearTab(CONTENT);
-          contentHelper.showNPF(contentTab, "content", false);
+          contentHelper.showNPF(contentTab, CONTENT1, false);
           logEvent(recorderTab, CONTENT);
         }
       });
@@ -309,39 +295,16 @@ public class Navigation extends TabContainer implements RequiresResize {
     });
 
     if (isQualityControl) {
-      review = makeFirstLevelTab(tabPanel, IconType.EDIT, REVIEW1);
+      review = makeFirstLevelTab(tabPanel, IconType.EDIT, FIX_DEFECTS);
       review.content.getElement().setId("viewReview_contentPanel");
       review.tab.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          checkAndMaybeClearTab(REVIEW1);
+          checkAndMaybeClearTab(FIX_DEFECTS);
           viewReview(review.content);
-          logEvent(review, REVIEW1);
+          logEvent(review, FIX_DEFECTS);
         }
       });
-
-/*      commented = makeFirstLevelTab(tabPanel, IconType.COMMENT, COMMENTS);
-      commented.tab.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          checkAndMaybeClearTab(COMMENTS);
-          viewComments(commented.content);
-          logEvent(commented,COMMENTS);
-        }
-      });*/
-/*
-      if (useAttention) {
-        attention = makeFirstLevelTab(tabPanel, IconType.WARNING_SIGN, ATTENTION_LL);
-        attention.tab.addClickHandler(new ClickHandler() {
-          @Override
-          public void onClick(ClickEvent event) {
-            checkAndMaybeClearTab(ATTENTION_LL);
-            viewAttention(attention.content);
-            logEvent(attention, ATTENTION_LL);
-          }
-        });
-      }*/
-
     }
 
     if (controller.getPermissions().contains(User.Permission.RECORD_AUDIO)) {
@@ -419,42 +382,35 @@ public class Navigation extends TabContainer implements RequiresResize {
   public void showInitialState() {
     final int user = userManager.getUser();
 
-    /*boolean isRecorder =*/ addTabs(chapterContent);
+    addTabs(chapterContent);
 
-    System.out.println("showInitialState show initial state for " + user +
-        " : getting user lists " + controller.isReviewMode());
+/*    System.out.println("showInitialState show initial state for " + user +
+        " : getting user lists " + controller.isReviewMode());*/
     String value = storage.getValue(CLICKED_TAB);
     if (value.isEmpty()) {   // no previous tab
-/*      if (isRecorder) {
-        tabPanel.selectTab(getSafeTabIndexFor(CHAPTERS));
-      }
-      else {*/
-        service.getListsForUser(user, true, true, new AsyncCallback<Collection<UserList>>() {
-          @Override
-          public void onFailure(Throwable caught) {
-          }
+      service.getListsForUser(user, true, true, new AsyncCallback<Collection<UserList>>() {
+        @Override
+        public void onFailure(Throwable caught) {}
 
-          @Override
-          public void onSuccess(Collection<UserList> result) {
-            if (result.size() == 1 && // if only one empty list - one you've created
-              result.iterator().next().isEmpty()) {
-              final String chapterNameToUse = getChapterName();
-              tabPanel.selectTab(getSafeTabIndexFor(chapterNameToUse));
-            } else {
-              boolean foundCreated = false;
-              for (UserList ul : result) {
-                if (createdByYou(ul)) {
-                  foundCreated = true;
-                  break;
-                }
+        @Override
+        public void onSuccess(Collection<UserList> result) {
+          if (result.size() == 1 && // if only one empty list - one you've created
+            result.iterator().next().isEmpty()) {
+            final String chapterNameToUse = getChapterName();
+            tabPanel.selectTab(getSafeTabIndexFor(chapterNameToUse));
+          } else {
+            boolean foundCreated = false;
+            for (UserList ul : result) {
+              if (createdByYou(ul)) {
+                foundCreated = true;
+                break;
               }
-              showMyLists(foundCreated, !foundCreated);
             }
+            showMyLists(foundCreated, !foundCreated);
           }
-        });
-  //    }
-    }
-    else {
+        }
+      });
+    } else {
       selectPreviousTab(value);
     }
   }
@@ -475,7 +431,7 @@ public class Navigation extends TabContainer implements RequiresResize {
           showMyLists(false, true);
         } else if (value.equals(BROWSE)) {
           viewBrowse();
-        } else if (value.equals(REVIEW1)) {
+        } else if (value.equals(FIX_DEFECTS)) {
           viewReview(review.content);
 /*        } else if (value.equals(COMMENTS)) {
           viewComments(commented.content);
@@ -484,7 +440,7 @@ public class Navigation extends TabContainer implements RequiresResize {
         } else if (value.equals(RECORD_AUDIO)) {
           recorderHelper.showNPF(recorderTab, "record_audio", true);
         } else if (value.equals(CONTENT) && contentTab != null) {
-          contentHelper.showNPF(contentTab, "content", true);
+          contentHelper.showNPF(contentTab, CONTENT1, true);
         }
       }
       else {
@@ -817,7 +773,7 @@ public class Navigation extends TabContainer implements RequiresResize {
 
     if (!chosePrev) {
       if (createdByYou(ul) && !ul.isPrivate() && ul.isEmpty() && edit != null) {
-        tabPanel.selectTab(ul.getName().equals(REVIEW1) ? 0 : SUBTAB_EDIT_INDEX);    // 2 = add/edit item
+        tabPanel.selectTab(ul.getName().equals(FIX_DEFECTS) ? 0 : SUBTAB_EDIT_INDEX);    // 2 = add/edit item
         showEditReviewOrComment(ul, isNormalList, edit, isReview,isComment);
       } else {
         tabPanel.selectTab(SUBTAB_LEARN_INDEX);
