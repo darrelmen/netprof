@@ -60,7 +60,7 @@ public class PagingExerciseList extends ExerciseList {
   public PagingExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
                             ExercisePanelFactory factory, ExerciseController controller, boolean showTurkToken, boolean showInOrder,
                             boolean showTypeAhead, String instance) {
-    super(currentExerciseVPanel, service, feedback, factory, controller, showTurkToken, showInOrder, instance);
+    super(currentExerciseVPanel, service, feedback, factory, controller, showTurkToken, instance);
     this.controller = controller;
     this.showTypeAhead = showTypeAhead;
     addComponents();
@@ -96,7 +96,7 @@ public class PagingExerciseList extends ExerciseList {
    */
   void loadExercises(String selectionState, String prefix) {
     lastReqID++;
-    System.out.println("PagingExerciseList.loadExercises : looking for '" + prefix + "' (" + prefix.length() + " chars) in list id "+userListID + " instance " +instance);
+    System.out.println("PagingExerciseList.loadExercises : looking for '" + prefix + "' (" + prefix.length() + " chars) in list id "+userListID + " instance " + getInstance());
     service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), prefix, userListID, controller.getUser(), getRole(), new SetExercisesCallback());
   }
 
@@ -303,7 +303,11 @@ public class PagingExerciseList extends ExerciseList {
   }
 
   @Override
-  public void addExercise(CommonShell es) { pagingContainer.addExercise(es);  }
+  public void addExercise(CommonShell es) {
+    //System.out.println(getInstance() +" : addExercise adding " + es.getID() + " state " + es.getState() + "/" + es.getSecondState());
+
+    pagingContainer.addExercise(es);
+  }
   public void addExerciseAfter(CommonShell after,CommonShell es) { pagingContainer.addExerciseAfter(after, es);  }
 
   public CommonShell forgetExercise(String id) {
@@ -329,7 +333,7 @@ public class PagingExerciseList extends ExerciseList {
   }
 
   protected void askServerForExercise(String itemID) {
-    System.out.println("ExerciseList.askServerForExercise id = " + itemID + " instance " + instance);
+    System.out.println("PagingExerciseList.askServerForExercise id = " + itemID + " instance " + getInstance());
     //RootPanel.get().setStyleName("waitCursor");
     if (SHOW_WAIT_CURSOR && itemID.equals(pagingContainer.getClickedExerciseID())) {
       waitPopup = new DecoratedPopupPanel();
