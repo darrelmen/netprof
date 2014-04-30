@@ -1,5 +1,6 @@
 package mitll.langtest.server.database.custom;
 
+import mitll.langtest.server.ExerciseSorter;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.PathWriter;
 import mitll.langtest.server.database.UserDAO;
@@ -8,7 +9,6 @@ import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.ExerciseAnnotation;
-import mitll.langtest.shared.Result;
 import mitll.langtest.shared.STATE;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
@@ -52,6 +52,7 @@ public class UserListManager {
   public static final long REVIEW_MAGIC_ID = -100;
   public static final long COMMENT_MAGIC_ID = -200;
   public static final long ATTN_LL_MAGIC_ID = -300;
+  private static final boolean DEBUG = false;
 
   private final UserDAO userDAO;
   private final ReviewedDAO reviewedDAO, secondStateDAO;
@@ -84,6 +85,8 @@ public class UserListManager {
   }
 
   /**
+   * Turned off setting second state for now -- what does it mean?
+   *
    * @see mitll.langtest.server.LangTestDatabaseImpl#init()
    */
   public void setStateOnExercises() {
@@ -91,8 +94,8 @@ public class UserListManager {
 
     Map<String, ReviewedDAO.StateCreator> exerciseToState = getExerciseToState(false);
 
-    setStateOnExercises(exerciseToState,true);
-    setStateOnExercises(secondStateDAO.getExerciseToState(false), false);
+    setStateOnExercises(exerciseToState, true);
+    //setStateOnExercises(secondStateDAO.getExerciseToState(false), false);
   }
 
   private void setStateOnExercises(Map<String, ReviewedDAO.StateCreator> exerciseToState, boolean firstState) {
@@ -116,10 +119,10 @@ public class UserListManager {
       if (predefExercise != null) {
         userExercisesRemaining.remove(pair.getKey());
         if (firstState) {
-          predefExercise.setState(pair.getValue().state);
+          predefExercise.setState(pair.getValue().getState());
         }
         else {
-          predefExercise.setSecondState(pair.getValue().state);
+          predefExercise.setSecondState(pair.getValue().getState());
         }
         count++;
       }
@@ -141,10 +144,10 @@ public class UserListManager {
       }
       else {
         if (firstState) {
-          commonUserExercise.setState(state.state);
+          commonUserExercise.setState(state.getState());
         }
         else {
-          commonUserExercise.setSecondState(state.state);
+          commonUserExercise.setSecondState(state.getState());
         }
         count++;
       }
@@ -154,7 +157,6 @@ public class UserListManager {
 
   /**
    * Update an old db where the review table doesn't have a state column.
-   * @paramx annotationDAO
    * @return
    */
   private Map<String, ReviewedDAO.StateCreator> getAmmendedStateMap() {
@@ -165,12 +167,14 @@ public class UserListManager {
 
     int count = 0;
     Set<String> reviewed = new HashSet<String>(stateMap.keySet());
+    long now = System.currentTimeMillis();
+
     for (String exid : reviewed) {   // incorrect - could be defect or comment for now
       if (exerciseToCreator.keySet().contains(exid)) {
         ReviewedDAO.StateCreator stateCreator = stateMap.get(exid);
-        if (stateCreator.state.equals(STATE.UNSET)) { // only happen when we have an old db
-          stateMap.put(exid, new ReviewedDAO.StateCreator(STATE.DEFECT, stateCreator.creatorID));
-          reviewedDAO.setState(exid, STATE.DEFECT, stateCreator.creatorID);
+        if (stateCreator.getState().equals(STATE.UNSET)) { // only happen when we have an old db
+          stateMap.put(exid, new ReviewedDAO.StateCreator(STATE.DEFECT, stateCreator.getCreatorID(), now));
+          reviewedDAO.setState(exid, STATE.DEFECT, stateCreator.getCreatorID());
           count++;
         }
       }
@@ -188,7 +192,7 @@ public class UserListManager {
    *
    * If an item has been recorded, the most recent state will be exercise id->UNSET.
    *
-   * @see #getCommentedList()
+   * @see #getCommentedList(java.util.Collection)
    * @return
    * @param skipUnset
    */
@@ -210,25 +214,29 @@ public class UserListManager {
     for (CommonShell shell : shells) {
       ReviewedDAO.StateCreator stateCreator = exerciseToState.get(shell.getID());
       if (stateCreator != null) {
-        shell.setState(stateCreator.state);
-        logger.debug("\t for " + shell.getID() + " state " + stateCreator.state);
+        shell.setState(stateCreator.getState());
+      //  logger.debug("\t for " + shell.getID() + " state " + stateCreator.getState());
         c++;
       }
     }
 
-    logger.debug("markState - first state " + c );
-    exerciseToState = secondStateDAO.getExerciseToState(false);
+    // does this help anyone???
+    // want to know if we have a new recording AFTER it's been inspected - why did the thing that I fixed now change back to needs inspection
+    // maybe turn off for now???
+    if (false) {
+      logger.debug("markState - first state " + c);
+      exerciseToState = secondStateDAO.getExerciseToState(false);
 
-    int n = 0;
-    for (CommonShell shell : shells) {
-      ReviewedDAO.StateCreator stateCreator = exerciseToState.get(shell.getID());
-      if (stateCreator != null) {
-        n++;
-        shell.setSecondState(stateCreator.state);
+      int n = 0;
+      for (CommonShell shell : shells) {
+        ReviewedDAO.StateCreator stateCreator = exerciseToState.get(shell.getID());
+        if (stateCreator != null) {
+          n++;
+          shell.setSecondState(stateCreator.getState());
+        }
       }
+      logger.debug("markState - sec state " + n);
     }
-    logger.debug("markState - sec state " + n );
-
   }
 
   /**
@@ -329,9 +337,11 @@ public class UserListManager {
       listsForUser.add(0, favorite);// put at front
     }
 
-    logger.debug("getListsForUser found " + listsForUser.size() +
-      " lists for user #" + userid + " only created " + listsICreated + " visited " +visitedLists +
-      "\n\tfavorite " + favorite);
+    if (DEBUG) {
+      logger.debug("getListsForUser found " + listsForUser.size() +
+        " lists for user #" + userid + " only created " + listsICreated + " visited " + visitedLists +
+        "\n\tfavorite " + favorite);
+    }
 
     return listsForUser;
   }
@@ -350,8 +360,9 @@ public class UserListManager {
    * Also, incorrect annotations are the latest annotations- a field can have a history of correct and incorrect
    * annotations - only if the latest is incorrect should the item appear on the comment or defect list.
    * @return
+   * @param typeOrder
    */
-  public UserList getCommentedList() {
+  public UserList getCommentedList(Collection<String> typeOrder) {
     Map<String, ReviewedDAO.StateCreator> exerciseToState = getExerciseToState(true); // skip unset items!
     Map<String, Long> idToCreator = annotationDAO.getDefectIds();
     logger.debug("getCommentedList There are " + exerciseToState.size() + " reviewed items ");
@@ -363,19 +374,19 @@ public class UserListManager {
 
     List<CommonUserExercise> include = userExerciseDAO.getWhere(idToCreator.keySet());
 
-    UserList reviewList = getReviewList(include, COMMENTS, ALL_ITEMS_WITH_COMMENTS, idToCreator.keySet(),COMMENT_MAGIC_ID);
+    UserList reviewList = getReviewList(include, COMMENTS, ALL_ITEMS_WITH_COMMENTS, idToCreator.keySet(),COMMENT_MAGIC_ID, typeOrder);
     reviewList.setUniqueID(COMMENT_MAGIC_ID);
     return reviewList;
   }
 
-  public UserList getAttentionList() {
+  public UserList getAttentionList(Collection<String> typeOrder) {
     Map<String, ReviewedDAO.StateCreator> exerciseToState = secondStateDAO.getExerciseToState(false);
 
     logger.debug("attention " + exerciseToState);
 
     Set<String> defectIds = new HashSet<String>();
     for (Map.Entry<String, ReviewedDAO.StateCreator> pair : exerciseToState.entrySet()) {
-      if (pair.getValue().state.equals(STATE.ATTN_LL)) {
+      if (pair.getValue().getState().equals(STATE.ATTN_LL)) {
         defectIds.add(pair.getKey());
       }
     }
@@ -383,54 +394,66 @@ public class UserListManager {
     List<CommonUserExercise> allKnown = userExerciseDAO.getWhere(defectIds);
     logger.debug("\tgetAttentionList ids #=" + allKnown.size());
 
-    return getReviewList(allKnown, ATTENTION, "Items for LL review", defectIds,ATTN_LL_MAGIC_ID);
+    return getReviewList(allKnown, ATTENTION, "Items for LL review", defectIds,ATTN_LL_MAGIC_ID, typeOrder);
   }
 
   /**
    * TODO : probably a bad idea to do a massive where in ... ids.
    *
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getDefectList()
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getReviewLists()
    * @see mitll.langtest.client.custom.Navigation#viewReview
    * @see #markCorrectness(String, boolean, long)
    * @return
+   * @param typeOrder
    */
-  public UserList getDefectList() {
+  public UserList getDefectList(Collection<String> typeOrder) {
     Set<String> defectIds = new HashSet<String>();
     Map<String, ReviewedDAO.StateCreator> exerciseToState = reviewedDAO.getExerciseToState(false);
 
     for (Map.Entry<String, ReviewedDAO.StateCreator> pair : exerciseToState.entrySet()) {
-      if (pair.getValue().state.equals(STATE.DEFECT)) {
+      if (pair.getValue().getState().equals(STATE.DEFECT)) {
         defectIds.add(pair.getKey());
       }
     }
 
     List<CommonUserExercise> allKnown = userExerciseDAO.getWhere(defectIds);
-    logger.debug("\tgetDefectList ids #=" + allKnown.size() + " vs " + defectIds.size());
+  //  logger.debug("\tgetDefectList ids #=" + allKnown.size() + " vs " + defectIds.size());
 
-    return getReviewList(allKnown, REVIEW, ITEMS_TO_REVIEW, defectIds, REVIEW_MAGIC_ID);
+    return getReviewList(allKnown, REVIEW, ITEMS_TO_REVIEW, defectIds, REVIEW_MAGIC_ID, typeOrder);
   }
 
-  private UserList getReviewList(List<CommonUserExercise> allKnown, String name, String description, Collection<String> ids, long userListMaginID) {
+  private UserList getReviewList(List<CommonUserExercise> allKnown, String name, String description, Collection<String> ids, long userListMaginID, Collection<String> typeOrder) {
     Map<String, CommonUserExercise> idToUser = new HashMap<String, CommonUserExercise>();
     for (CommonUserExercise ue : allKnown) idToUser.put(ue.getID(), ue);
 
     List<CommonUserExercise> onList = getReviewedUserExercises(idToUser, ids);
 
-    logger.debug("getDefectList ids size = " + allKnown.size() + " yielded " + onList.size());
-    List<User.Permission> permissions = new ArrayList<User.Permission>();
-    permissions.add(User.Permission.QUALITY_CONTROL);
-
-    User user = new User(-1, 89, 0, 0, "", "", false, permissions);
+    //logger.debug("getReviewList " +name+ " ids size = " + allKnown.size() + " yielded " + onList.size());
+    User user = getQCUser();
     UserList userList = new UserList(userListMaginID, user, name, description, "", false);
     userList.setReview(true);
+
+    /*List<CommonExercise> sortedByUnitThenAlpha =*/ new ExerciseSorter(typeOrder).getSortedByUnitThenAlpha(onList, false);
+/*
+    onList = sortedByUnitThenAlpha;
+*/
+
     userList.setExercises(onList);
 
     markState(onList);
+    logger.debug("returning " + userList + " first " +userList.getExercises().iterator().next());
     return userList;
   }
 
+  private User getQCUser() {
+    List<User.Permission> permissions = new ArrayList<User.Permission>();
+    permissions.add(User.Permission.QUALITY_CONTROL);
+
+    return new User(-1, 89, 0, 0, "", "", false, permissions);
+  }
+
   /**
-   * @see #getDefectList()
+   * @see #getDefectList(java.util.Collection)
    * @param idToUserExercise
    * @paramx incorrect redundant, but guarantees same order as they are reviewed
    * @return
@@ -441,9 +464,13 @@ public class UserListManager {
     for (String id : ids) {
       if (!id.startsWith(UserExercise.CUSTOM_PREFIX)) {   // add predef exercises
         CommonExercise byID = userExerciseDAO.getPredefExercise(id);
-        //logger.debug("getReviewedUserExercises : found " + byID + " tooltip " + byID.getTooltip());
         if (byID != null) {
-          onList.add(new UserExercise(byID)); // all predefined references
+          //logger.debug("getReviewedUserExercises : found " + byID + " tooltip " + byID.getTooltip());
+          UserExercise e = new UserExercise(byID);
+          onList.add(e); // all predefined references
+          e.setTooltip(byID.getCombinedTooltip());
+          //logger.debug("getReviewedUserExercises : found " + e.getID() + " tooltip " + e.getTooltip());
+
         }
       }
       else {                                             // add user defined exercises
@@ -615,17 +642,18 @@ public class UserListManager {
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds
    * @param id
+   * @param typeOrder
    * @return
    */
-  public UserList getUserListByID(long id) {
+  public UserList getUserListByID(long id, Collection<String> typeOrder) {
     if (id == -1) {
       logger.error("getUserListByID : huh? asking for id " + id);
       return null;
     }
     return
-      id == REVIEW_MAGIC_ID ? getDefectList() :
-        id == COMMENT_MAGIC_ID ? getCommentedList() :
-          id == ATTN_LL_MAGIC_ID ? getAttentionList() :
+      id == REVIEW_MAGIC_ID ? getDefectList(typeOrder) :
+        id == COMMENT_MAGIC_ID ? getCommentedList(typeOrder) :
+          id == ATTN_LL_MAGIC_ID ? getAttentionList(typeOrder) :
             userListDAO.getWithExercises(id);
   }
 
@@ -729,6 +757,13 @@ public class UserListManager {
     reviewedDAO.setState(shell.getID(), state, creatorID);
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile(String, String, String, int, int, int, boolean, String, boolean, boolean, boolean)
+   * @see mitll.langtest.server.database.custom.UserListManager#markState(String, mitll.langtest.shared.STATE, long)
+   * @param shell
+   * @param state
+   * @param creatorID
+   */
   public void setSecondState(CommonShell shell, STATE state, long creatorID) {
     shell.setSecondState(state);
     secondStateDAO.setState(shell.getID(), state, creatorID);
@@ -775,10 +810,10 @@ public class UserListManager {
     return b && userListDAO.remove(id);
   }
 
-  public boolean deleteItemFromList(long listid, String exid) {
+  public boolean deleteItemFromList(long listid, String exid, Collection<String> typeOrder) {
     logger.debug("deleteItemFromList " + listid + " " + exid);
 
-    UserList userListByID = getUserListByID(listid);
+    UserList userListByID = getUserListByID(listid, typeOrder);
     if (userListByID == null) return false;
     /*boolean remove =*/ userListByID.remove(exid);
     boolean remove = userListExerciseJoinDAO.remove(listid, exid);
