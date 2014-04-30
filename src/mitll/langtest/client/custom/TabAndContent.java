@@ -14,28 +14,15 @@ public class TabAndContent {
   public final DivWidget content;
 
   /**
-   * @param tab
-   * @param panel
-   * @see TabContainer#makeTab(com.github.gwtbootstrap.client.ui.TabPanel, com.github.gwtbootstrap.client.ui.constants.IconType, String)
-   */
-/*
-  public TabAndContent(Tab tab, DivWidget panel) {
-    this.tab = tab;
-    this.content = panel;
-  }
-*/
-
-  /**
    * @param iconType
    * @param label
    * @see TabContainer#makeTab(com.github.gwtbootstrap.client.ui.TabPanel, com.github.gwtbootstrap.client.ui.constants.IconType, String)
    */
-  public TabAndContent(/*TabPanel toAddTo,*/ IconType iconType, String label) {
+  public TabAndContent(IconType iconType, String label) {
     Tab tab = new Tab();
     tab.asWidget().getElement().setId("Tab_" + label);
     tab.setIcon(iconType);
     tab.setHeading(label);
- //   toAddTo.add(tab.asTabLink());
 
     final DivWidget content = new DivWidget();
     content.getElement().setId("Content_" + label);
@@ -47,11 +34,9 @@ public class TabAndContent {
     this.content = content;
   }
 
-  void zeroPadding(Panel createContent) {
+  private void zeroPadding(Panel createContent) {
     Style style = createContent.getElement().getStyle();
     style.setPaddingLeft(0, Style.Unit.PX);
     style.setPaddingRight(0, Style.Unit.PX);
- //   DOM.setStyleAttribute(createContent.getElement(), "paddingLeft", "0px");
- //   DOM.setStyleAttribute(createContent.getElement(), "paddingRight", "0px");
   }
 }
