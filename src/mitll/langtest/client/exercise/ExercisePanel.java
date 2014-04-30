@@ -51,11 +51,11 @@ public class ExercisePanel extends VerticalPanel implements
   protected static final String REPEAT_TWICE = "<i>Repeat the phrase twice, first at normal and then at slow speed.</i>";
   //private static final String TWO_SPACES = "&nbsp;&nbsp;";
   private static final String THREE_SPACES = "&nbsp;&nbsp;&nbsp;";
-  private static final String TEACHER_PROMPT = "Record the phrase above by clicking the record button, speak, and then stop when finished. ";
+ // private static final String TEACHER_PROMPT = "Record the phrase above by clicking the record button, speak, and then stop when finished. ";
   private static final String THE_FOREIGN_LANGUAGE = " the foreign language";
   private static final String ENGLISH = "English";
   private static final String TYPE_YOUR_ANSWER_IN = "Type your answer in ";
-  private static final String SPEAK_AND_RECORD_YOUR_ANSWER_IN = "Speak and record your answer in ";
+ // private static final String SPEAK_AND_RECORD_YOUR_ANSWER_IN = "Speak and record your answer in ";
   private static final int ITEM_HEADER = 5;
   private static final int CONTENT_SCROLL_HEIGHT = 220;
   private static final String PROMPT = "Read the following text and answer the question or questions below.";
