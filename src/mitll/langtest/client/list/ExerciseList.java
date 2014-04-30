@@ -56,7 +56,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   int lastReqID = 0;
   private final Set<Integer> visited = new HashSet<Integer>();
   final boolean allowPlusInURL;
-  public final String instance;
+  private String instance;
 
   /**
    * @see  mitll.langtest.client.LangTest#makeExerciseList
@@ -66,13 +66,12 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param factory
    * @param controller
    * @param showTurkToken
-   * @param showInOrder
    * @param instance
    */
   ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
                ExercisePanelFactory factory,
                ExerciseController controller,
-               boolean showTurkToken, boolean showInOrder, String instance) {
+               boolean showTurkToken, String instance) {
     addWidgets(currentExerciseVPanel);
     this.service = service;
     this.feedback = feedback;
@@ -106,13 +105,12 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   protected void onUnload() {
     super.onUnload();
   //  System.out.println("ExerciseList : History onUnload  " + instance);
-
     handlerRegistration.removeHandler();
     handlerRegistration = null;
   }
 
   /**
-   * @see #ExerciseList(com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExercisePanelFactory, mitll.langtest.client.exercise.ExerciseController, boolean, boolean, String)
+   * @see #ExerciseList(com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExercisePanelFactory, mitll.langtest.client.exercise.ExerciseController, boolean, String)
    * @param currentExerciseVPanel
    */
   private void addWidgets(final Panel currentExerciseVPanel) {
@@ -254,9 +252,17 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   protected String getRole() {
     String audioTypeRecorder = Result.AUDIO_TYPE_RECORDER;
-    String s = instance.equalsIgnoreCase("record_Audio") ? audioTypeRecorder : "";
+    String s = instance.equalsIgnoreCase("record_Audio") ? audioTypeRecorder : instance;
     System.out.println("instance " +instance + " role " +s);
     return s;
+  }
+
+  public String getInstance() {
+    return instance;
+  }
+
+  public void setInstance(String instance) {
+    this.instance = instance;
   }
 
   /**
@@ -330,7 +336,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   public void rememberAndLoadFirst(List<CommonShell> exercises) {
     //System.out.println(new Date() + " rememberAndLoadFirst : exercises " + exercises.size());
-
     rememberAndLoadFirst(exercises, null);
   }
 
