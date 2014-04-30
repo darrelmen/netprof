@@ -584,7 +584,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     }
 
     /**
-     * Add radio button choices to control which audio cut is chosen/gets played.
+     * Add choices to control which audio cut is chosen/gets played.
      *
      * @return
      * @see AudioPanel#addWidgets
