@@ -283,20 +283,24 @@ public class PagingContainer {
             boolean approved = state == STATE.APPROVED || recorded;
 
             boolean isSet = isDefect || isFixed || approved;
-            if (controller.getAudioType().equals(Result.AUDIO_TYPE_RECORDER)) {
+    /*        if (controller.getAudioType().equals(Result.AUDIO_TYPE_RECORDER)) {
               isSet = recorded;
             }
-
-        /*    if (isSet) {
-              System.out.println("shell " + shell.getID() + " state " + state + " defect " +isDefect +
+*/
+            if (isSet) {
+              System.out.println("shell " + shell.getID() + " state " + state + "/" + shell.getSecondState()+
+                " defect " +isDefect +
                 " fixed " + isFixed + " recorded " + recorded);
-            }*/
+           }
+         //   else {
+
+         //   }
+
 
             String icon =
               approved ? "icon-check" :
                 isDefect ? "icon-bug" :
                   isFixed ? "icon-thumbs-up" :
-                    //isLL ? "icon-warning-sign" :
                       "";
 
             html = (isSet ?
@@ -412,7 +416,6 @@ public class PagingContainer {
   public CommonShell byID(String id) { return idToExercise.get(id); }
 
   public void addExercise(CommonShell exercise) {
-    //System.out.println("addExercise adding " + exercise);
     idToExercise.put(exercise.getID(), exercise);
     getList().add(exercise);
     //System.out.println("data now has "+list.size() + " after adding " + exercise.getID());
