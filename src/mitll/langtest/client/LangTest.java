@@ -708,6 +708,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (!shouldCollectAudio() || flashRecordPanel.gotPermission()) {
       reallySetFactory();
 
+      if (getPermissions().contains(User.Permission.QUALITY_CONTROL)) {
+        exerciseList.setInstance(User.Permission.QUALITY_CONTROL.toString());
+      }
+
       boolean askedForExercises = exerciseList.getExercises(userID);
       if (!askedForExercises && (lastUser != userID) && lastUser != NO_USER_INITIAL) {
         System.out.println("\tdoEverythingAfterFactory : " + userID + " initially list and user now " + userID);
