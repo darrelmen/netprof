@@ -179,8 +179,9 @@ public class ReviewedDAO extends DAO {
    *
    * @return
    * @see UserListManager#getDefectList()
-   * @see UserListManager#getExerciseToState()
-   * @see UserListManager#markState(java.util.Collection, String)
+   * @see UserListManager#getExerciseToState
+   * @see UserListManager#markState
+   * @see mitll.langtest.server.database.custom.UserListManager#setStateOnExercises()
    * @param skipUnset
    */
   public Map<String, StateCreator> getExerciseToState(boolean skipUnset) {
@@ -242,7 +243,7 @@ public class ReviewedDAO extends DAO {
   }
 
   public static class StateCreator {
-    mitll.langtest.shared.STATE state;
+    STATE state;
     long creatorID;
 
     public StateCreator(mitll.langtest.shared.STATE state, long creatorID) {
