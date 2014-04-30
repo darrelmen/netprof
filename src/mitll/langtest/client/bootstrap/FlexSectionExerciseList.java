@@ -106,21 +106,15 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @see mitll.langtest.client.LangTest#doEverythingAfterFactory
    */
   public boolean getExercises(final long userID) {
-    System.out.println("FlexSectionExerciseList.getExercises : Get exercises for user=" + userID + " instance " + instance);
+    System.out.println("FlexSectionExerciseList.getExercises : Get exercises for user=" + userID + " instance " + getInstance());
     this.userID = userID;
     addWidgets();
     return false;
   }
 
   public void addWidgets() {
-//    System.out.println("FlexSectionExerciseList.addWidgets " + sectionPanel.getElement().getId() + " : ");
-
     sectionPanel.clear();
-  //  System.out.println("FlexSectionExerciseList.addWidgets " + sectionPanel.getElement().getId() + " : " + sectionPanel.getElement().getChildCount());
-
     sectionPanel.add(getWidgetsForTypes());
-    //System.out.println("\tFlexSectionExerciseList.addWidgets " + sectionPanel.getElement().getChildCount());
-
   }
 
   /**
@@ -228,7 +222,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
       }
     }
     long now = System.currentTimeMillis();
-    if (now - then > 200) System.out.println("\taddButtonRow took " + (now - then) + " millis" + " instance " + instance);
+    if (now - then > 200) System.out.println("\taddButtonRow took " + (now - then) + " millis" + " instance " + getInstance());
 
     if (last != null) setSizesAndPushFirst();
     Widget widget = addBottomText(container);
