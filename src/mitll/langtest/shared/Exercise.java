@@ -149,6 +149,12 @@ public class Exercise extends AudioExercise implements CommonExercise {
   }
 
   public CommonShell getShellCombinedTooltip() {
+    String combined = getCombinedTooltip();
+
+    return new ExerciseShell(getID(), combined);
+  }
+
+  public String getCombinedTooltip() {
     String refSentence = getRefSentence();
     if (refSentence.length() > 15) {
       refSentence = refSentence.substring(0, 15);
@@ -156,8 +162,7 @@ public class Exercise extends AudioExercise implements CommonExercise {
     boolean refSentenceEqualsTooltip = getTooltip().trim().equals(getRefSentence().trim());
     String combined = refSentenceEqualsTooltip ? getTooltip() : getTooltip() + (refSentence.isEmpty() ? "": " / " + refSentence);
     if (getTooltip().isEmpty()) combined = refSentence;
-
-    return new ExerciseShell(getID(), combined);
+    return combined;
   }
 
   public void addQuestion() {
