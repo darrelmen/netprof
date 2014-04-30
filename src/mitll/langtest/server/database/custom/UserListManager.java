@@ -205,22 +205,30 @@ public class UserListManager {
   public void markState(Collection<? extends CommonShell> shells) {
     Map<String, ReviewedDAO.StateCreator> exerciseToState = reviewedDAO.getExerciseToState(false);
 
-    //logger.debug("markState " + shells.size() + " shells, " + exerciseToState.size() + " states");
+    logger.debug("markState " + shells.size() + " shells, " + exerciseToState.size() + " states");
+    int c = 0;
     for (CommonShell shell : shells) {
       ReviewedDAO.StateCreator stateCreator = exerciseToState.get(shell.getID());
       if (stateCreator != null) {
         shell.setState(stateCreator.state);
+        logger.debug("\t for " + shell.getID() + " state " + stateCreator.state);
+        c++;
       }
     }
 
+    logger.debug("markState - first state " + c );
     exerciseToState = secondStateDAO.getExerciseToState(false);
 
+    int n = 0;
     for (CommonShell shell : shells) {
       ReviewedDAO.StateCreator stateCreator = exerciseToState.get(shell.getID());
       if (stateCreator != null) {
+        n++;
         shell.setSecondState(stateCreator.state);
       }
     }
+    logger.debug("markState - sec state " + n );
+
   }
 
   /**
@@ -408,7 +416,7 @@ public class UserListManager {
 
     List<CommonUserExercise> onList = getReviewedUserExercises(idToUser, ids);
 
-    //logger.debug("getDefectList ids size = " + allKnown.size() + " yielded " + onList.size());
+    logger.debug("getDefectList ids size = " + allKnown.size() + " yielded " + onList.size());
     List<User.Permission> permissions = new ArrayList<User.Permission>();
     permissions.add(User.Permission.QUALITY_CONTROL);
 
@@ -417,7 +425,7 @@ public class UserListManager {
     userList.setReview(true);
     userList.setExercises(onList);
 
-    //markState(onList);
+    markState(onList);
     return userList;
   }
 
@@ -633,7 +641,7 @@ public class UserListManager {
     if (where != null) {
       userListDAO.addVisitor(where.getUniqueID(), user);
     }
-    else {
+    else if (userListID > 0) {
       logger.warn("addVisitor - can't find list with id " + userListID);
     }
   }
