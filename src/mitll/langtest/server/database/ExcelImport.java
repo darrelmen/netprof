@@ -264,7 +264,9 @@ public class ExcelImport implements ExerciseDAO {
    * @return
    */
   public CommonExercise getExercise(String id) {
-    if (idToExercise.isEmpty()) logger.warn("huh? couldn't find any exercises..?");
+    if (idToExercise.isEmpty()) {
+      logger.warn("huh? couldn't find any exercises..?");
+    }
 
     synchronized (this) {
       CommonExercise exercise = idToExercise.get(id);
@@ -576,7 +578,6 @@ public class ExcelImport implements ExerciseDAO {
     String unitName = null, chapterName = null, weekName = null;
     try {
       Iterator<Row> iter = sheet.rowIterator();
-      //Map<Integer, CellRangeAddress> rowToRange = getRowToRange(sheet);
       boolean gotUCW = unitIndex != -1;
       for (; iter.hasNext(); ) {
         Row next = iter.next();
