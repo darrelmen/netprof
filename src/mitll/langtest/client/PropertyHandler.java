@@ -79,7 +79,7 @@ public class PropertyHandler {
   private static final int NUM_GRADES_TO_COLLECT_DEFAULT = 1;
  // private static final String ADD_RECORD_KEY_BINDING = "addRecordKeyBinding";
   private static final String LOGIN_TYPE_PARAM = "loginType";
-  private static final String FLASHCARD_PREVIEW_HEIGHT = "flashcardPreviewHeight";
+  //private static final String FLASHCARD_PREVIEW_HEIGHT = "flashcardPreviewHeight";
   private static final String SHOW_FLASHCARD_ANSWER = "showFlashcardAnswer";
   private static final String FLASHCARD_TEXT_RESPONSE = "flashcardTextResponse";
   private static final String EXERCISES_IN_ORDER = "exercisesInOrder";
