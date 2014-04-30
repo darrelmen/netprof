@@ -214,19 +214,31 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
+  /***
+   * Marks each exercise - first state - with whether this user has recorded audio for this item
+   * Defective audio is not included.
+   * Also if just one of regular or slow is recorded it's not "recorded".
+   *
+   * What you want to see in the record audio tab.  One bit of info - recorded or not recorded.
+   *
+   * @param userID
+   * @param role
+   * @param exercises
+   * @return
+   */
   private int markRecordedState(int userID, String role, Collection<? extends CommonShell> exercises) {
     int c = 0;
     if (role.equals(Result.AUDIO_TYPE_RECORDER)) {
       Set<String> recordedForUser = db.getAudioDAO().getRecordedForUser(userID);
-      //logger.debug("\tfound " + recordedForUser.size() + " recordings by " + userID);
+      logger.debug("\tfound " + recordedForUser.size() + " recordings by " + userID);
       for (CommonShell shell : exercises) {
         if (recordedForUser.contains(shell.getID())) {
-          shell.setState(STATE.RECORDED);c++;
+          shell.setState(STATE.RECORDED);
+          c++;
         }
       }
-    }
-    else {
-      //logger.debug("\tnot marking recorded");
+    } else {
+      logger.debug("\tnot marking recorded for " + role + " and " + userID);
     }
     return c;
   }
@@ -294,20 +306,26 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     List<CommonShell> exerciseShells = getExerciseShells(exercises);
 
+    logger.debug("makeExerciseListWrapper : userID " +userID + " Role is " + role);
     if (role.equals(Result.AUDIO_TYPE_RECORDER)) {
-//      logger.debug("makeExerciseListWrapper : userID " +userID + " Role is " + role);
       markRecordedState((int)userID,role,exerciseShells);
     }
-    else if (role.equalsIgnoreCase(User.Permission.QUALITY_CONTROL.toString()) || role.equalsIgnoreCase(Result.AUDIO_TYPE_REVIEW)) {
+    else if (role.equalsIgnoreCase(User.Permission.QUALITY_CONTROL.toString()) || role.startsWith(Result.AUDIO_TYPE_REVIEW)) {
       db.getUserListManager().markState(exerciseShells);
     }
 
     return new ExerciseListWrapper(reqID, exerciseShells, firstExercise);
   }
 
+  /**
+   * 0) Add annotations to fields on exercise
+   * 1) Attach audio recordings to exercise.
+   * 2) Adds information about whether the audio has been played or not...
+   * @param userID
+   * @param firstExercise
+   */
   private void addAnnotationsAndAudio(long userID, CommonExercise firstExercise) {
     addAnnotations(firstExercise); // todo do this in a better way
-    addPlayedMarkings(userID, firstExercise);
     List<AudioAttribute> audioAttributes = db.getAudioDAO().getAudioAttributes(firstExercise.getID());
     AudioConversion audioConversion = new AudioConversion();
 
@@ -323,14 +341,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    //   logger.debug("\tadding path '" + attr.getAudioRef() + "' "+attr + " to " + firstExercise.getID());
     }
 
-   // if (!audioAttributes.isEmpty()) {
+    addPlayedMarkings(userID, firstExercise);
+
+    // if (!audioAttributes.isEmpty()) {
    //   logger.debug("Added  " + audioAttributes.size() + " audio attrs to " + firstExercise);
    // }
   }
 
   private void addPlayedMarkings(long userID, CommonExercise firstExercise) {
     List<Event> allForUserAndExercise = db.getEventDAO().getAllForUserAndExercise(userID, firstExercise.getID());
-    Map<String,AudioAttribute> audioToAttr = firstExercise.getAudioRefToAttr();
+    Map<String, AudioAttribute> audioToAttr = firstExercise.getAudioRefToAttr();
     for (Event event : allForUserAndExercise) {
       AudioAttribute audioAttribute = audioToAttr.get(event.getContext());
       if (audioAttribute == null) {
