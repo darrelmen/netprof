@@ -199,7 +199,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * This is sort of a hack -- so we can get left justify...
    * @return
    */
-  Widget getBeforePlayWidget() { return null;  }
+  protected Widget getBeforePlayWidget() { return null;  }
 
   @Override
   public void onLoad() {
