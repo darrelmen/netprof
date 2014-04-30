@@ -539,14 +539,18 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
     if (isCourseContent()) {
       String id = exercise.getID();
-      System.out.println("instance = " +instance);
+      System.out.println("checkBoxWasClicked : instance = '" +instance +"'");
       if (instance.equalsIgnoreCase("classroom")) {
         STATE state = incorrectFields.isEmpty() ? STATE.UNSET : STATE.DEFECT;
         exercise.setState(state);
         listContainer.setState(id, state);
-      }
+        System.out.println("\tcheckBoxWasClicked : state now = '" +state +"'");
 
-      listContainer.redraw();
+        listContainer.redraw();
+      }
+      else {
+        System.out.println("\tcheckBoxWasClicked : ignoring instance = '" +instance +"'");
+      }
 
       setApproveButtonState();
       markReviewed(exercise);
