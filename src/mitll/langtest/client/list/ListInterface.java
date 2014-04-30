@@ -104,4 +104,6 @@ public interface ListInterface extends RequiresResize {
   void setSecondState(String id, STATE state);
 
   void addListChangedListener(ListChangeListener<CommonShell> listener);
+
+  void setInstance(String instance);
 }
