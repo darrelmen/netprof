@@ -79,15 +79,6 @@ public class Navigation extends TabContainer implements RequiresResize {
   private static final String NO_LISTS_CREATED_OR_VISITED_YET = "No lists created or visited yet.";
   public static final String NO_LISTS_YET = "No lists created yet that you haven't seen.";
 
- // private static final int YOUR_LIST_INDEX = 0;
- // private static final int OTHERS_LIST_INDEX = 1;
- // private static final int CREATE_TAB_INDEX = 2;
- // private static final int BROWSE_TAB_INDEX = 3;
- // private static final int CHAPTERS_TAB = 4;
- // private static final int REVIEW_TAB_INDEX = 5;
-//  private static final int COMMENT_TAB_INDEX = 6;
-//  private static final int ATTENTION_TAB_INDEX = 7;
-
   private static final int SUBTAB_LEARN_INDEX = 0;
   private static final int SUBTAB_PRACTICE_INDEX = 1;
   private static final int SUBTAB_EDIT_INDEX = 2;
@@ -541,6 +532,9 @@ public class Navigation extends TabContainer implements RequiresResize {
    */
   private void viewReview(final Panel contentPanel) {
     final Panel child = getContentChild(contentPanel, "defectReview_contentPanel");
+
+    System.out.println("------> viewReview : reviewLessons for " + userManager.getUser());
+
     service.getReviewLists(new AsyncCallback<List<UserList>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -801,7 +795,6 @@ public class Navigation extends TabContainer implements RequiresResize {
     }
     else {
       System.out.println("showLearnTab : onClick using npf helper " + instanceName1 + " and " +ul);
-     // npfHelper.setFactory(instanceName1,false);  // TODO : when would it be QC???
       npfHelper.showNPF(ul, learn, instanceName1, true);
     }
   }
