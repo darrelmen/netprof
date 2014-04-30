@@ -45,21 +45,27 @@ import java.util.Map;
 import java.util.Set;
 
 /**
-* Created by GO22670 on 3/28/2014.
-*/
+ * Created by GO22670 on 3/28/2014.
+ */
 class ReviewEditableExercise extends EditableExercise {
   private static final String FIXED = "Mark Fixed";
   private static final String DUPLICATE = "Duplicate";
   private static final String DELETE = "Delete";
-  public static final String DELETE_THIS_ITEM = "Delete this item.";
-  public static final String ARE_YOU_SURE = "Are you sure?";
-  public static final String REALLY_DELETE_ITEM = "Really delete item?";
-  public static final String COPY_THIS_ITEM = "Copy this item.";
+  private static final String DELETE_THIS_ITEM = "Delete this item.";
+  private static final String ARE_YOU_SURE = "Are you sure?";
+  private static final String REALLY_DELETE_ITEM = "Really delete item?";
+  private static final String COPY_THIS_ITEM = "Copy this item.";
+  private static final String MALE = "Male";
+  private static final String FEMALE = "Female";
+  private static final String AGE = "age";
+  public static final String REGULAR_SPEED = " Regular speed";
+  public static final String SLOW_SPEED = " Slow speed";
 
   private PagingExerciseList exerciseList;
   private ListInterface predefinedContentList;
   private static final String WAV = ".wav";
   private static final String MP3 = "." + AudioTag.COMPRESSED_TYPE;
+
   /**
    * @param itemMarker
    * @param changedUserExercise
@@ -82,11 +88,12 @@ class ReviewEditableExercise extends EditableExercise {
     this.exerciseList = exerciseList;
     this.predefinedContentList = predefinedContent;
   }
+
   private List<RememberTabAndContent> tabs;
 
   /**
-   * @see #addNew(mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel)
    * @return
+   * @see #addNew(mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel)
    */
   @Override
   protected Panel makeAudioRow() {
@@ -107,11 +114,20 @@ class ReviewEditableExercise extends EditableExercise {
     return tabPanel;
   }
 
+  /**
+   * Make tabs in order of users
+   *
+   * @param e
+   * @param tabPanel
+   * @param malesMap
+   * @param maleUsers
+   */
   private void addTabsForUsers(CommonExercise e, TabPanel tabPanel, Map<MiniUser, List<AudioAttribute>> malesMap, List<MiniUser> maleUsers) {
     for (MiniUser user : maleUsers) {
-      String tabTitle = (user.isMale() ? "Male" : "Female") + (controller.getProps().isAdminView() ? " (" + user.getUserID() + ")" : "") +
-        " age " + user.getAge();
-      RememberTabAndContent tabAndContent = new RememberTabAndContent(IconType.QUESTION_SIGN, tabTitle); // TODO : icon state dependent on whether they've listend to all the audio
+      String tabTitle = (user.isMale() ? MALE : FEMALE) +
+        (controller.getProps().isAdminView() ? " (" + user.getUserID() + ")" : "") +
+        " " + AGE + " " + user.getAge();
+      RememberTabAndContent tabAndContent = new RememberTabAndContent(IconType.QUESTION_SIGN, tabTitle);
       tabPanel.add(tabAndContent.tab.asTabLink());
       tabs.add(tabAndContent);
 
@@ -121,7 +137,9 @@ class ReviewEditableExercise extends EditableExercise {
       boolean allHaveBeenPlayed = true;
 
       for (AudioAttribute audio : malesMap.get(user)) {
-        if (!audio.isHasBeenPlayed()) allHaveBeenPlayed = false;
+        if (!audio.isHasBeenPlayed()) {
+          allHaveBeenPlayed = false;
+        }
         Widget panelForAudio = getPanelForAudio(e, audio, tabAndContent);
         tabAndContent.content.add(panelForAudio);
         if (audio.isHasBeenPlayed()) {
@@ -145,69 +163,131 @@ class ReviewEditableExercise extends EditableExercise {
     }
     final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel(audioRef, e.getRefSentence(), service, controller,
       controller.getProps().showSpectrogram(), new ScoreListener() {
+
       @Override
       public void gotScore(PretestScore score, boolean showOnlyOneExercise) {}
 
       @Override
-      public int getOffsetWidth() {
-        return 0;
+      public int getOffsetWidth() { return 0; }
+    }, 70, audio.isFast() ? REGULAR_SPEED : SLOW_SPEED, e.getID()
+    ) {
+
+      @Override
+      protected Widget getBeforePlayWidget() {
+        Button delete = new Button("Delete Audio");
+        addTooltip(delete, "Delete this audio cut.");
+        delete.addStyleName("leftFiveMargin");
+        delete.setType(ButtonType.WARNING);
+        delete.setIcon(IconType.REMOVE);
+
+        final Widget outer = this;
+        delete.addClickHandler(new ClickHandler() {
+          @Override
+          public void onClick(ClickEvent event) {
+            service.markAudioDefect(audio, e.getID(), new AsyncCallback<Void>() {    // delete comment too?
+              @Override
+              public void onFailure(Throwable caught) {
+              }
+
+              @Override
+              public void onSuccess(Void result) {
+                outer.setVisible(false);
+                // TODO : need to update other lists too?
+              }
+            });
+          }
+        });
+
+        return delete;
       }
-    }, 70, audio.isFast()?" Regular speed":" Slow speed", e.getID());
+    };
     audioPanel.setShowColor(true);
     audioPanel.getElement().setId("ASRScoringAudioPanel");
-    audioPanel.addPlayListener(new PlayListener() {
-      @Override
-      public void playStarted() {
-        System.out.println("playing audio " + audio.getAudioRef() + " has " +tabs.size() + " tabs");
-        audioWasPlayed.add(audioPanel);
-        if (audioWasPlayed.size() == toResize.size()) {
-          // all components played  // TODO put this back
-    //      setApproveButtonState();
-        }
-        for (RememberTabAndContent tabAndContent : tabs) {
-          tabAndContent.checkAllPlayed(audioWasPlayed);
-        }
-        controller.logEvent(audioPanel, "qcPlayAudio", e.getID(), audio.getAudioRef());
-      }
-
-      @Override
-      public void playStopped() {
-
-      }
-    });
+    noteAudioHasBeenPlayed(e.getID(), audio, audioPanel);
     tabAndContent.addWidget(audioPanel);
     toResize.add(audioPanel);
 
     Panel vert = new VerticalPanel();
     vert.add(audioPanel);
+    Widget commentLine = getCommentLine(e, audio);
+    if (commentLine != null) {
+      vert.add(commentLine);
+    }
+
+/*    Button delete = new Button("Delete");
+    delete.setIcon(IconType.REMOVE);
+    vert.add(delete);
+    delete.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        service.markAudioDefect(audio, new AsyncCallback<Void>() {    // delete comment too?
+          @Override
+          public void onFailure(Throwable caught) {
+
+          }
+
+          @Override
+          public void onSuccess(Void result) {
+            audioPanel.setVisible(false);
+          }
+        });
+      }
+    });*/
+
+    return vert;
+  }
+
+  private void noteAudioHasBeenPlayed(final String id, final AudioAttribute audio, final ASRScoringAudioPanel audioPanel) {
+    audioPanel.addPlayListener(new PlayListener() {
+      @Override
+      public void playStarted() {
+        //System.out.println("playing audio " + audio.getAudioRef() + " has " + tabs.size() + " tabs");
+        audioWasPlayed.add(audioPanel);
+        //if (audioWasPlayed.size() == toResize.size()) {
+          // all components played  // TODO put this back
+          //      setApproveButtonState();
+       // }
+        for (RememberTabAndContent tabAndContent : tabs) {
+          tabAndContent.checkAllPlayed(audioWasPlayed);
+        }
+        controller.logEvent(audioPanel, "qcPlayAudio", id, audio.getAudioRef());
+      }
+
+      @Override
+      public void playStopped() {
+      }
+    });
+  }
+
+  private Widget getCommentLine(CommonExercise e, AudioAttribute audio) {
     ExerciseAnnotation audioAnnotation = e.getAnnotation(audio.getAudioRef());
     if (audioAnnotation != null && !audioAnnotation.isCorrect()) {
       HTML child = new HTML(audioAnnotation.comment);
       child.getElement().getStyle().setFontSize(14, Style.Unit.PX);
       child.getElement().getStyle().setFontWeight(Style.FontWeight.BOLD);
-      vert.add(child);
+      return child;
     }
-
-    //  Widget entry = getEntry(audio.getAudioRef(), audioPanel, audioAnnotation);
-    // TODO add unique audio attribute id
-    return vert;
+    else return null;
   }
+
   protected String wavToMP3(String path) {
     return (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
   }
 
   @Override
-  protected boolean shouldDisableNext() { return false; }
+  protected boolean shouldDisableNext() {
+    return false;
+  }
 
   /**
    * Add a fixed button, so we know when to clear the comments and remove this item from the reviewed list.
    *
-   * @see #addNew
    * @param ul
    * @param pagingContainer
    * @param toAddTo
    * @param normalSpeedRecording
    * @return
+   * @see #addNew
    */
   @Override
   protected Panel getCreateButton(final UserList ul, final ListInterface pagingContainer, final Panel toAddTo,
@@ -256,7 +336,8 @@ class ReviewEditableExercise extends EditableExercise {
           public void gotYes() {
             service.deleteItem(newUserExercise.getID(), new AsyncCallback<Boolean>() {
               @Override
-              public void onFailure(Throwable caught) {}
+              public void onFailure(Throwable caught) {
+              }
 
               @Override
               public void onSuccess(Boolean result) {
@@ -267,7 +348,8 @@ class ReviewEditableExercise extends EditableExercise {
           }
 
           @Override
-          public void gotNo() {}
+          public void gotNo() {
+          }
         });
       }
     });
@@ -291,6 +373,7 @@ class ReviewEditableExercise extends EditableExercise {
 
   /**
    * Disable the button initially so we don't accidentally duplicate twice.
+   *
    * @param duplicate
    */
   private void duplicateExercise(final Button duplicate) {
@@ -320,8 +403,8 @@ class ReviewEditableExercise extends EditableExercise {
   }
 
   /**
-   * @see #getCreateButton(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, com.github.gwtbootstrap.client.ui.ControlGroup)
    * @return
+   * @see #getCreateButton(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, com.github.gwtbootstrap.client.ui.ControlGroup)
    */
   private Button makeFixedButton() {
     Button fixed = new Button(FIXED);
@@ -337,23 +420,27 @@ class ReviewEditableExercise extends EditableExercise {
         checkForForeignChange();
       }
     });
-    addTooltip(fixed,"Mark item as fixed, removed defective audio, and remove item from the review list.");
+    addTooltip(fixed, "Mark item as fixed, removed defective audio, and remove item from the review list.");
     return fixed;
   }
 
   @Override
-  protected void audioPosted() {  reallyChange(listInterface, false);  }
+  protected void audioPosted() {
+    reallyChange(listInterface, false);
+  }
 
   @Override
-  protected void checkIfNeedsRefAudio() {}
+  protected void checkIfNeedsRefAudio() {
+  }
 
   /**
-   * TODO : why do we have to do a sequence of server calls -- how about just one???
+   * TODOx : why do we have to do a sequence of server calls -- how about just one???
+   *
    * @param pagingContainer
    * @param buttonClicked
+   * @seex #doAfterEditComplete(mitll.langtest.client.list.ListInterface, boolean)
    * @see #reallyChange
    * @see #postEditItem(mitll.langtest.client.list.ListInterface, boolean)
-   * @seex #doAfterEditComplete(mitll.langtest.client.list.ListInterface, boolean)
    */
   @Override
   protected void doAfterEditComplete(ListInterface pagingContainer, boolean buttonClicked) {
@@ -363,13 +450,13 @@ class ReviewEditableExercise extends EditableExercise {
       final String id = newUserExercise.getID();
       int user = controller.getUser();
 
-      System.out.println("doAfterEditComplete : forgetting " + id + " user " +user);
+      System.out.println("doAfterEditComplete : forgetting " + id + " user " + user);
 
       if (!ul.remove(newUserExercise)) {
         System.err.println("\ndoAfterEditComplete : error - didn't remove " + id + " from ul " + ul);
       }
       if (!originalList.remove(newUserExercise)) {
-        System.err.println("\ndoAfterEditComplete : error - didn't remove " + id + " from original " +originalList);
+        System.err.println("\ndoAfterEditComplete : error - didn't remove " + id + " from original " + originalList);
       }
 
       service.setExerciseState(id, STATE.FIXED, user, new AsyncCallback<Void>() {
@@ -383,8 +470,7 @@ class ReviewEditableExercise extends EditableExercise {
           exerciseList.forgetExercise(id);
         }
       });
-    }
-    else {
+    } else {
       System.out.println("----> doAfterEditComplete : button not clicked ");
 
     }
