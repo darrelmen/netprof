@@ -108,6 +108,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     if (parentPanel instanceof ExercisePanel) {
       ((ExercisePanel) parentPanel).recordIncomplete(recordAudioPanel);
     }
+    controller.logEvent(recordAudioPanel.getButton(),"recordButton",getExercise().getID(),"invalid recording "+result.getValidity());
 
     setPlayEnabled(false);
   }
