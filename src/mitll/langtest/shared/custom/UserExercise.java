@@ -25,13 +25,13 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   private String english;
   private String foreignLanguage;
   private String transliteration;
-  private String content;
   private String context;
 
   private long creator;
   private boolean isPredef;
   private boolean isOverride;
   private Date modifiedDate;
+  private static final int MAX_TOOLTIP_LENGTH = 15;
 
   public UserExercise() {}  // just for serialization
 
@@ -175,19 +175,24 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
    */
   @Override
   public String getContent() {
-    return content;
+    return "";//content;
   }
 
   public CommonShell getShellCombinedTooltip() {
+    String combined = getCombinedTooltip();
+
+    return new ExerciseShell(getID(), combined);
+  }
+
+  public String getCombinedTooltip() {
     String refSentence = getForeignLanguage();
-    if (refSentence.length() > 15) {
-      refSentence = refSentence.substring(0, 15);
+    if (refSentence.length() > MAX_TOOLTIP_LENGTH) {
+      refSentence = refSentence.substring(0,  MAX_TOOLTIP_LENGTH);
     }
     boolean refSentenceEqualsTooltip = getTooltip().trim().equals(getForeignLanguage().trim());
     String combined = refSentenceEqualsTooltip ? getTooltip() : getTooltip() + (refSentence.isEmpty() ? "": " / " + refSentence);
     if (getTooltip().isEmpty()) combined = refSentence;
-
-    return new ExerciseShell(getID(), combined);
+    return combined;
   }
 
   @Override
@@ -229,6 +234,10 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   @Override
   public UserExercise toUserExercise() {  return this;  }
 
+  /**
+   * @see mitll.langtest.client.custom.ReviewEditableExercise#getCreateButton(UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, com.github.gwtbootstrap.client.ui.ControlGroup)
+   * @return
+   */
   public boolean checkPredef() {  return !getID().startsWith(CUSTOM_PREFIX);  }
 
   @Override
