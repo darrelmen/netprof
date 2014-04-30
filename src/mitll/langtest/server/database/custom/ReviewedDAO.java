@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -165,7 +166,14 @@ public class ReviewedDAO extends DAO {
     }
   }
 
-  public void setState(String exerciseID, mitll.langtest.shared.STATE state, long creatorID) {
+  /**
+   * @see mitll.langtest.server.database.custom.UserListManager#setState(mitll.langtest.shared.CommonShell, mitll.langtest.shared.STATE, long)
+   * @see mitll.langtest.server.database.custom.UserListManager#setSecondState(mitll.langtest.shared.CommonShell, mitll.langtest.shared.STATE, long)
+   * @param exerciseID
+   * @param state
+   * @param creatorID
+   */
+  public void setState(String exerciseID, STATE state, long creatorID) {
     try {
       add(exerciseID, state, creatorID);
     } catch (Exception ee) {
@@ -178,7 +186,7 @@ public class ReviewedDAO extends DAO {
    * many states, but this should return the latest one.
    *
    * @return
-   * @see UserListManager#getDefectList()
+   * @see UserListManager#getDefectList(java.util.Collection)
    * @see UserListManager#getExerciseToState
    * @see UserListManager#markState
    * @see mitll.langtest.server.database.custom.UserListManager#setStateOnExercises()
@@ -187,6 +195,7 @@ public class ReviewedDAO extends DAO {
   public Map<String, StateCreator> getExerciseToState(boolean skipUnset) {
     Connection connection = database.getConnection();
 
+    String latest = "latest";
     String sql3 = "select * from " +
       "(select " +
       EXERCISEID +
@@ -196,7 +205,9 @@ public class ReviewedDAO extends DAO {
       CREATORID +
       ",max(" +
       MODIFIED +
-      ") as latest from " +
+      ") as " +
+      latest +
+      " from " +
       tableName +
       " group by " +
       EXERCISEID +
@@ -209,23 +220,21 @@ public class ReviewedDAO extends DAO {
       ") order by " +
       EXERCISEID +
       "," +
-      "latest";
+      latest;
 
     try {
       PreparedStatement statement = connection.prepareStatement(sql3);
       ResultSet rs = statement.executeQuery();
       Map<String, StateCreator> exidToState = new HashMap<String, StateCreator>();
       while (rs.next()) {
-        String exerciseID = rs.getString(1);
-        String state = rs.getString(2);
-        long creator = rs.getLong(3);
+        String exerciseID = rs.getString(EXERCISEID);
+        String state = rs.getString(STATE_COL);
+        long creator = rs.getLong(CREATORID);
+        long when = rs.getTimestamp(4).getTime();
         STATE stateFromTable = (state == null) ? STATE.UNSET : STATE.valueOf(state);
 
-        if (skipUnset && stateFromTable == STATE.UNSET) {
-
-        }
-        else {
-          exidToState.put(exerciseID, new StateCreator(stateFromTable, creator));
+        if (!skipUnset || stateFromTable != STATE.UNSET) {
+          exidToState.put(exerciseID, new StateCreator(stateFromTable, creator, when));
         }
       }
 
@@ -234,7 +243,7 @@ public class ReviewedDAO extends DAO {
       database.closeConnection(connection);
      // int count = getCount();
      // if (count % 10 == 0) logger.debug("now " + count + " reviewed");
-      logger.debug("query " + sql3 + " returned " + exidToState.size() + " exercise->state items");
+      //logger.debug("query " + sql3 + " returned " + exidToState.size() + " exercise->state items");
       return exidToState;
     } catch (SQLException e) {
       logger.error("Got " + e + " doing " + sql3, e);
@@ -242,17 +251,70 @@ public class ReviewedDAO extends DAO {
     return Collections.emptyMap();
   }
 
-  public static class StateCreator {
-    STATE state;
-    long creatorID;
+/*  public List<StateCreator> getStateHistory(String exerciseID) {
+    Connection connection = database.getConnection();
 
-    public StateCreator(mitll.langtest.shared.STATE state, long creatorID) {
+    List<StateCreator> history = new ArrayList<StateCreator>();
+
+    String sql3 = "select " +
+      STATE_COL +
+      "," +
+      CREATORID +
+      "," +
+      MODIFIED +
+      " order by " + MODIFIED + " ASC WHERE EXERCISEID='" + exerciseID +
+      "'";
+
+    try {
+      PreparedStatement statement = connection.prepareStatement(sql3);
+      ResultSet rs = statement.executeQuery();
+      while (rs.next()) {
+        String state = rs.getString(STATE_COL);
+        long creator = rs.getLong(CREATORID);
+        long when = rs.getLong(MODIFIED);
+        STATE stateFromTable = (state == null) ? STATE.UNSET : STATE.valueOf(state);
+
+        history.add(new StateCreator(stateFromTable, creator, when));
+      }
+
+      rs.close();
+      statement.close();
+      database.closeConnection(connection);
+      // int count = getCount();
+      // if (count % 10 == 0) logger.debug("now " + count + " reviewed");
+      logger.debug("query " + sql3 + " returned " + history.size() + "state items");
+      return history;
+    } catch (SQLException e) {
+      logger.error("Got " + e + " doing " + sql3, e);
+    }
+    return Collections.emptyList();
+  }*/
+
+  public static class StateCreator {
+    private STATE state;
+    private long creatorID;
+    private long when;
+
+    public StateCreator(STATE state, long creatorID, long when) {
       this.state = state;
       this.creatorID = creatorID;
+      this.when = when;
+    }
+
+    public STATE getState() {
+      return state;
+    }
+
+    public long getCreatorID() {
+      return creatorID;
+    }
+
+    public long getWhen() {
+      return when;
     }
 
     public String toString() {
-      return "["+state.toString() + " by " + creatorID +"]";
+      return "["+state.toString() + " by " + creatorID +" at " + new Date(when)+ "]";
     }
   }
 
