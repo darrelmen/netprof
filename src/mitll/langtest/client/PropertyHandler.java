@@ -49,8 +49,8 @@ public class PropertyHandler {
   private static final String LANGUAGE = "language";
   private static final String CONTINUE_PROMPT = "promptBeforeNextItem";
   private static final String RIGHT_ALIGN_CONTENT = "rightAlignContent";
-  private static final String RESPONSE_TYPE = "responseType";
-  private static final String SECOND_RESPONSE_TYPE = "secondResponseType";
+  //private static final String RESPONSE_TYPE = "responseType";
+ // private static final String SECOND_RESPONSE_TYPE = "secondResponseType";
   private static final String BIND_NEXT_TO_ENTER = "bindNextToEnter";
   private static final String SCREEN_PORTION = "screenPortion";
 
@@ -87,7 +87,7 @@ public class PropertyHandler {
   private static final String CLASSROOM_MODE = "classroomMode";
   private static final String SHOW_SPECTROGRAM = "spectrogram";
   private boolean spectrogram = false;
-  private boolean combinedMode = false;
+  //private boolean combinedMode = false;
   private static final String NO_MODEL = "noModel";
   private static final String INSTRUMENT = "instrument";
   private boolean instrument = true; // by default we instrument for now 4/3/14
@@ -125,7 +125,7 @@ public class PropertyHandler {
   private boolean showSections = false;
   private boolean flashcardTeacherView = false;
   private boolean flashCard = false;
-  private boolean timedGame = false;
+  //private boolean timedGame = false;
   private String releaseDate;
   private String turkID = "";
 
@@ -191,11 +191,11 @@ public class PropertyHandler {
       else if (key.equals(LOG_CLIENT_MESSAGES)) logClientMessages = getBoolean(value);
       else if (key.equals(SHOW_SECTIONS)) showSections = getBoolean(value);
       else if (key.equals(FLASHCARD_TEACHER_VIEW)) flashcardTeacherView = getBoolean(value);
-      else if (key.equals(COMBINED_MODE)) combinedMode = getBoolean(value);
+     // else if (key.equals(COMBINED_MODE)) combinedMode = getBoolean(value);
       else if (key.equals(FLASHCARD)) flashCard = getBoolean(value);
       else if (key.equals(LANGUAGE)) language = value;
       else if (key.equals(SPLASH_TITLE)) splashTitle = value;
-      else if (key.equals(TIMED_GAME)) timedGame = getBoolean(value);
+    //  else if (key.equals(TIMED_GAME)) timedGame = getBoolean(value);
       else if (key.equals(GAME_TIME)) gameTimeSeconds = getInt(value, DEFAULT_GAME_TIME_SECONDS, GAME_TIME);
       else if (key.equals(CONTINUE_PROMPT)) promptBeforeNextItem = getBoolean(value);
       else if (key.equals(RIGHT_ALIGN_CONTENT)) rightAlignContent = getBoolean(value);
@@ -277,7 +277,6 @@ public class PropertyHandler {
     }
 
     String screenPortionParam =  Window.Location.getParameter("screenPortion");
-    //screenPortion = 1.0f;
     if (screenPortionParam != null) {
       try {
         screenPortion = Float.parseFloat(screenPortionParam);
@@ -289,7 +288,6 @@ public class PropertyHandler {
     englishOnlyMode = isEnglishOnlyMode() || (isEnglish != null && !isEnglish.equals("false"));
     goodwaveMode    = isGoodwaveMode() || (goodwave != null && !goodwave.equals("false"));
     if (goodwave != null && goodwave.equals("false")) goodwaveMode = false;
-    //GWT.log("goodwave mode = " + goodwaveMode + "/" +goodwave);
     boolean grading = this.isGrading() || (isGrading != null && !isGrading.equals("false")) || isEnglishOnlyMode();
     setGrading(grading);
     // get audio repeats
@@ -329,7 +327,7 @@ public class PropertyHandler {
 
     String timedgameParam = Window.Location.getParameter(TIMED_GAME);
     if (timedgameParam != null) {
-      timedGame = !timedgameParam.equals("false");
+     // timedGame = !timedgameParam.equals("false");
     }
     if (Window.Location.getParameter(SHOW_SECTIONS) != null) {
       showSections = !Window.Location.getParameter(SHOW_SECTIONS).equals("false");
@@ -382,7 +380,7 @@ public class PropertyHandler {
   /**
    * @see mitll.langtest.client.LangTest#modeSelect()
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
-   * @see mitll.langtest.client.LangTest#setFactory
+   * @seex mitll.langtest.client.LangTest#setFactory
    *
    * @return
    */
@@ -480,7 +478,7 @@ public class PropertyHandler {
   /**
    * @see LangTest#makeExerciseList
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
-   * @see mitll.langtest.client.LangTest#setFactory
+   * @seex mitll.langtest.client.LangTest#setFactory
    * @return
    */
   public boolean isFlashCard() {  return flashCard; }
@@ -499,10 +497,6 @@ public class PropertyHandler {
 
   public boolean isCRTDataCollectMode() {
     return CRTDataCollectMode;
-  }
-
-  public boolean isTimedGame() {
-    return timedGame;
   }
 
   public boolean isPromptBeforeNextItem() {
@@ -534,10 +528,6 @@ public class PropertyHandler {
 
   public boolean isClassroomMode() { return classroomMode; }
   public boolean showSpectrogram() { return spectrogram; }
-
-  public boolean isCombinedMode() {
-    return combinedMode;
-  }
 
   public boolean isNoModel() {
     return noModel;
