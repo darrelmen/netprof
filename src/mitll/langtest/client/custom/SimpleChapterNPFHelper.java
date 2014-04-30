@@ -111,10 +111,10 @@ class SimpleChapterNPFHelper implements RequiresResize {
    * @see #doNPF
    * @see #showNPF
    */
-  private void rememberAndLoadFirst() {
+/*  private void rememberAndLoadFirst() {
     System.out.println(getClass() + ".rememberAndLoadFirst : let's reload! --------------->");
     npfExerciseList.reload();
-  }
+  }*/
 
   protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
     return new ExercisePanelFactory(service, feedback, controller, exerciseList) {
