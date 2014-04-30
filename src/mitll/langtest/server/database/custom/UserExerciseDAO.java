@@ -337,7 +337,7 @@ public class UserExerciseDAO extends DAO {
   }
 
   /**
-   * @see UserListManager#getDefectList()
+   * @see UserListManager#getDefectList(java.util.Collection)
    * @param exids
    * @return
    */
