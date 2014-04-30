@@ -30,7 +30,7 @@ import java.util.List;
 public class AudioFileHelper {
   private static final Logger logger = Logger.getLogger(AudioFileHelper.class);
 
-  private static final String BEST_AUDIO = "bestAudio";
+  //private static final String BEST_AUDIO = "bestAudio";
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
   private ASRScoring asrScoring;
