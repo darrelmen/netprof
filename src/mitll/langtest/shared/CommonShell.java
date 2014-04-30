@@ -14,5 +14,4 @@ public interface CommonShell extends IsSerializable {
 
   STATE getSecondState();
   void setSecondState(STATE state);
-
 }
