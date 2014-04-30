@@ -112,7 +112,7 @@ public class UserManager {
         for (User u : result) {
           if (((int) u.getId()) == user) {
             for (User.Permission permission : u.getPermissions()) {
-              System.out.println("\tUserManager.login : found : " + u + " with perm " + permission);
+              //System.out.println("\tUserManager.login : found : " + u + " with perm " + permission);
 
               userNotification.setPermission(permission, true);
             }
