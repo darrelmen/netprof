@@ -8,6 +8,7 @@ import mitll.langtest.client.grading.GradedExerciseList;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.shared.User;
 
 /**
  * Deals with choosing the right exercise list, depending on the property settings.
@@ -74,9 +75,13 @@ public class ExerciseListLayout {
         true, props.isEnglishOnlyMode(), controller, "grading");
     } else {
       if (props.isShowSections()) {
-       // System.out.println("makeExerciseList : making flex");
+        boolean hasQC = controller.getPermissions().contains(User.Permission.QUALITY_CONTROL);
+        String instance = hasQC ? User.Permission.QUALITY_CONTROL.toString() : "flex";
+
+        System.out.println("\n\n\n---> makeExerciseList : making flex " + instance);
+
         FlexSectionExerciseList flex = new FlexSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
-          props.isShowTurkToken(), props.showExercisesInOrder(), controller, showTypeAhead, "flex");
+          props.isShowTurkToken(), props.showExercisesInOrder(), controller, showTypeAhead, instance);
         return flex;
       } else {
         return new PagingExerciseList(currentExerciseVPanel, service, feedback,
