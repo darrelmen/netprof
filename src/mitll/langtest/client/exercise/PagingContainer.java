@@ -18,7 +18,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.shared.CommonShell;
-import mitll.langtest.shared.Result;
 import mitll.langtest.shared.STATE;
 
 import java.util.Date;
@@ -150,6 +149,10 @@ public class PagingContainer {
     TableStyle cellTableStyle();
   }
 
+  /**
+   * @see mitll.langtest.client.list.PagingExerciseList#addTableWithPager(PagingContainer)
+   * @return
+   */
   public Panel getTableWithPager() {
     makeCellTable();
 
@@ -165,7 +168,7 @@ public class PagingContainer {
     // Set the cellList as the display.
     pager.setDisplay(table);
 
-    FlowPanel column = new FlowPanel();
+    Panel column = new FlowPanel();
     column.add(pager);
     column.add(table);
 
@@ -248,6 +251,7 @@ public class PagingContainer {
   private String clickedExerciseID = "";
 
   private Column<CommonShell, SafeHtml> getExerciseIdColumn2(final boolean consumeClicks) {
+
     return new Column<CommonShell, SafeHtml>(new MySafeHtmlCell(consumeClicks)) {
 
       @Override
@@ -287,15 +291,11 @@ public class PagingContainer {
               isSet = recorded;
             }
 */
-            if (isSet) {
-              System.out.println("shell " + shell.getID() + " state " + state + "/" + shell.getSecondState()+
+/*            if (isSet) {
+              System.out.println(table.getParent().getParent().getElement().getId()+" shell " + shell.getID() + " state " + state + "/" + shell.getSecondState()+
                 " defect " +isDefect +
                 " fixed " + isFixed + " recorded " + recorded);
-           }
-         //   else {
-
-         //   }
-
+           }*/
 
             String icon =
               approved ? "icon-check" :
@@ -429,7 +429,7 @@ public class PagingContainer {
     String id = exercise.getID();
     idToExercise.put(id, exercise);
     int i = list.indexOf(afterThisOne);
-    list.add(i+1, exercise);
+    list.add(i + 1, exercise);
     int after = list.size();
     System.out.println("data now has "+ after + " after adding " + exercise.getID());
     if (before +1!=after) System.err.println("didn't add " + exercise.getID());
