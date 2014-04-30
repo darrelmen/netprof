@@ -28,7 +28,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   protected final ExerciseController controller;
   private final LangTestDatabaseAsync service;
   private final boolean recordInResults;
-  private final String audioType;
+
   /**
    * @see GoodwaveExercisePanel.ASRRecordAudioPanel.MyPostAudioRecordButton
    * @param exercise
@@ -49,7 +49,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     this.controller = controller;
     this.service = service;
     this.recordInResults = recordInResults;
-    this.audioType = audioType;
+    //String audioType1 = audioType;
   //  System.out.println("PostAudioRecordButton : Audio type " + audioType);
     getElement().setId("PostAudioRecordButton");
     controller.register(this, exercise.getID());
