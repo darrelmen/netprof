@@ -257,10 +257,12 @@ public class PagingExerciseList extends ExerciseList {
    */
   @Override
   protected void rememberExercises(List<CommonShell> result) {
-    //System.out.println("PagingExerciseList : rememberExercises remembering " + result.size() + " instance " + instance);
+    //System.out.println("PagingExerciseList : rememberExercises remembering " + result.size() + " instance " + getInstance() + "/" +getRole());
     clear();
+    int c = 0;
     for (CommonShell es : result) {
       //System.out.println("PagingExerciseList : add " + es);
+     // if (c++ < 4) System.out.println("\tPagingExerciseList : rememberExercises add " + es.getID());
       addExercise(es);
     }
     flush();
@@ -304,14 +306,15 @@ public class PagingExerciseList extends ExerciseList {
 
   @Override
   public void addExercise(CommonShell es) {
-    //System.out.println(getInstance() +" : addExercise adding " + es.getID() + " state " + es.getState() + "/" + es.getSecondState());
-
+/*    if (pagingContainer.getSize() < 5) {
+      System.out.println(getInstance() +" : addExercise adding " + es.getID() + " state " + es.getState() + "/" + es.getSecondState());
+    }*/
     pagingContainer.addExercise(es);
   }
   public void addExerciseAfter(CommonShell after,CommonShell es) { pagingContainer.addExerciseAfter(after, es);  }
 
   public CommonShell forgetExercise(String id) {
-    System.out.println("PagingExerciseList.forgetExercise " + id + " on " + getElement().getId() + " ul " +userListID);
+   // System.out.println("PagingExerciseList.forgetExercise " + id + " on " + getElement().getId() + " ul " +userListID);
     return removeExercise(byID(id));
   }
 
