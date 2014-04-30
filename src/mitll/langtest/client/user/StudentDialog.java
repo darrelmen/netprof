@@ -718,7 +718,7 @@ class StudentDialog extends UserDialog {
       enableProps(false);
     }*/
 
-    protected void enableProps(boolean enabled) {
+/*    protected void enableProps(boolean enabled) {
 
       qcCheckBox.setEnabled(enabled);
       recordAudioCheckBox.setEnabled(enabled);
@@ -728,7 +728,7 @@ class StudentDialog extends UserDialog {
       dialectGroup.box.setEnabled(enabled);
 
 
-    }
+    }*/
 
 /*    public void clearProps() {
       ageEntryGroup.box.setText("");
