@@ -134,7 +134,7 @@ public abstract class FlexListLayout implements RequiresResize {
 
       @Override
       protected void loadExercises(final Map<String, Collection<String>> typeToSection, final String item) {
-        System.out.println(getClass() + ".loadExercises : instance " + instance + " " + typeToSection + " and item '" + item + "'" + " for list " + userListID);
+        System.out.println(getClass() + ".loadExercises : instance " + getInstance() + " " + typeToSection + " and item '" + item + "'" + " for list " + userListID);
         loadExercisesUsingPrefix(typeToSection, getPrefix());
       }
     };
@@ -143,7 +143,7 @@ public abstract class FlexListLayout implements RequiresResize {
   @Override
   public void onResize() {
     if (npfExerciseList != null) {
-      System.out.println(getClass() + " : onResize " + npfExerciseList.instance);
+      System.out.println(getClass() + " : onResize " + npfExerciseList.getInstance());
       npfExerciseList.onResize();
     }
   }
