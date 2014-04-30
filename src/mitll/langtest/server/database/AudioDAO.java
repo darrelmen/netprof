@@ -340,19 +340,25 @@ public class AudioDAO extends DAO {
     return -1;
   }
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#editItem(mitll.langtest.shared.custom.UserExercise)
+   * @param attribute
+   * @return
+   */
   public int markDefect(AudioAttribute attribute) {
     return markDefect((int) attribute.getUserid(), attribute.getExid(), attribute.getAudioType());
   }
 
   /**
-   * @param userid
-   * @param exerciseID
-   * @param audioType
-   * @return
+   * An audio cut is uniquely identified by by exercise id, speed (reg/slow), and who recorded it.
+   * @param userid recorded by this user
+   * @param exerciseID on this exercise
+   * @param audioType at this speed
+   * @return > 0 if audio was marked defective
    * @see mitll.langtest.server.database.DatabaseImpl#editItem(mitll.langtest.shared.custom.UserExercise)
    * @see mitll.langtest.client.custom.EditableExercise#postEditItem
    */
-  public int markDefect(int userid, String exerciseID, String audioType) {
+  private int markDefect(int userid, String exerciseID, String audioType) {
     try {
       Connection connection = database.getConnection();
       String sql = "UPDATE " + AUDIO +
@@ -378,8 +384,7 @@ public class AudioDAO extends DAO {
         logger.error("huh? couldn't find audio by " + userid + " for ex " +exerciseID + " and " + audioType);
       }
       else {
-        logger.debug("\n\n\n" + i+
-          " fixed audio defect by " + userid + " ex " +exerciseID + " speed " + audioType);
+        logger.debug(i+" marked audio defect by " + userid + " ex " +exerciseID + " speed " + audioType);
       }
 
       statement.close();
