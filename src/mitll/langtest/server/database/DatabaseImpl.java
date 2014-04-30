@@ -335,6 +335,7 @@ public class DatabaseImpl implements Database {
 
     Set<AudioAttribute> defects = new HashSet<AudioAttribute>();
     Set<AudioAttribute> original  = new HashSet<AudioAttribute>(userExercise.getAudioAttributes());
+    Set<String> keys = new HashSet<String>();
 
     for (Map.Entry<String,ExerciseAnnotation> fieldAnno : fieldToAnnotation.entrySet()) {
       if (!fieldAnno.getValue().isCorrect()) {
@@ -343,6 +344,7 @@ public class DatabaseImpl implements Database {
         if (audioAttribute != null) {
           logger.debug("\tmarking defect on audio");
           defects.add(audioAttribute);
+          keys.add(audioAttribute.getKey());
           audioDAO.markDefect(audioAttribute);
         }
         else {
@@ -358,11 +360,22 @@ public class DatabaseImpl implements Database {
     String overlayID = exercise.getID();
 
     original.removeAll(defects);
+
+    for (String key : keys) {
+      AudioAttribute remove = exercise.getAudioRefToAttr().remove(key);
+      if (remove == null) logger.warn("huh? couldn't remove " +key);
+    }
+
+    exercise.getAudioAttributes().removeAll(defects);
     for (AudioAttribute toCopy: original) {
       if (toCopy.getUserid() <1) logger.error("bad user id for " + toCopy);
 
       audioDAO.add((int) toCopy.getUserid(), toCopy.getAudioRef(), overlayID, toCopy.getTimestamp(), toCopy.getAudioType(), toCopy.getDuration());
     }
+  }
+
+  public void markAudioDefect(AudioAttribute audioAttribute) {
+    audioDAO.markDefect(audioAttribute);
   }
 
   /**
