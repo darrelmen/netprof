@@ -265,7 +265,7 @@ public class ExcelImport implements ExerciseDAO {
    */
   public CommonExercise getExercise(String id) {
     if (idToExercise.isEmpty()) {
-      logger.warn("huh? couldn't find any exercises..?");
+      logger.error("huh? couldn't find any exercises..? " + id);
     }
 
     synchronized (this) {
