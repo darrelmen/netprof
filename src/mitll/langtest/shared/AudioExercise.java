@@ -250,6 +250,10 @@ public class AudioExercise extends ExerciseShell {
     return getAudioAttributes().size();
   }
 
+  public boolean removeAudio(String key) {
+    return audioAttributes.remove(key) != null;
+  }
+
   public String toString() {
     return super.toString() +" audio attr (" +getAudioAttributes().size()+
       ") :" + getAudioAttributes() + " and " +fieldToAnnotation + " annotations, unit/lesson " + unitToValue;
