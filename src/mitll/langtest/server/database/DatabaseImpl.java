@@ -340,16 +340,14 @@ public class DatabaseImpl implements Database {
     for (Map.Entry<String,ExerciseAnnotation> fieldAnno : fieldToAnnotation.entrySet()) {
       if (!fieldAnno.getValue().isCorrect()) {
         AudioAttribute audioAttribute = userExercise.getAudioRefToAttr().get(fieldAnno.getKey());
-        logger.debug("found defect " + audioAttribute + " anno : " + fieldAnno.getValue() +  " field  " + fieldAnno.getKey());
+        logger.debug("found defect " + audioAttribute + " anno : " + fieldAnno.getValue() + " field  " + fieldAnno.getKey());
         if (audioAttribute != null) {
           logger.debug("\tmarking defect on audio");
           defects.add(audioAttribute);
           keys.add(audioAttribute.getKey());
           audioDAO.markDefect(audioAttribute);
-        }
-        else {
+        } else if (!fieldAnno.getKey().equals("transliteration")) {
           logger.error("\tcan't marking defect on audio! looking for " + fieldAnno.getKey() + " in " + userExercise.getAudioRefToAttr().keySet());
-
         }
       }
     }
@@ -362,11 +360,12 @@ public class DatabaseImpl implements Database {
     original.removeAll(defects);
 
     for (String key : keys) {
-      AudioAttribute remove = exercise.getAudioRefToAttr().remove(key);
-      if (remove == null) logger.warn("huh? couldn't remove " +key);
+      if (!exercise.removeAudio(key)) {
+        logger.warn("huh? couldn't remove " +key + " from " + exercise.getID());
+      }
     }
 
-    exercise.getAudioAttributes().removeAll(defects);
+    //exercise.getAudioAttributes().removeAll(defects);
     for (AudioAttribute toCopy: original) {
       if (toCopy.getUserid() <1) logger.error("bad user id for " + toCopy);
 
