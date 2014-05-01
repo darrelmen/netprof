@@ -704,12 +704,16 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private boolean doEverythingAfterFactory(long userID) {
-    System.out.println("doEverythingAfterFactory : user changed - new " + userID + " vs last " + lastUser + " audio type " + getAudioType());
+    System.out.println("doEverythingAfterFactory : user changed - new " + userID + " vs last " + lastUser +
+      " audio type " + getAudioType() + " perms " + getPermissions());
     if (!shouldCollectAudio() || flashRecordPanel.gotPermission()) {
       reallySetFactory();
 
       if (getPermissions().contains(User.Permission.QUALITY_CONTROL)) {
         exerciseList.setInstance(User.Permission.QUALITY_CONTROL.toString());
+      }
+      else {
+        exerciseList.setInstance("flex");
       }
 
       boolean askedForExercises = exerciseList.getExercises(userID);
@@ -788,7 +792,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   @Override
   public void rememberAudioType(String audioType) {
-    System.out.println("audio type now " + audioType);
+   // System.out.println("audio type now " + audioType);
     this.audioType = audioType;
   }
 
