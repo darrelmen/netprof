@@ -342,7 +342,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     List<CommonShell> exerciseShells = getExerciseShells(exercises);
 
-    logger.debug("makeExerciseListWrapper : userID " +userID + " Role is " + role);
+ //   logger.debug("makeExerciseListWrapper : userID " +userID + " Role is " + role);
     if (role.equals(Result.AUDIO_TYPE_RECORDER)) {
       markRecordedState((int)userID,role,exerciseShells);
     }
@@ -374,7 +374,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
      //   logger.debug("\tnow '" + attr.getAudioRef() + "'");
 
       }
-      logger.debug("\tadding path '" + attr.getAudioRef() + "' "+attr + " to " + firstExercise.getID());
+      //logger.debug("\tadding path '" + attr.getAudioRef() + "' "+attr + " to " + firstExercise.getID());
     }
 
     addPlayedMarkings(userID, firstExercise);
@@ -390,7 +390,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     for (Event event : allForUserAndExercise) {
       AudioAttribute audioAttribute = audioToAttr.get(event.getContext());
       if (audioAttribute == null) {
-        logger.warn("addPlayedMarkings huh? can't find " + event.getContext() + " in " + audioToAttr.keySet());
+        //logger.warn("addPlayedMarkings huh? can't find " + event.getContext() + " in " + audioToAttr.keySet());
       }
       else {
         audioAttribute.setHasBeenPlayed(true);
