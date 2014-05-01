@@ -24,8 +24,8 @@ import java.util.Map;
 public abstract class Scoring {
   private static final Logger logger = Logger.getLogger(Scoring.class);
 
-  private static final String WINDOWS_CONFIGURATIONS = "windowsConfig";
-  private static final String LINUX_CONFIGURATIONS = "mtexConfig";
+ // private static final String WINDOWS_CONFIGURATIONS = "windowsConfig";
+ // private static final String LINUX_CONFIGURATIONS = "mtexConfig";
   protected static final float SCORE_SCALAR = 1.0f;// / 0.15f;
   private static final String SCORING = "scoring";
 
@@ -39,16 +39,17 @@ public abstract class Scoring {
    */
   protected Scoring(String deployPath) {
     this.deployPath = deployPath;
-    String os = getOS();
     this.scoringDir = getScoringDir(deployPath);
-    String configFullPath = scoringDir + File.separator +
+    //  String os = getOS();
+/*    String configFullPath = scoringDir + File.separator +
       (os.equals("win32") ?
         WINDOWS_CONFIGURATIONS :
-        LINUX_CONFIGURATIONS);
+        LINUX_CONFIGURATIONS);*/
   }
 
   private static String getScoringDir(String deployPath) { return deployPath + File.separator + SCORING; }
 
+/*
   private String getOS() {
     String property = System.getProperty("os.name").toLowerCase();
     return property.contains("win") ? "win32" : property
@@ -57,6 +58,7 @@ public abstract class Scoring {
         .getProperty("os.arch").contains("64") ? "linux64"
         : "linux" : "linux";
   }
+*/
 
   /**
    * Given an audio file without a suffix, check if there are label files, and if so, for each one,
