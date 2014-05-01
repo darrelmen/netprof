@@ -193,6 +193,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
   boolean hasAudio() {  return true;  }
 
+  public boolean isAudioPathSet() { return audioPath != null; }
   public void doPause() { if (playAudio != null) playAudio.doPause(); }
 
   /**
