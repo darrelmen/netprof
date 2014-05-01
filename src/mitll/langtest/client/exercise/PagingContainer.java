@@ -3,23 +3,32 @@ package mitll.langtest.client.exercise;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Node;
+import com.google.gwt.dom.client.NodeList;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.SimplePager;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.STATE;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -157,13 +166,20 @@ public class PagingContainer {
     makeCellTable();
 
     // Create a data provider.
-    this.dataProvider = new ListDataProvider<CommonShell>();
+    this.dataProvider = new ListDataProvider<CommonShell>() {
+      @Override
+      protected void updateRowData(int start, List<CommonShell> values) {
+        super.updateRowData(start, values);
+
+        System.out.println("updateRowData " + start);
+      }
+    };
 
     // Connect the table to the data provider.
     dataProvider.addDataDisplay(table);
 
     // Create a SimplePager.
-    SimplePager pager = new SimplePager();
+    final MySimplePager pager = new MySimplePager();
 
     // Set the cellList as the display.
     pager.setDisplay(table);
@@ -171,8 +187,44 @@ public class PagingContainer {
     Panel column = new FlowPanel();
     column.add(pager);
     column.add(table);
+/*    Scheduler.get().scheduleDeferred(new Command() {
+      @Override
+      public void execute() {
+        pager.getImages();
+      }
+    });*/
 
+//    /pager.getWidget();
+    System.out.println("pager " + pager);
     return column;
+  }
+
+  private List<Image> getImgTags(Node child) {
+    NodeList<Node> childNodes = child.getChildNodes();
+    List<Image> images = new ArrayList<Image>();
+    for (int j = 0; j < childNodes.getLength(); j++) {
+      Node item = childNodes.getItem(j);
+      System.out.println("\tchild " + j+ " " + item.getNodeName() + " " + item.getNodeValue() + " " +item.getNodeType());
+      if (item.getNodeName().equalsIgnoreCase("img")) {
+
+   /*     Element as = ImageElement.as(item);
+        images.add(Image.wrap(as));*/
+
+        images.add(new MyImage(ImageElement.as(item)));
+      }
+      else {
+        images.addAll(getImgTags(item));
+      }
+    }
+    System.out.println("got  " + images);
+
+    return images;
+  }
+
+  private static class MyImage extends Image {
+    public MyImage(Element element) {
+      super(element);
+    }
   }
 
   private void makeCellTable() {
@@ -544,5 +596,50 @@ public class PagingContainer {
       if (consumeClicks) events.add(BrowserEvents.CLICK);
       return events;
     }
+  }
+
+  private class MySimplePager extends SimplePager {
+    public void getImages() {
+      for (int i = 0; i < getWidget().getElement().getChildCount(); i++) {
+        Node child = getWidget().getElement().getChild(i);
+        List<Image> imgTags = getImgTags(child);
+        System.out.println("getImages child " + i + " " + child + " " + imgTags.size());
+        for (final Image image : imgTags) {
+          System.out.println("\tgetImages add click handler " + i + " " + image );
+
+          image.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+              try {
+                String context = "pager button " + image.getElement().getPropertyString("aria-label");
+
+                System.out.println("image " + image + " " + context);
+
+                controller.logEvent(image, "pager", "unk", context);
+              } catch (Exception e) {
+                e.printStackTrace();
+              }
+            }
+          });
+        }
+      }
+    }
+ /*   @Override
+    protected Widget getWidget() {
+      Widget widget = super.getWidget();
+      for (int i = 0; i < widget.getElement().getChildCount(); i++) {
+        Node child = widget.getElement().getChild(i);
+      //  System.out.println("child " + i + " " + child);
+        getImgTags(child);
+      }
+      return widget;
+    }*/
+
+ /*   @Override
+    public String toString() {
+      String s = super.toString();
+     // getWidget();
+      return s;
+    }*/
   }
 }
