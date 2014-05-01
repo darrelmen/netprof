@@ -88,6 +88,7 @@ public class Navigation extends TabContainer implements RequiresResize {
 //  public static final String ATTENTION_LL = "Attention LL";
   public static final String RECORD_AUDIO = "Record Audio";
   public static final String CONTENT1 = "content";
+  public static final String CLASSROOM = "classroom";
 
   private final ExerciseController controller;
   private final LangTestDatabaseAsync service;
@@ -134,8 +135,7 @@ public class Navigation extends TabContainer implements RequiresResize {
         return new GoodwaveExercisePanelFactory(service, feedback, controller, exerciseList, 1.0f) {
           @Override
           public Panel getExercisePanel(CommonExercise e) {
-
-            return new CommentNPFExercise(e, controller, exerciseList, 1.0f, false, "classroom");
+            return new CommentNPFExercise(e, controller, exerciseList, 1.0f, false, CLASSROOM);
           }
         };
       }
@@ -347,8 +347,8 @@ public class Navigation extends TabContainer implements RequiresResize {
   }
 
   private void checkAndMaybeClearTab(String value) {
-  //  String value1 = storage.getValue(CLICKED_TAB);
-//      System.out.println("checkAndMaybeClearTab " + value1 + " vs "+value + " clearing " + CLICKED_USER_LIST);
+    String value1 = storage.getValue(CLICKED_TAB);
+    System.out.println("checkAndMaybeClearTab " + value1 + " vs "+value + " clearing " + CLICKED_USER_LIST);
     storage.removeValue(CLICKED_USER_LIST);
     storage.storeValue(CLICKED_TAB, value);
   }
@@ -899,7 +899,7 @@ public class Navigation extends TabContainer implements RequiresResize {
      */
     public UserListCallback(Panel contentPanel, Panel child, ScrollPanel listScrollPanel, String instanceName,
                             boolean onlyMyLists, boolean allLists) {
-      System.out.println("UserListCallback instance " +instanceName);
+     // System.out.println("UserListCallback instance " +instanceName);
       this.contentPanel = contentPanel;
       this.child = child;
       this.listScrollPanel = listScrollPanel;
