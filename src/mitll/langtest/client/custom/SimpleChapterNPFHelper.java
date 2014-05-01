@@ -38,7 +38,8 @@ class SimpleChapterNPFHelper implements RequiresResize {
    * @param userManager
    * @param controller
    */
-  public SimpleChapterNPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager, ExerciseController controller,
+  public SimpleChapterNPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager,
+                                ExerciseController controller,
                                 ListInterface predefinedContentList) {
     this.service = service;
     this.feedback = feedback;
