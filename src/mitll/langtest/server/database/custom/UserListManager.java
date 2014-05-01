@@ -162,7 +162,7 @@ public class UserListManager {
   private Map<String, ReviewedDAO.StateCreator> getAmmendedStateMap() {
     Map<String, ReviewedDAO.StateCreator> stateMap = getExerciseToState(false);
    // logger.debug("got " + stateMap.size() +" in state map");
-    Map<String,Long> exerciseToCreator = annotationDAO.getDefectIds();
+    Map<String,Long> exerciseToCreator = annotationDAO.getAnnotatedExerciseToCreator();
     //logger.debug("got " + exerciseToCreator.size() +" in defectIds");
 
     int count = 0;
@@ -356,23 +356,29 @@ public class UserListManager {
   }
 
   /**
-   * So comments are items with incorrect annotations on their fields that have not been marked as defects
+   * So comments are items with incorrect annotations on their fields that have not been marked as defects.
+   *
    * Also, incorrect annotations are the latest annotations- a field can have a history of correct and incorrect
    * annotations - only if the latest is incorrect should the item appear on the comment or defect list.
    * @return
    * @param typeOrder
    */
   public UserList getCommentedList(Collection<String> typeOrder) {
-    Map<String, ReviewedDAO.StateCreator> exerciseToState = getExerciseToState(true); // skip unset items!
-    Map<String, Long> idToCreator = annotationDAO.getDefectIds();
-    //logger.debug("getCommentedList There are " + exerciseToState.size() + " reviewed items ");
-   // logger.debug("getCommentedList There are " + idToCreator.size() + " idToCreator items ");
-    for (String id : exerciseToState.keySet()) {
+    //Map<String, ReviewedDAO.StateCreator> exerciseToState = getExerciseToState(true); // skip unset items!
+
+    Collection<String> defectExercises = reviewedDAO.getDefectExercises();
+    Map<String, Long> idToCreator = annotationDAO.getAnnotatedExerciseToCreator();
+    logger.debug("getCommentedList There are " + defectExercises.size() + " defect items ");
+    logger.debug("getCommentedList There are " + idToCreator.size() + " idToCreator items ");
+
+    // if it's on the defect list, remove it
+    for (String id : defectExercises) {
       idToCreator.remove(id);// what's left are items that are not reviewed
     }
-   // logger.debug("getCommentedList After there are " + idToCreator.size() + " idToCreator items ");
+    logger.debug("getCommentedList After there are " + idToCreator.size() + " idToCreator items ");
 
     List<CommonUserExercise> include = userExerciseDAO.getWhere(idToCreator.keySet());
+    logger.debug("getCommentedList include " + include.size() + " included ");
 
     UserList reviewList = getReviewList(include, COMMENTS, ALL_ITEMS_WITH_COMMENTS, idToCreator.keySet(),COMMENT_MAGIC_ID, typeOrder);
     reviewList.setUniqueID(COMMENT_MAGIC_ID);
@@ -441,7 +447,7 @@ public class UserListManager {
     userList.setExercises(onList);
 
     markState(onList);
-    logger.debug("returning " + userList + " first " +userList.getExercises().iterator().next());
+    logger.debug("returning " + userList + (userList.getExercises().isEmpty() ? "":" first " +userList.getExercises().iterator().next()));
     return userList;
   }
 
