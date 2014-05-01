@@ -78,7 +78,7 @@ public class ExerciseListLayout {
         boolean hasQC = controller.getPermissions().contains(User.Permission.QUALITY_CONTROL);
         String instance = hasQC ? User.Permission.QUALITY_CONTROL.toString() : "flex";
 
-        System.out.println("\n\n\n---> makeExerciseList : making flex " + instance);
+       // System.out.println("\n\n\n---> makeExerciseList : making flex " + instance);
 
         FlexSectionExerciseList flex = new FlexSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
           props.isShowTurkToken(), props.showExercisesInOrder(), controller, showTypeAhead, instance);

@@ -269,13 +269,14 @@ public class NavigationHelper extends HorizontalPanel {
     if (keyHandler != null) keyHandler.removeHandler();
   }
 
-  public void enableNextButton(boolean val) { next.setEnabled(val); }
-//  public void enablePrevButton(boolean val) { prev.setEnabled(val); }
-
-  public void setButtonsEnabled(boolean val) {
-    getPrev().setEnabled(val);
+  public void enableNextButton(boolean val) {
     next.setEnabled(val);
   }
+
+/*  public void setButtonsEnabled(boolean val) {
+    getPrev().setEnabled(val);
+    next.setEnabled(val);
+  }*/
 
   public Widget getNext() { return next; }
   public Button getPrev() { return prev; }

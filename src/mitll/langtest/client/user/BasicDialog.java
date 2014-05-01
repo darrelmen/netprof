@@ -148,21 +148,16 @@ public class BasicDialog {
     for (String s : values) {
       listBox.addItem(s);
     }
-    //int ilrChoiceWidth = ;
     listBox.setWidth(ilrChoiceWidth + "px");
     return listBox;
   }
 
-/*  protected ListBox getListBox(List<String> values) {
-    final ListBox genderBox = new ListBox(false);
-    for (String s : values) {
-      genderBox.addItem(s);
-    }
-    return genderBox;
-  }*/
-
   protected void markError(FormField dialectGroup, String message) {
-    markError(dialectGroup.group, dialectGroup.box, dialectGroup.box, TRY_AGAIN, message);
+    markError(dialectGroup, TRY_AGAIN, message);
+  }
+
+  protected void markError(FormField dialectGroup, String header, String message) {
+    markError(dialectGroup.group, dialectGroup.box, dialectGroup.box, header, message);
   }
 
   protected void markError(ControlGroup dialectGroup, Widget dialect, Focusable focusable, String header, String message) {
@@ -199,11 +194,6 @@ public class BasicDialog {
     setupPopoverThatHidesItself(dialectGroup.getWidget(1), header, message);
   }
 
-/*  protected void markError(ControlGroup dialectGroup, Widget dialect, String header, String message) {
-    dialectGroup.setType(ControlGroupType.ERROR);
-    setupPopoverThatHidesItself(dialect, header, message);
-  }*/
-
   void markError(ControlGroup dialectGroup, FocusWidget dialect, String header, String message) {
     markError(dialectGroup, dialect, header, message, Placement.RIGHT);
   }
@@ -214,24 +204,29 @@ public class BasicDialog {
     setupPopover(dialect, header, message, placement);
   }
 
-  void setupPopoverThatHidesItself(final Widget w, String heading, final String message) {
-    System.out.println("\ttriggering popover on '" + w.getTitle() + "' with " + heading + "/" + message);
+  protected void setupPopoverThatHidesItself(final Widget w, String heading, final String message) {
+    Placement placement = Placement.RIGHT;
+//    System.out.println("\ttriggering popover on '" + w.getTitle() + "' with " + heading + "/" + message);
+    setupPopover(w, heading, message, placement);
+  }
+
+  protected void setupPopover(Widget w, String heading, String message, Placement placement) {
+    int delayMillis = 3000;
+    setupPopover(w, heading, message, placement, delayMillis);
+  }
+
+  protected void setupPopover(Widget w, String heading, String message, Placement placement, int delayMillis) {
     final MyPopover popover = new MyPopover();
 
-    configurePopup(popover, w, heading, message, Placement.RIGHT);
+    configurePopup(popover, w, heading, message, placement);
 
     Timer t = new Timer() {
       @Override
       public void run() {
         popover.dontFireAgain();
-        //popover.setHideDelay(0);
-     //   popover.remove(w);
-        //  popover.clear();
-        //  popover.reconfigure();
-        //   popover.clear();
       }
     };
-    t.schedule(3000);
+    t.schedule(delayMillis);
   }
 
   /**
@@ -246,15 +241,6 @@ public class BasicDialog {
     final Popover popover = new Popover();
     configurePopup(popover, w, heading, message, placement);
     visiblePopovers.add(popover);
-/*
-    Timer t = new Timer() {
-      @Override
-      public void run() {
-        //System.out.println("hide popover on " + w + " with " + message);
-        popover.hide();
-      }
-    };
-    t.schedule(3000);*/
 
     Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
@@ -275,7 +261,7 @@ public class BasicDialog {
   void hidePopovers() {
     for (Popover popover : visiblePopovers) popover.hide();
     visiblePopovers.clear();
-    }
+  }
 
   private static class MyPopover extends Popover {
     public void dontFireAgain() {
