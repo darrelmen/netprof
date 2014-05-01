@@ -376,7 +376,7 @@ class StudentDialog extends UserDialog {
        * Fired when the user clicks on the sendButton.
        */
       public void onClick(ClickEvent event) {
-        closeButton.setEnabled(false);
+       // closeButton.setEnabled(false);
         String purposeSetting = getRole(purpose);
         final String audioType = getAudioTypeFromPurpose(purposeSetting);
         System.out.println("\tcheckUserAndMaybeRegister for " + purposeSetting);
