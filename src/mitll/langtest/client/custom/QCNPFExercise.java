@@ -148,6 +148,12 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     return navHelper;
   }
 
+  /**
+   * @see #getNavigationHelper(mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, boolean)
+   * @param listContainer
+   * @param widgets
+   * @return
+   */
   private Button addApprovedButton(final ListInterface listContainer, NavigationHelper widgets) {
     Button approved = new Button(APPROVED);
     approved.getElement().setId("approve");
@@ -232,18 +238,22 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
    * @see #markReviewed(mitll.langtest.client.list.ListInterface, mitll.langtest.shared.CommonShell)
    * @param completedExercise
    */
-  private void markReviewed(CommonShell completedExercise) {
+  private void markReviewed(final CommonShell completedExercise) {
     boolean allCorrect = incorrectFields.isEmpty();
-    System.out.println("markReviewed : exercise " + completedExercise.getID() + " instance " + instance+ " allCorrect " + allCorrect);
+    System.out.println("markReviewed : exercise " + completedExercise.getID() + " instance " + instance + " allCorrect " + allCorrect);
 
     service.markReviewed(completedExercise.getID(), allCorrect, controller.getUser(),
-        new AsyncCallback<Void>() {
-          @Override
-          public void onFailure(Throwable caught) {}
+      new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {
+        }
 
-          @Override
-          public void onSuccess(Void result) {}
-        });
+        @Override
+        public void onSuccess(Void result) {
+          System.out.println("\tmarkReviewed.onSuccess exercise " + completedExercise.getID() + " marked reviewed!");
+        }
+      }
+    );
   }
 
   /**
@@ -349,10 +359,11 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
       for (AudioAttribute audio : malesMap.get(user)) {
         if (!audio.isHasBeenPlayed()) allHaveBeenPlayed = false;
-        Widget panelForAudio = getPanelForAudio(e, audio, tabAndContent);
+        Pair panelForAudio1 = getPanelForAudio(e, audio, tabAndContent);
+        Widget panelForAudio = panelForAudio1.entry;
         tabAndContent.content.add(panelForAudio);
         if (audio.isHasBeenPlayed()) {
-          audioWasPlayed.add(panelForAudio);
+          audioWasPlayed.add(panelForAudio1.audioPanel);
         }
       }
 
@@ -371,7 +382,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
    * @param audio
    * @return
    */
-  private Widget getPanelForAudio(final CommonExercise e, final AudioAttribute audio,RememberTabAndContent tabAndContent) {
+  private Pair getPanelForAudio(final CommonExercise e, final AudioAttribute audio,RememberTabAndContent tabAndContent) {
     String audioRef = audio.getAudioRef();
     if (audioRef != null) {
       audioRef = wavToMP3(audioRef);   // todo why do we have to do this?
@@ -383,12 +394,12 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     audioPanel.addPlayListener(new PlayListener() {
       @Override
       public void playStarted() {
-        System.out.println("playing audio " + audio.getAudioRef() + " has " +tabs.size() + " tabs");
         audioWasPlayed.add(audioPanel);
-        if (audioWasPlayed.size() == toResize.size()) {
+        System.out.println("playing audio " + audio.getAudioRef() + " has " +tabs.size() + " tabs, now " + audioWasPlayed.size()  + " played");
+        //if (audioWasPlayed.size() == toResize.size()) {
           // all components played
           setApproveButtonState();
-        }
+       // }
         for (RememberTabAndContent tabAndContent : tabs) {
           tabAndContent.checkAllPlayed(audioWasPlayed);
         }
@@ -406,7 +417,17 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
     Widget entry = getEntry(audio.getAudioRef(), audioPanel, audioAnnotation);
     // TODO add unique audio attribute id
-    return entry;
+    return new Pair(entry,audioPanel);
+  }
+
+  private static class Pair {
+    Widget entry, audioPanel;
+
+    public Pair(Widget entry, Widget audioPanel) {
+      this.entry = entry;
+      this.audioPanel = audioPanel;
+    }
+
   }
 
   private Widget getEntry(CommonExercise e, final String field, final String label, String value) {
@@ -537,10 +558,12 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
       addCorrectComment(field);
     }
 
+    System.out.println("checkBoxWasClicked : instance = '" +instance +"'");
+
     if (isCourseContent()) {
       String id = exercise.getID();
-      System.out.println("checkBoxWasClicked : instance = '" +instance +"'");
-      if (instance.equalsIgnoreCase("classroom")) {
+      System.out.println("\tcheckBoxWasClicked : instance = '" +instance +"'");
+      if (instance.equalsIgnoreCase(Navigation.CLASSROOM)) {
         STATE state = incorrectFields.isEmpty() ? STATE.UNSET : STATE.DEFECT;
         exercise.setState(state);
         listContainer.setState(id, state);
@@ -560,6 +583,9 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   private void setApproveButtonState() {
     boolean allCorrect = incorrectFields.isEmpty();
     boolean allPlayed = audioWasPlayed.size() == toResize.size();
+
+    System.out.println("\tsetApproveButtonState : allPlayed= '" +allPlayed +"' allCorrect " + allCorrect + " audio played " + audioWasPlayed.size() + " total " + toResize.size());
+
     if (approvedButton != null) {   // comment tab doesn't have it...!
       approvedButton.setEnabled(allCorrect && allPlayed);
 
@@ -567,7 +593,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
       approvedTooltip.reconfigure();
     }
 
-    if (navigationHelper != null) {
+    if (navigationHelper != null) { // this called before nav helper exists
       navigationHelper.enableNextButton(allPlayed);
       nextTooltip.setText(!allPlayed ? "Not all audio has been reviewed" : allCorrect ? APPROVED_BUTTON_TOOLTIP : APPROVED_BUTTON_TOOLTIP2);
       nextTooltip.reconfigure();
