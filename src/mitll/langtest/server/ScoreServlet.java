@@ -29,7 +29,7 @@ public class ScoreServlet extends DatabaseServlet {
 
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    String encodedFileName = request.getRequestURI();
+    //String encodedFileName = request.getRequestURI();
 
     String pathInfo = request.getPathInfo();
     logger.debug("ScoreServlet.doGet : Request " + request.getQueryString() + " path " + pathInfo +
