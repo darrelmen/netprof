@@ -95,7 +95,7 @@ public class UserManager {
 
     }
     else {
-      StudentDialog studentDialog = new StudentDialog(service,props,this, userNotification);
+      StudentDialog studentDialog = new StudentDialog(service, props, this, userNotification);
       studentDialog.displayLoginBox();
     }
   }
@@ -109,16 +109,17 @@ public class UserManager {
 
       @Override
       public void onSuccess(List<User> result) {
+        userNotification.getPermissions().clear();
         for (User u : result) {
           if (((int) u.getId()) == user) {
             for (User.Permission permission : u.getPermissions()) {
               //System.out.println("\tUserManager.login : found : " + u + " with perm " + permission);
-
               userNotification.setPermission(permission, true);
             }
             break;
           }
         }
+        System.out.println("perms for " + user + " now " + userNotification.getPermissions());
         userNotification.gotUser(user);
       }
     });
