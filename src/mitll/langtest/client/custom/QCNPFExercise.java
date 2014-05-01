@@ -580,11 +580,14 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     }
   }
 
+  /**
+   * @see #checkBoxWasClicked(boolean, String, com.google.gwt.user.client.ui.Panel, com.google.gwt.user.client.ui.FocusWidget)
+   */
   private void setApproveButtonState() {
     boolean allCorrect = incorrectFields.isEmpty();
     boolean allPlayed = audioWasPlayed.size() == toResize.size();
 
-    System.out.println("\tsetApproveButtonState : allPlayed= '" +allPlayed +"' allCorrect " + allCorrect + " audio played " + audioWasPlayed.size() + " total " + toResize.size());
+    //System.out.println("\tsetApproveButtonState : allPlayed= '" +allPlayed +"' allCorrect " + allCorrect + " audio played " + audioWasPlayed.size() + " total " + toResize.size());
 
     if (approvedButton != null) {   // comment tab doesn't have it...!
       approvedButton.setEnabled(allCorrect && allPlayed);
