@@ -98,7 +98,7 @@ public class ReviewedDAO extends DAO {
   private void add(String exerciseID, mitll.langtest.shared.STATE state, long creatorID) {
     try {
       // there are much better ways of doing this...
-      //logger.info("add : exid " + exerciseID + " = " + state+ " by " + creatorID);
+      logger.info("add : exid " + exerciseID + " = " + state+ " by " + creatorID);
 
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement(
@@ -127,7 +127,7 @@ public class ReviewedDAO extends DAO {
       statement.close();
       database.closeConnection(connection);
 
-    //  logger.debug("now " + getCount() + " reviewed");
+      logger.debug("now " + getCount() + " reviewed");
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
