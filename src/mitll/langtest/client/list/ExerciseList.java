@@ -272,6 +272,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     public SetExercisesCallback() {}
 
     public void onFailure(Throwable caught) {
+      gotExercises(false);
       if (!caught.getMessage().trim().equals("0")) {
         feedback.showErrorMessage("Server error", "Please clear your cache and reload the page.");
       }
@@ -284,6 +285,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       if (isStaleResponse(result)) {
         System.out.println("----> SetExercisesCallback.onSuccess ignoring result " + result.getReqID() + " b/c before latest " + lastReqID);
       } else {
+        gotExercises(true);
         if (result.getExercises().isEmpty()) {
           gotEmptyExerciseList();
         }
@@ -293,6 +295,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       }
     }
   }
+
+  protected abstract void gotExercises(boolean success);
 
   class SetExercisesCallbackWithID implements AsyncCallback<ExerciseListWrapper> {
     private String id;
