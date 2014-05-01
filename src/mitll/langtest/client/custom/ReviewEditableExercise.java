@@ -6,6 +6,7 @@ import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -60,6 +61,7 @@ class ReviewEditableExercise extends EditableExercise {
   private static final String AGE = "age";
   public static final String REGULAR_SPEED = " Regular speed";
   public static final String SLOW_SPEED = " Slow speed";
+  public static final int DELAY_MILLIS = 5000;
 
   private PagingExerciseList exerciseList;
   private ListInterface predefinedContentList;
@@ -153,6 +155,19 @@ class ReviewEditableExercise extends EditableExercise {
     }
   }
 
+  @Override
+  boolean checkForForeignChange() {
+    boolean b = super.checkForForeignChange();
+
+    if (b) {
+      for (RememberTabAndContent tab : tabs) {
+        setupPopover(tab.content, getWarningHeader(), getWarningForFL(), Placement.TOP, DELAY_MILLIS);
+      }
+    }
+
+    return b;
+  }
+
   private Set<Widget> audioWasPlayed = new HashSet<Widget>();
   private Set<Widget> toResize = new HashSet<Widget>();
 
@@ -175,7 +190,7 @@ class ReviewEditableExercise extends EditableExercise {
       @Override
       protected Widget getBeforePlayWidget() {
         Button delete = new Button("Delete Audio");
-        addTooltip(delete, "Delete this audio cut.");
+        addTooltip(delete, "Delete this audio cut.  Original recorder can re-record.");
         delete.addStyleName("leftFiveMargin");
         delete.setType(ButtonType.WARNING);
         delete.setIcon(IconType.REMOVE);
@@ -191,7 +206,8 @@ class ReviewEditableExercise extends EditableExercise {
 
               @Override
               public void onSuccess(Void result) {
-                outer.setVisible(false);
+                outer.getParent().setVisible(false);
+                predefinedContentList.reload();
                 // TODO : need to update other lists too?
               }
             });
@@ -213,26 +229,6 @@ class ReviewEditableExercise extends EditableExercise {
     if (commentLine != null) {
       vert.add(commentLine);
     }
-
-/*    Button delete = new Button("Delete");
-    delete.setIcon(IconType.REMOVE);
-    vert.add(delete);
-    delete.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        service.markAudioDefect(audio, new AsyncCallback<Void>() {    // delete comment too?
-          @Override
-          public void onFailure(Throwable caught) {
-
-          }
-
-          @Override
-          public void onSuccess(Void result) {
-            audioPanel.setVisible(false);
-          }
-        });
-      }
-    });*/
 
     return vert;
   }
