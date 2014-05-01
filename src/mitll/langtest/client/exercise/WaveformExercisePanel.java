@@ -93,6 +93,7 @@ public class WaveformExercisePanel extends ExercisePanel {
     ResizableCaptionPanel cp = new ResizableCaptionPanel("Regular speed recording");
     cp.setContentWidget(fast);
     vp.add(cp);
+    if (fast.isAudioPathSet()) recordCompleted(fast);
 
     audioPanels.add(fast);
     addAnswerWidget(index, fast);
@@ -102,6 +103,8 @@ public class WaveformExercisePanel extends ExercisePanel {
     cp = new ResizableCaptionPanel("Slow speed recording");
     cp.setContentWidget(slow);
     audioPanels.add(slow);
+    if (slow.isAudioPathSet()) recordCompleted(slow);
+
     addAnswerWidget(index + 1, slow);
 
     vp.add(cp);
