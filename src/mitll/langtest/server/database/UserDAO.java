@@ -302,6 +302,7 @@ public class UserDAO extends DAO {
         userid = rs.getString("userid"); // userid
 
         if (perms != null) {
+          perms = perms.replaceAll("\\[", "").replaceAll("\\]", "");
           for (String perm : perms.split(",")) {
             try {
               if (!perm.isEmpty()) {
