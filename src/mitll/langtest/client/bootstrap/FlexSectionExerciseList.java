@@ -125,8 +125,6 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @see mitll.langtest.client.list.ListInterface#getExercises(long)
    */
   private Panel getWidgetsForTypes() {
-    System.out.println("FlexSectionExerciseList.getWidgetsForTypes ");
-
     final FluidContainer container = new FluidContainer();
     container.getElement().setId("typeOrderContainer");
     DOM.setStyleAttribute(container.getElement(), "paddingLeft", "2px");
@@ -139,9 +137,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
 
   private void getTypeOrder(final FluidContainer container) {
     typeOrder = controller.getStartupInfo().getTypeOrder();
-   // System.out.println("FlexSectionExerciseList.getTypeOrder typeOrder " + typeOrder);
-
-      addButtonRow(controller.getStartupInfo().getSectionNodes(), container, typeOrder, !controller.isGoodwaveMode());
+    addButtonRow(controller.getStartupInfo().getSectionNodes(), container, typeOrder, !controller.isGoodwaveMode());
   }
 
   @Override
@@ -223,7 +219,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
       }
     }
     long now = System.currentTimeMillis();
-    if (now - then > 200) System.out.println("\taddButtonRow took " + (now - then) + " millis" + " instance " + getInstance());
+    if (now - then > 300) System.out.println("\taddButtonRow took " + (now - then) + " millis" + " instance " + getInstance());
 
     if (last != null) setSizesAndPushFirst();
     Widget widget = addBottomText(container);
