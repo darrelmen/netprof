@@ -55,7 +55,7 @@ class AudioPositionPopup extends SimplePanel implements AudioControl  {
   public void songLoaded(final double durationInMillisIgnored) {
     Widget parent = imageContainer;// getParent();
     setSize("2px", parent.getOffsetHeight() + "px");
-    getElement().getStyle().setPosition(Style.Position.FIXED);
+    getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
     getElement().getStyle().setLeft(0, Style.Unit.PX);
     getElement().getStyle().setTop(0, Style.Unit.PX);
 /*    if (debug) System.out.println("songLoaded " + imageOverlay.isShowing() + " vis " + imageOverlay.isVisible() +
@@ -103,8 +103,8 @@ class AudioPositionPopup extends SimplePanel implements AudioControl  {
     if (horizontalFraction > 1f) horizontalFraction = 1f;
     int pixelProgress = (int) (((float) width) * horizontalFraction);
 
-    getElement().getStyle().setLeft(pixelProgress + parent.getAbsoluteLeft(), Style.Unit.PX);
-    getElement().getStyle().setTop(parent.getAbsoluteTop() + 1, Style.Unit.PX);
+    getElement().getStyle().setLeft(pixelProgress/* + parent.getAbsoluteLeft()*/, Style.Unit.PX);
+    //getElement().getStyle().setTop(parent.getAbsoluteTop() + 1, Style.Unit.PX);
     setSize("2px", offsetHeight + "px");
 
     if (debug) {
