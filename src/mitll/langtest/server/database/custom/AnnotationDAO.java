@@ -261,24 +261,24 @@ public class AnnotationDAO extends DAO {
 
     /**
      *
+     * @see mitll.langtest.server.database.custom.UserListManager#getCommentedList(java.util.Collection)
      * @see mitll.langtest.server.database.custom.UserListManager#UserListManager(mitll.langtest.server.database.UserDAO, UserListDAO, UserListExerciseJoinDAO, AnnotationDAO, ReviewedDAO, mitll.langtest.server.PathHelper)
      * @return
      */
-  public Map<String,Long> getDefectIds()  {
+  public Map<String,Long> getAnnotatedExerciseToCreator()  {
     long then = System.currentTimeMillis();
-    Map<String,Long> stateIds = getStateIds(true);
+    Map<String,Long> stateIds = getAnnotationToCreator(true);
     long now = System.currentTimeMillis();
-    //logger.debug("took " +(now-then) + " millis to find " + stateIds.size());
+    if(now-then > 200) logger.debug("getAnnotatedExerciseToCreator took " +(now-then) + " millis to find " + stateIds.size());
     return stateIds;
   }
 
-  private Map<String, Long> getStateIds(boolean forDefects) {
+  private Map<String, Long> getAnnotationToCreator(boolean forDefects) {
     Connection connection = database.getConnection();
 
     String sql2 = "select exerciseid,field,status,creatorid" +
       " from annotation group by exerciseid,field,status,modified order by exerciseid,field,modified;";
 
-   // Set<IDCreator> lists = Collections.emptySet();
     Map<String,Long> exToCreator = Collections.emptyMap();
     try {
       PreparedStatement statement = connection.prepareStatement(sql2);
@@ -301,7 +301,6 @@ public class AnnotationDAO extends DAO {
           // go through all the fields -- if the latest is "incorrect" on any field, it's a defect
           //examineFields(forDefects, lists, prevExid, fieldToStatus);
           if (examineFields(forDefects, fieldToStatus)) {
-            //lists.add(new IDCreator(prevExid,creatorid));
             exToCreator.put(prevExid,creatorid);
           }
           fieldToStatus.clear();
@@ -319,9 +318,7 @@ public class AnnotationDAO extends DAO {
         }
       } */
       if (examineFields(forDefects, fieldToStatus)) {
-    //    lists.add(new IDCreator(prevExid, prevCreatorid));
         exToCreator.put(prevExid,prevCreatorid);
-
       }
 
       logger.debug("getUserAnnotations forDefects " +forDefects+
