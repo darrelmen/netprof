@@ -58,6 +58,6 @@ public interface CommonExercise extends CommonShell {
   Date getModifiedDate();
 
   Collection<String> getFields();
-
+  boolean removeAudio(String key);
   String getCombinedTooltip();
 }
