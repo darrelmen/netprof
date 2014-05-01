@@ -30,6 +30,7 @@ import mitll.langtest.shared.custom.UserList;
 * Created by GO22670 on 3/28/2014.
 */
 class EditableExercise extends NewUserExercise {
+  //public static final String PLEASE_CHECK = "Please check";
   private final HTML englishAnno = new HTML();
   private final HTML translitAnno = new HTML();
   private final HTML foreignAnno = new HTML();
@@ -252,17 +253,26 @@ class EditableExercise extends NewUserExercise {
    */
   boolean checkForForeignChange() {
     if (foreignChanged()) {
-      if (!refAudioChanged() && newUserExercise.getRefAudio() != null) {
-        markError(normalSpeedRecording, "Consistent with " + controller.getLanguage() + "?", "Is the audio consistent with \"" + foreignLang.getText() + "\" ?");
+      String header = getWarningHeader();
+      if (normalSpeedRecording != null && !refAudioChanged() && newUserExercise.getRefAudio() != null) {
+        markError(normalSpeedRecording, header, getWarningForFL());
       }
-      if (!slowRefAudioChanged() && newUserExercise.getSlowAudioRef() != null) {
-        markError(slowSpeedRecording, "Consistent with " + controller.getLanguage() + "?", "Is the audio consistent with \"" + foreignLang.getText() + "\" ?");
+      if (slowSpeedRecording != null && !slowRefAudioChanged() && newUserExercise.getSlowAudioRef() != null) {
+        markError(slowSpeedRecording, header, getWarningForFL());
       }
       if (!translitChanged()) {
-        markError(translit, "Is the transliteration consistent with \"" + foreignLang.getText() + "\" ?");
+        markError(translit, header, "Is the transliteration consistent with \"" + foreignLang.getText() + "\" ?");
       }
       return true;
     } else return false;
+  }
+
+  protected String getWarningHeader() {
+    return "Consistent with " + controller.getLanguage() + "?";
+  }
+
+  protected String getWarningForFL() {
+    return "Is the audio consistent with \"" + foreignLang.getText() + "\" ?";
   }
 
   private boolean englishChanged() {
@@ -350,9 +360,10 @@ class EditableExercise extends NewUserExercise {
     if (byID == null) {
       System.err.println("changeTooltip : huh? can't find exercise with id " + newUserExercise.getID());
     } else {
-      String english1 = newUserExercise.getEnglish();
-      byID.setTooltip(english1.isEmpty() ? newUserExercise.getForeignLanguage() : english1);
-      //System.out.println("changeTooltip : for " + newUserExercise.getID() + " now " + byID.getTooltip());
+      //String english1 = newUserExercise.getEnglish();
+      String combinedTooltip = newUserExercise.getCombinedTooltip();
+      byID.setTooltip(combinedTooltip);//english1.isEmpty() ? newUserExercise.getForeignLanguage() : english1);
+      System.out.println("changeTooltip : for " + newUserExercise.getID() + " now " + byID.getTooltip());
 
       pagingContainer.redraw();   // show change to tooltip!
     }
