@@ -250,7 +250,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     int c = 0;
     if (role.equals(Result.AUDIO_TYPE_RECORDER)) {
       Set<String> recordedForUser = db.getAudioDAO().getRecordedForUser(userID);
-      logger.debug("\tfound " + recordedForUser.size() + " recordings by " + userID);
+      //logger.debug("\tfound " + recordedForUser.size() + " recordings by " + userID);
       for (CommonShell shell : exercises) {
         if (recordedForUser.contains(shell.getID())) {
           shell.setState(STATE.RECORDED);
@@ -258,7 +258,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         }
       }
     } else {
-      logger.debug("\tnot marking recorded for " + role + " and " + userID);
+      //logger.debug("\tnot marking recorded for " + role + " and " + userID);
     }
     return c;
   }
