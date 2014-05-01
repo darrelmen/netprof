@@ -554,6 +554,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
        */
       @Override
       protected void useInvalidResult(AudioAnswer result) {
+        super.useInvalidResult(result);
         playAudioPanel.setEnabled(false);
       }
     }
