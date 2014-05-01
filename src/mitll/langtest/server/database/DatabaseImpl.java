@@ -281,15 +281,7 @@ public class DatabaseImpl implements Database {
     boolean isExcel = lessonPlanFile.endsWith(".xlsx");
     makeDAO(useFile, lessonPlanFile, isExcel, mediaDir, installPath);
 
-    if (useFile && !isExcel) {
-      if (isWordPairs) {
-        ((FileExerciseDAO) exerciseDAO).readWordPairs(lessonPlanFile, doImages);
-      }
-      else {
-        ((FileExerciseDAO) exerciseDAO).readFastAndSlowExercises(installPath, configDir, lessonPlanFile);
-      }
-    }
-    List<CommonExercise> rawExercises = exerciseDAO.getRawExercises();
+    List<CommonExercise> rawExercises = exerciseDAO.getRawExercises();//getRawExercises(useFile, lessonPlanFile, isExcel);
     if (rawExercises.isEmpty()) {
       logger.warn("no exercises for useFile = " + useFile + " and " + lessonPlanFile + " at " + installPath);
     }
@@ -318,8 +310,22 @@ public class DatabaseImpl implements Database {
       exerciseDAO.setAddRemoveDAO(addRemoveDAO);
       exerciseDAO.setAudioDAO(audioDAO);
 
+      /*List<CommonExercise> rawExercises =*/ getRawExercises(useFile, lessonPlanFile, excel);
+
       userDAO.checkForFavorites(userListManager);
     }
+  }
+
+  private List<CommonExercise> getRawExercises(boolean useFile, String lessonPlanFile, boolean isExcel) {
+    if (useFile && !isExcel) {
+      if (isWordPairs) {
+        ((FileExerciseDAO) exerciseDAO).readWordPairs(lessonPlanFile, doImages);
+      }
+      else {
+        ((FileExerciseDAO) exerciseDAO).readFastAndSlowExercises(installPath, configDir, lessonPlanFile);
+      }
+    }
+    return exerciseDAO.getRawExercises();
   }
 
   /**
