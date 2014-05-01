@@ -54,7 +54,7 @@ class ReviewEditableExercise extends EditableExercise {
   private static final String DELETE = "Delete";
   private static final String DELETE_THIS_ITEM = "Delete this item.";
   private static final String ARE_YOU_SURE = "Are you sure?";
-  private static final String REALLY_DELETE_ITEM = "Really delete item?";
+  private static final String REALLY_DELETE_ITEM = "Really delete whole item and all audio cuts?";
   private static final String COPY_THIS_ITEM = "Copy this item.";
   private static final String MALE = "Male";
   private static final String FEMALE = "Female";
