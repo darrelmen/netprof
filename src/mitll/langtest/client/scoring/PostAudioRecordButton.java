@@ -154,7 +154,9 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
 
   public void startRecording() {  controller.startRecording();  }
 
-  protected abstract void useInvalidResult(AudioAnswer result);
+  protected void useInvalidResult(AudioAnswer result) {
+    controller.logEvent(this, "recordButton", getExercise().getID(), "invalid recording " + result.getValidity());
+  }
   public abstract void useResult(AudioAnswer result);
 
   public boolean hasValidAudio() { return validAudio; }
