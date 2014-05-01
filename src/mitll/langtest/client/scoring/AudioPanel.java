@@ -1,7 +1,9 @@
 package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.CheckBox;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Timer;
@@ -51,6 +53,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private static final boolean WARN_ABOUT_MISSING_AUDIO = false;
   private static final int WINDOW_SIZE_CHANGE_THRESHOLD = 50;
   private static final int IMAGE_WIDTH_SLOP = 70 + WINDOW_SIZE_CHANGE_THRESHOLD/2;
+  public static final boolean ADD_CHECKBOX = false;
 
   private final ScoreListener gaugePanel;
   protected final String exerciseID;
@@ -74,7 +77,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private boolean showSpectrogram = false;
   private final int rightMargin;
   private static final boolean debug = false;
-  private static final boolean DEBUG_GET_IMAGES = false;
+  private static final boolean DEBUG_GET_IMAGES = true;
 
   /**
    * @see ScoringAudioPanel#ScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener, int, String, String)
@@ -132,7 +135,10 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    */
   protected void addWidgets(String playButtonSuffix, String audioType) {
     //System.out.println("addWidgets audio path = " + path);
+    DivWidget outer = new DivWidget();
+    outer.getElement().getStyle().setPosition(Style.Position.RELATIVE);
     Panel imageContainer = new VerticalPanel();
+    outer.add(imageContainer);
     imageContainer.getElement().setId("AudioPanel_imageContainer");
 
     HorizontalPanel hp = new HorizontalPanel();
@@ -160,7 +166,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
     waveform = new ImageAndCheck();
     imageContainer.add(getWaveform().image);
-    controlPanel.add(addCheckbox(WAVEFORM, getWaveform()));
+    if (ADD_CHECKBOX) controlPanel.add(addCheckbox(WAVEFORM, getWaveform()));
 
     getWaveform().image.setAltText(WAVEFORM_TOOLTIP);
     getWaveform().image.setTitle(WAVEFORM_TOOLTIP);
@@ -168,18 +174,18 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     spectrogram = new ImageAndCheck();
     if (showSpectrogram) {
       imageContainer.add(getSpectrogram().image);
-      controlPanel.add(addCheckbox(SPECTROGRAM, getSpectrogram()));
+      if (ADD_CHECKBOX) controlPanel.add(addCheckbox(SPECTROGRAM, getSpectrogram()));
     }
 
     words = new ImageAndCheck();
     imageContainer.add(words.image);
     words.image.getElement().setId("Transcript_Words");
-    controlPanel.add(addCheckbox("words", words));
+    if (ADD_CHECKBOX) controlPanel.add(addCheckbox("words", words));
 
     phones = new ImageAndCheck();
     imageContainer.add(phones.image);
     phones.image.getElement().setId("Transcript_Phones");
-    controlPanel.add(addCheckbox("phones", phones));
+    if (ADD_CHECKBOX) controlPanel.add(addCheckbox("phones", phones));
 
     hp.add(controlPanel);
     hp.setCellHorizontalAlignment(controlPanel, HorizontalPanel.ALIGN_RIGHT);
@@ -188,7 +194,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     add(hp);
     hp.addStyleName("bottomFiveMargin");
 
-    add(imageContainer);
+    add(outer);
   }
 
   boolean hasAudio() {  return true;  }
@@ -347,11 +353,11 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     int leftColumnWidth1 = controller.getLeftColumnWidth();
     int leftColumnWidth =  Math.max(225, leftColumnWidth1) + IMAGE_WIDTH_SLOP;
     int rightSide = gaugePanel != null ? gaugePanel.getOffsetWidth() : rightMargin;
-    if (gaugePanel != null && rightSide == 0) {
-      rightSide = 180; // hack!!!
+    if (gaugePanel != null && rightSide == 0 && !controller.getProps().isNoModel()) {
+      rightSide = 180; // TODO : hack!!!
     }
     int width = (int) ((screenPortion * ((float) Window.getClientWidth())) - leftColumnWidth) - rightSide;
-
+    width = (width / 5)*5;
     if (DEBUG_GET_IMAGES) {
       System.out.println("AudioPanel.getImages : leftColumnWidth " + leftColumnWidth + "(" +leftColumnWidth1+
         ") width " + width + " (screen portion = " + screenPortion +
@@ -393,7 +399,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @param width
    * @param imageAndCheck
    */
-  private void getImageURLForAudio(final String path, final String type,int width, final ImageAndCheck imageAndCheck) {
+  private void getImageURLForAudio(final String path, final String type, int width, final ImageAndCheck imageAndCheck) {
     final int toUse = Math.max(MIN_WIDTH, width);
     float heightForType = type.equals(WAVEFORM) ? WAVEFORM_HEIGHT : SPECTROGRAM_HEIGHT;
     int height = Math.max(10,(int) (((float)Window.getClientHeight())/1200f * heightForType));
@@ -401,7 +407,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       int reqid = getReqID(type);
       final long then = System.currentTimeMillis();
 
-     // System.out.println("getImageURLForAudio : req " + reqid + " path " + path + " type " + type + " width " + width);
+      System.out.println("getImageURLForAudio : req " + reqid + " path " + path + " type " + type + " width " + width);
 //      service.getImageForAudioFile(reqid, path, type, toUse, height, new AsyncCallback<ImageResponse>() {
         controller.getImage(reqid, path, type, toUse, height, exerciseID, new AsyncCallback<ImageResponse>() {
           public void onFailure(Throwable caught) {
@@ -441,14 +447,16 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     imageAndCheck.image.setVisible(true);
     audioPositionPopup.reinitialize(result.durationInSeconds);
 
-    // attempt to have the check not become visible until the image comes back from the server
-    Timer t = new Timer() {
-      public void run() {
-        imageAndCheck.getCheck().setVisible(true);
-      }
-    };
+    if (ADD_CHECKBOX) {
+      // attempt to have the check not become visible until the image comes back from the server
+      Timer t = new Timer() {
+        public void run() {
+          imageAndCheck.getCheck().setVisible(true);
+        }
+      };
 
-    t.schedule(50);
+      t.schedule(50);
+    }
   }
 
   private void logMessage(ImageResponse result, long roundtrip) {
