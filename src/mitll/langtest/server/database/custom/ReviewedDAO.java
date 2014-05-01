@@ -10,11 +10,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Let's us keep track of state of read-only exercises too.
@@ -251,10 +255,21 @@ public class ReviewedDAO extends DAO {
     return Collections.emptyMap();
   }
 
-/*  public List<StateCreator> getStateHistory(String exerciseID) {
+  public Collection<String> getDefectExercises() {
+    Map<String, StateCreator> exerciseToState = getExerciseToState(true);
+    Set<String> ids = new HashSet<String>();
+    for (Map.Entry<String,StateCreator> pair : exerciseToState.entrySet()) {
+      if (pair.getValue().getState() == STATE.DEFECT) {
+          ids.add(pair.getKey());
+      }
+    }
+    return ids;
+  }
+
+/*  public Collection<String> getDefectExercises() {
     Connection connection = database.getConnection();
 
-    List<StateCreator> history = new ArrayList<StateCreator>();
+    List<String> history = new ArrayList<String>();
 
     String sql3 = "select " +
       STATE_COL +
