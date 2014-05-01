@@ -566,13 +566,14 @@ public class Navigation extends TabContainer implements RequiresResize {
     setScrollPanelWidth(listScrollPanel);
     npfHelper.onResize();
     avpHelper.onResize();
-    if (controller.isReviewMode()) {
+   // if (controller.isReviewMode()) {
       defectHelper.onResize();
       reviewItem.onResize();
       recorderHelper.onResize();
-    } else if (editItem != null) {
-      editItem.onResize();
-    }
+    //} else if (editItem != null) {
+    editItem.onResize();
+    contentHelper.onResize();
+    //}
   }
 
   /**
