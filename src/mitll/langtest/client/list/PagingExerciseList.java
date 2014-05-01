@@ -1,18 +1,21 @@
 package mitll.langtest.client.list;
 
-import com.github.gwtbootstrap.client.ui.ControlGroup;
-import com.github.gwtbootstrap.client.ui.ControlLabel;
-import com.github.gwtbootstrap.client.ui.Controls;
-import com.github.gwtbootstrap.client.ui.Icon;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.TextBox;
+import com.github.gwtbootstrap.client.ui.constants.IconSize;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Image;
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -179,6 +182,17 @@ public class PagingExerciseList extends ExerciseList {
     add(pagingContainer.getTableWithPager());
   }
 
+  private Timer waitTimer = null;
+  private SafeUri animated = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress28.gif");
+  private SafeUri white = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "white_32x32.png");
+  private final com.github.gwtbootstrap.client.ui.Image waitCursor = new com.github.gwtbootstrap.client.ui.Image(white);
+
+  private long then = 0;
+
+  /**
+   * Show wait cursor if the type ahead takes too long.
+   * @param column
+   */
   void addTypeAhead(Panel column) {
     if (showTypeAhead) {
       typeAhead.getElement().setId("ExerciseList_TypeAhead");
@@ -187,21 +201,55 @@ public class PagingExerciseList extends ExerciseList {
         public void onKeyUp(KeyUpEvent event) {
           String text = typeAhead.getText();
           if (!text.equals(lastTypeAheadValue)) {
+            if (waitTimer != null) {
+              waitTimer.cancel();
+            }
+            waitTimer = new Timer() {
+              @Override
+              public void run() {
+              //  waitCursor.getElement().getStyle().setColor("black");
+                waitCursor.setUrl(animated);
+              }
+            };
+            waitTimer.schedule(1000);
+
+            then = System.currentTimeMillis();
             System.out.println("addTypeAhead : looking for '" + text + "' (" + text.length() + " chars)");
-            controller.logEvent(typeAhead,"TypeAhead","UserList_"+userListID,"User search ='" +text+ "'");
+            controller.logEvent(typeAhead, "TypeAhead", "UserList_" + userListID, "User search ='" + text + "'");
             loadExercises(getHistoryToken(""), text);
             lastTypeAheadValue = text;
           }
         }
       });
 
-      addControlGroupEntry(column, "Search", typeAhead);
+      Panel flow = new FlowPanel();
+      flow.add(typeAhead);
+    //  right = new Icon(IconType.SPINNER);
+    //  right.setIconSize(IconSize.TWO_TIMES);
+      flow.add(waitCursor);
+      waitCursor.getElement().getStyle().setMarginTop(-7, Style.Unit.PX);
+      //waitCursor.getElement().getStyle().setColor("white");
+      waitCursor.setUrl(white);
+
+      //  right.setVisible(false);
+      addControlGroupEntry(column, "Search", flow);
       Scheduler.get().scheduleDeferred(new Command() {
         public void execute() {
           typeAhead.setFocus(true);
         }
       });
     }
+  }
+
+  @Override
+  protected void gotExercises(boolean success) {
+    long now = System.currentTimeMillis();
+    System.out.println("took " + (now - then) + " millis");
+    if (waitTimer != null) {
+      waitTimer.cancel();
+    }
+   waitCursor.setUrl(white);
+    // waitCursor.getElement().getStyle().setColor("white");
   }
 
   protected void showEmptySelection() {
