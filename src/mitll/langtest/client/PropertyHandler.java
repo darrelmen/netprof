@@ -42,15 +42,12 @@ public class PropertyHandler {
   private static final String SHOW_SECTIONS = "showSections";
   private static final String FLASHCARD = "flashcard";
   private static final String FLASHCARD_TEACHER_VIEW = "flashcardTeacherView";
-  private static final String COMBINED_MODE = "combinedMode";
 
   private static final String TIMED_GAME = "timedGame";
   private static final String GAME_TIME = "gameTimeSeconds";
   private static final String LANGUAGE = "language";
   private static final String CONTINUE_PROMPT = "promptBeforeNextItem";
   private static final String RIGHT_ALIGN_CONTENT = "rightAlignContent";
-  //private static final String RESPONSE_TYPE = "responseType";
- // private static final String SECOND_RESPONSE_TYPE = "secondResponseType";
   private static final String BIND_NEXT_TO_ENTER = "bindNextToEnter";
   private static final String SCREEN_PORTION = "screenPortion";
 
