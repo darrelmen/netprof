@@ -485,6 +485,10 @@ public class ExercisePanel extends VerticalPanel implements
     enableNext();
   }
 
+  /**
+   * @see mitll.langtest.client.exercise.WaveformPostAudioRecordButton#useResult(mitll.langtest.shared.AudioAnswer)
+   * @param answer
+   */
   public void recordCompleted(Widget answer) {
     completed.add(answer);
 
@@ -530,17 +534,22 @@ public class ExercisePanel extends VerticalPanel implements
   }
 
   protected void enableNext() {
-    //System.out.println("enableNext : answered " + completed.size() + " vs total " + answers.size());
+    System.out.println("enableNext : answered " + completed.size() + " vs total " + answers.size());
     boolean isComplete = isCompleted();
     navigationHelper.enableNextButton(isComplete);
   }
 
   protected boolean isCompleted() {
     boolean b = completed.size() == answers.size();
-    //System.out.println("isCompleted : answered " + completed.size() + " vs total " + answers.size() + " : " + b);
+    if (b) {
+      System.out.println("isCompleted : answered " + completed.size() + " vs total " + answers.size() + " : " + b);
+    }
     return b;
   }
 
   protected void enableNextButton(boolean val) {  navigationHelper.enableNextButton(val); }
-  void setButtonsEnabled(boolean val) { navigationHelper.setButtonsEnabled(val);}
+  void setButtonsEnabled(boolean val) {
+   // navigationHelper.setButtonsEnabled(val);
+    enableNext();
+  }
 }
