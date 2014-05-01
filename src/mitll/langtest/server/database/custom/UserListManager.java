@@ -365,12 +365,12 @@ public class UserListManager {
   public UserList getCommentedList(Collection<String> typeOrder) {
     Map<String, ReviewedDAO.StateCreator> exerciseToState = getExerciseToState(true); // skip unset items!
     Map<String, Long> idToCreator = annotationDAO.getDefectIds();
-    logger.debug("getCommentedList There are " + exerciseToState.size() + " reviewed items ");
-    logger.debug("getCommentedList There are " + idToCreator.size() + " idToCreator items ");
+    //logger.debug("getCommentedList There are " + exerciseToState.size() + " reviewed items ");
+   // logger.debug("getCommentedList There are " + idToCreator.size() + " idToCreator items ");
     for (String id : exerciseToState.keySet()) {
       idToCreator.remove(id);// what's left are items that are not reviewed
     }
-    logger.debug("getCommentedList After there are " + idToCreator.size() + " idToCreator items ");
+   // logger.debug("getCommentedList After there are " + idToCreator.size() + " idToCreator items ");
 
     List<CommonUserExercise> include = userExerciseDAO.getWhere(idToCreator.keySet());
 
@@ -574,6 +574,8 @@ public class UserListManager {
       ExerciseAnnotation value = pair.getValue();
       addAnnotation(assignedID, pair.getKey(), value.status, value.comment, userExercise.getCreator());
     }
+
+    userExercise.setTooltip(userExercise.getCombinedTooltip());
 
     return userExercise;
   }
