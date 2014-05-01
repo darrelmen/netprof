@@ -102,13 +102,15 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
 
   @Override
   protected void useInvalidResult(AudioAnswer result) {
+    super.useInvalidResult(result);
+
     System.out.println("WaveformPostAudioRecordButton : " + getElement().getId() + " : got invalid result " +result);
     recordAudioPanel.getWaveform().setVisible(false);
     recordAudioPanel.getSpectrogram().setVisible(false);
     if (parentPanel instanceof ExercisePanel) {
       ((ExercisePanel) parentPanel).recordIncomplete(recordAudioPanel);
     }
-    controller.logEvent(recordAudioPanel.getButton(),"recordButton",getExercise().getID(),"invalid recording "+result.getValidity());
+  //  controller.logEvent(recordAudioPanel.getButton(), "recordButton", getExercise().getID(), "invalid recording " + result.getValidity());
 
     setPlayEnabled(false);
   }
