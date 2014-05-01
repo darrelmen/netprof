@@ -77,7 +77,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private boolean showSpectrogram = false;
   private final int rightMargin;
   private static final boolean debug = false;
-  private static final boolean DEBUG_GET_IMAGES = true;
+  private static final boolean DEBUG_GET_IMAGES = false;
 
   /**
    * @see ScoringAudioPanel#ScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener, int, String, String)
@@ -353,7 +353,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     int leftColumnWidth1 = controller.getLeftColumnWidth();
     int leftColumnWidth =  Math.max(225, leftColumnWidth1) + IMAGE_WIDTH_SLOP;
     int rightSide = gaugePanel != null ? gaugePanel.getOffsetWidth() : rightMargin;
-    if (gaugePanel != null && rightSide == 0 && !controller.getProps().isNoModel()) {
+    if (gaugePanel != null && rightSide == 0 /*&& !controller.getProps().isNoModel()*/) {
       rightSide = 180; // TODO : hack!!!
     }
     int width = (int) ((screenPortion * ((float) Window.getClientWidth())) - leftColumnWidth) - rightSide;
