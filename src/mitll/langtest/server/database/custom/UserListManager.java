@@ -611,7 +611,7 @@ public class UserListManager {
       String fast = FAST + "_" + now + "_by_" + userExercise.getCreator() + ".wav";
       String refAudio = getRefAudioPath(userExercise.getID(), fileRef, fast, overwrite);
       regularSpeed.setAudioRef(refAudio);
-      logger.debug("fixAudioPaths : for " + userExercise.getID() + " fast is " + fast + " size " + FileUtils.size(refAudio));
+    //  logger.debug("fixAudioPaths : for " + userExercise.getID() + " fast is " + fast + " size " + FileUtils.size(refAudio));
     }
 
     AudioAttribute slowSpeed = userExercise.getSlowSpeed();
