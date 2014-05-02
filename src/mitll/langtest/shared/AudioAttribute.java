@@ -19,6 +19,7 @@ public class AudioAttribute implements IsSerializable {
 
   private MiniUser user;
 
+  private int uniqueID;
   private String audioRef;
   private String exid;
   private long userid;
@@ -27,13 +28,13 @@ public class AudioAttribute implements IsSerializable {
   private Map<String, String> attributes;
   private boolean hasBeenPlayed;
 
-  public AudioAttribute() {
-  }
+  public AudioAttribute() {}
 
-  public AudioAttribute(long userid,
+  public AudioAttribute(int uniqueID, long userid,
                         String exid,
                         String audioRef,
                         long timestamp, long duration, String type, MiniUser user) {
+    this.uniqueID = uniqueID;
     this.userid = userid;
     this.exid = exid;
     this.audioRef = audioRef;
@@ -157,12 +158,20 @@ public class AudioAttribute implements IsSerializable {
     return timestamp;
   }
 
-  @Override
-  public String toString() {
-    return "Audio " + audioRef + " attrs " + attributes + " by " + userid +"/"+user;
-  }
-
   public long getDuration() {
     return duration;
+  }
+
+  public int getUniqueID() {
+    return uniqueID;
+  }
+
+  public void setUniqueID(int uniqueID) {
+    this.uniqueID = uniqueID;
+  }
+
+  @Override
+  public String toString() {
+    return "Audio id " +uniqueID + " : " + audioRef + " attrs " + attributes + " by " + userid +"/"+user;
   }
 }
