@@ -25,12 +25,14 @@ import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.CommonUserExercise;
+import mitll.langtest.shared.Result;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 
@@ -581,7 +583,11 @@ public class NewUserExercise extends BasicDialog {
         new WaveformPostAudioRecordButton(exercise, controller, exercisePanel, this, service, recordRegularSpeed ? 0:1,
           false // don't record in results table
             ,
-          CLICK_AND_HOLD_TO_RECORD, RELEASE_TO_STOP, audioType) {
+          //CLICK_AND_HOLD_TO_RECORD,
+          //RELEASE_TO_STOP,
+          RecordButton.RECORD1,
+          RecordButton.STOP1,
+          audioType) {
           @Override
           public void stopRecording() {
             otherRAP.setEnabled(true);
@@ -605,12 +611,33 @@ public class NewUserExercise extends BasicDialog {
           }
 
           @Override
+          protected String getAudioType() {
+            return recordRegularSpeed ? Result.AUDIO_TYPE_REGULAR : Result.AUDIO_TYPE_SLOW;
+          }
+
+          @Override
           public void useResult(AudioAnswer result) {
             super.useResult(result);
-            if (recordRegularSpeed) {
-              newUserExercise.setRefAudio(result.getPath());
-            } else {
-              newUserExercise.setSlowRefAudio(result.getPath());
+
+            System.out.println("got back " + result.getAudioAttribute() + " for " + newUserExercise);
+            if (result.getAudioAttribute() != null) {
+
+              if (recordRegularSpeed) {
+                //newUserExercise.setRefAudio(result.getPath());
+                 result.getAudioAttribute().markRegular();
+              } else {
+                // newUserExercise.setSlowRefAudio(result.getPath());
+                result.getAudioAttribute().markSlow();
+              }
+
+             // System.out.println("\tsetting " + result.getAudioAttribute() + " on " + newUserExercise.getID());
+
+              newUserExercise.addAudio(result.getAudioAttribute());
+
+              //System.out.println("\tafter " + newUserExercise.getAudioAttributes());
+            }
+            else {
+              System.err.println("no valid audio on " + result);
             }
             audioPosted();
           }

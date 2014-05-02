@@ -119,7 +119,7 @@ public class UserManager {
             break;
           }
         }
-        System.out.println("perms for " + user + " now " + userNotification.getPermissions());
+        //System.out.println("perms for " + user + " now " + userNotification.getPermissions());
         userNotification.gotUser(user);
       }
     });
