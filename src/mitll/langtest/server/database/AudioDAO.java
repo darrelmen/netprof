@@ -26,6 +26,7 @@ import org.apache.log4j.Logger;
 public class AudioDAO extends DAO {
   private static final Logger logger = Logger.getLogger(AudioDAO.class);
 
+ // public static final String ID1 = "id";
   public static final String ID = "id";
   private static final String USERID = "userid";
   private static final String AUDIO_REF = "audioRef";
@@ -35,8 +36,10 @@ public class AudioDAO extends DAO {
   static final String AUDIO_TYPE = "audioType";
   static final String DURATION = "duration";
   static final String DEFECT = "defect";
+  public static final String REGULAR = "regular";
+  public static final String SLOW = "slow";
 
- // private final boolean debug = false;
+  // private final boolean debug = false;
   private final Connection connection;
   private UserDAO userDAO;
 
@@ -103,6 +106,16 @@ public class AudioDAO extends DAO {
     return new ArrayList<AudioAttribute>();
   }
 
+  public List<AudioAttribute> getAudioAttributesForID(long id) {
+    try {
+      String sql = "SELECT * FROM " + AUDIO + " WHERE " +ID +"=" + id;
+      return getResultsSQL(sql);
+    } catch (Exception ee) {
+      logger.error("got " + ee, ee);
+    }
+    return new ArrayList<AudioAttribute>();
+  }
+
   /**
    * Items that are recorded must have both regular and slow speed audio.
    * @see mitll.langtest.server.LangTestDatabaseImpl#markRecordedState(int, String, java.util.Collection)
@@ -111,10 +124,8 @@ public class AudioDAO extends DAO {
    */
   public Set<String> getRecordedForUser(long userid) {
     try {
-      //String audioSpeed = "regular";
-      Set<String> validAudioAtReg = getValidAudioAtSpeed(userid, "regular");
-      Set<String> validAudioAtSlow = getValidAudioAtSpeed(userid, "slow");
-      // logger.debug("sql " + sql + " ids " + exidResultsForQuery.size() + " ");
+      Set<String> validAudioAtReg  = getValidAudioAtSpeed(userid, REGULAR);
+      Set<String> validAudioAtSlow = getValidAudioAtSpeed(userid, SLOW);
       boolean b = validAudioAtReg.retainAll(validAudioAtSlow);
       return validAudioAtReg;
     } catch (Exception ee) {
@@ -158,7 +169,7 @@ public class AudioDAO extends DAO {
    // logger.debug("users " + miniUsers);
 
     while (rs.next()) {
-     // int uniqueID = rs.getInt(ID);
+      int uniqueID = rs.getInt(ID);
       long userID = rs.getLong(USERID);
       String exid = rs.getString(Database.EXID);
       Timestamp timestamp = rs.getTimestamp(Database.TIME);
@@ -168,7 +179,7 @@ public class AudioDAO extends DAO {
       int dur = rs.getInt(DURATION);
 
       MiniUser user = miniUsers.get(userID);
-      AudioAttribute audioAttr = new AudioAttribute(userID, //id
+      AudioAttribute audioAttr = new AudioAttribute(uniqueID, userID, //id
         exid, // id
         audioRef, // answer
         timestamp.getTime(),
@@ -284,6 +295,8 @@ public class AudioDAO extends DAO {
   }
 
   /**
+   * Why does this have to be so schizo? add or update -- should just choose
+   *
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile(String, String, String, int, int, int, boolean, String, boolean, boolean, boolean)
    * @param userid
    * @param audioRef
@@ -293,7 +306,7 @@ public class AudioDAO extends DAO {
    * @param durationInMillis
    * @return
    */
-  public int addOrUpdate(int userid, String audioRef, String exerciseID, long timestamp, String audioType, int durationInMillis) {
+  public AudioAttribute addOrUpdate(int userid, String audioRef, String exerciseID, long timestamp, String audioType, int durationInMillis) {
     if (userid <1) {
       logger.error("huh? userid is " +userid);
       new Exception().printStackTrace();
@@ -326,18 +339,84 @@ public class AudioDAO extends DAO {
 
       int i = statement.executeUpdate();
 
+      AudioAttribute audioAttr = null;
       if (i == 0) {
         long l = addAudio(connection, userid, audioRef, exerciseID, timestamp, audioType, durationInMillis);
-        i = (int)l;
+        audioAttr = getAudioAttribute((int)l,userid, audioRef, exerciseID, timestamp, audioType, durationInMillis);
+//        i = (int)l;
+
+        logger.debug("returning " + audioAttr);
+      }
+      else {
+        List<AudioAttribute> audioAttributes = getAudioAttributes(exerciseID);
+
+        logger.debug("for  " +exerciseID + " found " + audioAttributes);
+
+        for (AudioAttribute audioAttribute : audioAttributes) {
+          logger.debug("\tfor  " +audioAttribute + " against " + userid + "/" + audioType );
+
+          if (audioAttribute.getUserid() == userid && audioAttribute.getAudioType().equalsIgnoreCase(audioType)) {
+
+            logger.debug("\tfound  " +audioAttribute + " for " + userid + "/" + audioType );
+
+            audioAttr = audioAttribute;
+            break;
+          }
+        }
+        logger.debug("returning " + audioAttr);
+
+      }
+  //    if (i > 0) {
+    //  }
+
+      statement.close();
+      database.closeConnection(connection);
+
+      return audioAttr;
+    } catch (Exception e) {
+      logger.error("got " + e, e);
+    }
+    return null;
+  }
+
+  private AudioAttribute getAudioAttribute(int i,
+                                             int userid, String audioRef, String exerciseID, long timestamp, String audioType, int durationInMillis) {
+    return new AudioAttribute(i, userid, //id
+      exerciseID, // id
+      audioRef, // answer
+      timestamp,
+      durationInMillis, audioType,
+      userDAO.getMiniUser(userid));
+  }
+
+  public void updateExerciseID(int uniqueID, String exerciseID) {
+    try {
+      Connection connection = database.getConnection();
+      String sql = "UPDATE " + AUDIO +
+        " " +
+        "SET " +
+        Database.EXID +
+        "=? " +
+        "WHERE " +
+        ID + "=?";
+      PreparedStatement statement = connection.prepareStatement(sql);
+
+      int ii = 1;
+
+      statement.setString(ii++, exerciseID);
+      statement.setInt(ii++, uniqueID);
+
+      int i = statement.executeUpdate();
+
+      if (i == 0) {
+        logger.error("huh? couldn't update " + uniqueID + " to " + exerciseID);
       }
 
       statement.close();
       database.closeConnection(connection);
-      return i;
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
-    return -1;
   }
 
   /**
@@ -433,30 +512,12 @@ public class AudioDAO extends DAO {
     if (rs.next()) {
       newID = rs.getLong(1);
     } else {
-      logger.error("huh? no key was generated?");
+      logger.error("addAudio : huh? no key was generated?");
     }
 
     statement.close();
 
     return newID;
-  }
-
-  /**
-   *
-   * @see DatabaseImpl#importCourseExamples()
-   */
-  void drop() {
-    try {
-      PreparedStatement statement = connection.prepareStatement("DROP TABLE if exists "+AUDIO);
-      if (!statement.execute()) {
-        logger.error("couldn't drop table?");
-      }
-      statement.close();
-      database.closeConnection(connection);
-
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
   }
 
   /**
@@ -474,7 +535,8 @@ public class AudioDAO extends DAO {
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
       AUDIO +
       " (" +
-      "id IDENTITY, " +
+      ID +
+      " IDENTITY, " +
       USERID +
       " INT, " +
       Database.EXID + " VARCHAR, " +
