@@ -29,8 +29,8 @@ import mitll.langtest.client.flashcard.FlashcardRecordButtonPanel;
  */
 public class RecordButton extends Button {
   private static final int PERIOD_MILLIS = 500;
-  private static final String RECORD1 = "Record";
-  private static final String STOP1 = "Recording...";
+  public static final String RECORD1 = "Record      ";
+  public static final String STOP1 = "Recording...";
   private final String RECORD;
   private final String STOP;
 
@@ -60,6 +60,7 @@ public class RecordButton extends Button {
     super(buttonText);
     RECORD = buttonText;
     STOP = stopButtonText;
+    //if (STOP.equalsIgnoreCase("stop")) new Exception().printStackTrace();
     this.doClickAndHold = doClickAndHold;
     if (doClickAndHold) {
       setTitle(FlashcardRecordButtonPanel.PRESS_AND_HOLD_THE_MOUSE_BUTTON_TO_RECORD);

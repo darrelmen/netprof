@@ -14,7 +14,6 @@ public class PathWriter {
   private static final Logger logger = Logger.getLogger(PathWriter.class);
 
   private static final String BEST_AUDIO = "bestAudio";
- // private String configDir;
 
   /**
    * @see mitll.langtest.server.database.custom.UserListManager#getRefAudioPath
