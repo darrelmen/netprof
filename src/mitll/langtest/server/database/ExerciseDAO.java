@@ -18,7 +18,7 @@ public interface ExerciseDAO {
   List<CommonExercise> getRawExercises();
   SectionHelper getSectionHelper();
 
-  void addOverlay(CommonUserExercise userExercise);
+  CommonExercise addOverlay(CommonUserExercise userExercise);
   void add(CommonUserExercise userExercise);
 
   boolean remove(String id);
