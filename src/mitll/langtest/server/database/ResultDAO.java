@@ -1,10 +1,8 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
-import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
-import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.monitoring.Session;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
@@ -61,7 +59,7 @@ public class ResultDAO extends DAO {
   static final String PRON_SCORE = "pronscore";
   static final String STIMULUS = "stimulus";
 
-  private final GradeDAO gradeDAO;
+  //private final GradeDAO gradeDAO;
   private final boolean debug = false;
 
   /**
@@ -72,7 +70,7 @@ public class ResultDAO extends DAO {
   public ResultDAO(Database database, UserDAO userDAO) {
     super(database);
 
-    gradeDAO = new GradeDAO(database, userDAO, this);
+  //  gradeDAO = new GradeDAO(database, userDAO, this);
   }
 
   //public List<SimpleResult> getSimpleResults() { return getSimpleResults("");  }
@@ -351,11 +349,11 @@ public class ResultDAO extends DAO {
    * @return
    * @see DatabaseImpl#getNextUngradedExerciseSlow
    */
-  public boolean areAnyResultsLeftToGradeFor(CommonExercise e, int expected, boolean englishOnly) {
+/*  public boolean areAnyResultsLeftToGradeFor(CommonExercise e, int expected, boolean englishOnly) {
     String exerciseID = e.getID();
     GradeDAO.GradesAndIDs resultIDsForExercise = gradeDAO.getResultIDsForExercise(exerciseID);
     return !areAllResultsGraded(exerciseID, resultIDsForExercise.grades, expected, englishOnly);
-  }
+  }*/
 
   /**
    * Return true if all results have been graded at the grade number
@@ -369,12 +367,12 @@ public class ResultDAO extends DAO {
    * @return ungraded answers
    * @see #areAnyResultsLeftToGradeFor
    */
-  private boolean areAllResultsGraded(String exerciseID, Collection<Grade> gradedResults, int expected, boolean useEnglishGrades) {
+/*  private boolean areAllResultsGraded(String exerciseID, Collection<Grade> gradedResults, int expected, boolean useEnglishGrades) {
     List<Result> resultsForExercise = getAllResultsForExercise(exerciseID);
-/*    if (debug && !resultsForExercise.isEmpty()) {
+*//*    if (debug && !resultsForExercise.isEmpty()) {
       logger.debug("for " + exerciseID + " expected " + expected +
         " grades/item before " + resultsForExercise.size() + " results, and " + gradedResults.size() + " grades");
-    }*/
+    }*//*
     if (resultsForExercise.isEmpty()) {
       return true;
     }
@@ -408,7 +406,7 @@ public class ResultDAO extends DAO {
     }
 
     return allGraded;
-  }
+  }*/
 
   /**
    * @param exerciseID
