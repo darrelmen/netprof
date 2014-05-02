@@ -20,6 +20,9 @@ public class AudioAnswer implements IsSerializable {
   private boolean saidAnswer = false;
   private int durationInMillis;
   private long resultID;
+  //private int audioID;
+  private AudioAttribute audioAttribute;
+
 
   public enum Validity implements IsSerializable {
     OK("Audio OK."),
@@ -127,8 +130,17 @@ public class AudioAnswer implements IsSerializable {
     return durationInMillis;
   }
 
+  public AudioAttribute getAudioAttribute() {
+    return audioAttribute;
+  }
+
+  public void setAudioAttribute(AudioAttribute audioAttribute) {
+    this.audioAttribute = audioAttribute;
+  }
+
   public String toString() {
-    return "Answer id " + getResultID() + " : Path " + path + " id " + reqid + " validity " + validity +
+    return "Answer id " + getResultID() + " : audio attr " +audioAttribute+
+      " Path " + path + " id " + reqid + " validity " + validity +
       " correct " + correct + " score " + score + " said answer " + saidAnswer;
   }
 }
