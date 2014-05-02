@@ -210,14 +210,14 @@ public class ExcelImport implements ExerciseDAO {
    * @param userExercise
    */
   @Override
-  public void addOverlay(CommonUserExercise userExercise) {
+  public CommonExercise addOverlay(CommonUserExercise userExercise) {
     CommonExercise exercise = getExercise(userExercise.getID());
-    logger.debug("\taddOverlay at " +userExercise.getID() + " found " +exercise);
 
     if (exercise == null) {
       logger.error("addOverlay : huh? can't find " + userExercise);
     }
     else {
+      logger.debug("addOverlay at " +userExercise.getID() + " found " +exercise);
       synchronized (this) {
         int i = exercises.indexOf(exercise);
         if (i == -1) {
@@ -231,6 +231,7 @@ public class ExcelImport implements ExerciseDAO {
         logger.debug("addOverlay : after " + getExercise(userExercise.getID()));
       }
     }
+    return exercise;
   }
 
   public void add(CommonUserExercise ue) {
@@ -511,9 +512,9 @@ public class ExcelImport implements ExerciseDAO {
 
                 // keep track of synonyms (or better term)
                 rememberExercise(exercises, englishToExercises, imported);
-                if (MARK_MISSING_AUDIO_AS_DEFECT && !imported.hasRefAudio()) {
+/*                if (MARK_MISSING_AUDIO_AS_DEFECT && !imported.hasRefAudio()) {
                   fieldToDefect.put("refAudio", "missing reference audio");
-                }
+                }*/
                 if (!fieldToDefect.isEmpty()) {
                   idToDefectMap.put(imported.getID(), fieldToDefect);
                 }
@@ -682,9 +683,9 @@ public class ExcelImport implements ExerciseDAO {
 
                 // keep track of synonyms (or better term)
                 rememberExercise(exercises, englishToExercises, imported);
-                if (MARK_MISSING_AUDIO_AS_DEFECT && !imported.hasRefAudio()) {
+/*                if (MARK_MISSING_AUDIO_AS_DEFECT && !imported.hasRefAudio()) {
                   fieldToDefect.put("refAudio", "missing reference audio");
-                }
+                }*/
                 if (!fieldToDefect.isEmpty()) {
                   idToDefectMap.put(imported.getID(), fieldToDefect);
                 }
