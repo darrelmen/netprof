@@ -485,10 +485,11 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
     if (id.length() > 0) {
       checkAndAskServer(id);
-    } else {
+    }
+/*    else {
       System.out.println("ExerciseList.onValueChange : got invalid event " + event + " value " + token + " id '" + id+
           "'");
-    }
+    }*/
   }
 
   @Override
@@ -521,7 +522,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
         //System.out.println("got history item for another instance '" + selectionState.getInstance() + "' vs me '" + instance +"'");
       } else {
         String item = selectionState.getItem();
-        System.out.println("got history item for instance '" + selectionState.getInstance() + " : '" + item+"'");
+       // System.out.println("got history item for instance '" + selectionState.getInstance() + " : '" + item+"'");
         return item;
       }
     }
