@@ -138,7 +138,8 @@ public class Export {
    * @return
    * @see #getExport(boolean, boolean)
    */
-  private List<ExerciseExport> getExports(Map<Integer, List<Grade>> idToGrade, List<Result> resultsForExercise,
+  private List<ExerciseExport> getExports(Map<Integer, List<Grade>> idToGrade,
+                                          List<Result> resultsForExercise,
                                           CommonExercise exercise, boolean useFLQ, boolean useSpoken) {
     boolean debug = false;
     Map<Integer, ExerciseExport> qidToExport = populateIdToExportMap(exercise.toExercise());
