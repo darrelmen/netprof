@@ -50,7 +50,7 @@ import java.util.Map;
  * Time: 8:50 PM
  * To change this template use File | Settings | File Templates.
  */
-public class Navigation extends TabContainer implements RequiresResize {
+public class Navigation implements RequiresResize {
   private static final String CHAPTERS = "Learn";
   private static final String CONTENT = CHAPTERS;//"Course Content";
   private static final String YOUR_LISTS = "Study Your Lists";
@@ -369,7 +369,6 @@ public class Navigation extends TabContainer implements RequiresResize {
    * TODOs : streamline this -- there are three requests in sequence...
    * @see mitll.langtest.client.LangTest#doEverythingAfterFactory(long)
    */
-  @Override
   public void showInitialState() {
     final int user = userManager.getUser();
 
@@ -490,6 +489,20 @@ public class Navigation extends TabContainer implements RequiresResize {
     } else {
       toUse.tab.fireEvent(new ButtonClickEvent());
     }
+  }
+
+  /**
+   * @see Navigation#getTabPanel(com.google.gwt.user.client.ui.Panel)
+   * @see Navigation#getListOperations(mitll.langtest.shared.custom.UserList, String)
+   * @param tabPanel
+   * @param iconType
+   * @param label
+   * @return
+   */
+  TabAndContent makeTab(TabPanel tabPanel, IconType iconType, String label) {
+    TabAndContent tabAndContent = new TabAndContent(iconType, label);
+    tabPanel.add(tabAndContent.tab.asTabLink());
+    return tabAndContent;
   }
 
   /*To call click() function for Programmatic equivalent of the user clicking the button.*/
@@ -830,7 +843,7 @@ public class Navigation extends TabContainer implements RequiresResize {
                                                 UserList ul, String instanceName1,
                                                 boolean isReview, boolean isComment, boolean isAttention, boolean isNormalList) {
     String subTab = storage.getValue(SUB_TAB);
-    System.out.println("selectPreviouslyClickedSubTab : subtab " + subTab);
+    //System.out.println("selectPreviouslyClickedSubTab : subtab " + subTab);
 
     boolean chosePrev = false;
     if (subTab != null) {
