@@ -24,19 +24,11 @@ public class ExerciseSorter {
    * @param recordedLast
    * @return
    */
-  public void
-  //List<CommonExercise>
-  getSortedByUnitThenAlpha(List<? extends CommonExercise> toSort, //final Collection<String> typeOrder,
-                                                        final boolean recordedLast) {
-    //List<CommonExercise> copy = new ArrayList<CommonExercise>(toSort);
-
+  public void getSortedByUnitThenAlpha(List<? extends CommonExercise> toSort, final boolean recordedLast) {
     //logger.debug("sorting " + toSort.size() + " recorded last " +recordedLast);
-   // final Collection<String> typeOrder = getTypeOrder();
     if (typeOrder.isEmpty()) {
       sortByTooltip(toSort);
-     // return copy;
-    }
-    else {
+    } else {
       boolean allPredef = true;
       // first check if we have a homogenous predefined exercise list
       for (CommonExercise commonExercise : toSort) {
@@ -62,24 +54,28 @@ public class ExerciseSorter {
             for (String type : typeOrder) {
               String type1 = o1.getUnitToValue().get(type);
               String type2 = o2.getUnitToValue().get(type);
-              i = type1.compareTo(type2);
+              boolean t1Null = type1 == null;
+              boolean t2Null = type2 == null;
+              if (t1Null) {
+                i = t2Null ? 0 : +1;
+              } else if (t2Null) {
+                i = -1;
+              } else {
+                i = type1.compareTo(type2);
+              }
+
               if (i != 0) {
                 break;
               }
             }
 
             // items in same chapter alphabetical by tooltip
-            if (i == 0) {
-              return tooltipComp(o1, o2);
-            } else {
-              return i;
-            }
+            return (i == 0) ? tooltipComp(o1, o2) : i;
           }
         });
       } else {
         sortByTooltip(toSort);
       }
-     // return copy;
     }
   }
 
