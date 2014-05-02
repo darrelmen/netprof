@@ -238,6 +238,10 @@ public class UserDAO extends DAO {
     return mini;
   }
 
+  public MiniUser getMiniUser(long userid) {
+    User userWhere = getUserWhere(userid);
+    return userWhere == null ? null : new MiniUser(userWhere);
+  }
   /**
    * @seex OnlineUsers#getUser(long)
    * @param userid
