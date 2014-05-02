@@ -307,7 +307,7 @@ public class HistoryExerciseList extends PagingExerciseList {
      */
   @Override
   public void onValueChange(ValueChangeEvent<String> event) {
-    if (debug && false) System.out.println(new Date() +" HistoryExerciseList.onValueChange : ------ start ---- " + getInstance());
+    //if (debug && false) System.out.println(new Date() +" HistoryExerciseList.onValueChange : ------ start ---- " + getInstance());
 
     String rawToken = getTokenFromEvent(event);
     SelectionState selectionState1 = getSelectionState(rawToken);
