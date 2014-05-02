@@ -3,7 +3,6 @@ package mitll.langtest.client.exercise;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.ImageElement;
@@ -18,7 +17,6 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.SimplePager;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
@@ -88,7 +86,7 @@ public class PagingContainer {
   public void forgetExercise(CommonShell es) {
     List<CommonShell> list = getList();
     int before = getList().size();
-    System.out.println("PagingContainer.forgetExercise, before size = " + before + " : "+ es);
+    //System.out.println("PagingContainer.forgetExercise, before size = " + before + " : "+ es);
 
     if (!list.remove(es)) {
       if (!list.remove(getByID(es.getID()))) {
@@ -103,10 +101,10 @@ public class PagingContainer {
     }
     else {
       if (list.size() == before -1) {
-        System.out.println("\tPagingContainer : now has " + list.size()+ " items");
+        //System.out.println("\tPagingContainer : now has " + list.size()+ " items");
       }
       else {
-        System.err.println("\tPagingContainer : now has " + list.size() + " items vs " +before);
+        System.err.println("\tPagingContainer.forgetExercise : now has " + list.size() + " items vs " +before);
       }
       idToExercise.remove(es.getID());
     }
@@ -171,7 +169,7 @@ public class PagingContainer {
       protected void updateRowData(int start, List<CommonShell> values) {
         super.updateRowData(start, values);
 
-        System.out.println("updateRowData " + start);
+        //System.out.println("updateRowData " + start);
       }
     };
 
@@ -195,7 +193,7 @@ public class PagingContainer {
     });*/
 
 //    /pager.getWidget();
-    System.out.println("pager " + pager);
+    //System.out.println("pager " + pager);
     return column;
   }
 
@@ -483,7 +481,7 @@ public class PagingContainer {
     int i = list.indexOf(afterThisOne);
     list.add(i + 1, exercise);
     int after = list.size();
-    System.out.println("data now has "+ after + " after adding " + exercise.getID());
+   // System.out.println("data now has "+ after + " after adding " + exercise.getID());
     if (before +1!=after) System.err.println("didn't add " + exercise.getID());
   }
 
