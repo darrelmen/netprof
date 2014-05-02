@@ -7,6 +7,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.sound.PlayAudioPanel;
@@ -19,8 +20,8 @@ import mitll.langtest.shared.Result;
  * A waveform record button and a play audio button.
  */
 public class RecordAudioPanel extends AudioPanel {
-  public static final String RECORD = "Record";
-  public static final String STOP = "Stop";
+ // public static final String RECORD = "Record";
+ // public static final String STOP = "Stop";
   private final int index;
 
   private PostAudioRecordButton postAudioRecordButton;
@@ -93,27 +94,7 @@ public class RecordAudioPanel extends AudioPanel {
   }
 
   protected WaveformPostAudioRecordButton makePostAudioRecordButton(String audioType) {
-    return new WaveformPostAudioRecordButton(exercise, controller, exercisePanel, this, service, index, true, RECORD, STOP, audioType) {
-      /**
-       * @see mitll.langtest.client.recorder.RecordButton#start()
-       */
-      @Override
-      public void startRecording() {
-        super.startRecording();
-        showStart();
-      }
-
-      @Override
-      public void stopRecording() {
-        super.stopRecording();
-        showStop();
-      }
-
-      @Override
-      public void flip(boolean first) {
-        flipRecordImages(first);
-      }
-    };
+    return new MyWaveformPostAudioRecordButton(audioType);
   }
 
   protected void showStop() {
@@ -186,6 +167,36 @@ public class RecordAudioPanel extends AudioPanel {
       if (postAudioRecordButton == null) System.err.println("huh? postAudioRecordButton is null???");
       else add(postAudioRecordButton);
       super.addButtons();
+    }
+  }
+
+  private class MyWaveformPostAudioRecordButton extends WaveformPostAudioRecordButton {
+    public MyWaveformPostAudioRecordButton(String audioType) {
+      super(RecordAudioPanel.this.exercise,
+        RecordAudioPanel.this.controller,
+        RecordAudioPanel.this.exercisePanel,
+        RecordAudioPanel.this, RecordAudioPanel.this.service, RecordAudioPanel.this.index, true, RecordButton.RECORD1, RecordButton.STOP1, audioType);
+      setWidth("100px");
+    }
+
+    /**
+     * @see mitll.langtest.client.recorder.RecordButton#start()
+     */
+    @Override
+    public void startRecording() {
+      super.startRecording();
+      showStart();
+    }
+
+    @Override
+    public void stopRecording() {
+      super.stopRecording();
+      showStop();
+    }
+
+    @Override
+    public void flip(boolean first) {
+      flipRecordImages(first);
     }
   }
 }
