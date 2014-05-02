@@ -4,7 +4,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.DLIUser;
 import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.Result;
@@ -14,8 +13,6 @@ import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
-import mitll.langtest.shared.grade.CountAndGradeID;
-import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -36,13 +33,13 @@ public interface LangTestDatabaseAsync {
   void writeAudioFile(String base64EncodedString, String plan, String exercise, int question, int user,
                       int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults, boolean addToAudioTable, AsyncCallback<AudioAnswer> async);
 
-  void getNextUngradedExercise(String user, int expectedGrades, boolean englishOnly, AsyncCallback<CommonExercise> async);
+//  void getNextUngradedExercise(String user, int expectedGrades, boolean englishOnly, AsyncCallback<CommonExercise> async);
 
-  void checkoutExerciseID(String user,String id, AsyncCallback<Void> async);
+ // void checkoutExerciseID(String user,String id, AsyncCallback<Void> async);
 
-  void addGrade(String exerciseID, Grade grade, AsyncCallback<CountAndGradeID> async);
+ // void addGrade(String exerciseID, Grade grade, AsyncCallback<CountAndGradeID> async);
 
-  void changeGrade(Grade toChange, AsyncCallback<Void> async);
+ // void changeGrade(Grade toChange, AsyncCallback<Void> async);
 
   void getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence, int width, int height, boolean useScoreToColorBkg, AsyncCallback<PretestScore> async);
 
@@ -79,7 +76,7 @@ public interface LangTestDatabaseAsync {
   void getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix, long userListID,
                       int userID, String role, AsyncCallback<ExerciseListWrapper> async);
 
-  void addDLIUser(DLIUser dliUser, AsyncCallback<Void> async);
+ // void addDLIUser(DLIUser dliUser, AsyncCallback<Void> async);
 
   void getStartupInfo(AsyncCallback<StartupInfo> async);
 

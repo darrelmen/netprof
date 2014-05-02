@@ -25,7 +25,6 @@ import com.google.gwt.view.client.ListDataProvider;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
-import mitll.langtest.client.grading.GradingExercisePanel;
 import mitll.langtest.client.table.PagerTable;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Result;
