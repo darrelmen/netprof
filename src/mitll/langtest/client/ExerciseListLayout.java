@@ -4,9 +4,7 @@ import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.grading.GradedExerciseList;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.User;
 
@@ -38,7 +36,7 @@ public class ExerciseListLayout {
                                         Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                         ExerciseController controller) {
     boolean isGrading = props.isGrading();
-    this.exerciseList = makeExerciseList(secondRow, isGrading, feedback, currentExerciseVPanel, service, controller);
+    this.exerciseList = makeExerciseList(secondRow, feedback, currentExerciseVPanel, service, controller);
 
     boolean hideExerciseList = (props.isMinimalUI() && !isGrading) && !props.isAdminView();
     useExerciseList(exerciseListContainer);
@@ -59,35 +57,29 @@ public class ExerciseListLayout {
   /**
    * @see #makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.user.UserFeedback, com.google.gwt.user.client.ui.Panel, LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
    * @param secondRow add the section panel to this row
-   * @param isGrading
    * @param feedback
    * @param currentExerciseVPanel
    * @param service
    * @param controller
    * @return
    */
-  private ListInterface makeExerciseList(FluidRow secondRow, boolean isGrading, final UserFeedback feedback,
+  private ListInterface makeExerciseList(FluidRow secondRow, final UserFeedback feedback,
                                          Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                          ExerciseController controller) {
     boolean showTypeAhead = !props.isCRTDataCollectMode();
-    if (isGrading) {
-      return new GradedExerciseList(currentExerciseVPanel, service, feedback,
-        true, props.isEnglishOnlyMode(), controller, "grading");
-    } else {
-      if (props.isShowSections()) {
-        boolean hasQC = controller.getPermissions().contains(User.Permission.QUALITY_CONTROL);
-        String instance = hasQC ? User.Permission.QUALITY_CONTROL.toString() : "flex";
+  //  if (props.isShowSections()) {
+      boolean hasQC = controller.getPermissions().contains(User.Permission.QUALITY_CONTROL);
+      String instance = hasQC ? User.Permission.QUALITY_CONTROL.toString() : "flex";
 
-       // System.out.println("\n\n\n---> makeExerciseList : making flex " + instance);
+      // System.out.println("\n\n\n---> makeExerciseList : making flex " + instance);
 
-        FlexSectionExerciseList flex = new FlexSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
-          props.isShowTurkToken(), props.showExercisesInOrder(), controller, showTypeAhead, instance);
-        return flex;
-      } else {
-        return new PagingExerciseList(currentExerciseVPanel, service, feedback,
-          null, controller, props.isShowTurkToken(), props.showExercisesInOrder(), showTypeAhead, "paging");
-      }
-    }
+      FlexSectionExerciseList flex = new FlexSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
+        props.isShowTurkToken(), props.showExercisesInOrder(), controller, showTypeAhead, instance);
+      return flex;
+/*    } else {
+      return new PagingExerciseList(currentExerciseVPanel, service, feedback,
+        null, controller, props.isShowTurkToken(), props.showExercisesInOrder(), showTypeAhead, "paging");
+    }*/
   }
 
   /**
@@ -95,11 +87,11 @@ public class ExerciseListLayout {
    * @param exerciseListContainer add exercise list inside this
    */
   private void addExerciseListOnLeftSide(Panel exerciseListContainer) {
-    if (props.isTeacherView()) {
+/*    if (props.isTeacherView()) {
       exerciseListContainer.add(exerciseList.getWidget());
-    } else {
+    } else {*/
       exerciseListContainer.add(exerciseList.getExerciseListOnLeftSide(props));
-    }
+  //  }
   }
 
   private boolean showOnlyOneExercise() {

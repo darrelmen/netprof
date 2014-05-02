@@ -178,7 +178,7 @@ public class AudioCheck {
     public String toString() { return "valid " + validity + " dur " + durationInMillis; }
   }
 
-  public static void main(String []a ) {
+/*  public static void main(String []a ) {
     try {
 //      boolean b = new AudioCheck().checkWavFile(new File("C:\\Users\\go22670\\DLITest\\LangTest\\war\\answers\\test\\ac-LC1-006\\0\\subject-1\\answer.wav"));
    //   double b = new AudioCheck().getDurationInSeconds(new File("C:\\Users\\go22670\\DLITest\\LangTest\\war\\answers\\test\\ac-LC1-006\\0\\subject-1\\answer.wav"));
@@ -191,5 +191,5 @@ public class AudioCheck {
     } catch (Exception e) {
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
     }
-  }
+  }*/
 }
