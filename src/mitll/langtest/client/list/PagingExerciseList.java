@@ -1,8 +1,10 @@
 package mitll.langtest.client.list;
 
-import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.ControlGroup;
+import com.github.gwtbootstrap.client.ui.ControlLabel;
+import com.github.gwtbootstrap.client.ui.Controls;
+import com.github.gwtbootstrap.client.ui.Icon;
 import com.github.gwtbootstrap.client.ui.base.TextBox;
-import com.github.gwtbootstrap.client.ui.constants.IconSize;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
@@ -13,8 +15,14 @@ import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.*;
-import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.DecoratedPopupPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -191,6 +199,7 @@ public class PagingExerciseList extends ExerciseList {
 
   /**
    * Show wait cursor if the type ahead takes too long.
+   *
    * @param column
    */
   void addTypeAhead(Panel column) {
@@ -207,7 +216,7 @@ public class PagingExerciseList extends ExerciseList {
             waitTimer = new Timer() {
               @Override
               public void run() {
-              //  waitCursor.getElement().getStyle().setColor("black");
+                //  waitCursor.getElement().getStyle().setColor("black");
                 waitCursor.setUrl(animated);
               }
             };
@@ -224,8 +233,8 @@ public class PagingExerciseList extends ExerciseList {
 
       Panel flow = new FlowPanel();
       flow.add(typeAhead);
-    //  right = new Icon(IconType.SPINNER);
-    //  right.setIconSize(IconSize.TWO_TIMES);
+      //  right = new Icon(IconType.SPINNER);
+      //  right.setIconSize(IconSize.TWO_TIMES);
       flow.add(waitCursor);
       waitCursor.getElement().getStyle().setMarginTop(-7, Style.Unit.PX);
       //waitCursor.getElement().getStyle().setColor("white");
@@ -244,11 +253,11 @@ public class PagingExerciseList extends ExerciseList {
   @Override
   protected void gotExercises(boolean success) {
     long now = System.currentTimeMillis();
-    System.out.println("took " + (now - then) + " millis");
+    // System.out.println("took " + (now - then) + " millis");
     if (waitTimer != null) {
       waitTimer.cancel();
     }
-   waitCursor.setUrl(white);
+    waitCursor.setUrl(white);
     // waitCursor.getElement().getStyle().setColor("white");
   }
 
