@@ -534,7 +534,7 @@ public class ExercisePanel extends VerticalPanel implements
   }
 
   protected void enableNext() {
-    System.out.println("enableNext : answered " + completed.size() + " vs total " + answers.size());
+    //System.out.println("enableNext : answered " + completed.size() + " vs total " + answers.size());
     boolean isComplete = isCompleted();
     navigationHelper.enableNextButton(isComplete);
   }
