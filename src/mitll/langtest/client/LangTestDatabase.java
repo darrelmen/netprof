@@ -5,7 +5,6 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.DLIUser;
 import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.Result;
@@ -15,8 +14,6 @@ import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
-import mitll.langtest.shared.grade.CountAndGradeID;
-import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -41,8 +38,8 @@ public interface LangTestDatabase extends RemoteService {
   CommonExercise getExercise(String id, long userID);
 
   // gradeDAO
-  CountAndGradeID addGrade(String exerciseID, Grade grade);
-  void changeGrade(Grade toChange);
+ // CountAndGradeID addGrade(String exerciseID, Grade grade);
+ // void changeGrade(Grade toChange);
 
   void markAudioDefect(AudioAttribute audioAttribute, String exid);
 
@@ -57,9 +54,9 @@ public interface LangTestDatabase extends RemoteService {
   AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int question, int user,
                              int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults, boolean addToAudioTable);
 
-  CommonExercise getNextUngradedExercise(String user, int expectedGrades, boolean englishOnly);
+  //CommonExercise getNextUngradedExercise(String user, int expectedGrades, boolean englishOnly);
 
-  void checkoutExerciseID(String user,String id);
+  //void checkoutExerciseID(String user,String id);
 
   ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, String exerciseID);
 
@@ -91,7 +88,7 @@ public interface LangTestDatabase extends RemoteService {
 
   List<AVPHistoryForList> getUserHistoryForList(long userid, Collection<String> ids, long latestResultID);
 
-  void addDLIUser(DLIUser dliUser);
+  //void addDLIUser(DLIUser dliUser);
 
   StartupInfo getStartupInfo();
   long addUserList(long userid, String name, String description, String dliClass);
