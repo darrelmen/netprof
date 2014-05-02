@@ -91,8 +91,8 @@ public class FileExerciseDAO implements ExerciseDAO {
   }
 
   @Override
-  public void addOverlay(CommonUserExercise userExercise) {
-
+  public CommonExercise addOverlay(CommonUserExercise userExercise) {
+      return null;
   }
 
   @Override
@@ -719,11 +719,10 @@ public class FileExerciseDAO implements ExerciseDAO {
     String english = split1[4];
 
     String content = ExerciseFormatter.getContent(arabic, translit, english,"",isEnglish,isUrdu,isPashto);
-    String fastAudioRef = mediaDir+File.separator+name+File.separator+ FAST + ".wav";
-    String slowAudioRef = mediaDir+File.separator+name+File.separator+ SLOW + ".wav";
+    //String fastAudioRef = mediaDir+File.separator+name+File.separator+ FAST + ".wav";
+    //String slowAudioRef = mediaDir+File.separator+name+File.separator+ SLOW + ".wav";
 
-    return new Exercise(REPEAT, name, content,
-      arabic, english);
+    return new Exercise(REPEAT, name, content, arabic, english);
   }
 
   private String getImageContent(String flPhrase) {

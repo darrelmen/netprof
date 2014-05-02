@@ -68,7 +68,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
   public SectionHelper getSectionHelper() { return sectionHelper; }
 
   @Override
-  public void addOverlay(CommonUserExercise userExercise) {}
+  public CommonExercise addOverlay(CommonUserExercise userExercise) { return null; }
 
   @Override
   public void setAddRemoveDAO(AddRemoveDAO addRemoveDAO) {}
