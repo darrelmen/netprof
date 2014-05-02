@@ -140,6 +140,24 @@ public class DAO {
   }
 
   /**
+   *
+   *
+   */
+  void drop(String table) {
+    try {
+      PreparedStatement statement = database.getConnection().prepareStatement("DROP TABLE if exists "+table);
+      if (!statement.execute()) {
+        logger.error("couldn't drop table?");
+      }
+      statement.close();
+      database.closeConnection(database.getConnection());
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  /**
    * Does not seem to work with h2
    * @param connection
    * @param table
