@@ -39,13 +39,11 @@ import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import mitll.langtest.client.custom.CommentNPFExercise;
 import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.custom.QCNPFExercise;
-import mitll.langtest.client.custom.TabContainer;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.Flashcard;
-import mitll.langtest.client.grading.GradingExercisePanelFactory;
 import mitll.langtest.client.instrumentation.ButtonFactory;
 import mitll.langtest.client.instrumentation.EventLogger;
 import mitll.langtest.client.instrumentation.EventMock;
@@ -110,7 +108,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private StartupInfo startupInfo;
 
-  private TabContainer navigation;
+  private Navigation navigation;
   private EventLogger buttonFactory;
 
   /**
@@ -616,29 +614,24 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   /**
    * This determines which kind of exercise we're going to do.
+   *
    * @see #gotUser(long)
    */
   private void reallySetFactory() {
-    final LangTest outer = this;
-    if (props.isGoodwaveMode() && !props.isGrading()) {
-      if (props.isClassroomMode()) {
-        exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer, exerciseList, 1.0f) {
-          @Override
-          public Panel getExercisePanel(CommonExercise e) {
-            boolean reviewer = permissions.contains(User.Permission.QUALITY_CONTROL);
-            if (reviewer) {
-              return new QCNPFExercise(e, controller, exerciseList, 1.0f, false, "classroom");
-            } else {
-              return new CommentNPFExercise(e, controller, exerciseList, 1.0f, false, "classroom");
-            }
+    if (props.isClassroomMode()) {
+      exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, this, this, exerciseList, 1.0f) {
+        @Override
+        public Panel getExercisePanel(CommonExercise e) {
+          boolean reviewer = permissions.contains(User.Permission.QUALITY_CONTROL);
+          if (reviewer) {
+            return new QCNPFExercise(e, controller, exerciseList, 1.0f, false, "classroom");
+          } else {
+            return new CommentNPFExercise(e, controller, exerciseList, 1.0f, false, "classroom");
           }
-        }, userManager, 1);
-        //    }
-      } else {
-        exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer, exerciseList, getScreenPortion()), userManager, 1);
-      }
-    } else if (props.isGrading()) {
-      exerciseList.setFactory(new GradingExercisePanelFactory(service, outer, outer, exerciseList), userManager, props.getNumGradesToCollect());
+        }
+      }, userManager, 1);
+    } else {
+      exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, this, this, exerciseList, getScreenPortion()), userManager, 1);
     }
   }
 
