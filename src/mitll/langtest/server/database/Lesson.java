@@ -18,7 +18,7 @@ public class Lesson {
   private final List<CommonExercise> exerciseList = new ArrayList<CommonExercise>();
   private String unit;
 
-  public Lesson(){}
+  //public Lesson(){}
   public Lesson(String unit) { this.unit = unit; }
   public void addExercise(CommonExercise e) { exerciseList.add(e); }
   public Collection<CommonExercise> getExercises() { return Collections.unmodifiableList(exerciseList); }
