@@ -43,7 +43,6 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.flashcard.ControlState;
-import mitll.langtest.shared.DLIUser;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 
@@ -556,7 +555,7 @@ class StudentDialog extends UserDialog {
         System.out.println("addUser : server result is " + result);
         userManager.storeUser(result, audioType, userChosenID, PropertyHandler.LOGIN_TYPE.STUDENT);
 
-        DLIUser dliUser = new DLIUser(result, weeksOfExperience,
+/*        DLIUser dliUser = new DLIUser(result, weeksOfExperience,
           new DLIUser.ILRLevel(registrationInfo.reading.getValue(), registrationInfo.getValue("rilr")),
           new DLIUser.ILRLevel(registrationInfo.listening.getValue(), registrationInfo.getValue("lilr")),
           new DLIUser.ILRLevel(registrationInfo.speaking.getValue(), registrationInfo.getValue("silr")),
@@ -572,7 +571,7 @@ class StudentDialog extends UserDialog {
           @Override
           public void onSuccess(Void result) {
           }
-        });
+        });*/
       }
     };
   }
