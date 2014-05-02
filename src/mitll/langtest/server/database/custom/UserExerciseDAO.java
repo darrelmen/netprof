@@ -86,7 +86,7 @@ public class UserExerciseDAO extends DAO {
 
     try {
       // there are much better ways of doing this...
-      logger.debug("UserExerciseDAO.add : userExercise " + userExercise);
+     // logger.debug("UserExerciseDAO.add : userExercise " + userExercise);
 
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement(
@@ -150,7 +150,8 @@ public class UserExerciseDAO extends DAO {
       userExercise.setUniqueID(id);
 
       // TODO : consider making this an actual prepared statement?
-      if (!userExercise.isPredefined()) {     // cheesy!
+      boolean predefined = userExercise.isPredefined();
+      if (!predefined) {     // cheesy!
         String customID = UserExercise.CUSTOM_PREFIX + id;
         String sql = "UPDATE " + USEREXERCISE +
           " " +
@@ -163,13 +164,14 @@ public class UserExerciseDAO extends DAO {
         preparedStatement.close();
         userExercise.setID(customID);
 
-        logger.debug("\tuserExercise= " + userExercise);
+        //logger.debug("\tuserExercise= " + userExercise);
       }
 
       statement.close();
       database.closeConnection(connection);
 
-      logger.debug("now " + getCount(USEREXERCISE) + " and user exercise is " + userExercise);
+    //  logger.debug("now " + getCount(USEREXERCISE) + " user exercises and user exercise is " + userExercise);
+      logger.debug("new " + (predefined ? " PREDEF " : " USER ") + " user exercise is " + userExercise);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
