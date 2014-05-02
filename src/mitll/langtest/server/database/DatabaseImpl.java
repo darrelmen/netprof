@@ -1,6 +1,5 @@
 package mitll.langtest.server.database;
 
-import mitll.flashcard.UserState;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.connection.DatabaseConnection;
@@ -12,7 +11,6 @@ import mitll.langtest.server.database.custom.UserExerciseDAO;
 import mitll.langtest.server.database.custom.UserListDAO;
 import mitll.langtest.server.database.custom.UserListExerciseJoinDAO;
 import mitll.langtest.server.database.custom.UserListManager;
-import mitll.langtest.server.database.flashcard.UserStateWrapper;
 import mitll.langtest.server.database.instrumentation.EventDAO;
 import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
@@ -23,9 +21,7 @@ import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
-import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.grade.Grade;
-import mitll.langtest.shared.grade.ResultsAndGrades;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.monitoring.Session;
 import org.apache.commons.io.FileUtils;
@@ -44,12 +40,9 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 /**
  * Note with H2 that :  <br></br>
@@ -98,7 +91,6 @@ public class DatabaseImpl implements Database {
   private String mediaDir;
   private final ServerProperties serverProps;
 
-  private final Map<Long,UserStateWrapper> userToState = new HashMap<Long,UserStateWrapper>();
   private boolean addDefects = true;
 
   /**
@@ -182,7 +174,6 @@ public class DatabaseImpl implements Database {
     }
 
     try {
-      gradeDAO.createGradesTable(getConnection());
       userDAO.createUserTable(this);
       dliUserDAO.createUserTable(this);
       userListManager.setUserExerciseDAO(userExerciseDAO);
@@ -310,7 +301,7 @@ public class DatabaseImpl implements Database {
       exerciseDAO.setAddRemoveDAO(addRemoveDAO);
       exerciseDAO.setAudioDAO(audioDAO);
 
-      /*List<CommonExercise> rawExercises =*/ getRawExercises(useFile, lessonPlanFile, excel);
+      getRawExercises(useFile, lessonPlanFile, excel);
 
       userDAO.checkForFavorites(userListManager);
     }
@@ -339,9 +330,47 @@ public class DatabaseImpl implements Database {
     getUserListManager().editItem(userExercise, true, serverProps.getMediaDir());
     Map<String, ExerciseAnnotation> fieldToAnnotation = userExercise.getFieldToAnnotation();
 
+    //new HashSet<AudioAttribute>();
+    Set<AudioAttribute> original = new HashSet<AudioAttribute>(userExercise.getAudioAttributes());
+    // Set<String> keys = new HashSet<String>();
+
+    Set<AudioAttribute> defects = getDefects(userExercise, fieldToAnnotation);
+
+    CommonExercise exercise = exerciseDAO.addOverlay(userExercise);
+    if (exercise == null) {
+      // not an overlay! it's a new user exercise
+      exercise = getUserExerciseWhere(userExercise.getID());
+    }
+
+    if (exercise == null) {
+      logger.error("huh? couldn't make overlay or find user exercise for " + userExercise);
+    } else {
+      original.removeAll(defects);
+
+      for (AudioAttribute attribute : defects) {
+        if (!exercise.removeAudio(attribute.getKey())) {
+          logger.warn("huh? couldn't remove " + attribute.getKey() + " from " + exercise.getID());
+        }
+      }
+
+      //exercise.getAudioAttributes().removeAll(defects);
+      String overlayID = exercise.getID();
+      for (AudioAttribute toCopy : original) {
+        if (toCopy.getUserid() < 1) logger.error("bad user id for " + toCopy);
+
+        audioDAO.add((int) toCopy.getUserid(), toCopy.getAudioRef(), overlayID, toCopy.getTimestamp(), toCopy.getAudioType(), toCopy.getDuration());
+      }
+    }
+  }
+
+  /**
+   * Marks defects too...?
+   * @param userExercise
+   * @param fieldToAnnotation
+   * @return
+   * */
+  protected Set<AudioAttribute> getDefects(UserExercise userExercise, Map<String, ExerciseAnnotation> fieldToAnnotation) {
     Set<AudioAttribute> defects = new HashSet<AudioAttribute>();
-    Set<AudioAttribute> original  = new HashSet<AudioAttribute>(userExercise.getAudioAttributes());
-    Set<String> keys = new HashSet<String>();
 
     for (Map.Entry<String,ExerciseAnnotation> fieldAnno : fieldToAnnotation.entrySet()) {
       if (!fieldAnno.getValue().isCorrect()) {
@@ -350,7 +379,7 @@ public class DatabaseImpl implements Database {
         if (audioAttribute != null) {
           logger.debug("\tmarking defect on audio");
           defects.add(audioAttribute);
-          keys.add(audioAttribute.getKey());
+       //   keys.add(audioAttribute.getKey());
           audioDAO.markDefect(audioAttribute);
         } else if (!fieldAnno.getKey().equals("transliteration")) {
           logger.error("\tcan't marking defect on audio! looking for " + fieldAnno.getKey() + " in " + userExercise.getAudioRefToAttr().keySet());
@@ -358,217 +387,11 @@ public class DatabaseImpl implements Database {
       }
     }
 
-    exerciseDAO.addOverlay(userExercise);
-
-    CommonExercise exercise = getExercise(userExercise.getID());
-    String overlayID = exercise.getID();
-
-    original.removeAll(defects);
-
-    for (String key : keys) {
-      if (!exercise.removeAudio(key)) {
-        logger.warn("huh? couldn't remove " +key + " from " + exercise.getID());
-      }
-    }
-
-    //exercise.getAudioAttributes().removeAll(defects);
-    for (AudioAttribute toCopy: original) {
-      if (toCopy.getUserid() <1) logger.error("bad user id for " + toCopy);
-
-      audioDAO.add((int) toCopy.getUserid(), toCopy.getAudioRef(), overlayID, toCopy.getTimestamp(), toCopy.getAudioType(), toCopy.getDuration());
-    }
+    return defects;
   }
 
   public void markAudioDefect(AudioAttribute audioAttribute) {
     audioDAO.markDefect(audioAttribute);
-  }
-
-  /**
-   * TODO : consider how to make this faster, not have split between 1 and more than 1 case
-   *
-   * @param activeExercises
-   * @param expectedCount
-   * @param filterResults
-   * @param useFLQ
-   * @param useSpoken
-   * @param englishOnly
-   * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getNextUngradedExercise
-   */
-  public CommonExercise getNextUngradedExercise(Collection<String> activeExercises, int expectedCount, boolean filterResults,
-                                          boolean useFLQ, boolean useSpoken, boolean englishOnly) {
-    if (expectedCount == 1) {
-      return getNextUngradedExerciseQuick(activeExercises, expectedCount, filterResults, useFLQ, useSpoken);
-    } else {
-      return getNextUngradedExerciseSlow(activeExercises, expectedCount, englishOnly);
-    }
-  }
-
-  /**
-   * Walks through each exercise, checking if any have ungraded results.
-   * <p/>
-   * This gets slower as more exercises are graded.  Better to a "join" that determines after
-   * two queries what the next ungraded one is.
-   * Runs through each exercise in sequence -- slows down as more are completed!
-   * TODO : avoid using this.
-   *
-   * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getNextUngradedExercise
-   */
-  private CommonExercise getNextUngradedExerciseSlow(Collection<String> activeExercises, int expectedCount, boolean englishOnly) {
-    List<CommonExercise> rawExercises = getExercises();
-    logger.info("getNextUngradedExerciseSlow : checking " + rawExercises.size() + " exercises.");
-    for (CommonExercise e : rawExercises) {
-      if (!activeExercises.contains(e.getID()) && // no one is working on it
-          resultDAO.areAnyResultsLeftToGradeFor(e, expectedCount, englishOnly)) {
-        //logger.info("CommonExercise " +e + " needs grading.");
-
-        return e;
-      }
-    }
-    return null;
-  }
-
-  /**
-   * Does a join of grades against results - avoid iterated solution above.
-   *
-   * @see #getNextUngradedExercise
-   * @param activeExercises
-   * @param expectedCount
-   * @param filterResults
-   * @param useFLQ
-   * @param useSpoken
-   * @return next exercise containing ungraded results
-   */
-  private CommonExercise getNextUngradedExerciseQuick(Collection<String> activeExercises, int expectedCount,
-                                                boolean filterResults, boolean useFLQ, boolean useSpoken) {
-    long then = System.currentTimeMillis();
-    long start = then;
-
-    List<CommonExercise> rawExercises = getExercises();
-    long now = System.currentTimeMillis();
-    if (now-then > 100) logger.debug("getNextUngradedExerciseQuick took " +(now-then) + " to get exercises");
-
-    then = System.currentTimeMillis();
-    Collection<Result> resultExcludingExercises = resultDAO.getResultExcludingExercises(activeExercises);
-    now = System.currentTimeMillis();
-    if (now-then > 100) logger.debug("getNextUngradedExerciseQuick took " +(now-then) + " to get results");
-
-    then = System.currentTimeMillis();
-    GradeDAO.GradesAndIDs allGradesExcluding = gradeDAO.getAllGradesExcluding(activeExercises);
-    now = System.currentTimeMillis();
-
-    if (now-then > 100) logger.debug("getNextUngradedExerciseQuick took " +(now-then) + " to get grades");
-
-    Map<Integer, Integer> idToCount = getResultIdToGradeCount(expectedCount, allGradesExcluding);
-/*    logger.info("getNextUngradedExerciseQuick found " + resultExcludingExercises.size() + " results, " +
-      "expected count = " + expectedCount + ", " +
-      allGradesExcluding.resultIDs.size() + " graded results, filter results = " + filterResults +
-      " use flq " + useFLQ + " spoken " + useSpoken);*/
-
-    // remove results that have grades...
-    //int skipped = 0;
-    Iterator<Result> iterator = resultExcludingExercises.iterator();
-    while (iterator.hasNext()) {
-      Result result = iterator.next();
-
-      //if (allGradesExcluding.resultIDs.contains(result.uniqueID)) {
-      Integer numGrades = idToCount.get(result.uniqueID);
-      if (numGrades != null && expectedCount <= numGrades) {  // need 2 grades for english
-        //if (result.flq)  // TODO : need to enrich Results with flq flag
-        iterator.remove();
-      }
-      else if (filterResults && (result.flq != useFLQ || result.spoken != useSpoken)) {
-        //logger.debug("getNextUngradedExercise excluding " + result + " since no match for flq = " + useFLQ + " and spoken = " +useSpoken);
-        iterator.remove();
-        //skipped++;
-      }
-      else if (numGrades != null) {
-        logger.warn("\tfound grade " + numGrades + " for " +result +"?");
-      }
-    }
-
-/*    logger.debug("getNextUngradedExercise after removing graded, there were " + resultExcludingExercises.size() + " results" +//);
-      ", skipped " + skipped);*/
-
-    // whatever remains, find first exercise
-    if (resultExcludingExercises.isEmpty()) {
-      logger.debug("all results have been graded.");
-      return null;
-    }
-    else {
-      //  logger.debug("getNextUngradedExercise candidates are   " + exids);
-      SortedSet<String> exids = new TreeSet<String>(); // sort by id
-      for (Result r : resultExcludingExercises) {
-        exids.add(r.id);
-      }
-
-      int skipped2 = 0;
-      for (String candidate : exids) {
-        CommonExercise exerciseForID = getExercise(candidate);
-        if (exerciseForID != null) {
-          now = System.currentTimeMillis();
-          if (skipped2 > 0) {
-            logger.debug("getNextUngradedExerciseQuick note : skipped " + skipped2 + " exercises...");
-          }
-          logger.debug("getNextUngradedExerciseQuick : took " +(now-start) + " millis to get next ungraded exid : " +exerciseForID);
-          return exerciseForID;
-        }
-        else {
-          skipped2++;
-        }
-      }
-      if (!rawExercises.isEmpty()) {
-        logger.error("getNextUngradedExerciseQuick expecting an exercise to match any of " + exids.size() +
-          " (e.g." + exids.iterator().next()+
-          ") candidates in " + rawExercises.size() + " exercises.");
-      }
-    }
-
-    return null;
-  }
-
-  /**
-   * @see #getNextUngradedExerciseQuick(java.util.Collection, int, boolean, boolean, boolean)
-   * @param expectedCount
-   * @param allGradesExcluding
-   * @return
-   */
-  private Map<Integer, Integer> getResultIdToGradeCount(int expectedCount, GradeDAO.GradesAndIDs allGradesExcluding) {
-    Map<Integer, Integer> idToCount = new HashMap<Integer, Integer>();
-   // int atExpected = 0;
-    for (Grade g : allGradesExcluding.grades) {
-      if (g.gradeIndex == expectedCount - 1 && g.grade != Grade.UNASSIGNED) {
-   //     atExpected++;
-        if (!idToCount.containsKey(g.resultID)) {
-          idToCount.put(g.resultID, 1);
-        } else {
-          idToCount.put(g.resultID, idToCount.get(g.resultID) + 1);
-        }
-      }
-    }
-/*    logger.warn("found " + atExpected + " grades at " + expectedCount +
-      " out of " + allGradesExcluding.grades.size() + " returning map of " +idToCount.size() + " results to count");*/
-
-    return idToCount;
-  }
-
-  private UserStateWrapper createOrGetUserState(long userID, List<CommonExercise> exercises) {
-    UserStateWrapper userStateWrapper;
-
-    synchronized (userToState) {
-      userStateWrapper = userToState.get(userID);
-      logger.info("createOrGetUserState : for user " + userID +
-        " exercises has " + exercises.size() + " user state " + userStateWrapper);
-      if (userStateWrapper == null || (!exercises.isEmpty() && userStateWrapper.getNumExercises() != exercises.size())) {
-        userStateWrapper = getUserStateWrapper(userID, exercises);
-        userToState.put(userID, userStateWrapper);
-      }
-      else if (!exercises.isEmpty()) {
-        logger.debug("user state " + userStateWrapper.getNumExercises() + " vs " + exercises.size() + " now " + userStateWrapper);
-      }
-    }
-    return userStateWrapper;
   }
 
   /**
@@ -588,7 +411,6 @@ public class DatabaseImpl implements Database {
 
     AVPHistoryForList sessionAVPHistoryForList  = new AVPHistoryForList(sessionsForUserIn2, userid, true);
     AVPHistoryForList sessionAVPHistoryForList2 = new AVPHistoryForList(sessionsForUserIn2, userid, false);
-
 
     // sort by correct %
     Collections.sort(sessionsForUserIn2, new Comparator<Session>() {
@@ -666,7 +488,7 @@ public class DatabaseImpl implements Database {
    * @param exercises
    * @return
    */
-  private UserStateWrapper getUserStateWrapper(long userID, List<CommonExercise> exercises) {
+/*  private UserStateWrapper getUserStateWrapper(long userID, List<CommonExercise> exercises) {
     UserStateWrapper userStateWrapper;
     String[] strings = new String[0];
     if (exercises != null) {
@@ -678,9 +500,9 @@ public class DatabaseImpl implements Database {
     }
 
     UserState userState = new UserState(strings);
-/*    if (userState.finished()) {
+*//*    if (userState.finished()) {
       logger.info("-------------- user " + userID + " is finished ---------------- ");
-    }*/
+    }*//*
    // logger.debug("getUserStateWrapper : making user state for " + userID + " with " + strings.length + " exercises");
     userStateWrapper = new UserStateWrapper(userState, userID, exercises);
     List<ResultDAO.SimpleResult> resultsForUser = resultDAO.getResultsForUser(userID);
@@ -692,7 +514,7 @@ public class DatabaseImpl implements Database {
     logger.debug("getUserStateWrapper : after found existing " + userStateWrapper.getCompleted().size() + " completed.");
 
     return userStateWrapper;
-  }
+  }*/
 
   /**
    *
@@ -868,64 +690,6 @@ public class DatabaseImpl implements Database {
 
   public int getNumResults() { return resultDAO.getNumResults(); }
 
-  public ResultsAndGrades getResultsForExercise(String exid) {
-    return getResultsForExercise(exid, false, false, false);
-  }
-
-  /**
-   * Find all the grades for this exercise.<br></br>
-   * Find all the results for this exercise. <br></br>
-   * Get these schedules for this exercise and every user. <br></br>
-   * For every result, get the user and use it to find the schedule.  <br></br>
-   * Use the data in the schedule to mark the en/fl and spoken/written bits on the Results. <br></br>
-   * This lets us make a map of spoken->lang->results
-   *
-   * @param exid
-   * @return ResultsAndGrades
-   * @see DatabaseImpl#getResultsForExercise
-   */
-  private ResultsAndGrades getResultsForExercise(String exid, boolean filterByFLQAndSpoken, boolean useFLQ, boolean useSpoken) {
-    GradeDAO.GradesAndIDs gradesAndIDs = gradeDAO.getResultIDsForExercise(exid);
-    List<Result> resultsForExercise = resultDAO.getAllResultsForExercise(exid);
-    //Set<Long> users = resultDAO.getUsers(resultsForExercise);
-
-   // Map<Long, List<Schedule>> scheduleForUserAndExercise = scheduleDAO.getScheduleForUserAndExercise(users, exid);
-    Map<Boolean, Map<Boolean, List<Result>>> spokenToLangToResult = new HashMap<Boolean, Map<Boolean, List<Result>>>();
-    logger.debug("for exid " + exid + " got " +resultsForExercise.size() + " results and " + gradesAndIDs.grades.size() + " grades");
-    for (Result r : resultsForExercise) {
-     /* List<Schedule> schedules = scheduleForUserAndExercise.get(r.userid);
-      if (schedules == null) {
-        //System.err.println("huh? couldn't find schedule for user " +r.userid +"?");
-      } else {*/
-        //Schedule schedule = schedules.get(0);
-        //r.setFLQ(schedule.flQ);
-        //r.setSpoken(schedule.spoken);
-
-      boolean takeThisOne = !filterByFLQAndSpoken || (r.flq == useFLQ && r.spoken == useSpoken);
-      if (takeThisOne) {
-        boolean spoken = r.spoken;
-        boolean flq = r.flq;
-
-        if (!spoken && r.answer.endsWith(".wav")) { // recover from badly marked results
-          spoken = true;
-          if (r.audioType.equals(Result.AUDIO_TYPE_UNSET)) {
-            flq = true;
-          }
-        }
-        Map<Boolean, List<Result>> langToResult = spokenToLangToResult.get(spoken);
-        if (langToResult == null)
-          spokenToLangToResult.put(spoken, langToResult = new HashMap<Boolean, List<Result>>());
-        List<Result> resultsForLang = langToResult.get(flq);
-        if (resultsForLang == null) langToResult.put(flq, resultsForLang = new ArrayList<Result>());
-        resultsForLang.add(r);
-      }
-    }
-
-    logger.debug("for exid " + exid + " got " +resultsForExercise.size() + " results and " + gradesAndIDs.grades.size() + " grades and " + spokenToLangToResult.size());
-
-    return new ResultsAndGrades(resultsForExercise, gradesAndIDs.grades, spokenToLangToResult);
-  }
-
   /**
    * Creates the result table if it's not there.
    *
@@ -968,33 +732,12 @@ public class DatabaseImpl implements Database {
                              String audioFile,
                              boolean valid, boolean flq, boolean spoken,
                              String audioType, int durationInMillis, boolean correct, float score) {
-    if (valid) addCompleted(userID, exerciseID);
+    //if (valid) addCompleted(userID, exerciseID);
 
     return answerDAO.addAnswer(this, userID, plan, exerciseID, questionID, "", audioFile, valid, flq, spoken, audioType,
       durationInMillis, correct, score, "");
   }
 
-  public void addCompleted(int userID, String exerciseID) {
-    List<CommonExercise> objects = Collections.emptyList();
-    UserStateWrapper userStateWrapper = createOrGetUserState(userID, objects);
-    userStateWrapper.addCompleted(exerciseID);
-  }
-
-  /**
-   * @param exerciseID
-   * @param toAdd
-   * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addGrade
-   */
-  public CountAndGradeID addGrade(String exerciseID, Grade toAdd) {
-    return gradeDAO.addGradeEasy(exerciseID, toAdd);
-  }
-
-  /**
-   * @param toChange
-   * @see mitll.langtest.server.LangTestDatabaseImpl#changeGrade(mitll.langtest.shared.grade.Grade)
-   */
-  public void changeGrade(Grade toChange) {  gradeDAO.changeGrade(toChange);  }
   public int userExists(String login) { return userDAO.userExists(login);  }
 
   /**
