@@ -22,7 +22,6 @@ import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.CommonUserExercise;
-import mitll.langtest.shared.DLIUser;
 import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.Result;
@@ -33,8 +32,6 @@ import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
-import mitll.langtest.shared.grade.CountAndGradeID;
-import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -52,11 +49,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -479,7 +474,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param englishOnly
    * @return next ungraded exercise
    */
-  public CommonExercise getNextUngradedExercise(String user, int expectedGrades, boolean englishOnly) {
+/*  public CommonExercise getNextUngradedExercise(String user, int expectedGrades, boolean englishOnly) {
     synchronized (this) {
       ConcurrentMap<String,String> stringStringConcurrentMap = userToExerciseID.asMap();
       Collection<String> values = stringStringConcurrentMap.values();
@@ -496,8 +491,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       return db.getNextUngradedExercise(currentActiveExercises, expectedGrades,
           filterForArabicTextOnly, filterForArabicTextOnly, !filterForArabicTextOnly, englishOnly);
     }
-  }
+  }*/
 
+/*
   public void checkoutExerciseID(String user, String id) {
     synchronized (this) {
       userToExerciseID.put(user, id);
@@ -505,6 +501,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           " active exercise map now " + userToExerciseID.asMap());
     }
   }
+*/
 
   /**
    * TODO : come back to this!!!
@@ -673,7 +670,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public void addTextAnswer(int userID, CommonExercise exercise, int questionID, String answer, String answerType) {
     db.addAnswer(userID, exercise, questionID, answer, answerType);
-    db.addCompleted(userID,exercise.getID());
+   // db.addCompleted(userID,exercise.getID());
   }
 
   // Grades ---------------------
@@ -683,26 +680,26 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param exerciseID
    * @return
    */
-  public CountAndGradeID addGrade(String exerciseID, Grade toAdd) {  return db.addGrade(exerciseID, toAdd);  }
+  //public CountAndGradeID addGrade(String exerciseID, Grade toAdd) {  return db.addGrade(exerciseID, toAdd);  }
 
   /**
-   * @see mitll.langtest.client.grading.GradingResultManager#changeGrade(mitll.langtest.shared.grade.Grade)
-   * @param toChange
+   * @seec mitll.langtest.client.grading.GradingResultManager#changeGrade(mitll.langtest.shared.grade.Grade)
+   * @paramc toChange
    */
-  public void changeGrade(Grade toChange) { db.changeGrade(toChange);  }
+ // public void changeGrade(Grade toChange) { db.changeGrade(toChange);  }
 
   @Override
   public synchronized int userExists(String login) { return db.userExists(login);  }
 
   // Users ---------------------
 
-  public void addDLIUser(DLIUser dliUser) {
+/*  public void addDLIUser(DLIUser dliUser) {
     try {
       db.addDLIUser(dliUser);
     } catch (Exception e) {
       logAndNotifyServerException(e);
     }
-  }
+  }*/
 
   /**
    * @see mitll.langtest.client.custom.CreateListDialog#doCreate
@@ -849,8 +846,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public UserExercise reallyCreateNewItem(long userListID, UserExercise userExercise) {
     db.getUserListManager().reallyCreateNewItem(userListID, userExercise, serverProps.getMediaDir());
-    logger.debug("reallyCreateNewItem : made user exercise " + userExercise);
 
+    for (AudioAttribute audioAttribute : userExercise.getAudioAttributes()) {
+      logger.debug("\treallyCreateNewItem : update " + audioAttribute + " to " + userExercise.getID());
+
+      db.getAudioDAO().updateExerciseID(audioAttribute.getUniqueID(), userExercise.getID());
+    }
+    logger.debug("reallyCreateNewItem : made user exercise " + userExercise);
+ /*   if (userExercise.getRefAudio() != null) {
+      db.getAudioDAO().add((int)userExercise.getCreator(),userExercise.getRefAudio(),userExercise.getID(),System.currentTimeMillis(),"",0);
+    }*/
     return userExercise;
   }
 
@@ -969,7 +974,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int questionID,
                                     int user, int reqid, boolean flq, String audioType, boolean doFlashcard,
                                     boolean recordInResults, boolean addToAudioTable) {
-    CommonExercise exercise1 = getExercise(exercise,user);
+    CommonExercise exercise1 = getExercise(exercise, user); // NOTE : this could be null if we're posting audio against a new user exercise
     AudioAnswer audioAnswer = audioFileHelper.writeAudioFile(base64EncodedString, plan, exercise, exercise1, questionID, user, reqid,
       flq, audioType, doFlashcard, recordInResults);
 
@@ -977,11 +982,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       File fileRef = pathHelper.getAbsoluteFile(audioAnswer.getPath());
       String destFileName = audioType + "_" + System.currentTimeMillis() + "_by_" + user + ".wav";
       String permanentAudioPath = new PathWriter().getPermanentAudioPath(pathHelper, fileRef, destFileName, true, exercise);
-      db.getAudioDAO().addOrUpdate(user, permanentAudioPath, exercise, System.currentTimeMillis(), audioType, audioAnswer.getDurationInMillis());
-
+      AudioAttribute audioAttribute =
+        db.getAudioDAO().addOrUpdate(user, permanentAudioPath, exercise, System.currentTimeMillis(), audioType, audioAnswer.getDurationInMillis());
+      audioAnswer.setAudioAttribute(audioAttribute);
+      logger.debug("writeAudioFile for " + audioType + " audio answer has " + audioAttribute);
       // what state should we mark recorded audio?
-      db.getUserListManager().setState(exercise1, STATE.UNSET, user);
-      db.getUserListManager().setSecondState(exercise1, STATE.RECORDED, user);
+      if (exercise1 != null) {
+        db.getUserListManager().setState(exercise1, STATE.UNSET, user);
+        db.getUserListManager().setSecondState(exercise1, STATE.RECORDED, user);
+      }
     }
     return audioAnswer;
   }
