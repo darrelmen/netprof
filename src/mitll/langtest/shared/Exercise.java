@@ -326,12 +326,15 @@ public class Exercise extends AudioExercise implements CommonExercise {
 
     if (isRepeat() || getType() == EXERCISE_TYPE.MULTI_REF) {
       Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
+
+      // warn about attr that have no user
       StringBuilder builder = new StringBuilder();
       for (AudioAttribute attr:audioAttributes1) {
         if (attr.getUser() == null) {
           builder.append("\t").append(attr.toString()).append("\n");
         }
       }
+
       return "Exercise " + type + " " +id +  " content bytes = " + content.length() + " english '" + getEnglish() +
           "' ref sentence '" + getRefSentence() +"' audio count = " + audioAttributes1.size()+
         (builder.toString().isEmpty() ? "":" \n\tmissing user audio " + builder.toString()) +
