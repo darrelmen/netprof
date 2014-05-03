@@ -18,6 +18,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -216,14 +217,13 @@ public class PagingExerciseList extends ExerciseList {
             waitTimer = new Timer() {
               @Override
               public void run() {
-                //  waitCursor.getElement().getStyle().setColor("black");
                 waitCursor.setUrl(animated);
               }
             };
             waitTimer.schedule(1000);
 
             then = System.currentTimeMillis();
-            System.out.println("addTypeAhead : looking for '" + text + "' (" + text.length() + " chars)");
+            //System.out.println("addTypeAhead : looking for '" + text + "' (" + text.length() + " chars)");
             controller.logEvent(typeAhead, "TypeAhead", "UserList_" + userListID, "User search ='" + text + "'");
             loadExercises(getHistoryToken(""), text);
             lastTypeAheadValue = text;
@@ -231,16 +231,12 @@ public class PagingExerciseList extends ExerciseList {
         }
       });
 
-      Panel flow = new FlowPanel();
+      Panel flow = new HorizontalPanel();
       flow.add(typeAhead);
-      //  right = new Icon(IconType.SPINNER);
-      //  right.setIconSize(IconSize.TWO_TIMES);
       flow.add(waitCursor);
       waitCursor.getElement().getStyle().setMarginTop(-7, Style.Unit.PX);
-      //waitCursor.getElement().getStyle().setColor("white");
       waitCursor.setUrl(white);
 
-      //  right.setVisible(false);
       addControlGroupEntry(column, "Search", flow);
       Scheduler.get().scheduleDeferred(new Command() {
         public void execute() {
@@ -252,13 +248,12 @@ public class PagingExerciseList extends ExerciseList {
 
   @Override
   protected void gotExercises(boolean success) {
-    long now = System.currentTimeMillis();
+//    long now = System.currentTimeMillis();
     // System.out.println("took " + (now - then) + " millis");
     if (waitTimer != null) {
       waitTimer.cancel();
     }
     waitCursor.setUrl(white);
-    // waitCursor.getElement().getStyle().setColor("white");
   }
 
   protected void showEmptySelection() {
