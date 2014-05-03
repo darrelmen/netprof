@@ -603,7 +603,7 @@ public class UserListManager {
     }
     long now = System.currentTimeMillis();
 
-    logger.debug("fixAudioPaths : checking regular '" + regularSpeed.getAudioRef() + "' against '" +mediaDir + "'");
+    //logger.debug("fixAudioPaths : checking regular '" + regularSpeed.getAudioRef() + "' against '" +mediaDir + "'");
 
     if (!regularSpeed.getAudioRef().contains(mediaDir)) {
       File fileRef = pathHelper.getAbsoluteFile(regularSpeed.getAudioRef());
