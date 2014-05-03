@@ -113,8 +113,10 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     copyAudio(exercise);
   }
 
-  protected void copyAudio(CommonExercise exercise) {
-    for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) addAudio(audioAttribute);
+  private void copyAudio(CommonExercise exercise) {
+    for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
+      addAudio(audioAttribute);
+    }
   }
 
   /**
