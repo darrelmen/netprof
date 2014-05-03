@@ -46,13 +46,18 @@ public class AudioAttribute implements IsSerializable {
     else {
       attributes = new HashMap<String, String>();
     }
-    // System.out.println("user is " + user);
   }
 
   protected AudioAttribute(String audioRef) {
     this.audioRef = audioRef;
     if (audioRef == null) throw new IllegalArgumentException("huh audio ref is null?");
     markRegular();
+  }
+
+  public AudioAttribute(String audioRef, MiniUser miniUser) {
+    this(audioRef);
+    this.user = miniUser;
+    this.userid = miniUser.getId();
   }
 
   public String getExid() {
@@ -168,6 +173,10 @@ public class AudioAttribute implements IsSerializable {
 
   public void setUniqueID(int uniqueID) {
     this.uniqueID = uniqueID;
+  }
+
+  public void setUser(MiniUser user) {
+    this.user = user;
   }
 
   @Override
