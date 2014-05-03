@@ -126,9 +126,8 @@ class ReviewEditableExercise extends EditableExercise {
    */
   private void addTabsForUsers(CommonExercise e, TabPanel tabPanel, Map<MiniUser, List<AudioAttribute>> malesMap, List<MiniUser> maleUsers) {
     for (MiniUser user : maleUsers) {
-      String tabTitle = (user.isMale() ? MALE : FEMALE) +
-        (controller.getProps().isAdminView() ? " (" + user.getUserID() + ")" : "") +
-        " " + AGE + " " + user.getAge();
+      String tabTitle = (user.getId() == QCNPFExercise.DEFAULT_USER) ? "Default Speaker" : getUserTitle(user);
+
       RememberTabAndContent tabAndContent = new RememberTabAndContent(IconType.QUESTION_SIGN, tabTitle);
       tabPanel.add(tabAndContent.tab.asTabLink());
       tabs.add(tabAndContent);
@@ -153,6 +152,12 @@ class ReviewEditableExercise extends EditableExercise {
         tabAndContent.tab.setIcon(IconType.CHECK_SIGN);
       }
     }
+  }
+
+  private String getUserTitle(MiniUser user) {
+    return (user.isMale() ? "Male" :"Female")+
+      (controller.getProps().isAdminView() ?" (" + user.getUserID() + ")" :"") +
+      " age " + user.getAge();
   }
 
   @Override
