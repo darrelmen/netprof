@@ -69,6 +69,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   private static final String APPROVED_BUTTON_TOOLTIP2 = "Item has been marked with a defect";
   private static final String ATTENTION_LL = "Attention LL";
   private static final String MARK_FOR_LL_REVIEW = "Mark for LL review.";
+  public static final int DEFAULT_USER = -1;
 
   private Set<String> incorrectFields;
   private List<RequiresResize> toResize;
@@ -235,12 +236,13 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   }
 
   /**
+   * @see #checkBoxWasClicked(boolean, String, com.google.gwt.user.client.ui.Panel, com.google.gwt.user.client.ui.FocusWidget)
    * @see #markReviewed(mitll.langtest.client.list.ListInterface, mitll.langtest.shared.CommonShell)
    * @param completedExercise
    */
   private void markReviewed(final CommonShell completedExercise) {
     boolean allCorrect = incorrectFields.isEmpty();
-    System.out.println("markReviewed : exercise " + completedExercise.getID() + " instance " + instance + " allCorrect " + allCorrect);
+    //System.out.println("markReviewed : exercise " + completedExercise.getID() + " instance " + instance + " allCorrect " + allCorrect);
 
     service.markReviewed(completedExercise.getID(), allCorrect, controller.getUser(),
       new AsyncCallback<Void>() {
@@ -250,7 +252,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
         @Override
         public void onSuccess(Void result) {
-          System.out.println("\tmarkReviewed.onSuccess exercise " + completedExercise.getID() + " marked reviewed!");
+          //System.out.println("\tmarkReviewed.onSuccess exercise " + completedExercise.getID() + " marked reviewed!");
         }
       }
     );
@@ -344,9 +346,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
   private void addTabsForUsers(CommonExercise e, TabPanel tabPanel, Map<MiniUser, List<AudioAttribute>> malesMap, List<MiniUser> maleUsers) {
     for (MiniUser user : maleUsers) {
-      String tabTitle = (user.isMale() ? "Male" :"Female")+
-        (controller.getProps().isAdminView() ?" (" + user.getUserID() + ")" :"") +
-        " age " + user.getAge();
+      String tabTitle = (user.getId() == DEFAULT_USER) ? "Default Speaker" : getUserTitle(user);
 
       RememberTabAndContent tabAndContent = new RememberTabAndContent(IconType.QUESTION_SIGN, tabTitle);
       tabPanel.add(tabAndContent.tab.asTabLink());
@@ -373,6 +373,11 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     }
   }
 
+  private String getUserTitle(MiniUser user) {
+    return (user.isMale() ? "Male" :"Female")+
+      (controller.getProps().isAdminView() ?" (" + user.getUserID() + ")" :"") +
+      " age " + user.getAge();
+  }
 
   /**
    * Keep track of all audio elements -- have they all been played? If so, we can enable the approve & next buttons
@@ -395,7 +400,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
       @Override
       public void playStarted() {
         audioWasPlayed.add(audioPanel);
-        System.out.println("playing audio " + audio.getAudioRef() + " has " +tabs.size() + " tabs, now " + audioWasPlayed.size()  + " played");
+        //System.out.println("playing audio " + audio.getAudioRef() + " has " +tabs.size() + " tabs, now " + audioWasPlayed.size()  + " played");
         //if (audioWasPlayed.size() == toResize.size()) {
           // all components played
           setApproveButtonState();
@@ -407,17 +412,14 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
       }
 
       @Override
-      public void playStopped() {
-
-      }
+      public void playStopped() {}
     });
     tabAndContent.addWidget(audioPanel);
     toResize.add(audioPanel);
     ExerciseAnnotation audioAnnotation = e.getAnnotation(audio.getAudioRef());
 
     Widget entry = getEntry(audio.getAudioRef(), audioPanel, audioAnnotation);
-    // TODO add unique audio attribute id
-    return new Pair(entry,audioPanel);
+    return new Pair(entry, audioPanel);
   }
 
   private static class Pair {
@@ -558,16 +560,16 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
       addCorrectComment(field);
     }
 
-    System.out.println("checkBoxWasClicked : instance = '" +instance +"'");
+    //System.out.println("checkBoxWasClicked : instance = '" +instance +"'");
 
     if (isCourseContent()) {
       String id = exercise.getID();
-      System.out.println("\tcheckBoxWasClicked : instance = '" +instance +"'");
+     // System.out.println("\tcheckBoxWasClicked : instance = '" +instance +"'");
       if (instance.equalsIgnoreCase(Navigation.CLASSROOM)) {
         STATE state = incorrectFields.isEmpty() ? STATE.UNSET : STATE.DEFECT;
         exercise.setState(state);
         listContainer.setState(id, state);
-        System.out.println("\tcheckBoxWasClicked : state now = '" +state +"'");
+     //   System.out.println("\tcheckBoxWasClicked : state now = '" +state +"'");
 
         listContainer.redraw();
       }
