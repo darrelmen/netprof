@@ -325,21 +325,23 @@ public class DatabaseImpl implements Database {
    * @param userExercise
    */
   public void editItem(UserExercise userExercise) {
-    logger.debug("editItem " + userExercise.getID() + " mediaDir : " + serverProps.getMediaDir());
+    logger.debug("editItem " + userExercise.getID() + " mediaDir : " + serverProps.getMediaDir() +" initially audio was\n\t " + userExercise.getAudioAttributes());
 
     getUserListManager().editItem(userExercise, true, serverProps.getMediaDir());
     Map<String, ExerciseAnnotation> fieldToAnnotation = userExercise.getFieldToAnnotation();
 
-    //new HashSet<AudioAttribute>();
     Set<AudioAttribute> original = new HashSet<AudioAttribute>(userExercise.getAudioAttributes());
-    // Set<String> keys = new HashSet<String>();
-
     Set<AudioAttribute> defects = getDefects(userExercise, fieldToAnnotation);
 
     CommonExercise exercise = exerciseDAO.addOverlay(userExercise);
     if (exercise == null) {
       // not an overlay! it's a new user exercise
       exercise = getUserExerciseWhere(userExercise.getID());
+      logger.debug("not an overlay " + exercise);
+    }
+    else {
+      exercise = userExercise;
+      logger.debug("made overlay " + exercise);
     }
 
     if (exercise == null) {
@@ -353,10 +355,14 @@ public class DatabaseImpl implements Database {
         }
       }
 
-      //exercise.getAudioAttributes().removeAll(defects);
       String overlayID = exercise.getID();
+
+      logger.debug("editItem copying " + original.size() + " audio attrs under exercise overlay id " + overlayID);
+
       for (AudioAttribute toCopy : original) {
-        if (toCopy.getUserid() < 1) logger.error("bad user id for " + toCopy);
+        if (toCopy.getUserid() < 1 && toCopy.getUserid() != UserDAO.DEFAULT_USER_ID) {
+          logger.error("bad user id for " + toCopy);
+        }
 
         audioDAO.add((int) toCopy.getUserid(), toCopy.getAudioRef(), overlayID, toCopy.getTimestamp(), toCopy.getAudioType(), toCopy.getDuration());
       }
@@ -379,7 +385,6 @@ public class DatabaseImpl implements Database {
         if (audioAttribute != null) {
           logger.debug("\tmarking defect on audio");
           defects.add(audioAttribute);
-       //   keys.add(audioAttribute.getKey());
           audioDAO.markDefect(audioAttribute);
         } else if (!fieldAnno.getKey().equals("transliteration")) {
           logger.error("\tcan't marking defect on audio! looking for " + fieldAnno.getKey() + " in " + userExercise.getAudioRefToAttr().keySet());
