@@ -1,5 +1,10 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.shared.AudioAttribute;
+import mitll.langtest.shared.MiniUser;
+import mitll.langtest.shared.Result;
+import org.apache.log4j.Logger;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -12,12 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import mitll.langtest.shared.AudioAttribute;
-import mitll.langtest.shared.MiniUser;
-import mitll.langtest.shared.Result;
-
-import org.apache.log4j.Logger;
 
 /**
  * Create, drop, alter, read from the results table.
@@ -166,8 +165,6 @@ public class AudioDAO extends DAO {
     List<AudioAttribute> results = new ArrayList<AudioAttribute>();
     Map<Long, MiniUser> miniUsers = userDAO.getMiniUsers();
 
-   // logger.debug("users " + miniUsers);
-
     while (rs.next()) {
       int uniqueID = rs.getInt(ID);
       long userID = rs.getLong(USERID);
@@ -179,14 +176,19 @@ public class AudioDAO extends DAO {
       int dur = rs.getInt(DURATION);
 
       MiniUser user = miniUsers.get(userID);
+      if (userID == UserDAO.DEFAULT_USER_ID) {
+        user = UserDAO.DEFAULT_USER;
+      }
+
       AudioAttribute audioAttr = new AudioAttribute(uniqueID, userID, //id
         exid, // id
         audioRef, // answer
         timestamp.getTime(),
         dur, type,
         user);
+
       if (user == null) {
-        //logger.error("can't find user " + userID+ " for " + audioAttr + " in " + miniUsers.keySet());
+        logger.warn("can't find user " + userID+ " for " + audioAttr + " in " + miniUsers.keySet());
       }
       results.add(audioAttr);
     }
@@ -250,7 +252,7 @@ public class AudioDAO extends DAO {
     try {
       long then = System.currentTimeMillis();
 
-      if (userid <1) {
+      if (isBadUser(userid)) {
         logger.error("huh? userid is " +userid);
         new Exception().printStackTrace();
       }
@@ -307,7 +309,7 @@ public class AudioDAO extends DAO {
    * @return
    */
   public AudioAttribute addOrUpdate(int userid, String audioRef, String exerciseID, long timestamp, String audioType, int durationInMillis) {
-    if (userid <1) {
+    if (isBadUser(userid)) {
       logger.error("huh? userid is " +userid);
       new Exception().printStackTrace();
     }
@@ -366,9 +368,6 @@ public class AudioDAO extends DAO {
         logger.debug("returning " + audioAttr);
 
       }
-  //    if (i > 0) {
-    //  }
-
       statement.close();
       database.closeConnection(connection);
 
@@ -477,7 +476,7 @@ public class AudioDAO extends DAO {
 
   private long addAudio(Connection connection, int userid, String audioRef, String exerciseID, long timestamp,
                         String audioType, long durationInMillis) throws SQLException {
-    if (userid <1) {
+    if (isBadUser(userid)) {
       logger.error("huh? userid is " +userid);
       new Exception().printStackTrace();
     }
@@ -518,6 +517,10 @@ public class AudioDAO extends DAO {
     statement.close();
 
     return newID;
+  }
+
+  private boolean isBadUser(int userid) {
+    return userid < 1 && userid != UserDAO.DEFAULT_USER_ID;
   }
 
   /**
