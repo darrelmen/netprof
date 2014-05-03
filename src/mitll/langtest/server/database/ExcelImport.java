@@ -148,16 +148,7 @@ public class ExcelImport implements ExerciseDAO {
 
   private Map<String, List<AudioAttribute>> exToAudio;
   @Override
-  public void setAudioDAO(AudioDAO audioDAO) {
-    exToAudio = audioDAO.getExToAudio();
-   // int count = 0;
-    logger.debug("extoaudio now " + exToAudio.size());
-/*    for (String key : exToAudio.keySet()) {
-      logger.debug("\tid '" +key+
-        "'");
-      if (count++ > 10) break;
-    }*/
-  }
+  public void setAudioDAO(AudioDAO audioDAO) {  exToAudio = audioDAO.getExToAudio();  }
 
   /**
    * @return
@@ -179,10 +170,7 @@ public class ExcelImport implements ExerciseDAO {
         Collection<CommonUserExercise> overrides = userExerciseDAO.getOverrides();
 
         for (CommonUserExercise userExercise : overrides) {
-          if (removes.contains(userExercise.getID())) {
-
-          }
-          else {
+          if (!removes.contains(userExercise.getID())) {
             addOverlay(userExercise);
           }
         }
@@ -208,6 +196,7 @@ public class ExcelImport implements ExerciseDAO {
    * @see mitll.langtest.server.database.DatabaseImpl#editItem(mitll.langtest.shared.custom.UserExercise)
    * @see #getRawExercises()
    * @param userExercise
+   * @return old exercises
    */
   @Override
   public CommonExercise addOverlay(CommonUserExercise userExercise) {
@@ -993,10 +982,10 @@ public class ExcelImport implements ExerciseDAO {
         exists = test.exists();
       }
       if (exists) {
-        imported.setRefAudio(ensureForwardSlashes(fastAudioRef));
-      } else {
+        imported.addAudio(new AudioAttribute(ensureForwardSlashes(fastAudioRef), UserDAO.DEFAULT_USER));
+      } //else {
         //logger.debug("missing fast " + test.getAbsolutePath());
-      }
+      //}
     }
     if (!missingSlowSet.contains(audioDir)) {
       File test = new File(slowAudioRef);
@@ -1006,11 +995,11 @@ public class ExcelImport implements ExerciseDAO {
         exists = test.exists();
       }
       if (exists) {
-        imported.setSlowRefAudio(ensureForwardSlashes(slowAudioRef));
+        imported.addAudio(new AudioAttribute(ensureForwardSlashes(slowAudioRef),UserDAO.DEFAULT_USER).markSlow());
       }
-      else {
+    // else {
         //logger.debug("missing slow " + test.getAbsolutePath());
-      }
+     // }
     }
 
     attachAudio(id, imported);
