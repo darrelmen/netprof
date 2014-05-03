@@ -583,8 +583,6 @@ public class NewUserExercise extends BasicDialog {
         new WaveformPostAudioRecordButton(exercise, controller, exercisePanel, this, service, recordRegularSpeed ? 0:1,
           false // don't record in results table
             ,
-          //CLICK_AND_HOLD_TO_RECORD,
-          //RELEASE_TO_STOP,
           RecordButton.RECORD1,
           RecordButton.STOP1,
           audioType) {
@@ -619,24 +617,18 @@ public class NewUserExercise extends BasicDialog {
           public void useResult(AudioAnswer result) {
             super.useResult(result);
 
-            System.out.println("got back " + result.getAudioAttribute() + " for " + newUserExercise);
+            //System.out.println("got back " + result.getAudioAttribute() + " for " + newUserExercise);
             if (result.getAudioAttribute() != null) {
 
               if (recordRegularSpeed) {
-                //newUserExercise.setRefAudio(result.getPath());
-                 result.getAudioAttribute().markRegular();
+                result.getAudioAttribute().markRegular();
               } else {
-                // newUserExercise.setSlowRefAudio(result.getPath());
                 result.getAudioAttribute().markSlow();
               }
 
-             // System.out.println("\tsetting " + result.getAudioAttribute() + " on " + newUserExercise.getID());
-
               newUserExercise.addAudio(result.getAudioAttribute());
 
-              //System.out.println("\tafter " + newUserExercise.getAudioAttributes());
-            }
-            else {
+            } else {
               System.err.println("no valid audio on " + result);
             }
             audioPosted();
