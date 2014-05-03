@@ -348,7 +348,7 @@ public class Navigation implements RequiresResize {
 
   private void checkAndMaybeClearTab(String value) {
     String value1 = storage.getValue(CLICKED_TAB);
-    System.out.println("checkAndMaybeClearTab " + value1 + " vs "+value + " clearing " + CLICKED_USER_LIST);
+    //System.out.println("checkAndMaybeClearTab " + value1 + " vs "+value + " clearing " + CLICKED_USER_LIST);
     storage.removeValue(CLICKED_USER_LIST);
     storage.storeValue(CLICKED_TAB, value);
   }
