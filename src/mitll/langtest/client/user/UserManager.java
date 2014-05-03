@@ -195,11 +195,11 @@ public class UserManager {
     //getBinaryKey(showRerecordKey);
   }
 */
-
+/*
   private void addBinaryKey(boolean val, String unansweredKey) {
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
     localStorageIfSupported.setItem(unansweredKey, val ? "true" : "false");
-  }
+  }*/
 
 /*  private void rememberShowUnansweredFirst() {
     if (Storage.isLocalStorageSupported()) {
