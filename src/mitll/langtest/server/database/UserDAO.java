@@ -38,6 +38,8 @@ public class UserDAO extends DAO {
   public static final String PERMISSIONS = "permissions";
   private long defectDetector;
   private static final List<String> COLUMNS2 = Arrays.asList("id", "age", "gender", "experience", "ipaddr", "nativelang", "dialect", "userid", "timestamp", "demographics");
+  public static int DEFAULT_USER_ID = -1;
+  public static MiniUser DEFAULT_USER = new MiniUser(DEFAULT_USER_ID, 30, 0, "default", "default", "default");
 
   public UserDAO(Database database) {
     super(database);
