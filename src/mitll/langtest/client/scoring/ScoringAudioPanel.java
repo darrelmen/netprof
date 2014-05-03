@@ -31,7 +31,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   private ScoreListener scoreListener;
   private PretestScore result;
   private boolean showOnlyOneExercise = false; // true for when called from the headstart website
-  private static final boolean debug = true;
+  private static final boolean debug = false;
   public static final float MP3_HEADER_OFFSET = 0f;//0.048f;
 
   /**
@@ -179,7 +179,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   private void showImageAndCheck(String imageURL, ImageAndCheck wordTranscript) {
     wordTranscript.image.setUrl(imageURL);
     wordTranscript.image.setVisible(true);
-    wordTranscript.getCheck().setVisible(true);
+    if (ADD_CHECKBOX) wordTranscript.getCheck().setVisible(true);
   }
 
   void getClickedOnSegment(int eventXPos, NetPronImageType type, EventSegment onClick) {
