@@ -39,7 +39,6 @@ public class SQLExerciseDAO implements ExerciseDAO {
 
   private final Map<String,CommonExercise> idToExercise = new HashMap<String,CommonExercise>();
   private final SectionHelper sectionHelper = new SectionHelper();
-  //private final List<String> errors = new ArrayList<String>();
   private final ILRMapping ilrMapping;
 
   /**
