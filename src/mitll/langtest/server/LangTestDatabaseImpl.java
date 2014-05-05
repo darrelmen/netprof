@@ -363,11 +363,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String installPath = pathHelper.getInstallPath();
     for (AudioAttribute attr : audioAttributes) {
       firstExercise.addAudio(attr);
-      if (!audioConversion.exists(attr.getAudioRef(), installPath)) {
-     //   logger.debug("\twas '" + attr.getAudioRef() + "'");
+      if (attr.getAudioRef() == null) logger.error("huh? no audio ref for " + attr + " under " + firstExercise);
+      else if (!audioConversion.exists(attr.getAudioRef(), installPath)) {
+        //   logger.debug("\twas '" + attr.getAudioRef() + "'");
         attr.setAudioRef(relativeConfigDir + File.separator + attr.getAudioRef());
-     //   logger.debug("\tnow '" + attr.getAudioRef() + "'");
-
+        //   logger.debug("\tnow '" + attr.getAudioRef() + "'");
       }
       //logger.debug("\tadding path '" + attr.getAudioRef() + "' "+attr + " to " + firstExercise.getID());
     }
