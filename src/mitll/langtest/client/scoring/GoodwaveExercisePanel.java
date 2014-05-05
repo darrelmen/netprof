@@ -46,7 +46,6 @@ import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.MiniUser;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
