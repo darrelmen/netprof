@@ -69,6 +69,10 @@ public class AudioDAO extends DAO {
     statement.close();
   }
 
+  /**
+   * @see mitll.langtest.server.database.ExcelImport#setAudioDAO(AudioDAO)
+   * @return
+   */
   public Map<String, List<AudioAttribute>> getExToAudio() {
     Map<String, List<AudioAttribute>> exToAudio = new HashMap<String, List<AudioAttribute>>();
     for (AudioAttribute audio : getAudioAttributes()) {
@@ -105,7 +109,7 @@ public class AudioDAO extends DAO {
     return new ArrayList<AudioAttribute>();
   }
 
-  public List<AudioAttribute> getAudioAttributesForID(long id) {
+/*  public List<AudioAttribute> getAudioAttributesForID(long id) {
     try {
       String sql = "SELECT * FROM " + AUDIO + " WHERE " +ID +"=" + id;
       return getResultsSQL(sql);
@@ -113,7 +117,7 @@ public class AudioDAO extends DAO {
       logger.error("got " + ee, ee);
     }
     return new ArrayList<AudioAttribute>();
-  }
+  }*/
 
   /**
    * Items that are recorded must have both regular and slow speed audio.
@@ -300,11 +304,11 @@ public class AudioDAO extends DAO {
    * Why does this have to be so schizo? add or update -- should just choose
    *
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile(String, String, String, int, int, int, boolean, String, boolean, boolean, boolean)
-   * @param userid
+   * @param userid   part of unique id
    * @param audioRef
-   * @param exerciseID
+   * @param exerciseID part of unique id
    * @param timestamp
-   * @param audioType
+   * @param audioType    part of unique id
    * @param durationInMillis
    * @return
    */
@@ -345,8 +349,6 @@ public class AudioDAO extends DAO {
       if (i == 0) {
         long l = addAudio(connection, userid, audioRef, exerciseID, timestamp, audioType, durationInMillis);
         audioAttr = getAudioAttribute((int)l,userid, audioRef, exerciseID, timestamp, audioType, durationInMillis);
-//        i = (int)l;
-
         logger.debug("returning " + audioAttr);
       }
       else {
@@ -483,7 +485,8 @@ public class AudioDAO extends DAO {
 
     PreparedStatement statement = connection.prepareStatement("INSERT INTO " + AUDIO +
       "(" +
-      "userid," +
+      USERID +
+      "," +
       Database.EXID + "," +
       Database.TIME + "," +
       AUDIO_REF +
