@@ -23,6 +23,7 @@ import java.util.Set;
 public class ExerciseTrie extends Trie<CommonExercise> {
   private static final Logger logger = Logger.getLogger(ExerciseTrie.class);
   private static final int MB = (1024 * 1024);
+  public static final int TOOLONG_TO_WAIT = 150;
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds
@@ -65,7 +66,7 @@ public class ExerciseTrie extends Trie<CommonExercise> {
     endMakingNodes();
     long now = System.currentTimeMillis();
 
-    if (now - then > 50) {
+    if (now - then > TOOLONG_TO_WAIT) {
       logger.debug("getExercisesForSelectionState : took " + (now - then) + " millis to build ");
     }
     long freeAfter = rt.freeMemory()/ MB ;
