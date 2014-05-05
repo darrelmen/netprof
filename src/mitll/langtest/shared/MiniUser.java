@@ -21,7 +21,6 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
    * @param age
    * @param gender
    * @param userID
-   * @see mitll.langtest.server.database.UserDAO#getUsers()
    */
   public MiniUser(long id, int age, int gender, String nativeLang, String dialect, String userID) {
     this.id = id;
@@ -32,6 +31,10 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
     this.userID = userID;
   }
 
+  /**
+   * @see mitll.langtest.server.database.UserDAO#getMiniUsers()
+   * @param user
+   */
   public MiniUser(User user) {
     this(user.getId(), user.getAge(), user.getGender(), user.getNativeLang(), user.getDialect(), user.getUserID());
   }
