@@ -167,7 +167,7 @@ public class ExcelImport implements ExerciseDAO {
           exercises.remove(remove);
         }
 
-        Collection<CommonUserExercise> overrides = userExerciseDAO.getOverrides();
+        Collection<CommonUserExercise> overrides = userExerciseDAO.getOverrides(false);
 
         for (CommonUserExercise userExercise : overrides) {
           if (!removes.contains(userExercise.getID())) {
@@ -206,7 +206,7 @@ public class ExcelImport implements ExerciseDAO {
       logger.error("addOverlay : huh? can't find " + userExercise);
     }
     else {
-      logger.debug("addOverlay at " +userExercise.getID() + " found " +exercise);
+      //logger.debug("addOverlay at " +userExercise.getID() + " found " +exercise);
       synchronized (this) {
         int i = exercises.indexOf(exercise);
         if (i == -1) {
@@ -217,7 +217,7 @@ public class ExcelImport implements ExerciseDAO {
         }
         idToExercise.put(userExercise.getID(), userExercise);
 
-        logger.debug("addOverlay : after " + getExercise(userExercise.getID()));
+      //  logger.debug("addOverlay : after " + getExercise(userExercise.getID()));
       }
     }
     return exercise;
@@ -982,7 +982,7 @@ public class ExcelImport implements ExerciseDAO {
         exists = test.exists();
       }
       if (exists) {
-        imported.addAudio(new AudioAttribute(ensureForwardSlashes(fastAudioRef), UserDAO.DEFAULT_USER));
+        imported.addAudioForUser(ensureForwardSlashes(fastAudioRef), UserDAO.DEFAULT_USER);
       } //else {
         //logger.debug("missing fast " + test.getAbsolutePath());
       //}
