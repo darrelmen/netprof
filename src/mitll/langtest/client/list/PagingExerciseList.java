@@ -196,7 +196,7 @@ public class PagingExerciseList extends ExerciseList {
   private SafeUri white = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "white_32x32.png");
   private final com.github.gwtbootstrap.client.ui.Image waitCursor = new com.github.gwtbootstrap.client.ui.Image(white);
 
-  private long then = 0;
+ // private long then = 0;
 
   /**
    * Show wait cursor if the type ahead takes too long.
@@ -222,7 +222,7 @@ public class PagingExerciseList extends ExerciseList {
             };
             waitTimer.schedule(1000);
 
-            then = System.currentTimeMillis();
+       //     then = System.currentTimeMillis();
             //System.out.println("addTypeAhead : looking for '" + text + "' (" + text.length() + " chars)");
             controller.logEvent(typeAhead, "TypeAhead", "UserList_" + userListID, "User search ='" + text + "'");
             loadExercises(getHistoryToken(""), text);
