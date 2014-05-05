@@ -52,8 +52,8 @@ public class NewUserExercise extends BasicDialog {
   static final String SLOW_SPEED_REFERENCE_RECORDING_OPTIONAL = "Slow speed reference recording (optional)";
   private static final String ENTER_THE_FOREIGN_LANGUAGE_PHRASE = "Enter the foreign language phrase.";
   private static final String RECORD_REFERENCE_AUDIO_FOR_THE_FOREIGN_LANGUAGE_PHRASE = "Record reference audio for the foreign language phrase.";
-  private static final String CLICK_AND_HOLD_TO_RECORD = "Click and Hold to Record";
-  private static final String RELEASE_TO_STOP = "Release to Stop";
+ // private static final String CLICK_AND_HOLD_TO_RECORD = "Click and Hold to Record";
+ // private static final String RELEASE_TO_STOP = "Release to Stop";
   private static final String REMOVE_FROM_LIST = "Remove from list";
 
   private final EditItem editItem;
