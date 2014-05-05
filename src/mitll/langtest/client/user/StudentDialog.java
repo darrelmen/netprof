@@ -780,12 +780,12 @@ class StudentDialog extends UserDialog {
     }
 
 
-    public boolean getValue(String ilr) {
+/*    public boolean getValue(String ilr) {
       for (YesNo yn : ilrs) {
         if (yn.getName().equals(ilr)) return yn.getValue();
       }
       return false;
-    }
+    }*/
 
     /**
      * @return
