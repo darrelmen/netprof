@@ -1,11 +1,15 @@
 package mitll.langtest.server.database.custom;
 
+import mitll.langtest.server.database.AudioDAO;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.ExerciseDAO;
+import mitll.langtest.server.database.UserDAO;
+import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.CommonUserExercise;
+import mitll.langtest.shared.Result;
 import mitll.langtest.shared.custom.UserExercise;
 import org.apache.log4j.Logger;
 
@@ -34,15 +38,17 @@ public class UserExerciseDAO extends DAO {
   private static final String USEREXERCISE = "userexercise";
   private static final String MODIFIED = "modified";
   private static final String STATE = "state";
+  private static final String REF_AUDIO = "refAudio";
+  private static final String SLOW_AUDIO_REF = "slowAudioRef";
+  private static final boolean ADD_MISSING_AUDIO = false;
 
   private ExerciseDAO exerciseDAO;
   private static final boolean DEBUG = false;
 
-  public UserExerciseDAO(Database database) {
+  public UserExerciseDAO(Database database,UserDAO userDAO) {
     super(database);
     try {
       createUserTable(database);
-
       Collection<String> columns = getColumns(USEREXERCISE);
       Connection connection = database.getConnection();
       if (!columns.contains(TRANSLITERATION)) {
@@ -192,8 +198,10 @@ public class UserExerciseDAO extends DAO {
       "foreignLanguage VARCHAR, " +
       TRANSLITERATION + " VARCHAR, " +
       "creatorid LONG, " +
-      "refAudio VARCHAR, " +
-      "slowAudioRef VARCHAR, " +
+      REF_AUDIO +
+      " VARCHAR, " +
+      SLOW_AUDIO_REF +
+      " VARCHAR, " +
       "override" +
       " BOOLEAN, " +
       UNIT +
@@ -222,7 +230,7 @@ public class UserExerciseDAO extends DAO {
     try {
       if (DEBUG) logger.debug("\tusing for user exercise = " +sql);
 
-      List<CommonUserExercise> userExercises = getUserExercises(sql);
+      List<CommonUserExercise> userExercises = getUserExercises(sql, false);
       if (DEBUG) logger.debug("\tfound " +userExercises.size()+ " exercises userExercises on list " +listID);
 
       List<CommonUserExercise> userExercises2 = new ArrayList<CommonUserExercise>();
@@ -315,7 +323,7 @@ public class UserExerciseDAO extends DAO {
   public CommonUserExercise getWhere(String exid) {
     String sql = "SELECT * from " + USEREXERCISE + " where " +  EXERCISEID + "='" + exid + "'";
     try {
-      List<CommonUserExercise> userExercises = getUserExercises(sql);
+      List<CommonUserExercise> userExercises = getUserExercises(sql, false);
       if (userExercises.isEmpty()) {
         //logger.debug("getWhere : no custom exercise with id " + exid);
         return null;
@@ -328,10 +336,10 @@ public class UserExerciseDAO extends DAO {
     return null;
   }
 
-  public Collection<CommonUserExercise> getOverrides() {
+  public Collection<CommonUserExercise> getOverrides(boolean addMissingAudio) {
     String sql = "SELECT * from " + USEREXERCISE + " where override=true";
     try {
-      return getUserExercises(sql);
+      return getUserExercises(sql, addMissingAudio);
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
@@ -350,7 +358,7 @@ public class UserExerciseDAO extends DAO {
         EXERCISEID +
         " in (" + s+ ")";
     try {
-      List<CommonUserExercise> userExercises = getUserExercises(sql);
+      List<CommonUserExercise> userExercises = getUserExercises(sql, false);
       if (userExercises.isEmpty()) {
         logger.warn("getVisitorsOfList : no user exercises in " + exids.size() + " exercise ids");
       }
@@ -371,19 +379,22 @@ public class UserExerciseDAO extends DAO {
 
   /**
    * @see #getOnList(long)
-   * @see #getOverrides()
+   * @see #getOverrides(boolean)
    * @see #getWhere(java.util.Collection)
    * @see #getWhere(java.lang.String)
    * @param sql
+   * @param addMissingAudio
    * @return user exercises without annotations
    * @throws SQLException
    */
-  private List<CommonUserExercise> getUserExercises(String sql) throws SQLException {
+  private List<CommonUserExercise> getUserExercises(String sql, boolean addMissingAudio) throws SQLException {
     Connection connection = database.getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
     //logger.debug("getUserExercises sql = " + sql);
     ResultSet rs = statement.executeQuery();
     List<CommonUserExercise> exercises = new ArrayList<CommonUserExercise>();
+   // Map<Long, MiniUser> miniUsers = userDAO.getMiniUsers();
+
 
     List<String> typeOrder = exerciseDAO.getSectionHelper().getTypeOrder();
     while (rs.next()) {
@@ -406,6 +417,27 @@ public class UserExerciseDAO extends DAO {
         date
       );
 
+      if (addMissingAudio) {
+
+        String ref = rs.getString(REF_AUDIO);
+
+        String sref = rs.getString(SLOW_AUDIO_REF);
+
+        addMissingAudio(e, ref, sref);
+      }
+
+/*      MiniUser miniUser = miniUsers.get(e.getCreator());
+      if (miniUser == null) logger.error("huh? can't find user for " + e.getCreator());
+      String ref = rs.getString(REF_AUDIO);
+      if (ref != null && !ref.isEmpty()) {
+        e.addAudioForUser(ref, miniUser);
+      }
+
+      String sref = rs.getString(SLOW_AUDIO_REF);
+      if (sref != null && !sref.isEmpty()) {
+        e.addAudio(new AudioAttribute(sref, miniUser).markSlow());
+      }*/
+
       exercises.add(e);
     }
     rs.close();
@@ -413,6 +445,52 @@ public class UserExerciseDAO extends DAO {
     database.closeConnection(connection);
 
     return exercises;
+  }
+
+  private void addMissingAudio(UserExercise e, String ref, String sref) {
+    boolean hasRef = (ref != null && !ref.isEmpty());
+    boolean hasSRef = (sref != null && !sref.isEmpty());
+
+    boolean foundReg = false;
+    boolean foundSlow = false;
+
+    List<AudioAttribute> audioAttributes = exToAudio.get(e.getID());
+    if (audioAttributes != null) {
+      for (AudioAttribute attribute : audioAttributes) {
+        if (attribute.getUserid() == e.getCreator()) {
+          if ((attribute.getAudioType().equalsIgnoreCase(Result.AUDIO_TYPE_REGULAR) && hasRef)) {
+            foundReg = true;
+          }
+        }
+        if (attribute.getAudioType().equalsIgnoreCase(Result.AUDIO_TYPE_SLOW) && hasSRef) {
+          foundSlow = true;
+        }
+      }
+    }
+
+    long time = e.getModifiedDate().getTime();
+    if (time == 0) time = System.currentTimeMillis();
+    if (!foundReg && hasRef) {
+      audioDAO.add((int) e.getCreator(), ref, e.getID(), time, Result.AUDIO_TYPE_REGULAR, 0);
+      logger.debug("adding missing reg  audio ref -- only first time " + ref + " by " + e.getCreator());
+    }
+    if (!foundSlow && hasSRef) {
+      audioDAO.add((int) e.getCreator(), sref, e.getID(), time, Result.AUDIO_TYPE_SLOW, 0);
+      logger.debug("adding missing slow audio ref -- only first time " + ref + " by " + e.getCreator());
+
+    }
+  }
+
+  private Map<String, List<AudioAttribute>> exToAudio;
+  private AudioDAO audioDAO;
+
+  public void setAudioDAO(AudioDAO audioDAO) {
+    exToAudio = audioDAO.getExToAudio();
+    this.audioDAO = audioDAO;
+
+    if (ADD_MISSING_AUDIO) {
+      getOverrides(true);
+    }
   }
 
   private Map<String, String> getUnitToValue(ResultSet rs, List<String> typeOrder) throws SQLException {
