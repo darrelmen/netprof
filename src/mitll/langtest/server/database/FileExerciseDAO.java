@@ -44,8 +44,8 @@ public class FileExerciseDAO implements ExerciseDAO {
   private static final List<String> EMPTY_LIST = Collections.emptyList();
 
   public static final String ENCODING = "UTF8";
-  private static final String FAST = "Fast";
-  private static final String SLOW = "Slow";
+  //private static final String FAST = "Fast";
+  //private static final String SLOW = "Slow";
   private static final int MAX_ERRORS = 100;
   private static final boolean CONFIRM_AUDIO_REFS = false;
   private static final String PLEASE_RECORD_THE_SENTENCE_ABOVE = "Please record the sentence above.";
