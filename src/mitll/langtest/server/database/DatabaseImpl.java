@@ -140,7 +140,7 @@ public class DatabaseImpl implements Database {
     UserListDAO userListDAO = new UserListDAO(this, userDAO);
     addRemoveDAO = new AddRemoveDAO(this);
 
-    userExerciseDAO = new UserExerciseDAO(this);
+    userExerciseDAO = new UserExerciseDAO(this,userDAO);
     UserListExerciseJoinDAO userListExerciseJoinDAO = new UserListExerciseJoinDAO(this);
     dliUserDAO = new DLIUserDAO(this);
     resultDAO = new ResultDAO(this,userDAO);
@@ -304,6 +304,7 @@ public class DatabaseImpl implements Database {
       getRawExercises(useFile, lessonPlanFile, excel);
 
       userDAO.checkForFavorites(userListManager);
+      userExerciseDAO.setAudioDAO(audioDAO);
     }
   }
 
