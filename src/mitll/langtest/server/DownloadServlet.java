@@ -99,7 +99,7 @@ public class DownloadServlet extends DatabaseServlet {
        // logger.debug("\ts " + s);
 
         List<String> value = Arrays.asList(s.split(","));
-        logger.debug("\tkey " + key + "=" + value);
+     //   logger.debug("\tkey " + key + "=" + value);
         typeToSection.put(key, value);
       }
       else {
@@ -134,12 +134,12 @@ public class DownloadServlet extends DatabaseServlet {
     return configDir + File.separator + serverProps.getLessonPlan();
   }
 
-  public static void main(String [] arg) {
+/*  public static void main(String [] arg) {
     String test = "{Unit=[2,%201],%20Lesson=[5,%209]}";
     Map<String, Collection<String>> typeToSelectionFromRequest = new DownloadServlet().getTypeToSelectionFromRequest("{Lesson=[7,%208]}");
     System.out.println("Got " + typeToSelectionFromRequest);
 
    typeToSelectionFromRequest = new DownloadServlet().getTypeToSelectionFromRequest(test);
     System.out.println("Got " + typeToSelectionFromRequest);
-  }
+  }*/
 }

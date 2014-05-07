@@ -57,7 +57,6 @@
         <url-pattern>/downloadEvents/*</url-pattern>
     </servlet-mapping>
 
-
     <servlet-mapping>
         <servlet-name>downloadServet</servlet-name>
         <url-pattern>/downloadAudio/*</url-pattern>
