@@ -448,9 +448,7 @@ public class PropertyHandler {
     return releaseDate;
   }
 
-  public int getRecordTimeout() {
-    return isDataCollectMode() ? recordTimeout : shortRecordTimeout;
-  }
+  public int getRecordTimeout() {  return recordTimeout;  }
 
   public float getScreenPortion() {
     return screenPortion;
@@ -459,10 +457,6 @@ public class PropertyHandler {
   public String getNameForItem() { return nameForItem; }
   public String getNameForAnswer() { return nameForAnswer; }
   public String getNameForRecorder() { return nameForRecorder; }
-
-  public int getNumGradesToCollect() {
-    return numGradesToCollect;
-  }
 
   public boolean isLogClientMessages() {
     return logClientMessages;
