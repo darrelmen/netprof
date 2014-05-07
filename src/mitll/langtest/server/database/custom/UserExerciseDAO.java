@@ -4,7 +4,6 @@ import mitll.langtest.server.database.AudioDAO;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.ExerciseDAO;
-import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;

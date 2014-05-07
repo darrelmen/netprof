@@ -1,6 +1,6 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.server.ServerProperties;
+/*import mitll.langtest.server.ServerProperties;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import org.apache.commons.io.FileUtils;
@@ -9,13 +9,13 @@ import org.apache.log4j.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.Map;*/
 
 /**
  * Created by GO22670 on 5/6/2014.
  */
 public class ImportCourseExamples {
-  private static final Logger logger = Logger.getLogger(ImportCourseExamples.class);
+/*  private static final Logger logger = Logger.getLogger(ImportCourseExamples.class);
 
   private static DatabaseImpl makeDatabaseImpl(String h2DatabaseFile, String configDir) {
     ServerProperties serverProps = new ServerProperties(configDir,"quizlet.properties");
@@ -68,12 +68,12 @@ public class ImportCourseExamples {
     oldToNew.put(user.getId(), l);
   }
 
-  /**
+  *//**
    * TODO : deal with the user ids being the same after toLowerCase
    * @param userToResultsRegular
    * @param oldToNew
    * @param audioDAO
-   */
+   *//*
   protected static void copyAudio(Map<Long, Map<String, Result>> userToResultsRegular, Map<Long, Long> oldToNew, AudioDAO audioDAO) {
     int count = 0;
     for (Map.Entry<Long, Map<String, Result>> userToExIdToResult : userToResultsRegular.entrySet()) {
@@ -103,5 +103,5 @@ public class ImportCourseExamples {
       }
     }
     logger.debug("copied " + count + " files.");
-  }
+  }*/
 }
