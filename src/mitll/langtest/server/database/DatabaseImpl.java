@@ -1,5 +1,6 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.ExerciseSorter;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioConversion;
@@ -19,6 +20,7 @@ import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.DLIUser;
 import mitll.langtest.shared.ExerciseAnnotation;
+import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
@@ -242,7 +244,7 @@ public class DatabaseImpl implements Database {
    */
   public void setInstallPath(String installPath, String lessonPlanFile, String language,
                              boolean useFile, String mediaDir) {
-    logger.debug("got install path " + installPath + " media " + mediaDir);
+   // logger.debug("got install path " + installPath + " media " + mediaDir);
     this.installPath = installPath;
     this.lessonPlanFile = lessonPlanFile;
     this.mediaDir = mediaDir;
@@ -842,7 +844,7 @@ public class DatabaseImpl implements Database {
     }
 
     SectionHelper sectionHelper = getSectionHelper();
-   // CommonExercise ex = duplicate.toExercise();
+
     List<SectionHelper.Pair> pairs = new ArrayList<SectionHelper.Pair>();
     for (Map.Entry<String, String> pair : exercise.getUnitToValue().entrySet()) {
       pairs.add(sectionHelper.addExerciseToLesson(duplicate, pair.getKey(), pair.getValue()));
@@ -868,15 +870,8 @@ public class DatabaseImpl implements Database {
    */
   public boolean deleteItem(String id ) {
     getAddRemoveDAO().add(id, AddRemoveDAO.REMOVE);
-
     getUserListManager().removeReviewed(id);
-
-    SectionHelper sectionHelper = getSectionHelper();
-    CommonExercise exercise = getExercise(id);
-    for (Map.Entry<String, String> pair : exercise.getUnitToValue().entrySet()) {
-      sectionHelper.removeExerciseToLesson(exercise, pair.getKey(), pair.getValue());
-    }
-    //TODO remove pairs?
+    getSectionHelper().removeExercise(getExercise(id));
     return getExerciseDAO().remove(id);
   }
 
@@ -909,12 +904,12 @@ public class DatabaseImpl implements Database {
 
   public String toString() { return "Database : "+ connection.getConnection(); }
 
-  private static DatabaseImpl makeDatabaseImpl(String h2DatabaseFile, String configDir) {
+/*  private static DatabaseImpl makeDatabaseImpl(String h2DatabaseFile, String configDir) {
     ServerProperties serverProps = new ServerProperties(configDir,"quizlet.properties");
     DatabaseImpl database = new DatabaseImpl(configDir, configDir, h2DatabaseFile, serverProps, null, true);
     database.setInstallPath(".",configDir+File.separator+database.getServerProps().getLessonPlan(), database.getServerProps().getLanguage(),true,".");
     return database;
-  }
+  }*/
 /*
 
   public static void main(String[] arg) {
@@ -941,7 +936,7 @@ public class DatabaseImpl implements Database {
   }
 
   public void writeZip(OutputStream out, Map<String, Collection<String>> typeToSection) throws Exception {
-    Collection<CommonExercise> exercisesForSelectionState = getSectionHelper().getExercisesForSelectionState(typeToSection);
+    Collection<CommonExercise> exercisesForSelectionState = typeToSection.isEmpty()? getExercises() : getSectionHelper().getExercisesForSelectionState(typeToSection);
 
   //  System.out.println("got " + exercisesForSelectionState.size());
     String language1 = getServerProps().getLanguage();
@@ -953,19 +948,24 @@ public class DatabaseImpl implements Database {
     logger.debug("name " + name);
 
     List<CommonExercise> copy = new ArrayList<CommonExercise>(exercisesForSelectionState);
+
+    new ExerciseSorter(typeOrder).getSortedByUnitThenAlpha(copy, false);
+
+/*
     Collections.sort(copy, new Comparator<CommonExercise>() {
       @Override
       public int compare(CommonExercise o1, CommonExercise o2) {
         return o1.getEnglish().compareTo(o2.getEnglish());
       }
     });
+*/
 
     // File archiveParent = archiveContentDir.getParentFile();
     //  File zipFile = new File(archiveParent, archiveContentDir.getName()+ ".zip");
 
     //OutputStream out = new FileOutputStream(zipFile);
 
-    writeArchive(/*file,*/ copy, getAudioDAO(), ".", "war", name, typeOrder, language1, out, typeToSection.isEmpty());
+    writeArchive(/*file,*/ copy, getAudioDAO(), ".", "war", prefix, typeOrder, language1, out, typeToSection.isEmpty());
   }
 
   public String getPrefix(Map<String, Collection<String>> typeToSection) {
@@ -1070,15 +1070,15 @@ public class DatabaseImpl implements Database {
     return wb;
   }
 
-  private void writeArchive(  List<CommonExercise> toWrite, AudioDAO audioDAO,
-                                   String installPath, String relativeConfigDir1,String name, List<String> typeOrder,
-                                   String language1,OutputStream out, boolean skipAudio) throws Exception {
+  private void writeArchive(List<CommonExercise> toWrite, AudioDAO audioDAO,
+                            String installPath, String relativeConfigDir1, String name, List<String> typeOrder,
+                            String language1, OutputStream out, boolean skipAudio) throws Exception {
 /*    File archiveParent = archiveContentDir.getParentFile();
     File zipFile = new File(archiveParent, archiveContentDir.getName()+ ".zip");
 
     OutputStream out = new FileOutputStream(zipFile);*/
 
-    writeToStream(toWrite, audioDAO, installPath, relativeConfigDir1, name, typeOrder, language1, out,skipAudio);
+    writeToStream(toWrite, audioDAO, installPath, relativeConfigDir1, name, typeOrder, language1, out, skipAudio);
 
     /*zOut.flush();
     zOut.closeEntry();
@@ -1086,8 +1086,8 @@ public class DatabaseImpl implements Database {
     zOut.close();*/
 
 
-  //  logger.debug("wrote to " + zipFile.getAbsolutePath());
-   // return zipFile;
+    //  logger.debug("wrote to " + zipFile.getAbsolutePath());
+    // return zipFile;
   }
 
   private void writeToStream(List<CommonExercise> toWrite, AudioDAO audioDAO, String installPath,
@@ -1096,11 +1096,11 @@ public class DatabaseImpl implements Database {
     ZipOutputStream zOut = new ZipOutputStream(out);
 
     if (!skipAudio) {
-      writeFolderContents(zOut, /*"",*/ toWrite, audioDAO, installPath, relativeConfigDir1,name);
+      writeFolderContents(zOut, /*"",*/ toWrite, audioDAO, installPath, relativeConfigDir1, name);
     }
 
     //logger.debug("Adding xls file under " + name);
-    zOut.putNextEntry(new ZipEntry(name));
+    zOut.putNextEntry(new ZipEntry(name+".xlsx"));
 
     writeExcelToStream(toWrite, zOut, typeOrder, language1);
   }
@@ -1124,7 +1124,7 @@ public class DatabaseImpl implements Database {
       }
       String name = ex.getEnglish() + "_" + ex.getForeignLanguage();
       name = name.trim();
-      name = name.replaceAll("\"", "\\'").replaceAll("\\?", "").replaceAll("\\:", "");
+      name = name.replaceAll("\"", "\\'").replaceAll("\\?", "").replaceAll("\\:", "").replaceAll("/"," or ").replaceAll("\\\\"," or ");
       if (names.contains(name)) {
         name += "_" + ex.getID();
       }
@@ -1137,10 +1137,10 @@ public class DatabaseImpl implements Database {
 
       String parent = overallName+"_audio" + File.separator + name;
       if (!reg.isEmpty()) {
-        copyAudio(zOut, reg, parent, false, realContextPath, ex.getID());
+        copyAudio(zOut, reg, parent, false, realContextPath);
       }
       if (!slow.isEmpty()) {
-        copyAudio(zOut, slow, parent, true, realContextPath, ex.getID());
+        copyAudio(zOut, slow, parent, true, realContextPath);
       }
       //  }
       //  else {
@@ -1151,21 +1151,18 @@ public class DatabaseImpl implements Database {
     logger.debug("took " + (now - then) + " millis to export " + toWrite.size() + " items");
   }
 
-  private void copyAudio(ZipOutputStream zOut, Collection<AudioAttribute> reg, String parent, boolean isSlow, String realContextPath, String exerciseID) throws IOException {
+  private void copyAudio(ZipOutputStream zOut, Collection<AudioAttribute> reg, String parent, boolean isSlow, String realContextPath) throws IOException {
     //logger.debug("copyAudio writing to '" + parent + "' given " + reg.size() + " cuts");
-
- //   zOut.putNextEntry(new ZipEntry(parent));
     AudioConversion audioConversion = new AudioConversion();
 
     for (AudioAttribute attribute : reg) {
-      String baseName = parent + File.separator +
-        (attribute.isMale() ? "Male_" : "Female_") + "age_" + attribute.getUser().getAge() + (isSlow ? "_Slow" : "");
-      String name = baseName +
-        ".mp3";
+      MiniUser user = attribute.getUser();
+
+      String userInfo = user.isDefault() ? "DefaultSpeaker" :(attribute.isMale() ? "Male_" : "Female_") + "age_" + user.getAge() + "_(" +user.getId()+ ")";
+      String baseName = parent + File.separator + userInfo + (isSlow ? "_Slow" : "");
+      String name = baseName + ".mp3";
       String audioRef = attribute.getAudioRef();
     //  logger.debug("\twriting audio under " + name + " at " + audioRef);
-
-   //   audioConversion.writeMP3(file.getAbsolutePath());
 
       File input = new File(audioRef);
       if (input.exists()) {
@@ -1188,6 +1185,5 @@ public class DatabaseImpl implements Database {
         //logger.warn("\tDidn't write " + input.getAbsolutePath());
       }
     }
-  //  zOut.closeEntry();
   }
 }
