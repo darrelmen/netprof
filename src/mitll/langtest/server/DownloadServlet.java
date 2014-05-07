@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -28,17 +27,6 @@ import java.util.Map;
 public class DownloadServlet extends DatabaseServlet {
   private static final Logger logger = Logger.getLogger(DownloadServlet.class);
 
-/*  @Override
-  public void init() {
-    //this.pathHelper = new PathHelper(getServletContext());
-
-    String config = servletContext.getInitParameter("config");
-    this.relativeConfigDir = "config" + File.separator + config;
-    this.configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
-
-    readProperties(servletContext);
-    setInstallPath(serverProps.getUseFile(), db);
-  }*/
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     String encodedFileName = request.getRequestURI();
@@ -54,25 +42,7 @@ public class DownloadServlet extends DatabaseServlet {
 
     if (encodedFileName.toLowerCase().contains("audio")) {
       String queryString = request.getQueryString();
-      if (queryString.length() > 2) {
-        queryString = queryString.substring(1, queryString.length() - 1);
-      }
-      queryString = queryString.replaceAll("%20","");
-      String[] split = queryString.split(",");
-      Map<String, Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
-      for (String section : split) {
-        String[] split1 = section.split("=");
-        if (split1.length > 1) {
-          String s = split1[1];
-          if (!s.isEmpty()) {
-            s = s.substring(1, s.length() - 1);
-          }
-          String key = split1[0];
-          List<String> value = Arrays.asList(s.split(","));
-          // logger.debug("\tkey " + key + "=" + value);
-          typeToSection.put(key, value);
-        }
-      }
+      Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(queryString);
 
       logger.debug("Selection " + typeToSection);
       String name = typeToSection.isEmpty() ? "audio" : db.getPrefix(typeToSection);
@@ -99,6 +69,46 @@ public class DownloadServlet extends DatabaseServlet {
     response.getOutputStream().close();
   }
 
+  private Map<String, Collection<String>> getTypeToSelectionFromRequest(String queryString) {
+    if (queryString.length() > 2) {
+      queryString = queryString.substring(1, queryString.length() - 1);
+    }
+  //  logger.debug("got " + queryString);
+    queryString = queryString.replaceAll("%20","");
+    //logger.debug("got " + queryString);
+
+    String[] sections = queryString.split("],");
+
+    //logger.debug("sections " + sections[0]);
+
+    Map<String, Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
+    for (String section : sections) {
+    //  logger.debug("\tsection " + section);
+
+      String[] split1 = section.split("=");
+      if (split1.length > 1) {
+        String key = split1[0];
+        String s = split1[1];
+       // logger.debug("\ts " + s);
+
+        if (!s.isEmpty()) {
+          s = s.substring(1/*, s.length() - 1*/);
+        }
+       s = s.replaceAll("]","");
+
+       // logger.debug("\ts " + s);
+
+        List<String> value = Arrays.asList(s.split(","));
+        logger.debug("\tkey " + key + "=" + value);
+        typeToSection.put(key, value);
+      }
+      else {
+        logger.debug("\tsections 1" + split1[0]);
+      }
+    }
+    return typeToSection;
+  }
+
   private void setInstallPath(DatabaseImpl db) {
     ServletContext servletContext = getServletContext();
     String config = servletContext.getInitParameter("config");
@@ -122,5 +132,14 @@ public class DownloadServlet extends DatabaseServlet {
 
   private String getLessonPlan(String configDir) {
     return configDir + File.separator + serverProps.getLessonPlan();
+  }
+
+  public static void main(String [] arg) {
+    String test = "{Unit=[2,%201],%20Lesson=[5,%209]}";
+    Map<String, Collection<String>> typeToSelectionFromRequest = new DownloadServlet().getTypeToSelectionFromRequest("{Lesson=[7,%208]}");
+    System.out.println("Got " + typeToSelectionFromRequest);
+
+   typeToSelectionFromRequest = new DownloadServlet().getTypeToSelectionFromRequest(test);
+    System.out.println("Got " + typeToSelectionFromRequest);
   }
 }
