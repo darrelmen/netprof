@@ -2,8 +2,6 @@ package mitll.langtest.server;
 
 import audio.image.ImageType;
 import audio.imagewriter.ImageWriter;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.google.common.io.Files;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.AudioTag;
@@ -52,7 +50,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Supports all the database interactions.
@@ -76,10 +73,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private ServerProperties serverProps;
   private PathHelper pathHelper;
 
-  private final Cache<String, String> userToExerciseID = CacheBuilder.newBuilder()
+/*  private final Cache<String, String> userToExerciseID = CacheBuilder.newBuilder()
       .concurrencyLevel(4)
       .maximumSize(10000)
-      .expireAfterWrite(TIMEOUT, TimeUnit.MINUTES).build();
+      .expireAfterWrite(TIMEOUT, TimeUnit.MINUTES).build();*/
 
   /**
    * @param request
@@ -126,7 +123,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private List<CommonShell> getExerciseShellsCombined(Collection<? extends CommonExercise> exercises) {
     List<CommonShell> ids = new ArrayList<CommonShell>();
     for (CommonExercise e : exercises) {
-      ids.add(e.getShellCombinedTooltip());
+
+      CommonShell shellCombinedTooltip = e.getShellCombinedTooltip();
+
+      if (e.getID().equals("5878")) {
+        logger.debug("ex " + e + " tool " + e.getTooltip());
+        logger.debug("ex " + e + " combined " + e.getCombinedTooltip());
+        logger.debug("ex " + e + " translit " + e.getTransliteration());
+
+        logger.debug("ex " + shellCombinedTooltip + " tool " + shellCombinedTooltip.getTooltip());
+        //logger.debug("ex " + shellCombinedTooltip+ " tool " + shellCombinedTooltip.getCombinedTooltip());
+      }
+      ids.add(shellCombinedTooltip);
     }
     return ids;
   }
@@ -171,11 +179,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (typeToSelection.isEmpty()) {   // no unit-chapter filtering
       // get initial exercise set, either from a user list or predefined
       if (userListByID != null) {
-        // List<CommonExercise> exercises2 = getCommonExercises(userListByID);
         exercises = getCommonExercises(userListByID);
-
-        // consider sorting list?
-        // exercises = getSortedExercises(exercises2);
       } else {
         exercises = getExercises();
       }
@@ -216,13 +220,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     List<CommonExercise> exercises2 = getCommonExercises(userListByID);
     long then = System.currentTimeMillis();
     for (CommonExercise commonExercise : exercises2) {
-      for (Map.Entry<String, String> unit : commonExercise.getUnitToValue().entrySet()) {
+/*      for (Map.Entry<String, String> unit : commonExercise.getUnitToValue().entrySet()) {
         helper.addExerciseToLesson(commonExercise, unit.getKey(), unit.getValue());
-      }
+      }*/
+      helper.addExercise(commonExercise);
     }
     long now = System.currentTimeMillis();
 
-    logger.debug("used " + exercises2.size() + " exercises to build a hierarchy in " + (now - then) + " millis");
+    if (now - then > 100) {
+      logger.debug("used " + exercises2.size() + " exercises to build a hierarchy in " + (now - then) + " millis");
+    }
     helper.report();
     Collection<CommonExercise> exercisesForState = helper.getExercisesForSelectionState(typeToSelection);
     logger.debug("\tafter found " + exercisesForState.size() + " matches to " + typeToSelection);
