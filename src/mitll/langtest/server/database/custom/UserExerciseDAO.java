@@ -45,7 +45,7 @@ public class UserExerciseDAO extends DAO {
   private ExerciseDAO exerciseDAO;
   private static final boolean DEBUG = false;
 
-  public UserExerciseDAO(Database database,UserDAO userDAO) {
+  public UserExerciseDAO(Database database) {
     super(database);
     try {
       createUserTable(database);
