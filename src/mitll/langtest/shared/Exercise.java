@@ -247,14 +247,6 @@ public class Exercise extends AudioExercise implements CommonExercise {
     return qaPairs == null ? new ArrayList<QAPair>() : qaPairs;
   }
 
-/*
-  public int getNumQuestions() {
-    List<QAPair> en = langToQuestion == null ? new ArrayList<QAPair>() : langToQuestion.get("en");
-    if (en == null) return 0; // should never happen
-    return en.size();
-  }
-*/
-
   public String getEnglish() {  return englishSentence;  }
   public void setType(EXERCISE_TYPE type) { this.type = type;  }
 
