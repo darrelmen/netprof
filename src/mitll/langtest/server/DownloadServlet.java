@@ -117,17 +117,17 @@ public class DownloadServlet extends DatabaseServlet {
     String configDir = installPath + File.separator + relativeConfigDir;
 
     setInstallPath(serverProps.getUseFile(), db, installPath, relativeConfigDir,configDir);
+
   }
 
-  private String setInstallPath(boolean useFile, DatabaseImpl db,String installPath,String relativeConfigDir,String configDir) {
+  private String setInstallPath(boolean useFile, DatabaseImpl db, String installPath, String relativeConfigDir, String configDir) {
     String lessonPlanFile = getLessonPlan(configDir);
     if (useFile && !new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
 
-    //String installPath = pathHelper.getInstallPath();
     db.setInstallPath(installPath, lessonPlanFile, serverProps.getLanguage(), useFile,
-      relativeConfigDir+File.separator+serverProps.getMediaDir());
+      relativeConfigDir + File.separator + serverProps.getMediaDir());
 
-    return lessonPlanFile;
+    return configDir;
   }
 
   private String getLessonPlan(String configDir) {
