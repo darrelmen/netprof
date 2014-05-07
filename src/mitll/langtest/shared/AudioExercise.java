@@ -1,5 +1,7 @@
 package mitll.langtest.shared;
 
+import com.google.gwt.media.client.Audio;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -17,8 +19,8 @@ import java.util.Map;
  */
 public class AudioExercise extends ExerciseShell {
   private static final String SPEED = "speed";
-  private static final String REGULAR = "regular";
-  private static final String SLOW = "slow";
+  public static final String REGULAR = "regular";
+  public static final String SLOW = "slow";
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
 
@@ -81,6 +83,13 @@ public class AudioExercise extends ExerciseShell {
       if (audio.matches(name,value)) return audio;
     }
     return null;
+  }
+  public Collection<AudioAttribute> getAudioAtSpeed(String value) {
+    List<AudioAttribute> ret = new ArrayList<AudioAttribute>();
+    for (AudioAttribute audio : getAudioAttributes()) {
+      if (audio.matches(SPEED, value)) ret.add(audio);
+    }
+    return ret;
   }
 
   public boolean hasRefAudio() {
