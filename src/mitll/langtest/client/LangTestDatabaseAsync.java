@@ -76,8 +76,6 @@ public interface LangTestDatabaseAsync {
   void getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix, long userListID,
                       int userID, String role, AsyncCallback<ExerciseListWrapper> async);
 
- // void addDLIUser(DLIUser dliUser, AsyncCallback<Void> async);
-
   void getStartupInfo(AsyncCallback<StartupInfo> async);
 
   void getUserListsForText(String search, long userid, AsyncCallback<Collection<UserList>> async);
