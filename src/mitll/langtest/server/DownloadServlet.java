@@ -57,18 +57,21 @@ public class DownloadServlet extends DatabaseServlet {
       if (queryString.length() > 2) {
         queryString = queryString.substring(1, queryString.length() - 1);
       }
+      queryString = queryString.replaceAll("%20","");
       String[] split = queryString.split(",");
       Map<String, Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
       for (String section : split) {
         String[] split1 = section.split("=");
-        String s = split1[1];
-        if (!s.isEmpty()) {
-          s = s.substring(1, s.length() - 1);
+        if (split1.length > 1) {
+          String s = split1[1];
+          if (!s.isEmpty()) {
+            s = s.substring(1, s.length() - 1);
+          }
+          String key = split1[0];
+          List<String> value = Arrays.asList(s.split(","));
+          // logger.debug("\tkey " + key + "=" + value);
+          typeToSection.put(key, value);
         }
-        String key = split1[0];
-        List<String> value = Arrays.asList(s.split(","));
-       // logger.debug("\tkey " + key + "=" + value);
-        typeToSection.put(key, value);
       }
 
       logger.debug("Selection " + typeToSection);
