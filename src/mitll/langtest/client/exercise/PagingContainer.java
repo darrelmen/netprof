@@ -5,12 +5,7 @@ import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.dom.client.Node;
-import com.google.gwt.dom.client.NodeList;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -19,14 +14,12 @@ import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.STATE;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -177,7 +170,7 @@ public class PagingContainer {
     dataProvider.addDataDisplay(table);
 
     // Create a SimplePager.
-    final MySimplePager pager = new MySimplePager();
+    final SimplePager pager = new SimplePager();
 
     // Set the cellList as the display.
     pager.setDisplay(table);
@@ -197,7 +190,7 @@ public class PagingContainer {
     return column;
   }
 
-  private List<Image> getImgTags(Node child) {
+/*  private List<Image> getImgTags(Node child) {
     NodeList<Node> childNodes = child.getChildNodes();
     List<Image> images = new ArrayList<Image>();
     for (int j = 0; j < childNodes.getLength(); j++) {
@@ -205,8 +198,8 @@ public class PagingContainer {
       System.out.println("\tchild " + j+ " " + item.getNodeName() + " " + item.getNodeValue() + " " +item.getNodeType());
       if (item.getNodeName().equalsIgnoreCase("img")) {
 
-   /*     Element as = ImageElement.as(item);
-        images.add(Image.wrap(as));*/
+   *//*     Element as = ImageElement.as(item);
+        images.add(Image.wrap(as));*//*
 
         images.add(new MyImage(ImageElement.as(item)));
       }
@@ -217,13 +210,13 @@ public class PagingContainer {
     System.out.println("got  " + images);
 
     return images;
-  }
+  }*/
 
-  private static class MyImage extends Image {
+/*  private static class MyImage extends Image {
     public MyImage(Element element) {
       super(element);
     }
-  }
+  }*/
 
   private void makeCellTable() {
     CellTable.Resources o = chooseResources();
@@ -384,13 +377,13 @@ public class PagingContainer {
   protected void gotClickOnItem(final CommonShell e) {}
 
   /**
-   * @see mitll.langtest.client.grading.GradedExerciseList#loadFirstExercise()
+   * @seex mitll.langtest.client.grading.GradedExerciseList#loadFirstExercise()
    * @return
    */
-  public CommonShell selectFirst() {
+/*  public CommonShell selectFirst() {
     if (getList().isEmpty()) return null;
     return selectItem(0);
-  }
+  }*/
 
 /*  public boolean isFirst(CommonShell test) {
     return getList().isEmpty() || getList().get(0).getID().equals(test.getID());
@@ -436,18 +429,18 @@ public class PagingContainer {
   }*/
 
   /**
-   * @see #selectFirst()
-   * @param index
+   * @seex #selectFirst()
+   * @paramx index
    * @return
    */
-  private CommonShell selectItem(int index) {
+/*  private CommonShell selectItem(int index) {
     CommonShell first = getList().get(index);
 
     table.getSelectionModel().setSelected(first, true);
     table.redraw();
     onResize(first);
     return first;
-  }
+  }*/
 
   public void clear() {
     List<CommonShell> list = getList();
@@ -488,7 +481,7 @@ public class PagingContainer {
   public Set<String> getKeys() { return idToExercise.keySet(); }
 
   /**
-   * @see #selectItem(int)
+   * @seex #selectItem(int)
    * @see mitll.langtest.client.list.PagingExerciseList#onResize()
    * @param currentExercise
    */
@@ -596,7 +589,7 @@ public class PagingContainer {
     }
   }
 
-  private class MySimplePager extends SimplePager {
+/*  private class MySimplePager extends SimplePager {
     public void getImages() {
       for (int i = 0; i < getWidget().getElement().getChildCount(); i++) {
         Node child = getWidget().getElement().getChild(i);
@@ -622,7 +615,7 @@ public class PagingContainer {
         }
       }
     }
- /*   @Override
+ *//*   @Override
     protected Widget getWidget() {
       Widget widget = super.getWidget();
       for (int i = 0; i < widget.getElement().getChildCount(); i++) {
@@ -631,13 +624,13 @@ public class PagingContainer {
         getImgTags(child);
       }
       return widget;
-    }*/
+    }*//*
 
- /*   @Override
+ *//*   @Override
     public String toString() {
       String s = super.toString();
      // getWidget();
       return s;
-    }*/
-  }
+    }*//*
+  }*/
 }
