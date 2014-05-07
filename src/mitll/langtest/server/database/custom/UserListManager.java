@@ -315,11 +315,10 @@ public class UserListManager {
           favorite = userList;
         }
         else {
-          logger.debug("not favorite " + userList + " " + userList.getName());
+          //logger.debug("not favorite " + userList + " " + userList.getName());
         }
         ids.add(userList.getUniqueID());
       }
-
     }
     if (visitedLists) {
       for (UserList userList : userListDAO.getListsForUser(userid)) {
