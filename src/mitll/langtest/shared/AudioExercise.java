@@ -1,7 +1,5 @@
 package mitll.langtest.shared;
 
-import com.google.gwt.media.client.Audio;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -84,6 +82,12 @@ public class AudioExercise extends ExerciseShell {
     }
     return null;
   }
+
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#writeFolderContents(java.util.zip.ZipOutputStream, java.util.List, mitll.langtest.server.database.AudioDAO, String, String, String)
+   * @param value
+   * @return
+   */
   public Collection<AudioAttribute> getAudioAtSpeed(String value) {
     List<AudioAttribute> ret = new ArrayList<AudioAttribute>();
     for (AudioAttribute audio : getAudioAttributes()) {
