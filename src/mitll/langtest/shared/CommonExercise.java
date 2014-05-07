@@ -52,6 +52,12 @@ public interface CommonExercise extends CommonShell {
   CommonUserExercise toCommonUserExercise();
 
   // super nice to remove these... and make read only
+
+  /**
+   * @see mitll.langtest.server.database.SectionHelper#addExerciseToLesson(CommonExercise, String, String)
+   * @param unit
+   * @param value
+   */
   void addUnitToValue(String unit, String value);
 
   void addAnnotation(String field, String status, String comment);
