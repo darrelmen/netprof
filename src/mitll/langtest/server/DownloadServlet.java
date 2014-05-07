@@ -74,7 +74,7 @@ public class DownloadServlet extends DatabaseServlet {
       queryString = queryString.substring(1, queryString.length() - 1);
     }
   //  logger.debug("got " + queryString);
-    queryString = queryString.replaceAll("%20","");
+    queryString = queryString.replaceAll("%20"," ");
     //logger.debug("got " + queryString);
 
     String[] sections = queryString.split("],");
@@ -100,7 +100,7 @@ public class DownloadServlet extends DatabaseServlet {
 
         List<String> value = Arrays.asList(s.split(","));
      //   logger.debug("\tkey " + key + "=" + value);
-        typeToSection.put(key, value);
+        typeToSection.put(key.trim(), value);
       }
       else {
         logger.debug("\tsections 1" + split1[0]);
