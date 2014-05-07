@@ -32,7 +32,7 @@
 
 
     <servlet>
-        <servlet-name>downloadServet</servlet-name>
+        <servlet-name>downloadServlet</servlet-name>
         <servlet-class>mitll.langtest.server.DownloadServlet</servlet-class>
     </servlet>
 
@@ -43,22 +43,22 @@
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>downloadServet</servlet-name>
+        <servlet-name>downloadServlet</servlet-name>
         <url-pattern>/downloadUsers/*</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
-        <servlet-name>downloadServet</servlet-name>
+        <servlet-name>downloadServlet</servlet-name>
         <url-pattern>/downloadResults/*</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
-        <servlet-name>downloadServet</servlet-name>
+        <servlet-name>downloadServlet</servlet-name>
         <url-pattern>/downloadEvents/*</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
-        <servlet-name>downloadServet</servlet-name>
+        <servlet-name>downloadServlet</servlet-name>
         <url-pattern>/downloadAudio/*</url-pattern>
     </servlet-mapping>
 
