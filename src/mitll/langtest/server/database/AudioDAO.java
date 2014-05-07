@@ -109,6 +109,10 @@ public class AudioDAO extends DAO {
 
     //logger.debug("\tfound " + audioAttributes.size() + " for " + firstExercise.getID());
 
+    attachAudio(firstExercise, installPath, relativeConfigDir, audioAttributes);
+  }
+
+  public void attachAudio(CommonExercise firstExercise, String installPath, String relativeConfigDir, List<AudioAttribute> audioAttributes) {
     AudioConversion audioConversion = new AudioConversion();
 
     for (AudioAttribute attr : audioAttributes) {
