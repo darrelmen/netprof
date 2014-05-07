@@ -233,7 +233,6 @@ public class HistoryExerciseList extends PagingExerciseList {
           }
         } else {
           typesWithSelections.add(type);
-          //selectItem(type, selections);
         }
       }
     }
@@ -382,7 +381,7 @@ public class HistoryExerciseList extends PagingExerciseList {
    * @param token
    * @return object representing type=value pairs from history token
    */
-  SelectionState getSelectionState(String token) {
+  protected SelectionState getSelectionState(String token) {
     return new SelectionState(token, !allowPlusInURL);
   }
 
