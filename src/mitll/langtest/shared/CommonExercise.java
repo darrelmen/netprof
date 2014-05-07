@@ -31,6 +31,7 @@ public interface CommonExercise extends CommonShell {
   String getSlowAudioRef();
 
   Collection<AudioAttribute> getAudioAttributes();
+  Collection<AudioAttribute> getAudioAtSpeed(String value);
   AudioAttribute getRecordingsBy(long userID, boolean regularSpeed);
   List<MiniUser> getSortedUsers(Map<MiniUser, List<AudioAttribute>> malesMap);
   Map<String, AudioAttribute> getAudioRefToAttr();

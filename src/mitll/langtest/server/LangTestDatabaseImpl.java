@@ -291,6 +291,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return getExerciseListWrapperForPrefix(reqID, prefix, exercisesForState, userID, role);
   }
 
+
+
   /**
    * Always sort the result
    * @param reqID
@@ -357,26 +359,35 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   private void addAnnotationsAndAudio(long userID, CommonExercise firstExercise) {
     addAnnotations(firstExercise); // todo do this in a better way
-    List<AudioAttribute> audioAttributes = db.getAudioDAO().getAudioAttributes(firstExercise.getID());
-    AudioConversion audioConversion = new AudioConversion();
-
-    String installPath = pathHelper.getInstallPath();
-    for (AudioAttribute attr : audioAttributes) {
-      firstExercise.addAudio(attr);
-      if (attr.getAudioRef() == null) logger.error("huh? no audio ref for " + attr + " under " + firstExercise);
-      else if (!audioConversion.exists(attr.getAudioRef(), installPath)) {
-        //   logger.debug("\twas '" + attr.getAudioRef() + "'");
-        attr.setAudioRef(relativeConfigDir + File.separator + attr.getAudioRef());
-        //   logger.debug("\tnow '" + attr.getAudioRef() + "'");
-      }
-      //logger.debug("\tadding path '" + attr.getAudioRef() + "' "+attr + " to " + firstExercise.getID());
-    }
+    attachAudio(firstExercise);
 
     addPlayedMarkings(userID, firstExercise);
 
     // if (!audioAttributes.isEmpty()) {
    //   logger.debug("Added  " + audioAttributes.size() + " audio attrs to " + firstExercise);
    // }
+  }
+
+  private void attachAudio(CommonExercise firstExercise) {
+    String installPath = pathHelper.getInstallPath();
+    String relativeConfigDir1 = relativeConfigDir;
+    db.getAudioDAO().attachAudio(firstExercise,installPath,relativeConfigDir1);
+
+
+
+ /*   List<AudioAttribute> audioAttributes = db.getAudioDAO().getAudioAttributes(firstExercise.getID());
+    AudioConversion audioConversion = new AudioConversion();
+
+    for (AudioAttribute attr : audioAttributes) {
+      firstExercise.addAudio(attr);
+      if (attr.getAudioRef() == null) logger.error("huh? no audio ref for " + attr + " under " + firstExercise);
+      else if (!audioConversion.exists(attr.getAudioRef(), installPath)) {
+        //   logger.debug("\twas '" + attr.getAudioRef() + "'");
+        attr.setAudioRef(relativeConfigDir1 + File.separator + attr.getAudioRef());
+        //   logger.debug("\tnow '" + attr.getAudioRef() + "'");
+      }
+      //logger.debug("\tadding path '" + attr.getAudioRef() + "' "+attr + " to " + firstExercise.getID());
+    }*/
   }
 
   private void addPlayedMarkings(long userID, CommonExercise firstExercise) {
@@ -516,6 +527,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
       AudioConversion audioConversion = new AudioConversion();
       if (!audioConversion.exists(wavFile, parent)) {
+        logger.warn("can't find " + wavFile + " under " + parent + " trying config... ");
         parent = configDir;
       }
       if (!audioConversion.exists(wavFile, parent)) {
