@@ -836,11 +836,11 @@ class StudentDialog extends UserDialog {
 
   private class YesNo {
     public final RadioButton yes, no;
-    private final String name;
+   // private final String name;
     public final ControlGroup group;
 
     public YesNo(String name) {
-      this.name = name;
+      //this.name = name;
       yes = new RadioButton(name, "Y");
       yes.addClickHandler(new ClickHandler() {
         @Override
@@ -885,12 +885,12 @@ class StudentDialog extends UserDialog {
         return false;
       } else return true;
     }
-
+/*
     public String getName() {
       return name;
     }
     public boolean getValue() {
       return yes.getValue();
-    }
+    }*/
   }
 }
