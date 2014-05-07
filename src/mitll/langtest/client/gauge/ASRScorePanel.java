@@ -38,6 +38,9 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   private static final String WARNING = "Repeat the phrase exactly as it is written. " +
     "<b>Saying something different or adding/omitting words could result in incorrect scores.</b>";
   private static final int CHART_HEIGHT = 100;
+  private static final String SOUND_ACCURACY = "Sound Accuracy";
+  private static final String SCORE_HISTORY = "Score History";
+  private static final String SCORE = "Score";
 
   private final PretestGauge ASRGauge;
   private final Panel phoneList;
@@ -51,14 +54,14 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     addStyleName("leftFiveMargin");
     addStyleName("floatRight");
     getElement().setId("ASRScorePanel");
-    CaptionPanel chartCaptionPanel = new CaptionPanel("Score History");
+    CaptionPanel chartCaptionPanel = new CaptionPanel(SCORE_HISTORY);
 
     chartPanel = new SimplePanel();
     chartCaptionPanel.add(chartPanel);
 
     add(chartCaptionPanel);
 
-    CaptionPanel captionPanel = new CaptionPanel("Phone Accuracy");
+    CaptionPanel captionPanel = new CaptionPanel(SOUND_ACCURACY);
 
     phoneList = new FlowPanel();
     phoneList.getElement().getStyle().setFloat(Style.Float.LEFT);
@@ -67,7 +70,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 
     add(captionPanel);
 
-    CaptionPanel gaugeCaptionPanel = new CaptionPanel("Score");
+    CaptionPanel gaugeCaptionPanel = new CaptionPanel(SCORE);
 
     Panel gaugePanel = new FlowPanel();
     gaugePanel.setHeight("100%");
