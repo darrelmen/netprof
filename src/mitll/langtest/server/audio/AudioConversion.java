@@ -265,18 +265,19 @@ public class AudioConversion {
    * @param realContextPath
    * @param overwrite
    */
-  public void ensureWriteMP3(String pathToWav, String realContextPath, boolean overwrite) {
+  public String ensureWriteMP3(String pathToWav, String realContextPath, boolean overwrite) {
     if (pathToWav == null || pathToWav.equals("null")) throw new IllegalArgumentException("huh? path is null");
 
     if (AudioTag.COMPRESSED_TYPE.equals("ogg")) {
       writeOGG(pathToWav);
+      return pathToWav;
     }
     else {
-      writeMP3(pathToWav, realContextPath, overwrite);
+      return writeMP3(pathToWav, realContextPath, overwrite);
     }
   }
 
-  private void writeMP3(String pathToWav, String realContextPath, boolean overwrite) {
+  private String writeMP3(String pathToWav, String realContextPath, boolean overwrite) {
     File absolutePathToWav = getAbsoluteFile(pathToWav, realContextPath);
 
     String mp3File = absolutePathToWav.getAbsolutePath().replace(".wav",".mp3");
@@ -303,6 +304,7 @@ public class AudioConversion {
         logger.error("got " + e,e);
       }
     }
+    return mp3File;
   }
 
   /**
