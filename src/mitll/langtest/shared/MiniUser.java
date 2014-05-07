@@ -31,6 +31,8 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
     this.userID = userID;
   }
 
+  public boolean isDefault() { return id == -1; }
+
   /**
    * @see mitll.langtest.server.database.UserDAO#getMiniUsers()
    * @param user
