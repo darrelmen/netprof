@@ -176,9 +176,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
    * @return
    */
   @Override
-  public String getContent() {
-    return "";//content;
-  }
+  public String getContent() { return ""; }
 
   public CommonShell getShellCombinedTooltip() {
     String combined = getCombinedTooltip();
