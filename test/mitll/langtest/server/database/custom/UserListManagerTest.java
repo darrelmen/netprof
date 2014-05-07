@@ -36,12 +36,13 @@ public class UserListManagerTest {
     logger.debug("setup called");
 
     File file = new File("war" + File.separator + "config" + File.separator + ENGLISH + File.separator + "quizlet.properties");
-    logger.debug("config dir " + file.getParent());
+    String parent = file.getParent();
+    logger.debug("config dir " + parent);
     logger.debug("config     " + file.getName());
     test = "test";
-    database = new DatabaseImpl(file.getParent(), file.getName(), test, new PathHelper("war"), false);
+    database = new DatabaseImpl(parent, file.getName(), test, new PathHelper("war"), false);
     logger.debug("made " +database);
-    database.setInstallPath(".",file.getParent()+File.separator+database.getServerProps().getLessonPlan(),"english",true,".");
+    database.setInstallPath(".", parent +File.separator+database.getServerProps().getLessonPlan(),"english",true,".");
 
     database.getExercises();
   }
@@ -115,7 +116,7 @@ public class UserListManagerTest {
       UserList test1 = userListManager.getByName(user.getId(), "test");
       listid = test1.getUniqueID();
     }
-    assertTrue(userListManager.getUserListsForText("", -1).contains(userListManager.getUserListByID(listid)));
+    assertTrue(userListManager.getUserListsForText("", -1).contains(userListManager.getUserListByID(listid, new ArrayList<String>())));
 
     Iterator<UserList> iterator = userListManager.getListsForUser(user.getId(), false, false).iterator();
     UserList favorite = iterator.next();
@@ -158,7 +159,7 @@ public class UserListManagerTest {
     UserListManager userListManager = database.getUserListManager();
 
     long listid = addListCheck(owner.getId(), userListManager, "test");
-    UserList testList = userListManager.getUserListByID(listid);
+    UserList testList = userListManager.getUserListByID(listid, new ArrayList<String>());
     assertTrue(userListManager.getUserListsForText("", -1).contains(testList));
 
     long visitor = getUser("visitor");
@@ -201,17 +202,17 @@ public class UserListManagerTest {
 
     long listid = addListCheck(owner.getId(), userListManager, "test");
     logger.debug("list id " +listid);
-    UserList testList = userListManager.getUserListByID(listid);
+    UserList testList = userListManager.getUserListByID(listid, new ArrayList<String>());
     assertTrue(userListManager.getUserListsForText("", -1).contains(testList));
 
     UserExercise english = addAndDelete(owner, userListManager, listid, testList);
 
     // after delete, it should be gone
-    testList = userListManager.getUserListByID(listid);
+    testList = userListManager.getUserListByID(listid, new ArrayList<String>());
     assertTrue(!testList.getExercises().contains(english));
 
     userListManager.reallyCreateNewItem(listid, english, "");
-    testList = userListManager.getUserListByID(listid);
+    testList = userListManager.getUserListByID(listid, new ArrayList<String>());
     CommonUserExercise next = testList.getExercises().iterator().next();
     assertTrue(next.getEnglish().equals(ENGLISH));
 
@@ -232,7 +233,7 @@ public class UserListManagerTest {
 
     userListManager.editItem(next.toUserExercise(),false, "");
 
-    testList = userListManager.getUserListByID(listid);
+    testList = userListManager.getUserListByID(listid, new ArrayList<String>());
     next = testList.getExercises().iterator().next();
     assertTrue(next.getEnglish().equals(CHANGED));
   }
@@ -240,7 +241,7 @@ public class UserListManagerTest {
   public UserExercise addAndDelete(User owner, UserListManager userListManager, long listid, UserList testList) {
     UserExercise english = addExercise(owner, userListManager, listid, testList);
 
-    boolean b = userListManager.deleteItemFromList(listid, english.getID());
+    boolean b = userListManager.deleteItemFromList(listid, english.getID(), new ArrayList<String>());
     assertTrue(b);
     return english;
   }
@@ -254,7 +255,7 @@ public class UserListManagerTest {
     assertTrue(!testList.getExercises().contains(english));
 
     // OK, database should show it now
-    testList = userListManager.getUserListByID(listid);
+    testList = userListManager.getUserListByID(listid, new ArrayList<String>());
     Collection<CommonUserExercise> exercises = testList.getExercises();
     assertTrue(exercises.contains(english));
     // tooltip should never be empty
@@ -277,7 +278,7 @@ public class UserListManagerTest {
   @Test
   public void testReview() {
     UserListManager userListManager = database.getUserListManager();
-    UserList reviewList = userListManager.getDefectList();
+    UserList reviewList = userListManager.getDefectList(new ArrayList<String>());
     //userListManager.getReviewedExercises();
 
 
@@ -319,7 +320,7 @@ public class UserListManagerTest {
       } else {
         assertTrue("got list id " + listid, userListManager.listExists(listid));
         assertTrue(userListManager.hasByName(user, name));
-        UserList userListByID = userListManager.getUserListByID(listid);
+        UserList userListByID = userListManager.getUserListByID(listid, new ArrayList<String>());
         assertNotNull(userListByID);
       }
     } else {
