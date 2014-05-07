@@ -57,6 +57,12 @@
         <url-pattern>/downloadEvents/*</url-pattern>
     </servlet-mapping>
 
+
+    <servlet-mapping>
+        <servlet-name>downloadServet</servlet-name>
+        <url-pattern>/downloadAudio/*</url-pattern>
+    </servlet-mapping>
+
     <servlet-mapping>
         <servlet-name>scoreServlet</servlet-name>
         <url-pattern>/scoreServlet/*</url-pattern>
@@ -64,7 +70,7 @@
 
   <context-param>
      <param-name>config</param-name>
-     <param-value>english</param-value>
+     <param-value>mandarin</param-value>
   </context-param>
 
   <context-param>
