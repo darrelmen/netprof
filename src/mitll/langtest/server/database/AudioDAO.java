@@ -1,6 +1,5 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
