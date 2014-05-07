@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -41,6 +42,7 @@ import java.util.Set;
 public abstract class ExerciseList extends VerticalPanel implements ListInterface, ProvidesResize,
   ValueChangeHandler<String> {
   private static final int NUM_QUESTIONS_FOR_TOKEN = 5;
+  private static final Map<String, Collection<String>> TYPE_TO_SELECTION = new HashMap<String, Collection<String>>();
 
   private SimplePanel innerContainer;
   protected final LangTestDatabaseAsync service;
@@ -142,7 +144,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   public boolean getExercises(long userID) {
     System.out.println("ExerciseList.getExercises for user " +userID + " instance " + instance);
     lastReqID++;
-    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), "", -1, controller.getUser(), getRole(), new SetExercisesCallback());
+    service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, controller.getUser(), getRole(), new SetExercisesCallback());
     return true;
   }
 
@@ -152,7 +154,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   public void reload() {
     System.out.println("ExerciseList.reload for user " + controller.getUser() + " instance " + instance + " id " + getElement().getId());
-    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), "", -1,  controller.getUser(), getRole(), new SetExercisesCallback());
+    service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1,  controller.getUser(), getRole(), new SetExercisesCallback());
   }
 
   /**
@@ -163,7 +165,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   @Override
   public void reloadWith(String id) {
     System.out.println("ExerciseList.reloadWith id = " + id+ " for user " + controller.getUser() + " instance " + instance);
-    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), "", -1, controller.getUser(), getRole(), new SetExercisesCallbackWithID(id));
+    service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, controller.getUser(), getRole(), new SetExercisesCallbackWithID(id));
   }
 
   /**
