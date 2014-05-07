@@ -217,7 +217,22 @@ public class SectionHelper {
   public Pair addWeekToLesson(CommonExercise exercise, String unitName) { return addExerciseToLesson(exercise, weekType, unitName);}
 
   /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesFromFiltered(java.util.Map, mitll.langtest.shared.custom.UserList)
+   * @see ExcelImport#getRawExercises()
+   * @param where
+   */
+  public void addExercise(CommonExercise where) {
+    List<SectionHelper.Pair> pairs = new ArrayList<SectionHelper.Pair>();
+    for (Map.Entry<String, String> pair : where.getUnitToValue().entrySet()) {
+      Pair pair1 = addExerciseToLesson(where, pair.getKey(), pair.getValue());
+      pairs.add(pair1);
+    }
+    addAssociations(pairs);
+  }
+
+  /**
    * @see ExcelImport#recordUnitChapterWeek
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesFromFiltered(java.util.Map, mitll.langtest.shared.custom.UserList)
    * @param exercise
    * @param type
    * @param unitName
@@ -230,7 +245,7 @@ public class SectionHelper {
 
     exercise.addUnitToValue(type, unitName);
 
-    return new Pair(type,unitName);
+    return new Pair(type, unitName);
   }
 
   protected void addUnitNameEntry(CommonExercise exercise, String unitName, Map<String, Lesson> unit) {
@@ -241,6 +256,22 @@ public class SectionHelper {
     unitForName.addExercise(exercise);
   }
 
+  public void removeExercise(CommonExercise exercise) {
+    //logger.debug("Removing " + exercise.getID());
+    for (Map.Entry<String, String> pair : exercise.getUnitToValue().entrySet()) {
+      if (!removeExerciseToLesson(exercise, pair.getKey(), pair.getValue())) {
+        logger.warn("didn't remove " + exercise.getID() + " for " + pair);
+      }
+    }
+  }
+
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#deleteItem(String)
+   * @param exercise
+   * @param type
+   * @param unitName
+   * @return
+   */
   public boolean removeExerciseToLesson(CommonExercise exercise, String type, String unitName) {
     Map<String, Lesson> unit = getSectionToLesson(type);
     Lesson unitForName = unit.get(unitName);
