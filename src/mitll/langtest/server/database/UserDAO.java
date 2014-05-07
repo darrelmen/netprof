@@ -1,7 +1,6 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.database.custom.UserListManager;
-import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.DLIUser;
 import mitll.langtest.shared.Demographics;
 import mitll.langtest.shared.MiniUser;

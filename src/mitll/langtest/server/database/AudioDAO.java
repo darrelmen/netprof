@@ -1,10 +1,14 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.shared.AudioAttribute;
+import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.Result;
 import org.apache.log4j.Logger;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -97,6 +101,26 @@ public class AudioDAO extends DAO {
       logger.error("got " + ee, ee);
     }
     return new ArrayList<AudioAttribute>();
+  }
+
+
+  public void attachAudio(CommonExercise firstExercise,  String installPath, String relativeConfigDir) {
+    List<AudioAttribute> audioAttributes = getAudioAttributes(firstExercise.getID());
+
+    //logger.debug("\tfound " + audioAttributes.size() + " for " + firstExercise.getID());
+
+    AudioConversion audioConversion = new AudioConversion();
+
+    for (AudioAttribute attr : audioAttributes) {
+      firstExercise.addAudio(attr);
+      if (attr.getAudioRef() == null) logger.error("huh? no audio ref for " + attr + " under " + firstExercise);
+      else if (!audioConversion.exists(attr.getAudioRef(), installPath)) {
+        //   logger.debug("\twas '" + attr.getAudioRef() + "'");
+        attr.setAudioRef(relativeConfigDir + File.separator + attr.getAudioRef());
+        //   logger.debug("\tnow '" + attr.getAudioRef() + "'");
+      }
+      //logger.debug("\tadding path '" + attr.getAudioRef() + "' "+attr + " to " + firstExercise.getID());
+    }
   }
 
   public List<AudioAttribute> getAudioAttributes(String exid) {
@@ -218,7 +242,7 @@ public class AudioDAO extends DAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#copyAudio(java.util.Map, java.util.Map, AudioDAO)
+   * @see mitll.langtest.server.database.DatabaseImpl#copyAudio
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
    */
   public long add(Result result, int userid, String path) {
