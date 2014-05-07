@@ -360,9 +360,7 @@ class EditableExercise extends NewUserExercise {
     if (byID == null) {
       System.err.println("changeTooltip : huh? can't find exercise with id " + newUserExercise.getID());
     } else {
-      //String english1 = newUserExercise.getEnglish();
-      String combinedTooltip = newUserExercise.getCombinedTooltip();
-      byID.setTooltip(combinedTooltip);//english1.isEmpty() ? newUserExercise.getForeignLanguage() : english1);
+      byID.setTooltip(newUserExercise.getCombinedTooltip());
       System.out.println("changeTooltip : for " + newUserExercise.getID() + " now " + byID.getTooltip());
 
       pagingContainer.redraw();   // show change to tooltip!
