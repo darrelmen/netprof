@@ -2,6 +2,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
@@ -13,6 +14,7 @@ import mitll.langtest.server.database.custom.UserListExerciseJoinDAO;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.instrumentation.EventDAO;
 import mitll.langtest.shared.AudioAttribute;
+import mitll.langtest.shared.AudioExercise;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.DLIUser;
@@ -26,14 +28,22 @@ import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.monitoring.Session;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -43,6 +53,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Note with H2 that :  <br></br>
@@ -140,7 +152,7 @@ public class DatabaseImpl implements Database {
     UserListDAO userListDAO = new UserListDAO(this, userDAO);
     addRemoveDAO = new AddRemoveDAO(this);
 
-    userExerciseDAO = new UserExerciseDAO(this,userDAO);
+    userExerciseDAO = new UserExerciseDAO(this);
     UserListExerciseJoinDAO userListExerciseJoinDAO = new UserListExerciseJoinDAO(this);
     dliUserDAO = new DLIUserDAO(this);
     resultDAO = new ResultDAO(this,userDAO);
@@ -899,93 +911,284 @@ public class DatabaseImpl implements Database {
 
   private static DatabaseImpl makeDatabaseImpl(String h2DatabaseFile, String configDir) {
     ServerProperties serverProps = new ServerProperties(configDir,"quizlet.properties");
-    return new DatabaseImpl(configDir, configDir, h2DatabaseFile, serverProps, null, true);
+    DatabaseImpl database = new DatabaseImpl(configDir, configDir, h2DatabaseFile, serverProps, null, true);
+    database.setInstallPath(".",configDir+File.separator+database.getServerProps().getLessonPlan(), database.getServerProps().getLanguage(),true,".");
+    return database;
   }
+/*
 
   public static void main(String[] arg) {
-    importCourseExamples();
+    testZip();
   }
+*/
 
-  protected static void importCourseExamples() {
-    DatabaseImpl russianCourseExamples = makeDatabaseImpl("russianCourseExamples_04_16", "war/config/russian");
-    ResultDAO resultDAO1 = russianCourseExamples.getResultDAO();
-    System.out.println("got " + resultDAO1.getNumResults());
-    Map<Long, Map<String, Result>> userToResultsRegular = resultDAO1.getUserToResults(true, russianCourseExamples.getUserDAO());
-    System.out.println("got " + userToResultsRegular.size() + " keys " + userToResultsRegular.keySet());
+  public void writeZip( OutputStream out) {
+    try {
+     // DatabaseImpl russianCourseExamples = makeDatabaseImpl("npfRussian", "war/config/russian");
 
-    //  System.out.println("got " + result);
+     // List<CommonExercise> exercises = russianCourseExamples.getExercises();
 
-    Map<Long, Map<String, Result>> userToResultsSlow = resultDAO1.getUserToResults(false, russianCourseExamples.getUserDAO());
-    System.out.println("got " + userToResultsSlow.size() + " keys " + userToResultsSlow.keySet());
+     // if (exercises.isEmpty()) return;
+    //  System.out.println("got " + exercises.size());
 
-    // so now we have the latest audio
-    // write to id/regular_or_slow/user_id
-
-    // copy users to real database
-
-    DatabaseImpl npfRussian = makeDatabaseImpl("npfRussian", "war/config/russian");
-    Map<Long, User> userMap = russianCourseExamples.getUserDAO().getUserMap();
-    Map<Long, Long> oldToNew = new HashMap<Long, Long>();
-
-    for (long userid : userToResultsRegular.keySet()) {
-      copyUser(npfRussian, userMap, oldToNew, userid);
+      Map<String, Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
+      typeToSection.put("Chapter", Arrays.asList("1"));
+    //  typeToSection.put("Chapter", Arrays.asList("1","3"));
+      writeZip(out, typeToSection);
+    } catch (Exception e) {
+      e.printStackTrace();
     }
-
-    for (long userid : userToResultsSlow.keySet()) {
-      copyUser(npfRussian, userMap, oldToNew, userid);
-    }
-
-    // so now we have the users in the database
-
-    // add a audio reference to the audio ref table for each recording
-    AudioDAO audioDAO = npfRussian.getAudioDAO();
-   // audioDAO.drop();
-    copyAudio(userToResultsRegular, oldToNew, audioDAO);
-    copyAudio(userToResultsSlow, oldToNew, audioDAO);
   }
 
-  private static void copyUser(DatabaseImpl npfRussian, Map<Long, User> userMap, Map<Long, Long> oldToNew, long userid) {
-    User user = userMap.get(userid);
-    int i = npfRussian.userExists(user.getUserID());
-    if (i > 0) logger.debug("found duplicate " + user);
-    long l = i != -1 ? i : npfRussian.addUser(user);
-    oldToNew.put(user.getId(), l);
+  public void writeZip(OutputStream out, Map<String, Collection<String>> typeToSection) throws Exception {
+    Collection<CommonExercise> exercisesForSelectionState = getSectionHelper().getExercisesForSelectionState(typeToSection);
+
+    System.out.println("got " + exercisesForSelectionState.size());
+    String language1 = getServerProps().getLanguage();
+    String xlsx = "xlsx";
+
+    List<String> typeOrder = getSectionHelper().getTypeOrder();
+    String prefix = getPrefix(typeToSection, typeOrder);
+    String name = prefix + "." + xlsx;
+    logger.debug("name " + name);
+    //  FileOutputStream out = new FileOutputStream(name);
+    //  writeExcelToStream(exercisesForSelectionState, out, typeOrder,language1);
+/*
+
+    File exportDir = new File("exportDir");
+    exportDir.mkdir();
+    File file = new File(exportDir, prefix);
+    file.mkdir();
+*/
+
+
+    List<CommonExercise> copy = new ArrayList<CommonExercise>(exercisesForSelectionState);
+    Collections.sort(copy, new Comparator<CommonExercise>() {
+      @Override
+      public int compare(CommonExercise o1, CommonExercise o2) {
+        return o1.getEnglish().compareTo(o2.getEnglish());
+      }
+    });
+
+    // File archiveParent = archiveContentDir.getParentFile();
+    //  File zipFile = new File(archiveParent, archiveContentDir.getName()+ ".zip");
+
+    //OutputStream out = new FileOutputStream(zipFile);
+
+    writeArchive(/*file,*/ copy, getAudioDAO(), ".", "war", name, typeOrder, language1, out, typeToSection.isEmpty());
   }
 
-  /**
-   * TODO : deal with the user ids being the same after toLowerCase
-   * @param userToResultsRegular
-   * @param oldToNew
-   * @param audioDAO
-   */
-  protected static void copyAudio(Map<Long, Map<String, Result>> userToResultsRegular, Map<Long, Long> oldToNew, AudioDAO audioDAO) {
-    int count = 0;
-    for (Map.Entry<Long, Map<String, Result>> userToExIdToResult : userToResultsRegular.entrySet()) {
-      //for (Long userid : userToExIdToResult.getKey())
-      logger.debug("User " +userToExIdToResult.getKey());
-      Map<String, Result> exIdToResult = userToExIdToResult.getValue();
-      logger.debug("num = " + exIdToResult.size() + " exercises->results ");
-      for (Result r : exIdToResult.values()) {
-        if (count %  100 == 0) {
-          logger.debug("\tcount " + count +
-            " result = " + r.uniqueID + " for " + r.getID() + " type " + r.getAudioType() + " path " + r.answer);
-        }
+  public String getPrefix(Map<String, Collection<String>> typeToSection) {
+    List<String> typeOrder = getSectionHelper().getTypeOrder();
+    return getPrefix(typeToSection, typeOrder);
+  }
 
-        audioDAO.add(r, oldToNew.get(r.userid).intValue(), "bestAudio/" + r.answer);
-
-        try {
-          File destFile = new File("war/config/russian/bestAudio", r.answer);
-          destFile.getParentFile().mkdirs();
-          FileUtils.copyFile(new File("war/config/russian/candidateAudio", r.answer), destFile);
-          count++;
-          if (count % 100 == 0)  {
-            logger.debug("\tcount " + count + " copied to " + destFile.getAbsolutePath());
-          }
-        } catch (IOException e) {
-          logger.error("got " + e, e);
+    public String getPrefix(Map<String, Collection<String>> typeToSection, List<String> typeOrder) {
+    String prefix = "";
+    for (String type : typeOrder) {
+      Collection<String> selections = typeToSection.get(type);
+      if (selections != null) {
+        prefix += type + "_";
+        for (String sel : selections) {
+          prefix += sel + ",";
         }
+        if (!selections.isEmpty()) prefix = prefix.substring(0, prefix.length() - 1);
+        prefix += "_";
       }
     }
-    logger.debug("copied " + count + " files.");
+    if (prefix.isEmpty()) {
+      prefix = "All";
+    } else {
+      prefix = prefix.substring(0, prefix.length() - 1);
+    }
+    return prefix;
+  }
+
+  public static void writeExcelToStream(Collection<CommonExercise> exercises, OutputStream out, Collection<String> typeOrder,String russian) {
+    SXSSFWorkbook wb = writeExcel(exercises, russian,typeOrder);
+    long then = System.currentTimeMillis();
+    try {
+      wb.write(out);
+      long now2 = System.currentTimeMillis();
+      if (now2-then > 100) {
+        logger.warn("toXLSX : took " + (now2-then) + " millis to write excel to output stream ");
+      }
+    //  out.close();
+      wb.dispose();
+    } catch (IOException e) {
+      logger.error("got " + e, e);
+    }
+  }
+
+  private static SXSSFWorkbook writeExcel(Collection<CommonExercise> results, String language, Collection<String> typeOrder) {
+    long now;
+    long then = System.currentTimeMillis();
+
+    SXSSFWorkbook wb = new SXSSFWorkbook(1000); // keep 100 rows in memory, exceeding rows will be flushed to disk
+    Sheet sheet = wb.createSheet("Exercises");
+    int rownum = 0;
+    CellStyle cellStyle = wb.createCellStyle();
+    DataFormat dataFormat = wb.createDataFormat();
+
+    cellStyle.setDataFormat(dataFormat.getFormat("MMM dd HH:mm:ss"));
+    Row headerRow = sheet.createRow(rownum++);
+
+    List<String> columns = new ArrayList<String>();
+    columns.add("ID");
+    columns.add("Word/Expression");
+    columns.add(language);
+    for (String type : typeOrder) {
+      columns.add(type);
+    }
+/*    columns.add("Audio");
+    columns.add("Slow Audio");*/
+
+    for (int i = 0; i < columns.size(); i++) {
+      Cell headerCell = headerRow.createCell(i);
+      headerCell.setCellValue(columns.get(i));
+    }
+
+    List<CommonExercise> copy = new ArrayList<CommonExercise>(results);
+    Collections.sort(copy, new Comparator<CommonExercise>() {
+      @Override
+      public int compare(CommonExercise o1, CommonExercise o2) {
+        return o1.getEnglish().compareTo(o2.getEnglish());
+      }
+    });
+    for (CommonExercise exercise : copy) {
+      Row row = sheet.createRow(rownum++);
+      int j = 0;
+
+      Cell cell = row.createCell(j++);
+      cell.setCellValue(exercise.getID());
+
+      cell = row.createCell(j++);
+      cell.setCellValue(exercise.getEnglish());
+
+      cell = row.createCell(j++);
+      cell.setCellValue(exercise.getForeignLanguage());
+
+      for (String type : typeOrder) {
+        cell = row.createCell(j++);
+        cell.setCellValue(exercise.getUnitToValue().get(type));
+      }
+    }
+    now = System.currentTimeMillis();
+    if (now-then > 100) {
+      logger.warn("toXLSX : took " + (now-then) + " millis to add " + rownum + " rows to sheet, or " + (now-then)/rownum + " millis/row");
+    }
+    return wb;
+  }
+
+  private void writeArchive(  List<CommonExercise> toWrite, AudioDAO audioDAO,
+                                   String installPath, String relativeConfigDir1,String name, List<String> typeOrder,
+                                   String language1,OutputStream out, boolean skipAudio) throws Exception {
+/*    File archiveParent = archiveContentDir.getParentFile();
+    File zipFile = new File(archiveParent, archiveContentDir.getName()+ ".zip");
+
+    OutputStream out = new FileOutputStream(zipFile);*/
+
+    writeToStream(toWrite, audioDAO, installPath, relativeConfigDir1, name, typeOrder, language1, out,skipAudio);
+
+    /*zOut.flush();
+    zOut.closeEntry();
+
+    zOut.close();*/
+
+
+  //  logger.debug("wrote to " + zipFile.getAbsolutePath());
+   // return zipFile;
+  }
+
+  private void writeToStream(List<CommonExercise> toWrite, AudioDAO audioDAO, String installPath,
+                             String relativeConfigDir1, String name, List<String> typeOrder,
+                             String language1, OutputStream out, boolean skipAudio) throws Exception {
+    ZipOutputStream zOut = new ZipOutputStream(out);
+
+    if (!skipAudio) {
+      writeFolderContents(zOut, /*"",*/ toWrite, audioDAO, installPath, relativeConfigDir1/*, "war"*/);
+    }
+
+    //logger.debug("Adding xls file under " + name);
+    zOut.putNextEntry(new ZipEntry(name));
+
+    writeExcelToStream(toWrite, zOut, typeOrder, language1);
+  }
+
+  private void writeFolderContents(ZipOutputStream zOut,
+                                   List<CommonExercise> toWrite, AudioDAO audioDAO,
+                                   String installPath, String relativeConfigDir1
+                                   ) throws Exception {
+    int c = 0;
+    long then = System.currentTimeMillis();
+    String realContextPath = ".";
+    Set<String> names = new HashSet<String>();
+
+    for (CommonExercise ex : toWrite) {
+      audioDAO.attachAudio(ex, installPath, relativeConfigDir1);
+
+      String name = ex.getEnglish() + "_" + ex.getForeignLanguage();
+      name = name.trim();
+      name = name.replaceAll("\"","\\'").replaceAll("\\?","").replaceAll("\\:","");
+      if (names.contains(name)) {
+        name += "_"+ex.getID();
+      }
+      names.add(name);
+
+      Collection<AudioAttribute> reg = ex.getAudioAtSpeed(AudioExercise.REGULAR);
+     // logger.debug("entry for " + name + " has  " + reg.size() + " cuts/" + ex.getAudioAttributes().size());
+      Collection<AudioAttribute> slow = ex.getAudioAtSpeed(AudioExercise.SLOW);
+     // logger.debug("entry for " + name + " has  " + slow.size() + " cuts/" + ex.getAudioAttributes().size());
+
+      String parent = "audio" + File.separator + name;
+      if (!reg.isEmpty()) {
+        copyAudio(zOut, reg, parent, false, realContextPath, ex.getID());
+      }
+      if (!slow.isEmpty()) {
+        copyAudio(zOut, slow, parent, true, realContextPath, ex.getID());
+      }
+    }
+    long now = System.currentTimeMillis();
+    logger.debug("took " + (now - then) + " millis to export " + toWrite.size() + " items");
+  }
+
+  private void copyAudio(ZipOutputStream zOut, Collection<AudioAttribute> reg, String parent, boolean isSlow, String realContextPath, String exerciseID) throws IOException {
+    //logger.debug("copyAudio writing to '" + parent + "' given " + reg.size() + " cuts");
+
+ //   zOut.putNextEntry(new ZipEntry(parent));
+    AudioConversion audioConversion = new AudioConversion();
+
+    for (AudioAttribute attribute : reg) {
+      String baseName = parent + File.separator +
+        (attribute.isMale() ? "Male_" : "Female_") + "age_" + attribute.getUser().getAge() + (isSlow ? "_Slow" : "");
+      String name = baseName +
+        ".mp3";
+      String audioRef = attribute.getAudioRef();
+    //  logger.debug("\twriting audio under " + name + " at " + audioRef);
+
+   //   audioConversion.writeMP3(file.getAbsolutePath());
+
+      File input = new File(audioRef);
+      if (input.exists()) {
+        String s = audioConversion.ensureWriteMP3(audioRef, realContextPath, false);
+        File mp3 = new File(s);
+        if (mp3.exists()) {
+          // audioRef = audioRef.replaceAll(".wav",".mp3");
+       //   logger.warn("---> Did write " + mp3.getAbsolutePath());
+
+          zOut.putNextEntry(new ZipEntry(name));
+          FileUtils.copyFile(mp3, zOut);
+          zOut.flush();
+          zOut.closeEntry();
+        }
+        else {
+          logger.warn("\tDidn't write " + mp3.getAbsolutePath());
+        }
+      }
+      else {
+        //logger.warn("\tDidn't write " + input.getAbsolutePath());
+      }
+    }
+  //  zOut.closeEntry();
   }
 }
