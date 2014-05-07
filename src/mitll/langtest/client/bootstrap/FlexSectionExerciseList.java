@@ -4,8 +4,10 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -225,18 +227,9 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
       }
     }
 
-/*    Button export = new Button("Export");
-    export.setType(ButtonType.INFO);
-    export.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-
-      }
-    });*/
-
     labelColumn.add( child = new Anchor(getURL2()));
+    addTooltip(child, "Download spreadsheet and audio for selected sections.");
 
-   // labelColumn.add(export);
     long now = System.currentTimeMillis();
     if (now - then > 300)
       System.out.println("\taddButtonRow took " + (now - then) + " millis" + " instance " + getInstance());
@@ -267,7 +260,34 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     sb.appendHtmlConstant("</a>");
     return sb.toSafeHtml();
   }
+  protected Tooltip addTooltip(Widget w, String tip) {
+    return createAddTooltip(w, tip, Placement.RIGHT);
+  }
 
+  /**
+   * @see mitll.langtest.client.custom.NPFExercise#makeAddToList(mitll.langtest.shared.CommonExercise, mitll.langtest.client.exercise.ExerciseController)
+   * @param widget
+   * @param tip
+   * @param placement
+   * @return
+   */
+  private Tooltip createAddTooltip(Widget widget, String tip, Placement placement) {
+    Tooltip tooltip = new Tooltip();
+    tooltip.setWidget(widget);
+    tooltip.setText(tip);
+    tooltip.setAnimation(true);
+// As of 4/22 - bootstrap 2.2.1.0 -
+// Tooltips have an bug which causes the cursor to
+// toggle between finger and normal when show delay
+// is configured.
+
+    tooltip.setShowDelay(500);
+    tooltip.setHideDelay(500);
+
+    tooltip.setPlacement(placement);
+    tooltip.reconfigure();
+    return tooltip;
+  }
 
   /**
    * Label is in column 0
