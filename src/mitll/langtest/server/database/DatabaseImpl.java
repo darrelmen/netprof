@@ -943,7 +943,7 @@ public class DatabaseImpl implements Database {
   public void writeZip(OutputStream out, Map<String, Collection<String>> typeToSection) throws Exception {
     Collection<CommonExercise> exercisesForSelectionState = getSectionHelper().getExercisesForSelectionState(typeToSection);
 
-    System.out.println("got " + exercisesForSelectionState.size());
+  //  System.out.println("got " + exercisesForSelectionState.size());
     String language1 = getServerProps().getLanguage();
     String xlsx = "xlsx";
 
@@ -951,16 +951,6 @@ public class DatabaseImpl implements Database {
     String prefix = getPrefix(typeToSection, typeOrder);
     String name = prefix + "." + xlsx;
     logger.debug("name " + name);
-    //  FileOutputStream out = new FileOutputStream(name);
-    //  writeExcelToStream(exercisesForSelectionState, out, typeOrder,language1);
-/*
-
-    File exportDir = new File("exportDir");
-    exportDir.mkdir();
-    File file = new File(exportDir, prefix);
-    file.mkdir();
-*/
-
 
     List<CommonExercise> copy = new ArrayList<CommonExercise>(exercisesForSelectionState);
     Collections.sort(copy, new Comparator<CommonExercise>() {
@@ -1106,7 +1096,7 @@ public class DatabaseImpl implements Database {
     ZipOutputStream zOut = new ZipOutputStream(out);
 
     if (!skipAudio) {
-      writeFolderContents(zOut, /*"",*/ toWrite, audioDAO, installPath, relativeConfigDir1/*, "war"*/);
+      writeFolderContents(zOut, /*"",*/ toWrite, audioDAO, installPath, relativeConfigDir1,name);
     }
 
     //logger.debug("Adding xls file under " + name);
@@ -1117,36 +1107,45 @@ public class DatabaseImpl implements Database {
 
   private void writeFolderContents(ZipOutputStream zOut,
                                    List<CommonExercise> toWrite, AudioDAO audioDAO,
-                                   String installPath, String relativeConfigDir1
+                                   String installPath, String relativeConfigDir1, String overallName
                                    ) throws Exception {
     int c = 0;
     long then = System.currentTimeMillis();
     String realContextPath = ".";
     Set<String> names = new HashSet<String>();
 
+    Map<String, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
+    logger.debug("found audio for " + exToAudio.size() + " items");
     for (CommonExercise ex : toWrite) {
-      audioDAO.attachAudio(ex, installPath, relativeConfigDir1);
-
+      //audioDAO.attachAudio(ex, installPath, relativeConfigDir1);
+      List<AudioAttribute> audioAttributes = exToAudio.get(ex.getID());
+      if (audioAttributes != null) {
+        audioDAO.attachAudio(ex, installPath, relativeConfigDir1, audioAttributes);
+      }
       String name = ex.getEnglish() + "_" + ex.getForeignLanguage();
       name = name.trim();
-      name = name.replaceAll("\"","\\'").replaceAll("\\?","").replaceAll("\\:","");
+      name = name.replaceAll("\"", "\\'").replaceAll("\\?", "").replaceAll("\\:", "");
       if (names.contains(name)) {
-        name += "_"+ex.getID();
+        name += "_" + ex.getID();
       }
       names.add(name);
 
       Collection<AudioAttribute> reg = ex.getAudioAtSpeed(AudioExercise.REGULAR);
-     // logger.debug("entry for " + name + " has  " + reg.size() + " cuts/" + ex.getAudioAttributes().size());
+      // logger.debug("entry for " + name + " has  " + reg.size() + " cuts/" + ex.getAudioAttributes().size());
       Collection<AudioAttribute> slow = ex.getAudioAtSpeed(AudioExercise.SLOW);
-     // logger.debug("entry for " + name + " has  " + slow.size() + " cuts/" + ex.getAudioAttributes().size());
+      // logger.debug("entry for " + name + " has  " + slow.size() + " cuts/" + ex.getAudioAttributes().size());
 
-      String parent = "audio" + File.separator + name;
+      String parent = overallName+"_audio" + File.separator + name;
       if (!reg.isEmpty()) {
         copyAudio(zOut, reg, parent, false, realContextPath, ex.getID());
       }
       if (!slow.isEmpty()) {
         copyAudio(zOut, slow, parent, true, realContextPath, ex.getID());
       }
+      //  }
+      //  else {
+      //    logger.debug("no audio for exercise " + ex.getID());
+      //  }
     }
     long now = System.currentTimeMillis();
     logger.debug("took " + (now - then) + " millis to export " + toWrite.size() + " items");
