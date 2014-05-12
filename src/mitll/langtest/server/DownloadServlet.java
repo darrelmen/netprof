@@ -8,6 +8,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -15,7 +16,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created with IntelliJ IDEA.
+ * Deals with downloads from site -- for excel spreadsheets and zips of audio.
+ *
  * User: GO22670
  * Date: 12/17/13
  * Time: 4:57 PM
@@ -27,23 +29,10 @@ public class DownloadServlet extends DatabaseServlet {
 
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    String encodedFileName = request.getRequestURI();
-
-/*    DatabaseImpl db = readProperties();
-
-    setInstallPath(db);*/
-
-    DatabaseImpl db = null;
-
-    Object databaseReference = getServletContext().getAttribute("databaseReference");
-    if (databaseReference != null) {
-      db = (DatabaseImpl) databaseReference;
-      logger.debug("found existing database reference " + db + " under " +getServletContext());
-    } else {
-      logger.error("huh? no existing db reference?");
-    }
+    DatabaseImpl db = getDatabase();
 
     if (db != null) {
+      String encodedFileName = request.getRequestURI();
       if (encodedFileName.toLowerCase().contains("audio")) {
         String pathInfo = request.getPathInfo();
         logger.debug("DownloadServlet.doGet : Request " + request.getQueryString() + " path " + pathInfo +
@@ -53,7 +42,8 @@ public class DownloadServlet extends DatabaseServlet {
 
         logger.debug("Selection " + typeToSection);
         String name = typeToSection.isEmpty() ? "audio" : db.getPrefix(typeToSection);
-        response.setHeader("Content-Disposition", "attachment; filename=" + name);
+        name = name.replaceAll("\\,","_");
+        response.setHeader("Content-Disposition", "attachment; filename=" + db.getServerProps().getLanguage() +"_"+name);
         response.setContentType("application/zip");
         try {
           db.writeZip(response.getOutputStream(), typeToSection);
@@ -77,79 +67,67 @@ public class DownloadServlet extends DatabaseServlet {
     response.getOutputStream().close();
   }
 
+  private DatabaseImpl getDatabase() {
+    DatabaseImpl db = null;
+
+    Object databaseReference = getServletContext().getAttribute("databaseReference");
+    if (databaseReference != null) {
+      db = (DatabaseImpl) databaseReference;
+      logger.debug("found existing database reference " + db + " under " +getServletContext());
+    } else {
+      logger.error("huh? no existing db reference?");
+    }
+    return db;
+  }
+
+  /**
+   * Parse the query string that indicates the unit and chapter selections.
+   * @see #doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+   * @param queryString
+   * @return map representing unit/chapter selections - what SectionHelper will parse
+   */
   private Map<String, Collection<String>> getTypeToSelectionFromRequest(String queryString) {
     if (queryString.length() > 2) {
       queryString = queryString.substring(1, queryString.length() - 1);
     }
-  //  logger.debug("got " + queryString);
-    queryString = queryString.replaceAll("%20"," ");
-    //logger.debug("got " + queryString);
+   //  logger.debug("got " + queryString);
+    queryString = queryString.replaceAll("%20"," ");    // need this for pashto3 which has "29 LC1" as chapters
+  //   logger.debug("got " + queryString);
 
     String[] sections = queryString.split("],");
 
-    //logger.debug("sections " + sections[0]);
+   // logger.debug("sections " + sections[0]);
 
     Map<String, Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
     for (String section : sections) {
-    //  logger.debug("\tsection " + section);
+    // logger.debug("\tsection " + section);
 
       String[] split1 = section.split("=");
       if (split1.length > 1) {
         String key = split1[0];
         String s = split1[1];
-       // logger.debug("\ts " + s);
+    //   logger.debug("\ts " + s);
 
         if (!s.isEmpty()) {
           s = s.substring(1/*, s.length() - 1*/);
         }
        s = s.replaceAll("]","");
 
-       // logger.debug("\ts " + s);
+    //   logger.debug("\ts " + s);
 
-        List<String> value = Arrays.asList(s.split(","));
-     //   logger.debug("\tkey " + key + "=" + value);
-        typeToSection.put(key.trim(), value);
+        List<String> values = Arrays.asList(s.split(","));
+        List<String> trimmed = new ArrayList<String>();
+        for (String v : values) {
+          trimmed.add(v.trim());
+        }
+//        logger.debug("\tkey " + key + "=" + trimmed);
+        typeToSection.put(key.trim(), trimmed);
       }
       else {
         logger.debug("\tsections 1" + split1[0]);
       }
     }
+    logger.debug("returning " + typeToSection + " for " + queryString);
     return typeToSection;
   }
-
-/*  private void setInstallPath(DatabaseImpl db) {
-    ServletContext servletContext = getServletContext();
-    String config = servletContext.getInitParameter("config");
-    String relativeConfigDir = "config" + File.separator + config;
-    String installPath = new PathHelper(servletContext).getInstallPath();
-    String configDir = installPath + File.separator + relativeConfigDir;
-
-    setInstallPath(serverProps.getUseFile(), db, installPath, relativeConfigDir,configDir);
-
-  }*/
-
-/*  private String setInstallPath(boolean useFile, DatabaseImpl db, String installPath, String relativeConfigDir, String configDir) {
-    String lessonPlanFile = getLessonPlan(configDir);
-    if (useFile && !new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
-
-    db.setInstallPath(installPath, lessonPlanFile, serverProps.getLanguage(), useFile,
-      relativeConfigDir + File.separator + serverProps.getMediaDir());
-
-    return configDir;
-  }*/
-/*
-
-  private String getLessonPlan(String configDir) {
-    return configDir + File.separator + serverProps.getLessonPlan();
-  }
-*/
-
-/*  public static void main(String [] arg) {
-    String test = "{Unit=[2,%201],%20Lesson=[5,%209]}";
-    Map<String, Collection<String>> typeToSelectionFromRequest = new DownloadServlet().getTypeToSelectionFromRequest("{Lesson=[7,%208]}");
-    System.out.println("Got " + typeToSelectionFromRequest);
-
-   typeToSelectionFromRequest = new DownloadServlet().getTypeToSelectionFromRequest(test);
-    System.out.println("Got " + typeToSelectionFromRequest);
-  }*/
 }
