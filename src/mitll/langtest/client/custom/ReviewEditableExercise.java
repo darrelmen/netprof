@@ -186,7 +186,7 @@ class ReviewEditableExercise extends EditableExercise {
 
       @Override
       public int getOffsetWidth() { return 0; }
-    }, 70, audio.isFast() ? REGULAR_SPEED : SLOW_SPEED, e.getID()
+    }, 70, audio.isRegularSpeed() ? REGULAR_SPEED : SLOW_SPEED, e.getID()
     ) {
 
       @Override
