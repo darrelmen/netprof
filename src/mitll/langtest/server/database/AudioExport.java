@@ -3,7 +3,6 @@ package mitll.langtest.server.database;
 import mitll.langtest.server.ExerciseSorter;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.shared.AudioAttribute;
-import mitll.langtest.shared.AudioExercise;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.MiniUser;
 import org.apache.commons.io.FileUtils;
@@ -17,7 +16,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -26,12 +27,26 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 /**
- * Created by GO22670 on 5/7/2014.
+ * Take a selection and write out a zip with a spreadsheet and the audio as mp3 files.
+ *
  */
 public class AudioExport {
   private static final Logger logger = Logger.getLogger(AudioExport.class);
 
-  public void writeZip(OutputStream out, Map<String, Collection<String>> typeToSection,
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#writeZip(java.io.OutputStream, java.util.Map)
+   * @param out
+   * @param typeToSection
+   * @param sectionHelper
+   * @param exercisesForSelectionState
+   * @param language1
+   * @param audioDAO
+   * @param installPath
+   * @param relPath
+   * @throws Exception
+   */
+  public void writeZip(OutputStream out,
+                       Map<String, Collection<String>> typeToSection,
                        SectionHelper sectionHelper,
                        Collection<CommonExercise> exercisesForSelectionState,
                        String language1,
@@ -43,7 +58,10 @@ public class AudioExport {
     List<CommonExercise> copy = new ArrayList<CommonExercise>(exercisesForSelectionState);
 
     new ExerciseSorter(typeOrder).getSortedByUnitThenAlpha(copy, false);
-    writeArchive(copy, audioDAO, installPath, relPath, prefix, typeOrder, language1, out, typeToSection.isEmpty());
+   // writeArchive(copy, audioDAO, installPath, relPath, prefix, typeOrder, language1, out, typeToSection.isEmpty());
+
+    writeToStream(copy, audioDAO, installPath, relPath, prefix, typeOrder, language1, out, typeToSection.isEmpty());
+
   }
 
   public String getPrefix(SectionHelper sectionHelper,Map<String, Collection<String>> typeToSection) {
@@ -139,11 +157,11 @@ public class AudioExport {
     return wb;
   }
 
-  private void writeArchive(List<CommonExercise> toWrite, AudioDAO audioDAO,
+/*  private void writeArchive(List<CommonExercise> toWrite, AudioDAO audioDAO,
                             String installPath, String relativeConfigDir1, String name, List<String> typeOrder,
                             String language1, OutputStream out, boolean skipAudio) throws Exception {
     writeToStream(toWrite, audioDAO, installPath, relativeConfigDir1, name, typeOrder, language1, out, skipAudio);
-  }
+  }*/
 
   private void writeToStream(List<CommonExercise> toWrite, AudioDAO audioDAO, String installPath,
                              String relativeConfigDir1, String name, List<String> typeOrder,
@@ -151,17 +169,21 @@ public class AudioExport {
     ZipOutputStream zOut = new ZipOutputStream(out);
 
     if (!skipAudio) {
-      writeFolderContents(zOut, toWrite, audioDAO, installPath, relativeConfigDir1, name);
+      writeFolderContents(zOut, toWrite, audioDAO, installPath, relativeConfigDir1,
+       name,
+        language1.equalsIgnoreCase("English"));
     }
 
-    zOut.putNextEntry(new ZipEntry(name+".xlsx"));
+    zOut.putNextEntry(new ZipEntry(name+File.separator +name+".xlsx"));
 
     writeExcelToStream(toWrite, zOut, typeOrder, language1);
   }
 
   private void writeFolderContents(ZipOutputStream zOut,
                                    List<CommonExercise> toWrite, AudioDAO audioDAO,
-                                   String installPath, String relativeConfigDir1, String overallName
+                                   String installPath, String relativeConfigDir1,
+                                   String overallName,
+                                   boolean isEnglish
   ) throws Exception {
     int c = 0;
     long then = System.currentTimeMillis();
@@ -175,23 +197,68 @@ public class AudioExport {
     logger.debug("realContextPath         " + realContextPath);
     int numAttach = 0;
     int numMissing = 0;
+
+    // get male and female majority users
+    Map<MiniUser,Integer> maleToCount   = new HashMap<MiniUser, Integer>();
+    Map<MiniUser,Integer> femaleToCount = new HashMap<MiniUser, Integer>();
+
+    for (CommonExercise ex : toWrite) {
+      for (AudioAttribute attr : ex.getAudioAttributes()) {
+        MiniUser user = attr.getUser();
+
+        Map<MiniUser,Integer> userToCount = (user.isMale()) ? maleToCount : femaleToCount;
+        Integer count = userToCount.get(user);
+        userToCount.put(user, (count == null) ? 1 : count + 1);
+      }
+    }
+    MiniUser male = null, female = null;
+    int mCount = 0, fCount = 0;
+    for (Map.Entry<MiniUser, Integer> pair : maleToCount.entrySet()) {
+      if (male == null || pair.getValue() > mCount) {
+        male = pair.getKey();
+      }
+    }
+    for (Map.Entry<MiniUser, Integer> pair : femaleToCount.entrySet()) {
+      if (female == null || pair.getValue() > fCount) {
+        female = pair.getKey();
+      }
+    }
+    AudioConversion audioConversion = new AudioConversion();
+
     for (CommonExercise ex : toWrite) {
       List<AudioAttribute> audioAttributes = exToAudio.get(ex.getID());
       if (audioAttributes != null) {
         audioDAO.attachAudio(ex, installPath, relativeConfigDir1, audioAttributes);
         numAttach++;
       }
-      String name = ex.getEnglish() + "_" + ex.getForeignLanguage();
-      name = name.trim();
-      name = name.replaceAll("\"", "\\'").replaceAll("\\?", "").replaceAll("\\:", "").replaceAll("/"," or ").replaceAll("\\\\"," or ");
-      if (names.contains(name)) {
-        name += "_" + ex.getID();
-      }
-      names.add(name);
 
-      Collection<AudioAttribute> reg = ex.getAudioAtSpeed(AudioExercise.REGULAR);
+      boolean someAudio = false;
+      // choose male speaker
+      for (Boolean gender : Arrays.asList(Boolean.TRUE, Boolean.FALSE)) {
+        MiniUser majorityUser = gender ? male : female;
+        for (Boolean speed : Arrays.asList(Boolean.TRUE, Boolean.FALSE)) {
+          AudioAttribute recording = getAudioAttribute(majorityUser, ex, gender, speed);
+          if (recording != null) {
+            String name = overallName+File.separator+ getUniqueName(/*names,*/ ex, !isEnglish);
+           /* String mp3Name =*/ copyAudio(zOut, names, name, speed, realContextPath, audioConversion, recording, ex.getID());
+
+            someAudio = true;
+          }
+        }
+      }
+
+      if (!someAudio) {
+        if (numMissing < 10) {
+          logger.debug("no audio for exercise " + ex.getID());
+        }
+        numMissing++;
+      }
+
+  /*    String name = getUniqueName(names, ex, !isEnglish);
+
+      Collection<AudioAttribute> reg = ex.getAudioAtSpeed(true);
       // logger.debug("entry for " + name + " has  " + reg.size() + " cuts/" + ex.getAudioAttributes().size());
-      Collection<AudioAttribute> slow = ex.getAudioAtSpeed(AudioExercise.SLOW);
+      Collection<AudioAttribute> slow = ex.getAudioAtSpeed(false);
       // logger.debug("entry for " + name + " has  " + slow.size() + " cuts/" + ex.getAudioAttributes().size());
 
       String parent = overallName + "_audio" + File.separator + name;
@@ -205,48 +272,88 @@ public class AudioExport {
           logger.debug("no audio for exercise " + ex.getID());
         }
         numMissing++;
-      }
+      }*/
     }
     long now = System.currentTimeMillis();
     logger.debug("took " + (now - then) + " millis to export " + toWrite.size() + " items, num attached " + numAttach + " missing audio " + numMissing);
   }
 
+  private AudioAttribute getAudioAttribute(MiniUser majorityUser, CommonExercise ex, boolean isMale, boolean regularSpeed) {
+    AudioAttribute recordingAtSpeed = majorityUser != null ? ex.getRecordingsBy(majorityUser.getId(), regularSpeed) : null;
+    if (recordingAtSpeed == null) {  // can't find majority user or nothing by this person at that speed
+      Collection<AudioAttribute> byGender = ex.getByGender(isMale);
+      // choose the first one if not the majority majorityUser
+      for (AudioAttribute attribute : byGender) {
+        if ((attribute.isRegularSpeed() && regularSpeed) || (!attribute.isRegularSpeed() && !regularSpeed)) {
+          recordingAtSpeed = attribute;
+          break;
+        }
+      }
+    }
+    return recordingAtSpeed;
+  }
+
+  /**
+   * Worry about name collisions for entries composed of english-fl pairs
+   * @paramx names
+   * @param ex
+   * @return
+   */
+  private String getUniqueName(/*Set<String> names,*/ CommonExercise ex, boolean includeFL) {
+    String name = ex.getEnglish() + (includeFL ? "_" + ex.getForeignLanguage() : "");
+    name = name.trim();
+    name = name.replaceAll("\"", "\\'").replaceAll("\\?", "").replaceAll("\\:", "").replaceAll("/", " or ").replaceAll("\\\\", " or ");
+ /*   if (names.contains(name)) {
+      name += "_" + ex.getID();
+    }*/
+   // names.add(name);
+    return name;
+  }
+/*
   private void copyAudio(ZipOutputStream zOut, Collection<AudioAttribute> reg, String parent, boolean isSlow, String realContextPath) throws IOException {
     //logger.debug("copyAudio writing to '" + parent + "' given " + reg.size() + " cuts");
     AudioConversion audioConversion = new AudioConversion();
 
     for (AudioAttribute attribute : reg) {
-      String audioRef = attribute.getAudioRef();
-      //  logger.debug("\twriting audio under " + name + " at " + audioRef);
-
-    // File input = new File(audioRef);
-     // if (input.exists()) {
-        String s = audioConversion.ensureWriteMP3(audioRef, realContextPath, false);
-        File mp3 = new File(s);
-        if (mp3.exists()) {
-          // audioRef = audioRef.replaceAll(".wav",".mp3");
-         //  logger.debug("---> Did write " + mp3.getAbsolutePath());
-
-          String name = getName(parent, isSlow, attribute);
-          zOut.putNextEntry(new ZipEntry(name));
-          FileUtils.copyFile(mp3, zOut);
-          zOut.flush();
-          zOut.closeEntry();
-        }
-        else {
-          logger.warn("\tDidn't write " + mp3.getAbsolutePath());
-        }
-  //    }
-    //  else {
-     //   logger.warn("\tDidn't write " + input.getAbsolutePath() + " since not there?");
+      copyAudio(zOut, parent, isSlow, realContextPath, audioConversion, attribute);
+      //  else {
+      //   logger.warn("\tDidn't write " + input.getAbsolutePath() + " since not there?");
       //}
+    }
+  }*/
+
+  private String copyAudio(ZipOutputStream zOut,Set<String> names, String parent, boolean isRegularSpeed, String realContextPath, AudioConversion audioConversion, AudioAttribute attribute,
+                           String exid) throws IOException {
+    String audioRef = attribute.getAudioRef();
+    //  logger.debug("\twriting audio under " + name + " at " + audioRef);
+
+    String s = audioConversion.ensureWriteMP3(audioRef, realContextPath, false);
+    File mp3 = new File(s);
+    if (mp3.exists()) {
+      //  logger.debug("---> Did write " + mp3.getAbsolutePath());
+      String name = getName(parent, isRegularSpeed, attribute);
+      if (names.contains(name)) {
+        name += "_" + exid;
+      }
+      zOut.putNextEntry(new ZipEntry(name));
+      FileUtils.copyFile(mp3, zOut);
+      zOut.flush();
+      zOut.closeEntry();
+      return name;
+    } else {
+      logger.warn("\tDidn't write " + mp3.getAbsolutePath());
+      return "";
     }
   }
 
-  private String getName(String parent, boolean isSlow, AudioAttribute attribute) {
+  private String getName(String parent, boolean isRegularSpeed, AudioAttribute attribute) {
     MiniUser user = attribute.getUser();
-    String userInfo = user.isDefault() ? "DefaultSpeaker" :(attribute.isMale() ? "Male_" : "Female_") + "age_" + user.getAge() + "_(" +user.getId()+ ")";
-    String baseName = parent + File.separator + userInfo + (isSlow ? "_Slow" : "");
+    String userInfo = user.isDefault() ?
+      //"DefaultSpeaker" :
+      "" :
+      (attribute.isMale() ? "Male" : "Female");// + "_age_" + user.getAge() + "_(" +user.getId()+ ")";
+  //  String baseName = parent + File.separator + userInfo + (isSlow ? "_Slow" : "");
+    String baseName = parent + (user.isDefault() ? "" : "_" + userInfo) + (isRegularSpeed ? "":"_Slow");
     return baseName + ".mp3";
   }
 }
