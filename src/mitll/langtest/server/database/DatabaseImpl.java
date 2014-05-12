@@ -893,7 +893,9 @@ public class DatabaseImpl implements Database {
    * @throws Exception
    */
   public void writeZip(OutputStream out, Map<String, Collection<String>> typeToSection) throws Exception {
-    Collection<CommonExercise> exercisesForSelectionState = typeToSection.isEmpty() ? getExercises() : getSectionHelper().getExercisesForSelectionState(typeToSection);
+    Collection<CommonExercise> exercisesForSelectionState = typeToSection.isEmpty() ?
+      getExercises() :
+      getSectionHelper().getExercisesForSelectionState(typeToSection);
     String language1 = getServerProps().getLanguage();
 
     new AudioExport().writeZip(out, typeToSection, getSectionHelper(), exercisesForSelectionState, language1, getAudioDAO(), installPath, ".");
