@@ -6,7 +6,6 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/json-lib-2.4-jdk15.jar" sourcepath="C:/Users/go22670/langTestIngest/json/json-lib-2.4-jdk15-sources.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-codec-1.6.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/log4j-1.2.17.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/pronz.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/imagewriter.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/mira.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/svm.jar"/>
@@ -28,5 +27,6 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/poi-3.10-FINAL-20140208.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/poi-ooxml-3.10-FINAL-20140208.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/poi-ooxml-schemas-3.10-FINAL-20140208.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/pronz.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
