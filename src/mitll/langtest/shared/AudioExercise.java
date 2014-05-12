@@ -83,12 +83,16 @@ public class AudioExercise extends ExerciseShell {
     return null;
   }
 
+  public Collection<AudioAttribute> getAudioAtSpeed(boolean isRegular) {
+    return getAudioAtSpeed(isRegular ? REGULAR : SLOW);
+  }
+
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#writeFolderContents(java.util.zip.ZipOutputStream, java.util.List, mitll.langtest.server.database.AudioDAO, String, String, String)
+   * @see mitll.langtest.server.database.AudioExport#writeFolderContents
    * @param value
    * @return
    */
-  public Collection<AudioAttribute> getAudioAtSpeed(String value) {
+  private Collection<AudioAttribute> getAudioAtSpeed(String value) {
     List<AudioAttribute> ret = new ArrayList<AudioAttribute>();
     for (AudioAttribute audio : getAudioAttributes()) {
       if (audio.matches(SPEED, value)) ret.add(audio);
@@ -115,7 +119,7 @@ public class AudioExercise extends ExerciseShell {
    * @param isMale
    * @return
    */
-  private Collection<AudioAttribute> getByGender(boolean isMale) {
+  public Collection<AudioAttribute> getByGender(boolean isMale) {
     List<AudioAttribute> males = new ArrayList<AudioAttribute>();
     for (AudioAttribute audioAttribute : audioAttributes.values()) {
       MiniUser user = audioAttribute.getUser();
@@ -163,6 +167,13 @@ public class AudioExercise extends ExerciseShell {
     return mine;
   }
 
+  /**
+   * @see mitll.langtest.client.custom.ReviewEditableExercise#makeAudioRow()
+   * List of audio is sorted to show regular before slow.
+   *
+   * @param isMale
+   * @return
+   */
   public Map<MiniUser, List<AudioAttribute>> getUserMap(boolean isMale) {
     Map<MiniUser, List<AudioAttribute>> userToAudio = new HashMap<MiniUser, List<AudioAttribute>>();
     Collection<AudioAttribute> byGender = getByGender(isMale);
