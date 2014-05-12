@@ -46,7 +46,7 @@ public class ExcelImport implements ExerciseDAO {
   private static final boolean INCLUDE_ENGLISH_SEMI_AS_DEFECT = true;
   public static final boolean MARK_MISSING_AUDIO_AS_DEFECT = false;
 
-  private final boolean isFlashcard;
+ // private final boolean isFlashcard;
 
   private List<CommonExercise> exercises = null;
   private final Map<String, CommonExercise> idToExercise = new HashMap<String, CommonExercise>();
@@ -87,7 +87,7 @@ public class ExcelImport implements ExerciseDAO {
                      String installPath, boolean addDefects) {
     this.file = file;
     this.serverProps = serverProps;
-    this.isFlashcard = serverProps.isFlashcard();
+   // this.isFlashcard = serverProps.isFlashcard();
     maxExercises = serverProps.getMaxNumExercises();
     this.mediaDir = mediaDir;
     this.addDefects = addDefects;
