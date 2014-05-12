@@ -4,11 +4,9 @@ import mitll.langtest.server.database.DLIUserDAO;
 import mitll.langtest.server.database.DatabaseImpl;
 import org.apache.log4j.Logger;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -31,40 +29,50 @@ public class DownloadServlet extends DatabaseServlet {
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     String encodedFileName = request.getRequestURI();
 
-    String pathInfo = request.getPathInfo();
-    logger.debug("DownloadServlet.doGet : Request " + request.getQueryString() + " path "  + pathInfo +
-      " uri " + request.getRequestURI() + "  " + request.getRequestURL() +  "  " + request.getServletPath());
+/*    DatabaseImpl db = readProperties();
 
-    response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-    DatabaseImpl db = readProperties();
+    setInstallPath(db);*/
 
-    setInstallPath(db);
+    DatabaseImpl db = null;
 
-    if (encodedFileName.toLowerCase().contains("audio")) {
-      String queryString = request.getQueryString();
-      Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(queryString);
+    Object databaseReference = getServletContext().getAttribute("databaseReference");
+    if (databaseReference != null) {
+      db = (DatabaseImpl) databaseReference;
+      logger.debug("found existing database reference " + db + " under " +getServletContext());
+    } else {
+      logger.error("huh? no existing db reference?");
+    }
 
-      logger.debug("Selection " + typeToSection);
-      String name = typeToSection.isEmpty() ? "audio" : db.getPrefix(typeToSection);
-      response.setHeader("Content-Disposition", "attachment; filename=" + name);
-      response.setContentType("application/zip");
-      try {
-        db.writeZip(response.getOutputStream(), typeToSection);
-      } catch (Exception e) {
-        logger.error("couldn't write zip?",e);
+    if (db != null) {
+      if (encodedFileName.toLowerCase().contains("audio")) {
+        String pathInfo = request.getPathInfo();
+        logger.debug("DownloadServlet.doGet : Request " + request.getQueryString() + " path " + pathInfo +
+          " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
+
+        Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(request.getQueryString());
+
+        logger.debug("Selection " + typeToSection);
+        String name = typeToSection.isEmpty() ? "audio" : db.getPrefix(typeToSection);
+        response.setHeader("Content-Disposition", "attachment; filename=" + name);
+        response.setContentType("application/zip");
+        try {
+          db.writeZip(response.getOutputStream(), typeToSection);
+        } catch (Exception e) {
+          logger.error("couldn't write zip?", e);
+        }
+      } else {
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        if (encodedFileName.toLowerCase().contains("users")) {
+          response.setHeader("Content-Disposition", "attachment; filename=users");
+          db.getUserDAO().toXLSX(response.getOutputStream(), new DLIUserDAO(db));
+        } else if (encodedFileName.toLowerCase().contains("results")) {
+          response.setHeader("Content-Disposition", "attachment; filename=results");
+          db.getResultDAO().writeExcelToStream(db.getResultsWithGrades(), response.getOutputStream());
+        } else {
+          response.setHeader("Content-Disposition", "attachment; filename=events");
+          db.getEventDAO().toXLSX(response.getOutputStream());
+        }
       }
-    }
-    else if (encodedFileName.toLowerCase().contains("users")) {
-      response.setHeader("Content-Disposition", "attachment; filename=users");
-      db.getUserDAO().toXLSX(response.getOutputStream(), new DLIUserDAO(db));
-    }
-    else if (encodedFileName.toLowerCase().contains("results")) {
-      response.setHeader("Content-Disposition", "attachment; filename=results");
-      db.getResultDAO().writeExcelToStream(db.getResultsWithGrades(),response.getOutputStream());
-    }
-    else {
-      response.setHeader("Content-Disposition", "attachment; filename=events");
-      db.getEventDAO().toXLSX(response.getOutputStream());
     }
     response.getOutputStream().close();
   }
@@ -109,7 +117,7 @@ public class DownloadServlet extends DatabaseServlet {
     return typeToSection;
   }
 
-  private void setInstallPath(DatabaseImpl db) {
+/*  private void setInstallPath(DatabaseImpl db) {
     ServletContext servletContext = getServletContext();
     String config = servletContext.getInitParameter("config");
     String relativeConfigDir = "config" + File.separator + config;
@@ -118,9 +126,9 @@ public class DownloadServlet extends DatabaseServlet {
 
     setInstallPath(serverProps.getUseFile(), db, installPath, relativeConfigDir,configDir);
 
-  }
+  }*/
 
-  private String setInstallPath(boolean useFile, DatabaseImpl db, String installPath, String relativeConfigDir, String configDir) {
+/*  private String setInstallPath(boolean useFile, DatabaseImpl db, String installPath, String relativeConfigDir, String configDir) {
     String lessonPlanFile = getLessonPlan(configDir);
     if (useFile && !new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
 
@@ -128,11 +136,13 @@ public class DownloadServlet extends DatabaseServlet {
       relativeConfigDir + File.separator + serverProps.getMediaDir());
 
     return configDir;
-  }
+  }*/
+/*
 
   private String getLessonPlan(String configDir) {
     return configDir + File.separator + serverProps.getLessonPlan();
   }
+*/
 
 /*  public static void main(String [] arg) {
     String test = "{Unit=[2,%201],%20Lesson=[5,%209]}";
