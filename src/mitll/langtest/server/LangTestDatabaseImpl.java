@@ -1150,10 +1150,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String h2DatabaseFile = serverProps.getH2Database();
 
     db = makeDatabaseImpl(h2DatabaseFile);
-    if (serverProps.isAutoCRT()) {
+    Object databaseReference = servletContext.getAttribute("databaseReference");
+    if (databaseReference != null) {
+      logger.warn("huh? found existing database reference " + databaseReference);
+    } else {
+      servletContext.setAttribute("databaseReference", db);
+    }
+/*    if (serverProps.isAutoCRT()) {
       studentAnswersDB = makeDatabaseImpl(serverProps.getH2StudentAnswersDatabase());
       logger.debug("using student answers db at " + serverProps.getH2StudentAnswersDatabase());
-    }
+    }*/
   }
 
   private DatabaseImpl makeDatabaseImpl(String h2DatabaseFile) {
