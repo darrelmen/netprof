@@ -78,6 +78,10 @@ public class AudioAttribute implements IsSerializable {
     return this;
   }
 
+  /**
+   * @deprecated  use isRegularSpeed instead
+   * @return
+   */
   public boolean isFast() {
     return matches(SPEED, REGULAR);
   }
