@@ -486,7 +486,9 @@ fieldset > legend {
     word-wrap: break-word;       /* Internet Explorer 5.5+ */
     word-break: keep-all;
     white-space: normal;
+    font-family: sans-serif;
 }
+
 .Instruction-data-with-wrap  {
     color: #CC6600;
     font-size: 18px;
@@ -494,6 +496,7 @@ fieldset > legend {
     word-wrap: break-word;       /* Internet Explorer 5.5+ */
     word-break: keep-all;
     white-space: normal;
+    font-family: sans-serif;
 }
 
 .blueColor {
@@ -560,11 +563,11 @@ fieldset > legend {
 }
 
 .xlargeFont {
-    font-size: x-large;
+    font-size: xx-large;
 }
 
 .xlargeFont td {
-    font-size: x-large;
+    font-size: xx-large;
 }
 
 .table-center {
