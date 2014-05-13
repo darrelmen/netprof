@@ -27,7 +27,7 @@ class RememberTabAndContent extends TabAndContent {
   public void checkAllPlayed(Set<Widget> allPlayed) {
    // System.out.println("check " +allPlayed.size() + " against " + widgets.size());
     if (allPlayed.containsAll(widgets)) {
-      tab.setIcon(IconType.CHECK_SIGN);
+      getTab().setIcon(IconType.CHECK_SIGN);
     }
   }
 }
