@@ -349,11 +349,11 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
       String tabTitle = (user.getId() == DEFAULT_USER) ? "Default Speaker" : getUserTitle(user);
 
       RememberTabAndContent tabAndContent = new RememberTabAndContent(IconType.QUESTION_SIGN, tabTitle);
-      tabPanel.add(tabAndContent.tab.asTabLink());
+      tabPanel.add(tabAndContent.getTab().asTabLink());
       tabs.add(tabAndContent);
 
       // TODO : when do we need this???
-      tabAndContent.content.getElement().getStyle().setMarginRight(70, Style.Unit.PX);
+      tabAndContent.getContent().getElement().getStyle().setMarginRight(70, Style.Unit.PX);
 
       boolean allHaveBeenPlayed = true;
 
@@ -361,14 +361,14 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
         if (!audio.isHasBeenPlayed()) allHaveBeenPlayed = false;
         Pair panelForAudio1 = getPanelForAudio(e, audio, tabAndContent);
         Widget panelForAudio = panelForAudio1.entry;
-        tabAndContent.content.add(panelForAudio);
+        tabAndContent.getContent().add(panelForAudio);
         if (audio.isHasBeenPlayed()) {
           audioWasPlayed.add(panelForAudio1.audioPanel);
         }
       }
 
       if (allHaveBeenPlayed) {
-        tabAndContent.tab.setIcon(IconType.CHECK_SIGN);
+        tabAndContent.getTab().setIcon(IconType.CHECK_SIGN);
       }
     }
   }
