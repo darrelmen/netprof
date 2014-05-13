@@ -10,13 +10,13 @@ import com.google.gwt.user.client.ui.Panel;
 * Created by GO22670 on 4/14/2014.
 */
 public class TabAndContent {
-  public final Tab tab;
-  public final DivWidget content;
+  private final Tab tab;
+  private final DivWidget content;
 
   /**
    * @param iconType
    * @param label
-   * @see TabContainer#makeTab(com.github.gwtbootstrap.client.ui.TabPanel, com.github.gwtbootstrap.client.ui.constants.IconType, String)
+   * @see mitll.langtest.client.custom.Navigation#makeTab(com.github.gwtbootstrap.client.ui.TabPanel, com.github.gwtbootstrap.client.ui.constants.IconType, String)
    */
   public TabAndContent(IconType iconType, String label) {
     Tab tab = new Tab();
@@ -38,5 +38,13 @@ public class TabAndContent {
     Style style = createContent.getElement().getStyle();
     style.setPaddingLeft(0, Style.Unit.PX);
     style.setPaddingRight(0, Style.Unit.PX);
+  }
+
+  public Tab getTab() {
+    return tab;
+  }
+
+  public DivWidget getContent() {
+    return content;
   }
 }
