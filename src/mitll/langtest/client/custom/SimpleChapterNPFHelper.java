@@ -65,7 +65,7 @@ class SimpleChapterNPFHelper implements RequiresResize {
    */
   public void showNPF(TabAndContent tabAndContent, String instanceName, boolean loadExercises) {
     System.out.println(getClass() + " : adding npf content instanceName = " + instanceName + " loadExercises " + loadExercises);
-    DivWidget content = tabAndContent.content;
+    DivWidget content = tabAndContent.getContent();
     int widgetCount = content.getWidgetCount();
     if (!madeNPFContent || widgetCount == 0) {
       madeNPFContent = true;
