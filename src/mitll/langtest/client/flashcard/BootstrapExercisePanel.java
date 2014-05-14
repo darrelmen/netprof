@@ -15,8 +15,12 @@ import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
@@ -25,6 +29,7 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
+import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -90,12 +95,15 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
    * @param e
    * @param service
    * @param controller
-   * @see mitll.langtest.client.custom.NPFHelper#setFactory(mitll.langtest.client.list.PagingExerciseList, String, long)
+   * @see mitll.langtest.client.custom.MyFlashcardExercisePanelFactory.StatsPracticePanel#StatsPracticePanel(mitll.langtest.shared.CommonExercise)
    */
   public BootstrapExercisePanel(final CommonExercise e, final LangTestDatabaseAsync service,
                                 final ExerciseController controller, boolean addKeyBinding,
                                 final ControlState controlState) {
     this.addKeyBinding = addKeyBinding;
+    if (addKeyBinding) {
+
+    }
     this.exercise = e;
     this.controller = controller;
     this.controlState = controlState;
@@ -104,13 +112,23 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     HTML warnNoFlash = new HTML(WARN_NO_FLASH);
     soundFeedback = new SoundFeedback(controller.getSoundManager(), warnNoFlash);
 
-    DivWidget contentMiddle = getMiddlePrompt(e);
+    Panel contentMiddle = getMiddlePrompt(e);
     mainContainer = contentMiddle;
 
     DivWidget belowDiv = new DivWidget();
-    Panel horiz = getThreePartContent(controller, controlState, contentMiddle, belowDiv);
 
-    add(horiz);
+    FocusPanel focusPanel = new FocusPanel();
+    focusPanel.addBlurHandler(new BlurHandler() {
+      @Override
+      public void onBlur(BlurEvent event) {
+        System.out.println("got blur -------- " + event);
+        answerWidget.getActualRecordButton().setFocus(true);
+      }
+    });
+
+    Panel threePartContent = getThreePartContent(controlState, contentMiddle, belowDiv);
+    focusPanel.add(threePartContent);
+    add(focusPanel);
 
     addRecordingAndFeedbackWidgets(e, service, controller, contentMiddle);
     warnNoFlash.setVisible(false);
@@ -125,14 +143,12 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
 
   /**
    * Left side, middle content, and right side
-   * @param controller
    * @param controlState
    * @param contentMiddle
    * @param belowDiv
    * @return
    */
-  private Panel getThreePartContent(ExerciseController controller, ControlState controlState, DivWidget contentMiddle,
-                                    DivWidget belowDiv) {
+  private Panel getThreePartContent(ControlState controlState, Panel contentMiddle, DivWidget belowDiv) {
     Panel horiz = new HorizontalPanel();
     horiz.add(leftState = getLeftState());
 
@@ -141,12 +157,12 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     grid.setWidget(1, 0, belowDiv);
     horiz.add(grid);
 
-    rightColumn = getRightColumn(controller, controlState);
+    rightColumn = getRightColumn(controlState);
     horiz.add(rightColumn);
     return horiz;
   }
 
-  private DivWidget getMiddlePrompt(CommonExercise e) {
+  private Panel getMiddlePrompt(CommonExercise e) {
     cardPrompt = getCardPrompt(e);
     cardPrompt.getElement().setId("cardPrompt");
 
@@ -154,6 +170,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     contentMiddle.addStyleName("cardBorderShadow");
     contentMiddle.addStyleName("minWidthFifty");
     contentMiddle.add(cardPrompt);
+
     return contentMiddle;
   }
 
@@ -163,10 +180,10 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     rightColumn.setVisible(vis);
   }
 
-  private Panel getRightColumn(ExerciseController controller, ControlState controlState) {
+  private Panel getRightColumn(ControlState controlState) {
     Panel rightColumn = new VerticalPanel();
 
-    if (!controller.getLanguage().equalsIgnoreCase("English")) {
+    if (!isSiteEnglish()) {
       rightColumn.add(getShowGroup(controlState));
     }
     rightColumn.add(getAudioGroup(controlState));
@@ -356,7 +373,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
    * @return
    * @see #BootstrapExercisePanel
    */
-  Panel getCardPrompt(CommonExercise e) {
+  private Panel getCardPrompt(CommonExercise e) {
     Panel questionContent = getQuestionContent(e);
     questionContent.addStyleName("cardContent");
     return questionContent;
@@ -365,10 +382,13 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
   private Widget english;
   private Widget foreign;
 
-  Panel getQuestionContent(CommonExercise e) {
-    String foreignSentence = e.getForeignLanguage(); //e.getRefSentences().iterator().next();
-    DivWidget div = new DivWidget();
-    div.addStyleName("blockStyle");
+  /**
+   * If there's no english sentence, we use the foreign language phrase
+   * @param e
+   * @return
+   */
+  private Panel getQuestionContent(CommonExercise e) {
+    String foreignSentence = e.getForeignLanguage();
 
     String englishSentence = e.getEnglish();
     boolean usedForeign = false;
@@ -376,21 +396,25 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
       englishSentence = foreignSentence;
       usedForeign = true;
     }
-    english = new Heading(1, englishSentence);
-    english.getElement().setId("EnglishPhrase");
+    Heading englishHeading = new Heading(1, englishSentence);
+    englishHeading.getElement().setId("EnglishPhrase");
+    FocusPanel widgets = new FocusPanel();
+    widgets.add(englishHeading);
+    english = widgets;
+    english.getElement().setId("EnglishPhrase_container");
+
+    DivWidget div = new DivWidget();
+    div.addStyleName("blockStyle");
     div.add(english);
 
     foreign = getForeignLanguageContent(foreignSentence);
 
-    if (usedForeign) {
-
-    }
-    else {
+    if (!usedForeign) {
       div.add(foreign);
     }
-    if (controller.getLanguage().equals("English")) {
+    if (isSiteEnglish()) {
       if (getRefAudioToPlay() != null) {
-        addAudioBindings(english);
+        addAudioBindings2(widgets);
       }
     }
 
@@ -399,14 +423,27 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     return div;
   }
 
+  private boolean isSiteEnglish() {
+    return controller.getLanguage().equals("English");
+  }
+
   private Widget getForeignLanguageContent(String foreignSentence) {
     Heading widgets = new Heading(1, foreignSentence);
     widgets.getElement().setId("FLPhrase");
-    addAudioBindings(widgets);
-    return widgets;
+    FocusPanel container = new FocusPanel();
+    container.getElement().setId("FLPhrase_container");
+    container.add(widgets);
+    addAudioBindings2(container);
+    return container;
   }
 
-  PopupPanel popupPanel;
+  private PopupPanel popupPanel;
+
+  /**
+   * @see #getForeignLanguageContent(String)
+   * @see #getQuestionContent(mitll.langtest.shared.CommonExercise)
+   * @param widgets
+   */
   private void addAudioBindings(final Widget widgets) {
     widgets.addDomHandler(new ClickHandler() {
       @Override
@@ -437,10 +474,102 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
         widgets.removeStyleName("mouseOverHighlight");
       }
     }, MouseOutEvent.getType());
+
+    widgets.addDomHandler(new FocusHandler() {
+      @Override
+      public void onFocus(FocusEvent event) {
+        System.out.println("---> GOT FOCUS\n\n\n");
+      }
+    }, FocusEvent.getType());
+  }
+
+  private void addAudioBindings2(final FocusPanel widgets) {
+/*
+    widgets.addDomHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        playRefLater();
+      }
+    }, ClickEvent.getType());
+*/
+
+    widgets.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        playRefLater();
+      }
+    });
+
+/*    widgets.addDomHandler(new MouseOverHandler() {
+      @Override
+      public void onMouseOver(MouseOverEvent event) {
+        widgets.addStyleName("mouseOverHighlight");
+        popupPanel = new PopupPanel(true);
+        Icon w = new Icon(IconType.VOLUME_UP);
+        popupPanel.add(w);
+        int x = widgets.getAbsoluteLeft();
+        int y = widgets.getAbsoluteTop()+5;
+        popupPanel.setPopupPosition(x,y);
+        popupPanel.show();
+      }
+    }, MouseOverEvent.getType());*/
+
+    widgets.addMouseOverHandler(new MouseOverHandler() {
+      @Override
+      public void onMouseOver(MouseOverEvent event) {
+        widgets.addStyleName("mouseOverHighlight");
+        popupPanel = new PopupPanel(true);
+        Icon w = new Icon(IconType.VOLUME_UP);
+        popupPanel.add(w);
+        int x = widgets.getAbsoluteLeft();
+        int y = widgets.getAbsoluteTop()+5;
+        popupPanel.setPopupPosition(x,y);
+        popupPanel.show();
+      }
+    });
+/*
+    widgets.addDomHandler(new MouseOutHandler() {
+      @Override
+      public void onMouseOut(MouseOutEvent event) {
+        popupPanel.hide();
+        popupPanel = null;
+        widgets.removeStyleName("mouseOverHighlight");
+      }
+    }, MouseOutEvent.getType());*/
+
+    widgets.addMouseOutHandler(new MouseOutHandler() {
+      @Override
+      public void onMouseOut(MouseOutEvent event) {
+        popupPanel.hide();
+        popupPanel = null;
+        widgets.removeStyleName("mouseOverHighlight");
+      }
+    });
+/*
+    widgets.addDomHandler(new FocusHandler() {
+      @Override
+      public void onFocus(FocusEvent event) {
+        System.out.println("---> GOT FOCUS\n\n\n");
+      }
+    }, FocusEvent.getType());*/
+    widgets.addFocusHandler(new FocusHandler() {
+      @Override
+      public void onFocus(FocusEvent event) {
+        System.out.println(widgets.getElement().getId() + " ---> GOT FOCUS\n\n\n");
+        widgets.setFocus(false);
+      }
+    });
+    widgets.addBlurHandler(new BlurHandler() {
+      @Override
+      public void onBlur(BlurEvent event) {
+        System.out.println(widgets.getElement().getId() + " ---> GOT BLUR\n\n\n");
+
+      }
+    });
   }
 
   private void showEnglishOrForeign() {
-    System.out.println("show english or foreign " + controlState);
+   // System.out.println("show english or foreign " + controlState);
     if (controlState.showBoth()) {
       showBoth();
     } else if (controlState.showEnglish()) {
@@ -492,13 +621,13 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
 
   private RecordButtonPanel answerWidget;
   private Widget button;
+ // Button actualButton;
 
   private Widget getAnswerAndRecordButtonRow(CommonExercise e, LangTestDatabaseAsync service, ExerciseController controller) {
-//    System.out.println("BootstrapExercisePanel.getAnswerAndRecordButtonRow");
-
     RecordButtonPanel answerWidget = getAnswerWidget(e, service, controller, 1, addKeyBinding);
     this.answerWidget = answerWidget;
     button = answerWidget.getRecordButton();
+
     return getRecordButtonRow(button);
   }
 
@@ -706,37 +835,24 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     if (result.isSaidAnswer()/* && result.isCorrect()*/) { // if they said the right answer, but poorly, show pron score
       showPronScoreFeedback(score);
     }
-    //boolean hasSynonymAudio = !exercise.getSynonymAudioRefs().isEmpty();
     System.out.println("showIncorrectFeedback : " +
-      //"playing synonym audio " + exercise.getSynonymAudioRefs()+
-      " result " + result + " score " + score + " has ref " + hasRefAudio
-      //+ " hasSynonymAudio " + hasSynonymAudio
+        " result " + result + " score " + score + " has ref " + hasRefAudio
     );
 
     String correctPrompt = getCorrectDisplay();
     if (hasRefAudio) {
- /*     if (hasSynonymAudio) {
-        List<String> toPlay = new ArrayList<String>(exercise.getSynonymAudioRefs());
-        //  System.out.println("showIncorrectFeedback : playing " + toPlay);
-        if (controlState.isAudioFeedbackOn()) {
-          playAllAudio(correctPrompt, toPlay);
-        } else {
-          nextAfterDelay(result.isCorrect(), correctPrompt);
-        }
-      } else {*/
-        if (controlState.isAudioFeedbackOn()) {
-          String path = getRefAudioToPlay();
-          if (path == null) {
-            getSoundFeedback().playIncorrect(); // this should never happen
-          } else {
-            playRefAndGoToNext(correctPrompt, path);
-          }
-        } else {
+      if (controlState.isAudioFeedbackOn()) {
+        String path = getRefAudioToPlay();
+        if (path == null) {
           getSoundFeedback().playIncorrect(); // this should never happen
-
-          goToNextAfter(1000);
+        } else {
+          playRefAndGoToNext(correctPrompt, path);
         }
-   //   }
+      } else {
+        getSoundFeedback().playIncorrect(); // this should never happen
+
+        goToNextAfter(1000);
+      }
     } else {
       tryAgain();
     }
@@ -794,7 +910,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
    */
   private void playRef(String path) {
     path = getPath(path);
-    final Widget textWidget = controller.getLanguage().equalsIgnoreCase("English") ? english : foreign;
+    final Widget textWidget = isSiteEnglish() ? english : foreign;
     textWidget.addStyleName("playingAudioHighlight");
     getSoundFeedback().createSound(path, new SoundFeedback.EndListener() {
       @Override
@@ -831,46 +947,11 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
   }
 
   /**
-   * @param infoToShow
-   * @param toPlay
-   * @see #showIncorrectFeedback(mitll.langtest.shared.AudioAnswer, double, boolean)
-   */
-/*  private void playAllAudio(final String infoToShow, final List<String> toPlay) {
-    if (toPlay.isEmpty()) {
-      goToNextItem(infoToShow);
-    } else {
-      String path = toPlay.get(0);
-      if (path == null) {
-        System.err.println("skipping first null audio!");
-        goToNextItem(infoToShow);
-      } else {
-        path = (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
-
-        System.out.println("playAllAudio : " + toPlay.size() + " playing " + path);
-        getSoundFeedback().createSound(path, new SoundFeedback.EndListener() {
-          @Override
-          public void songEnded() {
-            toPlay.remove(0);
-
-            System.out.println("\tplayAllAudio : songEnded " + toPlay.size() + " items left.");
-
-            if (!toPlay.isEmpty()) {
-              playAllAudio(infoToShow, toPlay);
-            } else {
-              goToNextItem(infoToShow);
-            }
-          }
-        }, false);
-      }
-    }
-  }*/
-
-  /**
    * @param infoToShow longer text means longer delay while user reads it
-   * @see #playAllAudio(String, java.util.List)
+   * @see #playRefAndGoToNext(String, String)
    * @see #showIncorrectFeedback(mitll.langtest.shared.AudioAnswer, double, boolean)
    */
-  void goToNextItem(String infoToShow) {
+  private void goToNextItem(String infoToShow) {
     int delay = getFeedbackLengthProportionalDelay(infoToShow);
     System.out.println("goToNextItem : using delay " + delay + " info " + infoToShow);
     goToNextAfter(delay);
@@ -889,39 +970,8 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
   private String getCorrectDisplay() {
     String refSentence = exercise.getForeignLanguage();
     String translit = exercise.getTransliteration().length() > 0 ? "<br/>(" + exercise.getTransliteration() + ")" : "";
-
-/*    if (refSentence == null || refSentence.length() == 0) {
-      List<Exercise.QAPair> questions = exercise.getForeignLanguageQuestions();
-      refSentence = getAltAnswers(questions);
-      List<Exercise.QAPair> eq = exercise.getEnglishQuestions();
-      translit = "<br/>(" + getAltAnswers(eq) + " )";
-    }
-    boolean hasSynonyms = !exercise.getSynonymSentences().isEmpty();
-    if (hasSynonyms) {
-      refSentence = "";
-      for (int i = 0; i < exercise.getSynonymSentences().size(); i++) {
-        String synonym = exercise.getSynonymSentences().get(i);
-        String translit2 = exercise.getSynonymTransliterations().get(i);
-        refSentence += synonym + "(" + translit2 + ") or ";
-      }
-      refSentence = refSentence.substring(0, refSentence.length() - " or ".length());
-    }*/
-  //  return refSentence + (hasSynonyms ? "" : translit);
-    return refSentence + /*(false ? "" :*/ translit;
+    return refSentence + translit;
   }
-
-/*  private String getAltAnswers(List<Exercise.QAPair> questions) {
-    Exercise.QAPair qaPair = questions.get(0);
-    StringBuilder b = new StringBuilder();
-    for (String alt : qaPair.getAlternateAnswers()) {
-      if (alt.trim().length() > 0) {
-        b.append(alt).append(", ");
-      }
-    }
-    if (b.length() > 0) {
-      return b.toString().substring(0, b.length() - 2);
-    } else return "";
-  }*/
 
   private Timer currentTimer = null;
   /**
@@ -975,7 +1025,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     if (currentTimer != null) currentTimer.cancel();
   }
 
-  void initRecordButton() {  answerWidget.initRecordButton();  }
+  private void initRecordButton() {  answerWidget.initRecordButton();  }
 
   /**
    * @see #nextAfterDelay(boolean, String)
