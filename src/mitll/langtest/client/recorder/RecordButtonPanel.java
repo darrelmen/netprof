@@ -1,5 +1,6 @@
 package mitll.langtest.client.recorder;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -193,8 +194,8 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
   protected String getAudioType() { return controller.getAudioType();  }
 
   public Widget getRecordButton() { return recordButton; }
-/*  public Widget getActualRecordButton() { return recordButton; }
-  public void setRecordButtonEnabled(boolean val) { recordButton.setEnabled(val); }*/
+ public Button getActualRecordButton() { return recordButton; }
+ /*  public void setRecordButtonEnabled(boolean val) { recordButton.setEnabled(val); }*/
 
   protected void receivedAudioAnswer(AudioAnswer result, final ExerciseQuestionState questionState, final Panel outer) {}
   protected void receivedAudioFailure() {}
