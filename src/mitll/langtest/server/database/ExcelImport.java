@@ -1,10 +1,12 @@
 package mitll.langtest.server.database;
 
+import corpus.LTS;
 import mitll.langtest.client.custom.QCNPFExercise;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.UserExerciseDAO;
 import mitll.langtest.server.database.custom.UserListManager;
+import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonUserExercise;
@@ -302,7 +304,7 @@ public class ExcelImport implements ExerciseDAO {
        XSSFWorkbook wb = new XSSFWorkbook(inp);
       long now = System.currentTimeMillis();
       if (now-then > 1000) {
-        logger.info("took " + (now-then) + " millis to read spreadsheet");
+        logger.info("took " + (now - then) + " millis to read spreadsheet");
       }
 
       for (int i = 0; i < wb.getNumberOfSheets(); i++) {
@@ -714,7 +716,7 @@ public class ExcelImport implements ExerciseDAO {
         }
       }
       if (count > 0) {
-        logger.info("Automatically added " + exTofieldToDefect.size() +"/" +count+ " defects");
+        logger.info("Automatically added " + exTofieldToDefect.size() + "/" + count + " defects");
       }
     }
     else {
@@ -839,9 +841,8 @@ public class ExcelImport implements ExerciseDAO {
     }
   }*/
 
-/*
-  public boolean checkLTS(LTS lts, String foreignLanguagePhrase) {
-    List<String> tokens = new SmallVocabDecoder().getTokens(foreignLanguagePhrase);
+/*  public boolean checkLTS(LTS lts, String foreignLanguagePhrase) {
+    Collection<String> tokens = new SmallVocabDecoder().getTokens(foreignLanguagePhrase);
     try {
 
       for (String token : tokens) {
@@ -856,8 +857,7 @@ public class ExcelImport implements ExerciseDAO {
       return false;
     }
     return true;
-  }
-*/
+  }*/
 
   /**
    * @param id
