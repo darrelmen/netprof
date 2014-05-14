@@ -206,6 +206,11 @@ public class AnswerDAO {
     }
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#setAVPSkip(java.util.Collection)
+   * @see mitll.langtest.client.custom.MyFlashcardExercisePanelFactory.StatsPracticePanel#getRepeatButton()
+   * @param ids
+   */
   public void changeType(Collection<Long> ids) {
     try {
       Connection connection = database.getConnection();
