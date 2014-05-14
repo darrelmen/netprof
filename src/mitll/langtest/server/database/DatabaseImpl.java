@@ -141,7 +141,7 @@ public class DatabaseImpl implements Database {
     userExerciseDAO = new UserExerciseDAO(this);
     UserListExerciseJoinDAO userListExerciseJoinDAO = new UserListExerciseJoinDAO(this);
     dliUserDAO = new DLIUserDAO(this);
-    resultDAO = new ResultDAO(this,userDAO);
+    resultDAO = new ResultDAO(this);
     audioDAO = new AudioDAO(this,userDAO);
     answerDAO = new AnswerDAO(this, resultDAO);
     gradeDAO = new GradeDAO(this,userDAO, resultDAO);
