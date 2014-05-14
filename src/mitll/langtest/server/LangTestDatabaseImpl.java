@@ -288,8 +288,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   private ExerciseListWrapper getExerciseListWrapperForPrefix(int reqID, String prefix, Collection<CommonExercise> exercisesForState, long userID, String role) {
-    logger.debug("getExerciseListWrapperForPrefix userID " +userID + " prefix '" + prefix+ "' role " +role);
     boolean hasPrefix = !prefix.isEmpty();
+    if (hasPrefix) {
+      logger.debug("getExerciseListWrapperForPrefix userID " +userID + " prefix '" + prefix+ "' role " +role);
+    }
 
     int i = markRecordedState((int) userID, role, exercisesForState);
     //logger.debug("marked " +i + " as recorded role " +role);
@@ -434,6 +436,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (audioAttributes.isEmpty()) { logger.warn("ensureMP3s : no ref audio for " + byID); }
   }
 
+  private boolean checkedLTS = false;
   /**
    * Called from the client:
    * @see mitll.langtest.client.list.ListInterface#getExercises
@@ -442,6 +445,25 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   List<CommonExercise> getExercises() {
     List<CommonExercise> exercises = db.getExercises();
     makeAutoCRT();   // side effect of db.getExercises is to make the exercise DAO which is needed here...
+
+    synchronized (this) {
+      if (!checkedLTS) {
+        checkedLTS = true;
+        int count = 0;
+        for (CommonExercise exercise : exercises) {
+          boolean validForeignPhrase = isValidForeignPhrase(exercise.getForeignLanguage());
+          if (!validForeignPhrase) {
+            if (count < 10) {
+              logger.error("huh? for " + exercise.getID() + " we can't parse " + exercise.getForeignLanguage());
+            }
+            count++;
+          }
+        }
+        if (count > 0) {
+          logger.error("huh? out of " + exercises.size() + " LTS fails on " + count);
+        }
+      }
+    }
     return exercises;
   }
 
@@ -755,7 +777,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   @Override
-  public boolean isValidForeignPhrase(String foreign) {  return /*serverProps.isNoModel() ||*/ audioFileHelper.checkLTS(foreign); }
+  public boolean isValidForeignPhrase(String foreign) {  return audioFileHelper.checkLTS(foreign); }
 
   /**
    * Put the new item in the database,
@@ -974,7 +996,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public List<AVPHistoryForList> getUserHistoryForList(long userid, Collection<String> ids, long latestResultID) {
-    logger.debug("getUserHistoryForList " + userid + " and " + ids);
+    //logger.debug("getUserHistoryForList " + userid + " and " + ids);
 
     return db.getUserHistoryForList(userid, ids, latestResultID);
   }
