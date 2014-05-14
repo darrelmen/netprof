@@ -60,23 +60,15 @@ import java.util.Set;
 @SuppressWarnings("serial")
 public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase, AutoCRTScoring {
   private static final Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
-  //private static final int MB = (1024 * 1024);
-  private static final int TIMEOUT = 30;
-  //private static final boolean SCORE_RESULTS = false;
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
 
-  private DatabaseImpl db, studentAnswersDB;
+  private DatabaseImpl db;//, studentAnswersDB;
   private AudioFileHelper audioFileHelper;
   private String relativeConfigDir;
   private String configDir;
   private ServerProperties serverProps;
   private PathHelper pathHelper;
-
-/*  private final Cache<String, String> userToExerciseID = CacheBuilder.newBuilder()
-      .concurrencyLevel(4)
-      .maximumSize(10000)
-      .expireAfterWrite(TIMEOUT, TimeUnit.MINUTES).build();*/
 
   /**
    * @param request
@@ -123,18 +115,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private List<CommonShell> getExerciseShellsCombined(Collection<? extends CommonExercise> exercises) {
     List<CommonShell> ids = new ArrayList<CommonShell>();
     for (CommonExercise e : exercises) {
-
-      CommonShell shellCombinedTooltip = e.getShellCombinedTooltip();
-
-      if (e.getID().equals("5878")) {
-        logger.debug("ex " + e + " tool " + e.getTooltip());
-        logger.debug("ex " + e + " combined " + e.getCombinedTooltip());
-        logger.debug("ex " + e + " translit " + e.getTransliteration());
-
-        logger.debug("ex " + shellCombinedTooltip + " tool " + shellCombinedTooltip.getTooltip());
-        //logger.debug("ex " + shellCombinedTooltip+ " tool " + shellCombinedTooltip.getCombinedTooltip());
-      }
-      ids.add(shellCombinedTooltip);
+      ids.add(e.getShellCombinedTooltip());
     }
     return ids;
   }
@@ -220,9 +201,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     List<CommonExercise> exercises2 = getCommonExercises(userListByID);
     long then = System.currentTimeMillis();
     for (CommonExercise commonExercise : exercises2) {
-/*      for (Map.Entry<String, String> unit : commonExercise.getUnitToValue().entrySet()) {
-        helper.addExerciseToLesson(commonExercise, unit.getKey(), unit.getValue());
-      }*/
       helper.addExercise(commonExercise);
     }
     long now = System.currentTimeMillis();
@@ -379,22 +357,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String installPath = pathHelper.getInstallPath();
     String relativeConfigDir1 = relativeConfigDir;
     db.getAudioDAO().attachAudio(firstExercise,installPath,relativeConfigDir1);
-
-
-
- /*   List<AudioAttribute> audioAttributes = db.getAudioDAO().getAudioAttributes(firstExercise.getID());
-    AudioConversion audioConversion = new AudioConversion();
-
-    for (AudioAttribute attr : audioAttributes) {
-      firstExercise.addAudio(attr);
-      if (attr.getAudioRef() == null) logger.error("huh? no audio ref for " + attr + " under " + firstExercise);
-      else if (!audioConversion.exists(attr.getAudioRef(), installPath)) {
-        //   logger.debug("\twas '" + attr.getAudioRef() + "'");
-        attr.setAudioRef(relativeConfigDir1 + File.separator + attr.getAudioRef());
-        //   logger.debug("\tnow '" + attr.getAudioRef() + "'");
-      }
-      //logger.debug("\tadding path '" + attr.getAudioRef() + "' "+attr + " to " + firstExercise.getID());
-    }*/
   }
 
   private void addPlayedMarkings(long userID, CommonExercise firstExercise) {
@@ -482,44 +444,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     makeAutoCRT();   // side effect of db.getExercises is to make the exercise DAO which is needed here...
     return exercises;
   }
-
-  /**
-   * Remember who is grading which exercise.  Time out reservation after 30 minutes.
-   *
-   * @see mitll.langtest.client.grading.GradedExerciseList#getNextUngraded
-   * @param user
-   * @param expectedGrades
-   * @param englishOnly
-   * @return next ungraded exercise
-   */
-/*  public CommonExercise getNextUngradedExercise(String user, int expectedGrades, boolean englishOnly) {
-    synchronized (this) {
-      ConcurrentMap<String,String> stringStringConcurrentMap = userToExerciseID.asMap();
-      Collection<String> values = stringStringConcurrentMap.values();
-      String currentExerciseForUser = userToExerciseID.getIfPresent(user);
-      logger.debug("getNextUngradedExercise for " + user + " current " + currentExerciseForUser + " expected " + expectedGrades);
-
-      Collection<String> currentActiveExercises = new HashSet<String>(values);
-
-      if (currentExerciseForUser != null) {
-        currentActiveExercises.remove(currentExerciseForUser); // it's OK to include the one the user is working on now...
-      }
-      //logger.debug("getNextUngradedExercise current set minus " + user + " is " + currentActiveExercises);
-      boolean filterForArabicTextOnly = serverProps.isArabicTextDataCollect();
-      return db.getNextUngradedExercise(currentActiveExercises, expectedGrades,
-          filterForArabicTextOnly, filterForArabicTextOnly, !filterForArabicTextOnly, englishOnly);
-    }
-  }*/
-
-/*
-  public void checkoutExerciseID(String user, String id) {
-    synchronized (this) {
-      userToExerciseID.put(user, id);
-      logger.debug("checkoutExerciseID : after adding " + user + "->" + id +
-          " active exercise map now " + userToExerciseID.asMap());
-    }
-  }
-*/
 
   /**
    * TODO : come back to this!!!
@@ -689,36 +613,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public void addTextAnswer(int userID, CommonExercise exercise, int questionID, String answer, String answerType) {
     db.addAnswer(userID, exercise, questionID, answer, answerType);
-   // db.addCompleted(userID,exercise.getID());
   }
 
   // Grades ---------------------
-
-  /**
-   * @see mitll.langtest.client.grading.GradingResultManager#addGrade
-   * @param exerciseID
-   * @return
-   */
-  //public CountAndGradeID addGrade(String exerciseID, Grade toAdd) {  return db.addGrade(exerciseID, toAdd);  }
-
-  /**
-   * @seec mitll.langtest.client.grading.GradingResultManager#changeGrade(mitll.langtest.shared.grade.Grade)
-   * @paramc toChange
-   */
- // public void changeGrade(Grade toChange) { db.changeGrade(toChange);  }
 
   @Override
   public synchronized int userExists(String login) { return db.userExists(login);  }
 
   // Users ---------------------
-
-/*  public void addDLIUser(DLIUser dliUser) {
-    try {
-      db.addDLIUser(dliUser);
-    } catch (Exception e) {
-      logAndNotifyServerException(e);
-    }
-  }*/
 
   /**
    * @see mitll.langtest.client.custom.CreateListDialog#doCreate
@@ -823,11 +725,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public List<UserList> getReviewLists() {
-    logger.debug("asking for review lists --- ");
+    //logger.debug("asking for review lists --- ");
     List<UserList> lists = new ArrayList<UserList>();
     UserListManager userListManager = db.getUserListManager();
     UserList defectList = userListManager.getDefectList(getTypeOrder());
-    //defectList.setExercises(getExerciseShells(defectList.getExercises()));
     lists.add(defectList);
 
     lists.add(userListManager.getCommentedList(getTypeOrder()));
@@ -849,11 +750,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * Can't check if it's valid if we don't have a model.
+   * @see mitll.langtest.client.custom.NewUserExercise#isValidForeignPhrase(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, boolean)
    * @param foreign
    * @return
    */
   @Override
-  public boolean isValidForeignPhrase(String foreign) {  return serverProps.isNoModel() || audioFileHelper.checkLTS(foreign); }
+  public boolean isValidForeignPhrase(String foreign) {  return /*serverProps.isNoModel() ||*/ audioFileHelper.checkLTS(foreign); }
 
   /**
    * Put the new item in the database,
@@ -872,9 +774,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       db.getAudioDAO().updateExerciseID(audioAttribute.getUniqueID(), userExercise.getID());
     }
     logger.debug("reallyCreateNewItem : made user exercise " + userExercise);
- /*   if (userExercise.getRefAudio() != null) {
-      db.getAudioDAO().add((int)userExercise.getCreator(),userExercise.getRefAudio(),userExercise.getID(),System.currentTimeMillis(),"",0);
-    }*/
+
     return userExercise;
   }
 
@@ -1014,7 +914,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return audioAnswer;
   }
 
-  void makeAutoCRT() { audioFileHelper.makeAutoCRT(relativeConfigDir, this, studentAnswersDB, this); }
+  void makeAutoCRT() { audioFileHelper.makeAutoCRT(relativeConfigDir, this/*, studentAnswersDB, this*/); }
 
   @Override
   public Map<User, Integer> getUserToResultCount() { return db.getUserToResultCount();  }
@@ -1094,9 +994,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public void destroy() {
     super.destroy();
     db.destroy();
-    if (studentAnswersDB != null) {
+/*    if (studentAnswersDB != null) {
       studentAnswersDB.destroy();
-    }
+    }*/
   }
 
   @Override
@@ -1168,7 +1068,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see AudioFileHelper#makeAutoCRT(String, mitll.langtest.server.scoring.AutoCRTScoring, mitll.langtest.server.database.DatabaseImpl, LangTestDatabaseImpl)
+   * @see LangTestDatabaseImpl#init()
    * @param useFile
    * @param db
    * @return
