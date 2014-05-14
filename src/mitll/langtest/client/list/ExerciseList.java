@@ -510,7 +510,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       askServerForExercise(id);
     }
     else if (!id.equals(EditItem.NEW_EXERCISE_ID)) {
-      System.err.println("checkAndAskServer : can't load " +id);// + " keys were " + getKeys());
+      System.err.println("checkAndAskServer : can't load " +id);
     }
   }
 
@@ -705,7 +705,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   @Override
   public boolean loadNextExercise(CommonShell current) {
-    System.out.println("ExerciseList.loadNextExercise current is : " +current + " instance " + instance);
+    //System.out.println("ExerciseList.loadNextExercise current is : " +current + " instance " + instance);
     String id = current.getID();
     int i = getIndex(id);
 
@@ -728,7 +728,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   public boolean loadNextExercise(String id) {
-    System.out.println("ExerciseList.loadNextExercise id = " + id + " instance " + instance);
+    //System.out.println("ExerciseList.loadNextExercise id = " + id + " instance " + instance);
     CommonShell exerciseByID = byID(id);
     return exerciseByID != null && loadNextExercise(exerciseByID);
   }
