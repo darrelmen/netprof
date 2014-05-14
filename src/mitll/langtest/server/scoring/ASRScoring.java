@@ -88,6 +88,8 @@ public class ASRScoring extends Scoring {
     makeDecoder();
   }
 
+  private String languageProperty;
+
   /**
    * @seex mitll.langtest.server.audio.SplitAudio#getAsrScoring
    * @param deployPath
@@ -99,7 +101,8 @@ public class ASRScoring extends Scoring {
     lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
     audioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
 
-    String language = properties.get("language") != null ? properties.get("language") : "";
+    languageProperty = properties.get("language");
+    String language = languageProperty != null ? languageProperty : "";
 
     isMandarin = language.equalsIgnoreCase("mandarin");
     this.letterToSoundClass = new LTSFactory().getLTSClass(language);
@@ -118,6 +121,12 @@ public class ASRScoring extends Scoring {
 
   public SmallVocabDecoder getSmallVocabDecoder() { return svDecoderHelper; }
 
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#checkLTS(String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#isValidForeignPhrase(String)
+   * @param foreignLanguagePhrase
+   * @return
+   */
   public boolean checkLTS(String foreignLanguagePhrase) { return checkLTS(letterToSoundClass, foreignLanguagePhrase); }
 
   /**
@@ -146,7 +155,7 @@ public class ASRScoring extends Scoring {
           String[][] process = lts.process(token);
           if (process == null || process.length == 0 || process[0].length == 0 ||
             process[0][0].length() == 0 || process[0][0].equals("aa")) {
-            logger.debug("checkLTS token : " + token + " invalid!");
+            logger.debug("checkLTS with " + lts + "/" +languageProperty+ " token : '" + token + "' is invalid!");
             return false;
           }
         }
@@ -155,7 +164,6 @@ public class ASRScoring extends Scoring {
       logger.error("lts " +language+ " failed on " + foreignLanguagePhrase);
       return false;
     }
-    //logger.debug("checkLTS " +language+ "tokens : '" +tokens + "' valid!");
 
     return true;
   }
@@ -447,10 +455,9 @@ public class ASRScoring extends Scoring {
    *
    * @see #scoreRepeatExercise
    * @param eventAndFileInfo
-   * @param fileDuration
    * @return
    */
-  private Map<NetPronImageType, List<TranscriptSegment>> getTypeToEndTimes(ImageWriter.EventAndFileInfo eventAndFileInfo/*, double fileDuration*/) {
+  private Map<NetPronImageType, List<TranscriptSegment>> getTypeToEndTimes(ImageWriter.EventAndFileInfo eventAndFileInfo) {
     Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<NetPronImageType, List<TranscriptSegment>>();
     for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.typeToEvent.entrySet()) {
       NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
@@ -461,14 +468,7 @@ public class ASRScoring extends Scoring {
         endTimes.add(new TranscriptSegment(value.start, value.end, value.event, value.score));
       }
     }
-/*    for (List<TranscriptSegment> times : typeToEndTimes.values()) {
-      TranscriptSegment lastEndTime = times.isEmpty() ? (float)fileDuration : times.get(times.size() - 1);
 
-      if (lastEndTime < fileDuration && !times.isEmpty()) {
-       // logger.debug("setting last segment to end at end of file " + lastEndTime + " vs " + fileDuration);
-        times.set(times.size() - 1,(float)fileDuration);
-      }
-    }*/
     return typeToEndTimes;
   }
 
@@ -635,6 +635,11 @@ public class ASRScoring extends Scoring {
    */
   public Collection<String> getValidPhrases(Collection<String> phrases) { return getValidSentences(phrases); }
 
+  /**
+   * @see #isValid(String)
+   * @param phrase
+   * @return
+   */
   private boolean isPhraseInDict(String phrase) {  return letterToSoundClass.process(phrase) != null;  }
 
   /**

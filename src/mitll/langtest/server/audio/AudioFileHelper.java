@@ -7,6 +7,7 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.Export;
 import mitll.langtest.server.scoring.ASRScoring;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
@@ -30,7 +31,6 @@ import java.util.List;
 public class AudioFileHelper {
   private static final Logger logger = Logger.getLogger(AudioFileHelper.class);
 
-  //private static final String BEST_AUDIO = "bestAudio";
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
   private ASRScoring asrScoring;
@@ -46,6 +46,11 @@ public class AudioFileHelper {
     this.langTestDatabase = langTestDatabase;
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#isValidForeignPhrase(String)
+   * @param foreignLanguagePhrase
+   * @return
+   */
   public boolean checkLTS(String foreignLanguagePhrase) {
     makeASRScoring();
     return asrScoring.checkLTS(foreignLanguagePhrase);
@@ -56,9 +61,6 @@ public class AudioFileHelper {
     return asrScoring.getSmallVocabDecoder();
   }
 
-/*  public AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exerciseID, CommonExercise exercise1, int questionID,
-                                    int user, int reqid, boolean flq, String audioType, boolean doFlashcard,
-                                    boolean recordInResults, boolean addToAudioTable) {}*/
   /**
    * Record an answer entry in the database.<br></br>
    * Write the posted data to a wav and an mp3 file (since all the browser audio works with mp3).
@@ -107,12 +109,7 @@ public class AudioFileHelper {
         isValid, flq, true, audioType, validity.durationInMillis, answer.isCorrect(), (float) answer.getScore());
       answer.setResultID(answerID);
     }
-    logger.info("writeAudioFile answer " + answer);
-
-  /*  if (addToAudioTable) {
-      // TODO write or overwrite audio table entry
-
-    }*/
+    logger.debug("writeAudioFile answer " + answer);
     return answer;
   }
 
@@ -139,17 +136,6 @@ public class AudioFileHelper {
       return getASRScoreForAudio(0, testAudioFile.getPath(), vocab, 128, 128, false, true, tmpDir, serverProps.useScoreCache());
     }
   }
-
-  /**
-   * @seex LangTestDatabaseImpl#getScoreForAnswer
-   * @paramx e
-   * @paramx questionID
-   * @paramx answer
-   * @return
-   */
-/*  public double getScoreForAnswer(CommonExercise e, int questionID, String answer) {
-    return autoCRT.getScoreForExercise(e, questionID, answer);
-  }*/
 
   private String createSLFFile(Collection<String> lmSentences, String tmpDir) {
     return new SLFFile().createSimpleSLFFile(lmSentences, tmpDir);
@@ -329,18 +315,21 @@ public class AudioFileHelper {
    * @see mitll.langtest.server.LangTestDatabaseImpl#makeAutoCRT()
    * @param relativeConfigDir
    * @param crtScoring
-   * @param studentAnswersDB
-   * @param langTestDatabase
+   * @paramx studentAnswersDB
+   * @paramx langTestDatabase
    */
-  public void makeAutoCRT(String relativeConfigDir, AutoCRTScoring crtScoring, DatabaseImpl studentAnswersDB,
-                          LangTestDatabaseImpl langTestDatabase) {
+  public void makeAutoCRT(String relativeConfigDir, AutoCRTScoring crtScoring
+  //  , DatabaseImpl studentAnswersDB,
+  //                        LangTestDatabaseImpl langTestDatabase
+  ) {
     if (autoCRT == null) {
-      DatabaseImpl exportDB = serverProps.isAutoCRT() ? studentAnswersDB : db;
+/*      DatabaseImpl exportDB = serverProps.isAutoCRT() ? studentAnswersDB : db;
       if (serverProps.isAutoCRT()) {
         langTestDatabase.setInstallPath(serverProps.getUseFile(), exportDB);
         exportDB.getExercises();
-      }
-      autoCRT = new AutoCRT(exportDB.getExport(), crtScoring, pathHelper.getInstallPath(), relativeConfigDir,
+      }*/
+      Export export = db.getExport();
+      autoCRT = new AutoCRT(export, crtScoring, pathHelper.getInstallPath(), relativeConfigDir,
         serverProps.getMinPronScore());
       if (serverProps.isAutoCRT() && serverProps.isIncludeFeedback()) {
         autoCRT.makeClassifier();
