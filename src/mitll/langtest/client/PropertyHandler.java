@@ -30,7 +30,7 @@ public class PropertyHandler {
   private static final String CRT_DATA_COLLECT_MODE = "crtDataCollect";
   private static final String COLLECT_AUDIO= "collectAudio";
   private static final String RECORD_TIMEOUT = "recordTimeout";
-  private static final String SHORT_RECORD_TIMEOUT = "shortRecordTimeout";
+ // private static final String SHORT_RECORD_TIMEOUT = "shortRecordTimeout";
   private static final String TEACHER_VIEW = "teacherView";
   private static final String ADMIN_VIEW = "adminView";
   private static final String MINIMAL_UI = "minimalUI";
@@ -127,7 +127,7 @@ public class PropertyHandler {
   private String turkID = "";
 
   private int recordTimeout = DEFAULT_TIMEOUT;
-  private int shortRecordTimeout = DEFAULT_SHORT_TIMEOUT;
+  //private int shortRecordTimeout = DEFAULT_SHORT_TIMEOUT;
 
   private int gameTimeSeconds = DEFAULT_GAME_TIME_SECONDS;
   private float screenPortion = 1.0f;
@@ -176,7 +176,7 @@ public class PropertyHandler {
       else if (key.equals(DATA_COLLECT_MODE)) dataCollectMode = getBoolean(value);
       else if (key.equals(CRT_DATA_COLLECT_MODE)) CRTDataCollectMode = getBoolean(value);
       else if (key.equals(RECORD_TIMEOUT)) recordTimeout = getInt(value, DEFAULT_TIMEOUT, RECORD_TIMEOUT);
-      else if (key.equals(SHORT_RECORD_TIMEOUT)) shortRecordTimeout = getInt(value, DEFAULT_SHORT_TIMEOUT, SHORT_RECORD_TIMEOUT);
+     // else if (key.equals(SHORT_RECORD_TIMEOUT)) shortRecordTimeout = getInt(value, DEFAULT_SHORT_TIMEOUT, SHORT_RECORD_TIMEOUT);
       else if (key.equals(COLLECT_AUDIO)) collectAudio = getBoolean(value);
       else if (key.equals(ADMIN_VIEW)) adminView = getBoolean(value);
       else if (key.equals(MINIMAL_UI)) minimalUI = getBoolean(value);
