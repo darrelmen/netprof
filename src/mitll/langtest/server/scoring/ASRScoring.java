@@ -92,6 +92,7 @@ public class ASRScoring extends Scoring {
 
   /**
    * @seex mitll.langtest.server.audio.SplitAudio#getAsrScoring
+   * @see #ASRScoring(String, java.util.Map, mitll.langtest.server.LangTestDatabaseImpl)
    * @param deployPath
    * @param properties
    * @param dict
@@ -106,7 +107,6 @@ public class ASRScoring extends Scoring {
 
     isMandarin = language.equalsIgnoreCase("mandarin");
     this.letterToSoundClass = new LTSFactory().getLTSClass(language);
-//    logger.info("using LTS " + letterToSoundClass.getClass());
     this.htkDictionary = dict;
     makeDecoder();
     if (dict != null) logger.debug("htkDictionary size is " + dict.size());
