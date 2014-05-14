@@ -391,11 +391,9 @@ public class PagingExerciseList extends ExerciseList {
 
   protected void askServerForExercise(String itemID) {
     System.out.println("PagingExerciseList.askServerForExercise id = " + itemID + " instance " + getInstance());
-    //RootPanel.get().setStyleName("waitCursor");
     if (SHOW_WAIT_CURSOR && itemID.equals(pagingContainer.getClickedExerciseID())) {
       waitPopup = new DecoratedPopupPanel();
       waitPopup.setAutoHideEnabled(false);
-      //waitPopup.add(new Image(LangTest.LANGTEST_IMAGES + "animated_progress.gif"));
       waitPopup.add(new Icon(IconType.SPINNER));
 
       waitPopup.setPopupPosition(pagingContainer.getMouseX() + 12, pagingContainer.getMouseY() - 10);
