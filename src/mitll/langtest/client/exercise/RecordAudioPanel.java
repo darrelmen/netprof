@@ -20,8 +20,6 @@ import mitll.langtest.shared.Result;
  * A waveform record button and a play audio button.
  */
 public class RecordAudioPanel extends AudioPanel {
- // public static final String RECORD = "Record";
- // public static final String STOP = "Stop";
   private final int index;
 
   private PostAudioRecordButton postAudioRecordButton;
