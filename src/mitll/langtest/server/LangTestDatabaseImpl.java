@@ -727,6 +727,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db.getUserListManager().markState(id, state, creatorID);
   }
 
+  /**
+   * @see mitll.langtest.client.custom.MyFlashcardExercisePanelFactory.StatsPracticePanel#getRepeatButton()
+   * @param ids
+   */
   @Override
   public void setAVPSkip(Collection<Long> ids) { db.getAnswerDAO().changeType(ids); }
 
