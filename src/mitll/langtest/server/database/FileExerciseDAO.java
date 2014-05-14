@@ -57,7 +57,7 @@ public class FileExerciseDAO implements ExerciseDAO {
   private boolean isUrdu;
   private final boolean isFlashcard;
   private boolean isEnglish;
-  private final boolean processSemicolons = false;
+  //private final boolean processSemicolons = false;
   private boolean isPashto;
   private final SectionHelper sectionHelper = new SectionHelper();
   private final List<String> errors = new ArrayList<String>();
