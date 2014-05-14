@@ -27,6 +27,7 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.ListInterface;
@@ -37,6 +38,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserList;
 
@@ -88,7 +90,6 @@ public class Navigation implements RequiresResize {
 
   private static final String EDIT_ITEM = "editItem";
   private static final String LEARN = "learn";
-//  public static final String ATTENTION_LL = "Attention LL";
   public static final String RECORD_AUDIO = "Record Audio";
   public static final String CONTENT1 = "content";
   public static final String CLASSROOM = "classroom";
@@ -145,16 +146,53 @@ public class Navigation implements RequiresResize {
       }
     };
 
-    practiceHelper = new SimpleChapterNPFHelper(service, feedback, userManager, controller, listInterface) {
-      @Override
-      protected ExercisePanelFactory getFactory(PagingExerciseList exerciseList) {
-        return new MyFlashcardExercisePanelFactory(service, feedback, controller, exerciseList);
-      }
-    };
-
-
+    practiceHelper = makePracticeHelper(service, userManager, controller, feedback);
     reviewItem = new ReviewItemHelper(service, feedback, userManager, controller, null, predefinedContentList, npfHelper);
     editItem = new EditItem(service, userManager, controller, predefinedContentList, feedback, npfHelper);
+  }
+
+  private SimpleChapterNPFHelper makePracticeHelper(final LangTestDatabaseAsync service, final UserManager userManager,
+                                                      final ExerciseController controller, final UserFeedback feedback) {
+    return new SimpleChapterNPFHelper(service, feedback, userManager, controller, listInterface) {
+      MyFlashcardExercisePanelFactory myFlashcardExercisePanelFactory;
+      @Override
+      protected ExercisePanelFactory getFactory(PagingExerciseList exerciseList) {
+         myFlashcardExercisePanelFactory = new MyFlashcardExercisePanelFactory(service, feedback, controller, exerciseList);
+        return myFlashcardExercisePanelFactory;
+      }
+
+      @Override
+      protected FlexListLayout getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager, ExerciseController controller, SimpleChapterNPFHelper outer) {
+        return new MyFlexListLayout(service, feedback, userManager, controller, outer) {
+          @Override
+          protected FlexSectionExerciseList makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName) {
+            return new MyFlexSectionExerciseList(topRow, currentExercisePanel, instanceName) {
+              @Override
+              protected CommonShell findFirstExercise() {
+                String currentExerciseID = myFlashcardExercisePanelFactory.getCurrentExerciseID();
+                if (currentExerciseID != null && !currentExerciseID.trim().isEmpty()) {
+                  //System.out.println("\n\n\n\t ---> found previous state current ex = " + currentExerciseID);
+
+                  CommonShell shell = byID(currentExerciseID);
+
+                  if (shell == null) {
+                    System.err.println("huh? can't find " + currentExerciseID);
+                    return super.findFirstExercise();
+                  }
+                  else {
+                    myFlashcardExercisePanelFactory.populateCorrectMap();
+                    return shell;
+                  }
+                }
+                else {
+                  return super.findFirstExercise();
+                }
+              }
+            };
+          }
+        };
+      }
+    };
   }
 
   /**
@@ -295,13 +333,14 @@ public class Navigation implements RequiresResize {
       }
     });
 
-    practiceTab = makeFirstLevelTab(tabPanel, IconType.LIGHTBULB, "Practice");
+    practiceTab = makeFirstLevelTab(tabPanel, IconType.REPLY, "Practice");
     practiceTab.getContent().getElement().setId("practicePanel");
     practiceTab.getTab().addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         checkAndMaybeClearTab("Practice");
         practiceHelper.showNPF(practiceTab, "Practice", false);
+        practiceHelper.hideList();
         logEvent(practiceTab, "Practice");
       }
     });
@@ -444,6 +483,9 @@ public class Navigation implements RequiresResize {
           recorderHelper.showNPF(recorderTab, "record_audio", true);
         } else if (value.equals(CONTENT) && contentTab != null) {
           contentHelper.showNPF(contentTab, CONTENT1, true);
+        } else if (value.equals(PRACTICE) && practiceTab != null) {
+          practiceHelper.showNPF(practiceTab, PRACTICE, true);
+          practiceHelper.hideList();
         }
       }
       else {
