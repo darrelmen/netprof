@@ -61,7 +61,6 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
   private static final int HIDE_DELAY = 2500;
 
   private static final boolean NEXT_ON_BAD_AUDIO = false;
- // private static final String PRONUNCIATION_SCORE = "Pronunciation score ";
 
   private static final String WAV = ".wav";
   private static final String MP3 = "." + AudioTag.COMPRESSED_TYPE;
