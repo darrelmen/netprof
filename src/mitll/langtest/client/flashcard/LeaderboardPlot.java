@@ -114,11 +114,10 @@ public class LeaderboardPlot {
     if (yValuesForUser.isEmpty()) {
       System.err.println("huh??? addSeries is empty for " + seriesTitle);
     }
-    else {
-      System.out.println("addSeries " + yValuesForUser);
-    }
+    //else {
+   //   //System.out.println("addSeries " + yValuesForUser);
+   // }
 
-   // String seriesLabel = gameTimeSeconds > 0 ? "Correct in " + gameTimeSeconds + " seconds" : seriesTitle;
     Series series = chart.createSeries()
       .setName(seriesTitle)
       .setPoints(yValues);
