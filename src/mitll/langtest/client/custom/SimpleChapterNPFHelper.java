@@ -48,12 +48,12 @@ class SimpleChapterNPFHelper implements RequiresResize {
     this.predefinedContentList = predefinedContentList;
 
     final SimpleChapterNPFHelper outer = this;
-    this.flexListLayout = new FlexListLayout(service,feedback,userManager,controller) {
-      @Override
-      protected ExercisePanelFactory getFactory(PagingExerciseList exerciseList, String instanceName) {
-        return outer.getFactory(exerciseList);
-      }
-    };
+    this.flexListLayout = getMyListLayout(service, feedback, userManager, controller, outer);
+  }
+
+  protected FlexListLayout getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
+                                           UserManager userManager, ExerciseController controller, SimpleChapterNPFHelper outer) {
+    return new MyFlexListLayout(service, feedback, userManager, controller, outer);
   }
 
   /**
@@ -71,10 +71,7 @@ class SimpleChapterNPFHelper implements RequiresResize {
       madeNPFContent = true;
       System.out.println("\t: adding npf content instanceName = " + instanceName + " loadExercises " + loadExercises);
       addNPFToContent(content, instanceName, loadExercises);
-    } /*else {
-      System.out.println("\t: rememberAndLoadFirst instanceName = " + instanceName);
-      rememberAndLoadFirst();
-    }*/
+    }
   }
 
   private void addNPFToContent( Panel listContent, String instanceName, boolean loadExercises) {
@@ -92,12 +89,7 @@ class SimpleChapterNPFHelper implements RequiresResize {
    */
   private Panel doNPF(String instanceName, boolean loadExercises) {
     System.out.println(getClass() + " : doNPF instanceName = " + instanceName + " for list loadExercises " + loadExercises);
-    Panel hp = doInternalLayout(instanceName);
-
-/*    if (loadExercises) {
-      rememberAndLoadFirst();
-    }*/
-    return hp;
+    return doInternalLayout(instanceName);
   }
 
   private FlexListLayout flexListLayout;
@@ -108,14 +100,7 @@ class SimpleChapterNPFHelper implements RequiresResize {
     return widgets;
   }
 
-  /**
-   * @see #doNPF
-   * @see #showNPF
-   */
-/*  private void rememberAndLoadFirst() {
-    System.out.println(getClass() + ".rememberAndLoadFirst : let's reload! --------------->");
-    npfExerciseList.reload();
-  }*/
+  public void hideList() { npfExerciseList.hide(); }
 
   protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
     return new ExercisePanelFactory(service, feedback, controller, exerciseList) {
@@ -143,7 +128,21 @@ class SimpleChapterNPFHelper implements RequiresResize {
     } else if (npfExerciseList != null) {
       npfExerciseList.onResize();
     } else {
-      System.err.println("not sending resize event - flexListLayout is null?");
+      System.out.println("SimpleChapterNPFHelper.onResize : not sending resize event - flexListLayout is null?");
+    }
+  }
+
+  protected static class MyFlexListLayout extends FlexListLayout {
+    private final SimpleChapterNPFHelper outer;
+
+    public MyFlexListLayout(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager, ExerciseController controller, SimpleChapterNPFHelper outer) {
+      super(service, feedback, userManager, controller);
+      this.outer = outer;
+    }
+
+    @Override
+    protected ExercisePanelFactory getFactory(PagingExerciseList exerciseList, String instanceName) {
+      return outer.getFactory(exerciseList);
     }
   }
 }
