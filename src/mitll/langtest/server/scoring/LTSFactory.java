@@ -8,7 +8,13 @@ import corpus.LTS;
 import corpus.LevantineLTS;
 import corpus.ModernStandardArabicLTS;
 import corpus.PashtoLTS;
+import corpus.UrduLTS;
 import org.apache.log4j.Logger;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -20,32 +26,47 @@ import org.apache.log4j.Logger;
 public class LTSFactory {
   private static final Logger logger = Logger.getLogger(LTSFactory.class);
 
-  public LTS getLTSClass(String language) {
-    LTS letterToSoundClass = language != null && language.equals("English") ? new EnglishLTS() : new ArabicLTS();
+  // known languages
+  private static final String ARABIC = "Arabic";
+  private static final String DARI = "Dari";
+  private static final String EGYPTIAN = "Egyptian";
+  private static final String ENGLISH = "English";
+  private static final String FARSI = "Farsi";
+  private static final String LEVANTINE = "Levantine";
+  private static final String MANDARIN = "Mandarin";
+  private static final String MSA = "MSA";
+  private static final String PASHTO = "Pashto";
+  private static final String URDU = "Urdu";
+  // TODO : what about Japanese, Korean, ...?
 
-    if (language == null) {
-      letterToSoundClass = new ArabicLTS();
-      logger.warn("using default arabic LTS -- this may not be what you want -- set the language property.");
-    } else if (language.equalsIgnoreCase("English")) {
-      letterToSoundClass = new EnglishLTS();
-    } else if (language.equalsIgnoreCase("Arabic")) {
-      letterToSoundClass = new ArabicLTS();
-    } else if (language.equalsIgnoreCase("Dari")) {
-      letterToSoundClass = new DariLTS();
-    } else if (language.equalsIgnoreCase("Pashto")) {
-      letterToSoundClass = new PashtoLTS();
-    } else if (language.equalsIgnoreCase("MSA")) {
-      letterToSoundClass = new ModernStandardArabicLTS();
-    } else if (language.equalsIgnoreCase("Levantine")) {
-      letterToSoundClass = new LevantineLTS();
-    } else if (language.equalsIgnoreCase("Farsi")) {
-      letterToSoundClass = new FarsiLTS();  // TODO is there a FarsiLTS class???
-    } else if (language.equalsIgnoreCase("Mandarin")) {
-      //ara logger.info("NOTE: there is no LTS for " + language + " : that's OK though.");
-    } else {
-      logger.warn("NOTE: we have no LTS for '" + language +"', using " + letterToSoundClass.getClass());
+  private static final Map<String,LTS> languageToLTS = new HashMap<String,LTS>();
+  private static final LTS unknown = new LTS() {
+    @Override
+    public String[][] process(String word) {
+      return new String[0][];
+    }
+  };
+
+  public LTSFactory() {
+    languageToLTS.put(ARABIC.toLowerCase(), new ArabicLTS());
+    languageToLTS.put(DARI.toLowerCase(), new DariLTS());
+    languageToLTS.put(EGYPTIAN.toLowerCase(), new ArabicLTS());
+    languageToLTS.put(ENGLISH.toLowerCase(),new EnglishLTS());
+    languageToLTS.put(FARSI.toLowerCase(), new FarsiLTS());
+    languageToLTS.put(LEVANTINE.toLowerCase(), new LevantineLTS());
+    languageToLTS.put(MANDARIN.toLowerCase(), unknown);
+    languageToLTS.put(MSA.toLowerCase(), new ModernStandardArabicLTS());
+    languageToLTS.put(PASHTO.toLowerCase(), new PashtoLTS());
+    languageToLTS.put(URDU.toLowerCase(), new UrduLTS());
+  }
+
+  public LTS getLTSClass(String language) {
+    LTS letterToSoundClass = languageToLTS.get(language.toLowerCase());
+
+    if (letterToSoundClass == null) {
+      logger.warn("NOTE: we have no LTS for '" + language + "', using " + unknown.getClass());
+      letterToSoundClass = unknown;
     }
     return letterToSoundClass;
   }
-
 }
