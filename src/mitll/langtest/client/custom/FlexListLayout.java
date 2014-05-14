@@ -18,6 +18,7 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
+import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.custom.UserList;
 
 import java.util.Collection;
@@ -47,7 +48,6 @@ public abstract class FlexListLayout implements RequiresResize {
     this.service = service;
     this.feedback = feedback;
     this.userManager = userManager;
-   // System.out.println(getClass() + " : FlexListLayout ");
   }
 
   /**
@@ -114,30 +114,8 @@ public abstract class FlexListLayout implements RequiresResize {
 
   protected abstract ExercisePanelFactory getFactory(final PagingExerciseList exerciseList, final String instanceName);
 
-  private FlexSectionExerciseList makeExerciseList(final Panel topRow, Panel currentExercisePanel, final String instanceName) {
-    return new FlexSectionExerciseList(topRow, currentExercisePanel, service, feedback, false, false, controller, true, instanceName) {
-      @Override
-      protected void onLastItem() {
-        new ModalInfoDialog("Complete", "List complete!", new HiddenHandler() {
-          @Override
-          public void onHidden(HiddenEvent hiddenEvent) {
-            reloadExercises();
-          }
-        });
-      }
-
-      @Override
-      protected void noSectionsGetExercises(long userID) {
-        System.out.println(getClass() + " : noSectionsGetExercises instanceName = " + instanceName + " for list " + userListID);
-        loadExercises(getHistoryToken(""), getPrefix());
-      }
-
-      @Override
-      protected void loadExercises(final Map<String, Collection<String>> typeToSection, final String item) {
-        System.out.println(getClass() + ".loadExercises : instance " + getInstance() + " " + typeToSection + " and item '" + item + "'" + " for list " + userListID);
-        loadExercisesUsingPrefix(typeToSection, getPrefix());
-      }
-    };
+  protected FlexSectionExerciseList makeExerciseList(final Panel topRow, Panel currentExercisePanel, final String instanceName) {
+    return new MyFlexSectionExerciseList(topRow, currentExercisePanel, instanceName);
   }
 
   @Override
@@ -145,6 +123,37 @@ public abstract class FlexListLayout implements RequiresResize {
     if (npfExerciseList != null) {
       System.out.println(getClass() + " : onResize " + npfExerciseList.getInstance());
       npfExerciseList.onResize();
+    }
+  }
+
+  protected class MyFlexSectionExerciseList extends FlexSectionExerciseList {
+//    private final String instanceName;
+
+    public MyFlexSectionExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName) {
+      super(topRow, currentExercisePanel, FlexListLayout.this.service, FlexListLayout.this.feedback, false, false, FlexListLayout.this.controller, true, instanceName);
+  //    this.instanceName = instanceName;
+    }
+
+    @Override
+    protected void onLastItem() {
+      new ModalInfoDialog("Complete", "List complete!", new HiddenHandler() {
+        @Override
+        public void onHidden(HiddenEvent hiddenEvent) {
+          reloadExercises();
+        }
+      });
+    }
+
+    @Override
+    protected void noSectionsGetExercises(long userID) {
+     // System.out.println(getClass() + " : noSectionsGetExercises instanceName = " + instanceName + " for list " + userListID);
+      loadExercises(getHistoryToken(""), getPrefix());
+    }
+
+    @Override
+    protected void loadExercises(final Map<String, Collection<String>> typeToSection, final String item) {
+     // System.out.println(getClass() + ".loadExercises : instance " + getInstance() + " " + typeToSection + " and item '" + item + "'" + " for list " + userListID);
+      loadExercisesUsingPrefix(typeToSection, getPrefix());
     }
   }
 }
