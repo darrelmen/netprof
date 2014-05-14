@@ -399,7 +399,7 @@ public class NewUserExercise extends BasicDialog {
       markError(foreignLang, ENTER_THE_FOREIGN_LANGUAGE_PHRASE);
     }
     else if (validateForm(foreignLang, rap, normalSpeedRecording, foreignChanged)) {
-      checkValidForeignPhrase(ul, pagingContainer, toAddTo, onClick);
+      isValidForeignPhrase(ul, pagingContainer, toAddTo, onClick);
     }
     else {
       formInvalid();
@@ -418,16 +418,15 @@ public class NewUserExercise extends BasicDialog {
    * @param toAddTo
    * @param onClick
    */
-  private void checkValidForeignPhrase(final UserList ul, final ListInterface pagingContainer, final Panel toAddTo,
-                                       final boolean onClick) {
-    String foreignLangText = foreignLang.getText();
-/*    System.out.println("checkValidForeignPhrase : checking phrase " + foreignLangText +
+  private void isValidForeignPhrase(final UserList ul, final ListInterface pagingContainer, final Panel toAddTo,
+                                    final boolean onClick) {
+    //String foreignLangText = foreignLang.getText();
+/*    System.out.println("isValidForeignPhrase : checking phrase " + foreignLangText +
       " before adding/changing " + newUserExercise);*/
 
-    service.isValidForeignPhrase(foreignLangText, new AsyncCallback<Boolean>() {
+    service.isValidForeignPhrase(foreignLang.getText(), new AsyncCallback<Boolean>() {
       @Override
-      public void onFailure(Throwable caught) {
-      }
+      public void onFailure(Throwable caught) {}
 
       @Override
       public void onSuccess(Boolean result) {
@@ -466,7 +465,7 @@ public class NewUserExercise extends BasicDialog {
   }
 
   /**
-   * @see #checkValidForeignPhrase
+   * @see #isValidForeignPhrase
    * @param ul
    * @param exerciseList
    * @param toAddTo
