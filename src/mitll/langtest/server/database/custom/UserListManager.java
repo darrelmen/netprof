@@ -689,11 +689,15 @@ public class UserListManager {
    * @param field
    * @param comment
    */
-  public void addDefect(String exerciseID, String field, String comment) {
+  public boolean addDefect(String exerciseID, String field, String comment) {
     if (!annotationDAO.hasAnnotation(exerciseID, field, INCORRECT, comment)) {
       long defectDetector = userDAO.getDefectDetector();
       addAnnotation(exerciseID, field, INCORRECT, comment, defectDetector);
       markState(exerciseID, STATE.DEFECT, defectDetector);
+      return true;
+    }
+    else {
+      return false;
     }
   }
 
