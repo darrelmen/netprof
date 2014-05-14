@@ -381,14 +381,14 @@ public class AudioDAO extends DAO {
       else {
         List<AudioAttribute> audioAttributes = getAudioAttributes(exerciseID);
 
-        logger.debug("for  " +exerciseID + " found " + audioAttributes);
+        //logger.debug("for  " +exerciseID + " found " + audioAttributes);
 
         for (AudioAttribute audioAttribute : audioAttributes) {
-          logger.debug("\tfor  " +audioAttribute + " against " + userid + "/" + audioType );
+          //logger.debug("\tfor  " +audioAttribute + " against " + userid + "/" + audioType );
 
           if (audioAttribute.getUserid() == userid && audioAttribute.getAudioType().equalsIgnoreCase(audioType)) {
 
-            logger.debug("\tfound  " +audioAttribute + " for " + userid + "/" + audioType );
+            //logger.debug("\tfound  " +audioAttribute + " for " + userid + "/" + audioType );
 
             audioAttr = audioAttribute;
             break;
