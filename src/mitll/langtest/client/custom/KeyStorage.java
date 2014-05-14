@@ -12,13 +12,18 @@ public class KeyStorage {
   private String language;
   private int user;
 
+  /**
+   * @see mitll.langtest.client.user.StudentDialog#setDefaultControlValues(int)
+   * @param language
+   * @param user
+   */
   public KeyStorage(String language, int user) {
     this.language = language;
     this.user = user;
   }
 
   public KeyStorage(ExerciseController controller) {
-    this(controller.getLanguage(),controller.getUser());
+    this(controller.getLanguage(), controller.getUser());
     this.controller = controller;
   }
 
@@ -27,11 +32,7 @@ public class KeyStorage {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
 
       localStorageIfSupported.setItem(getLocalStorageKey(name), toStore);
-      if (debug) System.out.println("storeValue " + name + "="+toStore + " : " + getValue(name));
-
-      //if (showMessage()) {
-      //   System.err.println("----------------> huh? should not show again");
-      // }
+      if (debug) System.out.println("KeyStorage : storeValue " + name + "="+toStore + " : " + getValue(name));
     }
   }
 
@@ -40,7 +41,7 @@ public class KeyStorage {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
 
       String item = localStorageIfSupported.getItem(getLocalStorageKey(name));
-      if (debug) System.out.println("name " + name + "=" +item);
+      if (debug) System.out.println("KeyStorage : name " + name + "=" +item);
       if (item == null) item = "";
       return item;
     }
@@ -54,7 +55,7 @@ public class KeyStorage {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
 
       localStorageIfSupported.removeItem(getLocalStorageKey(name));
-      if (debug) System.out.println("removeValue " + name);
+      if (debug) System.out.println("KeyStorage : removeValue " + name);
 
     }
   }
@@ -65,6 +66,10 @@ public class KeyStorage {
       user = controller.getUser();
     }
 
+    return getKey(name);
+  }
+
+  protected String getKey(String name) {
     return "Navigation_" + language + "_" + user + "_" +name;
   }
 }
