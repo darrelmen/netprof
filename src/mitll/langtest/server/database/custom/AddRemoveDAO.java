@@ -132,7 +132,7 @@ public class AddRemoveDAO extends DAO {
       }
 
       // logger.debug("getReviewed sql " + sql + " yielded " + lists.size());
-        logger.debug("getReviewed yielded " + lists.size());
+      if (!lists.isEmpty())  logger.debug("getReviewed yielded " + lists.size());
       rs.close();
       statement.close();
       database.closeConnection(connection);
