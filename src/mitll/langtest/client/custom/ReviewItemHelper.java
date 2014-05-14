@@ -40,7 +40,6 @@ public class ReviewItemHelper extends NPFHelper {
     this.itemMarker = itemMarker;
     this.predefinedContent = predefinedContent;
     this.npfHelper = npfHelper;
-  //  System.out.println(getClass() + " : ReviewItemHelper ");
   }
 
   /**
@@ -52,8 +51,6 @@ public class ReviewItemHelper extends NPFHelper {
    * @return
    */
   protected Panel doInternalLayout(final UserList ul, String instanceName) {
-   // System.out.println(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
-
     this.flexListLayout = new FlexListLayout(service,feedback,userManager,controller) {
       @Override
       protected ExercisePanelFactory getFactory(final PagingExerciseList pagingExerciseList, String instanceName) {
@@ -88,7 +85,7 @@ public class ReviewItemHelper extends NPFHelper {
     } else if (npfExerciseList != null) {
       npfExerciseList.onResize();
     } else {
-      System.err.println("not sending resize event - flexListLayout is null?");
+      System.out.println("ReviewItemHelper.onResize : not sending resize event - flexListLayout is null?");
     }
   }
 }
