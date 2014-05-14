@@ -1,12 +1,10 @@
 package mitll.langtest.server.database;
 
-import corpus.LTS;
 import mitll.langtest.client.custom.QCNPFExercise;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.UserExerciseDAO;
 import mitll.langtest.server.database.custom.UserListManager;
-import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonUserExercise;
@@ -46,7 +44,7 @@ import java.util.Set;
 public class ExcelImport implements ExerciseDAO {
   private static final Logger logger = Logger.getLogger(ExcelImport.class);
   private static final boolean INCLUDE_ENGLISH_SEMI_AS_DEFECT = true;
-  public static final boolean MARK_MISSING_AUDIO_AS_DEFECT = false;
+//  public static final boolean MARK_MISSING_AUDIO_AS_DEFECT = false;
 
  // private final boolean isFlashcard;
 
@@ -839,24 +837,6 @@ public class ExcelImport implements ExerciseDAO {
       logger.error("couldn't do lts on " + (id - 1) + " " + foreignLanguagePhrase + " " + english);
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
     }
-  }*/
-
-/*  public boolean checkLTS(LTS lts, String foreignLanguagePhrase) {
-    Collection<String> tokens = new SmallVocabDecoder().getTokens(foreignLanguagePhrase);
-    try {
-
-      for (String token : tokens) {
-        String[][] process = lts.process(token);
-        if (process == null) {
-
-          return false;
-        }
-      }
-    } catch (Exception e) {
-      logger.error("lts failed on " + foreignLanguagePhrase);
-      return false;
-    }
-    return true;
   }*/
 
   /**
