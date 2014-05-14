@@ -55,7 +55,7 @@ public class ChapterNPFHelper extends NPFHelper {
     } else if (npfExerciseList != null) {
       npfExerciseList.onResize();
     } else {
-      System.err.println("not sending resize event - flexListLayout is null?");
+      System.out.println("ChapterNPFHelper.onResize : not sending resize event - flexListLayout is null?");
     }
   }
 }
