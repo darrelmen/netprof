@@ -6,5 +6,5 @@ import java.util.List;
  * Created by go22670 on 2/11/14.
  */
 public interface ListChangeListener<T> {
-  public void listChanged(List<T> items);
+  public void listChanged(List<T> items, String selectionID);
 }

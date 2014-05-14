@@ -108,8 +108,10 @@ public class PagingExerciseList extends ExerciseList {
    */
   void loadExercises(String selectionState, String prefix) {
     lastReqID++;
-    System.out.println("PagingExerciseList.loadExercises : looking for '" + prefix + "' (" + prefix.length() + " chars) in list id "+userListID + " instance " + getInstance());
-    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), prefix, userListID, controller.getUser(), getRole(), new SetExercisesCallback());
+    System.out.println("PagingExerciseList.loadExercises : looking for " +
+      "'" + prefix + "' (" + prefix.length() + " chars) in list id "+userListID + " instance " + getInstance());
+    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), prefix, userListID,
+      controller.getUser(), getRole(), new SetExercisesCallback(""));
   }
 
   /**
@@ -304,7 +306,7 @@ public class PagingExerciseList extends ExerciseList {
   }
 
   /**
-   * @see mitll.langtest.client.list.ExerciseList#rememberAndLoadFirst(java.util.List, mitll.langtest.shared.CommonExercise)
+   * @see ExerciseList#rememberAndLoadFirst(java.util.List, mitll.langtest.shared.CommonExercise, String)
    * @param result
    */
   @Override
