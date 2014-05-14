@@ -67,9 +67,7 @@ public class ExcelImport implements ExerciseDAO {
   private UserListManager userListManager;
   private AddRemoveDAO addRemoveDAO;
   private File installPath;
- // private boolean collectSynonyms = true;
-  boolean addDefects;
-  //private AudioDAO audioDAO;
+  private boolean addDefects;
   private int unitIndex;
   private int chapterIndex;
   private int weekIndex;
@@ -303,18 +301,20 @@ public class ExcelImport implements ExerciseDAO {
       long then = System.currentTimeMillis();
        XSSFWorkbook wb = new XSSFWorkbook(inp);
       long now = System.currentTimeMillis();
-      logger.debug("took " + (now-then) + " millis to read spreadsheet");
+      if (now-then > 1000) {
+        logger.info("took " + (now-then) + " millis to read spreadsheet");
+      }
 
       for (int i = 0; i < wb.getNumberOfSheets(); i++) {
         Sheet sheet = wb.getSheetAt(i);
         if (sheet.getPhysicalNumberOfRows() > 0) {
-          logger.info("------------ reading sheet " + sheet.getSheetName() + " ------------------");
+         // logger.info("------------ reading sheet " + sheet.getSheetName() + " ------------------");
           Collection<CommonExercise> exercises1 = readFromSheet(sheet);
           exercises.addAll(exercises1);
           logger.info("sheet " + sheet.getSheetName() + " had " + exercises1.size() + " items.");
           if (!exercises1.isEmpty()) {
             CommonExercise first = exercises1.iterator().next();
-            logger.debug("e.g. " + first + " content  " + first.getContent());// + " weight " + first.getWeight());
+            logger.debug("e.g. " + first + " content  " + first.getContent());
           }
         }
       }
@@ -432,7 +432,7 @@ public class ExcelImport implements ExerciseDAO {
             sectionHelper.setPredefinedTypeOrder(predefinedTypeOrder);
           }
 
-          logger.info("columns word index " + colIndexOffset +
+          if (debug) logger.debug("columns word index " + colIndexOffset +
             " week " + weekIndex + " unit " + unitIndex + " chapter " + chapterIndex +
             " meaning " + meaningIndex +
             " transliterationIndex " + transliterationIndex +
@@ -629,7 +629,7 @@ public class ExcelImport implements ExerciseDAO {
             }
           }
 
-          logger.info("columns word index " + colIndexOffset +
+          if (debug) logger.debug("columns word index " + colIndexOffset +
               " week " + weekIndex + " unit " + unitIndex + " chapter " + chapterIndex +
               " meaning " + meaningIndex +
               " transliterationIndex " + transliterationIndex +
@@ -705,16 +705,20 @@ public class ExcelImport implements ExerciseDAO {
 
   private void addDefects(Map<String,Map<String, String>> exTofieldToDefect) {
     if (addDefects) {
-      logger.debug("Automatically adding " + exTofieldToDefect.size() +" defects");
+      int count = 0;
       for (Map.Entry<String, Map<String, String>> pair : exTofieldToDefect.entrySet()) {
         for (Map.Entry<String, String> fieldToDefect: pair.getValue().entrySet()) {
-          userListManager.addDefect(pair.getKey(), fieldToDefect.getKey(), fieldToDefect.getValue());
+          if (userListManager.addDefect(pair.getKey(), fieldToDefect.getKey(), fieldToDefect.getValue())) {
+            count++;
+          }
         }
+      }
+      if (count > 0) {
+        logger.info("Automatically added " + exTofieldToDefect.size() +"/" +count+ " defects");
       }
     }
     else {
       logger.info("NOT Automatically adding " + exTofieldToDefect.size() + " defects");
-
     }
   }
 
