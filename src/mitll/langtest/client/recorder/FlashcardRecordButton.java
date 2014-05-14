@@ -2,6 +2,10 @@ package mitll.langtest.client.recorder;
 
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -30,7 +34,7 @@ import mitll.langtest.client.flashcard.MyCustomIconType;
 public class FlashcardRecordButton extends RecordButton {
   private static final int SPACE_CHAR = 32;
   private static final int HIDE_DELAY = 2500;
-  private static final String PROMPT2 = "Click or space and hold to record";
+  private static final String PROMPT2 = "Click/space and hold to record";
   private static final String SPACE_BAR = PROMPT2;//"space bar";
   private static final String NO_SPACE_WARNING = "Press and hold space bar or mouse button to begin recording, release to stop.";
   private static final String PROMPT = "Click and hold to record";
@@ -48,8 +52,8 @@ public class FlashcardRecordButton extends RecordButton {
    */
   public FlashcardRecordButton(int delay, RecordingListener recordingListener, boolean warnNotASpace, boolean addKeyBinding) {
     super(delay, recordingListener, true, addKeyBinding);
-    if (addKeyBinding) {
-    }
+/*    if (addKeyBinding) {
+    }*/
     this.addKeyBinding = addKeyBinding;
     this.warnUserWhenNotSpace = addKeyBinding && warnNotASpace;
    // setText(addKeyBinding ? getButtonText() : "Click and hold mouse button to record, release to stop.");
@@ -69,6 +73,9 @@ public class FlashcardRecordButton extends RecordButton {
     super.setupRecordButton(addKeyBinding);
 
     if (addKeyBinding) {
+
+      System.out.println("adding key binding ----------");
+
       addKeyDownHandler(new KeyDownHandler() {
         @Override
         public void onKeyDown(KeyDownEvent event) {
@@ -93,6 +100,22 @@ public class FlashcardRecordButton extends RecordButton {
       });
     }
     getFocus();
+
+    addBlurHandler(new BlurHandler() {
+      @Override
+      public void onBlur(BlurEvent event) {
+        System.out.println(getElement().getId() + " got blur " + event);
+        setFocus(true);
+      }
+    });
+
+    addFocusHandler(new FocusHandler() {
+      @Override
+      public void onFocus(FocusEvent event) {
+        System.out.println(getElement().getId() + " got focus " + event);
+
+      }
+    });
   }
 
 
