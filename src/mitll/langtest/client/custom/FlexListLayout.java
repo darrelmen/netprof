@@ -18,7 +18,6 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.custom.UserList;
 
 import java.util.Collection;
