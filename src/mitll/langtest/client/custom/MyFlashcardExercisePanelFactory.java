@@ -59,7 +59,7 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   private static final String CORRECT_SUBTITLE = "% correct";
   private static final int ROWS_IN_TABLE = 7;
   private static final String SKIP_TO_END = "Skip to end";
-  private static final boolean ADD_KEY_BINDING = false;
+  private static final boolean ADD_KEY_BINDING = false; // TODO : work on key binding...
   public static final int TABLE_WIDTH = 2 * 275;
   public static final int HORIZ_SPACE_FOR_CHARTS = (1250 - TABLE_WIDTH);
   public static final String CURRENT_EXERCISE = "currentExercise";
@@ -472,24 +472,26 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
           setMainContentVisible(true);
           belowContentDiv.remove(container);
 
-          System.out.println("set of ids is "+resultIDs.size());
-          service.setAVPSkip(resultIDs,new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-
-            }
-
-            @Override
-            public void onSuccess(Void result) {
-              /*System.out.println("!setAVPSkip success!");*/
-            }
-          });
+         // startOverAndForgetScores();
 
           startOver();
         }
       });
       controller.register(w1, currentExercise.getID());
       return w1;
+    }
+
+    protected void startOverAndForgetScores() {
+      System.out.println(START_OVER + " : set of ids is "+resultIDs.size());
+      service.setAVPSkip(resultIDs,new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {}
+
+        @Override
+        public void onSuccess(Void result) {
+          /*System.out.println("!setAVPSkip success!");*/
+        }
+      });
     }
 
     protected void startOver() {
@@ -501,7 +503,7 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       startOver.setVisible(true);
       seeScores.setVisible(true);
       String first = allExercises.iterator().next().getID();
-      exerciseList.checkAndAskServer(first);
+      //exerciseList.checkAndAskServer(first);
       exerciseList.loadExercise(first);
     }
 
@@ -563,6 +565,7 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
         @Override
         public void onClick(ClickEvent event) {
           startOver.setEnabled(false);
+          startOverAndForgetScores();
 
           startOver();
         }
