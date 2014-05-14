@@ -62,6 +62,8 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   private static final boolean ADD_KEY_BINDING = false;
   public static final int TABLE_WIDTH = 2 * 275;
   public static final int HORIZ_SPACE_FOR_CHARTS = (1250 - TABLE_WIDTH);
+  public static final String CURRENT_EXERCISE = "currentExercise";
+  public static final String CORRECT1 = "correct";
 
   private CommonExercise currentExercise;
   private final ControlState controlState;
@@ -70,6 +72,8 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   private final Map<String,Boolean> exToCorrect = new HashMap<String, Boolean>();
   private final Map<String,Double>   exToScore = new HashMap<String, Double>();
   private Set<Long> resultIDs = new HashSet<Long>();
+  private KeyStorage storage;
+  private String selectionID;
 
   /**
    * @see NPFHelper#setFactory
@@ -83,20 +87,35 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
     super(service, feedback, controller, exerciseList);
     controlState = new ControlState();
     if (exerciseList == null) exerciseList = controller.getExerciseList();
+
     exerciseList.addListChangedListener(new ListChangeListener<CommonShell>() {
       @Override
-      public void listChanged(List<CommonShell> items) {
+      public void listChanged(List<CommonShell> items, String selectionID) {
+        MyFlashcardExercisePanelFactory.this.selectionID = selectionID;
         allExercises = items;
         totalExercises = allExercises.size();
-//        System.out.println("got new set of items from list." + items.size());
+        System.out.println("MyFlashcardExercisePanelFactory : " + selectionID + " got new set of items from list." + items.size());
         reset();
       }
     });
+    storage = new KeyStorage(controller) {
+      @Override
+      protected String getKey(String name) {
+        return selectionID + "_"+super.getKey(name); // in the context of this selection
+      }
+    };
   }
 
+  /**
+   * @see mitll.langtest.client.list.ExerciseList#makeExercisePanel(mitll.langtest.shared.CommonExercise)
+   * @param e
+   * @return
+   */
   @Override
   public Panel getExercisePanel(CommonExercise e) {
     currentExercise = e;
+    storage.storeValue(CURRENT_EXERCISE, e.getID());
+
     return new StatsPracticePanel(e);
   }
 
@@ -106,6 +125,45 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
     totalExercises = allExercises.size();
     latestResultID = -1;
     resultIDs.clear();
+  }
+
+  public String getCurrentExerciseID() { return storage.getValue(CURRENT_EXERCISE); }
+
+  /**
+   * @see mitll.langtest.client.custom.Navigation#makePracticeHelper(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.user.UserFeedback)
+   */
+  public void populateCorrectMap() {
+    String value = storage.getValue(CORRECT1);
+    if (value != null && !value.trim().isEmpty()) {
+     // System.out.println("using correct map " + value);
+      for (String ex : value.split(",")) {
+        exToCorrect.put(ex,Boolean.TRUE);
+      }
+    }
+
+    value = storage.getValue(INCORRECT);
+    if (value != null && !value.trim().isEmpty()) {
+    //  System.out.println("using incorrect map " + value);
+      for (String ex : value.split(",")) {
+        exToCorrect.put(ex,Boolean.FALSE);
+      }
+    }
+
+    value = storage.getValue(SCORE);
+    if (value != null && !value.trim().isEmpty()) {
+  //    System.out.println("using score map " + value);
+      for (String pair : value.split(",")) {
+        String[] split = pair.split("=");
+        if (split.length == 2) {
+          exToScore.put(split[0],Double.parseDouble(split[1]));
+        }
+      }
+
+/*      System.out.println("Score now of size " + exToScore.size());
+      for (Map.Entry<String,Double> pair : exToScore.entrySet()) {
+        System.out.println("\t"+pair.getKey()+"\t"+pair.getValue());
+      }*/
+    }
   }
 
   private long latestResultID = -1;
@@ -138,8 +196,27 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
         return;
       }
       resultIDs.add(result.getResultID());
-      exToScore.put(currentExercise.getID(),   result.getScore());
+      exToScore.put(currentExercise.getID(), result.getScore());
       exToCorrect.put(currentExercise.getID(), result.isCorrect());
+
+      StringBuilder builder = new StringBuilder();
+      StringBuilder builder2 = new StringBuilder();
+      for (Map.Entry<String, Boolean> pair : exToCorrect.entrySet()) {
+        if (pair.getValue()) {
+          builder.append(pair.getKey()).append(",");
+        } else {
+          builder2.append(pair.getKey()).append(",");
+        }
+      }
+      storage.storeValue(CORRECT1, builder.toString());
+      storage.storeValue(INCORRECT, builder2.toString());
+
+      StringBuilder builder3= new StringBuilder();
+      for (Map.Entry<String, Double> pair : exToScore.entrySet()) {
+          builder3.append(pair.getKey()).append("=").append(pair.getValue()).append(",");
+      }
+      storage.storeValue(SCORE, builder3.toString());
+
       setStateFeedback();
 
       latestResultID = result.getResultID();
@@ -149,6 +226,7 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
     }
 
     /**
+     * @see #addWidgetsBelow(com.google.gwt.user.client.ui.Panel)
      * @see #loadNext()
      * @see #nextAfterDelay(boolean, String)
      */
@@ -156,6 +234,8 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       skip.setVisible(false);
       startOver.setVisible(false);
       seeScores.setVisible(false);
+
+      resetStorage();
 
       final int user = controller.getUser();
 
@@ -227,9 +307,17 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       return chart2;
     }
 
+    /**
+     * @see #makeCorrectChart(java.util.List, mitll.langtest.shared.flashcard.AVPHistoryForList)
+     * @param totalCorrect
+     * @param all
+     * @param sessionAVPHistoryForList
+     * @return
+     */
     private Chart makeChart(int totalCorrect, int all, AVPHistoryForList sessionAVPHistoryForList) {
       String suffix = getSkippedSuffix();
-      String correct = totalCorrect +" Correct (" + toPercent(totalCorrect, all) + ")" + suffix;
+      String correct = totalCorrect +" of " + all+
+        " Correct (" + toPercent(totalCorrect, all) + ")" + suffix;
       Chart chart  = new LeaderboardPlot().getChart(sessionAVPHistoryForList, correct, CORRECT_SUBTITLE);
 
       scaleCharts(chart);
@@ -270,7 +358,7 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
 
     private float needToScaleY() {
       float height = (float) Window.getClientHeight();
-      return height/(707);
+      return height/707;
     }
 
     /**
@@ -400,12 +488,14 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
           startOver();
         }
       });
-      controller.register(w1,currentExercise.getID());
+      controller.register(w1, currentExercise.getID());
       return w1;
     }
 
     protected void startOver() {
       reset();
+
+      resetStorage();
 
       skip.setVisible(true);
       startOver.setVisible(true);
@@ -439,6 +529,14 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
      */
     @Override
     protected void addWidgetsBelow(Panel toAddTo) {
+      toAddTo.add(getSkipItem());
+      toAddTo.add(getSkipToEnd());
+      toAddTo.add(getStartOver());
+
+      belowContentDiv = toAddTo;
+    }
+
+    private Button getSkipItem() {
       skip = new Button(SKIP_THIS_ITEM);
       skip.getElement().setId("AVP_Skip_Item");
       skip.setType(ButtonType.INFO);
@@ -451,9 +549,11 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
           loadNext();
         }
       });
-      toAddTo.add(skip);
       controller.register(skip, currentExercise.getID());
+      return skip;
+    }
 
+    private Button getStartOver() {
       startOver = new Button(START_OVER);
       startOver.getElement().setId("AVP_StartOver");
 
@@ -468,7 +568,10 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
         }
       });
       controller.register(startOver, currentExercise.getID());
+      return startOver;
+    }
 
+    private Button getSkipToEnd() {
       seeScores = new Button(SKIP_TO_END);
       seeScores.getElement().setId("AVP_SkipToEnd");
       controller.register(seeScores, currentExercise.getID());
@@ -484,10 +587,7 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
           onSetComplete();
         }
       });
-      toAddTo.add(seeScores);
-      toAddTo.add(startOver);
-
-      belowContentDiv = toAddTo;
+      return seeScores;
     }
 
     private Label remain, incorrectBox, correctBox;
@@ -524,6 +624,10 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       return g;
     }
 
+    /**
+     * @see #getLeftState()
+     * @see #receivedAudioAnswer(mitll.langtest.shared.AudioAnswer)
+     */
     private void setStateFeedback() {
       int totalCorrect = getCorrect();
       int totalIncorrect = getIncorrect();
@@ -532,5 +636,12 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       incorrectBox.setText(totalIncorrect + "");
       correctBox.setText(totalCorrect + "");
     }
+  }
+
+  private void resetStorage() {
+    storage.removeValue(CORRECT1);
+    storage.removeValue(INCORRECT);
+    storage.removeValue(CURRENT_EXERCISE);
+    storage.removeValue(SCORE);
   }
 }
