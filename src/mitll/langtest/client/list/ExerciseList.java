@@ -59,6 +59,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   private final Set<Integer> visited = new HashSet<Integer>();
   final boolean allowPlusInURL;
   private String instance;
+  private final List<ListChangeListener<CommonShell>> listeners = new ArrayList<ListChangeListener<CommonShell>>();
 
   /**
    * @see  mitll.langtest.client.LangTest#makeExerciseList
@@ -144,7 +145,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   public boolean getExercises(long userID) {
     System.out.println("ExerciseList.getExercises for user " +userID + " instance " + instance);
     lastReqID++;
-    service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, controller.getUser(), getRole(), new SetExercisesCallback());
+    service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, controller.getUser(), getRole(), new SetExercisesCallback(""));
     return true;
   }
 
@@ -154,7 +155,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   public void reload() {
     System.out.println("ExerciseList.reload for user " + controller.getUser() + " instance " + instance + " id " + getElement().getId());
-    service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1,  controller.getUser(), getRole(), new SetExercisesCallback());
+    service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1,  controller.getUser(), getRole(), new SetExercisesCallback(""));
   }
 
   /**
@@ -271,7 +272,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see ListInterface#getExercises(long)
    */
   class SetExercisesCallback implements AsyncCallback<ExerciseListWrapper> {
-    public SetExercisesCallback() {}
+    private String selectionID;
+    public SetExercisesCallback(String selectionID) { this.selectionID = selectionID; }
 
     public void onFailure(Throwable caught) {
       gotExercises(false);
@@ -292,7 +294,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
           gotEmptyExerciseList();
         }
 
-        rememberAndLoadFirst(result.getExercises(), result.getFirstExercise());
+        rememberAndLoadFirst(result.getExercises(), result.getFirstExercise(), selectionID);
         controller.showProgress();
       }
     }
@@ -300,7 +302,10 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   protected abstract void gotExercises(boolean success);
 
-  class SetExercisesCallbackWithID implements AsyncCallback<ExerciseListWrapper> {
+  /**
+   * @see #reloadWith(String)
+   */
+  private class SetExercisesCallbackWithID implements AsyncCallback<ExerciseListWrapper> {
     private String id;
 
     public SetExercisesCallbackWithID(String id) {
@@ -326,7 +331,9 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
         }
         List<CommonShell> exercises = result.getExercises();
         rememberExercises(exercises);
-        for (ListChangeListener<CommonShell> listener : listeners) listener.listChanged(exercises);
+        for (ListChangeListener<CommonShell> listener : listeners) {
+          listener.listChanged(exercises, "");
+        }
         pushFirstSelection(id);
         controller.showProgress();
       }
@@ -342,20 +349,23 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   public void rememberAndLoadFirst(List<CommonShell> exercises) {
     //System.out.println(new Date() + " rememberAndLoadFirst : exercises " + exercises.size());
-    rememberAndLoadFirst(exercises, null);
+    rememberAndLoadFirst(exercises, null, "All");
   }
 
   /**
    * @param exercises
+   * @param selectionID
    * @see ExerciseList.SetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
    * @see #rememberAndLoadFirst(java.util.List)
    */
-  public void rememberAndLoadFirst(List<CommonShell> exercises, CommonExercise firstExercise) {
-    System.out.println("ExerciseList : rememberAndLoadFirst " + instance+
-      " remembering " + exercises.size() + " : first = " +firstExercise);
+  public void rememberAndLoadFirst(List<CommonShell> exercises, CommonExercise firstExercise, String selectionID) {
+    System.out.println("ExerciseList : rememberAndLoadFirst instance '" + instance+
+      "' remembering " + exercises.size() + " exercises, first = " +firstExercise);
 
     rememberExercises(exercises);
-    for (ListChangeListener<CommonShell> listener : listeners) listener.listChanged(exercises);
+    for (ListChangeListener<CommonShell> listener : listeners) {
+      listener.listChanged(exercises, selectionID);
+    }
 
     if (firstExercise != null) {
       CommonShell firstExerciseShell = findFirstExercise();
@@ -453,7 +463,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     return pleaseWait;
   }
 
-  CommonShell findFirstExercise() {
+  protected CommonShell findFirstExercise() {
     return getFirst();
   }
 
@@ -603,7 +613,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param exercise
    */
   public Panel makeExercisePanel(CommonExercise exercise) {
-    //System.out.println("ExerciseList.makeExercisePanel : " +exercise + " instance " + instance);
+    System.out.println("ExerciseList.makeExercisePanel : " +exercise + " instance " + instance);
 
     Panel exercisePanel = factory.getExercisePanel(exercise);
     innerContainer.setWidget(exercisePanel);
@@ -694,7 +704,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @return
    */
   @Override
-  public  boolean loadNextExercise(CommonShell current) {
+  public boolean loadNextExercise(CommonShell current) {
     System.out.println("ExerciseList.loadNextExercise current is : " +current + " instance " + instance);
     String id = current.getID();
     int i = getIndex(id);
@@ -824,7 +834,11 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   public void reloadExercises() { loadFirstExercise();  }
   public void redraw() {}
 
-  private final List<ListChangeListener<CommonShell>> listeners = new ArrayList<ListChangeListener<CommonShell>>();
+  /**
+   * @see mitll.langtest.client.list.ExerciseList.SetExercisesCallbackWithID#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
+   * @see #rememberAndLoadFirst
+   * @param listener
+   */
   @Override
   public void addListChangedListener(ListChangeListener<CommonShell> listener) {  listeners.add(listener);  }
 }
