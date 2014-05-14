@@ -205,9 +205,10 @@ public class ResultDAO extends DAO {
   public List<Session> getSessionsForUserIn2(Collection<String> ids, long latestResultID) {
     List<Session> sessions = new ArrayList<Session>();
     Map<Long, List<Result>> userToAnswers = populateUserToAnswers(getResultsForeExIDIn(ids));
+    logger.debug("Got " + userToAnswers.size() + " user->answer map");
     for (Map.Entry<Long,List<Result>> userToResults : userToAnswers.entrySet()) {
       List<Session> c = partitionIntoSessions2(userToResults.getValue(), ids, latestResultID);
-      //logger.debug("\tfound " +c.size() + " sessions for " +userToResults.getKey() + " " +ids + " given  " + userToResults.getValue().size());
+      logger.debug("\tfound " +c.size() + " sessions for " +userToResults.getKey() + " " +ids + " given  " + userToResults.getValue().size());
 
       sessions.addAll(c);
     }
@@ -250,7 +251,7 @@ public class ResultDAO extends DAO {
         list +
         ") order by " + Database.TIME + " asc";
       List<Result> resultsSQL = getResultsSQL(sql);
-     // logger.debug("getResultsForeExIDIn for  " +sql+ " got " + resultsSQL.size());
+      logger.debug("getResultsForeExIDIn for  " +sql+ " got\n\t" + resultsSQL.size());
       return resultsSQL;
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
