@@ -59,28 +59,21 @@ public class ResultDAO extends DAO {
   static final String PRON_SCORE = "pronscore";
   static final String STIMULUS = "stimulus";
 
-  //private final GradeDAO gradeDAO;
   private final boolean debug = false;
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(mitll.langtest.server.PathHelper)
    * @param database
-   * @param userDAO
    */
-  public ResultDAO(Database database, UserDAO userDAO) {
+  public ResultDAO(Database database) {
     super(database);
-
-  //  gradeDAO = new GradeDAO(database, userDAO, this);
   }
-
-  //public List<SimpleResult> getSimpleResults() { return getSimpleResults("");  }
-  public List<SimpleResult> getResultsForUser(long userid) {  return getSimpleResults(" where userid=" + userid);  }
 
   /**
    * @return
    * @deprecated just an experiment...
    */
-  public List<Result> getResultsFor() {
+/*  public List<Result> getResultsFor() {
     try {
       String sql = "SELECT * FROM " + RESULTS + " where " + USERID +
         "=" + 326 + " and " + ANSWER + " like '%07980%'";
@@ -89,9 +82,9 @@ public class ResultDAO extends DAO {
       logger.error("got " + e, e);
     }
     return Collections.emptyList();
-  }
+  }*/
 
-  private List<SimpleResult> getSimpleResults(String whereClause) {
+/*  private List<SimpleResult> getSimpleResults(String whereClause) {
     try {
       String sql = "SELECT " +
         ID + ", " +
@@ -109,7 +102,7 @@ public class ResultDAO extends DAO {
       logger.error("got " + ee, ee);
     }
     return new ArrayList<SimpleResult>();
-  }
+  }*/
 
   /**
    * Get a list of Results for this Query.
@@ -119,6 +112,7 @@ public class ResultDAO extends DAO {
    * @return
    * @throws SQLException
    */
+/*
   private List<SimpleResult> getSimpleResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
     ResultSet rs = statement.executeQuery();
     List<SimpleResult> results = new ArrayList<SimpleResult>();
@@ -137,8 +131,9 @@ public class ResultDAO extends DAO {
 
     return results;
   }
+*/
 
-  public static class SimpleResult {
+/*  public static class SimpleResult {
     public final int uniqueID;
     public final String id;
     private final int qid;
@@ -154,7 +149,7 @@ public class ResultDAO extends DAO {
     public String getID() {
       return id + "/" + qid;
     }
-  }
+  }*/
 
   private List<Result> cachedResultsForQuery = null;
 
@@ -184,13 +179,6 @@ public class ResultDAO extends DAO {
     return new ArrayList<Result>();
   }
 
-/*  public List<Session> getSessionsForUserIn(long userid, Set<String> ids, String lastID) {
-    List<Session> sessions = partitionIntoSessions2(getResultsForUserIn(userid, ids), lastID);
-    logger.debug("found " +sessions.size() + " sessions for " + userid + " and " +ids + " last " + lastID);
-
-    return sessions;
-  }*/
-
   /**
    * For a set of exercise ids, find the results for each and make a map of user->results
    * Then for each user's results, make a list of sessions representing a sequence of grouped results
@@ -205,14 +193,14 @@ public class ResultDAO extends DAO {
   public List<Session> getSessionsForUserIn2(Collection<String> ids, long latestResultID) {
     List<Session> sessions = new ArrayList<Session>();
     Map<Long, List<Result>> userToAnswers = populateUserToAnswers(getResultsForeExIDIn(ids));
-    logger.debug("Got " + userToAnswers.size() + " user->answer map");
+    if (debug) logger.debug("Got " + userToAnswers.size() + " user->answer map");
     for (Map.Entry<Long,List<Result>> userToResults : userToAnswers.entrySet()) {
       List<Session> c = partitionIntoSessions2(userToResults.getValue(), ids, latestResultID);
-      logger.debug("\tfound " +c.size() + " sessions for " +userToResults.getKey() + " " +ids + " given  " + userToResults.getValue().size());
+      if (debug) logger.debug("\tfound " +c.size() + " sessions for " +userToResults.getKey() + " " +ids + " given  " + userToResults.getValue().size());
 
       sessions.addAll(c);
     }
-    logger.debug("found " +sessions.size() + " sessions for " +ids );
+    if (debug) logger.debug("found " +sessions.size() + " sessions for " +ids );
 
     return sessions;
   }
@@ -251,7 +239,7 @@ public class ResultDAO extends DAO {
         list +
         ") order by " + Database.TIME + " asc";
       List<Result> resultsSQL = getResultsSQL(sql);
-      logger.debug("getResultsForeExIDIn for  " +sql+ " got\n\t" + resultsSQL.size());
+      if (debug) logger.debug("getResultsForeExIDIn for  " +sql+ " got\n\t" + resultsSQL.size());
       return resultsSQL;
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
