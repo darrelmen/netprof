@@ -1,6 +1,5 @@
 package mitll.langtest.client.dialog;
 
-
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Modal;
@@ -16,7 +15,6 @@ import com.google.gwt.user.client.ui.Widget;
 import java.util.Collection;
 import java.util.Collections;
 
-
 /**
  * Created with IntelliJ IDEA.
  * User: GO22670
@@ -25,7 +23,7 @@ import java.util.Collections;
  * To change this template use File | Settings | File Templates.
  */
 public class ModalInfoDialog {
-  private final EnterKeyButtonHelper enterKeyButtonHelper = new EnterKeyButtonHelper();
+  private final KeyPressHelper enterKeyButtonHelper = new KeyPressHelper();
 
   public ModalInfoDialog(String title, String message, HiddenHandler handler) {
     this(title, Collections.singleton(message), null, handler);
@@ -56,14 +54,6 @@ public class ModalInfoDialog {
     });
 
     enterKeyButtonHelper.addKeyHandler(begin);
-/*
-    begin.addKeyUpHandler(new KeyUpHandler() {
-      @Override
-      public void onKeyUp(KeyUpEvent event) {
-        System.out.println("\n\n\n\tModalInfoDialog.got key up!!!! : key code: " + event.getNativeKeyCode());
-      }
-    });
-*/
     begin.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -83,9 +73,6 @@ public class ModalInfoDialog {
         enterKeyButtonHelper.removeKeyHandler();
       }
     });
-
-    //  System.out.println(new Date() +" ModalInfoDialog.showing...");
-
     modal.show();
   }
 }
