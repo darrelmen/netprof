@@ -20,10 +20,16 @@ public class SoundFeedback {
   private Sound currentSound = null;
   private final SoundManagerAPI soundManager;
 
+  /**
+   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#BootstrapExercisePanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, mitll.langtest.client.flashcard.ControlState)
+   * @param soundManager
+   * @param warnNoFlash
+   */
   public SoundFeedback(SoundManagerAPI soundManager,HTML warnNoFlash) {
     this.soundManager = soundManager;
     this.warnNoFlash = warnNoFlash;
   }
+
   public void playCorrect() {
     startSong(CORRECT, new EndListener() {
       @Override
@@ -55,6 +61,11 @@ public class SoundFeedback {
     }
   }
 
+  /**
+   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#playRef(String)
+   * @param song
+   * @param endListener
+   */
   public void createSound(final String song, EndListener endListener) { createSound(song, endListener, false); }
 
     /**
