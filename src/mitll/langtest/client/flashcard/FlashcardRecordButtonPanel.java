@@ -77,7 +77,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
 
   @Override
   protected RecordButton makeRecordButton(ExerciseController controller, String title) {
-    return new FlashcardRecordButton(controller.getRecordTimeout(), this, true, true);  // TODO : fix later in classroom?
+    return new FlashcardRecordButton(controller.getRecordTimeout(), this, true, true, controller);  // TODO : fix later in classroom?
   }
 
   @Override
