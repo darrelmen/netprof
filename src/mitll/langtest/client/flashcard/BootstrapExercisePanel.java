@@ -101,9 +101,6 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
                                 final ExerciseController controller, boolean addKeyBinding,
                                 final ControlState controlState) {
     this.addKeyBinding = addKeyBinding;
-    if (addKeyBinding) {
-
-    }
     this.exercise = e;
     this.controller = controller;
     this.controlState = controlState;
@@ -201,6 +198,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
    * @see #getQuestionContent
    */
   private void playRefLater() {
+    System.out.println("playRefLater... ---------- " + exercise.getID());
     Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
         playRef();
@@ -555,17 +553,17 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     widgets.addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {
-        System.out.println(widgets.getElement().getId() + " ---> GOT FOCUS\n\n\n");
+        //System.out.println(widgets.getElement().getId() + " ---> GOT FOCUS\n\n\n");
         widgets.setFocus(false);
       }
     });
-    widgets.addBlurHandler(new BlurHandler() {
+/*    widgets.addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
         System.out.println(widgets.getElement().getId() + " ---> GOT BLUR\n\n\n");
 
       }
-    });
+    });*/
   }
 
   private void showEnglishOrForeign() {
@@ -621,7 +619,6 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
 
   private RecordButtonPanel answerWidget;
   private Widget button;
- // Button actualButton;
 
   private Widget getAnswerAndRecordButtonRow(CommonExercise e, LangTestDatabaseAsync service, ExerciseController controller) {
     RecordButtonPanel answerWidget = getAnswerWidget(e, service, controller, 1, addKeyBinding);
@@ -700,7 +697,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     return new FlashcardRecordButtonPanel(this, service, controller, exercise, index, "avp") {
       @Override
       protected RecordButton makeRecordButton(final ExerciseController controller, String buttonTitle) {
-        return new FlashcardRecordButton(controller.getRecordTimeout(), this, true, addKeyBinding) {
+        return new FlashcardRecordButton(controller.getRecordTimeout(), this, true, addKeyBinding, controller) {
           @Override
           protected void start() {
             controller.logEvent(this,"AVP_RecordButton",exercise.getID(),"Start_Recording");
@@ -869,6 +866,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
   }
 
   private String getRefAudioToPlay() {
+    System.out.println(getElement().getId() + " playing audio for " +exercise.getID());
     String path = exercise.getRefAudio();
     if (path == null) {
       path = exercise.getSlowAudioRef(); // fall back to slow audio
@@ -904,6 +902,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     }
   }
 
+
   /**
    * @see #playRef()
    * @param path
@@ -915,9 +914,13 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     getSoundFeedback().createSound(path, new SoundFeedback.EndListener() {
       @Override
       public void songEnded() {
-        textWidget.removeStyleName("playingAudioHighlight");
+        BootstrapExercisePanel.this.songEnded(textWidget);
       }
     });
+  }
+
+  protected void songEnded(Widget textWidget) {
+    textWidget.removeStyleName("playingAudioHighlight");
   }
 
   private String getPath(String path) {
