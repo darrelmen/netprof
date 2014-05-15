@@ -2,19 +2,22 @@ package mitll.langtest.client.recorder;
 
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Node;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyDownHandler;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.PopupPanel;
+import mitll.langtest.client.dialog.KeyPressHelper;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.MyCustomIconType;
 
 /**
@@ -32,7 +35,7 @@ import mitll.langtest.client.flashcard.MyCustomIconType;
  * To change this template use File | Settings | File Templates.
  */
 public class FlashcardRecordButton extends RecordButton {
-  private static final int SPACE_CHAR = 32;
+  //private static final int SPACE_CHAR = 32;
   private static final int HIDE_DELAY = 2500;
   private static final String PROMPT2 = "Click/space and hold to record";
   private static final String SPACE_BAR = PROMPT2;//"space bar";
@@ -49,14 +52,32 @@ public class FlashcardRecordButton extends RecordButton {
    * @param recordingListener
    * @param warnNotASpace
    * @param addKeyBinding
+   * @param controller
    */
-  public FlashcardRecordButton(int delay, RecordingListener recordingListener, boolean warnNotASpace, boolean addKeyBinding) {
+  public FlashcardRecordButton(int delay, RecordingListener recordingListener, boolean warnNotASpace, boolean addKeyBinding, ExerciseController controller) {
     super(delay, recordingListener, true, addKeyBinding);
-/*    if (addKeyBinding) {
-    }*/
+    if (addKeyBinding) {
+      controller.addKeyListener(new KeyPressHelper.KeyListener() {
+        @Override
+        public String getName() {
+          return "FlashcardRecordButton";
+        }
+
+        @Override
+        public void gotPress(NativeEvent ne, boolean isKeyDown) {
+          if (isKeyDown) {
+            checkKeyDown2(ne);
+          }
+          else {
+            checkKeyUp2(ne);
+          }
+        }
+      });
+    }
+
     this.addKeyBinding = addKeyBinding;
     this.warnUserWhenNotSpace = addKeyBinding && warnNotASpace;
-   // setText(addKeyBinding ? getButtonText() : "Click and hold mouse button to record, release to stop.");
+
     DOM.setStyleAttribute(getElement(), "width", WIDTH_FOR_BUTTON + "px");
     DOM.setStyleAttribute(getElement(), "height", "48px");
     DOM.setStyleAttribute(getElement(), "fontSize", "x-large");
@@ -72,33 +93,6 @@ public class FlashcardRecordButton extends RecordButton {
   protected void setupRecordButton(boolean addKeyBinding) {
     super.setupRecordButton(addKeyBinding);
 
-    if (addKeyBinding) {
-
-      System.out.println("adding key binding ----------");
-
-      addKeyDownHandler(new KeyDownHandler() {
-        @Override
-        public void onKeyDown(KeyDownEvent event) {
-          if (event.getNativeKeyCode() == SPACE_CHAR) {
-            if (!mouseDown) {
-              mouseDown = true;
-              doClick();
-            }
-          } else if (warnUserWhenNotSpace) {
-            warnNotASpace();
-          }
-        }
-      });
-      addKeyUpHandler(new KeyUpHandler() {
-        @Override
-        public void onKeyUp(KeyUpEvent event) {
-          if (event.getNativeKeyCode() == SPACE_CHAR) {
-            mouseDown = false;
-            doClick();
-          }
-        }
-      });
-    }
     getFocus();
 
     addBlurHandler(new BlurHandler() {
@@ -116,6 +110,56 @@ public class FlashcardRecordButton extends RecordButton {
 
       }
     });
+  }
+
+/*  protected void checkKeyDown(KeyDownEvent event) {
+    if (event.getNativeKeyCode() == SPACE_CHAR) {
+      if (!mouseDown) {
+        mouseDown = true;
+        doClick();
+      }
+    } else if (warnUserWhenNotSpace) {
+      warnNotASpace();
+    }
+  }*/
+
+  protected void checkKeyDown2(NativeEvent event) {
+    int keyCode = event.getKeyCode();
+    boolean isSpace = keyCode == KeyCodes.KEY_SPACE;
+
+    if (isSpace) {
+     // System.out.println("\tcheckKeyDown2 Got key " + event.getCharCode());
+
+     /* com.google.gwt.dom.client.Element element = getElement();
+      String display = element.getPropertyString("display");
+      System.out.println("\tdisplay " + display);
+
+      while (element != null) {
+        System.out.println("\tdisplay " + display + " el " +element.getId());
+        display = element.getPropertyString("display");
+        System.out.println("\tdisplay " + display);
+        element = element.getParentElement();
+      }
+*/
+      if (!mouseDown) {
+        mouseDown = true;
+        doClick();
+      }
+    } else if (warnUserWhenNotSpace) {
+      warnNotASpace();
+    }
+  }
+
+  protected void checkKeyUp2(NativeEvent event) {
+    int keyCode = event.getKeyCode();
+    boolean isSpace = keyCode == KeyCodes.KEY_SPACE;
+
+    if (isSpace) {
+      //System.out.println("\tcheckKeyUp2 Got key " + event.getCharCode());
+
+      mouseDown = false;
+      doClick();
+    }
   }
 
 
