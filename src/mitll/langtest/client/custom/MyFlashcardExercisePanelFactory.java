@@ -59,7 +59,7 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   private static final String CORRECT_SUBTITLE = "% correct";
   private static final int ROWS_IN_TABLE = 7;
   private static final String SKIP_TO_END = "Skip to end";
-  private static final boolean ADD_KEY_BINDING = false; // TODO : work on key binding...
+  private static final boolean ADD_KEY_BINDING = true; // TODO : work on key binding...
   public static final int TABLE_WIDTH = 2 * 275;
   public static final int HORIZ_SPACE_FOR_CHARTS = (1250 - TABLE_WIDTH);
   public static final String CURRENT_EXERCISE = "currentExercise";
@@ -115,7 +115,6 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   public Panel getExercisePanel(CommonExercise e) {
     currentExercise = e;
     storage.storeValue(CURRENT_EXERCISE, e.getID());
-
     return new StatsPracticePanel(e);
   }
 
