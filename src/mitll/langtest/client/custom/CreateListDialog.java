@@ -15,7 +15,7 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.dialog.EnterKeyButtonHelper;
+import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserManager;
@@ -44,7 +44,7 @@ class CreateListDialog extends BasicDialog {
    */
   void doCreate(Panel thirdRow) {
     thirdRow.clear();
-    final EnterKeyButtonHelper enterKeyButtonHelper = new EnterKeyButtonHelper(true);
+    final KeyPressHelper enterKeyButtonHelper = new KeyPressHelper(true);
     Panel child = new DivWidget() {
       @Override
       protected void onUnload() {
