@@ -41,6 +41,7 @@ import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.custom.QCNPFExercise;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
+import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.Flashcard;
@@ -84,7 +85,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final int NO_USER_INITIAL = -2;
 
   private ListInterface exerciseList;
-  private final Label status = new Label();
+  //private final Label status = new Label();
 
   private UserManager userManager;
   private ResultManager resultManager;
@@ -104,12 +105,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private FluidRow secondRow;
   private Panel firstRow;
 
-  private ProgressHelper progressBar;
+//  private ProgressHelper progressBar;
 
   private StartupInfo startupInfo;
 
   private Navigation navigation;
   private EventLogger buttonFactory;
+  private KeyPressHelper keyPressHelper = new KeyPressHelper(false,true);
 
   /**
    * Make an exception handler that displays the exception.
@@ -344,12 +346,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     bothSecondAndThird.add(secondRow);
     bothSecondAndThird.add(thirdRow);
 
-    if ((isCRTDataCollectMode() || props.isDataCollectMode()) && !props.isFlashcardTeacherView()) {
+/*    if ((isCRTDataCollectMode() || props.isDataCollectMode()) && !props.isFlashcardTeacherView()) {
       addProgressBar(verticalContainer);
     }
     else {
       verticalContainer.add(status);
-    }
+    }*/
 
     // set up center right panel, initially with flash record panel
     Panel currentExerciseVPanel = new FlowPanel();
@@ -470,6 +472,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return headerRow;
   }
 
+/*
   private void addProgressBar(Panel widgets) {
     if (props.isGrading()) {
       widgets.add(status);
@@ -478,6 +481,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       widgets.add(progressBar.getProgressBar());
     }
   }
+*/
 
   /**
    * Set the page title and favicon.
@@ -883,9 +887,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     logMessageOnServer("Showing error message", title + " : " + msg);
   }
 
+/*
   public void showStatus(String msg) {
     status.setText(msg);
   }
+*/
 
   @Override
   public void showProgress() {
@@ -893,12 +899,23 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void showProgress(ListInterface exerciseList) {
-    if (progressBar != null) {
+/*    if (progressBar != null) {
       //progressBar.showAdvance(exerciseList);
-    }
+    }*/
   }
 
   public ListInterface getExerciseList() { return exerciseList; }
+
+  @Override
+  public void addKeyListener(KeyPressHelper.KeyListener listener) {
+    keyPressHelper.addKeyHandler(listener);
+    System.out.println("key press handler now " + keyPressHelper);
+  }
+
+  @Override
+  public boolean removeKeyListener(String name) {
+    return keyPressHelper.removeKeyHandler(name);
+  }
 
   private class LogoutClickHandler implements ClickHandler {
     public void onClick(ClickEvent event) {
