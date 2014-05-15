@@ -220,7 +220,7 @@ public class Navigation implements RequiresResize {
    * @param contentForChaptersTab
    * @return
    */
-  protected Panel getTabPanel(Panel contentForChaptersTab) {
+  private Panel getTabPanel(Panel contentForChaptersTab) {
     tabPanel = new TabPanel();
     tabPanel.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
     tabPanel.getElement().setId("tabPanel");
