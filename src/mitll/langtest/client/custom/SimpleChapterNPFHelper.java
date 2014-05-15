@@ -64,7 +64,7 @@ class SimpleChapterNPFHelper implements RequiresResize {
    * @param loadExercises should we load exercises initially
    */
   public void showNPF(TabAndContent tabAndContent, String instanceName, boolean loadExercises) {
-    System.out.println(getClass() + " : adding npf content instanceName = " + instanceName + " loadExercises " + loadExercises);
+    //System.out.println(getClass() + " : adding npf content instanceName = " + instanceName + " loadExercises " + loadExercises);
     DivWidget content = tabAndContent.getContent();
     int widgetCount = content.getWidgetCount();
     if (!madeNPFContent || widgetCount == 0) {
@@ -80,6 +80,7 @@ class SimpleChapterNPFHelper implements RequiresResize {
     listContent.addStyleName("userListBackground");
   }
 
+  private FlexListLayout flexListLayout;
   /**
    * Make the instance name uses the unique id for the list.
    *
@@ -88,13 +89,7 @@ class SimpleChapterNPFHelper implements RequiresResize {
    * @return
    */
   private Panel doNPF(String instanceName, boolean loadExercises) {
-    System.out.println(getClass() + " : doNPF instanceName = " + instanceName + " for list loadExercises " + loadExercises);
-    return doInternalLayout(instanceName);
-  }
-
-  private FlexListLayout flexListLayout;
-
-  protected Panel doInternalLayout(String instanceName) {
+    //System.out.println(getClass() + " : doNPF instanceName = " + instanceName + " for list loadExercises " + loadExercises);
     Panel widgets = flexListLayout.doInternalLayout(null, instanceName);
     npfExerciseList = flexListLayout.npfExerciseList;
     return widgets;
