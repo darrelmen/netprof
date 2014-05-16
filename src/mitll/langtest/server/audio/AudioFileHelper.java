@@ -115,8 +115,12 @@ public class AudioFileHelper {
 
   /**
    * Get score when doing autoCRT on an audio file.
+   *
+   * TODO : why even generate images here???
+   *
    * @see AutoCRT#getAutoCRTDecodeOutput
    * @see AutoCRT#getFlashcardAnswer
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio(java.io.File, java.util.Collection)
    * @param testAudioFile audio file to score
    * @param lmSentences to look for in the audio
    * @return PretestScore for audio
@@ -133,7 +137,7 @@ public class AudioFileHelper {
       unk.add(SLFFile.UNKNOWN_MODEL); // if  you don't include this dcodr will say : ERROR: word UNKNOWNMODEL is not in the dictionary!
       String vocab = asrScoring.getUsedTokens(lmSentences, unk);
       //logger.debug("getASRScoreForAudio : vocab " + vocab);
-      return getASRScoreForAudio(0, testAudioFile.getPath(), vocab, 128, 128, false, true, tmpDir, serverProps.useScoreCache());
+      return getASRScoreForAudio(0, testAudioFile.getPath(), vocab, 128, 128, false, true, tmpDir, serverProps.useScoreCache(), "");
     }
   }
 
@@ -166,11 +170,12 @@ public class AudioFileHelper {
    * @param decode
    * @param tmpDir
    * @param useCache
+   * @param prefix
    * @return PretestScore
    **/
   public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
-                                           int width, int height, boolean useScoreToColorBkg,
-                                           boolean decode, String tmpDir, boolean useCache) {
+                                          int width, int height, boolean useScoreToColorBkg,
+                                          boolean decode, String tmpDir, boolean useCache, String prefix) {
     //logger.debug("getASRScoreForAudio scoring " + testAudioFile + " with sentence '" + sentence + "' req# " + reqid);
 
     makeASRScoring();
@@ -194,7 +199,7 @@ public class AudioFileHelper {
     PretestScore pretestScore = asrScoring.scoreRepeat(
       testAudioDir, removeSuffix(testAudioName),
       sentence,
-      pathHelper.getImageOutDir(), width, height, useScoreToColorBkg, decode, tmpDir, useCache);
+      pathHelper.getImageOutDir(), width, height, useScoreToColorBkg, decode, tmpDir, useCache, prefix);
     pretestScore.setReqid(reqid);
 
     return pretestScore;
@@ -217,7 +222,7 @@ public class AudioFileHelper {
   }
 
   /**
-   * @see #getASRScoreForAudio(int, String, String, int, int, boolean, boolean, String, boolean)
+   * @see #getASRScoreForAudio(int, String, String, int, int, boolean, boolean, String, boolean, String)
    * @param testAudioFile
    * @return
    */
@@ -337,7 +342,7 @@ public class AudioFileHelper {
     }
   }
   /**
-   * @see #getASRScoreForAudio(int, String, String, int, int, boolean, boolean, String, boolean)
+   * @see #getASRScoreForAudio(int, String, String, int, int, boolean, boolean, String, boolean, String)
    */
   private static class DirAndName {
     private final String testAudioFile;
