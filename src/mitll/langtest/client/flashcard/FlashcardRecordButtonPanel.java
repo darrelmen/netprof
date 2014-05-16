@@ -22,6 +22,7 @@ import mitll.langtest.shared.CommonExercise;
  */
 public class FlashcardRecordButtonPanel extends RecordButtonPanel implements RecordButton.RecordingListener {
   public static final String PRESS_AND_HOLD_THE_MOUSE_BUTTON_TO_RECORD = "Press and hold the mouse button to record";
+  private static final boolean ADD_KEY_BINDING = false;
   private final AudioAnswerListener exercisePanel;
 
   /**
@@ -77,7 +78,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
 
   @Override
   protected RecordButton makeRecordButton(ExerciseController controller, String title) {
-    return new FlashcardRecordButton(controller.getRecordTimeout(), this, true, true, controller);  // TODO : fix later in classroom?
+    return new FlashcardRecordButton(controller.getRecordTimeout(), this, true, ADD_KEY_BINDING, controller);  // TODO : fix later in classroom?
   }
 
   @Override
