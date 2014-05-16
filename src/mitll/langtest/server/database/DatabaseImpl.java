@@ -153,18 +153,18 @@ public class DatabaseImpl implements Database {
 
     eventDAO = new EventDAO(this);
 
-    if (DROP_USER) {
+/*    if (DROP_USER) {
       try {
-        userDAO.dropUserTable(this);
+        userDAO.dropUserTable();
         userDAO.createUserTable(this);
       } catch (Exception e) {
         logger.error("got " + e, e);
       }
-    }
-    if (DROP_RESULT) {
+    }*/
+/*    if (DROP_RESULT) {
       logger.info("------------ dropping results table");
-      resultDAO.dropResults(this);
-    }
+      resultDAO.dropResults();
+    }*/
     try {
       resultDAO.createResultTable(getConnection());
     } catch (Exception e) {
@@ -407,7 +407,7 @@ public class DatabaseImpl implements Database {
    * @return
    */
   public List<AVPHistoryForList> getUserHistoryForList(long userid, Collection<String> ids, long latestResultID) {
-    logger.debug("getUserHistoryForList " +userid + " and " + ids + " latest " + latestResultID);
+    logger.debug("getUserHistoryForList " +userid + " and " + ids.size() + " ids, latest " + latestResultID);
 
     List<Session> sessionsForUserIn2 = resultDAO.getSessionsForUserIn2(ids, latestResultID);
 
@@ -485,41 +485,6 @@ public class DatabaseImpl implements Database {
       session.isLatest());
   }
 
-
-  /**
-   * @seex #getFlashcardResponse
-   * @param userID
-   * @param exercises
-   * @return
-   */
-/*  private UserStateWrapper getUserStateWrapper(long userID, List<CommonExercise> exercises) {
-    UserStateWrapper userStateWrapper;
-    String[] strings = new String[0];
-    if (exercises != null) {
-      strings = new String[exercises.size()];
-      int i = 0;
-      for (CommonExercise e : exercises) {
-        strings[i++] = e.getID();
-      }
-    }
-
-    UserState userState = new UserState(strings);
-*//*    if (userState.finished()) {
-      logger.info("-------------- user " + userID + " is finished ---------------- ");
-    }*//*
-   // logger.debug("getUserStateWrapper : making user state for " + userID + " with " + strings.length + " exercises");
-    userStateWrapper = new UserStateWrapper(userState, userID, exercises);
-    List<ResultDAO.SimpleResult> resultsForUser = resultDAO.getResultsForUser(userID);
-    //logger.debug("getUserStateWrapper : found existing " + resultsForUser.size() + " results");
-
-    for (ResultDAO.SimpleResult result : resultsForUser) {
-      userStateWrapper.addCompleted(result.id);
-    }
-    logger.debug("getUserStateWrapper : after found existing " + userStateWrapper.getCompleted().size() + " completed.");
-
-    return userStateWrapper;
-  }*/
-
   /**
    *
    *
@@ -547,7 +512,6 @@ public class DatabaseImpl implements Database {
          user.getExperience(), user.getIpaddr(), user.getNativeLang(), user.getDialect(), user.getUserID(), false,
          user.getPermissions());
     }
-   // userListManager.createFavorites(l);
     return l;
   }
 
@@ -620,7 +584,6 @@ public class DatabaseImpl implements Database {
   private Pair populateUserToNumAnswers() {
     Map<Long, Integer> idToCount = new HashMap<Long, Integer>();
     Map<Long, Set<String>> idToUniqueCount = new HashMap<Long, Set<String>>();
-   // Set<String> unique = new HashSet<String>();
     for (Result r : resultDAO.getResults()) {
       Integer count = idToCount.get(r.userid);
       if (count == null) idToCount.put(r.userid, 1);
