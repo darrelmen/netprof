@@ -122,7 +122,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     mainContainer = contentMiddle;
 
     DivWidget belowDiv = new DivWidget();
-
+    belowDiv.addStyleName("topFiveMargin");
     FocusPanel focusPanel = new FocusPanel();
     focusPanel.addBlurHandler(new BlurHandler() {
       @Override
@@ -207,7 +207,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
    * @see #getQuestionContent
    */
   private void playRefLater() {
-    //System.out.println("playRefLater... ---------- " + exercise.getID());
+    System.out.println("playRefLater... ---------- " + exercise.getID());
     Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
         playRef();
@@ -873,6 +873,9 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
    * @param path
    */
   private void playRef(String path) {
+
+    System.out.println("playRef... ---------- " + exercise.getID() + " path " + path );
+
     path = getPath(path);
     final Widget textWidget = isSiteEnglish() ? english : foreign;
     getSoundFeedback().queueSong(path, new SoundFeedback.EndListener() {
@@ -975,7 +978,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
 
       if (correct) {
         // go to next item
-        loadNextOnTimer(DELAY_MILLIS);
+        loadNextOnTimer(100);//DELAY_MILLIS);
       } else {
         initRecordButton();
         clearFeedback();
