@@ -1,11 +1,14 @@
 package mitll.langtest.server.scoring;
 
 import audio.image.ImageType;
+import audio.image.TranscriptEvent;
+import audio.image.TranscriptReader;
 import audio.imagewriter.ImageWriter;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import org.apache.log4j.Logger;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,8 +27,6 @@ import java.util.Map;
 public abstract class Scoring {
   private static final Logger logger = Logger.getLogger(Scoring.class);
 
- // private static final String WINDOWS_CONFIGURATIONS = "windowsConfig";
- // private static final String LINUX_CONFIGURATIONS = "mtexConfig";
   protected static final float SCORE_SCALAR = 1.0f;// / 0.15f;
   private static final String SCORING = "scoring";
 
@@ -40,25 +41,9 @@ public abstract class Scoring {
   protected Scoring(String deployPath) {
     this.deployPath = deployPath;
     this.scoringDir = getScoringDir(deployPath);
-    //  String os = getOS();
-/*    String configFullPath = scoringDir + File.separator +
-      (os.equals("win32") ?
-        WINDOWS_CONFIGURATIONS :
-        LINUX_CONFIGURATIONS);*/
   }
 
   private static String getScoringDir(String deployPath) { return deployPath + File.separator + SCORING; }
-
-/*
-  private String getOS() {
-    String property = System.getProperty("os.name").toLowerCase();
-    return property.contains("win") ? "win32" : property
-        .contains("mac") ? "macos"
-        : property.contains("linux") ? System
-        .getProperty("os.arch").contains("64") ? "linux64"
-        : "linux" : "linux";
-  }
-*/
 
   /**
    * Given an audio file without a suffix, check if there are label files, and if so, for each one,
@@ -71,11 +56,14 @@ public abstract class Scoring {
    * @param imageHeight
    * @param audioFileNoSuffix
    * @param useScoreToColorBkg
+   * @param prefix
    * @param suffix
+   * @param decode
    * @return map of image type to image path, suitable using in setURL on a GWT Image (must be relative to deploy location)
    */
   protected ImageWriter.EventAndFileInfo writeTranscripts(String imageOutDir, int imageWidth, int imageHeight,
-                                                          String audioFileNoSuffix, boolean useScoreToColorBkg, String suffix) {
+                                                          String audioFileNoSuffix, boolean useScoreToColorBkg,
+                                                          String prefix, String suffix, boolean decode) {
     String pathname = audioFileNoSuffix + ".wav";
     pathname = prependDeploy(pathname);
     if (!new File(pathname).exists()) {
@@ -85,8 +73,7 @@ public abstract class Scoring {
     imageOutDir = deployPath + File.separator + imageOutDir;
 
     boolean foundATranscript = false;
-    // These may not all exist. The speech file is created only by multisv
-    // right now.
+    // These may not all exist. The speech file is created only by multisv right now.
     String phoneLabFile  = prependDeploy(audioFileNoSuffix + ".phones.lab");
     Map<ImageType, String> typeToFile = new HashMap<ImageType, String>();
     if (new File(phoneLabFile).exists()) {
@@ -109,8 +96,25 @@ public abstract class Scoring {
       logger.error("no label files found, e.g. " + phoneLabFile);
     }
 
-    return new ImageWriter().writeTranscripts(pathname,
-        imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, suffix);
+    if (decode) {
+      return getEventInfo(typeToFile);
+    } else {
+      return new ImageWriter().writeTranscripts(pathname,
+        imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix);
+    }
+  }
+
+  private ImageWriter.EventAndFileInfo getEventInfo(Map<ImageType, String> imageTypes) {
+    Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = new HashMap<ImageType, Map<Float, TranscriptEvent>>();
+    try {
+      for (Map.Entry<ImageType, String> o : imageTypes.entrySet()) {
+        typeToEvent.put(o.getKey(), new TranscriptReader().readEventsFromFile(o.getValue()));
+      }
+      return new ImageWriter.EventAndFileInfo(new HashMap<ImageType, String>(), typeToEvent);
+    } catch (IOException e) {
+      e.printStackTrace();
+      return null;
+    }
   }
 
   /**
@@ -149,8 +153,4 @@ public abstract class Scoring {
     }
     return pathname;
   }
-
- // public abstract boolean isPhraseInDict(String phrase);
-
-  //public String getScoringDir() { return scoringDir; }
 }
