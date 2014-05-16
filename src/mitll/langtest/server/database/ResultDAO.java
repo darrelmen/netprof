@@ -205,22 +205,6 @@ public class ResultDAO extends DAO {
     return sessions;
   }
 
-/*  public List<Result> getResultsForUserIn(long userid, Set<String> ids) {
-    try {
-      String list = getInList(ids);
-
-      String sql = "SELECT * FROM " + RESULTS + " where " + USERID + "=" + userid + " AND " + Database.EXID + " in (" +
-        list +
-        ") order by " + Database.TIME + " asc";
-      List<Result> resultsSQL = getResultsSQL(sql);
-      logger.debug("got " + resultsSQL.size() + " results for " + userid);
-      return resultsSQL;
-    } catch (Exception ee) {
-      logger.error("got " + ee, ee);
-    }
-    return new ArrayList<Result>();
-  }*/
-
   /**
    * Only take avp audio type and valid audio.
    *
@@ -400,9 +384,9 @@ public class ResultDAO extends DAO {
   /**
    * @param exerciseID
    * @return
-   * @see DatabaseImpl#getResultsForExercise(String, boolean, boolean, boolean)
+   * @seex DatabaseImpl#getResultsForExercise(String, boolean, boolean, boolean)
    */
-  public List<Result> getAllResultsForExercise(String exerciseID) {
+/*  public List<Result> getAllResultsForExercise(String exerciseID) {
     try {
       Connection connection = database.getConnection();
       String sql = "SELECT * FROM results WHERE EXID='" + exerciseID + "'";
@@ -412,14 +396,14 @@ public class ResultDAO extends DAO {
       logger.error("got " + ee, ee);
     }
     return new ArrayList<Result>();
-  }
+  }*/
 
   /**
    * @param toExclude
    * @return
-   * @see DatabaseImpl#getNextUngradedExerciseQuick(java.util.Collection, int, boolean, boolean, boolean)
+   * @seex DatabaseImpl#getNextUngradedExerciseQuick(java.util.Collection, int, boolean, boolean, boolean)
    */
-  public Collection<Result> getResultExcludingExercises(Collection<String> toExclude) {
+/*  public Collection<Result> getResultExcludingExercises(Collection<String> toExclude) {
     // select results.* from results where results.exid not in ('ac-R0P-006','ac-LOP-001','ac-L0P-013')
     try {
       Connection connection = database.getConnection();
@@ -434,7 +418,7 @@ public class ResultDAO extends DAO {
     }
     return new ArrayList<Result>();
 
-  }
+  }*/
 
   private String getInList(Collection<String> toExclude) {
     StringBuilder b = new StringBuilder();
@@ -489,27 +473,24 @@ public class ResultDAO extends DAO {
     return new SessionInfo(sessions, userToRate);
   }
 
-  private List<Session>  makeSessionsForUser(
-                                   Map<Long, List<Session>> userToSessions,
-                                   Map.Entry<Long, List<Result>> userToAnswersEntry) {
+  private List<Session> makeSessionsForUser(Map<Long, List<Session>> userToSessions,
+                                            Map.Entry<Long, List<Result>> userToAnswersEntry) {
     Long userid = userToAnswersEntry.getKey();
     List<Result> answersForUser = userToAnswersEntry.getValue();
 
-    return makeSessionsForUser(
-      userToSessions, userid, answersForUser);
+    return makeSessionsForUser(userToSessions, userid, answersForUser);
   }
 
-  private List<Session>  makeSessionsForUser(
-                                   Map<Long, List<Session>> userToSessions,
-                                   Long userid,
-                                   List<Result> answersForUser) {
+  private List<Session> makeSessionsForUser(Map<Long, List<Session>> userToSessions,
+                                            Long userid,
+                                            List<Result> answersForUser) {
     sortByTime(answersForUser);
 
     return partitionIntoSessions(userToSessions, userid, answersForUser);
   }
 
-  private List<Session> partitionIntoSessions(
-                                     Map<Long, List<Session>> userToSessions, Long userid, List<Result> answersForUser) {
+  private List<Session> partitionIntoSessions(Map<Long, List<Session>> userToSessions,
+                                              Long userid, List<Result> answersForUser) {
     Session s = null;
     long last = 0;
 
@@ -561,7 +542,7 @@ public class ResultDAO extends DAO {
       s.setScore(r.id, r.getPronScore());
 
       if (r.uniqueID == latestResultID) {
-        logger.debug("\tpartitionIntoSessions2 marked " +s);
+        logger.debug("\tpartitionIntoSessions2 found current session " +s);
 
         s.setLatest(true);
       }
@@ -579,7 +560,6 @@ public class ResultDAO extends DAO {
 
     return sessions;
   }
-
 
   public static class SessionInfo {
     public final List<Session> sessions;
@@ -615,20 +595,7 @@ public class ResultDAO extends DAO {
     return userToAnswers;
   }
 
-  void dropResults(Database database) {
-    try {
-      Connection connection = database.getConnection();
-      PreparedStatement statement = connection.prepareStatement("DROP TABLE if exists results");
-      if (!statement.execute()) {
-        System.err.println("couldn't create table?");
-      }
-      statement.close();
-      database.closeConnection(connection);
-
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
+  //void dropResults() { drop(RESULTS);  }
 
   /**
    * No op if table exists and has the current number of columns.
@@ -817,20 +784,6 @@ public class ResultDAO extends DAO {
    * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    * @param out
    */
-/*
-  public void toXLSX(OutputStream out) {
-    long then = System.currentTimeMillis();
-    List<Result> results = getAudioAttributes();
-    long now = System.currentTimeMillis();
-    if (now-then > 100) {
-      logger.warn("toXLSX : took " + (now-then) + " millis to read " +results.size()+
-        " results from database");
-    }
-
-    writeExcelToStream(results, out);
-  }
-*/
-
   public void writeExcelToStream(List<Result> results, OutputStream out) {
     SXSSFWorkbook wb = writeExcel(results);
     long then = System.currentTimeMillis();
