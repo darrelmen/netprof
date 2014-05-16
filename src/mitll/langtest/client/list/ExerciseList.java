@@ -56,7 +56,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   private final boolean showTurkToken;
   private int countSincePrompt = 0;
   int lastReqID = 0;
-  private final Set<Integer> visited = new HashSet<Integer>();
+ // private final Set<Integer> visited = new HashSet<Integer>();
   final boolean allowPlusInURL;
   private String instance;
   private final List<ListChangeListener<CommonShell>> listeners = new ArrayList<ListChangeListener<CommonShell>>();
@@ -287,7 +287,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     public void onSuccess(ExerciseListWrapper result) {
       //System.out.println("\tExerciseList.SetExercisesCallback Got " + result.getExercises().size() + " results");
       if (isStaleResponse(result)) {
-        System.out.println("----> SetExercisesCallback.onSuccess ignoring result " + result.getReqID() + " b/c before latest " + lastReqID);
+        // System.out.println("----> SetExercisesCallback.onSuccess ignoring result " + result.getReqID() + " b/c before latest " + lastReqID);
       } else {
         gotExercises(true);
         if (result.getExercises().isEmpty()) {
@@ -600,8 +600,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     createdPanel = makeExercisePanel(result);
     String itemID = result.getID();
     markCurrentExercise(itemID);
-    System.out.println("ExerciseList.useExercise : item id " + itemID + " currentExercise " +getCurrentExercise() +
-      " or " + getCurrentExerciseID() + " instance " + instance);
+/*    System.out.println("ExerciseList.useExercise : item id " + itemID + " currentExercise " +getCurrentExercise() +
+      " or " + getCurrentExerciseID() + " instance " + instance);*/
   }
 
   public String getCurrentExerciseID() { return getCurrentExercise() != null ? getCurrentExercise().getID() : "Unknown"; }
@@ -709,7 +709,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     String id = current.getID();
     int i = getIndex(id);
 
-    visited.add(i);
+  //  visited.add(i);
 
     boolean onLast = isOnLastItem(i);
     System.out.println("ExerciseList.loadNextExercise current is : " + id + " index " +i +
