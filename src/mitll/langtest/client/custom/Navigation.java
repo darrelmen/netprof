@@ -637,6 +637,7 @@ public class Navigation implements RequiresResize {
     recorderHelper.onResize();
     editItem.onResize();
     contentHelper.onResize();
+    practiceHelper.onResize();
   }
 
   /**
