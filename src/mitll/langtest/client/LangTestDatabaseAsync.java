@@ -33,15 +33,7 @@ public interface LangTestDatabaseAsync {
   void writeAudioFile(String base64EncodedString, String plan, String exercise, int question, int user,
                       int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults, boolean addToAudioTable, AsyncCallback<AudioAnswer> async);
 
-//  void getNextUngradedExercise(String user, int expectedGrades, boolean englishOnly, AsyncCallback<CommonExercise> async);
-
- // void checkoutExerciseID(String user,String id, AsyncCallback<Void> async);
-
- // void addGrade(String exerciseID, Grade grade, AsyncCallback<CountAndGradeID> async);
-
- // void changeGrade(Grade toChange, AsyncCallback<Void> async);
-
-  void getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence, int width, int height, boolean useScoreToColorBkg, AsyncCallback<PretestScore> async);
+  void getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence, int width, int height, boolean useScoreToColorBkg, String exerciseID, AsyncCallback<PretestScore> async);
 
   void getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, String exerciseID, AsyncCallback<ImageResponse> async);
 

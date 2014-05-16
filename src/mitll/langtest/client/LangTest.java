@@ -84,7 +84,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final int NO_USER_INITIAL = -2;
 
   private ListInterface exerciseList;
-  //private final Label status = new Label();
 
   private UserManager userManager;
   private ResultManager resultManager;
@@ -229,19 +228,19 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   @Override
   public void getImage(int reqid, final String path, final String type, int toUse, int height, String exerciseID, AsyncCallback<ImageResponse> client) {
     String key = path + DIVIDER + type + DIVIDER + toUse + DIVIDER + height + DIVIDER + exerciseID;
-    getImage(reqid,key, client);
+    getImage(reqid, key, client);
   }
 
-  private void getImage(int reqid,String key, AsyncCallback<ImageResponse> client) {
+  private void getImage(int reqid, String key, AsyncCallback<ImageResponse> client) {
     String[] split = key.split("\\|");
 
     String path = split[0];
     String type = split[1];
-    int toUse=Integer.parseInt(split[2]);
-    int height=Integer.parseInt(split[3]);
+    int toUse = Integer.parseInt(split[2]);
+    int height = Integer.parseInt(split[3]);
     String exerciseID = split[4];
 
-    getImage(reqid,key,path,type,toUse,height, exerciseID, client);
+    getImage(reqid, key, path, type, toUse, height, exerciseID, client);
   }
 
   private void getImage(int reqid, final String key, String path, final String type, int toUse, int height,
@@ -249,7 +248,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     ImageResponse ifPresent = imageCache.getIfPresent(key);
     if (ifPresent != null) {
-      //System.out.println("found  " + ifPresent);
+      //System.out.println("getImage for key " + key+ " found  " + ifPresent);
       ifPresent.req = -1;
       client.onSuccess(ifPresent);
     } else {
@@ -264,6 +263,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
         public void onSuccess(ImageResponse result) {
           imageCache.put(key, result);
+          //System.out.println("getImage storing key " + key+ " now  " + imageCache.size() + " cached.");
+
           client.onSuccess(result);
         }
       });
@@ -344,13 +345,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     bothSecondAndThird.getElement().setId("secondAndThirdRowContainer");
     bothSecondAndThird.add(secondRow);
     bothSecondAndThird.add(thirdRow);
-
-/*    if ((isCRTDataCollectMode() || props.isDataCollectMode()) && !props.isFlashcardTeacherView()) {
-      addProgressBar(verticalContainer);
-    }
-    else {
-      verticalContainer.add(status);
-    }*/
 
     // set up center right panel, initially with flash record panel
     Panel currentExerciseVPanel = new FlowPanel();
@@ -470,17 +464,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     headerRow.add(new Column(12, title));
     return headerRow;
   }
-
-/*
-  private void addProgressBar(Panel widgets) {
-    if (props.isGrading()) {
-      widgets.add(status);
-    } else {
-      progressBar = new ProgressHelper();
-      widgets.add(progressBar.getProgressBar());
-    }
-  }
-*/
 
   /**
    * Set the page title and favicon.
@@ -831,7 +814,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public int getUser() { return userManager.getUser(); }
   public PropertyHandler getProps() { return props; }
   public boolean getEnglishOnly() { return props.isEnglishOnlyMode(); }
- // public int getNumGradesToCollect() { return props.getNumGradesToCollect(); }
   public int getSegmentRepeats() { return props.getSegmentRepeats(); }
   public boolean isArabicTextDataCollect() {  return props.isArabicTextDataCollect(); }
   public boolean useBkgColorForRef() {  return props.isBkgColorForRef(); }
