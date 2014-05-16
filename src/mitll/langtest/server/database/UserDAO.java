@@ -214,15 +214,7 @@ public class UserDAO extends DAO {
     statement.close();
   }
 
-  public void dropUserTable(Database database) throws Exception {
-    System.err.println("----------- dropUserTable -------------------- ");
-    Connection connection = database.getConnection();
-    PreparedStatement statement;
-    statement = connection.prepareStatement("drop TABLE users");
-    statement.execute();
-    statement.close();
-    database.closeConnection(connection);
-  }
+ // public void dropUserTable()  { drop(USERS); }
 
   /**
    * Pulls the list of users out of the database.
