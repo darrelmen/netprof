@@ -255,8 +255,8 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
         }
       }
 
-      System.out.println("StatsPracticePanel.onSetComplete. : calling  getUserHistoryForList for " + user +
-        " with " + exToCorrect + " and latest " + latestResultID + " and ids " +copies);
+/*      System.out.println("StatsPracticePanel.onSetComplete. : calling  getUserHistoryForList for " + user +
+        " with " + exToCorrect + " and latest " + latestResultID + " and ids " +copies);*/
 
       service.getUserHistoryForList(user, copies, latestResultID, new AsyncCallback<List<AVPHistoryForList>>() {
         @Override
@@ -416,8 +416,8 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       return table;
     }
 
-    private String bold(AVPHistoryForList.UserScore score,String html) {
-      return score.isCurrent() ? "<b>"+html+"</b>" : html;
+    private String bold(AVPHistoryForList.UserScore score, String html) {
+      return score.isCurrent() ? "<b>" + html + "</b>" : html;
     }
 
     private int getCorrect() {
@@ -555,6 +555,8 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
           loadNext();
         }
       });
+      new TooltipHelper().addTooltip(skip, "Skip to the next item.");
+
       controller.register(skip, currentExercise.getID());
       return skip;
     }
@@ -576,6 +578,8 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
           startOver();
         }
       });
+      new TooltipHelper().addTooltip(startOver, "Start over from the beginning.");
+
       controller.register(startOver, currentExercise.getID());
       return startOver;
     }
@@ -597,6 +601,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
           onSetComplete();
         }
       });
+      new TooltipHelper().addTooltip(seeScores, "Jump to end and see your scores.");
       return seeScores;
     }
 
@@ -668,7 +673,9 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
 
       if (retval) {
         stack.push(song);
-        System.out.println("\t 1 stack now -------  " + stack);
+        if (stack.size() > 1) {
+          System.out.println("\t 1 stack now -------  " + stack);
+        }
 
         stack2.push(endListener);
         playQueuedSong();
@@ -696,13 +703,13 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
     private synchronized void playQueuedSong() {
       if (!stack.isEmpty()) {
         String pop = stack.peek();
-        System.out.println("\t now playing queued sound -------  " + pop);
+       // System.out.println("\t now playing queued sound -------  " + pop);
 
         EndListener peek = stack2.peek();
         createSound(pop, peek);
       }
       else {
-        System.out.println("\t stack empty -------  ");
+       // System.out.println("\t stack empty -------  ");
       }
     }
 
@@ -710,7 +717,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       stack.pop();
       stack2.pop();
 
-      System.out.println("\t popCurrent stack now -------  " + stack);
+      //System.out.println("\t popCurrent stack now -------  " + stack);
 
     }
 
