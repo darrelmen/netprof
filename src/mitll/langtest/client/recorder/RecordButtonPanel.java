@@ -133,12 +133,12 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
     String base64EncodedWavFile = controller.getBase64EncodedWavFile();
     final int len = base64EncodedWavFile.length();
     service.writeAudioFile(base64EncodedWavFile,
-      "plan",//exercise.getPlan(),
+      "plan",
       exercise.getID(),
       index,
       controller.getUser(),
       reqid,
-      false,//!exercise.isPromptInEnglish(),
+      false,
       audioType,
       doFlashcardAudio,
       true, false, new AsyncCallback<AudioAnswer>() {
