@@ -471,12 +471,10 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
         @Override
         public void onClick(ClickEvent event) {
           cancelTimer();
-
+          soundFeedback.clear();
           w1.setVisible(false);
           setMainContentVisible(true);
           belowContentDiv.remove(container);
-
-         // startOverAndForgetScores();
 
           startOver();
         }
@@ -550,6 +548,8 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
         @Override
         public void onClick(ClickEvent event) {
           cancelTimer();
+          soundFeedback.clear();
+
           skip.setEnabled(false);
           totalExercises--;
           loadNext();
@@ -571,6 +571,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
         @Override
         public void onClick(ClickEvent event) {
           cancelTimer();
+          soundFeedback.clear();
 
           startOver.setEnabled(false);
           startOverAndForgetScores();
@@ -668,6 +669,11 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
 
     private Stack<SoundFeedback.EndListener> stack2 = new Stack<SoundFeedback.EndListener>();
 
+    /**
+     * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#playRefAndGoToNext(String, String)
+     * @param song
+     * @param endListener
+     */
     public synchronized void queueSong(String song, SoundFeedback.EndListener endListener) {
       boolean retval = stack.isEmpty();
 
@@ -686,7 +692,6 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
 
         EndListener currentListener = stack2.peek();
 
-
         stack.clear();
         stack2.clear();
 
@@ -699,6 +704,8 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
         System.out.println("\t 2 stack now -------  " + stack);
       }
     }
+
+    public void clear() { stack.clear(); stack2.clear(); }
 
     private synchronized void playQueuedSong() {
       if (!stack.isEmpty()) {
