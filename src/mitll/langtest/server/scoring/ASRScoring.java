@@ -90,7 +90,6 @@ public class ASRScoring extends Scoring {
   private String languageProperty;
 
   /**
-   * @seex mitll.langtest.server.audio.SplitAudio#getAsrScoring
    * @see #ASRScoring(String, java.util.Map, mitll.langtest.server.LangTestDatabaseImpl)
    * @param deployPath
    * @param properties
@@ -143,6 +142,7 @@ public class ASRScoring extends Scoring {
     //logger.debug("checkLTS " + language + " tokens : '" +tokens +"'");
 
     try {
+      int i = 0;
       for (String token : tokens) {
         if (isMandarin) {
           String segmentation = smallVocabDecoder.segmentation(token.trim());
@@ -153,14 +153,28 @@ public class ASRScoring extends Scoring {
         } else {
           String[][] process = lts.process(token);
           if (process == null || process.length == 0 || process[0].length == 0 ||
-            process[0][0].length() == 0 || process[0][0].equals("aa")) {
-            logger.debug("checkLTS with " + lts + "/" +languageProperty+ " token : '" + token + "' is invalid!");
-            return false;
+            process[0][0].length() == 0/* || process[0][0].equals("aa")*/) {
+            if (!htkDictionary.contains(token)) {
+              logger.warn("checkLTS with " + lts + "/" + languageProperty + " token #" +i+
+                " : '" + token + "' hash " + token.hashCode()+
+                " is invalid in " + foreignLanguagePhrase+
+                " and not in dictionary");
+              if (process != null) {
+                for (String[] ar : process) {
+                  logger.warn("got " + ar);
+                  for (String arr : ar) {
+                    logger.warn("\tgot " + arr);
+                  }
+                }
+              }
+              return false;
+            }
           }
         }
+        i++;
       }
     } catch (Exception e) {
-      logger.error("lts " +language+ " failed on " + foreignLanguagePhrase);
+      logger.error("lts " + language + "/" + lts + " failed on '" + foreignLanguagePhrase +"'", e);
       return false;
     }
 
@@ -274,8 +288,10 @@ public class ASRScoring extends Scoring {
     String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
     String pathname = noSuffix + ".wav";
 
-    logger.debug("scoreRepeatExercise for " + testAudioFileNoSuffix + " under " + testAudioDir);
 
+
+    boolean b = checkLTS(sentence);
+    logger.debug("scoreRepeatExercise for " + testAudioFileNoSuffix + " under " + testAudioDir + " check lts = " + b);
     File wavFile = new File(pathname);
     boolean mustPrepend = false;
     if (!wavFile.exists() && deployPath != null) {
@@ -597,7 +613,7 @@ public class ASRScoring extends Scoring {
     sentence = sentence.replaceAll("\\p{Z}+", " ");
     long then = System.currentTimeMillis();
 
-    //logger.debug("getScoresFromHydec decode '" + sentence +"'");
+    logger.debug("getScoresFromHydec scoring '" + sentence +"' (" +sentence.length()+ " )");
 
     try {
       Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut =
