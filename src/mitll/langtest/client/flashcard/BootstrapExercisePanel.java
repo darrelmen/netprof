@@ -207,7 +207,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
    * @see #getQuestionContent
    */
   private void playRefLater() {
-    System.out.println("playRefLater... ---------- " + exercise.getID());
+    //System.out.println("playRefLater... ---------- " + exercise.getID());
     Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
         playRef();
@@ -824,7 +824,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
    * @return
    */
   private String getRefAudioToPlay() {
-    System.out.println(getElement().getId() + " playing audio for " +exercise.getID());
+    //System.out.println(getElement().getId() + " playing audio for " +exercise.getID());
     String path = exercise.getRefAudio();
     if (path == null) {
       path = exercise.getSlowAudioRef(); // fall back to slow audio
