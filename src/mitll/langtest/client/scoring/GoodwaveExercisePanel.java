@@ -699,8 +699,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       RadioButton first = null;
       AudioAttribute firstAttr = null;
 
-      System.out.println("getBeforePlayWidget : for exercise " +exercise.getID() +
-        " path "+ audioPath + " attributes were " + audioAttributes);
+/*      System.out.println("getBeforePlayWidget : for exercise " +exercise.getID() +
+        " path "+ audioPath + " attributes were " + audioAttributes);*/
 
       RadioButton regular = null;
       for (final AudioAttribute audioAttribute : audioAttributes) {
