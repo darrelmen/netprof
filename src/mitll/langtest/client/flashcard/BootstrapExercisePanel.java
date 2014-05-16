@@ -40,6 +40,7 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.KeyStorage;
+import mitll.langtest.client.custom.MyFlashcardExercisePanelFactory;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.FlashcardRecordButton;
 import mitll.langtest.client.recorder.RecordButton;
@@ -80,7 +81,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
   private final CommonExercise exercise;
 
   private Heading recoOutput;
-  final SoundFeedback soundFeedback;
+  private final MyFlashcardExercisePanelFactory.MySoundFeedback soundFeedback;
   Widget cardPrompt;
   private final boolean addKeyBinding;
   private final ExerciseController controller;
@@ -88,6 +89,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
   private final Panel mainContainer;
   private Panel leftState;
   private Panel rightColumn;
+  private SoundFeedback.EndListener endListener;
 
   /**
    *
@@ -95,19 +97,26 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
    * @param e
    * @param service
    * @param controller
+   * @param soundFeedback
+   * @param endListener
    * @see mitll.langtest.client.custom.MyFlashcardExercisePanelFactory.StatsPracticePanel#StatsPracticePanel(mitll.langtest.shared.CommonExercise)
+   *
    */
   public BootstrapExercisePanel(final CommonExercise e, final LangTestDatabaseAsync service,
                                 final ExerciseController controller, boolean addKeyBinding,
-                                final ControlState controlState) {
+                                final ControlState controlState,
+                                MyFlashcardExercisePanelFactory.MySoundFeedback soundFeedback,
+                                SoundFeedback.EndListener endListener) {
     this.addKeyBinding = addKeyBinding;
     this.exercise = e;
     this.controller = controller;
     this.controlState = controlState;
+    this.endListener = endListener;
+
     controlState.setStorage(new KeyStorage(controller));
 
     HTML warnNoFlash = new HTML(WARN_NO_FLASH);
-    soundFeedback = new SoundFeedback(controller.getSoundManager(), warnNoFlash);
+    this.soundFeedback = soundFeedback;
 
     Panel contentMiddle = getMiddlePrompt(e);
     mainContainer = contentMiddle;
@@ -442,76 +451,13 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
    * @see #getQuestionContent(mitll.langtest.shared.CommonExercise)
    * @param widgets
    */
-  private void addAudioBindings(final Widget widgets) {
-    widgets.addDomHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        playRefLater();
-      }
-    }, ClickEvent.getType());
-
-    widgets.addDomHandler(new MouseOverHandler() {
-      @Override
-      public void onMouseOver(MouseOverEvent event) {
-        widgets.addStyleName("mouseOverHighlight");
-        popupPanel = new PopupPanel(true);
-        Icon w = new Icon(IconType.VOLUME_UP);
-        popupPanel.add(w);
-        int x = widgets.getAbsoluteLeft();
-        int y = widgets.getAbsoluteTop()+5;
-        popupPanel.setPopupPosition(x,y);
-        popupPanel.show();
-      }
-    }, MouseOverEvent.getType());
-
-    widgets.addDomHandler(new MouseOutHandler() {
-      @Override
-      public void onMouseOut(MouseOutEvent event) {
-        popupPanel.hide();
-        popupPanel = null;
-        widgets.removeStyleName("mouseOverHighlight");
-      }
-    }, MouseOutEvent.getType());
-
-    widgets.addDomHandler(new FocusHandler() {
-      @Override
-      public void onFocus(FocusEvent event) {
-        System.out.println("---> GOT FOCUS\n\n\n");
-      }
-    }, FocusEvent.getType());
-  }
-
   private void addAudioBindings2(final FocusPanel widgets) {
-/*
-    widgets.addDomHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        playRefLater();
-      }
-    }, ClickEvent.getType());
-*/
-
     widgets.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         playRefLater();
       }
     });
-
-/*    widgets.addDomHandler(new MouseOverHandler() {
-      @Override
-      public void onMouseOver(MouseOverEvent event) {
-        widgets.addStyleName("mouseOverHighlight");
-        popupPanel = new PopupPanel(true);
-        Icon w = new Icon(IconType.VOLUME_UP);
-        popupPanel.add(w);
-        int x = widgets.getAbsoluteLeft();
-        int y = widgets.getAbsoluteTop()+5;
-        popupPanel.setPopupPosition(x,y);
-        popupPanel.show();
-      }
-    }, MouseOverEvent.getType());*/
-
     widgets.addMouseOverHandler(new MouseOverHandler() {
       @Override
       public void onMouseOver(MouseOverEvent event) {
@@ -525,15 +471,6 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
         popupPanel.show();
       }
     });
-/*
-    widgets.addDomHandler(new MouseOutHandler() {
-      @Override
-      public void onMouseOut(MouseOutEvent event) {
-        popupPanel.hide();
-        popupPanel = null;
-        widgets.removeStyleName("mouseOverHighlight");
-      }
-    }, MouseOutEvent.getType());*/
 
     widgets.addMouseOutHandler(new MouseOutHandler() {
       @Override
@@ -543,13 +480,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
         widgets.removeStyleName("mouseOverHighlight");
       }
     });
-/*
-    widgets.addDomHandler(new FocusHandler() {
-      @Override
-      public void onFocus(FocusEvent event) {
-        System.out.println("---> GOT FOCUS\n\n\n");
-      }
-    }, FocusEvent.getType());*/
+
     widgets.addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {
@@ -561,7 +492,6 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
       @Override
       public void onBlur(BlurEvent event) {
         System.out.println(widgets.getElement().getId() + " ---> GOT BLUR\n\n\n");
-
       }
     });*/
   }
@@ -762,7 +692,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     return recoOutput;
   }
 
-  private SoundFeedback getSoundFeedback() {
+  private MyFlashcardExercisePanelFactory.MySoundFeedback getSoundFeedback() {
     return soundFeedback;
   }
 
@@ -817,7 +747,17 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
 
   private void showCorrectFeedback(double score) {
     showPronScoreFeedback(score);
-    getSoundFeedback().playCorrect();
+    getSoundFeedback().queueSong(SoundFeedback.CORRECT, new SoundFeedback.EndListener() {
+      @Override
+      public void songStarted() {
+        endListener.songStarted();
+      }
+
+      @Override
+      public void songEnded() {
+        endListener.songEnded();
+      }
+    });
   }
 
   /**
@@ -841,12 +781,12 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
       if (controlState.isAudioFeedbackOn()) {
         String path = getRefAudioToPlay();
         if (path == null) {
-          getSoundFeedback().playIncorrect(); // this should never happen
+          playIncorrect(); // this should never happen
         } else {
           playRefAndGoToNext(correctPrompt, path);
         }
       } else {
-        getSoundFeedback().playIncorrect(); // this should never happen
+        playIncorrect(); // this should never happen
 
         goToNextAfter(1000);
       }
@@ -865,6 +805,24 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     return correctPrompt;
   }
 
+  private void playIncorrect() {
+    getSoundFeedback().queueSong(SoundFeedback.INCORRECT, new SoundFeedback.EndListener() {
+      @Override
+      public void songStarted() {
+        endListener.songStarted();
+      }
+
+      @Override
+      public void songEnded() {
+        endListener.songEnded();
+      }
+    });
+  }
+
+  /**
+   * @see #playRef()
+   * @return
+   */
   private String getRefAudioToPlay() {
     System.out.println(getElement().getId() + " playing audio for " +exercise.getID());
     String path = exercise.getRefAudio();
@@ -883,12 +841,19 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     path = getPath(path);
     final String fcorrectPrompt = correctPrompt;
 
-    getSoundFeedback().createSound(path, new SoundFeedback.EndListener() {
+    getSoundFeedback().queueSong(path, new SoundFeedback.EndListener() {
+      @Override
+      public void songStarted() {
+        endListener.songStarted();
+      }
+
       @Override
       public void songEnded() {
+        endListener.songEnded();
+
         goToNextItem(fcorrectPrompt);
       }
-    }, false);
+    });
   }
 
   /**
@@ -910,11 +875,17 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
   private void playRef(String path) {
     path = getPath(path);
     final Widget textWidget = isSiteEnglish() ? english : foreign;
-    textWidget.addStyleName("playingAudioHighlight");
-    getSoundFeedback().createSound(path, new SoundFeedback.EndListener() {
+    getSoundFeedback().queueSong(path, new SoundFeedback.EndListener() {
       @Override
       public void songEnded() {
         BootstrapExercisePanel.this.songEnded(textWidget);
+        endListener.songEnded();
+      }
+
+      @Override
+      public void songStarted() {
+        textWidget.addStyleName("playingAudioHighlight");
+        endListener.songStarted();
       }
     });
   }
@@ -933,7 +904,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
    * @see #showIncorrectFeedback(mitll.langtest.shared.AudioAnswer, double, boolean)
    */
   private void tryAgain() {
-    getSoundFeedback().playIncorrect();
+    playIncorrect();
 
     Timer t = new Timer() {
       @Override
