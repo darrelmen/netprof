@@ -80,15 +80,6 @@ public class DLIUserDAO extends DAO {
     database.closeConnection(connection);
   }
 
-  void dropUserTable(Database database) throws Exception {
-    System.err.println("----------- dropUserTable -------------------- ");
-    Connection connection = database.getConnection();
-    PreparedStatement statement = connection.prepareStatement("drop TABLE " + DLIUSERS);
-    statement.execute();
-    statement.close();
-    database.closeConnection(connection);
-  }
-
   /**
    * Pulls the list of users out of the database.
    *
