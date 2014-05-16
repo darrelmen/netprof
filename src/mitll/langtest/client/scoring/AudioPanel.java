@@ -403,41 +403,40 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private void getImageURLForAudio(final String path, final String type, int width, final ImageAndCheck imageAndCheck) {
     final int toUse = Math.max(MIN_WIDTH, width);
     float heightForType = type.equals(WAVEFORM) ? WAVEFORM_HEIGHT : SPECTROGRAM_HEIGHT;
-    int height = Math.max(10,(int) (((float)Window.getClientHeight())/1200f * heightForType));
+    int height = Math.max(10, (int) (((float) Window.getClientHeight()) / 1200f * heightForType));
     if (path != null) {
       int reqid = getReqID(type);
       final long then = System.currentTimeMillis();
 
-      System.out.println("getImageURLForAudio : req " + reqid + " path " + path + " type " + type + " width " + width);
-//      service.getImageForAudioFile(reqid, path, type, toUse, height, new AsyncCallback<ImageResponse>() {
-        controller.getImage(reqid, path, type, toUse, height, exerciseID, new AsyncCallback<ImageResponse>() {
-          public void onFailure(Throwable caught) {
-            long now = System.currentTimeMillis();
-            System.out.println("getImageURLForAudio : (failure) took " + (now - then) + " millis");
-            if (!caught.getMessage().trim().equals("0")) {
-             // Window.alert("getImageForAudioFile Couldn't contact server. Please check network connection.");
-              controller.logMessageOnServer("getImageFailed for "+ path+" " +type + " width" +toUse,"onFailure");
-            }
-            System.out.println("message " + caught.getMessage() + " " + caught);
+//      System.out.println("getImageURLForAudio : req " + reqid + " path " + path + " type " + type + " width " + width);
+      controller.getImage(reqid, path, type, toUse, height, exerciseID, new AsyncCallback<ImageResponse>() {
+        public void onFailure(Throwable caught) {
+          long now = System.currentTimeMillis();
+          System.out.println("getImageURLForAudio : (failure) took " + (now - then) + " millis");
+          if (!caught.getMessage().trim().equals("0")) {
+            // Window.alert("getImageForAudioFile Couldn't contact server. Please check network connection.");
+            controller.logMessageOnServer("getImageFailed for " + path + " " + type + " width" + toUse, "onFailure");
           }
+          System.out.println("message " + caught.getMessage() + " " + caught);
+        }
 
-          public void onSuccess(ImageResponse result) {
-            long now = System.currentTimeMillis();
-            long roundtrip = now - then;
+        public void onSuccess(ImageResponse result) {
+          long now = System.currentTimeMillis();
+          long roundtrip = now - then;
 
-            if (!result.successful) {
-              System.err.println("got error for request for type " + type);
-              if (WARN_ABOUT_MISSING_AUDIO) Window.alert("missing audio file on server " + path);
-            } else if (result.req == -1 || isMostRecentRequest(type, result.req)) { // could be cached
-              showResult(result, imageAndCheck);
-            } else {
-              System.out.println("\tgetImageURLForAudio : ignoring out of sync response " + result.req + " for " + type);
-            }
-            if (logMessages) {
-              logMessage(result, roundtrip);
-            }
+          if (!result.successful) {
+            System.err.println("got error for request for type " + type);
+            if (WARN_ABOUT_MISSING_AUDIO) Window.alert("missing audio file on server " + path);
+          } else if (result.req == -1 || isMostRecentRequest(type, result.req)) { // could be cached
+            showResult(result, imageAndCheck);
+          } else {
+            System.out.println("\tgetImageURLForAudio : ignoring out of sync response " + result.req + " for " + type);
           }
-        });
+          if (logMessages) {
+            logMessage(result, roundtrip);
+          }
+        }
+      });
     }
   }
 
