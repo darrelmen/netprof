@@ -1,4 +1,4 @@
-package mitll.langtest.server.database.testing;
+package testing;
 
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
@@ -30,7 +30,7 @@ public class SmallDatabaseImpl implements Database {
   private static final Logger logger = Logger.getLogger(DatabaseImpl.class);
   private static final boolean TESTING = false;
 
-  private static final boolean DROP_USER = false;
+  //private static final boolean DROP_USER = false;
   private static final String H2_DB_NAME = TESTING ? "vlr-parle" : "/services/apache-tomcat-7.0.27/webapps/langTest/vlr-parle";
   // h2 config info
   private String url = "jdbc:h2:" + H2_DB_NAME + ";IFEXISTS=TRUE;QUERY_CACHE_SIZE=0;";
@@ -74,15 +74,17 @@ public class SmallDatabaseImpl implements Database {
       return;
     }
 
+/*
     if (DROP_USER) {
       try {
         UserDAO userDAO = new UserDAO(this);
-        userDAO.dropUserTable(this);
+        userDAO.dropUserTable();
         userDAO.createUserTable(this);
       } catch (Exception e) {
         logger.error("got " + e, e);
       }
     }
+*/
 
     try {
       UserDAO userDAO = new UserDAO(this);
@@ -135,7 +137,7 @@ public class SmallDatabaseImpl implements Database {
     return null;
   }
 
-  public Connection getConnection() /*throws Exception */{
+  public Connection getConnection() {
     Connection c;
     try {
       if (servlet == null) {
