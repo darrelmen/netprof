@@ -580,7 +580,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.scoring.ScoringAudioPanel#scoreAudio(String, long, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
+   * @see mitll.langtest.client.scoring.ASRScoringAudioPanel#scoreAudio(String, long, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
    * @param reqid
    * @param resultID
    * @param testAudioFile
@@ -588,12 +588,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param width
    * @param height
    * @param useScoreToColorBkg
+   * @param exerciseID
    * @return
    */
   public PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence,
-                                          int width, int height, boolean useScoreToColorBkg) {
+                                          int width, int height, boolean useScoreToColorBkg, String exerciseID) {
     PretestScore asrScoreForAudio = audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
-      false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache());
+      false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exerciseID);
     if (resultID > -1) {
       db.getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getHydecScore());
     }
