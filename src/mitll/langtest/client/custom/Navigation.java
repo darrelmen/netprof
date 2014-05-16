@@ -57,7 +57,7 @@ import java.util.Map;
  */
 public class Navigation implements RequiresResize {
   private static final String CHAPTERS = "Learn";
-  private static final String CONTENT = CHAPTERS;//"Course Content";
+  private static final String CONTENT = CHAPTERS;
   private static final String YOUR_LISTS = "Study Your Lists";
   private static final String OTHERS_LISTS = "Study Visited Lists";
   private static final String PRACTICE = "Practice";
@@ -628,7 +628,6 @@ public class Navigation implements RequiresResize {
 
   @Override
   public void onResize() {
-    //System.out.println("\tonResize :");
     setScrollPanelWidth(listScrollPanel);
     npfHelper.onResize();
     avpHelper.onResize();
