@@ -29,8 +29,6 @@ public class ScoreServlet extends DatabaseServlet {
 
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    //String encodedFileName = request.getRequestURI();
-
     String pathInfo = request.getPathInfo();
     logger.debug("ScoreServlet.doGet : Request " + request.getQueryString() + " path " + pathInfo +
       " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
@@ -80,7 +78,7 @@ public class ScoreServlet extends DatabaseServlet {
     PretestScore asrScoreForAudio = null;
     try {
       asrScoreForAudio = audioFileHelper.getASRScoreForAudio(-1, testAudioFile, sentence, 128, 128, false,
-        false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache());
+        false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), "");
     } catch (Exception e) {
 
       logger.error("got "+e,e);
