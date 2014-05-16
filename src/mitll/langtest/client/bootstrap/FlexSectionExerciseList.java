@@ -52,7 +52,8 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   private static final int UNACCOUNTED_WIDTH = 60;
   private static final int VERTICAL_DEFAULT = 160;
   private static final int CLASSROOM_VERTICAL_EXTRA = 270;
-  public static final String SHOWING_ALL_ENTRIES = "Showing all entries";
+  private static final String SHOWING_ALL_ENTRIES = "Showing all entries";
+  private static final String DOWNLOAD_SPREADSHEET = "Download spreadsheet and audio for selected sections.";
 
   private final List<ButtonType> buttonTypes = new ArrayList<ButtonType>();
   private final Map<String, ButtonType> typeToButton = new HashMap<String, ButtonType>();
@@ -155,7 +156,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @param types
    * @see #getTypeOrder(com.github.gwtbootstrap.client.ui.FluidContainer)
    */
-  private void addButtonRow(List<SectionNode> rootNodes, FluidContainer container, Collection<String> types) {
+  private void addButtonRow(List<SectionNode> rootNodes, final FluidContainer container, Collection<String> types) {
 /*    System.out.println("FlexSectionExerciseList.addButtonRow for user = " + userID + " got types " +
       types + " num root nodes " + rootNodes.size() + " instance " + instance);*/
     if (types.isEmpty()) {
@@ -224,8 +225,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
       }
     }
 
-    labelColumn.add( child = new Anchor(getURL2()));
-    addTooltip(child, "Download spreadsheet and audio for selected sections.");
+    labelColumn.add(downloadLink = getDownloadLink());
 
     long now = System.currentTimeMillis();
     if (now - then > 300)
@@ -235,13 +235,31 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     addBottomText(container);
   }
 
-  Anchor child;
+  private Anchor getDownloadLink() {
+    final Anchor downloadLink = new Anchor(getURL2());
+    addTooltip(downloadLink, DOWNLOAD_SPREADSHEET);
+    downloadLink.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        controller.logEvent(downloadLink,"DownloadLink","N/A","downloading audio");
+      }
+    });
+    downloadLink.getElement().setId("DownloadLink_" + getInstance());
+    return downloadLink;
+  }
+
+  private Anchor downloadLink;
 
   private SafeHtml getURL2() {
     SelectionState selectionState = getSelectionState(getHistoryToken(""));
     return getURLForDownload(selectionState);
   }
 
+  /**
+   * @see #showSelectionState(mitll.langtest.client.list.SelectionState)
+   * @param selectionState
+   * @return
+   */
   private SafeHtml getURLForDownload(SelectionState selectionState) {
     SafeHtmlBuilder sb = new SafeHtmlBuilder();
 
@@ -420,7 +438,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   private void showSelectionState(SelectionState selectionState) {
     //System.out.println("FlexSectionExerciseList.showSelectionState : got " + event + " and state '" + selectionState +"'");
     Map<String, Collection<String>> typeToSection = selectionState.getTypeToSection();
-    child.setHTML(getURLForDownload(selectionState));
+    downloadLink.setHTML(getURLForDownload(selectionState));
 
     if (typeToSection.isEmpty()) {
       showDefaultStatus();
