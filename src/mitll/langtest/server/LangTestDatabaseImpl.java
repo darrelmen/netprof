@@ -446,6 +446,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     List<CommonExercise> exercises = db.getExercises();
     makeAutoCRT();   // side effect of db.getExercises is to make the exercise DAO which is needed here...
 
+    checkLTS(exercises);
+    return exercises;
+  }
+
+  private void checkLTS(List<CommonExercise> exercises) {
     synchronized (this) {
       if (!checkedLTS) {
         checkedLTS = true;
@@ -454,7 +459,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           boolean validForeignPhrase = isValidForeignPhrase(exercise.getForeignLanguage());
           if (!validForeignPhrase) {
             if (count < 10) {
-              logger.error("huh? for " + exercise.getID() + " we can't parse " + exercise.getForeignLanguage());
+              logger.error("huh? for " + exercise.getID() + " we can't parse " + exercise.getID() + " " + exercise.getEnglish() + " fl " + exercise.getForeignLanguage());
             }
             count++;
           }
@@ -464,7 +469,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         }
       }
     }
-    return exercises;
   }
 
   /**
