@@ -3,9 +3,7 @@ package mitll.langtest.client.list;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.ControlLabel;
 import com.github.gwtbootstrap.client.ui.Controls;
-import com.github.gwtbootstrap.client.ui.Icon;
 import com.github.gwtbootstrap.client.ui.base.TextBox;
-import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -15,7 +13,6 @@ import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -48,7 +45,7 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class PagingExerciseList extends ExerciseList {
-  public static final boolean SHOW_WAIT_CURSOR = false;
+  //public static final boolean SHOW_WAIT_CURSOR = false;
   protected final ExerciseController controller;
   protected PagingContainer pagingContainer;
   private final boolean showTypeAhead;
@@ -389,8 +386,8 @@ public class PagingExerciseList extends ExerciseList {
     return es;
   }
 
-  protected void askServerForExercise(String itemID) {
-    System.out.println("PagingExerciseList.askServerForExercise id = " + itemID + " instance " + getInstance());
+/*  protected void askServerForExercise(String itemID) {
+    //System.out.println("PagingExerciseList.askServerForExercise id = " + itemID + " instance " + getInstance());
     if (SHOW_WAIT_CURSOR && itemID.equals(pagingContainer.getClickedExerciseID())) {
       waitPopup = new DecoratedPopupPanel();
       waitPopup.setAutoHideEnabled(false);
@@ -401,7 +398,7 @@ public class PagingExerciseList extends ExerciseList {
     }
 
     super.askServerForExercise(itemID);
-  }
+  }*/
 
   @Override
   public void onResize() {
