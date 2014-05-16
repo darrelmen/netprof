@@ -32,7 +32,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -223,24 +222,25 @@ public class ASRScoring extends Scoring {
    * @param imageHeight
    * @param useScoreForBkgColor
    * @param useCache
+   * @param prefix
    * @return PretestScore object
    */
   public PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
                                   String sentence, String imageOutDir,
                                   int imageWidth, int imageHeight, boolean useScoreForBkgColor,
                                   boolean decode, String tmpDir,
-                                  boolean useCache) {
-    return scoreRepeatExercise(testAudioDir,testAudioFileNoSuffix,
-        sentence,
-        scoringDir,imageOutDir,imageWidth,imageHeight, useScoreForBkgColor,
+                                  boolean useCache, String prefix) {
+    return scoreRepeatExercise(testAudioDir, testAudioFileNoSuffix,
+      sentence,
+      scoringDir, imageOutDir, imageWidth, imageHeight, useScoreForBkgColor,
       decode, tmpDir,
-      useCache);
+      useCache, prefix);
   }
 
   /**
    * Use hydec to do scoring<br></br>
    *
-   * Some magic happens in {@link Scoring#writeTranscripts(String, int, int, String, boolean, String)} where .lab files are
+   * Some magic happens in {@link Scoring#writeTranscripts(String, int, int, String, boolean, String, String, boolean)} where .lab files are
    * parsed to determine the start and end times for each event, which lets us both create images that
    * show the location of the words and phonemes, and for decoding, the actual reco sentence returned. <br></br>
    *
@@ -258,18 +258,24 @@ public class ASRScoring extends Scoring {
    * @param imageHeight image height
    * @param useScoreForBkgColor true if we want to color the segments by score else all are gray
    * @param useCache
+   * @param prefix
    * @return score info coming back from alignment/reco
    */
-  private PretestScore scoreRepeatExercise(String testAudioDir, String testAudioFileNoSuffix,
+  private PretestScore scoreRepeatExercise(String testAudioDir,
+                                           String testAudioFileNoSuffix,
                                            String sentence,
                                            String scoringDir,
 
                                            String imageOutDir,
-                                           int imageWidth, int imageHeight, boolean useScoreForBkgColor,
+                                           int imageWidth, int imageHeight,
+                                           boolean useScoreForBkgColor,
                                            boolean decode, String tmpDir,
-                                           boolean useCache) {
+                                           boolean useCache, String prefix) {
     String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
     String pathname = noSuffix + ".wav";
+
+    logger.debug("scoreRepeatExercise for " + testAudioFileNoSuffix + " under " + testAudioDir);
+
     File wavFile = new File(pathname);
     boolean mustPrepend = false;
     if (!wavFile.exists() && deployPath != null) {
@@ -300,24 +306,19 @@ public class ASRScoring extends Scoring {
 
     Scores scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir, useCache);
     if (scores == null) {
-      logger.warn("getScoreForAudio failed to generate scores.");
-      Random rand = new Random();
-      return new PretestScore(rand.nextBoolean() ? 0.99f : 0.01f);
+      logger.error("getScoreForAudio failed to generate scores.");
+      return new PretestScore(0.01f);
     }
-    ImageWriter.EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix, useScoreForBkgColor, "");
+    ImageWriter.EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
+      useScoreForBkgColor,
+      prefix + (useScoreForBkgColor ? "bkgColorForRef" : ""), "", decode);
     Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
     Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo);
     String recoSentence = getRecoSentence(eventAndFileInfo);
 
     double duration = new AudioCheck().getDurationInSeconds(wavFile);
-    PretestScore pretestScore =
-        new PretestScore(scores.hydecScore, getPhoneToScore(scores), sTypeToImage, typeToEndTimes, recoSentence,(float)duration);
-    return pretestScore;
+    return new PretestScore(scores.hydecScore, getPhoneToScore(scores), sTypeToImage, typeToEndTimes, recoSentence, (float) duration);
   }
-
-/*  private Map<NetPronImageType, List<TranscriptSegment>> getTypeToEndTimes(*//*File wavFile,*//* ImageWriter.EventAndFileInfo eventAndFileInfo) {
-    return getTypeToEndTimes(eventAndFileInfo);
-  }*/
 
 /*  public Scores decode(String testAudioDir, String testAudioFileNoSuffix,
                        String scoringDir,
@@ -382,7 +383,7 @@ public class ASRScoring extends Scoring {
    * The score per audio file is cached in {@link #audioToScore}
    *
    * @see #getScoreForAudio(String, String, String, String, boolean, String, boolean)
-   * @see #scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String, boolean)
+   * @see #scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String, boolean, String)
    * @param testAudioDir
    * @param testAudioFileNoSuffix
    * @param sentence  only for align
