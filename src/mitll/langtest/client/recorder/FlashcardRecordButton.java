@@ -3,8 +3,8 @@ package mitll.langtest.client.recorder;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.event.dom.client.BlurEvent;
-import com.google.gwt.event.dom.client.BlurHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
@@ -39,6 +39,7 @@ public class FlashcardRecordButton extends RecordButton {
 
   private boolean warnUserWhenNotSpace = true;
   private final boolean addKeyBinding;
+  private ExerciseController controller;
 
   /**
    * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#makeRecordButton
@@ -68,6 +69,7 @@ public class FlashcardRecordButton extends RecordButton {
         }
       });
     }
+    this.controller = controller;
 
     this.addKeyBinding = addKeyBinding;
     this.warnUserWhenNotSpace = addKeyBinding && warnNotASpace;
@@ -87,24 +89,25 @@ public class FlashcardRecordButton extends RecordButton {
   protected void setupRecordButton(boolean addKeyBinding) {
     super.setupRecordButton(addKeyBinding);
 
-    getFocus();
+  //  getFocus();
 
+/*
     addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
-        //System.out.println(getElement().getId() + " got blur " + event);
+         System.out.println(getElement().getId() + " got blur " + event + " controller " + controller.getUser());
 //        setFocus(true);
         getFocus();
       }
     });
+*/
 
-/*    addFocusHandler(new FocusHandler() {
+    addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {
         System.out.println(getElement().getId() + " got focus " + event);
-
       }
-    });*/
+    });
   }
 
   protected void checkKeyDown2(NativeEvent event) {
