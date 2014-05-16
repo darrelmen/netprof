@@ -30,6 +30,7 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.NavigationHelper;
@@ -378,32 +379,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   }
 
   protected Tooltip addTooltip(Widget w, String tip) {
-    return createAddTooltip(w, tip, Placement.RIGHT);
-  }
-
-    /**
-     * @see mitll.langtest.client.custom.NPFExercise#makeAddToList(mitll.langtest.shared.CommonExercise, mitll.langtest.client.exercise.ExerciseController)
-     * @param widget
-     * @param tip
-     * @param placement
-     * @return
-     */
-  private Tooltip createAddTooltip(Widget widget, String tip, Placement placement) {
-    Tooltip tooltip = new Tooltip();
-    tooltip.setWidget(widget);
-    tooltip.setText(tip);
-    tooltip.setAnimation(true);
-// As of 4/22 - bootstrap 2.2.1.0 -
-// Tooltips have an bug which causes the cursor to
-// toggle between finger and normal when show delay
-// is configured.
-
-    tooltip.setShowDelay(500);
-    tooltip.setHideDelay(500);
-
-    tooltip.setPlacement(placement);
-    tooltip.reconfigure();
-    return tooltip;
+    return new TooltipHelper().addTooltip(w, tip);
   }
 
   /**
