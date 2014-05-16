@@ -3,6 +3,7 @@ package mitll.langtest.server.audio;
 import mitll.langtest.server.database.FileExerciseDAO;
 import mitll.langtest.server.scoring.ASRScoring;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
+import org.apache.log4j.Logger;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -16,6 +17,8 @@ import java.util.Collection;
  * Created by go22670 on 1/17/14.
  */
 public class SLFFile {
+  private static final Logger logger = Logger.getLogger(SLFFile.class);
+
   /**
    * Limit on vocabulary size -- too big and dcodr will run out of memory and segfault
    */
@@ -46,7 +49,7 @@ public class SLFFile {
       sentencesToUse.add(UNKNOWN_MODEL);
       for (String sentence : sentencesToUse) {
         Collection<String> tokens = svd.getTokens(sentence);
-        //logger.debug("\tfor " + sentence + " tokens are " + tokens);
+        //logger.debug("\tfor '" + sentence + "' tokens are " + tokens);
         int start = 0;
 
         for (String token : tokens) {
