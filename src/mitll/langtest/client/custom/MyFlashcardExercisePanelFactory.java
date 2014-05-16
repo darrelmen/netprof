@@ -24,6 +24,7 @@ import mitll.langtest.client.flashcard.ControlState;
 import mitll.langtest.client.flashcard.LeaderboardPlot;
 import mitll.langtest.client.list.ListChangeListener;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CommonExercise;
@@ -36,6 +37,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 /**
  * Created by go22670 on 2/10/14.
@@ -44,7 +46,7 @@ import java.util.Set;
  * TODOx : concept of rounds explicit?
  * TODO : review table...?
  */
-class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
+public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   private static final String REMAINING = "Remaining";
   private static final String INCORRECT = "Incorrect";
   private static final String CORRECT = "Correct";
@@ -166,12 +168,18 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   }
 
   private long latestResultID = -1;
+  private MySoundFeedback soundFeedback = new MySoundFeedback();
 
   private class StatsPracticePanel extends BootstrapExercisePanel {
     private Panel container;
     public StatsPracticePanel(CommonExercise e) {
-      super(e, MyFlashcardExercisePanelFactory.this.service,
-        MyFlashcardExercisePanelFactory.this.controller, ADD_KEY_BINDING, MyFlashcardExercisePanelFactory.this.controlState);
+      super(e,
+        MyFlashcardExercisePanelFactory.this.service,
+        MyFlashcardExercisePanelFactory.this.controller,
+        ADD_KEY_BINDING,
+        MyFlashcardExercisePanelFactory.this.controlState,
+        soundFeedback,
+        soundFeedback.endListener);
     }
 
     @Override
@@ -266,11 +274,6 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
 
     private void showFeedbackCharts(List<AVPHistoryForList> result) {
       setMainContentVisible(false);
-
-/*      for (Session s : result) {
-        System.out.println("\tonSetComplete.onSuccess : result " + s);
-      }*/
-
       container = new HorizontalPanel();
 
       // add left chart and table
@@ -467,6 +470,8 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       w1.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
+          cancelTimer();
+
           w1.setVisible(false);
           setMainContentVisible(true);
           belowContentDiv.remove(container);
@@ -544,9 +549,9 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       skip.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
+          cancelTimer();
           skip.setEnabled(false);
           totalExercises--;
-          cancelTimer();
           loadNext();
         }
       });
@@ -563,6 +568,8 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       startOver.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
+          cancelTimer();
+
           startOver.setEnabled(false);
           startOverAndForgetScores();
 
@@ -584,6 +591,7 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       seeScores.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
+          cancelTimer();
           seeScores.setEnabled(false);
 
           onSetComplete();
@@ -645,5 +653,79 @@ class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
     storage.removeValue(INCORRECT);
     storage.removeValue(CURRENT_EXERCISE);
     storage.removeValue(SCORE);
+  }
+
+  public class MySoundFeedback extends SoundFeedback {
+    public MySoundFeedback() {
+      super(MyFlashcardExercisePanelFactory.this.controller.getSoundManager());
+    }
+    private Stack<String> stack = new Stack<String>();
+
+    private Stack<SoundFeedback.EndListener> stack2 = new Stack<SoundFeedback.EndListener>();
+
+    public synchronized void queueSong(String song, SoundFeedback.EndListener endListener) {
+      boolean retval = stack.isEmpty();
+
+      if (retval) {
+        stack.push(song);
+        System.out.println("\t 1 stack now -------  " + stack);
+
+        stack2.push(endListener);
+        playQueuedSong();
+      }
+      else {
+        String currentSong = stack.peek();
+       // System.out.println("\t now playing queued sound -------  " + currentSong);
+
+        EndListener currentListener = stack2.peek();
+
+
+        stack.clear();
+        stack2.clear();
+
+        stack.push(song);
+        stack2.push(endListener);
+
+        stack.push(currentSong);
+        stack2.push(currentListener);
+
+        System.out.println("\t 2 stack now -------  " + stack);
+      }
+    }
+
+    private synchronized void playQueuedSong() {
+      if (!stack.isEmpty()) {
+        String pop = stack.peek();
+        System.out.println("\t now playing queued sound -------  " + pop);
+
+        EndListener peek = stack2.peek();
+        createSound(pop, peek);
+      }
+      else {
+        System.out.println("\t stack empty -------  ");
+      }
+    }
+
+    private synchronized void popCurrent() {
+      stack.pop();
+      stack2.pop();
+
+      System.out.println("\t popCurrent stack now -------  " + stack);
+
+    }
+
+    private SoundFeedback.EndListener endListener = new SoundFeedback.EndListener() {
+      @Override
+      public void songStarted() {
+        System.out.println("song started --------- ");
+      }
+
+      @Override
+      public void songEnded() {
+        System.out.println("song ended -------  ");
+        popCurrent();
+        playQueuedSong();
+      }
+    };
   }
 }
