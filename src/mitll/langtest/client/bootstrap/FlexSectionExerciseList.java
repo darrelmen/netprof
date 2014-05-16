@@ -7,7 +7,6 @@ import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
-import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -25,6 +24,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SectionWidget;
@@ -176,7 +176,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
 
     boolean usuallyThereWillBeAHorizScrollbar = rootNodes.size() > 6;
 
-    this.labelColumn = makeLabelColumn(usuallyThereWillBeAHorizScrollbar, firstType, firstTypeRow, buttonGroupSectionWidget);
+    this.labelColumn = makeLabelColumn(firstType, firstTypeRow, buttonGroupSectionWidget);
     this.clearColumnContainer = makeClearColumn(usuallyThereWillBeAHorizScrollbar, types, firstType, firstTypeRow, buttonGroupSectionWidget);
 
     makePanelInsideScrollPanel(firstTypeRow);
@@ -257,44 +257,25 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     sb.appendHtmlConstant("</a>");
     return sb.toSafeHtml();
   }
-  protected Tooltip addTooltip(Widget w, String tip) {
-    return createAddTooltip(w, tip, Placement.RIGHT);
-  }
 
   /**
-   * @see mitll.langtest.client.custom.NPFExercise#makeAddToList(mitll.langtest.shared.CommonExercise, mitll.langtest.client.exercise.ExerciseController)
+   * @see #addButtonRow(java.util.List, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection)
    * @param widget
    * @param tip
-   * @param placement
    * @return
    */
-  private Tooltip createAddTooltip(Widget widget, String tip, Placement placement) {
-    Tooltip tooltip = new Tooltip();
-    tooltip.setWidget(widget);
-    tooltip.setText(tip);
-    tooltip.setAnimation(true);
-// As of 4/22 - bootstrap 2.2.1.0 -
-// Tooltips have an bug which causes the cursor to
-// toggle between finger and normal when show delay
-// is configured.
-
-    tooltip.setShowDelay(500);
-    tooltip.setHideDelay(500);
-
-    tooltip.setPlacement(placement);
-    tooltip.reconfigure();
-    return tooltip;
+  private Tooltip addTooltip(Widget widget, String tip) {
+    return new TooltipHelper().addTooltip(widget, tip);
   }
 
   /**
    * Label is in column 0
-   * @param usuallyThereWillBeAHorizScrollbar
    * @param firstType
    * @param firstTypeRow
    * @param buttonGroupSectionWidget
    */
-  private Panel makeLabelColumn(boolean usuallyThereWillBeAHorizScrollbar, String firstType, FlexTable firstTypeRow,
-                               ButtonGroupSectionWidget buttonGroupSectionWidget) {
+  private Panel makeLabelColumn(String firstType, FlexTable firstTypeRow,
+                                ButtonGroupSectionWidget buttonGroupSectionWidget) {
     Panel labelColumn = new VerticalPanel();
     labelColumn.getElement().setId("FlexSectionExerciseList_labelColumn");
     addLabelWidgetForRow(labelColumn, firstType, typeToButton.get(firstType), buttonGroupSectionWidget);
@@ -395,7 +376,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   }
 
   /**
-   * @see #makeLabelColumn(boolean, String, com.google.gwt.user.client.ui.FlexTable, ButtonGroupSectionWidget)
+   * @see #makeLabelColumn(String, com.google.gwt.user.client.ui.FlexTable, ButtonGroupSectionWidget)
    * @param labelRow
    * @param firstType
    * @param buttonType
