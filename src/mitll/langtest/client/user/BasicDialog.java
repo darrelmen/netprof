@@ -24,6 +24,7 @@ import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.custom.TooltipHelper;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -299,28 +300,20 @@ public class BasicDialog {
     public void setVisible(boolean visible) {
       group.setVisible(visible);
     }
-
     public String getText() { return box.getText(); }
-
     public void setRightSide(Widget rightSide) { this.rightSide = rightSide; }
-
-    public String toString() { return "FormField value " + getText(); }
     public ControlGroup getGroup() {
       return group;
     }
-
-    public Widget getWidget() {
-      return box;
-    }
+    public Widget getWidget() {  return box;    }
+    public String toString() { return "FormField value " + getText(); }
   }
 
   protected class ListBoxFormField {
     public final ListBox box;
-  //  public final ControlGroup group;
 
     public ListBoxFormField(final ListBox box) {
       this.box = box;
-     // this.group = group;
       box.addChangeHandler(new ChangeHandler() {
         @Override
         public void onChange(ChangeEvent event) {
@@ -333,12 +326,6 @@ public class BasicDialog {
       return box.getItemText(box.getSelectedIndex());
     }
 
-/*
-    protected void markSimpleError(String message) {
-      markSimpleError(message, Placement.RIGHT);
-    }
-*/
-
     void markSimpleError(String message, Placement placement) {
       box.setFocus(true);
       setupPopover(box, TRY_AGAIN, message, placement);
@@ -349,33 +336,5 @@ public class BasicDialog {
     }
   }
 
-
-  protected Tooltip addTooltip(Widget w, String tip) {
-    return createAddTooltip(w, tip, Placement.RIGHT);
-  }
-
-  /**
-   * @see mitll.langtest.client.custom.NPFExercise#makeAddToList(mitll.langtest.shared.CommonExercise, mitll.langtest.client.exercise.ExerciseController)
-   * @param widget
-   * @param tip
-   * @param placement
-   * @return
-   */
-  private Tooltip createAddTooltip(Widget widget, String tip, Placement placement) {
-    Tooltip tooltip = new Tooltip();
-    tooltip.setWidget(widget);
-    tooltip.setText(tip);
-    tooltip.setAnimation(true);
-// As of 4/22 - bootstrap 2.2.1.0 -
-// Tooltips have an bug which causes the cursor to
-// toggle between finger and normal when show delay
-// is configured.
-
-    tooltip.setShowDelay(500);
-    tooltip.setHideDelay(500);
-
-    tooltip.setPlacement(placement);
-    tooltip.reconfigure();
-    return tooltip;
-  }
+  protected Tooltip addTooltip(Widget w, String tip) {  return new TooltipHelper().addTooltip(w, tip);  }
 }
