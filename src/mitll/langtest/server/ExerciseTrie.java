@@ -71,7 +71,7 @@ public class ExerciseTrie extends Trie<CommonExercise> {
     }
     long freeAfter = rt.freeMemory()/ MB ;
 
-    if (freeAfter-free > 10) {
+    if (freeAfter-free > 40) {
       logMemory();
     }
   }
