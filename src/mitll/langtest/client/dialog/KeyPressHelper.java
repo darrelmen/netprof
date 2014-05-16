@@ -88,8 +88,8 @@ public class KeyPressHelper {
                                                        typeInt == 0x00200) // keyup
                                                        &&
                                                        "[object KeyboardEvent]".equals(ne.getString())) {
-                                                       ne.preventDefault();
-                                                       ne.stopPropagation();
+                                                     //  ne.preventDefault();
+                                                    //   ne.stopPropagation();
 
                                                        if (false) {
                                                          System.out.println(new Date() +
