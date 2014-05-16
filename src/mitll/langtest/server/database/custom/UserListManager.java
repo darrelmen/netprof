@@ -223,7 +223,7 @@ public class UserListManager {
     // does this help anyone???
     // want to know if we have a new recording AFTER it's been inspected - why did the thing that I fixed now change back to needs inspection
     // maybe turn off for now???
-    if (false) {
+/*    if (false) {
       logger.debug("markState - first state " + c);
       exerciseToState = secondStateDAO.getExerciseToState(false);
 
@@ -236,7 +236,7 @@ public class UserListManager {
         }
       }
       logger.debug("markState - sec state " + n);
-    }
+    }*/
   }
 
   /**
