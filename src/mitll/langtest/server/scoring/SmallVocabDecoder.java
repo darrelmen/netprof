@@ -78,7 +78,7 @@ public class SmallVocabDecoder {
     return all;
   }
 
-  public Collection<String> getTokens(String sentence) {
+  public List<String> getTokens(String sentence) {
     List<String> all = new ArrayList<String>();
 
     for (String untrimedToken : sentence.split("\\p{Z}+")) { // split on spaces
@@ -93,10 +93,7 @@ public class SmallVocabDecoder {
   }
 
 
-  public String segmentation(String phrase){
-    return longest_prefix(phrase, 0);
-    // logger.debug("phrase '" + phrase + "' -> '" + s + "'");
-  }
+  public String segmentation(String phrase){  return longest_prefix(phrase, 0);  }
 
   private String longest_prefix(String phrase, int i){
     if(i == phrase.length())
