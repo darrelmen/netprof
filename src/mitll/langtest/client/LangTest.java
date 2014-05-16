@@ -27,7 +27,6 @@ import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -909,7 +908,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   @Override
   public void addKeyListener(KeyPressHelper.KeyListener listener) {
     keyPressHelper.addKeyHandler(listener);
-    System.out.println("key press handler now " + keyPressHelper);
+    //System.out.println("key press handler now " + keyPressHelper);
   }
 
   @Override
