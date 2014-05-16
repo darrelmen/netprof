@@ -90,7 +90,7 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
 
     //System.out.println("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " type " + "score" + " width " + toUse);
 
-    service.getASRScoreForAudio(reqid, resultID, path, refSentence, toUse, height, useScoreToColorBkg, new AsyncCallback<PretestScore>() {
+    service.getASRScoreForAudio(reqid, resultID, path, refSentence, toUse, height, useScoreToColorBkg, exerciseID, new AsyncCallback<PretestScore>() {
       public void onFailure(Throwable caught) {
         if (!caught.getMessage().trim().equals("0")) {
           Window.alert("Server error -- couldn't contact server.");
