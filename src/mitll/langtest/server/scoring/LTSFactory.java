@@ -46,9 +46,9 @@ public class LTSFactory {
   };
 
   public LTSFactory() {
-    languageToLTS.put(ARABIC.toLowerCase(), new ArabicLTS());
+    languageToLTS.put(ARABIC.toLowerCase(), new ModernStandardArabicLTS());
     languageToLTS.put(DARI.toLowerCase(), new DariLTS());
-    languageToLTS.put(EGYPTIAN.toLowerCase(), new ArabicLTS());
+    languageToLTS.put(EGYPTIAN.toLowerCase(), new ModernStandardArabicLTS());
     languageToLTS.put(ENGLISH.toLowerCase(),new EnglishLTS());
     languageToLTS.put(FARSI.toLowerCase(), new FarsiLTS());
     languageToLTS.put(LEVANTINE.toLowerCase(), new LevantineLTS());
