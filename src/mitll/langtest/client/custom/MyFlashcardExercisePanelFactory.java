@@ -24,6 +24,7 @@ import mitll.langtest.client.flashcard.ControlState;
 import mitll.langtest.client.flashcard.LeaderboardPlot;
 import mitll.langtest.client.list.ListChangeListener;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.sound.Sound;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.AudioAnswer;
@@ -290,6 +291,8 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
 
       belowContentDiv.add(container);
       belowContentDiv.add(getRepeatButton());
+
+      resetStorage();
     }
 
     private Chart makeCorrectChart(List<AVPHistoryForList> result, AVPHistoryForList sessionAVPHistoryForList) {
@@ -520,7 +523,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
         onSetComplete();
       }
       else {
-        loadNextOnTimer(DELAY_MILLIS);
+        loadNextOnTimer(correct ? 100 : DELAY_MILLIS);
       }
     }
 
@@ -705,27 +708,29 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       }
     }
 
-    public void clear() { stack.clear(); stack2.clear(); }
+    public synchronized void clear() {
 
+      System.out.println("\t clear stack -------  ");
+      soundFeedback.destroySound(); // if there's something playing, stop it!
+      stack.clear();
+      stack2.clear();
+    }
+
+   // Sound sound;
     private synchronized void playQueuedSong() {
       if (!stack.isEmpty()) {
         String pop = stack.peek();
        // System.out.println("\t now playing queued sound -------  " + pop);
 
+       // if (sound != null) {
+          destroySound(); // if there's something playing, stop it!
+       // }
         EndListener peek = stack2.peek();
-        createSound(pop, peek);
+       /* sound = */createSound(pop, peek);
       }
       else {
        // System.out.println("\t stack empty -------  ");
       }
-    }
-
-    private synchronized void popCurrent() {
-      stack.pop();
-      stack2.pop();
-
-      //System.out.println("\t popCurrent stack now -------  " + stack);
-
     }
 
     private SoundFeedback.EndListener endListener = new SoundFeedback.EndListener() {
@@ -741,5 +746,13 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
         playQueuedSong();
       }
     };
+
+    private synchronized void popCurrent() {
+      stack.pop();
+      stack2.pop();
+
+      //System.out.println("\t popCurrent stack now -------  " + stack);
+
+    }
   }
 }
