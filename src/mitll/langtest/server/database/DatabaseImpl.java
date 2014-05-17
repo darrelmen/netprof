@@ -633,7 +633,7 @@ public class DatabaseImpl implements Database {
         user.setDemographics(dliUser);
       }
     }
-    if (users1.isEmpty()) logger.info("no dli users.");
+    //if (users1.isEmpty()) logger.info("no dli users.");
     return userMap.values();
   }
 
