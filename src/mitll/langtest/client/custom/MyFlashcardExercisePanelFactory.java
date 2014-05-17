@@ -118,6 +118,8 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   public Panel getExercisePanel(CommonExercise e) {
     currentExercise = e;
     storage.storeValue(CURRENT_EXERCISE, e.getID());
+
+    System.out.println("\n\n\\\\-> current is " + getCurrentExerciseID());
     return new StatsPracticePanel(e);
   }
 
@@ -523,7 +525,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
         onSetComplete();
       }
       else {
-        loadNextOnTimer(correct ? 100 : DELAY_MILLIS);
+        loadNextOnTimer(/*correct ? 100 :*/ DELAY_MILLIS);
       }
     }
 
@@ -683,7 +685,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       if (retval) {
         stack.push(song);
         if (stack.size() > 1) {
-          System.out.println("\t 1 stack now -------  " + stack);
+          System.out.println("\t 1 stack now -------  " + stack + " "+ System.currentTimeMillis());
         }
 
         stack2.push(endListener);
@@ -704,13 +706,13 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
         stack.push(currentSong);
         stack2.push(currentListener);
 
-        System.out.println("\t 2 stack now -------  " + stack);
+        System.out.println("\t 2 stack now -------  " + stack+ " " +System.currentTimeMillis());
       }
     }
 
     public synchronized void clear() {
 
-      System.out.println("\t clear stack -------  ");
+      System.out.println("\t clear stack -------  "+ System.currentTimeMillis());
       soundFeedback.destroySound(); // if there's something playing, stop it!
       stack.clear();
       stack2.clear();
@@ -736,12 +738,12 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
     private SoundFeedback.EndListener endListener = new SoundFeedback.EndListener() {
       @Override
       public void songStarted() {
-        System.out.println("song started --------- ");
+        System.out.println("song started --------- "+ System.currentTimeMillis());
       }
 
       @Override
       public void songEnded() {
-        System.out.println("song ended -------  ");
+        System.out.println("song ended -------  " + System.currentTimeMillis());
         popCurrent();
         playQueuedSong();
       }
