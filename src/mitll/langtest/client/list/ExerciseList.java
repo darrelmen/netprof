@@ -145,6 +145,9 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   public boolean getExercises(long userID) {
     System.out.println("ExerciseList.getExercises for user " +userID + " instance " + instance);
     lastReqID++;
+
+    String selectionID = userListID + "_"+typeToSection.toString();
+
     service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, controller.getUser(), getRole(), new SetExercisesCallback(""));
     return true;
   }
@@ -273,7 +276,16 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   class SetExercisesCallback implements AsyncCallback<ExerciseListWrapper> {
     private String selectionID;
-    public SetExercisesCallback(String selectionID) { this.selectionID = selectionID; }
+
+    public SetExercisesCallback(String selectionID) {
+      this.selectionID = selectionID;
+
+      if (selectionID.equals("-1")) {
+        new Exception().printStackTrace();
+      }
+      else          System.out.println("SetExercisesCallback. '" +selectionID + "' ");
+
+    }
 
     public void onFailure(Throwable caught) {
       gotExercises(false);
