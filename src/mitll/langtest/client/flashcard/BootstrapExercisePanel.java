@@ -143,7 +143,8 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
 
     addWidgetsBelow(belowDiv);
     if (controlState.isAudioOn()) {
-      playRefLater();
+      //playRefLater();
+      playRef();
     }
   }
 
@@ -987,6 +988,13 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
   }
 
   protected void loadNextOnTimer(final int delay) {
+
+
+
+    if (delay > 100) {
+      System.out.println("\n\n\nload next on " +delay);
+
+    }
     Timer t = new Timer() {
       @Override
       public void run() {
