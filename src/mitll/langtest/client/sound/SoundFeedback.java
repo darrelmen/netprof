@@ -131,7 +131,7 @@ public class SoundFeedback {
 
   public void destroySound() {
     if (currentSound != null) {
-      System.out.println("destroySound " +currentSound);
+      //System.out.println("destroySound " +currentSound);
       this.soundManager.destroySound(currentSound);
       currentSound = null;
     }
