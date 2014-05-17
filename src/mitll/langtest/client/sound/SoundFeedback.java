@@ -72,7 +72,7 @@ public class SoundFeedback {
    * @param song
    * @param endListener
    */
-  public void createSound(final String song, EndListener endListener) { createSound(song, endListener, false); }
+  public Sound createSound(final String song, EndListener endListener) { return createSound(song, endListener, false); }
 
     /**
      *
@@ -82,50 +82,58 @@ public class SoundFeedback {
      * @seex mitll.langtest.client.flashcard.BootstrapExercisePanel#playAllAudio
      * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#playRefAndGoToNext
      */
-  private void createSound(final String song, final EndListener endListener, final boolean soft) {
-    System.out.println("playing " +song);
-    currentSound = new Sound(new AudioControl() {
-      @Override
-      public void reinitialize() {}
-
-      @Override
-      public void songFirstLoaded(double durationEstimate) {
-       // System.out.println("songFirstLoaded " +song);
-
-      }
-
-      @Override
-      public void songLoaded(double duration) {
-      //  System.out.println("songLoaded " +song);
-
-        if (soft) {
-          soundManager.setVolume(song, SOFT_VOL);
-        }
-        if (endListener != null) {
-          endListener.songStarted();
+    private Sound createSound(final String song, final EndListener endListener, final boolean soft) {
+      System.out.println("playing " + song);
+      currentSound = new Sound(new AudioControl() {
+        @Override
+        public void reinitialize() {
         }
 
-        soundManager.play(currentSound);
-      }
+        @Override
+        public void songFirstLoaded(double durationEstimate) {
+          // System.out.println("songFirstLoaded " +song);
 
-      @Override
-      public void songFinished() {
-      //  System.out.println("songFinished " +song);
+        }
 
-        destroySound();
-        if (endListener != null) endListener.songEnded();
-      }
+        @Override
+        public void songLoaded(double duration) {
+          //  System.out.println("songLoaded " +song);
 
-      @Override
-      public void update(double position) {}
-    });
+          if (soft) {
+            soundManager.setVolume(song, SOFT_VOL);
+          }
+          if (endListener != null) {
+            endListener.songStarted();
+          }
 
-     soundManager.createSound(currentSound, song, song);
-  }
+          soundManager.play(currentSound);
+        }
 
-  private void destroySound() {
+        @Override
+        public void songFinished() {
+          //  System.out.println("songFinished " +song);
+
+          destroySound();
+          if (endListener != null) {
+            endListener.songEnded();
+          }
+        }
+
+        @Override
+        public void update(double position) {
+        }
+      });
+
+      soundManager.createSound(currentSound, song, song);
+
+      return currentSound;
+    }
+
+  public void destroySound() {
     if (currentSound != null) {
+      System.out.println("destroySound " +currentSound);
       this.soundManager.destroySound(currentSound);
+      currentSound = null;
     }
   }
 
