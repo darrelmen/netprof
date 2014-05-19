@@ -448,7 +448,7 @@ public class AudioConversion {
         logger.error("didn't write MP3 : " + testMP3.getAbsolutePath() +
           " exe path " + lamePath +
           " command was " + lameProc.command());
-        new Exception().printStackTrace();
+        //new Exception().printStackTrace();
       }
       return false;
     } else {
