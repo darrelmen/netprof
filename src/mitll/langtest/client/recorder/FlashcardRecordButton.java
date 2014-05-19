@@ -2,6 +2,7 @@ package mitll.langtest.client.recorder;
 
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
@@ -114,6 +115,19 @@ public class FlashcardRecordButton extends RecordButton {
     int keyCode = event.getKeyCode();
     boolean isSpace = keyCode == KeyCodes.KEY_SPACE;
 
+  //  if (checkIsHidden(getElement())) {
+    if (checkHidden(getElement().getId())) {
+      System.out.println("I'm hidden! " + getElement().getId());
+      return;
+    }
+    else {
+      System.out.println("not hidden! " + getElement().getId());
+    }
+    if (controller.getUser() == -1) {
+      System.out.println("no valid user " + getElement().getId());
+      return;
+    }
+
     if (isSpace) {
       if (!mouseDown) {
         mouseDown = true;
@@ -128,11 +142,41 @@ public class FlashcardRecordButton extends RecordButton {
     int keyCode = event.getKeyCode();
     boolean isSpace = keyCode == KeyCodes.KEY_SPACE;
 
+    if (checkHidden(getElement().getId())) {
+      System.out.println("I'm hidden! " + getElement().getId());
+      return;
+    }
+    else {
+      System.out.println("not hidden! " + getElement().getId());
+    }
+    if (controller.getUser() == -1) {
+      System.out.println("no valid user " + getElement().getId());
+      return;
+    }
     if (isSpace) {
       mouseDown = false;
       doClick();
     }
   }
+/*
+  private boolean checkIsHidden(Element element) {
+    String display = element.getPropertyString("display");
+    System.out.println("checkIsHidden : for '" + element.getId() + "' display is " + display);
+    if (display != null && display.contains("none")) {
+      return true;
+    }
+    else if (getParent() != null) {
+      System.out.println("parent is " + getParent().getTitle() + "/" + getParent().getElement().getId());
+      return checkIsHidden(getParent().getElement());
+    }
+    else {
+      return false;
+    }
+  }*/
+
+  private native boolean checkHidden(String id)  /*-{
+    return $wnd.jQuery('#'+id).is(":hidden");
+  }-*/;
 
   private void warnNotASpace() { showPopup(NO_SPACE_WARNING);  }
 
