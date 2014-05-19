@@ -142,8 +142,10 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     getElement().setId("BootstrapExercisePanel");
 
     addWidgetsBelow(belowDiv);
-    if (controlState.isAudioOn()) {
+    if (controlState.isAudioOn() && mainContainer.isVisible()) {
       //playRefLater();
+      System.out.println("main container is visible..." + mainContainer.getElement().getId());
+
       playRef();
     }
   }
@@ -748,17 +750,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
 
   private void showCorrectFeedback(double score) {
     showPronScoreFeedback(score);
-    getSoundFeedback().queueSong(SoundFeedback.CORRECT, new SoundFeedback.EndListener() {
-      @Override
-      public void songStarted() {
-        endListener.songStarted();
-      }
-
-      @Override
-      public void songEnded() {
-        endListener.songEnded();
-      }
-    });
+    getSoundFeedback().queueSong(SoundFeedback.CORRECT);
   }
 
   /**
@@ -773,9 +765,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     if (result.isSaidAnswer()/* && result.isCorrect()*/) { // if they said the right answer, but poorly, show pron score
       showPronScoreFeedback(score);
     }
-    System.out.println("showIncorrectFeedback : " +
-        " result " + result + " score " + score + " has ref " + hasRefAudio
-    );
+    System.out.println("showIncorrectFeedback : result " + result + " score " + score + " has ref " + hasRefAudio);
 
     String correctPrompt = getCorrectDisplay();
     if (hasRefAudio) {
@@ -783,13 +773,13 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
         String path = getRefAudioToPlay();
         if (path == null) {
           playIncorrect(); // this should never happen
-        } else {
+        } else if (!preventFutureTimerUse) {
           playRefAndGoToNext(correctPrompt, path);
         }
       } else {
-        playIncorrect(); // this should never happen
-
+        playIncorrect();
         goToNextAfter(1000);
+        //goToNextItem();
       }
     } else {
       tryAgain();
@@ -807,17 +797,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
   }
 
   private void playIncorrect() {
-    getSoundFeedback().queueSong(SoundFeedback.INCORRECT, new SoundFeedback.EndListener() {
-      @Override
-      public void songStarted() {
-        endListener.songStarted();
-      }
-
-      @Override
-      public void songEnded() {
-        endListener.songEnded();
-      }
-    });
+    getSoundFeedback().queueSong(SoundFeedback.INCORRECT);
   }
 
   /**
@@ -852,7 +832,8 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
       public void songEnded() {
         endListener.songEnded();
 
-        goToNextItem(fcorrectPrompt);
+        loadNext();
+        //goToNextItem(fcorrectPrompt);
       }
     });
   }
@@ -882,7 +863,8 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     getSoundFeedback().queueSong(path, new SoundFeedback.EndListener() {
       @Override
       public void songEnded() {
-        BootstrapExercisePanel.this.songEnded(textWidget);
+//        BootstrapExercisePanel.this.songEnded(textWidget);
+        textWidget.removeStyleName("playingAudioHighlight");
         endListener.songEnded();
       }
 
@@ -894,15 +876,17 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     });
   }
 
-  protected void songEnded(Widget textWidget) {
+/*  protected void songEnded(Widget textWidget) {
     textWidget.removeStyleName("playingAudioHighlight");
-  }
+  }*/
 
   private String getPath(String path) {
     path = (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
     path = ensureForwardSlashes(path);
     return path;
   }
+
+  private String ensureForwardSlashes(String wavPath) { return wavPath.replaceAll("\\\\", "/"); }
 
   /**
    * @see #showIncorrectFeedback(mitll.langtest.shared.AudioAnswer, double, boolean)
@@ -920,14 +904,9 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     t.schedule(incorrectDelay);
   }
 
-  private String ensureForwardSlashes(String wavPath) {
-    return wavPath.replaceAll("\\\\", "/");
-  }
-
   /**
    * @param infoToShow longer text means longer delay while user reads it
    * @see #playRefAndGoToNext(String, String)
-   * @see #showIncorrectFeedback(mitll.langtest.shared.AudioAnswer, double, boolean)
    */
   private void goToNextItem(String infoToShow) {
     int delay = getFeedbackLengthProportionalDelay(infoToShow);
@@ -988,28 +967,29 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
   }
 
   protected void loadNextOnTimer(final int delay) {
-
-
-
-    if (delay > 100) {
-      System.out.println("\n\n\nload next on " +delay);
-
-    }
-    Timer t = new Timer() {
-      @Override
-      public void run() {
-        currentTimer = null;
-        loadNext();
+    if (!preventFutureTimerUse) {
+      if (delay > 100) {
+        System.out.println("\n\n\n----> load next on " + delay);
       }
-    };
-    currentTimer = t;
-    t.schedule(delay);
+      Timer t = new Timer() {
+        @Override
+        public void run() {
+          currentTimer = null;
+          loadNext();
+        }
+      };
+      currentTimer = t;
+      t.schedule(delay);
+    } else {
+      System.out.println("\n\n\n----> ignoring next ");
+    }
   }
 
+  boolean preventFutureTimerUse = false;
   protected void cancelTimer() {
+    preventFutureTimerUse = true;
     if (currentTimer != null) currentTimer.cancel();
   }
-
   private void initRecordButton() {  answerWidget.initRecordButton();  }
 
   /**
