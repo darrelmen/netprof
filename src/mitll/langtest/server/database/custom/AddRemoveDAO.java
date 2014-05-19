@@ -98,20 +98,16 @@ public class AddRemoveDAO extends DAO {
   }
 
   /**
-   * @see UserListManager#UserListManager(mitll.langtest.server.database.UserDAO, mitll.langtest.server.database.custom.UserListDAO, mitll.langtest.server.database.custom.UserListExerciseJoinDAO, mitll.langtest.server.database.custom.AnnotationDAO, mitll.langtest.server.database.custom.AddRemoveDAO, mitll.langtest.server.PathHelper)
+   * @see mitll.langtest.server.database.ExcelImport#getRawExercises()
    * @return
    */
-  public Set<String> getAdds() {
-    String operation = ADD;
-    Set<String> lists = getIds(operation);
-    return lists;
-  }
+  public Set<String> getAdds() { return getIds(ADD); }
 
-  public Set<String> getRemoves() {
-    String operation = REMOVE;
-    Set<String> lists = getIds(operation);
-    return lists;
-  }
+  /**
+   * @see mitll.langtest.server.database.ExcelImport#getRawExercises()
+   * @return
+   */
+  public Set<String> getRemoves() {  return getIds(REMOVE); }
 
   public Set<String> getIds(String operation) {
     String sql = "SELECT DISTINCT exerciseid from " + ADDREMOVE + " where operation='" +
