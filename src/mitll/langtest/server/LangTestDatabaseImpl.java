@@ -276,8 +276,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return getExerciseListWrapperForPrefix(reqID, prefix, exercisesForState, userID, role);
   }
 
-
-
   /**
    * Always sort the result
    * @param reqID
