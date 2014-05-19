@@ -282,7 +282,9 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
       if (selectionID.equals("-1")) {
         new Exception().printStackTrace();
-      } else System.out.println("SetExercisesCallback. '" + selectionID + "' ");
+      } else {
+        //System.out.println("SetExercisesCallback. '" + selectionID + "' ");
+      }
 
     }
 
@@ -381,9 +383,13 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     if (firstExercise != null) {
       CommonShell firstExerciseShell = findFirstExercise();
       if (firstExerciseShell.getID().equals(firstExercise.getID())) {
+
+        System.out.println("ExerciseList : rememberAndLoadFirst using first = " +firstExercise);
         useExercise(firstExercise);   // allows us to skip another round trip with the server to ask for the first exercise
       }
       else {
+        System.out.println("ExerciseList : rememberAndLoadFirst finding first...");
+
         loadFirstExercise();
       }
     }
@@ -440,7 +446,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
         if (e != null) toLoad = e;
       }
 
-      //System.out.println("loadFirstExercise ex id =" + toLoad.getID() + " instance " + instance);
+      System.out.println("loadFirstExercise ex id =" + toLoad.getID() + " instance " + instance);
       pushFirstSelection(toLoad.getID());
     }
   }
@@ -475,7 +481,10 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   protected CommonShell findFirstExercise() {
-    return getFirst();
+    CommonShell first = getFirst();
+    System.out.println("findFirstExercise " + first.getID() + " is first in container.");
+
+    return first;
   }
 
   protected abstract CommonShell getFirst();
@@ -517,6 +526,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   @Override
   public void checkAndAskServer(String id) {
+    System.out.println("ExerciseList.checkAndAskServer - askServerForExercise = "  + id);
+    //                                                                      new Exception().printStackTrace();
     if (hasExercise(id)) {
       askServerForExercise(id);
     }
