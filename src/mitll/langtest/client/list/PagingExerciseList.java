@@ -159,6 +159,7 @@ public class PagingExerciseList extends ExerciseList {
     for (CommonShell es : pagingContainer.getExercises()) {
       STATE state = es.getState();
       if (state != null && state.equals(STATE.UNSET)) {
+        System.out.println("found first not set " + es.getID());
         return es;
       }
     }
