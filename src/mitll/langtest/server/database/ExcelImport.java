@@ -85,7 +85,6 @@ public class ExcelImport implements ExerciseDAO {
                      String installPath, boolean addDefects) {
     this.file = file;
     this.serverProps = serverProps;
-   // this.isFlashcard = serverProps.isFlashcard();
     maxExercises = serverProps.getMaxNumExercises();
     this.mediaDir = mediaDir;
     this.addDefects = addDefects;
@@ -105,8 +104,6 @@ public class ExcelImport implements ExerciseDAO {
     this.unitIndex = serverProps.getUnitChapterWeek()[0];
     this.chapterIndex = serverProps.getUnitChapterWeek()[1];
     this.weekIndex = serverProps.getUnitChapterWeek()[2];
-  //  collectSynonyms = this.serverProps.getCollectSynonyms();
-
 /*    logger.debug("\n\n\n\n ---> ExcelImport : config " + relativeConfigDir +
       " media dir " +mediaDir + " slow missing " +missingSlowSet.size() + " fast " + missingFastSet.size());*/
   }
@@ -162,8 +159,14 @@ public class ExcelImport implements ExerciseDAO {
         // remove exercises to remove
         Set<String> removes = addRemoveDAO.getRemoves();
 
+        logger.debug("Removing " + removes.size());
         for (String id : removes) {
-          exercises.remove(idToExercise.remove(id));
+          CommonExercise remove = idToExercise.remove(id);
+          if (remove != null) {
+            logger.debug("\tremove " + id);
+            exercises.remove(remove);
+            getSectionHelper().removeExercise(remove);
+          }
         }
 
         // mask over old items that have been overridden
@@ -271,7 +274,7 @@ public class ExcelImport implements ExerciseDAO {
 
     synchronized (this) {
       CommonExercise exercise = idToExercise.get(id);
-      //if (exercise == null) logger.warn("no '" +id+"'  in " + idToExercise.keySet());
+      if (exercise == null) logger.warn("no '" +id+"'  in " + idToExercise.keySet().size()+" keys");
       return exercise;
     }
   }
