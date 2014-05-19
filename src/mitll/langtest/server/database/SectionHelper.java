@@ -257,10 +257,13 @@ public class SectionHelper {
   }
 
   public void removeExercise(CommonExercise exercise) {
-    //logger.debug("Removing " + exercise.getID());
-    for (Map.Entry<String, String> pair : exercise.getUnitToValue().entrySet()) {
-      if (!removeExerciseToLesson(exercise, pair.getKey(), pair.getValue())) {
-        logger.warn("didn't remove " + exercise.getID() + " for " + pair);
+    Map<String, String> unitToValue = exercise.getUnitToValue();
+  //  logger.debug("Removing " + exercise.getID() + " with " +unitToValue);
+    if (unitToValue != null) {
+      for (Map.Entry<String, String> pair : unitToValue.entrySet()) {
+        if (!removeExerciseToLesson(exercise, pair.getKey(), pair.getValue())) {
+          logger.warn("didn't remove " + exercise.getID() + " for " + pair);
+        }
       }
     }
   }
