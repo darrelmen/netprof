@@ -57,7 +57,7 @@ public abstract class FlexListLayout implements RequiresResize {
    * @return
    */
   protected Panel doInternalLayout(UserList ul, String instanceName) {
-    System.out.println(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
+    //System.out.println(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
 
     Panel twoRows = new FlowPanel();
     twoRows.getElement().setId("twoRows");
@@ -120,7 +120,7 @@ public abstract class FlexListLayout implements RequiresResize {
   @Override
   public void onResize() {
     if (npfExerciseList != null) {
-      System.out.println(getClass() + " : onResize " + npfExerciseList.getInstance());
+      //System.out.println(getClass() + " : onResize " + npfExerciseList.getInstance());
       npfExerciseList.onResize();
     }
   }
