@@ -62,11 +62,13 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   private static final String CORRECT_SUBTITLE = "% correct";
   private static final int ROWS_IN_TABLE = 7;
   private static final String SKIP_TO_END = "Skip to end";
-  private static final boolean ADD_KEY_BINDING = false; // TODO : work on key binding...
   public static final int TABLE_WIDTH = 2 * 275;
   public static final int HORIZ_SPACE_FOR_CHARTS = (1250 - TABLE_WIDTH);
   public static final String CURRENT_EXERCISE = "currentExercise";
   public static final String CORRECT1 = "correct";
+
+  private static final boolean ADD_KEY_BINDING = false; // TODO : work on key binding...
+
 
   private CommonExercise currentExercise;
   private final ControlState controlState;
@@ -670,16 +672,16 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
     public MySoundFeedback() {
       super(MyFlashcardExercisePanelFactory.this.controller.getSoundManager());
     }
-    private Stack<String> stack = new Stack<String>();
+  //  private Stack<String> stack = new Stack<String>();
 
-    private Stack<SoundFeedback.EndListener> stack2 = new Stack<SoundFeedback.EndListener>();
+  //  private Stack<SoundFeedback.EndListener> stack2 = new Stack<SoundFeedback.EndListener>();
 
     /**
      * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#playRefAndGoToNext(String, String)
      * @param song
      * @param endListener
      */
-    public synchronized void queueSong(String song, SoundFeedback.EndListener endListener) {
+/*    public synchronized void queueSong(String song, SoundFeedback.EndListener endListener) {
       boolean retval = stack.isEmpty();
 
       if (retval) {
@@ -708,18 +710,29 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
 
         System.out.println("\t 2 stack now -------  " + stack+ " " +System.currentTimeMillis());
       }
+    }*/
+
+    public synchronized void queueSong(String song, SoundFeedback.EndListener endListener) {
+      System.out.println("\t queueSong song " +song+ " -------  "+ System.currentTimeMillis());
+
+      destroySound(); // if there's something playing, stop it!
+      createSound(song, endListener);
+    }
+
+    public synchronized void queueSong(String song) {
+      System.out.println("\t queueSong song " +song+ " -------  "+ System.currentTimeMillis());
+
+      destroySound(); // if there's something playing, stop it!
+      createSound(song, endListener);
     }
 
     public synchronized void clear() {
-
-      System.out.println("\t clear stack -------  "+ System.currentTimeMillis());
+      System.out.println("\t stop playing current sound -------  "+ System.currentTimeMillis());
       soundFeedback.destroySound(); // if there's something playing, stop it!
-      stack.clear();
-      stack2.clear();
     }
 
    // Sound sound;
-    private synchronized void playQueuedSong() {
+/*    private synchronized void playQueuedSong() {
       if (!stack.isEmpty()) {
         String pop = stack.peek();
        // System.out.println("\t now playing queued sound -------  " + pop);
@@ -728,12 +741,12 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
           destroySound(); // if there's something playing, stop it!
        // }
         EndListener peek = stack2.peek();
-       /* sound = */createSound(pop, peek);
+       *//* sound = *//*createSound(pop, peek);
       }
       else {
        // System.out.println("\t stack empty -------  ");
       }
-    }
+    }*/
 
     private SoundFeedback.EndListener endListener = new SoundFeedback.EndListener() {
       @Override
@@ -743,18 +756,16 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
 
       @Override
       public void songEnded() {
-        System.out.println("song ended -------  " + System.currentTimeMillis());
-        popCurrent();
-        playQueuedSong();
+        System.out.println("song ended   --------- " + System.currentTimeMillis());
       }
     };
 
-    private synchronized void popCurrent() {
+/*    private synchronized void popCurrent() {
       stack.pop();
       stack2.pop();
 
       //System.out.println("\t popCurrent stack now -------  " + stack);
 
-    }
+    }*/
   }
 }
