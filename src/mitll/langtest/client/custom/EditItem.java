@@ -149,6 +149,8 @@ public class EditItem {
             useExercise(getNewItem());
           }
           else {
+            System.out.println("EditItem.makeExerciseList - askServerForExercise = "  + itemID);
+
             super.askServerForExercise(itemID);
           }
         }
