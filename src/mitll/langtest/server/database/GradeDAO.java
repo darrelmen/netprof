@@ -299,7 +299,7 @@ public class GradeDAO extends DAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs()
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    * @param connection
    * @throws SQLException
    */
