@@ -1,5 +1,6 @@
 package mitll.langtest.client.list;
 
+import com.gargoylesoftware.htmlunit.javascript.host.Console;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -298,11 +299,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
     public void onFailure(Throwable caught) {
       gotExercises(false);
-      if (!caught.getMessage().trim().equals("0")) {
-        feedback.showErrorMessage("Server error", "Please clear your cache and reload the page.");
-      }
-      System.out.println("SetExercisesCallback.onFailure : Got exception '" +caught.getMessage() + "' " +caught);
-      caught.printStackTrace();
+      dealWithRPCError(caught);
     }
 
     public void onSuccess(ExerciseListWrapper result) {
@@ -335,11 +332,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
 
     public void onFailure(Throwable caught) {
-      if (!caught.getMessage().trim().equals("0")) {
-        feedback.showErrorMessage("Server error", "Please clear your cache and reload the page.");
-      }
-      System.out.println("ExerciseList.SetExercisesCallbackWithID Got exception '" + caught.getMessage() + "' " + caught);
-      caught.printStackTrace();
+      dealWithRPCError(caught);
     }
 
     public void onSuccess(ExerciseListWrapper result) {
@@ -359,6 +352,19 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
         controller.showProgress();
       }
     }
+  }
+
+  protected void dealWithRPCError(Throwable caught) {
+    String message = caught.getMessage();
+    if (message.length() > 200) message = message.substring(0,200);
+    if (!message.trim().equals("0")) {
+      feedback.showErrorMessage("Server error", "Please clear your cache and reload the page. (" +
+        message +
+        ")");
+    }
+    System.out.println("ExerciseList.SetExercisesCallbackWithID Got exception '" + message + "' " + caught);
+
+    caught.printStackTrace();
   }
 
   /**
