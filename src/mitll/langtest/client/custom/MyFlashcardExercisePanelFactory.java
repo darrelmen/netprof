@@ -24,7 +24,6 @@ import mitll.langtest.client.flashcard.ControlState;
 import mitll.langtest.client.flashcard.LeaderboardPlot;
 import mitll.langtest.client.list.ListChangeListener;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.sound.Sound;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.AudioAnswer;
@@ -38,7 +37,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 
 /**
  * Created by go22670 on 2/10/14.
@@ -67,7 +65,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   public static final String CURRENT_EXERCISE = "currentExercise";
   public static final String CORRECT1 = "correct";
 
-  private static final boolean ADD_KEY_BINDING = false; // TODO : work on key binding...
+  private static final boolean ADD_KEY_BINDING = true; // TODO : work on key binding...
 
 
   private CommonExercise currentExercise;
@@ -79,18 +77,22 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   private Set<Long> resultIDs = new HashSet<Long>();
   private KeyStorage storage;
   private String selectionID;
+  private String instance;
 
   /**
-   * @see NPFHelper#setFactory
+   * @see mitll.langtest.client.custom.AVPHelper#getFactory(mitll.langtest.client.list.PagingExerciseList, String, boolean)
+   * @see mitll.langtest.client.custom.Navigation#makePracticeHelper(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.user.UserFeedback)
    * @param service
    * @param feedback
    * @param controller
    * @param exerciseList
+   * @param instance
    */
   public MyFlashcardExercisePanelFactory(LangTestDatabaseAsync service, UserFeedback feedback, ExerciseController controller,
-                                         ListInterface exerciseList) {
+                                         ListInterface exerciseList, String instance) {
     super(service, feedback, controller, exerciseList);
     controlState = new ControlState();
+    this.instance = instance;
     if (exerciseList == null) exerciseList = controller.getExerciseList();
 
     exerciseList.addListChangedListener(new ListChangeListener<CommonShell>() {
@@ -99,7 +101,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
         MyFlashcardExercisePanelFactory.this.selectionID = selectionID;
         allExercises = items;
         totalExercises = allExercises.size();
-        System.out.println("MyFlashcardExercisePanelFactory : " + selectionID + " got new set of items from list." + items.size());
+        //System.out.println("MyFlashcardExercisePanelFactory : " + selectionID + " got new set of items from list. " + items.size());
         reset();
       }
     });
@@ -121,7 +123,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
     currentExercise = e;
     storage.storeValue(CURRENT_EXERCISE, e.getID());
 
-    System.out.println("\n\n\\\\-> current is " + getCurrentExerciseID());
+   // System.out.println("\n\n\\\\-> current is " + getCurrentExerciseID());
     return new StatsPracticePanel(e);
   }
 
@@ -184,7 +186,13 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
         ADD_KEY_BINDING,
         MyFlashcardExercisePanelFactory.this.controlState,
         soundFeedback,
-        soundFeedback.endListener);
+        soundFeedback.endListener, MyFlashcardExercisePanelFactory.this.instance);
+    }
+
+    @Override
+    protected void recordingStarted() {
+      soundFeedback.clear();
+      removePlayingHighlight();
     }
 
     @Override
@@ -672,81 +680,23 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
     public MySoundFeedback() {
       super(MyFlashcardExercisePanelFactory.this.controller.getSoundManager());
     }
-  //  private Stack<String> stack = new Stack<String>();
-
-  //  private Stack<SoundFeedback.EndListener> stack2 = new Stack<SoundFeedback.EndListener>();
-
-    /**
-     * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#playRefAndGoToNext(String, String)
-     * @param song
-     * @param endListener
-     */
-/*    public synchronized void queueSong(String song, SoundFeedback.EndListener endListener) {
-      boolean retval = stack.isEmpty();
-
-      if (retval) {
-        stack.push(song);
-        if (stack.size() > 1) {
-          System.out.println("\t 1 stack now -------  " + stack + " "+ System.currentTimeMillis());
-        }
-
-        stack2.push(endListener);
-        playQueuedSong();
-      }
-      else {
-        String currentSong = stack.peek();
-       // System.out.println("\t now playing queued sound -------  " + currentSong);
-
-        EndListener currentListener = stack2.peek();
-
-        stack.clear();
-        stack2.clear();
-
-        stack.push(song);
-        stack2.push(endListener);
-
-        stack.push(currentSong);
-        stack2.push(currentListener);
-
-        System.out.println("\t 2 stack now -------  " + stack+ " " +System.currentTimeMillis());
-      }
-    }*/
-
     public synchronized void queueSong(String song, SoundFeedback.EndListener endListener) {
       System.out.println("\t queueSong song " +song+ " -------  "+ System.currentTimeMillis());
-
       destroySound(); // if there's something playing, stop it!
       createSound(song, endListener);
     }
 
     public synchronized void queueSong(String song) {
       System.out.println("\t queueSong song " +song+ " -------  "+ System.currentTimeMillis());
-
       destroySound(); // if there's something playing, stop it!
       createSound(song, endListener);
     }
 
     public synchronized void clear() {
       System.out.println("\t stop playing current sound -------  "+ System.currentTimeMillis());
-      soundFeedback.destroySound(); // if there's something playing, stop it!
+      destroySound(); // if there's something playing, stop it!
+
     }
-
-   // Sound sound;
-/*    private synchronized void playQueuedSong() {
-      if (!stack.isEmpty()) {
-        String pop = stack.peek();
-       // System.out.println("\t now playing queued sound -------  " + pop);
-
-       // if (sound != null) {
-          destroySound(); // if there's something playing, stop it!
-       // }
-        EndListener peek = stack2.peek();
-       *//* sound = *//*createSound(pop, peek);
-      }
-      else {
-       // System.out.println("\t stack empty -------  ");
-      }
-    }*/
 
     private SoundFeedback.EndListener endListener = new SoundFeedback.EndListener() {
       @Override
@@ -759,13 +709,5 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
         System.out.println("song ended   --------- " + System.currentTimeMillis());
       }
     };
-
-/*    private synchronized void popCurrent() {
-      stack.pop();
-      stack2.pop();
-
-      //System.out.println("\t popCurrent stack now -------  " + stack);
-
-    }*/
   }
 }
