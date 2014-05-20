@@ -3,6 +3,7 @@ package mitll.langtest.client.custom;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.Label;
+import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
 import com.github.gwtbootstrap.client.ui.incubator.Table;
@@ -49,6 +50,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   private static final String REMAINING = "Remaining";
   private static final String INCORRECT = "Incorrect";
   private static final String CORRECT = "Correct";
+  private static final String AVG_SCORE = "Avg Score";
   public static final String START_OVER = "Start Over";
   private static final String CORRECT_NBSP = "Correct&nbsp;%";
   private static final String SKIP_THIS_ITEM = "Skip this item";
@@ -647,16 +649,17 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       return seeScores;
     }
 
-    private Label remain, incorrectBox, correctBox;
+    private Label remain, incorrectBox, correctBox, pronScore;
 
     protected Panel getLeftState() {
-      Grid g = new Grid(3, 2);
+      Grid g = new Grid(4, 2);
       ControlGroup remaining = new ControlGroup(REMAINING);
       remaining.addStyleName("topFiveMargin");
       remain = new Label();
       remain.setType(LabelType.INFO);
-      g.setWidget(0, 0, remaining);
-      g.setWidget(0, 1, remain);
+      int row = 0;
+      g.setWidget(row, 0, remaining);
+      g.setWidget(row++, 1, remain);
 
       ControlGroup incorrect = new ControlGroup(INCORRECT);
       incorrect.addStyleName("topFiveMargin");
@@ -664,8 +667,8 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       incorrectBox = new Label();
       incorrectBox.setType(LabelType.WARNING);
 
-      g.setWidget(1, 0, incorrect);
-      g.setWidget(1, 1, incorrectBox);
+      g.setWidget(row, 0, incorrect);
+      g.setWidget(row++, 1, incorrectBox);
 
       ControlGroup correct = new ControlGroup(CORRECT);
       correct.addStyleName("topFiveMargin");
@@ -673,8 +676,19 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       correctBox = new Label();
       correctBox.setType(LabelType.SUCCESS);
 
-      g.setWidget(2, 0, correct);
-      g.setWidget(2, 1, correctBox);
+      g.setWidget(row, 0, correct);
+      g.setWidget(row++, 1, correctBox);
+
+
+      ControlGroup pronScoreGroup = new ControlGroup(AVG_SCORE);
+      pronScoreGroup.addStyleName("topFiveMargin");
+
+      pronScore = new Label();
+      pronScore.setType(LabelType.SUCCESS);
+
+      g.setWidget(row, 0, pronScoreGroup);
+      pronScoreGroup.addStyleName("rightFiveMargin");
+      g.setWidget(row++, 1, pronScore);
 
       setStateFeedback();
       g.addStyleName("rightTenMargin");
@@ -692,6 +706,29 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       remain.setText(remaining + "");
       incorrectBox.setText(totalIncorrect + "");
       correctBox.setText(totalCorrect + "");
+
+      double total = 0;
+      int count = 0;
+      for (double score : exToScore.values()) {
+        if (score > 0) {
+          total += score;
+          count++;
+        }
+      }
+      if (count > 0) {
+        total /= count;
+      }
+
+      // TODO : come back to the color coding ...
+      LabelType type = total > 0.8 ? LabelType.SUCCESS :
+          total > 0.5 ? LabelType.INFO : LabelType.WARNING;
+      System.out.println("type "+type + " score " + total);
+      pronScore.setType(type);
+
+      total *= 100;
+      int itotal = (int) Math.ceil(total);
+
+      pronScore.setText("" + itotal);
     }
   }
 
