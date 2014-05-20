@@ -42,7 +42,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    */
   public PostAudioRecordButton(CommonExercise exercise, final ExerciseController controller, LangTestDatabaseAsync service,
                                int index, boolean recordInResults, String audioType, String recordButtonTitle, String stopButtonTitle) {
-    super(controller.getRecordTimeout(), true, true, recordButtonTitle, stopButtonTitle);
+    super(controller.getRecordTimeout(), true, recordButtonTitle, stopButtonTitle);
     setRecordingListener(this);
     this.index = index;
     this.exercise = exercise;

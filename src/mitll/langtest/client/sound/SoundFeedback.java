@@ -83,7 +83,7 @@ public class SoundFeedback {
      * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#playRefAndGoToNext
      */
     private Sound createSound(final String song, final EndListener endListener, final boolean soft) {
-      System.out.println("playing " + song);
+      //System.out.println("playing " + song);
       currentSound = new Sound(new AudioControl() {
         @Override
         public void reinitialize() {
