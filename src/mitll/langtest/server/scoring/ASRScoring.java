@@ -154,7 +154,7 @@ public class ASRScoring extends Scoring {
           String[][] process = lts.process(token);
           if (process == null || process.length == 0 || process[0].length == 0 ||
             process[0][0].length() == 0/* || process[0][0].equals("aa")*/) {
-            if (!htkDictionary.contains(token)) {
+            if (!htkDictionary.contains(token) && !htkDictionary.isEmpty()) {
               logger.warn("checkLTS with " + lts + "/" + languageProperty + " token #" +i+
                 " : '" + token + "' hash " + token.hashCode()+
                 " is invalid in " + foreignLanguagePhrase+
