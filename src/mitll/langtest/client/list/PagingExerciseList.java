@@ -56,7 +56,7 @@ public class PagingExerciseList extends ExerciseList {
   private int unaccountedForVertical = 160;
 
   /**
-   * @see mitll.langtest.client.ExerciseListLayout#makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, boolean, mitll.langtest.client.user.UserFeedback, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController)
+   * @see mitll.langtest.client.ExerciseListLayout#makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.user.UserFeedback, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
    * @param currentExerciseVPanel
    * @param service
    * @param feedback
@@ -67,9 +67,9 @@ public class PagingExerciseList extends ExerciseList {
    * @param instance
    */
   public PagingExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                            ExercisePanelFactory factory, ExerciseController controller, boolean showTurkToken, boolean showInOrder,
+                            ExercisePanelFactory factory, ExerciseController controller, boolean showTurkToken,
                             boolean showTypeAhead, String instance) {
-    super(currentExerciseVPanel, service, feedback, factory, controller, showTurkToken, instance);
+    super(currentExerciseVPanel, service, feedback, factory, controller, instance);
     this.controller = controller;
     this.showTypeAhead = showTypeAhead;
     addComponents();
