@@ -155,14 +155,16 @@ public class Navigation implements RequiresResize {
                                                       final ExerciseController controller, final UserFeedback feedback) {
     return new SimpleChapterNPFHelper(service, feedback, userManager, controller, listInterface) {
       MyFlashcardExercisePanelFactory myFlashcardExercisePanelFactory;
+
       @Override
       protected ExercisePanelFactory getFactory(PagingExerciseList exerciseList) {
-         myFlashcardExercisePanelFactory = new MyFlashcardExercisePanelFactory(service, feedback, controller, exerciseList);
+        myFlashcardExercisePanelFactory = new MyFlashcardExercisePanelFactory(service, feedback, controller, exerciseList, "practice");
         return myFlashcardExercisePanelFactory;
       }
 
       @Override
-      protected FlexListLayout getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager, ExerciseController controller, SimpleChapterNPFHelper outer) {
+      protected FlexListLayout getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
+                                               UserManager userManager, ExerciseController controller, SimpleChapterNPFHelper outer) {
         return new MyFlexListLayout(service, feedback, userManager, controller, outer) {
           @Override
           protected FlexSectionExerciseList makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName) {
