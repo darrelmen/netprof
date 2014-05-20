@@ -40,7 +40,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
                                        Panel widgets,
                                        RecordAudioPanel recordAudioPanel, LangTestDatabaseAsync service, int index,
                                        boolean recordInResults, String playButtonSuffix, String stopButtonText, String audioType) {
-    super(exercise, controller, service, index, recordInResults, controller.getAudioType(), playButtonSuffix, stopButtonText);
+    super(exercise, controller, service, index, recordInResults, playButtonSuffix, stopButtonText);
     this.recordAudioPanel = recordAudioPanel;
     this.parentPanel = widgets;
     getElement().setId("WaveformPostAudioRecordButton_" + index);
