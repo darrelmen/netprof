@@ -20,7 +20,6 @@ import java.util.Map;
  */
 public class KeyPressHelper {
   private final boolean removeOnEnter;
-//  private  boolean hearAllEvents;
   private HandlerRegistration keyHandler;
   private Map<String,KeyListener> listeners = new HashMap<String, KeyListener>();
 
@@ -40,9 +39,8 @@ public class KeyPressHelper {
   }
 
   public KeyPressHelper(boolean removeOnPress, boolean hearAllEvents) {
-     this(removeOnPress);
-   // this.hearAllEvents = hearAllEvents;
-      makeKeyHandler();
+    this(removeOnPress);
+    makeKeyHandler();
   }
 
   public void addKeyHandler(final Button button) {
@@ -65,6 +63,7 @@ public class KeyPressHelper {
     //System.out.println("addKeyHandler made click handler " + keyHandler);
   }
 
+  public int getSize() { return listeners.size(); }
 
   public void addKeyHandler(KeyListener handler) {
     listeners.put(handler.getName(), handler);
