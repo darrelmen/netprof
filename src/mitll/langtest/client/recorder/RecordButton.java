@@ -52,11 +52,10 @@ public class RecordButton extends Button {
    * @see mitll.langtest.client.scoring.PostAudioRecordButton#PostAudioRecordButton(mitll.langtest.shared.CommonExercise, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.LangTestDatabaseAsync, int, boolean, String, String, String)
    * @param delay
    * @param doClickAndHold
-   * @param addKeyBinding
    * @param buttonText
    * @param stopButtonText
    */
-  protected RecordButton(int delay, boolean doClickAndHold, boolean addKeyBinding, String buttonText, String stopButtonText) {
+  protected RecordButton(int delay, boolean doClickAndHold, String buttonText, String stopButtonText) {
     super(buttonText);
     RECORD = buttonText;
     STOP = stopButtonText;
@@ -70,7 +69,7 @@ public class RecordButton extends Button {
     setIcon(IconType.MICROPHONE);
    // if (addKeyBinding) new Exception().printStackTrace();
 
-    setupRecordButton(addKeyBinding);
+    setupRecordButton();
     getElement().setId("record_button");
   }
 
@@ -82,7 +81,7 @@ public class RecordButton extends Button {
    * @param addKeyBinding
    */
   public RecordButton(int delay, RecordingListener recordingListener, boolean doClickAndHold, boolean addKeyBinding) {
-    this(delay, doClickAndHold, addKeyBinding, RECORD1, STOP1);
+    this(delay, doClickAndHold, RECORD1, STOP1);
     this.setRecordingListener(recordingListener);
   }
 
@@ -107,7 +106,7 @@ public class RecordButton extends Button {
    */
   protected void setRecordingListener(RecordingListener recordingListener) { this.recordingListener = recordingListener;  }
 
-  void setupRecordButton(boolean addKeyBinding) {
+  void setupRecordButton() {
     if (doClickAndHold) {
       addMouseDownHandler(new MouseDownHandler() {
         @Override
