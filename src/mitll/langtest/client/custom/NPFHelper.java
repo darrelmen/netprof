@@ -39,7 +39,7 @@ class NPFHelper implements RequiresResize {
   protected final UserFeedback feedback;
   protected PagingExerciseList npfExerciseList;
   private Panel npfContentPanel;
-  boolean showQC;
+  private boolean showQC;
 
   /**
    * @see mitll.langtest.client.custom.Navigation#Navigation
@@ -71,11 +71,11 @@ class NPFHelper implements RequiresResize {
     int widgetCount = content.getWidgetCount();
     if (!madeNPFContent || widgetCount == 0) {
       madeNPFContent = true;
-      System.out.println("\t: adding npf content instanceName = " + instanceName + " for list " + ul);
+     // System.out.println("\t: adding npf content instanceName = " + instanceName + " for list " + ul);
      // System.out.println("\t: first is = " + instanceName + "  " + ul.getExercises().iterator().next().getID());
       addNPFToContent(ul, content, instanceName, loadExercises);
     } else {
-      System.out.println("\t: rememberAndLoadFirst instanceName = " + instanceName + " for list " + ul);
+    //  System.out.println("\t: rememberAndLoadFirst instanceName = " + instanceName + " for list " + ul);
    //   System.out.println("\t: first is = " + instanceName + "  " + ul.getExercises().iterator().next().getID());
       rememberAndLoadFirst(ul);
     }
@@ -177,7 +177,7 @@ class NPFHelper implements RequiresResize {
 
   PagingExerciseList makeExerciseList(final Panel right, final String instanceName) {
     //System.out.println(getClass() + ".makeExerciseList : instanceName " + instanceName);
-    return new PagingExerciseList(right, service, feedback, null, controller, false, false,
+    return new PagingExerciseList(right, service, feedback, null, controller, false,
       true, instanceName) {
       @Override
       protected void onLastItem() {
@@ -205,7 +205,6 @@ class NPFHelper implements RequiresResize {
     return new GoodwaveExercisePanelFactory(service, feedback, controller, exerciseList, 1.0f) {
       @Override
       public Panel getExercisePanel(CommonExercise e) {
-        //boolean showQC = controller.getAudioType().equalsIgnoreCase(Result.AUDIO_TYPE_REVIEW);
         if (showQC) {
           System.out.println("\nNPFHelper : making new QCNPFExercise for " +e + " instance " + instanceName);
           return new QCNPFExercise(e, controller, exerciseList, 1.0f, false, instanceName);
