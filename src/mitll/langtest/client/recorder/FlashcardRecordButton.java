@@ -2,10 +2,7 @@ package mitll.langtest.client.recorder;
 
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.event.dom.client.FocusEvent;
-import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
@@ -41,6 +38,7 @@ public class FlashcardRecordButton extends RecordButton {
   private boolean warnUserWhenNotSpace = true;
   private final boolean addKeyBinding;
   private ExerciseController controller;
+  private String instance;
 
   /**
    * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#makeRecordButton
@@ -49,26 +47,34 @@ public class FlashcardRecordButton extends RecordButton {
    * @param warnNotASpace
    * @param addKeyBinding
    * @param controller
+   * @param instance
    */
-  public FlashcardRecordButton(int delay, RecordingListener recordingListener, boolean warnNotASpace, boolean addKeyBinding, ExerciseController controller) {
+  public FlashcardRecordButton(int delay, RecordingListener recordingListener, boolean warnNotASpace,
+                               boolean addKeyBinding, ExerciseController controller, final String instance) {
     super(delay, recordingListener, true, addKeyBinding);
+    this.instance = instance;
     if (addKeyBinding) {
-      controller.addKeyListener(new KeyPressHelper.KeyListener() {
+      KeyPressHelper.KeyListener listener = new KeyPressHelper.KeyListener() {
         @Override
         public String getName() {
-          return "FlashcardRecordButton";
+          return "FlashcardRecordButton_" + instance;
         }
 
         @Override
         public void gotPress(NativeEvent ne, boolean isKeyDown) {
           if (isKeyDown) {
             checkKeyDown2(ne);
-          }
-          else {
+          } else {
             checkKeyUp2(ne);
           }
         }
-      });
+
+        public String toString() {
+          return "KeyListener " + getName();
+        }
+      };
+      controller.addKeyListener(listener);
+      System.out.println("FlashcardRecordButton : " + instance + " key is  " + listener.getName());
     }
     this.controller = controller;
 
@@ -84,95 +90,50 @@ public class FlashcardRecordButton extends RecordButton {
 
     initRecordButton();
 
-    getElement().setId("FlashcardRecordButton");
-  }
+    getElement().setId("FlashcardRecordButton_"+instance);
 
-  protected void setupRecordButton(boolean addKeyBinding) {
-    super.setupRecordButton(addKeyBinding);
-
-  //  getFocus();
-
-/*
-    addBlurHandler(new BlurHandler() {
-      @Override
-      public void onBlur(BlurEvent event) {
-         System.out.println(getElement().getId() + " got blur " + event + " controller " + controller.getUser());
-//        setFocus(true);
-        getFocus();
-      }
-    });
-*/
-
-    addFocusHandler(new FocusHandler() {
-      @Override
-      public void onFocus(FocusEvent event) {
-        System.out.println(getElement().getId() + " got focus " + event);
-      }
-    });
+    System.out.println("FlashcardRecordButton : using " + getElement().getId());
   }
 
   protected void checkKeyDown2(NativeEvent event) {
-    int keyCode = event.getKeyCode();
-    boolean isSpace = keyCode == KeyCodes.KEY_SPACE;
+    if (!shouldIgnoreKeyPress()) {
+      boolean isSpace = checkIsSpace(event);
 
-  //  if (checkIsHidden(getElement())) {
-    if (checkHidden(getElement().getId())) {
-      System.out.println("I'm hidden! " + getElement().getId());
-      return;
-    }
-    else {
-      System.out.println("not hidden! " + getElement().getId());
-    }
-    if (controller.getUser() == -1) {
-      System.out.println("no valid user " + getElement().getId());
-      return;
-    }
-
-    if (isSpace) {
-      if (!mouseDown) {
-        mouseDown = true;
-        doClick();
+      if (isSpace) {
+        if (!mouseDown) {
+          mouseDown = true;
+          doClick();
+        }
+      } else if (warnUserWhenNotSpace) {
+        warnNotASpace();
       }
-    } else if (warnUserWhenNotSpace) {
-      warnNotASpace();
     }
   }
 
   protected void checkKeyUp2(NativeEvent event) {
-    int keyCode = event.getKeyCode();
-    boolean isSpace = keyCode == KeyCodes.KEY_SPACE;
+    if (!shouldIgnoreKeyPress()) {
+      boolean isSpace = checkIsSpace(event);
 
-    if (checkHidden(getElement().getId())) {
-      System.out.println("I'm hidden! " + getElement().getId());
-      return;
-    }
-    else {
-      System.out.println("not hidden! " + getElement().getId());
-    }
-    if (controller.getUser() == -1) {
-      System.out.println("no valid user " + getElement().getId());
-      return;
-    }
-    if (isSpace) {
-      mouseDown = false;
-      doClick();
+      if (isSpace) {
+        mouseDown = false;
+        doClick();
+      }
     }
   }
-/*
-  private boolean checkIsHidden(Element element) {
-    String display = element.getPropertyString("display");
-    System.out.println("checkIsHidden : for '" + element.getId() + "' display is " + display);
-    if (display != null && display.contains("none")) {
-      return true;
-    }
-    else if (getParent() != null) {
-      System.out.println("parent is " + getParent().getTitle() + "/" + getParent().getElement().getId());
-      return checkIsHidden(getParent().getElement());
-    }
-    else {
-      return false;
-    }
-  }*/
+
+  private boolean checkIsSpace(NativeEvent event) {
+    int keyCode = event.getKeyCode();
+    return keyCode == KeyCodes.KEY_SPACE;
+  }
+
+  private boolean shouldIgnoreKeyPress() {
+    return !isAttached() || checkHidden(getElement().getId()) || controller.getUser() == -1;
+  }
+
+  @Override
+  protected void onUnload() {
+    super.onUnload();
+  }
 
   private native boolean checkHidden(String id)  /*-{
     return $wnd.jQuery('#'+id).is(":hidden");
@@ -219,14 +180,14 @@ public class FlashcardRecordButton extends RecordButton {
     super.initRecordButton();
     setText(addKeyBinding ? SPACE_BAR : PROMPT);
     setType(ButtonType.PRIMARY);
-    getFocus();
+    //getFocus();
   }
-
+/*
   private void getFocus() {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
         setFocus(true);
       }
     });
-  }
+  }*/
 }
