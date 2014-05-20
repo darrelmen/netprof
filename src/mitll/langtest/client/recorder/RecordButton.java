@@ -49,7 +49,7 @@ public class RecordButton extends Button {
   }
 
   /**
-   * @see mitll.langtest.client.scoring.PostAudioRecordButton#PostAudioRecordButton(mitll.langtest.shared.CommonExercise, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.LangTestDatabaseAsync, int, boolean, String, String, String)
+   * @see mitll.langtest.client.scoring.PostAudioRecordButton#PostAudioRecordButton(mitll.langtest.shared.CommonExercise, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.LangTestDatabaseAsync, int, boolean, String, String)
    * @param delay
    * @param doClickAndHold
    * @param buttonText
@@ -61,13 +61,12 @@ public class RecordButton extends Button {
     STOP = stopButtonText;
     //if (STOP.equalsIgnoreCase("stop")) new Exception().printStackTrace();
     this.doClickAndHold = doClickAndHold;
-    if (doClickAndHold) {
+/*    if (doClickAndHold) {
       setTitle(FlashcardRecordButtonPanel.PRESS_AND_HOLD_THE_MOUSE_BUTTON_TO_RECORD);
-    }
+    }*/
     this.autoStopDelay = delay;
     setType(ButtonType.PRIMARY);
     setIcon(IconType.MICROPHONE);
-   // if (addKeyBinding) new Exception().printStackTrace();
 
     setupRecordButton();
     getElement().setId("record_button");
@@ -78,9 +77,8 @@ public class RecordButton extends Button {
    * @param delay
    * @param recordingListener
    * @param doClickAndHold
-   * @param addKeyBinding
    */
-  public RecordButton(int delay, RecordingListener recordingListener, boolean doClickAndHold, boolean addKeyBinding) {
+  public RecordButton(int delay, RecordingListener recordingListener, boolean doClickAndHold) {
     this(delay, doClickAndHold, RECORD1, STOP1);
     this.setRecordingListener(recordingListener);
   }
@@ -101,7 +99,7 @@ public class RecordButton extends Button {
   private class ButtonClickEvent extends ClickEvent {}
 
   /**
-   * @see #RecordButton(int, mitll.langtest.client.recorder.RecordButton.RecordingListener, boolean, boolean)
+   * @see #RecordButton(int, mitll.langtest.client.recorder.RecordButton.RecordingListener, boolean)
    * @param recordingListener
    */
   protected void setRecordingListener(RecordingListener recordingListener) { this.recordingListener = recordingListener;  }
