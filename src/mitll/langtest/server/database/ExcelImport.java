@@ -356,8 +356,9 @@ public class ExcelImport implements ExerciseDAO {
     int meaningIndex = -1;
     int idIndex = -1;
     int contextIndex = -1;
-   // int segmentedIndex = -1;
     int audioIndex = -1;
+    boolean hasAudioIndex = false;
+
     List<String> lastRowValues = new ArrayList<String>();
     Map<String, List<CommonExercise>> englishToExercises = new HashMap<String, List<CommonExercise>>();
     int semis = 0;
@@ -427,6 +428,7 @@ public class ExcelImport implements ExerciseDAO {
               contextIndex = columns.indexOf(col);
             } else if (colNormalized.contains("audio_index")) {
               audioIndex = columns.indexOf(col);
+              hasAudioIndex = true;
             }
           }
           if (usePredefinedTypeOrder) {
@@ -498,15 +500,12 @@ public class ExcelImport implements ExerciseDAO {
               boolean expectFastAndSlow = idIndex == -1;
               String idToUse = expectFastAndSlow ? "" + id++ : givenIndex;
               CommonExercise imported = getExercise(idToUse, weightIndex, next, english, foreignLanguagePhrase, translit,
-                meaning, context, false, (audioIndex != -1) ? getCell(next, audioIndex) : "");
+                meaning, context, false, hasAudioIndex ? getCell(next, audioIndex) : "", true);
               if (imported.hasRefAudio() || !shouldHaveRefAudio) {  // skip items without ref audio, for now.
                 recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported, unitName, chapterName, weekName);
 
                 // keep track of synonyms (or better term)
                 rememberExercise(exercises, englishToExercises, imported);
-/*                if (MARK_MISSING_AUDIO_AS_DEFECT && !imported.hasRefAudio()) {
-                  fieldToDefect.put("refAudio", "missing reference audio");
-                }*/
                 if (!fieldToDefect.isEmpty()) {
                   idToDefectMap.put(imported.getID(), fieldToDefect);
                 }
@@ -669,7 +668,7 @@ public class ExcelImport implements ExerciseDAO {
               boolean expectFastAndSlow = idIndex == -1;
               String idToUse = expectFastAndSlow ? "" + id++ : givenIndex;
               CommonExercise imported = getExercise(idToUse, weightIndex, next, english, foreignLanguagePhrase, translit,
-                meaning, context, false, (audioIndex != -1) ? getCell(next, audioIndex) : "");
+                meaning, context, false, (audioIndex != -1) ? getCell(next, audioIndex) : "", false);
               if (imported.hasRefAudio() || !shouldHaveRefAudio) {  // skip items without ref audio, for now.
                 recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported, unitName, chapterName, weekName);
 
@@ -849,18 +848,19 @@ public class ExcelImport implements ExerciseDAO {
    * @param translit
    * @param meaning
    * @param context
+   * @param lookForOldAudio
    * @return
    * @see #readFromSheet(org.apache.poi.ss.usermodel.Sheet)
    */
   private CommonExercise getExercise(String id, int weightIndex, Row next,
-                               String english, String foreignLanguagePhrase, String translit, String meaning,
-                               String context, boolean promptInEnglish, String audioIndex) {
+                                     String english, String foreignLanguagePhrase, String translit, String meaning,
+                                     String context, boolean promptInEnglish, String audioIndex, boolean lookForOldAudio) {
     Exercise imported;
     List<String> translations = new ArrayList<String>();
     if (foreignLanguagePhrase.length() > 0) {
-      translations.add(foreignLanguagePhrase);//Arrays.asList(foreignLanguagePhrase.split(";")));
+      translations.add(foreignLanguagePhrase);
     }
-    imported = getExercise(id, english, foreignLanguagePhrase, translit, meaning, context, promptInEnglish, audioIndex);
+    imported = getExercise(id, english, foreignLanguagePhrase, translit, meaning, context, promptInEnglish, audioIndex, lookForOldAudio);
 
     imported.setEnglishSentence(english);
     if (translit.length() > 0) {
@@ -923,17 +923,29 @@ public class ExcelImport implements ExerciseDAO {
    * @param meaning
    * @param context
    * @param refAudioIndex
+   * @param lookForOldAudio
    * @return
-   * @see #getExercise(String, int, org.apache.poi.ss.usermodel.Row, String, String, String, String, String, boolean, String)
+   * @see #getExercise(String, int, org.apache.poi.ss.usermodel.Row, String, String, String, String, String, boolean, String, boolean)
    */
   private Exercise getExercise(String id,
                                String english, String foreignLanguagePhrase, String translit, String meaning,
-                               String context, boolean promptInEnglish, String refAudioIndex) {
+                               String context, boolean promptInEnglish, String refAudioIndex, boolean lookForOldAudio) {
     String content = ExerciseFormatter.getContent(foreignLanguagePhrase, translit, english, meaning, context, language);
     Exercise imported = new Exercise("import", id, content, promptInEnglish, true, english, context);
     imported.setMeaning(meaning);
     imported.addQuestion();   // TODO : needed?
+    imported.setType(Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW);
 
+    if (lookForOldAudio) {
+      addOldSchoolAudio(id, refAudioIndex, imported);
+    }
+
+    attachAudio(id, imported);
+
+    return imported;
+  }
+
+  private void addOldSchoolAudio(String id, String refAudioIndex, Exercise imported) {
     String audioDir = refAudioIndex.length() > 0 ? findBest(refAudioIndex) : id;
     if (audioOffset != 0) {
       audioDir = "" + (Integer.parseInt(audioDir.trim()) + audioOffset);
@@ -941,7 +953,6 @@ public class ExcelImport implements ExerciseDAO {
     String fastAudioRef = mediaDir + File.separator + audioDir + File.separator + "Fast" + ".wav";
     String slowAudioRef = mediaDir + File.separator + audioDir + File.separator + "Slow" + ".wav";
 
-    imported.setType(Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW);
 
     if (!missingFastSet.contains(audioDir)) {
       File test = new File(fastAudioRef);
@@ -953,7 +964,7 @@ public class ExcelImport implements ExerciseDAO {
       if (exists) {
         imported.addAudioForUser(ensureForwardSlashes(fastAudioRef), UserDAO.DEFAULT_USER);
       } //else {
-        //logger.debug("missing fast " + test.getAbsolutePath());
+      //logger.debug("missing fast " + test.getAbsolutePath());
       //}
     }
     if (!missingSlowSet.contains(audioDir)) {
@@ -964,16 +975,12 @@ public class ExcelImport implements ExerciseDAO {
         exists = test.exists();
       }
       if (exists) {
-        imported.addAudio(new AudioAttribute(ensureForwardSlashes(slowAudioRef),UserDAO.DEFAULT_USER).markSlow());
+        imported.addAudio(new AudioAttribute(ensureForwardSlashes(slowAudioRef), UserDAO.DEFAULT_USER).markSlow());
       }
-    // else {
-        //logger.debug("missing slow " + test.getAbsolutePath());
-     // }
+      // else {
+      //logger.debug("missing slow " + test.getAbsolutePath());
+      // }
     }
-
-    attachAudio(id, imported);
-
-    return imported;
   }
 
   private int missingExerciseCount = 0;
@@ -982,7 +989,7 @@ public class ExcelImport implements ExerciseDAO {
    * Why does it sometimes have the config dir on the front?
    * @param id
    * @param imported
-   * @see #getExercise(String, String, String, String, String, String, boolean, String)
+   * @see #getExercise(String, String, String, String, String, String, boolean, String, boolean)
    */
   private void attachAudio(String id, Exercise imported) {
     int c = 0;
