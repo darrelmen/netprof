@@ -1,7 +1,6 @@
 package mitll.langtest.client.recorder;
 
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.user.client.DOM;
