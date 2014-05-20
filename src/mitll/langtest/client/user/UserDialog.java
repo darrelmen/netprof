@@ -201,20 +201,12 @@ public abstract class UserDialog extends BasicDialog {
     return true;
   }
 
-  /**
-   */
-  void setRecordingOrder() {
-/*    boolean unansweredFirst = recordingOrder != null && recordingOrder.getValue().equals(LEAST_RECORDED_FIRST);
-    userManager.setShowUnansweredFirst(unansweredFirst);
-    userManager.setShowRerecord(recordingOrder.getValue().equals(LOW_GRADES_ONLY));*/
-  }
-
   private class ButtonClickEvent extends ClickEvent {
         /*To call click() function for Programmatic equivalent of the user clicking the button.*/
   }
 
   void removeKeyHandler() {
-    System.out.println("UserManager.removeKeyHandler : " + keyHandler);
+   // System.out.println("UserManager.removeKeyHandler : " + keyHandler);
     if (keyHandler != null) keyHandler.removeHandler();
   }
 
