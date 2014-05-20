@@ -104,8 +104,6 @@ public class ExcelImport implements ExerciseDAO {
     this.unitIndex = serverProps.getUnitChapterWeek()[0];
     this.chapterIndex = serverProps.getUnitChapterWeek()[1];
     this.weekIndex = serverProps.getUnitChapterWeek()[2];
-/*    logger.debug("\n\n\n\n ---> ExcelImport : config " + relativeConfigDir +
-      " media dir " +mediaDir + " slow missing " +missingSlowSet.size() + " fast " + missingFastSet.size());*/
   }
 
   public boolean getMissing(String relativeConfigDir, String file, Set<String> missing) {
@@ -274,7 +272,7 @@ public class ExcelImport implements ExerciseDAO {
 
     synchronized (this) {
       CommonExercise exercise = idToExercise.get(id);
-      if (exercise == null) logger.warn("no '" +id+"'  in " + idToExercise.keySet().size()+" keys");
+      //if (exercise == null) logger.warn("no '" +id+"'  in " + idToExercise.keySet().size()+" keys");
       return exercise;
     }
   }
@@ -286,6 +284,7 @@ public class ExcelImport implements ExerciseDAO {
    */
   private List<CommonExercise> readExercises(File file) {
     try {
+     // logger.debug("reading from " + file.getAbsolutePath());
       return readExercises(new FileInputStream(file));
     } catch (FileNotFoundException e) {
       logger.error("looking for " + file.getAbsolutePath() + " got " + e, e);
@@ -298,7 +297,7 @@ public class ExcelImport implements ExerciseDAO {
    * @return
    * @seex mitll.langtest.server.SiteDeployer#readExercises(mitll.langtest.shared.Site, org.apache.commons.fileupload.FileItem)
    */
-  public List<CommonExercise> readExercises(InputStream inp) {
+  private List<CommonExercise> readExercises(InputStream inp) {
     List<CommonExercise> exercises = new ArrayList<CommonExercise>();
     try {
       long then = System.currentTimeMillis();
@@ -311,7 +310,6 @@ public class ExcelImport implements ExerciseDAO {
       for (int i = 0; i < wb.getNumberOfSheets(); i++) {
         Sheet sheet = wb.getSheetAt(i);
         if (sheet.getPhysicalNumberOfRows() > 0) {
-         // logger.info("------------ reading sheet " + sheet.getSheetName() + " ------------------");
           Collection<CommonExercise> exercises1 = readFromSheet(sheet);
           exercises.addAll(exercises1);
           logger.info("sheet " + sheet.getSheetName() + " had " + exercises1.size() + " items.");
