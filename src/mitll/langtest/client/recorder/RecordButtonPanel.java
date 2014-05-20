@@ -46,7 +46,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
   /**
    * Has three parts -- record/stop button, audio validity feedback icon, and the audio control widget that allows playback.
    *
-   * @see SimpleRecordExercisePanel#getAnswerWidget(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#FlashcardRecordButtonPanel(mitll.langtest.client.flashcard.AudioAnswerListener, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.CommonExercise, int, String, String)
    */
   protected RecordButtonPanel(final LangTestDatabaseAsync service, final ExerciseController controller,
                               final CommonExercise exercise, final ExerciseQuestionState questionState, final int index,
@@ -102,6 +102,9 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
      return this.panel;
   }
 
+  /**
+   * @see mitll.langtest.client.recorder.RecordButton#start()
+   */
   public void startRecording() {
     recordImage1.setVisible(true);
     controller.startRecording();
@@ -156,7 +159,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
         }
 
         public void onSuccess(AudioAnswer result) {
-          System.out.println("postAudioFile : onSuccess " + result);
+          //System.out.println("postAudioFile : onSuccess " + result);
 
           if (reqid != result.getReqid()) {
             System.out.println("ignoring old answer " + result);
