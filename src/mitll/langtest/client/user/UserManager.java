@@ -387,7 +387,7 @@ public class UserManager {
    * @see StudentDialog#addUser
    */
   void storeUser(long sessionID, String audioType, String userChosenID, PropertyHandler.LOGIN_TYPE userType) {
-    System.out.println("storeUser : user now " + sessionID + " audio type '" + audioType +"'");
+    //System.out.println("storeUser : user now " + sessionID + " audio type '" + audioType +"'");
     final long DURATION = getUserSessionDuration();
     long futureMoment = getUserSessionEnd(DURATION);
     if (USE_COOKIE) {
