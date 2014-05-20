@@ -7,7 +7,6 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseQuestionState;
-import mitll.langtest.client.recorder.FlashcardRecordButton;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.shared.AudioAnswer;
@@ -20,10 +19,15 @@ import mitll.langtest.shared.CommonExercise;
  * Time: 1:43 PM
  * To change this template use File | Settings | File Templates.
  */
-public class FlashcardRecordButtonPanel extends RecordButtonPanel implements RecordButton.RecordingListener {
+public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel implements RecordButton.RecordingListener {
   public static final String PRESS_AND_HOLD_THE_MOUSE_BUTTON_TO_RECORD = "Press and hold the mouse button to record";
-  private static final boolean ADD_KEY_BINDING = false;
+  //private static final boolean ADD_KEY_BINDING = false;
   private final AudioAnswerListener exercisePanel;
+
+  private IconAnchor waiting;
+  private IconAnchor correctIcon;
+  private IconAnchor incorrect;
+  protected final String instance;
 
   /**
    *
@@ -34,21 +38,20 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
    * @param exercise
    * @param index
    * @param audioType
-   * @see BootstrapExercisePanel#getAnswerWidget(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int, boolean)
+   * @param instance
+   * @see BootstrapExercisePanel#getAnswerWidget(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int, boolean, String)
    */
   public FlashcardRecordButtonPanel(AudioAnswerListener exercisePanel, LangTestDatabaseAsync service,
-                                    ExerciseController controller, CommonExercise exercise, int index, String audioType) {
+                                    ExerciseController controller, CommonExercise exercise, int index, String audioType, String instance) {
     super(service, controller, exercise, null, index, true, audioType, "Record");
-
+    this.instance = instance;
     this.exercisePanel = exercisePanel;
-   // recordButton.setTitle("Press and hold the space bar or mouse button to record");
     recordButton.setTitle(PRESS_AND_HOLD_THE_MOUSE_BUTTON_TO_RECORD);
   }
 
-  private IconAnchor waiting;
-  private IconAnchor correctIcon;
-  private IconAnchor incorrect;
-
+  /**
+   * @see #layoutRecordButton(com.google.gwt.user.client.ui.Widget)
+   */
   @Override
   protected void addImages() {
     waiting = new IconAnchor();
@@ -65,6 +68,10 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
     incorrect.setVisible(false);
   }
 
+  /**
+   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#getAnswerAndRecordButtonRow(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
+   * @return
+   */
   @Override
   public Widget getRecordButton() {
     Widget recordButton1 = super.getRecordButton();
@@ -77,17 +84,17 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
   }
 
   @Override
-  protected RecordButton makeRecordButton(ExerciseController controller, String title) {
-    return new FlashcardRecordButton(controller.getRecordTimeout(), this, true, ADD_KEY_BINDING, controller);  // TODO : fix later in classroom?
-  }
-
-  @Override
   public void initRecordButton() {
     super.initRecordButton();
     correctIcon.setVisible(false);
     incorrect.setVisible(false);
     waiting.setVisible(false);
   }
+
+  @Override
+  protected abstract RecordButton makeRecordButton(ExerciseController controller, String title);/* {
+    return new FlashcardRecordButton(controller.getRecordTimeout(), this, true, ADD_KEY_BINDING, controller);  // TODO : fix later in classroom?
+  }*/
 
   /**
    * Deal with three cases: <br></br>
