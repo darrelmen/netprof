@@ -36,12 +36,11 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    * @param service
    * @param index
    * @param recordInResults
-   * @param audioType
    * @param recordButtonTitle
    * @param stopButtonTitle
    */
   public PostAudioRecordButton(CommonExercise exercise, final ExerciseController controller, LangTestDatabaseAsync service,
-                               int index, boolean recordInResults, String audioType, String recordButtonTitle, String stopButtonTitle) {
+                               int index, boolean recordInResults, String recordButtonTitle, String stopButtonTitle) {
     super(controller.getRecordTimeout(), true, recordButtonTitle, stopButtonTitle);
     setRecordingListener(this);
     this.index = index;
@@ -49,8 +48,6 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     this.controller = controller;
     this.service = service;
     this.recordInResults = recordInResults;
-    //String audioType1 = audioType;
-  //  System.out.println("PostAudioRecordButton : Audio type " + audioType);
     getElement().setId("PostAudioRecordButton");
     controller.register(this, exercise.getID());
   }
