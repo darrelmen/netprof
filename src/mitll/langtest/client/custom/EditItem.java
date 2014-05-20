@@ -131,7 +131,7 @@ public class EditItem {
     }
 
     final PagingExerciseList exerciseList =
-      new PagingExerciseList(right, service, feedback, null, controller, false, false,
+      new PagingExerciseList(right, service, feedback, null, controller, false,
         true, instanceName) {
         @Override
         protected void onLastItem() {
