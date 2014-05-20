@@ -161,7 +161,7 @@ public class ASRScoring extends Scoring {
                 " and not in dictionary");
               if (process != null) {
                 for (String[] ar : process) {
-                  logger.warn("got " + ar);
+                  //logger.warn("got " + ar);
                   for (String arr : ar) {
                     logger.warn("\tgot " + arr);
                   }
