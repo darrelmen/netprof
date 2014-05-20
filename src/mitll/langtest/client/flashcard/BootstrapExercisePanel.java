@@ -212,7 +212,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
    * @see #getQuestionContent
    */
   private void playRefLater() {
-    System.out.println("playRefLater... ---------- " + exercise.getID());
+   // System.out.println("playRefLater... ---------- " + exercise.getID());
     Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
         playRef();
@@ -860,7 +860,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
    */
   private void playRef(String path) {
 
-    System.out.println("playRef... ---------- " + exercise.getID() + " path " + path );
+  //  System.out.println("playRef... ---------- " + exercise.getID() + " path " + path );
 
     path = getPath(path);
     final Widget textWidget = isSiteEnglish() ? english : foreign;
