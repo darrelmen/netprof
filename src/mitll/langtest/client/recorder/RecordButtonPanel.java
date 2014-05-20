@@ -62,7 +62,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
   }
 
   protected RecordButton makeRecordButton(ExerciseController controller, String buttonTitle) {
-    return new RecordButton(controller.getRecordTimeout(), this, false, false);
+    return new RecordButton(controller.getRecordTimeout(), this, false);
   }
 
   public void flip(boolean first) {
