@@ -9,7 +9,17 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.DecoratedPopupPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.ProvidesResize;
+import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.UIObject;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.custom.EditItem;
@@ -26,7 +36,6 @@ import mitll.langtest.shared.Result;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,7 +50,7 @@ import java.util.Set;
  */
 public abstract class ExerciseList extends VerticalPanel implements ListInterface, ProvidesResize,
   ValueChangeHandler<String> {
-  private static final int NUM_QUESTIONS_FOR_TOKEN = 5;
+ // private static final int NUM_QUESTIONS_FOR_TOKEN = 5;
   private static final Map<String, Collection<String>> TYPE_TO_SELECTION = new HashMap<String, Collection<String>>();
 
   private SimplePanel innerContainer;
@@ -53,8 +62,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   protected Panel createdPanel;
   protected UserManager user;
   private String exercise_title;
-  private final boolean showTurkToken;
-  private int countSincePrompt = 0;
+//  private final boolean showTurkToken;
+//  private int countSincePrompt = 0;
   int lastReqID = 0;
  // private final Set<Integer> visited = new HashSet<Integer>();
   final boolean allowPlusInURL;
@@ -68,18 +77,17 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param feedback
    * @param factory
    * @param controller
-   * @param showTurkToken
    * @param instance
    */
   ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
                ExercisePanelFactory factory,
                ExerciseController controller,
-               boolean showTurkToken, String instance) {
+               String instance) {
     addWidgets(currentExerciseVPanel);
     this.service = service;
     this.feedback = feedback;
     this.factory = factory;
-    this.showTurkToken = showTurkToken;
+  //  this.showTurkToken = showTurkToken;
     this.allowPlusInURL = controller.getProps().shouldAllowPlusInURL();
     this.controller = controller;
     this.instance = instance;
@@ -113,7 +121,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   /**
-   * @see #ExerciseList(com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExercisePanelFactory, mitll.langtest.client.exercise.ExerciseController, boolean, String)
+   * @see #ExerciseList(com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExercisePanelFactory, mitll.langtest.client.exercise.ExerciseController, String)
    * @param currentExerciseVPanel
    */
   private void addWidgets(final Panel currentExerciseVPanel) {
@@ -259,7 +267,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   protected String getRole() {
     String audioTypeRecorder = Result.AUDIO_TYPE_RECORDER;
     String s = instance.equalsIgnoreCase("record_Audio") ? audioTypeRecorder : instance;
-    System.out.println("instance " +instance + " role " +s);
+   // System.out.println("instance " +instance + " role " +s);
     return s;
   }
 
@@ -384,11 +392,11 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       CommonShell firstExerciseShell = findFirstExercise();
       if (firstExerciseShell.getID().equals(firstExercise.getID())) {
 
-        System.out.println("ExerciseList : rememberAndLoadFirst using first = " +firstExercise);
+        //System.out.println("ExerciseList : rememberAndLoadFirst using first = " +firstExercise);
         useExercise(firstExercise);   // allows us to skip another round trip with the server to ask for the first exercise
       }
       else {
-        System.out.println("ExerciseList : rememberAndLoadFirst finding first...");
+        //System.out.println("ExerciseList : rememberAndLoadFirst finding first...");
 
         loadFirstExercise();
       }
@@ -446,7 +454,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
         if (e != null) toLoad = e;
       }
 
-      System.out.println("loadFirstExercise ex id =" + toLoad.getID() + " instance " + instance);
+      //System.out.println("loadFirstExercise ex id =" + toLoad.getID() + " instance " + instance);
       pushFirstSelection(toLoad.getID());
     }
   }
@@ -482,7 +490,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   protected CommonShell findFirstExercise() {
     CommonShell first = getFirst();
-    System.out.println("findFirstExercise " + first.getID() + " is first in container.");
+   // System.out.println("findFirstExercise " + first.getID() + " is first in container.");
 
     return first;
   }
@@ -526,8 +534,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   @Override
   public void checkAndAskServer(String id) {
-    System.out.println("ExerciseList.checkAndAskServer - askServerForExercise = "  + id);
-    //                                                                      new Exception().printStackTrace();
+//    System.out.println("ExerciseList.checkAndAskServer - askServerForExercise = "  + id);
     if (hasExercise(id)) {
       askServerForExercise(id);
     }
@@ -743,9 +750,9 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     else {
       getNextExercise(current);
     }
-    if (showTurkToken && (onLast || ++countSincePrompt % NUM_QUESTIONS_FOR_TOKEN == 0)) {
+/*    if (showTurkToken && (onLast || ++countSincePrompt % NUM_QUESTIONS_FOR_TOKEN == 0)) {
       showTurkToken(current);
-    }
+    }*/
     return onLast;
   }
 
@@ -771,9 +778,9 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   /**
    * So a turker can get credit for their work.
-   * @param current
+   * @paramx current
    */
-  private void showTurkToken(CommonShell current) {
+/*  private void showTurkToken(CommonShell current) {
     String code = user.getUser() + "_" + current.getID();
 
     // Create a basic popup widget
@@ -783,7 +790,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     simplePopup.setWidget(new HTML("To receive credit, copy and paste this token : " + code.hashCode() + "<br/>Click on the page to dismiss.<br/>"));
     simplePopup.setPopupPosition(Window.getClientWidth()/2,Window.getClientHeight()/2);
     simplePopup.show();
-  }
+  }*/
 
   @Override
   public boolean loadPrev() { return loadPreviousExercise(getCurrentExercise()); }
