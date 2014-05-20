@@ -39,7 +39,7 @@ public class HistoryExerciseList extends PagingExerciseList {
   protected HistoryExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
                                 boolean showTurkToken, boolean showInOrder, ExerciseController controller,
                                 boolean showTypeAhead, String instance) {
-    super(currentExerciseVPanel, service, feedback, null, controller, showTurkToken, showInOrder, showTypeAhead, instance);
+    super(currentExerciseVPanel, service, feedback, null, controller, showTurkToken, showTypeAhead, instance);
   }
 
   /**
