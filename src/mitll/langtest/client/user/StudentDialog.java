@@ -133,7 +133,7 @@ class StudentDialog extends UserDialog {
     final FormField user = addControlFormField(fieldset, USER_ID, MIN_LENGTH_USER_ID);
     user.setVisible(isDataCollection(purpose) || isPractice(purpose));
     addTooltip(user.box, USER_ID_TOOLTIP);
-
+    user.box.setFocus(true);
     final FormField password = addControlFormField(fieldset, PASSWORD, true, 30, USER_ID_MAX_LENGTH);
     password.setVisible(false);
 
@@ -219,16 +219,21 @@ class StudentDialog extends UserDialog {
 
       @Override
       public void onShown(ShownEvent shownEvent) {
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-          public void execute() {
-            user.box.setFocus(true);
-          }
-        });
+        getFocusOnUserID(user);
 
       }
     });
 
     dialogBox.show();
+    getFocusOnUserID(user);
+  }
+
+  protected void getFocusOnUserID(final FormField user) {
+    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      public void execute() {
+        user.box.setFocus(true);
+      }
+    });
   }
 
   //int userUniqueID = -1;
@@ -423,7 +428,7 @@ class StudentDialog extends UserDialog {
 
             checkThenRegister(audioType, registrationInfo, dialogBox, userID,permissions);
           }
-          setRecordingOrder();
+          //setRecordingOrder();
         }
       });
     } else {
