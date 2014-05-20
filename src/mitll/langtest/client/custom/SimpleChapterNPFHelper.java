@@ -69,7 +69,7 @@ class SimpleChapterNPFHelper implements RequiresResize {
     int widgetCount = content.getWidgetCount();
     if (!madeNPFContent || widgetCount == 0) {
       madeNPFContent = true;
-      System.out.println("\t: adding npf content instanceName = " + instanceName + " loadExercises " + loadExercises);
+      //System.out.println("\t: adding npf content instanceName = " + instanceName + " loadExercises " + loadExercises);
       addNPFToContent(content, instanceName, loadExercises);
     }
   }
