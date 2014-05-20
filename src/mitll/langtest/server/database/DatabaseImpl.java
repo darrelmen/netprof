@@ -59,8 +59,8 @@ import java.util.Set;
 public class DatabaseImpl implements Database {
   private static final Logger logger = Logger.getLogger(DatabaseImpl.class);
 
-  private static final boolean DROP_USER = false;
-  private static final boolean DROP_RESULT = false;
+/*  private static final boolean DROP_USER = false;
+  private static final boolean DROP_RESULT = false;*/
 
   private String installPath;
   private ExerciseDAO exerciseDAO = null;
@@ -177,6 +177,12 @@ public class DatabaseImpl implements Database {
       userListManager.setUserExerciseDAO(userExerciseDAO);
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
+    }
+
+    try {
+      gradeDAO.createGradesTable(getConnection());
+    } catch (SQLException e) {
+      logger.error("Got " +e,e);
     }
   }
 
@@ -479,8 +485,17 @@ public class DatabaseImpl implements Database {
 
   private AVPHistoryForList.UserScore makeScore(int count, Map<Long, User> userMap, Session session, boolean useCorrect) {
     float value = useCorrect ? session.getCorrectPercent() : 100f * session.getAvgScore();
+    long userid = session.getUserid();
+    User user = userMap.get(userid);
+    String userID;
+    if (user == null) {
+      logger.warn("huh? couldn't find userid " + userid + " in map with keys " + userMap.keySet());
+      userID = "Default User";
+    } else {
+      userID = user.getUserID();
+    }
     return new AVPHistoryForList.UserScore(count,
-      userMap.get(session.getUserid()).getUserID(),
+      userID,
       value,
       session.isLatest());
   }
