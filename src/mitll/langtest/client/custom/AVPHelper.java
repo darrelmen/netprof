@@ -32,10 +32,16 @@ class AVPHelper extends NPFHelper {
     super(service, feedback, userManager, controller, false);
   }
 
+  /**
+   * @see mitll.langtest.client.custom.NPFHelper#makeNPFExerciseList(com.google.gwt.user.client.ui.Panel, String)
+   * @param right
+   * @param instanceName
+   * @return
+   */
   @Override
   protected PagingExerciseList makeExerciseList(final Panel right, final String instanceName) {
-    ExercisePanelFactory factory = getFactory(null,instanceName, true);
-    return new PagingExerciseList(right, service, feedback, factory, controller, false, false,
+    ExercisePanelFactory factory = getFactory(null, instanceName, true);
+    return new PagingExerciseList(right, service, feedback, factory, controller, false,
       true, instanceName) {
       @Override
       protected void onLastItem() {
@@ -59,7 +65,7 @@ class AVPHelper extends NPFHelper {
 
   @Override
   protected ExercisePanelFactory getFactory(PagingExerciseList exerciseList, final String instanceName, boolean showQC) {
-    return new MyFlashcardExercisePanelFactory(service, feedback, controller, exerciseList);
+    return new MyFlashcardExercisePanelFactory(service, feedback, controller, exerciseList, "AVPHelper");
   }
 
   @Override
