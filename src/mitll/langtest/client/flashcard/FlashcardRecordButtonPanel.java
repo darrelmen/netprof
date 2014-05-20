@@ -21,7 +21,6 @@ import mitll.langtest.shared.CommonExercise;
  */
 public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel implements RecordButton.RecordingListener {
   public static final String PRESS_AND_HOLD_THE_MOUSE_BUTTON_TO_RECORD = "Press and hold the mouse button to record";
-  //private static final boolean ADD_KEY_BINDING = false;
   private final AudioAnswerListener exercisePanel;
 
   private IconAnchor waiting;
@@ -46,7 +45,7 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
     super(service, controller, exercise, null, index, true, audioType, "Record");
     this.instance = instance;
     this.exercisePanel = exercisePanel;
-    recordButton.setTitle(PRESS_AND_HOLD_THE_MOUSE_BUTTON_TO_RECORD);
+   // recordButton.setTitle(PRESS_AND_HOLD_THE_MOUSE_BUTTON_TO_RECORD);
   }
 
   /**
