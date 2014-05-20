@@ -887,15 +887,24 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   public ListInterface getExerciseList() { return exerciseList; }
 
+  /**
+   * @see mitll.langtest.client.recorder.FlashcardRecordButton#FlashcardRecordButton(int, mitll.langtest.client.recorder.RecordButton.RecordingListener, boolean, boolean, mitll.langtest.client.exercise.ExerciseController, String)
+   * @param listener
+   */
   @Override
   public void addKeyListener(KeyPressHelper.KeyListener listener) {
     keyPressHelper.addKeyHandler(listener);
-    //System.out.println("key press handler now " + keyPressHelper);
+    if (keyPressHelper.getSize() > 2) {
+      System.out.println("addKeyListener " + listener.getName() +
+        " key press handler now " + keyPressHelper);
+    }
   }
 
   @Override
   public boolean removeKeyListener(String name) {
-    return keyPressHelper.removeKeyHandler(name);
+    boolean b = keyPressHelper.removeKeyHandler(name);
+    System.out.println("removeKeyListener " + name+ " key press handler now " + keyPressHelper);
+    return b;
   }
 
   private class LogoutClickHandler implements ClickHandler {
