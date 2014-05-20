@@ -8,6 +8,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.PopupPanel;
+import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.MyCustomIconType;
@@ -37,7 +38,7 @@ public class FlashcardRecordButton extends RecordButton {
   private boolean warnUserWhenNotSpace = true;
   private final boolean addKeyBinding;
   private ExerciseController controller;
-  private String instance;
+ // private String instance;
 
   /**
    * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#makeRecordButton
@@ -50,8 +51,8 @@ public class FlashcardRecordButton extends RecordButton {
    */
   public FlashcardRecordButton(int delay, RecordingListener recordingListener, boolean warnNotASpace,
                                boolean addKeyBinding, ExerciseController controller, final String instance) {
-    super(delay, recordingListener, true, addKeyBinding);
-    this.instance = instance;
+    super(delay, recordingListener, true);
+   // this.instance = instance;
     if (addKeyBinding) {
       KeyPressHelper.KeyListener listener = new KeyPressHelper.KeyListener() {
         @Override
@@ -73,7 +74,7 @@ public class FlashcardRecordButton extends RecordButton {
         }
       };
       controller.addKeyListener(listener);
-      System.out.println("FlashcardRecordButton : " + instance + " key is  " + listener.getName());
+     // System.out.println("FlashcardRecordButton : " + instance + " key is  " + listener.getName());
     }
     this.controller = controller;
 
@@ -89,9 +90,11 @@ public class FlashcardRecordButton extends RecordButton {
 
     initRecordButton();
 
-    getElement().setId("FlashcardRecordButton_"+instance);
+    getElement().setId("FlashcardRecordButton_" + instance);
 
-    System.out.println("FlashcardRecordButton : using " + getElement().getId());
+    new TooltipHelper().addTooltip(this, addKeyBinding ? NO_SPACE_WARNING : PROMPT);
+
+//    System.out.println("FlashcardRecordButton : using " + getElement().getId());
   }
 
   protected void checkKeyDown2(NativeEvent event) {
