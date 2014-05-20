@@ -64,6 +64,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   public static final int HORIZ_SPACE_FOR_CHARTS = (1250 - TABLE_WIDTH);
   public static final String CURRENT_EXERCISE = "currentExercise";
   public static final String CORRECT1 = "correct";
+  public static final String SKIPPED = "skipped";
 
   private static final boolean ADD_KEY_BINDING = true; // TODO : work on key binding...
 
@@ -71,9 +72,10 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   private CommonExercise currentExercise;
   private final ControlState controlState;
   private List<CommonShell> allExercises;
-  private int totalExercises = 0;
+ // private int totalExercises = 0;
   private final Map<String,Boolean> exToCorrect = new HashMap<String, Boolean>();
   private final Map<String,Double>   exToScore = new HashMap<String, Double>();
+  private Set<String> skipped = new HashSet<String>();
   private Set<Long> resultIDs = new HashSet<Long>();
   private KeyStorage storage;
   private String selectionID;
@@ -100,7 +102,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       public void listChanged(List<CommonShell> items, String selectionID) {
         MyFlashcardExercisePanelFactory.this.selectionID = selectionID;
         allExercises = items;
-        totalExercises = allExercises.size();
+        //totalExercises = allExercises.size();
         //System.out.println("MyFlashcardExercisePanelFactory : " + selectionID + " got new set of items from list. " + items.size());
         reset();
       }
@@ -130,7 +132,8 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   private void reset() {
     exToCorrect.clear();
     exToScore.clear();
-    totalExercises = allExercises.size();
+    skipped.clear();
+    //totalExercises = allExercises.size();
     latestResultID = -1;
     resultIDs.clear();
   }
@@ -164,6 +167,23 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
         String[] split = pair.split("=");
         if (split.length == 2) {
           exToScore.put(split[0],Double.parseDouble(split[1]));
+        }
+      }
+
+/*      System.out.println("Score now of size " + exToScore.size());
+      for (Map.Entry<String,Double> pair : exToScore.entrySet()) {
+        System.out.println("\t"+pair.getKey()+"\t"+pair.getValue());
+      }*/
+    }
+
+    value = storage.getValue(SKIPPED);
+    if (value != null && !value.trim().isEmpty()) {
+      //    System.out.println("using score map " + value);
+      for (String pair : value.split(",")) {
+       // String[] split = pair.split("=");
+        String trim = pair.trim();
+        if (!trim.isEmpty()) {
+          skipped.add(trim);
         }
       }
 
@@ -311,7 +331,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       int totalCorrect = getCorrect();
       int totalIncorrect = getIncorrect();
       int all = totalCorrect + totalIncorrect;
-      System.out.println("onSetComplete.onSuccess : results " + result + " " +totalExercises +
+      System.out.println("onSetComplete.onSuccess : results " + result + " " +(allExercises.size()-skipped.size()) +
         " all " +all + " correct " + totalCorrect + " inc " + totalIncorrect);
 
       return makeChart(totalCorrect, all, sessionAVPHistoryForList);
@@ -333,8 +353,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
      */
     private Chart makeChart(int totalCorrect, int all, AVPHistoryForList sessionAVPHistoryForList) {
       String suffix = getSkippedSuffix();
-      String correct = totalCorrect +" of " + all+
-        " Correct (" + toPercent(totalCorrect, all) + ")" + suffix;
+      String correct = totalCorrect +" of " + all+ " Correct (" + toPercent(totalCorrect, all) + ")" + suffix;
       Chart chart  = new LeaderboardPlot().getChart(sessionAVPHistoryForList, correct, CORRECT_SUBTITLE);
 
       scaleCharts(chart);
@@ -566,7 +585,14 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
           soundFeedback.clear();
 
           skip.setEnabled(false);
-          totalExercises--;
+
+          StringBuilder builder = new StringBuilder();
+          for (String id : skipped) {
+            builder.append(id).append(",");
+          }
+
+          storage.storeValue(SKIPPED, builder.toString());
+          skipped.add(currentExercise.getID());
           loadNext();
         }
       });
@@ -662,7 +688,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
     private void setStateFeedback() {
       int totalCorrect = getCorrect();
       int totalIncorrect = getIncorrect();
-      int remaining = totalExercises - totalCorrect - totalIncorrect;
+      int remaining = allExercises.size() - skipped.size() - totalCorrect - totalIncorrect;
       remain.setText(remaining + "");
       incorrectBox.setText(totalIncorrect + "");
       correctBox.setText(totalCorrect + "");
@@ -674,6 +700,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
     storage.removeValue(INCORRECT);
     storage.removeValue(CURRENT_EXERCISE);
     storage.removeValue(SCORE);
+    storage.removeValue(SKIPPED);
   }
 
   public class MySoundFeedback extends SoundFeedback {
