@@ -211,6 +211,10 @@ public abstract class ScoringAudioPanel extends AudioPanel {
     scoreListener.showChart(showOnlyOneExercise);
   }
 
+  public void setClassAvg(float avgScore) {
+    scoreListener.setClassAvg(avgScore);
+  }
+
   private abstract class MyClickHandler implements ClickHandler, EventSegment {
     final NetPronImageType type;
 
