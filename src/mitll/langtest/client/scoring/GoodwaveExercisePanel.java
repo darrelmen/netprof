@@ -118,7 +118,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     if (widgets != null && !controller.getProps().isNoModel()) {
       add(widgets);
     }
-    addUserRecorder(service, controller, center, screenPortion); // todo : revisit screen portion...
+    addUserRecorder(service, controller, center, screenPortion,e); // todo : revisit screen portion...
 
     this.navigationHelper = getNavigationHelper(controller, listContainer, addKeyHandler);
     navigationHelper.addStyleName("topBarMargin");
@@ -165,12 +165,21 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    *
    * @param service
    * @param controller    used in subclasses for audio control
-   * @paramx i
    * @param screenPortion
+   * @param exercise
+   * @paramx i
+   * @see #GoodwaveExercisePanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, float, boolean, String)
    */
-  protected void addUserRecorder(LangTestDatabaseAsync service, ExerciseController controller, Panel toAddTo, float screenPortion) {
+  protected void addUserRecorder(LangTestDatabaseAsync service, ExerciseController controller, Panel toAddTo,
+                                 float screenPortion, CommonExercise exercise) {
     DivWidget div = new DivWidget();
-    Widget answerWidget = getAnswerWidget(service, controller, 1, screenPortion);
+    ScoringAudioPanel answerWidget = getAnswerWidget(service, controller, 1, screenPortion);
+    if (!exercise.getScores().isEmpty()) {
+      for (Float score : exercise.getScores()) {
+        answerWidget.addScore(score);
+      }
+      answerWidget.showChart();
+    }
     div.add(answerWidget);
 
     addGroupingStyle(div);
@@ -389,8 +398,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * @param index
    * @param screenPortion
    * @return
+   * @see #addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.CommonExercise)
    */
-  private Widget getAnswerWidget(LangTestDatabaseAsync service, final ExerciseController controller, final int index, float screenPortion) {
+  private ScoringAudioPanel getAnswerWidget(LangTestDatabaseAsync service, final ExerciseController controller, final int index, float screenPortion) {
     ScoringAudioPanel widgets = new ASRRecordAudioPanel(service, index, controller);
     widgets.addScoreListener(scorePanel);
     answerAudio = widgets;
