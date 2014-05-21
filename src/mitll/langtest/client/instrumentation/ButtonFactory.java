@@ -73,17 +73,20 @@ public class ButtonFactory implements EventLogger {
 
   @Override
   public void logEvent(final String widgetID, String widgetType, String exid, String context, long userid) {
+
+    System.out.println("logEvent event for " + widgetID + " " + widgetType + " exid " + exid + " context " + context + " user " + userid);
+
     service.logEvent(widgetID, widgetType, exid, context, userid, props.getTurkID(), new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
-        System.err.println("FAILED to send event for " + widgetID);
-
+        System.err.println("FAILED to send event for " + widgetID + " message " +caught.getMessage());
+        caught.printStackTrace();
       }
 
       @Override
       public void onSuccess(Void result) {
 
-        //System.out.println("sent event for " + widgetID);
+        System.out.println("sent event for " + widgetID);
       }
     });
   }
