@@ -158,7 +158,8 @@ public class ASRScoring extends Scoring {
               logger.warn("checkLTS with " + lts + "/" + languageProperty + " token #" +i+
                 " : '" + token + "' hash " + token.hashCode()+
                 " is invalid in " + foreignLanguagePhrase+
-                " and not in dictionary");
+                " and not in dictionary (" + htkDictionary.size()+
+                ")");
               if (process != null) {
                 for (String[] ar : process) {
                   //logger.warn("got " + ar);
@@ -589,17 +590,20 @@ public class ASRScoring extends Scoring {
    */
   private HTKDictionary makeDict() {
     String dictFile = configFileCreator.getDictFile();
-    boolean dictExists = new File(dictFile).exists();
-    if (!dictExists) logger.error("readDictionary : Can't find dict file at " + dictFile);
-
-    long then = System.currentTimeMillis();
-    HTKDictionary htkDictionary = new HTKDictionary(dictFile);
-    long now = System.currentTimeMillis();
-    int size = htkDictionary.size(); // force read from lazy val
-    if (now-then > 100) {
-      logger.debug("read dict " + dictFile + " of size " +size + " in " + (now-then) + " millis");
+    if (new File(dictFile).exists()) {
+      long then = System.currentTimeMillis();
+      HTKDictionary htkDictionary = new HTKDictionary(dictFile);
+      long now = System.currentTimeMillis();
+      int size = htkDictionary.size(); // force read from lazy val
+      if (now - then > 100) {
+        logger.debug("read dict " + dictFile + " of size " + size + " in " + (now - then) + " millis");
+      }
+      return htkDictionary;
     }
-    return htkDictionary;
+    else {
+      logger.warn("makeDict : Can't find dict file at " + dictFile);
+      return new HTKDictionary();
+    }
   }
 
   /**
