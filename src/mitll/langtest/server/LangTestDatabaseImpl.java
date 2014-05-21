@@ -832,7 +832,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   @Override
   public void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID) {
-    db.logEvent(id,widgetType,exid,context,userid, hitID);
+    try {
+      db.logEvent(id, widgetType, exid, context, userid, hitID);
+    } catch (Exception e) {
+      logger.error("got " +e,e);
+    }
   }
 
   public List<Event> getEvents() { return db.getEvents(); }
