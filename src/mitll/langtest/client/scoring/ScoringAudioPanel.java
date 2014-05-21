@@ -203,6 +203,14 @@ public abstract class ScoringAudioPanel extends AudioPanel {
     }
   }
 
+  public void addScore(Float score) {
+    scoreListener.addScore(score);
+  }
+
+  public void showChart() {
+    scoreListener.showChart(showOnlyOneExercise);
+  }
+
   private abstract class MyClickHandler implements ClickHandler, EventSegment {
     final NetPronImageType type;
 
