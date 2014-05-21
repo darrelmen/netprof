@@ -3,7 +3,6 @@ package mitll.langtest.client.custom;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.Label;
-import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
 import com.github.gwtbootstrap.client.ui.incubator.Table;
@@ -50,7 +49,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   private static final String REMAINING = "Remaining";
   private static final String INCORRECT = "Incorrect";
   private static final String CORRECT = "Correct";
-  private static final String AVG_SCORE = "Avg Score";
+  private static final String AVG_SCORE = "Pronunciation";
   public static final String START_OVER = "Start Over";
   private static final String CORRECT_NBSP = "Correct&nbsp;%";
   private static final String SKIP_THIS_ITEM = "Skip this item";
@@ -722,7 +721,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       // TODO : come back to the color coding ...
       LabelType type = total > 0.8 ? LabelType.SUCCESS :
           total > 0.5 ? LabelType.INFO : LabelType.WARNING;
-      System.out.println("type "+type + " score " + total);
+    //  System.out.println("type "+type + " score " + total);
       pronScore.setType(type);
 
       total *= 100;
