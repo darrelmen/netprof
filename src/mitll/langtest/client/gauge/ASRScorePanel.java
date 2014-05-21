@@ -12,12 +12,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.visualization.client.AbstractDataTable;
-import com.google.gwt.visualization.client.DataTable;
-import com.google.gwt.visualization.client.LegendPosition;
-import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
-import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
-import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import mitll.langtest.client.pretest.PretestGauge;
 import mitll.langtest.client.scoring.ScoreListener;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -46,6 +40,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   private final Panel phoneList;
   private final List<Float> scores = new ArrayList<Float>();
   private final SimplePanel chartPanel;
+  private final SimpleColumnChart chart = new SimpleColumnChart();
 
   /**
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel
@@ -60,17 +55,21 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     chartCaptionPanel.add(chartPanel);
 
     add(chartCaptionPanel);
+  //  add(new Heading(4,SCORE_HISTORY));
+    add(chartPanel);
 
-    CaptionPanel captionPanel = new CaptionPanel(SOUND_ACCURACY);
+   CaptionPanel captionPanel = new CaptionPanel(SOUND_ACCURACY);
 
     phoneList = new FlowPanel();
     phoneList.getElement().getStyle().setFloat(Style.Float.LEFT);
 
     captionPanel.add(phoneList);
-
+    //add(new Heading(4,SOUND_ACCURACY));
+    //add(phoneList);
     add(captionPanel);
 
     CaptionPanel gaugeCaptionPanel = new CaptionPanel(SCORE);
+  //  add(new Heading(4,SCORE));
 
     Panel gaugePanel = new FlowPanel();
     gaugePanel.setHeight("100%");
@@ -80,7 +79,8 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 
 
     gaugeCaptionPanel.add(gaugePanel);
-		add(gaugeCaptionPanel);
+    add(gaugeCaptionPanel);
+    //add(gaugePanel);
 
     Panel instructionsPanel = new FlowPanel();
     add(instructionsPanel);
@@ -115,15 +115,28 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#useResult
    */
   public void gotScore(PretestScore score, boolean showOnlyOneExercise) {
-    float zeroToHundred = score.getHydecScore() * 100f;
+    float hydecScore = score.getHydecScore();
+    float zeroToHundred = hydecScore * 100f;
     setASRGaugeValue(Math.min(100.0f, zeroToHundred));
     updatePhoneAccuracy(score.getPhoneScores());
-    scores.add(score.getHydecScore());
+    addScore(hydecScore);
     chartPanel.clear();
-    chartPanel.add(doChart(showOnlyOneExercise));
+    showChart(showOnlyOneExercise);
   }
 
-  private ColumnChart doChart(boolean showOnlyOneExercise) {
+  @Override
+  public void addScore(float hydecScore) {
+    scores.add(hydecScore);
+  }
+
+  @Override
+  public void showChart(boolean showOnlyOneExercise) {
+   // chartPanel.add(doChart(showOnlyOneExercise, scores));
+   chartPanel.add(chart.getChart(showOnlyOneExercise, scores, CHART_HEIGHT));
+
+  }
+
+/*  private ColumnChart doChart(boolean showOnlyOneExercise, List<Float> scores) {
     Options options = Options.create();
     options.setLegend(LegendPosition.NONE);
     options.setGridlineColor(showOnlyOneExercise ? "#efefef" : "white");
@@ -162,7 +175,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
       options.setBackgroundColor("#efefef");
     }
     return new ColumnChart(data, options);
-  }
+  }*/
 
   /**
    * @see mitll.langtest.client.scoring.ScoreListener#gotScore
@@ -182,7 +195,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 				}
 			});
 
-      VerticalPanel vp = new VerticalPanel();
+      Panel vp = new VerticalPanel();
       HorizontalPanel hp = new HorizontalPanel();
       vp.add(hp);
       hp.setSpacing(5);
@@ -190,8 +203,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 
       int c = 0;
       for (String phone : phones) {
-        HorizontalPanel p = getPhone(phoneAccuracies, phone);
-        hp.add(p);
+        hp.add(getPhone(phoneAccuracies, phone));
         if (++c % 5 == 0) {
           hp = new HorizontalPanel();
           hp.setSpacing(5);
@@ -203,7 +215,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 		}
   }
 
-  private HorizontalPanel getPhone(Map<String, Float> phoneAccuracies, String phone) {
+  private Panel getPhone(Map<String, Float> phoneAccuracies, String phone) {
     HorizontalPanel p = new HorizontalPanel();
 
     p.getElement().getStyle().setFloat(Style.Float.LEFT);
@@ -214,7 +226,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     p.add(left);
     HTML child = new HTML(phone);
     Float score = phoneAccuracies.get(phone);
-    p.getElement().getStyle().setBackgroundColor(getColor(score));
+    p.getElement().getStyle().setBackgroundColor(chart.getColor(score));
     float x = score * 100.0f;
     child.setTitle(((int) x ) +"%");
     p.add(child);
@@ -225,63 +237,4 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     p.add(r);
     return p;
   }
-
-  private String getColor(float score){
-    return getColor2(score);
-	}
-
-  /**
-   * This gives a smooth range red->yellow->green:
-   *  on green 0->255 over score 0->0.5, 255 for > 0.5 and
-   *  on red from 255->0 over 0.5->1 in score, 255 for < 0.5
-   *
-   *  NOTE : this is the same as in audio.image.TranscriptImage
-   * @param score
-   * @return color in # hex rgb format
-   */
-  private String getColor2(float score) {
-    if (score > 1.0) score = 1.0f;
-    if (score < 0f)  score = 0f;
-    int red   = (int)Math.max(0,(255f - (Math.max(0, score-0.5)*2f*255f)));
-    int green = (int)Math.min(255f, score*2f*255f);
-    int blue  = 0;
-    // System.out.println("s " +score + " red " + red + " green " + green + " b " +blue);
-    return "#" + getHexNumber(red) + getHexNumber(green) + getHexNumber(blue);
-    //return new Color(red, green, blue, BKG_ALPHA);
-  }
-
-  /**
-   * Does some interpolation, but it's buggy for now.
-   * @paramx score
-   * @return
-   *x @deprecated
-   */
-/*  private String oldGetColor(float score){
-	  if (score > 1.0) {
-	    Window.alert("ERROR: getColor: score > 1");
-	    return "#000000";
-	  }
-		float nf = Math.max(score, 0.0f) * (float) (colormap.length - 2);
-		int idx = (int) Math.floor(nf);
-		int[] color = {0, 0, 0};
-		for (int cc = 0; cc < 3; cc++){
-			color[cc] = Math.round((colormap[idx + 1][cc] - colormap[idx][cc]) * (nf - (float) idx) + colormap[idx][cc]);
-		}
-
-		return "#" + getHexNumber(color[0]) + getHexNumber(color[1]) + getHexNumber(color[2]);
-  }*/
-
-	private String getHexNumber(int number){
-		String hexString = Integer.toHexString(number).toUpperCase();
-
-		if(hexString.length() == 0){
-			return "00";
-		}
-		else if(hexString.length() == 1){
-			return "0" + hexString;
-		}
-		else{
-			return hexString;
-		}
-	}
 }
