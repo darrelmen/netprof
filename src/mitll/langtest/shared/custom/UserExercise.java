@@ -8,6 +8,7 @@ import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
@@ -31,6 +32,8 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   private boolean isPredef;
   private boolean isOverride;
   private Date modifiedDate;
+  private Collection<Float> scores;
+  private float avgScore;
   private static final int MAX_TOOLTIP_LENGTH = 15;
 
   public UserExercise() {}  // just for serialization
@@ -243,6 +246,23 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   @Override
   public Date getModifiedDate() {
     return modifiedDate;
+  }
+
+  public Collection<Float> getScores() {
+    return scores;
+  }
+
+  @Override
+  public void setScores(Collection<Float> scores) {
+    this.scores = scores;
+  }
+
+  public float getAvgScore() {
+    return avgScore;
+  }
+
+  public void setAvgScore(float avgScore) {
+    this.avgScore = avgScore;
   }
 
   public String toString() {
