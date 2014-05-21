@@ -1,6 +1,5 @@
 package mitll.langtest.client.list;
 
-import com.gargoylesoftware.htmlunit.javascript.host.Console;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
