@@ -61,6 +61,7 @@ public class ServerProperties {
   private static final String INCLUDE_FEEDBACK = "includeFeedback";
   private static final String MAPPING_FILE = "mappingFile";
   private static final String NO_MODEL = "noModel";
+  private static final String USE_MODEL_DICTIONARY = "useDictionary";
   private static final String TIER_INDEX = "tierIndex";
   public static final String VLR_PARLE_PILOT_ITEMS_TXT = "vlr-parle-pilot-items.txt";
 
@@ -216,6 +217,9 @@ public class ServerProperties {
   public boolean isClassroomMode() { return getDefaultFalse(CLASSROOM_MODE); }
   public boolean isNoModel() {
     return getDefaultFalse(NO_MODEL);
+  }
+  public boolean useDictionary() {
+    return getDefaultTrue(USE_MODEL_DICTIONARY);
   }
 
   public String getEmailAddress() {
