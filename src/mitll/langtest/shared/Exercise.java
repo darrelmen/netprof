@@ -38,6 +38,8 @@ public class Exercise extends AudioExercise implements CommonExercise {
   private List<String> refSentences = new ArrayList<String>();
   private List<String> translitSentences = new ArrayList<String>();
   private STATE state;
+  private Collection<Float> scores;
+  private float avgScore;
 
   public static class QAPair implements IsSerializable {
     private String question;
@@ -310,6 +312,23 @@ public class Exercise extends AudioExercise implements CommonExercise {
   @Override
   public void setState(STATE state) {
     this.state = state;
+  }
+
+  public Collection<Float> getScores() {
+    return scores;
+  }
+
+  @Override
+  public void setScores(Collection<Float> scores) {
+    this.scores = scores;
+  }
+
+  public float getAvgScore() {
+    return avgScore;
+  }
+
+  public void setAvgScore(float avgScore) {
+    this.avgScore = avgScore;
   }
 
   public String toString() {
