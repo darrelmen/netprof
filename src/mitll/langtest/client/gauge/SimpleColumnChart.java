@@ -1,8 +1,12 @@
 package mitll.langtest.client.gauge;
 
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.flashcard.LeaderboardPlot;
+import mitll.langtest.shared.flashcard.SetScore;
 import org.moxieapps.gwt.highcharts.client.Chart;
+import org.moxieapps.gwt.highcharts.client.PlotBand;
 import org.moxieapps.gwt.highcharts.client.Series;
+import org.moxieapps.gwt.highcharts.client.labels.PlotBandLabel;
 import org.moxieapps.gwt.highcharts.client.labels.XAxisLabels;
 import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
 
@@ -12,19 +16,18 @@ import java.util.List;
  * Created by GO22670 on 5/21/2014.
  */
 public class SimpleColumnChart {
-  public Widget getChart(boolean showOnlyOneExercise, List<Float> scores,int height) {
+  private static final float HALF = 2f;
+  public static final float GRAPH_MAX = 100f;
+
+  public Widget getChart(boolean showOnlyOneExercise, List<Float> scores, int height, float classAvg) {
     Chart chart = new Chart()
       .setType(Series.Type.COLUMN)
       .setChartTitleText("")
-        // .setChartSubtitleText(subtitle)
-        // .setMarginRight(10)
       .setOption("/credits/enabled", false)
       .setOption("/plotOptions/series/pointStart", 0)
       .setOption("/legend/enabled", false).setHeight(height);
 
     if (showOnlyOneExercise) chart.setBackgroundColor("#efefef");
-
-    //  chart.setColors("#058DC7", "#50B432", "#ED561B", "#DDDF00", "#24CBE5", "#64E572", "#FF9655", "#FFF263", "#6AF9C4");
 
     String[] colors = new String[scores.size()];
     for (int i = 0; i < scores.size(); i++) {
@@ -32,13 +35,9 @@ public class SimpleColumnChart {
     }
     chart.setColors(colors);
 
-    // addSeries(scores, chart, "name");
-    // Float[] yValues = scores.toArray(new Float[0]);
-    //Integer[] yValues = new Integer[scores.size()];
     for (int i = 0; i < scores.size(); i++) {
       int round = Math.round(scores.get(i) * 100);
       if (round == 0) round = 1;
-      // yValues[i] = round;
       Integer [] single = new Integer[1];
       single[0] = round;
       Series series = chart.createSeries()
@@ -46,22 +45,63 @@ public class SimpleColumnChart {
         .setPoints(single);
       chart.addSeries(series);
     }
-/*    Series series = chart.createSeries()
-     // .setName("Score")
-      .setPoints(yValues);
-    chart.addSeries(series);*/
-
-/*    float verticalRange = setPlotBands(numScores, title, subtitle,
-      pbCorrect, top, total, avg, chart);*/
+/*    chart.getYAxis().setPlotBands(
+      getAvgScore(classAvg*100,chart)
+    );*/
 
     chart.getYAxis().setAxisTitleText("")
-      //   .setAllowDecimals(true)
       .setMin(0)
       .setMax(100).setLabels(new YAxisLabels().setEnabled(false)).setGridLineWidth(0);
 
-    chart.getXAxis().setAllowDecimals(false).setLabels(new XAxisLabels().setEnabled(false));//.setTickmarkPlacement(TickmarkPlacement);
+    chart.getXAxis().setAllowDecimals(false).setLabels(new XAxisLabels().setEnabled(false));
     return chart;
   }
+
+/*  private <T extends SetScore> PlotBand getAvgScore(float avg, Chart chart) {
+    return getPlotBand(avg, chart, "#2031ff", LeaderboardPlot.AVERAGE);
+  }*/
+
+/*  private PlotBand getPlotBand(float pbCorrect, Chart chart, String color, String labelText) {
+    Range range = getRange(pbCorrect);
+    PlotBand personalBest = chart.getYAxis().createPlotBand()
+      .setColor(color)
+      .setFrom(range.from)
+      .setTo(range.to);
+
+    personalBest.setLabel(new PlotBandLabel().setAlign(PlotBandLabel.Align.LEFT).setText(labelText));
+    return personalBest;
+  }
+
+  private Range getRange(float pbCorrect) {
+    float from = under(pbCorrect);
+    float to = over(pbCorrect);
+    if (pbCorrect > GRAPH_MAX - HALF) {
+      to = GRAPH_MAX;
+      from = GRAPH_MAX - 2 * HALF;
+    }
+    if (pbCorrect < HALF) {
+      to = 2 * HALF;
+      from = 0;
+    }
+    return new Range(from, to);
+  }
+
+  private float over(float pbCorrect) {
+    return pbCorrect + HALF;
+  }
+
+  private float under(float pbCorrect) {
+    return pbCorrect - HALF;
+  }
+
+  private static class Range {
+    float from, to;
+
+    public Range(float from, float to) {
+      this.from = from;
+      this.to = to;
+    }
+  }*/
 
   /**
    * This gives a smooth range red->yellow->green:
