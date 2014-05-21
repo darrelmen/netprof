@@ -15,5 +15,7 @@ public interface ScoreListener {
 
   void addScore(float hydecScore);
 
+  void setClassAvg(float classAvg);
+
   void showChart(boolean showOnlyOneExercise);
 }
