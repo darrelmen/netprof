@@ -73,7 +73,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   private CommonExercise currentExercise;
   private final ControlState controlState;
   private List<CommonShell> allExercises;
- // private int totalExercises = 0;
+
   private final Map<String,Boolean> exToCorrect = new HashMap<String, Boolean>();
   private final Map<String,Double>   exToScore = new HashMap<String, Double>();
   private Set<String> skipped = new HashSet<String>();
@@ -103,7 +103,6 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       public void listChanged(List<CommonShell> items, String selectionID) {
         MyFlashcardExercisePanelFactory.this.selectionID = selectionID;
         allExercises = items;
-        //totalExercises = allExercises.size();
         //System.out.println("MyFlashcardExercisePanelFactory : " + selectionID + " got new set of items from list. " + items.size());
         reset();
       }
@@ -134,7 +133,6 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
     exToCorrect.clear();
     exToScore.clear();
     skipped.clear();
-    //totalExercises = allExercises.size();
     latestResultID = -1;
     resultIDs.clear();
   }
@@ -163,35 +161,22 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
 
     value = storage.getValue(SCORE);
     if (value != null && !value.trim().isEmpty()) {
-  //    System.out.println("using score map " + value);
       for (String pair : value.split(",")) {
         String[] split = pair.split("=");
         if (split.length == 2) {
           exToScore.put(split[0],Double.parseDouble(split[1]));
         }
       }
-
-/*      System.out.println("Score now of size " + exToScore.size());
-      for (Map.Entry<String,Double> pair : exToScore.entrySet()) {
-        System.out.println("\t"+pair.getKey()+"\t"+pair.getValue());
-      }*/
     }
 
     value = storage.getValue(SKIPPED);
     if (value != null && !value.trim().isEmpty()) {
-      //    System.out.println("using score map " + value);
       for (String pair : value.split(",")) {
-       // String[] split = pair.split("=");
         String trim = pair.trim();
         if (!trim.isEmpty()) {
           skipped.add(trim);
         }
       }
-
-/*      System.out.println("Score now of size " + exToScore.size());
-      for (Map.Entry<String,Double> pair : exToScore.entrySet()) {
-        System.out.println("\t"+pair.getKey()+"\t"+pair.getValue());
-      }*/
     }
   }
 
