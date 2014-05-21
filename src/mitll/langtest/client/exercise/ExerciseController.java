@@ -37,7 +37,7 @@ public interface ExerciseController {
   void stopRecording();
   String getBase64EncodedWavFile();
 
-  boolean getEnglishOnly();
+ // boolean getEnglishOnly();
 
   SoundManagerAPI getSoundManager();
 
@@ -57,7 +57,7 @@ public interface ExerciseController {
   boolean isGrading();
   boolean isLogClientMessages();
   String getAudioType();
-  boolean isReviewMode();
+ // boolean isReviewMode();
   Collection<User.Permission> getPermissions();
 
   boolean showCompleted();
@@ -87,5 +87,5 @@ public interface ExerciseController {
 
   void addKeyListener(KeyPressHelper.KeyListener listener);
 
-  boolean removeKeyListener(String name);
+  //boolean removeKeyListener(String name);
 }

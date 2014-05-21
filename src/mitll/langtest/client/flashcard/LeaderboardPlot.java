@@ -10,8 +10,8 @@ import org.moxieapps.gwt.highcharts.client.labels.PlotBandLabel;
 import java.util.List;
 
 public class LeaderboardPlot {
-  private static final float HALF = 3f;
-  private static final String AVERAGE = "Class Average";
+  public static final float HALF = 3f;
+  public static final String AVERAGE = "Class Average";
   private static final String TOP_SCORE = "Class Top Score";
   private static final String PERSONAL_BEST = "Personal Best";
   private static final String CORRECT = "Correct";
