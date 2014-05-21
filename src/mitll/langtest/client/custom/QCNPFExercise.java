@@ -96,7 +96,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   }
 
   /**
-   * @see #addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float)
+   * @see GoodwaveExercisePanel#addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.CommonExercise)
    * @see #getQuestionContent(mitll.langtest.shared.CommonExercise, com.google.gwt.user.client.ui.Panel)
    * @param div
    */
@@ -264,10 +264,11 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
    * @param controller    used in subclasses for audio control
    * @param toAddTo
    * @param screenPortion
+   * @param exercise
    */
   @Override
   protected void addUserRecorder(LangTestDatabaseAsync service, ExerciseController controller, Panel toAddTo,
-                                 float screenPortion) {}
+                                 float screenPortion, CommonExercise exercise) {}
 
   /**
    * @param e
