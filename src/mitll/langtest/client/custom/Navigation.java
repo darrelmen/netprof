@@ -9,6 +9,8 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.InlineLabel;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.google.gwt.dom.client.AnchorElement;
+import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -16,9 +18,12 @@ import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -32,6 +37,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.user.UserFeedback;
@@ -42,6 +48,7 @@ import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserList;
 
+import javax.lang.model.element.Element;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -678,24 +685,59 @@ public class Navigation implements RequiresResize {
     DOM.setStyleAttribute(container.getElement(), "paddingLeft", "2px");
     DOM.setStyleAttribute(container.getElement(), "paddingRight", "2px");
 
-    Panel child = new FluidRow();    // TODO : this is wacky -- clean up...
-    child.getElement().setId("container_first_row");
+    Panel firstRow = new FluidRow();    // TODO : this is wacky -- clean up...
+    firstRow.getElement().setId("container_first_row");
 
-    container.add(child);
+    container.add(firstRow);
+    firstRow.add(getListInfo(ul));
+    firstRow.addStyleName("userListDarkerBlueColor");
 
     Panel r1 = new FluidRow();
-    child.add(r1);
-    child.addStyleName("userListDarkerBlueColor");
+    r1.addStyleName("userListDarkerBlueColor");
 
-    Panel widgets = getListInfo(ul);
-    r1.add(widgets);
+    Anchor downloadLink = getDownloadLink(ul.getUniqueID(), instanceName + "_" + ul.getUniqueID(), ul.getName());
+    Node child = downloadLink.getElement().getChild(0);
+    AnchorElement.as(child).getStyle().setColor("#333333");
 
-    //HTML itemMarker = new HTML(ul.getExercises().size() + " items");  // TODOx Remove?
-    //listToMarker.put(ul,itemMarker);
+    r1.add(downloadLink);
+
+    container.add(r1);
 
     TabPanel listOperations = getListOperations(ul, instanceName);
     container.add(listOperations);
     return container;
+  }
+
+  private Anchor getDownloadLink(long listid, String linkid, final String name) {
+    final Anchor downloadLink = new Anchor(getURLForDownload(listid));
+    new TooltipHelper().addTooltip(downloadLink, "Download spreadsheet and audio for list.");
+    downloadLink.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        controller.logEvent(downloadLink, "DownloadLink", "N/A", "downloading audio for " +name);
+      }
+    });
+    downloadLink.getElement().setId("DownloadLink_" + linkid);
+    downloadLink.addStyleName("leftFiveMargin");
+    return downloadLink;
+  }
+
+  /**
+   * @seex #showSelectionState(mitll.langtest.client.list.SelectionState)
+   * @paramx xselectionState
+   * @return
+   */
+  private SafeHtml getURLForDownload(long listid) {
+    SafeHtmlBuilder sb = new SafeHtmlBuilder();
+    sb.appendHtmlConstant("<a class='" +"icon-download"+
+      "' href='" +
+      "downloadAudio" +
+      "?list=" + listid+
+      "'" +
+      ">");
+    sb.appendEscaped(" Download");
+    sb.appendHtmlConstant("</a>");
+    return sb.toSafeHtml();
   }
 
   private Panel getListInfo(UserList ul) {
@@ -704,6 +746,7 @@ public class Navigation implements RequiresResize {
 
     widgets.addStyleName("floatLeft");
     widgets.addStyleName("leftFiveMargin");
+    widgets.getElement().getStyle().setMarginBottom(3, Style.Unit.PX);
     return widgets;
   }
 
