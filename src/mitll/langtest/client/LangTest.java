@@ -308,7 +308,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     setPageTitle();
     browserCheck.checkForCompatibleBrowser();
 
-    loadVisualizationPackages();  // Note : this was formerly done in LangTest.html, since it seemed to be intermittently not loaded properly
+    if (props.isAdminView()) {
+      loadVisualizationPackages();  // Note : this was formerly done in LangTest.html, since it seemed to be intermittently not loaded properly
+    }
   }
 
   private Panel populateRootPanel() {
