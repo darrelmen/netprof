@@ -2,8 +2,6 @@ package mitll.langtest.client.sound;
 
 import com.google.gwt.user.client.ui.HTML;
 
-import java.util.Date;
-
 /**
  * Does sound feedback - correct/incorrect to user.
  * User: GO22670
