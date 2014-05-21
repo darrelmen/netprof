@@ -790,7 +790,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (permissions.contains(User.Permission.RECORD_AUDIO)) return Result.AUDIO_TYPE_RECORDER;
     else return audioType;
   }
-  public boolean isReviewMode() { return audioType.equals(Result.AUDIO_TYPE_REVIEW); }
+  private boolean isReviewMode() { return audioType.equals(Result.AUDIO_TYPE_REVIEW); }
 
   private Set<User.Permission> permissions = new HashSet<User.Permission>();
 
@@ -815,7 +815,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public int getUser() { return userManager.getUser(); }
   public PropertyHandler getProps() { return props; }
-  public boolean getEnglishOnly() { return props.isEnglishOnlyMode(); }
+  //public boolean getEnglishOnly() { return props.isEnglishOnlyMode(); }
   public int getSegmentRepeats() { return props.getSegmentRepeats(); }
   public boolean isArabicTextDataCollect() {  return props.isArabicTextDataCollect(); }
   public boolean useBkgColorForRef() {  return props.isBkgColorForRef(); }
@@ -902,12 +902,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
-  @Override
+/*  @Override
   public boolean removeKeyListener(String name) {
     boolean b = keyPressHelper.removeKeyHandler(name);
     System.out.println("removeKeyListener " + name+ " key press handler now " + keyPressHelper);
     return b;
-  }
+  }*/
 
   private class LogoutClickHandler implements ClickHandler {
     public void onClick(ClickEvent event) {
