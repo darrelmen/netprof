@@ -186,6 +186,16 @@ class ReviewEditableExercise extends EditableExercise {
 
       @Override
       public int getOffsetWidth() { return 0; }
+
+      @Override
+      public void addScore(float hydecScore) {
+
+      }
+
+      @Override
+      public void showChart(boolean showOnlyOneExercise) {
+
+      }
     }, 70, audio.isRegularSpeed() ? REGULAR_SPEED : SLOW_SPEED, e.getID()
     ) {
 
