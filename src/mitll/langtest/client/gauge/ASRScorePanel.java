@@ -41,6 +41,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   private final List<Float> scores = new ArrayList<Float>();
   private final SimplePanel chartPanel;
   private final SimpleColumnChart chart = new SimpleColumnChart();
+  private float classAvg;
 
   /**
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel
@@ -76,7 +77,6 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     gaugePanel.setWidth("100%");
     ASRGauge = new PretestGauge("ASR_"+parent, "ASR", INSTRUCTIONS, null);
     gaugePanel.add(ASRGauge);
-
 
     gaugeCaptionPanel.add(gaugePanel);
     add(gaugeCaptionPanel);
@@ -128,12 +128,12 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   public void addScore(float hydecScore) {
     scores.add(hydecScore);
   }
+  @Override
+  public void setClassAvg(float classAvg) { this.classAvg = classAvg; }
 
   @Override
   public void showChart(boolean showOnlyOneExercise) {
-   // chartPanel.add(doChart(showOnlyOneExercise, scores));
-   chartPanel.add(chart.getChart(showOnlyOneExercise, scores, CHART_HEIGHT));
-
+   chartPanel.add(chart.getChart(showOnlyOneExercise, scores, CHART_HEIGHT, classAvg));
   }
 
 /*  private ColumnChart doChart(boolean showOnlyOneExercise, List<Float> scores) {
