@@ -180,6 +180,10 @@ class ReviewEditableExercise extends EditableExercise {
     }
     final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel(audioRef, e.getRefSentence(), service, controller,
       controller.getProps().showSpectrogram(), new ScoreListener() {
+      @Override
+      public void setClassAvg(float classAvg) {
+
+      }
 
       @Override
       public void gotScore(PretestScore score, boolean showOnlyOneExercise) {}
