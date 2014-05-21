@@ -63,7 +63,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
 
-  private DatabaseImpl db;//, studentAnswersDB;
+  private DatabaseImpl db;
   private AudioFileHelper audioFileHelper;
   private String relativeConfigDir;
   private String configDir;
@@ -247,6 +247,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * Copies the exercises....?
    * @param userListByID
    * @return
+   * @see #getExerciseIds(int, java.util.Map, String, long, int, String)
+   * @see #getExercisesFromFiltered(java.util.Map, mitll.langtest.shared.custom.UserList)
    */
   private List<CommonExercise> getCommonExercises(UserList userListByID) {
     List<CommonExercise> exercises2 = new ArrayList<CommonExercise>();
@@ -284,6 +286,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param userID
    * @param role
    * @return
+   * @see #getExerciseIds(int, java.util.Map, String, long, int, String)
    */
   private ExerciseListWrapper getExerciseListWrapperForPrefix(int reqID, String prefix, Collection<CommonExercise> exercisesForState, long userID, String role) {
     boolean hasPrefix = !prefix.isEmpty();
@@ -345,12 +348,21 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private void addAnnotationsAndAudio(long userID, CommonExercise firstExercise) {
     addAnnotations(firstExercise); // todo do this in a better way
     attachAudio(firstExercise);
-
     addPlayedMarkings(userID, firstExercise);
+    List<Result> resultsForExercise = db.getResultDAO().getResultsForExercise(firstExercise.getID());
 
-    // if (!audioAttributes.isEmpty()) {
-   //   logger.debug("Added  " + audioAttributes.size() + " audio attrs to " + firstExercise);
-   // }
+    int total = resultsForExercise.size();
+    float scoreTotal = 0f;
+    List<Float> scores = new ArrayList<Float>();
+    for (Result r : resultsForExercise) {
+      if (r.userid == userID) {
+        float pronScore = r.getPronScore();
+        scoreTotal += pronScore;
+        scores.add(pronScore);
+      }
+    }
+    firstExercise.setScores(scores);
+    firstExercise.setAvgScore(scoreTotal/total);
   }
 
   private void attachAudio(CommonExercise firstExercise) {
@@ -385,7 +397,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#getTypeOrder(com.github.gwtbootstrap.client.ui.FluidContainer)
+   * @see #getStartupInfo()
    * @return
    */
   private List<SectionNode> getSectionNodes() {
@@ -411,7 +423,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     else {
       addAnnotationsAndAudio(userID, byID);
-      logger.debug("getExercise : returning " + byID);
+      //logger.debug("getExercise : returning " + byID);
       ensureMP3s(byID);
     }
     long now = System.currentTimeMillis();
