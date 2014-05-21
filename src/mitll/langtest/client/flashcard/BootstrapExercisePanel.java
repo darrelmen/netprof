@@ -549,7 +549,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
   private Widget button;
 
   private Widget getAnswerAndRecordButtonRow(CommonExercise e, LangTestDatabaseAsync service, ExerciseController controller) {
-    System.out.println("BootstrapExercisePanel.getAnswerAndRecordButtonRow = " + instance);
+    //System.out.println("BootstrapExercisePanel.getAnswerAndRecordButtonRow = " + instance);
 
     RecordButtonPanel answerWidget = getAnswerWidget(e, service, controller, 1, addKeyBinding, instance);
     this.answerWidget = answerWidget;
