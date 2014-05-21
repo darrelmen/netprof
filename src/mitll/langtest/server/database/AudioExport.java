@@ -61,6 +61,21 @@ public class AudioExport {
     writeToStream(copy, audioDAO, installPath, relPath, prefix, typeOrder, language1, out, typeToSection.isEmpty());
   }
 
+  public void writeZip(OutputStream out,
+                       String prefix,
+                       SectionHelper sectionHelper,
+                       Collection<? extends CommonExercise> exercisesForSelectionState,
+                       String language1,
+                       AudioDAO audioDAO,
+                       String installPath,
+                       String relPath) throws Exception {
+    List<String> typeOrder = sectionHelper.getTypeOrder();
+    List<CommonExercise> copy = new ArrayList<CommonExercise>(exercisesForSelectionState);
+
+    new ExerciseSorter(typeOrder).sortByTooltip(copy);
+    writeToStream(copy, audioDAO, installPath, relPath, prefix, typeOrder, language1, out, false);
+  }
+
   public String getPrefix(SectionHelper sectionHelper,Map<String, Collection<String>> typeToSection) {
     return getPrefix(typeToSection, sectionHelper.getTypeOrder());
   }
@@ -172,21 +187,19 @@ public class AudioExport {
   }
 
   private void writeFolderContents(ZipOutputStream zOut,
-                                   List<CommonExercise> toWrite, AudioDAO audioDAO,
+                                   List<CommonExercise> toWrite,
+                                   AudioDAO audioDAO,
                                    String installPath, String relativeConfigDir1,
                                    String overallName,
                                    boolean isEnglish
   ) throws Exception {
-    int c = 0;
+    //int c = 0;
     long then = System.currentTimeMillis();
     String realContextPath = installPath;
     Set<String> names = new HashSet<String>();
 
     Map<String, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
     logger.debug("found audio for " + exToAudio.size() + " items and writing " + toWrite.size() + " items ");
-   // logger.debug("installPath path " + installPath);
-   // logger.debug("rel path         " + relativeConfigDir1);
-  //  logger.debug("realContextPath         " + realContextPath);
     int numAttach = 0;
     int numMissing = 0;
 
