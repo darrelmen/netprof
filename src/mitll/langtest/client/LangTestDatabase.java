@@ -37,10 +37,6 @@ public interface LangTestDatabase extends RemoteService {
 
   CommonExercise getExercise(String id, long userID);
 
-  // gradeDAO
- // CountAndGradeID addGrade(String exerciseID, Grade grade);
- // void changeGrade(Grade toChange);
-
   void markAudioDefect(AudioAttribute audioAttribute, String exid);
 
   // user DAO
@@ -53,10 +49,6 @@ public interface LangTestDatabase extends RemoteService {
   void addTextAnswer(int userID, CommonExercise exercise, int questionID, String answer, String answerType);
   AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int question, int user,
                              int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults, boolean addToAudioTable);
-
-  //CommonExercise getNextUngradedExercise(String user, int expectedGrades, boolean englishOnly);
-
-  //void checkoutExerciseID(String user,String id);
 
   ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, String exerciseID);
 
@@ -87,8 +79,6 @@ public interface LangTestDatabase extends RemoteService {
   void logMessage(String message);
 
   List<AVPHistoryForList> getUserHistoryForList(long userid, Collection<String> ids, long latestResultID);
-
-  //void addDLIUser(DLIUser dliUser);
 
   StartupInfo getStartupInfo();
   long addUserList(long userid, String name, String description, String dliClass);
