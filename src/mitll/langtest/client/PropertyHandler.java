@@ -70,7 +70,7 @@ public class PropertyHandler {
   private static final boolean DEFAULT_SHOW_TURK_TOKEN = false;
   private static final int DEFAULT_SEGMENT_REPEATS = 0;
   private static final int DEFAULT_TIMEOUT = 45000;
-  private static final int DEFAULT_SHORT_TIMEOUT = 15000;
+  //private static final int DEFAULT_SHORT_TIMEOUT = 15000;
   private static final int DEFAULT_GAME_TIME_SECONDS = 60;
   private static final String DEFAULT_EXERCISE = null;
   private static final int NUM_GRADES_TO_COLLECT_DEFAULT = 1;
