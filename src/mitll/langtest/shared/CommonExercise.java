@@ -31,8 +31,7 @@ public interface CommonExercise extends CommonShell {
   String getSlowAudioRef();
 
   Collection<AudioAttribute> getAudioAttributes();
-  Collection<AudioAttribute> getAudioAtSpeed(boolean isRegular);
-  //Collection<AudioAttribute> getAudioAtSpeed(String value);
+ // Collection<AudioAttribute> getAudioAtSpeed(boolean isRegular);
   AudioAttribute getRecordingsBy(long userID, boolean regularSpeed);
   Collection<AudioAttribute> getByGender(boolean isMale);
   List<MiniUser> getSortedUsers(Map<MiniUser, List<AudioAttribute>> malesMap);
@@ -69,4 +68,8 @@ public interface CommonExercise extends CommonShell {
   Collection<String> getFields();
   boolean removeAudio(String key);
   String getCombinedTooltip();
+
+  void setScores(Collection<Float> scoreTotal);
+  Collection<Float> getScores();
+  void setAvgScore(float v);
 }
