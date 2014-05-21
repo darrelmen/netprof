@@ -18,6 +18,8 @@ import java.util.Map;
 /**
  * Deals with downloads from site -- for excel spreadsheets and zips of audio.
  *
+ * Can download a user list too.
+ *
  * User: GO22670
  * Date: 12/17/13
  * Time: 4:57 PM
@@ -35,20 +37,30 @@ public class DownloadServlet extends DatabaseServlet {
       String encodedFileName = request.getRequestURI();
       if (encodedFileName.toLowerCase().contains("audio")) {
         String pathInfo = request.getPathInfo();
-        logger.debug("DownloadServlet.doGet : Request " + request.getQueryString() + " path " + pathInfo +
+        String queryString = request.getQueryString();
+        logger.debug("DownloadServlet.doGet : Request " + queryString + " path " + pathInfo +
           " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
 
-        Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(request.getQueryString());
-
-        logger.debug("Selection " + typeToSection);
-        String name = typeToSection.isEmpty() ? "audio" : db.getPrefix(typeToSection);
-        name = name.replaceAll("\\,","_");
-        response.setHeader("Content-Disposition", "attachment; filename=" + db.getServerProps().getLanguage() +"_"+name);
-        response.setContentType("application/zip");
-        try {
-          db.writeZip(response.getOutputStream(), typeToSection);
-        } catch (Exception e) {
-          logger.error("couldn't write zip?", e);
+        if (queryString.startsWith("list")) {
+          String[] split = queryString.split("list=");
+          if (split.length == 2) {
+            String listid = split[1];
+            if (!listid.isEmpty()) {
+              writeUserList(response, db, listid);
+            }
+          }
+        }
+        else {
+          Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(queryString);
+          String name = typeToSection.isEmpty() ? "audio" : db.getPrefix(typeToSection);
+          name = name.replaceAll("\\,", "_");
+          String fileName = db.getServerProps().getLanguage() + "_" + name;
+          setHeader(response, fileName);
+          try {
+            db.writeZip(response.getOutputStream(), typeToSection);
+          } catch (Exception e) {
+            logger.error("couldn't write zip?", e);
+          }
         }
       } else {
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
@@ -65,6 +77,26 @@ public class DownloadServlet extends DatabaseServlet {
       }
     }
     response.getOutputStream().close();
+  }
+
+  private void writeUserList(HttpServletResponse response, DatabaseImpl db, String listid) {
+    Integer id = Integer.parseInt(listid);
+
+    try {
+      String name = db.getUserListName(id);
+      name = name.replaceAll("\\,", "_").replaceAll(" ", "_");
+   //   logger.debug("attachment name ='" + name + "'");
+      setHeader(response, name);
+
+      db.writeZip(response.getOutputStream(), id);
+    } catch (Exception e) {
+      logger.error("couldn't write zip?", e);
+    }
+  }
+
+  private void setHeader(HttpServletResponse response, String fileName) {
+    response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+    response.setContentType("application/zip");
   }
 
   private DatabaseImpl getDatabase() {
