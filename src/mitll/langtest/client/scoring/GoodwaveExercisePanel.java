@@ -178,6 +178,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       for (Float score : exercise.getScores()) {
         answerWidget.addScore(score);
       }
+      answerWidget.setClassAvg(exercise.getAvgScore());
+
       answerWidget.showChart();
     }
     div.add(answerWidget);
@@ -195,7 +197,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * @return
    */
   private Panel getUnitLessonForExercise() {
-    HorizontalPanel flow = new HorizontalPanel();
+    Panel flow = new HorizontalPanel();
     flow.getElement().setId("getUnitLessonForExercise_unitLesson");
     flow.addStyleName("leftFiveMargin");
     //System.out.println("getUnitLessonForExercise " + exercise + " unit value " +exercise.getUnitToValue());
