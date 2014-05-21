@@ -13,9 +13,12 @@ import java.util.List;
  * Created by GO22670 on 4/30/2014.
  */
 public class ExerciseSorter {
-  Collection<String> typeOrder;
+  private Collection<String> typeOrder;
 
-  public ExerciseSorter(Collection<String> typeOrder) {this.typeOrder = typeOrder;}
+  public ExerciseSorter(Collection<String> typeOrder) {
+    this.typeOrder = typeOrder;
+  }
+
   /**
    * what if the item has no unit/chapter info?
    * what if we have a mixed list of user and predef items?
@@ -25,7 +28,6 @@ public class ExerciseSorter {
    * @return
    */
   public void getSortedByUnitThenAlpha(List<? extends CommonExercise> toSort, final boolean recordedLast) {
-    //logger.debug("sorting " + toSort.size() + " recorded last " +recordedLast);
     if (typeOrder.isEmpty()) {
       sortByTooltip(toSort);
     } else {
@@ -83,7 +85,7 @@ public class ExerciseSorter {
    * I.e. by the lexicographic order of the displayed words in the word list
    * @param exerciseShells
    */
-  private  <T extends CommonShell> void sortByTooltip(List<T> exerciseShells) {
+  public  <T extends CommonShell> void sortByTooltip(List<T> exerciseShells) {
     Collections.sort(exerciseShells, new Comparator<T>() {
       @Override
       public int compare(T o1, T o2) {
