@@ -69,21 +69,6 @@ public class ResultDAO extends DAO {
     super(database);
   }
 
-  /**
-   * @return
-   * @deprecated just an experiment...
-   */
-/*  public List<Result> getResultsFor() {
-    try {
-      String sql = "SELECT * FROM " + RESULTS + " where " + USERID +
-        "=" + 326 + " and " + ANSWER + " like '%07980%'";
-      return getResultsSQL(sql);
-    } catch (SQLException e) {
-      logger.error("got " + e, e);
-    }
-    return Collections.emptyList();
-  }*/
-
 /*  private List<SimpleResult> getSimpleResults(String whereClause) {
     try {
       String sql = "SELECT " +
@@ -192,7 +177,7 @@ public class ResultDAO extends DAO {
    */
   public List<Session> getSessionsForUserIn2(Collection<String> ids, long latestResultID) {
     List<Session> sessions = new ArrayList<Session>();
-    Map<Long, List<Result>> userToAnswers = populateUserToAnswers(getResultsForeExIDIn(ids));
+    Map<Long, List<Result>> userToAnswers = populateUserToAnswers(getResultsForExIDIn(ids, true));
     if (debug) logger.debug("Got " + userToAnswers.size() + " user->answer map");
     for (Map.Entry<Long,List<Result>> userToResults : userToAnswers.entrySet()) {
       List<Session> c = partitionIntoSessions2(userToResults.getValue(), ids, latestResultID);
@@ -205,25 +190,31 @@ public class ResultDAO extends DAO {
     return sessions;
   }
 
+  public List<Result> getResultsForExercise(String id) {
+    return getResultsForExIDIn(Collections.singleton(id), false);
+  }
+
   /**
    * Only take avp audio type and valid audio.
    *
    * @see #getSessionsForUserIn2
    * @param ids
+   * @param matchAVP
    * @return
    */
-  private List<Result> getResultsForeExIDIn(Collection<String> ids) {
+  private List<Result> getResultsForExIDIn(Collection<String> ids, boolean matchAVP) {
     try {
       String list = getInList(ids);
 
       String sql = "SELECT * FROM " + RESULTS + " where " +
         VALID + "=true AND " +
-        AUDIO_TYPE + "='avp' AND " +
+        AUDIO_TYPE + (matchAVP?"=":"<>") +
+        "'avp' AND " +
         Database.EXID + " in (" +
         list +
         ") order by " + Database.TIME + " asc";
       List<Result> resultsSQL = getResultsSQL(sql);
-      if (debug) logger.debug("getResultsForeExIDIn for  " +sql+ " got\n\t" + resultsSQL.size());
+      if (debug) logger.debug("getResultsForExIDIn for  " +sql+ " got\n\t" + resultsSQL.size());
       return resultsSQL;
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
