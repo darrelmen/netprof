@@ -20,6 +20,7 @@ import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
+import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.instrumentation.Event;
@@ -612,7 +613,7 @@ public class DatabaseImpl implements Database {
   }
 
   public void logEvent(String id, String widgetID, String exid, String context, long userid, String hitID) {
-     eventDAO.add(new Event(id,widgetID,exid,context,userid,-1, hitID));
+    eventDAO.add(new Event(id, widgetID, exid, context, userid, -1, hitID));
   }
 
   public void logEvent(String exid, String context, long userid) {
@@ -877,6 +878,31 @@ public class DatabaseImpl implements Database {
     String language1 = getServerProps().getLanguage();
 
     new AudioExport().writeZip(out, typeToSection, getSectionHelper(), exercisesForSelectionState, language1, getAudioDAO(), installPath, ".");
+  }
+
+  public String writeZip(OutputStream out, long listid) throws Exception {
+    UserList userListByID = getUserListManager().getUserListByID(listid, getSectionHelper().getTypeOrder());
+
+    String language1 = getServerProps().getLanguage();
+    if (userListByID == null) {
+      logger.error("huh? can't find user list " + listid);
+      return language1 + "_Unknown";
+    } else {
+      logger.debug("writing contents of " + userListByID);
+      new AudioExport().writeZip(out, userListByID.getName(), getSectionHelper(), userListByID.getExercises(), language1, getAudioDAO(), installPath, ".");
+    }
+    return language1 + "_" + userListByID.getName();
+  }
+
+  public String getUserListName(long listid) {
+    UserList userListByID = getUserListManager().getUserListByID(listid, getSectionHelper().getTypeOrder());
+    String language1 = getServerProps().getLanguage();
+    if (userListByID == null) {
+      logger.error("huh? can't find user list " + listid);
+      return language1 + "_Unknown";
+    } else {
+      return language1 + "_" + userListByID.getName();
+    }
   }
 
   public String getPrefix(Map<String, Collection<String>> typeToSection) {
