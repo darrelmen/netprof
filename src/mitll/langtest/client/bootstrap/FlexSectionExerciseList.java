@@ -83,7 +83,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
                                  boolean showTurkToken, boolean showInOrder,
                                  ExerciseController controller,
                                  boolean showTypeAhead, String instance) {
-    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, showTypeAhead, instance);
+    super(currentExerciseVPanel, service, feedback, controller, showTypeAhead, instance);
 
     sectionPanel = new FluidContainer();
     sectionPanel.getElement().setId("sectionPanel_"+instance);
