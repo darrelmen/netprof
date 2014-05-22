@@ -617,7 +617,7 @@ public class ASRScoring extends Scoring {
     sentence = sentence.replaceAll("\\p{Z}+", " ");
     long then = System.currentTimeMillis();
 
-    logger.debug("getScoresFromHydec scoring '" + sentence +"' (" +sentence.length()+ " )");
+    //logger.debug("getScoresFromHydec scoring '" + sentence +"' (" +sentence.length()+ " )");
 
     try {
       Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut =
