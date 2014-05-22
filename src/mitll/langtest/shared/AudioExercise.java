@@ -143,14 +143,33 @@ public class AudioExercise extends ExerciseShell {
   /**
    * @see mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel
    * @param userID
-   * @param regularSpeed
+   * @param regularSpeed map fast and slow to regular
    * @return
+   * @see mitll.langtest.server.database.AudioExport#getAudioAttribute
    */
   public AudioAttribute getRecordingsBy(long userID, boolean regularSpeed) {
-    //List<AudioAttribute> mine = new ArrayList<AudioAttribute>();
-    for (AudioAttribute attr : getRecordingsBy(userID)) {
-      if (attr.isRegularSpeed() && regularSpeed || (attr.isSlow() && !regularSpeed)) return attr;
+    List<AudioAttribute> recordingsBy = getRecordingsBy(userID);
+   // boolean hasRecordings = !recordingsBy.isEmpty();
+
+    for (AudioAttribute attr : recordingsBy) {
+      if (attr.isRegularSpeed() && regularSpeed || (attr.isSlow() && !regularSpeed)) {
+        return attr;
+      }
     }
+
+    //return hasRecordings && regularSpeed ? recordingsBy.iterator().next() : null;
+    return null;
+  }
+
+  public AudioAttribute getRecordingsBy(long userID, String speed) {
+    List<AudioAttribute> recordingsBy = getRecordingsBy(userID);
+
+    for (AudioAttribute attr : recordingsBy) {
+      if (attr.getSpeed().equalsIgnoreCase(speed)) {
+        return attr;
+      }
+    }
+
     return null;
   }
 
