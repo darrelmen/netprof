@@ -44,6 +44,7 @@ public interface LangTestDatabase extends RemoteService {
 
   List<User> getUsers();
   int userExists(String login);
+  User getUserBy(long id);
 
   // answer DAO
   void addTextAnswer(int userID, CommonExercise exercise, int questionID, String answer, String answerType);
@@ -67,6 +68,7 @@ public interface LangTestDatabase extends RemoteService {
   List<Session> getSessions();
 
   int getNumResults();
+
 
   List<Result> getResults(int start, int end, String sortInfo);
 
