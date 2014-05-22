@@ -177,7 +177,7 @@ class NPFHelper implements RequiresResize {
 
   PagingExerciseList makeExerciseList(final Panel right, final String instanceName) {
     //System.out.println(getClass() + ".makeExerciseList : instanceName " + instanceName);
-    return new PagingExerciseList(right, service, feedback, null, controller, false,
+    return new PagingExerciseList(right, service, feedback, null, controller,
       true, instanceName) {
       @Override
       protected void onLastItem() {
