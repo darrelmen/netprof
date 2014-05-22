@@ -748,9 +748,13 @@ public class ResultDAO extends DAO {
   }
 
   public Map<Long,Map<String,Result>> getUserToResults(boolean isRegular, UserDAO userDAO) {
+    String typeToUse = isRegular ? Result.AUDIO_TYPE_REGULAR : Result.AUDIO_TYPE_SLOW;
+    return getUserToResults(typeToUse, userDAO);
+  }
+
+  public Map<Long, Map<String, Result>> getUserToResults(String typeToUse, UserDAO userDAO) {
     List<Result> results = getResults();
     Map<Long,Map<String,Result>> userToResult = new HashMap<Long, Map<String, Result>>();
-    String typeToUse = isRegular ? Result.AUDIO_TYPE_REGULAR : Result.AUDIO_TYPE_SLOW;
 
     Map<Long, User> userMap = userDAO.getUserMap();
 
