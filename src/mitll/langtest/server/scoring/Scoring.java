@@ -126,23 +126,27 @@ public abstract class Scoring {
    */
   protected Map<NetPronImageType, String> getTypeToRelativeURLMap(Map<ImageType, String> typeToImageFile) {
     Map<NetPronImageType, String> sTypeToImage = new HashMap<NetPronImageType, String>();
-    for (Map.Entry<ImageType, String> kv : typeToImageFile.entrySet()) {
-      String name = kv.getKey().toString();
-      NetPronImageType key = NetPronImageType.valueOf(name);
-      String filePath = kv.getValue();
-      if (filePath.startsWith(deployPath)) {
-        filePath = filePath.substring(deployPath.length()); // make it a relative path
-      }
-      else {
-        logger.error("expecting image " +filePath + "\tto be under " +deployPath);
-      }
+    if (typeToImageFile == null) {
+      logger.error("huh? typeToImageFile is null?");
+    }
+    else {
+      for (Map.Entry<ImageType, String> kv : typeToImageFile.entrySet()) {
+        String name = kv.getKey().toString();
+        NetPronImageType key = NetPronImageType.valueOf(name);
+        String filePath = kv.getValue();
+        if (filePath.startsWith(deployPath)) {
+          filePath = filePath.substring(deployPath.length()); // make it a relative path
+        } else {
+          logger.error("expecting image " + filePath + "\tto be under " + deployPath);
+        }
 
-      filePath = filePath.replaceAll("\\\\", "/");
-      if (filePath.startsWith("/")) {
-        //System.out.println("removing initial slash from " + filePath);
-        filePath = filePath.substring(1);
+        filePath = filePath.replaceAll("\\\\", "/");
+        if (filePath.startsWith("/")) {
+          //System.out.println("removing initial slash from " + filePath);
+          filePath = filePath.substring(1);
+        }
+        sTypeToImage.put(key, filePath);
       }
-      sTypeToImage.put(key, filePath);
     }
     return sTypeToImage;
   }
