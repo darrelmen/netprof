@@ -9,8 +9,8 @@ import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 
 /**
  * Handles storing cookies for users, etc. IF user ids are stored as cookies.
@@ -88,38 +88,34 @@ public class UserManager {
   private void login() {
     final int user = getUser();
     if (user != NO_USER_SET) {
-      System.out.println("UserManager.login : current user : " + user);
+      //System.out.println("UserManager.login : current user : " + user);
       rememberAudioType();
-
       getPermissionsAndSetUser(user);
-
     }
     else {
-      StudentDialog studentDialog = new StudentDialog(service, props, this, userNotification);
-      studentDialog.displayLoginBox();
+      new StudentDialog(service, props, this, userNotification).displayLoginBox();
     }
   }
 
+  /**
+   * TODO : instead have call to get permissions for a user.
+   * @param user
+   */
   private void getPermissionsAndSetUser(final int user) {
-    service.getUsers(new AsyncCallback<List<User>>() {
+    service.getUserBy(user, new AsyncCallback<User>() {
       @Override
       public void onFailure(Throwable caught) {
 
       }
 
       @Override
-      public void onSuccess(List<User> result) {
+      public void onSuccess(User result) {
         userNotification.getPermissions().clear();
-        for (User u : result) {
-          if (((int) u.getId()) == user) {
-            for (User.Permission permission : u.getPermissions()) {
-              //System.out.println("\tUserManager.login : found : " + u + " with perm " + permission);
-              userNotification.setPermission(permission, true);
-            }
-            break;
+        if (result != null) {
+          for (User.Permission permission : result.getPermissions()) {
+            userNotification.setPermission(permission, true);
           }
         }
-        //System.out.println("perms for " + user + " now " + userNotification.getPermissions());
         userNotification.gotUser(user);
       }
     });
