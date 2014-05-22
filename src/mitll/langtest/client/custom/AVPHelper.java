@@ -41,7 +41,7 @@ class AVPHelper extends NPFHelper {
   @Override
   protected PagingExerciseList makeExerciseList(final Panel right, final String instanceName) {
     ExercisePanelFactory factory = getFactory(null, instanceName, true);
-    return new PagingExerciseList(right, service, feedback, factory, controller, false,
+    return new PagingExerciseList(right, service, feedback, factory, controller,
       true, instanceName) {
       @Override
       protected void onLastItem() {
