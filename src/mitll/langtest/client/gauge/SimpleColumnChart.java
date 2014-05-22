@@ -1,12 +1,8 @@
 package mitll.langtest.client.gauge;
 
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.flashcard.LeaderboardPlot;
-import mitll.langtest.shared.flashcard.SetScore;
 import org.moxieapps.gwt.highcharts.client.Chart;
-import org.moxieapps.gwt.highcharts.client.PlotBand;
 import org.moxieapps.gwt.highcharts.client.Series;
-import org.moxieapps.gwt.highcharts.client.labels.PlotBandLabel;
 import org.moxieapps.gwt.highcharts.client.labels.XAxisLabels;
 import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
 
@@ -16,8 +12,8 @@ import java.util.List;
  * Created by GO22670 on 5/21/2014.
  */
 public class SimpleColumnChart {
-  private static final float HALF = 2f;
-  public static final float GRAPH_MAX = 100f;
+/*  private static final float HALF = 2f;
+  public static final float GRAPH_MAX = 100f;*/
 
   public Widget getChart(boolean showOnlyOneExercise, List<Float> scores, int height, float classAvg) {
     Chart chart = new Chart()
