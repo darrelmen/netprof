@@ -456,7 +456,11 @@ public class UserDAO extends DAO {
       cell = row.createCell(j++);
       cell.setCellValue(user.getUserID());
       cell = row.createCell(j++);
-      cell.setCellValue(new Date(user.getTimestamp()));
+      try {
+        cell.setCellValue(user.getTimestamp());
+      } catch (Exception e) {
+        cell.setCellValue("Unknown");
+      }
       cell.setCellStyle(cellStyle);
       cell = row.createCell(j++);
       Demographics demographics = user.getDemographics();
