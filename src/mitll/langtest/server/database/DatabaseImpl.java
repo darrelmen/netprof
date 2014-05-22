@@ -715,8 +715,6 @@ public class DatabaseImpl implements Database {
                              String audioFile,
                              boolean valid, boolean flq, boolean spoken,
                              String audioType, int durationInMillis, boolean correct, float score) {
-    //if (valid) addCompleted(userID, exerciseID);
-
     return answerDAO.addAnswer(this, userID, plan, exerciseID, questionID, "", audioFile, valid, flq, spoken, audioType,
       durationInMillis, correct, score, "");
   }
@@ -880,6 +878,13 @@ public class DatabaseImpl implements Database {
     new AudioExport().writeZip(out, typeToSection, getSectionHelper(), exercisesForSelectionState, language1, getAudioDAO(), installPath, ".");
   }
 
+  /**
+   * @see mitll.langtest.server.DownloadServlet#writeUserList(javax.servlet.http.HttpServletResponse, DatabaseImpl, String)
+   * @param out
+   * @param listid
+   * @return
+   * @throws Exception
+   */
   public String writeZip(OutputStream out, long listid) throws Exception {
     UserList userListByID = getUserListManager().getUserListByID(listid, getSectionHelper().getTypeOrder());
 
@@ -888,7 +893,7 @@ public class DatabaseImpl implements Database {
       logger.error("huh? can't find user list " + listid);
       return language1 + "_Unknown";
     } else {
-      logger.debug("writing contents of " + userListByID);
+      //logger.debug("writing contents of " + userListByID);
       new AudioExport().writeZip(out, userListByID.getName(), getSectionHelper(), userListByID.getExercises(), language1, getAudioDAO(), installPath, ".");
     }
     return language1 + "_" + userListByID.getName();
