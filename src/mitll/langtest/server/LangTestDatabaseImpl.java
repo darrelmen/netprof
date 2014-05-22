@@ -94,10 +94,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   public void logAndNotifyServerException(Exception e) {
-    String message = "Server Exception : " + ExceptionUtils.getStackTrace(e);
-    String prefixedMessage = "for " + pathHelper.getInstallPath() + " got " + message;
-    logger.debug(prefixedMessage);
-    getMailSupport().email(serverProps.getEmailAddress(),"Server Exception on " + pathHelper.getInstallPath(), prefixedMessage);
+    if (!e.getMessage().contains("Broken Pipe")) {
+      String message = "Server Exception : " + ExceptionUtils.getStackTrace(e);
+      String prefixedMessage = "for " + pathHelper.getInstallPath() + " got " + message;
+      logger.debug(prefixedMessage);
+      getMailSupport().email(serverProps.getEmailAddress(), "Server Exception on " + pathHelper.getInstallPath(), prefixedMessage);
+    }
   }
 
   private List<CommonShell> getExerciseShells(Collection<? extends CommonExercise> exercises) {
@@ -889,6 +891,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   public List<User> getUsers() { return db.getUsers();  }
+  @Override
+  public User getUserBy(long id) {
+    return db.getUserDAO().getUserWhere(id);
+  }
 
   // Results ---------------------
 
@@ -1029,7 +1035,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     logger.debug(prefixedMessage);
 
     if (message.startsWith("got browser exception")) {
-      getMailSupport().email(serverProps.getEmailAddress(),"Javascript Exception", prefixedMessage);
+      getMailSupport().email(serverProps.getEmailAddress(), "Javascript Exception", prefixedMessage);
     }
   }
 
