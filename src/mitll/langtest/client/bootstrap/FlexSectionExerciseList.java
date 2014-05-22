@@ -445,13 +445,11 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     } else {
       StringBuilder status = new StringBuilder();
 
-      System.out.println("showSelectionState : typeOrder " + typeOrder + " selection state " + typeToSection);
+      //System.out.println("showSelectionState : typeOrder " + typeOrder + " selection state " + typeToSection);
 
       for (String type : typeOrder) {
         Collection<String> selectedItems = typeToSection.get(type);
-        if (selectedItems == null) {
-          //System.out.println("showSelectionState : no value for '" + type + "' in " + typeToSection.keySet());
-        } else {
+        if (selectedItems != null) {
          // String statusForType = type + " " + selectedItems.toString().replaceAll("\\[", "").replaceAll("\\]", "");
           List<String> sorted = new ArrayList<String>();
           for (String selectedItem : selectedItems) {
