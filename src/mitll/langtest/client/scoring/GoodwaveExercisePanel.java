@@ -606,7 +606,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         if (!maleEmpty || !femaleEmpty) {
           container = getDropDown(rightSide, allSameDialect, malesMap, femalesMap, maleUsers, femaleUsers);
         }
-       // List<AudioAttribute> empty = Collections.emptyList();
         final Collection<AudioAttribute> initialAudioChoices = maleEmpty ?
           femaleEmpty ? audioAttributes : femalesMap.get(femaleUsers.get(0)) : malesMap.get(maleUsers.get(0));
 
@@ -715,8 +714,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
       RadioButton regular = null;
       for (final AudioAttribute audioAttribute : audioAttributes) {
-        final RadioButton radio = new RadioButton(GROUP + "_" + exercise.getID() + "_"+instance, audioAttribute.getDisplay());
-        radio.getElement().setId("Radio_"+audioAttribute.getDisplay());
+        String display = audioAttribute.getDisplay();
+       // System.out.println("attri " + audioAttribute + " display " +display);
+        final RadioButton radio = new RadioButton(GROUP + "_" + exercise.getID() + "_"+instance, display);
+        radio.getElement().setId("Radio_"+ display);
         if (audioAttribute.isRegularSpeed()) {
           regular = radio;
         }
