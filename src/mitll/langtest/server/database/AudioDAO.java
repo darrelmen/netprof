@@ -136,16 +136,6 @@ public class AudioDAO extends DAO {
     return new ArrayList<AudioAttribute>();
   }
 
-/*  public List<AudioAttribute> getAudioAttributesForID(long id) {
-    try {
-      String sql = "SELECT * FROM " + AUDIO + " WHERE " +ID +"=" + id;
-      return getResultsSQL(sql);
-    } catch (Exception ee) {
-      logger.error("got " + ee, ee);
-    }
-    return new ArrayList<AudioAttribute>();
-  }*/
-
   /**
    * Items that are recorded must have both regular and slow speed audio.
    * @see mitll.langtest.server.LangTestDatabaseImpl#markRecordedState(int, String, java.util.Collection)
