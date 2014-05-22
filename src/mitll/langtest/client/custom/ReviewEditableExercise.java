@@ -215,10 +215,10 @@ class ReviewEditableExercise extends EditableExercise {
         delete.addClickHandler(new ClickHandler() {
           @Override
           public void onClick(ClickEvent event) {
+            System.out.println("marking audio defect for " +audio + " on " + e.getID());
             service.markAudioDefect(audio, e.getID(), new AsyncCallback<Void>() {    // delete comment too?
               @Override
-              public void onFailure(Throwable caught) {
-              }
+              public void onFailure(Throwable caught) {}
 
               @Override
               public void onSuccess(Void result) {
