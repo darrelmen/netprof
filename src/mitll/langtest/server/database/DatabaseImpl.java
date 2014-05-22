@@ -401,8 +401,15 @@ public class DatabaseImpl implements Database {
     return defects;
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#markAudioDefect(mitll.langtest.shared.AudioAttribute, String)
+   * @see mitll.langtest.client.custom.ReviewEditableExercise#getPanelForAudio(mitll.langtest.shared.CommonExercise, mitll.langtest.shared.AudioAttribute, mitll.langtest.client.custom.RememberTabAndContent)
+   * @param audioAttribute
+   */
   public void markAudioDefect(AudioAttribute audioAttribute) {
-    audioDAO.markDefect(audioAttribute);
+    if (audioDAO.markDefect(audioAttribute) < 1) {
+      logger.error("huh? couldn't mark error on " + audioAttribute);
+    }
   }
 
   /**
@@ -875,7 +882,7 @@ public class DatabaseImpl implements Database {
       getSectionHelper().getExercisesForSelectionState(typeToSection);
     String language1 = getServerProps().getLanguage();
 
-    new AudioExport().writeZip(out, typeToSection, getSectionHelper(), exercisesForSelectionState, language1, getAudioDAO(), installPath, ".");
+    new AudioExport().writeZip(out, typeToSection, getSectionHelper(), exercisesForSelectionState, language1, getAudioDAO(), installPath, configDir);
   }
 
   /**
@@ -894,7 +901,7 @@ public class DatabaseImpl implements Database {
       return language1 + "_Unknown";
     } else {
       //logger.debug("writing contents of " + userListByID);
-      new AudioExport().writeZip(out, userListByID.getName(), getSectionHelper(), userListByID.getExercises(), language1, getAudioDAO(), installPath, ".");
+      new AudioExport().writeZip(out, userListByID.getName(), getSectionHelper(), userListByID.getExercises(), language1, getAudioDAO(), installPath, configDir);
     }
     return language1 + "_" + userListByID.getName();
   }
