@@ -860,13 +860,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public void markAudioDefect(AudioAttribute audioAttribute, String exid) {
+    logger.debug("mark audio defect for " + exid + " on " + audioAttribute);
+
     db.markAudioDefect(audioAttribute);
 
     CommonExercise byID = db.getCustomOrPredefExercise(exid);  // allow custom items to mask out non-custom items
 
     Map<String, AudioAttribute> audioRefToAttr = byID.getAudioRefToAttr();
     AudioAttribute remove = audioRefToAttr.remove(audioAttribute.getKey());
-    if (remove == null) logger.error("huh? couldn't remove " + audioAttribute + " from " + exid + " keys were " + audioRefToAttr.keySet());
+    if (remove == null) {
+      logger.error("huh? couldn't remove " + audioAttribute + " from " + exid + " keys were " + audioRefToAttr.keySet());
+    }
   }
 
   /**
