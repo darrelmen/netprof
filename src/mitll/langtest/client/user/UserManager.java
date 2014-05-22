@@ -9,7 +9,6 @@ import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 
 /**
