@@ -33,7 +33,7 @@ public class BrowserCheck {
       return this;
     }
     if (min == null) {
-      Window.alert("Your browser is " + browser + " version " + version + ". We strongly recommend any of " + browserToVersion.keySet());
+      // Window.alert("Your browser is " + browser + " version " + version + ". We strongly recommend any of " + browserToVersion.keySet());
     } else if (ver < min) {
         if (!browser.equals(FIREFOX) || !version.startsWith("10.0")) {
             Window.alert("Your browser is " + browser + " version " + version +
@@ -83,13 +83,24 @@ public class BrowserCheck {
       e.printStackTrace();
     }
 
+/*    System.out.println("got here 1 ");
+
+    System.out.println("appName " + getAppName());
+    System.out.println("appVersion " +getAppVersion());
+    System.out.println("got here 2 ");*/
+
     return browser + " " + ver;
   }
 
- // public boolean isFirefox() { return browser.equals(FIREFOX); }
-
   private static native String getUserAgent() /*-{
-    return navigator.userAgent.toLowerCase();
+      return navigator.userAgent.toLowerCase();
   }-*/;
 
+/*  private static native String getAppName() *//*-{
+      return navigator.appName;
+  }-*//*;
+
+  private static native String getAppVersion() *//*-{
+      return navigator.appVersion;
+  }-*//*;*/
 }
