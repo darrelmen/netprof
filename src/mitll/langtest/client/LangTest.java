@@ -503,7 +503,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     browserCheck.getBrowserAndVersion();
 
     String releaseDate = props.getReleaseDate() != null ? " " + props.getReleaseDate() : "";
-    return new HTML("<span><font size=-2>" + browserCheck.browser + " " + browserCheck.ver + releaseDate + "</font></span>");
+    return new HTML("<span><font size=-2>" +
+      //browserCheck.browser + " " +
+      browserCheck.ver +
+      releaseDate + "</font></span>");
   }
 
   private void setupSoundManager() {
