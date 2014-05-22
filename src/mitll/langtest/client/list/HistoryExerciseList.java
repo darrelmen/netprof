@@ -37,9 +37,9 @@ public class HistoryExerciseList extends PagingExerciseList {
   protected long userID;
   private static final boolean DEBUG = false;
   protected HistoryExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                                boolean showTurkToken, boolean showInOrder, ExerciseController controller,
+                                ExerciseController controller,
                                 boolean showTypeAhead, String instance) {
-    super(currentExerciseVPanel, service, feedback, null, controller, showTurkToken, showTypeAhead, instance);
+    super(currentExerciseVPanel, service, feedback, null, controller, showTypeAhead, instance);
   }
 
   /**
@@ -91,7 +91,7 @@ public class HistoryExerciseList extends PagingExerciseList {
   }
 
   protected void setHistoryItem(String historyToken) {
-    System.out.println("------------ HistoryExerciseList.setHistoryItem '" + historyToken + "' -------------- ");
+    //System.out.println("------------ HistoryExerciseList.setHistoryItem '" + historyToken + "' -------------- ");
     History.newItem(historyToken);
   }
 
