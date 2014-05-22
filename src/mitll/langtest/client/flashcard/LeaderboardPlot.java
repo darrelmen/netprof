@@ -141,7 +141,7 @@ public class LeaderboardPlot {
 
   private <T extends SetScore> PlotBand getAvgScore(int numScores, float total, Chart chart) {
     float avg = total / (float) numScores;
-    return getPlotBand(avg, chart, "#2031ff", AVERAGE);
+    return getPlotBand(avg, chart, "#8EB4E3", AVERAGE);
   }
 
   private PlotBand getTopScore(float top, Chart chart) {
