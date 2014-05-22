@@ -62,12 +62,11 @@ public class PagingExerciseList extends ExerciseList {
    * @param feedback
    * @param factory
    * @param controller
-   * @param showTurkToken
    * @param showTypeAhead
    * @param instance
    */
   public PagingExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                            ExercisePanelFactory factory, ExerciseController controller, boolean showTurkToken,
+                            ExercisePanelFactory factory, ExerciseController controller,
                             boolean showTypeAhead, String instance) {
     super(currentExerciseVPanel, service, feedback, factory, controller, instance);
     this.controller = controller;
