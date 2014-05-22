@@ -359,6 +359,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     int width = (int) ((screenPortion * ((float) Window.getClientWidth())) - leftColumnWidth) - rightSide;
     int i = width / 5;
     width = (i-1) *5;
+    width -= 4;
     if (DEBUG_GET_IMAGES) {
       System.out.println("AudioPanel.getImages : leftColumnWidth " + leftColumnWidth + "(" +leftColumnWidth1+
         ") width " + width + " (screen portion = " + screenPortion +
