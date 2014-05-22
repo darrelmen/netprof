@@ -144,7 +144,7 @@ public class DownloadServlet extends DatabaseServlet {
     //   logger.debug("\ts " + s);
 
         if (!s.isEmpty()) {
-          s = s.substring(1/*, s.length() - 1*/);
+          s = s.substring(1);
         }
        s = s.replaceAll("]","");
 
