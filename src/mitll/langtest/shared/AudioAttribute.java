@@ -16,6 +16,7 @@ public class AudioAttribute implements IsSerializable {
   private static final String SPEED = "speed";
   public static final String SLOW = "slow";
   public static final String REGULAR = "regular";
+  public static final String REGULAR_AND_SLOW = "regular and slow";
 
   private MiniUser user;
 
@@ -44,7 +45,7 @@ public class AudioAttribute implements IsSerializable {
     if (type.equals(Result.AUDIO_TYPE_REGULAR)) markRegular();
     else if (type.equals(Result.AUDIO_TYPE_SLOW)) markSlow();
     else if (type.equals(Result.AUDIO_TYPE_FAST_AND_SLOW)) {
-      addAttribute(SPEED, "fast and slow");
+      addAttribute(SPEED, REGULAR_AND_SLOW);
     }
     else {
       attributes = new HashMap<String, String>();
@@ -99,8 +100,12 @@ public class AudioAttribute implements IsSerializable {
   }
 
   public boolean isRegularSpeed() {
-    String speed = getAttributes().get(SPEED);
+    String speed = getSpeed();
     return speed != null && speed.equalsIgnoreCase(REGULAR);
+  }
+
+  public String getSpeed() {
+    return getAttributes().get(SPEED);
   }
 
   public boolean hasOnlySpeed() {
@@ -186,20 +191,9 @@ public class AudioAttribute implements IsSerializable {
     return uniqueID;
   }
 
-/*
-  public void setUniqueID(int uniqueID) {
-    this.uniqueID = uniqueID;
-  }
-*/
-
-/*
-  public void setUser(MiniUser user) {
-    this.user = user;
-  }
-*/
-
   @Override
   public String toString() {
     return "Audio id " +uniqueID + " : " + audioRef + " attrs " + attributes + " by " + userid +"/"+user;
   }
+
 }
