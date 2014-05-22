@@ -54,7 +54,9 @@ public class DownloadServlet extends DatabaseServlet {
           Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(queryString);
           String name = typeToSection.isEmpty() ? "audio" : db.getPrefix(typeToSection);
           name = name.replaceAll("\\,", "_");
+          name += ".zip";
           String fileName = db.getServerProps().getLanguage() + "_" + name;
+
           setHeader(response, fileName);
           try {
             db.writeZip(response.getOutputStream(), typeToSection);
@@ -85,6 +87,7 @@ public class DownloadServlet extends DatabaseServlet {
     try {
       String name = db.getUserListName(id);
       name = name.replaceAll("\\,", "_").replaceAll(" ", "_");
+      name += ".zip";
    //   logger.debug("attachment name ='" + name + "'");
       setHeader(response, name);
 
