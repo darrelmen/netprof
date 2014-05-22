@@ -44,9 +44,6 @@ import java.util.Set;
 public class ExcelImport implements ExerciseDAO {
   private static final Logger logger = Logger.getLogger(ExcelImport.class);
   private static final boolean INCLUDE_ENGLISH_SEMI_AS_DEFECT = true;
-//  public static final boolean MARK_MISSING_AUDIO_AS_DEFECT = false;
-
- // private final boolean isFlashcard;
 
   private List<CommonExercise> exercises = null;
   private final Map<String, CommonExercise> idToExercise = new HashMap<String, CommonExercise>();
@@ -157,11 +154,11 @@ public class ExcelImport implements ExerciseDAO {
         // remove exercises to remove
         Set<String> removes = addRemoveDAO.getRemoves();
 
-        logger.debug("Removing " + removes.size());
+        if (!removes.isEmpty()) logger.debug("Removing " + removes.size());
         for (String id : removes) {
           CommonExercise remove = idToExercise.remove(id);
           if (remove != null) {
-            logger.debug("\tremove " + id);
+//            logger.debug("\tremove " + id);
             exercises.remove(remove);
             getSectionHelper().removeExercise(remove);
           }
@@ -180,9 +177,9 @@ public class ExcelImport implements ExerciseDAO {
               sectionHelper.addExercise(userExercise);
               addOverlay(userExercise);
             }
-            else {
+            //else {
               //logger.debug("not adding as overlay " + userExercise.getID());
-            }
+            //}
           }
         }
 
