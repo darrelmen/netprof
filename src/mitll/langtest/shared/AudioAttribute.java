@@ -43,6 +43,9 @@ public class AudioAttribute implements IsSerializable {
     this.user = user;
     if (type.equals(Result.AUDIO_TYPE_REGULAR)) markRegular();
     else if (type.equals(Result.AUDIO_TYPE_SLOW)) markSlow();
+    else if (type.equals(Result.AUDIO_TYPE_FAST_AND_SLOW)) {
+      addAttribute(SPEED, "fast and slow");
+    }
     else {
       attributes = new HashMap<String, String>();
     }
@@ -117,9 +120,7 @@ public class AudioAttribute implements IsSerializable {
     attributes.put(name, value);
   }
 
-  public String getAudioRef() {
-    return audioRef;
-  }
+  public String getAudioRef() { return audioRef;  }
 
   public Map<String, String> getAttributes() {
     return attributes;
@@ -128,8 +129,11 @@ public class AudioAttribute implements IsSerializable {
   public String getKey() { return "user="+userid+", "+getAttributes().toString(); }
 
   public String getDisplay() {
+    //System.out.println("attributes '" +attributes+ "'");
+
     if (hasOnlySpeed()) {
       String speed = attributes.values().iterator().next();
+      //System.out.println("speed '" +speed+ "'");
       return speed.substring(0, 1).toUpperCase() + speed.substring(1);
     } else {
 
@@ -139,6 +143,7 @@ public class AudioAttribute implements IsSerializable {
         stringBuilder.append(key.substring(0, 1).toUpperCase() + key.substring(1));
 
         String value = pair.getValue();
+        //System.out.println("key '" +key+ "' value " + value);
 
         stringBuilder.append(" : " + value.substring(0, 1).toUpperCase() + value.substring(1));
         stringBuilder.append(", ");
@@ -149,16 +154,22 @@ public class AudioAttribute implements IsSerializable {
     }
   }
 
-  public MiniUser getUser() {
-    return user;
-  }
+  public MiniUser getUser() { return user; }
 
   public long getUserid() { return userid; }
 
+  /**
+   * @see mitll.langtest.client.custom.QCNPFExercise#addTabsForUsers(CommonExercise, com.github.gwtbootstrap.client.ui.TabPanel, java.util.Map, java.util.List)
+   * @return
+   */
   public boolean isHasBeenPlayed() {
     return hasBeenPlayed;
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addPlayedMarkings(long, CommonExercise)
+   * @param hasBeenPlayed
+   */
   public void setHasBeenPlayed(boolean hasBeenPlayed) {
     this.hasBeenPlayed = hasBeenPlayed;
   }
@@ -175,13 +186,17 @@ public class AudioAttribute implements IsSerializable {
     return uniqueID;
   }
 
+/*
   public void setUniqueID(int uniqueID) {
     this.uniqueID = uniqueID;
   }
+*/
 
+/*
   public void setUser(MiniUser user) {
     this.user = user;
   }
+*/
 
   @Override
   public String toString() {
