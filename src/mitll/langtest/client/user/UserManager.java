@@ -2,10 +2,13 @@ package mitll.langtest.client.user;
 
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Cookies;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.User;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -50,8 +53,6 @@ public class UserManager {
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
-   * @see mitll.langtest.client.LangTest#doFlashcard()
-   * @see mitll.langtest.client.LangTest#doDataCollectAdminView
    * @param lt
    * @param service
    * @param props
@@ -69,10 +70,10 @@ public class UserManager {
     if (loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS)) { // explicit setting of login type
       anonymousLogin();
     } else if (loginType.equals(PropertyHandler.LOGIN_TYPE.UNDEFINED) && // no explicit setting, so it's dependent on the mode
-      (props.isGoodwaveMode() || props.isAutocrt() || isInitialFlashcardTeacherView())) {   // no login for pron mode
+      (props.isGoodwaveMode() || isInitialFlashcardTeacherView())) {   // no login for pron mode
       anonymousLogin();
     } else {
-      loginDifferentTypes();
+      login();
     }
   }
 
@@ -83,40 +84,40 @@ public class UserManager {
   /**
    * @see #checkLogin()
    */
-  private void loginDifferentTypes() {
-    if (loginType.equals(PropertyHandler.LOGIN_TYPE.STUDENT)) {
-      login();
-    }
-    else if (loginType.equals(PropertyHandler.LOGIN_TYPE.DATA_COLLECTOR)) {
-      teacherLogin();
-    } // next has already been done in checkLogin
-  /*  else if (loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS)) {
-      teacherLogin();
-    }*/
-    else if (!props.isFlashCard() && ((props.isDataCollectMode() && !props.isCRTDataCollectMode()) || props.isTeacherView() || props.isGrading())) {
-      System.out.println("doing teacher login");
-      teacherLogin();
+  private void login() {
+    final int user = getUser();
+    if (user != NO_USER_SET) {
+      //System.out.println("UserManager.login : current user : " + user);
+      rememberAudioType();
+      getPermissionsAndSetUser(user);
     }
     else {
-      System.out.println("doing student login");
-
-      login();
+      new StudentDialog(service, props, this, userNotification).displayLoginBox();
     }
   }
 
   /**
-   * @see #loginDifferentTypes()
+   * TODO : instead have call to get permissions for a user.
+   * @param user
    */
-  private void login() {
-    int user = getUser();
-    if (user != NO_USER_SET) {
-      System.out.println("UserManager.login : current user : " + user);
-      rememberAudioType();
-      userNotification.gotUser(user);
-    } else {
-      StudentDialog studentDialog = new StudentDialog(service,props,this, userNotification);
-      studentDialog.displayLoginBox();
-    }
+  private void getPermissionsAndSetUser(final int user) {
+    service.getUserBy(user, new AsyncCallback<User>() {
+      @Override
+      public void onFailure(Throwable caught) {
+
+      }
+
+      @Override
+      public void onSuccess(User result) {
+        userNotification.getPermissions().clear();
+        if (result != null) {
+          for (User.Permission permission : result.getPermissions()) {
+            userNotification.setPermission(permission, true);
+          }
+        }
+        userNotification.gotUser(user);
+      }
+    });
   }
 
   /**
@@ -130,16 +131,17 @@ public class UserManager {
       userNotification.gotUser(user);
     }
     else {
-      //System.out.println("UserManager.anonymousLogin : make new user, since user = " + user);
+      System.out.println("UserManager.anonymousLogin : make new user, since user = " + user);
+
       addAnonymousUser();
-    }
+  }
   }
 
   private void addAnonymousUser() {
-    StudentDialog studentDialog = new StudentDialog(service,props,this, userNotification);
-    //System.out.println("UserManager.addAnonymousUser : adding anonymous user");
+    StudentDialog studentDialog = new StudentDialog(service,props,this,userNotification);
+    System.out.println("UserManager.addAnonymousUser : adding anonymous user");
 
-    studentDialog.addUser(89, "male", 0,"");
+    studentDialog.addUser(89, "male", 0,"", new ArrayList<User.Permission>());
   }
 
   /**
@@ -164,34 +166,53 @@ public class UserManager {
       }
       userNotification.rememberAudioType(audioType);
     }
-    rememberShowUnansweredFirst();
+    //rememberShowUnansweredFirst();
   }
 
   /**
    * When the user does the login dialog
+   * @see UserDialog#setRecordingOrder()
    * @param val
    */
-  public void setShowUnansweredFirst(boolean val) {
-    String unansweredKey = getUnansweredKey();
+/*  public void setShowUnansweredFirst(boolean val) {
+    addBinaryKey(val, getUnansweredKey());
+   // userNotification.setShowUnansweredFirst(val);
+
+    //getShowUnanswered();
+  }*/
+
+/*
+  public void setShowRerecord(boolean val) {
+    String showRerecordKey = getShowRerecordKey();
+    addBinaryKey(val, showRerecordKey);
+  //  userNotification.setShowRerecord(val);
+
+    //getBinaryKey(showRerecordKey);
+  }
+*/
+/*
+  private void addBinaryKey(boolean val, String unansweredKey) {
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
     localStorageIfSupported.setItem(unansweredKey, val ? "true" : "false");
-    userNotification.setShowUnansweredFirst(val);
+  }*/
 
-    getShowUnanswered();
-  }
-
-  private void rememberShowUnansweredFirst() {
+/*  private void rememberShowUnansweredFirst() {
     if (Storage.isLocalStorageSupported()) {
-      boolean showUnansweredFirst = getShowUnanswered();
-      userNotification.setShowUnansweredFirst(showUnansweredFirst);
+      userNotification.setShowUnansweredFirst(getShowUnanswered());
+      userNotification.setShowRerecord(getBinaryKey(getShowRerecordKey()));
     }
-  }
+  }*/
 
+/*
   private boolean getShowUnanswered() {
+    return getBinaryKey(getUnansweredKey());
+  }
+*/
+
+/*  private boolean getBinaryKey(String unansweredKey) {
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
 
     boolean showUnansweredFirst = false;
-    String unansweredKey = getUnansweredKey();
     String unanswered = localStorageIfSupported.getItem(unansweredKey);
     if (unanswered != null) {
       //System.out.println("found key " +unansweredKey + " = " + unanswered);
@@ -201,11 +222,16 @@ public class UserManager {
       //System.out.println("===> no key " +unansweredKey);
     }
     return showUnansweredFirst;
-  }
+  }*/
 
+/*
   private String getUnansweredKey() {
     return getShowUnansweredKey() + "_" +getUserID();
   }
+  private String getShowRerecordKey() {
+    return getShowRerecordRoot() + "_" +getUserID();
+  }
+*/
 
   /**
    * @return id of user
@@ -223,15 +249,23 @@ public class UserManager {
       String sid = localStorageIfSupported.getItem(getUserIDCookie());
 
       //System.out.println("user id cookie for " +getUserIDCookie() + " is " + sid);
-      if (sid != null && !sid.equals("" + NO_USER_SET)) {
+ /*     if (sid != null && !sid.equals("" + NO_USER_SET)) {
         boolean expired = checkUserExpired(sid);
         if (expired) checkLogin();
         sid = localStorageIfSupported.getItem(getUserIDCookie());
-      }
+      }*/
       return (sid == null || sid.equals("" + NO_USER_SET)) ? NO_USER_SET : Integer.parseInt(sid);
     } else {
       return (int) userID;
     }
+  }
+
+  public boolean isUserExpired() {
+    Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+    String sid = localStorageIfSupported.getItem(getUserIDCookie());
+
+    //System.out.println("user id cookie for " +getUserIDCookie() + " is " + sid);
+    return !(sid != null && !sid.equals("" + NO_USER_SET)) || checkUserExpired(sid);
   }
 
   /**
@@ -273,9 +307,14 @@ public class UserManager {
   private String getExpires() {
     return appTitle + ":" + "expires";
   }
+/*
   private String getShowUnansweredKey() {
     return appTitle + ":" + "showUnanswered";
   }
+  private String getShowRerecordRoot() {
+    return appTitle + ":" + "showRerecord";
+  }
+*/
 
   /**
    * @see #getUser()
@@ -299,8 +338,6 @@ public class UserManager {
         if (expirationDate < System.currentTimeMillis()) {
           System.out.println("checkExpiration : " + sid + " has expired.");
           return true;
-        } else {
-          //System.out.println("checkExpiration : " +sid + " has expires on " + new Date(expirationDate) + " vs now " + new Date());
         }
       } catch (NumberFormatException e) {
         e.printStackTrace();
@@ -314,23 +351,8 @@ public class UserManager {
     return localStorageIfSupported.getItem(getExpires());
   }
 
-/*  private PropertyHandler.LOGIN_TYPE getLoginTypeFromStorage() {
-    Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-    String item = localStorageIfSupported.getItem(getLoginType());
-    try {
-      if (item == null) {
-        return PropertyHandler.LOGIN_TYPE.UNDEFINED;
-      } else {
-        return PropertyHandler.LOGIN_TYPE.valueOf(item.toUpperCase());
-      }
-    } catch (IllegalArgumentException e) {
-      System.err.println("couldn't parse " + item);
-      return PropertyHandler.LOGIN_TYPE.UNDEFINED;
-    }
-  }*/
-
   /**
-   * @see mitll.langtest.client.LangTest#getLogout()
+   * @see mitll.langtest.client.LangTest#resetState()
    */
   public void clearUser() {
     clearCookieState();
@@ -352,33 +374,15 @@ public class UserManager {
   }
 
   /**
-   * @see mitll.langtest.client.LangTest#doDataCollectAdminView
-   * @see #loginDifferentTypes()
-   */
-  public void teacherLogin() {
-    int user = getUser();
-    if (user != NO_USER_SET) {
-      System.out.println("teacherLogin: got cached user : " + user);
-      rememberAudioType();
-      userNotification.gotUser(user);
-    } else {
-      DataCollectorDialog dataCollectorDialog = new DataCollectorDialog(service, props, userNotification, this);
-      dataCollectorDialog.displayTeacherLogin("Data Collector Login");
-    }
-  }
-
-  /**
    * TODO : move cookie manipulation to separate class
    *
    * @param sessionID    from database
    * @param audioType
    * @param userChosenID
-   * @see DataCollectorDialog#addFullUser(com.github.gwtbootstrap.client.ui.Modal, com.github.gwtbootstrap.client.ui.Button, UserManager, String, String, String, String, int, int)
-   * @see DataCollectorDialog#userExists
    * @see StudentDialog#addUser
    */
   void storeUser(long sessionID, String audioType, String userChosenID, PropertyHandler.LOGIN_TYPE userType) {
-    System.out.println("storeUser : user now " + sessionID + " audio type '" + audioType +"'");
+    //System.out.println("storeUser : user now " + sessionID + " audio type '" + audioType +"'");
     final long DURATION = getUserSessionDuration();
     long futureMoment = getUserSessionEnd(DURATION);
     if (USE_COOKIE) {
@@ -393,11 +397,15 @@ public class UserManager {
       localStorageIfSupported.setItem(getAudioType(), "" + audioType);
       localStorageIfSupported.setItem(getLoginType(), "" + userType);
       System.out.println("storeUser : user now " + sessionID + " / " + getUser() + " audio '" + audioType+"' expires in " + (DURATION/1000) + " seconds");
-    } else {
+      userNotification.rememberAudioType(audioType);
+
+      getPermissionsAndSetUser((int)sessionID);
+
+    } else {  // not sure what we could possibly do here...
       userID = sessionID;
       this.userChosenID = userChosenID;
+      userNotification.gotUser(sessionID);
     }
-    userNotification.gotUser(sessionID);
   }
 
 
