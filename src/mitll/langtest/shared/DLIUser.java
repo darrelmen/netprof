@@ -22,7 +22,7 @@ public class DLIUser implements IsSerializable, Demographics {
   }
 
   /**
-   * @see mitll.langtest.client.user.StudentDialog#addUser(int, String, int, String)
+   * @see mitll.langtest.client.user.StudentDialog#addUser(int, String, int, String, java.util.Collection)
    * @param userID
    * @param weeksOfExperience
    * @param reading
