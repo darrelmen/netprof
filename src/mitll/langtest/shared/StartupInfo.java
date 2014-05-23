@@ -36,4 +36,6 @@ public class StartupInfo implements IsSerializable {
   public List<SectionNode> getSectionNodes() {
     return sectionNodes;
   }
+
+  public String toString() { return "Order " + getTypeOrder() + " nodes " + getSectionNodes(); }
 }
