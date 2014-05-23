@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DLIUserDAO extends DAO {
-  private static Logger logger = Logger.getLogger(DLIUserDAO.class);
+  private static final Logger logger = Logger.getLogger(DLIUserDAO.class);
 
   private static final String DLIUSERS = "dliusers";
 
@@ -75,15 +75,6 @@ public class DLIUserDAO extends DAO {
       "USERS" +
       "(ID)" +
       ")");
-    statement.execute();
-    statement.close();
-    database.closeConnection(connection);
-  }
-
-  void dropUserTable(Database database) throws Exception {
-    System.err.println("----------- dropUserTable -------------------- ");
-    Connection connection = database.getConnection();
-    PreparedStatement statement = connection.prepareStatement("drop TABLE " + DLIUSERS);
     statement.execute();
     statement.close();
     database.closeConnection(connection);
