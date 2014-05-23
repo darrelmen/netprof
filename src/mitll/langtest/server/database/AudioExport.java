@@ -157,7 +157,7 @@ public class AudioExport {
       cell = row.createCell(j++);
       cell.setCellValue(exercise.getEnglish());
 
-      if (english) {
+      if (!english) {
         cell = row.createCell(j++);
         cell.setCellValue(exercise.getForeignLanguage());
       }
