@@ -1,4 +1,3 @@
-
 function microphone_recorder_events()
 {
   $('#status').append("<p>Microphone recorder event: " + arguments[0] + "  at " + new Date().getTime());
@@ -6,7 +5,13 @@ function microphone_recorder_events()
   switch(arguments[0]) {
   case "ready":
       $('#status').css({'color': '#000'}).append("<p>ready: ");
-      Recorder.connect("recorderApp", 0);
+      try {
+          console.log(FlashRecorderLocal);
+
+          FlashRecorderLocal.connect("recorderApp", 0);
+      } catch (e) {
+          console.error("got " +e);
+      }
     break;
 
   case "no_microphone_found":
@@ -47,75 +52,76 @@ function microphone_recorder_events()
   }
 }
 
-Recorder = {
-  recorder: null,
-  uploadFormId: "#uploadForm",
-  uploadFieldName: "upload_file[filename]",
-  permitCalled: 0,
 
-  connect: function(name, attempts) {
-    $('#status').css({'color': '#0F0'}).append("<p>connect called:  at " + new Date().getTime());
+FlashRecorderLocal = {
+    recorder: null,
+    uploadFormId: "#uploadForm",
+    uploadFieldName: "upload_file[filename]",
+    permitCalled: 0,
 
-    if(navigator.appName.indexOf("Microsoft") != -1) {
-      Recorder.recorder = window[name];
-    } else {
-      Recorder.recorder = document[name];
+    connect: function(name, attempts) {
+        $('#status').css({'color': '#0F0'}).append("<p>connect called:  at " + new Date().getTime());
+
+        if(navigator.appName.indexOf("Microsoft") != -1) {
+            FlashRecorderLocal.recorder = window[name];
+        } else {
+            FlashRecorderLocal.recorder = document[name];
+        }
+
+        if(attempts >= 40) {
+            return;
+        }
+
+        // flash app needs time to load and initialize
+        if(FlashRecorderLocal.recorder && FlashRecorderLocal.recorder.init) {
+            $('#status').css({'color': '#0F0'}).append("<p>calling permit at " + new Date().getTime());
+            FlashRecorderLocal.recorder.permit();
+            return;
+        }
+
+        setTimeout(function() {Recorder.connect(name, attempts+1);}, 100);
+    },
+
+    record: function(name, filename) {
+        $('#status').css({'color': '#0F0'}).append("<p>record at " + new Date().getTime());
+        FlashRecorderLocal.recorder.record(name, filename);
+    },
+
+    hide2:function () {
+        FlashRecorderLocal.recorder.width = 8 + "px";
+        FlashRecorderLocal.recorder.height = 8 + "px";
+    },
+
+    show: function() {
+        FlashRecorderLocal.recorder.show();
+    },
+
+    hide: function() {
+        FlashRecorderLocal.recorder.hide();
+    },
+
+    stop: function() {
+        $('#status').css({'color': '#0F0'}).append("<p>stop at " + new Date().getTime());
+        FlashRecorderLocal.recorder.stopRecording();
+    },
+
+    getWav: function() {
+        return FlashRecorderLocal.recorder.getwavbase64();
+    },
+
+    isMicrophoneAvailable: function() {
+        return FlashRecorderLocal.recorder.isMicrophoneAvailable();
+    },
+
+    showPermission: function() {
+        FlashRecorderLocal.recorder.permit();
     }
 
-    if(attempts >= 40) {
-      return;
-    }
+    /*,
+     showPermissionWindow: function() {
+     $('#upload_status').css({'color': '#0F0'}).append(" permit called: ");
 
-    // flash app needs time to load and initialize
-    if(Recorder.recorder && Recorder.recorder.init) {
-      $('#status').css({'color': '#0F0'}).append("<p>calling permit at " + new Date().getTime());
-        Recorder.recorder.permit();
-      return;
-    }
-
-    setTimeout(function() {Recorder.connect(name, attempts+1);}, 100);
-  },
-
-  record: function(name, filename) {
-      $('#status').css({'color': '#0F0'}).append("<p>record at " + new Date().getTime());
-      Recorder.recorder.record(name, filename);
-  },
-
-  hide2:function () {
-    Recorder.recorder.width = 8 + "px";
-    Recorder.recorder.height = 8 + "px";
-  },
-
-  show: function() {
-    Recorder.recorder.show();
-  },
-
-  hide: function() {
-    Recorder.recorder.hide();
-  },
-
-  stop: function() {
-      $('#status').css({'color': '#0F0'}).append("<p>stop at " + new Date().getTime());
-      Recorder.recorder.stopRecording();
-  },
-
-  getWav: function() {
-      return Recorder.recorder.getwavbase64();
-  },
-
-  isMicrophoneAvailable: function() {
-      return Recorder.recorder.isMicrophoneAvailable();
-  },
-
-  showPermission: function() {
-    Recorder.recorder.permit();
-  }
-
-  /*,
-  showPermissionWindow: function() {
-      $('#upload_status').css({'color': '#0F0'}).append(" permit called: ");
-
-    // need to wait until app is resized before displaying permissions screen
-      setTimeout(function(){Recorder.recorder.permit();}, 1);
-  }*/
-}
+     // need to wait until app is resized before displaying permissions screen
+     setTimeout(function(){FlashRecorderLocal.recorder.permit();}, 1);
+     }*/
+};
