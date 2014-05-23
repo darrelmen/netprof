@@ -1,7 +1,6 @@
 package mitll.langtest.server.database;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 
 /**
  * Created with IntelliJ IDEA.
@@ -11,9 +10,9 @@ import java.sql.SQLException;
  * To change this template use File | Settings | File Templates.
  */
 public interface Database {
-  Connection getConnection() /*throws Exception*/;
-
-  void closeConnection(Connection connection) throws SQLException;
+  Connection getConnection();
+  void closeConnection(Connection connection);
+  void logEvent(String exid, String context, long userid);
 
   String TIME = "time";
   String EXID = "exid";
