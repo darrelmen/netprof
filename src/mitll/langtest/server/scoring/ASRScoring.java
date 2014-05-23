@@ -6,12 +6,13 @@ import audio.image.TranscriptEvent;
 import audio.imagewriter.ImageWriter;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.io.Files;
 import corpus.HTKDictionary;
 import corpus.LTS;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
+import mitll.langtest.server.audio.SLFFile;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.commons.io.FileUtils;
@@ -31,7 +32,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -47,29 +47,32 @@ import java.util.TreeSet;
  * To change this template use File | Settings | File Templates.
  */
 public class ASRScoring extends Scoring {
-  private static Logger logger = Logger.getLogger(ASRScoring.class);
+  private static final double KEEP_THRESHOLD = 0.3;
+  private static final Logger logger = Logger.getLogger(ASRScoring.class);
+  private static final boolean DEBUG = false;
 
   private static final int FOREGROUND_VOCAB_LIMIT = 100;
   private static final int VOCAB_SIZE_LIMIT = 200;
 
   public static final String SMALL_LM_SLF = "smallLM.slf";
 
-  private final SmallVocabDecoder svDecoderHelper = new SmallVocabDecoder();
+  private SmallVocabDecoder svDecoderHelper = null;
   private LangTestDatabaseImpl langTestDatabase;
 
   /**
    * By keeping these here, we ensure that we only ever read the dictionary once
    */
   private HTKDictionary htkDictionary;
-  private LTS letterToSoundClass;
+  private final LTS letterToSoundClass;
   private final Cache<String, Scores> audioToScore;
-  private ConfigFileCreator configFileCreator;
+  private final ConfigFileCreator configFileCreator;
+  private final boolean isMandarin;
 
   /**
    * Normally we delete the tmp dir created by hydec, but if something went wrong, we want to keep it around.
    * If the score was below a threshold, or the magic -1, we keep it around for future study.
    */
-  private double lowScoreThresholdKeepTempDir = 0.3;
+  private double lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
@@ -81,25 +84,120 @@ public class ASRScoring extends Scoring {
     this(deployPath, properties, (HTKDictionary)null);
     this.langTestDatabase = langTestDatabase;
     readDictionary();
+    makeDecoder();
   }
 
+  private String languageProperty;
+
   /**
-   * @see mitll.langtest.server.audio.SplitAudio#getAsrScoring
+   * @see #ASRScoring(String, java.util.Map, mitll.langtest.server.LangTestDatabaseImpl)
    * @param deployPath
    * @param properties
    * @param dict
    */
-  public ASRScoring(String deployPath, Map<String, String> properties, HTKDictionary dict) {
+  private ASRScoring(String deployPath, Map<String, String> properties, HTKDictionary dict) {
     super(deployPath);
-    lowScoreThresholdKeepTempDir = 0.2;
+    lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
     audioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
 
-    String language = properties.get("language") != null ? properties.get("language") : "";
+    languageProperty = properties.get("language");
+    String language = languageProperty != null ? languageProperty : "";
 
+    isMandarin = language.equalsIgnoreCase("mandarin");
     this.letterToSoundClass = new LTSFactory().getLTSClass(language);
-//    logger.info("using LTS " + letterToSoundClass.getClass());
     this.htkDictionary = dict;
+    makeDecoder();
+    if (dict != null) logger.debug("htkDictionary size is " + dict.size());
     this.configFileCreator = new ConfigFileCreator(properties, letterToSoundClass, scoringDir);
+  }
+
+  private void makeDecoder() {
+    if (svDecoderHelper == null && htkDictionary != null) {
+      svDecoderHelper = new SmallVocabDecoder(htkDictionary);
+    }
+  }
+
+  public SmallVocabDecoder getSmallVocabDecoder() { return svDecoderHelper; }
+
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#checkLTS(String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#isValidForeignPhrase(String)
+   * @param foreignLanguagePhrase
+   * @return
+   */
+  public boolean checkLTS(String foreignLanguagePhrase) { return checkLTS(letterToSoundClass, foreignLanguagePhrase); }
+
+  /**
+   * So chinese is special -- it doesn't do lts -- it just uses a dictionary
+   * @see mitll.langtest.server.LangTestDatabaseImpl#isValidForeignPhrase(String)
+   * @param lts
+   * @param foreignLanguagePhrase
+   * @return
+   */
+  private boolean checkLTS(LTS lts, String foreignLanguagePhrase) {
+    SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(htkDictionary);
+    Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase);
+
+    String language = isMandarin ? " MANDARIN " : "";
+    //logger.debug("checkLTS " + language + " tokens : '" +tokens +"'");
+
+    try {
+      int i = 0;
+      for (String token : tokens) {
+        if (isMandarin) {
+          String segmentation = smallVocabDecoder.segmentation(token.trim());
+          if (segmentation.isEmpty()) {
+            logger.debug("checkLTS: mandarin token : " + token + " invalid!");
+            return false;
+          }
+        } else {
+          String[][] process = lts.process(token);
+          if (process == null || process.length == 0 || process[0].length == 0 ||
+            process[0][0].length() == 0/* || process[0][0].equals("aa")*/) {
+            if (!htkDictionary.contains(token) && !htkDictionary.isEmpty()) {
+              logger.warn("checkLTS with " + lts + "/" + languageProperty + " token #" +i+
+                " : '" + token + "' hash " + token.hashCode()+
+                " is invalid in " + foreignLanguagePhrase+
+                " and not in dictionary (" + htkDictionary.size()+
+                ")");
+              if (process != null) {
+                for (String[] ar : process) {
+                  //logger.warn("got " + ar);
+                  for (String arr : ar) {
+                    logger.warn("\tgot " + arr);
+                  }
+                }
+              }
+              return false;
+            }
+          }
+        }
+        i++;
+      }
+    } catch (Exception e) {
+      logger.error("lts " + language + "/" + lts + " failed on '" + foreignLanguagePhrase +"'", e);
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * For chinese, maybe later other languages.
+   * @param longPhrase
+   * @return
+   */
+  private String getSegmented(String longPhrase) {
+    Collection<String> tokens = svDecoderHelper.getTokens(longPhrase);
+    StringBuilder builder = new StringBuilder();
+    for (String token : tokens) {
+      builder.append(svDecoderHelper.segmentation(token.trim()));
+      builder.append(" ");
+    }
+    String s = builder.toString();
+   // logger.debug("getSegmented phrase '" + longPhrase + "' -> '" + s + "'");
+
+    return s;
   }
 
 /*  private Set<String> wordsInDict = new HashSet<String>();
@@ -139,24 +237,25 @@ public class ASRScoring extends Scoring {
    * @param imageHeight
    * @param useScoreForBkgColor
    * @param useCache
+   * @param prefix
    * @return PretestScore object
    */
   public PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
                                   String sentence, String imageOutDir,
                                   int imageWidth, int imageHeight, boolean useScoreForBkgColor,
                                   boolean decode, String tmpDir,
-                                  boolean useCache) {
-    return scoreRepeatExercise(testAudioDir,testAudioFileNoSuffix,
-        sentence,
-        scoringDir,imageOutDir,imageWidth,imageHeight, useScoreForBkgColor,
+                                  boolean useCache, String prefix) {
+    return scoreRepeatExercise(testAudioDir, testAudioFileNoSuffix,
+      sentence,
+      scoringDir, imageOutDir, imageWidth, imageHeight, useScoreForBkgColor,
       decode, tmpDir,
-      useCache);
+      useCache, prefix);
   }
 
   /**
    * Use hydec to do scoring<br></br>
    *
-   * Some magic happens in {@link #writeTranscripts(String, int, int, String, boolean)} where .lab files are
+   * Some magic happens in {@link Scoring#writeTranscripts(String, int, int, String, boolean, String, String, boolean)} where .lab files are
    * parsed to determine the start and end times for each event, which lets us both create images that
    * show the location of the words and phonemes, and for decoding, the actual reco sentence returned. <br></br>
    *
@@ -174,21 +273,30 @@ public class ASRScoring extends Scoring {
    * @param imageHeight image height
    * @param useScoreForBkgColor true if we want to color the segments by score else all are gray
    * @param useCache
+   * @param prefix
    * @return score info coming back from alignment/reco
    */
-  private PretestScore scoreRepeatExercise(String testAudioDir, String testAudioFileNoSuffix,
+  private PretestScore scoreRepeatExercise(String testAudioDir,
+                                           String testAudioFileNoSuffix,
                                            String sentence,
                                            String scoringDir,
 
                                            String imageOutDir,
-                                           int imageWidth, int imageHeight, boolean useScoreForBkgColor,
+                                           int imageWidth, int imageHeight,
+                                           boolean useScoreForBkgColor,
                                            boolean decode, String tmpDir,
-                                           boolean useCache) {
+                                           boolean useCache, String prefix) {
     String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
     String pathname = noSuffix + ".wav";
+
+
+
+    boolean b = checkLTS(sentence);
+    logger.debug("scoreRepeatExercise for " + testAudioFileNoSuffix + " under " + testAudioDir + " check lts = " + b);
     File wavFile = new File(pathname);
     boolean mustPrepend = false;
-    if (!wavFile.exists()) {
+    if (!wavFile.exists() && deployPath != null) {
+      //logger.debug("trying new path for " + pathname + " under " + deployPath);
       wavFile = new File(deployPath + File.separator + pathname);
       mustPrepend = true;
     }
@@ -215,23 +323,18 @@ public class ASRScoring extends Scoring {
 
     Scores scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir, useCache);
     if (scores == null) {
-      logger.warn("getScoreForAudio failed to generate scores.");
-      Random rand = new Random();
-      return new PretestScore(rand.nextBoolean() ? 0.99f : 0.01f);
+      logger.error("getScoreForAudio failed to generate scores.");
+      return new PretestScore(0.01f);
     }
-    ImageWriter.EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix, useScoreForBkgColor);
+    ImageWriter.EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
+      useScoreForBkgColor,
+      prefix + (useScoreForBkgColor ? "bkgColorForRef" : ""), "", decode);
     Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
-    Map<NetPronImageType, List<Float>> typeToEndTimes = getTypeToEndTimes(wavFile, eventAndFileInfo);
+    Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo);
     String recoSentence = getRecoSentence(eventAndFileInfo);
 
-    PretestScore pretestScore =
-        new PretestScore(scores.hydecScore, getPhoneToScore(scores), sTypeToImage, typeToEndTimes, recoSentence);
-    return pretestScore;
-  }
-
-  private Map<NetPronImageType, List<Float>> getTypeToEndTimes(File wavFile, ImageWriter.EventAndFileInfo eventAndFileInfo) {
     double duration = new AudioCheck().getDurationInSeconds(wavFile);
-    return getTypeToEndTimes(eventAndFileInfo, duration);
+    return new PretestScore(scores.hydecScore, getPhoneToScore(scores), sTypeToImage, typeToEndTimes, recoSentence, (float) duration);
   }
 
 /*  public Scores decode(String testAudioDir, String testAudioFileNoSuffix,
@@ -242,17 +345,19 @@ public class ASRScoring extends Scoring {
   }*/
 
   /**
-   * @see mitll.langtest.server.audio.SplitAudio#getAlignmentScores(ASRScoring, String, String, String, String)
-   * @param testAudioDir
-   * @param testAudioFileNoSuffix
-   * @param sentence
+   * @seex mitll.langtest.server.audio.SplitAudio#getAlignmentScores(ASRScoring, String, String, String, String)
+   * @paramx testAudioDir
+   * @paramx testAudioFileNoSuffix
+   * @paramx sentence
    * @return
    */
+/*
   public Scores align(String testAudioDir, String testAudioFileNoSuffix,
                       String sentence) {
     return getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir,
        false, Files.createTempDir().getAbsolutePath(), false);
   }
+*/
 
   /**
    * @see #scoreRepeatExercise
@@ -271,15 +376,20 @@ public class ASRScoring extends Scoring {
                                   boolean decode, String tmpDir, boolean useCache) {
     String key = testAudioDir + File.separator + testAudioFileNoSuffix;
     Scores scores = useCache ? audioToScore.getIfPresent(key) : null;
+
+    if (isMandarin) {
+      sentence = getSegmented(sentence.trim());
+    }
     if (scores == null) {
-      scores = calcScoreForAudio(testAudioDir,testAudioFileNoSuffix,sentence,scoringDir, decode,tmpDir);
+      scores = calcScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir);
       audioToScore.put(key, scores);
     }
     else {
-      //logger.debug("found cached score for file '" + key + "'");
+      if (DEBUG) logger.debug("found cached score for file '" + key + "'");
     }
     return scores;
   }
+
   /**
    * There are two modes you can use to score the audio : align mode and decode mode
    * In align mode, the decoder figures out where the words and phonemes in the sentence occur in the audio.
@@ -290,7 +400,7 @@ public class ASRScoring extends Scoring {
    * The score per audio file is cached in {@link #audioToScore}
    *
    * @see #getScoreForAudio(String, String, String, String, boolean, String, boolean)
-   * @see #scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String, boolean)
+   * @see #scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String, boolean, String)
    * @param testAudioDir
    * @param testAudioFileNoSuffix
    * @param sentence  only for align
@@ -363,26 +473,20 @@ public class ASRScoring extends Scoring {
    *
    * @see #scoreRepeatExercise
    * @param eventAndFileInfo
-   * @param fileDuration
    * @return
    */
-  private Map<NetPronImageType, List<Float>> getTypeToEndTimes(ImageWriter.EventAndFileInfo eventAndFileInfo, double fileDuration) {
-    Map<NetPronImageType, List<Float>> typeToEndTimes = new HashMap<NetPronImageType, List<Float>>();
+  private Map<NetPronImageType, List<TranscriptSegment>> getTypeToEndTimes(ImageWriter.EventAndFileInfo eventAndFileInfo) {
+    Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<NetPronImageType, List<TranscriptSegment>>();
     for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.typeToEvent.entrySet()) {
       NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
-      List<Float> endTimes = typeToEndTimes.get(key);
-      if (endTimes == null) { typeToEndTimes.put(key, endTimes = new ArrayList<Float>()); }
+      List<TranscriptSegment> endTimes = typeToEndTimes.get(key);
+      if (endTimes == null) { typeToEndTimes.put(key, endTimes = new ArrayList<TranscriptSegment>()); }
       for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
-        endTimes.add(event.getValue().end);
+        TranscriptEvent value = event.getValue();
+        endTimes.add(new TranscriptSegment(value.start, value.end, value.event, value.score));
       }
     }
-    for ( List<Float> times : typeToEndTimes.values()) {
-      Float lastEndTime = times.isEmpty() ? (float)fileDuration : times.get(times.size() - 1);
-      if (lastEndTime < fileDuration && !times.isEmpty()) {
-       // logger.debug("setting last segment to end at end of file " + lastEndTime + " vs " + fileDuration);
-        times.set(times.size() - 1,(float)fileDuration);
-      }
-    }
+
     return typeToEndTimes;
   }
 
@@ -469,7 +573,7 @@ public class ASRScoring extends Scoring {
     double hydecScore = scoresFromHydec.hydecScore;
     if (/*hydecScore != -1 ||*/ hydecScore > lowScoreThresholdKeepTempDir) {   // keep really bad scores for now
       try {
-        logger.debug("deleting " + tmpDir + " since score is " +hydecScore);
+        //logger.debug("deleting " + tmpDir + " since score is " +hydecScore);
         FileUtils.deleteDirectory(new File(tmpDir));
       } catch (IOException e) {
         logger.error("Deleting dir " + tmpDir + " got " +e,e);
@@ -481,28 +585,25 @@ public class ASRScoring extends Scoring {
   private void readDictionary() { htkDictionary = makeDict(); }
 
   /**
-   * @see mitll.langtest.server.audio.SplitAudio#convertExamples
-   * @return
-   */
-  public HTKDictionary getDict() { return htkDictionary; }
-
-  /**
    * @see #readDictionary()
    * @return
    */
   private HTKDictionary makeDict() {
     String dictFile = configFileCreator.getDictFile();
-    boolean dictExists = new File(dictFile).exists();
-    if (!dictExists) logger.error("readDictionary : Can't find dict file at " + dictFile);
-
-    long then = System.currentTimeMillis();
-    HTKDictionary htkDictionary = new HTKDictionary(dictFile);
-    long now = System.currentTimeMillis();
-    int size = htkDictionary.size(); // force read from lazy val
-    if (now-then > 100) {
-      logger.debug("read dict " + dictFile + " of size " +size + " in " + (now-then) + " millis");
+    if (new File(dictFile).exists()) {
+      long then = System.currentTimeMillis();
+      HTKDictionary htkDictionary = new HTKDictionary(dictFile);
+      long now = System.currentTimeMillis();
+      int size = htkDictionary.size(); // force read from lazy val
+      if (now - then > 100) {
+        logger.debug("read dict " + dictFile + " of size " + size + " in " + (now - then) + " millis");
+      }
+      return htkDictionary;
     }
-    return htkDictionary;
+    else {
+      logger.warn("makeDict : Can't find dict file at " + dictFile);
+      return new HTKDictionary();
+    }
   }
 
   /**
@@ -514,13 +615,13 @@ public class ASRScoring extends Scoring {
    */
   private Scores getScoresFromHydec(Audio testAudio, String sentence, String configFile) {
     sentence = sentence.replaceAll("\\p{Z}+", " ");
-    Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut;
     long then = System.currentTimeMillis();
 
-    //logger.debug("getScoresFromHydec using " + configFile + " to decode " + sentence);
+    //logger.debug("getScoresFromHydec scoring '" + sentence +"' (" +sentence.length()+ " )");
 
     try {
-      jscoreOut = testAudio.jscore(sentence, htkDictionary, letterToSoundClass, configFile);
+      Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut =
+        testAudio.jscore(sentence, htkDictionary, letterToSoundClass, configFile);
       float hydec_score = jscoreOut._1;
       long timeToRunHydec = System.currentTimeMillis() - then;
       logger.debug("getScoresFromHydec : scoring sentence " +sentence.length()+" characters long, got score " + hydec_score +
@@ -549,33 +650,18 @@ public class ASRScoring extends Scoring {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getValidPhrases(java.util.Collection)
+   * @see mitll.langtest.server.audio.AudioFileHelper#getValidPhrases(java.util.Collection)
    * @param phrases
    * @return
    */
-  public Collection<String> getValidPhrases(Collection<String> phrases) {
-    return getValidSentences(phrases);
- /*   List<String> valid = new ArrayList<String>();
-    for (String phrase : phrases) {
-      try {
-        if (!isPhraseInDict(phrase)) {
-          logger.warn("getValidPhrases : skipped " + phrase);
-        } else {
-          valid.add(phrase);
-        }
-      } catch (Exception e) {
-       logger.warn("skipped " + phrase);
-      }
-    }
-    if (phrases.size() != valid.size()) {
-      logger.warn("started with " + phrases.size() + " phrases, but now have " + valid.size() + " valid phrases.");
-    }
-    return valid;*/
-  }
+  public Collection<String> getValidPhrases(Collection<String> phrases) { return getValidSentences(phrases); }
 
-  private boolean isPhraseInDict(String phrase) {
-    return letterToSoundClass.process(phrase) != null;
-  }
+  /**
+   * @see #isValid(String)
+   * @param phrase
+   * @return
+   */
+  private boolean isPhraseInDict(String phrase) {  return letterToSoundClass.process(phrase) != null;  }
 
   /**
    * @see #getValidPhrases(java.util.Collection)
@@ -584,23 +670,10 @@ public class ASRScoring extends Scoring {
    */
   private Collection<String> getValidSentences(Collection<String> sentences) {
     Set<String> filtered = new TreeSet<String>();
-
- /*   BufferedWriter utf8 = null;
-    try {
-      utf8 = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("validTokens_for_" +sentences.size()+
-        "_" +System.currentTimeMillis()+
-        ".txt"), "UTF8"));
-    } catch (UnsupportedEncodingException e) {
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-    }
-*/
-    //Set<String> allValid = new HashSet<String>();
     Set<String> skipped = new TreeSet<String>();
 
     for (String sentence : sentences) {
-      List<String> tokens = svDecoderHelper.getTokens(sentence);
+      Collection<String> tokens = svDecoderHelper.getTokens(sentence);
       boolean valid = true;
       for (String token : tokens) {
         if (!isValid(token)) {
@@ -608,7 +681,6 @@ public class ASRScoring extends Scoring {
 
           valid = false;
         }
-        //else allValid.add(token);
       }
       if (valid) filtered.add(sentence);
       else {
@@ -621,25 +693,19 @@ public class ASRScoring extends Scoring {
       logger.warn("getValidSentences : skipped " + skipped.size() + " sentences : " + skipped  );
     }
 
-/*    try {
-      if (utf8 != null) {
-        for (String t : allValid) utf8.write(t + "\n");
-        utf8.close();
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }*/
-
     return filtered;
   }
 
-  private boolean isValid(String token) {
-    return checkToken(token) && isPhraseInDict(token);
-  }
+  /**
+   * @see #getValidSentences(java.util.Collection)
+   * @param token
+   * @return
+   */
+  private boolean isValid(String token) { return checkToken(token) && isPhraseInDict(token);  }
 
   private boolean checkToken(String token) {
     boolean valid = true;
-    if (token.equalsIgnoreCase(SmallVocabDecoder.UNKNOWN_MODEL)) return true;
+    if (token.equalsIgnoreCase(SLFFile.UNKNOWN_MODEL)) return true;
     for (int i = 0; i < token.length() && valid; i++) {
       char c = token.charAt(i);
       if (Character.isDigit(c)) {
@@ -651,22 +717,4 @@ public class ASRScoring extends Scoring {
     }
     return valid;
   }
-
-/*
-  public List<String> getTokens(String sentence) {
-    List<String> all = new ArrayList<String>();
-
-    for (String untrimedToken : sentence.split("\\p{Z}+")) { // split on spaces
-      String tt = untrimedToken.replaceAll("\\p{P}", ""); // remove all punct
-      String token = tt.trim();  // necessary?
-      if (token.length() > 0) {
-        all.add(token);
-      }
-    }
-
-    return all;
-  }
-*/
-
-
 }
