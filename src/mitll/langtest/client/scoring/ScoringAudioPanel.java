@@ -3,9 +3,12 @@ package mitll.langtest.client.scoring;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 
@@ -21,49 +24,86 @@ import java.util.List;
  */
 public abstract class ScoringAudioPanel extends AudioPanel {
   private static final int ANNOTATION_HEIGHT = 20;
+  private static final boolean SHOW_SPECTROGRAM = false;
 
-  private String refSentence;
-  private String refAudio;
+  private final String refSentence;
   private long resultID = -1;
   private ScoreListener scoreListener;
   private PretestScore result;
   private boolean showOnlyOneExercise = false; // true for when called from the headstart website
+  private static final boolean debug = false;
+  public static final float MP3_HEADER_OFFSET = 0f;//0.048f;
 
   /**
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, int, boolean, mitll.langtest.client.exercise.ExerciseController, ScoreListener)
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, ScoreListener, String, String)
+   * @param refSentence
    * @param service
-   * @param numRepeats
-   * @param useKeyboard
    * @param gaugePanel
+   * @param playButtonSuffix
+   * @param exerciseID
    */
-  public ScoringAudioPanel(LangTestDatabaseAsync service,
-                           int numRepeats, boolean useKeyboard, ExerciseController controller, ScoreListener gaugePanel) {
-    this(null, null, service, numRepeats, useKeyboard, controller, gaugePanel);
+  ScoringAudioPanel(String refSentence, LangTestDatabaseAsync service, ExerciseController controller,
+                    ScoreListener gaugePanel, String playButtonSuffix, String exerciseID) {
+    this(null, refSentence, service, controller, SHOW_SPECTROGRAM, gaugePanel, 23, playButtonSuffix, exerciseID);
   }
 
   /**
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener)
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener, int, String, String)
    * @param path
    * @param refSentence
    * @param service
-   * @param numRepeats
-   * @param useKeyboard
+   * @param showSpectrogram
    * @param gaugePanel
+   * @param rightMargin
+   * @param playButtonSuffix
+   * @param exerciseID
    */
-  public ScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
-                           int numRepeats, boolean useKeyboard, ExerciseController controller,
-                           ScoreListener gaugePanel) {
-    super(path, service, useKeyboard, controller, gaugePanel, controller.getAudioType());
+  ScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
+                    ExerciseController controller,
+                    boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin, String playButtonSuffix, String exerciseID) {
+    super(path, service, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix, controller.getAudioType(), exerciseID);
     this.refSentence = refSentence;
     showOnlyOneExercise = controller.showOnlyOneExercise();
-    addClickHandlers(numRepeats);
+    addClickHandlers();
   }
 
-  private void addClickHandlers(int numRepeats) {
+  //PopupPanel popupPanel;
+  private void addClickHandlers() {
     this.phones.image.getElement().getStyle().setCursor(Style.Cursor.POINTER);
-    this.phones.image.addClickHandler(new TranscriptEventClickHandler(NetPronImageType.PHONE_TRANSCRIPT, numRepeats));
-    this.words.image.getElement().getStyle().setCursor(Style.Cursor.POINTER);
-    this.words.image.addClickHandler(new TranscriptEventClickHandler(NetPronImageType.WORD_TRANSCRIPT, numRepeats));
+    this.phones.image.addClickHandler(new TranscriptEventClickHandler(this.phones.image, NetPronImageType.PHONE_TRANSCRIPT));
+    final Image image = this.words.image;
+    image.getElement().getStyle().setCursor(Style.Cursor.POINTER);
+    image.addClickHandler(new TranscriptEventClickHandler(image,NetPronImageType.WORD_TRANSCRIPT));
+
+    // TODO come back to this
+   /* final PopupPanel popupPanel = new PopupPanel(true);
+    popupPanel.add(new Icon(IconType.BULLHORN));
+
+    image.addMouseOverHandler(new MouseOverHandler() {
+      @Override
+      public void onMouseOver(final MouseOverEvent event) {
+        final int eventXPos = event.getX();
+
+
+        popupPanel.setPopupPosition(event.getClientX()-10,event.getClientY()-10);
+        popupPanel.show();
+
+    *//*    getClickedOnSegment(eventXPos,NetPronImageType.WORD_TRANSCRIPT,new EventSegment() {
+          @Override
+          public void onSegmentClick(float start, float end) {
+
+            popupPanel.setPopupPosition(event.getScreenX(),event.getScreenY());
+            popupPanel.show();
+          }
+        });*//*
+      }
+    });
+    image.addMouseOutHandler(new MouseOutHandler() {
+      @Override
+      public void onMouseOut(MouseOutEvent event) {
+        popupPanel.hide();
+      }
+    });*/
   }
 
   /**
@@ -71,21 +111,6 @@ public abstract class ScoringAudioPanel extends AudioPanel {
    * @param l
    */
   public void addScoreListener(ScoreListener l) { this.scoreListener = l;}
-
-  /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#getScoringAudioPanel(mitll.langtest.shared.Exercise, String)
-   * @param path
-   * @param refSentence
-   */
-  public void setRefAudio(String path, String refSentence) {
-    setRefAudio(path);
-    this.refSentence = refSentence;
-  }
-
-  public void setRefAudio(String path) {
-    this.refAudio = path;
-  }
-
   public void setResultID(long resultID) { this.resultID = resultID;}
 
   /**
@@ -95,11 +120,8 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   @Override
   protected void getEachImage(int width) {
     super.getEachImage(width);
-    if (refAudio != null) {
-      getTranscriptImageURLForAudio(audioPath, refAudio, refSentence, width,words,phones);
-    }
-    else {
-      System.out.println("AudioPanel.getImages : no ref audio");
+    if (!controller.getProps().isNoModel()) {
+      getTranscriptImageURLForAudio(audioPath, refSentence, width, words, phones);
     }
   }
 
@@ -112,15 +134,15 @@ public abstract class ScoringAudioPanel extends AudioPanel {
    * @param wordTranscript
    * @param phoneTranscript
    */
-  private void getTranscriptImageURLForAudio(final String path, final String refAudio, String refSentence, int width,
+  private void getTranscriptImageURLForAudio(final String path, String refSentence, int width,
                                              final ImageAndCheck wordTranscript,
                                              final ImageAndCheck phoneTranscript) {
     int widthToUse = Math.max(MIN_WIDTH, width);
     int reqid = getReqID("score");
-    scoreAudio(path, resultID, refAudio, refSentence, wordTranscript, phoneTranscript, widthToUse, ANNOTATION_HEIGHT, reqid);
+    scoreAudio(path, resultID, refSentence, wordTranscript, phoneTranscript, widthToUse, ANNOTATION_HEIGHT, reqid);
   }
 
-  protected abstract void scoreAudio(final String path, long resultID, String refAudio, String refSentence,
+  protected abstract void scoreAudio(final String path, long resultID, String refSentence,
                                      final ImageAndCheck wordTranscript, final ImageAndCheck phoneTranscript,
                                      int toUse, int height, int reqid);
 
@@ -128,15 +150,14 @@ public abstract class ScoringAudioPanel extends AudioPanel {
 
   /**
    * Record the image URLs in the Image widgets and enable the check boxes
-   * @see ScoringAudioPanel#scoreAudio(String, long, String, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
+   * @see ScoringAudioPanel#scoreAudio(String, long, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
    * @param result
    * @param wordTranscript
    * @param phoneTranscript
    * @param scoredBefore
    */
-  protected void useResult(PretestScore result, ImageAndCheck wordTranscript, ImageAndCheck phoneTranscript,
-                           boolean scoredBefore) {
-    //System.out.println("useResult got " + result);
+  void useResult(PretestScore result, ImageAndCheck wordTranscript, ImageAndCheck phoneTranscript,
+                 boolean scoredBefore) {
     if (result.getsTypeToImage().get(NetPronImageType.WORD_TRANSCRIPT) != null) {
       showImageAndCheck(result.getsTypeToImage().get(NetPronImageType.WORD_TRANSCRIPT), wordTranscript);
     }
@@ -150,7 +171,6 @@ public abstract class ScoringAudioPanel extends AudioPanel {
       phoneTranscript.image.setUrl(IMAGES_REDX_PNG);
     }
     if (!scoredBefore && scoreListener != null) {
-      System.out.println("new score returned " + result);
       scoreListener.gotScore(result, showOnlyOneExercise);
     }
     this.result = result;
@@ -159,31 +179,47 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   private void showImageAndCheck(String imageURL, ImageAndCheck wordTranscript) {
     wordTranscript.image.setUrl(imageURL);
     wordTranscript.image.setVisible(true);
-    wordTranscript.check.setVisible(true);
+    if (ADD_CHECKBOX) wordTranscript.getCheck().setVisible(true);
   }
 
-  /**
-   * Find the start-end time period corresponding to the click on either the phone or the word image and then
-   * play the segment. <br></br>
-   * NOTE : the duration (or length) of the wav file is usually about 0.1 sec shorter than the
-   * the mp3 file (silence padding at the end).<br></br>
-   * This means we have to scale the values returned from alignment so the audio times
-   * line up with those in the mp3 file.
-   * @see #addClickHandlers
-   */
-  private class TranscriptEventClickHandler implements ClickHandler {
-    private final boolean debug = false;
-    private final NetPronImageType type;
-    private final int numRepeats;
+  void getClickedOnSegment(int eventXPos, NetPronImageType type, EventSegment onClick) {
+    //int index = 0;
+    List<TranscriptSegment> transcriptSegments = result.getsTypeToEndTimes().get(type);
+    float wavFileLengthInSeconds = result.getWavFileLengthInSeconds();//transcriptSegments.get(transcriptSegments.size() - 1);
+    float horizOffset = (float) eventXPos / (float) phones.image.getWidth();
+    float mouseClickTime = wavFileLengthInSeconds * horizOffset;
+    if (debug) System.out.println("got client at " + eventXPos + " or " + horizOffset + " or time " + mouseClickTime +
+      " duration " + wavFileLengthInSeconds + " secs or " + wavFileLengthInSeconds * 1000 + " millis");
 
-    /**
-     * @see mitll.langtest.client.scoring.ScoringAudioPanel#addClickHandlers
-     * @param type
-     * @param numRepeats
-     */
-    public TranscriptEventClickHandler(NetPronImageType type, int numRepeats) {
+    for (TranscriptSegment segment : transcriptSegments) {
+     // TranscriptSegment next = transcriptSegments.get(Math.min(transcriptSegments.size() - 1, index + 1));
+      if (mouseClickTime > segment.getStart() && mouseClickTime <= segment.getEnd()) {
+        if (debug) System.out.println("\t playing " + segment);
+     //   result.getsTypeToEndTimes();
+        onClick.onSegmentClick(segment);
+        break;
+      }
+      //index++;
+    }
+  }
+
+  public void addScore(Float score) {
+    scoreListener.addScore(score);
+  }
+
+  public void showChart() {
+    scoreListener.showChart(showOnlyOneExercise);
+  }
+
+  public void setClassAvg(float avgScore) {
+    scoreListener.setClassAvg(avgScore);
+  }
+
+  private abstract class MyClickHandler implements ClickHandler, EventSegment {
+    final NetPronImageType type;
+
+    private MyClickHandler(NetPronImageType type) {
       this.type = type;
-      this.numRepeats = numRepeats;
     }
 
     /**
@@ -193,30 +229,72 @@ public abstract class ScoringAudioPanel extends AudioPanel {
      * end time of the next segment.  <br></br>
      * Then plays, the segment - note we have to adjust between the duration of a wav file and an mp3 file, which
      * will likely be different. (A little surprising to me, initially.)
-     * @see AudioPanel#playSegment
+     * @see mitll.langtest.client.scoring.AudioPanel#playSegment
      * @param event
      */
     public void onClick(ClickEvent event) {
-      float i = (float) event.getX() / (float) phones.image.getWidth();
       if (result != null) {
-        int index = 0;
-        List<Float> endTimes = result.getsTypeToEndTimes().get(type);
-        float wavFileLengthInSeconds = result.getWavFileLengthInSeconds();//endTimes.get(endTimes.size() - 1);
-        float mouseClickTime = wavFileLengthInSeconds * i;
-        if (debug) System.out.println("got client at " + event.getX() + " or " + i + " or time " + mouseClickTime +
-            " duration " + wavFileLengthInSeconds + " secs or " + wavFileLengthInSeconds * 1000 + " millis");
-        for (Float endTime : endTimes) {
-          float next = endTimes.get(Math.min(endTimes.size() - 1, index + 1));
-          if (mouseClickTime > endTime && mouseClickTime <= next) {
-            if (debug) System.out.println("\t playing from " + endTime + " to " + next);
+        int eventXPos = event.getX();
 
-            playSegment(endTime, next, numRepeats);
-          }
-          index++;
-        }
+        getClickedOnSegment(eventXPos,type,this);
       } else {
         System.err.println("no result for to click against?");
       }
     }
+
+/*    protected void getClickedOnSegment(MouseEvent<ClickHandler> event) {
+      int index = 0;
+      List<Float> endTimes = result.getsTypeToEndTimes().get(type);
+      float wavFileLengthInSeconds = result.getWavFileLengthInSeconds();//endTimes.get(endTimes.size() - 1);
+      float horizOffset = (float) event.getX() / (float) phones.image.getWidth();
+      float mouseClickTime = wavFileLengthInSeconds * horizOffset;
+      if (debug) System.out.println("got client at " + event.getX() + " or " + horizOffset + " or time " + mouseClickTime +
+          " duration " + wavFileLengthInSeconds + " secs or " + wavFileLengthInSeconds * 1000 + " millis");
+      for (Float endTime : endTimes) {
+        float next = endTimes.get(Math.min(endTimes.size() - 1, index + 1));
+        if (mouseClickTime > endTime && mouseClickTime <= next) {
+          if (debug) System.out.println("\t playing from " + endTime + " to " + next);
+
+          onSegmentClick(endTime, next);
+          break;
+        }
+        index++;
+      }
+    }*/
+
+    public abstract void onSegmentClick(TranscriptSegment segment);
+  }
+  /**
+   * Find the start-end time period corresponding to the click on either the phone or the word image and then
+   * play the segment. <br></br>
+   * NOTE : the duration (or length) of the wav file is usually about 0.1 sec shorter than the
+   * the mp3 file (silence padding at the end).<br></br>
+   * This means we have to scale the values returned from alignment so the audio times
+   * line up with those in the mp3 file.
+   * @see #addClickHandlers
+   */
+  private class TranscriptEventClickHandler extends MyClickHandler {
+    UIObject widget;
+    /**
+     * @see mitll.langtest.client.scoring.ScoringAudioPanel#addClickHandlers
+     * @param type
+     */
+    public TranscriptEventClickHandler(UIObject widget, NetPronImageType type) {
+      super(type);
+      this.widget =widget;
+    }
+
+    @Override
+    public void onSegmentClick(TranscriptSegment segment) {
+      playSegment(MP3_HEADER_OFFSET+segment.getStart(), MP3_HEADER_OFFSET+segment.getEnd());
+      if (controller.getProps().doInstrumentation()) {
+        long user = (long) controller.getUser();
+        controller.getButtonFactory().logEvent(widget, type.toString(), exerciseID, "Clicked on " + segment.getEvent(), user);
+      }
+    }
+  }
+
+  private static interface EventSegment {
+    void onSegmentClick(TranscriptSegment segment);
   }
 }
