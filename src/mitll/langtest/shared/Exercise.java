@@ -1,8 +1,11 @@
 package mitll.langtest.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.shared.custom.UserExercise;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +21,7 @@ import java.util.Map;
  * Time: 1:03 PM
  * To change this template use File | Settings | File Templates.
  */
-public class Exercise extends ExerciseShell {
+public class Exercise extends AudioExercise implements CommonExercise {
   private static final ArrayList<String> EMPTY_LIST = new ArrayList<String>();
 
   public enum EXERCISE_TYPE implements IsSerializable { RECORD, TEXT_RESPONSE, REPEAT, REPEAT_FAST_SLOW, MULTI_REF }
@@ -30,15 +33,13 @@ public class Exercise extends ExerciseShell {
   private EXERCISE_TYPE type = EXERCISE_TYPE.RECORD;
   private boolean promptInEnglish = true;
   private Map<String,List<QAPair>> langToQuestion = null;
-  private String refAudio;
-  private String slowAudioRef;
   private String englishSentence;
+  private String meaning, context;
   private List<String> refSentences = new ArrayList<String>();
-  private List<String> synonymSentences = new ArrayList<String>();
-  private List<String> synonymTransliterations = new ArrayList<String>();
-  private List<String> synonymAudioRefs = new ArrayList<String>();
   private List<String> translitSentences = new ArrayList<String>();
-  private double weight;
+  private STATE state;
+  private Collection<Float> scores;
+  private float avgScore;
 
   public static class QAPair implements IsSerializable {
     private String question;
@@ -55,13 +56,11 @@ public class Exercise extends ExerciseShell {
     private QAPair(String q, String a, List<String> alternateAnswers) { question = q; answer = a; this.alternateAnswers = alternateAnswers;}
 
     /**
-     * @see mitll.langtest.client.exercise.ExercisePanel#addQuestions
      * @return
      */
-    public String getQuestion() { return question; }
+    private String getQuestion() { return question; }
 
     /**
-     * @see mitll.langtest.client.exercise.ExercisePanel#getQuestionHeader
      * @return
      */
     public String getAnswer() { return answer; }
@@ -97,13 +96,16 @@ public class Exercise extends ExerciseShell {
    * @param promptInEnglish
    * @param recordAudio
    * @param tooltip
+   * @param context
    */
-  public Exercise(String plan, String id, String content, boolean promptInEnglish, boolean recordAudio, String tooltip) {
+  public Exercise(String plan, String id, String content, boolean promptInEnglish, boolean recordAudio, String tooltip,
+                  String context) {
     super(id,tooltip);
     this.plan = plan;
     this.setContent(content);
     this.setType(recordAudio ? EXERCISE_TYPE.RECORD : EXERCISE_TYPE.TEXT_RESPONSE);
     this.setPromptInEnglish(promptInEnglish);
+    this.context = context;
   }
 
   /**
@@ -120,7 +122,7 @@ public class Exercise extends ExerciseShell {
 
     this.plan = plan;
     this.setContent(content);
-    this.refAudio = audioRef;
+    setRefAudio(audioRef);
     this.refSentences.add(sentenceRef);
     this.setType(EXERCISE_TYPE.REPEAT);
   }
@@ -135,46 +137,38 @@ public class Exercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.server.database.FileExerciseDAO#readFastAndSlowExercises
+   * @see mitll.langtest.server.database.FileExerciseDAO#getExerciseForLine(String)
    * @param plan
    * @param id
    * @param content
-   * @param fastAudioRef
-   * @param slowAudioRef
    * @param sentenceRef
    * @param tooltip
    */
-  public Exercise(String plan, String id, String content, String fastAudioRef, String slowAudioRef, String sentenceRef, String tooltip) {
-    this(plan,id,content,fastAudioRef,sentenceRef, tooltip);
-    this.slowAudioRef = slowAudioRef;
+  public Exercise(String plan, String id, String content, String sentenceRef, String tooltip) {
+    this(plan,id,content,null,sentenceRef, tooltip);
+   // setSlowRefAudio(slowAudioRef);
     this.setType(EXERCISE_TYPE.REPEAT_FAST_SLOW);
   }
 
-  public ExerciseShell getShell() { return new ExerciseShell(getID(), getTooltip()); }
-
-  public ExerciseShell getShellCombinedTooltip() {
-    String refSentence = getRefSentence();
-    if (refSentence.length() > 15) {
-      refSentence = refSentence.substring(0, 15);
-    }
-    boolean equals = getTooltip().trim().equals(getRefSentence().trim());
-    String combined = equals ? getTooltip() : getTooltip() + (refSentence.isEmpty() ? "": " / " + refSentence);
-    if (getTooltip().isEmpty()) combined = refSentence;
+  public CommonShell getShellCombinedTooltip() {
+    String combined = getCombinedTooltip();
 
     return new ExerciseShell(getID(), combined);
   }
 
-  public void addQuestion() {
-    addQuestion(FL, "Please record the sentence above.", "", EMPTY_LIST);
+  public String getCombinedTooltip() {
+    String refSentence = getRefSentence();
+    if (refSentence.length() > 15) {
+      refSentence = refSentence.substring(0, 15);
+    }
+    boolean refSentenceEqualsTooltip = getTooltip().trim().equals(getRefSentence().trim());
+    String combined = refSentenceEqualsTooltip ? getTooltip() : getTooltip() + (refSentence.isEmpty() ? "": " / " + refSentence);
+    if (getTooltip().isEmpty()) combined = refSentence;
+    return combined;
   }
 
-  /**
-   * when not collecting audio, we only collect text, and
-   * we only collect fl text (never english text only english audio)
-   */
-  public void setTextOnly() {
-    setPromptInEnglish(false);
-    setRecordAnswer(false);
+  public void addQuestion() {
+    addQuestion(FL, "Please record the sentence above.", "", EMPTY_LIST);
   }
 
   /**
@@ -208,42 +202,8 @@ public class Exercise extends ExerciseShell {
   public String getPlan() { return plan; }
 
   public String getContent() { return content; }
-  public EXERCISE_TYPE getType() { return type; }
-  public boolean isRepeat() { return type == EXERCISE_TYPE.REPEAT || type == EXERCISE_TYPE.REPEAT_FAST_SLOW; }
-  public String getRefAudio() { return refAudio; }
-  public String getSlowAudioRef() { return slowAudioRef; }
-  public void setRefAudio(String s) { this.refAudio = s; }
-  public boolean hasRefAudio() { return refAudio != null || slowAudioRef != null; }
-
-  public List<String> getSynonymSentences() {
-    return synonymSentences;
-  }
-
-  public void setSynonymSentences(List<String> synonymSentences) {
-    this.synonymSentences = synonymSentences;
-  }
-
-  public List<String> getSynonymTransliterations() {
-    return synonymTransliterations;
-  }
-
-  public void setSynonymTransliterations(List<String> synonymTransliterations) {
-    this.synonymTransliterations = synonymTransliterations;
-  }
-
-  public List<String> getSynonymAudioRefs() {
-    return synonymAudioRefs;
-  }
-
-  public void setSynonymAudioRefs(List<String> synonymAudioRefs) {
-    this.synonymAudioRefs = synonymAudioRefs;
-  }
-
-  /**
-   * @see mitll.langtest.server.database.ExcelImport#getExercise(String, mitll.langtest.server.database.FileExerciseDAO, String, String, String, String, String, boolean, String)
-   * @param s
-   */
-  public void setSlowRefAudio(String s) { this.slowAudioRef = s; }
+  private EXERCISE_TYPE getType() { return type; }
+  private boolean isRepeat() { return type == EXERCISE_TYPE.REPEAT || type == EXERCISE_TYPE.REPEAT_FAST_SLOW; }
 
   public String getRefSentence() {
     StringBuilder builder = new StringBuilder();
@@ -254,15 +214,13 @@ public class Exercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.server.database.ExcelImport#getExercise(String, mitll.langtest.server.database.FileExerciseDAO, int, org.apache.poi.ss.usermodel.Row, String, String, String, String, String, String, boolean, String)
+   * @see mitll.langtest.server.database.ExcelImport#getExercise(String, int, org.apache.poi.ss.usermodel.Row, String, String, String, String, String, boolean, String)
    * @param sentenceRefs
    */
   public void setRefSentences(List<String> sentenceRefs) {
     this.refSentences = sentenceRefs;
   }
-  public String getTranslitSentence() { return translitSentences.isEmpty() ? "" : translitSentences.get(0); }
-  public List<String> getRefSentences() { return refSentences; }
-  public List<String> getTranslitSentences() { return translitSentences; }
+  public String getTransliteration() { return translitSentences.isEmpty() ? "" : translitSentences.get(0); }
 
   public void setRefSentence(String ref) {
     refSentences.clear();
@@ -274,12 +232,7 @@ public class Exercise extends ExerciseShell {
     translitSentences.add(translitSentence);
   }
 
-  public void setRecordAnswer(boolean spoken) {
-    setType(spoken ? EXERCISE_TYPE.RECORD : EXERCISE_TYPE.TEXT_RESPONSE);
-  }
-
   /**
-   * @see mitll.langtest.client.exercise.ExercisePanel#addQuestions(Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    * @return
    */
   public List<QAPair> getQuestions() {
@@ -296,16 +249,7 @@ public class Exercise extends ExerciseShell {
     return qaPairs == null ? new ArrayList<QAPair>() : qaPairs;
   }
 
-  public int getNumQuestions() {
-    List<QAPair> en = langToQuestion == null ? new ArrayList<QAPair>() : langToQuestion.get("en");
-    if (en == null) return 0; // should never happen
-    return en.size();
-  }
-
-  public double getWeight() { return weight;  }
-  public void setWeight(double weight) { this.weight = weight;  }
-
-  public String getEnglishSentence() {  return englishSentence;  }
+  public String getEnglish() {  return englishSentence;  }
   public void setType(EXERCISE_TYPE type) { this.type = type;  }
 
   public void setContent(String content) { this.content = content;  }
@@ -318,24 +262,100 @@ public class Exercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#setPromptAndRecordOnExercises
    * @param b
    */
-  public void setPromptInEnglish(boolean b) { this.promptInEnglish = b;  }
-  public boolean isPromptInEnglish() { return promptInEnglish;  }
+  private void setPromptInEnglish(boolean b) { this.promptInEnglish = b;  }
+  private boolean isPromptInEnglish() { return promptInEnglish;  }
+
+  @Override
+  public String getMeaning() {
+    return meaning;
+  }
+
+  public void setMeaning(String meaning) {
+    this.meaning = meaning;
+  }
+
+  @Override
+  public String getForeignLanguage() {
+    return getRefSentence();
+  }
+
+  @Override
+  public String getContext() {
+    return context;
+  }
+
+  public void setContext(String context) {
+    this.context = context;
+  }
+
+  public Exercise toExercise() {
+    return this;
+  }
+
+  @Override
+  public CommonUserExercise toCommonUserExercise() {
+    return new UserExercise(this);
+  }
+
+  @Override
+  public Date getModifiedDate() {
+    return null;
+  }
+
+  @Override
+  public STATE getState() {
+    return state;
+  }
+
+  @Override
+  public void setState(STATE state) {
+    this.state = state;
+  }
+
+  public Collection<Float> getScores() {
+    return scores;
+  }
+
+  @Override
+  public void setScores(Collection<Float> scores) {
+    this.scores = scores;
+  }
+
+  public float getAvgScore() {
+    return avgScore;
+  }
+
+  public void setAvgScore(float avgScore) {
+    this.avgScore = avgScore;
+  }
 
   public String toString() {
     String moreAboutQuestions = DEBUG ? " : " +  getQuestionToString() : "";
     String questionInfo = langToQuestion == null ? " no questions" : " num questions " + langToQuestion.size() + moreAboutQuestions;
 
     if (isRepeat() || getType() == EXERCISE_TYPE.MULTI_REF) {
-      return "Exercise " + type + " " +plan+"/"+ id + "/" + " content bytes = " + content.length() +
-          " ref sentence '" + getRefSentence() +"' audio " + refAudio + questionInfo;
+      Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
+
+      // warn about attr that have no user
+      StringBuilder builder = new StringBuilder();
+      for (AudioAttribute attr:audioAttributes1) {
+        if (attr.getUser() == null) {
+          builder.append("\t").append(attr.toString()).append("\n");
+        }
+      }
+
+      return "Exercise " + type + " " +id +  " content bytes = " + content.length() + " english '" + getEnglish() +
+          "' ref sentence '" + getRefSentence() +"' audio count = " + audioAttributes1.size()+
+        (builder.toString().isEmpty() ? "":" \n\tmissing user audio " + builder.toString()) +
+        " : " + questionInfo +
+        " unit->lesson " + getUnitToValue();
     }
     else {
-      return "Exercise " + getType() + " " +plan+"/"+ id + "/" + (isPromptInEnglish() ?"english":"foreign")+
+      return "Exercise " + getType() + " " + id + " " + (isPromptInEnglish() ?"english":"foreign")+
           " : content bytes = " + content.length() + (DEBUG ? " content : " +content : "")+
-          " ref '" + getRefSentence() + "' translit '" + getTranslitSentence()+ "'"+
+          " ref '" + getRefSentence() + "' translit '" + getTransliteration()+ "'"+
         questionInfo;
     }
   }

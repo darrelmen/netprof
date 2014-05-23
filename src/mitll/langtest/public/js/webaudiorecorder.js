@@ -6,6 +6,7 @@ var audio_context;
 var recorder;
 var rememberedInput;
 
+// called from initWebAudio
 function startUserMedia(stream) {
     var input = audio_context.createMediaStreamSource(stream);
     __log('Media stream created.');
@@ -110,6 +111,7 @@ function grabWav() {
 }
 
 function initWebAudio() {
+    var gotAudioContext = false;
     try {
         // webkit shim
         window.AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -118,8 +120,13 @@ function initWebAudio() {
             navigator.mozGetUserMedia ||
             navigator.msGetUserMedia);
         window.URL = window.URL || window.webkitURL;
+        __log('Audio context is something...');
+        console.info("got here...");
+
+        //  __log('Audio context is '+window.AudioContext);
 
         audio_context = new AudioContext;
+        gotAudioContext = true;
         __log('Audio context set up.');
         __log('navigator.getUserMedia ' + (navigator.getMedia ? 'available.' : 'not present!'));
     } catch (e) {
@@ -128,20 +135,22 @@ function initWebAudio() {
         webAudioMicNotAvailable();
     }
 
-    try {
-        if (navigator.getMedia) {
-            navigator.getMedia({audio: true}, startUserMedia, function (e) {
-                __log('No live audio input: ' + e);
-                console.error(e);
+    if (gotAudioContext) {
+        try {
+            if (navigator.getMedia) {
+                navigator.getMedia({audio: true}, startUserMedia, function (e) {
+                    __log('No live audio input: ' + e);
+                    console.error(e);
+                    webAudioMicNotAvailable();
+                });
+            }
+            else {
                 webAudioMicNotAvailable();
-            });
-        }
-        else {
+            }
+        } catch (e) {
+            __log('No navigator.getMedia in this browser!');
+            console.error(e);
             webAudioMicNotAvailable();
         }
-    } catch (e) {
-        __log('No navigator.getMedia in this browser!');
-        console.error(e);
-        webAudioMicNotAvailable();
     }
 }
