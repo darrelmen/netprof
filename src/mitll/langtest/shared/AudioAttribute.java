@@ -82,17 +82,10 @@ public class AudioAttribute implements IsSerializable {
     return this;
   }
 
-  /**
-   * @deprecated  use isRegularSpeed instead
-   * @return
-   */
-  public boolean isFast() {
-    return matches(SPEED, REGULAR);
-  }
   public boolean isSlow() {
     return matches(SPEED, SLOW);
   }
-  public String getAudioType() { return isRegularSpeed() ? REGULAR:SLOW;}
+  public String getAudioType() { return getSpeed(); }
 
   public boolean isMale() { return user != null && user.isMale();  }
   public boolean isFemale() {
@@ -104,9 +97,7 @@ public class AudioAttribute implements IsSerializable {
     return speed != null && speed.equalsIgnoreCase(REGULAR);
   }
 
-  public String getSpeed() {
-    return getAttributes().get(SPEED);
-  }
+  public String getSpeed() { return getAttributes().get(SPEED); }
 
   public boolean hasOnlySpeed() {
     return attributes.size() == 1 && attributes.containsKey(SPEED);
@@ -134,11 +125,8 @@ public class AudioAttribute implements IsSerializable {
   public String getKey() { return "user="+userid+", "+getAttributes().toString(); }
 
   public String getDisplay() {
-    //System.out.println("attributes '" +attributes+ "'");
-
     if (hasOnlySpeed()) {
       String speed = attributes.values().iterator().next();
-      //System.out.println("speed '" +speed+ "'");
       return speed.substring(0, 1).toUpperCase() + speed.substring(1);
     } else {
 
@@ -148,8 +136,6 @@ public class AudioAttribute implements IsSerializable {
         stringBuilder.append(key.substring(0, 1).toUpperCase() + key.substring(1));
 
         String value = pair.getValue();
-        //System.out.println("key '" +key+ "' value " + value);
-
         stringBuilder.append(" : " + value.substring(0, 1).toUpperCase() + value.substring(1));
         stringBuilder.append(", ");
       }
@@ -195,5 +181,4 @@ public class AudioAttribute implements IsSerializable {
   public String toString() {
     return "Audio id " +uniqueID + " : " + audioRef + " attrs " + attributes + " by " + userid +"/"+user;
   }
-
 }
