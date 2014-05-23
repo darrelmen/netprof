@@ -12,7 +12,7 @@ import com.google.gwt.user.client.ui.Widget;
 * Time: 5:30 PM
 * To change this template use File | Settings | File Templates.
 */
-public class ResizableCaptionPanel extends CaptionPanel implements ProvidesResize, RequiresResize {
+class ResizableCaptionPanel extends CaptionPanel implements ProvidesResize, RequiresResize {
   public ResizableCaptionPanel(String name) {
     super(name);
   }
