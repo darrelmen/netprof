@@ -1,14 +1,22 @@
 package mitll.langtest.client.exercise;
 
+import com.github.gwtbootstrap.client.ui.Heading;
+import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.ProvidesResize;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.scoring.ResizableCaptionPanel;
+import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.STATE;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,70 +29,122 @@ import java.util.Collection;
  * To change this template use File | Settings | File Templates.
  */
 public class WaveformExercisePanel extends ExercisePanel {
-  public static final String REPEAT_TWICE = "<i>Record the word or phrase twice, first at normal speed, then again at slow speed.</i>";
+  private static final String REPEAT_TWICE = "<i>Record the word or phrase, first at normal speed, then again at slow speed.</i>";
+  private static final String RECORD_PROMPT = "Record the word or phrase, first at normal speed, then again at slow speed.";
   private boolean isBusy = false;
   private Collection<RecordAudioPanel> audioPanels;
 
   /**
-   * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
    * @param e
    * @param service
    * @param userFeedback
    * @param controller
+   * @seex mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
    */
-  public WaveformExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
-                                   final ExerciseController controller, ListInterface exerciseList) {
+  public WaveformExercisePanel(final CommonExercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
+                               final ExerciseController controller, ListInterface exerciseList) {
     super(e, service, userFeedback, controller, exerciseList);
     getElement().setId("WaveformExercisePanel");
+  }
+
+  @Override
+  protected void onLoad() {
+    super.onLoad();
+    getParent().addStyleName("userNPFContentLightPadding");
+
   }
 
   public void setBusy(boolean v) {
     this.isBusy = v;
     setButtonsEnabled(!isBusy);
   }
-  public boolean isBusy() { return isBusy;  }
 
+  public boolean isBusy() {
+    return isBusy;
+  }
+  protected void addInstructions() {
+    if (!exercise.getUnitToValue().isEmpty()) {
+      Panel unitLessonForExercise = getUnitLessonForExercise();
+      unitLessonForExercise.add(getItemHeader(exercise));
+      add(unitLessonForExercise);
+    }
+
+    add(new Heading(4, RECORD_PROMPT));
+  }
+
+  protected String getExerciseContent(CommonExercise e) {
+    return ExerciseFormatter.getArabic(e.getForeignLanguage());
+  }
   /**
    * Has a answerPanel mark to indicate when the saved audio has been successfully posted to the server.
    *
-   *
-   * @see ExercisePanel#ExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, ExerciseController, ListInterface)
    * @param exercise
    * @param service
    * @param controller
    * @param index
    * @return
+   * @seex ExercisePanel#ExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, ExerciseController, ListInterface)
    */
-  @Override
-  protected Widget getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
+  protected Widget getAnswerWidget(CommonExercise exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
     audioPanels = new ArrayList<RecordAudioPanel>();
-    if (controller.getProps().getAudioType().equalsIgnoreCase(Result.AUDIO_TYPE_FAST_AND_SLOW)) {
-      VerticalPanel vp = new VerticalPanel();
+    VerticalPanel vp = new VerticalPanel();
 
-      RecordAudioPanel fast = new RecordAudioPanel(exercise, controller, this, service, index, true, Result.AUDIO_TYPE_REGULAR);
-      ResizableCaptionPanel cp = new ResizableCaptionPanel("Regular speed recording");
-      cp.setContentWidget(fast);
-      vp.add(cp);
 
-      audioPanels.add(fast);
-      addAnswerWidget(index, fast);
+    RecordAudioPanel fast = new RecordAudioPanel(exercise, controller, this, service, index, true, Result.AUDIO_TYPE_REGULAR);
+    ResizableCaptionPanel cp = new ResizableCaptionPanel("Regular speed recording");
+    cp.setContentWidget(fast);
+    vp.add(cp);
+    if (fast.isAudioPathSet()) recordCompleted(fast);
 
-      RecordAudioPanel slow = new RecordAudioPanel(exercise, controller, this, service, index+1, true, Result.AUDIO_TYPE_SLOW);
+    audioPanels.add(fast);
+    addAnswerWidget(index, fast);
 
-      cp = new ResizableCaptionPanel("Slow speed recording");
-      cp.setContentWidget(slow);
-      audioPanels.add(slow);
-      addAnswerWidget(index+1, slow);
+    RecordAudioPanel slow = new RecordAudioPanel(exercise, controller, this, service, index + 1, true, Result.AUDIO_TYPE_SLOW);
 
-      vp.add(cp);
-      return vp;
-    } else {
-      RecordAudioPanel fast = new RecordAudioPanel(exercise, controller, this, service, index, true, Result.AUDIO_TYPE_REGULAR);
-      audioPanels.add(fast);
-      addAnswerWidget(index, this);
-      return fast;
+    cp = new ResizableCaptionPanel("Slow speed recording");
+    cp.setContentWidget(slow);
+    audioPanels.add(slow);
+    if (slow.isAudioPathSet()) recordCompleted(slow);
+
+    addAnswerWidget(index + 1, slow);
+
+    vp.add(cp);
+    return vp;
+  }
+
+  private Panel getUnitLessonForExercise() {
+    HorizontalPanel flow = new HorizontalPanel();
+    flow.getElement().setId("getUnitLessonForExercise_unitLesson");
+    flow.addStyleName("leftFiveMargin");
+    //System.out.println("getUnitLessonForExercise " + exercise + " unit value " +exercise.getUnitToValue());
+
+    for (String type : controller.getStartupInfo().getTypeOrder()) {
+      Heading child = new Heading(GoodwaveExercisePanel.HEADING_FOR_UNIT_LESSON, type, exercise.getUnitToValue().get(type));
+      child.addStyleName("rightFiveMargin");
+      flow.add(child);
+    }
+    return flow;
+  }
+
+  Widget getItemHeader(CommonExercise e) {
+    Heading w = new Heading(GoodwaveExercisePanel.HEADING_FOR_UNIT_LESSON, "Item", e.getID());
+    w.getElement().setId("ItemHeading");
+    return w;
+  }
+
+  protected static class ResizableCaptionPanel extends CaptionPanel implements ProvidesResize, RequiresResize {
+    public ResizableCaptionPanel(String name) {
+      super(name);
+    }
+
+    public void onResize() {
+      Widget contentWidget = getContentWidget();
+      if (contentWidget instanceof RequiresResize) {
+        ((RequiresResize) contentWidget).onResize();
+      }
     }
   }
+
 
   protected Widget getContentScroller(HTML maybeRTLContent) {
     return maybeRTLContent;
@@ -92,7 +152,7 @@ public class WaveformExercisePanel extends ExercisePanel {
 
   @Override
   protected String getInstructions() {
-    String prefix = "<br/>" + THREE_SPACES;
+    String prefix = "<br/>" + "";//THREE_SPACES;
     String prompt = REPEAT_TWICE;
     if (controller.getAudioType().equals(Result.AUDIO_TYPE_REGULAR)) {
       prompt = REPEAT_ONCE;
@@ -108,13 +168,13 @@ public class WaveformExercisePanel extends ExercisePanel {
   }
 
   /**
-   * @see ExercisePanel#addQuestionPrompt(com.google.gwt.user.client.ui.Panel, mitll.langtest.shared.Exercise)
    * @param promptInEnglish
    * @return
+   * @seex ExercisePanel#addQuestionPrompt(com.google.gwt.user.client.ui.Panel, mitll.langtest.shared.Exercise)
    */
   @Override
   protected String getQuestionPrompt(boolean promptInEnglish) {
-    return getSpokenPrompt(promptInEnglish);
+    return "";
   }
 
   /**
@@ -124,10 +184,13 @@ public class WaveformExercisePanel extends ExercisePanel {
    *
    * @param controller
    * @param completedExercise
+   * @see mitll.langtest.client.exercise.NavigationHelper#clickNext(ExerciseController, mitll.langtest.shared.CommonExercise)
    */
   @Override
-  public void postAnswers(ExerciseController controller, Exercise completedExercise) {
-    exerciseList.addCompleted(completedExercise.getID());
+  public void postAnswers(ExerciseController controller, CommonExercise completedExercise) {
+    completedExercise.setState(STATE.RECORDED);
+    exerciseList.setState(completedExercise.getID(), STATE.RECORDED);
+    exerciseList.redraw();
     exerciseList.loadNextExercise(completedExercise);
   }
 }
