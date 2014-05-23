@@ -12,7 +12,7 @@ import java.util.Map;
  * Time: 7:17 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ScoreInfo implements IsSerializable {
+public class ScoreInfo implements IsSerializable,SetScore {
   private long userid;
   private long giverID;
   private int correct;
@@ -52,6 +52,16 @@ public class ScoreInfo implements IsSerializable {
 
   public int getCorrect() {
     return correct;
+  }
+
+  @Override
+  public float getAvgScore() {
+    return 0;
+  }
+
+  @Override
+  public float getCorrectPercent() {
+    return 0;
   }
 
   public String toString() {
