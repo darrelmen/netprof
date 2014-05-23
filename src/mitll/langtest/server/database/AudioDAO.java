@@ -457,6 +457,9 @@ public class AudioDAO extends DAO {
    */
   private int markDefect(int userid, String exerciseID, String audioType) {
     try {
+      if (audioType.equals(AudioAttribute.REGULAR_AND_SLOW)) {
+        audioType = Result.AUDIO_TYPE_FAST_AND_SLOW;
+      }
       Connection connection = database.getConnection();
       String sql = "UPDATE " + AUDIO +
         " " +
