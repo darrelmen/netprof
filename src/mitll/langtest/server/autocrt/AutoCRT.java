@@ -2,11 +2,12 @@ package mitll.langtest.server.autocrt;
 
 import ag.experiment.AutoGradeExperiment;
 import mira.classifier.Classifier;
+import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.database.Export;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.log4j.Logger;
 
@@ -31,19 +32,19 @@ import java.util.TreeSet;
  * To change this template use File | Settings | File Templates.
  */
 public class AutoCRT {
-  private static Logger logger = Logger.getLogger(AutoCRT.class);
+  private static final Logger logger = Logger.getLogger(AutoCRT.class);
   private static final String SERIALIZED_CLASSIFIER = "serializedClassifier.ser";
 
-  public static final double CORRECT_THRESHOLD = 0.499;
+  private static final double CORRECT_THRESHOLD = 0.499;
   private static final boolean GET_MSA = false;
   private static final boolean TESTING = false; // this doesn't really work
   private Classifier<AutoGradeExperiment.Event> classifier = null;
   private Map<String, Export.ExerciseExport> exerciseIDToExport;
-  private String installPath;
-  private String mediaDir;
+  private final String installPath;
+  private final String mediaDir;
   private final Export exporter;
-  private AutoCRTScoring db;
-  private double minPronScore;
+  private final AutoCRTScoring db;
+  private final double minPronScore;
 
   /**
    * @see mitll.langtest.server.audio.AudioFileHelper#makeAutoCRT
@@ -64,8 +65,8 @@ public class AutoCRT {
   /**
    * Get an auto crt reco output and score given an audio answer.
    *
-   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile(String, String, String, int, int, int, boolean, String, boolean)
-   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.audio.AudioCheck.ValidityAndDur, String, boolean, mitll.langtest.client.LangTestDatabase)
+   * @seex mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile(String, String, String, int, int, int, boolean, String, boolean)
+   * @seex mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.audio.AudioCheck.ValidityAndDur, String, boolean, mitll.langtest.client.LangTestDatabase)
    * @param exerciseID for this exercise
    * @param questionID and this question
    * @param audioFile score this file (
@@ -79,7 +80,7 @@ public class AutoCRT {
   private void markCorrectnessOnAnswer(String exerciseID, int questionID, PretestScore asrScoreForAudio, AudioAnswer answer) {
     String recoSentence = asrScoreForAudio.getRecoSentence();
     boolean lowPronScore = asrScoreForAudio.getHydecScore() < minPronScore;
-    boolean matchedUnknown = recoSentence.equals(SmallVocabDecoder.UNKNOWN_MODEL);
+    boolean matchedUnknown = recoSentence.equals(SLFFile.UNKNOWN_MODEL);
 
     logger.info("markCorrectnessOnAnswer: took " + //(now - then) + " millis to get score "+
       " for " + exerciseID + "/" +questionID+
@@ -143,41 +144,38 @@ public class AutoCRT {
    * Allow multiple correct answers from synonym sentence list.
    *
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
-   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.audio.AudioCheck.ValidityAndDur, String, boolean, mitll.langtest.client.LangTestDatabase)
-   * @see mitll.langtest.server.audio.AudioFileHelper#getFlashcardAnswer(mitll.langtest.shared.Exercise, java.io.File, mitll.langtest.shared.AudioAnswer)
+   * @seex mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.audio.AudioCheck.ValidityAndDur, String, boolean, mitll.langtest.client.LangTestDatabase)
+   * @seex mitll.langtest.server.audio.AudioFileHelper#getFlashcardAnswer(mitll.langtest.shared.Exercise, java.io.File, mitll.langtest.shared.AudioAnswer)
    * @param e
    * @param audioFile
    * @param answer
    */
-  public void getFlashcardAnswer(Exercise e,
-                                 File audioFile,
-                                 AudioAnswer answer) {
+  public void getFlashcardAnswer(CommonExercise e, File audioFile, AudioAnswer answer) {
     List<String> foregroundSentences = getRefSentences(e);
     List<String> foreground = new ArrayList<String>();
     for (String ref : foregroundSentences) {
-      foreground.add(removePunct(ref));
+      String e1 = removePunct(ref);
+    //  logger.debug("Answer is " + e1 + "(" +e1.length()+ ")");
+      foreground.add(e1);
     }
-    int n = foreground.size();
-    for (String synonym : getRefs(e.getSynonymSentences())) {
-      if (!foregroundSentences.contains(synonym)) {
-        foreground.add(removePunct(synonym));
-      }
-    }
-    if (foreground.size() > n) logger.debug("Added " + e.getSynonymSentences() + " synonyms");
 
-    logger.debug("getFlashcardAnswer : foreground " + foreground);
     PretestScore asrScoreForAudio = db.getASRScoreForAudio(audioFile, foreground);
 
     String recoSentence =
       asrScoreForAudio != null && asrScoreForAudio.getRecoSentence() != null ?
         asrScoreForAudio.getRecoSentence().toLowerCase().trim() : "";
-    boolean isCorrect = recoSentence != null && isCorrect(foregroundSentences, recoSentence);
+   // logger.debug("recoSentence is " + recoSentence + "(" +recoSentence.length()+ ")");
+
+    boolean isCorrect = /*recoSentence != null && */isCorrect(foregroundSentences, recoSentence);
     double scoreForAnswer = (asrScoreForAudio == null || asrScoreForAudio.getHydecScore() == -1) ? -1 : asrScoreForAudio.getHydecScore();
     answer.setCorrect(isCorrect && scoreForAnswer > minPronScore);
     answer.setSaidAnswer(isCorrect);
     if (!isCorrect) {
+      int length = foregroundSentences.isEmpty() ? 0 : foregroundSentences.iterator().next().length();
       logger.info("incorrect response for exercise #" +e.getID() +
-        " reco sentence was '" + recoSentence + "' vs " + "'"+foregroundSentences +"' pron score was " + scoreForAnswer);
+        " reco sentence was '" + recoSentence + "'(" +recoSentence.length()+
+        ") vs " + "'"+foregroundSentences +"'(" + length +
+        ") pron score was " + scoreForAnswer);
     }
     else {
       logger.info("correct response for exercise #" +e.getID() +
@@ -188,11 +186,29 @@ public class AutoCRT {
     answer.setScore(scoreForAnswer);
   }
 
+  private SmallVocabDecoder svd = new SmallVocabDecoder();
+  /**
+   * Convert dashes into spaces and remove periods, and other punct
+   * @param answerSentences
+   * @param recoSentence
+   * @return
+   */
   private boolean isCorrect(List<String> answerSentences, String recoSentence) {
+    List<String> recoTokens = svd.getTokens(recoSentence);
     for (String answer : answerSentences) {
       String converted = answer.replaceAll("-", " ").replaceAll("\\.", "").toLowerCase();
-      converted = removePunct(converted);
-      if (converted.equalsIgnoreCase(recoSentence)) return true;
+
+      List<String> answerTokens = svd.getTokens(converted);
+      if (answerTokens.size() == recoTokens.size()) {
+        boolean same = true;
+        for (int i = 0; i < answerTokens.size() && same; i++) {
+          String s = answerTokens.get(i);
+          String anotherString = recoTokens.get(i);
+          //logger.debug("comparing " + s + "" +s.length()+ " to " + anotherString  +""  +anotherString.length());
+          same = s.equalsIgnoreCase(anotherString);
+        }
+        if (same) return true;
+      }
     }
     return false;
   }
@@ -201,8 +217,9 @@ public class AutoCRT {
    * @param other
    * @return
    */
-  private List<String> getRefSentences(Exercise other) {
-    List<String> refSentences = other.getRefSentences();
+  private List<String> getRefSentences(CommonExercise other) {
+    List<String> refSentences = new ArrayList<String>();
+    refSentences.add(other.getForeignLanguage());
     return getRefs(refSentences);
   }
 
@@ -249,22 +266,13 @@ public class AutoCRT {
    * For this exercise and question, score the answer.<br></br>
    * Do this by getting all other answers to this question and the answer key and given this information
    * and the answer, ask the classifier to score the answer.
-   * @see mitll.langtest.server.audio.AudioFileHelper#getScoreForAnswer(mitll.langtest.shared.Exercise, int, String)
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAnswer
-   * @param e for this exercise
+   * @seex mitll.langtest.server.audio.AudioFileHelper#getScoreForAnswer(mitll.langtest.shared.Exercise, int, String)
+   * @seex mitll.langtest.server.LangTestDatabaseImpl#getScoreForAnswer
+   * @paramx e for this exercise
    * @param questionID for this question (when multiple questions in an exercise)
    * @param answer to score (correct->incorrect)
    * @return 0-1
    */
-  public double getScoreForExercise(Exercise e, int questionID, String answer) {
-    String exerciseID = e.getID();
-    if (answer.isEmpty()) {
-      logger.warn("huh? for exercise " + exerciseID + " question " + questionID + " answer is empty?");
-      return 0d;
-    }
-    return getScoreForExercise(exerciseID, questionID, answer);
-  }
-
   private double getScoreForExercise(String id, int questionID, String answer) {
     if (TESTING) return 0.1;
     getClassifier();
