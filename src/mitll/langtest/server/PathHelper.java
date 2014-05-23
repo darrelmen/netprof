@@ -16,14 +16,22 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class PathHelper {
-  private static Logger logger = Logger.getLogger(PathHelper.class);
+  private static final Logger logger = Logger.getLogger(PathHelper.class);
   public static final String ANSWERS = "answers";
   private static final String IMAGE_WRITER_IMAGES = "audioimages";
 
+  private String realContextPathTest;
   private final ServletContext context;
+  private String configDir;
+
 
   public PathHelper(ServletContext context) {
     this.context = context;
+  }
+
+  public PathHelper(String realContextPathTest) {
+    this((ServletContext)null);
+    this.realContextPathTest = realContextPathTest;
   }
 
   public String ensureForwardSlashes(String wavPath) {
@@ -46,13 +54,12 @@ public class PathHelper {
    * @return path to webapp install location
    */
   public String getInstallPath() {
-   // ServletContext context = servlet.getServletContext();
-    if (context == null) {
+    if (context == null && realContextPathTest == null) {
       logger.error("no servlet context.");
       return "";
     }
 
-    String realContextPath = context.getRealPath(context.getContextPath());
+    String realContextPath = context == null ? realContextPathTest : context.getRealPath(context.getContextPath());
 
     List<String> pathElements = Arrays.asList(realContextPath.split(realContextPath.contains("\\") ? "\\\\" : "/"));
 
@@ -61,8 +68,7 @@ public class PathHelper {
       String last = pathElements.get(pathElements.size() - 1);
       String nextToLast = pathElements.get(pathElements.size() - 2);
       if (last.equals(nextToLast)) {
-        String nodups = realContextPath.substring(0, realContextPath.length() - last.length() -1); // remove trailing slash
-        realContextPath = nodups;
+        realContextPath = realContextPath.substring(0, realContextPath.length() - last.length() -1);
       }
     }
 
@@ -115,7 +121,7 @@ public class PathHelper {
   }
 
   /**
-   * @see LangTestDatabaseImpl#getImageForAudioFile(int, String, String, int, int)
+   * @see LangTestDatabaseImpl#getImageForAudioFile
    * @return path to image output dir
    */
   public String getImageOutDir() {
@@ -131,5 +137,13 @@ public class PathHelper {
 
     }
     return imageOutdir;
+  }
+
+  public void setConfigDir(String configDir) {
+    this.configDir = configDir;
+  }
+
+  public String getConfigDir() {
+    return configDir;
   }
 }
