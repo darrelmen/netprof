@@ -29,25 +29,17 @@ public class ServerProperties {
   private static final String DEBUG_EMAIL = "debugEmail";
   private static final String DOIMAGES = "doimages";
   private static final String USE_SCORE_CACHE = "useScoreCache";
-  private static final String USE_WEIGHTS = "useWeights";
 
   private static final String DEFAULT_PROPERTIES_FILE = "config.properties";
-  private static final String FIRST_N_IN_ORDER = "firstNInOrder";
   private static final String DATA_COLLECT_MODE = "dataCollect";
-  private static final String COLLECT_AUDIO = "collectAudio";
-  private static final String COLLECT_AUDIO_DEFAULT = "true";
   private static final String BIAS_TOWARDS_UNANSWERED = "biasTowardsUnanswered";
-  private static final String USE_OUTSIDE_RESULT_COUNTS = "useOutsideResultCounts";
-  private static final String OUTSIDE_FILE = "outsideFile";
-  private static final String OUTSIDE_FILE_DEFAULT = "distributions.txt";
   private static final String H2_DATABASE = "h2Database";
   private static final String H2_DATABASE_DEFAULT = "vlr-parle";
-  private static final String H2_STUDENT_ANSWERS_DATABASE = "h2StudentAnswers";
-  private static final String H2_STUDENT_ANSWERS_DATABASE_DEFAULT = "h2StudentAnswers";
-  private static final String URDU = "urdu";
+  //private static final String H2_STUDENT_ANSWERS_DATABASE = "h2StudentAnswers";
+  //private static final String SECOND_DATABASE = "secondDatabase";
+  //private static final String H2_STUDENT_ANSWERS_DATABASE_DEFAULT = "h2StudentAnswers";
   private static final String READ_FROM_FILE = "readFromFile";
   private static final String FLASHCARD = "flashcard";
-  private static final String CRTDATACOLLECT = "crtDataCollect";
   private static final String LANGUAGE = "language";
   private static final String WORDPAIRS = "wordPairs";
   private static final String AUTOCRT = "autocrt";
@@ -55,36 +47,59 @@ public class ServerProperties {
   private static final String RECO_TEST = "recoTest";
   private static final String RECO_TEST2 = "recoTest2";
   private static final String ARABIC_TEXT_DATA_COLLECT = "arabicTextDataCollect";
-  private static final String COLLECT_ONLY_AUDIO = "collectAudioOnly";
-  private static final String TIMED_GAME = "timedGame";
   private static final String MIN_PRON_SCORE = "minPronScore";
   private static final String MIN_PRON_SCORE_DEFAULT = "0.20";
   private static final String GOODWAVE_MODE = "goodwaveMode";
-  private static final String FLASHCARD_TEACHER_VIEW = "flashcardTeacherView";
   private static final String USE_PREDEFINED_TYPE_ORDER = "usePredefinedTypeOrder";
-  private static final String SORT_BY_ID = "sortByID";
   private static final String SKIP_SEMICOLONS = "skipSemicolons";
   private static final String SORT_EXERCISES = "sortExercises";
   private static final String EMAIL_ADDRESS = "emailAddress";
   private static final String DEFAULT_EMAIL = "gordon.vidaver@ll.mit.edu";
   private static final String AUDIO_OFFSET = "audioOffset";
-  private static final String COLLECT_SYNONYMS = "collectSynonyms";
-  private static final String FOREIGN_LANGUAGE_QUESTIONS_ONLY = "foreignLanguageQuestionsOnly";
   private static final String MAX_NUM_EXERCISES = "maxNumExercises";
+  private static final String CLASSROOM_MODE = "classroomMode";
   private static final String INCLUDE_FEEDBACK = "includeFeedback";
+  private static final String MAPPING_FILE = "mappingFile";
+  private static final String NO_MODEL = "noModel";
+  private static final String USE_MODEL_DICTIONARY = "useDictionary";
+  private static final String TIER_INDEX = "tierIndex";
+  public static final String VLR_PARLE_PILOT_ITEMS_TXT = "vlr-parle-pilot-items.txt";
 
   private Properties props = new Properties();
 
   public boolean dataCollectMode;
-  private boolean collectAudio;
+ // private boolean collectAudio;
   public boolean biasTowardsUnanswered;
-  public boolean isDataCollectAdminView;
   private double minPronScore;
   private final int maxNumExercises = Integer.MAX_VALUE;
 
-  public void readPropertiesFile(ServletContext servletContext, String configDir) {
-   String configFile = servletContext.getInitParameter("configFile");
+  public ServerProperties() {}
+
+  public ServerProperties(ServletContext servletContext, String configDir) {
+    this(servletContext, configDir, servletContext.getInitParameter("configFile"));
+  }
+
+  public ServerProperties(String configDir, String configFile) {
+    this(null, configDir, configFile);
+  }
+
+  private ServerProperties(ServletContext servletContext, String configDir, String configFile) {
+    String dateFromManifest = getDateFromManifest(servletContext);
+    readProperties(configDir, configFile, dateFromManifest);
+  }
+
+  private void readProperties(String configDir, String configFile, String dateFromManifest) {
     if (configFile == null) configFile = DEFAULT_PROPERTIES_FILE;
+    readProps(configDir, configFile, dateFromManifest);
+  }
+
+  public void readPropertiesFile(ServletContext servletContext, String configDir) {
+    String configFile = servletContext.getInitParameter("configFile");
+    String dateFromManifest = getDateFromManifest(servletContext);
+    readProps(configDir,configFile,dateFromManifest);
+  }
+
+  private void readProps(String configDir, String configFile, String dateFromManifest) {
     String configFileFullPath = configDir + File.separator + configFile;
     if (!new File(configFileFullPath).exists()) {
       logger.error("couldn't find config file " + new File(configFileFullPath));
@@ -92,7 +107,7 @@ public class ServerProperties {
       try {
         props = new Properties();
         props.load(new FileInputStream(configFileFullPath));
-        readProperties(servletContext);
+        readProperties(dateFromManifest);
       } catch (IOException e) {
         logger.error("got " + e, e);
       }
@@ -104,7 +119,9 @@ public class ServerProperties {
    * @return
    */
   public String getH2Database() { return props.getProperty(H2_DATABASE, H2_DATABASE_DEFAULT); }
-  public String getH2StudentAnswersDatabase() { return props.getProperty(H2_STUDENT_ANSWERS_DATABASE, H2_STUDENT_ANSWERS_DATABASE_DEFAULT); }
+//  public String getH2StudentAnswersDatabase() { return props.getProperty(H2_STUDENT_ANSWERS_DATABASE, H2_STUDENT_ANSWERS_DATABASE_DEFAULT); }
+//  public String getSecondH2Database() { return props.getProperty(SECOND_DATABASE, "second"); }
+
   public String getLessonPlan() { return props.getProperty("lessonPlanFile", "lesson.plan"); }
 
   public boolean getUseFile() {
@@ -130,10 +147,6 @@ public class ServerProperties {
     return getDefaultFalse(FLASHCARD);
   }
 
-  public boolean isCRTDataCollect() {
-    return getDefaultFalse(CRTDATACOLLECT);
-  }
-
   public boolean isWordPairs() {
     return getDefaultFalse(WORDPAIRS);
   }
@@ -154,6 +167,22 @@ public class ServerProperties {
     return props.getProperty(LANGUAGE, "English");
   }
 
+  //specify this in  in config file like: tierIndex=5,4,-1. That
+  //tells us to treat (zero-indexed) column 5 like the "unit" column,
+  //column 4 like the "chapter" column, and that there isn't a "week" column
+  //--note that depending on how many unique elements are in each column, the 
+  //rows that appear on the classroom site may not be in the order 
+  //"unit,chapter,week"
+  public int[] getUnitChapterWeek() {
+    int[] parsedUCW = new int[]{-1,-1,-1};
+    String[] ucw = props.getProperty(TIER_INDEX, "-1,-1,-1").replaceAll("\\s+", "").split(",");
+    if(ucw.length != 3)
+        return parsedUCW;
+    for(int i = 0; i < 3; i++)
+        parsedUCW[i] = Integer.parseInt(ucw[i]);
+    return parsedUCW;
+  }
+
   /**
    * @see LangTestDatabaseImpl#setInstallPath
    * @return
@@ -169,36 +198,12 @@ public class ServerProperties {
     return getDefaultFalse(ARABIC_TEXT_DATA_COLLECT);
   }
 
-  public boolean isCollectOnlyAudio() {
-    return getDefaultFalse(COLLECT_ONLY_AUDIO);
-  }
-
-  public boolean isTimedGame() {
-    return getDefaultFalse(TIMED_GAME);
-  }
-
   public boolean isGoodwaveMode() {
     return getDefaultFalse(GOODWAVE_MODE);
   }
 
-  public boolean isFlashcardTeacherView() {
-    return getDefaultFalse(FLASHCARD_TEACHER_VIEW);
-  }
-
   public boolean usePredefinedTypeOrder() {
     return getDefaultFalse(USE_PREDEFINED_TYPE_ORDER);
-  }
-
-  public boolean shouldUseWeights() {
-    return getDefaultFalse(USE_WEIGHTS);
-  }
-
-  public boolean sortExercisesByID() {
-    return getDefaultFalse(SORT_BY_ID);
-  }
-
-  public boolean isCollectAudio() {
-    return collectAudio;
   }
 
   public boolean shouldSkipSemicolonEntries() {
@@ -209,12 +214,12 @@ public class ServerProperties {
     return getDefaultFalse(SORT_EXERCISES);
   }
 
-  public boolean showForeignLanguageQuestionsOnly() {
-    return getDefaultFalse(FOREIGN_LANGUAGE_QUESTIONS_ONLY);
+  public boolean isClassroomMode() { return getDefaultFalse(CLASSROOM_MODE); }
+  public boolean isNoModel() {
+    return getDefaultFalse(NO_MODEL);
   }
-  
-  public boolean getCollectSynonyms() {
-    return getDefaultTrue(COLLECT_SYNONYMS);
+  public boolean useDictionary() {
+    return getDefaultTrue(USE_MODEL_DICTIONARY);
   }
 
   public String getEmailAddress() {
@@ -227,6 +232,10 @@ public class ServerProperties {
     } catch (NumberFormatException e) {
       return 0;
     }
+  }
+
+  public String getMappingFile() {
+    return props.getProperty(MAPPING_FILE, VLR_PARLE_PILOT_ITEMS_TXT);
   }
 
   public int getMaxNumExercises() {
@@ -260,15 +269,13 @@ public class ServerProperties {
    *
    * Note that this will only ever be called once.
    * @see
-   * @param servletContext
+   * @param dateFromManifest
    */
-  private void readProperties(ServletContext servletContext) {
+  private void readProperties(String dateFromManifest) {
     dataCollectMode = getDefaultFalse(DATA_COLLECT_MODE);
-    collectAudio = !props.getProperty(COLLECT_AUDIO, COLLECT_AUDIO_DEFAULT).equals("false");
+    //collectAudio = !props.getProperty(COLLECT_AUDIO, COLLECT_AUDIO_DEFAULT).equals("false");
     biasTowardsUnanswered = getDefaultFalse(BIAS_TOWARDS_UNANSWERED);
-    isDataCollectAdminView = getDefaultFalse("dataCollectAdminView");
 
-    String dateFromManifest = getDateFromManifest(servletContext);
     if (dateFromManifest != null && dateFromManifest.length() > 0) {
       //logger.debug("Date from manifest " + dateFromManifest);
       props.setProperty("releaseDate",dateFromManifest);
@@ -295,9 +302,8 @@ public class ServerProperties {
   }
 
   private String getDateFromManifest(ServletContext servletContext) {
-    InputStream inputStream = servletContext.getResourceAsStream("/META-INF/MANIFEST.MF");
-
     try {
+      InputStream inputStream = servletContext.getResourceAsStream("/META-INF/MANIFEST.MF");
       Manifest manifest = new Manifest(inputStream);
       Attributes attributes = manifest.getMainAttributes();
       return attributes.getValue("Built-Date");
