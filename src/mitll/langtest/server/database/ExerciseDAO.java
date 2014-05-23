@@ -1,6 +1,9 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.server.database.custom.AddRemoveDAO;
+import mitll.langtest.server.database.custom.UserExerciseDAO;
+import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.CommonUserExercise;
 
 import java.util.List;
 
@@ -12,8 +15,19 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public interface ExerciseDAO {
-  List<Exercise> getRawExercises();
+  List<CommonExercise> getRawExercises();
   SectionHelper getSectionHelper();
 
-  Exercise getExercise(String id);
+  CommonExercise addOverlay(CommonUserExercise userExercise);
+  void add(CommonUserExercise userExercise);
+
+  boolean remove(String id);
+
+  void setUserExerciseDAO(UserExerciseDAO userExerciseDAO);
+
+  void setAddRemoveDAO(AddRemoveDAO addRemoveDAO);
+
+  CommonExercise getExercise(String id);
+
+  void setAudioDAO(AudioDAO audioDAO);
 }
