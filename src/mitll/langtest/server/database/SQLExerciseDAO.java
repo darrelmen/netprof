@@ -1,18 +1,18 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.server.database.testing.SmallDatabaseImpl;
+import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.custom.AddRemoveDAO;
+import mitll.langtest.server.database.custom.UserExerciseDAO;
+import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.Exercise;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -21,109 +21,70 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class SQLExerciseDAO implements ExerciseDAO {
-  private static Logger logger = Logger.getLogger(SQLExerciseDAO.class);
+  private static final Logger logger = Logger.getLogger(SQLExerciseDAO.class);
 
   private static final String HEADER_TAG = "h4";
-  private static final String ILR_LEVEL = "ILR_Level";
-  private static final String TEST_TYPE = "Test type";
-  private static final String VLR_PARLE_PILOT_ITEMS_TXT = "vlr-parle-pilot-items.txt";
-
-  private static final String ENCODING = "UTF8";
+  public static final String ENCODING = "UTF8";
   private static final boolean DEBUG = false;
 
   private final Database database;
-  private String mediaDir;
-  private List<Exercise> exercises;
-  private Map<String,Exercise> idToExercise = new HashMap<String,Exercise>();
-  private SectionHelper sectionHelper = new SectionHelper();
-  private Map<String,List<String>> levelToExercises = new HashMap<String,List<String>>();
-  private Map<String,String> exerciseToLevel = new HashMap<String,String>();
-  private Collection<String> readingExercises = new ArrayList<String>();
-  private Collection<String> listeningExercises = new ArrayList<String>();
+  private final String mediaDir;
+  private List<CommonExercise> exercises;
+
+  private final Map<String,CommonExercise> idToExercise = new HashMap<String,CommonExercise>();
+  private final SectionHelper sectionHelper = new SectionHelper();
+  private final ILRMapping ilrMapping;
 
   /**
    * @see DatabaseImpl#makeExerciseDAO(boolean)
    * @param database
    * @param mediaDir
    * @param configDir
+   * @param properties
    */
-  public SQLExerciseDAO(Database database, String mediaDir, String configDir) {
+  public SQLExerciseDAO(Database database, String mediaDir, String configDir, ServerProperties properties) {
     this.database = database;
     this.mediaDir = mediaDir;
     logger.debug("database " + database + " media dir " + mediaDir);
-    File ilrMapping = new File(configDir, VLR_PARLE_PILOT_ITEMS_TXT);
 
-    if (ilrMapping.exists()) {
-      readILRMapping2(ilrMapping);
-    }
-    else logger.debug("can't find " + ilrMapping.getAbsolutePath());
+    ilrMapping = new ILRMapping(configDir, sectionHelper, properties.getMappingFile());
     getRawExercises();
-    int size = idToExercise.keySet().size();
-    int size1 = getMappedExercises().size();
-    if (size != size1) {
-      logger.error("huh? there are " + size + " ids from reading the database, but " + size1 + " from reading the mapping file" );
-      Set<String> strings = new HashSet<String>(idToExercise.keySet());
-      strings.removeAll(getMappedExercises());
-      logger.error("unmapped are " + strings);
-    }
+    ilrMapping.report(idToExercise);
   }
 
-  private void readILRMapping2(File ilrMapping) {
-    try {
-      BufferedReader reader = getReader(ilrMapping.getAbsolutePath());
-      String line;
-      while ((line = reader.readLine()) != null) {
-        String[] split = line.split("\t");
-        if (split.length < 2) continue;
-        String ilr = split[1].trim();
-        ilr = ilr.split("/")[0];
-        String id = split[0].trim();
-        List<String> ids = levelToExercises.get(ilr);
-        if (ids == null) {
-          levelToExercises.put(ilr, ids = new ArrayList<String>());
-        }
-        exerciseToLevel.put(id,ilr);
-        ids.add(id);
+  @Override
+  public void setAudioDAO(AudioDAO audioDAO) {
 
-        String type = split[2].trim();
-        if (type.equals("listening")) {
-          listeningExercises.add(id);
-        }
-        else if (type.equals("reading")) {
-          readingExercises.add(id);
-        }
-      }
-      logger.debug("level->exercise map has size " + levelToExercises.size() + " keys " + levelToExercises.keySet());
-      logger.debug("listening has size " + listeningExercises.size() + " reading " + readingExercises.size());
-    } catch (Exception e) {
-      logger.error("got " + e, e);
-    }
-  }
-
-  public Set<String> getMappedExercises() {
-    Set<String> strings = new HashSet<String>();
-    for (List<String> ids : levelToExercises.values()) { strings.addAll(ids); }
-    return strings;
-  }
-
-  private BufferedReader getReader(String lessonPlanFile) throws FileNotFoundException, UnsupportedEncodingException {
-    FileInputStream resourceAsStream = new FileInputStream(lessonPlanFile);
-    return new BufferedReader(new InputStreamReader(resourceAsStream,ENCODING));
   }
 
   @Override
   public SectionHelper getSectionHelper() { return sectionHelper; }
 
   @Override
-  public Exercise getExercise(String id) {
+  public CommonExercise addOverlay(CommonUserExercise userExercise) { return null; }
+
+  @Override
+  public void setAddRemoveDAO(AddRemoveDAO addRemoveDAO) {}
+
+  @Override
+  public boolean remove(String id) {
+    return false;
+  }
+
+  @Override
+  public void add(CommonUserExercise userExercise) {}
+
+  @Override
+  public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {}
+
+  @Override
+  public CommonExercise getExercise(String id) {
     if (idToExercise.isEmpty()) logger.warn("huh? couldn't find any exercises..?");
     if (!idToExercise.containsKey(id)) {
       logger.warn("couldn't find " +id + " in " +idToExercise.size() + " exercises...");
@@ -139,7 +100,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
    * @return
    * @see mitll.langtest.server.database.DatabaseImpl#getExercises
    */
-  public List<Exercise> getRawExercises() {
+  public List<mitll.langtest.shared.CommonExercise> getRawExercises() {
     if (exercises == null) {
       String sql = "SELECT * FROM exercises";
       exercises = getExercises(sql);
@@ -149,26 +110,24 @@ public class SQLExerciseDAO implements ExerciseDAO {
   }
 
   private void populateIDToExercise() {
-    for (Exercise e : exercises) idToExercise.put(e.getID(),e);
+    for (CommonExercise e : exercises) idToExercise.put(e.getID(),e);
   }
 
-  private List<Exercise> getExercises(String sql) {
-    List<Exercise> exercises = new ArrayList<Exercise>();
-    //int count = 0;
+  private List<CommonExercise> getExercises(String sql) {
+    List<CommonExercise> exercises = new ArrayList<CommonExercise>();
     try {
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
-      boolean useMapping = !exerciseToLevel.isEmpty();
+      boolean useMapping = ilrMapping.useMapping();
       while (rs.next()) {
-      //  if (count++ > 5) break;
         String plan = rs.getString(1);
         String exid = rs.getString(2);
         String content = getStringFromClob(rs.getClob(5));
 
         if (content.startsWith("{")) {
           JSONObject obj = JSONObject.fromObject(content);
-          Exercise e = getExercise(plan, exid, obj);
+          CommonExercise e = getExercise(plan, exid, obj);
           if (e == null) {
             logger.warn("couldn't find exercise for plan '" + plan + "'");
           } else if (e.getID() == null) {
@@ -177,7 +136,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
             exercises.add(e);
 
             if (useMapping) {
-              addMappingAssoc(exid, e);
+              ilrMapping.addMappingAssoc(exid, e);
             }
             else {
               recordUnitChapterWeek(e);
@@ -188,9 +147,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
         }
       }
 
-      if (useMapping) {
-        sectionHelper.setPredefinedTypeOrder(Arrays.asList(TEST_TYPE, ILR_LEVEL));
-      }
+      ilrMapping.finalStep();
       rs.close();
       statement.close();
       database.closeConnection(connection);
@@ -210,27 +167,12 @@ public class SQLExerciseDAO implements ExerciseDAO {
     return exercises;
   }
 
-  private void addMappingAssoc(String exid, Exercise e) {
-    List<SectionHelper.Pair> pairs = new ArrayList<SectionHelper.Pair>();
-
-    String level = exerciseToLevel.get(exid);
-    SectionHelper.Pair ilrAssoc = sectionHelper.addExerciseToLesson(e, ILR_LEVEL, level);
-    pairs.add(ilrAssoc);
-
-    String type = listeningExercises.contains(exid) ? "Listening" : readingExercises.contains(exid) ? "Reading" : "other";
-    SectionHelper.Pair typeAssoc = sectionHelper.addExerciseToLesson(e, TEST_TYPE, type);
-
-    pairs.add(typeAssoc);
-
-    sectionHelper.addAssociations(pairs);
-  }
-
   /**
    * @see #getExercises(String)
    * @param imported
    * @return
    */
-  private boolean recordUnitChapterWeek(Exercise imported) {
+  private boolean recordUnitChapterWeek(CommonExercise imported) {
     String[] split = imported.getID().split("-");
     String unit = split[0];
     String chapter = split.length > 1 ? split[1] : "";
@@ -276,12 +218,12 @@ public class SQLExerciseDAO implements ExerciseDAO {
    * @param plan that this exercise is a part of
    * @param exid id for the exercise
    * @param obj json to get content and questions from
-   * @return Exercise from the json
+   * @return CommonExercise from the json
    */
-  private Exercise getExercise(String plan, String exid, JSONObject obj) {
+  private CommonExercise getExercise(String plan, String exid, JSONObject obj) {
     //String tip = "Item #"+exid; // TODO : have more informative tooltip
     String tip = exid; // TODO : have more informative tooltip
-    Exercise exercise = new Exercise(plan, exid, "", false, false, tip);
+    Exercise exercise = new Exercise(plan, exid, "", false, false, tip, "");
 
     String content = getContent(obj,exercise);
 
@@ -303,15 +245,15 @@ public class SQLExerciseDAO implements ExerciseDAO {
    * @return
    */
   private String convertTableMarkup(String content) {
+    content = content.replaceAll("<td width=\"20%\"> &nbsp; </td>","");
     if (content.contains("<td dir=\"rtl\">")) {
       content = content.replaceAll("Orientation :","Question Scenario");
       content = content.replaceAll("Orientation:","Question Scenario");
-      content = content.replaceAll("<td width=\"20%\"> &nbsp; </td>","");
       content = content.replaceAll("td", HEADER_TAG);
       content = content.replaceAll("br", HEADER_TAG);
-      if (content.contains(":")) {
-        content = content.replaceAll(":", " ");
-      }
+      //if (content.contains(":")) {
+      //  content = content.replaceAll(":", " ");
+      //}
       content += "</h3>";
     }
     content = content.replaceAll("dir=\"rtl\"","dir=\"rtl\" style=\"text-align:right\"");
@@ -331,7 +273,6 @@ public class SQLExerciseDAO implements ExerciseDAO {
    *
    * If there's an audio tag in the content, make that the ref audio for the exercise.
    * @see Exercise#setRefAudio(String)
-   * @see mitll.langtest.client.flashcard.AudioExerciseContent#getAudioWidget
    *
    * @param obj json to get content from
    * @return content with media paths set
@@ -346,19 +287,11 @@ public class SQLExerciseDAO implements ExerciseDAO {
         String[] split = content.split("<audio");
         String before = split[0];
         String after = split[1];
-
-       // logger.debug("before " + before);
-     //   logger.debug("after " + after);
         String[] split1 = after.split("</audio>");
         String audioTag = split1[0];
         String afterContent = split1.length > 1 ? split1[1] : "";
-
-      //  logger.debug("audioTag " + audioTag);
-
         String[] split2 = audioTag.split("src=\"");
         String audioPathOrig = split2[1];
-     //   logger.debug("audioPathOrig " + audioPathOrig);
-
         String audioPath = audioPathOrig.split("mp3")[0];
         exercise.setRefAudio(audioPath + "mp3");
 
@@ -406,97 +339,8 @@ public class SQLExerciseDAO implements ExerciseDAO {
     return b.toString();
   }
 
-/*  private static void dumpQuestionsAndAnswers(SQLExerciseDAO sqlExerciseDAO) {
-    List<Exercise> rawExercises = sqlExerciseDAO.getRawExercises();
-    //Exercise next = rawExercises.iterator().next();
-    try {
-      String filename = "QuestionAndAnswer";
-      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename +
-        ".tsv"), FileExerciseDAO.ENCODING));
-      BufferedWriter writer2 = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename +
-        "English.tsv"), FileExerciseDAO.ENCODING));
-      //  System.out.println("First is " +next + " content " + next.getContent());
-      writer.write ("ID\tQ #\tQuestion\t" +
-        "Answer" +
-        "\n");
-
-      writer.write("ID\t"+ "Audio\t" +"Scenario\t"+
-        "Q #\tQuestion\t");// +
-   //   writer.write("Content\t");
-      for (int i = 1; i < 7; i++) writer.write("Answer #" +i+ "\t");
-      writer.write("\n");
-
-      writer2.write("ID\t"+ "Audio\t" +"Scenario\t"+
-        "Q #\tQuestion\t");// +
-    //  writer2.write("Content\t");
-
-      for (int i = 1; i < 7; i++) writer2.write("Answer #" +i+ "\t");
-      writer2.write("\n");
-
-      for (Exercise e : rawExercises) {
-        int q = 0, qq = 0;
-     //   if (e.getID().contains("L0P")) {
-          for (Exercise.QAPair qaPair : e.getForeignLanguageQuestions()) {
-            q++;
-            writeQAPair(writer, e,q, qaPair);
-          }
-      //  writer2.write(e.getEnglishSentence()+"\t");
-
-        for (Exercise.QAPair qaPair : e.getEnglishQuestions()) {
-            String x = e.getID() + "\t" + qaPair.getQuestion() + "\t" + qaPair.getAnswer();
-            writer2.write(x+"\n");
-                     qq++;
-            writeQAPair(writer2, e, qq,qaPair);
-
-          }
-        //}
-      }
-      writer.close();
-      writer2.close();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }*/
-
-/*  private static void writeQAPair(BufferedWriter writer, Exercise e, int q,Exercise.QAPair qaPair) throws IOException {
-    writer.write(e.getID() + "\t");
-    String content = e.getContent();
-    boolean isAudio = content.contains("Listen to this");
-
-    writer.write(isAudio ? "Yes\t" :"No\t");
-
-    String[] split = content.split("Question Scenario");
-    if (split.length > 1) {
-      String s = split[1];
-      String[] split1 = s.split("<" +
-        HEADER_TAG +
-        " dir=\"rtl\">");
-
-      String s1 = split1[1];
-      String s2 = s1.split("</" +
-        HEADER_TAG +
-        ">")[0];
-      //logger.warn("s2 " +s2);
-      writer.write(s2 + "\t");
-    }
-
-    // String x = e.getID() + "\t" + qaPair.getQuestion() + "\t" + qaPair.getAnswer();
-    writer.write(q+ "\t");
-    writer.write(qaPair.getQuestion()+ "\t");
-    List<String> alternateAnswers = qaPair.getAlternateAnswers();
-    ListIterator<String> answerIterator = alternateAnswers.listIterator();
-    while (answerIterator.hasNext()) {
-      writer.write(answerIterator.next());
-      if (answerIterator.hasNext()) writer.write("\t");
-    }
-    writer.write("\n");
-  }*/
-
-/*  public static void main(String [] arg) {
-    String configDir = "config" +
-      File.separator +
-      "pilot";
-    SQLExerciseDAO sqlExerciseDAO = new SQLExerciseDAO(new SmallDatabaseImpl("war/config/pilot/avpDemo"), configDir, "war"+File.separator+configDir);
-    sqlExerciseDAO.getSectionHelper().getSectionNodes();
+/*  @Override
+  public List<String> getErrors() {
+    return errors;
   }*/
 }
