@@ -16,12 +16,11 @@ import java.util.List;
 import java.util.Properties;
 
 public class MailSupport {
-  //private static final String SWADE = "swade@ll.mit.edu";
   private static final String RECIPIENT_NAME = "Gordon Vidaver";
   private static final String DATA_COLLECT_WEBMASTER = "Data Collect Webmaster";
-  private static Logger logger = Logger.getLogger(MailSupport.class);
+  private static final Logger logger = Logger.getLogger(MailSupport.class);
   private static final String EMAIL = "gordon.vidaver@ll.mit.edu";
-  private boolean debugEmail;
+  private final boolean debugEmail;
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getMailSupport()
@@ -189,7 +188,8 @@ public class MailSupport {
     }
   }
 
-  public void secureEmail(String recipientName, String recipientEmail, List<String> ccEmails,
+/*
+  private void secureEmail(String recipientName, String recipientEmail, List<String> ccEmails,
                            String subject, String message, String email_transport, String email_server,
                            String email_username, String email_password) throws Exception {
     Properties props = new Properties();
@@ -203,6 +203,7 @@ public class MailSupport {
     transport.sendMessage(msg, msg.getAllRecipients());
     transport.close();
   }
+*/
 
   private Message makeMessage(Session session,
                               String recipientName, String recipientEmail,
