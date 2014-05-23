@@ -2,14 +2,9 @@ package mitll.langtest.client.exercise;
 
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Tab;
-import com.github.gwtbootstrap.client.ui.TabPanel;
-import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FocusWidget;
@@ -26,10 +21,9 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.flashcard.AudioExerciseContent;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.Result;
 
 import java.util.ArrayList;
@@ -42,7 +36,7 @@ import java.util.Set;
 /**
  * Note that for text input answers, the user is prevented from cut-copy-paste.<br></br>
  *
- * Subclassed to provide for audio recording and playback {@link mitll.langtest.client.recorder.SimpleRecordExercisePanel} and
+ * Subclassed to provide for audio recording and playback {@linkxx mitll.langtest.client.recorder.SimpleRecordExercisePanel} and
  * grading of answers {@link mitll.langtest.client.grading.GradingExercisePanel}
  *
  * User: GO22670
@@ -52,54 +46,47 @@ import java.util.Set;
  */
 public class ExercisePanel extends VerticalPanel implements
   BusyPanel, ExerciseQuestionState, PostAnswerProvider, ProvidesResize, RequiresResize {
-  private static final String ANSWER_BOX_WIDTH = "400px";
+  //private static final String ANSWER_BOX_WIDTH = "400px";
   protected static final String REPEAT_ONCE = "<i>Repeat the phrase once at normal speed.</i>";
-  private static final String REPEAT_TWICE = "<i>Repeat the phrase twice, first at normal and then at slow speed.</i>";
-  private static final String TWO_SPACES = "&nbsp;&nbsp;";
-  protected static final String THREE_SPACES = "&nbsp;&nbsp;&nbsp;";
-  private static final String TEACHER_PROMPT = "Record the phrase above by clicking the record button, speak, and then stop when finished. ";
+  protected static final String REPEAT_TWICE = "<i>Repeat the phrase twice, first at normal and then at slow speed.</i>";
+  //private static final String TWO_SPACES = "&nbsp;&nbsp;";
+  private static final String THREE_SPACES = "&nbsp;&nbsp;&nbsp;";
+ // private static final String TEACHER_PROMPT = "Record the phrase above by clicking the record button, speak, and then stop when finished. ";
   private static final String THE_FOREIGN_LANGUAGE = " the foreign language";
   private static final String ENGLISH = "English";
   private static final String TYPE_YOUR_ANSWER_IN = "Type your answer in ";
-  private static final String SPEAK_AND_RECORD_YOUR_ANSWER_IN = "Speak and record your answer in ";
+ // private static final String SPEAK_AND_RECORD_YOUR_ANSWER_IN = "Speak and record your answer in ";
   private static final int ITEM_HEADER = 5;
-  private static final int CONTENT_SCROLL_HEIGHT = 240;
-  private List<Widget> answers = new ArrayList<Widget>();
-  protected Set<Widget> completed = new HashSet<Widget>();
-  protected Exercise exercise = null;
-  protected ExerciseController controller;
-  private boolean enableNextOnlyWhenAllCompleted = true;
-  protected LangTestDatabaseAsync service;
-  protected UserFeedback feedback;
-  protected NavigationHelper navigationHelper;
-  protected Map<Integer,Set<Widget>> indexToWidgets = new HashMap<Integer, Set<Widget>>();
-  protected ListInterface exerciseList;
-  private TabPanel tabPanel = null;
-  private Map<Integer,Tab> indexToTab = new HashMap<Integer, Tab>();
+  private static final int CONTENT_SCROLL_HEIGHT = 220;
+  private static final String PROMPT = "Read the following text and answer the question or questions below.";
+  private final List<Widget> answers = new ArrayList<Widget>();
+  private final Set<Widget> completed = new HashSet<Widget>();
+  protected CommonExercise exercise = null;
+  protected final ExerciseController controller;
+  //private boolean enableNextOnlyWhenAllCompleted = true;
+  protected final LangTestDatabaseAsync service;
+  private final NavigationHelper navigationHelper;
+  protected final ListInterface exerciseList;
+  private final Map<Integer,Set<Widget>> indexToWidgets = new HashMap<Integer, Set<Widget>>();
+  //private TabPanel tabPanel = null;
+  private final Map<Integer,Tab> indexToTab = new HashMap<Integer, Tab>();
 
   /**
    * @see ExercisePanelFactory#getExercisePanel
-   * @see mitll.langtest.client.list.ExerciseList#loadExercise
+   * @see mitll.langtest.client.list.ListInterface#loadExercise
    * @param e
    * @param service
    * @param userFeedback
    * @param controller
    * @param exerciseList
    */
-  public ExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
+  public ExercisePanel(final CommonExercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                        final ExerciseController controller, ListInterface exerciseList) {
     this.exercise = e;
-    System.out.println("ExercisePanel.ExercisePanel : exercise is " + exercise.getID());
     this.controller = controller;
     this.service = service;
-    this.feedback = userFeedback;
     this.exerciseList = exerciseList;
     this.navigationHelper = getNavigationHelper(controller);
-    if (e.getQuestions().size() == 1) {
-      addItemHeader(e);
-    }
-
-    enableNextOnlyWhenAllCompleted = !isPashto();
 
     // attempt to left justify
     HorizontalPanel hp = new HorizontalPanel();
@@ -109,8 +96,8 @@ public class ExercisePanel extends VerticalPanel implements
       setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
     }
     hp.setHorizontalAlignment(rightAlignContent ? HasHorizontalAlignment.ALIGN_RIGHT : HasHorizontalAlignment.ALIGN_LEFT);
-    hp.add(getQuestionContent(e));
-    boolean showInstructions = !(e.getContent().toLowerCase().contains("listen") || controller.isDataCollectMode());   // hack
+    hp.add(getQuestionContent(e, true));
+    boolean showInstructions = !(getExerciseContent(e).toLowerCase().contains("listen") || controller.isDataCollectMode());   // hack
     if (showInstructions) {
       addInstructions();
     }
@@ -125,25 +112,29 @@ public class ExercisePanel extends VerticalPanel implements
   }
 
   protected NavigationHelper getNavigationHelper(ExerciseController controller) {
-    return new NavigationHelper(exercise,controller, this, exerciseList, true);
+    return new NavigationHelper(exercise,controller, this, exerciseList, true, true, true);
   }
 
-  protected void addInstructions() {
-    add(new Heading(4, "Read the following text and answer the question or questions below."));
+  protected void addInstructions() {  add(new Heading(4, PROMPT));  }
+
+  /**
+   * @see #ExercisePanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, ExerciseController, mitll.langtest.client.list.ListInterface)
+   * @param e
+   */
+  protected void addItemHeader(CommonExercise e) {
+    Heading w = new Heading(ITEM_HEADER, "Item " + e.getID());
+    w.getElement().setId("ItemHeading");
+    add(w);
   }
 
-  protected void addItemHeader(Exercise e) {
-     add(new Heading(ITEM_HEADER,"Item #" + e.getID()));
-  }
-
-  private Widget getQuestionContent(Exercise e) {
-    String content = e.getContent();
+  protected Widget getQuestionContent(CommonExercise e, boolean includeItemID) {
+    String content = getExerciseContent(e);
 
     //System.out.println("getQuestionContent : content is " + content);
-    if (content.contains("Listen")) {
-      return new AudioExerciseContent().getQuestionContent(e, controller, false, false);
+ /*   if (content.contains("Listen")) {
+      return new AudioExerciseContent().getQuestionContent(e, controller, includeItemID, false);
     }
-    else {
+    else {*/
       HTML maybeRTLContent = getMaybeRTLContent(content, true);
       maybeRTLContent.addStyleName("rightTenMargin");
       if (content.length() > 200) {
@@ -152,10 +143,14 @@ public class ExercisePanel extends VerticalPanel implements
       } else {
         return maybeRTLContent;
       }
-    }
+   // }
   }
 
-  protected Widget getContentScroller(HTML maybeRTLContent) {
+  protected String getExerciseContent(CommonExercise e) {
+    return e.getContent();
+  }
+
+  Widget getContentScroller(HTML maybeRTLContent) {
     ScrollPanel scroller = new ScrollPanel(maybeRTLContent);
     scroller.getElement().setId("contentScroller");
     scroller.setHeight(CONTENT_SCROLL_HEIGHT + "px");
@@ -206,65 +201,17 @@ public class ExercisePanel extends VerticalPanel implements
    * @param controller used in subclasses for audio control
    * @param questionNumber
    */
-  private void addQuestions(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, int questionNumber) {
-    List<Exercise.QAPair> englishQuestions = e.getEnglishQuestions();
-    List<Exercise.QAPair> flQuestions = e.getForeignLanguageQuestions();
-    int n = englishQuestions.size();
-    if (e.getQuestions().size() == 1) {
-      Exercise.QAPair questionToShow = e.getQuestions().iterator().next();
-      add(getQuestionPanel(e, service, controller, questionNumber, n, englishQuestions, flQuestions, questionToShow,this));
-    }
-    else {
-      makeTabPanel(e, service, controller, questionNumber, englishQuestions, flQuestions, n);
-      add(tabPanel);
-    }
+  private void addQuestions(CommonExercise e, LangTestDatabaseAsync service, ExerciseController controller, int questionNumber) {
+      add(getQuestionPanel(e, service, controller, questionNumber,
+        this));
   }
 
-  private void makeTabPanel(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, int questionNumber,
-                            List<Exercise.QAPair> englishQuestions,
-                            List<Exercise.QAPair> flQuestions,
-                            /*List<Exercise.QAPair> questionsToShow,*/ int n) {
-    tabPanel = new TabPanel();
-    DOM.setStyleAttribute(tabPanel.getWidget(0).getElement(), "marginBottom", "0px");
-
-    for (Exercise.QAPair pair : e.getQuestions()) {
-      Tab tabPane = new Tab();
-      tabPane.setHeading("Question #"+questionNumber);
-      tabPanel.add(tabPane);
-      indexToTab.put(questionNumber,tabPane);
-
-      tabPane.add(getQuestionPanel(e, service, controller, questionNumber, n, englishQuestions, flQuestions, pair, tabPane));
-
-      questionNumber++;
-    }
-    tabPanel.selectTab(0);
-  }
-
-  private Panel getQuestionPanel(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller,
+  private Panel getQuestionPanel(CommonExercise exercise, LangTestDatabaseAsync service, ExerciseController controller,
                                  int questionNumber,
-                                 int n,
-                                 List<Exercise.QAPair> englishQuestions,
-                                 List<Exercise.QAPair> flQuestions,
-                                 Exercise.QAPair pair,
                                  HasWidgets toAddTo) {
-    Exercise.QAPair engQAPair = questionNumber - 1 < n ? englishQuestions.get(questionNumber - 1) : null;
-    Exercise.QAPair flQAPair  = questionNumber - 1 < n ? flQuestions.get(questionNumber - 1) : null;
-
-    if (engQAPair != null) {
-      //getQuestionHeader(n, engQAPair, shouldShowAnswer(),!controller.isDemoMode(),toAddTo);
-      getQuestionHeader(questionNumber,n, pair, engQAPair, flQAPair, false,toAddTo);
-    }
-    else {
-      toAddTo.add(new Heading(6, ""));
-    }
-/*    if (controller.isDemoMode()) {
-      getQuestionHeader(questionNumber, n, flQAPair, pair, shouldShowAnswer(), toAddTo);
-     // getQuestionHeader(questionNumber,n, engQAPair, flQAPair,false,toAddTo);
-
-    }*/
     // add question prompt
     Panel vp = new VerticalPanel();
-    addQuestionPrompt(vp, exercise);
+    addQuestionPrompt(vp);
 
     // add answer widget
     vp.add(getAnswerWidget(exercise, service, controller, questionNumber));
@@ -273,7 +220,7 @@ public class ExercisePanel extends VerticalPanel implements
   }
 
   /**
-   * @see #getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
+   * @see #getAnswerWidget(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
    * @param index
    * @param answerWidget
    */
@@ -282,13 +229,12 @@ public class ExercisePanel extends VerticalPanel implements
     Set<Widget> objects = indexToWidgets.get(index);
     if (objects == null) indexToWidgets.put(index, objects = new HashSet<Widget>());
     objects.add(answerWidget);
-    System.out.println("addAnswerWidget : now " + answers.size() + " expected, adding '" + answerWidget.getElement().getId() + "'");
   }
 
   protected boolean shouldShowAnswer() { return controller.isDemoMode();  }
 
   /**
-   * @see #getQuestionPanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int, int, java.util.List, java.util.List, mitll.langtest.shared.Exercise.QAPair, com.google.gwt.user.client.ui.HasWidgets)
+   * @see #getQuestionPanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int, int, java.util.List, java.util.List, mitll.langtest.shared.CommonExercise.QAPair, com.google.gwt.user.client.ui.HasWidgets)
    * @param i
    * @param total
    * @param qaPair
@@ -297,13 +243,13 @@ public class ExercisePanel extends VerticalPanel implements
    * @param showAnswer
    * @param toAddTo
    */
-  protected void getQuestionHeader(int i, int total,
+/*  protected void getQuestionHeader(int i, int total,
                                    Exercise.QAPair qaPair,
                                    Exercise.QAPair englishPair,
                                    Exercise.QAPair flQAPair,
                                    boolean showAnswer, HasWidgets toAddTo) {
     getQuestionHeader(total, qaPair, showAnswer, true, toAddTo);
-  }
+  }*/
 
   /**
    * @see #addQuestions(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
@@ -313,7 +259,7 @@ public class ExercisePanel extends VerticalPanel implements
    * @param showAnswer
    * @param addSpacerAfter
    */
-  private void getQuestionHeader(int total, Exercise.QAPair qaPair, boolean showAnswer, boolean addSpacerAfter, HasWidgets toAddTo) {
+/*  private void getQuestionHeader(int total, Exercise.QAPair qaPair, boolean showAnswer, boolean addSpacerAfter, HasWidgets toAddTo) {
     String question = qaPair.getQuestion();
     String prefix = (total == 1) ? ("Question : ") : "";
 
@@ -343,15 +289,15 @@ public class ExercisePanel extends VerticalPanel implements
 
       toAddTo.add(maybeRTLContent);
     }
-  }
+  }*/
 
   /**
-   * @see #addQuestions(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
-   * @param vp
-   * @param e
+   * @seex #addQuestions(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
+   * @paramx vp
+   * @paramx e
    */
-  private void addQuestionPrompt(Panel vp, Exercise e) {
-    HTML prompt = new HTML(getQuestionPrompt(e.isPromptInEnglish()));
+  protected void addQuestionPrompt(Panel vp) {
+    HTML prompt = new HTML(getQuestionPrompt(true));
     prompt.getElement().setId("questionPrompt");
     prompt.addStyleName("marginBottomTen");
     vp.add(prompt);
@@ -372,16 +318,17 @@ public class ExercisePanel extends VerticalPanel implements
   }
 
   /**
-   * @see mitll.langtest.client.recorder.SimpleRecordExercisePanel#getQuestionPrompt(boolean)
    * @param promptInEnglish
    * @return
    */
+/*
   protected String getSpokenPrompt(boolean promptInEnglish) {
     String instructions = getInstructions();
     String studentPrompt = SPEAK_AND_RECORD_YOUR_ANSWER_IN + (promptInEnglish ? ENGLISH : getLanguage()) + " ";
     String teacherPrompt = TEACHER_PROMPT;
     return THREE_SPACES + (controller.isDataCollectMode() && !controller.isCRTDataCollectMode() ? teacherPrompt : studentPrompt) + instructions;
   }
+*/
 
   protected String getInstructions() {
     String instructions = ":";
@@ -416,12 +363,12 @@ public class ExercisePanel extends VerticalPanel implements
    * @param completedExercise
    */
   @Override
-  public void postAnswers(final ExerciseController controller, final Exercise completedExercise) {
+  public void postAnswers(final ExerciseController controller, final CommonExercise completedExercise) {
     int i = 1;
     int user = controller.getUser();
     final Set<Widget> incomplete = new HashSet<Widget>();
 
-    System.out.println("postAnswers " + completedExercise);
+    System.out.println("ExercisePanel.postAnswers " + completedExercise);
 
     boolean allHaveText = true;
     for (final Widget tb : answers) {
@@ -437,13 +384,18 @@ public class ExercisePanel extends VerticalPanel implements
         service.addTextAnswer(user, exercise, i++, text, controller.getAudioType(), new AsyncCallback<Void>() {
           public void onFailure(Throwable caught) {
             controller.getFeedback().showErrorMessage("Server error", "Couldn't post answers for exercise.");
-
           }
 
           public void onSuccess(Void result) {
             incomplete.remove(tb);
             if (incomplete.isEmpty()) {
-              exerciseList.loadNextExercise(completedExercise);
+              System.out.println("ExercisePanel.loadNextExercise " + completedExercise.getID());
+
+              exerciseList.loadNextExercise(completedExercise/*.getID()*/);
+            }
+            else {
+              System.out.println("ExercisePanel.postAnswers " + incomplete.size() + " incomplete...");
+
             }
           }
         }
@@ -471,14 +423,14 @@ public class ExercisePanel extends VerticalPanel implements
    * If we're in autoCRT mode {@link mitll.langtest.client.exercise.ExerciseController#isAutoCRTMode()} then we
    * add a check answer button after the text box to allow the user to see if they answered correctly.
    *
-   * @see #addQuestions(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
-   * @param exercise here used to determine the prompt language (English/FL)
-   * @param service used in subclasses
-   * @param controller  used in subclasses
-   * @param index of the question (0 for first, 1 for second, etc.) (used in subclasses)
+   * @seex #addQuestions(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
+   * @paramx exercise here used to determine the prompt language (English/FL)
+   * @paramx service used in subclasses
+   * @paramx controller  used in subclasses
+   * @paramx index of the question (0 for first, 1 for second, etc.) (used in subclasses)
    * @return widget that handles the answer
    */
-  protected Widget getAnswerWidget(final Exercise exercise, final LangTestDatabaseAsync service,
+/*  protected Widget getAnswerWidget(final CommonExercise exercise, final LangTestDatabaseAsync service,
                                    ExerciseController controller, final int index) {
     System.out.println("getAnswerWidget for " + exercise.getID() + " and " + index);
     boolean allowPaste = controller.isDemoMode();
@@ -501,8 +453,10 @@ public class ExercisePanel extends VerticalPanel implements
     }
     addAnswerWidget(index, answer);
     return answer;
-  }
+  }*/
 
+  protected Widget getAnswerWidget(final CommonExercise exercise, final LangTestDatabaseAsync service,
+                                   ExerciseController controller, final int index) { return null; }
   @Override
   protected void onLoad() {
     super.onLoad();
@@ -516,7 +470,6 @@ public class ExercisePanel extends VerticalPanel implements
   }
 
   /**
-   * @see mitll.langtest.client.recorder.SimpleRecordPanel#showAudioValidity(mitll.langtest.shared.AudioAnswer.Validity, ExerciseQuestionState, com.google.gwt.user.client.ui.Widget)
    * @param answer
    */
   public void recordIncomplete(Widget answer) {
@@ -532,6 +485,10 @@ public class ExercisePanel extends VerticalPanel implements
     enableNext();
   }
 
+  /**
+   * @see mitll.langtest.client.exercise.WaveformPostAudioRecordButton#useResult(mitll.langtest.shared.AudioAnswer)
+   * @param answer
+   */
   public void recordCompleted(Widget answer) {
     completed.add(answer);
 
@@ -540,10 +497,6 @@ public class ExercisePanel extends VerticalPanel implements
 
     if (completed.size() > answers.size()) {
       System.err.println("recordCompleted huh? more complete " + completed.size() + " than answers " + answers.size());
-    }
-
-    for (Widget complete : completed) {
-      System.out.println("\trecordCompleted : complete " + complete.getElement().getId());
     }
 
     markTabsComplete();
@@ -559,20 +512,20 @@ public class ExercisePanel extends VerticalPanel implements
       boolean allComplete = true;
       Set<Widget> widgetsForTab = indexWidgetsPair.getValue();
       Integer tabIndex = indexWidgetsPair.getKey();
-      System.out.println("\trecordCompleted : checking " + tabIndex + " and " + widgetsForTab.size());
+      //System.out.println("\trecordCompleted : checking " + tabIndex + " and " + widgetsForTab.size());
 
       for (Widget widget : widgetsForTab) {
         if (!completed.contains(widget)) {
-          System.out.println("\trecordCompleted : tab# " + tabIndex + " is *not* complete : " + widget.getElement().getId());
+          //System.out.println("\trecordCompleted : tab# " + tabIndex + " is *not* complete : " + widget.getElement().getId());
           allComplete = false;
           break;
         }
         else {
-          System.out.println("\trecordCompleted : tab# " + tabIndex + " is      complete : " + widget.getElement().getId());
+          //System.out.println("\trecordCompleted : tab# " + tabIndex + " is      complete : " + widget.getElement().getId());
         }
       }
       if (allComplete) {
-        System.out.println("\trecordCompleted : tab# " + tabIndex + " is complete");
+        //System.out.println("\trecordCompleted : tab# " + tabIndex + " is complete");
         if (!indexToTab.isEmpty()) {
           indexToTab.get(tabIndex).setIcon(IconType.CHECK);
         }
@@ -581,17 +534,22 @@ public class ExercisePanel extends VerticalPanel implements
   }
 
   protected void enableNext() {
-    System.out.println("enableNext : answered " + completed.size() + " vs total " + answers.size());
+    //System.out.println("enableNext : answered " + completed.size() + " vs total " + answers.size());
     boolean isComplete = isCompleted();
     navigationHelper.enableNextButton(isComplete);
   }
 
   protected boolean isCompleted() {
     boolean b = completed.size() == answers.size();
-    System.out.println("isCompleted : answered " + completed.size() + " vs total " + answers.size() + " : " + b);
+    if (b) {
+      System.out.println("isCompleted : answered " + completed.size() + " vs total " + answers.size() + " : " + b);
+    }
     return b;
   }
 
   protected void enableNextButton(boolean val) {  navigationHelper.enableNextButton(val); }
-  protected void setButtonsEnabled(boolean val) { navigationHelper.setButtonsEnabled(val);}
+  void setButtonsEnabled(boolean val) {
+   // navigationHelper.setButtonsEnabled(val);
+    enableNext();
+  }
 }
