@@ -1,5 +1,6 @@
 package mitll.langtest.client.recorder;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -15,10 +16,7 @@ import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseQuestionState;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.LZW;
-
-import java.util.List;
+import mitll.langtest.shared.CommonExercise;
 
 /**
  * Just a single record button for the UI component.
@@ -32,45 +30,41 @@ import java.util.List;
  * Time: 4:34 PM
  * To change this template use File | Settings | File Templates.
  */
-public class RecordButtonPanel extends HorizontalPanel implements RecordButton.RecordingListener {
-  protected RecordButton recordButton;
-  protected LangTestDatabaseAsync service;
-  protected ExerciseController controller;
-
-  private Exercise exercise;
-  private ExerciseQuestionState questionState;
-  private int index;
+public class RecordButtonPanel implements RecordButton.RecordingListener {
+  protected final RecordButton recordButton;
+  private final LangTestDatabaseAsync service;
+  private final ExerciseController controller;
+  private final CommonExercise exercise;
+  private final ExerciseQuestionState questionState;
+  private final int index;
   private int reqid = 0;
-  private Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
-  private Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
+  private Panel panel;
+  private final Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
+  private final Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
   private boolean doFlashcardAudio = false;
+  private final String audioType;
 
   /**
    * Has three parts -- record/stop button, audio validity feedback icon, and the audio control widget that allows playback.
    *
-   * @see SimpleRecordExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#FlashcardRecordButtonPanel(mitll.langtest.client.flashcard.AudioAnswerListener, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.CommonExercise, int, String, String)
    */
-  public RecordButtonPanel(final LangTestDatabaseAsync service, final ExerciseController controller,
-                           final Exercise exercise, final ExerciseQuestionState questionState, final int index,
-                           boolean doFlashcardAudio){
+  protected RecordButtonPanel(final LangTestDatabaseAsync service, final ExerciseController controller,
+                              final CommonExercise exercise, final ExerciseQuestionState questionState, final int index,
+                              boolean doFlashcardAudio, String audioType, String recordButtonTitle){
     this.service = service;
     this.controller = controller;
     this.exercise = exercise;
     this.questionState = questionState;
     this.index = index;
     this.doFlashcardAudio = doFlashcardAudio;
-    // make record button
-    recordImage1.getElement().setId("recordImage1_"+ index);
-    recordImage2.getElement().setId("recordImage2_"+ index);
-
-    layoutRecordButton(recordButton = makeRecordButton(controller));
+    layoutRecordButton(recordButton = makeRecordButton(controller,recordButtonTitle));
+    this.audioType = audioType;
   }
 
-  protected RecordButton makeRecordButton(ExerciseController controller) {
-    return new RecordButton(controller.getRecordTimeout(), this, false, getRecordButtonTitle());
+  protected RecordButton makeRecordButton(ExerciseController controller, String buttonTitle) {
+    return new RecordButton(controller.getRecordTimeout(), this, false);
   }
-
-  protected String getRecordButtonTitle() { return RecordButton.RECORD;  }
 
   public void flip(boolean first) {
     recordImage1.setVisible(!first);
@@ -78,30 +72,40 @@ public class RecordButtonPanel extends HorizontalPanel implements RecordButton.R
   }
 
   /**
-   * @see RecordButtonPanel#RecordButtonPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseQuestionState, int, boolean)
+   * @see RecordButtonPanel#RecordButtonPanel
    */
-  private Panel layoutRecordButton(Widget button) {
-    Panel recordButtonContainer = new SimplePanel(button);  // TODO : can we remove wrapper?
-    setRecordButtonWidth(recordButtonContainer);
-    recordButtonContainer.getElement().setId("recordButtonContainer");
-
-    getElement().setId("recordButtonPanel");
-    add(recordButtonContainer);
-    addImages(this);
-    return this;
-  }
-
-  protected void setRecordButtonWidth(Panel recordButtonContainer) {
+  void layoutRecordButton(Widget button) {
+    SimplePanel recordButtonContainer = new SimplePanel(button);
     recordButtonContainer.setWidth("75px");
+    HorizontalPanel hp = new HorizontalPanel();
+    hp.add(recordButtonContainer);
+    this.panel = hp;
+    panel.getElement().setId("recordButtonPanel");
+    addImages();
   }
 
-  protected void addImages(Panel container) {
-    container.add(recordImage1);
+  public void initRecordButton() {
+    recordButton.initRecordButton();
+  }
+
+  protected void addImages() {
+    panel.add(recordImage1);
     recordImage1.setVisible(false);
-    container.add(recordImage2);
+    panel.add(recordImage2);
     recordImage2.setVisible(false);
   }
 
+  /**
+   * @seex FeedbackRecordPanel#getAnswerWidget
+   * @return
+   */
+  public Panel getPanel() {
+     return this.panel;
+  }
+
+  /**
+   * @see mitll.langtest.client.recorder.RecordButton#start()
+   */
   public void startRecording() {
     recordImage1.setVisible(true);
     controller.startRecording();
@@ -117,36 +121,37 @@ public class RecordButtonPanel extends HorizontalPanel implements RecordButton.R
    * Once audio is posted to the server, two pieces of information come back in the AudioAnswer: the audio validity<br></br>
    *  (false if it's too short, etc.) and a URL to the stored audio on the server. <br></br>
    *   This is used to make the audio playback widget.
-   * @see #RecordButtonPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseQuestionState, int, boolean)
+   * @see #RecordButtonPanel
    */
   public void stopRecording() {
-    //System.out.println("RecordButtonPanel : stopRecording " );
     recordImage1.setVisible(false);
     recordImage2.setVisible(false);
-    final Panel outer = this;
     controller.stopRecording(new WavCallback() {
       @Override
       public void getBase64EncodedWavFile(String bytes) {
-        postAudioFile(outer, 1, bytes);
+        postAudioFile(getPanel(), 1, bytes);
       }
     });
+
   }
 
   protected void postAudioFile(final Panel outer, final int tries, final String base64EncodedWavFile) {
     //System.out.println("RecordButtonPanel : postAudioFile " );
+    final long then = System.currentTimeMillis();
     reqid++;
    // List<Integer> compressed = LZW.compress(base64EncodedWavFile);
 
+    final int len = base64EncodedWavFile.length();
     service.writeAudioFile(base64EncodedWavFile,
-      exercise.getPlan(),
+      "plan",
       exercise.getID(),
       index,
       controller.getUser(),
       reqid,
-      !exercise.isPromptInEnglish(),
-      getAudioType(),
+      false,
+      audioType,
       doFlashcardAudio,
-      new AsyncCallback<AudioAnswer>() {
+      true, false, new AsyncCallback<AudioAnswer>() {
         public void onFailure(Throwable caught) {
           controller.logException(caught);
           if (tries > 0) {
@@ -154,26 +159,54 @@ public class RecordButtonPanel extends HorizontalPanel implements RecordButton.R
           } else {
             recordButton.setEnabled(true);
             receivedAudioFailure();
-
+            logMessage("failed to post " + getLog(then));
             Window.alert("writeAudioFile : stopRecording : Couldn't post answers for exercise.");
             new ExceptionHandlerDialog(caught);
           }
         }
 
         public void onSuccess(AudioAnswer result) {
-          if (reqid != result.reqid) {
+          //System.out.println("postAudioFile : onSuccess " + result);
+
+          if (reqid != result.getReqid()) {
             System.out.println("ignoring old answer " + result);
             return;
           }
           recordButton.setEnabled(true);
           receivedAudioAnswer(result, questionState, outer);
+
+          long now = System.currentTimeMillis();
+          long diff = now - then;
+          if (diff > 1000) {
+            logMessage("posted "+ getLog(then));
+          }
+        }
+
+        private String getLog(long then) {
+          long now = System.currentTimeMillis();
+          long diff = now - then;
+          return "audio for user " + controller.getUser() + " for exercise " + exercise.getID() + " took " + diff + " millis to post " +
+            len + " characters or " + (len / diff) + " char/milli";
         }
       });
+  }
+
+  void logMessage(String message) {
+    service.logMessage(message,new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {}
+
+      @Override
+      public void onSuccess(Void result) {}
+    });
   }
 
   protected String getAudioType() { return controller.getAudioType();  }
 
   public Widget getRecordButton() { return recordButton; }
+ public Button getActualRecordButton() { return recordButton; }
+ /*  public void setRecordButtonEnabled(boolean val) { recordButton.setEnabled(val); }*/
+
   protected void receivedAudioAnswer(AudioAnswer result, final ExerciseQuestionState questionState, final Panel outer) {}
   protected void receivedAudioFailure() {}
 }
