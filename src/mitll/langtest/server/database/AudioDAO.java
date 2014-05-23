@@ -575,4 +575,6 @@ public class AudioDAO extends DAO {
     statement.execute();
     statement.close();
   }
+
+  public void drop() { drop(AUDIO);  }
 }
