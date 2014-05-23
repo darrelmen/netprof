@@ -12,4 +12,10 @@ import mitll.langtest.shared.scoring.PretestScore;
 public interface ScoreListener {
   void gotScore(PretestScore score, boolean showOnlyOneExercise);
   int getOffsetWidth();
+
+  void addScore(float hydecScore);
+
+  void setClassAvg(float classAvg);
+
+  void showChart(boolean showOnlyOneExercise);
 }
