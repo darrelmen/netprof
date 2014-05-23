@@ -8,9 +8,19 @@ package mitll.langtest.client.sound;
  * To change this template use File | Settings | File Templates.
  */
 public class SoundManagerStatic implements SoundManagerAPI {
-  private boolean debug = false;
+  private final boolean debug = false;
+  private final boolean webaudio = false;
+  private static final boolean PREFER_WEBAUDIO = false;
   public void initialize() {
     SoundManager.initialize();
+
+  /*  boolean b = PREFER_WEBAUDIO || WebAudio.checkIfWebAudioInstalled(); // for now -- note console seems to be undefined in IE
+    if (b && PREFER_WEBAUDIO) {
+      System.out.println("got web audio!");
+      if (PREFER_WEBAUDIO) {
+        webaudio = true;
+      }
+    }*/
   }
 
   /**
@@ -38,18 +48,49 @@ public class SoundManagerStatic implements SoundManagerAPI {
   /**
    * If you call this when SoundManger is not OK, will throw an exception.
    *
-   * @see mitll.langtest.client.sound.PlayAudioPanel#createSound
    * @param sound
    * @param title
    * @param file
+   * @see mitll.langtest.client.sound.PlayAudioPanel#createSound
+   * @see SoundFeedback#createSound(String, mitll.langtest.client.sound.SoundFeedback.EndListener, boolean)
    */
   public void createSound(Sound sound, String title, String file) {
-  if (debug) System.out.println("SoundManagerStatic.createSound " +sound);
+    if (debug) System.out.println("SoundManagerStatic.createSound " + sound);
     SoundManager.createSound(sound, title, file);
+
+    if (webaudio) {
+      WebAudio.setLoadedCallback(new WebAudio.Loaded() {
+        @Override
+        public void audioLoaded() {
+          System.out.println("got web audio loaded!");
+
+        }
+      });
+      WebAudio.loadSound(file);
+    }
+    else {
+
+    }
   }
 
+  @Override
+  public void createSoftSound(Sound sound, String title, String file) {
+ //   setVolume(title);
+    createSound(sound,title,file);
+  }
+
+  @Override
+  public void setVolume(String title, int vol) {
+    SoundManager.setVolume(title, vol);
+  }
+
+  /**
+     * @param sound
+     * @see mitll.langtest.client.sound.PlayAudioPanel#destroySound()
+     * @see mitll.langtest.client.sound.SoundFeedback#destroySound()
+     */
   public void destroySound(Sound sound) {
-    if (debug)  System.out.println("SoundManagerStatic.destroy " +sound);
+    if (debug) System.out.println("SoundManagerStatic.destroy " + sound);
     SoundManager.destroySound(sound);
   }
 
@@ -76,6 +117,9 @@ public class SoundManagerStatic implements SoundManagerAPI {
     SoundManager.playInterval(sound, start, end);
   }
 
+  /**
+   * @see mitll.langtest.client.LangTest#setupSoundManager
+   */
   public void exportStaticMethods() {
     SoundManager.exportStaticMethods();
   }
