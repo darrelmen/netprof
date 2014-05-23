@@ -29,7 +29,7 @@ public class GradeDAO extends DAO {
   private static final String GRADES = "grades";
   private final boolean debug = false;
   private final UserDAO userDAO;
-  private ResultDAO resultDAO;
+  private final ResultDAO resultDAO;
 
   public GradeDAO(Database database, UserDAO userDAO, ResultDAO resultDAO) {
     super(database);
@@ -232,7 +232,7 @@ public class GradeDAO extends DAO {
 
       List<User> users = userDAO.getUsers();
       Map<String,User> idToUser = new HashMap<String, User>();
-      for (User u : users) idToUser.put(u.userID,u);
+      for (User u : users) idToUser.put(u.getUserID(),u);
 
       boolean validIds = (idToUser.size() > 0 && !idToUser.keySet().iterator().next().equals("NOT_SET"));
       int count = 0;
@@ -249,7 +249,7 @@ public class GradeDAO extends DAO {
         } catch (NumberFormatException e) {
           User user = idToUser.get(grader);
           if (user != null) {
-            graderID = (int) user.id;
+            graderID = (int) user.getId();
           } else {
             if (count++ < 20 && validIds) {
               logger.warn("couldn't parse grader '" + grader + "' or find user by that id in " + idToUser.keySet());
@@ -299,7 +299,7 @@ public class GradeDAO extends DAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs()
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    * @param connection
    * @throws SQLException
    */
