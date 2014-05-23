@@ -2,7 +2,6 @@ package mitll.langtest.client;
 
 import com.github.gwtbootstrap.client.ui.ProgressBar;
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
-import mitll.langtest.client.list.ListInterface;
 
 /**
  * Created with IntelliJ IDEA.
@@ -11,8 +10,8 @@ import mitll.langtest.client.list.ListInterface;
  * Time: 12:09 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ProgressHelper {
-  private ProgressBar progressBar;
+class ProgressHelper {
+  private final ProgressBar progressBar;
   public ProgressHelper() {
     progressBar = makeProgressBar();
   }
@@ -28,11 +27,11 @@ public class ProgressHelper {
     return progressBar;
   }
 
-  public void showAdvance(ListInterface exerciseList) {
+/*  public void showAdvance(ListInterface exerciseList) {
     int percentComplete = exerciseList.getPercentComplete();
     getProgressBar().setPercent(percentComplete == 0 ? 100 : percentComplete);
     getProgressBar().setText(percentComplete == 0 ? "No items completed." :exerciseList.getComplete() + " complete."); // TODO when is this +1 and when not??
-  }
+  }*/
 
   public ProgressBar getProgressBar() {
     return progressBar;
