@@ -17,7 +17,7 @@ import java.util.Collection;
  * Created by go22670 on 1/17/14.
  */
 public class SLFFile {
-  private static final Logger logger = Logger.getLogger(SLFFile.class);
+  //private static final Logger logger = Logger.getLogger(SLFFile.class);
 
   /**
    * Limit on vocabulary size -- too big and dcodr will run out of memory and segfault
@@ -34,7 +34,6 @@ public class SLFFile {
    */
   public String createSimpleSLFFile(Collection<String> lmSentences, String tmpDir) {
     String slfFile = tmpDir + File.separator + SMALL_LM_SLF;
-    SmallVocabDecoder svd = new SmallVocabDecoder();
     try {
       BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(slfFile), FileExerciseDAO.ENCODING));
       writer.write("VERSION=1.0\n");
@@ -47,6 +46,8 @@ public class SLFFile {
       StringBuilder linksBuf = new StringBuilder();
       Collection<String> sentencesToUse = new ArrayList<String>(lmSentences);
       sentencesToUse.add(UNKNOWN_MODEL);
+
+      SmallVocabDecoder svd = new SmallVocabDecoder();
       for (String sentence : sentencesToUse) {
         Collection<String> tokens = svd.getTokens(sentence);
         //logger.debug("\tfor '" + sentence + "' tokens are " + tokens);
@@ -80,5 +81,4 @@ public class SLFFile {
     //logger.debug("wrote " + slfFile + " exists " + new File(slfFile).exists());
     return slfFile;
   }
-
 }
