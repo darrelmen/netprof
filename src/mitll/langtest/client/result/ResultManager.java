@@ -25,7 +25,6 @@ import com.google.gwt.view.client.ListDataProvider;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
-import mitll.langtest.client.grading.GradingExercisePanel;
 import mitll.langtest.client.table.PagerTable;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Result;
@@ -34,7 +33,6 @@ import mitll.langtest.shared.grade.Grade;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,14 +49,14 @@ public class ResultManager extends PagerTable {
   private static final int PAGE_SIZE = 12;
   protected static final String UNGRADED = "Ungraded";
   protected static final String SKIP = "Skip";
-  public static final int GRADING_WIDTH = 700;
+  protected static final int GRADING_WIDTH = 700;
   private final boolean textResponse;
   protected int pageSize = PAGE_SIZE;
-  protected LangTestDatabaseAsync service;
-  protected UserFeedback feedback;
+  protected final LangTestDatabaseAsync service;
+  protected final UserFeedback feedback;
   private final AudioTag audioTag = new AudioTag();
-  private String nameForAnswer;
-  private Map<Column<?,?>,String> colToField = new HashMap<Column<?,?>, String>();
+  private final String nameForAnswer;
+  private final Map<Column<?,?>,String> colToField = new HashMap<Column<?,?>, String>();
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad2
@@ -321,6 +319,22 @@ public class ResultManager extends PagerTable {
     table.addColumn(audioFile, nameForAnswer);
     colToField.put(audioFile,"answer");
 
+    TextColumn<Result> score = new TextColumn<Result>() {
+      @Override
+      public String getValue(Result answer) {
+        if (answer == null) {
+          System.err.println("huh? answer is null??");
+          return "";
+        }
+        else {
+          return "" + roundToHundredth(answer.getPronScore());
+        }
+      }
+    };
+    score.setSortable(true);
+    table.addColumn(score, "Score");
+    colToField.put(score, "score");
+
     addResultColumn(grades, grader, numGrades, table);
     return id;
   }
@@ -397,7 +411,7 @@ public class ResultManager extends PagerTable {
       }
     };
     exercise.setSortable(true);
-    table.addColumn(exercise, "Exercise");
+    table.addColumn(exercise, "CommonExercise");
     colToField.put(exercise,"id");
 
     return id;
@@ -405,7 +419,6 @@ public class ResultManager extends PagerTable {
 
   /**
    *
-   * @param grader used in GradingResultManager subclass
    * @param grader used in GradingResultManager subclass
    * @param numGrades used in GradingResultManager subclass
    * @param table to add columns to
@@ -450,11 +463,7 @@ public class ResultManager extends PagerTable {
     TextColumn<Result> gradeInfo = new TextColumn<Result>() {
       @Override
       public String getValue(Result answer) {
-        if (answer.gradeInfo.endsWith(",")) {
-          return answer.gradeInfo.substring(0, answer.gradeInfo.length() - 1);
-        } else {
-          return answer.gradeInfo;
-        }
+        return answer.getGradeInfo();
       }
     };
     table.addColumn(gradeInfo, "Grades");
@@ -482,26 +491,24 @@ public class ResultManager extends PagerTable {
   }
 
   private void addNoWrapColumn(CellTable<Result> table) {
+    Column<Result, SafeHtml> dateCol = getDateColumn(table);
+    colToField.put(dateCol,"timestamp");
+  }
+
+  private Column<Result, SafeHtml> getDateColumn(CellTable<Result> table) {
     SafeHtmlCell cell = new SafeHtmlCell();
     Column<Result,SafeHtml> dateCol = new Column<Result, SafeHtml>(cell) {
       @Override
       public SafeHtml getValue(Result answer) {
-        SafeHtmlBuilder sb = new SafeHtmlBuilder();
-        sb.appendHtmlConstant("<div style='white-space: nowrap;'><span>" +
-          new Date(answer.timestamp)+
-          "</span>" );
-
-        sb.appendHtmlConstant("</div>");
-        return sb.toSafeHtml();
+        return getSafeHTMLForTimestamp(answer.timestamp);
       }
     };
     table.addColumn(dateCol, "Time");
     dateCol.setSortable(true);
-    colToField.put(dateCol,"timestamp");
-
+    return dateCol;
   }
 
-/*  private void addNoWrapColumn2(CellTable<Result> table,String label) {
+  /*  private void addNoWrapColumn2(CellTable<Result> table,String label) {
     SafeHtmlCell cell = new SafeHtmlCell();
     Column<Result,SafeHtml> dateCol = new Column<Result, SafeHtml>(cell) {
       @Override
@@ -515,7 +522,7 @@ public class ResultManager extends PagerTable {
         return sb.toSafeHtml();
       }
     };
-    table.addColumn(dateCol, label);
+    table.addVarchar(dateCol, label);
   }*/
 
   private float roundToHundredth(double totalHours) {
