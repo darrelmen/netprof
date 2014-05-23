@@ -1,12 +1,22 @@
 package mitll.langtest.client.exercise;
 
+import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.Tab;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.WavCallback;
+import mitll.langtest.client.dialog.KeyPressHelper;
+import mitll.langtest.client.instrumentation.EventLogger;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.StartupInfo;
+import mitll.langtest.shared.User;
+
+import java.util.Collection;
 
 
 /**
@@ -29,8 +39,7 @@ public interface ExerciseController {
   void stopRecording(WavCallback wavCallback);
   //String getBase64EncodedWavFile();
 
-  boolean getEnglishOnly();
-  int getNumGradesToCollect();
+ // boolean getEnglishOnly();
 
   SoundManagerAPI getSoundManager();
 
@@ -50,24 +59,35 @@ public interface ExerciseController {
   boolean isGrading();
   boolean isLogClientMessages();
   String getAudioType();
+ // boolean isReviewMode();
+  Collection<User.Permission> getPermissions();
 
-  void showFlashHelp();
+  boolean showCompleted();
+
+  void getImage(int reqid, String path, String type, int toUse, int height, String exerciseID, AsyncCallback<ImageResponse> client);
+
   String getLanguage();
   boolean isPromptBeforeNextItem();
   boolean isRightAlignContent();
   boolean isGoodwaveMode();
   int getLeftColumnWidth();
   int getHeightOfTopRows();
-  boolean showUnansweredFirst();
-
-  int getFlashcardPreviewFrameHeight();
 
   PropertyHandler getProps();
 
   String logException(Throwable throwable);
+  void logMessageOnServer(String message, String prefix);
 
-  String getGreeting();
-
-  void resetState();
   StartupInfo getStartupInfo();
+  EventLogger getButtonFactory();
+  void register(Button button, String exid);
+
+  void register(Button button, String exid, String context);
+
+  void logEvent(Tab button, String widgetType, String exid, String context);
+  void logEvent(UIObject button, String widgetType, String exid, String context);
+
+  void addKeyListener(KeyPressHelper.KeyListener listener);
+
+  //boolean removeKeyListener(String name);
 }
