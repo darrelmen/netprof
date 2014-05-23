@@ -209,14 +209,14 @@ public class UserListManager {
   public void markState(Collection<? extends CommonShell> shells) {
     Map<String, ReviewedDAO.StateCreator> exerciseToState = reviewedDAO.getExerciseToState(false);
 
-    logger.debug("markState " + shells.size() + " shells, " + exerciseToState.size() + " states");
-    int c = 0;
+    //logger.debug("markState " + shells.size() + " shells, " + exerciseToState.size() + " states");
+    //int c = 0;
     for (CommonShell shell : shells) {
       ReviewedDAO.StateCreator stateCreator = exerciseToState.get(shell.getID());
       if (stateCreator != null) {
         shell.setState(stateCreator.getState());
       //  logger.debug("\t for " + shell.getID() + " state " + stateCreator.getState());
-        c++;
+      //  c++;
       }
     }
 
