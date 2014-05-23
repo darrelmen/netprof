@@ -11,7 +11,6 @@ import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.user.client.Timer;
-import mitll.langtest.client.flashcard.FlashcardRecordButtonPanel;
 
 /**
  * Basically a click handler and a timer to click stop recording, if the user doesn't.
