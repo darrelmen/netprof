@@ -37,7 +37,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.user.UserFeedback;
@@ -48,7 +47,6 @@ import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserList;
 
-import javax.lang.model.element.Element;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -328,7 +326,9 @@ public class Navigation implements RequiresResize {
           logEvent(recorderTab, CONTENT);
         }
       });
+      addPracticeTab();
     }
+
 
     // chapter tab
     final String chapterNameToUse = getChapterName();
@@ -342,17 +342,7 @@ public class Navigation implements RequiresResize {
       }
     });
 
-    practiceTab = makeFirstLevelTab(tabPanel, IconType.REPLY, "Practice");
-    practiceTab.getContent().getElement().setId("practicePanel");
-    practiceTab.getTab().addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        checkAndMaybeClearTab("Practice");
-        practiceHelper.showNPF(practiceTab, "Practice", false);
-        practiceHelper.hideList();
-        logEvent(practiceTab, "Practice");
-      }
-    });
+    if (!isQualityControl) addPracticeTab();
 
     if (isQualityControl) {
       review = makeFirstLevelTab(tabPanel, IconType.EDIT, FIX_DEFECTS);
@@ -379,6 +369,20 @@ public class Navigation implements RequiresResize {
         }
       });
     }
+  }
+
+  private void addPracticeTab() {
+    practiceTab = makeFirstLevelTab(tabPanel, IconType.REPLY, "Practice");
+    practiceTab.getContent().getElement().setId("practicePanel");
+    practiceTab.getTab().addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        checkAndMaybeClearTab("Practice");
+        practiceHelper.showNPF(practiceTab, "Practice", false);
+        practiceHelper.hideList();
+        logEvent(practiceTab, "Practice");
+      }
+    });
   }
 
   private String getChapterName() {
