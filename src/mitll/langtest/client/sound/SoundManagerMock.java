@@ -13,6 +13,17 @@ public class SoundManagerMock implements SoundManagerAPI {
   public SoundManagerMock() {
     GWT.log("making SoundManagerMock");
   }
+
+  @Override
+  public void setVolume(String title, int vol) {
+
+  }
+
+  @Override
+  public void createSoftSound(Sound sound, String title, String file) {
+
+  }
+
   public void initialize() {
     GWT.log("SoundManagerMock initialize");
   }
