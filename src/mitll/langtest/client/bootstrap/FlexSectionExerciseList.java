@@ -3,34 +3,34 @@ package mitll.langtest.client.bootstrap;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
-import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.Tooltip;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.list.HistoryExerciseList;
-import mitll.langtest.client.list.ItemSorter;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.SectionNode;
 
 import java.util.ArrayList;
@@ -39,7 +39,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -50,107 +49,87 @@ import java.util.Set;
  */
 public class FlexSectionExerciseList extends HistoryExerciseList {
   private static final int HEADING_FOR_LABEL = 4;
- // public static final int PANEL_INSIDE_SCROLL_MIN_HEIGHT = 50;
- // public static final int PANEL_INSIDE_SCROLL_MIN_HEIGHT_SMALL = 30;
-  private static final int UNACCOUNTED_WIDTH = 120;
-
+  private static final int UNACCOUNTED_WIDTH = 60;
+  private static final int VERTICAL_DEFAULT = 160;
+  private static final int CLASSROOM_VERTICAL_EXTRA = 270;
+  private static final String SHOWING_ALL_ENTRIES = "Showing all entries";
+  private static final String DOWNLOAD_SPREADSHEET = "Download spreadsheet and audio for selected sections.";
 
   private final List<ButtonType> buttonTypes = new ArrayList<ButtonType>();
-  private Map<String, ButtonType> typeToButton = new HashMap<String, ButtonType>();
+  private final Map<String, ButtonType> typeToButton = new HashMap<String, ButtonType>();
   private int numSections = 0;
   private Panel panelInsideScrollPanel;
   private ScrollPanel scrollPanel;
   private Panel clearColumnContainer;
   private Panel labelColumn;
-  protected Heading statusHeader = new Heading(4);
+  private final Heading statusHeader = new Heading(4);
   private Collection<String> typeOrder;
-  private Panel sectionPanel;
-  boolean showCompleted = false;
+  private final Panel sectionPanel;
 
   /**
-   * @see mitll.langtest.client.ExerciseListLayout#makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, boolean, mitll.langtest.client.user.UserFeedback, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
-   * @param secondRow
+   * @see mitll.langtest.client.ExerciseListLayout#makeExerciseList
+   * @param secondRow add the section panel to this row
    * @param currentExerciseVPanel
    * @param service
    * @param feedback
    * @param showTurkToken
    * @param showInOrder
-   * @paramx showListBox
    * @param controller
+   * @param showTypeAhead
    * @param instance
-   */
-  public FlexSectionExerciseList(FluidRow secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
+   * */
+  public FlexSectionExerciseList(Panel secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                  UserFeedback feedback,
-                                 boolean showTurkToken, boolean showInOrder,/* boolean showListBox, */ExerciseController controller, String instance) {
-    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, controller.isCRTDataCollectMode(),instance);
-    showCompleted = controller.isCRTDataCollectMode() || controller.isDataCollectMode();
-    sectionPanel = new FluidContainer();
-    sectionPanel.getElement().setId("sectionPanel");
+                                 boolean showTurkToken, boolean showInOrder,
+                                 ExerciseController controller,
+                                 boolean showTypeAhead, String instance) {
+    super(currentExerciseVPanel, service, feedback, controller, showTypeAhead, instance);
 
-    DOM.setStyleAttribute(sectionPanel.getElement(), "paddingLeft", "2px");
-    DOM.setStyleAttribute(sectionPanel.getElement(), "paddingRight", "2px");
+    sectionPanel = new FluidContainer();
+    sectionPanel.getElement().setId("sectionPanel_"+instance);
+
+    sectionPanel.getElement().getStyle().setPaddingLeft(0, Style.Unit.PX);
+    sectionPanel.getElement().getStyle().setPaddingRight(0, Style.Unit.PX);
     secondRow.add(new Column(12, sectionPanel));
 
     buttonTypes.add(ButtonType.PRIMARY);
     buttonTypes.add(ButtonType.SUCCESS);
     buttonTypes.add(ButtonType.INFO);
     buttonTypes.add(ButtonType.WARNING);
+    setUnaccountedForVertical(controller.getProps().isClassroomMode() ? CLASSROOM_VERTICAL_EXTRA : VERTICAL_DEFAULT);
   }
 
+  /**
+   * @see mitll.langtest.client.list.PagingExerciseList#PagingExerciseList
+   */
   @Override
   protected void addComponents() {
-    PagingContainer<? extends ExerciseShell> exerciseShellPagingContainer = makePagingContainer();
-    //System.out.println("addComponents made container " + exerciseShellPagingContainer);
+    PagingContainer exerciseShellPagingContainer = makePagingContainer();
     addTableWithPager(exerciseShellPagingContainer);
   }
 
   /**
    *
    * @param userID
-   * @param getNext
    * @see mitll.langtest.client.LangTest#doEverythingAfterFactory
    */
-  public void getExercises(final long userID, boolean getNext) {
-    System.out.println("FlexSectionExerciseList : getExercises : Get exercises for user=" + userID + " crt mode " + showCompleted);
+  public boolean getExercises(final long userID) {
+    System.out.println("FlexSectionExerciseList.getExercises : Get exercises for user=" + userID + " instance " + getInstance());
     this.userID = userID;
-
-    if (showCompleted) {
-      service.getCompletedExercises((int)userID, new AsyncCallback<Set<String>>() {
-        @Override
-        public void onFailure(Throwable caught) {}
-        @Override
-        public void onSuccess(Set<String> result) {
-          System.out.println("\tFlexSectionExerciseList : getCompletedExercises : completed for user=" + userID + " result " + result.size());
-          controller.getExerciseList().setCompleted(result);
-          addWidgets();
-        }
-      });
-    }
-    else {
-      addWidgets();
-    }
+    addWidgets();
+    return false;
   }
 
-  private void addWidgets() {
+  public void addWidgets() {
     sectionPanel.clear();
-    Panel flexTable = getWidgetsForTypes();
-    sectionPanel.add(flexTable);
-  }
-
-  /**
-   * @see #loadExercises(java.util.Map, String)
-   * @see #pushNewSectionHistoryToken()
-   * @param userID
-   */
-  protected void noSectionsGetExercises(long userID) {
-    super.getExercises(userID, true);
+    sectionPanel.add(getWidgetsForTypes());
   }
 
   /**
    * Assume for the moment that the first type has the largest elements... and every other type nests underneath it.
    *
    * @return
-   * @see mitll.langtest.client.list.ListInterface#getExercises(long, boolean)
+   * @see mitll.langtest.client.list.ListInterface#getExercises(long)
    */
   private Panel getWidgetsForTypes() {
     final FluidContainer container = new FluidContainer();
@@ -165,36 +144,31 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
 
   private void getTypeOrder(final FluidContainer container) {
     typeOrder = controller.getStartupInfo().getTypeOrder();
-    addButtonRow(controller.getStartupInfo().getSectionNodes(), container, typeOrder, !controller.isGoodwaveMode());
+    addButtonRow(controller.getStartupInfo().getSectionNodes(), container, typeOrder);
   }
 
   @Override
-  protected Collection<String> getTypeOrder(Map<String, Collection<String>> selectionState2) {
-    return typeOrder;
-  }
+  protected Collection<String> getTypeOrder(Map<String, Collection<String>> selectionState2) { return typeOrder;  }
 
   /**
    * @param rootNodes
    * @param container
    * @param types
-   * @param addInstructions
    * @see #getTypeOrder(com.github.gwtbootstrap.client.ui.FluidContainer)
    */
-  private void addButtonRow(List<SectionNode> rootNodes, FluidContainer container, Collection<String> types,
-                            boolean addInstructions) {
-    //System.out.println("addButtonRow (success) for user = " + userID + " got types " + types + " num root nodes " + rootNodes.size());
+  private void addButtonRow(List<SectionNode> rootNodes, final FluidContainer container, Collection<String> types) {
+/*    System.out.println("FlexSectionExerciseList.addButtonRow for user = " + userID + " got types " +
+      types + " num root nodes " + rootNodes.size() + " instance " + instance);*/
     if (types.isEmpty()) {
       System.err.println("huh? types is empty?");
       return;
     }
     showDefaultStatus();
 
-    if (addInstructions && getUserPrompt().length() > 0) container.add(getInstructionRow());
     FlexTable firstTypeRow = new FlexTable();
     firstTypeRow.getElement().setId("firstTypeRow");
     container.add(firstTypeRow);
     firstTypeRow.addStyleName("alignTop");
-   // firstTypeRow.addStyleName("positionAbsolute");
 
     populateButtonGroups(types);
 
@@ -203,8 +177,8 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
 
     boolean usuallyThereWillBeAHorizScrollbar = rootNodes.size() > 6;
 
-    makeLabelColumn(usuallyThereWillBeAHorizScrollbar, firstType, firstTypeRow, buttonGroupSectionWidget);
-    makeClearColumn(usuallyThereWillBeAHorizScrollbar, types, firstType, firstTypeRow, buttonGroupSectionWidget);
+    this.labelColumn = makeLabelColumn(firstType, firstTypeRow, buttonGroupSectionWidget);
+    this.clearColumnContainer = makeClearColumn(usuallyThereWillBeAHorizScrollbar, types, firstType, firstTypeRow, buttonGroupSectionWidget);
 
     makePanelInsideScrollPanel(firstTypeRow);
 
@@ -221,73 +195,133 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     Widget last = null;
     long then = System.currentTimeMillis();
     for (String sectionInFirstType : sectionsInType) {
-      FlowPanel sectionColumn = new FlowPanel();
+      Panel sectionColumn = new FlowPanel();
       ButtonWithChildren buttonWithChildren = addColumnButton(sectionColumn, sectionInFirstType, buttonGroupSectionWidget);
       buttonWithChildren.setButtonGroup(buttonGroupSectionWidget);
       last = sectionColumn;
-      DOM.setStyleAttribute(sectionColumn.getElement(), "marginBottom", (usuallyThereWillBeAHorizScrollbar ? 5 :0) + "px");
+      sectionColumn.getElement().getStyle().setMarginBottom((usuallyThereWillBeAHorizScrollbar ? 5 :0), Style.Unit.PX);
       panelInsideScrollPanel.add(sectionColumn);
 
       if (subType != null) {
-        SectionNode sectionNode = nameToNode.get(sectionInFirstType);
         ButtonGroupSectionWidget sectionWidget1 = (ButtonGroupSectionWidget) typeToBox.get(subType);
-        Panel rowContainer = new FlowPanel();
-        rowContainer.addStyleName("rowPadding");
 
        // System.out.println("addButtonRow adding row for " + subType + " under " + sectionInFirstType);
 
         HorizontalPanel rowForChildren = new HorizontalPanel();
         rowForChildren.setWidth("100%");
         rowForChildren.setHorizontalAlignment(ALIGN_LEFT);
-        List<ButtonWithChildren> buttonWithChildrens = addButtonGroup(rowForChildren, sectionNode.getChildren(),
-          subType, subs, sectionWidget1);
-        buttonWithChildren.setChildren(buttonWithChildrens);
+        SectionNode sectionNode = nameToNode.get(sectionInFirstType);
+        buttonWithChildren.setChildren(addButtonGroup(rowForChildren, sectionNode.getChildren(),
+          subType, subs, sectionWidget1));
         //sectionColumn.add(rowForChildren);
+
+        // make row container
+        Panel rowContainer = new FlowPanel();
+        rowContainer.addStyleName("rowPadding");
         rowContainer.add(rowForChildren);
         sectionColumn.add(rowContainer);
 
         sectionWidget1.addRow(rowContainer);
       }
     }
-    long now = System.currentTimeMillis();
-    if (now - then > 200) System.out.println("\taddButtonRow took " + (now - then) + " millis");
 
-    if (last != null) setSizesAndPushFirst(last/*, usuallyThereWillBeAHorizScrollbar*/);
+    labelColumn.add(downloadLink = getDownloadLink());
+
+    long now = System.currentTimeMillis();
+    if (now - then > 300)
+      System.out.println("\taddButtonRow took " + (now - then) + " millis" + " instance " + getInstance());
+
+    if (last != null) setSizesAndPushFirst();
     addBottomText(container);
   }
 
-  private void makeLabelColumn(boolean usuallyThereWillBeAHorizScrollbar, String firstType, FlexTable firstTypeRow,
-                               ButtonGroupSectionWidget buttonGroupSectionWidget) {
-    this.labelColumn = new VerticalPanel();
-    addLabelWidgetForRow(labelColumn, firstType, typeToButton.get(firstType), buttonGroupSectionWidget);
-
-    FlowPanel l2 = makeFlowPanel(labelColumn, usuallyThereWillBeAHorizScrollbar);
-
-    firstTypeRow.setWidget(0, 0, l2);
+  private Anchor getDownloadLink() {
+    final Anchor downloadLink = new Anchor(getURL2());
+    addTooltip(downloadLink, DOWNLOAD_SPREADSHEET);
+    downloadLink.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        controller.logEvent(downloadLink,"DownloadLink","N/A","downloading audio");
+      }
+    });
+    downloadLink.getElement().setId("DownloadLink_" + getInstance());
+    return downloadLink;
   }
 
-  private void makeClearColumn(boolean usuallyThereWillBeAHorizScrollbar, Collection<String> types, String firstType,
+  private Anchor downloadLink;
+
+  private SafeHtml getURL2() {
+    SelectionState selectionState = getSelectionState(getHistoryToken(""));
+    return getURLForDownload(selectionState);
+  }
+
+  /**
+   * @see #showSelectionState(mitll.langtest.client.list.SelectionState)
+   * @param selectionState
+   * @return
+   */
+  private SafeHtml getURLForDownload(SelectionState selectionState) {
+    SafeHtmlBuilder sb = new SafeHtmlBuilder();
+
+    Map<String, Collection<String>> typeToSection = selectionState.getTypeToSection();
+
+    sb.appendHtmlConstant("<a class='" +"icon-download"+
+      "' href='" +
+      "downloadAudio" +
+      "?" +typeToSection+
+      "'" +
+      ">");
+    sb.appendEscaped(" Download");
+    sb.appendHtmlConstant("</a>");
+    return sb.toSafeHtml();
+  }
+
+  /**
+   * @see #addButtonRow(java.util.List, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection)
+   * @param widget
+   * @param tip
+   * @return
+   */
+  private Tooltip addTooltip(Widget widget, String tip) {
+    return new TooltipHelper().addTooltip(widget, tip);
+  }
+
+  /**
+   * Label is in column 0
+   * @param firstType
+   * @param firstTypeRow
+   * @param buttonGroupSectionWidget
+   */
+  private Panel makeLabelColumn(String firstType, FlexTable firstTypeRow,
+                                ButtonGroupSectionWidget buttonGroupSectionWidget) {
+    Panel labelColumn = new VerticalPanel();
+    labelColumn.getElement().setId("FlexSectionExerciseList_labelColumn");
+    addLabelWidgetForRow(labelColumn, firstType, typeToButton.get(firstType), buttonGroupSectionWidget);
+    firstTypeRow.setWidget(0, 0, makeFlowPanel(labelColumn, false));
+    return labelColumn;
+  }
+
+  /**
+   * Clear button is in column 1
+   * @param usuallyThereWillBeAHorizScrollbar
+   * @param types
+   * @param firstType
+   * @param firstTypeRow
+   * @param buttonGroupSectionWidget
+   * @see #addButtonRow(java.util.List, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection)
+   */
+  private Panel makeClearColumn(boolean usuallyThereWillBeAHorizScrollbar, Collection<String> types, String firstType,
                                FlexTable firstTypeRow,
                                ButtonGroupSectionWidget buttonGroupSectionWidget) {
-    clearColumnContainer = new VerticalPanel();
+    Panel clearColumnContainer = new VerticalPanel();
     addClearButton(buttonGroupSectionWidget, clearColumnContainer);
-    FlowPanel c2 = makeFlowPanel(clearColumnContainer, usuallyThereWillBeAHorizScrollbar);
-
-    firstTypeRow.setWidget(0, 1, c2);
+    firstTypeRow.setWidget(0, 1,  makeFlowPanel(clearColumnContainer, usuallyThereWillBeAHorizScrollbar));
 
     for (String type : types) {
       if (type.equals(firstType)) continue;
       makeSectionWidget(labelColumn, clearColumnContainer, type, (ButtonGroupSectionWidget) typeToBox.get(type));
     }
-  }
-
-  private FlowPanel makeFlowPanel(Panel labelContainer, boolean usuallyThereWillBeAHorizScrollbar) {
-    FlowPanel l2 = new FlowPanel();
-    l2.add(labelContainer);
-    if (usuallyThereWillBeAHorizScrollbar) { // hack rule of thumb
-      l2.addStyleName("bottomMargin");
-    }
-    return l2;
+    return clearColumnContainer;
   }
 
   private void addClearButton(ButtonGroupSectionWidget buttonGroupSectionWidget, Panel clearColumnContainer) {
@@ -297,6 +331,19 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     clearColumnContainer.add(clearButton);
   }
 
+  private Panel makeFlowPanel(Panel labelContainer, boolean usuallyThereWillBeAHorizScrollbar) {
+    Panel l2 = new FlowPanel();
+    l2.add(labelContainer);
+    if (usuallyThereWillBeAHorizScrollbar) { // hack rule of thumb
+      l2.addStyleName("bottomMargin");
+    }
+    return l2;
+  }
+
+  /**
+   * @see #addButtonRow(java.util.List, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection)
+   * @param firstTypeRow
+   */
   private void makePanelInsideScrollPanel(FlexTable firstTypeRow) {
     panelInsideScrollPanel = new HorizontalPanel();
     panelInsideScrollPanel.addStyleName("blueBackground");
@@ -305,18 +352,23 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     makeScrollPanel(firstTypeRow, panelInsideScrollPanel);
   }
 
+  /**
+   * @see #makePanelInsideScrollPanel(com.google.gwt.user.client.ui.FlexTable)
+   * Button groups are in column 2
+   * @param firstTypeRow
+   * @param panelInside
+   */
   private void makeScrollPanel(FlexTable firstTypeRow, Panel panelInside) {
     this.scrollPanel = new ScrollPanel(panelInside);
     this.scrollPanel.addStyleName("leftFiveMargin");
     this.scrollPanel.getElement().setId("scrollPanel");
-
-/*    DivWidget div = new DivWidget();
-    div.addStyleName("positionAbsolute");
-    div.add(scrollPanel);*/
     firstTypeRow.setWidget(0, 2, scrollPanel);
-    setScrollPanelWidth();
   }
 
+  /**
+   * @see #addButtonRow(java.util.List, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection)
+   * @param types
+   */
   private void populateButtonGroups(Collection<String> types) {
     typeToBox.clear();
     typeToButton.clear();
@@ -341,8 +393,15 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     return items;
   }
 
+  /**
+   * @see #makeLabelColumn(String, com.google.gwt.user.client.ui.FlexTable, ButtonGroupSectionWidget)
+   * @param labelRow
+   * @param firstType
+   * @param buttonType
+   * @param buttonGroupSectionWidget
+   */
   private void addLabelWidgetForRow(Panel labelRow, String firstType, ButtonType buttonType, SectionWidget buttonGroupSectionWidget) {
-    Heading widget = makeLabelWidget(firstType);
+    Widget widget = makeLabelWidget(firstType);
     String color = getButtonTypeStyle(buttonType);
 
     buttonGroupSectionWidget.addLabel(widget, color);
@@ -353,11 +412,16 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     Heading widget = new Heading(HEADING_FOR_LABEL, firstType);
     DOM.setStyleAttribute(widget.getElement(), "webkitMarginBefore", "0");
     DOM.setStyleAttribute(widget.getElement(), "webkitMarginAfter", "0");
-    DOM.setStyleAttribute(widget.getElement(), "marginTop", "0px");
-    DOM.setStyleAttribute(widget.getElement(), "marginBottom", "15px");
+    widget.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
+    widget.getElement().getStyle().setMarginBottom(15, Style.Unit.PX);
+    widget.getElement().getStyle().setProperty("whiteSpace","nowrap");
     return widget;
   }
 
+  /**
+   * @see HistoryExerciseList#onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
+   * @param selectionState
+   */
   @Override
   protected void restoreListBoxState(SelectionState selectionState) {
     super.restoreListBoxState(selectionState);
@@ -374,20 +438,29 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   private void showSelectionState(SelectionState selectionState) {
     //System.out.println("FlexSectionExerciseList.showSelectionState : got " + event + " and state '" + selectionState +"'");
     Map<String, Collection<String>> typeToSection = selectionState.getTypeToSection();
+    downloadLink.setHTML(getURLForDownload(selectionState));
 
     if (typeToSection.isEmpty()) {
       showDefaultStatus();
     } else {
       StringBuilder status = new StringBuilder();
 
-      System.out.println("showSelectionState : typeOrder " + typeOrder + " selection state " + typeToSection);
+      //System.out.println("showSelectionState : typeOrder " + typeOrder + " selection state " + typeToSection);
 
       for (String type : typeOrder) {
         Collection<String> selectedItems = typeToSection.get(type);
-        if (selectedItems == null) {
-          //System.out.println("showSelectionState : no value for '" + type + "' in " + typeToSection.keySet());
-        } else {
-          String statusForType = type + " " + selectedItems.toString().replaceAll("\\[", "").replaceAll("\\]", "");
+        if (selectedItems != null) {
+         // String statusForType = type + " " + selectedItems.toString().replaceAll("\\[", "").replaceAll("\\]", "");
+          List<String> sorted = new ArrayList<String>();
+          for (String selectedItem : selectedItems) {
+            sorted.add(selectedItem);
+          }
+          Collections.sort(sorted);
+          StringBuilder status2 = new StringBuilder();
+          for (String item : sorted) status2.append(item).append(", ");
+          String s = status2.toString();
+          if (!s.isEmpty()) s = s.substring(0,s.length()-2);
+          String statusForType = type + " " + s;
           status.append(statusForType).append(" and ");
         }
       }
@@ -398,44 +471,32 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   }
 
   private void showDefaultStatus() {
-    statusHeader.setText("Showing all entries");
+    statusHeader.setText(SHOWING_ALL_ENTRIES);
   }
 
   /**
    * @param container
    * @see #addButtonRow
    */
-  protected Widget addBottomText(FluidContainer container) {
-    Panel status = new FluidRow();
+  void addBottomText(Panel container) {
+    Panel status = getStatusRow();
+    container.add(status);
+    status.addStyleName("leftFiftyPercentMargin");
+
+   // return status;
+  }
+
+  Panel getStatusRow() {
+    Panel status = new DivWidget();
     status.getElement().setId("statusRow");
     status.addStyleName("alignCenter");
     status.addStyleName("inlineBlockStyle");
-    container.add(status);
     status.add(statusHeader);
     statusHeader.getElement().setId("statusHeader");
     DOM.setStyleAttribute(statusHeader.getElement(), "marginTop", "0px");
     DOM.setStyleAttribute(statusHeader.getElement(), "marginBottom", "0px");
-
     return status;
   }
-
-  //@Override
-  protected int getKludge() { return 170;}
-
-  protected Panel getInstructionRow() {
-    Panel instructions = new FluidRow();
-    instructions.addStyleName("alignCenter");
-    instructions.addStyleName("inlineBlockStyle");
-
-    String userPrompt = getUserPrompt();
-    if (userPrompt.length() > 0) {
-      Heading heading = new Heading(5, userPrompt);
-      instructions.add(heading);
-    }
-    return instructions;
-  }
-
-  protected String getUserPrompt() { return "";  }
 
   /**
    * @param sectionInFirstType
@@ -443,7 +504,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @return
    * @see #addButtonRow
    */
-  private ButtonWithChildren addColumnButton(FlowPanel columnContainer,
+  private ButtonWithChildren addColumnButton(Panel columnContainer,
                                              final String sectionInFirstType,
                                              final ButtonGroupSectionWidget buttonGroupSectionWidget) {
     columnContainer.addStyleName("inlineBlockStyle");
@@ -484,7 +545,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   protected void selectItem(String type, Collection<String> sections) {
     ButtonGroupSectionWidget listBox = (ButtonGroupSectionWidget) typeToBox.get(type);
     listBox.clearSelectionState();
-    System.out.println("FlexSectionExerciseList.selectItem : selecting " + type + "=" + sections);
+    //System.out.println("FlexSectionExerciseList.selectItem : instance " + instance+ " selecting " + type + "=" + sections);
     listBox.selectItem(sections);
   }
 
@@ -504,23 +565,9 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   }
 
   /**
-   * @see HistoryExerciseList.MySetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
+   * @seex HistoryExerciseList.MySetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
    */
-  protected void gotEmptyExerciseList() {
-//    List<String> strings = Arrays.asList("No items match the selection and search.", "Try clearing one of your selections or changing the search.");
-    showPopup("No items match the selection and search.",typeAhead);
-  }
-
-  private void showPopup(String toShow,Widget widget) {
-    final PopupPanel popupImage = new PopupPanel(true);
-    popupImage.add(new HTML(toShow));
-    popupImage.showRelativeTo(widget);
-    Timer t = new Timer() {
-      @Override
-      public void run() { popupImage.hide(); }
-    };
-    t.schedule(3000);
-  }
+  protected void gotEmptyExerciseList() { showEmptySelection(); }
 
   /**
    * @param title
@@ -528,20 +575,17 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @see #addColumnButton
    */
   private ButtonWithChildren makeOverallButton(String type, String title) {
-    ButtonWithChildren overallButton = new ButtonWithChildren(title, type);
-
+    ButtonWithChildren overallButton = makeButton(title, type);
     overallButton.setWidth("100%");
     DOM.setStyleAttribute(overallButton.getElement(), "paddingLeft", "0px");
     DOM.setStyleAttribute(overallButton.getElement(), "paddingRight", "0px");
-    //DOM.setStyleAttribute(overallButton.getElement(), "borderWidth", "0");
 
     overallButton.setType(ButtonType.PRIMARY);
     return overallButton;
   }
 
   private ButtonWithChildren makeClearButton() {
-    ButtonWithChildren clear = new ButtonWithChildren(ANY, ANY);
-
+    ButtonWithChildren clear = makeButton(ANY, ANY);
     DOM.setStyleAttribute(clear.getElement(), "marginTop", "5px");
     DOM.setStyleAttribute(clear.getElement(), "marginBottom", "12px");
 
@@ -549,26 +593,12 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     return clear;
   }
 
-/*    int offsetHeight = columnContainer.getOffsetHeight() + (usuallyThereWillBeAHorizScrollbar ? 5 :0);
-    int minHeight = usuallyThereWillBeAHorizScrollbar ? PANEL_INSIDE_SCROLL_MIN_HEIGHT : PANEL_INSIDE_SCROLL_MIN_HEIGHT_SMALL;
-    panelInsideScrollPanel.setHeight(Math.max(minHeight, offsetHeight) + "px");
-    scrollPanel.setWidth("100%");*/
   /**
-   * @see #addButtonRow(java.util.List, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection, boolean)
-   * @param columnContainer
+   * Actually kick off getting the exercises.
+   * @see #addButtonRow(java.util.List, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection)
    */
-  private void setSizesAndPushFirst(Widget columnContainer) {
-  //  int offsetHeight = columnContainer.getOffsetHeight() + 5;
-
-    // System.out.println("height is " + offsetHeight);
-    //scrollPanel.setHeight(Math.max(50, offsetHeight) + "px");
- //   panelInsideScrollPanel.setHeight(Math.max(50, offsetHeight) + "px");
-    // panelInsideScrollPanel.getParent().setHeight(Math.max(50, offsetHeight) + "px");
-
-    //int width = Window.getClientWidth() - labelColumn.getOffsetWidth() - clearColumnContainer.getOffsetWidth() - 90;
-    //  System.out.println("setting width to " +width);
-    // scrollPanel.setWidth(Math.max(300, width) + "px");
-   // scrollPanel.setWidth("100%");
+  private void setSizesAndPushFirst() {
+    //System.out.println("setSizesAndPushFirst instance " + instance);
     pushFirstListBoxSelection();
 
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -586,17 +616,15 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @param typeForOriginal
    * @param sectionWidget
    * @return
-   * @see #addButtonRow
+   * @see #makeClearColumn(boolean, java.util.Collection, String, com.google.gwt.user.client.ui.FlexTable, ButtonGroupSectionWidget)
    */
   private SectionWidget makeSectionWidget(Panel labelContainer, Panel clearColumnContainer, String typeForOriginal,
                                           ButtonGroupSectionWidget sectionWidget) {
-    ButtonType buttonType = typeToButton.get(typeForOriginal);
     // make label
-
     Widget labelWidget = getLabelWidget(typeForOriginal);
     labelContainer.add(labelWidget);
-    String color = getButtonTypeStyle(buttonType);
-    sectionWidget.addLabel(labelWidget, color);
+    ButtonType buttonType = typeToButton.get(typeForOriginal);
+    sectionWidget.addLabel(labelWidget, getButtonTypeStyle(buttonType));
 
     // make clear button
     Button sectionButton = makeSubgroupButton(sectionWidget, ANY, buttonType, true);
@@ -692,17 +720,28 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   @Override
   public void onResize() {
     super.onResize();
-    setScrollPanelWidth();
+
+    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      public void execute() {
+        //System.out.println("FlexSectionExerciseList : deferred set scroll panel width instance " + instance);
+        setScrollPanelWidth();
+      }
+    });
   }
 
-  protected void setScrollPanelWidth() {
+  void setScrollPanelWidth() {
     if (labelColumn != null) {
-      int width = Window.getClientWidth() - labelColumn.getOffsetWidth() - clearColumnContainer.getOffsetWidth() - UNACCOUNTED_WIDTH;
-     // System.out.println("setScrollPanelWidth : scrollPanel width is " + width);
-      scrollPanel.setWidth(Math.max(300, width) + "px");
+      int leftSideWidth = labelColumn.getOffsetWidth() + clearColumnContainer.getOffsetWidth();
+      if (leftSideWidth == 0) leftSideWidth = 130;
+      int width = Window.getClientWidth() - leftSideWidth - UNACCOUNTED_WIDTH;
+/*      System.out.println("FlexSectionExeciseList.setScrollPanelWidth : scrollPanel width is " + width +" client " +Window.getClientWidth() +
+        " label col " +labelColumn.getOffsetWidth() + " clear " +clearColumnContainer.getOffsetWidth() + " unacct "+UNACCOUNTED_WIDTH);*/
+      if (!controller.getProps().isCRTDataCollectMode()) {
+        scrollPanel.setWidth(Math.max(300, width) + "px");
+      }
     }
     else {
-      //System.out.println("setScrollPanelWidth : labelColumn is null");
+     // System.out.println("\tsetScrollPanelWidth : labelColumn is null instance " + instance);
     }
   }
 
@@ -731,7 +770,8 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
                                                 final String section,
                                                 ButtonType buttonType, boolean isClear) {
     //System.out.println("making button " + type + "=" + section);
-    ButtonWithChildren sectionButton = new ButtonWithChildren(section, sectionWidgetFinal.getType());
+    ButtonWithChildren sectionButton = makeButton(section, sectionWidgetFinal.getType());
+
     //  System.out.println("made button " + sectionButton);
 
     boolean shrinkHorizontally = numSections > 5;
@@ -756,20 +796,23 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     return sectionButton;
   }
 
-  @Override
-  protected int getVerticalUnaccountedFor() {
-    return 160;
+  private ButtonWithChildren makeButton(String caption, String type) {
+    ButtonWithChildren widgets = new ButtonWithChildren(caption, type);
+    controller.register(widgets, "unknown");
+
+    return widgets;
   }
 
   public static class ButtonWithChildren extends Button {
     private List<ButtonWithChildren> children = new ArrayList<ButtonWithChildren>();
-    private String type;
+    private final String type;
     private ButtonWithChildren parent;
     private ButtonGroupSectionWidget buttonGroupContainer;
 
     public ButtonWithChildren(String caption, String type) {
       super(caption);
       this.type = type;
+      getElement().setId("Button_"+caption+"_"+type);
     }
 
     /**
@@ -796,7 +839,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
       return parent;
     }
 
-    public List<ButtonWithChildren> getSiblings() {
+/*    public List<ButtonWithChildren> getSiblings() {
       List<ButtonWithChildren> siblings = new ArrayList<ButtonWithChildren>();
       if (parent != null) {
         for (ButtonWithChildren button : parent.children) {
@@ -804,7 +847,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
         }
       }
       return siblings;
-    }
+    }*/
 
     public void setParentButton(ButtonWithChildren parent) {
       this.parent = parent;

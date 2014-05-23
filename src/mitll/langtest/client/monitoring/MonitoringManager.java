@@ -52,13 +52,13 @@ public class MonitoringManager {
   private static final int HOUR = (60 * MIN);
   private static final int MIN_COUNT_FOR_BROWSER = 10;
   private static final int MIN_COUNT_FOR_DIALECT = 10;
-  public static final int MIN_SIZE_TO_TRIGGER_FILTER = 15;
-  public static final int ITEM_CHART_ITEM_WIDTH = 1000;
-  public static final int MAX_GRADE_ROUNDS = 3;
+  private static final int MIN_SIZE_TO_TRIGGER_FILTER = 15;
+  private static final int ITEM_CHART_ITEM_WIDTH = 1000;
+  private static final int MAX_GRADE_ROUNDS = 3;
 
-  protected LangTestDatabaseAsync service;
+  private final LangTestDatabaseAsync service;
   private String item = "Item";
-  private String items = item+"s";
+  private final String items = item+"s";
   private String answer = "Answer";
   private String answers = answer +"s";
   private String user = "Recorder";
@@ -510,9 +510,9 @@ public class MonitoringManager {
         " (given the current rate).  How long until completion?");
 
     DataTable data = DataTable.create();
-    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Num " +
+    data.addVarchar(AbstractDataTable.ColumnType.NUMBER, "Num " +
         answers);
-    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Projected Hours");
+    data.addVarchar(AbstractDataTable.ColumnType.NUMBER, "Projected Hours");
 
     data.addRows(rateToCount.size());
 
@@ -946,7 +946,7 @@ public class MonitoringManager {
     for (Map.Entry<User,Integer> pair : userToCount.entrySet()) {
       Integer count = pair.getValue();
       User user = pair.getKey();
-      int age = (user.age / 5)*5;
+      int age = (user.getAge() / 5)*5;
       Integer c = ageToCount.get(age);
 
       if (c == null) ageToCount.put(age,count); else ageToCount.put(age,c+count);
@@ -1047,8 +1047,8 @@ public class MonitoringManager {
 
     labelAxes(options, "Months experience", "# " + incorrect + " responses");
     DataTable data = DataTable.create();
-    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Experience");
-    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Num " + incorrect);
+    data.addVarchar(AbstractDataTable.ColumnType.NUMBER, "Experience");
+    data.addVarchar(AbstractDataTable.ColumnType.NUMBER, "Num " + incorrect);
 
     int r = 0;
     List<Integer> countsForUsers = getSortedList(expToIncorrect.keySet());
@@ -1074,8 +1074,8 @@ public class MonitoringManager {
 
     labelAxes(options, "", "# " + user);
     DataTable data = DataTable.create();
-    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Num " + answers);
-    data.addColumn(AbstractDataTable.ColumnType.NUMBER, users +
+    data.addVarchar(AbstractDataTable.ColumnType.NUMBER, "Num " + answers);
+    data.addVarchar(AbstractDataTable.ColumnType.NUMBER, users +
       " with this many");
 
     Map<Integer, Integer> usersAtCount = new HashMap<Integer, Integer>();
@@ -1184,8 +1184,8 @@ public class MonitoringManager {
     //DataTable data = getDataTable(slot, dayToCount);
 
     DataTable data = DataTable.create();
-    data.addColumn(AbstractDataTable.ColumnType.DATE, slot);
-    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Items");
+    data.addVarchar(AbstractDataTable.ColumnType.DATE, slot);
+    data.addVarchar(AbstractDataTable.ColumnType.NUMBER, "Items");
     int r = 0;
 
     for (Map.Entry<String, Integer> pair : dayToCount.entrySet()) {
@@ -1223,7 +1223,7 @@ public class MonitoringManager {
     for (Map.Entry<User, Integer> pair : userToCount.entrySet()) {
       Integer count = pair.getValue();
       User user = pair.getKey();
-      String nativeLang1 = user.nativeLang;
+      String nativeLang1 = user.getNativeLang();
       if (nativeLang1 != null) {
         String nativeLang = nativeLang1.toLowerCase();
         Integer c = langToCount.get(nativeLang);
@@ -1248,7 +1248,7 @@ public class MonitoringManager {
     for (Map.Entry<User, Integer> pair : userToCount.entrySet()) {
       Integer count = pair.getValue();
       User user = pair.getKey();
-      String dialect = user.dialect;
+      String dialect = user.getDialect();
       if (dialect != null) {
         if (dialect.length() == 0) dialect = "Unknown";
         String slotToUse = dialect.toLowerCase();
@@ -1277,7 +1277,7 @@ public class MonitoringManager {
     for (Map.Entry<User, Integer> pair : userToCount.entrySet()) {
       Integer count = pair.getValue();
       User user = pair.getKey();
-      String ipaddr = user.ipaddr;
+      String ipaddr = user.getIpaddr();
       boolean badIP = ipaddr == null || ipaddr.length() == 0;
 //      if (badIP) {
 //        /System.err.println("huh? no ipaddr for " + user);
@@ -1315,9 +1315,9 @@ public class MonitoringManager {
     for (Map.Entry<User, Integer> pair : userToCount.entrySet()) {
       Integer doneByUser = pair.getValue();
       User user = pair.getKey();
-      String name = user.userID;
+      String name = user.getUserID();
       if (name == null || name.length() == 0) {
-        name = ""+user.id;
+        name = ""+ user.getId();
       }
       name = name.trim();
       Integer count = nameToCount.get(name);
@@ -1388,7 +1388,7 @@ public class MonitoringManager {
     for (Map.Entry<User, Integer> pair : userToCount.entrySet()) {
       Integer count = pair.getValue();
       User user = pair.getKey();
-      Integer slotToUse = user.experience;
+      Integer slotToUse = user.getExperience();
       Integer c = slotToCount.get(slotToUse);
       if (count > 0) {
         if (c == null) slotToCount.put(slotToUse, count);
