@@ -1,6 +1,6 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,23 +15,21 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class Lesson {
-  private List<Exercise> exerciseList = new ArrayList<Exercise>();
-  public long timestamp;
-  public String unit;
-  public String chapter;
-  public String week;
+  private final List<CommonExercise> exerciseList = new ArrayList<CommonExercise>();
+  private String unit;
 
-  public Lesson(){}
-  public Lesson(String unit, String chapter, String week) { this.unit = unit; this.chapter = chapter; this.week = week; }
-  public void addExercise(Exercise e) { exerciseList.add(e); }
-
-  public Collection<Exercise> getExercises() {
-    return Collections.unmodifiableList(exerciseList);  //To change body of created methods use File | Settings | File Templates.
-  }
+  //public Lesson(){}
+  public Lesson(String unit) { this.unit = unit; }
+  public void addExercise(CommonExercise e) { exerciseList.add(e); }
+  public Collection<CommonExercise> getExercises() { return Collections.unmodifiableList(exerciseList); }
 
   public String toString() {
-    return "Lesson '" + unit + "/" + chapter + "/" + week + "' " + exerciseList.size() + " exercises" +
+    return "Lesson '" + unit + "' " + exerciseList.size() + " exercises" +
         (exerciseList.isEmpty() ? "" :
         ", first is " + exerciseList.iterator().next());
+  }
+
+  public boolean remove(CommonExercise exercise) {
+   return exerciseList.remove(exercise);
   }
 }

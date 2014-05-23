@@ -32,23 +32,24 @@ h1 {
 
 
 .headerLowerBorder {
-    border-style:solid;
-    border-width: 2px;
-    border-top-color: #404141;
+    border: 2px solid #404141;
     border-bottom-color: #269cce;
-    border-left-color: #404141;
-    border-right-color: #404141;
 }
 
 .cardBorder {
-     border-style:solid;
-     border-width: 2px;
-    border-top-width: 0;
-    border-bottom-width: 0;
-     border-bottom-color: #404141;
+    border: 0 solid;
+    border-right-width: 2px;
+    border-bottom-color: #404141;
+    border-left-width: 2px;
 
     padding-right: 0px;
  }
+
+
+.qcBorder {
+    border: 0 solid #404141;
+    border-bottom: 2px #269cce;
+}
 
 .cardBackground {
      background-color: #e8eaea;
@@ -57,6 +58,10 @@ h1 {
 .cardHiddenText {
     color: #e8eaea;
 }
+
+.cardHiddenText2 {
+     color: white;
+ }
 
 .cardText {
     padding: 55px;
@@ -109,7 +114,7 @@ h1 {
 }
 
 .subtitleForeground {
-    color : #b2b5b4;
+    color : #f3f6f5;
 }
 
 .questionMarkForeground {
@@ -151,7 +156,12 @@ h1 {
 
 .floatLeft {
     float: left;
+    clear:none;
 }
+
+.floatLeftList {
+   float: left;
+ }
 .floatRight {
     float: right;
 }
@@ -166,7 +176,7 @@ h1 {
 
 .wrapword {
     word-wrap: break-word;       /* Internet Explorer 5.5+ */
-    word-break: normal;
+    word-break: keep-all;
     white-space: normal;
 }
 
@@ -315,8 +325,23 @@ fieldset {
 .topBarMargin {
      margin-top: 18px;
  }
+
 .topFiveMargin {
-     margin-top: 5px;
+    margin-top: 5px;
+}
+
+.bottomFiveMargin {
+     margin-bottom: 5px;
+}
+.topMinusFiveMargin {
+    margin-top: -13px;
+}
+
+.topTwentyMargin {
+    margin-top: 20px;
+}
+.topFiftyMargin {
+     margin-top: 50px;
  }
 
 .leftFiveMargin {
@@ -388,26 +413,26 @@ fieldset > legend {
   padding-left: 20px;
 }
 
-.currentExercisePanel {
-
-}
-
 .alignTop {
     vertical-align:top;
 }
 
 .ImageOverlay{
-    border: none;
     background-color: red;
+}
+
+.qcRightBorder {
+    padding-right: 5px;
+    margin-right: 5px;
 }
 
 .Button{
     font-family: Arial Unicode MS, Arial, sans-serif;
 }
 
-.clickable {
+/*.clickable {
   cursor                      :   pointer;
-}
+}*/
 
 .gwt-Button {
     background: none repeat scroll 0 0 #DDDDDD;
@@ -459,8 +484,19 @@ fieldset > legend {
     font-size: 18px;
     font-weight: bold;
     word-wrap: break-word;       /* Internet Explorer 5.5+ */
-    word-break: break-all;
+    word-break: keep-all;
     white-space: normal;
+    font-family: sans-serif;
+}
+
+.Instruction-data-with-wrap  {
+    color: #CC6600;
+    font-size: 18px;
+    font-weight: bold;
+    word-wrap: break-word;       /* Internet Explorer 5.5+ */
+    word-break: keep-all;
+    white-space: normal;
+    font-family: sans-serif;
 }
 
 .blueColor {
@@ -477,6 +513,20 @@ fieldset > legend {
 
 .grayColor {
     background-color: #d4d1cc;
+}
+
+.tableAltRowColor {
+    background-color: #eaf5fb;
+}
+
+.tableRowUserColor {
+    color: #d89374;
+    font-weight: bold;
+}
+
+.tableRowUserCurrentColor {
+    color:green;
+    font-weight: bold;
 }
 
 .correct {
@@ -513,149 +563,11 @@ fieldset > legend {
 }
 
 .xlargeFont {
-    font-size: x-large;
+    font-size: xx-large;
 }
 
 .xlargeFont td {
-    font-size: x-large;
-}
-
-/**
-* From here down is part of a partial attempt to have more graceful recovery from encountering a flash blocker.
-* This attempt wasn't completed though.
-*/
-/**
- * SoundManager 2 + useFlashBlock
- * ------------------------------
- * Flash positioning and flashblock / clicktoflash handling
- */
-
-#sm2-container {
-    /**
-     * where the SM2 flash movie goes. by default, relative container.
-     * set relative or absolute here, and don't touch it later or bad things will happen (see below comments.)
-     */
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    /* screw IE 6, just make it display nice */
-    _overflow: hidden;
-}
-
-#sm2-container object,
-#sm2-container embed {
-    /**
-     * the actual SWF movie bit.
-     * important: The SWF needs to be able to be moved off-screen without display: or position: changes.
-     * changing display: or position: or overflow: here or on parent can cause SWF reload or other weird issues after unblock
-     * e.g., SM2 starts but strange errors, no whileplaying() etc.
-     */
-    width: 48px;
-    height: 48px;
-    /* some flash blockers may also respect this rule */
-    max-width: 48px;
-    max-height: 48px;
-}
-
-#sm2-container.swf_timedout {
-    /* expand to show the timed-out SWF content */
-    position: relative;
-    width: 48px;
-    height: 48px;
-}
-
-#sm2-container.swf_timedout,
-#sm2-container.swf_timedout object,
-#sm2-container.swf_timedout embed {
-    /**
-     * when SM2 didn't start normally, time-out case. flash blocked, missing SWF, no flash?
-     * 48px square flash placeholder is typically used by blockers.
-     */
-    min-width: 48px;
-    min-height: 48px;
-}
-
-#sm2-container.swf_unblocked {
-    /* SWF unblocked, or was never blocked to begin with; try to collapse container as much as possible. */
-    width: 1px;
-    height: 1px;
-}
-
-#sm2-container.swf_loaded object,
-#sm2-container.swf_loaded embed,
-#sm2-container.swf_unblocked object,
-#sm2-container.swf_unblocked embed {
-    /* hide flash off-screen (relative to container) when it has loaded OK */
-    left: -9999em;
-    top: -9999em;
-}
-
-#sm2-container.swf_error {
-    /* when there is a fatal error (flash loaded, but SM2 failed) */
-    display: none;
-}
-
-#sm2-container.high_performance,
-#sm2-container.high_performance.swf_timeout {
-    /* "high performance" case: keep on-screen at all times */
-    position: absolute;
-}
-
-#sm2-container.high_performance {
-    overflow: hidden;
-    _top: -9999px; /* IE 6 hax, no position:fixed */
-    _left: -9999px;
-    bottom: 0px;
-    left: 0px;
-    /**
-     * special case: show at first with w/h, hide when unblocked.
-     * might be bad/annoying.
-     * try to stay within ClickToFlash "invisible" limits (so it won't be blocked.)
-     */
-    z-index: 99; /* try to stay on top */
-}
-
-#sm2-container.high_performance.swf_loaded,
-#sm2-container.high_performance.swf_unblocked {
-    z-index: auto;
-}
-
-#sm2-container.high_performance.swf_loaded,
-#sm2-container.high_performance.swf_unblocked,
-#sm2-container.high_performance.swf_unblocked object,
-#sm2-container.high_performance.swf_unblocked embed {
-    /**
-     * 8x8px is required minimum to load in fx/win32 in some cases(?)
-     * 6x6+ good for fast performance, even better when on-screen via position:fixed
-     * also, clickToFlash (Safari <5.1) may auto-load "invisible" SWFs at this size
-     */
-    height: 8px;
-    width: 8px;
-}
-
-#sm2-container.high_performance.swf_loaded {
-    /* stay bottom/left */
-    top: 0px;
-    left: 0px;
-/*
-    top: auto;
-*/
-/*    bottom: 0px;
-    left: 0px;*/
-}
-
-#sm2-container.high_performance.swf_loaded object,
-#sm2-container.high_performance.swf_loaded embed,
-#sm2-container.high_performance.swf_unblocked object,
-#sm2-container.high_performance.swf_unblocked embed {
-    /* high-performance case must stay on-screen */
-    left: auto;
-    top: auto;
-}
-
-#sm2-container.high_performance.swf_timedout {
-    z-index: 99; /* try to stay on top */
+    font-size: xx-large;
 }
 
 .table-center {
@@ -715,7 +627,10 @@ fieldset > legend {
     margin-right: 5px;
 }
 .rightTenMargin {
-     margin-right: 10px;
+    margin-right: 10px;
+}
+.rightTwentyMargin {
+     margin-right: 20px;
  }
 
 .minWidth {
@@ -732,25 +647,29 @@ fieldset > legend {
 
 .userListContent {
     margin-top: 10px;
-/*
-    width: 90%;
-*/
-    /*
-        background: none repeat scroll 0 0 #FFFFFF;
-    */
     border-radius: 3px 3px 3px 3px;
     box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
 }
 
 .userNPFContent {
-    margin-top: 10px;
-    width:100%;
-    /*
-        background: none repeat scroll 0 0 #FFFFFF;
-    */
+     margin-top: 2px;
+     border-radius: 3px 3px 3px 3px;
+     box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
+     padding: 5px 110px 5px 5px;
+ }
+
+.userNPFContentLightPadding {
+    margin-top: 2px;
     border-radius: 3px 3px 3px 3px;
     box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
-    padding: 5px;
+    padding: 5px 5px 5px 5px;
+}
+
+.shadowBorder {
+    margin-top: 2px;
+    border-radius: 3px 3px 3px 3px;
+    box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
+    padding: 5px 5px 5px 5px;
 }
 
 .userListBackground {
@@ -771,6 +690,16 @@ fieldset > legend {
     font-weight: bold;
 }
 
+.userListFontBlue {
+    color: #3339d9;
+    font: 600 19px/1.3 "Helvetica Neue",arial,sans-serif;
+    font-weight: bold;
+}
+
+.niceBlue {
+    color: #0088CC;
+}
+
 .userListFont2 {
     margin-left: 10px;
     color: #111111;
@@ -779,16 +708,13 @@ fieldset > legend {
 
 .numItemFont {
     color: #999999;
-    font-size: 95%;
+    font-size: 120%;
     font-weight: 200;
     margin-left: 4px;
     white-space: nowrap;
 }
 
 .userListContainer {
-/*
-    width: 90%;
-*/
     background-color: rgba(110, 175, 255, 0.27);
     border: none;
     padding-left:0;
@@ -817,6 +743,193 @@ fieldset > legend {
     left: 0px;
 }
 
+.tabbable .nav {
+    margin-bottom : 2px;
+}
+
+#showListContainer h1 small {
+    color: #333333;
+}
+
+#desc small {
+    color: #333333;
+}
+
+#course small {
+    color: #333333;
+}
+
+#unitLesson small {
+     color: #333333;
+ }
+
+.borderTopQC {
+    margin-top: 5px;
+    border-radius: 0px 0px 3px 0px;
+    border-top: inset rgba(0, 0, 0, 0.1);
+}
+
+.borderBottomQC {
+    margin-bottom: 5px;
+    width: 70px;
+    border-radius: 0 0 3px 0;
+    border-bottom: inset rgba(0, 0, 0, 0.1);
+}
+
+.centeredRadio {
+    margin-left: 25px;
+    margin-right: 25px;
+}
+
+.wideCenteredRadio {
+    margin-left: 35px;
+    margin-right: 35px;
+}
+
+.comment-button-group-new {
+    opacity:0.70;
+    filter:alpha(opacity=70);
+}
+
+.questionContentPadding {
+    padding-right: 93px;
+}
+
+.editComment {
+    font-size: 1.8em;
+    font-weight: bold;
+}
+
+.buttonGroupInsetFirst {
+    background-color: #89B0D5;
+    border: 1px solid #E3E3E3;
+    border-radius: 4px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05) inset;
+    min-height: 30px;
+    padding: 5px;
+}
+
+.buttonGroupInset {
+    background-color: #89B0D5;
+    border-radius: 3px 3px 3px 3px;
+    box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
+    min-height: 30px;
+    padding: 5px;
+}
+
+.buttonGroupInset3 {
+    border-radius: 3px 3px 3px 3px;
+    box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
+    min-height: 30px;
+    padding: 5px;
+}
+
+.buttonGroupInset5 {
+     border-radius: 3px 3px 3px 3px;
+     box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
+     min-height: 30px;
+     padding-left: 5px;
+     padding-right: 5px;
+     padding-top: 5px;
+ }
+
+.buttonGroupInset4 {
+    border-radius: 3px 3px 3px 3px;
+    box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
+    padding: 5px;
+    margin-bottom:5px;
+}
+
+.buttonGroupInset6 {
+    border-radius: 3px 3px 3px 3px;
+    box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
+    padding: 5px;
+    margin-top:5px;
+}
+
+.buttonGroupInset7 {
+    border-radius: 3px 3px 3px 3px;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 2px;
+    margin-top:2px;
+ }
+
+.mouseOverHighlight {
+    cursor: pointer;
+}
+
+.playingAudioHighlight {
+     background-color: yellow;
+ }
+
+.cardBorderShadow {
+    background-color: #FFFFFF;
+    border-radius: 4px 4px 4px 4px;
+    box-shadow: 1px 1px 0 #CAC3B8, 5px 5px 16px #D4CEC5;
+    padding:10px;
+}
+
+.cardContent {
+    word-wrap: break-word;
+    left: 0;
+    text-align: center;
+    vertical-align: middle;
+    width:100%;
+}
+
+.middleColumn {
+    position:absolute;
+    top:0px;
+    margin-right: 185px;
+    margin-left: 185px;
+}
+
+.rightColumn {
+    position:absolute;
+    right: 10px;
+    top:0px;
+    padding-left: 10px;
+}
+
+.leftColumn {
+    position:absolute;
+    left: 0px;
+    top:0px;
+    padding-right: 10px;
+}
+
+.bottomColumn {
+    position:absolute;
+    bottom:0px;
+    text-align:center;
+    padding-right: 10px;
+}
+
+.positionRelative {
+    position:relative;
+}
+
+.minWidthFifty {
+    min-width: 500px;
+}
+
+.maxWidth {
+     max-width: 145px;
+ }
+
+#ASRScorePanel fieldset legend {
+    margin-bottom: 5px;
+}
+
+#LeaderboardTable thead th {
+    border-top: 0px solid #DDDDDD;
+}
+
+.chartDim {
+    min-height: 400px;
+}
+
 fieldset > legend {
     margin-bottom: 3px;
 }
@@ -828,4 +941,42 @@ td > h5 {
 
 .englishQuestionRightMargin {
    margin-right : 131px;
+}
+
+#Student_LoginBoxDialog > .modal-body {
+    padding-top : 5px;
+}
+
+.cogStyle {
+    list-style: none outside none;
+}
+
+.englishFont {
+    font-family: georgia,"times new roman",times,serif;
+}
+
+.minWidthRecordButton {
+    min-width: 60px;
+}
+
+body>.dropdown-popup {
+    border: 1px solid #ddd;
+    background-clip: padding-box;
+    border-radius: 6px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+body>.dropdown-popup a:link {
+    color: black;
+}
+
+body>.dropdown-popup a:HOVER,
+body>.dropdown-popup .nav-list>li.active>a  {
+    background-color: #0081C2;
+    background-image: linear-gradient(to bottom, #0088CC, #0077B3);
+    background-repeat: repeat-x;
+    color: #FFFFFF;
+    outline: 0 none;
+    text-decoration: none;
+    text-shadow: none;
 }

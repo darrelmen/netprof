@@ -9,7 +9,6 @@ import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.client.WavCallback;
-import sun.net.www.content.audio.wav;
 
 /**
  * Somewhat related to Cykod example at <a href='https://github.com/cykod/FlashWavRecorder/blob/master/html/index.html'>Cykod example html</a><p></p>
@@ -25,7 +24,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   private static final int WIDTH = 250;
   private static final int HEIGHT = 170;
   private static final String PX = "8px";
-  private String id = "flashcontent";
+  private final String id = "flashcontent";
   private static MicPermission micPermission;
   private boolean didPopup = false;
   private static boolean permissionReceived;
@@ -50,18 +49,22 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     selfRef = this;
   }
 
+  /**
+   * @see #installFlash()
+   * @return
+   */
   public native boolean checkIfFlashInstalled() /*-{
       var hasFlash = false;
       try {
           var fo = new ActiveXObject('ShockwaveFlash.ShockwaveFlash');
           if(fo) hasFlash = true;
-      }catch(e){
+      } catch(e){
           if(navigator.mimeTypes ["application/x-shockwave-flash"] != undefined) hasFlash = true;
       }
       return hasFlash;
   }-*/;
 
-  public void show() {
+  void show() {
     setSize(WIDTH + "px", HEIGHT + "px");
   }
 
@@ -87,12 +90,22 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     rememberInstallFlash();
   }
 
+  /**
+   * @see #initFlash()
+   * @see #webAudioMicNotAvailable()
+   */
   private void rememberInstallFlash() {
+    System.out.println("rememberInstallFlash");
+
     if (!didPopup) {
       show();
       installFlash();
-      System.out.println("initFlash : did   installFlash");
+      System.out.println("rememberInstallFlash : did   installFlash");
       didPopup = true;
+    }
+    else {
+      System.out.println("rememberInstallFlash didPopup " + didPopup);
+
     }
   }
 
@@ -128,7 +141,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     }-*/;
 
   public native void flashRecordOnClick() /*-{
-    $wnd.Recorder.record('audio', 'audio.wav');
+    $wnd.FlashRecorderLocal.record('audio', 'audio.wav');
   }-*/;
 
   public void stopRecording() {
@@ -144,7 +157,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   }-*/;
 
   public native void flashStopRecording() /*-{
-      $wnd.Recorder.stop();
+      $wnd.FlashRecorderLocal.stop();
   }-*/;
 
   public void hide2() {
@@ -156,7 +169,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   }
 
   public native void flashHide2() /*-{
-    $wnd.Recorder.hide2();
+    $wnd.FlashRecorderLocal.hide2();
   }-*/;
 
   /**
@@ -176,7 +189,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    * @return
    */
   public native String flashGetWav() /*-{
-        return $wnd.Recorder.getWav();
+        return $wnd.FlashRecorderLocal.getWav();
     }-*/;
 
   /**
@@ -184,9 +197,11 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    */
   private void installFlash() {
     if (gotPermission()) {
+      System.out.println("Flash Player got permission!");
+
       micPermission.gotPermission();
-    }
-    else {
+    } else {
+      System.out.println("didn't get Flash Player permission!");
       if (!checkIfFlashInstalled()) {
         Window.alert("Flash player must be installed to record audio.");
       }
