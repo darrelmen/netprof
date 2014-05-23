@@ -50,9 +50,9 @@ import java.util.Date;
  * @author gregbramble
  *
  */
-public class SoundManager {
+class SoundManager {
   private static boolean onreadyWasCalled = false;
-  final static boolean   debug = false;
+  private final static boolean   debug = false;
   public static native void initialize() /*-{
     $wnd.soundManager.onload = $wnd.loaded();
     $wnd.soundManager.ontimeout = $wnd.ontimeout();
@@ -60,7 +60,11 @@ public class SoundManager {
 	}-*/;
 
   public static native boolean isOK()/*-{
-    return $wnd.soundManager.ok();
+      return $wnd.soundManager.ok();
+  }-*/;
+
+  public static native void setVolume(String title, int volume)/*-{
+      $wnd.soundManager.setVolume(title,volume);
   }-*/;
 
   /**
@@ -86,6 +90,7 @@ public class SoundManager {
 
   /**
    * Actually calls destruct on sound object
+   *
    * @param sound
    */
   public static native void destroySound(Sound sound) /*-{
@@ -133,7 +138,6 @@ public class SoundManager {
    */
   public static void loaded(){
      if (debug) System.out.println(new Date() + " : Got loaded call!");
-    //Window.alert("SoundManager loaded.");
   }
 
   /**
@@ -158,25 +162,28 @@ public class SoundManager {
 
 	public static void songFinished(Sound sound){
     if (debug) System.out.println("sound finished " +sound);
-		sound.parent.reinitialize();
+		sound.getParent().songFinished();
 	}
 
 	public static void songFirstLoaded(Sound sound, double durationEstimate){
     if (debug) System.out.println("songFirstLoaded sound " +sound);
 
-    sound.parent.songFirstLoaded(durationEstimate);
+    sound.getParent().songFirstLoaded(durationEstimate);
 	}
 
 	public static void songLoaded(Sound sound, double duration){
-    if (debug) System.out.println("songLoaded sound " +sound);
+    if (debug) System.out.println("songLoaded sound " +sound + " with dur " +duration);
 
-    sound.parent.songLoaded(duration);
+    sound.getParent().songLoaded(duration);
 	}
 
 	public static void update(Sound sound, double position){
-		sound.parent.update(position);
+		sound.getParent().update(position);
 	}
-	
+
+  /**
+   * @see mitll.langtest.client.sound.SoundManagerStatic#exportStaticMethods()
+   */
 	public static native void exportStaticMethods() /*-{
     $wnd.loaded = $entry(@mitll.langtest.client.sound.SoundManager::loaded());
     $wnd.ontimeout = $entry(@mitll.langtest.client.sound.SoundManager::ontimeout());
