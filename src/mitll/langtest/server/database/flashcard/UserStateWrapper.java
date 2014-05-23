@@ -1,7 +1,7 @@
 package mitll.langtest.server.database.flashcard;
 
 import mitll.flashcard.UserState;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,7 +24,7 @@ public class UserStateWrapper {
   private int pincorrect = 0;
 
   private int counter = 0;
-  private final List<Exercise> exercises;
+  private final List<CommonExercise> exercises;
   private final Set<String> completed = new HashSet<String>();
   private final Random random;
   private boolean initial = true;
@@ -34,11 +34,11 @@ public class UserStateWrapper {
    * @param userID
    * @param exercises
    */
-  public UserStateWrapper(UserState state, long userID, List<Exercise> exercises) {
+  public UserStateWrapper(UserState state, long userID, List<CommonExercise> exercises) {
     this.state = state;
     this.random = new Random(userID);
     if (exercises != null) {
-      this.exercises = new ArrayList<Exercise>(exercises);
+      this.exercises = new ArrayList<CommonExercise>(exercises);
       Collections.shuffle(exercises, random);
     }
     else this.exercises = Collections.emptyList();
@@ -86,14 +86,14 @@ public class UserStateWrapper {
    * @see mitll.langtest.server.database.DatabaseImpl#getFlashcardResponse(long, boolean, java.util.List, boolean)
    * @return
    */
-  public Exercise getNextExercise() {
+  public CommonExercise getNextExercise() {
     if (initial) return getFirst();
     else {
       return exercises.get(++counter % exercises.size());
     }
   }
 
-  private Exercise getFirst() {
+  private CommonExercise getFirst() {
     if (exercises.isEmpty()) {
       System.err.println("huh? no exercises in " + this);
       return null;
@@ -106,7 +106,7 @@ public class UserStateWrapper {
    * @see mitll.langtest.server.database.DatabaseImpl#getFlashcardResponse(long, boolean, java.util.List, boolean)
    * @return
    */
-  public Exercise getPrevExercise() {
+  public CommonExercise getPrevExercise() {
     if (counter == 0) {
       counter = exercises.size();
     }
