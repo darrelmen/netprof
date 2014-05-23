@@ -20,13 +20,11 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class DAO {
-  private static Logger logger = Logger.getLogger(DAO.class);
+  private static final Logger logger = Logger.getLogger(DAO.class);
 
   protected final Database database;
 
-  public DAO(Database database) {
-    this.database = database;
-  }
+  protected DAO(Database database) { this.database = database;  }
 
   protected int getNumColumns(Connection connection, String table) throws SQLException {
     Statement stmt = connection.createStatement();
@@ -40,7 +38,7 @@ public class DAO {
     return numColumns;
   }
 
-  protected Collection<String> getColumns(String table) throws SQLException {
+  protected Collection<String> getColumns(String table) {
     Set<String> columns = new HashSet<String>();
     try {
       Connection connection = database.getConnection();
@@ -76,6 +74,87 @@ public class DAO {
       e.printStackTrace();
     }
     return 0;
+  }
+
+  protected boolean remove(String table, String idField, long itemId) {
+    String sql = "DELETE FROM " + table +" WHERE " +
+      idField +
+      "=" + itemId +
+      "";
+
+    return doSqlOn(sql, table);
+  }
+
+
+  protected boolean remove(String table, String idField, String itemId) {
+    String sql = "DELETE FROM " + table +" WHERE " +
+      idField +
+      "='" + itemId +
+      "'";
+
+    return doSqlOn(sql, table);
+  }
+
+  protected boolean doSqlOn(String sql, String table) {
+    try {
+      int before = getCount(table);
+
+      Connection connection = database.getConnection();
+      PreparedStatement statement = connection.prepareStatement(sql);
+      boolean changed = statement.executeUpdate() == 1;
+
+      if (!changed) {
+        logger.warn("doSqlOn : didn't alter row for " + table + " sql " + sql);
+      }
+
+      statement.close();
+      database.closeConnection(connection);
+
+      int count = getCount(table);
+      logger.debug("now " + count + " in " + table);
+      if (before - count != 1) {
+        logger.warn("DAO.doSqlOn : there were " + before + " before for " + table);
+      }
+
+      return changed;
+    } catch (Exception ee) {
+      logger.error("got " + ee, ee);
+    }
+    return false;
+  }
+
+  public Database getDatabase() { return database; }
+
+  protected void addVarchar(Connection connection, String table, String col) throws SQLException {
+    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " +
+      table + " ADD " + col + " VARCHAR");
+    statement.execute();
+    statement.close();
+  }
+
+  protected void addBoolean(Connection connection, String table, String col) throws SQLException {
+    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " +
+      table + " ADD " + col + " BOOLEAN");
+    statement.execute();
+    statement.close();
+  }
+
+  /**
+   *
+   *
+   */
+  void drop(String table) {
+    try {
+      PreparedStatement statement = database.getConnection().prepareStatement("DROP TABLE if exists "+table);
+      if (!statement.execute()) {
+        logger.error("couldn't drop table?");
+      }
+      statement.close();
+      database.closeConnection(database.getConnection());
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   /**
