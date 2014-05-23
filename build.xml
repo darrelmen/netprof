@@ -36,24 +36,27 @@
         <path refid="GWT SDK [GWT - 2.5.0].libraryclasspath"/>
         <pathelement location="war/WEB-INF/lib/json-lib-2.4-jdk15.jar"/>
         <pathelement location="war/WEB-INF/lib/commons-codec-1.6.jar"/>
-        <pathelement location="war/WEB-INF/lib/guava-13.0.jar"/>
+        <pathelement location="war/WEB-INF/lib/guava-16.0.1.jar"/>
+        <pathelement location="war/WEB-INF/lib/guava-gwt-16.0.1.jar"/>
         <pathelement location="war/WEB-INF/lib/gchart.jar"/>
         <pathelement location="war/WEB-INF/lib/log4j-1.2.17.jar"/>
         <path refid="imagewriter.classpath"/>
         <pathelement location="war/WEB-INF/lib/pronz.jar"/>
         <pathelement location="war/WEB-INF/lib/mira.jar"/>
+<!--
         <pathelement location="war/WEB-INF/lib/javamelody-1.42.0.jar"/>
+-->
         <pathelement location="war/WEB-INF/lib/jrobin-1.5.9.jar"/>
         <pathelement location="war/WEB-INF/lib/gwt-visualization.jar"/>
-        <pathelement location="war/WEB-INF/lib/poi-3.9-20121203.jar"/>
-        <pathelement location="war/WEB-INF/lib/poi-ooxml-3.9-20121203.jar"/>
-        <pathelement location="war/WEB-INF/lib/poi-ooxml-schemas-3.9-20121203.jar"/>
+        <pathelement location="war/WEB-INF/lib/poi-3.10-FINAL-20140208.jar"/>
+        <pathelement location="war/WEB-INF/lib/poi-ooxml-3.10-FINAL-20140208.jar"/>
+        <pathelement location="war/WEB-INF/lib/poi-ooxml-schemas-3.10-FINAL-20140208.jar"/>
         <pathelement location="war/WEB-INF/lib/stax-api-1.0.1.jar"/>
         <pathelement location="war/WEB-INF/lib/xmlbeans-2.3.0.jar"/>
         <pathelement location="war/WEB-INF/lib/dom4j-1.6.1.jar"/>
         <pathelement location="war/WEB-INF/lib/commons-fileupload-1.2.2.jar"/>
         <pathelement location="war/WEB-INF/lib/flashcard.jar"/>
-        <pathelement location="war/WEB-INF/lib/gwt-bootstrap-2.3.2.0-SNAPSHOT.jar"/>
+        <pathelement location="war/WEB-INF/lib/gwt-bootstrap-2.3.2.1-SNAPSHOT.jar"/>
         <pathelement location="war/WEB-INF/lib/org.moxieapps.gwt.highcharts-1.5.0.jar"/>
     </path>
     <target name="init" depends="clean">
@@ -133,14 +136,6 @@
       </jar>
     </target>
 
-<!--    <target depends="build" name="warArabicVLL">
-        <jar destfile="npArabicVLL2.war" basedir="war" excludes="WEB-INF/lib/pronz.jar,answers/**,audioimages/**,scoring/**,config/first/**,config/urdu/**,config/autoCRT/**,config/msa/**,config/msa/**,config/levantine/**,config/eqyptian/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
-            <manifest>
-                <attribute name="Built-Date" value="${current.time}"/>
-            </manifest>
-        </jar>
-    </target>-->
-
     <target depends="build" name="flashcard">
         <jar destfile="npEnglishFlashcard.war" basedir="war"
              excludes="answers/**,audioimages/**,config/first/**,config/crtDari/**,config/dataCollectAdmin/**,config/egyptian/**,config/pashto/**,config/pilot/**,config/urdu/**,config/autoCRT/**,config/msa/**,config/msa/**,config/levantine/**,config/eqyptian/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.dli-pashto/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
@@ -152,7 +147,7 @@
 
     <target depends="build" name="frenchEnglishGame">
         <jar destfile="FrenchEnglishGame.war" basedir="war"
-             includes="favicon.ico,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/pilot/**,scoring/**,soundmanager2.js"
+             includes="images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/pilot/**,scoring/**,soundmanager2.js"
              excludes="answers/**,audioimages/**,config/first/**,config/crtDari/**,config/dataCollectAdmin/**,config/egyptian/**,config/pashto/**,config/urdu/**,config/autoCRT/**,config/msa/**,config/levantine/**,config/eqyptian/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.dli-pashto/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
         >
 
@@ -171,19 +166,9 @@
         </jar>
     </target>
 
-<!--
-    <target depends="build" name="dataCollectAdmin">
-        <jar destfile="dataCollectAdmin.war" basedir="war" excludes="WEB-INF/lib/pronz.jar,WEB-INF/lib/mira.jar,media/**,config/dataCollectAdmin/uploads/**,config/pilot/**,answers/**,fastAndSlowRef/**,audioimages/**,scoring/**,config/first/**,config/urdu/**,config/autoCRT/**,config/msa/**,config/msa/**,config/levantine/**,config/eqyptian/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
-            <manifest>
-                <attribute name="Built-Date" value="${current.time}"/>
-            </manifest>
-        </jar>
-    </target>
--->
-
     <target depends="build" name="warArabicVLL2">
         <jar destfile="npArabicVLL.war" basedir="war"
-             includes="favicon.ico,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/pilot/**,soundmanager2.js"
+             includes="images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/pilot/**,soundmanager2.js"
              excludes="WEB=INF/lib/pronz.jar">
 
             <manifest>
@@ -192,21 +177,21 @@
         </jar>
     </target>
 
-    <target depends="build" name="crtDari">
+<!--    <target depends="build" name="crtDari">
         <jar destfile="crtDari.war" basedir="war"
-             includes="favicon.ico,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/crtDari/**,soundmanager2.js"
+             includes="images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/crtDari/**,soundmanager2.js"
              excludes="WEB=INF/lib/pronz.jar">
 
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
             </manifest>
         </jar>
-    </target>
+    </target>-->
 
 
     <target depends="build" name="crtPashto">
         <jar destfile="crtPashto.war" basedir="war"
-             includes="favicon.ico,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/crtPashto/**,soundmanager2.js"
+             includes="images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/crtPashto/**,soundmanager2.js"
              excludes="WEB=INF/lib/pronz.jar">
 
             <manifest>
@@ -217,7 +202,7 @@
 
     <target depends="build" name="crtPashtoUpdate">
         <jar destfile="crt1cPashtotext.war" basedir="war"
-             includes="favicon.ico,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/crtPashtoJune/**"
+             includes="images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/crtPashtoJune/**"
              excludes="WEB=INF/lib/pronz.jar">
 
             <manifest>
@@ -228,7 +213,7 @@
 
     <target depends="build" name="farsiSections">
         <jar destfile="farsiSections.war" basedir="war"
-             includes="favicon.ico,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/farsi/**,soundmanager2.js"
+             includes="images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/farsi/**,soundmanager2.js"
              excludes="WEB=INF/lib/pronz.jar">
 
             <manifest>
@@ -239,7 +224,7 @@
 
     <target depends="build" name="msaFlashcard">
         <jar destfile="msaFlashcard.war" basedir="war"
-             includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/unitFlashcard/**,soundmanager2.js,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-ara/**"
+             includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/unitFlashcard/**,soundmanager2.js,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-ara/**"
                 >
 
             <manifest>
@@ -250,7 +235,7 @@
 
     <target depends="build" name="avpCRTDemo">
         <jar destfile="avpCRTDemo.war" basedir="war"
-             includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/pilot/**,soundmanager2.js,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-ara/**"
+             includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/pilot/**,soundmanager2.js,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-ara/**"
                 >
 
             <manifest>
@@ -272,7 +257,7 @@
 
     <target depends="build" name="npCourseDari">
         <jar destfile="npCourseDari.war" basedir="war"
-             includes="favicon.ico,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/dari/**,soundmanager2.js,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-dari/**"
+             includes="images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/dari/**,soundmanager2.js,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-dari/**"
                 >
 
             <manifest>
@@ -283,7 +268,7 @@
 
     <target depends="build" name="levantineFlashcard">
         <jar destfile="levantineFlashcard.war" basedir="war"
-             includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/unitFlashcard/**,soundmanager2.js,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-levantine/**"
+             includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/unitFlashcard/**,soundmanager2.js,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-levantine/**"
                 >
 
             <manifest>
@@ -294,7 +279,7 @@
 
     <target depends="build" name="dariFlashcard">
         <jar destfile="dariFlashcard.war" basedir="war"
-             includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/unitFlashcard/**,soundmanager2.js,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-dari/**"
+             includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/unitFlashcard/**,soundmanager2.js,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-dari/**"
                 >
 
             <manifest>
@@ -305,7 +290,7 @@
 
     <target depends="build" name="npfDari">
         <jar destfile="npfDari.war" basedir="war"
-             includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/dari/bestAudio/**,config/dari/*dari*,,config/dari/missing*,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-dari/**"
+             includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/dari/bestAudio/**,config/dari/*dari*,,config/dari/missing*,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-dari/**"
                 >
 
             <manifest>
@@ -316,7 +301,7 @@
 
     <target depends="build" name="npfFarsi">
         <jar destfile="npfFarsi.war" basedir="war"
-             includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/farsi/**,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-farsi/**"
+             includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/farsi/**,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-farsi/**"
                 >
 
             <manifest>
@@ -327,7 +312,7 @@
 
     <target depends="build" name="hsMSA">
         <jar destfile="hsMSA.war" basedir="war"
-             includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/msa/headstartMedia/**,config/msa/MSA-headstart.*,config/msa/msa.h2*,config/msa/*.properties,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-ara/**"
+             includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/msa/headstartMedia/**,config/msa/MSA-headstart.*,config/msa/msa.h2*,config/msa/*.properties,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-ara/**"
                 >
 
             <manifest>
@@ -361,7 +346,7 @@
 
     <target depends="build" name="npMSADC">
         <jar destfile="npMSADC.war" basedir="war"
-             includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/msa/media/**,config/msa/trans*,config/msa/MSA-headstart.*,config/msa/msa.h2*,config/msa/*.properties,config/msa/missing*,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-ara/**"
+             includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/msa/media/**,config/msa/trans*,config/msa/MSA-headstart.*,config/msa/msa.h2*,config/msa/*.properties,config/msa/missing*,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-ara/**"
                 >
 
             <manifest>
@@ -395,7 +380,7 @@
 
     <target depends="build" name="avpESL">
         <jar destfile="avpESLTimedFeedback.war" basedir="war"
-             includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/english/**,scoring/bin.linux64/**,scoring/configurations/**,scoring/models.wsj01-16/**"
+             includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/english/**,scoring/bin.linux64/**,scoring/configurations/**,scoring/models.wsj01-16/**"
                 >
 
             <manifest>
@@ -404,9 +389,9 @@
         </jar>
     </target>
 
-    <target depends="build" name="customNPF">
-        <jar destfile="customNPF.war" basedir="war"
-             includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/english/**,scoring/bin.linux64/**,scoring/configurations/**,scoring/models.wsj01-16/**"
+    <target depends="build" name="classroomEnglish">
+        <jar destfile="npfClassroomEnglish.war" basedir="war"
+             includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/english/**,scoring/bin.linux64/**,scoring/configurations/**,scoring/models.wsj01-16/**"
                 >
 
             <manifest>
@@ -415,9 +400,55 @@
         </jar>
     </target>
 
-    <target depends="build" name="taboo">
-        <jar destfile="taboo.war" basedir="war"
-             includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/taboo/**"
+
+    <target depends="build" name="classroomRussian">
+        <jar destfile="npfClassroomRussian.war" basedir="war"
+             includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/russian/**,scoring/bin.linux64/**,scoring/configurations/**,scoring/models.wsj01-16/**"
+             excludes="config/russian/*.tar,config/russian/candidateAudio/**"
+                >
+
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target depends="build" name="classroomEgyptian">
+        <jar destfile="npfClassroomEgyptian.war" basedir="war"
+             includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/egyptian/**,scoring/bin.linux64/**,scoring/configurations/**,scoring/models.wsj01-16/**"
+            >
+
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target depends="build" name="classroomSpanish">
+        <jar destfile="npfClassroomSpanish.war" basedir="war"
+             includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/spanish/**,scoring/bin.linux64/**,scoring/configurations/**,scoring/models.wsj01-16/**"
+                >
+
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target depends="build" name="classroomJapanese">
+        <jar destfile="npfClassroomJapanese.war" basedir="war"
+             includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/japanese/**,scoring/bin.linux64/**,scoring/configurations/**"
+                >
+
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target depends="build" name="classroomKorean">
+        <jar destfile="npfClassroomKorean.war" basedir="war"
+             includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/korean/**,scoring/bin.linux64/**,scoring/configurations/**"
                 >
 
             <manifest>
@@ -502,10 +533,21 @@
         </jar>
     </target>
 
+    <target depends="build" name="crtDari">
+    <jar destfile="crtDari.war" basedir="war"
+         includes="*.png,*.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/dari/**,scoring/bin.linux64/**,scoring/configurations/**,scoring/models.dli-dari/**"
+            >
+
+        <manifest>
+            <attribute name="Built-Date" value="${current.time}"/>
+        </manifest>
+    </jar>
+</target>
+
 
     <target depends="build" name="pashtoFlashcard">
         <jar destfile="pashtoFlashcard.war" basedir="war"
-             includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/unitFlashcard/**,soundmanager2.js,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-pashto/**"
+             includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/unitFlashcard/**,soundmanager2.js,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-pashto/**"
                 >
 
             <manifest>
@@ -516,7 +558,7 @@
 
     <target depends="build" name="dataCollectAdmin2">
         <jar destfile="dataCollectAdmin.war" basedir="war"
-             includes="favicon.ico,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/dataCollectAdmin/**"
+             includes="images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/dataCollectAdmin/**"
              excludes="WEB=INF/lib/pronz.jar">
 
             <manifest>
@@ -527,7 +569,7 @@
 
     <target depends="build" name="fullPatch">
         <jar destfile="npPatch.war" basedir="war"
-             excludes="WEB-INF/web.xml,WEB-INF/lib/poi*.jar,config/**,config/*/vlr-parle.*,answers/**,audioimages/**,scoring/**,config/first/**,config/autocrt/**,config/msa/**,config/msa/**,config/levantine/**,config/pilot/**,config/dari/**,config/pashto/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
+             excludes="WEB-INF/web.xml,config/**,config/*/vlr-parle.*,answers/**,audioimages/**,scoring/**,config/first/**,config/autocrt/**,config/msa/**,config/msa/**,config/levantine/**,config/pilot/**,config/dari/**,config/pashto/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
 
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
@@ -538,7 +580,17 @@
     <!-- Makes a jar of just the .class files and the javascript, so you can overlay it on an active webapp -->
     <target depends="build" name="patch">
         <jar destfile="npPatch.war" basedir="war"
-             excludes="WEB-INF/web.xml,WEB-INF/lib/pronz.jar,WEB-INF/lib/poi*.jar,config/**,config/*/vlr-parle.*,answers/**,audioimages/**,scoring/**,config/first/**,config/autocrt/**,config/msa/**,config/msa/**,config/levantine/**,config/pilot/**,config/dari/**,config/pashto/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
+             excludes="bestAudio/**,bestAudioCM/**,bestAudioRussian/**,WEB-INF/web.xml,WEB-INF/lib/pronz.jar,config/**,config/*/vlr-parle.*,answers/**,audioimages/**,scoring/**,config/first/**,config/autocrt/**,config/msa/**,config/msa/**,config/levantine/**,config/pilot/**,config/dari/**,config/pashto/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
+
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target depends="build" name="patchIncludePronz">
+        <jar destfile="npPatch.war" basedir="war"
+             excludes="bestAudio/**,bestAudioCM/**,bestAudioRussian/**,WEB-INF/web.xml,config/**,config/*/vlr-parle.*,answers/**,audioimages/**,scoring/**,config/first/**,config/autocrt/**,config/msa/**,config/msa/**,config/levantine/**,config/pilot/**,config/dari/**,config/pashto/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
 
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
