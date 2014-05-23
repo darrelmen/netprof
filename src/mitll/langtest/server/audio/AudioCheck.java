@@ -20,11 +20,11 @@ import java.io.IOException;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioCheck {
-  private static Logger logger = Logger.getLogger(AudioCheck.class);
+  private static final Logger logger = Logger.getLogger(AudioCheck.class);
 
   private static final int MinRecordLength = 1*(10000/2); // 10000 = 0.7 second
   private static final int WinSize = 10;
-  private static final float PowerThreshold = -79.0f;//-55.0f;
+  private static final float PowerThreshold = -79.50f;//-55.0f;
   private static final float VarianceThreshold = 20.0f;
   private static final double CLIPPED_RATIO = 0.005; // 1/2 %
   private static final double LOG_OF_TEN = Math.log(10.0);
@@ -38,9 +38,7 @@ public class AudioCheck {
    * @param file
    * @return
    */
-  public double getDurationInSeconds(String file) {
-    return getDurationInSeconds(new File(file));
-  }
+  public double getDurationInSeconds(String file) { return getDurationInSeconds(new File(file)); }
 
   /**
    * @see mitll.langtest.server.scoring.ASRScoring#scoreRepeatExercise
@@ -166,8 +164,8 @@ public class AudioCheck {
   }
 
   public static class ValidityAndDur {
-    public AudioAnswer.Validity validity;
-    public int durationInMillis;
+    public final AudioAnswer.Validity validity;
+    public final int durationInMillis;
 
     public ValidityAndDur(AudioAnswer.Validity validity) {
       this(validity, 0d);
@@ -180,7 +178,7 @@ public class AudioCheck {
     public String toString() { return "valid " + validity + " dur " + durationInMillis; }
   }
 
-  public static void main(String []a ) {
+/*  public static void main(String []a ) {
     try {
 //      boolean b = new AudioCheck().checkWavFile(new File("C:\\Users\\go22670\\DLITest\\LangTest\\war\\answers\\test\\ac-LC1-006\\0\\subject-1\\answer.wav"));
    //   double b = new AudioCheck().getDurationInSeconds(new File("C:\\Users\\go22670\\DLITest\\LangTest\\war\\answers\\test\\ac-LC1-006\\0\\subject-1\\answer.wav"));
@@ -193,5 +191,5 @@ public class AudioCheck {
     } catch (Exception e) {
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
     }
-  }
+  }*/
 }
