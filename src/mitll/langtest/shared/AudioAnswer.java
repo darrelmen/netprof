@@ -10,19 +10,23 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 * To change this template use File | Settings | File Templates.
 */
 public class AudioAnswer implements IsSerializable {
-  public int reqid;
-  public String path;
-  public Validity validity;
-  public String decodeOutput = "";
+  private static final String PRESS_AND_HOLD = "Press and hold to record, release to stop recording.";
+  private int reqid;
+  private String path;
+  private Validity validity;
+  private String decodeOutput = "";
   private double score = -1;
   private boolean correct = false;
   private boolean saidAnswer = false;
-  public int durationInMillis;
+  private int durationInMillis;
   private long resultID;
+  //private int audioID;
+  private AudioAttribute audioAttribute;
+
 
   public enum Validity implements IsSerializable {
     OK("Audio OK."),
-    TOO_SHORT("Audio too short. Please record again."),
+    TOO_SHORT(PRESS_AND_HOLD),
     TOO_QUIET("Audio too quiet. Check your mic settings or speak closer to the mic."),
     TOO_LOUD("Audio too loud. Check your mic settings or speak farther from the mic."),
     INVALID("There was a problem with the audio. Please record again.");
@@ -49,20 +53,6 @@ public class AudioAnswer implements IsSerializable {
     this.validity = validity;
     this.reqid = reqid;
     this.durationInMillis = duration;
-  }
-
-  /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
-   * @param path
-   * @param validity
-   * @param decodeOutput
-   * @param score
-   * @param reqid
-   */
-  public AudioAnswer(String path, Validity validity, String decodeOutput, double score, int reqid, int duration) {
-    this(path, validity, reqid, duration);
-    this.decodeOutput = decodeOutput;
-    this.score = score;
   }
 
   public void setDecodeOutput(String decodeOutput) { this.decodeOutput = decodeOutput; }
@@ -112,8 +102,45 @@ public class AudioAnswer implements IsSerializable {
 
   public boolean isValid() { return validity == Validity.OK; }
 
+  public int getReqid() {
+    return reqid;
+  }
+
+  public void setReqid(int reqid) {
+    this.reqid = reqid;
+  }
+
+  public String getPath() {
+    return path;
+  }
+
+  public void setPath(String path) {
+    this.path = path;
+  }
+
+  public Validity getValidity() {
+    return validity;
+  }
+
+  public String getDecodeOutput() {
+    return decodeOutput;
+  }
+
+  public int getDurationInMillis() {
+    return durationInMillis;
+  }
+
+  public AudioAttribute getAudioAttribute() {
+    return audioAttribute;
+  }
+
+  public void setAudioAttribute(AudioAttribute audioAttribute) {
+    this.audioAttribute = audioAttribute;
+  }
+
   public String toString() {
-    return "Answer id " + getResultID() + " : Path " + path + " id " + reqid + " validity " + validity +
+    return "Answer id " + getResultID() + " : audio attr " +audioAttribute+
+      " Path " + path + " id " + reqid + " validity " + validity +
       " correct " + correct + " score " + score + " said answer " + saidAnswer;
   }
 }
