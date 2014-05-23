@@ -6,6 +6,7 @@ import mitll.langtest.shared.grade.Grade;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -47,11 +48,13 @@ public class Result implements IsSerializable {
   public static final String AUDIO_TYPE_FAST_AND_SLOW = "fastAndSlow";
   public static final String AUDIO_TYPE_DEMO = "demo";
   public static final String AUDIO_TYPE_PRACTICE = "practice";
+  public static final String AUDIO_TYPE_REVIEW = "review";
+  public static final String AUDIO_TYPE_RECORDER = "recorder";
 
   public Result() {}
 
   /**
-   * @see mitll.langtest.server.database.ResultDAO#getResults()
+   * @see mitll.langtest.server.database.ResultDAO#getResultsForQuery(java.sql.Connection, java.sql.PreparedStatement)
    * @param userid
    * @param plan
    * @param id
@@ -92,24 +95,34 @@ public class Result implements IsSerializable {
     return id + "/" +qid;
   }
 
-  public void setFLQ(boolean flq) {
+/*  public void setFLQ(boolean flq) {
     this.flq = flq;
   }
 
   public void setSpoken(boolean v) {
     this.spoken = v;
-  }
+  }*/
 
   public String getAudioType() {
     return audioType;
   }
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#getResultsWithGrades()
+   * @param g
+   */
   public void addGrade(Grade g) {
     gradeInfo += g.grade +",";
   }
 
-  public void clearGradeInfo() {
-    gradeInfo = "";
+  public void clearGradeInfo() { gradeInfo = "";  }
+
+  public String getGradeInfo() {
+    if (gradeInfo.endsWith(",")) {
+      return gradeInfo.substring(0, gradeInfo.length() - 1);
+    } else {
+      return gradeInfo;
+    }
   }
 
   public boolean isCorrect() {
@@ -219,7 +232,8 @@ public class Result implements IsSerializable {
   @Override
   public String toString() {
     return "Result #" + uniqueID + "\t\tby user " + userid + "\texid " + id + " " +
-        (flq ? "flq" : "english") + "  ans " +answer+
+        (flq ? "flq" : "english") + " at " + new Date(timestamp)+
+      "  ans " +answer+
       " " + (spoken ? "spoken" : "written") + " audioType : " + audioType +
         " valid " + valid + " " + (correct ? "correct":"incorrect") + " score " + pronScore;
   }

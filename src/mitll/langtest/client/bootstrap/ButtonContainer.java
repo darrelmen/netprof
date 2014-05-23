@@ -22,6 +22,7 @@ class ButtonContainer {
   private final Set<Button> enabled = new HashSet<Button>();
   private final Set<Button> disabled = new HashSet<Button>();
   private final Map<String, Collection<Button>> nameToButton = new HashMap<String, Collection<Button>>();
+  boolean debug = false;
 
   public void add(Button b, String name) {
     buttons.add(b);
@@ -76,7 +77,7 @@ class ButtonContainer {
    * @param isEnable
    */
   public void rememberEnabled(Collection<FlexSectionExerciseList.ButtonWithChildren> buttonChildren, boolean isEnable) {
-    System.out.println(this + " rememberEnabled for " + buttonChildren + " : to enable = " + isEnable);
+    if (debug) System.out.println(this + " rememberEnabled for " + buttonChildren + " : to enable = " + isEnable);
 
     if (!buttons.containsAll(buttonChildren)) {
       System.err.println(this + " rememberEnabled  children = " + buttonChildren + " are not part of this set of buttons");
@@ -100,23 +101,22 @@ class ButtonContainer {
     disabled.clear();
     disabled.addAll(buttons);
     disabled.removeAll(enabled);
-    System.out.println(this + " rememberEnabled after ");
+    if (debug) System.out.println(this + " rememberEnabled after ");
   }
 
   /**
    * @see mitll.langtest.client.bootstrap.ButtonGroupSectionWidget#clearEnabled()
    * @see FlexSectionExerciseList#clearEnabled(String)
-   * @see mitll.langtest.client.list.section.SectionExerciseList#restoreListBoxState
    */
   public void clearEnabled() {
-    System.out.println(this + " : clearEnabled ");
+   // System.out.println(this + " : clearEnabled ");
 
     enabled.clear();
     disabled.addAll(buttons);
   }
 
   public void showEnabled() {
-    System.out.println(this + " : showEnabled ");
+   // System.out.println(this + " : showEnabled ");
 
     for (Button b : enabled) {
       b.setEnabled(true);
@@ -126,6 +126,7 @@ class ButtonContainer {
     }
   }
 
-  public String toString() { return "Buttons Set : " + buttons.size() + " buttons (" + enabled.size() + "/" + disabled.size() + ")"; }
-
+  public String toString() {
+    return "Buttons Set : " + buttons.size() + " buttons (" + enabled.size() + "/" + disabled.size() + ")";
+  }
 }
