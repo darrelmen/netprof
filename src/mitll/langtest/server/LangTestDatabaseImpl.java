@@ -527,7 +527,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     ImageWriter imageWriter = new ImageWriter();
 
     String wavAudioFile = getWavAudioFile(audioFile);
-    if (!new File(wavAudioFile).exists()) {
+    File testFile = new File(wavAudioFile);
+    if (!testFile.exists() || testFile.length() == 0) {
+      if (testFile.length() == 0) logger.error("huh? " +wavAudioFile + " is empty???");
       return new ImageResponse();
     }
     ImageType imageType1 =
@@ -538,15 +540,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     logger.debug("getImageForAudioFile : getting images (" + width + " x " + height + ") (" +reqid+ ") type " + imageType+
       " for " + wavAudioFile + "");
     String absolutePathToImage = imageWriter.writeImageSimple(wavAudioFile, pathHelper.getAbsoluteFile(imageOutDir).getAbsolutePath(),
-        width, height, imageType1, exerciseID);
+      width, height, imageType1, exerciseID);
     String installPath = pathHelper.getInstallPath();
     //System.out.println("Absolute path to image is " + absolutePathToImage);
 
     String relativeImagePath = absolutePathToImage;
     if (absolutePathToImage.startsWith(installPath)) {
       relativeImagePath = absolutePathToImage.substring(installPath.length());
-    }
-    else {
+    } else {
       logger.error("huh? file path " + absolutePathToImage + " doesn't start with " + installPath + "?");
     }
 
@@ -559,7 +560,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 /*    logger.debug("for " + wavAudioFile + " type " + imageType + " rel path is " + relativeImagePath +
         " url " + imageURL + " duration " + duration);*/
 
-    return new ImageResponse(reqid,imageURL, duration);
+    return new ImageResponse(reqid, imageURL, duration);
   }
 
   private String getWavAudioFile(String audioFile) {
@@ -867,9 +868,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     CommonExercise byID = db.getCustomOrPredefExercise(exid);  // allow custom items to mask out non-custom items
 
     Map<String, AudioAttribute> audioRefToAttr = byID.getAudioRefToAttr();
-    AudioAttribute remove = audioRefToAttr.remove(audioAttribute.getKey());
+    String key = audioAttribute.getKey();
+    AudioAttribute remove = audioRefToAttr.remove(key);
     if (remove == null) {
-      logger.error("huh? couldn't remove " + audioAttribute + " from " + exid + " keys were " + audioRefToAttr.keySet());
+      logger.error("huh? couldn't remove key '" + key +
+        "' : " + audioAttribute + " from " + exid +
+        " keys were " + audioRefToAttr.keySet() + " contains " + audioRefToAttr.containsKey(key));
     }
   }
 
