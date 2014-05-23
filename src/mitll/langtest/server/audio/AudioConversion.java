@@ -310,7 +310,7 @@ public class AudioConversion {
   }
 
   /**
-   * TODO : Have sox normalize to -3db -- thanks Paul!
+   * sox normalize to -3db -- thanks Paul!
    *
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile(String, String, String, int, int, int, boolean, String, boolean, boolean, boolean)
    * @see mitll.langtest.server.audio.PathWriter#getPermanentAudioPath(mitll.langtest.server.PathHelper, java.io.File, String, boolean, String)
@@ -320,16 +320,23 @@ public class AudioConversion {
     try {
       File tempFile = File.createTempFile("normalized_" + removeSuffix(absolutePathToWav.getName()) + "_" + System.currentTimeMillis(), ".wav");
       logger.debug("sox conversion from " + absolutePathToWav + " to " + tempFile.getAbsolutePath());
+/*
       ProcessBuilder soxFirst = new ProcessBuilder(getSox(),
         absolutePathToWav.getAbsolutePath(), "--norm",
         //"−3",                           TODO : why doesn't this work???
         "-q", tempFile.getAbsolutePath());
+*/
 
-      new ProcessRunner().runProcess(soxFirst);
+      ProcessBuilder soxFirst2 = new ProcessBuilder(getSox(),
+        absolutePathToWav.getAbsolutePath(),
+        tempFile.getAbsolutePath(),
+        "gain","-n", "-3");
+
+      new ProcessRunner().runProcess(soxFirst2);
 
       if (!tempFile.exists() || tempFile.length() == 0) {
         logger.error("didn't make " + tempFile);
-        logger.error("soxFirst " + soxFirst);
+        logger.error("soxFirst " + soxFirst2.command());
       }
       else {
         logger.debug("wrote normalized to " + tempFile.getAbsolutePath());
