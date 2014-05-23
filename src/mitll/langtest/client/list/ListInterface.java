@@ -6,13 +6,8 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.ExerciseShell;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import mitll.langtest.shared.CommonShell;
+import mitll.langtest.shared.STATE;
 
 /**
  * Created with IntelliJ IDEA.
@@ -30,15 +25,14 @@ public interface ListInterface extends RequiresResize {
    */
   void setFactory(ExercisePanelFactory factory, UserManager user, int expectedGrades);
 
-  void rememberAndLoadFirst(List<? extends ExerciseShell> exercises, Exercise firstExercise);
-
     /**
      * @see mitll.langtest.client.LangTest#gotUser(long)
      * @see mitll.langtest.client.LangTest#makeFlashContainer()
      * @param userID
-     * @param getNext
      */
-  void getExercises(long userID, boolean getNext);
+  boolean getExercises(long userID);
+
+  void reloadWith(String id);
 
   /**
    * @see mitll.langtest.client.LangTest#makeExerciseList
@@ -54,23 +48,35 @@ public interface ListInterface extends RequiresResize {
 
   Widget getExerciseListOnLeftSide(PropertyHandler props);
 
-  void loadExercise(ExerciseShell exerciseShell);
+  CommonShell byID(String name);
+
+  void loadExercise(String itemID);
+
+  boolean loadNext();
+
   /**
+   *
    * @param current
-   * @return true if on last exercise
-   * @see mitll.langtest.client.exercise.ExercisePanel#postAnswers
+   * @return
+   * @see ListInterface#loadNextExercise
    */
-  boolean loadNextExercise(ExerciseShell current);
+ boolean loadNextExercise(CommonShell current);
 
-  //boolean loadNextExercise(String id);
-  Panel makeExercisePanel(Exercise result);
+  boolean loadNextExercise(String id);
 
-  boolean loadPreviousExercise(ExerciseShell current);
+  boolean loadPrev();
+
+  boolean loadPreviousExercise(CommonShell current);
+
+  void checkAndAskServer(String id);
 
   public String getCurrentExerciseID();
 
-  boolean onFirst(ExerciseShell current);
-  boolean onLast(ExerciseShell current);
+  boolean onFirst();
+  boolean onFirst(CommonShell current);
+
+  boolean onLast();
+  boolean onLast(CommonShell current);
   /**
    * @see mitll.langtest.client.LangTest#resetState()
    */
@@ -80,18 +86,24 @@ public interface ListInterface extends RequiresResize {
    */
   void removeCurrentExercise();
 
+  /**
+   * @see mitll.langtest.client.custom.NPFHelper#makeExerciseList(com.google.gwt.user.client.ui.Panel, String)
+   */
   void reloadExercises();
+  void addExercise(CommonShell es);
 
-  int getPercentComplete();
+  CommonShell simpleRemove(String id);
 
-  int getComplete();
-
-  void setCompleted(Set<String> completed);
-  void addCompleted(String id);
-
-  void setSelectionState(Map<String,Collection<String>> selectionState);
-
-  void hideExerciseList();
-
+  void hide();
+  void show();
   Panel getCreatedPanel();
+  void reload();
+
+  void redraw();
+  void setState(String id, STATE state);
+  void setSecondState(String id, STATE state);
+
+  void addListChangedListener(ListChangeListener<CommonShell> listener);
+
+  void setInstance(String instance);
 }
