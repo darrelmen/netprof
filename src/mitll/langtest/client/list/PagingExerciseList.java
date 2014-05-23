@@ -146,19 +146,13 @@ public class PagingExerciseList extends ExerciseList {
 
   @Override
   protected CommonShell findFirstExercise() {
-    if (controller.showCompleted()) {
-      return getFirstNotCompleted();
-    }
-    else {
-      return super.findFirstExercise();
-    }
+    return controller.showCompleted() ? getFirstNotCompleted() : super.findFirstExercise();
   }
 
   private CommonShell getFirstNotCompleted() {
     for (CommonShell es : pagingContainer.getExercises()) {
       STATE state = es.getState();
       if (state != null && state.equals(STATE.UNSET)) {
-        System.out.println("found first not set " + es.getID());
         return es;
       }
     }
