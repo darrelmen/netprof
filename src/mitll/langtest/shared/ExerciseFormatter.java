@@ -8,26 +8,59 @@ package mitll.langtest.shared;
  * To change this template use File | Settings | File Templates.
  */
 public class ExerciseFormatter {
-  public static String getContent(String arabic, String translit, String english, String meaning, String context, String language) {
-    return getContent(arabic, translit, english, meaning, context, language.equalsIgnoreCase("english"), language.equalsIgnoreCase("urdu"), language.equalsIgnoreCase("pashto"));
+  public static final String FOREIGN_LANGUAGE_PROMPT = "Say:";
+  public static final String ENGLISH_PROMPT = "Meaning:";
+  public static final String TRANSLITERATION = "Transliteration:";
+  public static final String TRANSLATION = "Translation:";
+  public static final String CONTEXT = "Context:";
+
+  /**
+   * @see mitll.langtest.server.database.ExcelImport#getExercise(String, String, String, String, String, String, boolean, String)
+   * @see mitll.langtest.shared.custom.UserExercise#toExercise()
+   * @param foreignPhrase
+   * @param translit
+   * @param english
+   * @param meaning
+   * @param language
+   * @return
+   */
+  public static String getContent(String foreignPhrase, String translit, String english, String meaning, String context, String language) {
+    return getContent(foreignPhrase, translit, english, meaning, context,
+      language.equalsIgnoreCase("english"),
+      language.equalsIgnoreCase("urdu"),
+      language.equalsIgnoreCase("pashto"));
   }
 
-  public static String getContent(String arabic, String translit, String english, String meaning, boolean isEnglish, boolean isUrdu, boolean isPashto) {
-    return getContent(arabic, translit, english, meaning, "", isEnglish, isUrdu, isPashto);
+  public static String getContent(String foreignPhrase, String translit, String english, String meaning,
+                                  boolean isEnglish, boolean isUrdu, boolean isPashto) {
+    return getContent(foreignPhrase, translit, english, meaning, "", isEnglish, isUrdu, isPashto);
   }
 
-  public static String getContent(String arabic, String translit, String english, String meaning, String context, boolean isEnglish, boolean isUrdu, boolean isPashto) {
-    String arabicHTML = getArabic(arabic, isUrdu, isPashto);
-    String translitHTML = translit.length() > 0 ?
-      getSpanWrapper("Transliteration:", translit)
-      : "";
-    String translationHTML = english.length() > 0 ?
-      getSpanWrapper("Translation:", english) : "";
-    String meaningHTML = (isEnglish && meaning.length() > 0) ?
-      getSpanWrapper("Meaning:", meaning) : "";
+  /**
+   * TODO : This is a bad idea -- the client side should do formatting, etc.
+   *
+   * @param foreignPhrase
+   * @param translit
+   * @param english
+   * @param meaning
+   * @param context
+   * @param isEnglish
+   * @param isUrdu
+   * @param isPashto
+   * @return
+   */
+  private static String getContent(String foreignPhrase, String translit, String english, String meaning, String context,
+                                  boolean isEnglish, boolean isUrdu, boolean isPashto) {
+    String arabicHTML = getArabic(foreignPhrase, isUrdu, isPashto, false);
+    String translitHTML = translit.length() > 0 ? getSpanWrapper(TRANSLITERATION, translit, false) : "";
 
-    String contextHTML = (context.length() > 0) ?
-      getSpanWrapper("Context:", context) : "";
+    String translationHTML = english != null && english.length() > 0 && !english.equals(foreignPhrase) ?
+      getSpanWrapper(TRANSLATION, english, false) : "";
+
+    String meaningHTML = (isEnglish && meaning.length() > 0) ? getSpanWrapper(ENGLISH_PROMPT, meaning, false) : "";
+
+    String contextHTML = (context.length() > 0) ? getSpanWrapper(CONTEXT, "\""+ context + "\"", false) : "";
+
     return arabicHTML +
       translitHTML +
       translationHTML +
@@ -35,19 +68,28 @@ public class ExerciseFormatter {
       contextHTML;
   }
 
-  private static String getSpanWrapper(String rowTitle, String english) {
-    return "<div class=\"Instruction\">\n" +
-      "<span class=\"Instruction-title\">" +
+  private static String getSpanWrapper(String rowTitle, String english, boolean includePrompt) {
+    String prompt = includePrompt ? "<span class=\"Instruction-title\">" +
       rowTitle +
-      "</span>\n" +
-      "<span class=\"Instruction-data\"> " + english +
+      "</span>\n" : "";
+    String textClasses = "\"Instruction-data" + (rowTitle.equals(CONTEXT) ? " englishFont" : "")+ "\"";
+    return "<div class=\"Instruction\">\n" +
+      prompt +
+      "<span class=" + textClasses + "> " + english +
       "</span>\n" +
       "</div>";
   }
 
-  public static String getArabic(String arabic, boolean isUrdu, boolean isPashto) {
+  public static String getArabic(String arabic) {
+    return getArabic(arabic, false, false, false);
+  }
+
+  public static String getArabic(String arabic, boolean isUrdu, boolean isPashto, boolean includePrompt) {
+    String prompt = includePrompt ? "<span class=\"Instruction-title\">" +
+      FOREIGN_LANGUAGE_PROMPT +
+      "</span>\n" : "";
     return "<div class=\"Instruction\">\n" +
-      "<span class=\"Instruction-title\">Say:</span>\n" +
+      prompt +
       "<span class=\"" +
       (isUrdu ? "urdufont" : isPashto ? "pashtofont" : "Instruction-data") +
       "\"> " + arabic +
