@@ -2,18 +2,22 @@ package mitll.langtest.client.exercise;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.CommonExercise;
+
+import java.util.Date;
 
 /**
  * A row with prev/next buttons.  Key bindings for keys too.
@@ -27,19 +31,19 @@ import mitll.langtest.shared.Exercise;
 public class NavigationHelper extends HorizontalPanel {
   private static final String LEFT_ARROW_TOOLTIP = "Press the left arrow key to go to the previous item.";
   private static final String RIGHT_ARROW_TOOLTIP = "Press enter to go to the next item.";
- // private static final String RIGHT_ARROW_TOOLTIP2 = "Press the right arrow key to go to the next item.";
-  private static final String THE_FOREIGN_LANGUAGE = " the foreign language";
+  public static final String PASHTO = "Pashto";
+  // private static final String RIGHT_ARROW_TOOLTIP2 = "Press the right arrow key to go to the next item.";
 
   private Button prev;
-  private Button next;
+  protected Button next;
   private HandlerRegistration keyHandler;
-  private boolean debug = false;
+  private final boolean debug = false;
   private boolean enableNextOnlyWhenAllCompleted = true;
-  private PostAnswerProvider provider;
+  private final PostAnswerProvider provider;
 
-  boolean bindEnterKey = true;
+  private final boolean bindEnterKey = true;
 
-  protected ListInterface listContainer;
+  private final ListInterface listContainer;
 
   /**
    * @see ExercisePanel#getNavigationHelper(ExerciseController)
@@ -48,61 +52,70 @@ public class NavigationHelper extends HorizontalPanel {
    * @param provider
    * @param listContainer
    * @param addButtons
+   * @param addKeyHandler
    */
-  public NavigationHelper(Exercise exercise, ExerciseController controller, PostAnswerProvider provider,
-                          ListInterface listContainer, boolean addButtons) {
-    enableNextOnlyWhenAllCompleted = !getLanguage(controller).equalsIgnoreCase("Pashto");   // hack?
-    this.provider = provider;
-    this.listContainer = listContainer;
-    setSpacing(5);
-    getNextAndPreviousButtons(exercise, controller, addButtons);
-    getElement().setId("NavigationHelper");
+  public NavigationHelper(CommonExercise exercise, ExerciseController controller, PostAnswerProvider provider,
+                          ListInterface listContainer, boolean addButtons, boolean addKeyHandler) {
+    this(exercise, controller, provider, listContainer, addButtons, addKeyHandler,
+      !controller.getLanguage().equalsIgnoreCase(PASHTO) && !controller.getProps().isClassroomMode());
   }
 
-  private String getLanguage( ExerciseController controller) {
-    String language = controller.getLanguage();
-    return (language == null || language.length() == 0) ? THE_FOREIGN_LANGUAGE : language;
+  public NavigationHelper(CommonExercise exercise, ExerciseController controller, PostAnswerProvider provider,
+                          ListInterface listContainer, boolean addButtons, boolean addKeyHandler,
+                          boolean enableNextOnlyWhenAllCompleted) {
+    this.provider = provider;
+    this.listContainer = listContainer;
+    this.enableNextOnlyWhenAllCompleted = enableNextOnlyWhenAllCompleted;
+    setSpacing(5);
+    getNextAndPreviousButtons(exercise, controller, addButtons, addKeyHandler);
+    getElement().setId("NavigationHelper");
+    controller.register(prev, exercise.getID());
+    controller.register(next, exercise.getID());
   }
 
   /**
-   * @see NavigationHelper#NavigationHelper(mitll.langtest.shared.Exercise, ExerciseController, PostAnswerProvider, ListInterface, boolean)
+   * @see NavigationHelper#NavigationHelper
    * @param e
    * @param controller
    * @param addButtons
+   * @param addKeyHandler
    */
-  private void getNextAndPreviousButtons(final Exercise e,
-                                         final ExerciseController controller, boolean addButtons) {
-    makePrevButton(e, controller, addButtons);
+  private void getNextAndPreviousButtons(final CommonExercise e,
+                                         final ExerciseController controller, boolean addButtons, boolean addKeyHandler) {
+    boolean useKeyHandler = controller.isCollectAudio();
+
+    makePrevButton(e, controller, addButtons, useKeyHandler && addKeyHandler);
     makeNextButton(e, controller, addButtons);
 
-    //addKeyHandler(e, controller, useKeyHandler);
+    // TODO : revisit in the context of text data collections
+    if (addKeyHandler) {
+      addKeyHandler(e, controller, useKeyHandler);
+    }
   }
 
-  private void makePrevButton(final Exercise e, ExerciseController controller, boolean addButtons) {
+  private void makePrevButton(final CommonExercise exercise, ExerciseController controller, boolean addButtons, boolean useKeyHandler) {
     this.prev = new Button("Previous");
+    prev.getElement().setId("NavigationHelper_Previous");
     getPrev().addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        clickPrev(e);
+        clickPrev(exercise);
       }
     });
-    boolean onFirst = !listContainer.onFirst(e);
+    boolean onFirst = !listContainer.onFirst(exercise);
     getPrev().setEnabled(onFirst);
-    if (false) getPrev().setTitle(LEFT_ARROW_TOOLTIP);
+    if (useKeyHandler) getPrev().setTitle(LEFT_ARROW_TOOLTIP);
     getPrev().setType(ButtonType.SUCCESS);
 
     if (addButtons) add(getPrev());
     getPrev().setVisible(!controller.isMinimalUI() || !controller.isPromptBeforeNextItem());
   }
 
-  private void makeNextButton(final Exercise e, final ExerciseController controller, boolean addButtons) {
+  private void makeNextButton(final CommonExercise exercise, final ExerciseController controller, boolean addButtons) {
     this.next = new Button(getNextButtonText());
+    next.getElement().setId("NavigationHelper_"+getNextButtonText());
+
     next.setType(ButtonType.SUCCESS);
-    if (enableNextOnlyWhenAllCompleted) { // initially not enabled
-      next.setEnabled(false);
-    }
-    else {
-      next.setEnabled(!listContainer.onLast(e));
-    }
+    enableNext(exercise);
 
     if (addButtons)  add(next);
     if (controller.getProps().isBindNextToEnter()) next.setTitle(RIGHT_ARROW_TOOLTIP);
@@ -112,20 +125,24 @@ public class NavigationHelper extends HorizontalPanel {
     // send answers to server
     next.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        clickNext(controller, e);
+        clickNext(controller, exercise);
       }
     });
   }
 
-  public SimplePanel makeSpacer() {
-    SimplePanel spacer = new SimplePanel();
-    spacer.setSize("100%", "20px");
-    return spacer;
+  protected void enableNext(CommonExercise exercise) {
+    if (enableNextOnlyWhenAllCompleted) { // initially not enabled
+      next.setEnabled(false);
+    }
+    else {
+      next.setEnabled(!listContainer.onLast(exercise));
+    }
   }
 
-  private void clickPrev(Exercise e) {
+  void clickPrev(CommonExercise e) {
     if (getPrev().isEnabled() && getPrev().isVisible()) {
-      System.out.println("clickPrev " +keyHandler+ " click on prev " + getPrev());
+      getPrev().setEnabled(false);
+      //System.out.println("clickPrev " +keyHandler+ " click on prev " + getPrev());
       listContainer.loadPreviousExercise(e);
     }
   }
@@ -133,20 +150,22 @@ public class NavigationHelper extends HorizontalPanel {
   /**
    * Ignore clicks or keyboard activity when the widget is not enabled.
    * @see #getNextAndPreviousButtons
-   * @seex #addKeyHandler
+   * @see #addKeyHandler
    * @param controller
-   * @param e
+   * @param exercise
    */
-  protected void clickNext(final ExerciseController controller, final Exercise e) {
+  void clickNext(final ExerciseController controller, final CommonExercise exercise) {
     if (next.isEnabled() && next.isVisible()) {
       if (controller.isMinimalUI() && !controller.isGrading() && controller.isPromptBeforeNextItem()) {
-        showConfirmNextDialog(controller, e);
+        showConfirmNextDialog(controller, exercise);
       } else {
-        provider.postAnswers(controller, e);
+        if (provider != null) {
+          provider.postAnswers(controller, exercise);
+        }
       }
     }
     else {
-      System.out.println("clickNext " +keyHandler+ " ignoring next");
+      System.out.println("\t\tNavigationHelper.clickNext " +keyHandler+ " ignoring next");
     }
   }
 
@@ -156,9 +175,9 @@ public class NavigationHelper extends HorizontalPanel {
    * @paramx service
    * @paramx userFeedback
    * @param controller
-   * @param e
+   * @param exercise
    */
-  private void showConfirmNextDialog(final ExerciseController controller, final Exercise e) {
+  private void showConfirmNextDialog(final ExerciseController controller, final CommonExercise exercise) {
     final DialogBox dialogBox;
     Button yesButton;
 
@@ -189,8 +208,8 @@ public class NavigationHelper extends HorizontalPanel {
 
     yesButton.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        provider.postAnswers(controller, e);
-        prev.setEnabled(!controller.getExerciseList().onFirst(e));
+        provider.postAnswers(controller, exercise);
+        prev.setEnabled(!controller.getExerciseList().onFirst(exercise));
         dialogBox.hide();
       }
     });
@@ -203,11 +222,11 @@ public class NavigationHelper extends HorizontalPanel {
 
   /**
    * Enter key advances to next item, left arrow goes to previous
-   * @paramx e
-   * @paramx controller
-   * @paramx useKeyHandler
+   * @param e
+   * @param controller
+   * @param useKeyHandler
    */
-/*  private void addKeyHandler(final Exercise e, final ExerciseController controller, final boolean useKeyHandler) {
+  private void addKeyHandler(final CommonExercise e, final ExerciseController controller, final boolean useKeyHandler) {
     keyHandler = Event.addNativePreviewHandler(new
                                                  Event.NativePreviewHandler() {
 
@@ -243,11 +262,10 @@ public class NavigationHelper extends HorizontalPanel {
                                                    }
                                                  });
    // System.out.println("addKeyHandler made click handler " + keyHandler);
-  }*/
+  }
 
   public void removeKeyHandler() {
    // System.out.println("removeKeyHandler : " + keyHandler);
-
     if (keyHandler != null) keyHandler.removeHandler();
   }
 
@@ -255,16 +273,11 @@ public class NavigationHelper extends HorizontalPanel {
     next.setEnabled(val);
   }
 
-  public void enablePrevButton(boolean val) {
-    prev.setEnabled(val);
-  }
-
-  public void setButtonsEnabled(boolean val) {
+/*  public void setButtonsEnabled(boolean val) {
     getPrev().setEnabled(val);
     next.setEnabled(val);
-  }
+  }*/
 
-  //public Widget getPrev() { return prev; }
   public Widget getNext() { return next; }
   public Button getPrev() { return prev; }
 }
