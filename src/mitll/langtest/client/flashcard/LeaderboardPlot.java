@@ -1,203 +1,190 @@
 package mitll.langtest.client.flashcard;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.Column;
-import com.github.gwtbootstrap.client.ui.FluidRow;
-import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.Modal;
-import com.github.gwtbootstrap.client.ui.constants.ButtonType;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Timer;
-import mitll.langtest.shared.flashcard.Leaderboard;
-import mitll.langtest.shared.flashcard.ScoreInfo;
+import mitll.langtest.shared.flashcard.AVPHistoryForList;
+import mitll.langtest.shared.flashcard.SetScore;
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.PlotBand;
 import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.labels.PlotBandLabel;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 public class LeaderboardPlot {
-  public static final float HALF = (1f / 4f);
- // public static final int AUTO_HIDE_DELAY = 3000;
+  public static final float HALF = 3f;
+  public static final String AVERAGE = "Class Average";
+  private static final String TOP_SCORE = "Class Top Score";
+  private static final String PERSONAL_BEST = "Personal Best";
+  private static final String CORRECT = "Correct";
+  private static final String SCORE = "Score";
+  public static final float GRAPH_MAX = 100f;
 
-  public void showLeaderboardPlot(Leaderboard leaderboard, final long userID, int gameTimeSeconds,
-                                  Map<String, Collection<String>> currentSelection,
-                                  String prompt,
-                                  final ClickHandler onYes, final ClickHandler onNo,int autoHideDelay) {
-    List<ScoreInfo> scores = leaderboard.getScores(currentSelection);
-
-    showLeaderboardPlot(scores, userID, gameTimeSeconds, currentSelection, prompt,onYes, onNo,autoHideDelay);
+  /**
+   * @see mitll.langtest.client.custom.MyFlashcardExercisePanelFactory.StatsPracticePanel#makeChart(int, int, mitll.langtest.shared.flashcard.AVPHistoryForList)
+   * @param historyForList
+   * @param title
+   * @param subtitle
+   * @return
+   */
+  public Chart getChart(AVPHistoryForList historyForList, String title, String subtitle) {
+    boolean useCorrect = historyForList.isUseCorrect();
+    return getChart(historyForList.getNumScores(),title, subtitle,
+      useCorrect ? CORRECT : SCORE,
+      historyForList.getPbCorrect(),
+      historyForList.getTop(),
+      historyForList.getTotalCorrect(),
+      historyForList.getClassAvg(),
+      historyForList.getyValuesForUser()
+      );
   }
 
-/*  public Modal showLeaderboardPlot(Leaderboard leaderboard,final long userID, int gameTimeSeconds,
-                                   Map<String, Collection<String>> currentSelection,
-                                   String prompt,int autoHideDelay) {
-    List<ScoreInfo> scores = leaderboard.getScores(currentSelection);
-
-    return showLeaderboardPlot(scores, userID, gameTimeSeconds, currentSelection, prompt, null, null,autoHideDelay);
-  }*/
-
-/*
-  public Modal showLeaderboardPlot(List<ScoreInfo> scores, final long userID, int gameTimeSeconds,
-                                   Map<String, Collection<String>> currentSelection,
-                                   String prompt,int autoHideDelay) {
-    return showLeaderboardPlot(scores, userID, gameTimeSeconds, currentSelection, prompt, null, null, autoHideDelay);
-  }*/
-
-  private Modal showLeaderboardPlot(List<ScoreInfo> scores, final long userID, int gameTimeSeconds,
-                                  Map<String, Collection<String>> currentSelection,
-                                  String prompt,
-                                  final ClickHandler onYes, final ClickHandler onNo, int autoHideDelay) {
-    int pbCorrect = 0;
-    int top = 0;
-    float total = 0;
-    List<Float> yValuesForUser = new ArrayList<Float>();
-    for (ScoreInfo score : scores) {
-      if (score.getUserid() == userID || score.getGiverID() == userID) {
-        if (score.getCorrect() > pbCorrect) pbCorrect = score.getCorrect();
-        yValuesForUser.add((float) score.getCorrect());
-        System.out.println("showLeaderboardPlot : for " +userID + " got " + score);
-      }
-      if (score.getCorrect() > top) top = score.getCorrect();
-      total += score.getCorrect();
-    }
-    float avg = total / (float) scores.size();
-
-    final Modal modal = new Modal();
-    modal.setAnimation(false);
-    modal.setCloseVisible(true);
-    modal.setWidth("720px");
-    String hashMapToStringCleaned =
-      currentSelection.toString().replace("{", "").replace("}", "").replace("=", " ").replace("[", "").replace("]", "");
+  private Chart getChart(int numScores, String title, String subtitle, String seriesName,
+                         float pbCorrect, float top, float total, float avg, List<Float> yValuesForUser) {
     Chart chart = new Chart()
       .setType(Series.Type.SPLINE)
-      .setChartTitleText("Leaderboard")
-      .setChartSubtitleText(hashMapToStringCleaned)
-      .setMarginRight(10);
+      .setChartTitleText(title)
+      .setChartSubtitleText(subtitle)
+      .setMarginRight(10)
+      .setOption("/credits/enabled", false)
+      .setOption("/plotOptions/series/pointStart", 1)
+      .setOption("/legend/enabled", false);
 
-    Float[] yValues = yValuesForUser.toArray(new Float[0]);
+    addSeries(yValuesForUser, chart, seriesName);
 
-    String seriesLabel = gameTimeSeconds > 0 ? "Correct in " + gameTimeSeconds + " seconds" : "Score";
-    Series series = chart.createSeries()
-      .setName(seriesLabel)
-      .setPoints(yValues);
-    chart.addSeries(series);
+    float verticalRange = setPlotBands(numScores, title, subtitle,
+      pbCorrect, top, total, avg, chart);
 
-    float from = under(pbCorrect);
-    float to = over(pbCorrect);
-    PlotBand personalBest = chart.getYAxis().createPlotBand()
-      .setColor("#f18d24")
-      .setFrom(from)
-      .setTo(to);
+    configureChart(verticalRange, chart, subtitle);
+    return chart;
+  }
 
-    personalBest.setLabel(new PlotBandLabel().setAlign(PlotBandLabel.Align.LEFT).setText("Personal Best"));
+  private float setPlotBands(int numScores, String title, String subtitle,
+                             float pbCorrect, float top, float total, float avg, Chart chart) {
+    PlotBand personalBest = getPersonalBest(pbCorrect, chart);
+    PlotBand topScore = getTopScore(top, chart);
+    PlotBand avgScore = getAvgScore(numScores, total, chart);
 
-    PlotBand topScore = chart.getYAxis().createPlotBand()
-      .setColor("#46bf00")
-      .setFrom(under(top))
-      .setTo(over(top));
+    float fivePercent = 0.05f * GRAPH_MAX;
+    float topVsPersonalBest = Math.abs(top - pbCorrect);
+    float avgVsPersonalBest = Math.abs(avg - pbCorrect);
 
-    topScore.setLabel(new PlotBandLabel().setAlign(PlotBandLabel.Align.LEFT).setText("Top Score"));
+    System.out.println(title + " " + subtitle + " top vs pb " + topVsPersonalBest + " avg vs pb " + avgVsPersonalBest);
 
-    PlotBand avgScore = chart.getYAxis().createPlotBand()
-      .setColor("#2031ff")
-      .setFrom(under(avg))
-      .setTo(over(avg));
+    setPlotPands(chart, personalBest, topScore, avgScore, fivePercent, topVsPersonalBest, avgVsPersonalBest);
+    return GRAPH_MAX;
+  }
 
-    avgScore.setLabel(new PlotBandLabel().setAlign(PlotBandLabel.Align.LEFT).setText("Course Average"));
-
-    if (total > 2) {
-      if (top != pbCorrect) {
+  private void setPlotPands(Chart chart, PlotBand personalBest, PlotBand topScore, PlotBand avgScore,
+                            float fivePercent, float topVsPersonalBest, float avgVsPersonalBest) {
+    if (topVsPersonalBest > fivePercent) {
+      if (avgVsPersonalBest > fivePercent){
         chart.getYAxis().setPlotBands(
           avgScore,
           personalBest,
           topScore
         );
-      } else {
+      }
+      else {
         chart.getYAxis().setPlotBands(
-          avgScore,
-          personalBest
+          personalBest,
+          topScore
         );
       }
+    } else if (avgVsPersonalBest > fivePercent){
+      chart.getYAxis().setPlotBands(
+        avgScore,
+        personalBest
+      );
+    } else {
+      chart.getYAxis().setPlotBands(
+        personalBest
+      );
     }
+  }
 
-    chart.getYAxis().setAxisTitleText("# Correct");
+  /**
+   * @see #getChart
+   * @paramx gameTimeSeconds
+   * @param yValuesForUser
+   * @param chart
+   * @param seriesTitle
+   */
+  private void addSeries( List<Float> yValuesForUser, Chart chart, String seriesTitle) {
+    Float[] yValues = yValuesForUser.toArray(new Float[0]);
+
+    if (yValuesForUser.isEmpty()) {
+      System.err.println("huh??? addSeries is empty for " + seriesTitle);
+    }
+    //else {
+   //   //System.out.println("addSeries " + yValuesForUser);
+   // }
+
+    Series series = chart.createSeries()
+      .setName(seriesTitle)
+      .setPoints(yValues);
+    chart.addSeries(series);
+  }
+
+  /**
+   * @see #getChart(int, String, String, String, float, float, float, float, java.util.List)
+   * @param top
+   * @param chart
+   * @param title
+   */
+  private void configureChart(float top, Chart chart,String title) {
+    chart.getYAxis().setAxisTitleText(title)
+      .setAllowDecimals(true)
+      .setMin(0)
+      .setMax(top);
+
     chart.getXAxis().setAllowDecimals(false);
-    chart.getYAxis().setAllowDecimals(true);
-    chart.getYAxis().setMin(0);
-    chart.getYAxis().setMax(top + 2);
-
-    modal.setMaxHeigth("650px");
-    modal.setHeight("550px");
-    modal.add(chart);
-
-    Button yesButton = null;
-    Button noButton = null;
-
-    if (onYes != null) {
-      yesButton = new Button("Yes");
-      yesButton.setType(ButtonType.PRIMARY);
-      yesButton.addClickHandler(new ClickHandler() {
-        public void onClick(ClickEvent event) {
-          modal.hide();
-          onYes.onClick(event);
-        }
-      });
-      yesButton.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          modal.hide();
-        }
-      });
-    }
-
-    if (onNo != null) {
-      noButton = new Button("No");
-      noButton.setType(ButtonType.INVERSE);
-      noButton.addClickHandler(new ClickHandler() {
-        public void onClick(ClickEvent event) {
-          modal.hide();
-          onNo.onClick(event);
-        }
-      });
-    }
-
-    FluidRow promptRow = new FluidRow();
-    Column column = new Column(12,new Heading(4, prompt));
-    promptRow.add(column);
-    modal.add(promptRow);
-
-    if (onYes != null || onNo != null) {
-      FluidRow row = new FluidRow();
-      if (yesButton != null) row.add(new Column(4, yesButton));
-      row.add(new Column(4, new Heading(4)));
-      if (noButton != null)  row.add(new Column(4, noButton));
-      modal.add(row);
-    }
-    else {
-      Timer t = new Timer() {
-        @Override
-        public void run() {
-          modal.hide();
-        }
-      };
-      t.schedule(autoHideDelay);
-    }
-
-    modal.show();
-    return modal;
   }
 
-  private float over(float pbCorrect) {
-    return pbCorrect + HALF;
+  private <T extends SetScore> PlotBand getAvgScore(int numScores, float total, Chart chart) {
+    float avg = total / (float) numScores;
+    return getPlotBand(avg, chart, "#8EB4E3", AVERAGE);
   }
 
-  private float under(float pbCorrect) {
-    return pbCorrect - HALF;
+  private PlotBand getTopScore(float top, Chart chart) {
+    return getPlotBand(top, chart, "#46bf00", TOP_SCORE);
   }
+
+  private PlotBand getPersonalBest(float pbCorrect, Chart chart) {
+    return getPlotBand(pbCorrect, chart, "#f18d24", PERSONAL_BEST);
+  }
+
+  private PlotBand getPlotBand(float pbCorrect, Chart chart, String color, String labelText) {
+    Range range = getRange(pbCorrect);
+    PlotBand personalBest = chart.getYAxis().createPlotBand()
+      .setColor(color)
+      .setFrom(range.from)
+      .setTo(range.to);
+
+    personalBest.setLabel(new PlotBandLabel().setAlign(PlotBandLabel.Align.LEFT).setText(labelText));
+    return personalBest;
+  }
+
+  private Range getRange(float pbCorrect) {
+    float from = under(pbCorrect);
+    float to   = over (pbCorrect);
+    if (pbCorrect > GRAPH_MAX -HALF) {
+      to = GRAPH_MAX;
+      from = GRAPH_MAX -2*HALF;
+    }
+    if (pbCorrect < HALF) {
+      to = 2*HALF;
+      from = 0;
+    }
+    return new Range(from,to);
+  }
+
+  private static class Range {
+    float from,to;
+    public Range(float from, float to) {
+      this.from = from;
+      this.to = to;
+    }
+  }
+
+  private float over (float pbCorrect) { return pbCorrect + HALF;  }
+  private float under(float pbCorrect) { return pbCorrect - HALF;  }
 }
