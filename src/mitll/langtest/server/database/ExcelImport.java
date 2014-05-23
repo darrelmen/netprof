@@ -43,7 +43,7 @@ import java.util.Set;
  */
 public class ExcelImport implements ExerciseDAO {
   private static final Logger logger = Logger.getLogger(ExcelImport.class);
-  private static final boolean INCLUDE_ENGLISH_SEMI_AS_DEFECT = true;
+  private static final boolean INCLUDE_ENGLISH_SEMI_AS_DEFECT = false;
 
   private List<CommonExercise> exercises = null;
   private final Map<String, CommonExercise> idToExercise = new HashMap<String, CommonExercise>();
