@@ -2,6 +2,8 @@ package mitll.langtest.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
+import java.util.Collection;
+
 /**
  * Object representing a user.
  *
@@ -10,21 +12,22 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * Time: 3:54 PM
  * To change this template use File | Settings | File Templates.
  */
-public class User implements IsSerializable, Comparable<User> {
-  public long id;
-  public int age;
-  public int gender;
-  public int experience;
-  public String ipaddr;
+public class User extends MiniUser {
+  public static final String NOT_SET = "NOT_SET";
+  private int experience;
+  private String ipaddr;
   public String  password;
-  public long timestamp;
-  public String nativeLang,dialect;
-  public String userID;
   public boolean enabled;
   public boolean admin;
   private int numResults;
   private Demographics demographics;
   private float rate = 0.0f;
+  private boolean complete;
+  private float completePercent;
+
+  public static enum Permission implements IsSerializable { QUALITY_CONTROL, RECORD_AUDIO }
+
+  private Collection<Permission> permissions;
 
   public User() {} // for serialization
 
@@ -37,10 +40,11 @@ public class User implements IsSerializable, Comparable<User> {
    * @param ipaddr
    * @param password
    * @param enabled
+   * @param permissions
    */
   public User(long id, int age, int gender, int experience, String ipaddr, String password,
-               boolean enabled) {
-     this(id,age,gender,experience,ipaddr,password, "NOT_SET","NOT_SET","NOT_SET",0,enabled,false);
+              boolean enabled, Collection<Permission> permissions) {
+     this(id,age,gender,experience,ipaddr,password, NOT_SET, NOT_SET, NOT_SET,0,enabled,false, permissions);
   }
   /**
    * @see mitll.langtest.server.database.UserDAO#getUsers()
@@ -54,24 +58,23 @@ public class User implements IsSerializable, Comparable<User> {
    * @param timestamp
    * @param enabled
    * @param isAdmin
+   * @param permissions
    */
   public User(long id, int age, int gender, int experience, String ipaddr, String password,
-              String nativeLang, String dialect, String userID, long timestamp, boolean enabled, boolean isAdmin) {
-     this.id = id;
-    this.age = age;
-    this.gender = gender;
+              String nativeLang, String dialect, String userID, long timestamp, boolean enabled, boolean isAdmin, Collection<Permission> permissions) {
+    super(id,age,gender,nativeLang,dialect,userID);
     this.experience = experience;
     this.ipaddr = ipaddr;
     this.password = password;
-    this.timestamp = timestamp;
-    this.nativeLang = nativeLang;
-    this.dialect = dialect;
-    this.userID = userID;
+  //  this.timestamp = timestamp;
     this.enabled = enabled;
     this.admin = isAdmin;
+    this.permissions = permissions;
   }
 
-  public boolean isMale() { return gender == 0; }
+  public Collection<Permission> getPermissions() {
+    return permissions;
+  }
 
   public String getTimestamp() {
 	  if (ipaddr == null) return "";
@@ -81,6 +84,10 @@ public class User implements IsSerializable, Comparable<User> {
     }
     else return "";
   }
+
+/*
+  public long getRawTimestamp() { return timestamp; }
+*/
 
   /**
    * @see mitll.langtest.client.user.UserTable#getTable
@@ -94,9 +101,7 @@ public class User implements IsSerializable, Comparable<User> {
    * @see mitll.langtest.server.database.DatabaseImpl#getUsers
    * @param numResults
    */
-  public void setNumResults(int numResults) {
-    this.numResults = numResults;
-  }
+  public void setNumResults(int numResults) { this.numResults = numResults; }
 
   public Demographics getDemographics() {
     return demographics;
@@ -118,22 +123,38 @@ public class User implements IsSerializable, Comparable<User> {
     return rate;
   }
 
-  @Override
-  public int compareTo(User o) {
-    return id < o.id ? -1 : id > o.id ? +1 : 0;
+  public boolean isComplete() {
+    return complete;
   }
 
-  @Override
-  public boolean equals(Object obj) {
-    return (obj instanceof User) && compareTo((User)obj) == 0;
+  public void setComplete(boolean complete) {
+    this.complete = complete;
   }
 
-  @Override
-  public int hashCode() {
-    return new Long(id).hashCode();
+  public float getCompletePercent() {
+    return completePercent;
+  }
+
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#getUsers()
+   * @param completePercent
+   */
+  public void setCompletePercent(float completePercent) {
+    this.completePercent = completePercent;
+  }
+
+  public int getExperience() {
+    return experience;
+  }
+
+  public String getIpaddr() {
+    return ipaddr;
   }
 
   public String toString() {
-    return "user " + id + " age " + age + " gender " + gender + " native " + nativeLang + " dialect " + dialect+ " demographics " + demographics;
+    return "user " + getId() +  " is a " + getGender() + " age " + getAge() +
+        " native lang = " + getNativeLang() +
+        " dialect " + getDialect() + " demo " + demographics + " perms " + getPermissions();
   }
+
 }
