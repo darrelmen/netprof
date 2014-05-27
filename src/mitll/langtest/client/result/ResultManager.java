@@ -41,7 +41,7 @@ import java.util.Map;
 
 /**
  * Show a dialog with all the results we've collected so far.
- *
+ * <p/>
  * User: go22670
  * Date: 5/18/12
  * Time: 5:43 PM
@@ -52,19 +52,20 @@ public class ResultManager extends PagerTable {
   protected static final String UNGRADED = "Ungraded";
   protected static final String SKIP = "Skip";
   public static final int GRADING_WIDTH = 700;
+  protected static final String TIMESTAMP = "timestamp";
   private final boolean textResponse;
   protected int pageSize = PAGE_SIZE;
   protected LangTestDatabaseAsync service;
   protected UserFeedback feedback;
   private final AudioTag audioTag = new AudioTag();
   private String nameForAnswer;
-  private Map<Column<?,?>,String> colToField = new HashMap<Column<?,?>, String>();
+  private Map<Column<?, ?>, String> colToField = new HashMap<Column<?, ?>, String>();
 
   /**
-   * @see mitll.langtest.client.LangTest#onModuleLoad2
    * @param s
    * @param feedback
    * @param nameForAnswer
+   * @see mitll.langtest.client.LangTest#onModuleLoad2
    */
   public ResultManager(LangTestDatabaseAsync s, UserFeedback feedback, String nameForAnswer, PropertyHandler propertyHandler) {
     this.service = s;
@@ -73,18 +74,21 @@ public class ResultManager extends PagerTable {
     textResponse = propertyHandler.isFlashcardTextResponse();
   }
 
-  public void setPageSize(int s) { this.pageSize = s; }
+  public void setPageSize(int s) {
+    this.pageSize = s;
+  }
 
   private Widget lastTable = null;
   private Button closeButton;
 
   /**
-   * @see mitll.langtest.client.LangTest#makeLogoutParts
+   * @see mitll.langtest.client.LangTest.ResultsClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
+   * @see mitll.langtest.client.LangTest#makeHeaderRow()
    */
   public void showResults() {
     // Create the popup dialog box
     final DialogBox dialogBox = new DialogBox();
-    dialogBox.setText(nameForAnswer+"s");
+    dialogBox.setText(nameForAnswer + "s");
 
     // Enable glass background.
     dialogBox.setGlassEnabled(true);
@@ -96,7 +100,7 @@ public class ResultManager extends PagerTable {
     final VerticalPanel dialogVPanel = new VerticalPanel();
 
     int left = (Window.getClientWidth()) / 40;
-    int top  = (Window.getClientHeight()) / 40;
+    int top = (Window.getClientHeight()) / 40;
     dialogBox.setPopupPosition(left, top);
     dialogVPanel.setWidth("100%");
     //dialogBox.setWidth((int)((float)Window.getClientWidth()*0.85f) + "px");
@@ -104,7 +108,9 @@ public class ResultManager extends PagerTable {
 
     service.getNumResults(new AsyncCallback<Integer>() {
       @Override
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+      }
+
       @Override
       public void onSuccess(Integer result) {
         populateTableOld(result, dialogVPanel, dialogBox);
@@ -123,6 +129,7 @@ public class ResultManager extends PagerTable {
 
   /**
    * Experimental
+   *
    * @xdeprecated not ready
    */
 /*  private void showResultsNew() {
@@ -167,7 +174,6 @@ public class ResultManager extends PagerTable {
       }
     });*//*
   }*/
-
   private SafeHtml getURL2() {
     SafeHtmlBuilder sb = new SafeHtmlBuilder();
     sb.appendHtmlConstant("<a href='" +
@@ -217,13 +223,13 @@ public class ResultManager extends PagerTable {
   }*/
 
   /**
-   * @see GradingExercisePanel#showResults
    * @param result
    * @param showQuestionColumn
    * @param grades
    * @param grader
    * @param numGrades
    * @return
+   * @see GradingExercisePanel#showResults
    */
   public Widget getTable(Collection<Result> result, boolean showQuestionColumn,
                          Collection<Grade> grades, final int grader, int numGrades) {
@@ -241,7 +247,7 @@ public class ResultManager extends PagerTable {
 
     // Add a ColumnSortEvent.ListHandler to connect sorting to the
     // java.util.List.
-    addSorter(table, id, list);
+    //addSorter(table, id, list);
     return table;
   }
 
@@ -262,11 +268,12 @@ public class ResultManager extends PagerTable {
   }
 
   private Widget getAsyncTable(int numResults, boolean showQuestionColumn,
-                         Collection<Grade> grades, final int grader, int numGrades) {
+                               Collection<Grade> grades, final int grader, int numGrades) {
     CellTable<Result> table = new CellTable<Result>();
-    TextColumn<Result> id = addColumnsToTable(showQuestionColumn, grades, grader, numGrades, table);
+   /* TextColumn<Result> id =*/
+    addColumnsToTable(showQuestionColumn, grades, grader, numGrades, table);
     table.setRowCount(numResults, true);
-    table.setVisibleRange(0,15);
+    table.setVisibleRange(0, 15);
     createProvider(numResults, table);
 
     // Add a ColumnSortEvent.AsyncHandler to connect sorting to the
@@ -275,10 +282,21 @@ public class ResultManager extends PagerTable {
     table.addColumnSortHandler(columnSortHandler);
 
     // We know that the data is sorted alphabetically by default.
-    table.getColumnSortList().push(id);
+//     table.getColumnSortList().push(id);
+    Column<?, ?> time = getColumn(TIMESTAMP);
+    table.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(time, false));
 
     // Create a SimplePager.
     return getPagerAndTable(table);
+  }
+
+  private Column<?,?> getColumn(String name) {
+    for (Map.Entry<Column<?, ?>, String> pair : colToField.entrySet()) {
+      if (pair.getValue().equals(name)) {
+        return pair.getKey();
+      }
+    }
+    return null;
   }
 
   private TextColumn<Result> addColumnsToTable(boolean showQuestionColumn, Collection<Grade> grades,
@@ -303,13 +321,12 @@ public class ResultManager extends PagerTable {
         }
       }
     };
-    Column<Result,SafeHtml> audioFile = new Column<Result,SafeHtml>(progressCell) {
+    Column<Result, SafeHtml> audioFile = new Column<Result, SafeHtml>(progressCell) {
       @Override
       public SafeHtml getValue(Result answer) {
         if (answer.answer.endsWith(".wav")) {
           return audioTag.getAudioTag(answer.answer);
-        }
-        else {
+        } else {
           SafeHtmlBuilder sb = new SafeHtmlBuilder();
           sb.appendHtmlConstant(answer.answer);
           return sb.toSafeHtml();
@@ -319,17 +336,17 @@ public class ResultManager extends PagerTable {
     audioFile.setSortable(true);
 
     table.addColumn(audioFile, nameForAnswer);
-    colToField.put(audioFile,"answer");
+    colToField.put(audioFile, "answer");
 
     addResultColumn(grades, grader, numGrades, table);
     return id;
   }
 
   /**
-   * @see #getAsyncTable(int, boolean, java.util.Collection, int, int)
    * @param numResults
    * @param table
    * @return
+   * @see #getAsyncTable(int, boolean, java.util.Collection, int, int)
    */
   private AsyncDataProvider<Result> createProvider(final int numResults, final CellTable<Result> table) {
     AsyncDataProvider<Result> dataProvider = new AsyncDataProvider<Result>() {
@@ -346,6 +363,7 @@ public class ResultManager extends PagerTable {
           public void onFailure(Throwable caught) {
             Window.alert("Can't contact server.");
           }
+
           @Override
           public void onSuccess(List<Result> result) {
 //            System.out.println("createProvider : onSuccess for " + start +"->" + fend + " got " + result.size());
@@ -368,11 +386,19 @@ public class ResultManager extends PagerTable {
     for (int i = 0; i < sortList.size(); i++) {
       ColumnSortList.ColumnSortInfo columnSortInfo = sortList.get(i);
       Column<?, ?> column = columnSortInfo.getColumn();
-      builder.append(colToField.get(column) +"_"+(columnSortInfo.isAscending()?"ASC":"DESC")+",");
+      builder.append(colToField.get(column) + "_" + (columnSortInfo.isAscending() ? "ASC" : "DESC") + ",");
+    }
+    if (!builder.toString().contains(TIMESTAMP)) {
+      builder.append(TIMESTAMP + "_" + "DESC");
     }
     return builder;
   }
 
+  /**
+   * @param table
+   * @return
+   * @see #addColumnsToTable(boolean, java.util.Collection, int, int, com.google.gwt.user.cellview.client.CellTable)
+   */
   protected TextColumn<Result> addUserPlanExercise(CellTable<Result> table) {
     TextColumn<Result> id = new TextColumn<Result>() {
       @Override
@@ -380,8 +406,7 @@ public class ResultManager extends PagerTable {
         if (answer == null) {
           System.err.println("huh? answer is null??");
           return "";
-        }
-        else {
+        } else {
           return "" + answer.userid;
         }
       }
@@ -398,16 +423,15 @@ public class ResultManager extends PagerTable {
     };
     exercise.setSortable(true);
     table.addColumn(exercise, "Exercise");
-    colToField.put(exercise,"id");
+    colToField.put(exercise, "id");
 
     return id;
   }
 
   /**
-   *
-   * @param grader used in GradingResultManager subclass
+   * @param grader    used in GradingResultManager subclass
    * @param numGrades used in GradingResultManager subclass
-   * @param table to add columns to
+   * @param table     to add columns to
    */
   protected void addResultColumn(Collection<Grade> grades, int grader, int numGrades, CellTable<Result> table) {
     addNoWrapColumn(table);
@@ -443,7 +467,7 @@ public class ResultManager extends PagerTable {
       };
       valid.setSortable(true);
       table.addColumn(valid, "Valid");
-      colToField.put(valid,"valid");
+      colToField.put(valid, "valid");
     }
 
     TextColumn<Result> gradeInfo = new TextColumn<Result>() {
@@ -478,13 +502,13 @@ public class ResultManager extends PagerTable {
 
   private void addNoWrapColumn(CellTable<Result> table) {
     SafeHtmlCell cell = new SafeHtmlCell();
-    Column<Result,SafeHtml> dateCol = new Column<Result, SafeHtml>(cell) {
+    Column<Result, SafeHtml> dateCol = new Column<Result, SafeHtml>(cell) {
       @Override
       public SafeHtml getValue(Result answer) {
         SafeHtmlBuilder sb = new SafeHtmlBuilder();
         sb.appendHtmlConstant("<div style='white-space: nowrap;'><span>" +
-          new Date(answer.timestamp)+
-          "</span>" );
+          new Date(answer.timestamp) +
+          "</span>");
 
         sb.appendHtmlConstant("</div>");
         return sb.toSafeHtml();
@@ -492,8 +516,7 @@ public class ResultManager extends PagerTable {
     };
     table.addColumn(dateCol, "Time");
     dateCol.setSortable(true);
-    colToField.put(dateCol,"timestamp");
-
+    colToField.put(dateCol, TIMESTAMP);
   }
 
 /*  private void addNoWrapColumn2(CellTable<Result> table,String label) {
@@ -514,14 +537,14 @@ public class ResultManager extends PagerTable {
   }*/
 
   private float roundToHundredth(double totalHours) {
-    return ((float)((Math.round(totalHours*100))))/100f;
+    return ((float) ((Math.round(totalHours * 100)))) / 100f;
   }
 
   private Panel getPagerAndTable(CellTable<Result> table) {
-     return getOldSchoolPagerAndTable(table, table, pageSize, 1000);
+    return getOldSchoolPagerAndTable(table, table, pageSize, 1000);
   }
 
-  private void addSorter(CellTable<Result> table, TextColumn<Result> id, List<Result> list) {
+/*  private void addSorter(CellTable<Result> table, TextColumn<Result> id, List<Result> list) {
     ColumnSortEvent.ListHandler<Result> columnSortHandler = new ColumnSortEvent.ListHandler<Result>(list);
     columnSortHandler.setComparator(id,
       new Comparator<Result>() {
@@ -533,7 +556,7 @@ public class ResultManager extends PagerTable {
           // Compare the name columns.
           if (o1 != null) {
             if (o2 == null) return +1;
-            int res = o1.userid > o2.userid ? +1 :o1.userid < o2.userid ? -1 : 0;
+            int res = o1.userid > o2.userid ? +1 : o1.userid < o2.userid ? -1 : 0;
             if (res == 0) {
               res = o1.plan.compareTo(o2.plan);
             }
@@ -541,16 +564,17 @@ public class ResultManager extends PagerTable {
               res = o1.id.compareTo(o2.id);
             }
             if (res == 0) {
-              res =  o1.qid > o2.qid ? +1 :o1.qid < o2.qid ? -1 : 0;
+              res = o1.qid > o2.qid ? +1 : o1.qid < o2.qid ? -1 : 0;
             }
             if (res == 0) {
-              res =  o1.timestamp > o2.timestamp ? +1 :o1.timestamp < o2.timestamp ? -1 : 0;
+              res = o1.timestamp > o2.timestamp ? +1 : o1.timestamp < o2.timestamp ? -1 : 0;
             }
             return res;
           }
           return -1;
         }
-      });
+      }
+    );
     table.addColumnSortHandler(columnSortHandler);
-  }
+  }*/
 }
