@@ -268,6 +268,11 @@ public class SectionHelper {
     }
   }
 
+  public void refreshExercise(CommonExercise exercise) {
+    removeExercise(exercise);
+    addExercise(exercise);
+  }
+
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#deleteItem(String)
    * @param exercise
