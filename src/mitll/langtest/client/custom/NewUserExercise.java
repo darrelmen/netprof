@@ -446,6 +446,7 @@ public class NewUserExercise extends BasicDialog {
     newUserExercise.setEnglish(english.getText());
     newUserExercise.setForeignLanguage(foreignLang.getText());
     newUserExercise.setTransliteration(translit.getText());
+    newUserExercise.setTooltip();
   }
 
   void checkIfNeedsRefAudio() {
