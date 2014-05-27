@@ -27,7 +27,14 @@ public class AudioExercise extends ExerciseShell {
   private Map<String,ExerciseAnnotation> fieldToAnnotation = new HashMap<String, ExerciseAnnotation>();
 
   public AudioExercise() {}
-  public AudioExercise(String id, String tooltip) {  super(id,tooltip); }
+
+  public AudioExercise(String id) {
+    super(id);
+  }
+
+  public AudioExercise(String id, String tooltip) {
+    super(id, tooltip);
+  }
 
   public String getRefAudio() {
     AudioAttribute audio = getRegularSpeed();
@@ -284,8 +291,8 @@ public class AudioExercise extends ExerciseShell {
     return getAudioAttributes().size();
   }
 
-  public boolean removeAudio(String key) {
-    return audioAttributes.remove(key) != null;
+  public boolean removeAudio(AudioAttribute audioAttribute) {
+    return audioAttributes.remove(audioAttribute.getKey()) != null;
   }
 
   public String toString() {
