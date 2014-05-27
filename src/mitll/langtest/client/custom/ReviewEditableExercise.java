@@ -134,11 +134,15 @@ class ReviewEditableExercise extends EditableExercise {
 
       boolean allHaveBeenPlayed = true;
 
-      for (AudioAttribute audio : malesMap.get(user)) {
+      List<AudioAttribute> audioAttributes = malesMap.get(user);
+      for (AudioAttribute audio : audioAttributes) {
         if (!audio.isHasBeenPlayed()) {
           allHaveBeenPlayed = false;
         }
         Widget panelForAudio = getPanelForAudio(e, audio, tabAndContent);
+        if (audioAttributes.size() == 2 && audioAttributes.indexOf(audio) == 0) {
+          panelForAudio.addStyleName("bottomFiveMargin");
+        }
         tabAndContent.getContent().add(panelForAudio);
         if (audio.isHasBeenPlayed()) {
           audioWasPlayed.add(panelForAudio);
@@ -181,9 +185,7 @@ class ReviewEditableExercise extends EditableExercise {
     final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel(audioRef, e.getRefSentence(), service, controller,
       controller.getProps().showSpectrogram(), new ScoreListener() {
       @Override
-      public void setClassAvg(float classAvg) {
-
-      }
+      public void setClassAvg(float classAvg) {}
 
       @Override
       public void gotScore(PretestScore score, boolean showOnlyOneExercise) {}
@@ -192,14 +194,10 @@ class ReviewEditableExercise extends EditableExercise {
       public int getOffsetWidth() { return 0; }
 
       @Override
-      public void addScore(float hydecScore) {
-
-      }
+      public void addScore(float hydecScore) {}
 
       @Override
-      public void showChart(boolean showOnlyOneExercise) {
-
-      }
+      public void showChart(boolean showOnlyOneExercise) {}
     }, 70, audio.isRegularSpeed() ? REGULAR_SPEED : SLOW_SPEED, e.getID()
     ) {
 
