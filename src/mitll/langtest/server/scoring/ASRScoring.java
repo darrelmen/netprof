@@ -289,8 +289,6 @@ public class ASRScoring extends Scoring {
     String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
     String pathname = noSuffix + ".wav";
 
-
-
     boolean b = checkLTS(sentence);
     logger.debug("scoreRepeatExercise for " + testAudioFileNoSuffix + " under " + testAudioDir + " check lts = " + b);
     File wavFile = new File(pathname);
@@ -314,7 +312,7 @@ public class ASRScoring extends Scoring {
       }
       testAudioFileNoSuffix = new AudioConversion().convertTo16Khz(audioDir, testAudioFileNoSuffix);
     } catch (UnsupportedAudioFileException e) {
-      e.printStackTrace();
+      logger.error("Got " +e,e);
     }
 
     if (testAudioFileNoSuffix.contains(AudioConversion.SIXTEEN_K_SUFFIX)) {
