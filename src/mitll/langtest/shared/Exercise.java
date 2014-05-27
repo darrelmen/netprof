@@ -100,7 +100,7 @@ public class Exercise extends AudioExercise implements CommonExercise {
    */
   public Exercise(String plan, String id, String content, boolean promptInEnglish, boolean recordAudio, String tooltip,
                   String context) {
-    super(id,tooltip);
+    super(id, tooltip);
     this.plan = plan;
     this.setContent(content);
     this.setType(recordAudio ? EXERCISE_TYPE.RECORD : EXERCISE_TYPE.TEXT_RESPONSE);
@@ -127,6 +127,14 @@ public class Exercise extends AudioExercise implements CommonExercise {
     this.setType(EXERCISE_TYPE.REPEAT);
   }
 
+  /**
+   * @see mitll.langtest.server.database.FileExerciseDAO#getFlashcardExercise(int, String, String, String, String)
+   * @param plan
+   * @param id
+   * @param content
+   * @param sentenceRefs
+   * @param tooltip
+   */
   public Exercise(String plan, String id, String content, List<String> sentenceRefs, String tooltip) {
     super(id,tooltip);
 
@@ -145,9 +153,12 @@ public class Exercise extends AudioExercise implements CommonExercise {
    * @param tooltip
    */
   public Exercise(String plan, String id, String content, String sentenceRef, String tooltip) {
-    this(plan,id,content,null,sentenceRef, tooltip);
-   // setSlowRefAudio(slowAudioRef);
+    this(plan, id, content, null, sentenceRef, tooltip);
     this.setType(EXERCISE_TYPE.REPEAT_FAST_SLOW);
+  }
+
+  public void setTooltip() {
+    setTooltip(getCombinedTooltip());
   }
 
   public CommonShell getShellCombinedTooltip() {
