@@ -127,7 +127,9 @@ public class UserListManager {
         count++;
       }
     }
-    logger.debug("got " + userExercisesRemaining.size() +" in userExercisesRemaining, updated " + count + " predef exercises");
+    if (count > 0) {
+      logger.debug("got " + userExercisesRemaining.size() + " in userExercisesRemaining, updated " + count + " predef exercises");
+    }
     return userExercisesRemaining;
   }
 
@@ -152,7 +154,9 @@ public class UserListManager {
         count++;
       }
     }
-    logger.debug("updated " + count + " user exercises");
+    if (count > 0) {
+      logger.debug("updated " + count + " user exercises");
+    }
   }
 
   /**
@@ -580,7 +584,7 @@ public class UserListManager {
       addAnnotation(assignedID, pair.getKey(), value.status, value.comment, userExercise.getCreator());
     }
 
-    userExercise.setTooltip(userExercise.getCombinedTooltip());
+    userExercise.setTooltip();
 
     return userExercise;
   }
