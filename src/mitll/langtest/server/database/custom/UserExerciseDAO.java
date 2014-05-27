@@ -392,8 +392,6 @@ public class UserExerciseDAO extends DAO {
     //logger.debug("getUserExercises sql = " + sql);
     ResultSet rs = statement.executeQuery();
     List<CommonUserExercise> exercises = new ArrayList<CommonUserExercise>();
-   // Map<Long, MiniUser> miniUsers = userDAO.getMiniUsers();
-
 
     List<String> typeOrder = exerciseDAO.getSectionHelper().getTypeOrder();
     while (rs.next()) {
@@ -417,26 +415,10 @@ public class UserExerciseDAO extends DAO {
       );
 
       if (addMissingAudio) {
-
-        String ref = rs.getString(REF_AUDIO);
-
+        String ref  = rs.getString(REF_AUDIO);
         String sref = rs.getString(SLOW_AUDIO_REF);
-
         addMissingAudio(e, ref, sref);
       }
-
-/*      MiniUser miniUser = miniUsers.get(e.getCreator());
-      if (miniUser == null) logger.error("huh? can't find user for " + e.getCreator());
-      String ref = rs.getString(REF_AUDIO);
-      if (ref != null && !ref.isEmpty()) {
-        e.addAudioForUser(ref, miniUser);
-      }
-
-      String sref = rs.getString(SLOW_AUDIO_REF);
-      if (sref != null && !sref.isEmpty()) {
-        e.addAudio(new AudioAttribute(sref, miniUser).markSlow());
-      }*/
-
       exercises.add(e);
     }
     rs.close();
