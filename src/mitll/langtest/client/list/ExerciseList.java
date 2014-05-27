@@ -50,7 +50,6 @@ import java.util.Set;
  */
 public abstract class ExerciseList extends VerticalPanel implements ListInterface, ProvidesResize,
   ValueChangeHandler<String> {
- // private static final int NUM_QUESTIONS_FOR_TOKEN = 5;
   private static final Map<String, Collection<String>> TYPE_TO_SELECTION = new HashMap<String, Collection<String>>();
 
   private SimplePanel innerContainer;
@@ -62,10 +61,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   protected Panel createdPanel;
   protected UserManager user;
   private String exercise_title;
-//  private final boolean showTurkToken;
-//  private int countSincePrompt = 0;
   int lastReqID = 0;
- // private final Set<Integer> visited = new HashSet<Integer>();
   final boolean allowPlusInURL;
   private String instance;
   private final List<ListChangeListener<CommonShell>> listeners = new ArrayList<ListChangeListener<CommonShell>>();
