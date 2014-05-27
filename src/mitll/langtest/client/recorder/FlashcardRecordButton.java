@@ -2,6 +2,7 @@ package mitll.langtest.client.recorder;
 
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
@@ -38,7 +39,6 @@ public class FlashcardRecordButton extends RecordButton {
   private boolean warnUserWhenNotSpace = true;
   private final boolean addKeyBinding;
   private ExerciseController controller;
- // private String instance;
 
   /**
    * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#makeRecordButton
@@ -52,7 +52,7 @@ public class FlashcardRecordButton extends RecordButton {
   public FlashcardRecordButton(int delay, RecordingListener recordingListener, boolean warnNotASpace,
                                boolean addKeyBinding, ExerciseController controller, final String instance) {
     super(delay, recordingListener, true);
-   // this.instance = instance;
+
     if (addKeyBinding) {
       KeyPressHelper.KeyListener listener = new KeyPressHelper.KeyListener() {
         @Override
@@ -63,9 +63,9 @@ public class FlashcardRecordButton extends RecordButton {
         @Override
         public void gotPress(NativeEvent ne, boolean isKeyDown) {
           if (isKeyDown) {
-            checkKeyDown2(ne);
+            checkKeyDown(ne);
           } else {
-            checkKeyUp2(ne);
+            checkKeyUp(ne);
           }
         }
 
@@ -81,12 +81,12 @@ public class FlashcardRecordButton extends RecordButton {
     this.addKeyBinding = addKeyBinding;
     this.warnUserWhenNotSpace = addKeyBinding && warnNotASpace;
 
-    DOM.setStyleAttribute(getElement(), "width", WIDTH_FOR_BUTTON + "px");
-    DOM.setStyleAttribute(getElement(), "height", "48px");
+    setWidth(WIDTH_FOR_BUTTON + "px");
+    setHeight("48px");
     DOM.setStyleAttribute(getElement(), "fontSize", "x-large");
     DOM.setStyleAttribute(getElement(), "fontFamily", "Arial Unicode MS, Arial, sans-serif");
-    DOM.setStyleAttribute(getElement(), "verticalAlign", "middle");
-    DOM.setStyleAttribute(getElement(), "lineHeight", "37px");
+    getElement().getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
+    getElement().getStyle().setLineHeight(37, Style.Unit.PX);
 
     initRecordButton();
 
@@ -97,7 +97,7 @@ public class FlashcardRecordButton extends RecordButton {
 //    System.out.println("FlashcardRecordButton : using " + getElement().getId());
   }
 
-  protected void checkKeyDown2(NativeEvent event) {
+  protected void checkKeyDown(NativeEvent event) {
     if (!shouldIgnoreKeyPress()) {
       boolean isSpace = checkIsSpace(event);
 
@@ -112,7 +112,7 @@ public class FlashcardRecordButton extends RecordButton {
     }
   }
 
-  protected void checkKeyUp2(NativeEvent event) {
+  protected void checkKeyUp(NativeEvent event) {
     if (!shouldIgnoreKeyPress()) {
       boolean isSpace = checkIsSpace(event);
 
