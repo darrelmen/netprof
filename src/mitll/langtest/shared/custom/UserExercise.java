@@ -44,7 +44,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
    * @param creator
    */
   public UserExercise(CommonShell shell, long creator) {
-    super(shell.getID(), shell.getTooltip());
+    super(shell.getID());
     isPredef = !shell.getID().startsWith(CUSTOM_PREFIX);
     this.creator = creator;
   }
@@ -63,17 +63,18 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
    */
   public UserExercise(long uniqueID, String exerciseID, long creator, String english, String foreignLanguage,
                       String transliteration) {
-    super(exerciseID,english.trim().isEmpty() ? foreignLanguage : english);
+    super(exerciseID);
     this.creator = creator;
     this.uniqueID = uniqueID;
     this.english = english;
     this.foreignLanguage = foreignLanguage;
     this.transliteration = transliteration;
     isPredef = !exerciseID.startsWith(CUSTOM_PREFIX);
+    setTooltip();
   }
 
   /**
-   * @see mitll.langtest.server.database.custom.UserExerciseDAO#getUserExercises(String)
+   * @see mitll.langtest.server.database.custom.UserExerciseDAO#getUserExercises
    * @param uniqueID
    * @param exerciseID
    * @param creator
@@ -101,13 +102,12 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
    * @see mitll.langtest.client.custom.NPFExercise#populateListChoices
    */
   public UserExercise(CommonExercise exercise) {
-    super(exercise.getID(), exercise.getEnglish().trim().isEmpty() ? exercise.getRefSentence() : exercise.getEnglish());
-
+    super(exercise.getID());
     this.isPredef = true;
     this.english = exercise.getEnglish();
     this.foreignLanguage = exercise.getRefSentence();
     this.transliteration = exercise.getTransliteration();
-
+    setTooltip();
     setFieldToAnnotation(exercise.getFieldToAnnotation());
     setUnitToValue(exercise.getUnitToValue());
     setState(exercise.getState());
@@ -128,8 +128,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
    * @return
    */
   public Exercise toExercise() {
-    String tooltip = getEnglish().trim().isEmpty() ? getForeignLanguage() : getEnglish();
-    Exercise exercise = new Exercise("plan", getID(), getEnglish(), null, getForeignLanguage(), tooltip);
+    Exercise exercise = new Exercise("plan", getID(), getEnglish(), null, getForeignLanguage(), getTooltip());
     copyFields(exercise);
     copyAudio(exercise);
 
@@ -192,10 +191,15 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     if (refSentence.length() > MAX_TOOLTIP_LENGTH) {
       refSentence = refSentence.substring(0,  MAX_TOOLTIP_LENGTH);
     }
-    boolean refSentenceEqualsTooltip = getTooltip().trim().equals(getForeignLanguage().trim());
-    String combined = refSentenceEqualsTooltip ? getTooltip() : getTooltip() + (refSentence.isEmpty() ? "": " / " + refSentence);
-    if (getTooltip().isEmpty()) combined = refSentence;
+   // boolean refSentenceEqualsTooltip = getTooltip().trim().equals(getForeignLanguage().trim());
+    boolean englishSameAsForeign = getEnglish().trim().equals(getForeignLanguage().trim());
+    String combined = englishSameAsForeign ? getEnglish() : getEnglish() + (refSentence.isEmpty() ? "": " / " + refSentence);
+    if (combined.isEmpty()) combined = refSentence;
     return combined;
+  }
+
+  public void setTooltip() {
+    setTooltip(getCombinedTooltip());
   }
 
   @Override
@@ -214,15 +218,14 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   @Override
   public long getUniqueID() { return uniqueID; }
 
-  public void setEnglish(String english) {
-    this.english = english;
-    setTooltip(english.isEmpty() ? getForeignLanguage() : getEnglish());
-  }
-
+  /**
+   * @see mitll.langtest.client.custom.NewUserExercise#grabInfoFromFormAndStuffInfoExercise()
+   * @param english
+   */
+  public void setEnglish(String english) { this.english = english;  }
   public void setForeignLanguage(String foreignLanguage) {
     this.foreignLanguage = foreignLanguage;
   }
-
   public void setTransliteration(String transliteration) {
     this.transliteration = transliteration;
   }
