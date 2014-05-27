@@ -404,7 +404,7 @@ public class ExercisePanel extends VerticalPanel implements
       instructions = prefix +REPEAT_TWICE;
     }
     else if (controller.getAudioType().equals(Result.AUDIO_TYPE_REGULAR)) {
-      instructions = prefix +REPEAT_ONCE;
+      instructions = "";//prefix +REPEAT_ONCE; // this was confusing people
     }
     else if (!controller.isCRTDataCollectMode()) {
       System.out.println("unknown audio type " + controller.getAudioType());
