@@ -329,11 +329,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     List<CommonShell> exerciseShells = getExerciseShells(exercises);
 
- //   logger.debug("makeExerciseListWrapper : userID " +userID + " Role is " + role);
+    //   logger.debug("makeExerciseListWrapper : userID " +userID + " Role is " + role);
     if (role.equals(Result.AUDIO_TYPE_RECORDER)) {
-      markRecordedState((int)userID,role,exerciseShells);
-    }
-    else if (role.equalsIgnoreCase(User.Permission.QUALITY_CONTROL.toString()) || role.startsWith(Result.AUDIO_TYPE_REVIEW)) {
+      markRecordedState((int) userID, role, exerciseShells);
+    } else if (role.equalsIgnoreCase(User.Permission.QUALITY_CONTROL.toString()) || role.startsWith(Result.AUDIO_TYPE_REVIEW)) {
       db.getUserListManager().markState(exerciseShells);
     }
 
@@ -814,7 +813,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     for (AudioAttribute audioAttribute : userExercise.getAudioAttributes()) {
       logger.debug("\treallyCreateNewItem : update " + audioAttribute + " to " + userExercise.getID());
-
       db.getAudioDAO().updateExerciseID(audioAttribute.getUniqueID(), userExercise.getID());
     }
     logger.debug("reallyCreateNewItem : made user exercise " + userExercise);
@@ -861,20 +859,24 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public void markAudioDefect(AudioAttribute audioAttribute, String exid) {
-    logger.debug("mark audio defect for " + exid + " on " + audioAttribute);
+    logger.debug("markAudioDefect mark audio defect for " + exid + " on " + audioAttribute);
 
+    //CommonExercise before = db.getCustomOrPredefExercise(exid);  // allow custom items to mask out non-custom items
+    //int beforeNumAudio = before.getAudioAttributes().size();
     db.markAudioDefect(audioAttribute);
 
-    CommonExercise byID = db.getCustomOrPredefExercise(exid);  // allow custom items to mask out non-custom items
+    //CommonExercise byID = db.getCustomOrPredefExercise(exid);  // allow custom items to mask out non-custom items
 
-    Map<String, AudioAttribute> audioRefToAttr = byID.getAudioRefToAttr();
-    String key = audioAttribute.getKey();
-    AudioAttribute remove = audioRefToAttr.remove(key);
-    if (remove == null) {
+/*    if (!byID.removeAudio(audioAttribute)) {
+      String key = audioAttribute.getKey();
       logger.error("huh? couldn't remove key '" + key +
         "' : " + audioAttribute + " from " + exid +
-        " keys were " + audioRefToAttr.keySet() + " contains " + audioRefToAttr.containsKey(key));
+        " keys were " + byID.getAudioRefToAttr().keySet() + " contains " + byID.getAudioRefToAttr().containsKey(key));
     }
+    int afterNumAudio = byID.getAudioAttributes().size();
+    if (afterNumAudio != beforeNumAudio - 1) {
+      logger.error("\thuh? before there were " + beforeNumAudio + " but after there were " + afterNumAudio);
+    }*/
   }
 
   /**
@@ -890,7 +892,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public long addUser(int age, String gender, int experience,
                       String nativeLang, String dialect, String userID, Collection<User.Permission> permissions) {
-    logger.debug("Adding user " + userID);
+    //logger.debug("Adding user " + userID);
     return db.addUser(getThreadLocalRequest(),age, gender, experience, nativeLang, dialect, userID, permissions);
   }
 
