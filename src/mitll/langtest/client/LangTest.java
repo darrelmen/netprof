@@ -384,9 +384,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       firstRow.add(bothSecondAndThird);
     }
 
-    DivWidget w = new DivWidget();
-    w.getElement().setId("status");
-    verticalContainer.add(w);
+    if (true) {
+      DivWidget w = new DivWidget();
+      w.getElement().setId("status");
+      verticalContainer.add(w);
+    }
+
     return bothSecondAndThird;
   }
 
@@ -577,8 +580,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     FlashRecordPanelHeadless.setMicPermission(new MicPermission() {
       public void gotPermission() {
         System.out.println(new Date() + " : makeFlashContainer - got permission!");
-        flashRecordPanel.hide();
-        flashRecordPanel.hide2(); // must be a separate call!
+        hideFlash();
 
         checkLogin();
       }
@@ -604,7 +606,19 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           );
         }
       }
+
+      public void noRecordingMethodAvailable() {
+        System.out.println(new Date() + " : makeFlashContainer - no way to record");
+        hideFlash();
+        new DialogHelper(false).showErrorMessage("Can't record audio", "Recording audio is not supported.");
+        // TODO : OK, deal with it, disable recording...
+      }
     });
+  }
+
+  public void hideFlash() {
+    flashRecordPanel.hide();
+    flashRecordPanel.hide2(); // must be a separate call!
   }
 
   /**
@@ -727,10 +741,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (shouldCollectAudio() && !flashRecordPanel.gotPermission()) {
       System.out.println("checkInitFlash : initFlash");
 
-      flashRecordPanel.initRecorder();
+      //flashRecordPanel.initRecorder();
 
-      //flashRecordPanel.initFlash();
-
+      flashRecordPanel.initFlash();
     }
     else {
       gotMicPermission();
@@ -779,9 +792,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see #makeFlashContainer()
    */
   private void checkLogin() {
+    consoleLog("checkLogin");
     userManager.isUserExpired();
     userManager.checkLogin();
   }
+
+  native static void consoleLog( String message) /*-{
+      console.log( "LangTest:" + message );
+  }-*/;
 
   @Override
   public void rememberAudioType(String audioType) {
@@ -861,22 +879,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
    * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
    */
-/*  public void stopRecording() {
-    flashRecordPanel.stopRecording();
-  }*/
-
-  public void stopRecording(WavCallback wavCallback) {
-    flashRecordPanel.stopRecording(wavCallback);
-  }
+  public void stopRecording(WavCallback wavCallback) {  flashRecordPanel.stopRecording(wavCallback);  }
 
   /**
    * Recording interface
    */
-/*
-  public String getBase64EncodedWavFile() {
-    return flashRecordPanel.getWav();
-  }
-*/
 
   public SoundManagerAPI getSoundManager() {
     return soundManager;
