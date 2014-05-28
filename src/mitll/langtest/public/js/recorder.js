@@ -6,7 +6,7 @@ function microphone_recorder_events()
   case "ready":
       $('#status').css({'color': '#000'}).append("<p>ready: ");
       try {
-          console.log(FlashRecorderLocal);
+         // console.log(FlashRecorderLocal);
 
           FlashRecorderLocal.connect("recorderApp", 0);
       } catch (e) {
@@ -25,14 +25,27 @@ function microphone_recorder_events()
 
   case "microphone_connected":
     var mic = arguments[1];
-    micConnected();
-    $('#status').css({'color': '#000'}).append("<p>Microphone: " + mic.name);
+  //    if (FlashRecorderLocal.isMicrophoneAvailable()) {
+          $('#status').css({'color': '#000'}).append("<p>Microphone: " + mic.name);
+          micConnected();
+/*      }
+      else {
+          $('#status').css({'color': '#000'}).append("<p>Microphone: not connected " + mic.name);
+
+          micNotConnected();
+      }*/
     break;
 
   case "microphone_not_connected":
       $('#status').css({'color': '#000'}).append("<p>microphone_not_connected: ");
-      micNotConnected();
-    break;
+      //if (FlashRecorderLocal.permitCalled > 0) {
+          micNotConnected();
+    //  }
+    //  else {
+          $('#status').css({'color': '#0F0'}).append("<p># permit is " + FlashRecorderLocal.permitCalled);
+
+    //  }
+      break;
 
 /*  case "microphone_activity":
     $('#activity_level').text(arguments[1]);
@@ -75,6 +88,7 @@ FlashRecorderLocal = {
         // flash app needs time to load and initialize
         if(FlashRecorderLocal.recorder && FlashRecorderLocal.recorder.init) {
             $('#status').css({'color': '#0F0'}).append("<p>calling permit at " + new Date().getTime());
+            FlashRecorderLocal.permitCalled = FlashRecorderLocal.permitCalled + 1;
             FlashRecorderLocal.recorder.permit();
             return;
         }
