@@ -85,7 +85,7 @@ public class ReviewItemHelper extends NPFHelper {
     } else if (npfExerciseList != null) {
       npfExerciseList.onResize();
     } else {
-      System.out.println("ReviewItemHelper.onResize : not sending resize event - flexListLayout is null?");
+      //System.out.println("ReviewItemHelper.onResize : not sending resize event - flexListLayout is null?");
     }
   }
 }
