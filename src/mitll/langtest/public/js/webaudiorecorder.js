@@ -120,14 +120,16 @@ function initWebAudio() {
             navigator.mozGetUserMedia ||
             navigator.msGetUserMedia);
         window.URL = window.URL || window.webkitURL;
-        __log('Audio context is something...');
-        console.info("got here...");
+       // __log('Audio context is something...');
+        console.info("getting audio context...");
 
         //  __log('Audio context is '+window.AudioContext);
 
         audio_context = new AudioContext;
         gotAudioContext = true;
         __log('Audio context set up.');
+        console.info('Audio context set up.');
+
         __log('navigator.getUserMedia ' + (navigator.getMedia ? 'available.' : 'not present!'));
     } catch (e) {
         __log('No web audio support in this browser!');
