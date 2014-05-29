@@ -41,7 +41,13 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.sound.sampled.AudioFileFormat;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -540,6 +546,20 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String imageOutDir = pathHelper.getImageOutDir();
     logger.debug("getImageForAudioFile : getting images (" + width + " x " + height + ") (" +reqid+ ") type " + imageType+
       " for " + wavAudioFile + "");
+
+    try {
+      int open = open(testFile);
+      if (open == 2) { // for right now webaudio recording does stereo...
+        AudioConversion audioConversion = new AudioConversion();
+        File file = audioConversion.convertTo16Khz(testFile);
+        wavAudioFile = wavAudioFile.replace(".wav","_16K.wav");
+      }
+    } catch (Exception e) {
+      logger.error("got " +e,e);
+    }
+
+    logger.debug("Writing audio for  " +wavAudioFile);
+
     String absolutePathToImage = imageWriter.writeImageSimple(wavAudioFile, pathHelper.getAbsoluteFile(imageOutDir).getAbsolutePath(),
       width, height, imageType1, exerciseID);
     String installPath = pathHelper.getInstallPath();
@@ -562,6 +582,43 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         " url " + imageURL + " duration " + duration);*/
 
     return new ImageResponse(reqid, imageURL, duration);
+  }
+
+  /**
+   * Open an audio file and read its contents for display and zoom
+   *
+   * @param f a filename for an 16-bit linear wave file
+   * @throws Exception
+   */
+  private int open(File f) throws IOException {
+    AudioInputStream fwav;
+    int len;
+   // this.name = f.getName();
+    logger.debug("opening " + f.getAbsolutePath());
+    AudioFileFormat format;
+    try {
+      fwav = AudioSystem.getAudioInputStream(f);
+      logger.debug("opening " + f.getName() + " got " + fwav);
+
+      format = AudioSystem.getAudioFileFormat(f);
+      logger.debug("opening " + f.getName() + " format " + format);
+      int channels = format.getFormat().getChannels();
+   //   len = format.getFrameLength();
+     // logger.debug("opening " + f.getName() + " len " + len);
+      //logger.debug("Format " + format);
+      fwav.close();
+      return channels;
+
+    } catch (UnsupportedAudioFileException e) {
+      if (!f.getName().endsWith("raw")) {
+        logger.error("WARNING: Opening file using default RAW parameters '" + e.getMessage() + "'\n");
+      }
+      //len = (int) f.length() / DEFAULT_FORMAT.getFrameSize();
+      //fwav = new AudioInputStream(new FileInputStream(f), DEFAULT_FORMAT, len);
+      //format = new AudioFileFormat(AudioFileFormat.Type.SND, DEFAULT_FORMAT, len);
+    }
+    //System.err.println("Format: " + format.toString());
+    return 0;
   }
 
   private String getWavAudioFile(String audioFile) {
@@ -950,7 +1007,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param addToAudioTable
    * @return URL to audio on server and if audio is valid (not too short, etc.)
    */
-  public AudioAnswer writeAudioFile(List<Integer> compressedBase64EncodedString, String plan, String exercise, int questionID,
+/*  public AudioAnswer writeAudioFile(List<Integer> compressedBase64EncodedString, String plan, String exercise, int questionID,
                                     int user, int reqid, boolean flq, String audioType, boolean doFlashcard) {
     long then = System.currentTimeMillis();
 
@@ -961,11 +1018,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if(now-then > 100) {
       logger.debug("writeAudioFile : took " + (now - then) + " millis to decompress " + compressedBase64EncodedString.size());
     }
-/*    return audioFileHelper.writeAudioFile(decompress, plan, exercise, questionID, user, reqid, flq,
-      audioType, doFlashcard, this);*/
+*//*    return audioFileHelper.writeAudioFile(decompress, plan, exercise, questionID, user, reqid, flq,
+      audioType, doFlashcard, this);*//*
                 // TODO is this even called??
     return null;
-  }
+  }*/
 
   @Override
   public AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int questionID,
@@ -989,10 +1046,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         db.getUserListManager().setSecondState(exercise1, STATE.RECORDED, user);
       }
     }
+    if (!audioAnswer.isValid() && audioAnswer.getDurationInMillis() == 0) {
+      logger.warn("huh? got zero length recording " + user + " " + exercise);
+      logEvent("audioRecording", "writeAudioFile", exercise, "Writing audio - got zero duration!", user, "unknown");
+    }
     return audioAnswer;
   }
 
-  void makeAutoCRT() { audioFileHelper.makeAutoCRT(relativeConfigDir, this/*, studentAnswersDB, this*/); }
+  void makeAutoCRT() { audioFileHelper.makeAutoCRT(relativeConfigDir, this); }
 
   @Override
   public Map<User, Integer> getUserToResultCount() { return db.getUserToResultCount();  }
@@ -1072,9 +1133,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public void destroy() {
     super.destroy();
     db.destroy();
-/*    if (studentAnswersDB != null) {
-      studentAnswersDB.destroy();
-    }*/
   }
 
   @Override
@@ -1134,10 +1192,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     } else {
       servletContext.setAttribute("databaseReference", db);
     }
-/*    if (serverProps.isAutoCRT()) {
-      studentAnswersDB = makeDatabaseImpl(serverProps.getH2StudentAnswersDatabase());
-      logger.debug("using student answers db at " + serverProps.getH2StudentAnswersDatabase());
-    }*/
   }
 
   private DatabaseImpl makeDatabaseImpl(String h2DatabaseFile) {
