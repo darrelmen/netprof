@@ -117,7 +117,6 @@ public class AudioConversion {
     Base64 decoder = new Base64();
     byte[] decoded = null;
     //System.out.println("postArray : got " + base64EncodedByteArray.substring(0,Math.min(base64EncodedByteArray.length(), 20)) +"...");
-    // decoded = (byte[])decoder.decode(base64EncodedByteArray);
 
     try {
       decoded = (byte[]) decoder.decode(base64EncodedByteArray);
@@ -217,7 +216,7 @@ public class AudioConversion {
     return removeSuffix(name1);
   }
 
-  private File convertTo16Khz(File wavFile) throws UnsupportedAudioFileException {
+  public File convertTo16Khz(File wavFile) throws UnsupportedAudioFileException {
     if (!wavFile.exists()) {
       System.err.println("convertTo16Khz " + wavFile + " doesn't exist");
       return wavFile;
@@ -240,12 +239,12 @@ public class AudioConversion {
         }
       }
     } catch (IOException e) {
-      e.printStackTrace();
+      logger.error("Got " +e,e);
     }
     return wavFile;
   }
 
-  private String removeSuffix(String name1) {
+  public String removeSuffix(String name1) {
     return name1.substring(0,name1.length()-4);
   }
 
