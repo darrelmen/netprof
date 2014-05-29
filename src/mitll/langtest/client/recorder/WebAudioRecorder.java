@@ -26,6 +26,7 @@ public class WebAudioRecorder {
   public native void advertise() /*-{
       $wnd.webAudioMicAvailable = $entry(@mitll.langtest.client.recorder.WebAudioRecorder::webAudioMicAvailable());
       $wnd.webAudioMicNotAvailable = $entry(@mitll.langtest.client.recorder.WebAudioRecorder::webAudioMicNotAvailable());
+      $wnd.webAudioPermissionDenied = $entry(@mitll.langtest.client.recorder.WebAudioRecorder::webAudioPermissionDenied());
       $wnd.getBase64 = $entry(@mitll.langtest.client.recorder.WebAudioRecorder::getBase64(Ljava/lang/String;));
   }-*/;
 
@@ -66,6 +67,13 @@ public class WebAudioRecorder {
 
   public static void webAudioMicNotAvailable() {
     System.out.println("webAudioMicNotAvailable!");
+    webAudioMicAvailable = false;
+    FlashRecordPanelHeadless.micPermission.noRecordingMethodAvailable();
+    //   selfRef.rememberInstallFlash();
+  }
+
+  public static void webAudioPermissionDenied() {
+    System.out.println("webAudioPermissionDenied!");
     webAudioMicAvailable = false;
     FlashRecordPanelHeadless.micPermission.noRecordingMethodAvailable();
     //   selfRef.rememberInstallFlash();
