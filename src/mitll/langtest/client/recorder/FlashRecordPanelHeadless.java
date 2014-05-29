@@ -58,7 +58,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    * @see #installFlash()
    * @return
    */
-  private native boolean checkIfFlashInstalled() /*-{
+  public native boolean checkIfFlashInstalled() /*-{
       var hasFlash = false;
       try {
           var fo = new ActiveXObject('ShockwaveFlash.ShockwaveFlash');
@@ -69,6 +69,9 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
       return hasFlash;
   }-*/;
 
+  /**
+   * @see #rememberInstallFlash()
+   */
   void show() {
     setSize(WIDTH + "px", HEIGHT + "px");
   }
@@ -82,6 +85,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   }*/
 
   /**
+   * @see mitll.langtest.client.LangTest#checkInitFlash()
    * @see mitll.langtest.client.LangTest#showPopupOnDenial()
    */
   public void initFlash() {
@@ -158,9 +162,9 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
 */
 
     if (permissionReceived) {
-      if (!isMicAvailable()) {
+/*      if (!isMicAvailable()) {
         System.err.println("\n\n\nstopRecording huh? mic is not available");
-      }
+      }*/
       flashStopRecording();
     } else if (webAudio.isWebAudioMicAvailable()) {
       webAudio.stopRecording();
@@ -178,13 +182,18 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   /**
    * @see mitll.langtest.client.LangTest#makeFlashContainer()
    */
-  public void hide() { setSize(PX, PX); }
+  public void hide() {
+    System.out.println("hide...");
+    setSize(PX, PX);
+  }
 
   /**
    * @see mitll.langtest.client.LangTest#makeFlashContainer
    */
   public void hide2() {
     if (permissionReceived) {
+      System.out.println("hide2...");
+
       flashHide2();
     }
   }
@@ -200,6 +209,8 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    */
   private String getWav() {
     if (permissionReceived) {
+      System.out.println("getWav...");
+
       return flashGetWav();
     } else {
       return "";
@@ -220,7 +231,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    */
   private void installFlash() {
     if (gotPermission()) {
-      System.out.println("Flash Player got permission!");
+      System.out.println("installFlash :  got permission!");
 
       micPermission.gotPermission();
     } else {
