@@ -83,6 +83,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final int MAX_EXCEPTION_STRING = 300;
   private static final int MAX_CACHE_SIZE = 100;
   private static final int NO_USER_INITIAL = -2;
+  private static final boolean SHOW_STATUS = false;
+
 
   private ListInterface exerciseList;
 
@@ -384,7 +386,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       firstRow.add(bothSecondAndThird);
     }
 
-    if (true) {
+    if (SHOW_STATUS) {
       DivWidget w = new DivWidget();
       w.getElement().setId("status");
       verticalContainer.add(w);
