@@ -142,6 +142,9 @@ function initWebAudio() {
             if (navigator.getMedia) {
                 navigator.getMedia({audio: true}, startUserMedia, function (e) {
                     __log('No live audio input: ' + e);
+                    if (e.name == "PermissionDeniedError") {
+                        webAudioPermissionDenied();
+                    }
                     console.error(e);
                     webAudioMicNotAvailable();
                 });
