@@ -60,9 +60,6 @@ import java.util.Set;
 public class DatabaseImpl implements Database {
   private static final Logger logger = Logger.getLogger(DatabaseImpl.class);
 
-/*  private static final boolean DROP_USER = false;
-  private static final boolean DROP_RESULT = false;*/
-
   private String installPath;
   private ExerciseDAO exerciseDAO = null;
   private UserDAO userDAO;
