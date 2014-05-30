@@ -330,6 +330,10 @@ public class DatabaseImpl implements Database {
   public void editItem(UserExercise userExercise) {
     logger.debug("editItem " + userExercise.getID() + " mediaDir : " + serverProps.getMediaDir() +" initially audio was\n\t " + userExercise.getAudioAttributes());
 
+    userExercise.setTooltip();
+
+    logger.debug("tooltip now " + userExercise.getTooltip());
+
     getUserListManager().editItem(userExercise, true, serverProps.getMediaDir());
     Map<String, ExerciseAnnotation> fieldToAnnotation = userExercise.getFieldToAnnotation();
 
@@ -353,7 +357,7 @@ public class DatabaseImpl implements Database {
       original.removeAll(defects);
 
       for (AudioAttribute attribute : defects) {
-        if (!exercise.removeAudio(attribute.getKey())) {
+        if (!exercise.removeAudio(attribute)) {
           logger.warn("huh? couldn't remove " + attribute.getKey() + " from " + exercise.getID());
         }
       }
@@ -370,27 +374,32 @@ public class DatabaseImpl implements Database {
         audioDAO.add((int) toCopy.getUserid(), toCopy.getAudioRef(), overlayID, toCopy.getTimestamp(), toCopy.getAudioType(), toCopy.getDuration());
       }
     }
+
+    getSectionHelper().refreshExercise(exercise);
   }
 
   /**
    * Marks defects too...?
+   *
    * @param userExercise
    * @param fieldToAnnotation
    * @return
-   * */
-  protected Set<AudioAttribute> getDefects(UserExercise userExercise, Map<String, ExerciseAnnotation> fieldToAnnotation) {
+   *
+   * @see #editItem(mitll.langtest.shared.custom.UserExercise)
+   */
+  private Set<AudioAttribute> getDefects(UserExercise userExercise, Map<String, ExerciseAnnotation> fieldToAnnotation) {
     Set<AudioAttribute> defects = new HashSet<AudioAttribute>();
 
-    for (Map.Entry<String,ExerciseAnnotation> fieldAnno : fieldToAnnotation.entrySet()) {
+    for (Map.Entry<String, ExerciseAnnotation> fieldAnno : fieldToAnnotation.entrySet()) {
       if (!fieldAnno.getValue().isCorrect()) {
         AudioAttribute audioAttribute = userExercise.getAudioRefToAttr().get(fieldAnno.getKey());
-        logger.debug("found defect " + audioAttribute + " anno : " + fieldAnno.getValue() + " field  " + fieldAnno.getKey());
         if (audioAttribute != null) {
-          logger.debug("\tmarking defect on audio");
+          logger.debug("getDefects : found defect " + audioAttribute + " anno : " + fieldAnno.getValue() + " field  " + fieldAnno.getKey());
+         // logger.debug("\tmarking defect on audio");
           defects.add(audioAttribute);
           audioDAO.markDefect(audioAttribute);
         } else if (!fieldAnno.getKey().equals("transliteration")) {
-          logger.error("\tcan't marking defect on audio! looking for " + fieldAnno.getKey() + " in " + userExercise.getAudioRefToAttr().keySet());
+          logger.warn("\tcan't mark defect on audio : looking for field '" + fieldAnno.getKey() + "' in " + userExercise.getAudioRefToAttr().keySet());
         }
       }
     }
