@@ -794,12 +794,19 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see #makeFlashContainer()
    */
   private void checkLogin() {
-    consoleLog("checkLogin");
+    console("checkLogin");
     userManager.isUserExpired();
     userManager.checkLogin();
   }
 
-  native static void consoleLog( String message) /*-{
+  private void console(String message) {
+    int ieVersion = BrowserCheck.getIEVersion();
+    if (ieVersion == -1 || ieVersion > 9) {
+      consoleLog(message);
+    }
+  }
+
+  private native static void consoleLog( String message) /*-{
       console.log( "LangTest:" + message );
   }-*/;
 
