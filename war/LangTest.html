@@ -26,6 +26,11 @@
       <link rel="stylesheet" href="langtest/css/font-awesome-ie7.css">
       <![endif]-->
 
+<!--      <script type="text/javascript">
+          if (!window.console) window.console = {};
+          if (!window.console.log) window.console.log = function () { };
+      </script>-->
+
       <script type="text/javascript" src="langtest/js/buffer-loader.js"></script>
 
     <!--                                           -->
@@ -37,20 +42,11 @@
 
     <!-- These 2 scripts are so that Sound Manager 2 can be accessed through JSNI -->
       <script type="text/javascript" src="langtest/js/soundmanager2.js"></script>
-<!--
-      <script type="text/javascript" src="langtest/js/ZeroClipboard.js"></script>
--->
-
-<!--
-      <script type="text/javascript" src="langtest/js/highcharts.js"></script>
--->
       <script type="text/javascript" src="langtest/js/webaudiorecorder.js"></script>
       <script type="text/javascript" src="langtest/js/webaudiorecorderservice.js"></script>
       <script type="text/javascript" src="langtest/js/recorderWorker.js"></script>
 
-      <script type="text/javascript" src="langtest/js/AudioContextMonkeyPatch.js"></script>
-
-    <script type="text/javascript">
+      <script type="text/javascript">
       soundManager.url = 'langtest/swf/';
       soundManager.flashVersion = 9; // optional: shiny features (default = 8)
       soundManager.useFlashBlock = false; // optionally, enable when you're ready to dive in
