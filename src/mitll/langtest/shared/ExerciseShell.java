@@ -16,6 +16,11 @@ public class ExerciseShell implements IsSerializable, CommonShell {
   protected STATE secondState = STATE.UNSET;
 
   public ExerciseShell() {}
+
+  public ExerciseShell(String id) {
+    this.id = id;
+  }
+
   public ExerciseShell(String id, String tooltip) {
     this.id = id;
     setTooltip(tooltip);
