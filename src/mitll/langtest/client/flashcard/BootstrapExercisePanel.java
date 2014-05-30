@@ -125,20 +125,18 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
 
     DivWidget belowDiv = new DivWidget();
     belowDiv.addStyleName("topFiveMargin");
-    FocusPanel focusPanel = new FocusPanel();
-/*    focusPanel.addBlurHandler(new BlurHandler() {
-      @Override
-      public void onBlur(BlurEvent event) {
-        System.out.println("got blur -------- " + event);
-        answerWidget.getActualRecordButton().setFocus(true);
-      }
-    });*/
-
+ //   FocusPanel focusPanel = new FocusPanel();
     Panel threePartContent = getThreePartContent(controlState, contentMiddle, belowDiv);
-    focusPanel.add(threePartContent);
-    add(focusPanel);
+   // focusPanel.add(threePartContent);
+    //  add(focusPanel);
+    add(threePartContent);
 
-    addRecordingAndFeedbackWidgets(e, service, controller, contentMiddle);
+    if (controller.isRecordingEnabled()) {
+      addRecordingAndFeedbackWidgets(e, service, controller, contentMiddle);
+    }
+    else {
+      // TODO do something else like RapidRote
+    }
     warnNoFlash.setVisible(false);
     add(warnNoFlash);
     getElement().setId("BootstrapExercisePanel");
