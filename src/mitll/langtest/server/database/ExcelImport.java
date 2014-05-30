@@ -298,11 +298,12 @@ public class ExcelImport implements ExerciseDAO {
     List<CommonExercise> exercises = new ArrayList<CommonExercise>();
     try {
       long then = System.currentTimeMillis();
-       XSSFWorkbook wb = new XSSFWorkbook(inp);
+      XSSFWorkbook wb = new XSSFWorkbook(inp);
       long now = System.currentTimeMillis();
       if (now-then > 1000) {
         logger.info("took " + (now - then) + " millis to read spreadsheet");
       }
+      then = now;
 
       for (int i = 0; i < wb.getNumberOfSheets(); i++) {
         Sheet sheet = wb.getSheetAt(i);
@@ -326,6 +327,10 @@ public class ExcelImport implements ExerciseDAO {
       }
       if (debug) sectionHelper.report();
       inp.close();
+      now = System.currentTimeMillis();
+      if (now-then > 1000) {
+        logger.info("took " + (now - then) + " millis to make " + exercises.size() + " exercises...");
+      }
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -333,7 +338,8 @@ public class ExcelImport implements ExerciseDAO {
   }
 
   public List<CommonExercise> getExercises() { return exercises; }
-  private Map<String,Map<String,String>> idToDefectMap = new HashMap<String, Map<String, String>>();
+
+  private Map<String, Map<String, String>> idToDefectMap = new HashMap<String, Map<String, String>>();
 
   /**
    * @param sheet
