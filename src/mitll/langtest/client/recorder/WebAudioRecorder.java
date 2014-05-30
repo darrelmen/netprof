@@ -1,5 +1,6 @@
 package mitll.langtest.client.recorder;
 
+import mitll.langtest.client.BrowserCheck;
 import mitll.langtest.client.WavCallback;
 
 /**
@@ -30,7 +31,7 @@ public class WebAudioRecorder {
       $wnd.getBase64 = $entry(@mitll.langtest.client.recorder.WebAudioRecorder::getBase64(Ljava/lang/String;));
   }-*/;
 
-  public void recordOnClick() {
+/*  public void recordOnClick() {
     System.out.println("webAudioMicAvailable -- recording!");
 
     if (webAudioMicAvailable) {
@@ -39,7 +40,7 @@ public class WebAudioRecorder {
     else {
       System.err.println("web audio not available for recording...");
     }
-  }
+  }*/
 
   public native void startRecording() /*-{
       $wnd.startRecording();
@@ -49,8 +50,15 @@ public class WebAudioRecorder {
       return $wnd.stopRecording();
   }-*/;
 
-  native static void consoleLog( String message) /*-{
-      console.log( "me:" + message );
+  private static void console(String message) {
+    int ieVersion = BrowserCheck.getIEVersion();
+    if (ieVersion == -1 || ieVersion > 9) {
+      consoleLog(message);
+    }
+  }
+
+  private native static void consoleLog( String message) /*-{
+      console.log( "WebAudioRecorder:" + message );
   }-*/;
 
   public boolean isMicConnected() { return micConnected; }
@@ -60,8 +68,7 @@ public class WebAudioRecorder {
     webAudioMicAvailable = true;
 
     System.out.println("webAudioMicAvailable -- connected!");
-    // permissionReceived = true;
-    consoleLog("webAudioMicAvailable -- connected!");
+    console("webAudioMicAvailable -- connected!");
     FlashRecordPanelHeadless.micPermission.gotPermission();
   }
 
@@ -69,14 +76,12 @@ public class WebAudioRecorder {
     System.out.println("webAudioMicNotAvailable!");
     webAudioMicAvailable = false;
     FlashRecordPanelHeadless.micPermission.noRecordingMethodAvailable();
-    //   selfRef.rememberInstallFlash();
   }
 
   public static void webAudioPermissionDenied() {
     System.out.println("webAudioPermissionDenied!");
     webAudioMicAvailable = false;
     FlashRecordPanelHeadless.micPermission.noRecordingMethodAvailable();
-    //   selfRef.rememberInstallFlash();
   }
 
   /**
