@@ -47,9 +47,11 @@ import java.util.Map;
  */
 public class ResultManager extends PagerTable {
   private static final int PAGE_SIZE = 12;
-  protected static final String UNGRADED = "Ungraded";
-  protected static final String SKIP = "Skip";
-  protected static final int GRADING_WIDTH = 700;
+//  protected static final String UNGRADED = "Ungraded";
+//  protected static final String SKIP = "Skip";
+//  protected static final int GRADING_WIDTH = 700;
+  protected static final String TIMESTAMP = "timestamp";
+
   private final boolean textResponse;
   protected int pageSize = PAGE_SIZE;
   protected final LangTestDatabaseAsync service;
@@ -239,7 +241,7 @@ public class ResultManager extends PagerTable {
 
     // Add a ColumnSortEvent.ListHandler to connect sorting to the
     // java.util.List.
-    addSorter(table, id, list);
+  //  addSorter(table, id, list);
     return table;
   }
 
@@ -262,7 +264,7 @@ public class ResultManager extends PagerTable {
   private Widget getAsyncTable(int numResults, boolean showQuestionColumn,
                          Collection<Grade> grades, final int grader, int numGrades) {
     CellTable<Result> table = new CellTable<Result>();
-    TextColumn<Result> id = addColumnsToTable(showQuestionColumn, grades, grader, numGrades, table);
+    addColumnsToTable(showQuestionColumn, grades, grader, numGrades, table);
     table.setRowCount(numResults, true);
     table.setVisibleRange(0,15);
     createProvider(numResults, table);
@@ -272,11 +274,20 @@ public class ResultManager extends PagerTable {
     ColumnSortEvent.AsyncHandler columnSortHandler = new ColumnSortEvent.AsyncHandler(table);
     table.addColumnSortHandler(columnSortHandler);
 
-    // We know that the data is sorted alphabetically by default.
-    table.getColumnSortList().push(id);
+    Column<?, ?> time = getColumn(TIMESTAMP);
+    table.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(time, false));
 
     // Create a SimplePager.
     return getPagerAndTable(table);
+  }
+
+  private Column<?,?> getColumn(String name) {
+    for (Map.Entry<Column<?, ?>, String> pair : colToField.entrySet()) {
+      if (pair.getValue().equals(name)) {
+        return pair.getKey();
+      }
+    }
+    return null;
   }
 
   private TextColumn<Result> addColumnsToTable(boolean showQuestionColumn, Collection<Grade> grades,
@@ -344,6 +355,7 @@ public class ResultManager extends PagerTable {
    * @param numResults
    * @param table
    * @return
+   * @see #getAsyncTable(int, boolean, java.util.Collection, int, int)
    */
   private AsyncDataProvider<Result> createProvider(final int numResults, final CellTable<Result> table) {
     AsyncDataProvider<Result> dataProvider = new AsyncDataProvider<Result>() {
@@ -384,9 +396,17 @@ public class ResultManager extends PagerTable {
       Column<?, ?> column = columnSortInfo.getColumn();
       builder.append(colToField.get(column) +"_"+(columnSortInfo.isAscending()?"ASC":"DESC")+",");
     }
+    if (!builder.toString().contains(TIMESTAMP)) {
+      builder.append(TIMESTAMP + "_" + "DESC");
+    }
     return builder;
   }
 
+  /**
+   * @param table
+   * @return
+   * @see #addColumnsToTable(boolean, java.util.Collection, int, int, com.google.gwt.user.cellview.client.CellTable)
+   */
   protected TextColumn<Result> addUserPlanExercise(CellTable<Result> table) {
     TextColumn<Result> id = new TextColumn<Result>() {
       @Override
@@ -492,7 +512,7 @@ public class ResultManager extends PagerTable {
 
   private void addNoWrapColumn(CellTable<Result> table) {
     Column<Result, SafeHtml> dateCol = getDateColumn(table);
-    colToField.put(dateCol,"timestamp");
+    colToField.put(dateCol, TIMESTAMP);
   }
 
   private Column<Result, SafeHtml> getDateColumn(CellTable<Result> table) {
@@ -508,23 +528,6 @@ public class ResultManager extends PagerTable {
     return dateCol;
   }
 
-  /*  private void addNoWrapColumn2(CellTable<Result> table,String label) {
-    SafeHtmlCell cell = new SafeHtmlCell();
-    Column<Result,SafeHtml> dateCol = new Column<Result, SafeHtml>(cell) {
-      @Override
-      public SafeHtml getValue(Result answer) {
-        SafeHtmlBuilder sb = new SafeHtmlBuilder();
-        sb.appendHtmlConstant("<div style='white-space: nowrap;'><span>" +
-         answer.getStimulus()+
-          "</span>" );
-
-        sb.appendHtmlConstant("</div>");
-        return sb.toSafeHtml();
-      }
-    };
-    table.addVarchar(dateCol, label);
-  }*/
-
   private float roundToHundredth(double totalHours) {
     return ((float)((Math.round(totalHours*100))))/100f;
   }
@@ -533,7 +536,7 @@ public class ResultManager extends PagerTable {
      return getOldSchoolPagerAndTable(table, table, pageSize, 1000);
   }
 
-  private void addSorter(CellTable<Result> table, TextColumn<Result> id, List<Result> list) {
+/*  private void addSorter(CellTable<Result> table, TextColumn<Result> id, List<Result> list) {
     ColumnSortEvent.ListHandler<Result> columnSortHandler = new ColumnSortEvent.ListHandler<Result>(list);
     columnSortHandler.setComparator(id,
       new Comparator<Result>() {
@@ -564,5 +567,5 @@ public class ResultManager extends PagerTable {
         }
       });
     table.addColumnSortHandler(columnSortHandler);
-  }
+  }*/
 }
