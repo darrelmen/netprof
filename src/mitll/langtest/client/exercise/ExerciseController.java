@@ -89,5 +89,7 @@ public interface ExerciseController {
 
   void addKeyListener(KeyPressHelper.KeyListener listener);
 
+  boolean isRecordingEnabled();
+
   //boolean removeKeyListener(String name);
 }
