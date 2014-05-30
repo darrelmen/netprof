@@ -151,12 +151,12 @@ public class AudioCheck {
       //}
       return validityAndDur;
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.error("Got " +e,e);
     } finally {
       try {
         if (ais != null) ais.close();
       } catch (IOException e) {
-        e.printStackTrace();
+       logger.error("Got " +e,e);
       }
     }
 
@@ -177,19 +177,4 @@ public class AudioCheck {
     }
     public String toString() { return "valid " + validity + " dur " + durationInMillis; }
   }
-
-/*  public static void main(String []a ) {
-    try {
-//      boolean b = new AudioCheck().checkWavFile(new File("C:\\Users\\go22670\\DLITest\\LangTest\\war\\answers\\test\\ac-LC1-006\\0\\subject-1\\answer.wav"));
-   //   double b = new AudioCheck().getDurationInSeconds(new File("C:\\Users\\go22670\\DLITest\\LangTest\\war\\answers\\test\\ac-LC1-006\\0\\subject-1\\answer.wav"));
-      new AudioCheck().checkWavFile(new File("C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\answer_1367419336128.wav"));
-      new AudioCheck().checkWavFile(new File("C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\answer_1367440890259.wav"));
-      new AudioCheck().checkWavFile(new File("C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\answer_1367366259387.wav"));
-      new AudioCheck().checkWavFile(new File("C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\answer_1367366259387.wav"));
-      new AudioCheck().checkWavFile(new File("C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\answer_1367352029073.wav"));
-   //   System.out.println("duration " + b);
-    } catch (Exception e) {
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-    }
-  }*/
 }
