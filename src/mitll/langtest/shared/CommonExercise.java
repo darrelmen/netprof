@@ -66,8 +66,9 @@ public interface CommonExercise extends CommonShell {
   Date getModifiedDate();
 
   Collection<String> getFields();
-  boolean removeAudio(String key);
+  boolean removeAudio(AudioAttribute audioAttribute);
   String getCombinedTooltip();
+  void setTooltip();
 
   void setScores(Collection<Float> scoreTotal);
   Collection<Float> getScores();
