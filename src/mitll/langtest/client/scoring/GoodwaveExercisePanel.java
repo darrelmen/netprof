@@ -118,7 +118,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     if (widgets != null && !controller.getProps().isNoModel()) {
       add(widgets);
     }
-    addUserRecorder(service, controller, center, screenPortion,e); // todo : revisit screen portion...
+    if (controller.isRecordingEnabled()) {
+      addUserRecorder(service, controller, center, screenPortion,e); // todo : revisit screen portion...
+    }
 
     this.navigationHelper = getNavigationHelper(controller, listContainer, addKeyHandler);
     navigationHelper.addStyleName("topBarMargin");
