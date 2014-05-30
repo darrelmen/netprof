@@ -3,6 +3,7 @@ package mitll.langtest.client.user;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import mitll.langtest.client.BrowserCheck;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.shared.Result;
@@ -88,7 +89,7 @@ public class UserManager {
     final int user = getUser();
     if (user != NO_USER_SET) {
       //System.out.println("UserManager.login : current user : " + user);
-      consoleLog("UserManager.login : current user : " + user);
+      console("UserManager.login : current user : " + user);
       rememberAudioType();
       getPermissionsAndSetUser(user);
     }
@@ -97,16 +98,24 @@ public class UserManager {
     }
   }
 
-  native static void consoleLog( String message) /*-{
+  private void console(String message) {
+    int ieVersion = BrowserCheck.getIEVersion();
+    if (ieVersion == -1 || ieVersion > 9) {
+      consoleLog(message);
+    }
+  }
+
+  private native static void consoleLog( String message) /*-{
       console.log( "UserManager:" + message );
   }-*/;
+
 
   /**
    * TODO : instead have call to get permissions for a user.
    * @param user
    */
   private void getPermissionsAndSetUser(final int user) {
-    consoleLog("getPermissionsAndSetUser : " + user);
+    console("getPermissionsAndSetUser : " + user);
 
     service.getUserBy(user, new AsyncCallback<User>() {
       @Override
@@ -122,7 +131,7 @@ public class UserManager {
             userNotification.setPermission(permission, true);
           }
         }
-        consoleLog("getPermissionsAndSetUser.onSuccess : " + user);
+        console("getPermissionsAndSetUser.onSuccess : " + user);
 
         userNotification.gotUser(user);
       }
