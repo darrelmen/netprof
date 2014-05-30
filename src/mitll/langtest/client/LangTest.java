@@ -85,7 +85,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final int NO_USER_INITIAL = -2;
   private static final boolean SHOW_STATUS = false;
 
-
   private ListInterface exerciseList;
 
   private UserManager userManager;
@@ -113,6 +112,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private Navigation navigation;
   private EventLogger buttonFactory;
   private KeyPressHelper keyPressHelper = new KeyPressHelper(false,true);
+ // private boolean recordingEnabled = false;
 
   /**
    * Make an exception handler that displays the exception.
@@ -583,6 +583,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       public void gotPermission() {
         System.out.println(new Date() + " : makeFlashContainer - got permission!");
         hideFlash();
+       // recordingEnabled = true;
 
         checkLogin();
       }
@@ -612,8 +613,16 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       public void noRecordingMethodAvailable() {
         System.out.println(new Date() + " : makeFlashContainer - no way to record");
         hideFlash();
-        new DialogHelper(false).showErrorMessage("Can't record audio", "Recording audio is not supported.");
+        new ModalInfoDialog("Can't record audio", "Recording audio is not supported.",new HiddenHandler() {
+          @Override
+          public void onHidden(HiddenEvent hiddenEvent) {
+            checkLogin();
+          }
+        });
+
         // TODO : OK, deal with it, disable recording...
+//        recordingEnabled = false;
+        flashcard.setSplash("RECORDING DISABLED");
       }
     });
   }
@@ -710,7 +719,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private boolean doEverythingAfterFactory(long userID) {
     System.out.println("doEverythingAfterFactory : user changed - new " + userID + " vs last " + lastUser +
       " audio type " + getAudioType() + " perms " + getPermissions());
-    if (!shouldCollectAudio() || flashRecordPanel.gotPermission()) {
+    //if (!shouldCollectAudio()/* || flashRecordPanel.gotPermission()*/) {
       reallySetFactory();
 
       if (getPermissions().contains(User.Permission.QUALITY_CONTROL)) {
@@ -727,9 +736,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         exerciseList.reload();
       }
       navigation.showInitialState();
-    } else {
-      System.out.println("\tdoEverythingAfterFactory : " + userID + " NOT getting exercises");
-    }
+    //} else {
+  //    System.out.println("\tdoEverythingAfterFactory : " + userID + " NOT getting exercises");
+   // }
     lastUser = userID;
 
     return true;
@@ -934,6 +943,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       System.out.println("addKeyListener " + listener.getName() +
         " key press handler now " + keyPressHelper);
     }
+  }
+
+  @Override
+  public boolean isRecordingEnabled() {
+    return  flashRecordPanel.gotPermission();
   }
 
 /*  @Override
