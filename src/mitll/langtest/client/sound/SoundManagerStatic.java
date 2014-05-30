@@ -9,19 +9,8 @@ package mitll.langtest.client.sound;
  */
 public class SoundManagerStatic implements SoundManagerAPI {
   private final boolean debug = false;
-  private final boolean webaudio = false;
-  private static final boolean PREFER_WEBAUDIO = false;
-  public void initialize() {
-    SoundManager.initialize();
 
-  /*  boolean b = PREFER_WEBAUDIO || WebAudio.checkIfWebAudioInstalled(); // for now -- note console seems to be undefined in IE
-    if (b && PREFER_WEBAUDIO) {
-      System.out.println("got web audio!");
-      if (PREFER_WEBAUDIO) {
-        webaudio = true;
-      }
-    }*/
-  }
+  public void initialize() {  SoundManager.initialize();  }
 
   /**
    * This always seems to be true, whether or not a flash blocker is active.
@@ -58,6 +47,7 @@ public class SoundManagerStatic implements SoundManagerAPI {
     if (debug) System.out.println("SoundManagerStatic.createSound " + sound);
     SoundManager.createSound(sound, title, file);
 
+    boolean webaudio = false;
     if (webaudio) {
       WebAudio.setLoadedCallback(new WebAudio.Loaded() {
         @Override
