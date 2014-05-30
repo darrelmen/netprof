@@ -105,7 +105,11 @@ public class DatabaseImpl implements Database {
 
   public DatabaseImpl(String configDir, String relativeConfigDir, String dbName, ServerProperties serverProps,
                       PathHelper pathHelper, boolean mustAlreadyExist) {
+    long then = System.currentTimeMillis();
     connection = new H2Connection(configDir, dbName, mustAlreadyExist);
+    long now = System.currentTimeMillis();
+    if (now - then > 1000) logger.info("took " + (now - then) + " millis to open database");
+
     absConfigDir = configDir;
     this.configDir = relativeConfigDir;
 
@@ -124,7 +128,12 @@ public class DatabaseImpl implements Database {
       logger.error("couldn't open connection to database, got " + e.getMessage(),e);
       return;
     }
+    then = System.currentTimeMillis();
+
     initializeDAOs(pathHelper);
+    now = System.currentTimeMillis();
+    if (now - then > 1000) logger.info("took " + (now - then) + " millis to initialize DAOs");
+
     monitoringSupport = getMonitoringSupport();
   }
 
