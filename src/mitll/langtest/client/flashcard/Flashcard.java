@@ -42,6 +42,7 @@ public class Flashcard implements RequiresResize {
   private HTML userNameWidget;
   private final String nameForAnswer;
   private final boolean adminView;
+  Paragraph subtitle;
 
   /**
    * @see mitll.langtest.client.LangTest#makeHeaderRow()
@@ -83,7 +84,8 @@ public class Flashcard implements RequiresResize {
    * @param permissions
    * @return
    */
-  public Panel getHeaderRow(String splashText, boolean isBeta, String appIcon, String appTitle, String userName,
+  public Panel getHeaderRow(String splashText,
+                            boolean isBeta, String appIcon, String appTitle, String userName,
                             HTML browserInfo,
                             ClickHandler logoutClickHandler,
                             ClickHandler users,
@@ -107,7 +109,7 @@ public class Flashcard implements RequiresResize {
     appName.addStyleName("bigFont");
 
     flashcard.add(appName);
-    Paragraph subtitle = new Paragraph(splashText);
+    subtitle = new Paragraph(splashText);
     subtitle.addStyleName("subtitleForeground");
     DOM.setStyleAttribute(subtitle.getElement(), "marginBottom", "5px");
 
@@ -222,6 +224,7 @@ public class Flashcard implements RequiresResize {
    * @param name
    */
   public void setUserName(String name) {  this.userNameWidget.setText(name);  }
+  public void setSplash(String name) {  this.subtitle.setText(name);  }
 
   @Override
   public void onResize() {
