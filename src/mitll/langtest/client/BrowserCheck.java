@@ -16,13 +16,13 @@ public class BrowserCheck {
   public int ver = 0;
   private String version = "";
 
-  private final Map<String,Integer> browserToVersion = new HashMap<String,Integer>();
+  private final Map<String, Integer> browserToVersion = new HashMap<String, Integer>();
 
   public BrowserCheck() {
-    browserToVersion.put(FIREFOX,14);
-    browserToVersion.put(CHROME,21);
-    browserToVersion.put(IE,9);
-    browserToVersion.put(SAFARI,5);
+    browserToVersion.put(FIREFOX, 14);
+    browserToVersion.put(CHROME, 21);
+    browserToVersion.put(IE, 9);
+    browserToVersion.put(SAFARI, 5);
   }
 
   public BrowserCheck checkForCompatibleBrowser() {
@@ -32,25 +32,31 @@ public class BrowserCheck {
       //Window.alert("Your browser is " + browser + ".<br></br>We recommend using either Firefox, Safari, or Chrome.");
       return this;
     }
+    int ieVersion = getIEVersion();
+    if (ieVersion < 9 && ieVersion > 0) {
+      Window.alert("Your browser is IE version " + version +
+        ". We strongly recommend upgrading to version " + min + " or later.");
+    }
     if (min == null) {
       // Window.alert("Your browser is " + browser + " version " + version + ". We strongly recommend any of " + browserToVersion.keySet());
     } else if (ver < min) {
-        if (!browser.equals(FIREFOX) || !version.startsWith("10.0")) {
-            Window.alert("Your browser is " + browser + " version " + version +
-                    ". We strongly recommend upgrading to version " + min + " or later.");
-        }
+      if (!browser.equals(FIREFOX) || !version.startsWith("10.0")) {
+        Window.alert("Your browser is " + browser + " version " + version +
+          ". We strongly recommend upgrading to version " + min + " or later.");
+      }
     } else {
       //System.out.println("browser " +browser + " ver " + ver + " version " + version + " vs " + min);
     }
     return this;
   }
 
-  public boolean isIE7() { return getBrowserAndVersion().equals("IE 7"); }
-  //public boolean isIE() { return browser.equals("IE"); }
+  public boolean isIE7() {
+    return getBrowserAndVersion().equals("IE 7");
+  }
 
   /**
-   * @see mitll.langtest.client.LangTest#getReleaseStatus()
    * @return
+   * @see mitll.langtest.client.LangTest#getReleaseStatus()
    */
   public String getBrowserAndVersion() {
     String agent = getUserAgent();
@@ -71,7 +77,7 @@ public class BrowserCheck {
     } else if (agent.contains(SAFARI)) {
       version = agent.substring(agent.indexOf(SAFARI) + SAFARI.length() + 1).split("\\s+")[0];
       if (version.length() > 1) {
-        version = version.substring(0,1);
+        version = version.substring(0, 1);
       }
       browser = SAFARI;
     }
@@ -82,13 +88,6 @@ public class BrowserCheck {
       System.err.println("couldn't parse " + agent + " and " + major);
       e.printStackTrace();
     }
-
-/*    System.out.println("got here 1 ");
-
-    System.out.println("appName " + getAppName());
-    System.out.println("appVersion " +getAppVersion());
-    System.out.println("got here 2 ");*/
-
     return browser + " " + ver;
   }
 
@@ -97,30 +96,22 @@ public class BrowserCheck {
   }-*/;
 
   public static native int getIEVersion() /*-{
-    var ua = window.navigator.userAgent;
-    var msie = ua.indexOf('MSIE ');
-    var trident = ua.indexOf('Trident/');
+      var ua = window.navigator.userAgent;
+      var msie = ua.indexOf('MSIE ');
+      var trident = ua.indexOf('Trident/');
 
-    if (msie > 0) {
-        // IE 10 or older => return version number
-        return parseInt(ua.substring(msie + 5, ua.indexOf('.', msie)), 10);
-    }
+      if (msie > 0) {
+          // IE 10 or older => return version number
+          return parseInt(ua.substring(msie + 5, ua.indexOf('.', msie)), 10);
+      }
 
-    if (trident > 0) {
-        // IE 11 (or newer) => return version number
-        var rv = ua.indexOf('rv:');
-        return parseInt(ua.substring(rv + 3, ua.indexOf('.', rv)), 10);
-    }
+      if (trident > 0) {
+          // IE 11 (or newer) => return version number
+          var rv = ua.indexOf('rv:');
+          return parseInt(ua.substring(rv + 3, ua.indexOf('.', rv)), 10);
+      }
 
-    // other browser
-    return -1;
+      // other browser
+      return -1;
   }-*/;
-
-/*  private static native String getAppName() *//*-{
-      return navigator.appName;
-  }-*//*;
-
-  private static native String getAppVersion() *//*-{
-      return navigator.appVersion;
-  }-*//*;*/
 }
