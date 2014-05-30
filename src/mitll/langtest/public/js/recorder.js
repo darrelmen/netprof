@@ -6,7 +6,7 @@ function microphone_recorder_events()
   case "ready":
       $('#status').css({'color': '#000'}).append("<p>ready: ");
       try {
-         // console.log(FlashRecorderLocal);
+         //console.log("got ready");
 
           FlashRecorderLocal.connect("recorderApp", 0);
       } catch (e) {
@@ -25,7 +25,9 @@ function microphone_recorder_events()
 
   case "microphone_connected":
     var mic = arguments[1];
-  //    if (FlashRecorderLocal.isMicrophoneAvailable()) {
+      //console.log("got microphone_connected");
+
+      //    if (FlashRecorderLocal.isMicrophoneAvailable()) {
           $('#status').css({'color': '#000'}).append("<p>Microphone: " + mic.name);
           micConnected();
 /*      }
@@ -37,6 +39,8 @@ function microphone_recorder_events()
     break;
 
   case "microphone_not_connected":
+      //console.log("got microphone_not_connected");
+
       $('#status').css({'color': '#000'}).append("<p>microphone_not_connected: ");
       //if (FlashRecorderLocal.permitCalled > 0) {
           micNotConnected();
@@ -72,7 +76,28 @@ FlashRecorderLocal = {
     uploadFieldName: "upload_file[filename]",
     permitCalled: 0,
 
-    connect: function(name, attempts) {
+
+    detectIE: function () {
+        var ua = window.navigator.userAgent;
+        var msie = ua.indexOf('MSIE ');
+        var trident = ua.indexOf('Trident/');
+
+        if (msie > 0) {
+            // IE 10 or older => return version number
+            return parseInt(ua.substring(msie + 5, ua.indexOf('.', msie)), 10);
+        }
+
+        if (trident > 0) {
+            // IE 11 (or newer) => return version number
+            var rv = ua.indexOf('rv:');
+            return parseInt(ua.substring(rv + 3, ua.indexOf('.', rv)), 10);
+        }
+
+        // other browser
+        return false;
+    },
+
+    connect: function (name, attempts) {
         $('#status').css({'color': '#0F0'}).append("<p>connect called:  at " + new Date().getTime());
 
         if(navigator.appName.indexOf("Microsoft") != -1) {
@@ -88,8 +113,13 @@ FlashRecorderLocal = {
         // flash app needs time to load and initialize
         if(FlashRecorderLocal.recorder && FlashRecorderLocal.recorder.init) {
             $('#status').css({'color': '#0F0'}).append("<p>calling permit at " + new Date().getTime());
-            FlashRecorderLocal.permitCalled = FlashRecorderLocal.permitCalled + 1;
-            FlashRecorderLocal.recorder.permit();
+          //  FlashRecorderLocal.permitCalled = FlashRecorderLocal.permitCalled + 1;
+            if (this.detectIE()) {
+                FlashRecorderLocal.recorder.showPrivacy();
+            }
+            else {
+                FlashRecorderLocal.recorder.permit();
+            }
             return;
         }
 
@@ -129,6 +159,10 @@ FlashRecorderLocal = {
 
     showPermission: function() {
         FlashRecorderLocal.recorder.permit();
+    },
+
+    showPrivacy: function() {
+        FlashRecorderLocal.recorder.showPrivacy();
     }
 
     /*,
