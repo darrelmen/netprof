@@ -23,11 +23,15 @@ function onVisibilityChange() {
     if (document.webkitHidden) {
         __log('webkitHidden');
 
-        rememberedInput.stop(0);
+        if (rememberedInput) {
+            rememberedInput.stop(0);
+        }
     } else {
         __log('webkitRevealed');
 
-        rememberedInput.start(0);
+        if (rememberedInput) {
+            rememberedInput.start(0);
+        }
     }
 }
 
