@@ -27,12 +27,12 @@ import java.util.Date;
 public class UserManager {
   private static final long HOUR_IN_MILLIS = 1000 * 60 * 60;
 
-  private static final int WEEK_HOURS = 24 * 7;
   private static final int DAY_HOURS = 24;
+  private static final int WEEK_HOURS = DAY_HOURS * 7;
   //private static final int ONE_YEAR = 24 * 365;
 
   private static final int EXPIRATION_HOURS = WEEK_HOURS;
-  private static final int SHORT_EXPIRATION_HOURS = DAY_HOURS;
+ // private static final int SHORT_EXPIRATION_HOURS = DAY_HOURS;
 //  private static final int FOREVER_HOURS = ONE_YEAR;
 
   private static final int NO_USER_SET = -1;
@@ -472,7 +472,7 @@ public class UserManager {
    * @return
    */
   private long getUserSessionDuration() {
-    boolean useShortExpiration = loginType.equals(PropertyHandler.LOGIN_TYPE.STUDENT);
-    return HOUR_IN_MILLIS * (useShortExpiration ? SHORT_EXPIRATION_HOURS : EXPIRATION_HOURS);
+    //boolean useShortExpiration = loginType.equals(PropertyHandler.LOGIN_TYPE.STUDENT);
+    return HOUR_IN_MILLIS * EXPIRATION_HOURS;//(useShortExpiration ? SHORT_EXPIRATION_HOURS : EXPIRATION_HOURS);
   }
 }
