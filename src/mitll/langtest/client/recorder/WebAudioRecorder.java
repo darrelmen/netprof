@@ -89,7 +89,9 @@ public class WebAudioRecorder {
    * @param encoded
    */
   public static void getBase64(String encoded) {
-    System.out.println("getBase64 " + encoded.length());
+    System.out.println("WebAudioRecorder.getBase64 " + encoded.length());
+    if (encoded.length() < 100) System.out.print("bytes = '" +encoded+
+      "'");
     if (WebAudioRecorder.wavCallback == null) {
       System.err.println("getBase64 no callback?");
     } else {

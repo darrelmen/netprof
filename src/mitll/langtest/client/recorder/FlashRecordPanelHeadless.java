@@ -39,10 +39,10 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     SimplePanel flashContent = new SimplePanel();
     flashContent.getElement().setId(id); // indicates the place for flash player to install in the page
 
-    InlineHTML inner = new InlineHTML();
+/*    InlineHTML inner = new InlineHTML();
     //  inner.setHTML("<p>ERROR: Your browser must have JavaScript enabled and the Adobe Flash Player installed.</p>");
     inner.setHTML("<p>ERROR: Your browser must have JavaScript enabled and the Adobe Flash Player installed or support WebAudio.</p>");
-    flashContent.add(inner);
+    flashContent.add(inner);*/
     add(flashContent);
     hide();
 
@@ -126,13 +126,6 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     FlashRecordPanelHeadless.micPermission = micPermission;
   }
 
-/*
-  public native void initWebaudio() */
-/*-{
-      $wnd.initWebAudio();
-  }-*//*
-;
-*/
   public void recordOnClick() {
     if (permissionReceived) {
       if (!isMicAvailable()) {
@@ -151,14 +144,6 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     $wnd.FlashRecorderLocal.record('audio', 'audio.wav');
   }-*/;
 
-/*  private void stopRecording() {
-    if (permissionReceived) {
-      flashStopRecording();
-    } else if (webAudio.isWebAudioMicAvailable()) {
-      webAudio.stopRecording();
-    }
-  }*/
-
   public native void flashStopRecording() /*-{
       $wnd.FlashRecorderLocal.stop();
   }-*/;
@@ -166,13 +151,14 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   public native boolean isMicAvailable() /*-{
       return $wnd.FlashRecorderLocal.isMicrophoneAvailable();
   }-*/;
-
-  public native boolean showPrivacy() /*-{
+/*
+  public native boolean showPrivacy() *//*-{
         return $wnd.FlashRecorderLocal.showPrivacy();
-    }-*/;
+    }-*//*;*/
 
   /**
-   * @see mitll.langtest.client.LangTest#makeFlashContainer()
+   * @see mitll.langtest.client.LangTest#hideFlash()
+   * @see #FlashRecordPanelHeadless()
    */
   public void hide() {
     System.out.println("hide...");
