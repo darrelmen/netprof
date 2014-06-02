@@ -132,18 +132,27 @@ public class AudioCheck {
 
       float mean = pm / n;
       float var = p2 / n - mean * mean;
-      final boolean validAudio = mean > PowerThreshold || Math.sqrt(var) > VarianceThreshold;
+      double std = Math.sqrt(var);
+      final boolean validAudio = mean > PowerThreshold || std > VarianceThreshold;
 
       if (wasClipped || !validAudio) {
         logger.info("checkWavFile: audio recording (Length: " + frameLength + ") " +
           "mean power = " + mean + " (dB) vs " + PowerThreshold +
-          ", std = " + Math.sqrt(var) + " vs " + VarianceThreshold+
+          ", std = " + std + " vs " + VarianceThreshold+
           " valid = " + validAudio + " was clipped " + wasClipped + " (" + (clippedRatio * 100f) +
           "% samples clipped)");
       }
 
+      boolean micDisconnected = mean < -79.999 && std < 0.001;
+
       AudioAnswer.Validity validity = validAudio ?
-        (wasClipped ? AudioAnswer.Validity.TOO_LOUD : AudioAnswer.Validity.OK) : AudioAnswer.Validity.TOO_QUIET;
+        (wasClipped ?
+          AudioAnswer.Validity.TOO_LOUD :
+          AudioAnswer.Validity.OK) :
+        micDisconnected ?
+          AudioAnswer.Validity.MIC_DISCONNECTED :
+          AudioAnswer.Validity.TOO_QUIET;
+
       ValidityAndDur validityAndDur = new ValidityAndDur(validity, dur);
 
       //if (validityAndDur.validity != AudioAnswer.Validity.OK) {
