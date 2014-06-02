@@ -55,9 +55,10 @@ public class AnnotationDAO extends DAO {
         ANNOTATION +
       " (" +
       "uniqueid IDENTITY, " +
-      CREATORID +
-      " LONG, " +
-      "exerciseid VARCHAR, field VARCHAR, status VARCHAR, modified TIMESTAMP, comment VARCHAR, " +
+      CREATORID + " INT, " +
+      "exerciseid VARCHAR, field VARCHAR, " +
+      STATUS +
+      " VARCHAR, modified TIMESTAMP, comment VARCHAR, " +
       "FOREIGN KEY(" +
       CREATORID +
       ") REFERENCES " +
@@ -89,7 +90,9 @@ public class AnnotationDAO extends DAO {
         "INSERT INTO " + ANNOTATION +
           "(" +
           CREATORID +
-          ",exerciseid,field,status,modified,comment) " +
+          ",exerciseid,field," +
+          STATUS +
+          ",modified,comment) " +
           "VALUES(?,?,?,?,?,?);");
       int i = 1;
       //     statement.setLong(i++, annotation.getUserID());
@@ -102,16 +105,9 @@ public class AnnotationDAO extends DAO {
 
       int j = statement.executeUpdate();
 
-      if (j != 1)
+      if (j != 1) {
         logger.error("huh? didn't insert row for ");// + grade + " grade for " + resultID + " and " + grader + " and " + gradeID + " and " + gradeType);
-
-/*      ResultSet rs = statement.getGeneratedKeys(); // will return the ID in ID_COLUMN
-      if (rs.next()) {
-        id = rs.getLong(1);
-      } else {
-        logger.error("huh? no key was generated?");
-      }*/
-      //logger.debug("unique id = " + id);
+      }
 
       statement.close();
       database.closeConnection(connection);
@@ -160,29 +156,6 @@ public class AnnotationDAO extends DAO {
     ExerciseAnnotation annotation = latestByExerciseID.get(field);
     return (annotation != null) && (annotation.status.equals(status) && annotation.comment.equals(comment));
   }
-
-  /**
-   * @see mitll.langtest.server.database.custom.UserListManager#addDefect(String, String, String)
-   * @param exerciseID
-   * @param field
-   * @param status
-   * @param comment
-   * @param userID
-   * @return
-   */
-/*  public boolean hasAnnotationOld(String exerciseID, String field, String status, String comment, long userID) {
-    String sql = "SELECT * from " + ANNOTATION + " where exerciseid='" + exerciseID + "' AND " + CREATORID +"="+userID+
-      " order by field,modified desc";
-
-    try {
-      Map<String, ExerciseAnnotation> latestByExerciseID = getFieldToAnnotationMap(sql);
-      ExerciseAnnotation annotation = latestByExerciseID.get(field);
-      return (annotation != null) && (annotation.status.equals(status) && annotation.comment.equals(comment));
-    } catch (SQLException e) {
-      logger.error("got " +e + " doing " + sql,e);
-    }
-    return false;
-  }*/
 
   /**
    * @see UserListManager#addAnnotations
@@ -276,8 +249,8 @@ public class AnnotationDAO extends DAO {
   private Map<String, Long> getAnnotationToCreator(boolean forDefects) {
     Connection connection = database.getConnection();
 
-    String sql2 = "select exerciseid,field,status,creatorid" +
-      " from annotation group by exerciseid,field,status,modified order by exerciseid,field,modified;";
+    String sql2 = "select exerciseid,field," +STATUS +"," +CREATORID +
+      " from annotation group by exerciseid,field," + STATUS +",modified order by exerciseid,field,modified;";
 
     Map<String,Long> exToCreator = Collections.emptyMap();
     try {
@@ -311,18 +284,11 @@ public class AnnotationDAO extends DAO {
         fieldToStatus.put(field, status);
       }
 
-/*      for (String latest : fieldToStatus.values()) {
-        if (latest.equals(statusToLookFor)) {
-          lists.add(prevExid);
-          break;
-        }
-      } */
       if (examineFields(forDefects, fieldToStatus)) {
         exToCreator.put(prevExid,prevCreatorid);
       }
 
-      logger.debug("getUserAnnotations forDefects " +forDefects+
-        " sql " + sql2 + " yielded " + exToCreator.size());
+      //logger.debug("getUserAnnotations forDefects " +forDefects+ " sql " + sql2 + " yielded " + exToCreator.size());
    /*   if (lists.size() > 20) {
         Iterator<String> iterator = lists.iterator();
         //for (int i = 0; i < 20;i++) logger.debug("\tgetUserAnnotations e.g. " + iterator.next() );
@@ -336,13 +302,6 @@ public class AnnotationDAO extends DAO {
     }
     return exToCreator;
   }
-
-/*  public static class IDCreator {
-    //CommonShell.STATE state; // really should be an enum...
-    String exID;
-    long creatorID;
-    public IDCreator(String exID,long creatorID) {this.exID = exID; this.creatorID=creatorID;}
-  }*/
 
   private boolean examineFields(boolean forDefects, Map<String, String> fieldToStatus) {
     String statusToLookFor = "correct";
