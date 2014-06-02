@@ -5,6 +5,7 @@ function __log(e, data) {
 var audio_context;
 var recorder;
 var rememberedInput;
+var allZero;
 
 // called from initWebAudio
 function startUserMedia(stream) {
@@ -69,11 +70,14 @@ function uint6ToB64 (nUint6) {
 function bytesToBase64(aBytes) {
 
     var sB64Enc = "";
+//    this.allZero = true;
 
     for (var nMod3, nLen = aBytes.length, nUint24 = 0, nIdx = 0; nIdx < nLen; nIdx++) {
         nMod3 = nIdx % 3;
         if (nIdx > 0 && (nIdx * 4 / 3) % 76 === 0) { sB64Enc += "\r\n"; }
-        nUint24 |= aBytes[nIdx] << (16 >>> nMod3 & 24);
+        var aByte = aBytes[nIdx];
+       // if (aByte != 0) allZero = false;
+        nUint24 |= aByte << (16 >>> nMod3 & 24);
         if (nMod3 === 2 || aBytes.length - nIdx === 1) {
             sB64Enc += String.fromCharCode(uint6ToB64(nUint24 >>> 18 & 63), uint6ToB64(nUint24 >>> 12 & 63), uint6ToB64(nUint24 >>> 6 & 63), uint6ToB64(nUint24 & 63));
             nUint24 = 0;
@@ -81,11 +85,21 @@ function bytesToBase64(aBytes) {
     }
 
     return sB64Enc.replace(/A(?=A$|$)/g, "=");
-
 }
 
+//function getAllZero() { return allZero; }
+
+function getAllZero() {
+    recorder && recorder.getAllZero(function (blob) {
+        console.log("Got " + blob);
+        allZero = blob;
+    });
+}
+
+// see #stopRecording
+// see WebAudioRecorder#getBase64
 function grabWav() {
-    recorder && recorder.exportWAV(function (blob) {
+    recorder && recorder.exportMonoWAV(function (blob) {
         try {
             var reader = new FileReader();
 
@@ -114,6 +128,7 @@ function grabWav() {
     });
 }
 
+// see WebAudioRecorder#initWebaudio
 function initWebAudio() {
     var gotAudioContext = false;
     try {
@@ -123,7 +138,7 @@ function initWebAudio() {
             navigator.webkitGetUserMedia ||
             navigator.mozGetUserMedia ||
             navigator.msGetUserMedia);
-        window.URL = window.URL || window.webkitURL;
+       // window.URL = window.URL || window.webkitURL;
        // __log('Audio context is something...');
         //console.info("getting audio context...");
 
