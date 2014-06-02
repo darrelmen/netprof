@@ -68,15 +68,12 @@ function uint6ToB64 (nUint6) {
 }
 
 function bytesToBase64(aBytes) {
-
     var sB64Enc = "";
-//    this.allZero = true;
 
     for (var nMod3, nLen = aBytes.length, nUint24 = 0, nIdx = 0; nIdx < nLen; nIdx++) {
         nMod3 = nIdx % 3;
         if (nIdx > 0 && (nIdx * 4 / 3) % 76 === 0) { sB64Enc += "\r\n"; }
         var aByte = aBytes[nIdx];
-       // if (aByte != 0) allZero = false;
         nUint24 |= aByte << (16 >>> nMod3 & 24);
         if (nMod3 === 2 || aBytes.length - nIdx === 1) {
             sB64Enc += String.fromCharCode(uint6ToB64(nUint24 >>> 18 & 63), uint6ToB64(nUint24 >>> 12 & 63), uint6ToB64(nUint24 >>> 6 & 63), uint6ToB64(nUint24 & 63));
@@ -86,8 +83,6 @@ function bytesToBase64(aBytes) {
 
     return sB64Enc.replace(/A(?=A$|$)/g, "=");
 }
-
-//function getAllZero() { return allZero; }
 
 function getAllZero() {
     recorder && recorder.getAllZero(function (blob) {
