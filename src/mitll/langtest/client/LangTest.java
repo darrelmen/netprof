@@ -621,7 +621,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         });
 
         // TODO : OK, deal with it, disable recording...
-//        recordingEnabled = false;
         flashcard.setSplash("RECORDING DISABLED");
       }
     });
