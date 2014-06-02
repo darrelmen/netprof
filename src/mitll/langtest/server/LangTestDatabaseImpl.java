@@ -546,15 +546,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     try {
       int open = open(testFile);
       if (open == 2) { // for right now webaudio recording does stereo...
+        logger.debug("Writing audio for  " +wavAudioFile);
         AudioConversion audioConversion = new AudioConversion();
-        File file = audioConversion.convertTo16Khz(testFile);
+        /*File file =*/ audioConversion.convertTo16Khz(testFile);
         wavAudioFile = wavAudioFile.replace(".wav","_16K.wav");
       }
     } catch (Exception e) {
       logger.error("got " +e,e);
     }
-
-    logger.debug("Writing audio for  " +wavAudioFile);
 
     String absolutePathToImage = imageWriter.writeImageSimple(wavAudioFile, pathHelper.getAbsoluteFile(imageOutDir).getAbsolutePath(),
       width, height, imageType1, exerciseID);
@@ -594,7 +593,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     AudioFileFormat format;
     try {
       fwav = AudioSystem.getAudioInputStream(f);
-      logger.debug("opening " + f.getName() + " got " + fwav);
+      //logger.debug("opening " + f.getName() + " got " + fwav);
 
       format = AudioSystem.getAudioFileFormat(f);
       logger.debug("opening " + f.getName() + " format " + format);
