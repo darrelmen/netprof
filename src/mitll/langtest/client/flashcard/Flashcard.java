@@ -224,7 +224,11 @@ public class Flashcard implements RequiresResize {
    * @param name
    */
   public void setUserName(String name) {  this.userNameWidget.setText(name);  }
-  public void setSplash(String name) {  this.subtitle.setText(name);  }
+  public void setSplash(String name) {  this.subtitle.setText(name);
+
+    subtitle.removeStyleName("subtitleForeground");
+    subtitle.addStyleName("subtitleNoRecordingForeground");
+  }
 
   @Override
   public void onResize() {
