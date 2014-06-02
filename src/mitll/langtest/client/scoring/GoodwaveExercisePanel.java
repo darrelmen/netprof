@@ -115,7 +115,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     add(center);
 
     // score panel with gauge is on the right
-    if (widgets != null && !controller.getProps().isNoModel()) {
+    if (widgets != null && !controller.getProps().isNoModel() && controller.isRecordingEnabled()) {
       add(widgets);
     }
     if (controller.isRecordingEnabled()) {
