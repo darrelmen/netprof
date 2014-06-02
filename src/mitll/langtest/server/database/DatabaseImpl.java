@@ -732,12 +732,13 @@ public class DatabaseImpl implements Database {
    * @param durationInMillis
    * @param correct
    * @param score
+   * @param recordedWithFlash
    */
   public long addAudioAnswer(int userID, String plan, String exerciseID, int questionID,
                              String audioFile,
                              boolean valid, boolean flq, boolean spoken,
-                             String audioType, int durationInMillis, boolean correct, float score) {
-    return answerDAO.addAnswer(this, userID, plan, exerciseID, questionID, "", audioFile, valid, flq, spoken, audioType,
+                             String audioType, int durationInMillis, boolean correct, float score, boolean recordedWithFlash) {
+    return answerDAO.addAnswer(this, userID, plan, exerciseID, questionID, "", audioFile, valid, flq, spoken, audioType + (recordedWithFlash ? "" : "_by_WebRTC"),
       durationInMillis, correct, score, "");
   }
 
