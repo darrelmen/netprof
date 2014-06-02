@@ -112,7 +112,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private Navigation navigation;
   private EventLogger buttonFactory;
   private KeyPressHelper keyPressHelper = new KeyPressHelper(false,true);
- // private boolean recordingEnabled = false;
 
   /**
    * Make an exception handler that displays the exception.
@@ -583,8 +582,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       public void gotPermission() {
         System.out.println(new Date() + " : makeFlashContainer - got permission!");
         hideFlash();
-       // recordingEnabled = true;
-
         checkLogin();
       }
 
@@ -718,26 +715,22 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private boolean doEverythingAfterFactory(long userID) {
     System.out.println("doEverythingAfterFactory : user changed - new " + userID + " vs last " + lastUser +
       " audio type " + getAudioType() + " perms " + getPermissions());
-    //if (!shouldCollectAudio()/* || flashRecordPanel.gotPermission()*/) {
-      reallySetFactory();
+    reallySetFactory();
 
-      if (getPermissions().contains(User.Permission.QUALITY_CONTROL)) {
-        exerciseList.setInstance(User.Permission.QUALITY_CONTROL.toString());
-      }
-      else {
-        exerciseList.setInstance("flex");
-      }
+    if (getPermissions().contains(User.Permission.QUALITY_CONTROL)) {
+      exerciseList.setInstance(User.Permission.QUALITY_CONTROL.toString());
+    } else {
+      exerciseList.setInstance("flex");
+    }
 
-      boolean askedForExercises = exerciseList.getExercises(userID);
-      if (!askedForExercises && (lastUser != userID) && lastUser != NO_USER_INITIAL) {
-        System.out.println("\tdoEverythingAfterFactory : " + userID + " initially list and user now " + userID);
+    boolean askedForExercises = exerciseList.getExercises(userID);
+    if (!askedForExercises && (lastUser != userID) && lastUser != NO_USER_INITIAL) {
+      System.out.println("\tdoEverythingAfterFactory : " + userID + " initially list and user now " + userID);
 
-        exerciseList.reload();
-      }
-      navigation.showInitialState();
-    //} else {
-  //    System.out.println("\tdoEverythingAfterFactory : " + userID + " NOT getting exercises");
-   // }
+      exerciseList.reload();
+    }
+    navigation.showInitialState();
+
     lastUser = userID;
 
     return true;
@@ -749,9 +742,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   // TODO : refactor all this into mode objects that decide whether we need flash or not, etc.
   private void checkInitFlash() {
     if (shouldCollectAudio() && !flashRecordPanel.gotPermission()) {
-      System.out.println("checkInitFlash : initFlash");
-
-      //flashRecordPanel.initRecorder();
+//      System.out.println("checkInitFlash : initFlash");
 
       flashRecordPanel.initFlash();
     }
@@ -819,10 +810,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }-*/;
 
   @Override
-  public void rememberAudioType(String audioType) {
-   // System.out.println("audio type now " + audioType);
-    this.audioType = audioType;
-  }
+  public void rememberAudioType(String audioType) {  this.audioType = audioType;  }
 
   public boolean showCompleted() {
     return isReviewMode() || isCRTDataCollectMode() || getAudioType().equals(Result.AUDIO_TYPE_RECORDER);
@@ -862,7 +850,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public int getUser() { return userManager.getUser(); }
   public PropertyHandler getProps() { return props; }
-  //public boolean getEnglishOnly() { return props.isEnglishOnlyMode(); }
   public int getSegmentRepeats() { return props.getSegmentRepeats(); }
   public boolean isArabicTextDataCollect() {  return props.isArabicTextDataCollect(); }
   public boolean useBkgColorForRef() {  return props.isBkgColorForRef(); }
@@ -946,19 +933,17 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   @Override
   public boolean isRecordingEnabled() {
-    return  flashRecordPanel.gotPermission();
+    return flashRecordPanel.gotPermission();
   }
 
-/*  @Override
-  public boolean removeKeyListener(String name) {
-    boolean b = keyPressHelper.removeKeyHandler(name);
-    System.out.println("removeKeyListener " + name+ " key press handler now " + keyPressHelper);
-    return b;
-  }*/
+  @Override
+  public boolean usingFlashRecorder() {
+    return flashRecordPanel.usingFlash();
+  }
 
   private class LogoutClickHandler implements ClickHandler {
     public void onClick(ClickEvent event) {
-      logEvent("No widget","UserLoging","N/A","User Logout");
+      logEvent("No widget", "UserLoging", "N/A", "User Logout");
 
       resetState();
     }
