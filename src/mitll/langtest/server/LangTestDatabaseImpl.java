@@ -40,10 +40,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.sound.sampled.AudioFileFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -543,17 +539,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     logger.debug("getImageForAudioFile : getting images (" + width + " x " + height + ") (" +reqid+ ") type " + imageType+
       " for " + wavAudioFile + "");
 
-    try {
+/*    try {
       int open = open(testFile);
       if (open == 2) { // for right now webaudio recording does stereo...
         logger.debug("Writing audio for  " +wavAudioFile);
         AudioConversion audioConversion = new AudioConversion();
-        /*File file =*/ audioConversion.convertTo16Khz(testFile);
+        *//*File file =*//* audioConversion.convertTo16Khz(testFile);
         wavAudioFile = wavAudioFile.replace(".wav","_16K.wav");
       }
     } catch (Exception e) {
       logger.error("got " +e,e);
-    }
+    }*/
 
     String absolutePathToImage = imageWriter.writeImageSimple(wavAudioFile, pathHelper.getAbsoluteFile(imageOutDir).getAbsolutePath(),
       width, height, imageType1, exerciseID);
@@ -585,22 +581,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param f a filename for an 16-bit linear wave file
    * @throws Exception
    */
-  private int open(File f) throws IOException {
+/*  private int open(File f) throws IOException {
     AudioInputStream fwav;
     int len;
-   // this.name = f.getName();
     logger.debug("opening " + f.getAbsolutePath());
     AudioFileFormat format;
     try {
       fwav = AudioSystem.getAudioInputStream(f);
-      //logger.debug("opening " + f.getName() + " got " + fwav);
-
       format = AudioSystem.getAudioFileFormat(f);
       logger.debug("opening " + f.getName() + " format " + format);
       int channels = format.getFormat().getChannels();
-   //   len = format.getFrameLength();
-     // logger.debug("opening " + f.getName() + " len " + len);
-      //logger.debug("Format " + format);
       fwav.close();
       return channels;
 
@@ -608,13 +598,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       if (!f.getName().endsWith("raw")) {
         logger.error("WARNING: Opening file using default RAW parameters '" + e.getMessage() + "'\n");
       }
-      //len = (int) f.length() / DEFAULT_FORMAT.getFrameSize();
-      //fwav = new AudioInputStream(new FileInputStream(f), DEFAULT_FORMAT, len);
-      //format = new AudioFileFormat(AudioFileFormat.Type.SND, DEFAULT_FORMAT, len);
     }
-    //System.err.println("Format: " + format.toString());
     return 0;
-  }
+  }*/
 
   private String getWavAudioFile(String audioFile) {
     if (audioFile.endsWith("." +
@@ -1003,15 +989,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param doFlashcard
    * @param recordInResults
    * @param addToAudioTable
+   * @param recordedWithFlash
    * @return URL to audio on server and if audio is valid (not too short, etc.)
    */
   @Override
   public AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int questionID,
                                     int user, int reqid, boolean flq, String audioType, boolean doFlashcard,
-                                    boolean recordInResults, boolean addToAudioTable) {
+                                    boolean recordInResults, boolean addToAudioTable, boolean recordedWithFlash) {
     CommonExercise exercise1 = getExercise(exercise, user); // NOTE : this could be null if we're posting audio against a new user exercise
     AudioAnswer audioAnswer = audioFileHelper.writeAudioFile(base64EncodedString, plan, exercise, exercise1, questionID, user, reqid,
-      flq, audioType, doFlashcard, recordInResults);
+      flq, audioType, doFlashcard, recordInResults, recordedWithFlash);
 
     if (addToAudioTable && audioAnswer.isValid()) {
       File fileRef = pathHelper.getAbsoluteFile(audioAnswer.getPath());
