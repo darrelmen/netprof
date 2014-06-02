@@ -80,11 +80,12 @@ public class AudioFileHelper {
    * @param audioType regular or fast then slow audio recording
    * @param doFlashcard
    * @param recordInResults
+   * @param recordedWithFlash
    * @return URL to audio on server and if audio is valid (not too short, etc.)
    */
   public AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exerciseID, CommonExercise exercise1, int questionID,
                                     int user, int reqid, boolean flq, String audioType, boolean doFlashcard,
-                                    boolean recordInResults) {
+                                    boolean recordInResults, boolean recordedWithFlash) {
     String wavPath = pathHelper.getLocalPathToAnswer(plan, exerciseID, questionID, user);
     File file = pathHelper.getAbsoluteFile(wavPath);
 
@@ -106,7 +107,7 @@ public class AudioFileHelper {
 
     if (recordInResults) {
       long answerID = db.addAudioAnswer(user, plan, exerciseID, questionID, file.getPath(),
-        isValid, flq, true, audioType, validity.durationInMillis, answer.isCorrect(), (float) answer.getScore());
+        isValid, flq, true, audioType, validity.durationInMillis, answer.isCorrect(), (float) answer.getScore(), recordedWithFlash);
       answer.setResultID(answerID);
     }
     logger.debug("writeAudioFile answer " + answer);
@@ -287,9 +288,6 @@ public class AudioFileHelper {
 
   /**
    * @see #writeAudioFile
-   * @paramx exerciseID
-   * @paramx questionID
-   * @paramx user
    * @param reqid
    * @param file
    * @param validity
