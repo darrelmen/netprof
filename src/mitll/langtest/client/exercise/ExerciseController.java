@@ -91,5 +91,7 @@ public interface ExerciseController {
 
   boolean isRecordingEnabled();
 
+  boolean usingFlashRecorder();
+
   //boolean removeKeyListener(String name);
 }
