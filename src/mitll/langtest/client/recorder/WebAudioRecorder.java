@@ -24,6 +24,10 @@ public class WebAudioRecorder {
       $wnd.initWebAudio();
   }-*/;
 
+  private static native boolean getAllZero() /*-{
+     return $wnd.allZero;
+  }-*/;
+
   public native void advertise() /*-{
       $wnd.webAudioMicAvailable = $entry(@mitll.langtest.client.recorder.WebAudioRecorder::webAudioMicAvailable());
       $wnd.webAudioMicNotAvailable = $entry(@mitll.langtest.client.recorder.WebAudioRecorder::webAudioMicNotAvailable());
@@ -31,23 +35,12 @@ public class WebAudioRecorder {
       $wnd.getBase64 = $entry(@mitll.langtest.client.recorder.WebAudioRecorder::getBase64(Ljava/lang/String;));
   }-*/;
 
-/*  public void recordOnClick() {
-    System.out.println("webAudioMicAvailable -- recording!");
-
-    if (webAudioMicAvailable) {
-      startRecording();
-    }
-    else {
-      System.err.println("web audio not available for recording...");
-    }
-  }*/
-
   public native void startRecording() /*-{
       $wnd.startRecording();
   }-*/;
 
   public native void stopRecording() /*-{
-      return $wnd.stopRecording();
+      $wnd.stopRecording();
   }-*/;
 
   private static void console(String message) {
@@ -81,7 +74,7 @@ public class WebAudioRecorder {
   public static void webAudioPermissionDenied() {
     System.out.println("webAudioPermissionDenied!");
     webAudioMicAvailable = false;
-    FlashRecordPanelHeadless.micPermission.noRecordingMethodAvailable();
+   // FlashRecordPanelHeadless.micPermission.noRecordingMethodAvailable();
   }
 
   /**
@@ -89,9 +82,13 @@ public class WebAudioRecorder {
    * @param encoded
    */
   public static void getBase64(String encoded) {
-    System.out.println("WebAudioRecorder.getBase64 " + encoded.length());
-    if (encoded.length() < 100) System.out.print("bytes = '" +encoded+
-      "'");
+    //System.out.println("WebAudioRecorder.getBase64 " + encoded.length());
+    if (encoded.length() < 100) {
+      System.out.print("bytes = '" +encoded+ "'");
+    }
+/*    if (getAllZero()) {
+      System.out.println("Seems like the mic is not plugged in?");
+    }*/
     if (WebAudioRecorder.wavCallback == null) {
       System.err.println("getBase64 no callback?");
     } else {
