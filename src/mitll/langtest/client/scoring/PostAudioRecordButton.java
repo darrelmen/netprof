@@ -73,15 +73,15 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     final long then = System.currentTimeMillis();
    // List<Integer> compressed = LZW.compress(base64EncodedWavFile);
     service.writeAudioFile(base64EncodedWavFile,
-      "plan",//exercise.getPlan(),
+      "plan",
       exercise.getID(),
       index,
       controller.getUser(),
       reqid,
-      true,//!exercise.isPromptInEnglish(),
+      true,
       getAudioType(),
       false, recordInResults,
-      shouldAddToAudioTable(), new AsyncCallback<AudioAnswer>() {
+      shouldAddToAudioTable(), controller.usingFlashRecorder(), new AsyncCallback<AudioAnswer>() {
         public void onFailure(Throwable caught) {
           long now = System.currentTimeMillis();
           System.out.println("PostAudioRecordButton : (failure) posting audio took " + (now - then) + " millis");
