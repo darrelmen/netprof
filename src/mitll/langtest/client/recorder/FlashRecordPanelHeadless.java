@@ -38,11 +38,6 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   public FlashRecordPanelHeadless() {
     SimplePanel flashContent = new SimplePanel();
     flashContent.getElement().setId(id); // indicates the place for flash player to install in the page
-
-/*    InlineHTML inner = new InlineHTML();
-    //  inner.setHTML("<p>ERROR: Your browser must have JavaScript enabled and the Adobe Flash Player installed.</p>");
-    inner.setHTML("<p>ERROR: Your browser must have JavaScript enabled and the Adobe Flash Player installed or support WebAudio.</p>");
-    flashContent.add(inner);*/
     add(flashContent);
     hide();
 
@@ -151,17 +146,13 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   public native boolean isMicAvailable() /*-{
       return $wnd.FlashRecorderLocal.isMicrophoneAvailable();
   }-*/;
-/*
-  public native boolean showPrivacy() *//*-{
-        return $wnd.FlashRecorderLocal.showPrivacy();
-    }-*//*;*/
 
   /**
    * @see mitll.langtest.client.LangTest#hideFlash()
    * @see #FlashRecordPanelHeadless()
    */
   public void hide() {
-    System.out.println("hide...");
+    //System.out.println("hide...");
     setSize(PX, PX);
   }
 
@@ -170,7 +161,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    */
   public void hide2() {
     if (permissionReceived) {
-      System.out.println("hide2...");
+      //System.out.println("hide2...");
 
       flashHide2();
     }
@@ -187,7 +178,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    */
   private String getWav() {
     if (permissionReceived) {
-      System.out.println("getWav...");
+      //System.out.println("getWav...");
 
       return flashGetWav();
     } else {
