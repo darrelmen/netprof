@@ -46,6 +46,7 @@ import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.MiniUser;
+import mitll.langtest.shared.ScoreAndPath;
 
 import java.util.Collection;
 import java.util.Date;
@@ -179,7 +180,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     DivWidget div = new DivWidget();
     ScoringAudioPanel answerWidget = getAnswerWidget(service, controller, 1, screenPortion);
     if (!exercise.getScores().isEmpty()) {
-      for (Float score : exercise.getScores()) {
+      for (ScoreAndPath score : exercise.getScores()) {
         answerWidget.addScore(score);
       }
       answerWidget.setClassAvg(exercise.getAvgScore());
