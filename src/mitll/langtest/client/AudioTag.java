@@ -19,7 +19,7 @@ public class AudioTag {
   public static final String COMPRESSED_TYPE = "mp3";//"ogg";//"mp3";
 
   /**
-   * @see mitll.langtest.client.result.ResultManager#getTable
+   * @see mitll.langtest.client.result.ResultManager#addColumnsToTable(boolean, java.util.Collection, int, int, com.google.gwt.user.cellview.client.CellTable)
    * @param result
    * @return
    */
@@ -43,5 +43,5 @@ public class AudioTag {
     return sb.toSafeHtml();
   }
 
-  private String ensureForwardSlashes(String wavPath) {  return wavPath.replaceAll("\\\\", "/"); }
+  public String ensureForwardSlashes(String wavPath) {  return wavPath.replaceAll("\\\\", "/"); }
 }
