@@ -19,6 +19,7 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class ASRScoringAudioPanel extends ScoringAudioPanel {
+  public static final String SCORE = "score";
   private final Set<String> tested = new HashSet<String>();
   private boolean useScoreToColorBkg = true;
 
@@ -102,8 +103,8 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
       public void onSuccess(PretestScore result) {
         t.cancel();
 
-        if (isMostRecentRequest("score", result.getReqid())) {
-          useResult(result, wordTranscript, phoneTranscript, tested.contains(path));
+        if (isMostRecentRequest(SCORE, result.getReqid())) {
+          useResult(result, wordTranscript, phoneTranscript, tested.contains(path), path);
           tested.add(path);
         }
       }
