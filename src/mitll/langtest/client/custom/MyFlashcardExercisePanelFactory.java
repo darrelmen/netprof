@@ -729,19 +729,19 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       super(MyFlashcardExercisePanelFactory.this.controller.getSoundManager());
     }
     public synchronized void queueSong(String song, SoundFeedback.EndListener endListener) {
-      System.out.println("\t queueSong song " +song+ " -------  "+ System.currentTimeMillis());
+      //System.out.println("\t queueSong song " +song+ " -------  "+ System.currentTimeMillis());
       destroySound(); // if there's something playing, stop it!
       createSound(song, endListener);
     }
 
     public synchronized void queueSong(String song) {
-      System.out.println("\t queueSong song " +song+ " -------  "+ System.currentTimeMillis());
+      //System.out.println("\t queueSong song " +song+ " -------  "+ System.currentTimeMillis());
       destroySound(); // if there's something playing, stop it!
       createSound(song, endListener);
     }
 
     public synchronized void clear() {
-      System.out.println("\t stop playing current sound -------  "+ System.currentTimeMillis());
+    //  System.out.println("\t stop playing current sound -------  "+ System.currentTimeMillis());
       destroySound(); // if there's something playing, stop it!
 
     }
