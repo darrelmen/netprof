@@ -984,3 +984,34 @@ body>.dropdown-popup .nav-list>li.active>a  {
     text-decoration: none;
     text-shadow: none;
 }
+
+a.sm2_button {
+    border-radius: 6px 6px 6px 6px;
+    display: inline-block;
+    height: 18px;
+    margin-top: -1px;
+    overflow: hidden;
+    position: relative;
+    text-indent: -9999px;
+    transition: all 0.2s ease-in-out 0s;
+    vertical-align: middle;
+    width: 18px;
+}
+a.sm2_button:focus {
+    outline: medium none;
+}
+a.sm2_button, a.sm2_button.sm2_paused:hover {
+    background-color: #3399CC;
+    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAKCAYAAABmBXS+AAAAbklEQVQY02NgQAL//v1jZMAF/v//vwuIs9HEUBUBTbj4HwIeA3EGVsVAxtn/qOAVUGM8uknIiv4hsV8A5ZKxKfoLVvnvHwifAzLtMKwDSQLBVSBti27dJajkcSD2RJODO3wtkOOMz/tMSJJYAxMA5dmsL0IfubQAAAAASUVORK5CYII=");
+    background-position: 5px 50%;
+    background-repeat: no-repeat;
+}
+a.sm2_button:hover, a.sm2_button.sm2_playing, a.sm2_button.sm2_playing:hover {
+    background-color: #CC3333;
+}
+a.sm2_button.sm2_playing, a.sm2_button.sm2_playing:hover {
+    transform: rotate(90deg);
+}
+a.sm2_button.sm2_paused, a.sm2_button.sm2_paused:hover {
+    background-color: #666666;
+}
