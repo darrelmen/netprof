@@ -45,8 +45,12 @@ public class SoundManagerStatic implements SoundManagerAPI {
    */
   public void createSound(Sound sound, String title, String file) {
     if (debug) System.out.println("SoundManagerStatic.createSound " + sound);
-    SoundManager.createSound(sound, title, file);
-
+    if (SoundManager.isReady() && SoundManager.isOK()) {
+      SoundManager.createSound(sound, title, file);
+    }
+    else {
+      // TODO : consider warning that sound playback is not ready or working...
+    }
     boolean webaudio = false;
     if (webaudio) {
       WebAudio.setLoadedCallback(new WebAudio.Loaded() {
@@ -63,11 +67,11 @@ public class SoundManagerStatic implements SoundManagerAPI {
     }
   }
 
-  @Override
+/*  @Override
   public void createSoftSound(Sound sound, String title, String file) {
  //   setVolume(title);
     createSound(sound,title,file);
-  }
+  }*/
 
   @Override
   public void setVolume(String title, int vol) {
@@ -81,7 +85,9 @@ public class SoundManagerStatic implements SoundManagerAPI {
      */
   public void destroySound(Sound sound) {
     if (debug) System.out.println("SoundManagerStatic.destroy " + sound);
-    SoundManager.destroySound(sound);
+    if (SoundManager.isReady() && SoundManager.isOK()) {
+      SoundManager.destroySound(sound);
+    }
   }
 
   public void pause(Sound sound) {
@@ -99,9 +105,11 @@ public class SoundManagerStatic implements SoundManagerAPI {
     SoundManager.setPosition(sound, position);
   }
 
+/*
   public void setPositionAndPlay(Sound sound, double position) {
     SoundManager.setPositionAndPlay(sound, position);
   }
+*/
 
   public void playInterval(Sound sound, int start, int end) {
     SoundManager.playInterval(sound, start, end);
@@ -139,6 +147,6 @@ public class SoundManagerStatic implements SoundManagerAPI {
   }
 
   public void update(Sound sound, double position) {
-    SoundManager.update(sound,position);
+    SoundManager.update(sound, position);
   }
 }
