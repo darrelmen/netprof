@@ -10,11 +10,11 @@ import com.google.gwt.user.client.ui.HTML;
  * To change this template use File | Settings | File Templates.
  */
 public class SoundFeedback {
-  public static final String CORRECT   = "langtest/sounds/correct4.mp3";
+  public static final String CORRECT = "langtest/sounds/correct4.mp3";
   public static final String INCORRECT = "langtest/sounds/incorrect1.mp3";
   private static final int SOFT_VOL = 50;
 
- // private final HTML warnNoFlash;
+  // private final HTML warnNoFlash;
   private Sound currentSound = null;
   private final SoundManagerAPI soundManager;
 
@@ -29,7 +29,7 @@ public class SoundFeedback {
    */
   private SoundFeedback(SoundManagerAPI soundManager, HTML warnNoFlash) {
     this.soundManager = soundManager;
- //   this.warnNoFlash = warnNoFlash;
+    //   this.warnNoFlash = warnNoFlash;
   }
 
 /*
@@ -66,66 +66,67 @@ public class SoundFeedback {
   }*/
 
   /**
-   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#playRef(String)
    * @param song
    * @param endListener
+   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#playRef(String)
    */
-  public Sound createSound(final String song, EndListener endListener) { return createSound(song, endListener, false); }
+  public Sound createSound(final String song, EndListener endListener) {
+    return createSound(song, endListener, false);
+  }
 
-    /**
-     *
-     * @param song
-     * @param soft
-     * @seex #startSong
-     * @seex mitll.langtest.client.flashcard.BootstrapExercisePanel#playAllAudio
-     * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#playRefAndGoToNext
-     */
-    private Sound createSound(final String song, final EndListener endListener, final boolean soft) {
-      //System.out.println("playing " + song);
-      currentSound = new Sound(new AudioControl() {
-        @Override
-        public void reinitialize() {
+  /**
+   * @param song
+   * @param soft
+   * @seex #startSong
+   * @seex mitll.langtest.client.flashcard.BootstrapExercisePanel#playAllAudio
+   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#playRefAndGoToNext
+   */
+  private Sound createSound(final String song, final EndListener endListener, final boolean soft) {
+    //System.out.println("playing " + song);
+    currentSound = new Sound(new AudioControl() {
+      @Override
+      public void reinitialize() {
+      }
+
+      @Override
+      public void songFirstLoaded(double durationEstimate) {
+        // System.out.println("songFirstLoaded " +song);
+
+      }
+
+      @Override
+      public void songLoaded(double duration) {
+        //  System.out.println("songLoaded " +song);
+
+        if (soft) {
+          soundManager.setVolume(song, SOFT_VOL);
+        }
+        if (endListener != null) {
+          endListener.songStarted();
         }
 
-        @Override
-        public void songFirstLoaded(double durationEstimate) {
-          // System.out.println("songFirstLoaded " +song);
+        soundManager.play(currentSound);
+      }
 
+      @Override
+      public void songFinished() {
+        //  System.out.println("songFinished " +song);
+
+        destroySound();
+        if (endListener != null) {
+          endListener.songEnded();
         }
+      }
 
-        @Override
-        public void songLoaded(double duration) {
-          //  System.out.println("songLoaded " +song);
+      @Override
+      public void update(double position) {
+      }
+    });
 
-          if (soft) {
-            soundManager.setVolume(song, SOFT_VOL);
-          }
-          if (endListener != null) {
-            endListener.songStarted();
-          }
+    soundManager.createSound(currentSound, song, song);
 
-          soundManager.play(currentSound);
-        }
-
-        @Override
-        public void songFinished() {
-          //  System.out.println("songFinished " +song);
-
-          destroySound();
-          if (endListener != null) {
-            endListener.songEnded();
-          }
-        }
-
-        @Override
-        public void update(double position) {
-        }
-      });
-
-      soundManager.createSound(currentSound, song, song);
-
-      return currentSound;
-    }
+    return currentSound;
+  }
 
   public void destroySound() {
     if (currentSound != null) {
