@@ -3,17 +3,25 @@
  */
 package mitll.langtest.client.gauge;
 
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.ibm.icu.impl.CalendarAstronomer;
+import mitll.langtest.client.AudioTag;
+import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.pretest.PretestGauge;
 import mitll.langtest.client.scoring.ScoreListener;
+import mitll.langtest.shared.ScoreAndPath;
 import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.ArrayList;
@@ -27,6 +35,7 @@ import java.util.Map;
  * @author gregbramble
  */
 public class ASRScorePanel extends FlowPanel implements ScoreListener {
+  public static final int NUM_TO_SHOW = 6;
   private static final String INSTRUCTIONS = "Your speech is scored by a speech recognizer trained on speech from many native speakers. " +
       "The recognizer generates scores for each word and phonetic unit (see the color-coded transcript for details).";
   private static final String WARNING = "Repeat the phrase exactly as it is written. " +
@@ -39,6 +48,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   private final PretestGauge ASRGauge;
   private final Panel phoneList;
   private final List<Float> scores = new ArrayList<Float>();
+  private final List<ScoreAndPath> scores2 = new ArrayList<ScoreAndPath>();
   private final SimplePanel chartPanel;
   private final SimpleColumnChart chart = new SimpleColumnChart();
   private float classAvg;
@@ -112,28 +122,79 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
    *
    * @param score
    * @param showOnlyOneExercise
+   * @param path
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#useResult
    */
-  public void gotScore(PretestScore score, boolean showOnlyOneExercise) {
+  public void gotScore(PretestScore score, boolean showOnlyOneExercise, String path) {
     float hydecScore = score.getHydecScore();
     float zeroToHundred = hydecScore * 100f;
     setASRGaugeValue(Math.min(100.0f, zeroToHundred));
     updatePhoneAccuracy(score.getPhoneScores());
-    addScore(hydecScore);
+    addScore(new ScoreAndPath(hydecScore,path));
     chartPanel.clear();
     showChart(showOnlyOneExercise);
   }
 
   @Override
-  public void addScore(float hydecScore) {
-    scores.add(hydecScore);
+  public void addScore(ScoreAndPath hydecScore) {
+    scores.add(hydecScore.getScore());
+    scores2.add(hydecScore);
   }
   @Override
   public void setClassAvg(float classAvg) { this.classAvg = classAvg; }
 
+  //@Override
+  public void showChartOld(boolean showOnlyOneExercise) {
+    chartPanel.add(chart.getChart(showOnlyOneExercise, scores, CHART_HEIGHT, classAvg));
+  }
+
   @Override
   public void showChart(boolean showOnlyOneExercise) {
-   chartPanel.add(chart.getChart(showOnlyOneExercise, scores, CHART_HEIGHT, classAvg));
+    VerticalPanel vp = new VerticalPanel();
+    List<ScoreAndPath> scoreAndPaths = scores2;
+   AudioTag audioTag = new AudioTag();
+
+    if (scores2.size() > NUM_TO_SHOW) {
+      scoreAndPaths = scores2.subList(scores2.size() - NUM_TO_SHOW, scores2.size());
+    }
+
+    TooltipHelper tooltipHelper = new TooltipHelper();
+    for (ScoreAndPath scoreAndPath : scoreAndPaths) {
+      DivWidget row = makeRow(tooltipHelper, scoreAndPath, "Score");
+      HorizontalPanel hp = new HorizontalPanel();
+      SafeHtmlBuilder sb = new SafeHtmlBuilder();
+      sb.appendHtmlConstant("<a href=\"" +
+        audioTag.ensureForwardSlashes(scoreAndPath.getPath()) +
+        "\"" +
+        " title=\"Play\" class=\"sm2_button\">Play</a>");
+
+
+
+      //   hp.add(new InlineHTML(audioTag.getAudioTag(scoreAndPath.getPath())));
+      hp.add(new HTML( sb.toSafeHtml()));
+
+
+      row.addStyleName("leftFiveMargin");
+      hp.add(row);
+      vp.add(hp);
+    }
+    DivWidget classAvgDiv = makeRow(tooltipHelper, new ScoreAndPath(classAvg, ""), "Class Avg");
+    classAvgDiv.addStyleName("topFiveMargin");
+    vp.add(classAvgDiv);
+    chartPanel.add(vp);
+  }
+
+  public DivWidget makeRow(TooltipHelper tooltipHelper, ScoreAndPath scoreAndPath,String prefix) {
+    DivWidget row = new DivWidget();
+    int iScore = (int) (100f * scoreAndPath.getScore());
+    row.setWidth(iScore + "px");
+    row.setHeight(10 + "px");
+    row.getElement().getStyle().setBackgroundColor(chart.getColor(scoreAndPath.getScore()));
+    row.getElement().getStyle().setMarginBottom(3, Style.Unit.PX);
+   // String prefix = "Score";
+    tooltipHelper.createAddTooltip(row, prefix +
+      " = " + iScore + "%", Placement.RIGHT);
+    return row;
   }
 
 /*  private ColumnChart doChart(boolean showOnlyOneExercise, List<Float> scores) {
