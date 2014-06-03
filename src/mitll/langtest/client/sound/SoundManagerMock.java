@@ -15,14 +15,12 @@ public class SoundManagerMock implements SoundManagerAPI {
   }
 
   @Override
-  public void setVolume(String title, int vol) {
+  public void setVolume(String title, int vol) {}
 
-  }
-
-  @Override
+/*  @Override
   public void createSoftSound(Sound sound, String title, String file) {
 
-  }
+  }*/
 
   public void initialize() {
     GWT.log("SoundManagerMock initialize");
@@ -56,9 +54,9 @@ public class SoundManagerMock implements SoundManagerAPI {
     GWT.log("SoundManagerMock setPosition " + position);
   }
 
-  public void setPositionAndPlay(Sound sound, double position) {
+/*  public void setPositionAndPlay(Sound sound, double position) {
     GWT.log("SoundManagerMock setPositionAndPlay " + position);
-  }
+  }*/
 
   public void exportStaticMethods() {
     GWT.log("SoundManagerMock exportStaticMethods");
