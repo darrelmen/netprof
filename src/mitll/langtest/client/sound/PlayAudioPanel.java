@@ -259,7 +259,8 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   }
 
   /**
-   *
+   * @see #onUnload()
+   * @see #startSong(String)
    */
   private void destroySound() {
     if (currentSound != null) {
