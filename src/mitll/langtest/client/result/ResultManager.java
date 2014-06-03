@@ -32,7 +32,6 @@ import mitll.langtest.shared.grade.Grade;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -234,10 +233,10 @@ public class ResultManager extends PagerTable {
   protected CellTable<Result> getResultCellTable(Collection<Result> result,
                                                  boolean showQuestionColumn, Collection<Grade> grades, int grader, int numGrades) {
     CellTable<Result> table = new CellTable<Result>();
-    TextColumn<Result> id = addColumnsToTable(showQuestionColumn, grades, grader, numGrades, table);
+    /*TextColumn<Result> id =*/ addColumnsToTable(showQuestionColumn, grades, grader, numGrades, table);
 
     // Create a data provider.
-    List<Result> list = createProvider(result, table);
+    /*List<Result> list =*/ createProvider(result, table);
 
     // Add a ColumnSortEvent.ListHandler to connect sorting to the
     // java.util.List.
