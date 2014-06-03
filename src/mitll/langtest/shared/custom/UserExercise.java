@@ -7,6 +7,7 @@ import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.ScoreAndPath;
 
 import java.util.Collection;
 import java.util.Date;
@@ -32,7 +33,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   private boolean isPredef;
   private boolean isOverride;
   private Date modifiedDate;
-  private Collection<Float> scores;
+  private Collection<ScoreAndPath> scores;
   private float avgScore;
   private static final int MAX_TOOLTIP_LENGTH = 15;
 
@@ -251,12 +252,12 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     return modifiedDate;
   }
 
-  public Collection<Float> getScores() {
+  public Collection<ScoreAndPath> getScores() {
     return scores;
   }
 
   @Override
-  public void setScores(Collection<Float> scores) {
+  public void setScores(Collection<ScoreAndPath> scores) {
     this.scores = scores;
   }
 
