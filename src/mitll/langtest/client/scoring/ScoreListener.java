@@ -1,5 +1,6 @@
 package mitll.langtest.client.scoring;
 
+import mitll.langtest.shared.ScoreAndPath;
 import mitll.langtest.shared.scoring.PretestScore;
 
 /**
@@ -10,10 +11,10 @@ import mitll.langtest.shared.scoring.PretestScore;
  * To change this template use File | Settings | File Templates.
  */
 public interface ScoreListener {
-  void gotScore(PretestScore score, boolean showOnlyOneExercise);
+  void gotScore(PretestScore score, boolean showOnlyOneExercise, String path);
   int getOffsetWidth();
 
-  void addScore(float hydecScore);
+  void addScore(ScoreAndPath hydecScore);
 
   void setClassAvg(float classAvg);
 
