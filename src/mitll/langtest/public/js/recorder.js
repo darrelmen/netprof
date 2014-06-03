@@ -1,7 +1,11 @@
+var recorderHasConsole = (window.console || console.log);
+
 function microphone_recorder_events()
 {
   $('#status').append("<p>Microphone recorder event: " + arguments[0] + "  at " + new Date().getTime());
-
+  if (recorderHasConsole) {
+      console.log("got event " + arguments[0]);
+  }
   switch(arguments[0]) {
   case "ready":
       $('#status').css({'color': '#000'}).append("<p>ready: ");
@@ -113,14 +117,22 @@ FlashRecorderLocal = {
         // flash app needs time to load and initialize
         if(FlashRecorderLocal.recorder && FlashRecorderLocal.recorder.init) {
             $('#status').css({'color': '#0F0'}).append("<p>calling permit at " + new Date().getTime());
-          //  FlashRecorderLocal.permitCalled = FlashRecorderLocal.permitCalled + 1;
-            if (this.detectIE()) {
+          //  var isSafari = (navigator.userAgent.indexOf('Safari') != -1 && navigator.userAgent.indexOf('Chrome') == -1);
+         //   if (this.detectIE() || isSafari) {
+            if (recorderHasConsole) {
+                console.log("showPrivacy");
+            }
                 FlashRecorderLocal.recorder.showPrivacy();
-            }
-            else {
-                FlashRecorderLocal.recorder.permit();
-            }
+          //  }
+         //   else {
+          //      FlashRecorderLocal.recorder.permit();
+          //  }
             return;
+        }
+        else {
+            if (recorderHasConsole) {
+                console.log("no recorder?");
+            }
         }
 
         setTimeout(function() {Recorder.connect(name, attempts+1);}, 100);
