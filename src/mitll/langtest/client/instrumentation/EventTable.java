@@ -105,7 +105,7 @@ public class EventTable extends PagerTable {
     table.setPageSize(PAGE_SIZE);
     int width = (int) (Window.getClientWidth() * 0.9);
     table.setWidth(width + "px");
-    TextColumn<Event> id = addColumns(table);
+    /*TextColumn<Event> id =*/ addColumns(table);
 
     // Create a data provider.
     ListDataProvider<Event> dataProvider = new ListDataProvider<Event>();
