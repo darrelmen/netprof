@@ -34,6 +34,7 @@ import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.STATE;
+import mitll.langtest.shared.ScoreAndPath;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -188,13 +189,13 @@ class ReviewEditableExercise extends EditableExercise {
       public void setClassAvg(float classAvg) {}
 
       @Override
-      public void gotScore(PretestScore score, boolean showOnlyOneExercise) {}
+      public void gotScore(PretestScore score, boolean showOnlyOneExercise, String path) {}
 
       @Override
       public int getOffsetWidth() { return 0; }
 
       @Override
-      public void addScore(float hydecScore) {}
+      public void addScore(ScoreAndPath hydecScore) {}
 
       @Override
       public void showChart(boolean showOnlyOneExercise) {}
