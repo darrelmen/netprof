@@ -8,6 +8,7 @@ import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.shared.ScoreAndPath;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -138,8 +139,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
                                              final ImageAndCheck wordTranscript,
                                              final ImageAndCheck phoneTranscript) {
     int widthToUse = Math.max(MIN_WIDTH, width);
-    int reqid = getReqID("score");
-    scoreAudio(path, resultID, refSentence, wordTranscript, phoneTranscript, widthToUse, ANNOTATION_HEIGHT, reqid);
+    scoreAudio(path, resultID, refSentence, wordTranscript, phoneTranscript, widthToUse, ANNOTATION_HEIGHT, getReqID("score"));
   }
 
   protected abstract void scoreAudio(final String path, long resultID, String refSentence,
@@ -155,9 +155,10 @@ public abstract class ScoringAudioPanel extends AudioPanel {
    * @param wordTranscript
    * @param phoneTranscript
    * @param scoredBefore
+   * @param path
    */
   void useResult(PretestScore result, ImageAndCheck wordTranscript, ImageAndCheck phoneTranscript,
-                 boolean scoredBefore) {
+                 boolean scoredBefore, String path) {
     if (result.getsTypeToImage().get(NetPronImageType.WORD_TRANSCRIPT) != null) {
       showImageAndCheck(result.getsTypeToImage().get(NetPronImageType.WORD_TRANSCRIPT), wordTranscript);
     }
@@ -171,7 +172,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
       phoneTranscript.image.setUrl(IMAGES_REDX_PNG);
     }
     if (!scoredBefore && scoreListener != null) {
-      scoreListener.gotScore(result, showOnlyOneExercise);
+      scoreListener.gotScore(result, showOnlyOneExercise, path);
     }
     this.result = result;
   }
@@ -203,9 +204,11 @@ public abstract class ScoringAudioPanel extends AudioPanel {
     }
   }
 
-  public void addScore(Float score) {
-    scoreListener.addScore(score);
-  }
+  /**
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.CommonExercise)
+   * @param score
+   */
+  public void addScore(ScoreAndPath score) {  scoreListener.addScore(score); }
 
   public void showChart() {
     scoreListener.showChart(showOnlyOneExercise);
