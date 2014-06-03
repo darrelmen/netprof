@@ -117,6 +117,10 @@ h1 {
     color : #f3f6f5;
 }
 
+.subtitleNoRecordingForeground {
+     color : #ffb911;
+ }
+
 .questionMarkForeground {
     color : #f0f9fb;
 }
