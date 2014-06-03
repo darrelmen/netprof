@@ -24,6 +24,7 @@ import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.STATE;
+import mitll.langtest.shared.ScoreAndPath;
 import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.User;
@@ -354,12 +355,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     int total = resultsForExercise.size();
     float scoreTotal = 0f;
-    List<Float> scores = new ArrayList<Float>();
+    List<ScoreAndPath> scores = new ArrayList<ScoreAndPath>();
     for (Result r : resultsForExercise) {
       if (r.userid == userID) {
         float pronScore = r.getPronScore();
         scoreTotal += pronScore;
-        scores.add(pronScore);
+
+   /*     String relativeImagePath = pathHelper.ensureForwardSlashes(r.answer);
+        if (relativeImagePath.startsWith("/")) {
+          relativeImagePath = relativeImagePath.substring(1);
+        }*/
+
+        scores.add(new ScoreAndPath(pronScore, r.answer));
       }
     }
     firstExercise.setScores(scores);
