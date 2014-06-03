@@ -70,8 +70,8 @@ public interface CommonExercise extends CommonShell {
   String getCombinedTooltip();
   void setTooltip();
 
-  void setScores(Collection<Float> scoreTotal);
-  Collection<Float> getScores();
+  void setScores(Collection<ScoreAndPath> scoreTotal);
+  Collection<ScoreAndPath> getScores();
   void setAvgScore(float v);
   float getAvgScore();
 }
