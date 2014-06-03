@@ -29,9 +29,6 @@ public class PretestScore implements IsSerializable {
   public PretestScore(float score) { this.hydecScore = score; }
   public PretestScore(boolean isNoModel) { this.noModel = isNoModel; }
 
-  public void setReqid(int r) { this.reqid = r;}
-  public int  getReqid()      { return reqid;  }
-
   /**
    * @see mitll.langtest.server.scoring.ASRScoring#scoreRepeatExercise
    * @param hydecScore
@@ -75,6 +72,9 @@ public class PretestScore implements IsSerializable {
   }
 
   public float getWavFileLengthInSeconds() { return wavFileLengthSeconds; }
+
+  public void setReqid(int r) { this.reqid = r;}
+  public int  getReqid()      { return reqid;  }
 
   public boolean isNoModel() { return noModel; }
 
