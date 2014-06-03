@@ -13,6 +13,8 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.HasDirection;
+import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -367,15 +369,36 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       nameValueRow.add(labelWidget);
     }
 
-    InlineHTML englishPhrase = new InlineHTML(value);
+    InlineHTML englishPhrase = new InlineHTML(value, WordCountDirectionEstimator.get().estimateDirection(value));
     englishPhrase.addStyleName(withWrap ? "Instruction-data-with-wrap" : "Instruction-data");
     if (label.contains("Meaning")) {
-       englishPhrase.addStyleName("englishFont");
+      englishPhrase.addStyleName("englishFont");
     }
     nameValueRow.add(englishPhrase);
     addTooltip(englishPhrase,label.replaceAll(":",""));
     englishPhrase.addStyleName("leftFiveMargin");
     return nameValueRow;
+  }
+
+  protected HTML getMaybeRTLContent(String content, boolean requireAlignment) {
+    boolean rightAlignContent = controller.isRightAlignContent();
+    HasDirection.Direction direction =
+      requireAlignment && rightAlignContent ? HasDirection.Direction.RTL : WordCountDirectionEstimator.get().estimateDirection(content);
+
+    HTML html = new HTML(content, direction);
+    html.setWidth("100%");
+    if (requireAlignment && rightAlignContent) {
+      html.addStyleName("rightAlign");
+    }
+
+    html.addStyleName("wrapword");
+/*    if (isPashto()) {
+      html.addStyleName("pashtofont");
+    }
+    else {
+      html.addStyleName("xlargeFont");
+    }*/
+    return html;
   }
 
   /**
