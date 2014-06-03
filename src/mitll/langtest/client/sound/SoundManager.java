@@ -74,16 +74,24 @@ class SoundManager {
    * @param file
    */
 	public static native void createSound(Sound sound, String title, String file) /*-{
-    var javascriptSound = $wnd.soundManager.createSound({
-			id: title,
-			url: file,
-			autoLoad: true,
-  			autoPlay: false,
-  			onfinish: function(){$wnd.songFinished(sound);},
-			onload: function(){$wnd.songLoaded(sound, this.duration);},
-			whileloading: function(){$wnd.songFirstLoaded(sound, this.durationEstimate);},
-			whileplaying: function(){$wnd.update(sound, this.position);}
-		});
+      var javascriptSound = $wnd.soundManager.createSound({
+          id: title,
+          url: file,
+          autoLoad: true,
+          autoPlay: false,
+          onfinish: function () {
+              $wnd.songFinished(sound);
+          },
+          onload: function () {
+              $wnd.songLoaded(sound, this.duration);
+          },
+          whileloading: function () {
+              $wnd.songFirstLoaded(sound, this.durationEstimate);
+          },
+          whileplaying: function () {
+              $wnd.update(sound, this.position);
+          }
+      });
 
 		sound.@mitll.langtest.client.sound.Sound::sound = javascriptSound;
 	}-*/;
@@ -92,9 +100,13 @@ class SoundManager {
    * Actually calls destruct on sound object
    *
    * @param sound
+   * @see mitll.langtest.client.sound.SoundManagerStatic#destroySound(Sound)
    */
   public static native void destroySound(Sound sound) /*-{
-		sound.@mitll.langtest.client.sound.Sound::sound.destruct();
+      var newVar = sound.@mitll.langtest.client.sound.Sound::sound;
+      if (newVar) {
+          sound.@mitll.langtest.client.sound.Sound::sound.destruct();
+      }
   }-*/;
 
 	public static native void pause(Sound sound) /*-{
@@ -109,10 +121,10 @@ class SoundManager {
 		sound.@mitll.langtest.client.sound.Sound::sound.setPosition(position);
 	}-*/;
 
-	public static native void setPositionAndPlay(Sound sound, double position) /*-{
+/*	public static native void setPositionAndPlay(Sound sound, double position) *//*-{
 		sound.@mitll.langtest.client.sound.Sound::sound.setPosition(position);
 		sound.@mitll.langtest.client.sound.Sound::sound.play();
-	}-*/;
+	}-*//*;*/
 
   /**
    * When the segment finished, calls songFinished
