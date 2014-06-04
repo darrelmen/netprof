@@ -32,6 +32,7 @@ public class UserListDAO extends DAO {
   private static final String NAME = "name";
 
   public static final String USER_EXERCISE_LIST = "userexerciselist";
+  private static final String ISPRIVATE = "isprivate";
   private final UserDAO userDAO;
   private UserExerciseDAO userExerciseDAO;
   private final UserListVisitorJoinDAO userListVisitorJoinDAO;
@@ -82,7 +83,9 @@ public class UserListDAO extends DAO {
       CREATORID +
       " LONG, " +
       NAME +
-      " VARCHAR, description VARCHAR, classmarker VARCHAR, modified TIMESTAMP, isprivate BOOLEAN, " +
+      " VARCHAR, description VARCHAR, classmarker VARCHAR, modified TIMESTAMP, " +
+      ISPRIVATE +
+      " BOOLEAN, " +
       "FOREIGN KEY(" +
       CREATORID +
       ") REFERENCES " +
@@ -118,7 +121,9 @@ public class UserListDAO extends DAO {
           CREATORID +
           "," +
           NAME +
-          ",description,classmarker,modified,isprivate) " +
+          ",description,classmarker,modified," +
+          ISPRIVATE +
+          ") " +
           "VALUES(?,?,?,?,?,?);");
       int i = 1;
       //     statement.setLong(i++, userList.getUserID());
@@ -211,7 +216,9 @@ public class UserListDAO extends DAO {
    */
   public List<UserList> getAllPublic(long userid) {
     try {
-      String sql = "SELECT * from " + USER_EXERCISE_LIST + " where isprivate=false" +
+      String sql = "SELECT * from " + USER_EXERCISE_LIST + " where " +
+        ISPRIVATE +
+        "=false" +
         " order by modified DESC ";
 
       List<UserList> userLists = getUserLists(sql, userid);
@@ -375,7 +382,7 @@ public class UserListDAO extends DAO {
         rs.getString(NAME), // exp
         rs.getString("description"), // exp
         rs.getString("classmarker"), // exp
-        rs.getBoolean("isprivate")
+        rs.getBoolean(ISPRIVATE)
       )
       );
     }
