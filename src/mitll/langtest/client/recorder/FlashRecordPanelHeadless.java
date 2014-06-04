@@ -126,7 +126,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
         System.err.println("recordOnClick mic is not available");
       }
       else {
-        System.out.println("recordOnClick mic IS  available");
+        //System.out.println("recordOnClick mic IS  available");
       }
       flashRecordOnClick();
     } else if (webAudio.isWebAudioMicAvailable()) {
