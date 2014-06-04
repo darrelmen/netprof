@@ -199,6 +199,11 @@ class ReviewEditableExercise extends EditableExercise {
 
       @Override
       public void showChart(boolean showOnlyOneExercise) {}
+
+      @Override
+      public void setRefAudio(String refAudio) {
+
+      }
     }, 70, audio.isRegularSpeed() ? REGULAR_SPEED : SLOW_SPEED, e.getID()
     ) {
 
