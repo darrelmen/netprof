@@ -1,18 +1,22 @@
 package mitll.langtest.client.custom;
 
 import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.TextArea;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.dialog.KeyPressHelper;
@@ -21,7 +25,13 @@ import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserManager;
 
 class CreateListDialog extends BasicDialog {
+  private static final String REVIEW = "Review";
+  private static final String PRACTICE = "Practice";
+
   private static final String CLASS = "Course Info (optional)";
+  public static final String CREATE_LIST = "Create List";
+  public static final String TITLE = "Title";
+  public static final String DESCRIPTION_OPTIONAL = "Description (optional)";
 /*  private static final boolean REQUIRE_DESC = false;
   private static final boolean REQUIRE_CLASS = false;*/
 
@@ -63,7 +73,7 @@ class CreateListDialog extends BasicDialog {
 
     row = new FluidRow();
     child.add(row);
-    final BasicDialog.FormField titleBox = addControlFormField(row, "Title");
+    final BasicDialog.FormField titleBox = addControlFormField(row, TITLE);
     titleBox.box.getElement().setId("CreateListDialog_Title");
     titleBox.box.addBlurHandler(new BlurHandler() {
       @Override
@@ -74,7 +84,7 @@ class CreateListDialog extends BasicDialog {
     row = new FluidRow();
     child.add(row);
     final TextArea area = new TextArea();
-    final BasicDialog.FormField description = getFormField(row, "Description (optional)", area, 1);
+    final BasicDialog.FormField description = getFormField(row, DESCRIPTION_OPTIONAL, area, 1);
     description.box.getElement().setId("CreateListDialog_Description");
     description.box.addBlurHandler(new BlurHandler() {
       @Override
@@ -82,7 +92,6 @@ class CreateListDialog extends BasicDialog {
         controller.logEvent(description.box,"TextBox","Create New List","Description = " + description.box.getValue());
       }
     });
-
 
     row = new FluidRow();
     child.add(row);
@@ -96,28 +105,43 @@ class CreateListDialog extends BasicDialog {
       }
     });
 
+
     row = new FluidRow();
     child.add(row);
 
-    Button submit = new Button("Create List");
-    submit.setType(ButtonType.PRIMARY);
-    submit.getElement().setId("CreateList_Submit");
-    controller.register(submit,"CreateList");
+    RadioButton radioButton = new RadioButton("Public_Private_Group", "Public");
+    RadioButton radioButton2 = new RadioButton("Public_Private_Group", "Private");
 
-    DOM.setStyleAttribute(submit.getElement(), "marginBottom", "10px");
+    String audioType = controller.getAudioType();
+    boolean isStudent = audioType.equalsIgnoreCase(PRACTICE);
 
-    submit.addStyleName("leftFiveMargin");
-    submit.addClickHandler(new ClickHandler() {
+    System.out.println("STUDENT = " + isStudent + " audio type '" + audioType+
+      "'");
+
+    radioButton.setValue(!isStudent);
+    radioButton2.setValue(isStudent);
+
+    HorizontalPanel hp = new HorizontalPanel();
+    hp.add(radioButton);
+    radioButton2.addStyleName("leftFiveMargin");
+    hp.add(radioButton2);
+
+    ControlGroup widgets = addControlGroupEntry(row, "Keep List Public/Private?", hp);
+   // classBox.box.getElement().setId("CreateListDialog_CourseInfo");
+/*    classBox.box.addBlurHandler(new BlurHandler() {
       @Override
-      public void onClick(ClickEvent event) {
-        //System.out.println("creating list for " + titleBox + " " + area.getText() + " and " + classBox.getText());
-        enterKeyButtonHelper.removeKeyHandler();
-        if (validateCreateList(titleBox/*, description, classBox*/)) {
-          addUserList(titleBox, area, classBox);
-        }
+      public void onBlur(BlurEvent event) {
+        controller.logEvent(classBox.box,"TextBox","Create New List","CourseInfo = " + classBox.box.getValue());
       }
-    });
-    enterKeyButtonHelper.addKeyHandler(submit);
+    });*/
+
+    row.add(widgets);
+
+
+    row = new FluidRow();
+    child.add(row);
+
+    Button submit = makeCreateButton(enterKeyButtonHelper, titleBox, area, classBox, radioButton);
     row.add(submit);
 
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -127,23 +151,47 @@ class CreateListDialog extends BasicDialog {
     });
   }
 
-  private void addUserList(final FormField titleBox, TextArea area, FormField classBox) {
+  private Button makeCreateButton(final KeyPressHelper enterKeyButtonHelper, final FormField titleBox, final TextArea area,
+                                  final FormField classBox,final RadioButton publicRadio) {
+    Button submit = new Button(CREATE_LIST);
+    submit.setType(ButtonType.PRIMARY);
+    submit.getElement().setId("CreateList_Submit");
+    controller.register(submit, "CreateList");
+
+    submit.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
+
+    submit.addStyleName("leftFiveMargin");
+    submit.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        //System.out.println("creating list for " + titleBox + " " + area.getText() + " and " + classBox.getText());
+        enterKeyButtonHelper.removeKeyHandler();
+        if (validateCreateList(titleBox/*, description, classBox*/)) {
+          addUserList(titleBox, area, classBox,publicRadio.getValue());
+        }
+      }
+    });
+    enterKeyButtonHelper.addKeyHandler(submit);
+    return submit;
+  }
+
+  private void addUserList(final FormField titleBox, TextArea area, FormField classBox, boolean isPublic) {
     int user = userManager.getUser();
     service.addUserList(user,
       titleBox.getText(),
       area.getText(),
-      classBox.getText(), new AsyncCallback<Long>() {
-      @Override
-      public void onFailure(Throwable caught) {}
+      classBox.getText(), isPublic, new AsyncCallback<Long>() {
+        @Override
+        public void onFailure(Throwable caught) {}
 
-      @Override
-      public void onSuccess(Long result) {
-        if (result == -1) {
-          markError(titleBox,"You already have a list named "+ titleBox.getText());
-        } else {
-          navigation.clickOnYourLists(result);
+        @Override
+        public void onSuccess(Long result) {
+          if (result == -1) {
+            markError(titleBox, "You already have a list named " + titleBox.getText());
+          } else {
+            navigation.clickOnYourLists(result);
+          }
         }
-      }
     });
   }
 
