@@ -9,6 +9,7 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -61,9 +62,12 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
 
   /**
    * @see mitll.langtest.client.recorder.FeedbackRecordPanel#enableNext()
+   * @see mitll.langtest.client.list.HistoryExerciseList#loadExercises(java.util.Map, String)
    * @param completed
    */
   public void setCompleted(Set<String> completed) {
+    System.out.println("setCompleted : completed " + completed.size());
+
     this.completed = completed;
     pagingContainer.setCompleted(completed);
   }
@@ -146,7 +150,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
 
   protected void loadExercises(String selectionState, String prefix) {
     lastReqID++;
-    System.out.println("loadExercises : looking for '" + prefix + "' (" + prefix.length() + " chars)");
+    System.out.println("PagingExerciseList.loadExercises : looking for '" + prefix + "' (" + prefix.length() + " chars)");
 
     service.getExerciseIds(lastReqID, controller.getUser(), prefix, new SetExercisesCallback());
   }
@@ -257,4 +261,28 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   protected void markCurrentExercise(int i) {
    pagingContainer.markCurrentExercise(i);
  }
+
+  @Override
+  public void getExercises(final long userID, boolean getNext) {
+    System.out.println("HistoryExerciseList.getExercises for user " + userID);
+
+    if (showInOrder) {
+      getExercisesInOrder();
+    } else {
+      service.getCompletedExercises(controller.getUser(), new AsyncCallback<Set<String>>() {
+        @Override
+        public void onFailure(Throwable caught) {
+        }
+
+        @Override
+        public void onSuccess(Set<String> result) {
+          //System.out.println("\tHistoryExerciseList.loadExercises : " + typeToSection + " and item '" + item + "' result " + result.size());
+
+          controller.getExerciseList().setCompleted(result);
+          lastReqID++;
+          service.getExerciseIds(lastReqID, userID, controller.showUnansweredFirst(), new SetExercisesCallback());
+        }
+      });
+    }
+  }
 }
