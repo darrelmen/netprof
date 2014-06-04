@@ -530,7 +530,6 @@ public class NewUserExercise extends BasicDialog {
    * @return
    */
   CreateFirstRecordAudioPanel makeRecordAudioPanel(final Panel row, boolean recordRegularSpeed) {
-    //Exercise newExercise = newUserExercise.toExercise();
     return new CreateFirstRecordAudioPanel(newUserExercise, row,  recordRegularSpeed);
   }
 
