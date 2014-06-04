@@ -68,7 +68,7 @@ class StudentDialog extends UserDialog {
   private static final String PRACTICE = "Practice";
   private static final String DEMO = "Demo";
   private static final String DATA_COLLECTION = "Data Collection";
-  private static final String REVIEW = "Review";
+  public static final String REVIEW = "Review";
   private static final Map<String, String> displayToRoles = new TreeMap<String, String>();
   private static final String STUDENT = "Student";
   private static final String TEACHER_REVIEWER = "Reviewer";
