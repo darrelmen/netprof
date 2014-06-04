@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -40,7 +41,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
       "The recognizer generates scores for each word and phonetic unit (see the color-coded transcript for details).";
   private static final String WARNING = "Repeat the phrase exactly as it is written. " +
     "<b>Saying something different or adding/omitting words could result in incorrect scores.</b>";
- // private static final int CHART_HEIGHT = 100;
+
   private static final String SOUND_ACCURACY = "Sound Accuracy";
   private static final String SCORE_HISTORY = "Score History";
   private static final String SCORE = "Score";
@@ -135,12 +136,11 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     addScore(new ScoreAndPath(hydecScore,path));
     chartPanel.clear();
     showChart(showOnlyOneExercise);
+    addPlayer();
   }
 
   @Override
-  public void addScore(ScoreAndPath hydecScore) {
-    scores2.add(hydecScore);
-  }
+  public void addScore(ScoreAndPath hydecScore) {  scores2.add(hydecScore);  }
 
   /**
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#setClassAvg(float)
@@ -150,9 +150,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   public void setClassAvg(float classAvg) { this.classAvg = classAvg; }
 
   @Override
-  public void setRefAudio(String refAudio) {
-    this.refAudio = refAudio;
-  }
+  public void setRefAudio(String refAudio) {  this.refAudio = refAudio;  }
 
   /**
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#showChart()
@@ -176,34 +174,84 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
       vp.add(hp);
     }
 
-    String prefix = classAvg < 0.001f ? "No Class Avg Yet" : "Class Avg";
-    if (classAvg < 0.001f) {
-      System.out.println("setting class avg to 1");
-      classAvg = 1f;
+    if (classAvg > 0) {
+      vp.add(getClassAverage(tooltipHelper));
     }
-    System.out.println("class avg " + classAvg);
 
-    Widget classAvgDiv = (refAudio == null) ?
-      makeRow(tooltipHelper, new ScoreAndPath(classAvg, ""), prefix) :
-      getAudioAndScore(audioTag, tooltipHelper, new ScoreAndPath(classAvg, refAudio), prefix, Placement.RIGHT, "Play Reference", true);
+    if (refAudio != null && !scoreAndPaths.isEmpty()) { // show audio to compare yours against
+      Panel hp = getRefAudio(audioTag);
 
-    classAvgDiv.addStyleName("topFiveMargin");
-    vp.add(classAvgDiv);
+      vp.add(hp);
+    }
     chartPanel.add(vp);
   }
 
-  public Panel getAudioAndScore(AudioTag audioTag, TooltipHelper tooltipHelper, ScoreAndPath scoreAndPath, String prefix, String title) {
-    return getAudioAndScore(audioTag, tooltipHelper, scoreAndPath, prefix, Placement.RIGHT, title, false);
+  private Panel getRefAudio(AudioTag audioTag) {
+    HTML w = getAudioWidget(audioTag, new ScoreAndPath(classAvg, refAudio), "Play Reference");
+    makeChildGreen(w);
+
+    Panel hp = new HorizontalPanel();
+    hp.add(w);
+    HTML child = new HTML("Default Reference");
+    child.addStyleName("leftFiveMargin");
+    hp.add(child);
+    return hp;
   }
 
-  public Panel getAudioAndScore(AudioTag audioTag, TooltipHelper tooltipHelper, ScoreAndPath scoreAndPath, String prefix,
+  private Panel getClassAverage(TooltipHelper tooltipHelper) {
+    String prefix = /*classAvg < 0.001f ? "No Class Avg Yet" :*/ "Class Avg";
+    ScoreAndPath scoreAndPath = new ScoreAndPath(classAvg, "");
+    if (classAvg < 0.001f) {
+//      classAvg = 1f;
+    }
+    else {
+      prefix += " " + toPercent(scoreAndPath) +"%";
+    }
+    //System.out.println("class avg " + classAvg);
+
+    Widget widget = makeRow2(tooltipHelper, scoreAndPath, prefix, Placement.BOTTOM);
+    widget.getElement().getStyle().setMarginLeft(18+5, Style.Unit.PX);
+    Panel hp2 = new HorizontalPanel();
+    hp2.add(widget);
+    InlineHTML w1 = new InlineHTML("Class Avg");
+    w1.getElement().getStyle().setColor("gray");
+    w1.getElement().getStyle().setFontWeight(Style.FontWeight.LIGHTER);
+    w1.getElement().getStyle().setProperty("fontSize", "smaller");
+    w1.getElement().getStyle().setMarginLeft(3, Style.Unit.PX);
+    hp2.add(w1);
+    return hp2;
+  }
+
+  private Panel getAudioAndScore(AudioTag audioTag, TooltipHelper tooltipHelper, ScoreAndPath scoreAndPath, String prefix, String title) {
+    return getAudioAndScore(audioTag, tooltipHelper, scoreAndPath, prefix, Placement.BOTTOM, title, false);
+  }
+
+  private Panel getAudioAndScore(AudioTag audioTag, TooltipHelper tooltipHelper, ScoreAndPath scoreAndPath, String prefix,
                                 Placement placement, String title, boolean backgroundGreen) {
-    DivWidget row = makeRow(tooltipHelper, scoreAndPath, prefix, placement);
-    HorizontalPanel hp = new HorizontalPanel();
+    HTML w = getAudioWidget(audioTag, scoreAndPath, title);
+    if (backgroundGreen) {
+      makeChildGreen(w);
+    }
+
+    Widget row = makeRow(tooltipHelper, scoreAndPath, prefix, placement, true);
+    row.addStyleName("leftFiveMargin");
+
+    Panel hp = new HorizontalPanel();
+    hp.add(w);
+    hp.add(row);
+    return hp;
+  }
+
+  private void makeChildGreen(HTML w) {
+    Node child = w.getElement().getChild(0);
+    Element as = Element.as(child);
+    as.getStyle().setBackgroundColor("green");
+  }
+
+  private HTML getAudioWidget(AudioTag audioTag, ScoreAndPath scoreAndPath, String title) {
     SafeHtmlBuilder sb = new SafeHtmlBuilder();
     sb.appendHtmlConstant("<a href=\"" +
-      audioTag.ensureForwardSlashes(scoreAndPath.getPath()).replace(".wav", "." +
-        AudioTag.COMPRESSED_TYPE) +
+      audioTag.ensureForwardSlashes(scoreAndPath.getPath()).replace(".wav", "." + AudioTag.COMPRESSED_TYPE) +
       "\"" +
       " title=\"" +
       title +
@@ -211,85 +259,39 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
       title +
       "</a>");
 
-    //   hp.add(new InlineHTML(audioTag.getAudioTag(scoreAndPath.getPath())));
-    HTML w = new HTML(sb.toSafeHtml());
-    hp.add(w);
-   if (backgroundGreen){
-     Node child = w.getElement().getChild(0);
-     Element as = Element.as(child);
-     as.getStyle().setBackgroundColor("green");
-   }
-
-    row.addStyleName("leftFiveMargin");
-    hp.add(row);
-    return hp;
+    return new HTML(sb.toSafeHtml());
   }
 
   private native void addPlayer() /*-{
       $wnd.basicMP3Player.init();
   }-*/;
 
-  private DivWidget makeRow(TooltipHelper tooltipHelper, ScoreAndPath scoreAndPath, String prefix) {
-    return makeRow(tooltipHelper, scoreAndPath, prefix, Placement.RIGHT);
-  }
-
-  private DivWidget makeRow(TooltipHelper tooltipHelper, ScoreAndPath scoreAndPath, String prefix, Placement right) {
-    DivWidget row = new DivWidget();
-    int iScore = (int) (100f * scoreAndPath.getScore());
+  private Widget makeRow(TooltipHelper tooltipHelper, ScoreAndPath scoreAndPath, String prefix, Placement right, boolean showPercent) {
+    Widget row = new DivWidget();
+    int iScore = toPercent(scoreAndPath);
     row.setWidth(iScore + "px");
     row.setHeight(HEIGHT + "px");
     row.getElement().getStyle().setBackgroundColor(chart.getColor(scoreAndPath.getScore()));
-    //row.getElement().getStyle().setMarginBottom(3, Style.Unit.PX);
     row.getElement().getStyle().setMarginTop(2, Style.Unit.PX);
-    // String prefix = "Score";
-    //  Placement right = Placement.RIGHT;
-    tooltipHelper.createAddTooltip(row, prefix +
-      //" = " +
-       " " +
-      iScore + "%", right);
+    tooltipHelper.createAddTooltip(row, prefix + (showPercent ? " " + iScore + "%" : ""), right);
     return row;
   }
 
-/*  private ColumnChart doChart(boolean showOnlyOneExercise, List<Float> scores) {
-    Options options = Options.create();
-    options.setLegend(LegendPosition.NONE);
-    options.setGridlineColor(showOnlyOneExercise ? "#efefef" : "white");
-    options.setHeight(CHART_HEIGHT);
-    String[] colors = new String[scores.size()];
-    for (int i = 0; i < scores.size(); i++) {
-      colors[i] = getColor(scores.get(i));
-    }
-    options.setColors(colors);
+  private int toPercent(ScoreAndPath scoreAndPath) {
+    return (int) (100f * scoreAndPath.getScore());
+  }
 
-    AxisOptions options1 = AxisOptions.create();
-    options1.setMinValue(0);
-    options1.setMaxValue(100);
-    options1.setTextPosition("none");
-    options.setVAxisOptions(options1);
+  private Widget makeRow2(TooltipHelper tooltipHelper, ScoreAndPath scoreAndPath, String prefix, Placement placement) {
+    Widget row = new DivWidget();
+    int iScore = toPercent(scoreAndPath);
+    row.setWidth(iScore + "px");
+    row.setHeight(HEIGHT + "px");
+    row.getElement().getStyle().setBackgroundColor(chart.getColor(scoreAndPath.getScore()));
+    row.getElement().getStyle().setMarginTop(2, Style.Unit.PX);
 
-    AxisOptions options2 = AxisOptions.create();
-    options2.setTextPosition("none");
-    options.setHAxisOptions(options2);
-    DataTable data = DataTable.create();
-    data.addColumn(AbstractDataTable.ColumnType.STRING, "Recording");
-
-    for (int i = 0; i < scores.size(); i++) {
-      data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Score #"+(i+1));
-    }
-
-    data.addRows(1);
-    data.setValue(0, 0, ""+1);
-
-    for (int i = 0; i < scores.size(); i++) {
-      int round = Math.round(scores.get(i) * 100);
-      data.setValue(0,i+1, round);
-    }
-
-    if (showOnlyOneExercise) {
-      options.setBackgroundColor("#efefef");
-    }
-    return new ColumnChart(data, options);
-  }*/
+    tooltipHelper.createAddTooltip(row, prefix, placement);
+    return row;
+  }
 
   /**
    * @see mitll.langtest.client.scoring.ScoreListener#gotScore
