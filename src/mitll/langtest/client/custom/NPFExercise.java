@@ -47,8 +47,9 @@ public class NPFExercise extends GoodwaveExercisePanel {
   private static final String ITEM_ALREADY_ADDED = "Item already added to your list(s)";
   private static final String ADD_TO_LIST = "Add to List";
   private static final String NEW_LIST = "New List";
-  public static final String ITEM_ADDED = "Item Added!";
-  public static final String ADDING_TO_LIST = "Adding to list ";
+  private static final String ITEM_ADDED = "Item Added!";
+  private static final String ADDING_TO_LIST = "Adding to list ";
+  private static final String PRACTICE = "Practice";
 
   private DropdownButton addToList;
   private int activeCount = 0;
@@ -242,10 +243,12 @@ public class NPFExercise extends GoodwaveExercisePanel {
    */
   private void addUserList(long userID, String title, final TextBox textBox) {
     //System.out.println("user " +userID + " adding list " +title);
+    String audioType = controller.getAudioType();
+    boolean isStudent = audioType.equalsIgnoreCase(PRACTICE);
     service.addUserList(userID,
       title,
       "",
-      "", new AsyncCallback<Long>() {
+      "", !isStudent, new AsyncCallback<Long>() {
         @Override
         public void onFailure(Throwable caught) {
         }
