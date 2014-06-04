@@ -57,6 +57,11 @@ public class LTSFactory {
     languageToLTS.put(URDU.toLowerCase(), new UrduLTS());
   }
 
+  /**
+   * @see mitll.langtest.server.scoring.ASRScoring#ASRScoring(String, java.util.Map, corpus.HTKDictionary)
+   * @param language
+   * @return
+   */
   public LTS getLTSClass(String language) {
     LTS letterToSoundClass = languageToLTS.get(language.toLowerCase());
 
