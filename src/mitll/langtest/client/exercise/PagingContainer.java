@@ -35,6 +35,7 @@ import java.util.Set;
 public class PagingContainer<T extends ExerciseShell> {
   private static final int MAX_LENGTH_ID = 27;
   protected static final int PAGE_SIZE = 15;   // TODO : make this sensitive to vertical real estate?
+  private static final int VERTICAL_SLOP = 55;
   private ListDataProvider<T> dataProvider;
   private static final boolean DEBUG = false;
   private static final int ID_LINE_WRAP_LENGTH = 20;
@@ -52,6 +53,7 @@ public class PagingContainer<T extends ExerciseShell> {
     this.controller = controller;
     this.verticalUnaccountedFor = verticalUnaccountedFor;
     this.showCompleted = showCompleted;
+    System.out.println("verticalUnaccountedFor " + verticalUnaccountedFor);
   }
 
   public interface TableResources extends CellTable.Resources {
@@ -179,7 +181,7 @@ public class PagingContainer<T extends ExerciseShell> {
    * @param completed
    */
   public void setCompleted(Set<String> completed) {
-    //System.out.println("PagingContainer.setCompleted : show completed " +showCompleted + " completed " +completed.size());
+    System.out.println("PagingContainer.setCompleted : show completed " +showCompleted + " completed " +completed.size());
 
     this.completed = completed;
     if (table != null) table.redraw(); // todo check this...
@@ -306,11 +308,21 @@ public class PagingContainer<T extends ExerciseShell> {
     }
   }
 
+  private static final boolean debug = false;
   public int getNumTableRowsGivenScreenHeight() {
     int header = getTableHeaderHeight();
-    int leftOver = Window.getClientHeight() - header - verticalUnaccountedFor;
+    int pixelsAbove = header + verticalUnaccountedFor;
+    if (table.getElement().getAbsoluteTop() > 0) {
+      pixelsAbove = table.getElement().getAbsoluteTop() + VERTICAL_SLOP;
+    }
+    int leftOver = Window.getClientHeight() - pixelsAbove;
 
-    //System.out.println("Got on resize " + Window.getClientHeight() + " " + header + " result = " + leftOver);
+    if (debug) {
+      System.out.println("getNumTableRowsGivenScreenHeight Got on resize window height " + Window.getClientHeight() +
+        " header " + header + " result = " + leftOver + "( vert unaccount " +
+        verticalUnaccountedFor+ " vs absolute top " + table.getElement().getAbsoluteTop()+ " pix above " + pixelsAbove+
+        ")");
+    }
 
     float rawRatio = ((float) leftOver) / (float) heightOfCellTableWith15Rows();
     float tableRatio = Math.min(MAX_PAGES, rawRatio);
@@ -326,7 +338,12 @@ public class PagingContainer<T extends ExerciseShell> {
         }
       }
     }
-    return Math.max(MIN_PAGE_SIZE, Math.round(ratio));
+    int rows = Math.max(MIN_PAGE_SIZE, (int)Math.floor(ratio));
+/*    if (debug) {
+      System.out.println("getNumTableRowsGivenScreenHeight : rows " + rows);
+    }*/
+
+    return rows;
   }
 
   protected int heightOfCellTableWith15Rows() {
