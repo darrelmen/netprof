@@ -139,7 +139,7 @@ public class ASRScoring extends Scoring {
     Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase);
 
     String language = isMandarin ? " MANDARIN " : "";
-    //logger.debug("checkLTS " + language + " tokens : '" +tokens +"'");
+    logger.debug("checkLTS '" + language + "' tokens : '" +tokens +"'");
 
     try {
       int i = 0;
@@ -153,8 +153,9 @@ public class ASRScoring extends Scoring {
         } else {
           String[][] process = lts.process(token);
           if (process == null || process.length == 0 || process[0].length == 0 ||
-            process[0][0].length() == 0/* || process[0][0].equals("aa")*/) {
-            if (!htkDictionary.contains(token) && !htkDictionary.isEmpty()) {
+            process[0][0].length() == 0 || (process.length == 1 && process[0].length == 1 && process[0][0].equals("aa"))) {
+            boolean htkEntry = htkDictionary.contains(token);
+            if (!htkEntry && !htkDictionary.isEmpty()) {
               logger.warn("checkLTS with " + lts + "/" + languageProperty + " token #" +i+
                 " : '" + token + "' hash " + token.hashCode()+
                 " is invalid in " + foreignLanguagePhrase+
@@ -170,7 +171,25 @@ public class ASRScoring extends Scoring {
               }
               return false;
             }
+            else {
+              logger.debug("htkDict has " + htkDictionary.size());
+              logger.debug("htkDict contains " + htkEntry);
+            }
           }
+        /*  else {
+            if (process != null) {
+              for (String[] ar : process) {
+                //logger.warn("got " + ar);
+                for (String arr : ar) {
+                  logger.warn("\tgot " + arr);
+                }
+              }
+            }
+            else {
+              logger.warn("\tprocess is " + process);
+
+            }
+          }*/
         }
         i++;
       }
