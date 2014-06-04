@@ -16,7 +16,14 @@ public interface ScoreListener {
 
   void addScore(ScoreAndPath hydecScore);
 
+  /**
+   * @see mitll.langtest.client.scoring.ScoringAudioPanel#setClassAvg(float)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.CommonExercise)
+   * @param classAvg
+   */
   void setClassAvg(float classAvg);
 
   void showChart(boolean showOnlyOneExercise);
+
+  void setRefAudio(String refAudio);
 }
