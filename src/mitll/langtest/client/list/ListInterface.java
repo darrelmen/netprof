@@ -1,18 +1,17 @@
 package mitll.langtest.client.list;
 
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.Widget;
+import java.util.List;
+import java.util.Set;
+
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Created with IntelliJ IDEA.
