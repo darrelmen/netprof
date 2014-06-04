@@ -63,6 +63,11 @@ public class UserDAO extends DAO {
     }
   }
 
+  /**
+   * @see mitll.langtest.server.database.custom.UserListManager#addDefect(String, String, String)
+   * @see mitll.langtest.server.database.custom.AnnotationDAO#AnnotationDAO(Database, UserDAO)
+   * @return
+   */
   public long getDefectDetector() { return defectDetector; }
 
   /**
