@@ -33,7 +33,6 @@ public class Flashcard implements RequiresResize {
   private static final double MAX_FONT_EM = 1.8d;
   private static final int SLOP = 55;
   private static final String NEW_PRO_F1_PNG = "NewProF1.png";
-  //private static final String NEW_PRO_F2_PNG = "NewProF2.png";
   private final boolean isAnonymous;
   private Paragraph appName;
   private Image flashcardImage;
@@ -98,7 +97,8 @@ public class Flashcard implements RequiresResize {
     headerRow.addStyleName("headerBackground");
     headerRow.addStyleName("headerLowerBorder");
 
-    FlowPanel iconLeftHeader = new FlowPanel();
+   // Panel iconLeftHeader = new FlowPanel();
+    Panel iconLeftHeader = new HorizontalPanel();
     headerRow.add(iconLeftHeader);
 
     Panel flashcard = new FlowPanel();
