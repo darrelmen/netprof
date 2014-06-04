@@ -36,6 +36,7 @@ public class AudioExport {
   private static final String ID = "ID";
   private static final String WORD_EXPRESSION = "Word/Expression";
   private static final String TRANSLITERATION = "Transliteration";
+  private static final String MEANING = "Meaning";
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#writeZip(java.io.OutputStream, java.util.Map)
@@ -134,40 +135,35 @@ public class AudioExport {
     columns.add(ID);
     columns.add(WORD_EXPRESSION);
     boolean english = isEnglish(language);
-    if (english) {
+    if (!english) {
       columns.add(language);
     }
-    columns.add(english ? "Context" :TRANSLITERATION);
-    for (String type : typeOrder) {
-      columns.add(type);
-    }
+    columns.add(english ? MEANING :TRANSLITERATION);
+ /*   if (english) {
+      columns.add("Context");
+    }*/
+    columns.addAll(typeOrder);
 
     for (int i = 0; i < columns.size(); i++) {
-      Cell headerCell = headerRow.createCell(i);
-      headerCell.setCellValue(columns.get(i));
+      headerRow.createCell(i).setCellValue(columns.get(i));
     }
 
     for (CommonExercise exercise : copy) {
       Row row = sheet.createRow(rownum++);
+
       int j = 0;
 
-      Cell cell = row.createCell(j++);
-      cell.setCellValue(exercise.getID());
-
-      cell = row.createCell(j++);
-      cell.setCellValue(exercise.getEnglish());
+      row.createCell(j++).setCellValue(exercise.getID());
+      row.createCell(j++).setCellValue(exercise.getEnglish());
 
       if (!english) {
-        cell = row.createCell(j++);
-        cell.setCellValue(exercise.getForeignLanguage());
+        row.createCell(j++).setCellValue(exercise.getForeignLanguage());
       }
 
-      cell = row.createCell(j++);
-      cell.setCellValue(english ? exercise.getContext() : exercise.getTransliteration());
+      row.createCell(j++).setCellValue(english ? exercise.getMeaning() : exercise.getTransliteration());
 
       for (String type : typeOrder) {
-        cell = row.createCell(j++);
-        cell.setCellValue(exercise.getUnitToValue().get(type));
+        row.createCell(j++).setCellValue(exercise.getUnitToValue().get(type));
       }
     }
     now = System.currentTimeMillis();
