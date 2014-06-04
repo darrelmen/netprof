@@ -179,14 +179,17 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
                                  float screenPortion, CommonExercise exercise) {
     DivWidget div = new DivWidget();
     ScoringAudioPanel answerWidget = getAnswerWidget(service, controller, 1, screenPortion);
-    if (!exercise.getScores().isEmpty()) {
+    String refAudio = exercise.getRefAudio();
+    if (refAudio == null) refAudio = exercise.getSlowAudioRef();
+    answerWidget.setRefAudio(refAudio);
+    //if (!exercise.getScores().isEmpty()) {
       for (ScoreAndPath score : exercise.getScores()) {
         answerWidget.addScore(score);
       }
       answerWidget.setClassAvg(exercise.getAvgScore());
 
       answerWidget.showChart();
-    }
+    //}
     div.add(answerWidget);
 
     addGroupingStyle(div);
