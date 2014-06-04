@@ -2,6 +2,7 @@ package mitll.langtest.server.database.instrumentation;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.shared.instrumentation.Event;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
@@ -40,9 +41,16 @@ public class EventDAO extends DAO {
   private static final String WIDGETTYPE = "widgettype";
   private static final String HITID = "hitid";
   private static final String EXERCISEID = "exerciseid";
+  private final UserDAO userDAO;
 
-  public EventDAO(Database database) {
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(mitll.langtest.server.PathHelper)
+   * @param database
+   * @param userDAO
+   */
+  public EventDAO(Database database, UserDAO userDAO) {
     super(database);
+    this.userDAO = userDAO;
     try {
       createTable(database);
 
@@ -69,7 +77,7 @@ public class EventDAO extends DAO {
       EVENT +
       " (" +
       "uniqueid IDENTITY, " +
-      CREATORID + " LONG, " +
+      CREATORID + " INT, " +
       EXERCISEID + " VARCHAR, " +
       "context VARCHAR, " +
       "widgetid VARCHAR, " +
@@ -124,7 +132,7 @@ public class EventDAO extends DAO {
       long creatorID = event.getCreatorID();
       if (creatorID == -1) {
         logger.error("huh? creator is " + creatorID + " for " + event);
-        creatorID = 0;
+        creatorID = userDAO.getDefectDetector();
       }
       statement.setLong(i++, creatorID);
       statement.setString(i++, event.getExerciseID());
