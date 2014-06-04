@@ -1,10 +1,5 @@
 package mitll.langtest.server.audio;
 
-import mitll.langtest.server.database.FileExerciseDAO;
-import mitll.langtest.server.scoring.ASRScoring;
-import mitll.langtest.server.scoring.SmallVocabDecoder;
-import org.apache.log4j.Logger;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -12,6 +7,10 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+
+import mitll.langtest.server.database.FileExerciseDAO;
+import mitll.langtest.server.scoring.ASRScoring;
+import mitll.langtest.server.scoring.SmallVocabDecoder;
 
 /**
  * Created by go22670 on 1/17/14.
