@@ -80,9 +80,11 @@ public abstract class UserDialog extends BasicDialog {
   int getAge(TextBoxBase ageEntryBox) {
     int i = 0;
     try {
-      i = Integer.parseInt(ageEntryBox.getText());
+      if (!ageEntryBox.getText().trim().isEmpty()) {
+        i = Integer.parseInt(ageEntryBox.getText());
+      }
     } catch (NumberFormatException e) {
-      System.out.println("couldn't parse " + ageEntryBox.getText());
+      System.out.println("couldn't parse '" + ageEntryBox.getText() + "'");
     }
     return i;
   }
