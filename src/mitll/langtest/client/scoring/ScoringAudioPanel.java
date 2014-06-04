@@ -210,12 +210,21 @@ public abstract class ScoringAudioPanel extends AudioPanel {
    */
   public void addScore(ScoreAndPath score) {  scoreListener.addScore(score); }
 
+  /**
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.CommonExercise)
+   */
   public void showChart() {
     scoreListener.showChart(showOnlyOneExercise);
   }
 
-  public void setClassAvg(float avgScore) {
-    scoreListener.setClassAvg(avgScore);
+  /**
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.CommonExercise)
+   * @param avgScore
+   */
+  public void setClassAvg(float avgScore) { scoreListener.setClassAvg(avgScore);  }
+
+  public void setRefAudio(String refAudio) {
+    scoreListener.setRefAudio(refAudio);
   }
 
   private abstract class MyClickHandler implements ClickHandler, EventSegment {
