@@ -360,17 +360,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       if (r.userid == userID) {
         float pronScore = r.getPronScore();
         scoreTotal += pronScore;
-
-   /*     String relativeImagePath = pathHelper.ensureForwardSlashes(r.answer);
-        if (relativeImagePath.startsWith("/")) {
-          relativeImagePath = relativeImagePath.substring(1);
-        }*/
-
         scores.add(new ScoreAndPath(pronScore, r.answer));
       }
     }
     firstExercise.setScores(scores);
-    firstExercise.setAvgScore(scoreTotal/total);
+    firstExercise.setAvgScore(total == 0 ? 0f : scoreTotal/total);
   }
 
   private void attachAudio(CommonExercise firstExercise) {
