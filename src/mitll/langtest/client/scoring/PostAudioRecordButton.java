@@ -1,5 +1,6 @@
 package mitll.langtest.client.scoring;
 
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
@@ -51,6 +52,8 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     this.recordInResults = recordInResults;
     getElement().setId("PostAudioRecordButton");
     controller.register(this, exercise.getID());
+    getElement().getStyle().setMarginTop(1, Style.Unit.PX);
+    getElement().getStyle().setMarginBottom(1, Style.Unit.PX);
   }
 
   public void setExercise(CommonExercise exercise) { this.exercise = exercise; }
