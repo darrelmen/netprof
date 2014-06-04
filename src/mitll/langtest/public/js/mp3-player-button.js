@@ -99,7 +99,9 @@ function BasicMP3Player() {
     play: function() {
       pl.removeClass(this._data.oLink,this._data.className);
       this._data.className = pl.css.sPlaying;
-      pl.addClass(this._data.oLink,this._data.className);
+        sm._writeDebug('basicMP3Player.play - add class ' + this._data.className);
+
+        pl.addClass(this._data.oLink,this._data.className);
     },
 
     stop: function() {
@@ -175,7 +177,11 @@ function BasicMP3Player() {
     soundURL = (o.href);
     thisSound = self.getSoundByURL(soundURL);
     if (thisSound) {
-      // already exists
+        sm._writeDebug('basicMP3Player.handleClick() sound exists ' + soundURL);
+        thisSound._data = {
+            oLink: o
+        };
+        // already exists
       if (thisSound === self.lastSound) {
         // and was playing (or paused)
         thisSound.togglePause();
