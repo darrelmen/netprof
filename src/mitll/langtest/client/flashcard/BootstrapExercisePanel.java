@@ -12,9 +12,11 @@ import com.github.gwtbootstrap.client.ui.Paragraph;
 import com.github.gwtbootstrap.client.ui.ProgressBar;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
+import com.github.gwtbootstrap.client.ui.constants.IconSize;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
@@ -33,6 +35,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.AudioTag;
@@ -75,6 +78,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
   private static final String ENGLISH = "English";
   private static final String PLAY = "PLAY";
   private static final String BOTH = "Both";
+  private static final int LEFT_MARGIN_FOR_FOREIGN_PHRASE = 17;
 
   private final CommonExercise exercise;
 
@@ -418,7 +422,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     div.addStyleName("blockStyle");
     div.add(english);
 
-    foreign = getForeignLanguageContent(foreignSentence);
+    foreign = getForeignLanguageContent(foreignSentence,  e.hasRefAudio());
 
     if (!usedForeign) {
       div.add(foreign);
@@ -438,57 +442,87 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     return controller.getLanguage().equals("English");
   }
 
-  private Widget getForeignLanguageContent(String foreignSentence) {
-    Heading widgets = new Heading(1, foreignSentence);
-    widgets.getElement().setId("FLPhrase");
+  /**
+   * @see #getQuestionContent(mitll.langtest.shared.CommonExercise)
+   * @param foreignSentence
+   * @param hasRefAudio
+   * @return
+   */
+  private Widget getForeignLanguageContent(String foreignSentence, boolean hasRefAudio) {
+    Heading heading = new Heading(1, foreignSentence);
+    heading.getElement().setId("FLPhrase");
+    heading.getElement().getStyle().setMarginLeft(LEFT_MARGIN_FOR_FOREIGN_PHRASE, Style.Unit.PX);
     FocusPanel container = new FocusPanel();
     container.getElement().setId("FLPhrase_container");
-    container.add(widgets);
+    //container.add(heading);
+    HorizontalPanel hp = new HorizontalPanel();
+    hp.add(heading);
+    if (hasRefAudio) {
+      Icon w = new Icon(IconType.VOLUME_UP);
+      w.setSize(IconSize.TWO_TIMES);
+      Panel simple = new SimplePanel();
+      simple.add(w);
+     // simple.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
+      simple.addStyleName("leftTenMargin");
+      hp.add(simple);
+    }
+    DivWidget centeringRow = getCenteringRow();
+    centeringRow.add(hp);
+    container.add(centeringRow);
+
     addAudioBindings2(container);
     return container;
   }
 
-  private PopupPanel popupPanel;
+  DivWidget getCenteringRow() {
+    DivWidget status = new DivWidget();
+    status.getElement().setId("statusRow");
+    status.addStyleName("alignCenter");
+    status.addStyleName("inlineBlockStyle");
+    return status;
+  }
+
+ // private PopupPanel popupPanel;
 
   /**
-   * @see #getForeignLanguageContent(String)
+   * @see #getForeignLanguageContent(String, boolean)
    * @see #getQuestionContent(mitll.langtest.shared.CommonExercise)
-   * @param widgets
+   * @param focusPanel
    */
-  private void addAudioBindings2(final FocusPanel widgets) {
-    widgets.addClickHandler(new ClickHandler() {
+  private void addAudioBindings2(final FocusPanel focusPanel) {
+    focusPanel.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         playRefLater();
       }
     });
-    widgets.addMouseOverHandler(new MouseOverHandler() {
+    focusPanel.addMouseOverHandler(new MouseOverHandler() {
       @Override
       public void onMouseOver(MouseOverEvent event) {
-        widgets.addStyleName("mouseOverHighlight");
-        popupPanel = new PopupPanel(true);
+        focusPanel.addStyleName("mouseOverHighlight");
+  /*      popupPanel = new PopupPanel(true);
         Icon w = new Icon(IconType.VOLUME_UP);
         popupPanel.add(w);
-        int x = widgets.getAbsoluteLeft();
-        int y = widgets.getAbsoluteTop()+5;
-        popupPanel.setPopupPosition(x,y);
-        popupPanel.show();
+        int x = focusPanel.getAbsoluteLeft();
+        int y = focusPanel.getAbsoluteTop() + 5;
+        popupPanel.setPopupPosition(x, y);
+        popupPanel.show();*/
       }
     });
 
-    widgets.addMouseOutHandler(new MouseOutHandler() {
+    focusPanel.addMouseOutHandler(new MouseOutHandler() {
       @Override
       public void onMouseOut(MouseOutEvent event) {
-        popupPanel.hide();
-        popupPanel = null;
-        widgets.removeStyleName("mouseOverHighlight");
+     //   popupPanel.hide();
+     //   popupPanel = null;
+        focusPanel.removeStyleName("mouseOverHighlight");
       }
     });
 
-    widgets.addFocusHandler(new FocusHandler() {
+    focusPanel.addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {
-        widgets.setFocus(false);
+        focusPanel.setFocus(false);
       }
     });
   }
