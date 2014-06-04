@@ -244,16 +244,17 @@ public class UserListManager {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addUserList(long, String, String, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addUserList
    * @see mitll.langtest.client.custom.CreateListDialog#doCreate
    * @param userid
    * @param name
    * @param description
    * @param dliClass
+   * @param isPublic
    * @return
    */
-  public long addUserList(long userid, String name, String description, String dliClass) {
-    UserList userList = createUserList(userid, name, description, dliClass, false);
+  public long addUserList(long userid, String name, String description, String dliClass, boolean isPublic) {
+    UserList userList = createUserList(userid, name, description, dliClass, !isPublic);
     if (userList == null) return -1;
     else return userList.getUniqueID();
   }
