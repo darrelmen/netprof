@@ -358,7 +358,7 @@ public class HistoryExerciseList extends PagingExerciseList {
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
   protected void loadExercises(final Map<String, Collection<String>> typeToSection, final String item) {
-    //System.out.println("HistoryExerciseList.loadExercises : " + typeToSection + " and item '" + item + "'");
+    System.out.println("HistoryExerciseList.loadExercises : " + typeToSection + " and item '" + item + "' showCompleted " + showCompleted);
     if (showCompleted) {
       service.getCompletedExercises(controller.getUser(),new AsyncCallback<Set<String>>() {
         @Override
@@ -366,6 +366,8 @@ public class HistoryExerciseList extends PagingExerciseList {
 
         @Override
         public void onSuccess(Set<String> result) {
+          System.out.println("\tHistoryExerciseList.loadExercises : " + typeToSection + " and item '" + item + "' result " + result.size());
+
           controller.getExerciseList().setCompleted(result);
           loadExercisesUsingPrefix(typeToSection, getPrefix());
         }
@@ -376,6 +378,22 @@ public class HistoryExerciseList extends PagingExerciseList {
     }
   }
 
+  private void getCompleted() {
+    service.getCompletedExercises(controller.getUser(),new AsyncCallback<Set<String>>() {
+      @Override
+      public void onFailure(Throwable caught) {}
+
+      @Override
+      public void onSuccess(Set<String> result) {
+        //System.out.println("\tHistoryExerciseList.loadExercises : " + typeToSection + " and item '" + item + "' result " + result.size());
+
+        controller.getExerciseList().setCompleted(result);
+      //  loadExercisesUsingPrefix(typeToSection, getPrefix());
+      }
+    });
+  }
+
+  @Override
   protected void loadExercises(String selectionState, String prefix) {
     Map<String, Collection<String>> typeToSection = getSelectionState(selectionState).getTypeToSection();
     loadExercisesUsingPrefix(typeToSection, prefix);
