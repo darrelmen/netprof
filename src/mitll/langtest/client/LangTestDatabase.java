@@ -86,7 +86,7 @@ public interface LangTestDatabase extends RemoteService {
   List<AVPHistoryForList> getUserHistoryForList(long userid, Collection<String> ids, long latestResultID);
 
   StartupInfo getStartupInfo();
-  long addUserList(long userid, String name, String description, String dliClass);
+  long addUserList(long userid, String name, String description, String dliClass, boolean isPublic);
   void addVisitor(long userListID, long user);
   Collection<UserList> getListsForUser(long userid, boolean onlyCreated, boolean visited);
   Collection<UserList> getUserListsForText(String search, long userid);
