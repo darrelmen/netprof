@@ -73,7 +73,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   protected UserManager user;
   private String exercise_title;
   private final boolean showTurkToken;
-  private final boolean showInOrder;
+  protected final boolean showInOrder;
   private int countSincePrompt = 0;
   protected int lastReqID = 0;
   private final Set<Integer> visited = new HashSet<Integer>();
@@ -142,7 +142,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param getNext
    */
   public void getExercises(long userID, boolean getNext) {
-    System.out.println("ExerciseList.getExercises for user " +userID);
+    System.out.println("---> ExerciseList.getExercises for user " +userID + " get next " + getNext);
 
     if (showInOrder) {
       getExercisesInOrder();
@@ -207,7 +207,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   /**
    * @see mitll.langtest.client.grading.GradedExerciseList#setFactory(ExercisePanelFactory, mitll.langtest.client.user.UserManager, int)
    */
-  private void getExercisesInOrder() {
+  protected void getExercisesInOrder() {
     lastReqID++;
     service.getExerciseIds(lastReqID, -1, new SetExercisesCallback());
   }
@@ -280,6 +280,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param exercises
    */
   public void rememberAndLoadFirst(List<? extends ExerciseShell> exercises, Exercise firstExercise) {
+    System.out.println(new Date() + " rememberAndLoadFirst : exercises " +exercises.size());
+
     rememberExercises(exercises);
     if (firstExercise != null) {
       ExerciseShell firstExerciseShell = findFirstExercise();
