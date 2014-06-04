@@ -149,16 +149,16 @@ public class DatabaseImpl implements Database {
     UserListExerciseJoinDAO userListExerciseJoinDAO = new UserListExerciseJoinDAO(this);
     dliUserDAO = new DLIUserDAO(this);
     resultDAO = new ResultDAO(this);
-    audioDAO = new AudioDAO(this,userDAO);
+    audioDAO = new AudioDAO(this, userDAO);
     answerDAO = new AnswerDAO(this, resultDAO);
-    gradeDAO = new GradeDAO(this,userDAO, resultDAO);
+    gradeDAO = new GradeDAO(this, userDAO, resultDAO);
     userListManager = new UserListManager(userDAO, userListDAO, userListExerciseJoinDAO,
       new AnnotationDAO(this, userDAO),
       new ReviewedDAO(this, ReviewedDAO.REVIEWED),
       new ReviewedDAO(this, ReviewedDAO.SECOND_STATE),
       pathHelper);
 
-    eventDAO = new EventDAO(this);
+    eventDAO = new EventDAO(this, userDAO);
 
 /*    if (DROP_USER) {
       try {
@@ -189,7 +189,7 @@ public class DatabaseImpl implements Database {
     try {
       gradeDAO.createGradesTable(getConnection());
     } catch (SQLException e) {
-      logger.error("Got " +e,e);
+      logger.error("Got " + e, e);
     }
   }
 
