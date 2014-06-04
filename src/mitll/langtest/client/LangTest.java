@@ -283,8 +283,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     currentExerciseVPanel.getElement().setId("currentExercisePanel");
     DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingLeft", "5px");
     DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingRight", "2px");
-
-    ListInterface listInterface = makeExerciseList(secondRow, leftColumn);
+     currentExerciseVPanel.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
+    /*ListInterface listInterface =*/ makeExerciseList(secondRow, leftColumn);
     belowFirstRow.add(bothSecondAndThird);
 
     if (usualLayout) {
