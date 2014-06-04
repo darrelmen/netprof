@@ -142,10 +142,8 @@ public class Flashcard implements RequiresResize {
     }
 
     // add log out/admin options menu
-   // NavPills container = new NavPills();
     Dropdown menu = makeMenu(users, results, monitoring,events);
     menu.addStyleName("cogStyle");
-    //container.add(menu);
     NavLink widget1 = new NavLink("Log Out");
     widget1.addClickHandler(logoutClickHandler);
     menu.add(widget1);
