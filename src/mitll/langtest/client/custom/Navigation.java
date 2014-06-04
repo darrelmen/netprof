@@ -1225,17 +1225,12 @@ public class Navigation implements RequiresResize {
 
     if (!ul.isFavorite()) {
       long uniqueID = ul.getUniqueID();
-      String html1 = "by " +
-          (uniqueID == UserListManager.COMMENT_MAGIC_ID ? "Students" :
-              uniqueID == UserListManager.REVIEW_MAGIC_ID ? REVIEWERS :
-                  ul.getCreator().getUserID());
-      Heading h4Again;
-      if (yourList) {
-        h4Again = new Heading(5,html1);
-      }
-      else {
-        h4Again = new Heading(4,"",html1);
-      }
+
+      String html1 = (ul.isPrivate() ? "" : "Public ") + " by " +
+        (uniqueID == UserListManager.COMMENT_MAGIC_ID ? "Students" :
+          uniqueID == UserListManager.REVIEW_MAGIC_ID ? REVIEWERS :
+            ul.getCreator().getUserID());
+      Heading h4Again = yourList ? new Heading(5, html1) : new Heading(4, "", html1);
 
       h4Again.addStyleName("floatRight");
       r1.add(h4Again);
