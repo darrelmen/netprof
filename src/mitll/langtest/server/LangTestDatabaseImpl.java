@@ -708,11 +708,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param name
    * @param description
    * @param dliClass
+   * @param isPublic
    * @return
    */
   @Override
-  public long addUserList(long userid, String name, String description, String dliClass) {
-    return db.getUserListManager().addUserList(userid, name, description, dliClass);
+  public long addUserList(long userid, String name, String description, String dliClass, boolean isPublic) {
+    return db.getUserListManager().addUserList(userid, name, description, dliClass, isPublic);
   }
 
   /**
@@ -839,7 +840,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   @Override
-  public boolean isValidForeignPhrase(String foreign) {  return audioFileHelper.checkLTS(foreign); }
+  public boolean isValidForeignPhrase(String foreign) {
+
+    boolean b = audioFileHelper.checkLTS(foreign);
+    logger.debug("'" +foreign +
+      "' is valid phrase = "+b);
+    return b;
+  }
 
   /**
    * Put the new item in the database,
