@@ -47,9 +47,6 @@ public interface LangTestDatabase extends RemoteService {
   User getUserBy(long id);
 
   // answer DAO
-/*  AudioAnswer writeAudioFile(List<Integer> compressedBase64EncodedString, String plan, String exercise, int question, int user,
-                             int reqid, boolean flq, String audioType, boolean doFlashcard);*/
-
   void addTextAnswer(int userID, CommonExercise exercise, int questionID, String answer, String answerType);
   AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int question, int user,
                              int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults, boolean addToAudioTable, boolean recordedWithFlash);
@@ -87,6 +84,7 @@ public interface LangTestDatabase extends RemoteService {
 
   StartupInfo getStartupInfo();
   long addUserList(long userid, String name, String description, String dliClass, boolean isPublic);
+  void setPublicOnList(long userListID, boolean isPublic);
   void addVisitor(long userListID, long user);
   Collection<UserList> getListsForUser(long userid, boolean onlyCreated, boolean visited);
   Collection<UserList> getUserListsForText(String search, long userid);
@@ -107,7 +105,6 @@ public interface LangTestDatabase extends RemoteService {
   void setAVPSkip(Collection<Long> ids);
 
   void setExerciseState(String id, STATE state, long userID);
-
 
   List<UserList> getReviewLists();
 
