@@ -114,7 +114,6 @@ public interface LangTestDatabaseAsync {
   void getReviewLists(AsyncCallback<List<UserList>> async);
 
   void markAudioDefect(AudioAttribute audioAttribute, String exid, AsyncCallback<Void> async);
-/*
-  void writeAudioFile(String base64EncodedString, String plan, String exercise, int questionID,
-                      int user, int reqid, boolean flq, String audioType, boolean doFlashcard, AsyncCallback<AudioAnswer> async);*/
+
+  void setPublicOnList(long userListID, boolean isPublic, AsyncCallback<Void> async);
 }
