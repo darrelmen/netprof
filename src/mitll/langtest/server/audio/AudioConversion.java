@@ -318,13 +318,7 @@ public class AudioConversion {
   public void normalizeLevels(File absolutePathToWav) {
     try {
       File tempFile = File.createTempFile("normalized_" + removeSuffix(absolutePathToWav.getName()) + "_" + System.currentTimeMillis(), ".wav");
-      logger.debug("sox conversion from " + absolutePathToWav + " to " + tempFile.getAbsolutePath());
-/*
-      ProcessBuilder soxFirst = new ProcessBuilder(getSox(),
-        absolutePathToWav.getAbsolutePath(), "--norm",
-        //"−3",                           TODO : why doesn't this work???
-        "-q", tempFile.getAbsolutePath());
-*/
+      //logger.debug("sox conversion from " + absolutePathToWav + " to " + tempFile.getAbsolutePath());
 
       ProcessBuilder soxFirst2 = new ProcessBuilder(getSox(),
         absolutePathToWav.getAbsolutePath(),
@@ -337,9 +331,9 @@ public class AudioConversion {
         logger.error("didn't make " + tempFile);
         logger.error("soxFirst " + soxFirst2.command());
       }
-      else {
-        logger.debug("wrote normalized to " + tempFile.getAbsolutePath());
-      }
+      //else {
+        //logger.debug("wrote normalized to " + tempFile.getAbsolutePath());
+      //}
 
       FileUtils.copyFile(tempFile, absolutePathToWav);
     } catch (IOException e) {
