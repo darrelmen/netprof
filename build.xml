@@ -8,8 +8,8 @@
     <property name="ECLIPSE_HOME" value="../../../eclipse_juno"/>
     <property name="imagewriter.location" value="imagewriter"/>
     <property name="debuglevel" value="source,lines,vars"/>
-    <property name="target" value="1.7"/>
-    <property name="source" value="1.7"/>
+    <property name="target" value="1.6"/>
+    <property name="source" value="1.6"/>
 
     <tstamp>
         <format property="current.time" pattern="MM/dd_HH"/>
@@ -38,7 +38,9 @@
         <pathelement location="war/WEB-INF/lib/commons-codec-1.6.jar"/>
         <pathelement location="war/WEB-INF/lib/guava-16.0.1.jar"/>
         <pathelement location="war/WEB-INF/lib/guava-gwt-16.0.1.jar"/>
+<!--
         <pathelement location="war/WEB-INF/lib/gchart.jar"/>
+-->
         <pathelement location="war/WEB-INF/lib/log4j-1.2.17.jar"/>
         <path refid="imagewriter.classpath"/>
         <pathelement location="war/WEB-INF/lib/pronz.jar"/>
@@ -46,7 +48,9 @@
 <!--
         <pathelement location="war/WEB-INF/lib/javamelody-1.42.0.jar"/>
 -->
+<!--
         <pathelement location="war/WEB-INF/lib/jrobin-1.5.9.jar"/>
+-->
         <pathelement location="war/WEB-INF/lib/gwt-visualization.jar"/>
         <pathelement location="war/WEB-INF/lib/poi-3.10-FINAL-20140208.jar"/>
         <pathelement location="war/WEB-INF/lib/poi-ooxml-3.10-FINAL-20140208.jar"/>
