@@ -836,4 +836,8 @@ public class UserListManager {
 
     return remove;
   }
+
+  public void setPublicOnList(long userListID, boolean isPublic) {
+    userListDAO.setPublicOnList(userListID,isPublic);
+  }
 }
