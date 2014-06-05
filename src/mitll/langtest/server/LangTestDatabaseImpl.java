@@ -717,6 +717,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
+   * @see mitll.langtest.client.custom.Navigation#addWidgetsForList(mitll.langtest.shared.custom.UserList, boolean, com.google.gwt.user.client.ui.Panel, boolean)
+   * @param userListID
+   * @param isPublic
+   */
+  @Override
+  public void setPublicOnList(long userListID, boolean isPublic) {
+    db.getUserListManager().setPublicOnList(userListID, isPublic);
+  }
+
+  /**
    * @see mitll.langtest.client.custom.Navigation#addVisitor(mitll.langtest.shared.custom.UserList)
    * @param userListID
    * @param user
@@ -841,10 +851,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public boolean isValidForeignPhrase(String foreign) {
-
     boolean b = audioFileHelper.checkLTS(foreign);
-    logger.debug("'" +foreign +
-      "' is valid phrase = "+b);
+/*    logger.debug("'" +foreign +
+      "' is valid phrase = "+b);*/
     return b;
   }
 
