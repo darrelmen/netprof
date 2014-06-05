@@ -81,7 +81,7 @@ public class UserListDAO extends DAO {
       " (" +
       "uniqueid IDENTITY, " +
       CREATORID +
-      " LONG, " +
+      " INT, " +
       NAME +
       " VARCHAR, description VARCHAR, classmarker VARCHAR, modified TIMESTAMP, " +
       ISPRIVATE +
@@ -405,10 +405,41 @@ public class UserListDAO extends DAO {
     where.setExercises(onList);
     //if (!onList.isEmpty()) {
       //logger.debug("populateList : got " + onList.size() + " for list " + where.getUniqueID() + " = " + where);
-   // }
+    // }
   }
 
   public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
     this.userExerciseDAO = userExerciseDAO;
+  }
+
+  public void setPublicOnList(long userListID, boolean isPublic) {
+    try {
+      Connection connection = database.getConnection();
+
+      String sql = "UPDATE " + USER_EXERCISE_LIST +
+        " " +
+        "SET " +
+        ISPRIVATE +
+        "=? " +
+        "WHERE uniqueid=?";
+
+      PreparedStatement statement = connection.prepareStatement(sql);
+      statement.setBoolean(1, isPublic);
+      statement.setLong(2, userListID);
+      int i = statement.executeUpdate();
+
+      //if (false) logger.debug("UPDATE " + i);
+      if (i == 0) {
+        logger.error("huh? didn't update the userList for " + userListID + " sql " + sql);
+      }
+      else {
+        logger.debug("updated "+ userListID + " public " + isPublic+  " sql " + sql);
+      }
+
+      statement.close();
+      database.closeConnection(connection);
+    } catch (Exception e) {
+      logger.error("got " + e, e);
+    }
   }
 }

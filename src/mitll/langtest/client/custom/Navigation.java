@@ -7,26 +7,18 @@ import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.InlineLabel;
-import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.MouseOutEvent;
-import com.google.gwt.event.dom.client.MouseOutHandler;
-import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.FocusPanel;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -41,7 +33,6 @@ import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.User;
@@ -83,7 +74,7 @@ public class Navigation implements RequiresResize {
   private static final String LESSONS = "lessons";
   private static final String DELETE = "Delete";
   private static final String NO_LISTS_CREATED_YET = "No lists created yet.";
-  private static final String CLICKED_USER_LIST = "clickedUserList";
+  public static final String CLICKED_USER_LIST = "clickedUserList";
   private static final String CLICKED_TAB = "clickedTab";
   private static final String SUB_TAB = "subTab";
   private static final String NO_LISTS_CREATED_OR_VISITED_YET = "No lists created or visited yet.";
@@ -425,12 +416,12 @@ public class Navigation implements RequiresResize {
   /**
    * @see #getTabPanel(com.google.gwt.user.client.ui.Panel)
    * @see #showMyLists(boolean, boolean)
-   * @see #makeDeleteButton(mitll.langtest.shared.custom.UserList, boolean)
+   * @see #deleteList(com.github.gwtbootstrap.client.ui.Button, mitll.langtest.shared.custom.UserList, boolean)
    * @see #clickOnYourLists(long)
    * @param onlyMine
    * @param onlyVisited
    */
-  private void refreshViewLessons(boolean onlyMine, boolean onlyVisited) {
+  void refreshViewLessons(boolean onlyMine, boolean onlyVisited) {
     viewLessons(onlyMine ? yourStuff.getContent() : othersStuff.getContent(), false, onlyMine, onlyVisited);
   }
 
@@ -537,7 +528,7 @@ public class Navigation implements RequiresResize {
   }
 
   /**
-   * @see mitll.langtest.client.custom.CreateListDialog#addUserList(mitll.langtest.client.user.BasicDialog.FormField, com.github.gwtbootstrap.client.ui.TextArea, mitll.langtest.client.user.BasicDialog.FormField)
+   * @see mitll.langtest.client.custom.CreateListDialog#addUserList
    * @param userListID
    */
   public void clickOnYourLists(long userListID) {
@@ -573,6 +564,10 @@ public class Navigation implements RequiresResize {
     return tabAndContent;
   }
 
+  public KeyStorage getStorage() {
+    return storage;
+  }
+
   /*To call click() function for Programmatic equivalent of the user clicking the button.*/
   private class ButtonClickEvent extends ClickEvent {}
 
@@ -598,12 +593,12 @@ public class Navigation implements RequiresResize {
     if (getAll) {
      // System.out.println("viewLessons----> getAll = " + getAll);
       service.getUserListsForText("", controller.getUser(),
-        new UserListCallback(contentPanel, child, listScrollPanel, LESSONS + "_All", false, true));
+        new UserListCallback(this, contentPanel, child, listScrollPanel, LESSONS + "_All", false, true, userManager, onlyMine));
     } else {
      // System.out.println("viewLessons for " + userManager.getUser());
       service.getListsForUser(userManager.getUser(), onlyMine,
         onlyVisited,
-        new UserListCallback(contentPanel, child, listScrollPanel, LESSONS + (onlyMine ? "_Mine":"_Others"), onlyMine, false));
+        new UserListCallback(this, contentPanel, child, listScrollPanel, LESSONS + (onlyMine ? "_Mine":"_Others"), onlyMine, false, userManager, onlyMine));
     }
   }
 
@@ -624,7 +619,7 @@ public class Navigation implements RequiresResize {
       public void onSuccess(List<UserList> reviewLists) {
         System.out.println("\tviewReview : reviewLessons for " + userManager.getUser() + " got " + reviewLists);
 
-        new UserListCallback(contentPanel, child, new ScrollPanel(), REVIEW, false, false).onSuccess(reviewLists);
+        new UserListCallback(Navigation.this, contentPanel, child, new ScrollPanel(), REVIEW, false, false, userManager, false).onSuccess(reviewLists);
       }
     });
   }
@@ -653,14 +648,15 @@ public class Navigation implements RequiresResize {
   }
 
   /**
-   * @see Navigation.UserListCallback#getDisplayRowPerList(mitll.langtest.shared.custom.UserList, boolean, boolean)
-   * @see mitll.langtest.client.custom.Navigation.UserListCallback#selectPreviousList
+   * @see UserListCallback#getDisplayRowPerList(mitll.langtest.shared.custom.UserList, boolean, boolean)
+   * @see UserListCallback#selectPreviousList
    * @param ul
    * @param contentPanel
    */
-  private void showList(final UserList ul, Panel contentPanel, final String instanceName) {
+  void showList(final UserList ul, Panel contentPanel, final String instanceName) {
     System.out.println("showList " + ul + " instance " + instanceName);
   //  if (!ul.isEmpty()) System.out.println("\tfirst" + ul.getExercises().iterator().next());
+    controller.logEvent(contentPanel,"Tab","UserList_"+ul.getID(),"Show List");
 
     String previousList = storage.getValue(CLICKED_USER_LIST);
     String currentValue = storeCurrentClickedList(ul);
@@ -1005,302 +1001,40 @@ public class Navigation implements RequiresResize {
     }
   }
 
-  private class UserListCallback implements AsyncCallback<Collection<UserList>> {
-    private final Panel contentPanel;
-    private final Panel child;
-    private final ScrollPanel listScrollPanel;
-    private final boolean allLists;
-    private final String instanceName;
-    final boolean onlyMyLists;
-
-    /**
-     * @see #viewLessons(com.google.gwt.user.client.ui.Panel, boolean, boolean, boolean)
-     * @see #viewReview(com.google.gwt.user.client.ui.Panel)
-     * @param contentPanel
-     * @param child
-     * @param listScrollPanel
-     * @param instanceName
-     * @param onlyMyLists
-     * @param allLists
-     */
-    public UserListCallback(Panel contentPanel, Panel child, ScrollPanel listScrollPanel, String instanceName,
-                            boolean onlyMyLists, boolean allLists) {
-     // System.out.println("UserListCallback instance " +instanceName);
-      this.contentPanel = contentPanel;
-      this.child = child;
-      this.listScrollPanel = listScrollPanel;
-      this.instanceName = instanceName;
-      this.onlyMyLists = onlyMyLists;
-      this.allLists = allLists;
-    }
-
-    @Override
-    public void onFailure(Throwable caught) {}
-
-    @Override
-    public void onSuccess(final Collection<UserList> result) {
-      //System.out.println("\tUserListCallback : Displaying " + result.size() + " user lists for " + instanceName);
-      if (result.isEmpty()) {
-        child.add(new Heading(3, allLists ? NO_LISTS_YET :NO_LISTS_CREATED_YET));
-      } else {
-        listScrollPanel.getElement().setId("scrollPanel");
-
-        setScrollPanelWidth(listScrollPanel);
-
-        final Panel insideScroll = new DivWidget();
-        insideScroll.getElement().setId("insideScroll");
-        insideScroll.addStyleName("userListContainer");
-        listScrollPanel.add(insideScroll);
-
-        Map<String, List<UserList>> nameToLists = populateNameToList(result);
-
-        boolean anyAdded = addUserListsToDisplay(result, insideScroll, nameToLists);
-        if (!anyAdded) {
-          insideScroll.add(new Heading(3, allLists ? NO_LISTS_CREATED_OR_VISITED_YET:NO_LISTS_CREATED_YET));
-        }
-        child.add(listScrollPanel);
-
-        selectPreviousList(result);
-      }
-    }
-
-    /**
-     * @see #onSuccess(java.util.Collection)
-     * @param result
-     */
-    private void selectPreviousList(Collection<UserList> result) {
-      String clickedUserList = storage.getValue(CLICKED_USER_LIST);
-      if (clickedUserList != null && !clickedUserList.isEmpty()) {
-        long id = Long.parseLong(clickedUserList);
-        for (UserList ul : result) {
-           if (ul.getUniqueID() == id) {
-             showList(ul, contentPanel, instanceName);
-             break;
-           }
-        }
-      }
-    }
-
-    private Map<String, List<UserList>> populateNameToList(Collection<UserList> result) {
-      Map<String,List<UserList>> nameToLists = new HashMap<String, List<UserList>>();
-
-      for (final UserList ul : result) {
-        List<UserList> userLists = nameToLists.get(ul.getName());
-        if (userLists == null) nameToLists.put(ul.getName(), userLists = new ArrayList<UserList>());
-        userLists.add(ul);
-      }
-      return nameToLists;
-    }
-
-    /**
-     * @see #onSuccess(java.util.Collection)
-     * @param result
-     * @param insideScroll
-     * @param nameToLists
-     * @return
-     */
-    private boolean addUserListsToDisplay(Collection<UserList> result, Panel insideScroll, Map<String, List<UserList>> nameToLists) {
-      boolean anyAdded = false;
-      for (final UserList ul : result) {
-        List<UserList> collisions = nameToLists.get(ul.getName());
-        boolean showMore = false;
-        if (collisions.size() > 1) {
-          if (collisions.indexOf(ul) > 0) showMore = true;
-        }
-        if (!ul.isEmpty() || (!ul.isPrivate()) ) {
-          anyAdded = true;
-          insideScroll.add(getDisplayRowPerList(ul, showMore, onlyMyLists));
-        }
-      }
-      return anyAdded;
-    }
-
-    private void setScrollPanelWidth(ScrollPanel row) {
-      if (row != null) {
-        row.setHeight((Window.getClientHeight() * 0.7) + "px");
-      }
-    }
-
-   /**
-    * When you click on the panel, show the list.
-    *
-    * @see mitll.langtest.client.custom.Navigation.UserListCallback#addUserListsToDisplay(java.util.Collection, com.google.gwt.user.client.ui.Panel, java.util.Map)
-    * @param ul
-    * @param showMore
-    * @param onlyMyLists
-    * @return
-    */
-    private Panel getDisplayRowPerList(final UserList ul, boolean showMore, boolean onlyMyLists) {
-      final FocusPanel widgets = new FocusPanel();
-
-      widgets.addStyleName("userListContent");
-      widgets.addStyleName("userListBackground");
-      widgets.addStyleName("leftTenMargin");
-      widgets.addStyleName("rightTenMargin");
-
-      widgets.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          showList(ul, contentPanel, instanceName);
-          controller.logEvent(contentPanel,"Tab","UserList_"+ul.getID(),"Show List");
-        }
-      });
-      widgets.addMouseOverHandler(new MouseOverHandler() {
-        @Override
-        public void onMouseOver(MouseOverEvent event) {
-          widgets.removeStyleName("userListBackground");
-          widgets.addStyleName("blueBackground");
-          widgets.addStyleName("handCursor");
-          widgets.getElement().getStyle().setCursor(Style.Cursor.POINTER);
-        }
-      });
-      widgets.addMouseOutHandler(new MouseOutHandler() {
-        @Override
-        public void onMouseOut(MouseOutEvent event) {
-          widgets.removeStyleName("blueBackground");
-          widgets.addStyleName("userListBackground");
-          widgets.removeStyleName("handCursor");
-        }
-      });
-      FluidContainer w = new FluidContainer();
-      widgets.add(w);
-
-      addWidgetsForList(ul, showMore, w, onlyMyLists);
-      return widgets;
-    }
-  }
-
-/*
-  private final Map<UserList, HasText> listToMarker = new HashMap<UserList, HasText>();
-*/
-
-  /**
-   * @see mitll.langtest.client.custom.Navigation.UserListCallback#getDisplayRowPerList(mitll.langtest.shared.custom.UserList, boolean, boolean)
-   * @param ul
-   * @param showMore
-   * @param container
-   * @param onlyMyLists
-   */
-  private void addWidgetsForList(final UserList ul, boolean showMore, final Panel container, boolean onlyMyLists) {
-    Panel r1 = new FlowPanel();
-    r1.addStyleName("trueInlineStyle");
-    String name = ul.getName();
-/*    Widget child = makeItemMarker2(ul);
-    child.addStyleName("leftFiveMargin");*/
-
-    Heading h4 = new Heading(4,name,ul.getExercises().size() + " items");
-    h4.addStyleName("floatLeft");
-    r1.add(h4);
-
-    boolean empty = ul.getDescription().trim().isEmpty();
-    boolean cmempty = ul.getClassMarker().trim().isEmpty();
-    String subtext = empty ? "" : ul.getDescription() + (cmempty ? "":",");
-
-    if (!empty) {
-      h4 = new Heading(4, "", subtext);
-      h4.addStyleName("floatLeft");
-      h4.addStyleName("leftFiveMargin");
-      h4.getElement().setId("desc");
-
-      r1.add(h4);
-    }
-
-    if (!cmempty) {
-      String classMarker = ul.getClassMarker();
-      h4 = new Heading(4, "", classMarker);
-      h4.addStyleName("floatLeft");
-      h4.addStyleName("leftFiveMargin");
-      h4.getElement().setId("course");
-
-      r1.add(h4);
-    }
-
-    boolean yourList = isYourList(ul);
-    if (yourList) {
-      Button deleteButton = makeDeleteButton(ul, onlyMyLists);
-      deleteButton.addStyleName("floatRight");
-      deleteButton.addStyleName("leftFiveMargin");
-      r1.add(deleteButton);
-    }
-
-    if (!ul.isFavorite()) {
-      long uniqueID = ul.getUniqueID();
-
-      String html1 = (ul.isPrivate() ? "" : "Public ") + " by " +
-        (uniqueID == UserListManager.COMMENT_MAGIC_ID ? "Students" :
-          uniqueID == UserListManager.REVIEW_MAGIC_ID ? REVIEWERS :
-            ul.getCreator().getUserID());
-      Heading h4Again = yourList ? new Heading(5, html1) : new Heading(4, "", html1);
-
-      h4Again.addStyleName("floatRight");
-      r1.add(h4Again);
-    }
-
-    container.add(r1);
-
-    if (showMore && !ul.getDescription().isEmpty()) {
-      Panel r2 = new FluidRow();
-      container.add(r2);
-      r2.add(getUserListText2(ul.getDescription()));
-    }
-  }
-
-/*  private Widget makeItemMarker2(UserList ul) {
-    InlineLabel itemMarker = new InlineLabel(ul.getExercises().size() + " items");
-    itemMarker.addStyleName("numItemFont");
-    listToMarker.put(ul, itemMarker);
-    return itemMarker;
-  }*/
-
-  /**
-   * @see #addWidgetsForList(mitll.langtest.shared.custom.UserList, boolean, com.google.gwt.user.client.ui.Panel, boolean)
-   * @param ul
-   * @param onlyMyLists
-   * @return
-   */
-  private Button makeDeleteButton(final UserList ul, final boolean onlyMyLists) {
-    final Button delete = new Button(DELETE);
-    delete.getElement().setId("UserList_"+ul.getID()+"_delete");
-    delete.addStyleName("topMargin");
-    DOM.setStyleAttribute(delete.getElement(), "marginBottom", "5px");
-
-    delete.setType(ButtonType.WARNING);
-    delete.addClickHandler(new ClickHandler() {
+  void deleteList(Button delete, final UserList ul, final boolean onlyMyLists) {
+    controller.logEvent(delete, "Button", "UserList_" + ul.getID(), "Delete");
+    service.deleteList(ul.getUniqueID(), new AsyncCallback<Boolean>() {
       @Override
-      public void onClick(final ClickEvent event) {
-        controller.logEvent(delete,"Button","UserList_"+ul.getID(),"Delete");
-        service.deleteList(ul.getUniqueID(), new AsyncCallback<Boolean>() {
-          @Override
-          public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+      }
 
-          @Override
-          public void onSuccess(Boolean result) {
-            if (result) {
-              refreshViewLessons(onlyMyLists, false);
-            }
-            else {
-              System.err.println("---> did not do deleteList " + ul.getUniqueID());
-            }
-          }
-        });
+      @Override
+      public void onSuccess(Boolean result) {
+        if (result) {
+          refreshViewLessons(onlyMyLists, false);
+        } else {
+          System.err.println("---> did not do deleteList " + ul.getUniqueID());
+        }
       }
     });
-    return delete;
   }
 
-  /**
-   * Any list of yours but not your favorites
-   * @param ul
-   * @return
-   */
-  private boolean isYourList(UserList ul) {
-    return createdByYou(ul) && !ul.getName().equals(UserList.MY_LIST);
-  }
-  private boolean createdByYou(UserList ul) { return ul.getCreator().getId() == userManager.getUser(); }
+  void setPublic(long uniqueID, boolean isPublic) {
+    service.setPublicOnList(uniqueID, isPublic, new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {
 
-  private Widget getUserListText2(String content) {
-    Widget nameInfo = new HTML(content);
-    nameInfo.addStyleName("userListFont2");
-    return nameInfo;
+      }
+
+      @Override
+      public void onSuccess(Void result) {
+
+      }
+    });
+  }
+
+
+  private boolean createdByYou(UserList ul) {
+    return ul.getCreator().getId() == userManager.getUser();
   }
 }
