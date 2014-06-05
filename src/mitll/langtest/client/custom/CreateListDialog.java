@@ -115,28 +115,17 @@ class CreateListDialog extends BasicDialog {
     String audioType = controller.getAudioType();
     boolean isStudent = audioType.equalsIgnoreCase(PRACTICE);
 
-    System.out.println("STUDENT = " + isStudent + " audio type '" + audioType+
-      "'");
-
     radioButton.setValue(!isStudent);
     radioButton2.setValue(isStudent);
 
-    HorizontalPanel hp = new HorizontalPanel();
+    Panel hp = new HorizontalPanel();
     hp.add(radioButton);
     radioButton2.addStyleName("leftFiveMargin");
     hp.add(radioButton2);
 
     ControlGroup widgets = addControlGroupEntry(row, "Keep List Public/Private?", hp);
-   // classBox.box.getElement().setId("CreateListDialog_CourseInfo");
-/*    classBox.box.addBlurHandler(new BlurHandler() {
-      @Override
-      public void onBlur(BlurEvent event) {
-        controller.logEvent(classBox.box,"TextBox","Create New List","CourseInfo = " + classBox.box.getValue());
-      }
-    });*/
 
     row.add(widgets);
-
 
     row = new FluidRow();
     child.add(row);
