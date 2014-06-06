@@ -307,12 +307,9 @@ public class NewUserExercise extends BasicDialog {
     // translit
     translit.box.setText(newUserExercise.getTransliteration());
 
-   // CommonExercise exercise = newUserExercise.toExercise();
-
     // regular speed audio
     rap.getPostAudioButton().setExercise(newUserExercise);
     String refAudio = newUserExercise.getRefAudio();
-
 
     if (refAudio != null) {
       rap.getImagesForPath(refAudio);
@@ -338,16 +335,13 @@ public class NewUserExercise extends BasicDialog {
   Panel getCreateButton(UserList ul, ListInterface pagingContainer, Panel toAddTo,
                         ControlGroup normalSpeedRecording
   ) {
-    Button submit = makeCreateButton(ul, pagingContainer, toAddTo, foreignLang, rap, normalSpeedRecording,
-      CREATE);
+    Button submit = makeCreateButton(ul, pagingContainer, toAddTo, foreignLang, rap, normalSpeedRecording,  CREATE);
     DOM.setStyleAttribute(submit.getElement(), "marginBottom", "5px");
     DOM.setStyleAttribute(submit.getElement(), "marginRight", "15px");
 
     Panel row = new DivWidget();
     row.addStyleName("marginBottomTen");
 
-    //Column column = new Column(2, 9, submit);
-    //column.addStyleName("topMargin");
     configureButtonRow(row);
     row.add(submit);
     return row;
