@@ -68,7 +68,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   private static final String APPROVED_BUTTON_TOOLTIP = "Indicate item has no defects.";
   private static final String APPROVED_BUTTON_TOOLTIP2 = "Item has been marked with a defect";
   private static final String ATTENTION_LL = "Attention LL";
-  private static final String MARK_FOR_LL_REVIEW = "Mark for LL review.";
+  private static final String MARK_FOR_LL_REVIEW = "Mark for review by Lincoln Laboratory.";
   public static final int DEFAULT_USER = -1;
 
   private Set<String> incorrectFields;
@@ -183,7 +183,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
         markAttentionLL(listContainer, exercise);
       }
     });
-    /*approvedTooltip = */addTooltip(attention, MARK_FOR_LL_REVIEW);
+    addTooltip(attention, MARK_FOR_LL_REVIEW);
     return attention;
   }
 
@@ -247,8 +247,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     service.markReviewed(completedExercise.getID(), allCorrect, controller.getUser(),
       new AsyncCallback<Void>() {
         @Override
-        public void onFailure(Throwable caught) {
-        }
+        public void onFailure(Throwable caught) {}
 
         @Override
         public void onSuccess(Void result) {
@@ -346,8 +345,9 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   }
 
   private void addTabsForUsers(CommonExercise e, TabPanel tabPanel, Map<MiniUser, List<AudioAttribute>> malesMap, List<MiniUser> maleUsers) {
+    int me = controller.getUser();
     for (MiniUser user : maleUsers) {
-      String tabTitle = (user.getId() == DEFAULT_USER) ? "Default Speaker" : getUserTitle(user);
+      String tabTitle = getUserTitle(me, user);
 
       RememberTabAndContent tabAndContent = new RememberTabAndContent(IconType.QUESTION_SIGN, tabTitle);
       tabPanel.add(tabAndContent.getTab().asTabLink());
@@ -372,6 +372,10 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
         tabAndContent.getTab().setIcon(IconType.CHECK_SIGN);
       }
     }
+  }
+
+  private String getUserTitle(int me, MiniUser user) {
+    return (user.getId() == DEFAULT_USER) ? "Default Speaker" : (user.getId() == me) ? "by You (" +user.getUserID()+ ")" : getUserTitle(user);
   }
 
   private String getUserTitle(MiniUser user) {
