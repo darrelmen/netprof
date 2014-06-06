@@ -272,7 +272,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   private Widget makeRow(TooltipHelper tooltipHelper, ScoreAndPath scoreAndPath, String prefix, Placement right, boolean showPercent) {
     Widget row = new DivWidget();
     int iScore = toPercent(scoreAndPath);
-    row.setWidth(iScore + "px");
+    row.setWidth(Math.max(3,iScore) + "px");
     row.setHeight(HEIGHT + "px");
     row.getElement().getStyle().setBackgroundColor(chart.getColor(scoreAndPath.getScore()));
     row.getElement().getStyle().setMarginTop(2, Style.Unit.PX);
