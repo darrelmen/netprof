@@ -46,6 +46,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   private static final String SCORE_HISTORY = "Score History";
   private static final String SCORE = "Score";
   private static final int HEIGHT = 18;
+  private static final int ROW_LEFT_MARGIN = 18 + 5;
 
   private final PretestGauge ASRGauge;
   private final Panel phoneList;
@@ -175,7 +176,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     }
 
     if (classAvg > 0) {
-      vp.add(getClassAverage(tooltipHelper));
+      vp.add(getClassAverage(tooltipHelper, !scoreAndPaths.isEmpty()));
     }
 
     if (refAudio != null && !scoreAndPaths.isEmpty()) { // show audio to compare yours against
@@ -198,7 +199,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     return hp;
   }
 
-  private Panel getClassAverage(TooltipHelper tooltipHelper) {
+  private Panel getClassAverage(TooltipHelper tooltipHelper, boolean addLeftMargin) {
     String prefix = /*classAvg < 0.001f ? "No Class Avg Yet" :*/ "Class Avg";
     ScoreAndPath scoreAndPath = new ScoreAndPath(classAvg, "");
     if (classAvg < 0.001f) {
@@ -210,7 +211,9 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     //System.out.println("class avg " + classAvg);
 
     Widget widget = makeRow2(tooltipHelper, scoreAndPath, prefix, Placement.BOTTOM);
-    widget.getElement().getStyle().setMarginLeft(18+5, Style.Unit.PX);
+    if (addLeftMargin) {
+      widget.getElement().getStyle().setMarginLeft(ROW_LEFT_MARGIN, Style.Unit.PX);
+    }
     Panel hp2 = new HorizontalPanel();
     hp2.add(widget);
     InlineHTML w1 = new InlineHTML("Class Avg");
