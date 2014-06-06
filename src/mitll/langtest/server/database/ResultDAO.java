@@ -799,7 +799,7 @@ public class ResultDAO extends DAO {
     long now;
     long then = System.currentTimeMillis();
 
-    SXSSFWorkbook wb = new SXSSFWorkbook(1000); // keep 100 rows in memory, exceeding rows will be flushed to disk
+    SXSSFWorkbook wb = new SXSSFWorkbook(10000); // keep 100 rows in memory, exceeding rows will be flushed to disk
     Sheet sheet = wb.createSheet("Results");
     int rownum = 0;
     CellStyle cellStyle = wb.createCellStyle();
