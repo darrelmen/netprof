@@ -838,6 +838,6 @@ public class UserListManager {
   }
 
   public void setPublicOnList(long userListID, boolean isPublic) {
-    userListDAO.setPublicOnList(userListID,isPublic);
+    userListDAO.setPublicOnList(userListID, isPublic);
   }
 }
