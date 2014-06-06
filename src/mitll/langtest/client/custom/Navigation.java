@@ -68,17 +68,12 @@ public class Navigation implements RequiresResize {
   private static final String ITEMS_WITH_COMMENTS = "Items with comments";
   private static final String LEARN_PRONUNCIATION = "Learn Pronunciation";
   private static final String FIX_DEFECTS = "Fix Defects";
-  private static final String REVIEWERS = "Reviewers";
   private static final String CREATE = "Create a New List";
   private static final String BROWSE = "Browse Lists";
   private static final String LESSONS = "lessons";
-  private static final String DELETE = "Delete";
-  private static final String NO_LISTS_CREATED_YET = "No lists created yet.";
   public static final String CLICKED_USER_LIST = "clickedUserList";
   private static final String CLICKED_TAB = "clickedTab";
   private static final String SUB_TAB = "subTab";
-  private static final String NO_LISTS_CREATED_OR_VISITED_YET = "No lists created or visited yet.";
-  public static final String NO_LISTS_YET = "No lists created yet that you haven't seen.";
 
   private static final int SUBTAB_LEARN_INDEX = 0;
   private static final int SUBTAB_PRACTICE_INDEX = 1;
