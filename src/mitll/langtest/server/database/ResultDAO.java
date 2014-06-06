@@ -195,7 +195,7 @@ public class ResultDAO extends DAO {
   }
 
   /**
-   * Only take avp audio type and valid audio.
+   * Only take avp audio type and *valid* audio.
    *
    * @see #getSessionsForUserIn2
    * @param ids
