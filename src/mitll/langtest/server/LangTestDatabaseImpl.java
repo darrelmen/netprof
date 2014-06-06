@@ -353,13 +353,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     addPlayedMarkings(userID, firstExercise);
     List<Result> resultsForExercise = db.getResultDAO().getResultsForExercise(firstExercise.getID());
 
-    int total = resultsForExercise.size();
+    int total = 0;
     float scoreTotal = 0f;
     List<ScoreAndPath> scores = new ArrayList<ScoreAndPath>();
     for (Result r : resultsForExercise) {
-      if (r.userid == userID) {
-        float pronScore = r.getPronScore();
+      float pronScore = r.getPronScore();
+      if (pronScore > 0) { // overkill?
+        total++;
         scoreTotal += pronScore;
+      }
+      if (r.userid == userID) {
         scores.add(new ScoreAndPath(pronScore, r.answer));
       }
     }
@@ -540,22 +543,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     logger.debug("getImageForAudioFile : getting images (" + width + " x " + height + ") (" +reqid+ ") type " + imageType+
       " for " + wavAudioFile + "");
 
-/*    try {
-      int open = open(testFile);
-      if (open == 2) { // for right now webaudio recording does stereo...
-        logger.debug("Writing audio for  " +wavAudioFile);
-        AudioConversion audioConversion = new AudioConversion();
-        *//*File file =*//* audioConversion.convertTo16Khz(testFile);
-        wavAudioFile = wavAudioFile.replace(".wav","_16K.wav");
-      }
-    } catch (Exception e) {
-      logger.error("got " +e,e);
-    }*/
-
     String absolutePathToImage = imageWriter.writeImageSimple(wavAudioFile, pathHelper.getAbsoluteFile(imageOutDir).getAbsolutePath(),
       width, height, imageType1, exerciseID);
     String installPath = pathHelper.getInstallPath();
-    //System.out.println("Absolute path to image is " + absolutePathToImage);
 
     String relativeImagePath = absolutePathToImage;
     if (absolutePathToImage.startsWith(installPath)) {
@@ -575,33 +565,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     return new ImageResponse(reqid, imageURL, duration);
   }
-
-  /**
-   * Open an audio file and read its contents for display and zoom
-   *
-   * @param f a filename for an 16-bit linear wave file
-   * @throws Exception
-   */
-/*  private int open(File f) throws IOException {
-    AudioInputStream fwav;
-    int len;
-    logger.debug("opening " + f.getAbsolutePath());
-    AudioFileFormat format;
-    try {
-      fwav = AudioSystem.getAudioInputStream(f);
-      format = AudioSystem.getAudioFileFormat(f);
-      logger.debug("opening " + f.getName() + " format " + format);
-      int channels = format.getFormat().getChannels();
-      fwav.close();
-      return channels;
-
-    } catch (UnsupportedAudioFileException e) {
-      if (!f.getName().endsWith("raw")) {
-        logger.error("WARNING: Opening file using default RAW parameters '" + e.getMessage() + "'\n");
-      }
-    }
-    return 0;
-  }*/
 
   private String getWavAudioFile(String audioFile) {
     if (audioFile.endsWith("." +
@@ -717,7 +680,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.custom.Navigation#addWidgetsForList(mitll.langtest.shared.custom.UserList, boolean, com.google.gwt.user.client.ui.Panel, boolean)
+   * @see mitll.langtest.client.custom.Navigation#setPublic(long, boolean)
    * @param userListID
    * @param isPublic
    */
