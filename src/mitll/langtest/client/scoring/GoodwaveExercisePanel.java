@@ -10,6 +10,9 @@ import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.AnchorElement;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -280,10 +283,15 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     return vp;
   }
 
-  Widget getItemHeader(CommonExercise e) {
+  /**
+   * @see #getQuestionContent(mitll.langtest.shared.CommonExercise)
+   * @param e
+   * @return
+   */
+  private Widget getItemHeader(CommonExercise e) {
     Heading w = new Heading(HEADING_FOR_UNIT_LESSON, "Item", e.getID());
     w.getElement().setId("ItemHeading");
-   return w;
+    return w;
   }
 
   protected Widget getQuestionContent(CommonExercise e, String content) {
@@ -657,24 +665,16 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
                                  List<MiniUser> femaleUsers) {
       Dropdown dropdown = new Dropdown("Choose Speaker");
       dropdown.addStyleName("leftFiveMargin");
-      addChoices(rightSide, malesMap,   dropdown, maleUsers,   MALE,   !allSameDialect);
+      Node child = dropdown.getElement().getChild(0);
+      AnchorElement.as(child).getStyle().setFontWeight(Style.FontWeight.BOLDER);
+      addChoices(rightSide, malesMap, dropdown, maleUsers, MALE, !allSameDialect);
       addChoices(rightSide, femalesMap, dropdown, femaleUsers, FEMALE, !allSameDialect);
 
-      // final Collection<AudioAttribute> initialAudioChoices =
-    //  setInitialMenuState(allSameDialect, maleUsers, femaleUsers, dropdown);
       NavPills container = new NavPills();
       container.add(dropdown);
       container.getElement().getStyle().setMarginTop(8, Style.Unit.PX);
       return container;
     }
-
-/*
-    private void setInitialMenuState(boolean allSameDialect,
-                                     List<MiniUser> maleUsers, List<MiniUser> femaleUsers, Dropdown dropdown) {
-      MiniUser first = maleUsers.isEmpty() ? femaleUsers.get(0) : maleUsers.get(0);
-      dropdown.setText("Choose Speaker " + getChoiceTitle(first.isMale() ? MALE : FEMALE, first, !allSameDialect));
-    }
-*/
 
     private boolean allAudioSameDialect(Collection<AudioAttribute> audioAttributes) {
       boolean allSameDialect = true;
