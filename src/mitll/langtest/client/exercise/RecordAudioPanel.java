@@ -12,6 +12,7 @@ import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
+import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.Result;
@@ -39,6 +40,7 @@ public class RecordAudioPanel extends AudioPanel {
    * @param showSpectrogram
    * @param audioType
    * @see mitll.langtest.client.custom.NewUserExercise.CreateFirstRecordAudioPanel#CreateFirstRecordAudioPanel(mitll.langtest.shared.CommonExercise, com.google.gwt.user.client.ui.Panel, boolean)
+   * @see mitll.langtest.client.exercise.WaveformExercisePanel#getAnswerWidget(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
    */
   public RecordAudioPanel(CommonExercise exercise, ExerciseController controller, Panel widgets,
                           LangTestDatabaseAsync service, int index, boolean showSpectrogram, String audioType) {
@@ -129,11 +131,6 @@ public class RecordAudioPanel extends AudioPanel {
    * A play button that controls the state of the record button.
    */
   private class MyPlayAudioPanel extends PlayAudioPanel {
-    @Override
-    protected void play() {
-     // audioPositionPopup.setImageContainer(imageContainer);
-      super.play();
-    }
     public MyPlayAudioPanel(Image recordImage1, Image recordImage2, final Panel panel, String suffix) {
       super(RecordAudioPanel.this.soundManager, new PlayListener() {
         public void playStarted() {
@@ -195,6 +192,14 @@ public class RecordAudioPanel extends AudioPanel {
     @Override
     public void flip(boolean first) {
       flipRecordImages(first);
+    }
+
+    @Override
+    public void useResult(AudioAnswer result) {
+      super.useResult(result);
+      if (result.isValid()) {
+        System.out.println("tell other tabs that audio has arrived!");
+      }
     }
   }
 }
