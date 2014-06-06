@@ -30,7 +30,6 @@ import mitll.langtest.shared.custom.UserList;
 * Created by GO22670 on 3/28/2014.
 */
 class EditableExercise extends NewUserExercise {
-  //public static final String PLEASE_CHECK = "Please check";
   private final HTML englishAnno = new HTML();
   private final HTML translitAnno = new HTML();
   private final HTML foreignAnno = new HTML();
@@ -429,8 +428,7 @@ class EditableExercise extends NewUserExercise {
   }
 
   private void useAnnotation(CommonExercise userExercise, String field, HTML annoField) {
-    ExerciseAnnotation anno = userExercise.getAnnotation(field);
-    useAnnotation(anno, annoField);
+    useAnnotation(userExercise.getAnnotation(field), annoField);
   }
 
   private void useAnnotation(ExerciseAnnotation anno, HTML annoField) {
