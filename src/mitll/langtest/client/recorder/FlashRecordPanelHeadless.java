@@ -83,10 +83,6 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   /**
    * Show this widget (make it big enough to accommodate the permission dialog) and install the flash player.
    * @see mitll.langtest.client.LangTest#checkInitFlash()
-   */
-
-  /**
-   * @see mitll.langtest.client.LangTest#checkInitFlash()
    * @see mitll.langtest.client.LangTest#showPopupOnDenial()
    */
   public void initFlash() {
@@ -205,9 +201,13 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     } else {
       System.out.println("didn't get Flash Player permission!");
       if (checkIfFlashInstalled()) {
+        console("found flash, installing from " + GWT.getModuleBaseURL());
+
         installFlash(GWT.getModuleBaseURL(), id);
       }
       else {
+        console("no flash, trying web audio");
+
         webAudio.tryWebAudio(); // kick web audio!
       }
     }
@@ -236,17 +236,31 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
 
     $wnd.micConnected = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::micConnected());
     $wnd.micNotConnected = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::micNotConnected());
-    $wnd.noMicrophoneFound = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::noMicrophoneFound());
+      $wnd.noMicrophoneFound = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::noMicrophoneFound());
+      $wnd.installFailure = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::installFailure());
 
-    function outputStatus(e) {
-      //alert("e.success = " + e.success +"\ne.id = "+ e.id +"\ne.ref = "+ e.ref);
-    }
+      //This function is invoked by SWFObject once the <object> has been created
+      var callback = function (e){
+
+          //Only execute if SWFObject embed was successful
+          if(!e.success || !e.ref){ $wnd.installFailure(); }
+
+
+      };
 		
-		$wnd.swfobject.embedSWF(moduleBaseURL + "test.swf", id, appWidth, appHeight, "10.1.0", "", flashvars, params, attributes, outputStatus);
+		$wnd.swfobject.embedSWF(moduleBaseURL + "test.swf", id, appWidth, appHeight, "10.1.0", "", flashvars, params, attributes, callback);
   }-*/;
 
   private native void removeFlash(String id) /*-{
-    $wnd.swfobject.removeSWF("recorderApp");
+      $wnd.swfobject.removeSWF("recorderApp");
+  }-*/;
+
+
+  public static native void installFailure() /*-{
+      if ($wnd.console) {
+          $wnd.console("got swf install failure!")
+      }
+      $wnd.micNotConnected();
   }-*/;
 
   /**
