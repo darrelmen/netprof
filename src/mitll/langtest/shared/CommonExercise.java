@@ -72,6 +72,11 @@ public interface CommonExercise extends CommonShell {
 
   void setScores(Collection<ScoreAndPath> scoreTotal);
   Collection<ScoreAndPath> getScores();
+
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addAnnotationsAndAudio(long, CommonExercise)
+   * @param v
+   */
   void setAvgScore(float v);
   float getAvgScore();
 }
