@@ -52,6 +52,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList>> {
   final boolean onlyMyLists;
   UserManager userManager;
   boolean showIsPublic;
+
   /**
    * @see mitll.langtest.client.custom.Navigation#viewLessons(com.google.gwt.user.client.ui.Panel, boolean, boolean, boolean)
    * @see Navigation#viewReview(com.google.gwt.user.client.ui.Panel)
