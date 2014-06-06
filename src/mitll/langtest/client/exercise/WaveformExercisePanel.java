@@ -39,7 +39,7 @@ public class WaveformExercisePanel extends ExercisePanel {
    * @param service
    * @param userFeedback
    * @param controller
-   * @seex mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
+   * @see mitll.langtest.client.custom.SimpleChapterNPFHelper#getFactory(mitll.langtest.client.list.PagingExerciseList)
    */
   public WaveformExercisePanel(final CommonExercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                                final ExerciseController controller, ListInterface exerciseList) {
