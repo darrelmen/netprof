@@ -289,6 +289,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList>> {
       @Override
       public void onClick(ClickEvent event) {
         event.stopPropagation();
+        System.out.println("For " + uniqueID   + " value " + isPublic.getValue());
         navigation.setPublic(uniqueID, isPublic.getValue());
       }
     });
