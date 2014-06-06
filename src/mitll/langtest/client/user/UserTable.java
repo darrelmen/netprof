@@ -25,6 +25,9 @@ import java.util.List;
 
 public class UserTable extends PagerTable {
   private static final int PAGE_SIZE = 5;
+ // private static final boolean INCLUDE_EXPERIENCE = false;
+  public static final String USER_ID = "User ID";
+
   private Widget lastTable = null;
   private Button closeButton;
   private final PropertyHandler props;
@@ -114,16 +117,9 @@ public class UserTable extends PagerTable {
     id.setSortable(true);
     table.addColumn(id, "ID");
 
-    addUserIDColumns(service, table);
+    addUserIDColumns(table);
 
-    TextColumn<User> lang = new TextColumn<User>() {
-      @Override
-      public String getValue(User contact) {
-        return "" + contact.getNativeLang();
-      }
-    };
-    lang.setSortable(true);
-    table.addColumn(lang, "Lang");
+    //addLanguage(table);
 
     TextColumn<User> dialect = new TextColumn<User>() {
       @Override
@@ -152,29 +148,11 @@ public class UserTable extends PagerTable {
     gender.setSortable(true);
     table.addColumn(gender, "Gender");
 
-    TextColumn<User> experience = new TextColumn<User>() {
-      @Override
-      public String getValue(User contact) {
-        int experience1 = contact.getExperience();
-        String exp = "" + experience1 + " months";
-        if (contact.getDemographics() != null) {
-          exp = contact.getDemographics().toString();
-        }
-        String prefix = "user id " + contact.getId() + " has ";
-        if (exp.startsWith(prefix)) {
-          exp = exp.substring(prefix.length());
-        }
-        return exp;
-      }
-    };
-    experience.setSortable(true);
-    table.addColumn(experience, "Experience");
+    addExperience(table);
 
     TextColumn<User> perm = new TextColumn<User>() {
       @Override
-      public String getValue(User contact) {
-        return "" + contact.getPermissions();
-      }
+      public String getValue(User contact) { return "" + contact.getPermissions(); }
     };
     perm.setSortable(true);
     table.addColumn(perm, "Permissions");
@@ -191,9 +169,7 @@ public class UserTable extends PagerTable {
 
     TextColumn<User> items = new TextColumn<User>() {
       @Override
-      public String getValue(User contact) {
-        return "" + contact.getNumResults();
-      }
+      public String getValue(User contact) { return "" + contact.getNumResults(); }
     };
     items.setSortable(true);
     table.addColumn(items, "Num " + props.getNameForAnswer() +"s");
@@ -272,11 +248,52 @@ public class UserTable extends PagerTable {
     return getOldSchoolPagerAndTable(table, table, 10, 10);
   }
 
-  private float roundToHundredth(double totalHours) {
-    return ((float) ((Math.round(totalHours * 100)))) / 100f;
+/*  private void addLanguage(CellTable<User> table) {
+    TextColumn<User> lang = new TextColumn<User>() {
+      @Override
+      public String getValue(User contact) {
+        return "" + contact.getNativeLang();
+      }
+    };
+    lang.setSortable(true);
+    table.addColumn(lang, "Lang");
+  }*/
+
+/*  private void addExperience(CellTable<User> table) {
+    TextColumn<User> experience = new TextColumn<User>() {
+      @Override
+      public String getValue(User contact) {
+        int experience1 = contact.getExperience();
+        String exp = "" + experience1 + " months";
+        if (contact.getDemographics() != null) {
+          exp = contact.getDemographics().toString();
+        }
+        String prefix = "user id " + contact.getId() + " has ";
+        if (exp.startsWith(prefix)) {
+          exp = exp.substring(prefix.length());
+        }
+        return exp;
+      }
+    };
+    experience.setSortable(true);
+    table.addColumn(experience, "Experience");
+  }*/
+
+  private void addExperience(CellTable<User> table) {
+    TextColumn<User> experience = new TextColumn<User>() {
+      @Override
+      public String getValue(User contact) {
+        int experience1 = contact.getExperience();
+        return experience1 + " months";
+      }
+    };
+    experience.setSortable(true);
+    table.addColumn(experience, "Experience");
   }
 
-  void addUserIDColumns(final LangTestDatabaseAsync service, CellTable<User> table) {
+  private float roundToHundredth(double totalHours) { return ((float) ((Math.round(totalHours * 100)))) / 100f;  }
+
+  void addUserIDColumns(CellTable<User> table) {
     TextColumn<User> userID = new TextColumn<User>() {
       @Override
       public String getValue(User contact) {
@@ -284,6 +301,6 @@ public class UserTable extends PagerTable {
       }
     };
     userID.setSortable(true);
-    table.addColumn(userID, "User ID");
+    table.addColumn(userID, USER_ID);
   }
 }
