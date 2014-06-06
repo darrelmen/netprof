@@ -14,6 +14,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -564,7 +565,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see #onModuleLoad2()
    */
   private void modeSelect() {
-    checkInitFlash();
+    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      public void execute() {
+        checkInitFlash();
+      }
+    });
   }
 
   private boolean showingPlugInNotice = false;
