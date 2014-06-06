@@ -582,6 +582,10 @@ public class DatabaseImpl implements Database {
     return request.getRemoteHost() +/*"/"+ request.getRemoteAddr()+*/(header != null ? "/" + header : "") + " at " + format;
   }
 
+  public void usersToXLSX(OutputStream out) {
+    userDAO.toXLSX(out,getUsers());
+  }
+
   /**
    * Adds some sugar -- sets the answers and rate per user, and joins with dli experience data
    *
