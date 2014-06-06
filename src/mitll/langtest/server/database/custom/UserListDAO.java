@@ -424,7 +424,7 @@ public class UserListDAO extends DAO {
         "WHERE uniqueid=?";
 
       PreparedStatement statement = connection.prepareStatement(sql);
-      statement.setBoolean(1, isPublic);
+      statement.setBoolean(1, !isPublic);
       statement.setLong(2, userListID);
       int i = statement.executeUpdate();
 
