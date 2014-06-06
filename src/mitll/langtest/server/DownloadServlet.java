@@ -68,7 +68,7 @@ public class DownloadServlet extends DatabaseServlet {
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         if (encodedFileName.toLowerCase().contains("users")) {
           response.setHeader("Content-Disposition", "attachment; filename=users");
-          db.getUserDAO().toXLSX(response.getOutputStream(), new DLIUserDAO(db));
+          db.usersToXLSX(response.getOutputStream());
         } else if (encodedFileName.toLowerCase().contains("results")) {
           response.setHeader("Content-Disposition", "attachment; filename=results");
           db.getResultDAO().writeExcelToStream(db.getResultsWithGrades(), response.getOutputStream());
