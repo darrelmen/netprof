@@ -75,7 +75,7 @@ class SimpleChapterNPFHelper implements RequiresResize {
   }
 
   private void addNPFToContent( Panel listContent, String instanceName, boolean loadExercises) {
-    Panel npfContent = doNPF(instanceName, loadExercises);
+    Panel npfContent = doNPF(instanceName);
     listContent.add(npfContent);
     listContent.addStyleName("userListBackground");
   }
@@ -85,10 +85,9 @@ class SimpleChapterNPFHelper implements RequiresResize {
    * Make the instance name uses the unique id for the list.
    *
    * @param instanceName
-   * @param loadExercises
    * @return
    */
-  private Panel doNPF(String instanceName, boolean loadExercises) {
+  private Panel doNPF(String instanceName) {
     //System.out.println(getClass() + " : doNPF instanceName = " + instanceName + " for list loadExercises " + loadExercises);
     Panel widgets = flexListLayout.doInternalLayout(null, instanceName);
     npfExerciseList = flexListLayout.npfExerciseList;
@@ -105,15 +104,23 @@ class SimpleChapterNPFHelper implements RequiresResize {
           @Override
           public void postAnswers(ExerciseController controller, CommonExercise completedExercise) {
             super.postAnswers(controller, completedExercise);
-            if (e.getID().equals(predefinedContentList.getCurrentExerciseID())) {
-              System.out.println( "reloading "+ e.getID());
-
-              predefinedContentList.loadExercise(e.getID());
-            }
+            tellOtherListExerciseDirty(e);
           }
         };
       }
     };
+  }
+
+  protected void tellOtherListExerciseDirty(CommonExercise e) {
+    if (e.getID().equals(predefinedContentList.getCurrentExerciseID())) {
+      System.out.println( "WaveformExercisePanel.reloading "+ e.getID());
+
+      predefinedContentList.loadExercise(e.getID());
+    }
+    else {
+      System.out.println( "WaveformExercisePanel.not reloading "+ e.getID());
+
+    }
   }
 
   @Override
