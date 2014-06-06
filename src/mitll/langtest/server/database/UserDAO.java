@@ -1,5 +1,6 @@
 package mitll.langtest.server.database;
 
+import com.google.gwt.user.cellview.client.TextColumn;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.DLIUser;
 import mitll.langtest.shared.Demographics;
@@ -34,10 +35,23 @@ public class UserDAO extends DAO {
   public static final String USERS = "users";
   public static final String MALE = "male";
   public static final String FEMALE = "female";
-  public static final String PERMISSIONS = "permissions";
+  private static final String PERMISSIONS = "permissions";
   private long defectDetector;
-  private static final List<String> COLUMNS2 = Arrays.asList("id", "age", "gender", "experience", "ipaddr", "nativelang", "dialect", "userid", "timestamp", "demographics");
-  public static int DEFAULT_USER_ID = -1;
+  private static final List<String> COLUMNS2 = Arrays.asList("id",
+    "userid",
+    "dialect",
+    "age",
+    "gender",
+    "experience",
+    "permissions",
+    "items complete?",
+    "num recordings", "rate(sec)",
+    "ipaddr",
+ //   "nativelang",
+    "timestamp"
+  //  , "demographics"
+  );
+  public static final int DEFAULT_USER_ID = -1;
   public static MiniUser DEFAULT_USER = new MiniUser(DEFAULT_USER_ID, 30, 0, "default", "default", "default");
 
   public UserDAO(Database database) {
@@ -55,6 +69,10 @@ public class UserDAO extends DAO {
     }
   }
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#makeDAO(boolean, String, boolean, String, String)
+   * @param manager
+   */
   public void checkForFavorites(UserListManager manager) {
     for (User u : getUsers()) {
       if (manager.getListsForUser(u.getId(), true, false).isEmpty()) {
@@ -127,9 +145,8 @@ public class UserDAO extends DAO {
 
       return newID;
     } catch (Exception ee) {
-      logger.error("Got " + ee,ee);
-      database.logEvent("unk","adding user: "+ee.toString(),0);
-
+      logger.error("Got " + ee, ee);
+      database.logEvent("unk", "adding user: " + ee.toString(), 0);
     }
     return 0;
   }
@@ -168,26 +185,24 @@ public class UserDAO extends DAO {
 
     PreparedStatement statement;
 
-    statement = connection.prepareStatement("CREATE TABLE if not exists users (" +
-        "id IDENTITY, " +
-        "age INT, " +
-        "gender INT, " +
-        "experience INT, " +
-        "ipaddr VARCHAR, " +
-        "password VARCHAR, " +
-        "nativeLang VARCHAR, " +
-        "dialect VARCHAR, " +
-        "userID VARCHAR, " +
-        "timestamp TIMESTAMP AS CURRENT_TIMESTAMP, " +
+    statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS users (" +
+      "id IDENTITY, " +
+      "age INT, " +
+      "gender INT, " +
+      "experience INT, " +
+      "ipaddr VARCHAR, " +
+      "password VARCHAR, " +
+      "nativeLang VARCHAR, " +
+      "dialect VARCHAR, " +
+      "userID VARCHAR, " +
+      "timestamp TIMESTAMP AS CURRENT_TIMESTAMP, " +
       "enabled BOOLEAN, " +
-      PERMISSIONS +
-      " VARCHAR, " +
-        "CONSTRAINT pkusers PRIMARY KEY (id))");
+      PERMISSIONS + " VARCHAR, " +
+      "CONSTRAINT pkusers PRIMARY KEY (id))");
     statement.execute();
     statement.close();
     database.closeConnection(connection);
 
-    //int numColumns = getNumColumns(connection, "users");
     //logger.debug("found " + numColumns + " in users table");
 
     Set<String> expected = new HashSet<String>();
@@ -212,23 +227,21 @@ public class UserDAO extends DAO {
   }
 
   private void addColumn(Connection connection, String column, String type) throws SQLException {
-    PreparedStatement statement = connection.prepareStatement("ALTER TABLE users ADD " +
-      column + " " + type);
+    PreparedStatement statement = connection.prepareStatement("ALTER TABLE users ADD " + column + " " + type);
     statement.execute();
     statement.close();
   }
-
- // public void dropUserTable()  { drop(USERS); }
 
   /**
    * Pulls the list of users out of the database.
    * @return
    */
-  public List<User> getUsers() {
-    String sql = "SELECT * from users;";
-    return getUsers(sql);
-  }
+  public List<User> getUsers() { return getUsers("SELECT * from users;");  }
 
+  /**
+   * @see AudioDAO#getResultsForQuery(java.sql.Connection, java.sql.PreparedStatement)
+   * @return
+   */
   public Map<Long, MiniUser> getMiniUsers() {
     List<User> users = getUsers();
     Map<Long, MiniUser> mini = new HashMap<Long, MiniUser>();
@@ -236,12 +249,18 @@ public class UserDAO extends DAO {
     return mini;
   }
 
+  /**
+   * @see AudioDAO#getAudioAttribute(int, int, String, String, long, String, int)
+   * @param userid
+   * @return
+   */
   public MiniUser getMiniUser(long userid) {
     User userWhere = getUserWhere(userid);
     return userWhere == null ? null : new MiniUser(userWhere);
   }
+
   /**
-   * @seex OnlineUsers#getUser(long)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getUserBy(long)
    * @param userid
    * @return
    */
@@ -347,30 +366,10 @@ public class UserDAO extends DAO {
     return users;
   }
 
-/*  public boolean isUserMale(long userID) {
-    List<User> users = getUsers();
-    return isUserMale(userID, users);
-  }*/
+  public Map<Long, User> getUserMap(boolean getMale) {  return getUserMap(getMale, getUsers());  }
+  public Map<Long, User> getUserMap() {  return getMap(getUsers());  }
 
-/*
-  public boolean isUserMale(long userID, List<User> users) {
-    User thisUser = null;
-    for (User u : users) {
-      if (u.getId() == userID) {
-        thisUser = u;
-        break;
-      }
-    }
-    return thisUser != null && thisUser.isMale();
-  }
-*/
-
-  public Map<Long, User> getUserMap(boolean getMale) {
-    List<User> users = getUsers();
-    return getUserMap(getMale, users);
-  }
-
-  public Map<Long, User> getUserMap(boolean getMale, List<User> users) {
+  private Map<Long, User> getUserMap(boolean getMale, List<User> users) {
     Map<Long,User> idToUser = new HashMap<Long, User>();
     for (User u : users) {
       if (u.isMale() && getMale || (!u.isMale() && !getMale)) {
@@ -380,11 +379,11 @@ public class UserDAO extends DAO {
     return idToUser;
   }
 
-  public Map<Long, User> getUserMap() {
-    List<User> users = getUsers();
-    return getMap(users);
-  }
-
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#joinWithDLIUsers(java.util.List)
+   * @param users
+   * @return
+   */
   public Map<Long, User> getMap(List<User> users) {
     Map<Long, User> idToUser = new HashMap<Long, User>();
     for (User u : users) {
@@ -393,39 +392,30 @@ public class UserDAO extends DAO {
     return idToUser;
   }
 
-/*  public Map<Long, User> getNativeUserMap() {
-    List<User> users = getUsers();
-    Map<Long, User> idToUser = new HashMap<Long, User>();
-    for (User u : users) {
-      if (u.experience > 239) {
-        idToUser.put(u.id, u);
-      }
-    }
-    return idToUser;
-  }*/
-
-/*
-  public Set<Long> getNativeUsers() {
-    return getNativeUserMap().keySet();
-  }
-*/
-
   /**
    * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    * @param out
    * @param dliUserDAO
    */
-  public void toXLSX(OutputStream out,DLIUserDAO dliUserDAO) {
+  public void toXLSX(OutputStream out, DLIUserDAO dliUserDAO) {
     long then = System.currentTimeMillis();
 
     List<User> users = joinWithDLIUsers(dliUserDAO);
     long now = System.currentTimeMillis();
     if (now-then > 100) logger.warn("toXLSX : took " + (now-then) + " millis to read " + users.size()+
       " users from database");
-    then = now;
+    toXLSX(out,users);
+  }
+
+  public void toXLSX(OutputStream out, List<User> users) {
+    writeToStream(out, getSpreadsheet(users));
+  }
+
+  public SXSSFWorkbook getSpreadsheet(List<User> users) {
+    long then = System.currentTimeMillis();
 
     //Workbook wb = new XSSFWorkbook();
-    SXSSFWorkbook wb = new SXSSFWorkbook(100); // keep 100 rows in memory, exceeding rows will be flushed to disk
+    SXSSFWorkbook wb = new SXSSFWorkbook(1000); // keep 100 rows in memory, exceeding rows will be flushed to disk
 
     Sheet sheet = wb.createSheet("Users");
     int rownum = 0;
@@ -443,45 +433,49 @@ public class UserDAO extends DAO {
     for (User user : users) {
       Row row = sheet.createRow(rownum++);
       int j = 0;
+      row.createCell(j++).setCellValue(user.getId());
+      row.createCell(j++).setCellValue(user.getUserID());
+      row.createCell(j++).setCellValue(user.getDialect());
+      row.createCell(j++).setCellValue(user.getAge());
+      row.createCell(j++).setCellValue(user.getGender() == 0 ? "male" : "female");
+      row.createCell(j++).setCellValue(user.getExperience());
+
+      row.createCell(j++).setCellValue(user.getPermissions().toString().replaceAll("\\[","").replaceAll("\\]",""));
+      row.createCell(j++).setCellValue(user.isComplete() ? "Yes":("No (" +Math.round(100*user.getCompletePercent())+  "%)"));
+      row.createCell(j++).setCellValue("" + user.getNumResults());
+      row.createCell(j++).setCellValue("" + roundToHundredth(user.getRate()));
+
+//      row.createCell(j++).setCellValue(user.getNativeLang());
+      row.createCell(j++).setCellValue(user.getIpaddr());
+
       Cell cell = row.createCell(j++);
-      cell.setCellValue(user.getId());
-      cell = row.createCell(j++);
-      cell.setCellValue(user.getAge());
-      cell = row.createCell(j++);
-      cell.setCellValue(user.getGender());
-      cell = row.createCell(j++);
-      cell.setCellValue(user.getExperience());
-      cell = row.createCell(j++);
-      cell.setCellValue(user.getIpaddr());
-      cell = row.createCell(j++);
-      cell.setCellValue(user.getNativeLang());
-      cell = row.createCell(j++);
-      cell.setCellValue(user.getDialect());
-      cell = row.createCell(j++);
-      cell.setCellValue(user.getUserID());
-      cell = row.createCell(j++);
       try {
         cell.setCellValue(user.getTimestamp());
       } catch (Exception e) {
         cell.setCellValue("Unknown");
       }
       cell.setCellStyle(cellStyle);
-      cell = row.createCell(j++);
-      Demographics demographics = user.getDemographics();
+      //cell = row.createCell(j++);
+      //Demographics demographics = user.getDemographics();
    //   if (demographics == null) logger.warn("no demographics for " + user);
-      cell.setCellValue(demographics == null ? "" :demographics.toString());
+      //cell.setCellValue(demographics == null ? "" :demographics.toString());
     }
-    now = System.currentTimeMillis();
+    long now = System.currentTimeMillis();
     if (now-then > 100) logger.warn("toXLSX : took " + (now-then) + " millis to write " + rownum+
       " rows to sheet, or " + (now-then)/rownum + " millis/row");
-    then = now;
+    return wb;
+  }
+
+  public void writeToStream(OutputStream out, SXSSFWorkbook wb) {
+    long now;
     try {
+      long then = System.currentTimeMillis();
       wb.write(out);
       now = System.currentTimeMillis();
       if (now-then > 100) {
         logger.warn("toXLSX : took " + (now-then) + " millis to write excel to output stream ");
       }
-      then = now;
+    //  then = now;
       out.close();
       wb.dispose();
     } catch (IOException e) {
@@ -490,6 +484,9 @@ public class UserDAO extends DAO {
 
     }
   }
+
+  private float roundToHundredth(double totalHours) { return ((float) ((Math.round(totalHours * 100)))) / 100f;  }
+
 
   private List<User> joinWithDLIUsers(DLIUserDAO dliUserDAO) {
     List<User> users = getUsers();
