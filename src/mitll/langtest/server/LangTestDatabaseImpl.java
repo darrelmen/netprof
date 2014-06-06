@@ -361,9 +361,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       if (pronScore > 0) { // overkill?
         total++;
         scoreTotal += pronScore;
-      }
-      if (r.userid == userID) {
-        scores.add(new ScoreAndPath(pronScore, r.answer));
+        if (r.userid == userID) {
+          scores.add(new ScoreAndPath(pronScore, r.answer));
+        }
       }
     }
     firstExercise.setScores(scores);
