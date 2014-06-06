@@ -984,3 +984,11 @@ body>.dropdown-popup .nav-list>li.active>a  {
     text-decoration: none;
     text-shadow: none;
 }
+
+#addItemsAtTop_unitLesson small {
+    color:black;
+}
+
+#getUnitLessonForExercise_unitLesson  small {
+    color:black;
+}
