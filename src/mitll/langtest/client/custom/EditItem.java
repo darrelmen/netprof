@@ -156,7 +156,7 @@ public class EditItem {
         }
 
         @Override
-        protected void rememberExercises(List<CommonShell> result) {
+        protected List<CommonShell> rememberExercises(List<CommonShell> result) {
           clear();
           boolean addNewItem = includeAddItem;
 
@@ -171,6 +171,7 @@ public class EditItem {
             addExercise(getNewItem());  // TODO : fix this
           }
           flush();
+          return result;
         }
       };
     setFactory(exerciseList, ul, originalList);
