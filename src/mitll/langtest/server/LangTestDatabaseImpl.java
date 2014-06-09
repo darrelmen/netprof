@@ -351,6 +351,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     addAnnotations(firstExercise); // todo do this in a better way
     attachAudio(firstExercise);
     addPlayedMarkings(userID, firstExercise);
+
+    attachScoreHistory(userID, firstExercise);
+  }
+
+  private void attachScoreHistory(long userID, CommonExercise firstExercise) {
     List<Result> resultsForExercise = db.getResultDAO().getResultsForExercise(firstExercise.getID());
 
     int total = 0;
