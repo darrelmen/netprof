@@ -110,7 +110,8 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
                                 final ExerciseController controller, boolean addKeyBinding,
                                 final ControlState controlState,
                                 MyFlashcardExercisePanelFactory.MySoundFeedback soundFeedback,
-                                SoundFeedback.EndListener endListener, String instance) {
+                                SoundFeedback.EndListener endListener,
+                                String instance) {
     this.addKeyBinding = addKeyBinding;
     this.exercise = e;
     this.controller = controller;
@@ -129,10 +130,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
 
     DivWidget belowDiv = new DivWidget();
     belowDiv.addStyleName("topFiveMargin");
- //   FocusPanel focusPanel = new FocusPanel();
     Panel threePartContent = getThreePartContent(controlState, contentMiddle, belowDiv);
-   // focusPanel.add(threePartContent);
-    //  add(focusPanel);
     add(threePartContent);
 
     if (controller.isRecordingEnabled()) {
@@ -147,9 +145,6 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
 
     addWidgetsBelow(belowDiv);
     if (controlState.isAudioOn() && mainContainer.isVisible()) {
-      //playRefLater();
-      //System.out.println("main container is visible..." + mainContainer.getElement().getId());
-
       playRef();
     }
   }
@@ -193,7 +188,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     rightColumn.setVisible(vis);
   }
 
-  private Panel getRightColumn(ControlState controlState) {
+  private Panel getRightColumn(final ControlState controlState) {
     Panel rightColumn = new VerticalPanel();
 
     if (!isSiteEnglish()) {
@@ -201,9 +196,28 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     }
     rightColumn.add(getAudioGroup(controlState));
     rightColumn.add(getFeedbackGroup(controlState));
+    final Button shuffle = new Button("Shuffle");
+    shuffle.setToggle(true);
+    shuffle.setIcon(IconType.RANDOM);
+    shuffle.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        controlState.setSuffleOn(!shuffle.isToggled());
+        gotShuffleClick(!shuffle.isToggled());
+      }
+    });
+    shuffle.setActive(controlState.isShuffle());
+
+    //shuffle.setActive(controlState.isAudioFeedbackOn());
+
+    rightColumn.add(shuffle);
 
     rightColumn.addStyleName("leftTenMargin");
     return rightColumn;
+  }
+
+  protected void gotShuffleClick(boolean b) {
+
   }
 
   protected Panel getLeftState() { return new Heading(6, ""); }
@@ -222,6 +236,11 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     });
   }
 
+  /**
+   * @see #getRightColumn(ControlState)
+   * @param controlState
+   * @return
+   */
   private ControlGroup getAudioGroup(final ControlState controlState) {
     ControlGroup group = new ControlGroup(PLAY + " " + controller.getLanguage().toUpperCase());
     ButtonToolbar w = new ButtonToolbar();
@@ -363,7 +382,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
 
   private Button getBoth(final ControlState controlState) {
     Button both = new Button(BOTH);
-    both.getElement().setId("Show_Both_"+controller.getLanguage()+"_and_English");
+    both.getElement().setId("Show_Both_" + controller.getLanguage() + "_and_English");
     controller.register(both, exercise.getID());
 
     both.addClickHandler(new ClickHandler() {
@@ -582,7 +601,6 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
 
   private Widget getAnswerAndRecordButtonRow(CommonExercise e, LangTestDatabaseAsync service, ExerciseController controller) {
     //System.out.println("BootstrapExercisePanel.getAnswerAndRecordButtonRow = " + instance);
-
     RecordButtonPanel answerWidget = getAnswerWidget(e, service, controller, 1, addKeyBinding, instance);
     this.answerWidget = answerWidget;
     button = answerWidget.getRecordButton();
