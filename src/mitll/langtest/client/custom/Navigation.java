@@ -40,9 +40,13 @@ import mitll.langtest.shared.custom.UserList;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
+import java.util.Random;
+import java.util.RandomAccess;
 
 /**
  * Created with IntelliJ IDEA.
@@ -164,7 +168,7 @@ public class Navigation implements RequiresResize {
               protected CommonShell findFirstExercise() {
                 String currentExerciseID = myFlashcardExercisePanelFactory.getCurrentExerciseID();
                 if (currentExerciseID != null && !currentExerciseID.trim().isEmpty()) {
-                  //System.out.println("\n\n\n\t ---> found previous state current ex = " + currentExerciseID);
+                  System.out.println("\n\n\n\t ---> found previous state current ex = " + currentExerciseID);
 
                   CommonShell shell = byID(currentExerciseID);
 
