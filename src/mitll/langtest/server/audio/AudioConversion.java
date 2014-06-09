@@ -279,7 +279,7 @@ public class AudioConversion {
   private String writeMP3(String pathToWav, String realContextPath, boolean overwrite) {
     File absolutePathToWav = getAbsoluteFile(pathToWav, realContextPath);
 
-    String mp3File = absolutePathToWav.getAbsolutePath().replace(".wav",".mp3");
+    String mp3File = absolutePathToWav.getAbsolutePath().replace(".wav", ".mp3");
     File mp3 = new File(mp3File);
     if (!mp3.exists() || overwrite) {
       if (DEBUG) logger.debug("writeMP3 : doing mp3 conversion for " + absolutePathToWav + " path " + pathToWav + " context " + realContextPath);
