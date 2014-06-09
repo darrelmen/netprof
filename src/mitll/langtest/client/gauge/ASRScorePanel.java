@@ -5,6 +5,7 @@ package mitll.langtest.client.gauge;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
@@ -109,7 +110,11 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
    // System.out.println("looking for dom element id " + id + " width " + canvas.getOffsetWidth() );
     ASRGauge.createCanvasElementOld();
     initGauge(ASRGauge);
-    addPlayer();
+    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      public void execute() {
+        addPlayer();
+      }
+    });
   }
 
   private void initGauge(PretestGauge gauge) {
@@ -272,7 +277,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   private Widget makeRow(TooltipHelper tooltipHelper, ScoreAndPath scoreAndPath, String prefix, Placement right, boolean showPercent) {
     Widget row = new DivWidget();
     int iScore = toPercent(scoreAndPath);
-    row.setWidth(Math.max(3,iScore) + "px");
+    row.setWidth(Math.max(3, iScore) + "px");
     row.setHeight(HEIGHT + "px");
     row.getElement().getStyle().setBackgroundColor(chart.getColor(scoreAndPath.getScore()));
     row.getElement().getStyle().setMarginTop(2, Style.Unit.PX);
