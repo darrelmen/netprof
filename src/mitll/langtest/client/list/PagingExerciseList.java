@@ -30,6 +30,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.STATE;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -146,6 +147,8 @@ public class PagingExerciseList extends ExerciseList {
 
   @Override
   protected CommonShell findFirstExercise() {
+    System.out.println("findFirstExercise : completed " + controller.showCompleted());
+
     return controller.showCompleted() ? getFirstNotCompleted() : super.findFirstExercise();
   }
 
@@ -296,12 +299,20 @@ public class PagingExerciseList extends ExerciseList {
     onResize();
   }
 
+  List<CommonShell> inOrderResult;
   /**
    * @see ExerciseList#rememberAndLoadFirst(java.util.List, mitll.langtest.shared.CommonExercise, String)
    * @param result
    */
   @Override
-  protected void rememberExercises(List<CommonShell> result) {
+  protected List<CommonShell> rememberExercises(List<CommonShell> result) {
+    inOrderResult = result;
+    if (!doShuffle) {
+      System.out.println("PagingExerciseList : rememberExercises remembering " + result.size() + " instance " + getInstance() + "/" +getRole() + " SHUFFLING!");
+
+      result = new ArrayList<CommonShell>(result);
+      shuffle(result);
+    }
     //System.out.println("PagingExerciseList : rememberExercises remembering " + result.size() + " instance " + getInstance() + "/" +getRole());
     clear();
     int c = 0;
@@ -311,8 +322,12 @@ public class PagingExerciseList extends ExerciseList {
       addExercise(es);
     }
     flush();
+    return result;
     //System.out.println("PagingExerciseList : size " + getSize());
   }
+
+  @Override
+  protected List<CommonShell> getInOrder() { return inOrderResult; }
 
   @Override
   protected int getSize() {
@@ -360,7 +375,13 @@ public class PagingExerciseList extends ExerciseList {
 
   public CommonShell forgetExercise(String id) {
    // System.out.println("PagingExerciseList.forgetExercise " + id + " on " + getElement().getId() + " ul " +userListID);
-    return removeExercise(byID(id));
+    CommonShell es = byID(id);
+    if (es != null) {
+      return removeExercise(es);
+    }
+    else {
+      return null;
+    }
   }
 
   /**
