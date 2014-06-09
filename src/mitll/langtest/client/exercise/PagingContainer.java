@@ -112,7 +112,7 @@ public class PagingContainer {
   public CommonShell getFirst() {  return getAt(0);  }
   public int getIndex(CommonShell t) {  return getList().indexOf(t); }
   public CommonShell getAt(int i) { return getList().get(i);  }
-
+/*
   public int getMouseX() {
     return mouseX;
   }
@@ -123,7 +123,7 @@ public class PagingContainer {
 
   public String getClickedExerciseID() {
     return clickedExerciseID;
-  }
+  }*/
 
   public interface TableResources extends CellTable.Resources {
     /**
