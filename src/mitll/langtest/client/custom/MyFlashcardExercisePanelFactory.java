@@ -97,14 +97,21 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
     controlState = new ControlState();
     this.instance = instance;
     if (exerciseList == null) exerciseList = controller.getExerciseList();
+    final ListInterface fexerciseList = exerciseList;
 
     exerciseList.addListChangedListener(new ListChangeListener<CommonShell>() {
       @Override
       public void listChanged(List<CommonShell> items, String selectionID) {
         MyFlashcardExercisePanelFactory.this.selectionID = selectionID;
         allExercises = items;
-        //System.out.println("MyFlashcardExercisePanelFactory : " + selectionID + " got new set of items from list. " + items.size());
+        System.out.println("MyFlashcardExercisePanelFactory : " + selectionID + " got new set of items from list. " + items.size());
         reset();
+
+       /* if (selectionID.equals("shuffleChange")) {
+          String first = allExercises.iterator().next().getID();
+          //exerciseList.checkAndAskServer(first);
+          fexerciseList.loadExercise(first);
+        }*/
       }
     });
     storage = new KeyStorage(controller) {
@@ -193,6 +200,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
         MyFlashcardExercisePanelFactory.this.controlState,
         soundFeedback,
         soundFeedback.endListener, MyFlashcardExercisePanelFactory.this.instance);
+      exerciseList.simpleSetShuffle(controlState.isShuffle());
     }
 
     @Override
@@ -208,6 +216,12 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       } else {
         exerciseList.loadNextExercise(currentExercise.getID());
       }
+    }
+
+    @Override
+    protected void gotShuffleClick(boolean b) {
+      resetStorage();
+      exerciseList.setShuffle(b);
     }
 
     /**
