@@ -60,7 +60,6 @@ public class ResultDAO extends DAO {
   private final GradeDAO gradeDAO;
   private final ScheduleDAO scheduleDAO;
   private final boolean debug = false;
-  //private long lastWriteTime = Long.MIN_VALUE;
 
   public ResultDAO(Database database, UserDAO userDAO) {
     super(database);
@@ -70,11 +69,16 @@ public class ResultDAO extends DAO {
   }
 
   public List<SimpleResult> getSimpleResults() {
-    return getSimpleResults("");
+    return getSimpleResults(" WHERE " + VALID + "=TRUE");
   }
 
+  /**
+   * Only valid results...
+   * @param userid
+   * @return
+   */
   public List<SimpleResult> getResultsForUser(long userid) {
-    return getSimpleResults(" where userid=" + userid);
+    return getSimpleResults(" WHERE userid=" + userid + " AND " + VALID + "=TRUE");
   }
 
   private List<SimpleResult> getSimpleResults(String whereClause) {
@@ -149,7 +153,7 @@ public class ResultDAO extends DAO {
    * Pulls the list of results out of the database.
    *
    * @return
-   * @see mitll.langtest.server.database.DatabaseImpl#getResults()
+   * @see DatabaseImpl#getResultsWithGrades()
    */
   public List<Result> getResults() {
     try {
@@ -321,7 +325,7 @@ public class ResultDAO extends DAO {
    * @return
    * @see DatabaseImpl#getExercisesFirstNInOrder(long, int)
    */
-  public String getExerciseIDLastResult(long userid) {
+/*  public String getExerciseIDLastResult(long userid) {
     try {
       Connection connection = database.getConnection();
       String sql = "SELECT exid FROM results WHERE TIME IN (SELECT MAX(TIME) FROM results WHERE userid = " +
@@ -343,7 +347,7 @@ public class ResultDAO extends DAO {
       ee.printStackTrace();
     }
     return "INVALID";
-  }
+  }*/
 
   /**
    * @param exerciseID
@@ -450,8 +454,8 @@ public class ResultDAO extends DAO {
   }
 
   public static class SessionInfo {
-    public List<Session> sessions;
-    public Map<Long, Float> userToRate;
+    public final List<Session> sessions;
+    public final Map<Long, Float> userToRate;
 
     public SessionInfo(List<Session> sessions, Map<Long, Float> userToRate) {
       this.sessions = sessions;
