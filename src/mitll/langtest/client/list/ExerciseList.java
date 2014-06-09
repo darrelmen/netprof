@@ -35,9 +35,13 @@ import mitll.langtest.shared.Result;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
+import java.util.Random;
+import java.util.RandomAccess;
 import java.util.Set;
 
 /**
@@ -65,6 +69,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   final boolean allowPlusInURL;
   private String instance;
   private final List<ListChangeListener<CommonShell>> listeners = new ArrayList<ListChangeListener<CommonShell>>();
+  protected boolean doShuffle;
 
   /**
    * @see  mitll.langtest.client.LangTest#makeExerciseList
@@ -83,7 +88,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     this.service = service;
     this.feedback = feedback;
     this.factory = factory;
-  //  this.showTurkToken = showTurkToken;
     this.allowPlusInURL = controller.getProps().shouldAllowPlusInURL();
     this.controller = controller;
     this.instance = instance;
@@ -339,7 +343,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
           gotEmptyExerciseList();
         }
         List<CommonShell> exercises = result.getExercises();
-        rememberExercises(exercises);
+        exercises = rememberExercises(exercises);
         for (ListChangeListener<CommonShell> listener : listeners) {
           listener.listChanged(exercises, "");
         }
@@ -380,11 +384,11 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see ExerciseList.SetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
    * @see #rememberAndLoadFirst(java.util.List)
    */
-  public void rememberAndLoadFirst(List<CommonShell> exercises, CommonExercise firstExercise, String selectionID) {
+  private void rememberAndLoadFirst(List<CommonShell> exercises, CommonExercise firstExercise, String selectionID) {
     System.out.println("ExerciseList : rememberAndLoadFirst instance '" + instance+
       "' remembering " + exercises.size() + " exercises, first = " +firstExercise);
 
-    rememberExercises(exercises);
+    exercises = rememberExercises(exercises);
     for (ListChangeListener<CommonShell> listener : listeners) {
       listener.listChanged(exercises, selectionID);
     }
@@ -411,7 +415,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     return result.getReqID() < lastReqID;
   }
 
-  protected abstract void rememberExercises(List<CommonShell> result);
+  protected abstract List<CommonShell> rememberExercises(List<CommonShell> result);
   protected abstract int getSize();
 
   /**
@@ -455,7 +459,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
         if (e != null) toLoad = e;
       }
 
-      //System.out.println("loadFirstExercise ex id =" + toLoad.getID() + " instance " + instance);
+      System.out.println("loadFirstExercise ex id =" + toLoad.getID() + " instance " + instance);
       pushFirstSelection(toLoad.getID());
     }
   }
@@ -491,7 +495,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   protected CommonShell findFirstExercise() {
     CommonShell first = getFirst();
-   // System.out.println("findFirstExercise " + first.getID() + " is first in container.");
+     System.out.println("findFirstExercise " + first.getID() + " is first in container.");
 
     return first;
   }
@@ -751,9 +755,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     else {
       getNextExercise(current);
     }
-/*    if (showTurkToken && (onLast || ++countSincePrompt % NUM_QUESTIONS_FOR_TOKEN == 0)) {
-      showTurkToken(current);
-    }*/
+
     return onLast;
   }
 
@@ -776,22 +778,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       loadFirstExercise();
     }
   }
-
-  /**
-   * So a turker can get credit for their work.
-   * @paramx current
-   */
-/*  private void showTurkToken(CommonShell current) {
-    String code = user.getUser() + "_" + current.getID();
-
-    // Create a basic popup widget
-    final DecoratedPopupPanel simplePopup = new DecoratedPopupPanel(true);
-    simplePopup.ensureDebugId("cwBasicPopup-simplePopup");
-    simplePopup.setWidth("250px");
-    simplePopup.setWidget(new HTML("To receive credit, copy and paste this token : " + code.hashCode() + "<br/>Click on the page to dismiss.<br/>"));
-    simplePopup.setPopupPosition(Window.getClientWidth()/2,Window.getClientHeight()/2);
-    simplePopup.show();
-  }*/
 
   @Override
   public boolean loadPrev() { return loadPreviousExercise(getCurrentExercise()); }
@@ -871,4 +857,79 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   @Override
   public void addListChangedListener(ListChangeListener<CommonShell> listener) {  listeners.add(listener);  }
+  protected abstract List<CommonShell> getInOrder();
+
+  @Override
+  public void setShuffle(boolean doShuffle) {
+    if (doShuffle != this.doShuffle) {
+      rememberAndLoadFirst(getInOrder());
+    }
+    simpleSetShuffle(doShuffle);
+  }
+
+  public void simpleSetShuffle(boolean doShuffle) {
+    this.doShuffle = doShuffle;
+  }
+
+  private static final int SHUFFLE_THRESHOLD        =    5;
+
+  public static void shuffle(List<?> list) {
+    Random rnd = r;
+    if (rnd == null)
+      r = rnd = new Random(); // harmless race.
+    shuffle(list, rnd);
+  }
+
+  private static Random r;
+  private static void shuffle(List<?> list, Random rnd) {
+    int size = list.size();
+    if (size < SHUFFLE_THRESHOLD || list instanceof RandomAccess) {
+      for (int i=size; i>1; i--)
+        swap(list, i-1, rnd.nextInt(i));
+    } else {
+      Object arr[] = list.toArray();
+
+      // Shuffle array
+      for (int i=size; i>1; i--)
+        swap(arr, i-1, rnd.nextInt(i));
+
+      // Dump array back into list
+      ListIterator it = list.listIterator();
+      for (int i=0; i<arr.length; i++) {
+        it.next();
+        it.set(arr[i]);
+      }
+    }
+  }
+
+  /**
+   * Swaps the two specified elements in the specified array.
+   */
+  private static void swap(Object[] arr, int i, int j) {
+    Object tmp = arr[i];
+    arr[i] = arr[j];
+    arr[j] = tmp;
+  }
+
+  /**
+   * Swaps the elements at the specified positions in the specified list.
+   * (If the specified positions are equal, invoking this method leaves
+   * the list unchanged.)
+   *
+   * @param list The list in which to swap elements.
+   * @param i the index of one element to be swapped.
+   * @param j the index of the other element to be swapped.
+   * @throws IndexOutOfBoundsException if either <tt>i</tt> or <tt>j</tt>
+   *         is out of range (i &lt; 0 || i &gt;= list.size()
+   *         || j &lt; 0 || j &gt;= list.size()).
+   * @since 1.4
+   */
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  private static void swap(List<?> list, int i, int j) {
+    // instead of using a raw type here, it's possible to capture
+    // the wildcard but it will require a call to a supplementary
+    // private method
+    final List l = list;
+    l.set(i, l.set(j, l.get(i)));
+  }
 }
