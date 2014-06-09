@@ -3,7 +3,6 @@ package mitll.langtest.server.database;
 import mitll.flashcard.UserState;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.server.database.flashcard.UserStateWrapper;
@@ -716,6 +715,8 @@ public class DatabaseImpl implements Database {
   }
 
   /**
+   * Make sure we put unanswered by this user at the front, no matter what.
+   * Answered exercises go at the end.
    *
    * @param userID
    * @param rawExercises
@@ -727,29 +728,42 @@ public class DatabaseImpl implements Database {
     Map<String,Integer> idToCount = new HashMap<String, Integer>();
     Map<String,Double> idToWeight = new HashMap<String, Double>();
 
-    populateInitialExerciseIDToCount(rawExercises, idToExercise, idToCount,idToWeight, useWeights);
+    List<ResultDAO.SimpleResult> simpleResults = getSimpleResults();
+
+    List<ResultDAO.SimpleResult> resultsForUser = resultDAO.getResultsForUser(userID);
+
+    for (Exercise e : rawExercises) {   idToExercise.put(e.getID(), e); }
+
+    List<Exercise> alreadyByUser = new ArrayList<Exercise>();
+    for (ResultDAO.SimpleResult r : resultsForUser) {
+      Exercise remove = idToExercise.remove(r.id);
+      if (remove != null) alreadyByUser.add(remove);
+    }
+    rawExercises = new ArrayList<Exercise>(idToExercise.values());
+   // logger.debug("after pruning, there are " + rawExercises.size() + " unanswered, "  + alreadyByUser.size() + " answered");
+
+    populateInitialExerciseIDToCount(rawExercises, idToExercise, idToCount, idToWeight, useWeights);
 
     // only find answers that are for the gender
-    List<ResultDAO.SimpleResult> results = getSimpleResults();
+    getExerciseIDToResultCount(userID, idToCount, simpleResults);
 
-    getExerciseIDToResultCount(userID, idToCount,results);
-
-    logger.debug("getExercisesBiasTowardsUnanswered for " + userID+ " id->count " + idToCount.size());
-    //logger.debug("count " +idToCount.get())
+    //logger.debug("getExercisesBiasTowardsUnanswered for " + userID+ " id->count " + idToCount.size());
 
     Map<String, Integer> idToCountScaled = getScaledIdToCount(idToCount, idToWeight);
 
   //  logger.debug("getExercisesBiasTowardsUnanswered idToCountScaled " + idToCountScaled);
 
     SortedMap<Integer, List<String>> countToIds = getCountToExerciseIDs(idToCountScaled);
-  //  List<String> sampleIDs = countToIds.get(countToIds.firstKey());
-    //logger.debug("getExercisesBiasTowardsUnanswered count keys " + countToIds.keySet() + " first set sample " + sampleIDs.subList(0, Math.min(sampleIDs.size(),20)));
+    //List<String> sampleIDs = countToIds.get(countToIds.firstKey());
+   // logger.debug("getExercisesBiasTowardsUnanswered count keys " + countToIds.keySet().size() + " first set sample " + sampleIDs.subList(0, Math.min(sampleIDs.size(),20)));
     /*logger.debug("getExercisesBiasTowardsUnanswered count keys " + countToIds.keySet() + " first set sample (" +
       countToIds.firstKey() +
       ") = " + sampleIDs);*/
 
     //logger.debug("getExercisesBiasTowardsUnanswered map " + countToIds);
-    return getResultsRandomizedPerUser(userID, idToExercise, countToIds, idToWeight);
+    List<Exercise> exercisesRandomizedPerUser = getExercisesRandomizedPerUser(userID, idToExercise, countToIds, idToWeight);
+    exercisesRandomizedPerUser.addAll(alreadyByUser);// put answered at end
+    return exercisesRandomizedPerUser;
   }
 
   /**
@@ -814,7 +828,7 @@ public class DatabaseImpl implements Database {
     // now make a map of count at this number to exercise ids for these numbers
     SortedMap<Integer, List<String>> countToIds = getCountToExerciseIDs(idToCount);
 
-    return getResultsRandomizedPerUser(userID, idToExercise, countToIds,idToWeight);
+    return getExercisessRandomizedPerUser(userID, idToExercise, countToIds,idToWeight);
   }*/
 
   /**
@@ -828,10 +842,10 @@ public class DatabaseImpl implements Database {
    * @param countToIds statistics about answers for each exercise
    * @return List of exercises in order from least answers to most
    */
-  private List<Exercise> getResultsRandomizedPerUser(long userID,
-                                                     Map<String, Exercise> idToExercise,
-                                                     SortedMap<Integer, List<String>> countToIds,
-                                                     Map<String, Double> idToWeight) {
+  private List<Exercise> getExercisesRandomizedPerUser(long userID,
+                                                        Map<String, Exercise> idToExercise,
+                                                        SortedMap<Integer, List<String>> countToIds,
+                                                        Map<String, Double> idToWeight) {
     List<Exercise> result = new ArrayList<Exercise>();
     Random rnd = new Random(userID);
 
@@ -889,7 +903,8 @@ public class DatabaseImpl implements Database {
    * @param idToCount
    */
   private void populateInitialExerciseIDToCount(Collection<Exercise> rawExercises,
-                                                Map<String, Exercise> idToExercise, Map<String, Integer> idToCount,
+                                                Map<String, Exercise> idToExercise,
+                                                Map<String, Integer> idToCount,
                                                 Map<String, Double> idToWeight, boolean useWeights) {
     boolean foundWeights = false;
     for (Exercise e : rawExercises) {
@@ -910,48 +925,49 @@ public class DatabaseImpl implements Database {
    * @paramx userMale
    * @param idToCount exercise id->count
    */
-  private Collection<String> getExerciseIDToResultCount(long userID, Map<String, Integer> idToCount, List<ResultDAO.SimpleResult> results) {
+  private void getExerciseIDToResultCount(long userID, Map<String, Integer> idToCount, List<ResultDAO.SimpleResult> results) {
     List<User> users = userDAO.getUsers();
 
     boolean userMale = userDAO.isUserMale(userID, users);
-    Map<Long, User> userMap = userDAO.getUserMap(userMale, users);
-    return getExerciseIDToResultCount(userID, userMap, results, idToCount);
+    getExerciseIDToResultCount(userDAO.getUserMap(userMale, users), results, idToCount);
   }
 
-  private Collection<String> getExerciseIDToResultCount(long userID, Map<Long, User> userMap, List<ResultDAO.SimpleResult> results,
-                                                        Map<String, Integer> idToCount // what gets populated
+  /**
+   * @see #getExerciseIDToResultCount(long, java.util.Map, java.util.List)
+   * @paramx userID
+   * @param userMap
+   * @param results
+   * @param idToCount
+   * @return set of exercises already answered by userID
+   */
+  private void getExerciseIDToResultCount(Map<Long, User> userMap, List<ResultDAO.SimpleResult> results,
+                                          Map<String, Integer> idToCount // what gets populated
   ) {
-    List<String> alreadyAnsweredByThisUser = new ArrayList<String>();
     Map<String, Set<Long>> keyToUsers = new HashMap<String, Set<Long>>();
 
     for (ResultDAO.SimpleResult r : results) {
       Integer current = idToCount.get(r.id);
       if (current != null) {  // unlikely not null
         if (userMap.containsKey(r.userid)) { // only get male or female results
-          String key = r.id;
-          Set<Long> usersForResult = keyToUsers.get(key);
+          String exerciseID = r.id;
+          Set<Long> usersForResult = keyToUsers.get(exerciseID);
 
           if (usersForResult == null) {
-            keyToUsers.put(key, usersForResult = new HashSet<Long>());
+            keyToUsers.put(exerciseID, usersForResult = new HashSet<Long>());
           }
           if (!usersForResult.contains(r.userid)) {   // ignore re-recordings
             usersForResult.add(r.userid);
-            Integer c = idToCount.get(key);
+            Integer c = idToCount.get(exerciseID);
             if (c == null) {
-              logger.warn("huh? key " + key + " not found?");
-              idToCount.put(key, 1);
+              logger.warn("huh? exerciseID " + exerciseID + " not found?");
+              idToCount.put(exerciseID, 1);
             } else {
-              idToCount.put(key, c + 1);
+              idToCount.put(exerciseID, c + 1);
             }
           }
         }
-        if (r.userid == userID) {
-          alreadyAnsweredByThisUser.add(r.id);
-          //logger.debug("user " + userID + " has already answered exercise " + r.id + " at result " + r.uniqueID);
-        }
       }
     }
-    return alreadyAnsweredByThisUser;
   }
 
   /**
@@ -1002,7 +1018,7 @@ public class DatabaseImpl implements Database {
     SortedMap<Integer, List<String>> integerListSortedMap = countToIds.subMap(0, MIN_INCORRECT_ANSWERS);
     // logger.debug("num with less than ten are " + integerListSortedMap);
 
-    List<Exercise> fewResponses = getResultsRandomizedPerUser(userID, idToExercise, integerListSortedMap, idToWeight);
+    List<Exercise> fewResponses = getExercisesRandomizedPerUser(userID, idToExercise, integerListSortedMap, idToWeight);
     Set<String> fewSet = new HashSet<String>();
     for (Exercise e : fewResponses) fewSet.add(e.getID());
    // logger.debug("getExercisesGradeBalancing for " + MIN_INCORRECT_ANSWERS + " fewSet size " + fewSet.size());
@@ -1237,6 +1253,10 @@ public class DatabaseImpl implements Database {
     return userMap.values();
   }
 
+  /**
+   * @see #getExercisesBiasTowardsUnanswered(long, java.util.Collection, boolean)
+   * @return
+   */
   private List<ResultDAO.SimpleResult> getSimpleResults() { return resultDAO.getSimpleResults(); }
 
   public List<Result> getResultsWithGrades() {
