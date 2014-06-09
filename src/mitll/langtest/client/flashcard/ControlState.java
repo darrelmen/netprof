@@ -9,14 +9,17 @@ public class ControlState {
   private static final String SHOW_STATE = "showState";
   private static final String AUDIO_ON = "audioOn";
   private static final String AUDIO_FEEDBACK_ON = "audioFeedbackOn";
+  private static final String SHUFFLE_ON = "shuffleOn";
+  public static final String TRUE_VALUE = Boolean.TRUE.toString();
   private static int count = 0;
   private boolean audioOn = true;
   private boolean audioFeedbackOn = true;
+  private boolean shuffleOn = false;
   public static final String ENGLISH = "english";
   public static final String FOREIGN = "foreign";
   public static final String BOTH = "both";
   private String showState = ENGLISH; // english/foreign/both
- // boolean playStateOn = false;
+
   private KeyStorage storage = null;
   private final int id;
 
@@ -26,7 +29,7 @@ public class ControlState {
   public boolean showBoth() { return  showState.equals(BOTH);}
 
   /**
-   * @see BootstrapExercisePanel#BootstrapExercisePanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ControlState, mitll.langtest.client.sound.SoundFeedback, mitll.langtest.client.sound.SoundFeedback.EndListener)
+   * @see BootstrapExercisePanel#BootstrapExercisePanel
    * @param storage
    */
   public void setStorage(KeyStorage storage) {
@@ -37,27 +40,39 @@ public class ControlState {
     else if (showState1.equals(BOTH)) showState = BOTH;
 
     String audioOnKey = storage.getValue(AUDIO_ON);
-    String anObject = Boolean.TRUE.toString();
-    //System.out.println("audioOn " + audioOnKey + " vs " + anObject);
-    audioOn = audioOnKey.equalsIgnoreCase(anObject);
+    audioOn = audioOnKey.equalsIgnoreCase(TRUE_VALUE);
 
     String audioFeedbackOnKey = storage.getValue(AUDIO_FEEDBACK_ON);
-    audioFeedbackOn = audioFeedbackOnKey.equalsIgnoreCase(anObject);
+    audioFeedbackOn = audioFeedbackOnKey.equalsIgnoreCase(TRUE_VALUE);
+
+    String shuffleOnKey = storage.getValue(SHUFFLE_ON);
+    shuffleOn = shuffleOnKey.equalsIgnoreCase(TRUE_VALUE);
   }
 
   public void setAudioOn(boolean audioOn) {
     this.audioOn = audioOn;
-    if (storage != null) storage.storeValue(AUDIO_ON, Boolean.toString(audioOn));
+    storeValue(AUDIO_ON, audioOn);
   }
 
   public void setAudioFeedbackOn(boolean audioFeedbackOn) {
     this.audioFeedbackOn = audioFeedbackOn;
-    if (storage != null) storage.storeValue(AUDIO_FEEDBACK_ON, Boolean.toString(audioFeedbackOn));
+    storeValue(AUDIO_FEEDBACK_ON, audioFeedbackOn);
+  }
+
+  public void setSuffleOn(boolean shuffleOn) {
+    this.shuffleOn = shuffleOn;
+    storeValue(SHUFFLE_ON,shuffleOn);
   }
 
   public void setShowState(String showState) {
     this.showState = showState;
     if (storage != null) storage.storeValue(SHOW_STATE, showState);
+  }
+
+  public void storeValue(String slot,boolean shuffleOn) {
+    if (storage != null) {
+      storage.storeValue(slot, Boolean.toString(shuffleOn));
+    }
   }
 
   public String getShowState() {
@@ -67,10 +82,10 @@ public class ControlState {
   public boolean isAudioOn() {
     return audioOn;
   }
+  public boolean isAudioFeedbackOn() { return audioFeedbackOn;  }
+  public boolean isShuffle() { return shuffleOn;  }
 
-  public boolean isAudioFeedbackOn() {
-    return audioFeedbackOn;
+  public String toString() {
+    return "ControlState : id " + id + " audio " + audioOn + " show " + showState + " shuffle " + shuffleOn;
   }
-
-  public String toString() {  return "ControlState : id " + id + " audio " + audioOn + " show " + showState;  }
 }
