@@ -106,4 +106,6 @@ public interface ListInterface extends RequiresResize {
   void addListChangedListener(ListChangeListener<CommonShell> listener);
 
   void setInstance(String instance);
+  void setShuffle(boolean doShuffle);
+  void simpleSetShuffle(boolean doShuffle);
 }
