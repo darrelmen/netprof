@@ -21,6 +21,9 @@ import mitll.langtest.client.user.UserManager;
 * To change this template use File | Settings | File Templates.
 */
 class AVPHelper extends NPFHelper {
+  private static final String COMPLETE = "Complete";
+  private static final String LIST_COMPLETE = "List complete!";
+
   /**
    * @see Navigation#Navigation
    * @param service
@@ -41,11 +44,11 @@ class AVPHelper extends NPFHelper {
   @Override
   protected PagingExerciseList makeExerciseList(final Panel right, final String instanceName) {
     ExercisePanelFactory factory = getFactory(null, instanceName, true);
-    return new PagingExerciseList(right, service, feedback, factory, controller,
+    PagingExerciseList complete = new PagingExerciseList(right, service, feedback, factory, controller,
       true, instanceName) {
       @Override
       protected void onLastItem() {
-        new ModalInfoDialog("Complete", "List complete!", new HiddenHandler() {
+        new ModalInfoDialog(COMPLETE, LIST_COMPLETE, new HiddenHandler() {
           @Override
           public void onHidden(HiddenEvent hiddenEvent) {
             reloadExercises();
@@ -59,8 +62,10 @@ class AVPHelper extends NPFHelper {
       }
 
       @Override
-      protected void addMinWidthStyle(Panel leftColumn) {}
+      protected void addMinWidthStyle(Panel leftColumn) {
+      }
     };
+    return complete;
   }
 
   @Override
