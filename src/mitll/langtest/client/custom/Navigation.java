@@ -168,7 +168,7 @@ public class Navigation implements RequiresResize {
               protected CommonShell findFirstExercise() {
                 String currentExerciseID = myFlashcardExercisePanelFactory.getCurrentExerciseID();
                 if (currentExerciseID != null && !currentExerciseID.trim().isEmpty()) {
-                  System.out.println("\n\n\n\t ---> found previous state current ex = " + currentExerciseID);
+                  System.out.println("---> found previous state current ex = " + currentExerciseID);
 
                   CommonShell shell = byID(currentExerciseID);
 
