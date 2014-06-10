@@ -29,7 +29,7 @@ public class ModalInfoDialog {
     this(title, Collections.singleton(message), null, handler);
   }
 
-  private ModalInfoDialog(String title, Collection<String> messages, Widget widget, HiddenHandler handler) {
+  public ModalInfoDialog(String title, Collection<String> messages, Widget widget, HiddenHandler handler) {
     final Modal modal = new Modal(true);
     modal.setTitle(title);
     for (String m : messages) {
