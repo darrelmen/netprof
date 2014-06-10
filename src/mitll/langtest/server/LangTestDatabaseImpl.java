@@ -151,7 +151,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   @Override
-  public ExerciseListWrapper getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix, long userListID, int userID, String role) {
+  public ExerciseListWrapper getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix,
+                                            long userListID, int userID, String role) {
     List<CommonExercise> exercises;
     logger.debug("getExerciseIds : getting exercise ids for " +
       " config " + relativeConfigDir +
