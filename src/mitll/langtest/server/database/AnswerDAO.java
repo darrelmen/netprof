@@ -196,7 +196,7 @@ public class AnswerDAO {
       int i = statement.executeUpdate();
 
       if (i == 0) {
-        logger.error("huh? didn't update the answer for " + id + " sql " + sql);
+        logger.error("huh? didn't change the answer for " + id + " sql " + sql);
       }
 
       statement.close();
@@ -213,6 +213,7 @@ public class AnswerDAO {
    */
   public void changeType(Collection<Long> ids) {
     try {
+      if (ids.isEmpty()) return;
       Connection connection = database.getConnection();
       String list = getInList(ids);
 
