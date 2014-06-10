@@ -299,19 +299,27 @@ public class PagingExerciseList extends ExerciseList {
     onResize();
   }
 
-  List<CommonShell> inOrderResult;
+  private List<CommonShell> inOrderResult;
+
   /**
+   * A little complicated -- if {@link #doShuffle} is true, shuffles the exercises
+   *
    * @see ExerciseList#rememberAndLoadFirst(java.util.List, mitll.langtest.shared.CommonExercise, String)
    * @param result
+   * @see #simpleSetShuffle(boolean)
    */
   @Override
   protected List<CommonShell> rememberExercises(List<CommonShell> result) {
     inOrderResult = result;
-    if (!doShuffle) {
+    if (doShuffle) {
       System.out.println("PagingExerciseList : rememberExercises remembering " + result.size() + " instance " + getInstance() + "/" +getRole() + " SHUFFLING!");
 
       result = new ArrayList<CommonShell>(result);
-      shuffle(result);
+      Shuffler.shuffle(result);
+    }
+    else {
+      System.out.println("PagingExerciseList : rememberExercises remembering " + result.size() + " instance " + getInstance() + "/" +getRole() + " not shuffling...");
+
     }
     //System.out.println("PagingExerciseList : rememberExercises remembering " + result.size() + " instance " + getInstance() + "/" +getRole());
     clear();
@@ -401,20 +409,6 @@ public class PagingExerciseList extends ExerciseList {
     return es;
   }
 
-/*  protected void askServerForExercise(String itemID) {
-    //System.out.println("PagingExerciseList.askServerForExercise id = " + itemID + " instance " + getInstance());
-    if (SHOW_WAIT_CURSOR && itemID.equals(pagingContainer.getClickedExerciseID())) {
-      waitPopup = new DecoratedPopupPanel();
-      waitPopup.setAutoHideEnabled(false);
-      waitPopup.add(new Icon(IconType.SPINNER));
-
-      waitPopup.setPopupPosition(pagingContainer.getMouseX() + 12, pagingContainer.getMouseY() - 10);
-      waitPopup.show();
-    }
-
-    super.askServerForExercise(itemID);
-  }*/
-
   @Override
   public void onResize() {
     super.onResize();
@@ -425,7 +419,6 @@ public class PagingExerciseList extends ExerciseList {
   protected void markCurrentExercise(String itemID) { pagingContainer.markCurrentExercise(itemID); }
 
   public void setUserListID(long userListID) {
-    //System.out.println("PagingExerciseList.setUserListID " +userListID + " for " +instance);
     this.userListID = userListID;
   }
 
