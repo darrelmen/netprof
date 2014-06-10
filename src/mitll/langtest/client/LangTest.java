@@ -67,9 +67,11 @@ import mitll.langtest.shared.Result;
 import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.User;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -573,6 +575,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private boolean showingPlugInNotice = false;
+
   /**
    * Hookup feedback for events from Flash generated from the user's response to the Mic Access dialog
    *
@@ -599,12 +602,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       public void noMicAvailable() {
         if (!showingPlugInNotice) {
           showingPlugInNotice = true;
-          new ModalInfoDialog("Plug in microphone", "Please plug in your microphone.",
+          List<String> messages = Arrays.asList("If you want to record audio, ", "plug in or enable your mic and reload the page.");
+          new ModalInfoDialog("Plug in microphone", messages, null,
             new HiddenHandler() {
               @Override
               public void onHidden(HiddenEvent hiddenEvent) {
-                showingPlugInNotice = false;
-                removeAndReloadFlash();
+                hideFlash();
+                checkLogin();
+
+                flashcard.setSplash("RECORDING DISABLED");
               }
             }
           );
@@ -614,14 +620,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       public void noRecordingMethodAvailable() {
         System.out.println(new Date() + " : makeFlashContainer - no way to record");
         hideFlash();
-        new ModalInfoDialog("Can't record audio", "Recording audio is not supported.",new HiddenHandler() {
+        new ModalInfoDialog("Can't record audio", "Recording audio is not supported.", new HiddenHandler() {
           @Override
           public void onHidden(HiddenEvent hiddenEvent) {
             checkLogin();
           }
         });
 
-        // TODO : OK, deal with it, disable recording...
         flashcard.setSplash("RECORDING DISABLED");
       }
     });
@@ -746,7 +751,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   // TODO : refactor all this into mode objects that decide whether we need flash or not, etc.
   private void checkInitFlash() {
     if (shouldCollectAudio() && !flashRecordPanel.gotPermission()) {
-//      System.out.println("checkInitFlash : initFlash");
+      System.out.println("checkInitFlash : initFlash");
 
       flashRecordPanel.initFlash();
     }
