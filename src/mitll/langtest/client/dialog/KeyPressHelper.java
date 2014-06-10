@@ -68,7 +68,7 @@ public class KeyPressHelper {
   public void addKeyHandler(KeyListener handler) {
     listeners.put(handler.getName(), handler);
     if (listeners.size() > 1) {
-      System.out.println("addKeyHandler added  " + handler.getName() + " now " + this);
+      //System.out.println("addKeyHandler added  " + handler.getName() + " now " + this);
     }
   }
 
