@@ -71,7 +71,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
 
   private static final String WAV = ".wav";
   private static final String MP3 = "." + AudioTag.COMPRESSED_TYPE;
-  private static final String FEEDBACK = "PLAY WORD ON ERROR";
+  private static final String FEEDBACK = "PLAY ON MISTAKE";
   private static final String ON = "On";
   private static final String OFF = "Off";
   private static final String SHOW = "SHOW";
@@ -202,13 +202,14 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     shuffle.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        controlState.setSuffleOn(!shuffle.isToggled());
-        gotShuffleClick(!shuffle.isToggled());
+        boolean shuffleOn = !shuffle.isToggled();
+
+        //System.out.println("shuffle onClick " + shuffleOn);
+        controlState.setSuffleOn(shuffleOn);
+        gotShuffleClick(shuffleOn);
       }
     });
     shuffle.setActive(controlState.isShuffle());
-
-    //shuffle.setActive(controlState.isAudioFeedbackOn());
 
     rightColumn.add(shuffle);
 
@@ -481,7 +482,6 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
       w.setSize(IconSize.TWO_TIMES);
       Panel simple = new SimplePanel();
       simple.add(w);
-     // simple.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
       simple.addStyleName("leftTenMargin");
       hp.add(simple);
     }
@@ -519,21 +519,12 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
       @Override
       public void onMouseOver(MouseOverEvent event) {
         focusPanel.addStyleName("mouseOverHighlight");
-  /*      popupPanel = new PopupPanel(true);
-        Icon w = new Icon(IconType.VOLUME_UP);
-        popupPanel.add(w);
-        int x = focusPanel.getAbsoluteLeft();
-        int y = focusPanel.getAbsoluteTop() + 5;
-        popupPanel.setPopupPosition(x, y);
-        popupPanel.show();*/
       }
     });
 
     focusPanel.addMouseOutHandler(new MouseOutHandler() {
       @Override
       public void onMouseOut(MouseOutEvent event) {
-     //   popupPanel.hide();
-     //   popupPanel = null;
         focusPanel.removeStyleName("mouseOverHighlight");
       }
     });
@@ -622,7 +613,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
 
     recordButtonRow.addStyleName("leftTenMargin");
     recordButtonRow.addStyleName("rightTenMargin");
-    DOM.setStyleAttribute(recordButtonRow.getElement(), "marginRight", "10px");
+    recordButtonRow.getElement().getStyle().setMarginRight(10, Style.Unit.PX);
 
     return recordButtonRow;
   }
@@ -645,7 +636,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
   private Panel getRecoOutputRow() {
     recoOutput = new Heading(3, "Answer");
     recoOutput.addStyleName("cardHiddenText2");   // same color as background so text takes up space but is invisible
-    DOM.setStyleAttribute(recoOutput.getElement(), "color", "#ffffff");
+    recoOutput.getElement().getStyle().setColor("#ffffff");
 
     Panel recoOutputRow = new FluidRow();
     Panel recoOutputContainer = new Paragraph();
@@ -816,7 +807,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
    * @see #receivedAudioAnswer
    */
   private String showIncorrectFeedback(AudioAnswer result, double score, boolean hasRefAudio) {
-    if (result.isSaidAnswer()/* && result.isCorrect()*/) { // if they said the right answer, but poorly, show pron score
+    if (result.isSaidAnswer()) { // if they said the right answer, but poorly, show pron score
       showPronScoreFeedback(score);
     }
    // System.out.println("showIncorrectFeedback : result " + result + " score " + score + " has ref " + hasRefAudio);
@@ -828,12 +819,11 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
         if (path == null) {
           playIncorrect(); // this should never happen
         } else if (!preventFutureTimerUse) {
-          playRefAndGoToNext(/*correctPrompt,*/ path);
+          playRefAndGoToNext(path);
         }
       } else {
         playIncorrect();
         goToNextAfter(1000);
-        //goToNextItem();
       }
     } else {
       tryAgain();
@@ -872,9 +862,8 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
    * @paramx correctPrompt
    * @param path
    */
-  private void playRefAndGoToNext(/*String correctPrompt,*/ String path) {
+  private void playRefAndGoToNext(String path) {
     path = getPath(path);
-   // final String fcorrectPrompt = correctPrompt;
 
     getSoundFeedback().queueSong(path, new SoundFeedback.EndListener() {
       @Override
@@ -885,9 +874,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
       @Override
       public void songEnded() {
         endListener.songEnded();
-
         loadNext();
-        //goToNextItem(fcorrectPrompt);
       }
     });
   }
@@ -909,7 +896,6 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
    * @param path
    */
   private void playRef(String path) {
-
   //  System.out.println("playRef... ---------- " + exercise.getID() + " path " + path );
 
     path = getPath(path);
@@ -923,7 +909,6 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
 
       @Override
       public void songEnded() {
-//        BootstrapExercisePanel.this.songEnded(textWidget);
         removePlayingHighlight(textWidget);
         endListener.songEnded();
       }
@@ -938,10 +923,6 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
   protected void removePlayingHighlight(Widget textWidget) {
     textWidget.removeStyleName("playingAudioHighlight");
   }
-
-/*  protected void songEnded(Widget textWidget) {
-    textWidget.removeStyleName("playingAudioHighlight");
-  }*/
 
   private String getPath(String path) {
     path = (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
@@ -1038,7 +1019,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     }
   }
 
-  boolean preventFutureTimerUse = false;
+  private boolean preventFutureTimerUse = false;
   protected void cancelTimer() {
     removePlayingHighlight();
 
