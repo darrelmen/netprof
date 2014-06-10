@@ -31,8 +31,10 @@ public class KeyStorage {
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
 
-      localStorageIfSupported.setItem(getLocalStorageKey(name), toStore);
-      if (debug) System.out.println("KeyStorage : storeValue " + name + "="+toStore + " : " + getValue(name));
+      String localStorageKey = getLocalStorageKey(name);
+      localStorageIfSupported.setItem(localStorageKey, toStore);
+      if (debug) System.out.println("KeyStorage : (" + localStorageKey+
+        ") storeValue " + name + "="+toStore + " : " + getValue(name));
     }
   }
 
@@ -40,8 +42,9 @@ public class KeyStorage {
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
 
-      String item = localStorageIfSupported.getItem(getLocalStorageKey(name));
-      if (debug) System.out.println("KeyStorage : name " + name + "=" +item);
+      String localStorageKey = getLocalStorageKey(name);
+      String item = localStorageIfSupported.getItem(localStorageKey);
+      if (debug) System.out.println("KeyStorage : (" +localStorageKey+ ")" + " name " + name + "=" +item);
       if (item == null) item = "";
       return item;
     }
@@ -60,7 +63,7 @@ public class KeyStorage {
     }
   }
 
-  String getLocalStorageKey(String name) {
+  private String getLocalStorageKey(String name) {
     if (controller != null) {
       language = controller.getLanguage();          // necessary???
       user = controller.getUser();
