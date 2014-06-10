@@ -79,7 +79,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   private Set<String> skipped = new HashSet<String>();
   private Set<Long> resultIDs = new HashSet<Long>();
   private KeyStorage storage;
-  private String selectionID;
+  private String selectionID = "";
   private String instance;
 
   /**
@@ -96,8 +96,12 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
     super(service, feedback, controller, exerciseList);
     controlState = new ControlState();
     this.instance = instance;
-    if (exerciseList == null) exerciseList = controller.getExerciseList();
-    final ListInterface fexerciseList = exerciseList;
+
+   // System.out.println("made factory ---------------------\n");
+    boolean sharedList = exerciseList == null;
+    if (sharedList) {   // when does this happen??
+      exerciseList = controller.getExerciseList();
+    }
 
     exerciseList.addListChangedListener(new ListChangeListener<CommonShell>() {
       @Override
@@ -106,20 +110,20 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
         allExercises = items;
         System.out.println("MyFlashcardExercisePanelFactory : " + selectionID + " got new set of items from list. " + items.size());
         reset();
-
-       /* if (selectionID.equals("shuffleChange")) {
-          String first = allExercises.iterator().next().getID();
-          //exerciseList.checkAndAskServer(first);
-          fexerciseList.loadExercise(first);
-        }*/
       }
     });
     storage = new KeyStorage(controller) {
       @Override
       protected String getKey(String name) {
-        return selectionID + "_"+super.getKey(name); // in the context of this selection
+        return (selectionID.isEmpty() ? "":selectionID + "_") + super.getKey(name); // in the context of this selection
       }
     };
+    controlState.setStorage(storage);
+   // System.out.println("setting shuffle --------------------- " +controlState.isShuffle()+ "\n");
+
+    if (!sharedList) {
+      exerciseList.simpleSetShuffle(controlState.isShuffle());
+    }
   }
 
   /**
@@ -200,7 +204,6 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
         MyFlashcardExercisePanelFactory.this.controlState,
         soundFeedback,
         soundFeedback.endListener, MyFlashcardExercisePanelFactory.this.instance);
-      exerciseList.simpleSetShuffle(controlState.isShuffle());
     }
 
     @Override
