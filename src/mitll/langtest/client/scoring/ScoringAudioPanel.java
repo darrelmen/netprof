@@ -180,7 +180,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   private void showImageAndCheck(String imageURL, ImageAndCheck wordTranscript) {
     wordTranscript.image.setUrl(imageURL);
     wordTranscript.image.setVisible(true);
-    if (ADD_CHECKBOX) wordTranscript.getCheck().setVisible(true);
+    //if (ADD_CHECKBOX) wordTranscript.getCheck().setVisible(true);
   }
 
   void getClickedOnSegment(int eventXPos, NetPronImageType type, EventSegment onClick) {
