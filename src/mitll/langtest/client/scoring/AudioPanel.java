@@ -6,7 +6,6 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -53,7 +52,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private static final boolean WARN_ABOUT_MISSING_AUDIO = false;
   private static final int WINDOW_SIZE_CHANGE_THRESHOLD = 50;
   private static final int IMAGE_WIDTH_SLOP = 70 + WINDOW_SIZE_CHANGE_THRESHOLD/2;
-  public static final boolean ADD_CHECKBOX = false;
+  //public static final boolean ADD_CHECKBOX = false;
 
   private final ScoreListener gaugePanel;
   protected final String exerciseID;
@@ -111,7 +110,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     this.gaugePanel = gaugePanel;
     if (debug) System.out.println("AudioPanel : gauge panel " + gaugePanel);
     this.showSpectrogram = showSpectrogram;
-  //  if (showSpectrogram) System.out.println("AudioPanel : showSpectrogram! ");
     this.rightMargin = rightMargin;
     this.exerciseID = exerciseID;
     getElement().setId("AudioPanel_exercise_"+exerciseID);
@@ -125,7 +123,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     });
   }
 
-  //protected Panel imageContainer;
   /**
    * Replace the html 5 audio tag with our fancy waveform widget.
    * @seex #AudioPanel(String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener, int, String)
@@ -135,10 +132,10 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    */
   protected void addWidgets(String playButtonSuffix, String audioType) {
     //System.out.println("addWidgets audio path = " + path);
-    DivWidget outer = new DivWidget();
-    outer.getElement().getStyle().setPosition(Style.Position.RELATIVE);
+    DivWidget divWithRelativePosition = new DivWidget();  // need this for audio position div to work properly
+    divWithRelativePosition.getElement().getStyle().setPosition(Style.Position.RELATIVE);
     Panel imageContainer = new VerticalPanel();
-    outer.add(imageContainer);
+    divWithRelativePosition.add(imageContainer);
     imageContainer.getElement().setId("AudioPanel_imageContainer");
 
     HorizontalPanel hp = new HorizontalPanel();
@@ -146,27 +143,27 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     hp.getElement().setId("AudioPanel_hp");
 
     // add widgets to left of play button
-    Widget beforePlayWidget = getBeforePlayWidget();
+    Widget toTheRightWidget = getAfterPlayWidget();
     audioPositionPopup = new AudioPositionPopup(imageContainer);
     imageContainer.add(audioPositionPopup);
     //System.out.println("added " + audioPositionPopup.getElement().getId() + " for " + exerciseID + " audio type " + audioType);
 
     if (hasAudio()) {
-      playAudio = getPlayButtons(beforePlayWidget, playButtonSuffix, audioType);
+      playAudio = getPlayButtons(toTheRightWidget, playButtonSuffix, audioType);
       hp.add(playAudio);
       hp.setCellHorizontalAlignment(playAudio, HorizontalPanel.ALIGN_LEFT);
     }
     else {
-      hp.add(beforePlayWidget);
+      hp.add(toTheRightWidget);
       audioPositionPopup.setVisible(false);
     }
 
-    Panel controlPanel = new HorizontalPanel();
-    controlPanel.getElement().setId("AudioPanel_controlPanel");
+  //  Panel controlPanel = new HorizontalPanel();
+   // controlPanel.getElement().setId("AudioPanel_controlPanel");
 
     waveform = new ImageAndCheck();
     imageContainer.add(getWaveform().image);
-    if (ADD_CHECKBOX) controlPanel.add(addCheckbox(WAVEFORM, getWaveform()));
+    //if (ADD_CHECKBOX) controlPanel.add(addCheckbox(WAVEFORM, getWaveform()));
 
     getWaveform().image.setAltText(WAVEFORM_TOOLTIP);
     getWaveform().image.setTitle(WAVEFORM_TOOLTIP);
@@ -174,27 +171,27 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     spectrogram = new ImageAndCheck();
     if (showSpectrogram) {
       imageContainer.add(getSpectrogram().image);
-      if (ADD_CHECKBOX) controlPanel.add(addCheckbox(SPECTROGRAM, getSpectrogram()));
+      //if (ADD_CHECKBOX) controlPanel.add(addCheckbox(SPECTROGRAM, getSpectrogram()));
     }
 
     words = new ImageAndCheck();
     imageContainer.add(words.image);
     words.image.getElement().setId("Transcript_Words");
-    if (ADD_CHECKBOX) controlPanel.add(addCheckbox("words", words));
+    //if (ADD_CHECKBOX) controlPanel.add(addCheckbox("words", words));
 
     phones = new ImageAndCheck();
     imageContainer.add(phones.image);
     phones.image.getElement().setId("Transcript_Phones");
-    if (ADD_CHECKBOX) controlPanel.add(addCheckbox("phones", phones));
+    //if (ADD_CHECKBOX) controlPanel.add(addCheckbox("phones", phones));
 
-    hp.add(controlPanel);
-    hp.setCellHorizontalAlignment(controlPanel, HorizontalPanel.ALIGN_RIGHT);
+   // hp.add(controlPanel);
+  //  hp.setCellHorizontalAlignment(controlPanel, HorizontalPanel.ALIGN_RIGHT);
     hp.setWidth("100%");
 
     add(hp);
     hp.addStyleName("bottomFiveMargin");
 
-    add(outer);
+    add(divWithRelativePosition);
   }
 
   boolean hasAudio() {  return true;  }
@@ -203,10 +200,10 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   public void doPause() { if (playAudio != null) playAudio.doPause(); }
 
   /**
-   * This is sort of a hack -- so we can get left justify...
+   * This is sort of a hack --
    * @return
    */
-  protected Widget getBeforePlayWidget() { return null;  }
+  protected Widget getAfterPlayWidget() { return null;  }
 
   @Override
   public void onLoad() {
@@ -245,7 +242,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
   public static class ImageAndCheck {
     final Image image;
-    private Widget check;
+    //private Widget check;
     public ImageAndCheck() {
       image = new Image();
       image.setVisible(false);
@@ -253,25 +250,25 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
     public void setVisible(boolean visible) {
       image.setVisible(visible);
-      if (check != null) check.setVisible(visible);
+      //if (check != null) check.setVisible(visible);
     }
 
     public void setUrl(String url) { image.setUrl(url); }
 
-    public Widget getCheck() {
+/*    public Widget getCheck() {
       return check;
     }
-
     public void setCheck(Widget check) {
       this.check = check;
-    }
+    }*/
   }
 
   /**
+   * Ask the server for the URLs to the mp3 for this audio
    * @see #onLoad()
    * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.FastAndSlowASRScoringAudioPanel#showAudio(mitll.langtest.shared.AudioAttribute)
-   * @param path
+   * @param path to audio on the server
    */
   public void getImagesForPath(String path) {
     path = wavToMP3(path);
@@ -285,6 +282,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       playAudio.startSong(path);
     }
 
+    // wait for rest of page to do layout before asking for the images
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
         getImages();
@@ -302,9 +300,11 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   }
 
   /**
+   * Note this is currently not very accurate with soundmanager2.
+   *
    * @see ScoringAudioPanel.TranscriptEventClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
-   * @param start
-   * @param end
+   * @param start from here
+   * @param end to here
    * @paramx waveDurInSeconds
    */
   void playSegment(float start, float end) {
@@ -318,22 +318,23 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   }
 
     /**
+     * Adds a listener to the audio panel - this way it can update its position as the audio plays
     * @see #addWidgets(String, String)
     * @return PlayAudioPanel
     */
-  private PlayAudioPanel getPlayButtons(Widget toTheLeftWidget, String playButtonSuffix, String audioType) {
-    PlayAudioPanel playAudio = makePlayAudioPanel(toTheLeftWidget, playButtonSuffix, audioType);
+  private PlayAudioPanel getPlayButtons(Widget toTheRightWidget, String playButtonSuffix, String audioType) {
+    PlayAudioPanel playAudio = makePlayAudioPanel(toTheRightWidget, playButtonSuffix, audioType);
     playAudio.addListener(audioPositionPopup);
     return playAudio;
   }
 
-  protected PlayAudioPanel makePlayAudioPanel(final Widget toTheLeftWidget, String playButtonSuffix, String audioType) {
+  protected PlayAudioPanel makePlayAudioPanel(final Widget toTheRightWidget, String playButtonSuffix, String audioType) {
     return new PlayAudioPanel(soundManager, playButtonSuffix) {
       @Override
       protected void addButtons() {
         super.addButtons();
-        if (toTheLeftWidget != null) {
-          add(toTheLeftWidget);
+        if (toTheRightWidget != null) {
+          add(toTheRightWidget);
         }
       }
     };
@@ -341,7 +342,9 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
   /**
    * Ask the server for images of the waveform, spectrogram, and transcripts.
-   * <p></p>
+   * <p/>
+   * Complicated -- could be improved -- tries to ask for an image of that would fit horizontally.
+   * <p/>
    * TODO uses the window width to determine the image width -- ideally we could find out what the width
    * of this component is and then use that.  getOffsetWidth doesn't work well, although perhaps using a parent
    * component's getOffsetWidth would.
@@ -381,6 +384,10 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     }
   }
 
+  /**
+   * Get images of all types.
+   * @param width
+   */
   protected void getEachImage(int width) {
    // System.out.println("AudioPanel.getEachImage : " + getElement().getId()+ " path " + audioPath);
     getImageURLForAudio(audioPath, WAVEFORM, width, getWaveform());
@@ -441,14 +448,13 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     }
   }
 
-  protected void showResult(ImageResponse result, final ImageAndCheck imageAndCheck) {
+  private void showResult(ImageResponse result, final ImageAndCheck imageAndCheck) {
    // System.out.println("\tgetImageURLForAudio : using new url " + result.imageURL);
-
     imageAndCheck.image.setUrl(result.imageURL);
     imageAndCheck.image.setVisible(true);
     audioPositionPopup.reinitialize(result.durationInSeconds);
 
-    if (ADD_CHECKBOX) {
+/*    if (ADD_CHECKBOX) {
       // attempt to have the check not become visible until the image comes back from the server
       Timer t = new Timer() {
         public void run() {
@@ -457,7 +463,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       };
 
       t.schedule(50);
-    }
+    }*/
   }
 
   private void logMessage(ImageResponse result, long roundtrip) {
@@ -503,7 +509,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @param widget
    * @return
    */
-  private Panel addCheckbox(final String label, final ImageAndCheck widget) {
+/*  private Panel addCheckbox(final String label, final ImageAndCheck widget) {
     final CheckBox checkBox = new CheckBox();
     checkBox.getElement().setId("CheckBox_for_"+label);
     checkBox.setValue(true);
@@ -519,7 +525,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     p.add(new Label(label));
     p.addStyleName("buttonMargin");
     p.setVisible(false);
-    widget.setCheck(p);
+    //widget.setCheck(p);
     return p;
-  }
+  }*/
 }
