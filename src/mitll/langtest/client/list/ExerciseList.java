@@ -37,10 +37,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
-import java.util.Random;
-import java.util.RandomAccess;
 import java.util.Set;
 
 /**
@@ -500,7 +497,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   protected CommonShell findFirstExercise() {
     CommonShell first = getFirst();
-    System.out.println("findFirstExercise " + first.getID() + " is first in container.");
+    //System.out.println("findFirstExercise " + first.getID() + " is first in container.");
 
     return first;
   }
