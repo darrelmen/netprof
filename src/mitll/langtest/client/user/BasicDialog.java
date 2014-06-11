@@ -2,6 +2,7 @@ package mitll.langtest.client.user;
 
 import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.ControlLabel;
+import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.PasswordTextBox;
 import com.github.gwtbootstrap.client.ui.Popover;
@@ -50,13 +51,34 @@ public class BasicDialog {
     return getFormField(dialogBox, label, user, minLength);
   }
 
+  protected FormField addControlFormFieldHorizontal(Panel dialogBox, String label, boolean isPassword, int minLength, int labelWidth) {
+    final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
+    final ControlGroup userGroup = addControlGroupEntryHorizontal(dialogBox, label, user, labelWidth);
+    return new FormField(user, userGroup, minLength);
+  }
+
   protected FormField addControlFormField(Panel dialogBox, String label, boolean isPassword, int minLength, Widget rightSide) {
     final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
 
+    user.getElement().setId("textBox");
     Panel row = new HorizontalPanel();
     row.add(user);
     row.add(rightSide);
     final ControlGroup userGroup = addControlGroupEntry(dialogBox, label, row);
+
+    FormField formField = new FormField(user, userGroup, minLength);
+    formField.setRightSide(rightSide);
+    return formField;
+  }
+
+  protected FormField addControlFormFieldHorizontal(Panel dialogBox, String label, boolean isPassword, int minLength, Widget rightSide, int labelWidth) {
+    final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
+
+    user.getElement().setId("textBox");
+    Panel row = new HorizontalPanel();
+    row.add(user);
+    row.add(rightSide);
+    final ControlGroup userGroup = addControlGroupEntryHorizontal(dialogBox, label, row, labelWidth);
 
     FormField formField = new FormField(user, userGroup, minLength);
     formField.setRightSide(rightSide);
@@ -81,9 +103,27 @@ public class BasicDialog {
   protected ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget widget) {
     final ControlGroup userGroup = new ControlGroup();
     userGroup.addStyleName("leftFiveMargin");
-    userGroup.add(new ControlLabel(label));
+    ControlLabel widget1 = new ControlLabel(label);
+    widget1.getElement().setId("Label_" + label);
+    userGroup.add(widget1);
     widget.addStyleName("leftFiveMargin");
     userGroup.add(widget);
+
+    dialogBox.add(userGroup);
+    return userGroup;
+  }
+
+  protected ControlGroup addControlGroupEntryHorizontal(Panel dialogBox, String label, Widget widget, int labelWidth) {
+    final ControlGroup userGroup = new ControlGroup();
+
+    final HorizontalPanel hp = new HorizontalPanel();
+    hp.addStyleName("leftFiveMargin");
+    Heading w = new Heading(5, label);
+    hp.add(w);
+    w.setWidth(labelWidth +"px");
+    //widget.addStyleName("leftFiveMargin");
+    hp.add(widget);
+    userGroup.add(hp);
 
     dialogBox.add(userGroup);
     return userGroup;
