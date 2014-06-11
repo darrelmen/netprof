@@ -107,8 +107,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private FluidRow secondRow;
   private Panel firstRow;
 
-//  private ProgressHelper progressBar;
-
   private StartupInfo startupInfo;
 
   private Navigation navigation;
