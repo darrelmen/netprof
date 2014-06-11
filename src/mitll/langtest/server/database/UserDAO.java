@@ -1,19 +1,5 @@
 package mitll.langtest.server.database;
 
-import com.google.gwt.user.cellview.client.TextColumn;
-import mitll.langtest.server.database.custom.UserListManager;
-import mitll.langtest.shared.DLIUser;
-import mitll.langtest.shared.Demographics;
-import mitll.langtest.shared.MiniUser;
-import mitll.langtest.shared.User;
-import org.apache.log4j.Logger;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.DataFormat;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Connection;
@@ -28,6 +14,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import mitll.langtest.server.database.custom.UserListManager;
+import mitll.langtest.shared.DLIUser;
+import mitll.langtest.shared.MiniUser;
+import mitll.langtest.shared.User;
+
+import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 public class UserDAO extends DAO {
   private static final String DEFECT_DETECTOR = "defectDetector";
