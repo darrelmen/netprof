@@ -19,6 +19,9 @@ import mitll.langtest.shared.Result;
 
 /**
  * A waveform record button and a play audio button.
+ *
+ * The record audio and play buttons are tied to each other in that when playing audio, you can't record, and vice-versa.
+ *
  */
 public class RecordAudioPanel extends AudioPanel {
   private final int index;
@@ -30,6 +33,7 @@ public class RecordAudioPanel extends AudioPanel {
   private final Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
   private final Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
   protected CommonExercise exercise;
+  protected String audioType;
 
   /**
    *
@@ -53,33 +57,46 @@ public class RecordAudioPanel extends AudioPanel {
     this.exercisePanel = widgets;
     this.index = index;
     this.exercise = exercise;
-
-    AudioAttribute attribute =
-      audioType.equals(Result.AUDIO_TYPE_REGULAR) ? exercise.getRecordingsBy(controller.getUser(), true) :
-        audioType.equals(Result.AUDIO_TYPE_SLOW) ? exercise.getRecordingsBy(controller.getUser(), false) : null;
+    this.audioType = audioType;
+    AudioAttribute attribute = getAudioAttribute();
 /*    System.out.println("RecordAudioPanel for " + exercise.getID() +
       " audio type " + audioType + " ref " + exercise.getRefAudio() + " path " + attribute);*/
     if (attribute != null) {
       this.audioPath = attribute.getAudioRef();
     }
 
-    addWidgets("", audioType);
+    addWidgets("", audioType, getRecordButtonTitle());
     getElement().setId("RecordAudioPanel_" + exerciseID + "_" + index + "_" + audioType);
+  }
+
+  public AudioAttribute getAudioAttribute() {
+    return
+      audioType.equals(Result.AUDIO_TYPE_REGULAR) ? exercise.getRecordingsBy(controller.getUser(), true) :
+      audioType.equals(Result.AUDIO_TYPE_SLOW)    ? exercise.getRecordingsBy(controller.getUser(), false) : null;
+  }
+
+  private String getRecordButtonTitle() {
+    return
+      audioType.equals(Result.AUDIO_TYPE_REGULAR) ? "Record regular"// speed"
+        :
+        audioType.equals(Result.AUDIO_TYPE_SLOW)    ? "Record slow" //+ " speed"
+          : "Record";
   }
 
   /**
    * @see mitll.langtest.client.scoring.AudioPanel#getPlayButtons
    * @param toTheRightWidget
    * @param playButtonSuffix
+   * @param recordButtonTitle
    * @return
    */
   @Override
-  protected PlayAudioPanel makePlayAudioPanel(Widget toTheRightWidget, String playButtonSuffix, String audioType) {
-    WaveformPostAudioRecordButton myPostAudioRecordButton = makePostAudioRecordButton(audioType);
+  protected PlayAudioPanel makePlayAudioPanel(Widget toTheRightWidget, String playButtonSuffix, String audioType, String recordButtonTitle) {
+    WaveformPostAudioRecordButton myPostAudioRecordButton = makePostAudioRecordButton(audioType, recordButtonTitle);
     postAudioRecordButton = myPostAudioRecordButton;
 
    // System.out.println("makePlayAudioPanel : audio type " + audioType + " suffix '" +playButtonSuffix +"'");
-    playAudioPanel = new MyPlayAudioPanel(recordImage1, recordImage2, exercisePanel, playButtonSuffix);
+    playAudioPanel = new MyPlayAudioPanel(recordImage1, recordImage2, exercisePanel, playButtonSuffix, toTheRightWidget);
     myPostAudioRecordButton.setPlayAudioPanel(playAudioPanel);
 
     return playAudioPanel;
@@ -93,8 +110,8 @@ public class RecordAudioPanel extends AudioPanel {
     return postAudioRecordButton.isRecording();
   }
 
-  protected WaveformPostAudioRecordButton makePostAudioRecordButton(String audioType) {
-    return new MyWaveformPostAudioRecordButton(audioType);
+  protected WaveformPostAudioRecordButton makePostAudioRecordButton(String audioType, String recordButtonTitle) {
+    return new MyWaveformPostAudioRecordButton(audioType, recordButtonTitle);
   }
 
   protected void showStop() {
@@ -120,8 +137,6 @@ public class RecordAudioPanel extends AudioPanel {
     if (postAudioRecordButton.hasValidAudio()) playAudioPanel.setEnabled(val);
   }
 
-  //public void addPlayListener(PlayListener playListener) {  playAudioPanel.addPlayListener(playListener);  }
-
   public void setExercise(CommonExercise exercise) {
     this.exercise = exercise;
     postAudioRecordButton.setExercise(exercise);
@@ -131,7 +146,7 @@ public class RecordAudioPanel extends AudioPanel {
    * A play button that controls the state of the record button.
    */
   private class MyPlayAudioPanel extends PlayAudioPanel {
-    public MyPlayAudioPanel(Image recordImage1, Image recordImage2, final Panel panel, String suffix) {
+    public MyPlayAudioPanel(Image recordImage1, Image recordImage2, final Panel panel, String suffix, Widget toTheRightWidget) {
       super(RecordAudioPanel.this.soundManager, new PlayListener() {
         public void playStarted() {
           if (panel instanceof BusyPanel) {
@@ -146,7 +161,7 @@ public class RecordAudioPanel extends AudioPanel {
           }
           postAudioRecordButton.setEnabled(true);
         }
-      }, suffix);
+      }, suffix, toTheRightWidget);
       add(recordImage1);
       recordImage1.setVisible(false);
       add(recordImage2);
@@ -155,23 +170,24 @@ public class RecordAudioPanel extends AudioPanel {
     }
 
     /**
-     * @see mitll.langtest.client.sound.PlayAudioPanel#PlayAudioPanel(mitll.langtest.client.sound.SoundManagerAPI, String)
+     * @see mitll.langtest.client.sound.PlayAudioPanel#PlayAudioPanel(mitll.langtest.client.sound.SoundManagerAPI, String, com.google.gwt.user.client.ui.Widget)
+     * @param optionalToTheRight
      */
     @Override
-    protected void addButtons() {
+    protected void addButtons(Widget optionalToTheRight) {
       if (postAudioRecordButton == null) System.err.println("huh? postAudioRecordButton is null???");
       else add(postAudioRecordButton);
-      super.addButtons();
+      super.addButtons(optionalToTheRight);
     }
   }
 
-  private class MyWaveformPostAudioRecordButton extends WaveformPostAudioRecordButton {
-    public MyWaveformPostAudioRecordButton(String audioType) {
+  protected class MyWaveformPostAudioRecordButton extends WaveformPostAudioRecordButton {
+    public MyWaveformPostAudioRecordButton(String audioType, String recordButtonTitle) {
       super(RecordAudioPanel.this.exercise,
         RecordAudioPanel.this.controller,
         RecordAudioPanel.this.exercisePanel,
-        RecordAudioPanel.this, RecordAudioPanel.this.service, RecordAudioPanel.this.index, true, RecordButton.RECORD1, RecordButton.STOP1, audioType);
-      setWidth("100px");
+        RecordAudioPanel.this, RecordAudioPanel.this.service, RecordAudioPanel.this.index, true, recordButtonTitle, RecordButton.STOP1, audioType);
+      setWidth("110px");
     }
 
     /**
