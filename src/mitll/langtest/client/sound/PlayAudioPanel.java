@@ -7,6 +7,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -49,28 +50,30 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel
    * @param soundManager
    * @param suffix
+   * @param optionalToTheRight
    */
-  public PlayAudioPanel(SoundManagerAPI soundManager, String suffix) {
+  public PlayAudioPanel(SoundManagerAPI soundManager, String suffix, Widget optionalToTheRight) {
     this.soundManager = soundManager;
     setSpacing(10);
     setVerticalAlignment(ALIGN_MIDDLE);
     PLAY_LABEL = " Play" + suffix;
     playButton = new Button(PLAY_LABEL);
     playButton.setIcon(IconType.PLAY);
-    addButtons();
+    addButtons(optionalToTheRight);
     id = counter++;
     getElement().setId("PlayAudioPanel_"+id);
   }
 
   /**
-   * @see mitll.langtest.client.exercise.RecordAudioPanel.MyPlayAudioPanel#MyPlayAudioPanel(com.github.gwtbootstrap.client.ui.Image, com.github.gwtbootstrap.client.ui.Image, com.google.gwt.user.client.ui.Panel, String)
+   * @see mitll.langtest.client.exercise.RecordAudioPanel.MyPlayAudioPanel#MyPlayAudioPanel(com.github.gwtbootstrap.client.ui.Image, com.github.gwtbootstrap.client.ui.Image, com.google.gwt.user.client.ui.Panel, String, com.google.gwt.user.client.ui.Widget)
    * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel
    * @param soundManager
    * @param playListener
    * @param suffix
+   * @param optionalToTheRight
    */
-  public PlayAudioPanel(SoundManagerAPI soundManager, PlayListener playListener, String suffix) {
-    this(soundManager, suffix);
+  public PlayAudioPanel(SoundManagerAPI soundManager, PlayListener playListener, String suffix, Widget optionalToTheRight) {
+    this(soundManager, suffix, optionalToTheRight);
     addPlayListener(playListener);
   }
 
@@ -94,7 +97,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     if (listener != null) listener.reinitialize();    // remove playing line, if it's there
   }
 
-  protected void addButtons() {
+  protected void addButtons(Widget optionalToTheRight) {
     playButton.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         doClick();
@@ -107,6 +110,11 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     add(playButton);
     warnNoFlash.setVisible(false);
     add(warnNoFlash);
+
+    if (optionalToTheRight != null) {
+     // System.out.println("adding " +optionalToTheRight.getElement().getId() + " to " + getElement().getId());
+      add(optionalToTheRight);
+    }
   }
 
   /**
@@ -122,8 +130,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   }
 
   /**
-   * @see #addButtons( 
-   */
+   * @see #addButtons(Widget) */
   private void doClick() {
     if (playButton.isVisible() && playButton.isEnabled()) {
       if (isPlaying()) {
