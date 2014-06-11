@@ -8,6 +8,7 @@ import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -52,8 +53,6 @@ public class NewUserExercise extends BasicDialog {
   static final String SLOW_SPEED_REFERENCE_RECORDING_OPTIONAL = "Slow speed reference recording (optional)";
   private static final String ENTER_THE_FOREIGN_LANGUAGE_PHRASE = "Enter the foreign language phrase.";
   private static final String RECORD_REFERENCE_AUDIO_FOR_THE_FOREIGN_LANGUAGE_PHRASE = "Record reference audio for the foreign language phrase.";
- // private static final String CLICK_AND_HOLD_TO_RECORD = "Click and Hold to Record";
- // private static final String RELEASE_TO_STOP = "Release to Stop";
   private static final String REMOVE_FROM_LIST = "Remove from list";
 
   private final EditItem editItem;
@@ -89,9 +88,7 @@ public class NewUserExercise extends BasicDialog {
     this.service = service;
     this.itemMarker = itemMarker;
     this.editItem = editItem;
-   // System.out.println("got " + newExercise.getAudioAttributes());
     this.newUserExercise = newExercise.toUserExercise();
-    //System.out.println("after " + newUserExercise.getAudioAttributes());
   }
 
   /**
@@ -110,6 +107,8 @@ public class NewUserExercise extends BasicDialog {
     DivWidget upper = new DivWidget();
 
     container.getElement().setId("NewUserExercise_container");
+    container.getElement().getStyle().setPaddingLeft(10, Style.Unit.PX);
+    container.getElement().getStyle().setPaddingRight(10, Style.Unit.PX);
     upper.addStyleName("buttonGroupInset4");
     container.addStyleName("greenBackground");
 
@@ -575,7 +574,7 @@ public class NewUserExercise extends BasicDialog {
      * @return
      */
     @Override
-    protected WaveformPostAudioRecordButton makePostAudioRecordButton(String audioType) {
+    protected WaveformPostAudioRecordButton makePostAudioRecordButton(String audioType, String recordButtonTitle) {
       postAudioButton =
         new WaveformPostAudioRecordButton(exercise, controller, exercisePanel, this, service, recordRegularSpeed ? 0:1,
           false // don't record in results table
