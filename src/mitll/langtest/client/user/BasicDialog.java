@@ -14,6 +14,7 @@ import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.github.gwtbootstrap.client.ui.constants.Trigger;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -51,13 +52,13 @@ public class BasicDialog {
     return getFormField(dialogBox, label, user, minLength);
   }
 
-  protected FormField addControlFormFieldHorizontal(Panel dialogBox, String label, boolean isPassword, int minLength, int labelWidth) {
+/*  protected FormField addControlFormFieldHorizontal(Panel dialogBox, String label, boolean isPassword, int minLength, int labelWidth) {
     final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
-    final ControlGroup userGroup = addControlGroupEntryHorizontal(dialogBox, label, user, labelWidth);
+    final ControlGroup userGroup = addControlGroupEntryHorizontal(dialogBox, label, user, labelWidth, subtext);
     return new FormField(user, userGroup, minLength);
-  }
+  }*/
 
-  protected FormField addControlFormField(Panel dialogBox, String label, boolean isPassword, int minLength, Widget rightSide) {
+/*  protected FormField addControlFormField(Panel dialogBox, String label, boolean isPassword, int minLength, Widget rightSide) {
     final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
 
     user.getElement().setId("textBox");
@@ -69,16 +70,17 @@ public class BasicDialog {
     FormField formField = new FormField(user, userGroup, minLength);
     formField.setRightSide(rightSide);
     return formField;
-  }
+  }*/
 
-  protected FormField addControlFormFieldHorizontal(Panel dialogBox, String label, boolean isPassword, int minLength, Widget rightSide, int labelWidth) {
+  protected FormField addControlFormFieldHorizontal(Panel dialogBox, String label, String subtext, boolean isPassword, int minLength,
+                                                    Widget rightSide, int labelWidth) {
     final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
 
     user.getElement().setId("textBox");
     Panel row = new HorizontalPanel();
     row.add(user);
     row.add(rightSide);
-    final ControlGroup userGroup = addControlGroupEntryHorizontal(dialogBox, label, row, labelWidth);
+    final ControlGroup userGroup = addControlGroupEntryHorizontal(dialogBox, label, row, labelWidth, subtext);
 
     FormField formField = new FormField(user, userGroup, minLength);
     formField.setRightSide(rightSide);
@@ -113,15 +115,17 @@ public class BasicDialog {
     return userGroup;
   }
 
-  protected ControlGroup addControlGroupEntryHorizontal(Panel dialogBox, String label, Widget widget, int labelWidth) {
+  protected ControlGroup addControlGroupEntryHorizontal(Panel dialogBox, String label, Widget widget, int labelWidth, String subtext) {
     final ControlGroup userGroup = new ControlGroup();
 
     final HorizontalPanel hp = new HorizontalPanel();
     hp.addStyleName("leftFiveMargin");
-    Heading w = new Heading(5, label);
+    Heading w = new Heading(6, label,subtext);
+    w.getElement().getStyle().setPadding(0, Style.Unit.PX);
+    w.getElement().getStyle().setMargin(0, Style.Unit.PX);
+
     hp.add(w);
     w.setWidth(labelWidth +"px");
-    //widget.addStyleName("leftFiveMargin");
     hp.add(widget);
     userGroup.add(hp);
 
