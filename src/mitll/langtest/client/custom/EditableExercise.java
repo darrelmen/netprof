@@ -206,18 +206,18 @@ class EditableExercise extends NewUserExercise {
    * @see #makeEnglishRow(com.google.gwt.user.client.ui.Panel)
    * @param row
    * @param label
-   * @param englishAnno
+   * @param annoBox
    * @return
    */
-  protected FormField makeBoxAndAnno(Panel row, String label, HTML englishAnno) {
-    FormField formField = addControlFormField(row, label, false, 1, englishAnno);
-    englishAnno.addStyleName("leftFiveMargin");
-    englishAnno.addStyleName("editComment");
+  protected FormField makeBoxAndAnno(Panel row, String label, HTML annoBox) {
+    FormField formField = addControlFormFieldHorizontal(row, label, false, 1, annoBox, 190);
+    annoBox.addStyleName("leftFiveMargin");
+    annoBox.addStyleName("editComment");
     return formField;
   }
 
   /**
-   * @see #checkValidForeignPhrase
+   * @see #isValidForeignPhrase
    * @param ul
    * @param exerciseList
    * @param toAddTo
