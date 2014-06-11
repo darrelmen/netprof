@@ -69,12 +69,12 @@ public class RecordAudioPanel extends AudioPanel {
 
   /**
    * @see mitll.langtest.client.scoring.AudioPanel#getPlayButtons
-   * @param toAdd
+   * @param toTheRightWidget
    * @param playButtonSuffix
    * @return
    */
   @Override
-  protected PlayAudioPanel makePlayAudioPanel(Widget toAdd, String playButtonSuffix, String audioType) {
+  protected PlayAudioPanel makePlayAudioPanel(Widget toTheRightWidget, String playButtonSuffix, String audioType) {
     WaveformPostAudioRecordButton myPostAudioRecordButton = makePostAudioRecordButton(audioType);
     postAudioRecordButton = myPostAudioRecordButton;
 
