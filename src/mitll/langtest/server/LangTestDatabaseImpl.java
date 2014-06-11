@@ -171,8 +171,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       // now if there's a prefix, filter by prefix match
       if (!prefix.isEmpty()) {
         // now do a trie over matches
+        long then = System.currentTimeMillis();
         ExerciseTrie trie = new ExerciseTrie(exercises, serverProps.getLanguage(), audioFileHelper.getSmallVocabDecoder());
         exercises = trie.getExercises(prefix);
+        long now = System.currentTimeMillis();
+        if (now-then > 300) {
+          logger.debug("took " + (now-then) + " millis to do trie lookup");
+        }
         if (exercises.isEmpty()) { // allow lookup by id
           CommonExercise exercise = getExercise(prefix, userID);
           if (exercise != null) exercises = Collections.singletonList(exercise);
