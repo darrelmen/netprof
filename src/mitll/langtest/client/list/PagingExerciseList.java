@@ -147,7 +147,7 @@ public class PagingExerciseList extends ExerciseList {
 
   @Override
   protected CommonShell findFirstExercise() {
-    System.out.println("findFirstExercise : completed " + controller.showCompleted());
+    //System.out.println("findFirstExercise : completed " + controller.showCompleted());
 
     return controller.showCompleted() ? getFirstNotCompleted() : super.findFirstExercise();
   }
@@ -312,26 +312,16 @@ public class PagingExerciseList extends ExerciseList {
   protected List<CommonShell> rememberExercises(List<CommonShell> result) {
     inOrderResult = result;
     if (doShuffle) {
-      System.out.println("PagingExerciseList : rememberExercises remembering " + result.size() + " instance " + getInstance() + "/" +getRole() + " SHUFFLING!");
-
       result = new ArrayList<CommonShell>(result);
       Shuffler.shuffle(result);
     }
-    else {
-      System.out.println("PagingExerciseList : rememberExercises remembering " + result.size() + " instance " + getInstance() + "/" +getRole() + " not shuffling...");
-
-    }
-    //System.out.println("PagingExerciseList : rememberExercises remembering " + result.size() + " instance " + getInstance() + "/" +getRole());
     clear();
     int c = 0;
     for (CommonShell es : result) {
-      //System.out.println("PagingExerciseList : add " + es);
-     // if (c++ < 4) System.out.println("\tPagingExerciseList : rememberExercises add " + es.getID());
       addExercise(es);
     }
     flush();
     return result;
-    //System.out.println("PagingExerciseList : size " + getSize());
   }
 
   @Override
