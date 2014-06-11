@@ -67,8 +67,8 @@ public class KeyPressHelper {
 
   public void addKeyHandler(KeyListener handler) {
     listeners.put(handler.getName(), handler);
-    if (listeners.size() > 1) {
-      //System.out.println("addKeyHandler added  " + handler.getName() + " now " + this);
+    if (listeners.size() > 3) {
+      System.out.println("addKeyHandler added  " + handler.getName() + " now " + this);
     }
   }
 
@@ -79,25 +79,20 @@ public class KeyPressHelper {
                                                    @Override
                                                    public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
                                                      NativeEvent ne = event.getNativeEvent();
-                                                     //      int keyCode = ne.getKeyCode();
-                                                     // boolean isEnter = keyCode == KeyCodes.KEY_ENTER;
                                                      int typeInt = event.getTypeInt();
 
                                                      if ((typeInt == 0x00080 || // keydown
                                                        typeInt == 0x00200) // keyup
                                                        &&
                                                        "[object KeyboardEvent]".equals(ne.getString())) {
-                                                     //  ne.preventDefault();
-                                                    //   ne.stopPropagation();
-
-                                                       if (false) {
+   /*                                                    if (false) {
                                                          System.out.println(new Date() +
                                                            " : getNextAndPreviousButtons - key handler : " + keyHandler +
                                                            " Got " + event + " type int " +
                                                            typeInt + " assoc " + event.getAssociatedType() +
                                                            " native " + event.getNativeEvent() +
                                                            " source " + event.getSource());
-                                                       }
+                                                       }*/
 
                                                        gotEvent(ne, typeInt == 0x00080);
                                                      }
@@ -126,9 +121,9 @@ public class KeyPressHelper {
   public void removeKeyHandler() {
     if (keyHandler == null) {
       System.err.println("\nEnterKeyButtonHelper : removeKeyHandler : " + keyHandler);
-    } else {
+    } //else {
       //System.out.println("EnterKeyButtonHelper : removeKeyHandler : " + keyHandler);
-    }
+   // }
     if (keyHandler != null) {
       keyHandler.removeHandler();
       keyHandler = null;
