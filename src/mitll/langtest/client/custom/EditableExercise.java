@@ -30,6 +30,7 @@ import mitll.langtest.shared.custom.UserList;
 * Created by GO22670 on 3/28/2014.
 */
 class EditableExercise extends NewUserExercise {
+  public static final int LABEL_WIDTH = 105;
   private final HTML englishAnno = new HTML();
   private final HTML translitAnno = new HTML();
   private final HTML foreignAnno = new HTML();
@@ -76,12 +77,6 @@ class EditableExercise extends NewUserExercise {
     validateThenPost(foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo, false, changed);
   }
 
-  PrevNextList getPrevNext(ListInterface pagingContainer) {
-    final CommonShell exerciseShell = pagingContainer.byID(newUserExercise.getID());
-   // System.out.println("Getting shell for " + newUserExercise.getID() + " : " + exerciseShell);
-    return new PrevNextList(exerciseShell, exerciseList, shouldDisableNext(), controller);
-  }
-
   @Override
   protected void addItemsAtTop(Panel container) {
     if (!newUserExercise.getUnitToValue().isEmpty()) {
@@ -121,6 +116,7 @@ class EditableExercise extends NewUserExercise {
     Panel row = new DivWidget();
     row.addStyleName("marginBottomTen");
     PrevNextList prevNext = getPrevNext(pagingContainer);
+    prevNext.getElement().setId("PrevNextList");
     prevNext.addStyleName("floatLeft");
     prevNext.addStyleName("rightFiveMargin");
     row.add(prevNext);
@@ -131,6 +127,15 @@ class EditableExercise extends NewUserExercise {
     row.add(delete);
 
     return row;
+  }
+
+  /**
+   * @see #getCreateButton(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, com.github.gwtbootstrap.client.ui.ControlGroup)
+   * @param pagingContainer
+   * @return
+   */
+  PrevNextList getPrevNext(ListInterface pagingContainer) {
+    return new PrevNextList(pagingContainer.byID(newUserExercise.getID()), exerciseList, shouldDisableNext(), controller);
   }
 
   private Button makeDeleteButton(final long uniqueID) {
@@ -155,9 +160,11 @@ class EditableExercise extends NewUserExercise {
   protected Panel makeEnglishRow(Panel container) {
     Panel row = new FluidRow();
     container.add(row);
-    english = makeBoxAndAnno(row, ENGLISH_LABEL, englishAnno);
+    english = makeBoxAndAnno(row, getEnglishLabel(), "(optional)", englishAnno);
     return row;
   }
+
+  protected String getEnglishLabel() {  return ENGLISH_LABEL;  }
 
   /**
    * @param container
@@ -166,7 +173,7 @@ class EditableExercise extends NewUserExercise {
   protected FormField makeForeignLangRow(Panel container) {
     Panel row = new FluidRow();
     container.add(row);
-    foreignLang = makeBoxAndAnno(row, controller.getLanguage(), foreignAnno);
+    foreignLang = makeBoxAndAnno(row, controller.getLanguage(), "", foreignAnno);
     foreignLang.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
     return foreignLang;
   }
@@ -175,8 +182,10 @@ class EditableExercise extends NewUserExercise {
   protected void makeTranslitRow(Panel container) {
     Panel row = new FluidRow();
     container.add(row);
-    translit = makeBoxAndAnno(row, TRANSLITERATION_OPTIONAL, translitAnno);
+    translit = makeBoxAndAnno(row, getTransliterationLabel(), "(optional)", translitAnno);
   }
+
+  protected String getTransliterationLabel() {  return TRANSLITERATION_OPTIONAL;  }
 
   /**
    * @see NewUserExercise#addNew
@@ -206,11 +215,12 @@ class EditableExercise extends NewUserExercise {
    * @see #makeEnglishRow(com.google.gwt.user.client.ui.Panel)
    * @param row
    * @param label
+   * @param subtext
    * @param annoBox
    * @return
    */
-  protected FormField makeBoxAndAnno(Panel row, String label, HTML annoBox) {
-    FormField formField = addControlFormFieldHorizontal(row, label, false, 1, annoBox, 190);
+  protected FormField makeBoxAndAnno(Panel row, String label, String subtext, HTML annoBox) {
+    FormField formField = addControlFormFieldHorizontal(row, label, subtext, false, 1, annoBox, LABEL_WIDTH);
     annoBox.addStyleName("leftFiveMargin");
     annoBox.addStyleName("editComment");
     return formField;
