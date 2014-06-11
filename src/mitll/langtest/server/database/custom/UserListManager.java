@@ -419,6 +419,7 @@ public class UserListManager {
   public UserList getDefectList(Collection<String> typeOrder) {
     Set<String> defectIds = new HashSet<String>();
     Map<String, ReviewedDAO.StateCreator> exerciseToState = reviewedDAO.getExerciseToState(false);
+    logger.debug("\tgetDefectList exerciseToState=" + exerciseToState.size());
 
     for (Map.Entry<String, ReviewedDAO.StateCreator> pair : exerciseToState.entrySet()) {
       if (pair.getValue().getState().equals(STATE.DEFECT)) {
@@ -427,7 +428,7 @@ public class UserListManager {
     }
 
     List<CommonUserExercise> allKnown = userExerciseDAO.getWhere(defectIds);
-  //  logger.debug("\tgetDefectList ids #=" + allKnown.size() + " vs " + defectIds.size());
+    logger.debug("\tgetDefectList ids #=" + allKnown.size() + " vs " + defectIds.size());
 
     return getReviewList(allKnown, REVIEW, ITEMS_TO_REVIEW, defectIds, REVIEW_MAGIC_ID, typeOrder);
   }
@@ -438,15 +439,12 @@ public class UserListManager {
 
     List<CommonUserExercise> onList = getReviewedUserExercises(idToUser, ids);
 
-    //logger.debug("getReviewList " +name+ " ids size = " + allKnown.size() + " yielded " + onList.size());
+    logger.debug("getReviewList " +name+ " ids size = " + allKnown.size() + " yielded " + onList.size());
     User user = getQCUser();
     UserList userList = new UserList(userListMaginID, user, name, description, "", false);
     userList.setReview(true);
 
-    /*List<CommonExercise> sortedByUnitThenAlpha =*/ new ExerciseSorter(typeOrder).getSortedByUnitThenAlpha(onList, false);
-/*
-    onList = sortedByUnitThenAlpha;
-*/
+    new ExerciseSorter(typeOrder).getSortedByUnitThenAlpha(onList, false);
 
     userList.setExercises(onList);
 
