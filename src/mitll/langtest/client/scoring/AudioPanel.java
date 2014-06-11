@@ -1,16 +1,12 @@
 package mitll.langtest.client.scoring;
 
-import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -93,7 +89,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     this(service, controller, showSpectrogram, gaugePanel, 1.0f, rightMargin, exerciseID);
     this.audioPath = path;
 
-    addWidgets(playButtonSuffix, audioType);
+    addWidgets(playButtonSuffix, audioType, "Record");
     if (playAudio != null) {
       controller.register(playAudio.getPlayButton(), exerciseID);
     }
@@ -125,13 +121,14 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
   /**
    * Replace the html 5 audio tag with our fancy waveform widget.
-   * @seex #AudioPanel(String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener, int, String)
-   * @seex mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, int, boolean)
+   * @see mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, int, boolean, String)
+   * @see mitll.langtest.client.scoring.AudioPanel#AudioPanel
    * @return
    * @param playButtonSuffix
+   * @param recordButtonTitle
    */
-  protected void addWidgets(String playButtonSuffix, String audioType) {
-    //System.out.println("addWidgets audio path = " + path);
+  protected void addWidgets(String playButtonSuffix, String audioType, String recordButtonTitle) {
+   // System.out.println("addWidgets " + audioType + " " + recordButtonTitle);
     DivWidget divWithRelativePosition = new DivWidget();  // need this for audio position div to work properly
     divWithRelativePosition.getElement().getStyle().setPosition(Style.Position.RELATIVE);
     Panel imageContainer = new VerticalPanel();
@@ -144,12 +141,14 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
     // add widgets to left of play button
     Widget toTheRightWidget = getAfterPlayWidget();
+    //System.out.println("addWidgets toTheRightWidget " + (toTheRightWidget == null ? "null" : toTheRightWidget.getElement().getId()));
+
     audioPositionPopup = new AudioPositionPopup(imageContainer);
     imageContainer.add(audioPositionPopup);
     //System.out.println("added " + audioPositionPopup.getElement().getId() + " for " + exerciseID + " audio type " + audioType);
 
     if (hasAudio()) {
-      playAudio = getPlayButtons(toTheRightWidget, playButtonSuffix, audioType);
+      playAudio = getPlayButtons(toTheRightWidget, playButtonSuffix, audioType, recordButtonTitle);
       hp.add(playAudio);
       hp.setCellHorizontalAlignment(playAudio, HorizontalPanel.ALIGN_LEFT);
     }
@@ -157,9 +156,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       hp.add(toTheRightWidget);
       audioPositionPopup.setVisible(false);
     }
-
-  //  Panel controlPanel = new HorizontalPanel();
-   // controlPanel.getElement().setId("AudioPanel_controlPanel");
 
     waveform = new ImageAndCheck();
     imageContainer.add(getWaveform().image);
@@ -184,8 +180,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     phones.image.getElement().setId("Transcript_Phones");
     //if (ADD_CHECKBOX) controlPanel.add(addCheckbox("phones", phones));
 
-   // hp.add(controlPanel);
-  //  hp.setCellHorizontalAlignment(controlPanel, HorizontalPanel.ALIGN_RIGHT);
     hp.setWidth("100%");
 
     add(hp);
@@ -317,27 +311,21 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     }
   }
 
-    /**
-     * Adds a listener to the audio panel - this way it can update its position as the audio plays
-    * @see #addWidgets(String, String)
-    * @return PlayAudioPanel
-    */
-  private PlayAudioPanel getPlayButtons(Widget toTheRightWidget, String playButtonSuffix, String audioType) {
-    PlayAudioPanel playAudio = makePlayAudioPanel(toTheRightWidget, playButtonSuffix, audioType);
+  /**
+   * Adds a listener to the audio panel - this way it can update its position as the audio plays
+   *
+   * @return PlayAudioPanel
+   * @see #addWidgets(String, String, String)
+   */
+  private PlayAudioPanel getPlayButtons(Widget toTheRightWidget, String playButtonSuffix, String audioType, String recordButtonTitle) {
+    PlayAudioPanel playAudio = makePlayAudioPanel(toTheRightWidget, playButtonSuffix, audioType, recordButtonTitle);
     playAudio.addListener(audioPositionPopup);
     return playAudio;
   }
 
-  protected PlayAudioPanel makePlayAudioPanel(final Widget toTheRightWidget, String playButtonSuffix, String audioType) {
-    return new PlayAudioPanel(soundManager, playButtonSuffix) {
-      @Override
-      protected void addButtons() {
-        super.addButtons();
-        if (toTheRightWidget != null) {
-          add(toTheRightWidget);
-        }
-      }
-    };
+  protected PlayAudioPanel makePlayAudioPanel(final Widget toTheRightWidget, String playButtonSuffix, String audioType,
+                                              String recordButtonTitle) {
+    return new PlayAudioPanel(soundManager, playButtonSuffix, toTheRightWidget);
   }
 
   /**
@@ -410,7 +398,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    */
   private void getImageURLForAudio(final String path, final String type, int width, final ImageAndCheck imageAndCheck) {
     final int toUse = Math.max(MIN_WIDTH, width);
-    float heightForType = type.equals(WAVEFORM) ? WAVEFORM_HEIGHT : SPECTROGRAM_HEIGHT;
+    float heightForType = type.equals(WAVEFORM) ? getWaveformHeight() : SPECTROGRAM_HEIGHT;
     int height = Math.max(10, (int) (((float) Window.getClientHeight()) / 1200f * heightForType));
     if (path != null) {
       int reqid = getReqID(type);
@@ -446,6 +434,10 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
         }
       });
     }
+  }
+
+  protected float getWaveformHeight() {
+    return WAVEFORM_HEIGHT;
   }
 
   private void showResult(ImageResponse result, final ImageAndCheck imageAndCheck) {
@@ -504,7 +496,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   }
 
   /**
-   * @see #addWidgets(String, String)
+   * @see #addWidgets(String, String, String)
    * @param label
    * @param widget
    * @return
