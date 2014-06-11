@@ -23,8 +23,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   private final String audioType;
 
   /**
-   * @see mitll.langtest.client.exercise.RecordAudioPanel#makePostAudioRecordButton(String)
-   * @see mitll.langtest.client.custom.NewUserExercise.CreateFirstRecordAudioPanel#makePostAudioRecordButton(String)
+   * @see RecordAudioPanel#makePostAudioRecordButton(String, String)
    * @param exercise
    * @param controller
    * @param widgets
