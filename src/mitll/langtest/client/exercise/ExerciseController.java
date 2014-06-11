@@ -35,11 +35,7 @@ public interface ExerciseController {
   int getUser();
 
   void startRecording();
-  //void stopRecording();
   void stopRecording(WavCallback wavCallback);
-  //String getBase64EncodedWavFile();
-
- // boolean getEnglishOnly();
 
   SoundManagerAPI getSoundManager();
 
@@ -59,7 +55,6 @@ public interface ExerciseController {
   boolean isGrading();
   boolean isLogClientMessages();
   String getAudioType();
- // boolean isReviewMode();
   Collection<User.Permission> getPermissions();
 
   boolean showCompleted();
@@ -92,6 +87,4 @@ public interface ExerciseController {
   boolean isRecordingEnabled();
 
   boolean usingFlashRecorder();
-
-  //boolean removeKeyListener(String name);
 }
