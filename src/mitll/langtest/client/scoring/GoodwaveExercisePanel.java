@@ -474,13 +474,13 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
      * audio, we can't record. We also mark the widget as busy so we can't move on to a different exercise.
      *
      *
-     * @param toAdd
+     * @param toTheRightWidget
      * @param playButtonSuffix
      * @return
      * @see AudioPanel#getPlayButtons
      */
     @Override
-    protected PlayAudioPanel makePlayAudioPanel(Widget toAdd, String playButtonSuffix, String audioType) {
+    protected PlayAudioPanel makePlayAudioPanel(Widget toTheRightWidget, String playButtonSuffix, String audioType) {
       recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
       recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
       postAudioRecordButton = new MyPostAudioRecordButton(controller);
@@ -615,7 +615,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
      * @see AudioPanel#addWidgets
      */
     @Override
-    protected Widget getBeforePlayWidget() {
+    protected Widget getAfterPlayWidget() {
       final Panel rightSide = new VerticalPanel();
 
       rightSide.getElement().setId("beforePlayWidget_verticalPanel");
@@ -623,7 +623,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
 
       boolean allSameDialect = allAudioSameDialect(audioAttributes);
-/*      System.out.println("getBeforePlayWidget : for exercise " +exercise.getID() +
+/*      System.out.println("getAfterPlayWidget : for exercise " +exercise.getID() +
         " path "+ audioPath + " attributes were " + audioAttributes);*/
 
       if (audioAttributes.isEmpty()) {
@@ -738,7 +738,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       RadioButton first = null;
       AudioAttribute firstAttr = null;
 
-/*      System.out.println("getBeforePlayWidget : for exercise " +exercise.getID() +
+/*      System.out.println("getAfterPlayWidget : for exercise " +exercise.getID() +
         " path "+ audioPath + " attributes were " + audioAttributes);*/
 
       RadioButton regular = null;
