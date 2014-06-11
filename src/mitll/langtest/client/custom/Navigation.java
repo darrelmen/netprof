@@ -40,13 +40,9 @@ import mitll.langtest.shared.custom.UserList;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
-import java.util.Random;
-import java.util.RandomAccess;
 
 /**
  * Created with IntelliJ IDEA.
@@ -653,7 +649,7 @@ public class Navigation implements RequiresResize {
    * @param contentPanel
    */
   void showList(final UserList ul, Panel contentPanel, final String instanceName) {
-    System.out.println("showList " + ul + " instance " + instanceName);
+    //System.out.println("showList " + ul + " instance " + instanceName);
   //  if (!ul.isEmpty()) System.out.println("\tfirst" + ul.getExercises().iterator().next());
     controller.logEvent(contentPanel,"Tab","UserList_"+ul.getID(),"Show List");
 
@@ -662,7 +658,7 @@ public class Navigation implements RequiresResize {
 
     // if select a new list, clear the subtab selection
     if (previousList != null && !previousList.equals(currentValue)) {
-      System.out.println("\tshowList " +previousList + " vs " + currentValue);
+      //System.out.println("\tshowList " +previousList + " vs " + currentValue);
 
       storage.removeValue(SUB_TAB);
     }
