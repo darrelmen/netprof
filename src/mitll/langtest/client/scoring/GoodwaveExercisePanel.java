@@ -11,7 +11,6 @@ import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.AnchorElement;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -476,11 +475,12 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
      *
      * @param toTheRightWidget
      * @param playButtonSuffix
+     * @param recordButtonTitle
      * @return
      * @see AudioPanel#getPlayButtons
      */
     @Override
-    protected PlayAudioPanel makePlayAudioPanel(Widget toTheRightWidget, String playButtonSuffix, String audioType) {
+    protected PlayAudioPanel makePlayAudioPanel(Widget toTheRightWidget, String playButtonSuffix, String audioType, String recordButtonTitle) {
       recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
       recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
       postAudioRecordButton = new MyPostAudioRecordButton(controller);
@@ -497,12 +497,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     }
 
     private class MyPlayAudioPanel extends PlayAudioPanel {
-      @Override
-      protected void play() {
-        //audioPositionPopup.setImageContainer(imageContainer);
-        super.play();
-      }
-
       public MyPlayAudioPanel(Image recordImage1, Image recordImage2, SoundManagerAPI soundManager,
                               final PostAudioRecordButton postAudioRecordButton1,
                               final GoodwaveExercisePanel goodwaveExercisePanel, String playSuffix) {
@@ -516,7 +510,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
             goodwaveExercisePanel.setBusy(false);
             postAudioRecordButton1.setEnabled(true);
           }
-        }, playSuffix);
+        }, playSuffix, null);
         add(recordImage1);
         recordImage1.setVisible(false);
         add(recordImage2);
@@ -525,10 +519,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       }
 
       @Override
-      protected void addButtons() {
+      protected void addButtons(Widget optionalToTheRight) {
         add(postAudioRecordButton);
         postAudioRecordButton.addStyleName("rightFiveMargin");
-        super.addButtons();
+        super.addButtons(optionalToTheRight);
       }
     }
 
