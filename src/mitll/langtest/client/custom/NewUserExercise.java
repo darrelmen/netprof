@@ -162,6 +162,10 @@ public class NewUserExercise extends BasicDialog {
     return container;
   }
 
+  /**
+   * @see #addNew(mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel)
+   * @return
+   */
   protected Panel makeAudioRow() {
     FluidRow row = new FluidRow();
 
