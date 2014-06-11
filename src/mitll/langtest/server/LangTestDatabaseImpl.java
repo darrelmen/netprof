@@ -384,7 +384,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private void attachAudio(CommonExercise firstExercise) {
     String installPath = pathHelper.getInstallPath();
     String relativeConfigDir1 = relativeConfigDir;
-    db.getAudioDAO().attachAudio(firstExercise,installPath,relativeConfigDir1);
+    db.getAudioDAO().attachAudio(firstExercise, installPath, relativeConfigDir1);
   }
 
   private void addPlayedMarkings(long userID, CommonExercise firstExercise) {
@@ -896,15 +896,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     //int beforeNumAudio = before.getAudioAttributes().size();
     db.markAudioDefect(audioAttribute);
 
-    //CommonExercise byID = db.getCustomOrPredefExercise(exid);  // allow custom items to mask out non-custom items
+    CommonExercise byID = db.getCustomOrPredefExercise(exid);  // allow custom items to mask out non-custom items
 
-/*    if (!byID.removeAudio(audioAttribute)) {
+    if (!byID.removeAudio(audioAttribute)) {
       String key = audioAttribute.getKey();
-      logger.error("huh? couldn't remove key '" + key +
+      logger.warn("huh? couldn't remove key '" + key +
         "' : " + audioAttribute + " from " + exid +
         " keys were " + byID.getAudioRefToAttr().keySet() + " contains " + byID.getAudioRefToAttr().containsKey(key));
     }
-    int afterNumAudio = byID.getAudioAttributes().size();
+   /*   int afterNumAudio = byID.getAudioAttributes().size();
     if (afterNumAudio != beforeNumAudio - 1) {
       logger.error("\thuh? before there were " + beforeNumAudio + " but after there were " + afterNumAudio);
     }*/
