@@ -339,7 +339,7 @@ public class HistoryExerciseList extends PagingExerciseList {
       try {
         SelectionState selectionState = getSelectionState(token);
         restoreListBoxState(selectionState);
-        System.out.println(new Date() + " HistoryExerciseList.onValueChange : selectionState '" + selectionState + "'");
+        if (debug) System.out.println(new Date() + " HistoryExerciseList.onValueChange : selectionState '" + selectionState + "'");
 
         loadExercises(selectionState.getTypeToSection(), selectionState.getItem());
       } catch (Exception e) {
