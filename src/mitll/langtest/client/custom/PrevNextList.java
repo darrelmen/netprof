@@ -54,7 +54,7 @@ class PrevNextList extends HorizontalPanel {
 
   private void makeNextButton(final CommonShell exercise) {
     this.next = new Button("Next");
-    next.getElement().setId("PrevNextList_Next");
+    next.getElement().setId("nextButton");
     controller.register(next,exercise.getID());
 
     next.setType(ButtonType.SUCCESS);
@@ -62,7 +62,7 @@ class PrevNextList extends HorizontalPanel {
 
     add(next);
 
-    DOM.setElementAttribute(next.getElement(), "id", "nextButton");
+    //DOM.setElementAttribute(next.getElement(), "id", "nextButton");
 
     next.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
