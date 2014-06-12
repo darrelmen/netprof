@@ -453,7 +453,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
         if (e != null) toLoad = e;
       }
 
-      System.out.println("loadFirstExercise ex id =" + toLoad.getID() + " instance " + instance);
+     // System.out.println("loadFirstExercise ex id =" + toLoad.getID() + " instance " + instance);
       pushFirstSelection(toLoad.getID());
     }
   }
@@ -573,15 +573,13 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   protected boolean loadByID(String id) {
     if (hasExercise(id)) {
-       System.out.println("loading exercise " + id);
+      // System.out.println("loading exercise " + id);
       loadExercise(id);
       return true;
     } else {
       return false;
     }
   }
-
-  protected PopupPanel waitPopup;
 
   /**
    * @param itemID
@@ -595,7 +593,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   private class ExerciseAsyncCallback implements AsyncCallback<CommonExercise> {
     @Override
     public void onFailure(Throwable caught) {
-      if (waitPopup != null) waitPopup.hide();
       if (caught instanceof IncompatibleRemoteServiceException) {
         Window.alert("This application has recently been updated.\nPlease refresh this page, or restart your browser." +
           "\nIf you still see this message, clear your cache. (" + caught.getMessage() +
@@ -610,8 +607,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
     @Override
     public void onSuccess(CommonExercise result) {
-      if (waitPopup != null) waitPopup.hide();
-
       if (result == null) {
         Window.alert("Unfortunately there's a configuration error and we can't find this exercise.");
       } else {
