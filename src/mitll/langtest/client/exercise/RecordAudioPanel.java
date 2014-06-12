@@ -77,10 +77,9 @@ public class RecordAudioPanel extends AudioPanel {
 
   private String getRecordButtonTitle() {
     return
-      audioType.equals(Result.AUDIO_TYPE_REGULAR) ? "Record regular"// speed"
+      audioType.equals(Result.AUDIO_TYPE_REGULAR) ? "Record regular"
         :
-        audioType.equals(Result.AUDIO_TYPE_SLOW)    ? "Record slow" //+ " speed"
-          : "Record";
+        audioType.equals(Result.AUDIO_TYPE_SLOW)    ? "Record slow"  : "Record";
   }
 
   /**
