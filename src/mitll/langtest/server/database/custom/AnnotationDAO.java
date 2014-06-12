@@ -49,9 +49,7 @@ public class AnnotationDAO extends DAO {
    */
   void createTable(Database database) throws SQLException {
     Connection connection = database.getConnection();
-    PreparedStatement statement;
-
-    statement = connection.prepareStatement("CREATE TABLE if not exists " +
+    PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
         ANNOTATION +
       " (" +
       "uniqueid IDENTITY, " +
@@ -81,7 +79,7 @@ public class AnnotationDAO extends DAO {
   public void add(UserAnnotation annotation) {
     try {
       // there are much better ways of doing this...
-     logger.info("add :annotation " + annotation);
+     //logger.info("add :annotation " + annotation);
 
       Connection connection = database.getConnection();
       PreparedStatement statement;
