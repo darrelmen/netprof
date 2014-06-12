@@ -172,7 +172,7 @@ public class HistoryExerciseList extends PagingExerciseList {
    */
   @Override
   protected void gotClickOnItem(CommonShell e) {
-    System.out.println("----------- got click on " + e.getID() + " -------------- ");
+    //System.out.println("----------- got click on " + e.getID() + " -------------- ");
     //if (!INCLUDE_ITEM_IN_BOOKMARK) {
       loadByID(e.getID());
    // }
