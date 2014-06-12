@@ -35,7 +35,7 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class PagingContainer {
-  private static final int MAX_LENGTH_ID = 27;
+  private static final int MAX_LENGTH_ID = 35;
   private static final int PAGE_SIZE = 10;   // TODO : make this sensitive to vertical real estate?
   private static final int VERTICAL_SLOP = 35;
 
