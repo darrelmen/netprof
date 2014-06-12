@@ -3,12 +3,18 @@ package mitll.langtest.shared;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
-* Created with IntelliJ IDEA.
-* User: GO22670
-* Date: 7/6/12
-* Time: 7:01 PM
-* To change this template use File | Settings | File Templates.
-*/
+ * What a client might want to know about some audio that was just posted.
+ * <p/>
+ * For instance, if it was a valid recording and if not, what type of problem (too quiet, too loud, no mic, etc.)
+ * <p/>
+ * Also returns the score if the audio was scored, and any decode output if it was decoding.
+ * <p/>
+ * Mainly it the path to the audio on the server so the client can play it as an mp3.
+ * User: GO22670
+ * Date: 7/6/12
+ * Time: 7:01 PM
+ * To change this template use File | Settings | File Templates.
+ */
 public class AudioAnswer implements IsSerializable {
   private static final String PRESS_AND_HOLD = "Press and hold to record, release to stop recording.";
   private int reqid;
@@ -20,9 +26,7 @@ public class AudioAnswer implements IsSerializable {
   private boolean saidAnswer = false;
   private int durationInMillis;
   private long resultID;
-  //private int audioID;
   private AudioAttribute audioAttribute;
-
 
   public enum Validity implements IsSerializable {
     OK("Audio OK."),
@@ -131,6 +135,10 @@ public class AudioAnswer implements IsSerializable {
     return durationInMillis;
   }
 
+  /**
+   * Audio information that is attached to the exercise.
+   * @return
+   */
   public AudioAttribute getAudioAttribute() {
     return audioAttribute;
   }
