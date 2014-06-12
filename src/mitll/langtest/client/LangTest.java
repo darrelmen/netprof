@@ -18,6 +18,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.DOM;
@@ -716,7 +717,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public void gotUser(long userID) {
     flashcard.setUserName(getGreeting());
     doEverythingAfterFactory(userID);
-    logEvent("No widget", "UserLoging", "N/A", "User Login");
+    logEvent("No widget", "UserLogin", "N/A", "User Login by " + userID);
   }
 
   private boolean doEverythingAfterFactory(long userID) {
@@ -779,6 +780,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   @Override
   public void register(Button button, String exid, String context) {
     buttonFactory.registerButton(button, exid, context, getUser());
+  }
+
+  @Override
+  public void registerWidget(HasClickHandlers clickable, UIObject uiObject, String exid, String context) {
+    buttonFactory.registerWidget(clickable, uiObject, exid, context, getUser());
   }
 
   @Override
@@ -950,7 +956,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private class LogoutClickHandler implements ClickHandler {
     public void onClick(ClickEvent event) {
-      logEvent("No widget", "UserLoging", "N/A", "User Logout");
+      logEvent("No widget", "UserLoging", "N/A", "User Logout by " + lastUser);
 
       resetState();
     }
