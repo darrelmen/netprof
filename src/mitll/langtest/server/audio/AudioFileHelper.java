@@ -297,8 +297,7 @@ public class AudioFileHelper {
    */
   private AudioAnswer getAudioAnswer(CommonExercise exercise,
                                      int reqid,
-                                     File file, AudioCheck.ValidityAndDur validity, String url, boolean doFlashcard
-  ) {
+                                     File file, AudioCheck.ValidityAndDur validity, String url, boolean doFlashcard) {
     AudioAnswer audioAnswer = new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
     if (serverProps.isFlashcard() || doFlashcard) {
       makeASRScoring();
