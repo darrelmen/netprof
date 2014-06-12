@@ -114,7 +114,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @see mitll.langtest.client.LangTest#doEverythingAfterFactory
    */
   public boolean getExercises(final long userID) {
-    System.out.println("FlexSectionExerciseList.getExercises : Get exercises for user=" + userID + " instance " + getInstance());
+    //System.out.println("FlexSectionExerciseList.getExercises : Get exercises for user=" + userID + " instance " + getInstance());
     this.userID = userID;
     addWidgets();
     return false;
