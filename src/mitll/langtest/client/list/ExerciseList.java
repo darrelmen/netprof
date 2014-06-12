@@ -35,6 +35,7 @@ import mitll.langtest.shared.Result;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -88,10 +89,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     this.controller = controller;
     this.instance = instance;
     getElement().setId("ExerciseList_" + instance);
-    //System.out.println("\n\n\tExerciseList : got instance  " + instance);
 
     // Add history listener
-
     if (handlerRegistration == null) {
       handlerRegistration = History.addValueChangeHandler(this);
     }
@@ -150,9 +149,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   public boolean getExercises(long userID) {
     System.out.println("ExerciseList.getExercises for user " + userID + " instance " + instance);
     lastReqID++;
-
-    //  String selectionID = userListID + "_"+typeToSection.toString();
-
     service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, controller.getUser(), getRole(), new SetExercisesCallback(""));
     return true;
   }
@@ -266,7 +262,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   protected String getRole() {
     String audioTypeRecorder = Result.AUDIO_TYPE_RECORDER;
     String s = instance.equalsIgnoreCase("record_Audio") ? audioTypeRecorder : instance;
-    // System.out.println("instance " +instance + " role " +s);
     return s;
   }
 
@@ -289,10 +284,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
       if (selectionID.equals("-1")) {
         new Exception().printStackTrace();
-      } else {
-        //System.out.println("SetExercisesCallback. '" + selectionID + "' ");
       }
-
     }
 
     public void onFailure(Throwable caught) {
@@ -373,7 +365,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   public void rememberAndLoadFirst(List<CommonShell> exercises) {
-    //System.out.println(new Date() + " rememberAndLoadFirst : exercises " + exercises.size());
+//    System.out.println(new Date() + " rememberAndLoadFirst : exercises " + exercises.size());
     rememberAndLoadFirst(exercises, null, "All");
   }
 
@@ -497,7 +489,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   protected CommonShell findFirstExercise() {
     CommonShell first = getFirst();
-    //System.out.println("findFirstExercise " + first.getID() + " is first in container.");
+    System.out.println("findFirstExercise " + first.getID() + " is first in container.");
 
     return first;
   }
@@ -517,9 +509,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see #loadNextExercise
    * @see #loadPreviousExercise
    */
-  public void loadExercise(String itemID) {
-    pushNewItem(itemID);
-  }
+  public void loadExercise(String itemID) { pushNewItem(itemID);  }
 
   /**
    * This method is called whenever the application's history changes.
@@ -583,7 +573,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   protected boolean loadByID(String id) {
     if (hasExercise(id)) {
-      //System.out.println("loading exercise " + id);
+       System.out.println("loading exercise " + id);
       loadExercise(id);
       return true;
     } else {
