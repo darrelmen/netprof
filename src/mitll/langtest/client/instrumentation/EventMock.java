@@ -2,6 +2,7 @@ package mitll.langtest.client.instrumentation;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Tab;
+import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.exercise.ExerciseController;
 
@@ -13,11 +14,11 @@ public class EventMock implements EventLogger {
   public void register(ExerciseController controller, Button button, String exid) {
 
   }
-/*
-  @Override
-  public void registerButton(Button button, String exid, long userid) {
 
-  }*/
+  @Override
+  public void registerWidget(HasClickHandlers clickable, UIObject uiObject, String exid, String context, long userid) {
+
+  }
 
   @Override
   public void registerButton(Button button, String exid, String context, long userid) {
