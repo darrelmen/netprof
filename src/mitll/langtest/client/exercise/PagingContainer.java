@@ -289,9 +289,9 @@ public class PagingContainer {
     };*/
   }
 
-  private int mouseX;
+/*  private int mouseX;
   private int mouseY;
-  private String clickedExerciseID = "";
+  private String clickedExerciseID = "";*/
 
   private Column<CommonShell, SafeHtml> getExerciseIdColumn2(final boolean consumeClicks) {
 
@@ -302,9 +302,9 @@ public class PagingContainer {
         super.onBrowserEvent(context, elem, object, event);
         if (BrowserEvents.CLICK.equals(event.getType())) {
           //System.out.println("getExerciseIdColumn.onBrowserEvent : got click " + event);
-          mouseX = event.getClientX();
-          mouseY = event.getClientY();
-          clickedExerciseID = object.getID();
+          //mouseX = event.getClientX();
+          //mouseY = event.getClientY();
+          //clickedExerciseID = object.getID();
           gotClickOnItem(object);
         }
       }
