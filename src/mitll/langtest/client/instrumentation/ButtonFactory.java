@@ -4,6 +4,7 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Tab;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -37,6 +38,18 @@ public class ButtonFactory implements EventLogger {
       @Override
       public void onClick(ClickEvent event) {
         logEvent(button, "button",exid, context, userid);
+      }
+    });
+  }
+
+  @Override
+  public void registerWidget(final HasClickHandlers clickable, final UIObject uiObject, final String exid, final String context, final long userid) {
+    clickable.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        String widgetType = uiObject.getClass().toString();
+        widgetType = widgetType.substring(widgetType.lastIndexOf(".")+1);
+        logEvent(uiObject, widgetType, exid, context, userid);
       }
     });
   }
