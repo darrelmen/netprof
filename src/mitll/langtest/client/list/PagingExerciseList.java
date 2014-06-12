@@ -147,7 +147,7 @@ public class PagingExerciseList extends ExerciseList {
 
   @Override
   protected CommonShell findFirstExercise() {
-     System.out.println("findFirstExercise : completed " + controller.showCompleted());
+     //System.out.println("findFirstExercise : completed " + controller.showCompleted());
 
     return controller.showCompleted() ? getFirstNotCompleted() : super.findFirstExercise();
   }
