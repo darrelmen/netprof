@@ -333,7 +333,7 @@ class ReviewEditableExercise extends EditableExercise {
   private Widget getCommentLine(CommonExercise e, AudioAttribute audio) {
     ExerciseAnnotation audioAnnotation = e.getAnnotation(audio.getAudioRef());
     if (audioAnnotation != null && !audioAnnotation.isCorrect()) {
-      HTML child = new HTML(audioAnnotation.comment);
+      HTML child = new HTML(audioAnnotation.comment.isEmpty() ? "EMPTY COMMENT" : audioAnnotation.comment);
       child.getElement().getStyle().setFontSize(14, Style.Unit.PX);
       child.getElement().getStyle().setFontWeight(Style.FontWeight.BOLD);
       return child;
