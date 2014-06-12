@@ -47,6 +47,12 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     addStyleName("minWidthRecordButton");
   }
 
+  /**
+   * So when we're recording reference audio for an item, we want to add the audio to the audio table and not
+   * the results table.
+   * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile(String, String, String, int, int, int, boolean, String, boolean, boolean, boolean, boolean)
+   */
   @Override
   protected boolean shouldAddToAudioTable() {
     return true;
