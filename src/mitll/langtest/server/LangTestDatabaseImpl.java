@@ -966,6 +966,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * Record an answer entry in the database.<br></br>
    * Write the posted data to a wav and an mp3 file (since all the browser audio works with mp3).
    *
+   * A side effect is to set the first state to UNSET if it was APPROVED
+   * and to set the second state (not really used right now) to RECORDED
+   *
    * Client references:
    * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
    * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
@@ -973,15 +976,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param plan which set of exercises
    * @param exercise exercise within the plan
    * @param questionID question within the exercise
-   * @param user answering the question
+   * @param user who is answering the question
    * @param reqid request id from the client, so it can potentially throw away out of order responses
    * @param flq was the prompt a foreign language query
    * @param audioType regular or fast then slow audio recording
-   * @param doFlashcard
-   * @param recordInResults
-   * @param addToAudioTable
-   * @param recordedWithFlash
-   * @return URL to audio on server and if audio is valid (not too short, etc.)
+   * @param doFlashcard true if called from practice (flashcard) and we want to do decode and not align
+   * @param recordInResults if true, record in results table -- only when recording in a learn or practice tab
+   * @param addToAudioTable if true, add to audio table -- only when recording reference audio for an item.
+   * @param recordedWithFlash mark if we recorded it using flash recorder or webrtc
+   * @return AudioAnswer object with information about the audio on the server, including if audio is valid (not too short, etc.)
    */
   @Override
   public AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int questionID,
@@ -992,24 +995,53 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       flq, audioType, doFlashcard, recordInResults, recordedWithFlash);
 
     if (addToAudioTable && audioAnswer.isValid()) {
-      File fileRef = pathHelper.getAbsoluteFile(audioAnswer.getPath());
-      String destFileName = audioType + "_" + System.currentTimeMillis() + "_by_" + user + ".wav";
-      String permanentAudioPath = new PathWriter().getPermanentAudioPath(pathHelper, fileRef, destFileName, true, exercise);
-      AudioAttribute audioAttribute =
-        db.getAudioDAO().addOrUpdate(user, permanentAudioPath, exercise, System.currentTimeMillis(), audioType, audioAnswer.getDurationInMillis());
-      audioAnswer.setAudioAttribute(audioAttribute);
-      logger.debug("writeAudioFile for " + audioType + " audio answer has " + audioAttribute);
-      // what state should we mark recorded audio?
-      if (exercise1 != null) {
-        db.getUserListManager().setState(exercise1, STATE.UNSET, user);
-        db.getUserListManager().setSecondState(exercise1, STATE.RECORDED, user);
-      }
+      AudioAttribute attribute = addToAudioTable(user, audioType, exercise1, audioAnswer);
+      audioAnswer.setAudioAttribute(attribute);
     }
     if (!audioAnswer.isValid() && audioAnswer.getDurationInMillis() == 0) {
       logger.warn("huh? got zero length recording " + user + " " + exercise);
       logEvent("audioRecording", "writeAudioFile", exercise, "Writing audio - got zero duration!", user, "unknown");
     }
     return audioAnswer;
+  }
+
+  /**
+   * Remember this audio as reference audio for this exercise, and possibly clear the APRROVED (inspected) state
+   * on the exercise indicating it needs to be inspected again (we've added new audio).
+   *
+   * @param user who recorded audio
+   * @param audioType regular or slow
+   * @param exercise1 for which exercise
+   * @param audioAnswer holds the path of the temporary recorded file
+   */
+  private AudioAttribute addToAudioTable(int user, String audioType, CommonExercise exercise1, AudioAnswer audioAnswer) {
+    String exercise = exercise1.getID();
+    File fileRef = pathHelper.getAbsoluteFile(audioAnswer.getPath());
+    String destFileName = audioType + "_" + System.currentTimeMillis() + "_by_" + user + ".wav";
+    String permanentAudioPath = new PathWriter().getPermanentAudioPath(pathHelper, fileRef, destFileName, true, exercise);
+    AudioAttribute audioAttribute =
+      db.getAudioDAO().addOrUpdate(user, permanentAudioPath, exercise, System.currentTimeMillis(), audioType, audioAnswer.getDurationInMillis());
+    //logger.debug("writeAudioFile for " + audioType + " audio answer has " + audioAttribute);
+
+    // what state should we mark recorded audio?
+    setExerciseState(exercise, user, exercise1);
+    return audioAttribute;
+  }
+
+  /**
+   * Only change APPROVED to UNSET.
+   * @param exercise
+   * @param user
+   * @param exercise1
+   */
+  private void setExerciseState(String exercise, int user, CommonExercise exercise1) {
+    if (exercise1 != null) {
+      STATE currentState = db.getUserListManager().getCurrentState(exercise);
+      if (currentState == STATE.APPROVED) { // clear approved on new audio -- we need to review it again
+        db.getUserListManager().setState(exercise1, STATE.UNSET, user);
+      }
+      db.getUserListManager().setSecondState(exercise1, STATE.RECORDED, user);
+    }
   }
 
   void makeAutoCRT() { audioFileHelper.makeAutoCRT(relativeConfigDir, this); }
