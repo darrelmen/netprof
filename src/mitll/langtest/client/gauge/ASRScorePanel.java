@@ -1,6 +1,3 @@
-/**
- * 
- */
 package mitll.langtest.client.gauge;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
@@ -10,6 +7,7 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -21,6 +19,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.custom.TooltipHelper;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.pretest.PretestGauge;
 import mitll.langtest.client.scoring.ScoreListener;
 import mitll.langtest.shared.ScoreAndPath;
@@ -48,6 +47,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   private static final String SCORE = "Score";
   private static final int HEIGHT = 18;
   private static final int ROW_LEFT_MARGIN = 18 + 5;
+  public static final String PLAY_REFERENCE = "Play Reference";
 
   private final PretestGauge ASRGauge;
   private final Panel phoneList;
@@ -56,11 +56,15 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   private final SimpleColumnChart chart = new SimpleColumnChart();
   private float classAvg = 0f;
   private String refAudio;
+  private ExerciseController controller;
+  private String exerciseID;
 
   /**
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel
    */
-	public ASRScorePanel(String parent){
+	public ASRScorePanel(String parent, ExerciseController controller, String exerciseID){
+    this.controller = controller;
+    this.exerciseID = exerciseID;
     addStyleName("leftFiveMargin");
     addStyleName("floatRight");
     getElement().setId("ASRScorePanel");
@@ -145,6 +149,10 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     addPlayer();
   }
 
+  private native void addPlayer() /*-{
+    $wnd.basicMP3Player.init();
+  }-*/;
+
   @Override
   public void addScore(ScoreAndPath hydecScore) {  scores2.add(hydecScore);  }
 
@@ -193,11 +201,11 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   }
 
   private Panel getRefAudio(AudioTag audioTag) {
-    HTML w = getAudioWidget(audioTag, new ScoreAndPath(classAvg, refAudio), "Play Reference");
-    makeChildGreen(w);
+    Widget audioWidget = getAudioWidget(audioTag, new ScoreAndPath(classAvg, refAudio), PLAY_REFERENCE);
+    makeChildGreen(audioWidget);
 
     Panel hp = new HorizontalPanel();
-    hp.add(w);
+    hp.add(audioWidget);
     HTML child = new HTML("Default Reference");
     child.addStyleName("leftFiveMargin");
     hp.add(child);
@@ -236,7 +244,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 
   private Panel getAudioAndScore(AudioTag audioTag, TooltipHelper tooltipHelper, ScoreAndPath scoreAndPath, String prefix,
                                 Placement placement, String title, boolean backgroundGreen) {
-    HTML w = getAudioWidget(audioTag, scoreAndPath, title);
+    Widget w = getAudioWidget(audioTag, scoreAndPath, title);
     if (backgroundGreen) {
       makeChildGreen(w);
     }
@@ -250,13 +258,13 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     return hp;
   }
 
-  private void makeChildGreen(HTML w) {
+  private void makeChildGreen(Widget w) {
     Node child = w.getElement().getChild(0);
     Element as = Element.as(child);
     as.getStyle().setBackgroundColor("green");
   }
 
-  private HTML getAudioWidget(AudioTag audioTag, ScoreAndPath scoreAndPath, String title) {
+  private Anchor getAudioWidget(AudioTag audioTag, ScoreAndPath scoreAndPath, String title) {
     SafeHtmlBuilder sb = new SafeHtmlBuilder();
     sb.appendHtmlConstant("<a href=\"" +
       audioTag.ensureForwardSlashes(scoreAndPath.getPath()).replace(".wav", "." + AudioTag.COMPRESSED_TYPE) +
@@ -267,12 +275,11 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
       title +
       "</a>");
 
-    return new HTML(sb.toSafeHtml());
+    Anchor anchor = new Anchor(sb.toSafeHtml());
+    anchor.getElement().setId("PlayUserAudio_"+title);
+    controller.registerWidget(anchor, anchor, exerciseID, "playing user audio " + scoreAndPath.getPath());
+    return anchor;
   }
-
-  private native void addPlayer() /*-{
-      $wnd.basicMP3Player.init();
-  }-*/;
 
   private Widget makeRow(TooltipHelper tooltipHelper, ScoreAndPath scoreAndPath, String prefix, Placement right, boolean showPercent) {
     Widget row = new DivWidget();
