@@ -6,7 +6,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created with IntelliJ IDEA.
+ * What the client wants to know about a reference audio cut.
+ * <p/>
+ * Includes info about who recorded it and when, for which exercise, and the path to the audio on the server.
+ * <p/>
+ * Also indicates any attributes REGULAR or SLOW and whether it's been played by a reviewer.
  * User: GO22670
  * Date: 12/6/13
  * Time: 3:53 PM
@@ -146,7 +150,6 @@ public class AudioAttribute implements IsSerializable {
   }
 
   public MiniUser getUser() { return user; }
-
   public long getUserid() { return userid; }
 
   /**
@@ -168,11 +171,9 @@ public class AudioAttribute implements IsSerializable {
   public long getTimestamp() {
     return timestamp;
   }
-
   public long getDuration() {
     return duration;
   }
-
   public int getUniqueID() {
     return uniqueID;
   }
