@@ -145,7 +145,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   public void wasRevealed() {}
 
   protected ASRScorePanel makeScorePanel(CommonExercise e, String instance) {
-    ASRScorePanel widgets = new ASRScorePanel("GoodwaveExercisePanel_" + instance);
+    ASRScorePanel widgets = new ASRScorePanel("GoodwaveExercisePanel_" + instance, controller, exercise.getID());
     scorePanel = widgets;
     return widgets;
   }
