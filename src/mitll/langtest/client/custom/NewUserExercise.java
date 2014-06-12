@@ -557,7 +557,7 @@ public class NewUserExercise extends BasicDialog {
       String speed = (recordRegularSpeed ? "Regular" : "Slow") + "_speed";
       getPostAudioButton().getElement().setId(newUserExercise_waveformPostAudioRecordButton + speed);
       getPlayButton().getElement().setId(newUserExercise_waveformPostAudioRecordButton+ "Play_"+speed);
-      controller.register(getPlayButton(),newExercise.getID());
+      controller.register(getPlayButton(), newExercise.getID());
     }
 
     @Override
