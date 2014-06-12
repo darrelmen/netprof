@@ -49,7 +49,7 @@ public class PretestGauge extends HTML{
       {0f, 255f, 0f}};*/
 
   /**
-   * @see mitll.langtest.client.gauge.ASRScorePanel#ASRScorePanel(String)
+   * @see mitll.langtest.client.gauge.ASRScorePanel#ASRScorePanel(String, mitll.langtest.client.exercise.ExerciseController, Exercise)
    * @paramx id
    * @param label
    * @param instructions
