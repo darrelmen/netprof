@@ -8,6 +8,8 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.user.client.Timer;
@@ -72,7 +74,7 @@ public class RecordButton extends Button {
   }
 
   /**
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#makeRecordButton(mitll.langtest.client.exercise.ExerciseController)
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#makeRecordButton
    * @param delay
    * @param recordingListener
    * @param doClickAndHold
@@ -126,15 +128,16 @@ public class RecordButton extends Button {
         }
       });
 
-/*      addMouseOutHandler(new MouseOutHandler() {
+      addMouseOutHandler(new MouseOutHandler() {
         @Override
         public void onMouseOut(MouseOutEvent event) {
-          if (mouseDown) {
+          System.out.println("got mouse out " + mouseDown);
+          /*if (mouseDown) {
             mouseDown = false;
             doClick();
-          }
+          }*/
         }
-      });*/
+      });
     } else {
       addClickHandler(new ClickHandler() {
         @Override
