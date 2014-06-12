@@ -19,9 +19,13 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Let's us keep track of state of read-only exercises too.
+ * Records {@link STATE} transitions of each exercise as it is marked by quality control reviewers.
  * <p/>
+ * So for instance an exercise can go from UNSET->DEFECT->FIXED and back again, or APPROVED->UNSET->APPROVED.
  * <p/>
+ * All state changes are recorded, nothing is overwritten. To get the current state you have to get the latest
+ * entry.
+ *
  * User: GO22670
  * Date: 12/9/13
  * Time: 2:23 PM
@@ -97,21 +101,19 @@ public class ReviewedDAO extends DAO {
    *
    * @see #setState
    */
-  private void add(String exerciseID, mitll.langtest.shared.STATE state, long creatorID) {
+  private void add(String exerciseID, STATE state, long creatorID) {
     try {
       // there are much better ways of doing this...
-     // logger.info("add : exid " + exerciseID + " = " + state+ " by " + creatorID);
+//      logger.info("add : exid " + exerciseID + " = " + state + " by " + creatorID);
 
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement(
         "INSERT INTO " + tableName +
           "(" +
-          CREATORID +
-          "," +
-          EXERCISEID +
-          "," +
-          MODIFIED +
-          "," + STATE_COL +
+          CREATORID + "," +
+          EXERCISEID + "," +
+          MODIFIED + "," +
+          STATE_COL +
           ") " +
           "VALUES(?,?,?,?);"
       );
@@ -157,7 +159,7 @@ public class ReviewedDAO extends DAO {
       if (j != 1) {
         logger.error("remove : huh? didn't remove row for " + exerciseID);
         int count = getCount();
-        logger.debug("now " + count + " reviewed");
+       // logger.debug("now " + count + " reviewed");
         if (before - count != 1) logger.error("ReviewedDAO : huh? there were " + before + " before");
       }
 
@@ -195,36 +197,34 @@ public class ReviewedDAO extends DAO {
    * @param skipUnset
    */
   public Map<String, StateCreator> getExerciseToState(boolean skipUnset) {
+    return getExerciseToState(skipUnset, false, "");
+  }
+
+  public STATE getCurrentState(String exerciseID) {
+    Map<String, StateCreator> exerciseToState = getExerciseToState(false, true, exerciseID);
+    if (exerciseToState.isEmpty()) return STATE.UNSET;
+    else return exerciseToState.values().iterator().next().getState();
+  }
+
+  private Map<String, StateCreator> getExerciseToState(boolean skipUnset, boolean selectSingleExercise, String exerciseIDToFind) {
     Connection connection = database.getConnection();
 
     String latest = "latest";
+    String whereClause = selectSingleExercise ? " where " + EXERCISEID + "='" + exerciseIDToFind + "'" : "";
+
     String sql3 = "select * from " +
       "(select " +
-      EXERCISEID +
-      "," +
-      STATE_COL +
-      "," +
-      CREATORID +
-      ",max(" +
-      MODIFIED +
-      ") as " +
-      latest +
-      " from " +
-      tableName +
-      " group by " +
-      EXERCISEID +
-      "," +
-      STATE_COL +
-      "," +
-      CREATORID +
-      " order by " +
-      EXERCISEID +
-      ") order by " +
-      EXERCISEID +
-      "," +
-      latest;
+      EXERCISEID + "," +
+      STATE_COL + "," +
+      CREATORID + ", " +
+      "max(" + MODIFIED + ") as " + latest +
+      " from " + tableName +
+      whereClause +
+      " group by " + EXERCISEID + "," + STATE_COL + "," + CREATORID +
+      " order by " + EXERCISEID + ") order by " + EXERCISEID + "," + latest;
 
     try {
+      //logger.debug("Running " + sql3);
       PreparedStatement statement = connection.prepareStatement(sql3);
       ResultSet rs = statement.executeQuery();
       Map<String, StateCreator> exidToState = new HashMap<String, StateCreator>();
@@ -264,45 +264,6 @@ public class ReviewedDAO extends DAO {
     return ids;
   }
 
-/*  public Collection<String> getDefectExercises() {
-    Connection connection = database.getConnection();
-
-    List<String> history = new ArrayList<String>();
-
-    String sql3 = "select " +
-      STATE_COL +
-      "," +
-      CREATORID +
-      "," +
-      MODIFIED +
-      " order by " + MODIFIED + " ASC WHERE EXERCISEID='" + exerciseID +
-      "'";
-
-    try {
-      PreparedStatement statement = connection.prepareStatement(sql3);
-      ResultSet rs = statement.executeQuery();
-      while (rs.next()) {
-        String state = rs.getString(STATE_COL);
-        long creator = rs.getLong(CREATORID);
-        long when = rs.getLong(MODIFIED);
-        STATE stateFromTable = (state == null) ? STATE.UNSET : STATE.valueOf(state);
-
-        history.add(new StateCreator(stateFromTable, creator, when));
-      }
-
-      rs.close();
-      statement.close();
-      database.closeConnection(connection);
-      // int count = getCount();
-      // if (count % 10 == 0) logger.debug("now " + count + " reviewed");
-      logger.debug("query " + sql3 + " returned " + history.size() + "state items");
-      return history;
-    } catch (SQLException e) {
-      logger.error("Got " + e + " doing " + sql3, e);
-    }
-    return Collections.emptyList();
-  }*/
-
   public static class StateCreator {
     private STATE state;
     private long creatorID;
@@ -318,6 +279,10 @@ public class ReviewedDAO extends DAO {
       return state;
     }
 
+    /**
+     * @see UserListManager#getAmmendedStateMap()
+     * @return
+     */
     public long getCreatorID() {
       return creatorID;
     }
