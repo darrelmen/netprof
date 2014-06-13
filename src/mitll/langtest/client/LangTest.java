@@ -87,6 +87,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final int MAX_CACHE_SIZE = 100;
   private static final int NO_USER_INITIAL = -2;
   private static final boolean SHOW_STATUS = false;
+  private static final boolean SHOW_EXCEPTION_TO_USER = false;
 
   private ListInterface exerciseList;
 
@@ -164,8 +165,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
       public void onUncaughtException(Throwable throwable) {
         String exceptionAsString = logException(throwable);
-        if (exceptionAsString.length() > 0) {
-          new ExceptionHandlerDialog().showExceptionInDialog(browserCheck, exceptionAsString);
+
+        if (SHOW_EXCEPTION_TO_USER) {
+          if (exceptionAsString.length() > 0) {
+            new ExceptionHandlerDialog().showExceptionInDialog(browserCheck, exceptionAsString);
+          }
         }
       }
     });
