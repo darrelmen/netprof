@@ -26,11 +26,14 @@ public class ExerciseTrie extends Trie<CommonExercise> {
   public static final int TOOLONG_TO_WAIT = 150;
 
   /**
+   * Tokens are normalized to lower case.
+   *
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseListWrapperForPrefix(int, String, java.util.Collection, long, String)
    * @param exercisesForState
    * @param language
    */
-  public ExerciseTrie(Collection<CommonExercise> exercisesForState, String language,SmallVocabDecoder smallVocabDecoder) {
+  public ExerciseTrie(Collection<CommonExercise> exercisesForState, String language, SmallVocabDecoder smallVocabDecoder) {
     boolean includeForeign = !language.equals("English");
     startMakingNodes();
     Runtime rt = Runtime.getRuntime();
@@ -40,24 +43,25 @@ public class ExerciseTrie extends Trie<CommonExercise> {
     long then = System.currentTimeMillis();
     boolean isMandarin = language.equalsIgnoreCase("Mandarin");
 
-    for (CommonExercise e : exercisesForState) {
-      if (e.getEnglish() != null && !e.getEnglish().isEmpty()) {
-        addEntryToTrie(new ExerciseWrapper(e, true));
-        Collection<String> tokens = smallVocabDecoder.getTokens(e.getEnglish());
+    for (CommonExercise exercise : exercisesForState) {
+      String english = exercise.getEnglish();
+      if (english != null && !english.isEmpty()) {
+        addEntryToTrie(new ExerciseWrapper(exercise, true));
+        Collection<String> tokens = smallVocabDecoder.getTokens(english.toLowerCase());
         if (tokens.size() > 1) {
           for (String token : tokens) {
-            addEntryToTrie(new ExerciseWrapper(token, e));
+            addEntryToTrie(new ExerciseWrapper(token/*.toLowerCase()*/, exercise));
           }
         }
       }
       if (includeForeign) {
-        if (e.getForeignLanguage() != null && !e.getForeignLanguage().isEmpty()) {
-          addEntryToTrie(new ExerciseWrapper(e, false));
+        if (exercise.getForeignLanguage() != null && !exercise.getForeignLanguage().isEmpty()) {
+          addEntryToTrie(new ExerciseWrapper(exercise, false));
 
-          Collection<String> tokens = isMandarin ? getFLTokens(smallVocabDecoder, e) : smallVocabDecoder.getTokens(e.getForeignLanguage());
+          Collection<String> tokens = isMandarin ? getFLTokens(smallVocabDecoder, exercise) : smallVocabDecoder.getTokens(exercise.getForeignLanguage());
           if (tokens.size() > 1) {
             for (String token : tokens) {
-              addEntryToTrie(new ExerciseWrapper(token, e));
+              addEntryToTrie(new ExerciseWrapper(token, exercise));
             }
           }
         }
@@ -87,7 +91,8 @@ public class ExerciseTrie extends Trie<CommonExercise> {
    * @return
    */
   public List<CommonExercise> getExercises(String prefix) {
-    List<EmitValue<CommonExercise>> emits = getEmits(prefix);
+    String lc = prefix.toLowerCase();
+    List<EmitValue<CommonExercise>> emits = getEmits(lc);
     Set<CommonExercise> unique = new HashSet<CommonExercise>();
     List<CommonExercise> ids = new ArrayList<CommonExercise>();
     for (EmitValue<CommonExercise> ev : emits) {
@@ -97,7 +102,7 @@ public class ExerciseTrie extends Trie<CommonExercise> {
         unique.add(exercise);
       }
     }
-    logger.debug("getExercises : for '" +prefix + "' got " + ids.size() + " matches");
+    logger.debug("getExercises : for '" +prefix + "' (" +lc+ ") got " + ids.size() + " matches");
     return ids;
   }
 
@@ -111,7 +116,7 @@ public class ExerciseTrie extends Trie<CommonExercise> {
      * @param useEnglish
      */
     public ExerciseWrapper(CommonExercise e, boolean useEnglish) {
-      this((useEnglish ? e.getEnglish() : e.getForeignLanguage()), e);
+      this((useEnglish ? e.getEnglish().toLowerCase() : e.getForeignLanguage()), e);
     }
 
     public ExerciseWrapper(String value, CommonExercise e) {
