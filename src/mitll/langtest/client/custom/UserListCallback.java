@@ -331,15 +331,16 @@ class UserListCallback implements AsyncCallback<Collection<UserList>> {
    */
   private Button makeDeleteButton(final UserList ul, final boolean onlyMyLists) {
     final Button delete = new Button(DELETE);
-    delete.getElement().setId("UserList_"+ul.getID()+"_delete");
+    delete.getElement().setId("UserList_" + ul.getID() + "_delete");
     delete.addStyleName("topMargin");
-    DOM.setStyleAttribute(delete.getElement(), "marginBottom", "5px");
+    delete.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
 
     delete.setType(ButtonType.WARNING);
     delete.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(final ClickEvent event) {
-        navigation.deleteList(delete,ul,onlyMyLists);
+        event.stopPropagation();
+        navigation.deleteList(delete, ul, onlyMyLists);
       }
     });
     return delete;
