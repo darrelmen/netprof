@@ -118,6 +118,7 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     this.controlState = controlState;
     this.endListener = endListener;
     this.instance = instance;
+  //  addStyleName("centeringPractice");
    // System.out.println("BootstrapExercisePanel.instance = " + instance);
 
     controlState.setStorage(new KeyStorage(controller));
@@ -472,10 +473,10 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     Heading heading = new Heading(1, foreignSentence);
     heading.getElement().setId("FLPhrase");
     heading.getElement().getStyle().setMarginLeft(LEFT_MARGIN_FOR_FOREIGN_PHRASE, Style.Unit.PX);
-    FocusPanel container = new FocusPanel();
+    FocusPanel container = new FocusPanel();   // TODO : remove???
     container.getElement().setId("FLPhrase_container");
-    //container.add(heading);
-    HorizontalPanel hp = new HorizontalPanel();
+
+    Panel hp = new HorizontalPanel();
     hp.add(heading);
     if (hasRefAudio) {
       Icon w = new Icon(IconType.VOLUME_UP);
@@ -501,8 +502,6 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     return status;
   }
 
- // private PopupPanel popupPanel;
-
   /**
    * @see #getForeignLanguageContent(String, boolean)
    * @see #getQuestionContent(mitll.langtest.shared.CommonExercise)
@@ -521,14 +520,12 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
         focusPanel.addStyleName("mouseOverHighlight");
       }
     });
-
     focusPanel.addMouseOutHandler(new MouseOutHandler() {
       @Override
       public void onMouseOut(MouseOutEvent event) {
         focusPanel.removeStyleName("mouseOverHighlight");
       }
     });
-
     focusPanel.addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {
