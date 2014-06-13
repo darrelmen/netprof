@@ -375,7 +375,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   }
 
   private String getUserTitle(int me, MiniUser user) {
-    return (user.getId() == DEFAULT_USER) ? "Default Speaker" : (user.getId() == me) ? "by You (" +user.getUserID()+ ")" : getUserTitle(user);
+    return (user.getId() == DEFAULT_USER) ? GoodwaveExercisePanel.DEFAULT_SPEAKER : (user.getId() == me) ? "by You (" +user.getUserID()+ ")" : getUserTitle(user);
   }
 
   private String getUserTitle(MiniUser user) {
