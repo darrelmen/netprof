@@ -28,6 +28,7 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.scoring.EmptyScoreListener;
+import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.AudioAttribute;
@@ -59,16 +60,16 @@ class ReviewEditableExercise extends EditableExercise {
   private static final String ARE_YOU_SURE = "Are you sure?";
   private static final String REALLY_DELETE_ITEM = "Really delete whole item and all audio cuts?";
   private static final String COPY_THIS_ITEM = "Copy this item.";
-  public static final String REGULAR_SPEED = " Regular speed";
-  public static final String SLOW_SPEED = " Slow speed";
-  public static final int DELAY_MILLIS = 5000;
-  public static final String ADD_AUDIO = "Add audio";
-  public static final String DEFAULT_SPEAKER = "Default Speaker";
-  public static final String MALE = "Male";
-  public static final String FEMALE = "Female";
+  private static final String REGULAR_SPEED = " Regular speed";
+  private static final String SLOW_SPEED = " Slow speed";
+  private static final int DELAY_MILLIS = 5000;
+  private static final String ADD_AUDIO = "Add audio";
+  //public static final String DEFAULT_SPEAKER = "Default Speaker";
+  private static final String MALE = "Male";
+  private static final String FEMALE = "Female";
 
-  private PagingExerciseList exerciseList;
-  private ListInterface predefinedContentList;
+  private final PagingExerciseList exerciseList;
+  private final ListInterface predefinedContentList;
   private static final String WAV = ".wav";
   private static final String MP3 = "." + AudioTag.COMPRESSED_TYPE;
 
@@ -206,7 +207,7 @@ class ReviewEditableExercise extends EditableExercise {
   }
 
   private String getUserTitle(int me, MiniUser user) {
-    return (user.getId() == QCNPFExercise.DEFAULT_USER) ? DEFAULT_SPEAKER : (user.getId() == me) ? "by You (" +user.getUserID()+ ")" : getUserTitle(user);
+    return (user.getId() == QCNPFExercise.DEFAULT_USER) ? GoodwaveExercisePanel.DEFAULT_SPEAKER : (user.getId() == me) ? "by You (" +user.getUserID()+ ")" : getUserTitle(user);
   }
 
   private String getUserTitle(MiniUser user) {
@@ -228,8 +229,8 @@ class ReviewEditableExercise extends EditableExercise {
     return b;
   }
 
-  private Set<Widget> audioWasPlayed = new HashSet<Widget>();
-  private Set<Widget> toResize = new HashSet<Widget>();
+  private final Set<Widget> audioWasPlayed = new HashSet<Widget>();
+  private final Set<Widget> toResize = new HashSet<Widget>();
 
   private Widget getPanelForAudio(final CommonExercise e, final AudioAttribute audio, RememberTabAndContent tabAndContent) {
     String audioRef = audio.getAudioRef();
@@ -343,7 +344,7 @@ class ReviewEditableExercise extends EditableExercise {
     }
   }
 
-  protected String wavToMP3(String path) {
+  String wavToMP3(String path) {
     return (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
   }
 
@@ -539,9 +540,9 @@ class ReviewEditableExercise extends EditableExercise {
           exerciseList.forgetExercise(id);
         }
       });
-    } else {
+    } //else {
       //System.out.println("----> doAfterEditComplete : button not clicked ");
-    }
+   // }
   }
   @Override
   protected String getEnglishLabel() { return "English<br/>";  }
