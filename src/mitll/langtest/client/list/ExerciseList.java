@@ -1,5 +1,6 @@
 package mitll.langtest.client.list;
 
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -26,6 +27,7 @@ import mitll.langtest.client.custom.EditItem;
 import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.flashcard.BootstrapExercisePanel;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.CommonExercise;
@@ -642,8 +644,23 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     System.out.println("ExerciseList.makeExercisePanel : " + exercise + " instance " + instance);
 
     Panel exercisePanel = factory.getExercisePanel(exercise);
-    innerContainer.setWidget(exercisePanel);
+/*    if (exercisePanel instanceof BootstrapExercisePanel) {
+      DivWidget centeringRow = getCenteringRow();
+      centeringRow.add(exercisePanel);
+      innerContainer.setWidget(centeringRow);
+    }
+    else {*/
+      innerContainer.setWidget(exercisePanel);
+  //  }
     return exercisePanel;
+  }
+
+  DivWidget getCenteringRow() {
+    DivWidget status = new DivWidget();
+    status.getElement().setId("statusRow");
+    status.addStyleName("alignCenter");
+    status.addStyleName("inlineBlockStyle");
+    return status;
   }
 
   /**
