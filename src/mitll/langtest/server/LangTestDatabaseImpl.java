@@ -163,16 +163,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     if (typeToSelection.isEmpty()) {   // no unit-chapter filtering
       // get initial exercise set, either from a user list or predefined
-      if (userListByID != null) {
-        exercises = getCommonExercises(userListByID);
-      } else {
-        exercises = getExercises();
-      }
+      boolean predefExercises = userListByID == null;
+      exercises = predefExercises ? getExercises() : getCommonExercises(userListByID);
+
       // now if there's a prefix, filter by prefix match
       if (!prefix.isEmpty()) {
         // now do a trie over matches
         long then = System.currentTimeMillis();
-        ExerciseTrie trie = new ExerciseTrie(exercises, serverProps.getLanguage(), audioFileHelper.getSmallVocabDecoder());
+        ExerciseTrie trie = predefExercises ? fullTrie : new ExerciseTrie(exercises, serverProps.getLanguage(), audioFileHelper.getSmallVocabDecoder());
         exercises = trie.getExercises(prefix);
         long now = System.currentTimeMillis();
         if (now-then > 300) {
@@ -463,6 +461,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private boolean checkedLTS = false;
+  private ExerciseTrie fullTrie;
+
   /**
    * Called from the client:
    * @see mitll.langtest.client.list.ListInterface#getExercises
@@ -471,6 +471,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   List<CommonExercise> getExercises() {
     List<CommonExercise> exercises = db.getExercises();
     makeAutoCRT();   // side effect of db.getExercises is to make the exercise DAO which is needed here...
+    if (fullTrie == null) {
+      fullTrie = new ExerciseTrie(exercises, serverProps.getLanguage(), audioFileHelper.getSmallVocabDecoder());
+    }
 
     checkLTS(exercises);
     return exercises;
@@ -995,7 +998,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       flq, audioType, doFlashcard, recordInResults, recordedWithFlash);
 
     if (addToAudioTable && audioAnswer.isValid()) {
-      AudioAttribute attribute = addToAudioTable(user, audioType, exercise1, audioAnswer);
+      AudioAttribute attribute = addToAudioTable(user, audioType, exercise1, exercise, audioAnswer);
       audioAnswer.setAudioAttribute(attribute);
     }
     if (!audioAnswer.isValid() && audioAnswer.getDurationInMillis() == 0) {
@@ -1014,8 +1017,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param exercise1 for which exercise
    * @param audioAnswer holds the path of the temporary recorded file
    */
-  private AudioAttribute addToAudioTable(int user, String audioType, CommonExercise exercise1, AudioAnswer audioAnswer) {
-    String exercise = exercise1.getID();
+  private AudioAttribute addToAudioTable(int user, String audioType, CommonExercise exercise1, String exerciseID, AudioAnswer audioAnswer) {
+    String exercise = exercise1 == null ? exerciseID : exercise1.getID();
     File fileRef = pathHelper.getAbsoluteFile(audioAnswer.getPath());
     String destFileName = audioType + "_" + System.currentTimeMillis() + "_by_" + user + ".wav";
     String permanentAudioPath = new PathWriter().getPermanentAudioPath(pathHelper, fileRef, destFileName, true, exercise);
