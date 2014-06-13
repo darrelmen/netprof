@@ -62,19 +62,16 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   /**
    * @see mitll.langtest.client.recorder.RecordButton#stop()
    */
-  public void stopRecording() {
-    controller.stopRecording(new WavCallback() {
+  public void stopRecording() {  controller.stopRecording(new WavCallback() {
       @Override
       public void getBase64EncodedWavFile(String bytes) {
         postAudioFile(bytes);
       }
-    });
-  }
+    });  }
 
-  protected void postAudioFile(String base64EncodedWavFile) {
+  private void postAudioFile(String base64EncodedWavFile) {
     reqid++;
     final long then = System.currentTimeMillis();
-   // List<Integer> compressed = LZW.compress(base64EncodedWavFile);
     service.writeAudioFile(base64EncodedWavFile,
       "plan",
       exercise.getID(),
@@ -153,12 +150,10 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   private void logMessage(String message) {
     service.logMessage(message, new AsyncCallback<Void>() {
       @Override
-      public void onFailure(Throwable caught) {
-      }
+      public void onFailure(Throwable caught) {}
 
       @Override
-      public void onSuccess(Void result) {
-      }
+      public void onSuccess(Void result) {}
     });
   }
 
