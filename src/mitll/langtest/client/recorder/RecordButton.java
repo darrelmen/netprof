@@ -39,7 +39,7 @@ public class RecordButton extends Button {
   private Timer recordTimer;
   private final int autoStopDelay;
   private final boolean doClickAndHold;
-  boolean mouseDown = false;
+  protected boolean mouseDown = false;
 
   private RecordingListener recordingListener;
 
@@ -131,11 +131,11 @@ public class RecordButton extends Button {
       addMouseOutHandler(new MouseOutHandler() {
         @Override
         public void onMouseOut(MouseOutEvent event) {
-          System.out.println("got mouse out " + mouseDown);
           /*if (mouseDown) {
             mouseDown = false;
             doClick();
           }*/
+          gotMouseOut();
         }
       });
     } else {
@@ -148,10 +148,17 @@ public class RecordButton extends Button {
     }
   }
 
+  protected void gotMouseOut() {
+    if (mouseDown) {
+      mouseDown = false;
+      System.out.println("got mouse out " + mouseDown);
+      doClick();
+    }
+  }
   /**
    * @see #setupRecordButton
    */
-  void doClick() {
+  protected void doClick() {
     if (isVisible() && isEnabled()) {
       startOrStopRecording();
     }
