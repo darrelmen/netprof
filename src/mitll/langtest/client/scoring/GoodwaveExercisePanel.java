@@ -68,6 +68,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   public static final int HEADING_FOR_UNIT_LESSON = 4;
   public static final String CORRECT = "correct";
   public static final String INCORRECT = "incorrect";
+  public static final int DEFAULT_USER = -1;
+  public static final String DEFAULT_SPEAKER = "Default Speaker";
   private boolean isBusy = false;
 
   private static final String WAV = ".wav";
@@ -83,7 +85,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   protected final NavigationHelper navigationHelper;
   private final float screenPortion;
   protected final String instance;
-  private static final boolean DEBUG = true;
+ // private static final boolean DEBUG = true;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -526,6 +528,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       }
     }
 
+    /**
+     * @see #makePlayAudioPanel(com.google.gwt.user.client.ui.Widget, String, String, String)
+     */
     private class MyPostAudioRecordButton extends PostAudioRecordButton {
       public MyPostAudioRecordButton(ExerciseController controller) {
         super(exercise, controller, ASRRecordAudioPanel.this.service, ASRRecordAudioPanel.this.index, true,
@@ -661,8 +666,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       dropdown.addStyleName("leftFiveMargin");
       Node child = dropdown.getElement().getChild(0);
       AnchorElement.as(child).getStyle().setFontWeight(Style.FontWeight.BOLDER);
-      addChoices(rightSide, malesMap, dropdown, maleUsers, MALE, !allSameDialect);
-      addChoices(rightSide, femalesMap, dropdown, femaleUsers, FEMALE, !allSameDialect);
+      addChoices(rightSide, malesMap, dropdown, maleUsers, MALE/*, !allSameDialect*/);
+      addChoices(rightSide, femalesMap, dropdown, femaleUsers, FEMALE/*, !allSameDialect*/);
 
       NavPills container = new NavPills();
       container.add(dropdown);
@@ -695,36 +700,41 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
      * @param dropdown
      * @param maleUsers
      * @param title
-     * @param includeDialect
+     * @paramx includeDialect
      */
     private void addChoices(final Panel rightSide,
                             final Map<MiniUser, List<AudioAttribute>> malesMap,
-                            final Dropdown dropdown, List<MiniUser> maleUsers, String title, final boolean includeDialect) {
+                            final Dropdown dropdown, List<MiniUser> maleUsers, String title//, final boolean includeDialect
+    ) {
+      int count = 0;
       for (final MiniUser male : maleUsers) {
-        NavLink widget2 = new NavLink(getChoiceTitle(title, male,includeDialect));
+        if (male.getId() != DEFAULT_USER) count++;
+        NavLink widget2 = new NavLink(getChoiceTitle(title, male/*,includeDialect*/));
         widget2.addClickHandler(new ClickHandler() {
           @Override
           public void onClick(ClickEvent event) {
             rightSide.clear();
             List<AudioAttribute> audioAttributes = malesMap.get(male);
             addRegularAndSlow(rightSide, audioAttributes);
-            dropdown.setText(getChoiceTitle(male.isMale() ? MALE : FEMALE, male,includeDialect));
+            dropdown.setText(getChoiceTitle(male.isMale() ? MALE : FEMALE, male/*, includeDialect*/));
           }
         });
         dropdown.add(widget2);
+        if (count == 1) break; // evil
       }
     }
 
-    private String getChoiceTitle(String title, MiniUser male, boolean includeDialect) {
-      if (male.getId() == -1) { // default user
-        return "Default Speaker";
+    private String getChoiceTitle(String title, MiniUser male//, boolean includeDialect
+    ) {
+      if (male.getId() == DEFAULT_USER) { // default user
+        return DEFAULT_SPEAKER;
       } else {
         return title +
           " " +
-          (includeDialect ? male.getDialect() : "") +
-          (controller.getProps().isAdminView() ? " (" + male.getUserID() + ")" : "") +
-          " " +
-          "age " + male.getAge();
+         // (includeDialect ? male.getDialect() : "") +
+          (controller.getProps().isAdminView() ? " (" + male.getUserID() + ")" : "")
+          //+" " + "age " + male.getAge()
+          ;
       }
     }
 
