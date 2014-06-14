@@ -8,6 +8,7 @@ import com.github.gwtbootstrap.client.ui.Paragraph;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconSize;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.user.client.DOM;
@@ -18,6 +19,8 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.shared.User;
@@ -42,6 +45,8 @@ public class Flashcard implements RequiresResize {
   private final String nameForAnswer;
   private final boolean adminView;
   Paragraph subtitle;
+  HTML browserInfo;
+  Panel qc,recordAudio;
 
   /**
    * @see mitll.langtest.client.LangTest#makeHeaderRow()
@@ -97,7 +102,6 @@ public class Flashcard implements RequiresResize {
     headerRow.addStyleName("headerBackground");
     headerRow.addStyleName("headerLowerBorder");
 
-   // Panel iconLeftHeader = new FlowPanel();
     Panel iconLeftHeader = new HorizontalPanel();
     headerRow.add(iconLeftHeader);
 
@@ -111,9 +115,9 @@ public class Flashcard implements RequiresResize {
     flashcard.add(appName);
     subtitle = new Paragraph(splashText);
     subtitle.addStyleName("subtitleForeground");
-    DOM.setStyleAttribute(subtitle.getElement(), "marginBottom", "5px");
+    subtitle.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
 
-    flashcard.add(subtitle);
+      flashcard.add(subtitle);
 
     flashcardImage = new Image(LangTest.LANGTEST_IMAGES + appIcon);
     flashcardImage.addStyleName("floatLeft");
@@ -133,13 +137,13 @@ public class Flashcard implements RequiresResize {
       hp.add(userNameWidget);
     }
 
-    if (permissions.contains(User.Permission.QUALITY_CONTROL)) {
-      hp.add(new Icon(IconType.EDIT));
-    }
+    //if (permissions.contains(User.Permission.QUALITY_CONTROL)) {
+      hp.add(qc = new SimplePanel());
+    //}
 
-    if (permissions.contains(User.Permission.RECORD_AUDIO)) {
-      hp.add(new Icon(IconType.MICROPHONE));
-    }
+    //if (permissions.contains(User.Permission.RECORD_AUDIO)) {
+      hp.add(recordAudio = new SimplePanel());
+    //}
 
     // add log out/admin options menu
     Dropdown menu = makeMenu(users, results, monitoring,events);
@@ -154,6 +158,7 @@ public class Flashcard implements RequiresResize {
 
     browserInfo.addStyleName("leftFiveMargin");
     browserInfo.addStyleName("darkerBlueColor");
+    this.browserInfo = browserInfo;
     hp.add(browserInfo);
     widget.add(hp);
     hp.addStyleName("topMinusFiveMargin");
@@ -169,12 +174,35 @@ public class Flashcard implements RequiresResize {
     return headerRow;
   }
 
+  public void reflectPermissions(Collection<User.Permission> permissions) {
+    boolean hasAudio = permissions.contains(User.Permission.RECORD_AUDIO);
+    qc.clear();
+    if (permissions.contains(User.Permission.QUALITY_CONTROL)) {
+      Icon child = new Icon(IconType.EDIT);
+      child.addStyleName("darkerBlueColor");
+      if (!hasAudio) {
+        child.getElement().getStyle().setMarginRight(3, Style.Unit.PX);
+      }
+      qc.add(child);
+    }
+
+    recordAudio.clear();
+    if (hasAudio) {
+      Icon child = new Icon(IconType.MICROPHONE);
+      child.addStyleName("darkerBlueColor");
+      child.getElement().getStyle().setMarginRight(3, Style.Unit.PX);
+      recordAudio.add(child);
+    }
+  }
+
+  public void setBrowserInfo(String v) { browserInfo.setHTML(v);}
+
   private HTML getUserNameWidget(String userName) {
     userNameWidget = new HTML(userName);
     userNameWidget.getElement().setId("Username");
     userNameWidget.addStyleName("bold");
 
-    userNameWidget.addStyleName("rightTwentyMargin");
+    userNameWidget.addStyleName("rightTenMargin");
     userNameWidget.addStyleName("blueColor");
     return userNameWidget;
   }
