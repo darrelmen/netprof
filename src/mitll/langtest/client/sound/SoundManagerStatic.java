@@ -10,6 +10,11 @@ package mitll.langtest.client.sound;
 public class SoundManagerStatic implements SoundManagerAPI {
   private final boolean debug = false;
 
+  public SoundManagerStatic() {
+    exportStaticMethods();
+    initialize();
+  }
+
   public void initialize() {  SoundManager.initialize();  }
 
   /**
