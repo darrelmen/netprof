@@ -288,9 +288,10 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     micPermission.noMicAvailable();
   }
 
-  public boolean gotPermission()  { return permissionReceived || webAudio.isWebAudioMicAvailable(); }
+  public boolean gotPermission()  { return permissionReceived || usingWebRTC(); }
   public boolean isMicConnected() { return micConnected; }
   public boolean usingFlash() { return permissionReceived; }
+  public boolean usingWebRTC() { return webAudio.isWebAudioMicAvailable(); }
   /**
    * @see mitll.langtest.client.LangTest#stopRecording(mitll.langtest.client.WavCallback)
    */
