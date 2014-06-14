@@ -50,7 +50,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   private static final String INCORRECT = "Incorrect";
   private static final String CORRECT = "Correct";
   private static final String AVG_SCORE = "Pronunciation";
-  public static final String START_OVER = "Start Over";
+  private static final String START_OVER = "Start Over";
   private static final String CORRECT_NBSP = "Correct&nbsp;%";
   private static final String SKIP_THIS_ITEM = "Skip this item";
 
@@ -60,12 +60,12 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   private static final String SCORE_SUBTITLE = "score %";
   private static final String CORRECT_SUBTITLE = "% correct";
   private static final int ROWS_IN_TABLE = 7;
-  private static final String SKIP_TO_END = "Skip to end";
-  public static final int TABLE_WIDTH = 2 * 275;
-  public static final int HORIZ_SPACE_FOR_CHARTS = (1250 - TABLE_WIDTH);
-  public static final String CURRENT_EXERCISE = "currentExercise";
-  public static final String CORRECT1 = "correct";
-  public static final String SKIPPED = "skipped";
+  private static final String SKIP_TO_END = "See your scores";
+  private static final int TABLE_WIDTH = 2 * 275;
+  private static final int HORIZ_SPACE_FOR_CHARTS = (1250 - TABLE_WIDTH);
+  private static final String CURRENT_EXERCISE = "currentExercise";
+  private static final String CORRECT1 = "correct";
+  private static final String SKIPPED = "skipped";
 
   private static final boolean ADD_KEY_BINDING = true; // TODO : work on key binding...
 
@@ -76,11 +76,11 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
 
   private final Map<String,Boolean> exToCorrect = new HashMap<String, Boolean>();
   private final Map<String,Double>   exToScore = new HashMap<String, Double>();
-  private Set<String> skipped = new HashSet<String>();
-  private Set<Long> resultIDs = new HashSet<Long>();
-  private KeyStorage storage;
+  private final Set<String> skipped = new HashSet<String>();
+  private final Set<Long> resultIDs = new HashSet<Long>();
+  private final KeyStorage storage;
   private String selectionID = "";
-  private String instance;
+  private final String instance;
 
   /**
    * @see mitll.langtest.client.custom.AVPHelper#getFactory(mitll.langtest.client.list.PagingExerciseList, String, boolean)
@@ -192,7 +192,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   }
 
   private long latestResultID = -1;
-  private MySoundFeedback soundFeedback = new MySoundFeedback();
+  private final MySoundFeedback soundFeedback = new MySoundFeedback();
 
   private class StatsPracticePanel extends BootstrapExercisePanel {
     private Panel container;
@@ -520,7 +520,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       return w1;
     }
 
-    protected void startOverAndForgetScores() {
+    void startOverAndForgetScores() {
       System.out.println(START_OVER + " : set of ids is "+resultIDs.size());
       service.setAVPSkip(resultIDs,new AsyncCallback<Void>() {
         @Override
@@ -533,7 +533,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       });
     }
 
-    protected void startOver() {
+    void startOver() {
       reset();
 
       resetStorage();
@@ -763,7 +763,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
 
     }
 
-    private SoundFeedback.EndListener endListener = new SoundFeedback.EndListener() {
+    private final SoundFeedback.EndListener endListener = new SoundFeedback.EndListener() {
       @Override
       public void songStarted() {
         System.out.println("song started --------- "+ System.currentTimeMillis());
