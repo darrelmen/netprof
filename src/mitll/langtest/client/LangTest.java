@@ -515,18 +515,19 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private HTML getReleaseStatus() {
     browserCheck.getBrowserAndVersion();
 
-    String releaseDate = props.getReleaseDate() != null ? " " + props.getReleaseDate() : "";
-    return new HTML("<span><font size=-2>" +
-      //browserCheck.browser + " " +
-      browserCheck.ver +
-      releaseDate + "</font></span>");
+    return new HTML(getInfoLine());
   }
 
-  private void setupSoundManager() {
-    soundManager = new SoundManagerStatic();
-    soundManager.exportStaticMethods();
-    soundManager.initialize();
+  private String getInfoLine() {
+    String releaseDate = props.getReleaseDate() != null ? " " + props.getReleaseDate() : "";
+    return "<span><font size=-2>" +
+      //browserCheck.browser + " " +
+      browserCheck.ver +
+      releaseDate + (flashRecordPanel.usingWebRTC() ? " Flashless recording" : "")+
+      "</font></span>";
   }
+
+  private void setupSoundManager() {  soundManager = new SoundManagerStatic();  }
 
   /**
    * Tell the exercise list when the browser window changes size
@@ -744,7 +745,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     navigation.showInitialState();
 
     lastUser = userID;
-
+    flashcard.setBrowserInfo(getInfoLine());
+    flashcard.reflectPermissions(getPermissions());
     return true;
   }
 
