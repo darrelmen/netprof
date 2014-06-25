@@ -5,6 +5,7 @@ import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -148,6 +149,53 @@ public class AudioDAO extends DAO {
     }
     return new ArrayList<AudioAttribute>();
   }
+
+  public Set<String> getRecordedBy(long userid) {
+    User user = userDAO.getUserMap().get(userid);
+    boolean isMale = (user != null && user.isMale());
+    Map<Long, User> userMap = userDAO.getUserMap(isMale);
+    logger.debug("found " + (isMale ? " male " : " female ") + " users : " + userMap.keySet());
+    // find set of users of same gender
+    Set<String> validAudioAtReg  = getAudioForGender(userMap, REGULAR);
+
+    Set<String> validAudioAtSlow = getAudioForGender(userMap, SLOW);
+      /*boolean b =*/
+    validAudioAtReg.retainAll(validAudioAtSlow);
+    return validAudioAtReg;
+  }
+
+  private Set<String> getAudioForGender( Map<Long, User> userMap, String audioSpeed) {
+    Set<String> results = new HashSet<String>();
+    try {
+      Connection connection = database.getConnection();
+      StringBuffer buffer = new StringBuffer();
+      for (long id : userMap.keySet()) {
+        buffer.append(id).append(",");
+      }
+      String s = buffer.toString();
+      if (!s.isEmpty()) s = s.substring(0,s.length()-1);
+      String sql = "SELECT * FROM " + AUDIO + " WHERE " +
+        (s.isEmpty() ? "" : USERID+" IN (" + s+ ") AND ")+
+        DEFECT +"<>true " +
+        " AND "+AUDIO_TYPE +"='" +
+        audioSpeed +
+        "' ";
+      PreparedStatement statement = connection.prepareStatement(sql);
+      ResultSet rs = statement.executeQuery();
+      while (rs.next()) {
+        String exid = rs.getString(Database.EXID);
+        results.add(exid);
+      }
+      rs.close();
+      statement.close();
+      database.closeConnection(connection);
+
+    } catch (Exception ee) {
+      logger.error("got " + ee, ee);
+    }
+    return results;
+  }
+
 
   /**
    * Items that are recorded must have both regular and slow speed audio.
@@ -409,6 +457,17 @@ public class AudioDAO extends DAO {
     return null;
   }
 
+  /**
+   * @see #addOrUpdate(int, String, String, long, String, int)
+   * @param i
+   * @param userid
+   * @param audioRef
+   * @param exerciseID
+   * @param timestamp
+   * @param audioType
+   * @param durationInMillis
+   * @return
+   */
   private AudioAttribute getAudioAttribute(int i,
                                              int userid, String audioRef, String exerciseID, long timestamp, String audioType, int durationInMillis) {
     return new AudioAttribute(i, userid, //id
