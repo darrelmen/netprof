@@ -8,7 +8,14 @@ import com.google.gwt.user.client.ui.Widget;
  * Created by go22670 on 5/16/2014.
  */
 public class TooltipHelper {
+  /**
+   * @see mitll.langtest.client.user.BasicDialog#addTooltip(com.google.gwt.user.client.ui.Widget, String)
+   * @param w
+   * @param tip
+   * @return
+   */
   public Tooltip addTooltip(Widget w, String tip) {
+    //System.out.println("Add tooltip " + tip + " to " + w.getElement().getId());
     return createAddTooltip(w, tip, Placement.RIGHT);
   }
 
