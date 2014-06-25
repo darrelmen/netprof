@@ -149,7 +149,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   public boolean getExercises(long userID) {
     System.out.println("ExerciseList.getExercises for user " + userID + " instance " + instance);
     lastReqID++;
-    service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, controller.getUser(), getRole(), new SetExercisesCallback(""));
+    service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, controller.getUser(), getRole(), false, new SetExercisesCallback(""));
     return true;
   }
 
@@ -159,7 +159,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   public void reload() {
     System.out.println("ExerciseList.reload for user " + controller.getUser() + " instance " + instance + " id " + getElement().getId());
-    service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, controller.getUser(), getRole(), new SetExercisesCallback(""));
+    service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, controller.getUser(), getRole(), false, new SetExercisesCallback(""));
   }
 
   /**
@@ -171,7 +171,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   @Override
   public void reloadWith(String id) {
     System.out.println("ExerciseList.reloadWith id = " + id + " for user " + controller.getUser() + " instance " + instance);
-    service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, controller.getUser(), getRole(), new SetExercisesCallbackWithID(id));
+    service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, controller.getUser(), getRole(), false, new SetExercisesCallbackWithID(id));
   }
 
   /**
@@ -322,6 +322,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
 
     public void onFailure(Throwable caught) {
+      gotExercises(false);
       dealWithRPCError(caught);
     }
 
@@ -330,6 +331,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       if (isStaleResponse(result)) {
         System.out.println("----> SetExercisesCallbackWithID.onSuccess ignoring result " + result.getReqID() + " b/c before latest " + lastReqID);
       } else {
+        gotExercises(true);
         if (result.getExercises().isEmpty()) {
           gotEmptyExerciseList();
         }
