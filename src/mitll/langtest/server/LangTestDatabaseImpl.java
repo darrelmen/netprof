@@ -12,6 +12,7 @@ import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.PathWriter;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.SectionHelper;
+import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.AutoCRTScoring;
@@ -148,16 +149,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param userListID
    * @param userID
    * @param role
+   * @param onlyUnrecordedByMe
    * @return
    */
   @Override
   public ExerciseListWrapper getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix,
-                                            long userListID, int userID, String role) {
-    List<CommonExercise> exercises;
+                                            long userListID, int userID, String role, boolean onlyUnrecordedByMe) {
+    Collection<CommonExercise> exercises;
     logger.debug("getExerciseIds : getting exercise ids for " +
       " config " + relativeConfigDir +
       " prefix " + prefix+
-      " and user list id " + userListID + " user " + userID + " role " + role);
+      " and user list id " + userListID + " user " + userID + " role " + role + " filter " + onlyUnrecordedByMe);
 
     UserList userListByID = userListID != -1 ? db.getUserListManager().getUserListByID(userListID, getTypeOrder()) : null;
 
@@ -181,26 +183,64 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           if (exercise != null) exercises = Collections.singletonList(exercise);
         }
       }
+      exercises = filterByUnrecorded(userID, onlyUnrecordedByMe, exercises);
       int i = markRecordedState(userID, role, exercises);
       //logger.debug("marked " +i + " as recorded");
 
       // now sort : everything gets sorted the same way
-      exercises = new ArrayList<CommonExercise>(exercises);
+      List<CommonExercise> commonExercises = new ArrayList<CommonExercise>(exercises);
+      new ExerciseSorter(getTypeOrder()).getSortedByUnitThenAlpha(commonExercises, role.equals(Result.AUDIO_TYPE_RECORDER));
 
-      new ExerciseSorter(getTypeOrder()).getSortedByUnitThenAlpha(exercises, role.equals(Result.AUDIO_TYPE_RECORDER));
-
-      return makeExerciseListWrapper(reqID, exercises, userID, role);
+      return makeExerciseListWrapper(reqID, commonExercises, userID, role);
 
     } else { // sort by unit-chapter selection
       // builds unit-lesson hierarchy if non-empty type->selection over user list
       if (userListByID != null) {
         Collection<CommonExercise> exercisesForState = getExercisesFromFiltered(typeToSelection, userListByID);
+        exercisesForState = filterByUnrecorded(userID, onlyUnrecordedByMe, exercisesForState);
 
         return getExerciseListWrapperForPrefix(reqID, prefix, exercisesForState, userID, role);
       } else {
-        return getExercisesForSelectionState(reqID, typeToSelection, prefix, userID, role);
+        return getExercisesForSelectionState(reqID, typeToSelection, prefix, userID, role, onlyUnrecordedByMe);
       }
     }
+  }
+
+  private Collection<CommonExercise> filterByUnrecorded(long userID, boolean onlyUnrecordedByMe, Collection<CommonExercise> exercises) {
+    if (onlyUnrecordedByMe) {
+      Set<String> recordedForUser = db.getAudioDAO().getRecordedBy(userID);
+      boolean male = db.getUserDAO().getUserWhere(userID).isMale();
+      List<CommonExercise> copy = new ArrayList<CommonExercise>();
+      logger.debug("recorded already " + recordedForUser.size() + " checking " + exercises.size());
+      // filter
+      for (CommonExercise exercise : exercises) {
+        if (!recordedForUser.contains(exercise.getID())) {
+          copy.add(exercise);
+        }
+        else {
+          Collection<AudioAttribute> byGender = exercise.getByGender(male);
+          boolean hasReg = false;
+          boolean hasSlow = false;
+ /*         if (!byGender.isEmpty()) logger.debug("checking " + male + " ex " + exercise.getID()+
+            " has " + byGender.size() + " recordings");*/
+          for (AudioAttribute attr : byGender) {
+            if (attr.getUserid() != UserDAO.DEFAULT_USER_ID) {
+              hasReg = hasReg ||  attr.isRegularSpeed();
+              hasSlow = hasSlow ||  attr.isSlow();
+              if (hasReg && hasSlow) break;
+            }
+          }
+
+          if (!hasReg || !hasSlow) {
+            copy.add(exercise);
+          }
+        }
+      }
+      logger.debug("to be recorded " + copy.size() + " from " + exercises.size());
+
+      return copy;
+    }
+    return exercises;
   }
 
   private Collection<CommonExercise> getExercisesFromFiltered(Map<String, Collection<String>> typeToSelection, UserList userListByID) {
@@ -254,7 +294,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * Copies the exercises....?
    * @param userListByID
    * @return
-   * @see #getExerciseIds(int, java.util.Map, String, long, int, String)
+   * @see #getExerciseIds
    * @see #getExercisesFromFiltered(java.util.Map, mitll.langtest.shared.custom.UserList)
    */
   private List<CommonExercise> getCommonExercises(UserList userListByID) {
@@ -270,17 +310,20 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * @see mitll.langtest.client.list.HistoryExerciseList#loadExercises(String, String)
-   * @see #getExerciseIds(int, java.util.Map, String, long, int, String)
+   * @see #getExerciseIds
    * @param reqID
    * @param typeToSection
    * @param prefix
    * @param userID
    * @param role
+   * @param onlyUnrecordedByMe
    * @return
    */
   private ExerciseListWrapper getExercisesForSelectionState(int reqID,
-                                                            Map<String, Collection<String>> typeToSection, String prefix, long userID, String role) {
+                                                            Map<String, Collection<String>> typeToSection, String prefix,
+                                                            long userID, String role, boolean onlyUnrecordedByMe) {
     Collection<CommonExercise> exercisesForState = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
+    exercisesForState = filterByUnrecorded(userID, onlyUnrecordedByMe, exercisesForState);
 
     return getExerciseListWrapperForPrefix(reqID, prefix, exercisesForState, userID, role);
   }
@@ -293,7 +336,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param userID
    * @param role
    * @return
-   * @see #getExerciseIds(int, java.util.Map, String, long, int, String)
+   * @see #getExerciseIds
    */
   private ExerciseListWrapper getExerciseListWrapperForPrefix(int reqID, String prefix, Collection<CommonExercise> exercisesForState, long userID, String role) {
     boolean hasPrefix = !prefix.isEmpty();
@@ -348,6 +391,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * 0) Add annotations to fields on exercise
    * 1) Attach audio recordings to exercise.
    * 2) Adds information about whether the audio has been played or not...
+   * 3) Attach history info (when has the user recorded audio for the item under the learn tab and gotten a score)
    * @param userID
    * @param firstExercise
    */
