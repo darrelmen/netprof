@@ -732,9 +732,9 @@ public class ExcelImport implements ExerciseDAO {
     if (translit.contains(";")) {
       fieldToDefect.put(QCNPFExercise.TRANSLITERATION, "contains semicolon - should this item be split?");
     }
-    if (INCLUDE_ENGLISH_SEMI_AS_DEFECT && english.contains(";")) {
+/*    if (INCLUDE_ENGLISH_SEMI_AS_DEFECT && english.contains(";")) {
       fieldToDefect.put(QCNPFExercise.ENGLISH, "contains semicolon - should this item be split?");
-    }
+    }*/
   }
 
   private Map<Integer, CellRangeAddress> getRowToRange(Sheet sheet) {
