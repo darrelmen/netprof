@@ -12,6 +12,7 @@
     <!-- Consider inlining CSS to reduce the number of requested files -->
     <!--                                                               -->
     <link type="text/css" rel="stylesheet" href="LangTest.css">
+    <link rel="stylesheet" type="text/css" href="langtest/css/mp3-player-button.css" />
 
     <!--                                           -->
     <!-- Any title is fine - changed in LangTest   -->
@@ -31,7 +32,9 @@
           if (!window.console.log) window.console.log = function () { };
       </script>-->
 
+<!--
       <script type="text/javascript" src="langtest/js/buffer-loader.js"></script>
+-->
 
     <!--                                           -->
     <!-- This script loads your compiled module.   -->
@@ -41,7 +44,6 @@
     <script type="text/javascript" language="javascript" src="langtest/langtest.nocache.js"></script>
 
     <!-- These 2 scripts are so that Sound Manager 2 can be accessed through JSNI -->
-      <link rel="stylesheet" type="text/css" href="langtest/css/mp3-player-button.css" />
       <script type="text/javascript" src="langtest/js/soundmanager2.js"></script>
       <script type="text/javascript" src="langtest/js/mp3-player-button.js"></script>
 
