@@ -1,6 +1,7 @@
 package mitll.langtest.client.custom;
 
 import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
@@ -19,6 +20,7 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -27,6 +29,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
@@ -124,7 +127,38 @@ public class Navigation implements RequiresResize {
     avpHelper = new AVPHelper(service, feedback, userManager, controller);
 
     defectHelper = new ChapterNPFHelper(service, feedback, userManager, controller, true);
-    recorderHelper = new SimpleChapterNPFHelper(service, feedback, userManager, controller, listInterface);
+    recorderHelper = new SimpleChapterNPFHelper(service, feedback, userManager, controller, listInterface) {
+      @Override
+      protected FlexListLayout getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
+                                               UserManager userManager, ExerciseController controller, SimpleChapterNPFHelper outer) {
+        return new MyFlexListLayout(service, feedback, userManager, controller, outer) {
+          @Override
+          protected FlexSectionExerciseList makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName) {
+            return new MyFlexSectionExerciseList(topRow, currentExercisePanel, instanceName) {
+              @Override
+              protected void addTableWithPager(PagingContainer pagingContainer) {
+                Panel column = new FlowPanel();
+                add(column);
+                addTypeAhead(column);
+                final CheckBox w = new CheckBox("Show Only Unrecorded");
+                w.addClickHandler(new ClickHandler() {
+                  @Override
+                  public void onClick(ClickEvent event) {
+                    setUnrecorded(w.getValue());
+                    scheduleWaitTimer();
+                    loadExercises(getHistoryToken(""), getTypeAheadText());
+                  }
+                });
+                w.addStyleName("leftFiveMargin");
+                add(w);
+                add(pagingContainer.getTableWithPager());
+              }
+            };
+
+          }
+        };
+      }
+    };
 
     contentHelper = new SimpleChapterNPFHelper(service, feedback, userManager, controller, listInterface) {
       protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
@@ -421,7 +455,7 @@ public class Navigation implements RequiresResize {
   }
 
   /**
-   * TODOs : streamline this -- there are three requests in sequence...
+   *
    * @see mitll.langtest.client.LangTest#doEverythingAfterFactory(long)
    */
   public void showInitialState() {
