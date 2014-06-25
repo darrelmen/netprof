@@ -18,7 +18,6 @@ public class ScoreAndPath implements IsSerializable {
   public Float getScore() {
     return score;
   }
-
   public String getPath() {
     return path;
   }
