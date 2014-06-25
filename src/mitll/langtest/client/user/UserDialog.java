@@ -35,9 +35,6 @@ import java.util.List;
  */
 public abstract class UserDialog extends BasicDialog {
   protected static final int USER_ID_MAX_LENGTH = 25;
-/*  protected static final String LEAST_RECORDED_FIRST = "Least recorded first";
-  protected static final String LOW_GRADES_ONLY = "Redo items";*/
-
   private static final String GRADING = "grading";
   private static final String TESTING = "testing";  // TODO make these safer
 
@@ -58,23 +55,13 @@ public abstract class UserDialog extends BasicDialog {
   private static final String MALE = "Male";
   private static final String FEMALE = "Female";
   public static final String HIT_ENTER_TO_LOG_IN = "Hit enter to log in.";
-/*
-  private static final String ALL_ITEMS = "Sequential Order";
-  private static final String RECORDING_ORDER = "Item Order";
-*/
-
+  //public static final String TRY_AGAIN = "Try Again";
   final PropertyHandler props;
-
   final LangTestDatabaseAsync service;
-/*  private final UserManager userManager;
-  private final UserNotification userNotification;
-  protected ListBoxFormField recordingOrder;*/
 
   UserDialog(LangTestDatabaseAsync service, PropertyHandler props) {
     this.service = service;
     this.props = props;
-   // this.userManager = userManager;
- //   this.userNotification =  userNotification;
   }
 
   int getAge(TextBoxBase ageEntryBox) {
@@ -123,32 +110,41 @@ public abstract class UserDialog extends BasicDialog {
     login.setTitle(HIT_ENTER_TO_LOG_IN);
     login.getElement().setId("login");
     hp.add(login);
+    login.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
 
     dialogBox.add(hp);
     return login;
   }
 
-  FormField addControlFormField(Panel dialogBox, String label, int minLength) {
-    return addControlFormField(dialogBox, label, false, minLength, USER_ID_MAX_LENGTH);
+  FormField addControlFormField(Panel dialogBox, String label, int minLength, String hint) {
+    return addControlFormField(dialogBox, label, false, minLength, USER_ID_MAX_LENGTH, hint);
   }
 
-  protected FormField addControlFormField(Panel dialogBox, String label, boolean isPassword, int minLength, int maxLength) {
+  protected FormField addControlFormField(Panel dialogBox, String label, boolean isPassword, int minLength, int maxLength, String hint) {
     final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
     user.setMaxLength(maxLength);
-    return getFormField(dialogBox, label, user, minLength);
+    return getFormField(dialogBox, label, user, minLength, hint);
   }
 
-  private FormField getFormField(Panel dialogBox, String label, TextBox user, int minLength) {
-    final ControlGroup userGroup = addControlGroupEntry(dialogBox, label, user);
+  private FormField getFormField(Panel dialogBox, String label, TextBox user, int minLength, String hint) {
+    final ControlGroup userGroup = addControlGroupEntry(dialogBox, label, user, hint);
     return new FormField(user, userGroup, minLength);
   }
 
   protected void markError(FormField dialectGroup, String message) {
-    markError(dialectGroup.group, dialectGroup.box, "Try Again", message, Placement.TOP);
+    markError(dialectGroup.group, dialectGroup.box, TRY_AGAIN, message, Placement.TOP);
+  }
+
+  protected void markError(FormField dialectGroup, String message, Placement placement) {
+    markError(dialectGroup.group, dialectGroup.box, TRY_AGAIN, message, placement);
   }
 
   private HandlerRegistration keyHandler;
 
+  /**
+   * @see mitll.langtest.client.user.StudentDialog#configureKeyHandler(com.github.gwtbootstrap.client.ui.Modal, com.github.gwtbootstrap.client.ui.Button)
+   * @param send
+   */
   // TODO : replace with enter key handler
   void addKeyHandler(final Button send) {
     keyHandler = Event.addNativePreviewHandler(new
@@ -164,7 +160,7 @@ public abstract class UserDialog extends BasicDialog {
                                                      //   System.out.println("key code is " +keyCode);
                                                      if (isEnter && event.getTypeInt() == 512 &&
                                                        "[object KeyboardEvent]".equals(ne.getString())) {
-                                                       ne.preventDefault();
+                                                       //ne.preventDefault();
                                                        send.fireEvent(new ButtonClickEvent());
                                                      }
                                                    }
@@ -187,20 +183,44 @@ public abstract class UserDialog extends BasicDialog {
     return true;
   }
 
+  /**
+   * @see mitll.langtest.client.user.StudentDialog#checkUserAndMaybeRegister(com.github.gwtbootstrap.client.ui.Button, String, mitll.langtest.client.user.BasicDialog.FormField, mitll.langtest.client.user.BasicDialog.FormField, com.github.gwtbootstrap.client.ui.Modal, com.github.gwtbootstrap.client.ui.AccordionGroup, mitll.langtest.client.user.StudentDialog.RegistrationInfo, String, java.util.Collection)
+   * @param user
+   * @return
+   */
   boolean checkValidUser(FormField user) {
     final String userID = user.box.getText();
+
+    boolean foundError = false;
+    String msg = "";
     if (userID.length() > USER_ID_MAX_LENGTH) {
-      markError(user, "Please enter a user id of reasonable length.");
-      return false;
+      msg = "Please enter a user id of reasonable length.";
+      foundError = true;
     } else if (userID.length() == 0) {
-      markError(user, "Please enter a user id.");
-      return false;
+      msg = "Please enter a user id.";
+      foundError = true;
     } else if (userID.length() < StudentDialog.MIN_LENGTH_USER_ID) {
-      markError(user, "Please enter a user of a reasonable length.");
-      return false;
+      msg = "Must be at least " + StudentDialog.MIN_LENGTH_USER_ID + " characters.";
+      foundError = true;
+    } else {
+      int c = 0;
+      for (int i = 0; i < userID.length(); i++) {
+        if (Character.isDigit(userID.charAt(i))) {
+          c++;
+        }
+      }
+      //System.out.println("goufn " + c);
+      if (c < 2) {
+        msg = "Please include at least 2 numbers.";
+        foundError = true;
+      }
     }
-    user.clearError();
-    return true;
+    if (foundError) {
+      markError(user, msg, Placement.BOTTOM);
+    } else {
+      user.clearError();
+    }
+    return !foundError;
   }
 
   private class ButtonClickEvent extends ClickEvent {
@@ -224,16 +244,6 @@ public abstract class UserDialog extends BasicDialog {
     }
     return genderBox;
   }
-/*
-  protected ListBox getExperienceBox() {
-    final ListBox experienceBox = new ListBox(false);
-    List<String> choices = EXPERIENCE_CHOICES;
-    for (String c : choices) {
-      experienceBox.addItem(c);
-    }
-    experienceBox.ensureDebugId("cwListBox-dropBox");
-    return experienceBox;
-    }*/
 
   boolean checkPassword(FormField password) { return checkPassword(password.box);  }
 
