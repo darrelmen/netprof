@@ -123,7 +123,7 @@ class CreateListDialog extends BasicDialog {
     radioButton2.addStyleName("leftFiveMargin");
     hp.add(radioButton2);
 
-    ControlGroup widgets = addControlGroupEntry(row, "Keep List Public/Private?", hp);
+    ControlGroup widgets = addControlGroupEntry(row, "Keep List Public/Private?", hp, "");
 
     row.add(widgets);
 
