@@ -46,7 +46,6 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class PagingExerciseList extends ExerciseList {
-  //public static final boolean SHOW_WAIT_CURSOR = false;
   protected final ExerciseController controller;
   protected PagingContainer pagingContainer;
   private final boolean showTypeAhead;
@@ -55,6 +54,7 @@ public class PagingExerciseList extends ExerciseList {
   private String lastTypeAheadValue = "";
   protected long userListID = -1;
   private int unaccountedForVertical = 160;
+  private boolean unrecorded;
 
   /**
    * @see mitll.langtest.client.ExerciseListLayout#makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.user.UserFeedback, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
@@ -104,11 +104,13 @@ public class PagingExerciseList extends ExerciseList {
    * @param prefix
    */
   void loadExercises(String selectionState, String prefix) {
+    scheduleWaitTimer();
+
     lastReqID++;
     System.out.println("PagingExerciseList.loadExercises : looking for " +
       "'" + prefix + "' (" + prefix.length() + " chars) in list id "+userListID + " instance " + getInstance());
     service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), prefix, userListID,
-      controller.getUser(), getRole(), new SetExercisesCallback(""));
+      controller.getUser(), getRole(), getUnrecorded(), new SetExercisesCallback(""));
   }
 
   /**
@@ -192,14 +194,12 @@ public class PagingExerciseList extends ExerciseList {
   private SafeUri white = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "white_32x32.png");
   private final com.github.gwtbootstrap.client.ui.Image waitCursor = new com.github.gwtbootstrap.client.ui.Image(white);
 
- // private long then = 0;
-
   /**
    * Show wait cursor if the type ahead takes too long.
    *
    * @param column
    */
-  void addTypeAhead(Panel column) {
+  protected void addTypeAhead(Panel column) {
     if (showTypeAhead) {
       typeAhead.getElement().setId("ExerciseList_TypeAhead");
       typeAhead.setDirectionEstimator(true);   // automatically detect whether text is RTL
@@ -207,18 +207,6 @@ public class PagingExerciseList extends ExerciseList {
         public void onKeyUp(KeyUpEvent event) {
           String text = typeAhead.getText();
           if (!text.equals(lastTypeAheadValue)) {
-            if (waitTimer != null) {
-              waitTimer.cancel();
-            }
-            waitTimer = new Timer() {
-              @Override
-              public void run() {
-                waitCursor.setUrl(animated);
-              }
-            };
-            waitTimer.schedule(1000);
-
-       //     then = System.currentTimeMillis();
             //System.out.println("addTypeAhead : looking for '" + text + "' (" + text.length() + " chars)");
             controller.logEvent(typeAhead, "TypeAhead", "UserList_" + userListID, "User search ='" + text + "'");
             loadExercises(getHistoryToken(""), text);
@@ -241,6 +229,21 @@ public class PagingExerciseList extends ExerciseList {
       });
     }
   }
+
+  protected void scheduleWaitTimer() {
+    if (waitTimer != null) {
+      waitTimer.cancel();
+    }
+    waitTimer = new Timer() {
+      @Override
+      public void run() {
+        waitCursor.setUrl(animated);
+      }
+    };
+    waitTimer.schedule(700);
+  }
+
+  protected String getTypeAheadText() { return typeAhead.getText(); }
 
   @Override
   protected void gotExercises(boolean success) {
@@ -415,5 +418,13 @@ public class PagingExerciseList extends ExerciseList {
   public void redraw() {
     pagingContainer.flush();
     pagingContainer.redraw();
+  }
+
+  public boolean getUnrecorded() {
+    return unrecorded;
+  }
+
+  public void setUnrecorded(boolean unrecorded) {
+    this.unrecorded = unrecorded;
   }
 }
