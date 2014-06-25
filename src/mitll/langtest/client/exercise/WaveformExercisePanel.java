@@ -53,7 +53,6 @@ public class WaveformExercisePanel extends ExercisePanel {
   protected void onLoad() {
     super.onLoad();
     getParent().addStyleName("userNPFContentLightPadding");
-
   }
 
   public void setBusy(boolean v) {
@@ -74,9 +73,9 @@ public class WaveformExercisePanel extends ExercisePanel {
     add(new Heading(4, RECORD_PROMPT));
   }
 
-  protected String getExerciseContent(CommonExercise e) {
-    return ExerciseFormatter.getArabic(e.getForeignLanguage());
-  }
+  @Override
+  protected String getExerciseContent(CommonExercise e) { return ExerciseFormatter.getArabic(e.getForeignLanguage()); }
+
   /**
    * Has a answerPanel mark to indicate when the saved audio has been successfully posted to the server.
    *
