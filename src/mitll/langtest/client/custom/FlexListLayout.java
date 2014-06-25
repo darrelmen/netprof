@@ -120,17 +120,13 @@ public abstract class FlexListLayout implements RequiresResize {
   @Override
   public void onResize() {
     if (npfExerciseList != null) {
-      //System.out.println(getClass() + " : onResize " + npfExerciseList.getInstance());
       npfExerciseList.onResize();
     }
   }
 
   protected class MyFlexSectionExerciseList extends FlexSectionExerciseList {
-//    private final String instanceName;
-
     public MyFlexSectionExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName) {
       super(topRow, currentExercisePanel, FlexListLayout.this.service, FlexListLayout.this.feedback, false, false, FlexListLayout.this.controller, true, instanceName);
-  //    this.instanceName = instanceName;
     }
 
     @Override
@@ -145,7 +141,6 @@ public abstract class FlexListLayout implements RequiresResize {
 
     @Override
     protected void noSectionsGetExercises(long userID) {
-     // System.out.println(getClass() + " : noSectionsGetExercises instanceName = " + instanceName + " for list " + userListID);
       loadExercises(getHistoryToken(""), getPrefix());
     }
 
