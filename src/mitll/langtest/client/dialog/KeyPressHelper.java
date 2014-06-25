@@ -7,7 +7,6 @@ import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Event;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
