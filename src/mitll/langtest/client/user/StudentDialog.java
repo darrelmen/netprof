@@ -316,7 +316,7 @@ class StudentDialog extends UserDialog {
 
   private void checkUserAndMaybeRegister(Button closeButton,
                                          final String audioType,
-                                         FormField user,
+                                         final FormField user,
                                          final FormField password,
                                          final Modal dialogBox,
                                          final AccordionGroup accordion,
@@ -327,7 +327,7 @@ class StudentDialog extends UserDialog {
     boolean needsPassword = purposeSetting.equals(REVIEW) || purposeSetting.equals(RECORDER);
 
     System.out.println("checkUserAndMaybeRegister " + purposeSetting + " review " + needsPassword);
-    if (checkValidUser(user) &&
+    if (//checkValidUser(user) &&
       (!needsPassword || checkValidPassword(password, true))
       ) {
       service.userExists(userID, new AsyncCallback<Integer>() {
@@ -343,7 +343,7 @@ class StudentDialog extends UserDialog {
             dialogBox.hide();
             langTest.rememberAudioType(audioType);
             userManager.storeUser(result, audioType, userID, PropertyHandler.LOGIN_TYPE.STUDENT);
-          } else {
+          } else if (checkValidUser(user)) {
             System.out.println("checkUserAndMaybeRegister for " + purposeSetting + " user does not exist id=" + result);
 
             boolean skipRegister = canSkipRegister(purposeSetting);
