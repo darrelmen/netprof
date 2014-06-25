@@ -14,7 +14,6 @@ import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import org.apache.log4j.Logger;
-import org.h2.store.fs.FileUtils;
 
 import java.io.File;
 import java.util.ArrayList;
