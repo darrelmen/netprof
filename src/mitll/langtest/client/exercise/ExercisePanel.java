@@ -56,7 +56,7 @@ public class ExercisePanel extends VerticalPanel implements
   private static final String ENGLISH = "English";
   private static final String TYPE_YOUR_ANSWER_IN = "Type your answer in ";
  // private static final String SPEAK_AND_RECORD_YOUR_ANSWER_IN = "Speak and record your answer in ";
-  private static final int ITEM_HEADER = 5;
+ // private static final int ITEM_HEADER = 5;
   private static final int CONTENT_SCROLL_HEIGHT = 220;
   private static final String PROMPT = "Read the following text and answer the question or questions below.";
   private final List<Widget> answers = new ArrayList<Widget>();
@@ -117,38 +117,20 @@ public class ExercisePanel extends VerticalPanel implements
 
   protected void addInstructions() {  add(new Heading(4, PROMPT));  }
 
-  /**
-   * @see #ExercisePanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, ExerciseController, mitll.langtest.client.list.ListInterface)
-   * @param e
-   */
-  protected void addItemHeader(CommonExercise e) {
-    Heading w = new Heading(ITEM_HEADER, "Item " + e.getID());
-    w.getElement().setId("ItemHeading");
-    add(w);
-  }
-
   protected Widget getQuestionContent(CommonExercise e, boolean includeItemID) {
     String content = getExerciseContent(e);
 
-    //System.out.println("getQuestionContent : content is " + content);
- /*   if (content.contains("Listen")) {
-      return new AudioExerciseContent().getQuestionContent(e, controller, includeItemID, false);
+    HTML maybeRTLContent = getMaybeRTLContent(content, true);
+    maybeRTLContent.addStyleName("rightTenMargin");
+    maybeRTLContent.addStyleName("topFiveMargin");
+    if (content.length() > 200) {
+      return getContentScroller(maybeRTLContent);
+    } else {
+      return maybeRTLContent;
     }
-    else {*/
-      HTML maybeRTLContent = getMaybeRTLContent(content, true);
-      maybeRTLContent.addStyleName("rightTenMargin");
-      if (content.length() > 200) {
-        //System.out.println("content length " + content.length() + " " + content);
-        return getContentScroller(maybeRTLContent);
-      } else {
-        return maybeRTLContent;
-      }
-   // }
   }
 
-  protected String getExerciseContent(CommonExercise e) {
-    return e.getContent();
-  }
+  protected String getExerciseContent(CommonExercise e) { return e.getContent();  }
 
   Widget getContentScroller(HTML maybeRTLContent) {
     ScrollPanel scroller = new ScrollPanel(maybeRTLContent);
