@@ -485,7 +485,7 @@ fieldset > legend {
 
 .Instruction-data  {
     color: #CC6600;
-    font-size: 18px;
+    font-size: larger;
     font-weight: bold;
     word-wrap: break-word;       /* Internet Explorer 5.5+ */
     word-break: keep-all;
@@ -495,7 +495,7 @@ fieldset > legend {
 
 .Instruction-data-with-wrap  {
     color: #CC6600;
-    font-size: 18px;
+    font-size: larger;
     font-weight: bold;
     word-wrap: break-word;       /* Internet Explorer 5.5+ */
     word-break: keep-all;
@@ -991,4 +991,10 @@ body>.dropdown-popup .nav-list>li.active>a  {
 
 #getUnitLessonForExercise_unitLesson  small {
     color:black;
+}
+
+.centeringPractice {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 800px;
 }
