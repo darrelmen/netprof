@@ -12,6 +12,7 @@ import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.exercise.ExerciseController;
 
 /**
+ * Does event logging for widgets -- calls service to log event.
  * Created by GO22670 on 3/24/2014.
  */
 public class ButtonFactory implements EventLogger {
@@ -68,13 +69,13 @@ public class ButtonFactory implements EventLogger {
 
   @Override
   public void logEvent(final String widgetID, String widgetType, String exid, String context, long userid) {
-    System.out.println("logEvent event for " + widgetID + " " + widgetType + " exid " + exid + " context " + context + " user " + userid);
+   // System.out.println("logEvent event for " + widgetID + " " + widgetType + " exid " + exid + " context " + context + " user " + userid);
 
     service.logEvent(widgetID, widgetType, exid, context, userid, props.getTurkID(), new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
         if (!caught.getMessage().trim().equals("0")) {
-          System.err.println("FAILED to send event for " + widgetID + " message '" + caught.getMessage() +"'");
+         // System.err.println("FAILED to send event for " + widgetID + " message '" + caught.getMessage() +"'");
           caught.printStackTrace();
         }
       }
