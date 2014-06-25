@@ -90,7 +90,7 @@ public class ExerciseTrie extends Trie<CommonExercise> {
    * @param prefix
    * @return
    */
-  public List<CommonExercise> getExercises(String prefix) {
+  public Collection<CommonExercise> getExercises(String prefix) {
     String lc = prefix.toLowerCase();
     List<EmitValue<CommonExercise>> emits = getEmits(lc);
     Set<CommonExercise> unique = new HashSet<CommonExercise>();
