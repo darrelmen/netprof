@@ -1,6 +1,5 @@
 package mitll.langtest.client.list;
 
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -27,7 +26,6 @@ import mitll.langtest.client.custom.EditItem;
 import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.flashcard.BootstrapExercisePanel;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.CommonExercise;
@@ -37,7 +35,6 @@ import mitll.langtest.shared.Result;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +51,7 @@ import java.util.Set;
 public abstract class ExerciseList extends VerticalPanel implements ListInterface, ProvidesResize,
   ValueChangeHandler<String> {
   private static final Map<String, Collection<String>> TYPE_TO_SELECTION = new HashMap<String, Collection<String>>();
+  private static final int MAX_MSG_LEN = 200;
 
   private SimplePanel innerContainer;
   protected final LangTestDatabaseAsync service;
@@ -348,7 +346,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   protected void dealWithRPCError(Throwable caught) {
     String message = caught.getMessage();
-    if (message.length() > 200) message = message.substring(0, 200);
+    if (message.length() > MAX_MSG_LEN) message = message.substring(0, MAX_MSG_LEN);
     if (!message.trim().equals("0")) {
       feedback.showErrorMessage("Server error", "Please clear your cache and reload the page. (" +
         message +
@@ -655,13 +653,13 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     return exercisePanel;
   }
 
-  DivWidget getCenteringRow() {
+/*  DivWidget getCenteringRow() {
     DivWidget status = new DivWidget();
     status.getElement().setId("statusRow");
     status.addStyleName("alignCenter");
     status.addStyleName("inlineBlockStyle");
     return status;
-  }
+  }*/
 
   /**
    * @return
