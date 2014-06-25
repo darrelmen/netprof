@@ -48,7 +48,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.Flashcard;
 import mitll.langtest.client.instrumentation.ButtonFactory;
 import mitll.langtest.client.instrumentation.EventLogger;
-import mitll.langtest.client.instrumentation.EventMock;
 import mitll.langtest.client.instrumentation.EventTable;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.monitoring.MonitoringManager;
@@ -209,6 +208,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void logMessageOnServer(String message) {
+    new Exception().printStackTrace();
     service.logMessage(message,
       new AsyncCallback<Void>() {
         @Override
@@ -219,8 +219,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       }
     );
   }
-
- // private Panel bothSecondAndThird;
 
   /**
    * @see mitll.langtest.client.scoring.AudioPanel#getImageURLForAudio(String, String, int, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck)
@@ -295,9 +293,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (props.doInstrumentation()) {
       buttonFactory = new ButtonFactory(service, props);
     }
-    else {
+/*    else {
       buttonFactory = new EventMock();
-    }
+    }*/
     userManager = new UserManager(this, service, props);
 
     checkAdmin();
