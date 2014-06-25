@@ -68,7 +68,7 @@ public class ButtonFactory implements EventLogger {
 
   @Override
   public void logEvent(final String widgetID, String widgetType, String exid, String context, long userid) {
-    //System.out.println("logEvent event for " + widgetID + " " + widgetType + " exid " + exid + " context " + context + " user " + userid);
+    System.out.println("logEvent event for " + widgetID + " " + widgetType + " exid " + exid + " context " + context + " user " + userid);
 
     service.logEvent(widgetID, widgetType, exid, context, userid, props.getTurkID(), new AsyncCallback<Void>() {
       @Override
