@@ -26,8 +26,8 @@ import java.util.Map;
  */
 public class HistoryExerciseList extends PagingExerciseList {
   public static final String ANY = "Clear";
-  private boolean debugOnValueChange = false;
-  private static final boolean DEBUG = false;
+  private static final boolean debugOnValueChange = false;
+  private static final boolean DEBUG = true;
 
   protected final Map<String,SectionWidget> typeToBox = new HashMap<String, SectionWidget>();
   /**
@@ -255,37 +255,8 @@ public class HistoryExerciseList extends PagingExerciseList {
     }
 
     for (String type : typesWithSelections) {
-      //System.out.println("restoreListBoxState : selecting items for " + type);
-
-      Collection<String> selections = selectionState2.get(type);
-      selectItem(type, selections);
+      selectItem(type, selectionState2.get(type));
     }
-/*    List<String> toRemove = new ArrayList<String>();
-    for (Map.Entry<String, Collection<String>> typeSelectionPair : selectionState2.entrySet()) {
-      Collection<String> selections = typeSelectionPair.getValue();
-      if (selections.size() == 1 && selections.iterator().next().equals(ANY)) {
-        toRemove.add(typeSelectionPair.getKey());
-        selectItem(typeSelectionPair.getKey(), selections);
-      }
-    }
-
-    System.out.println("restoreListBoxState : selection state " + selectionState2);
-    Collection<String> types = new ArrayList<String>(getTypeOrder(selectionState2));
-    types.removeAll(toRemove);
-    // whatever is left here are actual selections
-    for (String type : types) {
-      if (selectionState2.containsKey(type)) {
-        Collection<String> section = selectionState2.get(type);
-        if (!typeToBox.containsKey(type)) {
-          if (!type.equals("item")) {
-            System.err.println("restoreListBoxState for " + selectionState + " : huh? bad type '" + type +
-              "', expecting something in " + typeToBox.keySet());
-          }
-        } else {
-          selectItem(type, section);
-        }
-      }
-    }*/
   }
 
   protected void clearEnabled(String type) {}
@@ -360,7 +331,10 @@ public class HistoryExerciseList extends PagingExerciseList {
   }
 
   protected void loadExercises(String selectionState, String prefix) {
+
     Map<String, Collection<String>> typeToSection = getSelectionState(selectionState).getTypeToSection();
+    System.out.println("HistoryExerciseList.loadExercises : looking for " +
+      "'" + prefix + "' (" + prefix.length() + " chars) in list id "+userListID + " instance " + getInstance());
     loadExercisesUsingPrefix(typeToSection, prefix);
   }
 
@@ -369,14 +343,15 @@ public class HistoryExerciseList extends PagingExerciseList {
     if (DEBUG) {
       System.out.println("HistoryExerciseList.loadExercisesUsingPrefix looking for '" + prefix +
         "' (" + prefix.length() + " chars) in context of " + typeToSection + " list " + userListID +
-        " instance " + getInstance() + " user " + controller.getUser());
+        " instance " + getInstance() + " user " + controller.getUser() + " unrecorded " + getUnrecorded());
     }
     String selectionID = userListID + "_"+typeToSection.toString();
-    service.getExerciseIds(lastReqID, typeToSection, prefix, userListID, controller.getUser(), getRole(), new SetExercisesCallback(selectionID));
+    scheduleWaitTimer();
+    service.getExerciseIds(lastReqID, typeToSection, prefix, userListID, controller.getUser(), getRole(), getUnrecorded(), new SetExercisesCallback(selectionID));
   }
 
   /**
-   * @see HistoryExerciseList#loadExercises(String, String)
+   * @see PagingExerciseList#loadExercises(String, String)
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    * @param token
    * @return object representing type=value pairs from history token
