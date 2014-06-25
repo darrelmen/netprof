@@ -15,7 +15,6 @@ import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.DOM;
@@ -393,7 +392,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     return nameValueRow;
   }
 
-  protected HTML getMaybeRTLContent(String content, boolean requireAlignment) {
+/*  protected HTML getMaybeRTLContent(String content, boolean requireAlignment) {
     boolean rightAlignContent = controller.isRightAlignContent();
     HasDirection.Direction direction =
       requireAlignment && rightAlignContent ? HasDirection.Direction.RTL : WordCountDirectionEstimator.get().estimateDirection(content);
@@ -405,14 +404,14 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     }
 
     html.addStyleName("wrapword");
-/*    if (isPashto()) {
+*//*    if (isPashto()) {
       html.addStyleName("pashtofont");
     }
     else {
       html.addStyleName("xlargeFont");
-    }*/
+    }*//*
     return html;
-  }
+  }*/
 
   /**
    * @see mitll.langtest.client.custom.QCNPFExercise#populateCommentRow
