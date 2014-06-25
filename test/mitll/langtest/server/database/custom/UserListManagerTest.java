@@ -345,7 +345,7 @@ public class UserListManagerTest {
   }
 
   private long addList(long user, UserListManager userListManager, String name) {
-    long listid = userListManager.addUserList(user, name, "", "");
+    long listid = userListManager.addUserList(user, name, "", "", false);
     logger.debug("adding list " + name + " got " + listid);
     Collection<UserList> listsForUser1 = userListManager.getListsForUser(user, false, false);
     assertTrue(" size is " + listsForUser1.size(), listsForUser1.size() == 2);
