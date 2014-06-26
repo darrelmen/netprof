@@ -1,5 +1,16 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.database.custom.UserListManager;
+import mitll.langtest.shared.MiniUser;
+import mitll.langtest.shared.User;
+import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Connection;
@@ -14,19 +25,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import mitll.langtest.server.database.custom.UserListManager;
-import mitll.langtest.shared.DLIUser;
-import mitll.langtest.shared.MiniUser;
-import mitll.langtest.shared.User;
-
-import org.apache.log4j.Logger;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.DataFormat;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 public class UserDAO extends DAO {
   private static final String DEFECT_DETECTOR = "defectDetector";
@@ -46,12 +44,14 @@ public class UserDAO extends DAO {
     "items complete?",
     "num recordings", "rate(sec)",
     "ipaddr",
- //   "nativelang",
     "timestamp"
-  //  , "demographics"
   );
   public static final int DEFAULT_USER_ID = -1;
+  public static final int DEFAULT_MALE_ID = -2;
+  public static final int DEFAULT_FEMALE_ID = -3;
   public static MiniUser DEFAULT_USER = new MiniUser(DEFAULT_USER_ID, 30, 0, "default", "default", "default");
+  public static MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 30, 0, "default", "default", "Male");
+  public static MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 30, 1, "default", "default", "Female");
 
   public UserDAO(Database database) {
     super(database);
@@ -396,7 +396,7 @@ public class UserDAO extends DAO {
    * @param out
    * @param dliUserDAO
    */
-  public void toXLSX(OutputStream out, DLIUserDAO dliUserDAO) {
+/*  public void toXLSX(OutputStream out, DLIUserDAO dliUserDAO) {
     long then = System.currentTimeMillis();
 
     List<User> users = joinWithDLIUsers(dliUserDAO);
@@ -404,13 +404,13 @@ public class UserDAO extends DAO {
     if (now-then > 100) logger.warn("toXLSX : took " + (now-then) + " millis to read " + users.size()+
       " users from database");
     toXLSX(out,users);
-  }
+  }*/
 
   public void toXLSX(OutputStream out, List<User> users) {
     writeToStream(out, getSpreadsheet(users));
   }
 
-  public SXSSFWorkbook getSpreadsheet(List<User> users) {
+  private SXSSFWorkbook getSpreadsheet(List<User> users) {
     long then = System.currentTimeMillis();
 
     //Workbook wb = new XSSFWorkbook();
@@ -465,7 +465,7 @@ public class UserDAO extends DAO {
     return wb;
   }
 
-  public void writeToStream(OutputStream out, SXSSFWorkbook wb) {
+  private void writeToStream(OutputStream out, SXSSFWorkbook wb) {
     long now;
     try {
       long then = System.currentTimeMillis();
@@ -486,8 +486,7 @@ public class UserDAO extends DAO {
 
   private float roundToHundredth(double totalHours) { return ((float) ((Math.round(totalHours * 100)))) / 100f;  }
 
-
-  private List<User> joinWithDLIUsers(DLIUserDAO dliUserDAO) {
+/*  private List<User> joinWithDLIUsers(DLIUserDAO dliUserDAO) {
     List<User> users = getUsers();
     List<DLIUser> users1 = dliUserDAO.getUsers();
     Map<Long, User> userMap = getMap(users);
@@ -500,5 +499,5 @@ public class UserDAO extends DAO {
     }
     if (users1.isEmpty()) logger.info("no dli users.");
     return users;
-  }
+  }*/
 }
