@@ -240,6 +240,9 @@ public class ExcelImport implements ExerciseDAO {
   }
 
   @Override
+  /**
+   * @return true if exercise with this id was removed
+   */
   public boolean remove(String id) {
     synchronized (this) {
       if (!idToExercise.containsKey(id)) return false;
