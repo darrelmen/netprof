@@ -62,11 +62,12 @@ public class AddRemoveDAO extends DAO {
 
 
   /**
-   * Somehow on subsequent runs, the ids skip by 30 or so?
-   * <p/>
-   * Uses return generated keys to get the user id
+   * Add or delete an exercise.
    *
-   * @see mitll.langtest.server.database.custom.UserListManager#markApproved(String, long)
+   * @see mitll.langtest.server.database.DatabaseImpl#deleteItem
+   * @see mitll.langtest.server.database.DatabaseImpl#duplicateExercise(mitll.langtest.shared.custom.UserExercise)
+   * @see mitll.langtest.client.custom.ReviewEditableExercise#duplicateExercise
+   * @see mitll.langtest.client.custom.ReviewEditableExercise#deleteItem(String, long, mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.PagingExerciseList, mitll.langtest.client.list.PagingExerciseList)
    */
   public void add(String exerciseID, String operation) {
     try {
