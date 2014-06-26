@@ -39,7 +39,9 @@ public class UserExerciseDAO extends DAO {
   private static final String STATE = "state";
   private static final String REF_AUDIO = "refAudio";
   private static final String SLOW_AUDIO_REF = "slowAudioRef";
-  private static final boolean ADD_MISSING_AUDIO = false;
+
+  // ?? when would this be used?
+  //private static final boolean ADD_MISSING_AUDIO = false;
 
   private ExerciseDAO exerciseDAO;
   private static final boolean DEBUG = false;
@@ -196,7 +198,7 @@ public class UserExerciseDAO extends DAO {
       "english VARCHAR, " +
       "foreignLanguage VARCHAR, " +
       TRANSLITERATION + " VARCHAR, " +
-      "creatorid LONG, " +
+      "creatorid INT, " +
       REF_AUDIO +
       " VARCHAR, " +
       SLOW_AUDIO_REF +
@@ -335,6 +337,12 @@ public class UserExerciseDAO extends DAO {
     return null;
   }
 
+  /**
+   * @see mitll.langtest.server.database.ExcelImport#getRawExercises()
+   * @see #setAudioDAO(mitll.langtest.server.database.AudioDAO)
+   * @param addMissingAudio always false
+   * @return
+   */
   public Collection<CommonUserExercise> getOverrides(boolean addMissingAudio) {
     String sql = "SELECT * from " + USEREXERCISE + " where override=true";
     try {
@@ -382,7 +390,7 @@ public class UserExerciseDAO extends DAO {
    * @see #getWhere(java.util.Collection)
    * @see #getWhere(java.lang.String)
    * @param sql
-   * @param addMissingAudio
+   * @param addMissingAudio always false
    * @return user exercises without annotations
    * @throws SQLException
    */
@@ -428,6 +436,12 @@ public class UserExerciseDAO extends DAO {
     return exercises;
   }
 
+  /**
+   * @see #getUserExercises(String, boolean)
+   * @param e
+   * @param ref
+   * @param sref
+   */
   private void addMissingAudio(UserExercise e, String ref, String sref) {
     boolean hasRef = (ref != null && !ref.isEmpty());
     boolean hasSRef = (sref != null && !sref.isEmpty());
@@ -469,9 +483,9 @@ public class UserExerciseDAO extends DAO {
     exToAudio = audioDAO.getExToAudio();
     this.audioDAO = audioDAO;
 
-    if (ADD_MISSING_AUDIO) {
+/*    if (ADD_MISSING_AUDIO) {
       getOverrides(true);
-    }
+    }*/
   }
 
   private Map<String, String> getUnitToValue(ResultSet rs, List<String> typeOrder) throws SQLException {
