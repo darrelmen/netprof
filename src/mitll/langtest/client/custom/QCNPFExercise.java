@@ -1,14 +1,18 @@
 package mitll.langtest.client.custom;
 
 import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.ButtonGroup;
+import com.github.gwtbootstrap.client.ui.ButtonToolbar;
 import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.Tooltip;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.github.gwtbootstrap.client.ui.constants.ToggleType;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
@@ -17,8 +21,10 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -27,6 +33,7 @@ import mitll.langtest.client.exercise.PostAnswerProvider;
 import mitll.langtest.client.gauge.ASRScorePanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
+import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.AudioAttribute;
@@ -322,7 +329,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
       ExerciseAnnotation refAudio = e.getAnnotation(REF_AUDIO);
       Panel column = new FlowPanel();
       column.addStyleName("blockStyle");
-      column.add(getEntry(REF_AUDIO, new Label(NO_AUDIO_RECORDED), refAudio));
+      column.add(getCommentWidget(REF_AUDIO, new Label(NO_AUDIO_RECORDED), refAudio));
       return column;
     } else {
       Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getUserMap(true);
@@ -360,9 +367,26 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
       for (AudioAttribute audio : malesMap.get(user)) {
         if (!audio.isHasBeenPlayed()) allHaveBeenPlayed = false;
-        Pair panelForAudio1 = getPanelForAudio(e, audio, tabAndContent);
+        Pair panelForAudio1 = getPanelForAudio(e, audio);
+
         Widget panelForAudio = panelForAudio1.entry;
-        tabAndContent.getContent().add(panelForAudio);
+        tabAndContent.addWidget(panelForAudio1.audioPanel);
+        toResize.add(panelForAudio1.audioPanel);
+
+        if (user.isDefault()) {    // add widgets to mark gender on default audio
+          Panel vp = new VerticalPanel();
+          Panel hp = new HorizontalPanel();
+
+          final Button next = getNextButton();
+          hp.add(getGenderGroup(tabAndContent, audio, next));
+          hp.add(next);
+          next.setVisible(false);
+          vp.add(hp);
+          vp.add(panelForAudio);
+          tabAndContent.getContent().add(vp);
+        } else {
+          tabAndContent.getContent().add(panelForAudio);
+        }
         if (audio.isHasBeenPlayed()) {
           audioWasPlayed.add(panelForAudio1.audioPanel);
         }
@@ -374,8 +398,98 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     }
   }
 
+  private Button getNextButton() {
+    final Button next = new Button("Next");
+    next.setType(ButtonType.SUCCESS);
+    next.setIcon(IconType.ARROW_RIGHT);
+    next.addStyleName("leftFiveMargin");
+    next.addStyleName("topMargin");
+    next.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        next.setEnabled(false);
+        loadNext();
+      }
+    });
+    return next;
+  }
+
+  /**
+   * TODO : this may be undone if someone deletes the audio cut - since this essentially masks out old score
+   * default audio.
+   *
+   * @param tabAndContent
+   * @param audio
+   * @param next
+   * @return
+   */
+  private DivWidget getGenderGroup(final RememberTabAndContent tabAndContent, final AudioAttribute audio, final Button next) {
+    ButtonToolbar w = new ButtonToolbar();
+    ButtonGroup buttonGroup = new ButtonGroup();
+    buttonGroup.setToggle(ToggleType.RADIO);
+    w.add(buttonGroup);
+
+    final Button onButton = makeGroupButton(buttonGroup, "MALE");
+
+    if (audio.getExid() == null) {
+      audio.setExid(exercise.getID());
+    }
+    onButton.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        onButton.setEnabled(false);
+
+        service.markGender(audio, true, new AsyncCallback<Void>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            onButton.setEnabled(true);
+          }
+
+          @Override
+          public void onSuccess(Void result) {
+            onButton.setEnabled(true);
+            tabAndContent.getTab().setHeading("Male");
+            next.setVisible(true);
+          }
+        });
+      }
+    });
+
+    final Button offButton = makeGroupButton(buttonGroup, "FEMALE");
+
+    offButton.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        offButton.setEnabled(false);
+        service.markGender(audio, false, new AsyncCallback<Void>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            offButton.setEnabled(true);
+          }
+
+          @Override
+          public void onSuccess(Void result) {
+            offButton.setEnabled(true);
+            tabAndContent.getTab().setHeading("Female");
+            next.setVisible(true);
+          }
+        });
+      }
+    });
+
+    return w;
+  }
+
+  private Button makeGroupButton(ButtonGroup buttonGroup,String title) {
+    Button onButton = new Button(title);
+    onButton.getElement().setId("MaleFemale"+"_"+title);
+    controller.register(onButton, exercise.getID());
+    buttonGroup.add(onButton);
+    return onButton;
+  }
+
   private String getUserTitle(int me, MiniUser user) {
-    return (user.getId() == DEFAULT_USER) ? GoodwaveExercisePanel.DEFAULT_SPEAKER : (user.getId() == me) ? "by You (" +user.getUserID()+ ")" : getUserTitle(user);
+    return (user.isDefault()) ? GoodwaveExercisePanel.DEFAULT_SPEAKER : (user.getId() == me) ? "by You (" +user.getUserID()+ ")" : getUserTitle(user);
   }
 
   private String getUserTitle(MiniUser user) {
@@ -390,9 +504,10 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
    *
    * @param e
    * @param audio
-   * @return
+   * @return both the comment widget and the audio panel
+   * @see #addTabsForUsers(mitll.langtest.shared.CommonExercise, com.github.gwtbootstrap.client.ui.TabPanel, java.util.Map, java.util.List)
    */
-  private Pair getPanelForAudio(final CommonExercise e, final AudioAttribute audio,RememberTabAndContent tabAndContent) {
+  private Pair getPanelForAudio(final CommonExercise e, final AudioAttribute audio) {
     String audioRef = audio.getAudioRef();
     if (audioRef != null) {
       audioRef = wavToMP3(audioRef);   // todo why do we have to do this?
@@ -407,9 +522,9 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
         audioWasPlayed.add(audioPanel);
         //System.out.println("playing audio " + audio.getAudioRef() + " has " +tabs.size() + " tabs, now " + audioWasPlayed.size()  + " played");
         //if (audioWasPlayed.size() == toResize.size()) {
-          // all components played
-          setApproveButtonState();
-       // }
+        // all components played
+        setApproveButtonState();
+        // }
         for (RememberTabAndContent tabAndContent : tabs) {
           tabAndContent.checkAllPlayed(audioWasPlayed);
         }
@@ -417,20 +532,20 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
       }
 
       @Override
-      public void playStopped() {}
+      public void playStopped() {
+      }
     });
-    tabAndContent.addWidget(audioPanel);
-    toResize.add(audioPanel);
     ExerciseAnnotation audioAnnotation = e.getAnnotation(audio.getAudioRef());
 
-    Widget entry = getEntry(audio.getAudioRef(), audioPanel, audioAnnotation);
+    Widget entry = getCommentWidget(audio.getAudioRef(), audioPanel, audioAnnotation);
     return new Pair(entry, audioPanel);
   }
 
   private static class Pair {
-    Widget entry, audioPanel;
+    Widget entry;
+    AudioPanel audioPanel;
 
-    public Pair(Widget entry, Widget audioPanel) {
+    public Pair(Widget entry, AudioPanel audioPanel) {
       this.entry = entry;
       this.audioPanel = audioPanel;
     }
@@ -442,7 +557,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   }
 
   private Widget getEntry(final String field, final String label, String value, ExerciseAnnotation annotation, boolean includeLabel) {
-    return getEntry(field, getContentWidget(label, value, true, includeLabel), annotation);
+    return getCommentWidget(field, getContentWidget(label, value, true, includeLabel), annotation);
   }
 
   /**
@@ -450,7 +565,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
    * @param annotation
    * @return
    */
-  private Widget getEntry(final String field, Widget content, ExerciseAnnotation annotation) {
+  private Widget getCommentWidget(final String field, Widget content, ExerciseAnnotation annotation) {
     final FocusWidget commentEntry = makeCommentEntry(field, annotation);
 
     boolean alreadyMarkedCorrect = annotation == null || annotation.status == null || annotation.status.equals("correct");
@@ -484,7 +599,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   }
 
   /**
-   * @see #getEntry(String, com.google.gwt.user.client.ui.Widget, mitll.langtest.shared.ExerciseAnnotation)
+   * @see #getCommentWidget(String, com.google.gwt.user.client.ui.Widget, mitll.langtest.shared.ExerciseAnnotation)
    * @param commentEntry
    * @param alreadyMarkedCorrect
    * @param commentRow
@@ -499,7 +614,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   }
 
   /**
-   * @see #getEntry(String, com.google.gwt.user.client.ui.Widget, mitll.langtest.shared.ExerciseAnnotation)
+   * @see #getCommentWidget(String, com.google.gwt.user.client.ui.Widget, mitll.langtest.shared.ExerciseAnnotation)
    * @param field
    * @param annotation
    * @return
