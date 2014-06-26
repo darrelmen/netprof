@@ -394,6 +394,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * 3) Attach history info (when has the user recorded audio for the item under the learn tab and gotten a score)
    * @param userID
    * @param firstExercise
+   * @see #getExercise(String, long)
+   * @see #makeExerciseListWrapper(int, java.util.Collection, long, String)
    */
   private void addAnnotationsAndAudio(long userID, CommonExercise firstExercise) {
     addAnnotations(firstExercise); // todo do this in a better way
@@ -968,6 +970,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
+   * @see mitll.langtest.client.custom.QCNPFExercise#getGenderGroup(mitll.langtest.client.custom.RememberTabAndContent, mitll.langtest.shared.AudioAttribute, com.github.gwtbootstrap.client.ui.Button)
+   * @param attr
+   * @param isMale
+   */
+  @Override
+  public void markGender(AudioAttribute attr, boolean isMale) {
+    db.getAudioDAO().add(isMale ? UserDAO.DEFAULT_MALE_ID : UserDAO.DEFAULT_FEMALE_ID, attr);
+  }
+
+  /**
    * @param age
    * @param gender
    * @param experience
@@ -1070,6 +1082,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param audioType regular or slow
    * @param exercise1 for which exercise
    * @param audioAnswer holds the path of the temporary recorded file
+   * @return AudioAttribute that represents the audio that has been added to the exercise
    */
   private AudioAttribute addToAudioTable(int user, String audioType, CommonExercise exercise1, String exerciseID, AudioAnswer audioAnswer) {
     String exercise = exercise1 == null ? exerciseID : exercise1.getID();
