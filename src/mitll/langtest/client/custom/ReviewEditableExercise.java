@@ -207,7 +207,7 @@ class ReviewEditableExercise extends EditableExercise {
   }
 
   private String getUserTitle(int me, MiniUser user) {
-    return (user.getId() == QCNPFExercise.DEFAULT_USER) ? GoodwaveExercisePanel.DEFAULT_SPEAKER : (user.getId() == me) ? "by You (" +user.getUserID()+ ")" : getUserTitle(user);
+    return (user.isDefault()) ? GoodwaveExercisePanel.DEFAULT_SPEAKER : (user.getId() == me) ? "by You (" +user.getUserID()+ ")" : getUserTitle(user);
   }
 
   private String getUserTitle(MiniUser user) {
