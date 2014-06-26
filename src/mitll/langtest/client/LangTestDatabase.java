@@ -38,7 +38,7 @@ public interface LangTestDatabase extends RemoteService {
   CommonExercise getExercise(String id, long userID);
 
   void markAudioDefect(AudioAttribute audioAttribute, String exid);
-
+  void markGender(AudioAttribute attr, boolean isMale);
   // user DAO
   long addUser(int age, String gender, int experience, String nativeLang, String dialect, String userID, Collection<User.Permission> permissions);
 
