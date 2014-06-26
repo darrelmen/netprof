@@ -344,10 +344,9 @@ public class DatabaseImpl implements Database {
     logger.debug("tooltip now " + userExercise.getTooltip());
 
     getUserListManager().editItem(userExercise, true, serverProps.getMediaDir());
-    Map<String, ExerciseAnnotation> fieldToAnnotation = userExercise.getFieldToAnnotation();
 
     Set<AudioAttribute> original = new HashSet<AudioAttribute>(userExercise.getAudioAttributes());
-    Set<AudioAttribute> defects = getDefects(userExercise, fieldToAnnotation);
+    Set<AudioAttribute> defects = getAndMarkDefects(userExercise, userExercise.getFieldToAnnotation());
 
     CommonExercise exercise = exerciseDAO.addOverlay(userExercise);
     if (exercise == null) {
@@ -376,7 +375,7 @@ public class DatabaseImpl implements Database {
       logger.debug("editItem copying " + original.size() + " audio attrs under exercise overlay id " + overlayID);
 
       for (AudioAttribute toCopy : original) {
-        if (toCopy.getUserid() < 1 && toCopy.getUserid() != UserDAO.DEFAULT_USER_ID) {
+        if (toCopy.getUserid() < UserDAO.DEFAULT_FEMALE_ID) {
           logger.error("bad user id for " + toCopy);
         }
 
@@ -396,14 +395,14 @@ public class DatabaseImpl implements Database {
    *
    * @see #editItem(mitll.langtest.shared.custom.UserExercise)
    */
-  private Set<AudioAttribute> getDefects(UserExercise userExercise, Map<String, ExerciseAnnotation> fieldToAnnotation) {
+  private Set<AudioAttribute> getAndMarkDefects(UserExercise userExercise, Map<String, ExerciseAnnotation> fieldToAnnotation) {
     Set<AudioAttribute> defects = new HashSet<AudioAttribute>();
 
     for (Map.Entry<String, ExerciseAnnotation> fieldAnno : fieldToAnnotation.entrySet()) {
       if (!fieldAnno.getValue().isCorrect()) {
         AudioAttribute audioAttribute = userExercise.getAudioRefToAttr().get(fieldAnno.getKey());
         if (audioAttribute != null) {
-          logger.debug("getDefects : found defect " + audioAttribute + " anno : " + fieldAnno.getValue() + " field  " + fieldAnno.getKey());
+          logger.debug("getAndMarkDefects : found defect " + audioAttribute + " anno : " + fieldAnno.getValue() + " field  " + fieldAnno.getKey());
          // logger.debug("\tmarking defect on audio");
           defects.add(audioAttribute);
           audioDAO.markDefect(audioAttribute);
