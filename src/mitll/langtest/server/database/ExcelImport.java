@@ -43,6 +43,8 @@ import java.util.Set;
  */
 public class ExcelImport implements ExerciseDAO {
   private static final Logger logger = Logger.getLogger(ExcelImport.class);
+  public static final String FAST_WAV = "Fast" + ".wav";
+  public static final String SLOW_WAV = "Slow" + ".wav";
   //private static final boolean INCLUDE_ENGLISH_SEMI_AS_DEFECT = false;
 
   private List<CommonExercise> exercises = null;
@@ -951,14 +953,22 @@ public class ExcelImport implements ExerciseDAO {
     return imported;
   }
 
+  /**
+   * Can override audio file directory with a non-empty refAudioIndex.
+   *
+   * @param id
+   * @param refAudioIndex
+   * @param imported
+   */
   private void addOldSchoolAudio(String id, String refAudioIndex, Exercise imported) {
     String audioDir = refAudioIndex.length() > 0 ? findBest(refAudioIndex) : id;
     if (audioOffset != 0) {
       audioDir = "" + (Integer.parseInt(audioDir.trim()) + audioOffset);
     }
-    String fastAudioRef = mediaDir + File.separator + audioDir + File.separator + "Fast" + ".wav";
-    String slowAudioRef = mediaDir + File.separator + audioDir + File.separator + "Slow" + ".wav";
 
+    String parentPath = mediaDir + File.separator + audioDir + File.separator;
+    String fastAudioRef = parentPath + FAST_WAV;
+    String slowAudioRef = parentPath + SLOW_WAV;
 
     if (!missingFastSet.contains(audioDir)) {
       File test = new File(fastAudioRef);
