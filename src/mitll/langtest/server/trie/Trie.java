@@ -266,10 +266,9 @@ public class Trie<T> {
         }
       }
     }
-
   }
 
-  private static class MyTextEntityValue implements TextEntityValue<String> {
+/*  private static class MyTextEntityValue implements TextEntityValue<String> {
     private final String entry;
     public MyTextEntityValue(String entry) {
       this.entry = entry;
@@ -285,7 +284,7 @@ public class Trie<T> {
       return entry;
     }
     public String toString() { return entry; }
-  }
+  }*/
 
 /*  public static void main(String [] arg) {
     Trie trie = new Trie(false);
