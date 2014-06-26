@@ -27,7 +27,7 @@ import java.util.Map;
 public class HistoryExerciseList extends PagingExerciseList {
   public static final String ANY = "Clear";
   private static final boolean debugOnValueChange = false;
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   protected final Map<String,SectionWidget> typeToBox = new HashMap<String, SectionWidget>();
   /**
@@ -333,14 +333,14 @@ public class HistoryExerciseList extends PagingExerciseList {
   protected void loadExercises(String selectionState, String prefix) {
 
     Map<String, Collection<String>> typeToSection = getSelectionState(selectionState).getTypeToSection();
-    System.out.println("HistoryExerciseList.loadExercises : looking for " +
-      "'" + prefix + "' (" + prefix.length() + " chars) in list id "+userListID + " instance " + getInstance());
+/*    System.out.println("HistoryExerciseList.loadExercises : looking for " +
+      "'" + prefix + "' (" + prefix.length() + " chars) in list id "+userListID + " instance " + getInstance());*/
     loadExercisesUsingPrefix(typeToSection, prefix);
   }
 
   protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection, String prefix) {
     lastReqID++;
-    if (DEBUG) {
+    if (DEBUG || true) {
       System.out.println("HistoryExerciseList.loadExercisesUsingPrefix looking for '" + prefix +
         "' (" + prefix.length() + " chars) in context of " + typeToSection + " list " + userListID +
         " instance " + getInstance() + " user " + controller.getUser() + " unrecorded " + getUnrecorded());
