@@ -818,6 +818,7 @@ public class DatabaseImpl implements Database {
 
   /**
    * @see mitll.langtest.client.custom.ReviewEditableExercise#duplicateExercise
+   * @see mitll.langtest.server.LangTestDatabaseImpl#duplicateExercise(mitll.langtest.shared.custom.UserExercise)
    * @param exercise
    * @return
    */
@@ -852,7 +853,8 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @see
+   * @see mitll.langtest.server.LangTestDatabaseImpl#deleteItem(String)
+   * @see mitll.langtest.client.custom.ReviewEditableExercise#deleteItem(String, long, mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.PagingExerciseList, mitll.langtest.client.list.PagingExerciseList)
    * @param id
    * @return
    */
