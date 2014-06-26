@@ -161,14 +161,14 @@ public class ASRScoring extends Scoring {
                 " is invalid in " + foreignLanguagePhrase+
                 " and not in dictionary (" + htkDictionary.size()+
                 ")");
-              if (process != null) {
+   /*           if (process != null) {
                 for (String[] ar : process) {
                   //logger.warn("got " + ar);
                   for (String arr : ar) {
                     logger.warn("\tgot " + arr);
                   }
                 }
-              }
+              }*/
               return false;
             }
           }
@@ -291,7 +291,7 @@ public class ASRScoring extends Scoring {
     String pathname = noSuffix + ".wav";
 
     boolean b = checkLTS(sentence);
-    logger.debug("scoreRepeatExercise for " + testAudioFileNoSuffix + " under " + testAudioDir + " check lts = " + b);
+    //logger.debug("scoreRepeatExercise for " + testAudioFileNoSuffix + " under " + testAudioDir + " check lts = " + b);
     File wavFile = new File(pathname);
     boolean mustPrepend = false;
     if (!wavFile.exists() && deployPath != null) {
