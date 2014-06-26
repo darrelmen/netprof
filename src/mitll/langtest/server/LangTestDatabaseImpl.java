@@ -905,8 +905,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public UserExercise duplicateExercise(UserExercise exercise) { return db.duplicateExercise(exercise);  }
+
+  /**
+   * @see mitll.langtest.client.custom.ReviewEditableExercise#deleteItem(String, long, mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.PagingExerciseList, mitll.langtest.client.list.PagingExerciseList)
+   * @param id
+   * @return
+   */
   public boolean deleteItem(String id ) {
-    return db.deleteItem(id);
+    boolean b = db.deleteItem(id);
+    if (b) {
+      fullTrie = null; // force rebuild of full trie
+    }
+    return b;
   }
 
   @Override
