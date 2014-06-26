@@ -285,6 +285,11 @@ public class BootstrapExercisePanel extends HorizontalPanel implements AudioAnsw
     return group;
   }
 
+  /**
+   * @see #getRightColumn(ControlState)
+   * @param controlState
+   * @return
+   */
   private ControlGroup getFeedbackGroup(final ControlState controlState) {
     ControlGroup group = new ControlGroup(FEEDBACK);
     ButtonToolbar w = new ButtonToolbar();
