@@ -22,8 +22,11 @@ import java.util.Set;
  */
 public class ExerciseTrie extends Trie<CommonExercise> {
   private static final Logger logger = Logger.getLogger(ExerciseTrie.class);
+
   private static final int MB = (1024 * 1024);
-  public static final int TOOLONG_TO_WAIT = 150;
+  private static final int TOOLONG_TO_WAIT = 150;
+  private static final String MANDARIN = "Mandarin";
+  private static final String ENGLISH = "English";
 
   /**
    * Tokens are normalized to lower case.
@@ -34,14 +37,14 @@ public class ExerciseTrie extends Trie<CommonExercise> {
    * @param language
    */
   public ExerciseTrie(Collection<CommonExercise> exercisesForState, String language, SmallVocabDecoder smallVocabDecoder) {
-    boolean includeForeign = !language.equals("English");
+    boolean includeForeign = !language.equals(ENGLISH);
     startMakingNodes();
     Runtime rt = Runtime.getRuntime();
     long free = rt.freeMemory()/ MB ;
    // logger.debug("ExerciseTrie : searching over " + exercisesForState.size());
 
     long then = System.currentTimeMillis();
-    boolean isMandarin = language.equalsIgnoreCase("Mandarin");
+    boolean isMandarin = language.equalsIgnoreCase(MANDARIN);
 
     for (CommonExercise exercise : exercisesForState) {
       String english = exercise.getEnglish();
@@ -50,7 +53,7 @@ public class ExerciseTrie extends Trie<CommonExercise> {
         Collection<String> tokens = smallVocabDecoder.getTokens(english.toLowerCase());
         if (tokens.size() > 1) {
           for (String token : tokens) {
-            addEntryToTrie(new ExerciseWrapper(token/*.toLowerCase()*/, exercise));
+            addEntryToTrie(new ExerciseWrapper(token, exercise));
           }
         }
       }
