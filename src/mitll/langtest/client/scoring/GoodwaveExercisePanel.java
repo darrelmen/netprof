@@ -69,6 +69,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   public static final String INCORRECT = "incorrect";
   public static final int DEFAULT_USER = -1;
   public static final String DEFAULT_SPEAKER = "Default Speaker";
+  private final ListInterface listContainer;
   private boolean isBusy = false;
 
   private static final String WAV = ".wav";
@@ -129,6 +130,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     }
 
     this.navigationHelper = getNavigationHelper(controller, listContainer, addKeyHandler);
+    this.listContainer = listContainer;
     navigationHelper.addStyleName("topBarMargin");
     center.add(navigationHelper);
   }
@@ -149,6 +151,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     ASRScorePanel widgets = new ASRScorePanel("GoodwaveExercisePanel_" + instance, controller, exercise.getID());
     scorePanel = widgets;
     return widgets;
+  }
+
+  protected void loadNext() {
+    listContainer.loadNextExercise(exercise.getID());
   }
 
   protected void nextWasPressed(ListInterface listContainer, CommonShell completedExercise) {
