@@ -190,6 +190,10 @@ public class AudioAttribute implements IsSerializable {
     return uniqueID;
   }
 
+  public void setExid(String exid) {
+    this.exid = exid;
+  }
+
   @Override
   public String toString() {
     return "Audio id " +uniqueID + " : " + audioRef + " attrs " + attributes + " by " + userid +"/"+user;
