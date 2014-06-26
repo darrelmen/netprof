@@ -116,4 +116,6 @@ public interface LangTestDatabaseAsync {
   void markAudioDefect(AudioAttribute audioAttribute, String exid, AsyncCallback<Void> async);
 
   void setPublicOnList(long userListID, boolean isPublic, AsyncCallback<Void> async);
+
+  void markGender(AudioAttribute attr, boolean isMale, AsyncCallback<Void> async);
 }
