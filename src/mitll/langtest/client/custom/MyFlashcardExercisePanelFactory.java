@@ -21,6 +21,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.flashcard.BootstrapExercisePanel;
 import mitll.langtest.client.flashcard.ControlState;
+import mitll.langtest.client.flashcard.FlashcardPanel;
 import mitll.langtest.client.flashcard.LeaderboardPlot;
 import mitll.langtest.client.list.ListChangeListener;
 import mitll.langtest.client.list.ListInterface;
@@ -135,9 +136,13 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   public Panel getExercisePanel(CommonExercise e) {
     currentExercise = e;
     storage.storeValue(CURRENT_EXERCISE, e.getID());
-
-   // System.out.println("\n\n\\\\-> current is " + getCurrentExerciseID());
-    return new StatsPracticePanel(e);
+    return controller.getProps().isNoModel() || !controller.isRecordingEnabled() ? new FlashcardPanel(e,
+      MyFlashcardExercisePanelFactory.this.service,
+      MyFlashcardExercisePanelFactory.this.controller,
+      ADD_KEY_BINDING,
+      MyFlashcardExercisePanelFactory.this.controlState,
+      soundFeedback,
+      soundFeedback.endListener, MyFlashcardExercisePanelFactory.this.instance) : new StatsPracticePanel(e);
   }
 
   private void reset() {
@@ -194,6 +199,9 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   private long latestResultID = -1;
   private final MySoundFeedback soundFeedback = new MySoundFeedback();
 
+  /**
+   * @see #getExercisePanel(mitll.langtest.shared.CommonExercise)
+   */
   private class StatsPracticePanel extends BootstrapExercisePanel {
     private Panel container;
     public StatsPracticePanel(CommonExercise e) {
