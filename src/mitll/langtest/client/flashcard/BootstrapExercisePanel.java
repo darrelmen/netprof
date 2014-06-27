@@ -18,6 +18,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
+import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -199,6 +200,11 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
     DivWidget finalWidgets = super.getFinalWidgets();
     finalWidgets.setVisible(false);
     return finalWidgets;
+  }
+
+  @Override
+  protected Panel getCardContent() {
+    return new DivWidget();
   }
 
   /**
