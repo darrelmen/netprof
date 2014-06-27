@@ -356,8 +356,15 @@ public class AudioDAO extends DAO {
     return -1;
   }
 
-  public long add(int userid, AudioAttribute attr) {
-    return add(userid, attr.getAudioRef(), attr.getExid(), attr.getTimestamp(), attr.getAudioType(), attr.getDuration());
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#markGender(mitll.langtest.shared.AudioAttribute, boolean)
+   * @param userid
+   * @param attr
+   * @return
+   */
+  public AudioAttribute addOrUpdate(int userid, AudioAttribute attr) {
+    return addOrUpdate(userid, attr.getAudioRef(), attr.getExid(), attr.getTimestamp(), attr.getAudioType(), (int)attr.getDuration());
+   // addOrUpdate();
   }
 
   /**
