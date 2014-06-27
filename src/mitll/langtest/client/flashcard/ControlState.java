@@ -27,6 +27,8 @@ public class ControlState {
   public boolean showEnglish() { return showState.equals(ENGLISH) || showState.equals(BOTH);}
   public boolean showForeign() { return showState.equals(FOREIGN) || showState.equals(BOTH);}
   public boolean showBoth() { return  showState.equals(BOTH);}
+  public boolean isEnglish() { return showState.equals(ENGLISH);}
+  public boolean isForeign() { return showState.equals(FOREIGN);}
 
   /**
    * @see BootstrapExercisePanel#BootstrapExercisePanel
