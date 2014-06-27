@@ -213,14 +213,21 @@ public class FlashcardPanel extends HorizontalPanel {
   private Panel getMiddlePrompt(CommonExercise e,DivWidget inner) {
     cardPrompt = getCardPrompt(e);
     cardPrompt.getElement().setId("cardPrompt");
+    inner.add(cardPrompt);
 
-    FocusPanel contentMiddle = new FocusPanel();
+   // inner.add(getFinalWidgets());
+    Panel contentMiddle = getCardContent();
+    contentMiddle.add(inner);
+
     contentMiddle.addStyleName("cardBorderShadow");
     contentMiddle.addStyleName("minWidthFifty");
 
-    inner.add(cardPrompt);
-   // inner.add(getFinalWidgets());
-    contentMiddle.add(inner);
+
+    return contentMiddle;
+  }
+
+  protected Panel getCardContent() {
+    FocusPanel contentMiddle = new FocusPanel();
     contentMiddle.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -234,7 +241,6 @@ public class FlashcardPanel extends HorizontalPanel {
         }
       }
     });
-
     return contentMiddle;
   }
 
