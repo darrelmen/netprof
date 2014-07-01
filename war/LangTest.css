@@ -495,12 +495,13 @@ fieldset > legend {
 
 .Instruction-data-with-wrap  {
     color: #CC6600;
-    font-size: larger;
+    font-size: 28px;
     font-weight: bold;
     word-wrap: break-word;       /* Internet Explorer 5.5+ */
     word-break: keep-all;
     white-space: normal;
     font-family: sans-serif;
+    margin-bottom: 6px;
 }
 
 .blueColor {
@@ -872,6 +873,9 @@ fieldset > legend {
     border-radius: 4px 4px 4px 4px;
     box-shadow: 1px 1px 0 #CAC3B8, 5px 5px 16px #D4CEC5;
     padding:10px;
+    border: #CAC3B8;
+    border-width: 1px 0px 0 1px;
+    border-style: solid;
 }
 
 .cardContent {
@@ -997,4 +1001,8 @@ body>.dropdown-popup .nav-list>li.active>a  {
     margin-left: auto;
     margin-right: auto;
     max-width: 800px;
+}
+
+.dontSelect {
+    -moz-user-select: none;
 }
