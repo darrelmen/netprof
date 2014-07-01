@@ -137,11 +137,13 @@ public class FlashcardPanel extends HorizontalPanel {
 	  clickToFlipContainer= new DivWidget();
 	  clickToFlipContainer.setHeight("100px");
     clickToFlip = new HTML("Click to flip");
+
     clickToFlip.addStyleName("dontSelect");
+    clickToFlipContainer.addStyleName("dontSelect");
 
     //boolean isEnglish = controlState.getShowState().equals(ControlState.ENGLISH);
     //boolean isForeign = controlState.getShowState().equals(ControlState.FOREIGN);
-    setTitleOfClick(controlState.isEnglish(), controlState.isForeign(), true);
+    //setTitleOfClick(controlState.isEnglish(), controlState.isForeign(), true);
     clickToFlip.addStyleName("floatRight");
     clickToFlip.getElement().getStyle().setFontWeight(Style.FontWeight.BOLDER);
     clickToFlip.getElement().getStyle().setMarginTop(82, Style.Unit.PX);
@@ -158,7 +160,7 @@ public class FlashcardPanel extends HorizontalPanel {
     return clickToFlipContainer;
   }
 
-  private void setTitleOfClick(boolean isEnglish, boolean isForeign, boolean show) {
+/*  private void setTitleOfClick(boolean isEnglish, boolean isForeign, boolean show) {
     String show1 = show ? "show" :"hide";
     if (clickToFlip != null) {
       if (isEnglish && !isForeign) {
@@ -171,7 +173,7 @@ public class FlashcardPanel extends HorizontalPanel {
           " English");
       }
     }
-  }
+  }*/
 
 /*  private Panel getCenteredWrapper(Widget recordButton) {
     Panel recordButtonRow = new FluidRow();
@@ -232,11 +234,14 @@ public class FlashcardPanel extends HorizontalPanel {
       @Override
       public void onClick(ClickEvent event) {
         if (clickToFlip.isVisible()) {
-          if (!controlState.showEnglish()) {
+          if (!controlState.showEnglish() || !controlState.showForeign()) {
             toggleVisibility(english);
-          }
-          if (!controlState.showForeign()) {
+       //   }
+         // if (!controlState.showForeign()) {
             toggleVisibility(foreign);
+            if (isHidden(foreign) && controlState.isAudioOn()) {
+              playRef();
+            }
           }
         }
       }
@@ -249,7 +254,13 @@ public class FlashcardPanel extends HorizontalPanel {
     String visibility = style.getVisibility();
     boolean hidden = visibility.equals("hidden");
     style.setVisibility(hidden ? Style.Visibility.VISIBLE : Style.Visibility.HIDDEN);
-    setTitleOfClick(controlState.isEnglish(),controlState.isForeign(),!hidden);
+    //setTitleOfClick(controlState.isEnglish(),controlState.isForeign(),!hidden);
+  }
+
+  private boolean isHidden(Widget english) {
+    Style style = english.getElement().getStyle();
+    String visibility = style.getVisibility();
+    return visibility.equals("hidden");
   }
 
   protected void setMainContentVisible(boolean vis) {
@@ -591,7 +602,7 @@ public class FlashcardPanel extends HorizontalPanel {
       System.err.println("huh? show english or foreign " + controlState);
 
     }
-    setTitleOfClick(controlState.isEnglish(), controlState.isForeign(), true);
+    //setTitleOfClick(controlState.isEnglish(), controlState.isForeign(), true);
   }
 
   private void showBoth() {
