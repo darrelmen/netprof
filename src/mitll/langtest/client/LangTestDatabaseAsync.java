@@ -38,7 +38,15 @@ public interface LangTestDatabaseAsync {
 
   void getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, String exerciseID, AsyncCallback<ImageResponse> async);
 
+<<<<<<< HEAD
   void getExercise(String id, long userID, AsyncCallback<CommonExercise> async);
+=======
+  void getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, AsyncCallback<ImageResponse> async);
+
+  void getExercise(String id, long userid, AsyncCallback<Exercise> async);
+
+  void getScoreForAnswer(long userID, Exercise e, int questionID, String answer, String answerType, AsyncCallback<Double> async);
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
 
   void getUserToResultCount(AsyncCallback<Map<User, Integer>> async);
 
@@ -103,7 +111,11 @@ public interface LangTestDatabaseAsync {
 
   void getUserHistoryForList(long userid, Collection<String> ids, long latestResultID, AsyncCallback<List<AVPHistoryForList>> async);
 
+<<<<<<< HEAD
   void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID, AsyncCallback<Void> async);
+=======
+  void getExerciseIds(int reqID, int userID, AsyncCallback<ExerciseListWrapper> async);
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
 
   void getEvents(AsyncCallback<List<Event>> async);
 
