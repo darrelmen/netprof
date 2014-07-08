@@ -25,9 +25,8 @@ public class PathHelper {
   private String configDir;
 
 
-  public PathHelper(ServletContext context) {
-    this.context = context;
-  }
+  public PathHelper() { this.context = null;  }
+  public PathHelper(ServletContext context) { this.context = context;  }
 
   public PathHelper(String realContextPathTest) {
     this((ServletContext)null);

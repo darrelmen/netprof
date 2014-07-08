@@ -734,6 +734,13 @@ class StudentDialog extends UserDialog {
       group.add(controls);
     }
 
+<<<<<<< HEAD
+=======
+/*    public boolean markSimpleError() {
+      return markSimpleError(Placement.RIGHT);
+    }*/
+
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
     public boolean markSimpleError(Placement placement) {
       if (!yes.getValue() && !no.getValue()) {
         markError(group, yes, "Please choose", "Click yes or no.", placement);
