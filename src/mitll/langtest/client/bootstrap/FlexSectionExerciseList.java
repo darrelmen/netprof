@@ -232,6 +232,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
       System.out.println("\taddButtonRow took " + (now - then) + " millis" + " instance " + getInstance());
 
     if (last != null) setSizesAndPushFirst();
+<<<<<<< HEAD
     addBottomText(container);
   }
 
@@ -284,6 +285,15 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    */
   private Tooltip addTooltip(Widget widget, String tip) {
     return new TooltipHelper().addTooltip(widget, tip);
+=======
+    Widget widget = addBottomText(container);
+    if (controller.getProps().isCRTDataCollectMode()) {
+      firstTypeRow.setWidget(0, 3, widget);
+    }
+    else {
+      widget.addStyleName("leftFiftyPercentMargin");
+    }
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
   }
 
   /**

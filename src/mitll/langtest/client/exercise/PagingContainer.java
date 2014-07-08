@@ -34,12 +34,20 @@ import java.util.Set;
  * Time: 7:49 PM
  * To change this template use File | Settings | File Templates.
  */
+<<<<<<< HEAD
 public class PagingContainer {
   private static final int MAX_LENGTH_ID = 35;
   private static final int PAGE_SIZE = 10;   // TODO : make this sensitive to vertical real estate?
   private static final int VERTICAL_SLOP = 35;
 
   private ListDataProvider<CommonShell> dataProvider;
+=======
+public class PagingContainer<T extends ExerciseShell> {
+  private static final int MAX_LENGTH_ID = 27;
+  protected static final int PAGE_SIZE = 15;   // TODO : make this sensitive to vertical real estate?
+  private static final int VERTICAL_SLOP = 55;
+  private ListDataProvider<T> dataProvider;
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
   private static final boolean DEBUG = false;
   private static final int ID_LINE_WRAP_LENGTH = 20;
   private static final int HEIGHT_OF_CELL_TABLE_WITH_15_ROWS = 390;
@@ -59,6 +67,11 @@ public class PagingContainer {
   public PagingContainer(ExerciseController controller, int verticalUnaccountedFor) {
     this.controller = controller;
     this.verticalUnaccountedFor = verticalUnaccountedFor;
+<<<<<<< HEAD
+=======
+    this.showCompleted = showCompleted;
+    System.out.println("verticalUnaccountedFor " + verticalUnaccountedFor);
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
   }
 
   public void redraw() {  table.redraw();  }
@@ -289,9 +302,19 @@ public class PagingContainer {
     };*/
   }
 
+<<<<<<< HEAD
 /*  private int mouseX;
   private int mouseY;
   private String clickedExerciseID = "";*/
+=======
+  /**
+   * @see mitll.langtest.client.list.PagingExerciseList#addCompleted(String)
+   * @see mitll.langtest.client.list.PagingExerciseList#setCompleted(java.util.Set)
+   * @param completed
+   */
+  public void setCompleted(Set<String> completed) {
+    System.out.println("PagingContainer.setCompleted : show completed " +showCompleted + " completed " +completed.size());
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
 
   private Column<CommonShell, SafeHtml> getExerciseIdColumn2(final boolean consumeClicks) {
 
@@ -302,6 +325,7 @@ public class PagingContainer {
         super.onBrowserEvent(context, elem, object, event);
         if (BrowserEvents.CLICK.equals(event.getType())) {
           //System.out.println("getExerciseIdColumn.onBrowserEvent : got click " + event);
+<<<<<<< HEAD
           //mouseX = event.getClientX();
           //mouseY = event.getClientY();
           //clickedExerciseID = object.getID();
@@ -364,6 +388,15 @@ public class PagingContainer {
 
           }
           return new SafeHtmlBuilder().appendHtmlConstant(html).toSafeHtml();
+=======
+          final T e = object;
+       /*   if (isExercisePanelBusy()) {
+            tellUserPanelIsBusy();
+            markCurrentExercise(currentExercise);
+          } else {*/
+          gotClickOnItem(e);
+          // }
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
         }
       }
 
@@ -376,6 +409,7 @@ public class PagingContainer {
 
   protected void gotClickOnItem(final CommonShell e) {}
 
+<<<<<<< HEAD
   /**
    * @seex mitll.langtest.client.grading.GradedExerciseList#loadFirstExercise()
    * @return
@@ -384,6 +418,22 @@ public class PagingContainer {
     if (getList().isEmpty()) return null;
     return selectItem(0);
   }*/
+=======
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        if (BrowserEvents.CLICK.equals(event.getType())) {
+         // System.out.println("getExerciseIdColumn.onBrowserEvent : got click " + event);
+          final T e = object;
+     /*     if (isExercisePanelBusy()) {
+            tellUserPanelIsBusy();
+            markCurrentExercise(currentExercise);
+          } else {*/
+            gotClickOnItem(e);
+       //   }
+        }
+      }
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
 
 /*  public boolean isFirst(CommonShell test) {
     return getList().isEmpty() || getList().get(0).getID().equals(test.getID());
@@ -499,7 +549,11 @@ public class PagingContainer {
   }
 
   private static final boolean debug = false;
+<<<<<<< HEAD
   private int getNumTableRowsGivenScreenHeight() {
+=======
+  public int getNumTableRowsGivenScreenHeight() {
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
     int header = getTableHeaderHeight();
     int pixelsAbove = header + verticalUnaccountedFor;
     if (table.getElement().getAbsoluteTop() > 0) {
@@ -507,10 +561,19 @@ public class PagingContainer {
     }
     int leftOver = Window.getClientHeight() - pixelsAbove;
 
+<<<<<<< HEAD
     if (debug) System.out.println("getNumTableRowsGivenScreenHeight Got on resize window height " + Window.getClientHeight() +
        " header " + header + " result = " + leftOver + "( vert unaccount " +
        verticalUnaccountedFor+ " vs absolute top " + table.getElement().getAbsoluteTop()+ " pix above " + pixelsAbove+
        ")");
+=======
+    if (debug) {
+      System.out.println("getNumTableRowsGivenScreenHeight Got on resize window height " + Window.getClientHeight() +
+        " header " + header + " result = " + leftOver + "( vert unaccount " +
+        verticalUnaccountedFor+ " vs absolute top " + table.getElement().getAbsoluteTop()+ " pix above " + pixelsAbove+
+        ")");
+    }
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
 
     float rawRatio = ((float) leftOver) / (float) heightOfCellTableWith15Rows();
     float tableRatio = Math.min(MAX_PAGES, rawRatio);
@@ -529,6 +592,15 @@ public class PagingContainer {
       }
     }
     int rows = Math.max(MIN_PAGE_SIZE, (int)Math.floor(ratio));
+<<<<<<< HEAD
+=======
+/*    if (debug) {
+      System.out.println("getNumTableRowsGivenScreenHeight : rows " + rows);
+    }*/
+
+    return rows;
+  }
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
 
     if (debug) System.out.println("getNumTableRowsGivenScreenHeight : rows " + rows);
     return rows;
