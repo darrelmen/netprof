@@ -529,8 +529,19 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       protected void addButtons(Widget optionalToTheRight) {
         add(postAudioRecordButton);
         postAudioRecordButton.addStyleName("rightFiveMargin");
+<<<<<<< HEAD
         super.addButtons(optionalToTheRight);
       }
+=======
+        super.addButtons();
+      }
+
+      /**
+       * No keyboard listener for play button -- since there can be two play buttons -- which one gets the space bar?
+       */
+      @Override
+      protected void addKeyboardListener() {}
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
     }
 
     /**
