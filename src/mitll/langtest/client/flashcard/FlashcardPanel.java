@@ -1,17 +1,13 @@
 package mitll.langtest.client.flashcard;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.ButtonGroup;
-import com.github.gwtbootstrap.client.ui.ButtonToolbar;
-import com.github.gwtbootstrap.client.ui.ControlGroup;
-import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.Icon;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.github.gwtbootstrap.client.ui.constants.IconSize;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
+import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -35,6 +31,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.custom.MyFlashcardExercisePanelFactory;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.CommonExercise;
 
@@ -72,6 +69,7 @@ public class FlashcardPanel extends HorizontalPanel {
   private Panel rightColumn;
   protected SoundFeedback.EndListener endListener;
   protected final String instance;
+  ListInterface exerciseList;
 
   /**
    *
@@ -82,43 +80,49 @@ public class FlashcardPanel extends HorizontalPanel {
    * @param soundFeedback
    * @param endListener
    * @param instance
-   * @see mitll.langtest.client.custom.MyFlashcardExercisePanelFactory.StatsPracticePanel#StatsPracticePanel(mitll.langtest.shared.CommonExercise)
+   * @param exerciseList
+   * @see mitll.langtest.client.custom.MyFlashcardExercisePanelFactory#getExercisePanel(mitll.langtest.shared.CommonExercise)
    *
    */
   public FlashcardPanel(final CommonExercise e, final LangTestDatabaseAsync service,
-                                final ExerciseController controller, boolean addKeyBinding,
-                                final ControlState controlState,
-                                MyFlashcardExercisePanelFactory.MySoundFeedback soundFeedback,
-                                SoundFeedback.EndListener endListener,
-                                String instance) {
+                        final ExerciseController controller, boolean addKeyBinding,
+                        final ControlState controlState,
+                        MyFlashcardExercisePanelFactory.MySoundFeedback soundFeedback,
+                        SoundFeedback.EndListener endListener,
+                        String instance, ListInterface exerciseList) {
     this.addKeyBinding = addKeyBinding;
     this.exercise = e;
     this.controller = controller;
     this.controlState = controlState;
     this.endListener = endListener;
     this.instance = instance;
+    this.exerciseList = exerciseList;
     //  addStyleName("centeringPractice");
     // System.out.println("BootstrapExercisePanel.instance = " + instance);
 
     controlState.setStorage(new KeyStorage(controller));
 
-    HTML warnNoFlash = new HTML(WARN_NO_FLASH);
     this.soundFeedback = soundFeedback;
     DivWidget inner2 = new DivWidget();
     Panel contentMiddle = getMiddlePrompt(e,inner2);
     mainContainer = contentMiddle;
 
     DivWidget belowDiv = new DivWidget();
+    belowDiv.getElement().setId("belowDiv");
     belowDiv.addStyleName("topFiveMargin");
     Panel threePartContent = getThreePartContent(controlState, contentMiddle, belowDiv);
     DivWidget inner = new DivWidget();
+    inner.getElement().setId("threePartContent_Container");
     add(inner);
 
     inner.add(threePartContent);
 
     addRecordingAndFeedbackWidgets(e, service, controller, inner2);
+
+    HTML warnNoFlash = new HTML(WARN_NO_FLASH);
     warnNoFlash.setVisible(false);
     inner.add(warnNoFlash);
+
     getElement().setId("BootstrapExercisePanel");
 
     addWidgetsBelow(belowDiv);
@@ -212,10 +216,11 @@ public class FlashcardPanel extends HorizontalPanel {
     return horiz;
   }
 
-  private Panel getMiddlePrompt(CommonExercise e,DivWidget inner) {
+  private Panel getMiddlePrompt(CommonExercise e, DivWidget inner) {
     cardPrompt = getCardPrompt(e);
     cardPrompt.getElement().setId("cardPrompt");
     inner.add(cardPrompt);
+    inner.getElement().setId("cardPrompt_container");
 
    // inner.add(getFinalWidgets());
     Panel contentMiddle = getCardContent();
@@ -236,8 +241,8 @@ public class FlashcardPanel extends HorizontalPanel {
         if (clickToFlip.isVisible()) {
           if (!controlState.showEnglish() || !controlState.showForeign()) {
             toggleVisibility(english);
-       //   }
-         // if (!controlState.showForeign()) {
+            //   }
+            // if (!controlState.showForeign()) {
             toggleVisibility(foreign);
             if (isHidden(foreign) && controlState.isAudioOn()) {
               playRef();
@@ -300,10 +305,67 @@ public class FlashcardPanel extends HorizontalPanel {
   }
 
   protected Widget getFeedbackGroup(ControlState controlState) { return null;  }
-  protected void gotShuffleClick(boolean b) {}
-  protected Panel getLeftState() { return null; }
-  protected void addWidgetsBelow(Panel toAddTo) {}
 
+  protected void gotShuffleClick(boolean b) {
+    exerciseList.setShuffle(b);
+  }
+
+  protected Panel getLeftState() {
+    return null;
+  }
+
+  protected void addWidgetsBelow(Panel toAddTo) {
+    final Button left = new Button();
+    toAddTo.add(left);
+    left.setIcon(IconType.CARET_LEFT);
+    left.addStyleName("floatLeft");
+    left.setSize(ButtonSize.LARGE);
+    left.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        left.setEnabled(false);
+        exerciseList.loadPrev();
+
+      }
+    });
+
+    DivWidget vp = new DivWidget();
+    vp.setWidth("78%");
+    vp.getElement().getStyle().setMarginLeft(17, Style.Unit.PCT);
+
+    ProgressBar progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT);
+    showAdvance(exerciseList, progressBar);
+    progressBar.addStyleName("progressBar");
+
+    Heading child = new Heading(6, Math.max(1,exerciseList.getComplete()+1) + " of " + exerciseList.getSize());
+    child.getElement().getStyle().setMarginLeft(39, Style.Unit.PCT);
+    vp.add(child);
+    vp.add(progressBar);
+    toAddTo.add(vp);
+    final Button right = new Button();
+    toAddTo.add(right);
+    right.setIcon(IconType.CARET_RIGHT);
+    right.addStyleName("floatRight");
+    right.setSize(ButtonSize.LARGE);
+    right.getElement().getStyle().setMarginTop(-30, Style.Unit.PX);
+    right.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        right.setEnabled(false);
+        exerciseList.loadNext();
+      }
+    });
+
+  }
+  void showAdvance(ListInterface exerciseList, ProgressBar progressBar) {
+    int complete = exerciseList.getComplete();
+  //  System.out.println("complete " +complete);
+
+    int i = (complete == -1 ? 1:complete+1);
+    double percent = 100d * ((double) i / (double) exerciseList.getSize());
+//    System.out.println("i " +i + " pct " + percent);
+    progressBar.setPercent(percent);
+  }
   /**
    * @see #getAudioGroup(mitll.langtest.client.flashcard.ControlState)
    * @see #getQuestionContent
