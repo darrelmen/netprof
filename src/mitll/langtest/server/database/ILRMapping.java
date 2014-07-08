@@ -55,7 +55,9 @@ public class ILRMapping {
       logger.warn("huh? there are " + size + " ids from reading the database, but " + size1 + " from reading the mapping file" );
       Set<String> strings = new HashSet<String>(idToExercise.keySet());
       strings.removeAll(getMappedExercises());
-      if (!strings.isEmpty()) logger.warn("unmapped are these ids " + strings);
+      if (!strings.isEmpty()) {
+        logger.warn("unmapped are these ids " + (strings.size() > 10 ? " num = "  +strings.size() : strings));
+      }
     }
   }
 
