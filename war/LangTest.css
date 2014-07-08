@@ -476,11 +476,15 @@ fieldset > legend {
 
 .Instruction {
     text-align: left;
+    margin-bottom: 6px;
 }
 
 .Instruction-title {
     color: #333333;
     font-size: 16px;
+/*
+    margin-bottom: 4px;
+    */
 }
 
 .Instruction-data  {
@@ -501,7 +505,6 @@ fieldset > legend {
     word-break: keep-all;
     white-space: normal;
     font-family: sans-serif;
-    margin-bottom: 6px;
 }
 
 .blueColor {
@@ -1005,4 +1008,11 @@ body>.dropdown-popup .nav-list>li.active>a  {
 
 .dontSelect {
     -moz-user-select: none;
+}
+
+.progressBar {
+    width: 78%;
+    float: left;
+    margin-left: 0px;
+    margin-top: -8px;
 }
