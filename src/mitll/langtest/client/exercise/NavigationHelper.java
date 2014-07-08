@@ -54,6 +54,7 @@ public class NavigationHelper extends HorizontalPanel {
    * @param addButtons
    * @param addKeyHandler
    */
+<<<<<<< HEAD
   public NavigationHelper(CommonExercise exercise, ExerciseController controller, PostAnswerProvider provider,
                           ListInterface listContainer, boolean addButtons, boolean addKeyHandler) {
     this(exercise, controller, provider, listContainer, addButtons, addKeyHandler,
@@ -63,6 +64,11 @@ public class NavigationHelper extends HorizontalPanel {
   public NavigationHelper(CommonExercise exercise, ExerciseController controller, PostAnswerProvider provider,
                           ListInterface listContainer, boolean addButtons, boolean addKeyHandler,
                           boolean enableNextOnlyWhenAllCompleted) {
+=======
+  public NavigationHelper(Exercise exercise, ExerciseController controller, PostAnswerProvider provider,
+                          ListInterface listContainer, boolean addButtons) {
+    enableNextOnlyWhenAllCompleted = true;//!getLanguage(controller).equalsIgnoreCase("Pashto");   // hack?
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
     this.provider = provider;
     this.listContainer = listContainer;
     this.enableNextOnlyWhenAllCompleted = enableNextOnlyWhenAllCompleted;
@@ -115,7 +121,18 @@ public class NavigationHelper extends HorizontalPanel {
     next.getElement().setId("NavigationHelper_"+getNextButtonText());
 
     next.setType(ButtonType.SUCCESS);
+<<<<<<< HEAD
     enableNext(exercise);
+=======
+    System.out.println("makeNextButton " +enableNextOnlyWhenAllCompleted+ " ex id " + e.getID());
+
+    if (enableNextOnlyWhenAllCompleted) { // initially not enabled
+      next.setEnabled(false);
+    }
+    else {
+      next.setEnabled(!listContainer.onLast(e));
+    }
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
 
     if (addButtons)  add(next);
     if (controller.getProps().isBindNextToEnter()) next.setTitle(RIGHT_ARROW_TOOLTIP);
@@ -269,6 +286,7 @@ public class NavigationHelper extends HorizontalPanel {
     if (keyHandler != null) keyHandler.removeHandler();
   }
 
+<<<<<<< HEAD
   public void enableNextButton(boolean val) {
     next.setEnabled(val);
   }
@@ -277,6 +295,10 @@ public class NavigationHelper extends HorizontalPanel {
     getPrev().setEnabled(val);
     next.setEnabled(val);
   }*/
+=======
+  public void enableNextButton(boolean val) { next.setEnabled(val); }
+  public void enablePrevButton(boolean val) { prev.setEnabled(val); }
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
 
   public Widget getNext() { return next; }
   public Button getPrev() { return prev; }
