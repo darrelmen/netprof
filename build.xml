@@ -37,7 +37,10 @@
         <pathelement location="war/WEB-INF/lib/json-lib-2.4-jdk15.jar"/>
         <pathelement location="war/WEB-INF/lib/commons-codec-1.6.jar"/>
         <pathelement location="war/WEB-INF/lib/guava-16.0.1.jar"/>
+<<<<<<< HEAD
         <pathelement location="war/WEB-INF/lib/guava-gwt-16.0.1.jar"/>
+=======
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
 <!--
         <pathelement location="war/WEB-INF/lib/gchart.jar"/>
 -->
