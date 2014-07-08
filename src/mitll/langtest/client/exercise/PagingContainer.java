@@ -541,8 +541,7 @@ public class PagingContainer {
     if (getList() == null || getList().isEmpty()) return;
 
     CommonShell t = idToExercise.get(itemID);
-    int i = getList().indexOf(t);
-    markCurrent(i,t);
+    markCurrent(getList().indexOf(t), t);
   }
 
   private void markCurrent(int i, CommonShell itemToSelect) {
