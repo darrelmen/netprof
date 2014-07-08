@@ -472,7 +472,11 @@ public class UserManager {
    * @return
    */
   private long getUserSessionDuration() {
+<<<<<<< HEAD
     //boolean useShortExpiration = loginType.equals(PropertyHandler.LOGIN_TYPE.STUDENT);
+=======
+   // boolean useShortExpiration = loginType.equals(PropertyHandler.LOGIN_TYPE.STUDENT);
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
     return HOUR_IN_MILLIS * EXPIRATION_HOURS;//(useShortExpiration ? SHORT_EXPIRATION_HOURS : EXPIRATION_HOURS);
   }
 }

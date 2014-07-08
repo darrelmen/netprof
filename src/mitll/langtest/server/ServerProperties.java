@@ -35,9 +35,14 @@ public class ServerProperties {
   private static final String BIAS_TOWARDS_UNANSWERED = "biasTowardsUnanswered";
   private static final String H2_DATABASE = "h2Database";
   private static final String H2_DATABASE_DEFAULT = "vlr-parle";
+<<<<<<< HEAD
   //private static final String H2_STUDENT_ANSWERS_DATABASE = "h2StudentAnswers";
   //private static final String SECOND_DATABASE = "secondDatabase";
   //private static final String H2_STUDENT_ANSWERS_DATABASE_DEFAULT = "h2StudentAnswers";
+=======
+  private static final String H2_STUDENT_ANSWERS_DATABASE = "h2StudentAnswers";
+  private static final String H2_STUDENT_ANSWERS_DATABASE_DEFAULT = "h2StudentAnswers";
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
   private static final String READ_FROM_FILE = "readFromFile";
   private static final String FLASHCARD = "flashcard";
   private static final String LANGUAGE = "language";
@@ -67,8 +72,13 @@ public class ServerProperties {
 
   private Properties props = new Properties();
 
+<<<<<<< HEAD
   public boolean dataCollectMode;
  // private boolean collectAudio;
+=======
+  private boolean dataCollectMode;
+  private boolean collectAudio;
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
   public boolean biasTowardsUnanswered;
   private double minPronScore;
   private final int maxNumExercises = Integer.MAX_VALUE;
@@ -248,6 +258,7 @@ public class ServerProperties {
     }
   }
 
+  public boolean isDataCollectMode() { return dataCollectMode;  }
   public boolean isIncludeFeedback() { return getDefaultFalse(INCLUDE_FEEDBACK);  }
 
   /**
