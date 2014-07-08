@@ -137,12 +137,18 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
     currentExercise = e;
     storage.storeValue(CURRENT_EXERCISE, e.getID());
     return controller.getProps().isNoModel() || !controller.isRecordingEnabled() ? new FlashcardPanel(e,
-      MyFlashcardExercisePanelFactory.this.service,
-      MyFlashcardExercisePanelFactory.this.controller,
-      ADD_KEY_BINDING,
-      MyFlashcardExercisePanelFactory.this.controlState,
-      soundFeedback,
-      soundFeedback.endListener, MyFlashcardExercisePanelFactory.this.instance) : new StatsPracticePanel(e);
+        MyFlashcardExercisePanelFactory.this.service,
+        MyFlashcardExercisePanelFactory.this.controller,
+        ADD_KEY_BINDING,
+        MyFlashcardExercisePanelFactory.this.controlState,
+        soundFeedback,
+        soundFeedback.endListener, MyFlashcardExercisePanelFactory.this.instance, exerciseList) {
+      @Override
+      protected void gotShuffleClick(boolean b) {
+        resetStorage();
+        super.gotShuffleClick(b);
+      }
+    } : new StatsPracticePanel(e);
   }
 
   private void reset() {
@@ -211,7 +217,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
         ADD_KEY_BINDING,
         MyFlashcardExercisePanelFactory.this.controlState,
         soundFeedback,
-        soundFeedback.endListener, MyFlashcardExercisePanelFactory.this.instance);
+        soundFeedback.endListener, MyFlashcardExercisePanelFactory.this.instance, exerciseList);
     }
 
     @Override
@@ -232,7 +238,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
     @Override
     protected void gotShuffleClick(boolean b) {
       resetStorage();
-      exerciseList.setShuffle(b);
+      super.gotShuffleClick(b);
     }
 
     /**
