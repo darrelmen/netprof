@@ -55,6 +55,10 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   protected String audioPath;
   private final Map<String,Integer> reqs = new HashMap<String, Integer>();
   private int reqid;
+<<<<<<< HEAD
+=======
+  private boolean useKeyboard = false;
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
 
   private ImageAndCheck waveform;
   private ImageAndCheck spectrogram;
@@ -73,6 +77,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private final int rightMargin;
   private static final boolean debug = false;
   private static final boolean DEBUG_GET_IMAGES = false;
+
+  private final boolean debug = false;
 
   /**
    * @see ScoringAudioPanel#ScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener, int, String, String)
@@ -95,16 +101,27 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     }
   }
 
+<<<<<<< HEAD
   protected AudioPanel(LangTestDatabaseAsync service,
                        ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel,
                        float screenPortion, int rightMargin, String exerciseID) {
     this.screenPortion = screenPortion;
+=======
+  public AudioPanel(LangTestDatabaseAsync service,
+                    boolean useKeyboard, ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel) {
+    this.screenPortion = controller.getScreenPortion();
+    if (debug) System.out.println("Screen portion " + screenPortion);
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
     this.soundManager = controller.getSoundManager();
     this.service = service;
     this.logMessages = controller.isLogClientMessages();
     this.controller = controller;
     this.gaugePanel = gaugePanel;
+<<<<<<< HEAD
     if (debug) System.out.println("AudioPanel : gauge panel " + gaugePanel);
+=======
+    if (debug) System.out.println("gauge panel " + gaugePanel);
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
     this.showSpectrogram = showSpectrogram;
     this.rightMargin = rightMargin;
     this.exerciseID = exerciseID;
@@ -323,9 +340,29 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     return playAudio;
   }
 
+<<<<<<< HEAD
   protected PlayAudioPanel makePlayAudioPanel(final Widget toTheRightWidget, String playButtonSuffix, String audioType,
                                               String recordButtonTitle) {
     return new PlayAudioPanel(soundManager, playButtonSuffix, toTheRightWidget);
+=======
+  protected PlayAudioPanel makePlayAudioPanel(final Widget toTheLeftWidget, String audioType) {
+    return new PlayAudioPanel(soundManager) {
+      @Override
+      protected void addButtons() {
+        if (toTheLeftWidget != null) {
+          add(toTheLeftWidget);
+        }
+        super.addButtons();
+      }
+
+      @Override
+      protected void addKeyboardListener() {
+        if (useKeyboard) {
+          makeKeyHandler();
+        }
+      }
+    };
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
   }
 
   /**
