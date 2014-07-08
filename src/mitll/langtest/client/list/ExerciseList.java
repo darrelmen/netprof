@@ -408,8 +408,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   protected abstract List<CommonShell> rememberExercises(List<CommonShell> result);
 
-  protected abstract int getSize();
-
   /**
    * Worry about deleting the currently visible item.
    *
@@ -623,9 +621,9 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   protected void useExercise(CommonExercise result) {
     //System.out.println("ExerciseList.useExercise : result " +result);
-    createdPanel = makeExercisePanel(result);
     String itemID = result.getID();
     markCurrentExercise(itemID);
+    createdPanel = makeExercisePanel(result);
 /*    System.out.println("ExerciseList.useExercise : item id " + itemID + " currentExercise " +getCurrentExercise() +
       " or " + getCurrentExerciseID() + " instance " + instance);*/
   }
@@ -644,24 +642,10 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     System.out.println("ExerciseList.makeExercisePanel : " + exercise + " instance " + instance);
 
     Panel exercisePanel = factory.getExercisePanel(exercise);
-/*    if (exercisePanel instanceof BootstrapExercisePanel) {
-      DivWidget centeringRow = getCenteringRow();
-      centeringRow.add(exercisePanel);
-      innerContainer.setWidget(centeringRow);
-    }
-    else {*/
-      innerContainer.setWidget(exercisePanel);
-  //  }
+    innerContainer.setWidget(exercisePanel);
     return exercisePanel;
   }
 
-/*  DivWidget getCenteringRow() {
-    DivWidget status = new DivWidget();
-    status.getElement().setId("statusRow");
-    status.addStyleName("alignCenter");
-    status.addStyleName("inlineBlockStyle");
-    return status;
-  }*/
 
   /**
    * @return
@@ -697,7 +681,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   private int getIndex(String currentID) {
     CommonShell shell = byID(currentID);
     int i = shell != null ? getRealIndex(shell) : -1;
-    //System.out.println("getIndex " + currentID + " = " +i);
+    System.out.println("getIndex " + currentID + " = " +i);
     return i;
   }
 
@@ -705,15 +689,15 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   protected abstract CommonShell getAt(int i);
 
-/*  @Override
+  @Override
   public int getPercentComplete() {
-    float ratio = (float) visited.size() / (float) getSize();
+    float ratio = (float) getIndex(getCurrentExerciseID()) / (float) getSize();
     System.out.println("Ratio " + ratio);
-    return (int) (Math.ceil(100f * ratio));
-  }*/
+    return (int) (Math.ceil(100f * Math.abs(ratio)));
+  }
 
-/*  @Override
-  public int getComplete() {  return visited.size(); }*/
+  @Override
+  public int getComplete() {  return  getIndex(getCurrentExerciseID()); }
 
   /**
    * @see #removeExercise
