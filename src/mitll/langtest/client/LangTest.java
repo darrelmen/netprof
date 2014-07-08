@@ -5,8 +5,12 @@ import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.Container;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
+<<<<<<< HEAD
 import com.github.gwtbootstrap.client.ui.Tab;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+=======
+import com.github.gwtbootstrap.client.ui.Row;
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.common.cache.Cache;
@@ -14,15 +18,23 @@ import com.google.common.cache.CacheBuilder;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
+<<<<<<< HEAD
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
+=======
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style;
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.DOM;
+<<<<<<< HEAD
 import com.google.gwt.user.client.History;
+=======
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
@@ -356,8 +368,16 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // set up center right panel, initially with flash record panel
     Panel currentExerciseVPanel = new FlowPanel();
     currentExerciseVPanel.getElement().setId("currentExercisePanel");
+<<<<<<< HEAD
 
     makeExerciseList(secondRow, exerciseListContainer, currentExerciseVPanel);
+=======
+    DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingLeft", "5px");
+    DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingRight", "2px");
+     currentExerciseVPanel.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
+    /*ListInterface listInterface =*/ makeExerciseList(secondRow, leftColumn);
+    belowFirstRow.add(bothSecondAndThird);
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
 
     RootPanel.get().clear();
     if (!showOnlyOneExercise()) {
@@ -459,24 +479,65 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
         (props.isAdminView()) ? new UsersClickHandler() : null,
         (props.isAdminView()) ? new ResultsClickHandler() : null,
+<<<<<<< HEAD
         (props.isAdminView()) ? new MonitoringClickHandler() : null,
         (props.isAdminView()) ? new EventsClickHandler() : null
       );
     } else {
       flashcard = new Flashcard(props);
       title = flashcard.getHeaderRow(props.getSplash(), props.isClassroomMode(), NEW_PRO_F2_PNG, props.getAppTitle(), getGreeting(), getReleaseStatus(), new LogoutClickHandler(),
+=======
+        (props.isAdminView()) ? new MonitoringClickHandler() : null
+        );
+    }
+    else {//if (props.isFlashcardTeacherView() || props.isAutocrt()) {
+      flashcard = new Flashcard(props.getNameForAnswer());
+      title = flashcard.getHeaderRow(props.getSplash(), "NewProF2.png",props.getAppTitle(), getGreeting(), getReleaseStatus(), new LogoutClickHandler(),
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
 
         (props.isAdminView()) ? new UsersClickHandler() : null,
         (props.isAdminView()) ? new ResultsClickHandler() : null,
+<<<<<<< HEAD
         (props.isAdminView()) ? new MonitoringClickHandler() : null,
         (props.isAdminView()) ? new EventsClickHandler() : null, permissions);
     }
+=======
+        (props.isAdminView()) ? new MonitoringClickHandler() : null);
+    }
+/*    else {
+      title = getTitleWidget();
+    }*/
+
+    headerRow.add(new Column(12,title));
+    return headerRow;
+  }
+
+  private void addProgressBar(Panel widgets) {
+    if (props.isGrading()) {
+      widgets.add(status);
+    } else {
+      progressBar = new ProgressHelper();
+      widgets.add(progressBar.getProgressBar());
+    }
+  }
+
+/*  private Widget getTitleWidget() {
+    FluidRow titleRow = new FluidRow();
+    titleRow.addStyleName("alignCenter");
+    titleRow.addStyleName("inlineBlockStyle");
+    Heading pageTitle = new Heading(3, props.getAppTitle());
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
 
 
+<<<<<<< HEAD
     headerRow = new FluidRow();
     headerRow.add(new Column(12, title));
     return headerRow;
   }
+=======
+    return titleRow;
+  }*/
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
 
   /**
    * Set the page title and favicon.
@@ -644,6 +705,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    *
    * @see #gotUser(long)
    */
+<<<<<<< HEAD
   private void reallySetFactory() {
     if (props.isClassroomMode()) {
       exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, this, this, exerciseList, 1.0f) {
@@ -654,6 +716,33 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
             return new QCNPFExercise(e, controller, exerciseList, 1.0f, false, "classroom");
           } else {
             return new CommentNPFExercise(e, controller, exerciseList, 1.0f, false, "classroom");
+=======
+  private void setFactory(ListInterface exerciseList) {
+    final LangTest outer = this;
+   // System.out.println("factory " + props.isDataCollectMode() + " " + props.isCollectAudio()+ " " +  !props.isCRTDataCollectMode());
+    if (props.isGoodwaveMode() && !props.isGrading()) {
+      exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer, exerciseList, getScreenPortion()), userManager, 1);
+    } else if (props.isGrading()) {
+      exerciseList.setFactory(new GradingExercisePanelFactory(service, outer, outer, exerciseList), userManager, props.getNumGradesToCollect());
+    } else if (props.getFlashcardNextAndPrev()) {
+      String responseType = props.getResponseType();
+
+      //System.out.println("setFactory : got response type " + responseType + " : " + props.getSecondResponseType());
+      if (responseType.equalsIgnoreCase(ResponseChoice.TEXT)) {
+        exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer, exerciseList) {
+          @Override
+          public Panel getExercisePanel(Exercise e) {
+            return new TextCRTFlashcard(e, service, controller);
+          }
+        }, userManager, 1);
+      } else if (responseType.equalsIgnoreCase(ResponseChoice.AUDIO)) {
+        exerciseList.setFactory(new DataCollectionFlashcardFactory(service, outer, outer, exerciseList), userManager, 1);
+      } else if (responseType.equalsIgnoreCase(ResponseChoice.BOTH)) {
+        exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer, exerciseList) {
+          @Override
+          public Panel getExercisePanel(Exercise e) {
+            return new CombinedResponseFlashcard(e, service, controller);
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
           }
         }
       }, userManager, 1);
@@ -679,7 +768,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void removeAndReloadFlash() {
-    System.out.println(new Date() + " : removeAndReloadFlash - reloading...");
+    //System.out.println(new Date() + " : removeAndReloadFlash - reloading...");
 
     firstRow.remove(flashRecordPanel);
     flashRecordPanel.removeFlash();
@@ -718,9 +807,25 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param userID
    */
   public void gotUser(long userID) {
+<<<<<<< HEAD
     flashcard.setUserName(getGreeting());
     doEverythingAfterFactory(userID);
     logEvent("No widget", "UserLogin", "N/A", "User Login by " + userID);
+=======
+    System.out.println("LangTest.gotUser : got user " + userID);
+    if (flashcard != null) {
+      flashcard.setUserName(getGreeting());
+    }
+    if (userline != null) {
+      String userText = getUserText();
+      userline.setHTML(userText);
+    }
+    if (props.isDataCollectAdminView()) {
+      checkForAdminUser();
+    } else {
+      doEverythingAfterFactory(userID);
+    }
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
   }
 
   private boolean doEverythingAfterFactory(long userID) {
