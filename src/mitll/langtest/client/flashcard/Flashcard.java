@@ -50,11 +50,15 @@ public class Flashcard implements RequiresResize {
   /**
    * @see mitll.langtest.client.LangTest#makeHeaderRow()
    */
+<<<<<<< HEAD
   public Flashcard(PropertyHandler props) {
     this.nameForAnswer = props.getNameForAnswer() + "s";
     isAnonymous = props.getLoginType().equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS);
     adminView = props.isAdminView();
   }
+=======
+  public Flashcard(String nameForAnswer) { this.nameForAnswer = nameForAnswer + "s"; }
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
 
   /**
    * @param splashText
@@ -218,6 +222,12 @@ public class Flashcard implements RequiresResize {
     w.setRightDropdown(true);
     w.setIcon(IconType.COG);
     w.setIconSize(IconSize.LARGE);
+<<<<<<< HEAD
+=======
+
+    NavLink widget1 = new NavLink("Log Out");
+    widget1.addClickHandler(logoutClickHandler);
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
 
     if (users != null) {
       NavLink widget2 = new NavLink("Users");
