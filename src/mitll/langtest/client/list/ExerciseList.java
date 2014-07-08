@@ -57,6 +57,18 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   protected final LangTestDatabaseAsync service;
   protected final UserFeedback feedback;
   private ExercisePanelFactory factory;
+<<<<<<< HEAD
+=======
+  private Panel createdPanel;
+  protected UserManager user;
+  private String exercise_title;
+  private final boolean showTurkToken;
+  protected final boolean showInOrder;
+  private int countSincePrompt = 0;
+  protected int lastReqID = 0;
+  private final Set<Integer> visited = new HashSet<Integer>();
+  protected final boolean allowPlusInURL;
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
   private final ExerciseController controller;
 
   protected Panel createdPanel;
@@ -146,12 +158,17 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see mitll.langtest.client.LangTest#doEverythingAfterFactory(long)
    * @see mitll.langtest.client.list.HistoryExerciseList#noSectionsGetExercises(long)
    */
+<<<<<<< HEAD
   public boolean getExercises(long userID) {
     System.out.println("ExerciseList.getExercises for user " + userID + " instance " + instance);
     lastReqID++;
     service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, controller.getUser(), getRole(), false, new SetExercisesCallback(""));
     return true;
   }
+=======
+  public void getExercises(long userID, boolean getNext) {
+    System.out.println("---> ExerciseList.getExercises for user " +userID + " get next " + getNext);
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
 
   /**
    * @see mitll.langtest.client.custom.ReviewEditableExercise#doAfterEditComplete(ListInterface, boolean)
@@ -220,9 +237,23 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see #pushFirstSelection(String)
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
+<<<<<<< HEAD
   void pushNewItem(String exerciseID) {
     System.out.println("------------ ExerciseList.pushNewItem : (" + instance + ") push history " + exerciseID + " - ");
     History.newItem("#item=" + exerciseID + ";instance=" + instance);
+=======
+  protected void pushNewItem(String exerciseID) {
+    System.out.println("------------ ExerciseList.pushNewItem : push history " + exerciseID + " -------------- ");
+    History.newItem("#item=" + exerciseID + ";instance="+instance);
+  }
+
+  /**
+   * @see mitll.langtest.client.grading.GradedExerciseList#setFactory(ExercisePanelFactory, mitll.langtest.client.user.UserManager, int)
+   */
+  protected void getExercisesInOrder() {
+    lastReqID++;
+    service.getExerciseIds(lastReqID, -1, new SetExercisesCallback());
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
   }
 
   public void onResize() {
@@ -377,6 +408,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see ExerciseList.SetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
    * @see #rememberAndLoadFirst(java.util.List)
    */
+<<<<<<< HEAD
   private void rememberAndLoadFirst(List<CommonShell> exercises, CommonExercise firstExercise, String selectionID) {
     System.out.println("ExerciseList : rememberAndLoadFirst instance '" + instance +
       "' remembering " + exercises.size() + " exercises, first = " + firstExercise);
@@ -386,6 +418,12 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       listener.listChanged(exercises, selectionID);
     }
 
+=======
+  public void rememberAndLoadFirst(List<? extends ExerciseShell> exercises, Exercise firstExercise) {
+    System.out.println(new Date() + " rememberAndLoadFirst : exercises " +exercises.size());
+
+    rememberExercises(exercises);
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
     if (firstExercise != null) {
       CommonShell firstExerciseShell = findFirstExercise();
       if (firstExerciseShell.getID().equals(firstExercise.getID())) {
@@ -546,7 +584,18 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
   }
 
+<<<<<<< HEAD
   protected abstract Set<String> getKeys();
+=======
+  /**
+   * @see #loadByIDFromToken(String)
+   * @param exerciseShell
+   */
+  protected void askServerForExercise(ExerciseShell exerciseShell) {
+    System.out.println("ExerciseList.askServerForExercise id = " + exerciseShell.getID());
+    service.getExercise(exerciseShell.getID(), controller.getUser(), new ExerciseAsyncCallback(exerciseShell));
+  }
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
 
   String getTokenFromEvent(ValueChangeEvent<String> event) {
     String token = event.getValue();
@@ -583,6 +632,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
   }
 
+<<<<<<< HEAD
   /**
    * @param itemID
    * @see #checkAndAskServer(String)
@@ -591,6 +641,20 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     System.out.println("ExerciseList.askServerForExercise id = " + itemID + " instance " + instance);
     service.getExercise(itemID, controller.getUser(), new ExerciseAsyncCallback());
   }
+=======
+  private class ExerciseAsyncCallback implements AsyncCallback<Exercise> {
+    private final ExerciseShell exerciseShell;
+
+    /**
+     * @see ExerciseList#askServerForExercise(mitll.langtest.shared.ExerciseShell)
+     * @param exerciseShell
+     */
+    public ExerciseAsyncCallback(ExerciseShell exerciseShell) {
+      this.exerciseShell = exerciseShell;
+      System.out.println("ExerciseAsyncCallback exid = " + exerciseShell.getID());
+
+    }
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
 
   private class ExerciseAsyncCallback implements AsyncCallback<CommonExercise> {
     @Override
@@ -624,11 +688,21 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   protected void useExercise(CommonExercise result) {
     //System.out.println("ExerciseList.useExercise : result " +result);
     createdPanel = makeExercisePanel(result);
+<<<<<<< HEAD
     String itemID = result.getID();
     markCurrentExercise(itemID);
 /*    System.out.println("ExerciseList.useExercise : item id " + itemID + " currentExercise " +getCurrentExercise() +
       " or " + getCurrentExerciseID() + " instance " + instance);*/
   }
+=======
+    int i = getIndex(e);
+    //System.out.println("ExerciseList.useExercise : " + e.getID() + " index " + i);
+    if (i == -1) {
+      System.err.println("useExercise can't find " + e + " in list of " + currentExercises.size() +
+        " exercises (" +currentExercises+ ")");
+      return;
+    }
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
 
   public String getCurrentExerciseID() {
     return getCurrentExercise() != null ? getCurrentExercise().getID() : "Unknown";
@@ -640,6 +714,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param exercise
    * @see #useExercise(mitll.langtest.shared.CommonExercise)
    */
+<<<<<<< HEAD
   public Panel makeExercisePanel(CommonExercise exercise) {
     System.out.println("ExerciseList.makeExercisePanel : " + exercise + " instance " + instance);
 
@@ -652,6 +727,13 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     else {*/
       innerContainer.setWidget(exercisePanel);
   //  }
+=======
+  public Panel makeExercisePanel(Exercise result) {
+    //System.out.println("ExerciseList.makeExercisePanel : " +result.getID());
+
+    Panel exercisePanel = factory.getExercisePanel(result);
+    innerContainer.setWidget(exercisePanel);
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
     return exercisePanel;
   }
 

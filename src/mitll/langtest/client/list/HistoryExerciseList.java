@@ -326,10 +326,47 @@ public class HistoryExerciseList extends PagingExerciseList {
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
   protected void loadExercises(final Map<String, Collection<String>> typeToSection, final String item) {
+<<<<<<< HEAD
     //System.out.println("HistoryExerciseList.loadExercises : instance " + getInstance() + " " + typeToSection + " and item '" + item + "'");
     loadExercisesUsingPrefix(typeToSection, getPrefix());
+=======
+    System.out.println("HistoryExerciseList.loadExercises : " + typeToSection + " and item '" + item + "' showCompleted " + showCompleted);
+    if (showCompleted) {
+      service.getCompletedExercises(controller.getUser(),new AsyncCallback<Set<String>>() {
+        @Override
+        public void onFailure(Throwable caught) {}
+
+        @Override
+        public void onSuccess(Set<String> result) {
+          System.out.println("\tHistoryExerciseList.loadExercises : " + typeToSection + " and item '" + item + "' result " + result.size());
+
+          controller.getExerciseList().setCompleted(result);
+          loadExercisesUsingPrefix(typeToSection, getPrefix());
+        }
+      });
+    }
+    else {
+      loadExercisesUsingPrefix(typeToSection, getPrefix());
+    }
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
   }
 
+  private void getCompleted() {
+    service.getCompletedExercises(controller.getUser(),new AsyncCallback<Set<String>>() {
+      @Override
+      public void onFailure(Throwable caught) {}
+
+      @Override
+      public void onSuccess(Set<String> result) {
+        //System.out.println("\tHistoryExerciseList.loadExercises : " + typeToSection + " and item '" + item + "' result " + result.size());
+
+        controller.getExerciseList().setCompleted(result);
+      //  loadExercisesUsingPrefix(typeToSection, getPrefix());
+      }
+    });
+  }
+
+  @Override
   protected void loadExercises(String selectionState, String prefix) {
 
     Map<String, Collection<String>> typeToSection = getSelectionState(selectionState).getTypeToSection();
