@@ -29,9 +29,14 @@ import java.util.List;
  */
 public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   private static final String PAUSE_LABEL = "|| pause";
+<<<<<<< HEAD
   private static final int MIN_WIDTH = 40;
   private static final boolean DEBUG = false;
 
+=======
+  public static final int SPACE_BAR = 32;
+  private static final String PRESS_THE_SPACE_BAR_TO_PLAY_STOP_PLAYING_AUDIO = "Press the space bar to play/stop playing audio.";
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
   private Sound currentSound = null;
   private final SoundManagerAPI soundManager;
 
@@ -61,12 +66,21 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     playButton.setIcon(IconType.PLAY);
     addButtons(optionalToTheRight);
     id = counter++;
+<<<<<<< HEAD
     getElement().setId("PlayAudioPanel_"+id);
   }
 
   /**
    * @see mitll.langtest.client.exercise.RecordAudioPanel.MyPlayAudioPanel#MyPlayAudioPanel(com.github.gwtbootstrap.client.ui.Image, com.github.gwtbootstrap.client.ui.Image, com.google.gwt.user.client.ui.Panel, String, com.google.gwt.user.client.ui.Widget)
    * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel
+=======
+    getElement().setId("PlayAudioPanel");
+  }
+
+  /**
+   * @see mitll.langtest.client.exercise.RecordAudioPanel.MyPlayAudioPanel
+   * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel(com.google.gwt.user.client.ui.Widget, String)
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
    * @param soundManager
    * @param playListener
    * @param suffix
@@ -103,10 +117,33 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
         doClick();
       }
     });
+<<<<<<< HEAD
     playButton.setType(ButtonType.INFO);
     playButton.getElement().setId("PlayAudioPanel_playButton");
     playButton.addStyleName("leftFiveMargin");
     playButton.setEnabled(false);
+=======
+    playButton.getElement().setId("PlayButton");
+    playButton.addFocusHandler(new FocusHandler() {
+      @Override
+      public void onFocus(FocusEvent event) {
+        hasFocus = true;
+      }
+    });
+    playButton.addBlurHandler(new BlurHandler() {
+      @Override
+      public void onBlur(BlurEvent event) {
+        hasFocus = false;
+      }
+    });
+    playButton.setType(ButtonType.INFO);
+
+    addKeyboardListener();
+    if (keyHandler != null) {
+      playButton.setTitle(PRESS_THE_SPACE_BAR_TO_PLAY_STOP_PLAYING_AUDIO);
+    }
+    playButton.setVisible(false);
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
     add(playButton);
     warnNoFlash.setVisible(false);
     add(warnNoFlash);
@@ -117,6 +154,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     }
   }
 
+<<<<<<< HEAD
   /**
    * Make sure play button doesn't squish down when it says "pause"
    */
@@ -127,6 +165,31 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     int offsetWidth = playButton.getOffsetWidth();
     if (offsetWidth < MIN_WIDTH) offsetWidth = MIN_WIDTH;
     playButton.getElement().getStyle().setProperty("minWidth", offsetWidth + "px");
+=======
+  protected void addKeyboardListener() {
+    //makeKeyHandler();
+  }
+
+  protected void makeKeyHandler() {
+    keyHandler = Event.addNativePreviewHandler(new
+                                                 Event.NativePreviewHandler() {
+
+                                                   @Override
+                                                   public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
+                                                     NativeEvent ne = event.getNativeEvent();
+                                                     if (ne.getCharCode() == SPACE_BAR &&
+                                                       "[object KeyboardEvent]".equals(ne.getString()) &&
+                                                       !hasFocus && playButton.isVisible()) {
+                                                       ne.preventDefault();
+
+                                                       System.out.println(new Date() + " : Play click handler : Got " + event + " type int " +
+                                                         event.getTypeInt() + " assoc " + event.getAssociatedType() +
+                                                         " native " + event.getNativeEvent() + " source " + event.getSource());
+                                                       doClick();
+                                                     }
+                                                   }
+                                                 });
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
   }
 
   /**
@@ -191,7 +254,21 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   public void repeatSegment(float startInSeconds, float endInSeconds) {
     playing = true;
     setPlayButtonText();
+<<<<<<< HEAD
     playSegment(startInSeconds,endInSeconds);
+=======
+    int times = (end - start > LONG_AUDIO_THRESHOLD) ? numRepeats-1 : numRepeats;
+    times = Math.max(0,times);
+    playSegment(start, end, times);
+  }
+
+  private void playSegment(float start, float end, int times) {
+    count = times;
+    this.start = start;
+    this.end = end;
+
+    playSegment(start, end);
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
   }
 
   /**
