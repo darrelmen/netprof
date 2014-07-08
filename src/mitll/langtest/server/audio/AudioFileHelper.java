@@ -299,7 +299,12 @@ public class AudioFileHelper {
                                      int reqid,
                                      File file, AudioCheck.ValidityAndDur validity, String url, boolean doFlashcard) {
     AudioAnswer audioAnswer = new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
+<<<<<<< HEAD
     if (serverProps.isFlashcard() || doFlashcard) {
+=======
+    Exercise exercise1 = langTestDatabase.getExercise(exercise, user);
+    if (serverProps.isFlashcard()|| doFlashcard) {
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
       makeASRScoring();
       autoCRT.getFlashcardAnswer(exercise, file, audioAnswer);
       return audioAnswer;
