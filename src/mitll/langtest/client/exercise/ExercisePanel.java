@@ -87,6 +87,15 @@ public class ExercisePanel extends VerticalPanel implements
     this.service = service;
     this.exerciseList = exerciseList;
     this.navigationHelper = getNavigationHelper(controller);
+<<<<<<< HEAD
+=======
+
+    //if (!controller.getProps().isDataCollectMode()) {
+      addItemHeader(e);
+    //}
+
+    enableNextOnlyWhenAllCompleted = !isPashto();
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
 
     // attempt to left justify
     HorizontalPanel hp = new HorizontalPanel();
@@ -104,11 +113,23 @@ public class ExercisePanel extends VerticalPanel implements
     add(hp);
 
     addQuestions(e, service, controller, 1);
+    addRecordingStatus(e, controller);
 
     // add next and prev buttons
     add(navigationHelper);
     navigationHelper.addStyleName("topMargin");
     getElement().setId("ExercisePanel");
+  }
+
+  private void addRecordingStatus(Exercise e, ExerciseController controller) {
+    String status = (e.getReg() > 0 || e.getSlow() > 0) ?
+      "Total recordings : " +
+        (e.getReg()  > 0 ? e.getReg()  + " reg " : "") +
+        (e.getSlow() > 0 ? e.getSlow() + " slow " : "") +
+        "" : "";
+    if (!status.isEmpty() && controller.isDataCollectMode() && !controller.isGrading()) {
+      add(new Heading(ITEM_HEADER+1, status));
+    }
   }
 
   protected NavigationHelper getNavigationHelper(ExerciseController controller) {
@@ -117,6 +138,7 @@ public class ExercisePanel extends VerticalPanel implements
 
   protected void addInstructions() {  add(new Heading(4, PROMPT));  }
 
+<<<<<<< HEAD
   protected Widget getQuestionContent(CommonExercise e, boolean includeItemID) {
     String content = getExerciseContent(e);
 
@@ -127,6 +149,36 @@ public class ExercisePanel extends VerticalPanel implements
       return getContentScroller(maybeRTLContent);
     } else {
       return maybeRTLContent;
+=======
+  /**
+   * @see #ExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, ExerciseController, mitll.langtest.client.list.ListInterface)
+   * @param e
+   */
+  protected void addItemHeader(Exercise e) {
+
+    //HorizontalPanel hp = new HorizontalPanel();
+    //hp.setSpacing(5);
+    Heading w = new Heading(ITEM_HEADER, "Item ",e.getID());
+    w.getElement().setId("ItemHeading");
+    add(w);
+    //hp.add(new Heading(ITEM_HEADER+1, e.getID()));
+    //add(hp);
+  }
+
+  private Widget getQuestionContent(Exercise e, boolean includeItemID) {
+    String content = e.getContent();
+    if (content.contains("Listen")) {
+      return new AudioExerciseContent().getQuestionContent(e, controller, includeItemID, false);
+    }
+    else {
+      HTML maybeRTLContent = getMaybeRTLContent(content, true);
+      maybeRTLContent.addStyleName("rightTenMargin");
+      if (content.length() > 200) {
+        return getContentScroller(maybeRTLContent);
+      } else {
+        return maybeRTLContent;
+      }
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
     }
   }
 
@@ -319,7 +371,7 @@ public class ExercisePanel extends VerticalPanel implements
       instructions = prefix +REPEAT_TWICE;
     }
     else if (controller.getAudioType().equals(Result.AUDIO_TYPE_REGULAR)) {
-      instructions = prefix +REPEAT_ONCE;
+      instructions = "";//prefix +REPEAT_ONCE; // this was confusing people
     }
     else if (!controller.isCRTDataCollectMode()) {
       System.out.println("unknown audio type " + controller.getAudioType());
@@ -516,8 +568,8 @@ public class ExercisePanel extends VerticalPanel implements
   }
 
   protected void enableNext() {
-    //System.out.println("enableNext : answered " + completed.size() + " vs total " + answers.size());
     boolean isComplete = isCompleted();
+    System.out.println("enableNext : answered " + completed.size() + " vs total " + answers.size() + " complete " + isComplete);
     navigationHelper.enableNextButton(isComplete);
   }
 
@@ -530,8 +582,13 @@ public class ExercisePanel extends VerticalPanel implements
   }
 
   protected void enableNextButton(boolean val) {  navigationHelper.enableNextButton(val); }
+<<<<<<< HEAD
   void setButtonsEnabled(boolean val) {
    // navigationHelper.setButtonsEnabled(val);
+=======
+  protected void setButtonsEnabled(boolean val) {
+    navigationHelper.enablePrevButton(val);
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
     enableNext();
   }
 }
