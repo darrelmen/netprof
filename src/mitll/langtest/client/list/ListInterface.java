@@ -81,6 +81,11 @@ public interface ListInterface extends RequiresResize {
    * @see mitll.langtest.client.LangTest#resetState()
    */
   void clear();
+
+  int getPercentComplete();
+
+  int getComplete();
+
   /**
    * @see mitll.langtest.client.LangTest#resetState()
    */
@@ -93,6 +98,8 @@ public interface ListInterface extends RequiresResize {
   void addExercise(CommonShell es);
 
   CommonShell simpleRemove(String id);
+
+  int getSize();
 
   void hide();
   void show();
