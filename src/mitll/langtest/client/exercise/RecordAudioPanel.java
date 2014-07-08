@@ -12,10 +12,17 @@ import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
+<<<<<<< HEAD
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.Result;
+=======
+import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.Result;
+
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
 
 /**
  * A waveform record button and a play audio button.
@@ -57,6 +64,7 @@ public class RecordAudioPanel extends AudioPanel {
     this.exercisePanel = widgets;
     this.index = index;
     this.exercise = exercise;
+<<<<<<< HEAD
     this.audioType = audioType;
     AudioAttribute attribute = getAudioAttribute();
 /*    System.out.println("RecordAudioPanel for " + exercise.getID() +
@@ -80,22 +88,41 @@ public class RecordAudioPanel extends AudioPanel {
       audioType.equals(Result.AUDIO_TYPE_REGULAR) ? "Record regular"
         :
         audioType.equals(Result.AUDIO_TYPE_SLOW)    ? "Record slow"  : "Record";
+=======
+    String path =
+      audioType.equals(Result.AUDIO_TYPE_REGULAR) ? exercise.getRefAudio() :
+      audioType.equals(Result.AUDIO_TYPE_SLOW) ?    exercise.getSlowAudioRef() : null;
+    System.out.println("for " + exercise.getID()+
+      " audio type " + audioType + " ref " +exercise.getRefAudio() + " path " + path);
+
+    addWidgets(path, audioType);
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
   }
 
   /**
    * @see mitll.langtest.client.scoring.AudioPanel#getPlayButtons
+<<<<<<< HEAD
    * @param toTheRightWidget
    * @param playButtonSuffix
    * @param recordButtonTitle
+=======
+   * @param toAdd
+   * @param audioType
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
    * @return
    */
   @Override
   protected PlayAudioPanel makePlayAudioPanel(Widget toTheRightWidget, String playButtonSuffix, String audioType, String recordButtonTitle) {
     WaveformPostAudioRecordButton myPostAudioRecordButton = makePostAudioRecordButton(audioType, recordButtonTitle);
     postAudioRecordButton = myPostAudioRecordButton;
+<<<<<<< HEAD
 
    // System.out.println("makePlayAudioPanel : audio type " + audioType + " suffix '" +playButtonSuffix +"'");
     playAudioPanel = new MyPlayAudioPanel(recordImage1, recordImage2, exercisePanel, playButtonSuffix, toTheRightWidget);
+=======
+    PlayAudioPanel playAudioPanel = new MyPlayAudioPanel(recordImage1, recordImage2, exercisePanel);
+    myPostAudioRecordButton.addStyleName("rightFiveMargin");
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
     myPostAudioRecordButton.setPlayAudioPanel(playAudioPanel);
 
     return playAudioPanel;
@@ -113,6 +140,7 @@ public class RecordAudioPanel extends AudioPanel {
     return new MyWaveformPostAudioRecordButton(audioType, recordButtonTitle);
   }
 
+<<<<<<< HEAD
   protected void showStop() {
     recordImage1.setVisible(false);
     recordImage2.setVisible(false);
@@ -127,6 +155,8 @@ public class RecordAudioPanel extends AudioPanel {
     recordImage2.setVisible(!first);
   }
 
+=======
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
   public Button getButton() { return postAudioRecordButton; }
   public Button getPlayButton() { return playAudioPanel.getPlayButton(); }
 
