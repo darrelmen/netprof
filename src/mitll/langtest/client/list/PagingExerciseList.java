@@ -315,6 +315,8 @@ public class PagingExerciseList extends ExerciseList {
   protected List<CommonShell> rememberExercises(List<CommonShell> result) {
     inOrderResult = result;
     if (doShuffle) {
+      System.out.println(getInstance() +" : rememberExercises - shuffling " + result.size() + " items");
+
       result = new ArrayList<CommonShell>(result);
       Shuffler.shuffle(result);
     }
@@ -331,9 +333,7 @@ public class PagingExerciseList extends ExerciseList {
   protected List<CommonShell> getInOrder() { return inOrderResult; }
 
   @Override
-  protected int getSize() {
-    return pagingContainer.getSize();
-  }
+  public int getSize() {  return pagingContainer.getSize();  }
 
   @Override
   protected boolean isEmpty() {
@@ -346,9 +346,7 @@ public class PagingExerciseList extends ExerciseList {
   }
 
   @Override
-  public CommonShell byID(String name) {
-    return pagingContainer.byID(name);
-  }
+  public CommonShell byID(String name) {  return pagingContainer.byID(name);  }
 
   @Override
   public CommonShell getCurrentExercise() {
@@ -409,6 +407,10 @@ public class PagingExerciseList extends ExerciseList {
     pagingContainer.onResize(getCurrentExercise());
   }
 
+  /**
+   * @see #useExercise(mitll.langtest.shared.CommonExercise)
+   * @param itemID
+   */
   protected void markCurrentExercise(String itemID) { pagingContainer.markCurrentExercise(itemID); }
 
   public void setUserListID(long userListID) {
