@@ -24,6 +24,22 @@ import java.util.Map;
 public class Exercise extends AudioExercise implements CommonExercise {
   private static final ArrayList<String> EMPTY_LIST = new ArrayList<String>();
 
+  public int getReg() {
+    return reg;
+  }
+
+  public void setReg(int reg) {
+    this.reg = reg;
+  }
+
+  public int getSlow() {
+    return slow;
+  }
+
+  public void setSlow(int slow) {
+    this.slow = slow;
+  }
+
   public enum EXERCISE_TYPE implements IsSerializable { RECORD, TEXT_RESPONSE, REPEAT, REPEAT_FAST_SLOW, MULTI_REF }
   public static final String EN = "en";
   public static final String FL = "fl";
@@ -37,9 +53,15 @@ public class Exercise extends AudioExercise implements CommonExercise {
   private String meaning, context;
   private List<String> refSentences = new ArrayList<String>();
   private List<String> translitSentences = new ArrayList<String>();
+<<<<<<< HEAD
   private STATE state;
   private Collection<ScoreAndPath> scores;
   private float avgScore;
+=======
+  private double weight;
+  private int reg;
+  private int slow;
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
 
   public static class QAPair implements IsSerializable {
     private String question;
