@@ -1,13 +1,22 @@
 package mitll.langtest.client.list;
 
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.Widget;
+import java.util.List;
+import java.util.Set;
+
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.user.UserManager;
+<<<<<<< HEAD
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.STATE;
+=======
+import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.ExerciseShell;
+
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.Widget;
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
 
 /**
  * Created with IntelliJ IDEA.
@@ -64,7 +73,11 @@ public interface ListInterface extends RequiresResize {
 
   boolean loadNextExercise(String id);
 
+<<<<<<< HEAD
   boolean loadPrev();
+=======
+  Panel makeExercisePanel(Exercise result);
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
 
   boolean loadPreviousExercise(CommonShell current);
 
@@ -99,6 +112,7 @@ public interface ListInterface extends RequiresResize {
   Panel getCreatedPanel();
   void reload();
 
+<<<<<<< HEAD
   void redraw();
   void setState(String id, STATE state);
   void setSecondState(String id, STATE state);
@@ -108,4 +122,7 @@ public interface ListInterface extends RequiresResize {
   void setInstance(String instance);
   void setShuffle(boolean doShuffle);
   void simpleSetShuffle(boolean doShuffle);
+=======
+  void hideExerciseList();
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
 }
