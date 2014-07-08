@@ -18,8 +18,11 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/org.moxieapps.gwt.highcharts-1.5.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-bootstrap-2.3.2.1-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/guava-16.0.1.jar"/>
+<<<<<<< HEAD
 	<classpathentry kind="lib" path="war/WEB-INF/lib/guava-gwt-16.0.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/junit-4.11.jar"/>
+=======
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
 	<classpathentry combineaccessrules="false" kind="src" path="/imagewriter"/>
 	<classpathentry kind="lib" path="gwt/validation-api-1.0.0.GA-sources.jar"/>
 	<classpathentry kind="lib" path="gwt/validation-api-1.0.0.GA.jar"/>

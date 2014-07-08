@@ -77,9 +77,14 @@ public class FileExerciseDAO implements ExerciseDAO {
     }
     this.mediaDir = mediaDir;
     this.isFlashcard = isFlashcard;
-    ilrMapping = new ILRMapping(configDir,sectionHelper, mappingFile);
+    ilrMapping = new ILRMapping(configDir, sectionHelper, mappingFile);
+
   }
 
+  /**
+   * @see DatabaseImpl#getSectionHelper()
+   * @return
+   */
   @Override
   public void setAudioDAO(AudioDAO audioDAO) {
 
@@ -375,6 +380,8 @@ public class FileExerciseDAO implements ExerciseDAO {
               }
 
               lastID = exercise.getID();
+
+              sectionHelper.addUnitToLesson(exercise, "Default");
             }
           }
         } catch (Exception e) {
@@ -396,6 +403,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     }
     else {
       logger.debug("found " + exercises.size() + " exercises, first is " + exercises.iterator().next());
+      sectionHelper.report();
     }
     if (CONFIRM_AUDIO_REFS) confirmAudioRefs(exercises);
     populateIDToExercise(exercises);
