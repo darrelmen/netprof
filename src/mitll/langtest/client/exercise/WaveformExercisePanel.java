@@ -158,7 +158,8 @@ public class WaveformExercisePanel extends ExercisePanel {
     String prefix = "<br/>" + "";//THREE_SPACES;
     String prompt = REPEAT_TWICE;
     if (controller.getAudioType().equals(Result.AUDIO_TYPE_REGULAR)) {
-      prompt = REPEAT_ONCE;
+      //prompt = "";//REPEAT_ONCE;
+      return "";
     }
     return prefix + prompt;
   }
