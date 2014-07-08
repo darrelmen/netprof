@@ -13,6 +13,7 @@ import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -90,12 +91,24 @@ public class PagingExerciseList extends ExerciseList {
   }
 
   /**
+<<<<<<< HEAD
    * Add two rows -- the search box and then the item list
    */
   protected void addComponents() {
     PagingContainer exerciseShellPagingContainer = makePagingContainer();
 
     addTableWithPager(exerciseShellPagingContainer);
+=======
+   * @see mitll.langtest.client.recorder.FeedbackRecordPanel#enableNext()
+   * @see mitll.langtest.client.list.HistoryExerciseList#loadExercises(java.util.Map, String)
+   * @param completed
+   */
+  public void setCompleted(Set<String> completed) {
+    System.out.println("setCompleted : completed " + completed.size());
+
+    this.completed = completed;
+    pagingContainer.setCompleted(completed);
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
   }
 
   /**
@@ -230,6 +243,7 @@ public class PagingExerciseList extends ExerciseList {
     }
   }
 
+<<<<<<< HEAD
   protected void scheduleWaitTimer() {
     if (waitTimer != null) {
       waitTimer.cancel();
@@ -242,6 +256,11 @@ public class PagingExerciseList extends ExerciseList {
     };
     waitTimer.schedule(700);
   }
+=======
+  protected void loadExercises(String selectionState, String prefix) {
+    lastReqID++;
+    System.out.println("PagingExerciseList.loadExercises : looking for '" + prefix + "' (" + prefix.length() + " chars)");
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
 
   protected String getTypeAheadText() { return typeAhead.getText(); }
 
@@ -409,6 +428,7 @@ public class PagingExerciseList extends ExerciseList {
     pagingContainer.onResize(getCurrentExercise());
   }
 
+<<<<<<< HEAD
   protected void markCurrentExercise(String itemID) { pagingContainer.markCurrentExercise(itemID); }
 
   public void setUserListID(long userListID) {
@@ -426,5 +446,40 @@ public class PagingExerciseList extends ExerciseList {
 
   public void setUnrecorded(boolean unrecorded) {
     this.unrecorded = unrecorded;
+=======
+  /**
+   * not sure how this happens, but need Math.max(0,...)
+   *
+   * @see ExerciseList#useExercise(mitll.langtest.shared.Exercise, mitll.langtest.shared.ExerciseShell)
+   * @param i
+   */
+ @Override
+  protected void markCurrentExercise(int i) {
+   pagingContainer.markCurrentExercise(i);
+ }
+
+  @Override
+  public void getExercises(final long userID, boolean getNext) {
+    System.out.println("HistoryExerciseList.getExercises for user " + userID);
+
+    if (showInOrder) {
+      getExercisesInOrder();
+    } else {
+      service.getCompletedExercises(controller.getUser(), new AsyncCallback<Set<String>>() {
+        @Override
+        public void onFailure(Throwable caught) {
+        }
+
+        @Override
+        public void onSuccess(Set<String> result) {
+          //System.out.println("\tHistoryExerciseList.loadExercises : " + typeToSection + " and item '" + item + "' result " + result.size());
+
+          controller.getExerciseList().setCompleted(result);
+          lastReqID++;
+          service.getExerciseIds(lastReqID, userID, controller.showUnansweredFirst(), new SetExercisesCallback());
+        }
+      });
+    }
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
   }
 }
