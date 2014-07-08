@@ -50,6 +50,7 @@ public class PropertyHandler {
   private static final String RIGHT_ALIGN_CONTENT = "rightAlignContent";
   private static final String BIND_NEXT_TO_ENTER = "bindNextToEnter";
   private static final String SCREEN_PORTION = "screenPortion";
+  private static final String DATA_COLLECT_TYPE = "dataCollectType";
 
   // URL parameters that can override above parameters
   private static final String GRADING = GRADING_PROP;
@@ -135,6 +136,7 @@ public class PropertyHandler {
   private String splashTitle;
   private boolean promptBeforeNextItem = false;
   private boolean rightAlignContent;
+  private String dataCollectType = "Both";    // CourseExamples or Data
 
   // do we bind the record key to space -- problematic if we have text entry anywhere else on the page, say in a search
   // box
@@ -201,9 +203,16 @@ public class PropertyHandler {
       else if (key.equals(BIND_NEXT_TO_ENTER)) bindNextToEnter = getBoolean(value);
       else if (key.equals(SCREEN_PORTION)) screenPortion = getFloat(value, 1.0f, SCREEN_PORTION);
       else if (key.equals(CLASSROOM_MODE)) classroomMode = getBoolean(value);
+<<<<<<< HEAD
       else if (key.equals(SHOW_SPECTROGRAM)) spectrogram = getBoolean(value);
       else if (key.equals(INSTRUMENT)) instrument = getBoolean(value);
       else if (key.equals(NO_MODEL)) noModel = getBoolean(value);
+=======
+      else if (key.equals(DEFAULT_AUDIO_TYPE)) audioType = value;
+      else if (key.equals(INCLUDE_FEEDBACK)) includeFeedback = getBoolean(value);
+      else if (key.equals(DATA_COLLECT_TYPE)) dataCollectType = value;
+
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
       else if (key.equals(LOGIN_TYPE_PARAM)) {
         try {
           loginType = LOGIN_TYPE.valueOf(value.toUpperCase());
@@ -481,7 +490,7 @@ public class PropertyHandler {
   }
 
   public String getSplash() {
-    return splashTitle;
+    return splashTitle == null ? appTitle : splashTitle;
   }
 
   public boolean isCRTDataCollectMode() {
@@ -516,9 +525,17 @@ public class PropertyHandler {
   }
 
   public boolean isClassroomMode() { return classroomMode; }
+<<<<<<< HEAD
   public boolean showSpectrogram() { return spectrogram; }
 
   public boolean isNoModel() {
     return noModel;
+=======
+  public String getAudioType() { return audioType; }
+  public boolean isIncludeFeedback () { return includeFeedback; }
+
+  public String getDataCollectType() {
+    return dataCollectType;
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
   }
 }
