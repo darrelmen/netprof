@@ -15,16 +15,28 @@ public class ExerciseListWrapper implements IsSerializable {
   public ExerciseListWrapper(){}
 
   private int reqID;
+<<<<<<< HEAD
   private List<CommonShell> exercises;
   private CommonExercise firstExercise;
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#makeExerciseListWrapper(int, java.util.Collection)
+=======
+  private List<ExerciseShell> exercises;
+  private Exercise firstExercise;
+
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#makeExerciseListWrapper(int, java.util.List)
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
    * @param reqID
    * @param ids
    * @param firstExercise
    */
+<<<<<<< HEAD
   public ExerciseListWrapper(int reqID, List<CommonShell> ids, CommonExercise firstExercise) {
+=======
+  public ExerciseListWrapper(int reqID, List<ExerciseShell> ids, Exercise firstExercise) {
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
     this.reqID = reqID;
     this.exercises = ids;
     this.firstExercise = firstExercise;
