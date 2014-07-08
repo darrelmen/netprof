@@ -67,6 +67,25 @@ public class ResultDAO extends DAO {
    */
   public ResultDAO(Database database) {
     super(database);
+<<<<<<< HEAD
+=======
+
+    gradeDAO = new GradeDAO(database, userDAO, this);
+    scheduleDAO = new ScheduleDAO(database);
+  }
+
+  public List<SimpleResult> getSimpleResults() {
+    return getSimpleResults(" WHERE " + VALID + "=TRUE");
+  }
+
+  /**
+   * Only valid results...
+   * @param userid
+   * @return
+   */
+  public List<SimpleResult> getResultsForUser(long userid) {
+    return getSimpleResults(" WHERE userid=" + userid + " AND " + VALID + "=TRUE");
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
   }
 
 /*  private List<SimpleResult> getSimpleResults(String whereClause) {
@@ -370,6 +389,38 @@ public class ResultDAO extends DAO {
     }
 
     return allGraded;
+<<<<<<< HEAD
+=======
+  }
+
+  /**
+   * @param userid
+   * @return
+   * @see DatabaseImpl#getExercisesFirstNInOrder(long, int)
+   */
+/*  public String getExerciseIDLastResult(long userid) {
+    try {
+      Connection connection = database.getConnection();
+      String sql = "SELECT exid FROM results WHERE TIME IN (SELECT MAX(TIME) FROM results WHERE userid = " +
+        userid +
+        ");";
+      PreparedStatement statement = connection.prepareStatement(sql);
+
+      ResultSet rs = statement.executeQuery();
+      String exid = "INVALID";
+      if (rs.next()) {
+        exid = rs.getString(1);
+      }
+      rs.close();
+      statement.close();
+      database.closeConnection(connection);
+      return exid;
+
+    } catch (Exception ee) {
+      ee.printStackTrace();
+    }
+    return "INVALID";
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
   }*/
 
   /**
