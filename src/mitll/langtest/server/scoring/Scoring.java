@@ -104,6 +104,7 @@ public abstract class Scoring {
     }
   }
 
+<<<<<<< HEAD
   private ImageWriter.EventAndFileInfo getEventInfo(Map<ImageType, String> imageTypes) {
     Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = new HashMap<ImageType, Map<Float, TranscriptEvent>>();
     try {
@@ -115,6 +116,13 @@ public abstract class Scoring {
       e.printStackTrace();
       return null;
     }
+=======
+    ImageWriter.EventAndFileInfo eventAndFileInfo = new ImageWriter().writeTranscripts(pathname,
+        imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg,"");
+//    Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
+//    logger.debug("image map is " + sTypeToImage);
+    return eventAndFileInfo;
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
   }
 
   /**
