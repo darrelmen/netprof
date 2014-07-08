@@ -18,7 +18,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
-import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -26,6 +25,8 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.MyFlashcardExercisePanelFactory;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.list.ExerciseList;
+import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.recorder.FlashcardRecordButton;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
@@ -95,6 +96,7 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
    * @param soundFeedback
    * @param endListener
    * @param instance
+   * @param exerciseList
    * @see mitll.langtest.client.custom.MyFlashcardExercisePanelFactory.StatsPracticePanel#StatsPracticePanel(mitll.langtest.shared.CommonExercise)
    *
    */
@@ -103,8 +105,8 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
                                 final ControlState controlState,
                                 MyFlashcardExercisePanelFactory.MySoundFeedback soundFeedback,
                                 SoundFeedback.EndListener endListener,
-                                String instance) {
-    super(e,service,controller,addKeyBinding,controlState,soundFeedback,endListener,instance);
+                                String instance, ListInterface  exerciseList) {
+    super(e,service,controller,addKeyBinding,controlState,soundFeedback,endListener,instance, exerciseList);
   }
 
   /**
