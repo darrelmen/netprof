@@ -33,14 +33,33 @@ import java.util.Map;
 public interface LangTestDatabase extends RemoteService {
   boolean WRITE_ALTERNATE_COMPRESSED_AUDIO = false;
 
+<<<<<<< HEAD
   ExerciseListWrapper getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix, long userListID, int userID, String role, boolean onlyUnrecordedByMe);
 
   CommonExercise getExercise(String id, long userID);
+=======
+  // exerciseDAO
+  ExerciseListWrapper getExerciseIds(int reqID, long userID, boolean unansweredFirst);
+  ExerciseListWrapper getExerciseIds(int reqID, int userID);
+  ExerciseListWrapper getExerciseIds(int reqID, long userID, String prefix);
+
+  Exercise getExercise(String id, long userid);
+
+  ResultsAndGrades getResultsForExercise(String exid, boolean arabicTextDataCollect);
+
+  // gradeDAO
+  CountAndGradeID addGrade(String exerciseID, Grade grade);
+  void changeGrade(Grade toChange);
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
 
   void markAudioDefect(AudioAttribute audioAttribute, String exid);
   void markGender(AudioAttribute attr, boolean isMale);
   // user DAO
+<<<<<<< HEAD
   long addUser(int age, String gender, int experience, String nativeLang, String dialect, String userID, Collection<User.Permission> permissions);
+=======
+  long addUser(int age, String gender, int experience, String nativeLang, String dialect, String userID);
+>>>>>>> 9ea1717642f00415277fe4e6a352158a7530b162
 
   List<User> getUsers();
   int userExists(String login);
