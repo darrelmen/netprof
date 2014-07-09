@@ -30,6 +30,8 @@ import java.util.ArrayList;
  * To change this template use File | Settings | File Templates.
  */
 class NPFHelper implements RequiresResize {
+  protected static final String LIST_COMPLETE = "List complete!";
+  protected static final String COMPLETE = "Complete";
   private boolean madeNPFContent = false;
 
   protected final LangTestDatabaseAsync service;
@@ -181,7 +183,11 @@ class NPFHelper implements RequiresResize {
       true, instanceName) {
       @Override
       protected void onLastItem() {
-        new ModalInfoDialog("Complete", "List complete!", new HiddenHandler() {
+        System.out.println("\n" +
+            "\n" +
+            "\nNPFHelper.onLastItem!\n\n\n");
+
+        new ModalInfoDialog(COMPLETE, LIST_COMPLETE, new HiddenHandler() {
           @Override
           public void onHidden(HiddenEvent hiddenEvent) {
             reloadExercises();
