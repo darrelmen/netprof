@@ -57,7 +57,7 @@ public class AudioAttribute implements IsSerializable {
     this.audioRef = audioRef;
     this.timestamp = timestamp;
     this.duration = duration;
-    this.user = user;
+    this.setUser(user);
     if (type.equals(Result.AUDIO_TYPE_REGULAR)) markRegular();
     else if (type.equals(Result.AUDIO_TYPE_SLOW)) markSlow();
     else if (type.equals(Result.AUDIO_TYPE_FAST_AND_SLOW)) {
@@ -76,7 +76,7 @@ public class AudioAttribute implements IsSerializable {
 
   public AudioAttribute(String audioRef, MiniUser miniUser) {
     this(audioRef);
-    this.user = miniUser;
+    this.setUser(miniUser);
     this.userid = miniUser.getId();
   }
 
@@ -162,6 +162,8 @@ public class AudioAttribute implements IsSerializable {
   }
 
   public MiniUser getUser() { return user; }
+  public void setUser(MiniUser user) { this.user = user;  }
+
   public long getUserid() { return userid; }
 
   /**
@@ -179,20 +181,14 @@ public class AudioAttribute implements IsSerializable {
   public void setHasBeenPlayed(boolean hasBeenPlayed) {
     this.hasBeenPlayed = hasBeenPlayed;
   }
-
   public long getTimestamp() {
     return timestamp;
   }
   public long getDuration() {
     return duration;
   }
-  public int getUniqueID() {
-    return uniqueID;
-  }
-
-  public void setExid(String exid) {
-    this.exid = exid;
-  }
+  public int getUniqueID() { return uniqueID;  }
+  public void setExid(String exid) {  this.exid = exid;  }
 
   @Override
   public String toString() {
