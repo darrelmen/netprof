@@ -173,9 +173,7 @@ class NPFHelper implements RequiresResize {
     npfExerciseList.rememberAndLoadFirst(new ArrayList<CommonShell>(ul.getExercises()));
   }
 
-  Panel setupContent(Panel hp) {
-    return npfContentPanel;
-  }
+  Panel setupContent(Panel hp) {  return npfContentPanel;  }
 
   PagingExerciseList makeExerciseList(final Panel right, final String instanceName) {
     //System.out.println(getClass() + ".makeExerciseList : instanceName " + instanceName);
@@ -183,10 +181,6 @@ class NPFHelper implements RequiresResize {
       true, instanceName) {
       @Override
       protected void onLastItem() {
-        System.out.println("\n" +
-            "\n" +
-            "\nNPFHelper.onLastItem!\n\n\n");
-
         new ModalInfoDialog(COMPLETE, LIST_COMPLETE, new HiddenHandler() {
           @Override
           public void onHidden(HiddenEvent hiddenEvent) {
@@ -227,7 +221,7 @@ class NPFHelper implements RequiresResize {
    * @see #doNPF(mitll.langtest.shared.custom.UserList, String, boolean)
    * @return
    */
-  Panel getNpfContentPanel() { return npfContentPanel; }
+ // Panel getNpfContentPanel() { return npfContentPanel; }
 
   @Override
   public void onResize() { if (npfContentPanel != null) {  npfExerciseList.onResize(); } }
