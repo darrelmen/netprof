@@ -64,9 +64,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   private static final String SKIP_TO_END = "See your scores";
   private static final int TABLE_WIDTH = 2 * 275;
   private static final int HORIZ_SPACE_FOR_CHARTS = (1250 - TABLE_WIDTH);
-  private static final String CURRENT_EXERCISE = "currentExercise";
-  private static final String CORRECT1 = "correct";
-  private static final String SKIPPED = "skipped";
+
 
   private static final boolean ADD_KEY_BINDING = true; // TODO : work on key binding...
 
@@ -79,9 +77,10 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   private final Map<String,Double>   exToScore = new HashMap<String, Double>();
   private final Set<String> skipped = new HashSet<String>();
   private final Set<Long> resultIDs = new HashSet<Long>();
-  private final KeyStorage storage;
+  //private final KeyStorage storage;
   private String selectionID = "";
   private final String instance;
+  StickyState sticky;
 
   /**
    * @see mitll.langtest.client.custom.AVPHelper#getFactory(mitll.langtest.client.list.PagingExerciseList, String, boolean)
@@ -113,12 +112,13 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
         reset();
       }
     });
-    storage = new KeyStorage(controller) {
+    KeyStorage storage = new KeyStorage(controller) {
       @Override
       protected String getKey(String name) {
         return (selectionID.isEmpty() ? "":selectionID + "_") + super.getKey(name); // in the context of this selection
       }
     };
+    sticky = new StickyState(storage);
     controlState.setStorage(storage);
    // System.out.println("setting shuffle --------------------- " +controlState.isShuffle()+ "\n");
 
@@ -135,7 +135,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   @Override
   public Panel getExercisePanel(CommonExercise e) {
     currentExercise = e;
-    storage.storeValue(CURRENT_EXERCISE, e.getID());
+    sticky.storeCurrent(e);
     return controller.getProps().isNoModel() || !controller.isRecordingEnabled() ? new FlashcardPanel(e,
         MyFlashcardExercisePanelFactory.this.service,
         MyFlashcardExercisePanelFactory.this.controller,
@@ -145,7 +145,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
         soundFeedback.endListener, MyFlashcardExercisePanelFactory.this.instance, exerciseList) {
       @Override
       protected void gotShuffleClick(boolean b) {
-        resetStorage();
+        sticky.resetStorage();
         super.gotShuffleClick(b);
       }
     } : new StatsPracticePanel(e);
@@ -159,13 +159,13 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
     resultIDs.clear();
   }
 
-  public String getCurrentExerciseID() { return storage.getValue(CURRENT_EXERCISE); }
+  public String getCurrentExerciseID() { return sticky.getCurrentExerciseID(); }
 
   /**
    * @see mitll.langtest.client.custom.Navigation#makePracticeHelper(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.user.UserFeedback)
    */
   public void populateCorrectMap() {
-    String value = storage.getValue(CORRECT1);
+    String value = sticky.getCorrect();
     if (value != null && !value.trim().isEmpty()) {
      // System.out.println("using correct map " + value);
       for (String ex : value.split(",")) {
@@ -173,7 +173,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       }
     }
 
-    value = storage.getValue(INCORRECT);
+    value = sticky.getIncorrect();
     if (value != null && !value.trim().isEmpty()) {
     //  System.out.println("using incorrect map " + value);
       for (String ex : value.split(",")) {
@@ -181,7 +181,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       }
     }
 
-    value = storage.getValue(SCORE);
+    value = sticky.getScore();
     if (value != null && !value.trim().isEmpty()) {
       for (String pair : value.split(",")) {
         String[] split = pair.split("=");
@@ -191,7 +191,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       }
     }
 
-    value = storage.getValue(SKIPPED);
+    value = sticky.getSkipped();
     if (value != null && !value.trim().isEmpty()) {
       for (String pair : value.split(",")) {
         String trim = pair.trim();
@@ -204,6 +204,10 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
 
   private long latestResultID = -1;
   private final MySoundFeedback soundFeedback = new MySoundFeedback();
+
+  public void resetStorage() {
+    sticky.resetStorage();
+  }
 
   /**
    * @see #getExercisePanel(mitll.langtest.shared.CommonExercise)
@@ -237,7 +241,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
 
     @Override
     protected void gotShuffleClick(boolean b) {
-      resetStorage();
+      sticky.resetStorage();
       super.gotShuffleClick(b);
     }
 
@@ -265,14 +269,14 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
           builder2.append(pair.getKey()).append(",");
         }
       }
-      storage.storeValue(CORRECT1, builder.toString());
-      storage.storeValue(INCORRECT, builder2.toString());
+      sticky.storeCorrect(builder);
+      sticky.storeIncorrect(builder2);
 
       StringBuilder builder3= new StringBuilder();
       for (Map.Entry<String, Double> pair : exToScore.entrySet()) {
           builder3.append(pair.getKey()).append("=").append(pair.getValue()).append(",");
       }
-      storage.storeValue(SCORE, builder3.toString());
+      sticky.storeScore(builder3);
 
       setStateFeedback();
 
@@ -292,7 +296,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       startOver.setVisible(false);
       seeScores.setVisible(false);
 
-      resetStorage();
+      sticky.resetStorage();
 
       final int user = controller.getUser();
 
@@ -341,7 +345,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       belowContentDiv.add(container);
       belowContentDiv.add(getRepeatButton());
 
-      resetStorage();
+      sticky.resetStorage();
     }
 
     private Chart makeCorrectChart(List<AVPHistoryForList> result, AVPHistoryForList sessionAVPHistoryForList) {
@@ -550,7 +554,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
     void startOver() {
       reset();
 
-      resetStorage();
+      sticky.resetStorage();
 
       skip.setVisible(true);
       startOver.setVisible(true);
@@ -608,7 +612,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
             builder.append(id).append(",");
           }
 
-          storage.storeValue(SKIPPED, builder.toString());
+          sticky.storeSkipped(builder);
           skipped.add(currentExercise.getID());
           loadNext();
         }
@@ -745,14 +749,6 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
 
       pronScore.setText("" + itotal);
     }
-  }
-
-  private void resetStorage() {
-    storage.removeValue(CORRECT1);
-    storage.removeValue(INCORRECT);
-    storage.removeValue(CURRENT_EXERCISE);
-    storage.removeValue(SCORE);
-    storage.removeValue(SKIPPED);
   }
 
   public class MySoundFeedback extends SoundFeedback {
