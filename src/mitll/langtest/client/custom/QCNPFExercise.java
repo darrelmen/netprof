@@ -76,7 +76,11 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   private static final String APPROVED_BUTTON_TOOLTIP2 = "Item has been marked with a defect";
   private static final String ATTENTION_LL = "Attention LL";
   private static final String MARK_FOR_LL_REVIEW = "Mark for review by Lincoln Laboratory.";
-  public static final int DEFAULT_USER = -1;
+  //public static final int DEFAULT_USER = -1;
+  public static final int DEFAULT_MALE_ID = -2;
+  public static final int DEFAULT_FEMALE_ID = -3;
+  private static MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 30, 0, "default", "default", "Male");
+  private static MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 30, 1, "default", "default", "Female");
 
   private Set<String> incorrectFields;
   private List<RequiresResize> toResize;
@@ -295,9 +299,9 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
     if (e.getModifiedDate() != null && e.getModifiedDate().getTime() != 0) {
       Heading widgets = new Heading(5, "Changed", e.getModifiedDate().toString());
-      if (!e.getAudioAttributes().isEmpty()) {
-        widgets.addStyleName("floatRight");
-      }
+    //  if (!e.getAudioAttributes().isEmpty()) {
+    //    widgets.addStyleName("floatRight");
+    //  }
       row.add(widgets);
     }
 
@@ -351,6 +355,14 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     }
   }
 
+  /**
+   * For all the users, show a tab for each audio cut they've recorded (regular and slow speed).
+   * Special logic included for default users so a QC person can set the gender.
+   * @param e
+   * @param tabPanel
+   * @param malesMap
+   * @param maleUsers
+   */
   private void addTabsForUsers(CommonExercise e, TabPanel tabPanel, Map<MiniUser, List<AudioAttribute>> malesMap, List<MiniUser> maleUsers) {
     int me = controller.getUser();
     for (MiniUser user : maleUsers) {
@@ -365,7 +377,8 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
       boolean allHaveBeenPlayed = true;
 
-      for (AudioAttribute audio : malesMap.get(user)) {
+      List<AudioAttribute> audioAttributes = malesMap.get(user);
+      for (AudioAttribute audio : audioAttributes) {
         if (!audio.isHasBeenPlayed()) allHaveBeenPlayed = false;
         Pair panelForAudio1 = getPanelForAudio(e, audio);
 
@@ -378,7 +391,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
           Panel hp = new HorizontalPanel();
 
           final Button next = getNextButton();
-          hp.add(getGenderGroup(tabAndContent, audio, next));
+          hp.add(getGenderGroup(tabAndContent, audio, next, audioAttributes));
           hp.add(next);
           next.setVisible(false);
           vp.add(hp);
@@ -418,12 +431,15 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
    * TODO : this may be undone if someone deletes the audio cut - since this essentially masks out old score
    * default audio.
    *
+   * TODO:  add list of all audio by this user.
    * @param tabAndContent
    * @param audio
    * @param next
+   * @param allByUser
    * @return
+   * @see #addTabsForUsers(mitll.langtest.shared.CommonExercise, com.github.gwtbootstrap.client.ui.TabPanel, java.util.Map, java.util.List)
    */
-  private DivWidget getGenderGroup(final RememberTabAndContent tabAndContent, final AudioAttribute audio, final Button next) {
+  private DivWidget getGenderGroup(final RememberTabAndContent tabAndContent, final AudioAttribute audio, final Button next, final List<AudioAttribute> allByUser) {
     ButtonToolbar w = new ButtonToolbar();
     ButtonGroup buttonGroup = new ButtonGroup();
     buttonGroup.setToggle(ToggleType.RADIO);
@@ -447,9 +463,8 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
           @Override
           public void onSuccess(Void result) {
-            onButton.setEnabled(true);
-            tabAndContent.getTab().setHeading("Male");
-            next.setVisible(true);
+            audio.setUser(DEFAULT_MALE);
+            showGenderChange(onButton, tabAndContent, allByUser, next);
           }
         });
       }
@@ -469,15 +484,30 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
           @Override
           public void onSuccess(Void result) {
-            offButton.setEnabled(true);
-            tabAndContent.getTab().setHeading("Female");
-            next.setVisible(true);
+            audio.setUser(DEFAULT_FEMALE);
+            showGenderChange(offButton, tabAndContent, allByUser, next);
           }
         });
       }
     });
 
     return w;
+  }
+
+  protected void showGenderChange(Button onButton, RememberTabAndContent tabAndContent, List<AudioAttribute> allByUser, Button next) {
+    onButton.setEnabled(true);
+    tabAndContent.getTab().setHeading(getTabLabelFromAudio(allByUser));
+    next.setVisible(true);
+  }
+
+  protected String getTabLabelFromAudio(List<AudioAttribute> allByUser) {
+    StringBuilder builder = new StringBuilder();
+    AudioAttribute last = allByUser.get(allByUser.size() - 1);
+    for (AudioAttribute audioAttribute : allByUser) {
+      builder.append(audioAttribute.getUser().isDefault() ? GoodwaveExercisePanel.DEFAULT_SPEAKER : audioAttribute.isMale() ? "Male":"Female");
+      if (audioAttribute != last) builder.append("/");
+    }
+    return builder.toString();
   }
 
   private Button makeGroupButton(ButtonGroup buttonGroup,String title) {
@@ -573,23 +603,30 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
       incorrectFields.add(field);
     }
     final Panel commentRow = new FlowPanel();
+    commentRow.getElement().setId("QCNPFExercise_commentRow_"+field);
+
     final Widget qcCol = getQCCheckBox(field, commentEntry, alreadyMarkedCorrect, commentRow);
+    qcCol.getElement().setId("QCNPFExercise_qcCol_"+field);
 
     populateCommentRow(commentEntry, alreadyMarkedCorrect, commentRow);
 
     // comment to left, content to right
 
     Panel row = new FlowPanel();
+    row.getElement().setId("QCNPFExercise_row_"+field);
+
     row.addStyleName("trueInlineStyle");
     qcCol.addStyleName("floatLeft");
     row.add(qcCol);
     row.add(content);
 
     Panel rowContainer = new FlowPanel();
+    rowContainer.getElement().setId("QCNPFExercise_rowContainer_"+field);
     rowContainer.addStyleName("topFiveMargin");
     rowContainer.addStyleName("blockStyle");
     rowContainer.add(row);
     rowContainer.add(commentRow);
+    rowContainer.setWidth("650px");
 
     return rowContainer;
   }
