@@ -221,7 +221,13 @@ public class Navigation implements RequiresResize {
                 myFlashcardExercisePanelFactory.resetStorage();
                 super.onLastItem();
               }
+
             };
+          }
+
+          @Override
+          protected void styleBottomRow(Panel bottomRow) {
+            bottomRow.addStyleName("centerPractice");
           }
         };
       }
