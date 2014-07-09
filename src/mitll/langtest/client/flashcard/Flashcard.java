@@ -32,7 +32,7 @@ import java.util.Collection;
  */
 public class Flashcard implements RequiresResize {
   private static final String PRONUNCIATION_FEEDBACK = "PRONUNCIATION FEEDBACK";
-  private static final double MAX_FONT_EM = 1.8d;
+  private static final double MAX_FONT_EM = 1.7d;
   private static final int SLOP = 55;
   private static final String NEW_PRO_F1_PNG = "NewProF1.png";
   private final boolean isAnonymous;
