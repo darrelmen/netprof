@@ -681,7 +681,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   private int getIndex(String currentID) {
     CommonShell shell = byID(currentID);
     int i = shell != null ? getRealIndex(shell) : -1;
-    System.out.println("getIndex " + currentID + " = " +i);
+   // System.out.println("getIndex " + currentID + " = " +i);
     return i;
   }
 
@@ -692,7 +692,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   @Override
   public int getPercentComplete() {
     float ratio = (float) getIndex(getCurrentExerciseID()) / (float) getSize();
-    System.out.println("Ratio " + ratio);
+   // System.out.println("Ratio " + ratio);
     return (int) (Math.ceil(100f * Math.abs(ratio)));
   }
 
@@ -744,12 +744,9 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     //System.out.println("ExerciseList.loadNextExercise current is : " +current + " instance " + instance);
     String id = current.getID();
     int i = getIndex(id);
-
-    //  visited.add(i);
-
     boolean onLast = isOnLastItem(i);
-    System.out.println("ExerciseList.loadNextExercise current is : " + id + " index " + i +
-      " of " + getSize() + " last is " + (getSize() - 1) + " on last " + onLast);
+/*    System.out.println("ExerciseList.loadNextExercise current is : " + id + " index " + i +
+        " of " + getSize() + " last is " + (getSize() - 1) + " on last " + onLast);*/
 
     if (onLast) {
       onLastItem();
@@ -848,7 +845,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   @Override
   public boolean onLast(CommonShell current) {
     boolean b = current == null || getSize() == 1 || isOnLastItem(getIndex(current.getID()));
-    //System.out.println("onLast  : of " +getSize() +", on checking " + current + " = " + b);
     return b;
   }
 
