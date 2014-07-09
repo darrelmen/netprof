@@ -126,7 +126,7 @@ public class FlashcardPanel extends HorizontalPanel {
     getElement().setId("BootstrapExercisePanel");
 
     addWidgetsBelow(belowDiv);
-    if (controlState.isAudioOn() && mainContainer.isVisible()) {
+    if (controlState.isAudioOn() && mainContainer.isVisible() && !isHidden(foreign)) {
       playRef();
     }
     addStyleName("leftFiftyMargin");
@@ -145,14 +145,10 @@ public class FlashcardPanel extends HorizontalPanel {
     clickToFlip.addStyleName("dontSelect");
     clickToFlipContainer.addStyleName("dontSelect");
 
-    //boolean isEnglish = controlState.getShowState().equals(ControlState.ENGLISH);
-    //boolean isForeign = controlState.getShowState().equals(ControlState.FOREIGN);
-    //setTitleOfClick(controlState.isEnglish(), controlState.isForeign(), true);
     clickToFlip.addStyleName("floatRight");
     clickToFlip.getElement().getStyle().setFontWeight(Style.FontWeight.BOLDER);
     clickToFlip.getElement().getStyle().setMarginTop(82, Style.Unit.PX);
-    //clickToFlipContainer.setVisible(!controlState.showBoth());
-  clickToFlipContainer.getElement().getStyle().setVisibility(controlState.showBoth() ? Style.Visibility.HIDDEN : Style.Visibility.VISIBLE);
+    clickToFlipContainer.getElement().getStyle().setVisibility(controlState.showBoth() ? Style.Visibility.HIDDEN : Style.Visibility.VISIBLE);
 
     Icon w = new Icon(IconType.UNDO);
     w.addStyleName("floatRight");
@@ -160,37 +156,10 @@ public class FlashcardPanel extends HorizontalPanel {
     w.getElement().getStyle().setMarginTop(84, Style.Unit.PX);
     clickToFlipContainer.add(w);
     clickToFlipContainer.add(clickToFlip);
-    //this.clickToFlipContainer = widget;
     return clickToFlipContainer;
   }
 
-/*  private void setTitleOfClick(boolean isEnglish, boolean isForeign, boolean show) {
-    String show1 = show ? "show" :"hide";
-    if (clickToFlip != null) {
-      if (isEnglish && !isForeign) {
-        clickToFlip.setText("Click to " +
-          show1 +
-          " " + controller.getLanguage());
-      } else if (!isEnglish && isForeign) {
-        clickToFlip.setText("Click to " +
-          show1 +
-          " English");
-      }
-    }
-  }*/
-
-/*  private Panel getCenteredWrapper(Widget recordButton) {
-    Panel recordButtonRow = new FluidRow();
-    Paragraph recordButtonContainer = new Paragraph();
-    recordButtonContainer.addStyleName("alignCenter");
-    recordButtonContainer.add(recordButton);
-    recordButton.addStyleName("alignCenter");
-    recordButtonRow.add(new Column(12, recordButtonContainer));
-    return recordButtonRow;
-  }*/
-
   protected void addRecordingAndFeedbackWidgets(CommonExercise e, LangTestDatabaseAsync service, ExerciseController controller, Panel contentMiddle) {
-
   }
 
   /**
@@ -241,10 +210,8 @@ public class FlashcardPanel extends HorizontalPanel {
         if (clickToFlip.isVisible()) {
           if (!controlState.showEnglish() || !controlState.showForeign()) {
             toggleVisibility(english);
-            //   }
-            // if (!controlState.showForeign()) {
             toggleVisibility(foreign);
-            if (isHidden(foreign) && controlState.isAudioOn()) {
+            if (!isHidden(foreign) && controlState.isAudioOn()) {
               playRef();
             }
           }
@@ -259,7 +226,6 @@ public class FlashcardPanel extends HorizontalPanel {
     String visibility = style.getVisibility();
     boolean hidden = visibility.equals("hidden");
     style.setVisibility(hidden ? Style.Visibility.VISIBLE : Style.Visibility.HIDDEN);
-    //setTitleOfClick(controlState.isEnglish(),controlState.isForeign(),!hidden);
   }
 
   private boolean isHidden(Widget english) {
@@ -701,6 +667,8 @@ public class FlashcardPanel extends HorizontalPanel {
 
   /**
    * @see #playRefLater()
+   * @see #getCardContent()
+   * @see #FlashcardPanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ControlState, mitll.langtest.client.custom.MyFlashcardExercisePanelFactory.MySoundFeedback, mitll.langtest.client.sound.SoundFeedback.EndListener, String, mitll.langtest.client.list.ListInterface)
    */
   private void playRef() {
     String refAudioToPlay = getRefAudioToPlay();
