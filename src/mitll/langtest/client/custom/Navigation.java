@@ -215,6 +215,12 @@ public class Navigation implements RequiresResize {
                   return super.findFirstExercise();
                 }
               }
+
+              @Override
+              protected void onLastItem() {
+                myFlashcardExercisePanelFactory.resetStorage();
+                super.onLastItem();
+              }
             };
           }
         };
@@ -842,6 +848,7 @@ public class Navigation implements RequiresResize {
     if (isNormalList) {
       practice = makeTab(tabPanel, IconType.CHECK, PRACTICE);
       final TabAndContent fpractice = practice;
+      practice.getContent().addStyleName("centerPractice");
       practice.getTab().addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
