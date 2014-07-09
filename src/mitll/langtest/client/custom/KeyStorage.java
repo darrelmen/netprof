@@ -75,4 +75,6 @@ public class KeyStorage {
   protected String getKey(String name) {
     return "Navigation_" + language + "_" + user + "_" +name;
   }
+
+  public String toString() { return getKey(""); }
 }
