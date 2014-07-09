@@ -15,12 +15,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Create, drop, alter, read from the results table.
@@ -362,9 +357,8 @@ public class AudioDAO extends DAO {
    * @param attr
    * @return
    */
-  public AudioAttribute addOrUpdate(int userid, AudioAttribute attr) {
-    return addOrUpdate(userid, attr.getAudioRef(), attr.getExid(), attr.getTimestamp(), attr.getAudioType(), (int)attr.getDuration());
-   // addOrUpdate();
+  public AudioAttribute addOrUpdateUser(int userid, AudioAttribute attr) {
+    return addOrUpdateUser(userid, attr.getAudioRef(), attr.getExid(), attr.getTimestamp(), attr.getAudioType(), (int)attr.getDuration());
   }
 
   /**
@@ -422,6 +416,79 @@ public class AudioDAO extends DAO {
     return addAudio(connection, userid, audioRef, exerciseID, timestamp, audioType, durationInMillis);
   }
 
+
+  /**
+   * Why does this have to be so schizo? add or update -- should just choose
+   *
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable(int, String, mitll.langtest.shared.CommonExercise, String, mitll.langtest.shared.AudioAnswer)
+   * @param userid   part of unique id
+   * @param audioRef
+   * @param exerciseID part of unique id
+   * @param timestamp
+   * @param audioType    part of unique id
+   * @param durationInMillis
+   * @return AudioAttribute that represents the audio that has been added to the exercise
+   */
+  private AudioAttribute addOrUpdateUser(int userid, String audioRef, String exerciseID, long timestamp, String audioType, int durationInMillis) {
+    if (isBadUser(userid)) {
+      logger.error("huh? userid is " +userid);
+      new Exception().printStackTrace();
+    }
+    try {
+      logger.debug("addOrUpdate " + userid + " " + audioRef + " ex " + exerciseID + " at " + new Date(timestamp) + " type " + audioType + " dur " + durationInMillis);
+      Connection connection = database.getConnection();
+      String sql = "UPDATE " + AUDIO + " " +
+          "SET " + USERID + "=? "+
+          "WHERE " +
+          Database.EXID + "=?" + " AND " +
+         // USERID + "=?" + " AND " +
+          AUDIO_TYPE + "=? AND " +
+          DEFECT +"=false";
+      PreparedStatement statement = connection.prepareStatement(sql);
+
+      int ii = 1;
+
+      //statement.setString(ii++, audioRef);
+      //statement.setTimestamp(ii++, new Timestamp(timestamp));
+      //statement.setInt(ii++, durationInMillis);
+
+      statement.setInt(ii++, userid);
+      statement.setString(ii++, exerciseID);
+      statement.setString(ii++, audioType);
+
+      int i = statement.executeUpdate();
+
+      AudioAttribute audioAttr = null;
+      if (i == 0) {
+        logger.debug("\taddOrUpdate adding entry for  " + userid + " " + audioRef + " ex " + exerciseID + " at " + new Date(timestamp) + " type " + audioType + " dur " + durationInMillis);
+
+        long l = addAudio(connection, userid, audioRef, exerciseID, timestamp, audioType, durationInMillis);
+        audioAttr = getAudioAttribute((int)l,userid, audioRef, exerciseID, timestamp, audioType, durationInMillis);
+      }
+      else {
+        List<AudioAttribute> audioAttributes = getAudioAttributes(exerciseID);
+        //logger.debug("for  " +exerciseID + " found " + audioAttributes);
+
+        for (AudioAttribute audioAttribute : audioAttributes) {
+          //logger.debug("\tfor  " +audioAttribute + " against " + userid + "/" + audioType );
+          if (audioAttribute.getUserid() == userid && audioAttribute.getAudioType().equalsIgnoreCase(audioType)) {
+            //logger.debug("\tfound  " +audioAttribute + " for " + userid + "/" + audioType );
+            audioAttr = audioAttribute;
+            break;
+          }
+        }
+      }
+      logger.debug("returning " + audioAttr);
+      statement.close();
+      database.closeConnection(connection);
+
+      return audioAttr;
+    } catch (Exception e) {
+      logger.error("got " + e, e);
+    }
+    return null;
+  }
+
   /**
    * Why does this have to be so schizo? add or update -- should just choose
    *
@@ -440,6 +507,7 @@ public class AudioDAO extends DAO {
       new Exception().printStackTrace();
     }
     try {
+      logger.debug("addOrUpdate " + userid + " " + audioRef + " ex " + exerciseID + " at " + new Date(timestamp) + " type " + audioType + " dur " + durationInMillis);
       Connection connection = database.getConnection();
       String sql = "UPDATE " + AUDIO +
         " " +
@@ -469,6 +537,8 @@ public class AudioDAO extends DAO {
 
       AudioAttribute audioAttr = null;
       if (i == 0) {
+        logger.debug("\taddOrUpdate adding entry for  " + userid + " " + audioRef + " ex " + exerciseID + " at " + new Date(timestamp) + " type " + audioType + " dur " + durationInMillis);
+
         long l = addAudio(connection, userid, audioRef, exerciseID, timestamp, audioType, durationInMillis);
         audioAttr = getAudioAttribute((int)l,userid, audioRef, exerciseID, timestamp, audioType, durationInMillis);
       }
@@ -508,13 +578,13 @@ public class AudioDAO extends DAO {
    * @return
    */
   private AudioAttribute getAudioAttribute(int i,
-                                             int userid, String audioRef, String exerciseID, long timestamp, String audioType, int durationInMillis) {
+                                           int userid, String audioRef, String exerciseID, long timestamp, String audioType, int durationInMillis) {
     return new AudioAttribute(i, userid, //id
-      exerciseID, // id
-      audioRef, // answer
-      timestamp,
-      durationInMillis, audioType,
-      userDAO.getMiniUser(userid));
+        exerciseID, // id
+        audioRef, // answer
+        timestamp,
+        durationInMillis, audioType,
+        userDAO.getMiniUser(userid));
   }
 
   public void updateExerciseID(int uniqueID, String exerciseID) {
