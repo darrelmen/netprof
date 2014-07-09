@@ -129,14 +129,14 @@ public class FlashcardPanel extends HorizontalPanel {
     if (controlState.isAudioOn() && mainContainer.isVisible() && !isHidden(foreign)) {
       playRef();
     }
-    addStyleName("leftFiftyMargin");
+    //addStyleName("leftFiftyMargin");
     DivWidget finalWidgets = getFinalWidgets();
     if (finalWidgets != null) inner2.add(finalWidgets);
 
   }
 
-  HTML clickToFlip;
-  DivWidget clickToFlipContainer;
+  private HTML clickToFlip;
+  private DivWidget clickToFlipContainer;
   protected DivWidget getFinalWidgets() {
 	  clickToFlipContainer= new DivWidget();
 	  clickToFlipContainer.setHeight("100px");
