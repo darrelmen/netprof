@@ -1016,3 +1016,8 @@ body>.dropdown-popup .nav-list>li.active>a  {
     margin-left: 0px;
     margin-top: -8px;
 }
+
+.centerPractice {
+    width: 800px;
+    margin: 0 auto;
+}
