@@ -75,8 +75,7 @@ public abstract class FlexListLayout implements RequiresResize {
     Panel bottomRow = new HorizontalPanel();
     bottomRow.add(exerciseListContainer);
     bottomRow.getElement().setId("bottomRow");
-    bottomRow.setWidth("100%");
-    bottomRow.addStyleName("trueInlineStyle");
+    styleBottomRow(bottomRow);
 
     twoRows.add(bottomRow);
 
@@ -95,6 +94,11 @@ public abstract class FlexListLayout implements RequiresResize {
 
     widgets.addWidgets();
     return twoRows;
+  }
+
+  protected void styleBottomRow(Panel bottomRow) {
+    bottomRow.setWidth("100%");
+    bottomRow.addStyleName("trueInlineStyle");
   }
 
   private FlexSectionExerciseList makeNPFExerciseList(final Panel topRow, Panel currentExercisePanel, String instanceName, long userListID) {
