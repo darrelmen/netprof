@@ -23,7 +23,7 @@ public class PretestScore implements IsSerializable {
   public PretestScore(){} // required for serialization
 
   /**
-   * @see mitll.langtest.server.scoring.ASRScoring#scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String, boolean)
+   * @see mitll.langtest.server.scoring.ASRScoring#scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String, boolean, String)
    * @param score
    */
   public PretestScore(float score) { this.hydecScore = score; }
