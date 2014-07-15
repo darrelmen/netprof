@@ -62,6 +62,14 @@
     <libelement value="jar://$MODULE_DIR$/war/WEB-INF/lib/flashcard.jar!/" />
     <libelement value="jar://$MODULE_DIR$/gwt/validation-api-1.0.0.GA-sources.jar!/" />
     <libelement value="jar://$MODULE_DIR$/gwt/validation-api-1.0.0.GA.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/war/WEB-INF/lib/org.moxieapps.gwt.highcharts-1.5.0.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/war/WEB-INF/lib/gwt-bootstrap-2.3.2.1-SNAPSHOT.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/war/WEB-INF/lib/guava-16.0.1.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/war/WEB-INF/lib/guava-gwt-16.0.1.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/war/WEB-INF/lib/junit-4.11.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/war/WEB-INF/lib/poi-3.10-FINAL-20140208.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/war/WEB-INF/lib/poi-ooxml-3.10-FINAL-20140208.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/war/WEB-INF/lib/poi-ooxml-schemas-3.10-FINAL-20140208.jar!/" />
     <conelement value="com.google.gwt.eclipse.core.GWT_CONTAINER" />
     <src_description expected_position="0">
       <src_folder value="file://$MODULE_DIR$/src" expected_position="0" />
@@ -71,7 +79,7 @@
   <component name="FacetManager">
     <facet type="gwt" name="GWT">
       <configuration>
-        <setting name="compilerMaxHeapSize" value="128" />
+        <setting name="compilerMaxHeapSize" value="512" />
         <setting name="gwtScriptOutputStyle" value="PRETTY" />
         <setting name="gwtSdkUrl" value="file://$MODULE_DIR$/gwt" />
         <setting name="webFacet" value="Web" />
@@ -85,9 +93,6 @@
         <webroots>
           <root url="file://$MODULE_DIR$/war" relative="/" />
         </webroots>
-        <sourceRoots>
-          <root url="file://$MODULE_DIR$/src" />
-        </sourceRoots>
       </configuration>
     </facet>
     <facet type="web" name="Web2">
@@ -98,6 +103,10 @@
         <webroots>
           <root url="file://$MODULE_DIR$/war" relative="/" />
         </webroots>
+        <sourceRoots>
+          <root url="file://$MODULE_DIR$/src" />
+          <root url="file://$MODULE_DIR$/test" />
+        </sourceRoots>
       </configuration>
     </facet>
   </component>
@@ -106,7 +115,6 @@
     <exclude-output />
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/gwt-unitCache" />
       <excludeFolder url="file://$MODULE_DIR$/out" />
       <excludeFolder url="file://$MODULE_DIR$/splitScripts" />
@@ -119,8 +127,6 @@
       <excludeFolder url="file://$MODULE_DIR$/war/langtest" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="imagewriter" />
-    <orderEntry type="module" module-name="Audioimage" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="module-library">
       <library name="json-lib-2.4-jdk15.jar">
@@ -129,7 +135,7 @@
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$USER_HOME$/langTestIngest/json/json-lib-2.4-jdk15-sources.jar!/" />
+          <root url="file://C:/Users/go22670/langTestIngest/json/json-lib-2.4-jdk15-sources.jar" />
         </SOURCES>
       </library>
     </orderEntry>
@@ -143,17 +149,6 @@
       </library>
     </orderEntry>
     <orderEntry type="module-library">
-      <library name="guava-13.0.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/war/WEB-INF/lib/guava-13.0.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$USER_HOME$/guava/guava13/guava-13.0-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
       <library name="log4j-1.2.17.jar">
         <CLASSES>
           <root url="jar://$MODULE_DIR$/war/WEB-INF/lib/log4j-1.2.17.jar!/" />
@@ -163,22 +158,70 @@
       </library>
     </orderEntry>
     <orderEntry type="module-library">
-      <library>
+      <library name="imagewriter.jar">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/gwt/gwt-dev.jar!/" />
-          <root url="jar://$MODULE_DIR$/gwt/gwt-user.jar!/" />
-          <root url="jar://$MODULE_DIR$/gwt/validation-api-1.0.0.GA.jar!/" />
+          <root url="file://war/WEB-INF/lib/imagewriter.jar" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES>
-          <root url="jar://$MODULE_DIR$/gwt/gwt-dev.jar!/" />
-          <root url="jar://$MODULE_DIR$/gwt/gwt-user.jar!/" />
-          <root url="jar://$MODULE_DIR$/gwt/validation-api-1.0.0.GA-sources.jar!/" />
-        </SOURCES>
+        <SOURCES />
       </library>
     </orderEntry>
     <orderEntry type="module-library">
-      <library>
+      <library name="mira.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/war/WEB-INF/lib/mira.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="svm.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/war/WEB-INF/lib/svm.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="gwt-visualization.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/war/WEB-INF/lib/gwt-visualization.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="dom4j-1.6.1.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/war/WEB-INF/lib/dom4j-1.6.1.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="stax-api-1.0.1.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/war/WEB-INF/lib/stax-api-1.0.1.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="xmlbeans-2.3.0.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/war/WEB-INF/lib/xmlbeans-2.3.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="commons-fileupload-1.2.2.jar">
         <CLASSES>
           <root url="jar://$MODULE_DIR$/war/WEB-INF/lib/commons-fileupload-1.2.2.jar!/" />
         </CLASSES>
@@ -187,7 +230,7 @@
       </library>
     </orderEntry>
     <orderEntry type="module-library">
-      <library>
+      <library name="flashcard.jar">
         <CLASSES>
           <root url="jar://$MODULE_DIR$/war/WEB-INF/lib/flashcard.jar!/" />
         </CLASSES>
@@ -195,30 +238,108 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="mira" level="project" />
-    <orderEntry type="library" name="poi-3.9-20121203" level="project" />
-    <orderEntry type="library" name="gwt-visualization" level="project" />
-    <orderEntry type="library" name="pronz" level="project" />
-    <orderEntry type="library" name="org.moxieapps.gwt.highcharts-1.5.0 (2)" level="project" />
-    <orderEntry type="library" name="ezmorph-1.0.6" level="project" />
-    <orderEntry type="library" name="commons-beanutils-1.8.0" level="project" />
-    <orderEntry type="library" name="gwt-visualization" level="project" />
-    <orderEntry type="library" name="poi-3.9-20121203" level="project" />
-    <orderEntry type="library" name="pronz" level="project" />
-    <orderEntry type="library" name="mira" level="project" />
-    <orderEntry type="library" name="org.moxieapps.gwt.highcharts-1.5.0" level="project" />
-    <orderEntry type="library" name="junit-4.11" level="project" />
     <orderEntry type="module-library">
-      <library>
+      <library name="org.moxieapps.gwt.highcharts-1.5.0.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/war/WEB-INF/lib/org.moxieapps.gwt.highcharts-1.5.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="gwt-bootstrap-2.3.2.1-SNAPSHOT.jar">
         <CLASSES>
           <root url="jar://$MODULE_DIR$/war/WEB-INF/lib/gwt-bootstrap-2.3.2.1-SNAPSHOT.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES>
-          <root url="jar://$MODULE_DIR$/war/WEB-INF/lib/gwt-bootstrap-2.3.2.1-SNAPSHOT.jar!/" />
-        </SOURCES>
+        <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="module-library">
+      <library name="guava-16.0.1.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/war/WEB-INF/lib/guava-16.0.1.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="guava-gwt-16.0.1.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/war/WEB-INF/lib/guava-gwt-16.0.1.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="junit-4.11.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/war/WEB-INF/lib/junit-4.11.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="validation-api-1.0.0.GA-sources.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/gwt/validation-api-1.0.0.GA-sources.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="validation-api-1.0.0.GA.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/gwt/validation-api-1.0.0.GA.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="poi-3.10-FINAL-20140208.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/war/WEB-INF/lib/poi-3.10-FINAL-20140208.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="poi-ooxml-3.10-FINAL-20140208.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/war/WEB-INF/lib/poi-ooxml-3.10-FINAL-20140208.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="library" name="gwt-dev" level="project" />
+    <orderEntry type="module-library">
+      <library name="poi-ooxml-schemas-3.10-FINAL-20140208.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/war/WEB-INF/lib/poi-ooxml-schemas-3.10-FINAL-20140208.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="pronz.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/war/WEB-INF/lib/pronz.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="library" name="gwt-user" level="project" />
+    <orderEntry type="module" module-name="imagewriter" />
   </component>
 </module>
 
