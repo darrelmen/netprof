@@ -3,7 +3,10 @@ package mitll.langtest.server;
 import com.google.common.io.Files;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
@@ -12,12 +15,11 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -84,6 +86,26 @@ public class ScoreServlet extends DatabaseServlet {
     JSONObject jsonObject = new JSONObject();
     jsonObject.put("score",book.getHydecScore());
     logger.debug("score for " + word + " and " + saveFile.getName() + " = " + book);
+
+    for (Map.Entry<NetPronImageType,List<TranscriptSegment>> pair : book.getsTypeToEndTimes().entrySet()) {
+      List<TranscriptSegment> value = pair.getValue();
+      JSONArray value1 = new JSONArray();
+      //logger.debug("got " + pair.getKey() + " with " + value.size() + " now " + jsonObject);
+
+      for (TranscriptSegment segment : value) {
+        JSONObject object = new JSONObject();
+       // logger.debug("\tgot " + pair.getKey() + " with " + value1.size() + " now " + jsonObject);
+        object.put("event",segment.getEvent());
+        object.put("start",segment.getStart());
+        object.put("end",segment.getEnd());
+        object.put("score",segment.getScore());
+
+        value1.add(object);
+        //logger.debug("\tobject " + object);
+      }
+
+      jsonObject.put(pair.getKey().toString(), value1);
+    }
     ServletOutputStream outputStream1 = response.getOutputStream();
     outputStream1.println(jsonObject.toString());
 
