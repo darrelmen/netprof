@@ -372,8 +372,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private ExerciseListWrapper makeExerciseListWrapper(int reqID, Collection<CommonExercise> exercises, long userID, String role) {
     CommonExercise firstExercise = exercises.isEmpty() ? null : exercises.iterator().next();
     if (firstExercise != null) {
-      ensureMP3s(firstExercise);
       addAnnotationsAndAudio(userID, firstExercise);
+      ensureMP3s(firstExercise);
     }
     List<CommonShell> exerciseShells = getExerciseShells(exercises);
 
