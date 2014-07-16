@@ -118,6 +118,8 @@ public class DatabaseImpl implements Database {
     this.language = serverProps.getLanguage();
     this.isFlashcard = serverProps.isFlashcard();
     this.serverProps = serverProps;
+    this.lessonPlanFile = serverProps.getLessonPlan();
+    this.useFile = lessonPlanFile != null;
 
     try {
       if (getConnection() == null) {
@@ -279,7 +281,7 @@ public class DatabaseImpl implements Database {
       logger.error("huh? lesson plan file is null???", new Exception());
       return Collections.emptyList();
     }
-    //logger.debug("using lesson plan file " +lessonPlanFile);
+    //logger.debug("using lesson plan file " +lessonPlanFile + " at " + installPath);
     boolean isExcel = lessonPlanFile.endsWith(".xlsx");
     makeDAO(useFile, lessonPlanFile, isExcel, mediaDir, installPath);
 
