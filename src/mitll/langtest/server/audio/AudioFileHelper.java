@@ -38,6 +38,13 @@ public class AudioFileHelper {
   private final DatabaseImpl db;
   private final LangTestDatabaseImpl langTestDatabase;
 
+  /**
+   * @see mitll.langtest.server.ScoreServlet#getAudioFileHelper()
+   * @param pathHelper
+   * @param serverProperties
+   * @param db
+   * @param langTestDatabase
+   */
   public AudioFileHelper(PathHelper pathHelper, ServerProperties serverProperties, DatabaseImpl db,
                          LangTestDatabaseImpl langTestDatabase) {
     this.pathHelper = pathHelper;
