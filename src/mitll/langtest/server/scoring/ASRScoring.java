@@ -76,6 +76,7 @@ public class ASRScoring extends Scoring {
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
+   * @see mitll.langtest.server.audio.AudioFileHelper#makeASRScoring()
    * @param deployPath
    * @param properties
    * @param langTestDatabase
