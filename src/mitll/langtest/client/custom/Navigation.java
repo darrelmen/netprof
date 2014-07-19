@@ -21,10 +21,12 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
+
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -70,6 +72,7 @@ public class Navigation implements RequiresResize {
   private static final String POSSIBLE_DEFECTS = "Review";
   private static final String ITEMS_WITH_COMMENTS = "Items with comments";
   private static final String LEARN_PRONUNCIATION = "Learn Pronunciation";
+  private static final String PRACTICE_DIALOG = "Practice Dialog";
   private static final String FIX_DEFECTS = "Fix Defects";
   private static final String CREATE = "Create a New List";
   private static final String BROWSE = "Browse Lists";
@@ -249,7 +252,7 @@ public class Navigation implements RequiresResize {
   private Widget container;
   private TabPanel tabPanel;
   private TabAndContent yourStuff, othersStuff;
-  private TabAndContent browse, chapters, create;
+  private TabAndContent browse, chapters, create, dialog;
   private TabAndContent review, recorderTab, contentTab, practiceTab;
   private List<TabAndContent> tabs = new ArrayList<TabAndContent>();
   private Panel chapterContent;
@@ -343,6 +346,16 @@ public class Navigation implements RequiresResize {
         logEvent(browse, BROWSE);
         viewBrowse();
       }
+    });
+
+    dialog = makeFirstLevelTab(tabPanel, IconType.TH_LIST, PRACTICE_DIALOG);
+    dialog.getTab().addClickHandler(new ClickHandler() {
+          @Override
+          public void onClick(ClickEvent event) {
+              checkAndMaybeClearTab(PRACTICE_DIALOG);
+              logEvent(dialog, PRACTICE_DIALOG);
+              viewDialog();
+          }
     });
 
     boolean isQualityControl = isQC();
@@ -522,6 +535,8 @@ public class Navigation implements RequiresResize {
           showMyLists(false, true);
         } else if (value.equals(BROWSE)) {
           viewBrowse();
+        } else if (value.equals(PRACTICE_DIALOG)) {
+          viewDialog();
         } else if (value.equals(FIX_DEFECTS)) {
           viewReview(review.getContent());
         } else if (value.equals(RECORD_AUDIO)) {
@@ -614,7 +629,35 @@ public class Navigation implements RequiresResize {
 
   private void viewBrowse() { viewLessons(browse.getContent(), true, false, false); }
 
-  /**
+  private void viewDialog() { viewDialogOptions(dialog.getContent()); };
+
+  private void viewDialogOptions(final Panel contentPanel) {
+     contentPanel.clear();
+     contentPanel.getElement().setId("contentPanel");
+     
+     final ListBox availableDialogs = new ListBox();
+     availableDialogs.addItem("Choose a dialog to record:");
+     availableDialogs.addItem("My first exciting dialog");
+     availableDialogs.addItem("Here's another dialog");
+     availableDialogs.setVisibleItemCount(1);
+     contentPanel.add(availableDialogs);
+     
+     final ListBox availableSpeakers = new ListBox();
+     availableSpeakers.addItem("Choose a part to read:");
+     availableSpeakers.addItem("Crane");
+     availableSpeakers.addItem("Wang");
+     availableSpeakers.setVisibleItemCount(1);
+     contentPanel.add(availableSpeakers);
+     
+     Button startDialog = new Button("Start Recording!", new ClickHandler() {
+    	 public void onClick(ClickEvent event) {
+    		 Window.alert("oh well, not implemented yet!");
+    	 }
+     });
+     contentPanel.add(startDialog);
+  }
+
+/**
    * @see #viewBrowse()
    * @see #refreshViewLessons(boolean, boolean)
    * @param contentPanel
