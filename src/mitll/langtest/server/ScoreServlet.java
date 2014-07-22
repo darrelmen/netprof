@@ -1,7 +1,6 @@
 package mitll.langtest.server;
 
 import com.google.common.io.Files;
-import com.mongodb.util.JSON;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
@@ -13,7 +12,6 @@ import mitll.langtest.shared.scoring.PretestScore;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.log4j.Logger;
@@ -38,8 +36,16 @@ public class ScoreServlet extends DatabaseServlet {
   static final int BUFFER_SIZE = 4096;
   private String relativeConfigDir;
   private String configDir;
+  private JSONObject chapters;
 
-
+  /**
+   * Remembers chapters from previous requests...
+   *
+   * @param request
+   * @param response
+   * @throws ServletException
+   * @throws IOException
+   */
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     String pathInfo = request.getPathInfo();
@@ -61,8 +67,15 @@ public class ScoreServlet extends DatabaseServlet {
     writer.close();
   }
 
-  JSONObject chapters;
 
+  /**
+   * TODO : Is handling a multi-part request slow?
+   *
+   * @param request
+   * @param response
+   * @throws ServletException
+   * @throws IOException
+   */
   @Override
   protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     String pathInfo = request.getPathInfo();
@@ -72,13 +85,10 @@ public class ScoreServlet extends DatabaseServlet {
     response.setContentType("application/json; charset=UTF-8");
     response.setCharacterEncoding("UTF-8");
 
-   // String requestURI = request.getRequestURI();
-
     JSONObject jsonObject;
 
-    logger.debug("got " +request.getParts().size() + " parts");
     boolean isMultipart = ServletFileUpload.isMultipartContent(request);
-    logger.debug("got isMultipart " +isMultipart);
+    logger.debug("got " +request.getParts().size() + " parts isMultipart " +isMultipart);
 
     if (isMultipart) {
       jsonObject = getJsonForParts(request);
@@ -93,6 +103,11 @@ public class ScoreServlet extends DatabaseServlet {
     writer.close();
   }
 
+  /**
+   * Use apache commons file upload to grab the parts - is this really necessary?
+   * @param request
+   * @return
+   */
   private JSONObject getJsonForParts(HttpServletRequest request)
   {
    // boolean isMultipart = ServletFileUpload.isMultipartContent(request);
@@ -144,7 +159,7 @@ public class ScoreServlet extends DatabaseServlet {
     return new JSONObject();
   }
 
-  private JSONObject getJsonForAudioParts(HttpServletRequest request) {
+/*  private JSONObject getJsonForAudioParts(HttpServletRequest request) {
     try {
       String word = "";
       File saveFile = null;
@@ -172,7 +187,7 @@ public class ScoreServlet extends DatabaseServlet {
       logger.error("got " + e, e);
     }
     return new JSONObject();
-  }
+  }*/
 
   public static final String ENCODING = "UTF8";
 
@@ -326,19 +341,42 @@ public class ScoreServlet extends DatabaseServlet {
   private DatabaseImpl db;
   private PathHelper pathHelper;
   private AudioFileHelper audioFileHelper;
+
+  /**
+   * Get a reference to the current database object, made in the main LangTestDatabaseImpl servlet
+   * @see #doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+   * @see #getJsonForWordAndAudio(String, java.io.File)
+   * @return
+   */
   private AudioFileHelper getAudioFileHelper() {
     if (audioFileHelper == null) {
       ServletContext servletContext = getServletContext();
       pathHelper = new PathHelper(servletContext);
-      db = getDatabase(servletContext, pathHelper);
+      db = getDatabase();
+      serverProps = db.getServerProps();
 
       String config = servletContext.getInitParameter("config");
       this.relativeConfigDir = "config" + File.separator + config;
+      logger.debug("rel " + relativeConfigDir);
       this.configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
+      logger.debug("configDir " + configDir);
 
       audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, null);
     }
     return audioFileHelper;
+  }
+
+  private DatabaseImpl getDatabase() {
+    DatabaseImpl db = null;
+
+    Object databaseReference = getServletContext().getAttribute("databaseReference");
+    if (databaseReference != null) {
+      db = (DatabaseImpl) databaseReference;
+      logger.debug("found existing database reference " + db + " under " +getServletContext());
+    } else {
+      logger.error("huh? no existing db reference?");
+    }
+    return db;
   }
 
   /**
