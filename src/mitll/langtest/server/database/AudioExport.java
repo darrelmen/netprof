@@ -299,12 +299,14 @@ public class AudioExport {
     AudioConversion audioConversion = new AudioConversion();
     logger.debug("writing " + toWrite.size());
     int c =0;
+    int d =0;
     for (CommonExercise ex : toWrite) {
       if (ex.getRefAudio() != null) {
         try {
           copyAudioSimple(zOut, installPath, audioConversion, ex.getRefAudio());
         } catch (IOException e) {
-          logger.debug("skipping duplicate " +e);
+          //logger.debug("skipping duplicate " +e);
+          d++;
         }
         c++;
       }
@@ -312,11 +314,11 @@ public class AudioExport {
     zOut.close();
     long now = System.currentTimeMillis();
     long diff = now - then;
-    logger.debug("took " + diff + " millis to export " + toWrite.size() + " items " +c);
+    logger.debug("took " + diff + " millis to export " + toWrite.size() + " items " +c + " duplicates " + d);
 
-    if (diff > 1000) {
-      logger.debug("took " + diff + " millis to export " + toWrite.size() + " items");
-    }
+   // if (diff > 1000) {
+  //    logger.debug("took " + diff + " millis to export " + toWrite.size() + " items");
+   // }
   }
 
 /*  private AudioAttribute getAudioAttribute(MiniUser majorityUser, CommonExercise ex, boolean isMale, boolean regularSpeed) {
