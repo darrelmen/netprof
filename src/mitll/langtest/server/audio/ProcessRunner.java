@@ -1,9 +1,12 @@
 package mitll.langtest.server.audio;
 
+import org.apache.log4j.Logger;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Date;
 
 /**
  * Created with IntelliJ IDEA.
@@ -13,10 +16,12 @@ import java.io.InputStreamReader;
  * To change this template use File | Settings | File Templates.
  */
 public class ProcessRunner {
+  private static final Logger logger = Logger.getLogger(ProcessRunner.class);
+
   private static final boolean SHOW_OUTPUT = false;
 
   public void runProcess(ProcessBuilder shellProc) throws IOException {
-   // System.out.println(new Date() + " : proc " + shellProc.command() + " started...");
+    logger.debug(new Date() + " : proc " + shellProc.command() + " started...");
 
     shellProc.redirectErrorStream(true);
     Process process2 = shellProc.start();
