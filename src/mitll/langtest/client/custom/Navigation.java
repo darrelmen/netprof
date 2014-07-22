@@ -13,6 +13,7 @@ import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -23,11 +24,14 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -47,6 +51,7 @@ import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserList;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -637,6 +642,7 @@ public class Navigation implements RequiresResize {
   private void viewDialogOptions(final Panel contentPanel) {
      contentPanel.clear();
      contentPanel.getElement().setId("contentPanel");
+	 final FlowPanel forSents = new FlowPanel();
      
      final ListBox availableDialogs = new ListBox();
      final ListBox availableSpeakers = new ListBox();
@@ -648,7 +654,7 @@ public class Navigation implements RequiresResize {
      availableDialogs.addItem(CHOOSE_DIALOG);
      availableDialogs.setVisibleItemCount(1);
      
-     Integer i = 0;
+     Integer i = 1;
      ArrayList<String> sortedDialogs = new ArrayList<String>(dialogToParts.keySet());
      java.util.Collections.sort(sortedDialogs);
      for( String dialog : sortedDialogs){
@@ -666,16 +672,22 @@ public class Navigation implements RequiresResize {
     		 if(availableDialogs.getSelectedIndex() < 1){
  		    	availableSpeakers.clear();
  		    	availableSpeakers.addItem(CHOOSE_PART);
- 		    	availableSpeakers.getElement().setAttribute("disabled", "disabled");	 
+ 		    	availableSpeakers.getElement().setAttribute("disabled", "disabled");
     		 }
     		 else{
     			availableSpeakers.clear();
     			availableSpeakers.addItem(CHOOSE_PART);
-    			for(String part : dialogToParts.get(dialogIndex.get(availableSpeakers.getSelectedIndex()))){
+    			for(String part : dialogToParts.get(availableDialogs.getValue(availableDialogs.getSelectedIndex()))){
     				availableSpeakers.addItem(part);
     			}
     			availableSpeakers.getElement().removeAttribute("disabled");
     		 }
+    		 forSents.clear();
+    	 }
+     });
+     availableSpeakers.addChangeHandler(new ChangeHandler() {
+    	 public void onChange(ChangeEvent event){
+    		 forSents.clear();
     	 }
      });
      contentPanel.add(availableDialogs);
@@ -687,37 +699,49 @@ public class Navigation implements RequiresResize {
     			 Window.alert("Select a dialog and part first!");
     		 }
     		 else{
-    		     displayDialog(availableDialogs.getSelectedIndex(), availableSpeakers.getSelectedIndex(), dialogToParts, dialogIndex);
+    		     displayDialog(dialogIndex.get(availableDialogs.getSelectedIndex()), availableSpeakers.getValue(availableSpeakers.getSelectedIndex()), forSents);
+    		     contentPanel.add(forSents);
     		 }
     	 }
      });
      contentPanel.add(startDialog);
   }
   
-  private void displayDialog(int dialogIndex, int partIndex, HashMap<String, String[]> dialogToParts, HashMap<Integer, String> dialogIndexMap){
-	  if((dialogIndex > 0) && (partIndex > 0)){
-		  
+  private void displayDialog(String dialog, String part, Panel cp){
+
+	  HashMap<String, Integer> sentToAudioIndex = getSentToAudioIndex();
+	  HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSpeaker = getDialogToSentIndexToSpeaker();
+	  HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSent = getDialogToSentIndexToSent();
+
+	  int sentIndex = 0;
+	  while(dialogToSentIndexToSent.get(dialog).containsKey(sentIndex)){
+		  FlowPanel sentPanel = new FlowPanel();
+		  HTML sent = new HTML(dialogToSentIndexToSpeaker.get(dialog).get(sentIndex)+": "+dialogToSentIndexToSent.get(dialog).get(sentIndex));
+		  System.out.println("hi");
+		  if(part.equals(dialogToSentIndexToSpeaker.get(dialog).get(sentIndex))){
+			  Button record = new Button("Press and hold to record");
+			  Button listen = new Button("Play reference recording");
+
+			  sentPanel.add(record);
+			  sentPanel.add(listen);
+			  sent.getElement().getStyle().setProperty("fontWeight", "bolder");
+			  System.out.println("there");
+		  }
+		  else{
+			  sent.getElement().getStyle().setProperty("fontStyle", "italic");
+		  }
+		  sentPanel.add(sent);
+		  cp.add(sentPanel);
+		  System.out.println("buddy");
+		  sentIndex += 1;
 	  }
+	  System.out.println("still alive?");
   }
   
   private HashMap<String, String[]> getDialogToPartsMap(){
 	  HashMap<String, String[]> m = new HashMap<String, String[]>();
 	  m.put("Unit 1: Part 1", new String[] {"Crane", "Wang"});
-	  m.put("Unit 1: Part 2", new String[] {"Smith", "Zhou"});
-	  return m;
-  }
-  
-  private HashMap<String, HashMap<String, String[]>> getDialogToSentences(){
-	  HashMap<String, HashMap<String, String[]>> m = new HashMap<String, HashMap<String, String[]>>();
-	  String up1 = "Unit 1: Part 1";
-	  String up2 = "Unit 2: Part 2";
-	  m.put(up1, new HashMap<String, String[]>());
-	  m.put(up2, new HashMap<String, String[]>());
-	  
-	  m.get(up1).put("Wang", new String[] {"Kē Léi'ēn, nǐ hăo!", "Nǐ dào năr qù a?", "Wŏ huí sùshè."});
-	  m.get(up1).put("Crane", new String[] {"Wáng Jīngshēng, nǐ hăo!", "Wŏ qù túshūguăn. Nĭ ne?"});
-	  m.get(up2).put("Smith", new String[] {"Zhào Guócái, nĭ hăo a!", "Hái xíng. Nĭ àirén, háizi dōu hăo ma?", "Wŏ yŏu yìdiănr shìr, xiān zŏule. Zàijiàn!"});
-	  m.get(up2).put("Zhao", new String[] {"Nĭ hăo! Hăo jiŭ bú jiànle.", "Zěmmeyàng a?", "Tāmen dōu hěn hăo, xièxie.", "Zàijiàn"});
+	  m.put("Unit 1: Part 2", new String[] {"Smith", "Zhao"});
 	  return m;
   }
   
@@ -735,22 +759,56 @@ public class Navigation implements RequiresResize {
 	  m.put("Nĭ hăo! Hăo jiŭ bú jiànle.", 42);
 	  m.put("Zěmmeyàng a?", 43);
 	  m.put("Tāmen dōu hěn hăo, xièxie.", 61);
-	  m.put("Zàijiàn", 70);
+	  m.put("Zàijiàn.", 70);
 	  
 	  return m;
   }
   
-  private HashMap<String, HashMap<String, int[]>> getDialogSpeakerToSentOrdering() {
-	  HashMap<String, HashMap<String, int[]>> m = new HashMap<String, HashMap<String, int[]>>();
+  private HashMap<String, HashMap<Integer, String>> getDialogToSentIndexToSpeaker() {
+	  HashMap<String, HashMap<Integer, String>> m = new HashMap<String, HashMap<Integer, String>>();
 	  String up1 = "Unit 1: Part 1";
-	  String up2 = "Unit 2: Part 2";
-	  m.put(up1, new HashMap<String, int[]>());
-	  m.put(up2, new HashMap<String, int[]>());
+	  String up2 = "Unit 1: Part 2";
+	  m.put(up1, new HashMap<Integer, String>());
+	  m.put(up2, new HashMap<Integer, String>());
 	  
-	  m.get(up1).put("Wang", new int[] {0, 2, 4});
-	  m.get(up1).put("Crane", new int[] {1, 3});
-	  m.get(up2).put("Smith", new int[] {0, 3, 5});
-	  m.get(up2).put("Zhao", new int[] {1, 2, 4, 6});
+	  m.get(up1).put(0, "Wang");
+	  m.get(up1).put(1, "Crane");
+	  m.get(up1).put(2, "Wang");
+	  m.get(up1).put(3, "Crane");
+	  m.get(up1).put(4, "Wang");
+	  
+	  m.get(up2).put(0, "Smith");
+	  m.get(up2).put(1, "Zhao");
+	  m.get(up2).put(2, "Zhao");
+	  m.get(up2).put(3, "Smith");
+	  m.get(up2).put(4, "Zhao");
+	  m.get(up2).put(5, "Smith");
+	  m.get(up2).put(6, "Zhao");
+	  
+	  return m;
+  }
+  
+  private HashMap<String, HashMap<Integer, String>> getDialogToSentIndexToSent() {
+	  HashMap<String, HashMap<Integer, String>> m = new HashMap<String, HashMap<Integer, String>>();
+	  String up1 = "Unit 1: Part 1";
+	  String up2 = "Unit 1: Part 2";
+	  m.put(up1, new HashMap<Integer, String>());
+	  m.put(up2, new HashMap<Integer, String>());
+	  
+	  m.get(up1).put(0, "Kē Léi'ēn, nǐ hăo!");
+	  m.get(up1).put(1, "Wáng Jīngshēng, nǐ hăo!");
+	  m.get(up1).put(2, "Nǐ dào năr qù a?");
+	  m.get(up1).put(3, "Wŏ qù túshūguăn. Nĭ ne?");
+	  m.get(up1).put(4, "Wŏ huí sùshè.");
+	  
+	  m.get(up2).put(0, "Zhào Guócái, nĭ hăo a!");
+	  m.get(up2).put(1, "Nĭ hăo! Hăo jiŭ bú jiànle.");
+	  m.get(up2).put(2, "Zěmmeyàng a?");
+	  m.get(up2).put(3, "Hái xíng. Nĭ àirén, háizi dōu hăo ma?");
+	  m.get(up2).put(4, "Tāmen dōu hěn hăo, xièxie.");
+	  m.get(up2).put(5, "Wŏ yŏu yìdiănr shìr, xiān zŏule. Zàijiàn!");
+	  m.get(up2).put(6, "Zàijiàn.");
+	  
 	  return m;
   }
   
