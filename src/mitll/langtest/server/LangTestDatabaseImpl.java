@@ -16,19 +16,7 @@ import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.AutoCRTScoring;
-import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.AudioAttribute;
-import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.CommonShell;
-import mitll.langtest.shared.CommonUserExercise;
-import mitll.langtest.shared.ExerciseListWrapper;
-import mitll.langtest.shared.ImageResponse;
-import mitll.langtest.shared.Result;
-import mitll.langtest.shared.STATE;
-import mitll.langtest.shared.ScoreAndPath;
-import mitll.langtest.shared.SectionNode;
-import mitll.langtest.shared.StartupInfo;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.*;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
@@ -44,14 +32,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Supports all the database interactions.
@@ -1216,6 +1197,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * The config web.xml file.
    * As a final step, creates the DatabaseImpl!<br></br>
    *
+   *  NOTE : makes the database available to other servlets via the databaseReference servlet context attribute.
    * Note that this will only ever be called once.
    * @see #init()
    * @param servletContext
