@@ -1,5 +1,6 @@
 package mitll.langtest.client.custom;
 
+import com.gargoylesoftware.htmlunit.javascript.host.Console;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
@@ -12,6 +13,8 @@ import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -636,22 +639,54 @@ public class Navigation implements RequiresResize {
      contentPanel.getElement().setId("contentPanel");
      
      final ListBox availableDialogs = new ListBox();
-     availableDialogs.addItem("Choose a dialog to record:");
-     availableDialogs.addItem("My first exciting dialog");
-     availableDialogs.addItem("Here's another dialog");
-     availableDialogs.setVisibleItemCount(1);
-     contentPanel.add(availableDialogs);
-     
      final ListBox availableSpeakers = new ListBox();
-     availableSpeakers.addItem("Choose a part to read:");
-     availableSpeakers.addItem("Crane");
-     availableSpeakers.addItem("Wang");
+     final String CHOOSE_PART = "Choose a part to read";
+     final String CHOOSE_DIALOG = "Choose a dialog to practice";
+     
+ 	 availableSpeakers.addItem(CHOOSE_PART);
+ 	 availableSpeakers.getElement().setAttribute("disabled", "disabled");
      availableSpeakers.setVisibleItemCount(1);
+
+     availableDialogs.addItem(CHOOSE_DIALOG);
+     availableDialogs.addItem("Unit 1: Part 1");
+     availableDialogs.addItem("Unit 2: Part 2");
+     availableDialogs.setVisibleItemCount(1);
+     
+     availableDialogs.addChangeHandler(new ChangeHandler() {
+    	 public void onChange(ChangeEvent event){
+    		 switch(availableDialogs.getSelectedIndex()){
+    		    case 1:
+    		    	availableSpeakers.clear();
+    		    	availableSpeakers.addItem(CHOOSE_PART);
+    		    	availableSpeakers.addItem("Crane");
+    		    	availableSpeakers.addItem("Wang");
+    		    	availableSpeakers.getElement().removeAttribute("disabled");
+    		    	break;
+    		    case 2:
+    		    	availableSpeakers.clear();
+    		    	availableSpeakers.addItem(CHOOSE_PART);
+    		    	availableSpeakers.addItem("Smith");
+    		    	availableSpeakers.addItem("Zhou");
+    		    	availableSpeakers.getElement().removeAttribute("disabled");
+    		    	break;
+    		    default:
+    		    	availableSpeakers.clear();
+    		    	availableSpeakers.addItem(CHOOSE_PART);
+    		    	availableSpeakers.getElement().setAttribute("disabled", "disabled");
+    		 }
+    	 }
+     });
+     contentPanel.add(availableDialogs);
      contentPanel.add(availableSpeakers);
      
      Button startDialog = new Button("Start Recording!", new ClickHandler() {
     	 public void onClick(ClickEvent event) {
-    		 Window.alert("oh well, not implemented yet!");
+    		 if((availableSpeakers.getSelectedIndex() < 1) || (availableDialogs.getSelectedIndex() < 1)){
+    			 Window.alert("Select a dialog and part first!");
+    		 }
+    		 else{
+    		     Window.alert("oh well, not implemented yet!");
+    		 }
     	 }
      });
      contentPanel.add(startDialog);
