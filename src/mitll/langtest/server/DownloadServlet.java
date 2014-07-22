@@ -28,6 +28,29 @@ import java.util.Map;
 public class DownloadServlet extends DatabaseServlet {
   private static final Logger logger = Logger.getLogger(DownloadServlet.class);
 
+  /**
+   * This is getting complicated.
+   * <p/>
+   * Just calling this servlet gives you a zip with one default audio cut per exercise, if available.
+   * e.g. https://np.ll.mit.edu/npfClassroomPashto3/downloadAudio
+   * <p/>
+   * Calling it with an empty argument list, e.g. https://np.ll.mit.edu/npfClassroomPashto3/downloadAudio?{}
+   * returns a zip with just an excel spreadsheet of the all the backing data.
+   * <p/>
+   * Calling it with a list argument, e.g. https://np.ll.mit.edu/npfClassroomPashto3/downloadAudio?list=2
+   * returns an excel spreadsheet and audio for that list - one male and one female recording, if available.
+   * <p/>
+   * Without a list, but without an argument indicates a chapter selection, e.g. https://np.ll.mit.edu/npfClassroomPashto3/downloadAudio?{Chapter=[29%20LC-1]}
+   * <p/>
+   * Otherwise, either the users, results, or events table is returned as a spreadsheet, e.g. https://np.ll.mit.edu/npfClassroomPashto3/downloadUsers
+   * <p/>
+   * You can only see these in admin mode: https://np.ll.mit.edu/npfClassroomPashto3/?admin
+   *
+   * @param request
+   * @param response
+   * @throws ServletException
+   * @throws IOException
+   */
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     DatabaseImpl db = getDatabase();
@@ -40,7 +63,11 @@ public class DownloadServlet extends DatabaseServlet {
         logger.debug("DownloadServlet.doGet : Request " + queryString + " path " + pathInfo +
           " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
 
-        if (queryString.startsWith("list")) {
+        if (queryString == null) {
+          setHeader(response, "allAudio.zip");
+          writeAllAudio(response);
+        }
+        else if (queryString.startsWith("list")) {
           String[] split = queryString.split("list=");
           if (split.length == 2) {
             String listid = split[1];
@@ -64,20 +91,42 @@ public class DownloadServlet extends DatabaseServlet {
           }
         }
       } else {
-        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        if (encodedFileName.toLowerCase().contains("users")) {
-          response.setHeader("Content-Disposition", "attachment; filename=users");
-          db.usersToXLSX(response.getOutputStream());
-        } else if (encodedFileName.toLowerCase().contains("results")) {
-          response.setHeader("Content-Disposition", "attachment; filename=results");
-          db.getResultDAO().writeExcelToStream(db.getResultsWithGrades(), response.getOutputStream());
-        } else {
-          response.setHeader("Content-Disposition", "attachment; filename=events");
-          db.getEventDAO().toXLSX(response.getOutputStream());
-        }
+        returnSpreadsheet(response, db, encodedFileName);
       }
     }
-    response.getOutputStream().close();
+
+    try {
+      response.getOutputStream().close();
+    } catch (IOException e) {
+      logger.warn("got " +e,e);
+    }
+  }
+
+  private void returnSpreadsheet(HttpServletResponse response, DatabaseImpl db, String encodedFileName) throws IOException {
+    response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    if (encodedFileName.toLowerCase().contains("users")) {
+      response.setHeader("Content-Disposition", "attachment; filename=users");
+      db.usersToXLSX(response.getOutputStream());
+    } else if (encodedFileName.toLowerCase().contains("results")) {
+      response.setHeader("Content-Disposition", "attachment; filename=results");
+      db.getResultDAO().writeExcelToStream(db.getResultsWithGrades(), response.getOutputStream());
+    } else if (encodedFileName.toLowerCase().contains("events")) {
+      response.setHeader("Content-Disposition", "attachment; filename=events");
+      db.getEventDAO().toXLSX(response.getOutputStream());
+    } else {
+      logger.warn("huh? can't handle request " + encodedFileName);
+    }
+  }
+
+  private void writeAllAudio(HttpServletResponse response) {
+    DatabaseImpl db = getDatabase();
+
+    try {
+      db.writeZip(response.getOutputStream());
+    } catch (Exception e) {
+      logger.error("Got " +e,e);
+    }
+
   }
 
   private void writeUserList(HttpServletResponse response, DatabaseImpl db, String listid) {
@@ -87,7 +136,6 @@ public class DownloadServlet extends DatabaseServlet {
       String name = db.getUserListName(id);
       name = name.replaceAll("\\,", "_").replaceAll(" ", "_");
       name += ".zip";
-   //   logger.debug("attachment name ='" + name + "'");
       setHeader(response, name);
 
       db.writeZip(response.getOutputStream(), id);
