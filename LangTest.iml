@@ -109,6 +109,16 @@
         </sourceRoots>
       </configuration>
     </facet>
+    <facet type="web" name="Web3">
+      <configuration>
+        <descriptors>
+          <deploymentDescriptor name="web.xml" url="file://$MODULE_DIR$/war/config/dataCollectAdmin/template/WEB-INF/web.xml" />
+        </descriptors>
+        <webroots>
+          <root url="file://$MODULE_DIR$/war/config/dataCollectAdmin/template" relative="/" />
+        </webroots>
+      </configuration>
+    </facet>
   </component>
   <component name="NewModuleRootManager" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/war/WEB-INF/classes" />
@@ -340,6 +350,7 @@
     </orderEntry>
     <orderEntry type="library" name="gwt-user" level="project" />
     <orderEntry type="module" module-name="imagewriter" />
+    <orderEntry type="module" module-name="Audioimage" />
   </component>
 </module>
 
