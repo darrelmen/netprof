@@ -908,7 +908,13 @@ public class DatabaseImpl implements Database {
     new AudioExport().writeZip(out, typeToSection, getSectionHelper(), exercisesForSelectionState, language1, getAudioDAO(), installPath, configDir);
   }
 
+  public void writeZip(OutputStream out) throws Exception {
+    Collection<CommonExercise> exercisesForSelectionState = getExercises();
+    new AudioExport().writeZipJustOneAudio(out, getSectionHelper(), exercisesForSelectionState, installPath);
+  }
+
   /**
+   * For downloading a user list.
    * @see mitll.langtest.server.DownloadServlet#writeUserList(javax.servlet.http.HttpServletResponse, DatabaseImpl, String)
    * @param out
    * @param listid
