@@ -4,6 +4,7 @@ import com.google.common.io.Files;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.ScoreServlet;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.database.DatabaseImpl;
@@ -312,6 +313,28 @@ public class AudioFileHelper {
       return audioAnswer;
     }
     return audioAnswer;
+  }
+
+  /**
+   * @see mitll.langtest.server.ScoreServlet#getFlashcardScore(AudioFileHelper, java.io.File, String)
+   * @param file
+   * @param wordOrPhrase
+   * @return
+   */
+  public ScoreAndAnswer getFlashcardAnswer(File file, String wordOrPhrase) {
+    makeASRScoring();
+    AudioAnswer audioAnswer = new AudioAnswer();
+    PretestScore flashcardAnswer = autoCRT.getFlashcardAnswer(file, wordOrPhrase, audioAnswer);
+    return new ScoreAndAnswer(flashcardAnswer, audioAnswer);
+  }
+
+  public static class ScoreAndAnswer {
+    public PretestScore score;
+    public AudioAnswer answer;
+    public ScoreAndAnswer(PretestScore score, AudioAnswer answer) {
+      this.score = score;
+      this.answer = answer;
+    }
   }
 
   private void makeASRScoring() {
