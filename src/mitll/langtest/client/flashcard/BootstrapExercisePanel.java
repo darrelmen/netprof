@@ -51,42 +51,6 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
   private static final boolean NEXT_ON_BAD_AUDIO = false;
   private static final String FEEDBACK = "PLAY ON MISTAKE";
 
-  /*  public static final String WARN_NO_FLASH = "<font color='red'>Flash is not activated. " +
-    "Do you have a flashblocker? Please add this site to its whitelist.</font>";
-
-  protected static final int DELAY_MILLIS = 1000;
-  private static final int DELAY_MILLIS_LONG = 3000;
-  private static final int LONG_DELAY_MILLIS = 3500;
-  private static final int DELAY_CHARACTERS = 40;
-  private static final int HIDE_DELAY = 2500;
-
-  private static final boolean NEXT_ON_BAD_AUDIO = false;
-
-  private static final String WAV = ".wav";
-  private static final String MP3 = "." + AudioTag.COMPRESSED_TYPE;
-  private static final String FEEDBACK = "PLAY ON MISTAKE";
-  private static final String ON = "On";
-  private static final String OFF = "Off";
-  private static final String SHOW = "SHOW";
-  private static final String ENGLISH = "English";
-  private static final String PLAY = "PLAY";
-  private static final String BOTH = "Both";
-  private static final int LEFT_MARGIN_FOR_FOREIGN_PHRASE = 17;
-
-  private final CommonExercise exercise;
-
-  private Heading recoOutput;
-  private final MyFlashcardExercisePanelFactory.MySoundFeedback soundFeedback;
-  Widget cardPrompt;
-  private final boolean addKeyBinding;
-  private final ExerciseController controller;
-  private final ControlState controlState;
-  private final Panel mainContainer;
-  private Panel leftState;
-  private Panel rightColumn;
-  private SoundFeedback.EndListener endListener;
-  protected final String instance;*/
-
   /**
    *
    *
