@@ -140,7 +140,7 @@ public class ASRScoring extends Scoring {
     Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase);
 
     String language = isMandarin ? " MANDARIN " : "";
-   // logger.debug("checkLTS '" + language + "' tokens : '" +tokens +"'");
+    //logger.debug("checkLTS '" + language + "' tokens : '" +tokens +"'");
 
     try {
       int i = 0;
@@ -162,14 +162,6 @@ public class ASRScoring extends Scoring {
                 " is invalid in " + foreignLanguagePhrase+
                 " and not in dictionary (" + htkDictionary.size()+
                 ")");
-   /*           if (process != null) {
-                for (String[] ar : process) {
-                  //logger.warn("got " + ar);
-                  for (String arr : ar) {
-                    logger.warn("\tgot " + arr);
-                  }
-                }
-              }*/
               return false;
             }
           }
@@ -180,7 +172,7 @@ public class ASRScoring extends Scoring {
       logger.error("lts " + language + "/" + lts + " failed on '" + foreignLanguagePhrase +"'", e);
       return false;
     }
-
+//    logger.debug("phrase '" +foreignLanguagePhrase+ "' is valid.");
     return true;
   }
 
