@@ -110,7 +110,9 @@ public class ScoreServlet extends DatabaseServlet {
    */
   private JSONObject getJsonForParts(HttpServletRequest request)
   {
-   // boolean isMultipart = ServletFileUpload.isMultipartContent(request);
+    long then = System.currentTimeMillis();
+
+    // boolean isMultipart = ServletFileUpload.isMultipartContent(request);
     // Create a factory for disk-based file items
     DiskFileItemFactory factory = new DiskFileItemFactory();
 
@@ -149,7 +151,9 @@ public class ScoreServlet extends DatabaseServlet {
       File saveFile = new File(tempDir + File.separator+ "MyAudioFile.wav");
       // opens input stream of the request for reading data
       writeToFile(next.getInputStream(), saveFile);
-  //    logger.debug("wrote to file " + saveFile.getAbsolutePath());
+      long now = System.currentTimeMillis();
+      logger.debug("took " +(now-then) + " millis to parse request and write the file");
+      //    logger.debug("wrote to file " + saveFile.getAbsolutePath());
       return getJsonForWordAndAudio(word, saveFile);
 
     } catch (Exception e) {
@@ -282,8 +286,11 @@ public class ScoreServlet extends DatabaseServlet {
     logger.debug("File written to: " + saveFile.getAbsolutePath());
 
     AudioFileHelper audioFileHelper = getAudioFileHelper();
+    long then = System.currentTimeMillis();
     PretestScore book = getASRScoreForAudio(audioFileHelper, saveFile.getAbsolutePath(), word);
-    logger.debug("score for " + word + " and " + saveFile.getName() + " = " + book);
+    long now = System.currentTimeMillis();
+    logger.debug("score for '" + word + "' took " + (now-then) +
+        " millis for " + saveFile.getName() + " = " + book);
 
     return getJsonForScore(book);
   }
