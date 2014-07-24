@@ -118,4 +118,6 @@ public interface LangTestDatabaseAsync {
   void setPublicOnList(long userListID, boolean isPublic, AsyncCallback<Void> async);
 
   void markGender(AudioAttribute attr, boolean isMale, AsyncCallback<Void> async);
+
+  void getMaleFemaleProgress(AsyncCallback<Map<String, Float>> async);
 }
