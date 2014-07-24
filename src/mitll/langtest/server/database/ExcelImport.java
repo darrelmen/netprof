@@ -1000,6 +1000,8 @@ public class ExcelImport implements ExerciseDAO {
   }
 
   private int missingExerciseCount = 0;
+  int c = 0;
+
   /**
    * TODO : rationalize media path -- don't force hack on bestAudio replacement
    * Why does it sometimes have the config dir on the front?
@@ -1008,7 +1010,6 @@ public class ExcelImport implements ExerciseDAO {
    * @see #getExercise(String, String, String, String, String, String, boolean, String, boolean)
    */
   private void attachAudio(String id, Exercise imported) {
-    int c = 0;
     String mediaDir1 = mediaDir.replaceAll("bestAudio","");
     //logger.debug("media dir " + mediaDir1);
     if (exToAudio.containsKey(id) || exToAudio.containsKey(id + "/1") || exToAudio.containsKey(id + "/2")) {
@@ -1036,8 +1037,10 @@ public class ExcelImport implements ExerciseDAO {
             imported.addAudio(audio);
           } else {
             c++;
-            /*if (c < 5) */
-            logger.warn("file " + test.getAbsolutePath() + " does not exist - " + audio.getAudioRef());
+            if (c < 15) {
+              logger.warn("file " + test.getAbsolutePath() + " does not exist - " + audio.getAudioRef());
+              logger.warn("installPath " + installPath + "mediaDir " + mediaDir +" mediaDir1 " + mediaDir1);
+            }
           }
         }
       }
