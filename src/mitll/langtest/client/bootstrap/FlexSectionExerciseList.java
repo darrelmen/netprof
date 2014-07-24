@@ -438,7 +438,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   private void showSelectionState(SelectionState selectionState) {
     //System.out.println("FlexSectionExerciseList.showSelectionState : got " + event + " and state '" + selectionState +"'");
     Map<String, Collection<String>> typeToSection = selectionState.getTypeToSection();
-    downloadLink.setHTML(getURLForDownload(selectionState));
+    if (downloadLink != null) downloadLink.setHTML(getURLForDownload(selectionState));
 
     if (typeToSection.isEmpty()) {
       showDefaultStatus();
