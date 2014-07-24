@@ -3,6 +3,7 @@ package mitll.langtest.server;
 import audio.image.ImageType;
 import audio.imagewriter.ImageWriter;
 import com.google.common.io.Files;
+import com.google.gwt.media.client.Audio;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabase;
@@ -1104,7 +1105,56 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public Map<String, Integer> getResultByDay() {  return db.getResultByDay();  }
   @Override
-  public Map<String, Integer> getResultByHourOfDay() {  return db.getResultByHourOfDay();  }
+  public Map<String, Integer> getResultByHourOfDay() {
+    return db.getResultByHourOfDay();
+  }
+
+  @Override
+  public Map<String, Float> getMaleFemaleProgress() {
+    List<CommonExercise> exercises = getExercises();
+    Map<String, Float> report = new HashMap<String, Float>();
+
+    float total = exercises.size();
+    float male = 0;
+    float female = 0;
+    float maleFast = 0;
+    float maleSlow = 0;
+
+    float femaleFast = 0;
+    float femaleSlow = 0;
+    for (CommonExercise exercise : exercises) {
+      Collection<AudioAttribute> males   = exercise.getByGender(true);
+      Collection<AudioAttribute> females = exercise.getByGender(false);
+
+      if (!males.isEmpty()) male++;
+      if (!females.isEmpty()) female++;
+      AudioAttribute r = null, s = null;
+      for (AudioAttribute audioAttribute : males) {
+        if (audioAttribute.isRegularSpeed()) r = audioAttribute;
+        if (audioAttribute.isSlow()) s = audioAttribute;
+      }
+      if (r != null) maleFast++;
+      if (s != null) maleSlow++;
+
+      r = null;
+      s = null;
+      for (AudioAttribute audioAttribute : females) {
+        if (audioAttribute.isRegularSpeed()) r = audioAttribute;
+        if (audioAttribute.isSlow()) s = audioAttribute;
+      }
+      if (r != null) femaleFast++;
+      if (s != null) femaleSlow++;
+    }
+    report.put("total", total);
+    report.put("male", male);
+    report.put("female", female);
+    report.put("maleFast", maleFast);
+    report.put("maleSlow", maleSlow);
+    report.put("femaleFast", femaleFast);
+    report.put("femaleSlow", femaleSlow);
+    return report;
+
+  }
 
   /**
    * Map of overall, male, female to list of counts (ex 0 had 7, ex 1, had 5, etc.)
