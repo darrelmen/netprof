@@ -109,6 +109,7 @@ public class MonitoringManager {
 
     doDesiredQuery(getVPanel(vp),null);
     doSessionQuery(getVPanel(vp),null);
+    doMaleFemale(getVPanel(vp),null);
     doResultQuery(getVPanel(vp),null);
     doGradeQuery(getVPanel(vp));
     doGenderQuery(getVPanel(vp));
@@ -739,6 +740,7 @@ public class MonitoringManager {
         Integer unanswered = userToCount.get(0);
         float ratio = total > 0 ? ((float) unanswered) / ((float) total) : 0;
         int percent = (int) (ratio*100f);
+
         vp.add(new HTML("<h2>Collection progress</h2>"));
         FlexTable flex = new FlexTable();
         flex.setHTML(0, 0, "<font color='red'>Number without a " +
@@ -755,6 +757,67 @@ public class MonitoringManager {
         if (it != null) it.go();
       }
     });
+
+
+  }
+
+  private void doMaleFemale(final Panel vp, final DoIt it) {
+    service.getMaleFemaleProgress(new AsyncCallback<Map<String, Float>>() {
+      @Override
+      public void onFailure(Throwable caught) {
+
+      }
+
+      @Override
+      public void onSuccess(Map<String, Float> result) {
+        vp.add(new HTML("<h2>Male/Female Reference Audio Coverage</h2>"));
+        FlexTable flex = new FlexTable();
+        vp.add(flex);
+
+        float total = result.get("total");
+        Float male = result.get("male");
+
+//        System.out.println("report " + result);
+
+        int r = 0;
+
+        flex.setHTML(r, 0, "<b>Count</b>");
+        flex.setHTML(r, 1, "<b>Male/Female Fast/Slow</b>");
+        flex.setHTML(r++, 2,"<b>%</b>");
+
+        flex.setHTML(r, 0, "Male " + answer);
+        flex.setHTML(r, 1, result.get("male").intValue() + "");
+        flex.setHTML(r++, 2, getPercent(male, total) + "%");
+
+        flex.setHTML(r, 0, "Male regular speed " + answer);
+        flex.setHTML(r, 1, ""+result.get("maleFast").intValue());
+        flex.setHTML(r++, 2, getPercent(result.get("maleFast"), total) + "%");
+
+        flex.setHTML(r, 0, "Male slow speed " + answer);
+        flex.setHTML(r, 1, ""+result.get("maleSlow").intValue());
+        flex.setHTML(r++, 2, getPercent(result.get("maleSlow"), total) + "%");
+
+        flex.setHTML(r, 0, "Female " + answer);
+        flex.setHTML(r, 1,""+result.get("female").intValue());
+        flex.setHTML(r++, 2, getPercent(result.get("female"), total) + "%");
+
+        flex.setHTML(r, 0, "Female regular speed " + answer);
+        flex.setHTML(r, 1, ""+result.get("femaleFast").intValue());
+        flex.setHTML(r++, 2, getPercent(result.get("femaleFast"), total) + "%");
+
+        flex.setHTML(r, 0, "Female slow speed " + answer);
+        flex.setHTML(r, 1, ""+result.get("femaleSlow").intValue());
+        flex.setHTML(r++, 2, getPercent(result.get("femaleSlow"), total) + "%");
+
+        // do the next one...
+        if (it != null) it.go();
+      }
+    });
+  }
+
+  private int getPercent(Float male, float total) {
+    float ratio = total > 0 ? male / ( total) : 0;
+    return (int) (ratio*100f);
   }
 
   private void doGenderQuery(final Panel vp) {
