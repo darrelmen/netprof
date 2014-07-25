@@ -6,7 +6,6 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -22,6 +21,7 @@ import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.pretest.PretestGauge;
 import mitll.langtest.client.scoring.ScoreListener;
+import mitll.langtest.client.sound.PlayAudioWidget;
 import mitll.langtest.shared.ScoreAndPath;
 import mitll.langtest.shared.scoring.PretestScore;
 
@@ -201,7 +201,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   }
 
   private Panel getRefAudio(AudioTag audioTag) {
-    Widget audioWidget = getAudioWidget(audioTag, new ScoreAndPath(classAvg, refAudio), PLAY_REFERENCE);
+    Widget audioWidget = getAudioWidget(new ScoreAndPath(classAvg, refAudio), PLAY_REFERENCE);
     makeChildGreen(audioWidget);
 
     Panel hp = new HorizontalPanel();
@@ -244,7 +244,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 
   private Panel getAudioAndScore(AudioTag audioTag, TooltipHelper tooltipHelper, ScoreAndPath scoreAndPath, String prefix,
                                 Placement placement, String title, boolean backgroundGreen) {
-    Widget w = getAudioWidget(audioTag, scoreAndPath, title);
+    Widget w = getAudioWidget(scoreAndPath, title);
     if (backgroundGreen) {
       makeChildGreen(w);
     }
@@ -264,21 +264,8 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     as.getStyle().setBackgroundColor("green");
   }
 
-  private Anchor getAudioWidget(AudioTag audioTag, ScoreAndPath scoreAndPath, String title) {
-    SafeHtmlBuilder sb = new SafeHtmlBuilder();
-    sb.appendHtmlConstant("<a href=\"" +
-      audioTag.ensureForwardSlashes(scoreAndPath.getPath()).replace(".wav", "." + AudioTag.COMPRESSED_TYPE) +
-      "\"" +
-      " title=\"" +
-      title +
-      "\" class=\"sm2_button\">" +
-      title +
-      "</a>");
-
-    Anchor anchor = new Anchor(sb.toSafeHtml());
-    anchor.getElement().setId("PlayUserAudio_"+title);
-    controller.registerWidget(anchor, anchor, exerciseID, "playing user audio " + scoreAndPath.getPath());
-    return anchor;
+  private Anchor getAudioWidget(ScoreAndPath scoreAndPath, String title) {
+    return new PlayAudioWidget().getAudioWidgetWithEventRecording(scoreAndPath.getPath(), title, exerciseID, controller);
   }
 
   private Widget makeRow(TooltipHelper tooltipHelper, ScoreAndPath scoreAndPath, String prefix, Placement right, boolean showPercent) {
