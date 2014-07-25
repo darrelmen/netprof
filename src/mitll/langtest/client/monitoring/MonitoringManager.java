@@ -781,7 +781,7 @@ public class MonitoringManager {
 
         int r = 0;
 
-        flex.setHTML(r, 0, "<b>Count</b>");
+        flex.setHTML(r, 0, "<b>Reference Audio Type</b>");
         flex.setHTML(r, 1, "<b>Male/Female Fast/Slow</b>");
         flex.setHTML(r++, 2,"<b>%</b>");
 
