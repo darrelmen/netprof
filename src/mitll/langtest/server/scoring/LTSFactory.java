@@ -66,7 +66,7 @@ public class LTSFactory {
     LTS letterToSoundClass = languageToLTS.get(language.toLowerCase());
 
     if (letterToSoundClass == null) {
-      logger.warn("NOTE: we have no LTS for '" + language + "', using " + unknown.getClass());
+      logger.warn("NOTE: we have no LTS for '" + language + "', using the empty LTS class : " + unknown.getClass());
       letterToSoundClass = unknown;
     }
     return letterToSoundClass;
