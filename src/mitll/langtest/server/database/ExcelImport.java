@@ -372,6 +372,7 @@ public class ExcelImport implements ExerciseDAO {
     int semis = 0;
     int logging = 0;
     int skipped = 0;
+    int deleted = 0;
     int englishSkipped = 0;
     String unitName = null, chapterName = null, weekName = null;
     try {
@@ -381,7 +382,6 @@ public class ExcelImport implements ExerciseDAO {
       for (; iter.hasNext(); ) {
         Row next = iter.next();
         if (id > maxExercises) break;
-        //    logger.warn("------------ Row # " + next.getRowNum() + " --------------- ");
         boolean inMergedRow = rowToRange.keySet().contains(next.getRowNum());
         Map<String,String> fieldToDefect = new HashMap<String, String>();
         List<String> columns = new ArrayList<String>();
@@ -397,7 +397,6 @@ public class ExcelImport implements ExerciseDAO {
           List<String> predefinedTypeOrder = new ArrayList<String>();
           for (String col : columns) {
             String colNormalized = col.toLowerCase();
-            //  colNormalized = colNormalized.toLowerCase()
             if (colNormalized.startsWith("Word".toLowerCase())) {
               gotHeader = true;
               colIndexOffset = columns.indexOf(col);
@@ -452,6 +451,8 @@ public class ExcelImport implements ExerciseDAO {
           );
         } else {
           int colIndex = colIndexOffset;
+          boolean isDelete = sheet.getWorkbook().getFontAt(next.getCell(colIndex).getCellStyle().getFontIndex()).getStrikeout();
+
           String english = getCell(next, colIndex++).trim();
           String foreignLanguagePhrase = getCell(next, colIndex).trim();
           String translit = getCell(next, transliterationIndex);
@@ -507,9 +508,11 @@ public class ExcelImport implements ExerciseDAO {
 
               boolean expectFastAndSlow = idIndex == -1;
               String idToUse = expectFastAndSlow ? "" + id++ : givenIndex;
-              CommonExercise imported = getExercise(idToUse, weightIndex, next, english, foreignLanguagePhrase, translit,
+              CommonExercise imported = isDelete ? null : getExercise(idToUse, weightIndex, next, english, foreignLanguagePhrase, translit,
                 meaning, context, false, hasAudioIndex ? getCell(next, audioIndex) : "", true);
-              if (imported.hasRefAudio() || !shouldHaveRefAudio) {  // skip items without ref audio, for now.
+
+              if (!isDelete &&
+                  (imported.hasRefAudio() || !shouldHaveRefAudio)) {  // skip items without ref audio, for now.
                 recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported, unitName, chapterName, weekName);
 
                 // keep track of synonyms (or better term)
@@ -518,12 +521,18 @@ public class ExcelImport implements ExerciseDAO {
                   idToDefectMap.put(imported.getID(), fieldToDefect);
                 }
               } else {
-                if (logging++ < 3) {
-                  logger.info("skipping exercise " + imported.getID() + " : '" + imported.getEnglish() + "' since no audio.");
+                if (isDelete) {
+                  deleted++;
                 }
-                skipped++;
+                else {
+                  if (logging++ < 3) {
+                    logger.info("skipping exercise " + imported.getID() + " : '" + imported.getEnglish() + "' since no audio.");
+                  }
+                  skipped++;
+                }
               }
               if (inMergedRow) {
+                //logger.debug("found merged row...");
                 lastRowValues.add(english);
                 lastRowValues.add(foreignLanguagePhrase);
                 lastRowValues.add(translit);
@@ -540,16 +549,7 @@ public class ExcelImport implements ExerciseDAO {
       logger.error("got " + e, e);
     }
 
-    logger.info("max exercise id = " + id);
-    if (skipped > 0) {
-      logger.info("Skipped " + skipped + " entries with missing audio. " + (100f * ((float) skipped) / (float) id) + "%");
-    }
-    if (englishSkipped > 0) {
-      logger.info("Skipped " + englishSkipped + " entries with missing english. " + (100f * ((float) englishSkipped) / (float) id) + "%");
-    }
-    if (semis > 0) {
-      logger.info("Skipped " + semis + " entries with semicolons or " + (100f * ((float) semis) / (float) id) + "%");
-    }
+    logStatistics(id, semis, skipped, englishSkipped, deleted);
 
     // put the skips at the end
     if (serverProps.isClassroomMode()) {
@@ -574,6 +574,7 @@ public class ExcelImport implements ExerciseDAO {
     Map<String, List<CommonExercise>> englishToExercises = new HashMap<String, List<CommonExercise>>();
     int semis = 0;
     int skipped = 0;
+    int deleted = 0;
     int englishSkipped = 0;
     String unitName = null, chapterName = null, weekName = null;
     try {
@@ -592,10 +593,8 @@ public class ExcelImport implements ExerciseDAO {
         }
 
         if (!gotHeader) {
-          List<String> predefinedTypeOrder = new ArrayList<String>();
           for (String col : columns) {
             String colNormalized = col.toLowerCase();
-            //  colNormalized = colNormalized.toLowerCase()
             if (colNormalized.startsWith("Word".toLowerCase())) {
               gotHeader = true;
               colIndexOffset = columns.indexOf(col);
@@ -603,26 +602,20 @@ public class ExcelImport implements ExerciseDAO {
               transliterationIndex = columns.indexOf(col);
             } else if (gotUCW) {
               if(columns.indexOf(col) == unitIndex){
-                  predefinedTypeOrder.add(col);
                   unitName = col;
               } else if(columns.indexOf(col) == chapterIndex){
-                  predefinedTypeOrder.add(col);
                   chapterName = col;
               } else if(columns.indexOf(col) == weekIndex){
-                  predefinedTypeOrder.add(col);
                   weekName = col;
               }
             } else if (colNormalized.contains("unit") || colNormalized.contains("book")) {
               unitIndex = columns.indexOf(col);
-              predefinedTypeOrder.add(col);
               unitName = col;
             } else if (colNormalized.contains("chapter") || colNormalized.contains("lesson")) {
               chapterIndex = columns.indexOf(col);
-              predefinedTypeOrder.add(col);
               chapterName = col;
             } else if (colNormalized.contains("week")) {
               weekIndex = columns.indexOf(col);
-              predefinedTypeOrder.add(col);
               weekName = col;
             } else if (colNormalized.contains("weight")) {
               weightIndex = columns.indexOf(col);
@@ -646,6 +639,7 @@ public class ExcelImport implements ExerciseDAO {
           );
         } else {
           int colIndex = colIndexOffset;
+          boolean isDelete = sheet.getWorkbook().getFontAt(next.getCell(colIndex).getCellStyle().getFontIndex()).getStrikeout();
           String english = getCell(next, colIndex++).trim();
           String foreignLanguagePhrase = getCell(next, colIndex).trim();
           String translit = getCell(next, transliterationIndex);
@@ -654,7 +648,6 @@ public class ExcelImport implements ExerciseDAO {
           foreignLanguagePhrase = cleanTics(foreignLanguagePhrase);
 
           //logger.info("for row " + next.getRowNum() + " english = " + english + " in merged " + inMergedRow + " last row " + lastRowValues.size());
-
 
           if (english.length() == 0) {
             if (serverProps.isClassroomMode()) {
@@ -667,7 +660,7 @@ public class ExcelImport implements ExerciseDAO {
             }
           }
           if (gotHeader && english.length() > 0) {
-             if (skipSemicolons && (foreignLanguagePhrase.contains(";") || translit.contains(";"))) {
+            if (skipSemicolons && (foreignLanguagePhrase.contains(";") || translit.contains(";"))) {
               String meaning = getCell(next, meaningIndex);
               String givenIndex = getCell(next, idIndex);
               String context = getCell(next, contextIndex);
@@ -676,15 +669,13 @@ public class ExcelImport implements ExerciseDAO {
               boolean expectFastAndSlow = idIndex == -1;
               String idToUse = expectFastAndSlow ? "" + id++ : givenIndex;
               CommonExercise imported = getExercise(idToUse, weightIndex, next, english, foreignLanguagePhrase, translit,
-                meaning, context, false, (audioIndex != -1) ? getCell(next, audioIndex) : "", false);
-              if (imported.hasRefAudio() || !shouldHaveRefAudio) {  // skip items without ref audio, for now.
+                  meaning, context, false, (audioIndex != -1) ? getCell(next, audioIndex) : "", false);
+              if (isDelete) {
+                deleted++;
+              } else if (imported.hasRefAudio() || !shouldHaveRefAudio) {  // skip items without ref audio, for now.
                 recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported, unitName, chapterName, weekName);
 
-                // keep track of synonyms (or better term)
                 rememberExercise(exercises, englishToExercises, imported);
-/*                if (MARK_MISSING_AUDIO_AS_DEFECT && !imported.hasRefAudio()) {
-                  fieldToDefect.put("refAudio", "missing reference audio");
-                }*/
                 if (!fieldToDefect.isEmpty()) {
                   idToDefectMap.put(imported.getID(), fieldToDefect);
                 }
@@ -697,19 +688,28 @@ public class ExcelImport implements ExerciseDAO {
       logger.error("got " + e, e);
     }
 
-    logger.info("max exercise id = " + id);
-    if (skipped > 0) {
-      logger.info("Skipped " + skipped + " entries with missing audio. " + (100f * ((float) skipped) / (float) id) + "%");
-    }
-    if (englishSkipped > 0) {
-      logger.info("Skipped " + englishSkipped + " entries with missing english. " + (100f * ((float) englishSkipped) / (float) id) + "%");
-    }
-    if (semis > 0) {
-      logger.info("Skipped " + semis + " entries with semicolons or " + (100f * ((float) semis) / (float) id) + "%");
-    }
+    logStatistics(id, semis, skipped, englishSkipped, deleted);
     if (missingExerciseCount > 0) logger.debug("missing ex count " + missingExerciseCount);
     return exercises;
   }
+
+  private void logStatistics(int id, int semis, int skipped, int englishSkipped, int deleted) {
+    logger.info("max exercise id = " + id);
+    if (skipped > 0) {
+      logger.info("Skipped " + skipped + " entries with missing audio. " + getPercent(skipped, id));
+    }
+    if (englishSkipped > 0) {
+      logger.info("Skipped " + englishSkipped + " entries with missing english. " +  getPercent(englishSkipped, id));
+    }
+    if (semis > 0) {
+      logger.info("Skipped " + semis + " entries with semicolons or " + getPercent(semis, id));
+    }
+    if (deleted > 0) {
+      logger.info("Skipped " + deleted + " deleted entries with semicolons or " + getPercent(deleted, id));
+    }
+  }
+
+  private String getPercent(float skipped, float total) { return (100f * skipped / total) + "%"; }
 
   private void addDefects(Map<String,Map<String, String>> exTofieldToDefect) {
     if (addDefects) {
