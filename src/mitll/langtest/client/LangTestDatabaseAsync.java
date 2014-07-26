@@ -120,4 +120,9 @@ public interface LangTestDatabaseAsync {
   void markGender(AudioAttribute attr, boolean isMale, AsyncCallback<Void> async);
 
   void getMaleFemaleProgress(AsyncCallback<Map<String, Float>> async);
+
+  void getAlignment(String base64EncodedString,
+                    String textToAlign,
+                    String identifier,
+                    int reqid, AsyncCallback<AudioAnswer> async);
 }
