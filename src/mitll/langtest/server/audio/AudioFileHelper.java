@@ -122,6 +122,28 @@ public class AudioFileHelper {
     return answer;
   }
 
+  public AudioAnswer getAlignment(String base64EncodedString, String textToAlign, String identifier, int reqid) {
+    String wavPath = pathHelper.getWavPathUnder("postedAudio");
+    File file = pathHelper.getAbsoluteFile(wavPath);
+
+    AudioCheck.ValidityAndDur validity = new AudioConversion().convertBase64ToAudioFiles(base64EncodedString, file);
+    boolean isValid = validity.validity == AudioAnswer.Validity.OK;
+    AudioAnswer audioAnswer = new AudioAnswer(pathHelper.ensureForwardSlashes(wavPath), validity.validity, reqid, validity.durationInMillis);
+
+    logger.warn("writing to " + file.getAbsolutePath() + " answer " + audioAnswer);
+
+    if (isValid) {
+      PretestScore asrScoreForAudio = getASRScoreForAudio(reqid, file.getAbsolutePath(), textToAlign, -1, -1, false,
+          false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), identifier);
+
+      audioAnswer.setPretestScore(asrScoreForAudio);
+    } else {
+      logger.warn("got invalid audio file (" + validity + ") identifier " + identifier + " file " + file.getAbsolutePath());
+    }
+
+    return audioAnswer;
+  }
+
   /**
    * Get score when doing autoCRT on an audio file.
    *
