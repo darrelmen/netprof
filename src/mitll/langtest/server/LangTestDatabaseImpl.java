@@ -1056,6 +1056,20 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return audioAnswer;
   }
 
+  @Override
+  public AudioAnswer getAlignment(String base64EncodedString,
+                                  String textToAlign,
+                                  String identifier,
+                                  int reqid) {
+    AudioAnswer audioAnswer = audioFileHelper.getAlignment(base64EncodedString, textToAlign, identifier, reqid);
+
+    if (!audioAnswer.isValid() && audioAnswer.getDurationInMillis() == 0) {
+      logger.warn("huh? got zero length recording " + identifier);
+      logEvent("audioRecording", "writeAudioFile", identifier, "Writing audio - got zero duration!", -1, "unknown");
+    }
+    return audioAnswer;
+  }
+
   /**
    * Remember this audio as reference audio for this exercise, and possibly clear the APRROVED (inspected) state
    * on the exercise indicating it needs to be inspected again (we've added new audio).
