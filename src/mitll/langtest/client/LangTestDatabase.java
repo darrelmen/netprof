@@ -57,6 +57,11 @@ public interface LangTestDatabase extends RemoteService {
 
   // monitoring support
 
+  AudioAnswer getAlignment(String base64EncodedString,
+                           String textToAlign,
+                           String identifier,
+                           int reqid);
+
   Map<User, Integer> getUserToResultCount();
 
   Map<Integer, Integer> getResultCountToCount();
