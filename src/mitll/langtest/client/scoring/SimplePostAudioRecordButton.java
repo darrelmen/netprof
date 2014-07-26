@@ -6,12 +6,15 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.LangTest;
+import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.WavCallback;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.Exercise;
 
 /**
  * This binds a record button with the act of posting recorded audio to the server.
@@ -31,6 +34,31 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
   private final LangTestDatabaseAsync service;
   private String textToAlign;
   private String identifier;
+
+  /**
+   * Make a record button that returns the alignment and score.
+   *
+   * @param controller  needed for recording
+   * @param service     to post the audio to
+   * @param textToAlign to align the audio to
+   */
+  public SimplePostAudioRecordButton(final ExerciseController controller, LangTestDatabaseAsync service,
+                                     String textToAlign) {
+    this(controller, service, textToAlign, "item");
+  }
+
+  /**
+   * Make a record button that returns the alignment and score.
+   *
+   * @param controller  needed for recording
+   * @param service     to post the audio to
+   * @param textToAlign to align the audio to
+   * @param identifier  optional, but if you want to associate the audio with an item "e.g. Dialog Item #3".
+   */
+  public SimplePostAudioRecordButton(final ExerciseController controller, LangTestDatabaseAsync service,
+                                     String textToAlign, String identifier) {
+    this(controller, service, "Record", "Release to stop", textToAlign, identifier);
+  }
 
   /**
    * @param controller
