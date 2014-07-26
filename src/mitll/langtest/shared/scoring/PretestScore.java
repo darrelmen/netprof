@@ -8,7 +8,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Everything you'd want to know about audio alignment.
  *
+ * Overall score, word scores, phone scores, file length, and segment offsets {@link mitll.langtest.shared.instrumentation.TranscriptSegment}
  */
 public class PretestScore implements IsSerializable {
   private int reqid = 0;
@@ -18,7 +20,6 @@ public class PretestScore implements IsSerializable {
   private Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes = new HashMap<NetPronImageType, List<TranscriptSegment>>();
   private String recoSentence;
   private float wavFileLengthSeconds;
-  private boolean noModel;
 
   public PretestScore(){} // required for serialization
 
@@ -27,7 +28,6 @@ public class PretestScore implements IsSerializable {
    * @param score
    */
   public PretestScore(float score) { this.hydecScore = score; }
-  public PretestScore(boolean isNoModel) { this.noModel = isNoModel; }
 
   /**
    * @see mitll.langtest.server.scoring.ASRScoring#scoreRepeatExercise
@@ -76,14 +76,11 @@ public class PretestScore implements IsSerializable {
   public void setReqid(int r) { this.reqid = r;}
   public int  getReqid()      { return reqid;  }
 
-  public boolean isNoModel() { return noModel; }
-
   public String toString() {
-    return "hydec " + hydecScore +
+    return "hydec score " + hydecScore +
       " phones " + getPhoneScores() +
       " type->image " + getsTypeToImage() +
-      " type->endtimes " + getsTypeToEndTimes() +
-      (isNoModel() ? " NO MODEL!" : "")
+      " type->endtimes " + getsTypeToEndTimes()
       ;
   }
 }
