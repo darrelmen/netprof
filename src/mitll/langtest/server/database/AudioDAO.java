@@ -168,7 +168,7 @@ public class AudioDAO extends DAO {
     }
   }
 
-  List<AudioAttribute> getAudioAttributes(String exid) {
+  private List<AudioAttribute> getAudioAttributes(String exid) {
     try {
       String sql = "SELECT * FROM " + AUDIO + " WHERE " +Database.EXID +"='" + exid+ "' AND "+DEFECT +"=false";
       return getResultsSQL(sql);
