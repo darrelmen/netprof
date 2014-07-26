@@ -75,6 +75,13 @@ public class PathHelper {
     return realContextPath;
   }
 
+  public File getFileForAnswer(String plan, String exercise, int question, int user) {
+    String tomcatWriteDirectory = getTomcatDir();
+
+    String planAndTestPath = plan + File.separator + exercise + File.separator + question + File.separator + "subject-" + user;
+    return getAbsoluteFile(getWavPath(tomcatWriteDirectory, planAndTestPath));
+  }
+
   /**
    * Make a place to store the audio answer, of the form:<br></br>
    *
@@ -99,10 +106,15 @@ public class PathHelper {
     String tomcatWriteDirectory = getTomcatDir();
 
     String planAndTestPath = plan + File.separator + exercise + File.separator + question + File.separator + "subject-" + user;
+    return getWavPath(tomcatWriteDirectory, planAndTestPath);
+  }
+
+  public File getFileForWavPathUnder(String planAndTestPath) { return getAbsoluteFile(getWavPath(getTomcatDir(), planAndTestPath)); }
+  public String getWavPathUnder(String planAndTestPath) { return getWavPath(getTomcatDir(), planAndTestPath); }
+
+  private String getWavPath(String tomcatWriteDirectory, String planAndTestPath) {
     String currentTestDir = tomcatWriteDirectory + File.separator + planAndTestPath;
     String wavPath = currentTestDir + File.separator + "answer_" + System.currentTimeMillis() + ".wav";
-    //File audioFilePath = new File(currentTestDir);
-    //boolean mkdirs = audioFilePath.mkdirs();
     //if (mkdirs) logger.debug("getLocalPathToAnswer : making dir at : " + audioFilePath.getAbsolutePath());
 
     return wavPath;
