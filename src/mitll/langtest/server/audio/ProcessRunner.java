@@ -21,7 +21,7 @@ public class ProcessRunner {
   private static final boolean SHOW_OUTPUT = false;
 
   public void runProcess(ProcessBuilder shellProc) throws IOException {
-    logger.debug(new Date() + " : proc " + shellProc.command() + " started...");
+    //logger.debug(new Date() + " : proc " + shellProc.command() + " started...");
 
     shellProc.redirectErrorStream(true);
     Process process2 = shellProc.start();
