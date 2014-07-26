@@ -3,6 +3,7 @@ package mitll.langtest.server;
 import audio.image.ImageType;
 import audio.imagewriter.ImageWriter;
 import com.google.common.io.Files;
+import com.google.gwt.media.client.Audio;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabase;
@@ -1055,6 +1056,20 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return audioAnswer;
   }
 
+  @Override
+  public AudioAnswer getAlignment(String base64EncodedString,
+                                  String textToAlign,
+                                  String identifier,
+                                  int reqid) {
+    AudioAnswer audioAnswer = audioFileHelper.getAlignment(base64EncodedString, textToAlign, identifier, reqid);
+
+    if (!audioAnswer.isValid() && audioAnswer.getDurationInMillis() == 0) {
+      logger.warn("huh? got zero length recording " + identifier);
+      logEvent("audioRecording", "writeAudioFile", identifier, "Writing audio - got zero duration!", -1, "unknown");
+    }
+    return audioAnswer;
+  }
+
   /**
    * Remember this audio as reference audio for this exercise, and possibly clear the APRROVED (inspected) state
    * on the exercise indicating it needs to be inspected again (we've added new audio).
@@ -1104,7 +1119,56 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public Map<String, Integer> getResultByDay() {  return db.getResultByDay();  }
   @Override
-  public Map<String, Integer> getResultByHourOfDay() {  return db.getResultByHourOfDay();  }
+  public Map<String, Integer> getResultByHourOfDay() {
+    return db.getResultByHourOfDay();
+  }
+
+  @Override
+  public Map<String, Float> getMaleFemaleProgress() {
+    List<CommonExercise> exercises = getExercises();
+    Map<String, Float> report = new HashMap<String, Float>();
+
+    float total = exercises.size();
+    float male = 0;
+    float female = 0;
+    float maleFast = 0;
+    float maleSlow = 0;
+
+    float femaleFast = 0;
+    float femaleSlow = 0;
+    for (CommonExercise exercise : exercises) {
+      Collection<AudioAttribute> males   = exercise.getByGender(true);
+      Collection<AudioAttribute> females = exercise.getByGender(false);
+
+      if (!males.isEmpty()) male++;
+      if (!females.isEmpty()) female++;
+      AudioAttribute r = null, s = null;
+      for (AudioAttribute audioAttribute : males) {
+        if (audioAttribute.isRegularSpeed()) r = audioAttribute;
+        if (audioAttribute.isSlow()) s = audioAttribute;
+      }
+      if (r != null) maleFast++;
+      if (s != null) maleSlow++;
+
+      r = null;
+      s = null;
+      for (AudioAttribute audioAttribute : females) {
+        if (audioAttribute.isRegularSpeed()) r = audioAttribute;
+        if (audioAttribute.isSlow()) s = audioAttribute;
+      }
+      if (r != null) femaleFast++;
+      if (s != null) femaleSlow++;
+    }
+    report.put("total", total);
+    report.put("male", male);
+    report.put("female", female);
+    report.put("maleFast", maleFast);
+    report.put("maleSlow", maleSlow);
+    report.put("femaleFast", femaleFast);
+    report.put("femaleSlow", femaleSlow);
+    return report;
+
+  }
 
   /**
    * Map of overall, male, female to list of counts (ex 0 had 7, ex 1, had 5, etc.)
