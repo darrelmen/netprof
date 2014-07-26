@@ -10,6 +10,7 @@ import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.WavCallback;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.instrumentation.EventLogger;
+import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
@@ -27,7 +28,7 @@ import java.util.Collection;
  * Time: 11:56 AM
  * To change this template use File | Settings | File Templates.
  */
-public interface ExerciseController {
+public interface ExerciseController extends EventRegistration {
   LangTestDatabaseAsync getService();
   UserFeedback getFeedback();
   ListInterface getExerciseList();
@@ -75,16 +76,6 @@ public interface ExerciseController {
   void logMessageOnServer(String message, String prefix);
 
   StartupInfo getStartupInfo();
-  EventLogger getButtonFactory();
-  void register(Button button, String exid);
-
-  void register(Button button, String exid, String context);
-
-  void logEvent(Tab button, String widgetType, String exid, String context);
-
-  void registerWidget(HasClickHandlers clickable, UIObject uiObject, String exid, String context);
-
-  void logEvent(UIObject button, String widgetType, String exid, String context);
 
   void addKeyListener(KeyPressHelper.KeyListener listener);
 
