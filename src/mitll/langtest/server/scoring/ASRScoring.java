@@ -248,27 +248,31 @@ public class ASRScoring extends Scoring {
 
   /**
    * Use hydec to do scoring<br></br>
-   *
+   * <p/>
    * Some magic happens in {@link Scoring#writeTranscripts(String, int, int, String, boolean, String, String, boolean)} where .lab files are
    * parsed to determine the start and end times for each event, which lets us both create images that
    * show the location of the words and phonemes, and for decoding, the actual reco sentence returned. <br></br>
-   *
+   * <p/>
    * For alignment, of course, the reco sentence is just the given sentence echoed back (unless alignment fails to
    * generate any alignments (e.g. for audio that's complete silence or when the
    * spoken sentence is utterly unrelated to the reference.)).
+   * <p/>
+   * Audio file must be a wav file, but can be any sample rate - if not 16K will be sampled down to 16K.
    *
-   * @see #scoreRepeat
-   * @param testAudioDir where the audio is
-   * @param testAudioFileNoSuffix file name without a suffix
-   * @param sentence to align
-   * @param scoringDir where the hydec subset is (models, bin.linux64, etc.)
-   * @param imageOutDir where to write the images (audioImage)
-   * @param imageWidth image width
-   * @param imageHeight image height
-   * @param useScoreForBkgColor true if we want to color the segments by score else all are gray
-   * @param useCache
-   * @param prefix
+   * @param testAudioDir          where the audio is
+   * @param testAudioFileNoSuffix file name without a suffix - wav file, any sample rate
+   * @param sentence              to align
+   * @param scoringDir            where the hydec subset is (models, bin.linux64, etc.)
+   * @param imageOutDir           where to write the images (audioImage)
+   * @param imageWidth            image width
+   * @param imageHeight           image height
+   * @param useScoreForBkgColor   true if we want to color the segments by score else all are gray
+   * @param decode                if true, skips writing image files
+   * @param tmpDir                where to run hydec
+   * @param useCache              cache scores so subsequent requests for the same audio file will get the cached score
+   * @param prefix                on the names of the image files, if they are written
    * @return score info coming back from alignment/reco
+   * @see #scoreRepeat
    */
   private PretestScore scoreRepeatExercise(String testAudioDir,
                                            String testAudioFileNoSuffix,
@@ -318,6 +322,11 @@ public class ASRScoring extends Scoring {
       logger.error("getScoreForAudio failed to generate scores.");
       return new PretestScore(0.01f);
     }
+    return getPretestScore(imageOutDir, imageWidth, imageHeight, useScoreForBkgColor, decode, prefix, noSuffix, wavFile, scores);
+  }
+
+  private PretestScore getPretestScore(String imageOutDir, int imageWidth, int imageHeight, boolean useScoreForBkgColor,
+                                       boolean decode, String prefix, String noSuffix, File wavFile, Scores scores) {
     ImageWriter.EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
       useScoreForBkgColor,
       prefix + (useScoreForBkgColor ? "bkgColorForRef" : ""), "", decode);
