@@ -1,12 +1,6 @@
 package mitll.langtest.shared;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -55,7 +49,7 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.server.database.ExcelImport#getExercise(String, String, String, String, String, String, boolean, String)
+   * @see mitll.langtest.server.database.ExcelImport#getExercise
    * @param s
    * @deprecated - try to avoid this
    */
@@ -67,6 +61,7 @@ public class AudioExercise extends ExerciseShell {
   }
 
   public void addAudio(AudioAttribute audioAttribute) {
+    if (audioAttribute == null) throw new IllegalArgumentException("adding null audio?");
     audioAttributes.put(audioAttribute.getKey(),audioAttribute);
   }
 
