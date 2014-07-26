@@ -6,23 +6,12 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * Created by GO22670 on 3/25/2014.
  */
 public class TranscriptSegment implements IsSerializable {
-
-  // Data Members
   private float start;                  /// Start time in seconds
   private float end;                    /// End time in seconds
   private String event;                 /// Text to be displayed per event
   private float score;                  /// posterior score
 
   public TranscriptSegment() {}
-/*
-  public TranscriptSegment(float s, float e, String name) {
-    this(s, e, name, 0);
-  }
-*/
-/*
-  public TranscriptSegment(TranscriptEvent event) {
-    this(event.start, event.end, event.event, event.score);
-  }*/
 
   /**
    * Constructor
@@ -48,6 +37,10 @@ public class TranscriptSegment implements IsSerializable {
     return end;
   }
 
+  /**
+   * Event could be a word or a phone, generally.
+   * @return
+   */
   public String getEvent() {
     return event;
   }
