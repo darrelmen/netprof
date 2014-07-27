@@ -63,6 +63,7 @@ public class ServerProperties {
   private static final String NO_MODEL = "noModel";
   private static final String USE_MODEL_DICTIONARY = "useDictionary";
   private static final String TIER_INDEX = "tierIndex";
+  private static final String DIALOG = "dialog";
   public static final String VLR_PARLE_PILOT_ITEMS_TXT = "vlr-parle-pilot-items.txt";
 
   private Properties props = new Properties();
@@ -189,6 +190,14 @@ public class ServerProperties {
    */
   public String getMediaDir() {
     return props.getProperty(MEDIA_DIR, "media");
+  }
+  
+  public String getDialog() {
+	return props.getProperty("DIALOG", "");
+  }
+  
+  public boolean hasDialog() {
+	return getDialog().equals("");
   }
 
   public double getMinPronScore() {
