@@ -6,6 +6,7 @@ import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.InlineLabel;
@@ -20,6 +21,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -34,22 +36,34 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.WavCallback;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.recorder.RecordButton;
+import mitll.langtest.client.recorder.RecordButton.RecordingListener;
+import mitll.langtest.client.recorder.RecordButtonPanel;
+import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
+import mitll.langtest.client.scoring.ScoreListener;
+import mitll.langtest.client.sound.PlayAudioPanel;
+import mitll.langtest.client.sound.Sound;
+import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
+import mitll.langtest.server.PathHelper;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserList;
 
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -117,6 +131,9 @@ public class Navigation implements RequiresResize {
   private ReviewItemHelper reviewItem;
 
   private final KeyStorage storage;
+  
+  private final SoundManagerAPI soundManager;
+
 
   /**
    * @param service
@@ -132,6 +149,7 @@ public class Navigation implements RequiresResize {
     this.service = service;
     this.userManager = userManager;
     this.controller = controller;
+    this.soundManager = controller.getSoundManager();
     this.listInterface = predefinedContentList;
     storage = new KeyStorage(controller);
     npfHelper = new NPFHelper(service, feedback, userManager, controller, false);
@@ -707,17 +725,26 @@ public class Navigation implements RequiresResize {
      contentPanel.add(startDialog);
   }
   
+  private final Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
+  private final Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
+  
   private void displayDialog(String dialog, String part, Panel cp){
 
 	  HashMap<String, Integer> sentToAudioIndex = getSentToAudioIndex();
 	  HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSpeaker = getDialogToSentIndexToSpeaker();
 	  HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSent = getDialogToSentIndexToSent();
+	  
+	  PlayAudioPanel testPlay = new PlayAudioPanel(soundManager, "foo", null);
+	  controller.register(testPlay.getPlayButton(), "0");	  
+	  cp.add(testPlay);
+	  
+	  System.out.println(System.getProperty("user.dir"));
+	  testPlay.startSong("bestAudio/0/Fast.wav");
 
 	  int sentIndex = 0;
 	  while(dialogToSentIndexToSent.get(dialog).containsKey(sentIndex)){
 		  FlowPanel sentPanel = new FlowPanel();
 		  HTML sent = new HTML(dialogToSentIndexToSpeaker.get(dialog).get(sentIndex)+": "+dialogToSentIndexToSent.get(dialog).get(sentIndex));
-		  System.out.println("hi");
 		  if(part.equals(dialogToSentIndexToSpeaker.get(dialog).get(sentIndex))){
 			  Button record = new Button("Press and hold to record");
 			  Button listen = new Button("Play reference recording");
@@ -725,17 +752,14 @@ public class Navigation implements RequiresResize {
 			  sentPanel.add(record);
 			  sentPanel.add(listen);
 			  sent.getElement().getStyle().setProperty("fontWeight", "bolder");
-			  System.out.println("there");
 		  }
 		  else{
 			  sent.getElement().getStyle().setProperty("fontStyle", "italic");
 		  }
 		  sentPanel.add(sent);
 		  cp.add(sentPanel);
-		  System.out.println("buddy");
 		  sentIndex += 1;
 	  }
-	  System.out.println("still alive?");
   }
   
   private HashMap<String, String[]> getDialogToPartsMap(){
