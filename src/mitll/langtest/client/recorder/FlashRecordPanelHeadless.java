@@ -4,6 +4,7 @@
 package mitll.langtest.client.recorder;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.client.BrowserCheck;
@@ -296,10 +297,17 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   /**
    * @see mitll.langtest.client.LangTest#stopRecording(mitll.langtest.client.WavCallback)
    */
-  public void stopRecording(WavCallback wavCallback) {
+  public void stopRecording(final WavCallback wavCallback) {
     if (permissionReceived) {
-      flashStopRecording();
-      wavCallback.getBase64EncodedWavFile(getWav());
+
+      Timer t = new Timer() {
+        @Override
+        public void run() {
+          flashStopRecording();
+          wavCallback.getBase64EncodedWavFile(getWav());
+        }
+      };
+      t.schedule(130); // add flash delay
     }
     else if (webAudio.isWebAudioMicAvailable()) {
       webAudio.stopRecording(wavCallback);
