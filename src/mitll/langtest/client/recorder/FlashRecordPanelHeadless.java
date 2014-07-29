@@ -27,7 +27,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   public static MicPermission micPermission;
   private boolean didPopup = false;
   private static boolean permissionReceived;
-  private static boolean micConnected = true;
+  //private static boolean micConnected = true;
   private static WebAudioRecorder webAudio;
 
   /**
@@ -84,15 +84,15 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    * @see mitll.langtest.client.LangTest#checkInitFlash()
    * @see mitll.langtest.client.LangTest#showPopupOnDenial()
    */
-  public void initFlash() {
-    rememberInstallFlash();
+  public boolean initFlash() {
+    return rememberInstallFlash();
   }
 
   /**
    * @see #initFlash()
    * @seex #webAudioMicNotAvailable
    */
-  private void rememberInstallFlash() {
+  private boolean rememberInstallFlash() {
     System.out.println("rememberInstallFlash");
 
     if (!didPopup) {
@@ -100,10 +100,12 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
       installFlash();
       System.out.println("rememberInstallFlash : did   installFlash");
       didPopup = true;
+      return false;
     }
     else {
       System.out.println("rememberInstallFlash didPopup " + didPopup);
 
+      return true;
     }
   }
 
@@ -283,12 +285,12 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   public static void noMicrophoneFound() {
     System.err.println("no mic available");
     permissionReceived = false;
-    micConnected = false;
+    //micConnected = false;
     micPermission.noMicAvailable();
   }
 
   public boolean gotPermission()  { return permissionReceived || usingWebRTC(); }
-  public boolean isMicConnected() { return micConnected; }
+ // public boolean isMicConnected() { return micConnected; }
   public boolean usingFlash() { return permissionReceived; }
   public boolean usingWebRTC() { return webAudio.isWebAudioMicAvailable(); }
   /**
