@@ -909,7 +909,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public void stopRecording(WavCallback wavCallback) {
     now = System.currentTimeMillis();
     System.out.println("time recording in UI " + (now-then) + " millis");
-    flashRecordPanel.stopRecording(wavCallback);  }
+
+    flashRecordPanel.stopRecording(wavCallback);
+  }
 
   /**
    * Recording interface
