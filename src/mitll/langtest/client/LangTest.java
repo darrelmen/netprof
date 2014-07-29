@@ -696,6 +696,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @seex #getLogout()
    */
   private void resetState() {
+    System.out.println("got resetState");
     History.newItem(""); // clear history!
     userManager.clearUser();
     exerciseList.removeCurrentExercise();
@@ -756,7 +757,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (shouldCollectAudio() && !flashRecordPanel.gotPermission()) {
       System.out.println("checkInitFlash : initFlash");
 
-      flashRecordPanel.initFlash();
+      if (flashRecordPanel.initFlash()) {
+        checkLogin();
+      }
     }
     else {
       gotMicPermission();
