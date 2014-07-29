@@ -544,14 +544,13 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         download.setIcon(IconType.DOWNLOAD);
         download.setIconSize(IconSize.TWO_TIMES);
         download.addStyleName("leftFiveMargin");
-        //setDownloadHref();
-        download.setEnabled(false);
+        download.setVisible(false);
         add(download);
       }
     }
 
     public void setDownloadHref() {
-      download.setEnabled(true);
+      download.setVisible(true);
 
       download.setHref("downloadAudio?file=" +
           audioPath +
@@ -587,7 +586,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
         super.startRecording();
         recordImage1.setVisible(true);
-        download.setEnabled(false);
+        download.setVisible(false);
       }
 
       @Override
