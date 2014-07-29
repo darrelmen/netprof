@@ -38,6 +38,12 @@ public class PathHelper {
     return wavPath.replaceAll("\\\\", "/");
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable(int, String, mitll.langtest.shared.CommonExercise, String, mitll.langtest.shared.AudioAnswer)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getImageForAudioFile(int, String, String, int, int, String)
+   * @param filePath
+   * @return
+   */
   public File getAbsoluteFile(String filePath) {
     String realContextPath = getInstallPath();
     return getAbsolute(realContextPath, filePath);
