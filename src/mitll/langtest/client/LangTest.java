@@ -890,11 +890,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public LangTestDatabaseAsync getService() { return service; }
   public UserFeedback getFeedback() { return this; }
 
+  private long then, now;
   // recording methods...
   /**
    * Recording interface
    */
   public void startRecording() {
+
+    then = System.currentTimeMillis();
     flashRecordPanel.recordOnClick();
   }
 
@@ -903,7 +906,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
    * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
    */
-  public void stopRecording(WavCallback wavCallback) {  flashRecordPanel.stopRecording(wavCallback);  }
+  public void stopRecording(WavCallback wavCallback) {
+    now = System.currentTimeMillis();
+    System.out.println("time recording in UI " + (now-then) + " millis");
+    flashRecordPanel.stopRecording(wavCallback);  }
 
   /**
    * Recording interface
@@ -918,12 +924,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     dialogHelper.showErrorMessage(title, msg);
     logMessageOnServer("Showing error message", title + " : " + msg);
   }
-
-/*
-  public void showStatus(String msg) {
-    status.setText(msg);
-  }
-*/
 
   @Override
   public void showProgress() {
