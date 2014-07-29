@@ -540,7 +540,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         super.addButtons(optionalToTheRight);
 
         download = new IconAnchor();
-        download.setTitle("Download");
+        download.setTitle("Download what you just said.");
         download.setIcon(IconType.DOWNLOAD);
         download.setIconSize(IconSize.TWO_TIMES);
         download.addStyleName("leftFiveMargin");
