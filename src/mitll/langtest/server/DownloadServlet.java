@@ -1,12 +1,18 @@
 package mitll.langtest.server;
 
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.User;
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -76,7 +82,45 @@ public class DownloadServlet extends DatabaseServlet {
             }
           }
         }
-        else {
+        else if (queryString.startsWith("file")) {
+          String[] split = queryString.split("&");
+
+          String file = split[0].split("=")[1];
+          String exercise = split[1].split("=")[1];
+          String useridString = split[2].split("=")[1];
+
+          logger.debug("query is " + queryString + " file " + file + " " + exercise);
+
+          long userid = Long.parseLong(useridString);
+
+          CommonExercise exercise1 = db.getExercise(exercise);
+          User userWhere = db.getUserDAO().getUserWhere(userid);
+          String userPart = userWhere != null ? "_by_" + userWhere.getUserID() : "";
+          boolean english = db.getServerProps().getLanguage().equalsIgnoreCase("english");
+          String fileName = (english ? "" : exercise1.getForeignLanguage().trim() + "_") + exercise1.getEnglish().trim() + userPart + ".mp3";
+
+          logger.debug("file is '" + fileName + "'");
+          String underscores = fileName.replaceAll("\\p{Z}+", "_");  // split on spaces
+
+          response.setContentType("application/octet-stream");
+
+          underscores = URLEncoder.encode(underscores, "UTF-8");
+          response.setCharacterEncoding("UTF-8");
+          response.setHeader("Content-Disposition", "attachment; filename*=UTF-8''" + underscores);
+
+          File fileRef = pathHelper.getAbsoluteFile(file);
+          if (!fileRef.exists()) {
+            logger.warn("huh? can't find " + file);
+          } else {
+            FileInputStream input = new FileInputStream(fileRef);
+            int size = (int) input.getChannel().size();
+            logger.debug("copying file " + fileRef + " size  " + size);
+            response.setContentLength(size);
+
+            IOUtils.copy(input, response.getOutputStream());
+            response.getOutputStream().flush();
+          }
+        } else {
           Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(queryString);
           String name = typeToSection.isEmpty() ? "audio" : db.getPrefix(typeToSection);
           name = name.replaceAll("\\,", "_");
@@ -211,5 +255,12 @@ public class DownloadServlet extends DatabaseServlet {
     }
     logger.debug("returning " + typeToSection + " for " + queryString);
     return typeToSection;
+  }
+
+  @Override
+  public void init() throws ServletException {
+    super.init();
+
+    setPaths();
   }
 }
