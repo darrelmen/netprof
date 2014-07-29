@@ -3,12 +3,9 @@ package mitll.langtest.client.user;
 import com.github.gwtbootstrap.client.ui.AccordionGroup;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.CheckBox;
-import com.github.gwtbootstrap.client.ui.ControlGroup;
-import com.github.gwtbootstrap.client.ui.Controls;
 import com.github.gwtbootstrap.client.ui.Fieldset;
 import com.github.gwtbootstrap.client.ui.Form;
 import com.github.gwtbootstrap.client.ui.Modal;
-import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
@@ -207,9 +204,6 @@ class StudentDialog extends UserDialog {
   }
 
   private void showAccordion() {
-    //System.out.println("show accordion!!!! ------ \n\n\n");
-
-
     accordion.setVisible(true);
     accordion.show();
     accordionHasBeenShown = true;
@@ -333,17 +327,15 @@ class StudentDialog extends UserDialog {
         String purposeSetting = getRole(purpose);
         final String audioType = getAudioTypeFromPurpose(purposeSetting);
         System.out.println("\tmakeCloseHandler.onClick for " + purposeSetting);
-        checkUserAndMaybeRegister(closeButton, audioType, user, password, dialogBox, accordion, registrationInfo, purposeSetting, permissions);
+        checkUserAndMaybeRegister(audioType, user, password, dialogBox, registrationInfo, purposeSetting, permissions);
       }
     };
   }
 
-  private void checkUserAndMaybeRegister(Button closeButton,
-                                         final String audioType,
+  private void checkUserAndMaybeRegister(final String audioType,
                                          final FormField user,
                                          final FormField password,
                                          final Modal dialogBox,
-                                         final AccordionGroup accordion,
                                          final RegistrationInfo registrationInfo,
                                          final String purposeSetting,
                                          final Collection<User.Permission> permissions) {
@@ -351,8 +343,7 @@ class StudentDialog extends UserDialog {
     boolean needsPassword = purposeSetting.equals(REVIEW) || purposeSetting.equals(RECORDER);
 
     System.out.println("checkUserAndMaybeRegister " + purposeSetting + " review " + needsPassword);
-    if (//checkValidUser(user) &&
-      (!needsPassword || checkValidPassword(password, true))
+    if ((!needsPassword || checkValidPassword(password, true))
       ) {
       service.userExists(userID, new AsyncCallback<Integer>() {
         @Override
@@ -370,19 +361,11 @@ class StudentDialog extends UserDialog {
           } else if (checkValidUser(user)) {
             System.out.println("checkUserAndMaybeRegister for " + purposeSetting + " user does not exist id=" + result);
 
-//            boolean skipRegister = canSkipRegister(purposeSetting);
-//            accordion.setVisible(!skipRegister);
-//            if (!skipRegister) {
-//              showAccordion();
-//            }
-
             checkThenRegister(audioType, registrationInfo, dialogBox, userID, permissions);
           }
         }
       });
-    }/* else {
-      System.out.println("checkUserAndMaybeRegister for " + purposeSetting + " user name " + userID + " is invalid?");
-    }*/
+    }
   }
 
   /**
@@ -391,24 +374,18 @@ class StudentDialog extends UserDialog {
    * @param registrationInfo
    * @param dialogBox
    * @param userID
-   * @see #checkUserAndMaybeRegister(com.github.gwtbootstrap.client.ui.Button, String, mitll.langtest.client.user.BasicDialog.FormField, mitll.langtest.client.user.BasicDialog.FormField, com.github.gwtbootstrap.client.ui.Modal, com.github.gwtbootstrap.client.ui.AccordionGroup, mitll.langtest.client.user.StudentDialog.RegistrationInfo, String, java.util.Collection)
+   * @see #checkUserAndMaybeRegister(String, mitll.langtest.client.user.BasicDialog.FormField, mitll.langtest.client.user.BasicDialog.FormField, com.github.gwtbootstrap.client.ui.Modal, mitll.langtest.client.user.StudentDialog.RegistrationInfo, String, java.util.Collection)
    */
   private void checkThenRegister(String audioType, RegistrationInfo registrationInfo, Modal dialogBox, String userID,
                                  Collection<User.Permission> permissions) {
     String s = audioType.toLowerCase();
     boolean skipWeekCheck = s.contains(REVIEW.toLowerCase()) || s.contains(RECORDER.toLowerCase());
     boolean skipChecks    = s.contains(PRACTICE.toLowerCase()); // i.e. you are a student
-    if (skipChecks/* || (!qcCheckBox.getValue() && !recordAudioCheckBox.getValue())*/) {
+    if (skipChecks) {
       System.out.println("checkThenRegister : skipChecks " + audioType + " user  " + userID);
 
-  /*    if (!accordionHasBeenShown) {
-        showAccordion();
-      } else {*/
       hideAndSend(audioType, registrationInfo, dialogBox, userID, permissions);
-      //  }
     } else {
-
-
       boolean shownBefore = accordionHasBeenShown;
       showAccordion();
 
@@ -434,13 +411,10 @@ class StudentDialog extends UserDialog {
               "Enter age between " + MIN_AGE + " and " + MAX_AGE + ".");
         }
       } else if (shownBefore) {
-
         System.out.println("checkThenRegister : shownBefore - skipChecks " + audioType + " user  " + userID);
 
         hideAndSend(audioType, registrationInfo, dialogBox, userID, permissions);
-
       }
-
     }
   }
 
@@ -527,7 +501,6 @@ class StudentDialog extends UserDialog {
       }
 
       public void onSuccess(Long result) {
-//        System.out.println("addUser : server result is " + result);
         userManager.storeUser(result, audioType, userChosenID, PropertyHandler.LOGIN_TYPE.STUDENT);
       }
     };
