@@ -1251,7 +1251,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       new RecoTest(this, serverProps, pathHelper, audioFileHelper);
     }
     if (!serverProps.dataCollectMode && !serverProps.isArabicTextDataCollect()) {
-      db.getUnmodExercises();
+      db.preloadExercises();
     }
 
     db.getUserListManager().setStateOnExercises();
