@@ -83,43 +83,7 @@ public class DownloadServlet extends DatabaseServlet {
           }
         }
         else if (queryString.startsWith("file")) {
-          String[] split = queryString.split("&");
-
-          String file = split[0].split("=")[1];
-          String exercise = split[1].split("=")[1];
-          String useridString = split[2].split("=")[1];
-
-          logger.debug("query is " + queryString + " file " + file + " " + exercise);
-
-          long userid = Long.parseLong(useridString);
-
-          CommonExercise exercise1 = db.getExercise(exercise);
-          User userWhere = db.getUserDAO().getUserWhere(userid);
-          String userPart = userWhere != null ? "_by_" + userWhere.getUserID() : "";
-          boolean english = db.getServerProps().getLanguage().equalsIgnoreCase("english");
-          String fileName = (english ? "" : exercise1.getForeignLanguage().trim() + "_") + exercise1.getEnglish().trim() + userPart + ".mp3";
-
-          logger.debug("file is '" + fileName + "'");
-          String underscores = fileName.replaceAll("\\p{Z}+", "_");  // split on spaces
-
-          response.setContentType("application/octet-stream");
-
-          underscores = URLEncoder.encode(underscores, "UTF-8");
-          response.setCharacterEncoding("UTF-8");
-          response.setHeader("Content-Disposition", "attachment; filename*=UTF-8''" + underscores);
-
-          File fileRef = pathHelper.getAbsoluteFile(file);
-          if (!fileRef.exists()) {
-            logger.warn("huh? can't find " + file);
-          } else {
-            FileInputStream input = new FileInputStream(fileRef);
-            int size = (int) input.getChannel().size();
-            logger.debug("copying file " + fileRef + " size  " + size);
-            response.setContentLength(size);
-
-            IOUtils.copy(input, response.getOutputStream());
-            response.getOutputStream().flush();
-          }
+          returnAudioFile(response, db, queryString);
         } else {
           Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(queryString);
           String name = typeToSection.isEmpty() ? "audio" : db.getPrefix(typeToSection);
@@ -143,6 +107,46 @@ public class DownloadServlet extends DatabaseServlet {
       response.getOutputStream().close();
     } catch (IOException e) {
       logger.warn("got " +e,e);
+    }
+  }
+
+  private void returnAudioFile(HttpServletResponse response, DatabaseImpl db, String queryString) throws IOException {
+    String[] split = queryString.split("&");
+
+    String file = split[0].split("=")[1];
+    String exercise = split[1].split("=")[1];
+    String useridString = split[2].split("=")[1];
+
+    // logger.debug("query is " + queryString + " file " + file + " " + exercise);
+
+    long userid = Long.parseLong(useridString);
+
+    CommonExercise exercise1 = db.getExercise(exercise);
+    User userWhere = db.getUserDAO().getUserWhere(userid);
+    String userPart = userWhere != null ? "_by_" + userWhere.getUserID() : "";
+    boolean english = db.getServerProps().getLanguage().equalsIgnoreCase("english");
+    String fileName = (english ? "" : exercise1.getForeignLanguage().trim() + "_") + exercise1.getEnglish().trim() + userPart + ".mp3";
+
+    //logger.debug("file is '" + fileName + "'");
+    String underscores = fileName.replaceAll("\\p{Z}+", "_");  // split on spaces
+
+    response.setContentType("application/octet-stream");
+
+    underscores = URLEncoder.encode(underscores, "UTF-8");
+    response.setCharacterEncoding("UTF-8");
+    response.setHeader("Content-Disposition", "attachment; filename*=UTF-8''" + underscores);
+
+    File fileRef = pathHelper.getAbsoluteFile(file);
+    if (!fileRef.exists()) {
+      logger.warn("huh? can't find " + file);
+    } else {
+      FileInputStream input = new FileInputStream(fileRef);
+      int size = (int) input.getChannel().size();
+     // logger.debug("copying file " + fileRef + " size  " + size);
+      response.setContentLength(size);
+
+      IOUtils.copy(input, response.getOutputStream());
+      response.getOutputStream().flush();
     }
   }
 
@@ -199,7 +203,7 @@ public class DownloadServlet extends DatabaseServlet {
     Object databaseReference = getServletContext().getAttribute("databaseReference");
     if (databaseReference != null) {
       db = (DatabaseImpl) databaseReference;
-      logger.debug("found existing database reference " + db + " under " +getServletContext());
+     // logger.debug("found existing database reference " + db + " under " +getServletContext());
     } else {
       logger.error("huh? no existing db reference?");
     }
