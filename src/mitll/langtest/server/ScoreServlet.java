@@ -34,9 +34,6 @@ import java.util.*;
 @SuppressWarnings("serial")
 public class ScoreServlet extends DatabaseServlet {
   private static final Logger logger = Logger.getLogger(ScoreServlet.class);
-  private static final int BUFFER_SIZE = 4096;
-  private String relativeConfigDir;
-  private String configDir;
   private JSONObject chapters;
 
   /**
@@ -86,10 +83,9 @@ public class ScoreServlet extends DatabaseServlet {
     response.setContentType("application/json; charset=UTF-8");
     response.setCharacterEncoding("UTF-8");
 
-    JSONObject jsonObject;
-
     boolean isMultipart = ServletFileUpload.isMultipartContent(request);
 
+    JSONObject jsonObject;
     if (isMultipart) {
       logger.debug("got " +request.getParts().size() + " parts isMultipart " +isMultipart);
       jsonObject = getJsonForParts(request);
@@ -236,29 +232,6 @@ public class ScoreServlet extends DatabaseServlet {
     return jsonObject;
   }
 
-  private void ensureMP3s(CommonExercise byID) {
-     ensureMP3(byID.getRefAudio());
-
-    //if (!audioAttributes.isEmpty()) { logger.warn("ensureMP3s : ref audio for " + byID); }
-  }
-
-  private void ensureMP3(String wavFile) {
-    if (wavFile != null) {
-      String parent = pathHelper.getInstallPath();
-      //logger.debug("ensureMP3 : wav " + wavFile + " under " + parent);
-
-      AudioConversion audioConversion = new AudioConversion();
-      if (!audioConversion.exists(wavFile, parent)) {
-        logger.warn("can't find " + wavFile + " under " + parent + " trying config... ");
-        parent = configDir;
-      }
-      if (!audioConversion.exists(wavFile, parent)) {
-        logger.error("huh? can't find " + wavFile + " under " + parent);
-      }
-      audioConversion.ensureWriteMP3(wavFile, parent, false);
-    }
-  }
-
   private JSONObject getJsonForAudio(HttpServletRequest request) throws IOException {
     // Gets file name for HTTP header
     String fileName = request.getHeader("fileName");
@@ -324,23 +297,6 @@ public class ScoreServlet extends DatabaseServlet {
     writeToFile(inputStream, saveFile);
   }
 
-  private void writeToFile(InputStream inputStream, File saveFile) throws IOException {
-    // opens an output stream for writing file
-    FileOutputStream outputStream = new FileOutputStream(saveFile);
-
-    byte[] buffer = new byte[BUFFER_SIZE];
-    int bytesRead = -1;
-    logger.debug("Receiving data...");
-
-    while ((bytesRead = inputStream.read(buffer)) != -1) {
-      outputStream.write(buffer, 0, bytesRead);
-    }
-
-    // System.out.println("Data received.");
-    outputStream.close();
-    inputStream.close();
-  }
-
   private JSONObject getJsonForScore(PretestScore book) {
     JSONObject jsonObject = new JSONObject();
     jsonObject.put("score", book.getHydecScore());
@@ -391,7 +347,6 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   private DatabaseImpl db;
-  private PathHelper pathHelper;
   private AudioFileHelper audioFileHelper;
 
   /**
@@ -402,16 +357,13 @@ public class ScoreServlet extends DatabaseServlet {
    */
   private AudioFileHelper getAudioFileHelper() {
     if (audioFileHelper == null) {
-      ServletContext servletContext = getServletContext();
-      pathHelper = new PathHelper(servletContext);
+      setPaths();
+
       db = getDatabase();
       serverProps = db.getServerProps();
 
-      String config = servletContext.getInitParameter("config");
-      this.relativeConfigDir = "config" + File.separator + config;
-      logger.debug("rel " + relativeConfigDir);
-      this.configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
-      logger.debug("configDir " + configDir);
+
+     // logger.debug("configDir " + configDir);
 
       audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, null);
     }
