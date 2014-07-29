@@ -71,8 +71,8 @@ public class BasicDialog {
   }
 
   ListBoxFormField getListBoxFormField(Panel dialogBox, String label, ListBox user) {
-    addControlGroupEntry(dialogBox, label, user, "");
-    return new ListBoxFormField(user);
+    ControlGroup group = addControlGroupEntry(dialogBox, label, user, "");
+    return new ListBoxFormField(user,group);
   }
 
   /**
@@ -197,10 +197,10 @@ public class BasicDialog {
 
     setupPopoverThatHidesItself(dialect, header, message, Placement.RIGHT);
   }
-
+/*
   boolean highlightIntegerBox(FormField ageEntryGroup, int min, int max) {
     return highlightIntegerBox(ageEntryGroup, min, max, Integer.MAX_VALUE);
-  }
+  }*/
 
   boolean highlightIntegerBox(FormField ageEntryGroup, int min, int max, int exception) {
     String text = ageEntryGroup.box.getText();
@@ -353,17 +353,11 @@ public class BasicDialog {
 
   protected class ListBoxFormField {
     public final ListBox box;
+    private ControlGroup group;
 
-    public ListBoxFormField(final ListBox box) {
+    public ListBoxFormField(final ListBox box, ControlGroup group) {
+      this.group = group;
       this.box = box;
-/*
-      box.addChangeHandler(new ChangeHandler() {
-        @Override
-        public void onChange(ChangeEvent event) {
-          hidePopovers();
-        }
-      });
-*/
     }
 
     public String getValue() {
@@ -372,9 +366,10 @@ public class BasicDialog {
 
     void markSimpleError(String message, Placement placement) {
       box.setFocus(true);
-  //    System.out.println("ListBoxFormField mark error " + message + " on " +box.getElement().getId());
       setupPopover(box, TRY_AGAIN, message, placement);
     }
+
+    public void setVisible(boolean v) { box.setVisible(v); group.setVisible(v); }
 
     public String toString() {
       return "Box: " + getValue();
