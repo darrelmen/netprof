@@ -9,6 +9,9 @@ import com.github.gwtbootstrap.client.ui.NavPills;
 import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.base.IconAnchor;
+import com.github.gwtbootstrap.client.ui.constants.IconSize;
+import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Node;
@@ -461,6 +464,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     private final int index;
     private PostAudioRecordButton postAudioRecordButton;
     private PlayAudioPanel playAudioPanel;
+    IconAnchor download;
 
     /**
      * @param service
@@ -525,12 +529,37 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         getElement().setId("GoodwaveExercisePanel_MyPlayAudioPanel");
       }
 
+      /**
+       * @see mitll.langtest.client.sound.PlayAudioPanel#PlayAudioPanel(mitll.langtest.client.sound.SoundManagerAPI, String, com.google.gwt.user.client.ui.Widget)
+       * @param optionalToTheRight
+       */
       @Override
       protected void addButtons(Widget optionalToTheRight) {
         add(postAudioRecordButton);
         postAudioRecordButton.addStyleName("rightFiveMargin");
         super.addButtons(optionalToTheRight);
+
+        download = new IconAnchor();
+        download.setTitle("Download what you just said.");
+        download.setIcon(IconType.DOWNLOAD);
+        download.setIconSize(IconSize.TWO_TIMES);
+        download.addStyleName("leftFiveMargin");
+        download.setVisible(false);
+        add(download);
       }
+    }
+
+    public void setDownloadHref() {
+      download.setVisible(true);
+
+      download.setHref("downloadAudio?file=" +
+          audioPath +
+          "&" +
+          "exerciseID=" +
+          exerciseID +
+          "&" +
+          "userID=" +
+          controller.getUser());
     }
 
     /**
@@ -546,6 +575,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       public void useResult(AudioAnswer result) {
         setResultID(result.getResultID());
         getImagesForPath(result.getPath());
+        setDownloadHref();
       }
 
       @Override
@@ -556,6 +586,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
         super.startRecording();
         recordImage1.setVisible(true);
+        download.setVisible(false);
       }
 
       @Override
