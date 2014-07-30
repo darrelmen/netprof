@@ -58,7 +58,7 @@ public abstract class Scoring {
    * @param useScoreToColorBkg
    * @param prefix
    * @param suffix
-   * @param decode
+   * @param decode if true don't bother to write out images for word and phone
    * @return map of image type to image path, suitable using in setURL on a GWT Image (must be relative to deploy location)
    */
   protected ImageWriter.EventAndFileInfo writeTranscripts(String imageOutDir, int imageWidth, int imageHeight,
@@ -96,7 +96,7 @@ public abstract class Scoring {
       logger.error("no label files found, e.g. " + phoneLabFile);
     }
 
-    if (decode) {
+    if (decode || imageWidth < 0) {  // hack to skip image generation
       return getEventInfo(typeToFile);
     } else {
       return new ImageWriter().writeTranscripts(pathname,
