@@ -19,6 +19,13 @@ public class StartupInfo implements IsSerializable {
   private List<SectionNode> sectionNodes;
 
   public StartupInfo() {} // for serialization
+
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getStartupInfo()
+   * @param properties
+   * @param typeOrder
+   * @param sectionNodes
+   */
   public StartupInfo(Map<String, String> properties, Collection<String> typeOrder, List<SectionNode> sectionNodes) {
     this.properties = properties;
     this.typeOrder = typeOrder;
