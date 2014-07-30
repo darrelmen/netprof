@@ -20,7 +20,7 @@ import mitll.langtest.shared.CommonExercise;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel implements RecordButton.RecordingListener {
-  public static final String PRESS_AND_HOLD_THE_MOUSE_BUTTON_TO_RECORD = "Press and hold the mouse button to record";
+  //public static final String PRESS_AND_HOLD_THE_MOUSE_BUTTON_TO_RECORD = "Press and hold the mouse button to record";
   private final AudioAnswerListener exercisePanel;
 
   private IconAnchor waiting;
@@ -91,9 +91,7 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
   }
 
   @Override
-  protected abstract RecordButton makeRecordButton(ExerciseController controller, String title);/* {
-    return new FlashcardRecordButton(controller.getRecordTimeout(), this, true, ADD_KEY_BINDING, controller);  // TODO : fix later in classroom?
-  }*/
+  protected abstract RecordButton makeRecordButton(ExerciseController controller, String title);
 
   /**
    * Deal with three cases: <br></br>
