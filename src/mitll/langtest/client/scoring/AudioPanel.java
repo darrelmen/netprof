@@ -264,7 +264,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.FastAndSlowASRScoringAudioPanel#showAudio(mitll.langtest.shared.AudioAttribute)
    * @param path to audio on the server
    */
-  public void getImagesForPath(String path) {
+  public String getImagesForPath(String path) {
     path = wavToMP3(path);
     path = ensureForwardSlashes(path);
     if (debug) System.out.println("AudioPanel : " + getElement().getId()+ " getImagesForPath " +path);
@@ -282,6 +282,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
         getImages();
       }
     });
+
+    return path;
   }
 
 
