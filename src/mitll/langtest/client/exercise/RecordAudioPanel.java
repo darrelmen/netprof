@@ -181,6 +181,8 @@ public class RecordAudioPanel extends AudioPanel {
   }
 
   protected class MyWaveformPostAudioRecordButton extends WaveformPostAudioRecordButton {
+    private long then,now;
+
     public MyWaveformPostAudioRecordButton(String audioType, String recordButtonTitle) {
       super(RecordAudioPanel.this.exercise,
         RecordAudioPanel.this.controller,
@@ -194,12 +196,18 @@ public class RecordAudioPanel extends AudioPanel {
      */
     @Override
     public void startRecording() {
+      then = System.currentTimeMillis();
+      System.out.println("startRecording " + then);
       super.startRecording();
       showStart();
     }
 
     @Override
     public void stopRecording() {
+      now = System.currentTimeMillis();
+
+      System.out.println("stopRecording " + now + " diff " + (now-then) + " millis");
+
       super.stopRecording();
       showStop();
     }
