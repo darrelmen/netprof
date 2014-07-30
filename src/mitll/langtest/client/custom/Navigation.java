@@ -11,6 +11,7 @@ import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.InlineLabel;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
@@ -732,15 +733,19 @@ public class Navigation implements RequiresResize {
      contentPanel.add(startDialog);
   }
   
-  private SimplePostAudioRecordButton getRecordButton(String sent){
+  private native void addPlayer() /*-{
+     $wnd.basicMP3Player.init();
+  }-*/;
+  
+  private SimplePostAudioRecordButton getRecordButton(String sent, final HTML resultHolder){
 	  final FlowPanel resultPanel = new FlowPanel();
 	  return new SimplePostAudioRecordButton(controller, service, sent) {
 		  @Override
 		  public void useResult(AudioAnswer result){
-			  HTML res = new HTML("result was: " + result);
-			  HTML score = new HTML("score was: " + result.getPretestScore());
-			  resultPanel.add(res);
-			  resultPanel.add(score);
+			  //HTML res = new HTML("result was: " + result);
+			  resultHolder.setHTML(String.valueOf(result.getScore()));
+			  //resultPanel.add(res);
+			  //resultPanel.add(score);
 		  }
 		  
 		  @Override
@@ -749,6 +754,8 @@ public class Navigation implements RequiresResize {
 		  }
 	  };
   }
+  
+  
   
   private void displayDialog(String dialog, String part, Panel cp){
 
@@ -766,11 +773,11 @@ public class Navigation implements RequiresResize {
 		  HTML sent = new HTML(dialogToSentIndexToSpeaker.get(dialog).get(sentIndex)+": "+sentence);
 		  if(part.equals(dialogToSentIndexToSpeaker.get(dialog).get(sentIndex))){
 			  Anchor playButton = (new PlayAudioWidget()).getAudioWidget("config/mandarinClassroom/bestAudio/"+sentToAudioPath.get(sentence));
-			  Button recordButton = getRecordButton(dialogToSentIndexToSent.get(dialog).get(sentIndex));
+			  HTML score = new HTML("0.0");
+			  Button recordButton = getRecordButton(dialogToSentIndexToSent.get(dialog).get(sentIndex), score);
 			  sentPanel.setWidget(sentIndex, 2, recordButton);
 			  sent.getElement().getStyle().setProperty("fontWeight", "bolder");
 			  sentPanel.setWidget(sentIndex, 0, playButton);
-			  HTML score = new HTML("50%");
 			  scoreElements.add(score);
 			  score.setVisible(false);
 			  last = recordButton;
@@ -783,19 +790,27 @@ public class Navigation implements RequiresResize {
 		  sentPanel.setWidget(sentIndex, 1, sent);
 		  sentIndex += 1;
 	  }
-	  final HTML avg = new HTML("avg score was: 51%");
+	  final HTML avg = new HTML("avg score was: 0.0");
 	  avg.setVisible(false);
 	  last.addMouseUpHandler(new MouseUpHandler() {
 		  @Override
 		  public void onMouseUp(MouseUpEvent e){
+			double sum = 0.0;
 			for(HTML sco : scoreElements){
 				sco.setVisible(true);
+				sum += Double.parseDouble(sco.getHTML());
 			}
+			avg.setHTML("avg score was: "+String.valueOf(sum/scoreElements.size()));
 			avg.setVisible(true);
 		  }
 	  });
 	  cp.add(sentPanel);
 	  cp.add(avg);
+	  Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+	     public void execute() {
+	        addPlayer();
+	     }
+	  });
   }
   
   private HashMap<String, String[]> getDialogToPartsMap(){
