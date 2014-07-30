@@ -13,14 +13,7 @@ import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * AutoCRT support -- basically wrapping Jacob's work that lives in mira.jar <br></br>
@@ -43,7 +36,7 @@ public class AutoCRT {
   private final String installPath;
   private final String mediaDir;
   private final Export exporter;
-  private final AutoCRTScoring db;
+  private final AutoCRTScoring autoCRTScoring;
   private final double minPronScore;
 
   /**
@@ -58,7 +51,7 @@ public class AutoCRT {
     this.installPath = installPath;
     this.mediaDir = relativeConfigDir;
     this.exporter = exporter;
-    this.db = db;
+    this.autoCRTScoring = db;
     this.minPronScore = minPronScore;
   }
 
@@ -115,7 +108,7 @@ public class AutoCRT {
   /**
    * Do decoding on an audio file over a set of possible reco sentences and the UNKNOWN model.
    * <p></p>
-   * The possible sentences are student responses collected previously (exported answers from the student h2 db).
+   * The possible sentences are student responses collected previously (exported answers from the student h2 autoCRTScoring).
    * Filter out student answers that we can't decode given our dictionary (e.g. numbers "222").
    *
    * @see #getExportedAnswers(String, int)
@@ -126,11 +119,11 @@ public class AutoCRT {
    */
   private PretestScore getScoreForAudio(String exerciseID, int questionID, File audioFile) {
     Collection<String> exportedAnswers = getExportedAnswers(exerciseID, questionID);
-    exportedAnswers = db.getValidPhrases(exportedAnswers);   // remove phrases that break hydec
+    exportedAnswers = autoCRTScoring.getValidPhrases(exportedAnswers);   // remove phrases that break hydec
     //logger.info("getAutoCRTDecodeOutput : got answers, num = " + exportedAnswers.size());
     long then = System.currentTimeMillis();
 
-    PretestScore asrScoreForAudio = db.getASRScoreForAudio(audioFile, exportedAnswers);
+    PretestScore asrScoreForAudio = autoCRTScoring.getASRScoreForAudio(audioFile, exportedAnswers);
     long now = System.currentTimeMillis();
     if (now-then > 100) {
       logger.info("getScoreForAudio : took " + (now - then) + " millis to get score " + asrScoreForAudio +
@@ -146,44 +139,80 @@ public class AutoCRT {
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
    * @seex mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.audio.AudioCheck.ValidityAndDur, String, boolean, mitll.langtest.client.LangTestDatabase)
    * @seex mitll.langtest.server.audio.AudioFileHelper#getFlashcardAnswer(mitll.langtest.shared.Exercise, java.io.File, mitll.langtest.shared.AudioAnswer)
-   * @param e
+   * @param commonExercise
    * @param audioFile
    * @param answer
    */
-  public void getFlashcardAnswer(CommonExercise e, File audioFile, AudioAnswer answer) {
-    List<String> foregroundSentences = getRefSentences(e);
+  public void getFlashcardAnswer(CommonExercise commonExercise, File audioFile, AudioAnswer answer) {
+    List<String> foregroundSentences = getRefSentences(commonExercise);
+    getFlashcardAnswer(audioFile, foregroundSentences, answer);
+
+    // log what happened
+    if (answer.isCorrect()) {
+      logger.info("correct response for exercise #" +commonExercise.getID() +
+          " reco sentence was '" + answer.getDecodeOutput() + "' vs " + "'"+foregroundSentences +"' " +
+          "pron score was " + answer.getScore() + " answer " + answer);
+    }
+    else {
+      int length = foregroundSentences.isEmpty() ? 0 : foregroundSentences.iterator().next().length();
+      logger.info("incorrect response for exercise #" +commonExercise.getID() +
+          " reco sentence was '" + answer.getDecodeOutput() + "'(" +answer.getDecodeOutput().length()+
+          ") vs " + "'"+foregroundSentences +"'(" + length +
+          ") pron score was " + answer.getScore());
+    }
+  }
+
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#getFlashcardAnswer(java.io.File, String)
+   * @see mitll.langtest.server.ScoreServlet#getFlashcardScore
+   *
+   * @param audioFile
+   * @param foregroundSentence
+   * @param answer
+   * @return
+   */
+  public PretestScore getFlashcardAnswer(File audioFile, String foregroundSentence, AudioAnswer answer) {
+    return getFlashcardAnswer(audioFile, getRefs(Collections.singletonList(foregroundSentence)), answer);
+  }
+
+  /**
+   * So we need to process the possible decode sentences so that hydec can handle them.
+   * <p/>
+   * E.g. english is in UPPER CASE.
+   * <p/>
+   * Decode result is correct if all the tokens match (ignore case) any of the possibleSentences AND the score is
+   * above the {@link #minPronScore} min score, typically in the 30s.
+   * <p/>
+   * If you want to see what the decoder output was, that's in {@link mitll.langtest.shared.AudioAnswer#getDecodeOutput()}.
+   *  For instance if you wanted to show that for debugging purposes.
+   * If you want to know whether the said the right word or not (which might have scored too low to be correct) see {@link mitll.langtest.shared.AudioAnswer#isSaidAnswer()}.
+   *
+   * @param audioFile         to score against
+   * @param possibleSentences any of these can match and we'd call this a correct response
+   * @param answer            holds the score, whether it was correct, the decode output, and whether one of the possible sentences
+   * @return PretestScore word/phone alignment with scores
+   */
+  private PretestScore getFlashcardAnswer(File audioFile, List<String> possibleSentences, AudioAnswer answer) {
     List<String> foreground = new ArrayList<String>();
-    for (String ref : foregroundSentences) {
+    for (String ref : possibleSentences) {
       String e1 = removePunct(ref);
-    //  logger.debug("Answer is " + e1 + "(" +e1.length()+ ")");
       foreground.add(e1);
     }
 
-    PretestScore asrScoreForAudio = db.getASRScoreForAudio(audioFile, foreground);
+    PretestScore asrScoreForAudio = autoCRTScoring.getASRScoreForAudio(audioFile, foreground);
 
     String recoSentence =
       asrScoreForAudio != null && asrScoreForAudio.getRecoSentence() != null ?
         asrScoreForAudio.getRecoSentence().toLowerCase().trim() : "";
-   // logger.debug("recoSentence is " + recoSentence + "(" +recoSentence.length()+ ")");
+    // logger.debug("recoSentence is " + recoSentence + "(" +recoSentence.length()+ ")");
 
-    boolean isCorrect = /*recoSentence != null && */isCorrect(foregroundSentences, recoSentence);
+    boolean isCorrect = isCorrect(possibleSentences, recoSentence);
     double scoreForAnswer = (asrScoreForAudio == null || asrScoreForAudio.getHydecScore() == -1) ? -1 : asrScoreForAudio.getHydecScore();
     answer.setCorrect(isCorrect && scoreForAnswer > minPronScore);
     answer.setSaidAnswer(isCorrect);
-    if (!isCorrect) {
-      int length = foregroundSentences.isEmpty() ? 0 : foregroundSentences.iterator().next().length();
-      logger.info("incorrect response for exercise #" +e.getID() +
-        " reco sentence was '" + recoSentence + "'(" +recoSentence.length()+
-        ") vs " + "'"+foregroundSentences +"'(" + length +
-        ") pron score was " + scoreForAnswer);
-    }
-    else {
-      logger.info("correct response for exercise #" +e.getID() +
-        " reco sentence was '" + recoSentence + "' vs " + "'"+foregroundSentences +"' pron score was " + scoreForAnswer + " answer " + answer);
-    }
-
     answer.setDecodeOutput(recoSentence);
     answer.setScore(scoreForAnswer);
+    return asrScoreForAudio;
   }
 
   private SmallVocabDecoder svd = new SmallVocabDecoder();
