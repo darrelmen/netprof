@@ -28,7 +28,9 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -52,12 +54,15 @@ import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.scoring.ScoreListener;
+import mitll.langtest.client.scoring.SimplePostAudioRecordButton;
 import mitll.langtest.client.sound.PlayAudioPanel;
+import mitll.langtest.client.sound.PlayAudioWidget;
 import mitll.langtest.client.sound.Sound;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.User;
@@ -725,41 +730,49 @@ public class Navigation implements RequiresResize {
      contentPanel.add(startDialog);
   }
   
-  private final Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
-  private final Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
+  private SimplePostAudioRecordButton getRecordButton(String sent){
+	  final FlowPanel resultPanel = new FlowPanel();
+	  return new SimplePostAudioRecordButton(controller, service, sent) {
+		  @Override
+		  public void useResult(AudioAnswer result){
+			  HTML res = new HTML("result was: " + result);
+			  HTML score = new HTML("score was: " + result.getPretestScore());
+			  resultPanel.add(res);
+			  resultPanel.add(score);
+		  }
+		  
+		  @Override
+		  public void flip(boolean first){
+			  //do nothing
+		  }
+	  };
+  }
   
   private void displayDialog(String dialog, String part, Panel cp){
 
 	  HashMap<String, Integer> sentToAudioIndex = getSentToAudioIndex();
 	  HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSpeaker = getDialogToSentIndexToSpeaker();
 	  HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSent = getDialogToSentIndexToSent();
-	  
-	  PlayAudioPanel testPlay = new PlayAudioPanel(soundManager, "foo", null);
-	  controller.register(testPlay.getPlayButton(), "0");	  
-	  cp.add(testPlay);
-	  
-	  System.out.println(System.getProperty("user.dir"));
-	  testPlay.startSong("bestAudio/0/Fast.wav");
 
 	  int sentIndex = 0;
+	  Grid sentPanel = new Grid(dialogToSentIndexToSent.get(dialog).size(), 3);
 	  while(dialogToSentIndexToSent.get(dialog).containsKey(sentIndex)){
-		  FlowPanel sentPanel = new FlowPanel();
 		  HTML sent = new HTML(dialogToSentIndexToSpeaker.get(dialog).get(sentIndex)+": "+dialogToSentIndexToSent.get(dialog).get(sentIndex));
 		  if(part.equals(dialogToSentIndexToSpeaker.get(dialog).get(sentIndex))){
-			  Button record = new Button("Press and hold to record");
-			  Button listen = new Button("Play reference recording");
-
-			  sentPanel.add(record);
-			  sentPanel.add(listen);
+			  Anchor playButton = (new PlayAudioWidget()).getAudioWidget("config/mandarinClassroom/bestAudio/0/regular_1403800787347_by_8.wav");
+			  Button recordButton = getRecordButton(dialogToSentIndexToSent.get(dialog).get(sentIndex));
+			  sentPanel.setWidget(sentIndex, 2, recordButton);
 			  sent.getElement().getStyle().setProperty("fontWeight", "bolder");
+			  sentPanel.setWidget(sentIndex, 0, playButton);
 		  }
 		  else{
+			  sentPanel.setWidget(sentIndex, 0, (new PlayAudioWidget()).getAudioWidget("config/mandarinClassroom/bestAudio/0/regular_1403800787347_by_8.wav"));
 			  sent.getElement().getStyle().setProperty("fontStyle", "italic");
 		  }
-		  sentPanel.add(sent);
-		  cp.add(sentPanel);
+		  sentPanel.setWidget(sentIndex, 1, sent);
 		  sentIndex += 1;
 	  }
+	  cp.add(sentPanel);
   }
   
   private HashMap<String, String[]> getDialogToPartsMap(){
