@@ -34,7 +34,6 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -42,7 +41,6 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.WavCallback;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
@@ -759,6 +757,7 @@ public class Navigation implements RequiresResize {
 	  HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSent = getDialogToSentIndexToSent();
 
 	  int sentIndex = 0;
+
 	  Grid sentPanel = new Grid(dialogToSentIndexToSent.get(dialog).size(), 4);
 	  final ArrayList<HTML> scoreElements = new ArrayList<HTML>();
 	  Button last = null;
@@ -806,6 +805,7 @@ public class Navigation implements RequiresResize {
 	  return m;
   }
   
+
   private HashMap<String, String> getSentToAudioPath() {
 	  HashMap<String, String> m = new HashMap<String, String>();
 	  m.put("Kē Léi'ēn, nǐ hăo!", "/4/slow_1403800571291_by_8.wav");
