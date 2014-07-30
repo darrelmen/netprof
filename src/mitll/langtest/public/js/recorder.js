@@ -1,9 +1,10 @@
 var recorderHasConsole = (window.console || console.log);
-
+var recordingStart;
+var recordingEnd;
 function microphone_recorder_events() {
   $('#status').append("<p>Microphone recorder event: " + arguments[0] + "  at " + new Date().getTime());
   if (recorderHasConsole) {
-    console.log("got event " + arguments[0]);
+    console.log("got event " + arguments[0]+ " at " + new Date().getTime());
   }
   switch (arguments[0]) {
     case "ready":
@@ -40,12 +41,14 @@ function microphone_recorder_events() {
     case "recording":
       var name = arguments[1];
       $('#status').css({'color': '#000'}).append("<p> recording - " + name + " at " + new Date().getTime());
+        recordingStart = new Date().getTime();
       break;
 
     case "recording_stopped":
       var name = arguments[1];
       var duration = arguments[2];
       $('#status').css({'color': '#000'}).append("<p> recording_stopped - " + name + " Duration: " + duration + "  at " + new Date().getTime());
+        if (recorderHasConsole) console.log("recording duration " + (new Date().getTime()-recordingStart))
       break;
   }
 }
