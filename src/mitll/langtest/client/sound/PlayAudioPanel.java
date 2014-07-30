@@ -97,6 +97,10 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     if (listener != null) listener.reinitialize();    // remove playing line, if it's there
   }
 
+  /**
+   * @see #PlayAudioPanel
+   * @param optionalToTheRight
+   */
   protected void addButtons(Widget optionalToTheRight) {
     playButton.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
