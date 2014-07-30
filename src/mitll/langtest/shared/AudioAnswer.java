@@ -1,6 +1,7 @@
 package mitll.langtest.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.shared.scoring.PretestScore;
 
 /**
  * What a client might want to know about some audio that was just posted.
@@ -27,6 +28,7 @@ public class AudioAnswer implements IsSerializable {
   private int durationInMillis;
   private long resultID;
   private AudioAttribute audioAttribute;
+  private PretestScore pretestScore;
 
   public enum Validity implements IsSerializable {
     OK("Audio OK."),
@@ -147,9 +149,18 @@ public class AudioAnswer implements IsSerializable {
     this.audioAttribute = audioAttribute;
   }
 
+  public PretestScore getPretestScore() {
+    return pretestScore;
+  }
+
+  public void setPretestScore(PretestScore pretestScore) {
+    this.pretestScore = pretestScore;
+    this.score = pretestScore.getHydecScore();
+  }
+
   public String toString() {
     return "Answer id " + getResultID() + " : audio attr " +audioAttribute+
-      " Path " + path + " id " + reqid + " validity " + validity +
+      " Path " + path + " duration " + durationInMillis + " id " + reqid + " validity " + validity +
       " correct " + correct + " score " + score + " said answer " + saidAnswer;
   }
 }
