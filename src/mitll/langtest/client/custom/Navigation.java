@@ -19,6 +19,10 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.event.dom.client.MouseUpEvent;
+import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.UriUtils;
@@ -750,29 +754,49 @@ public class Navigation implements RequiresResize {
   
   private void displayDialog(String dialog, String part, Panel cp){
 
-	  HashMap<String, Integer> sentToAudioIndex = getSentToAudioIndex();
+	  HashMap<String, String> sentToAudioPath = getSentToAudioPath();
 	  HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSpeaker = getDialogToSentIndexToSpeaker();
 	  HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSent = getDialogToSentIndexToSent();
 
 	  int sentIndex = 0;
-	  Grid sentPanel = new Grid(dialogToSentIndexToSent.get(dialog).size(), 3);
+	  Grid sentPanel = new Grid(dialogToSentIndexToSent.get(dialog).size(), 4);
+	  final ArrayList<HTML> scoreElements = new ArrayList<HTML>();
+	  Button last = null;
 	  while(dialogToSentIndexToSent.get(dialog).containsKey(sentIndex)){
-		  HTML sent = new HTML(dialogToSentIndexToSpeaker.get(dialog).get(sentIndex)+": "+dialogToSentIndexToSent.get(dialog).get(sentIndex));
+		  String sentence = dialogToSentIndexToSent.get(dialog).get(sentIndex);
+		  HTML sent = new HTML(dialogToSentIndexToSpeaker.get(dialog).get(sentIndex)+": "+sentence);
 		  if(part.equals(dialogToSentIndexToSpeaker.get(dialog).get(sentIndex))){
-			  Anchor playButton = (new PlayAudioWidget()).getAudioWidget("config/mandarinClassroom/bestAudio/0/regular_1403800787347_by_8.wav");
+			  Anchor playButton = (new PlayAudioWidget()).getAudioWidget("config/mandarinClassroom/bestAudio/"+sentToAudioPath.get(sentence));
 			  Button recordButton = getRecordButton(dialogToSentIndexToSent.get(dialog).get(sentIndex));
 			  sentPanel.setWidget(sentIndex, 2, recordButton);
 			  sent.getElement().getStyle().setProperty("fontWeight", "bolder");
 			  sentPanel.setWidget(sentIndex, 0, playButton);
+			  HTML score = new HTML("50%");
+			  scoreElements.add(score);
+			  score.setVisible(false);
+			  last = recordButton;
+			  sentPanel.setWidget(sentIndex, 3, score);
 		  }
 		  else{
-			  sentPanel.setWidget(sentIndex, 0, (new PlayAudioWidget()).getAudioWidget("config/mandarinClassroom/bestAudio/0/regular_1403800787347_by_8.wav"));
+			  sentPanel.setWidget(sentIndex, 0, (new PlayAudioWidget()).getAudioWidget("config/mandarinClassroom/bestAudio/"+sentToAudioPath.get(sentence)));
 			  sent.getElement().getStyle().setProperty("fontStyle", "italic");
 		  }
 		  sentPanel.setWidget(sentIndex, 1, sent);
 		  sentIndex += 1;
 	  }
+	  final HTML avg = new HTML("avg score was: 51%");
+	  avg.setVisible(false);
+	  last.addMouseUpHandler(new MouseUpHandler() {
+		  @Override
+		  public void onMouseUp(MouseUpEvent e){
+			for(HTML sco : scoreElements){
+				sco.setVisible(true);
+			}
+			avg.setVisible(true);
+		  }
+	  });
 	  cp.add(sentPanel);
+	  cp.add(avg);
   }
   
   private HashMap<String, String[]> getDialogToPartsMap(){
@@ -782,21 +806,21 @@ public class Navigation implements RequiresResize {
 	  return m;
   }
   
-  private HashMap<String, Integer> getSentToAudioIndex() {
-	  HashMap<String, Integer> m = new HashMap<String, Integer>();
-	  m.put("Kē Léi'ēn, nǐ hăo!", 4);
-	  m.put("Nǐ dào năr qù a?", 13);
-	  m.put("Wŏ huí sùshè.", 24);
-	  m.put("Wáng Jīngshēng, nǐ hăo!", 7);
-	  m.put("Wŏ qù túshūguăn. Nĭ ne?", 20);
+  private HashMap<String, String> getSentToAudioPath() {
+	  HashMap<String, String> m = new HashMap<String, String>();
+	  m.put("Kē Léi'ēn, nǐ hăo!", "/4/slow_1403800571291_by_8.wav");
+	  m.put("Nǐ dào năr qù a?", "/13/slow_1403801128819_by_8.wav");
+	  m.put("Wŏ huí sùshè.", "/24/slow_1403800649832_by_8.wav");
+	  m.put("Wáng Jīngshēng, nǐ hăo!", "/7/slow_1403800597192_by_8.wav");
+	  m.put("Wŏ qù túshūguăn. Nĭ ne?", "/20/slow_1403800730216_by_8.wav");
 	  
-	  m.put("Zhào Guócái, nĭ hăo a!", 38);
-	  m.put("Hái xíng. Nĭ àirén, háizi dōu hăo ma?", 55);
-	  m.put("Wŏ yŏu yìdiănr shìr, xiān zŏule. Zàijiàn!", 69);
-	  m.put("Nĭ hăo! Hăo jiŭ bú jiànle.", 42);
-	  m.put("Zěmmeyàng a?", 43);
-	  m.put("Tāmen dōu hěn hăo, xièxie.", 61);
-	  m.put("Zàijiàn.", 70);
+	  m.put("Zhào Guócái, nĭ hăo a!", "/38/slow_1403793753756_by_8.wav");
+	  m.put("Hái xíng. Nĭ àirén, háizi dōu hăo ma?", "/55/slow_1403792056835_by_8.wav"); //hi
+	  m.put("Wŏ yŏu yìdiănr shìr, xiān zŏule. Zàijiàn!", "/69/slow_1403791957048_by_8.wav");
+	  m.put("Nĭ hăo! Hăo jiŭ bú jiànle.", "/42/slow_1403792877099_by_8.wav");
+	  m.put("Zěmmeyàng a?", "/43/slow_1403792244061_by_8.wav");
+	  m.put("Tāmen dōu hěn hăo, xièxie.", "/61/slow_1403793525457_by_8.wav");
+	  m.put("Zàijiàn.", "/70/slow_1403791837948_by_8.wav");
 	  
 	  return m;
   }
