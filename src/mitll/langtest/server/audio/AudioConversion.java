@@ -216,7 +216,13 @@ public class AudioConversion {
     return removeSuffix(name1);
   }
 
-  public File convertTo16Khz(File wavFile) throws UnsupportedAudioFileException {
+  /**
+   * @see #convertTo16Khz(String, String)
+   * @param wavFile
+   * @return
+   * @throws UnsupportedAudioFileException
+   */
+  private File convertTo16Khz(File wavFile) throws UnsupportedAudioFileException {
     if (!wavFile.exists()) {
       System.err.println("convertTo16Khz " + wavFile + " doesn't exist");
       return wavFile;
@@ -226,14 +232,14 @@ public class AudioConversion {
       float sampleRate = audioFileFormat.getFormat().getSampleRate();
       if (sampleRate != 16000f) {
         String binPath = getBinPath();
-        String s = new AudioConverter().convertTo16KHZ(binPath, wavFile.getAbsolutePath());
+        String convertTo16KHZ = new AudioConverter().convertTo16KHZ(binPath, wavFile.getAbsolutePath());
         String name1 = wavFile.getName();
         String sampled = wavFile.getParent() + File.separator + removeSuffix(name1) + SIXTEEN_K_SUFFIX + ".wav";
-        if (new FileCopier().copy(s, sampled)) {
+        if (new FileCopier().copy(convertTo16KHZ, sampled)) {
           wavFile = new File(sampled);
 
           // cleanup
-          String parent = new File(s).getParent();
+          String parent = new File(convertTo16KHZ).getParent();
           File file = new File(parent);
           FileUtils.deleteDirectory(file);
         }
@@ -244,7 +250,7 @@ public class AudioConversion {
     return wavFile;
   }
 
-  public String removeSuffix(String name1) {
+  private String removeSuffix(String name1) {
     return name1.substring(0,name1.length()-4);
   }
 
@@ -298,7 +304,7 @@ public class AudioConversion {
         if (DEBUG)  logger.debug("run lame on " + tempFile + " making " + mp3File);
         convertFileAndCheck(lamePath, tempFile.getAbsolutePath(), mp3File);
       } catch (IOException e) {
-        logger.error("got " + e,e);
+        logger.error("converting " + pathToWav + " to " + mp3File + " got " + e,e);
       }
     }
     return mp3File;
@@ -362,7 +368,7 @@ public class AudioConversion {
     return file;
   }
 
-  private static boolean DEBUG = false;
+  private static final boolean DEBUG = false;
   /**
    * Use lame to write an mp3 file.
    * @param pathToWav
