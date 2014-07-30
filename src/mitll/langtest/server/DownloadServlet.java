@@ -1,12 +1,18 @@
 package mitll.langtest.server;
 
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.User;
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -28,6 +34,29 @@ import java.util.Map;
 public class DownloadServlet extends DatabaseServlet {
   private static final Logger logger = Logger.getLogger(DownloadServlet.class);
 
+  /**
+   * This is getting complicated.
+   * <p/>
+   * Just calling this servlet gives you a zip with one default audio cut per exercise, if available.
+   * e.g. https://np.ll.mit.edu/npfClassroomPashto3/downloadAudio
+   * <p/>
+   * Calling it with an empty argument list, e.g. https://np.ll.mit.edu/npfClassroomPashto3/downloadAudio?{}
+   * returns a zip with just an excel spreadsheet of the all the backing data.
+   * <p/>
+   * Calling it with a list argument, e.g. https://np.ll.mit.edu/npfClassroomPashto3/downloadAudio?list=2
+   * returns an excel spreadsheet and audio for that list - one male and one female recording, if available.
+   * <p/>
+   * Without a list, but without an argument indicates a chapter selection, e.g. https://np.ll.mit.edu/npfClassroomPashto3/downloadAudio?{Chapter=[29%20LC-1]}
+   * <p/>
+   * Otherwise, either the users, results, or events table is returned as a spreadsheet, e.g. https://np.ll.mit.edu/npfClassroomPashto3/downloadUsers
+   * <p/>
+   * You can only see these in admin mode: https://np.ll.mit.edu/npfClassroomPashto3/?admin
+   *
+   * @param request
+   * @param response
+   * @throws ServletException
+   * @throws IOException
+   */
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     DatabaseImpl db = getDatabase();
@@ -40,7 +69,11 @@ public class DownloadServlet extends DatabaseServlet {
         logger.debug("DownloadServlet.doGet : Request " + queryString + " path " + pathInfo +
           " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
 
-        if (queryString.startsWith("list")) {
+        if (queryString == null) {
+          setHeader(response, "allAudio.zip");
+          writeAllAudio(response);
+        }
+        else if (queryString.startsWith("list")) {
           String[] split = queryString.split("list=");
           if (split.length == 2) {
             String listid = split[1];
@@ -49,7 +82,9 @@ public class DownloadServlet extends DatabaseServlet {
             }
           }
         }
-        else {
+        else if (queryString.startsWith("file")) {
+          returnAudioFile(response, db, queryString);
+        } else {
           Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(queryString);
           String name = typeToSection.isEmpty() ? "audio" : db.getPrefix(typeToSection);
           name = name.replaceAll("\\,", "_");
@@ -64,20 +99,82 @@ public class DownloadServlet extends DatabaseServlet {
           }
         }
       } else {
-        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        if (encodedFileName.toLowerCase().contains("users")) {
-          response.setHeader("Content-Disposition", "attachment; filename=users");
-          db.usersToXLSX(response.getOutputStream());
-        } else if (encodedFileName.toLowerCase().contains("results")) {
-          response.setHeader("Content-Disposition", "attachment; filename=results");
-          db.getResultDAO().writeExcelToStream(db.getResultsWithGrades(), response.getOutputStream());
-        } else {
-          response.setHeader("Content-Disposition", "attachment; filename=events");
-          db.getEventDAO().toXLSX(response.getOutputStream());
-        }
+        returnSpreadsheet(response, db, encodedFileName);
       }
     }
-    response.getOutputStream().close();
+
+    try {
+      response.getOutputStream().close();
+    } catch (IOException e) {
+      logger.warn("got " +e,e);
+    }
+  }
+
+  private void returnAudioFile(HttpServletResponse response, DatabaseImpl db, String queryString) throws IOException {
+    String[] split = queryString.split("&");
+
+    String file = split[0].split("=")[1];
+    String exercise = split[1].split("=")[1];
+    String useridString = split[2].split("=")[1];
+
+    // logger.debug("query is " + queryString + " file " + file + " " + exercise);
+
+    long userid = Long.parseLong(useridString);
+
+    CommonExercise exercise1 = db.getExercise(exercise);
+    User userWhere = db.getUserDAO().getUserWhere(userid);
+    String userPart = userWhere != null ? "_by_" + userWhere.getUserID() : "";
+    boolean english = db.getServerProps().getLanguage().equalsIgnoreCase("english");
+    String fileName = (english ? "" : exercise1.getForeignLanguage().trim() + "_") + exercise1.getEnglish().trim() + userPart + ".mp3";
+
+    //logger.debug("file is '" + fileName + "'");
+    String underscores = fileName.replaceAll("\\p{Z}+", "_");  // split on spaces
+
+    response.setContentType("application/octet-stream");
+
+    underscores = URLEncoder.encode(underscores, "UTF-8");
+    response.setCharacterEncoding("UTF-8");
+    response.setHeader("Content-Disposition", "attachment; filename*=UTF-8''" + underscores);
+
+    File fileRef = pathHelper.getAbsoluteFile(file);
+    if (!fileRef.exists()) {
+      logger.warn("huh? can't find " + file);
+    } else {
+      FileInputStream input = new FileInputStream(fileRef);
+      int size = (int) input.getChannel().size();
+     // logger.debug("copying file " + fileRef + " size  " + size);
+      response.setContentLength(size);
+
+      IOUtils.copy(input, response.getOutputStream());
+      response.getOutputStream().flush();
+    }
+  }
+
+  private void returnSpreadsheet(HttpServletResponse response, DatabaseImpl db, String encodedFileName) throws IOException {
+    response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    if (encodedFileName.toLowerCase().contains("users")) {
+      response.setHeader("Content-Disposition", "attachment; filename=users");
+      db.usersToXLSX(response.getOutputStream());
+    } else if (encodedFileName.toLowerCase().contains("results")) {
+      response.setHeader("Content-Disposition", "attachment; filename=results");
+      db.getResultDAO().writeExcelToStream(db.getResultsWithGrades(), response.getOutputStream());
+    } else if (encodedFileName.toLowerCase().contains("events")) {
+      response.setHeader("Content-Disposition", "attachment; filename=events");
+      db.getEventDAO().toXLSX(response.getOutputStream());
+    } else {
+      logger.warn("huh? can't handle request " + encodedFileName);
+    }
+  }
+
+  private void writeAllAudio(HttpServletResponse response) {
+    DatabaseImpl db = getDatabase();
+
+    try {
+      db.writeZip(response.getOutputStream());
+    } catch (Exception e) {
+      logger.error("Got " +e,e);
+    }
+
   }
 
   private void writeUserList(HttpServletResponse response, DatabaseImpl db, String listid) {
@@ -87,7 +184,6 @@ public class DownloadServlet extends DatabaseServlet {
       String name = db.getUserListName(id);
       name = name.replaceAll("\\,", "_").replaceAll(" ", "_");
       name += ".zip";
-   //   logger.debug("attachment name ='" + name + "'");
       setHeader(response, name);
 
       db.writeZip(response.getOutputStream(), id);
@@ -107,7 +203,7 @@ public class DownloadServlet extends DatabaseServlet {
     Object databaseReference = getServletContext().getAttribute("databaseReference");
     if (databaseReference != null) {
       db = (DatabaseImpl) databaseReference;
-      logger.debug("found existing database reference " + db + " under " +getServletContext());
+     // logger.debug("found existing database reference " + db + " under " +getServletContext());
     } else {
       logger.error("huh? no existing db reference?");
     }
@@ -163,5 +259,12 @@ public class DownloadServlet extends DatabaseServlet {
     }
     logger.debug("returning " + typeToSection + " for " + queryString);
     return typeToSection;
+  }
+
+  @Override
+  public void init() throws ServletException {
+    super.init();
+
+    setPaths();
   }
 }
