@@ -24,9 +24,9 @@ public class WebAudioRecorder {
       $wnd.initWebAudio();
   }-*/;
 
-  private static native boolean getAllZero() /*-{
-     return $wnd.allZero;
-  }-*/;
+//  private static native boolean getAllZero() /*-{
+//     return $wnd.allZero;
+//  }-*/;
 
   public native void advertise() /*-{
       $wnd.webAudioMicAvailable = $entry(@mitll.langtest.client.recorder.WebAudioRecorder::webAudioMicAvailable());
