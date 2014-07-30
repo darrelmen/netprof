@@ -4,6 +4,7 @@ import com.google.common.io.Files;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.ScoreServlet;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.database.DatabaseImpl;
@@ -38,6 +39,13 @@ public class AudioFileHelper {
   private final DatabaseImpl db;
   private final LangTestDatabaseImpl langTestDatabase;
 
+  /**
+   * @see mitll.langtest.server.ScoreServlet#getAudioFileHelper()
+   * @param pathHelper
+   * @param serverProperties
+   * @param db
+   * @param langTestDatabase
+   */
   public AudioFileHelper(PathHelper pathHelper, ServerProperties serverProperties, DatabaseImpl db,
                          LangTestDatabaseImpl langTestDatabase) {
     this.pathHelper = pathHelper;
@@ -112,6 +120,28 @@ public class AudioFileHelper {
     }
     logger.debug("writeAudioFile answer " + answer);
     return answer;
+  }
+
+  public AudioAnswer getAlignment(String base64EncodedString, String textToAlign, String identifier, int reqid) {
+    String wavPath = pathHelper.getWavPathUnder("postedAudio");
+    File file = pathHelper.getAbsoluteFile(wavPath);
+
+    AudioCheck.ValidityAndDur validity = new AudioConversion().convertBase64ToAudioFiles(base64EncodedString, file);
+    boolean isValid = validity.validity == AudioAnswer.Validity.OK;
+    AudioAnswer audioAnswer = new AudioAnswer(pathHelper.ensureForwardSlashes(wavPath), validity.validity, reqid, validity.durationInMillis);
+
+    logger.warn("writing to " + file.getAbsolutePath() + " answer " + audioAnswer);
+
+    if (isValid) {
+      PretestScore asrScoreForAudio = getASRScoreForAudio(reqid, file.getAbsolutePath(), textToAlign, -1, -1, false,
+          false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), identifier);
+
+      audioAnswer.setPretestScore(asrScoreForAudio);
+    } else {
+      logger.warn("got invalid audio file (" + validity + ") identifier " + identifier + " file " + file.getAbsolutePath());
+    }
+
+    return audioAnswer;
   }
 
   /**
@@ -305,6 +335,28 @@ public class AudioFileHelper {
       return audioAnswer;
     }
     return audioAnswer;
+  }
+
+  /**
+   * @see mitll.langtest.server.ScoreServlet#getFlashcardScore(AudioFileHelper, java.io.File, String)
+   * @param file
+   * @param wordOrPhrase
+   * @return
+   */
+  public ScoreAndAnswer getFlashcardAnswer(File file, String wordOrPhrase) {
+    makeASRScoring();
+    AudioAnswer audioAnswer = new AudioAnswer();
+    PretestScore flashcardAnswer = autoCRT.getFlashcardAnswer(file, wordOrPhrase, audioAnswer);
+    return new ScoreAndAnswer(flashcardAnswer, audioAnswer);
+  }
+
+  public static class ScoreAndAnswer {
+    public PretestScore score;
+    public AudioAnswer answer;
+    public ScoreAndAnswer(PretestScore score, AudioAnswer answer) {
+      this.score = score;
+      this.answer = answer;
+    }
   }
 
   private void makeASRScoring() {
