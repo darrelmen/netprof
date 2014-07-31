@@ -24,6 +24,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   private static final int WIDTH = 250;
   private static final int HEIGHT = 170;
   private static final String PX = "8px";
+  private static final int FLASH_RECORDING_STOP_DELAY = 160;
   private final String id = "flashcontent";
   public static MicPermission micPermission;
   private boolean didPopup = false;
@@ -307,7 +308,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
           wavCallback.getBase64EncodedWavFile(getWav());
         }
       };
-      t.schedule(130); // add flash delay
+      t.schedule(FLASH_RECORDING_STOP_DELAY); // add flash delay
     }
     else if (webAudio.isWebAudioMicAvailable()) {
       webAudio.stopRecording(wavCallback);
