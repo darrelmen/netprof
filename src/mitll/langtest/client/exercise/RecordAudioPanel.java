@@ -17,6 +17,8 @@ import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.Result;
 
+import java.util.Map;
+
 /**
  * A waveform record button and a play audio button.
  *
@@ -59,8 +61,8 @@ public class RecordAudioPanel extends AudioPanel {
     this.exercise = exercise;
     this.audioType = audioType;
     AudioAttribute attribute = getAudioAttribute();
-/*    System.out.println("RecordAudioPanel for " + exercise.getID() +
-      " audio type " + audioType + " ref " + exercise.getRefAudio() + " path " + attribute);*/
+    System.out.println("RecordAudioPanel for " + exercise.getID() +
+      " audio type " + audioType + " ref " + exercise.getRefAudio() + " path " + attribute);
     if (attribute != null) {
       this.audioPath = attribute.getAudioRef();
     }
@@ -70,9 +72,24 @@ public class RecordAudioPanel extends AudioPanel {
   }
 
   public AudioAttribute getAudioAttribute() {
-    return
-      audioType.equals(Result.AUDIO_TYPE_REGULAR) ? exercise.getRecordingsBy(controller.getUser(), true) :
-      audioType.equals(Result.AUDIO_TYPE_SLOW)    ? exercise.getRecordingsBy(controller.getUser(), false) : null;
+    AudioAttribute audioAttribute = audioType.equals(Result.AUDIO_TYPE_REGULAR) ? exercise.getRecordingsBy(controller.getUser(), true) :
+        audioType.equals(Result.AUDIO_TYPE_SLOW) ? exercise.getRecordingsBy(controller.getUser(), false) : null;
+    System.out.println("for exercise " +exerciseID);
+
+    if (audioType.startsWith("context")) {
+      for (AudioAttribute audioAttribute1 : exercise.getAudioAttributes()) {
+        Map<String, String> attributes = audioAttribute1.getAttributes();
+        System.out.println("checking " + attributes);
+        //if (attributes.containsKey("context=" + Result.AUDIO_TYPE_REGULAR)) {
+        if (attributes.containsKey("context") && audioAttribute1.getUserid() == controller.getUser()) {
+          return audioAttribute1;
+        }
+      }
+      return null;
+    }
+    else {
+      return audioAttribute;
+    }
   }
 
   private String getRecordButtonTitle() {
@@ -197,7 +214,6 @@ public class RecordAudioPanel extends AudioPanel {
     @Override
     public void startRecording() {
       then = System.currentTimeMillis();
-      System.out.println("startRecording " + then);
       super.startRecording();
       showStart();
     }
@@ -205,7 +221,6 @@ public class RecordAudioPanel extends AudioPanel {
     @Override
     public void stopRecording() {
       now = System.currentTimeMillis();
-
       System.out.println("stopRecording " + now + " diff " + (now-then) + " millis");
 
       super.stopRecording();
