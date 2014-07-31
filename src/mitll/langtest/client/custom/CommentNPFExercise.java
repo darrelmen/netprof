@@ -1,15 +1,17 @@
 package mitll.langtest.client.custom;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.RadioButton;
-import com.github.gwtbootstrap.client.ui.TextBox;
-import com.github.gwtbootstrap.client.ui.Tooltip;
+import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.github.gwtbootstrap.client.ui.constants.ToggleType;
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.media.client.Audio;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -19,13 +21,18 @@ import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.flashcard.ControlState;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
+import mitll.langtest.client.sound.PlayAudioPanel;
+import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseFormatter;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -36,8 +43,12 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class CommentNPFExercise extends NPFExercise {
-
-  public static final String NO_REFERENCE_AUDIO = "No reference audio";
+  private static final String NO_REFERENCE_AUDIO = "No reference audio";
+  public static final String M = "M";
+  public static final String F = "F";
+  //private String genderChoice;
+  private AudioAttribute defaultAudio, maleAudio, femaleAudio;
+  PlayAudioPanel contextPlay;
 
   public CommentNPFExercise(CommonExercise e, ExerciseController controller, ListInterface listContainer,
                             float screenPortion, boolean addKeyHandler, String instance) {
@@ -48,7 +59,7 @@ public class CommentNPFExercise extends NPFExercise {
    * @param e
    * @param content
    * @return
-   * @see #getQuestionContent(mitll.langtest.shared.CommonExercise, com.google.gwt.user.client.ui.Panel)
+   * @see #getQuestionContent(mitll.langtest.shared.CommonExercise)
    */
   @Override
   protected Widget getQuestionContent(CommonExercise e, String content) {
@@ -59,21 +70,102 @@ public class CommentNPFExercise extends NPFExercise {
     column.add(getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getRefSentence()));
 
     String translitSentence = e.getTransliteration();
-    if (!translitSentence.isEmpty()) {
+    if (!translitSentence.isEmpty() && !translitSentence.equals("N/A")) {
       column.add(getEntry(e, QCNPFExercise.TRANSLITERATION, ExerciseFormatter.TRANSLITERATION, translitSentence));
     }
 
     String english = e.getMeaning() != null && !e.getMeaning().trim().isEmpty() ? e.getMeaning() : e.getEnglish();
-    if (!english.isEmpty()) {
+    if (!english.isEmpty() && !english.equals("N/A")) {
       column.add(getEntry(e, QCNPFExercise.ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, english));
     }
 
     String context = e.getContext() != null && !e.getContext().trim().isEmpty() ? e.getContext() : "";
     if (!context.isEmpty()) {
-      column.add(getEntry(e, QCNPFExercise.CONTEXT, ExerciseFormatter.CONTEXT, "\""+ context + "\""));
+      Widget entry = getEntry(e, QCNPFExercise.CONTEXT, ExerciseFormatter.CONTEXT, context);
+      Panel hp = new HorizontalPanel();
+      String path = null;
+
+      //System.out.println("context audio is " + e.getAudioAttributes());
+
+      for (AudioAttribute audioAttribute
+          : e.getAudioAttributes()) {
+        if (audioAttribute.getAudioType().startsWith("context")) {
+          if (audioAttribute.getUser().isDefault()) defaultAudio = audioAttribute;
+          else if (audioAttribute.getUser().isMale()) {
+            maleAudio = audioAttribute;
+          }
+          else femaleAudio = audioAttribute;
+        }
+      }
+
+      AudioAttribute toUse = maleAudio != null ? maleAudio : femaleAudio != null ? femaleAudio : defaultAudio;
+      path = toUse == null ? null : toUse.getAudioRef();
+      if (path != null) {
+        contextPlay = new PlayAudioPanel(controller, path)
+            .setPlayLabel("")
+            .setPauseLabel("")
+            .setMinWidth(12);
+        contextPlay.getPlayButton().getElement().getStyle().setMarginTop(-6, Style.Unit.PX);
+
+        hp.add(contextPlay);
+
+        List<String> choices = new ArrayList<String>();
+        if (maleAudio != null) choices.add(M);
+        if (femaleAudio != null) choices.add(F);
+        if (defaultAudio != null) choices.add("Default"); //better not happen
+
+        hp.add(getShowGroup(choices));
+      }
+
+      hp.add(entry);
+      hp.getElement().getStyle().setMarginTop(5, Style.Unit.PX);
+      column.add(hp);
     }
 
     return column;
+  }
+
+  private DivWidget getShowGroup(List<String> choices) {
+    ButtonToolbar w = new ButtonToolbar();
+    ButtonGroup buttonGroup = new ButtonGroup();
+    buttonGroup.setToggle(ToggleType.RADIO);
+    w.add(buttonGroup);
+
+    boolean first =true;
+    for (final String choice : choices) {
+      Button choice1 = getChoice(choice, first, new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          if (choice.equals(M)) {
+            contextPlay.loadAudio(maleAudio.getAudioRef());
+          } else if (choice.equals(F)) {
+            contextPlay.loadAudio(femaleAudio.getAudioRef());
+          } else {
+            contextPlay.loadAudio(defaultAudio.getAudioRef());
+          }
+        }
+      });
+      buttonGroup.add(choice1);
+      if (choice.equals(M)) choice1.setIcon(IconType.MALE);
+      else if (choice.equals(F)) choice1.setIcon(IconType.FEMALE);
+      first = false;
+    }
+
+    Style style = w.getElement().getStyle();
+    style.setMarginTop(-6, Style.Unit.PX);
+    style.setMarginBottom(0, Style.Unit.PX);
+    style.setMarginLeft(5, Style.Unit.PX);
+
+    return w;
+  }
+
+  private Button getChoice( String title, boolean isActive,ClickHandler handler ) {
+    Button onButton = new Button(title.equals(M) ? "" : title.equals(F)? "": title);
+    onButton.getElement().setId("Choice_" + title);
+    controller.register(onButton, exercise.getID());
+    onButton.addClickHandler(handler);
+    onButton.setActive(isActive);
+    return onButton;
   }
 
   private Widget getEntry(CommonExercise e, final String field, final String label, String value) {
@@ -288,7 +380,6 @@ public class CommentNPFExercise extends NPFExercise {
     if (previous == null || !previous.equals(comment)) {
       fieldToComment.put(field, comment);
       boolean isCorrect = comment.length() == 0;
-
 //      System.out.println("commentComplete " + field + " comment '" + comment +"' correct = " +isCorrect);
 
       setButtonTitle(commentButton, isCorrect, comment);
