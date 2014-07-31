@@ -110,6 +110,15 @@ public class DownloadServlet extends DatabaseServlet {
     }
   }
 
+  /**
+   * Option to download an mp3 you've just recorded.
+   *
+   * Hack to remove N/A english fields
+   * @param response
+   * @param db
+   * @param queryString
+   * @throws IOException
+   */
   private void returnAudioFile(HttpServletResponse response, DatabaseImpl db, String queryString) throws IOException {
     String[] split = queryString.split("&");
 
@@ -125,7 +134,11 @@ public class DownloadServlet extends DatabaseServlet {
     User userWhere = db.getUserDAO().getUserWhere(userid);
     String userPart = userWhere != null ? "_by_" + userWhere.getUserID() : "";
     boolean english = db.getServerProps().getLanguage().equalsIgnoreCase("english");
-    String fileName = (english ? "" : exercise1.getForeignLanguage().trim() + "_") + exercise1.getEnglish().trim() + userPart + ".mp3";
+    String foreignPart = english ? "" : exercise1.getForeignLanguage().trim();
+    String englishPart = exercise1.getEnglish().trim();
+    if (englishPart.equals("N/A")) englishPart = "";
+    if (!englishPart.isEmpty()) englishPart = "_" + englishPart;
+    String fileName = foreignPart + englishPart + userPart + ".mp3";
 
     //logger.debug("file is '" + fileName + "'");
     String underscores = fileName.replaceAll("\\p{Z}+", "_");  // split on spaces
