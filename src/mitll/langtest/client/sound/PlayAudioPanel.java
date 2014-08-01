@@ -36,7 +36,8 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    */
   private static final String PAUSE_LABEL = "pause";
   private static final int MIN_WIDTH = 40;
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
+  private static final String FILE_MISSING = "FILE_MISSING";
   private String currentPath = null;
 
   private Sound currentSound = null;
@@ -59,14 +60,18 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   /**
    * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel
    * @param soundManager
-   * @param suffix
+   * @param buttonTitle
    * @param optionalToTheRight
    */
-  public PlayAudioPanel(SoundManagerAPI soundManager, String suffix, Widget optionalToTheRight) {
+  public PlayAudioPanel(SoundManagerAPI soundManager, String buttonTitle, Widget optionalToTheRight) {
     this.soundManager = soundManager;
     setSpacing(10);
     setVerticalAlignment(ALIGN_MIDDLE);
-    playLabel = " Play" + suffix;
+    playLabel = buttonTitle;
+    if (buttonTitle.isEmpty()) {
+      minWidth = 12;
+      pauseLabel = "";
+    }
     playButton = new Button(playLabel);
     playButton.setIcon(IconType.PLAY);
     addButtons(optionalToTheRight);
@@ -87,11 +92,11 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel
    * @param soundManager
    * @param playListener
-   * @param suffix
+   * @param buttonTitle
    * @param optionalToTheRight
    */
-  public PlayAudioPanel(SoundManagerAPI soundManager, PlayListener playListener, String suffix, Widget optionalToTheRight) {
-    this(soundManager, suffix, optionalToTheRight);
+  public PlayAudioPanel(SoundManagerAPI soundManager, PlayListener playListener, String buttonTitle, Widget optionalToTheRight) {
+    this(soundManager, buttonTitle, optionalToTheRight);
     addPlayListener(playListener);
   }
 
@@ -198,7 +203,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   private void setPlayButtonText() {
     boolean playing1 = isPlaying();
     String html = playing1 ? pauseLabel : playLabel;
-    System.out.println("setPlayButtonText now playing = " + isPlaying());
+   // System.out.println("setPlayButtonText now playing = " + isPlaying());
     playButton.setText(html);
     playButton.setIcon(playing1 ?  IconType.PAUSE : IconType.PLAY);
   }
@@ -272,11 +277,17 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     return path;
   }
 
+  /**
+   * @see mitll.langtest.client.custom.CommentNPFExercise#getShowGroup(java.util.List)
+   * @param path
+   */
   public void playAudio(String path) {
     if (currentPath.equals(path)) {
       doClick();
     }
     else {
+      System.out.println("playAudio - "  + path);
+
       loadAudio(path);
       this.currentPath = path;
 
@@ -314,16 +325,22 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    * @see mitll.langtest.client.scoring.AudioPanel#getImagesForPath(String)
    * @param path to audio file on server
    */
-  public void startSong(String path){
-    if (DEBUG) System.out.println("PlayAudioPanel : start song : " + path);
-    if (soundManager.isReady()) {
-      if (DEBUG) System.out.println(new Date() + " Sound manager is ready.");
-      if (soundManager.isOK()) {
-        destroySound();
-        createSound(path);
-      } else {
-        System.out.println(new Date() + " Sound manager is not OK!.");
-        warnNoFlash.setVisible(true);
+  public void startSong(String path) {
+    if (!path.equals(FILE_MISSING)) {
+      //System.out.println("PlayAudioPanel.loadAudio - skipping " + path);
+      if (DEBUG) System.out.println("PlayAudioPanel : start song : " + path);
+      if (soundManager.isReady()) {
+        //if (DEBUG) System.out.println(new Date() + " Sound manager is ready.");
+        if (soundManager.isOK()) {
+          if (DEBUG)
+            System.out.println("PlayAudioPanel : startSong : " + path + " destroy current sound " + currentSound);
+
+          destroySound();
+          createSound(path);
+        } else {
+          System.out.println(new Date() + " Sound manager is not OK!.");
+          warnNoFlash.setVisible(true);
+        }
       }
     }
   }
@@ -381,14 +398,17 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    * @param durationEstimate
    */
   public void songFirstLoaded(double durationEstimate){
-    if (DEBUG) System.out.println("PlayAudioPanel.songFirstLoaded : " + this);
+    if (DEBUG) {
+      System.out.println("PlayAudioPanel.songFirstLoaded : " + this);
+    //  new Exception().printStackTrace();
+    }
 
-    if (listener != null) {
+    if (listener != null && listener != this) {
       listener.songFirstLoaded(durationEstimate);
     }
-//    else {
-//      System.out.println("PlayAudioPanel :songFirstLoaded - no listener");
-//    }
+    else if (listener != null) {
+      System.out.println("PlayAudioPanel :songFirstLoaded - listener is me??? ");
+    }
     setEnabled(true);
   }
 
