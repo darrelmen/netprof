@@ -167,6 +167,10 @@ public class Exercise extends AudioExercise implements CommonExercise {
     return new ExerciseShell(getID(), combined);
   }
 
+  /**
+   * Hack - if we have "N/A" for english, don't show it in the list.
+   * @return
+   */
   public String getCombinedTooltip() {
     String refSentence = getRefSentence();
     if (refSentence.length() > 15) {
@@ -174,7 +178,7 @@ public class Exercise extends AudioExercise implements CommonExercise {
     }
     boolean refSentenceEqualsTooltip = getTooltip().trim().equals(getRefSentence().trim());
     String combined = refSentenceEqualsTooltip ? getTooltip() : getTooltip() + (refSentence.isEmpty() ? "": " / " + refSentence);
-    if (getTooltip().isEmpty()) combined = refSentence;
+    if (getTooltip().isEmpty() || getTooltip().equals("N/A")) combined = refSentence;
     return combined;
   }
 
@@ -297,6 +301,10 @@ public class Exercise extends AudioExercise implements CommonExercise {
     return context;
   }
 
+  /**
+   * @see mitll.langtest.shared.custom.UserExercise#copyFields(Exercise)  - only
+   * @param context
+   */
   public void setContext(String context) {
     this.context = context;
   }
