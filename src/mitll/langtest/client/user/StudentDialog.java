@@ -3,15 +3,9 @@ package mitll.langtest.client.user;
 import com.github.gwtbootstrap.client.ui.AccordionGroup;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.CheckBox;
-import com.github.gwtbootstrap.client.ui.Column;
-import com.github.gwtbootstrap.client.ui.ControlGroup;
-import com.github.gwtbootstrap.client.ui.ControlLabel;
-import com.github.gwtbootstrap.client.ui.Controls;
 import com.github.gwtbootstrap.client.ui.Fieldset;
-import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Form;
 import com.github.gwtbootstrap.client.ui.Modal;
-import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
@@ -24,6 +18,7 @@ import com.github.gwtbootstrap.client.ui.event.ShownHandler;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -35,10 +30,8 @@ import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.custom.KeyStorage;
@@ -46,7 +39,6 @@ import mitll.langtest.client.flashcard.ControlState;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -61,8 +53,6 @@ import java.util.TreeMap;
  * To change this template use File | Settings | File Templates.
  */
 class StudentDialog extends UserDialog {
-  private static final int MIN_WEEKS = 0;
-  private static final int MAX_WEEKS = 104;
   public static final int ILR_CHOICE_WIDTH = 80;
   public static final int MIN_LENGTH_USER_ID = 8;
   private static final String PRACTICE = "Practice";
@@ -86,10 +76,13 @@ class StudentDialog extends UserDialog {
   private static final String RECORD_REFERENCE_AUDIO = " Record Reference Audio";
   private static final String RECORD_REFERENCE_AUDIO_TOOLTIP = "Record reference audio for course content";
 
+  boolean accordionHasBeenShown = false;
   private final UserManager userManager;
   private final UserNotification langTest;
   private CheckBox qcCheckBox, recordAudioCheckBox;
   private Button closeButton;
+  RegistrationInfo registrationInfo;
+  AccordionGroup accordion;
 
   public StudentDialog(LangTestDatabaseAsync service, PropertyHandler props, UserManager userManager,
                        UserNotification userNotification) {
@@ -146,9 +139,10 @@ class StudentDialog extends UserDialog {
     Panel permissions = makePermissions();
 
     Panel register = new FlowPanel();
-    final RegistrationInfo registrationInfo = new RegistrationInfo(register, permissions);
+    registrationInfo = new RegistrationInfo(register, permissions);
+    showDemographicFields(false);
 
-    final AccordionGroup accordion = getAccordion(dialogBox, register);
+    accordion = getAccordion(dialogBox, register);
     // only show the accordion if logging in for the first time
     accordion.setVisible(false);
 
@@ -158,12 +152,13 @@ class StudentDialog extends UserDialog {
         boolean skipRegister = canSkipRegister(purpose);
         boolean needUserID = isDataCollection(purpose) || isReview(purpose) || isPractice(purpose);
         user.setVisible(needUserID);
-        registrationInfo.showOrHideILR(!isReview(purpose));
+       // registrationInfo.showOrHideILR(!isReview(purpose));
         password.setVisible(isReview(purpose));
 
         if (skipRegister) {
           accordion.hide();
         } else {
+          System.out.println("can't skip register...");
           final String userID = user.box.getText();
           if (shouldCheckForExistingUser(userID, purpose, password, true)
             ) {
@@ -176,7 +171,12 @@ class StudentDialog extends UserDialog {
                 boolean exists = result != -1;
                 accordion.setVisible(!exists);
                 if (!exists) {
-                  accordion.show();
+                  System.out.println("user doesn't exist...");
+                  showAccordion();
+                }
+                else {
+                  System.out.println("user exists...");
+
                 }
               }
             });
@@ -203,6 +203,12 @@ class StudentDialog extends UserDialog {
     getFocusOnUserID(user);
   }
 
+  private void showAccordion() {
+    accordion.setVisible(true);
+    accordion.show();
+    accordionHasBeenShown = true;
+  }
+
   protected void getFocusOnUserID(final FormField user) {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
@@ -215,7 +221,11 @@ class StudentDialog extends UserDialog {
     return !userID.isEmpty() && (!isReview(purpose) || checkValidPassword(password, markError));
   }
 
-  protected Panel makePermissions() {
+  /**
+   * @see #displayLoginBox()
+   * @return
+   */
+  private Panel makePermissions() {
     Panel permissions = new VerticalPanel();
 
     qcCheckBox = new CheckBox(DO_QUALITY_CONTROL);
@@ -223,6 +233,7 @@ class StudentDialog extends UserDialog {
       @Override
       public void onClick(ClickEvent event) {
         langTest.setPermission(User.Permission.QUALITY_CONTROL, qcCheckBox.getValue());
+        showDemographicFields(qcCheckBox.getValue());
       }
     });
     addTooltip(qcCheckBox, MARK_AND_FIX_DEFECTS);
@@ -234,18 +245,25 @@ class StudentDialog extends UserDialog {
 
     recordAudioCheckBox = new CheckBox(RECORD_REFERENCE_AUDIO);
     recordAudioCheckBox.getHTML();
-     child = recordAudioCheckBox.getElement().getChild(1);
-     as = SpanElement.as(child);
+    child = recordAudioCheckBox.getElement().getChild(1);
+    as = SpanElement.as(child);
     as.setClassName("icon-microphone");
     addTooltip(recordAudioCheckBox, RECORD_REFERENCE_AUDIO_TOOLTIP);
     recordAudioCheckBox.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         langTest.setPermission(User.Permission.RECORD_AUDIO, recordAudioCheckBox.getValue());
+        showDemographicFields(recordAudioCheckBox.getValue());
       }
     });
     permissions.add(recordAudioCheckBox);
     return permissions;
+  }
+
+  private void showDemographicFields(boolean vis) {
+    registrationInfo.ageEntryGroup.setVisible(vis);
+    registrationInfo.genderGroup.setVisible(vis);
+    registrationInfo.dialectGroup.setVisible(vis);
   }
 
   private boolean isDataCollection(ListBoxFormField purpose) {
@@ -309,17 +327,15 @@ class StudentDialog extends UserDialog {
         String purposeSetting = getRole(purpose);
         final String audioType = getAudioTypeFromPurpose(purposeSetting);
         System.out.println("\tmakeCloseHandler.onClick for " + purposeSetting);
-        checkUserAndMaybeRegister(closeButton, audioType, user, password, dialogBox, accordion, registrationInfo, purposeSetting, permissions);
+        checkUserAndMaybeRegister(audioType, user, password, dialogBox, registrationInfo, purposeSetting, permissions);
       }
     };
   }
 
-  private void checkUserAndMaybeRegister(Button closeButton,
-                                         final String audioType,
+  private void checkUserAndMaybeRegister(final String audioType,
                                          final FormField user,
                                          final FormField password,
                                          final Modal dialogBox,
-                                         final AccordionGroup accordion,
                                          final RegistrationInfo registrationInfo,
                                          final String purposeSetting,
                                          final Collection<User.Permission> permissions) {
@@ -327,8 +343,7 @@ class StudentDialog extends UserDialog {
     boolean needsPassword = purposeSetting.equals(REVIEW) || purposeSetting.equals(RECORDER);
 
     System.out.println("checkUserAndMaybeRegister " + purposeSetting + " review " + needsPassword);
-    if (//checkValidUser(user) &&
-      (!needsPassword || checkValidPassword(password, true))
+    if ((!needsPassword || checkValidPassword(password, true))
       ) {
       service.userExists(userID, new AsyncCallback<Integer>() {
         @Override
@@ -346,19 +361,11 @@ class StudentDialog extends UserDialog {
           } else if (checkValidUser(user)) {
             System.out.println("checkUserAndMaybeRegister for " + purposeSetting + " user does not exist id=" + result);
 
-            boolean skipRegister = canSkipRegister(purposeSetting);
-            accordion.setVisible(!skipRegister);
-            if (!skipRegister) {
-              accordion.show();
-            }
-
-            checkThenRegister(audioType, registrationInfo, dialogBox, userID,permissions);
+            checkThenRegister(audioType, registrationInfo, dialogBox, userID, permissions);
           }
         }
       });
-    }/* else {
-      System.out.println("checkUserAndMaybeRegister for " + purposeSetting + " user name " + userID + " is invalid?");
-    }*/
+    }
   }
 
   /**
@@ -367,50 +374,63 @@ class StudentDialog extends UserDialog {
    * @param registrationInfo
    * @param dialogBox
    * @param userID
+   * @see #checkUserAndMaybeRegister(String, mitll.langtest.client.user.BasicDialog.FormField, mitll.langtest.client.user.BasicDialog.FormField, com.github.gwtbootstrap.client.ui.Modal, mitll.langtest.client.user.StudentDialog.RegistrationInfo, String, java.util.Collection)
    */
-  private void checkThenRegister(String audioType, RegistrationInfo registrationInfo, Modal dialogBox, String userID, Collection<User.Permission> permissions) {
+  private void checkThenRegister(String audioType, RegistrationInfo registrationInfo, Modal dialogBox, String userID,
+                                 Collection<User.Permission> permissions) {
     String s = audioType.toLowerCase();
     boolean skipWeekCheck = s.contains(REVIEW.toLowerCase()) || s.contains(RECORDER.toLowerCase());
-    boolean skipChecks = s.contains(PRACTICE.toLowerCase());
+    boolean skipChecks    = s.contains(PRACTICE.toLowerCase()); // i.e. you are a student
     if (skipChecks) {
       System.out.println("checkThenRegister : skipChecks " + audioType + " user  " + userID);
 
-      hideAndSend(audioType, registrationInfo, dialogBox, userID,permissions);
-    } else if (highlightIntegerBox(registrationInfo.ageEntryGroup)) {
-      System.out.println("\tcheckThenRegister : age OK skipChecks " + audioType + " skipWeekCheck " + skipWeekCheck);
-
-      if (skipWeekCheck || highlightIntegerBox(registrationInfo.weeks, MIN_WEEKS, MAX_WEEKS)) {
-        // order is important here --
-         if (registrationInfo.checkValidGender()) {
-          if (registrationInfo.dialectGroup.getText().isEmpty()) {
-            System.out.println("\tcheckThenRegister : dialectGroup ");
-
-            markError(registrationInfo.dialectGroup, "Enter a language dialect.");
-          } else if (registrationInfo.checkValidity() && registrationInfo.checkValidity2()
-            ) {
-            System.out.println("\tcheckThenRegister : hideAndSend");
-
-            hideAndSend(audioType, registrationInfo, dialogBox, userID,permissions);
-          } else {
-            System.out.println("\tcheckThenRegister : skipChecks " + audioType + " user  " + userID);
-          }
-        }
-      } else {
-        System.out.println("\tcheckThenRegister : markError weeks ");
-
-        markError(registrationInfo.weeks, "Enter weeks between " + MIN_WEEKS + " and " + MAX_WEEKS + ".");
-      }
+      hideAndSend(audioType, registrationInfo, dialogBox, userID, permissions);
     } else {
-      markError(registrationInfo.ageEntryGroup.group, registrationInfo.ageEntryGroup.box, "",
-        "Enter age between " + MIN_AGE + " and " + MAX_AGE + ".");
+      boolean shownBefore = accordionHasBeenShown;
+      showAccordion();
+
+      if (qcCheckBox.getValue() || recordAudioCheckBox.getValue()) {
+        if (highlightIntegerBox(registrationInfo.ageEntryGroup)) {
+          System.out.println("\tcheckThenRegister : age OK skipChecks " + audioType + " skipWeekCheck " + skipWeekCheck);
+
+          // order is important here --
+          if (registrationInfo.checkValidGender()) {
+            if (registrationInfo.dialectGroup.getText().isEmpty()) {
+              System.out.println("\tcheckThenRegister : dialectGroup ");
+
+              markError(registrationInfo.dialectGroup, "Enter a language dialect.");
+            } else {
+              System.out.println("\tcheckThenRegister : hideAndSend");
+
+              hideAndSend(audioType, registrationInfo, dialogBox, userID, permissions);
+            }
+          }
+
+        } else {
+          markError(registrationInfo.ageEntryGroup.group, registrationInfo.ageEntryGroup.box, "",
+              "Enter age between " + MIN_AGE + " and " + MAX_AGE + ".");
+        }
+      } else if (shownBefore) {
+        System.out.println("checkThenRegister : shownBefore - skipChecks " + audioType + " user  " + userID);
+
+        hideAndSend(audioType, registrationInfo, dialogBox, userID, permissions);
+      }
     }
   }
 
   protected void markError(FormField dialectGroup, String message) {
-    super.markError(dialectGroup,message);
+    super.markError(dialectGroup, message);
     closeButton.setEnabled(true);
   }
 
+  /**
+   * @see #checkThenRegister(String, mitll.langtest.client.user.StudentDialog.RegistrationInfo, com.github.gwtbootstrap.client.ui.Modal, String, java.util.Collection)
+   * @param audioType
+   * @param registrationInfo
+   * @param dialogBox
+   * @param userID
+   * @param permissions
+   */
   private void hideAndSend(String audioType, RegistrationInfo registrationInfo, Modal dialogBox, String userID, Collection<User.Permission> permissions) {
     System.out.println("hideAndSend : audioType " + audioType + " user  " + userID);
 
@@ -454,8 +474,8 @@ class StudentDialog extends UserDialog {
    * @see #makeCloseHandler
    */
   private void sendNameToServer(RegistrationInfo registrationInfo, String audioType, String userID, Collection<User.Permission> permissions) {
-    int weeksValue = registrationInfo.weeks.getText().isEmpty() ? 0 : Integer.parseInt(registrationInfo.weeks.getText());
-    addUser(0, weeksValue, registrationInfo, audioType, userID, permissions);
+    //int weeksValue = registrationInfo.weeks.getText().isEmpty() ? 0 : Integer.parseInt(registrationInfo.weeks.getText());
+    addUser(0, registrationInfo, audioType, userID, permissions);
   }
 
   /**
@@ -464,7 +484,7 @@ class StudentDialog extends UserDialog {
    * @param permissions
    * @see #sendNameToServer(mitll.langtest.client.user.StudentDialog.RegistrationInfo, String, String, java.util.Collection)
    */
-  private void addUser(int monthsOfExperience, final int weeksOfExperience,
+  private void addUser(int monthsOfExperience,
                        final RegistrationInfo registrationInfo,
                        final String audioType, String userID, Collection<User.Permission> permissions) {
     int age = getAge(registrationInfo.ageEntryGroup.box);
@@ -481,7 +501,6 @@ class StudentDialog extends UserDialog {
       }
 
       public void onSuccess(Long result) {
-//        System.out.println("addUser : server result is " + result);
         userManager.storeUser(result, audioType, userChosenID, PropertyHandler.LOGIN_TYPE.STUDENT);
       }
     };
@@ -547,20 +566,16 @@ class StudentDialog extends UserDialog {
   private class RegistrationInfo {
     private final FormField ageEntryGroup;
     private final ListBoxFormField genderGroup;
-    private final FormField weeks;
-    private ListBoxFormField reading;
-    private ListBoxFormField listening;
-    private ListBoxFormField speaking;
-    private ListBoxFormField writing;
     private final FormField dialectGroup;
-    final FluidRow ilrLevels;
-    final FluidRow estimating;
-    final Widget label;
 
-
+    /**
+     * @see StudentDialog#displayLoginBox()
+     * @param dialogBox
+     * @param lowerLeft
+     */
     public RegistrationInfo(Panel dialogBox, Panel lowerLeft) {
       Form form = new Form();
-      DOM.setStyleAttribute(form.getElement(), "marginBottom", "0px");
+      form.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
 
       form.addStyleName("form-horizontal");
 
@@ -582,163 +597,24 @@ class StudentDialog extends UserDialog {
       dialogBox.add(divLeft);
       dialogBox.add(divRight);
 
-      ageEntryGroup = addControlFormField(fieldsetLeft, "Your age");
       genderGroup = getListBoxFormField(fieldsetRight, "Gender", getGenderBox());
-      weeks = addControlFormField(new FlowPanel(), "Weeks of Experience");
 
       addControlGroupEntrySimple(fieldsetLeft, "Permissions", lowerLeft);
+      ageEntryGroup = addControlFormField(fieldsetLeft, "Your age");
       dialectGroup = getDialect(fieldsetRight);
-
-      final ControlGroup ilrLevel = new ControlGroup();
-      ilrLevel.addStyleName("leftFiveMargin");
-      ControlLabel label = new ControlLabel("Select your ILR level (check boxes below if estimating)");
-      ilrLevel.add(label);
-      this.label = label;
-      dialogBox.add(ilrLevel);
-      ilrLevel.addStyleName("floatLeft");
-
-      FluidRow row = getILRLevels();
-      row.addStyleName("floatLeft");
-
-      dialogBox.add(row);
-      ilrLevels = row;
-      FluidRow row2 = getEstimating2();
-      dialogBox.add(row2);
-      estimating = row2;
     }
 
-    public void showOrHideILR(boolean show) {
-      ilrLevels.setVisible(show);
-      estimating.setVisible(show);
-      label.setVisible(show);
-      weeks.setVisible(show);
-    }
 
-    public boolean checkValidity() {
-      if (!ilrLevels.isVisible()) return true;
-      for (ListBoxFormField f : Arrays.asList(reading,listening,speaking,writing)) {
-         if (f.box.getValue().equals(UNSET)) {
-           f.markSimpleError("Choose a level", Placement.TOP);
-           return false;
-         }
-      }
-      return true;
-    }
-
-    public boolean checkValidity2() {
-      if (!estimating.isVisible()) return true;
-
-      for (YesNo f : ilrs) {
-        if (!f.markSimpleError(Placement.TOP)) {
-          return false;
-        }
-      }
-      return true;
-    }
-
+    /**
+     * @see #checkThenRegister(String, mitll.langtest.client.user.StudentDialog.RegistrationInfo, com.github.gwtbootstrap.client.ui.Modal, String, java.util.Collection)
+     * @return
+     */
     public boolean checkValidGender() {
       boolean valid = !genderGroup.getValue().equals(UNSET);
       if (!valid) {
         genderGroup.markSimpleError(CHOOSE_A_GENDER,Placement.LEFT);
       }
       return valid;
-    }
-
-    /**
-     * @return
-     * @see #RegistrationInfo
-     */
-    private FluidRow getILRLevels() {
-      FluidRow row = new FluidRow();
-      Column column = new Column(2, new HTML());
-      row.add(column);
-
-      Column c1 = new Column(2);
-      row.add(c1);
-      Column c2 = new Column(2);
-      row.add(c2);
-      Column c3 = new Column(2);
-      row.add(c3);
-      Column c4 = new Column(2);
-      row.add(c4);
-
-      List<String> levels = Arrays.asList("Unset", "0+", "1", "1+", "2", "2+", "3", "3+", "4");
-      reading = getListBoxFormField(c1, "Reading", getListBox2(levels));
-      listening = getListBoxFormField(c2, "Listening", getListBox2(levels));
-      speaking  = getListBoxFormField(c3, "Speaking", getListBox2(levels));
-      writing   = getListBoxFormField(c4, "Writing", getListBox2(levels));
-      return row;
-    }
-
-    private final List<YesNo> ilrs = new ArrayList<YesNo>();
-
-    private FluidRow getEstimating2() {
-      FluidRow row2 = new FluidRow();
-
-      Column cc0 = new Column(2, new HTML("Estimating:"));
-      row2.add(cc0);
-
-      for (String ilr : Arrays.asList("rilr", "lilr", "silr", "wilr")) {
-        YesNo e = new YesNo(ilr);
-        e.group.addStyleName("leftThirtyMargin");
-
-        Column cc1 = new Column(2, e.group);
-        row2.add(cc1);
-        ilrs.add(e);
-      }
-
-      return row2;
-    }
-  }
-
-  private class YesNo {
-    public final RadioButton yes, no;
-    public final ControlGroup group;
-
-    public YesNo(String name) {
-      yes = new RadioButton(name, "Y");
-      yes.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-         // hidePopovers();
-        }
-      });
-      no = new RadioButton(name, "N");
-      no.addClickHandler(
-        new ClickHandler() {
-          @Override
-          public void onClick(ClickEvent event) {
-           // hidePopovers();
-          }
-        }
-      );
-
-      group = new ControlGroup();
-
-      yes.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          group.setType(ControlGroupType.NONE);
-        }
-      });
-      no.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          group.setType(ControlGroupType.NONE);
-        }
-      });
-
-      Controls controls = new Controls();
-      controls.add(yes);
-      controls.add(no);
-      group.add(controls);
-    }
-
-    public boolean markSimpleError(Placement placement) {
-      if (!yes.getValue() && !no.getValue()) {
-        markError(group, yes, "Please choose", "Click yes or no.", placement);
-        return false;
-      } else return true;
     }
   }
 }
