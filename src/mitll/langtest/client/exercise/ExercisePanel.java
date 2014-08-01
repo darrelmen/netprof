@@ -11,7 +11,6 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasValue;
-import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -24,7 +23,6 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.Result;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -127,7 +125,7 @@ public class ExercisePanel extends VerticalPanel implements
 
     HTML maybeRTLContent = getMaybeRTLContent(content, true);
     maybeRTLContent.addStyleName("rightTenMargin");
-    maybeRTLContent.addStyleName("topFiveMargin");
+    maybeRTLContent.addStyleName("topMargin");
     if (content.length() > 200) {
       return getContentScroller(maybeRTLContent);
     } else {
@@ -195,13 +193,12 @@ public class ExercisePanel extends VerticalPanel implements
    * @param questionNumber
    */
   private void addQuestions(CommonExercise e, LangTestDatabaseAsync service, ExerciseController controller, int questionNumber) {
-      add(getQuestionPanel(e, service, controller, questionNumber,
-        this));
+      add(getQuestionPanel(e, service, controller, questionNumber
+      ));
   }
 
   private Panel getQuestionPanel(CommonExercise exercise, LangTestDatabaseAsync service, ExerciseController controller,
-                                 int questionNumber,
-                                 HasWidgets toAddTo) {
+                                 int questionNumber) {
     // add question prompt
     Panel vp = new VerticalPanel();
     addQuestionPrompt(vp);
@@ -224,7 +221,7 @@ public class ExercisePanel extends VerticalPanel implements
     objects.add(answerWidget);
   }
 
-  protected boolean shouldShowAnswer() { return controller.isDemoMode();  }
+  //protected boolean shouldShowAnswer() { return controller.isDemoMode();  }
 
   /**
    * @see #getQuestionPanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int, int, java.util.List, java.util.List, mitll.langtest.shared.CommonExercise.QAPair, com.google.gwt.user.client.ui.HasWidgets)
@@ -308,34 +305,6 @@ public class ExercisePanel extends VerticalPanel implements
   private String getLanguage() {
     String language = controller.getLanguage();
     return (language == null || language.length() == 0) ? THE_FOREIGN_LANGUAGE : language;
-  }
-
-  /**
-   * @param promptInEnglish
-   * @return
-   */
-/*
-  protected String getSpokenPrompt(boolean promptInEnglish) {
-    String instructions = getInstructions();
-    String studentPrompt = SPEAK_AND_RECORD_YOUR_ANSWER_IN + (promptInEnglish ? ENGLISH : getLanguage()) + " ";
-    String teacherPrompt = TEACHER_PROMPT;
-    return THREE_SPACES + (controller.isDataCollectMode() && !controller.isCRTDataCollectMode() ? teacherPrompt : studentPrompt) + instructions;
-  }
-*/
-
-  protected String getInstructions() {
-    String instructions = ":";
-/*    String prefix = "<br></br>" + THREE_SPACES;
-    if (controller.getAudioType().equals(Result.AUDIO_TYPE_FAST_AND_SLOW)) {
-      instructions = prefix +REPEAT_TWICE;
-    }
-    else if (controller.getAudioType().equals(Result.AUDIO_TYPE_REGULAR)) {
-      instructions = prefix +REPEAT_ONCE;
-    }
-    else if (!controller.isCRTDataCollectMode()) {
-      System.out.println("unknown audio type " + controller.getAudioType());
-    }*/
-    return instructions;
   }
 
   @Override
