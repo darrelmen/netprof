@@ -3,6 +3,7 @@ package mitll.langtest.server.scoring;
 import corpus.DariLTS;
 import corpus.EnglishLTS;
 import corpus.FarsiLTS;
+import corpus.EgyptianLTS;
 import corpus.LTS;
 import corpus.LevantineLTS;
 import corpus.ModernStandardArabicLTS;
@@ -47,7 +48,7 @@ public class LTSFactory {
   public LTSFactory() {
     languageToLTS.put(ARABIC.toLowerCase(), new ModernStandardArabicLTS());
     languageToLTS.put(DARI.toLowerCase(), new DariLTS());
-    languageToLTS.put(EGYPTIAN.toLowerCase(), new ModernStandardArabicLTS());
+    languageToLTS.put(EGYPTIAN.toLowerCase(), new EgyptianLTS());
     languageToLTS.put(ENGLISH.toLowerCase(),new EnglishLTS());
     languageToLTS.put(FARSI.toLowerCase(), new FarsiLTS());
     languageToLTS.put(LEVANTINE.toLowerCase(), new LevantineLTS());
