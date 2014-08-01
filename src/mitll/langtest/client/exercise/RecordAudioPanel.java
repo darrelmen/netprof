@@ -71,15 +71,19 @@ public class RecordAudioPanel extends AudioPanel {
     getElement().setId("RecordAudioPanel_" + exerciseID + "_" + index + "_" + audioType);
   }
 
+  /**
+   *
+   * @return
+   */
   public AudioAttribute getAudioAttribute() {
     AudioAttribute audioAttribute = audioType.equals(Result.AUDIO_TYPE_REGULAR) ? exercise.getRecordingsBy(controller.getUser(), true) :
         audioType.equals(Result.AUDIO_TYPE_SLOW) ? exercise.getRecordingsBy(controller.getUser(), false) : null;
-    System.out.println("for exercise " +exerciseID);
+    //System.out.println("for exercise " +exerciseID);
 
     if (audioType.startsWith("context")) {
       for (AudioAttribute audioAttribute1 : exercise.getAudioAttributes()) {
         Map<String, String> attributes = audioAttribute1.getAttributes();
-        System.out.println("checking " + attributes);
+     //   System.out.println("checking " + attributes);
         //if (attributes.containsKey("context=" + Result.AUDIO_TYPE_REGULAR)) {
         if (attributes.containsKey("context") && audioAttribute1.getUserid() == controller.getUser()) {
           return audioAttribute1;
