@@ -24,7 +24,6 @@ import java.util.*;
 public class AudioDAO extends DAO {
   private static final Logger logger = Logger.getLogger(AudioDAO.class);
 
- // public static final String ID1 = "id";
   private static final String ID = "id";
   private static final String USERID = "userid";
   private static final String AUDIO_REF = "audioRef";
@@ -547,8 +546,9 @@ public class AudioDAO extends DAO {
         //logger.debug("for  " +exerciseID + " found " + audioAttributes);
 
         for (AudioAttribute audioAttribute : audioAttributes) {
-          //logger.debug("\tfor  " +audioAttribute + " against " + userid + "/" + audioType );
-          if (audioAttribute.getUserid() == userid && audioAttribute.getAudioType().equalsIgnoreCase(audioType)) {
+          String audioType1 = audioAttribute.getAudioType();
+          //logger.debug("\tfor  " +audioAttribute + " against " + userid + "/" + audioType  + " audio type " + audioType1);
+          if (audioAttribute.getUserid() == userid && audioType1.equalsIgnoreCase(audioType)) {
                       //logger.debug("\tfound  " +audioAttribute + " for " + userid + "/" + audioType );
             audioAttr = audioAttribute;
             break;
@@ -694,6 +694,8 @@ public class AudioDAO extends DAO {
       logger.error("huh? userid is " +userid);
       new Exception().printStackTrace();
     }
+
+    logger.debug("addAudio : by " + userid + " for ex " + exerciseID + " type " + audioType + " ref " + audioRef);
 
     PreparedStatement statement = connection.prepareStatement("INSERT INTO " + AUDIO +
       "(" +
