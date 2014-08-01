@@ -63,6 +63,10 @@ public class AudioAttribute implements IsSerializable {
     else if (type.equals(Result.AUDIO_TYPE_FAST_AND_SLOW)) {
       addAttribute(SPEED, REGULAR_AND_SLOW);
     }
+    else if (type.contains("=")) {
+      String[] split = type.split("=");
+      addAttribute(split[0], split[1]);
+    }
     else {
       attributes = new HashMap<String, String>();
     }
@@ -101,7 +105,16 @@ public class AudioAttribute implements IsSerializable {
   public boolean isSlow() {
     return matches(SPEED, SLOW);
   }
-  public String getAudioType() { return getSpeed(); }
+  public String getAudioType() {
+    String speed = getSpeed();
+    if (speed == null && !attributes.isEmpty()) {
+      String s = attributes.toString();
+      return s.substring(1,s.length()-1);
+    }
+    else {
+      return speed;
+    }
+  }
 
   public boolean isMale() { return user != null && user.isMale();  }
   public boolean isFemale() {
