@@ -61,8 +61,9 @@ public class RecordAudioPanel extends AudioPanel {
     this.exercise = exercise;
     this.audioType = audioType;
     AudioAttribute attribute = getAudioAttribute();
-    System.out.println("RecordAudioPanel for " + exercise.getID() +
+/*    System.out.println("RecordAudioPanel for " + exercise.getID() +
       " audio type " + audioType + " ref " + exercise.getRefAudio() + " path " + attribute);
+  */
     if (attribute != null) {
       this.audioPath = attribute.getAudioRef();
     }
