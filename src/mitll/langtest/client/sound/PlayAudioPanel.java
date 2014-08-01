@@ -8,6 +8,8 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.AudioTag;
+import mitll.langtest.client.exercise.ExerciseController;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -28,14 +30,19 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
-  private static final String PAUSE_LABEL = "|| pause";
+  /**
+   * @see #setPlayButtonText
+   */
+  private static final String PAUSE_LABEL = "pause";
   private static final int MIN_WIDTH = 40;
   private static final boolean DEBUG = false;
 
   private Sound currentSound = null;
   private final SoundManagerAPI soundManager;
 
-  private final String PLAY_LABEL;
+  private String playLabel;
+  private String pauseLabel = PAUSE_LABEL;
+  private int minWidth = MIN_WIDTH;
   private final Button playButton;
 
   private final HTML warnNoFlash = new HTML("<font color='red'>Flash is not activated. Do you have a flashblocker? " +
@@ -56,13 +63,20 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     this.soundManager = soundManager;
     setSpacing(10);
     setVerticalAlignment(ALIGN_MIDDLE);
-    PLAY_LABEL = " Play" + suffix;
-    playButton = new Button(PLAY_LABEL);
+    playLabel = " Play" + suffix;
+    playButton = new Button(playLabel);
     playButton.setIcon(IconType.PLAY);
     addButtons(optionalToTheRight);
     id = counter++;
     getElement().setId("PlayAudioPanel_"+id);
   }
+
+  public PlayAudioPanel(ExerciseController controller, String path) {
+    this(controller.getSoundManager(),"",null);
+    loadAudio(path);
+  }
+
+  public PlayAudioPanel setPlayLabel(String label) { this.playLabel = label; playButton.setText(playLabel); return this; }
 
   /**
    * @see mitll.langtest.client.exercise.RecordAudioPanel.MyPlayAudioPanel#MyPlayAudioPanel(com.github.gwtbootstrap.client.ui.Image, com.github.gwtbootstrap.client.ui.Image, com.google.gwt.user.client.ui.Panel, String, com.google.gwt.user.client.ui.Widget)
@@ -97,6 +111,10 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     if (listener != null) listener.reinitialize();    // remove playing line, if it's there
   }
 
+  /**
+   * @see #PlayAudioPanel
+   * @param optionalToTheRight
+   */
   protected void addButtons(Widget optionalToTheRight) {
     playButton.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
@@ -125,8 +143,15 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     super.onLoad();
 
     int offsetWidth = playButton.getOffsetWidth();
-    if (offsetWidth < MIN_WIDTH) offsetWidth = MIN_WIDTH;
-    playButton.getElement().getStyle().setProperty("minWidth", offsetWidth + "px");
+    if (offsetWidth < minWidth && minWidth > 0) {
+      offsetWidth = minWidth;
+    }
+
+    if (minWidth > 0) {
+//      System.out.println("setting min width " + minWidth + " on " + playButton.getElement().getId());
+      if (minWidth == 12) offsetWidth = 12;
+      playButton.getElement().getStyle().setProperty("minWidth", offsetWidth + "px");
+    }
   }
 
   /**
@@ -166,18 +191,21 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   }
 
   private void setPlayButtonText() {
-    String html = isPlaying() ? PAUSE_LABEL : PLAY_LABEL;
+   // System.out.println("setPlayButtonText " + isPlaying());
+    boolean playing1 = isPlaying();
+    String html = playing1 ? pauseLabel : playLabel;
     playButton.setText(html);
+    playButton.setIcon(playing1 ?  IconType.PAUSE : IconType.PLAY);
   }
 
-  private boolean isPlaying() {
-    return playing;
-  }
+  private boolean isPlaying() { return playing;  }
 
   private void setPlayLabel() {
     playing = false;
     if (DEBUG) System.out.println(new Date() + " setPlayLabel playing " +playing);
-    playButton.setText(PLAY_LABEL);
+    playButton.setText(playLabel);
+    playButton.setIcon(IconType.PLAY);
+
     for (PlayListener playListener : playListeners) playListener.playStopped();
   }
 
@@ -226,10 +254,29 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     if (listener != null) {
       listener.update(position);
     }
-    else {
-      System.out.println("PlayAudioPanel :update - no listener");
-    }
+    //else {
+      //System.out.println("PlayAudioPanel :update - no listener");
+    //}
   }
+
+  public String loadAudio(String path) {
+    path = wavToMP3(path);
+    path = ensureForwardSlashes(path);
+    if (isPlaying()) pause();
+    startSong(path);
+    return path;
+  }
+  private static final String WAV = ".wav";
+  private static final String MP3 = "." + AudioTag.COMPRESSED_TYPE;
+
+  protected String wavToMP3(String path) {
+    return (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
+  }
+
+  private String ensureForwardSlashes(String wavPath) {
+    return wavPath.replaceAll("\\\\", "/");
+  }
+
 
   /**
    * Check if soundmanager loaded properly, warn if it didn't.
@@ -294,20 +341,24 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
 
       listener.reinitialize();
     }
-    else {
-      System.out.println("PlayAudioPanel :reinitialize - no listener");
-    }
+//    else {
+//      System.out.println("PlayAudioPanel :reinitialize - no listener");
+//    }
   }
 
+  /**
+   * So this is the first message you'd get...
+   * @param durationEstimate
+   */
   public void songFirstLoaded(double durationEstimate){
     if (DEBUG) System.out.println("PlayAudioPanel.songFirstLoaded : " + this);
 
     if (listener != null) {
       listener.songFirstLoaded(durationEstimate);
     }
-    else {
-      System.out.println("PlayAudioPanel :songFirstLoaded - no listener");
-    }
+//    else {
+//      System.out.println("PlayAudioPanel :songFirstLoaded - no listener");
+//    }
     setEnabled(true);
   }
 
@@ -320,13 +371,17 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
 
     if (listener != null) {
       listener.songLoaded(duration);
-    } else {
-      System.out.println("no listener for song loaded " + duration);
     }
+//    else {
+//      System.out.println("no listener for song loaded " + duration);
+//    }
     setEnabled(true);
     reinitialize();
   }
 
+  /**
+   * Called when the audio stops playing, also relays the message to the listener if there is one.
+   */
   public void songFinished() {
     if (DEBUG) System.out.println("PlayAudioPanel :songFinished "+ getElement().getId());
 
@@ -339,7 +394,21 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
 
   public void setEnabled(boolean val) { playButton.setEnabled(val); }
 
+  /**
+   * @see mitll.langtest.client.exercise.RecordAudioPanel#getPlayButton()
+   * @return
+   */
   public Button getPlayButton() { return playButton;  }
+
+  public PlayAudioPanel setPauseLabel(String pauseLabel) {
+    this.pauseLabel = pauseLabel;
+    return this;
+  }
+
+  public PlayAudioPanel setMinWidth(int minWidth) {
+    this.minWidth = minWidth;
+    return this;
+  }
 
   public String toString() { return "PlayAudioPanel #" +id; }
 }
