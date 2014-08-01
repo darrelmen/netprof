@@ -4,6 +4,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * What the client wants to know about a reference audio cut.
@@ -150,6 +151,8 @@ public class AudioAttribute implements IsSerializable {
   public Map<String, String> getAttributes() {
     return attributes;
   }
+
+  public Set<String> getAttributeKeys() { return attributes.keySet(); }
 
   public String getKey() { return "user="+userid+", "+getAttributes().toString(); }
 
