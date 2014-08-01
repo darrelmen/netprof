@@ -59,12 +59,14 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     return true;
   }
 
+  long then;
   @Override
   public void startRecording() {
     if (parentPanel instanceof BusyPanel) {
       ((BusyPanel) parentPanel).setBusy(true);
     }
-    controller.logEvent(this, RECORD_BUTTON,getExercise().getID(),"startRecording");
+    controller.logEvent(this, RECORD_BUTTON, getExercise().getID(), "startRecording");
+    then = System.currentTimeMillis();
     super.startRecording();
     setPlayEnabled(false);
   }
@@ -80,7 +82,9 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     if (parentPanel instanceof BusyPanel) {
       ((BusyPanel) parentPanel).setBusy(false);
     }
-    controller.logEvent(this, RECORD_BUTTON,getExercise().getID(),"stopRecording");
+    long now = System.currentTimeMillis();
+
+    controller.logEvent(this, RECORD_BUTTON, getExercise().getID(), "stopRecording, duration " + (now - then) + " millis");
 
     recordAudioPanel.getWaveform().setVisible(true);
     recordAudioPanel.getWaveform().setUrl(LangTest.LANGTEST_IMAGES + "animated_progress.gif");
@@ -88,6 +92,10 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     super.stopRecording();
   }
 
+  /**
+   * @see #postAudioFile(String)
+   * @return
+   */
   @Override
   protected String getAudioType() {
     return audioType;
