@@ -1,5 +1,6 @@
 package mitll.langtest.shared;
 
+import javax.validation.constraints.Min;
 import java.util.*;
 
 /**
@@ -196,24 +197,100 @@ public class AudioExercise extends ExerciseShell {
    * @return
    */
   public Map<MiniUser, List<AudioAttribute>> getUserMap(boolean isMale) {
-    Map<MiniUser, List<AudioAttribute>> userToAudio = new HashMap<MiniUser, List<AudioAttribute>>();
-    Collection<AudioAttribute> byGender = getByGender(isMale);
-    for (AudioAttribute attribute : byGender) {
-      List<AudioAttribute> audioAttributes1 = userToAudio.get(attribute.getUser());
-      if (audioAttributes1 == null)
-        userToAudio.put(attribute.getUser(), audioAttributes1 = new ArrayList<AudioAttribute>());
-      audioAttributes1.add(attribute);
-    }
+    Map<MiniUser, List<AudioAttribute>> userToAudio = getUserToAudio(isMale);
 
+    sortRegBeforeSlow(userToAudio);
+    return userToAudio;
+  }
+
+  private void sortRegBeforeSlow(Map<MiniUser, List<AudioAttribute>> userToAudio) {
     for (List<AudioAttribute> lists : userToAudio.values()) {
-      Collections.sort(lists,new Comparator<AudioAttribute>() {
+      Collections.sort(lists, new Comparator<AudioAttribute>() {
         @Override
         public int compare(AudioAttribute o1, AudioAttribute o2) {
           return o1.isRegularSpeed() && o2.isSlow() ? -1 : o1.isSlow() && o2.isRegularSpeed() ? +1 : 0;
         }
       });
     }
+  }
+
+  /**
+   * Skip context audio
+   * @param isMale
+   * @return
+   */
+  private Map<MiniUser, List<AudioAttribute>> getUserToAudio(boolean isMale) {
+    Map<MiniUser, List<AudioAttribute>> userToAudio = new HashMap<MiniUser, List<AudioAttribute>>();
+    Collection<AudioAttribute> byGender = getByGender(isMale);
+    for (AudioAttribute attribute : byGender) {
+      if (!attribute.getAttributeKeys().contains("context")) {
+        List<AudioAttribute> audioAttributes1 = userToAudio.get(attribute.getUser());
+        if (audioAttributes1 == null)
+          userToAudio.put(attribute.getUser(), audioAttributes1 = new ArrayList<AudioAttribute>());
+        audioAttributes1.add(attribute);
+      }
+    }
     return userToAudio;
+  }
+
+  public List<AudioAttribute> getDefaultUserAudio() {
+    List<AudioAttribute> males = new ArrayList<AudioAttribute>();
+    for (AudioAttribute audioAttribute : audioAttributes.values()) {
+      MiniUser user = audioAttribute.getUser();
+      if (user == null) {
+        System.err.println("getByGender : huh? there's no user attached to " + audioAttribute);
+      } else if (user.isDefault()) {
+        males.add(audioAttribute);
+      }
+    }
+    return males;
+  }
+
+  /**
+   * So we probably want the most recent recordings but bias first towards ones that have both fast and slow.
+   *
+   * @param isMale
+   * @return singleton map not containing default user -
+   */
+  public Map<MiniUser, List<AudioAttribute>> getMostRecentAudio(boolean isMale) {
+    Map<MiniUser, List<AudioAttribute>> userToAudio = getUserToAudio(isMale);
+
+    long bothTimestamp = 0;
+    long timestamp = 0;
+    MiniUser bothLatest = null;
+    MiniUser latest = null;
+    for (Map.Entry<MiniUser, List<AudioAttribute>> pair : userToAudio.entrySet()) {
+      boolean reg = false, slow = false;
+      for (AudioAttribute audioAttribute : pair.getValue()) {
+        MiniUser user = pair.getKey();
+        if (!user.isDefault()) {
+          if (audioAttribute.isRegularSpeed()) reg = true;
+          if (audioAttribute.isSlow()) slow = true;
+
+          long timestamp1 = audioAttribute.getTimestamp();
+          if (reg && slow && bothTimestamp < timestamp1) {
+            bothTimestamp = timestamp1;
+            bothLatest = user;
+          }
+          if (timestamp < timestamp1) {
+            timestamp = timestamp1;
+            latest = user;
+          }
+        }
+      }
+    }
+
+    MiniUser toUse = bothLatest != null ? bothLatest : latest;
+    Map<MiniUser, List<AudioAttribute>> userToAudioSingle = new HashMap<MiniUser, List<AudioAttribute>>();
+    if (toUse == null && !userToAudio.isEmpty()) {
+      System.err.println("huh? user->audio map was " + userToAudio + " but couldn't find latest user?");
+    }
+    else {
+      userToAudioSingle.put(toUse,userToAudio.get(toUse));
+    }
+
+    sortRegBeforeSlow(userToAudioSingle);
+    return userToAudioSingle;
   }
 
   public List<MiniUser> getSortedUsers(Map<MiniUser, List<AudioAttribute>> malesMap) {
