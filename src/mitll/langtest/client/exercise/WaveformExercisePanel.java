@@ -58,6 +58,11 @@ public class WaveformExercisePanel extends ExercisePanel {
   public boolean isBusy() {
     return isBusy;
   }
+
+  /**
+   * @see ExercisePanel#ExercisePanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, ExerciseController, mitll.langtest.client.list.ListInterface)
+   *
+   */
   protected void addInstructions() {
     if (!exercise.getUnitToValue().isEmpty()) {
       Panel unitLessonForExercise = getUnitLessonForExercise();
@@ -86,9 +91,9 @@ public class WaveformExercisePanel extends ExercisePanel {
     Panel vp = new VerticalPanel();
 
     // add normal speed recording widget
-    addRecordAudioPanel(exercise, service, controller, index, vp,Result.AUDIO_TYPE_REGULAR,REGULAR_SPEED_RECORDING);
+    addRecordAudioPanelNoCaption(exercise, service, controller, index, vp,Result.AUDIO_TYPE_REGULAR,REGULAR_SPEED_RECORDING);
     // add slow speed recording widget
-    addRecordAudioPanel(exercise, service, controller, index+1, vp,Result.AUDIO_TYPE_SLOW,SLOW_SPEED_RECORDING);
+    addRecordAudioPanelNoCaption(exercise, service, controller, index+1, vp,Result.AUDIO_TYPE_SLOW,SLOW_SPEED_RECORDING);
     if (exercise.getContext() != null && !exercise.getContext().isEmpty()) {
       DivWidget div = new DivWidget();
       div.addStyleName("Instruction");
@@ -111,11 +116,28 @@ public class WaveformExercisePanel extends ExercisePanel {
 
     System.out.println("addRecordAudioPanel " + exercise + " audioType " +audioType);
 
-    RecordAudioPanel fast = new RecordAudioPanel(exercise, controller, this, service, index, true, audioType);
+    RecordAudioPanel fast = new RecordAudioPanel(exercise, controller, this, service, index, false, audioType);
     ResizableCaptionPanel cp = new ResizableCaptionPanel(caption);
     cp.setContentWidget(fast);
     audioPanels.add(fast);
     vp.add(cp);
+
+    if (fast.isAudioPathSet()) recordCompleted(fast);
+    addAnswerWidget(index, fast);
+    return fast;
+  }
+
+  private VerticalPanel addRecordAudioPanelNoCaption(CommonExercise exercise, LangTestDatabaseAsync service,
+                                            ExerciseController controller, int index, Panel vp, String audioType, String caption) {
+
+    System.out.println("addRecordAudioPanel " + exercise + " audioType " +audioType);
+
+    RecordAudioPanel fast = new RecordAudioPanel(exercise, controller, this, service, index, false, audioType);
+    //ResizableCaptionPanel cp = new ResizableCaptionPanel(caption);
+   // cp.setContentWidget(fast);
+    audioPanels.add(fast);
+    // vp.add(cp);
+     vp.add(fast);
 
     if (fast.isAudioPathSet()) recordCompleted(fast);
     addAnswerWidget(index, fast);
@@ -158,16 +180,6 @@ public class WaveformExercisePanel extends ExercisePanel {
 
   protected Widget getContentScroller(HTML maybeRTLContent) {
     return maybeRTLContent;
-  }
-
-  @Override
-  protected String getInstructions() {
-    String prefix = "<br/>" + "";//THREE_SPACES;
-    String prompt = REPEAT_TWICE;
-    if (controller.getAudioType().equals(Result.AUDIO_TYPE_REGULAR)) {
-      prompt = REPEAT_ONCE;
-    }
-    return prefix + prompt;
   }
 
   @Override
