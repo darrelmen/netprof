@@ -127,7 +127,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @param recordButtonTitle
    */
   protected void addWidgets(String playButtonSuffix, String audioType, String recordButtonTitle) {
-    System.out.println("AudioPanel.addWidgets " + audioType + " title " + recordButtonTitle + " suffix = " + playButtonSuffix);
+    //System.out.println("AudioPanel.addWidgets " + audioType + " title " + recordButtonTitle + " suffix = " + playButtonSuffix);
     DivWidget divWithRelativePosition = new DivWidget();  // need this for audio position div to work properly
     divWithRelativePosition.getElement().getStyle().setPosition(Style.Position.RELATIVE);
     Panel imageContainer = new VerticalPanel();
@@ -140,11 +140,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
     // add widgets to left of play button
     Widget toTheRightWidget = getAfterPlayWidget();
-    //System.out.println("addWidgets toTheRightWidget " + (toTheRightWidget == null ? "null" : toTheRightWidget.getElement().getId()));
-
     audioPositionPopup = new AudioPositionPopup(imageContainer);
     imageContainer.add(audioPositionPopup);
-    //System.out.println("added " + audioPositionPopup.getElement().getId() + " for " + exerciseID + " audio type " + audioType);
 
     if (hasAudio()) {
       playAudio = getPlayButtons(toTheRightWidget, playButtonSuffix, audioType, recordButtonTitle);
@@ -324,9 +321,9 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     return playAudio;
   }
 
-  protected PlayAudioPanel makePlayAudioPanel(final Widget toTheRightWidget, String playButtonSuffix, String audioType,
+  protected PlayAudioPanel makePlayAudioPanel(final Widget toTheRightWidget, String buttonTitle, String audioType,
                                               String recordButtonTitle) {
-    return new PlayAudioPanel(soundManager, playButtonSuffix, toTheRightWidget);
+    return new PlayAudioPanel(soundManager, buttonTitle, toTheRightWidget);
   }
 
   /**
@@ -378,7 +375,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @param width
    */
   protected void getEachImage(int width) {
-   // System.out.println("AudioPanel.getEachImage : " + getElement().getId()+ " path " + audioPath);
+    System.out.println("AudioPanel.getEachImage : " + getElement().getId()+ " path " + audioPath);
     getImageURLForAudio(audioPath, WAVEFORM, width, getWaveform());
     if (showSpectrogram) {
       getImageURLForAudio(audioPath, SPECTROGRAM, width, getSpectrogram());
