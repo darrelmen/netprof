@@ -47,7 +47,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   private static final String SCORE = "Score";
   private static final int HEIGHT = 18;
   private static final int ROW_LEFT_MARGIN = 18 + 5;
-  public static final String PLAY_REFERENCE = "Play Reference";
+  public static final String PLAY_REFERENCE = "";//"Play Reference";
 
   private final PretestGauge ASRGauge;
   private final Panel phoneList;
@@ -193,14 +193,14 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     }
 
     if (refAudio != null && !scoreAndPaths.isEmpty()) { // show audio to compare yours against
-      Panel hp = getRefAudio(audioTag);
+      Panel hp = getRefAudio();
 
       vp.add(hp);
     }
     chartPanel.add(vp);
   }
 
-  private Panel getRefAudio(AudioTag audioTag) {
+  private Panel getRefAudio() {
     Widget audioWidget = getAudioWidget(new ScoreAndPath(classAvg, refAudio), PLAY_REFERENCE);
     makeChildGreen(audioWidget);
 
