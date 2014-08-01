@@ -530,9 +530,8 @@ public class DatabaseImpl implements Database {
    * @return unmodifiable list of exercises
    * @see mitll.langtest.server.LangTestDatabaseImpl#init
    */
-  public List<CommonExercise> getUnmodExercises() {
-    List<CommonExercise> exercises = getExercises(useFile, lessonPlanFile);
-    return Collections.unmodifiableList(exercises);
+  public void preloadExercises() {
+    getExercises(useFile, lessonPlanFile);
   }
 
   public long addUser(HttpServletRequest request,
