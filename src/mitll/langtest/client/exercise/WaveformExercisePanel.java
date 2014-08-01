@@ -1,14 +1,9 @@
 package mitll.langtest.client.exercise;
 
 import com.github.gwtbootstrap.client.ui.Heading;
-import com.google.gwt.user.client.ui.CaptionPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.ProvidesResize;
-import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
@@ -31,8 +26,8 @@ import java.util.Collection;
 public class WaveformExercisePanel extends ExercisePanel {
   private static final String REPEAT_TWICE = "<i>Record the word or phrase, first at normal speed, then again at slow speed.</i>";
   private static final String RECORD_PROMPT = "Record the word or phrase, first at normal speed, then again at slow speed.";
-  public static final String REGULAR_SPEED_RECORDING = "Regular speed recording";
-  public static final String SLOW_SPEED_RECORDING = "Slow speed recording";
+  private static final String REGULAR_SPEED_RECORDING = "Regular speed recording";
+  private static final String SLOW_SPEED_RECORDING = "Slow speed recording";
   private boolean isBusy = false;
   private Collection<RecordAudioPanel> audioPanels;
 
@@ -88,31 +83,43 @@ public class WaveformExercisePanel extends ExercisePanel {
    */
   protected Widget getAnswerWidget(CommonExercise exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
     audioPanels = new ArrayList<RecordAudioPanel>();
-    VerticalPanel vp = new VerticalPanel();
+    Panel vp = new VerticalPanel();
 
     // add normal speed recording widget
-    RecordAudioPanel fast = new RecordAudioPanel(exercise, controller, this, service, index, true, Result.AUDIO_TYPE_REGULAR);
-    ResizableCaptionPanel cp = new ResizableCaptionPanel(REGULAR_SPEED_RECORDING);
+    addRecordAudioPanel(exercise, service, controller, index, vp,Result.AUDIO_TYPE_REGULAR,REGULAR_SPEED_RECORDING);
+    // add slow speed recording widget
+    addRecordAudioPanel(exercise, service, controller, index+1, vp,Result.AUDIO_TYPE_SLOW,SLOW_SPEED_RECORDING);
+    if (exercise.getContext() != null && !exercise.getContext().isEmpty()) {
+      DivWidget div = new DivWidget();
+      div.addStyleName("Instruction");
+      InlineHTML englishPhrase = new InlineHTML(exercise.getContext(), WordCountDirectionEstimator.get().estimateDirection(exercise.getContext()));
+   //   englishPhrase.addStyleName(true ? "Instruction-data-with-wrap" : "Instruction-data");
+      englishPhrase.addStyleName("Instruction-data-with-wrap");
+        div.add(englishPhrase);
+      englishPhrase.addStyleName("xlargeFont");
+      div.addStyleName("topMargin");
+
+      VerticalPanel widgets = addRecordAudioPanel(exercise, service, controller, index + 1, vp, "context=" + Result.AUDIO_TYPE_REGULAR, "Example Sentence");
+      widgets.insert(div,0);
+    }
+
+    return vp;
+  }
+
+  private VerticalPanel addRecordAudioPanel(CommonExercise exercise, LangTestDatabaseAsync service,
+                                            ExerciseController controller, int index, Panel vp, String audioType, String caption) {
+
+    System.out.println("addRecordAudioPanel " + exercise + " audioType " +audioType);
+
+    RecordAudioPanel fast = new RecordAudioPanel(exercise, controller, this, service, index, true, audioType);
+    ResizableCaptionPanel cp = new ResizableCaptionPanel(caption);
     cp.setContentWidget(fast);
     audioPanels.add(fast);
     vp.add(cp);
 
     if (fast.isAudioPathSet()) recordCompleted(fast);
     addAnswerWidget(index, fast);
-
-    // add slow speed recording widget
-
-    RecordAudioPanel slow = new RecordAudioPanel(exercise, controller, this, service, index + 1, true, Result.AUDIO_TYPE_SLOW);
-
-    cp = new ResizableCaptionPanel(SLOW_SPEED_RECORDING);
-    cp.setContentWidget(slow);
-    audioPanels.add(slow);
-    vp.add(cp);
-
-    if (slow.isAudioPathSet()) recordCompleted(slow);
-    addAnswerWidget(index + 1, slow);
-
-    return vp;
+    return fast;
   }
 
   private Panel getUnitLessonForExercise() {
