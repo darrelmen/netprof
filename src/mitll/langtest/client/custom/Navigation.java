@@ -22,6 +22,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -672,6 +673,12 @@ public class Navigation implements RequiresResize {
      
      final ListBox availableDialogs = new ListBox();
      final ListBox availableSpeakers = new ListBox();
+     availableDialogs.getElement().getStyle().setProperty("fontSize", "150%");
+     availableDialogs.getElement().getStyle().setProperty("width", "auto");
+     availableDialogs.getElement().getStyle().setProperty("margin", "10px");
+     availableSpeakers.getElement().getStyle().setProperty("fontSize", "150%");
+     availableSpeakers.getElement().getStyle().setProperty("width", "auto");
+     availableSpeakers.getElement().getStyle().setProperty("margin", "10px");
      final String CHOOSE_PART = "Choose a part to read";
      final String CHOOSE_DIALOG = "Choose a dialog to practice";
      final HashMap<String, String[]> dialogToParts = getDialogToPartsMap();
@@ -725,11 +732,14 @@ public class Navigation implements RequiresResize {
     			 Window.alert("Select a dialog and part first!");
     		 }
     		 else{
+    			 forSents.clear();
     		     displayDialog(dialogIndex.get(availableDialogs.getSelectedIndex()), availableSpeakers.getValue(availableSpeakers.getSelectedIndex()), forSents);
     		     contentPanel.add(forSents);
     		 }
     	 }
      });
+     startDialog.getElement().getStyle().setProperty("fontSize", "150%");
+     availableDialogs.getElement().getStyle().setProperty("margin", "10px");
      contentPanel.add(startDialog);
   }
   
@@ -738,14 +748,10 @@ public class Navigation implements RequiresResize {
   }-*/;
   
   private SimplePostAudioRecordButton getRecordButton(String sent, final HTML resultHolder){
-	  final FlowPanel resultPanel = new FlowPanel();
 	  return new SimplePostAudioRecordButton(controller, service, sent) {
 		  @Override
 		  public void useResult(AudioAnswer result){
-			  //HTML res = new HTML("result was: " + result);
 			  resultHolder.setHTML(String.valueOf(result.getScore()));
-			  //resultPanel.add(res);
-			  //resultPanel.add(score);
 		  }
 		  
 		  @Override
@@ -755,42 +761,73 @@ public class Navigation implements RequiresResize {
 	  };
   }
   
-  
-  
   private void displayDialog(String dialog, String part, Panel cp){
 
 	  HashMap<String, String> sentToAudioPath = getSentToAudioPath();
 	  HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSpeaker = getDialogToSentIndexToSpeaker();
 	  HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSent = getDialogToSentIndexToSent();
-
 	  int sentIndex = 0;
-
 	  Grid sentPanel = new Grid(dialogToSentIndexToSent.get(dialog).size(), 4);
 	  final ArrayList<HTML> scoreElements = new ArrayList<HTML>();
 	  Button last = null;
+      String otherPart = "";
+      boolean youStart = false;
+      
 	  while(dialogToSentIndexToSent.get(dialog).containsKey(sentIndex)){
 		  String sentence = dialogToSentIndexToSent.get(dialog).get(sentIndex);
-		  HTML sent = new HTML(dialogToSentIndexToSpeaker.get(dialog).get(sentIndex)+": "+sentence);
+		  HTML sent = new HTML(sentence);
+		  sent.getElement().getStyle().setProperty("color", "#B8B8B8");
+		  sent.getElement().getStyle().setProperty("margin", "5px 10px");
+		  sent.getElement().getStyle().setProperty("fontSize", "130%");
 		  if(part.equals(dialogToSentIndexToSpeaker.get(dialog).get(sentIndex))){
-			  Anchor playButton = (new PlayAudioWidget()).getAudioWidget("config/mandarinClassroom/bestAudio/"+sentToAudioPath.get(sentence));
+			  if (sentIndex == 0)
+				  youStart = true;
+			  PlayAudioPanel play = new PlayAudioPanel(controller, "config/mandarinClassroom/bestAudio/"+sentToAudioPath.get(sentence));
 			  HTML score = new HTML("0.0");
 			  Button recordButton = getRecordButton(dialogToSentIndexToSent.get(dialog).get(sentIndex), score);
 			  sentPanel.setWidget(sentIndex, 2, recordButton);
-			  sent.getElement().getStyle().setProperty("fontWeight", "bolder");
-			  sentPanel.setWidget(sentIndex, 0, playButton);
+			  sent.getElement().getStyle().setProperty("fontWeight", "900");
+			  sentPanel.setWidget(sentIndex, 1, play);
 			  scoreElements.add(score);
 			  score.setVisible(false);
 			  last = recordButton;
 			  sentPanel.setWidget(sentIndex, 3, score);
+			  recordButton.setVisible(false);
+			  play.setVisible(false);
 		  }
 		  else{
-			  sentPanel.setWidget(sentIndex, 0, (new PlayAudioWidget()).getAudioWidget("config/mandarinClassroom/bestAudio/"+sentToAudioPath.get(sentence)));
+			  PlayAudioPanel play = new PlayAudioPanel(controller, "config/mandarinClassroom/bestAudio/"+sentToAudioPath.get(sentence));
+			  sentPanel.setWidget(sentIndex, 1, play);
 			  sent.getElement().getStyle().setProperty("fontStyle", "italic");
+			  play.setVisible(false);
+			  otherPart = dialogToSentIndexToSpeaker.get(dialog).get(sentIndex);
 		  }
-		  sentPanel.setWidget(sentIndex, 1, sent);
+		  sentPanel.setWidget(sentIndex, 0, sent);
 		  sentIndex += 1;
 	  }
-	  final HTML avg = new HTML("avg score was: 0.0");
+	  HTML setup = new HTML("You are "+part+" talking to "+otherPart+". "+(youStart ? "You" : otherPart) +" begin"+(youStart ? "" : "s")+" the conversation.");
+	  setup.getElement().getStyle().setProperty("fontSize", "130%");
+	  setup.getElement().getStyle().setProperty("margin", "10px");
+	  cp.add(setup);
+	  
+	  setupPlayOrder();
+	  cp.add(setupScoring(new HTML("avg score was: 0.0"), last, scoreElements));
+	  cp.add(sentPanel);
+	  Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+	     public void execute() {
+	        addPlayer();
+	     }
+	  });
+	  if(!youStart){
+		  ((PlayAudioPanel) sentPanel.getWidget(0, 1)).playCurrent();
+	  }
+  }
+  
+  private void setupPlayOrder(){
+	  
+  }
+  
+  private HTML setupScoring(final HTML avg, Button last, final ArrayList<HTML> scoreElements){
 	  avg.setVisible(false);
 	  last.addMouseUpHandler(new MouseUpHandler() {
 		  @Override
@@ -804,13 +841,7 @@ public class Navigation implements RequiresResize {
 			avg.setVisible(true);
 		  }
 	  });
-	  cp.add(sentPanel);
-	  cp.add(avg);
-	  Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-	     public void execute() {
-	        addPlayer();
-	     }
-	  });
+	  return avg;
   }
   
   private HashMap<String, String[]> getDialogToPartsMap(){
