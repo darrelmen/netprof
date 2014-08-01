@@ -479,10 +479,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db.getUserListManager().addAnnotations(byID); // TODO nice not to do this when not in classroom...
   }
 
+  /**
+   * @see #getExercise(String, long)
+   * @see #makeExerciseListWrapper(int, java.util.Collection, long, String)
+   * @param byID
+   */
   private void ensureMP3s(CommonExercise byID) {
     Collection<AudioAttribute> audioAttributes = byID.getAudioAttributes();
     for (AudioAttribute audioAttribute : audioAttributes) {
-      ensureMP3(audioAttribute.getAudioRef(), false);
+      if (!ensureMP3(audioAttribute.getAudioRef(), false)) {
+        audioAttribute.setAudioRef(AudioConversion.FILE_MISSING);
+      }
     }
 
     if (audioAttributes.isEmpty()) { logger.warn("ensureMP3s : no ref audio for " + byID); }
@@ -533,8 +540,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see #ensureMP3s(mitll.langtest.shared.CommonExercise)
    * @param wavFile
    * @param overwrite
+   * @return true if mp3 file exists
    */
-  private void ensureMP3(String wavFile, boolean overwrite) {
+  private boolean ensureMP3(String wavFile, boolean overwrite) {
     if (wavFile != null) {
       String parent = pathHelper.getInstallPath();
       //logger.debug("ensureMP3 : wav " + wavFile + " under " + parent);
@@ -547,8 +555,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       if (!audioConversion.exists(wavFile, parent)) {
         logger.error("huh? can't find " + wavFile + " under " + parent);
       }
-      audioConversion.ensureWriteMP3(wavFile, parent, overwrite);
+      String s = audioConversion.ensureWriteMP3(wavFile, parent, overwrite);
+      return !(s.equals(AudioConversion.FILE_MISSING));
     }
+    return false;
   }
 
   /**
