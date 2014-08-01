@@ -35,6 +35,7 @@ public class AudioConversion {
   private static final String LINUX_SOX_BIN_DIR_2 = "/usr/bin";
   private static final String WINDOWS_SOX_BIN_DIR = "C:\\Users\\go22670\\sox-14-3-2";
   public static final String SIXTEEN_K_SUFFIX = "_16K";
+  public static final String FILE_MISSING = "FILE_MISSING";
   private File oggEncoder;
   private final AudioCheck audioCheck = new AudioCheck();
 
@@ -302,7 +303,9 @@ public class AudioConversion {
 
         String lamePath = getLame();
         if (DEBUG)  logger.debug("run lame on " + tempFile + " making " + mp3File);
-        convertFileAndCheck(lamePath, tempFile.getAbsolutePath(), mp3File);
+        if (!convertFileAndCheck(lamePath, tempFile.getAbsolutePath(), mp3File)) {
+          return FILE_MISSING;
+        }
       } catch (IOException e) {
         logger.error("converting " + pathToWav + " to " + mp3File + " got " + e,e);
       }
