@@ -38,8 +38,8 @@ import java.util.Map;
  */
 public class CommentNPFExercise extends NPFExercise {
   private static final String NO_REFERENCE_AUDIO = "No reference audio";
-  public static final String M = "M";
-  public static final String F = "F";
+  private static final String M = "M";
+  private static final String F = "F";
 
   private AudioAttribute defaultAudio, maleAudio, femaleAudio;
   private PlayAudioPanel contextPlay;
@@ -77,44 +77,7 @@ public class CommentNPFExercise extends NPFExercise {
     if (!context.isEmpty()) {
       Widget entry = getEntry(e, QCNPFExercise.CONTEXT, ExerciseFormatter.CONTEXT, context);
       Panel hp = new HorizontalPanel();
-      String path = null;
-
-      long maleTime = 0, femaleTime = 0;
-      for (AudioAttribute audioAttribute
-          : e.getAudioAttributes()) {
-        if (audioAttribute.getAudioType().startsWith("context")) {
-          if (audioAttribute.getUser().isDefault()) {
-            defaultAudio = audioAttribute;
-          } else if (audioAttribute.getUser().isMale()) {
-            if (audioAttribute.getTimestamp() > maleTime) {
-              maleAudio = audioAttribute;
-              maleTime = audioAttribute.getTimestamp();
-            }
-          } else if (audioAttribute.getTimestamp() > femaleTime) {
-            femaleAudio = audioAttribute;
-            femaleTime = audioAttribute.getTimestamp();
-          }
-        }
-      }
-
-      AudioAttribute toUse = maleAudio != null ? maleAudio : femaleAudio != null ? femaleAudio : defaultAudio;
-      path = toUse == null ? null : toUse.getAudioRef();
-      if (path != null) {
-        contextPlay = new PlayAudioPanel(controller, path)
-            .setPlayLabel("")
-            .setPauseLabel("")
-            .setMinWidth(12);
-        contextPlay.getPlayButton().getElement().getStyle().setMarginTop(-6, Style.Unit.PX);
-
-        hp.add(contextPlay);
-
-        List<String> choices = new ArrayList<String>();
-        if (maleAudio != null) choices.add(M);
-        if (femaleAudio != null) choices.add(F);
-        if (defaultAudio != null) choices.add("Default"); //better not happen
-
-        hp.add(getShowGroup(choices));
-      }
+      addGenderChoices(e, hp);
 
       hp.add(entry);
       hp.getElement().getStyle().setMarginTop(5, Style.Unit.PX);
@@ -122,6 +85,47 @@ public class CommentNPFExercise extends NPFExercise {
     }
 
     return column;
+  }
+
+  private void addGenderChoices(CommonExercise e, Panel hp) {
+    String path = null;
+
+    long maleTime = 0, femaleTime = 0;
+    for (AudioAttribute audioAttribute : e.getAudioAttributes()) {
+      if (audioAttribute.getAudioType().startsWith("context")) {
+        if (audioAttribute.getUser().isDefault()) {
+          defaultAudio = audioAttribute;
+        } else if (audioAttribute.getUser().isMale()) {
+          if (audioAttribute.getTimestamp() > maleTime) {
+            maleAudio = audioAttribute;
+            maleTime = audioAttribute.getTimestamp();
+          }
+        } else if (audioAttribute.getTimestamp() > femaleTime) {
+          femaleAudio = audioAttribute;
+          femaleTime = audioAttribute.getTimestamp();
+        }
+      }
+    }
+
+    AudioAttribute toUse = maleAudio != null ? maleAudio : femaleAudio != null ? femaleAudio : defaultAudio;
+    path = toUse == null ? null : toUse.getAudioRef();
+    if (path != null) {
+      System.out.println("adding context play option " + path);
+      contextPlay = new PlayAudioPanel(controller, path)
+          .setPlayLabel("")
+          .setPauseLabel("")
+          .setMinWidth(12);
+      contextPlay.getPlayButton().getElement().getStyle().setMarginTop(-6, Style.Unit.PX);
+
+      hp.add(contextPlay);
+
+      List<String> choices = new ArrayList<String>();
+      if (maleAudio != null) choices.add(M);
+      if (femaleAudio != null) choices.add(F);
+      if (defaultAudio != null) choices.add("Default"); //better not happen
+
+      hp.add(getShowGroup(choices));
+    }
   }
 
   private DivWidget getShowGroup(List<String> choices) {
@@ -136,11 +140,10 @@ public class CommentNPFExercise extends NPFExercise {
         @Override
         public void onClick(ClickEvent event) {
           if (choice.equals(M)) {
-           // System.out.println("playing male audio! " + maleAudio.getAudioRef());
+            //System.out.println("playing male audio! " + maleAudio.getAudioRef());
             contextPlay.playAudio(maleAudio.getAudioRef());
           } else if (choice.equals(F)) {
-           // System.out.println("playing female audio! " + femaleAudio.getAudioRef());
-
+            //System.out.println("playing female audio! " + femaleAudio.getAudioRef());
             contextPlay.playAudio(femaleAudio.getAudioRef());
           } else {
             contextPlay.playAudio(defaultAudio.getAudioRef());
@@ -161,8 +164,8 @@ public class CommentNPFExercise extends NPFExercise {
     return w;
   }
 
-  private Button getChoice( String title, boolean isActive,ClickHandler handler ) {
-    Button onButton = new Button(title.equals(M) ? "" : title.equals(F)? "": title);
+  private Button getChoice(String title, boolean isActive, ClickHandler handler) {
+    Button onButton = new Button(title.equals(M) ? "" : title.equals(F) ? "" : title);
     onButton.getElement().setId("Choice_" + title);
     controller.register(onButton, exercise.getID());
     onButton.addClickHandler(handler);
