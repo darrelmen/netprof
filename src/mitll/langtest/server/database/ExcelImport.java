@@ -103,6 +103,8 @@ public class ExcelImport implements ExerciseDAO {
     this.unitIndex = serverProps.getUnitChapterWeek()[0];
     this.chapterIndex = serverProps.getUnitChapterWeek()[1];
     this.weekIndex = serverProps.getUnitChapterWeek()[2];
+
+    logger.debug("unit " + unitIndex + " chapter " +chapterIndex + " week " +weekIndex);
   }
 
   public boolean getMissing(String relativeConfigDir, String file, Set<String> missing) {
@@ -397,21 +399,36 @@ public class ExcelImport implements ExerciseDAO {
           List<String> predefinedTypeOrder = new ArrayList<String>();
           for (String col : columns) {
             String colNormalized = col.toLowerCase();
-            if (colNormalized.startsWith("Word".toLowerCase())) {
+
+            logger.debug("col " + col + " norm '" +colNormalized+
+                "' " + colNormalized.contains("context"));
+            if (colNormalized.startsWith("word")) {
               gotHeader = true;
               colIndexOffset = columns.indexOf(col);
             } else if (colNormalized.contains("transliteration")) {
               transliterationIndex = columns.indexOf(col);
+            } else if (colNormalized.contains("weight")) {
+              weightIndex = columns.indexOf(col);
+            } else if (colNormalized.contains("meaning")) {
+              meaningIndex = columns.indexOf(col);
+            } else if (colNormalized.contains("id")) {
+              idIndex = columns.indexOf(col);
+            } else if (colNormalized.contains("context")) {
+              contextIndex = columns.indexOf(col);
+            } else if (colNormalized.contains("audio_index")) {
+              audioIndex = columns.indexOf(col);
+              hasAudioIndex = true;
             } else if (gotUCW) {
-              if(columns.indexOf(col) == unitIndex){
-                  predefinedTypeOrder.add(col);
-                  unitName = col;
-              } else if(columns.indexOf(col) == chapterIndex){
-                  predefinedTypeOrder.add(col);
-                  chapterName = col;
-              } else if(columns.indexOf(col) == weekIndex){
-                  predefinedTypeOrder.add(col);
-                  weekName = col;
+              logger.debug("using predef unit/chapter/week ");
+              if (columns.indexOf(col) == unitIndex) {
+                predefinedTypeOrder.add(col);
+                unitName = col;
+              } else if (columns.indexOf(col) == chapterIndex) {
+                predefinedTypeOrder.add(col);
+                chapterName = col;
+              } else if (columns.indexOf(col) == weekIndex) {
+                predefinedTypeOrder.add(col);
+                weekName = col;
               }
             } else if (colNormalized.contains("unit") || colNormalized.contains("book")) {
               unitIndex = columns.indexOf(col);
@@ -425,17 +442,6 @@ public class ExcelImport implements ExerciseDAO {
               weekIndex = columns.indexOf(col);
               predefinedTypeOrder.add(col);
               weekName = col;
-            } else if (colNormalized.contains("weight")) {
-              weightIndex = columns.indexOf(col);
-            } else if (colNormalized.contains("meaning")) {
-              meaningIndex = columns.indexOf(col);
-            } else if (colNormalized.contains("id")) {
-              idIndex = columns.indexOf(col);
-            } else if (colNormalized.contains("context")) {
-              contextIndex = columns.indexOf(col);
-            } else if (colNormalized.contains("audio_index")) {
-              audioIndex = columns.indexOf(col);
-              hasAudioIndex = true;
             }
           }
           if (usePredefinedTypeOrder) {
@@ -508,6 +514,7 @@ public class ExcelImport implements ExerciseDAO {
 
               boolean expectFastAndSlow = idIndex == -1;
               String idToUse = expectFastAndSlow ? "" + id++ : givenIndex;
+
               CommonExercise imported = isDelete ? null : getExercise(idToUse, weightIndex, next, english, foreignLanguagePhrase, translit,
                 meaning, context, false, hasAudioIndex ? getCell(next, audioIndex) : "", true);
 
@@ -595,11 +602,19 @@ public class ExcelImport implements ExerciseDAO {
         if (!gotHeader) {
           for (String col : columns) {
             String colNormalized = col.toLowerCase();
-            if (colNormalized.startsWith("Word".toLowerCase())) {
+            if (colNormalized.startsWith("word")) {
               gotHeader = true;
               colIndexOffset = columns.indexOf(col);
             } else if (colNormalized.contains("transliteration")) {
               transliterationIndex = columns.indexOf(col);
+            } else if (colNormalized.contains("meaning")) {
+              meaningIndex = columns.indexOf(col);
+            } else if (colNormalized.contains("id")) {
+              idIndex = columns.indexOf(col);
+            } else if (colNormalized.contains("context")) {
+              contextIndex = columns.indexOf(col);
+            } else if (colNormalized.contains("audio_index")) {
+              audioIndex = columns.indexOf(col);
             } else if (gotUCW) {
               if(columns.indexOf(col) == unitIndex){
                   unitName = col;
@@ -619,14 +634,6 @@ public class ExcelImport implements ExerciseDAO {
               weekName = col;
             } else if (colNormalized.contains("weight")) {
               weightIndex = columns.indexOf(col);
-            } else if (colNormalized.contains("meaning")) {
-              meaningIndex = columns.indexOf(col);
-            } else if (colNormalized.contains("id")) {
-              idIndex = columns.indexOf(col);
-            } else if (colNormalized.contains("context")) {
-              contextIndex = columns.indexOf(col);
-            } else if (colNormalized.contains("audio_index")) {
-              audioIndex = columns.indexOf(col);
             }
           }
 
@@ -868,7 +875,9 @@ public class ExcelImport implements ExerciseDAO {
     if (foreignLanguagePhrase.length() > 0) {
       translations.add(foreignLanguagePhrase);
     }
+//    logger.debug("id " + id + " context " + context);
     imported = getExercise(id, english, foreignLanguagePhrase, translit, meaning, context, promptInEnglish, audioIndex, lookForOldAudio);
+ //   logger.debug("id " + id + " context " + imported.getContext());
 
     imported.setEnglishSentence(english);
     if (translit.length() > 0) {
@@ -939,7 +948,13 @@ public class ExcelImport implements ExerciseDAO {
                                String english, String foreignLanguagePhrase, String translit, String meaning,
                                String context, boolean promptInEnglish, String refAudioIndex, boolean lookForOldAudio) {
     String content = ExerciseFormatter.getContent(foreignLanguagePhrase, translit, english, meaning, context, language);
+
+    //logger.debug("id  " + id+  " context " + context);
+
     Exercise imported = new Exercise("import", id, content, promptInEnglish, true, english, context);
+
+    //logger.debug("id  " + id+  " context " + imported.getContext());
+
     imported.setMeaning(meaning);
     imported.addQuestion();   // TODO : needed?
     imported.setType(Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW);
