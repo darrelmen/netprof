@@ -7,10 +7,9 @@ package mitll.langtest.client.sound;
  * Time: 12:17 AM
  * To change this template use File | Settings | File Templates.
  */
-public interface AudioControl {
+public interface AudioControl extends SimpleAudioListener {
   void reinitialize();
   void songFirstLoaded(double durationEstimate);
-  void songLoaded(double duration);
-  void songFinished();
+
   void update(double position);
 }
