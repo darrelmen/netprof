@@ -55,7 +55,6 @@ public abstract class UserDialog extends BasicDialog {
   private static final String MALE = "Male";
   private static final String FEMALE = "Female";
   public static final String HIT_ENTER_TO_LOG_IN = "Hit enter to log in.";
-  //public static final String TRY_AGAIN = "Try Again";
   final PropertyHandler props;
   final LangTestDatabaseAsync service;
 
