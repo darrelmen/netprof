@@ -72,19 +72,16 @@ public class RecordAudioPanel extends AudioPanel {
   }
 
   /**
-   *
+   * Worries about context type audio too.
    * @return
    */
   public AudioAttribute getAudioAttribute() {
     AudioAttribute audioAttribute = audioType.equals(Result.AUDIO_TYPE_REGULAR) ? exercise.getRecordingsBy(controller.getUser(), true) :
         audioType.equals(Result.AUDIO_TYPE_SLOW) ? exercise.getRecordingsBy(controller.getUser(), false) : null;
-    //System.out.println("for exercise " +exerciseID);
 
     if (audioType.startsWith("context")) {
       for (AudioAttribute audioAttribute1 : exercise.getAudioAttributes()) {
         Map<String, String> attributes = audioAttribute1.getAttributes();
-     //   System.out.println("checking " + attributes);
-        //if (attributes.containsKey("context=" + Result.AUDIO_TYPE_REGULAR)) {
         if (attributes.containsKey("context") && audioAttribute1.getUserid() == controller.getUser()) {
           return audioAttribute1;
         }
@@ -106,17 +103,17 @@ public class RecordAudioPanel extends AudioPanel {
   /**
    * @see mitll.langtest.client.scoring.AudioPanel#getPlayButtons
    * @param toTheRightWidget
-   * @param playButtonSuffix
+   * @param buttonTitle
    * @param recordButtonTitle
    * @return
    */
   @Override
-  protected PlayAudioPanel makePlayAudioPanel(Widget toTheRightWidget, String playButtonSuffix, String audioType, String recordButtonTitle) {
+  protected PlayAudioPanel makePlayAudioPanel(Widget toTheRightWidget, String buttonTitle, String audioType, String recordButtonTitle) {
     WaveformPostAudioRecordButton myPostAudioRecordButton = makePostAudioRecordButton(audioType, recordButtonTitle);
     postAudioRecordButton = myPostAudioRecordButton;
 
    // System.out.println("makePlayAudioPanel : audio type " + audioType + " suffix '" +playButtonSuffix +"'");
-    playAudioPanel = new MyPlayAudioPanel(recordImage1, recordImage2, exercisePanel, playButtonSuffix, toTheRightWidget);
+    playAudioPanel = new MyPlayAudioPanel(recordImage1, recordImage2, exercisePanel, buttonTitle, toTheRightWidget);
     myPostAudioRecordButton.setPlayAudioPanel(playAudioPanel);
 
     return playAudioPanel;
@@ -130,6 +127,12 @@ public class RecordAudioPanel extends AudioPanel {
     return postAudioRecordButton.isRecording();
   }
 
+  /**
+   * @see #makePlayAudioPanel(com.google.gwt.user.client.ui.Widget, String, String, String)
+   * @param audioType
+   * @param recordButtonTitle
+   * @return
+   */
   protected WaveformPostAudioRecordButton makePostAudioRecordButton(String audioType, String recordButtonTitle) {
     return new MyWaveformPostAudioRecordButton(audioType, recordButtonTitle);
   }
@@ -204,6 +207,11 @@ public class RecordAudioPanel extends AudioPanel {
   protected class MyWaveformPostAudioRecordButton extends WaveformPostAudioRecordButton {
     private long then,now;
 
+    /**
+     * @see #makePostAudioRecordButton(String, String)
+     * @param audioType
+     * @param recordButtonTitle
+     */
     public MyWaveformPostAudioRecordButton(String audioType, String recordButtonTitle) {
       super(RecordAudioPanel.this.exercise,
         RecordAudioPanel.this.controller,

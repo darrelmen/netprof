@@ -34,9 +34,17 @@ public interface CommonExercise extends CommonShell {
   AudioAttribute getRecordingsBy(long userID, boolean regularSpeed);
   AudioAttribute getRecordingsBy(long userID, String speed);
   Collection<AudioAttribute> getByGender(boolean isMale);
+  Collection<AudioAttribute> getDefaultUserAudio();
+
+  /**
+   * Sorted by user age. Gotta choose something...
+   * @param malesMap
+   * @return
+   */
   List<MiniUser> getSortedUsers(Map<MiniUser, List<AudioAttribute>> malesMap);
   Map<String, AudioAttribute> getAudioRefToAttr();
   Map<MiniUser, List<AudioAttribute>> getUserMap(boolean isMale);
+  Map<MiniUser, List<AudioAttribute>> getMostRecentAudio(boolean isMale);
   void addAudio(AudioAttribute audioAttribute);
 
   Map<String, String> getUnitToValue();
