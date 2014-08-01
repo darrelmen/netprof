@@ -48,7 +48,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private static final boolean WARN_ABOUT_MISSING_AUDIO = false;
   private static final int WINDOW_SIZE_CHANGE_THRESHOLD = 50;
   private static final int IMAGE_WIDTH_SLOP = 70 + WINDOW_SIZE_CHANGE_THRESHOLD/2;
-  //public static final boolean ADD_CHECKBOX = false;
 
   private final ScoreListener gaugePanel;
   protected final String exerciseID;
@@ -128,7 +127,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @param recordButtonTitle
    */
   protected void addWidgets(String playButtonSuffix, String audioType, String recordButtonTitle) {
-   // System.out.println("addWidgets " + audioType + " " + recordButtonTitle);
+    System.out.println("AudioPanel.addWidgets " + audioType + " title " + recordButtonTitle + " suffix = " + playButtonSuffix);
     DivWidget divWithRelativePosition = new DivWidget();  // need this for audio position div to work properly
     divWithRelativePosition.getElement().getStyle().setPosition(Style.Position.RELATIVE);
     Panel imageContainer = new VerticalPanel();
@@ -264,7 +263,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.FastAndSlowASRScoringAudioPanel#showAudio(mitll.langtest.shared.AudioAttribute)
    * @param path to audio on the server
    */
-  public void getImagesForPath(String path) {
+  public String getImagesForPath(String path) {
     path = wavToMP3(path);
     path = ensureForwardSlashes(path);
     if (debug) System.out.println("AudioPanel : " + getElement().getId()+ " getImagesForPath " +path);
@@ -282,6 +281,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
         getImages();
       }
     });
+
+    return path;
   }
 
 
