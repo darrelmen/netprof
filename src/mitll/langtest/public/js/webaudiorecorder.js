@@ -36,16 +36,21 @@ function onVisibilityChange() {
     }
 }
 
+var start = new Date().getTime();
+
 function startRecording() {
     recorder.clear();
     recorder && recorder.record();
+  //  start = new Date().getTime();
+
     __log('Recording...');
 }
 
 function stopRecording() {
     recorder && recorder.stop();
     __log('Stopped recording.');
-
+ //   var end = new Date().getTime();
+  //  __log("duration " + (end-start));
     // get WAV from audio data blob
     grabWav();
 }
