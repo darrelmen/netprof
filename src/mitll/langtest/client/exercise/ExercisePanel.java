@@ -96,7 +96,7 @@ public class ExercisePanel extends VerticalPanel implements
       setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
     }
     hp.setHorizontalAlignment(rightAlignContent ? HasHorizontalAlignment.ALIGN_RIGHT : HasHorizontalAlignment.ALIGN_LEFT);
-    hp.add(getQuestionContent(e, true));
+    hp.add(getQuestionContent(e));
     boolean showInstructions = !(getExerciseContent(e).toLowerCase().contains("listen") || controller.isDataCollectMode());   // hack
     if (showInstructions) {
       addInstructions();
@@ -117,7 +117,12 @@ public class ExercisePanel extends VerticalPanel implements
 
   protected void addInstructions() {  add(new Heading(4, PROMPT));  }
 
-  protected Widget getQuestionContent(CommonExercise e, boolean includeItemID) {
+  /**
+   * @see #ExercisePanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, ExerciseController, mitll.langtest.client.list.ListInterface)
+   * @param e
+   * @return
+   */
+  private Widget getQuestionContent(CommonExercise e) {
     String content = getExerciseContent(e);
 
     HTML maybeRTLContent = getMaybeRTLContent(content, true);
@@ -139,6 +144,12 @@ public class ExercisePanel extends VerticalPanel implements
     return scroller;
   }
 
+  /**
+   * @see #getQuestionContent(mitll.langtest.shared.CommonExercise)
+   * @param content
+   * @param requireAlignment
+   * @return
+   */
   protected HTML getMaybeRTLContent(String content, boolean requireAlignment) {
     boolean rightAlignContent = controller.isRightAlignContent();
     HasDirection.Direction direction =
@@ -314,7 +325,7 @@ public class ExercisePanel extends VerticalPanel implements
 
   protected String getInstructions() {
     String instructions = ":";
-    String prefix = "<br></br>" + THREE_SPACES;
+/*    String prefix = "<br></br>" + THREE_SPACES;
     if (controller.getAudioType().equals(Result.AUDIO_TYPE_FAST_AND_SLOW)) {
       instructions = prefix +REPEAT_TWICE;
     }
@@ -323,7 +334,7 @@ public class ExercisePanel extends VerticalPanel implements
     }
     else if (!controller.isCRTDataCollectMode()) {
       System.out.println("unknown audio type " + controller.getAudioType());
-    }
+    }*/
     return instructions;
   }
 
@@ -529,7 +540,7 @@ public class ExercisePanel extends VerticalPanel implements
     return b;
   }
 
-  protected void enableNextButton(boolean val) {  navigationHelper.enableNextButton(val); }
+  //protected void enableNextButton(boolean val) {  navigationHelper.enableNextButton(val); }
   void setButtonsEnabled(boolean val) {
    // navigationHelper.setButtonsEnabled(val);
     enableNext();
