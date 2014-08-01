@@ -77,7 +77,6 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   private final Map<String,Double>   exToScore = new HashMap<String, Double>();
   private final Set<String> skipped = new HashSet<String>();
   private final Set<Long> resultIDs = new HashSet<Long>();
-  //private final KeyStorage storage;
   private String selectionID = "";
   private final String instance;
   StickyState sticky;
