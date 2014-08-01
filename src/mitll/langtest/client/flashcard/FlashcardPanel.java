@@ -634,17 +634,11 @@ public class FlashcardPanel extends HorizontalPanel {
   }
 
   private void showBoth() {
-    //english.setHeight("50%");
-   // foreign.setHeight("50%");
-//    english.setVisible(true);
- //   foreign.setVisible(true);
     english.getElement().getStyle().setVisibility(Style.Visibility.VISIBLE);
     foreign.getElement().getStyle().setVisibility(Style.Visibility.VISIBLE);
 
     if (clickToFlip != null) {
-      //clickToFlipContainer.setVisible(false);
       clickToFlipContainer.getElement().getStyle().setVisibility(Style.Visibility.HIDDEN);
-
     }
   }
 
