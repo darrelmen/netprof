@@ -2,6 +2,7 @@ package mitll.langtest.client.exercise;
 
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -24,10 +25,11 @@ import java.util.Collection;
  * To change this template use File | Settings | File Templates.
  */
 public class WaveformExercisePanel extends ExercisePanel {
-  private static final String REPEAT_TWICE = "<i>Record the word or phrase, first at normal speed, then again at slow speed.</i>";
+//  private static final String REPEAT_TWICE = "<i>Record the word or phrase, first at normal speed, then again at slow speed.</i>";
   private static final String RECORD_PROMPT = "Record the word or phrase, first at normal speed, then again at slow speed.";
-  private static final String REGULAR_SPEED_RECORDING = "Regular speed recording";
-  private static final String SLOW_SPEED_RECORDING = "Slow speed recording";
+  private static final String RECORD_PROMPT2 = "Record the word or phrase, first at normal speed, then again at slow speed.<br/>Record the example sentence at normal speed.";
+ // private static final String REGULAR_SPEED_RECORDING = "Regular speed recording";
+ // private static final String SLOW_SPEED_RECORDING = "Slow speed recording";
   private boolean isBusy = false;
   private Collection<RecordAudioPanel> audioPanels;
 
@@ -70,7 +72,7 @@ public class WaveformExercisePanel extends ExercisePanel {
       add(unitLessonForExercise);
     }
 
-    add(new Heading(4, RECORD_PROMPT));
+    add(new Heading(4, hasContext(exercise) ? RECORD_PROMPT2 : RECORD_PROMPT));
   }
 
   @Override
@@ -91,30 +93,38 @@ public class WaveformExercisePanel extends ExercisePanel {
     Panel vp = new VerticalPanel();
 
     // add normal speed recording widget
-    addRecordAudioPanelNoCaption(exercise, service, controller, index, vp,Result.AUDIO_TYPE_REGULAR,REGULAR_SPEED_RECORDING);
+    addRecordAudioPanelNoCaption(exercise, service, controller, index, vp,Result.AUDIO_TYPE_REGULAR/*,REGULAR_SPEED_RECORDING*/);
     // add slow speed recording widget
-    addRecordAudioPanelNoCaption(exercise, service, controller, index+1, vp,Result.AUDIO_TYPE_SLOW,SLOW_SPEED_RECORDING);
-    if (exercise.getContext() != null && !exercise.getContext().isEmpty()) {
-      DivWidget div = new DivWidget();
-      div.addStyleName("Instruction");
-      InlineHTML englishPhrase = new InlineHTML(exercise.getContext(), WordCountDirectionEstimator.get().estimateDirection(exercise.getContext()));
-   //   englishPhrase.addStyleName(true ? "Instruction-data-with-wrap" : "Instruction-data");
-      englishPhrase.addStyleName("Instruction-data-with-wrap");
-        div.add(englishPhrase);
-      englishPhrase.addStyleName("xlargeFont");
-      div.addStyleName("topMargin");
-
-      VerticalPanel widgets = addRecordAudioPanel(exercise, service, controller, index + 1, vp, "context=" + Result.AUDIO_TYPE_REGULAR, "Example Sentence");
-      widgets.insert(div,0);
+    VerticalPanel widgets = addRecordAudioPanelNoCaption(exercise, service, controller, index + 1, vp, Result.AUDIO_TYPE_SLOW/*, SLOW_SPEED_RECORDING*/);
+    widgets.addStyleName("topFiveMargin");
+    if (hasContext(exercise)) {
+      addExampleSentenceRecorder(exercise, service, controller, index, vp);
     }
 
     return vp;
   }
 
+  private boolean hasContext(CommonExercise exercise) {
+    return exercise.getContext() != null && !exercise.getContext().isEmpty();
+  }
+
+  private void addExampleSentenceRecorder(CommonExercise exercise, LangTestDatabaseAsync service, ExerciseController controller, int index, Panel vp) {
+    DivWidget div = new DivWidget();
+    div.addStyleName("Instruction");
+    InlineHTML contextPhrase = new InlineHTML(exercise.getContext(), WordCountDirectionEstimator.get().estimateDirection(exercise.getContext()));
+    contextPhrase.addStyleName("Instruction-data-with-wrap");
+    div.add(contextPhrase);
+    contextPhrase.addStyleName("xlargeFont");
+    div.addStyleName("topMargin");
+
+    VerticalPanel widgets = addRecordAudioPanel(exercise, service, controller, index + 1, vp, "context=" + Result.AUDIO_TYPE_REGULAR, "Example Sentence");
+    widgets.insert(div, 0);
+  }
+
   private VerticalPanel addRecordAudioPanel(CommonExercise exercise, LangTestDatabaseAsync service,
                                             ExerciseController controller, int index, Panel vp, String audioType, String caption) {
 
-    System.out.println("addRecordAudioPanel " + exercise + " audioType " +audioType);
+  //  System.out.println("addRecordAudioPanel " + exercise + " audioType " +audioType);
 
     RecordAudioPanel fast = new RecordAudioPanel(exercise, controller, this, service, index, false, audioType);
     ResizableCaptionPanel cp = new ResizableCaptionPanel(caption);
@@ -128,16 +138,12 @@ public class WaveformExercisePanel extends ExercisePanel {
   }
 
   private VerticalPanel addRecordAudioPanelNoCaption(CommonExercise exercise, LangTestDatabaseAsync service,
-                                            ExerciseController controller, int index, Panel vp, String audioType, String caption) {
-
-    System.out.println("addRecordAudioPanel " + exercise + " audioType " +audioType);
+                                            ExerciseController controller, int index, Panel vp, String audioType) {
+//    System.out.println("addRecordAudioPanel " + exercise + " audioType " +audioType);
 
     RecordAudioPanel fast = new RecordAudioPanel(exercise, controller, this, service, index, false, audioType);
-    //ResizableCaptionPanel cp = new ResizableCaptionPanel(caption);
-   // cp.setContentWidget(fast);
     audioPanels.add(fast);
-    // vp.add(cp);
-     vp.add(fast);
+    vp.add(fast);
 
     if (fast.isAudioPathSet()) recordCompleted(fast);
     addAnswerWidget(index, fast);
@@ -145,9 +151,10 @@ public class WaveformExercisePanel extends ExercisePanel {
   }
 
   private Panel getUnitLessonForExercise() {
-    HorizontalPanel flow = new HorizontalPanel();
+    Panel flow = new HorizontalPanel();
     flow.getElement().setId("getUnitLessonForExercise_unitLesson");
     flow.addStyleName("leftFiveMargin");
+    flow.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
     //System.out.println("getUnitLessonForExercise " + exercise + " unit value " +exercise.getUnitToValue());
 
     for (String type : controller.getStartupInfo().getTypeOrder()) {
