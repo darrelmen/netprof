@@ -734,20 +734,28 @@ public class Navigation implements RequiresResize {
     			 Window.alert("Select a dialog and part first!");
     		 }
     		 else{
+    			 //resetPlayer();
     			 forSents.clear();
     		     Grid sentPanel = displayDialog(dialogIndex.get(availableDialogs.getSelectedIndex()), availableSpeakers.getValue(availableSpeakers.getSelectedIndex()), forSents);
     		     setupPlayOrder(sentPanel, 0, sentPanel.getRowCount());
-    		     contentPanel.add(forSents);
+    		     //contentPanel.add(forSents);
     		 }
     	 }
      });
+
      startDialog.getElement().getStyle().setProperty("fontSize", "150%");
      availableDialogs.getElement().getStyle().setProperty("margin", "10px");
      contentPanel.add(startDialog);
+     contentPanel.add(forSents);
   }
   
   private native void addPlayer() /*-{
      $wnd.basicMP3Player.init();
+  }-*/;
+  
+  private native void resetPlayer() /*-{
+     $wnd.soundManager.reset;
+     $wnd.soundManager.init;
   }-*/;
   
   private SimplePostAudioRecordButton getRecordButton(String sent, final HTML resultHolder){
@@ -772,7 +780,6 @@ public class Navigation implements RequiresResize {
 	  int sentIndex = 0;
 	  final Grid sentPanel = new Grid(dialogToSentIndexToSent.get(dialog).size(), 4);
 	  final ArrayList<HTML> scoreElements = new ArrayList<HTML>();
-	  Button last = null;
       String otherPart = "";
       boolean youStart = false;
       
@@ -793,7 +800,6 @@ public class Navigation implements RequiresResize {
 			  sentPanel.setWidget(sentIndex, 1, play);
 			  scoreElements.add(score);
 			  score.setVisible(false);
-			  last = recordButton;
 			  sentPanel.setWidget(sentIndex, 3, score);
 			  recordButton.setVisible(false);
 			  play.setVisible(false);
@@ -810,12 +816,12 @@ public class Navigation implements RequiresResize {
 	  }
 	  
 	  cp.add(getSetupText(part, otherPart, youStart));
-	  cp.add(setupScoring(new HTML("avg score was: 0.0"), last, scoreElements));
 	  cp.add(sentPanel);
+	  cp.add(setupScoring((Button) sentPanel.getWidget(sentPanel.getRowCount()-1, 2), (PlayAudioPanel) sentPanel.getWidget(sentPanel.getRowCount()-1, 1), scoreElements));
 	  Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-	     public void execute() {
-	        addPlayer();
-	     }
+		  public void execute() {
+			  addPlayer();
+		  }
 	  });
 	  return sentPanel;
   }
@@ -830,6 +836,7 @@ public class Navigation implements RequiresResize {
 	  	  ((Button) sentPanel.getWidget(currIndex,  2)).addMouseUpHandler(new MouseUpHandler() {
 			  @Override
 			  public void onMouseUp(MouseUpEvent e){
+				  System.out.println("mouse is going up");
 			      sentPanel.getWidget(currIndex, 0).getElement().getStyle().setProperty("color", "#B8B8B8");
 				  sentPanel.getWidget(currIndex, 2).setVisible(false);
 				  sentPanel.getWidget(currIndex, 1).setVisible(false);
@@ -870,8 +877,7 @@ public class Navigation implements RequiresResize {
 				public void update(double position) {
 					// TODO Auto-generated method stub
 					
-				}
-			  
+				}  
           });
 	  }
   }
@@ -883,21 +889,62 @@ public class Navigation implements RequiresResize {
 	  return setup;
   }
   
-  private HTML setupScoring(final HTML avg, Button last, final ArrayList<HTML> scoreElements){
-	  avg.setVisible(false);
-	  last.addMouseUpHandler(new MouseUpHandler() {
-		  @Override
-		  public void onMouseUp(MouseUpEvent e){
-			double sum = 0.0;
-			for(HTML sco : scoreElements){
-				sco.setVisible(true);
-				sum += Double.parseDouble(sco.getHTML());
+  private HTML setupScoring(Button lastB, PlayAudioPanel lastP, final ArrayList<HTML> scoreElements){
+	  final HTML avg = new HTML("");
+	  if(lastB != null){
+		  lastB.addMouseUpHandler(new MouseUpHandler() {
+			  @Override
+			  public void onMouseUp(MouseUpEvent e){
+				  avg.setHTML(innerScoring(scoreElements));
+			  }
+		  });
+	  }
+	  else{
+		  lastP.addListener(new AudioControl(){
+
+			@Override
+			public void reinitialize() {
+				// TODO Auto-generated method stub
+				
 			}
-			avg.setHTML("avg score was: "+String.valueOf(sum/scoreElements.size()));
-			avg.setVisible(true);
-		  }
-	  });
+
+			@Override
+			public void songFirstLoaded(double durationEstimate) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void songLoaded(double duration) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void songFinished() {
+				avg.setHTML(innerScoring(scoreElements));
+			}
+
+			@Override
+			public void update(double position) {
+				// TODO Auto-generated method stub
+				
+			}  
+          });
+	  }
+	  avg.setVisible(true);
+	  avg.getElement().getStyle().setProperty("fontSize", "130%");
+	  avg.getElement().getStyle().setProperty("margin", "10px");
 	  return avg;
+  }
+  
+  private String innerScoring(ArrayList<HTML> scoreElements){
+	  double sum = 0.0;
+	  for(HTML sco : scoreElements){
+		sco.setVisible(true);
+		sum += Double.parseDouble(sco.getHTML());
+	  }
+	  return "Your average score was: "+String.valueOf(sum/scoreElements.size());
   }
   
   private HashMap<String, String[]> getDialogToPartsMap(){
