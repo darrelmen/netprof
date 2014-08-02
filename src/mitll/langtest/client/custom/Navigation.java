@@ -59,8 +59,10 @@ import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.scoring.ScoreListener;
 import mitll.langtest.client.scoring.SimplePostAudioRecordButton;
+import mitll.langtest.client.sound.AudioControl;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayAudioWidget;
+import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.Sound;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
@@ -733,7 +735,8 @@ public class Navigation implements RequiresResize {
     		 }
     		 else{
     			 forSents.clear();
-    		     displayDialog(dialogIndex.get(availableDialogs.getSelectedIndex()), availableSpeakers.getValue(availableSpeakers.getSelectedIndex()), forSents);
+    		     Grid sentPanel = displayDialog(dialogIndex.get(availableDialogs.getSelectedIndex()), availableSpeakers.getValue(availableSpeakers.getSelectedIndex()), forSents);
+    		     setupPlayOrder(sentPanel, 0, sentPanel.getRowCount());
     		     contentPanel.add(forSents);
     		 }
     	 }
@@ -761,13 +764,13 @@ public class Navigation implements RequiresResize {
 	  };
   }
   
-  private void displayDialog(String dialog, String part, Panel cp){
+  private Grid displayDialog(String dialog, String part, Panel cp){
 
 	  HashMap<String, String> sentToAudioPath = getSentToAudioPath();
 	  HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSpeaker = getDialogToSentIndexToSpeaker();
 	  HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSent = getDialogToSentIndexToSent();
 	  int sentIndex = 0;
-	  Grid sentPanel = new Grid(dialogToSentIndexToSent.get(dialog).size(), 4);
+	  final Grid sentPanel = new Grid(dialogToSentIndexToSent.get(dialog).size(), 4);
 	  final ArrayList<HTML> scoreElements = new ArrayList<HTML>();
 	  Button last = null;
       String otherPart = "";
@@ -805,12 +808,8 @@ public class Navigation implements RequiresResize {
 		  sentPanel.setWidget(sentIndex, 0, sent);
 		  sentIndex += 1;
 	  }
-	  HTML setup = new HTML("You are "+part+" talking to "+otherPart+". "+(youStart ? "You" : otherPart) +" begin"+(youStart ? "" : "s")+" the conversation.");
-	  setup.getElement().getStyle().setProperty("fontSize", "130%");
-	  setup.getElement().getStyle().setProperty("margin", "10px");
-	  cp.add(setup);
 	  
-	  setupPlayOrder();
+	  cp.add(getSetupText(part, otherPart, youStart));
 	  cp.add(setupScoring(new HTML("avg score was: 0.0"), last, scoreElements));
 	  cp.add(sentPanel);
 	  Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -818,13 +817,70 @@ public class Navigation implements RequiresResize {
 	        addPlayer();
 	     }
 	  });
-	  if(!youStart){
-		  ((PlayAudioPanel) sentPanel.getWidget(0, 1)).playCurrent();
+	  return sentPanel;
+  }
+  
+  private void setupPlayOrder(final Grid sentPanel, final int currIndex, final int stop){
+	  if(currIndex >= stop)
+		  return;
+	  sentPanel.getWidget(currIndex, 0).getElement().getStyle().setProperty("color", "#000000");
+	  if(sentPanel.getWidget(currIndex, 2) != null){
+		  sentPanel.getWidget(currIndex, 1).setVisible(true);
+		  sentPanel.getWidget(currIndex,  2).setVisible(true);
+	  	  ((Button) sentPanel.getWidget(currIndex,  2)).addMouseUpHandler(new MouseUpHandler() {
+			  @Override
+			  public void onMouseUp(MouseUpEvent e){
+			      sentPanel.getWidget(currIndex, 0).getElement().getStyle().setProperty("color", "#B8B8B8");
+				  sentPanel.getWidget(currIndex, 2).setVisible(false);
+				  sentPanel.getWidget(currIndex, 1).setVisible(false);
+				  sentPanel.getWidget(currIndex+1, 0).getElement().getStyle().setProperty("color", "#000000");
+				  setupPlayOrder(sentPanel, currIndex + 1, stop);
+			  }
+	  	  });
+	  }
+	  else{
+		  ((PlayAudioPanel) sentPanel.getWidget(currIndex, 1)).playCurrent();
+		  ((PlayAudioPanel) sentPanel.getWidget(currIndex, 1)).addListener(new AudioControl(){
+
+				@Override
+				public void reinitialize() {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void songFirstLoaded(double durationEstimate) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void songLoaded(double duration) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void songFinished() {
+					setupPlayOrder(sentPanel, currIndex + 1, stop);
+					sentPanel.getWidget(currIndex, 0).getElement().getStyle().setProperty("color", "#B8B8B8");
+				}
+
+				@Override
+				public void update(double position) {
+					// TODO Auto-generated method stub
+					
+				}
+			  
+          });
 	  }
   }
   
-  private void setupPlayOrder(){
-	  
+  private HTML getSetupText(String part, String otherPart, boolean youStart){
+	  HTML setup = new HTML("You are "+part+" talking to "+otherPart+". "+(youStart ? "You" : otherPart) +" begin"+(youStart ? "" : "s")+" the conversation.");
+	  setup.getElement().getStyle().setProperty("fontSize", "130%");
+	  setup.getElement().getStyle().setProperty("margin", "10px");
+	  return setup;
   }
   
   private HTML setupScoring(final HTML avg, Button last, final ArrayList<HTML> scoreElements){
