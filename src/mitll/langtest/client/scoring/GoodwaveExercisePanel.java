@@ -57,7 +57,7 @@ import java.util.*;
 public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel, RequiresResize, ProvidesResize {
   private static final String REFERENCE = "";//" Reference";
   private static final String RECORD_YOURSELF = "Record";// Yourself";
-  private static final String RELEASE_TO_STOP = "Release to Stop";
+  private static final String RELEASE_TO_STOP = "Release";// to Stop";
   public static final int HEADING_FOR_UNIT_LESSON = 4;
   private static final String CORRECT = "correct";
   private static final String INCORRECT = "incorrect";
