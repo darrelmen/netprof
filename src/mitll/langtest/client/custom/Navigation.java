@@ -817,7 +817,11 @@ public class Navigation implements RequiresResize {
 	  
 	  cp.add(getSetupText(part, otherPart, youStart));
 	  cp.add(sentPanel);
-	  cp.add(setupScoring((Button) sentPanel.getWidget(sentPanel.getRowCount()-1, 2), (PlayAudioPanel) sentPanel.getWidget(sentPanel.getRowCount()-1, 1), scoreElements));
+	  //hack alert, fix later
+	  if((Button) sentPanel.getWidget(sentPanel.getRowCount()-1, 2) != null)
+	     cp.add(setupScoring((Button) sentPanel.getWidget(sentPanel.getRowCount()-1, 2), (PlayAudioPanel) sentPanel.getWidget(sentPanel.getRowCount()-1, 1), scoreElements));
+	  else
+	     cp.add(setupScoring((Button) sentPanel.getWidget(sentPanel.getRowCount()-2, 2), (PlayAudioPanel) sentPanel.getWidget(sentPanel.getRowCount()-1, 1), scoreElements));
 	  Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
 		  public void execute() {
 			  addPlayer();
@@ -836,11 +840,12 @@ public class Navigation implements RequiresResize {
 	  	  ((Button) sentPanel.getWidget(currIndex,  2)).addMouseUpHandler(new MouseUpHandler() {
 			  @Override
 			  public void onMouseUp(MouseUpEvent e){
-				  System.out.println("mouse is going up");
 			      sentPanel.getWidget(currIndex, 0).getElement().getStyle().setProperty("color", "#B8B8B8");
 				  sentPanel.getWidget(currIndex, 2).setVisible(false);
 				  sentPanel.getWidget(currIndex, 1).setVisible(false);
-				  sentPanel.getWidget(currIndex+1, 0).getElement().getStyle().setProperty("color", "#000000");
+				  if(currIndex+1 != stop){
+				     sentPanel.getWidget(currIndex+1, 0).getElement().getStyle().setProperty("color", "#000000");
+				  }
 				  setupPlayOrder(sentPanel, currIndex + 1, stop);
 			  }
 	  	  });
@@ -899,7 +904,7 @@ public class Navigation implements RequiresResize {
 			  }
 		  });
 	  }
-	  else{
+	  else{/*
 		  lastP.addListener(new AudioControl(){
 
 			@Override
@@ -930,7 +935,7 @@ public class Navigation implements RequiresResize {
 				// TODO Auto-generated method stub
 				
 			}  
-          });
+          });*/
 	  }
 	  avg.setVisible(true);
 	  avg.getElement().getStyle().setProperty("fontSize", "130%");
@@ -944,6 +949,8 @@ public class Navigation implements RequiresResize {
 		sco.setVisible(true);
 		sum += Double.parseDouble(sco.getHTML());
 	  }
+	  System.out.println(sum);
+	  System.out.println(scoreElements.size());
 	  return "Your average score was: "+String.valueOf(sum/scoreElements.size());
   }
   
@@ -963,13 +970,13 @@ public class Navigation implements RequiresResize {
 	  m.put("Wáng Jīngshēng, nǐ hăo!", "/7/slow_1403800597192_by_8.wav");
 	  m.put("Wŏ qù túshūguăn. Nĭ ne?", "/20/slow_1403800730216_by_8.wav");
 	  
-	  m.put("Zhào Guócái, nĭ hăo a!", "/38/slow_1403793753756_by_8.wav");
-	  m.put("Hái xíng. Nĭ àirén, háizi dōu hăo ma?", "/55/slow_1403792056835_by_8.wav"); //hi
-	  m.put("Wŏ yŏu yìdiănr shìr, xiān zŏule. Zàijiàn!", "/69/slow_1403791957048_by_8.wav");
-	  m.put("Nĭ hăo! Hăo jiŭ bú jiànle.", "/42/slow_1403792877099_by_8.wav");
-	  m.put("Zěmmeyàng a?", "/43/slow_1403792244061_by_8.wav");
-	  m.put("Tāmen dōu hěn hăo, xièxie.", "/61/slow_1403793525457_by_8.wav");
-	  m.put("Zàijiàn.", "/70/slow_1403791837948_by_8.wav");
+	  m.put("Zhào Guócái, nĭ hăo a!", "/40/slow_1403793805369_by_8.wav");
+	  m.put("Hái xíng. Nĭ àirén, háizi dōu hăo ma?", "/57/slow_1403793264402_by_8.wav"); //hi
+	  m.put("Wŏ yŏu yìdiănr shìr, xiān zŏule. Zàijiàn!", "/71/slow_1403792972693_by_8.wav");
+	  m.put("Nĭ hăo! Hăo jiŭ bú jiànle.", "/44/slow_1403792786355_by_8.wav");
+	  m.put("Zěmmeyàng a?", "/45/slow_1403792847063_by_8.wav");
+	  m.put("Tāmen dōu hěn hăo, xièxie.", "/63/slow_1403793604382_by_8.wav");
+	  m.put("Zàijiàn.", "/72/slow_1403792425728_by_8.wav");
 	  
 	  return m;
   }
