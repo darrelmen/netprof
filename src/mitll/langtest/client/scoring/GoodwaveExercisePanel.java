@@ -308,6 +308,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
   private ASRScoringAudioPanel getAudioPanel(String path) {
     ASRScoringAudioPanel audioPanel = makeFastAndSlowAudio(path);
+    Style style = audioPanel.getPlayButton().getElement().getStyle();
+    style.setMarginTop(10, Style.Unit.PX);
+    style.setMarginBottom(10, Style.Unit.PX);
     audioPanel.getElement().setId("ASRScoringAudioPanel");
     return audioPanel;
   }
@@ -629,10 +632,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         // add gender choices
         Map<MiniUser, List<AudioAttribute>> malesMap   = exercise.getMostRecentAudio(true);
 
-        //System.out.println("males  " + malesMap);
+       // System.out.println("getAfterPlayWidget.males  " + malesMap);
         Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false);
 
-       // System.out.println("females  " + femalesMap);
+        //System.out.println("getAfterPlayWidget.females  " + femalesMap);
         Collection<AudioAttribute> defaultUserAudio = exercise.getDefaultUserAudio();
 
         List<MiniUser> maleUsers   = exercise.getSortedUsers(malesMap);
@@ -647,6 +650,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         }
         final Collection<AudioAttribute> initialAudioChoices = maleEmpty ?
           femaleEmpty ? audioAttributes : femalesMap.get(femaleUsers.get(0)) : malesMap.get(maleUsers.get(0));
+        System.out.println("getAfterPlayWidget.initialAudioChoices  " + initialAudioChoices);
+
 
         addRegularAndSlow(rightSide, initialAudioChoices);
 
@@ -701,6 +706,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
                                     final Map<MiniUser, List<AudioAttribute>> femalesMap,
                                     final Collection<AudioAttribute> defaultAudioSet) {
       ButtonToolbar w = new ButtonToolbar();
+    //  w.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
+
+      w.getElement().setId("GenderChoices");
+
       ButtonGroup buttonGroup = new ButtonGroup();
       buttonGroup.setToggle(ToggleType.RADIO);
       w.add(buttonGroup);
@@ -749,8 +758,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       }
 
       Style style = w.getElement().getStyle();
-      style.setMarginTop(10, Style.Unit.PX);
-      style.setMarginBottom(0, Style.Unit.PX);
+      int topToUse = 10;
+      style.setMarginTop(topToUse, Style.Unit.PX);
+      style.setMarginBottom(topToUse, Style.Unit.PX);
       style.setMarginLeft(5, Style.Unit.PX);
 
       return w;
