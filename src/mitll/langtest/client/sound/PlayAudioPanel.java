@@ -401,7 +401,6 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   public Button getPlayButton() { return playButton;  }
   
   public void playCurrent(){
-	  System.out.println("hi from playCurrent()!");
 	  if (DEBUG) System.out.println("PlayAudioPanel :play " + playing);
 	  playing = true;
 	  setPlayButtonText();
