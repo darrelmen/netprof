@@ -153,7 +153,6 @@ public class RecordAudioPanel extends AudioPanel {
   }
 
   public Button getButton() { return postAudioRecordButton; }
-  public Button getPlayButton() { return playAudioPanel.getPlayButton(); }
 
   public void setEnabled(boolean val) {
     //System.out.println("RecordAudioPanel.setEnabled " + val);
