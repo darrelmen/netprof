@@ -407,6 +407,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     firstExercise.setAvgScore(total == 0 ? 0f : scoreTotal/total);
   }
 
+  /**
+   * @see #addAnnotationsAndAudio(long, mitll.langtest.shared.CommonExercise)
+   * @param firstExercise
+   */
   private void attachAudio(CommonExercise firstExercise) {
     String installPath = pathHelper.getInstallPath();
     String relativeConfigDir1 = relativeConfigDir;
