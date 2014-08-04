@@ -43,6 +43,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.WavCallback;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
@@ -772,17 +773,28 @@ public class Navigation implements RequiresResize {
 	  };
   }
   
+  private final Image somethingIsHappening = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress44.gif"));
+  
   private Grid displayDialog(String dialog, String part, Panel cp){
 
 	  HashMap<String, String> sentToAudioPath = getSentToAudioPath();
 	  HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSpeaker = getDialogToSentIndexToSpeaker();
 	  HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSent = getDialogToSentIndexToSent();
+	  HashMap<String, HashMap<String, Integer>> dialogToSpeakerToLast = getDialogToSpeakerToLast();
 	  int sentIndex = 0;
 	  final Grid sentPanel = new Grid(dialogToSentIndexToSent.get(dialog).size(), 4);
 	  final ArrayList<HTML> scoreElements = new ArrayList<HTML>();
       String otherPart = "";
       boolean youStart = false;
-      
+      int yourLast = dialogToSpeakerToLast.get(dialog).get(part);
+      System.out.println(yourLast);
+	  final FlowPanel rp = new FlowPanel();
+	  rp.add(somethingIsHappening);
+	  final HTML avg = new HTML("");
+	  avg.setVisible(false);
+	  rp.add(avg);
+	  rp.setVisible(false);
+
 	  while(dialogToSentIndexToSent.get(dialog).containsKey(sentIndex)){
 		  String sentence = dialogToSentIndexToSent.get(dialog).get(sentIndex);
 		  HTML sent = new HTML(sentence);
@@ -793,12 +805,52 @@ public class Navigation implements RequiresResize {
 			  if (sentIndex == 0)
 				  youStart = true;
 			  PlayAudioPanel play = new PlayAudioPanel(controller, "config/mandarinClassroom/bestAudio/"+sentToAudioPath.get(sentence));
-			  HTML score = new HTML("0.0");
-			  Button recordButton = getRecordButton(dialogToSentIndexToSent.get(dialog).get(sentIndex), score);
+			  final HTML score = new HTML("0.0");
+			  scoreElements.add(score);
+			  Button recordButton = null;
+			  if(sentIndex != yourLast){
+			     recordButton = getRecordButton(dialogToSentIndexToSent.get(dialog).get(sentIndex), score);
+			  }
+			  else{
+				 recordButton = new SimplePostAudioRecordButton(controller, service, dialogToSentIndexToSent.get(dialog).get(sentIndex)) {
+					  
+				      @Override
+					  public void useResult(AudioAnswer result){
+			    	      System.out.println("hi");
+						  score.setHTML(String.valueOf(result.getScore()));
+						  avg.setHTML(innerScoring(scoreElements));
+						  avg.getElement().getStyle().setProperty("fontSize", "130%");
+						  avg.getElement().getStyle().setProperty("margin", "10px");
+						  flip(false);
+					  }
+						  
+					  @Override
+					  public void flip(boolean first){
+						  somethingIsHappening.setVisible(first);
+						  avg.setVisible(!first);
+				      }
+					  
+					  @Override
+					  protected void useInvalidResult(AudioAnswer result){
+			    	      System.out.println("hi invalid");
+						  score.setHTML(String.valueOf(result.getScore()));
+						  avg.setHTML(innerScoring(scoreElements));
+						  avg.getElement().getStyle().setProperty("fontSize", "130%");
+						  avg.getElement().getStyle().setProperty("margin", "10px");
+						  flip(false);
+					  }
+			      };
+				  
+				  recordButton.addMouseUpHandler(new MouseUpHandler() {
+					  @Override
+					  public void onMouseUp(MouseUpEvent e){
+						  rp.setVisible(true);
+					  }
+				  });
+			  }
 			  sentPanel.setWidget(sentIndex, 2, recordButton);
 			  sent.getElement().getStyle().setProperty("fontWeight", "900");
 			  sentPanel.setWidget(sentIndex, 1, play);
-			  scoreElements.add(score);
 			  score.setVisible(false);
 			  sentPanel.setWidget(sentIndex, 3, score);
 			  recordButton.setVisible(false);
@@ -814,14 +866,11 @@ public class Navigation implements RequiresResize {
 		  sentPanel.setWidget(sentIndex, 0, sent);
 		  sentIndex += 1;
 	  }
-	  
+	  	  
 	  cp.add(getSetupText(part, otherPart, youStart));
 	  cp.add(sentPanel);
-	  //hack alert, fix later
-	  if((Button) sentPanel.getWidget(sentPanel.getRowCount()-1, 2) != null)
-	     cp.add(setupScoring((Button) sentPanel.getWidget(sentPanel.getRowCount()-1, 2), (PlayAudioPanel) sentPanel.getWidget(sentPanel.getRowCount()-1, 1), scoreElements));
-	  else
-	     cp.add(setupScoring((Button) sentPanel.getWidget(sentPanel.getRowCount()-2, 2), (PlayAudioPanel) sentPanel.getWidget(sentPanel.getRowCount()-1, 1), scoreElements));
+	  
+	  cp.add(rp);
 	  Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
 		  public void execute() {
 			  addPlayer();
@@ -894,55 +943,6 @@ public class Navigation implements RequiresResize {
 	  return setup;
   }
   
-  private HTML setupScoring(Button lastB, PlayAudioPanel lastP, final ArrayList<HTML> scoreElements){
-	  final HTML avg = new HTML("");
-	  if(lastB != null){
-		  lastB.addMouseUpHandler(new MouseUpHandler() {
-			  @Override
-			  public void onMouseUp(MouseUpEvent e){
-				  avg.setHTML(innerScoring(scoreElements));
-			  }
-		  });
-	  }
-	  else{/*
-		  lastP.addListener(new AudioControl(){
-
-			@Override
-			public void reinitialize() {
-				// TODO Auto-generated method stub
-				
-			}
-
-			@Override
-			public void songFirstLoaded(double durationEstimate) {
-				// TODO Auto-generated method stub
-				
-			}
-
-			@Override
-			public void songLoaded(double duration) {
-				// TODO Auto-generated method stub
-				
-			}
-
-			@Override
-			public void songFinished() {
-				avg.setHTML(innerScoring(scoreElements));
-			}
-
-			@Override
-			public void update(double position) {
-				// TODO Auto-generated method stub
-				
-			}  
-          });*/
-	  }
-	  avg.setVisible(true);
-	  avg.getElement().getStyle().setProperty("fontSize", "130%");
-	  avg.getElement().getStyle().setProperty("margin", "10px");
-	  return avg;
-  }
-  
   private String innerScoring(ArrayList<HTML> scoreElements){
 	  double sum = 0.0;
 	  for(HTML sco : scoreElements){
@@ -978,6 +978,19 @@ public class Navigation implements RequiresResize {
 	  m.put("Tāmen dōu hěn hăo, xièxie.", "/63/slow_1403793604382_by_8.wav");
 	  m.put("Zàijiàn.", "/72/slow_1403792425728_by_8.wav");
 	  
+	  return m;
+  }
+  
+  private HashMap<String, HashMap<String, Integer>> getDialogToSpeakerToLast(){
+	  HashMap<String, HashMap<String, Integer>> m = new HashMap<String, HashMap<String, Integer>>();
+	  String up1 = "Unit 1: Part 1";
+	  String up2 = "Unit 1: Part 2";
+	  m.put(up1, new HashMap<String, Integer>());
+	  m.put(up2, new HashMap<String, Integer>());
+	  m.get(up1).put("Wang", 4);
+	  m.get(up1).put("Crane", 3);
+	  m.get(up2).put("Smith", 5);
+	  m.get(up2).put("Zhao", 6);
 	  return m;
   }
   
