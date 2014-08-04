@@ -1,5 +1,6 @@
 package mitll.langtest.client.scoring;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
@@ -90,9 +91,11 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
     addWidgets(playButtonSuffix, audioType, "Record");
     if (playAudio != null) {
-      controller.register(playAudio.getPlayButton(), exerciseID);
+      controller.register(getPlayButton(), exerciseID);
     }
   }
+
+  public Button getPlayButton() {return playAudio.getPlayButton();}
 
   protected AudioPanel(LangTestDatabaseAsync service,
                        ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel,
