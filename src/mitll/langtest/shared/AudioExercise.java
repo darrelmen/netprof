@@ -66,6 +66,11 @@ public class AudioExercise extends ExerciseShell {
     audioAttributes.put(audioAttribute.getKey(),audioAttribute);
   }
 
+  /**
+   * @see mitll.langtest.server.database.ExcelImport#addOldSchoolAudio(String, Exercise)
+   * @param ref
+   * @param user
+   */
   public void addAudioForUser(String ref, MiniUser user) {
     addAudio(new AudioAttribute(ref, user));
   }
@@ -259,10 +264,13 @@ public class AudioExercise extends ExerciseShell {
     long timestamp = 0;
     MiniUser bothLatest = null;
     MiniUser latest = null;
+    MiniUser defaultUser = null;
     for (Map.Entry<MiniUser, List<AudioAttribute>> pair : userToAudio.entrySet()) {
       boolean reg = false, slow = false;
       for (AudioAttribute audioAttribute : pair.getValue()) {
         MiniUser user = pair.getKey();
+       // System.out.println("\tuser " + user + " " + user.isDefault());
+
         if (!user.isDefault()) {
           if (audioAttribute.isRegularSpeed()) reg = true;
           if (audioAttribute.isSlow()) slow = true;
@@ -277,22 +285,37 @@ public class AudioExercise extends ExerciseShell {
             latest = user;
           }
         }
+        else {
+         // System.out.println("found default user " + defaultUser);
+          defaultUser = user;
+        }
       }
     }
 
     MiniUser toUse = bothLatest != null ? bothLatest : latest;
     Map<MiniUser, List<AudioAttribute>> userToAudioSingle = new HashMap<MiniUser, List<AudioAttribute>>();
     if (toUse == null && !userToAudio.isEmpty()) {
-      System.err.println("huh? user->audio map was " + userToAudio + " but couldn't find latest user?");
+      if (userToAudio.size() > 1 || defaultUser == null) {
+        System.err.println("AudioExercise.getMostRecentAudio : huh? user->audio map size=" + userToAudio.size() +
+            " was " + userToAudio + " but couldn't find latest user?");
+      }
     }
     else {
-      userToAudioSingle.put(toUse,userToAudio.get(toUse));
+      List<AudioAttribute> value = userToAudio.get(toUse);
+      if (value != null) {
+        userToAudioSingle.put(toUse, value);
+      }
     }
 
     sortRegBeforeSlow(userToAudioSingle);
     return userToAudioSingle;
   }
 
+  /**
+   * @see mitll.langtest.client.custom.ReviewEditableExercise#makeAudioRow()
+   * @param malesMap
+   * @return
+   */
   public List<MiniUser> getSortedUsers(Map<MiniUser, List<AudioAttribute>> malesMap) {
     List<MiniUser> maleUsers = new ArrayList<MiniUser>(malesMap.keySet());
     Collections.sort(maleUsers, new Comparator<MiniUser>() {
