@@ -44,6 +44,12 @@ public interface CommonExercise extends CommonShell {
   List<MiniUser> getSortedUsers(Map<MiniUser, List<AudioAttribute>> malesMap);
   Map<String, AudioAttribute> getAudioRefToAttr();
   Map<MiniUser, List<AudioAttribute>> getUserMap(boolean isMale);
+
+  /**
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.FastAndSlowASRScoringAudioPanel#getAfterPlayWidget()
+   * @param isMale
+   * @return
+   */
   Map<MiniUser, List<AudioAttribute>> getMostRecentAudio(boolean isMale);
   void addAudio(AudioAttribute audioAttribute);
 
