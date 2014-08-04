@@ -53,7 +53,7 @@ public class ExcelImport implements ExerciseDAO {
   private final String file;
   private final SectionHelper sectionHelper = new SectionHelper();
   private final boolean debug = false;
-  private String mediaDir;
+  private String mediaDir,mediaDir1;
   private final Set<String> missingSlowSet = new HashSet<String>();
   private final Set<String> missingFastSet = new HashSet<String>();
   private boolean shouldHaveRefAudio = false;
@@ -86,6 +86,7 @@ public class ExcelImport implements ExerciseDAO {
     this.serverProps = serverProps;
     maxExercises = serverProps.getMaxNumExercises();
     this.mediaDir = mediaDir;
+    mediaDir1 = mediaDir.replaceAll("bestAudio","");
     this.addDefects = addDefects;
     this.installPath = new File(installPath);
     if (!this.installPath.exists()) {
@@ -399,9 +400,6 @@ public class ExcelImport implements ExerciseDAO {
           List<String> predefinedTypeOrder = new ArrayList<String>();
           for (String col : columns) {
             String colNormalized = col.toLowerCase();
-
-            logger.debug("col " + col + " norm '" +colNormalized+
-                "' " + colNormalized.contains("context"));
             if (colNormalized.startsWith("word")) {
               gotHeader = true;
               colIndexOffset = columns.indexOf(col);
@@ -960,7 +958,7 @@ public class ExcelImport implements ExerciseDAO {
     imported.setType(Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW);
 
     if (lookForOldAudio) {
-      addOldSchoolAudio(id, refAudioIndex, imported);
+      addOldSchoolAudio(refAudioIndex, imported);
     }
 
     attachAudio(id, imported);
@@ -969,13 +967,19 @@ public class ExcelImport implements ExerciseDAO {
   }
 
   /**
+   * Go looking for audio in the media directory ("bestAudio") and if there's a file there
+   * under a matching exercise id, attach Fast and/or slow versions to this exercise.
+   *
    * Can override audio file directory with a non-empty refAudioIndex.
    *
-   * @param id
-   * @param refAudioIndex
-   * @param imported
+   * Also uses audioOffset - audio index is an integer.
+   *
+   * @param refAudioIndex override place to look for audio
+   * @param imported to attach audio to
+   * @see #getExercise(String, String, String, String, String, String, boolean, String, boolean)
    */
-  private void addOldSchoolAudio(String id, String refAudioIndex, Exercise imported) {
+  private void addOldSchoolAudio(String refAudioIndex, Exercise imported) {
+    String id = imported.getID();
     String audioDir = refAudioIndex.length() > 0 ? findBest(refAudioIndex) : id;
     if (audioOffset != 0) {
       audioDir = "" + (Integer.parseInt(audioDir.trim()) + audioOffset);
@@ -994,9 +998,7 @@ public class ExcelImport implements ExerciseDAO {
       }
       if (exists) {
         imported.addAudioForUser(ensureForwardSlashes(fastAudioRef), UserDAO.DEFAULT_USER);
-      } //else {
-      //logger.debug("missing fast " + test.getAbsolutePath());
-      //}
+      }
     }
     if (!missingSlowSet.contains(audioDir)) {
       File test = new File(slowAudioRef);
@@ -1025,7 +1027,7 @@ public class ExcelImport implements ExerciseDAO {
    * @see #getExercise(String, String, String, String, String, String, boolean, String, boolean)
    */
   private void attachAudio(String id, Exercise imported) {
-    String mediaDir1 = mediaDir.replaceAll("bestAudio","");
+    //String mediaDir1 = mediaDir.replaceAll("bestAudio","");
     //logger.debug("media dir " + mediaDir1);
     if (exToAudio.containsKey(id) || exToAudio.containsKey(id + "/1") || exToAudio.containsKey(id + "/2")) {
       List<AudioAttribute> audioAttributes = exToAudio.get(id);
@@ -1034,6 +1036,10 @@ public class ExcelImport implements ExerciseDAO {
         missingExerciseCount++;
         if (missingExerciseCount < 10) logger.error("attachAudio can't find " + id);
       } else if (!audioAttributes.isEmpty()) {
+        Set<String> audioPaths = new HashSet<String>();
+        for (AudioAttribute audioAttribute : imported.getAudioAttributes()) {
+          audioPaths.add(audioAttribute.getAudioRef());
+        }
         for (AudioAttribute audio : audioAttributes) {
           String child = mediaDir1 + File.separator + audio.getAudioRef();
           /*  if (child.contains("bestAudio\bestAudio")) {
@@ -1048,8 +1054,11 @@ public class ExcelImport implements ExerciseDAO {
             child = audio.getAudioRef();
           }
           if (exists) {
-            audio.setAudioRef(child);   // remember to prefix the path
-            imported.addAudio(audio);
+            if (!audioPaths.contains(child)) {
+              audio.setAudioRef(child);   // remember to prefix the path
+              imported.addAudio(audio);
+              audioPaths.add(child);
+            }
           } else {
             c++;
             if (c < 15) {
