@@ -782,12 +782,11 @@ public class Navigation implements RequiresResize {
 	  HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSent = getDialogToSentIndexToSent();
 	  HashMap<String, HashMap<String, Integer>> dialogToSpeakerToLast = getDialogToSpeakerToLast();
 	  int sentIndex = 0;
-	  final Grid sentPanel = new Grid(dialogToSentIndexToSent.get(dialog).size(), 4);
+	  final Grid sentPanel = new Grid(dialogToSentIndexToSent.get(dialog).size(), 5);
 	  final ArrayList<HTML> scoreElements = new ArrayList<HTML>();
       String otherPart = "";
       boolean youStart = false;
       int yourLast = dialogToSpeakerToLast.get(dialog).get(part);
-      System.out.println(yourLast);
 	  final FlowPanel rp = new FlowPanel();
 	  rp.add(somethingIsHappening);
 	  final HTML avg = new HTML("");
@@ -808,6 +807,8 @@ public class Navigation implements RequiresResize {
 			  final HTML score = new HTML("0.0");
 			  scoreElements.add(score);
 			  Button recordButton = null;
+			  final Button continueButton = new Button("Continue");
+			  continueButton.setEnabled(false);
 			  if(sentIndex != yourLast){
 			     recordButton = getRecordButton(dialogToSentIndexToSent.get(dialog).get(sentIndex), score);
 			  }
@@ -816,7 +817,6 @@ public class Navigation implements RequiresResize {
 					  
 				      @Override
 					  public void useResult(AudioAnswer result){
-			    	      System.out.println("hi");
 						  score.setHTML(String.valueOf(result.getScore()));
 						  avg.setHTML(innerScoring(scoreElements));
 						  avg.getElement().getStyle().setProperty("fontSize", "130%");
@@ -832,7 +832,6 @@ public class Navigation implements RequiresResize {
 					  
 					  @Override
 					  protected void useInvalidResult(AudioAnswer result){
-			    	      System.out.println("hi invalid");
 						  score.setHTML(String.valueOf(result.getScore()));
 						  avg.setHTML(innerScoring(scoreElements));
 						  avg.getElement().getStyle().setProperty("fontSize", "130%");
@@ -841,18 +840,28 @@ public class Navigation implements RequiresResize {
 					  }
 			      };
 				  
-				  recordButton.addMouseUpHandler(new MouseUpHandler() {
+				  continueButton.addMouseUpHandler(new MouseUpHandler() {
 					  @Override
 					  public void onMouseUp(MouseUpEvent e){
 						  rp.setVisible(true);
 					  }
 				  });
 			  }
+			  
+			  recordButton.addMouseUpHandler(new MouseUpHandler() {
+				  @Override
+				  public void onMouseUp(MouseUpEvent e){
+					  continueButton.setEnabled(true);
+				  }
+			  });
+			  
 			  sentPanel.setWidget(sentIndex, 2, recordButton);
 			  sent.getElement().getStyle().setProperty("fontWeight", "900");
 			  sentPanel.setWidget(sentIndex, 1, play);
 			  score.setVisible(false);
-			  sentPanel.setWidget(sentIndex, 3, score);
+			  sentPanel.setWidget(sentIndex, 3, continueButton);
+			  continueButton.setVisible(false);
+			  sentPanel.setWidget(sentIndex, 4, score);
 			  recordButton.setVisible(false);
 			  play.setVisible(false);
 		  }
@@ -886,12 +895,14 @@ public class Navigation implements RequiresResize {
 	  if(sentPanel.getWidget(currIndex, 2) != null){
 		  sentPanel.getWidget(currIndex, 1).setVisible(true);
 		  sentPanel.getWidget(currIndex,  2).setVisible(true);
-	  	  ((Button) sentPanel.getWidget(currIndex,  2)).addMouseUpHandler(new MouseUpHandler() {
+		  sentPanel.getWidget(currIndex,  3).setVisible(true);
+	  	  ((Button) sentPanel.getWidget(currIndex,  3)).addMouseUpHandler(new MouseUpHandler() {
 			  @Override
 			  public void onMouseUp(MouseUpEvent e){
 			      sentPanel.getWidget(currIndex, 0).getElement().getStyle().setProperty("color", "#B8B8B8");
 				  sentPanel.getWidget(currIndex, 2).setVisible(false);
 				  sentPanel.getWidget(currIndex, 1).setVisible(false);
+				  sentPanel.getWidget(currIndex, 3).setVisible(false);
 				  if(currIndex+1 != stop){
 				     sentPanel.getWidget(currIndex+1, 0).getElement().getStyle().setProperty("color", "#000000");
 				  }
