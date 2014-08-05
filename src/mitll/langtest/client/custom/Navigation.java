@@ -759,11 +759,15 @@ public class Navigation implements RequiresResize {
      $wnd.soundManager.init;
   }-*/;
   
-  private SimplePostAudioRecordButton getRecordButton(String sent, final HTML resultHolder){
+  private SimplePostAudioRecordButton getRecordButton(String sent, final HTML resultHolder, final Button continueButton){
 	  return new SimplePostAudioRecordButton(controller, service, sent) {
 		  @Override
 		  public void useResult(AudioAnswer result){
 			  resultHolder.setHTML(String.valueOf(result.getScore()));
+		  }
+		  
+		  public void useInvalidResult(AudioAnswer result){
+			  continueButton.setEnabled(false);
 		  }
 		  
 		  @Override
@@ -789,6 +793,7 @@ public class Navigation implements RequiresResize {
       int yourLast = dialogToSpeakerToLast.get(dialog).get(part);
 	  final FlowPanel rp = new FlowPanel();
 	  rp.add(somethingIsHappening);
+	  somethingIsHappening.setVisible(true);
 	  final HTML avg = new HTML("");
 	  avg.setVisible(false);
 	  rp.add(avg);
@@ -810,18 +815,23 @@ public class Navigation implements RequiresResize {
 			  final Button continueButton = new Button("Continue");
 			  continueButton.setEnabled(false);
 			  if(sentIndex != yourLast){
-			     recordButton = getRecordButton(dialogToSentIndexToSent.get(dialog).get(sentIndex), score);
+			     recordButton = getRecordButton(dialogToSentIndexToSent.get(dialog).get(sentIndex), score, continueButton);
 			  }
 			  else{
 				 recordButton = new SimplePostAudioRecordButton(controller, service, dialogToSentIndexToSent.get(dialog).get(sentIndex)) {
 					  
 				      @Override
 					  public void useResult(AudioAnswer result){
+				    	  flip(false);
+				    	  if(rp.isVisible()){//what a hack
+						     for(HTML sco : scoreElements){
+								sco.setVisible(true);
+						     }
+				    	  }
 						  score.setHTML(String.valueOf(result.getScore()));
 						  avg.setHTML(innerScoring(scoreElements));
 						  avg.getElement().getStyle().setProperty("fontSize", "130%");
 						  avg.getElement().getStyle().setProperty("margin", "10px");
-						  flip(false);
 					  }
 						  
 					  @Override
@@ -832,18 +842,17 @@ public class Navigation implements RequiresResize {
 					  
 					  @Override
 					  protected void useInvalidResult(AudioAnswer result){
-						  score.setHTML(String.valueOf(result.getScore()));
-						  avg.setHTML(innerScoring(scoreElements));
-						  avg.getElement().getStyle().setProperty("fontSize", "130%");
-						  avg.getElement().getStyle().setProperty("margin", "10px");
-						  flip(false);
+					     continueButton.setEnabled(false); 
 					  }
 			      };
 				  
-				  continueButton.addMouseUpHandler(new MouseUpHandler() {
+				  continueButton.addClickHandler(new ClickHandler() {
 					  @Override
-					  public void onMouseUp(MouseUpEvent e){
-						  rp.setVisible(true);
+					  public void onClick(ClickEvent e){
+						  if(continueButton.isEnabled()){
+						     rp.setVisible(true);
+						     somethingIsHappening.setVisible(true);
+						  }
 					  }
 				  });
 			  }
@@ -899,14 +908,16 @@ public class Navigation implements RequiresResize {
 	  	  ((Button) sentPanel.getWidget(currIndex,  3)).addMouseUpHandler(new MouseUpHandler() {
 			  @Override
 			  public void onMouseUp(MouseUpEvent e){
-			      sentPanel.getWidget(currIndex, 0).getElement().getStyle().setProperty("color", "#B8B8B8");
-				  sentPanel.getWidget(currIndex, 2).setVisible(false);
-				  sentPanel.getWidget(currIndex, 1).setVisible(false);
-				  sentPanel.getWidget(currIndex, 3).setVisible(false);
-				  if(currIndex+1 != stop){
-				     sentPanel.getWidget(currIndex+1, 0).getElement().getStyle().setProperty("color", "#000000");
+				  if(((Button) sentPanel.getWidget(currIndex,  3)).isEnabled()){
+				      sentPanel.getWidget(currIndex, 0).getElement().getStyle().setProperty("color", "#B8B8B8");
+					  sentPanel.getWidget(currIndex, 2).setVisible(false);
+					  sentPanel.getWidget(currIndex, 1).setVisible(false);
+					  sentPanel.getWidget(currIndex, 3).setVisible(false);
+					  if(currIndex+1 != stop){
+					     sentPanel.getWidget(currIndex+1, 0).getElement().getStyle().setProperty("color", "#000000");
+					  }
+					  setupPlayOrder(sentPanel, currIndex + 1, stop);
 				  }
-				  setupPlayOrder(sentPanel, currIndex + 1, stop);
 			  }
 	  	  });
 	  }
@@ -957,11 +968,9 @@ public class Navigation implements RequiresResize {
   private String innerScoring(ArrayList<HTML> scoreElements){
 	  double sum = 0.0;
 	  for(HTML sco : scoreElements){
-		sco.setVisible(true);
+		//sco.setVisible(true);
 		sum += Double.parseDouble(sco.getHTML());
 	  }
-	  System.out.println(sum);
-	  System.out.println(scoreElements.size());
 	  return "Your average score was: "+String.valueOf(sum/scoreElements.size());
   }
   
