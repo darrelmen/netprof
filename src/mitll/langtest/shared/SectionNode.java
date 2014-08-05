@@ -29,6 +29,8 @@ public class SectionNode implements IsSerializable {
 
   public String getName() { return name; }
   public String getType() { return type; }
+  public boolean isLeaf() { return children.isEmpty(); }
+
   public List<SectionNode> getChildren() { return children; }
 
   public String toString() {
