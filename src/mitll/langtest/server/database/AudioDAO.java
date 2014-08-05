@@ -85,14 +85,11 @@ public class AudioDAO extends DAO {
       }
       String audioRef = audio.getAudioRef();
       if (!paths.contains(audioRef)) {
-        if (exid.startsWith("25")) {
-          logger.warn("adding " + audio + " to " + exid);
-        }
         audioAttributes.add(audio);
         paths.add(audioRef);
       }
       else {
-        logger.warn("skipping " +audioRef + " on " + exid);
+//        logger.warn("skipping " +audioRef + " on " + exid);
       }
     }
     return exToAudio;
