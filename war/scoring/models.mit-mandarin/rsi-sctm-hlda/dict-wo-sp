@@ -1,3 +1,245 @@
+A   a1
+A   a2
+A   a3
+A   a4
+Bu   b u1
+Bu   b u2
+Bu   b u3
+Bu   b u4
+Bàba   b a4 b a1
+Bàn   b a4 n
+Bù   b u4
+Bú   b u2
+De   d e1
+De   d e2
+De   d e3
+De   d e4
+Dào   d a4 o4
+Děi   d e3 i3
+Dōu   d o1 u1
+Guócái   g u2 o2 c a2 i2
+Gāo   g a1 o1
+Gōngzuò   g o1 ng z u4 o4
+Huí   h u2 i2
+Huānyíng   h u1 a1 n y i2 ng
+Hái   h a2 i2
+Háizi   h a2 i2 z i3
+Hé   h e2
+Hăo   h a3 o3
+Hěn   h e3 n
+Jiànle   j i4 a4 n l e1
+Jiŭ   j i3 u3
+Jìn   j i4 n
+Jīngshēng   j i1 ng sh e1 ng
+Jĭnzhāng   j i3 n zh a1 ng
+Jĭnzhāngde   j i3 n zh a1 ng d e2
+Kèqi   k e4 q i1
+Kéyi   k e2 y i3
+Kùn   k u4 n
+Kē   k e1
+Le   l e1
+Le   l e2
+Le   l e3
+Le   l e4
+Lèi   l e4 i4
+Léiēn   l e2 i2 e1 n
+Lín   l i2 n
+Lăo   l a3 o3
+Lăoshī   l a3 o3 sh i1
+Lĭ   l i3
+Ma   m a1
+Ma   m a2
+Ma   m a3
+Ma   m a4
+Màn   m a4 n
+Máng   m a2 ng
+Méi   m e2 i2
+Māma   m a1 m a2
+Ne   n e1
+Ne   n e2
+Ne   n e3
+Ne   n e4
+Nán   n a2 n
+Nín   n i2 n
+Năr   n a3 r
+Nĭ   n i3
+Nĭmen   n i3 m e4 n
+Nǐ   n i3
+Qù   q u4
+Qĭng   q i3 ng
+Róngyi   r o2 ng y i3
+Shi   sh i1
+Shi   sh i2
+Shi   sh i3
+Shi   sh i4
+Shì   sh i4
+Shìr   sh i4 r
+Shítáng   sh i2 t a2 ng
+Sùshè   s u4 sh e4
+Tài   t a4 i4
+Tàitai   t a4 i4 t a1 i1
+Tàitai   t a4 i4 t a2 i2
+Tàitai   t a4 i4 t a3 i3
+Tàitai   t a4 i4 t a4 i4
+Túshūguăn   t u2 sh u1 g u3 a3 n
+Tā   t a1
+Tāmen   t a1 m e2 n
+Tĭng   t i3 ng
+Wáng   w a2 ng
+Wŏ   w o3
+Wŏmen   w o3 m e4 n
+Xiáojie   x i2 a2 o2 j i1 e1
+Xiáojie   x i2 a2 o2 j i2 e2
+Xiáojie   x i2 a2 o2 j i3 e3
+Xiáojie   x i2 a2 o2 j i4 e4
+Xiè   x i4 e4
+Xièxie   x i4 e4 x i1 e1
+Xièxie   x i4 e4 x i2 e2
+Xièxie   x i4 e4 x i3 e3
+Xièxie   x i4 e4 x i4 e4
+Xiān   x i1 a1 n
+Xiānsheng   x i1 a1 n sh e2 ng
+Xiăo   x i3 a3 o3
+Xuéxí   x u2 e2 x i2
+Xíng   x i2 ng
+Yàngzi   y a4 ng z i1
+Yìdiăn   y i4 d i3 a3 n
+Yìdiănr   y i4 d i3 a3 n r
+Yìsi   y i4 s i1
+Yě   y e3
+Yŏu   y o3 u3
+Zhào   zh a4 o4
+Zhōngwén   zh o1 ng w e2 n
+Zuìjìn   z u4 i4 j i4 n
+Zuò   z u4 o4
+Zàijiàn   z a4 i4 j i4 a4 n
+Zěmmeyàng   z e3 m m e4 y a4 ng
+Zŏu   z o3 u3
+Zŏule   z o3 u3 l e4
+Àirén   a4 i4 r e2 n
+Èi   e4 i4
+Ăi   a3 i3
+a   a1
+a   a2
+a   a3
+a   a4
+bu   b u1
+bu   b u2
+bu   b u3
+bu   b u4
+bàba   b a4 b a1
+bàn   b a4 n
+bù   b u4
+bú   b u2
+de   d e1
+de   d e2
+de   d e3
+de   d e4
+dào   d a4 o4
+děi   d e3 i3
+dōu   d o1 u1
+guócái   g u2 o2 c a2 i2
+gāo   g a1 o1
+gōngzuò   g o1 ng z u4 o4
+huí   h u2 i2
+huānyíng   h u1 a1 n y i2 ng
+hái   h a2 i2
+háizi   h a2 i2 z i3
+hé   h e2
+hăo   h a3 o3
+hěn   h e3 n
+jiànle   j i4 a4 n l e1
+jiŭ   j i3 u3
+jìn   j i4 n
+jīngshēng   j i1 ng sh e1 ng
+jĭnzhāng   j i3 n zh a1 ng
+jĭnzhāngde   j i3 n zh a1 ng d e2
+kèqi   k e4 q i1
+kéyi   k e2 y i3
+kùn   k u4 n
+kē   k e1
+le   l e1
+le   l e2
+le   l e3
+le   l e4
+lèi   l e4 i4
+léiēn   l e2 i2 e1 n
+lín   l i2 n
+lăo   l a3 o3
+lăoshī   l a3 o3 sh i1
+lĭ   l i3
+ma   m a1
+ma   m a2
+ma   m a3
+ma   m a4
+màn   m a4 n
+máng   m a2 ng
+méi   m e2 i2
+māma   m a1 m a2
+ne   n e1
+ne   n e2
+ne   n e3
+ne   n e4
+nán   n a2 n
+nín   n i2 n
+năr   n a3 r
+nĭ   n i3
+nĭmen   n i3 m e4 n
+nǐ   n i3
+qù   q u4
+qĭng   q i3 ng
+róngyi   r o2 ng y i3
+shi   sh i1
+shi   sh i2
+shi   sh i3
+shi   sh i4
+shì   sh i4
+shìr   sh i4 r
+shítáng   sh i2 t a2 ng
+sùshè   s u4 sh e4
+tài   t a4 i4
+tàitai   t a4 i4 t a1 i1
+tàitai   t a4 i4 t a2 i2
+tàitai   t a4 i4 t a3 i3
+tàitai   t a4 i4 t a4 i4
+túshūguăn   t u2 sh u1 g u3 a3 n
+tā   t a1
+tāmen   t a1 m e2 n
+tĭng   t i3 ng
+wáng   w a2 ng
+wŏ   w o3
+wŏmen   w o3 m e4 n
+xiáojie   x i2 a2 o2 j i1 e1
+xiáojie   x i2 a2 o2 j i2 e2
+xiáojie   x i2 a2 o2 j i3 e3
+xiáojie   x i2 a2 o2 j i4 e4
+xiè   x i4 e4
+xièxie   x i4 e4 x i1 e1
+xièxie   x i4 e4 x i2 e2
+xièxie   x i4 e4 x i3 e3
+xièxie   x i4 e4 x i4 e4
+xiān   x i1 a1 n
+xiānsheng   x i1 a1 n sh e2 ng
+xiăo   x i3 a3 o3
+xuéxí   x u2 e2 x i2
+xíng   x i2 ng
+yàngzi   y a4 ng z i1
+yìdiăn   y i4 d i3 a3 n
+yìdiănr   y i4 d i3 a3 n r
+yìsi   y i4 s i1
+yě   y e3
+yŏu   y o3 u3
+zhào   zh a4 o4
+zhōngwén   zh o1 ng w e2 n
+zuìjìn   z u4 i4 j i4 n
+zuò   z u4 o4
+zàijiàn   z a4 i4 j i4 a4 n
+zěmmeyàng   z e3 m m e4 y a4 ng
+zŏu   z o3 u3
+zŏule   z o3 u3 l e4
+àirén   a4 i4 r e2 n
+èi   e4 i4
+ăi   a3 i3
 行长                             h a2 ng zh a3 ng
 之下                             zh i1 x i4 a4
 抽样                             ch o1 u1 y a4 ng
