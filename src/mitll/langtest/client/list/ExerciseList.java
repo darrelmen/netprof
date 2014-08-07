@@ -1,5 +1,6 @@
 package mitll.langtest.client.list;
 
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -587,6 +588,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   protected void askServerForExercise(String itemID) {
     System.out.println("ExerciseList.askServerForExercise id = " + itemID + " instance " + instance);
+    controller.checkUser();
     service.getExercise(itemID, controller.getUser(), new ExerciseAsyncCallback());
   }
 
@@ -814,7 +816,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   protected void addMinWidthStyle(Panel leftColumn) {
     leftColumn.addStyleName("minWidth");
-    DOM.setStyleAttribute(leftColumn.getElement(), "paddingRight", "10px");
+    leftColumn.getElement().getStyle().setPaddingRight(10, Style.Unit.PX);
   }
 
   @Override
