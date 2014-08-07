@@ -157,7 +157,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   }
 
   protected void addQuestionContentRow(CommonExercise e, ExerciseController controller, Panel hp) {
-     hp.add(getQuestionContent(e/*, (Panel) null*/));
+     hp.add(getQuestionContent(e));
   }
 
   public void setBusy(boolean v) {  this.isBusy = v;  }
@@ -243,7 +243,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * @return the panel that has the instructions and the audio panel
    * @see #GoodwaveExercisePanel
    */
-  Widget getQuestionContent(CommonExercise e/*, Panel addToList*/) {
+  Widget getQuestionContent(CommonExercise e) {
     String content = e.getContent();
     String path = e.getRefAudio() != null ? e.getRefAudio() : e.getSlowAudioRef();
 
