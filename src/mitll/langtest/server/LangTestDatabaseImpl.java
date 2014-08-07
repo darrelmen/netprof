@@ -462,19 +462,38 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     long then = System.currentTimeMillis();
     List<CommonExercise> exercises = getExercises();
 
+    long then2 = System.currentTimeMillis();
+
     CommonExercise byID = db.getCustomOrPredefExercise(id);  // allow custom items to mask out non-custom items
+
+    long now = System.currentTimeMillis();
+    if (now - then2 > 200) {
+      logger.debug("getExercise : (" + serverProps.getLanguage() + ") took " + (now - then) + " millis to find exercise " + id);
+    }
 
     if (byID == null) {
       logger.error("getExercise : huh? couldn't find exercise with id " + id + " when examining " + exercises.size() + " items");
     }
     else {
+      then2 = System.currentTimeMillis();
+
       addAnnotationsAndAudio(userID, byID);
+      now = System.currentTimeMillis();
+      if (now - then2 > 200) {
+        logger.debug("getExercise : (" + serverProps.getLanguage() + ") took " + (now - then) + " millis to add annotations to exercise " + id);
+      }
+      then2 = System.currentTimeMillis();
+
       //logger.debug("getExercise : returning " + byID);
       ensureMP3s(byID);
+      now = System.currentTimeMillis();
+      if (now - then2 > 200) {
+        logger.debug("getExercise : (" + serverProps.getLanguage() + ") took " + (now - then) + " millis to ensure there are mp3s for exercise " + id);
+      }
     }
-    long now = System.currentTimeMillis();
+    now = System.currentTimeMillis();
     if (now - then > 200) {
-      logger.debug("getExercise : took " + (now - then) + " millis to find " + id);
+      logger.debug("getExercise : (" + serverProps.getLanguage() + ") took " + (now - then) + " millis to find " + id);
     }
     return byID;
   }
@@ -508,6 +527,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   List<CommonExercise> getExercises() {
+    long then = System.currentTimeMillis();
     List<CommonExercise> exercises = db.getExercises();
     makeAutoCRT();   // side effect of db.getExercises is to make the exercise DAO which is needed here...
     if (fullTrie == null) {
@@ -515,6 +535,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
 
     checkLTS(exercises);
+    long now = System.currentTimeMillis();
+    if (now-then > 200) {
+      logger.info("took " +(now-then) + " millis to get the predef exercise list.");
+    }
     return exercises;
   }
 
