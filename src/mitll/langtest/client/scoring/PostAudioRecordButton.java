@@ -72,8 +72,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   private void postAudioFile(String base64EncodedWavFile) {
     reqid++;
     final long then = System.currentTimeMillis();
-    System.out.println("PostAudioRecordButton.postAudioFile : " +  getAudioType());
-
+   // System.out.println("PostAudioRecordButton.postAudioFile : " +  getAudioType());
 
     service.writeAudioFile(base64EncodedWavFile,
       "plan",
