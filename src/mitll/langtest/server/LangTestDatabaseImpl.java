@@ -573,7 +573,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private boolean ensureMP3(String wavFile, boolean overwrite) {
     if (wavFile != null) {
       String parent = pathHelper.getInstallPath();
-      //logger.debug("ensureMP3 : wav " + wavFile + " under " + parent);
+      logger.debug("ensureMP3 : wav " + wavFile + " under " + parent);
 
       AudioConversion audioConversion = new AudioConversion();
       if (!audioConversion.exists(wavFile, parent)) {
@@ -990,7 +990,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.custom.QCNPFExercise#getGenderGroup(mitll.langtest.client.custom.RememberTabAndContent, mitll.langtest.shared.AudioAttribute, com.github.gwtbootstrap.client.ui.Button)
+   * @see mitll.langtest.client.custom.QCNPFExercise#getGenderGroup
    * @param attr
    * @param isMale
    */
@@ -1012,7 +1012,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public long addUser(int age, String gender, int experience,
                       String nativeLang, String dialect, String userID, Collection<User.Permission> permissions) {
-    //logger.debug("Adding user " + userID);
     return db.addUser(getThreadLocalRequest(),age, gender, experience, nativeLang, dialect, userID, permissions);
   }
 
@@ -1087,6 +1086,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       AudioAttribute attribute = addToAudioTable(user, audioType, exercise1, exercise, audioAnswer);
       audioAnswer.setAudioAttribute(attribute);
     }
+    else {
+      normalizeLevel(audioAnswer);
+      ensureMP3(audioAnswer.getPath(),false);
+    }
     if (!audioAnswer.isValid() && audioAnswer.getDurationInMillis() == 0) {
       logger.warn("huh? got zero length recording " + user + " " + exercise);
       logEvent("audioRecording", "writeAudioFile", exercise, "Writing audio - got zero duration!", user, "unknown");
@@ -1094,6 +1097,25 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return audioAnswer;
   }
 
+  private void normalizeLevel(AudioAnswer audioAnswer) {
+    File absoluteFile = pathHelper.getAbsoluteFile(audioAnswer.getPath());
+    if (!absoluteFile.exists()) {
+      logger.error("huh? can't find " + absoluteFile + " audio file just posted.?");
+    }
+    else {
+      logger.debug("norm level for " + absoluteFile);
+      new AudioConversion().normalizeLevels(absoluteFile);
+    }
+  }
+
+  /**
+   * @see mitll.langtest.client.scoring.SimplePostAudioRecordButton#postAudioFile(String)
+   * @param base64EncodedString
+   * @param textToAlign
+   * @param identifier
+   * @param reqid
+   * @return
+   */
   @Override
   public AudioAnswer getAlignment(String base64EncodedString,
                                   String textToAlign,
@@ -1117,6 +1139,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param exercise1 for which exercise
    * @param audioAnswer holds the path of the temporary recorded file
    * @return AudioAttribute that represents the audio that has been added to the exercise
+   * @see #writeAudioFile(String, String, String, int, int, int, boolean, String, boolean, boolean, boolean, boolean)
    */
   private AudioAttribute addToAudioTable(int user, String audioType, CommonExercise exercise1, String exerciseID, AudioAnswer audioAnswer) {
     String exercise = exercise1 == null ? exerciseID : exercise1.getID();
@@ -1125,7 +1148,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String permanentAudioPath = new PathWriter().getPermanentAudioPath(pathHelper, fileRef, destFileName, true, exercise);
     AudioAttribute audioAttribute =
       db.getAudioDAO().addOrUpdate(user, permanentAudioPath, exercise, System.currentTimeMillis(), audioType, audioAnswer.getDurationInMillis());
-    //logger.debug("writeAudioFile for " + audioType + " audio answer has " + audioAttribute);
+
+    logger.debug("addToAudioTable user " + user + " ex " + exerciseID + " for " + audioType + " audio answer has " + audioAttribute);
 
     // what state should we mark recorded audio?
     setExerciseState(exercise, user, exercise1);
