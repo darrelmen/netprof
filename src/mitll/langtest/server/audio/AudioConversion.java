@@ -38,6 +38,7 @@ public class AudioConversion {
   public static final String FILE_MISSING = "FILE_MISSING";
   private File oggEncoder;
   private final AudioCheck audioCheck = new AudioCheck();
+  private static final boolean DEBUG = false;
 
   public AudioConversion() {
     String os = getOS();
@@ -82,9 +83,11 @@ public class AudioConversion {
 
 
   /**
-   * Also writes an MP3 file equivalent.
+   * Converts base 64 string into bytes and writes them to a file.
+   * This is what we send over from FLASH when recording.  TODO : Ideally we could post the bytes without encoding.
    *
    * @see AudioFileHelper#writeAudioFile(String, String, String, mitll.langtest.shared.CommonExercise, int, int, int, boolean, String, boolean, boolean, boolean)
+   * @see mitll.langtest.server.audio.AudioFileHelper#getAlignment(String, String, String, int)
    * @param base64EncodedString audio bytes from the client
    * @param file where we want to write the wav file to
    * @return true if audio is valid (not too short, not silence)
@@ -100,8 +103,8 @@ public class AudioConversion {
     }
     AudioCheck.ValidityAndDur valid = isValid(file);
 
-    AudioConversion audioConversion = new AudioConversion();
-    audioConversion.writeMP3(file.getAbsolutePath());
+    //AudioConversion audioConversion = new AudioConversion();
+   // audioConversion.writeMP3(file.getAbsolutePath());
 /*    if (LangTestDatabase.WRITE_ALTERNATE_COMPRESSED_AUDIO) {
       audioConversion.writeCompressed(file.getAbsolutePath());
     }*/
@@ -152,60 +155,12 @@ public class AudioConversion {
   }
 
   /**
-   * Return a reference to a wav file that is at the proper (expected) sample rate of 16K.
-   * If the audio file path is relative, make it absolute.
-   * If the audio file is an mp3 file convert it to wav
-   * If the audio file is not at the right sample rate, convert it.
-   * @param audioFile
-   * @param installPath
-   * @return reference to a wav file at the expected sample rate
-   */
-/*  public File getProperAudioFile(String audioFile, String installPath) {
-    // check the path of the audio file!
-    File t = new File(audioFile);
-    if (!t.exists()) {
-      System.out.println("getProperAudioFile getProperAudioFile " + t.getAbsolutePath() + " doesn't exist");
-    }
-    // make sure it's under the deploy location/install path
-    if (!audioFile.startsWith(installPath)) {
-      audioFile = installPath + File.separator + audioFile;
-    }
-    String noSuffix = removeSuffix(audioFile);
-
-    // convert it to wav, if needed
-    if (audioFile.endsWith(".mp3")) {
-      logger.debug("converting " + audioFile + " to wav ");
-      String wavFile = noSuffix +".wav";
-      File test = new File(wavFile);
-      audioFile = test.exists() ? test.getAbsolutePath() : convertMP3ToWav(audioFile).getAbsolutePath();
-    }
-
-    File testAudioFile = new File(audioFile);
-    if (!testAudioFile.exists()) {
-      logger.error("getProperAudioFile can't find file at " + testAudioFile.getAbsolutePath());
-    }
-    // convert it to 16K sample rate, if needed
-    try {
-      File converted = convertTo16Khz(testAudioFile);
-//      System.out.println("getProperAudioFile test audio is " + testAudioFile.getAbsolutePath() + " converted " + converted.getAbsolutePath());
-      testAudioFile = converted;
-    } catch (UnsupportedAudioFileException e) {
-      logger.error("getProperAudioFile couldn't convert " + testAudioFile.getAbsolutePath() + " : " + e.getMessage());
-    }
-
-    if (!testAudioFile.exists()) {
-      logger.error("getProperAudioFile getProperAudioFile " + testAudioFile.getAbsolutePath() + " doesn't exist????");
-    }
-    return testAudioFile;
-  }*/
-
-  /**
    * Checks if the sample rate is not 16K (as required by things like sv).
    * If not, then uses sox to make an audio file with the right sample rate.
    *
    * @param testAudioDir directory for audio
    * @param testAudioFileNoSuffix name without suffix
-   * @see mitll.langtest.server.scoring.ASRScoring#scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String, boolean)
+   * @see mitll.langtest.server.scoring.ASRScoring#scoreRepeatExercise
    * @return
    */
   public String convertTo16Khz(String testAudioDir, String testAudioFileNoSuffix) throws UnsupportedAudioFileException {
@@ -252,7 +207,7 @@ public class AudioConversion {
   }
 
   private String removeSuffix(String name1) {
-    return name1.substring(0,name1.length()-4);
+    return name1.substring(0, name1.length() - 4);
   }
 
   private boolean writeOGG(String pathToWav) {
@@ -283,6 +238,13 @@ public class AudioConversion {
     }
   }
 
+  /**
+   * @see #ensureWriteMP3(String, String, boolean)
+   * @param pathToWav
+   * @param realContextPath
+   * @param overwrite
+   * @return
+   */
   private String writeMP3(String pathToWav, String realContextPath, boolean overwrite) {
     File absolutePathToWav = getAbsoluteFile(pathToWav, realContextPath);
 
@@ -371,10 +333,10 @@ public class AudioConversion {
     return file;
   }
 
-  private static final boolean DEBUG = false;
   /**
    * Use lame to write an mp3 file.
    * @param pathToWav
+   * @see #convertBase64ToAudioFiles(String, java.io.File)
    */
   private void writeMP3(String pathToWav) {
     String mp3File = pathToWav.replace(".wav", ".mp3");

@@ -308,10 +308,12 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
   private ASRScoringAudioPanel getAudioPanel(String path) {
     ASRScoringAudioPanel audioPanel = makeFastAndSlowAudio(path);
-    Style style = audioPanel.getPlayButton().getElement().getStyle();
-    style.setMarginTop(10, Style.Unit.PX);
-    style.setMarginBottom(10, Style.Unit.PX);
     audioPanel.getElement().setId("ASRScoringAudioPanel");
+    if (audioPanel.hasAudio()) {
+      Style style = audioPanel.getPlayButton().getElement().getStyle();
+      style.setMarginTop(10, Style.Unit.PX);
+      style.setMarginBottom(10, Style.Unit.PX);
+    }
     return audioPanel;
   }
 
@@ -650,8 +652,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         }
         final Collection<AudioAttribute> initialAudioChoices = maleEmpty ?
           femaleEmpty ? audioAttributes : femalesMap.get(femaleUsers.get(0)) : malesMap.get(maleUsers.get(0));
-        System.out.println("getAfterPlayWidget.initialAudioChoices  " + initialAudioChoices);
-
+        //System.out.println("getAfterPlayWidget.initialAudioChoices  " + initialAudioChoices);
 
         addRegularAndSlow(rightSide, initialAudioChoices);
 
@@ -842,7 +843,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
      * @param audioAttributes
      */
     private void addRegularAndSlow(Panel vp, Collection<AudioAttribute> audioAttributes) {
-
 /*      System.out.println("getAfterPlayWidget : for exercise " +exercise.getID() +
         " path "+ audioPath + " attributes were " + audioAttributes);*/
 
@@ -897,7 +897,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
           System.err.println("no radio choice got selected??? ");
 
       else {
-       System.out.println("GoodwaveExercisePanel.addRegularAndSlow showing " +firstAttr);
+       //System.out.println("GoodwaveExercisePanel.addRegularAndSlow showing " +firstAttr);
         final AudioAttribute ffirstAttr = firstAttr;
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
           @Override
