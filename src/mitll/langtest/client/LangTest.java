@@ -813,9 +813,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see #makeFlashContainer()
    */
   private void checkLogin() {
-    console("checkLogin");
+    //console("checkLogin");
     userManager.isUserExpired();
     userManager.checkLogin();
+  }
+
+  public void checkUser() {
+    if (userManager.isUserExpired()) {
+      checkLogin();
+    }
   }
 
   private void console(String message) {
@@ -833,7 +839,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public void rememberAudioType(String audioType) {  this.audioType = audioType;  }
 
   public boolean showCompleted() {
-    return isReviewMode() || isCRTDataCollectMode() || getAudioType().equals(Result.AUDIO_TYPE_RECORDER);
+    return isReviewMode() || getAudioType().equals(Result.AUDIO_TYPE_RECORDER);
   }
 
   /**
@@ -873,11 +879,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public int getSegmentRepeats() { return props.getSegmentRepeats(); }
   public boolean isArabicTextDataCollect() {  return props.isArabicTextDataCollect(); }
   public boolean useBkgColorForRef() {  return props.isBkgColorForRef(); }
-  public boolean isDemoMode() {  return props.isDemoMode(); }
   public boolean isAutoCRTMode() {  return props.isAutocrt(); }
   public int getRecordTimeout() {  return props.getRecordTimeout(); }
   public boolean isDataCollectMode() {  return props.isDataCollectMode(); }
-  public boolean isCRTDataCollectMode() {  return props.isCRTDataCollectMode(); }
   public boolean isCollectAudio() {  return props.isCollectAudio(); }
   public boolean isMinimalUI() {  return props.isMinimalUI(); }
   public boolean isGrading() {  return props.isGrading(); }
@@ -908,7 +912,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public void stopRecording(WavCallback wavCallback) {
     now = System.currentTimeMillis();
-    System.out.println("time recording in UI " + (now-then) + " millis");
+    System.out.println("stopRecording : time recording in UI " + (now-then) + " millis");
 
     flashRecordPanel.stopRecording(wavCallback);
   }
