@@ -67,7 +67,7 @@
 
     <context-param>
         <param-name>config</param-name>
-        <param-value>mandarin</param-value>
+        <param-value>farsi</param-value>
     </context-param>
 
     <context-param>
