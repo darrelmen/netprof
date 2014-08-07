@@ -67,31 +67,19 @@ public class ExerciseListLayout {
                                          Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                          ExerciseController controller) {
     boolean showTypeAhead = !props.isCRTDataCollectMode();
-  //  if (props.isShowSections()) {
-      boolean hasQC = controller.getPermissions().contains(User.Permission.QUALITY_CONTROL);
-      String instance = hasQC ? User.Permission.QUALITY_CONTROL.toString() : "flex";
+    boolean hasQC = controller.getPermissions().contains(User.Permission.QUALITY_CONTROL);
+    String instance = hasQC ? User.Permission.QUALITY_CONTROL.toString() : "flex";
 
-      // System.out.println("\n\n\n---> makeExerciseList : making flex " + instance);
-
-      FlexSectionExerciseList flex = new FlexSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
+    return new FlexSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
         props.isShowTurkToken(), props.showExercisesInOrder(), controller, showTypeAhead, instance);
-      return flex;
-/*    } else {
-      return new PagingExerciseList(currentExerciseVPanel, service, feedback,
-        null, controller, props.isShowTurkToken(), props.showExercisesInOrder(), showTypeAhead, "paging");
-    }*/
   }
 
   /**
-   * @see #useExerciseList
    * @param exerciseListContainer add exercise list inside this
+   * @see #useExerciseList
    */
   private void addExerciseListOnLeftSide(Panel exerciseListContainer) {
-/*    if (props.isTeacherView()) {
-      exerciseListContainer.add(exerciseList.getWidget());
-    } else {*/
-      exerciseListContainer.add(exerciseList.getExerciseListOnLeftSide(props));
-  //  }
+    exerciseListContainer.add(exerciseList.getExerciseListOnLeftSide(props));
   }
 
   private boolean showOnlyOneExercise() {
