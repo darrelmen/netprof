@@ -573,7 +573,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private boolean ensureMP3(String wavFile, boolean overwrite) {
     if (wavFile != null) {
       String parent = pathHelper.getInstallPath();
-      logger.debug("ensureMP3 : wav " + wavFile + " under " + parent);
+      //logger.debug("ensureMP3 : wav " + wavFile + " under " + parent);
 
       AudioConversion audioConversion = new AudioConversion();
       if (!audioConversion.exists(wavFile, parent)) {
@@ -1103,7 +1103,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       logger.error("huh? can't find " + absoluteFile + " audio file just posted.?");
     }
     else {
-      logger.debug("norm level for " + absoluteFile);
+      //logger.debug("norm level for " + absoluteFile);
       new AudioConversion().normalizeLevels(absoluteFile);
     }
   }
