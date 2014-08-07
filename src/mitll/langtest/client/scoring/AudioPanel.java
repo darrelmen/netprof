@@ -130,7 +130,9 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @param recordButtonTitle
    */
   protected void addWidgets(String playButtonSuffix, String audioType, String recordButtonTitle) {
-    //System.out.println("AudioPanel.addWidgets " + audioType + " title " + recordButtonTitle + " suffix = " + playButtonSuffix);
+    System.out.println("AudioPanel.addWidgets " + audioType + " title " + recordButtonTitle +
+        " suffix = " + playButtonSuffix + " has audio " + hasAudio());
+
     DivWidget divWithRelativePosition = new DivWidget();  // need this for audio position div to work properly
     divWithRelativePosition.getElement().getStyle().setPosition(Style.Position.RELATIVE);
     Panel imageContainer = new VerticalPanel();
