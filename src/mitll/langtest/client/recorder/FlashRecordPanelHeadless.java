@@ -10,6 +10,8 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.client.BrowserCheck;
 import mitll.langtest.client.WavCallback;
 
+import java.util.Date;
+
 /**
  * Somewhat related to Cykod example at <a href='https://github.com/cykod/FlashWavRecorder/blob/master/html/index.html'>Cykod example html</a><p></p>
  *
@@ -300,10 +302,17 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    */
   public void stopRecording(final WavCallback wavCallback) {
     if (permissionReceived) {
+      final long then = System.currentTimeMillis();
+      System.out.println("stopRecording at " + then + " " + new Date(then));
 
       Timer t = new Timer() {
         @Override
         public void run() {
+
+          long now = System.currentTimeMillis();
+          System.out.println("stopRecording timer at " + now + " diff " + (now-then)+
+              "" + new Date(now) );
+
           flashStopRecording();
           wavCallback.getBase64EncodedWavFile(getWav());
         }
