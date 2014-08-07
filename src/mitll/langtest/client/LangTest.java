@@ -16,6 +16,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
@@ -88,6 +89,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final boolean SHOW_STATUS = false;
   private static final boolean SHOW_EXCEPTION_TO_USER = false;
 
+  /**
+   * @see #makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, com.google.gwt.user.client.ui.Panel, com.google.gwt.user.client.ui.Panel)
+   */
   private ListInterface exerciseList;
 
   private UserManager userManager;
@@ -290,17 +294,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void onModuleLoad2() {
     setupSoundManager();
 
-    if (props.doInstrumentation()) {
+    //if (props.doInstrumentation()) { // basically always true
       buttonFactory = new ButtonFactory(service, props);
-    }
-/*    else {
-      buttonFactory = new EventMock();
-    }*/
+    //}
+
     userManager = new UserManager(this, service, props);
 
     checkAdmin();
 
-    DOM.setStyleAttribute(RootPanel.get().getElement(), "paddingTop", "2px");
+    RootPanel.get().getElement().getStyle().setPaddingTop(2, Style.Unit.PX);
 
     addResizeHandler();
 
@@ -318,6 +320,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
+  /**
+   * @see #onModuleLoad2()
+   * @return
+   */
   private Panel populateRootPanel() {
     Container verticalContainer = new FluidContainer();
     verticalContainer.getElement().setId("root_vertical_container");
@@ -359,22 +365,30 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     makeExerciseList(secondRow, exerciseListContainer, currentExerciseVPanel);
 
-    RootPanel.get().clear();
-    if (!showOnlyOneExercise()) {
+    RootPanel.get().clear();   // necessary?
+    if (showOnlyOneExercise()) {
+      // show fancy lace background image
+      currentExerciseVPanel.addStyleName("body");
+      currentExerciseVPanel.getElement().getStyle().setBackgroundImage("url(" + LANGTEST_IMAGES + "levantine_window_bg.jpg" + ")");
+      currentExerciseVPanel.addStyleName("noMargin");
+
+      Container verticalContainer2 = new FluidContainer();
+      verticalContainer2.getElement().setId("root_vertical_container");
+      verticalContainer2.add(flashRecordPanel);
+      verticalContainer2.add(currentExerciseVPanel);
+      RootPanel.get().add(verticalContainer2);
+
+    } else {
       currentExerciseVPanel.addStyleName("floatLeftList");
       thirdRow.add(currentExerciseVPanel);     // right side of third row is exercise panel
       RootPanel.get().add(verticalContainer);
     }
-    else {  // show fancy lace background image
-      currentExerciseVPanel.addStyleName("body");
-      currentExerciseVPanel.getElement().getStyle().setBackgroundImage("url("+ LANGTEST_IMAGES +"levantine_window_bg.jpg"+")");
-      currentExerciseVPanel.addStyleName("noMargin");
-      RootPanel.get().add(currentExerciseVPanel);
-    }
 
-    // don't do flash if we're doing text only collection
-
-    if (shouldCollectAudio()) {
+    if (shouldCollectAudio() && !showOnlyOneExercise()
+        ) {
+      /**
+       * {@link #makeFlashContainer}
+       */
       firstRow.add(flashRecordPanel);
     }
     modeSelect();
@@ -385,7 +399,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       firstRow.add(navigation.getNav(bothSecondAndThird));
     }
     else {
-      firstRow.add(bothSecondAndThird);
+      firstRow.add(bothSecondAndThird); // TODO : would this ever happen?
     }
 
     if (SHOW_STATUS) {
@@ -425,7 +439,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   /**
    * Supports different flavors of exercise list -- Paging, Grading, and vanilla.
    *
-   * @seex #reallyMakeExerciseList
+   * @see #populateRootPanel()
    */
   private ListInterface makeExerciseList(FluidRow secondRow, Panel exerciseListContainer, Panel currentExerciseVPanel) {
     this.exerciseList = new ExerciseListLayout(props).makeExerciseList(secondRow, exerciseListContainer, this, currentExerciseVPanel, service, this);
@@ -558,6 +572,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return exerciseList.getWidget().getOffsetWidth();
   }
 
+  /**
+   * @see #populateRootPanel()
+   * @see mitll.langtest.client.scoring.ScoringAudioPanel#ScoringAudioPanel(String, String, LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, mitll.langtest.client.scoring.ScoreListener, int, String, String)
+   * @return
+   */
   public boolean showOnlyOneExercise() {
     return props.getExercise_title() != null;
   }
@@ -737,7 +756,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     boolean askedForExercises = exerciseList.getExercises(userID);
     if (!askedForExercises && (lastUser != userID) && lastUser != NO_USER_INITIAL) {
-      System.out.println("\tdoEverythingAfterFactory : " + userID + " initially list and user now " + userID);
+      //System.out.println("\tdoEverythingAfterFactory : " + userID + " initially list and user now " + userID);
 
       exerciseList.reload();
     }
@@ -977,13 +996,29 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private class UsersClickHandler implements ClickHandler {
     public void onClick(ClickEvent event) {
-      new UserTable(props).showUsers(service);
+      GWT.runAsync(new RunAsyncCallback() {
+        public void onFailure(Throwable caught) {
+          Window.alert("Code download failed");
+        }
+
+        public void onSuccess() {
+          new UserTable(props).showUsers(service);
+        }
+      });
     }
   }
 
   private class EventsClickHandler implements ClickHandler {
     public void onClick(ClickEvent event) {
-      new EventTable(props).show(service);
+      GWT.runAsync(new RunAsyncCallback() {
+        public void onFailure(Throwable caught) {
+          Window.alert("Code download failed");
+        }
+
+        public void onSuccess() {
+          new EventTable().show(service);
+        }
+      });
     }
   }
 
