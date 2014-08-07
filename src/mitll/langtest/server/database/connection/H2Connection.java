@@ -24,26 +24,23 @@ public class H2Connection implements DatabaseConnection {
   private final int queryCacheSize;
   private static final int maxMemoryRows = 50000;
 
-/*  private H2Connection(String configDir, String dbName) {
-    this(configDir, dbName, 50000, 8, true);
-  }*/
-
   public H2Connection(String configDir, String dbName, boolean mustAlreadyExist) {
     this(configDir, dbName, 50000, 8, mustAlreadyExist);
   }
-    /**
-     * @see mitll.langtest.server.database.DatabaseImpl#DatabaseImpl
-     * @param configDir
-     * @param dbName
-     */
-    private H2Connection(String configDir, String dbName, int cacheSizeKB, int queryCacheSize, boolean mustAlreadyExist) {
+
+  /**
+   * @param configDir
+   * @param dbName
+   * @see mitll.langtest.server.database.DatabaseImpl#DatabaseImpl
+   */
+  private H2Connection(String configDir, String dbName, int cacheSizeKB, int queryCacheSize, boolean mustAlreadyExist) {
     this.cacheSizeKB = cacheSizeKB;
     this.queryCacheSize = queryCacheSize;
     connect(configDir, dbName, mustAlreadyExist);
   }
 
   private void connect(String configDir, String database, boolean mustAlreadyExist) {
-    String h2FilePath = configDir +File.separator+ database;
+    String h2FilePath = configDir + File.separator + database;
     connect(h2FilePath, mustAlreadyExist);
   }
 
