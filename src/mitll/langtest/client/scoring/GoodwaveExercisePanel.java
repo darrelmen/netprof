@@ -126,7 +126,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     this.navigationHelper = getNavigationHelper(controller, listContainer, addKeyHandler);
     this.listContainer = listContainer;
     navigationHelper.addStyleName("topBarMargin");
-    center.add(navigationHelper);
+
+    if (!controller.showOnlyOneExercise()) { // headstart doesn't need navigation, lists, etc.
+      center.add(navigationHelper);
+    }
   }
 
   protected NavigationHelper getNavigationHelper(ExerciseController controller,
