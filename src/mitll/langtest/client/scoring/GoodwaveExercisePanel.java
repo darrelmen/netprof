@@ -842,13 +842,14 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
      * @param audioAttributes
      */
     private void addRegularAndSlow(Panel vp, Collection<AudioAttribute> audioAttributes) {
-      RadioButton first = null;
-      AudioAttribute firstAttr = null;
 
 /*      System.out.println("getAfterPlayWidget : for exercise " +exercise.getID() +
         " path "+ audioPath + " attributes were " + audioAttributes);*/
 
       RadioButton regular = null;
+      AudioAttribute regAttr = null;
+      RadioButton slow = null;
+      AudioAttribute slowAttr = null;
       for (final AudioAttribute audioAttribute : audioAttributes) {
         String display = audioAttribute.getDisplay();
        // System.out.println("attri " + audioAttribute + " display " +display);
@@ -856,32 +857,47 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         radio.getElement().setId("Radio_"+ display);
         if (audioAttribute.isRegularSpeed()) {
           regular = radio;
+          regAttr = audioAttribute;
         }
-        if (first == null) {
-          first = radio;
-          firstAttr = audioAttribute;
+        else{
+          slow = radio;
+          slowAttr = audioAttribute;
         }
-        addAudioRadioButton(vp, radio, audioAttribute.getAudioRef());
+      }
 
-        radio.addClickHandler(new ClickHandler() {
+      if(regular != null){
+         addAudioRadioButton(vp, regular, regAttr.getAudioRef());
+         final AudioAttribute innerRegAttr = regAttr;
+         final RadioButton innerRegular = regular;
+         regular.addClickHandler(new ClickHandler() {
+           @Override
+           public void onClick(ClickEvent event) {
+             showAudio(innerRegAttr);
+             controller.logEvent(innerRegular, "RadioButton", exerciseID, "Selected audio " + innerRegAttr.getAudioRef());
+           }
+         });
+         regular.setValue(true);
+      }
+      if(slow != null){
+    	 addAudioRadioButton(vp, slow, slowAttr.getAudioRef());
+    	 final AudioAttribute innerSlowAttr = slowAttr;
+    	 final RadioButton innerSlow = slow;
+         slow.addClickHandler(new ClickHandler() {
           @Override
           public void onClick(ClickEvent event) {
-            showAudio(audioAttribute);
-            controller.logEvent(radio, "RadioButton", exerciseID, "Selected audio " + audioAttribute.getAudioRef());
+            showAudio(innerSlowAttr);
+            controller.logEvent(innerSlow, "RadioButton", exerciseID, "Selected audio " + innerSlowAttr.getAudioRef());
           }
         });
+        if(regular == null)
+        	slow.setValue(true);
       }
+      AudioAttribute firstAttr = (regular != null) ? regAttr : slowAttr;
+      if((regular == null) && (slow == null))
+          System.err.println("no radio choice got selected??? ");
 
-      if (regular != null) {
-        regular.setValue(true);
-      } else if (first != null) {
-        first.setValue(true);
-      } else if (!audioAttributes.isEmpty()) {
-        System.err.println("no radio choice got selected??? ");
-      }
-
-      if (firstAttr != null) {
-       // System.out.println("GoodwaveExercisePanel.addRegularAndSlow showing " +firstAttr);
+      else {
+       System.out.println("GoodwaveExercisePanel.addRegularAndSlow showing " +firstAttr);
         final AudioAttribute ffirstAttr = firstAttr;
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
           @Override
@@ -889,7 +905,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
             showAudio(ffirstAttr);
           }
         });
-      } else System.err.println("huh? no attribute ");
+      } 
+      if(firstAttr == null)
+    	  System.err.println("huh? no attribute ");
     }
 
     protected void addNoRefAudioWidget(Panel vp) { vp.add(new Label(NO_REFERENCE_AUDIO)); }
