@@ -17,7 +17,7 @@ public class PathWriter {
 
   /**
    * @see mitll.langtest.server.database.custom.UserListManager#getRefAudioPath
-   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile(String, String, String, int, int, int, boolean, String, boolean, boolean, boolean)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable(int, String, mitll.langtest.shared.CommonExercise, String, mitll.langtest.shared.AudioAnswer)
    * @param pathHelper
    * @param fileRef
    * @param destFileName
@@ -35,16 +35,22 @@ public class PathWriter {
       if (!bestDirForExercise.exists()) logger.warn("huh? couldn't make " + bestDirForExercise.getAbsolutePath());
     }
     File destination = new File(bestDirForExercise, destFileName);
-    //logger.debug("getRefAudioPath : copying from " + fileRef +  " to " + destination.getAbsolutePath());
+    //logger.debug("getPermanentAudioPath : copying from " + fileRef +  " to " + destination.getAbsolutePath());
     String s = BEST_AUDIO + File.separator + id + File.separator + destFileName;
-    //logger.debug("getRefAudioPath : dest path    " + bestDirForExercise.getPath() + " vs " +s);
+    //logger.debug("getPermanentAudioPath : dest path    " + bestDirForExercise.getPath() + " vs " +s);
     if (!fileRef.equals(destination)) {
       new FileCopier().copy(fileRef.getAbsolutePath(), destination.getAbsolutePath());
 
+      logger.debug("getPermanentAudioPath : normalizing levels for " + destination.getAbsolutePath());
+
       new AudioConversion().normalizeLevels(destination);
     } else {
-      if (FileUtils.size(destination.getAbsolutePath()) == 0)
+      if (FileUtils.size(destination.getAbsolutePath()) == 0) {
         logger.error("\ngetRefAudioPath : huh? " + destination + " is empty???");
+      }
+
+      logger.debug("getPermanentAudioPath : *not* normalizing levels for " + destination.getAbsolutePath());
+
     }
     ensureMP3(pathHelper, s, overwrite);
     return s;
@@ -56,7 +62,7 @@ public class PathWriter {
       String parent = pathHelper.getInstallPath();
 
       AudioConversion audioConversion = new AudioConversion();
-      if (!audioConversion.exists(wavFile,parent)) {
+      if (!audioConversion.exists(wavFile, parent)) {
         parent = pathHelper.getConfigDir();
       }
       if (!audioConversion.exists(wavFile,parent)) {
