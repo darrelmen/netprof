@@ -36,12 +36,6 @@ public interface ListInterface extends RequiresResize {
 
   /**
    * @see mitll.langtest.client.LangTest#makeExerciseList
-   * @param exercise_title
-   */
-  void setExercise_title(String exercise_title);
-
-  /**
-   * @see mitll.langtest.client.LangTest#makeExerciseList
    * @return
    */
   Widget getWidget();
