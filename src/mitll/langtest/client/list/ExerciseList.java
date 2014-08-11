@@ -62,7 +62,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   protected Panel createdPanel;
   protected UserManager user;
-  private String exercise_title;
   int lastReqID = 0;
   final boolean allowPlusInURL;
   private String instance;
@@ -235,17 +234,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
   }
 
-  /**
-   * So you an load a specific exercise
-   *
-   * @param exercise_title
-   * @see mitll.langtest.client.LangTest#makeExerciseList
-   */
-  @Override
-  public void setExercise_title(String exercise_title) {
-    this.exercise_title = exercise_title;
-  }
-
   private String unencodeToken(String token) {
     token = token.replaceAll("%3D", "=").replaceAll("%3B", ";").replaceAll("%2", " ").replaceAll("\\+", " ");
     return token;
@@ -262,8 +250,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   protected String getRole() {
     String audioTypeRecorder = Result.AUDIO_TYPE_RECORDER;
-    String s = instance.equalsIgnoreCase("record_Audio") ? audioTypeRecorder : instance;
-    return s;
+    return instance.equalsIgnoreCase("record_Audio") ? audioTypeRecorder : instance;
   }
 
   public String getInstance() {
@@ -373,29 +360,45 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   /**
-   * @param exercises
-   * @param selectionID
+   * Calls remember exercises -- interacts with flashcard mode and the shuffle option there.
+   * <p/>
+   * Has override for headstart selection of a specific exercise.
+   * <p/>
+   * Previously we would first ask the server for the exercise list and then ask for the first exercise on
+   * the list, making the user/client wait for both calls to finish before displaying the first item.
+   * <p/>
+   * Now the first exercise is in the {@link mitll.langtest.shared.ExerciseListWrapper#getFirstExercise()} returned with the exercise list on the first call.
+   *
+   * @param exercises     - exercise list
+   * @param firstExercise - the initial exercise returned from getExercises
+   * @param selectionID   - in the context of this selection
    * @see ExerciseList.SetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
    * @see #rememberAndLoadFirst(java.util.List)
    */
   private void rememberAndLoadFirst(List<CommonShell> exercises, CommonExercise firstExercise, String selectionID) {
     System.out.println("ExerciseList : rememberAndLoadFirst instance '" + instance +
-      "' remembering " + exercises.size() + " exercises, first = " + firstExercise);
+        "' remembering " + exercises.size() + " exercises, first = " + firstExercise);
 
     exercises = rememberExercises(exercises);
     for (ListChangeListener<CommonShell> listener : listeners) {
       listener.listChanged(exercises, selectionID);
     }
 
+    String exercise_title1 = controller.getProps().getExercise_title();
+    if (exercise_title1 != null) {
+      CommonShell headstartExercise = byID(exercise_title1);
+      if (headstartExercise != null) {
+        loadExercise(exercise_title1);
+        return;
+      }
+    }
     if (firstExercise != null) {
       CommonShell firstExerciseShell = findFirstExercise();
       if (firstExerciseShell.getID().equals(firstExercise.getID())) {
-
         //System.out.println("ExerciseList : rememberAndLoadFirst using first = " +firstExercise);
         useExercise(firstExercise);   // allows us to skip another round trip with the server to ask for the first exercise
       } else {
         //System.out.println("ExerciseList : rememberAndLoadFirst finding first...");
-
         loadFirstExercise();
       }
     } else {
@@ -439,7 +442,9 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   /**
-   * @see #rememberAndLoadFirst
+   * If we're not already showing this item, ask there server for the exercise.
+   * Does this by pushing a history item and then noticing the history item change.
+   * @see #rememberAndLoadFirst(java.util.List, mitll.langtest.shared.CommonExercise, String)
    */
   protected void loadFirstExercise() {
     if (isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
@@ -448,12 +453,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       removeCurrentExercise();
     } else {
       CommonShell toLoad = findFirstExercise();
-
-      if (exercise_title != null) {
-        CommonShell e = byID(exercise_title);
-        if (e != null) toLoad = e;
-      }
-
      // System.out.println("loadFirstExercise ex id =" + toLoad.getID() + " instance " + instance);
       pushFirstSelection(toLoad.getID());
     }
@@ -488,12 +487,11 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     return pleaseWait;
   }
 
-  protected CommonShell findFirstExercise() {
-    CommonShell first = getFirst();
-   // System.out.println("findFirstExercise " + first.getID() + " is first in container.");
-
-    return first;
-  }
+  /**
+   * Sometimes you want to change which exercise is loaded first.
+   * @return
+   */
+  protected CommonShell findFirstExercise() { return getFirst();  }
 
   protected abstract CommonShell getFirst();
 
@@ -618,14 +616,15 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   /**
-   * @param result
+   * @param commonExercise
+   * @see #rememberAndLoadFirst(java.util.List, mitll.langtest.shared.CommonExercise, String)
    * @see ExerciseAsyncCallback#onSuccess(mitll.langtest.shared.CommonExercise)
    */
-  protected void useExercise(CommonExercise result) {
-    //System.out.println("ExerciseList.useExercise : result " +result);
-    String itemID = result.getID();
+  protected void useExercise(CommonExercise commonExercise) {
+    //System.out.println("ExerciseList.useExercise : commonExercise " +commonExercise);
+    String itemID = commonExercise.getID();
     markCurrentExercise(itemID);
-    createdPanel = makeExercisePanel(result);
+    createdPanel = makeExercisePanel(commonExercise);
 /*    System.out.println("ExerciseList.useExercise : item id " + itemID + " currentExercise " +getCurrentExercise() +
       " or " + getCurrentExerciseID() + " instance " + instance);*/
   }
