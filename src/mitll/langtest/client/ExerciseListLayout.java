@@ -20,9 +20,11 @@ public class ExerciseListLayout {
   private final PropertyHandler props;
   private ListInterface exerciseList;
 
-  public ExerciseListLayout(PropertyHandler props) {
-    this.props = props;
-  }
+  /**
+   * @see LangTest#makeExerciseList
+   * @param props
+   */
+  public ExerciseListLayout(PropertyHandler props) { this.props = props; }
 
   /**
    * Supports different flavors of exercise list -- Paging, Grading, and vanilla.
@@ -35,23 +37,16 @@ public class ExerciseListLayout {
                                         Panel exerciseListContainer, UserFeedback feedback,
                                         Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                         ExerciseController controller) {
-    boolean isGrading = props.isGrading();
     this.exerciseList = makeExerciseList(secondRow, feedback, currentExerciseVPanel, service, controller);
 
-    boolean hideExerciseList = (props.isMinimalUI() && !isGrading) && !props.isAdminView();
-    useExerciseList(exerciseListContainer);
+    addExerciseListOnLeftSide(exerciseListContainer);
+
+    boolean hideExerciseList = (props.isMinimalUI() && !props.isGrading()) && !props.isAdminView();
     if (hideExerciseList) {
       exerciseList.hide();
     }
 
     return exerciseList;
-  }
-
-  private void useExerciseList(Panel exerciseListContainer) {
-    if (showOnlyOneExercise()) {
-      exerciseList.setExercise_title(props.getExercise_title());
-    }
-    addExerciseListOnLeftSide(exerciseListContainer);
   }
 
   /**
@@ -76,13 +71,8 @@ public class ExerciseListLayout {
 
   /**
    * @param exerciseListContainer add exercise list inside this
-   * @see #useExerciseList
    */
   private void addExerciseListOnLeftSide(Panel exerciseListContainer) {
     exerciseListContainer.add(exerciseList.getExerciseListOnLeftSide(props));
-  }
-
-  private boolean showOnlyOneExercise() {
-    return props.getExercise_title() != null;
   }
 }
