@@ -110,7 +110,7 @@ public class CommentNPFExercise extends NPFExercise {
     AudioAttribute toUse = maleAudio != null ? maleAudio : femaleAudio != null ? femaleAudio : defaultAudio;
     path = toUse == null ? null : toUse.getAudioRef();
     if (path != null) {
-      System.out.println("adding context play option " + path);
+      //System.out.println("adding context play option " + path);
       contextPlay = new PlayAudioPanel(controller, path)
           .setPlayLabel("")
           .setPauseLabel("")
