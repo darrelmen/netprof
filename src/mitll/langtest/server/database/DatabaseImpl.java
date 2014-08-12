@@ -548,7 +548,7 @@ public class DatabaseImpl implements Database {
       logger.debug("addUser " + user);
        l = userDAO.addUser(user.getAge(), user.getGender() == 0 ? UserDAO.MALE : UserDAO.FEMALE,
          user.getExperience(), user.getIpaddr(), user.getNativeLang(), user.getDialect(), user.getUserID(), false,
-         user.getPermissions());
+         user.getPermissions(), User.Kind.STUDENT, "", "");
     }
     return l;
   }
@@ -570,7 +570,7 @@ public class DatabaseImpl implements Database {
   public long addUser(int age, String gender, int experience, String ipAddr,
                       String nativeLang, String dialect, String userID, Collection<User.Permission> permissions) {
     logger.debug("addUser " + userID);
-    long l = userDAO.addUser(age, gender, experience, ipAddr, nativeLang, dialect, userID, false, permissions);
+    long l = userDAO.addUser(age, gender, experience, ipAddr, nativeLang, dialect, userID, false, permissions, User.Kind.STUDENT, "", "");
     userListManager.createFavorites(l);
     return l;
   }
