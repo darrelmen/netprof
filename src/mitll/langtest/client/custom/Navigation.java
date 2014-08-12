@@ -1067,7 +1067,7 @@ public class Navigation implements RequiresResize {
       return new ExercisePanelFactory(service, feedback, controller, exerciseList) {
         @Override
         public Panel getExercisePanel(final CommonExercise e) {
-          System.out.println("getting exercise for " + e.getID() + " normal rec " +doNormalRecording);
+          //System.out.println("getting exercise for " + e.getID() + " normal rec " +doNormalRecording);
           return new WaveformExercisePanel(e, service, controller, exerciseList, doNormalRecording) {
             @Override
             public void postAnswers(ExerciseController controller, CommonExercise completedExercise) {
@@ -1103,6 +1103,7 @@ public class Navigation implements RequiresResize {
               w.addStyleName("leftFiveMargin");
               add(w);
               add(pagingContainer.getTableWithPager());
+              setOnlyExamples(!doNormalRecording);
             }
           };
 
