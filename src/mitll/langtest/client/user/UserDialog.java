@@ -34,7 +34,7 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class UserDialog extends BasicDialog {
-  protected static final int USER_ID_MAX_LENGTH = 25;
+  protected static final int USER_ID_MAX_LENGTH = 35;
   private static final String GRADING = "grading";
   private static final String TESTING = "testing";  // TODO make these safer
 
