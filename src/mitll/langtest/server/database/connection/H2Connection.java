@@ -18,14 +18,16 @@ import java.sql.Statement;
  */
 public class H2Connection implements DatabaseConnection {
   private static final Logger logger = Logger.getLogger(H2Connection.class);
+  private static final int QUERY_CACHE_SIZE = 8;
 
   private Connection conn;
   private final int cacheSizeKB;
   private final int queryCacheSize;
-  private static final int maxMemoryRows = 50000;
+  private static final int MAX_MEMORY_ROWS = 50000;
+  private static final int maxMemoryRows = MAX_MEMORY_ROWS;
 
   public H2Connection(String configDir, String dbName, boolean mustAlreadyExist) {
-    this(configDir, dbName, 50000, 8, mustAlreadyExist);
+    this(configDir, dbName, 50000, QUERY_CACHE_SIZE, mustAlreadyExist);
   }
 
   /**
