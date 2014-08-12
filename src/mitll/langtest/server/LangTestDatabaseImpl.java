@@ -3,7 +3,6 @@ package mitll.langtest.server;
 import audio.image.ImageType;
 import audio.imagewriter.ImageWriter;
 import com.google.common.io.Files;
-import com.google.gwt.media.client.Audio;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabase;
@@ -742,6 +741,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   @Override
   public synchronized int userExists(String login) { return db.userExists(login);  }
+  public User userExists(String login,String passwordH) { return db.getUserDAO().getUser(login,passwordH);  }
 
   // Users ---------------------
 
