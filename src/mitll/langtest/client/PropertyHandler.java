@@ -70,13 +70,11 @@ public class PropertyHandler {
   private static final boolean DEFAULT_SHOW_TURK_TOKEN = false;
   private static final int DEFAULT_SEGMENT_REPEATS = 0;
   private static final int DEFAULT_TIMEOUT = 45000;
-  //private static final int DEFAULT_SHORT_TIMEOUT = 15000;
   private static final int DEFAULT_GAME_TIME_SECONDS = 60;
   private static final String DEFAULT_EXERCISE = null;
   private static final int NUM_GRADES_TO_COLLECT_DEFAULT = 1;
  // private static final String ADD_RECORD_KEY_BINDING = "addRecordKeyBinding";
   private static final String LOGIN_TYPE_PARAM = "loginType";
-  //private static final String FLASHCARD_PREVIEW_HEIGHT = "flashcardPreviewHeight";
   private static final String SHOW_FLASHCARD_ANSWER = "showFlashcardAnswer";
   private static final String FLASHCARD_TEXT_RESPONSE = "flashcardTextResponse";
   private static final String EXERCISES_IN_ORDER = "exercisesInOrder";
@@ -84,7 +82,6 @@ public class PropertyHandler {
   private static final String CLASSROOM_MODE = "classroomMode";
   private static final String SHOW_SPECTROGRAM = "spectrogram";
   private boolean spectrogram = false;
-  //private boolean combinedMode = false;
   private static final String NO_MODEL = "noModel";
   private static final String INSTRUMENT = "instrument";
   private boolean instrument = true; // by default we instrument for now 4/3/14
@@ -122,12 +119,10 @@ public class PropertyHandler {
   private boolean showSections = false;
   private boolean flashcardTeacherView = false;
   private boolean flashCard = false;
-  //private boolean timedGame = false;
   private String releaseDate;
   private String turkID = "";
 
   private int recordTimeout = DEFAULT_TIMEOUT;
-  //private int shortRecordTimeout = DEFAULT_SHORT_TIMEOUT;
 
   private int gameTimeSeconds = DEFAULT_GAME_TIME_SECONDS;
   private float screenPortion = 1.0f;
