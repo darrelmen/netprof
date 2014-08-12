@@ -33,7 +33,15 @@ public class UserDAO extends DAO {
   public static final String MALE = "male";
   public static final String FEMALE = "female";
   private static final String PERMISSIONS = "permissions";
+  private static final String KIND = "kind";
+  private static final String PASS = "passwordH";
+  private static final String EMAIL = "emailH";
+  public static final String USER_ID = "userID";
   private long defectDetector;
+
+  /**
+   * For spreadsheet download
+   */
   private static final List<String> COLUMNS2 = Arrays.asList("id",
     "userid",
     "dialect",
@@ -44,7 +52,9 @@ public class UserDAO extends DAO {
     "items complete?",
     "num recordings", "rate(sec)",
     "ipaddr",
-    "timestamp"
+    "timestamp",
+      KIND,
+       PASS,EMAIL
   );
   public static final int DEFAULT_USER_ID = -1;
   public static final int DEFAULT_MALE_ID = -2;
@@ -52,6 +62,7 @@ public class UserDAO extends DAO {
   public static MiniUser DEFAULT_USER = new MiniUser(DEFAULT_USER_ID, 30, 0, "default", "default", "default");
   public static MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 30, 0, "default", "default", "Male");
   public static MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 30, 1, "default", "default", "Female");
+  private static final List<String> admins = Arrays.asList("swade","gvidaverAdmin","tamasAdmin","alexAdmin","dRandolphAdmin");
 
   public UserDAO(Database database) {
     super(database);
@@ -60,7 +71,7 @@ public class UserDAO extends DAO {
 
       defectDetector = userExists(DEFECT_DETECTOR);
       if (defectDetector == -1) {
-        defectDetector = addUser(89, MALE, 0, "", "unknown", "unknown", DEFECT_DETECTOR, false, new ArrayList<User.Permission>());
+        defectDetector = addUser(89, MALE, 0, "", "unknown", "unknown", DEFECT_DETECTOR, false, new ArrayList<User.Permission>(), User.Kind.STUDENT, "", "");
       }
     } catch (Exception e) {
       logger.error("got "+e,e);
@@ -102,10 +113,14 @@ public class UserDAO extends DAO {
    * @param userID
    * @param enabled
    * @param permissions
+   * @param kind
+   * @param passwordH
+   * @param emailH
    * @return newly inserted user id, or 0 if something goes horribly wrong
    */
   public long addUser(int age, String gender, int experience, String ipAddr,
-                      String nativeLang, String dialect, String userID, boolean enabled, Collection<User.Permission> permissions) {
+                      String nativeLang, String dialect, String userID, boolean enabled, Collection<User.Permission> permissions,
+                      User.Kind kind, String passwordH, String emailH) {
     try {
       // there are much better ways of doing this...
       long max = 0;
@@ -119,9 +134,13 @@ public class UserDAO extends DAO {
           "INSERT INTO " +
             USERS +
             "(id,age,gender,experience,ipaddr,nativeLang,dialect,userID,enabled," +
-            PERMISSIONS +
+            PERMISSIONS + ","+
+              KIND +","+
+              PASS + ","+
+              EMAIL +
+
             ") " +
-          "VALUES(?,?,?,?,?,?,?,?,?,?);");
+          "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?);");
       int i = 1;
       long newID = max + 1;
       statement.setLong(i++, newID);
@@ -133,6 +152,9 @@ public class UserDAO extends DAO {
       statement.setString(i++, dialect);
       statement.setString(i++, userID);
       statement.setBoolean(i++, enabled);
+      statement.setString(i++, kind.toString());
+      statement.setString(i++, passwordH);
+      statement.setString(i++, emailH);
       StringBuilder builder = new StringBuilder();
       for (User.Permission permission : permissions) builder.append(permission).append(",");
       statement.setString(i++, builder.toString());
@@ -196,7 +218,10 @@ public class UserDAO extends DAO {
       "userID VARCHAR, " +
       "timestamp TIMESTAMP AS CURRENT_TIMESTAMP, " +
       "enabled BOOLEAN, " +
-      PERMISSIONS + " VARCHAR, " +
+        PERMISSIONS + " VARCHAR, " +
+        KIND + " VARCHAR, " +
+        PASS + " VARCHAR, " +
+        EMAIL + " VARCHAR, " +
       "CONSTRAINT pkusers PRIMARY KEY (id))");
     statement.execute();
     statement.close();
@@ -216,12 +241,23 @@ public class UserDAO extends DAO {
 
       if (missing.equalsIgnoreCase("nativeLang")) { addColumn(connection,"nativeLang","VARCHAR"); }
       if (missing.equalsIgnoreCase("dialect")) { addColumn(connection,"dialect","VARCHAR"); }
-      if (missing.equalsIgnoreCase("userID")) { addColumn(connection,"userID","VARCHAR"); }
+      if (missing.equalsIgnoreCase(USER_ID)) { addColumn(connection, USER_ID,"VARCHAR"); }
       if (missing.equalsIgnoreCase("timestamp")) { addColumn(connection,"timestamp","TIMESTAMP AS CURRENT_TIMESTAMP"); }
       if (missing.equalsIgnoreCase("enabled")) { addColumn(connection,"enabled","BOOLEAN"); }
     }
-    if (!getColumns(USERS).contains(PERMISSIONS)) {
+    Collection<String> columns = getColumns(USERS);
+    if (!columns.contains(PERMISSIONS)) {
       addColumn(connection, PERMISSIONS,"VARCHAR");
+    }
+
+    if (!columns.contains(KIND)) {
+      addColumn(connection, KIND, "VARCHAR");
+    }
+    if (!columns.contains(PASS)) {
+      addColumn(connection, PASS, "VARCHAR");
+    }
+    if (!columns.contains(EMAIL)) {
+      addColumn(connection, EMAIL, "VARCHAR");
     }
   }
 
@@ -301,7 +337,7 @@ public class UserDAO extends DAO {
     int i;
 
     List<User> users = new ArrayList<User>();
-    int columnCount = rs.getMetaData().getColumnCount();
+/*    int columnCount = rs.getMetaData().getColumnCount();
     if (columnCount == 7) {
       while (rs.next()) {
         i = 1;
@@ -313,7 +349,7 @@ public class UserDAO extends DAO {
           rs.getString(i++), // password
           rs.getBoolean(i++), new ArrayList<User.Permission>()));
       }
-    } else {
+    } else {*/
       while (rs.next()) {
         String userid;
 
@@ -337,23 +373,25 @@ public class UserDAO extends DAO {
         }
 
 
+        boolean isAdmin = userid != null && (admins.contains(userid));
         User newUser = new User(rs.getLong("id"), //id
-          rs.getInt("age"), // age
-          rs.getInt("gender"), //gender
-          rs.getInt("experience"), // exp
-          rs.getString("ipaddr"), // ip
-          rs.getString("password"), // password
+            rs.getInt("age"), // age
+            rs.getInt("gender"), //gender
+            rs.getInt("experience"), // exp
+            rs.getString("ipaddr"), // ip
+            rs.getString("password"), // password
 
-          // first
-          // last
-          rs.getString("nativeLang"), // native
-          rs.getString("dialect"), // dialect
-          userid, // userid
-          rs.getTimestamp("timestamp").getTime(),
+            // first
+            // last
+            rs.getString("nativeLang"), // native
+            rs.getString("dialect"), // dialect
+            rs.getString(USER_ID), // dialect
 
-          rs.getBoolean("enabled"),
-          userid != null && (userid.equals("gvidaver") | userid.equals("swade")),
-          permissions);
+            rs.getBoolean("enabled"),
+            isAdmin,
+            permissions,
+            User.Kind.valueOf(rs.getString(KIND)),
+            rs.getString(EMAIL));
 
         users.add(newUser);
 
@@ -361,7 +399,7 @@ public class UserDAO extends DAO {
           newUser.setUserID(""+ newUser.getId());
         }
       }
-    }
+    //}
     return users;
   }
 
@@ -394,7 +432,7 @@ public class UserDAO extends DAO {
   /**
    * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    * @param out
-   * @param dliUserDAO
+   * @paramx dliUserDAO
    */
 /*  public void toXLSX(OutputStream out, DLIUserDAO dliUserDAO) {
     long then = System.currentTimeMillis();
@@ -454,10 +492,10 @@ public class UserDAO extends DAO {
         cell.setCellValue("Unknown");
       }
       cell.setCellStyle(cellStyle);
-      //cell = row.createCell(j++);
-      //Demographics demographics = user.getDemographics();
-   //   if (demographics == null) logger.warn("no demographics for " + user);
-      //cell.setCellValue(demographics == null ? "" :demographics.toString());
+
+      row.createCell(j++).setCellValue(user.getUserKind().toString());
+      row.createCell(j++).setCellValue(user.getPasswordHash().isEmpty() ? "NO_PASSWORD" : "HAS_PASSWORD");
+      row.createCell(j++).setCellValue(user.getEmailHash().isEmpty() ? "NO_EMAIL" : "HAS_EMAIL");
     }
     long now = System.currentTimeMillis();
     if (now-then > 100) logger.warn("toXLSX : took " + (now-then) + " millis to write " + rownum+
@@ -474,7 +512,6 @@ public class UserDAO extends DAO {
       if (now-then > 100) {
         logger.warn("toXLSX : took " + (now-then) + " millis to write excel to output stream ");
       }
-    //  then = now;
       out.close();
       wb.dispose();
     } catch (IOException e) {
@@ -485,19 +522,4 @@ public class UserDAO extends DAO {
   }
 
   private float roundToHundredth(double totalHours) { return ((float) ((Math.round(totalHours * 100)))) / 100f;  }
-
-/*  private List<User> joinWithDLIUsers(DLIUserDAO dliUserDAO) {
-    List<User> users = getUsers();
-    List<DLIUser> users1 = dliUserDAO.getUsers();
-    Map<Long, User> userMap = getMap(users);
-
-    for (DLIUser dliUser : users1) {
-      User user = userMap.get(dliUser.getUserID());
-      if (user != null) {
-        user.setDemographics(dliUser);
-      }
-    }
-    if (users1.isEmpty()) logger.info("no dli users.");
-    return users;
-  }*/
 }
