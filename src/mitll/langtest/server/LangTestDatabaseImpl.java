@@ -410,11 +410,36 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see #makeExerciseListWrapper(int, java.util.Collection, long, String, boolean)
    */
   private void addAnnotationsAndAudio(long userID, CommonExercise firstExercise) {
+    long then = System.currentTimeMillis();
+
     addAnnotations(firstExercise); // todo do this in a better way
+    long now = System.currentTimeMillis();
+    if (now - then > 40) {
+      logger.debug("addAnnotationsAndAudio : (" + serverProps.getLanguage() + ") took " + (now - then) + " millis to add annotations to exercise " + firstExercise.getID());
+    }
+    then = now;
     attachAudio(firstExercise);
+
+    now = System.currentTimeMillis();
+    if (now - then > 40) {
+      logger.debug("addAnnotationsAndAudio : (" + serverProps.getLanguage() + ") took " + (now - then) + " millis to attach audio to exercise " + firstExercise.getID());
+    }
+    then = now;
+
     addPlayedMarkings(userID, firstExercise);
 
+    now = System.currentTimeMillis();
+    if (now - then > 40) {
+      logger.debug("addAnnotationsAndAudio : (" + serverProps.getLanguage() + ") took " + (now - then) + " millis to add played markings to exercise " + firstExercise.getID());
+    }
+    then = now;
+
     attachScoreHistory(userID, firstExercise);
+
+    now = System.currentTimeMillis();
+    if (now - then > 40) {
+      logger.debug("addAnnotationsAndAudio : (" + serverProps.getLanguage() + ") took " + (now - then) + " millis to attach score history to exercise " + firstExercise.getID());
+    }
   }
 
   private void attachScoreHistory(long userID, CommonExercise firstExercise) {
@@ -509,7 +534,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
       addAnnotationsAndAudio(userID, byID);
       now = System.currentTimeMillis();
-      if (now - then2 > 200) {
+      if (now - then2 > 100) {
         logger.debug("getExercise : (" + serverProps.getLanguage() + ") took " + (now - then) + " millis to add annotations to exercise " + id);
       }
       then2 = System.currentTimeMillis();
@@ -522,7 +547,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       }
     }
     now = System.currentTimeMillis();
-    if (now - then > 200) {
+    if (now - then > 20) {
       logger.debug("getExercise : (" + serverProps.getLanguage() + ") took " + (now - then) + " millis to find " + id);
     }
     return byID;
