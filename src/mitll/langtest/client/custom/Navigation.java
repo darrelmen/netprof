@@ -30,6 +30,7 @@ import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.PagingContainer;
+import mitll.langtest.client.exercise.WaveformExercisePanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
@@ -62,7 +63,7 @@ public class Navigation implements RequiresResize {
   private static final String PRACTICE = "Practice";
   public static final String REVIEW = "review";
   public static final String COMMENT = "comment";
-  public static final String ATTENTION = "attention";
+  private static final String ATTENTION = "attention";
   private static final String PRACTICE1 = "practice";
   private static final String ADD_OR_EDIT_ITEM = "Add/Edit Item";
   private static final String ADD_DELETE_EDIT_ITEM = "Fix Defects";
@@ -84,9 +85,11 @@ public class Navigation implements RequiresResize {
 
   private static final String EDIT_ITEM = "editItem";
   private static final String LEARN = "learn";
-  public static final String RECORD_AUDIO = "Record Audio";
-  public static final String CONTENT1 = "content";
+  private static final String RECORD_AUDIO = "Record Audio";
+  private static final String RECORD_EXAMPLE = "Record In-context Audio";
+  private static final String CONTENT1 = "content";
   public static final String CLASSROOM = "classroom";
+  public static final String SHOW_ONLY_UNRECORDED = "Show Only Unrecorded";
 
   private final ExerciseController controller;
   private final LangTestDatabaseAsync service;
@@ -98,12 +101,12 @@ public class Navigation implements RequiresResize {
   private final NPFHelper npfHelper;
   private final NPFHelper avpHelper;
 
-  private EditItem editItem;
+  private final EditItem editItem;
 
-  private ChapterNPFHelper defectHelper;
-  private SimpleChapterNPFHelper recorderHelper;
-  private SimpleChapterNPFHelper contentHelper;
-  private ReviewItemHelper reviewItem;
+  private final ChapterNPFHelper defectHelper;
+  private final SimpleChapterNPFHelper recorderHelper, recordExampleHelper;
+  private final SimpleChapterNPFHelper contentHelper;
+  private final ReviewItemHelper reviewItem;
 
   private final KeyStorage storage;
 
@@ -127,38 +130,8 @@ public class Navigation implements RequiresResize {
     avpHelper = new AVPHelper(service, feedback, userManager, controller);
 
     defectHelper = new ChapterNPFHelper(service, feedback, userManager, controller, true);
-    recorderHelper = new SimpleChapterNPFHelper(service, feedback, userManager, controller, listInterface) {
-      @Override
-      protected FlexListLayout getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
-                                               UserManager userManager, ExerciseController controller, SimpleChapterNPFHelper outer) {
-        return new MyFlexListLayout(service, feedback, userManager, controller, outer) {
-          @Override
-          protected FlexSectionExerciseList makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName) {
-            return new MyFlexSectionExerciseList(topRow, currentExercisePanel, instanceName) {
-              @Override
-              protected void addTableWithPager(PagingContainer pagingContainer) {
-                Panel column = new FlowPanel();
-                add(column);
-                addTypeAhead(column);
-                final CheckBox w = new CheckBox("Show Only Unrecorded");
-                w.addClickHandler(new ClickHandler() {
-                  @Override
-                  public void onClick(ClickEvent event) {
-                    setUnrecorded(w.getValue());
-                    scheduleWaitTimer();
-                    loadExercises(getHistoryToken(""), getTypeAheadText());
-                  }
-                });
-                w.addStyleName("leftFiveMargin");
-                add(w);
-                add(pagingContainer.getTableWithPager());
-              }
-            };
-
-          }
-        };
-      }
-    };
+    recorderHelper = new RecorderNPFHelper(service, feedback, userManager, controller, true);
+    recordExampleHelper = new RecorderNPFHelper(service, feedback, userManager, controller, false);
 
     contentHelper = new SimpleChapterNPFHelper(service, feedback, userManager, controller, listInterface) {
       protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
@@ -239,19 +212,13 @@ public class Navigation implements RequiresResize {
    * @param secondAndThird
    * @see mitll.langtest.client.LangTest#populateRootPanel()
    */
-  public Widget getNav(final Panel secondAndThird) {
-    this.container = getTabPanel(secondAndThird);
-    return container;
-  }
+  public Widget getNav(final Panel secondAndThird) {  return getTabPanel(secondAndThird);  }
 
-  public Widget getContainer() { return container; }
-
-  private Widget container;
   private TabPanel tabPanel;
   private TabAndContent yourStuff, othersStuff;
   private TabAndContent browse, chapters, create;
-  private TabAndContent review, recorderTab, contentTab, practiceTab;
-  private List<TabAndContent> tabs = new ArrayList<TabAndContent>();
+  private TabAndContent review, recorderTab, recordExampleTab, contentTab, practiceTab;
+  private final List<TabAndContent> tabs = new ArrayList<TabAndContent>();
   private Panel chapterContent;
 
   /**
@@ -354,7 +321,7 @@ public class Navigation implements RequiresResize {
         @Override
         public void onClick(ClickEvent event) {
           checkAndMaybeClearTab(CONTENT);
-          contentHelper.showNPF(contentTab, CONTENT1, false);
+          contentHelper.showNPF(contentTab, CONTENT1);
           logEvent(recorderTab, CONTENT);
         }
       });
@@ -396,8 +363,19 @@ public class Navigation implements RequiresResize {
         @Override
         public void onClick(ClickEvent event) {
           checkAndMaybeClearTab(RECORD_AUDIO);
-          recorderHelper.showNPF(recorderTab, "record_Audio", false);
+          recorderHelper.showNPF(recorderTab, "record_Audio");
           logEvent(recorderTab, RECORD_AUDIO);
+        }
+      });
+
+      recordExampleTab = makeFirstLevelTab(tabPanel, IconType.MICROPHONE, RECORD_EXAMPLE);
+      recordExampleTab.getContent().getElement().setId("record_example_contentPanel");
+      recordExampleTab.getTab().addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          checkAndMaybeClearTab(RECORD_EXAMPLE);
+          recordExampleHelper.showNPF(recordExampleTab, "record_Example_Audio");
+          logEvent(recordExampleTab, RECORD_EXAMPLE);
         }
       });
     }
@@ -410,7 +388,7 @@ public class Navigation implements RequiresResize {
       @Override
       public void onClick(ClickEvent event) {
         checkAndMaybeClearTab("Practice");
-        practiceHelper.showNPF(practiceTab, "Practice", false);
+        practiceHelper.showNPF(practiceTab, "Practice");
         practiceHelper.hideList();
         logEvent(practiceTab, "Practice");
       }
@@ -425,14 +403,14 @@ public class Navigation implements RequiresResize {
 
   private boolean isQC() {  return controller.getPermissions().contains(User.Permission.QUALITY_CONTROL); }
 
-  protected void logEvent(TabAndContent yourStuff, String context) {
+  void logEvent(TabAndContent yourStuff, String context) {
     if (yourStuff != null && yourStuff.getTab() != null) {
       controller.logEvent(yourStuff.getTab().asWidget(), "Tab", "", context);
     }
   }
 
-  private Map<String,TabAndContent> nameToTab = new HashMap<String, TabAndContent>();
-  private Map<String,Integer> nameToIndex = new HashMap<String, Integer>();
+  private final Map<String,TabAndContent> nameToTab = new HashMap<String, TabAndContent>();
+  private final Map<String,Integer> nameToIndex = new HashMap<String, Integer>();
   private TabAndContent makeFirstLevelTab(TabPanel tabPanel, IconType iconType, String label) {
     TabAndContent tabAndContent = makeTab(tabPanel, iconType, label);
     nameToIndex.put(label,tabs.size());
@@ -525,11 +503,13 @@ public class Navigation implements RequiresResize {
         } else if (value.equals(FIX_DEFECTS)) {
           viewReview(review.getContent());
         } else if (value.equals(RECORD_AUDIO)) {
-          recorderHelper.showNPF(recorderTab, "record_audio", true);
+          recorderHelper.showNPF(recorderTab, "record_audio");
+        } else if (value.equals(RECORD_EXAMPLE)) {
+          recordExampleHelper.showNPF(recordExampleTab, "record_example_audio");
         } else if (value.equals(CONTENT) && contentTab != null) {
-          contentHelper.showNPF(contentTab, CONTENT1, true);
+          contentHelper.showNPF(contentTab, CONTENT1);
         } else if (value.equals(PRACTICE) && practiceTab != null) {
-          practiceHelper.showNPF(practiceTab, PRACTICE, true);
+          practiceHelper.showNPF(practiceTab, PRACTICE);
           practiceHelper.hideList();
         }
       }
@@ -648,7 +628,7 @@ public class Navigation implements RequiresResize {
    * @param contentPanel
    */
   private void viewReview(final Panel contentPanel) {
-    final Panel child = getContentChild(contentPanel, "defectReview_contentPanel");
+    final Panel child = getContentChild(contentPanel);
 
     System.out.println("------> viewReview : reviewLessons for " + userManager.getUser());
 
@@ -665,9 +645,9 @@ public class Navigation implements RequiresResize {
     });
   }
 
-  private Panel getContentChild(Panel contentPanel, String id) {
+  private Panel getContentChild(Panel contentPanel) {
     contentPanel.clear();
-    contentPanel.getElement().setId(id);
+    contentPanel.getElement().setId("defectReview_contentPanel");
 
     final Panel child = new DivWidget();
     contentPanel.add(child);
@@ -682,6 +662,7 @@ public class Navigation implements RequiresResize {
     avpHelper.onResize();
     defectHelper.onResize();
     reviewItem.onResize();
+    recorderHelper.onResize();
     recorderHelper.onResize();
     editItem.onResize();
     contentHelper.onResize();
@@ -1024,10 +1005,8 @@ public class Navigation implements RequiresResize {
    * @param addItem
    */
   private void showEditItem(UserList ul, TabAndContent addItem, EditItem editItem, boolean includeAddItem) {
-    //System.out.println("showEditReviewOrComment --- " + ul + " : " + includeAddItem  + " reviewer " + isUserReviewer);
     addItem.getContent().clear();
     addItem.getContent().add(editItem.editItem(ul,
-      //listToMarker.get(ul),
       new InlineLabel(),   // TODO get rid of this entirely
       includeAddItem));
   }
@@ -1047,8 +1026,7 @@ public class Navigation implements RequiresResize {
     controller.logEvent(delete, "Button", "UserList_" + ul.getID(), "Delete");
     service.deleteList(ul.getUniqueID(), new AsyncCallback<Boolean>() {
       @Override
-      public void onFailure(Throwable caught) {
-      }
+      public void onFailure(Throwable caught) {}
 
       @Override
       public void onSuccess(Boolean result) {
@@ -1064,19 +1042,72 @@ public class Navigation implements RequiresResize {
   void setPublic(long uniqueID, boolean isPublic) {
     service.setPublicOnList(uniqueID, isPublic, new AsyncCallback<Void>() {
       @Override
-      public void onFailure(Throwable caught) {
-
-      }
+      public void onFailure(Throwable caught) {}
 
       @Override
-      public void onSuccess(Void result) {
-
-      }
+      public void onSuccess(Void result) {}
     });
   }
 
 
   private boolean createdByYou(UserList ul) {
     return ul.getCreator().getId() == userManager.getUser();
+  }
+
+  private class RecorderNPFHelper extends SimpleChapterNPFHelper {
+    boolean doNormalRecording;
+
+    public RecorderNPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager, ExerciseController controller, boolean doNormalRecording) {
+      super(service, feedback, userManager, controller, Navigation.this.listInterface);
+      this.doNormalRecording = doNormalRecording;
+    }
+
+    @Override
+    protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
+      return new ExercisePanelFactory(service, feedback, controller, exerciseList) {
+        @Override
+        public Panel getExercisePanel(final CommonExercise e) {
+          System.out.println("getting exercise for " + e.getID() + " normal rec " +doNormalRecording);
+          return new WaveformExercisePanel(e, service, controller, exerciseList, doNormalRecording) {
+            @Override
+            public void postAnswers(ExerciseController controller, CommonExercise completedExercise) {
+              super.postAnswers(controller, completedExercise);
+              tellOtherListExerciseDirty(e);
+            }
+          };
+        }
+      };
+    }
+
+    @Override
+    protected FlexListLayout getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
+                                             UserManager userManager, ExerciseController controller, SimpleChapterNPFHelper outer) {
+      return new MyFlexListLayout(service, feedback, userManager, controller, outer) {
+        @Override
+        protected FlexSectionExerciseList makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName) {
+          return new MyFlexSectionExerciseList(topRow, currentExercisePanel, instanceName) {
+            @Override
+            protected void addTableWithPager(PagingContainer pagingContainer) {
+              Panel column = new FlowPanel();
+              add(column);
+              addTypeAhead(column);
+              final CheckBox w = new CheckBox(SHOW_ONLY_UNRECORDED);
+              w.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                  setUnrecorded(w.getValue());
+                  scheduleWaitTimer();
+                  loadExercises(getHistoryToken(""), getTypeAheadText());
+                }
+              });
+              w.addStyleName("leftFiveMargin");
+              add(w);
+              add(pagingContainer.getTableWithPager());
+            }
+          };
+
+        }
+      };
+    }
   }
 }
