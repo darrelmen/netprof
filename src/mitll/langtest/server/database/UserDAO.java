@@ -180,12 +180,30 @@ public class UserDAO extends DAO {
    * @return
    */
   public int userExists(String id) {
+
+    String sql = "SELECT id from users where UPPER(userID)='" +
+        id.toUpperCase() +
+        "'";
+
+    return userExistsSQL(id, sql);
+  }
+
+  public User getUser(String id, String passwordHash) {
+    String sql = "SELECT * from users where UPPER(userID)='" +
+        id.toUpperCase() +
+        "' and " +PASS +"='" +passwordHash+
+        "'";
+
+    return getUserWhere(-1, sql);
+  }
+
+
+  public int userExistsSQL(String id, String sql) {
     int val = -1;
     try {
       Connection connection = database.getConnection();
-      PreparedStatement statement = connection.prepareStatement("SELECT id from users where UPPER(userID)='" +
-          id.toUpperCase() +
-          "'");
+
+      PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
       if (rs.next()) {
         val = rs.getInt(1);
@@ -250,13 +268,13 @@ public class UserDAO extends DAO {
       addColumn(connection, PERMISSIONS,"VARCHAR");
     }
 
-    if (!columns.contains(KIND)) {
+    if (!columns.contains(KIND.toLowerCase())) {
       addColumn(connection, KIND, "VARCHAR");
     }
-    if (!columns.contains(PASS)) {
+    if (!columns.contains(PASS.toLowerCase())) {
       addColumn(connection, PASS, "VARCHAR");
     }
-    if (!columns.contains(EMAIL)) {
+    if (!columns.contains(EMAIL.toLowerCase())) {
       addColumn(connection, EMAIL, "VARCHAR");
     }
   }
@@ -301,6 +319,10 @@ public class UserDAO extends DAO {
    */
   public User getUserWhere(long userid) {
     String sql = "SELECT * from users where id=" +userid+";";
+    return getUserWhere(userid, sql);
+  }
+
+  public User getUserWhere(long userid, String sql) {
     List<User> users = getUsers(sql);
     if (users.isEmpty()) {
       if (userid > 0) {
@@ -308,9 +330,9 @@ public class UserDAO extends DAO {
       }
       return null;
     }
-    else if (users.size() > 1) {
-      logger.warn("huh? " + users.size() + " with  id " + userid);
-    }
+   // else if (users.size() > 1) {
+  //    logger.warn("huh? " + users.size() + " with  id " + userid);
+  //  }
 
     return users.iterator().next();
   }
@@ -374,6 +396,7 @@ public class UserDAO extends DAO {
 
 
         boolean isAdmin = userid != null && (admins.contains(userid));
+        String userKind = rs.getString(KIND);
         User newUser = new User(rs.getLong("id"), //id
             rs.getInt("age"), // age
             rs.getInt("gender"), //gender
@@ -390,7 +413,7 @@ public class UserDAO extends DAO {
             rs.getBoolean("enabled"),
             isAdmin,
             permissions,
-            User.Kind.valueOf(rs.getString(KIND)),
+            userKind == null ? User.Kind.UNSET : User.Kind.valueOf(userKind),
             rs.getString(EMAIL));
 
         users.add(newUser);
