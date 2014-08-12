@@ -258,6 +258,11 @@ public class UserDAO extends DAO {
     return userWhere == null ? null : new MiniUser(userWhere);
   }
 
+  public boolean isMale(long userid) {
+    User userWhere = getUserWhere(userid);
+    return userWhere == null || userWhere.isMale();
+  }
+
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getUserBy(long)
    * @param userid
