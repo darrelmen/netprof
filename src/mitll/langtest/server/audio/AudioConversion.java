@@ -222,6 +222,8 @@ public class AudioConversion {
    * part of the file.)
    *
    * @see mitll.langtest.server.LangTestDatabaseImpl#ensureMP3
+   * @see mitll.langtest.server.DatabaseServlet#ensureMP3
+   * @see mitll.langtest.server.audio.PathWriter#ensureMP3(mitll.langtest.server.PathHelper, String, boolean)
    * @param pathToWav
    * @param realContextPath
    * @param overwrite
@@ -282,7 +284,7 @@ public class AudioConversion {
   /**
    * sox normalize to -3db -- thanks Paul!
    *
-   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile(String, String, String, int, int, int, boolean, String, boolean, boolean, boolean)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#normalizeLevel(mitll.langtest.shared.AudioAnswer)
    * @see mitll.langtest.server.audio.PathWriter#getPermanentAudioPath(mitll.langtest.server.PathHelper, java.io.File, String, boolean, String)
    * @param absolutePathToWav
    */
