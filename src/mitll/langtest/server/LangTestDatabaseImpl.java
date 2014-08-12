@@ -1148,7 +1148,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String permanentAudioPath = new PathWriter().getPermanentAudioPath(pathHelper, fileRef, destFileName, true, exercise);
     AudioAttribute audioAttribute =
       db.getAudioDAO().addOrUpdate(user, permanentAudioPath, exercise, System.currentTimeMillis(), audioType, audioAnswer.getDurationInMillis());
-
+    audioAnswer.setPath(audioAttribute.getAudioRef());
     logger.debug("addToAudioTable user " + user + " ex " + exerciseID + " for " + audioType + " audio answer has " + audioAttribute);
 
     // what state should we mark recorded audio?
