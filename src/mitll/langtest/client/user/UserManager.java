@@ -128,17 +128,21 @@ public class UserManager {
 
       @Override
       public void onSuccess(User result) {
-        userNotification.getPermissions().clear();
-        if (result != null) {
-          for (User.Permission permission : result.getPermissions()) {
-            userNotification.setPermission(permission, true);
-          }
-        }
-        console("getPermissionsAndSetUser.onSuccess : " + user);
-
-        userNotification.gotUser(user);
+        gotNewUser(result);
       }
     });
+  }
+
+  public void gotNewUser(User result) {
+    userNotification.getPermissions().clear();
+    if (result != null) {
+      for (User.Permission permission : result.getPermissions()) {
+        userNotification.setPermission(permission, true);
+      }
+    }
+    //console("getPermissionsAndSetUser.onSuccess : " + user);
+
+    userNotification.gotUser(result.getId());
   }
 
   /**
@@ -380,6 +384,29 @@ public class UserManager {
       userID = sessionID;
       this.userChosenID = userChosenID;
       userNotification.gotUser(sessionID);
+    }
+  }
+
+  void storeUser(User user, String audioType) {
+    //System.out.println("storeUser : user now " + sessionID + " audio type '" + audioType +"'");
+    final long DURATION = getUserSessionDuration();
+    long futureMoment = getUserSessionEnd(DURATION);
+    if (Storage.isLocalStorageSupported()) {
+      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+
+      localStorageIfSupported.setItem(getUserIDCookie(), "" + user.getId());
+      localStorageIfSupported.setItem(getUserChosenID(), "" + userChosenID);
+      rememberUserSessionEnd(localStorageIfSupported, futureMoment);
+      localStorageIfSupported.setItem(getAudioType(), "" + audioType);
+      // localStorageIfSupported.setItem(getLoginType(), "" + userType);
+      System.out.println("storeUser : user now " + user.getId() + " / " + getUser() + " audio '" + audioType + "' expires in " + (DURATION / 1000) + " seconds");
+      userNotification.rememberAudioType(audioType);
+
+      gotNewUser(user);
+
+    } else {  // not sure what we could possibly do here...
+      userID = user.getId();
+      userNotification.gotUser(userID);
     }
   }
 
