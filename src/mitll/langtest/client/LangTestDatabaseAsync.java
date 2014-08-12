@@ -125,4 +125,6 @@ public interface LangTestDatabaseAsync {
                     String textToAlign,
                     String identifier,
                     int reqid, AsyncCallback<AudioAnswer> async);
+
+  void userExists(String login, String passwordH, AsyncCallback<User> async);
 }
