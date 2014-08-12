@@ -1021,3 +1021,26 @@ body>.dropdown-popup .nav-list>li.active>a  {
     width: 800px;
     margin: 0 auto;
 }
+
+.loginPage {
+    margin: -154px -228px 0 -418px;
+    top: 22%;
+    width: 838px;
+    left: 50%;
+    position: absolute;
+}
+
+.loginPageBack {
+    position: fixed;
+    width: 200%;
+    height: 200%;
+    left: -50%;
+    background: rgba(173, 216, 230, 0.61);
+}
+
+.formRounded {
+    /*margin-top: 2px;*/
+    border-radius: 3px 3px 3px 3px;
+    box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
+    padding: 5px 5px 5px 5px;
+}
