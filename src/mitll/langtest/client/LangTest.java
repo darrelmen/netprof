@@ -1,11 +1,7 @@
 package mitll.langtest.client;
 
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.Column;
-import com.github.gwtbootstrap.client.ui.Container;
-import com.github.gwtbootstrap.client.ui.FluidContainer;
-import com.github.gwtbootstrap.client.ui.FluidRow;
-import com.github.gwtbootstrap.client.ui.Tab;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
@@ -27,14 +23,7 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.UIObject;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
@@ -58,10 +47,7 @@ import mitll.langtest.client.result.ResultManager;
 import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundManagerStatic;
-import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.client.user.UserManager;
-import mitll.langtest.client.user.UserNotification;
-import mitll.langtest.client.user.UserTable;
+import mitll.langtest.client.user.*;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.Result;
@@ -320,6 +306,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
+
   /**
    * @see #onModuleLoad2()
    * @return
@@ -338,6 +325,17 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     this.firstRow = firstRow;
     firstRow.getElement().setId("firstRow");
 
+
+    boolean show = userManager.isUserExpired() || userManager.getUserID() == null;
+    if (show) {
+      Panel content = new UserPassLogin(service, getProps()).getContent();
+      firstRow.add(content);
+      RootPanel.get().add(verticalContainer);
+      return null;
+    }
+    else {
+
+    }
     // second row ---------------
     secondRow = new FluidRow();
     secondRow.getElement().setId("secondRow");
@@ -462,7 +460,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   /**
-   * @see #onModuleLoad2()
+   * @see #populateRootPanel()
    * @return
    */
   private Panel makeHeaderRow() {
@@ -842,13 +840,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       checkLogin();
     }
   }
-
+/*
   private void console(String message) {
     int ieVersion = BrowserCheck.getIEVersion();
     if (ieVersion == -1 || ieVersion > 9) {
       consoleLog(message);
     }
-  }
+  }*/
 
   private native static void consoleLog( String message) /*-{
       console.log( "LangTest:" + message );
