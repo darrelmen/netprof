@@ -27,7 +27,7 @@ public class User extends MiniUser {
   private float completePercent;
   private Kind userKind;
 
-  public static enum Kind implements IsSerializable { STUDENT, TEACHER, CONTENT_DEVELOPER, ADMIN }
+  public static enum Kind implements IsSerializable { UNSET, STUDENT, TEACHER, CONTENT_DEVELOPER, ADMIN }
 
   public static enum Permission implements IsSerializable { QUALITY_CONTROL, RECORD_AUDIO }
 
