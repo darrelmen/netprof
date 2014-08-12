@@ -64,7 +64,7 @@ public class AudioAttribute implements IsSerializable {
     else if (type.equals(Result.AUDIO_TYPE_FAST_AND_SLOW)) {
       addAttribute(SPEED, REGULAR_AND_SLOW);
     }
-    else if (type.contains("=")) {
+    else if (type.contains("=")) { // e.g. context=regular or context=slow - or any key-value pair
       String[] split = type.split("=");
       addAttribute(split[0], split[1]);
     }
@@ -135,6 +135,10 @@ public class AudioAttribute implements IsSerializable {
 
   public boolean matches(String name, String value) {
     return attributes.containsKey(name) && attributes.get(name).equals(value);
+  }
+
+  public boolean isExampleSentence() {
+    return attributes.containsKey("context");
   }
 
   public void addAttribute(String name, String value) {
