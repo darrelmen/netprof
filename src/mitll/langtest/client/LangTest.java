@@ -328,8 +328,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     boolean show = userManager.isUserExpired() || userManager.getUserID() == null;
     if (show) {
-      Panel content = new UserPassLogin(service, getProps()).getContent();
+      Panel content = new UserPassLogin(service, getProps(), userManager).getContent();
       firstRow.add(content);
+      verticalContainer.getElement().getStyle().setPaddingLeft(0, Style.Unit.PX);
+      verticalContainer.getElement().getStyle().setPaddingRight(0, Style.Unit.PX);
       RootPanel.get().add(verticalContainer);
       return null;
     }
