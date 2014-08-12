@@ -1,6 +1,5 @@
 package mitll.langtest.server.database;
 
-import com.google.gwt.media.client.Audio;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
@@ -273,8 +272,8 @@ public class AudioDAO extends DAO {
    */
   public Set<String> getRecordedForUser(long userid) {
     try {
-      Set<String> validAudioAtReg  = getValidAudioAtSpeed(userid, REGULAR);
-      Set<String> validAudioAtSlow = getValidAudioAtSpeed(userid, SLOW);
+      Set<String> validAudioAtReg  = getValidAudioOfType(userid, REGULAR);
+      Set<String> validAudioAtSlow = getValidAudioOfType(userid, SLOW);
       /*boolean b =*/ validAudioAtReg.retainAll(validAudioAtSlow);
       return validAudioAtReg;
     } catch (Exception ee) {
@@ -283,14 +282,31 @@ public class AudioDAO extends DAO {
     return new HashSet<String>();
   }
 
-  Set<String> getValidAudioAtSpeed(long userid, String audioSpeed) throws SQLException {
+  /**
+   * TODO make this a like "context=%"
+   * @param userid
+   * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#markRecordedState(int, String, java.util.Collection, boolean)
+   */
+  public Set<String> getRecordedExampleForUser(long userid) {
+    try {
+      Set<String> validAudioAtReg  = getValidAudioOfType(userid, "context="+REGULAR);
+      //logger.debug("only example for " + userid + " got " + validAudioAtReg.size());
+
+      return validAudioAtReg;
+    } catch (Exception ee) {
+      logger.error("got " + ee, ee);
+    }
+    return new HashSet<String>();
+  }
+
+  private Set<String> getValidAudioOfType(long userid, String audioType) throws SQLException {
     String sql = "SELECT " + Database.EXID+
       " FROM " + AUDIO + " WHERE " +USERID +"=" + userid+
       " AND "+DEFECT +"<>true " +
-      " AND "+AUDIO_TYPE +"='" +
-      audioSpeed +
-      "' "
-      ;
+      " AND "+AUDIO_TYPE +"='" +audioType + "'";
+
+   // logger.debug("sql " + sql);
     Connection connection = database.getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
     return getExidResultsForQuery(connection, statement);
