@@ -119,40 +119,12 @@ public class WaveformExercisePanel extends ExercisePanel {
   }
 
   private void addExampleSentenceRecorder(CommonExercise exercise, LangTestDatabaseAsync service, ExerciseController controller, int index, Panel vp) {
-/*    DivWidget div = new DivWidget();
-    div.addStyleName("Instruction");
-    String context = hasContext(exercise) ? exercise.getContext() : "No in-context audio for this exercise.";
-
-    InlineHTML contextPhrase = new InlineHTML(context, WordCountDirectionEstimator.get().estimateDirection(context));
-    contextPhrase.addStyleName("Instruction-data-with-wrap");
-    div.add(contextPhrase);
-    contextPhrase.addStyleName("xlargeFont");
-    div.addStyleName("topMargin");*/
-
-   // VerticalPanel widgets = addRecordAudioPanel(exercise, service, controller, index + 1, vp, "context=" + Result.AUDIO_TYPE_REGULAR, IN_CONTEXT_SENTENCE);
-    //widgets.insert(div, 0);
-
     RecordAudioPanel fast = new RecordAudioPanel(exercise, controller, this, service, index, false, "context=" + Result.AUDIO_TYPE_REGULAR);
     audioPanels.add(fast);
     vp.add(fast);
 
     if (fast.isAudioPathSet()) recordCompleted(fast);
     addAnswerWidget(index, fast);
-  }
-
-  private VerticalPanel addRecordAudioPanel(CommonExercise exercise, LangTestDatabaseAsync service,
-                                            ExerciseController controller, int index, Panel vp, String audioType, String caption) {
-  //  System.out.println("addRecordAudioPanel " + exercise + " audioType " +audioType);
-
-    RecordAudioPanel fast = new RecordAudioPanel(exercise, controller, this, service, index, false, audioType);
-    ResizableCaptionPanel cp = new ResizableCaptionPanel(caption);
-    cp.setContentWidget(fast);
-    audioPanels.add(fast);
-    vp.add(cp);
-
-    if (fast.isAudioPathSet()) recordCompleted(fast);
-    addAnswerWidget(index, fast);
-    return fast;
   }
 
   private VerticalPanel addRecordAudioPanelNoCaption(CommonExercise exercise, LangTestDatabaseAsync service,
