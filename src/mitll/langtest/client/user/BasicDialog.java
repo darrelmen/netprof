@@ -75,6 +75,17 @@ public class BasicDialog {
     return new ListBoxFormField(user,group);
   }
 
+  protected ControlGroup addControlGroupEntryNoLabel(Panel dialogBox, Widget widget) {
+    final ControlGroup userGroup = new ControlGroup();
+    userGroup.addStyleName("leftFiveMargin");
+    widget.addStyleName("leftFiveMargin");
+
+    userGroup.add(widget);
+    dialogBox.add(userGroup);
+    return userGroup;
+  }
+
+
   /**
    * Make a control group with a label, a widget, and an optional hint under the widget.
    *
@@ -240,7 +251,14 @@ public class BasicDialog {
     dialectGroup.setType(ControlGroupType.ERROR);
     dialect.setFocus(true);
 //    setupPopover(dialect, header, message, placement);
-    setupPopoverThatHidesItself(dialectGroup.getWidget(1), header, message,placement);
+    Widget widget = dialect;
+
+    try {
+      widget = dialectGroup.getWidget(1);
+    } catch (Exception e) {
+      System.out.println("no nested object...");
+    }
+    setupPopoverThatHidesItself(widget, header, message,placement);
   }
 
   private void setupPopoverThatHidesItself(final Widget w, String heading, final String message,Placement placement) {
