@@ -67,7 +67,7 @@ public interface LangTestDatabaseAsync {
   void getGradeCountPerExercise(AsyncCallback<Map<Integer, Map<String, Map<String, Integer>>>> async);
 
   void getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix, long userListID,
-                      int userID, String role, boolean onlyUnrecordedByMe, AsyncCallback<ExerciseListWrapper> async);
+                      int userID, String role, boolean onlyUnrecordedByMe, boolean onlyExamples, AsyncCallback<ExerciseListWrapper> async);
 
   void getStartupInfo(AsyncCallback<StartupInfo> async);
 
@@ -121,6 +121,14 @@ public interface LangTestDatabaseAsync {
 
   void getMaleFemaleProgress(AsyncCallback<Map<String, Float>> async);
 
+  /**
+   * @see mitll.langtest.client.scoring.SimplePostAudioRecordButton#postAudioFile(String)
+   * @param base64EncodedString
+   * @param textToAlign
+   * @param identifier
+   * @param reqid
+   * @param async
+   */
   void getAlignment(String base64EncodedString,
                     String textToAlign,
                     String identifier,
