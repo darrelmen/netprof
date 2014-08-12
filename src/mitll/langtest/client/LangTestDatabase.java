@@ -44,6 +44,7 @@ public interface LangTestDatabase extends RemoteService {
 
   List<User> getUsers();
   int userExists(String login);
+  User userExists(String login, String passwordH);
   User getUserBy(long id);
 
   // answer DAO
