@@ -555,7 +555,7 @@ public class AudioDAO extends DAO {
       new Exception().printStackTrace();
     }
     try {
-      logger.debug("addOrUpdate " + userid + " " + audioRef + " ex " + exerciseID + " at " + new Date(timestamp) + " type " + audioType + " dur " + durationInMillis);
+      //logger.debug("addOrUpdate " + userid + " " + audioRef + " ex " + exerciseID + " at " + new Date(timestamp) + " type " + audioType + " dur " + durationInMillis);
       Connection connection = database.getConnection();
       String sql = "UPDATE " + AUDIO +
         " " +
@@ -591,6 +591,8 @@ public class AudioDAO extends DAO {
         audioAttr = getAudioAttribute((int)l,userid, audioRef, exerciseID, timestamp, audioType, durationInMillis);
       }
       else {
+        logger.debug("\taddOrUpdate updating entry for  " + userid + " " + audioRef + " ex " + exerciseID + " at " + new Date(timestamp) + " type " + audioType + " dur " + durationInMillis);
+
         List<AudioAttribute> audioAttributes = getAudioAttributes(exerciseID);
         //logger.debug("for  " +exerciseID + " found " + audioAttributes);
 
@@ -779,6 +781,7 @@ public class AudioDAO extends DAO {
     }
 
     statement.close();
+    connection.commit();
 
     return newID;
   }
