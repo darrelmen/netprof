@@ -130,8 +130,10 @@ public class EventDAO extends DAO {
       int i = 1;
 
       long creatorID = event.getCreatorID();
-      if (creatorID == -1) {
-        logger.error("huh? creator is " + creatorID + " for " + event);
+      boolean missingCreator = creatorID == -1;
+      if (missingCreator) {
+        event.setTimestamp(System.currentTimeMillis());
+        logger.warn("creator is " + creatorID + " for " + event);
         creatorID = userDAO.getDefectDetector();
       }
       statement.setLong(i++, creatorID);
