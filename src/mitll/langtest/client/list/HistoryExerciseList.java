@@ -344,6 +344,8 @@ public class HistoryExerciseList extends PagingExerciseList {
       System.out.println("HistoryExerciseList.loadExercisesUsingPrefix looking for '" + prefix +
         "' (" + prefix.length() + " chars) in context of " + typeToSection + " list " + userListID +
         " instance " + getInstance() + " user " + controller.getUser() + " unrecorded " + getUnrecorded());
+
+//      new Exception().printStackTrace();
     }
     String selectionID = userListID + "_"+typeToSection.toString();
     scheduleWaitTimer();
