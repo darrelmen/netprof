@@ -139,10 +139,9 @@ public class UserManager {
       for (User.Permission permission : result.getPermissions()) {
         userNotification.setPermission(permission, true);
       }
+      userNotification.gotUser(result.getId());
     }
     //console("getPermissionsAndSetUser.onSuccess : " + user);
-
-    userNotification.gotUser(result.getId());
   }
 
   /**
@@ -393,7 +392,7 @@ public class UserManager {
     long futureMoment = getUserSessionEnd(DURATION);
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-
+      userChosenID = user.getUserID();
       localStorageIfSupported.setItem(getUserIDCookie(), "" + user.getId());
       localStorageIfSupported.setItem(getUserChosenID(), "" + userChosenID);
       rememberUserSessionEnd(localStorageIfSupported, futureMoment);
