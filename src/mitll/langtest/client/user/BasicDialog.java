@@ -256,7 +256,7 @@ public class BasicDialog {
     try {
       widget = dialectGroup.getWidget(1);
     } catch (Exception e) {
-      System.out.println("no nested object...");
+      //System.out.println("no nested object...");
     }
     setupPopoverThatHidesItself(widget, header, message,placement);
   }
