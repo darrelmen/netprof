@@ -541,6 +541,14 @@ public class DatabaseImpl implements Database {
     return addUser(age, gender, experience, ip, nativeLang, dialect, userID, permissions);
   }
 
+  public User addUser(HttpServletRequest request, String userID, String passwordH, String emailH, User.Kind kind) {
+    String ip = getIPInfo(request);
+    User user = userDAO.addUser(userID, passwordH, emailH, kind, ip);
+    if (user != null) {
+      userListManager.createFavorites(user.getId());
+    }
+    return user;
+  }
 
   public long addUser(User user) {
     long l;
