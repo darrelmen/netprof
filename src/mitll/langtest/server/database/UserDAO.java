@@ -17,14 +17,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class UserDAO extends DAO {
   private static final String DEFECT_DETECTOR = "defectDetector";
@@ -98,6 +91,11 @@ public class UserDAO extends DAO {
    */
   public long getDefectDetector() { return defectDetector; }
 
+  public User addUser(String userID, String passwordH, String emailH,User.Kind kind,String ipAddr) {
+    long l = addUser(0, "", 0, ipAddr, "", "", userID, false, Collections.EMPTY_LIST, kind, passwordH, emailH);
+    return getUserWhere(l);
+  }
+
   /**
    * Somehow on subsequent runs, the ids skip by 30 or so?
    * <p/>
@@ -152,12 +150,13 @@ public class UserDAO extends DAO {
       statement.setString(i++, dialect);
       statement.setString(i++, userID);
       statement.setBoolean(i++, enabled);
-      statement.setString(i++, kind.toString());
-      statement.setString(i++, passwordH);
-      statement.setString(i++, emailH);
       StringBuilder builder = new StringBuilder();
       for (User.Permission permission : permissions) builder.append(permission).append(",");
       statement.setString(i++, builder.toString());
+
+      statement.setString(i++, kind.toString());
+      statement.setString(i++, passwordH);
+      statement.setString(i++, emailH);
 
       statement.executeUpdate();
 
