@@ -311,6 +311,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @return
    */
   private Panel populateRootPanel() {
+    RootPanel.get().clear();   // necessary?
+
     Container verticalContainer = new FluidContainer();
     verticalContainer.getElement().setId("root_vertical_container");
 
@@ -347,7 +349,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     makeExerciseList(secondRow, exerciseListContainer, currentExerciseVPanel);
 
-    RootPanel.get().clear();   // necessary?
     if (showOnlyOneExercise()) {
       // show fancy lace background image
       currentExerciseVPanel.addStyleName("body");
@@ -417,8 +418,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       verticalContainer.getElement().getStyle().setPaddingLeft(0, Style.Unit.PX);
       verticalContainer.getElement().getStyle().setPaddingRight(0, Style.Unit.PX);
       RootPanel.get().add(verticalContainer);
+      flashcard.setCogVisible(false);
+
       return true;
     }
+    flashcard.setCogVisible(true);
     return false;
   }
 
