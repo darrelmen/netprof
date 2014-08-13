@@ -137,10 +137,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public ExerciseListWrapper getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix,
                                             long userListID, int userID, String role, boolean onlyUnrecordedByMe) {
     Collection<CommonExercise> exercises;
-    logger.debug("getExerciseIds : getting exercise ids for " +
+    logger.debug("getExerciseIds : getting exercise ids for" +
       " config " + relativeConfigDir +
-      " prefix " + prefix+
-      " and user list id " + userListID + " user " + userID + " role " + role + " filter " + onlyUnrecordedByMe);
+      " prefix '" + prefix+
+      "' and user list id " + userListID + " user '" + userID + "' role '" + role + "' filter for only recorded by me = " + onlyUnrecordedByMe);
 
     UserList userListByID = userListID != -1 ? db.getUserListManager().getUserListByID(userListID, getTypeOrder()) : null;
 
@@ -737,13 +737,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db.addAnswer(userID, exercise, questionID, answer, answerType);
   }
 
-  // Grades ---------------------
+  // Users ---------------------
 
   @Override
   public synchronized int userExists(String login) { return db.userExists(login);  }
-  public User userExists(String login,String passwordH) { return db.getUserDAO().getUser(login, passwordH);  }
 
-  // Users ---------------------
+  /**
+   * @see mitll.langtest.client.user.UserPassLogin#gotLogin(String, String)
+   * @param login
+   * @param passwordH
+   * @return
+   */
+  public User userExists(String login,String passwordH) { return db.getUserDAO().getUser(login, passwordH);  }
 
   /**
    * @see mitll.langtest.client.custom.CreateListDialog#doCreate
