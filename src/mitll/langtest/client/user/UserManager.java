@@ -70,20 +70,22 @@ public class UserManager {
    * @see mitll.langtest.client.LangTest#checkLogin()
    */
   public void checkLogin() {
-    //System.out.println("loginType " + loginType);
-    if (loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS)) { // explicit setting of login type
+    System.out.println("checkLogin : loginType " + loginType);
+/*    if (loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS)) { // explicit setting of login type
       anonymousLogin();
     } else if (loginType.equals(PropertyHandler.LOGIN_TYPE.UNDEFINED) && // no explicit setting, so it's dependent on the mode
       (props.isGoodwaveMode() || isInitialFlashcardTeacherView())) {   // no login for pron mode
       anonymousLogin();
-    } else {
+    } else {*/
       login();
-    }
+  //  }
   }
 
+/*
   private boolean isInitialFlashcardTeacherView() {
     return (props.isFlashcardTeacherView() && !props.isFlashCard());
   }
+*/
 
   /**
    * @see #checkLogin()
@@ -97,7 +99,8 @@ public class UserManager {
       getPermissionsAndSetUser(user);
     }
     else {
-      new StudentDialog(service, props, this, userNotification).displayLoginBox();
+      //new StudentDialog(service, props, this, userNotification).displayLoginBox();
+      userNotification.showLogin();
     }
   }
 
@@ -116,9 +119,12 @@ public class UserManager {
   /**
    * TODO : instead have call to get permissions for a user.
    * @param user
+   * @see #login()
+   * @see #storeUser(long, String, String, mitll.langtest.client.PropertyHandler.LOGIN_TYPE)
    */
   private void getPermissionsAndSetUser(final int user) {
     console("getPermissionsAndSetUser : " + user);
+    System.out.println("UserManager.getPermissionsAndSetUser " + user);
 
     service.getUserBy(user, new AsyncCallback<User>() {
       @Override
@@ -133,7 +139,12 @@ public class UserManager {
     });
   }
 
-  public void gotNewUser(User result) {
+  /**
+   * @see #storeUser(long, String, String, mitll.langtest.client.PropertyHandler.LOGIN_TYPE)
+   * @param result
+   */
+  private void gotNewUser(User result) {
+    System.out.println("UserManager.gotNewUser " + result);
     userNotification.getPermissions().clear();
     if (result != null) {
       for (User.Permission permission : result.getPermissions()) {
@@ -386,8 +397,13 @@ public class UserManager {
     }
   }
 
+  /**
+   * @see mitll.langtest.client.user.UserPassLogin#storeUser(mitll.langtest.shared.User)
+   * @param user
+   * @param audioType
+   */
   void storeUser(User user, String audioType) {
-    //System.out.println("storeUser : user now " + sessionID + " audio type '" + audioType +"'");
+    System.out.println("storeUser : user now " + user + " audio type '" + audioType +"'");
     final long DURATION = getUserSessionDuration();
     long futureMoment = getUserSessionEnd(DURATION);
     if (Storage.isLocalStorageSupported()) {
