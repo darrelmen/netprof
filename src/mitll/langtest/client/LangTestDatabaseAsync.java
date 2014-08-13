@@ -127,4 +127,6 @@ public interface LangTestDatabaseAsync {
                     int reqid, AsyncCallback<AudioAnswer> async);
 
   void userExists(String login, String passwordH, AsyncCallback<User> async);
+
+  void addUser(String userID, String passwordH, String emailH, User.Kind kind, AsyncCallback<User> async);
 }
