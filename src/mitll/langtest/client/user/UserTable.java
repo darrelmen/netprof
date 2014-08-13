@@ -206,6 +206,31 @@ public class UserTable extends PagerTable {
     date.setSortable(true);
     table.addColumn(date, "Time");
 
+
+    TextColumn<User> kind = new TextColumn<User>() {
+      @Override
+      public String getValue(User contact) {
+        return "" + contact.getUserKind();
+      }
+    };
+    table.addColumn(kind, "Type");
+
+    TextColumn<User> emailH = new TextColumn<User>() {
+      @Override
+      public String getValue(User contact) {
+        return contact.getEmailHash() == null ? "NO" : "YES";
+      }
+    };
+    table.addColumn(emailH, "Has Email");
+
+    TextColumn<User> passH = new TextColumn<User>() {
+      @Override
+      public String getValue(User contact) {
+        return contact.getPasswordHash() == null ? "NO" : "YES";
+      }
+    };
+    table.addColumn(passH, "Has Password");
+
     // Create a data provider.
     ListDataProvider<User> dataProvider = new ListDataProvider<User>();
 
