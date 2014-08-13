@@ -12,6 +12,7 @@ public interface EventRegistration {
   EventLogger getButtonFactory();
 
   void register(Button button, String exid);
+  void register(Button button);
 
   void register(Button button, String exid, String context);
 
