@@ -1044,3 +1044,10 @@ body>.dropdown-popup .nav-list>li.active>a  {
     box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
     padding: 5px 5px 5px 5px;
 }
+
+.signUp {
+    border-bottom: 1px solid #E1E8ED;
+    margin-left: 11px;
+    margin-top: 0;
+    padding-top: 0;
+}
