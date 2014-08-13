@@ -45,6 +45,7 @@ public class Flashcard implements RequiresResize {
   Paragraph subtitle;
   HTML browserInfo;
   Panel qc,recordAudio;
+  Dropdown cogMenu;
 
   /**
    * @see mitll.langtest.client.LangTest#makeHeaderRow()
@@ -141,15 +142,15 @@ public class Flashcard implements RequiresResize {
       hp.add(recordAudio = new SimplePanel());
     //}
 
-    // add log out/admin options menu
-    Dropdown menu = makeMenu(users, results, monitoring,events);
-    menu.addStyleName("cogStyle");
+    // add log out/admin options cogMenu
+    cogMenu = makeMenu(users, results, monitoring,events);
+    cogMenu.addStyleName("cogStyle");
     NavLink widget1 = new NavLink("Log Out");
     widget1.addClickHandler(logoutClickHandler);
-    menu.add(widget1);
+    cogMenu.add(widget1);
 
     if (!isAnonymous || adminView) {
-      hp.add(menu);
+      hp.add(cogMenu);
     }
 
     browserInfo.addStyleName("leftFiveMargin");
@@ -191,6 +192,9 @@ public class Flashcard implements RequiresResize {
     }
   }
 
+  public void setCogVisible(boolean val) {
+    cogMenu.setVisible(val);
+  }
   public void setBrowserInfo(String v) { browserInfo.setHTML(v);}
 
   private HTML getUserNameWidget(String userName) {
