@@ -24,7 +24,6 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.shared.User;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -68,7 +67,7 @@ public class Flashcard implements RequiresResize {
                                 ClickHandler monitoring,
                                 ClickHandler events) {
     return getHeaderRow(splashText, isBeta,NEW_PRO_F1_PNG, PRONUNCIATION_FEEDBACK, userName, browserInfo, logoutClickHandler,
-      users, results, monitoring,events, new ArrayList<User.Permission>());
+      users, results, monitoring,events);
   }
 
   /**
@@ -84,7 +83,6 @@ public class Flashcard implements RequiresResize {
    * @param results
    * @param monitoring
    * @param events
-   * @param permissions
    * @return
    */
   public Panel getHeaderRow(String splashText,
@@ -94,8 +92,7 @@ public class Flashcard implements RequiresResize {
                             ClickHandler users,
                             ClickHandler results,
                             ClickHandler monitoring,
-                            ClickHandler events,
-                            Collection<User.Permission> permissions) {
+                            ClickHandler events) {
     HorizontalPanel headerRow = new HorizontalPanel();
     headerRow.setWidth("100%");
     headerRow.addStyleName("headerBackground");
