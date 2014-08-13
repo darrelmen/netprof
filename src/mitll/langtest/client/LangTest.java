@@ -325,7 +325,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     this.firstRow = firstRow;
     firstRow.getElement().setId("firstRow");
 
-
     boolean show = userManager.isUserExpired() || userManager.getUserID() == null;
     if (show) {
       Panel content = new UserPassLogin(service, getProps(), userManager).getContent();
@@ -335,9 +334,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       RootPanel.get().add(verticalContainer);
       return null;
     }
-    else {
 
-    }
     // second row ---------------
     secondRow = new FluidRow();
     secondRow.getElement().setId("secondRow");
@@ -483,7 +480,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         (props.isAdminView()) ? new UsersClickHandler() : null,
         (props.isAdminView()) ? new ResultsClickHandler() : null,
         (props.isAdminView()) ? new MonitoringClickHandler() : null,
-        (props.isAdminView()) ? new EventsClickHandler() : null, permissions);
+        (props.isAdminView()) ? new EventsClickHandler() : null);
     }
 
 
@@ -665,6 +662,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private void reallySetFactory() {
     if (props.isClassroomMode()) {
+      if (secondRow == null) {
+        populateRootPanel();
+       // flashcard.setUserName(getGreeting());
+      }
       exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, this, this, exerciseList, 1.0f) {
         @Override
         public Panel getExercisePanel(CommonExercise e) {
@@ -707,7 +708,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     flashRecordPanel.initFlash();
   }
 
-  public String getGreeting() {
+  /**
+   * @see #gotUser(long)
+   * @see #makeHeaderRow()
+   * @return
+   */
+  private String getGreeting() {
     return userManager.getUserID() == null ? "" : (""+  userManager.getUserID());
   }
 
