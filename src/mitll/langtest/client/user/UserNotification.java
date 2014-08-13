@@ -12,6 +12,8 @@ import java.util.Collection;
  * To change this template use File | Settings | File Templates.
  */
 public interface UserNotification {
+  void showLogin();
+
   void gotUser(long userID);
   void rememberAudioType(String audioType);
   void setPermission(User.Permission permission, boolean on);
