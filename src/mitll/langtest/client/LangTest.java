@@ -12,6 +12,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -280,9 +281,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void onModuleLoad2() {
     setupSoundManager();
 
-    //if (props.doInstrumentation()) { // basically always true
-      buttonFactory = new ButtonFactory(service, props);
-    //}
+    buttonFactory = new ButtonFactory(service, props);
 
     userManager = new UserManager(this, service, props);
 
@@ -317,23 +316,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     // header/title line
     // first row ---------------
-    verticalContainer.add(headerRow = makeHeaderRow());
-    headerRow.getElement().setId("headerRow");
+    Panel firstRow = makeFirstTwoRows(verticalContainer);
 
-    Panel firstRow = new DivWidget();
-    verticalContainer.add(firstRow);
-    this.firstRow = firstRow;
-    firstRow.getElement().setId("firstRow");
-
-    boolean show = userManager.isUserExpired() || userManager.getUserID() == null;
-    if (show) {
-      Panel content = new UserPassLogin(service, getProps(), userManager).getContent();
-      firstRow.add(content);
-      verticalContainer.getElement().getStyle().setPaddingLeft(0, Style.Unit.PX);
-      verticalContainer.getElement().getStyle().setPaddingRight(0, Style.Unit.PX);
-      RootPanel.get().add(verticalContainer);
-      return null;
-    }
+    if (showLogin(verticalContainer, firstRow)) return null;
 
     // second row ---------------
     secondRow = new FluidRow();
@@ -406,6 +391,46 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
 
     return bothSecondAndThird;
+  }
+
+  @Override
+  public void showLogin() {
+    RootPanel.get().clear();   // necessary?
+
+    Container verticalContainer = new FluidContainer();
+    verticalContainer.getElement().setId("login_container");
+
+    // header/title line
+    // first row ---------------
+    Panel firstRow = makeFirstTwoRows(verticalContainer);
+
+    showLogin(verticalContainer, firstRow);
+  }
+
+
+  private boolean showLogin(Container verticalContainer, Panel firstRow) {
+    boolean show = userManager.isUserExpired() || userManager.getUserID() == null;
+    if (show) {
+      Panel content = new UserPassLogin(service, getProps(), userManager, this).getContent();
+      firstRow.add(content);
+      content.getElement().setId("UserPassLogin");
+      verticalContainer.getElement().getStyle().setPaddingLeft(0, Style.Unit.PX);
+      verticalContainer.getElement().getStyle().setPaddingRight(0, Style.Unit.PX);
+      RootPanel.get().add(verticalContainer);
+      return true;
+    }
+    return false;
+  }
+
+  private Panel makeFirstTwoRows(Container verticalContainer) {
+    verticalContainer.add(headerRow = makeHeaderRow());
+    headerRow.getElement().setId("headerRow");
+
+    Panel firstRow = new DivWidget();
+    verticalContainer.add(firstRow);
+    this.firstRow = firstRow;
+    firstRow.getElement().setId("firstRow");
+    return firstRow;
   }
 
   private void checkAdmin() {
@@ -494,7 +519,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private void setPageTitle() {
     String appTitle = props.getAppTitle();
-    setTitle(appTitle);
+    Window.setTitle(appTitle + " : " +"Learn pronunciation and practice vocabulary.");
+    //setTitle(appTitle);
 
     Element element = DOM.getElementById("favicon");   // set the page title to be consistent
     if (props.isFlashCard() || props.isFlashcardTeacherView()) {
@@ -509,12 +535,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
-  private void setTitle(String appTitle) {
+/*  private void setTitle(String appTitle) {
     Element elementById = DOM.getElementById("title-tag");   // set the page title to be consistent
     if (elementById != null) {
       elementById.setInnerText(appTitle);
     }
-  }
+  }*/
 
   /**
    * @seex #doDataCollectAdminView()
@@ -583,6 +609,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    *
    * If in goodwave (pronunciation scoring) mode or auto crt mode, skip the user login.
    * @see #onModuleLoad2()
+   * @see #resetState()
    */
   private void modeSelect() {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -662,10 +689,29 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private void reallySetFactory() {
     if (props.isClassroomMode()) {
-      if (secondRow == null) {
-        populateRootPanel();
-       // flashcard.setUserName(getGreeting());
+
+      //Panel widgets = RootPanel.get();
+      int childCount = firstRow.getElement().getChildCount();
+    //  Node node = childCount;
+
+      System.out.println("root " + firstRow.getElement().getNodeName() + " childCount " + childCount);
+      if (childCount > 0) {
+        Node child = firstRow.getElement().getChild(0);
+        Element as = Element.as(child);
+        if (as.getId().contains("Login")) {
+          populateRootPanel();
+        }
       }
+     // if (node.getElement().getId().contains("Login")) {
+     //   System.out.println("\n\nset root panel...\n\n\n");
+      //  populateRootPanel();
+     // }
+      //if (lastUser > -1) {
+
+       // flashcard.setUserName(getGreeting());
+     // }
+
+
       exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, this, this, exerciseList, 1.0f) {
         @Override
         public Panel getExercisePanel(CommonExercise e) {
@@ -721,7 +767,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @seex #getLogout()
    */
   private void resetState() {
-    System.out.println("got resetState");
+    System.out.println("resetState");
+    exerciseList.removeHistoryListener();
     History.newItem(""); // clear history!
     userManager.clearUser();
     exerciseList.removeCurrentExercise();
@@ -739,19 +786,29 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * Only get the exercises if the user has accepted mic access.
    *
    * @see #makeFlashContainer
-   * @see UserManager#login
+   * @see UserManager#gotNewUser(mitll.langtest.shared.User)
    * @see UserManager#storeUser
    * @param userID
    */
   public void gotUser(long userID) {
     flashcard.setUserName(getGreeting());
-    doEverythingAfterFactory(userID);
-    logEvent("No widget", "UserLogin", "N/A", "User Login by " + userID);
+    if (userID != lastUser) {
+      doEverythingAfterFactory(userID);
+      logEvent("No widget", "UserLogin", "N/A", "User Login by " + userID);
+    }
+    else {
+      System.out.println("ignoring got user for current user " + userID);
+    }
   }
 
+  /**
+   * @see #gotUser(long)
+   * @param userID
+   * @return
+   */
   private boolean doEverythingAfterFactory(long userID) {
     System.out.println("doEverythingAfterFactory : user changed - new " + userID + " vs last " + lastUser +
-      " audio type " + getAudioType() + " perms " + getPermissions());
+        " audio type " + getAudioType() + " perms " + getPermissions());
     reallySetFactory();
 
     if (getPermissions().contains(User.Permission.QUALITY_CONTROL)) {
@@ -805,6 +862,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   @Override
+  public void register(Button button) {
+    buttonFactory.register(this, button, "N/A");
+  }
+
+  @Override
   public void register(Button button, String exid) {
     buttonFactory.register(this, button, exid);
   }
@@ -839,6 +901,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private void checkLogin() {
     //console("checkLogin");
+    System.out.println("checkLogin -- ");
     userManager.isUserExpired();
     userManager.checkLogin();
   }
@@ -855,10 +918,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       consoleLog(message);
     }
   }*/
+/*
 
-  private native static void consoleLog( String message) /*-{
+  private native static void consoleLog( String message) */
+/*-{
       console.log( "LangTest:" + message );
-  }-*/;
+  }-*//*
+;
+*/
 
   @Override
   public void rememberAudioType(String audioType) {  this.audioType = audioType;  }
