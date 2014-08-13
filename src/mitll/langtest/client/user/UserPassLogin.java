@@ -2,18 +2,22 @@ package mitll.langtest.client.user;
 
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.dialog.KeyPressHelper;
+import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 
@@ -25,47 +29,60 @@ import java.security.NoSuchAlgorithmException;
  */
 public class UserPassLogin extends UserDialog {
   public static final int MIN_LENGTH_USER_ID = 6;
-  private static final String STUDENT = "Student";
-  private static final String TEACHER = "Teacher";
+  //private static final String STUDENT = "Student";
+  //private static final String TEACHER = "Teacher";
 
   public static final int MIN_PASSWORD = 6;
+  public static final int MIN_EMAIL = 13;
+  public static final int LEFT_SIDE_WIDTH = 483;
+  public static final String SIGN_UP_SUBTEXT = "Or add missing info";//password and email";
   private final UserManager userManager;
   private final KeyPressHelper enterKeyButtonHelper;
   private FormField user;
+  private FormField signUpUser;
+  FormField signUpEmail;
+  FormField signUpPassword;
   private FormField password;
+  private boolean signInHasFocus = true;
+  EventRegistration eventRegistration;
 
-  public UserPassLogin(LangTestDatabaseAsync service, PropertyHandler props,UserManager userManager) {
-    super(service,props);
+  /**
+   * @see mitll.langtest.client.LangTest#showLogin
+   * @param service
+   * @param props
+   * @param userManager
+   * @param eventRegistration
+   */
+  public UserPassLogin(LangTestDatabaseAsync service, PropertyHandler props, UserManager userManager, EventRegistration eventRegistration) {
+    super(service, props);
     this.userManager = userManager;
-
-     enterKeyButtonHelper = new KeyPressHelper(true) {
+    this.eventRegistration = eventRegistration;
+    enterKeyButtonHelper = new KeyPressHelper(true) {
       @Override
       public void userHitEnterKey(Button button) {
-        if (user.box.getValue().isEmpty() || password.box.getValue().isEmpty()) {
-          signUp.fireEvent(new KeyPressHelper.ButtonClickEvent());
-        }
-        else {
+
+        if (signInHasFocus) {//user.box.getValue().isEmpty() || password.box.getValue().isEmpty()) {
+          System.out.println("sending click to " + button.getElement().getId());
           button.fireEvent(new ButtonClickEvent());
+        } else {
+          System.out.println("sending click to " + signUp.getElement().getId());
+          signUp.fireEvent(new KeyPressHelper.ButtonClickEvent());
         }
       }
     };
   }
 
   public Panel getContent() {
-
     Panel container = new DivWidget();
     DivWidget child = new DivWidget();
     container.add(child);
     child.addStyleName("loginPageBack");
 
     Panel leftAndRight = new DivWidget();
-
     leftAndRight.addStyleName("loginPage");
 
     container.add(leftAndRight);
-
     getLeftIntro(leftAndRight);
-
     getRightLogin(leftAndRight);
     return container;
   }
@@ -97,32 +114,51 @@ public class UserPassLogin extends UserDialog {
     user = addControlFormField(fieldset, false, MIN_LENGTH_USER_ID,USER_ID_MAX_LENGTH,"Username or Email");
     user.box.addStyleName("topMargin");
     user.box.addStyleName("rightFiveMargin");
-
+    user.box.getElement().setId("Username_Box_SignIn");
     user.box.setFocus(true);
     user.box.setWidth("266px");
 
+    user.box.addFocusHandler(new FocusHandler() {
+      @Override
+      public void onFocus(FocusEvent event) {
+        System.out.println("sign in user box has focus...");
+        signInHasFocus = true;
+      }
+    });
+
     password = addControlFormField(fieldset, true, MIN_PASSWORD, 15, "Password");
+    password.box.addFocusHandler(new FocusHandler() {
+      @Override
+      public void onFocus(FocusEvent event) {
+        signInHasFocus = true;
+      }
+    });
+
     Panel hp = new HorizontalPanel();
     hp.add(password.box);
     hp.addStyleName("leftFiveMargin");
 
     Button signIn = new Button("Sign In");
+    signIn.getElement().setId("SignIn");
+    eventRegistration.register(signIn);
     hp.add(signIn);
     signIn.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        if (user.box.getValue().isEmpty() || password.box.getValue().isEmpty()) {
-          signUp.fireEvent(new KeyPressHelper.ButtonClickEvent());
-        }
-        else {
-          if (user.box.getValue().length() < MIN_LENGTH_USER_ID) {
-            markError(user, "Please enter either a user id or email.");
-          } else if (password.box.getValue().length() < MIN_PASSWORD) {
-            markError(user, "Please enter user password.");
+        //System.out.println("sign in got click!");
+
+        String userID = user.box.getValue();
+        if (userID.length() < MIN_LENGTH_USER_ID) {
+          markError(user, "Please enter either a valid user id or email.");
+        } else {
+          String value = password.box.getValue();
+          if (!value.isEmpty() && value.length() < MIN_PASSWORD) {
+            markError(password, "Please enter your password.");
           } else {
-            gotLogin(user.box.getValue(), password.box.getValue());
+            gotLogin(userID, value, value.isEmpty());
           }
         }
+
       }
     });
     enterKeyButtonHelper.addKeyHandler(signIn);
@@ -133,10 +169,10 @@ public class UserPassLogin extends UserDialog {
     signIn.setType(ButtonType.PRIMARY);
     fieldset.add(hp);
 
-    getFocusOnUserID(user);
+    getFocusOnField(user);
   }
 
-  protected void getFocusOnUserID(final FormField user) {
+  protected void getFocusOnField(final FormField user) {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
         user.box.setFocus(true);
@@ -144,7 +180,7 @@ public class UserPassLogin extends UserDialog {
     });
   }
 
-  Button signUp;
+  private Button signUp;
   public Form getSignUpForm() {
     Form form = new Form();
     form.addStyleName("topMargin");
@@ -152,43 +188,66 @@ public class UserPassLogin extends UserDialog {
     form.getElement().getStyle().setBackgroundColor("white");
 
     Fieldset fieldset = new Fieldset();
-    Heading w = new Heading(3, "Sign Up", "New to Classroom?");
+    Heading w = new Heading(3, "Sign Up", SIGN_UP_SUBTEXT);
     w.addStyleName("signUp");
     form.add(w);
     form.add(fieldset);
 
     // final ListBoxFormField purpose = getListBoxFormField(fieldset, ARE_YOU_A, getListBox2(ROLES));
-    //  purpose.box.setWidth("150px");
-    // purpose.box.addStyleName("floatRight");
+    //  purpose.userBox.setWidth("150px");
+    // purpose.userBox.addStyleName("floatRight");
 
-    final FormField user = addControlFormField(fieldset, false, MIN_LENGTH_USER_ID,20,"Username");
-    user.box.addStyleName("topMargin");
-    user.box.addStyleName("rightFiveMargin");
-    user.box.setWidth("266px");
-    user.box.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
+    signUpUser = addControlFormField(fieldset, false, MIN_LENGTH_USER_ID,20,"Username");
+    final TextBoxBase userBox = signUpUser.box;
+    userBox.addStyleName("topMargin");
+    userBox.addStyleName("rightFiveMargin");
+    userBox.setWidth("266px");
+    userBox.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
+    userBox.addFocusHandler(new FocusHandler() {
+      @Override
+      public void onFocus(FocusEvent event) {
+        signInHasFocus = false;
+      }
+    });
 
-    final FormField email = addControlFormField(fieldset, false, MIN_LENGTH_USER_ID,USER_ID_MAX_LENGTH,"Email");
-    email.box.addStyleName("topMargin");
-    email.box.addStyleName("rightFiveMargin");
-    email.box.setWidth("266px");
+    signUpEmail = addControlFormField(fieldset, false, MIN_LENGTH_USER_ID,USER_ID_MAX_LENGTH,"Email");
+    final TextBoxBase emailBox = signUpEmail.box;
+    emailBox.addStyleName("topMargin");
+    emailBox.addStyleName("rightFiveMargin");
+    emailBox.setWidth("266px");
+    emailBox.addFocusHandler(new FocusHandler() {
+      @Override
+      public void onFocus(FocusEvent event) {
+        signInHasFocus = false;
+      }
+    });
 
-    final FormField password = addControlFormField(fieldset, true, MIN_PASSWORD, 15, "Password");
-    //Panel hp = new HorizontalPanel();
-   // hp.add(password.box);
-   // hp.addStyleName("leftFiveMargin");
+    signUpPassword = addControlFormField(fieldset, true, MIN_PASSWORD, 15, "Password");
+    signUpPassword.box.addFocusHandler(new FocusHandler() {
+      @Override
+      public void onFocus(FocusEvent event) {
+        signInHasFocus = false;
+      }
+    });
 
     signUp = new Button("Sign Up");
+    signUp.getElement().setId("SignIn");
+
+
     fieldset.add(signUp);
 
     signUp.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        if (user.box.getValue().length() < MIN_LENGTH_USER_ID) {
-          markError(user, "Please enter either a user id or email.");
-        } else if (password.box.getValue().length() < MIN_PASSWORD) {
-          markError(user, "Please enter user password.");
+        System.out.println("signUp got click!");
+        if (userBox.getValue().length() < MIN_LENGTH_USER_ID) {
+          markError(signUpUser, "Please enter either a valid user id.");
+        } else if (signUpEmail.box.getValue().length() < MIN_EMAIL) {
+          markError(signUpEmail, "Please enter your email.");
+        } else if (signUpPassword.box.getValue().length() < MIN_PASSWORD) {
+          markError(signUpPassword, "Please enter a password.");
         } else {
-          gotSignUp(user.box.getValue(), password.box.getValue(), email.box.getValue());
+          gotSignUp(userBox.getValue(), signUpPassword.box.getValue(), emailBox.getValue());
         }
       }
     });
@@ -212,7 +271,12 @@ public class UserPassLogin extends UserDialog {
 
       @Override
       public void onSuccess(User result) {
-        storeUser(result);
+        if (result == null) {
+          markError(signUpUser, "User exists already, please sign in.");
+        }
+        else {
+          storeUser(result);
+        }
       }
     });
   }
@@ -220,7 +284,7 @@ public class UserPassLogin extends UserDialog {
   public void getLeftIntro(Panel leftAndRight) {
     DivWidget left = new DivWidget();
     left.addStyleName("floatLeft");
-    left.setWidth(494 + "px");
+    left.setWidth(LEFT_SIDE_WIDTH + "px");
     leftAndRight.add(left);
     int size = 2;
     int subSize = size+1;
@@ -273,17 +337,19 @@ public class UserPassLogin extends UserDialog {
     return new String(hexString);
   }
 
-  private void gotLogin(String user, final String pass) {
+  /**
+   * @see #getRightLogin(com.google.gwt.user.client.ui.Panel)
+   * @param user
+   * @param pass
+   */
+  private void gotLogin(String user, final String pass, final boolean emptyPassword) {
+    final String hashed = toHexString(getMd5Digest(pass.getBytes()));
 
-    String hashed = toHexString(getMd5Digest(pass.getBytes()));
-
-   // System.out.println("hash is " +hashed);
+    System.out.println("gotLogin : user is '" +user + "' pass '" + pass +"' or " + hashed);
 
     service.userExists(user, hashed, new AsyncCallback<User>() {
       @Override
-      public void onFailure(Throwable caught) {
-
-      }
+      public void onFailure(Throwable caught) {}
 
       @Override
       public void onSuccess(User result) {
@@ -292,13 +358,32 @@ public class UserPassLogin extends UserDialog {
           markError(password, "User-password combination not found.");
         }
         else {
-          storeUser(result);
+          String emailHash = result.getEmailHash();
+          String passwordHash = result.getPasswordHash();
+          if (emailHash == null || passwordHash == null || emailHash.isEmpty() || passwordHash.isEmpty()) {
+            signUpUser.box.setText(result.getUserID());
+            signUpPassword.box.setText(password.getText());
+            getFocusOnField(signUpEmail);
+          }
+          else {
+            System.out.println("Got valid user " + result);
+            if (emptyPassword) {
+              markError(password, "Please enter your password.");
+            }
+            else if (result.getPasswordHash().equals(hashed)) {
+              storeUser(result);
+            }
+            else {
+              markError(password, "User-password combination not found.");
+            }
+          }
         }
       }
     });
   }
 
   public void storeUser(User result) {
+    System.out.println("UserPassLogin.storeUser - " + result);
     enterKeyButtonHelper.removeKeyHandler();
     userManager.storeUser(result, getAudioTypeFromPurpose(result.getUserKind()));
   }
