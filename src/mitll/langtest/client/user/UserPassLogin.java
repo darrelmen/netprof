@@ -28,7 +28,7 @@ import java.security.NoSuchAlgorithmException;
  * Created by go22670 on 8/11/14.
  */
 public class UserPassLogin extends UserDialog {
-  public static final int MIN_LENGTH_USER_ID = 6;
+  public static final int MIN_LENGTH_USER_ID = 4;
   //private static final String STUDENT = "Student";
   //private static final String TEACHER = "Teacher";
 
@@ -36,6 +36,8 @@ public class UserPassLogin extends UserDialog {
   public static final int MIN_EMAIL = 13;
   public static final int LEFT_SIDE_WIDTH = 483;
   public static final String SIGN_UP_SUBTEXT = "Or add missing info";//password and email";
+  public static final String PLEASE_ENTER_YOUR_PASSWORD = "Please enter your password.";
+  public static final String BAD_PASSWORD = "Wrong password - have you signed up?";
   private final UserManager userManager;
   private final KeyPressHelper enterKeyButtonHelper;
   private FormField user;
@@ -45,6 +47,7 @@ public class UserPassLogin extends UserDialog {
   private FormField password;
   private boolean signInHasFocus = true;
   EventRegistration eventRegistration;
+  Button signIn;
 
   /**
    * @see mitll.langtest.client.LangTest#showLogin
@@ -111,7 +114,7 @@ public class UserPassLogin extends UserDialog {
     //  purpose.box.setWidth("150px");
     // purpose.box.addStyleName("floatRight");
 
-    user = addControlFormField(fieldset, false, MIN_LENGTH_USER_ID,USER_ID_MAX_LENGTH,"Username or Email");
+    user = addControlFormField(fieldset, false, MIN_LENGTH_USER_ID,USER_ID_MAX_LENGTH,"Username");
     user.box.addStyleName("topMargin");
     user.box.addStyleName("rightFiveMargin");
     user.box.getElement().setId("Username_Box_SignIn");
@@ -121,7 +124,7 @@ public class UserPassLogin extends UserDialog {
     user.box.addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {
-        System.out.println("sign in user box has focus...");
+        //System.out.println("sign in user box has focus...");
         signInHasFocus = true;
       }
     });
@@ -138,7 +141,7 @@ public class UserPassLogin extends UserDialog {
     hp.add(password.box);
     hp.addStyleName("leftFiveMargin");
 
-    Button signIn = new Button("Sign In");
+    signIn = new Button("Sign In");
     signIn.getElement().setId("SignIn");
     eventRegistration.register(signIn);
     hp.add(signIn);
@@ -149,11 +152,11 @@ public class UserPassLogin extends UserDialog {
 
         String userID = user.box.getValue();
         if (userID.length() < MIN_LENGTH_USER_ID) {
-          markError(user, "Please enter either a valid user id or email.");
+          markError(user, "Please enter a longer user id.");
         } else {
           String value = password.box.getValue();
           if (!value.isEmpty() && value.length() < MIN_PASSWORD) {
-            markError(password, "Please enter your password.");
+            markError(password, value.isEmpty() ? PLEASE_ENTER_YOUR_PASSWORD : BAD_PASSWORD);
           } else {
             gotLogin(userID, value, value.isEmpty());
           }
@@ -245,7 +248,7 @@ public class UserPassLogin extends UserDialog {
         } else if (signUpEmail.box.getValue().length() < MIN_EMAIL) {
           markError(signUpEmail, "Please enter your email.");
         } else if (signUpPassword.box.getValue().length() < MIN_PASSWORD) {
-          markError(signUpPassword, "Please enter a password.");
+          markError(signUpPassword, signUpPassword.box.getValue().isEmpty() ? "Please enter a password." : "Please enter a password at least " + MIN_PASSWORD + " characters long.");
         } else {
           gotSignUp(userBox.getValue(), signUpPassword.box.getValue(), emailBox.getValue());
         }
@@ -263,15 +266,18 @@ public class UserPassLogin extends UserDialog {
     String passH = toHexString(getMd5Digest(password.getBytes()));
     String emailH = toHexString(getMd5Digest(email.getBytes()));
 
+    signUp.setEnabled(false);
     service.addUser(user,passH,emailH,User.Kind.STUDENT,new AsyncCallback<User>() {
       @Override
       public void onFailure(Throwable caught) {
+        signUp.setEnabled(true);
 
       }
 
       @Override
       public void onSuccess(User result) {
         if (result == null) {
+          signUp.setEnabled(true);
           markError(signUpUser, "User exists already, please sign in.");
         }
         else {
@@ -347,34 +353,45 @@ public class UserPassLogin extends UserDialog {
 
     System.out.println("gotLogin : user is '" +user + "' pass '" + pass +"' or " + hashed);
 
+    signIn.setEnabled(false);
     service.userExists(user, hashed, new AsyncCallback<User>() {
       @Override
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+        signIn.setEnabled(true);
+
+      }
 
       @Override
       public void onSuccess(User result) {
         if (result == null) {
-          System.out.println("No user with that name?");
-          markError(password, "User-password combination not found.");
-        }
-        else {
+          System.out.println("No user with that name? pass empty " + emptyPassword);
+          markError(password, emptyPassword ? PLEASE_ENTER_YOUR_PASSWORD : BAD_PASSWORD);
+          signIn.setEnabled(true);
+        } else {
+          System.out.println("Found user "+result);
+
           String emailHash = result.getEmailHash();
           String passwordHash = result.getPasswordHash();
           if (emailHash == null || passwordHash == null || emailHash.isEmpty() || passwordHash.isEmpty()) {
             signUpUser.box.setText(result.getUserID());
             signUpPassword.box.setText(password.getText());
             getFocusOnField(signUpEmail);
+            markError(signUpEmail,"Add info","Current users should add an email and password.");
+            signIn.setEnabled(true);
+
           }
           else {
             System.out.println("Got valid user " + result);
             if (emptyPassword) {
-              markError(password, "Please enter your password.");
+              markError(password, PLEASE_ENTER_YOUR_PASSWORD);
+              signIn.setEnabled(true);
             }
             else if (result.getPasswordHash().equals(hashed)) {
               storeUser(result);
             }
             else {
-              markError(password, "User-password combination not found.");
+              markError(password, BAD_PASSWORD);
+              signIn.setEnabled(true);
             }
           }
         }
