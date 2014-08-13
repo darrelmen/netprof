@@ -741,7 +741,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   @Override
   public synchronized int userExists(String login) { return db.userExists(login);  }
-  public User userExists(String login,String passwordH) { return db.getUserDAO().getUser(login,passwordH);  }
+  public User userExists(String login,String passwordH) { return db.getUserDAO().getUser(login, passwordH);  }
 
   // Users ---------------------
 
@@ -1015,6 +1015,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.addUser(getThreadLocalRequest(),age, gender, experience, nativeLang, dialect, userID, permissions);
   }
 
+
+  @Override
+  public User addUser(String userID, String passwordH, String emailH, User.Kind kind) {
+    return db.addUser(getThreadLocalRequest(), userID, passwordH, emailH, kind);
+  }
   /**
    * @see mitll.langtest.client.user.UserTable#showDialog(mitll.langtest.client.LangTestDatabaseAsync)
    * @return
