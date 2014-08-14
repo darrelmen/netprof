@@ -80,6 +80,8 @@ public interface LangTestDatabase extends RemoteService {
   int getNumResults();
 
 
+  boolean forgotUsername(String emailH, String email, String url);
+
   List<Result> getResults(int start, int end, String sortInfo);
 
   Map<String,Number> getResultStats();
