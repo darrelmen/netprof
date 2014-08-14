@@ -23,6 +23,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
+import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -759,22 +760,72 @@ public class Navigation implements RequiresResize {
      $wnd.soundManager.init;
   }-*/;
   
-  private SimplePostAudioRecordButton getRecordButton(String sent, final HTML resultHolder, final Button continueButton){
-	  return new SimplePostAudioRecordButton(controller, service, sent) {
+  private SimplePostAudioRecordButton getRecordButton(String sent, final HTML resultHolder, final Button continueButton, final Image check, final Image x){
+	  SimplePostAudioRecordButton s = new SimplePostAudioRecordButton(controller, service, sent) {
 		  @Override
 		  public void useResult(AudioAnswer result){
 			  resultHolder.setHTML(String.valueOf(result.getScore()));
+			  continueButton.setEnabled(true);
+			  check.setVisible(true);
+			  x.setVisible(false);
 		  }
 		  
 		  public void useInvalidResult(AudioAnswer result){
 			  continueButton.setEnabled(false);
+			  check.setVisible(false);
+			  x.setVisible(true);
 		  }
 		  
 		  @Override
 		  public void flip(boolean first){
-			  //do nothing
+			  //check.setVisible(first);
+			  //x.setVisible(!first);
 		  }
+		  
 	  };
+	  s.addMouseDownHandler(new MouseDownHandler() {
+		  @Override
+		  public void onMouseDown(MouseDownEvent e){
+			  check.setVisible(false);
+			  x.setVisible(false);
+		  }
+	  });
+	  return s;
+  }
+  
+  private SimplePostAudioRecordButton getFinalRecordButton(String sent, final Button continueButton, final Image check, final Image x, final ArrayList<HTML> scoreElements, final HTML score, final HTML avg, final FlowPanel rp){
+	  return new SimplePostAudioRecordButton(controller, service, sent) {
+		  
+	      @Override
+		  public void useResult(AudioAnswer result){
+	    	  flip(false);
+	    	  if(rp.isVisible()){//what a hack
+			     for(HTML sco : scoreElements){
+					sco.setVisible(true);
+			     }
+	    	  }
+			  score.setHTML(String.valueOf(result.getScore()));
+			  avg.setHTML(innerScoring(scoreElements));
+			  avg.getElement().getStyle().setProperty("fontSize", "130%");
+			  avg.getElement().getStyle().setProperty("margin", "10px");
+			  continueButton.setEnabled(true);
+			  check.setVisible(true);
+			  x.setVisible(false);
+		  }
+			  
+		  @Override
+		  public void flip(boolean first){
+			  somethingIsHappening.setVisible(first);
+			  avg.setVisible(!first);
+	      }
+		  
+		  @Override
+		  protected void useInvalidResult(AudioAnswer result){
+		     continueButton.setEnabled(false); 
+		     check.setVisible(false);
+		     x.setVisible(true);
+		  }
+      };
   }
   
   private final Image somethingIsHappening = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress44.gif"));
@@ -786,7 +837,7 @@ public class Navigation implements RequiresResize {
 	  HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSent = getDialogToSentIndexToSent();
 	  HashMap<String, HashMap<String, Integer>> dialogToSpeakerToLast = getDialogToSpeakerToLast();
 	  int sentIndex = 0;
-	  final Grid sentPanel = new Grid(dialogToSentIndexToSent.get(dialog).size(), 5);
+	  final Grid sentPanel = new Grid(dialogToSentIndexToSent.get(dialog).size(), 7);
 	  final ArrayList<HTML> scoreElements = new ArrayList<HTML>();
       String otherPart = "";
       boolean youStart = false;
@@ -814,37 +865,13 @@ public class Navigation implements RequiresResize {
 			  Button recordButton = null;
 			  final Button continueButton = new Button("Continue");
 			  continueButton.setEnabled(false);
+			  final Image check = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "checkmark32.png"));
+			  final Image x = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "redx32.png"));
 			  if(sentIndex != yourLast){
-			     recordButton = getRecordButton(dialogToSentIndexToSent.get(dialog).get(sentIndex), score, continueButton);
+			     recordButton = getRecordButton(dialogToSentIndexToSent.get(dialog).get(sentIndex), score, continueButton, check, x);
 			  }
 			  else{
-				 recordButton = new SimplePostAudioRecordButton(controller, service, dialogToSentIndexToSent.get(dialog).get(sentIndex)) {
-					  
-				      @Override
-					  public void useResult(AudioAnswer result){
-				    	  flip(false);
-				    	  if(rp.isVisible()){//what a hack
-						     for(HTML sco : scoreElements){
-								sco.setVisible(true);
-						     }
-				    	  }
-						  score.setHTML(String.valueOf(result.getScore()));
-						  avg.setHTML(innerScoring(scoreElements));
-						  avg.getElement().getStyle().setProperty("fontSize", "130%");
-						  avg.getElement().getStyle().setProperty("margin", "10px");
-					  }
-						  
-					  @Override
-					  public void flip(boolean first){
-						  somethingIsHappening.setVisible(first);
-						  avg.setVisible(!first);
-				      }
-					  
-					  @Override
-					  protected void useInvalidResult(AudioAnswer result){
-					     continueButton.setEnabled(false); 
-					  }
-			      };
+				 recordButton = getFinalRecordButton(dialogToSentIndexToSent.get(dialog).get(sentIndex), continueButton, check, x, scoreElements, score, avg, rp);
 				  
 				  continueButton.addClickHandler(new ClickHandler() {
 					  @Override
@@ -852,6 +879,8 @@ public class Navigation implements RequiresResize {
 						  if(continueButton.isEnabled()){
 						     rp.setVisible(true);
 						     somethingIsHappening.setVisible(true);
+						     check.setVisible(false);
+						     x.setVisible(false);
 						  }
 					  }
 				  });
@@ -860,10 +889,17 @@ public class Navigation implements RequiresResize {
 			  recordButton.addMouseUpHandler(new MouseUpHandler() {
 				  @Override
 				  public void onMouseUp(MouseUpEvent e){
-					  continueButton.setEnabled(true);
+					  //continueButton.setEnabled(true);
 				  }
 			  });
-			  
+			  recordButton.addMouseDownHandler(new MouseDownHandler(){
+				  @Override
+				  public void onMouseDown(MouseDownEvent e){
+					  check.setVisible(false);
+					  x.setVisible(false);
+				  }
+			  });
+
 			  sentPanel.setWidget(sentIndex, 2, recordButton);
 			  sent.getElement().getStyle().setProperty("fontWeight", "900");
 			  sentPanel.setWidget(sentIndex, 1, play);
@@ -873,6 +909,10 @@ public class Navigation implements RequiresResize {
 			  sentPanel.setWidget(sentIndex, 4, score);
 			  recordButton.setVisible(false);
 			  play.setVisible(false);
+			  sentPanel.setWidget(sentIndex, 5, check);
+			  check.setVisible(false);
+			  sentPanel.setWidget(sentIndex, 6, x);
+			  x.setVisible(false);
 		  }
 		  else{
 			  PlayAudioPanel play = new PlayAudioPanel(controller, "config/mandarinClassroom/bestAudio/"+sentToAudioPath.get(sentence));
@@ -913,6 +953,8 @@ public class Navigation implements RequiresResize {
 					  sentPanel.getWidget(currIndex, 2).setVisible(false);
 					  sentPanel.getWidget(currIndex, 1).setVisible(false);
 					  sentPanel.getWidget(currIndex, 3).setVisible(false);
+					  sentPanel.getWidget(currIndex, 5).setVisible(false);
+					  sentPanel.getWidget(currIndex, 6).setVisible(false);
 					  if(currIndex+1 != stop){
 					     sentPanel.getWidget(currIndex+1, 0).getElement().getStyle().setProperty("color", "#000000");
 					  }
