@@ -10,9 +10,6 @@ import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyPressEvent;
-import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.Timer;
@@ -200,7 +197,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
   /**
    * @param commentEntryText
    * @return
-   * @see mitll.langtest.client.custom.CommentNPFExercise#makeCommentPopup(String, com.github.gwtbootstrap.client.ui.Button, mitll.langtest.client.custom.NPFExercise.HidePopupTextBox, com.github.gwtbootstrap.client.ui.Button)
+   * @see #getNextListButton()
    */
   private DecoratedPopupPanel makePopupAndButton(TextBox commentEntryText, ClickHandler clickHandler) {
     final DecoratedPopupPanel commentPopup = new DecoratedPopupPanel();
@@ -218,6 +215,8 @@ public class NPFExercise extends GoodwaveExercisePanel {
    * Clicking OK just dismisses the popup.
    * @param commentPopup
    * @return
+   * @see #makePopupAndButton(com.github.gwtbootstrap.client.ui.TextBox, com.google.gwt.event.dom.client.ClickHandler)
+   * @see mitll.langtest.client.custom.CommentNPFExercise#makeCommentPopup(String, com.github.gwtbootstrap.client.ui.Button, HidePopupTextBox, com.github.gwtbootstrap.client.ui.Button)
    */
   protected Button getOKButton(final PopupPanel commentPopup, ClickHandler clickHandler) {
     Button ok = new Button("OK");
@@ -374,21 +373,4 @@ public class NPFExercise extends GoodwaveExercisePanel {
     return textBox;
   }
 
-  protected static class HidePopupTextBox extends TextBox {
-    public void configure(final PopupPanel popup) {
-      addKeyPressHandler(new KeyPressHandler() {
-        @Override
-        public void onKeyPress(KeyPressEvent event) {
-          int keyCode = event.getNativeEvent().getKeyCode();
-          if (keyCode == KeyCodes.KEY_ENTER) {
-           // System.out.println("HidePopupTextBox : got key press on " + getElement().getId());
-            popup.hide();
-            onEnter();
-          }
-        }
-      });
-    }
-    protected void onEnter() {
-    }
-  }
 }

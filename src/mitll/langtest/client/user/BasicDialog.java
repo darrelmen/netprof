@@ -261,6 +261,27 @@ public class BasicDialog {
     setupPopoverThatHidesItself(widget, header, message,placement);
   }
 
+  void markError(Widget dialect, String message) {
+    // System.out.println("markError on '" + dialect.getElement().getId() + "' with " + header + "/" + message);
+   // dialect.setFocus(true);
+//    setupPopover(dialect, header, message, placement);
+    Widget widget = dialect;
+
+
+    setupPopoverThatHidesItself(widget, "Error", message,Placement.RIGHT);
+  }
+
+  void markError(Widget dialect, String header, String message, Placement placement) {
+    // System.out.println("markError on '" + dialect.getElement().getId() + "' with " + header + "/" + message);
+    // dialect.setFocus(true);
+//    setupPopover(dialect, header, message, placement);
+    Widget widget = dialect;
+
+
+    setupPopoverThatHidesItself(widget, header, message,placement);
+  }
+
+
   private void setupPopoverThatHidesItself(final Widget w, String heading, final String message,Placement placement) {
     System.out.println("\ttriggering popover on '" + w.getTitle() + "' with " + heading + "/" + message);
     setupPopover(w, heading, message, placement);
@@ -271,9 +292,13 @@ public class BasicDialog {
     setupPopover(w, heading, message, placement, delayMillis);
   }
 
-  protected void setupPopover(Widget w, String heading, String message, Placement placement, int delayMillis) {
+  protected Popover setupPopover(Widget w, String heading, String message, Placement placement, int delayMillis) {
     final MyPopover popover = new MyPopover();
 
+    return setupPopover(w, heading, message, placement, delayMillis, popover);
+  }
+
+  protected Popover setupPopover(Widget w, String heading, String message, Placement placement, int delayMillis, final MyPopover popover) {
     configurePopup(popover, w, heading, message, placement);
 
     Timer t = new Timer() {
@@ -283,6 +308,7 @@ public class BasicDialog {
       }
     };
     t.schedule(delayMillis);
+    return popover;
   }
 
   /**
@@ -296,7 +322,6 @@ public class BasicDialog {
     System.out.println("setupPopover   : triggering popover on " + w.getElement().getId() + " with " + heading +"/"+message);
     final Popover popover = new Popover();
     configurePopup(popover, w, heading, message, placement);
-    //visiblePopovers.add(popover);
 
     Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
@@ -316,15 +341,7 @@ public class BasicDialog {
     popover.show();
   }
 
-/*  void hidePopovers() {
-    if (!visiblePopovers.isEmpty()) {
-         System.out.println("\n\n\n\thiding " + visiblePopovers.size() + " popovers");
-    }
-    for (Popover popover : visiblePopovers) popover.hide();
-    visiblePopovers.clear();
-  }*/
-
-  private static class MyPopover extends Popover {
+  protected static class MyPopover extends Popover {
     public void dontFireAgain() {
       hide();
       setTrigger(Trigger.MANUAL);

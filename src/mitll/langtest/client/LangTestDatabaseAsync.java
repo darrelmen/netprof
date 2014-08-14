@@ -1,5 +1,6 @@
 package mitll.langtest.client;
 
+import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.AudioAttribute;
@@ -129,4 +130,6 @@ public interface LangTestDatabaseAsync {
   void userExists(String login, String passwordH, AsyncCallback<User> async);
 
   void addUser(String userID, String passwordH, String emailH, User.Kind kind, AsyncCallback<User> async);
+
+  void resetPassword(String userid, String text, AsyncCallback<Void> asyncCallback);
 }
