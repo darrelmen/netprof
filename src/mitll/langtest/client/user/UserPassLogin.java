@@ -15,9 +15,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
-import com.google.gwt.event.logical.shared.CloseEvent;
-import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -67,12 +65,18 @@ public class UserPassLogin extends UserDialog {
    */
   public UserPassLogin(LangTestDatabaseAsync service, PropertyHandler props, UserManager userManager, EventRegistration eventRegistration) {
     super(service, props);
+
+System.out.println("loc " + Window.Location.getProtocol() + " " + Window.Location.getHref());
+
     this.userManager = userManager;
     this.eventRegistration = eventRegistration;
     enterKeyButtonHelper = new KeyPressHelper(true) {
       @Override
       public void userHitEnterKey(Button button) {
-        if (resetEmailPopup != null && resetEmailPopup.isVisible()) {
+        if (sendUsernamePopup != null && sendUsernamePopup.isVisible()) {
+          sendUsernameEmail.fireEvent(new ButtonClickEvent());
+        }
+        else if (resetEmailPopup != null && resetEmailPopup.isVisible()) {
           sendEmail.fireEvent(new ButtonClickEvent());
         }
         else if (signInHasFocus) {
@@ -178,11 +182,22 @@ public class UserPassLogin extends UserDialog {
     signIn.setType(ButtonType.PRIMARY);
     fieldset.add(hp);
 
-    final Anchor forgotPassword = getForgotPassword();
-    fieldset.add(forgotPassword);
-    forgotPassword.getElement().getStyle().setProperty("fontSize", "smaller");
+    Panel hp2 = new HorizontalPanel();
 
-    forgotPassword.addStyleName("leftTenMargin");
+
+
+    final Anchor forgotUser = getForgotUser();
+    hp2.add(forgotUser);
+    //forgotUser.getElement().getStyle().setProperty("fontSize", "smaller");
+    forgotUser.addStyleName("leftTenMargin");
+
+
+    final Anchor forgotPassword = getForgotPassword();
+    hp2.add(forgotPassword);
+    fieldset.add(hp2);
+  //  forgotPassword.getElement().getStyle().setProperty("fontSize", "smaller");
+
+    forgotPassword.addStyleName("leftFiveMargin");
 
     getFocusOnField(user);
   }
@@ -255,7 +270,7 @@ public class UserPassLogin extends UserDialog {
         });
         eventRegistration.register(sendEmail, "N/A", "reset password");
 
-        makePopup(resetEmailPopup, emailEntry, sendEmail);
+        makePopup(resetEmailPopup, emailEntry, sendEmail,"Enter your email to reset your password.");
         resetEmailPopup.showRelativeTo(forgotPassword);
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
           public void execute() {
@@ -267,17 +282,94 @@ public class UserPassLogin extends UserDialog {
     return forgotPassword;
   }
 
+  DecoratedPopupPanel sendUsernamePopup;
+  Button sendUsernameEmail;
+
+  public Anchor getForgotUser() {
+    final Anchor forgotUsername = new Anchor("Forgot username?");
+    forgotUsername.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+ /*       if (user.getText().isEmpty()) {
+          markError(user, "Enter a user name.");
+          return;
+        }*/
+        final HidePopupTextBox emailEntry = new HidePopupTextBox();
+        sendUsernamePopup = new DecoratedPopupPanel();
+        sendUsernameEmail = new Button("Send");
+        sendUsernameEmail.setType(ButtonType.PRIMARY);
+        sendUsernameEmail.addStyleName("leftTenMargin");
+        sendUsernameEmail.addClickHandler(new ClickHandler() {
+          @Override
+          public void onClick(ClickEvent event) {
+            String text = emailEntry.getText();
+            if (!isValidEmail(text)) {
+       /*       System.out.println("email is '" + text+
+                  "' ");*/
+              markError(emailEntry,
+                  "Please check",
+                  VALID_EMAIL, Placement.TOP);
+              return;
+            }
+
+            sendUsernameEmail.setEnabled(false);
+            service.forgotUsername(Md5Hash.getHash(text), text, Window.Location.getHref(), new AsyncCallback<Boolean>() {
+              @Override
+              public void onFailure(Throwable caught) {
+                sendUsernameEmail.setEnabled(true);
+              }
+
+              @Override
+              public void onSuccess(Boolean isValid) {
+                if (!isValid) {
+                  markError(sendUsernameEmail,"Check your spelling","No user has this email.",Placement.LEFT);
+                  sendUsernameEmail.setEnabled(true);
+                }
+                else {
+                  setupPopover(sendUsernameEmail, "Check Email", "Please check your email", Placement.LEFT, 5000, new MyPopover() {
+                    boolean isFirst = true;
+
+                    @Override
+                    public void hide() {
+                      super.hide();
+                      if (isFirst) {
+                        isFirst = false;
+                      } else {
+                        sendUsernamePopup.hide(); // TODO : ugly
+                      }
+                    }
+                  });
+                }
+              }
+            });
+          }
+        });
+        eventRegistration.register(sendUsernameEmail, "N/A", "send username");
+
+        makePopup(sendUsernamePopup, emailEntry, sendUsernameEmail, "Enter your email to get your username.");
+        sendUsernamePopup.showRelativeTo(forgotUsername);
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+          public void execute() {
+            emailEntry.setFocus(true);
+          }
+        });
+      }
+    });
+    return forgotUsername;
+  }
+
   public boolean isValidEmail(String text) {
     return text.toUpperCase().matches("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$");
   }
 
-  private void makePopup(DecoratedPopupPanel commentPopup,HidePopupTextBox commentEntryText, Button okButton) {
+  private void makePopup(DecoratedPopupPanel commentPopup,HidePopupTextBox commentEntryText, Button okButton, String prompt) {
     //final DecoratedPopupPanel commentPopup = new DecoratedPopupPanel();
     commentPopup.setAutoHideEnabled(false);
     //   commentPopup.configure(commentEntryText, commentButton, clearButton);
     //   commentPopup.setField(field);
     VerticalPanel vp = new VerticalPanel();
-    Panel w = new Heading(6,"Enter your email to reset your password.");
+   // String prompt = "Enter your email to reset your password.";
+    Panel w = new Heading(6, prompt);
     vp.add(w);
     w.addStyleName("bottomFiveMargin");
     Panel hp = new HorizontalPanel();
