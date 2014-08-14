@@ -32,94 +32,86 @@ public class MailSupport {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#sendEmail(int, String, String, String, String, String)
+   * @seex mitll.langtest.server.LangTestDatabaseImpl#sendEmail(int, String, String, String, String, String)
    * @param serverName
    * @param baseURL
    * @param to
    * @param replyTo
    * @param subject
    * @param message
-   * @param token
+   * @param linkText
    */
-  public void sendEmail(String serverName, String baseURL, String to, String replyTo, String subject, String message, String token) {
+  public void sendEmail(String serverName, String baseURL, String to, String replyTo, String subject, String message, String linkText) {
     List<String> toAddresses = (to.contains(",")) ? Arrays.asList(to.split(",")) : new ArrayList<String>();
     if (toAddresses.isEmpty()) {
       toAddresses.add(to);
     }
-//    logger.debug("server info " + getServletContext().getServerInfo());
-    //  URI uri = new URI();
-    //String serverName = getThreadLocalRequest().getServerName();
-    logger.info("server name " + serverName);
-/*
-    String link = "\nHere's a link <a href='" + getBaseUrl() + "#" + URLEncoder.encode(token) +
-      "'>" + linkTitle + "</a>.\n";
-    //message += link;
 
-    logger.info("link " +link);*/
+    String body = getHTMLEmail(linkText, message, baseURL);
 
-    String link2 = baseURL + "?showSectionWidgets=false"+"#" + URLEncoder.encode(token);
-    String body = getHTMLEmail(subject, message, link2);
-
-    String fromEmail = "email@" + serverName;
+    String fromEmail = "admin@" + serverName;
     normalFullEmail(fromEmail, fromEmail, replyTo, toAddresses,
-      subject,
-      body);
+        subject,
+        body);
   }
 
-  public String getHTMLEmail(String subject, String message, String link2) {
+  public String getHTMLEmail(String linkText, String message, String link2) {
     return "<html>" +
-      "<head>" +
-      "</head>" +
-      "<body lang=EN-US link=blue vlink=purple style='tab-interval:.5in'>" +
-      "<div align=center>" +
-      "<table>" +
-      (message.length() > 0 ?
-        "<tr>" +
-          "    <td colspan=2 style='padding:.75pt .75pt .75pt .75pt'>\n" +
-          "    <p ><span style='font-size:13.0pt;font-family:\"Georgia\",\"serif\";\n" +
-          "    color:#333333'>" +
-          message +
-          "<p></p></span></p>\n" +
-          "    </td>" +
-          "</tr>" : "") +
-      "     <tr >\n" +
-      "      <td style='border:none;padding:10.5pt 10.5pt 10.5pt 10.5pt'>\n" +
-      "      <h1 style='margin-top:0in;margin-right:0in;margin-bottom:3.0pt;\n" + "      margin-left:0in'>" +
-      "<span style='font-size:12.5pt;font-family:\"Georgia\",\"serif\";\n" +  "      font-weight:normal'>" +
-      "<a\n" + "      href=\"" +
-      link2 +
-      "\">" +
-      "<span\n" + "      style='color:#004276'>" +
-      subject +
-      "</span>" +
-      "</a><p></p>" +
-      "</span>" +
-      "</h1>\n" +
-      "      </td>\n" +
-      "     </tr>" +
+        "<head>" +
+        "</head>" +
 
-      "   <tr>\n" +
-      "    <td style='padding:0in 0in 0in 0in'>\n" +
-      "    <p>" +
-      "<span style='font-size:8.5pt;font-family:\"Arial\",\"sans-serif\";\n" +
-      "    color:#333333'>Or, copy and paste this URL into your browser: <a\n" +
-      "    href=\"" +
-      link2 +
-      "\"><b>" +
-      "<span\n" +
-      "    style='color:#004276'>" +
-      link2 +
-      "</span></b></a>" +
-      "<p></p></span>" +
-      "</p>\n" +
-      "    </td>\n" +
-      //     "    <td style='padding:.75pt .75pt .75pt .75pt'></td>\n" +
-      "   </tr>"+
+        "<body lang=EN-US link=blue vlink=purple style='tab-interval:.5in'>" +
+        "<div align=center>" +
+        "<table>" +
+        (message.length() > 0 ?
+            "<tr>" +
+                "    <td colspan=2 style='padding:.75pt .75pt .75pt .75pt'>\n" +
+                "    <p ><span style='font-size:13.0pt;font-family:\"Georgia\",\"serif\";\n" +
+                "    color:#333333'>" +
+                message +
+                "<p></p></span></p>\n" +
+                "    </td>" +
+                "</tr>" : "") +
+        "     <tr >\n" +
+        "      <td style='border:none;padding:10.5pt 10.5pt 10.5pt 10.5pt'>\n" +
+        "      <h1 style='margin-top:0in;margin-right:0in;margin-bottom:3.0pt;\n" + "      margin-left:0in'>" +
+        "<span style='font-size:12.5pt;font-family:\"Georgia\",\"serif\";\n" + "      font-weight:normal'>" +
+        "<a\n" + "      href=\"" +
+        link2 +
+        "\">" +
+        "<span\n" + "      style='color:#004276'>" +
+        linkText +
+        "</span>" +
+        "</a>" +
 
-      "</table>" +
-      "</div>" +
-      "</body>" +
-      "</html>";
+        "<p></p>" +
+        "</span>" +
+        "</h1>\n" +
+        "      </td>\n" +
+        "     </tr>" +
+
+        "   <tr>\n" +
+        "    <td style='padding:0in 0in 0in 0in'>\n" +
+        "    <p>" +
+        "<span style='font-size:8.5pt;font-family:\"Arial\",\"sans-serif\";\n" +
+        "    color:#333333'>Or, copy and paste this URL into your browser: <a\n" +
+        "    href=\"" +
+        link2 +
+        "\"><b>" +
+        "<span\n" +
+        "    style='color:#004276'>" +
+        link2 +
+        "</span></b></a>" +
+        "<p></p></span>" +
+        "</p>\n" +
+        "    </td>\n" +
+        //     "    <td style='padding:.75pt .75pt .75pt .75pt'></td>\n" +
+        "   </tr>" +
+
+        "</table>" +
+        "</div>" +
+        "</body>" +
+        "</html>";
   }
 
   /**
@@ -169,12 +161,17 @@ public class MailSupport {
       Message msg = makeMessage(session, recipientName, recipientEmail, ccEmails, subject, message);
       Transport.send(msg);
     } catch (Exception e) {
-      logger.error("Couldn't send email to " +recipientEmail+". Got " +e,e);
+      if (e.getMessage().contains("Could not connect to SMTP")) {
+        logger.info("couldn't send email - no mail daemon?");
+      }
+      else {
+        logger.error("Couldn't send email to " +recipientEmail+". Got " +e,e);
+      }
     }
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#sendEmail
+   * @seex mitll.langtest.server.LangTestDatabaseImpl#sendEmail
    * @param senderName
    * @param senderEmail
    * @param recipientEmails
@@ -191,13 +188,22 @@ public class MailSupport {
       Properties props = new Properties();
       props.put("mail.smtp.host", LOCALHOST);
       props.put("mail.debug", ""+debugEmail);
+
+      props.put("mail.smtp.port", 1025);
+
+
       Session session = Session.getDefaultInstance(props, null);
       Message msg = makeHTMLMessage(session,
         senderName, senderEmail, replyToEmail, recipientEmails,
         subject, message);
       Transport.send(msg);
     } catch (Exception e) {
-      logger.error("Couldn't send email to " +recipientEmails+". Got " +e,e);
+      if (e.getMessage().contains("Could not connect to SMTP")) {
+        logger.info("couldn't send email - no mail daemon?");
+      }
+      else {
+        logger.error("Couldn't send email to " + recipientEmails + ". Got " + e, e);
+      }
     }
   }
 
