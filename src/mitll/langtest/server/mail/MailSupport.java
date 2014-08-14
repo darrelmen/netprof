@@ -20,6 +20,7 @@ public class MailSupport {
   private static final String DATA_COLLECT_WEBMASTER = "Data Collect Webmaster";
   private static final Logger logger = Logger.getLogger(MailSupport.class);
   private static final String EMAIL = "gordon.vidaver@ll.mit.edu";
+  public static final String LOCALHOST = "localhost";
   private final boolean debugEmail;
 
   /**
@@ -40,7 +41,7 @@ public class MailSupport {
    * @param message
    * @param token
    */
-  private void sendEmail(String serverName, String baseURL, String to, String replyTo, String subject, String message, String token) {
+  public void sendEmail(String serverName, String baseURL, String to, String replyTo, String subject, String message, String token) {
     List<String> toAddresses = (to.contains(",")) ? Arrays.asList(to.split(",")) : new ArrayList<String>();
     if (toAddresses.isEmpty()) {
       toAddresses.add(to);
@@ -57,7 +58,16 @@ public class MailSupport {
     logger.info("link " +link);*/
 
     String link2 = baseURL + "?showSectionWidgets=false"+"#" + URLEncoder.encode(token);
-    String body = "<html>" +
+    String body = getHTMLEmail(subject, message, link2);
+
+    String fromEmail = "email@" + serverName;
+    normalFullEmail(fromEmail, fromEmail, replyTo, toAddresses,
+      subject,
+      body);
+  }
+
+  public String getHTMLEmail(String subject, String message, String link2) {
+    return "<html>" +
       "<head>" +
       "</head>" +
       "<body lang=EN-US link=blue vlink=purple style='tab-interval:.5in'>" +
@@ -110,11 +120,6 @@ public class MailSupport {
       "</div>" +
       "</body>" +
       "</html>";
-
-    String fromEmail = "email@" + serverName;
-    normalFullEmail(fromEmail, fromEmail, replyTo, toAddresses,
-      subject,
-      body);
   }
 
   /**
@@ -125,7 +130,7 @@ public class MailSupport {
    * @param message
    */
   private void email(String subject, String message) {
-    normalEmail(RECIPIENT_NAME, EMAIL, new ArrayList<String>(),subject, message,"localhost");
+    normalEmail(RECIPIENT_NAME, EMAIL, new ArrayList<String>(),subject, message, LOCALHOST);
   }
 
   /**
@@ -136,7 +141,7 @@ public class MailSupport {
    * @param message
    */
   public void email(String receiver, String subject, String message) {
-    normalEmail(RECIPIENT_NAME, receiver, new ArrayList<String>(),subject, message,"localhost");
+    normalEmail(RECIPIENT_NAME, receiver, new ArrayList<String>(),subject, message, LOCALHOST);
   }
 
 /*  public void email(String recipientName, String recipientEmail, String subject, String message) {
@@ -184,7 +189,7 @@ public class MailSupport {
                               String subject, String message) {
     try {
       Properties props = new Properties();
-      props.put("mail.smtp.host", "localhost");
+      props.put("mail.smtp.host", LOCALHOST);
       props.put("mail.debug", ""+debugEmail);
       Session session = Session.getDefaultInstance(props, null);
       Message msg = makeHTMLMessage(session,
