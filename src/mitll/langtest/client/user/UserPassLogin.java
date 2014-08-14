@@ -72,14 +72,12 @@ public class UserPassLogin extends UserDialog {
     enterKeyButtonHelper = new KeyPressHelper(true) {
       @Override
       public void userHitEnterKey(Button button) {
-        if (resetEmailPopup.isVisible()) {
+        if (resetEmailPopup != null && resetEmailPopup.isVisible()) {
           sendEmail.fireEvent(new ButtonClickEvent());
         }
-        else if (signInHasFocus) {//user.box.getValue().isEmpty() || password.box.getValue().isEmpty()) {
-          //System.out.println("sending click to " + button.getElement().getId());
+        else if (signInHasFocus) {
           button.fireEvent(new ButtonClickEvent());
         } else {
-        //  System.out.println("sending click to " + signUp.getElement().getId());
           signUp.fireEvent(new KeyPressHelper.ButtonClickEvent());
         }
       }
