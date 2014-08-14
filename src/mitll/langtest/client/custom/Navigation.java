@@ -7,6 +7,7 @@ import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Image;
+import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.InlineLabel;
@@ -37,11 +38,13 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import mitll.langtest.client.LangTest;
@@ -673,6 +676,7 @@ public class Navigation implements RequiresResize {
   private void viewDialogOptions(final Panel contentPanel) {
      contentPanel.clear();
      contentPanel.getElement().setId("contentPanel");
+     final HorizontalPanel optionPanel = new HorizontalPanel();
 	 final FlowPanel forSents = new FlowPanel();
      
      final ListBox availableDialogs = new ListBox();
@@ -727,8 +731,26 @@ public class Navigation implements RequiresResize {
     		 forSents.clear();
     	 }
      });
-     contentPanel.add(availableDialogs);
-     contentPanel.add(availableSpeakers);
+     optionPanel.add(availableDialogs);
+     optionPanel.add(availableSpeakers);
+     
+     VerticalPanel showDiaPanel = new VerticalPanel();
+     showDiaPanel.getElement().getStyle().setProperty("margin", "10px");
+     final RadioButton yesDia = new RadioButton("showDia", "Show your part");
+     final RadioButton noDia = new RadioButton("showDia", "Hide your part");
+     yesDia.setValue(true);
+     showDiaPanel.add(yesDia);
+     showDiaPanel.add(noDia);
+     optionPanel.add(showDiaPanel);
+     
+     VerticalPanel audioSpeedPanel = new VerticalPanel();
+     audioSpeedPanel.getElement().getStyle().setProperty("margin", "10px");
+     final RadioButton regular = new RadioButton("audioSpeed", "Regular speed");
+     final RadioButton slow = new RadioButton("audioSpeed", "Slow speed");
+     regular.setValue(true);
+     audioSpeedPanel.add(regular);
+     audioSpeedPanel.add(slow);
+     optionPanel.add(audioSpeedPanel);
      
      Button startDialog = new Button("Start Recording!", new ClickHandler() {
     	 public void onClick(ClickEvent event) {
@@ -738,15 +760,18 @@ public class Navigation implements RequiresResize {
     		 else{
     			 //resetPlayer();
     			 forSents.clear();
-    		     Grid sentPanel = displayDialog(dialogIndex.get(availableDialogs.getSelectedIndex()), availableSpeakers.getValue(availableSpeakers.getSelectedIndex()), forSents);
+    		     Grid sentPanel = displayDialog(dialogIndex.get(availableDialogs.getSelectedIndex()), availableSpeakers.getValue(availableSpeakers.getSelectedIndex()), forSents, yesDia.getValue(), regular.getValue());
     		     setupPlayOrder(sentPanel, 0, sentPanel.getRowCount());
     		     //contentPanel.add(forSents);
     		 }
     	 }
      });
+     
+     //make startDialog green or something? also change on radio select
 
      startDialog.getElement().getStyle().setProperty("fontSize", "150%");
      availableDialogs.getElement().getStyle().setProperty("margin", "10px");
+     contentPanel.add(optionPanel);
      contentPanel.add(startDialog);
      contentPanel.add(forSents);
   }
@@ -830,7 +855,7 @@ public class Navigation implements RequiresResize {
   
   private final Image somethingIsHappening = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress44.gif"));
   
-  private Grid displayDialog(String dialog, String part, Panel cp){
+  private Grid displayDialog(String dialog, String part, Panel cp, boolean showPart, boolean regAudio){
 
 	  HashMap<String, String> sentToAudioPath = getSentToAudioPath();
 	  HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSpeaker = getDialogToSentIndexToSpeaker();
