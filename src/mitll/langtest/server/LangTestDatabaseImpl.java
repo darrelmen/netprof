@@ -1035,6 +1035,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getUserDAO().getUserWhere(id);
   }
 
+  public void resetPassword(String user, String email) {
+    logger.debug("Sending reset password email...");
+    //getMailSupport()
+  }
+
   // Results ---------------------
 
   /**
