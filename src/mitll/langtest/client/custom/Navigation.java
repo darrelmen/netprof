@@ -884,6 +884,8 @@ public class Navigation implements RequiresResize {
 		  if(part.equals(dialogToSentIndexToSpeaker.get(dialog).get(sentIndex))){
 			  if (sentIndex == 0)
 				  youStart = true;
+			  if(!showPart)
+				  sent.setText("(Say your part)"); // be careful to not get the sentence for scoring from here!
 			  PlayAudioPanel play = new PlayAudioPanel(controller, "config/mandarinClassroom/bestAudio/"+sentToAudioPath.get(sentence));
 			  final HTML score = new HTML("0.0");
 			  scoreElements.add(score);
