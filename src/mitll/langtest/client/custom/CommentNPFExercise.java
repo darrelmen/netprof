@@ -306,7 +306,7 @@ public class CommentNPFExercise extends NPFExercise {
     }
 
     /**
-     * @see mitll.langtest.client.custom.CommentNPFExercise#makeCommentPopup(String, com.github.gwtbootstrap.client.ui.Button, mitll.langtest.client.custom.CommentNPFExercise.HidePopupTextBox, com.github.gwtbootstrap.client.ui.Button)
+     * @see mitll.langtest.client.custom.CommentNPFExercise#makeCommentPopup(String, com.github.gwtbootstrap.client.ui.Button, HidePopupTextBox, com.github.gwtbootstrap.client.ui.Button)
      * @param commentBox
      * @param commentButton
      * @param clearButton
