@@ -242,6 +242,32 @@ public class UserDAO extends DAO {
     return false;
   }
 
+  public User isValidEmail(String emailH) {
+    String sql = "SELECT " +
+        ID +
+        " from " + USERS+
+        " where " +EMAIL+
+        "='" +
+        emailH +
+        "'";
+
+    int i = userExistsSQL("N/A", sql);
+    return i == -1 ? null : getUserWhere(i);
+  }
+
+  public User isValidUserAndEmail(String user, String emailH) {
+    String sql = "SELECT " +
+        ID +
+        " from " + USERS +
+        " where " +
+        EMAIL + "='" + emailH + "' AND UPPER(" +
+        USER_ID + ")='" + user.toUpperCase() + "' AND ";
+
+    int i = userExistsSQL("N/A", sql);
+    return i == -1 ? null : getUserWhere(i);
+  }
+
+
   /**
    * Not case sensitive.
    *
@@ -282,7 +308,7 @@ public class UserDAO extends DAO {
   }
 
   public User getUserByID(String id) {
-    return getUserWhere(-1,"SELECT * from users where UPPER(userID)='" +
+    return getUserWhere(-1, "SELECT * from users where UPPER(userID)='" +
         id.toUpperCase() +
         "'");
   }
@@ -633,4 +659,5 @@ public class UserDAO extends DAO {
   private float roundToHundredth(double totalHours) {
     return ((float) ((Math.round(totalHours * 100)))) / 100f;
   }
+
 }
