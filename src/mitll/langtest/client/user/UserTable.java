@@ -41,7 +41,7 @@ public class UserTable extends PagerTable {
   }
 
   void showDialog(final LangTestDatabaseAsync service) {
-    // Create the popup dialog box
+    // Create the resetEmailPopup dialog box
     final DialogBox dialogBox = new DialogBox();
     dialogBox.setText("Registered Users");
 
