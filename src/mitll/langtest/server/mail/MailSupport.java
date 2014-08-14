@@ -40,7 +40,7 @@ public class MailSupport {
    * @param message
    * @param token
    */
-  public void sendEmail(String serverName, String baseURL, String to, String replyTo, String subject, String message, String token) {
+  private void sendEmail(String serverName, String baseURL, String to, String replyTo, String subject, String message, String token) {
     List<String> toAddresses = (to.contains(",")) ? Arrays.asList(to.split(",")) : new ArrayList<String>();
     if (toAddresses.isEmpty()) {
       toAddresses.add(to);
@@ -124,9 +124,17 @@ public class MailSupport {
    * @param subject
    * @param message
    */
-  public void email(String subject, String message) {
+  private void email(String subject, String message) {
     normalEmail(RECIPIENT_NAME, EMAIL, new ArrayList<String>(),subject, message,"localhost");
   }
+
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#logAndNotifyServerException(Exception)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#logMessage(String)
+   * @param receiver
+   * @param subject
+   * @param message
+   */
   public void email(String receiver, String subject, String message) {
     normalEmail(RECIPIENT_NAME, receiver, new ArrayList<String>(),subject, message,"localhost");
   }
@@ -168,7 +176,7 @@ public class MailSupport {
    * @param subject
    * @param message
    */
-  public void normalFullEmail(String senderName,
+  private void normalFullEmail(String senderName,
                               String senderEmail,
                               String replyToEmail,
                               List<String> recipientEmails,
