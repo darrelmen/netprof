@@ -455,7 +455,12 @@ public class ExcelImport implements ExerciseDAO {
           );
         } else {
           int colIndex = colIndexOffset;
-          boolean isDelete = sheet.getWorkbook().getFontAt(next.getCell(colIndex).getCellStyle().getFontIndex()).getStrikeout();
+          boolean isDelete = false;
+          try {
+            isDelete = sheet.getWorkbook().getFontAt(next.getCell(colIndex).getCellStyle().getFontIndex()).getStrikeout();
+          } catch (Exception e) {
+            logger.debug("got exception on row " + next.getRowNum() );
+          }
 
           String english = getCell(next, colIndex++).trim();
           String foreignLanguagePhrase = getCell(next, colIndex).trim();
