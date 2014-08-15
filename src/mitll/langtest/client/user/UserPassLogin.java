@@ -15,6 +15,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
@@ -66,7 +67,7 @@ public class UserPassLogin extends UserDialog {
   public UserPassLogin(LangTestDatabaseAsync service, PropertyHandler props, UserManager userManager, EventRegistration eventRegistration) {
     super(service, props);
 
-System.out.println("loc " + Window.Location.getProtocol() + " " + Window.Location.getHref());
+    //System.out.println("loc " + Window.Location.getProtocol() + " " + Window.Location.getHref());
 
     this.userManager = userManager;
     this.eventRegistration = eventRegistration;
@@ -100,6 +101,110 @@ System.out.println("loc " + Window.Location.getProtocol() + " " + Window.Locatio
     container.add(leftAndRight);
     getLeftIntro(leftAndRight);
     getRightLogin(leftAndRight);
+    return container;
+  }
+
+  public Panel getResetPassword(final String token) {
+
+    Panel container = new DivWidget();
+    DivWidget child = new DivWidget();
+    container.add(child);
+    child.addStyleName("loginPageBack");
+
+    Panel leftAndRight = new DivWidget();
+    leftAndRight.addStyleName("resetPage");
+    container.add(leftAndRight);
+
+    DivWidget right = new DivWidget();
+
+    leftAndRight.add(right);
+    right.addStyleName("floatRight");
+
+    DivWidget rightDiv = new DivWidget();
+
+    Form form = new Form();
+    form.getElement().setId("resetForm");
+    rightDiv.add(form);
+
+    //rightDiv.add(
+
+    form.addStyleName("topMargin");
+    form.addStyleName("formRounded");
+    form.getElement().getStyle().setBackgroundColor("white");
+
+    final Fieldset fieldset = new Fieldset();
+    form.add(fieldset);
+
+    Heading w = new Heading(3, "Choose a new password");
+    fieldset.add(w);
+    w.addStyleName("leftFiveMargin");
+    final FormField firstPassword = addControlFormField(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
+    final FormField secondPassword = addControlFormField(fieldset, true, MIN_PASSWORD, 15, "Confirm " +PASSWORD);
+
+
+    final Button changePassword = new Button("Change Password");
+    changePassword.getElement().setId("changePassword");
+    eventRegistration.register(changePassword);
+    changePassword.addStyleName("floatRight");
+    fieldset.add(changePassword);
+    changePassword.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        String first = firstPassword.box.getText();
+        String second = secondPassword.box.getText();
+        if (first.isEmpty()) {
+          markError(firstPassword, "Please enter a password");
+        } else if (first.length() < MIN_PASSWORD) {
+          markError(firstPassword, "Please enter a longer password");
+        } else if (second.isEmpty()) {
+            markError(secondPassword, "Please enter a password");
+          } else if (second.length() < MIN_PASSWORD) {
+            markError(secondPassword, "Please enter a longer password");
+          } else if (!second.equals(first)) {
+            markError(secondPassword, "Please enter the same password");
+
+        }
+        else {
+          changePassword.setEnabled(false);
+          enterKeyButtonHelper.removeKeyHandler();
+
+          System.out.println("changing password for " + token);
+          service.changePFor(token, Md5Hash.getHash(first), new AsyncCallback<Boolean>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              changePassword.setEnabled(true);
+              markError(changePassword,"Can't communicate with server - check network connection.");
+
+            }
+
+            @Override
+            public void onSuccess(Boolean result) {
+              if (!result) {
+                markError(changePassword,"Password has already been changed?");
+              }
+              else {
+                markError(changePassword,"Success","Password has been changed",Placement.LEFT);
+                Timer t = new Timer() {
+                  @Override
+                  public void run() {
+                  Window.Location.reload();
+                  }
+                };
+                t.schedule(3000);
+              }
+            }
+          });
+        }
+      }
+    });
+    enterKeyButtonHelper.addKeyHandler(changePassword);
+
+    changePassword.addStyleName("rightFiveMargin");
+    changePassword.addStyleName("leftFiveMargin");
+
+    changePassword.setType(ButtonType.PRIMARY);
+    right.add(rightDiv);
+
     return container;
   }
 
@@ -216,7 +321,7 @@ System.out.println("loc " + Window.Location.getProtocol() + " " + Window.Locatio
           return;
         }
         final HidePopupTextBox emailEntry = new HidePopupTextBox();
-       resetEmailPopup = new DecoratedPopupPanel();
+       resetEmailPopup = new DecoratedPopupPanel(true);
         /*resetEmailPopup.addCloseHandler(new CloseHandler<PopupPanel>() {
           @Override
           public void onClose(CloseEvent<PopupPanel> event) {
@@ -241,7 +346,7 @@ System.out.println("loc " + Window.Location.getProtocol() + " " + Window.Locatio
             }
 
             sendEmail.setEnabled(false);
-            service.resetPassword(user.box.getText(), text, new AsyncCallback<Void>() {
+            service.resetPassword(user.box.getText(), text, Window.Location.getHref(), new AsyncCallback<Void>() {
               @Override
               public void onFailure(Throwable caught) {
                 sendEmail.setEnabled(true);
@@ -249,7 +354,7 @@ System.out.println("loc " + Window.Location.getProtocol() + " " + Window.Locatio
 
               @Override
               public void onSuccess(Void result) {
-                 Popover widgets = setupPopover(sendEmail, "Check Email", "Please check your email", Placement.LEFT, 5000, new MyPopover() {
+                 setupPopover(sendEmail, "Check Email", "Please check your email", Placement.LEFT, 5000, new MyPopover() {
                   boolean isFirst = true;
                   @Override
                   public void hide() {
@@ -260,8 +365,8 @@ System.out.println("loc " + Window.Location.getProtocol() + " " + Window.Locatio
                     else {
                       resetEmailPopup.hide(); // TODO : ugly
                     }
-                    System.out.println("got hide !" + new Date()
-                    );
+                    //System.out.println("got hide !" + new Date()
+                    //);
                   }
                 });
               }
@@ -290,12 +395,9 @@ System.out.println("loc " + Window.Location.getProtocol() + " " + Window.Locatio
     forgotUsername.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
- /*       if (user.getText().isEmpty()) {
-          markError(user, "Enter a user name.");
-          return;
-        }*/
         final HidePopupTextBox emailEntry = new HidePopupTextBox();
-        sendUsernamePopup = new DecoratedPopupPanel();
+        sendUsernamePopup = new DecoratedPopupPanel(true);
+        sendUsernamePopup.setAutoHideEnabled(true);
         sendUsernameEmail = new Button("Send");
         sendUsernameEmail.setType(ButtonType.PRIMARY);
         sendUsernameEmail.addStyleName("leftTenMargin");
@@ -304,8 +406,6 @@ System.out.println("loc " + Window.Location.getProtocol() + " " + Window.Locatio
           public void onClick(ClickEvent event) {
             String text = emailEntry.getText();
             if (!isValidEmail(text)) {
-       /*       System.out.println("email is '" + text+
-                  "' ");*/
               markError(emailEntry,
                   "Please check",
                   VALID_EMAIL, Placement.TOP);
@@ -363,50 +463,16 @@ System.out.println("loc " + Window.Location.getProtocol() + " " + Window.Locatio
   }
 
   private void makePopup(DecoratedPopupPanel commentPopup,HidePopupTextBox commentEntryText, Button okButton, String prompt) {
-    //final DecoratedPopupPanel commentPopup = new DecoratedPopupPanel();
-    commentPopup.setAutoHideEnabled(false);
-    //   commentPopup.configure(commentEntryText, commentButton, clearButton);
-    //   commentPopup.setField(field);
     VerticalPanel vp = new VerticalPanel();
-   // String prompt = "Enter your email to reset your password.";
     Panel w = new Heading(6, prompt);
     vp.add(w);
     w.addStyleName("bottomFiveMargin");
     Panel hp = new HorizontalPanel();
     hp.add(commentEntryText);
-    //Button okButton = getOKButton(clickHandler);
     hp.add(okButton);
     vp.add(hp);
     commentPopup.add(vp);
-    //return okButton;
-    //return commentPopup;
   }
-
-  /**
-   * Clicking OK just dismisses the resetEmailPopup.
-   * @paramx commentPopup
-   * @return
-   */
-/*
-  protected Button getOKButton(//final PopupPanel commentPopup,
-                               ClickHandler clickHandler) {
-    Button ok = new Button("OK");
-    ok.setType(ButtonType.PRIMARY);
-    ok.addStyleName("leftTenMargin");
-*/
-/*    ok.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        commentPopup.hide();
-      }
-    });*//*
-
-    if (clickHandler != null) {
-      ok.addClickHandler(clickHandler);
-    }
-    return ok;
-  }
-*/
 
   protected void getFocusOnField(final FormField user) {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
