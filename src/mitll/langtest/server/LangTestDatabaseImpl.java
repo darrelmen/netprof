@@ -77,12 +77,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   public void logAndNotifyServerException(Exception e) {
-    if (!e.getMessage().contains("Broken Pipe")) {
+    String message1 = e == null ? "null_ex" : e.getMessage() == null ? "null_msg":e.getMessage();
+    if (!message1.contains("Broken Pipe")) {
       String message = "Server Exception : " + ExceptionUtils.getStackTrace(e);
       String prefixedMessage = "for " + pathHelper.getInstallPath() + " got " + message;
       logger.debug(prefixedMessage);
-      getMailSupport().email(serverProps.getEmailAddress(), "Server Exception on " + pathHelper.getInstallPath(), prefixedMessage);
+      String subject = "Server Exception on " + pathHelper.getInstallPath();
+      sendEmail(subject, prefixedMessage);
     }
+  }
+
+  public void sendEmail(String subject, String prefixedMessage) {
+    getMailSupport().email(serverProps.getEmailAddress(), subject, prefixedMessage);
   }
 
   private List<CommonShell> getExerciseShells(Collection<? extends CommonExercise> exercises) {
@@ -143,48 +149,54 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       " prefix " + prefix+
       " and user list id " + userListID + " user " + userID + " role " + role + " filter " + onlyUnrecordedByMe + " only examples " + onlyExamples);
 
-    UserList userListByID = userListID != -1 ? db.getUserListManager().getUserListByID(userListID, getTypeOrder()) : null;
+    try {
+      UserList userListByID = userListID != -1 ? db.getUserListManager().getUserListByID(userListID, getTypeOrder()) : null;
 
-    if (typeToSelection.isEmpty()) {   // no unit-chapter filtering
-      // get initial exercise set, either from a user list or predefined
-      boolean predefExercises = userListByID == null;
-      exercises = predefExercises ? getExercises() : getCommonExercises(userListByID);
+      if (typeToSelection.isEmpty()) {   // no unit-chapter filtering
+        // get initial exercise set, either from a user list or predefined
+        boolean predefExercises = userListByID == null;
+        exercises = predefExercises ? getExercises() : getCommonExercises(userListByID);
 
-      // now if there's a prefix, filter by prefix match
-      if (!prefix.isEmpty()) {
-        // now do a trie over matches
-        long then = System.currentTimeMillis();
-        ExerciseTrie trie = predefExercises ? fullTrie : new ExerciseTrie(exercises, serverProps.getLanguage(), audioFileHelper.getSmallVocabDecoder());
-        exercises = trie.getExercises(prefix);
-        long now = System.currentTimeMillis();
-        if (now-then > 300) {
-          logger.debug("took " + (now-then) + " millis to do trie lookup");
+        // now if there's a prefix, filter by prefix match
+        if (!prefix.isEmpty()) {
+          // now do a trie over matches
+          long then = System.currentTimeMillis();
+          ExerciseTrie trie = predefExercises ? fullTrie : new ExerciseTrie(exercises, serverProps.getLanguage(), audioFileHelper.getSmallVocabDecoder());
+          exercises = trie.getExercises(prefix);
+          long now = System.currentTimeMillis();
+          if (now-then > 300) {
+            logger.debug("took " + (now-then) + " millis to do trie lookup");
+          }
+          if (exercises.isEmpty()) { // allow lookup by id
+            CommonExercise exercise = getExercise(prefix, userID);
+            if (exercise != null) exercises = Collections.singletonList(exercise);
+          }
         }
-        if (exercises.isEmpty()) { // allow lookup by id
-          CommonExercise exercise = getExercise(prefix, userID);
-          if (exercise != null) exercises = Collections.singletonList(exercise);
+        exercises = filterByUnrecorded(userID, onlyUnrecordedByMe, onlyExamples, exercises);
+        int i = markRecordedState(userID, role, exercises, onlyExamples);
+        //logger.debug("marked " +i + " as recorded");
+
+        // now sort : everything gets sorted the same way
+        List<CommonExercise> commonExercises = new ArrayList<CommonExercise>(exercises);
+        new ExerciseSorter(getTypeOrder()).getSortedByUnitThenAlpha(commonExercises, role.equals(Result.AUDIO_TYPE_RECORDER));
+
+        return makeExerciseListWrapper(reqID, commonExercises, userID, role, onlyExamples);
+
+      } else { // sort by unit-chapter selection
+        // builds unit-lesson hierarchy if non-empty type->selection over user list
+        if (userListByID != null) {
+          Collection<CommonExercise> exercisesForState = getExercisesFromFiltered(typeToSelection, userListByID);
+          exercisesForState = filterByUnrecorded(userID, onlyUnrecordedByMe, onlyExamples, exercisesForState);
+
+          return getExerciseListWrapperForPrefix(reqID, prefix, exercisesForState, userID, role, onlyExamples);
+        } else {
+          return getExercisesForSelectionState(reqID, typeToSelection, prefix, userID, role, onlyUnrecordedByMe, onlyExamples);
         }
       }
-      exercises = filterByUnrecorded(userID, onlyUnrecordedByMe, onlyExamples, exercises);
-      int i = markRecordedState(userID, role, exercises, onlyExamples);
-      //logger.debug("marked " +i + " as recorded");
-
-      // now sort : everything gets sorted the same way
-      List<CommonExercise> commonExercises = new ArrayList<CommonExercise>(exercises);
-      new ExerciseSorter(getTypeOrder()).getSortedByUnitThenAlpha(commonExercises, role.equals(Result.AUDIO_TYPE_RECORDER));
-
-      return makeExerciseListWrapper(reqID, commonExercises, userID, role, onlyExamples);
-
-    } else { // sort by unit-chapter selection
-      // builds unit-lesson hierarchy if non-empty type->selection over user list
-      if (userListByID != null) {
-        Collection<CommonExercise> exercisesForState = getExercisesFromFiltered(typeToSelection, userListByID);
-        exercisesForState = filterByUnrecorded(userID, onlyUnrecordedByMe, onlyExamples, exercisesForState);
-
-        return getExerciseListWrapperForPrefix(reqID, prefix, exercisesForState, userID, role, onlyExamples);
-      } else {
-        return getExercisesForSelectionState(reqID, typeToSelection, prefix, userID, role, onlyUnrecordedByMe, onlyExamples);
-      }
+    } catch (Exception e) {
+      logger.warn("got " +e,e);
+      logAndNotifyServerException(e);
+      return new ExerciseListWrapper();
     }
   }
 
@@ -522,8 +534,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     CommonExercise byID = db.getCustomOrPredefExercise(id);  // allow custom items to mask out non-custom items
 
     long now = System.currentTimeMillis();
+    String language = serverProps.getLanguage();
     if (now - then2 > 200) {
-      logger.debug("getExercise : (" + serverProps.getLanguage() + ") took " + (now - then) + " millis to find exercise " + id);
+      logger.debug("getExercise : (" + language + ") took " + (now - then2) + " millis to find exercise " + id);
     }
 
     if (byID == null) {
@@ -535,7 +548,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       addAnnotationsAndAudio(userID, byID);
       now = System.currentTimeMillis();
       if (now - then2 > 100) {
-        logger.debug("getExercise : (" + serverProps.getLanguage() + ") took " + (now - then) + " millis to add annotations to exercise " + id);
+        logger.debug("getExercise : (" + language + ") took " + (now - then2) + " millis to add annotations to exercise " + id);
       }
       then2 = System.currentTimeMillis();
 
@@ -543,12 +556,20 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       ensureMP3s(byID);
       now = System.currentTimeMillis();
       if (now - then2 > 200) {
-        logger.debug("getExercise : (" + serverProps.getLanguage() + ") took " + (now - then) + " millis to ensure there are mp3s for exercise " + id);
+        logger.debug("getExercise : (" + language + ") took " + (now - then2) + " millis to ensure there are mp3s for exercise " + id);
       }
     }
     now = System.currentTimeMillis();
-    if (now - then > 20) {
-      logger.debug("getExercise : (" + serverProps.getLanguage() + ") took " + (now - then) + " millis to find " + id);
+    long diff = now - then;
+    String message = "getExercise : (" + language + ") took " + diff + " millis to get exercise " + id;
+    if (diff > 3000) {
+      logger.error(message);
+      sendEmail("slow exercise on " + language, "Getting ex " + id + " on " + language + " took " + diff + " millis.");
+    } else if (diff > 1000) {
+      logger.warn(message);
+    }
+    else if (diff > 20) {
+      logger.debug(message);
     }
     return byID;
   }
@@ -1346,7 +1367,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     logger.debug(prefixedMessage);
 
     if (message.startsWith("got browser exception")) {
-      getMailSupport().email(serverProps.getEmailAddress(), "Javascript Exception", prefixedMessage);
+      sendEmail("Javascript Exception", prefixedMessage);
     }
   }
 
