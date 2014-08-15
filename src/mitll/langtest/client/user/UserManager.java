@@ -74,15 +74,11 @@ public class UserManager {
     if (loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS)) { // explicit setting of login type
       anonymousLogin();
     } else if (loginType.equals(PropertyHandler.LOGIN_TYPE.UNDEFINED) && // no explicit setting, so it's dependent on the mode
-      (props.isGoodwaveMode() || isInitialFlashcardTeacherView())) {   // no login for pron mode
+      (props.isGoodwaveMode() )) {   // no login for pron mode
       anonymousLogin();
     } else {
       login();
     }
-  }
-
-  private boolean isInitialFlashcardTeacherView() {
-    return (props.isFlashcardTeacherView() && !props.isFlashCard());
   }
 
   /**
