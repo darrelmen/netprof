@@ -4,11 +4,7 @@ import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.DataFormat;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import java.io.IOException;
@@ -203,12 +199,12 @@ public class UserDAO extends DAO {
     return 0;
   }
 
-  public boolean updateUser(long id, User.Kind kind,    String passwordH, String emailH) {
+  public boolean updateUser(long id, User.Kind kind, String passwordH, String emailH) {
     try {
       // there are much better ways of doing this...
       long max = 0;
       for (User u : getUsers()) if (u.getId() > max) max = u.getId();
-     // logger.info("addUser : max is " + max + " new user '" + userID + "' age " + age + " gender " + gender + " pass " +passwordH);
+      // logger.info("addUser : max is " + max + " new user '" + userID + "' age " + age + " gender " + gender + " pass " +passwordH);
       if (passwordH == null) {
         new Exception().printStackTrace();
       }
@@ -217,12 +213,12 @@ public class UserDAO extends DAO {
       PreparedStatement statement;
 
       statement = connection.prepareStatement(
-          "UPDATE " + USERS + " set " +
-              KIND +  "=?," +
-              PASS +  "=?," +
-              EMAIL + "=?"  +
-              " where " +
-              ID    + "=?");
+          "UPDATE " + USERS + " SET " +
+              KIND + "=?," +
+              PASS + "=?," +
+              EMAIL + "=?" +
+              " WHERE " +
+              ID + "=?");
       int i = 1;
       statement.setString(i++, kind.toString());
       statement.setString(i++, passwordH);
@@ -261,12 +257,11 @@ public class UserDAO extends DAO {
         " from " + USERS +
         " where " +
         EMAIL + "='" + emailH + "' AND UPPER(" +
-        USER_ID + ")='" + user.toUpperCase() + "' AND ";
+        USER_ID + ")='" + user.toUpperCase() + "'";
 
     int i = userExistsSQL("N/A", sql);
     return i == -1 ? null : getUserWhere(i);
   }
-
 
   /**
    * Not case sensitive.
@@ -660,4 +655,38 @@ public class UserDAO extends DAO {
     return ((float) ((Math.round(totalHours * 100)))) / 100f;
   }
 
+  public boolean changePassword(Long remove, String passwordH) {
+    try {
+      // there are much better ways of doing this...
+      long max = 0;
+      for (User u : getUsers()) if (u.getId() > max) max = u.getId();
+      // logger.info("addUser : max is " + max + " new user '" + userID + "' age " + age + " gender " + gender + " pass " +passwordH);
+      if (passwordH == null) {
+        new Exception().printStackTrace();
+      }
+
+      Connection connection = database.getConnection();
+      PreparedStatement statement;
+
+      statement = connection.prepareStatement(
+          "UPDATE " + USERS + " SET " +
+              PASS + "=? " +
+              " WHERE " +
+              ID + "=?");
+      int i = 1;
+      statement.setString(i++, passwordH);
+      statement.setLong(i++, remove);
+
+      int i1 = statement.executeUpdate();
+
+      statement.close();
+      database.closeConnection(connection);
+
+      return i1 != 0;
+    } catch (Exception ee) {
+      logger.error("Got " + ee, ee);
+      database.logEvent("unk", "update user: " + ee.toString(), 0);
+    }
+    return false;
+  }
 }
