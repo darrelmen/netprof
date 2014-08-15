@@ -29,6 +29,7 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.TooltipHelper;
 
 import java.util.Collection;
+import java.util.Date;
 
 /**
  * Created with IntelliJ IDEA.
@@ -319,7 +320,7 @@ public class BasicDialog {
    * @param placement
    */
   void setupPopover(final FocusWidget w, String heading, final String message, Placement placement) {
-    System.out.println("setupPopover   : triggering popover on " + w.getElement().getId() + " with " + heading +"/"+message);
+    System.out.println(new Date() + " : setupPopover   : triggering popover on " + w.getElement().getId() + " with " + heading +"/"+message);
     final Popover popover = new Popover();
     configurePopup(popover, w, heading, message, placement);
 
@@ -331,7 +332,7 @@ public class BasicDialog {
   }
 
   private void configurePopup(Popover popover, Widget w, String heading, String message, Placement placement) {
-    System.out.println("configurePopup : triggering popover on " + w.getElement().getId() + " with " + heading +"/"+message + " " + placement);
+    System.out.println(new Date() + "configurePopup : triggering popover on " + w.getElement().getId() + " with " + heading +"/"+message + " " + placement);
 
     popover.setWidget(w);
     popover.setText(message);
