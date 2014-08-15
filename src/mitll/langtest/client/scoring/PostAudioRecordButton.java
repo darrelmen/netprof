@@ -43,7 +43,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    */
   public PostAudioRecordButton(CommonExercise exercise, final ExerciseController controller, LangTestDatabaseAsync service,
                                int index, boolean recordInResults, String recordButtonTitle, String stopButtonTitle) {
-    super(controller.getRecordTimeout(), true, recordButtonTitle, stopButtonTitle);
+    super(controller.getRecordTimeout(), controller.getProps().doClickAndHold(), recordButtonTitle, stopButtonTitle);
     setRecordingListener(this);
     this.index = index;
     this.exercise = exercise;
@@ -118,7 +118,8 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
             System.out.println("ignoring old response " + result);
             return;
           }
-          if (result.getValidity() == AudioAnswer.Validity.OK) {
+          if (result.getValidity() == AudioAnswer.Validity.OK ||
+              (controller.getProps().isQuietAudioOK() && result.getValidity() == AudioAnswer.Validity.TOO_QUIET)) {
             validAudio = true;
             useResult(result);
           } else {
