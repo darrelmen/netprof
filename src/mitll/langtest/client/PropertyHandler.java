@@ -85,6 +85,7 @@ public class PropertyHandler {
   private static final String NO_MODEL = "noModel";
   private static final String INSTRUMENT = "instrument";
   private boolean instrument = true; // by default we instrument for now 4/3/14
+  private String resetPassToken;
 
   public boolean doInstrumentation() {
     return instrument;
@@ -308,6 +309,13 @@ public class PropertyHandler {
     if (turkParam != null) {
       turkID = turkParam;
     }
+
+    String resetPasswordID = Window.Location.getParameter("rp");
+
+    //System.out.println("token " + resetPasswordID);
+    if (resetPasswordID != null) {
+      resetPassToken = resetPasswordID;
+    }
     gameTimeSeconds = getInt(Window.Location.getParameter(GAME_TIME), gameTimeSeconds, REPEATS);
 
     String flashcardParam = Window.Location.getParameter(FLASHCARD);
@@ -515,5 +523,9 @@ public class PropertyHandler {
 
   public boolean isNoModel() {
     return noModel;
+  }
+
+  public String getResetPassToken() {
+    return resetPassToken;
   }
 }
