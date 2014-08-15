@@ -39,6 +39,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.Flashcard;
 import mitll.langtest.client.instrumentation.ButtonFactory;
 import mitll.langtest.client.instrumentation.EventLogger;
+import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.instrumentation.EventTable;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.monitoring.MonitoringManager;
@@ -310,7 +311,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see #onModuleLoad2()
    * @return
    */
-  private Panel populateRootPanel() {
+  private void populateRootPanel() {
     RootPanel.get().clear();   // necessary?
 
     Container verticalContainer = new FluidContainer();
@@ -320,8 +321,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // first row ---------------
     Panel firstRow = makeFirstTwoRows(verticalContainer);
 
-    if (showLogin(verticalContainer, firstRow)) return null;
+    if (!showLogin(verticalContainer, firstRow)) {
+      populateBelowHeader(verticalContainer, firstRow);
+    }
+    //return bothSecondAndThird;
+  }
 
+  private void populateBelowHeader(Container verticalContainer, Panel firstRow) {
     // second row ---------------
     secondRow = new FluidRow();
     secondRow.getElement().setId("secondRow");
@@ -350,25 +356,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     makeExerciseList(secondRow, exerciseListContainer, currentExerciseVPanel);
 
     if (showOnlyOneExercise()) {
-      // show fancy lace background image
-      currentExerciseVPanel.addStyleName("body");
-      currentExerciseVPanel.getElement().getStyle().setBackgroundImage("url(" + LANGTEST_IMAGES + "levantine_window_bg.jpg" + ")");
-      currentExerciseVPanel.addStyleName("noMargin");
-
-      Container verticalContainer2 = new FluidContainer();
-      verticalContainer2.getElement().setId("root_vertical_container");
-      verticalContainer2.add(flashRecordPanel);
-      verticalContainer2.add(currentExerciseVPanel);
-      RootPanel.get().add(verticalContainer2);
-
+      RootPanel.get().add(getHeadstart(currentExerciseVPanel));
     } else {
       currentExerciseVPanel.addStyleName("floatLeftList");
       thirdRow.add(currentExerciseVPanel);     // right side of third row is exercise panel
       RootPanel.get().add(verticalContainer);
     }
 
-    if (shouldCollectAudio() && !showOnlyOneExercise()
-        ) {
+    if (shouldCollectAudio() && !showOnlyOneExercise()) {
       /**
        * {@link #makeFlashContainer}
        */
@@ -378,20 +373,26 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     navigation = new Navigation(service, userManager, this, exerciseList, this);
 
-    if (getProps().isClassroomMode()) {
-      firstRow.add(navigation.getNav(bothSecondAndThird));
-    }
-    else {
-      firstRow.add(bothSecondAndThird); // TODO : would this ever happen?
-    }
+    firstRow.add(navigation.getNav(bothSecondAndThird));
 
     if (SHOW_STATUS) {
       DivWidget w = new DivWidget();
       w.getElement().setId("status");
       verticalContainer.add(w);
     }
+  }
 
-    return bothSecondAndThird;
+  private Container getHeadstart(Panel currentExerciseVPanel) {
+    // show fancy lace background image
+    currentExerciseVPanel.addStyleName("body");
+    currentExerciseVPanel.getElement().getStyle().setBackgroundImage("url(" + LANGTEST_IMAGES + "levantine_window_bg.jpg" + ")");
+    currentExerciseVPanel.addStyleName("noMargin");
+
+    Container verticalContainer2 = new FluidContainer();
+    verticalContainer2.getElement().setId("root_vertical_container");
+    verticalContainer2.add(flashRecordPanel);
+    verticalContainer2.add(currentExerciseVPanel);
+    return verticalContainer2;
   }
 
   @Override
@@ -409,10 +410,46 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
 
-  private boolean showLogin(Container verticalContainer, Panel firstRow) {
+  String staleToken = "";
+
+  private boolean showLogin(final Container verticalContainer, final Panel firstRow) {
+    final EventRegistration eventRegistration = this;
+
+    final String resetPassToken = props.getResetPassToken();
+    if (resetPassToken != null && !resetPassToken.equals(staleToken)) {
+      service.getUserIDForToken(resetPassToken, new AsyncCallback<Long>() {
+        @Override
+        public void onFailure(Throwable caught) {
+
+        }
+
+        @Override
+        public void onSuccess(Long result) {
+          if (result == null || result < 0) {
+            System.out.println("token " + resetPassToken + " is stale. Showing normal view");
+            staleToken = resetPassToken;
+     //       firstRow.add(new Heading(4,"Password reset has been done before."));
+            populateBelowHeader(verticalContainer,firstRow);
+          }
+          else {
+            Panel content = new UserPassLogin(service, getProps(), userManager, eventRegistration).getResetPassword(resetPassToken);
+            firstRow.add(content);
+            content.getElement().setId("ResetPassswordContent");
+            verticalContainer.getElement().getStyle().setPaddingLeft(0, Style.Unit.PX);
+            verticalContainer.getElement().getStyle().setPaddingRight(0, Style.Unit.PX);
+          }
+        }
+      });
+
+      RootPanel.get().add(verticalContainer);
+      flashcard.setCogVisible(false);
+
+      return true;
+    }
+
     boolean show = userManager.isUserExpired() || userManager.getUserID() == null;
     if (show) {
-      Panel content = new UserPassLogin(service, getProps(), userManager, this).getContent();
+      Panel content = new UserPassLogin(service, getProps(), userManager, eventRegistration).getContent();
       firstRow.add(content);
       content.getElement().setId("UserPassLogin");
       verticalContainer.getElement().getStyle().setPaddingLeft(0, Style.Unit.PX);
@@ -422,6 +459,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
       return true;
     }
+
+
     flashcard.setCogVisible(true);
     return false;
   }
@@ -437,6 +476,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return firstRow;
   }
 
+  /**
+   * @see #onModuleLoad2
+   */
   private void checkAdmin() {
     if (props.isAdminView() || props.isGrading()) {
       final LangTest outer = this;
