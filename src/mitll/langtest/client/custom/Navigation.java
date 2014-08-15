@@ -14,6 +14,7 @@ import com.github.gwtbootstrap.client.ui.base.InlineLabel;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.AnchorElement;
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
@@ -46,6 +47,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.github.gwtbootstrap.client.ui.constants.Placement;
 
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -57,9 +59,6 @@ import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.client.recorder.RecordButton;
-import mitll.langtest.client.recorder.RecordButton.RecordingListener;
-import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
@@ -791,44 +790,27 @@ public class Navigation implements RequiresResize {
   private SimplePostAudioRecordButton getRecordButton(String sent, final HTML resultHolder, final Button continueButton, final Image check, final Image x){
 	  final SimpleColumnChart chart = new SimpleColumnChart();
 	  SimplePostAudioRecordButton s = new SimplePostAudioRecordButton(controller, service, sent) {
-		  
-		  AudioAnswer lastResult;
-		  
+		  		  
 		  @Override
 		  public void useResult(AudioAnswer result){
 			  resultHolder.setHTML(String.valueOf(result.getScore()));
 			  continueButton.setEnabled(true);
 			  check.setVisible(true);
 			  x.setVisible(false);
-			  lastResult = result;
+			  this.lastResult = result;
 		  }
 		  
 		  public void useInvalidResult(AudioAnswer result){
 			  continueButton.setEnabled(false);
 			  check.setVisible(false);
 			  x.setVisible(true);
-			  lastResult = result;
+			  this.lastResult = result;
 		  }
 		  
 		  @Override
 		  public void flip(boolean first){
 			  //check.setVisible(first);
 			  //x.setVisible(!first);
-		  }
-		  
-		  @Override
-		  public HorizontalPanel getSentColors(String sentToColor){
-			  HorizontalPanel colorfulSent = new HorizontalPanel();
-			  List<TranscriptSegment> ts = lastResult.getPretestScore().getsTypeToEndTimes().get(NetPronImageType.WORD_TRANSCRIPT);
-			  for(TranscriptSegment wordInfo: ts){
-				  HTML word = new HTML(wordInfo.getEvent()+" ");
-				  word.getElement().getStyle().setProperty("fontSize", "130%");
-				  word.getElement().getStyle().setProperty("marginLeft", "2px");
-				  word.getElement().getStyle().setProperty("color", chart.getColor(wordInfo.getScore()));
-				  colorfulSent.add(word);
-			  }
-			  colorfulSent.getElement().getStyle().setProperty("margin", "5px 10px");
-			  return colorfulSent;
 		  }
 		  
 	  };
@@ -844,8 +826,6 @@ public class Navigation implements RequiresResize {
   
   private SimplePostAudioRecordButton getFinalRecordButton(String sent, final Button continueButton, final Image check, final Image x, final ArrayList<HTML> scoreElements, final HTML score, final HTML avg, final FlowPanel rp){
 	  return new SimplePostAudioRecordButton(controller, service, sent) {
-		  final SimpleColumnChart chart = new SimpleColumnChart();
-		  AudioAnswer lastResult;
 		  
 	      @Override
 		  public void useResult(AudioAnswer result){
@@ -862,7 +842,7 @@ public class Navigation implements RequiresResize {
 			  continueButton.setEnabled(true);
 			  check.setVisible(true);
 			  x.setVisible(false);
-			  lastResult = result;
+			  this.lastResult = result;
 		  }
 			  
 		  @Override
@@ -876,23 +856,9 @@ public class Navigation implements RequiresResize {
 		     continueButton.setEnabled(false); 
 		     check.setVisible(false);
 		     x.setVisible(true);
-		     lastResult = result;
+		     this.lastResult = result;
 		  }
 		  
-		  @Override
-		  public HorizontalPanel getSentColors(String sentToColor){
-			  HorizontalPanel colorfulSent = new HorizontalPanel();
-			  List<TranscriptSegment> ts = lastResult.getPretestScore().getsTypeToEndTimes().get(NetPronImageType.WORD_TRANSCRIPT);
-			  for(TranscriptSegment wordInfo: ts){
-				  HTML word = new HTML(wordInfo.getEvent()+" ");
-				  word.getElement().getStyle().setProperty("fontSize", "130%");
-				  word.getElement().getStyle().setProperty("marginLeft", "2px");
-				  word.getElement().getStyle().setProperty("color", chart.getColor(wordInfo.getScore()));
-				  colorfulSent.add(word);
-			  }
-			  colorfulSent.getElement().getStyle().setProperty("margin", "5px 10px");
-			  return colorfulSent;
-		  }
       };
   }
   
@@ -905,7 +871,7 @@ public class Navigation implements RequiresResize {
 	  HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSent = getDialogToSentIndexToSent();
 	  HashMap<String, HashMap<String, Integer>> dialogToSpeakerToLast = getDialogToSpeakerToLast();
 	  int sentIndex = 0;
-	  final Grid sentPanel = new Grid(dialogToSentIndexToSent.get(dialog).size(), 7);
+	  final Grid sentPanel = new Grid(dialogToSentIndexToSent.get(dialog).size(), 8);
 	  final ArrayList<HTML> scoreElements = new ArrayList<HTML>();
       String otherPart = "";
       boolean youStart = false;
@@ -953,12 +919,10 @@ public class Navigation implements RequiresResize {
 						     rp.setVisible(true);
 						     somethingIsHappening.setVisible(true);
 						     check.setVisible(false);
-						     System.out.println(sentIndexes.size());
 						     x.setVisible(false);
 						     for(int i = 0; i < sentIndexes.size(); i++){
-						    	 System.out.println(i);
-						    	 System.out.println(sentIndexes.get(i));
 						    	 sentPanel.setWidget(sentIndexes.get(i),  0, recoButtons.get(i).getSentColors(((HTML) sentPanel.getWidget(sentIndexes.get(i), 0)).getText()));
+						    	 sentPanel.setWidget(sentIndexes.get(i), 7, recoButtons.get(i).getScoreBar(Float.parseFloat(scoreElements.get(i).getText())));
 						     }
 						  }
 					  }
