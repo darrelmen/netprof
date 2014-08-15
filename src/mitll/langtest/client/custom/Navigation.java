@@ -900,7 +900,7 @@ public class Navigation implements RequiresResize {
   
   private Grid displayDialog(String dialog, String part, Panel cp, boolean showPart, boolean regAudio){
 
-	  HashMap<String, String> sentToAudioPath = getSentToAudioPath();
+	  HashMap<String, String> sentToAudioPath = regAudio ? getSentToAudioPath() : getSentToSlowAudioPath();
 	  HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSpeaker = getDialogToSentIndexToSpeaker();
 	  HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSent = getDialogToSentIndexToSent();
 	  HashMap<String, HashMap<String, Integer>> dialogToSpeakerToLast = getDialogToSpeakerToLast();
@@ -1107,19 +1107,19 @@ public class Navigation implements RequiresResize {
 
   private HashMap<String, String> getSentToAudioPath() {
 	  HashMap<String, String> m = new HashMap<String, String>();
-	  m.put("Kē Léi'ēn, nǐ hăo!", "/4/slow_1403800571291_by_8.wav");
-	  m.put("Nǐ dào năr qù a?", "/13/slow_1403801128819_by_8.wav");
-	  m.put("Wŏ huí sùshè.", "/24/slow_1403800649832_by_8.wav");
-	  m.put("Wáng Jīngshēng, nǐ hăo!", "/7/slow_1403800597192_by_8.wav");
-	  m.put("Wŏ qù túshūguăn. Nĭ ne?", "/20/slow_1403800730216_by_8.wav");
+	  m.put("Kē Léi'ēn, nǐ hăo!", "/4/regular_1403800547484_by_8.wav");
+	  m.put("Nǐ dào năr qù a?", "/13/regular_1403801120710_by_8.wav");
+	  m.put("Wŏ huí sùshè.", "/24/regular_1403800638873_by_8.wav");
+	  m.put("Wáng Jīngshēng, nǐ hăo!", "/7/regular_1403800587874_by_8.wav");
+	  m.put("Wŏ qù túshūguăn. Nĭ ne?", "/20/regular_1403800718502_by_8.wav");
 	  
-	  m.put("Zhào Guócái, nĭ hăo a!", "/40/slow_1403793805369_by_8.wav");
-	  m.put("Hái xíng. Nĭ àirén, háizi dōu hăo ma?", "/57/slow_1403793264402_by_8.wav"); //hi
-	  m.put("Wŏ yŏu yìdiănr shìr, xiān zŏule. Zàijiàn!", "/71/slow_1403792972693_by_8.wav");
-	  m.put("Nĭ hăo! Hăo jiŭ bú jiànle.", "/44/slow_1403792786355_by_8.wav");
-	  m.put("Zěmmeyàng a?", "/45/slow_1403792847063_by_8.wav");
-	  m.put("Tāmen dōu hěn hăo, xièxie.", "/63/slow_1403793604382_by_8.wav");
-	  m.put("Zàijiàn.", "/72/slow_1403792425728_by_8.wav");
+	  m.put("Zhào Guócái, nĭ hăo a!", "/40/regular_1403793765777_by_8.wav");
+	  m.put("Hái xíng. Nĭ àirén, háizi dōu hăo ma?", "/57/regular_1403793281208_by_8.wav"); //hi
+	  m.put("Wŏ yŏu yìdiănr shìr, xiān zŏule. Zàijiàn!", "/71/regular_1403792961229_by_8.wav");
+	  m.put("Nĭ hăo! Hăo jiŭ bú jiànle.", "/44/regular_1403792777589_by_8.wav");
+	  m.put("Zěmmeyàng a?", "/45/regular_1403792803630_by_8.wav");
+	  m.put("Tāmen dōu hěn hăo, xièxie.", "/63/regular_1403793540903_by_8.wav");
+	  m.put("Zàijiàn.", "/72/regular_1403792398921_by_8.wav");
 	  
 	  return m;
   }
