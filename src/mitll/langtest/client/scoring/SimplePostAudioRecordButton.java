@@ -1,5 +1,10 @@
 package mitll.langtest.client.scoring;
 
+import java.util.List;
+
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -12,11 +17,15 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.WavCallback;
+import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.scoring.NetPronImageType;
 
 /**
  * This binds a record button with the act of posting recorded audio to the server.
@@ -36,6 +45,8 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
   private final LangTestDatabaseAsync service;
   private String textToAlign;
   private String identifier;
+  private final SimpleColumnChart chart = new SimpleColumnChart();
+  protected AudioAnswer lastResult;
 
   /**
    * Make a record button that returns the alignment and score.
@@ -207,8 +218,39 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
     return validAudio;
   }
 
-public HorizontalPanel getSentColors(String sentToColor) {
-	return new HorizontalPanel();
-}
+  public HorizontalPanel getSentColors(String sentToColor){
+	  HorizontalPanel colorfulSent = new HorizontalPanel();
+	  List<TranscriptSegment> ts = lastResult.getPretestScore().getsTypeToEndTimes().get(NetPronImageType.WORD_TRANSCRIPT);
+	  String[] words = sentToColor.split("\\s+");
+	  int wordIndex = 0;
+	  for(int i = 0; i < ts.size(); i++){ // why the offset? Because of the silence tags.
+		  TranscriptSegment wordInfo = ts.get(i);
+		  if(wordInfo.getEvent().contains("<"))
+			  continue;
+		  HTML word = new HTML(words[wordIndex]+" ");
+		  word.getElement().getStyle().setProperty("fontSize", "130%");
+		  word.getElement().getStyle().setProperty("marginLeft", "2px");
+		  word.getElement().getStyle().setBackgroundColor(chart.getColor(wordInfo.getScore()));
+		  colorfulSent.add(word);
+		  wordIndex += 1;
+	  }
+	  colorfulSent.getElement().getStyle().setProperty("margin", "5px 10px");
+	  return colorfulSent;
+  }
+  
+  public DivWidget getScoreBar(float score){
+	  System.out.println("THERE");
+	  int iscore = (int) (100f * score);
+	  final int HEIGHT = 18;
+	  DivWidget bar = new DivWidget();
+	  TooltipHelper tooltipHelper = new TooltipHelper();
+	  bar.setWidth(iscore + "px");
+	  bar.setHeight(HEIGHT + "px");
+	  bar.getElement().getStyle().setBackgroundColor(chart.getColor(score));
+	  bar.getElement().getStyle().setMarginTop(2, Style.Unit.PX);
+
+	  tooltipHelper.createAddTooltip(bar, "Score " + score + "%", Placement.BOTTOM);
+	  return bar;
+  }
 
 }
