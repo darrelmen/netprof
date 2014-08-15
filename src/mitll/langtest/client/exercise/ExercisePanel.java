@@ -84,7 +84,7 @@ public class ExercisePanel extends VerticalPanel implements
     }
     hp.setHorizontalAlignment(rightAlignContent ? HasHorizontalAlignment.ALIGN_RIGHT : HasHorizontalAlignment.ALIGN_LEFT);
     hp.add(getQuestionContent(e));
-    boolean showInstructions = !(getExerciseContent(e).toLowerCase().contains("listen") || controller.isDataCollectMode());   // hack
+    boolean showInstructions = !(getExerciseContent(e).toLowerCase().contains("listen"));   // hack
     if (showInstructions) {
       addInstructions();
     }
