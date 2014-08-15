@@ -44,12 +44,8 @@ public interface ExerciseController extends EventRegistration {
   // parameters
   float getScreenPortion();
   boolean showOnlyOneExercise();
-  int getSegmentRepeats();
-  boolean isArabicTextDataCollect();
   boolean useBkgColorForRef();
-  boolean isAutoCRTMode();
   int getRecordTimeout();
-  boolean isDataCollectMode();
   boolean isCollectAudio();
   boolean isMinimalUI();
   boolean isGrading();
