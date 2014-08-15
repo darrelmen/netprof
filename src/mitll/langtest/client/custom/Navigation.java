@@ -54,6 +54,7 @@ import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.PagingContainer;
+import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.recorder.RecordButton;
@@ -78,6 +79,8 @@ import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.scoring.NetPronImageType;
 
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -786,25 +789,46 @@ public class Navigation implements RequiresResize {
   }-*/;
   
   private SimplePostAudioRecordButton getRecordButton(String sent, final HTML resultHolder, final Button continueButton, final Image check, final Image x){
+	  final SimpleColumnChart chart = new SimpleColumnChart();
 	  SimplePostAudioRecordButton s = new SimplePostAudioRecordButton(controller, service, sent) {
+		  
+		  AudioAnswer lastResult;
+		  
 		  @Override
 		  public void useResult(AudioAnswer result){
 			  resultHolder.setHTML(String.valueOf(result.getScore()));
 			  continueButton.setEnabled(true);
 			  check.setVisible(true);
 			  x.setVisible(false);
+			  lastResult = result;
 		  }
 		  
 		  public void useInvalidResult(AudioAnswer result){
 			  continueButton.setEnabled(false);
 			  check.setVisible(false);
 			  x.setVisible(true);
+			  lastResult = result;
 		  }
 		  
 		  @Override
 		  public void flip(boolean first){
 			  //check.setVisible(first);
 			  //x.setVisible(!first);
+		  }
+		  
+		  @Override
+		  public HorizontalPanel getSentColors(String sentToColor){
+			  HorizontalPanel colorfulSent = new HorizontalPanel();
+			  List<TranscriptSegment> ts = lastResult.getPretestScore().getsTypeToEndTimes().get(NetPronImageType.WORD_TRANSCRIPT);
+			  for(TranscriptSegment wordInfo: ts){
+				  HTML word = new HTML(wordInfo.getEvent()+" ");
+				  word.getElement().getStyle().setProperty("fontSize", "130%");
+				  word.getElement().getStyle().setProperty("marginLeft", "2px");
+				  word.getElement().getStyle().setProperty("color", chart.getColor(wordInfo.getScore()));
+				  colorfulSent.add(word);
+			  }
+			  colorfulSent.getElement().getStyle().setProperty("margin", "5px 10px");
+			  return colorfulSent;
 		  }
 		  
 	  };
@@ -820,6 +844,8 @@ public class Navigation implements RequiresResize {
   
   private SimplePostAudioRecordButton getFinalRecordButton(String sent, final Button continueButton, final Image check, final Image x, final ArrayList<HTML> scoreElements, final HTML score, final HTML avg, final FlowPanel rp){
 	  return new SimplePostAudioRecordButton(controller, service, sent) {
+		  final SimpleColumnChart chart = new SimpleColumnChart();
+		  AudioAnswer lastResult;
 		  
 	      @Override
 		  public void useResult(AudioAnswer result){
@@ -836,6 +862,7 @@ public class Navigation implements RequiresResize {
 			  continueButton.setEnabled(true);
 			  check.setVisible(true);
 			  x.setVisible(false);
+			  lastResult = result;
 		  }
 			  
 		  @Override
@@ -849,6 +876,22 @@ public class Navigation implements RequiresResize {
 		     continueButton.setEnabled(false); 
 		     check.setVisible(false);
 		     x.setVisible(true);
+		     lastResult = result;
+		  }
+		  
+		  @Override
+		  public HorizontalPanel getSentColors(String sentToColor){
+			  HorizontalPanel colorfulSent = new HorizontalPanel();
+			  List<TranscriptSegment> ts = lastResult.getPretestScore().getsTypeToEndTimes().get(NetPronImageType.WORD_TRANSCRIPT);
+			  for(TranscriptSegment wordInfo: ts){
+				  HTML word = new HTML(wordInfo.getEvent()+" ");
+				  word.getElement().getStyle().setProperty("fontSize", "130%");
+				  word.getElement().getStyle().setProperty("marginLeft", "2px");
+				  word.getElement().getStyle().setProperty("color", chart.getColor(wordInfo.getScore()));
+				  colorfulSent.add(word);
+			  }
+			  colorfulSent.getElement().getStyle().setProperty("margin", "5px 10px");
+			  return colorfulSent;
 		  }
       };
   }
@@ -874,6 +917,8 @@ public class Navigation implements RequiresResize {
 	  avg.setVisible(false);
 	  rp.add(avg);
 	  rp.setVisible(false);
+	  final ArrayList<SimplePostAudioRecordButton> recoButtons = new ArrayList<SimplePostAudioRecordButton>();
+	  final ArrayList<Integer> sentIndexes = new ArrayList<Integer>();
 
 	  while(dialogToSentIndexToSent.get(dialog).containsKey(sentIndex)){
 		  String sentence = dialogToSentIndexToSent.get(dialog).get(sentIndex);
@@ -882,6 +927,7 @@ public class Navigation implements RequiresResize {
 		  sent.getElement().getStyle().setProperty("margin", "5px 10px");
 		  sent.getElement().getStyle().setProperty("fontSize", "130%");
 		  if(part.equals(dialogToSentIndexToSpeaker.get(dialog).get(sentIndex))){
+			  sentIndexes.add(sentIndex);
 			  if (sentIndex == 0)
 				  youStart = true;
 			  if(!showPart)
@@ -889,7 +935,7 @@ public class Navigation implements RequiresResize {
 			  PlayAudioPanel play = new PlayAudioPanel(controller, "config/mandarinClassroom/bestAudio/"+sentToAudioPath.get(sentence));
 			  final HTML score = new HTML("0.0");
 			  scoreElements.add(score);
-			  Button recordButton = null;
+			  SimplePostAudioRecordButton recordButton = null;
 			  final Button continueButton = new Button("Continue");
 			  continueButton.setEnabled(false);
 			  final Image check = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "checkmark32.png"));
@@ -902,12 +948,18 @@ public class Navigation implements RequiresResize {
 				  
 				  continueButton.addClickHandler(new ClickHandler() {
 					  @Override
-					  public void onClick(ClickEvent e){
+					  public void onClick(ClickEvent e){ //think about how to add colors at this point
 						  if(continueButton.isEnabled()){
 						     rp.setVisible(true);
 						     somethingIsHappening.setVisible(true);
 						     check.setVisible(false);
+						     System.out.println(sentIndexes.size());
 						     x.setVisible(false);
+						     for(int i = 0; i < sentIndexes.size(); i++){
+						    	 System.out.println(i);
+						    	 System.out.println(sentIndexes.get(i));
+						    	 sentPanel.setWidget(sentIndexes.get(i),  0, recoButtons.get(i).getSentColors(((HTML) sentPanel.getWidget(sentIndexes.get(i), 0)).getText()));
+						     }
 						  }
 					  }
 				  });
@@ -926,6 +978,8 @@ public class Navigation implements RequiresResize {
 					  x.setVisible(false);
 				  }
 			  });
+			  
+			  recoButtons.add((SimplePostAudioRecordButton) recordButton);
 
 			  sentPanel.setWidget(sentIndex, 2, recordButton);
 			  sent.getElement().getStyle().setProperty("fontWeight", "900");
@@ -1052,6 +1106,25 @@ public class Navigation implements RequiresResize {
   
 
   private HashMap<String, String> getSentToAudioPath() {
+	  HashMap<String, String> m = new HashMap<String, String>();
+	  m.put("Kē Léi'ēn, nǐ hăo!", "/4/slow_1403800571291_by_8.wav");
+	  m.put("Nǐ dào năr qù a?", "/13/slow_1403801128819_by_8.wav");
+	  m.put("Wŏ huí sùshè.", "/24/slow_1403800649832_by_8.wav");
+	  m.put("Wáng Jīngshēng, nǐ hăo!", "/7/slow_1403800597192_by_8.wav");
+	  m.put("Wŏ qù túshūguăn. Nĭ ne?", "/20/slow_1403800730216_by_8.wav");
+	  
+	  m.put("Zhào Guócái, nĭ hăo a!", "/40/slow_1403793805369_by_8.wav");
+	  m.put("Hái xíng. Nĭ àirén, háizi dōu hăo ma?", "/57/slow_1403793264402_by_8.wav"); //hi
+	  m.put("Wŏ yŏu yìdiănr shìr, xiān zŏule. Zàijiàn!", "/71/slow_1403792972693_by_8.wav");
+	  m.put("Nĭ hăo! Hăo jiŭ bú jiànle.", "/44/slow_1403792786355_by_8.wav");
+	  m.put("Zěmmeyàng a?", "/45/slow_1403792847063_by_8.wav");
+	  m.put("Tāmen dōu hěn hăo, xièxie.", "/63/slow_1403793604382_by_8.wav");
+	  m.put("Zàijiàn.", "/72/slow_1403792425728_by_8.wav");
+	  
+	  return m;
+  }
+  
+  private HashMap<String, String> getSentToSlowAudioPath() {
 	  HashMap<String, String> m = new HashMap<String, String>();
 	  m.put("Kē Léi'ēn, nǐ hăo!", "/4/slow_1403800571291_by_8.wav");
 	  m.put("Nǐ dào năr qù a?", "/13/slow_1403801128819_by_8.wav");
