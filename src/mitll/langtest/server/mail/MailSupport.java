@@ -21,6 +21,7 @@ public class MailSupport {
   private static final Logger logger = Logger.getLogger(MailSupport.class);
   private static final String EMAIL = "gordon.vidaver@ll.mit.edu";
   public static final String LOCALHOST = "localhost";
+  public static final int MAIL_PORT = 1025;
   private final boolean debugEmail;
 
   /**
@@ -121,9 +122,9 @@ public class MailSupport {
    * @param subject
    * @param message
    */
-  private void email(String subject, String message) {
+ /* private void email(String subject, String message) {
     normalEmail(RECIPIENT_NAME, EMAIL, new ArrayList<String>(),subject, message, LOCALHOST);
-  }
+  }*/
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#logAndNotifyServerException(Exception)
@@ -162,7 +163,7 @@ public class MailSupport {
       Transport.send(msg);
     } catch (Exception e) {
       if (e.getMessage().contains("Could not connect to SMTP")) {
-        logger.info("couldn't send email - no mail daemon?");
+        logger.info("couldn't send email - no mail daemon? ");
       }
       else {
         logger.error("Couldn't send email to " +recipientEmail+". Got " +e,e);
@@ -189,7 +190,8 @@ public class MailSupport {
       props.put("mail.smtp.host", LOCALHOST);
       props.put("mail.debug", ""+debugEmail);
 
-      props.put("mail.smtp.port", 1025);
+      // TODO : Remove me!
+      props.put("mail.smtp.port", MAIL_PORT);
 
 
       Session session = Session.getDefaultInstance(props, null);
@@ -199,7 +201,7 @@ public class MailSupport {
       Transport.send(msg);
     } catch (Exception e) {
       if (e.getMessage().contains("Could not connect to SMTP")) {
-        logger.info("couldn't send email - no mail daemon?");
+        logger.info("couldn't send email - no mail daemon? subj " + subject);
       }
       else {
         logger.error("Couldn't send email to " + recipientEmails + ". Got " + e, e);
