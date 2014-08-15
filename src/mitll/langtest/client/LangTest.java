@@ -458,7 +458,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private boolean shouldCollectAudio() {
-    return props.isCollectAudio() && !props.isFlashcardTeacherView() || props.isFlashCard()  || props.isGoodwaveMode() ;
+    return props.isCollectAudio() || props.isGoodwaveMode() ;
   }
 
   /**
@@ -467,7 +467,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private Panel makeHeaderRow() {
     Widget title;
-    if (isGoodwaveMode()) {
+//    if (isGoodwaveMode()) {
       flashcard = new Flashcard(props);
       title = flashcard.makeNPFHeaderRow(props.getSplash(), props.isClassroomMode(), getGreeting(), getReleaseStatus(), new LogoutClickHandler(),
 
@@ -476,6 +476,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         (props.isAdminView()) ? new MonitoringClickHandler() : null,
         (props.isAdminView()) ? new EventsClickHandler() : null
       );
+/*
     } else {
       flashcard = new Flashcard(props);
       title = flashcard.getHeaderRow(props.getSplash(), props.isClassroomMode(), NEW_PRO_F2_PNG, props.getAppTitle(), getGreeting(), getReleaseStatus(), new LogoutClickHandler(),
@@ -485,6 +486,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         (props.isAdminView()) ? new MonitoringClickHandler() : null,
         (props.isAdminView()) ? new EventsClickHandler() : null, permissions);
     }
+*/
 
 
     headerRow = new FluidRow();
@@ -500,15 +502,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     setTitle(appTitle);
 
     Element element = DOM.getElementById("favicon");   // set the page title to be consistent
-    if (props.isFlashCard() || props.isFlashcardTeacherView()) {
-      if (element != null) {
-        element.setAttribute("href",  LANGTEST_IMAGES + "NewProF2_48x48.png");
-      }
-    }
-    else if (props.isGoodwaveMode()) {
-      if (element != null) {
-        element.setAttribute("href", LANGTEST_IMAGES + "NewProF1_48x48.png");
-      }
+
+    if (element != null) {
+      element.setAttribute("href", LANGTEST_IMAGES + "NewProF1_48x48.png");
     }
   }
 
@@ -745,7 +741,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private boolean doEverythingAfterFactory(long userID) {
     System.out.println("doEverythingAfterFactory : user changed - new " + userID + " vs last " + lastUser +
-      " audio type " + getAudioType() + " perms " + getPermissions());
+        " audio type " + getAudioType() + " perms " + getPermissions());
     reallySetFactory();
 
     if (getPermissions().contains(User.Permission.QUALITY_CONTROL)) {
@@ -895,12 +891,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public int getUser() { return userManager.getUser(); }
   public PropertyHandler getProps() { return props; }
-  public int getSegmentRepeats() { return props.getSegmentRepeats(); }
-  public boolean isArabicTextDataCollect() {  return props.isArabicTextDataCollect(); }
   public boolean useBkgColorForRef() {  return props.isBkgColorForRef(); }
-  public boolean isAutoCRTMode() {  return props.isAutocrt(); }
   public int getRecordTimeout() {  return props.getRecordTimeout(); }
-  public boolean isDataCollectMode() {  return props.isDataCollectMode(); }
   public boolean isCollectAudio() {  return props.isCollectAudio(); }
   public boolean isMinimalUI() {  return props.isMinimalUI(); }
   public boolean isGrading() {  return props.isGrading(); }
