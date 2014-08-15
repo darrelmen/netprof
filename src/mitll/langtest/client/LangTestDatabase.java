@@ -79,6 +79,9 @@ public interface LangTestDatabase extends RemoteService {
 
   int getNumResults();
 
+  boolean changePFor(String token, String first);
+
+  long getUserIDForToken(String token);
 
   boolean forgotUsername(String emailH, String email, String url);
 
@@ -127,5 +130,5 @@ public interface LangTestDatabase extends RemoteService {
   void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID);
   List<Event> getEvents();
 
-  void resetPassword(String userid, String text);
+  void resetPassword(String userid, String text, String url);
 }
