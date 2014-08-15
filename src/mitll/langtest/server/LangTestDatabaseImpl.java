@@ -568,7 +568,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     } else if (diff > 1000) {
       logger.warn(message);
     }
-    else if (diff > 20) {
+    else if (diff > 40) {
       logger.debug(message);
     }
     return byID;
