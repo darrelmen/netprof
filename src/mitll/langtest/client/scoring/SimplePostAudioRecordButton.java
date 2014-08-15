@@ -4,8 +4,10 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
+
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -204,5 +206,9 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
   public boolean hasValidAudio() {
     return validAudio;
   }
+
+public HorizontalPanel getSentColors(String sentToColor) {
+	return new HorizontalPanel();
+}
 
 }
