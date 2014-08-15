@@ -4,6 +4,8 @@ import audio.image.ImageType;
 import audio.imagewriter.ImageWriter;
 import com.google.common.io.Files;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import com.google.gwt.util.tools.shared.Md5Utils;
+import com.google.gwt.util.tools.shared.StringUtils;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.server.audio.AudioCheck;
@@ -32,8 +34,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.*;
 
 /**
@@ -1044,30 +1044,71 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getUserDAO().getUserWhere(id);
   }
 
+  Map<String,Long> keyToUser = new HashMap<String, Long>();
+  //Map<String,Long> keyToUser = new HashMap<String, Long>();
+
   /**
    * TODO : set server email
    * TODO : set URL
-   *
-   * @param user
+   *  @param user
    * @param email
+   * @param url
    */
-  public void resetPassword(String user, String email) {
+  public void resetPassword(String user, String email, String url) {
     logger.debug("Sending reset password email...");
-    if (db.getUserDAO().isValidUserAndEmail(user,email) != null) {
+
+    String toHash = user + "_" + System.currentTimeMillis();
+    String hash = getHash(toHash);
+    User validUserAndEmail = db.getUserDAO().isValidUserAndEmail(user, getHash(email));
+
+    url = trimURL(url);
+
+    if (validUserAndEmail != null) {
+      keyToUser.put(hash,validUserAndEmail.getId());
+
+      String message = "Hi " + user + ",<br/><br/>" +
+          "Click the link below to change your password.";
       getMailSupport().sendEmail(NP_SERVER,
-          "base"
+          url +"?rp=" + hash
           , email,
           REPLY_TO,
           "Password Reset",
-          "Hi " + user + ",<br/>" +
-              "Click here to reset your password", "");
+          message, "Reset Password");
+
+      logger.debug("key map is " +keyToUser);
     }
     else {
+      logger.debug("couldn't find user " + user + " and email " +email);
       String message = "User " + user + " with email " + email + " tried to reset password - but they're not valid.";
       String prefixedMessage = "for " + pathHelper.getInstallPath() + " got " + message;
       logger.debug(prefixedMessage);
       getMailSupport().email(serverProps.getEmailAddress(), "Invalid password reset for " + serverProps.getLanguage(), prefixedMessage);
     }
+  }
+
+  public String getHash(String toHash) {
+    return StringUtils.toHexString(Md5Utils.getMd5Digest(toHash.getBytes()));
+  }
+
+  @Override
+  public long getUserIDForToken(String token) {
+    Long aLong = keyToUser.get(token);
+    if (aLong == null) {
+      return -1;
+    }
+    else return aLong;
+  }
+
+  @Override
+  public boolean changePFor(String token, String passwordH) {
+    Long remove = keyToUser.remove(token);
+    if (remove != null) {
+      if (!db.getUserDAO().changePassword(remove,passwordH)) {
+        logger.error("couldn't update user password for user #"+remove);
+      }
+      return true;
+    }
+    else return false;
   }
 
   /**
@@ -1080,6 +1121,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public boolean forgotUsername(String emailH, String email, String url) {
     User valid = db.getUserDAO().isValidEmail(emailH);
+
+    url = trimURL(url);
+
     if (valid != null) {
       logger.debug("Sending user email...");
       String message = "Hi " + valid.getUserID() + ",<br/>" +
@@ -1097,47 +1141,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return valid != null;
   }
 
-  public String getWebappUrl(boolean ssl) {
-    String protocol = ssl ? "https" : "http";
-    String host = getHostName();
-
-    logger.debug("path " + getServletContext().getContextPath());
-    logger.debug("context " + getServletContext());
-    logger.debug("req " + reqURL);
-    logger.debug("path " + path);
-    logger.debug("info " + info);
-    String context = getServletContext().getServletContextName();
-    return protocol + "://" + host + "/" + context;
-  }
-
-  public static String getHostName() {
-    String[] hostnames = getHostNames();
-    if (hostnames.length == 0) return "localhost";
-    if (hostnames.length == 1) return hostnames[0];
-    for (String hostname : hostnames) {
-      if (!"localhost".equals(hostname)) return hostname;
-    }
-    return hostnames[0];
-  }
-
-  public static String[] getHostNames() {
-    String localhostName;
-    try {
-      localhostName = InetAddress.getLocalHost().getHostName();
-    } catch (UnknownHostException ex) {
-      return new String[] {"localhost"};
-    }
-    InetAddress ia[];
-    try {
-      ia = InetAddress.getAllByName(localhostName);
-    } catch (UnknownHostException ex) {
-      return new String[] {localhostName};
-    }
-    String[] sa = new String[ia.length];
-    for (int i = 0; i < ia.length; i++) {
-      sa[i] = ia[i].getHostName();
-    }
-    return sa;
+  public String trimURL(String url) {
+    if (url.contains("127.0.0.1")) return url;
+    else return url.split("\\?")[0];
   }
 
   // Results ---------------------
