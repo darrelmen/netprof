@@ -133,7 +133,7 @@ public class BasicDialog {
     w.getElement().getStyle().setMargin(0, Style.Unit.PX);
 
     hp.add(w);
-    w.setWidth(labelWidth +"px");
+    w.setWidth(labelWidth + "px");
     hp.add(widget);
     userGroup.add(hp);
 
@@ -196,18 +196,28 @@ public class BasicDialog {
     markError(dialectGroup, TRY_AGAIN, message);
   }
 
+
   protected void markError(FormField dialectGroup, String header, String message) {
-    markError(dialectGroup.group, dialectGroup.box, dialectGroup.box, header, message);
+    markError(dialectGroup.group, dialectGroup.box, dialectGroup.box, header, message, Placement.RIGHT);
   }
+
+  protected void markError(FormField dialectGroup, String header, String message, Placement right) {
+    markError(dialectGroup.group, dialectGroup.box, dialectGroup.box, header, message, right);
+  }
+
   protected void markError(ControlGroup dialectGroup, String header, String message) {
-    markError(dialectGroup, header, message,Placement.RIGHT);
+    markError(dialectGroup, header, message, Placement.RIGHT);
   }
 
   protected void markError(ControlGroup dialectGroup, Widget dialect, Focusable focusable, String header, String message) {
+    markError(dialectGroup, dialect, focusable, header, message, Placement.RIGHT);
+  }
+
+  protected void markError(ControlGroup dialectGroup, Widget dialect, Focusable focusable, String header, String message, Placement right) {
     dialectGroup.setType(ControlGroupType.ERROR);
     focusable.setFocus(true);
 
-    setupPopoverThatHidesItself(dialect, header, message, Placement.RIGHT);
+    setupPopoverThatHidesItself(dialect, header, message, right);
   }
 /*
   boolean highlightIntegerBox(FormField ageEntryGroup, int min, int max) {
@@ -240,7 +250,7 @@ public class BasicDialog {
    */
   protected void markError(ControlGroup dialectGroup, String header, String message, Placement placement) {
     dialectGroup.setType(ControlGroupType.ERROR);
-    setupPopoverThatHidesItself(dialectGroup.getWidget(1), header, message,placement);
+    setupPopoverThatHidesItself(dialectGroup.getWidget(1), header, message, placement);
   }
 
   void markError(ControlGroup dialectGroup, FocusWidget dialect, String header, String message) {
@@ -259,7 +269,7 @@ public class BasicDialog {
     } catch (Exception e) {
       //System.out.println("no nested object...");
     }
-    setupPopoverThatHidesItself(widget, header, message,placement);
+    setupPopoverThatHidesItself(widget, header, message, placement);
   }
 
   void markError(Widget dialect, String message) {
@@ -269,7 +279,7 @@ public class BasicDialog {
     Widget widget = dialect;
 
 
-    setupPopoverThatHidesItself(widget, "Error", message,Placement.RIGHT);
+    setupPopoverThatHidesItself(widget, "Error", message, Placement.RIGHT);
   }
 
   void markError(Widget dialect, String header, String message, Placement placement) {
@@ -279,7 +289,7 @@ public class BasicDialog {
     Widget widget = dialect;
 
 
-    setupPopoverThatHidesItself(widget, header, message,placement);
+    setupPopoverThatHidesItself(widget, header, message, placement);
   }
 
 
