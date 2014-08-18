@@ -26,6 +26,8 @@ public class UserDAO extends DAO {
   private static final String PASS = "passwordH";
   private static final String EMAIL = "emailH";
   private static final String USER_ID = "userID";
+  private static final List<User.Permission> CD_PERMISSIONS = Arrays.asList(User.Permission.QUALITY_CONTROL, User.Permission.RECORD_AUDIO);
+  private static final List<User.Permission> EMPTY_PERM = new ArrayList<User.Permission>();
   private long defectDetector;
 
   private static final String ID = "id";
@@ -116,7 +118,8 @@ public class UserDAO extends DAO {
       }
     }
     else {
-      long l = addUser(0, "", 0, ipAddr, "", "", userID, false, Collections.EMPTY_LIST, kind, passwordH, emailH);
+      Collection<User.Permission> perms = (kind == User.Kind.CONTENT_DEVELOPER) ? CD_PERMISSIONS : EMPTY_PERM;
+      long l = addUser(0, "", 0, ipAddr, "", "", userID, false, perms, kind, passwordH, emailH);
       return getUserWhere(l);
     }
   }
