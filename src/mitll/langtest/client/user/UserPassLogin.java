@@ -73,10 +73,10 @@ public class UserPassLogin extends UserDialog {
     enterKeyButtonHelper = new KeyPressHelper(true) {
       @Override
       public void userHitEnterKey(Button button) {
-        if (sendUsernamePopup != null && sendUsernamePopup.isVisible()) {
+        if (sendUsernamePopup != null && sendUsernamePopup.isShowing()) {
           sendUsernameEmail.fireEvent(new ButtonClickEvent());
         }
-        else if (resetEmailPopup != null && resetEmailPopup.isVisible()) {
+        else if (resetEmailPopup != null && resetEmailPopup.isShowing()) {
           sendEmail.fireEvent(new ButtonClickEvent());
         }
         else if (signInHasFocus) {
