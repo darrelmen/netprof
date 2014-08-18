@@ -191,8 +191,9 @@ public class MailSupport {
       props.put("mail.debug", ""+debugEmail);
 
       // TODO : Remove me!
-      props.put("mail.smtp.port", MAIL_PORT);
-
+      if (debugEmail) {
+        props.put("mail.smtp.port", MAIL_PORT);
+      }
 
       Session session = Session.getDefaultInstance(props, null);
       Message msg = makeHTMLMessage(session,
