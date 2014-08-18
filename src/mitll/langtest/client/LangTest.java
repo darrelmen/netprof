@@ -322,16 +322,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     Panel firstRow = makeFirstTwoRows(verticalContainer);
 
     if (!showLogin(verticalContainer, firstRow)) {
-
       System.out.println("populate below header...");
 
       populateBelowHeader(verticalContainer, firstRow);
     }
-    else {
-      System.out.println("showing login...");
-
-    }
-    //return bothSecondAndThird;
   }
 
   private void populateBelowHeader(Container verticalContainer, Panel firstRow) {
@@ -419,6 +413,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   String staleToken = "";
 
+  /**
+   * @see #showLogin()
+   * @see #populateRootPanel()
+   * @param verticalContainer
+   * @param firstRow
+   * @return
+   */
   private boolean showLogin(final Container verticalContainer, final Panel firstRow) {
     final EventRegistration eventRegistration = this;
 
@@ -426,9 +427,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (resetPassToken != null && !resetPassToken.equals(staleToken)) {
       service.getUserIDForToken(resetPassToken, new AsyncCallback<Long>() {
         @Override
-        public void onFailure(Throwable caught) {
-
-        }
+        public void onFailure(Throwable caught) {}
 
         @Override
         public void onSuccess(Long result) {
@@ -868,6 +867,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     else {
       System.out.println("ignoring got user for current user " + userID);
     }
+    if (userID > -1) {
+      flashcard.setCogVisible(true);
+    }
   }
 
   /**
@@ -921,18 +923,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     else {
       System.out.println("checkInitFlash : initFlash - has permission");
-
-  //    gotMicPermission();
-
       checkLogin();
     }
   }
-
-/*  public boolean gotMicPermission() {
-    boolean gotPermission = flashRecordPanel != null && flashRecordPanel.gotPermission();
-    System.out.println("checkInitFlash : skip init flash, just checkLogin (got permission = " + gotPermission + ")");
-    return gotPermission;
-  }*/
 
   @Override
   public EventLogger getButtonFactory() {
