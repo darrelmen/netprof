@@ -159,7 +159,7 @@ public class UserManager {
    * @see mitll.langtest.client.LangTest#checkLogin
    * @deprecated
    */
-  private void anonymousLogin() {
+/*  private void anonymousLogin() {
     int user = getUser();
     if (user != NO_USER_SET) {
       //System.out.println("UserManager.anonymousLogin : current user : " + user);
@@ -171,14 +171,16 @@ public class UserManager {
 
       addAnonymousUser();
   }
-  }
+  }*/
 
+/*
   private void addAnonymousUser() {
     StudentDialog studentDialog = new StudentDialog(service,props,this,userNotification);
     System.out.println("UserManager.addAnonymousUser : adding anonymous user");
 
     studentDialog.addUser(89, "male", 0,"", new ArrayList<User.Permission>());
   }
+*/
 
   /**
    * For display purposes
