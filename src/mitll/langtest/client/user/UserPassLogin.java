@@ -8,6 +8,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.github.gwtbootstrap.client.ui.constants.ToggleType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
@@ -26,8 +27,6 @@ import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
-
-import java.util.Date;
 
 /**
  * Created by go22670 on 8/11/14.
@@ -531,12 +530,69 @@ public class UserPassLogin extends UserDialog {
         signInHasFocus = false;
       }
     });
+    signUpPassword.box.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
 
+    Heading w1 = new Heading(5, "Are you a");
+    fieldset.add(w1);
+    w1.addStyleName("leftTenMargin");
+    w1.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
+    w1.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
+    fieldset.add(getShowGroup());
+    getSignUpButton(userBox, emailBox);
+    fieldset.add(signUp);
+    return form;
+  }
+
+  User.Kind selectedRole = User.Kind.UNSET;
+
+  private DivWidget getShowGroup() {
+    ButtonToolbar w = new ButtonToolbar();
+    w.addStyleName("bottomFiveMargin");
+    w.getElement().getStyle().setMarginTop(3, Style.Unit.PX);
+    ButtonGroup buttonGroup = new ButtonGroup();
+    buttonGroup.setToggle(ToggleType.RADIO);
+    w.add(buttonGroup);
+
+    buttonGroup.add(getChoice("Student", true, new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        selectedRole = User.Kind.STUDENT;
+      }
+    }));
+    buttonGroup.add(getChoice("Teacher", false, new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        selectedRole = User.Kind.TEACHER;
+      }
+    }));
+    buttonGroup.add(getChoice("Content Developer", false, new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        selectedRole = User.Kind.CONTENT_DEVELOPER;
+      }
+    }));
+
+    Style style = w.getElement().getStyle();
+   // style.setMarginTop(-6, Style.Unit.PX);
+   // style.setMarginBottom(0, Style.Unit.PX);
+    style.setMarginLeft(9, Style.Unit.PX);
+
+    return w;
+  }
+
+  private Button getChoice(String title, boolean isActive, ClickHandler handler) {
+    Button onButton = new Button(title);
+    onButton.getElement().setId("Choice_" + title);
+    eventRegistration.register(onButton, "N/A");
+    onButton.addClickHandler(handler);
+    onButton.setActive(isActive);
+    return onButton;
+  }
+
+  public void getSignUpButton(final TextBoxBase userBox, final TextBoxBase emailBox) {
     signUp = new Button("Sign Up");
     signUp.getElement().setId("SignIn");
 
-
-    fieldset.add(signUp);
 
     signUp.addClickHandler(new ClickHandler() {
       @Override
@@ -553,7 +609,7 @@ public class UserPassLogin extends UserDialog {
           markError(signUpPassword, signUpPassword.box.getValue().isEmpty() ? "Please enter a password." :
               "Please enter a password at least " + MIN_PASSWORD + " characters long.");
         } else {
-          gotSignUp(userBox.getValue(), signUpPassword.box.getValue(), emailBox.getValue());
+          gotSignUp(userBox.getValue(), signUpPassword.box.getValue(), emailBox.getValue(), selectedRole);
         }
       }
     });
@@ -562,15 +618,14 @@ public class UserPassLogin extends UserDialog {
     signUp.addStyleName("leftFiveMargin");
 
     signUp.setType(ButtonType.SUCCESS);
-    return form;
   }
 
-  private void gotSignUp(String user, String password, String email) {
+  private void gotSignUp(String user, String password, String email, User.Kind kind) {
     String passH = Md5Hash.getHash(password);
     String emailH = Md5Hash.getHash(email);
 
     signUp.setEnabled(false);
-    service.addUser(user, passH, emailH, User.Kind.STUDENT, new AsyncCallback<User>() {
+    service.addUser(user, passH, emailH, kind, new AsyncCallback<User>() {
       @Override
       public void onFailure(Throwable caught) {
         signUp.setEnabled(true);
