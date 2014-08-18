@@ -8,6 +8,7 @@ import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
+import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
@@ -451,8 +452,7 @@ public class NewUserExercise extends BasicDialog {
       //System.out.println("checkIfNeedsRefAudio : new user ex " + newUserExercise);
 
       Button recordButton = rap.getButton();
-      markError(normalSpeedRecording, recordButton, recordButton, "",
-        RECORD_REFERENCE_AUDIO_FOR_THE_FOREIGN_LANGUAGE_PHRASE);
+      markError(normalSpeedRecording, recordButton, recordButton, "", RECORD_REFERENCE_AUDIO_FOR_THE_FOREIGN_LANGUAGE_PHRASE, Placement.RIGHT);
       recordButton.addMouseOverHandler(new MouseOverHandler() {
         @Override
         public void onMouseOver(MouseOverEvent event) {
