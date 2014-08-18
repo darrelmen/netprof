@@ -550,6 +550,11 @@ public class DatabaseImpl implements Database {
     return user;
   }
 
+  /**
+   * @see mitll.langtest.server.database.ImportCourseExamples#copyUser(DatabaseImpl, java.util.Map, java.util.Map, long)
+   * @param user
+   * @return
+   */
   public long addUser(User user) {
     long l;
     if ((l = userDAO.userExists(user.getUserID())) == -1) {
