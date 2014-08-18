@@ -51,6 +51,7 @@ import java.util.TreeMap;
  * Date: 9/10/13
  * Time: 5:33 PM
  * To change this template use File | Settings | File Templates.
+ * @deprecated
  */
 class StudentDialog extends UserDialog {
   public static final int ILR_CHOICE_WIDTH = 80;
