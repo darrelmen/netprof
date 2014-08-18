@@ -1143,7 +1143,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   public String trimURL(String url) {
     if (url.contains("127.0.0.1")) return url;
-    else return url.split("\\?")[0];
+    else return url.split("\\?")[0].split("\\#")[0];
   }
 
   // Results ---------------------
