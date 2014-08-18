@@ -6,6 +6,7 @@ import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
@@ -278,14 +279,11 @@ public class ScoreServlet extends DatabaseServlet {
     return getJsonArray(copy);
   }
 
-
-/*
-  private void getJsonForExercises(JSONObject jsonObject, SectionNode node, List<CommonExercise> copy) {
-    JSONArray exercises = getJsonArray(copy);
-    jsonObject.put(node.getName(), exercises);
-  }
-*/
-
+  /**
+   * This is the json that describes an individual entry.
+   * @param copy
+   * @return
+   */
   private JSONArray getJsonArray(List<CommonExercise> copy) {
     JSONArray exercises = new JSONArray();
 
@@ -297,6 +295,8 @@ public class ScoreServlet extends DatabaseServlet {
       ex.put("tl", exercise.getTransliteration());
       ex.put("en", exercise.getEnglish());
       ex.put("ct", exercise.getContext());
+      AudioAttribute latestContext = exercise.getLatestContext();
+      ex.put("ctref", latestContext == null ? "NO" : latestContext.getAudioRef());
       ex.put("ref", exercise.hasRefAudio() ? exercise.getRefAudio() : "NO");
       exercises.add(ex);
     }
