@@ -322,7 +322,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     Panel firstRow = makeFirstTwoRows(verticalContainer);
 
     if (!showLogin(verticalContainer, firstRow)) {
+
+      System.out.println("populate below header...");
+
       populateBelowHeader(verticalContainer, firstRow);
+    }
+    else {
+      System.out.println("showing login...");
+
     }
     //return bothSecondAndThird;
   }
@@ -740,12 +747,17 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       int childCount = firstRow.getElement().getChildCount();
     //  Node node = childCount;
 
-      System.out.println("root " + firstRow.getElement().getNodeName() + " childCount " + childCount);
+      System.out.println("reallySetFactory root " + firstRow.getElement().getNodeName() + " childCount " + childCount);
       if (childCount > 0) {
         Node child = firstRow.getElement().getChild(0);
         Element as = Element.as(child);
-        if (as.getId().contains("Login")) {
+        if (as.getId().contains("Login")
+            //|| as.getId().isEmpty()
+            ) {
           populateRootPanel();
+        }
+        else {
+          System.out.println("elem is Got " + as.getId());
         }
       }
      // if (node.getElement().getId().contains("Login")) {
@@ -837,6 +849,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param userID
    */
   public void gotUser(long userID) {
+
+    System.out.println("gotUser : userID " +userID);
+
     flashcard.setUserName(getGreeting());
     if (userID != lastUser) {
       doEverythingAfterFactory(userID);
@@ -864,10 +879,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
 
     boolean askedForExercises = exerciseList.getExercises(userID);
-    if (!askedForExercises && (lastUser != userID) && lastUser != NO_USER_INITIAL) {
-      //System.out.println("\tdoEverythingAfterFactory : " + userID + " initially list and user now " + userID);
+    if (!askedForExercises){// && (lastUser != userID) && lastUser != NO_USER_INITIAL) {
+      System.out.println("\tdoEverythingAfterFactory : " + userID + " initially list and user now " + userID);
 
       exerciseList.reload();
+    }
+    else {
+      System.out.println("\tdoEverythingAfterFactory : " + userID + " not reloading - asked " +askedForExercises);
+
     }
     navigation.showInitialState();
 
@@ -883,13 +902,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   // TODO : refactor all this into mode objects that decide whether we need flash or not, etc.
   private void checkInitFlash() {
     if (shouldCollectAudio() && !flashRecordPanel.gotPermission()) {
-      System.out.println("checkInitFlash : initFlash");
+      System.out.println("checkInitFlash : initFlash - no permission yet");
 
       if (flashRecordPanel.initFlash()) {
         checkLogin();
       }
     }
     else {
+      System.out.println("checkInitFlash : initFlash - has permission");
+
       gotMicPermission();
 
       checkLogin();
