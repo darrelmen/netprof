@@ -50,12 +50,12 @@ public class UserPassLogin extends UserDialog {
   private final KeyPressHelper enterKeyButtonHelper;
   private FormField user;
   private FormField signUpUser;
-  FormField signUpEmail;
-  FormField signUpPassword;
+  private  FormField signUpEmail;
+  private FormField signUpPassword;
   private FormField password;
   private boolean signInHasFocus = true;
-  EventRegistration eventRegistration;
-  Button signIn;
+  private EventRegistration eventRegistration;
+  private Button signIn;
 
   /**
    * @see mitll.langtest.client.LangTest#showLogin
@@ -649,7 +649,7 @@ public class UserPassLogin extends UserDialog {
             signUpUser.box.setText(result.getUserID());
             signUpPassword.box.setText(password.getText());
             getFocusOnField(signUpEmail);
-            markError(signUpEmail,"Add info","Current users should add an email and password.");
+            markError(signUpEmail,"Add info","Current users should add an email and password.",Placement.TOP);
             signIn.setEnabled(true);
 
           }
