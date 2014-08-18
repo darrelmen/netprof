@@ -124,7 +124,7 @@ public class UserManager {
    */
   private void getPermissionsAndSetUser(final int user) {
     console("getPermissionsAndSetUser : " + user);
-    System.out.println("UserManager.getPermissionsAndSetUser " + user);
+    System.out.println("UserManager.getPermissionsAndSetUser " + user + " asking server for info...");
 
     service.getUserBy(user, new AsyncCallback<User>() {
       @Override
@@ -157,6 +157,7 @@ public class UserManager {
 
   /**
    * @see mitll.langtest.client.LangTest#checkLogin
+   * @deprecated
    */
   private void anonymousLogin() {
     int user = getUser();
@@ -371,7 +372,7 @@ public class UserManager {
    * @see StudentDialog#addUser
    */
   void storeUser(long sessionID, String audioType, String userChosenID, PropertyHandler.LOGIN_TYPE userType) {
-    //System.out.println("storeUser : user now " + sessionID + " audio type '" + audioType +"'");
+    System.out.println("storeUser : user now " + sessionID + " audio type '" + audioType +"' id " +userChosenID + " type " +userType);
     final long DURATION = getUserSessionDuration();
     long futureMoment = getUserSessionEnd(DURATION);
     if (USE_COOKIE) {
