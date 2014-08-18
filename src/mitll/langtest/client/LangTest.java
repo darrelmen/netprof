@@ -514,11 +514,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   /**
    * Supports different flavors of exercise list -- Paging, Grading, and vanilla.
    *
-   * @see #populateRootPanel()
+   * @see #populateBelowHeader(com.github.gwtbootstrap.client.ui.Container, com.google.gwt.user.client.ui.Panel)
    */
   private ListInterface makeExerciseList(FluidRow secondRow, Panel exerciseListContainer, Panel currentExerciseVPanel) {
     this.exerciseList = new ExerciseListLayout(props).makeExerciseList(secondRow, exerciseListContainer, this, currentExerciseVPanel, service, this);
-    reallySetFactory();
+    //reallySetFactory();
     return exerciseList;
   }
 
@@ -738,10 +738,18 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   /**
    * This determines which kind of exercise we're going to do.
    *
+   * Two things determine what kind of UI is shown - what kind of user has logged in (students get basic view, content developers see more tabs)
+   * And whether the ability to record audio is there -- if flash, whether permission has been granted or is allowed via
+   * configuration.  If webrtc (in browser) recording, whether permission has been granted or not.  Also, there are
+   * physical considerations - is there a mic available at all?  Or is there a flashblocker preventing flash from running?
+   *
+   * So we want to configure the UI after login and after the recording state has been settled.
+   *
    * @see #gotUser(long)
+   * @see #configureUIGivenUser(long) (long)
    */
   private void reallySetFactory() {
-    if (props.isClassroomMode()) {
+    //if (props.isClassroomMode()) {
 
       //Panel widgets = RootPanel.get();
       int childCount = firstRow.getElement().getChildCount();
@@ -769,7 +777,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
        // flashcard.setUserName(getGreeting());
      // }
 
-
+      // have to wait until we know what kind of user has logged in before knowing what to present
       exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, this, this, exerciseList, 1.0f) {
         @Override
         public Panel getExercisePanel(CommonExercise e) {
@@ -781,9 +789,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           }
         }
       }, userManager, 1);
-    } else {
-      exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, this, this, exerciseList, getScreenPortion()), userManager, 1);
-    }
+   // } else {
+   //   exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, this, this, exerciseList, getScreenPortion()), userManager, 1);
+   // }
   }
 
   /**
@@ -854,7 +862,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     flashcard.setUserName(getGreeting());
     if (userID != lastUser) {
-      doEverythingAfterFactory(userID);
+      configureUIGivenUser(userID);
       logEvent("No widget", "UserLogin", "N/A", "User Login by " + userID);
     }
     else {
@@ -867,8 +875,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param userID
    * @return
    */
-  private boolean doEverythingAfterFactory(long userID) {
-    System.out.println("doEverythingAfterFactory : user changed - new " + userID + " vs last " + lastUser +
+  private void configureUIGivenUser(long userID) {
+    System.out.println("configureUIGivenUser : user changed - new " + userID + " vs last " + lastUser +
         " audio type " + getAudioType() + " perms " + getPermissions());
     reallySetFactory();
 
@@ -878,22 +886,25 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       exerciseList.setInstance("flex");
     }
 
-    boolean askedForExercises = exerciseList.getExercises(userID);
-    if (!askedForExercises){// && (lastUser != userID) && lastUser != NO_USER_INITIAL) {
-      System.out.println("\tdoEverythingAfterFactory : " + userID + " initially list and user now " + userID);
+    System.out.println("\tconfigureUIGivenUser : " + userID + " get exercises...");
 
-      exerciseList.reload();
+    boolean askedForExercises = exerciseList.getExercises(userID);
+    if (askedForExercises){// && (lastUser != userID) && lastUser != NO_USER_INITIAL) {
+      System.out.println("\n" +
+          "\n" +
+          "\n\tconfigureUIGivenUser : " + userID + " not reloading - asked for exercises");
     }
     else {
-      System.out.println("\tdoEverythingAfterFactory : " + userID + " not reloading - asked " +askedForExercises);
+      System.out.println("\tconfigureUIGivenUser : " + userID + " initially list and user now " + userID);
 
+      exerciseList.reload();
     }
     navigation.showInitialState();
 
     lastUser = userID;
     flashcard.setBrowserInfo(getInfoLine());
     flashcard.reflectPermissions(getPermissions());
-    return true;
+    //return true;
   }
 
   /**
@@ -911,17 +922,17 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     else {
       System.out.println("checkInitFlash : initFlash - has permission");
 
-      gotMicPermission();
+  //    gotMicPermission();
 
       checkLogin();
     }
   }
 
-  public boolean gotMicPermission() {
+/*  public boolean gotMicPermission() {
     boolean gotPermission = flashRecordPanel != null && flashRecordPanel.gotPermission();
     System.out.println("checkInitFlash : skip init flash, just checkLogin (got permission = " + gotPermission + ")");
     return gotPermission;
-  }
+  }*/
 
   @Override
   public EventLogger getButtonFactory() {
@@ -973,6 +984,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     userManager.checkLogin();
   }
 
+  /**
+   * @see mitll.langtest.client.list.ExerciseList#askServerForExercise(String)
+   */
   public void checkUser() {
     if (userManager.isUserExpired()) {
       checkLogin();
