@@ -191,7 +191,7 @@ public class MailSupport {
       props.put("mail.debug", ""+debugEmail);
 
       // TODO : Remove me!
-      if (debugEmail) {
+      if (debugEmail || true) {
         props.put("mail.smtp.port", MAIL_PORT);
       }
 
