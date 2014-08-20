@@ -1,7 +1,7 @@
 package mitll.langtest.client.user;
 
-import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.PasswordTextBox;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
@@ -45,11 +45,12 @@ public class UserPassLogin extends UserDialog {
   public static final String SIGN_IN = "Sign In";
   public static final String PLEASE_ENTER_A_LONGER_USER_ID = "Please enter a longer user id.";
   public static final String VALID_EMAIL = "Please enter a valid email address.";
+  public static final String PLEASE_WAIT = "Please wait";
   private final UserManager userManager;
   private final KeyPressHelper enterKeyButtonHelper;
   private FormField user;
   private FormField signUpUser;
-  private  FormField signUpEmail;
+  private FormField signUpEmail;
   private FormField signUpPassword;
   private FormField password;
   private boolean signInHasFocus = true;
@@ -57,16 +58,14 @@ public class UserPassLogin extends UserDialog {
   private Button signIn;
 
   /**
-   * @see mitll.langtest.client.LangTest#showLogin
    * @param service
    * @param props
    * @param userManager
    * @param eventRegistration
+   * @see mitll.langtest.client.LangTest#showLogin
    */
   public UserPassLogin(LangTestDatabaseAsync service, PropertyHandler props, UserManager userManager, EventRegistration eventRegistration) {
     super(service, props);
-
-    //System.out.println("loc " + Window.Location.getProtocol() + " " + Window.Location.getHref());
 
     this.userManager = userManager;
     this.eventRegistration = eventRegistration;
@@ -75,11 +74,9 @@ public class UserPassLogin extends UserDialog {
       public void userHitEnterKey(Button button) {
         if (sendUsernamePopup != null && sendUsernamePopup.isShowing()) {
           sendUsernameEmail.fireEvent(new ButtonClickEvent());
-        }
-        else if (resetEmailPopup != null && resetEmailPopup.isShowing()) {
+        } else if (resetEmailPopup != null && resetEmailPopup.isShowing()) {
           sendEmail.fireEvent(new ButtonClickEvent());
-        }
-        else if (signInHasFocus) {
+        } else if (signInHasFocus) {
           button.fireEvent(new ButtonClickEvent());
         } else {
           signUp.fireEvent(new KeyPressHelper.ButtonClickEvent());
@@ -125,8 +122,6 @@ public class UserPassLogin extends UserDialog {
     form.getElement().setId("resetForm");
     rightDiv.add(form);
 
-    //rightDiv.add(
-
     form.addStyleName("topMargin");
     form.addStyleName("formRounded");
     form.getElement().getStyle().setBackgroundColor("white");
@@ -138,7 +133,7 @@ public class UserPassLogin extends UserDialog {
     fieldset.add(w);
     w.addStyleName("leftFiveMargin");
     final FormField firstPassword = addControlFormField(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
-    final FormField secondPassword = addControlFormField(fieldset, true, MIN_PASSWORD, 15, "Confirm " +PASSWORD);
+    final FormField secondPassword = addControlFormField(fieldset, true, MIN_PASSWORD, 15, "Confirm " + PASSWORD);
 
 
     final Button changePassword = new Button("Change Password");
@@ -156,14 +151,13 @@ public class UserPassLogin extends UserDialog {
         } else if (first.length() < MIN_PASSWORD) {
           markError(firstPassword, "Please enter a longer password");
         } else if (second.isEmpty()) {
-            markError(secondPassword, "Please enter a password");
-          } else if (second.length() < MIN_PASSWORD) {
-            markError(secondPassword, "Please enter a longer password");
-          } else if (!second.equals(first)) {
-            markError(secondPassword, "Please enter the same password");
+          markError(secondPassword, "Please enter a password");
+        } else if (second.length() < MIN_PASSWORD) {
+          markError(secondPassword, "Please enter a longer password");
+        } else if (!second.equals(first)) {
+          markError(secondPassword, "Please enter the same password");
 
-        }
-        else {
+        } else {
           changePassword.setEnabled(false);
           enterKeyButtonHelper.removeKeyHandler();
 
@@ -172,21 +166,20 @@ public class UserPassLogin extends UserDialog {
             @Override
             public void onFailure(Throwable caught) {
               changePassword.setEnabled(true);
-              markError(changePassword,"Can't communicate with server - check network connection.");
+              markError(changePassword, "Can't communicate with server - check network connection.");
 
             }
 
             @Override
             public void onSuccess(Boolean result) {
               if (!result) {
-                markError(changePassword,"Password has already been changed?");
-              }
-              else {
-                markError(changePassword,"Success","Password has been changed",Placement.LEFT);
+                markError(changePassword, "Password has already been changed?");
+              } else {
+                markError(changePassword, "Success", "Password has been changed", Placement.LEFT);
                 Timer t = new Timer() {
                   @Override
                   public void run() {
-                  Window.Location.reload();
+                    Window.Location.reload();
                   }
                 };
                 t.schedule(3000);
@@ -227,11 +220,7 @@ public class UserPassLogin extends UserDialog {
     form.add(fieldset);
     right.add(rightDiv);
 
-    // final ListBoxFormField purpose = getListBoxFormField(fieldset, ARE_YOU_A, getListBox2(ROLES));
-    //  purpose.box.setWidth("150px");
-    // purpose.box.addStyleName("floatRight");
-
-    user = addControlFormField(fieldset, false, MIN_LENGTH_USER_ID,USER_ID_MAX_LENGTH, USERNAME);
+    user = addControlFormField(fieldset, false, MIN_LENGTH_USER_ID, USER_ID_MAX_LENGTH, USERNAME);
     user.box.addStyleName("topMargin");
     user.box.addStyleName("rightFiveMargin");
     user.box.getElement().setId("Username_Box_SignIn");
@@ -288,18 +277,13 @@ public class UserPassLogin extends UserDialog {
 
     Panel hp2 = new HorizontalPanel();
 
-
-
     final Anchor forgotUser = getForgotUser();
     hp2.add(forgotUser);
-    //forgotUser.getElement().getStyle().setProperty("fontSize", "smaller");
     forgotUser.addStyleName("leftTenMargin");
-
 
     final Anchor forgotPassword = getForgotPassword();
     hp2.add(forgotPassword);
     fieldset.add(hp2);
-  //  forgotPassword.getElement().getStyle().setProperty("fontSize", "smaller");
 
     forgotPassword.addStyleName("leftFiveMargin");
 
@@ -316,18 +300,11 @@ public class UserPassLogin extends UserDialog {
       @Override
       public void onClick(ClickEvent event) {
         if (user.getText().isEmpty()) {
-          markError(user,"Enter a user name.");
+          markError(user, "Enter a user name.");
           return;
         }
         final HidePopupTextBox emailEntry = new HidePopupTextBox();
-       resetEmailPopup = new DecoratedPopupPanel(true);
-        /*resetEmailPopup.addCloseHandler(new CloseHandler<PopupPanel>() {
-          @Override
-          public void onClose(CloseEvent<PopupPanel> event) {
-
-            System.out.println("got close event -------");
-          }
-        });*/
+        resetEmailPopup = new DecoratedPopupPanel(true);
         sendEmail = new Button("Send");
         sendEmail.setType(ButtonType.PRIMARY);
         sendEmail.addStyleName("leftTenMargin");
@@ -336,8 +313,7 @@ public class UserPassLogin extends UserDialog {
           public void onClick(ClickEvent event) {
             String text = emailEntry.getText();
             if (!isValidEmail(text)) {
-       /*       System.out.println("email is '" + text+
-                  "' ");*/
+       /*       System.out.println("email is '" + text+ "' ");*/
               markError(emailEntry,
                   "Please check",
                   VALID_EMAIL, Placement.TOP);
@@ -353,16 +329,16 @@ public class UserPassLogin extends UserDialog {
 
               @Override
               public void onSuccess(Void result) {
-                 setupPopover(sendEmail, "Check Email", "Please check your email", Placement.LEFT, 5000, new MyPopover() {
+                setupPopover(sendEmail, "Check Email", "Please check your email", Placement.LEFT, 5000, new MyPopover() {
                   boolean isFirst = true;
+
                   @Override
                   public void hide() {
                     super.hide();
                     if (isFirst) {
                       isFirst = false;
-                    }
-                    else {
-                      resetEmailPopup.hide(); // TODO : ugly
+                    } else {
+                      resetEmailPopup.hide(); // TODO : ugly - somehow hide is called twice
                     }
                     //System.out.println("got hide !" + new Date()
                     //);
@@ -374,7 +350,7 @@ public class UserPassLogin extends UserDialog {
         });
         eventRegistration.register(sendEmail, "N/A", "reset password");
 
-        makePopup(resetEmailPopup, emailEntry, sendEmail,"Enter your email to reset your password.");
+        makePopup(resetEmailPopup, emailEntry, sendEmail, "Enter your email to reset your password.");
         resetEmailPopup.showRelativeTo(forgotPassword);
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
           public void execute() {
@@ -421,10 +397,9 @@ public class UserPassLogin extends UserDialog {
               @Override
               public void onSuccess(Boolean isValid) {
                 if (!isValid) {
-                  markError(sendUsernameEmail,"Check your spelling","No user has this email.",Placement.LEFT);
+                  markError(sendUsernameEmail, "Check your spelling", "No user has this email.", Placement.LEFT);
                   sendUsernameEmail.setEnabled(true);
-                }
-                else {
+                } else {
                   setupPopover(sendUsernameEmail, "Check Email", "Please check your email", Placement.LEFT, 5000, new MyPopover() {
                     boolean isFirst = true;
 
@@ -461,7 +436,7 @@ public class UserPassLogin extends UserDialog {
     return text.toUpperCase().matches("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$");
   }
 
-  private void makePopup(DecoratedPopupPanel commentPopup,HidePopupTextBox commentEntryText, Button okButton, String prompt) {
+  private void makePopup(DecoratedPopupPanel commentPopup, HidePopupTextBox commentEntryText, Button okButton, String prompt) {
     VerticalPanel vp = new VerticalPanel();
     Panel w = new Heading(6, prompt);
     vp.add(w);
@@ -482,6 +457,7 @@ public class UserPassLogin extends UserDialog {
   }
 
   private Button signUp;
+
   public Form getSignUpForm() {
     Form form = new Form();
     form.addStyleName("topMargin");
@@ -498,7 +474,7 @@ public class UserPassLogin extends UserDialog {
     //  purpose.userBox.setWidth("150px");
     // purpose.userBox.addStyleName("floatRight");
 
-    signUpUser = addControlFormField(fieldset, false, MIN_LENGTH_USER_ID,20, USERNAME);
+    signUpUser = addControlFormField(fieldset, false, MIN_LENGTH_USER_ID, 20, USERNAME);
     final TextBoxBase userBox = signUpUser.box;
     userBox.addStyleName("topMargin");
     userBox.addStyleName("rightFiveMargin");
@@ -511,7 +487,7 @@ public class UserPassLogin extends UserDialog {
       }
     });
 
-    signUpEmail = addControlFormField(fieldset, false, MIN_LENGTH_USER_ID,USER_ID_MAX_LENGTH,"Email");
+    signUpEmail = addControlFormField(fieldset, false, MIN_LENGTH_USER_ID, USER_ID_MAX_LENGTH, "Email");
     final TextBoxBase emailBox = signUpEmail.box;
     emailBox.addStyleName("topMargin");
     emailBox.addStyleName("rightFiveMargin");
@@ -573,8 +549,8 @@ public class UserPassLogin extends UserDialog {
     }));
 
     Style style = w.getElement().getStyle();
-   // style.setMarginTop(-6, Style.Unit.PX);
-   // style.setMarginBottom(0, Style.Unit.PX);
+    // style.setMarginTop(-6, Style.Unit.PX);
+    // style.setMarginBottom(0, Style.Unit.PX);
     style.setMarginLeft(9, Style.Unit.PX);
 
     return w;
@@ -597,7 +573,7 @@ public class UserPassLogin extends UserDialog {
     signUp.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-      //  System.out.println("signUp got click!");
+        //  System.out.println("signUp got click!");
         if (userBox.getValue().length() < MIN_LENGTH_USER_ID) {
           markError(signUpUser, PLEASE_ENTER_A_LONGER_USER_ID);
         } else if (signUpEmail.box.getValue().length() < MIN_EMAIL) {
@@ -625,7 +601,7 @@ public class UserPassLogin extends UserDialog {
     String emailH = Md5Hash.getHash(email);
 
     signUp.setEnabled(false);
-    service.addUser(user, passH, emailH, kind, new AsyncCallback<User>() {
+    service.addUser(user, passH, emailH, kind, Window.Location.getHref(), new AsyncCallback<User>() {
       @Override
       public void onFailure(Throwable caught) {
         signUp.setEnabled(true);
@@ -637,9 +613,13 @@ public class UserPassLogin extends UserDialog {
         if (result == null) {
           signUp.setEnabled(true);
           markError(signUpUser, "User exists already, please sign in or choose a different name.");
-        }
-        else {
-          storeUser(result);
+        } else {
+          if (result.isEnabled()) {
+            storeUser(result);
+          } else {
+            markError(signUp, "Wait for approval", "Please wait for approval before logging in.", Placement.LEFT);
+            signUp.setEnabled(true);
+          }
         }
       }
     });
@@ -651,8 +631,8 @@ public class UserPassLogin extends UserDialog {
     left.setWidth(LEFT_SIDE_WIDTH + "px");
     leftAndRight.add(left);
     int size = 2;
-    int subSize = size+1;
-    left.add(new Heading(size,"Learn how to pronounce words and practice vocabulary."));
+    int subSize = size + 1;
+    left.add(new Heading(size, "Learn how to pronounce words and practice vocabulary."));
     Heading w1 = new Heading(subSize, "Do flashcards to learn or review vocabulary", "Speak your answers. Compete with your friends.");
     left.add(w1);
 
@@ -670,23 +650,22 @@ public class UserPassLogin extends UserDialog {
   }
 
 
-
   /**
-   * @see #getRightLogin(com.google.gwt.user.client.ui.Panel)
    * @param user
    * @param pass
+   * @see #getRightLogin(com.google.gwt.user.client.ui.Panel)
    */
   private void gotLogin(String user, final String pass, final boolean emptyPassword) {
     final String hashed = Md5Hash.getHash(pass);
 
-    System.out.println("gotLogin : user is '" +user + "' pass '" + pass +"' or " + hashed);
+    //  System.out.println("gotLogin : user is '" +user + "' pass '" + pass +"' or " + hashed);
 
     signIn.setEnabled(false);
     service.userExists(user, hashed, new AsyncCallback<User>() {
       @Override
       public void onFailure(Throwable caught) {
         signIn.setEnabled(true);
-        markError(signIn,"Trouble connecting to server.");
+        markError(signIn, "Trouble connecting to server.");
       }
 
       @Override
@@ -696,7 +675,7 @@ public class UserPassLogin extends UserDialog {
           markError(password, emptyPassword ? PLEASE_ENTER_YOUR_PASSWORD : BAD_PASSWORD);
           signIn.setEnabled(true);
         } else {
-          System.out.println("Found user "+result);
+          System.out.println("Found user " + result);
 
           String emailHash = result.getEmailHash();
           String passwordHash = result.getPasswordHash();
@@ -704,20 +683,22 @@ public class UserPassLogin extends UserDialog {
             signUpUser.box.setText(result.getUserID());
             signUpPassword.box.setText(password.getText());
             getFocusOnField(signUpEmail);
-            markError(signUpEmail,"Add info","Current users should add an email and password.",Placement.TOP);
+            markError(signUpEmail, "Add info", "Current users should add an email and password.", Placement.TOP);
             signIn.setEnabled(true);
 
-          }
-          else {
+          } else {
             System.out.println("Got valid user " + result);
             if (emptyPassword) {
               markError(password, PLEASE_ENTER_YOUR_PASSWORD);
               signIn.setEnabled(true);
-            }
-            else if (result.getPasswordHash().equals(hashed)) {
-              storeUser(result);
-            }
-            else {
+            } else if (result.getPasswordHash().equals(hashed)) {
+              if (result.isEnabled() || result.getUserKind() != User.Kind.CONTENT_DEVELOPER) {
+                storeUser(result);
+              } else {
+                markError(signIn, PLEASE_WAIT, "Please wait until you've been approved.", Placement.LEFT);
+                signIn.setEnabled(true);
+              }
+            } else {
               markError(password, BAD_PASSWORD);
               signIn.setEnabled(true);
             }
