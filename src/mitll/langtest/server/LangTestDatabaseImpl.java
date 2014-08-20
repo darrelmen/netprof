@@ -47,8 +47,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private static final Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
-  public static final String NP_SERVER = "np.ll.mit.edu";
-  public static final String REPLY_TO = "admin@" + NP_SERVER;
+  private static final String NP_SERVER = "np.ll.mit.edu";
+  private static final String REPLY_TO = "admin@" + NP_SERVER;
+  private static final String CONTENT_DEVELOPER_APPROVAL_EMAIL = "gordon.vidaver@ll.mit.edu";
+  private static final String RP = "rp";
 
   private DatabaseImpl db;
   private AudioFileHelper audioFileHelper;
@@ -56,7 +58,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private String configDir;
   private ServerProperties serverProps;
   private PathHelper pathHelper;
- String reqURL, path, info;
+  private String reqURL, path, info;
 
   /**
    * @param request
@@ -1022,6 +1024,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param userID
    * @param permissions
    * @return
+   * @deprecated called from student dialog
    */
   @Override
   public long addUser(int age, String gender, int experience,
@@ -1029,10 +1032,46 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.addUser(getThreadLocalRequest(),age, gender, experience, nativeLang, dialect, userID, permissions);
   }
 
-
+  /**
+   * @see mitll.langtest.client.user.UserPassLogin#gotSignUp(String, String, String, mitll.langtest.shared.User.Kind)
+   * @param userID
+   * @param passwordH
+   * @param emailH
+   * @param kind
+   * @param url
+   * @return null if existing user
+   */
   @Override
-  public User addUser(String userID, String passwordH, String emailH, User.Kind kind) {
-    return db.addUser(getThreadLocalRequest(), userID, passwordH, emailH, kind);
+  public User addUser(String userID, String passwordH, String emailH, User.Kind kind, String url) {
+    User user = db.addUser(getThreadLocalRequest(), userID, passwordH, emailH, kind);
+    if (user != null && !user.isEnabled()) { // user = null means existing user.
+      url = trimURL(url);
+      String userID1 = user.getUserID();
+      String toHash = userID1 + "_" + System.currentTimeMillis();
+      String hash = getHash(toHash);
+      keyToEnabledUser.put(hash,user.getId());
+
+
+      String message = "Hi Tamas" + ",<br/><br/>" +
+          "User '" +userID1+
+          "' would like to be a content developer for " + serverProps.getLanguage()+
+          "." +          "<br/>" +
+
+          "Click the link to allow them." +
+          "<br/><br/>" +
+          "Regards, Administrator" ;
+
+      getMailSupport().sendEmail(NP_SERVER,
+          url +"?cd=" + hash
+          ,
+          CONTENT_DEVELOPER_APPROVAL_EMAIL,
+          "gordon.vidaver@ll.mit.edu",
+          "Content Developer approval for " + userID1 + " for " +serverProps.getLanguage(),
+          message,
+          "Click to approve" // link text
+      );
+    }
+    return user;
   }
   /**
    * @see mitll.langtest.client.user.UserTable#showDialog(mitll.langtest.client.LangTestDatabaseAsync)
@@ -1044,8 +1083,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getUserDAO().getUserWhere(id);
   }
 
+  /// TODO : replace with columns on user id table
   Map<String,Long> keyToUser = new HashMap<String, Long>();
-  //Map<String,Long> keyToUser = new HashMap<String, Long>();
+  Map<String,Long> keyToEnabledUser = new HashMap<String, Long>();
 
   /**
    * TODO : set server email
@@ -1067,15 +1107,22 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       keyToUser.put(hash,validUserAndEmail.getId());
 
       String message = "Hi " + user + ",<br/><br/>" +
-          "Click the link below to change your password.";
+          "Click the link below to change your password." +
+          "<br/><br/>" +
+          "Regards, Administrator" ;
+
       getMailSupport().sendEmail(NP_SERVER,
-          url +"?rp=" + hash
+          url +"?" +
+              RP +
+              "=" + hash
           , email,
           REPLY_TO,
           "Password Reset",
-          message, "Reset Password");
+          message,
+          "Reset Password" // link text
+      );
 
-      logger.debug("key map is " +keyToUser);
+      //logger.debug("key map is " +keyToUser);
     }
     else {
       logger.debug("couldn't find user " + user + " and email " +email);
@@ -1083,6 +1130,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       String prefixedMessage = "for " + pathHelper.getInstallPath() + " got " + message;
       logger.debug(prefixedMessage);
       getMailSupport().email(serverProps.getEmailAddress(), "Invalid password reset for " + serverProps.getLanguage(), prefixedMessage);
+    }
+  }
+
+  public Long enableCDUser(String token) {
+    Long aLong = keyToEnabledUser.remove(token);
+    if (aLong == null) {
+      return null;
+    }
+    else {
+      return (db.getUserDAO().enableUser(aLong) ? aLong : -1);
     }
   }
 
@@ -1127,7 +1184,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (valid != null) {
       logger.debug("Sending user email...");
       String message = "Hi " + valid.getUserID() + ",<br/>" +
-          "Your user name is " + valid.getUserID() + ".";
+          "Your user name is " + valid.getUserID() + "." +
+          "<br/><br/>" +
+          "Regards, Administrator";
       getMailSupport().sendEmail(NP_SERVER, // server name
           url // baseURL
           ,
@@ -1135,7 +1194,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           REPLY_TO, // reply email
           "Your user name", // subject
           message,
-          "Click here to return to the site." // token
+          "Click here to return to the site." // link text
       );
     }
     return valid != null;
