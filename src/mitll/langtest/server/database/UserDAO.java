@@ -14,6 +14,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 public class UserDAO extends DAO {
   private static final String DEFECT_DETECTOR = "defectDetector";
@@ -28,6 +29,7 @@ public class UserDAO extends DAO {
   private static final String USER_ID = "userID";
   private static final List<User.Permission> CD_PERMISSIONS = Arrays.asList(User.Permission.QUALITY_CONTROL, User.Permission.RECORD_AUDIO);
   private static final List<User.Permission> EMPTY_PERM = new ArrayList<User.Permission>();
+  private static final String ENABLED = "enabled";
   private long defectDetector;
 
   private static final String ID = "id";
@@ -102,6 +104,7 @@ public class UserDAO extends DAO {
    * @param kind
    * @param ipAddr
    * @return
+   * @see mitll.langtest.server.database.DatabaseImpl#addUser(javax.servlet.http.HttpServletRequest, int, String, int, String, String, String, java.util.Collection)
    */
   public User addUser(String userID, String passwordH, String emailH, User.Kind kind, String ipAddr) {
     User userByID = getUserByID(userID);
@@ -119,7 +122,8 @@ public class UserDAO extends DAO {
     }
     else {
       Collection<User.Permission> perms = (kind == User.Kind.CONTENT_DEVELOPER) ? CD_PERMISSIONS : EMPTY_PERM;
-      long l = addUser(0, "", 0, ipAddr, "", "", userID, false, perms, kind, passwordH, emailH);
+      boolean enabled = (kind != User.Kind.CONTENT_DEVELOPER) || isAdmin(userID);
+      long l = addUser(0, "", 0, ipAddr, "", "", userID, enabled, perms, kind, passwordH, emailH);
       return getUserWhere(l);
     }
   }
@@ -162,7 +166,8 @@ public class UserDAO extends DAO {
               USERS +
               "(" +
               ID +
-              ",age,gender,experience,ipaddr,nativeLang,dialect,userID,enabled," +
+              ",age,gender,experience,ipaddr,nativeLang,dialect,userID," +
+              ENABLED + "," +
               PERMISSIONS + "," +
               KIND + "," +
               PASS + "," +
@@ -204,18 +209,12 @@ public class UserDAO extends DAO {
 
   public boolean updateUser(long id, User.Kind kind, String passwordH, String emailH) {
     try {
-      // there are much better ways of doing this...
-      long max = 0;
-      for (User u : getUsers()) if (u.getId() > max) max = u.getId();
-      // logger.info("addUser : max is " + max + " new user '" + userID + "' age " + age + " gender " + gender + " pass " +passwordH);
       if (passwordH == null) {
-        new Exception().printStackTrace();
+        logger.error("Got null password Hash?", new Exception("empty password hash"));
       }
 
       Connection connection = database.getConnection();
-      PreparedStatement statement;
-
-      statement = connection.prepareStatement(
+      PreparedStatement statement = connection.prepareStatement(
           "UPDATE " + USERS + " SET " +
               KIND + "=?," +
               PASS + "=?," +
@@ -237,6 +236,30 @@ public class UserDAO extends DAO {
     } catch (Exception ee) {
       logger.error("Got " + ee, ee);
       database.logEvent("unk", "update user: " + ee.toString(), 0);
+    }
+    return false;
+  }
+
+  public boolean enableUser(long id) {
+    try {
+      Connection connection = database.getConnection();
+      PreparedStatement statement = connection.prepareStatement(
+          "UPDATE " + USERS + " SET " +
+              ENABLED + "=TRUE" +
+              " WHERE " +
+              ID + "=?");
+      int i = 1;
+      statement.setLong(i++, id);
+
+      int i1 = statement.executeUpdate();
+
+      statement.close();
+      database.closeConnection(connection);
+
+      return i1 != 0;
+    } catch (Exception ee) {
+      logger.error("Got " + ee, ee);
+      database.logEvent("unk", "enableUser: " + ee.toString(), 0);
     }
     return false;
   }
@@ -363,7 +386,7 @@ public class UserDAO extends DAO {
 
     Set<String> expected = new HashSet<String>();
     expected.addAll(Arrays.asList(ID, "age", "gender", "experience",
-        "ipaddr", "nativelang", "dialect", "userid", "timestamp", "enabled"));
+        "ipaddr", "nativelang", "dialect", "userid", "timestamp", ENABLED));
     expected.removeAll(getColumns(USERS));
     if (!expected.isEmpty()) logger.info("adding columns for " + expected);
     for (String missing : expected) {
@@ -379,8 +402,8 @@ public class UserDAO extends DAO {
       if (missing.equalsIgnoreCase("timestamp")) {
         addColumn(connection, "timestamp", "TIMESTAMP AS CURRENT_TIMESTAMP");
       }
-      if (missing.equalsIgnoreCase("enabled")) {
-        addColumn(connection, "enabled", "BOOLEAN");
+      if (missing.equalsIgnoreCase(ENABLED)) {
+        addColumn(connection, ENABLED, "BOOLEAN");
       }
     }
     Collection<String> columns = getColumns(USERS);
@@ -504,7 +527,7 @@ public class UserDAO extends DAO {
       }
 
 
-      boolean isAdmin = userid != null && (admins.contains(userid));
+      boolean isAdmin = isAdmin(userid);
       String userKind = rs.getString(KIND);
 
       long id = rs.getLong(ID);
@@ -529,7 +552,7 @@ public class UserDAO extends DAO {
           rs.getString("dialect"), // dialect
           userID, // dialect
 
-          rs.getBoolean("enabled"),
+          rs.getBoolean(ENABLED),
           isAdmin,
           permissions,
           userKind == null ? User.Kind.UNSET : User.Kind.valueOf(userKind),
@@ -542,6 +565,10 @@ public class UserDAO extends DAO {
       }
     }
     return users;
+  }
+
+  private boolean isAdmin(String userid) {
+    return userid != null && (admins.contains(userid));
   }
 
   public Map<Long, User> getUserMap(boolean getMale) {
