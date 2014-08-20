@@ -75,7 +75,7 @@ public class User extends MiniUser {
     this.passwordHash = passwordH;
     this.emailHash = emailHash;
     this.userKind = userKind;
-    this.enabled = enabled;
+    this.setEnabled(enabled);
     this.admin = isAdmin;
     this.permissions = permissions;
   }
@@ -107,9 +107,11 @@ public class User extends MiniUser {
    */
   public void setNumResults(int numResults) { this.numResults = numResults; }
 
+/*
   public Demographics getDemographics() {
     return demographics;
   }
+*/
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#joinWithDLIUsers(java.util.List)
@@ -165,6 +167,15 @@ public class User extends MiniUser {
 
   public Kind getUserKind() {
     return userKind;
+  }
+
+
+  public boolean isEnabled() {
+    return enabled;
+  }
+
+  public void setEnabled(boolean enabled) {
+    this.enabled = enabled;
   }
 
   public String toString() {
