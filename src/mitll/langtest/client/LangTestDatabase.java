@@ -1,5 +1,6 @@
 package mitll.langtest.client;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.shared.AudioAnswer;
@@ -42,7 +43,7 @@ public interface LangTestDatabase extends RemoteService {
   // user DAO
   long addUser(int age, String gender, int experience, String nativeLang, String dialect, String userID, Collection<User.Permission> permissions);
 
-  User addUser(String userID, String passwordH, String emailH, User.Kind kind);
+  User addUser(String userID, String passwordH, String emailH, User.Kind kind, String url);
 
   List<User> getUsers();
   int userExists(String login);
@@ -131,4 +132,5 @@ public interface LangTestDatabase extends RemoteService {
   List<Event> getEvents();
 
   void resetPassword(String userid, String text, String url);
+  Long enableCDUser(String cdToken);
 }
