@@ -534,6 +534,18 @@ public class DatabaseImpl implements Database {
     getExercises(useFile, lessonPlanFile);
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addUser(int, String, int, String, String, String, java.util.Collection)
+   * @param request
+   * @param age
+   * @param gender
+   * @param experience
+   * @param nativeLang
+   * @param dialect
+   * @param userID
+   * @param permissions
+   * @return
+   */
   public long addUser(HttpServletRequest request,
                       int age, String gender, int experience,
                       String nativeLang, String dialect, String userID, Collection<User.Permission> permissions) {
@@ -541,6 +553,15 @@ public class DatabaseImpl implements Database {
     return addUser(age, gender, experience, ip, nativeLang, dialect, userID, permissions);
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addUser(String, String, String, mitll.langtest.shared.User.Kind)
+   * @param request
+   * @param userID
+   * @param passwordH
+   * @param emailH
+   * @param kind
+   * @return
+   */
   public User addUser(HttpServletRequest request, String userID, String passwordH, String emailH, User.Kind kind) {
     String ip = getIPInfo(request);
     User user = userDAO.addUser(userID, passwordH, emailH, kind, ip);
