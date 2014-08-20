@@ -129,7 +129,7 @@ public interface LangTestDatabaseAsync {
 
   void userExists(String login, String passwordH, AsyncCallback<User> async);
 
-  void addUser(String userID, String passwordH, String emailH, User.Kind kind, AsyncCallback<User> async);
+  void addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, AsyncCallback<User> async);
 
   void resetPassword(String userid, String text, String url, AsyncCallback<Void> asyncCallback);
 
@@ -138,4 +138,6 @@ public interface LangTestDatabaseAsync {
   void getUserIDForToken(String token, AsyncCallback<Long> async);
 
   void changePFor(String token, String first, AsyncCallback<Boolean> asyncCallback);
+
+  void enableCDUser(String cdToken, AsyncCallback<Long> asyncCallback);
 }
