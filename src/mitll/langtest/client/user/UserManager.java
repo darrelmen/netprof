@@ -9,7 +9,6 @@ import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 
-import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -31,7 +30,7 @@ public class UserManager {
   private static final int WEEK_HOURS = DAY_HOURS * 7;
   //private static final int ONE_YEAR = 24 * 365;
 
-  private static final int EXPIRATION_HOURS = WEEK_HOURS;
+  private static final int EXPIRATION_HOURS = 8*WEEK_HOURS;
  // private static final int SHORT_EXPIRATION_HOURS = DAY_HOURS;
 //  private static final int FOREVER_HOURS = ONE_YEAR;
 
@@ -48,9 +47,7 @@ public class UserManager {
   private long userID = NO_USER_SET;
   private String userChosenID = "";
 
-  private final PropertyHandler.LOGIN_TYPE loginType;
   private final String appTitle;
-  private final PropertyHandler props;
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
@@ -61,31 +58,14 @@ public class UserManager {
   public UserManager(UserNotification lt, LangTestDatabaseAsync service, PropertyHandler props) {
     this.userNotification = lt;
     this.service = service;
-    this.props = props;
-    this.loginType = props.getLoginType();
     this.appTitle = props.getAppTitle();
   }
 
   /**
    * @see mitll.langtest.client.LangTest#checkLogin()
    */
-  public void checkLogin() {
-    System.out.println("checkLogin : loginType " + loginType);
-/*    if (loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS)) { // explicit setting of login type
-      anonymousLogin();
-    } else if (loginType.equals(PropertyHandler.LOGIN_TYPE.UNDEFINED) && // no explicit setting, so it's dependent on the mode
-      (props.isGoodwaveMode() || isInitialFlashcardTeacherView())) {   // no login for pron mode
-      anonymousLogin();
-    } else {*/
-      login();
-  //  }
-  }
+  public void checkLogin() { login(); }
 
-/*
-  private boolean isInitialFlashcardTeacherView() {
-    return (props.isFlashcardTeacherView() && !props.isFlashCard());
-  }
-*/
 
   /**
    * @see #checkLogin()
@@ -154,33 +134,6 @@ public class UserManager {
     }
     //console("getPermissionsAndSetUser.onSuccess : " + user);
   }
-
-  /**
-   * @see mitll.langtest.client.LangTest#checkLogin
-   * @deprecated
-   */
-/*  private void anonymousLogin() {
-    int user = getUser();
-    if (user != NO_USER_SET) {
-      //System.out.println("UserManager.anonymousLogin : current user : " + user);
-      rememberAudioType();
-      userNotification.gotUser(user);
-    }
-    else {
-      System.out.println("UserManager.anonymousLogin : make new user, since user = " + user);
-
-      addAnonymousUser();
-  }
-  }*/
-
-/*
-  private void addAnonymousUser() {
-    StudentDialog studentDialog = new StudentDialog(service,props,this,userNotification);
-    System.out.println("UserManager.addAnonymousUser : adding anonymous user");
-
-    studentDialog.addUser(89, "male", 0,"", new ArrayList<User.Permission>());
-  }
-*/
 
   /**
    * For display purposes
