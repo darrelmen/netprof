@@ -81,12 +81,15 @@ public class PropertyHandler {
   private static final String ALLOW_PLUS_IN_URL = "allowPlusInURL";
   private static final String CLASSROOM_MODE = "classroomMode";
   private static final String SHOW_SPECTROGRAM = "spectrogram";
+  public static final String RP = "rp";
   private boolean spectrogram = false;
   private static final String NO_MODEL = "noModel";
   private static final String INSTRUMENT = "instrument";
   private boolean instrument = true; // by default we instrument for now 4/3/14
   private String resetPassToken;
+  private String cdEnableToken;
 
+  // right now always true
   public boolean doInstrumentation() {
     return instrument;
   }
@@ -310,11 +313,14 @@ public class PropertyHandler {
       turkID = turkParam;
     }
 
-    String resetPasswordID = Window.Location.getParameter("rp");
-
-    //System.out.println("token " + resetPasswordID);
+    String resetPasswordID = Window.Location.getParameter(RP);
     if (resetPasswordID != null) {
       resetPassToken = resetPasswordID;
+    }
+
+    String cdEnable = Window.Location.getParameter("cd");
+    if (cdEnable != null) {
+      cdEnableToken = cdEnable;
     }
     gameTimeSeconds = getInt(Window.Location.getParameter(GAME_TIME), gameTimeSeconds, REPEATS);
 
@@ -525,7 +531,15 @@ public class PropertyHandler {
     return noModel;
   }
 
+  /**
+   * @see LangTest#showLogin()
+   * @return
+   */
   public String getResetPassToken() {
     return resetPassToken;
+  }
+
+  public String getCdEnableToken() {
+    return cdEnableToken;
   }
 }
