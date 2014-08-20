@@ -21,6 +21,7 @@ import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
@@ -425,6 +426,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     final String resetPassToken = props.getResetPassToken();
     if (resetPassToken != null && !resetPassToken.equals(staleToken)) {
+      staleToken = resetPassToken;
       service.getUserIDForToken(resetPassToken, new AsyncCallback<Long>() {
         @Override
         public void onFailure(Throwable caught) {}
@@ -433,7 +435,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         public void onSuccess(Long result) {
           if (result == null || result < 0) {
             System.out.println("token " + resetPassToken + " is stale. Showing normal view");
-            staleToken = resetPassToken;
      //       firstRow.add(new Heading(4,"Password reset has been done before."));
             populateBelowHeader(verticalContainer,firstRow);
           }
@@ -449,6 +450,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
       RootPanel.get().add(verticalContainer);
       flashcard.setCogVisible(false);
+
+      return true;
+    }
+
+
+    final String cdToken = props.getCdEnableToken();
+    if (cdToken != null && !cdToken.equals(staleToken)) {
+      handleCDToken(verticalContainer, firstRow, cdToken);
 
       return true;
     }
@@ -469,6 +478,41 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     flashcard.setCogVisible(true);
     return false;
+  }
+
+  private void handleCDToken(final Container verticalContainer, final Panel firstRow, final String cdToken) {
+    service.enableCDUser(cdToken, new AsyncCallback<Long>() {
+      @Override
+      public void onFailure(Throwable caught) {
+      }
+
+      @Override
+      public void onSuccess(Long result) {
+        staleToken = cdToken;
+        if (result == null || result < 0) {
+          System.out.println("enable - token " + cdToken + " is stale. Showing normal view");
+          //       firstRow.add(new Heading(4,"Password reset has been done before."));
+          populateBelowHeader(verticalContainer, firstRow);
+        } else {
+          //Panel content = new UserPassLogin(service, getProps(), userManager, eventRegistration).getResetPassword(resetPassToken);
+          firstRow.add(new Heading(2, "OK, content developer has been approved."));
+          // content.getElement().setId("ResetPassswordContent");
+          verticalContainer.getElement().getStyle().setPaddingLeft(0, Style.Unit.PX);
+          verticalContainer.getElement().getStyle().setPaddingRight(0, Style.Unit.PX);
+
+          Timer t = new Timer() {
+            @Override
+            public void run() {
+              Window.Location.reload();
+            }
+          };
+          t.schedule(3000);
+        }
+      }
+    });
+
+    RootPanel.get().add(verticalContainer);
+    flashcard.setCogVisible(false);
   }
 
   private Panel makeFirstTwoRows(Container verticalContainer) {
