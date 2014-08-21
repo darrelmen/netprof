@@ -11,6 +11,7 @@ import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.InlineLabel;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Node;
@@ -27,6 +28,7 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.UriUtils;
+import com.google.gwt.typedarrays.shared.ArrayBuffer;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -48,6 +50,7 @@ import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.PagingContainer;
+import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
@@ -55,6 +58,7 @@ import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.scoring.SimplePostAudioRecordButton;
 import mitll.langtest.client.sound.AudioControl;
 import mitll.langtest.client.sound.PlayAudioPanel;
+import mitll.langtest.client.sound.PlayAudioWidget;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
@@ -67,6 +71,8 @@ import mitll.langtest.shared.custom.UserList;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -662,6 +668,7 @@ public class Navigation implements RequiresResize {
      contentPanel.getElement().setId("contentPanel");
      final HorizontalPanel optionPanel = new HorizontalPanel();
 	 final FlowPanel forSents = new FlowPanel();
+	 final FlowPanel forPhoneScores = new FlowPanel();
 	 forSents.getElement().getStyle().setProperty("marginBottom", "10px");
      
      final ListBox availableDialogs = new ListBox();
@@ -712,12 +719,12 @@ public class Navigation implements RequiresResize {
     			}
     			availableSpeakers.getElement().removeAttribute("disabled");
     		 }
-    		 mkNewDialog(availableSpeakers, availableDialogs, forSents, dialogIndex, yesDia, regular, false);
+    		 mkNewDialog(availableSpeakers, availableDialogs, forSents, forPhoneScores, dialogIndex, yesDia, regular, false);
     	 }
      });
      availableSpeakers.addChangeHandler(new ChangeHandler() {
     	 public void onChange(ChangeEvent event){
-    		 mkNewDialog(availableSpeakers, availableDialogs, forSents, dialogIndex, yesDia, regular, false);
+    		 mkNewDialog(availableSpeakers, availableDialogs, forSents, forPhoneScores, dialogIndex, yesDia, regular, false);
     	 }
      });
      optionPanel.add(availableDialogs);
@@ -730,12 +737,12 @@ public class Navigation implements RequiresResize {
      showDiaPanel.add(noDia);
      yesDia.addClickHandler(new ClickHandler(){
     	 public void onClick(ClickEvent event){
-    		 mkNewDialog(availableSpeakers, availableDialogs, forSents, dialogIndex, yesDia, regular, false);
+    		 mkNewDialog(availableSpeakers, availableDialogs, forSents, forPhoneScores, dialogIndex, yesDia, regular, false);
     	 }
      });
      noDia.addClickHandler(new ClickHandler(){
     	 public void onClick(ClickEvent event){
-    		 mkNewDialog(availableSpeakers, availableDialogs, forSents, dialogIndex, yesDia, regular, false);
+    		 mkNewDialog(availableSpeakers, availableDialogs, forSents, forPhoneScores, dialogIndex, yesDia, regular, false);
     	 }
      });
      optionPanel.add(showDiaPanel);
@@ -747,12 +754,12 @@ public class Navigation implements RequiresResize {
      audioSpeedPanel.add(slow);
      regular.addClickHandler(new ClickHandler(){
     	 public void onClick(ClickEvent event){
-    		 mkNewDialog(availableSpeakers, availableDialogs, forSents, dialogIndex, yesDia, regular, false);
+    		 mkNewDialog(availableSpeakers, availableDialogs, forSents, forPhoneScores, dialogIndex, yesDia, regular, false);
     	 }
      });
      slow.addClickHandler(new ClickHandler(){
     	 public void onClick(ClickEvent event){
-    		 mkNewDialog(availableSpeakers, availableDialogs, forSents, dialogIndex, yesDia, regular, false);
+    		 mkNewDialog(availableSpeakers, availableDialogs, forSents, forPhoneScores, dialogIndex, yesDia, regular, false);
     	 }
      });
      optionPanel.add(audioSpeedPanel);
@@ -763,7 +770,7 @@ public class Navigation implements RequiresResize {
     		    Window.alert("Select a dialog and part first!");
     		 }
     		 else
-    		    mkNewDialog(availableSpeakers, availableDialogs, forSents, dialogIndex, yesDia, regular, true);
+    		    mkNewDialog(availableSpeakers, availableDialogs, forSents, forPhoneScores, dialogIndex, yesDia, regular, true);
     	 }
      });
      
@@ -771,23 +778,30 @@ public class Navigation implements RequiresResize {
 
      startDialog.getElement().getStyle().setProperty("fontSize", "150%");
      availableDialogs.getElement().getStyle().setProperty("margin", "10px");
+     forPhoneScores.getElement().getStyle().setProperty("margin", "10px");
+     HorizontalPanel sentsAndPhones = new HorizontalPanel();
+     VerticalPanel diaAndStart = new VerticalPanel();
+     diaAndStart.add(forSents);
+     diaAndStart.add(startDialog);
      contentPanel.add(optionPanel);
-     contentPanel.add(forSents);
-     contentPanel.add(startDialog);
+     sentsAndPhones.add(diaAndStart);
+     sentsAndPhones.add(forPhoneScores);
+     contentPanel.add(sentsAndPhones);
+     //contentPanel.add(startDialog);
   }
   
-  public void mkNewDialog(ListBox availableSpeakers, ListBox availableDialogs, FlowPanel forSents, HashMap<Integer, String> dialogIndex, RadioButton yesDia, RadioButton regular, boolean fromButton){
+  public void mkNewDialog(ListBox availableSpeakers, ListBox availableDialogs, FlowPanel forSents, FlowPanel forPhoneScores, HashMap<Integer, String> dialogIndex, RadioButton yesDia, RadioButton regular, boolean fromButton){
 	 if((availableSpeakers.getSelectedIndex() < 1) || (availableDialogs.getSelectedIndex() < 1)){
 		 forSents.clear();
+		 forPhoneScores.clear();
 		 return;
 	 }
      else{
-    	 //resetPlayer();
 		 forSents.clear();
-		 Grid sentPanel = displayDialog(dialogIndex.get(availableDialogs.getSelectedIndex()), availableSpeakers.getValue(availableSpeakers.getSelectedIndex()), forSents, yesDia.getValue(), regular.getValue());
+		 forPhoneScores.clear();
+		 Grid sentPanel = displayDialog(dialogIndex.get(availableDialogs.getSelectedIndex()), availableSpeakers.getValue(availableSpeakers.getSelectedIndex()), forSents, forPhoneScores, yesDia.getValue(), regular.getValue());
 		 if(fromButton)
 		    setupPlayOrder(sentPanel, 0, sentPanel.getRowCount());
-		 //contentPanel.add(forSents);
      }
   }
   
@@ -847,7 +861,7 @@ public class Navigation implements RequiresResize {
   }
   
   
-  private SimplePostAudioRecordButton getFinalRecordButton(String sent, final Button continueButton, final Image check, final Image x, final Image somethingIsHappening, final ArrayList<HTML> scoreElements, final HTML score, final HTML avg, final FlowPanel rp){
+  private SimplePostAudioRecordButton getFinalRecordButton(String sent, final Button continueButton, final Image check, final Image x, final Image somethingIsHappening, final ArrayList<HTML> scoreElements, final HTML score, final HTML avg, final FlowPanel rp, final FlowPanel pp){
 	  SimplePostAudioRecordButton s = new SimplePostAudioRecordButton(controller, service, sent) {
 		  
 	      @Override
@@ -889,14 +903,14 @@ public class Navigation implements RequiresResize {
 	  return s;
   }
   
-
-  
-  private Grid displayDialog(final String dialog, String part, Panel cp, boolean showPart, boolean regAudio){
+  private Grid displayDialog(final String dialog, String part, FlowPanel cp, final FlowPanel pp, boolean showPart, boolean regAudio){
 
 	  HashMap<String, String> sentToAudioPath = regAudio ? getSentToAudioPath() : getSentToSlowAudioPath();
 	  HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSpeaker = getDialogToSentIndexToSpeaker();
 	  final HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSent = getDialogToSentIndexToSent();
 	  HashMap<String, HashMap<String, Integer>> dialogToSpeakerToLast = getDialogToSpeakerToLast();
+	  final HashMap<String, ArrayList<Float>> phonesToScores = new HashMap<String, ArrayList<Float>>();
+	  final HashMap<String, Anchor> phoneToAudioExample = getPlayAudioWidget();
 	  int sentIndex = 0;
 	  final Grid sentPanel = new Grid(dialogToSentIndexToSent.get(dialog).size(), 9);
 	  final ArrayList<HTML> scoreElements = new ArrayList<HTML>();
@@ -936,18 +950,13 @@ public class Navigation implements RequiresResize {
 			     recordButton = getRecordButton(dialogToSentIndexToSent.get(dialog).get(sentIndex), score, continueButton, check, x, somethingIsHappening);
 			  }
 			  else{
-				 recordButton = getFinalRecordButton(dialogToSentIndexToSent.get(dialog).get(sentIndex), continueButton, check, x, somethingIsHappening, scoreElements, score, avg, rp);
+				 recordButton = getFinalRecordButton(dialogToSentIndexToSent.get(dialog).get(sentIndex), continueButton, check, x, somethingIsHappening, scoreElements, score, avg, rp, pp);
 				  
 				  continueButton.addClickHandler(new ClickHandler() {
 					  @Override
 					  public void onClick(ClickEvent e){ //think about how to add colors at this point
 						  if(continueButton.isEnabled()){
 						     rp.setVisible(true);
-						     //if(score.equals("-0.0")){
-						     //   somethingIsHappening.setVisible(true);
-						     //   check.setVisible(false);
-						     //   x.setVisible(false);
-						     //}
 						     for(HTML elt : scoreElements){
 						    	 elt.setVisible(true);
 						     }
@@ -955,6 +964,31 @@ public class Navigation implements RequiresResize {
 						    	 sentPanel.setWidget(sentIndexes.get(i),  0, recoButtons.get(i).getSentColors(((dialogToSentIndexToSent.get(dialog).get(sentIndexes.get(i))))));
 						    	 sentPanel.setWidget(sentIndexes.get(i), 8, recoButtons.get(i).getScoreBar(Float.parseFloat(scoreElements.get(i).getText())));
 						     }
+						     for(SimplePostAudioRecordButton recordButton: recoButtons){
+						    	 Map<String, Float> pts = recordButton.getPhoneScores();
+						    	 for(String phone : pts.keySet()){
+						    		 if(! phonesToScores.containsKey(phone)){
+						    			 phonesToScores.put(phone, new ArrayList<Float>());
+						    		 }
+						    		 phonesToScores.get(phone).add(pts.get(phone));
+						    	 }
+						     }
+						     ArrayList<String> phones = new ArrayList<String>(phonesToScores.keySet());
+						     Collections.sort(phones, new Comparator<String>(){
+						    	 @Override
+						    	 public int compare(String s1, String s2){
+						    		 return (int) (1000*(avg(phonesToScores.get(s2)) - avg(phonesToScores.get(s1))));
+						    	 }
+						     });
+						     Grid phoneScores = new Grid(phones.size(), 3);
+						     SimpleColumnChart chart = new SimpleColumnChart();
+						     for(int pi = 0; pi < phones.size(); pi++){
+						    	 String currPhone = phones.get(pi);
+						    	 phoneScores.setWidget(pi, 0, phoneToAudioExample.get(currPhone));
+						    	 phoneScores.setWidget(pi, 1, new HTML(currPhone));
+						    	 phoneScores.setWidget(pi, 2, getScoreBar(phonesToScores.get(currPhone), chart));
+						     }
+						     pp.add(phoneScores);
 						  }
 					  }
 				  });
@@ -1013,6 +1047,29 @@ public class Navigation implements RequiresResize {
 		  }
 	  });
 	  return sentPanel;
+  }
+  
+  private float avg(ArrayList<Float> scores){
+	  float sum = 0;
+	  for(float f: scores){
+		  sum += f;
+	  }
+	  return sum/scores.size();
+  }
+  
+  public DivWidget getScoreBar(ArrayList<Float> scores, SimpleColumnChart chart){
+	  float score = avg(scores);
+	  int iscore = (int) (100f * score);
+	  final int HEIGHT = 18;
+	  DivWidget bar = new DivWidget();
+	  TooltipHelper tooltipHelper = new TooltipHelper();
+	  bar.setWidth(iscore + "px");
+	  bar.setHeight(HEIGHT + "px");
+	  bar.getElement().getStyle().setBackgroundColor(chart.getColor(score));
+	  bar.getElement().getStyle().setMarginTop(2, Style.Unit.PX);
+
+	  tooltipHelper.createAddTooltip(bar, "Score " + score + "%", Placement.BOTTOM);
+	  return bar;
   }
   
   private void setupPlayOrder(final Grid sentPanel, final int currIndex, final int stop){
@@ -1138,6 +1195,62 @@ public class Navigation implements RequiresResize {
 	  m.put("Zàijiàn.", "/72/slow_1403792425728_by_8.wav");
 	  
 	  return m;
+  }
+  
+  private HashMap<String, Anchor> getPlayAudioWidget(){
+	  HashMap<String, Anchor> pw = new HashMap<String, Anchor>();
+	  PlayAudioWidget w = new PlayAudioWidget();
+	  pw.put("a1",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("a2",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("a3",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("a4",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("b",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("c",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("ch",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("d",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("e1",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("e2",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("e3",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("e4",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("f",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("g",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("h",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("i1",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("i2",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("i3",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("i4",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("j",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("k",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("l",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("m",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("n",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("ng",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("o1",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("o2",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("o3",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("o4",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("p",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("q",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("r",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("s",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("sh",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("sil",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("t",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("u1",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("u2",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("u3",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("u4",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("uu1",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("uu2",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("uu3",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("uu4",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("unk",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("w",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("x",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("y",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("z",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  pw.put("zh",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+	  return pw;
   }
   
   private HashMap<String, HashMap<String, Integer>> getDialogToSpeakerToLast(){
