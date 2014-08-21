@@ -2,8 +2,11 @@ package mitll.langtest.client.scoring;
 
 import java.util.List;
 
+import java.util.Map;
+
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.google.gwt.dev.util.collect.HashMap;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Timer;
@@ -11,6 +14,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import mitll.langtest.client.LangTest;
@@ -238,8 +242,11 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
 	  return colorfulSent;
   }
   
+  public Map<String, Float> getPhoneScores(){
+	  return lastResult.getPretestScore().getPhoneScores();
+  }
+  
   public DivWidget getScoreBar(float score){
-	  System.out.println("THERE");
 	  int iscore = (int) (100f * score);
 	  final int HEIGHT = 18;
 	  DivWidget bar = new DivWidget();
