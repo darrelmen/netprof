@@ -1,5 +1,6 @@
 package mitll.langtest.client.user;
 
+import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
@@ -98,7 +99,6 @@ public class UserManager {
       getPermissionsAndSetUser(user);
     }
     else {
-      //new StudentDialog(service, props, this, userNotification).displayLoginBox();
       userNotification.showLogin();
     }
   }
@@ -119,7 +119,7 @@ public class UserManager {
    * TODO : instead have call to get permissions for a user.
    * @param user
    * @see #login()
-   * @see #storeUser(long, String, String, mitll.langtest.client.PropertyHandler.LOGIN_TYPE)
+   * @see #storeUser
    */
   private void getPermissionsAndSetUser(final int user) {
     console("getPermissionsAndSetUser : " + user);
@@ -133,7 +133,17 @@ public class UserManager {
 
       @Override
       public void onSuccess(User result) {
-        gotNewUser(result);
+        System.out.println("UserManager.getPermissionsAndSetUser : onSuccess " + user + " : " + result);
+
+        if (loginType == PropertyHandler.LOGIN_TYPE.ANONYMOUS && result.getUserKind() != User.Kind.ANONYMOUS) {
+          clearUser();
+          addAnonymousUser();
+        } else if (loginType != PropertyHandler.LOGIN_TYPE.ANONYMOUS && result.getUserKind() == User.Kind.ANONYMOUS) {
+          clearUser();
+          userNotification.showLogin();
+        } else {
+          gotNewUser(result);
+        }
       }
     });
   }
@@ -164,14 +174,17 @@ public class UserManager {
     //console("getPermissionsAndSetUser.onSuccess : " + user);
   }
 
-  /* @see #checkLogin()
+  /**
+   * So if there's a current user, ask the server about them.
+   * If not add a new anonymous user.
+   * @see #checkLogin()
    * @see mitll.langtest.client.LangTest#checkLogin
    */
   private void anonymousLogin() {
     int user = getUser();
     if (user != NO_USER_SET) {
       //System.out.println("UserManager.anonymousLogin : current user : " + user);
-      rememberAudioType();
+      rememberAudioType(); // TODO : necessary?
     //  userNotification.gotUser(user);
       getPermissionsAndSetUser(user);
     } else {
@@ -182,42 +195,25 @@ public class UserManager {
   }
 
   private void addAnonymousUser() {
-   // StudentDialog studentDialog = new StudentDialog(service,props,this,userNotification);
     System.out.println("UserManager.addAnonymousUser : adding anonymous user");
 
-    /*studentDialog.*/addUser(89, "male", 0,"", PropertyHandler.LOGIN_TYPE.ANONYMOUS ,Result.AUDIO_TYPE_PRACTICE,
-        new ArrayList<User.Permission>());
-  }
-
-  private void addUser(int age, String gender, int monthsOfExperience, String dialect,
-                       final PropertyHandler.LOGIN_TYPE loginType,
-                       final String audioType, Collection<User.Permission> permissions) {
-    AsyncCallback<Long> async = new AsyncCallback<Long>() {
+    service.addUser("anonymous", "", "", User.Kind.ANONYMOUS, Window.Location.getHref(), "", new AsyncCallback<User>() {
+      @Override
       public void onFailure(Throwable caught) {
-        Window.alert("addUser : Couldn't contact server.");
+
       }
 
-      public void onSuccess(Long result) {
-        System.out.println("addUser : server result is " + result);
-        setDefaultControlValues(result.intValue());
-        storeUser(result, audioType, "" + result, loginType);
+      @Override
+      public void onSuccess(User result) {
+        setDefaultControlValues((int)result.getId());
+        storeUser(result, Result.AUDIO_TYPE_PRACTICE);
       }
-    };
-    addUser(age, gender, monthsOfExperience, dialect, "", "", permissions, async);
-  }
-
-  private void addUser(int age, String gender, int monthsOfExperience, String dialect, String nativeLang, String userID,
-                       Collection<User.Permission> permissions, AsyncCallback<Long> async) {
-    System.out.println("addUser : userID is " + userID);
-
-    service.addUser(age,
-        gender,
-        monthsOfExperience, nativeLang, dialect, userID, permissions, async);
+    });
   }
 
   private void setDefaultControlValues(int user) {
     ControlState controlState = new ControlState();
-    controlState.setStorage(new KeyStorage(props.getLanguage(),user));
+    controlState.setStorage(new KeyStorage(props.getLanguage(), user));
     controlState.setAudioOn(true);
     controlState.setAudioFeedbackOn(true);
   }
@@ -319,12 +315,6 @@ public class UserManager {
       clearUser();
       expired = true;
     }
-    // this seems like a bad idea if we can login as data collector or as anonymous...
-    /* else if (getLoginTypeFromStorage() != loginType) {
-      System.out.println("current login type : " + getLoginTypeFromStorage() + " vs mode " + loginType);
-      clearUser(userID1);
-      expired = true;
-    }*/
     return expired;
   }
 
@@ -413,7 +403,7 @@ public class UserManager {
    * @param userChosenID
    * @see StudentDialog#addUser
    */
-  void storeUser(long sessionID, String audioType, String userChosenID, PropertyHandler.LOGIN_TYPE userType) {
+/*  void storeUser(long sessionID, String audioType, String userChosenID, PropertyHandler.LOGIN_TYPE userType) {
     System.out.println("storeUser : user now " + sessionID + " audio type '" + audioType +"' id " +userChosenID + " type " +userType);
     final long DURATION = getUserSessionDuration();
     long futureMoment = getUserSessionEnd(DURATION);
@@ -438,7 +428,7 @@ public class UserManager {
       this.userChosenID = userChosenID;
     //  userNotification.gotUser(sessionID);
     }
-  }
+  }*/
 
   /**
    * @see mitll.langtest.client.user.UserPassLogin#storeUser(mitll.langtest.shared.User)
