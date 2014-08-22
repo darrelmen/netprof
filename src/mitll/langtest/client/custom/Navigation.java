@@ -917,8 +917,7 @@ public class Navigation implements RequiresResize {
 	  HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSpeaker = getDialogToSentIndexToSpeaker();
 	  final HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSent = getDialogToSentIndexToSent();
 	  HashMap<String, HashMap<String, Integer>> dialogToSpeakerToLast = getDialogToSpeakerToLast();
-	  final HashMap<String, ArrayList<Float>> phonesToScores = new HashMap<String, ArrayList<Float>>();
-	  final HashMap<String, PlayAudioPanel> phoneToAudioExample = getPlayAudioWidget();
+
 	  int sentIndex = 0;
 	  final Grid sentPanel = new Grid(dialogToSentIndexToSent.get(dialog).size(), 9);
 	  final ArrayList<HTML> scoreElements = new ArrayList<HTML>();
@@ -963,80 +962,9 @@ public class Navigation implements RequiresResize {
 				  
 				  continueButton.addClickHandler(new ClickHandler() {
 					  @Override
-					  public void onClick(ClickEvent e){ //think about how to add colors at this point
+					  public void onClick(ClickEvent e){ 
 						  if(continueButton.isEnabled()){
-						     rp.setVisible(true);
-						     for(HTML elt : scoreElements){
-						    	 elt.setVisible(true);
-						     }
-						     for(int i = 0; i < sentIndexes.size(); i++){
-						    	 sentPanel.setWidget(sentIndexes.get(i),  0, recoButtons.get(i).getSentColors(((dialogToSentIndexToSent.get(dialog).get(sentIndexes.get(i))))));
-						    	 sentPanel.setWidget(sentIndexes.get(i), 8, recoButtons.get(i).getScoreBar(Float.parseFloat(scoreElements.get(i).getText())));
-						     }
-						     for(SimplePostAudioRecordButton recordButton: recoButtons){
-						    	 Map<String, Float> pts = recordButton.getPhoneScores();
-						    	 for(String phone : pts.keySet()){
-						    		 if(! phonesToScores.containsKey(phone)){
-						    			 phonesToScores.put(phone, new ArrayList<Float>());
-						    		 }
-						    		 phonesToScores.get(phone).add(pts.get(phone));
-						    	 }
-						     }
-						     ArrayList<String> preFilteredPhones = new ArrayList<String>(phonesToScores.keySet());
-						     ArrayList<String> phones = new ArrayList<String>();
-						     for(String phone : preFilteredPhones){
-						    	 if(phonesToScores.get(phone).size() > 1)
-						    		 phones.add(phone);
-						     }
-						     if(phones.size() < 10){ //strategy 2, if there aren't enough phone repeats
-						    	 phones.clear();
-						    	 for(String phone : preFilteredPhones){
-						    		 if(avg(phonesToScores.get(phone)) > 0.1)
-						    			 phones.add(phone);
-						    	 }
-						    	 System.out.println("Falling back to cropping worst phones");
-						     }
-						     else
-						    	 System.out.println("Filtering out phones with only one pronunication");
-						     Collections.sort(phones, new Comparator<String>(){
-						    	 @Override
-						    	 public int compare(String s1, String s2){
-						    		 return (int) (1000*(avg(phonesToScores.get(s2)) - avg(phonesToScores.get(s1))));
-						    	 }
-						     });
-						     Grid goodPhoneScores = new Grid(5, 2); //the magic number 5!!!
-						     SimpleColumnChart chart = new SimpleColumnChart();
-						     for(int pi = 0; pi < 5; pi++){
-						    	 String currPhone = phones.get(pi);
-						    	 PlayAudioPanel audiWid = phoneToAudioExample.get(currPhone);
-						    	 audiWid.setMinWidth(50);
-						    	 audiWid.getElement().getStyle().setWidth(50, Style.Unit.PX);
-						    	 goodPhoneScores.setWidget(pi, 0, audiWid);
-						    	 goodPhoneScores.setWidget(pi, 1, getScoreBar(phonesToScores.get(currPhone), chart));
-						     }
-						     int numToShow = 5;
-						     Grid badPhoneScores = new Grid(numToShow, 2);
-						     for(int pi = phones.size() -1; pi > phones.size()-numToShow-1; pi--){
-						    	 String currPhone = phones.get(pi);
-						    	 PlayAudioPanel audiWid = phoneToAudioExample.get(currPhone);
-						    	 audiWid.setMinWidth(50);
-						    	 audiWid.getElement().getStyle().setWidth(50, Style.Unit.PX);
-						    	 badPhoneScores.setWidget(numToShow-(phones.size()-pi), 0, audiWid);
-						    	 badPhoneScores.setWidget(numToShow-(phones.size()-pi), 1, getScoreBar(phonesToScores.get(currPhone), chart));
-						     }
-						     HTML goodPhonesTitle = new HTML("Some Sounds You Pronounced Well");
-						     goodPhonesTitle.getElement().getStyle().setProperty("fontSize", "130%");
-						     goodPhonesTitle.getElement().getStyle().setProperty("color", "#048500");
-						     goodPhonesTitle.getElement().getStyle().setProperty("marginBottom", "10px");
-						     goodPhonePanel.add(goodPhonesTitle);
-						     goodPhonePanel.add(goodPhoneScores);
-						     HTML badPhonesTitle = new HTML("Some Sounds You May Need To Improve");
-						     badPhonesTitle.getElement().getStyle().setProperty("fontSize", "130%");
-						     badPhonesTitle.getElement().getStyle().setProperty("color", "#AD0000");
-						     badPhonesTitle.getElement().getStyle().setProperty("marginBottom", "10px");
-						     badPhonePanel.add(badPhonesTitle);
-						     badPhonePanel.add(badPhoneScores);
-						     
+							  displayResults(dialog, scoreElements, sentIndexes, dialogToSentIndexToSent, recoButtons, sentPanel, rp, goodPhonePanel, badPhonePanel);
 						  }
 					  }
 				  });
@@ -1097,6 +1025,82 @@ public class Navigation implements RequiresResize {
 		  }
 	  });
 	  return sentPanel;
+  }
+  
+  private void displayResults(String dialog, ArrayList<HTML> scoreElements, ArrayList<Integer> sentIndexes, HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSent, ArrayList<SimplePostAudioRecordButton> recoButtons, Grid sentPanel, FlowPanel rp, FlowPanel goodPhonePanel, FlowPanel badPhonePanel){
+	     final HashMap<String, ArrayList<Float>> phonesToScores = new HashMap<String, ArrayList<Float>>();
+	     HashMap<String, PlayAudioPanel> phoneToAudioExample = getPlayAudioWidget();
+	     rp.setVisible(true);
+	     for(HTML elt : scoreElements){
+	    	 elt.setVisible(true);
+	     }
+	     for(int i = 0; i < sentIndexes.size(); i++){
+	    	 sentPanel.setWidget(sentIndexes.get(i),  0, recoButtons.get(i).getSentColors(((dialogToSentIndexToSent.get(dialog).get(sentIndexes.get(i))))));
+	    	 sentPanel.setWidget(sentIndexes.get(i), 8, recoButtons.get(i).getScoreBar(Float.parseFloat(scoreElements.get(i).getText())));
+	     }
+	     for(SimplePostAudioRecordButton recordButton: recoButtons){
+	    	 Map<String, Float> pts = recordButton.getPhoneScores();
+	    	 for(String phone : pts.keySet()){
+	    		 if(! phonesToScores.containsKey(phone)){
+	    			 phonesToScores.put(phone, new ArrayList<Float>());
+	    		 }
+	    		 phonesToScores.get(phone).add(pts.get(phone));
+	    	 }
+	     }
+	     ArrayList<String> preFilteredPhones = new ArrayList<String>(phonesToScores.keySet());
+	     ArrayList<String> phones = new ArrayList<String>();
+	     for(String phone : preFilteredPhones){
+	    	 if(phonesToScores.get(phone).size() > 1)
+	    		 phones.add(phone);
+	     }
+	     if(phones.size() < 10){ //strategy 2, if there aren't enough phone repeats
+	    	 phones.clear();
+	    	 for(String phone : preFilteredPhones){
+	    		 if(avg(phonesToScores.get(phone)) > 0.1)
+	    			 phones.add(phone);
+	    	 }
+	    	 System.out.println("Falling back to cropping worst phones");
+	     }
+	     else
+	    	 System.out.println("Filtering out phones with only one pronunication");
+	     Collections.sort(phones, new Comparator<String>(){
+	    	 @Override
+	    	 public int compare(String s1, String s2){
+	    		 return (int) (1000*(avg(phonesToScores.get(s2)) - avg(phonesToScores.get(s1))));
+	    	 }
+	     });
+	     Grid goodPhoneScores = new Grid(5, 2); //the magic number 5!!!
+	     SimpleColumnChart chart = new SimpleColumnChart();
+	     for(int pi = 0; pi < 5; pi++){
+	    	 String currPhone = phones.get(pi);
+	    	 PlayAudioPanel audiWid = phoneToAudioExample.get(currPhone);
+	    	 audiWid.setMinWidth(50);
+	    	 audiWid.getElement().getStyle().setWidth(50, Style.Unit.PX);
+	    	 goodPhoneScores.setWidget(pi, 0, audiWid);
+	    	 goodPhoneScores.setWidget(pi, 1, getScoreBar(phonesToScores.get(currPhone), chart));
+	     }
+	     int numToShow = 5;
+	     Grid badPhoneScores = new Grid(numToShow, 2);
+	     for(int pi = phones.size() -1; pi > phones.size()-numToShow-1; pi--){
+	    	 String currPhone = phones.get(pi);
+	    	 PlayAudioPanel audiWid = phoneToAudioExample.get(currPhone);
+	    	 audiWid.setMinWidth(50);
+	    	 audiWid.getElement().getStyle().setWidth(50, Style.Unit.PX);
+	    	 badPhoneScores.setWidget(numToShow-(phones.size()-pi), 0, audiWid);
+	    	 badPhoneScores.setWidget(numToShow-(phones.size()-pi), 1, getScoreBar(phonesToScores.get(currPhone), chart));
+	     }
+	     HTML goodPhonesTitle = new HTML("Some Sounds You Pronounced Well");
+	     goodPhonesTitle.getElement().getStyle().setProperty("fontSize", "130%");
+	     goodPhonesTitle.getElement().getStyle().setProperty("color", "#048500");
+	     goodPhonesTitle.getElement().getStyle().setProperty("marginBottom", "10px");
+	     goodPhonePanel.add(goodPhonesTitle);
+	     goodPhonePanel.add(goodPhoneScores);
+	     HTML badPhonesTitle = new HTML("Some Sounds You May Need To Improve");
+	     badPhonesTitle.getElement().getStyle().setProperty("fontSize", "130%");
+	     badPhonesTitle.getElement().getStyle().setProperty("color", "#AD0000");
+	     badPhonesTitle.getElement().getStyle().setProperty("marginBottom", "10px");
+	     badPhonePanel.add(badPhonesTitle);
+	     badPhonePanel.add(badPhoneScores);
   }
   
   private float avg(ArrayList<Float> scores){
