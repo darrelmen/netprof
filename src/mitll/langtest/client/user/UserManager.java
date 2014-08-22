@@ -2,13 +2,18 @@ package mitll.langtest.client.user;
 
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Cookies;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.BrowserCheck;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.custom.KeyStorage;
+import mitll.langtest.client.flashcard.ControlState;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 
 /**
@@ -47,7 +52,9 @@ public class UserManager {
   private long userID = NO_USER_SET;
   private String userChosenID = "";
 
+  private final PropertyHandler.LOGIN_TYPE loginType;
   private final String appTitle;
+  private final PropertyHandler props;
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
@@ -58,14 +65,26 @@ public class UserManager {
   public UserManager(UserNotification lt, LangTestDatabaseAsync service, PropertyHandler props) {
     this.userNotification = lt;
     this.service = service;
+    this.props = props;
+    this.loginType = props.getLoginType();
     this.appTitle = props.getAppTitle();
   }
 
   /**
+   * Keeping option to do an anonymous login...
+   * for egyptian class...
+   * 8/22/14
+   *
    * @see mitll.langtest.client.LangTest#checkLogin()
    */
-  public void checkLogin() { login(); }
-
+  public void checkLogin() {
+    System.out.println("loginType " + loginType);
+    if (loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS)) { // explicit setting of login type
+      anonymousLogin();
+    } else {
+      login();
+    }
+  }
 
   /**
    * @see #checkLogin()
@@ -143,6 +162,64 @@ public class UserManager {
       userNotification.gotUser(result);
     }
     //console("getPermissionsAndSetUser.onSuccess : " + user);
+  }
+
+  /* @see #checkLogin()
+   * @see mitll.langtest.client.LangTest#checkLogin
+   */
+  private void anonymousLogin() {
+    int user = getUser();
+    if (user != NO_USER_SET) {
+      //System.out.println("UserManager.anonymousLogin : current user : " + user);
+      rememberAudioType();
+    //  userNotification.gotUser(user);
+      getPermissionsAndSetUser(user);
+    } else {
+      System.out.println("UserManager.anonymousLogin : make new user, since user = " + user);
+
+      addAnonymousUser();
+    }
+  }
+
+  private void addAnonymousUser() {
+   // StudentDialog studentDialog = new StudentDialog(service,props,this,userNotification);
+    System.out.println("UserManager.addAnonymousUser : adding anonymous user");
+
+    /*studentDialog.*/addUser(89, "male", 0,"", PropertyHandler.LOGIN_TYPE.ANONYMOUS ,Result.AUDIO_TYPE_PRACTICE,
+        new ArrayList<User.Permission>());
+  }
+
+  private void addUser(int age, String gender, int monthsOfExperience, String dialect,
+                       final PropertyHandler.LOGIN_TYPE loginType,
+                       final String audioType, Collection<User.Permission> permissions) {
+    AsyncCallback<Long> async = new AsyncCallback<Long>() {
+      public void onFailure(Throwable caught) {
+        Window.alert("addUser : Couldn't contact server.");
+      }
+
+      public void onSuccess(Long result) {
+        System.out.println("addUser : server result is " + result);
+        setDefaultControlValues(result.intValue());
+        storeUser(result, audioType, "" + result, loginType);
+      }
+    };
+    addUser(age, gender, monthsOfExperience, dialect, "", "", permissions, async);
+  }
+
+  private void addUser(int age, String gender, int monthsOfExperience, String dialect, String nativeLang, String userID,
+                       Collection<User.Permission> permissions, AsyncCallback<Long> async) {
+    System.out.println("addUser : userID is " + userID);
+
+    service.addUser(age,
+        gender,
+        monthsOfExperience, nativeLang, dialect, userID, permissions, async);
+  }
+
+  private void setDefaultControlValues(int user) {
+    ControlState controlState = new ControlState();
+    controlState.setStorage(new KeyStorage(props.getLanguage(),user));
+    controlState.setAudioOn(true);
+    controlState.setAudioFeedbackOn(true);
   }
 
   /**
