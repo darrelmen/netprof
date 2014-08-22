@@ -110,7 +110,7 @@ public class UserDAO extends DAO {
    */
   public User addUser(String userID, String passwordH, String emailH, User.Kind kind, String ipAddr) {
     User userByID = getUserByID(userID);
-    if (userByID != null) {
+    if (userByID != null && kind != User.Kind.ANONYMOUS) {
       if (userByID.getEmailHash() != null && userByID.getPasswordHash() != null &&
           !userByID.getEmailHash().isEmpty() && !userByID.getPasswordHash().isEmpty()) {
         return null; // existing user!
