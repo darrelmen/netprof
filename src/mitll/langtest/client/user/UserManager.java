@@ -140,7 +140,7 @@ public class UserManager {
           userNotification.setPermission(permission, true);
         }
       }
-      userNotification.gotUser(result.getId());
+      userNotification.gotUser(result);
     }
     //console("getPermissionsAndSetUser.onSuccess : " + user);
   }
@@ -359,7 +359,7 @@ public class UserManager {
     } else {  // not sure what we could possibly do here...
       userID = sessionID;
       this.userChosenID = userChosenID;
-      userNotification.gotUser(sessionID);
+    //  userNotification.gotUser(sessionID);
     }
   }
 
@@ -387,7 +387,7 @@ public class UserManager {
 
     } else {  // not sure what we could possibly do here...
       userID = user.getId();
-      userNotification.gotUser(userID);
+      userNotification.gotUser(user);
     }
   }
 
