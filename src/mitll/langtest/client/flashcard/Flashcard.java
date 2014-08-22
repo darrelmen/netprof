@@ -90,6 +90,7 @@ public class Flashcard implements RequiresResize {
                             boolean isBeta, String appIcon, String appTitle, String userName,
                             HTML browserInfo,
                             ClickHandler logoutClickHandler,
+
                             ClickHandler users,
                             ClickHandler results,
                             ClickHandler monitoring,
@@ -143,7 +144,7 @@ public class Flashcard implements RequiresResize {
     //}
 
     // add log out/admin options cogMenu
-    cogMenu = makeMenu(users, results, monitoring,events);
+    cogMenu = makeMenu(users, results, monitoring, events);
     cogMenu.addStyleName("cogStyle");
     NavLink widget1 = new NavLink("Log Out");
     widget1.addClickHandler(logoutClickHandler);
@@ -213,6 +214,7 @@ public class Flashcard implements RequiresResize {
     return userNameWidget;
   }
 
+  NavLink userC, resultsC, monitoringC, eventsC;
   /**
    * @see #getHeaderRow
    * @param users
@@ -226,29 +228,32 @@ public class Flashcard implements RequiresResize {
     w.setIcon(IconType.COG);
     w.setIconSize(IconSize.LARGE);
 
-    if (users != null) {
-      NavLink widget2 = new NavLink("Users");
-      widget2.addClickHandler(users);
-      w.add(widget2);
-    }
+    userC = new NavLink("Users");
+    userC.addClickHandler(users);
+    w.add(userC);
 
-    if (results != null) {
-      NavLink widget2 = new NavLink(nameForAnswer.substring(0,1).toUpperCase()+nameForAnswer.substring(1));
-      widget2.addClickHandler(results);
-      w.add(widget2);
-    }
+    resultsC = new NavLink(nameForAnswer.substring(0, 1).toUpperCase() + nameForAnswer.substring(1));
+    resultsC.addClickHandler(results);
+    w.add(resultsC);
 
-    if (monitoring != null) {
-      NavLink widget2 = new NavLink("Monitoring");
-      widget2.addClickHandler(monitoring);
-      w.add(widget2);
-    }
-    if (events != null) {
-      NavLink widget2 = new NavLink("Events");
-      widget2.addClickHandler(events);
-      w.add(widget2);
-    }
+    monitoringC = new NavLink("Monitoring");
+    monitoringC.addClickHandler(monitoring);
+    w.add(monitoringC);
+
+    eventsC = new NavLink("Events");
+    eventsC.addClickHandler(events);
+    w.add(eventsC);
+
     return w;
+  }
+
+  public void setVisibleAdmin(boolean visibleAdmin) {
+   // if (visibleAdmin) {
+      userC.setVisible(visibleAdmin);
+      resultsC.setVisible(visibleAdmin);
+      monitoringC.setVisible(visibleAdmin);
+      eventsC.setVisible(visibleAdmin);
+    //}
   }
 
   /**
