@@ -116,6 +116,23 @@ public class AudioExercise extends ExerciseShell {
     return audioAttributes.values();
   }
 
+  public AudioAttribute getLatestContext() {
+    long maleTime = 0;
+    AudioAttribute latest = null;
+    for (AudioAttribute audioAttribute : getAudioAttributes()) {
+      if (audioAttribute.getAudioType().startsWith("context")) {
+
+
+        if (audioAttribute.getTimestamp() > maleTime) {
+          latest = audioAttribute;
+          maleTime = audioAttribute.getTimestamp();
+        }
+      }
+    }
+
+    return latest;
+  }
+
   public Map<String, AudioAttribute> getAudioRefToAttr() {
     Map<String, AudioAttribute> audioToAttr = new HashMap<String, AudioAttribute>();
     for (AudioAttribute attr : getAudioAttributes()) audioToAttr.put(attr.getAudioRef(), attr);
