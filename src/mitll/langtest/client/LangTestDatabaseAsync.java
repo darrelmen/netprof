@@ -131,7 +131,7 @@ public interface LangTestDatabaseAsync {
 
   void addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email, AsyncCallback<User> async);
 
-  void resetPassword(String userid, String text, String url, AsyncCallback<Void> asyncCallback);
+  void resetPassword(String userid, String text, String url, AsyncCallback<Boolean> asyncCallback);
 
   void forgotUsername(String emailH, String email, String url, AsyncCallback<Boolean> async);
 
