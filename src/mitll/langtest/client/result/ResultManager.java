@@ -21,17 +21,11 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
-import com.google.gwt.view.client.ListDataProvider;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.table.PagerTable;
-import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.grade.Grade;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,12 +43,11 @@ public class ResultManager extends PagerTable {
 //  protected static final String UNGRADED = "Ungraded";
 //  protected static final String SKIP = "Skip";
 //  protected static final int GRADING_WIDTH = 700;
-  protected static final String TIMESTAMP = "timestamp";
+  private static final String TIMESTAMP = "timestamp";
 
-  private final boolean textResponse;
-  protected int pageSize = PAGE_SIZE;
-  protected final LangTestDatabaseAsync service;
-  protected final UserFeedback feedback;
+  //private final boolean textResponse;
+  private final int pageSize = PAGE_SIZE;
+  private final LangTestDatabaseAsync service;
   private final AudioTag audioTag = new AudioTag();
   private final String nameForAnswer;
   private final Map<Column<?,?>,String> colToField = new HashMap<Column<?,?>, String>();
@@ -62,23 +55,21 @@ public class ResultManager extends PagerTable {
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad2
    * @param s
-   * @param feedback
    * @param nameForAnswer
    */
-  public ResultManager(LangTestDatabaseAsync s, UserFeedback feedback, String nameForAnswer, PropertyHandler propertyHandler) {
+  public ResultManager(LangTestDatabaseAsync s, String nameForAnswer) {
     this.service = s;
-    this.feedback = feedback;
     this.nameForAnswer = nameForAnswer;
-    textResponse = propertyHandler.isFlashcardTextResponse();
+    //textResponse = propertyHandler.isFlashcardTextResponse();
   }
 
-  public void setPageSize(int s) { this.pageSize = s; }
+ // public void setPageSize(int s) { this.pageSize = s; }
 
   private Widget lastTable = null;
   private Button closeButton;
 
   /**
-   * @see mitll.langtest.client.LangTest#makeLogoutParts
+   * @see mitll.langtest.client.LangTest.ResultsClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
    */
   public void showResults() {
     // Create the popup dialog box
@@ -184,7 +175,7 @@ public class ResultManager extends PagerTable {
       dialogVPanel.remove(closeButton);
     }
 
-    Widget table = getAsyncTable(numResults, !textResponse, new ArrayList<Grade>(), -1, 1);
+    Widget table = getAsyncTable(numResults);
     table.setWidth("100%");
 
     dialogVPanel.add(new Anchor(getURL2()));
@@ -215,36 +206,21 @@ public class ResultManager extends PagerTable {
     dialogBox.show();
   }*/
 
-  /**
-   * @see GradingExercisePanel#showResults
-   * @param result
-   * @param showQuestionColumn
-   * @param grades
-   * @param grader
-   * @param numGrades
-   * @return
-   */
-  public Widget getTable(Collection<Result> result, boolean showQuestionColumn,
-                         Collection<Grade> grades, final int grader, int numGrades) {
-    CellTable<Result> table = getResultCellTable(result, showQuestionColumn, grades, grader, numGrades);
-    return getPagerAndTable(table);
-  }
-
-  protected CellTable<Result> getResultCellTable(Collection<Result> result,
-                                                 boolean showQuestionColumn, Collection<Grade> grades, int grader, int numGrades) {
+/*  CellTable<Result> getResultCellTable(Collection<Result> result,
+                                       boolean showQuestionColumn, Collection<Grade> grades, int grader, int numGrades) {
     CellTable<Result> table = new CellTable<Result>();
-    /*TextColumn<Result> id =*/ addColumnsToTable(showQuestionColumn, grades, grader, numGrades, table);
+    *//*TextColumn<Result> id =*//* addColumnsToTable(showQuestionColumn, grades, grader, numGrades, table);
 
     // Create a data provider.
-    /*List<Result> list =*/ createProvider(result, table);
+    *//*List<Result> list =*//* createProvider(result, table);
 
     // Add a ColumnSortEvent.ListHandler to connect sorting to the
     // java.util.List.
   //  addSorter(table, id, list);
     return table;
-  }
+  }*/
 
-  private List<Result> createProvider(Collection<Result> result, CellTable<Result> table) {
+  /*private List<Result> createProvider(Collection<Result> result, CellTable<Result> table) {
     ListDataProvider<Result> dataProvider = new ListDataProvider<Result>();
 
     // Connect the table to the data provider.
@@ -258,12 +234,11 @@ public class ResultManager extends PagerTable {
     }
     table.setRowCount(list.size());
     return list;
-  }
+  }*/
 
-  private Widget getAsyncTable(int numResults, boolean showQuestionColumn,
-                         Collection<Grade> grades, final int grader, int numGrades) {
+  private Widget getAsyncTable(int numResults) {
     CellTable<Result> table = new CellTable<Result>();
-    addColumnsToTable(showQuestionColumn, grades, grader, numGrades, table);
+    addColumnsToTable(table);
     table.setRowCount(numResults, true);
     table.setVisibleRange(0,15);
     createProvider(numResults, table);
@@ -273,26 +248,25 @@ public class ResultManager extends PagerTable {
     ColumnSortEvent.AsyncHandler columnSortHandler = new ColumnSortEvent.AsyncHandler(table);
     table.addColumnSortHandler(columnSortHandler);
 
-    Column<?, ?> time = getColumn(TIMESTAMP);
+    Column<?, ?> time = getColumn();
     table.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(time, false));
 
     // Create a SimplePager.
     return getPagerAndTable(table);
   }
 
-  private Column<?,?> getColumn(String name) {
+  private Column<?,?> getColumn() {
     for (Map.Entry<Column<?, ?>, String> pair : colToField.entrySet()) {
-      if (pair.getValue().equals(name)) {
+      if (pair.getValue().equals(ResultManager.TIMESTAMP)) {
         return pair.getKey();
       }
     }
     return null;
   }
 
-  private TextColumn<Result> addColumnsToTable(boolean showQuestionColumn, Collection<Grade> grades,
-                                               int grader, int numGrades, CellTable<Result> table) {
-    TextColumn<Result> id = addUserPlanExercise(table);
-    if (showQuestionColumn) {
+  private void addColumnsToTable(CellTable<Result> table) {
+    /*TextColumn<Result> id =*/ addUserPlanExercise(table);
+    //if (true) {
       TextColumn<Result> experience = new TextColumn<Result>() {
         @Override
         public String getValue(Result answer) {
@@ -301,7 +275,7 @@ public class ResultManager extends PagerTable {
       };
       experience.setSortable(true);
       table.addColumn(experience, "Q. #");
-    }
+    //}
 
     final AbstractCell<SafeHtml> progressCell = new AbstractCell<SafeHtml>("click") {
       @Override
@@ -345,18 +319,18 @@ public class ResultManager extends PagerTable {
     table.addColumn(score, "Score");
     colToField.put(score, "score");
 
-    addResultColumn(grades, grader, numGrades, table);
-    return id;
+    addResultColumn(table);
+    //return id;
   }
 
   /**
-   * @see #getAsyncTable(int, boolean, java.util.Collection, int, int)
+   * @see #getAsyncTable(int)
    * @param numResults
    * @param table
    * @return
-   * @see #getAsyncTable(int, boolean, java.util.Collection, int, int)
+   * @see #getAsyncTable(int)
    */
-  private AsyncDataProvider<Result> createProvider(final int numResults, final CellTable<Result> table) {
+  private void createProvider(final int numResults, final CellTable<Result> table) {
     AsyncDataProvider<Result> dataProvider = new AsyncDataProvider<Result>() {
       @Override
       protected void onRangeChanged(HasData<Result> display) {
@@ -384,7 +358,7 @@ public class ResultManager extends PagerTable {
     dataProvider.addDataDisplay(table);
     dataProvider.updateRowCount(numResults, true);
 
-    return dataProvider;
+    //return dataProvider;
   }
 
   private StringBuilder getColumnSortedState(CellTable<Result> table) {
@@ -404,9 +378,9 @@ public class ResultManager extends PagerTable {
   /**
    * @param table
    * @return
-   * @see #addColumnsToTable(boolean, java.util.Collection, int, int, com.google.gwt.user.cellview.client.CellTable)
+   * @see #addColumnsToTable(com.google.gwt.user.cellview.client.CellTable)
    */
-  protected TextColumn<Result> addUserPlanExercise(CellTable<Result> table) {
+  TextColumn<Result> addUserPlanExercise(CellTable<Result> table) {
     TextColumn<Result> id = new TextColumn<Result>() {
       @Override
       public String getValue(Result answer) {
@@ -438,14 +412,11 @@ public class ResultManager extends PagerTable {
 
   /**
    *
-   * @param grader used in GradingResultManager subclass
-   * @param numGrades used in GradingResultManager subclass
-   * @param table to add columns to
-   */
-  protected void addResultColumn(Collection<Grade> grades, int grader, int numGrades, CellTable<Result> table) {
+   * @param table to add columns to*/
+  void addResultColumn(CellTable<Result> table) {
     addNoWrapColumn(table);
 
-    if (!textResponse) {
+   // if (true) {
       TextColumn<Result> audioType = new TextColumn<Result>() {
         @Override
         public String getValue(Result answer) {
@@ -477,7 +448,7 @@ public class ResultManager extends PagerTable {
       valid.setSortable(true);
       table.addColumn(valid, "Valid");
       colToField.put(valid,"valid");
-    }
+    //}
 
     TextColumn<Result> gradeInfo = new TextColumn<Result>() {
       @Override
