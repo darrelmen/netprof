@@ -41,11 +41,6 @@ public class ExerciseListLayout {
 
     addExerciseListOnLeftSide(exerciseListContainer);
 
-    boolean hideExerciseList = (props.isMinimalUI() && !props.isGrading()) && !props.isAdminView();
-    if (hideExerciseList) {
-      exerciseList.hide();
-    }
-
     return exerciseList;
   }
 
@@ -61,12 +56,11 @@ public class ExerciseListLayout {
   private ListInterface makeExerciseList(FluidRow secondRow, final UserFeedback feedback,
                                          Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                          ExerciseController controller) {
-    boolean showTypeAhead = !props.isCRTDataCollectMode();
     boolean hasQC = controller.getPermissions().contains(User.Permission.QUALITY_CONTROL);
     String instance = hasQC ? User.Permission.QUALITY_CONTROL.toString() : "flex";
 
     return new FlexSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
-        props.isShowTurkToken(), props.showExercisesInOrder(), controller, showTypeAhead, instance);
+        false, false, controller, true, instance);
   }
 
   /**
