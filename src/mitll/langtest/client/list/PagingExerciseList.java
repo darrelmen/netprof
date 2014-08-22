@@ -55,6 +55,7 @@ public class PagingExerciseList extends ExerciseList {
   protected long userListID = -1;
   private int unaccountedForVertical = 160;
   private boolean unrecorded;
+  private boolean onlyExamples;
 
   /**
    * @see mitll.langtest.client.ExerciseListLayout#makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.user.UserFeedback, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
@@ -110,7 +111,7 @@ public class PagingExerciseList extends ExerciseList {
     System.out.println("PagingExerciseList.loadExercises : looking for " +
       "'" + prefix + "' (" + prefix.length() + " chars) in list id "+userListID + " instance " + getInstance());
     service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), prefix, userListID,
-      controller.getUser(), getRole(), getUnrecorded(), new SetExercisesCallback(""));
+      controller.getUser(), getRole(), getUnrecorded(), isOnlyExamples(), new SetExercisesCallback(""));
   }
 
   /**
@@ -422,11 +423,18 @@ public class PagingExerciseList extends ExerciseList {
     pagingContainer.redraw();
   }
 
-  public boolean getUnrecorded() {
-    return unrecorded;
-  }
+  /**
+   * @see mitll.langtest.client.list.HistoryExerciseList#loadExercisesUsingPrefix(java.util.Map, String)
+   * @return
+   */
+  public boolean getUnrecorded() { return unrecorded;  }
 
-  public void setUnrecorded(boolean unrecorded) {
-    this.unrecorded = unrecorded;
-  }
+  /**
+   * @see mitll.langtest.client.custom.Navigation.RecorderNPFHelper#getMyListLayout(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.custom.SimpleChapterNPFHelper)
+   * @param unrecorded
+   */
+  public void setUnrecorded(boolean unrecorded) { this.unrecorded = unrecorded;  }
+
+  public boolean isOnlyExamples() { return onlyExamples;  }
+  public void setOnlyExamples(boolean onlyExamples) {  this.onlyExamples = onlyExamples;  }
 }
