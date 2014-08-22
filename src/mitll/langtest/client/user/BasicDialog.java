@@ -28,8 +28,10 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.TooltipHelper;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -40,7 +42,20 @@ import java.util.Date;
  */
 public class BasicDialog {
   protected static final String TRY_AGAIN = "Try Again";
- // private final List<Popover> visiblePopovers = new ArrayList<Popover>();
+  static final String UNSET = "Unset";
+  /*  private static final List<String> EXPERIENCE_CHOICES = Arrays.asList(
+        UNSET,
+      "0-3 months (Semester 1)",
+      "4-6 months (Semester 1)",
+      "7-9 months (Semester 2)",
+      "10-12 months (Semester 2)",
+      "13-16 months (Semester 3)",
+      "16+ months",
+      "Native speaker");
+    protected static final int NATIVE_MONTHS = 20 * 12;*/
+  private static final String MALE = "Male";
+  private static final String FEMALE = "Female";
+  // private final List<Popover> visiblePopovers = new ArrayList<Popover>();
 
   protected FormField addControlFormField(Panel dialogBox, String label) {
     return addControlFormField(dialogBox, label, false, 0, 30, "");
@@ -350,6 +365,19 @@ public class BasicDialog {
     popover.setPlacement(placement);
     popover.reconfigure();
     popover.show();
+  }
+
+  ListBox getGenderBox() {
+    List<String> values = Arrays.asList(UNSET, MALE, FEMALE);
+    return getListBox(values);
+  }
+
+  protected ListBox getListBox(List<String> values) {
+    final ListBox genderBox = new ListBox(false);
+    for (String s : values) {
+      genderBox.addItem(s);
+    }
+    return genderBox;
   }
 
   protected static class MyPopover extends Popover {
