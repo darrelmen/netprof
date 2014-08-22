@@ -367,7 +367,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @param width
    */
   protected void getEachImage(int width) {
-    System.out.println("AudioPanel.getEachImage : " + getElement().getId()+ " path " + audioPath);
+    //System.out.println("AudioPanel.getEachImage : " + getElement().getId()+ " path " + audioPath);
     getImageURLForAudio(audioPath, WAVEFORM, width, getWaveform());
     if (showSpectrogram) {
       getImageURLForAudio(audioPath, SPECTROGRAM, width, getSpectrogram());
