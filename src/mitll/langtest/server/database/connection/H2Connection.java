@@ -67,7 +67,10 @@ public class H2Connection implements DatabaseConnection {
       logger.debug("connecting to " + url);
       org.h2.Driver.load();
       try {
+        long then = System.currentTimeMillis();
         conn = DriverManager.getConnection(url, "", "");
+        long now = System.currentTimeMillis();
+        if (now-then > 200) logger.info("took " + (now-then) + " millis to open " + url);
         conn.setAutoCommit(true);
 
       } catch (SQLException e) {
