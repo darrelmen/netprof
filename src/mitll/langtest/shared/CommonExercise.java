@@ -31,6 +31,7 @@ public interface CommonExercise extends CommonShell {
   String getSlowAudioRef();
 
   Collection<AudioAttribute> getAudioAttributes();
+  AudioAttribute getLatestContext();
   AudioAttribute getRecordingsBy(long userID, boolean regularSpeed);
   AudioAttribute getRecordingsBy(long userID, String speed);
   Collection<AudioAttribute> getByGender(boolean isMale);
