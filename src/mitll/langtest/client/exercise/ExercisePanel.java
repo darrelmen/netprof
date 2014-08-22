@@ -35,7 +35,7 @@ import java.util.Set;
  * Note that for text input answers, the user is prevented from cut-copy-paste.<br></br>
  *
  * Subclassed to provide for audio recording and playback {@linkxx mitll.langtest.client.recorder.SimpleRecordExercisePanel} and
- * grading of answers {@link mitll.langtest.client.grading.GradingExercisePanel}
+ * grading of answers {@linkx mitll.langtest.client.grading.GradingExercisePanel}
  *
  * User: GO22670
  * Date: 5/8/12
@@ -44,29 +44,16 @@ import java.util.Set;
  */
 public class ExercisePanel extends VerticalPanel implements
   BusyPanel, ExerciseQuestionState, PostAnswerProvider, ProvidesResize, RequiresResize {
-  //private static final String ANSWER_BOX_WIDTH = "400px";
-  protected static final String REPEAT_ONCE = "<i>Repeat the phrase once at normal speed.</i>";
-  protected static final String REPEAT_TWICE = "<i>Repeat the phrase twice, first at normal and then at slow speed.</i>";
-  //private static final String TWO_SPACES = "&nbsp;&nbsp;";
-  private static final String THREE_SPACES = "&nbsp;&nbsp;&nbsp;";
- // private static final String TEACHER_PROMPT = "Record the phrase above by clicking the record button, speak, and then stop when finished. ";
-  private static final String THE_FOREIGN_LANGUAGE = " the foreign language";
-  private static final String ENGLISH = "English";
-  private static final String TYPE_YOUR_ANSWER_IN = "Type your answer in ";
- // private static final String SPEAK_AND_RECORD_YOUR_ANSWER_IN = "Speak and record your answer in ";
- // private static final int ITEM_HEADER = 5;
-  private static final int CONTENT_SCROLL_HEIGHT = 220;
+   private static final int CONTENT_SCROLL_HEIGHT = 220;
   private static final String PROMPT = "Read the following text and answer the question or questions below.";
   private final List<Widget> answers = new ArrayList<Widget>();
   private final Set<Widget> completed = new HashSet<Widget>();
   protected CommonExercise exercise = null;
   protected final ExerciseController controller;
-  //private boolean enableNextOnlyWhenAllCompleted = true;
   protected final LangTestDatabaseAsync service;
   private final NavigationHelper navigationHelper;
   protected final ListInterface exerciseList;
   private final Map<Integer,Set<Widget>> indexToWidgets = new HashMap<Integer, Set<Widget>>();
-  //private TabPanel tabPanel = null;
   private final Map<Integer,Tab> indexToTab = new HashMap<Integer, Tab>();
 
   /**
@@ -95,7 +82,7 @@ public class ExercisePanel extends VerticalPanel implements
     }
     hp.setHorizontalAlignment(rightAlignContent ? HasHorizontalAlignment.ALIGN_RIGHT : HasHorizontalAlignment.ALIGN_LEFT);
     hp.add(getQuestionContent(e));
-    boolean showInstructions = !(getExerciseContent(e).toLowerCase().contains("listen") || controller.isDataCollectMode());   // hack
+    boolean showInstructions = !(getExerciseContent(e).toLowerCase().contains("listen"));// || controller.isDataCollectMode());   // hack
     if (showInstructions) {
       addInstructions();
     }
@@ -170,7 +157,7 @@ public class ExercisePanel extends VerticalPanel implements
   }
 
   private boolean isPashto() {
-    return getLanguage().equalsIgnoreCase("Pashto");
+    return controller.getLanguage().equalsIgnoreCase("Pashto");
   }
 
   public void onResize() {}
@@ -286,7 +273,7 @@ public class ExercisePanel extends VerticalPanel implements
    * @paramx vp
    * @paramx e
    */
-  protected void addQuestionPrompt(Panel vp) {
+  private void addQuestionPrompt(Panel vp) {
     HTML prompt = new HTML(getQuestionPrompt(true));
     prompt.getElement().setId("questionPrompt");
     prompt.addStyleName("marginBottomTen");
@@ -294,25 +281,25 @@ public class ExercisePanel extends VerticalPanel implements
   }
 
   protected String getQuestionPrompt(boolean promptInEnglish) {
-    return getWrittenPrompt(promptInEnglish);
+    return "";
   }
 
-  protected String getWrittenPrompt(boolean promptInEnglish) {
+/*  protected String getWrittenPrompt(boolean promptInEnglish) {
     return THREE_SPACES +
         TYPE_YOUR_ANSWER_IN +(promptInEnglish ? ENGLISH : getLanguage()) +" :";
-  }
+  }*/
 
-  private String getLanguage() {
+ /* private String getLanguage() {
     String language = controller.getLanguage();
     return (language == null || language.length() == 0) ? THE_FOREIGN_LANGUAGE : language;
-  }
+  }*/
 
-  @Override
+/*  @Override
   protected void onUnload() {
     super.onUnload();
    // System.out.println("onUnload : doing unload of prev/next handler " +keyHandler);
     navigationHelper.removeKeyHandler();
-  }
+  }*/
 
   /**
    * Record answers at the server.  For our purposes, add a row to the result table and possibly post
@@ -376,46 +363,6 @@ public class ExercisePanel extends VerticalPanel implements
     };
     t.schedule(3000);
   }
-
-  /**
-   * Remember to have the text default to RTL direction if the prompt is in the foreign (Arabic) language.
-   * <br></br>
-   * Keeps track of which text fields have been typed in, so we can enable/disable the next button.<br></br>
-   *
-   * If we're in autoCRT mode {@link mitll.langtest.client.exercise.ExerciseController#isAutoCRTMode()} then we
-   * add a check answer button after the text box to allow the user to see if they answered correctly.
-   *
-   * @seex #addQuestions(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
-   * @paramx exercise here used to determine the prompt language (English/FL)
-   * @paramx service used in subclasses
-   * @paramx controller  used in subclasses
-   * @paramx index of the question (0 for first, 1 for second, etc.) (used in subclasses)
-   * @return widget that handles the answer
-   */
-/*  protected Widget getAnswerWidget(final CommonExercise exercise, final LangTestDatabaseAsync service,
-                                   ExerciseController controller, final int index) {
-    System.out.println("getAnswerWidget for " + exercise.getID() + " and " + index);
-    boolean allowPaste = controller.isDemoMode();
-    final TextBox answer = allowPaste ? new TextBox() : new NoPasteTextBox();
-    answer.setWidth(ANSWER_BOX_WIDTH);
-    answer.setFocus(true);
-    if (!exercise.isPromptInEnglish()) {
-      answer.setDirection(HasDirection.Direction.RTL);
-    }
-    if (enableNextOnlyWhenAllCompleted) {  // make sure user entered in answers for everything
-      answer.addKeyUpHandler(new KeyUpHandler() {
-        public void onKeyUp(KeyUpEvent event) {
-          if (answer.getText().length() > 0) {
-            recordCompleted(answer);
-          } else {
-            recordIncomplete(answer);
-          }
-        }
-      });
-    }
-    addAnswerWidget(index, answer);
-    return answer;
-  }*/
 
   protected Widget getAnswerWidget(final CommonExercise exercise, final LangTestDatabaseAsync service,
                                    ExerciseController controller, final int index) { return null; }
