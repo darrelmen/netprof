@@ -6,9 +6,6 @@ import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.Fieldset;
 import com.github.gwtbootstrap.client.ui.Form;
 import com.github.gwtbootstrap.client.ui.Modal;
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
-import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.github.gwtbootstrap.client.ui.event.ShowEvent;
@@ -18,13 +15,10 @@ import com.github.gwtbootstrap.client.ui.event.ShownHandler;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Window;
@@ -262,9 +256,9 @@ class StudentDialog extends UserDialog {
   }
 
   private void showDemographicFields(boolean vis) {
-    registrationInfo.ageEntryGroup.setVisible(vis);
-    registrationInfo.genderGroup.setVisible(vis);
-    registrationInfo.dialectGroup.setVisible(vis);
+    registrationInfo.getAgeEntryGroup().setVisible(vis);
+    registrationInfo.getGenderGroup().setVisible(vis);
+    registrationInfo.getDialectGroup().setVisible(vis);
   }
 
   private boolean isDataCollection(ListBoxFormField purpose) {
@@ -358,7 +352,7 @@ class StudentDialog extends UserDialog {
 
             dialogBox.hide();
             langTest.rememberAudioType(audioType);
-            userManager.storeUser(result, audioType, userID, PropertyHandler.LOGIN_TYPE.STUDENT);
+         //   userManager.storeUser(result, audioType, userID, PropertyHandler.LOGIN_TYPE.STUDENT);
           } else if (checkValidUser(user)) {
             System.out.println("checkUserAndMaybeRegister for " + purposeSetting + " user does not exist id=" + result);
 
@@ -375,7 +369,7 @@ class StudentDialog extends UserDialog {
    * @param registrationInfo
    * @param dialogBox
    * @param userID
-   * @see #checkUserAndMaybeRegister(String, mitll.langtest.client.user.BasicDialog.FormField, mitll.langtest.client.user.BasicDialog.FormField, com.github.gwtbootstrap.client.ui.Modal, mitll.langtest.client.user.StudentDialog.RegistrationInfo, String, java.util.Collection)
+   * @see #checkUserAndMaybeRegister(String, mitll.langtest.client.user.BasicDialog.FormField, mitll.langtest.client.user.BasicDialog.FormField, com.github.gwtbootstrap.client.ui.Modal, RegistrationInfo, String, java.util.Collection)
    */
   private void checkThenRegister(String audioType, RegistrationInfo registrationInfo, Modal dialogBox, String userID,
                                  Collection<User.Permission> permissions) {
@@ -391,15 +385,15 @@ class StudentDialog extends UserDialog {
       showAccordion();
 
       if (qcCheckBox.getValue() || recordAudioCheckBox.getValue()) {
-        if (highlightIntegerBox(registrationInfo.ageEntryGroup)) {
+        if (highlightIntegerBox(registrationInfo.getAgeEntryGroup())) {
           System.out.println("\tcheckThenRegister : age OK skipChecks " + audioType + " skipWeekCheck " + skipWeekCheck);
 
           // order is important here --
           if (registrationInfo.checkValidGender()) {
-            if (registrationInfo.dialectGroup.getText().isEmpty()) {
+            if (registrationInfo.getDialectGroup().getText().isEmpty()) {
               System.out.println("\tcheckThenRegister : dialectGroup ");
 
-              markError(registrationInfo.dialectGroup, "Enter a language dialect.");
+              markError(registrationInfo.getDialectGroup(), "Enter a language dialect.");
             } else {
               System.out.println("\tcheckThenRegister : hideAndSend");
 
@@ -408,7 +402,7 @@ class StudentDialog extends UserDialog {
           }
 
         } else {
-          markError(registrationInfo.ageEntryGroup.group, registrationInfo.ageEntryGroup.box, "",
+          markError(registrationInfo.getAgeEntryGroup().group, registrationInfo.getAgeEntryGroup().box, "",
               "Enter age between " + MIN_AGE + " and " + MAX_AGE + ".");
         }
       } else if (shownBefore) {
@@ -425,7 +419,7 @@ class StudentDialog extends UserDialog {
   }
 
   /**
-   * @see #checkThenRegister(String, mitll.langtest.client.user.StudentDialog.RegistrationInfo, com.github.gwtbootstrap.client.ui.Modal, String, java.util.Collection)
+   * @see #checkThenRegister(String, RegistrationInfo, com.github.gwtbootstrap.client.ui.Modal, String, java.util.Collection)
    * @param audioType
    * @param registrationInfo
    * @param dialogBox
@@ -454,21 +448,6 @@ class StudentDialog extends UserDialog {
       purposeValue.equalsIgnoreCase(DEMO);
   }
 
-  private FormField getDialect(Panel dialogBox) {
-    final FormField dialectGroup = addControlFormField(dialogBox, DIALECT);
-    dialectGroup.group.addStyleName("topTwentyMargin");
-
-    dialectGroup.box.addKeyUpHandler(new KeyUpHandler() {
-      public void onKeyUp(KeyUpEvent event) {
-        if (dialectGroup.box.getText().length() > 0) {
-          dialectGroup.group.setType(ControlGroupType.NONE);
-        }
-      }
-    });
-    return dialectGroup;
-  }
-
-
   /**
    * Send the name from the nameField to the server and wait for a response.
    *
@@ -483,19 +462,19 @@ class StudentDialog extends UserDialog {
    * @param monthsOfExperience
    * @param userID
    * @param permissions
-   * @see #sendNameToServer(mitll.langtest.client.user.StudentDialog.RegistrationInfo, String, String, java.util.Collection)
+   * @see #sendNameToServer(RegistrationInfo, String, String, java.util.Collection)
    */
   private void addUser(int monthsOfExperience,
                        final RegistrationInfo registrationInfo,
                        final String audioType, String userID, Collection<User.Permission> permissions) {
-    int age = getAge(registrationInfo.ageEntryGroup.box);
-    String gender = registrationInfo.genderGroup.getValue();
+    int age = getAge(registrationInfo.getAgeEntryGroup().box);
+    String gender = registrationInfo.getGenderGroup().getValue();
 
-    AsyncCallback<Long> async = getAddDLIUserCallback(audioType, userID);
-    addUser(age, gender, monthsOfExperience, registrationInfo.dialectGroup.getText(), "", userID, permissions, async);
+  //  AsyncCallback<Long> async = getAddDLIUserCallback(audioType, userID);
+  //  addUser(age, gender, monthsOfExperience, registrationInfo.dialectGroup.getText(), "", userID, permissions, async);
   }
 
-  private AsyncCallback<Long> getAddDLIUserCallback(final String audioType, final String userChosenID) {
+/*  private AsyncCallback<Long> getAddDLIUserCallback(final String audioType, final String userChosenID) {
     return new AsyncCallback<Long>() {
       public void onFailure(Throwable caught) {
         Window.alert("addUser : Couldn't contact server.");
@@ -505,7 +484,7 @@ class StudentDialog extends UserDialog {
         userManager.storeUser(result, audioType, userChosenID, PropertyHandler.LOGIN_TYPE.STUDENT);
       }
     };
-  }
+  }*/
 
   /**
    * @param age
@@ -538,7 +517,7 @@ class StudentDialog extends UserDialog {
       public void onSuccess(Long result) {
         System.out.println("addUser : server result is " + result);
         setDefaultControlValues(result.intValue());
-        userManager.storeUser(result, audioType, "" + result, loginType);
+        //userManager.storeUser(result, audioType, "" + result, loginType);
       }
     };
     addUser(age, gender, monthsOfExperience, dialect, "", "", permissions, async);
@@ -564,58 +543,4 @@ class StudentDialog extends UserDialog {
     return highlightIntegerBox(ageEntryGroup, MIN_AGE, MAX_AGE+1, TEST_AGE);
   }
 
-  private class RegistrationInfo {
-    private final FormField ageEntryGroup;
-    private final ListBoxFormField genderGroup;
-    private final FormField dialectGroup;
-
-    /**
-     * @see StudentDialog#displayLoginBox()
-     * @param dialogBox
-     * @param lowerLeft
-     */
-    public RegistrationInfo(Panel dialogBox, Panel lowerLeft) {
-      Form form = new Form();
-      form.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
-
-      form.addStyleName("form-horizontal");
-
-      Fieldset fieldsetLeft = new Fieldset();
-      Fieldset fieldsetRight = new Fieldset();
-
-      DivWidget divLeft = new DivWidget();
-      divLeft.addStyleName("floatLeft");
-
-      DivWidget divRight = new DivWidget();
-      divRight.addStyleName("floatRight");
-
-      divLeft.add(fieldsetLeft);
-      form.add(divLeft);
-
-      divRight.add(fieldsetRight);
-      form.add(divRight);
-
-      dialogBox.add(divLeft);
-      dialogBox.add(divRight);
-
-      genderGroup = getListBoxFormField(fieldsetRight, "Gender", getGenderBox());
-
-      addControlGroupEntrySimple(fieldsetLeft, "Permissions", lowerLeft);
-      ageEntryGroup = addControlFormField(fieldsetLeft, "Your age");
-      dialectGroup = getDialect(fieldsetRight);
-    }
-
-
-    /**
-     * @see #checkThenRegister(String, mitll.langtest.client.user.StudentDialog.RegistrationInfo, com.github.gwtbootstrap.client.ui.Modal, String, java.util.Collection)
-     * @return
-     */
-    public boolean checkValidGender() {
-      boolean valid = !genderGroup.getValue().equals(UNSET);
-      if (!valid) {
-        genderGroup.markSimpleError(CHOOSE_A_GENDER,Placement.LEFT);
-      }
-      return valid;
-    }
-  }
 }
