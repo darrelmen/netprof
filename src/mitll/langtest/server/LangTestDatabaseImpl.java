@@ -1050,7 +1050,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       String userID1 = user.getUserID();
       String toHash = userID1 + "_" + System.currentTimeMillis();
       String hash = getHash(toHash);
-      keyToEnabledUser.put(hash,user.getId());
+   //   keyToEnabledUser.put(hash,user.getId());
+      db.getUserDAO().addKey(user.getId(),false,hash);
 
       String message = "Hi Tamas" + ",<br/><br/>" +
           "User '" +userID1+
@@ -1086,7 +1087,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     return builder.toString();
   }
-  
+
   /**
    * @see mitll.langtest.client.user.UserTable#showDialog(mitll.langtest.client.LangTestDatabaseAsync)
    * @return
@@ -1098,8 +1099,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /// TODO : replace with columns on user id table
-  Map<String,Long> keyToUser = new HashMap<String, Long>();
-  Map<String,Long> keyToEnabledUser = new HashMap<String, Long>();
+  //Map<String,Long> keyToUser = new HashMap<String, Long>();
+ // Map<String,Long> keyToEnabledUser = new HashMap<String, Long>();
 
   /**
    * TODO : set server email
@@ -1118,7 +1119,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     url = trimURL(url);
 
     if (validUserAndEmail != null) {
-      keyToUser.put(hash,validUserAndEmail.getId());
+      //keyToUser.put(hash,validUserAndEmail.getId());
+      db.getUserDAO().addKey(validUserAndEmail.getId(),true,hash);
 
       String message = "Hi " + user + ",<br/><br/>" +
           "Click the link below to change your password." +
@@ -1160,7 +1162,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   public Long enableCDUser(String token, String emailR, String url) {
-    Long userID = keyToEnabledUser.remove(token);
+   // Long userID = keyToEnabledUser.remove(token);
+
+    User userWhereEnabledReq = db.getUserDAO().getUserWhereEnabledReq(token);
+    Long userID = null;
+    if (userWhereEnabledReq == null) {
+      logger.debug("user id " + userID  + " for " +token);
+      userID = null;
+    }
+    else {
+      logger.debug("user id " + userID  + " for " +token + " vs " + userWhereEnabledReq.getId());
+
+      userID = userWhereEnabledReq.getId();
+    }
     String email = rot13(emailR);
 
     if (userID == null) {
@@ -1193,21 +1207,35 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return StringUtils.toHexString(Md5Utils.getMd5Digest(toHash.getBytes()));
   }
 
+  /**
+   * @see mitll.langtest.client.LangTest#showLogin()
+   * @param token
+   * @return
+   */
   @Override
   public long getUserIDForToken(String token) {
-    Long aLong = keyToUser.get(token);
-    if (aLong == null) {
+    //Long aLong = keyToUser.get(token);
+    User user = db.getUserDAO().getUserWhereResetKey(token);
+    if (user == null) {
+      //if (aLong != null) logger.error("huh? disagree - ");
       return -1;
     }
-    else return aLong;
+    else {
+      //if (aLong != user.getId()) logger.error("disagree --");
+      return user.getId();
+    //  return aLong;
+    }
   }
 
   @Override
   public boolean changePFor(String token, String passwordH) {
-    Long remove = keyToUser.remove(token);
-    if (remove != null) {
-      if (!db.getUserDAO().changePassword(remove,passwordH)) {
-        logger.error("couldn't update user password for user #"+remove);
+    //Long remove = keyToUser.remove(token);
+    User userWhereResetKey = db.getUserDAO().getUserWhereResetKey(token);
+    if (userWhereResetKey != null) {
+      db.getUserDAO().clearKey(userWhereResetKey.getId(),true);
+
+      if (!db.getUserDAO().changePassword(userWhereResetKey.getId(),passwordH)) {
+        logger.error("couldn't update user password for user "+userWhereResetKey);
       }
       return true;
     }
