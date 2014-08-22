@@ -982,7 +982,22 @@ public class Navigation implements RequiresResize {
 						    		 phonesToScores.get(phone).add(pts.get(phone));
 						    	 }
 						     }
-						     ArrayList<String> phones = new ArrayList<String>(phonesToScores.keySet());
+						     ArrayList<String> preFilteredPhones = new ArrayList<String>(phonesToScores.keySet());
+						     ArrayList<String> phones = new ArrayList<String>();
+						     for(String phone : preFilteredPhones){
+						    	 if(phonesToScores.get(phone).size() > 1)
+						    		 phones.add(phone);
+						     }
+						     if(phones.size() < 10){ //strategy 2, if there aren't enough phone repeats
+						    	 phones.clear();
+						    	 for(String phone : preFilteredPhones){
+						    		 if(avg(phonesToScores.get(phone)) > 0.1)
+						    			 phones.add(phone);
+						    	 }
+						    	 System.out.println("Falling back to cropping worst phones");
+						     }
+						     else
+						    	 System.out.println("Filtering out phones with only one pronunication");
 						     Collections.sort(phones, new Comparator<String>(){
 						    	 @Override
 						    	 public int compare(String s1, String s2){
@@ -1009,10 +1024,10 @@ public class Navigation implements RequiresResize {
 						    	 badPhoneScores.setWidget(numToShow-(phones.size()-pi), 0, audiWid);
 						    	 badPhoneScores.setWidget(numToShow-(phones.size()-pi), 1, getScoreBar(phonesToScores.get(currPhone), chart));
 						     }
-						     HTML goodPhonesTitle = new HTML("Some Sounds You Pronounce Well");
+						     HTML goodPhonesTitle = new HTML("Some Sounds You Pronounced Well");
 						     goodPhonesTitle.getElement().getStyle().setProperty("fontSize", "130%");
 						     goodPhonesTitle.getElement().getStyle().setProperty("color", "#048500");
-						     goodPhonesTitle.getElement().getStyle().setProperty("marginBottom", "7px");
+						     goodPhonesTitle.getElement().getStyle().setProperty("marginBottom", "10px");
 						     goodPhonePanel.add(goodPhonesTitle);
 						     goodPhonePanel.add(goodPhoneScores);
 						     HTML badPhonesTitle = new HTML("Some Sounds You May Need To Improve");
