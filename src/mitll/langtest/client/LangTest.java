@@ -869,10 +869,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     if (userID > -1) {
       flashcard.setCogVisible(true);
-      //if (user.isAdmin()) {
-        checkAdmin(user.isAdmin());
-        flashcard.setVisibleAdmin(user.isAdmin());
-      //}
+      checkAdmin(user.isAdmin());
+      flashcard.setVisibleAdmin(user.isAdmin());
     }
   }
 
