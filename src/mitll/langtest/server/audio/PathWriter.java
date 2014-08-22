@@ -70,7 +70,8 @@ public class PathWriter {
       }
       audioConversion.ensureWriteMP3(wavFile, parent, overwrite);
     }
+    else {
+      logger.warn("not converting wav to mp3???\n\n\n");
+    }
   }
-
- // public void setConfigDir(String configDir) { this.configDir =configDir;}
 }
