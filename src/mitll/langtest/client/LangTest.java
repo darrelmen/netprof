@@ -399,6 +399,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   @Override
   public void showLogin() {
+    System.out.println("show login!");
+
     RootPanel.get().clear();   // necessary?
 
     Container verticalContainer = new FluidContainer();
@@ -410,7 +412,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     showLogin(verticalContainer, firstRow);
   }
-
 
   private String staleToken = "";
 
@@ -426,6 +427,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     final String resetPassToken = props.getResetPassToken();
     if (!resetPassToken.isEmpty() && !resetPassToken.equals(staleToken)) {
+
+      System.out.println("showLogin token '" + resetPassToken + "' for password reset");
+
       staleToken = resetPassToken;
       service.getUserIDForToken(resetPassToken, new AsyncCallback<Long>() {
         @Override
@@ -457,6 +461,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     final String cdToken = props.getCdEnableToken();
     if (!cdToken.isEmpty() && !cdToken.equals(staleToken)) {
+      System.out.println("showLogin token '" + resetPassToken + "' for enabling cd user");
+
       handleCDToken(verticalContainer, firstRow, cdToken, props.getEmailRToken());
       return true;
     }
