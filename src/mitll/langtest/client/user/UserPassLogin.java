@@ -605,7 +605,7 @@ public class UserPassLogin extends UserDialog {
   }
 
   private void gotSignUp(String user, String password, String email, User.Kind kind) {
-    String passH = Md5Hash.getHash(password);
+    String passH  = Md5Hash.getHash(password);
     String emailH = Md5Hash.getHash(email);
 
     signUp.setEnabled(false);
