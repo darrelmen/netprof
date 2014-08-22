@@ -71,12 +71,14 @@ import java.util.concurrent.TimeUnit;
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   public static final String LANGTEST_IMAGES = "langtest/images/";
   private static final String DIVIDER = "|";
-  private static final String NEW_PRO_F2_PNG = "NewProF2.png";
+ // private static final String NEW_PRO_F2_PNG = "NewProF2.png";
   private static final int MAX_EXCEPTION_STRING = 300;
   private static final int MAX_CACHE_SIZE = 100;
   private static final int NO_USER_INITIAL = -2;
   private static final boolean SHOW_STATUS = false;
-  private static final boolean SHOW_EXCEPTION_TO_USER = false;
+ // private static final boolean SHOW_EXCEPTION_TO_USER = false;
+  private static final String PLEASE_ALLOW_ACCESS_TO_THE_MICROPHONE = "Please allow access to the microphone.";
+  private static final String TRY_AGAIN = "Try Again";
 
   /**
    * @see #makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, com.google.gwt.user.client.ui.Panel, com.google.gwt.user.client.ui.Panel)
@@ -105,7 +107,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private Navigation navigation;
   private EventLogger buttonFactory;
-  private KeyPressHelper keyPressHelper = new KeyPressHelper(false,true);
+  private final KeyPressHelper keyPressHelper = new KeyPressHelper(false,true);
 
   /**
    * Make an exception handler that displays the exception.
@@ -156,13 +158,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void dealWithExceptions() {
     GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
       public void onUncaughtException(Throwable throwable) {
-        String exceptionAsString = logException(throwable);
+        /*String exceptionAsString =*/ logException(throwable);
 
-        if (SHOW_EXCEPTION_TO_USER) {
+ /*       if (SHOW_EXCEPTION_TO_USER) {
           if (exceptionAsString.length() > 0) {
             new ExceptionHandlerDialog().showExceptionInDialog(browserCheck, exceptionAsString);
           }
-        }
+        }*/
       }
     });
   }
@@ -269,7 +271,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
-  private Cache<String, ImageResponse> imageCache = CacheBuilder.newBuilder()
+  private final Cache<String, ImageResponse> imageCache = CacheBuilder.newBuilder()
     .maximumSize(MAX_CACHE_SIZE)
     .expireAfterWrite(7, TimeUnit.DAYS)
     .build();
@@ -293,9 +295,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     addResizeHandler();
 
-    if (shouldCollectAudio()) {
-      makeFlashContainer();
-    }
+    makeFlashContainer();
 
     populateRootPanel();
 
@@ -365,7 +365,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       RootPanel.get().add(verticalContainer);
     }
 
-    if (shouldCollectAudio() && !showOnlyOneExercise()) {
+    if (!showOnlyOneExercise()) {
       /**
        * {@link #makeFlashContainer}
        */
@@ -412,7 +412,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
 
-  String staleToken = "";
+  private String staleToken = "";
 
   /**
    * @see #showLogin()
@@ -425,7 +425,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     final EventRegistration eventRegistration = this;
 
     final String resetPassToken = props.getResetPassToken();
-    if (resetPassToken != null && !resetPassToken.equals(staleToken)) {
+    if (!resetPassToken.isEmpty() && !resetPassToken.equals(staleToken)) {
       staleToken = resetPassToken;
       service.getUserIDForToken(resetPassToken, new AsyncCallback<Long>() {
         @Override
@@ -434,7 +434,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         @Override
         public void onSuccess(Long result) {
           if (result == null || result < 0) {
-            System.out.println("token " + resetPassToken + " is stale. Showing normal view");
+            System.out.println("token '" + resetPassToken + "' is stale. Showing normal view");
      //       firstRow.add(new Heading(4,"Password reset has been done before."));
             populateBelowHeader(verticalContainer,firstRow);
           }
@@ -454,11 +454,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       return true;
     }
 
-
     final String cdToken = props.getCdEnableToken();
-    if (cdToken != null && !cdToken.equals(staleToken)) {
-      handleCDToken(verticalContainer, firstRow, cdToken);
-
+    if (!cdToken.isEmpty() && !cdToken.equals(staleToken)) {
+      handleCDToken(verticalContainer, firstRow, cdToken, props.getEmailRToken());
       return true;
     }
 
@@ -480,8 +478,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return false;
   }
 
-  private void handleCDToken(final Container verticalContainer, final Panel firstRow, final String cdToken) {
-    service.enableCDUser(cdToken, new AsyncCallback<Long>() {
+  private void handleCDToken(final Container verticalContainer, final Panel firstRow, final String cdToken, String emailR) {
+    service.enableCDUser(cdToken, emailR, Window.Location.getHref(), new AsyncCallback<Long>() {
       @Override
       public void onFailure(Throwable caught) {
       }
@@ -490,7 +488,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       public void onSuccess(Long result) {
         staleToken = cdToken;
         if (result == null || result < 0) {
-          System.out.println("enable - token " + cdToken + " is stale. Showing normal view");
+          System.out.println("handleCDToken enable - token " + cdToken + " is stale. Showing normal view");
           //       firstRow.add(new Heading(4,"Password reset has been done before."));
           populateBelowHeader(verticalContainer, firstRow);
         } else {
@@ -503,7 +501,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           Timer t = new Timer() {
             @Override
             public void run() {
-              Window.Location.reload();
+              Window.Location.replace(trimURL(Window.Location.getHref()));
             }
           };
           t.schedule(3000);
@@ -513,6 +511,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     RootPanel.get().add(verticalContainer);
     flashcard.setCogVisible(false);
+  }
+
+  private String trimURL(String url) {
+    if (url.contains("127.0.0.1")) return url;
+    else return url.split("\\?")[0].split("\\#")[0];
   }
 
   private Panel makeFirstTwoRows(Container verticalContainer) {
@@ -538,7 +541,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         }
 
         public void onSuccess() {
-          resultManager = new ResultManager(service, outer, props.getNameForAnswer(), props);
+          resultManager = new ResultManager(service, props.getNameForAnswer());
         }
       });
 
@@ -561,7 +564,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private ListInterface makeExerciseList(FluidRow secondRow, Panel exerciseListContainer, Panel currentExerciseVPanel) {
     this.exerciseList = new ExerciseListLayout(props).makeExerciseList(secondRow, exerciseListContainer, this, currentExerciseVPanel, service, this);
-    //reallySetFactory();
     return exerciseList;
   }
 
@@ -569,41 +571,24 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     VisualizationUtils.loadVisualizationApi(new Runnable() {
       @Override
       public void run() {
-        System.out.println("\tloaded VisualizationUtils...");
+        //System.out.println("\tloaded VisualizationUtils...");
         logMessageOnServer("loaded VisualizationUtils.");
       }
     }, ColumnChart.PACKAGE, LineChart.PACKAGE);
   }
 
-  private boolean shouldCollectAudio() {
-    return props.isCollectAudio() && !props.isFlashcardTeacherView() || props.isFlashCard()  || props.isGoodwaveMode() ;
-  }
-
   /**
-   * @see #populateRootPanel()
    * @return
+   * @see #populateRootPanel()
    */
   private Panel makeHeaderRow() {
-    Widget title;
-    if (isGoodwaveMode()) {
-      flashcard = new Flashcard(props);
-      title = flashcard.makeNPFHeaderRow(props.getSplash(), props.isClassroomMode(), getGreeting(), getReleaseStatus(), new LogoutClickHandler(),
-
+    flashcard = new Flashcard(props);
+    Widget title = flashcard.makeNPFHeaderRow(props.getSplash(), true, getGreeting(), getReleaseStatus(), new LogoutClickHandler(),
         (props.isAdminView()) ? new UsersClickHandler() : null,
         (props.isAdminView()) ? new ResultsClickHandler() : null,
         (props.isAdminView()) ? new MonitoringClickHandler() : null,
         (props.isAdminView()) ? new EventsClickHandler() : null
-      );
-    } else {
-      flashcard = new Flashcard(props);
-      title = flashcard.getHeaderRow(props.getSplash(), props.isClassroomMode(), NEW_PRO_F2_PNG, props.getAppTitle(), getGreeting(), getReleaseStatus(), new LogoutClickHandler(),
-
-        (props.isAdminView()) ? new UsersClickHandler() : null,
-        (props.isAdminView()) ? new ResultsClickHandler() : null,
-        (props.isAdminView()) ? new MonitoringClickHandler() : null,
-        (props.isAdminView()) ? new EventsClickHandler() : null);
-    }
-
+    );
 
     headerRow = new FluidRow();
     headerRow.add(new Column(12, title));
@@ -615,37 +600,20 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private void setPageTitle() {
     String appTitle = props.getAppTitle();
-    Window.setTitle(appTitle + " : " +"Learn pronunciation and practice vocabulary.");
-    //setTitle(appTitle);
+    Window.setTitle(appTitle + " : " + "Learn pronunciation and practice vocabulary.");
 
     Element element = DOM.getElementById("favicon");   // set the page title to be consistent
-    if (props.isFlashCard() || props.isFlashcardTeacherView()) {
-      if (element != null) {
-        element.setAttribute("href",  LANGTEST_IMAGES + "NewProF2_48x48.png");
-      }
-    }
-    else if (props.isGoodwaveMode()) {
-      if (element != null) {
-        element.setAttribute("href", LANGTEST_IMAGES + "NewProF1_48x48.png");
-      }
+    if (element != null) {
+       element.setAttribute("href", LANGTEST_IMAGES + "NewProF1_48x48.png");
     }
   }
 
-/*  private void setTitle(String appTitle) {
-    Element elementById = DOM.getElementById("title-tag");   // set the page title to be consistent
-    if (elementById != null) {
-      elementById.setInnerText(appTitle);
-    }
-  }*/
-
   /**
-   * @seex #doDataCollectAdminView()
    * @see #makeHeaderRow()
    * @return
    */
   private HTML getReleaseStatus() {
     browserCheck.getBrowserAndVersion();
-
     return new HTML(getInfoLine());
   }
 
@@ -676,10 +644,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         }
       }
     });
-  }
-
-  public float getScreenPortion() {
-    return props.getScreenPortion();
   }
 
   public int getHeightOfTopRows() {
@@ -745,15 +709,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           showingPlugInNotice = true;
           List<String> messages = Arrays.asList("If you want to record audio, ", "plug in or enable your mic and reload the page.");
           new ModalInfoDialog("Plug in microphone", messages, null,
-            new HiddenHandler() {
-              @Override
-              public void onHidden(HiddenEvent hiddenEvent) {
-                hideFlash();
-                checkLogin();
+              new HiddenHandler() {
+                @Override
+                public void onHidden(HiddenEvent hiddenEvent) {
+                  hideFlash();
+                  checkLogin();
 
-                flashcard.setSplash("RECORDING DISABLED");
+                  flashcard.setSplash("RECORDING DISABLED");
+                }
               }
-            }
           );
         }
       }
@@ -773,7 +737,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     });
   }
 
-  public void hideFlash() {
+  void hideFlash() {
     flashRecordPanel.hide();
     flashRecordPanel.hide2(); // must be a separate call!
   }
@@ -792,59 +756,42 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see #configureUIGivenUser(long) (long)
    */
   private void reallySetFactory() {
-    //if (props.isClassroomMode()) {
+    int childCount = firstRow.getElement().getChildCount();
 
-      //Panel widgets = RootPanel.get();
-      int childCount = firstRow.getElement().getChildCount();
-    //  Node node = childCount;
-
-      System.out.println("reallySetFactory root " + firstRow.getElement().getNodeName() + " childCount " + childCount);
-      if (childCount > 0) {
-        Node child = firstRow.getElement().getChild(0);
-        Element as = Element.as(child);
-        if (as.getId().contains("Login")
-            //|| as.getId().isEmpty()
-            ) {
-          populateRootPanel();
-        }
-        else {
-          System.out.println("elem is Got " + as.getId());
+    //System.out.println("reallySetFactory root " + firstRow.getElement().getNodeName() + " childCount " + childCount);
+    if (childCount > 0) {
+      Node child = firstRow.getElement().getChild(0);
+      Element as = Element.as(child);
+      if (as.getId().contains("Login")) {
+        populateRootPanel();
+      }
+      //else {
+      //  System.out.println("elem is Got " + as.getId());
+      //}
+    }
+    // have to wait until we know what kind of user has logged in before knowing what to present
+    exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, this, this, exerciseList, 1.0f) {
+      @Override
+      public Panel getExercisePanel(CommonExercise e) {
+        boolean reviewer = permissions.contains(User.Permission.QUALITY_CONTROL);
+        if (reviewer) {
+          return new QCNPFExercise(e, controller, exerciseList, 1.0f, false, "classroom");
+        } else {
+          return new CommentNPFExercise(e, controller, exerciseList, 1.0f, false, "classroom");
         }
       }
-     // if (node.getElement().getId().contains("Login")) {
-     //   System.out.println("\n\nset root panel...\n\n\n");
-      //  populateRootPanel();
-     // }
-      //if (lastUser > -1) {
-
-       // flashcard.setUserName(getGreeting());
-     // }
-
-      // have to wait until we know what kind of user has logged in before knowing what to present
-      exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, this, this, exerciseList, 1.0f) {
-        @Override
-        public Panel getExercisePanel(CommonExercise e) {
-          boolean reviewer = permissions.contains(User.Permission.QUALITY_CONTROL);
-          if (reviewer) {
-            return new QCNPFExercise(e, controller, exerciseList, 1.0f, false, "classroom");
-          } else {
-            return new CommentNPFExercise(e, controller, exerciseList, 1.0f, false, "classroom");
-          }
-        }
-      }, userManager, 1);
-   // } else {
-   //   exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, this, this, exerciseList, getScreenPortion()), userManager, 1);
-   // }
+    }, userManager, 1);
   }
 
   /**
    * Show a popup telling how unhappy we are with the user's choice not to allow mic recording.
    *
    * Remove the flash player that was there, put in a new one, again, and ask the user again for permission.
-   *
+   * @see #makeFlashContainer()
+   * @deprecated fall back to in browswer recording
    */
   private void showPopupOnDenial() {
-    new ModalInfoDialog("Try Again", "Please allow access to the microphone.",
+    new ModalInfoDialog(TRY_AGAIN, PLEASE_ALLOW_ACCESS_TO_THE_MICROPHONE,
       new HiddenHandler() {
         @Override
         public void onHidden(HiddenEvent hiddenEvent) {
@@ -935,8 +882,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     System.out.println("\tconfigureUIGivenUser : " + userID + " get exercises...");
 
     boolean askedForExercises = exerciseList.getExercises(userID);
-    if (askedForExercises){// && (lastUser != userID) && lastUser != NO_USER_INITIAL) {
-      System.out.println("\n" +
+    if (askedForExercises){
+      System.out.println(
           "\n" +
           "\n\tconfigureUIGivenUser : " + userID + " not reloading - asked for exercises");
     }
@@ -950,7 +897,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     lastUser = userID;
     flashcard.setBrowserInfo(getInfoLine());
     flashcard.reflectPermissions(getPermissions());
-    //return true;
   }
 
   /**
@@ -958,7 +904,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   // TODO : refactor all this into mode objects that decide whether we need flash or not, etc.
   private void checkInitFlash() {
-    if (shouldCollectAudio() && !flashRecordPanel.gotPermission()) {
+    if (!flashRecordPanel.gotPermission()) {
       System.out.println("checkInitFlash : initFlash - no permission yet");
 
       if (flashRecordPanel.initFlash()) {
@@ -972,19 +918,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   @Override
-  public EventLogger getButtonFactory() {
-    return buttonFactory;
-  }
+  public EventLogger getButtonFactory() { return buttonFactory; }
 
   @Override
-  public void register(Button button) {
-    buttonFactory.register(this, button, "N/A");
-  }
+  public void register(Button button) { buttonFactory.register(this, button, "N/A");  }
 
   @Override
-  public void register(Button button, String exid) {
-    buttonFactory.register(this, button, exid);
-  }
+  public void register(Button button, String exid) {  buttonFactory.register(this, button, exid);  }
 
   @Override
   public void register(Button button, String exid, String context) {
@@ -1063,7 +1003,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
   private boolean isReviewMode() { return audioType.equals(Result.AUDIO_TYPE_REVIEW); }
 
-  private Set<User.Permission> permissions = new HashSet<User.Permission>();
+  private final Set<User.Permission> permissions = new HashSet<User.Permission>();
 
   /**
    * When we login, we ask for permissions for the user from the server.
@@ -1086,25 +1026,20 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public int getUser() { return userManager.getUser(); }
   public PropertyHandler getProps() { return props; }
-  public int getSegmentRepeats() { return props.getSegmentRepeats(); }
-  public boolean isArabicTextDataCollect() {  return props.isArabicTextDataCollect(); }
+
   public boolean useBkgColorForRef() {  return props.isBkgColorForRef(); }
-  public boolean isAutoCRTMode() {  return props.isAutocrt(); }
+
   public int getRecordTimeout() {  return props.getRecordTimeout(); }
-  public boolean isDataCollectMode() {  return props.isDataCollectMode(); }
-  public boolean isCollectAudio() {  return props.isCollectAudio(); }
-  public boolean isMinimalUI() {  return props.isMinimalUI(); }
   public boolean isGrading() {  return props.isGrading(); }
   public boolean isLogClientMessages() {  return props.isLogClientMessages(); }
   public String getLanguage() {  return props.getLanguage(); }
-  public boolean isPromptBeforeNextItem() {  return props.isPromptBeforeNextItem(); }
   public boolean isRightAlignContent() {  return props.isRightAlignContent(); }
 
-  public boolean isGoodwaveMode() {  return props.isGoodwaveMode(); }
   public LangTestDatabaseAsync getService() { return service; }
   public UserFeedback getFeedback() { return this; }
 
   private long then, now;
+
   // recording methods...
   /**
    * Recording interface
@@ -1131,9 +1066,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * Recording interface
    */
 
-  public SoundManagerAPI getSoundManager() {
-    return soundManager;
-  }
+  public SoundManagerAPI getSoundManager() { return soundManager;  }
 
   public void showErrorMessage(String title, String msg) {
     DialogHelper dialogHelper = new DialogHelper(false);
@@ -1142,9 +1075,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   @Override
-  public void showProgress() {
-    showProgress(exerciseList);
-  }
+  public void showProgress() { showProgress(exerciseList);  }
 
   private void showProgress(ListInterface exerciseList) {
 /*    if (progressBar != null) {
@@ -1168,19 +1099,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   @Override
-  public boolean isRecordingEnabled() {
-    return flashRecordPanel.gotPermission();
-  }
+  public boolean isRecordingEnabled() {  return flashRecordPanel.gotPermission();  }
 
   @Override
-  public boolean usingFlashRecorder() {
-    return flashRecordPanel.usingFlash();
-  }
+  public boolean usingFlashRecorder() {  return flashRecordPanel.usingFlash();  }
 
   private class LogoutClickHandler implements ClickHandler {
     public void onClick(ClickEvent event) {
       logEvent("No widget", "UserLoging", "N/A", "User Logout by " + lastUser);
-
       resetState();
     }
   }
