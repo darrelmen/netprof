@@ -51,6 +51,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.gauge.SimpleColumnChart;
+import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
@@ -667,8 +668,12 @@ public class Navigation implements RequiresResize {
      contentPanel.clear();
      contentPanel.getElement().setId("contentPanel");
      final HorizontalPanel optionPanel = new HorizontalPanel();
-	 final FlowPanel forSents = new FlowPanel();
-	 final FlowPanel forPhoneScores = new FlowPanel();
+	 final FlowPanel forSents = new FlowPanel();	 
+	 final FlowPanel forGoodPhoneScores = new FlowPanel();
+	 forGoodPhoneScores.getElement().getStyle().setProperty("borderLeftStyle", "dashed");
+	 forGoodPhoneScores.getElement().getStyle().setProperty("borderLeftWidth", "2px");
+	 forGoodPhoneScores.getElement().getStyle().setProperty("paddingLeft", "18px");
+	 final FlowPanel forBadPhoneScores = new FlowPanel();
 	 forSents.getElement().getStyle().setProperty("marginBottom", "10px");
      
      final ListBox availableDialogs = new ListBox();
@@ -719,12 +724,12 @@ public class Navigation implements RequiresResize {
     			}
     			availableSpeakers.getElement().removeAttribute("disabled");
     		 }
-    		 mkNewDialog(availableSpeakers, availableDialogs, forSents, forPhoneScores, dialogIndex, yesDia, regular, false);
+    		 mkNewDialog(availableSpeakers, availableDialogs, forSents, forGoodPhoneScores, forBadPhoneScores, dialogIndex, yesDia, regular, false);
     	 }
      });
      availableSpeakers.addChangeHandler(new ChangeHandler() {
     	 public void onChange(ChangeEvent event){
-    		 mkNewDialog(availableSpeakers, availableDialogs, forSents, forPhoneScores, dialogIndex, yesDia, regular, false);
+    		 mkNewDialog(availableSpeakers, availableDialogs, forSents, forGoodPhoneScores, forBadPhoneScores, dialogIndex, yesDia, regular, false);
     	 }
      });
      optionPanel.add(availableDialogs);
@@ -737,12 +742,12 @@ public class Navigation implements RequiresResize {
      showDiaPanel.add(noDia);
      yesDia.addClickHandler(new ClickHandler(){
     	 public void onClick(ClickEvent event){
-    		 mkNewDialog(availableSpeakers, availableDialogs, forSents, forPhoneScores, dialogIndex, yesDia, regular, false);
+    		 mkNewDialog(availableSpeakers, availableDialogs, forSents, forGoodPhoneScores, forBadPhoneScores, dialogIndex, yesDia, regular, false);
     	 }
      });
      noDia.addClickHandler(new ClickHandler(){
     	 public void onClick(ClickEvent event){
-    		 mkNewDialog(availableSpeakers, availableDialogs, forSents, forPhoneScores, dialogIndex, yesDia, regular, false);
+    		 mkNewDialog(availableSpeakers, availableDialogs, forSents, forGoodPhoneScores, forBadPhoneScores, dialogIndex, yesDia, regular, false);
     	 }
      });
      optionPanel.add(showDiaPanel);
@@ -754,12 +759,12 @@ public class Navigation implements RequiresResize {
      audioSpeedPanel.add(slow);
      regular.addClickHandler(new ClickHandler(){
     	 public void onClick(ClickEvent event){
-    		 mkNewDialog(availableSpeakers, availableDialogs, forSents, forPhoneScores, dialogIndex, yesDia, regular, false);
+    		 mkNewDialog(availableSpeakers, availableDialogs, forSents, forGoodPhoneScores, forBadPhoneScores, dialogIndex, yesDia, regular, false);
     	 }
      });
      slow.addClickHandler(new ClickHandler(){
     	 public void onClick(ClickEvent event){
-    		 mkNewDialog(availableSpeakers, availableDialogs, forSents, forPhoneScores, dialogIndex, yesDia, regular, false);
+    		 mkNewDialog(availableSpeakers, availableDialogs, forSents, forGoodPhoneScores, forBadPhoneScores, dialogIndex, yesDia, regular, false);
     	 }
      });
      optionPanel.add(audioSpeedPanel);
@@ -770,7 +775,7 @@ public class Navigation implements RequiresResize {
     		    Window.alert("Select a dialog and part first!");
     		 }
     		 else
-    		    mkNewDialog(availableSpeakers, availableDialogs, forSents, forPhoneScores, dialogIndex, yesDia, regular, true);
+    		    mkNewDialog(availableSpeakers, availableDialogs, forSents, forGoodPhoneScores, forBadPhoneScores, dialogIndex, yesDia, regular, true);
     	 }
      });
      
@@ -778,28 +783,32 @@ public class Navigation implements RequiresResize {
 
      startDialog.getElement().getStyle().setProperty("fontSize", "150%");
      availableDialogs.getElement().getStyle().setProperty("margin", "10px");
-     forPhoneScores.getElement().getStyle().setProperty("margin", "10px");
+     forGoodPhoneScores.getElement().getStyle().setProperty("margin", "10px");
+     forBadPhoneScores.getElement().getStyle().setProperty("margin", "10px");
      HorizontalPanel sentsAndPhones = new HorizontalPanel();
      VerticalPanel diaAndStart = new VerticalPanel();
      diaAndStart.add(forSents);
      diaAndStart.add(startDialog);
      contentPanel.add(optionPanel);
      sentsAndPhones.add(diaAndStart);
-     sentsAndPhones.add(forPhoneScores);
+     sentsAndPhones.add(forGoodPhoneScores);
+     sentsAndPhones.add(forBadPhoneScores);
      contentPanel.add(sentsAndPhones);
      //contentPanel.add(startDialog);
   }
   
-  public void mkNewDialog(ListBox availableSpeakers, ListBox availableDialogs, FlowPanel forSents, FlowPanel forPhoneScores, HashMap<Integer, String> dialogIndex, RadioButton yesDia, RadioButton regular, boolean fromButton){
+  public void mkNewDialog(ListBox availableSpeakers, ListBox availableDialogs, FlowPanel forSents, FlowPanel forGoodPhoneScores, FlowPanel forBadPhoneScores, HashMap<Integer, String> dialogIndex, RadioButton yesDia, RadioButton regular, boolean fromButton){
 	 if((availableSpeakers.getSelectedIndex() < 1) || (availableDialogs.getSelectedIndex() < 1)){
 		 forSents.clear();
-		 forPhoneScores.clear();
+		 forGoodPhoneScores.clear();
+		 forBadPhoneScores.clear();
 		 return;
 	 }
      else{
 		 forSents.clear();
-		 forPhoneScores.clear();
-		 Grid sentPanel = displayDialog(dialogIndex.get(availableDialogs.getSelectedIndex()), availableSpeakers.getValue(availableSpeakers.getSelectedIndex()), forSents, forPhoneScores, yesDia.getValue(), regular.getValue());
+		 forGoodPhoneScores.clear();
+		 forBadPhoneScores.clear();
+		 Grid sentPanel = displayDialog(dialogIndex.get(availableDialogs.getSelectedIndex()), availableSpeakers.getValue(availableSpeakers.getSelectedIndex()), forSents, forGoodPhoneScores, forBadPhoneScores, yesDia.getValue(), regular.getValue());
 		 if(fromButton)
 		    setupPlayOrder(sentPanel, 0, sentPanel.getRowCount());
      }
@@ -861,7 +870,7 @@ public class Navigation implements RequiresResize {
   }
   
   
-  private SimplePostAudioRecordButton getFinalRecordButton(String sent, final Button continueButton, final Image check, final Image x, final Image somethingIsHappening, final ArrayList<HTML> scoreElements, final HTML score, final HTML avg, final FlowPanel rp, final FlowPanel pp){
+  private SimplePostAudioRecordButton getFinalRecordButton(String sent, final Button continueButton, final Image check, final Image x, final Image somethingIsHappening, final ArrayList<HTML> scoreElements, final HTML score, final HTML avg){
 	  SimplePostAudioRecordButton s = new SimplePostAudioRecordButton(controller, service, sent) {
 		  
 	      @Override
@@ -903,14 +912,13 @@ public class Navigation implements RequiresResize {
 	  return s;
   }
   
-  private Grid displayDialog(final String dialog, String part, FlowPanel cp, final FlowPanel pp, boolean showPart, boolean regAudio){
-
+  private Grid displayDialog(final String dialog, String part, FlowPanel cp, final FlowPanel goodPhonePanel, final FlowPanel badPhonePanel, boolean showPart, boolean regAudio){
 	  HashMap<String, String> sentToAudioPath = regAudio ? getSentToAudioPath() : getSentToSlowAudioPath();
 	  HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSpeaker = getDialogToSentIndexToSpeaker();
 	  final HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSent = getDialogToSentIndexToSent();
 	  HashMap<String, HashMap<String, Integer>> dialogToSpeakerToLast = getDialogToSpeakerToLast();
 	  final HashMap<String, ArrayList<Float>> phonesToScores = new HashMap<String, ArrayList<Float>>();
-	  final HashMap<String, Anchor> phoneToAudioExample = getPlayAudioWidget();
+	  final HashMap<String, PlayAudioPanel> phoneToAudioExample = getPlayAudioWidget();
 	  int sentIndex = 0;
 	  final Grid sentPanel = new Grid(dialogToSentIndexToSent.get(dialog).size(), 9);
 	  final ArrayList<HTML> scoreElements = new ArrayList<HTML>();
@@ -924,8 +932,9 @@ public class Navigation implements RequiresResize {
 	  rp.setVisible(false);
 	  final ArrayList<SimplePostAudioRecordButton> recoButtons = new ArrayList<SimplePostAudioRecordButton>();
 	  final ArrayList<Integer> sentIndexes = new ArrayList<Integer>();
-
+	  
 	  while(dialogToSentIndexToSent.get(dialog).containsKey(sentIndex)){
+		  boolean nextIsSame = dialogToSentIndexToSent.get(dialog).containsKey(sentIndex+1) && (dialogToSentIndexToSent.get(dialog).get(sentIndex) == dialogToSentIndexToSent.get(dialog).get(sentIndex+1));
 		  String sentence = dialogToSentIndexToSent.get(dialog).get(sentIndex);
 		  HTML sent = new HTML(sentence);
 		  sent.getElement().getStyle().setProperty("color", "#B8B8B8");
@@ -950,7 +959,7 @@ public class Navigation implements RequiresResize {
 			     recordButton = getRecordButton(dialogToSentIndexToSent.get(dialog).get(sentIndex), score, continueButton, check, x, somethingIsHappening);
 			  }
 			  else{
-				 recordButton = getFinalRecordButton(dialogToSentIndexToSent.get(dialog).get(sentIndex), continueButton, check, x, somethingIsHappening, scoreElements, score, avg, rp, pp);
+				 recordButton = getFinalRecordButton(dialogToSentIndexToSent.get(dialog).get(sentIndex), continueButton, check, x, somethingIsHappening, scoreElements, score, avg);
 				  
 				  continueButton.addClickHandler(new ClickHandler() {
 					  @Override
@@ -980,15 +989,39 @@ public class Navigation implements RequiresResize {
 						    		 return (int) (1000*(avg(phonesToScores.get(s2)) - avg(phonesToScores.get(s1))));
 						    	 }
 						     });
-						     Grid phoneScores = new Grid(phones.size(), 3);
+						     Grid goodPhoneScores = new Grid(5, 2); //the magic number 5!!!
 						     SimpleColumnChart chart = new SimpleColumnChart();
-						     for(int pi = 0; pi < phones.size(); pi++){
+						     for(int pi = 0; pi < 5; pi++){
 						    	 String currPhone = phones.get(pi);
-						    	 phoneScores.setWidget(pi, 0, phoneToAudioExample.get(currPhone));
-						    	 phoneScores.setWidget(pi, 1, new HTML(currPhone));
-						    	 phoneScores.setWidget(pi, 2, getScoreBar(phonesToScores.get(currPhone), chart));
+						    	 PlayAudioPanel audiWid = phoneToAudioExample.get(currPhone);
+						    	 audiWid.setMinWidth(50);
+						    	 audiWid.getElement().getStyle().setWidth(50, Style.Unit.PX);
+						    	 goodPhoneScores.setWidget(pi, 0, audiWid);
+						    	 goodPhoneScores.setWidget(pi, 1, getScoreBar(phonesToScores.get(currPhone), chart));
 						     }
-						     pp.add(phoneScores);
+						     int numToShow = 5;
+						     Grid badPhoneScores = new Grid(numToShow, 2);
+						     for(int pi = phones.size() -1; pi > phones.size()-numToShow-1; pi--){
+						    	 String currPhone = phones.get(pi);
+						    	 PlayAudioPanel audiWid = phoneToAudioExample.get(currPhone);
+						    	 audiWid.setMinWidth(50);
+						    	 audiWid.getElement().getStyle().setWidth(50, Style.Unit.PX);
+						    	 badPhoneScores.setWidget(numToShow-(phones.size()-pi), 0, audiWid);
+						    	 badPhoneScores.setWidget(numToShow-(phones.size()-pi), 1, getScoreBar(phonesToScores.get(currPhone), chart));
+						     }
+						     HTML goodPhonesTitle = new HTML("Some Sounds You Pronounce Well");
+						     goodPhonesTitle.getElement().getStyle().setProperty("fontSize", "130%");
+						     goodPhonesTitle.getElement().getStyle().setProperty("color", "#048500");
+						     goodPhonesTitle.getElement().getStyle().setProperty("marginBottom", "7px");
+						     goodPhonePanel.add(goodPhonesTitle);
+						     goodPhonePanel.add(goodPhoneScores);
+						     HTML badPhonesTitle = new HTML("Some Sounds You May Need To Improve");
+						     badPhonesTitle.getElement().getStyle().setProperty("fontSize", "130%");
+						     badPhonesTitle.getElement().getStyle().setProperty("color", "#AD0000");
+						     badPhonesTitle.getElement().getStyle().setProperty("marginBottom", "10px");
+						     badPhonePanel.add(badPhonesTitle);
+						     badPhonePanel.add(badPhoneScores);
+						     
 						  }
 					  }
 				  });
@@ -1018,6 +1051,8 @@ public class Navigation implements RequiresResize {
 			  continueButton.setVisible(false);
 			  sentPanel.setWidget(sentIndex, 4, score);
 			  recordButton.setVisible(false);
+			  if(nextIsSame)
+			     recordButton.getElement().addClassName("dontShow");
 			  play.setVisible(false);
 			  sentPanel.setWidget(sentIndex, 5, check);
 			  check.setVisible(false);
@@ -1079,7 +1114,8 @@ public class Navigation implements RequiresResize {
 	  if(sentPanel.getWidget(currIndex, 2) != null){
 		  sentPanel.getWidget(currIndex, 1).setVisible(true);
 		  sentPanel.getWidget(currIndex,  2).setVisible(true);
-		  sentPanel.getWidget(currIndex,  3).setVisible(true);
+		  if(!sentPanel.getWidget(currIndex, 3).getElement().hasClassName("dontShow"))
+		     sentPanel.getWidget(currIndex,  3).setVisible(true);
 	  	  ((Button) sentPanel.getWidget(currIndex,  3)).addMouseUpHandler(new MouseUpHandler() {
 			  @Override
 			  public void onMouseUp(MouseUpEvent e){
@@ -1197,59 +1233,58 @@ public class Navigation implements RequiresResize {
 	  return m;
   }
   
-  private HashMap<String, Anchor> getPlayAudioWidget(){
-	  HashMap<String, Anchor> pw = new HashMap<String, Anchor>();
-	  PlayAudioWidget w = new PlayAudioWidget();
-	  pw.put("a1",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("a2",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("a3",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("a4",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("b",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("c",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("ch",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("d",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("e1",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("e2",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("e3",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("e4",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("f",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("g",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("h",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("i1",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("i2",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("i3",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("i4",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("j",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("k",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("l",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("m",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("n",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("ng",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("o1",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("o2",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("o3",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("o4",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("p",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("q",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("r",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("s",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("sh",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("sil",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("t",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("u1",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("u2",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("u3",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("u4",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("uu1",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("uu2",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("uu3",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("uu4",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("unk",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("w",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("x",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("y",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("z",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
-	  pw.put("zh",w.getAudioWidget("72/slow_1403792425728_by_8.wav"));
+  private HashMap<String, PlayAudioPanel> getPlayAudioWidget(){
+	  HashMap<String, PlayAudioPanel> pw = new HashMap<String, PlayAudioPanel>();
+	  pw.put("a1",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/ma1.mp3").setPlayLabel("a1"));
+	  pw.put("a2",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/ma2.mp3").setPlayLabel("a2"));
+	  pw.put("a3",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/x.mp3").setPlayLabel("a3"));
+	  pw.put("a4",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/ba4.mp3").setPlayLabel("a4"));
+	  pw.put("b",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/bu4.mp3").setPlayLabel("b"));
+	  pw.put("c",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/cai2.mp3").setPlayLabel("c"));
+	  pw.put("ch",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/x.mp3").setPlayLabel("ch"));
+	  pw.put("d",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/dao2.mp3").setPlayLabel("d"));
+	  pw.put("e1",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/ke1.mp3").setPlayLabel("e1"));
+	  pw.put("e2",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/he2.mp3").setPlayLabel("e2"));
+	  pw.put("e3",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/ye3.mp3").setPlayLabel("e3"));
+	  pw.put("e4",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/ke4.mp3").setPlayLabel("e4"));
+	  pw.put("f",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/x.mp3").setPlayLabel("f"));
+	  pw.put("g",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/go1.mp3").setPlayLabel("g"));
+	  pw.put("h",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/he2.mp3").setPlayLabel("h"));
+	  pw.put("i1",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/shi1.mp3").setPlayLabel("i1"));
+	  pw.put("i2",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/yi2.mp3").setPlayLabel("i2"));
+	  pw.put("i3",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/ni3.mp3").setPlayLabel("i3"));
+	  pw.put("i4",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/shi4.mp3").setPlayLabel("i4"));
+	  pw.put("j",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/ji1ng.mp3").setPlayLabel("j"));
+	  pw.put("k",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/ke4.mp3").setPlayLabel("k"));
+	  pw.put("l",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/lao3.mp3").setPlayLabel("l"));
+	  pw.put("m",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/ma2.mp3").setPlayLabel("m"));
+	  pw.put("n",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/ni3.mp3").setPlayLabel("n"));
+	  pw.put("ng",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/a2ng.mp3").setPlayLabel("ng"));
+	  pw.put("o1",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/zho1.mp3").setPlayLabel("o1"));
+	  pw.put("o2",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/ro2.mp3").setPlayLabel("o2"));
+	  pw.put("o3",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/wo3.mp3").setPlayLabel("o3"));
+	  pw.put("o4",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/zuo4.mp3").setPlayLabel("o4"));
+	  pw.put("p",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/x.mp3").setPlayLabel("p"));
+	  pw.put("q",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/quu4.mp3").setPlayLabel("q"));
+	  pw.put("r",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/ro2.mp3").setPlayLabel("r"));
+	  pw.put("s",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/su4.mp3").setPlayLabel("s"));
+	  pw.put("sh",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/shu1.mp3").setPlayLabel("sh"));
+	  pw.put("t",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/tu2.mp3").setPlayLabel("t"));
+	  pw.put("u1",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/shu1.mp3").setPlayLabel("u1"));
+	  pw.put("u2",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/bu2.mp3").setPlayLabel("u2"));
+	  pw.put("u3",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/x.mp3").setPlayLabel("u3"));
+	  pw.put("u4",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/bu4.mp3").setPlayLabel("u4"));
+	  pw.put("uu1",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/x.mp3").setPlayLabel("uu1"));
+	  pw.put("uu2",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/xuue2.mp3").setPlayLabel("uu2"));
+	  pw.put("uu3",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/x.mp3").setPlayLabel("uu3"));
+	  pw.put("uu4",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/x.mp3").setPlayLabel("uu4"));
+	  pw.put("w",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/wo3.mp3").setPlayLabel("w"));
+	  pw.put("x",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/x.mp3").setPlayLabel("x"));
+	  pw.put("y",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/yi2.mp3").setPlayLabel("y"));
+	  pw.put("z",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/zou3.mp3").setPlayLabel("z"));
+	  pw.put("zh",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/zho1.mp3").setPlayLabel("zh"));
+	  pw.put("sil",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/x.mp3").setPlayLabel("sil"));
+	  pw.put("unk",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/x.mp3").setPlayLabel("unk"));
 	  return pw;
   }
   
