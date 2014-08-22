@@ -764,6 +764,12 @@ public class UserDAO extends DAO {
     return false;
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#changePFor(String, String)
+   * @param remove
+   * @param resetKey
+   * @return
+   */
   public boolean clearKey(Long remove, boolean resetKey) {
     try {
       Connection connection = database.getConnection();
