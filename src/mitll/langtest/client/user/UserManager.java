@@ -120,6 +120,10 @@ public class UserManager {
   }
 
   /**
+   * Only content developers can do quality control or record audio.
+   *
+   * Legacy people must get approval.
+   *
    * @see #storeUser(long, String, String, mitll.langtest.client.PropertyHandler.LOGIN_TYPE)
    * @param result
    */
@@ -127,8 +131,14 @@ public class UserManager {
     System.out.println("UserManager.gotNewUser " + result);
     userNotification.getPermissions().clear();
     if (result != null) {
+      boolean isCD = result.getUserKind() == User.Kind.CONTENT_DEVELOPER;
       for (User.Permission permission : result.getPermissions()) {
-        userNotification.setPermission(permission, true);
+        boolean valid = true;
+        if (permission == User.Permission.QUALITY_CONTROL ||
+            permission == User.Permission.RECORD_AUDIO) valid = isCD;
+        if (valid) {
+          userNotification.setPermission(permission, true);
+        }
       }
       userNotification.gotUser(result.getId());
     }
