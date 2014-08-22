@@ -28,6 +28,18 @@ import java.util.Map;
 public interface LangTestDatabaseAsync {
   void addTextAnswer(int usedID, CommonExercise exercise, int questionID, String answer, String answerType, AsyncCallback<Void> async);
   void userExists(String login, AsyncCallback<Integer> async);
+
+  /**
+   * @param age
+   * @param gender
+   * @param experience
+   * @param nativeLang
+   * @param dialect
+   * @param userID
+   * @param permissions
+   * @param async
+   * @deprecated
+   */
   void addUser(int age, String gender, int experience, String nativeLang, String dialect, String userID, Collection<User.Permission> permissions, AsyncCallback<Long> async);
   void getUsers(AsyncCallback<List<User>> async);
   void getUserBy(long id, AsyncCallback<User> async);
@@ -68,7 +80,7 @@ public interface LangTestDatabaseAsync {
   void getGradeCountPerExercise(AsyncCallback<Map<Integer, Map<String, Map<String, Integer>>>> async);
 
   void getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix, long userListID,
-                      int userID, String role, boolean onlyUnrecordedByMe, AsyncCallback<ExerciseListWrapper> async);
+                      int userID, String role, boolean onlyUnrecordedByMe, boolean onlyExamples, AsyncCallback<ExerciseListWrapper> async);
 
   void getStartupInfo(AsyncCallback<StartupInfo> async);
 
@@ -122,6 +134,14 @@ public interface LangTestDatabaseAsync {
 
   void getMaleFemaleProgress(AsyncCallback<Map<String, Float>> async);
 
+  /**
+   * @see mitll.langtest.client.scoring.SimplePostAudioRecordButton#postAudioFile(String)
+   * @param base64EncodedString
+   * @param textToAlign
+   * @param identifier
+   * @param reqid
+   * @param async
+   */
   void getAlignment(String base64EncodedString,
                     String textToAlign,
                     String identifier,
