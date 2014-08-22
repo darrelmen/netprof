@@ -817,7 +817,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   /**
-   * @see #gotUser(long)
+   * @see #gotUser
    * @see #makeHeaderRow()
    * @return
    */
@@ -1050,7 +1050,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public LangTestDatabaseAsync getService() { return service; }
   public UserFeedback getFeedback() { return this; }
 
-  private long then, now;
+  private long then;
 
   // recording methods...
   /**
@@ -1068,8 +1068,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
    */
   public void stopRecording(WavCallback wavCallback) {
-    now = System.currentTimeMillis();
-    System.out.println("stopRecording : time recording in UI " + (now-then) + " millis");
+    long now = System.currentTimeMillis();
+    System.out.println("stopRecording : time recording in UI " + (now -then) + " millis");
 
     flashRecordPanel.stopRecording(wavCallback);
   }
