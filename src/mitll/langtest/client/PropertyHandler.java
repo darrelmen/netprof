@@ -15,7 +15,6 @@ import java.util.Map;
 public class PropertyHandler {
   // property file property names
   private static final String GRADING_PROP = "grading";
-  private static final String SHOW_TURK_TOKEN = "showTurkToken";
   private static final String APP_TITLE = "appTitle";
   private static final String SPLASH_TITLE = "splashTitle";
   private static final String RELEASE_DATE = "releaseDate";
@@ -53,16 +52,26 @@ public class PropertyHandler {
   private static final String RP = "rp";
   private static final String CD = "cd";
   private static final String ER = "er";
+  private static final String CLICK_AND_HOLD = "clickAndHold";
   private boolean spectrogram = false;
   private static final String NO_MODEL = "noModel";
-  private static final String INSTRUMENT = "instrument";
+  // private static final String INSTRUMENT = "instrument";
+  private boolean clickAndHold = true;
+  private boolean quietAudioOK;
   private boolean instrument = true; // by default we instrument for now 4/3/14
   private String resetPassToken = "";
   private String cdEnableToken = "", emailRToken = "";
 
   // right now always true
-  public boolean doInstrumentation() {
-    return instrument;
+
+  public boolean doClickAndHold() { return clickAndHold; }
+
+  public boolean isQuietAudioOK() {
+    return quietAudioOK;
+  }
+
+  public void setQuietAudioOK(boolean quietAudioOK) {
+    this.quietAudioOK = quietAudioOK;
   }
 
   public enum LOGIN_TYPE {ANONYMOUS, STUDENT }
@@ -112,6 +121,7 @@ public class PropertyHandler {
     for (Map.Entry<String, String> kv : props.entrySet()) {
       String key = kv.getKey();
       String value = kv.getValue();
+
       if (key.equals(GRADING_PROP)) grading = getBoolean(value);
 
       else if (key.equals(APP_TITLE)) appTitle = value;
@@ -131,8 +141,9 @@ public class PropertyHandler {
       else if (key.equals(SHOW_FLASHCARD_ANSWER)) showFlashcardAnswer = getBoolean(value);
       else if (key.equals(ALLOW_PLUS_IN_URL)) allowPlusInURL = getBoolean(value);
       else if (key.equals(SHOW_SPECTROGRAM)) spectrogram = getBoolean(value);
-      else if (key.equals(INSTRUMENT)) instrument = getBoolean(value);
+   //   else if (key.equals(INSTRUMENT)) instrument = getBoolean(value);
       else if (key.equals(NO_MODEL)) noModel = getBoolean(value);
+      else if (key.equals("quietAudioOK")) quietAudioOK = getBoolean(value);
       else if (key.equals(LOGIN_TYPE_PARAM)) {
         try {
           loginType = LOGIN_TYPE.valueOf(value.toUpperCase());
@@ -189,6 +200,7 @@ public class PropertyHandler {
     String bkgColorForRefParam = Window.Location.getParameter(BKG_COLOR_FOR_REF);
     String demoParam = Window.Location.getParameter(DEMO_MODE);
 
+    // supports headstart mode
     String exercise_title = Window.Location.getParameter(EXERCISE_TITLE);
     if (exercise_title != null) {
       this.exercise_title = exercise_title;
@@ -205,8 +217,6 @@ public class PropertyHandler {
         e.printStackTrace();
       }
     }
-    // System.out.println("param grading " + isGrading);
-
     boolean grading = this.isGrading() || (isGrading != null && !isGrading.equals("false"));
     setGrading(grading);
     // get audio repeats
@@ -237,9 +247,23 @@ public class PropertyHandler {
     String emailR = Window.Location.getParameter(ER);
     if (emailR != null) { emailRToken = emailR; }
 
+    if (Window.Location.getParameter(CLICK_AND_HOLD) != null) {
+      clickAndHold = !Window.Location.getParameter(CLICK_AND_HOLD).equals("false");
+    }
+
     if (Window.Location.getParameter(SHOW_SPECTROGRAM) != null) {
       spectrogram = !Window.Location.getParameter(SHOW_SPECTROGRAM).equals("false");
       if (spectrogram) System.out.println("spectrogram is " + spectrogram);
+    }
+
+    String loginType = Window.Location.getParameter(LOGIN_TYPE_PARAM);
+    if (loginType != null) {
+      try {
+        this.loginType = LOGIN_TYPE.valueOf(loginType);
+        System.out.println("log in type is " + loginType);
+      } catch (IllegalArgumentException e) {
+        System.err.println("couldn't parse " +loginType );
+      }
     }
 
     return grading;

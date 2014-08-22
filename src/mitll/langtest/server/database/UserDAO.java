@@ -482,6 +482,11 @@ public class UserDAO extends DAO {
     return getUserWhere(-1, sql);
   }
 
+  public boolean isMale(long userid) {
+    User userWhere = getUserWhere(userid);
+    return userWhere == null || userWhere.isMale();
+  }
+
   /**
    * @param userid
    * @return
