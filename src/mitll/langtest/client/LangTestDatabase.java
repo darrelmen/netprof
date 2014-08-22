@@ -130,6 +130,6 @@ public interface LangTestDatabase extends RemoteService {
   void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID);
   List<Event> getEvents();
 
-  void resetPassword(String userid, String text, String url);
+  boolean resetPassword(String userid, String text, String url);
   Long enableCDUser(String cdToken, String emailR, String url);
 }
