@@ -321,8 +321,8 @@ public class PagingContainer {
             STATE state = shell.getState();
 
             boolean isDefect = state == STATE.DEFECT;
-            boolean isFixed = state == STATE.FIXED;
-            boolean isLL = shell.getSecondState() == STATE.ATTN_LL;
+            boolean isFixed  = state == STATE.FIXED;
+            boolean isLL     = shell.getSecondState() == STATE.ATTN_LL;
             boolean isRerecord = shell.getSecondState() == STATE.RECORDED;
 
             boolean hasSecondState = isLL || isRerecord;
