@@ -1,8 +1,6 @@
 package mitll.langtest.client.exercise;
 
 import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.Tab;
-import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.Timer;
@@ -21,7 +19,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.CommonExercise;
 
 import java.util.ArrayList;
@@ -44,33 +41,34 @@ import java.util.Set;
  */
 public class ExercisePanel extends VerticalPanel implements
   BusyPanel, ExerciseQuestionState, PostAnswerProvider, ProvidesResize, RequiresResize {
-   private static final int CONTENT_SCROLL_HEIGHT = 220;
+  private static final int CONTENT_SCROLL_HEIGHT = 220;
   private static final String PROMPT = "Read the following text and answer the question or questions below.";
   private final List<Widget> answers = new ArrayList<Widget>();
   private final Set<Widget> completed = new HashSet<Widget>();
   protected CommonExercise exercise = null;
   protected final ExerciseController controller;
-  protected final LangTestDatabaseAsync service;
+  private final LangTestDatabaseAsync service;
   private final NavigationHelper navigationHelper;
   protected final ListInterface exerciseList;
   private final Map<Integer,Set<Widget>> indexToWidgets = new HashMap<Integer, Set<Widget>>();
-  private final Map<Integer,Tab> indexToTab = new HashMap<Integer, Tab>();
+  protected String message;
 
   /**
    * @see ExercisePanelFactory#getExercisePanel
    * @see mitll.langtest.client.list.ListInterface#loadExercise
    * @param e
    * @param service
-   * @param userFeedback
    * @param controller
    * @param exerciseList
+   * @param instructionMessage
    */
-  public ExercisePanel(final CommonExercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
-                       final ExerciseController controller, ListInterface exerciseList) {
+  public ExercisePanel(final CommonExercise e, final LangTestDatabaseAsync service,
+                       final ExerciseController controller, ListInterface exerciseList, String instructionMessage) {
     this.exercise = e;
     this.controller = controller;
     this.service = service;
     this.exerciseList = exerciseList;
+    this.message = instructionMessage;
     this.navigationHelper = getNavigationHelper(controller);
 
     // attempt to left justify
@@ -82,7 +80,7 @@ public class ExercisePanel extends VerticalPanel implements
     }
     hp.setHorizontalAlignment(rightAlignContent ? HasHorizontalAlignment.ALIGN_RIGHT : HasHorizontalAlignment.ALIGN_LEFT);
     hp.add(getQuestionContent(e));
-    boolean showInstructions = !(getExerciseContent(e).toLowerCase().contains("listen"));// || controller.isDataCollectMode());   // hack
+    boolean showInstructions = !(getExerciseContent(e).toLowerCase().contains("listen"));   // hack
     if (showInstructions) {
       addInstructions();
     }
@@ -103,7 +101,7 @@ public class ExercisePanel extends VerticalPanel implements
   protected void addInstructions() {  add(new Heading(4, PROMPT));  }
 
   /**
-   * @see #ExercisePanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, ExerciseController, mitll.langtest.client.list.ListInterface)
+   * @see #ExercisePanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, mitll.langtest.client.list.ListInterface, String)
    * @param e
    * @return
    */
@@ -207,66 +205,6 @@ public class ExercisePanel extends VerticalPanel implements
     if (objects == null) indexToWidgets.put(index, objects = new HashSet<Widget>());
     objects.add(answerWidget);
   }
-
-  //protected boolean shouldShowAnswer() { return controller.isDemoMode();  }
-
-  /**
-   * @see #getQuestionPanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int, int, java.util.List, java.util.List, mitll.langtest.shared.CommonExercise.QAPair, com.google.gwt.user.client.ui.HasWidgets)
-   * @param i
-   * @param total
-   * @param qaPair
-   * @param englishPair
-   * @param flQAPair
-   * @param showAnswer
-   * @param toAddTo
-   */
-/*  protected void getQuestionHeader(int i, int total,
-                                   Exercise.QAPair qaPair,
-                                   Exercise.QAPair englishPair,
-                                   Exercise.QAPair flQAPair,
-                                   boolean showAnswer, HasWidgets toAddTo) {
-    getQuestionHeader(total, qaPair, showAnswer, true, toAddTo);
-  }*/
-
-  /**
-   * @see #addQuestions(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
-   * @see #getQuestionHeader
-   * @param total
-   * @param qaPair
-   * @param showAnswer
-   * @param addSpacerAfter
-   */
-/*  private void getQuestionHeader(int total, Exercise.QAPair qaPair, boolean showAnswer, boolean addSpacerAfter, HasWidgets toAddTo) {
-    String question = qaPair.getQuestion();
-    String prefix = (total == 1) ? ("Question : ") : "";
-
-    if (showAnswer) {
-      String answer = qaPair.getAnswer();
-
-      toAddTo.add(new HTML("<br></br><b>" + prefix + "</b>" + question));
-      if (qaPair.getAlternateAnswers().size() > 1) {
-        int j = 1;
-        for (String alternate : qaPair.getAlternateAnswers()) {
-          toAddTo.add(new HTML("<b>Possible answer #" + j++ +
-            " : " +
-            TWO_SPACES +
-            "</b>" + alternate));
-        }
-        if (addSpacerAfter) add(new HTML("<br></br>"));
-      } else {
-        toAddTo.add(new HTML("<b>Answer : " +
-          TWO_SPACES +
-          "</b>" + answer + (addSpacerAfter ? "<br></br>" : "")));
-      }
-    }
-    else {
-      String questionHeader = prefix + question;
-      HTML maybeRTLContent = getMaybeRTLContent("<h4>" + questionHeader + "</h4>", false);
-      DOM.setStyleAttribute(maybeRTLContent.getElement(), "marginTop", "0px");
-
-      toAddTo.add(maybeRTLContent);
-    }
-  }*/
 
   /**
    * @seex #addQuestions(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
@@ -408,7 +346,7 @@ public class ExercisePanel extends VerticalPanel implements
       System.err.println("recordCompleted huh? more complete " + completed.size() + " than answers " + answers.size());
     }
 
-    markTabsComplete();
+   // markTabsComplete();
     enableNext();
   }
 
@@ -416,7 +354,7 @@ public class ExercisePanel extends VerticalPanel implements
    * If all the answer widgets within a question tab have been answered, put a little check mark icon
    * on the tab to indicate it's complete.
    */
-  private void markTabsComplete() {
+/*  private void markTabsComplete() {
     for (Map.Entry<Integer, Set<Widget>> indexWidgetsPair : indexToWidgets.entrySet()) {
       boolean allComplete = true;
       Set<Widget> widgetsForTab = indexWidgetsPair.getValue();
@@ -429,9 +367,9 @@ public class ExercisePanel extends VerticalPanel implements
           allComplete = false;
           break;
         }
-        else {
+       // else {
           //System.out.println("\trecordCompleted : tab# " + tabIndex + " is      complete : " + widget.getElement().getId());
-        }
+      //  }
       }
       if (allComplete) {
         //System.out.println("\trecordCompleted : tab# " + tabIndex + " is complete");
@@ -440,7 +378,7 @@ public class ExercisePanel extends VerticalPanel implements
         }
       }
     }
-  }
+  }*/
 
   protected void enableNext() {
     //System.out.println("enableNext : answered " + completed.size() + " vs total " + answers.size());
@@ -456,9 +394,7 @@ public class ExercisePanel extends VerticalPanel implements
     return b;
   }
 
-  //protected void enableNextButton(boolean val) {  navigationHelper.enableNextButton(val); }
   void setButtonsEnabled(boolean val) {
-   // navigationHelper.setButtonsEnabled(val);
     enableNext();
   }
 }
