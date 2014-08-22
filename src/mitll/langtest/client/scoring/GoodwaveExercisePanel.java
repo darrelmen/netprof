@@ -468,11 +468,11 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       return playAudioPanel;
     }
 
-    @Override
+ /*   @Override
     protected void onUnload() {
       super.onUnload();
       navigationHelper.removeKeyHandler();
-    }
+    }*/
 
     private class MyPlayAudioPanel extends PlayAudioPanel {
       public MyPlayAudioPanel(Image recordImage1, Image recordImage2, SoundManagerAPI soundManager,
