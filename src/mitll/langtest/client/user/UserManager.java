@@ -138,6 +138,7 @@ public class UserManager {
   }
 
   /**
+   * @see #checkLogin()
    * @see mitll.langtest.client.LangTest#checkLogin
    */
   private void anonymousLogin() {
@@ -146,12 +147,11 @@ public class UserManager {
       //System.out.println("UserManager.anonymousLogin : current user : " + user);
       rememberAudioType();
       userNotification.gotUser(user);
-    }
-    else {
+    } else {
       System.out.println("UserManager.anonymousLogin : make new user, since user = " + user);
 
       addAnonymousUser();
-  }
+    }
   }
 
   private void addAnonymousUser() {
