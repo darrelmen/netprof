@@ -111,7 +111,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   /**
    *
    * @param userID
-   * @see mitll.langtest.client.LangTest#doEverythingAfterFactory
+   * @see mitll.langtest.client.LangTest#configureUIGivenUser(long)
    */
   public boolean getExercises(final long userID) {
     //System.out.println("FlexSectionExerciseList.getExercises : Get exercises for user=" + userID + " instance " + getInstance());
@@ -134,8 +134,8 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   private Panel getWidgetsForTypes() {
     final FluidContainer container = new FluidContainer();
     container.getElement().setId("typeOrderContainer");
-    DOM.setStyleAttribute(container.getElement(), "paddingLeft", "2px");
-    DOM.setStyleAttribute(container.getElement(), "paddingRight", "2px");
+    container.getElement().getStyle().setPaddingLeft(2, Style.Unit.PX);
+    container.getElement().getStyle().setPaddingRight(2, Style.Unit.PX);
 
     getTypeOrder(container);
 
