@@ -289,7 +289,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     userManager = new UserManager(this, service, props);
 
-    checkAdmin();
+    checkAdmin(false);
 
     RootPanel.get().getElement().getStyle().setPaddingTop(2, Style.Unit.PX);
 
@@ -302,9 +302,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     setPageTitle();
     browserCheck.checkForCompatibleBrowser();
 
-    if (props.isAdminView()) {
+/*    if (isAdmin()) {
       loadVisualizationPackages();  // Note : this was formerly done in LangTest.html, since it seemed to be intermittently not loaded properly
-    }
+    }*/
   }
 
 
@@ -439,7 +439,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
             populateBelowHeader(verticalContainer,firstRow);
           }
           else {
-            Panel content = new UserPassLogin(service, getProps(), userManager, eventRegistration).getResetPassword(resetPassToken);
+            UserPassLogin userPassLogin = new UserPassLogin(service, getProps(), userManager, eventRegistration);
+            Panel content = userPassLogin.getResetPassword(resetPassToken);
             firstRow.add(content);
             content.getElement().setId("ResetPassswordContent");
             verticalContainer.getElement().getStyle().setPaddingLeft(0, Style.Unit.PX);
@@ -532,9 +533,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   /**
    * @see #onModuleLoad2
    */
-  private void checkAdmin() {
-    if (props.isAdminView() || props.isGrading()) {
-      final LangTest outer = this;
+  private void checkAdmin(boolean isAdmin) {
+    if (isAdmin || props.isGrading()) {
+    //  final LangTest outer = this;
       GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
           Window.alert("Code download failed");
@@ -556,6 +557,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       });
     }
   }
+
+  //private boolean isAdmin() {
+  //  return props.isAdminView();
+  //}
 
   /**
    * Supports different flavors of exercise list -- Paging, Grading, and vanilla.
@@ -584,10 +589,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private Panel makeHeaderRow() {
     flashcard = new Flashcard(props);
     Widget title = flashcard.makeNPFHeaderRow(props.getSplash(), true, getGreeting(), getReleaseStatus(), new LogoutClickHandler(),
-        (props.isAdminView()) ? new UsersClickHandler() : null,
-        (props.isAdminView()) ? new ResultsClickHandler() : null,
-        (props.isAdminView()) ? new MonitoringClickHandler() : null,
-        (props.isAdminView()) ? new EventsClickHandler() : null
+        new UsersClickHandler(),
+        new ResultsClickHandler(),
+        new MonitoringClickHandler(),
+        new EventsClickHandler()
     );
 
     headerRow = new FluidRow();
@@ -844,9 +849,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see #makeFlashContainer
    * @see UserManager#gotNewUser(mitll.langtest.shared.User)
    * @see UserManager#storeUser
-   * @param userID
+   * @param user
    */
-  public void gotUser(long userID) {
+  public void gotUser(User user) {
+
+    long userID= -1;
+    if (user != null) userID = user.getId();
 
     System.out.println("gotUser : userID " +userID);
 
@@ -860,11 +868,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     if (userID > -1) {
       flashcard.setCogVisible(true);
+      //if (user.isAdmin()) {
+        checkAdmin(user.isAdmin());
+        flashcard.setVisibleAdmin(user.isAdmin());
+      //}
     }
   }
 
   /**
-   * @see #gotUser(long)
+   * @see #gotUser
    * @param userID
    * @return
    */
@@ -897,6 +909,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     lastUser = userID;
     flashcard.setBrowserInfo(getInfoLine());
     flashcard.reflectPermissions(getPermissions());
+
   }
 
   /**
