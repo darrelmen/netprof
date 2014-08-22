@@ -4,7 +4,6 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
@@ -161,7 +160,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   public boolean getExercises(long userID) {
     System.out.println("ExerciseList.getExercises for user " + userID + " instance " + instance);
     lastReqID++;
-    service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, controller.getUser(), getRole(), false, new SetExercisesCallback(""));
+    service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, controller.getUser(), getRole(), false, false, new SetExercisesCallback(""));
     return true;
   }
 
@@ -171,7 +170,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   public void reload() {
     System.out.println("ExerciseList.reload for user " + controller.getUser() + " instance " + instance + " id " + getElement().getId());
-    service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, controller.getUser(), getRole(), false, new SetExercisesCallback(""));
+    service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, controller.getUser(), getRole(), false, false, new SetExercisesCallback(""));
   }
 
   /**
@@ -183,7 +182,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   @Override
   public void reloadWith(String id) {
     System.out.println("ExerciseList.reloadWith id = " + id + " for user " + controller.getUser() + " instance " + instance);
-    service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, controller.getUser(), getRole(), false, new SetExercisesCallbackWithID(id));
+    service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, controller.getUser(), getRole(), false, false, new SetExercisesCallbackWithID(id));
   }
 
   /**
@@ -260,9 +259,13 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     return createdPanel;
   }
 
+  /**
+   * TODO : horrible hack here to get role of request.
+   * @return
+   */
   protected String getRole() {
     String audioTypeRecorder = Result.AUDIO_TYPE_RECORDER;
-    return instance.equalsIgnoreCase("record_Audio") ? audioTypeRecorder : instance;
+    return instance.startsWith("record") ? audioTypeRecorder : instance;
   }
 
   public String getInstance() {
@@ -346,7 +349,11 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
   }
 
-  protected void dealWithRPCError(Throwable caught) {
+  /**
+   * @see mitll.langtest.client.list.ExerciseList.SetExercisesCallback#onFailure(Throwable)
+   * @param caught
+   */
+  private void dealWithRPCError(Throwable caught) {
     String message = caught.getMessage();
     if (message.length() > MAX_MSG_LEN) message = message.substring(0, MAX_MSG_LEN);
     if (!message.trim().equals("0")) {
@@ -357,6 +364,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     System.out.println("ExerciseList.SetExercisesCallbackWithID Got exception '" + message + "' " + caught);
 
     caught.printStackTrace();
+    controller.logMessageOnServer("got exception " + caught.getMessage(), " RPCerror?");
   }
 
   /**
