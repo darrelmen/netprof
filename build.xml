@@ -103,73 +103,6 @@
         </jar>
     </target>
 
-    <target depends="build" name="warDari">
-        <jar destfile="npDari.war" basedir="war" excludes="answers/**,audioimages/**,config/autoCRT/**,config/pashto/**,config/egyptian/**,config/english/**,config/farsi/**,config/farsi2/**,config/first/**,config/levantine/**,config/msa/**,config/pilot/**,config/sudanese/**,config/urdu/**,config/autoCRT/**,scoring/tmp/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,scoring/models.dli-ara/**,scoring/models.dli-pashto/**">
-        </jar>
-    </target>
-
-    <target depends="build" name="warMSA">
-      <jar destfile="npMSA.war" basedir="war" excludes="answers/**,audioimages/**,config/autoCRT/**,config/pashto/**,config/egyptian/**,config/english/**,config/farsi/**,config/farsi2/**,config/first/**,config/levantine/**,config/dari/**,config/pilot/**,config/sudanese/**,config/urdu/**,scoring/tmp/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,scoring/models.dli-dari/**,scoring/models.dli-pashto/**">
-      </jar>
-    </target>
-
-    <target depends="build" name="warPashto">
-      <jar destfile="npPashto.war" basedir="war" excludes="answers/**,audioimages/**,config/autoCRT/**,config/msa/**,config/egyptian/**,config/english/**,config/farsi/**,config/farsi2/**,config/first/**,config/levantine/**,config/dari/**,config/pilot/**,config/sudanese/**,config/urdu/**,scoring/tmp/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
-      </jar>
-    </target>
-
-    <!-- Makes data collection target -->
-    <target depends="build" name="warUrdu">
-        <jar destfile="npUrduData.war" basedir="war" excludes="WEB-INF/lib/pronz.jar,answers/**,audioimages/**,scoring/**,config/first/**,config/autoCRT/**,config/msa/**,config/msa/**,config/levantine/**,config/pilot/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
-            <manifest>
-                <attribute name="Built-Date" value="${current.time}"/>
-            </manifest>
-        </jar>
-    </target>
-
-    <target depends="build" name="warEnglish">
-      <jar destfile="npEnglishData.war" basedir="war" excludes="WEB-INF/lib/pronz.jar,WEB-INF/lib/poi*.jar,answers/**,audioimages/**,scoring/**,config/first/**,config/autoCRT/**,config/msa/**,config/msa/**,config/levantine/**,config/pilot/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**,config/urdu/**">
-          <manifest>
-              <attribute name="Built-Date" value="${current.time}"/>
-          </manifest>
-      </jar>
-    </target>
-
-    <target depends="build" name="warFarsi2">
-      <jar destfile="npFarsiData2.war" basedir="war" excludes="WEB-INF/lib/pronz.jar,answers/**,audioimages/**,scoring/**,config/first/**,config/autoCRT/**,config/msa/**,config/english/**,config/levantine/**,config/pilot/**,config/dari/**,config/sudanese/**,config/egyptian/**,config/urdu/**,config/farsi/**">
-      </jar>
-    </target>
-
-    <target depends="build" name="flashcard">
-        <jar destfile="npEnglishFlashcard.war" basedir="war"
-             excludes="answers/**,audioimages/**,config/first/**,config/crtDari/**,config/dataCollectAdmin/**,config/egyptian/**,config/pashto/**,config/pilot/**,config/urdu/**,config/autoCRT/**,config/msa/**,config/msa/**,config/levantine/**,config/eqyptian/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.dli-pashto/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
-            <manifest>
-                <attribute name="Built-Date" value="${current.time}"/>
-            </manifest>
-        </jar>
-    </target>
-
-    <target depends="build" name="frenchEnglishGame">
-        <jar destfile="FrenchEnglishGame.war" basedir="war"
-             includes="images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/pilot/**,scoring/**,soundmanager2.js"
-             excludes="answers/**,audioimages/**,config/first/**,config/crtDari/**,config/dataCollectAdmin/**,config/egyptian/**,config/pashto/**,config/urdu/**,config/autoCRT/**,config/msa/**,config/levantine/**,config/eqyptian/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.dli-pashto/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
-        >
-
-            <manifest>
-                <attribute name="Built-Date" value="${current.time}"/>
-            </manifest>
-        </jar>
-    </target>
-
-    <target depends="build" name="flashcardEnglishArabic">
-        <jar destfile="EnglishArabic.war" basedir="war"
-             excludes="answers/**,audioimages/**,config/first/**,config/dataCollectAdmin/**,config/egyptian/**,config/pashto/**,config/pilot/**,config/urdu/**,config/autoCRT/**,config/msa/**,config/msa/**,config/levantine/**,config/eqyptian/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.dli-pashto/**,,scoring/models.dli-dari/**,scoring/models.wsj01-16/**">
-            <manifest>
-                <attribute name="Built-Date" value="${current.time}"/>
-            </manifest>
-        </jar>
-    </target>
-
     <target depends="build" name="warArabicVLL2">
         <jar destfile="npArabicVLL.war" basedir="war"
              includes="images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/pilot/**,soundmanager2.js"
@@ -180,18 +113,6 @@
             </manifest>
         </jar>
     </target>
-
-<!--    <target depends="build" name="crtDari">
-        <jar destfile="crtDari.war" basedir="war"
-             includes="images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/crtDari/**,soundmanager2.js"
-             excludes="WEB=INF/lib/pronz.jar">
-
-            <manifest>
-                <attribute name="Built-Date" value="${current.time}"/>
-            </manifest>
-        </jar>
-    </target>-->
-
 
     <target depends="build" name="crtPashto">
         <jar destfile="crtPashto.war" basedir="war"
@@ -208,28 +129,6 @@
         <jar destfile="crt1cPashtotext.war" basedir="war"
              includes="images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/crtPashtoJune/**"
              excludes="WEB=INF/lib/pronz.jar">
-
-            <manifest>
-                <attribute name="Built-Date" value="${current.time}"/>
-            </manifest>
-        </jar>
-    </target>
-
-    <target depends="build" name="farsiSections">
-        <jar destfile="farsiSections.war" basedir="war"
-             includes="images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/farsi/**,soundmanager2.js"
-             excludes="WEB=INF/lib/pronz.jar">
-
-            <manifest>
-                <attribute name="Built-Date" value="${current.time}"/>
-            </manifest>
-        </jar>
-    </target>
-
-    <target depends="build" name="msaFlashcard">
-        <jar destfile="msaFlashcard.war" basedir="war"
-             includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/unitFlashcard/**,soundmanager2.js,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-ara/**"
-                >
 
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
@@ -259,16 +158,6 @@
         </jar>
     </target>
 
-    <target depends="build" name="npCourseDari">
-        <jar destfile="npCourseDari.war" basedir="war"
-             includes="images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/dari/**,soundmanager2.js,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-dari/**"
-                >
-
-            <manifest>
-                <attribute name="Built-Date" value="${current.time}"/>
-            </manifest>
-        </jar>
-    </target>
 
     <target depends="build" name="levantineFlashcard">
         <jar destfile="levantineFlashcard.war" basedir="war"
@@ -281,38 +170,6 @@
         </jar>
     </target>
 
-    <target depends="build" name="dariFlashcard">
-        <jar destfile="dariFlashcard.war" basedir="war"
-             includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/unitFlashcard/**,soundmanager2.js,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-dari/**"
-                >
-
-            <manifest>
-                <attribute name="Built-Date" value="${current.time}"/>
-            </manifest>
-        </jar>
-    </target>
-
-    <target depends="build" name="npfDari">
-        <jar destfile="npfDari.war" basedir="war"
-             includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/dari/bestAudio/**,config/dari/*dari*,,config/dari/missing*,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-dari/**"
-                >
-
-            <manifest>
-                <attribute name="Built-Date" value="${current.time}"/>
-            </manifest>
-        </jar>
-    </target>
-
-    <target depends="build" name="npfFarsi">
-        <jar destfile="npfFarsi.war" basedir="war"
-             includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/farsi/**,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-farsi/**"
-                >
-
-            <manifest>
-                <attribute name="Built-Date" value="${current.time}"/>
-            </manifest>
-        </jar>
-    </target>
 
     <target depends="build" name="hsMSA">
         <jar destfile="hsMSA.war" basedir="war"
@@ -359,39 +216,6 @@
         </jar>
     </target>
 
-    <target depends="build" name="npfPashto">
-        <jar destfile="npfPashto.war" basedir="war"
-             includes="npfIcon.png,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/pashto/*,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-pashto/**"
-                >
-
-            <manifest>
-                <attribute name="Built-Date" value="${current.time}"/>
-            </manifest>
-        </jar>
-    </target>
-
-    <target depends="build" name="avpPashto">
-        <jar destfile="avpPashto.war" basedir="war"
-             includes="npfIcon.png,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/pashto/*,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-pashto/**"
-                >
-
-            <manifest>
-                <attribute name="Built-Date" value="${current.time}"/>
-            </manifest>
-        </jar>
-    </target>
-
-
-    <target depends="build" name="avpESL">
-        <jar destfile="avpESLTimedFeedback.war" basedir="war"
-             includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/english/**,scoring/bin.linux64/**,scoring/configurations/**,scoring/models.wsj01-16/**"
-                >
-
-            <manifest>
-                <attribute name="Built-Date" value="${current.time}"/>
-            </manifest>
-        </jar>
-    </target>
 
     <target depends="build" name="classroomEnglish">
         <jar destfile="npfClassroomEnglish.war" basedir="war"
@@ -461,81 +285,7 @@
         </jar>
     </target>
 
-    <target depends="build" name="npfCM">
-        <jar destfile="npfCM.war" basedir="war"
-             includes="npfIcon.png,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/mandarin/**,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-mandarin/**"
-                >
-            <manifest>
-                <attribute name="Built-Date" value="${current.time}"/>
-            </manifest>
-        </jar>
-    </target>
 
-    <target depends="build" name="avpCM">
-        <jar destfile="avpCM.war" basedir="war"
-             includes="npfIcon.png,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/mandarin/**,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-mandarin/**"
-                >
-
-            <manifest>
-                <attribute name="Built-Date" value="${current.time}"/>
-            </manifest>
-        </jar>
-    </target>
-
-    <target depends="build" name="npfCML1">
-        <jar destfile="npfCML1.war" basedir="war"
-             includes="npfIcon.png,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/mandarinL1/**,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-mandarin/**"
-                >
-            <manifest>
-                <attribute name="Built-Date" value="${current.time}"/>
-            </manifest>
-        </jar>
-    </target>
-
-    <target depends="build" name="avpCML1">
-        <jar destfile="avpCML1.war" basedir="war"
-             includes="npfIcon.png,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/mandarinL1/**,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-mandarin/**"
-                >
-
-            <manifest>
-                <attribute name="Built-Date" value="${current.time}"/>
-            </manifest>
-        </jar>
-    </target>
-
-
-    <target depends="build" name="npfMSA">
-        <jar destfile="npfMSA.war" basedir="war"
-             includes="npfIcon.png,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/msa/**,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-ara/**"
-                >
-            <manifest>
-                <attribute name="Built-Date" value="${current.time}"/>
-            </manifest>
-        </jar>
-    </target>
-
-    <target depends="build" name="avpMSA">
-        <jar destfile="avpMSA.war" basedir="war"
-             includes="npfIcon.png,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/msa/**,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-ara/**"
-                >
-
-            <manifest>
-                <attribute name="Built-Date" value="${current.time}"/>
-            </manifest>
-        </jar>
-    </target>
-
-
-    <target depends="build" name="avpDari">
-        <jar destfile="avpDari.war" basedir="war"
-             includes="npfIcon.png,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/dari/**,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-dari/**"
-                >
-
-            <manifest>
-                <attribute name="Built-Date" value="${current.time}"/>
-            </manifest>
-        </jar>
-    </target>
 
     <target depends="build" name="crtDari">
     <jar destfile="crtDari.war" basedir="war"
@@ -548,17 +298,6 @@
     </jar>
 </target>
 
-
-    <target depends="build" name="pashtoFlashcard">
-        <jar destfile="pashtoFlashcard.war" basedir="war"
-             includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/unitFlashcard/**,soundmanager2.js,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-pashto/**"
-                >
-
-            <manifest>
-                <attribute name="Built-Date" value="${current.time}"/>
-            </manifest>
-        </jar>
-    </target>
 
     <target depends="build" name="dataCollectAdmin2">
         <jar destfile="dataCollectAdmin.war" basedir="war"
@@ -689,18 +428,4 @@
         </copy>
 
     </target>
-    <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
-<!--    <target description="copy Eclipse compiler jars to ant lib directory" name="init-eclipse-compiler">
-        <copy todir="${ant.library.dir}">
-            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
-        </copy>
-        <unzip dest="${ant.library.dir}">
-            <patternset includes="jdtCompilerAdapter.jar"/>
-            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
-        </unzip>
-    </target>
-    <target description="compile project with Eclipse compiler" name="build-eclipse-compiler">
-        <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
-        <antcall target="build"/>
-    </target>-->
 </project>
