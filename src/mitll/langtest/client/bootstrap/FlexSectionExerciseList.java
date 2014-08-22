@@ -32,6 +32,7 @@ import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.SectionNode;
+import sun.tools.jconsole.Plotter;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -736,7 +737,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
       int width = Window.getClientWidth() - leftSideWidth - UNACCOUNTED_WIDTH;
 /*      System.out.println("FlexSectionExeciseList.setScrollPanelWidth : scrollPanel width is " + width +" client " +Window.getClientWidth() +
         " label col " +labelColumn.getOffsetWidth() + " clear " +clearColumnContainer.getOffsetWidth() + " unacct "+UNACCOUNTED_WIDTH);*/
-        scrollPanel.setWidth(Math.max(300, width) + "px");
+      scrollPanel.setWidth(Math.max(300, width) + "px");
     }
 //    else {
      // System.out.println("\tsetScrollPanelWidth : labelColumn is null instance " + instance);
@@ -750,8 +751,9 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    */
   private Widget getLabelWidget(String typeForOriginal) {
     Heading widget = new Heading(HEADING_FOR_LABEL, typeForOriginal);
-    DOM.setStyleAttribute(widget.getElement(), "marginBottom", "10px");
-    DOM.setStyleAttribute(widget.getElement(), "marginRight", "5px");
+    Style style = widget.getElement().getStyle();
+    style.setMarginBottom(10, Style.Unit.PX);
+    style.setMarginRight(5, Style.Unit.PX);
     return widget;
   }
 
