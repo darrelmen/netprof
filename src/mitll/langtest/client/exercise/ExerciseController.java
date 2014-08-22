@@ -1,15 +1,10 @@
 package mitll.langtest.client.exercise;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.Tab;
-import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.WavCallback;
 import mitll.langtest.client.dialog.KeyPressHelper;
-import mitll.langtest.client.instrumentation.EventLogger;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.SoundManagerAPI;
@@ -41,17 +36,11 @@ public interface ExerciseController extends EventRegistration {
 
   SoundManagerAPI getSoundManager();
 
-  // parameters
-  float getScreenPortion();
   boolean showOnlyOneExercise();
-  int getSegmentRepeats();
-  boolean isArabicTextDataCollect();
+
   boolean useBkgColorForRef();
-  boolean isAutoCRTMode();
+
   int getRecordTimeout();
-  boolean isDataCollectMode();
-  boolean isCollectAudio();
-  boolean isMinimalUI();
   boolean isGrading();
   boolean isLogClientMessages();
   String getAudioType();
@@ -62,9 +51,7 @@ public interface ExerciseController extends EventRegistration {
   void getImage(int reqid, String path, String type, int toUse, int height, String exerciseID, AsyncCallback<ImageResponse> client);
 
   String getLanguage();
-  boolean isPromptBeforeNextItem();
   boolean isRightAlignContent();
-  boolean isGoodwaveMode();
   int getLeftColumnWidth();
   int getHeightOfTopRows();
 
