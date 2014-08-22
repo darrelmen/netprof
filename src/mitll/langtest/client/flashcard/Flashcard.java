@@ -42,10 +42,10 @@ public class Flashcard implements RequiresResize {
   private HTML userNameWidget;
   private final String nameForAnswer;
   private final boolean adminView;
-  Paragraph subtitle;
-  HTML browserInfo;
-  Panel qc,recordAudio;
-  Dropdown cogMenu;
+  private Paragraph subtitle;
+  private HTML browserInfo;
+  private Panel qc,recordAudio;
+  private Dropdown cogMenu;
 
   /**
    * @see mitll.langtest.client.LangTest#makeHeaderRow()
@@ -194,7 +194,13 @@ public class Flashcard implements RequiresResize {
 
   public void setCogVisible(boolean val) {
     cogMenu.setVisible(val);
+    userNameWidget.setVisible(val);
   }
+
+  /**
+   * @see mitll.langtest.client.LangTest#configureUIGivenUser(long)
+   * @param v
+   */
   public void setBrowserInfo(String v) { browserInfo.setHTML(v);}
 
   private HTML getUserNameWidget(String userName) {
