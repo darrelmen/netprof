@@ -30,6 +30,8 @@ public class UserDAO extends DAO {
   private static final List<User.Permission> CD_PERMISSIONS = Arrays.asList(User.Permission.QUALITY_CONTROL, User.Permission.RECORD_AUDIO);
   private static final List<User.Permission> EMPTY_PERM = new ArrayList<User.Permission>();
   private static final String ENABLED = "enabled";
+  public static final String RESET_PASSWORD_KEY = "resetPasswordKey";
+  public static final String ENABLED_REQ_KEY = "enabledReqKey";
   private long defectDetector;
 
   private static final String ID = "id";
@@ -56,7 +58,7 @@ public class UserDAO extends DAO {
   public static MiniUser DEFAULT_USER = new MiniUser(DEFAULT_USER_ID, 30, 0, "default", "default", "default");
   public static MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 30, 0, "default", "default", "Male");
   public static MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 30, 1, "default", "default", "Female");
-  private static final List<String> admins = Arrays.asList("swade", "gvidaverAdmin", "tamasAdmin", "alexAdmin", "dRandolphAdmin");
+  private static final List<String> admins = Arrays.asList("swade", "gvidaver", "tmarius", "acohen", "drandolph", "djones");
 
   public UserDAO(Database database) {
     super(database);
@@ -373,6 +375,10 @@ public class UserDAO extends DAO {
         "userID VARCHAR, " +
         "timestamp TIMESTAMP AS CURRENT_TIMESTAMP, " +
         "enabled BOOLEAN, " +
+        RESET_PASSWORD_KEY +
+        " VARCHAR, " +
+        ENABLED_REQ_KEY +
+        " VARCHAR, " +
         PERMISSIONS + " VARCHAR, " +
         KIND + " VARCHAR, " +
         PASS + " VARCHAR, " +
@@ -420,6 +426,12 @@ public class UserDAO extends DAO {
     if (!columns.contains(EMAIL.toLowerCase())) {
       addColumn(connection, EMAIL, "VARCHAR");
     }
+    if (!columns.contains(ENABLED_REQ_KEY.toLowerCase())) {
+      addColumn(connection, ENABLED_REQ_KEY, "VARCHAR");
+    }
+    if (!columns.contains(RESET_PASSWORD_KEY.toLowerCase())) {
+      addColumn(connection, RESET_PASSWORD_KEY, "VARCHAR");
+    }
   }
 
   private void addColumn(Connection connection, String column, String type) throws SQLException {
@@ -433,9 +445,7 @@ public class UserDAO extends DAO {
    *
    * @return
    */
-  public List<User> getUsers() {
-    return getUsers("SELECT * from users;");
-  }
+  public List<User> getUsers() { return getUsers("SELECT * from users;");  }
 
   /**
    * @return
@@ -456,6 +466,20 @@ public class UserDAO extends DAO {
   public MiniUser getMiniUser(long userid) {
     User userWhere = getUserWhere(userid);
     return userWhere == null ? null : new MiniUser(userWhere);
+  }
+
+  public User getUserWhereResetKey(String resetKey) {
+    String sql = "SELECT * from users where " +
+        RESET_PASSWORD_KEY +
+        "='" + resetKey + "';";
+    return getUserWhere(-1, sql);
+  }
+
+  public User getUserWhereEnabledReq(String resetKey) {
+    String sql = "SELECT * from users where " +
+        ENABLED_REQ_KEY +
+        "='" + resetKey + "';";
+    return getUserWhere(-1, sql);
   }
 
   /**
@@ -687,10 +711,6 @@ public class UserDAO extends DAO {
 
   public boolean changePassword(Long remove, String passwordH) {
     try {
-      // there are much better ways of doing this...
-      long max = 0;
-      for (User u : getUsers()) if (u.getId() > max) max = u.getId();
-      // logger.info("addUser : max is " + max + " new user '" + userID + "' age " + age + " gender " + gender + " pass " +passwordH);
       if (passwordH == null) {
         new Exception().printStackTrace();
       }
@@ -716,6 +736,55 @@ public class UserDAO extends DAO {
     } catch (Exception ee) {
       logger.error("Got " + ee, ee);
       database.logEvent("unk", "update user: " + ee.toString(), 0);
+    }
+    return false;
+  }
+
+  public boolean addKey(Long remove, boolean resetKey, String key) {
+    try {
+      Connection connection = database.getConnection();
+      PreparedStatement statement = connection.prepareStatement(
+          "UPDATE " + USERS + " SET " +
+              (resetKey ? RESET_PASSWORD_KEY : ENABLED_REQ_KEY) + "=?" +
+              " WHERE " +
+              ID + "=?");
+      int i = 1;
+      statement.setString(i++, key);
+      statement.setLong(i++, remove);
+      int i1 = statement.executeUpdate();
+
+      statement.close();
+      database.closeConnection(connection);
+
+      return i1 != 0;
+    } catch (Exception ee) {
+      logger.error("Got " + ee, ee);
+      database.logEvent("unk", "clearKey user: " + remove + " " +ee.toString(), 0);
+    }
+    return false;
+  }
+
+  public boolean clearKey(Long remove, boolean resetKey) {
+    try {
+      Connection connection = database.getConnection();
+      PreparedStatement statement;
+
+      statement = connection.prepareStatement(
+          "UPDATE " + USERS + " SET " +
+              (resetKey ? RESET_PASSWORD_KEY : ENABLED_REQ_KEY) + "=''" +
+              " WHERE " +
+              ID + "=?");
+      int i = 1;
+      statement.setLong(i++, remove);
+      int i1 = statement.executeUpdate();
+
+      statement.close();
+      database.closeConnection(connection);
+
+      return i1 != 0;
+    } catch (Exception ee) {
+      logger.error("Got " + ee, ee);
+      database.logEvent("unk", "clearKey user: " + remove + " " +ee.toString(), 0);
     }
     return false;
   }
