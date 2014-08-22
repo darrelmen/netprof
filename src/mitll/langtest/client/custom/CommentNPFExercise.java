@@ -170,6 +170,7 @@ public class CommentNPFExercise extends NPFExercise {
     controller.register(onButton, exercise.getID());
     onButton.addClickHandler(handler);
     onButton.setActive(isActive);
+    onButton.getElement().getStyle().setZIndex(0);
     return onButton;
   }
 
