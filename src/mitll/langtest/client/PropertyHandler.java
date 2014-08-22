@@ -65,10 +65,7 @@ public class PropertyHandler {
   private boolean clickAndHold = true;
   private boolean quietAudioOK;
 
-  public boolean doClickAndHold() {
-    System.out.println("click and hold " + clickAndHold);
-    return clickAndHold;
-  }
+  public boolean doClickAndHold() { return clickAndHold; }
 
   public boolean isQuietAudioOK() {
     return quietAudioOK;
@@ -135,6 +132,7 @@ public class PropertyHandler {
     for (Map.Entry<String, String> kv : props.entrySet()) {
       String key = kv.getKey();
       String value = kv.getValue();
+
       if (key.equals(GRADING_PROP)) grading = getBoolean(value);
    //   else if (key.equals(ENGLISH_ONLY_MODE)) englishOnlyMode = getBoolean(value);
    //   else if (key.equals(GOODWAVE_MODE)) goodwaveMode = getBoolean(value);
@@ -282,6 +280,15 @@ public class PropertyHandler {
       if (spectrogram) System.out.println("spectrogram is " + spectrogram);
     }
     setResponseType();
+
+    String loginType = Window.Location.getParameter(LOGIN_TYPE_PARAM);
+    if (loginType != null) {
+      try {
+        this.loginType = LOGIN_TYPE.valueOf(loginType);
+      } catch (IllegalArgumentException e) {
+        System.err.println("couldn't parse " +loginType );
+      }
+    }
 
     return grading;
   }
