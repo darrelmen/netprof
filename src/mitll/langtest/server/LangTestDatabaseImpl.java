@@ -1039,10 +1039,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param emailH
    * @param kind
    * @param url
+   * @param email
    * @return null if existing user
    */
   @Override
-  public User addUser(String userID, String passwordH, String emailH, User.Kind kind, String url) {
+  public User addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email) {
     User user = db.addUser(getThreadLocalRequest(), userID, passwordH, emailH, kind);
     if (user != null && !user.isEnabled()) { // user = null means existing user.
       url = trimURL(url);
@@ -1050,7 +1051,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       String toHash = userID1 + "_" + System.currentTimeMillis();
       String hash = getHash(toHash);
       keyToEnabledUser.put(hash,user.getId());
-
 
       String message = "Hi Tamas" + ",<br/><br/>" +
           "User '" +userID1+
@@ -1062,17 +1062,31 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           "Regards, Administrator" ;
 
       getMailSupport().sendEmail(NP_SERVER,
-          url +"?cd=" + hash
-          ,
+          url + "?cd=" + hash + "&" +
+              "er" +
+              "=" + rot13(email),
           CONTENT_DEVELOPER_APPROVAL_EMAIL,
           "gordon.vidaver@ll.mit.edu",
-          "Content Developer approval for " + userID1 + " for " +serverProps.getLanguage(),
+          "Content Developer approval for " + userID1 + " for " + serverProps.getLanguage(),
           message,
           "Click to approve" // link text
       );
     }
     return user;
   }
+
+  private String rot13(String val) {
+    StringBuilder builder = new StringBuilder();
+    for (char c : val.toCharArray()) {
+      if       (c >= 'a' && c <= 'm') c += 13;
+      else if  (c >= 'A' && c <= 'M') c += 13;
+      else if  (c >= 'n' && c <= 'z') c -= 13;
+      else if  (c >= 'N' && c <= 'Z') c -= 13;
+      builder.append(c);
+    }
+    return builder.toString();
+  }
+  
   /**
    * @see mitll.langtest.client.user.UserTable#showDialog(mitll.langtest.client.LangTestDatabaseAsync)
    * @return
@@ -1111,12 +1125,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           "<br/><br/>" +
           "Regards, Administrator" ;
 
-      getMailSupport().sendEmail(NP_SERVER,
-          url +"?" +
-              RP +
-              "=" + hash
-          , email,
-          REPLY_TO,
+      sendEmail(url + "?" + RP + "=" + hash,
+          email,
           "Password Reset",
           message,
           "Reset Password" // link text
@@ -1133,13 +1143,49 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
-  public Long enableCDUser(String token) {
-    Long aLong = keyToEnabledUser.remove(token);
-    if (aLong == null) {
+  private void sendEmail(String link, String to, String subject, String message, String linkText) {
+    getMailSupport().sendEmail(NP_SERVER,
+        link,
+        to,
+        REPLY_TO,
+        subject,
+        message,
+        linkText// link text
+    );
+  }
+
+  /**
+   * @see mitll.langtest.client.LangTest#handleCDToken
+   * @param token
+   * @return
+   */
+  public Long enableCDUser(String token, String emailR, String url) {
+    Long userID = keyToEnabledUser.remove(token);
+    String email = rot13(emailR);
+
+    if (userID == null) {
       return null;
-    }
-    else {
-      return (db.getUserDAO().enableUser(aLong) ? aLong : -1);
+    } else {
+      boolean b = db.getUserDAO().enableUser(userID);
+      if (b) {
+        User userWhere = db.getUserDAO().getUserWhere(userID);
+        url = trimURL(url);
+
+        logger.debug("Sending user email... link is " +url);
+        String message = "Hi " + userWhere.getUserID() + ",<br/>" +
+            "You have been approved to be a content developer for " + serverProps.getLanguage() + "." +
+            "<br/>Click on the link below to log in." +
+            "<br/><br/>" +
+            "Regards, Administrator";
+        sendEmail(url // baseURL
+            ,
+            email, // destination email
+            "Account approved", // subject
+            message,
+            "Click here to return to the site." // link text
+        );
+      }
+      return (b ? userID : -1);
     }
   }
 
@@ -1187,11 +1233,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           "Your user name is " + valid.getUserID() + "." +
           "<br/><br/>" +
           "Regards, Administrator";
-      getMailSupport().sendEmail(NP_SERVER, // server name
-          url // baseURL
+      sendEmail(url // baseURL
           ,
           email, // destination email
-          REPLY_TO, // reply email
           "Your user name", // subject
           message,
           "Click here to return to the site." // link text
