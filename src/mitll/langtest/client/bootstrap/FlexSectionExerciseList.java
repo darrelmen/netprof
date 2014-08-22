@@ -96,7 +96,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     buttonTypes.add(ButtonType.SUCCESS);
     buttonTypes.add(ButtonType.INFO);
     buttonTypes.add(ButtonType.WARNING);
-    setUnaccountedForVertical(controller.getProps().isClassroomMode() ? CLASSROOM_VERTICAL_EXTRA : VERTICAL_DEFAULT);
+    setUnaccountedForVertical(CLASSROOM_VERTICAL_EXTRA);
   }
 
   /**
@@ -736,13 +736,11 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
       int width = Window.getClientWidth() - leftSideWidth - UNACCOUNTED_WIDTH;
 /*      System.out.println("FlexSectionExeciseList.setScrollPanelWidth : scrollPanel width is " + width +" client " +Window.getClientWidth() +
         " label col " +labelColumn.getOffsetWidth() + " clear " +clearColumnContainer.getOffsetWidth() + " unacct "+UNACCOUNTED_WIDTH);*/
-      if (!controller.getProps().isCRTDataCollectMode()) {
         scrollPanel.setWidth(Math.max(300, width) + "px");
-      }
     }
-    else {
+//    else {
      // System.out.println("\tsetScrollPanelWidth : labelColumn is null instance " + instance);
-    }
+  //  }
   }
 
   /**
