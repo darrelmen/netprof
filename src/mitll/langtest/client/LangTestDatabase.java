@@ -33,13 +33,15 @@ import java.util.Map;
 public interface LangTestDatabase extends RemoteService {
   boolean WRITE_ALTERNATE_COMPRESSED_AUDIO = false;
 
-  ExerciseListWrapper getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix, long userListID, int userID, String role, boolean onlyUnrecordedByMe);
+  ExerciseListWrapper getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix, long userListID, int userID, String role, boolean onlyUnrecordedByMe, boolean onlyExamples);
 
   CommonExercise getExercise(String id, long userID);
 
   void markAudioDefect(AudioAttribute audioAttribute, String exid);
   void markGender(AudioAttribute attr, boolean isMale);
   // user DAO
+
+  // @deprecated
   long addUser(int age, String gender, int experience, String nativeLang, String dialect, String userID, Collection<User.Permission> permissions);
 
   User addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email);
