@@ -27,7 +27,7 @@ public class User extends MiniUser {
   private float completePercent;
   private Kind userKind;
 
-  public static enum Kind implements IsSerializable { UNSET, STUDENT, TEACHER, CONTENT_DEVELOPER, ADMIN }
+  public static enum Kind implements IsSerializable { UNSET, STUDENT, TEACHER, CONTENT_DEVELOPER }
 
   public static enum Permission implements IsSerializable { QUALITY_CONTROL, RECORD_AUDIO }
 
@@ -112,6 +112,10 @@ public class User extends MiniUser {
     return demographics;
   }
 */
+
+  public boolean isAdmin() {
+    return admin;
+  }
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#joinWithDLIUsers(java.util.List)
