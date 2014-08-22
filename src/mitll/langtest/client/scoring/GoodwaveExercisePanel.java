@@ -55,9 +55,9 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel, RequiresResize, ProvidesResize {
-  private static final String REFERENCE = "";//" Reference";
-  private static final String RECORD_YOURSELF = "Record";// Yourself";
-  private static final String RELEASE_TO_STOP = "Release";// to Stop";
+  private static final String REFERENCE = "";
+  private static final String RECORD_YOURSELF = "Record";
+  private static final String RELEASE_TO_STOP = "Release";
   public static final int HEADING_FOR_UNIT_LESSON = 4;
   private static final String CORRECT = "correct";
   private static final String INCORRECT = "incorrect";
@@ -536,7 +536,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     private class MyPostAudioRecordButton extends PostAudioRecordButton {
       public MyPostAudioRecordButton(ExerciseController controller) {
         super(exercise, controller, ASRRecordAudioPanel.this.service, ASRRecordAudioPanel.this.index, true,
-          RECORD_YOURSELF, RELEASE_TO_STOP);
+          RECORD_YOURSELF, controller.getProps().doClickAndHold() ? RELEASE_TO_STOP : "Stop");
       }
 
       @Override
