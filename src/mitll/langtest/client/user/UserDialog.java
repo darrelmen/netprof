@@ -4,7 +4,6 @@ import com.github.gwtbootstrap.client.ui.Accordion;
 import com.github.gwtbootstrap.client.ui.AccordionGroup;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
-import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.Modal;
 import com.github.gwtbootstrap.client.ui.PasswordTextBox;
 import com.github.gwtbootstrap.client.ui.TextBox;
@@ -23,9 +22,6 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * Created with IntelliJ IDEA.
  * User: GO22670
@@ -41,19 +37,6 @@ public abstract class UserDialog extends BasicDialog {
   static final int MIN_AGE = 12;
   static final int MAX_AGE = 90;
   static final int TEST_AGE = 100;
-  static final String UNSET = "Unset";
-/*  private static final List<String> EXPERIENCE_CHOICES = Arrays.asList(
-      UNSET,
-    "0-3 months (Semester 1)",
-    "4-6 months (Semester 1)",
-    "7-9 months (Semester 2)",
-    "10-12 months (Semester 2)",
-    "13-16 months (Semester 3)",
-    "16+ months",
-    "Native speaker");
-  protected static final int NATIVE_MONTHS = 20 * 12;*/
-  private static final String MALE = "Male";
-  private static final String FEMALE = "Female";
   public static final String HIT_ENTER_TO_LOG_IN = "Hit enter to log in.";
   final PropertyHandler props;
   final LangTestDatabaseAsync service;
@@ -229,19 +212,6 @@ public abstract class UserDialog extends BasicDialog {
   void removeKeyHandler() {
    // System.out.println("UserManager.removeKeyHandler : " + keyHandler);
     if (keyHandler != null) keyHandler.removeHandler();
-  }
-
-  ListBox getGenderBox() {
-    List<String> values = Arrays.asList(UNSET, MALE, FEMALE);
-    return getListBox(values);
-  }
-
-  protected ListBox getListBox(List<String> values) {
-    final ListBox genderBox = new ListBox(false);
-    for (String s : values) {
-      genderBox.addItem(s);
-    }
-    return genderBox;
   }
 
   boolean checkPassword(FormField password) { return checkPassword(password.box);  }
