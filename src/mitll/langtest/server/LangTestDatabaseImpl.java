@@ -88,12 +88,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   public void logAndNotifyServerException(Exception e) {
-    if (!e.getMessage().contains("Broken Pipe")) {
+    String message1 = e == null ? "null_ex" : e.getMessage() == null ? "null_msg":e.getMessage();
+    if (!message1.contains("Broken Pipe")) {
       String message = "Server Exception : " + ExceptionUtils.getStackTrace(e);
       String prefixedMessage = "for " + pathHelper.getInstallPath() + " got " + message;
       logger.debug(prefixedMessage);
-      getMailSupport().email(serverProps.getEmailAddress(), "Server Exception on " + pathHelper.getInstallPath(), prefixedMessage);
+      String subject = "Server Exception on " + pathHelper.getInstallPath();
+      sendEmail(subject, prefixedMessage);
     }
+  }
+
+  public void sendEmail(String subject, String prefixedMessage) {
+    getMailSupport().email(serverProps.getEmailAddress(), subject, prefixedMessage);
   }
 
   private List<CommonShell> getExerciseShells(Collection<? extends CommonExercise> exercises) {
@@ -141,88 +147,121 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param userID
    * @param role
    * @param onlyUnrecordedByMe
+   * @param onlyExamples
    * @return
    * @see mitll.langtest.client.list.PagingExerciseList#loadExercises(String, String)
    */
   @Override
   public ExerciseListWrapper getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix,
-                                            long userListID, int userID, String role, boolean onlyUnrecordedByMe) {
+                                            long userListID, int userID, String role, boolean onlyUnrecordedByMe, boolean onlyExamples) {
     Collection<CommonExercise> exercises;
-    logger.debug("getExerciseIds : getting exercise ids for" +
-        " config " + relativeConfigDir +
-        " prefix '" + prefix +
-        "' and user list id " + userListID + " user '" + userID + "' role '" + role + "' filter for only recorded by me = " + onlyUnrecordedByMe);
+    logger.debug("getExerciseIds : getting exercise ids for " +
+      " config " + relativeConfigDir +
+      " prefix " + prefix+
+      " and user list id " + userListID + " user " + userID + " role " + role + " filter " + onlyUnrecordedByMe + " only examples " + onlyExamples);
 
-    UserList userListByID = userListID != -1 ? db.getUserListManager().getUserListByID(userListID, getTypeOrder()) : null;
+    try {
+      UserList userListByID = userListID != -1 ? db.getUserListManager().getUserListByID(userListID, getTypeOrder()) : null;
 
-    if (typeToSelection.isEmpty()) {   // no unit-chapter filtering
-      // get initial exercise set, either from a user list or predefined
-      boolean predefExercises = userListByID == null;
-      exercises = predefExercises ? getExercises() : getCommonExercises(userListByID);
+      if (typeToSelection.isEmpty()) {   // no unit-chapter filtering
+        // get initial exercise set, either from a user list or predefined
+        boolean predefExercises = userListByID == null;
+        exercises = predefExercises ? getExercises() : getCommonExercises(userListByID);
 
-      // now if there's a prefix, filter by prefix match
-      if (!prefix.isEmpty()) {
-        // now do a trie over matches
-        long then = System.currentTimeMillis();
-        ExerciseTrie trie = predefExercises ? fullTrie : new ExerciseTrie(exercises, serverProps.getLanguage(), audioFileHelper.getSmallVocabDecoder());
-        exercises = trie.getExercises(prefix);
-        long now = System.currentTimeMillis();
-        if (now - then > 300) {
-          logger.debug("took " + (now - then) + " millis to do trie lookup");
+        // now if there's a prefix, filter by prefix match
+        if (!prefix.isEmpty()) {
+          // now do a trie over matches
+          long then = System.currentTimeMillis();
+          ExerciseTrie trie = predefExercises ? fullTrie : new ExerciseTrie(exercises, serverProps.getLanguage(), audioFileHelper.getSmallVocabDecoder());
+          exercises = trie.getExercises(prefix);
+          long now = System.currentTimeMillis();
+          if (now-then > 300) {
+            logger.debug("took " + (now-then) + " millis to do trie lookup");
+          }
+          if (exercises.isEmpty()) { // allow lookup by id
+            CommonExercise exercise = getExercise(prefix, userID);
+            if (exercise != null) exercises = Collections.singletonList(exercise);
+          }
         }
-        if (exercises.isEmpty()) { // allow lookup by id
-          CommonExercise exercise = getExercise(prefix, userID);
-          if (exercise != null) exercises = Collections.singletonList(exercise);
+        exercises = filterByUnrecorded(userID, onlyUnrecordedByMe, onlyExamples, exercises);
+        int i = markRecordedState(userID, role, exercises, onlyExamples);
+        //logger.debug("marked " +i + " as recorded");
+
+        // now sort : everything gets sorted the same way
+        List<CommonExercise> commonExercises = new ArrayList<CommonExercise>(exercises);
+        new ExerciseSorter(getTypeOrder()).getSortedByUnitThenAlpha(commonExercises, role.equals(Result.AUDIO_TYPE_RECORDER));
+
+        return makeExerciseListWrapper(reqID, commonExercises, userID, role, onlyExamples);
+
+      } else { // sort by unit-chapter selection
+        // builds unit-lesson hierarchy if non-empty type->selection over user list
+        if (userListByID != null) {
+          Collection<CommonExercise> exercisesForState = getExercisesFromFiltered(typeToSelection, userListByID);
+          exercisesForState = filterByUnrecorded(userID, onlyUnrecordedByMe, onlyExamples, exercisesForState);
+
+          return getExerciseListWrapperForPrefix(reqID, prefix, exercisesForState, userID, role, onlyExamples);
+        } else {
+          return getExercisesForSelectionState(reqID, typeToSelection, prefix, userID, role, onlyUnrecordedByMe, onlyExamples);
         }
       }
-      exercises = filterByUnrecorded(userID, onlyUnrecordedByMe, exercises);
-      int i = markRecordedState(userID, role, exercises);
-      //logger.debug("marked " +i + " as recorded");
-
-      // now sort : everything gets sorted the same way
-      List<CommonExercise> commonExercises = new ArrayList<CommonExercise>(exercises);
-      new ExerciseSorter(getTypeOrder()).getSortedByUnitThenAlpha(commonExercises, role.equals(Result.AUDIO_TYPE_RECORDER));
-
-      return makeExerciseListWrapper(reqID, commonExercises, userID, role);
-
-    } else { // sort by unit-chapter selection
-      // builds unit-lesson hierarchy if non-empty type->selection over user list
-      if (userListByID != null) {
-        Collection<CommonExercise> exercisesForState = getExercisesFromFiltered(typeToSelection, userListByID);
-        exercisesForState = filterByUnrecorded(userID, onlyUnrecordedByMe, exercisesForState);
-
-        return getExerciseListWrapperForPrefix(reqID, prefix, exercisesForState, userID, role);
-      } else {
-        return getExercisesForSelectionState(reqID, typeToSelection, prefix, userID, role, onlyUnrecordedByMe);
-      }
+    } catch (Exception e) {
+      logger.warn("got " +e,e);
+      logAndNotifyServerException(e);
+      return new ExerciseListWrapper();
     }
   }
 
-  private Collection<CommonExercise> filterByUnrecorded(long userID, boolean onlyUnrecordedByMe, Collection<CommonExercise> exercises) {
+  /**
+   * For all the exercises the user has not recorded, do they have the required reg and slow speed recordings by a matching gender.
+   * <p/>
+   * Or if looking for example audio, find ones missing examples.
+   *
+   * @param userID             exercise not recorded by this user and matching the user's gender
+   * @param onlyUnrecordedByMe do we filter
+   * @param onlyExamples       only example audio
+   * @param exercises          to filter
+   * @return exercises missing audio, what we want to record
+   */
+  private Collection<CommonExercise> filterByUnrecorded(long userID, boolean onlyUnrecordedByMe, boolean onlyExamples,
+                                                        Collection<CommonExercise> exercises) {
     if (onlyUnrecordedByMe) {
       Set<String> recordedForUser = db.getAudioDAO().getRecordedBy(userID);
-      boolean male = db.getUserDAO().getUserWhere(userID).isMale();
+      boolean isMale = db.getUserDAO().isMale(userID);
       List<CommonExercise> copy = new ArrayList<CommonExercise>();
       logger.debug("recorded already " + recordedForUser.size() + " checking " + exercises.size());
       // filter
       for (CommonExercise exercise : exercises) {
         if (!recordedForUser.contains(exercise.getID())) {
           copy.add(exercise);
-        } else {
-          Collection<AudioAttribute> byGender = exercise.getByGender(male);
+        }
+        else {
+          Collection<AudioAttribute> byGender = exercise.getByGender(isMale);
           boolean hasReg = false;
           boolean hasSlow = false;
- /*         if (!byGender.isEmpty()) logger.debug("checking " + male + " ex " + exercise.getID()+
+          boolean hasExample = false;
+ /*         if (!byGender.isEmpty()) logger.debug("checking " + isMale + " ex " + exercise.getID()+
             " has " + byGender.size() + " recordings");*/
           for (AudioAttribute attr : byGender) {
             if (attr.getUserid() != UserDAO.DEFAULT_USER_ID) {
-              hasReg = hasReg || attr.isRegularSpeed();
-              hasSlow = hasSlow || attr.isSlow();
-              if (hasReg && hasSlow) break;
+              hasReg = hasReg ||  attr.isRegularSpeed();
+              hasSlow = hasSlow ||  attr.isSlow();
+              hasExample = attr.isExampleSentence();
+
+              if (onlyExamples) {
+                if (hasExample) break;
+              }
+              else if (hasReg && hasSlow) {
+                break;
+              }
             }
           }
 
-          if (!hasReg || !hasSlow) {
+          if (onlyExamples) {
+            if (!hasExample) {
+              copy.add(exercise);
+            }
+          }
+          else if (!hasReg || !hasSlow) {
             copy.add(exercise);
           }
         }
@@ -248,7 +287,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     helper.report();
     Collection<CommonExercise> exercisesForState = helper.getExercisesForSelectionState(typeToSelection);
-    logger.debug("\tafter found " + exercisesForState.size() + " matches to " + typeToSelection);
+   // logger.debug("\tafter found " + exercisesForState.size() + " matches to " + typeToSelection);
     return exercisesForState;
   }
 
@@ -262,13 +301,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param userID
    * @param role
    * @param exercises
+   * @param onlyExample
    * @return
+   * @see #getExerciseIds(int, java.util.Map, String, long, int, String, boolean, boolean)
    */
-  private int markRecordedState(int userID, String role, Collection<? extends CommonShell> exercises) {
+  private int markRecordedState(int userID, String role, Collection<? extends CommonShell> exercises, boolean onlyExample) {
     int c = 0;
     if (role.equals(Result.AUDIO_TYPE_RECORDER)) {
-      Set<String> recordedForUser = db.getAudioDAO().getRecordedForUser(userID);
-      //logger.debug("\tfound " + recordedForUser.size() + " recordings by " + userID);
+      Set<String> recordedForUser = onlyExample ? db.getAudioDAO().getRecordedExampleForUser(userID) : db.getAudioDAO().getRecordedForUser(userID);
+      //logger.debug("\tfound " + recordedForUser.size() + " recordings by " + userID + " only example " + onlyExample);
       for (CommonShell shell : exercises) {
         if (recordedForUser.contains(shell.getID())) {
           shell.setState(STATE.RECORDED);
@@ -276,7 +317,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         }
       }
     } else {
-      //logger.debug("\tnot marking recorded for " + role + " and " + userID);
+      logger.debug("\tnot marking recorded for '" + role + "' and user " + userID);
     }
     return c;
   }
@@ -307,17 +348,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param userID
    * @param role
    * @param onlyUnrecordedByMe
+   * @param onlyExamples
    * @return
    * @see mitll.langtest.client.list.HistoryExerciseList#loadExercises(String, String)
    * @see #getExerciseIds
    */
   private ExerciseListWrapper getExercisesForSelectionState(int reqID,
                                                             Map<String, Collection<String>> typeToSection, String prefix,
-                                                            long userID, String role, boolean onlyUnrecordedByMe) {
+                                                            long userID, String role, boolean onlyUnrecordedByMe, boolean onlyExamples) {
     Collection<CommonExercise> exercisesForState = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
-    exercisesForState = filterByUnrecorded(userID, onlyUnrecordedByMe, exercisesForState);
+    exercisesForState = filterByUnrecorded(userID, onlyUnrecordedByMe, onlyExamples, exercisesForState);
 
-    return getExerciseListWrapperForPrefix(reqID, prefix, exercisesForState, userID, role);
+    return getExerciseListWrapperForPrefix(reqID, prefix, exercisesForState, userID, role, onlyExamples);
   }
 
   /**
@@ -328,16 +370,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param exercisesForState
    * @param userID
    * @param role
+   * @param onlyExamples
    * @return
    * @see #getExerciseIds
    */
-  private ExerciseListWrapper getExerciseListWrapperForPrefix(int reqID, String prefix, Collection<CommonExercise> exercisesForState, long userID, String role) {
+  private ExerciseListWrapper getExerciseListWrapperForPrefix(int reqID, String prefix, Collection<CommonExercise> exercisesForState, long userID, String role, boolean onlyExamples) {
     boolean hasPrefix = !prefix.isEmpty();
     if (hasPrefix) {
       logger.debug("getExerciseListWrapperForPrefix userID " + userID + " prefix '" + prefix + "' role " + role);
     }
 
-    int i = markRecordedState((int) userID, role, exercisesForState);
+    int i = markRecordedState((int) userID, role, exercisesForState, onlyExamples);
     //logger.debug("marked " +i + " as recorded role " +role);
 
     if (hasPrefix) {
@@ -349,7 +392,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     new ExerciseSorter(getTypeOrder()).getSortedByUnitThenAlpha(copy, role.equals(Result.AUDIO_TYPE_RECORDER));
 
-    return makeExerciseListWrapper(reqID, copy, userID, role);
+    return makeExerciseListWrapper(reqID, copy, userID, role, onlyExamples);
   }
 
   /**
@@ -359,11 +402,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param exercises
    * @param userID
    * @param role
+   * @param onlyExamples
    * @return
    * @see #getExerciseIds
-   * @see #getExerciseListWrapperForPrefix(int, String, java.util.Collection, long, String)
+   * @see #getExerciseListWrapperForPrefix(int, String, java.util.Collection, long, String, boolean)
    */
-  private ExerciseListWrapper makeExerciseListWrapper(int reqID, Collection<CommonExercise> exercises, long userID, String role) {
+  private ExerciseListWrapper makeExerciseListWrapper(int reqID, Collection<CommonExercise> exercises, long userID, String role, boolean onlyExamples) {
     CommonExercise firstExercise = exercises.isEmpty() ? null : exercises.iterator().next();
     if (firstExercise != null) {
       addAnnotationsAndAudio(userID, firstExercise);
@@ -373,7 +417,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     //   logger.debug("makeExerciseListWrapper : userID " +userID + " Role is " + role);
     if (role.equals(Result.AUDIO_TYPE_RECORDER)) {
-      markRecordedState((int) userID, role, exerciseShells);
+      markRecordedState((int) userID, role, exerciseShells, onlyExamples);
     } else if (role.equalsIgnoreCase(User.Permission.QUALITY_CONTROL.toString()) || role.startsWith(Result.AUDIO_TYPE_REVIEW)) {
       db.getUserListManager().markState(exerciseShells);
     }
@@ -390,14 +434,39 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param userID
    * @param firstExercise
    * @see #getExercise(String, long)
-   * @see #makeExerciseListWrapper(int, java.util.Collection, long, String)
+   * @see #makeExerciseListWrapper(int, java.util.Collection, long, String, boolean)
    */
   private void addAnnotationsAndAudio(long userID, CommonExercise firstExercise) {
+    long then = System.currentTimeMillis();
+
     addAnnotations(firstExercise); // todo do this in a better way
+    long now = System.currentTimeMillis();
+    if (now - then > 40) {
+      logger.debug("addAnnotationsAndAudio : (" + serverProps.getLanguage() + ") took " + (now - then) + " millis to add annotations to exercise " + firstExercise.getID());
+    }
+    then = now;
     attachAudio(firstExercise);
+
+    now = System.currentTimeMillis();
+    if (now - then > 40) {
+      logger.debug("addAnnotationsAndAudio : (" + serverProps.getLanguage() + ") took " + (now - then) + " millis to attach audio to exercise " + firstExercise.getID());
+    }
+    then = now;
+
     addPlayedMarkings(userID, firstExercise);
 
+    now = System.currentTimeMillis();
+    if (now - then > 40) {
+      logger.debug("addAnnotationsAndAudio : (" + serverProps.getLanguage() + ") took " + (now - then) + " millis to add played markings to exercise " + firstExercise.getID());
+    }
+    then = now;
+
     attachScoreHistory(userID, firstExercise);
+
+    now = System.currentTimeMillis();
+    if (now - then > 40) {
+      logger.debug("addAnnotationsAndAudio : (" + serverProps.getLanguage() + ") took " + (now - then) + " millis to attach score history to exercise " + firstExercise.getID());
+    }
   }
 
   private void attachScoreHistory(long userID, CommonExercise firstExercise) {
@@ -479,8 +548,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     CommonExercise byID = db.getCustomOrPredefExercise(id);  // allow custom items to mask out non-custom items
 
     long now = System.currentTimeMillis();
+    String language = serverProps.getLanguage();
     if (now - then2 > 200) {
-      logger.debug("getExercise : (" + serverProps.getLanguage() + ") took " + (now - then) + " millis to find exercise " + id);
+      logger.debug("getExercise : (" + language + ") took " + (now - then2) + " millis to find exercise " + id);
     }
 
     if (byID == null) {
@@ -490,8 +560,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
       addAnnotationsAndAudio(userID, byID);
       now = System.currentTimeMillis();
-      if (now - then2 > 200) {
-        logger.debug("getExercise : (" + serverProps.getLanguage() + ") took " + (now - then) + " millis to add annotations to exercise " + id);
+      if (now - then2 > 100) {
+        logger.debug("getExercise : (" + language + ") took " + (now - then2) + " millis to add annotations to exercise " + id);
       }
       then2 = System.currentTimeMillis();
 
@@ -499,12 +569,20 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       ensureMP3s(byID);
       now = System.currentTimeMillis();
       if (now - then2 > 200) {
-        logger.debug("getExercise : (" + serverProps.getLanguage() + ") took " + (now - then) + " millis to ensure there are mp3s for exercise " + id);
+        logger.debug("getExercise : (" + language + ") took " + (now - then2) + " millis to ensure there are mp3s for exercise " + id);
       }
     }
     now = System.currentTimeMillis();
-    if (now - then > 200) {
-      logger.debug("getExercise : (" + serverProps.getLanguage() + ") took " + (now - then) + " millis to find " + id);
+    long diff = now - then;
+    String message = "getExercise : (" + language + ") took " + diff + " millis to get exercise " + id;
+    if (diff > 3000) {
+      logger.error(message);
+      sendEmail("slow exercise on " + language, "Getting ex " + id + " on " + language + " took " + diff + " millis.");
+    } else if (diff > 1000) {
+      logger.warn(message);
+    }
+    else if (diff > 40) {
+      logger.debug(message);
     }
     return byID;
   }
@@ -516,7 +594,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * @param byID
    * @see #getExercise(String, long)
-   * @see #makeExerciseListWrapper(int, java.util.Collection, long, String)
+   * @see #makeExerciseListWrapper(int, java.util.Collection, long, String, boolean)
+   * @param byID
    */
   private void ensureMP3s(CommonExercise byID) {
     Collection<AudioAttribute> audioAttributes = byID.getAudioAttributes();
@@ -1419,8 +1498,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String destFileName = audioType + "_" + System.currentTimeMillis() + "_by_" + user + ".wav";
     String permanentAudioPath = new PathWriter().getPermanentAudioPath(pathHelper, fileRef, destFileName, true, exercise);
     AudioAttribute audioAttribute =
-        db.getAudioDAO().addOrUpdate(user, permanentAudioPath, exercise, System.currentTimeMillis(), audioType, audioAnswer.getDurationInMillis());
-
+      db.getAudioDAO().addOrUpdate(user, permanentAudioPath, exercise, System.currentTimeMillis(), audioType, audioAnswer.getDurationInMillis());
+    audioAnswer.setPath(audioAttribute.getAudioRef());
     logger.debug("addToAudioTable user " + user + " ex " + exerciseID + " for " + audioType + " audio answer has " + audioAttribute);
 
     // what state should we mark recorded audio?
@@ -1578,7 +1657,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     logger.debug(prefixedMessage);
 
     if (message.startsWith("got browser exception")) {
-      getMailSupport().email(serverProps.getEmailAddress(), "Javascript Exception", prefixedMessage);
+      sendEmail("Javascript Exception", prefixedMessage);
     }
   }
 
