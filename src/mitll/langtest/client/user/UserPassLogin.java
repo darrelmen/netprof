@@ -161,7 +161,7 @@ public class UserPassLogin extends UserDialog {
           changePassword.setEnabled(false);
           enterKeyButtonHelper.removeKeyHandler();
 
-          System.out.println("changing password for " + token);
+//          System.out.println("getResetPassword : changing password for " + token);
           service.changePFor(token, Md5Hash.getHash(first), new AsyncCallback<Boolean>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -178,7 +178,12 @@ public class UserPassLogin extends UserDialog {
                 Timer t = new Timer() {
                   @Override
                   public void run() {
-                    Window.Location.replace(trimURL(Window.Location.getHref()));
+
+                    String newURL = trimURL(Window.Location.getHref());
+                  //  System.out.println("url now " +newURL);
+                    Window.Location.replace(newURL);
+                    Window.Location.reload();
+
                   }
                 };
                 t.schedule(3000);
@@ -200,7 +205,7 @@ public class UserPassLogin extends UserDialog {
   }
 
   private String trimURL(String url) {
-    if (url.contains("127.0.0.1")) return url;
+    if (url.contains("127.0.0.1")) return url.split("#")[0];
     else return url.split("\\?")[0].split("#")[0];
   }
 
@@ -325,15 +330,17 @@ public class UserPassLogin extends UserDialog {
             }
 
             sendEmail.setEnabled(false);
-            service.resetPassword(user.box.getText(), text, Window.Location.getHref(), new AsyncCallback<Void>() {
+            service.resetPassword(user.box.getText(), text, Window.Location.getHref(), new AsyncCallback<Boolean>() {
               @Override
               public void onFailure(Throwable caught) {
                 sendEmail.setEnabled(true);
               }
 
               @Override
-              public void onSuccess(Void result) {
-                setupPopover(sendEmail, "Check Email", "Please check your email", Placement.LEFT, 5000, new MyPopover() {
+              public void onSuccess(Boolean result) {
+                String heading = result ? "Check Email" : "Unknown email";
+                String message = result ? "Please check your email" : user.box.getText() +" doesn't have that email. Check for a typo?";
+                setupPopover(sendEmail, heading, message, Placement.LEFT, 5000, new MyPopover() {
                   boolean isFirst = true;
 
                   @Override
@@ -523,7 +530,7 @@ public class UserPassLogin extends UserDialog {
     return form;
   }
 
-  User.Kind selectedRole = User.Kind.UNSET;
+  private User.Kind selectedRole = User.Kind.UNSET;
 
   private DivWidget getShowGroup() {
     ButtonToolbar w = new ButtonToolbar();
@@ -553,8 +560,6 @@ public class UserPassLogin extends UserDialog {
     }));
 
     Style style = w.getElement().getStyle();
-    // style.setMarginTop(-6, Style.Unit.PX);
-    // style.setMarginBottom(0, Style.Unit.PX);
     style.setMarginLeft(9, Style.Unit.PX);
 
     return w;
@@ -571,8 +576,7 @@ public class UserPassLogin extends UserDialog {
 
   public void getSignUpButton(final TextBoxBase userBox, final TextBoxBase emailBox) {
     signUp = new Button("Sign Up");
-    signUp.getElement().setId("SignIn");
-
+    signUp.getElement().setId("SignUp");
 
     signUp.addClickHandler(new ClickHandler() {
       @Override
