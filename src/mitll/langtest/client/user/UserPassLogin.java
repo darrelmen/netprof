@@ -167,7 +167,6 @@ public class UserPassLogin extends UserDialog {
             public void onFailure(Throwable caught) {
               changePassword.setEnabled(true);
               markError(changePassword, "Can't communicate with server - check network connection.");
-
             }
 
             @Override
@@ -179,7 +178,7 @@ public class UserPassLogin extends UserDialog {
                 Timer t = new Timer() {
                   @Override
                   public void run() {
-                    Window.Location.reload();
+                    Window.Location.replace(trimURL(Window.Location.getHref()));
                   }
                 };
                 t.schedule(3000);
@@ -198,6 +197,11 @@ public class UserPassLogin extends UserDialog {
     right.add(rightDiv);
 
     return container;
+  }
+
+  private String trimURL(String url) {
+    if (url.contains("127.0.0.1")) return url;
+    else return url.split("\\?")[0].split("#")[0];
   }
 
   public void getRightLogin(Panel leftAndRight) {
@@ -601,7 +605,7 @@ public class UserPassLogin extends UserDialog {
     String emailH = Md5Hash.getHash(email);
 
     signUp.setEnabled(false);
-    service.addUser(user, passH, emailH, kind, Window.Location.getHref(), new AsyncCallback<User>() {
+    service.addUser(user, passH, emailH, kind, Window.Location.getHref(), email, new AsyncCallback<User>() {
       @Override
       public void onFailure(Throwable caught) {
         signUp.setEnabled(true);
@@ -617,7 +621,7 @@ public class UserPassLogin extends UserDialog {
           if (result.isEnabled()) {
             storeUser(result);
           } else {
-            markError(signUp, "Wait for approval", "Please wait for approval before logging in.", Placement.LEFT);
+            markError(signUp, "Wait for approval", "You will get an approval message by email.", Placement.LEFT);
             signUp.setEnabled(true);
           }
         }
@@ -695,7 +699,7 @@ public class UserPassLogin extends UserDialog {
               if (result.isEnabled() || result.getUserKind() != User.Kind.CONTENT_DEVELOPER) {
                 storeUser(result);
               } else {
-                markError(signIn, PLEASE_WAIT, "Please wait until you've been approved.", Placement.LEFT);
+                markError(signIn, PLEASE_WAIT, "Please wait until you've been approved. Check your email.", Placement.LEFT);
                 signIn.setEnabled(true);
               }
             } else {
