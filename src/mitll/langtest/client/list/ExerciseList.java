@@ -779,15 +779,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   /**
    * @see ListInterface#loadNextExercise
    */
-  protected void onLastItem() {
-    PropertyHandler props = controller.getProps();
-    if (props.isCRTDataCollectMode() || props.isDataCollectMode()) {
-      String title = props.isDataCollectMode() ? "Collection Complete" : "Test complete";
-      feedback.showErrorMessage(title, "All Items Complete! Thank you!");
-    } else {
-      loadFirstExercise();
-    }
-  }
+  protected void onLastItem() {  loadFirstExercise();  }
 
   @Override
   public boolean loadPrev() {
