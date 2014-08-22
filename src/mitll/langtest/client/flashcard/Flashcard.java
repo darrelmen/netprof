@@ -134,6 +134,9 @@ public class Flashcard implements RequiresResize {
     if (!isAnonymous || adminView) {
       hp.add(userNameWidget);
     }
+    else {
+      System.out.println("anon " +isAnonymous + " admin " + adminView);
+    }
 
     //if (permissions.contains(User.Permission.QUALITY_CONTROL)) {
       hp.add(qc = new SimplePanel());
@@ -193,6 +196,13 @@ public class Flashcard implements RequiresResize {
     }
   }
 
+  /**
+   * @see mitll.langtest.client.LangTest#gotUser(mitll.langtest.shared.User)
+   * @see mitll.langtest.client.LangTest#handleCDToken(com.github.gwtbootstrap.client.ui.Container, com.google.gwt.user.client.ui.Panel, String, String)
+   * @see mitll.langtest.client.LangTest#showLogin(com.github.gwtbootstrap.client.ui.Container, com.google.gwt.user.client.ui.Panel)
+   *
+   * @param val
+   */
   public void setCogVisible(boolean val) {
     cogMenu.setVisible(val);
     userNameWidget.setVisible(val);
@@ -204,6 +214,11 @@ public class Flashcard implements RequiresResize {
    */
   public void setBrowserInfo(String v) { browserInfo.setHTML(v);}
 
+  /**
+   * @see #getHeaderRow(String, boolean, String, String, String, com.google.gwt.user.client.ui.HTML, com.google.gwt.event.dom.client.ClickHandler, com.google.gwt.event.dom.client.ClickHandler, com.google.gwt.event.dom.client.ClickHandler, com.google.gwt.event.dom.client.ClickHandler, com.google.gwt.event.dom.client.ClickHandler)
+   * @param userName
+   * @return
+   */
   private HTML getUserNameWidget(String userName) {
     userNameWidget = new HTML(userName);
     userNameWidget.getElement().setId("Username");
