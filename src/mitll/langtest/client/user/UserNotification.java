@@ -14,7 +14,7 @@ import java.util.Collection;
 public interface UserNotification {
   void showLogin();
 
-  void gotUser(long userID);
+  void gotUser(User user);
   void rememberAudioType(String audioType);
   void setPermission(User.Permission permission, boolean on);
   Collection<User.Permission> getPermissions();
