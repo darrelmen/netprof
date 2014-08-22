@@ -503,6 +503,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
             @Override
             public void run() {
               Window.Location.replace(trimURL(Window.Location.getHref()));
+              Window.Location.reload();
             }
           };
           t.schedule(3000);
@@ -757,7 +758,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    *
    * So we want to configure the UI after login and after the recording state has been settled.
    *
-   * @see #gotUser(long)
+   * @see #gotUser
    * @see #configureUIGivenUser(long) (long)
    */
   private void reallySetFactory() {
