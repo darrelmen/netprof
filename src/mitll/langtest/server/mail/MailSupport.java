@@ -20,8 +20,8 @@ public class MailSupport {
   private static final String DATA_COLLECT_WEBMASTER = "Data Collect Webmaster";
   private static final Logger logger = Logger.getLogger(MailSupport.class);
   private static final String EMAIL = "gordon.vidaver@ll.mit.edu";
-  public static final String LOCALHOST = "localhost";
-  public static final int MAIL_PORT = 1025;
+  private static final String LOCALHOST = "localhost";
+  private static final int MAIL_PORT = 1025;
   private final boolean debugEmail;
 
   /**
@@ -33,7 +33,8 @@ public class MailSupport {
   }
 
   /**
-   * @seex mitll.langtest.server.LangTestDatabaseImpl#sendEmail(int, String, String, String, String, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#sendEmail(String, String, String, String, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addUser(String, String, String, mitll.langtest.shared.User.Kind, String, String)
    * @param serverName
    * @param baseURL
    * @param to
@@ -172,7 +173,7 @@ public class MailSupport {
   }
 
   /**
-   * @seex mitll.langtest.server.LangTestDatabaseImpl#sendEmail
+   * @see #sendEmail(String, String, String, String, String, String, String)
    * @param senderName
    * @param senderEmail
    * @param recipientEmails
@@ -191,8 +192,9 @@ public class MailSupport {
       props.put("mail.debug", ""+debugEmail);
 
       // TODO : Remove me!
-      if (debugEmail || true) {
+      if (debugEmail) {
         props.put("mail.smtp.port", MAIL_PORT);
+        logger.debug("using port " + MAIL_PORT);
       }
 
       Session session = Session.getDefaultInstance(props, null);
@@ -202,7 +204,7 @@ public class MailSupport {
       Transport.send(msg);
     } catch (Exception e) {
       if (e.getMessage().contains("Could not connect to SMTP")) {
-        logger.info("couldn't send email - no mail daemon? subj " + subject);
+        logger.info("couldn't send email - no mail daemon? subj " + subject,e);
       }
       else {
         logger.error("Couldn't send email to " + recipientEmails + ". Got " + e, e);
