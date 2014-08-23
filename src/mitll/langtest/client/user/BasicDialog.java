@@ -41,8 +41,10 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class BasicDialog {
+  public static final int ILR_CHOICE_WIDTH = 80;
+  public static final int MIN_LENGTH_USER_ID = 8;
   protected static final String TRY_AGAIN = "Try Again";
-  static final String UNSET = "Unset";
+  static final String UNSET = "GENDER";
   /*  private static final List<String> EXPERIENCE_CHOICES = Arrays.asList(
         UNSET,
       "0-3 months (Semester 1)",
@@ -61,8 +63,13 @@ public class BasicDialog {
     return addControlFormField(dialogBox, label, false, 0, 30, "");
   }
 
+  protected FormField addControlFormField(Panel dialogBox, String label, int maxLength) {
+    return addControlFormField(dialogBox, label, false, 0, maxLength, "");
+  }
+
   protected FormField addControlFormField(Panel dialogBox, String label, boolean isPassword, int minLength, int maxLength, String hint) {
     final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
+    user.setMaxLength(maxLength);
     return getFormField(dialogBox, label, user, minLength);
   }
 
@@ -88,7 +95,12 @@ public class BasicDialog {
 
   ListBoxFormField getListBoxFormField(Panel dialogBox, String label, ListBox user) {
     ControlGroup group = addControlGroupEntry(dialogBox, label, user, "");
-    return new ListBoxFormField(user,group);
+    return new ListBoxFormField(user, group);
+  }
+
+  ListBoxFormField getListBoxFormFieldNoLabel(Panel dialogBox, String label, ListBox user) {
+    ControlGroup group = addControlGroupEntryNoLabel(dialogBox, user);
+    return new ListBoxFormField(user, group);
   }
 
   protected ControlGroup addControlGroupEntryNoLabel(Panel dialogBox, Widget widget) {
@@ -194,7 +206,7 @@ public class BasicDialog {
   }
 
   ListBox getListBox2(Collection<String> values) {
-    return getListBox2(values, StudentDialog.ILR_CHOICE_WIDTH);
+    return getListBox2(values, BasicDialog.ILR_CHOICE_WIDTH);
   }
 
   ListBox getListBox2(Collection<String> values, int ilrChoiceWidth) {
@@ -237,6 +249,10 @@ public class BasicDialog {
 /*
   boolean highlightIntegerBox(FormField ageEntryGroup, int min, int max) {
     return highlightIntegerBox(ageEntryGroup, min, max, Integer.MAX_VALUE);
+  }*/
+
+/*  boolean highlightIntegerBox(FormField ageEntryGroup) {
+    return highlightIntegerBox(ageEntryGroup, 7, 97, -1);
   }*/
 
   boolean highlightIntegerBox(FormField ageEntryGroup, int min, int max, int exception) {
@@ -368,7 +384,7 @@ public class BasicDialog {
   }
 
   ListBox getGenderBox() {
-    List<String> values = Arrays.asList(UNSET, MALE, FEMALE);
+    List<String> values = Arrays.asList("GENDER", MALE, FEMALE);
     return getListBox(values);
   }
 
@@ -378,6 +394,22 @@ public class BasicDialog {
       genderBox.addItem(s);
     }
     return genderBox;
+  }
+
+  protected FormField addControlFormFieldWithPlaceholder(Panel dialogBox, boolean isPassword, int minLength, int maxLength, String hint) {
+    final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
+    user.setMaxLength(maxLength);
+    user.setPlaceholder(hint);
+    return getFormField(dialogBox, user, minLength);
+  }
+
+  private FormField getFormField(Panel dialogBox, TextBox user, int minLength) {
+    final ControlGroup userGroup = addControlGroupEntryNoLabel(dialogBox, user);
+    return new FormField(user, userGroup, minLength);
+  }
+
+  protected boolean highlightIntegerBox(FormField ageEntryGroup) {
+    return highlightIntegerBox(ageEntryGroup, UserDialog.MIN_AGE, UserDialog.MAX_AGE+1, UserDialog.TEST_AGE);
   }
 
   protected static class MyPopover extends Popover {
