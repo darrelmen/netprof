@@ -571,9 +571,9 @@ public class UserDAO extends DAO {
         logger.debug("User " + id + "/" + userID + " pass " + password + " email " + email);
       }*/
       User.Kind userKind1 = userKind == null ? User.Kind.UNSET : User.Kind.valueOf(userKind);
-      if (userKind1 == User.Kind.UNSET) {
-        logger.debug("for user " + id + " kind is " + userKind);
-      }
+     // if (userKind1 == User.Kind.UNSET) {
+     //   logger.debug("for user " + id + " kind is " + userKind);
+     // }
 
       User newUser = new User(id, //id
           rs.getInt("age"), // age
