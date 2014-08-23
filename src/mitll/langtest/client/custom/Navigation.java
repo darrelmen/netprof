@@ -28,7 +28,6 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.UriUtils;
-import com.google.gwt.typedarrays.shared.ArrayBuffer;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -51,7 +50,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.gauge.SimpleColumnChart;
-import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
@@ -59,7 +57,6 @@ import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.scoring.SimplePostAudioRecordButton;
 import mitll.langtest.client.sound.AudioControl;
 import mitll.langtest.client.sound.PlayAudioPanel;
-import mitll.langtest.client.sound.PlayAudioWidget;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
@@ -69,7 +66,6 @@ import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserList;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -866,6 +862,7 @@ public class Navigation implements RequiresResize {
 			     somethingIsHappening.setVisible(true);
 		  }
 	  });
+	  s.setWidth("120px");
 	  return s;
   }
   
@@ -909,6 +906,7 @@ public class Navigation implements RequiresResize {
 			     somethingIsHappening.setVisible(true);
 		  }
 	  });
+	  s.setWidth("120px");
 	  return s;
   }
   
@@ -947,6 +945,7 @@ public class Navigation implements RequiresResize {
 			  if(!showPart)
 				  sent.setText("(Say your part)"); // be careful to not get the sentence for scoring from here!
 			  PlayAudioPanel play = new PlayAudioPanel(controller, "config/mandarinClassroom/bestAudio/"+sentToAudioPath.get(sentence));
+			  play.setMinWidth(82);
 			  final HTML score = new HTML("0.0");
 			  scoreElements.add(score);
 			  SimplePostAudioRecordButton recordButton = null;
@@ -1145,6 +1144,10 @@ public class Navigation implements RequiresResize {
   }
   
   private void setupPlayOrder(final Grid sentPanel, final int currIndex, final int stop){
+	  setupPlayOrder(sentPanel, currIndex, stop, new ArrayList<Integer>());
+  }
+  
+  private void setupPlayOrder(final Grid sentPanel, final int currIndex, final int stop, final ArrayList<Integer> reactingSents){
 	  if(currIndex >= stop)
 		  return;
 	  sentPanel.getWidget(currIndex, 0).getElement().getStyle().setProperty("color", "#000000");
@@ -1152,22 +1155,29 @@ public class Navigation implements RequiresResize {
 		  sentPanel.getWidget(currIndex, 1).setVisible(true);
 		  sentPanel.getWidget(currIndex,  2).setVisible(true);
 		  final boolean sentsInARow = sentPanel.getWidget(currIndex, 3).getElement().hasClassName("nextIsSame");
-		  if(!sentsInARow)
-		     sentPanel.getWidget(currIndex,  3).setVisible(true);
-	  	  ((Button) sentPanel.getWidget(currIndex,  sentsInARow ? 2 : 3)).addMouseUpHandler(new MouseUpHandler() {
+		  if(sentsInARow){
+			  reactingSents.add(currIndex);
+		      setupPlayOrder(sentPanel, currIndex + 1, stop, reactingSents);
+		      return;
+		  }
+		  sentPanel.getWidget(currIndex,  3).setVisible(true);
+	  	  ((Button) sentPanel.getWidget(currIndex, 3)).addMouseUpHandler(new MouseUpHandler() {
 			  @Override
 			  public void onMouseUp(MouseUpEvent e){
-				  if(((Button) sentPanel.getWidget(currIndex,  3)).isEnabled() || sentsInARow){
-				      sentPanel.getWidget(currIndex, 0).getElement().getStyle().setProperty("color", "#B8B8B8");
-					  sentPanel.getWidget(currIndex, 2).setVisible(false);
-					  sentPanel.getWidget(currIndex, 1).setVisible(false);
-					  sentPanel.getWidget(currIndex, 3).setVisible(false);
-					  sentPanel.getWidget(currIndex, 5).setVisible(false);
-					  sentPanel.getWidget(currIndex, 6).setVisible(false);
+				  if(((Button) sentPanel.getWidget(currIndex,  3)).isEnabled()){
+					  reactingSents.add(currIndex);
+					  for(int i : reactingSents){
+						  sentPanel.getWidget(i, 0).getElement().getStyle().setProperty("color", "#B8B8B8");
+						  sentPanel.getWidget(i, 2).setVisible(false);
+						  sentPanel.getWidget(i, 1).setVisible(false);
+						  sentPanel.getWidget(i, 3).setVisible(false);
+						  sentPanel.getWidget(i, 5).setVisible(false);
+						  sentPanel.getWidget(i, 6).setVisible(false);
+					  }
 					  if(currIndex+1 != stop){
 					     sentPanel.getWidget(currIndex+1, 0).getElement().getStyle().setProperty("color", "#000000");
 					  }
-					  setupPlayOrder(sentPanel, currIndex + 1, stop);
+					  setupPlayOrder(sentPanel, currIndex + 1, stop, new ArrayList<Integer>());
 				  }
 			  }
 	  	  });
@@ -1196,7 +1206,7 @@ public class Navigation implements RequiresResize {
 
 				@Override
 				public void songFinished() {
-					setupPlayOrder(sentPanel, currIndex + 1, stop);
+					setupPlayOrder(sentPanel, currIndex + 1, stop, reactingSents);
 					sentPanel.getWidget(currIndex, 0).getElement().getStyle().setProperty("color", "#B8B8B8");
 				}
 
