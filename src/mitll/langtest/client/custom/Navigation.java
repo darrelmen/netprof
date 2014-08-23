@@ -1101,8 +1101,8 @@ public class Navigation implements RequiresResize {
 	     for(int pi = phones.size() -1; pi > phones.size()-numToShow-1; pi--){
 	    	 String currPhone = phones.get(pi);
 	    	 PlayAudioPanel audiWid = phoneToAudioExample.get(currPhone);
-	    	 audiWid.setMinWidth(50);
-	    	 audiWid.getElement().getStyle().setWidth(50, Style.Unit.PX);
+	    	 audiWid.setMinWidth(60);
+	    	 audiWid.getElement().getStyle().setWidth(60, Style.Unit.PX);
 	    	 badPhoneScores.setWidget(numToShow-(phones.size()-pi), 0, audiWid);
 	    	 badPhoneScores.setWidget(numToShow-(phones.size()-pi), 1, getScoreBar(phonesToScores.get(currPhone), chart));
 	     }
@@ -1327,7 +1327,7 @@ public class Navigation implements RequiresResize {
 	  pw.put("uu3",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/x.mp3").setPlayLabel("uu3"));
 	  pw.put("uu4",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/x.mp3").setPlayLabel("uu4"));
 	  pw.put("w",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/wo3.mp3").setPlayLabel("w"));
-	  pw.put("x",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/x.mp3").setPlayLabel("x"));
+	  pw.put("x",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/xuue2.mp3").setPlayLabel("x"));
 	  pw.put("y",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/yi2.mp3").setPlayLabel("y"));
 	  pw.put("z",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/zou3.mp3").setPlayLabel("z"));
 	  pw.put("zh",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/zho1.mp3").setPlayLabel("zh"));
