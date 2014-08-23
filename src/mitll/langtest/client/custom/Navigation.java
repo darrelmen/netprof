@@ -931,15 +931,16 @@ public class Navigation implements RequiresResize {
 	  rp.setVisible(false);
 	  final ArrayList<SimplePostAudioRecordButton> recoButtons = new ArrayList<SimplePostAudioRecordButton>();
 	  final ArrayList<Integer> sentIndexes = new ArrayList<Integer>();
+	  final ArrayList<Image> prevResponses = new ArrayList<Image>();
 	  
 	  while(dialogToSentIndexToSent.get(dialog).containsKey(sentIndex)){
-		  boolean nextIsSame = dialogToSentIndexToSent.get(dialog).containsKey(sentIndex+1) && (dialogToSentIndexToSent.get(dialog).get(sentIndex) == dialogToSentIndexToSent.get(dialog).get(sentIndex+1));
 		  String sentence = dialogToSentIndexToSent.get(dialog).get(sentIndex);
 		  HTML sent = new HTML(sentence);
 		  sent.getElement().getStyle().setProperty("color", "#B8B8B8");
 		  sent.getElement().getStyle().setProperty("margin", "5px 10px");
 		  sent.getElement().getStyle().setProperty("fontSize", "130%");
 		  if(part.equals(dialogToSentIndexToSpeaker.get(dialog).get(sentIndex))){
+			  boolean nextIsSame = dialogToSentIndexToSpeaker.get(dialog).containsKey(sentIndex+1) && (dialogToSentIndexToSpeaker.get(dialog).get(sentIndex).equals(dialogToSentIndexToSpeaker.get(dialog).get(sentIndex+1)));
 			  sentIndexes.add(sentIndex);
 			  if (sentIndex == 0)
 				  youStart = true;
@@ -954,8 +955,21 @@ public class Navigation implements RequiresResize {
 			  final Image check = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "checkmark32.png"));
 			  final Image x = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "redx32.png"));
 			  final Image somethingIsHappening = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress28.gif"));
+			  if(nextIsSame){
+				  prevResponses.add(check);
+				  prevResponses.add(x);
+				  prevResponses.add(somethingIsHappening);
+			  }
 			  if(sentIndex != yourLast){
 			     recordButton = getRecordButton(dialogToSentIndexToSent.get(dialog).get(sentIndex), score, continueButton, check, x, somethingIsHappening);
+			     continueButton.addClickHandler(new ClickHandler() {
+			    	 @Override
+			    	 public void onClick(ClickEvent e){
+						 for(Image i : prevResponses)
+					        i.setVisible(false);
+			    		 prevResponses.clear();
+			    	 }
+			     });
 			  }
 			  else{
 				 recordButton = getFinalRecordButton(dialogToSentIndexToSent.get(dialog).get(sentIndex), continueButton, check, x, somethingIsHappening, scoreElements, score, avg);
@@ -965,6 +979,9 @@ public class Navigation implements RequiresResize {
 					  public void onClick(ClickEvent e){ 
 						  if(continueButton.isEnabled()){
 							  displayResults(dialog, scoreElements, sentIndexes, dialogToSentIndexToSent, recoButtons, sentPanel, rp, goodPhonePanel, badPhonePanel);
+							  for(Image i : prevResponses)
+								  i.setVisible(false);
+							  prevResponses.clear();
 						  }
 					  }
 				  });
@@ -995,7 +1012,7 @@ public class Navigation implements RequiresResize {
 			  sentPanel.setWidget(sentIndex, 4, score);
 			  recordButton.setVisible(false);
 			  if(nextIsSame)
-			     recordButton.getElement().addClassName("dontShow");
+			     continueButton.getElement().addClassName("nextIsSame");
 			  play.setVisible(false);
 			  sentPanel.setWidget(sentIndex, 5, check);
 			  check.setVisible(false);
@@ -1047,6 +1064,7 @@ public class Navigation implements RequiresResize {
 	    		 phonesToScores.get(phone).add(pts.get(phone));
 	    	 }
 	     }
+	     int numToShow = 5;
 	     ArrayList<String> preFilteredPhones = new ArrayList<String>(phonesToScores.keySet());
 	     ArrayList<String> phones = new ArrayList<String>();
 	     for(String phone : preFilteredPhones){
@@ -1063,23 +1081,23 @@ public class Navigation implements RequiresResize {
 	     }
 	     else
 	    	 System.out.println("Filtering out phones with only one pronunication");
+	     numToShow = phones.size() < 10 ? phones.size()/2 : 5; // the magic number 5!!!
 	     Collections.sort(phones, new Comparator<String>(){
 	    	 @Override
 	    	 public int compare(String s1, String s2){
 	    		 return (int) (1000*(avg(phonesToScores.get(s2)) - avg(phonesToScores.get(s1))));
 	    	 }
 	     });
-	     Grid goodPhoneScores = new Grid(5, 2); //the magic number 5!!!
+	     Grid goodPhoneScores = new Grid(numToShow, 2); 
 	     SimpleColumnChart chart = new SimpleColumnChart();
-	     for(int pi = 0; pi < 5; pi++){
+	     for(int pi = 0; pi < numToShow; pi++){
 	    	 String currPhone = phones.get(pi);
 	    	 PlayAudioPanel audiWid = phoneToAudioExample.get(currPhone);
-	    	 audiWid.setMinWidth(50);
-	    	 audiWid.getElement().getStyle().setWidth(50, Style.Unit.PX);
+	    	 audiWid.setMinWidth(60);
+	    	 audiWid.getElement().getStyle().setWidth(60, Style.Unit.PX);
 	    	 goodPhoneScores.setWidget(pi, 0, audiWid);
 	    	 goodPhoneScores.setWidget(pi, 1, getScoreBar(phonesToScores.get(currPhone), chart));
 	     }
-	     int numToShow = 5;
 	     Grid badPhoneScores = new Grid(numToShow, 2);
 	     for(int pi = phones.size() -1; pi > phones.size()-numToShow-1; pi--){
 	    	 String currPhone = phones.get(pi);
@@ -1133,12 +1151,13 @@ public class Navigation implements RequiresResize {
 	  if(sentPanel.getWidget(currIndex, 2) != null){
 		  sentPanel.getWidget(currIndex, 1).setVisible(true);
 		  sentPanel.getWidget(currIndex,  2).setVisible(true);
-		  if(!sentPanel.getWidget(currIndex, 3).getElement().hasClassName("dontShow"))
+		  final boolean sentsInARow = sentPanel.getWidget(currIndex, 3).getElement().hasClassName("nextIsSame");
+		  if(!sentsInARow)
 		     sentPanel.getWidget(currIndex,  3).setVisible(true);
-	  	  ((Button) sentPanel.getWidget(currIndex,  3)).addMouseUpHandler(new MouseUpHandler() {
+	  	  ((Button) sentPanel.getWidget(currIndex,  sentsInARow ? 2 : 3)).addMouseUpHandler(new MouseUpHandler() {
 			  @Override
 			  public void onMouseUp(MouseUpEvent e){
-				  if(((Button) sentPanel.getWidget(currIndex,  3)).isEnabled()){
+				  if(((Button) sentPanel.getWidget(currIndex,  3)).isEnabled() || sentsInARow){
 				      sentPanel.getWidget(currIndex, 0).getElement().getStyle().setProperty("color", "#B8B8B8");
 					  sentPanel.getWidget(currIndex, 2).setVisible(false);
 					  sentPanel.getWidget(currIndex, 1).setVisible(false);
