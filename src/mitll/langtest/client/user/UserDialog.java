@@ -181,8 +181,8 @@ public abstract class UserDialog extends BasicDialog {
     } else if (userID.length() == 0) {
       msg = "Please enter a user id.";
       foundError = true;
-    } else if (userID.length() < StudentDialog.MIN_LENGTH_USER_ID) {
-      msg = "Must be at least " + StudentDialog.MIN_LENGTH_USER_ID + " characters.";
+    } else if (userID.length() < BasicDialog.MIN_LENGTH_USER_ID) {
+      msg = "Must be at least " + BasicDialog.MIN_LENGTH_USER_ID + " characters.";
       foundError = true;
     } else {
       int c = 0;
