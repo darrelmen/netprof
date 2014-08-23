@@ -1166,7 +1166,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           url + "?cd=" + hash + "&" +
               "er" +
               "=" + rot13(email),
-          CONTENT_DEVELOPER_APPROVAL_EMAIL,
+          serverProps.getApprovalEmailAddress(),
           "gordon.vidaver@ll.mit.edu",
           "Content Developer approval for " + userID1 + " for " + serverProps.getLanguage(),
           message,
