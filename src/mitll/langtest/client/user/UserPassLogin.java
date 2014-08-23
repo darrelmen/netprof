@@ -2,8 +2,6 @@ package mitll.langtest.client.user;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.*;
-import com.github.gwtbootstrap.client.ui.PasswordTextBox;
-import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
@@ -132,8 +130,8 @@ public class UserPassLogin extends UserDialog {
     Heading w = new Heading(3, "Choose a new password");
     fieldset.add(w);
     w.addStyleName("leftFiveMargin");
-    final FormField firstPassword = addControlFormField(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
-    final FormField secondPassword = addControlFormField(fieldset, true, MIN_PASSWORD, 15, "Confirm " + PASSWORD);
+    final FormField firstPassword = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
+    final FormField secondPassword = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, "Confirm " + PASSWORD);
 
 
     final Button changePassword = new Button("Change Password");
@@ -180,7 +178,7 @@ public class UserPassLogin extends UserDialog {
                   public void run() {
 
                     String newURL = trimURL(Window.Location.getHref());
-                  //  System.out.println("url now " +newURL);
+                    //  System.out.println("url now " +newURL);
                     Window.Location.replace(newURL);
                     Window.Location.reload();
 
@@ -229,7 +227,7 @@ public class UserPassLogin extends UserDialog {
     form.add(fieldset);
     right.add(rightDiv);
 
-    user = addControlFormField(fieldset, false, MIN_LENGTH_USER_ID, USER_ID_MAX_LENGTH, USERNAME);
+    user = addControlFormFieldWithPlaceholder(fieldset, false, MIN_LENGTH_USER_ID, USER_ID_MAX_LENGTH, USERNAME);
     user.box.addStyleName("topMargin");
     user.box.addStyleName("rightFiveMargin");
     user.box.getElement().setId("Username_Box_SignIn");
@@ -243,7 +241,7 @@ public class UserPassLogin extends UserDialog {
       }
     });
 
-    password = addControlFormField(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
+    password = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
     password.box.addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {
@@ -339,7 +337,7 @@ public class UserPassLogin extends UserDialog {
               @Override
               public void onSuccess(Boolean result) {
                 String heading = result ? "Check Email" : "Unknown email";
-                String message = result ? "Please check your email" : user.box.getText() +" doesn't have that email. Check for a typo?";
+                String message = result ? "Please check your email" : user.box.getText() + " doesn't have that email. Check for a typo?";
                 setupPopover(sendEmail, heading, message, Placement.LEFT, 5000, new MyPopover() {
                   boolean isFirst = true;
 
@@ -481,11 +479,7 @@ public class UserPassLogin extends UserDialog {
     form.add(w);
     form.add(fieldset);
 
-    // final ListBoxFormField purpose = getListBoxFormField(fieldset, ARE_YOU_A, getListBox2(ROLES));
-    //  purpose.userBox.setWidth("150px");
-    // purpose.userBox.addStyleName("floatRight");
-
-    signUpUser = addControlFormField(fieldset, false, MIN_LENGTH_USER_ID, 20, USERNAME);
+    signUpUser = addControlFormFieldWithPlaceholder(fieldset, false, MIN_LENGTH_USER_ID, 20, USERNAME);
     final TextBoxBase userBox = signUpUser.box;
     userBox.addStyleName("topMargin");
     userBox.addStyleName("rightFiveMargin");
@@ -498,7 +492,7 @@ public class UserPassLogin extends UserDialog {
       }
     });
 
-    signUpEmail = addControlFormField(fieldset, false, MIN_LENGTH_USER_ID, USER_ID_MAX_LENGTH, "Email");
+    signUpEmail = addControlFormFieldWithPlaceholder(fieldset, false, MIN_LENGTH_USER_ID, USER_ID_MAX_LENGTH, "Email");
     final TextBoxBase emailBox = signUpEmail.box;
     emailBox.addStyleName("topMargin");
     emailBox.addStyleName("rightFiveMargin");
@@ -510,7 +504,7 @@ public class UserPassLogin extends UserDialog {
       }
     });
 
-    signUpPassword = addControlFormField(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
+    signUpPassword = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
     signUpPassword.box.addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {
@@ -526,11 +520,36 @@ public class UserPassLogin extends UserDialog {
     w1.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
     fieldset.add(getShowGroup());
     getSignUpButton(userBox, emailBox);
+
+    registrationInfo = new RegistrationInfo(fieldset);
+
+    registrationInfo.getAgeEntryGroup().box.addFocusHandler(new FocusHandler() {
+      @Override
+      public void onFocus(FocusEvent event) {
+        signInHasFocus = false;
+      }
+    });
+    registrationInfo.getDialectGroup().box.addFocusHandler(new FocusHandler() {
+      @Override
+      public void onFocus(FocusEvent event) {
+        signInHasFocus = false;
+      }
+    });
+    registrationInfo.getGenderGroup().box.addFocusHandler(new FocusHandler() {
+      @Override
+      public void onFocus(FocusEvent event) {
+        signInHasFocus = false;
+      }
+    });
+
+    registrationInfo.setVisible(false);
     fieldset.add(signUp);
+
     return form;
   }
 
-  private User.Kind selectedRole = User.Kind.UNSET;
+  private RegistrationInfo registrationInfo;
+  private User.Kind selectedRole = User.Kind.STUDENT;
 
   private DivWidget getShowGroup() {
     ButtonToolbar w = new ButtonToolbar();
@@ -544,18 +563,21 @@ public class UserPassLogin extends UserDialog {
       @Override
       public void onClick(ClickEvent event) {
         selectedRole = User.Kind.STUDENT;
+        registrationInfo.setVisible(false);
       }
     }));
     buttonGroup.add(getChoice("Teacher", false, new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         selectedRole = User.Kind.TEACHER;
+        registrationInfo.setVisible(false);
       }
     }));
     buttonGroup.add(getChoice("Content Developer", false, new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         selectedRole = User.Kind.CONTENT_DEVELOPER;
+        registrationInfo.setVisible(true);
       }
     }));
 
@@ -592,6 +614,13 @@ public class UserPassLogin extends UserDialog {
         } else if (signUpPassword.box.getValue().length() < MIN_PASSWORD) {
           markError(signUpPassword, signUpPassword.box.getValue().isEmpty() ? "Please enter a password." :
               "Please enter a password at least " + MIN_PASSWORD + " characters long.");
+        } else if (selectedRole == User.Kind.CONTENT_DEVELOPER && !registrationInfo.checkValidGender()) {
+
+        } else if (selectedRole == User.Kind.CONTENT_DEVELOPER && !highlightIntegerBox(registrationInfo.getAgeEntryGroup())) {
+          markError(registrationInfo.getAgeEntryGroup().group, registrationInfo.getAgeEntryGroup().box, "",
+              "Enter age between " + MIN_AGE + " and " + MAX_AGE + ".");
+        } else if (selectedRole == User.Kind.CONTENT_DEVELOPER && registrationInfo.getDialectGroup().getText().isEmpty()) {
+          markError(registrationInfo.getDialectGroup(), "Enter a language dialect.");
         } else {
           gotSignUp(userBox.getValue(), signUpPassword.box.getValue(), emailBox.getValue(), selectedRole);
         }
@@ -605,32 +634,49 @@ public class UserPassLogin extends UserDialog {
   }
 
   private void gotSignUp(String user, String password, String email, User.Kind kind) {
-    String passH  = Md5Hash.getHash(password);
+    String passH = Md5Hash.getHash(password);
     String emailH = Md5Hash.getHash(email);
 
-    signUp.setEnabled(false);
-    service.addUser(user, passH, emailH, kind, Window.Location.getHref(), email, new AsyncCallback<User>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        signUp.setEnabled(true);
-        markError(signUp, "Trouble connecting to server.");
-      }
+    boolean isCD = kind == User.Kind.CONTENT_DEVELOPER;
+    String gender = isCD ? registrationInfo.getGenderGroup().box.getValue() : "male";
+    String age = isCD ? registrationInfo.getAgeEntryGroup().getText() : "";
+    int age1 = isCD ? Integer.parseInt(age) : 0;
+    String dialect = isCD ? registrationInfo.getDialectGroup().getText() : "unk";
 
-      @Override
-      public void onSuccess(User result) {
-        if (result == null) {
-          signUp.setEnabled(true);
-          markError(signUpUser, "User exists already, please sign in or choose a different name.");
-        } else {
-          if (result.isEnabled()) {
-            storeUser(result);
-          } else {
-            markError(signUp, "Wait for approval", "You will get an approval message by email.", Placement.LEFT);
+    signUp.setEnabled(false);
+
+ //   System.out.println("kind is " +kind);
+    service.addUser(user, passH, emailH, kind, Window.Location.getHref(), email,
+        gender.equalsIgnoreCase("male"), age1, dialect, new AsyncCallback<User>() {
+          @Override
+          public void onFailure(Throwable caught) {
             signUp.setEnabled(true);
+            markError(signUp, "Trouble connecting to server.");
           }
-        }
-      }
-    });
+
+          @Override
+          public void onSuccess(User result) {
+            if (result == null) {
+              signUp.setEnabled(true);
+              markError(signUpUser, "User exists already, please sign in or choose a different name.");
+            } else {
+              if (result.isEnabled()) {
+                storeUser(result);
+              } else {
+                markError(signUp, "Wait for approval", "You will get an approval message by email.", Placement.LEFT);
+//            signUp.setEnabled(true);
+                Timer t = new Timer() {
+                  @Override
+                  public void run() {
+                    Window.Location.reload();
+
+                  }
+                };
+                t.schedule(5000);
+              }
+            }
+          }
+        });
   }
 
   public void getLeftIntro(Panel leftAndRight) {
@@ -726,18 +772,5 @@ public class UserPassLogin extends UserDialog {
     if (kind == User.Kind.STUDENT || kind == User.Kind.TEACHER) return Result.AUDIO_TYPE_PRACTICE;
     else if (kind == User.Kind.CONTENT_DEVELOPER) return Result.AUDIO_TYPE_RECORDER;
     else return Result.AUDIO_TYPE_REVIEW;
-  }
-
-
-  private FormField addControlFormField(Panel dialogBox, boolean isPassword, int minLength, int maxLength, String hint) {
-    final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
-    user.setMaxLength(maxLength);
-    user.setPlaceholder(hint);
-    return getFormField(dialogBox, user, minLength);
-  }
-
-  private FormField getFormField(Panel dialogBox, TextBox user, int minLength) {
-    final ControlGroup userGroup = addControlGroupEntryNoLabel(dialogBox, user);
-    return new FormField(user, userGroup, minLength);
   }
 }
