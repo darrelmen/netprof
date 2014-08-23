@@ -554,17 +554,20 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addUser(String, String, String, mitll.langtest.shared.User.Kind)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addUser
    * @param request
    * @param userID
    * @param passwordH
    * @param emailH
    * @param kind
+   * @param isMale
+   *@param age
+   * @param dialect
    * @return
    */
-  public User addUser(HttpServletRequest request, String userID, String passwordH, String emailH, User.Kind kind) {
+  public User addUser(HttpServletRequest request, String userID, String passwordH, String emailH, User.Kind kind, boolean isMale, int age, String dialect) {
     String ip = getIPInfo(request);
-    User user = userDAO.addUser(userID, passwordH, emailH, kind, ip);
+    User user = userDAO.addUser(userID, passwordH, emailH, kind, ip, isMale, age, dialect);
     if (user != null) {
       userListManager.createFavorites(user.getId());
     }
