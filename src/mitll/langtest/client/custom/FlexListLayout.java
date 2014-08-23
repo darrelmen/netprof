@@ -130,7 +130,7 @@ public abstract class FlexListLayout implements RequiresResize {
 
   protected class MyFlexSectionExerciseList extends FlexSectionExerciseList {
     public MyFlexSectionExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName) {
-      super(topRow, currentExercisePanel, FlexListLayout.this.service, FlexListLayout.this.feedback, false, false, FlexListLayout.this.controller, true, instanceName);
+      super(topRow, currentExercisePanel, FlexListLayout.this.service, FlexListLayout.this.feedback, FlexListLayout.this.controller, true, instanceName);
     }
 
     @Override
