@@ -3,22 +3,18 @@ package mitll.langtest.client.scoring;
 import java.util.List;
 
 import java.util.Map;
+import java.util.HashMap;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
-import com.google.gwt.dev.util.collect.HashMap;
-import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-import mitll.langtest.client.LangTest;
-import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.WavCallback;
 import mitll.langtest.client.custom.TooltipHelper;
@@ -26,8 +22,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 
@@ -224,6 +218,15 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
 
   public HorizontalPanel getSentColors(String sentToColor){
 	  HorizontalPanel colorfulSent = new HorizontalPanel();
+	  if(null == lastResult.getPretestScore()){
+		  HTML bad = new HTML("no result available");
+		  bad.getElement().getStyle().setBackgroundColor("#000000");
+		  bad.getElement().getStyle().setProperty("color", "#FFFFFF");
+		  bad.getElement().getStyle().setProperty("margin", "5px 10px");
+		  bad.getElement().getStyle().setProperty("fontSize", "130%");
+		  colorfulSent.add(bad);
+		  return colorfulSent;
+	  }
 	  List<TranscriptSegment> ts = lastResult.getPretestScore().getsTypeToEndTimes().get(NetPronImageType.WORD_TRANSCRIPT);
 	  String[] words = sentToColor.split("\\s+");
 	  int wordIndex = 0;
@@ -243,6 +246,8 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
   }
   
   public Map<String, Float> getPhoneScores(){
+	  if(null == lastResult.getPretestScore())
+		  return new HashMap<String, Float>();
 	  return lastResult.getPretestScore().getPhoneScores();
   }
   
