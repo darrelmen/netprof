@@ -60,7 +60,7 @@ public class ExerciseListLayout {
     String instance = hasQC ? User.Permission.QUALITY_CONTROL.toString() : "flex";
 
     return new FlexSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
-        false, false, controller, true, instance);
+        controller, true, instance);
   }
 
   /**
