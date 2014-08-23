@@ -1,11 +1,8 @@
 package mitll.langtest.client.user;
 
 import com.github.gwtbootstrap.client.ui.Fieldset;
-import com.github.gwtbootstrap.client.ui.Form;
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.ui.Panel;
@@ -19,11 +16,11 @@ class RegistrationInfo extends BasicDialog {
   private final FormField dialectGroup;
 
   /**
-   * @see mitll.langtest.client.user.StudentDialog#displayLoginBox()
-   * @param dialogBox
-   * @param lowerLeft
+   * @seex mitll.langtest.client.user.StudentDialog#displayLoginBox()
+   * @paramx dialogBox
+   * @paramx lowerLeft
    */
-  public RegistrationInfo(Panel dialogBox, Panel lowerLeft) {
+/*  public RegistrationInfo(Panel dialogBox, Panel lowerLeft) {
     Form form = new Form();
     form.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
 
@@ -49,14 +46,30 @@ class RegistrationInfo extends BasicDialog {
 
     genderGroup = getListBoxFormField(fieldsetRight, "Gender", getGenderBox());
 
-    addControlGroupEntrySimple(fieldsetLeft, "Permissions", lowerLeft);
+    //addControlGroupEntrySimple(fieldsetLeft, "Permissions", lowerLeft);
     ageEntryGroup = addControlFormField(fieldsetLeft, "Your age");
     dialectGroup = getDialect(fieldsetRight);
+  }*/
+
+  public RegistrationInfo(Fieldset toAddTo) {
+    genderGroup = getListBoxFormFieldNoLabel(toAddTo, "Gender", getGenderBox());
+    genderGroup.box.setWidth("100px");
+    genderGroup.box.addStyleName("topMargin");
+    //addControlGroupEntrySimple(fieldsetLeft, "Permissions", lowerLeft);
+    ageEntryGroup = addControlFormFieldWithPlaceholder(toAddTo, false,2,2,"Your age");
+    ageEntryGroup.box.setWidth("88px");
+    dialectGroup = getDialect(toAddTo);
+  }
+
+  public void setVisible(boolean visible) {
+    genderGroup.setVisible(visible);
+    ageEntryGroup.setVisible(visible);
+    dialectGroup.setVisible(visible);
   }
 
   private FormField getDialect(Panel dialogBox) {
-    final FormField dialectGroup = addControlFormField(dialogBox, StudentDialog.DIALECT);
-    dialectGroup.group.addStyleName("topTwentyMargin");
+    final FormField dialectGroup = addControlFormFieldWithPlaceholder(dialogBox, false, 3, 25, DIALECT);
+//    dialectGroup.group.addStyleName("topTwentyMargin");
 
     dialectGroup.box.addKeyUpHandler(new KeyUpHandler() {
       public void onKeyUp(KeyUpEvent event) {
@@ -67,6 +80,8 @@ class RegistrationInfo extends BasicDialog {
     });
     return dialectGroup;
   }
+  private static final String CHOOSE_A_GENDER = "Choose a gender.";
+  private static final String DIALECT = "Dialect";
 
   /**
    * @see #checkThenRegister(String, RegistrationInfo, com.github.gwtbootstrap.client.ui.Modal, String, java.util.Collection)
@@ -75,7 +90,7 @@ class RegistrationInfo extends BasicDialog {
   public boolean checkValidGender() {
     boolean valid = !getGenderGroup().getValue().equals(UNSET);
     if (!valid) {
-      getGenderGroup().markSimpleError(StudentDialog.CHOOSE_A_GENDER, Placement.LEFT);
+      getGenderGroup().markSimpleError(CHOOSE_A_GENDER, Placement.LEFT);
     }
     return valid;
   }
