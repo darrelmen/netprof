@@ -1,6 +1,5 @@
 package mitll.langtest.client.user;
 
-import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
@@ -12,10 +11,6 @@ import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.flashcard.ControlState;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
 
 /**
  * Handles storing cookies for users, etc. IF user ids are stored as cookies.
@@ -116,7 +111,7 @@ public class UserManager {
 
 
   /**
-   * TODO : instead have call to get permissions for a user.
+   * TODOx : instead have call to get permissions for a user.
    * @param user
    * @see #login()
    * @see #storeUser
@@ -197,7 +192,7 @@ public class UserManager {
   private void addAnonymousUser() {
     System.out.println("UserManager.addAnonymousUser : adding anonymous user");
 
-    service.addUser("anonymous", "", "", User.Kind.ANONYMOUS, Window.Location.getHref(), "", new AsyncCallback<User>() {
+    service.addUser("anonymous", "", "", User.Kind.ANONYMOUS, Window.Location.getHref(), "", true, 0, "unknown", new AsyncCallback<User>() {
       @Override
       public void onFailure(Throwable caught) {
 
