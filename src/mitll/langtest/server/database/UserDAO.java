@@ -1,5 +1,6 @@
 package mitll.langtest.server.database;
 
+import com.google.gwt.i18n.server.testing.Gender;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.User;
@@ -105,27 +106,28 @@ public class UserDAO extends DAO {
    * @param emailH
    * @param kind
    * @param ipAddr
+   * @param isMale
+   * @param age
+   * @param dialect
    * @return
    * @see mitll.langtest.server.database.DatabaseImpl#addUser(javax.servlet.http.HttpServletRequest, int, String, int, String, String, String, java.util.Collection)
    */
-  public User addUser(String userID, String passwordH, String emailH, User.Kind kind, String ipAddr) {
+  public User addUser(String userID, String passwordH, String emailH, User.Kind kind, String ipAddr, boolean isMale, int age, String dialect) {
     User userByID = getUserByID(userID);
     if (userByID != null && kind != User.Kind.ANONYMOUS) {
       if (userByID.getEmailHash() != null && userByID.getPasswordHash() != null &&
           !userByID.getEmailHash().isEmpty() && !userByID.getPasswordHash().isEmpty()) {
         return null; // existing user!
-      }
-      else {
+      } else {
         updateUser(userByID.getId(), kind, passwordH, emailH);
         User userWhere = getUserWhere(userByID.getId());
-        logger.debug("returning updated user " +userWhere);
+        logger.debug("returning updated user " + userWhere);
         return userWhere;
       }
-    }
-    else {
+    } else {
       Collection<User.Permission> perms = (kind == User.Kind.CONTENT_DEVELOPER) ? CD_PERMISSIONS : EMPTY_PERM;
       boolean enabled = (kind != User.Kind.CONTENT_DEVELOPER) || isAdmin(userID);
-      long l = addUser(0, "", 0, ipAddr, "", "", userID, enabled, perms, kind, passwordH, emailH);
+      long l = addUser(age, isMale ? MALE : FEMALE, 0, ipAddr, "", dialect, userID, enabled, perms, kind, passwordH, emailH);
       return getUserWhere(l);
     }
   }
@@ -568,6 +570,11 @@ public class UserDAO extends DAO {
 /*      if (email != null) {
         logger.debug("User " + id + "/" + userID + " pass " + password + " email " + email);
       }*/
+      User.Kind userKind1 = userKind == null ? User.Kind.UNSET : User.Kind.valueOf(userKind);
+      if (userKind1 == User.Kind.UNSET) {
+        logger.debug("for user " + id + " kind is " + userKind);
+      }
+
       User newUser = new User(id, //id
           rs.getInt("age"), // age
           rs.getInt("gender"), //gender
@@ -581,10 +588,10 @@ public class UserDAO extends DAO {
           rs.getString("dialect"), // dialect
           userID, // dialect
 
-          rs.getBoolean(ENABLED),
+          rs.getBoolean(ENABLED) || (userKind1 != User.Kind.CONTENT_DEVELOPER),
           isAdmin,
           permissions,
-          userKind == null ? User.Kind.UNSET : User.Kind.valueOf(userKind),
+          userKind1,
           email);
 
       users.add(newUser);
