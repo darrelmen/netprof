@@ -47,11 +47,9 @@ public interface ExerciseController extends EventRegistration {
   int getSegmentRepeats();
   boolean isArabicTextDataCollect();
   boolean useBkgColorForRef();
-  boolean isDemoMode();
   boolean isAutoCRTMode();
   int getRecordTimeout();
   boolean isDataCollectMode();
-  boolean isCRTDataCollectMode();
   boolean isCollectAudio();
   boolean isMinimalUI();
   boolean isGrading();
@@ -82,4 +80,6 @@ public interface ExerciseController extends EventRegistration {
   boolean isRecordingEnabled();
 
   boolean usingFlashRecorder();
+
+  void checkUser();
 }
