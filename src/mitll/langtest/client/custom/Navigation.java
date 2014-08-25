@@ -1239,6 +1239,8 @@ public class Navigation implements RequiresResize {
 	  HashMap<String, String[]> m = new HashMap<String, String[]>();
 	  m.put("Unit 1: Part 1", new String[] {"Crane", "Wang"});
 	  m.put("Unit 1: Part 2", new String[] {"Smith", "Zhao"});
+	  m.put("Unit 1: Part 3", new String[] {"Kao", "He"});
+	  m.put("Unit 1: Part 4", new String[] {"Mrs. Li", "Mrs. Smith"});
 	  return m;
   }
   
@@ -1259,6 +1261,23 @@ public class Navigation implements RequiresResize {
 	  m.put("Tāmen dōu hěn hăo, xièxie.", "/63/regular_1403793540903_by_8.wav");
 	  m.put("Zàijiàn.", "/72/regular_1403792398921_by_8.wav");
 	  
+	  m.put("Èi, Lăo Hé!", "/90/regular_1403794727635_by_8.wav");
+	  m.put("Xiăo Gāo!", "/93/regular_1403794869759_by_8.wav");
+	  m.put("Zuìjìn zěmmeyàng a?", "/96/regular_1403794766781_by_8.wav");
+	  m.put("Hái kéyi. Nĭ ne?", "/99/regular_1403795159594_by_8.wav");
+	  m.put("Hái shi lăo yàngzi. Nĭ gōngzuò máng bu máng?", "/109/regular_1403795348397_by_8.wav");
+	  m.put("Bú tài máng. Nĭ xuéxí zěmmeyàng?", "/115/regular_1403795085285_by_8.wav");
+	  m.put("Tĭng jĭnzhāngde.", "/119/regular_1403795511433_by_8.wav");
+	  
+	  m.put("Xiè Tàitai, huānyíng, huānyíng! Qĭng jìn, qĭng jìn.", "/145/regular_1403797935594_by_8.wav");
+	  m.put("Xièxie.", "/146/regular_1403798184425_by_8.wav");
+	  m.put("Qĭng zuò, qĭng zuò.", "149/regular_1403798074844_by_8.wav");
+	  m.put("Xièxie.", "/146/regular_1403798184425_by_8.wav");
+	  m.put("Lĭ Tàitai, wŏ yŏu yìdiăn shì, děi zŏule.", "/154/regular_1403797865456_by_8.wav");
+	  m.put("Lĭ Tàitai, xièxie nín le.", "/158/regular_1403797900178_by_8.wav");
+	  m.put("Bú kèqi. Màn zŏu a!", "/161/regular_1403798275036_by_8.wav");
+	  m.put("Zàijiàn, zàijiàn!", "/162/regular_1403797559758_by_8.wav");
+	  
 	  return m;
   }
   
@@ -1277,6 +1296,23 @@ public class Navigation implements RequiresResize {
 	  m.put("Zěmmeyàng a?", "/45/slow_1403792847063_by_8.wav");
 	  m.put("Tāmen dōu hěn hăo, xièxie.", "/63/slow_1403793604382_by_8.wav");
 	  m.put("Zàijiàn.", "/72/slow_1403792425728_by_8.wav");
+	  
+	  m.put("Èi, Lăo Hé!", "/90/slow_1403794714026_by_8.wav");
+	  m.put("Xiăo Gāo!", "/93/slow_1403794875313_by_8.wav");
+	  m.put("Zuìjìn zěmmeyàng a?", "/96/slow_1403794750850_by_8.wav");
+	  m.put("Hái kéyi. Nĭ ne?", "/99/slow_1403795185981_by_8.wav");
+	  m.put("Hái shi lăo yàngzi. Nĭ gōngzuò máng bu máng?", "/109/slow_1403795359109_by_8.wav");
+	  m.put("Bú tài máng. Nĭ xuéxí zěmmeyàng?", "/115/slow_1403795093515_by_8.wav");
+	  m.put("Tĭng jĭnzhāngde.", "/119/slow_1403795517517_by_8.wav");
+	  
+	  m.put("Xiè Tàitai, huānyíng, huānyíng! Qĭng jìn, qĭng jìn.", "/145/slow_1403797946854_by_8.wav");
+	  m.put("Xièxie.", "/146/slow_1403798188972_by_8.wav");
+	  m.put("Qĭng zuò, qĭng zuò.", "/149/slow_1403798082119_by_8.wav");
+	  m.put("Xièxie.", "/146/slow_1403798188972_by_8.wav");
+	  m.put("Lĭ Tàitai, wŏ yŏu yìdiăn shì, děi zŏule.", "/154/slow_1403797874655_by_8.wav");
+	  m.put("Lĭ Tàitai, xièxie nín le.", "/158/slow_1403797916593_by_8.wav");
+	  m.put("Bú kèqi. Màn zŏu a!", "/161/slow_1403798282629_by_8.wav");
+	  m.put("Zàijiàn, zàijiàn!", "/162/slow_1403797569320_by_8.wav");
 	  
 	  return m;
   }
@@ -1340,12 +1376,21 @@ public class Navigation implements RequiresResize {
 	  HashMap<String, HashMap<String, Integer>> m = new HashMap<String, HashMap<String, Integer>>();
 	  String up1 = "Unit 1: Part 1";
 	  String up2 = "Unit 1: Part 2";
+	  String up3 = "Unit 1: Part 3";
+	  String up4 = "Unit 1: Part 4";
 	  m.put(up1, new HashMap<String, Integer>());
 	  m.put(up2, new HashMap<String, Integer>());
+	  m.put(up3, new HashMap<String, Integer>());
+	  m.put(up4, new HashMap<String, Integer>());
 	  m.get(up1).put("Wang", 4);
 	  m.get(up1).put("Crane", 3);
 	  m.get(up2).put("Smith", 5);
 	  m.get(up2).put("Zhao", 6);
+	  m.get(up3).put("He", 5);
+	  m.get(up3).put("Kao", 6);
+	  m.get(up4).put("Mrs. Smith", 6);
+	  m.get(up4).put("Mrs. Li", 7);
+	  
 	  return m;
   }
   
@@ -1353,8 +1398,12 @@ public class Navigation implements RequiresResize {
 	  HashMap<String, HashMap<Integer, String>> m = new HashMap<String, HashMap<Integer, String>>();
 	  String up1 = "Unit 1: Part 1";
 	  String up2 = "Unit 1: Part 2";
+	  String up3 = "Unit 1: Part 3";
+	  String up4 = "Unit 1: Part 4";
 	  m.put(up1, new HashMap<Integer, String>());
 	  m.put(up2, new HashMap<Integer, String>());
+	  m.put(up3, new HashMap<Integer, String>());
+	  m.put(up4, new HashMap<Integer, String>());
 	  
 	  m.get(up1).put(0, "Wang");
 	  m.get(up1).put(1, "Crane");
@@ -1370,6 +1419,23 @@ public class Navigation implements RequiresResize {
 	  m.get(up2).put(5, "Smith");
 	  m.get(up2).put(6, "Zhao");
 	  
+	  m.get(up3).put(0, "Kao");
+	  m.get(up3).put(1, "He");
+	  m.get(up3).put(2, "Kao");
+	  m.get(up3).put(3, "He");
+	  m.get(up3).put(4, "Kao");
+	  m.get(up3).put(5, "He");
+	  m.get(up3).put(6, "Kao");
+	  
+	  m.get(up4).put(0, "Mrs. Li");
+	  m.get(up4).put(1, "Mrs. Smith");
+	  m.get(up4).put(2, "Mrs. Li");
+	  m.get(up4).put(3, "Mrs. Smith");
+	  m.get(up4).put(4, "Mrs. Li");
+	  m.get(up4).put(5, "Mrs. Li");
+	  m.get(up4).put(6, "Mrs. Smith");
+	  m.get(up4).put(7, "Mrs. Li");
+	  
 	  return m;
   }
   
@@ -1377,8 +1443,12 @@ public class Navigation implements RequiresResize {
 	  HashMap<String, HashMap<Integer, String>> m = new HashMap<String, HashMap<Integer, String>>();
 	  String up1 = "Unit 1: Part 1";
 	  String up2 = "Unit 1: Part 2";
+	  String up3 = "Unit 1: Part 3";
+	  String up4 = "Unit 1: Part 4";
 	  m.put(up1, new HashMap<Integer, String>());
 	  m.put(up2, new HashMap<Integer, String>());
+	  m.put(up3, new HashMap<Integer, String>());
+	  m.put(up4, new HashMap<Integer, String>());
 	  
 	  m.get(up1).put(0, "Kē Léi'ēn, nǐ hăo!");
 	  m.get(up1).put(1, "Wáng Jīngshēng, nǐ hăo!");
@@ -1393,6 +1463,23 @@ public class Navigation implements RequiresResize {
 	  m.get(up2).put(4, "Tāmen dōu hěn hăo, xièxie.");
 	  m.get(up2).put(5, "Wŏ yŏu yìdiănr shìr, xiān zŏule. Zàijiàn!");
 	  m.get(up2).put(6, "Zàijiàn.");
+	  
+	  m.get(up3).put(0, "Èi, Lăo Hé!");
+	  m.get(up3).put(1, "Xiăo Gāo!");
+	  m.get(up3).put(2, "Zuìjìn zěmmeyàng a?");
+	  m.get(up3).put(3, "Hái kéyi. Nĭ ne?");
+	  m.get(up3).put(4, "Hái shi lăo yàngzi. Nĭ gōngzuò máng bu máng?");
+	  m.get(up3).put(5, "Bú tài máng. Nĭ xuéxí zěmmeyàng?");
+	  m.get(up3).put(6, "Tĭng jĭnzhāngde.");
+	  
+	  m.get(up4).put(0, "Xiè Tàitai, huānyíng, huānyíng! Qĭng jìn, qĭng jìn.");
+	  m.get(up4).put(1, "Xièxie.");
+	  m.get(up4).put(2, "Qĭng zuò, qĭng zuò.");
+	  m.get(up4).put(3, "Xièxie.");
+	  m.get(up4).put(4, "Lĭ Tàitai, wŏ yŏu yìdiăn shì, děi zŏule.");
+	  m.get(up4).put(5, "Lĭ Tàitai, xièxie nín le.");
+	  m.get(up4).put(6, "Bú kèqi. Màn zŏu a!");
+	  m.get(up4).put(7, "Zàijiàn, zàijiàn!");
 	  
 	  return m;
   }
