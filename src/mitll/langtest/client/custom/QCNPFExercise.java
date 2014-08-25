@@ -626,7 +626,9 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     rowContainer.addStyleName("blockStyle");
     rowContainer.add(row);
     rowContainer.add(commentRow);
-    rowContainer.setWidth("650px");
+
+    // why????
+  //  rowContainer.setWidth("650px");
 
     return rowContainer;
   }
