@@ -53,10 +53,10 @@ public class SoundManagerStatic implements SoundManagerAPI {
     if (SoundManager.isReady() && SoundManager.isOK()) {
       SoundManager.createSound(sound, title, file);
     }
-    else {
+    //else {
       // TODO : consider warning that sound playback is not ready or working...
-    }
-    boolean webaudio = false;
+   // }
+/*    boolean webaudio = false;
     if (webaudio) {
       WebAudio.setLoadedCallback(new WebAudio.Loaded() {
         @Override
@@ -69,7 +69,7 @@ public class SoundManagerStatic implements SoundManagerAPI {
     }
     else {
 
-    }
+    }*/
   }
 
 /*  @Override
@@ -91,7 +91,11 @@ public class SoundManagerStatic implements SoundManagerAPI {
   public void destroySound(Sound sound) {
     if (debug) System.out.println("SoundManagerStatic.destroy " + sound);
     if (SoundManager.isReady() && SoundManager.isOK()) {
-      SoundManager.destroySound(sound);
+      try {
+        SoundManager.destroySound(sound);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
     }
   }
 
