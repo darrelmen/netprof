@@ -27,11 +27,7 @@ public class EventTable extends PagerTable {
   private static final int PAGE_SIZE = 5;
   private Widget lastTable = null;
   private Button closeButton;
- // private final PropertyHandler props;
 
-  public EventTable(PropertyHandler props) {
-    //this.props = props;
-  }
   /**
    */
   public void show(final LangTestDatabaseAsync service) {
