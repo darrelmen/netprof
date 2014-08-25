@@ -73,10 +73,23 @@ public class AudioDAO extends DAO {
    */
   public Map<String, List<AudioAttribute>> getExToAudio() {
     Map<String, List<AudioAttribute>> exToAudio = new HashMap<String, List<AudioAttribute>>();
+    Map<String,Set<String>> idToPaths = new HashMap<String, Set<String>>();
     for (AudioAttribute audio : getAudioAttributes()) {
-      List<AudioAttribute> audioAttributes = exToAudio.get(audio.getExid());
-      if (audioAttributes == null) exToAudio.put(audio.getExid(), audioAttributes = new ArrayList<AudioAttribute>());
-      audioAttributes.add(audio);
+      String exid = audio.getExid();
+      List<AudioAttribute> audioAttributes = exToAudio.get(exid);
+      Set<String> paths = idToPaths.get(exid);
+      if (audioAttributes == null) {
+        exToAudio.put(exid, audioAttributes = new ArrayList<AudioAttribute>());
+        idToPaths.put(exid, paths = new HashSet<String>());
+      }
+      String audioRef = audio.getAudioRef();
+      if (!paths.contains(audioRef)) {
+        audioAttributes.add(audio);
+        paths.add(audioRef);
+      }
+      else {
+//        logger.warn("skipping " +audioRef + " on " + exid);
+      }
     }
     return exToAudio;
   }
@@ -128,13 +141,25 @@ public class AudioDAO extends DAO {
 
     List<AudioAttribute> defaultAudio = new ArrayList<AudioAttribute>();
     Set<String> audioPaths = new HashSet<String>();
+    Set<String> initialPaths = new HashSet<String>();
+
+    for (AudioAttribute initial : firstExercise.getAudioAttributes()) {
+      //logger.debug("predef audio " +initial + " for " + firstExercise.getID());
+      initialPaths.add(initial.getAudioRef());
+    }
+
     for (AudioAttribute attr : audioAttributes) {
-      if (attr.getUser().isDefault()) {
-        defaultAudio.add(attr);
-      } else {
-        audioPaths.add(attr.getAudioRef());
-        attachAudio(firstExercise, installPath, relativeConfigDir, audioConversion, attr);
-        //logger.debug("\tadding path '" + attr.getAudioRef() + "' " + attr + " to " + firstExercise.getID());
+      if (initialPaths.contains(attr.getAudioRef())) {
+    //    logger.debug("skipping " + attr + " on " +firstExercise);
+      }
+      else {
+        if (attr.getUser().isDefault()) {
+          defaultAudio.add(attr);
+        } else {
+          audioPaths.add(attr.getAudioRef());
+          attachAudio(firstExercise, installPath, relativeConfigDir, audioConversion, attr);
+         // logger.debug("\tadding path '" + attr.getAudioRef() + "' " + attr + " to " + firstExercise.getID());
+        }
       }
     }
     for (AudioAttribute attr : defaultAudio) {
@@ -170,7 +195,22 @@ public class AudioDAO extends DAO {
   private List<AudioAttribute> getAudioAttributes(String exid) {
     try {
       String sql = "SELECT * FROM " + AUDIO + " WHERE " +Database.EXID +"='" + exid+ "' AND "+DEFECT +"=false";
-      return getResultsSQL(sql);
+      List<AudioAttribute> resultsSQL = getResultsSQL(sql);
+      Set<String> paths = new HashSet<String>();
+
+      List<AudioAttribute> ret = new ArrayList<AudioAttribute>();
+
+      for (AudioAttribute audioAttribute : resultsSQL) {
+        String audioRef = audioAttribute.getAudioRef();
+        if (!paths.contains(audioRef)) {
+            ret.add(audioAttribute);
+          paths.add(audioRef);
+        }
+        else {
+          //logger.info("skipping duplicate audio attr " + audioAttribute + " for " + exid);
+        }
+      }
+      return ret;
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
@@ -181,7 +221,7 @@ public class AudioDAO extends DAO {
     User user = userDAO.getUserMap().get(userid);
     boolean isMale = (user != null && user.isMale());
     Map<Long, User> userMap = userDAO.getUserMap(isMale);
-    logger.debug("found " + (isMale ? " male " : " female ") + " users : " + userMap.keySet());
+    //logger.debug("found " + (isMale ? " male " : " female ") + " users : " + userMap.keySet());
     // find set of users of same gender
     Set<String> validAudioAtReg  = getAudioForGender(userMap, REGULAR);
 
@@ -232,8 +272,8 @@ public class AudioDAO extends DAO {
    */
   public Set<String> getRecordedForUser(long userid) {
     try {
-      Set<String> validAudioAtReg  = getValidAudioAtSpeed(userid, REGULAR);
-      Set<String> validAudioAtSlow = getValidAudioAtSpeed(userid, SLOW);
+      Set<String> validAudioAtReg  = getValidAudioOfType(userid, REGULAR);
+      Set<String> validAudioAtSlow = getValidAudioOfType(userid, SLOW);
       /*boolean b =*/ validAudioAtReg.retainAll(validAudioAtSlow);
       return validAudioAtReg;
     } catch (Exception ee) {
@@ -242,19 +282,43 @@ public class AudioDAO extends DAO {
     return new HashSet<String>();
   }
 
-  Set<String> getValidAudioAtSpeed(long userid, String audioSpeed) throws SQLException {
+  /**
+   * TODO make this a like "context=%"
+   * @param userid
+   * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#markRecordedState(int, String, java.util.Collection, boolean)
+   */
+  public Set<String> getRecordedExampleForUser(long userid) {
+    try {
+      Set<String> validAudioAtReg  = getValidAudioOfType(userid, "context="+REGULAR);
+      //logger.debug("only example for " + userid + " got " + validAudioAtReg.size());
+
+      return validAudioAtReg;
+    } catch (Exception ee) {
+      logger.error("got " + ee, ee);
+    }
+    return new HashSet<String>();
+  }
+
+  private Set<String> getValidAudioOfType(long userid, String audioType) throws SQLException {
     String sql = "SELECT " + Database.EXID+
       " FROM " + AUDIO + " WHERE " +USERID +"=" + userid+
       " AND "+DEFECT +"<>true " +
-      " AND "+AUDIO_TYPE +"='" +
-      audioSpeed +
-      "' "
-      ;
+      " AND "+AUDIO_TYPE +"='" +audioType + "'";
+
+   // logger.debug("sql " + sql);
     Connection connection = database.getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
     return getExidResultsForQuery(connection, statement);
   }
 
+  /**
+   * @see #getAudioAttributes()
+   * @see #getAudioAttributes(String)
+   * @param sql
+   * @return
+   * @throws SQLException
+   */
   private List<AudioAttribute> getResultsSQL(String sql) throws SQLException {
     Connection connection = database.getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
@@ -262,12 +326,13 @@ public class AudioDAO extends DAO {
   }
 
   /**
-   * Get a list of Results for this Query.
+   * Get a list of audio attributes for this Query.
    *
    * @param connection
    * @param statement
    * @return
    * @throws java.sql.SQLException
+   * @see #getResultsSQL(String)
    */
   private List<AudioAttribute> getResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
     ResultSet rs = statement.executeQuery();
@@ -506,7 +571,7 @@ public class AudioDAO extends DAO {
       new Exception().printStackTrace();
     }
     try {
-      logger.debug("addOrUpdate " + userid + " " + audioRef + " ex " + exerciseID + " at " + new Date(timestamp) + " type " + audioType + " dur " + durationInMillis);
+      //logger.debug("addOrUpdate " + userid + " " + audioRef + " ex " + exerciseID + " at " + new Date(timestamp) + " type " + audioType + " dur " + durationInMillis);
       Connection connection = database.getConnection();
       String sql = "UPDATE " + AUDIO +
         " " +
@@ -542,6 +607,8 @@ public class AudioDAO extends DAO {
         audioAttr = getAudioAttribute((int)l,userid, audioRef, exerciseID, timestamp, audioType, durationInMillis);
       }
       else {
+        logger.debug("\taddOrUpdate updating entry for  " + userid + " " + audioRef + " ex " + exerciseID + " at " + new Date(timestamp) + " type " + audioType + " dur " + durationInMillis);
+
         List<AudioAttribute> audioAttributes = getAudioAttributes(exerciseID);
         //logger.debug("for  " +exerciseID + " found " + audioAttributes);
 
@@ -730,6 +797,7 @@ public class AudioDAO extends DAO {
     }
 
     statement.close();
+    connection.commit();
 
     return newID;
   }
