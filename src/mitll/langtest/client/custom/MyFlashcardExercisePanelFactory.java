@@ -772,15 +772,16 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
 
     }
 
+    // TODO : remove this empty listener
     private final SoundFeedback.EndListener endListener = new SoundFeedback.EndListener() {
       @Override
       public void songStarted() {
-        System.out.println("song started --------- "+ System.currentTimeMillis());
+        //System.out.println("song started --------- "+ System.currentTimeMillis());
       }
 
       @Override
       public void songEnded() {
-        System.out.println("song ended   --------- " + System.currentTimeMillis());
+        //System.out.println("song ended   --------- " + System.currentTimeMillis());
       }
     };
   }
