@@ -1,13 +1,11 @@
 package mitll.langtest.client.exercise;
 
 import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
-import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.Result;
@@ -24,23 +22,24 @@ import java.util.Collection;
  * To change this template use File | Settings | File Templates.
  */
 public class WaveformExercisePanel extends ExercisePanel {
-  private static final String REPEAT_TWICE = "<i>Record the word or phrase, first at normal speed, then again at slow speed.</i>";
   private static final String RECORD_PROMPT = "Record the word or phrase, first at normal speed, then again at slow speed.";
-  private static final String REGULAR_SPEED_RECORDING = "Regular speed recording";
-  private static final String SLOW_SPEED_RECORDING = "Slow speed recording";
+  private static final String RECORD_PROMPT2 = "Record the in-context sentence.";
+  private static final String EXAMPLE_RECORD = "EXAMPLE_RECORD";
+  // private static final String IN_CONTEXT_SENTENCE = "In-context sentence";
   private boolean isBusy = false;
   private Collection<RecordAudioPanel> audioPanels;
+//  private final boolean doNormalRecording;
 
   /**
    * @param e
    * @param service
-   * @param userFeedback
    * @param controller
+   * @param doNormalRecording
    * @see mitll.langtest.client.custom.SimpleChapterNPFHelper#getFactory(mitll.langtest.client.list.PagingExerciseList)
    */
-  public WaveformExercisePanel(final CommonExercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
-                               final ExerciseController controller, ListInterface exerciseList) {
-    super(e, service, userFeedback, controller, exerciseList);
+  public WaveformExercisePanel(final CommonExercise e, final LangTestDatabaseAsync service,
+                               final ExerciseController controller, ListInterface exerciseList, boolean doNormalRecording) {
+    super(e, service, controller, exerciseList, doNormalRecording ? "" : EXAMPLE_RECORD);
     getElement().setId("WaveformExercisePanel");
   }
 
@@ -58,6 +57,11 @@ public class WaveformExercisePanel extends ExercisePanel {
   public boolean isBusy() {
     return isBusy;
   }
+
+  /**
+   * @see ExercisePanel#ExercisePanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, mitll.langtest.client.list.ListInterface, String)
+   *
+   */
   protected void addInstructions() {
     if (!exercise.getUnitToValue().isEmpty()) {
       Panel unitLessonForExercise = getUnitLessonForExercise();
@@ -65,11 +69,23 @@ public class WaveformExercisePanel extends ExercisePanel {
       add(unitLessonForExercise);
     }
 
-    add(new Heading(4, RECORD_PROMPT));
+    add(new Heading(4, isExampleRecord() ? RECORD_PROMPT2 : RECORD_PROMPT));
   }
 
+  private boolean isExampleRecord() {
+    return message.equals(EXAMPLE_RECORD);
+  }
+
+
+  private boolean isNormalRecord() { return !isExampleRecord(); }
+
   @Override
-  protected String getExerciseContent(CommonExercise e) { return ExerciseFormatter.getArabic(e.getForeignLanguage()); }
+  protected String getExerciseContent(CommonExercise e) {
+    System.out.println("normal recording for " +e.getID());
+    String context = isNormalRecord() ? e.getForeignLanguage() : hasContext(exercise) ? exercise.getContext() : "No in-context audio for this exercise.";
+
+    return ExerciseFormatter.getArabic(context);
+  }
 
   /**
    * Has a answerPanel mark to indicate when the saved audio has been successfully posted to the server.
@@ -86,36 +102,38 @@ public class WaveformExercisePanel extends ExercisePanel {
     Panel vp = new VerticalPanel();
 
     // add normal speed recording widget
-    addRecordAudioPanel(exercise, service, controller, index, vp,Result.AUDIO_TYPE_REGULAR,REGULAR_SPEED_RECORDING);
-    // add slow speed recording widget
-    addRecordAudioPanel(exercise, service, controller, index+1, vp,Result.AUDIO_TYPE_SLOW,SLOW_SPEED_RECORDING);
-    if (exercise.getContext() != null && !exercise.getContext().isEmpty()) {
-      DivWidget div = new DivWidget();
-      div.addStyleName("Instruction");
-      InlineHTML englishPhrase = new InlineHTML(exercise.getContext(), WordCountDirectionEstimator.get().estimateDirection(exercise.getContext()));
-   //   englishPhrase.addStyleName(true ? "Instruction-data-with-wrap" : "Instruction-data");
-      englishPhrase.addStyleName("Instruction-data-with-wrap");
-        div.add(englishPhrase);
-      englishPhrase.addStyleName("xlargeFont");
-      div.addStyleName("topMargin");
-
-      VerticalPanel widgets = addRecordAudioPanel(exercise, service, controller, index + 1, vp, "context=" + Result.AUDIO_TYPE_REGULAR, "Example Sentence");
-      widgets.insert(div,0);
+    if (isNormalRecord()) {
+      addRecordAudioPanelNoCaption(exercise, service, controller, index, vp, Result.AUDIO_TYPE_REGULAR);
+      // add slow speed recording widget
+      VerticalPanel widgets = addRecordAudioPanelNoCaption(exercise, service, controller, index + 1, vp, Result.AUDIO_TYPE_SLOW);
+      widgets.addStyleName("topFiveMargin");
+    } else {
+      addExampleSentenceRecorder(exercise, service, controller, index, vp);
     }
 
     return vp;
   }
 
-  private VerticalPanel addRecordAudioPanel(CommonExercise exercise, LangTestDatabaseAsync service,
-                                            ExerciseController controller, int index, Panel vp, String audioType, String caption) {
+  private boolean hasContext(CommonExercise exercise) {
+    return exercise.getContext() != null && !exercise.getContext().isEmpty();
+  }
 
-    System.out.println("addRecordAudioPanel " + exercise + " audioType " +audioType);
-
-    RecordAudioPanel fast = new RecordAudioPanel(exercise, controller, this, service, index, true, audioType);
-    ResizableCaptionPanel cp = new ResizableCaptionPanel(caption);
-    cp.setContentWidget(fast);
+  private void addExampleSentenceRecorder(CommonExercise exercise, LangTestDatabaseAsync service, ExerciseController controller, int index, Panel vp) {
+    RecordAudioPanel fast = new RecordAudioPanel(exercise, controller, this, service, index, false, "context=" + Result.AUDIO_TYPE_REGULAR);
     audioPanels.add(fast);
-    vp.add(cp);
+    vp.add(fast);
+
+    if (fast.isAudioPathSet()) recordCompleted(fast);
+    addAnswerWidget(index, fast);
+  }
+
+  private VerticalPanel addRecordAudioPanelNoCaption(CommonExercise exercise, LangTestDatabaseAsync service,
+                                            ExerciseController controller, int index, Panel vp, String audioType) {
+//    System.out.println("addRecordAudioPanel " + exercise + " audioType " +audioType);
+
+    RecordAudioPanel fast = new RecordAudioPanel(exercise, controller, this, service, index, false, audioType);
+    audioPanels.add(fast);
+    vp.add(fast);
 
     if (fast.isAudioPathSet()) recordCompleted(fast);
     addAnswerWidget(index, fast);
@@ -123,9 +141,10 @@ public class WaveformExercisePanel extends ExercisePanel {
   }
 
   private Panel getUnitLessonForExercise() {
-    HorizontalPanel flow = new HorizontalPanel();
+    Panel flow = new HorizontalPanel();
     flow.getElement().setId("getUnitLessonForExercise_unitLesson");
     flow.addStyleName("leftFiveMargin");
+    flow.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
     //System.out.println("getUnitLessonForExercise " + exercise + " unit value " +exercise.getUnitToValue());
 
     for (String type : controller.getStartupInfo().getTypeOrder()) {
@@ -158,16 +177,6 @@ public class WaveformExercisePanel extends ExercisePanel {
 
   protected Widget getContentScroller(HTML maybeRTLContent) {
     return maybeRTLContent;
-  }
-
-  @Override
-  protected String getInstructions() {
-    String prefix = "<br/>" + "";//THREE_SPACES;
-    String prompt = REPEAT_TWICE;
-    if (controller.getAudioType().equals(Result.AUDIO_TYPE_REGULAR)) {
-      prompt = REPEAT_ONCE;
-    }
-    return prefix + prompt;
   }
 
   @Override
