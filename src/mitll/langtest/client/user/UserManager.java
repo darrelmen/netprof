@@ -66,6 +66,9 @@ public class UserManager {
     this.appTitle = props.getAppTitle();
   }
 
+  /**
+   * @see mitll.langtest.client.LangTest#checkLogin()
+   */
   public void checkLogin() {
     //System.out.println("loginType " + loginType);
     if (loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS)) { // explicit setting of login type
@@ -165,6 +168,7 @@ public class UserManager {
   /**
    * For display purposes
    * @return
+   * @see mitll.langtest.client.LangTest#getGreeting()
    */
   public String getUserID() {
     if (Storage.isLocalStorageSupported()) {
@@ -184,48 +188,14 @@ public class UserManager {
       }
       userNotification.rememberAudioType(audioType);
     }
-    //rememberShowUnansweredFirst();
   }
 
-  /**
-   * When the user does the login dialog
-   * @see UserDialog#setRecordingOrder()
-   * @param val
-   */
-/*  public void setShowUnansweredFirst(boolean val) {
-    addBinaryKey(val, getUnansweredKey());
-   // userNotification.setShowUnansweredFirst(val);
-
-    //getShowUnanswered();
-  }*/
-
-/*
-  public void setShowRerecord(boolean val) {
-    String showRerecordKey = getShowRerecordKey();
-    addBinaryKey(val, showRerecordKey);
-  //  userNotification.setShowRerecord(val);
-
-    //getBinaryKey(showRerecordKey);
-  }
-*/
 /*
   private void addBinaryKey(boolean val, String unansweredKey) {
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
     localStorageIfSupported.setItem(unansweredKey, val ? "true" : "false");
   }*/
 
-/*  private void rememberShowUnansweredFirst() {
-    if (Storage.isLocalStorageSupported()) {
-      userNotification.setShowUnansweredFirst(getShowUnanswered());
-      userNotification.setShowRerecord(getBinaryKey(getShowRerecordKey()));
-    }
-  }*/
-
-/*
-  private boolean getShowUnanswered() {
-    return getBinaryKey(getUnansweredKey());
-  }
-*/
 
 /*  private boolean getBinaryKey(String unansweredKey) {
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
@@ -241,15 +211,6 @@ public class UserManager {
     }
     return showUnansweredFirst;
   }*/
-
-/*
-  private String getUnansweredKey() {
-    return getShowUnansweredKey() + "_" +getUserID();
-  }
-  private String getShowRerecordKey() {
-    return getShowRerecordRoot() + "_" +getUserID();
-  }
-*/
 
   /**
    * @return id of user
@@ -278,16 +239,20 @@ public class UserManager {
     }
   }
 
+  /**
+   * @see mitll.langtest.client.LangTest#checkLogin();
+   * @return
+   */
   public boolean isUserExpired() {
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
     String sid = localStorageIfSupported.getItem(getUserIDCookie());
 
     //System.out.println("user id cookie for " +getUserIDCookie() + " is " + sid);
-    return !(sid != null && !sid.equals("" + NO_USER_SET)) || checkUserExpired(sid);
+    return (sid == null || sid.equals("" + NO_USER_SET)) || checkUserExpired(sid);
   }
 
   /**
-   * @see #getUser()
+   * @see #isUserExpired()
    * @param sid
    * @return
    */
@@ -325,14 +290,6 @@ public class UserManager {
   private String getExpires() {
     return appTitle + ":" + "expires";
   }
-/*
-  private String getShowUnansweredKey() {
-    return appTitle + ":" + "showUnanswered";
-  }
-  private String getShowRerecordRoot() {
-    return appTitle + ":" + "showRerecord";
-  }
-*/
 
   /**
    * @see #getUser()
