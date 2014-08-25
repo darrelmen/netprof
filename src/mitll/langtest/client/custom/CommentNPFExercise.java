@@ -50,7 +50,6 @@ public class CommentNPFExercise extends NPFExercise {
   }
 
   /**
-   * @param e
    * @param content
    * @return
    * @see #getQuestionContent(mitll.langtest.shared.CommonExercise)
@@ -86,6 +85,11 @@ public class CommentNPFExercise extends NPFExercise {
 
     return column;
   }
+
+  private String removePunct(String t) {
+    return t.replaceAll("\\p{P}","");
+  }
+
 
   private void addGenderChoices(CommonExercise e, Panel hp) {
     String path = null;
@@ -190,7 +194,7 @@ public class CommentNPFExercise extends NPFExercise {
   protected ASRScoringAudioPanel makeFastAndSlowAudio(final String path) {
     return new FastAndSlowASRScoringAudioPanel(exercise, path, service, controller, scorePanel) {
       @Override
-      protected void addAudioRadioButton(Panel vp, RadioButton fast, String audioPath) {
+      protected void addAudioRadioButton(Panel vp, RadioButton fast) {
         vp.add(getEntry(audioPath, fast, exercise.getAnnotation(audioPath)));
       }
 
