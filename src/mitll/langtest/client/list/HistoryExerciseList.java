@@ -331,7 +331,6 @@ public class HistoryExerciseList extends PagingExerciseList {
   }
 
   protected void loadExercises(String selectionState, String prefix) {
-
     Map<String, Collection<String>> typeToSection = getSelectionState(selectionState).getTypeToSection();
 /*    System.out.println("HistoryExerciseList.loadExercises : looking for " +
       "'" + prefix + "' (" + prefix.length() + " chars) in list id "+userListID + " instance " + getInstance());*/
@@ -343,11 +342,11 @@ public class HistoryExerciseList extends PagingExerciseList {
     if (DEBUG || true) {
       System.out.println("HistoryExerciseList.loadExercisesUsingPrefix looking for '" + prefix +
         "' (" + prefix.length() + " chars) in context of " + typeToSection + " list " + userListID +
-        " instance " + getInstance() + " user " + controller.getUser() + " unrecorded " + getUnrecorded());
+        " instance " + getInstance() + " user " + controller.getUser() + " unrecorded " + getUnrecorded() + " only examples " +isOnlyExamples());
     }
     String selectionID = userListID + "_"+typeToSection.toString();
     scheduleWaitTimer();
-    service.getExerciseIds(lastReqID, typeToSection, prefix, userListID, controller.getUser(), getRole(), getUnrecorded(), new SetExercisesCallback(selectionID));
+    service.getExerciseIds(lastReqID, typeToSection, prefix, userListID, controller.getUser(), getRole(), getUnrecorded(), isOnlyExamples(), new SetExercisesCallback(selectionID));
   }
 
   /**
@@ -365,8 +364,5 @@ public class HistoryExerciseList extends PagingExerciseList {
    * @see #pushNewSectionHistoryToken()
    * @param userID
    */
-  protected void noSectionsGetExercises(long userID) {
-   // System.out.println("HistoryExerciseList.noSectionsGetExercises for " + userID + " instance " + getInstance());
-    super.getExercises(userID);
-  }
+  protected void noSectionsGetExercises(long userID) {  super.getExercises(userID);  }
 }
