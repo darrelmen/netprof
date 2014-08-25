@@ -122,6 +122,14 @@ public class AudioFileHelper {
     return answer;
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getAlignment(String, String, String, int)
+   * @param base64EncodedString
+   * @param textToAlign
+   * @param identifier
+   * @param reqid
+   * @return
+   */
   public AudioAnswer getAlignment(String base64EncodedString, String textToAlign, String identifier, int reqid) {
     String wavPath = pathHelper.getWavPathUnder("postedAudio");
     File file = pathHelper.getAbsoluteFile(wavPath);
