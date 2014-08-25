@@ -95,6 +95,10 @@ public class AudioAnswer implements IsSerializable {
     return resultID;
   }
 
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#writeAudioFile
+   * @param resultID
+   */
   public void setResultID(long resultID) {
     this.resultID = resultID;
   }
@@ -113,17 +117,15 @@ public class AudioAnswer implements IsSerializable {
     return reqid;
   }
 
+/*
   public void setReqid(int reqid) {
     this.reqid = reqid;
   }
+*/
 
-  public String getPath() {
-    return path;
-  }
+  public String getPath() { return path; }
 
-  public void setPath(String path) {
-    this.path = path;
-  }
+  public void setPath(String path) { this.path = path;  }
 
   public Validity getValidity() {
     return validity;
@@ -153,6 +155,10 @@ public class AudioAnswer implements IsSerializable {
     return pretestScore;
   }
 
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#getAlignment(String, String, String, int)
+   * @param pretestScore
+   */
   public void setPretestScore(PretestScore pretestScore) {
     this.pretestScore = pretestScore;
     this.score = pretestScore.getHydecScore();
