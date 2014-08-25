@@ -20,9 +20,11 @@ public class ExerciseListLayout {
   private final PropertyHandler props;
   private ListInterface exerciseList;
 
-  public ExerciseListLayout(PropertyHandler props) {
-    this.props = props;
-  }
+  /**
+   * @see LangTest#makeExerciseList
+   * @param props
+   */
+  public ExerciseListLayout(PropertyHandler props) { this.props = props; }
 
   /**
    * Supports different flavors of exercise list -- Paging, Grading, and vanilla.
@@ -35,23 +37,16 @@ public class ExerciseListLayout {
                                         Panel exerciseListContainer, UserFeedback feedback,
                                         Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                         ExerciseController controller) {
-    boolean isGrading = props.isGrading();
     this.exerciseList = makeExerciseList(secondRow, feedback, currentExerciseVPanel, service, controller);
 
-    boolean hideExerciseList = (props.isMinimalUI() && !isGrading) && !props.isAdminView();
-    useExerciseList(exerciseListContainer);
+    addExerciseListOnLeftSide(exerciseListContainer);
+
+    boolean hideExerciseList = (props.isMinimalUI() && !props.isGrading()) && !props.isAdminView();
     if (hideExerciseList) {
       exerciseList.hide();
     }
 
     return exerciseList;
-  }
-
-  private void useExerciseList(Panel exerciseListContainer) {
-    if (showOnlyOneExercise()) {
-      exerciseList.setExercise_title(props.getExercise_title());
-    }
-    addExerciseListOnLeftSide(exerciseListContainer);
   }
 
   /**
@@ -67,34 +62,17 @@ public class ExerciseListLayout {
                                          Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                          ExerciseController controller) {
     boolean showTypeAhead = !props.isCRTDataCollectMode();
-  //  if (props.isShowSections()) {
-      boolean hasQC = controller.getPermissions().contains(User.Permission.QUALITY_CONTROL);
-      String instance = hasQC ? User.Permission.QUALITY_CONTROL.toString() : "flex";
+    boolean hasQC = controller.getPermissions().contains(User.Permission.QUALITY_CONTROL);
+    String instance = hasQC ? User.Permission.QUALITY_CONTROL.toString() : "flex";
 
-      // System.out.println("\n\n\n---> makeExerciseList : making flex " + instance);
-
-      FlexSectionExerciseList flex = new FlexSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
+    return new FlexSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
         props.isShowTurkToken(), props.showExercisesInOrder(), controller, showTypeAhead, instance);
-      return flex;
-/*    } else {
-      return new PagingExerciseList(currentExerciseVPanel, service, feedback,
-        null, controller, props.isShowTurkToken(), props.showExercisesInOrder(), showTypeAhead, "paging");
-    }*/
   }
 
   /**
-   * @see #useExerciseList
    * @param exerciseListContainer add exercise list inside this
    */
   private void addExerciseListOnLeftSide(Panel exerciseListContainer) {
-/*    if (props.isTeacherView()) {
-      exerciseListContainer.add(exerciseList.getWidget());
-    } else {*/
-      exerciseListContainer.add(exerciseList.getExerciseListOnLeftSide(props));
-  //  }
-  }
-
-  private boolean showOnlyOneExercise() {
-    return props.getExercise_title() != null;
+    exerciseListContainer.add(exerciseList.getExerciseListOnLeftSide(props));
   }
 }
