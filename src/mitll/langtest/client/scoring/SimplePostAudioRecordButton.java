@@ -36,6 +36,7 @@ import mitll.langtest.shared.scoring.NetPronImageType;
  *  TODO : make PostAudioRecordButton extend this class.
  */
 public abstract class SimplePostAudioRecordButton extends RecordButton implements RecordButton.RecordingListener {
+  public static final String RELEASE_TO_STOP = "Release";// to stop";
   private boolean validAudio = false;
   private static final int LOG_ROUNDTRIP_THRESHOLD = 3000;
   private int reqid = 0;
@@ -68,7 +69,7 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
    */
   public SimplePostAudioRecordButton(final ExerciseController controller, LangTestDatabaseAsync service,
                                      String textToAlign, String identifier) {
-    this(controller, service, "Record", "Release to stop", textToAlign, identifier);
+    this(controller, service, "Record", RELEASE_TO_STOP, textToAlign, identifier);
   }
 
   /**
