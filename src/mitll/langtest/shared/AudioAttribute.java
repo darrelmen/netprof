@@ -4,6 +4,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * What the client wants to know about a reference audio cut.
@@ -63,7 +64,7 @@ public class AudioAttribute implements IsSerializable {
     else if (type.equals(Result.AUDIO_TYPE_FAST_AND_SLOW)) {
       addAttribute(SPEED, REGULAR_AND_SLOW);
     }
-    else if (type.contains("=")) {
+    else if (type.contains("=")) { // e.g. context=regular or context=slow - or any key-value pair
       String[] split = type.split("=");
       addAttribute(split[0], split[1]);
     }
@@ -136,6 +137,10 @@ public class AudioAttribute implements IsSerializable {
     return attributes.containsKey(name) && attributes.get(name).equals(value);
   }
 
+  public boolean isExampleSentence() {
+    return attributes.containsKey("context");
+  }
+
   public void addAttribute(String name, String value) {
     if (attributes == null) attributes = new HashMap<String, String>();
     if (attributes.containsKey(name)) {
@@ -150,6 +155,8 @@ public class AudioAttribute implements IsSerializable {
   public Map<String, String> getAttributes() {
     return attributes;
   }
+
+  public Set<String> getAttributeKeys() { return attributes.keySet(); }
 
   public String getKey() { return "user="+userid+", "+getAttributes().toString(); }
 
