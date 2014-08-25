@@ -10,6 +10,8 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.client.BrowserCheck;
 import mitll.langtest.client.WavCallback;
 
+import java.util.Date;
+
 /**
  * Somewhat related to Cykod example at <a href='https://github.com/cykod/FlashWavRecorder/blob/master/html/index.html'>Cykod example html</a><p></p>
  *
@@ -24,7 +26,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   private static final int WIDTH = 250;
   private static final int HEIGHT = 170;
   private static final String PX = "8px";
-  private static final int FLASH_RECORDING_STOP_DELAY = 160;
+  private static final int FLASH_RECORDING_STOP_DELAY = 210; // was 160
   private final String id = "flashcontent";
   public static MicPermission micPermission;
   private boolean didPopup = false;
@@ -65,6 +67,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    */
   void show() {
     setSize(WIDTH + "px", HEIGHT + "px");
+   // System.out.println("show: set size on " + this.getElement().getId());
     if (BrowserCheck.getIEVersion() != -1) {
       console("Found IE Version " + BrowserCheck.getIEVersion());
     }
@@ -205,6 +208,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
       System.out.println("didn't get Flash Player permission!");
       if (checkIfFlashInstalled()) {
         console("found flash, installing from " + GWT.getModuleBaseURL());
+        System.out.println("installFlash looking for " +id);
 
         installFlash(GWT.getModuleBaseURL(), id);
       }
@@ -300,10 +304,17 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    */
   public void stopRecording(final WavCallback wavCallback) {
     if (permissionReceived) {
+      final long then = System.currentTimeMillis();
+      System.out.println("stopRecording at " + then + " " + new Date(then));
 
       Timer t = new Timer() {
         @Override
         public void run() {
+
+          long now = System.currentTimeMillis();
+          System.out.println("stopRecording timer at " + now + " diff " + (now-then)+
+              " " + new Date(now) );
+
           flashStopRecording();
           wavCallback.getBase64EncodedWavFile(getWav());
         }

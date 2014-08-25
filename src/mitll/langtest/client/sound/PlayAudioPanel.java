@@ -3,6 +3,7 @@ package mitll.langtest.client.sound;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.HTML;
@@ -36,6 +37,8 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   private static final String PAUSE_LABEL = "pause";
   private static final int MIN_WIDTH = 40;
   private static final boolean DEBUG = false;
+  private static final String FILE_MISSING = "FILE_MISSING";
+  private String currentPath = null;
 
   private Sound currentSound = null;
   private final SoundManagerAPI soundManager;
@@ -48,6 +51,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   private final HTML warnNoFlash = new HTML("<font color='red'>Flash is not activated. Do you have a flashblocker? " +
     "Please add this site to its whitelist.</font>");
   private AudioControl listener;
+  private SimpleAudioListener simpleAudioListener;
   private final List<PlayListener> playListeners = new ArrayList<PlayListener>();
   private static int counter = 0;
   private final int id;
@@ -56,14 +60,18 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   /**
    * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel
    * @param soundManager
-   * @param suffix
+   * @param buttonTitle
    * @param optionalToTheRight
    */
-  public PlayAudioPanel(SoundManagerAPI soundManager, String suffix, Widget optionalToTheRight) {
+  public PlayAudioPanel(SoundManagerAPI soundManager, String buttonTitle, Widget optionalToTheRight) {
     this.soundManager = soundManager;
     setSpacing(10);
     setVerticalAlignment(ALIGN_MIDDLE);
-    playLabel = " Play" + suffix;
+    playLabel = buttonTitle;
+    if (buttonTitle.isEmpty()) {
+      minWidth = 12;
+      pauseLabel = "";
+    }
     playButton = new Button(playLabel);
     playButton.setIcon(IconType.PLAY);
     addButtons(optionalToTheRight);
@@ -74,6 +82,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   public PlayAudioPanel(ExerciseController controller, String path) {
     this(controller.getSoundManager(),"",null);
     loadAudio(path);
+    this.currentPath = path;
   }
 
   public PlayAudioPanel setPlayLabel(String label) { this.playLabel = label; playButton.setText(playLabel); return this; }
@@ -83,11 +92,11 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel
    * @param soundManager
    * @param playListener
-   * @param suffix
+   * @param buttonTitle
    * @param optionalToTheRight
    */
-  public PlayAudioPanel(SoundManagerAPI soundManager, PlayListener playListener, String suffix, Widget optionalToTheRight) {
-    this(soundManager, suffix, optionalToTheRight);
+  public PlayAudioPanel(SoundManagerAPI soundManager, PlayListener playListener, String buttonTitle, Widget optionalToTheRight) {
+    this(soundManager, buttonTitle, optionalToTheRight);
     addPlayListener(playListener);
   }
 
@@ -179,11 +188,12 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    * @param listener
    */
   public void addListener(AudioControl listener) { this.listener = listener;  }
+  public void addSimpleListener(SimpleAudioListener listener) { this.simpleAudioListener = listener;  }
 
   /**
    * @see #doClick()
    */
-  protected void play() {
+  private void play() {
     if (DEBUG) System.out.println("PlayAudioPanel :play " + playing);
     playing = true;
     setPlayButtonText();
@@ -191,9 +201,9 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   }
 
   private void setPlayButtonText() {
-   // System.out.println("setPlayButtonText " + isPlaying());
     boolean playing1 = isPlaying();
     String html = playing1 ? pauseLabel : playLabel;
+   // System.out.println("setPlayButtonText now playing = " + isPlaying());
     playButton.setText(html);
     playButton.setIcon(playing1 ?  IconType.PAUSE : IconType.PLAY);
   }
@@ -259,13 +269,44 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     //}
   }
 
-  public String loadAudio(String path) {
+  private String loadAudio(String path) {
     path = wavToMP3(path);
     path = ensureForwardSlashes(path);
     if (isPlaying()) pause();
     startSong(path);
     return path;
   }
+
+  /**
+   * @see mitll.langtest.client.custom.CommentNPFExercise#getShowGroup(java.util.List)
+   * @param path
+   */
+  public void playAudio(String path) {
+    if (currentPath.equals(path)) {
+      doClick();
+    }
+    else {
+      System.out.println("playAudio - "  + path);
+
+      loadAudio(path);
+      this.currentPath = path;
+
+      addSimpleListener(new SimpleAudioListener() {
+        @Override
+        public void songLoaded(double duration) {
+          Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            public void execute() {
+              doClick();
+            }
+          });
+        }
+
+        @Override
+        public void songFinished() {}
+      });
+    }
+  }
+
   private static final String WAV = ".wav";
   private static final String MP3 = "." + AudioTag.COMPRESSED_TYPE;
 
@@ -284,16 +325,22 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    * @see mitll.langtest.client.scoring.AudioPanel#getImagesForPath(String)
    * @param path to audio file on server
    */
-  public void startSong(String path){
-    if (DEBUG) System.out.println("PlayAudioPanel : start song : " + path);
-    if (soundManager.isReady()) {
-      if (DEBUG) System.out.println(new Date() + " Sound manager is ready.");
-      if (soundManager.isOK()) {
-        destroySound();
-        createSound(path);
-      } else {
-        System.out.println(new Date() + " Sound manager is not OK!.");
-        warnNoFlash.setVisible(true);
+  public void startSong(String path) {
+    if (!path.equals(FILE_MISSING)) {
+      //System.out.println("PlayAudioPanel.loadAudio - skipping " + path);
+      if (DEBUG) System.out.println("PlayAudioPanel : start song : " + path);
+      if (soundManager.isReady()) {
+        //if (DEBUG) System.out.println(new Date() + " Sound manager is ready.");
+        if (soundManager.isOK()) {
+          if (DEBUG)
+            System.out.println("PlayAudioPanel : startSong : " + path + " destroy current sound " + currentSound);
+
+          destroySound();
+          createSound(path);
+        } else {
+          System.out.println(new Date() + " Sound manager is not OK!.");
+          warnNoFlash.setVisible(true);
+        }
       }
     }
   }
@@ -305,7 +352,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   private void createSound(String song){
     currentSound = new Sound(this);
     if (DEBUG) {
-      System.out.println("PlayAudioPanel.createSound : (" + getElement().getId()+ ") for " +song +" : "+ this + " created sound " + currentSound);
+      System.out.println("PlayAudioPanel.createSound  : (" + getElement().getId()+ ") for " +song +" : "+ this + " created sound " + currentSound);
     }
 
     String uniqueID = song + "_" + getElement().getId(); // fix bug where multiple npf panels might load the same audio file and not load the second one seemingly
@@ -351,14 +398,17 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    * @param durationEstimate
    */
   public void songFirstLoaded(double durationEstimate){
-    if (DEBUG) System.out.println("PlayAudioPanel.songFirstLoaded : " + this);
+    if (DEBUG) {
+      System.out.println("PlayAudioPanel.songFirstLoaded : " + this);
+    //  new Exception().printStackTrace();
+    }
 
-    if (listener != null) {
+    if (listener != null && listener != this) {
       listener.songFirstLoaded(durationEstimate);
     }
-//    else {
-//      System.out.println("PlayAudioPanel :songFirstLoaded - no listener");
-//    }
+    else if (listener != null) {
+      System.out.println("PlayAudioPanel :songFirstLoaded - listener is me??? ");
+    }
     setEnabled(true);
   }
 
@@ -371,6 +421,9 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
 
     if (listener != null) {
       listener.songLoaded(duration);
+    }
+    if (simpleAudioListener != null) {
+      simpleAudioListener.songLoaded(duration);
     }
 //    else {
 //      System.out.println("no listener for song loaded " + duration);
@@ -389,6 +442,9 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
 
     if (listener != null) {  // remember to delegate too
       listener.songFinished();
+    }
+    if (simpleAudioListener != null) {
+      simpleAudioListener.songFinished();
     }
   }
 
