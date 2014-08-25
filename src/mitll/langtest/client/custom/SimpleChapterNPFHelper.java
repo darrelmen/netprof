@@ -33,6 +33,7 @@ class SimpleChapterNPFHelper implements RequiresResize {
 
   /**
    * @see Navigation#Navigation
+   * @see Navigation#makePracticeHelper(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.user.UserFeedback)
    * @param service
    * @param feedback
    * @param userManager
@@ -58,25 +59,25 @@ class SimpleChapterNPFHelper implements RequiresResize {
 
   /**
    * Add npf widget to content of a tab - here marked tabAndContent
-   * @see mitll.langtest.client.custom.Navigation#getListOperations
+   * @see Navigation#addPracticeTab()
+   * @see Navigation#addTabs(com.google.gwt.user.client.ui.Panel)
+   * @see mitll.langtest.client.custom.Navigation#selectPreviousTab(String)
    * @param tabAndContent in this tab
    * @param instanceName flex, review, etc.
-   * @param loadExercises should we load exercises initially
    */
-  public void showNPF(TabAndContent tabAndContent, String instanceName, boolean loadExercises) {
+  public void showNPF(TabAndContent tabAndContent, String instanceName) {
     //System.out.println(getClass() + " : adding npf content instanceName = " + instanceName + " loadExercises " + loadExercises);
     DivWidget content = tabAndContent.getContent();
     int widgetCount = content.getWidgetCount();
     if (!madeNPFContent || widgetCount == 0) {
       madeNPFContent = true;
       //System.out.println("\t: adding npf content instanceName = " + instanceName + " loadExercises " + loadExercises);
-      addNPFToContent(content, instanceName, loadExercises);
+      addNPFToContent(content, instanceName);
     }
   }
 
-  private void addNPFToContent( Panel listContent, String instanceName, boolean loadExercises) {
-    Panel npfContent = doNPF(instanceName);
-    listContent.add(npfContent);
+  private void addNPFToContent(Panel listContent, String instanceName) {
+    listContent.add(doNPF(instanceName));
     listContent.addStyleName("userListBackground");
   }
 
@@ -96,11 +97,17 @@ class SimpleChapterNPFHelper implements RequiresResize {
 
   public void hideList() { npfExerciseList.hide(); }
 
+  /**
+   * This is important - this is where the actual content is chosen.
+   * @see mitll.langtest.client.exercise.WaveformExercisePanel
+   * @param exerciseList
+   * @return
+   */
   protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
     return new ExercisePanelFactory(service, feedback, controller, exerciseList) {
       @Override
       public Panel getExercisePanel(final CommonExercise e) {
-        return new WaveformExercisePanel(e, service, feedback, controller, exerciseList) {
+        return new WaveformExercisePanel(e, service, controller, exerciseList, true) {
           @Override
           public void postAnswers(ExerciseController controller, CommonExercise completedExercise) {
             super.postAnswers(controller, completedExercise);
