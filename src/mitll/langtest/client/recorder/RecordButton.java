@@ -187,6 +187,8 @@ public class RecordButton extends Button {
   }
 
   void showRecording() {
+    setIcon(IconType.STOP);
+
     if (showInitialRecordImage()) {
       flipImage();
     }
@@ -213,6 +215,8 @@ public class RecordButton extends Button {
   }
 
   void showStopped() {
+    setIcon(IconType.MICROPHONE);
+
     if (t != null) {
       hideBothRecordImages();
       t.cancel();
