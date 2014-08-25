@@ -47,12 +47,12 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   private static final String SCORE = "Score";
   private static final int HEIGHT = 18;
   private static final int ROW_LEFT_MARGIN = 18 + 5;
-  public static final String PLAY_REFERENCE = "Play Reference";
+  public static final String PLAY_REFERENCE = "";//"Play Reference";
 
   private final PretestGauge ASRGauge;
   private final Panel phoneList;
   private final List<ScoreAndPath> scores2 = new ArrayList<ScoreAndPath>();
-  private final SimplePanel chartPanel;
+  private final SimplePanel scoreHistoryPanel;
   private final SimpleColumnChart chart = new SimpleColumnChart();
   private float classAvg = 0f;
   private String refAudio;
@@ -70,12 +70,16 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     getElement().setId("ASRScorePanel");
     CaptionPanel chartCaptionPanel = new CaptionPanel(SCORE_HISTORY);
 
-    chartPanel = new SimplePanel();
-    chartCaptionPanel.add(chartPanel);
+    scoreHistoryPanel = new SimplePanel();
+    chartCaptionPanel.add(scoreHistoryPanel);
+    scoreHistoryPanel.getElement().setId("ScoreHistoryPanel");
 
-    add(chartCaptionPanel);
-  //  add(new Heading(4,SCORE_HISTORY));
-    add(chartPanel);
+    if (!controller.showOnlyOneExercise()) {
+      add(chartCaptionPanel);
+      //  add(new Heading(4,SCORE_HISTORY));
+      add(scoreHistoryPanel);
+    }
+
 
    CaptionPanel captionPanel = new CaptionPanel(SOUND_ACCURACY);
 
@@ -144,7 +148,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     setASRGaugeValue(Math.min(100.0f, zeroToHundred));
     updatePhoneAccuracy(score.getPhoneScores());
     addScore(new ScoreAndPath(hydecScore,path));
-    chartPanel.clear();
+    scoreHistoryPanel.clear();
     showChart(showOnlyOneExercise);
     addPlayer();
   }
@@ -193,14 +197,14 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     }
 
     if (refAudio != null && !scoreAndPaths.isEmpty()) { // show audio to compare yours against
-      Panel hp = getRefAudio(audioTag);
+      Panel hp = getRefAudio();
 
       vp.add(hp);
     }
-    chartPanel.add(vp);
+    scoreHistoryPanel.add(vp);
   }
 
-  private Panel getRefAudio(AudioTag audioTag) {
+  private Panel getRefAudio() {
     Widget audioWidget = getAudioWidget(new ScoreAndPath(classAvg, refAudio), PLAY_REFERENCE);
     makeChildGreen(audioWidget);
 

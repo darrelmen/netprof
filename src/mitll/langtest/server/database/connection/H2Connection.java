@@ -18,32 +18,31 @@ import java.sql.Statement;
  */
 public class H2Connection implements DatabaseConnection {
   private static final Logger logger = Logger.getLogger(H2Connection.class);
+  private static final int QUERY_CACHE_SIZE = 8;
 
   private Connection conn;
   private final int cacheSizeKB;
   private final int queryCacheSize;
-  private static final int maxMemoryRows = 50000;
-
-/*  private H2Connection(String configDir, String dbName) {
-    this(configDir, dbName, 50000, 8, true);
-  }*/
+  private static final int MAX_MEMORY_ROWS = 50000;
+  private static final int maxMemoryRows = MAX_MEMORY_ROWS;
 
   public H2Connection(String configDir, String dbName, boolean mustAlreadyExist) {
-    this(configDir, dbName, 50000, 8, mustAlreadyExist);
+    this(configDir, dbName, 50000, QUERY_CACHE_SIZE, mustAlreadyExist);
   }
-    /**
-     * @see mitll.langtest.server.database.DatabaseImpl#DatabaseImpl
-     * @param configDir
-     * @param dbName
-     */
-    private H2Connection(String configDir, String dbName, int cacheSizeKB, int queryCacheSize, boolean mustAlreadyExist) {
+
+  /**
+   * @param configDir
+   * @param dbName
+   * @see mitll.langtest.server.database.DatabaseImpl#DatabaseImpl
+   */
+  private H2Connection(String configDir, String dbName, int cacheSizeKB, int queryCacheSize, boolean mustAlreadyExist) {
     this.cacheSizeKB = cacheSizeKB;
     this.queryCacheSize = queryCacheSize;
     connect(configDir, dbName, mustAlreadyExist);
   }
 
   private void connect(String configDir, String database, boolean mustAlreadyExist) {
-    String h2FilePath = configDir +File.separator+ database;
+    String h2FilePath = configDir + File.separator + database;
     connect(h2FilePath, mustAlreadyExist);
   }
 
@@ -65,7 +64,7 @@ public class H2Connection implements DatabaseConnection {
 
     File test = new File(h2FilePath + ".h2.db");
     if (!test.exists()) {
-      logger.warn("no h2 db file at  " + test.getAbsolutePath() + "");
+      logger.error("no h2 db file at  " + test.getAbsolutePath() + "");
     } else {
       logger.debug("connecting to " + url);
       org.h2.Driver.load();
