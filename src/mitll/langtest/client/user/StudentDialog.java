@@ -116,10 +116,10 @@ class StudentDialog extends UserDialog {
 
     Element element = dialogBox.getElement();
     element.setId("Student_LoginBoxDialog");
-    DOM.setStyleAttribute(element, "top", "1%");
+    element.getStyle().setTop(1, Style.Unit.PCT);
     Form form = new Form();
     form.addStyleName("form-horizontal");
-    DOM.setStyleAttribute(form.getElement(), "marginBottom", "0px");
+    form.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
 
     Fieldset fieldset = new Fieldset();
     form.add(fieldset);
