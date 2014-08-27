@@ -26,6 +26,7 @@ public class H2Connection implements DatabaseConnection {
   private final int queryCacheSize;
   private static final int MAX_MEMORY_ROWS = 1000000;
   private static final int maxMemoryRows = MAX_MEMORY_ROWS;
+  private static final boolean USE_MVCC = true;
 
   public H2Connection(String configDir, String dbName, boolean mustAlreadyExist) {
     this(configDir, dbName, CACHE_SIZE_KB, QUERY_CACHE_SIZE, mustAlreadyExist);
@@ -60,7 +61,8 @@ public class H2Connection implements DatabaseConnection {
       (mustAlreadyExist ? "IFEXISTS=TRUE;" :"") +
       "QUERY_CACHE_SIZE=" + queryCacheSize + ";" +
       "CACHE_SIZE="       + cacheSizeKB + ";" +
-      "MAX_MEMORY_ROWS="  + maxMemoryRows
+      "MAX_MEMORY_ROWS="  + maxMemoryRows + ";" +
+        (USE_MVCC ? "MVCC=true" : "")
       ;
 
     File test = new File(h2FilePath + ".h2.db");
