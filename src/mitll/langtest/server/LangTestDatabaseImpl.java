@@ -305,9 +305,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           c++;
         }
       }
-    } else {
-      logger.debug("\tnot marking recorded for '" + role + "' and user " + userID);
     }
+    //else {
+      //logger.debug("\tnot marking recorded for '" + role + "' and user " + userID);
+    //}
     return c;
   }
 
@@ -438,12 +439,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     then = now;
 
-    addPlayedMarkings(userID, firstExercise);
-
-    now = System.currentTimeMillis();
-    if (now - then > 40) {
-      logger.debug("addAnnotationsAndAudio : (" + serverProps.getLanguage() + ") took " + (now - then) + " millis to add played markings to exercise " + firstExercise.getID());
+    User userWhere = db.getUserDAO().getUserWhere(userID);
+    if (userWhere != null && userWhere.getPermissions().contains(User.Permission.QUALITY_CONTROL)) {
+      addPlayedMarkings(userID, firstExercise);
+      now = System.currentTimeMillis();
+      if (now - then > 40) {
+        logger.debug("addAnnotationsAndAudio : (" + serverProps.getLanguage() + ") took " + (now - then) + " millis to add played markings to exercise " + firstExercise.getID());
+      }
     }
+
     then = now;
 
     attachScoreHistory(userID, firstExercise);
@@ -484,6 +488,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db.getAudioDAO().attachAudio(firstExercise, installPath, relativeConfigDir1);
   }
 
+  /**
+   * Only add the played markings if doing QC.
+   *
+   * TODO : This is an expensive query - we need a smarter way of remembering when audio has been played.
+   * @see #addAnnotationsAndAudio(long, mitll.langtest.shared.CommonExercise)
+   * @param userID
+   * @param firstExercise
+   */
   private void addPlayedMarkings(long userID, CommonExercise firstExercise) {
     List<Event> allForUserAndExercise = db.getEventDAO().getAllForUserAndExercise(userID, firstExercise.getID());
     Map<String, AudioAttribute> audioToAttr = firstExercise.getAudioRefToAttr();
@@ -535,7 +547,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     long now = System.currentTimeMillis();
     String language = serverProps.getLanguage();
-    if (now - then2 > 200) {
+    if (now - then2 > 100) {
       logger.debug("getExercise : (" + language + ") took " + (now - then2) + " millis to find exercise " + id);
     }
 
@@ -555,20 +567,20 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       //logger.debug("getExercise : returning " + byID);
       ensureMP3s(byID);
       now = System.currentTimeMillis();
-      if (now - then2 > 200) {
+      if (now - then2 > 100) {
         logger.debug("getExercise : (" + language + ") took " + (now - then2) + " millis to ensure there are mp3s for exercise " + id);
       }
     }
     now = System.currentTimeMillis();
     long diff = now - then;
     String message = "getExercise : (" + language + ") took " + diff + " millis to get exercise " + id;
+
     if (diff > 3000) {
       logger.error(message);
       sendEmail("slow exercise on " + language, "Getting ex " + id + " on " + language + " took " + diff + " millis.");
     } else if (diff > 1000) {
       logger.warn(message);
-    }
-    else if (diff > 40) {
+    } else if (diff > 20) {
       logger.debug(message);
     }
     return byID;
