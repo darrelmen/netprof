@@ -122,7 +122,7 @@ public class DownloadServlet extends DatabaseServlet {
     String exercise = split[1].split("=")[1];
     String useridString = split[2].split("=")[1];
 
-    // logger.debug("query is " + queryString + " file " + file + " " + exercise);
+      logger.debug("returnAudioFile query is " + queryString + " file " + file + " ex " + exercise + " user " + useridString);
 
     String underscores = getFilenameForDownload(db, exercise, useridString);
 
