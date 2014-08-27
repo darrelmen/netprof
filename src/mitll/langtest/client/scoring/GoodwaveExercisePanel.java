@@ -53,7 +53,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   public static final int HEADING_FOR_UNIT_LESSON = 4;
   private static final String CORRECT = "correct";
   private static final String INCORRECT = "incorrect";
-  //private static final int DEFAULT_USER = -1;
   public static final String DEFAULT_SPEAKER = "Default Speaker";
   private final ListInterface listContainer;
   private boolean isBusy = false;
@@ -112,7 +111,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       add(widgets);
     }
     if (controller.isRecordingEnabled()) {
-      addUserRecorder(service, controller, center, screenPortion,e); // todo : revisit screen portion...
+      addUserRecorder(service, controller, center, screenPortion, e); // todo : revisit screen portion...
     }
 
     this.navigationHelper = getNavigationHelper(controller, listContainer, addKeyHandler);
@@ -122,6 +121,11 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     if (!controller.showOnlyOneExercise()) { // headstart doesn't need navigation, lists, etc.
       center.add(navigationHelper);
     }
+  }
+
+  protected void addBelowPlaybackWidget(CommonExercise e, Panel toAddTo) {
+
+
   }
 
   protected NavigationHelper getNavigationHelper(ExerciseController controller,
@@ -170,7 +174,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * @param controller    used in subclasses for audio control
    * @param screenPortion
    * @param exercise
-   * @paramx i
    * @see #GoodwaveExercisePanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, float, boolean, String)
    */
   protected void addUserRecorder(LangTestDatabaseAsync service, ExerciseController controller, Panel toAddTo,
@@ -186,6 +189,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     div.add(answerWidget);
 
     addGroupingStyle(div);
+
+    addBelowPlaybackWidget(exercise, toAddTo);
     toAddTo.add(div);
   }
 
@@ -238,10 +243,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * @return the panel that has the instructions and the audio panel
    * @see #GoodwaveExercisePanel
    */
-  Widget getQuestionContent(CommonExercise e) {
+  private Widget getQuestionContent(CommonExercise e) {
     String content = e.getContent();
-    //String path = e.getRefAudio() != null ? e.getRefAudio() : e.getSlowAudioRef();
-
     final VerticalPanel vp = new VerticalPanel();
     vp.getElement().setId("getQuestionContent_verticalContainer");
 
@@ -665,7 +668,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
         Widget container = null;
         if (!maleEmpty || !femaleEmpty || !defaultUserAudio.isEmpty()) {
-          //container = getDropDown(rightSide, allSameDialect, malesMap, femalesMap, maleUsers, femaleUsers);
           container = getGenderChoices(rightSide, malesMap, femalesMap, defaultUserAudio);
         }
         final Collection<AudioAttribute> initialAudioChoices = maleEmpty ?
@@ -717,17 +719,11 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
             Collection<AudioAttribute> audioChoices;
 
             if (choice.equals(M)) {
-              // System.out.println("playing male audio! " + maleAudio.getAudioRef());
-              //contextPlay.playAudio(maleAudio.getAudioRef());
               audioChoices = malesMap.values().iterator().next();
-
             } else if (choice.equals(F)) {
-              // System.out.println("playing female audio! " + femaleAudio.getAudioRef());
               audioChoices = femalesMap.values().iterator().next();
-
             } else {
               audioChoices = defaultAudioSet;
-
             }
             addRegularAndSlow(rightSide, audioChoices);
           }
