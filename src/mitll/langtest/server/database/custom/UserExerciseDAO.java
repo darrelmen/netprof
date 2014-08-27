@@ -259,7 +259,9 @@ public class UserExerciseDAO extends DAO {
         if (exercise != null) {
           userExercises2.add(new UserExercise(exercise));
         }
-        else logger.info("can't find exercise " + exid);
+        else {
+          //logger.info("can't find exercise " + exid);
+        }
       }
       if (userExercises2.isEmpty()) {
         if (DEBUG) logger.debug("\tgetOnList : no exercises on list id " + listID);
