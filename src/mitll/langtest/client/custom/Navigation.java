@@ -891,6 +891,11 @@ public class Navigation implements RequiresResize {
   }
   
   private Grid displayDialog(final String dialog, String part, FlowPanel cp, final FlowPanel goodPhonePanel, final FlowPanel badPhonePanel, boolean showPart, boolean regAudio){
+	  
+	  // need something like      
+	  //   controller.register(startDialog, "recording started for dialog "+ availableDialogs.getItemText(availableDialogs.getSelectedIndex())+
+	  //  		 "as speaker " + availableSpeakers.getItemText(availableSpeakers.getSelectedIndex())+ " with audio speed " + (regular.getValue() ? "regular" : "slow") + " and part " + (yesDia.getValue() ? "visible" : "hidden"));
+	  
 	  HashMap<String, String> sentToAudioPath = regAudio ? getSentToAudioPath() : getSentToSlowAudioPath();
 	  HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSpeaker = getDialogToSentIndexToSpeaker();
 	  final HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSent = getDialogToSentIndexToSent();
@@ -980,7 +985,8 @@ public class Navigation implements RequiresResize {
 					  x.setVisible(false);
 				  }
 			  });
-			  
+			  recordButton.registerForEvents("record button for sent: " + sentence + " in dialog " + dialog);
+			  controller.register(continueButton, "continue button for sent: " + sentence + " in dialog " + dialog);
 			  recoButtons.add((SimplePostAudioRecordButton) recordButton);
 
 			  sentPanel.setWidget(sentIndex, 2, recordButton);
