@@ -15,6 +15,7 @@ import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.AudioTag;
+import mitll.langtest.client.BrowserCheck;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
@@ -40,6 +41,8 @@ public class CommentNPFExercise extends NPFExercise {
   private static final String NO_REFERENCE_AUDIO = "No reference audio";
   private static final String M = "M";
   private static final String F = "F";
+  public static final String PUNCT_REGEX = "[\\?\\.,-\\/#!$%\\^&\\*;:{}=\\-_`~()]";//"\\p{P}";
+  public static final String SPACE_REGEX = " ";
 
   private AudioAttribute defaultAudio, maleAudio, femaleAudio;
   private PlayAudioPanel contextPlay;
@@ -72,22 +75,110 @@ public class CommentNPFExercise extends NPFExercise {
       column.add(getEntry(e, QCNPFExercise.ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, english));
     }
 
+   // addContext(e, column);
+
+    return column;
+  }
+
+  @Override
+  protected void addBelowPlaybackWidget(CommonExercise e, Panel toAddTo) {
+    //addContext(e,toAddTo);
+  }
+
+  private void addContext(CommonExercise e, Panel toAddTo) {
     String context = e.getContext() != null && !e.getContext().trim().isEmpty() ? e.getContext() : "";
+
     if (!context.isEmpty()) {
+      context = highlightVocabItemInContext(e, context);
       Widget entry = getEntry(e, QCNPFExercise.CONTEXT, ExerciseFormatter.CONTEXT, context);
       Panel hp = new HorizontalPanel();
       addGenderChoices(e, hp);
 
       hp.add(entry);
-      hp.getElement().getStyle().setMarginTop(5, Style.Unit.PX);
-      column.add(hp);
+      hp.getElement().getStyle().setMarginTop(15, Style.Unit.PX);
+      toAddTo.add(hp);
+    }
+  }
+
+  /**
+   * Add underlines of item tokens in context sentence.
+   * @param e
+   * @param context
+   * @return
+   */
+  private String highlightVocabItemInContext(CommonExercise e, String context) {
+    String trim = e.getRefSentence().trim();
+   // String trim = ref;
+    String toFind = removePunct(trim);
+
+    // todone split on spaces, find matching words if no contigious overlap
+    int i = context.indexOf(toFind);
+    int end = i + toFind.length();
+    if (i > -1) {
+     log("marking underline from " + i + " to " + end + " for '" + toFind +
+         "' in '" + trim  +  "'");
+      context = context.substring(0, i) + "<u>" + context.substring(i, end) + "</u>" + context.substring(end);
+    } else {
+      log("NOT marking underline from " + i + " to " + end);
+      log("trim   " + trim + " len " + trim.length());
+      log("toFind " +toFind + " len " +trim.length());
+
+      List<String> tokens = getTokens(trim);
+      int startToken;
+      int endToken = 0;
+      StringBuilder builder = new StringBuilder();
+      for (String token : tokens) {
+        startToken = context.indexOf(token, endToken);
+        if (startToken != -1) {
+          builder.append(context.substring(endToken, startToken));
+          builder.append("<u>");
+          builder.append(context.substring(startToken, endToken = startToken + token.length()));
+          builder.append("</u>");
+        } else {
+          log("from " + endToken + " couldn't find token '" + token + "' len " + token.length() + " in '" +context+
+              "'");
+        }
+      }
+      builder.append(context.substring(endToken));
+     // System.out.println("before " + context + " after " + builder.toString());
+      context = builder.toString();
+    }
+    return context;
+  }
+
+  private void log(String message) {
+    System.out.println(message);
+    console(message);
+  }
+
+  private void console(String message) {
+    int ieVersion = BrowserCheck.getIEVersion();
+    if (ieVersion == -1 || ieVersion > 9) {
+      consoleLog(message);
+    }
+  }
+
+  private native static void consoleLog( String message) /*-{
+      console.log( "LangTest:" + message );
+  }-*/;
+
+
+  private List<String> getTokens(String sentence) {
+    List<String> all = new ArrayList<String>();
+    sentence = sentence.replaceAll(PUNCT_REGEX, " ");
+    for (String untrimedToken : sentence.split(SPACE_REGEX)) { // split on spaces
+      String tt = untrimedToken.replaceAll(PUNCT_REGEX, ""); // remove all punct
+      String token = tt.trim();  // necessary?
+      if (token.length() > 0) {
+        all.add(token);
+      }
     }
 
-    return column;
+    return all;
   }
 
   private String removePunct(String t) {
-    return t.replaceAll("\\p{P}","");
+    return t.replaceAll(PUNCT_REGEX,"");
   }
 
 
