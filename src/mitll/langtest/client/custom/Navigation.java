@@ -892,10 +892,6 @@ public class Navigation implements RequiresResize {
   
   private Grid displayDialog(final String dialog, String part, FlowPanel cp, final FlowPanel goodPhonePanel, final FlowPanel badPhonePanel, boolean showPart, boolean regAudio){
 	  
-	  // need something like      
-	  //   controller.register(startDialog, "recording started for dialog "+ availableDialogs.getItemText(availableDialogs.getSelectedIndex())+
-	  //  		 "as speaker " + availableSpeakers.getItemText(availableSpeakers.getSelectedIndex())+ " with audio speed " + (regular.getValue() ? "regular" : "slow") + " and part " + (yesDia.getValue() ? "visible" : "hidden"));
-	  
 	  HashMap<String, String> sentToAudioPath = regAudio ? getSentToAudioPath() : getSentToSlowAudioPath();
 	  HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSpeaker = getDialogToSentIndexToSpeaker();
 	  final HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSent = getDialogToSentIndexToSent();
@@ -915,6 +911,7 @@ public class Navigation implements RequiresResize {
 	  final ArrayList<SimplePostAudioRecordButton> recoButtons = new ArrayList<SimplePostAudioRecordButton>();
 	  final ArrayList<Integer> sentIndexes = new ArrayList<Integer>();
 	  final ArrayList<Image> prevResponses = new ArrayList<Image>();
+	  boolean yourFirstReco = true;
 	  
 	  while(dialogToSentIndexToSent.get(dialog).containsKey(sentIndex)){
 		  String sentence = dialogToSentIndexToSent.get(dialog).get(sentIndex);
@@ -985,8 +982,19 @@ public class Navigation implements RequiresResize {
 					  x.setVisible(false);
 				  }
 			  });
-			  recordButton.registerForEvents("record button for sent: " + sentence + " in dialog " + dialog);
-			  controller.register(continueButton, "continue button for sent: " + sentence + " in dialog " + dialog);
+			  if(yourFirstReco){
+				  controller.register(recordButton, "recording started with sent " + sentence + " in dialog "+ dialog + " as speaker " + part + " with audio speed " + (regAudio ? "regular" : "slow") + " and part " + (showPart ? "visible" : "hidden"));
+				  yourFirstReco = false;
+			  }
+			  else{
+				  controller.register(recordButton, "record button for sent: " + sentence + " in dialog " + dialog);
+			  }
+			  if(sentIndex == yourLast){
+				  controller.register(continueButton, "recording stopped with sent " + sentence + " in dialog "+dialog);
+			  }
+			  else{
+			      controller.register(continueButton, "continue button for sent: " + sentence + " in dialog " + dialog);
+			  }
 			  recoButtons.add((SimplePostAudioRecordButton) recordButton);
 
 			  sentPanel.setWidget(sentIndex, 2, recordButton);
@@ -1375,8 +1383,8 @@ public class Navigation implements RequiresResize {
 	  m.get(up2).put("Zhao", 6);
 	  m.get(up3).put("He", 5);
 	  m.get(up3).put("Kao", 6);
-	  m.get(up4).put("Mrs. Smith", 6);
-	  m.get(up4).put("Mrs. Li", 7);
+	  m.get(up4).put("Mrs. Smith", 7);
+	  m.get(up4).put("Mrs. Li", 6);
 	  
 	  return m;
   }
@@ -1418,10 +1426,10 @@ public class Navigation implements RequiresResize {
 	  m.get(up4).put(1, "Mrs. Smith");
 	  m.get(up4).put(2, "Mrs. Li");
 	  m.get(up4).put(3, "Mrs. Smith");
-	  m.get(up4).put(4, "Mrs. Li");
-	  m.get(up4).put(5, "Mrs. Li");
-	  m.get(up4).put(6, "Mrs. Smith");
-	  m.get(up4).put(7, "Mrs. Li");
+	  m.get(up4).put(4, "Mrs. Smith");
+	  m.get(up4).put(5, "Mrs. Smith");
+	  m.get(up4).put(6, "Mrs. Li");
+	  m.get(up4).put(7, "Mrs. Smith");
 	  
 	  return m;
   }
