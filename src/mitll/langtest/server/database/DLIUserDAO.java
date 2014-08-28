@@ -27,7 +27,7 @@ public class DLIUserDAO extends DAO {
     // there are much better ways of doing this...
     logger.info("addUser :dliUser " + dliUser);
 
-    Connection connection = database.getConnection();
+    Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement;
 
     statement = connection.prepareStatement(
@@ -47,18 +47,15 @@ public class DLIUserDAO extends DAO {
     statement.setBoolean(i++, dliUser.getWriting().isEstimating());
 
     int i1 = statement.executeUpdate();
-    statement.close();
-    database.closeConnection(connection);
+    finish(connection, statement);
 
     logger.debug("added user# " + i1 + "  now " + getCount(DLIUSERS));
   }
 
   void createUserTable(Database database) throws Exception {
-    Connection connection = database.getConnection();
+    Connection connection = database.getConnection(this.getClass().toString());
 
-    PreparedStatement statement;
-
-    statement = connection.prepareStatement("CREATE TABLE if not exists " +
+    PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
       DLIUSERS +
       " (" +
       "userid LONG, " +
@@ -75,9 +72,7 @@ public class DLIUserDAO extends DAO {
       "USERS" +
       "(ID)" +
       ")");
-    statement.execute();
-    statement.close();
-    database.closeConnection(connection);
+    finish(database, connection, statement);
   }
 
   /**
@@ -87,7 +82,7 @@ public class DLIUserDAO extends DAO {
    */
   public List<DLIUser> getUsers() {
     try {
-      Connection connection = database.getConnection();
+      Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement;
 
       statement = connection.prepareStatement("SELECT * from " + DLIUSERS);
@@ -106,9 +101,7 @@ public class DLIUserDAO extends DAO {
           new DLIUser.ILRLevel(rs.getString(i++), rs.getBoolean(i++))
         ));
       }
-      rs.close();
-      statement.close();
-      database.closeConnection(connection);
+      finish(connection, statement, rs);
 
       return users;
     } catch (Exception ee) {
