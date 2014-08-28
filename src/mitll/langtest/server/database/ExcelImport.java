@@ -314,7 +314,7 @@ public class ExcelImport implements ExerciseDAO {
       XSSFWorkbook wb = new XSSFWorkbook(inp);
       long now = System.currentTimeMillis();
       if (now-then > 1000) {
-        logger.info("took " + (now - then) + " millis to read spreadsheet");
+        logger.info("took " + (now - then) + " millis to read spreadsheet for " + serverProps.getLanguage());
       }
       then = now;
 
