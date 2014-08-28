@@ -11,8 +11,9 @@ import java.sql.Connection;
  */
 public interface DatabaseConnection {
   void contextDestroyed();
+  int connectionsOpen();
 
-  Connection getConnection();
+  Connection getConnection(String who);
 
   boolean isValid();
 }
