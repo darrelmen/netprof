@@ -1,6 +1,5 @@
 package mitll.langtest.server.database;
 
-import com.google.gwt.i18n.server.testing.Gender;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.User;
@@ -15,7 +14,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 
 public class UserDAO extends DAO {
   private static final String DEFECT_DETECTOR = "defectDetector";
@@ -31,8 +29,8 @@ public class UserDAO extends DAO {
   private static final List<User.Permission> CD_PERMISSIONS = Arrays.asList(User.Permission.QUALITY_CONTROL, User.Permission.RECORD_AUDIO);
   private static final List<User.Permission> EMPTY_PERM = new ArrayList<User.Permission>();
   private static final String ENABLED = "enabled";
-  public static final String RESET_PASSWORD_KEY = "resetPasswordKey";
-  public static final String ENABLED_REQ_KEY = "enabledReqKey";
+  private static final String RESET_PASSWORD_KEY = "resetPasswordKey";
+  private static final String ENABLED_REQ_KEY = "enabledReqKey";
   private long defectDetector;
 
   private static final String ID = "id";
@@ -162,7 +160,7 @@ public class UserDAO extends DAO {
       logger.info("addUser : max is " + max + " new user '" + userID + "' age " + age + " gender " + gender + " pass " +passwordH);
       if (passwordH == null) new Exception().printStackTrace();
 
-      Connection connection = database.getConnection();
+      Connection connection = getConnection();
       PreparedStatement statement;
 
       statement = connection.prepareStatement(
@@ -200,8 +198,7 @@ public class UserDAO extends DAO {
 
       statement.executeUpdate();
 
-      statement.close();
-      database.closeConnection(connection);
+      finish(connection, statement);
 
       return newID;
     } catch (Exception ee) {
@@ -211,13 +208,13 @@ public class UserDAO extends DAO {
     return 0;
   }
 
-  public boolean updateUser(long id, User.Kind kind, String passwordH, String emailH) {
+  private void updateUser(long id, User.Kind kind, String passwordH, String emailH) {
     try {
       if (passwordH == null) {
         logger.error("Got null password Hash?", new Exception("empty password hash"));
       }
 
-      Connection connection = database.getConnection();
+      Connection connection = getConnection();
       PreparedStatement statement = connection.prepareStatement(
           "UPDATE " + USERS + " SET " +
               KIND + "=?," +
@@ -236,17 +233,22 @@ public class UserDAO extends DAO {
       statement.close();
       database.closeConnection(connection);
 
-      return i1 != 0;
+      if (i1 == 0) {
+        logger.warn("huh? didn't update user for " + id + " kind " + kind);
+      }
     } catch (Exception ee) {
       logger.error("Got " + ee, ee);
       database.logEvent("unk", "update user: " + ee.toString(), 0);
     }
-    return false;
+  }
+
+  private Connection getConnection() {
+    return database.getConnection(this.getClass().toString());
   }
 
   public boolean enableUser(long id) {
     try {
-      Connection connection = database.getConnection();
+      Connection connection = getConnection();
       PreparedStatement statement = connection.prepareStatement(
           "UPDATE " + USERS + " SET " +
               ENABLED + "=TRUE" +
@@ -332,27 +334,29 @@ public class UserDAO extends DAO {
     return userWhere;
   }
 
-  public User getUserByID(String id) {
-    return getUserWhere(-1, "SELECT * from users where UPPER(userID)='" +
+  User getUserByID(String id) {
+    return getUserWhere(-1, "SELECT * from users where UPPER(" +
+        "userID" +
+        ")='" +
         id.toUpperCase() +
         "'");
   }
 
 
-  public int userExistsSQL(String id, String sql) {
+  int userExistsSQL(String id, String sql) {
     int val = -1;
     try {
-      Connection connection = database.getConnection();
+      Connection connection = getConnection();
 
       PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
       if (rs.next()) {
         val = rs.getInt(1);
       }
-      //    logger.debug("user exists " + id + " = " + val);
-      rs.close();
-      statement.close();
-      database.closeConnection(connection);
+
+  //    logger.debug("user exists " + id + " = " + val);
+      finish(connection, statement, rs);
+
     } catch (Exception e) {
       logger.error("Got " + e, e);
       database.logEvent(id, "userExists: " + e.toString(), 0);
@@ -361,12 +365,12 @@ public class UserDAO extends DAO {
   }
 
   public void createUserTable(Database database) throws Exception {
-    Connection connection = database.getConnection();
+    Connection connection = database.getConnection(this.getClass().toString());
 
-    PreparedStatement statement;
-
-    statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS users (" +
-        "id IDENTITY, " +
+    try {
+      PreparedStatement statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS users (" +
+          ID +
+          " IDENTITY, " +
         "age INT, " +
         "gender INT, " +
         "experience INT, " +
@@ -434,6 +438,9 @@ public class UserDAO extends DAO {
     if (!columns.contains(RESET_PASSWORD_KEY.toLowerCase())) {
       addColumn(connection, RESET_PASSWORD_KEY, "VARCHAR");
     }
+    } finally {
+      database.closeConnection(connection);
+    }
   }
 
   private void addColumn(Connection connection, String column, String type) throws SQLException {
@@ -495,11 +502,24 @@ public class UserDAO extends DAO {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getUserBy(long)
    */
   public User getUserWhere(long userid) {
-    String sql = "SELECT * from users where id=" + userid + ";";
-    return getUserWhere(userid, sql);
+    String sql = "SELECT * from users where " +
+        ID +
+        "=" +userid+";";
+    List<User> users = getUsers(sql);
+    if (users.isEmpty()) {
+      if (userid > 0) {
+        logger.warn("no user with id " + userid);
+      }
+      return null;
+    }
+    // else if (users.size() > 1) {
+    //    logger.warn("huh? " + users.size() + " with  id " + userid);
+    //  }
+
+    return users.iterator().next();
   }
 
-  public User getUserWhere(long userid, String sql) {
+  User getUserWhere(long userid, String sql) {
     List<User> users = getUsers(sql);
     if (users.isEmpty()) {
       if (userid > 0) {
@@ -516,13 +536,11 @@ public class UserDAO extends DAO {
 
   private List<User> getUsers(String sql) {
     try {
-      Connection connection = database.getConnection();
+      Connection connection = getConnection();
       PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
       List<User> users = getUsers(rs);
-      rs.close();
-      statement.close();
-      database.closeConnection(connection);
+      finish(connection, statement, rs);
 
       return users;
     } catch (Exception ee) {
@@ -694,8 +712,11 @@ public class UserDAO extends DAO {
       row.createCell(j++).setCellValue(emailHash == null || emailHash.isEmpty() ? "NO_EMAIL" : "HAS_EMAIL");
     }
     long now = System.currentTimeMillis();
-    if (now - then > 100) logger.warn("toXLSX : took " + (now - then) + " millis to write " + rownum +
-        " rows to sheet, or " + (now - then) / rownum + " millis/row");
+    long diff = now - then;
+    if (diff > 100) {
+      logger.info("toXLSX : took " + diff + " millis to write " + rownum+
+          " rows to sheet, or " + diff /rownum + " millis/row." );
+    }
     return wb;
   }
 
@@ -727,7 +748,7 @@ public class UserDAO extends DAO {
         new Exception().printStackTrace();
       }
 
-      Connection connection = database.getConnection();
+      Connection connection = getConnection();
       PreparedStatement statement;
 
       statement = connection.prepareStatement(
@@ -754,7 +775,7 @@ public class UserDAO extends DAO {
 
   public boolean addKey(Long remove, boolean resetKey, String key) {
     try {
-      Connection connection = database.getConnection();
+      Connection connection = getConnection();
       PreparedStatement statement = connection.prepareStatement(
           "UPDATE " + USERS + " SET " +
               (resetKey ? RESET_PASSWORD_KEY : ENABLED_REQ_KEY) + "=?" +
@@ -784,7 +805,7 @@ public class UserDAO extends DAO {
    */
   public boolean clearKey(Long remove, boolean resetKey) {
     try {
-      Connection connection = database.getConnection();
+      Connection connection = getConnection();
       PreparedStatement statement;
 
       statement = connection.prepareStatement(
