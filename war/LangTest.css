@@ -1059,3 +1059,28 @@ body>.dropdown-popup .nav-list>li.active>a  {
     margin-top: 0;
     padding-top: 0;
 }
+
+body .btn-success.active {
+    background-color: #B75AB6;
+    background-image: linear-gradient(to bottom, #C362C3, #A351A3);
+    color: white;
+    background-position: center;
+    text-shadow: none;
+}
+
+body .btn-primary.active {
+    background-color: #CC8800;
+    background-image: linear-gradient(to bottom, #CC4400, #CC8800);
+}
+
+body .btn-toolbar > .btn-group > .btn:hover, .btn-toolbar > .btn-group > .btn:focus, .btn-toolbar > .btn-group > .btn:active, .btn-toolbar > .btn-group > .btn.active {
+    z-index: 0;
+}
+
+body .btn-toolbar > .btn-group > .btn.active {
+    background-color: #737373;
+    background-image: linear-gradient(to bottom, #737373, #a0a0a0);
+    color: white;
+    background-position: center;
+    text-shadow: none;
+}
