@@ -12,19 +12,15 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Deals with downloads from site -- for excel spreadsheets and zips of audio.
- *
+ * <p/>
  * Can download a user list too.
- *
+ * <p/>
  * User: GO22670
  * Date: 12/17/13
  * Time: 4:57 PM
@@ -67,13 +63,12 @@ public class DownloadServlet extends DatabaseServlet {
         String pathInfo = request.getPathInfo();
         String queryString = request.getQueryString();
         logger.debug("DownloadServlet.doGet : Request " + queryString + " path " + pathInfo +
-          " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
+            " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
 
         if (queryString == null) {
           setHeader(response, "allAudio.zip");
           writeAllAudio(response);
-        }
-        else if (queryString.startsWith("list")) {
+        } else if (queryString.startsWith("list")) {
           String[] split = queryString.split("list=");
           if (split.length == 2) {
             String listid = split[1];
@@ -81,8 +76,7 @@ public class DownloadServlet extends DatabaseServlet {
               writeUserList(response, db, listid);
             }
           }
-        }
-        else if (queryString.startsWith("file")) {
+        } else if (queryString.startsWith("file")) {
           returnAudioFile(response, db, queryString);
         } else {
           Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(queryString);
@@ -106,14 +100,15 @@ public class DownloadServlet extends DatabaseServlet {
     try {
       response.getOutputStream().close();
     } catch (IOException e) {
-      logger.warn("got " +e,e);
+      logger.warn("got " + e, e);
     }
   }
 
   /**
    * Option to download an mp3 you've just recorded.
-   *
+   * <p/>
    * Hack to remove N/A english fields
+   *
    * @param response
    * @param db
    * @param queryString
@@ -127,26 +122,11 @@ public class DownloadServlet extends DatabaseServlet {
     String exercise = split[1].split("=")[1];
     String useridString = split[2].split("=")[1];
 
-    // logger.debug("query is " + queryString + " file " + file + " " + exercise);
+    String underscores = getFilenameForDownload(db, exercise, useridString);
 
-    long userid = Long.parseLong(useridString);
-
-    CommonExercise exercise1 = db.getExercise(exercise);
-    User userWhere = db.getUserDAO().getUserWhere(userid);
-    String userPart = userWhere != null ? "_by_" + userWhere.getUserID() : "";
-    boolean english = db.getServerProps().getLanguage().equalsIgnoreCase("english");
-    String foreignPart = english ? "" : exercise1.getForeignLanguage().trim();
-    String englishPart = exercise1.getEnglish().trim();
-    if (englishPart.equals("N/A")) englishPart = "";
-    if (!englishPart.isEmpty()) englishPart = "_" + englishPart;
-    String fileName = foreignPart + englishPart + userPart + ".mp3";
-
-    //logger.debug("file is '" + fileName + "'");
-    String underscores = fileName.replaceAll("\\p{Z}+", "_");  // split on spaces
+    logger.debug("returnAudioFile query is " + queryString + " file " + file + " ex " + exercise + " user " + useridString + " so name is " + underscores);
 
     response.setContentType("application/octet-stream");
-
-    underscores = URLEncoder.encode(underscores, "UTF-8");
     response.setCharacterEncoding("UTF-8");
     response.setHeader("Content-Disposition", "attachment; filename*=UTF-8''" + underscores);
 
@@ -156,12 +136,51 @@ public class DownloadServlet extends DatabaseServlet {
     } else {
       FileInputStream input = new FileInputStream(fileRef);
       int size = (int) input.getChannel().size();
-     // logger.debug("copying file " + fileRef + " size  " + size);
+      // logger.debug("copying file " + fileRef + " size  " + size);
       response.setContentLength(size);
 
       IOUtils.copy(input, response.getOutputStream());
       response.getOutputStream().flush();
     }
+  }
+
+  /**
+   * Return an attachment that looks like foreign_english_by_user.
+   * 
+   * @param db to talk to
+   * @param exercise id of the exercise
+   * @param useridString missing is OK, although unexpected
+   * @return name without spaces
+   * @throws UnsupportedEncodingException
+   */
+  private String getFilenameForDownload(DatabaseImpl db, String exercise, String useridString) throws UnsupportedEncodingException {
+    CommonExercise exercise1 = db.getExercise(exercise);
+    boolean english = db.getServerProps().getLanguage().equalsIgnoreCase("english");
+
+    // foreign part
+    String foreignPart = english ? "" : exercise1.getForeignLanguage().trim();
+
+    // english part
+    String englishPart = exercise1.getEnglish().trim();
+    if (englishPart.equals("N/A")) englishPart = "";
+    if (!englishPart.isEmpty()) englishPart = "_" + englishPart;
+
+    // user part
+    String userPart = getUserPart(db, Long.parseLong(useridString));
+
+    String fileName = foreignPart + englishPart + userPart;
+    fileName = fileName.replaceAll("\\.","");
+    fileName += ".mp3";
+
+    //logger.debug("file is '" + fileName + "'");
+    String underscores = fileName.replaceAll("\\p{Z}+", "_");  // split on spaces
+    underscores = URLEncoder.encode(underscores, "UTF-8");
+    return underscores;
+  }
+
+  private String getUserPart(DatabaseImpl db, long userid) {
+    User userWhere = db.getUserDAO().getUserWhere(userid);
+    return userWhere != null ? (userWhere.getUserID().isEmpty() ? "":"_by_" + userWhere.getUserID()) : "";
   }
 
   private void returnSpreadsheet(HttpServletResponse response, DatabaseImpl db, String encodedFileName) throws IOException {
@@ -186,7 +205,7 @@ public class DownloadServlet extends DatabaseServlet {
     try {
       db.writeZip(response.getOutputStream());
     } catch (Exception e) {
-      logger.error("Got " +e,e);
+      logger.error("Got " + e, e);
     }
 
   }
@@ -217,7 +236,7 @@ public class DownloadServlet extends DatabaseServlet {
     Object databaseReference = getServletContext().getAttribute("databaseReference");
     if (databaseReference != null) {
       db = (DatabaseImpl) databaseReference;
-     // logger.debug("found existing database reference " + db + " under " +getServletContext());
+      // logger.debug("found existing database reference " + db + " under " +getServletContext());
     } else {
       logger.error("huh? no existing db reference?");
     }
@@ -226,38 +245,39 @@ public class DownloadServlet extends DatabaseServlet {
 
   /**
    * Parse the query string that indicates the unit and chapter selections.
-   * @see #doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+   *
    * @param queryString
    * @return map representing unit/chapter selections - what SectionHelper will parse
+   * @see #doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
   private Map<String, Collection<String>> getTypeToSelectionFromRequest(String queryString) {
     if (queryString.length() > 2) {
       queryString = queryString.substring(1, queryString.length() - 1);
     }
-   //  logger.debug("got " + queryString);
-    queryString = queryString.replaceAll("%20"," ");    // need this for pashto3 which has "29 LC1" as chapters
-  //   logger.debug("got " + queryString);
+    //  logger.debug("got " + queryString);
+    queryString = queryString.replaceAll("%20", " ");    // need this for pashto3 which has "29 LC1" as chapters
+    //   logger.debug("got " + queryString);
 
     String[] sections = queryString.split("],");
 
-   // logger.debug("sections " + sections[0]);
+    // logger.debug("sections " + sections[0]);
 
     Map<String, Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
     for (String section : sections) {
-    // logger.debug("\tsection " + section);
+      // logger.debug("\tsection " + section);
 
       String[] split1 = section.split("=");
       if (split1.length > 1) {
         String key = split1[0];
         String s = split1[1];
-    //   logger.debug("\ts " + s);
+        //   logger.debug("\ts " + s);
 
         if (!s.isEmpty()) {
           s = s.substring(1);
         }
-       s = s.replaceAll("]","");
+        s = s.replaceAll("]", "");
 
-    //   logger.debug("\ts " + s);
+        //   logger.debug("\ts " + s);
 
         List<String> values = Arrays.asList(s.split(","));
         List<String> trimmed = new ArrayList<String>();
@@ -266,8 +286,7 @@ public class DownloadServlet extends DatabaseServlet {
         }
 //        logger.debug("\tkey " + key + "=" + trimmed);
         typeToSection.put(key.trim(), trimmed);
-      }
-      else {
+      } else {
         logger.debug("\tsections 1" + split1[0]);
       }
     }
