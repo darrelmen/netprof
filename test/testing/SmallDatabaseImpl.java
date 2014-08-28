@@ -44,7 +44,7 @@ public class SmallDatabaseImpl implements Database {
     this.h2DbName = dburl;
     this.url = "jdbc:h2:" + h2DbName + ";IFEXISTS=TRUE;QUERY_CACHE_SIZE=0;";
     try {
-      getConnection();
+      getConnection(this.getClass().toString());
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
     }
@@ -63,7 +63,7 @@ public class SmallDatabaseImpl implements Database {
   public SmallDatabaseImpl(HttpServlet s) {
     this.servlet = s;
     try {
-      boolean open = getConnection() != null;
+      boolean open = getConnection(this.getClass().toString()) != null;
       if (!open) {
         logger.warn("couldn't open connection to database");
         return;
@@ -137,7 +137,7 @@ public class SmallDatabaseImpl implements Database {
     return null;
   }
 
-  public Connection getConnection() {
+  public Connection getConnection(String who) {
     Connection c;
     try {
       if (servlet == null) {
