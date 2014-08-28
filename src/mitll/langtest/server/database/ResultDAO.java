@@ -1,7 +1,9 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.ScoreAndPath;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.monitoring.Session;
 import org.apache.log4j.Logger;
@@ -190,6 +192,26 @@ public class ResultDAO extends DAO {
     return sessions;
   }
 
+  public void attachScoreHistory(long userID, CommonExercise firstExercise) {
+    List<Result> resultsForExercise = getResultsForExercise(firstExercise.getID());
+
+    int total = 0;
+    float scoreTotal = 0f;
+    List<ScoreAndPath> scores = new ArrayList<ScoreAndPath>();
+    for (Result r : resultsForExercise) {
+      float pronScore = r.getPronScore();
+      if (pronScore > 0) { // overkill?
+        total++;
+        scoreTotal += pronScore;
+        if (r.userid == userID) {
+          scores.add(new ScoreAndPath(pronScore, r.answer));
+        }
+      }
+    }
+    firstExercise.setScores(scores);
+    firstExercise.setAvgScore(total == 0 ? 0f : scoreTotal/total);
+  }
+
   public List<Result> getResultsForExercise(String id) {
     return getResultsForExIDIn(Collections.singleton(id), false);
   }
@@ -207,12 +229,12 @@ public class ResultDAO extends DAO {
       String list = getInList(ids);
 
       String sql = "SELECT * FROM " + RESULTS + " where " +
-        VALID + "=true AND " +
-        AUDIO_TYPE + (matchAVP?"=":"<>") +
-        "'avp' AND " +
-        Database.EXID + " in (" +
-        list +
-        ") order by " + Database.TIME + " asc";
+          Database.EXID + " in (" + list + ")" +
+          " AND " +
+        VALID + "=true" +
+          " AND " +
+        AUDIO_TYPE + (matchAVP?"=":"<>") + "'avp'" +
+          " order by " + Database.TIME + " asc";
       List<Result> resultsSQL = getResultsSQL(sql);
       if (debug) logger.debug("getResultsForExIDIn for  " +sql+ " got\n\t" + resultsSQL.size());
       return resultsSQL;
@@ -223,7 +245,7 @@ public class ResultDAO extends DAO {
   }
 
   private List<Result> getResultsSQL(String sql) throws SQLException {
-    Connection connection = database.getConnection();
+    Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
 
     return getResultsForQuery(connection, statement);
@@ -236,15 +258,13 @@ public class ResultDAO extends DAO {
   public int getNumResults() {
     int numResults = 0;
     try {
-      Connection connection = database.getConnection();
+      Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) FROM " + RESULTS + ";");
       ResultSet rs = statement.executeQuery();
       if (rs.next()) {
         numResults = rs.getInt(1);
       }
-      rs.close();
-      statement.close();
-      database.closeConnection(connection);
+      finish(connection, statement, rs);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
@@ -293,9 +313,7 @@ public class ResultDAO extends DAO {
       trimPathForWebPage(result);
       results.add(result);
     }
-    rs.close();
-    statement.close();
-    database.closeConnection(connection);
+    finish(connection, statement, rs);
 
     return results;
   }
@@ -620,6 +638,13 @@ public class ResultDAO extends DAO {
       //logger.info(RESULTS + " table had num columns = " + numColumns);
       addStimulus(connection);
     }
+
+    database.closeConnection(connection);
+
+    createIndex(database,Database.EXID,RESULTS);
+    createIndex(database,VALID,RESULTS);
+    createIndex(database,AUDIO_TYPE,RESULTS);
+
     // enrichResults();
     //removeValidDefault(connection);
     // addValidDefault(connection);
