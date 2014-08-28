@@ -62,7 +62,7 @@ public class GradeDAO extends DAO {
    */
   public void changeGrade(Grade toChange) {
     try {
-      Connection connection = database.getConnection();
+      Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement;
 
       String sql = "UPDATE grades " +
@@ -80,8 +80,7 @@ public class GradeDAO extends DAO {
         logger.error("huh? didn't update the grade for " + toChange);
       }
 
-      statement.close();
-      database.closeConnection(connection);
+      finish(connection, statement);
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -115,7 +114,7 @@ public class GradeDAO extends DAO {
                                    int grader, String gradeType, int gradeIndex) {
     long id = 0;
     try {
-      Connection connection = database.getConnection();
+      Connection connection = database.getConnection(this.getClass().toString());
       //logger.debug("addGrade " + grade + " grade for " + resultID + " and " +grader + " ex id " + exerciseID+ " and " +gradeID);
 
       String sql = "INSERT INTO grades(resultID,exerciseID,grade,correct,grader,gradeType,gradeIndex) VALUES(?,?,?,?,?,?,?)";
@@ -146,8 +145,7 @@ public class GradeDAO extends DAO {
         logger.error("huh? no key was generated?");
       }
 
-      statement.close();
-      database.closeConnection(connection);
+      finish(connection, statement);
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -223,7 +221,7 @@ public class GradeDAO extends DAO {
 
   private GradesAndIDs getGradesForSQL(String sql) {
     try {
-      Connection connection = database.getConnection();
+      Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(sql);
       //logger.debug("getGradesForSQL : sql " + sql);
       ResultSet rs = statement.executeQuery();
@@ -265,9 +263,7 @@ public class GradeDAO extends DAO {
         grades.add(g);
         ids.add(resultID);
       }
-      rs.close();
-      statement.close();
-      database.closeConnection(connection);
+      finish(connection, statement, rs);
 
     //  logger.debug("found " + results.size() + " graded results for " + exerciseID);
       return new GradesAndIDs(grades,ids);
