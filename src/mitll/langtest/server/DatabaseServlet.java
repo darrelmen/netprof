@@ -13,7 +13,6 @@ import java.io.*;
  * Created by GO22670 on 4/8/2014.
  */
 public class DatabaseServlet extends HttpServlet {
-
   private static final Logger logger = Logger.getLogger(DatabaseServlet.class);
   private static final int BUFFER_SIZE = 4096;
 
@@ -34,7 +33,7 @@ public class DatabaseServlet extends HttpServlet {
   protected String configDir;
   protected PathHelper pathHelper;
 
-  protected DatabaseImpl getDatabase(ServletContext servletContext, PathHelper pathHelper) {
+/*  protected DatabaseImpl getDatabase(ServletContext servletContext, PathHelper pathHelper) {
     String config = servletContext.getInitParameter("config");
     String relativeConfigDir = "config" + File.separator + config;
     String configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
@@ -44,19 +43,19 @@ public class DatabaseServlet extends HttpServlet {
     String h2DatabaseFile = serverProps.getH2Database();
 
     return makeDatabaseImpl(h2DatabaseFile,configDir,relativeConfigDir,serverProps,pathHelper);
-  }
+  }*/
 
-  private ServerProperties getServerProperties(ServletContext servletContext, String configDir) {
+/*  private ServerProperties getServerProperties(ServletContext servletContext, String configDir) {
     ServerProperties serverProps = new ServerProperties();
 
     serverProps.readPropertiesFile(servletContext, configDir);
     return serverProps;
-  }
+  }*/
 
-  private DatabaseImpl makeDatabaseImpl(String h2DatabaseFile, String configDir, String relativeConfigDir, ServerProperties serverProperties,PathHelper pathHelper) {
+/*  private DatabaseImpl makeDatabaseImpl(String h2DatabaseFile, String configDir, String relativeConfigDir, ServerProperties serverProperties,PathHelper pathHelper) {
     //logger.debug("word pairs " +  serverProps.isWordPairs() + " language " + serverProps.getLanguage() + " config dir " + relativeConfigDir);
     return new DatabaseImpl(configDir, relativeConfigDir, h2DatabaseFile, serverProperties, pathHelper, true);
-  }
+  }*/
 
   protected boolean ensureMP3(CommonExercise byID, PathHelper pathHelper, String configDir) {
     return ensureMP3(byID.getRefAudio(), pathHelper, configDir);
@@ -104,17 +103,11 @@ public class DatabaseServlet extends HttpServlet {
     return pathHelper.getInstallPath() + File.separator + "config" + File.separator + config;
   }
 
-  protected void ensureMP3s(CommonExercise byID) {
-     ensureMP3(byID, pathHelper, configDir);
-
-    //if (!audioAttributes.isEmpty()) { logger.warn("ensureMP3s : ref audio for " + byID); }
-  }
+  protected void ensureMP3s(CommonExercise byID) {  ensureMP3(byID, pathHelper, configDir);  }
 
   protected void writeToFile(InputStream inputStream, File saveFile) throws IOException {
     // opens an output stream for writing file
-    FileOutputStream outputStream = new FileOutputStream(saveFile);
-
-    copyToOutput(inputStream, outputStream);
+    copyToOutput(inputStream, new FileOutputStream(saveFile));
   }
 
   protected void copyToOutput(InputStream inputStream, OutputStream outputStream) throws IOException {
