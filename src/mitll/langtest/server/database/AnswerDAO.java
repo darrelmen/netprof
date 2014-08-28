@@ -80,18 +80,19 @@ public class AnswerDAO {
   public long addAnswer(Database database, int userID, String plan, String id, int questionID, String answer,
                         String audioFile, boolean valid, boolean flq, boolean spoken, String audioType, int durationInMillis,
                         boolean correct, float pronScore, String stimulus) {
+    Connection connection = database.getConnection(this.getClass().toString());
     try {
       long then = System.currentTimeMillis();
-      Connection connection = database.getConnection();
       long newid = addAnswerToTable(connection, userID, plan, id, questionID, answer, audioFile, valid, flq, spoken,
         audioType, durationInMillis, correct, pronScore, stimulus);
-      database.closeConnection(connection);
       long now = System.currentTimeMillis();
       if (now - then > 100) System.out.println("took " + (now - then) + " millis to record answer.");
       return newid;
 
     } catch (Exception ee) {
       logger.error("addAnswer got " + ee, ee);
+    } finally {
+      database.closeConnection(connection);
     }
     return -1;
   }
@@ -185,7 +186,7 @@ public class AnswerDAO {
    */
   public void changeAnswer(long id, float score) {
     try {
-      Connection connection = database.getConnection();
+      Connection connection = database.getConnection(this.getClass().toString());
 
       String sql = "UPDATE results " +
         "SET " +
@@ -214,7 +215,7 @@ public class AnswerDAO {
   public void changeType(Collection<Long> ids) {
     try {
       if (ids.isEmpty()) return;
-      Connection connection = database.getConnection();
+      Connection connection = database.getConnection(this.getClass().toString());
       String list = getInList(ids);
 
       String sql = "UPDATE " +
