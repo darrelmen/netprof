@@ -3,6 +3,8 @@ package mitll.langtest.server.database.instrumentation;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.UserDAO;
+import mitll.langtest.shared.AudioAttribute;
+import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
@@ -19,12 +21,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -53,13 +50,18 @@ public class EventDAO extends DAO {
     this.userDAO = userDAO;
     try {
       createTable(database);
+      createIndex(database, WIDGETTYPE, EVENT);
+      createIndex(database, CREATORID, EVENT);
+      createIndex(database, EXERCISEID, EVENT);
 
       // check for missing column
       Collection<String> columns = getColumns(EVENT);
-      Connection connection = database.getConnection();
+      Connection connection = database.getConnection(this.getClass().toString());
       if (!columns.contains(HITID)) {
         addVarchar(connection, EVENT, HITID);
       }
+
+      database.closeConnection(connection);
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
@@ -70,10 +72,8 @@ public class EventDAO extends DAO {
    * @throws java.sql.SQLException
    */
   void createTable(Database database) throws SQLException {
-    Connection connection = database.getConnection();
-    PreparedStatement statement;
-
-    statement = connection.prepareStatement("CREATE TABLE if not exists " +
+    Connection connection = database.getConnection(this.getClass().toString());
+    PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
       EVENT +
       " (" +
       "uniqueid IDENTITY, " +
@@ -93,9 +93,7 @@ public class EventDAO extends DAO {
       "(ID)" +
       ")");
 
-    statement.execute();
-    statement.close();
-    database.closeConnection(connection);
+    finish(database, connection, statement);
   }
 
 
@@ -104,16 +102,14 @@ public class EventDAO extends DAO {
    * <p/>
    * Uses return generated keys to get the user id
    *
-   * @see mitll.langtest.server.database.custom.UserListManager#reallyCreateNewItem(long, mitll.langtest.shared.custom.UserExercise, String)
+   * @see mitll.langtest.server.database.DatabaseImpl#logEvent(String, String, String, String, long, String)
    */
-  public void add(Event event) {
+  public void add(Event event) throws SQLException {
+    Connection connection = database.getConnection(this.getClass().toString());
     try {
       // there are much better ways of doing this...
 
-      Connection connection = database.getConnection();
-      PreparedStatement statement;
-
-      statement = connection.prepareStatement(
+      PreparedStatement statement = connection.prepareStatement(
         "INSERT INTO " + EVENT +
           "(" +
           CREATORID +
@@ -150,11 +146,13 @@ public class EventDAO extends DAO {
         logger.error("huh? didn't insert row for ");// + grade + " grade for " + resultID + " and " + grader + " and " + gradeID + " and " + gradeType);
 
       statement.close();
-      database.closeConnection(connection);
 
       //logger.debug("now " + getCount(EVENT) + " and event is " + event);
-    } catch (Exception ee) {
+    } catch (SQLException ee) {
       logger.error("got " + ee, ee);
+      throw ee;
+    } finally {
+      database.closeConnection(connection);
     }
   }
 
@@ -167,6 +165,20 @@ public class EventDAO extends DAO {
       logger.error("got " + ee, ee);
     }
     return Collections.emptyList();
+  }
+
+  public void addPlayedMarkings(long userID, CommonExercise firstExercise) {
+    List<Event> allForUserAndExercise = getAllForUserAndExercise(userID, firstExercise.getID());
+    Map<String, AudioAttribute> audioToAttr = firstExercise.getAudioRefToAttr();
+    for (Event event : allForUserAndExercise) {
+      AudioAttribute audioAttribute = audioToAttr.get(event.getContext());
+      if (audioAttribute == null) {
+        //logger.warn("addPlayedMarkings huh? can't find " + event.getContext() + " in " + audioToAttr.keySet());
+      }
+      else {
+        audioAttribute.setHasBeenPlayed(true);
+      }
+    }
   }
 
   public List<Event> getAllForUserAndExercise(long userid, String exid) {
@@ -185,6 +197,8 @@ public class EventDAO extends DAO {
     return Collections.emptyList();
   }
 
+
+
   /**
    * Pulls the list of users out of the database.
    *
@@ -202,7 +216,7 @@ public class EventDAO extends DAO {
   }*/
 
   private List<Event> getEvents(String sql) throws SQLException {
-    Connection connection = database.getConnection();
+    Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
     ResultSet rs = statement.executeQuery();
     List<Event> lists = new ArrayList<Event>();
@@ -221,9 +235,7 @@ public class EventDAO extends DAO {
     }
 
     //logger.debug("getUserAnnotations sql " + sql + " yielded " + lists);
-    rs.close();
-    statement.close();
-    database.closeConnection(connection);
+    finish(connection, statement, rs);
     return lists;
   }
 
