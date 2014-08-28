@@ -281,7 +281,6 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
                                  float screenPortion, CommonExercise exercise) {}
 
   /**
-   * @param e
    * @param content
    * @return
    */
@@ -328,7 +327,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
   private List<RememberTabAndContent> tabs;
 
-  protected Widget getScoringAudioPanel(final CommonExercise e, String pathxxxx) {
+  protected Widget getScoringAudioPanel(final CommonExercise e) {
     if (!e.hasRefAudio()) {
       ExerciseAnnotation refAudio = e.getAnnotation(REF_AUDIO);
       Panel column = new FlowPanel();
