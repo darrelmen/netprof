@@ -52,9 +52,10 @@ public class ReviewedDAO extends DAO {
 
       // check for missing column
       Collection<String> columns = getColumns(tableName);
-      Connection connection = database.getConnection();
       if (!columns.contains(STATE_COL)) {
+        Connection connection = database.getConnection(this.getClass().toString());
         addVarchar(connection, tableName, STATE_COL);
+        database.closeConnection(connection);
       }
     } catch (SQLException e) {
       logger.error("got " + e, e);
@@ -69,10 +70,8 @@ public class ReviewedDAO extends DAO {
    * @throws java.sql.SQLException
    */
   private void createTable(Database database) throws SQLException {
-    Connection connection = database.getConnection();
-    PreparedStatement statement;
-
-    statement = connection.prepareStatement("CREATE TABLE if not exists " +
+    Connection connection = database.getConnection(this.getClass().toString());
+    PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
       tableName +
       " (" +
       "uniqueid IDENTITY, " +
@@ -90,9 +89,7 @@ public class ReviewedDAO extends DAO {
       "USERS" +
       "(ID)" +
       ")");
-    statement.execute();
-    statement.close();
-    database.closeConnection(connection);
+    finish(database, connection, statement);
   }
 
   /**
@@ -106,7 +103,7 @@ public class ReviewedDAO extends DAO {
       // there are much better ways of doing this...
 //      logger.info("add : exid " + exerciseID + " = " + state + " by " + creatorID);
 
-      Connection connection = database.getConnection();
+      Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(
         "INSERT INTO " + tableName +
           "(" +
@@ -128,8 +125,7 @@ public class ReviewedDAO extends DAO {
       if (j != 1)
         logger.error("huh? didn't insert row for " + exerciseID + " " + creatorID);
 
-      statement.close();
-      database.closeConnection(connection);
+      finish(connection, statement);
 
       //logger.debug("now " + getCount() + " reviewed");
     } catch (Exception ee) {
@@ -145,7 +141,7 @@ public class ReviewedDAO extends DAO {
   public void remove(String exerciseID) {
     try {
       int before = getCount();
-      Connection connection = database.getConnection();
+      Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(
         "DELETE FROM " + tableName +
           " WHERE " +
@@ -163,8 +159,7 @@ public class ReviewedDAO extends DAO {
         if (before - count != 1) logger.error("ReviewedDAO : huh? there were " + before + " before");
       }
 
-      statement.close();
-      database.closeConnection(connection);
+      finish(connection, statement);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
@@ -207,7 +202,7 @@ public class ReviewedDAO extends DAO {
   }
 
   private Map<String, StateCreator> getExerciseToState(boolean skipUnset, boolean selectSingleExercise, String exerciseIDToFind) {
-    Connection connection = database.getConnection();
+    Connection connection = database.getConnection(this.getClass().toString());
 
     String latest = "latest";
     String whereClause = selectSingleExercise ? " where " + EXERCISEID + "='" + exerciseIDToFind + "'" : "";
@@ -240,9 +235,7 @@ public class ReviewedDAO extends DAO {
         }
       }
 
-      rs.close();
-      statement.close();
-      database.closeConnection(connection);
+      finish(connection, statement, rs);
      // int count = getCount();
      // if (count % 10 == 0) logger.debug("now " + count + " reviewed");
       //logger.debug("query " + sql3 + " returned " + exidToState.size() + " exercise->state items");
