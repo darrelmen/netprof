@@ -30,6 +30,7 @@ public class AnnotationDAO extends DAO {
   private static final String ANNOTATION = "annotation";
   private static final String CREATORID = "creatorid";
   private static final String STATUS = "status";
+  public static final String EXERCISEID = "exerciseid";
 
   public AnnotationDAO(Database database, UserDAO userDAO) {
     super(database);
@@ -48,26 +49,30 @@ public class AnnotationDAO extends DAO {
    * @throws SQLException
    */
   void createTable(Database database) throws SQLException {
-    Connection connection = database.getConnection();
-    PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
+    Connection connection = database.getConnection(this.getClass().toString());
+    PreparedStatement statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS " +
         ANNOTATION +
-      " (" +
-      "uniqueid IDENTITY, " +
-      CREATORID + " INT, " +
-      "exerciseid VARCHAR, field VARCHAR, " +
-      STATUS +
-      " VARCHAR, modified TIMESTAMP, comment VARCHAR, " +
-      "FOREIGN KEY(" +
-      CREATORID +
-      ") REFERENCES " +
-      "USERS" +
-      "(ID)" +
-      ")");
-    statement.execute();
-    statement.close();
-    database.closeConnection(connection);
+        " (" +
+        "uniqueid IDENTITY, " +
+        CREATORID + " INT, " +
+        EXERCISEID + " VARCHAR, " +
+        "field VARCHAR, " +
+        STATUS + " VARCHAR, " +
+        "modified TIMESTAMP, " +
+        "comment VARCHAR, " +
+        "FOREIGN KEY(" +
+        CREATORID +
+        ") REFERENCES " +
+        "USERS" +
+        "(ID)" +
+        ")");
+    finish(database, connection, statement);
+    index(database);
   }
 
+  void index(Database database) throws SQLException {
+    createIndex(database, EXERCISEID, ANNOTATION);
+  }
 
   /**
    * Somehow on subsequent runs, the ids skip by 30 or so?
@@ -81,7 +86,7 @@ public class AnnotationDAO extends DAO {
       // there are much better ways of doing this...
      //logger.info("add :annotation " + annotation);
 
-      Connection connection = database.getConnection();
+      Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement;
 
       statement = connection.prepareStatement(
@@ -107,8 +112,7 @@ public class AnnotationDAO extends DAO {
         logger.error("huh? didn't insert row for ");// + grade + " grade for " + resultID + " and " + grader + " and " + gradeID + " and " + gradeType);
       }
 
-      statement.close();
-      database.closeConnection(connection);
+      finish(connection, statement);
 
     //  logger.debug("now " + getCount(ANNOTATION) + " and user exercise is " + annotation);
     } catch (Exception ee) {
@@ -160,8 +164,10 @@ public class AnnotationDAO extends DAO {
    * @param exerciseID
    * @return
    */
-  public Map<String,ExerciseAnnotation> getLatestByExerciseID(String exerciseID) {
-    String sql = "SELECT * from " + ANNOTATION + " where exerciseid='" + exerciseID + "' order by field,modified desc";
+  public Map<String, ExerciseAnnotation> getLatestByExerciseID(String exerciseID) {
+    String sql = "SELECT * from " + ANNOTATION + " where " +
+        EXERCISEID +
+        "='" + exerciseID + "' order by field,modified desc";
     try {
       return getFieldToAnnotationMap(sql);
     } catch (SQLException e) {
@@ -206,14 +212,14 @@ public class AnnotationDAO extends DAO {
    * @throws SQLException
    */
   private List<UserAnnotation> getUserAnnotations(String sql) throws SQLException {
-    Connection connection = database.getConnection();
+    Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
     ResultSet rs = statement.executeQuery();
     List<UserAnnotation> lists = new ArrayList<UserAnnotation>();
 
     while (rs.next()) {
       lists.add(new UserAnnotation(
-          rs.getString("exerciseid"),
+          rs.getString(EXERCISEID),
           rs.getString("field"),
           rs.getString(STATUS),
           rs.getString("comment"),
@@ -224,9 +230,7 @@ public class AnnotationDAO extends DAO {
     }
 
     //logger.debug("getUserAnnotations sql " + sql + " yielded " + lists);
-    rs.close();
-    statement.close();
-    database.closeConnection(connection);
+    finish(connection, statement, rs);
     return lists;
   }
 
@@ -245,7 +249,7 @@ public class AnnotationDAO extends DAO {
   }
 
   private Map<String, Long> getAnnotationToCreator(boolean forDefects) {
-    Connection connection = database.getConnection();
+    Connection connection = database.getConnection(this.getClass().toString());
 
     String sql2 = "select exerciseid,field," +STATUS +"," +CREATORID +
       " from annotation group by exerciseid,field," + STATUS +",modified order by exerciseid,field,modified;";
@@ -292,9 +296,7 @@ public class AnnotationDAO extends DAO {
         //for (int i = 0; i < 20;i++) logger.debug("\tgetUserAnnotations e.g. " + iterator.next() );
       }*/
 
-      rs.close();
-      statement.close();
-      database.closeConnection(connection);
+      finish(connection, statement, rs);
     } catch (SQLException e) {
       logger.error("Got " +e + " doing " + sql2,e);
     }
