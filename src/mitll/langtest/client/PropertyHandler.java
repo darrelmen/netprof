@@ -59,11 +59,14 @@ public class PropertyHandler {
   private static final String CLASSROOM_MODE = "classroomMode";
   private static final String SHOW_SPECTROGRAM = "spectrogram";
   private static final String CLICK_AND_HOLD = "clickAndHold";
+  private static final String SHOW_CONTEXT = "showContext";
+  public static final String QUIET_AUDIO_OK = "quietAudioOK";
   private boolean spectrogram = false;
   private static final String NO_MODEL = "noModel";
  // private static final String INSTRUMENT = "instrument";
   private boolean clickAndHold = true;
   private boolean quietAudioOK;
+  private boolean showContext = false;
 
   public boolean doClickAndHold() { return clickAndHold; }
 
@@ -73,6 +76,11 @@ public class PropertyHandler {
 
   public void setQuietAudioOK(boolean quietAudioOK) {
     this.quietAudioOK = quietAudioOK;
+  }
+
+  public boolean showContextButton() {
+
+    return showContext;
   }
 
   public enum LOGIN_TYPE { UNDEFINED, ANONYMOUS, STUDENT }
@@ -171,7 +179,8 @@ public class PropertyHandler {
       else if (key.equals(SHOW_SPECTROGRAM)) spectrogram = getBoolean(value);
    //   else if (key.equals(INSTRUMENT)) instrument = getBoolean(value);
       else if (key.equals(NO_MODEL)) noModel = getBoolean(value);
-      else if (key.equals("quietAudioOK")) quietAudioOK = getBoolean(value);
+      else if (key.equals(QUIET_AUDIO_OK)) quietAudioOK = getBoolean(value);
+      else if (key.equals(SHOW_CONTEXT)) showContext = getBoolean(value);
       else if (key.equals(LOGIN_TYPE_PARAM)) {
         try {
           loginType = LOGIN_TYPE.valueOf(value.toUpperCase());
