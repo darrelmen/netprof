@@ -28,7 +28,7 @@ public class DAO {
 
   protected int getNumColumns(Connection connection, String table) throws SQLException {
     Statement stmt = connection.createStatement();
-    ResultSet rs = stmt.executeQuery("SELECT * FROM " + table);
+    ResultSet rs = stmt.executeQuery("SELECT * FROM " + table + " LIMIT 1");
 
     // Get result set meta data
     ResultSetMetaData rsmd = rs.getMetaData();
@@ -38,13 +38,18 @@ public class DAO {
     return numColumns;
   }
 
+  /**
+   * @see mitll.langtest.server.database.custom.UserListVisitorJoinDAO#createUserListTable(Database)
+   * @param table
+   * @return
+   */
   protected Collection<String> getColumns(String table) {
     Set<String> columns = new HashSet<String>();
     try {
-      Connection connection = database.getConnection();
+      Connection connection = database.getConnection(this.getClass().toString());
 
       Statement stmt = connection.createStatement();
-      ResultSet rs = stmt.executeQuery("SELECT * FROM " + table);
+      ResultSet rs = stmt.executeQuery("SELECT * FROM " + table + " LIMIT 1");
 
       // Get result set meta data
       ResultSetMetaData rsmd = rs.getMetaData();
@@ -54,6 +59,8 @@ public class DAO {
 
       rs.close();
       stmt.close();
+
+      database.closeConnection(connection);
     } catch (Exception e) {
       logger.error("doing getColumns: got " +e,e);
     }
@@ -63,7 +70,7 @@ public class DAO {
 
   protected int getCount(String table) {
     try {
-      Connection connection = database.getConnection();
+      Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) from " + table);
       ResultSet rs = statement.executeQuery();
       if (rs.next()) return rs.getInt(1);
@@ -99,7 +106,7 @@ public class DAO {
     try {
       int before = getCount(table);
 
-      Connection connection = database.getConnection();
+      Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(sql);
       boolean changed = statement.executeUpdate() == 1;
 
@@ -139,23 +146,58 @@ public class DAO {
     statement.close();
   }
 
+  protected void createIndex(Database database, String column, String table) throws SQLException {
+    Connection connection = database.getConnection(this.getClass().toString());
+    PreparedStatement statement = connection.prepareStatement("" +
+        "CREATE INDEX IF NOT EXISTS " +
+        "IDX_" + column +
+        " ON " +
+        table +
+        "(" +
+        column +
+        ");" );
+    statement.execute();
+    statement.close();
+    database.closeConnection(connection);
+  }
+
+  protected void finish(Connection connection, PreparedStatement statement, ResultSet rs) throws SQLException {
+    rs.close();
+    statement.close();
+    database.closeConnection(connection);
+  }
+
+  protected void finish(Database database, Connection connection, PreparedStatement statement) throws SQLException {
+    statement.execute();
+    statement.close();
+    database.closeConnection(connection);
+  }
+
+  public void finish(Connection connection, PreparedStatement statement) throws SQLException {
+    statement.close();
+    database.closeConnection(connection);
+  }
+
   /**
    *
    *
    */
+/*
   void drop(String table) {
     try {
-      PreparedStatement statement = database.getConnection().prepareStatement("DROP TABLE if exists "+table);
+      Connection connection = database.getConnection();
+      PreparedStatement statement = connection.prepareStatement("DROP TABLE if exists " + table);
       if (!statement.execute()) {
         logger.error("couldn't drop table?");
       }
       statement.close();
-      database.closeConnection(database.getConnection());
+      database.closeConnection(connection);
 
     } catch (Exception e) {
       e.printStackTrace();
     }
   }
+*/
 
   /**
    * Does not seem to work with h2
