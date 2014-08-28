@@ -41,7 +41,7 @@ import java.util.*;
  * Time: 5:49 PM
  */
 @SuppressWarnings("serial")
-public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase, AutoCRTScoring {
+public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase, AutoCRTScoring, LogAndNotify {
   private static final Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
@@ -76,6 +76,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       }
   }
 
+  @Override
   public void logAndNotifyServerException(Exception e) {
     String message1 = e == null ? "null_ex" : e.getMessage() == null ? "null_msg":e.getMessage();
     if (!message1.contains("Broken Pipe")) {
@@ -458,24 +459,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
+  /**
+   * @see #addAnnotationsAndAudio(long, mitll.langtest.shared.CommonExercise)
+   * @param userID
+   * @param firstExercise
+   */
   private void attachScoreHistory(long userID, CommonExercise firstExercise) {
-    List<Result> resultsForExercise = db.getResultDAO().getResultsForExercise(firstExercise.getID());
-
-    int total = 0;
-    float scoreTotal = 0f;
-    List<ScoreAndPath> scores = new ArrayList<ScoreAndPath>();
-    for (Result r : resultsForExercise) {
-      float pronScore = r.getPronScore();
-      if (pronScore > 0) { // overkill?
-        total++;
-        scoreTotal += pronScore;
-        if (r.userid == userID) {
-          scores.add(new ScoreAndPath(pronScore, r.answer));
-        }
-      }
-    }
-    firstExercise.setScores(scores);
-    firstExercise.setAvgScore(total == 0 ? 0f : scoreTotal/total);
+    db.getResultDAO().attachScoreHistory(userID,firstExercise);
   }
 
   /**
@@ -484,8 +474,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   private void attachAudio(CommonExercise firstExercise) {
     String installPath = pathHelper.getInstallPath();
-    String relativeConfigDir1 = relativeConfigDir;
-    db.getAudioDAO().attachAudio(firstExercise, installPath, relativeConfigDir1);
+    db.getAudioDAO().attachAudio(firstExercise, installPath, relativeConfigDir);
   }
 
   /**
@@ -497,17 +486,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param firstExercise
    */
   private void addPlayedMarkings(long userID, CommonExercise firstExercise) {
-    List<Event> allForUserAndExercise = db.getEventDAO().getAllForUserAndExercise(userID, firstExercise.getID());
-    Map<String, AudioAttribute> audioToAttr = firstExercise.getAudioRefToAttr();
-    for (Event event : allForUserAndExercise) {
-      AudioAttribute audioAttribute = audioToAttr.get(event.getContext());
-      if (audioAttribute == null) {
-        //logger.warn("addPlayedMarkings huh? can't find " + event.getContext() + " in " + audioToAttr.keySet());
-      }
-      else {
-        audioAttribute.setHasBeenPlayed(true);
-      }
-    }
+    db.getEventDAO().addPlayedMarkings(userID, firstExercise);
   }
 
   /**
@@ -586,9 +565,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return byID;
   }
 
-  private void addAnnotations(CommonExercise byID) {
-    db.getUserListManager().addAnnotations(byID); // TODO nice not to do this when not in classroom...
-  }
+  /**
+   * @see #addAnnotationsAndAudio(long, mitll.langtest.shared.CommonExercise)
+   * @param byID
+   */
+  private void addAnnotations(CommonExercise byID) {  db.getUserListManager().addAnnotations(byID);  }
 
   /**
    * @see #getExercise(String, long)
@@ -1438,7 +1419,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   private DatabaseImpl makeDatabaseImpl(String h2DatabaseFile) {
     //logger.debug("word pairs " +  serverProps.isWordPairs() + " language " + serverProps.getLanguage() + " config dir " + relativeConfigDir);
-    return new DatabaseImpl(configDir, relativeConfigDir, h2DatabaseFile, serverProps, pathHelper, true);
+    return new DatabaseImpl(configDir, relativeConfigDir, h2DatabaseFile, serverProps, pathHelper, true, this);
   }
 
   /**
