@@ -99,7 +99,7 @@ public class H2Connection implements DatabaseConnection {
   @Override
   public void contextDestroyed() {
     if (conn == null) {
-      logger.info("not never successfully created h2 connection ");
+      //logger.info("not never successfully created h2 connection ");
     } //else {
       sendShutdown();
       cleanup();
@@ -117,9 +117,11 @@ public class H2Connection implements DatabaseConnection {
     logger.info("send shutdown on connection " + conn);
 
     try {
-      Statement stat = conn.createStatement();
+      Connection connection = getConnection(this.getClass().toString());
+      Statement stat = connection.createStatement();
       stat.execute("SHUTDOWN");
       stat.close();
+      connection.close();
     } catch (Exception e) {
       e.printStackTrace();
     }
