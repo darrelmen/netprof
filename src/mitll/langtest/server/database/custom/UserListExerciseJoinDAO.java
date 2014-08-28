@@ -39,7 +39,7 @@ public class UserListExerciseJoinDAO extends DAO {
   }
 
   void createUserListTable(Database database) throws SQLException {
-    Connection connection = database.getConnection();
+    Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
       USER_EXERCISE_LIST_EXERCISE +
       " (" +
@@ -61,9 +61,7 @@ public class UserListExerciseJoinDAO extends DAO {
       UserExerciseDAO.USEREXERCISE +
       "(uniqueid)" +*/
       ")");
-    statement.execute();
-    statement.close();
-    database.closeConnection(connection);
+    finish(database, connection, statement);
   }
 
   /**
@@ -78,7 +76,7 @@ public class UserListExerciseJoinDAO extends DAO {
       // there are much better ways of doing this...
       logger.info("UserListExerciseJoinDAO.add :userList " + userList.getUniqueID() + " exercise " + uniqueID);
 
-      Connection connection = database.getConnection();
+      Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(
         "INSERT INTO " + USER_EXERCISE_LIST_EXERCISE +
           "(" +
@@ -96,8 +94,7 @@ public class UserListExerciseJoinDAO extends DAO {
       if (j != 1)
         logger.error("huh? didn't insert row for ");
 
-      statement.close();
-      database.closeConnection(connection);
+      finish(connection, statement);
 
       logger.debug("\tUserListExerciseJoinDAO.add : now " + getCount(USER_EXERCISE_LIST_EXERCISE) + " and user exercise is " + userList);
     } catch (Exception ee) {
