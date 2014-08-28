@@ -51,7 +51,7 @@ public class UserExerciseDAO extends DAO {
     try {
       createUserTable(database);
       Collection<String> columns = getColumns(USEREXERCISE);
-      Connection connection = database.getConnection();
+      Connection connection = database.getConnection(this.getClass().toString());
       if (!columns.contains(TRANSLITERATION)) {
         addColumnToTable(connection);
       }
@@ -73,6 +73,7 @@ public class UserExerciseDAO extends DAO {
       if (!columns.contains(STATE)) {
         addColumnToTable4(connection);
       }
+      database.closeConnection(connection);
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
@@ -95,7 +96,7 @@ public class UserExerciseDAO extends DAO {
       // there are much better ways of doing this...
      // logger.debug("UserExerciseDAO.add : userExercise " + userExercise);
 
-      Connection connection = database.getConnection();
+      Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(
         "INSERT INTO " + USEREXERCISE +
           "(" +
@@ -174,8 +175,7 @@ public class UserExerciseDAO extends DAO {
         //logger.debug("\tuserExercise= " + userExercise);
       }
 
-      statement.close();
-      database.closeConnection(connection);
+      finish(connection, statement);
 
     //  logger.debug("now " + getCount(USEREXERCISE) + " user exercises and user exercise is " + userExercise);
       logger.debug("new " + (predefined ? " PREDEF " : " USER ") + " user exercise is " + userExercise);
@@ -187,10 +187,8 @@ public class UserExerciseDAO extends DAO {
   private String fixSingleQuote(String s) { return s.replaceAll("'","''"); }
 
   void createUserTable(Database database) throws SQLException {
-    Connection connection = database.getConnection();
-    PreparedStatement statement;
-
-    statement = connection.prepareStatement("CREATE TABLE if not exists " +
+    Connection connection = database.getConnection(this.getClass().toString());
+    PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
       USEREXERCISE +
       " (" +
       "uniqueid IDENTITY, " +
@@ -215,9 +213,13 @@ public class UserExerciseDAO extends DAO {
       "USERS" +
       "(ID)" +
       ")");
-    statement.execute();
-    statement.close();
-    database.closeConnection(connection);
+    finish(database, connection, statement);
+
+    index(database);
+  }
+
+  void index(Database database) throws SQLException {
+    createIndex(database,EXERCISEID,USEREXERCISE);
   }
 
   /**
@@ -259,7 +261,9 @@ public class UserExerciseDAO extends DAO {
         if (exercise != null) {
           userExercises2.add(new UserExercise(exercise));
         }
-        else logger.info("can't find exercise " + exid);
+        else {
+          //logger.info("can't find exercise " + exid);
+        }
       }
       if (userExercises2.isEmpty()) {
         if (DEBUG) logger.debug("\tgetOnList : no exercises on list id " + listID);
@@ -395,7 +399,7 @@ public class UserExerciseDAO extends DAO {
    * @throws SQLException
    */
   private List<CommonUserExercise> getUserExercises(String sql, boolean addMissingAudio) throws SQLException {
-    Connection connection = database.getConnection();
+    Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
     //logger.debug("getUserExercises sql = " + sql);
     ResultSet rs = statement.executeQuery();
@@ -429,9 +433,7 @@ public class UserExerciseDAO extends DAO {
       }
       exercises.add(e);
     }
-    rs.close();
-    statement.close();
-    database.closeConnection(connection);
+    finish(connection, statement, rs);
 
     return exercises;
   }
@@ -506,7 +508,7 @@ public class UserExerciseDAO extends DAO {
   }
 
   private List<String> getExercises(String sql) throws SQLException {
-    Connection connection = database.getConnection();
+    Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
     ResultSet rs = statement.executeQuery();
     List<String> exercises = new ArrayList<String>();
@@ -514,9 +516,7 @@ public class UserExerciseDAO extends DAO {
     while (rs.next()) {
       exercises.add(rs.getString(EXERCISEID));
     }
-    rs.close();
-    statement.close();
-    database.closeConnection(connection);
+    finish(connection, statement, rs);
 
     return exercises;
   }
@@ -594,7 +594,7 @@ public class UserExerciseDAO extends DAO {
    */
   public void update(UserExercise userExercise, boolean createIfDoesntExist) {
     try {
-      Connection connection = database.getConnection();
+      Connection connection = database.getConnection(this.getClass().toString());
       String sql = "UPDATE " + USEREXERCISE +
         " " +
         "SET " +
@@ -627,8 +627,7 @@ public class UserExerciseDAO extends DAO {
         }
       }
 
-      statement.close();
-      database.closeConnection(connection);
+      finish(connection, statement);
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
