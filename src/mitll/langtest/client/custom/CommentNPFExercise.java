@@ -61,12 +61,14 @@ public class CommentNPFExercise extends NPFExercise {
    */
   @Override
   protected Widget getQuestionContent(final CommonExercise e, String content) {
-    Panel column = new FlowPanel();
+    Panel column = new VerticalPanel();
     column.getElement().setId("QuestionContent");
     column.setWidth("100%");
 
-    Widget entry = getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getRefSentence());
     DivWidget row = new DivWidget();
+    row.getElement().setId("QuestionContent_item");
+
+    Widget entry = getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getRefSentence());
     entry.addStyleName("floatLeft");
     row.add(entry);
 
@@ -104,8 +106,6 @@ public class CommentNPFExercise extends NPFExercise {
     if (!english.isEmpty() && !english.equals("N/A")) {
       column.add(getEntry(e, QCNPFExercise.ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, english));
     }
-
-   // addContext(e, column);
 
     return column;
   }
@@ -304,7 +304,7 @@ public class CommentNPFExercise extends NPFExercise {
 
   /**
    * @see #getQuestionContent(mitll.langtest.shared.CommonExercise, String)
-   * @see #addContext(mitll.langtest.shared.CommonExercise, com.google.gwt.user.client.ui.Panel)
+   * @see #getContext(mitll.langtest.shared.CommonExercise)
    * @param e
    * @param field
    * @param label
