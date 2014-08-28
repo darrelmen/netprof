@@ -46,11 +46,6 @@ public class UserListDAO extends DAO {
     }
     this.userDAO = userDAO;
     userListVisitorJoinDAO = new UserListVisitorJoinDAO(database);
-    try {
-      userListVisitorJoinDAO.createUserListTable(database);
-    } catch (SQLException e) {
-      logger.error("got " +e,e);
-    }
   }
 
   /**
@@ -73,10 +68,10 @@ public class UserListDAO extends DAO {
   }
 
   private void createUserListTable(Database database) throws SQLException {
-    Connection connection = database.getConnection();
-    PreparedStatement statement;
+    logger.debug("createUserListTable --- ");
 
-    statement = connection.prepareStatement("CREATE TABLE if not exists " +
+    Connection connection = database.getConnection(this.getClass().toString());
+    PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
       USER_EXERCISE_LIST +
       " (" +
       "uniqueid IDENTITY, " +
@@ -92,9 +87,9 @@ public class UserListDAO extends DAO {
       "USERS" +
       "(ID)" +
       ")");
-    statement.execute();
-    statement.close();
-    database.closeConnection(connection);
+
+    createIndex(database, CREATORID, USER_EXERCISE_LIST);
+    finish(database, connection, statement);
   }
 
 
@@ -112,10 +107,8 @@ public class UserListDAO extends DAO {
       // there are much better ways of doing this...
       logger.info("add :userList " + userList);
 
-      Connection connection = database.getConnection();
-      PreparedStatement statement;
-
-      statement = connection.prepareStatement(
+      Connection connection = database.getConnection(this.getClass().toString());
+      PreparedStatement statement = connection.prepareStatement(
         "INSERT INTO " + USER_EXERCISE_LIST +
           "(" +
           CREATORID +
@@ -150,8 +143,7 @@ public class UserListDAO extends DAO {
 
       userList.setUniqueID(id);
 
-      statement.close();
-      database.closeConnection(connection);
+      finish(connection, statement);
 
     //  logger.debug("now " + getCount(USER_EXERCISE_LIST) + " and user exercise is " + userList);
     } catch (Exception ee) {
@@ -161,7 +153,7 @@ public class UserListDAO extends DAO {
 
   public void updateModified(long uniqueID) {
     try {
-      Connection connection = database.getConnection();
+      Connection connection = database.getConnection(this.getClass().toString());
 
       String sql = "UPDATE " + USER_EXERCISE_LIST +
         " " +
@@ -179,8 +171,7 @@ public class UserListDAO extends DAO {
         logger.error("huh? didn't update the userList for " + uniqueID + " sql " + sql);
       }
 
-      statement.close();
-      database.closeConnection(connection);
+      finish(connection, statement);
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
@@ -370,7 +361,7 @@ public class UserListDAO extends DAO {
   }
 
   private List<UserList> getWhere(String sql) throws SQLException {
-    Connection connection = database.getConnection();
+    Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
     ResultSet rs = statement.executeQuery();
     List<UserList> lists = new ArrayList<UserList>();
@@ -387,9 +378,7 @@ public class UserListDAO extends DAO {
       );
     }
     //logger.debug("getWhere : got " + lists);
-    rs.close();
-    statement.close();
-    database.closeConnection(connection);
+    finish(connection, statement, rs);
     return lists;
   }
 
@@ -414,7 +403,7 @@ public class UserListDAO extends DAO {
 
   public void setPublicOnList(long userListID, boolean isPublic) {
     try {
-      Connection connection = database.getConnection();
+      Connection connection = database.getConnection(this.getClass().toString());
 
       String sql = "UPDATE " + USER_EXERCISE_LIST +
         " " +
@@ -436,8 +425,7 @@ public class UserListDAO extends DAO {
         logger.debug("updated "+ userListID + " public " + isPublic+  " sql " + sql);
       }
 
-      statement.close();
-      database.closeConnection(connection);
+      finish(connection, statement);
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
