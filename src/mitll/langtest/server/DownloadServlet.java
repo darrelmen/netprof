@@ -122,9 +122,9 @@ public class DownloadServlet extends DatabaseServlet {
     String exercise = split[1].split("=")[1];
     String useridString = split[2].split("=")[1];
 
-      logger.debug("returnAudioFile query is " + queryString + " file " + file + " ex " + exercise + " user " + useridString);
-
     String underscores = getFilenameForDownload(db, exercise, useridString);
+
+    logger.debug("returnAudioFile query is " + queryString + " file " + file + " ex " + exercise + " user " + useridString + " so name is " + underscores);
 
     response.setContentType("application/octet-stream");
     response.setCharacterEncoding("UTF-8");
@@ -168,7 +168,9 @@ public class DownloadServlet extends DatabaseServlet {
     // user part
     String userPart = getUserPart(db, Long.parseLong(useridString));
 
-    String fileName = foreignPart + englishPart + userPart + ".mp3";
+    String fileName = foreignPart + englishPart + userPart;
+    fileName = fileName.replaceAll("\\.","");
+    fileName += ".mp3";
 
     //logger.debug("file is '" + fileName + "'");
     String underscores = fileName.replaceAll("\\p{Z}+", "_");  // split on spaces
@@ -178,7 +180,7 @@ public class DownloadServlet extends DatabaseServlet {
 
   private String getUserPart(DatabaseImpl db, long userid) {
     User userWhere = db.getUserDAO().getUserWhere(userid);
-    return userWhere != null ? "_by_" + userWhere.getUserID() : "";
+    return userWhere != null ? (userWhere.getUserID().isEmpty() ? "":"_by_" + userWhere.getUserID()) : "";
   }
 
   private void returnSpreadsheet(HttpServletResponse response, DatabaseImpl db, String encodedFileName) throws IOException {
