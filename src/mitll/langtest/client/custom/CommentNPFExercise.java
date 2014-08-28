@@ -5,8 +5,11 @@ import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
+import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
+import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -16,6 +19,7 @@ import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.BrowserCheck;
+import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
@@ -25,10 +29,7 @@ import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseFormatter;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -43,6 +44,7 @@ public class CommentNPFExercise extends NPFExercise {
   private static final String F = "F";
   public static final String PUNCT_REGEX = "[\\?\\.,-\\/#!$%\\^&\\*;:{}=\\-_`~()]";//"\\p{P}";
   public static final String SPACE_REGEX = " ";
+  public static final String REF_AUDIO = "refAudio";
 
   private AudioAttribute defaultAudio, maleAudio, femaleAudio;
   private PlayAudioPanel contextPlay;
@@ -58,12 +60,40 @@ public class CommentNPFExercise extends NPFExercise {
    * @see #getQuestionContent(mitll.langtest.shared.CommonExercise)
    */
   @Override
-  protected Widget getQuestionContent(CommonExercise e, String content) {
+  protected Widget getQuestionContent(final CommonExercise e, String content) {
     Panel column = new FlowPanel();
     column.getElement().setId("QuestionContent");
     column.setWidth("100%");
 
-    column.add(getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getRefSentence()));
+    Widget entry = getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getRefSentence());
+    DivWidget row = new DivWidget();
+    entry.addStyleName("floatLeft");
+    row.add(entry);
+
+    String context = e.getContext() != null && !e.getContext().trim().isEmpty() ? e.getContext() : "";
+
+    if (!context.isEmpty() && controller.getProps().showContextButton()) {
+      Button show = new Button("Context Sentence");
+      show.setIcon(IconType.QUOTE_RIGHT);
+      show.setType(ButtonType.SUCCESS);
+      show.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          new ModalInfoDialog("Context Sentence", Collections.EMPTY_LIST, getContext(e),
+              null
+          );
+        }
+      });
+
+      show.addStyleName("floatRight");
+      show.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
+      show.getElement().getStyle().setMarginTop(-10, Style.Unit.PX);
+      show.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
+
+      row.add(show);
+    }
+
+    column.add(row);
 
     String translitSentence = e.getTransliteration();
     if (!translitSentence.isEmpty() && !translitSentence.equals("N/A")) {
@@ -85,7 +115,7 @@ public class CommentNPFExercise extends NPFExercise {
     //addContext(e,toAddTo);
   }
 
-  private void addContext(CommonExercise e, Panel toAddTo) {
+  private Panel getContext(CommonExercise e) {
     String context = e.getContext() != null && !e.getContext().trim().isEmpty() ? e.getContext() : "";
 
     if (!context.isEmpty()) {
@@ -95,8 +125,12 @@ public class CommentNPFExercise extends NPFExercise {
       addGenderChoices(e, hp);
 
       hp.add(entry);
-      hp.getElement().getStyle().setMarginTop(15, Style.Unit.PX);
-      toAddTo.add(hp);
+     // hp.getElement().getStyle().setMarginTop(15, Style.Unit.PX);
+     // toAddTo.add(hp);
+      return hp;
+    }
+    else {
+      return null;
     }
   }
 
@@ -268,10 +302,28 @@ public class CommentNPFExercise extends NPFExercise {
     return onButton;
   }
 
+  /**
+   * @see #getQuestionContent(mitll.langtest.shared.CommonExercise, String)
+   * @see #addContext(mitll.langtest.shared.CommonExercise, com.google.gwt.user.client.ui.Panel)
+   * @param e
+   * @param field
+   * @param label
+   * @param value
+   * @return
+   */
   private Widget getEntry(CommonExercise e, final String field, final String label, String value) {
     return getEntry(field, label, value, e.getAnnotation(field));
   }
 
+  /**
+   * @see #getEntry(mitll.langtest.shared.CommonExercise, String, String, String)
+   * @see #makeFastAndSlowAudio(String)
+   * @param field
+   * @param label
+   * @param value
+   * @param annotation
+   * @return
+   */
   private Widget getEntry(final String field, final String label, String value, ExerciseAnnotation annotation) {
     return getEntry(field, getContentWidget(label, value, true, false), annotation);
   }
@@ -291,7 +343,7 @@ public class CommentNPFExercise extends NPFExercise {
 
       @Override
       protected void addNoRefAudioWidget(Panel vp) {
-        Widget entry = getEntry("refAudio", "ReferenceAudio", CommentNPFExercise.NO_REFERENCE_AUDIO, exercise.getAnnotation("refAudio"));
+        Widget entry = getEntry(REF_AUDIO, "ReferenceAudio", CommentNPFExercise.NO_REFERENCE_AUDIO, exercise.getAnnotation(REF_AUDIO));
         entry.setWidth("500px");
         vp.add(entry);
       }
@@ -303,6 +355,7 @@ public class CommentNPFExercise extends NPFExercise {
    * @param content to wrap
    * @param annotation to get current comment from
    * @return three part widget -- content, comment button, and clear button
+   * @see #getEntry(String, String, String, mitll.langtest.shared.ExerciseAnnotation)
    */
   private Widget getEntry(String field, Widget content, ExerciseAnnotation annotation) {
     final Button commentButton = new Button();
