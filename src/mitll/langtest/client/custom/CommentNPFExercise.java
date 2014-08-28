@@ -5,8 +5,11 @@ import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
+import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
+import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -15,6 +18,8 @@ import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.AudioTag;
+import mitll.langtest.client.BrowserCheck;
+import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
@@ -24,10 +29,7 @@ import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseFormatter;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -40,6 +42,9 @@ public class CommentNPFExercise extends NPFExercise {
   private static final String NO_REFERENCE_AUDIO = "No reference audio";
   private static final String M = "M";
   private static final String F = "F";
+  public static final String PUNCT_REGEX = "[\\?\\.,-\\/#!$%\\^&\\*;:{}=\\-_`~()]";//"\\p{P}";
+  public static final String SPACE_REGEX = " ";
+  public static final String REF_AUDIO = "refAudio";
 
   private AudioAttribute defaultAudio, maleAudio, femaleAudio;
   private PlayAudioPanel contextPlay;
@@ -50,18 +55,47 @@ public class CommentNPFExercise extends NPFExercise {
   }
 
   /**
-   * @param e
    * @param content
    * @return
    * @see #getQuestionContent(mitll.langtest.shared.CommonExercise)
    */
   @Override
-  protected Widget getQuestionContent(CommonExercise e, String content) {
-    Panel column = new FlowPanel();
+  protected Widget getQuestionContent(final CommonExercise e, String content) {
+    Panel column = new VerticalPanel();
     column.getElement().setId("QuestionContent");
     column.setWidth("100%");
 
-    column.add(getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getRefSentence()));
+    DivWidget row = new DivWidget();
+    row.getElement().setId("QuestionContent_item");
+
+    Widget entry = getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getRefSentence());
+    entry.addStyleName("floatLeft");
+    row.add(entry);
+
+    String context = e.getContext() != null && !e.getContext().trim().isEmpty() ? e.getContext() : "";
+
+    if (!context.isEmpty() && controller.getProps().showContextButton()) {
+      Button show = new Button("Context Sentence");
+      show.setIcon(IconType.QUOTE_RIGHT);
+      show.setType(ButtonType.SUCCESS);
+      show.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          new ModalInfoDialog("Context Sentence", Collections.EMPTY_LIST, getContext(e),
+              null
+          );
+        }
+      });
+
+      show.addStyleName("floatRight");
+      show.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
+      show.getElement().getStyle().setMarginTop(-10, Style.Unit.PX);
+      show.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
+
+      row.add(show);
+    }
+
+    column.add(row);
 
     String translitSentence = e.getTransliteration();
     if (!translitSentence.isEmpty() && !translitSentence.equals("N/A")) {
@@ -73,19 +107,114 @@ public class CommentNPFExercise extends NPFExercise {
       column.add(getEntry(e, QCNPFExercise.ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, english));
     }
 
+    return column;
+  }
+
+  @Override
+  protected void addBelowPlaybackWidget(CommonExercise e, Panel toAddTo) {
+    //addContext(e,toAddTo);
+  }
+
+  private Panel getContext(CommonExercise e) {
     String context = e.getContext() != null && !e.getContext().trim().isEmpty() ? e.getContext() : "";
+
     if (!context.isEmpty()) {
+      context = highlightVocabItemInContext(e, context);
       Widget entry = getEntry(e, QCNPFExercise.CONTEXT, ExerciseFormatter.CONTEXT, context);
       Panel hp = new HorizontalPanel();
       addGenderChoices(e, hp);
 
       hp.add(entry);
-      hp.getElement().getStyle().setMarginTop(5, Style.Unit.PX);
-      column.add(hp);
+     // hp.getElement().getStyle().setMarginTop(15, Style.Unit.PX);
+     // toAddTo.add(hp);
+      return hp;
+    }
+    else {
+      return null;
+    }
+  }
+
+  /**
+   * Add underlines of item tokens in context sentence.
+   * @param e
+   * @param context
+   * @return
+   */
+  private String highlightVocabItemInContext(CommonExercise e, String context) {
+    String trim = e.getRefSentence().trim();
+   // String trim = ref;
+    String toFind = removePunct(trim);
+
+    // todone split on spaces, find matching words if no contigious overlap
+    int i = context.indexOf(toFind);
+    int end = i + toFind.length();
+    if (i > -1) {
+     log("marking underline from " + i + " to " + end + " for '" + toFind +
+         "' in '" + trim  +  "'");
+      context = context.substring(0, i) + "<u>" + context.substring(i, end) + "</u>" + context.substring(end);
+    } else {
+      log("NOT marking underline from " + i + " to " + end);
+      log("trim   " + trim + " len " + trim.length());
+      log("toFind " +toFind + " len " +trim.length());
+
+      List<String> tokens = getTokens(trim);
+      int startToken;
+      int endToken = 0;
+      StringBuilder builder = new StringBuilder();
+      for (String token : tokens) {
+        startToken = context.indexOf(token, endToken);
+        if (startToken != -1) {
+          builder.append(context.substring(endToken, startToken));
+          builder.append("<u>");
+          builder.append(context.substring(startToken, endToken = startToken + token.length()));
+          builder.append("</u>");
+        } else {
+          log("from " + endToken + " couldn't find token '" + token + "' len " + token.length() + " in '" +context+
+              "'");
+        }
+      }
+      builder.append(context.substring(endToken));
+     // System.out.println("before " + context + " after " + builder.toString());
+      context = builder.toString();
+    }
+    return context;
+  }
+
+  private void log(String message) {
+    System.out.println(message);
+    console(message);
+  }
+
+  private void console(String message) {
+    int ieVersion = BrowserCheck.getIEVersion();
+    if (ieVersion == -1 || ieVersion > 9) {
+      consoleLog(message);
+    }
+  }
+
+  private native static void consoleLog( String message) /*-{
+      console.log( "LangTest:" + message );
+  }-*/;
+
+
+  private List<String> getTokens(String sentence) {
+    List<String> all = new ArrayList<String>();
+    sentence = sentence.replaceAll(PUNCT_REGEX, " ");
+    for (String untrimedToken : sentence.split(SPACE_REGEX)) { // split on spaces
+      String tt = untrimedToken.replaceAll(PUNCT_REGEX, ""); // remove all punct
+      String token = tt.trim();  // necessary?
+      if (token.length() > 0) {
+        all.add(token);
+      }
     }
 
-    return column;
+    return all;
   }
+
+  private String removePunct(String t) {
+    return t.replaceAll(PUNCT_REGEX,"");
+  }
+
 
   private void addGenderChoices(CommonExercise e, Panel hp) {
     String path = null;
@@ -174,10 +303,28 @@ public class CommentNPFExercise extends NPFExercise {
     return onButton;
   }
 
+  /**
+   * @see #getQuestionContent(mitll.langtest.shared.CommonExercise, String)
+   * @see #getContext(mitll.langtest.shared.CommonExercise)
+   * @param e
+   * @param field
+   * @param label
+   * @param value
+   * @return
+   */
   private Widget getEntry(CommonExercise e, final String field, final String label, String value) {
     return getEntry(field, label, value, e.getAnnotation(field));
   }
 
+  /**
+   * @see #getEntry(mitll.langtest.shared.CommonExercise, String, String, String)
+   * @see #makeFastAndSlowAudio(String)
+   * @param field
+   * @param label
+   * @param value
+   * @param annotation
+   * @return
+   */
   private Widget getEntry(final String field, final String label, String value, ExerciseAnnotation annotation) {
     return getEntry(field, getContentWidget(label, value, true, false), annotation);
   }
@@ -191,13 +338,13 @@ public class CommentNPFExercise extends NPFExercise {
   protected ASRScoringAudioPanel makeFastAndSlowAudio(final String path) {
     return new FastAndSlowASRScoringAudioPanel(exercise, path, service, controller, scorePanel) {
       @Override
-      protected void addAudioRadioButton(Panel vp, RadioButton fast, String audioPath) {
+      protected void addAudioRadioButton(Panel vp, RadioButton fast) {
         vp.add(getEntry(audioPath, fast, exercise.getAnnotation(audioPath)));
       }
 
       @Override
       protected void addNoRefAudioWidget(Panel vp) {
-        Widget entry = getEntry("refAudio", "ReferenceAudio", CommentNPFExercise.NO_REFERENCE_AUDIO, exercise.getAnnotation("refAudio"));
+        Widget entry = getEntry(REF_AUDIO, "ReferenceAudio", CommentNPFExercise.NO_REFERENCE_AUDIO, exercise.getAnnotation(REF_AUDIO));
         entry.setWidth("500px");
         vp.add(entry);
       }
@@ -209,6 +356,7 @@ public class CommentNPFExercise extends NPFExercise {
    * @param content to wrap
    * @param annotation to get current comment from
    * @return three part widget -- content, comment button, and clear button
+   * @see #getEntry(String, String, String, mitll.langtest.shared.ExerciseAnnotation)
    */
   private Widget getEntry(String field, Widget content, ExerciseAnnotation annotation) {
     final Button commentButton = new Button();

@@ -42,11 +42,11 @@ public class AudioDAO extends DAO {
 
   public AudioDAO(Database database, UserDAO userDAO) {
     super(database);
-    connection = database.getConnection();
+    connection = database.getConnection(this.getClass().toString());
 
     this.userDAO = userDAO;
     try {
-      createTable(database.getConnection());
+      createTable(connection);
     } catch (SQLException e) {
       logger.error("Got " +e,e);
     }
@@ -57,6 +57,7 @@ public class AudioDAO extends DAO {
         logger.error("got "+e,e);
       }
     }
+    database.closeConnection(connection);
   }
 
   @Override
@@ -234,7 +235,7 @@ public class AudioDAO extends DAO {
   private Set<String> getAudioForGender( Map<Long, User> userMap, String audioSpeed) {
     Set<String> results = new HashSet<String>();
     try {
-      Connection connection = database.getConnection();
+      Connection connection = database.getConnection(this.getClass().toString());
       StringBuffer buffer = new StringBuffer();
       for (long id : userMap.keySet()) {
         buffer.append(id).append(",");
@@ -253,9 +254,7 @@ public class AudioDAO extends DAO {
         String exid = rs.getString(Database.EXID);
         results.add(exid);
       }
-      rs.close();
-      statement.close();
-      database.closeConnection(connection);
+      finish(connection, statement, rs);
 
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
@@ -307,7 +306,7 @@ public class AudioDAO extends DAO {
       " AND "+AUDIO_TYPE +"='" +audioType + "'";
 
    // logger.debug("sql " + sql);
-    Connection connection = database.getConnection();
+    Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
     return getExidResultsForQuery(connection, statement);
   }
@@ -320,7 +319,7 @@ public class AudioDAO extends DAO {
    * @throws SQLException
    */
   private List<AudioAttribute> getResultsSQL(String sql) throws SQLException {
-    Connection connection = database.getConnection();
+    Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
     return getResultsForQuery(connection, statement);
   }
@@ -373,9 +372,7 @@ public class AudioDAO extends DAO {
       }
       results.add(audioAttr);
     }
-    rs.close();
-    statement.close();
-    database.closeConnection(connection);
+    finish(connection, statement, rs);
 
     return results;
   }
@@ -387,9 +384,7 @@ public class AudioDAO extends DAO {
       String exid = rs.getString(Database.EXID);
       results.add(exid);
     }
-    rs.close();
-    statement.close();
-    database.closeConnection(connection);
+    finish(connection, statement, rs);
 
     return results;
   }
@@ -503,21 +498,16 @@ public class AudioDAO extends DAO {
     }
     try {
       logger.debug("addOrUpdate " + userid + " " + audioRef + " ex " + exerciseID + " at " + new Date(timestamp) + " type " + audioType + " dur " + durationInMillis);
-      Connection connection = database.getConnection();
+      Connection connection = database.getConnection(this.getClass().toString());
       String sql = "UPDATE " + AUDIO + " " +
           "SET " + USERID + "=? "+
           "WHERE " +
           Database.EXID + "=?" + " AND " +
-         // USERID + "=?" + " AND " +
           AUDIO_TYPE + "=? AND " +
           DEFECT +"=false";
       PreparedStatement statement = connection.prepareStatement(sql);
 
       int ii = 1;
-
-      //statement.setString(ii++, audioRef);
-      //statement.setTimestamp(ii++, new Timestamp(timestamp));
-      //statement.setInt(ii++, durationInMillis);
 
       statement.setInt(ii++, userid);
       statement.setString(ii++, exerciseID);
@@ -546,8 +536,7 @@ public class AudioDAO extends DAO {
         }
       }
       logger.debug("returning " + audioAttr);
-      statement.close();
-      database.closeConnection(connection);
+      finish(connection, statement);
 
       return audioAttr;
     } catch (Exception e) {
@@ -575,7 +564,7 @@ public class AudioDAO extends DAO {
     }
     try {
       //logger.debug("addOrUpdate " + userid + " " + audioRef + " ex " + exerciseID + " at " + new Date(timestamp) + " type " + audioType + " dur " + durationInMillis);
-      Connection connection = database.getConnection();
+      Connection connection = database.getConnection(this.getClass().toString());
       String sql = "UPDATE " + AUDIO +
         " " +
         "SET " +
@@ -626,8 +615,7 @@ public class AudioDAO extends DAO {
         }
       }
       logger.debug("returning " + audioAttr);
-      statement.close();
-      database.closeConnection(connection);
+      finish(connection, statement);
 
       return audioAttr;
     } catch (Exception e) {
@@ -659,7 +647,7 @@ public class AudioDAO extends DAO {
 
   public void updateExerciseID(int uniqueID, String exerciseID) {
     try {
-      Connection connection = database.getConnection();
+      Connection connection = database.getConnection(this.getClass().toString());
       String sql = "UPDATE " + AUDIO +
         " " +
         "SET " +
@@ -680,8 +668,7 @@ public class AudioDAO extends DAO {
         logger.error("huh? couldn't update " + uniqueID + " to " + exerciseID);
       }
 
-      statement.close();
-      database.closeConnection(connection);
+      finish(connection, statement);
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
@@ -710,7 +697,7 @@ public class AudioDAO extends DAO {
       if (audioType.equals(AudioAttribute.REGULAR_AND_SLOW)) {
         audioType = Result.AUDIO_TYPE_FAST_AND_SLOW;
       }
-      Connection connection = database.getConnection();
+      Connection connection = database.getConnection(this.getClass().toString());
       String sql = "UPDATE " + AUDIO +
         " " +
         "SET " +
@@ -737,8 +724,7 @@ public class AudioDAO extends DAO {
         logger.debug(i+" marked audio defect by " + userid + " ex " +exerciseID + " speed " + audioType);
       }
 
-      statement.close();
-      database.closeConnection(connection);
+      finish(connection, statement);
       return i;
     } catch (Exception e) {
       logger.error("got " + e, e);
@@ -835,5 +821,11 @@ public class AudioDAO extends DAO {
       ")");
     statement.execute();
     statement.close();
+    index(database);
+  }
+
+
+  private void index(Database database) throws SQLException {
+    createIndex(database, Database.EXID, AUDIO);
   }
 }
