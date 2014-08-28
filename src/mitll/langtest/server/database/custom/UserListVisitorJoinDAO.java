@@ -39,19 +39,18 @@ public class UserListVisitorJoinDAO extends DAO {
     }
   }
 
-  void createUserListTable(Database database) throws SQLException {
-    Connection connection = database.getConnection();
-    PreparedStatement statement;
-
-    statement = connection.prepareStatement("CREATE TABLE if not exists " +
+  private void createUserListTable(Database database) throws SQLException {
+    logger.debug("create user list table ");
+    Connection connection = database.getConnection(this.getClass().toString());
+    PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
       USER_EXERCISE_LIST_VISITOR +
       " (" +
       UNIQUEID +
       " IDENTITY, " +
       USERLISTID +
-      " LONG, " +
+      " BIGINT, " +
       VISITORID +
-      " LONG, " +
+      " BIGINT, " +
       MODIFIED +
       " TIMESTAMP,"+
       "FOREIGN KEY(" +
@@ -69,11 +68,11 @@ public class UserListVisitorJoinDAO extends DAO {
       ")");
     statement.execute();
     statement.close();
-    database.closeConnection(connection);
 
     if (!getColumns(USER_EXERCISE_LIST_VISITOR).contains(MODIFIED)) {
       addColumnToTable(connection);
     }
+    database.closeConnection(connection);
   }
 
   /**
@@ -88,15 +87,8 @@ public class UserListVisitorJoinDAO extends DAO {
         // there are much better ways of doing this...
         logger.info("add :visitor " + visitor + " to " + listID);
 
-        Connection connection = database.getConnection();
-        PreparedStatement statement;
-
- /*     String prefix = "IF NOT EXISTS (SELECT visitorid" +
-        " FROM " + USER_EXERCISE_LIST_VISITOR +
-        " WHERE visitorid = " + visitor +
-        " AND userlistid = " + listID +
-        ") ";*/
-        statement = connection.prepareStatement(
+        Connection connection = database.getConnection(this.getClass().toString());
+        PreparedStatement statement = connection.prepareStatement(
           "INSERT INTO " + USER_EXERCISE_LIST_VISITOR +
             "(" +
             USERLISTID + "," +
@@ -115,8 +107,7 @@ public class UserListVisitorJoinDAO extends DAO {
         if (j != 1)
           logger.error("huh? didn't insert row for " + listID + " and " + visitor);
 
-        statement.close();
-        database.closeConnection(connection);
+        finish(connection, statement);
 
         logger.debug("UserListVisitorJoinDAO.add: now " + getCount(USER_EXERCISE_LIST_VISITOR) + " in " + USER_EXERCISE_LIST_VISITOR);
       } catch (Exception ee) {
@@ -154,25 +145,23 @@ public class UserListVisitorJoinDAO extends DAO {
       "=" + userid +
       " ORDER BY " +MODIFIED + " DESC";
     try {
-      return getVisitors(sql,USERLISTID);
+      return getVisitors(sql);
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
     return null;
   }
 
-  private List<Long> getVisitors(String sql, String column) throws SQLException {
-    Connection connection = database.getConnection();
+  private List<Long> getVisitors(String sql) throws SQLException {
+    Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
     ResultSet rs = statement.executeQuery();
     List<Long> visitors = new ArrayList<Long>();
 
     while (rs.next()) {
-      visitors.add(rs.getLong(column));
+      visitors.add(rs.getLong(UserListVisitorJoinDAO.USERLISTID));
     }
-    rs.close();
-    statement.close();
-    database.closeConnection(connection);
+    finish(connection, statement, rs);
 
     return visitors;
   }
@@ -185,7 +174,7 @@ public class UserListVisitorJoinDAO extends DAO {
    */
   private boolean update(long userListID, long visitor) {
     try {
-      Connection connection = database.getConnection();
+      Connection connection = database.getConnection(this.getClass().toString());
       String sql = "UPDATE " + USER_EXERCISE_LIST_VISITOR +
         " " +
         "SET " +
@@ -198,8 +187,7 @@ public class UserListVisitorJoinDAO extends DAO {
       statement.setTimestamp(1, new Timestamp(System.currentTimeMillis()));  // smarter way to do this...?
       int i = statement.executeUpdate();
 
-      statement.close();
-      database.closeConnection(connection);
+      finish(connection, statement);
       boolean b = i > 0;
       if (b) {
         logger.debug("did update for list " + userListID + " and " + visitor + " in " + USER_EXERCISE_LIST_VISITOR);
