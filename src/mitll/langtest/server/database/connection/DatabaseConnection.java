@@ -16,4 +16,6 @@ public interface DatabaseConnection {
   Connection getConnection(String who);
 
   boolean isValid();
+
+  boolean usingCP();
 }
