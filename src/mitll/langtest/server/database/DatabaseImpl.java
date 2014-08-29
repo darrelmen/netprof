@@ -121,7 +121,7 @@ public class DatabaseImpl implements Database {
     long then = System.currentTimeMillis();
     connection = new H2Connection(configDir, dbName, mustAlreadyExist);
     long now = System.currentTimeMillis();
-    if (now - then > 1000) logger.info("took " + (now - then) + " millis to open database");
+    if (now - then > 1000) logger.info("took " + (now - then) + " millis to open database for " + serverProps.getLanguage());
 
     absConfigDir = configDir;
     this.configDir = relativeConfigDir;
@@ -152,7 +152,9 @@ public class DatabaseImpl implements Database {
 
     initializeDAOs(pathHelper);
     now = System.currentTimeMillis();
-    if (now - then > 1000) logger.info("took " + (now - then) + " millis to initialize DAOs");
+    if (now - then > 1000) {
+      logger.info("took " + (now - then) + " millis to initialize DAOs for " + serverProps.getLanguage());
+    }
 
     monitoringSupport = getMonitoringSupport();
   }
