@@ -60,6 +60,7 @@ import java.util.Set;
  */
 public class DatabaseImpl implements Database {
   private static final Logger logger = Logger.getLogger(DatabaseImpl.class);
+  public static final int LOG_THRESHOLD = 10;
 
   private String installPath;
   private ExerciseDAO exerciseDAO = null;
@@ -164,7 +165,7 @@ public class DatabaseImpl implements Database {
    * Create or alter tables as needed.
    */
   private void initializeDAOs(PathHelper pathHelper) {
-    logger.debug("initializeDAOs ---");
+//    logger.debug("initializeDAOs ---");
     userDAO = new UserDAO(this);
     UserListDAO userListDAO = new UserListDAO(this, userDAO);
     addRemoveDAO = new AddRemoveDAO(this);
@@ -219,8 +220,15 @@ public class DatabaseImpl implements Database {
   public void closeConnection(Connection conn) {
     try {
       int before = connection.connectionsOpen();
-      conn.close();
-      if (connection.connectionsOpen() > 3) {
+      if (conn != null && !conn.isClosed()) {
+        if (connection.usingCP()) {
+          conn.close();
+        }
+      }
+      //else {
+        //logger.warn("trying to close a null connection...");
+     // }
+      if (connection.connectionsOpen() > LOG_THRESHOLD) {
         logger.debug("closeConnection : now " + connection.connectionsOpen() + " open vs before " + before);
       }
 
@@ -230,7 +238,7 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @see UserListManagerTest#tearDown
+   * @seex mitll.langtest.server.database.custom.UserListManagerTest#tearDown
    * @throws SQLException
    */
   public void closeConnection() throws SQLException {
