@@ -1147,7 +1147,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int questionID,
                                     int user, int reqid, boolean flq, String audioType, boolean doFlashcard,
                                     boolean recordInResults, boolean addToAudioTable, boolean recordedWithFlash) {
-    CommonExercise exercise1 = getExercise(exercise, user); // NOTE : this could be null if we're posting audio against a new user exercise
+//    CommonExercise exercise1 = getExercise(exercise, user); // NOTE : this could be null if we're posting audio against a new user exercise
+
+    CommonExercise exercise1 = db.getCustomOrPredefExercise(exercise);  // allow custom items to mask out non-custom items
+
     AudioAnswer audioAnswer = audioFileHelper.writeAudioFile(base64EncodedString, plan, exercise, exercise1, questionID, user, reqid,
       flq, audioType, doFlashcard, recordInResults, recordedWithFlash);
 
