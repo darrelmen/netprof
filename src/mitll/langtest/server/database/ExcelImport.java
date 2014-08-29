@@ -475,7 +475,7 @@ public class ExcelImport implements ExerciseDAO {
           try {
             isDelete = sheet.getWorkbook().getFontAt(next.getCell(colIndex).getCellStyle().getFontIndex()).getStrikeout();
           } catch (Exception e) {
-            logger.debug("got error reading " + next.getRowNum());
+            logger.debug("got error reading delete strikeout at row " + next.getRowNum() + " for " +serverProps.getLanguage());
           }
 
           String english = getCell(next, colIndex++).trim();
@@ -669,8 +669,7 @@ public class ExcelImport implements ExerciseDAO {
           try {
             isDelete = sheet.getWorkbook().getFontAt(next.getCell(colIndex).getCellStyle().getFontIndex()).getStrikeout();
           } catch (Exception e) {
-
-            logger.warn("Got exception reading row " +next.getRowNum());
+            logger.debug("got error reading delete strikeout at row " + next.getRowNum() + " for " +serverProps.getLanguage());
           }
           String english = getCell(next, colIndex++).trim();
           String foreignLanguagePhrase = getCell(next, colIndex).trim();
