@@ -219,7 +219,7 @@ public class UserExerciseDAO extends DAO {
   }
 
   void index(Database database) throws SQLException {
-    createIndex(database,EXERCISEID,USEREXERCISE);
+    createIndex(database, EXERCISEID, USEREXERCISE);
   }
 
   /**
@@ -400,40 +400,45 @@ public class UserExerciseDAO extends DAO {
    */
   private List<CommonUserExercise> getUserExercises(String sql, boolean addMissingAudio) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
-    PreparedStatement statement = connection.prepareStatement(sql);
-    //logger.debug("getUserExercises sql = " + sql);
-    ResultSet rs = statement.executeQuery();
-    List<CommonUserExercise> exercises = new ArrayList<CommonUserExercise>();
+    List<CommonUserExercise> exercises;
+    try {
+      PreparedStatement statement = connection.prepareStatement(sql);
+      //logger.debug("getUserExercises sql = " + sql);
+      ResultSet rs = statement.executeQuery();
+      exercises = new ArrayList<CommonUserExercise>();
 
-    List<String> typeOrder = exerciseDAO.getSectionHelper().getTypeOrder();
-    while (rs.next()) {
-      Map<String, String> unitToValue = getUnitToValue(rs, typeOrder);
+      List<String> typeOrder = exerciseDAO.getSectionHelper().getTypeOrder();
+      while (rs.next()) {
+        Map<String, String> unitToValue = getUnitToValue(rs, typeOrder);
 
-      Timestamp timestamp = rs.getTimestamp(MODIFIED);
+        Timestamp timestamp = rs.getTimestamp(MODIFIED);
 
-      Date date = (timestamp != null) ? new Date(timestamp.getTime()) : new Date(0);
+        Date date = (timestamp != null) ? new Date(timestamp.getTime()) : new Date(0);
 
-      UserExercise e = new UserExercise(
-        rs.getLong("uniqueid"),
-        rs.getString(EXERCISEID),
-        rs.getLong("creatorid"),
-        rs.getString("english"),
-        rs.getString("foreignLanguage"),
-        rs.getString(TRANSLITERATION),
-        "",         // TODO complete fill in of context!
-        rs.getBoolean(OVERRIDE),
-        unitToValue,
-        date
-      );
+        UserExercise e = new UserExercise(
+          rs.getLong("uniqueid"),
+          rs.getString(EXERCISEID),
+          rs.getLong("creatorid"),
+          rs.getString("english"),
+          rs.getString("foreignLanguage"),
+          rs.getString(TRANSLITERATION),
+          "",         // TODO complete fill in of context!
+          rs.getBoolean(OVERRIDE),
+          unitToValue,
+          date
+        );
 
-      if (addMissingAudio) {
-        String ref  = rs.getString(REF_AUDIO);
-        String sref = rs.getString(SLOW_AUDIO_REF);
-        addMissingAudio(e, ref, sref);
+        if (addMissingAudio) {
+          String ref  = rs.getString(REF_AUDIO);
+          String sref = rs.getString(SLOW_AUDIO_REF);
+          addMissingAudio(e, ref, sref);
+        }
+        exercises.add(e);
       }
-      exercises.add(e);
+      finish(connection, statement, rs);
+    } finally {
+      database.closeConnection(connection);
     }
-    finish(connection, statement, rs);
 
     return exercises;
   }
