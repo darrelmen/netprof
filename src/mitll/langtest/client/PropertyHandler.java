@@ -66,7 +66,7 @@ public class PropertyHandler {
  // private static final String INSTRUMENT = "instrument";
   private boolean clickAndHold = true;
   private boolean quietAudioOK;
-  private boolean showContext = false;
+  private boolean showContext = true;
 
   public boolean doClickAndHold() { return clickAndHold; }
 
@@ -74,9 +74,11 @@ public class PropertyHandler {
     return quietAudioOK;
   }
 
+/*
   public void setQuietAudioOK(boolean quietAudioOK) {
     this.quietAudioOK = quietAudioOK;
   }
+*/
 
   public boolean showContextButton() {
 
