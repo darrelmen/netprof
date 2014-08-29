@@ -105,24 +105,24 @@ public class EventDAO extends DAO {
    * @see mitll.langtest.server.database.DatabaseImpl#logEvent(String, String, String, String, long, String)
    */
   public void add(Event event) throws SQLException {
-    Connection connection = database.getConnection(this.getClass().toString());
+    Connection connection = getConnection();
     try {
       // there are much better ways of doing this...
 
       PreparedStatement statement = connection.prepareStatement(
-        "INSERT INTO " + EVENT +
-          "(" +
-          CREATORID +
-          "," +
-          EXERCISEID +
-          ",context," +
-          "widgetid," +
-          WIDGETTYPE +
-          "," +
-          HITID +
-          "," +
-          "modified) " +
-          "VALUES(?,?,?,?,?,?,?);");
+          "INSERT INTO " + EVENT +
+              "(" +
+              CREATORID +
+              "," +
+              EXERCISEID +
+              ",context," +
+              "widgetid," +
+              WIDGETTYPE +
+              "," +
+              HITID +
+              "," +
+              "modified) " +
+              "VALUES(?,?,?,?,?,?,?);");
       int i = 1;
 
       long creatorID = event.getCreatorID();
@@ -214,7 +214,7 @@ public class EventDAO extends DAO {
   }*/
 
   private List<Event> getEvents(String sql) throws SQLException {
-    Connection connection = database.getConnection(this.getClass().toString());
+    Connection connection = getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
     ResultSet rs = statement.executeQuery();
     List<Event> lists = new ArrayList<Event>();
