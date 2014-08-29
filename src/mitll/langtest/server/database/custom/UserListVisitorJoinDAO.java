@@ -40,7 +40,7 @@ public class UserListVisitorJoinDAO extends DAO {
   }
 
   private void createUserListTable(Database database) throws SQLException {
-    logger.debug("create user list table ");
+   // logger.debug("create user list table ");
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
       USER_EXERCISE_LIST_VISITOR +
