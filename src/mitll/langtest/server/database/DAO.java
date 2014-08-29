@@ -178,6 +178,10 @@ public class DAO {
     database.closeConnection(connection);
   }
 
+  protected Connection getConnection() {
+    return database.getConnection(this.getClass().toString());
+  }
+
   /**
    *
    *
