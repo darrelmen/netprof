@@ -114,9 +114,7 @@ public class UserDAO extends DAO {
       logger.info("addUser : max is " + max + " new user '" + userID + "' age " +age + " gender " + gender);
 
       Connection connection = database.getConnection(this.getClass().toString());
-      PreparedStatement statement;
-
-      statement = connection.prepareStatement(
+      PreparedStatement statement = connection.prepareStatement(
           "INSERT INTO " +
             USERS +
             "(id,age,gender,experience,ipaddr,nativeLang,dialect,userID,enabled," +
