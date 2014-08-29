@@ -297,12 +297,23 @@ public class ExcelImport implements ExerciseDAO {
     return new ArrayList<CommonExercise>();
   }
 
+  private void log() {
+    int MB = (1024 * 1024);
+    Runtime rt = Runtime.getRuntime();
+    long free = rt.freeMemory();
+    long used = rt.totalMemory() - free;
+    long max = rt.maxMemory();
+    logger.debug(serverProps.getLanguage() +
+        " : # cores = " + Runtime.getRuntime().availableProcessors() + " heap info free " + free / MB + "M used " + used / MB + "M max " + max / MB + "M");
+  }
+
   /**
    * @param inp
    * @return
    * @seex mitll.langtest.server.SiteDeployer#readExercises(mitll.langtest.shared.Site, org.apache.commons.fileupload.FileItem)
    */
   private List<CommonExercise> readExercises(InputStream inp) {
+    log();
     List<CommonExercise> exercises = new ArrayList<CommonExercise>();
     String language1 = serverProps.getLanguage();
     try {
