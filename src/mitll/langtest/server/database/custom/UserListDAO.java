@@ -68,7 +68,7 @@ public class UserListDAO extends DAO {
   }
 
   private void createUserListTable(Database database) throws SQLException {
-    logger.debug("createUserListTable --- ");
+//    logger.debug("createUserListTable --- ");
 
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
@@ -88,7 +88,7 @@ public class UserListDAO extends DAO {
       "(ID)" +
       ")");
 
-    createIndex(database, CREATORID, USER_EXERCISE_LIST);
+   // createIndex(database, CREATORID, USER_EXERCISE_LIST);
     finish(database, connection, statement);
   }
 
