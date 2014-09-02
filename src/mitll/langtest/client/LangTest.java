@@ -263,10 +263,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     } else {
       service.getImageForAudioFile(reqid, path, type, toUse, height, exerciseID, new AsyncCallback<ImageResponse>() {
         public void onFailure(Throwable caught) {
-          if (!caught.getMessage().trim().equals("0")) {
+       /*   if (!caught.getMessage().trim().equals("0")) {
             Window.alert("getImageForAudioFile Couldn't contact server. Please check network connection.");
-          }
+          }*/
           System.out.println("message " + caught.getMessage() + " " + caught);
+          logException(caught);
           client.onFailure(caught);
         }
 
