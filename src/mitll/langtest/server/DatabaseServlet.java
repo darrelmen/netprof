@@ -2,7 +2,9 @@ package mitll.langtest.server;
 
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
+import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletContext;
@@ -122,5 +124,18 @@ public class DatabaseServlet extends HttpServlet {
     // System.out.println("Data received.");
     outputStream.close();
     inputStream.close();
+  }
+
+  protected JSONObject getJsonForExercise(CommonExercise exercise) {
+    JSONObject ex = new JSONObject();
+    ex.put("id", exercise.getID());
+    ex.put("fl", exercise.getForeignLanguage());
+    ex.put("tl", exercise.getTransliteration());
+    ex.put("en", exercise.getEnglish());
+    ex.put("ct", exercise.getContext());
+    AudioAttribute latestContext = exercise.getLatestContext();
+    ex.put("ctref", latestContext == null ? "NO" : latestContext.getAudioRef());
+    ex.put("ref", exercise.hasRefAudio() ? exercise.getRefAudio() : "NO");
+    return ex;
   }
 }
