@@ -40,6 +40,7 @@
         <servlet-class>mitll.langtest.server.ScoreServlet</servlet-class>
     </servlet>
 
+
     <servlet-mapping>
         <servlet-name>downloadServlet</servlet-name>
         <url-pattern>/downloadUsers/*</url-pattern>
@@ -63,6 +64,15 @@
     <servlet-mapping>
         <servlet-name>scoreServlet</servlet-name>
         <url-pattern>/scoreServlet/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>loadTestServlet</servlet-name>
+        <servlet-class>mitll.langtest.server.LoadTestServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>loadTestServlet</servlet-name>
+        <url-pattern>/loadTest/*</url-pattern>
     </servlet-mapping>
 
     <context-param>
