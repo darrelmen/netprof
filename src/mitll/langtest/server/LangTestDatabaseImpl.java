@@ -41,7 +41,7 @@ import java.util.*;
  * Time: 5:49 PM
  */
 @SuppressWarnings("serial")
-public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase, AutoCRTScoring, LogAndNotify {
+public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase, AutoCRTScoring, LogAndNotify, LoadTesting {
   private static final Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
@@ -508,6 +508,27 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getSectionHelper().getSectionNodes();
   }
 
+  @Override
+  public CommonExercise getRandomExercise() {
+    List<User> users = db.getUserDAO().getUsers();
+
+    Random rand = new Random();
+    User user = users.get(rand.nextInt(users.size()));
+
+    ExerciseListWrapper exerciseIDs = getExerciseIDs((int) user.getId());
+
+    List<CommonShell> exercises = exerciseIDs.getExercises();
+
+    CommonShell shell = exercises.get(rand.nextInt(exercises.size()));
+
+    return getExercise(shell.getID(),user.getId());
+  }
+
+  private ExerciseListWrapper getExerciseIDs(int userID) {
+    Map<String, Collection<String>> objectObjectMap = Collections.emptyMap();
+    return getExerciseIds(0, objectObjectMap,"",-1,userID,"",false,false);
+  }
+
   /**
    * Joins with annotation data when doing QC.
    *
@@ -559,7 +580,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       sendEmail("slow exercise on " + language, "Getting ex " + id + " on " + language + " took " + diff + " millis.");
     } else if (diff > 1000) {
       logger.warn(message);
-    } else if (diff > 20) {
+    } else if (diff > 5) {
       logger.debug(message);
     }
     return byID;
@@ -606,7 +627,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     checkLTS(exercises);
     long now = System.currentTimeMillis();
     if (now-then > 200) {
-      logger.info("took " +(now-then) + " millis to get the predef exercise list.");
+      logger.info("took " +(now-then) + " millis to get the predef exercise list for " + serverProps.getLanguage());
     }
     return exercises;
   }
@@ -1412,6 +1433,20 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String h2DatabaseFile = serverProps.getH2Database();
 
     db = makeDatabaseImpl(h2DatabaseFile);
+    shareDB(servletContext);
+    shareLoadTesting(servletContext);
+  }
+
+  private void shareLoadTesting(ServletContext servletContext) {
+    Object loadTesting = servletContext.getAttribute(ScoreServlet.LOAD_TESTING);
+    if (loadTesting != null) {
+      logger.warn("huh? found existing reference " + loadTesting);
+    } else {
+      servletContext.setAttribute(ScoreServlet.LOAD_TESTING, (LoadTesting) this);
+    }
+  }
+
+  private void shareDB(ServletContext servletContext) {
     Object databaseReference = servletContext.getAttribute("databaseReference");
     if (databaseReference != null) {
       logger.warn("huh? found existing database reference " + databaseReference);
