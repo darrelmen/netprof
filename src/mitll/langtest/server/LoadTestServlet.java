@@ -1,14 +1,11 @@
 package mitll.langtest.server;
 
 import com.google.common.io.Files;
-import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.scoring.AutoCRTScoring;
-import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.AudioAttribute;
-import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.SectionNode;
+import mitll.langtest.shared.*;
+import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -32,46 +29,137 @@ import java.util.*;
  * User: GO22670
  */
 @SuppressWarnings("serial")
-public class ScoreServlet extends DatabaseServlet {
-  private static final Logger logger = Logger.getLogger(ScoreServlet.class);
-  private JSONObject chapters, nestedChapters;
+public class LoadTestServlet extends DatabaseServlet {
+  private static final Logger logger = Logger.getLogger(LoadTestServlet.class);
+  public static final String DATABASE_REFERENCE = "databaseReference";
   public static final String LOAD_TESTING = "loadTesting";
-
+  public static final String ADD_ANON_USER = "addAnonUser";
+  public static final String GET_EXERCISE_I_DS_FOR = "getExerciseIDsFor";
+  public static final String GET_EXERCISE = "getExercise";
+  public static final String GET_RANDOM_EXERCISE = "getRandomExercise";
+  public static final String LOG_EVENT = "logEvent";
+  public static final String LISTS_FOR_USER = "listsForUser";
+  public static final String IMAGE_FOR_AUDIO = "imageForAudio";
+  //private JSONObject chapters, nestedChapters;
   /**
    * Remembers chapters from previous requests...
    *
    * @param request
    * @param response
-   * @throws ServletException
-   * @throws IOException
+   * @throws javax.servlet.ServletException
+   * @throws java.io.IOException
    */
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     String pathInfo = request.getPathInfo();
-    logger.debug("ScoreServlet.doPost : Request " + request.getQueryString() + " path " + pathInfo +
+/*    logger.debug("ScoreServlet.doGet : Request " + request.getQueryString() + " path " + pathInfo +
         " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
+        */
 
     response.setContentType("application/json; charset=UTF-8");
     response.setCharacterEncoding("UTF-8");
 
-    getAudioFileHelper();
+    //getAudioFileHelper();
     String queryString = request.getQueryString();
 
-    JSONObject toReturn;
-    if (chapters == null) {
-      chapters = getJsonChapters();
-    }
-    toReturn = chapters;
-    if (queryString != null && queryString.startsWith("nestedChapters")) {
-      if (nestedChapters == null) {
-        nestedChapters = getJsonNestedChapters();
+    LoadTesting loadTesting = getLoadTesting();
+
+    JSONObject toReturn = new JSONObject();
+    if (queryString != null) {
+     /*if (queryString.startsWith(ADD_ANON_USER)) {
+        long l = loadTesting.addAnonUser();
+        toReturn.put("userid", l);
+      } else if (queryString.startsWith(GET_EXERCISE_I_DS_FOR)) {
+        String s = queryString.split("=")[1];
+        ExerciseListWrapper exerciseIDs = loadTesting.getExerciseIDs(Integer.parseInt(s));
+        JSONArray jsonArray = new JSONArray();
+        for (CommonShell id : exerciseIDs.getExercises()) {
+          jsonArray.add(id.getID());
+        }
+        toReturn.put("ids", jsonArray);
+       */
+       if (queryString.startsWith(GET_RANDOM_EXERCISE)) {
+         CommonExercise exercise = loadTesting.getRandomExercise();
+         toReturn = getJsonForExercise(exercise);
+      } else if (queryString.startsWith(GET_EXERCISE)) {
+        String[] split1 = queryString.split("&");
+        String first = split1[0];
+        //  logger.debug("first " + first);
+        String exid = first.split("=")[1];
+
+        String second = split1[1];
+        //  logger.debug("second " + second);
+        String userid = second.split("=")[1];
+
+        //logger.debug("user " + userid + " ex " + exid);
+
+        CommonExercise exercise = loadTesting.getExercise(exid, Integer.parseInt(userid));
+        toReturn = getJsonForExercise(exercise);
+      } else if (queryString.startsWith(LOG_EVENT)) {
+        // logEvent=exid&userid=12
+        String[] split1 = queryString.split("&");
+        String first = split1[0];
+        //  logger.debug("first " + first);
+        String exid = first.split("=")[1];
+
+        String second = split1[1];
+        //  logger.debug("second " + second);
+        String userid = second.split("=")[1];
+
+        //logger.debug("user " + userid + " ex " + exid);
+
+        try {
+          //loadTesting.logEvent("next","button",exid,"next",Long.parseLong(userid),"");
+        } catch (NumberFormatException e) {
+          e.printStackTrace();
+        }
       }
-      toReturn = nestedChapters;
+      else if (queryString.startsWith(LISTS_FOR_USER)) {
+        String s = queryString.split("=")[1];
+        try {
+          //Collection<UserList> listsForUser = loadTesting.getListsForUser(Long.parseLong(s), true, false);
+          //if (listsForUser.isEmpty()) logger.info("huh? no lists for " + s);
+        } catch (NumberFormatException e) {
+          e.printStackTrace();
+        }
+      }    else if (queryString.startsWith(IMAGE_FOR_AUDIO)) {
+        //  ?imageForAudio=1&audioFile=....
+
+
+        String[] split1 = queryString.split("&");
+        String first = split1[0];
+        //  logger.debug("first " + first);
+        String exid = first.split("=")[1];
+
+        String second = split1[1];
+        //  logger.debug("second " + second);
+        String audioFile = second.split("=")[1];
+        try {
+          //  logger.debug("audio file " + audioFile);
+        //  ImageResponse response1 = loadTesting.getImageForAudioFile(audioFile, exid);
+        //  if (!response1.successful) logger.info("huh? no image for " + exid + " and " +audioFile);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
     }
 
     PrintWriter writer = response.getWriter();
     writer.println(toReturn.toString());
     writer.close();
+  }
+
+  private LoadTesting getLoadTesting() {
+    LoadTesting db = null;
+
+    Object databaseReference = getServletContext().getAttribute(LOAD_TESTING);
+    if (databaseReference != null) {
+      db = (LoadTesting) databaseReference;
+      //   logger.debug("found existing reference " + db + " under " + getServletContext());
+    } else {
+      logger.error("huh? no existing db reference?");
+    }
+    return db;
   }
 
 
@@ -80,8 +168,8 @@ public class ScoreServlet extends DatabaseServlet {
    *
    * @param request
    * @param response
-   * @throws ServletException
-   * @throws IOException
+   * @throws javax.servlet.ServletException
+   * @throws java.io.IOException
    */
   @Override
   protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -290,20 +378,17 @@ public class ScoreServlet extends DatabaseServlet {
 
     for (CommonExercise exercise : copy) {
       ensureMP3s(exercise);
-      JSONObject ex = new JSONObject();
-      ex.put("id", exercise.getID());
-      ex.put("fl", exercise.getForeignLanguage());
-      ex.put("tl", exercise.getTransliteration());
-      ex.put("en", exercise.getEnglish());
-      ex.put("ct", exercise.getContext());
-      AudioAttribute latestContext = exercise.getLatestContext();
-      ex.put("ctref", latestContext == null ? "NO" : latestContext.getAudioRef());
-      ex.put("ref", exercise.hasRefAudio() ? exercise.getRefAudio() : "NO");
+      JSONObject ex = getJsonForExercise(exercise);
       exercises.add(ex);
     }
     return exercises;
   }
 
+  /* protected JSONObject getJsonForExercise(CommonExercise exercise) {
+     JSONObject ex = super.getJsonForExercise(exercise);
+     return ex;
+   }
+ */
   private JSONObject getJsonForAudio(HttpServletRequest request) throws IOException {
     // Gets file name for HTTP header
     String fileName = request.getHeader("fileName");
@@ -442,7 +527,7 @@ public class ScoreServlet extends DatabaseServlet {
   private DatabaseImpl getDatabase() {
     DatabaseImpl db = null;
 
-    Object databaseReference = getServletContext().getAttribute("databaseReference");
+    Object databaseReference = getServletContext().getAttribute(DATABASE_REFERENCE);
     if (databaseReference != null) {
       db = (DatabaseImpl) databaseReference;
       logger.debug("found existing database reference " + db + " under " + getServletContext());
@@ -515,7 +600,7 @@ public class ScoreServlet extends DatabaseServlet {
   /**
    * @param db
    * @return
-   * @see LangTestDatabaseImpl#init()
+   * @see mitll.langtest.server.LangTestDatabaseImpl#init()
    */
   private String setInstallPath(DatabaseImpl db) {
     String lessonPlanFile = getLessonPlan();
