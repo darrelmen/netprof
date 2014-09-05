@@ -20,6 +20,8 @@ public interface LoadTesting {
   */
   CommonExercise getExercise(String id, long userID);
 
+  CommonExercise getFirstExercise();
+
 /*  void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID);
 
   ImageResponse getImageForAudioFile(String audioFile, String exerciseID);
