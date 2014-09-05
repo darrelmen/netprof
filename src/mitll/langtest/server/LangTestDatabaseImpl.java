@@ -47,6 +47,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private static final Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
+  public static final String DATABASE_REFERENCE = "databaseReference";
 
   private DatabaseImpl db;
   private AudioFileHelper audioFileHelper;
@@ -1524,11 +1525,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private void shareDB(ServletContext servletContext) {
-    Object databaseReference = servletContext.getAttribute("databaseReference");
+    Object databaseReference = servletContext.getAttribute(DATABASE_REFERENCE);
     if (databaseReference != null) {
       logger.warn("huh? found existing database reference " + databaseReference);
     } else {
-      servletContext.setAttribute("databaseReference", db);
+      servletContext.setAttribute(DATABASE_REFERENCE, db);
     }
   }
 
