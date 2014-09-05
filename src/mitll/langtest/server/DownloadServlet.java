@@ -58,42 +58,47 @@ public class DownloadServlet extends DatabaseServlet {
     DatabaseImpl db = getDatabase();
 
     if (db != null) {
-      String encodedFileName = request.getRequestURI();
-      if (encodedFileName.toLowerCase().contains("audio")) {
-        String pathInfo = request.getPathInfo();
-        String queryString = request.getQueryString();
-        logger.debug("DownloadServlet.doGet : Request " + queryString + " path " + pathInfo +
-            " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
+      try {
+        String encodedFileName = request.getRequestURI();
+        if (encodedFileName.toLowerCase().contains("audio")) {
+          String pathInfo = request.getPathInfo();
+          String queryString = request.getQueryString();
+          logger.debug("DownloadServlet.doGet : Request " + queryString + " path " + pathInfo +
+              " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
+          if (queryString == null) {
+            setHeader(response, "allAudio.zip");
+            writeAllAudio(response);
+          } else if (queryString.startsWith("list")) {
+            String[] split = queryString.split("list=");
+            if (split.length == 2) {
+              String listid = split[1];
+              if (!listid.isEmpty()) {
+                writeUserList(response, db, listid);
+              }
+            }
+          } else if (queryString.startsWith("file")) {
+            returnAudioFile(response, db, queryString);
+          } else {
+            Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(queryString);
+            String name = typeToSection.isEmpty() ? "audio" : db.getPrefix(typeToSection);
+            name = name.replaceAll("\\,", "_");
+            name += ".zip";
+            String fileName = db.getServerProps().getLanguage() + "_" + name;
 
-        if (queryString == null) {
-          setHeader(response, "allAudio.zip");
-          writeAllAudio(response);
-        } else if (queryString.startsWith("list")) {
-          String[] split = queryString.split("list=");
-          if (split.length == 2) {
-            String listid = split[1];
-            if (!listid.isEmpty()) {
-              writeUserList(response, db, listid);
+            setHeader(response, fileName);
+            try {
+              db.writeZip(response.getOutputStream(), typeToSection);
+            } catch (Exception e) {
+              logger.error("couldn't write zip?", e);
             }
           }
-        } else if (queryString.startsWith("file")) {
-          returnAudioFile(response, db, queryString);
         } else {
-          Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(queryString);
-          String name = typeToSection.isEmpty() ? "audio" : db.getPrefix(typeToSection);
-          name = name.replaceAll("\\,", "_");
-          name += ".zip";
-          String fileName = db.getServerProps().getLanguage() + "_" + name;
-
-          setHeader(response, fileName);
-          try {
-            db.writeZip(response.getOutputStream(), typeToSection);
-          } catch (Exception e) {
-            logger.error("couldn't write zip?", e);
-          }
+          returnSpreadsheet(response, db, encodedFileName);
         }
-      } else {
-        returnSpreadsheet(response, db, encodedFileName);
+      } catch (Exception e) {
+        logger.error("Got " + e, e);
+        db.logAndNotify(e);
+        throw new IOException("couldn't process request.", e);
       }
     }
 
@@ -233,7 +238,7 @@ public class DownloadServlet extends DatabaseServlet {
   private DatabaseImpl getDatabase() {
     DatabaseImpl db = null;
 
-    Object databaseReference = getServletContext().getAttribute("databaseReference");
+    Object databaseReference = getServletContext().getAttribute(LangTestDatabaseImpl.DATABASE_REFERENCE);
     if (databaseReference != null) {
       db = (DatabaseImpl) databaseReference;
       // logger.debug("found existing database reference " + db + " under " +getServletContext());
