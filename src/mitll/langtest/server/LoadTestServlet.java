@@ -4,8 +4,9 @@ import com.google.common.io.Files;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.scoring.AutoCRTScoring;
-import mitll.langtest.shared.*;
-import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -36,11 +37,13 @@ public class LoadTestServlet extends DatabaseServlet {
   public static final String ADD_ANON_USER = "addAnonUser";
   public static final String GET_EXERCISE_I_DS_FOR = "getExerciseIDsFor";
   public static final String GET_EXERCISE = "getExercise";
+  public static final String GET_FIRST_EXERCISE = "getFirstExercise";
   public static final String GET_RANDOM_EXERCISE = "getRandomExercise";
   public static final String LOG_EVENT = "logEvent";
   public static final String LISTS_FOR_USER = "listsForUser";
   public static final String IMAGE_FOR_AUDIO = "imageForAudio";
   //private JSONObject chapters, nestedChapters;
+
   /**
    * Remembers chapters from previous requests...
    *
@@ -78,9 +81,12 @@ public class LoadTestServlet extends DatabaseServlet {
         }
         toReturn.put("ids", jsonArray);
        */
-       if (queryString.startsWith(GET_RANDOM_EXERCISE)) {
-         CommonExercise exercise = loadTesting.getRandomExercise();
-         toReturn = getJsonForExercise(exercise);
+      if (queryString.startsWith(GET_RANDOM_EXERCISE)) {
+        CommonExercise exercise = loadTesting.getRandomExercise();
+        toReturn = getJsonForExercise(exercise);
+      } else if (queryString.startsWith(GET_FIRST_EXERCISE)) {
+        CommonExercise exercise = loadTesting.getFirstExercise();
+        toReturn = getJsonForExercise(exercise);
       } else if (queryString.startsWith(GET_EXERCISE)) {
         String[] split1 = queryString.split("&");
         String first = split1[0];
@@ -113,8 +119,7 @@ public class LoadTestServlet extends DatabaseServlet {
         } catch (NumberFormatException e) {
           e.printStackTrace();
         }
-      }
-      else if (queryString.startsWith(LISTS_FOR_USER)) {
+      } else if (queryString.startsWith(LISTS_FOR_USER)) {
         String s = queryString.split("=")[1];
         try {
           //Collection<UserList> listsForUser = loadTesting.getListsForUser(Long.parseLong(s), true, false);
@@ -122,7 +127,7 @@ public class LoadTestServlet extends DatabaseServlet {
         } catch (NumberFormatException e) {
           e.printStackTrace();
         }
-      }    else if (queryString.startsWith(IMAGE_FOR_AUDIO)) {
+      } else if (queryString.startsWith(IMAGE_FOR_AUDIO)) {
         //  ?imageForAudio=1&audioFile=....
 
 
@@ -136,8 +141,8 @@ public class LoadTestServlet extends DatabaseServlet {
         String audioFile = second.split("=")[1];
         try {
           //  logger.debug("audio file " + audioFile);
-        //  ImageResponse response1 = loadTesting.getImageForAudioFile(audioFile, exid);
-        //  if (!response1.successful) logger.info("huh? no image for " + exid + " and " +audioFile);
+          //  ImageResponse response1 = loadTesting.getImageForAudioFile(audioFile, exid);
+          //  if (!response1.successful) logger.info("huh? no image for " + exid + " and " +audioFile);
         } catch (Exception e) {
           e.printStackTrace();
         }
@@ -370,6 +375,7 @@ public class LoadTestServlet extends DatabaseServlet {
 
   /**
    * This is the json that describes an individual entry.
+   *
    * @param copy
    * @return
    */
