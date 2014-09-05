@@ -303,6 +303,10 @@ public class ExcelImport implements ExerciseDAO {
     long free = rt.freeMemory();
     long used = rt.totalMemory() - free;
     long max = rt.maxMemory();
+
+    ThreadGroup threadGroup = Thread.currentThread().getThreadGroup();
+    logger.debug(serverProps.getLanguage() + " current thread group " + threadGroup.getName() + " = " + threadGroup.activeCount());
+
     logger.debug(serverProps.getLanguage() +
         " : # cores = " + Runtime.getRuntime().availableProcessors() + " heap info free " + free / MB + "M used " + used / MB + "M max " + max / MB + "M");
   }
