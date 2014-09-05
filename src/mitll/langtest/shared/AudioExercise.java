@@ -1,6 +1,5 @@
 package mitll.langtest.shared;
 
-import javax.validation.constraints.Min;
 import java.util.*;
 
 /**
@@ -12,13 +11,13 @@ import java.util.*;
  */
 public class AudioExercise extends ExerciseShell {
   private static final String SPEED = "speed";
-  public static final String REGULAR = "regular";
-  public static final String SLOW = "slow";
+  private static final String REGULAR = "regular";
+  private static final String SLOW = "slow";
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
 
-  protected Map<String,AudioAttribute> audioAttributes = new HashMap<String, AudioAttribute>();
-  protected Map<String,String> unitToValue = new HashMap<String, String>();
+  private Map<String,AudioAttribute> audioAttributes = new HashMap<String, AudioAttribute>();
+  private Map<String,String> unitToValue = new HashMap<String, String>();
   private Map<String,ExerciseAnnotation> fieldToAnnotation = new HashMap<String, ExerciseAnnotation>();
 
   public AudioExercise() {}
@@ -84,7 +83,7 @@ public class AudioExercise extends ExerciseShell {
     if (audio != null) audioAttributes.remove(audio.getKey());
   }
 
-  public AudioAttribute getAudio(String name, String value) {
+  AudioAttribute getAudio(String name, String value) {
     for (AudioAttribute audio : getAudioAttributes()) {
       if (audio.matches(name,value)) return audio;
     }
@@ -186,11 +185,17 @@ public class AudioExercise extends ExerciseShell {
     return null;
   }
 
+  /**
+   * @see mitll.langtest.server.database.AudioExport#getAudioAttribute(MiniUser, CommonExercise, boolean, String)
+   * @param userID
+   * @param speed
+   * @return
+   */
   public AudioAttribute getRecordingsBy(long userID, String speed) {
     List<AudioAttribute> recordingsBy = getRecordingsBy(userID);
 
     for (AudioAttribute attr : recordingsBy) {
-      if (attr.getSpeed().equalsIgnoreCase(speed)) {
+      if (attr.getSpeed() != null && attr.getSpeed().equalsIgnoreCase(speed)) {
         return attr;
       }
     }
@@ -198,7 +203,7 @@ public class AudioExercise extends ExerciseShell {
     return null;
   }
 
-  public List<AudioAttribute> getRecordingsBy(long userID) {
+  List<AudioAttribute> getRecordingsBy(long userID) {
     List<AudioAttribute> mine = new ArrayList<AudioAttribute>();
     for (AudioAttribute attr : getAudioAttributes()) {
       if (attr.getUser() != null) {
