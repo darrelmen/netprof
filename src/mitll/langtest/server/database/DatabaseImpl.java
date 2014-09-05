@@ -684,8 +684,12 @@ public class DatabaseImpl implements Database {
     try {
       logEvent("unknown","server",exid,context,userid,"unknown");
     } catch (SQLException e) {
-      logAndNotify.logAndNotifyServerException(e);
+      logAndNotify(e);
     }
+  }
+
+  public void logAndNotify(Exception e) {
+    logAndNotify.logAndNotifyServerException(e);
   }
 
   public List<Event> getEvents() {
