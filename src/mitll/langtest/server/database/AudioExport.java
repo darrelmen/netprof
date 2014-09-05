@@ -352,7 +352,9 @@ public class AudioExport {
       Collection<AudioAttribute> byGender = ex.getByGender(isMale);
       // choose the first one if not the majority majorityUser
       for (AudioAttribute attribute : byGender) {
-        if (attribute.getSpeed().equalsIgnoreCase(speed)) {
+        String speed1 = attribute.getSpeed();
+        if (speed1 != null &&
+            speed1.equalsIgnoreCase(speed)) {
           recordingAtSpeed = attribute;
           break;
         }
