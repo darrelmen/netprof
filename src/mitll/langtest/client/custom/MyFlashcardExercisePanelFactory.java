@@ -3,6 +3,7 @@ package mitll.langtest.client.custom;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.Label;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
 import com.github.gwtbootstrap.client.ui.incubator.Table;
@@ -11,11 +12,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -286,14 +283,15 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
     }
 
     /**
-     * @see #addWidgetsBelow(com.google.gwt.user.client.ui.Panel)
+     * @see #getSkipToEnd()
      * @see #loadNext()
      * @see #nextAfterDelay(boolean, String)
      */
-    public void onSetComplete() {
+    private void onSetComplete() {
       skip.setVisible(false);
       startOver.setVisible(false);
       seeScores.setVisible(false);
+      setPrevNextVisible(false);
 
       sticky.resetStorage();
 
@@ -558,6 +556,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
       skip.setVisible(true);
       startOver.setVisible(true);
       seeScores.setVisible(true);
+      setPrevNextVisible(true);
       String first = allExercises.iterator().next().getID();
       //exerciseList.checkAndAskServer(first);
       exerciseList.loadExercise(first);
@@ -586,13 +585,25 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
      * @param toAddTo
      */
     @Override
-    protected void addWidgetsBelow(Panel toAddTo) {
+    protected void addRowBelowPrevNext(DivWidget toAddTo) {
       toAddTo.add(getSkipItem());
       toAddTo.add(getSkipToEnd());
       toAddTo.add(getStartOver());
 
       belowContentDiv = toAddTo;
     }
+
+
+    @Override
+    protected void gotClickOnNext() {
+      if (exerciseList.onLast()) {
+        onSetComplete();
+      }
+      else {
+        exerciseList.loadNext();
+      }
+    }
+
 
     private Button getSkipItem() {
       skip = new Button(SKIP_THIS_ITEM);
