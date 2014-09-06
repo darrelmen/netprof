@@ -9,7 +9,6 @@ import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.InlineLabel;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
@@ -57,13 +56,11 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class Navigation implements RequiresResize {
-  private static final String CHAPTERS = "Learn Pronunciation";
+  private static final String CHAPTERS = "Learn";
   private static final String CONTENT = CHAPTERS;
   private static final String YOUR_LISTS = "Study Your Lists";
-  private static final String STUDY_LISTS = "Study Lists and Favorites";
   private static final String OTHERS_LISTS = "Study Visited Lists";
-  private static final String PRACTICE = "Do Flashcards";
-  //private static final String PRACTICE2 = "Do Flashcards";
+  private static final String PRACTICE = "Practice";
   public static final String REVIEW = "review";
   public static final String COMMENT = "comment";
   private static final String ATTENTION = "attention";
@@ -218,7 +215,7 @@ public class Navigation implements RequiresResize {
   public Widget getNav(final Panel secondAndThird) {  return getTabPanel(secondAndThird);  }
 
   private TabPanel tabPanel;
-  private TabAndContent yourStuff, othersStuff, studyLists;
+  private TabAndContent yourStuff, othersStuff;
   private TabAndContent browse, chapters, create;
   private TabAndContent review, recorderTab, recordExampleTab, contentTab, practiceTab;
   private final List<TabAndContent> tabs = new ArrayList<TabAndContent>();
@@ -271,40 +268,51 @@ public class Navigation implements RequiresResize {
     nameToTab.clear();
     nameToIndex.clear();
 
-    boolean isQualityControl = isQC();
-    //if (!isQualityControl) {
-      addPracticeTab();
-   // }
-
-    // chapter tab
-    final String chapterNameToUse = getChapterName();
-    chapters = makeFirstLevelTab(tabPanel, isQualityControl ? IconType.FLAG : IconType.LIGHTBULB, chapterNameToUse);
-    chapters.getContent().add(contentForChaptersTab);
-    chapters.getTab().addClickHandler(new ClickHandler() {
+    // your list tab
+    yourStuff = makeFirstLevelTab(tabPanel, IconType.FOLDER_CLOSE, YOUR_LISTS);
+    yourStuff.getTab().addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        checkAndMaybeClearTab(chapterNameToUse);
-        logEvent(chapters, chapterNameToUse);
-      }
-    });
-
-
-    studyLists = makeFirstLevelTab(tabPanel, IconType.FOLDER_CLOSE, STUDY_LISTS);
-    final TabPanel w = new TabPanel();
-    studyLists.getContent().add(w);
-    addListTabs(w);
-    studyLists.getTab().addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-       // checkAndMaybeClearTab(STUDY_LISTS);
-       // refreshViewLessons(true, false);
-        clickOnTab(yourStuff);
-        w.selectTab(0);
+        checkAndMaybeClearTab(YOUR_LISTS);
         refreshViewLessons(true, false);
-        logEvent(studyLists, STUDY_LISTS);
+        logEvent(yourStuff, YOUR_LISTS);
       }
     });
-//    addListTabs();
+
+    // visited lists
+    othersStuff = makeFirstLevelTab(tabPanel, IconType.FOLDER_CLOSE, OTHERS_LISTS);
+    othersStuff.getTab().addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        checkAndMaybeClearTab(OTHERS_LISTS);
+        refreshViewLessons(false, true);
+        logEvent(othersStuff, OTHERS_LISTS);
+      }
+    });
+
+    // create tab
+    create = makeFirstLevelTab(tabPanel, IconType.PLUS_SIGN, CREATE);
+    final CreateListDialog createListDialog = new CreateListDialog(this, service, userManager, controller);
+    create.getTab().addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        createListDialog.doCreate(create.getContent());
+        logEvent(create, CREATE);
+      }
+    });
+
+    // browse tab
+    browse = makeFirstLevelTab(tabPanel, IconType.TH_LIST, BROWSE);
+    browse.getTab().addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        checkAndMaybeClearTab(BROWSE);
+        logEvent(browse, BROWSE);
+        viewBrowse();
+      }
+    });
+
+    boolean isQualityControl = isQC();
 
     if (isQualityControl) {
       contentTab = makeFirstLevelTab(tabPanel, IconType.LIGHTBULB, CONTENT);
@@ -319,6 +327,21 @@ public class Navigation implements RequiresResize {
       });
       addPracticeTab();
     }
+
+
+    // chapter tab
+    final String chapterNameToUse = getChapterName();
+    chapters = makeFirstLevelTab(tabPanel, isQualityControl ? IconType.FLAG : IconType.LIGHTBULB, chapterNameToUse);
+    chapters.getContent().add(contentForChaptersTab);
+    chapters.getTab().addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        checkAndMaybeClearTab(chapterNameToUse);
+        logEvent(chapters, chapterNameToUse);
+      }
+    });
+
+    if (!isQualityControl) addPracticeTab();
 
     if (isQualityControl) {
       review = makeFirstLevelTab(tabPanel, IconType.EDIT, FIX_DEFECTS);
@@ -358,76 +381,24 @@ public class Navigation implements RequiresResize {
     }
   }
 
-  private void addListTabs(TabPanel tabPanel) {
-    // your list tab
-    yourStuff = makeTab(tabPanel, IconType.FOLDER_CLOSE, YOUR_LISTS);
-
-//    TabAndContent tabAndContent = makeTab(tabPanel, iconType, label);
-
-    yourStuff.getTab().addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        checkAndMaybeClearTab(YOUR_LISTS);
-        refreshViewLessons(true, false);
-        logEvent(yourStuff, YOUR_LISTS);
-      }
-    });
-
-    // visited lists
-    othersStuff = makeTab(tabPanel, IconType.FOLDER_CLOSE, OTHERS_LISTS);
-    othersStuff.getTab().addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        checkAndMaybeClearTab(OTHERS_LISTS);
-        refreshViewLessons(false, true);
-        logEvent(othersStuff, OTHERS_LISTS);
-      }
-    });
-
-    // create tab
-    create = makeTab(tabPanel, IconType.PLUS_SIGN, CREATE);
-    final CreateListDialog createListDialog = new CreateListDialog(this, service, userManager, controller);
-    create.getTab().addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        createListDialog.doCreate(create.getContent());
-        logEvent(create, CREATE);
-      }
-    });
-
-    // browse tab
-    browse = makeTab(tabPanel, IconType.TH_LIST, BROWSE);
-    browse.getTab().addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        checkAndMaybeClearTab(BROWSE);
-        logEvent(browse, BROWSE);
-        viewBrowse();
-      }
-    });
-  }
-
-  /**
-   * Make the practice tab...
-   */
   private void addPracticeTab() {
-    practiceTab = makeFirstLevelTab(tabPanel, IconType.REPLY, PRACTICE);
+    practiceTab = makeFirstLevelTab(tabPanel, IconType.REPLY, "Practice");
     practiceTab.getContent().getElement().setId("practicePanel");
     practiceTab.getTab().addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-
-        System.out.println("got practice click !!! \n\n\n");
-        checkAndMaybeClearTab(PRACTICE);
-        practiceHelper.showNPF(practiceTab, PRACTICE);
+        checkAndMaybeClearTab("Practice");
+        practiceHelper.showNPF(practiceTab, "Practice");
         practiceHelper.hideList();
-        logEvent(practiceTab, PRACTICE);
+        logEvent(practiceTab, "Practice");
       }
     });
   }
 
   private String getChapterName() {
-    return isQC() ? MARK_DEFECTS : CHAPTERS;
+    boolean isQualityControl = isQC();
+
+    return isQualityControl ? MARK_DEFECTS : CHAPTERS;
   }
 
   private boolean isQC() {  return controller.getPermissions().contains(User.Permission.QUALITY_CONTROL); }
@@ -438,17 +409,13 @@ public class Navigation implements RequiresResize {
     }
   }
 
-  private final Map<String, TabAndContent> nameToTab = new HashMap<String, TabAndContent>();
-  private final Map<String, Integer> nameToIndex = new HashMap<String, Integer>();
-
+  private final Map<String,TabAndContent> nameToTab = new HashMap<String, TabAndContent>();
+  private final Map<String,Integer> nameToIndex = new HashMap<String, Integer>();
   private TabAndContent makeFirstLevelTab(TabPanel tabPanel, IconType iconType, String label) {
-
-    //System.out.println("makeFirstLevelTab " + label);
-
     TabAndContent tabAndContent = makeTab(tabPanel, iconType, label);
-    nameToIndex.put(label, tabs.size());
+    nameToIndex.put(label,tabs.size());
     tabs.add(tabAndContent);
-    nameToTab.put(label, tabAndContent);
+    nameToTab.put(label,tabAndContent);
     return tabAndContent;
   }
 
@@ -498,13 +465,8 @@ public class Navigation implements RequiresResize {
         public void onSuccess(Collection<UserList> result) {
           if (result.size() == 1 && // if only one empty list - one you've created
             result.iterator().next().isEmpty()) {
-            // choose default tab to show
-
-            //final String chapterNameToUse = getChapterName();
-            //tabPanel.selectTab(getSafeTabIndexFor(chapterNameToUse));
-          //  tabPanel.selectTab(0);
-         //   System.out.println("practice is initial tab...");
-            selectPreviousTab(PRACTICE);
+            final String chapterNameToUse = getChapterName();
+            tabPanel.selectTab(getSafeTabIndexFor(chapterNameToUse));
           } else {
             boolean foundCreated = false;
             for (UserList ul : result) {
@@ -518,8 +480,6 @@ public class Navigation implements RequiresResize {
         }
       });
     } else {
-
-      System.out.println("previous selection was " + value);
       selectPreviousTab(value);
     }
   }
@@ -549,18 +509,13 @@ public class Navigation implements RequiresResize {
         } else if (value.equals(CONTENT) && contentTab != null) {
           contentHelper.showNPF(contentTab, CONTENT1);
         } else if (value.equals(PRACTICE) && practiceTab != null) {
-
-          System.out.println("showing practice\n\n\n ");
-
           practiceHelper.showNPF(practiceTab, PRACTICE);
           practiceHelper.hideList();
-        } else {
-          System.out.println("got unknown value '" + value+ "'");
         }
       }
       else {
-        System.err.println("selectPreviousTab : found value  '" + value + "' " +
-            " but I only know about tabs : " + nameToIndex.keySet());
+        System.out.println("selectPreviousTab : found value  '" + value + "' " +
+          " but I only know about tabs : " + nameToIndex.keySet());
         final String chapterNameToUse = getChapterName();
 
         tabPanel.selectTab(getSafeTabIndexFor(chapterNameToUse));
@@ -606,29 +561,13 @@ public class Navigation implements RequiresResize {
     refreshViewLessons(true, false);
   }
 
-  /**
-   * @see #clickOnYourLists(long)
-   * @see #selectPreviouslyClickedSubTab(com.github.gwtbootstrap.client.ui.TabPanel, TabAndContent, TabAndContent, TabAndContent, mitll.langtest.shared.custom.UserList, String, boolean, boolean, boolean, boolean)
-   * @see #selectPreviousTab(String)
-   * @see #showMyLists(boolean, boolean)
-   * @param toUse
-   */
-  private void clickOnTab(final TabAndContent toUse) {
+  private void clickOnTab(TabAndContent toUse) {
     if (toUse == null) {
       System.err.println("huh? toUse is nulll???\n\n");
     } else if (toUse.getTab() == null) {
       System.err.println("huh? toUse has a null tab? " + toUse);
     } else {
-
-      System.out.println("clicking on " +toUse);
-     toUse.getTab().fireEvent(new ButtonClickEvent());
-
-   /*   Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-        public void execute() {
-          toUse.getTab().fireEvent(new ButtonClickEvent());
-        }
-      });
-*/
+      toUse.getTab().fireEvent(new ButtonClickEvent());
     }
   }
 
@@ -640,7 +579,7 @@ public class Navigation implements RequiresResize {
    * @param label
    * @return
    */
-  private TabAndContent makeTab(TabPanel tabPanel, IconType iconType, String label) {
+  TabAndContent makeTab(TabPanel tabPanel, IconType iconType, String label) {
     TabAndContent tabAndContent = new TabAndContent(iconType, label);
     tabPanel.add(tabAndContent.getTab().asTabLink());
     return tabAndContent;
@@ -652,9 +591,6 @@ public class Navigation implements RequiresResize {
 
   /*To call click() function for Programmatic equivalent of the user clicking the button.*/
   private class ButtonClickEvent extends ClickEvent {}
-
-  /*To call click() function for Programmatic equivalent of the user clicking the button.*/
-  private class MyClickEvent extends ClickEvent {}
 
   private void viewBrowse() { viewLessons(browse.getContent(), true, false, false); }
 
