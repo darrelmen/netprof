@@ -70,7 +70,7 @@ public class FlashcardPanel extends HorizontalPanel {
   protected SoundFeedback.EndListener endListener;
   protected final String instance;
   ListInterface exerciseList;
-
+  DivWidget prevNextRow;
   /**
    *
    *
@@ -107,10 +107,13 @@ public class FlashcardPanel extends HorizontalPanel {
     Panel contentMiddle = getMiddlePrompt(e,inner2);
     mainContainer = contentMiddle;
 
-    DivWidget belowDiv = new DivWidget();
-    belowDiv.getElement().setId("belowDiv");
-    belowDiv.addStyleName("topFiveMargin");
-    Panel threePartContent = getThreePartContent(controlState, contentMiddle, belowDiv);
+    prevNextRow = new DivWidget();
+    prevNextRow.getElement().setId("prevNextRow");
+    prevNextRow.addStyleName("topFiveMargin");
+
+    DivWidget lowestRow = new DivWidget();
+
+    Panel threePartContent = getThreePartContent(controlState, contentMiddle, prevNextRow, lowestRow);
     DivWidget inner = new DivWidget();
     inner.getElement().setId("threePartContent_Container");
     add(inner);
@@ -125,13 +128,16 @@ public class FlashcardPanel extends HorizontalPanel {
 
     getElement().setId("BootstrapExercisePanel");
 
-    addWidgetsBelow(belowDiv);
+    addPrevNextWidgets(prevNextRow);
+
+    addRowBelowPrevNext(lowestRow);
     if (controlState.isAudioOn() && mainContainer.isVisible() && !isHidden(foreign)) {
       playRef();
     }
     //addStyleName("leftFiftyMargin");
     DivWidget finalWidgets = getFinalWidgets();
-    if (finalWidgets != null) inner2.add(finalWidgets);
+    //if (finalWidgets != null)
+    inner2.add(finalWidgets);
 
   }
 
@@ -169,15 +175,17 @@ public class FlashcardPanel extends HorizontalPanel {
    * @param belowDiv
    * @return
    */
-  private Panel getThreePartContent(ControlState controlState, Panel contentMiddle, DivWidget belowDiv) {
+  private Panel getThreePartContent(ControlState controlState, Panel contentMiddle, DivWidget belowDiv, DivWidget lowestRow) {
     Panel horiz = new HorizontalPanel();
 
     leftState = getLeftState();
     if (leftState != null) horiz.add(leftState);
 
-    Grid grid = new Grid(2, 1);
+    int rows = lowestRow != null ? 3 : 2;
+    Grid grid = new Grid(rows, 1);
     grid.setWidget(0, 0, contentMiddle);
     grid.setWidget(1, 0, belowDiv);
+    if (lowestRow != null) grid.setWidget(2, 0, lowestRow);
     horiz.add(grid);
 
     rightColumn = getRightColumn(controlState);
@@ -280,9 +288,33 @@ public class FlashcardPanel extends HorizontalPanel {
     return null;
   }
 
-  protected void addWidgetsBelow(Panel toAddTo) {
-    final Button left = new Button();
+  /**
+   * Widgets below the card are a left button, a progress bar, and a right button.
+   * @param toAddTo
+   *
+   * @see #FlashcardPanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ControlState, mitll.langtest.client.custom.MyFlashcardExercisePanelFactory.MySoundFeedback, mitll.langtest.client.sound.SoundFeedback.EndListener, String, mitll.langtest.client.list.ListInterface)
+   */
+  protected void addPrevNextWidgets(Panel toAddTo) {
+    final Button left = getPrevButton();
     toAddTo.add(left);
+
+    DivWidget vp = getProgressBarWidget();
+    toAddTo.add(vp);
+
+    final Button right = getNextButton();
+    toAddTo.add(right);
+  }
+
+  public void setPrevNextVisible(boolean val) {
+    prevNextRow.setVisible(val);
+  }
+
+  protected void addRowBelowPrevNext(DivWidget lowestRow) {
+
+  }
+
+  private Button getPrevButton() {
+    final Button left = new Button();
     left.setIcon(IconType.CARET_LEFT);
     left.addStyleName("floatLeft");
     left.setSize(ButtonSize.LARGE);
@@ -294,7 +326,10 @@ public class FlashcardPanel extends HorizontalPanel {
 
       }
     });
+    return left;
+  }
 
+  private DivWidget getProgressBarWidget() {
     DivWidget vp = new DivWidget();
     vp.setWidth("78%");
     vp.getElement().getStyle().setMarginLeft(17, Style.Unit.PCT);
@@ -307,9 +342,11 @@ public class FlashcardPanel extends HorizontalPanel {
     child.getElement().getStyle().setMarginLeft(39, Style.Unit.PCT);
     vp.add(child);
     vp.add(progressBar);
-    toAddTo.add(vp);
+    return vp;
+  }
+
+  private Button getNextButton() {
     final Button right = new Button();
-    toAddTo.add(right);
     right.setIcon(IconType.CARET_RIGHT);
     right.addStyleName("floatRight");
     right.setSize(ButtonSize.LARGE);
@@ -318,11 +355,16 @@ public class FlashcardPanel extends HorizontalPanel {
       @Override
       public void onClick(ClickEvent event) {
         right.setEnabled(false);
-        exerciseList.loadNext();
+        gotClickOnNext();
       }
     });
-
+    return right;
   }
+
+  protected void gotClickOnNext() {
+    exerciseList.loadNext();
+  }
+
   void showAdvance(ListInterface exerciseList, ProgressBar progressBar) {
     int complete = exerciseList.getComplete();
   //  System.out.println("complete " +complete);
