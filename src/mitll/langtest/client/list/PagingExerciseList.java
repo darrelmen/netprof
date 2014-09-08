@@ -385,7 +385,7 @@ public class PagingExerciseList extends ExerciseList {
   }
 
   /**
-   * @see mitll.langtest.client.custom.NewUserExercise#afterValidForeignPhrase
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    * @see mitll.langtest.client.list.ExerciseList#removeExercise
    * @param id
    * @return
