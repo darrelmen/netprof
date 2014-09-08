@@ -187,7 +187,7 @@ public class AudioAttribute implements IsSerializable {
   public long getUserid() { return userid; }
 
   /**
-   * @see mitll.langtest.client.custom.QCNPFExercise#addTabsForUsers(CommonExercise, com.github.gwtbootstrap.client.ui.TabPanel, java.util.Map, java.util.List)
+   * @see mitll.langtest.client.qc.QCNPFExercise#addTabsForUsers(CommonExercise, com.github.gwtbootstrap.client.ui.TabPanel, java.util.Map, java.util.List)
    * @see mitll.langtest.client.custom.ReviewEditableExercise#addTabsForUsers(CommonExercise, com.github.gwtbootstrap.client.ui.TabPanel, java.util.Map, java.util.List)
    * @return
    */
