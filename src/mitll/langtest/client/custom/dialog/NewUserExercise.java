@@ -1,4 +1,4 @@
-package mitll.langtest.client.custom;
+package mitll.langtest.client.custom.dialog;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
@@ -292,7 +292,7 @@ public class NewUserExercise extends BasicDialog {
   }
 */
 
-  void setFields(CommonExercise newUserExercise) {
+  public void setFields(CommonExercise newUserExercise) {
     System.out.println("grabInfoFromFormAndStuffInfoExercise : setting fields with " + newUserExercise);
 
     // english
