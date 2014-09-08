@@ -297,7 +297,7 @@ public class UserListManager {
   /**
    * TODO : expensive -- could just be a query against your own lists and/or against visited lists...
    * @see mitll.langtest.server.LangTestDatabaseImpl#getListsForUser
-   * @see mitll.langtest.client.custom.NPFExercise#populateListChoices
+   * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    * @param userid
    * @param listsICreated
    * @param visitedLists
@@ -522,7 +522,7 @@ public class UserListManager {
   }
 
   /**
-   * @see mitll.langtest.client.custom.NPFExercise#populateListChoices
+   * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    * @see mitll.langtest.server.LangTestDatabaseImpl#addItemToUserList(long, mitll.langtest.shared.custom.UserExercise)
    * @param userListID
    * @param userExercise
@@ -533,7 +533,7 @@ public class UserListManager {
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#reallyCreateNewItem
    * @see #addItemToUserList(long, mitll.langtest.shared.custom.UserExercise)
-   * @see mitll.langtest.client.custom.NewUserExercise#afterValidForeignPhrase
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    * @param userListID
    * @param userExercise
    * @param mediaDir
@@ -755,7 +755,7 @@ public class UserListManager {
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#markReviewed
    * @see #addAnnotation(String, String, String, String, long)
-   * @see mitll.langtest.client.custom.QCNPFExercise#markReviewed
+   * @see mitll.langtest.client.qc.QCNPFExercise#markReviewed
    * @param id
    * @param state
    * @param creatorID
@@ -838,7 +838,7 @@ public class UserListManager {
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#markReviewed(String, boolean, long)
-   * @see mitll.langtest.client.custom.QCNPFExercise#markReviewed
+   * @see mitll.langtest.client.qc.QCNPFExercise#markReviewed
    * @param id
    * @param correct
    * @param userID
