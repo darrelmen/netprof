@@ -921,7 +921,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    * @see mitll.langtest.client.custom.Navigation#showInitialState()
    * @see mitll.langtest.client.custom.Navigation#viewLessons
-   * @see mitll.langtest.client.custom.NPFExercise#populateListChoices
+   * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    */
   public Collection<UserList> getListsForUser(long userid, boolean onlyCreated, boolean visited) {
     if (!onlyCreated && !visited) logger.error("huh? asking for neither your lists nor  your visited lists.");
@@ -944,7 +944,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param userListID
    * @param userExercise
    * @return
-   * @see mitll.langtest.client.custom.NPFExercise#populateListChoices
+   * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    */
   public void addItemToUserList(long userListID, UserExercise userExercise) {
     db.getUserListManager().addItemToUserList(userListID, userExercise);
@@ -967,7 +967,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param id
    * @param isCorrect
    * @param creatorID
-   * @see mitll.langtest.client.custom.QCNPFExercise#markReviewed
+   * @see mitll.langtest.client.qc.QCNPFExercise#markReviewed
    */
   public void markReviewed(String id, boolean isCorrect, long creatorID) {
     db.getUserListManager().markCorrectness(id, isCorrect, creatorID);
@@ -979,7 +979,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * @param ids
-   * @see mitll.langtest.client.custom.MyFlashcardExercisePanelFactory.StatsPracticePanel#getRepeatButton()
+   * @see mitll.langtest.client.flashcard.MyFlashcardExercisePanelFactory.StatsPracticePanel#getRepeatButton()
    */
   @Override
   public void setAVPSkip(Collection<Long> ids) {
@@ -1031,7 +1031,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    *
    * @param foreign
    * @return
-   * @see mitll.langtest.client.custom.NewUserExercise#isValidForeignPhrase(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, boolean)
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, boolean)
    */
   @Override
   public boolean isValidForeignPhrase(String foreign) {
@@ -1048,7 +1048,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    *
    * @param userListID
    * @param userExercise
-   * @see mitll.langtest.client.custom.NewUserExercise#afterValidForeignPhrase
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    */
   public UserExercise reallyCreateNewItem(long userListID, UserExercise userExercise) {
     db.getUserListManager().reallyCreateNewItem(userListID, userExercise, serverProps.getMediaDir());
@@ -1111,7 +1111,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * @param audioAttribute
    * @param exid
-   * @see mitll.langtest.client.custom.ReviewEditableExercise#getPanelForAudio(mitll.langtest.shared.CommonExercise, mitll.langtest.shared.AudioAttribute, mitll.langtest.client.custom.RememberTabAndContent)
+   * @see mitll.langtest.client.custom.ReviewEditableExercise#getPanelForAudio(mitll.langtest.shared.CommonExercise, mitll.langtest.shared.AudioAttribute, mitll.langtest.client.custom.tabs.RememberTabAndContent)
    */
   @Override
   public void markAudioDefect(AudioAttribute audioAttribute, String exid) {
@@ -1138,7 +1138,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * @param attr
    * @param isMale
-   * @see mitll.langtest.client.custom.QCNPFExercise#getGenderGroup
+   * @see mitll.langtest.client.qc.QCNPFExercise#getGenderGroup
    */
   @Override
   public void markGender(AudioAttribute attr, boolean isMale) {
@@ -1445,7 +1445,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param userid
    * @param latestResultID
    * @return
-   * @see mitll.langtest.client.custom.MyFlashcardExercisePanelFactory.StatsPracticePanel#onSetComplete()
+   * @see mitll.langtest.client.flashcard.MyFlashcardExercisePanelFactory.StatsPracticePanel#onSetComplete()
    */
   @Override
   public List<AVPHistoryForList> getUserHistoryForList(long userid, Collection<String> ids, long latestResultID) {
