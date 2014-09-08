@@ -1,4 +1,4 @@
-package mitll.langtest.client.custom;
+package mitll.langtest.client.custom.exercise;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.*;
@@ -8,8 +8,6 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
-import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
-import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -22,6 +20,7 @@ import mitll.langtest.client.BrowserCheck;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.shared.AudioAttribute;
@@ -454,7 +453,7 @@ public class CommentNPFExercise extends NPFExercise {
     }
 
     /**
-     * @see mitll.langtest.client.custom.CommentNPFExercise#makeCommentPopup(String, com.github.gwtbootstrap.client.ui.Button, mitll.langtest.client.custom.CommentNPFExercise.HidePopupTextBox, com.github.gwtbootstrap.client.ui.Button)
+     * @see CommentNPFExercise#makeCommentPopup(String, com.github.gwtbootstrap.client.ui.Button, CommentNPFExercise.HidePopupTextBox, com.github.gwtbootstrap.client.ui.Button)
      * @param commentBox
      * @param commentButton
      * @param clearButton
@@ -521,7 +520,7 @@ public class CommentNPFExercise extends NPFExercise {
   private final Map<String,String> fieldToComment = new HashMap<String,String>();
 
   /**
-   * @see mitll.langtest.client.custom.CommentNPFExercise.MyPopup#configure(com.github.gwtbootstrap.client.ui.TextBox, com.google.gwt.user.client.ui.Widget, com.google.gwt.user.client.ui.Widget)
+   * @see CommentNPFExercise.MyPopup#configure(com.github.gwtbootstrap.client.ui.TextBox, com.google.gwt.user.client.ui.Widget, com.google.gwt.user.client.ui.Widget)
    * @param commentEntry
    * @param field
    * @param commentButton
