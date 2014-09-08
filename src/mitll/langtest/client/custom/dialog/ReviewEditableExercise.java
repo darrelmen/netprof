@@ -1,4 +1,4 @@
-package mitll.langtest.client.custom;
+package mitll.langtest.client.custom.dialog;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
@@ -13,13 +13,11 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasText;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.custom.content.NPFHelper;
+import mitll.langtest.client.custom.tabs.RememberTabAndContent;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.RecordAudioPanel;
@@ -30,29 +28,16 @@ import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.scoring.EmptyScoreListener;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.sound.PlayListener;
-import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.AudioAttribute;
-import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.CommonShell;
-import mitll.langtest.shared.CommonUserExercise;
-import mitll.langtest.shared.ExerciseAnnotation;
-import mitll.langtest.shared.MiniUser;
-import mitll.langtest.shared.Result;
-import mitll.langtest.shared.STATE;
+import mitll.langtest.shared.*;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by GO22670 on 3/28/2014.
  */
-class ReviewEditableExercise extends EditableExercise {
+public class ReviewEditableExercise extends EditableExercise {
   private static final String FIXED = "Mark Fixed";
   private static final String DUPLICATE = "Duplicate";
   private static final String DELETE = "Delete";
@@ -78,7 +63,7 @@ class ReviewEditableExercise extends EditableExercise {
    * @param changedUserExercise
    * @param originalList
    * @param exerciseList
-   * @see mitll.langtest.client.custom.ReviewItemHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
+   * @see mitll.langtest.client.custom.content.NPFHelper.ReviewItemHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
    */
   public ReviewEditableExercise(LangTestDatabaseAsync service,
                                 ExerciseController controller,
