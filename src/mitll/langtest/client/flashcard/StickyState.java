@@ -1,8 +1,10 @@
-package mitll.langtest.client.custom;
+package mitll.langtest.client.flashcard;
 
+import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.shared.CommonExercise;
 
 /**
+ * Remember the state of the flashcards in the localStorage browser cache.
  * Created by go22670 on 7/8/14.
  */
 public class StickyState {
@@ -14,6 +16,10 @@ public class StickyState {
   private static final String SKIPPED = "skipped";
   private final KeyStorage storage;
 
+  /**
+   * @see mitll.langtest.client.flashcard.MyFlashcardExercisePanelFactory
+   * @param storage
+   */
   public StickyState(KeyStorage storage) { this.storage = storage; }
   protected void storeCurrent(CommonExercise e) {
    // System.out.println("store current " + e.getID());
