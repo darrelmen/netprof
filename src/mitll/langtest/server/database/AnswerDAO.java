@@ -17,6 +17,7 @@ import java.util.Collection;
  */
 public class AnswerDAO {
   private static final Logger logger = Logger.getLogger(AnswerDAO.class);
+  public static final String AVP_SKIP = "avp_skip";
 
   private final Database database;
   private final ResultDAO resultDAO;
@@ -227,7 +228,7 @@ public class AnswerDAO {
         ResultDAO.RESULTS +
         " " +
         "SET " +
-        ResultDAO.AUDIO_TYPE + "='" + "avp_skip" + "' " +
+        ResultDAO.AUDIO_TYPE + "='" + AVP_SKIP + "' " +
         " where " + ResultDAO.ID + " in (" +
         list + ") ";
       PreparedStatement statement = connection.prepareStatement(sql);
