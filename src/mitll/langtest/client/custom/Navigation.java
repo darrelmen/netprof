@@ -9,7 +9,6 @@ import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.InlineLabel;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
@@ -28,10 +27,18 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
+import mitll.langtest.client.custom.content.AVPHelper;
+import mitll.langtest.client.custom.content.ChapterNPFHelper;
+import mitll.langtest.client.custom.content.NPFHelper;
+import mitll.langtest.client.custom.dialog.CreateListDialog;
+import mitll.langtest.client.custom.dialog.EditItem;
+import mitll.langtest.client.custom.exercise.CommentNPFExercise;
+import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.WaveformExercisePanel;
+import mitll.langtest.client.flashcard.MyFlashcardExercisePanelFactory;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
@@ -109,7 +116,7 @@ public class Navigation implements RequiresResize {
   private final ChapterNPFHelper defectHelper;
   private final SimpleChapterNPFHelper recorderHelper, recordExampleHelper;
   private final SimpleChapterNPFHelper contentHelper;
-  private final ReviewItemHelper reviewItem;
+  private final NPFHelper.ReviewItemHelper reviewItem;
 
   private final KeyStorage storage;
 
@@ -148,7 +155,7 @@ public class Navigation implements RequiresResize {
     };
 
     practiceHelper = makePracticeHelper(service, userManager, controller, feedback);
-    reviewItem = new ReviewItemHelper(service, feedback, userManager, controller, null, predefinedContentList, npfHelper);
+    reviewItem = new NPFHelper.ReviewItemHelper(service, feedback, userManager, controller, null, predefinedContentList, npfHelper);
     editItem = new EditItem(service, userManager, controller, predefinedContentList, feedback, npfHelper);
   }
 
@@ -164,7 +171,7 @@ public class Navigation implements RequiresResize {
       }
 
       @Override
-      protected FlexListLayout getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
+      protected NPFHelper.FlexListLayout getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
                                                UserManager userManager, ExerciseController controller, SimpleChapterNPFHelper outer) {
         return new MyFlexListLayout(service, feedback, userManager, controller, outer) {
           @Override
@@ -594,7 +601,7 @@ public class Navigation implements RequiresResize {
   }
 
   /**
-   * @see mitll.langtest.client.custom.CreateListDialog#addUserList
+   * @see mitll.langtest.client.custom.dialog.CreateListDialog#addUserList
    * @param userListID
    */
   public void clickOnYourLists(long userListID) {
@@ -1144,7 +1151,7 @@ public class Navigation implements RequiresResize {
     }
 
     @Override
-    protected FlexListLayout getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
+    protected NPFHelper.FlexListLayout getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
                                              UserManager userManager, ExerciseController controller, SimpleChapterNPFHelper outer) {
       return new MyFlexListLayout(service, feedback, userManager, controller, outer) {
         @Override
