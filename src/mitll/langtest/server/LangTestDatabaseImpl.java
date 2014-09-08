@@ -888,7 +888,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param dliClass
    * @param isPublic
    * @return
-   * @see mitll.langtest.client.custom.CreateListDialog#doCreate
+   * @see mitll.langtest.client.custom.dialog.CreateListDialog#doCreate
    */
   @Override
   public long addUserList(long userid, String name, String description, String dliClass, boolean isPublic) {
@@ -990,7 +990,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param id
    * @param state
    * @param userID
-   * @see mitll.langtest.client.custom.ReviewEditableExercise#doAfterEditComplete(mitll.langtest.client.list.ListInterface, boolean)
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#doAfterEditComplete(mitll.langtest.client.list.ListInterface, boolean)
    */
   @Override
   public void setExerciseState(String id, STATE state, long userID) {
