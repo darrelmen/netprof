@@ -40,7 +40,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   public UserExercise() {}  // just for serialization
 
   /**
-   * @see mitll.langtest.client.custom.NPFExercise#populateListChoices
+   * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    * @param shell
    * @param creator
    */
@@ -53,8 +53,8 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   /**
    * Tooltip is the english phrase, but if it's empty, use the foreign language.
    *
-   * @see mitll.langtest.client.custom.EditItem#createNewItem(long)
-   * @see mitll.langtest.client.custom.EditItem#getNewItem() (long)
+   * @see mitll.langtest.client.custom.dialog.EditItem#createNewItem(long)
+   * @see mitll.langtest.client.custom.dialog.EditItem#getNewItem() (long)
    * @param uniqueID
    * @param exerciseID
    * @param creator
@@ -100,7 +100,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
 
   /**
    * @param exercise
-   * @see mitll.langtest.client.custom.NPFExercise#populateListChoices
+   * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    */
   public UserExercise(CommonExercise exercise) {
     super(exercise.getID());
@@ -124,7 +124,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   }
 
   /**
-   * @see mitll.langtest.client.custom.NewUserExercise#addNew
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#addNew
    * @deprecated ideally we shouldn't have to do this
    * @return
    */
@@ -220,7 +220,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   public long getUniqueID() { return uniqueID; }
 
   /**
-   * @see mitll.langtest.client.custom.NewUserExercise#grabInfoFromFormAndStuffInfoExercise()
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#grabInfoFromFormAndStuffInfoExercise()
    * @param english
    */
   public void setEnglish(String english) { this.english = english;  }
