@@ -1,4 +1,4 @@
-package mitll.langtest.client.custom;
+package mitll.langtest.client.custom.exercise;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.DropdownButton;
@@ -61,7 +61,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
    * @param screenPortion
    * @param addKeyHandler
    * @param instance
-   * @see NPFHelper#setFactory(mitll.langtest.client.list.PagingExerciseList, String, boolean)
+   * @see mitll.langtest.client.custom.content.NPFHelper#setFactory(mitll.langtest.client.list.PagingExerciseList, String, boolean)
    */
   NPFExercise(CommonExercise e, ExerciseController controller, ListInterface listContainer, float screenPortion,
               boolean addKeyHandler, String instance) {
@@ -200,7 +200,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
   /**
    * @param commentEntryText
    * @return
-   * @see mitll.langtest.client.custom.CommentNPFExercise#makeCommentPopup(String, com.github.gwtbootstrap.client.ui.Button, mitll.langtest.client.custom.NPFExercise.HidePopupTextBox, com.github.gwtbootstrap.client.ui.Button)
+   * @see mitll.langtest.client.custom.exercise.CommentNPFExercise#makeCommentPopup(String, com.github.gwtbootstrap.client.ui.Button, NPFExercise.HidePopupTextBox, com.github.gwtbootstrap.client.ui.Button)
    */
   private DecoratedPopupPanel makePopupAndButton(TextBox commentEntryText, ClickHandler clickHandler) {
     final DecoratedPopupPanel commentPopup = new DecoratedPopupPanel();
@@ -269,7 +269,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
   /**
    * Every time this panel becomes visible again, we need to check the lists for this user.
    *
-   * @see Navigation#getTabPanel(com.google.gwt.user.client.ui.Panel)
+   * @see mitll.langtest.client.custom.Navigation#getTabPanel(com.google.gwt.user.client.ui.Panel)
    */
   @Override
   public void wasRevealed() { populateListChoices(exercise, controller, addToList);  }
