@@ -1,4 +1,4 @@
-package mitll.langtest.client.custom;
+package mitll.langtest.client.custom.tabs;
 
 import com.github.gwtbootstrap.client.ui.Tab;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
