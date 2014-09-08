@@ -1,15 +1,16 @@
-package mitll.langtest.client.custom;
+package mitll.langtest.client.custom.content;
 
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.custom.content.NPFHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.PagingContainer;
+import mitll.langtest.client.flashcard.MyFlashcardExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
@@ -22,9 +23,9 @@ import mitll.langtest.shared.custom.UserList;
 * Time: 5:58 PM
 * To change this template use File | Settings | File Templates.
 */
-class AVPHelper extends NPFHelper {
+public class AVPHelper extends NPFHelper {
   /**
-   * @see Navigation#Navigation
+   * @see mitll.langtest.client.custom.Navigation#Navigation
    * @param service
    * @param feedback
    * @param userManager
@@ -45,7 +46,7 @@ class AVPHelper extends NPFHelper {
 
 
   /**
-   * @see mitll.langtest.client.custom.NPFHelper#makeNPFExerciseList(com.google.gwt.user.client.ui.Panel, String)
+   * @see mitll.langtest.client.custom.content.NPFHelper#makeNPFExerciseList(com.google.gwt.user.client.ui.Panel, String)
    * @param right
    * @param instanceName
    * @return
