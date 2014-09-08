@@ -1,6 +1,6 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.client.custom.QCNPFExercise;
+import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.UserExerciseDAO;
