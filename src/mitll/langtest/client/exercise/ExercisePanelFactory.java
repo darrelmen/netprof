@@ -20,7 +20,7 @@ public abstract class ExercisePanelFactory {
   protected ListInterface exerciseList;
 
   /**
-   * @see mitll.langtest.client.custom.EditItem#setFactory
+   * @see mitll.langtest.client.custom.dialog.EditItem#setFactory
    * @param service
    * @param userFeedback
    * @param controller
