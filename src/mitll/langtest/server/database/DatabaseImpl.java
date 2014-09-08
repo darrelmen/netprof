@@ -456,7 +456,7 @@ public class DatabaseImpl implements Database {
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#markAudioDefect(mitll.langtest.shared.AudioAttribute, String)
-   * @see mitll.langtest.client.custom.ReviewEditableExercise#getPanelForAudio(mitll.langtest.shared.CommonExercise, mitll.langtest.shared.AudioAttribute, mitll.langtest.client.custom.RememberTabAndContent)
+   * @see mitll.langtest.client.custom.ReviewEditableExercise#getPanelForAudio(mitll.langtest.shared.CommonExercise, mitll.langtest.shared.AudioAttribute, mitll.langtest.client.custom.tabs.RememberTabAndContent)
    * @param audioAttribute
    */
   public void markAudioDefect(AudioAttribute audioAttribute) {
@@ -469,7 +469,7 @@ public class DatabaseImpl implements Database {
    * TODOx : do all average calc on server!
    *
    * @see mitll.langtest.server.LangTestDatabaseImpl#getUserHistoryForList
-   * @see mitll.langtest.client.custom.MyFlashcardExercisePanelFactory.StatsPracticePanel#onSetComplete
+   * @see mitll.langtest.client.flashcard.MyFlashcardExercisePanelFactory.StatsPracticePanel#onSetComplete
    * @paramx listid
    * @return
    */
