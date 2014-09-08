@@ -1,4 +1,4 @@
-package mitll.langtest.client.custom;
+package mitll.langtest.client.flashcard;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
@@ -14,12 +14,11 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.custom.KeyStorage;
+import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.flashcard.BootstrapExercisePanel;
-import mitll.langtest.client.flashcard.ControlState;
-import mitll.langtest.client.flashcard.FlashcardPanel;
-import mitll.langtest.client.flashcard.LeaderboardPlot;
+import mitll.langtest.client.list.ExerciseList;
 import mitll.langtest.client.list.ListChangeListener;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.SoundFeedback;
@@ -144,7 +143,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
         sticky.resetStorage();
         super.gotShuffleClick(b);
       }
-    } : new StatsPracticePanel(e);
+    } : new StatsPracticePanel(e,exerciseList);
   }
 
   private void reset() {
@@ -210,14 +209,14 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
    */
   private class StatsPracticePanel extends BootstrapExercisePanel {
     private Panel container;
-    public StatsPracticePanel(CommonExercise e) {
+    public StatsPracticePanel(CommonExercise e, ListInterface exerciseListToUse) {
       super(e,
         MyFlashcardExercisePanelFactory.this.service,
         MyFlashcardExercisePanelFactory.this.controller,
         ADD_KEY_BINDING,
         MyFlashcardExercisePanelFactory.this.controlState,
         soundFeedback,
-        soundFeedback.endListener, MyFlashcardExercisePanelFactory.this.instance, exerciseList);
+        soundFeedback.endListener, MyFlashcardExercisePanelFactory.this.instance, exerciseListToUse);
     }
 
     @Override
@@ -489,7 +488,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
     }
 
     /**
-     * @see mitll.langtest.client.custom.MyFlashcardExercisePanelFactory.StatsPracticePanel#showFeedbackCharts
+     * @see MyFlashcardExercisePanelFactory.StatsPracticePanel#showFeedbackCharts
      * @return
      */
     private double getAvgScore() {
@@ -512,7 +511,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
     }
 
     /**
-     * @see mitll.langtest.client.custom.MyFlashcardExercisePanelFactory.StatsPracticePanel#showFeedbackCharts
+     * @see MyFlashcardExercisePanelFactory.StatsPracticePanel#showFeedbackCharts
      * @return
      */
     private Button getRepeatButton() {
