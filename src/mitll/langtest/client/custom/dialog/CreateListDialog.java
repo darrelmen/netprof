@@ -1,4 +1,4 @@
-package mitll.langtest.client.custom;
+package mitll.langtest.client.custom.dialog;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
@@ -19,13 +19,14 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserManager;
 
-class CreateListDialog extends BasicDialog {
-  private static final String REVIEW = "Review";
+public class CreateListDialog extends BasicDialog {
+  //private static final String REVIEW = "Review";
   private static final String PRACTICE = "Practice";
 
   private static final String CLASS = "Course Info (optional)";
@@ -52,7 +53,7 @@ class CreateListDialog extends BasicDialog {
    * @param thirdRow
    * @seex
    */
-  void doCreate(Panel thirdRow) {
+  public void doCreate(Panel thirdRow) {
     thirdRow.clear();
     final KeyPressHelper enterKeyButtonHelper = new KeyPressHelper(true);
     Panel child = new DivWidget() {
