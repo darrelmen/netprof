@@ -172,7 +172,7 @@ public class ResultDAO extends DAO {
    * A session will have statistics - # correct, avg pronunciation score, maybe duration, etc.
    *
    * @see mitll.langtest.server.database.DatabaseImpl#getUserHistoryForList
-   * @see mitll.langtest.client.custom.MyFlashcardExercisePanelFactory.StatsPracticePanel#onSetComplete()
+   * @see mitll.langtest.client.flashcard.MyFlashcardExercisePanelFactory.StatsPracticePanel#onSetComplete()
    * @param ids
    * @param latestResultID
    * @return

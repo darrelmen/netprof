@@ -325,7 +325,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   }
 
   /**
-   * @see mitll.langtest.client.custom.QCNPFExercise#makeCommentEntry(String, mitll.langtest.shared.ExerciseAnnotation)
+   * @see mitll.langtest.client.qc.QCNPFExercise#makeCommentEntry(String, mitll.langtest.shared.ExerciseAnnotation)
    * @param commentToPost
    * @param field
    */
@@ -354,8 +354,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   }
 
   /**
-   * @see mitll.langtest.client.custom.CommentNPFExercise#getEntry
-   * @see mitll.langtest.client.custom.QCNPFExercise#getEntry
+   * @see mitll.langtest.client.custom.exercise.CommentNPFExercise#getEntry
+   * @see mitll.langtest.client.qc.QCNPFExercise#getEntry
    * @param label
    * @param value
    * @param withWrap
@@ -386,7 +386,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   }
 
   /**
-   * @see mitll.langtest.client.custom.QCNPFExercise#populateCommentRow
+   * @see mitll.langtest.client.qc.QCNPFExercise#populateCommentRow
    * @return
    */
   protected Label getCommentLabel() {
