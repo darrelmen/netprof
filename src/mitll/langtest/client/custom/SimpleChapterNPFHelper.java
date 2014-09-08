@@ -4,6 +4,8 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.custom.content.NPFHelper;
+import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.WaveformExercisePanel;
@@ -52,7 +54,7 @@ class SimpleChapterNPFHelper implements RequiresResize {
     this.flexListLayout = getMyListLayout(service, feedback, userManager, controller, outer);
   }
 
-  protected FlexListLayout getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
+  protected NPFHelper.FlexListLayout getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
                                            UserManager userManager, ExerciseController controller, SimpleChapterNPFHelper outer) {
     return new MyFlexListLayout(service, feedback, userManager, controller, outer);
   }
@@ -81,7 +83,7 @@ class SimpleChapterNPFHelper implements RequiresResize {
     listContent.addStyleName("userListBackground");
   }
 
-  private FlexListLayout flexListLayout;
+  private NPFHelper.FlexListLayout flexListLayout;
   /**
    * Make the instance name uses the unique id for the list.
    *
@@ -141,7 +143,7 @@ class SimpleChapterNPFHelper implements RequiresResize {
     }
   }
 
-  protected static class MyFlexListLayout extends FlexListLayout {
+  protected static class MyFlexListLayout extends NPFHelper.FlexListLayout {
     private final SimpleChapterNPFHelper outer;
 
     public MyFlexListLayout(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager, ExerciseController controller, SimpleChapterNPFHelper outer) {
