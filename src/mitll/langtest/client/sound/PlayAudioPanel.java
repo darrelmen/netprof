@@ -278,7 +278,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   }
 
   /**
-   * @see mitll.langtest.client.custom.CommentNPFExercise#getShowGroup(java.util.List)
+   * @see mitll.langtest.client.custom.exercise.CommentNPFExercise#getShowGroup(java.util.List)
    * @param path
    */
   public void playAudio(String path) {
