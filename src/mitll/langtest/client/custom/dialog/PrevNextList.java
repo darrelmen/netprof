@@ -1,4 +1,4 @@
-package mitll.langtest.client.custom;
+package mitll.langtest.client.custom.dialog;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
@@ -19,7 +19,7 @@ class PrevNextList extends HorizontalPanel {
   private boolean disableNext = true;
 
   /**
-   * @see EditableExercise#addNew
+   * @see mitll.langtest.client.custom.dialog.EditableExercise#addNew
    * @param exerciseShell
    * @param listContainer
    * @param disableNext
