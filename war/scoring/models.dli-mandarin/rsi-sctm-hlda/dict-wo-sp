@@ -7,39 +7,98 @@ A   a2
 A   a3
 A   a4
 Ba   b a1
+Ba   b a1 
 Ba   b a2
+Ba   b a2 
 Ba   b a3
+Ba   b a3 
 Ba   b a4
+Ba   b a4 
 Bié   b i2 e2
 Bu   b u1
+Bu   b u1 
 Bu   b u2
+Bu   b u2 
 Bu   b u3
+Bu   b u3 
 Bu   b u4
+Bu   b u4 
 Bàba   b a4 b a1
 Bàn   b a4 n
+Bàn   b a4 n 
+Bànde   b a4 n d e1 
+Bànr   b a4 n r 
 Bái   b a2 i2
 Bù   b u4
+Bù   b u4 
 Bú   b u2
+Bā   b a1 
+Bādiăn   b a1 d i3 a3 n 
+Bān   b a1 n 
+Bāngshang   b a1 ng sh a2 ng 
+Bānshang   b a1 n sh a2 ng 
+Bāsuì   b a1 s u4 i4 
+Băi   b a3 i3 
+Bēibāo   b e1 i1 b a1 o1 
+Bēizi   b e1 i1 z i2 
+Chà   ch a4 
+Chàbuduō   ch a4 b u1 d u1 o1 
+Cháng   ch a2 ng 
 Chén   ch e2 n
+Chē   ch e1 
 Chēnghu   ch e1 ng h u2
 Cuò   c u4 o4
+Cāi   c a1 i1 
+Cāicai   c a1 i1 c a1 i1 
+Cāicai   c a1 i1 c a2 i2 
+Cāicai   c a1 i1 c a3 i3 
+Cāicai   c a1 i1 c a4 i4 
 De   d e1
 De   d e2
 De   d e3
 De   d e4
+Diăn   d i3 a3 n 
+Dui   d u1 i1 
+Dui   d u2 i2 
+Dui   d u3 i3 
+Dui   d u4 i4 
+Duì   d u4 i4 
 Duìbuqĭ   d u4 i4 b u1 q i3
 Duō   d u1 o1
+Duō   d u1 o1 
+Duōshăo   d u1 o1 sh a3 o3 
+Dà   d a4 
 Dài   d a4 i4
+Dàizi   d a4 i4 z i1 
 Dào   d a4 o4
+Dào   d a4 o4 
 Dàshĭguăn   d a4 sh i3 g u3 a3 n
 Dàxué   d a4 x uu2 e2
+Déguo   d e2 g u1 o1 
+Déguo   d e2 g u2 o2 
+Déguo   d e2 g u3 o3 
+Déguo   d e2 g u4 o4 
+Dìdi   d i4 d i1 
 Dānwèi   d a1 n w e4 i4
+Dĕi   d ĕ i1 
+Dĕi   d ĕ i2 
+Dĕi   d ĕ i3 
+Dĕi   d ĕ i4 
 Děi   d e3 i3
 Dōu   d o1 u1
+Dōu   d o1 u1 
+Fùqin   f u4 q i1 n 
+Făguo   f a3 g u1 o1 
+Făguo   f a3 g u2 o2 
+Făguo   f a3 g u3 o3 
+Făguo   f a3 g u4 o4 
+Fēn   f e1 n 
 Ge   g e1
 Ge   g e2
 Ge   g e3
 Ge   g e4
+Guì   g u4 i4 
+Guìle   g u4 i4 l e1 
 Guìxìng   g u4 i4 x i4 ng
 Guócái   g u2 o2 c a2 i2
 Guānxi   g u1 a1 n x i2
@@ -48,24 +107,31 @@ Gāoxìng   g a1 o1 x i4 ng
 Găo   g a3 o3
 Găocuò   g a3 o3 c u4 o4
 Găocuòle   g a3 o3 c u4 o4 l e1
+Gēge   g e1 g e2 
 Gēn   g e1 n
+Gēn   g e1 n 
 Gĕi   g ĕ i1
 Gĕi   g ĕ i2
 Gĕi   g ĕ i3
 Gĕi   g ĕ i4
+Gōngshìbāo   g o1 ng sh i4 b a1 o1 
 Gōngsī   g o1 ng s i1
 Gōngsīde   g o1 ng s i1 d e2
 Gōngzuò   g o1 ng z u4 o4
 Huáyì   h u2 a2 y i4
 Huí   h u2 i2
 Huānyíng   h u1 a1 n y i2 ng
+Huŏ   h u3 o3 
+Huŏchē   h u3 o3 ch e1 
 Hái   h a2 i2
 Háizi   h a2 i2 z i3
 Hé   h e2
 Hóu   h o2 u2
 Hăo   h a3 o3
+Hăo   h a3 o3 
 Hăole   h a3 o3 l e4
 Hĕn   h ĕ n
+Hĕn   h ĕ n 
 Hěn   h e3 n
 Jiànle   j i4 a4 n l e1
 Jiào   j i4 a4 o4
@@ -75,58 +141,142 @@ Jièshao   j i4 e4 sh a3 o3
 Jièshao   j i4 e4 sh a4 o4
 Jiéruì   j i2 e2 r u4 i4
 Jiésī   j i2 e2 s i1
+Jiù   j i4 u4 
 Jiā   j i1 a1
+Jiā   j i1 a1 
 Jiānádà   j i1 a1 n a2 d a4
+Jiăn   j i3 a3 n 
+Jiĕjie   j i1 ĕ j i1 e1 
+Jiĕjie   j i2 ĕ j i2 e2 
+Jiĕjie   j i3 ĕ j i3 e3 
+Jiĕjie   j i4 ĕ j i4 e4 
 Jiŭ   j i3 u3
+Jiŭ   j i3 u3 
+Jiŭdiăn   j i3 u3 d i3 a3 n 
+Jiŭfēn   j i3 u3 f e1 n 
+Jiŭshibākuài   j i3 u3 sh i4 b a1 k u4 a4 i4 
+Jiŭshí   j i3 u3 sh i2 
+Jiŭsuì   j i3 u3 s u4 i4 
 Jìn   j i4 n
+Jí   j i2 
 Jīnglĭ   j i1 ng l i3
 Jīngshēng   j i1 ng sh e1 ng
+Jīnnián   j i1 n n i2 a2 n 
+Jĭ   j i3 
+Jĭdiăn   j i3 d i3 a3 n 
+Jĭge   j i3 g e4 
 Jĭnzhāng   j i3 n zh a1 ng
 Jĭnzhāngde   j i3 n zh a1 ng d e2
+Jĭsuì   j i3 s u4 i4 
+Jĭwèi   j i3 w e4 i4 
+Kuài   k u4 a4 i4 
+Kàn   k a4 n 
+Kànkan   k a4 n k a1 n 
+Kànkàn   k a4 n k a4 n 
+Kè   k e4 
 Kèqi   k e4 q i1
 Kéyi   k e2 y i3
 Kùn   k u4 n
+Kāi   k a1 i1 
 Kē   k e1
+Kĕshi   k ĕ sh i1 
+Kĕshi   k ĕ sh i2 
+Kĕshi   k ĕ sh i3 
+Kĕshi   k ĕ sh i4 
+Kĕài   k ĕ a4 i4 
+Kĕàitā   k ĕ a4 i4 t a1 
 Kěshi   k e3 sh i4
+Kŏngpà   k o3 ng p a4 
 Le   l e1
+Le   l e1 
 Le   l e2
+Le   l e2 
 Le   l e3
+Le   l e3 
 Le   l e4
+Le   l e4 
+Liù   l i4 u4 
+Liùshí   l i4 u4 sh i2 
+Liăng   l i3 a3 ng 
+Liăngge   l i3 a3 ng g e4 
+Liăngwèi   l i3 a3 ng w e4 i4 
 Luó   l u2 o2
 Lái   l a2 i2
+Láibují   l a2 i2 b u3 j i2 
+Láibujíle   l a2 i2 b u3 j i2 l e3 
 Lèi   l e4 i4
 Léiēn   l e2 i2 e1 n
 Lín   l i2 n
+Líng   l i2 ng 
 Lăo   l a3 o3
 Lăoshī   l a3 o3 sh i1
+Lăoshī   l a3 o3 sh i1 
 Lĭ   l i3
 Ma   m a1
+Ma   m a1 
 Ma   m a2
+Ma   m a2 
 Ma   m a3
+Ma   m a3 
 Ma   m a4
+Ma   m a4 
+Mài   m a4 i4 
+Màide   m a4 i4 d e1 
 Màn   m a4 n
 Màoyì   m a4 o4 y i4
 Máng   m a2 ng
+Máng   m a2 ng 
+Máo   m a2 o2 
+Mèimei   m e4 i4 m e1 i1 
+Mèimei   m e4 i4 m e2 i2 
+Mèimei   m e4 i4 m e3 i3 
+Mèimei   m e4 i4 m e4 i4 
 Méi   m e2 i2
+Méiyou   m e2 i2 y o1 u1 
+Méiyou   m e2 i2 y o2 u2 
+Méiyou   m e2 i2 y o3 u3 
+Méiyou   m e2 i2 y o4 u4 
 Míngpiàn   m i2 ng p i4 a4 n
 Míngzi   m i2 ng z i3
 Māma   m a1 m a2
 Mă   m a3
+Măi   m a3 i3 
 Măláixīyà   m a3 l a2 i2 x i1 y a4
+Mĕiguo   m ĕ i1 g u1 o1 
+Mĕiguo   m ĕ i2 g u2 o2 
+Mĕiguo   m ĕ i3 g u3 o3 
+Mĕiguo   m ĕ i4 g u4 o4 
+Mĕiguó   m ĕ i1 g u2 o2 
+Mĕiguó   m ĕ i2 g u2 o2 
+Mĕiguó   m ĕ i3 g u2 o2 
+Mĕiguó   m ĕ i4 g u2 o2 
 Měiguo   m e3 i3 g u1 o1
 Měiguo   m e3 i3 g u2 o2
 Měiguo   m e3 i3 g u3 o3
 Měiguo   m e3 i3 g u4 o4
 Měiguó   m e3 i3 g u2 o2
+Mŭqin   m u3 q i4 n 
 Ne   n e1
+Ne   n e1 
 Ne   n e2
+Ne   n e2 
 Ne   n e3
+Ne   n e3 
 Ne   n e4
+Ne   n e4 
+Niánji   n i2 a2 n j i3 
 Nà   n a4
+Nà   n a4 
 Nán   n a2 n
+Nánde   n a2 n d e3 
+Nánlăoshī   n a2 n l a3 o3 sh i1 
+Nánshēng   n a2 n sh e1 ng 
 Nèi   n e4 i4
+Nèige   n e4 i4 g e1 
 Nèiwèi   n e4 i4 w e4 i4
+Nèmme   n e4 m m e1 
 Nín   n i2 n
+Nín   n i2 n 
 Nínde   n i2 n d e3
 Năr   n a3 r
 Nĕige   n ĕ i1 g e1
@@ -137,67 +287,130 @@ Něi   n e3 i3
 Něiguó   n e3 i3 g u2 o2
 Něiwèi   n e3 i3 w e4 i4
 Nĭ   n i3
+Nĭ   n i3 
 Nĭmen   n i3 m e4 n
+Nĭmen   n i3 m e4 n 
 Nĭmende   n i3 m e4 n d e1
 Nǐ   n i3
+Nǚde   n uu3 d e4 
+Nǚlăoshī   n uu3 l a3 o3 sh i1 
 Nǚshì   n uu3 sh i4
+Nǚshēng   n uu3 sh e1 ng 
+Piányi   p i2 a2 n y i3 
+Piányide   p i2 a2 n y i3 d e4 
+Qián   q i2 a2 n 
+Qíge   q i2 g e3 
 Qù   q uu4
+Qī   q i1 
+Qīshí   q i1 sh i2 
 Qĭng   q i3 ng
+Qĭng   q i3 ng 
 Rènshi   r e4 n sh i1
 Rén   r e2 n
+Rén   r e2 n 
 Rìběn   r i4 b e3 n
 Róngyi   r o2 ng y i3
 Shi   sh i1
+Shi   sh i1 
 Shi   sh i2
+Shi   sh i2 
 Shi   sh i3
+Shi   sh i3 
 Shi   sh i4
+Shi   sh i4 
+Shàng   sh a4 ng 
+Shàngge   sh a4 ng g e1 
 Shéi   sh e2 i2
 Shémme   sh e2 m m e3
 Shì   sh i4
 Shìr   sh i4 r
+Shí   sh i2 
+Shídiăn   sh i2 d i3 a3 n 
+Shífēn   sh i2 f e1 n 
+Shíjiān   sh i2 j i1 a1 n 
 Shítáng   sh i2 t a2 ng
+Shíwèi   sh i2 w e4 i4 
+Shíyīkuài   sh i2 y i1 k u4 a4 i4 
 Shī   sh i1
+Suì   s u4 i4 
+Sì   s i4 
+Sìshibāsuì   s i4 sh i1 b a1 s u4 i4 
 Sùshè   s u4 sh e4
 Sùshān   s u4 sh a1 n
+Sān   s a1 n 
+Sāndiăn   s a1 n d i3 a3 n 
+Sānkuài   s a1 n k u4 a4 i4 
+Sānkè   s a1 n k e4 
+Sānshí   s a1 n sh i2 
+Sānwèi   s a1 n w e4 i4 
+Tiānjīn   t i1 a1 n j i1 n 
+Tiānjīnde   t i1 a1 n j i1 n d e2 
 Tài   t a4 i4
+Tài   t a4 i4 
 Tàitai   t a4 i4 t a1 i1
 Tàitai   t a4 i4 t a2 i2
 Tàitai   t a4 i4 t a3 i3
 Tàitai   t a4 i4 t a4 i4
+Tàng   t a4 ng 
 Táiwān   t a2 i2 w a1 n
 Tóngshì   t o2 ng sh i4
 Tóngwū   t o2 ng w u1
 Tóngwūr   t o2 ng w u1 r
 Tóngxué   t o2 ng x uu2 e2
+Tóngxué   t o2 ng x uu2 e2 
 Túshūguăn   t u2 sh u1 g u3 a3 n
 Tā   t a1
+Tā   t a1 
 Tāmen   t a1 m e2 n
+Tāmen   t a1 m e2 n 
 Tĭng   t i3 ng
+Tĭng   t i3 ng 
 Wàijiāobù   w a4 i4 j i1 a1 o1 b u4
 Wáng   w a2 ng
 Wèi   w e4 i4
 Wèn   w e4 n
+Wèn   w e4 n 
 Wú   w u2
 Wŏ   w o3
+Wŏ   w o3 
 Wŏde   w o3 d e4
 Wŏmen   w o3 m e4 n
+Wŭ   w u3 
+Wŭge   w u3 g e4 
+Wŭmáo   w u3 m a2 o2 
+Wŭshisìsuì   w u3 sh i4 s i4 s u4 i4 
+Wŭshisānsuì   w u3 sh i4 s a1 n s u4 i4 
+Xià   x i4 a4 
+Xiàge   x i4 a4 g e1 
+Xiànzài   x i4 a4 n z a4 i4 
 Xiàozhăng   x i4 a4 o4 zh a3 ng
+Xiàyítàng   x i4 a4 y i2 t a4 ng 
+Xiángxiang   x i2 a2 ng x i1 a1 ng 
+Xiángxiang   x i2 a2 ng x i2 a2 ng 
+Xiángxiang   x i2 a2 ng x i3 a3 ng 
+Xiángxiang   x i2 a2 ng x i4 a4 ng 
 Xiáojie   x i2 a2 o2 j i1 e1
 Xiáojie   x i2 a2 o2 j i2 e2
 Xiáojie   x i2 a2 o2 j i3 e3
 Xiáojie   x i2 a2 o2 j i4 e4
 Xiè   x i4 e4
 Xièxie   x i4 e4 x i1 e1
+Xièxie   x i4 e4 x i1 e1 
 Xièxie   x i4 e4 x i2 e2
+Xièxie   x i4 e4 x i2 e2 
 Xièxie   x i4 e4 x i3 e3
+Xièxie   x i4 e4 x i3 e3 
 Xièxie   x i4 e4 x i4 e4
+Xièxie   x i4 e4 x i4 e4 
 Xiān   x i1 a1 n
 Xiānggăng   x i1 a1 ng g a3 ng
 Xiānsheng   x i1 a1 n sh e2 ng
+Xiăng   x i3 a3 ng 
 Xiăo   x i3 a3 o3
 Xuéxí   x uu2 e2 x i2
 Xìng   x i4 ng
 Xíng   x i2 ng
+Xíng   x i2 ng 
 Xībānyá   x i1 b a1 n y a2
 Xīn   x i1 n
 Xīnjiāpō   x i1 n j i1 a1 p o1
@@ -205,38 +418,64 @@ Yixiar   y i1 x i1 a1 r
 Yixiar   y i2 x i2 a2 r
 Yixiar   y i3 x i3 a3 r
 Yixiar   y i4 x i4 a4 r
+Yuè   y uu4 e4 
 Yàngzi   y a4 ng z i1
 Yào   y a4 o4
+Yào   y a4 o4 
+Yìbăi   y i4 b a3 i3 
 Yìdiăn   y i4 d i3 a3 n
 Yìdiănr   y i4 d i3 a3 n r
 Yìdiănshìr   y i4 d i3 a3 n sh i4 r
 Yìjiā   y i4 j i1 a1
+Yìqiān   y i4 q i1 a1 n 
+Yìqiānkuài   y i4 q i1 a1 n k u4 a4 i4 
 Yìsi   y i4 s i1
+Yíbàn   y i2 b a4 n 
+Yíbànr   y i2 b a4 n r 
+Yíge   y i2 g e3 
+Yígòng   y i2 g o4 ng 
+Yíkè   y i2 k e4 
+Yíwèi   y i2 w e4 i4 
 Yíxià   y i2 x i4 a4
 Yíxiàr   y i2 x i4 a4 r
+Yò   y o4 
+Yĕ   y ĕ 
 Yě   y e3
 Yī   y i1
+Yī   y i1 
 Yīngguo   y i1 ng g u1 o1
 Yīngguo   y i1 ng g u2 o2
 Yīngguo   y i1 ng g u3 o3
 Yīngguo   y i1 ng g u4 o4
 Yīnggāi   y i1 ng g a1 i1
+Yīqiān   y i1 q i1 a1 n 
+Yīqiānkuài   y i1 q i1 a1 n k u4 a4 i4 
+Yĭjīng   y i3 j i1 ng 
 Yŏu   y o3 u3
+Yŏu   y o3 u3 
 Zhào   zh a4 o4
 Zhè   zh e4
+Zhè   zh e4 
 Zhèi   zh e4 i4
+Zhèige   zh e4 i4 g e1 
 Zhèiwèi   zh e4 i4 w e4 i4
+Zhèiwèi   zh e4 i4 w e4 i4 
 Zhèmme   zh e4 m m e1
 Zhĭ   zh i3
+Zhĭ   zh i3 
+Zhōng   zh o1 ng 
+ZhōngMěi   zh o1 ng m e3 i3
 Zhōngguo   zh o1 ng g u1 o1
 Zhōngguo   zh o1 ng g u2 o2
 Zhōngguo   zh o1 ng g u3 o3
 Zhōngguo   zh o1 ng g u4 o4
-ZhōngMěi   zh o1 ng m e3 i3
+Zhōngtóu   zh o1 ng t o2 u2 
 Zhōngwén   zh o1 ng w e2 n
 Zuìjìn   z u4 i4 j i4 n
 Zuò   z u4 o4
+Zuò   z u4 o4 
 Zài   z a4 i4
+Zài   z a4 i4 
 Zàijiàn   z a4 i4 j i4 a4 n
 Zĕmme   z ĕ m m e1
 Zĕmme   z ĕ m m e2
@@ -247,44 +486,104 @@ Zŏng   z o3 ng
 Zŏngjīnglĭ   z o3 ng j i1 ng l i3
 Zŏu   z o3 u3
 Zŏule   z o3 u3 l e4
+Zŏule   z o3 u3 l e4 
 a   a1
 a   a2
 a   a3
 a   a4
 ba   b a1
+ba   b a1 
 ba   b a2
+ba   b a2 
 ba   b a3
+ba   b a3 
 ba   b a4
+ba   b a4 
 bié   b i2 e2
 bu   b u1
+bu   b u1 
 bu   b u2
+bu   b u2 
 bu   b u3
+bu   b u3 
 bu   b u4
+bu   b u4 
 bàba   b a4 b a1
 bàn   b a4 n
+bàn   b a4 n 
+bànde   b a4 n d e1 
+bànr   b a4 n r 
 bái   b a2 i2
 bù   b u4
+bù   b u4 
 bú   b u2
+bā   b a1 
+bādiăn   b a1 d i3 a3 n 
+bān   b a1 n 
+bāngshang   b a1 ng sh a2 ng 
+bānshang   b a1 n sh a2 ng 
+bāsuì   b a1 s u4 i4 
+băi   b a3 i3 
+bēibāo   b e1 i1 b a1 o1 
+bēizi   b e1 i1 z i2 
+chà   ch a4 
+chàbuduō   ch a4 b u1 d u1 o1 
+cháng   ch a2 ng 
 chén   ch e2 n
+chē   ch e1 
 chēnghu   ch e1 ng h u2
 cuò   c u4 o4
+cāi   c a1 i1 
+cāicai   c a1 i1 c a1 i1 
+cāicai   c a1 i1 c a2 i2 
+cāicai   c a1 i1 c a3 i3 
+cāicai   c a1 i1 c a4 i4 
 de   d e1
 de   d e2
 de   d e3
 de   d e4
+diăn   d i3 a3 n 
+dui   d u1 i1 
+dui   d u2 i2 
+dui   d u3 i3 
+dui   d u4 i4 
+duì   d u4 i4 
 duìbuqĭ   d u4 i4 b u1 q i3
 duō   d u1 o1
+duō   d u1 o1 
+duōshăo   d u1 o1 sh a3 o3 
+dà   d a4 
 dài   d a4 i4
+dàizi   d a4 i4 z i1 
 dào   d a4 o4
+dào   d a4 o4 
 dàshĭguăn   d a4 sh i3 g u3 a3 n
 dàxué   d a4 x uu2 e2
+déguo   d e2 g u1 o1 
+déguo   d e2 g u2 o2 
+déguo   d e2 g u3 o3 
+déguo   d e2 g u4 o4 
+dìdi   d i4 d i1 
 dānwèi   d a1 n w e4 i4
+dĕi   d ĕ i1 
+dĕi   d ĕ i2 
+dĕi   d ĕ i3 
+dĕi   d ĕ i4 
 děi   d e3 i3
 dōu   d o1 u1
+dōu   d o1 u1 
+fùqin   f u4 q i1 n 
+făguo   f a3 g u1 o1 
+făguo   f a3 g u2 o2 
+făguo   f a3 g u3 o3 
+făguo   f a3 g u4 o4 
+fēn   f e1 n 
 ge   g e1
 ge   g e2
 ge   g e3
 ge   g e4
+guì   g u4 i4 
+guìle   g u4 i4 l e1 
 guìxìng   g u4 i4 x i4 ng
 guócái   g u2 o2 c a2 i2
 guānxi   g u1 a1 n x i2
@@ -293,24 +592,31 @@ gāoxìng   g a1 o1 x i4 ng
 găo   g a3 o3
 găocuò   g a3 o3 c u4 o4
 găocuòle   g a3 o3 c u4 o4 l e1
+gēge   g e1 g e2 
 gēn   g e1 n
+gēn   g e1 n 
 gĕi   g ĕ i1
 gĕi   g ĕ i2
 gĕi   g ĕ i3
 gĕi   g ĕ i4
+gōngshìbāo   g o1 ng sh i4 b a1 o1 
 gōngsī   g o1 ng s i1
 gōngsīde   g o1 ng s i1 d e2
 gōngzuò   g o1 ng z u4 o4
 huáyì   h u2 a2 y i4
 huí   h u2 i2
 huānyíng   h u1 a1 n y i2 ng
+huŏ   h u3 o3 
+huŏchē   h u3 o3 ch e1 
 hái   h a2 i2
 háizi   h a2 i2 z i3
 hé   h e2
 hóu   h o2 u2
 hăo   h a3 o3
+hăo   h a3 o3 
 hăole   h a3 o3 l e4
 hĕn   h ĕ n
+hĕn   h ĕ n 
 hěn   h e3 n
 jiànle   j i4 a4 n l e1
 jiào   j i4 a4 o4
@@ -320,58 +626,142 @@ jièshao   j i4 e4 sh a3 o3
 jièshao   j i4 e4 sh a4 o4
 jiéruì   j i2 e2 r u4 i4
 jiésī   j i2 e2 s i1
+jiù   j i4 u4 
 jiā   j i1 a1
+jiā   j i1 a1 
 jiānádà   j i1 a1 n a2 d a4
+jiăn   j i3 a3 n 
+jiĕjie   j i1 ĕ j i1 e1 
+jiĕjie   j i2 ĕ j i2 e2 
+jiĕjie   j i3 ĕ j i3 e3 
+jiĕjie   j i4 ĕ j i4 e4 
 jiŭ   j i3 u3
+jiŭ   j i3 u3 
+jiŭdiăn   j i3 u3 d i3 a3 n 
+jiŭfēn   j i3 u3 f e1 n 
+jiŭshibākuài   j i3 u3 sh i4 b a1 k u4 a4 i4 
+jiŭshí   j i3 u3 sh i2 
+jiŭsuì   j i3 u3 s u4 i4 
 jìn   j i4 n
+jí   j i2 
 jīnglĭ   j i1 ng l i3
 jīngshēng   j i1 ng sh e1 ng
+jīnnián   j i1 n n i2 a2 n 
+jĭ   j i3 
+jĭdiăn   j i3 d i3 a3 n 
+jĭge   j i3 g e4 
 jĭnzhāng   j i3 n zh a1 ng
 jĭnzhāngde   j i3 n zh a1 ng d e2
+jĭsuì   j i3 s u4 i4 
+jĭwèi   j i3 w e4 i4 
+kuài   k u4 a4 i4 
+kàn   k a4 n 
+kànkan   k a4 n k a1 n 
+kànkàn   k a4 n k a4 n 
+kè   k e4 
 kèqi   k e4 q i1
 kéyi   k e2 y i3
 kùn   k u4 n
+kāi   k a1 i1 
 kē   k e1
+kĕshi   k ĕ sh i1 
+kĕshi   k ĕ sh i2 
+kĕshi   k ĕ sh i3 
+kĕshi   k ĕ sh i4 
+kĕài   k ĕ a4 i4 
+kĕàitā   k ĕ a4 i4 t a1 
 kěshi   k e3 sh i4
+kŏngpà   k o3 ng p a4 
 le   l e1
+le   l e1 
 le   l e2
+le   l e2 
 le   l e3
+le   l e3 
 le   l e4
+le   l e4 
+liù   l i4 u4 
+liùshí   l i4 u4 sh i2 
+liăng   l i3 a3 ng 
+liăngge   l i3 a3 ng g e4 
+liăngwèi   l i3 a3 ng w e4 i4 
 luó   l u2 o2
 lái   l a2 i2
+láibují   l a2 i2 b u3 j i2 
+láibujíle   l a2 i2 b u3 j i2 l e3 
 lèi   l e4 i4
 léiēn   l e2 i2 e1 n
 lín   l i2 n
+líng   l i2 ng 
 lăo   l a3 o3
 lăoshī   l a3 o3 sh i1
+lăoshī   l a3 o3 sh i1 
 lĭ   l i3
 ma   m a1
+ma   m a1 
 ma   m a2
+ma   m a2 
 ma   m a3
+ma   m a3 
 ma   m a4
+ma   m a4 
+mài   m a4 i4 
+màide   m a4 i4 d e1 
 màn   m a4 n
 màoyì   m a4 o4 y i4
 máng   m a2 ng
+máng   m a2 ng 
+máo   m a2 o2 
+mèimei   m e4 i4 m e1 i1 
+mèimei   m e4 i4 m e2 i2 
+mèimei   m e4 i4 m e3 i3 
+mèimei   m e4 i4 m e4 i4 
 méi   m e2 i2
+méiyou   m e2 i2 y o1 u1 
+méiyou   m e2 i2 y o2 u2 
+méiyou   m e2 i2 y o3 u3 
+méiyou   m e2 i2 y o4 u4 
 míngpiàn   m i2 ng p i4 a4 n
 míngzi   m i2 ng z i3
 māma   m a1 m a2
 mă   m a3
+măi   m a3 i3 
 măláixīyà   m a3 l a2 i2 x i1 y a4
+mĕiguo   m ĕ i1 g u1 o1 
+mĕiguo   m ĕ i2 g u2 o2 
+mĕiguo   m ĕ i3 g u3 o3 
+mĕiguo   m ĕ i4 g u4 o4 
+mĕiguó   m ĕ i1 g u2 o2 
+mĕiguó   m ĕ i2 g u2 o2 
+mĕiguó   m ĕ i3 g u2 o2 
+mĕiguó   m ĕ i4 g u2 o2 
 měiguo   m e3 i3 g u1 o1
 měiguo   m e3 i3 g u2 o2
 měiguo   m e3 i3 g u3 o3
 měiguo   m e3 i3 g u4 o4
 měiguó   m e3 i3 g u2 o2
+mŭqin   m u3 q i4 n 
 ne   n e1
+ne   n e1 
 ne   n e2
+ne   n e2 
 ne   n e3
+ne   n e3 
 ne   n e4
+ne   n e4 
+niánji   n i2 a2 n j i3 
 nà   n a4
+nà   n a4 
 nán   n a2 n
+nánde   n a2 n d e3 
+nánlăoshī   n a2 n l a3 o3 sh i1 
+nánshēng   n a2 n sh e1 ng 
 nèi   n e4 i4
+nèige   n e4 i4 g e1 
 nèiwèi   n e4 i4 w e4 i4
+nèmme   n e4 m m e1 
 nín   n i2 n
+nín   n i2 n 
 nínde   n i2 n d e3
 năr   n a3 r
 nĕige   n ĕ i1 g e1
@@ -382,67 +772,130 @@ něi   n e3 i3
 něiguó   n e3 i3 g u2 o2
 něiwèi   n e3 i3 w e4 i4
 nĭ   n i3
+nĭ   n i3 
 nĭmen   n i3 m e4 n
+nĭmen   n i3 m e4 n 
 nĭmende   n i3 m e4 n d e1
 nǐ   n i3
+nǚde   n uu3 d e4 
+nǚlăoshī   n uu3 l a3 o3 sh i1 
 nǚshì   n uu3 sh i4
+nǚshēng   n uu3 sh e1 ng 
+piányi   p i2 a2 n y i3 
+piányide   p i2 a2 n y i3 d e4 
+qián   q i2 a2 n 
+qíge   q i2 g e3 
 qù   q uu4
+qī   q i1 
+qīshí   q i1 sh i2 
 qĭng   q i3 ng
+qĭng   q i3 ng 
 rènshi   r e4 n sh i1
 rén   r e2 n
+rén   r e2 n 
 rìběn   r i4 b e3 n
 róngyi   r o2 ng y i3
 shi   sh i1
+shi   sh i1 
 shi   sh i2
+shi   sh i2 
 shi   sh i3
+shi   sh i3 
 shi   sh i4
+shi   sh i4 
+shàng   sh a4 ng 
+shàngge   sh a4 ng g e1 
 shéi   sh e2 i2
 shémme   sh e2 m m e3
 shì   sh i4
 shìr   sh i4 r
+shí   sh i2 
+shídiăn   sh i2 d i3 a3 n 
+shífēn   sh i2 f e1 n 
+shíjiān   sh i2 j i1 a1 n 
 shítáng   sh i2 t a2 ng
+shíwèi   sh i2 w e4 i4 
+shíyīkuài   sh i2 y i1 k u4 a4 i4 
 shī   sh i1
+suì   s u4 i4 
+sì   s i4 
+sìshibāsuì   s i4 sh i1 b a1 s u4 i4 
 sùshè   s u4 sh e4
 sùshān   s u4 sh a1 n
+sān   s a1 n 
+sāndiăn   s a1 n d i3 a3 n 
+sānkuài   s a1 n k u4 a4 i4 
+sānkè   s a1 n k e4 
+sānshí   s a1 n sh i2 
+sānwèi   s a1 n w e4 i4 
+tiānjīn   t i1 a1 n j i1 n 
+tiānjīnde   t i1 a1 n j i1 n d e2 
 tài   t a4 i4
+tài   t a4 i4 
 tàitai   t a4 i4 t a1 i1
 tàitai   t a4 i4 t a2 i2
 tàitai   t a4 i4 t a3 i3
 tàitai   t a4 i4 t a4 i4
+tàng   t a4 ng 
 táiwān   t a2 i2 w a1 n
 tóngshì   t o2 ng sh i4
 tóngwū   t o2 ng w u1
 tóngwūr   t o2 ng w u1 r
 tóngxué   t o2 ng x uu2 e2
+tóngxué   t o2 ng x uu2 e2 
 túshūguăn   t u2 sh u1 g u3 a3 n
 tā   t a1
+tā   t a1 
 tāmen   t a1 m e2 n
+tāmen   t a1 m e2 n 
 tĭng   t i3 ng
+tĭng   t i3 ng 
 wàijiāobù   w a4 i4 j i1 a1 o1 b u4
 wáng   w a2 ng
 wèi   w e4 i4
 wèn   w e4 n
+wèn   w e4 n 
 wú   w u2
 wŏ   w o3
+wŏ   w o3 
 wŏde   w o3 d e4
 wŏmen   w o3 m e4 n
+wŭ   w u3 
+wŭge   w u3 g e4 
+wŭmáo   w u3 m a2 o2 
+wŭshisìsuì   w u3 sh i4 s i4 s u4 i4 
+wŭshisānsuì   w u3 sh i4 s a1 n s u4 i4 
+xià   x i4 a4 
+xiàge   x i4 a4 g e1 
+xiànzài   x i4 a4 n z a4 i4 
 xiàozhăng   x i4 a4 o4 zh a3 ng
+xiàyítàng   x i4 a4 y i2 t a4 ng 
+xiángxiang   x i2 a2 ng x i1 a1 ng 
+xiángxiang   x i2 a2 ng x i2 a2 ng 
+xiángxiang   x i2 a2 ng x i3 a3 ng 
+xiángxiang   x i2 a2 ng x i4 a4 ng 
 xiáojie   x i2 a2 o2 j i1 e1
 xiáojie   x i2 a2 o2 j i2 e2
 xiáojie   x i2 a2 o2 j i3 e3
 xiáojie   x i2 a2 o2 j i4 e4
 xiè   x i4 e4
 xièxie   x i4 e4 x i1 e1
+xièxie   x i4 e4 x i1 e1 
 xièxie   x i4 e4 x i2 e2
+xièxie   x i4 e4 x i2 e2 
 xièxie   x i4 e4 x i3 e3
+xièxie   x i4 e4 x i3 e3 
 xièxie   x i4 e4 x i4 e4
+xièxie   x i4 e4 x i4 e4 
 xiān   x i1 a1 n
 xiānggăng   x i1 a1 ng g a3 ng
 xiānsheng   x i1 a1 n sh e2 ng
+xiăng   x i3 a3 ng 
 xiăo   x i3 a3 o3
 xuéxí   x uu2 e2 x i2
 xìng   x i4 ng
 xíng   x i2 ng
+xíng   x i2 ng 
 xībānyá   x i1 b a1 n y a2
 xīn   x i1 n
 xīnjiāpō   x i1 n j i1 a1 p o1
@@ -450,38 +903,64 @@ yixiar   y i1 x i1 a1 r
 yixiar   y i2 x i2 a2 r
 yixiar   y i3 x i3 a3 r
 yixiar   y i4 x i4 a4 r
+yuè   y uu4 e4 
 yàngzi   y a4 ng z i1
 yào   y a4 o4
+yào   y a4 o4 
+yìbăi   y i4 b a3 i3 
 yìdiăn   y i4 d i3 a3 n
 yìdiănr   y i4 d i3 a3 n r
 yìdiănshìr   y i4 d i3 a3 n sh i4 r
 yìjiā   y i4 j i1 a1
+yìqiān   y i4 q i1 a1 n 
+yìqiānkuài   y i4 q i1 a1 n k u4 a4 i4 
 yìsi   y i4 s i1
+yíbàn   y i2 b a4 n 
+yíbànr   y i2 b a4 n r 
+yíge   y i2 g e3 
+yígòng   y i2 g o4 ng 
+yíkè   y i2 k e4 
+yíwèi   y i2 w e4 i4 
 yíxià   y i2 x i4 a4
 yíxiàr   y i2 x i4 a4 r
+yò   y o4 
+yĕ   y ĕ 
 yě   y e3
 yī   y i1
+yī   y i1 
 yīngguo   y i1 ng g u1 o1
 yīngguo   y i1 ng g u2 o2
 yīngguo   y i1 ng g u3 o3
 yīngguo   y i1 ng g u4 o4
 yīnggāi   y i1 ng g a1 i1
+yīqiān   y i1 q i1 a1 n 
+yīqiānkuài   y i1 q i1 a1 n k u4 a4 i4 
+yĭjīng   y i3 j i1 ng 
 yŏu   y o3 u3
+yŏu   y o3 u3 
 zhào   zh a4 o4
 zhè   zh e4
+zhè   zh e4 
 zhèi   zh e4 i4
+zhèige   zh e4 i4 g e1 
 zhèiwèi   zh e4 i4 w e4 i4
+zhèiwèi   zh e4 i4 w e4 i4 
 zhèmme   zh e4 m m e1
 zhĭ   zh i3
+zhĭ   zh i3 
+zhōng   zh o1 ng 
 zhōngguo   zh o1 ng g u1 o1
 zhōngguo   zh o1 ng g u2 o2
 zhōngguo   zh o1 ng g u3 o3
 zhōngguo   zh o1 ng g u4 o4
 zhōngměi   zh o1 ng m e3 i3
+zhōngtóu   zh o1 ng t o2 u2 
 zhōngwén   zh o1 ng w e2 n
 zuìjìn   z u4 i4 j i4 n
 zuò   z u4 o4
+zuò   z u4 o4 
 zài   z a4 i4
+zài   z a4 i4 
 zàijiàn   z a4 i4 j i4 a4 n
 zĕmme   z ĕ m m e1
 zĕmme   z ĕ m m e2
@@ -492,16 +971,25 @@ zŏng   z o3 ng
 zŏngjīnglĭ   z o3 ng j i1 ng l i3
 zŏu   z o3 u3
 zŏule   z o3 u3 l e4
+zŏule   z o3 u3 l e4 
 À   a4
+Ài   a4 i4 
 Àihuá   a4 i4 h u2 a2
 Àirén   a4 i4 r e2 n
 Èi   e4 i4
+Èr   e4 r 
+Èrshí   e4 r sh i2 
 Ò   o4
+Ò   o4 
 à   a4
+ài   a4 i4 
 àihuá   a4 i4 h u2 a2
 àirén   a4 i4 r e2 n
 èi   e4 i4
+èr   e4 r 
+èrshí   e4 r sh i2 
 ò   o4
+ò   o4 
 Ăi   a3 i3
 ăi   a3 i3
 一                              y i1
