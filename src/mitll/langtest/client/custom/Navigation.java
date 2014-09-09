@@ -1373,10 +1373,18 @@ public class Navigation implements RequiresResize {
 	  String up2 = "Unit 1: Part 2";
 	  String up3 = "Unit 1: Part 3";
 	  String up4 = "Unit 1: Part 4";
+	  String u2p1 = "Unit 2: Part 1";
+	  String u2p2 = "Unit 2: Part 2";
+	  String u2p3 = "Unit 2: Part 3";
+	  String u2p4 = "Unit 2: Part 4";
 	  m.put(up1, new HashMap<String, Integer>());
 	  m.put(up2, new HashMap<String, Integer>());
 	  m.put(up3, new HashMap<String, Integer>());
 	  m.put(up4, new HashMap<String, Integer>());
+	  m.put(u2p1, new HashMap<String, Integer>());
+	  m.put(u2p2, new HashMap<String, Integer>());
+	  m.put(u2p3, new HashMap<String, Integer>());
+	  m.put(u2p4, new HashMap<String, Integer>());
 	  m.get(up1).put("Wang", 4);
 	  m.get(up1).put("Crane", 3);
 	  m.get(up2).put("Smith", 5);
@@ -1385,6 +1393,14 @@ public class Navigation implements RequiresResize {
 	  m.get(up3).put("Kao", 6);
 	  m.get(up4).put("Mrs. Smith", 7);
 	  m.get(up4).put("Mrs. Li", 6);
+	  m.get(u2p1).put("Taiwanese Student", 4);
+	  m.get(u2p1).put("Parsons", 6);
+	  m.get(u2p2).put("First Chinese/American", 9);
+	  m.get(u2p2).put("Second Chinese", 10);
+	  m.get(u2p3).put("Chinese", 9);
+	  m.get(u2p3).put("American", 10);
+	  m.get(u2p4).put("Taiwanese Guest", 9);
+	  m.get(u2p4).put("Rogers/Holbrooke", 10);
 	  
 	  return m;
   }
@@ -1395,10 +1411,18 @@ public class Navigation implements RequiresResize {
 	  String up2 = "Unit 1: Part 2";
 	  String up3 = "Unit 1: Part 3";
 	  String up4 = "Unit 1: Part 4";
+	  String u2p1 = "Unit 2: Part 1";
+	  String u2p2 = "Unit 2: Part 2";
+	  String u2p3 = "Unit 2: Part 3";
+	  String u2p4 = "Unit 2: Part 4";
 	  m.put(up1, new HashMap<Integer, String>());
 	  m.put(up2, new HashMap<Integer, String>());
 	  m.put(up3, new HashMap<Integer, String>());
 	  m.put(up4, new HashMap<Integer, String>());
+	  m.put(u2p1, new HashMap<Integer, String>());
+	  m.put(u2p2, new HashMap<Integer, String>());
+	  m.put(u2p3, new HashMap<Integer, String>());
+	  m.put(u2p4, new HashMap<Integer, String>());
 	  
 	  m.get(up1).put(0, "Wang");
 	  m.get(up1).put(1, "Crane");
@@ -1431,6 +1455,50 @@ public class Navigation implements RequiresResize {
 	  m.get(up4).put(6, "Mrs. Li");
 	  m.get(up4).put(7, "Mrs. Smith");
 	  
+	  m.get(u2p1).put(0, "Taiwanese Student");
+	  m.get(u2p1).put(1, "Parsons");
+	  m.get(u2p1).put(2, "Taiwanese Student");
+	  m.get(u2p1).put(3, "Parsons");
+	  m.get(u2p1).put(4, "Taiwanese Student");
+	  m.get(u2p1).put(5, "Parsons");
+	  m.get(u2p1).put(6, "Parsons");
+	  
+	  m.get(u2p2).put(0, "First Chinese/American");
+	  m.get(u2p2).put(1, "Second Chinese");
+	  m.get(u2p2).put(2, "First Chinese/American");
+	  m.get(u2p2).put(3, "First Chinese/American");
+	  m.get(u2p2).put(4, "First Chinese/American");
+	  m.get(u2p2).put(5, "Second Chinese");
+	  m.get(u2p2).put(6, "First Chinese/American");
+	  m.get(u2p2).put(7, "Second Chinese");
+	  m.get(u2p2).put(8, "Second Chinese");
+	  m.get(u2p2).put(9, "First Chinese/American");
+	  m.get(u2p2).put(10, "Second Chinese");
+	  
+	  m.get(u2p3).put(0, "American");
+	  m.get(u2p3).put(1, "Chinese");
+	  m.get(u2p3).put(2, "American");
+	  m.get(u2p3).put(3, "American");
+	  m.get(u2p3).put(4, "Chinese");
+	  m.get(u2p3).put(5, "American");
+	  m.get(u2p3).put(6, "Chinese");
+	  m.get(u2p3).put(7, "American");
+	  m.get(u2p3).put(8, "Chinese");
+	  m.get(u2p3).put(9, "Chinese");
+	  m.get(u2p3).put(10, "American");
+	  
+	  m.get(u2p4).put(0, "Rogers/Holbrooke");
+	  m.get(u2p4).put(1, "Rogers/Holbrooke");
+	  m.get(u2p4).put(2, "Taiwanese Guest");
+	  m.get(u2p4).put(3, "Taiwanese Guest");
+	  m.get(u2p4).put(4, "Rogers/Holbrooke");
+	  m.get(u2p4).put(5, "Rogers/Holbrooke");
+	  m.get(u2p4).put(6, "Taiwanese Guest");
+	  m.get(u2p4).put(7, "Rogers/Holbrooke");
+	  m.get(u2p4).put(8, "Rogers/Holbrooke");
+	  m.get(u2p4).put(9, "Taiwanese Guest");
+	  m.get(u2p4).put(10, "Rogers/Holbrooke");
+	  
 	  return m;
   }
   
@@ -1440,10 +1508,19 @@ public class Navigation implements RequiresResize {
 	  String up2 = "Unit 1: Part 2";
 	  String up3 = "Unit 1: Part 3";
 	  String up4 = "Unit 1: Part 4";
+	  String u2p1 = "Unit 2: Part 1";
+	  String u2p2 = "Unit 2: Part 2";
+	  String u2p3 = "Unit 2: Part 3";
+	  String u2p4 = "Unit 2: Part 4";
+	  
 	  m.put(up1, new HashMap<Integer, String>());
 	  m.put(up2, new HashMap<Integer, String>());
 	  m.put(up3, new HashMap<Integer, String>());
 	  m.put(up4, new HashMap<Integer, String>());
+	  m.put(u2p1, new HashMap<Integer, String>());
+	  m.put(u2p2, new HashMap<Integer, String>());
+	  m.put(u2p3, new HashMap<Integer, String>());
+	  m.put(u2p4, new HashMap<Integer, String>());
 	  
 	  m.get(up1).put(0, "Kē Léi'ēn, nǐ hăo!");
 	  m.get(up1).put(1, "Wáng Jīngshēng, nǐ hăo!");
@@ -1475,6 +1552,50 @@ public class Navigation implements RequiresResize {
 	  m.get(up4).put(5, "Lĭ Tàitai, xièxie nín le.");
 	  m.get(up4).put(6, "Bú kèqi. Màn zŏu a!");
 	  m.get(up4).put(7, "Zàijiàn, zàijiàn!");
+	  
+	  m.get(u2p1).put(0, "Qĭng wèn, nĭ shì něiguó rén?");
+	  m.get(u2p1).put(1, "Wŏ shi Měiguo rén.");
+	  m.get(u2p1).put(2, "Nĭ jiào shémme míngzi?");
+	  m.get(u2p1).put(3, "Wŏ jiào Bái Jiéruì.");
+	  m.get(u2p1).put(4, "Nĭmen dōu shi Měiguo rén ma?");
+	  m.get(u2p1).put(5, "Wŏmen bù dōu shi Měiguo rén.");
+	  m.get(u2p1).put(6, "Zhèiwèi tóngxué yě shi Měiguo rén, kěshi nèiwèi tóngxué shi Jiā'nádà rén.");
+	  
+	  m.get(u2p2).put(0, "Qĭng jìn!");
+	  m.get(u2p2).put(1, "Èi, Xiăo Mă. Ò.");
+	  m.get(u2p2).put(2, "Ò, Xiăo Chén, wŏ gĕi nĭ jièshao yixiar.");
+	  m.get(u2p2).put(3, "Zhè shi wŏde xīn tóngwū, tā jiào Wáng Àihuá.");
+	  m.get(u2p2).put(4, "Wáng Àihuá, zhè shi wŏde lăo tóngxué, Xiăo Chén.");
+	  m.get(u2p2).put(5, "Ò, huānyíng nĭ dào Zhōngguo lái!");
+	  m.get(u2p2).put(6, "Hĕn gāoxìng rènshi nĭ, Chén Xiáojie!");
+	  m.get(u2p2).put(7, "Ò, bié zhèmme chēnghu wŏ.");
+	  m.get(u2p2).put(8, "Hái shi jiào wŏ Xiăo Chén hăole.");
+	  m.get(u2p2).put(9, "Xíng. Nà nĭ yě jiào wŏ Xiăo Wáng hăole.");
+	  m.get(u2p2).put(10, "Hăo.");
+	  
+	  m.get(u2p3).put(0, "Nín guìxìng?");
+	  m.get(u2p3).put(1, "Wŏ xìng Gāo. Nín guìxìng?");
+	  m.get(u2p3).put(2, "Wŏ xìng Wú, Wú Sùshān.");
+	  m.get(u2p3).put(3, "Gāo Xiānsheng, nín zài nĕige dānwèi gōngzuò?");
+	  m.get(u2p3).put(4, "Wŏ zài Wàijiāobù gōngzuò. Nín ne?");
+	  m.get(u2p3).put(5, "Wŏ zài Měiguo Dàshĭguăn gōngzuò.");
+	  m.get(u2p3).put(6, "Nèiwèi shi nínde xiānsheng ba?");
+	  m.get(u2p3).put(7, "Bú shì, bú shì! Tā shì wŏde tóngshì.");
+	  m.get(u2p3).put(8, "Ò, Wú nǚshì, duìbuqĭ.");
+	  m.get(u2p3).put(9, "Wŏ yŏu yìdiănshìr, xiān zŏule. Zàijiàn!");
+	  m.get(u2p3).put(10, "Zàijiàn!");
+	  
+	  m.get(u2p4).put(0, "Nĭ hăo! Wŏ jiào Luó Jiésī.");
+	  m.get(u2p4).put(1, "Qĭng duō zhĭ jiào.");
+	  m.get(u2p4).put(2, "Wŏ xìng Shī. Duìbuqĭ, wŏ méi dài míngpiàn.");
+	  m.get(u2p4).put(3, "Wŏ zài Zhōng-Měi Màoyì Gōngsī gōngzuò.");
+	  m.get(u2p4).put(4, "Zŏngjīnglĭ, zhè shì Zhōng-Měi Màoyì Gōngsī Shī Xiáojie.");
+	  m.get(u2p4).put(5, "À, huānyíng, huānyíng! Wŏ xìng Hóu.");
+	  m.get(u2p4).put(6, "Xièxie. Zŏngjīnglĭ yě shi Yīngguo rén ba?");
+	  m.get(u2p4).put(7, "Bù, wŏ gēn Luó Xiáojie dōu bú shi Yīngguo rén.");
+	  m.get(u2p4).put(8, "Wŏmen shi Měiguo rén.");
+	  m.get(u2p4).put(9, "Ò, duìbuqĭ, wŏ găocuòle.");
+	  m.get(u2p4).put(10, "Méi guānxi.");
 	  
 	  return m;
   }
