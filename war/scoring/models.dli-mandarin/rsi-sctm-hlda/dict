@@ -11,9 +11,13 @@ A   a3 sp
 A   a4
 A   a4 sp
 Ba   b a1
+Ba   b a1 sp
 Ba   b a2
+Ba   b a2 sp
 Ba   b a3
+Ba   b a3 sp
 Ba   b a4
+Ba   b a4 sp
 Bié   b i2 e2
 Bu   b u1 sp
 Bu   b u2 sp
@@ -22,14 +26,34 @@ Bu   b u4 sp
 Bàba   b a4 b a1
 Bàba   b a4 b a1 sp
 Bàn   b a4 n sp
+Bànde   b a4 n d e1 sp
+Bànr   b a4 n r sp
 Bái   b a2 i2
 Bù   b u4
 Bù   b u4 sp
 Bú   b u2
 Bú   b u2 sp
+Bā   b a1 sp
+Bādiăn   b a1 d i3 a3 n sp
+Bān   b a1 n sp
+Bāngshang   b a1 ng sh a2 ng sp
+Bānshang   b a1 n sh a2 ng sp
+Bāsuì   b a1 s u4 i4 sp
+Băi   b a3 i3 sp
+Bēibāo   b e1 i1 b a1 o1 sp
+Bēizi   b e1 i1 z i2 sp
+Chà   ch a4 sp
+Chàbuduō   ch a4 b u1 d u1 o1 sp
+Cháng   ch a2 ng sp
 Chén   ch e2 n
+Chē   ch e1 sp
 Chēnghu   ch e1 ng h u2
 Cuò   c u4 o4
+Cāi   c a1 i1 sp
+Cāicai   c a1 i1 c a1 i1 sp
+Cāicai   c a1 i1 c a2 i2 sp
+Cāicai   c a1 i1 c a3 i3 sp
+Cāicai   c a1 i1 c a4 i4 sp
 De   d e1
 De   d e1 sp
 De   d e2
@@ -38,21 +62,48 @@ De   d e3
 De   d e3 sp
 De   d e4
 De   d e4 sp
+Diăn   d i3 a3 n sp
+Dui   d u1 i1 sp
+Dui   d u2 i2 sp
+Dui   d u3 i3 sp
+Dui   d u4 i4 sp
+Duì   d u4 i4 sp
 Duìbuqĭ   d u4 i4 b u1 q i3
 Duō   d u1 o1
+Duō   d u1 o1 sp
+Duōshăo   d u1 o1 sh a3 o3 sp
+Dà   d a4 sp
 Dài   d a4 i4
+Dàizi   d a4 i4 z i1 sp
 Dào   d a4 o4
 Dào   d a4 o4 sp
 Dàshĭguăn   d a4 sh i3 g u3 a3 n
 Dàxué   d a4 x uu2 e2
+Déguo   d e2 g u1 o1 sp
+Déguo   d e2 g u2 o2 sp
+Déguo   d e2 g u3 o3 sp
+Déguo   d e2 g u4 o4 sp
+Dìdi   d i4 d i1 sp
 Dānwèi   d a1 n w e4 i4
+Dĕi   d ĕ i1 sp
+Dĕi   d ĕ i2 sp
+Dĕi   d ĕ i3 sp
+Dĕi   d ĕ i4 sp
 Děi   d e3 i3 sp
 Dōu   d o1 u1
 Dōu   d o1 u1 sp
+Fùqin   f u4 q i1 n sp
+Făguo   f a3 g u1 o1 sp
+Făguo   f a3 g u2 o2 sp
+Făguo   f a3 g u3 o3 sp
+Făguo   f a3 g u4 o4 sp
+Fēn   f e1 n sp
 Ge   g e1
 Ge   g e2
 Ge   g e3
 Ge   g e4
+Guì   g u4 i4 sp
+Guìle   g u4 i4 l e1 sp
 Guìxìng   g u4 i4 x i4 ng
 Guócái   g u2 o2 c a2 i2 sp
 Guānxi   g u1 a1 n x i2
@@ -62,11 +113,14 @@ Gāoxìng   g a1 o1 x i4 ng
 Găo   g a3 o3
 Găocuò   g a3 o3 c u4 o4
 Găocuòle   g a3 o3 c u4 o4 l e1
+Gēge   g e1 g e2 sp
 Gēn   g e1 n
+Gēn   g e1 n sp
 Gĕi   g ĕ i1
 Gĕi   g ĕ i2
 Gĕi   g ĕ i3
 Gĕi   g ĕ i4
+Gōngshìbāo   g o1 ng sh i4 b a1 o1 sp
 Gōngsī   g o1 ng s i1
 Gōngsīde   g o1 ng s i1 d e2
 Gōngzuò   g o1 ng z u4 o4
@@ -75,6 +129,8 @@ Huáyì   h u2 a2 y i4
 Huí   h u2 i2 sp
 Huānyíng   h u1 a1 n y i2 ng
 Huānyíng   h u1 a1 n y i2 ng sp
+Huŏ   h u3 o3 sp
+Huŏchē   h u3 o3 ch e1 sp
 Hái   h a2 i2
 Hái   h a2 i2 sp
 Háizi   h a2 i2 z i3 sp
@@ -84,6 +140,7 @@ Hăo   h a3 o3
 Hăo   h a3 o3 sp
 Hăole   h a3 o3 l e4
 Hĕn   h ĕ n
+Hĕn   h ĕ n sp
 Hěn   h e3 n sp
 Jiànle   j i4 a4 n l e1 sp
 Jiào   j i4 a4 o4
@@ -93,20 +150,52 @@ Jièshao   j i4 e4 sh a3 o3
 Jièshao   j i4 e4 sh a4 o4
 Jiéruì   j i2 e2 r u4 i4
 Jiésī   j i2 e2 s i1
+Jiù   j i4 u4 sp
 Jiā   j i1 a1
+Jiā   j i1 a1 sp
 Jiānádà   j i1 a1 n a2 d a4
+Jiăn   j i3 a3 n sp
+Jiĕjie   j i1 ĕ j i1 e1 sp
+Jiĕjie   j i2 ĕ j i2 e2 sp
+Jiĕjie   j i3 ĕ j i3 e3 sp
+Jiĕjie   j i4 ĕ j i4 e4 sp
 Jiŭ   j i3 u3 sp
+Jiŭdiăn   j i3 u3 d i3 a3 n sp
+Jiŭfēn   j i3 u3 f e1 n sp
+Jiŭshibākuài   j i3 u3 sh i4 b a1 k u4 a4 i4 sp
+Jiŭshí   j i3 u3 sh i2 sp
+Jiŭsuì   j i3 u3 s u4 i4 sp
 Jìn   j i4 n
 Jìn   j i4 n sp
+Jí   j i2 sp
 Jīnglĭ   j i1 ng l i3
 Jīngshēng   j i1 ng sh e1 ng sp
+Jīnnián   j i1 n n i2 a2 n sp
+Jĭ   j i3 sp
+Jĭdiăn   j i3 d i3 a3 n sp
+Jĭge   j i3 g e4 sp
 Jĭnzhāng   j i3 n zh a1 ng sp
 Jĭnzhāngde   j i3 n zh a1 ng d e2 sp
+Jĭsuì   j i3 s u4 i4 sp
+Jĭwèi   j i3 w e4 i4 sp
+Kuài   k u4 a4 i4 sp
+Kàn   k a4 n sp
+Kànkan   k a4 n k a1 n sp
+Kànkàn   k a4 n k a4 n sp
+Kè   k e4 sp
 Kèqi   k e4 q i1 sp
 Kéyi   k e2 y i3 sp
 Kùn   k u4 n sp
+Kāi   k a1 i1 sp
 Kē   k e1 sp
+Kĕshi   k ĕ sh i1 sp
+Kĕshi   k ĕ sh i2 sp
+Kĕshi   k ĕ sh i3 sp
+Kĕshi   k ĕ sh i4 sp
+Kĕài   k ĕ a4 i4 sp
+Kĕàitā   k ĕ a4 i4 t a1 sp
 Kěshi   k e3 sh i4
+Kŏngpà   k o3 ng p a4 sp
 Le   l e1
 Le   l e1 sp
 Le   l e2
@@ -115,11 +204,19 @@ Le   l e3
 Le   l e3 sp
 Le   l e4
 Le   l e4 sp
+Liù   l i4 u4 sp
+Liùshí   l i4 u4 sh i2 sp
+Liăng   l i3 a3 ng sp
+Liăngge   l i3 a3 ng g e4 sp
+Liăngwèi   l i3 a3 ng w e4 i4 sp
 Luó   l u2 o2
 Lái   l a2 i2
+Láibují   l a2 i2 b u3 j i2 sp
+Láibujíle   l a2 i2 b u3 j i2 l e3 sp
 Lèi   l e4 i4 sp
 Léiēn   l e2 i2 e1 n sp
 Lín   l i2 n sp
+Líng   l i2 ng sp
 Lăo   l a3 o3
 Lăo   l a3 o3 sp
 Lăoshī   l a3 o3 sh i1 sp
@@ -132,21 +229,42 @@ Ma   m a3
 Ma   m a3 sp
 Ma   m a4
 Ma   m a4 sp
+Mài   m a4 i4 sp
+Màide   m a4 i4 d e1 sp
 Màn   m a4 n sp
 Màoyì   m a4 o4 y i4
 Máng   m a2 ng sp
+Máo   m a2 o2 sp
+Mèimei   m e4 i4 m e1 i1 sp
+Mèimei   m e4 i4 m e2 i2 sp
+Mèimei   m e4 i4 m e3 i3 sp
+Mèimei   m e4 i4 m e4 i4 sp
 Méi   m e2 i2
 Méi   m e2 i2 sp
+Méiyou   m e2 i2 y o1 u1 sp
+Méiyou   m e2 i2 y o2 u2 sp
+Méiyou   m e2 i2 y o3 u3 sp
+Méiyou   m e2 i2 y o4 u4 sp
 Míngpiàn   m i2 ng p i4 a4 n
 Míngzi   m i2 ng z i3
 Māma   m a1 m a2 sp
 Mă   m a3
+Măi   m a3 i3 sp
 Măláixīyà   m a3 l a2 i2 x i1 y a4
+Mĕiguo   m ĕ i1 g u1 o1 sp
+Mĕiguo   m ĕ i2 g u2 o2 sp
+Mĕiguo   m ĕ i3 g u3 o3 sp
+Mĕiguo   m ĕ i4 g u4 o4 sp
+Mĕiguó   m ĕ i1 g u2 o2 sp
+Mĕiguó   m ĕ i2 g u2 o2 sp
+Mĕiguó   m ĕ i3 g u2 o2 sp
+Mĕiguó   m ĕ i4 g u2 o2 sp
 Měiguo   m e3 i3 g u1 o1
 Měiguo   m e3 i3 g u2 o2
 Měiguo   m e3 i3 g u3 o3
 Měiguo   m e3 i3 g u4 o4
 Měiguó   m e3 i3 g u2 o2
+Mŭqin   m u3 q i4 n sp
 Ne   n e1
 Ne   n e1 sp
 Ne   n e2
@@ -155,10 +273,17 @@ Ne   n e3
 Ne   n e3 sp
 Ne   n e4
 Ne   n e4 sp
+Niánji   n i2 a2 n j i3 sp
 Nà   n a4
+Nà   n a4 sp
 Nán   n a2 n sp
+Nánde   n a2 n d e3 sp
+Nánlăoshī   n a2 n l a3 o3 sh i1 sp
+Nánshēng   n a2 n sh e1 ng sp
 Nèi   n e4 i4
+Nèige   n e4 i4 g e1 sp
 Nèiwèi   n e4 i4 w e4 i4
+Nèmme   n e4 m m e1 sp
 Nín   n i2 n
 Nín   n i2 n sp
 Nínde   n i2 n d e3
@@ -177,12 +302,22 @@ Nĭmen   n i3 m e4 n
 Nĭmen   n i3 m e4 n sp
 Nĭmende   n i3 m e4 n d e1
 Nǐ   n i3 sp
+Nǚde   n uu3 d e4 sp
+Nǚlăoshī   n uu3 l a3 o3 sh i1 sp
 Nǚshì   n uu3 sh i4
+Nǚshēng   n uu3 sh e1 ng sp
+Piányi   p i2 a2 n y i3 sp
+Piányide   p i2 a2 n y i3 d e4 sp
+Qián   q i2 a2 n sp
+Qíge   q i2 g e3 sp
 Qù   q uu4 sp
+Qī   q i1 sp
+Qīshí   q i1 sh i2 sp
 Qĭng   q i3 ng
 Qĭng   q i3 ng sp
 Rènshi   r e4 n sh i1
 Rén   r e2 n
+Rén   r e2 n sp
 Rìběn   r i4 b e3 n
 Róngyi   r o2 ng y i3 sp
 Shi   sh i1
@@ -193,15 +328,34 @@ Shi   sh i3
 Shi   sh i3 sp
 Shi   sh i4
 Shi   sh i4 sp
+Shàng   sh a4 ng sp
+Shàngge   sh a4 ng g e1 sp
 Shéi   sh e2 i2
 Shémme   sh e2 m m e3
 Shì   sh i4
 Shì   sh i4 sp
 Shìr   sh i4 r sp
+Shí   sh i2 sp
+Shídiăn   sh i2 d i3 a3 n sp
+Shífēn   sh i2 f e1 n sp
+Shíjiān   sh i2 j i1 a1 n sp
 Shítáng   sh i2 t a2 ng sp
+Shíwèi   sh i2 w e4 i4 sp
+Shíyīkuài   sh i2 y i1 k u4 a4 i4 sp
 Shī   sh i1
+Suì   s u4 i4 sp
+Sì   s i4 sp
+Sìshibāsuì   s i4 sh i1 b a1 s u4 i4 sp
 Sùshè   s u4 sh e4 sp
 Sùshān   s u4 sh a1 n
+Sān   s a1 n sp
+Sāndiăn   s a1 n d i3 a3 n sp
+Sānkuài   s a1 n k u4 a4 i4 sp
+Sānkè   s a1 n k e4 sp
+Sānshí   s a1 n sh i2 sp
+Sānwèi   s a1 n w e4 i4 sp
+Tiānjīn   t i1 a1 n j i1 n sp
+Tiānjīnde   t i1 a1 n j i1 n d e2 sp
 Tài   t a4 i4 sp
 Tàitai   t a4 i4 t a1 i1
 Tàitai   t a4 i4 t a1 i1 sp
@@ -211,11 +365,13 @@ Tàitai   t a4 i4 t a3 i3
 Tàitai   t a4 i4 t a3 i3 sp
 Tàitai   t a4 i4 t a4 i4
 Tàitai   t a4 i4 t a4 i4 sp
+Tàng   t a4 ng sp
 Táiwān   t a2 i2 w a1 n
 Tóngshì   t o2 ng sh i4
 Tóngwū   t o2 ng w u1
 Tóngwūr   t o2 ng w u1 r
 Tóngxué   t o2 ng x uu2 e2
+Tóngxué   t o2 ng x uu2 e2 sp
 Túshūguăn   t u2 sh u1 g u3 a3 n sp
 Tā   t a1
 Tā   t a1 sp
@@ -226,13 +382,27 @@ Wáng   w a2 ng
 Wáng   w a2 ng sp
 Wèi   w e4 i4
 Wèn   w e4 n
+Wèn   w e4 n sp
 Wú   w u2
 Wŏ   w o3
 Wŏ   w o3 sp
 Wŏde   w o3 d e4
 Wŏmen   w o3 m e4 n
 Wŏmen   w o3 m e4 n sp
+Wŭ   w u3 sp
+Wŭge   w u3 g e4 sp
+Wŭmáo   w u3 m a2 o2 sp
+Wŭshisìsuì   w u3 sh i4 s i4 s u4 i4 sp
+Wŭshisānsuì   w u3 sh i4 s a1 n s u4 i4 sp
+Xià   x i4 a4 sp
+Xiàge   x i4 a4 g e1 sp
+Xiànzài   x i4 a4 n z a4 i4 sp
 Xiàozhăng   x i4 a4 o4 zh a3 ng
+Xiàyítàng   x i4 a4 y i2 t a4 ng sp
+Xiángxiang   x i2 a2 ng x i1 a1 ng sp
+Xiángxiang   x i2 a2 ng x i2 a2 ng sp
+Xiángxiang   x i2 a2 ng x i3 a3 ng sp
+Xiángxiang   x i2 a2 ng x i4 a4 ng sp
 Xiáojie   x i2 a2 o2 j i1 e1
 Xiáojie   x i2 a2 o2 j i1 e1 sp
 Xiáojie   x i2 a2 o2 j i2 e2
@@ -255,6 +425,7 @@ Xiān   x i1 a1 n sp
 Xiānggăng   x i1 a1 ng g a3 ng
 Xiānsheng   x i1 a1 n sh e2 ng
 Xiānsheng   x i1 a1 n sh e2 ng sp
+Xiăng   x i3 a3 ng sp
 Xiăo   x i3 a3 o3
 Xiăo   x i3 a3 o3 sp
 Xuéxí   x uu2 e2 x i2
@@ -269,41 +440,65 @@ Yixiar   y i1 x i1 a1 r
 Yixiar   y i2 x i2 a2 r
 Yixiar   y i3 x i3 a3 r
 Yixiar   y i4 x i4 a4 r
+Yuè   y uu4 e4 sp
 Yàngzi   y a4 ng z i1 sp
 Yào   y a4 o4
+Yào   y a4 o4 sp
+Yìbăi   y i4 b a3 i3 sp
 Yìdiăn   y i4 d i3 a3 n sp
 Yìdiănr   y i4 d i3 a3 n r sp
 Yìdiănshìr   y i4 d i3 a3 n sh i4 r
 Yìjiā   y i4 j i1 a1
+Yìqiān   y i4 q i1 a1 n sp
+Yìqiānkuài   y i4 q i1 a1 n k u4 a4 i4 sp
 Yìsi   y i4 s i1 sp
+Yíbàn   y i2 b a4 n sp
+Yíbànr   y i2 b a4 n r sp
+Yíge   y i2 g e3 sp
+Yígòng   y i2 g o4 ng sp
+Yíkè   y i2 k e4 sp
+Yíwèi   y i2 w e4 i4 sp
 Yíxià   y i2 x i4 a4
 Yíxiàr   y i2 x i4 a4 r
+Yò   y o4 sp
+Yĕ   y ĕ sp
 Yě   y e3
 Yě   y e3 sp
 Yī   y i1
+Yī   y i1 sp
 Yīngguo   y i1 ng g u1 o1
 Yīngguo   y i1 ng g u2 o2
 Yīngguo   y i1 ng g u3 o3
 Yīngguo   y i1 ng g u4 o4
 Yīnggāi   y i1 ng g a1 i1
+Yīqiān   y i1 q i1 a1 n sp
+Yīqiānkuài   y i1 q i1 a1 n k u4 a4 i4 sp
+Yĭjīng   y i3 j i1 ng sp
 Yŏu   y o3 u3
 Yŏu   y o3 u3 sp
 Zhào   zh a4 o4 sp
 Zhè   zh e4
+Zhè   zh e4 sp
 Zhèi   zh e4 i4
+Zhèige   zh e4 i4 g e1 sp
 Zhèiwèi   zh e4 i4 w e4 i4
+Zhèiwèi   zh e4 i4 w e4 i4 sp
 Zhèmme   zh e4 m m e1
 Zhĭ   zh i3
+Zhĭ   zh i3 sp
+Zhōng   zh o1 ng sp
+ZhōngMěi   zh o1 ng m e3 i3
 Zhōngguo   zh o1 ng g u1 o1
 Zhōngguo   zh o1 ng g u2 o2
 Zhōngguo   zh o1 ng g u3 o3
 Zhōngguo   zh o1 ng g u4 o4
-ZhōngMěi   zh o1 ng m e3 i3
+Zhōngtóu   zh o1 ng t o2 u2 sp
 Zhōngwén   zh o1 ng w e2 n
 Zhōngwén   zh o1 ng w e2 n sp
 Zuìjìn   z u4 i4 j i4 n sp
 Zuò   z u4 o4 sp
 Zài   z a4 i4
+Zài   z a4 i4 sp
 Zàijiàn   z a4 i4 j i4 a4 n
 Zàijiàn   z a4 i4 j i4 a4 n sp
 Zĕmme   z ĕ m m e1
@@ -326,9 +521,13 @@ a   a3 sp
 a   a4
 a   a4 sp
 ba   b a1
+ba   b a1 sp
 ba   b a2
+ba   b a2 sp
 ba   b a3
+ba   b a3 sp
 ba   b a4
+ba   b a4 sp
 bié   b i2 e2
 bu   b u1 sp
 bu   b u2 sp
@@ -337,14 +536,34 @@ bu   b u4 sp
 bàba   b a4 b a1
 bàba   b a4 b a1 sp
 bàn   b a4 n sp
+bànde   b a4 n d e1 sp
+bànr   b a4 n r sp
 bái   b a2 i2
 bù   b u4
 bù   b u4 sp
 bú   b u2
 bú   b u2 sp
+bā   b a1 sp
+bādiăn   b a1 d i3 a3 n sp
+bān   b a1 n sp
+bāngshang   b a1 ng sh a2 ng sp
+bānshang   b a1 n sh a2 ng sp
+bāsuì   b a1 s u4 i4 sp
+băi   b a3 i3 sp
+bēibāo   b e1 i1 b a1 o1 sp
+bēizi   b e1 i1 z i2 sp
+chà   ch a4 sp
+chàbuduō   ch a4 b u1 d u1 o1 sp
+cháng   ch a2 ng sp
 chén   ch e2 n
+chē   ch e1 sp
 chēnghu   ch e1 ng h u2
 cuò   c u4 o4
+cāi   c a1 i1 sp
+cāicai   c a1 i1 c a1 i1 sp
+cāicai   c a1 i1 c a2 i2 sp
+cāicai   c a1 i1 c a3 i3 sp
+cāicai   c a1 i1 c a4 i4 sp
 de   d e1
 de   d e1 sp
 de   d e2
@@ -353,21 +572,48 @@ de   d e3
 de   d e3 sp
 de   d e4
 de   d e4 sp
+diăn   d i3 a3 n sp
+dui   d u1 i1 sp
+dui   d u2 i2 sp
+dui   d u3 i3 sp
+dui   d u4 i4 sp
+duì   d u4 i4 sp
 duìbuqĭ   d u4 i4 b u1 q i3
 duō   d u1 o1
+duō   d u1 o1 sp
+duōshăo   d u1 o1 sh a3 o3 sp
+dà   d a4 sp
 dài   d a4 i4
+dàizi   d a4 i4 z i1 sp
 dào   d a4 o4
 dào   d a4 o4 sp
 dàshĭguăn   d a4 sh i3 g u3 a3 n
 dàxué   d a4 x uu2 e2
+déguo   d e2 g u1 o1 sp
+déguo   d e2 g u2 o2 sp
+déguo   d e2 g u3 o3 sp
+déguo   d e2 g u4 o4 sp
+dìdi   d i4 d i1 sp
 dānwèi   d a1 n w e4 i4
+dĕi   d ĕ i1 sp
+dĕi   d ĕ i2 sp
+dĕi   d ĕ i3 sp
+dĕi   d ĕ i4 sp
 děi   d e3 i3 sp
 dōu   d o1 u1
 dōu   d o1 u1 sp
+fùqin   f u4 q i1 n sp
+făguo   f a3 g u1 o1 sp
+făguo   f a3 g u2 o2 sp
+făguo   f a3 g u3 o3 sp
+făguo   f a3 g u4 o4 sp
+fēn   f e1 n sp
 ge   g e1
 ge   g e2
 ge   g e3
 ge   g e4
+guì   g u4 i4 sp
+guìle   g u4 i4 l e1 sp
 guìxìng   g u4 i4 x i4 ng
 guócái   g u2 o2 c a2 i2 sp
 guānxi   g u1 a1 n x i2
@@ -377,11 +623,14 @@ gāoxìng   g a1 o1 x i4 ng
 găo   g a3 o3
 găocuò   g a3 o3 c u4 o4
 găocuòle   g a3 o3 c u4 o4 l e1
+gēge   g e1 g e2 sp
 gēn   g e1 n
+gēn   g e1 n sp
 gĕi   g ĕ i1
 gĕi   g ĕ i2
 gĕi   g ĕ i3
 gĕi   g ĕ i4
+gōngshìbāo   g o1 ng sh i4 b a1 o1 sp
 gōngsī   g o1 ng s i1
 gōngsīde   g o1 ng s i1 d e2
 gōngzuò   g o1 ng z u4 o4
@@ -390,6 +639,8 @@ huáyì   h u2 a2 y i4
 huí   h u2 i2 sp
 huānyíng   h u1 a1 n y i2 ng
 huānyíng   h u1 a1 n y i2 ng sp
+huŏ   h u3 o3 sp
+huŏchē   h u3 o3 ch e1 sp
 hái   h a2 i2
 hái   h a2 i2 sp
 háizi   h a2 i2 z i3 sp
@@ -399,6 +650,7 @@ hăo   h a3 o3
 hăo   h a3 o3 sp
 hăole   h a3 o3 l e4
 hĕn   h ĕ n
+hĕn   h ĕ n sp
 hěn   h e3 n sp
 jiànle   j i4 a4 n l e1 sp
 jiào   j i4 a4 o4
@@ -408,20 +660,52 @@ jièshao   j i4 e4 sh a3 o3
 jièshao   j i4 e4 sh a4 o4
 jiéruì   j i2 e2 r u4 i4
 jiésī   j i2 e2 s i1
+jiù   j i4 u4 sp
 jiā   j i1 a1
+jiā   j i1 a1 sp
 jiānádà   j i1 a1 n a2 d a4
+jiăn   j i3 a3 n sp
+jiĕjie   j i1 ĕ j i1 e1 sp
+jiĕjie   j i2 ĕ j i2 e2 sp
+jiĕjie   j i3 ĕ j i3 e3 sp
+jiĕjie   j i4 ĕ j i4 e4 sp
 jiŭ   j i3 u3 sp
+jiŭdiăn   j i3 u3 d i3 a3 n sp
+jiŭfēn   j i3 u3 f e1 n sp
+jiŭshibākuài   j i3 u3 sh i4 b a1 k u4 a4 i4 sp
+jiŭshí   j i3 u3 sh i2 sp
+jiŭsuì   j i3 u3 s u4 i4 sp
 jìn   j i4 n
 jìn   j i4 n sp
+jí   j i2 sp
 jīnglĭ   j i1 ng l i3
 jīngshēng   j i1 ng sh e1 ng sp
+jīnnián   j i1 n n i2 a2 n sp
+jĭ   j i3 sp
+jĭdiăn   j i3 d i3 a3 n sp
+jĭge   j i3 g e4 sp
 jĭnzhāng   j i3 n zh a1 ng sp
 jĭnzhāngde   j i3 n zh a1 ng d e2 sp
+jĭsuì   j i3 s u4 i4 sp
+jĭwèi   j i3 w e4 i4 sp
+kuài   k u4 a4 i4 sp
+kàn   k a4 n sp
+kànkan   k a4 n k a1 n sp
+kànkàn   k a4 n k a4 n sp
+kè   k e4 sp
 kèqi   k e4 q i1 sp
 kéyi   k e2 y i3 sp
 kùn   k u4 n sp
+kāi   k a1 i1 sp
 kē   k e1 sp
+kĕshi   k ĕ sh i1 sp
+kĕshi   k ĕ sh i2 sp
+kĕshi   k ĕ sh i3 sp
+kĕshi   k ĕ sh i4 sp
+kĕài   k ĕ a4 i4 sp
+kĕàitā   k ĕ a4 i4 t a1 sp
 kěshi   k e3 sh i4
+kŏngpà   k o3 ng p a4 sp
 le   l e1
 le   l e1 sp
 le   l e2
@@ -430,11 +714,19 @@ le   l e3
 le   l e3 sp
 le   l e4
 le   l e4 sp
+liù   l i4 u4 sp
+liùshí   l i4 u4 sh i2 sp
+liăng   l i3 a3 ng sp
+liăngge   l i3 a3 ng g e4 sp
+liăngwèi   l i3 a3 ng w e4 i4 sp
 luó   l u2 o2
 lái   l a2 i2
+láibují   l a2 i2 b u3 j i2 sp
+láibujíle   l a2 i2 b u3 j i2 l e3 sp
 lèi   l e4 i4 sp
 léiēn   l e2 i2 e1 n sp
 lín   l i2 n sp
+líng   l i2 ng sp
 lăo   l a3 o3
 lăo   l a3 o3 sp
 lăoshī   l a3 o3 sh i1 sp
@@ -447,21 +739,42 @@ ma   m a3
 ma   m a3 sp
 ma   m a4
 ma   m a4 sp
+mài   m a4 i4 sp
+màide   m a4 i4 d e1 sp
 màn   m a4 n sp
 màoyì   m a4 o4 y i4
 máng   m a2 ng sp
+máo   m a2 o2 sp
+mèimei   m e4 i4 m e1 i1 sp
+mèimei   m e4 i4 m e2 i2 sp
+mèimei   m e4 i4 m e3 i3 sp
+mèimei   m e4 i4 m e4 i4 sp
 méi   m e2 i2
 méi   m e2 i2 sp
+méiyou   m e2 i2 y o1 u1 sp
+méiyou   m e2 i2 y o2 u2 sp
+méiyou   m e2 i2 y o3 u3 sp
+méiyou   m e2 i2 y o4 u4 sp
 míngpiàn   m i2 ng p i4 a4 n
 míngzi   m i2 ng z i3
 māma   m a1 m a2 sp
 mă   m a3
+măi   m a3 i3 sp
 măláixīyà   m a3 l a2 i2 x i1 y a4
+mĕiguo   m ĕ i1 g u1 o1 sp
+mĕiguo   m ĕ i2 g u2 o2 sp
+mĕiguo   m ĕ i3 g u3 o3 sp
+mĕiguo   m ĕ i4 g u4 o4 sp
+mĕiguó   m ĕ i1 g u2 o2 sp
+mĕiguó   m ĕ i2 g u2 o2 sp
+mĕiguó   m ĕ i3 g u2 o2 sp
+mĕiguó   m ĕ i4 g u2 o2 sp
 měiguo   m e3 i3 g u1 o1
 měiguo   m e3 i3 g u2 o2
 měiguo   m e3 i3 g u3 o3
 měiguo   m e3 i3 g u4 o4
 měiguó   m e3 i3 g u2 o2
+mŭqin   m u3 q i4 n sp
 ne   n e1
 ne   n e1 sp
 ne   n e2
@@ -470,10 +783,17 @@ ne   n e3
 ne   n e3 sp
 ne   n e4
 ne   n e4 sp
+niánji   n i2 a2 n j i3 sp
 nà   n a4
+nà   n a4 sp
 nán   n a2 n sp
+nánde   n a2 n d e3 sp
+nánlăoshī   n a2 n l a3 o3 sh i1 sp
+nánshēng   n a2 n sh e1 ng sp
 nèi   n e4 i4
+nèige   n e4 i4 g e1 sp
 nèiwèi   n e4 i4 w e4 i4
+nèmme   n e4 m m e1 sp
 nín   n i2 n
 nín   n i2 n sp
 nínde   n i2 n d e3
@@ -492,12 +812,22 @@ nĭmen   n i3 m e4 n
 nĭmen   n i3 m e4 n sp
 nĭmende   n i3 m e4 n d e1
 nǐ   n i3 sp
+nǚde   n uu3 d e4 sp
+nǚlăoshī   n uu3 l a3 o3 sh i1 sp
 nǚshì   n uu3 sh i4
+nǚshēng   n uu3 sh e1 ng sp
+piányi   p i2 a2 n y i3 sp
+piányide   p i2 a2 n y i3 d e4 sp
+qián   q i2 a2 n sp
+qíge   q i2 g e3 sp
 qù   q uu4 sp
+qī   q i1 sp
+qīshí   q i1 sh i2 sp
 qĭng   q i3 ng
 qĭng   q i3 ng sp
 rènshi   r e4 n sh i1
 rén   r e2 n
+rén   r e2 n sp
 rìběn   r i4 b e3 n
 róngyi   r o2 ng y i3 sp
 shi   sh i1
@@ -508,15 +838,34 @@ shi   sh i3
 shi   sh i3 sp
 shi   sh i4
 shi   sh i4 sp
+shàng   sh a4 ng sp
+shàngge   sh a4 ng g e1 sp
 shéi   sh e2 i2
 shémme   sh e2 m m e3
 shì   sh i4
 shì   sh i4 sp
 shìr   sh i4 r sp
+shí   sh i2 sp
+shídiăn   sh i2 d i3 a3 n sp
+shífēn   sh i2 f e1 n sp
+shíjiān   sh i2 j i1 a1 n sp
 shítáng   sh i2 t a2 ng sp
+shíwèi   sh i2 w e4 i4 sp
+shíyīkuài   sh i2 y i1 k u4 a4 i4 sp
 shī   sh i1
+suì   s u4 i4 sp
+sì   s i4 sp
+sìshibāsuì   s i4 sh i1 b a1 s u4 i4 sp
 sùshè   s u4 sh e4 sp
 sùshān   s u4 sh a1 n
+sān   s a1 n sp
+sāndiăn   s a1 n d i3 a3 n sp
+sānkuài   s a1 n k u4 a4 i4 sp
+sānkè   s a1 n k e4 sp
+sānshí   s a1 n sh i2 sp
+sānwèi   s a1 n w e4 i4 sp
+tiānjīn   t i1 a1 n j i1 n sp
+tiānjīnde   t i1 a1 n j i1 n d e2 sp
 tài   t a4 i4 sp
 tàitai   t a4 i4 t a1 i1
 tàitai   t a4 i4 t a1 i1 sp
@@ -526,11 +875,13 @@ tàitai   t a4 i4 t a3 i3
 tàitai   t a4 i4 t a3 i3 sp
 tàitai   t a4 i4 t a4 i4
 tàitai   t a4 i4 t a4 i4 sp
+tàng   t a4 ng sp
 táiwān   t a2 i2 w a1 n
 tóngshì   t o2 ng sh i4
 tóngwū   t o2 ng w u1
 tóngwūr   t o2 ng w u1 r
 tóngxué   t o2 ng x uu2 e2
+tóngxué   t o2 ng x uu2 e2 sp
 túshūguăn   t u2 sh u1 g u3 a3 n sp
 tā   t a1
 tā   t a1 sp
@@ -541,13 +892,27 @@ wáng   w a2 ng
 wáng   w a2 ng sp
 wèi   w e4 i4
 wèn   w e4 n
+wèn   w e4 n sp
 wú   w u2
 wŏ   w o3
 wŏ   w o3 sp
 wŏde   w o3 d e4
 wŏmen   w o3 m e4 n
 wŏmen   w o3 m e4 n sp
+wŭ   w u3 sp
+wŭge   w u3 g e4 sp
+wŭmáo   w u3 m a2 o2 sp
+wŭshisìsuì   w u3 sh i4 s i4 s u4 i4 sp
+wŭshisānsuì   w u3 sh i4 s a1 n s u4 i4 sp
+xià   x i4 a4 sp
+xiàge   x i4 a4 g e1 sp
+xiànzài   x i4 a4 n z a4 i4 sp
 xiàozhăng   x i4 a4 o4 zh a3 ng
+xiàyítàng   x i4 a4 y i2 t a4 ng sp
+xiángxiang   x i2 a2 ng x i1 a1 ng sp
+xiángxiang   x i2 a2 ng x i2 a2 ng sp
+xiángxiang   x i2 a2 ng x i3 a3 ng sp
+xiángxiang   x i2 a2 ng x i4 a4 ng sp
 xiáojie   x i2 a2 o2 j i1 e1
 xiáojie   x i2 a2 o2 j i1 e1 sp
 xiáojie   x i2 a2 o2 j i2 e2
@@ -570,6 +935,7 @@ xiān   x i1 a1 n sp
 xiānggăng   x i1 a1 ng g a3 ng
 xiānsheng   x i1 a1 n sh e2 ng
 xiānsheng   x i1 a1 n sh e2 ng sp
+xiăng   x i3 a3 ng sp
 xiăo   x i3 a3 o3
 xiăo   x i3 a3 o3 sp
 xuéxí   x uu2 e2 x i2
@@ -584,41 +950,65 @@ yixiar   y i1 x i1 a1 r
 yixiar   y i2 x i2 a2 r
 yixiar   y i3 x i3 a3 r
 yixiar   y i4 x i4 a4 r
+yuè   y uu4 e4 sp
 yàngzi   y a4 ng z i1 sp
 yào   y a4 o4
+yào   y a4 o4 sp
+yìbăi   y i4 b a3 i3 sp
 yìdiăn   y i4 d i3 a3 n sp
 yìdiănr   y i4 d i3 a3 n r sp
 yìdiănshìr   y i4 d i3 a3 n sh i4 r
 yìjiā   y i4 j i1 a1
+yìqiān   y i4 q i1 a1 n sp
+yìqiānkuài   y i4 q i1 a1 n k u4 a4 i4 sp
 yìsi   y i4 s i1 sp
+yíbàn   y i2 b a4 n sp
+yíbànr   y i2 b a4 n r sp
+yíge   y i2 g e3 sp
+yígòng   y i2 g o4 ng sp
+yíkè   y i2 k e4 sp
+yíwèi   y i2 w e4 i4 sp
 yíxià   y i2 x i4 a4
 yíxiàr   y i2 x i4 a4 r
+yò   y o4 sp
+yĕ   y ĕ sp
 yě   y e3
 yě   y e3 sp
 yī   y i1
+yī   y i1 sp
 yīngguo   y i1 ng g u1 o1
 yīngguo   y i1 ng g u2 o2
 yīngguo   y i1 ng g u3 o3
 yīngguo   y i1 ng g u4 o4
 yīnggāi   y i1 ng g a1 i1
+yīqiān   y i1 q i1 a1 n sp
+yīqiānkuài   y i1 q i1 a1 n k u4 a4 i4 sp
+yĭjīng   y i3 j i1 ng sp
 yŏu   y o3 u3
 yŏu   y o3 u3 sp
 zhào   zh a4 o4 sp
 zhè   zh e4
+zhè   zh e4 sp
 zhèi   zh e4 i4
+zhèige   zh e4 i4 g e1 sp
 zhèiwèi   zh e4 i4 w e4 i4
+zhèiwèi   zh e4 i4 w e4 i4 sp
 zhèmme   zh e4 m m e1
 zhĭ   zh i3
+zhĭ   zh i3 sp
+zhōng   zh o1 ng sp
 zhōngguo   zh o1 ng g u1 o1
 zhōngguo   zh o1 ng g u2 o2
 zhōngguo   zh o1 ng g u3 o3
 zhōngguo   zh o1 ng g u4 o4
 zhōngměi   zh o1 ng m e3 i3
+zhōngtóu   zh o1 ng t o2 u2 sp
 zhōngwén   zh o1 ng w e2 n
 zhōngwén   zh o1 ng w e2 n sp
 zuìjìn   z u4 i4 j i4 n sp
 zuò   z u4 o4 sp
 zài   z a4 i4
+zài   z a4 i4 sp
 zàijiàn   z a4 i4 j i4 a4 n
 zàijiàn   z a4 i4 j i4 a4 n sp
 zĕmme   z ĕ m m e1
@@ -633,15 +1023,23 @@ zŏu   z o3 u3 sp
 zŏule   z o3 u3 l e4
 zŏule   z o3 u3 l e4 sp
 À   a4
+Ài   a4 i4 sp
 Àihuá   a4 i4 h u2 a2
 Àirén   a4 i4 r e2 n sp
 Èi   e4 i4 sp
+Èr   e4 r sp
+Èrshí   e4 r sh i2 sp
 Ò   o4
+Ò   o4 sp
 à   a4
+ài   a4 i4 sp
 àihuá   a4 i4 h u2 a2
 àirén   a4 i4 r e2 n sp
 èi   e4 i4 sp
+èr   e4 r sp
+èrshí   e4 r sh i2 sp
 ò   o4
+ò   o4 sp
 Ăi   a3 i3 sp
 ăi   a3 i3 sp
 一                              y i1 sp
