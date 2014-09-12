@@ -53,30 +53,7 @@ public class SoundManagerStatic implements SoundManagerAPI {
     if (SoundManager.isReady() && SoundManager.isOK()) {
       SoundManager.createSound(sound, title, file);
     }
-    //else {
-      // TODO : consider warning that sound playback is not ready or working...
-   // }
-/*    boolean webaudio = false;
-    if (webaudio) {
-      WebAudio.setLoadedCallback(new WebAudio.Loaded() {
-        @Override
-        public void audioLoaded() {
-          System.out.println("got web audio loaded!");
-
-        }
-      });
-      WebAudio.loadSound(file);
-    }
-    else {
-
-    }*/
   }
-
-/*  @Override
-  public void createSoftSound(Sound sound, String title, String file) {
- //   setVolume(title);
-    createSound(sound,title,file);
-  }*/
 
   @Override
   public void setVolume(String title, int vol) {
@@ -105,7 +82,11 @@ public class SoundManagerStatic implements SoundManagerAPI {
 
   public void play(Sound sound) {
     if (debug) System.out.println("SoundManagerStatic.play " + sound);
-    SoundManager.play(sound);
+    try {
+      SoundManager.play(sound);
+    } catch (Exception e) {
+      if (debug) System.out.println("SoundManagerStatic.play got exception playing sound.");
+    }
   }
 
   public void setPosition(Sound sound, double position) {
