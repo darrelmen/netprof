@@ -116,7 +116,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
   private List<CommonExercise> getExercises(String sql) {
     List<CommonExercise> exercises = new ArrayList<CommonExercise>();
     try {
-      Connection connection = database.getConnection();
+      Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
       boolean useMapping = ilrMapping.useMapping();
