@@ -299,10 +299,8 @@ public abstract class ScoringAudioPanel extends AudioPanel {
     @Override
     public void onSegmentClick(TranscriptSegment segment) {
       playSegment(MP3_HEADER_OFFSET+segment.getStart(), MP3_HEADER_OFFSET+segment.getEnd());
-      if (controller.getProps().doInstrumentation()) {
-        long user = (long) controller.getUser();
-        controller.getButtonFactory().logEvent(widget, type.toString(), exerciseID, "Clicked on " + segment.getEvent(), user);
-      }
+      long user = (long) controller.getUser();
+      controller.getButtonFactory().logEvent(widget, type.toString(), exerciseID, "Clicked on " + segment.getEvent(), user);
     }
   }
 
