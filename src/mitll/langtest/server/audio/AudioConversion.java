@@ -103,11 +103,6 @@ public class AudioConversion {
     }
     AudioCheck.ValidityAndDur valid = isValid(file);
 
-    //AudioConversion audioConversion = new AudioConversion();
-   // audioConversion.writeMP3(file.getAbsolutePath());
-/*    if (LangTestDatabase.WRITE_ALTERNATE_COMPRESSED_AUDIO) {
-      audioConversion.writeCompressed(file.getAbsolutePath());
-    }*/
     return valid;
   }
 
@@ -125,7 +120,7 @@ public class AudioConversion {
     try {
       decoded = (byte[]) decoder.decode(base64EncodedByteArray);
     } catch (Exception e1) {   // just b/c eclipse seems to insist
-      e1.printStackTrace();
+      logger.error("got " +e1,e1);
     }
     return decoded;
   }
@@ -136,7 +131,7 @@ public class AudioConversion {
       outputStream.write(byteArray);
       outputStream.close();
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.error("got " +e,e);
     }
   }
 
@@ -147,9 +142,10 @@ public class AudioConversion {
    */
   private AudioCheck.ValidityAndDur isValid(File file) {
     try {
-      return audioCheck.checkWavFile(file);
+      AudioCheck.ValidityAndDur validityAndDur = audioCheck.checkWavFile(file);
+      return validityAndDur;
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.error("got " +e,e);
     }
     return new AudioCheck.ValidityAndDur(AudioAnswer.Validity.INVALID);
   }
@@ -388,7 +384,7 @@ public class AudioConversion {
       //     System.out.println("convertFileAndCheck exited  lame" + lameProc);
     } catch (IOException e) {
       System.err.println("Couldn't run " + lameProc);
-      e.printStackTrace();
+      logger.error("got " +e,e);
     }
 
     File testMP3 = new File(mp3File);
@@ -417,7 +413,7 @@ public class AudioConversion {
       //     System.out.println("convertFileAndCheck exited  lame" + lameProc);
     } catch (IOException e) {
       System.err.println("Couldn't run " + lameProc);
-      e.printStackTrace();
+      logger.error("got " +e,e);
     }
 
     File testMP3 = new File(mp3File);
@@ -432,9 +428,9 @@ public class AudioConversion {
         //new Exception().printStackTrace();
       }
       return false;
-    } else {
+    }// else {
       //logger.debug("Wrote to " + testMP3 + " length " + testMP3.getTotalSpace());
-    }
+   // }
     return true;
   }
 }
