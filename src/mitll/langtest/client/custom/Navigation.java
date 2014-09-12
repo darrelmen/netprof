@@ -1236,6 +1236,10 @@ public class Navigation implements RequiresResize {
 	  m.put("Unit 1: Part 2", new String[] {"Smith", "Zhao"});
 	  m.put("Unit 1: Part 3", new String[] {"Kao", "He"});
 	  m.put("Unit 1: Part 4", new String[] {"Mrs. Li", "Mrs. Smith"});
+	  m.put("Unit 2: Part 1", new String[] {"Taiwanese Student", "Parsons"});
+	  m.put("Unit 2: Part 2", new String[] {"First Chinese", "Second Chinese", "American"});
+	  m.put("Unit 2: Part 3", new String[] {"American", "Chinese"});
+	  m.put("Unit 2: Part 4", new String[] {"Rogers", "Taiwanese Guest", "Holbrooke"});
 	  return m;
   }
   
@@ -1273,6 +1277,50 @@ public class Navigation implements RequiresResize {
 	  m.put("Bú kèqi. Màn zŏu a!", "/161/regular_1403798275036_by_8.wav");
 	  m.put("Zàijiàn, zàijiàn!", "/162/regular_1403797559758_by_8.wav");
 	  
+	  m.put("Qĭng wèn, nĭ shì něiguó rén?", "/188/regular_1409322875786_by_8.wav");
+	  m.put("Wŏ shi Měiguo rén.", "/191/regular_1409322897089_by_8.wav");
+	  m.put("Nĭ jiào shémme míngzi?", "/196/regular_1409323764263_by_8.wav");
+	  m.put("Wŏ jiào Bái Jiéruì.", "/199/regular_1409323274311_by_8.wav");
+	  m.put("Nĭmen dōu shi Měiguo rén ma?", "/200/regular_1409321590091_by_8.wav");
+	  m.put("Wŏmen bù dōu shi Měiguo rén.", "/202/regular_1409323704609_by_8.wav");
+	  m.put("Zhèiwèi tóngxué yě shi Měiguo rén, kěshi nèiwèi tóngxué shi Jiā'nádà rén.", "/215/regular_1409323661836_by_8.wav");
+	  
+	  m.put("Qĭng jìn!", "/242/regular_1409324867082_by_8.wav");
+	  m.put("Èi, Xiăo Mă. Ò.", "/243/missing2_2.wav");
+	  m.put("Ò, Xiăo Chén, wŏ gĕi nĭ jièshao yixiar.", "/261/regular_1409325498732_by_8.wav");
+	  m.put("Zhè shi wŏde xīn tóngwū, tā jiào Wáng Àihuá.", "/262/regular_1409325719045_by_8.wav");
+	  m.put("Wáng Àihuá, zhè shi wŏde lăo tóngxué, Xiăo Chén.", "/263/regular_1409325343747_by_8.wav");
+	  m.put("Ò, huānyíng nĭ dào Zhōngguo lái!", "/268/regular_1409325523740_by_8.wav");
+	  m.put("Hĕn gāoxìng rènshi nĭ, Chén Xiáojie!", "/272/regular_1409325037171_by_8.wav");
+	  m.put("Ò, bié zhèmme chēnghu wŏ.", "/280/regular_1409325476239_by_8.wav");
+	  m.put("Hái shi jiào wŏ Xiăo Chén hăole.", "/281/regular_1409325318317_by_8.wav");
+	  m.put("Xíng. Nà nĭ yě jiào wŏ Xiăo Wáng hăole.", "/284/regular_1409325429191_by_8.wav");
+	  m.put("Hăo.", "/285/regular_1409324474164_by_8.wav");
+	  
+	  m.put("Nín guìxìng?", "/296/regular_1409328095788_by_8.wav");
+	  m.put("Wŏ xìng Gāo. Nín guìxìng?", "/299/regular_1409327839500_by_8.wav");
+	  m.put("Wŏ xìng Wú, Wú Sùshān.", "/310/regular_1409327869935_by_8.wav");
+	  m.put("Gāo Xiānsheng, nín zài nĕige dānwèi gōngzuò?", "/311/regular_1409327753895_by_8.wav");
+	  m.put("Wŏ zài Wàijiāobù gōngzuò. Nín ne?", "/314/regular_1409327615970_by_8.wav");
+	  m.put("Wŏ zài Měiguo Dàshĭguăn gōngzuò.", "/317/regular_1409327653722_by_8.wav");
+	  m.put("Nèiwèi shi nínde xiānsheng ba?", "/323/regular_1409327593572_by_8.wav");
+	  m.put("Bú shì, bú shì! Tā shì wŏde tóngshì.", "/328/regular_1409327910091_by_8.wav");
+	  m.put("Ò, Wú nǚshì, duìbuqĭ.", "/332/regular_1409327942560_by_8.wav");
+	  m.put("Wŏ yŏu yìdiănshìr, xiān zŏule. Zàijiàn!", "/333/regular_1409327507146_by_8.wav");
+	  m.put("Zàijiàn!", "/334/regular_1409327365810_by_8.wav");
+	  
+	  m.put("Nĭ hăo! Wŏ jiào Luó Jiésī.", "/355/regular_1409329603821_by_8.wav");
+	  m.put("Qĭng duō zhĭ jiào.", "/357/regular_1409330000487_by_8.wav");
+	  m.put("Wŏ xìng Shī. Duìbuqĭ, wŏ méi dài míngpiàn.", "/368/regular_1409329841202_by_8.wav");
+	  m.put("Wŏ zài Zhōng-Měi Màoyì Gōngsī gōngzuò.", "/369/regular_1409329682905_by_8.wav");
+	  m.put("Zŏngjīnglĭ, zhè shì Zhōng-Měi Màoyì Gōngsī de Shī Xiáojie.", "/374/regular_1409329793024_by_8.wav");
+	  m.put("À, huānyíng, huānyíng! Wŏ xìng Hóu.", "/378/regular_1409329975201_by_8.wav");
+	  m.put("Xièxie. Zŏngjīnglĭ yě shi Yīngguo rén ba?", "/382/regular_1409330116515_by_8.wav");
+	  m.put("Bù, wŏ gēn Luó Xiáojie dōu bú shi Yīngguo rén.", "/387/regular_1409329916452_by_8.wav");
+	  m.put("Wŏmen shi Měiguo rén.", "/388/regular_1409330281249_by_8.wav");
+	  m.put("Ò, duìbuqĭ, wŏ găocuòle.", "/395/regular_1409329951250_by_8.wav");
+	  m.put("Méi guānxi.", "/397/regular_1409330196368_by_8.wav");
+	  
 	  return m;
   }
   
@@ -1308,6 +1356,50 @@ public class Navigation implements RequiresResize {
 	  m.put("Lĭ Tàitai, xièxie nín le.", "/158/slow_1403797916593_by_8.wav");
 	  m.put("Bú kèqi. Màn zŏu a!", "/161/slow_1403798282629_by_8.wav");
 	  m.put("Zàijiàn, zàijiàn!", "/162/slow_1403797569320_by_8.wav");
+	  
+	  m.put("Qĭng wèn, nĭ shì něiguó rén?", "/188/slow_1409322882550_by_8.wav");
+	  m.put("Wŏ shi Měiguo rén.", "/191/slow_1409322902819_by_8.wav");
+	  m.put("Nĭ jiào shémme míngzi?", "/196/slow_1409323768824_by_8.wav");
+	  m.put("Wŏ jiào Bái Jiéruì.", "/199/slow_1409323280017_by_8.wav");
+	  m.put("Nĭmen dōu shi Měiguo rén ma?", "/200/slow_1409321642660_by_8.wav");
+	  m.put("Wŏmen bù dōu shi Měiguo rén.", "/202/slow_1409323710820_by_8.wav");
+	  m.put("Zhèiwèi tóngxué yě shi Měiguo rén, kěshi nèiwèi tóngxué shi Jiā'nádà rén.", "/215/slow_1409323675900_by_8.wav");
+	  
+	  m.put("Qĭng jìn!", "/242/slow_1409324871090_by_8.wav");
+	  m.put("Èi, Xiăo Mă. Ò.", "/243/missing2_2.wav");
+	  m.put("Ò, Xiăo Chén, wŏ gĕi nĭ jièshao yixiar.", "/261/slow_1409325506235_by_8.wav");
+	  m.put("Zhè shi wŏde xīn tóngwū, tā jiào Wáng Àihuá.", "/262/slow_1409325727429_by_8.wav");
+	  m.put("Wáng Àihuá, zhè shi wŏde lăo tóngxué, Xiăo Chén.", "/263/slow_1409325351489_by_8.wav");
+	  m.put("Ò, huānyíng nĭ dào Zhōngguo lái!", "/268/slow_1409325530229_by_8.wav");
+	  m.put("Hĕn gāoxìng rènshi nĭ, Chén Xiáojie!", "/272/slow_1409325044588_by_8.wav");
+	  m.put("Ò, bié zhèmme chēnghu wŏ.", "/280/slow_1409325482468_by_8.wav");
+	  m.put("Hái shi jiào wŏ Xiăo Chén hăole.", "/281/slow_1409325324176_by_8.wav");
+	  m.put("Xíng. Nà nĭ yě jiào wŏ Xiăo Wáng hăole.", "/284/slow_1409325437152_by_8.wav");
+	  m.put("Hăo.", "/285/slow_1409324477262_by_8.wav");
+	  
+	  m.put("Nín guìxìng?", "/296/slow_1409328100134_by_8.wav");
+	  m.put("Wŏ xìng Gāo. Nín guìxìng?", "/299/slow_1409327855443_by_8.wav");
+	  m.put("Wŏ xìng Wú, Wú Sùshān.", "/310/slow_1409327876439_by_8.wav");
+	  m.put("Gāo Xiānsheng, nín zài nĕige dānwèi gōngzuò?", "/311/slow_1409327769824_by_8.wav");
+	  m.put("Wŏ zài Wàijiāobù gōngzuò. Nín ne?", "/314/slow_1409327623622_by_8.wav");
+	  m.put("Wŏ zài Měiguo Dàshĭguăn gōngzuò.", "/317/slow_1409327660792_by_8.wav");
+	  m.put("Nèiwèi shi nínde xiānsheng ba?", "/323/slow_1409327599327_by_8.wav");
+	  m.put("Bú shì, bú shì! Tā shì wŏde tóngshì.", "/328/slow_1409327926507_by_8.wav");
+	  m.put("Ò, Wú nǚshì, duìbuqĭ.", "/332/slow_1409327948820_by_8.wav");
+	  m.put("Wŏ yŏu yìdiănshìr, xiān zŏule. Zàijiàn!", "/333/slow_1409327522521_by_8.wav");
+	  m.put("Zàijiàn!", "/334/slow_1409327369250_by_8.wav");
+	  
+	  m.put("Nĭ hăo! Wŏ jiào Luó Jiésī.", "/355/slow_1409329610608_by_8.wav");
+	  m.put("Qĭng duō zhĭ jiào.", "/357/slow_1409330005743_by_8.wav");
+	  m.put("Wŏ xìng Shī. Duìbuqĭ, wŏ méi dài míngpiàn.", "/368/slow_1409329849454_by_8.wav");
+	  m.put("Wŏ zài Zhōng-Měi Màoyì Gōngsī gōngzuò.", "/369/slow_1409329689735_by_8.wav");
+	  m.put("Zŏngjīnglĭ, zhè shì Zhōng-Měi Màoyì Gōngsī de Shī Xiáojie.", "/374/slow_1409329769057_by_8.wav");
+	  m.put("À, huānyíng, huānyíng! Wŏ xìng Hóu.", "/378/slow_1409329982278_by_8.wav");
+	  m.put("Xièxie. Zŏngjīnglĭ yě shi Yīngguo rén ba?", "/382/slow_1409330123914_by_8.wav");
+	  m.put("Bù, wŏ gēn Luó Xiáojie dōu bú shi Yīngguo rén.", "/387/slow_1409329924825_by_8.wav");
+	  m.put("Wŏmen shi Měiguo rén.", "/388/slow_1409330286656_by_8.wav");
+	  m.put("Ò, duìbuqĭ, wŏ găocuòle.", "/395/slow_1409329957821_by_8.wav");
+	  m.put("Méi guānxi.", "/397/slow_1409330185688_by_8.wav");
 	  
 	  return m;
   }
@@ -1395,12 +1487,14 @@ public class Navigation implements RequiresResize {
 	  m.get(up4).put("Mrs. Li", 6);
 	  m.get(u2p1).put("Taiwanese Student", 4);
 	  m.get(u2p1).put("Parsons", 6);
-	  m.get(u2p2).put("First Chinese/American", 9);
+	  m.get(u2p2).put("First Chinese", 4);
+	  m.get(u2p2).put("American", 9);
 	  m.get(u2p2).put("Second Chinese", 10);
 	  m.get(u2p3).put("Chinese", 9);
 	  m.get(u2p3).put("American", 10);
+	  m.get(u2p4).put("Rogers", 4);
 	  m.get(u2p4).put("Taiwanese Guest", 9);
-	  m.get(u2p4).put("Rogers/Holbrooke", 10);
+	  m.get(u2p4).put("Holbrooke", 10);
 	  
 	  return m;
   }
@@ -1463,16 +1557,16 @@ public class Navigation implements RequiresResize {
 	  m.get(u2p1).put(5, "Parsons");
 	  m.get(u2p1).put(6, "Parsons");
 	  
-	  m.get(u2p2).put(0, "First Chinese/American");
+	  m.get(u2p2).put(0, "First Chinese");
 	  m.get(u2p2).put(1, "Second Chinese");
-	  m.get(u2p2).put(2, "First Chinese/American");
-	  m.get(u2p2).put(3, "First Chinese/American");
-	  m.get(u2p2).put(4, "First Chinese/American");
+	  m.get(u2p2).put(2, "First Chinese");
+	  m.get(u2p2).put(3, "First Chinese");
+	  m.get(u2p2).put(4, "First Chinese");
 	  m.get(u2p2).put(5, "Second Chinese");
-	  m.get(u2p2).put(6, "First Chinese/American");
+	  m.get(u2p2).put(6, "American");
 	  m.get(u2p2).put(7, "Second Chinese");
 	  m.get(u2p2).put(8, "Second Chinese");
-	  m.get(u2p2).put(9, "First Chinese/American");
+	  m.get(u2p2).put(9, "American");
 	  m.get(u2p2).put(10, "Second Chinese");
 	  
 	  m.get(u2p3).put(0, "American");
@@ -1487,17 +1581,17 @@ public class Navigation implements RequiresResize {
 	  m.get(u2p3).put(9, "Chinese");
 	  m.get(u2p3).put(10, "American");
 	  
-	  m.get(u2p4).put(0, "Rogers/Holbrooke");
-	  m.get(u2p4).put(1, "Rogers/Holbrooke");
+	  m.get(u2p4).put(0, "Rogers");
+	  m.get(u2p4).put(1, "Rogers");
 	  m.get(u2p4).put(2, "Taiwanese Guest");
 	  m.get(u2p4).put(3, "Taiwanese Guest");
-	  m.get(u2p4).put(4, "Rogers/Holbrooke");
-	  m.get(u2p4).put(5, "Rogers/Holbrooke");
+	  m.get(u2p4).put(4, "Rogers");
+	  m.get(u2p4).put(5, "Holbrooke");
 	  m.get(u2p4).put(6, "Taiwanese Guest");
-	  m.get(u2p4).put(7, "Rogers/Holbrooke");
-	  m.get(u2p4).put(8, "Rogers/Holbrooke");
+	  m.get(u2p4).put(7, "Holbrooke");
+	  m.get(u2p4).put(8, "Holbrooke");
 	  m.get(u2p4).put(9, "Taiwanese Guest");
-	  m.get(u2p4).put(10, "Rogers/Holbrooke");
+	  m.get(u2p4).put(10, "Holbrooke");
 	  
 	  return m;
   }
@@ -1589,7 +1683,7 @@ public class Navigation implements RequiresResize {
 	  m.get(u2p4).put(1, "Qĭng duō zhĭ jiào.");
 	  m.get(u2p4).put(2, "Wŏ xìng Shī. Duìbuqĭ, wŏ méi dài míngpiàn.");
 	  m.get(u2p4).put(3, "Wŏ zài Zhōng-Měi Màoyì Gōngsī gōngzuò.");
-	  m.get(u2p4).put(4, "Zŏngjīnglĭ, zhè shì Zhōng-Měi Màoyì Gōngsī Shī Xiáojie.");
+	  m.get(u2p4).put(4, "Zŏngjīnglĭ, zhè shì Zhōng-Měi Màoyì Gōngsī de Shī Xiáojie.");
 	  m.get(u2p4).put(5, "À, huānyíng, huānyíng! Wŏ xìng Hóu.");
 	  m.get(u2p4).put(6, "Xièxie. Zŏngjīnglĭ yě shi Yīngguo rén ba?");
 	  m.get(u2p4).put(7, "Bù, wŏ gēn Luó Xiáojie dōu bú shi Yīngguo rén.");
