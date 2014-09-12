@@ -80,18 +80,19 @@ public class AnswerDAO {
   public long addAnswer(Database database, int userID, String plan, String id, int questionID, String answer,
                         String audioFile, boolean valid, boolean flq, boolean spoken, String audioType, int durationInMillis,
                         boolean correct, float pronScore, String stimulus) {
+    Connection connection = database.getConnection(this.getClass().toString());
     try {
       long then = System.currentTimeMillis();
-      Connection connection = database.getConnection();
       long newid = addAnswerToTable(connection, userID, plan, id, questionID, answer, audioFile, valid, flq, spoken,
-        audioType, durationInMillis, correct, pronScore, stimulus);
-      database.closeConnection(connection);
+          audioType, durationInMillis, correct, pronScore, stimulus);
       long now = System.currentTimeMillis();
       if (now - then > 100) System.out.println("took " + (now - then) + " millis to record answer.");
       return newid;
 
     } catch (Exception ee) {
       logger.error("addAnswer got " + ee, ee);
+    } finally {
+      database.closeConnection(connection);
     }
     return -1;
   }
@@ -184,8 +185,8 @@ public class AnswerDAO {
    * @param id
    */
   public void changeAnswer(long id, float score) {
+    Connection connection = getConnection();
     try {
-      Connection connection = database.getConnection();
 
       String sql = "UPDATE results " +
         "SET " +
@@ -200,10 +201,15 @@ public class AnswerDAO {
       }
 
       statement.close();
-      database.closeConnection(connection);
     } catch (Exception e) {
       logger.error("got " +e,e);
+    } finally {
+      database.closeConnection(connection);
     }
+  }
+
+  protected Connection getConnection() {
+    return database.getConnection(this.getClass().toString());
   }
 
   /**
@@ -212,9 +218,9 @@ public class AnswerDAO {
    * @param ids
    */
   public void changeType(Collection<Long> ids) {
+    if (ids.isEmpty()) return;
+    Connection connection = getConnection();
     try {
-      if (ids.isEmpty()) return;
-      Connection connection = database.getConnection();
       String list = getInList(ids);
 
       String sql = "UPDATE " +
@@ -236,9 +242,10 @@ public class AnswerDAO {
       }
 
       statement.close();
-      database.closeConnection(connection);
     } catch (Exception e) {
       logger.error("got " +e,e);
+    } finally {
+      database.closeConnection(connection);
     }
   }
 
