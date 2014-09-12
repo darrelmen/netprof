@@ -1409,11 +1409,11 @@ public class Navigation implements RequiresResize {
 	  HashMap<String, PlayAudioPanel> pw = new HashMap<String, PlayAudioPanel>();
 	  pw.put("a1",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/ma1.mp3").setPlayLabel("a1"));
 	  pw.put("a2",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/ma2.mp3").setPlayLabel("a2"));
-	  pw.put("a3",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/x.mp3").setPlayLabel("a3"));
+	  pw.put("a3",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/ha3o3.mp3").setPlayLabel("a3"));
 	  pw.put("a4",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/ba4.mp3").setPlayLabel("a4"));
 	  pw.put("b",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/bu4.mp3").setPlayLabel("b"));
 	  pw.put("c",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/cai2.mp3").setPlayLabel("c"));
-	  pw.put("ch",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/x.mp3").setPlayLabel("ch"));
+	  pw.put("ch",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/che2.mp3").setPlayLabel("ch"));
 	  pw.put("d",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/dao2.mp3").setPlayLabel("d"));
 	  pw.put("e1",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/ke1.mp3").setPlayLabel("e1"));
 	  pw.put("e2",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/he2.mp3").setPlayLabel("e2"));
@@ -1436,7 +1436,7 @@ public class Navigation implements RequiresResize {
 	  pw.put("o2",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/ro2.mp3").setPlayLabel("o2"));
 	  pw.put("o3",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/wo3.mp3").setPlayLabel("o3"));
 	  pw.put("o4",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/zuo4.mp3").setPlayLabel("o4"));
-	  pw.put("p",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/x.mp3").setPlayLabel("p"));
+	  pw.put("p",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/pi4a4n.mp3").setPlayLabel("p"));
 	  pw.put("q",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/quu4.mp3").setPlayLabel("q"));
 	  pw.put("r",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/ro2.mp3").setPlayLabel("r"));
 	  pw.put("s",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/su4.mp3").setPlayLabel("s"));
@@ -1448,7 +1448,7 @@ public class Navigation implements RequiresResize {
 	  pw.put("u4",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/bu4.mp3").setPlayLabel("u4"));
 	  pw.put("uu1",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/x.mp3").setPlayLabel("uu1"));
 	  pw.put("uu2",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/xuue2.mp3").setPlayLabel("uu2"));
-	  pw.put("uu3",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/x.mp3").setPlayLabel("uu3"));
+	  pw.put("uu3",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/nuu3.mp3").setPlayLabel("uu3"));
 	  pw.put("uu4",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/x.mp3").setPlayLabel("uu4"));
 	  pw.put("w",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/wo3.mp3").setPlayLabel("w"));
 	  pw.put("x",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/xuue2.mp3").setPlayLabel("x"));
