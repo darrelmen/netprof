@@ -343,16 +343,17 @@ public class Navigation implements RequiresResize {
         viewBrowse();
       }
     });
-
-    dialog = makeFirstLevelTab(tabPanel, IconType.TH_LIST, PRACTICE_DIALOG);
-    dialog.getTab().addClickHandler(new ClickHandler() {
-          @Override
-          public void onClick(ClickEvent event) {
-              checkAndMaybeClearTab(PRACTICE_DIALOG);
-              logEvent(dialog, PRACTICE_DIALOG);
-              viewDialog();
-          }
-    });
+    if(controller.getProps().hasDialog()){
+	    dialog = makeFirstLevelTab(tabPanel, IconType.TH_LIST, PRACTICE_DIALOG);
+	    dialog.getTab().addClickHandler(new ClickHandler() {
+	          @Override
+	          public void onClick(ClickEvent event) {
+	              checkAndMaybeClearTab(PRACTICE_DIALOG);
+	              logEvent(dialog, PRACTICE_DIALOG);
+	              viewDialog();
+	          }
+	    });
+    }
 
     boolean isQualityControl = isQC();
 
