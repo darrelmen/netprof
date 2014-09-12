@@ -105,7 +105,7 @@ public class ExcelImport implements ExerciseDAO {
     this.chapterIndex = serverProps.getUnitChapterWeek()[1];
     this.weekIndex = serverProps.getUnitChapterWeek()[2];
 
-    logger.debug("unit " + unitIndex + " chapter " +chapterIndex + " week " +weekIndex);
+//    logger.debug("unit " + unitIndex + " chapter " +chapterIndex + " week " +weekIndex);
   }
 
   public boolean getMissing(String relativeConfigDir, String file, Set<String> missing) {
@@ -297,19 +297,39 @@ public class ExcelImport implements ExerciseDAO {
     return new ArrayList<CommonExercise>();
   }
 
+  private void log() {
+    int MB = (1024 * 1024);
+    Runtime rt = Runtime.getRuntime();
+    long free = rt.freeMemory();
+    long used = rt.totalMemory() - free;
+    long max = rt.maxMemory();
+
+    ThreadGroup threadGroup = Thread.currentThread().getThreadGroup();
+    logger.debug(serverProps.getLanguage() + " current thread group " + threadGroup.getName() + " = " + threadGroup.activeCount());
+
+    logger.debug(serverProps.getLanguage() +
+        " : # cores = " + Runtime.getRuntime().availableProcessors() + " heap info free " + free / MB + "M used " + used / MB + "M max " + max / MB + "M");
+  }
+
   /**
    * @param inp
    * @return
    * @seex mitll.langtest.server.SiteDeployer#readExercises(mitll.langtest.shared.Site, org.apache.commons.fileupload.FileItem)
    */
   private List<CommonExercise> readExercises(InputStream inp) {
+    log();
     List<CommonExercise> exercises = new ArrayList<CommonExercise>();
+    String language1 = serverProps.getLanguage();
     try {
       long then = System.currentTimeMillis();
+      logger.debug("starting to read spreadsheet for " + language1 + " on " + Thread.currentThread() + " at " + System.currentTimeMillis());
+
       XSSFWorkbook wb = new XSSFWorkbook(inp);
+      logger.debug("finished reading spreadsheet for " + language1 + " on " + Thread.currentThread() + " at " + System.currentTimeMillis());
+
       long now = System.currentTimeMillis();
       if (now-then > 1000) {
-        logger.info("took " + (now - then) + " millis to read spreadsheet");
+        logger.info("took " + (now - then) + " millis to open spreadsheet for " + language1 + " on " + Thread.currentThread());
       }
       then = now;
 
@@ -337,7 +357,7 @@ public class ExcelImport implements ExerciseDAO {
       inp.close();
       now = System.currentTimeMillis();
       if (now-then > 1000) {
-        logger.info("took " + (now - then) + " millis to make " + exercises.size() + " exercises...");
+        logger.info("took " + (now - then) + " millis to make " + exercises.size() + " exercises for " + language1);
       }
     } catch (IOException e) {
       e.printStackTrace();
@@ -417,7 +437,7 @@ public class ExcelImport implements ExerciseDAO {
               audioIndex = columns.indexOf(col);
               hasAudioIndex = true;
             } else if (gotUCW) {
-              logger.debug("using predef unit/chapter/week ");
+//              logger.debug("using predef unit/chapter/week ");
               if (columns.indexOf(col) == unitIndex) {
                 predefinedTypeOrder.add(col);
                 unitName = col;
@@ -455,7 +475,12 @@ public class ExcelImport implements ExerciseDAO {
           );
         } else {
           int colIndex = colIndexOffset;
-          boolean isDelete = sheet.getWorkbook().getFontAt(next.getCell(colIndex).getCellStyle().getFontIndex()).getStrikeout();
+          boolean isDelete = false;
+          try {
+            isDelete = sheet.getWorkbook().getFontAt(next.getCell(colIndex).getCellStyle().getFontIndex()).getStrikeout();
+          } catch (Exception e) {
+            logger.debug("got error reading delete strikeout at row " + next.getRowNum() + " for " +serverProps.getLanguage());
+          }
 
           String english = getCell(next, colIndex++).trim();
           String foreignLanguagePhrase = getCell(next, colIndex).trim();
@@ -644,7 +669,12 @@ public class ExcelImport implements ExerciseDAO {
           );
         } else {
           int colIndex = colIndexOffset;
-          boolean isDelete = sheet.getWorkbook().getFontAt(next.getCell(colIndex).getCellStyle().getFontIndex()).getStrikeout();
+          boolean isDelete = false;
+          try {
+            isDelete = sheet.getWorkbook().getFontAt(next.getCell(colIndex).getCellStyle().getFontIndex()).getStrikeout();
+          } catch (Exception e) {
+            logger.debug("got error reading delete strikeout at row " + next.getRowNum() + " for " +serverProps.getLanguage());
+          }
           String english = getCell(next, colIndex++).trim();
           String foreignLanguagePhrase = getCell(next, colIndex).trim();
           String translit = getCell(next, transliterationIndex);
@@ -770,54 +800,6 @@ public class ExcelImport implements ExerciseDAO {
     exercises.add(imported);
   }
 
-  /**
-   * @see #readFromSheet(org.apache.poi.ss.usermodel.Sheet)
-   * @paramx englishToExercises
-   */
-/*  private void addSynonyms(Map<String, List<CommonExercise>> englishToExercises) {
-    for (List<CommonExercise> exercises2 : englishToExercises.values()) {
-      if (exercises2.size() > 1) {
-        Set<String> translationSet = new HashSet<String>();
-
-        List<String> translations = new ArrayList<String>();
-        List<String> transliterations = new ArrayList<String>();
-        List<String> audioRefs = new ArrayList<String>();
-        for (CommonExercise e : exercises2) {
-          for (int i = 0; i < e.getRefSentences().size(); i++) {
-            try {
-              String ref = e.getRefSentences().get(i);
-              String transLower = ref.toLowerCase().trim();
-
-              List<String> translitSentences = e.getTranslitSentences();
-              if (translitSentences.size() > i) {
-                String translit = translitSentences.get(i);
-                if (!translationSet.contains(transLower)) {
-                  translations.add(ref);
-                  transliterations.add(translit);
-                  translationSet.add(transLower);
-                  audioRefs.add(e.getRefAudio());
-                }
-              }
-              else {
-                //logger.warn("no translit sentence at " + i + " for " + e);
-              }
-            } catch (Exception e1) {
-              logger.error("got " + e1 + " on " + e, e1);
-            }
-          }
-        }
-
-        if (translations.size() > 1) {
-          for (CommonExercise e : exercises2) {
-            e.setSynonymSentences(translations);
-            e.setSynonymTransliterations(transliterations);
-            e.setSynonymAudioRefs(audioRefs);
-            //logger.debug("e " + e.getID() + " '" + e.getEnglish() + "' has " + e.getSynonymAudioRefs().size() + " audio refs or " + translations);
-          }
-        }
-      }
-    }
-  }*/
 
   private String cleanTics(String foreignLanguagePhrase) {
     if (foreignLanguagePhrase.startsWith("\'")) {
@@ -827,30 +809,6 @@ public class ExcelImport implements ExerciseDAO {
       foreignLanguagePhrase = foreignLanguagePhrase.substring(0, foreignLanguagePhrase.length() - 1);
     return foreignLanguagePhrase;
   }
-
-/*  private void checkLTS(int id, BufferedWriter writer, SmallVocabDecoder svd, ModernStandardArabicLTS lts, String english, String foreignLanguagePhrase) {
-    List<String> tokens = svd.getTokens(foreignLanguagePhrase);
-    try {
-
-      for (String token : tokens) {
-        String[][] process = lts.process(token);
-        if (process == null) {
-          String message = "couldn't do lts on exercise #" + (id - 1) + " token '" + token +
-            "' length " + token.length() + " trim '" + token.trim() +
-            "' " +
-            " '" + foreignLanguagePhrase + "' english = '" + english + "'";
-          logger.error(message);
-          //logger.error("\t tokens " + tokens + " num =  " + tokens.size());
-
-          writer.write(message);
-          writer.write("\n");
-        }
-      }
-    } catch (Exception e) {
-      logger.error("couldn't do lts on " + (id - 1) + " " + foreignLanguagePhrase + " " + english);
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-    }
-  }*/
 
   /**
    * @param id
