@@ -74,15 +74,11 @@ public class UserManager {
     if (loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS)) { // explicit setting of login type
       anonymousLogin();
     } else if (loginType.equals(PropertyHandler.LOGIN_TYPE.UNDEFINED) && // no explicit setting, so it's dependent on the mode
-      (props.isGoodwaveMode() || isInitialFlashcardTeacherView())) {   // no login for pron mode
+      (props.isGoodwaveMode() )) {   // no login for pron mode
       anonymousLogin();
     } else {
       login();
     }
-  }
-
-  private boolean isInitialFlashcardTeacherView() {
-    return (props.isFlashcardTeacherView() && !props.isFlashCard());
   }
 
   /**
@@ -142,6 +138,7 @@ public class UserManager {
   }
 
   /**
+   * @see #checkLogin()
    * @see mitll.langtest.client.LangTest#checkLogin
    */
   private void anonymousLogin() {
@@ -150,12 +147,11 @@ public class UserManager {
       //System.out.println("UserManager.anonymousLogin : current user : " + user);
       rememberAudioType();
       userNotification.gotUser(user);
-    }
-    else {
+    } else {
       System.out.println("UserManager.anonymousLogin : make new user, since user = " + user);
 
       addAnonymousUser();
-  }
+    }
   }
 
   private void addAnonymousUser() {
