@@ -34,7 +34,8 @@ public class UserDAO extends DAO {
   public static final String FEMALE = "female";
   private static final String PERMISSIONS = "permissions";
   private long defectDetector;
-  private static final List<String> COLUMNS2 = Arrays.asList("id",
+  public static final String ID = "id";
+  private static final List<String> COLUMNS2 = Arrays.asList(ID,
     "userid",
     "dialect",
     "age",
@@ -112,10 +113,8 @@ public class UserDAO extends DAO {
       for (User u : getUsers()) if (u.getId() > max) max = u.getId();
       logger.info("addUser : max is " + max + " new user '" + userID + "' age " +age + " gender " + gender);
 
-      Connection connection = database.getConnection();
-      PreparedStatement statement;
-
-      statement = connection.prepareStatement(
+      Connection connection = database.getConnection(this.getClass().toString());
+      PreparedStatement statement = connection.prepareStatement(
           "INSERT INTO " +
             USERS +
             "(id,age,gender,experience,ipaddr,nativeLang,dialect,userID,enabled," +
@@ -139,8 +138,7 @@ public class UserDAO extends DAO {
 
       statement.executeUpdate();
 
-      statement.close();
-      database.closeConnection(connection);
+      finish(connection, statement);
 
       return newID;
     } catch (Exception ee) {
@@ -160,7 +158,7 @@ public class UserDAO extends DAO {
   public int userExists(String id) {
     int val = -1;
     try {
-      Connection connection = database.getConnection();
+      Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement("SELECT id from users where UPPER(userID)='" +
           id.toUpperCase() +
           "'");
@@ -169,9 +167,7 @@ public class UserDAO extends DAO {
         val = rs.getInt(1);
       }
   //    logger.debug("user exists " + id + " = " + val);
-      rs.close();
-      statement.close();
-      database.closeConnection(connection);
+      finish(connection, statement, rs);
     } catch (Exception e) {
       logger.error("Got " + e,e);
       database.logEvent(id, "userExists: " + e.toString(), 0);
@@ -180,48 +176,51 @@ public class UserDAO extends DAO {
   }
 
   public void createUserTable(Database database) throws Exception {
-    Connection connection = database.getConnection();
+    Connection connection = database.getConnection(this.getClass().toString());
 
-    PreparedStatement statement;
+    try {
+      PreparedStatement statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS users (" +
+          ID +
+          " IDENTITY, " +
+        "age INT, " +
+        "gender INT, " +
+        "experience INT, " +
+        "ipaddr VARCHAR, " +
+        "password VARCHAR, " +
+        "nativeLang VARCHAR, " +
+        "dialect VARCHAR, " +
+        "userID VARCHAR, " +
+        "timestamp TIMESTAMP AS CURRENT_TIMESTAMP, " +
+        "enabled BOOLEAN, " +
+        PERMISSIONS + " VARCHAR, " +
+        "CONSTRAINT pkusers PRIMARY KEY (id))");
+      statement.execute();
+      statement.close();
 
-    statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS users (" +
-      "id IDENTITY, " +
-      "age INT, " +
-      "gender INT, " +
-      "experience INT, " +
-      "ipaddr VARCHAR, " +
-      "password VARCHAR, " +
-      "nativeLang VARCHAR, " +
-      "dialect VARCHAR, " +
-      "userID VARCHAR, " +
-      "timestamp TIMESTAMP AS CURRENT_TIMESTAMP, " +
-      "enabled BOOLEAN, " +
-      PERMISSIONS + " VARCHAR, " +
-      "CONSTRAINT pkusers PRIMARY KEY (id))");
-    statement.execute();
-    statement.close();
-    database.closeConnection(connection);
+      //logger.debug("found " + numColumns + " in users table");
 
-    //logger.debug("found " + numColumns + " in users table");
+      Set<String> expected = new HashSet<String>();
+      expected.addAll(Arrays.asList(ID,"age","gender","experience",
+        //"firstname","lastname",
+        "ipaddr","nativelang","dialect","userid","timestamp","enabled"));
+    /*boolean users = */
+      expected.removeAll(getColumns(USERS));
+      if (!expected.isEmpty()) logger.info("adding columns for " + expected);
+      for (String missing : expected) {
+        //if (missing.equalsIgnoreCase("firstName")) { addVarchar(connection,"firstName","VARCHAR"); }
+        //if (missing.equalsIgnoreCase("lastName")) { addVarchar(connection,"lastName","VARCHAR"); }
 
-    Set<String> expected = new HashSet<String>();
-    expected.addAll(Arrays.asList("id","age","gender","experience",
-      //"firstname","lastname",
-      "ipaddr","nativelang","dialect","userid","timestamp","enabled"));
-    /*boolean users = */expected.removeAll(getColumns(USERS));
-    if (!expected.isEmpty()) logger.info("adding columns for " + expected);
-    for (String missing : expected) {
-      //if (missing.equalsIgnoreCase("firstName")) { addVarchar(connection,"firstName","VARCHAR"); }
-      //if (missing.equalsIgnoreCase("lastName")) { addVarchar(connection,"lastName","VARCHAR"); }
-
-      if (missing.equalsIgnoreCase("nativeLang")) { addColumn(connection,"nativeLang","VARCHAR"); }
-      if (missing.equalsIgnoreCase("dialect")) { addColumn(connection,"dialect","VARCHAR"); }
-      if (missing.equalsIgnoreCase("userID")) { addColumn(connection,"userID","VARCHAR"); }
-      if (missing.equalsIgnoreCase("timestamp")) { addColumn(connection,"timestamp","TIMESTAMP AS CURRENT_TIMESTAMP"); }
-      if (missing.equalsIgnoreCase("enabled")) { addColumn(connection,"enabled","BOOLEAN"); }
-    }
-    if (!getColumns(USERS).contains(PERMISSIONS)) {
-      addColumn(connection, PERMISSIONS,"VARCHAR");
+        if (missing.equalsIgnoreCase("nativeLang")) { addColumn(connection,"nativeLang","VARCHAR"); }
+        if (missing.equalsIgnoreCase("dialect")) { addColumn(connection,"dialect","VARCHAR"); }
+        if (missing.equalsIgnoreCase("userID")) { addColumn(connection,"userID","VARCHAR"); }
+        if (missing.equalsIgnoreCase("timestamp")) { addColumn(connection,"timestamp","TIMESTAMP AS CURRENT_TIMESTAMP"); }
+        if (missing.equalsIgnoreCase("enabled")) { addColumn(connection,"enabled","BOOLEAN"); }
+      }
+      if (!getColumns(USERS).contains(PERMISSIONS)) {
+        addColumn(connection, PERMISSIONS,"VARCHAR");
+      }
+    } finally {
+      database.closeConnection(connection);
     }
   }
 
@@ -269,7 +268,9 @@ public class UserDAO extends DAO {
    * @return
    */
   public User getUserWhere(long userid) {
-    String sql = "SELECT * from users where id=" +userid+";";
+    String sql = "SELECT * from users where " +
+        ID +
+        "=" +userid+";";
     List<User> users = getUsers(sql);
     if (users.isEmpty()) {
       if (userid > 0) {
@@ -286,13 +287,11 @@ public class UserDAO extends DAO {
 
   private List<User> getUsers(String sql) {
     try {
-      Connection connection = database.getConnection();
+      Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
       List<User> users = getUsers(rs);
-      rs.close();
-      statement.close();
-      database.closeConnection(connection);
+      finish(connection, statement, rs);
 
       return users;
     } catch (Exception ee) {
@@ -311,12 +310,12 @@ public class UserDAO extends DAO {
       while (rs.next()) {
         i = 1;
         users.add(new User(rs.getLong(i++), //id
-          rs.getInt(i++), // age
-          rs.getInt(i++), //gender
-          rs.getInt(i++), // exp
-          rs.getString(i++), // ip
-          rs.getString(i++), // password
-          rs.getBoolean(i++), new ArrayList<User.Permission>()));
+            rs.getInt(i++), // age
+            rs.getInt(i++), //gender
+            rs.getInt(i++), // exp
+            rs.getString(i++), // ip
+            rs.getString(i++), // password
+            rs.getBoolean(i++), new ArrayList<User.Permission>()));
       }
     } else {
       while (rs.next()) {
@@ -342,7 +341,7 @@ public class UserDAO extends DAO {
         }
 
 
-        User newUser = new User(rs.getLong("id"), //id
+        User newUser = new User(rs.getLong(ID), //id
           rs.getInt("age"), // age
           rs.getInt("gender"), //gender
           rs.getInt("experience"), // exp
@@ -395,21 +394,6 @@ public class UserDAO extends DAO {
     }
     return idToUser;
   }
-
-  /**
-   * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-   * @param out
-   * @param dliUserDAO
-   */
-/*  public void toXLSX(OutputStream out, DLIUserDAO dliUserDAO) {
-    long then = System.currentTimeMillis();
-
-    List<User> users = joinWithDLIUsers(dliUserDAO);
-    long now = System.currentTimeMillis();
-    if (now-then > 100) logger.warn("toXLSX : took " + (now-then) + " millis to read " + users.size()+
-      " users from database");
-    toXLSX(out,users);
-  }*/
 
   public void toXLSX(OutputStream out, List<User> users) {
     writeToStream(out, getSpreadsheet(users));
@@ -465,8 +449,11 @@ public class UserDAO extends DAO {
       //cell.setCellValue(demographics == null ? "" :demographics.toString());
     }
     long now = System.currentTimeMillis();
-    if (now-then > 100) logger.warn("toXLSX : took " + (now-then) + " millis to write " + rownum+
-      " rows to sheet, or " + (now-then)/rownum + " millis/row");
+    long diff = now - then;
+    if (diff > 100) {
+      logger.info("toXLSX : took " + diff + " millis to write " + rownum+
+          " rows to sheet, or " + diff /rownum + " millis/row." );
+    }
     return wb;
   }
 
@@ -490,19 +477,4 @@ public class UserDAO extends DAO {
   }
 
   private float roundToHundredth(double totalHours) { return ((float) ((Math.round(totalHours * 100)))) / 100f;  }
-
-/*  private List<User> joinWithDLIUsers(DLIUserDAO dliUserDAO) {
-    List<User> users = getUsers();
-    List<DLIUser> users1 = dliUserDAO.getUsers();
-    Map<Long, User> userMap = getMap(users);
-
-    for (DLIUser dliUser : users1) {
-      User user = userMap.get(dliUser.getUserID());
-      if (user != null) {
-        user.setDemographics(dliUser);
-      }
-    }
-    if (users1.isEmpty()) logger.info("no dli users.");
-    return users;
-  }*/
 }
