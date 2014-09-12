@@ -44,7 +44,7 @@ public class AddRemoveDAO extends DAO {
    * @throws java.sql.SQLException
    */
   void createTable(Database database) throws SQLException {
-    Connection connection = database.getConnection();
+    Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement;
 
     statement = connection.prepareStatement("CREATE TABLE if not exists " +
@@ -55,9 +55,7 @@ public class AddRemoveDAO extends DAO {
       "operation VARCHAR, " +
       "modified TIMESTAMP" +
       ")");
-    statement.execute();
-    statement.close();
-    database.closeConnection(connection);
+    finish(database, connection, statement);
   }
 
 
@@ -74,7 +72,7 @@ public class AddRemoveDAO extends DAO {
       // there are much better ways of doing this...
       logger.info("add : " + exerciseID + " operation " + operation);
 
-      Connection connection = database.getConnection();
+      Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(
         "INSERT INTO " + ADDREMOVE +
           "(exerciseid,operation,modified) " +
@@ -89,8 +87,7 @@ public class AddRemoveDAO extends DAO {
       if (j != 1)
         logger.error("huh? didn't insert row for " + exerciseID + " " + operation);
 
-      statement.close();
-      database.closeConnection(connection);
+      finish(connection, statement);
 
       logger.debug("now " + getCount() + " add/remove");
     } catch (Exception ee) {
@@ -119,7 +116,7 @@ public class AddRemoveDAO extends DAO {
 
     Set<String> lists = Collections.emptySet();
     try {
-      Connection connection = database.getConnection();
+      Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
       lists = new TreeSet<String>();
@@ -130,9 +127,7 @@ public class AddRemoveDAO extends DAO {
 
       // logger.debug("getReviewed sql " + sql + " yielded " + lists.size());
       if (!lists.isEmpty())  logger.debug("getReviewed yielded " + lists.size());
-      rs.close();
-      statement.close();
-      database.closeConnection(connection);
+      finish(connection, statement, rs);
     } catch (SQLException e) {
       logger.error("Got " + e + " doing " + sql, e);
     }
