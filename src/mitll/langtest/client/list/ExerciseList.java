@@ -337,7 +337,11 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
   }
 
-  protected void dealWithRPCError(Throwable caught) {
+  /**
+   * @see mitll.langtest.client.list.ExerciseList.SetExercisesCallback#onFailure(Throwable)
+   * @param caught
+   */
+  private void dealWithRPCError(Throwable caught) {
     String message = caught.getMessage();
     if (message.length() > MAX_MSG_LEN) message = message.substring(0, MAX_MSG_LEN);
     if (!message.trim().equals("0")) {
@@ -348,6 +352,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     System.out.println("ExerciseList.SetExercisesCallbackWithID Got exception '" + message + "' " + caught);
 
     caught.printStackTrace();
+    controller.logMessageOnServer("got exception " + caught.getMessage(), " RPCerror?");
   }
 
   /**
@@ -770,15 +775,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   /**
    * @see ListInterface#loadNextExercise
    */
-  protected void onLastItem() {
-    PropertyHandler props = controller.getProps();
-    if (props.isCRTDataCollectMode() || props.isDataCollectMode()) {
-      String title = props.isDataCollectMode() ? "Collection Complete" : "Test complete";
-      feedback.showErrorMessage(title, "All Items Complete! Thank you!");
-    } else {
-      loadFirstExercise();
-    }
-  }
+  protected void onLastItem() {  loadFirstExercise();  }
 
   @Override
   public boolean loadPrev() {
