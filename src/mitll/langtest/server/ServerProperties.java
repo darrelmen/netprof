@@ -65,14 +65,15 @@ public class ServerProperties {
   private static final String TIER_INDEX = "tierIndex";
   private static final String DIALOG = "dialog";
   public static final String VLR_PARLE_PILOT_ITEMS_TXT = "vlr-parle-pilot-items.txt";
+  public static final String QUIET_AUDIO_OK = "quietAudioOK";
 
   private Properties props = new Properties();
 
   public boolean dataCollectMode;
- // private boolean collectAudio;
   public boolean biasTowardsUnanswered;
   private double minPronScore;
   private final int maxNumExercises = Integer.MAX_VALUE;
+  private boolean quietAudioOK;
 
   public ServerProperties() {}
 
@@ -290,6 +291,8 @@ public class ServerProperties {
       props.setProperty("releaseDate",dateFromManifest);
     }
 
+    quietAudioOK = getDefaultFalse(QUIET_AUDIO_OK);
+
     try {
       minPronScore = Double.parseDouble(props.getProperty(MIN_PRON_SCORE, MIN_PRON_SCORE_DEFAULT));
     } catch (NumberFormatException e) {
@@ -322,4 +325,8 @@ public class ServerProperties {
     }
     return "";
   }
+
+  public boolean isQuietAudioOK() { return quietAudioOK; }
+
+  //public void setQuietAudioOK(boolean quietAudioOK) { this.quietAudioOK = quietAudioOK;  }
 }
