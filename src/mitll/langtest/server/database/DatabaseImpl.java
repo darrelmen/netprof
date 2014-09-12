@@ -1,5 +1,6 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.connection.DatabaseConnection;
@@ -59,6 +60,7 @@ import java.util.Set;
  */
 public class DatabaseImpl implements Database {
   private static final Logger logger = Logger.getLogger(DatabaseImpl.class);
+  public static final int LOG_THRESHOLD = 10;
 
   private String installPath;
   private ExerciseDAO exerciseDAO = null;
@@ -86,6 +88,7 @@ public class DatabaseImpl implements Database {
   private final String absConfigDir;
   private String mediaDir;
   private final ServerProperties serverProps;
+  private LogAndNotify logAndNotify;
 
   private boolean addDefects = true;
 
@@ -97,18 +100,28 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#readProperties(javax.servlet.ServletContext)
    */
   public DatabaseImpl(String configDir, String configFile, String dbName, PathHelper pathHelper, boolean mustAlreadyExist) {
-    this(configDir, "", dbName, new ServerProperties(configDir, configFile), pathHelper, mustAlreadyExist);
+    this(configDir, "", dbName, new ServerProperties(configDir, configFile), pathHelper, mustAlreadyExist, null);
     this.lessonPlanFile = serverProps.getLessonPlan();
     this.useFile = lessonPlanFile != null;
     addDefects = false;
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#makeDatabaseImpl(String)
+   * @param configDir
+   * @param relativeConfigDir
+   * @param dbName
+   * @param serverProps
+   * @param pathHelper
+   * @param mustAlreadyExist
+   * @param logAndNotify
+   */
   public DatabaseImpl(String configDir, String relativeConfigDir, String dbName, ServerProperties serverProps,
-                      PathHelper pathHelper, boolean mustAlreadyExist) {
+                      PathHelper pathHelper, boolean mustAlreadyExist, LogAndNotify logAndNotify) {
     long then = System.currentTimeMillis();
     connection = new H2Connection(configDir, dbName, mustAlreadyExist);
     long now = System.currentTimeMillis();
-    if (now - then > 1000) logger.info("took " + (now - then) + " millis to open database");
+    if (now - then > 1000) logger.info("took " + (now - then) + " millis to open database for " + serverProps.getLanguage());
 
     absConfigDir = configDir;
     this.configDir = relativeConfigDir;
@@ -120,11 +133,16 @@ public class DatabaseImpl implements Database {
     this.serverProps = serverProps;
     this.lessonPlanFile = serverProps.getLessonPlan();
     this.useFile = lessonPlanFile != null;
+    this.logAndNotify = logAndNotify;
 
     try {
-      if (getConnection() == null) {
+      Connection connection1 = getConnection();
+      if (connection1 == null) {
         logger.warn("couldn't open connection to database at " + configDir + " : " + dbName);
         return;
+      }
+      else {
+        closeConnection(connection1);
       }
     } catch (Exception e) {
       logger.error("couldn't open connection to database, got " + e.getMessage(),e);
@@ -134,15 +152,22 @@ public class DatabaseImpl implements Database {
 
     initializeDAOs(pathHelper);
     now = System.currentTimeMillis();
-    if (now - then > 1000) logger.info("took " + (now - then) + " millis to initialize DAOs");
+    if (now - then > 1000) {
+      logger.info("took " + (now - then) + " millis to initialize DAOs for " + serverProps.getLanguage());
+    }
 
     monitoringSupport = getMonitoringSupport();
+  }
+
+  private Connection getConnection() {
+    return getConnection(this.getClass().toString());
   }
 
   /**
    * Create or alter tables as needed.
    */
   private void initializeDAOs(PathHelper pathHelper) {
+//    logger.debug("initializeDAOs ---");
     userDAO = new UserDAO(this);
     UserListDAO userListDAO = new UserListDAO(this, userDAO);
     addRemoveDAO = new AddRemoveDAO(this);
@@ -162,22 +187,16 @@ public class DatabaseImpl implements Database {
 
     eventDAO = new EventDAO(this, userDAO);
 
-/*    if (DROP_USER) {
-      try {
-        userDAO.dropUserTable();
-        userDAO.createUserTable(this);
-      } catch (Exception e) {
-        logger.error("got " + e, e);
-      }
-    }*/
-/*    if (DROP_RESULT) {
-      logger.info("------------ dropping results table");
-      resultDAO.dropResults();
-    }*/
+    Connection connection1 = getConnection();
     try {
-      resultDAO.createResultTable(getConnection());
+      resultDAO.createResultTable(connection1);
+      connection1 = getConnection();
+      gradeDAO.createGradesTable(connection1);
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
+    }
+    finally {
+      closeConnection(connection1);
     }
 
     try {
@@ -187,29 +206,47 @@ public class DatabaseImpl implements Database {
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
     }
-
-    try {
-      gradeDAO.createGradesTable(getConnection());
-    } catch (SQLException e) {
-      logger.error("Got " + e, e);
-    }
   }
 
   public ResultDAO getResultDAO() { return resultDAO; }
   public UserDAO getUserDAO() { return userDAO; }
 
   @Override
-  public Connection getConnection() { return connection.getConnection();  }
+  public Connection getConnection(String who) { return connection.getConnection(who);  }
 
   /**
    * It seems like this isn't required?
-   * @param connection
+   * @param conn
    * @throws SQLException
    */
-  public void closeConnection(Connection connection) {}
-  public void closeConnection() throws SQLException {
+  public void closeConnection(Connection conn) {
+    try {
+      int before = connection.connectionsOpen();
+      if (conn != null && !conn.isClosed()) {
+        if (connection.usingCP()) {
+          conn.close();
+        }
+      }
+      //else {
+        //logger.warn("trying to close a null connection...");
+     // }
+      if (connection.connectionsOpen() > LOG_THRESHOLD) {
+        logger.debug("closeConnection : now " + connection.connectionsOpen() + " open vs before " + before);
+      }
 
-    Connection connection1 = connection.getConnection();
+    } catch (SQLException e) {
+      logger.error("Got " +e,e);
+    }
+  }
+
+  /**
+   * @seex mitll.langtest.server.database.custom.UserListManagerTest#tearDown
+   * @throws SQLException
+   */
+  public void closeConnection() throws SQLException {
+    logger.debug("   ------- testing only closeConnection : now " +connection.connectionsOpen() + " open.");
+
+    Connection connection1 = connection.getConnection(this.getClass().toString());
     if (connection1 != null) {
       connection1.close();
     }
@@ -638,13 +675,21 @@ public class DatabaseImpl implements Database {
     return new Pair(idToCount, idToUniqueCount);
   }
 
-  public void logEvent(String id, String widgetID, String exid, String context, long userid, String hitID) {
+  public void logEvent(String id, String widgetID, String exid, String context, long userid, String hitID) throws SQLException {
     eventDAO.add(new Event(id, widgetID, exid, context, userid, -1, hitID));
   }
 
   public void logEvent(String exid, String context, long userid) {
     if (context.length()>100) context = context.substring(0,100).replace("\n"," ");
-    logEvent("unknown","server",exid,context,userid,"unknown");
+    try {
+      logEvent("unknown","server",exid,context,userid,"unknown");
+    } catch (SQLException e) {
+      logAndNotify(e);
+    }
+  }
+
+  public void logAndNotify(Exception e) {
+    logAndNotify.logAndNotifyServerException(e);
   }
 
   public List<Event> getEvents() {
@@ -870,9 +915,12 @@ public class DatabaseImpl implements Database {
    * @param id
    * @return
    */
-  private CommonExercise getUserExerciseWhere(String id) {
-    CommonUserExercise where = userExerciseDAO.getWhere(id);
-    return where != null ? where : null;
+  public CommonExercise getCustomOrPredefExercise(String id) {
+    CommonExercise byID = getUserExerciseWhere(id);  // allow custom items to mask out non-custom items
+    if (byID == null) {
+      byID = getExercise(id);
+    }
+    return byID;
   }
 
   /**
@@ -880,12 +928,9 @@ public class DatabaseImpl implements Database {
    * @param id
    * @return
    */
-  public CommonExercise getCustomOrPredefExercise(String id) {
-    CommonExercise byID = getUserExerciseWhere(id);  // allow custom items to mask out non-custom items
-    if (byID == null) {
-      byID = getExercise(id);
-    }
-    return byID;
+  private CommonExercise getUserExerciseWhere(String id) {
+    CommonUserExercise where = userExerciseDAO.getWhere(id);
+    return where != null ? where : null;
   }
 
   public ServerProperties getServerProps() { return serverProps; }
@@ -950,6 +995,6 @@ public class DatabaseImpl implements Database {
   }
 
   public String toString() {
-    return "Database : " + connection.getConnection();
+    return "Database : " + this.getClass().toString();
   }
 }
