@@ -98,7 +98,7 @@ public class AudioFileHelper {
     File file = pathHelper.getAbsoluteFile(wavPath);
 
     AudioCheck.ValidityAndDur validity = new AudioConversion().convertBase64ToAudioFiles(base64EncodedString, file);
-    boolean isValid = validity.validity == AudioAnswer.Validity.OK;
+    boolean isValid = validity.validity == AudioAnswer.Validity.OK || (serverProps.isQuietAudioOK() && validity.validity == AudioAnswer.Validity.TOO_QUIET);
     if (!isValid) {
       logger.warn("got invalid audio file (" + validity +
         ") user = " + user + " exerciseID " + exerciseID +
@@ -138,7 +138,7 @@ public class AudioFileHelper {
     boolean isValid = validity.validity == AudioAnswer.Validity.OK;
     AudioAnswer audioAnswer = new AudioAnswer(pathHelper.ensureForwardSlashes(wavPath), validity.validity, reqid, validity.durationInMillis);
 
-    logger.warn("writing to " + file.getAbsolutePath() + " answer " + audioAnswer);
+    logger.debug("writing to " + file.getAbsolutePath() + " answer " + audioAnswer);
 
     if (isValid) {
       PretestScore asrScoreForAudio = getASRScoreForAudio(reqid, file.getAbsolutePath(), textToAlign, -1, -1, false,
@@ -215,7 +215,8 @@ public class AudioFileHelper {
   public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
                                           int width, int height, boolean useScoreToColorBkg,
                                           boolean decode, String tmpDir, boolean useCache, String prefix) {
-    logger.debug("getASRScoreForAudio scoring " + testAudioFile + " with sentence '" + sentence + "' req# " + reqid);
+    logger.debug("getASRScoreForAudio (" + serverProps.getLanguage() + ")" +
+        " scoring " + testAudioFile + " with sentence '" + sentence + "' req# " + reqid);
 
     makeASRScoring();
     if (testAudioFile == null) {
