@@ -248,7 +248,8 @@ public class AutoCRT {
    */
   private List<String> getRefSentences(CommonExercise other) {
     List<String> refSentences = new ArrayList<String>();
-    refSentences.add(other.getForeignLanguage());
+    String foreignLanguage = other.getForeignLanguage();
+    refSentences.add(foreignLanguage);
     return getRefs(refSentences);
   }
 
