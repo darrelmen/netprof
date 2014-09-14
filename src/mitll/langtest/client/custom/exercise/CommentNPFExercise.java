@@ -47,6 +47,7 @@ public class CommentNPFExercise extends NPFExercise {
 
   private AudioAttribute defaultAudio, maleAudio, femaleAudio;
   private PlayAudioPanel contextPlay;
+  private CommentBox commentBox;
 
   public CommentNPFExercise(CommonExercise e, ExerciseController controller, ListInterface listContainer,
                             float screenPortion, boolean addKeyHandler, String instance) {
@@ -60,6 +61,9 @@ public class CommentNPFExercise extends NPFExercise {
    */
   @Override
   protected Widget getQuestionContent(final CommonExercise e, String content) {
+    if (commentBox == null) // defensive...
+     this.commentBox = new CommentBox(e, controller, this);
+
     Panel column = new VerticalPanel();
     column.getElement().setId("QuestionContent");
     column.setWidth("100%");
@@ -124,37 +128,37 @@ public class CommentNPFExercise extends NPFExercise {
       addGenderChoices(e, hp);
 
       hp.add(entry);
-     // hp.getElement().getStyle().setMarginTop(15, Style.Unit.PX);
-     // toAddTo.add(hp);
+      // hp.getElement().getStyle().setMarginTop(15, Style.Unit.PX);
+      // toAddTo.add(hp);
       return hp;
-    }
-    else {
+    } else {
       return null;
     }
   }
 
   /**
    * Add underlines of item tokens in context sentence.
+   *
    * @param e
    * @param context
    * @return
    */
   private String highlightVocabItemInContext(CommonExercise e, String context) {
     String trim = e.getRefSentence().trim();
-   // String trim = ref;
+    // String trim = ref;
     String toFind = removePunct(trim);
 
     // todone split on spaces, find matching words if no contigious overlap
     int i = context.indexOf(toFind);
     int end = i + toFind.length();
     if (i > -1) {
-     log("marking underline from " + i + " to " + end + " for '" + toFind +
-         "' in '" + trim  +  "'");
+      log("marking underline from " + i + " to " + end + " for '" + toFind +
+          "' in '" + trim + "'");
       context = context.substring(0, i) + "<u>" + context.substring(i, end) + "</u>" + context.substring(end);
     } else {
       log("NOT marking underline from " + i + " to " + end);
       log("trim   " + trim + " len " + trim.length());
-      log("toFind " +toFind + " len " +trim.length());
+      log("toFind " + toFind + " len " + trim.length());
 
       List<String> tokens = getTokens(trim);
       int startToken;
@@ -168,12 +172,12 @@ public class CommentNPFExercise extends NPFExercise {
           builder.append(context.substring(startToken, endToken = startToken + token.length()));
           builder.append("</u>");
         } else {
-          log("from " + endToken + " couldn't find token '" + token + "' len " + token.length() + " in '" +context+
+          log("from " + endToken + " couldn't find token '" + token + "' len " + token.length() + " in '" + context +
               "'");
         }
       }
       builder.append(context.substring(endToken));
-     // System.out.println("before " + context + " after " + builder.toString());
+      // System.out.println("before " + context + " after " + builder.toString());
       context = builder.toString();
     }
     return context;
@@ -191,8 +195,8 @@ public class CommentNPFExercise extends NPFExercise {
     }
   }
 
-  private native static void consoleLog( String message) /*-{
-      console.log( "LangTest:" + message );
+  private native static void consoleLog(String message) /*-{
+      console.log("LangTest:" + message);
   }-*/;
 
 
@@ -211,7 +215,7 @@ public class CommentNPFExercise extends NPFExercise {
   }
 
   private String removePunct(String t) {
-    return t.replaceAll(PUNCT_REGEX,"");
+    return t.replaceAll(PUNCT_REGEX, "");
   }
 
 
@@ -262,7 +266,7 @@ public class CommentNPFExercise extends NPFExercise {
     buttonGroup.setToggle(ToggleType.RADIO);
     w.add(buttonGroup);
 
-    boolean first =true;
+    boolean first = true;
     for (final String choice : choices) {
       Button choice1 = getChoice(choice, first, new ClickHandler() {
         @Override
@@ -302,42 +306,42 @@ public class CommentNPFExercise extends NPFExercise {
   }
 
   /**
-   * @see #getQuestionContent(mitll.langtest.shared.CommonExercise, String)
-   * @see #getContext(mitll.langtest.shared.CommonExercise)
    * @param e
    * @param field
    * @param label
    * @param value
    * @return
+   * @see #getQuestionContent(mitll.langtest.shared.CommonExercise, String)
+   * @see #getContext(mitll.langtest.shared.CommonExercise)
    */
   private Widget getEntry(CommonExercise e, final String field, final String label, String value) {
     return getEntry(field, label, value, e.getAnnotation(field));
   }
 
   /**
-   * @see #getEntry(mitll.langtest.shared.CommonExercise, String, String, String)
-   * @see #makeFastAndSlowAudio(String)
    * @param field
    * @param label
    * @param value
    * @param annotation
    * @return
+   * @see #getEntry(mitll.langtest.shared.CommonExercise, String, String, String)
+   * @see #makeFastAndSlowAudio(String)
    */
   private Widget getEntry(final String field, final String label, String value, ExerciseAnnotation annotation) {
-    return getEntry(field, getContentWidget(label, value, true, false), annotation);
+    return commentBox.getEntry(field, getContentWidget(label, value, true, false), annotation);
   }
 
   /**
-   * @see #getAudioPanel
    * @param path
    * @return
+   * @see #getAudioPanel
    */
   @Override
   protected ASRScoringAudioPanel makeFastAndSlowAudio(final String path) {
     return new FastAndSlowASRScoringAudioPanel(exercise, path, service, controller, scorePanel) {
       @Override
       protected void addAudioRadioButton(Panel vp, RadioButton fast) {
-        vp.add(getEntry(audioPath, fast, exercise.getAnnotation(audioPath)));
+        vp.add(commentBox.getEntry(audioPath, fast, exercise.getAnnotation(audioPath)));
       }
 
       @Override
@@ -347,202 +351,5 @@ public class CommentNPFExercise extends NPFExercise {
         vp.add(entry);
       }
     };
-  }
-
-  /**
-   * @param field of the exercise to comment on
-   * @param content to wrap
-   * @param annotation to get current comment from
-   * @return three part widget -- content, comment button, and clear button
-   * @see #getEntry(String, String, String, mitll.langtest.shared.ExerciseAnnotation)
-   */
-  private Widget getEntry(String field, Widget content, ExerciseAnnotation annotation) {
-    final Button commentButton = new Button();
-
-    if (field.endsWith(AudioTag.COMPRESSED_TYPE)) {
-      field = field.replaceAll("." + AudioTag.COMPRESSED_TYPE,".wav");
-    }
-
-    final HidePopupTextBox commentEntryText = new HidePopupTextBox();
-    commentEntryText.getElement().setId("CommentEntryTextBox_for_"+field);
-    commentEntryText.setVisibleLength(60);
-
-    Button clearButton = getClearButton(commentEntryText, commentButton, field);
-    final MyPopup commentPopup = makeCommentPopup(field, commentButton, commentEntryText, clearButton);
-    commentPopup.addAutoHidePartner(commentButton.getElement()); // fix for bug Wade found where click didn't toggle comment
-    configureTextBox(annotation != null ? annotation.comment : null, commentEntryText, commentPopup);
-
-    boolean isCorrect = annotation == null || annotation.status == null || annotation.isCorrect();
-    String comment = !isCorrect ? annotation.comment : "";
-/*    System.out.println("getEntry : field " + field + " annotation " + annotation +
-      " correct " + isCorrect + " comment '" + comment+
-      "', fields " + exercise.getFields());*/
-
-    configureCommentButton(commentButton,
-      isCorrect, commentPopup,
-      comment, commentEntryText);
-
-    // content on left side, comment button on right
-
-    Panel row = new HorizontalPanel();
-    row.add(content);
-    row.add(commentButton);
-    row.add(clearButton);
-
-    showOrHideCommentButton(commentButton, clearButton, isCorrect);
-    return row;
-  }
-
-  /**
-   * @see #getEntry(String, com.google.gwt.user.client.ui.Widget, mitll.langtest.shared.ExerciseAnnotation)
-   * @param field
-   * @param commentButton
-   * @param commentEntryText
-   * @param clearButton
-   * @return
-   */
-  private MyPopup makeCommentPopup(String field, Button commentButton, HidePopupTextBox commentEntryText, Button clearButton) {
-    final MyPopup commentPopup = new MyPopup();
-    commentPopup.setAutoHideEnabled(true);
-    commentPopup.configure(commentEntryText, commentButton, clearButton);
-    commentPopup.setField(field);
-
-    Panel hp = new HorizontalPanel();
-    hp.add(commentEntryText);
-    hp.add(getOKButton(commentPopup, null));
-
-    commentPopup.add(hp);
-    return commentPopup;
-  }
-
-  /**
-   * Post correct comment to server when clear button is clicked.
-   * @param commentEntryText
-   * @param commentButton
-   * @param field
-   * @return
-   */
-  private Button getClearButton(final HidePopupTextBox commentEntryText,
-                                  final Widget commentButton, final String field) {
-    final Button clear = new Button("");
-    clear.getElement().setId("CommentNPFExercise_"+field);
-    controller.register(clear, exercise.getID(), "clear comment");
-    clear.addStyleName("leftFiveMargin");
-    addTooltip(clear, "Clear comment");
-
-    clear.setIcon(IconType.REMOVE);
-    clear.setSize(ButtonSize.MINI);
-    clear.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        commentEntryText.setText("");
-        showOrHideCommentButton(commentButton, clear, true);
-        exercise.addAnnotation(field, "correct", "");
-        setButtonTitle(commentButton, true, "");
-        addCorrectComment(field);
-      }
-    });
-    return clear;
-  }
-
-  public class MyPopup extends DecoratedPopupPanel {
-    private String field;
-
-    public void setField(String field) {
-      this.field = field;
-    }
-
-    /**
-     * @see CommentNPFExercise#makeCommentPopup(String, com.github.gwtbootstrap.client.ui.Button, CommentNPFExercise.HidePopupTextBox, com.github.gwtbootstrap.client.ui.Button)
-     * @param commentBox
-     * @param commentButton
-     * @param clearButton
-     */
-    public void configure(final TextBox commentBox, final Widget commentButton, final Widget clearButton) {
-      addCloseHandler(new CloseHandler<PopupPanel>() {
-        @Override
-        public void onClose(CloseEvent<PopupPanel> event) {
-          controller.logEvent(commentBox,"Comment_TextBox",exercise.getID(),"submit comment '" +commentBox.getValue()+
-            "'");
-          commentComplete(commentBox, field, commentButton, clearButton);
-        }
-      });
-    }
-  }
-
-  private void showOrHideCommentButton(UIObject commentButton, UIObject clearButton, boolean isCorrect) {
-    if (isCorrect) {
-      showQC(commentButton);
-    }
-    else {
-      showQCHasComment(commentButton);
-    }
-    clearButton.setVisible(!isCorrect);
-  }
-
-  /**
-   * @see #getEntry(String, com.google.gwt.user.client.ui.Widget, mitll.langtest.shared.ExerciseAnnotation)
-   * @param commentButton
-   * @param alreadyMarkedCorrect
-   * @param commentPopup
-   * @param comment
-   * @param commentEntry
-   * @return
-   */
-  private void configureCommentButton(final Button commentButton,
-                                      final boolean alreadyMarkedCorrect, final PopupPanel commentPopup, String comment,
-                                      final TextBox commentEntry) {
-    commentButton.setIcon(IconType.COMMENT);
-    commentButton.setSize(ButtonSize.MINI);
-    commentButton.addStyleName("leftTenMargin");
-    commentButton.getElement().setId("CommentNPFExercise_comment");
-    controller.register(commentButton, exercise.getID(), "show comment");
-
-    final Tooltip tooltip = setButtonTitle(commentButton, alreadyMarkedCorrect, comment);
-    configurePopupButton(commentButton, commentPopup, commentEntry, tooltip);
-
-    showQC(commentButton);
-  }
-
-  private Tooltip setButtonTitle(Widget button, boolean isCorrect, String comment) {
-    String tip = isCorrect ? "Add a comment" : "\""+ comment + "\"";
-    return addTooltip(button, tip);
-  }
-
-  private void showQC(UIObject qcCol) {
-    qcCol.addStyleName("comment-button-group-new");
-  }
-
-  private void showQCHasComment(UIObject child) {
-    child.removeStyleName("comment-button-group-new");
-  }
-
-  private final Map<String,String> fieldToComment = new HashMap<String,String>();
-
-  /**
-   * @see CommentNPFExercise.MyPopup#configure(com.github.gwtbootstrap.client.ui.TextBox, com.google.gwt.user.client.ui.Widget, com.google.gwt.user.client.ui.Widget)
-   * @param commentEntry
-   * @param field
-   * @param commentButton
-   * @param clearButton
-   */
-  private <T extends TextBox> void commentComplete(T commentEntry, String field, Widget commentButton, Widget clearButton) {
-    String comment = commentEntry.getText();
-    String previous = fieldToComment.get(field);
-    if (previous == null || !previous.equals(comment)) {
-      fieldToComment.put(field, comment);
-      boolean isCorrect = comment.length() == 0;
-//      System.out.println("commentComplete " + field + " comment '" + comment +"' correct = " +isCorrect);
-
-      setButtonTitle(commentButton, isCorrect, comment);
-      showOrHideCommentButton(commentButton, clearButton, isCorrect);
-      if (isCorrect) {
-        addCorrectComment(field);
-      }
-      else {
-        addIncorrectComment(comment,field);
-      }
-      //System.out.println("\t commentComplete : annotations now " + exercise.getFields());
-    }
   }
 }
