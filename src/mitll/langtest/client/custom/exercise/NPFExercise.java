@@ -53,6 +53,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
 
   private DropdownButton addToList;
   private int activeCount = 0;
+  PopupContainer popupContainer = new PopupContainer();
 
   /**
    * @param e
@@ -96,7 +97,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
   }
 
   private Widget getNextListButton() {
-    final HidePopupTextBox textBox = new HidePopupTextBox() {
+    final PopupContainer.HidePopupTextBox textBox = new PopupContainer.HidePopupTextBox() {
       @Override
       protected void onEnter() {
         makeANewList(this);
@@ -117,7 +118,8 @@ public class NPFExercise extends GoodwaveExercisePanel {
     textBox.getElement().setId("NewList");
     textBox.setVisibleLength(60);
 
-    final DecoratedPopupPanel commentPopup = makePopupAndButton(textBox, new ClickHandler() {
+    PopupContainer popupContainer = new PopupContainer();
+    final DecoratedPopupPanel commentPopup = popupContainer.makePopupAndButton(textBox, new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         makeANewList(textBox);
@@ -126,7 +128,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
 
     final Button newListButton = new Button(NEW_LIST);
     commentPopup.addAutoHidePartner(newListButton.getElement()); // fix for bug Wade found where click didn't toggle comment
-    configureTextBox("", textBox, commentPopup);
+    popupContainer.configureTextBox("", textBox, commentPopup);
 
     configureNewListButton(newListButton,
       commentPopup,
@@ -149,10 +151,17 @@ public class NPFExercise extends GoodwaveExercisePanel {
     popupButton.getElement().setId("NPFExercise_popup");
     controller.register(popupButton, exercise.getID(), "show new list");
 
-    configurePopupButton(popupButton, popup, textEntry, addTooltip(popupButton, "Make a new list"));
+    new PopupContainer().configurePopupButton(popupButton, popup, textEntry, addTooltip(popupButton, "Make a new list"));
+    popupButton.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        makeANewList(textEntry);
+
+      }
+    });
   }
 
-  protected void configurePopupButton(final Button popupButton, final PopupPanel popup, final TextBox textEntry, final Tooltip tooltip) {
+/*  protected void configurePopupButton(final Button popupButton, final PopupPanel popup, final TextBox textEntry, final Tooltip tooltip) {
     popupButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -171,7 +180,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
         makeANewList(textEntry);
       }
     });
-  }
+  }*/
 
   private void makeANewList(TextBox textEntry) {
     String newListName = textEntry.getValue();
@@ -202,7 +211,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
    * @return
    * @see mitll.langtest.client.custom.exercise.CommentNPFExercise#makeCommentPopup(String, com.github.gwtbootstrap.client.ui.Button, NPFExercise.HidePopupTextBox, com.github.gwtbootstrap.client.ui.Button)
    */
-  private DecoratedPopupPanel makePopupAndButton(TextBox commentEntryText, ClickHandler clickHandler) {
+/*  private DecoratedPopupPanel makePopupAndButton(TextBox commentEntryText, ClickHandler clickHandler) {
     final DecoratedPopupPanel commentPopup = new DecoratedPopupPanel();
     commentPopup.setAutoHideEnabled(true);
 
@@ -212,14 +221,14 @@ public class NPFExercise extends GoodwaveExercisePanel {
 
     commentPopup.add(hp);
     return commentPopup;
-  }
+  }*/
 
   /**
    * Clicking OK just dismisses the popup.
    * @param commentPopup
    * @return
    */
-  protected Button getOKButton(final PopupPanel commentPopup, ClickHandler clickHandler) {
+  /*protected Button getOKButton(final PopupPanel commentPopup, ClickHandler clickHandler) {
     Button ok = new Button("OK");
     ok.setType(ButtonType.PRIMARY);
     ok.addStyleName("leftTenMargin");
@@ -233,7 +242,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
       ok.addClickHandler(clickHandler);
     }
     return ok;
-  }
+  }*/
 
   /**
    * @see #makeANewList(com.github.gwtbootstrap.client.ui.TextBox)
@@ -315,7 +324,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
 
                   @Override
                   public void onSuccess(Void result) {
-                    showPopup(ITEM_ADDED, w1);
+                    popupContainer.showPopup(ITEM_ADDED, w1);
                     widget.setVisible(false);
                     activeCount--;
                     if (activeCount == 0) {
@@ -336,7 +345,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
     });
   }
 
-  private void showPopup(String html, Widget target) {
+/*  private void showPopup(String html, Widget target) {
     Widget content = new HTML(html);
     final PopupPanel pleaseWait = new DecoratedPopupPanel();
     pleaseWait.setAutoHideEnabled(true);
@@ -349,7 +358,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
       }
     };
     t.schedule(2000);
-  }
+  }*/
 
   /**
    * For this field configure the textBox box to post annotation on blur and enter
@@ -358,7 +367,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
    * @param textBox comment box to configure
    * @return
    */
-  protected FocusWidget configureTextBox(String initialText,
+ /* protected FocusWidget configureTextBox(String initialText,
                                          final HidePopupTextBox textBox,
                                          final PopupPanel popup) {
     if (initialText != null) {
@@ -390,5 +399,5 @@ public class NPFExercise extends GoodwaveExercisePanel {
     }
     protected void onEnter() {
     }
-  }
+  }*/
 }
