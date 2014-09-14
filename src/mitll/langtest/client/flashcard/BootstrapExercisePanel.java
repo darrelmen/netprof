@@ -59,7 +59,7 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
    * @param endListener
    * @param instance
    * @param exerciseList
-   * @see MyFlashcardExercisePanelFactory.StatsPracticePanel#StatsPracticePanel(mitll.langtest.shared.CommonExercise)
+   * @see MyFlashcardExercisePanelFactory.StatsPracticePanel#StatsPracticePanel
    *
    */
   public BootstrapExercisePanel(final CommonExercise e, final LangTestDatabaseAsync service,
@@ -254,6 +254,11 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
           public void stop() {
             controller.logEvent(this, "AVP_RecordButton", exercise.getID(), "Stop_Recording");
             super.stop();
+          }
+
+          @Override
+          protected boolean shouldIgnoreKeyPress() {
+            return super.shouldIgnoreKeyPress() || otherReasonToIgnoreKeyPress();
           }
         };
       }
