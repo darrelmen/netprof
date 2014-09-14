@@ -1,14 +1,6 @@
 package mitll.langtest.client.flashcard;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.ButtonGroup;
-import com.github.gwtbootstrap.client.ui.ButtonToolbar;
-import com.github.gwtbootstrap.client.ui.Column;
-import com.github.gwtbootstrap.client.ui.ControlGroup;
-import com.github.gwtbootstrap.client.ui.FluidRow;
-import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.Paragraph;
-import com.github.gwtbootstrap.client.ui.ProgressBar;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
@@ -159,18 +151,30 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
     return getRecordButtonRow(button);
   }
 
-  @Override
+/*  @Override
   protected DivWidget getFinalWidgets() {
     DivWidget finalWidgets = super.getFinalWidgets();
     finalWidgets.setVisible(false);
     return finalWidgets;
-  }
+  }*/
 
+/*
   @Override
   protected Panel getCardContent() {
     return new DivWidget();
   }
+*/
 
+  @Override
+  protected void setClickToFlipHeight(DivWidget clickToFlipContainer) {
+    clickToFlipContainer.setHeight("12px");
+  }
+
+  @Override
+  protected void setMarginTop(HTML clickToFlip, Widget icon) {
+    icon.getElement().getStyle().setMarginTop(2, Style.Unit.PX);
+
+  }
   /**
    * Center align the record button image.
    *
@@ -206,7 +210,7 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
    * @return
    */
   private Panel getRecoOutputRow() {
-    recoOutput = new Heading(3, "Answer");
+    recoOutput = new Heading(3, "");
     recoOutput.addStyleName("cardHiddenText2");   // same color as background so text takes up space but is invisible
     recoOutput.getElement().getStyle().setColor("#ffffff");
 
