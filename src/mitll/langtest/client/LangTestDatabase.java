@@ -14,6 +14,7 @@ import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
+import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -87,7 +88,7 @@ public interface LangTestDatabase extends RemoteService {
 
   void logMessage(String message);
 
-  List<AVPHistoryForList> getUserHistoryForList(long userid, Collection<String> ids, long latestResultID);
+  AVPScoreReport getUserHistoryForList(long userid, Collection<String> ids, long latestResultID);
 
   StartupInfo getStartupInfo();
   long addUserList(long userid, String name, String description, String dliClass, boolean isPublic);
