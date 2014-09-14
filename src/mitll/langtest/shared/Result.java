@@ -95,14 +95,6 @@ public class Result implements IsSerializable {
     return id + "/" +qid;
   }
 
-/*  public void setFLQ(boolean flq) {
-    this.flq = flq;
-  }
-
-  public void setSpoken(boolean v) {
-    this.spoken = v;
-  }*/
-
   public String getAudioType() {
     return audioType;
   }
