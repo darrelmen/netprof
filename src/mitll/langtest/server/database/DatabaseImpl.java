@@ -23,6 +23,7 @@ import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
+import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.monitoring.Session;
@@ -473,10 +474,12 @@ public class DatabaseImpl implements Database {
    * @paramx listid
    * @return
    */
-  public List<AVPHistoryForList> getUserHistoryForList(long userid, Collection<String> ids, long latestResultID) {
+  public AVPScoreReport getUserHistoryForList(long userid, Collection<String> ids, long latestResultID) {
     logger.debug("getUserHistoryForList " +userid + " and " + ids.size() + " ids, latest " + latestResultID);
 
-    List<Session> sessionsForUserIn2 = resultDAO.getSessionsForUserIn2(ids, latestResultID);
+   // List<Session> sessionsForUserIn2 = resultDAO.getSessionsForUserIn2(ids, latestResultID, userid);
+    ResultDAO.SessionsAndScores sessionsAndScores = resultDAO.getSessionsForUserIn2(ids, latestResultID, userid);
+    List<Session> sessionsForUserIn2 = sessionsAndScores.sessions;
 
     Map<Long, User> userMap = userDAO.getUserMap();
 
@@ -536,8 +539,8 @@ public class DatabaseImpl implements Database {
     historyForLists.add(sessionAVPHistoryForList2);
 
     logger.debug("returning " +historyForLists);
-
-    return historyForLists;
+      return new AVPScoreReport(historyForLists,sessionsAndScores.sortedResults);
+    //return historyForLists;
   }
 
   private int compareTimestamps(Session o1, Session o2) {
