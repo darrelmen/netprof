@@ -46,13 +46,13 @@ import java.util.*;
  * Time: 11:51 AM
  * To change this template use File | Settings | File Templates.
  */
-public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel, RequiresResize, ProvidesResize {
+public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel, RequiresResize, ProvidesResize, CommentAnnotator {
   private static final String REFERENCE = "";
   private static final String RECORD_YOURSELF = "Record";
   private static final String RELEASE_TO_STOP = "Release";
   public static final int HEADING_FOR_UNIT_LESSON = 4;
-  private static final String CORRECT = "correct";
-  private static final String INCORRECT = "incorrect";
+  public static final String CORRECT = "correct";
+  public static final String INCORRECT = "incorrect";
   public static final String DEFAULT_SPEAKER = "Default Speaker";
   private final ListInterface listContainer;
   private boolean isBusy = false;
@@ -329,13 +329,15 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * @param commentToPost
    * @param field
    */
-  protected void addIncorrectComment(final String commentToPost, final String field) {
+  @Override
+  public void addIncorrectComment(final String commentToPost, final String field) {
 /*    System.out.println(new Date() + " : post to server " + exercise.getID() +
       " field " + field + " commentLabel '" + commentToPost + "' is incorrect");*/
     addAnnotation(field, INCORRECT, commentToPost);
   }
 
-  protected void addCorrectComment(final String field) {
+  @Override
+  public void addCorrectComment(final String field) {
   //  System.out.println(new Date() + " : post to server " + exercise.getID() + " field " + field + " is correct");
     addAnnotation(field, CORRECT, "");
   }
