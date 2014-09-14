@@ -51,7 +51,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   private static final String START_OVER = "Start Over";
 
   private static final String SKIP_TO_END = "See your scores";
-  private static final int TABLE_WIDTH = 2 * 275;
+ // private static final int TABLE_WIDTH = 2 * 275;
   private static final boolean ADD_KEY_BINDING = true;
  // public static final String JUMP_TO_THE_END = "Jump to end and see your scores.";
  private static final String JUMP_TO_THE_END = "See your scores.";
