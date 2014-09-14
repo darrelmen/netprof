@@ -1,10 +1,9 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
-import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.Result;
-import mitll.langtest.shared.ScoreAndPath;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.*;
+import mitll.langtest.shared.flashcard.CorrectAndScore;
+import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import mitll.langtest.shared.monitoring.Session;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
@@ -21,18 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Create, drop, alter, read from the results table.
@@ -177,7 +165,7 @@ public class ResultDAO extends DAO {
    * @param latestResultID
    * @return
    */
-  public List<Session> getSessionsForUserIn2(Collection<String> ids, long latestResultID) {
+  public SessionsAndScores getSessionsForUserIn2(Collection<String> ids, long latestResultID,long userid) {
     List<Session> sessions = new ArrayList<Session>();
     Map<Long, List<Result>> userToAnswers = populateUserToAnswers(getResultsForExIDIn(ids, true));
     if (debug) logger.debug("Got " + userToAnswers.size() + " user->answer map");
@@ -187,9 +175,30 @@ public class ResultDAO extends DAO {
 
       sessions.addAll(c);
     }
+
+    List<Result> results = userToAnswers.get(userid);
+   // SortedMap<String,List<CorrectAndScore>> idToScores = new TreeMap<String, List<CorrectAndScore>>();
+    SortedMap<String,ExerciseCorrectAndScore> idToScores = new TreeMap<String, ExerciseCorrectAndScore>();
+    for (Result r: results) {
+      ExerciseCorrectAndScore correctAndScores = idToScores.get(r.getID());
+      if (correctAndScores == null) idToScores.put(r.getID(),correctAndScores = new ExerciseCorrectAndScore(r.getID()));
+      correctAndScores.add(new CorrectAndScore(r));
+    }
+    for (ExerciseCorrectAndScore exerciseCorrectAndScore  : idToScores.values()) { exerciseCorrectAndScore.sort(); }
+    List<ExerciseCorrectAndScore> sortedResults = new ArrayList<ExerciseCorrectAndScore>(idToScores.values());
+
     if (debug) logger.debug("found " +sessions.size() + " sessions for " +ids );
 
-    return sessions;
+    return new SessionsAndScores(sessions,sortedResults);
+  }
+
+  public static class SessionsAndScores {
+    List<Session> sessions;
+    List<ExerciseCorrectAndScore> sortedResults;
+    public SessionsAndScores(List<Session> sessions, List<ExerciseCorrectAndScore> sortedResults) {
+      this.sessions = sessions;
+      this.sortedResults = sortedResults;
+    }
   }
 
   public void attachScoreHistory(long userID, CommonExercise firstExercise) {
