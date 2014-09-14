@@ -28,6 +28,7 @@ import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
+import mitll.langtest.shared.flashcard.AVPScoreReport;
 import org.moxieapps.gwt.highcharts.client.Chart;
 
 import java.util.HashMap;
@@ -302,14 +303,16 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
 /*      System.out.println("StatsPracticePanel.onSetComplete. : calling  getUserHistoryForList for " + user +
         " with " + exToCorrect + " and latest " + latestResultID + " and ids " +copies);*/
 
-      service.getUserHistoryForList(user, copies, latestResultID, new AsyncCallback<List<AVPHistoryForList>>() {
+      service.getUserHistoryForList(user, copies, latestResultID, new AsyncCallback<AVPScoreReport>() {
         @Override
         public void onFailure(Throwable caught) {
           System.err.println("StatsPracticePanel.onSetComplete. : got failure " + caught);
         }
 
         @Override
-        public void onSuccess(List<AVPHistoryForList> result) {
+        public void onSuccess(AVPScoreReport scoreReport) {
+          List<AVPHistoryForList> result = scoreReport.getAvpHistoryForLists();
+          System.out.println("Got back " + scoreReport.getSortedHistory());
           showFeedbackCharts(result);
         }
       });
@@ -318,21 +321,8 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
 
     private void showFeedbackCharts(List<AVPHistoryForList> result) {
       setMainContentVisible(false);
-      container = completeDisplay.showFeedbackCharts(result,exToScore,getCorrect(),getIncorrect(),allExercises.size());
-    /*  container = new HorizontalPanel();
-
-      // add left chart and table
-      AVPHistoryForList sessionAVPHistoryForList = result.get(0);
-      Chart chart = makeCorrectChart(result, sessionAVPHistoryForList);
-      container.add(chart);
-      container.add(makeTable(sessionAVPHistoryForList, CORRECT_NBSP));
-
-      // add right chart and table
-      AVPHistoryForList sessionAVPHistoryForListScore = result.get(1);
-      Chart chart2 = makePronChart(getAvgScore(), sessionAVPHistoryForListScore);
-      container.add(chart2);
-      container.add(makeTable(sessionAVPHistoryForListScore, SCORE));
-*/
+      container = completeDisplay.showFeedbackCharts(result, exToScore, getCorrect(), getIncorrect(), allExercises.size());
+      DivWidget leftRight = new DivWidget();
       belowContentDiv.add(container);
       belowContentDiv.add(getRepeatButton());
 
