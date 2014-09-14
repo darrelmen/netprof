@@ -22,6 +22,13 @@ public class AVPHistoryForList implements IsSerializable {
   private List<UserScore> scores = new ArrayList<UserScore>();
 
   public AVPHistoryForList() {}
+
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#getUserHistoryForList(long, java.util.Collection, long)
+   * @param scores
+   * @param userID
+   * @param useCorrect when false get score percentages true for percentage correct
+   */
   public AVPHistoryForList(List<Session> scores, long userID, boolean useCorrect) {
     this.useCorrect = useCorrect;
     numScores = scores.size();
