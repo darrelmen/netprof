@@ -18,6 +18,7 @@ import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
@@ -29,10 +30,16 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.KeyStorage;
+import mitll.langtest.client.custom.exercise.CommentBox;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.qc.QCNPFExercise;
+import mitll.langtest.client.scoring.CommentAnnotator;
+import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.CommonExercise;
+
+import java.util.Date;
 
 /**
  * Created by GO22670 on 6/26/2014.
@@ -59,7 +66,6 @@ public class FlashcardPanel extends HorizontalPanel {
   protected Widget foreign;
 
   private final MyFlashcardExercisePanelFactory.MySoundFeedback soundFeedback;
-  Widget cardPrompt;
   protected final boolean addKeyBinding;
   protected final ExerciseController controller;
   protected final ControlState controlState;
@@ -70,6 +76,8 @@ public class FlashcardPanel extends HorizontalPanel {
   protected final String instance;
   ListInterface exerciseList;
   DivWidget prevNextRow;
+  LangTestDatabaseAsync service;
+
   /**
    *
    *
@@ -96,6 +104,7 @@ public class FlashcardPanel extends HorizontalPanel {
     this.endListener = endListener;
     this.instance = instance;
     this.exerciseList = exerciseList;
+    this.service = service;
     //  addStyleName("centeringPractice");
     // System.out.println("BootstrapExercisePanel.instance = " + instance);
 
@@ -103,7 +112,10 @@ public class FlashcardPanel extends HorizontalPanel {
 
     this.soundFeedback = soundFeedback;
     DivWidget inner2 = new DivWidget();
-    Panel contentMiddle = getMiddlePrompt(e,inner2);
+      Panel contentMiddle = getCardContent();
+    DivWidget firstRow = getFirstRow(controller);
+    contentMiddle.add(firstRow);
+     getMiddlePrompt(e, contentMiddle, inner2);
     mainContainer = contentMiddle;
 
     prevNextRow = new DivWidget();
@@ -112,7 +124,8 @@ public class FlashcardPanel extends HorizontalPanel {
 
     DivWidget lowestRow = new DivWidget();
 
-    Panel threePartContent = getThreePartContent(controlState, contentMiddle, prevNextRow, lowestRow);
+    Panel threePartContent = getThreePartContent(controlState, //firstRow,
+        contentMiddle, prevNextRow, lowestRow);
     DivWidget inner = new DivWidget();
     inner.getElement().setId("threePartContent_Container");
     add(inner);
@@ -138,6 +151,60 @@ public class FlashcardPanel extends HorizontalPanel {
     //if (finalWidgets != null)
     inner2.add(finalWidgets);
 
+  }
+
+  // boolean commentPopupVisible = false;
+  private CommentBox commentBox;
+
+  protected DivWidget getFirstRow(ExerciseController controller) {
+    DivWidget firstRow = new DivWidget();
+    commentBox = new CommentBox(exercise, controller, new CommentAnnotator() {
+      @Override
+      public void addIncorrectComment(String commentToPost, String field) {
+        addAnnotation(field, GoodwaveExercisePanel.INCORRECT, commentToPost);
+      }
+
+      @Override
+      public void addCorrectComment(String field) {
+        addAnnotation(field, GoodwaveExercisePanel.CORRECT, "");
+      }
+    }) {
+      /*@Override
+      protected void popupAboutToBeHidden() {
+        commentPopupVisible = false;
+      }
+
+      @Override
+      protected void popupAboutToBeShown() {
+        commentPopupVisible = true;
+      }*/
+    };
+    firstRow.add(commentBox.getEntry(QCNPFExercise.FOREIGN_LANGUAGE,null,exercise.getAnnotation(QCNPFExercise.FOREIGN_LANGUAGE)));
+    return firstRow;
+  }
+
+/*  public void addIncorrectComment(final String commentToPost, final String field) {
+*//*    System.out.println(new Date() + " : post to server " + exercise.getID() +
+      " field " + field + " commentLabel '" + commentToPost + "' is incorrect");*//*
+    addAnnotation(field, GoodwaveExercisePanel.INCORRECT, commentToPost);
+  }
+
+  public void addCorrectComment(final String field) {
+    //  System.out.println(new Date() + " : post to server " + exercise.getID() + " field " + field + " is correct");
+    addAnnotation(field, GoodwaveExercisePanel.CORRECT, "");
+  }*/
+
+  private void addAnnotation(final String field, final String status, final String commentToPost) {
+    service.addAnnotation(exercise.getID(), field, status, commentToPost, controller.getUser(), new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {}
+
+      @Override
+      public void onSuccess(Void result) {
+        System.out.println("\t" + new Date() + " : onSuccess : posted to server " + exercise.getID() +
+            " field '" + field + "' commentLabel '" + commentToPost + "' is " + status);//, took " + (now - then) + " millis");
+      }
+    });
   }
 
   private HTML clickToFlip;
@@ -173,18 +240,25 @@ public class FlashcardPanel extends HorizontalPanel {
    * @param contentMiddle
    * @param belowDiv
    * @return
+   * @see #FlashcardPanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ControlState, mitll.langtest.client.flashcard.MyFlashcardExercisePanelFactory.MySoundFeedback, mitll.langtest.client.sound.SoundFeedback.EndListener, String, mitll.langtest.client.list.ListInterface)
    */
-  private Panel getThreePartContent(ControlState controlState, Panel contentMiddle, DivWidget belowDiv, DivWidget lowestRow) {
+  private Panel getThreePartContent(ControlState controlState,
+                                   // Widget firstRow,
+                                    Panel contentMiddle,
+                                    DivWidget belowDiv, DivWidget lowestRow) {
     Panel horiz = new HorizontalPanel();
 
     leftState = getLeftState();
     if (leftState != null) horiz.add(leftState);
 
-    int rows = lowestRow != null ? 3 : 2;
+    int basicNumRows = 2;
+    int rows = lowestRow != null ? basicNumRows+1 : basicNumRows;
     Grid grid = new Grid(rows, 1);
-    grid.setWidget(0, 0, contentMiddle);
-    grid.setWidget(1, 0, belowDiv);
-    if (lowestRow != null) grid.setWidget(2, 0, lowestRow);
+    int row = 0;
+    //grid.setWidget(row++, 0, firstRow);
+    grid.setWidget(row++, 0, contentMiddle);
+    grid.setWidget(row++, 0, belowDiv);
+    if (lowestRow != null) grid.setWidget(row++, 0, lowestRow);
     horiz.add(grid);
 
     rightColumn = getRightColumn(controlState);
@@ -192,19 +266,24 @@ public class FlashcardPanel extends HorizontalPanel {
     return horiz;
   }
 
-  private Panel getMiddlePrompt(CommonExercise e, DivWidget inner) {
-    cardPrompt = getCardPrompt(e);
+  /**
+   * @see #FlashcardPanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ControlState, mitll.langtest.client.flashcard.MyFlashcardExercisePanelFactory.MySoundFeedback, mitll.langtest.client.sound.SoundFeedback.EndListener, String, mitll.langtest.client.list.ListInterface)
+   * @param e
+   * @param inner
+   * @return
+   */
+  private Panel getMiddlePrompt(CommonExercise e, Panel contentMiddle,DivWidget inner) {
+    Widget cardPrompt = getCardPrompt(e);
     cardPrompt.getElement().setId("cardPrompt");
     inner.add(cardPrompt);
     inner.getElement().setId("cardPrompt_container");
 
    // inner.add(getFinalWidgets());
-    Panel contentMiddle = getCardContent();
+   // Panel contentMiddle = getCardContent();
     contentMiddle.add(inner);
 
     contentMiddle.addStyleName("cardBorderShadow");
     contentMiddle.addStyleName("minWidthFifty");
-
 
     return contentMiddle;
   }
@@ -748,4 +827,13 @@ public class FlashcardPanel extends HorizontalPanel {
   }
 
   private String ensureForwardSlashes(String wavPath) { return wavPath.replaceAll("\\\\", "/"); }
+
+  /**
+   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#getAnswerWidget(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int, boolean, String)
+   * @return
+   */
+  protected boolean otherReasonToIgnoreKeyPress() {
+    //if (commentBox.isPopupShowing()) System.out.println("comment is visible so ignoring key press...");
+    return commentBox.isPopupShowing();
+  }
 }
