@@ -616,7 +616,7 @@ public class ASRScoring extends Scoring {
    * @return
    */
   private Scores getScoresFromHydec(Audio testAudio, String sentence, String configFile) {
-    sentence = sentence.replaceAll("\\p{Z}+", " ");
+    sentence = sentence.replaceAll("\\p{Z}+", " ").replaceAll(";", " ");
     long then = System.currentTimeMillis();
 
     //logger.debug("getScoresFromHydec scoring '" + sentence +"' (" +sentence.length()+ " )");
