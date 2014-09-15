@@ -378,6 +378,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       ExerciseTrie trie = new ExerciseTrie(exercisesForState, serverProps.getLanguage(), audioFileHelper.getSmallVocabDecoder());
       exercisesForState = trie.getExercises(prefix);
     }
+
+    if (exercisesForState.isEmpty()) { // allow lookup by id
+      CommonExercise exercise = getExercise(prefix, userID);
+      if (exercise != null) exercisesForState = Collections.singletonList(exercise);
+    }
     // why copy???
     List<CommonExercise> copy = new ArrayList<CommonExercise>(exercisesForState);
 
