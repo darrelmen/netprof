@@ -177,16 +177,18 @@ public class ResultDAO extends DAO {
     }
 
     List<Result> results = userToAnswers.get(userid);
-   // SortedMap<String,List<CorrectAndScore>> idToScores = new TreeMap<String, List<CorrectAndScore>>();
     SortedMap<String,ExerciseCorrectAndScore> idToScores = new TreeMap<String, ExerciseCorrectAndScore>();
     for (Result r: results) {
-      ExerciseCorrectAndScore correctAndScores = idToScores.get(r.getID());
-      if (correctAndScores == null) idToScores.put(r.getID(),correctAndScores = new ExerciseCorrectAndScore(r.getID()));
-      correctAndScores.add(new CorrectAndScore(r));
+      String id = r.getID();
+      ExerciseCorrectAndScore correctAndScores = idToScores.get(id);
+      if (correctAndScores == null) idToScores.put(id,correctAndScores = new ExerciseCorrectAndScore(id));
+      CorrectAndScore correctAndScore = new CorrectAndScore(r);
+      //logger.debug("added " + correctAndScore + " for "+ id + " from " + r);
+      correctAndScores.add(correctAndScore);
     }
     for (ExerciseCorrectAndScore exerciseCorrectAndScore  : idToScores.values()) { exerciseCorrectAndScore.sort(); }
     List<ExerciseCorrectAndScore> sortedResults = new ArrayList<ExerciseCorrectAndScore>(idToScores.values());
-
+    Collections.sort(sortedResults);
     if (debug) logger.debug("found " +sessions.size() + " sessions for " +ids );
 
     return new SessionsAndScores(sessions,sortedResults);
