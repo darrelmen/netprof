@@ -2,11 +2,21 @@ package mitll.langtest.client.flashcard;
 
 import com.github.gwtbootstrap.client.ui.incubator.Table;
 import com.github.gwtbootstrap.client.ui.incubator.TableHeader;
+import com.google.gwt.cell.client.SafeHtmlCell;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
+import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.SimplePagingContainer;
+import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
+import mitll.langtest.shared.flashcard.CorrectAndScore;
+import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import org.moxieapps.gwt.highcharts.client.Chart;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,6 +26,7 @@ import java.util.Map;
 public class SetCompleteDisplay {
   private static final String CORRECT_NBSP = "Correct&nbsp;%";
   // private static final String SKIP_THIS_ITEM = "Skip this item";
+  private static final int MAX_LENGTH_ID = 35;
 
   private static final String RANK = "Rank";
   private static final String NAME = "Name";
@@ -126,10 +137,11 @@ public class SetCompleteDisplay {
    * @param sessionAVPHistoryForList
    * @param scoreColHeader
    * @return
+   * @see #showFeedbackCharts(java.util.List, java.util.Map, int, int, int)
    */
   private Table makeTable(AVPHistoryForList sessionAVPHistoryForList, String scoreColHeader) {
     Table table = new Table();
-    table.getElement().setId("LeaderboardTable");
+    table.getElement().setId("LeaderboardTable_"+scoreColHeader.substring(0,3));
     TableHeader w = new TableHeader(RANK);
     table.add(w);
     table.add(new TableHeader(NAME));
@@ -172,6 +184,74 @@ public class SetCompleteDisplay {
       }
     }
     return table;
+  }
+
+  public Widget getScoreHistory(List<ExerciseCorrectAndScore> sortedHistory,
+                                List<CommonShell> allExercises, ExerciseController controller) {
+    final Map<String,String> idToExercise = new HashMap<String, String>();
+    for (CommonShell commonShell : allExercises) {
+      idToExercise.put(commonShell.getID() +"/1",commonShell.getTooltip());
+    }
+    SimplePagingContainer<ExerciseCorrectAndScore> container = new SimplePagingContainer<ExerciseCorrectAndScore>(controller){
+      @Override
+      protected void addColumnsToTable() {
+        addColumn(getColumn());
+      }
+
+      private Column<ExerciseCorrectAndScore, SafeHtml> getColumn() {
+
+        return new Column<ExerciseCorrectAndScore, SafeHtml>(new SafeHtmlCell()) {
+
+          @Override
+          public SafeHtml getValue(ExerciseCorrectAndScore shell) {
+              String columnText = shell.getId();
+            columnText= idToExercise.get(shell.getId());
+              String html = shell.getId();
+              if (columnText != null) {
+                if (columnText.length() > MAX_LENGTH_ID)
+                  columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
+
+                StringBuilder builder = new StringBuilder();
+                List<CorrectAndScore> correctAndScores = shell.getCorrectAndScores();
+                int size = correctAndScores.size();
+                if (size > 5) correctAndScores = correctAndScores.subList(size - 5, size);
+                for (CorrectAndScore correctAndScore : correctAndScores) {
+                  boolean correct = correctAndScore.isCorrect();
+                  String icon =
+                      correct ? "icon-plus-sign" :
+                          "icon-minus-sign";
+                  builder.append("<i " +
+                      (correct ? "style='color:green'" :
+                          "style='color:red'") +
+                      " class='" +
+                      icon +
+                      "'></i>" +
+
+                      "&nbsp;");
+                }
+
+                String s = "<span style='float:right'>" + builder.toString() + "</span>";
+                html = "<span style='float:left'>" + columnText + "</span>" + s;
+
+              }
+            return new SafeHtmlBuilder().appendHtmlConstant(html).toSafeHtml();
+          }
+
+          private SafeHtml getColumnToolTip(String columnText) {
+            if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
+            return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
+          }
+        };
+      }
+    };
+    Panel tableWithPager = container.getTableWithPager();
+    tableWithPager.setWidth("225px");
+    for (ExerciseCorrectAndScore exerciseCorrectAndScore : sortedHistory) {
+      container.addItem(exerciseCorrectAndScore);
+    }
+    container.flush();
+
+    return tableWithPager;
   }
 
   private String bold(AVPHistoryForList.UserScore score, String html) {
