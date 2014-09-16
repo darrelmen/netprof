@@ -7,11 +7,8 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
-import com.github.gwtbootstrap.client.ui.incubator.Table;
-import com.github.gwtbootstrap.client.ui.incubator.TableHeader;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -19,7 +16,6 @@ import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.list.ExerciseList;
 import mitll.langtest.client.list.ListChangeListener;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.SoundFeedback;
@@ -29,7 +25,7 @@ import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
-import org.moxieapps.gwt.highcharts.client.Chart;
+import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -44,7 +40,7 @@ import java.util.Set;
  * TODOx : concept of rounds explicit?
  * TODO : review table...?
  */
-public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
+public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory implements RequiresResize {
   private static final String REMAINING = "Remaining";
   private static final String INCORRECT = "Incorrect";
   private static final String CORRECT = "Correct";
@@ -68,6 +64,7 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
   private String selectionID = "";
   private final String instance;
   StickyState sticky;
+  Widget scoreHistory;
 
   /**
    * @see mitll.langtest.client.custom.content.AVPHelper#getFactory
@@ -111,6 +108,13 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
 
     if (!sharedList) {
       exerciseList.simpleSetShuffle(controlState.isShuffle());
+    }
+  }
+
+  @Override
+  public void onResize() {
+    if (scoreHistory != null) {
+      ((RequiresResize)scoreHistory).onResize();
     }
   }
 
@@ -312,18 +316,25 @@ public class MyFlashcardExercisePanelFactory extends ExercisePanelFactory {
         @Override
         public void onSuccess(AVPScoreReport scoreReport) {
           List<AVPHistoryForList> result = scoreReport.getAvpHistoryForLists();
-          System.out.println("Got back " + scoreReport.getSortedHistory());
-          showFeedbackCharts(result);
+         // System.out.println("Got back " + scoreReport.getSortedHistory());
+          showFeedbackCharts(result,scoreReport.getSortedHistory());
         }
       });
       // TODO : maybe add table showing results per word
     }
 
-    private void showFeedbackCharts(List<AVPHistoryForList> result) {
+    private void showFeedbackCharts(List<AVPHistoryForList> result, List<ExerciseCorrectAndScore> sortedHistory) {
       setMainContentVisible(false);
       container = completeDisplay.showFeedbackCharts(result, exToScore, getCorrect(), getIncorrect(), allExercises.size());
-      DivWidget leftRight = new DivWidget();
-      belowContentDiv.add(container);
+      Panel leftRight = new HorizontalPanel();
+     // belowContentDiv.add(container);
+      belowContentDiv.add(leftRight);
+      scoreHistory = completeDisplay.getScoreHistory(sortedHistory, allExercises, controller);
+      //scoreHistory.addStyleName("floatLeft");
+      leftRight.add(scoreHistory);
+      DivWidget right = new DivWidget();
+      right.add(container);
+      leftRight.add(right);
       belowContentDiv.add(getRepeatButton());
 
       sticky.resetStorage();
