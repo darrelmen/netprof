@@ -171,6 +171,12 @@ public class Navigation implements RequiresResize {
       }
 
       @Override
+      public void onResize() {
+        super.onResize();
+        myFlashcardExercisePanelFactory.onResize();
+      }
+
+      @Override
       protected NPFHelper.FlexListLayout getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
                                                UserManager userManager, ExerciseController controller, SimpleChapterNPFHelper outer) {
         return new MyFlexListLayout(service, feedback, userManager, controller, outer) {
