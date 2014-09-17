@@ -215,7 +215,7 @@ public class AnswerDAO {
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#setAVPSkip(java.util.Collection)
-   * @see mitll.langtest.client.flashcard.MyFlashcardExercisePanelFactory.StatsPracticePanel#getRepeatButton()
+   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#getRepeatButton()
    * @param ids
    */
   public void changeType(Collection<Long> ids) {
