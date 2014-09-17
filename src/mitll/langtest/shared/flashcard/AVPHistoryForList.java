@@ -133,7 +133,7 @@ public class AVPHistoryForList implements IsSerializable {
 
     /**
      * Is this the score for the current session?
-     * @see mitll.langtest.client.flashcard.MyFlashcardExercisePanelFactory.StatsPracticePanel#bold(mitll.langtest.shared.flashcard.AVPHistoryForList.UserScore, String)
+     * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#bold(mitll.langtest.shared.flashcard.AVPHistoryForList.UserScore, String)
      * @return
      */
     public boolean isCurrent() {
