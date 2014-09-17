@@ -505,6 +505,7 @@ fieldset > legend {
     word-break: keep-all;
     white-space: normal;
     font-family: sans-serif;
+    line-height: 1;
 }
 
 .blueColor {
