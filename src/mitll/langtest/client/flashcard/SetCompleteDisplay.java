@@ -10,6 +10,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
+import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
@@ -204,8 +205,7 @@ public class SetCompleteDisplay {
 
           @Override
           public SafeHtml getValue(ExerciseCorrectAndScore shell) {
-              String columnText = shell.getId();
-            columnText= idToExercise.get(shell.getId());
+              String columnText = idToExercise.get(shell.getId());
               String html = shell.getId();
               if (columnText != null) {
                 if (columnText.length() > MAX_LENGTH_ID)
@@ -220,9 +220,14 @@ public class SetCompleteDisplay {
                   String icon =
                       correct ? "icon-plus-sign" :
                           "icon-minus-sign";
+                 // String color = SimpleColumnChart.getColor(((float)correctAndScore.getScore())/100f);
                   builder.append("<i " +
-                      (correct ? "style='color:green'" :
-                          "style='color:red'") +
+                      (correct ? "style='color:" +
+                          "green" +
+                          "'" :
+                          "style='color:" +
+                              "red" +
+                              "'") +
                       " class='" +
                       icon +
                       "'></i>" +
@@ -230,8 +235,8 @@ public class SetCompleteDisplay {
                       "&nbsp;");
                 }
 
-                String s = "<span style='float:right'>" + builder.toString() + "</span>";
-                html = "<span style='float:left'>" + columnText + "</span>" + s;
+                String s = "<span style='float:right;margin-right:-10px;'>" + builder.toString() + "</span>";
+                html = "<span style='float:left;margin-left:-10px;'>" + columnText + "</span>" + s;
 
               }
             return new SafeHtmlBuilder().appendHtmlConstant(html).toSafeHtml();
