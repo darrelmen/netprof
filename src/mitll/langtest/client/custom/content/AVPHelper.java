@@ -5,12 +5,11 @@ import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.custom.content.NPFHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.PagingContainer;
-import mitll.langtest.client.flashcard.MyFlashcardExercisePanelFactory;
+import mitll.langtest.client.flashcard.StatsFlashcardFactory;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
@@ -58,11 +57,11 @@ public class AVPHelper extends NPFHelper {
       true, instanceName) {
       @Override
       protected void onLastItem() {
-        ((MyFlashcardExercisePanelFactory)factory).resetStorage();
+        ((StatsFlashcardFactory)factory).resetStorage();
         new ModalInfoDialog(COMPLETE, LIST_COMPLETE, new HiddenHandler() {
           @Override
           public void onHidden(HiddenEvent hiddenEvent) {
-            ((MyFlashcardExercisePanelFactory)factory).resetStorage();
+            ((StatsFlashcardFactory)factory).resetStorage();
             reloadExercises();
           }
         });
@@ -81,7 +80,7 @@ public class AVPHelper extends NPFHelper {
 
   @Override
   protected ExercisePanelFactory getFactory(PagingExerciseList exerciseList, final String instanceName, boolean showQC) {
-    return new MyFlashcardExercisePanelFactory(service, feedback, controller, exerciseList, "AVPHelper");
+    return new StatsFlashcardFactory(service, feedback, controller, exerciseList, "AVPHelper");
   }
 /*
   @Override
