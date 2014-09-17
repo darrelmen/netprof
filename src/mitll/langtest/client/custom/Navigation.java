@@ -38,7 +38,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.WaveformExercisePanel;
-import mitll.langtest.client.flashcard.MyFlashcardExercisePanelFactory;
+import mitll.langtest.client.flashcard.StatsFlashcardFactory;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
@@ -162,18 +162,18 @@ public class Navigation implements RequiresResize {
   private SimpleChapterNPFHelper makePracticeHelper(final LangTestDatabaseAsync service, final UserManager userManager,
                                                       final ExerciseController controller, final UserFeedback feedback) {
     return new SimpleChapterNPFHelper(service, feedback, userManager, controller, listInterface) {
-      MyFlashcardExercisePanelFactory myFlashcardExercisePanelFactory;
+      StatsFlashcardFactory statsFlashcardFactory;
 
       @Override
       protected ExercisePanelFactory getFactory(PagingExerciseList exerciseList) {
-        myFlashcardExercisePanelFactory = new MyFlashcardExercisePanelFactory(service, feedback, controller, exerciseList, "practice");
-        return myFlashcardExercisePanelFactory;
+        statsFlashcardFactory = new StatsFlashcardFactory(service, feedback, controller, exerciseList, "practice");
+        return statsFlashcardFactory;
       }
 
       @Override
       public void onResize() {
         super.onResize();
-        myFlashcardExercisePanelFactory.onResize();
+        statsFlashcardFactory.onResize();
       }
 
       @Override
@@ -185,7 +185,7 @@ public class Navigation implements RequiresResize {
             return new MyFlexSectionExerciseList(topRow, currentExercisePanel, instanceName) {
               @Override
               protected CommonShell findFirstExercise() {
-                String currentExerciseID = myFlashcardExercisePanelFactory.getCurrentExerciseID();
+                String currentExerciseID = statsFlashcardFactory.getCurrentExerciseID();
                 if (currentExerciseID != null && !currentExerciseID.trim().isEmpty()) {
                   System.out.println("findFirstExercise ---> found previous state current ex = " + currentExerciseID);
 
@@ -196,7 +196,7 @@ public class Navigation implements RequiresResize {
                     return super.findFirstExercise();
                   }
                   else {
-                    myFlashcardExercisePanelFactory.populateCorrectMap();
+                    statsFlashcardFactory.populateCorrectMap();
                     return shell;
                   }
                 }
@@ -207,10 +207,15 @@ public class Navigation implements RequiresResize {
 
               @Override
               protected void onLastItem() {
-                myFlashcardExercisePanelFactory.resetStorage();
+                statsFlashcardFactory.resetStorage();
                 super.onLastItem();
               }
 
+              @Override
+              protected void loadExercises(Map<String, Collection<String>> typeToSection, String item) {
+                super.loadExercises(typeToSection, item);
+                statsFlashcardFactory.setSelection(typeToSection);
+              }
             };
           }
 
