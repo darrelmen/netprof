@@ -19,7 +19,6 @@ import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.monitoring.Session;
@@ -980,7 +979,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * @param ids
-   * @see mitll.langtest.client.flashcard.MyFlashcardExercisePanelFactory.StatsPracticePanel#getRepeatButton()
+   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#getRepeatButton()
    */
   @Override
   public void setAVPSkip(Collection<Long> ids) {
@@ -1066,7 +1065,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * @param exercise
    * @return
-   * @see mitll.langtest.client.custom.ReviewEditableExercise#duplicateExercise
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#duplicateExercise
    */
   @Override
   public UserExercise duplicateExercise(UserExercise exercise) {
@@ -1076,7 +1075,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * @param id
    * @return
-   * @see mitll.langtest.client.custom.ReviewEditableExercise#deleteItem(String, long, mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.PagingExerciseList, mitll.langtest.client.list.PagingExerciseList)
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#deleteItem(String, long, mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.PagingExerciseList, mitll.langtest.client.list.PagingExerciseList)
    */
   public boolean deleteItem(String id) {
     boolean b = db.deleteItem(id);
@@ -1101,7 +1100,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * @param userExercise
-   * @see mitll.langtest.client.custom.EditableExercise#postEditItem
+   * @see mitll.langtest.client.custom.dialog.EditableExercise#postEditItem
    */
   @Override
   public void editItem(UserExercise userExercise) {
@@ -1112,7 +1111,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * @param audioAttribute
    * @param exid
-   * @see mitll.langtest.client.custom.ReviewEditableExercise#getPanelForAudio(mitll.langtest.shared.CommonExercise, mitll.langtest.shared.AudioAttribute, mitll.langtest.client.custom.tabs.RememberTabAndContent)
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getPanelForAudio(mitll.langtest.shared.CommonExercise, mitll.langtest.shared.AudioAttribute, mitll.langtest.client.custom.tabs.RememberTabAndContent)
    */
   @Override
   public void markAudioDefect(AudioAttribute audioAttribute, String exid) {
@@ -1445,14 +1444,21 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * @param userid
    * @param latestResultID
+   * @param typeToSection
    * @return
-   * @see mitll.langtest.client.flashcard.MyFlashcardExercisePanelFactory.StatsPracticePanel#onSetComplete()
+   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete()
    */
   @Override
-  public AVPScoreReport getUserHistoryForList(long userid, Collection<String> ids, long latestResultID) {
+  public AVPScoreReport getUserHistoryForList(long userid, Collection<String> ids, long latestResultID,
+                                              Map<String, Collection<String>> typeToSection) {
     //logger.debug("getUserHistoryForList " + userid + " and " + ids);
 
-    return db.getUserHistoryForList(userid, ids, latestResultID);
+    Collection<CommonExercise> exercisesForState = typeToSection.isEmpty() ? getExercises() :
+        db.getSectionHelper().getExercisesForSelectionState(typeToSection);
+    List<String> allIDs = new ArrayList<String>();
+    for (CommonExercise exercise : exercisesForState) allIDs.add(exercise.getID());
+    logger.debug("for " + typeToSection + " found " + allIDs);
+    return db.getUserHistoryForList(userid, ids, latestResultID, allIDs);
   }
 
   public void logMessage(String message) {
