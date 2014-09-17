@@ -309,7 +309,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
     public SetExercisesCallbackWithID(String id) {
       this.id = id;
-      System.out.println("ExerciseList.SetExercisesCallbackWithID id = " + id);
+     // System.out.println("ExerciseList.SetExercisesCallbackWithID id = " + id);
     }
 
     public void onFailure(Throwable caught) {
@@ -418,7 +418,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     return result.getReqID() < lastReqID;
   }
 
-  protected abstract List<CommonShell> rememberExercises(List<CommonShell> result);
+  public abstract List<CommonShell> rememberExercises(List<CommonShell> result);
 
   /**
    * Worry about deleting the currently visible item.
@@ -872,6 +872,10 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   protected abstract List<CommonShell> getInOrder();
 
+  /**
+   * @see mitll.langtest.client.flashcard.FlashcardPanel#gotShuffleClick(boolean)
+   * @param doShuffle
+   */
   @Override
   public void setShuffle(boolean doShuffle) {
     simpleSetShuffle(doShuffle);
@@ -879,7 +883,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   /**
-   * @see mitll.langtest.client.flashcard.MyFlashcardExercisePanelFactory.StatsPracticePanel#StatsPracticePanel(mitll.langtest.shared.CommonExercise)
+   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#StatsPracticePanel(mitll.langtest.shared.CommonExercise)
    * @param doShuffle
    */
   public void simpleSetShuffle(boolean doShuffle) {
