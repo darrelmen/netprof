@@ -27,18 +27,15 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
 
   @Override
   public int compareTo(ExerciseCorrectAndScore o) {
-   // float myCorrect = getAvgCorrect();
-   // float otherCorrect = o.getAvgCorrect();
     int myI = getNumIncorrect();
     int oI = o.getNumIncorrect();
     int i = myI < oI ? +1 : myI > oI ? -1 : 0;
     if (i == 0) {
-      //if (myCorrect < 0.01 || myCorrect > 0.99) {
-        int n = getNumCorrect();
-        int on = o.getNumCorrect();
+      int n = getNumCorrect();
+      int on = o.getNumCorrect();
 
-        i = n < on ? -1 : n > on ? +1 : 0;
-      //}
+      i = n < on ? -1 : n > on ? +1 : 0;
+
       if (i == 0) {
         float myScore = getAvgScore();
         float otherScore = o.getAvgScore();
