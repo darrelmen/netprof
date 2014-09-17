@@ -179,15 +179,15 @@ public class ResultDAO extends DAO {
 
    // List<Result> results = userToAnswers.get(userid);
     List<Result> results = getResultsForExIDInForUser(allIds,true,userid);
-    if (debug) logger.debug("found " +results.size() + " results for " +allIds.size() + " items" );
+    if (true) logger.debug("found " +results.size() + " results for " +allIds.size() + " items" );
 
-    List<ExerciseCorrectAndScore> sortedResults = getSortedAVPHistory(results);
+    List<ExerciseCorrectAndScore> sortedResults = getSortedAVPHistory(results,allIds);
     if (debug) logger.debug("found " +sessions.size() + " sessions for " +ids );
 
     return new SessionsAndScores(sessions,sortedResults);
   }
 
-  protected List<ExerciseCorrectAndScore> getSortedAVPHistory(List<Result> results) {
+  protected List<ExerciseCorrectAndScore> getSortedAVPHistory(List<Result> results, Collection<String> allIds) {
     SortedMap<String,ExerciseCorrectAndScore> idToScores = new TreeMap<String, ExerciseCorrectAndScore>();
     if (results != null) {
       for (Result r : results) {
@@ -200,6 +200,11 @@ public class ResultDAO extends DAO {
       }
     }
     for (ExerciseCorrectAndScore exerciseCorrectAndScore  : idToScores.values()) { exerciseCorrectAndScore.sort(); }
+
+
+    for (String id : allIds) {
+      if (idToScores.containsKey(id)) idToScores.put(id,new ExerciseCorrectAndScore(id));
+    }
     List<ExerciseCorrectAndScore> sortedResults = new ArrayList<ExerciseCorrectAndScore>(idToScores.values());
     Collections.sort(sortedResults);
     return sortedResults;
