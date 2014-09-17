@@ -9,6 +9,8 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.STATE;
 
+import java.util.List;
+
 /**
  * Created with IntelliJ IDEA.
  * User: GO22670
@@ -90,6 +92,8 @@ public interface ListInterface extends RequiresResize {
    */
   void reloadExercises();
   void addExercise(CommonShell es);
+
+  List<CommonShell> rememberExercises(List<CommonShell> result);
 
   CommonShell simpleRemove(String id);
 
