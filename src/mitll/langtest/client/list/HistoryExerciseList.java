@@ -342,11 +342,13 @@ public class HistoryExerciseList extends PagingExerciseList {
     if (DEBUG || true) {
       System.out.println("HistoryExerciseList.loadExercisesUsingPrefix looking for '" + prefix +
         "' (" + prefix.length() + " chars) in context of " + typeToSection + " list " + userListID +
-        " instance " + getInstance() + " user " + controller.getUser() + " unrecorded " + getUnrecorded() + " only examples " +isOnlyExamples());
+        " instance " + getInstance() + " user " + controller.getUser() + " unrecorded " + getUnrecorded() +
+          " only examples " +isOnlyExamples());
     }
     String selectionID = userListID + "_"+typeToSection.toString();
     scheduleWaitTimer();
-    service.getExerciseIds(lastReqID, typeToSection, prefix, userListID, controller.getUser(), getRole(), getUnrecorded(), isOnlyExamples(), new SetExercisesCallback(selectionID));
+    service.getExerciseIds(lastReqID, typeToSection, prefix, userListID, controller.getUser(), getRole(),
+        getUnrecorded(), isOnlyExamples(), new SetExercisesCallback(selectionID));
   }
 
   /**
