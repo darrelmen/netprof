@@ -51,13 +51,13 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
    * @param endListener
    * @param instance
    * @param exerciseList
-   * @see MyFlashcardExercisePanelFactory.StatsPracticePanel#StatsPracticePanel
+   * @see StatsFlashcardFactory.StatsPracticePanel#StatsPracticePanel
    *
    */
   public BootstrapExercisePanel(final CommonExercise e, final LangTestDatabaseAsync service,
                                 final ExerciseController controller, boolean addKeyBinding,
                                 final ControlState controlState,
-                                MyFlashcardExercisePanelFactory.MySoundFeedback soundFeedback,
+                                StatsFlashcardFactory.MySoundFeedback soundFeedback,
                                 SoundFeedback.EndListener endListener,
                                 String instance, ListInterface  exerciseList) {
     super(e,service,controller,addKeyBinding,controlState,soundFeedback,endListener,instance, exerciseList);
