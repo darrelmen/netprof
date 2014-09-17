@@ -108,7 +108,7 @@ public class SimpleColumnChart {
    * @param score
    * @return color in # hex rgb format
    */
-  public String getColor(float score) {
+  public static String getColor(float score) {
     if (score > 1.0) score = 1.0f;
     if (score < 0f)  score = 0f;
     int red   = (int)Math.max(0,(255f - (Math.max(0, score-0.5)*2f*255f)));
@@ -119,7 +119,7 @@ public class SimpleColumnChart {
     //return new Color(red, green, blue, BKG_ALPHA);
   }
 
-  private String getHexNumber(int number){
+  private static String getHexNumber(int number){
     String hexString = Integer.toHexString(number).toUpperCase();
 
     if(hexString.length() == 0){
