@@ -157,7 +157,7 @@ public class EditItem {
         }
 
         @Override
-        protected List<CommonShell> rememberExercises(List<CommonShell> result) {
+        public List<CommonShell> rememberExercises(List<CommonShell> result) {
           clear();
           boolean addNewItem = includeAddItem;
 
