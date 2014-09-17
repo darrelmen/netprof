@@ -8,6 +8,7 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.STATE;
 
@@ -166,6 +167,12 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
         return columnText;
       }
     };*/
+  }
+
+  @Override
+  protected void addSelectionModel() {
+    selectionModel = new SingleSelectionModel<CommonShell>();
+    table.setSelectionModel(selectionModel);
   }
 
   private Column<CommonShell, SafeHtml> getExerciseIdColumn2(final boolean consumeClicks) {
