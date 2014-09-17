@@ -17,7 +17,7 @@ public class StickyState {
   private final KeyStorage storage;
 
   /**
-   * @see mitll.langtest.client.flashcard.MyFlashcardExercisePanelFactory
+   * @see StatsFlashcardFactory
    * @param storage
    */
   public StickyState(KeyStorage storage) { this.storage = storage; }
