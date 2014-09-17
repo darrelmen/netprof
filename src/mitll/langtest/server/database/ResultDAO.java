@@ -160,12 +160,13 @@ public class ResultDAO extends DAO {
    * A session will have statistics - # correct, avg pronunciation score, maybe duration, etc.
    *
    * @see mitll.langtest.server.database.DatabaseImpl#getUserHistoryForList
-   * @see mitll.langtest.client.flashcard.MyFlashcardExercisePanelFactory.StatsPracticePanel#onSetComplete()
+   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete()
    * @param ids
    * @param latestResultID
    * @return
    */
-  public SessionsAndScores getSessionsForUserIn2(Collection<String> ids, long latestResultID,long userid) {
+  public SessionsAndScores getSessionsForUserIn2(Collection<String> ids, long latestResultID,long userid,
+                                                 Collection<String> allIds) {
     List<Session> sessions = new ArrayList<Session>();
     Map<Long, List<Result>> userToAnswers = populateUserToAnswers(getResultsForExIDIn(ids, true));
     if (debug) logger.debug("Got " + userToAnswers.size() + " user->answer map");
@@ -176,7 +177,17 @@ public class ResultDAO extends DAO {
       sessions.addAll(c);
     }
 
-    List<Result> results = userToAnswers.get(userid);
+   // List<Result> results = userToAnswers.get(userid);
+    List<Result> results = getResultsForExIDInForUser(allIds,true,userid);
+    if (debug) logger.debug("found " +results.size() + " results for " +allIds.size() + " items" );
+
+    List<ExerciseCorrectAndScore> sortedResults = getSortedAVPHistory(results);
+    if (debug) logger.debug("found " +sessions.size() + " sessions for " +ids );
+
+    return new SessionsAndScores(sessions,sortedResults);
+  }
+
+  protected List<ExerciseCorrectAndScore> getSortedAVPHistory(List<Result> results) {
     SortedMap<String,ExerciseCorrectAndScore> idToScores = new TreeMap<String, ExerciseCorrectAndScore>();
     if (results != null) {
       for (Result r : results) {
@@ -191,9 +202,7 @@ public class ResultDAO extends DAO {
     for (ExerciseCorrectAndScore exerciseCorrectAndScore  : idToScores.values()) { exerciseCorrectAndScore.sort(); }
     List<ExerciseCorrectAndScore> sortedResults = new ArrayList<ExerciseCorrectAndScore>(idToScores.values());
     Collections.sort(sortedResults);
-    if (debug) logger.debug("found " +sessions.size() + " sessions for " +ids );
-
-    return new SessionsAndScores(sessions,sortedResults);
+    return sortedResults;
   }
 
   public static class SessionsAndScores {
@@ -257,6 +266,32 @@ public class ResultDAO extends DAO {
     return new ArrayList<Result>();
   }
 
+  private List<Result> getResultsForExIDInForUser(Collection<String> ids, boolean matchAVP, long userid) {
+    try {
+      String list = getInList(ids);
+
+      String sql = "SELECT * FROM " + RESULTS + " where " +
+          USERID + "=" + userid + " AND "+
+          VALID + "=true" +       " AND " +
+          AUDIO_TYPE + (matchAVP?"=":"<>") + "'avp'" + " AND " +
+          Database.EXID + " in (" + list + ")" +
+          " order by " + Database.TIME + " asc";
+      List<Result> resultsSQL = getResultsSQL(sql);
+      if (debug) logger.debug("getResultsForExIDIn for  " +sql+ " got\n\t" + resultsSQL.size());
+      return resultsSQL;
+    } catch (Exception ee) {
+      logger.error("got " + ee, ee);
+    }
+    return new ArrayList<Result>();
+  }
+
+  /**
+   * @see #getResults()
+   * @see #getResultsForExIDIn(java.util.Collection, boolean)
+   * @param sql
+   * @return
+   * @throws SQLException
+   */
   private List<Result> getResultsSQL(String sql) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
@@ -578,7 +613,7 @@ public class ResultDAO extends DAO {
     if (sessions.isEmpty() && !answersForUser.isEmpty()) {
       logger.error("huh? no sessions from " + answersForUser.size() + " given " + ids);
     }
-    logger.debug("\tpartitionIntoSessions2 made " +sessions.size() + " from " + answersForUser.size() + " answers");
+//    logger.debug("\tpartitionIntoSessions2 made " +sessions.size() + " from " + answersForUser.size() + " answers");
 
     return sessions;
   }
