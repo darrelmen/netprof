@@ -313,7 +313,7 @@ public class PagingExerciseList extends ExerciseList {
    * @see #simpleSetShuffle(boolean)
    */
   @Override
-  protected List<CommonShell> rememberExercises(List<CommonShell> result) {
+  public List<CommonShell> rememberExercises(List<CommonShell> result) {
     inOrderResult = result;
     if (doShuffle) {
       System.out.println(getInstance() +" : rememberExercises - shuffling " + result.size() + " items");
