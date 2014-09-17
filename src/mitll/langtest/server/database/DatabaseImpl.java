@@ -470,15 +470,17 @@ public class DatabaseImpl implements Database {
    * TODOx : do all average calc on server!
    *
    * @see mitll.langtest.server.LangTestDatabaseImpl#getUserHistoryForList
-   * @see mitll.langtest.client.flashcard.MyFlashcardExercisePanelFactory.StatsPracticePanel#onSetComplete
+   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete
    * @paramx listid
    * @return
    */
-  public AVPScoreReport getUserHistoryForList(long userid, Collection<String> ids, long latestResultID) {
+  public AVPScoreReport getUserHistoryForList(long userid, Collection<String> ids, long latestResultID,
+                                              Collection<String> allIDs) {
     logger.debug("getUserHistoryForList " +userid + " and " + ids.size() + " ids, latest " + latestResultID);
 
    // List<Session> sessionsForUserIn2 = resultDAO.getSessionsForUserIn2(ids, latestResultID, userid);
-    ResultDAO.SessionsAndScores sessionsAndScores = resultDAO.getSessionsForUserIn2(ids, latestResultID, userid);
+
+    ResultDAO.SessionsAndScores sessionsAndScores = resultDAO.getSessionsForUserIn2(ids, latestResultID, userid,allIDs);
     List<Session> sessionsForUserIn2 = sessionsAndScores.sessions;
 
     Map<Long, User> userMap = userDAO.getUserMap();
