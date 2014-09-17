@@ -10,7 +10,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
-import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
@@ -38,7 +37,17 @@ public class SetCompleteDisplay {
  // private static final String SKIP_TO_END = "See your scores";
   private static final int TABLE_WIDTH = 2 * 275;
   private static final int HORIZ_SPACE_FOR_CHARTS = (1250 - TABLE_WIDTH);
+  public static final int MAX_TO_SHOW = 5;
 
+  /**
+   * @see StatsFlashcardFactory.StatsPracticePanel#showFeedbackCharts(java.util.List, java.util.List)
+   * @param result
+   * @param exToScore
+   * @param numCorrect
+   * @param numIncorrect
+   * @param numExercises
+   * @return
+   */
   public Widget showFeedbackCharts(List<AVPHistoryForList> result,
                                    Map<String, Double> exToScore, int numCorrect, int numIncorrect, int numExercises) {
     Panel container = new HorizontalPanel();
@@ -187,7 +196,7 @@ public class SetCompleteDisplay {
     return table;
   }
 
-  public Widget getScoreHistory(List<ExerciseCorrectAndScore> sortedHistory,
+  public Panel getScoreHistory(List<ExerciseCorrectAndScore> sortedHistory,
                                 List<CommonShell> allExercises, ExerciseController controller) {
     final Map<String,String> idToExercise = new HashMap<String, String>();
     for (CommonShell commonShell : allExercises) {
@@ -214,7 +223,7 @@ public class SetCompleteDisplay {
                 StringBuilder builder = new StringBuilder();
                 List<CorrectAndScore> correctAndScores = shell.getCorrectAndScores();
                 int size = correctAndScores.size();
-                if (size > 5) correctAndScores = correctAndScores.subList(size - 5, size);
+                if (size > MAX_TO_SHOW) correctAndScores = correctAndScores.subList(size - MAX_TO_SHOW, size);
                 for (CorrectAndScore correctAndScore : correctAndScores) {
                   boolean correct = correctAndScore.isCorrect();
                   String icon =
@@ -265,7 +274,7 @@ public class SetCompleteDisplay {
 
 
   /**
-   * @see MyFlashcardExercisePanelFactory.StatsPracticePanel#showFeedbackCharts
+   * @see StatsFlashcardFactory.StatsPracticePanel#showFeedbackCharts
    * @return
    */
   private double getAvgScore(Map<String,Double> exToScore) {
