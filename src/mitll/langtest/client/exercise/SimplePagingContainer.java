@@ -102,12 +102,13 @@ public class SimplePagingContainer<T> implements RequiresResize {
     table.setHeight("auto");
 
     // Add a selection model to handle user selection.
-    selectionModel = new SingleSelectionModel<T>();
-    table.setSelectionModel(selectionModel);
+    addSelectionModel();
     // we don't want to listen for changes in the selection model, since that happens on load too -- we just want clicks
 
     addColumnsToTable();
   }
+
+  protected void addSelectionModel() {}
 
   protected void addColumnsToTable() {
 
