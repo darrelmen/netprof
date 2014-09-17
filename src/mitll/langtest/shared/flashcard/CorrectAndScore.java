@@ -9,7 +9,7 @@ import mitll.langtest.shared.Result;
 public class CorrectAndScore implements IsSerializable, Comparable<CorrectAndScore> {
   private boolean correct;
   private int score;
-  long timestamp;
+  private long timestamp;
 
   public CorrectAndScore() {
   }
