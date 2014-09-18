@@ -36,22 +36,12 @@ import java.util.List;
 public abstract class UserDialog extends BasicDialog {
   protected static final int USER_ID_MAX_LENGTH = 25;
   private static final String GRADING = "grading";
-  private static final String TESTING = "testing";  // TODO make these safer
+  private static final String TESTING = "dlitesting";  // TODO make these safer
 
   static final int MIN_AGE = 12;
   static final int MAX_AGE = 90;
   static final int TEST_AGE = 100;
   static final String UNSET = "Unset";
-/*  private static final List<String> EXPERIENCE_CHOICES = Arrays.asList(
-      UNSET,
-    "0-3 months (Semester 1)",
-    "4-6 months (Semester 1)",
-    "7-9 months (Semester 2)",
-    "10-12 months (Semester 2)",
-    "13-16 months (Semester 3)",
-    "16+ months",
-    "Native speaker");
-  protected static final int NATIVE_MONTHS = 20 * 12;*/
   private static final String MALE = "Male";
   private static final String FEMALE = "Female";
   public static final String HIT_ENTER_TO_LOG_IN = "Hit enter to log in.";
@@ -183,7 +173,7 @@ public abstract class UserDialog extends BasicDialog {
   }
 
   /**
-   * @see mitll.langtest.client.user.StudentDialog#checkUserAndMaybeRegister(com.github.gwtbootstrap.client.ui.Button, String, mitll.langtest.client.user.BasicDialog.FormField, mitll.langtest.client.user.BasicDialog.FormField, com.github.gwtbootstrap.client.ui.Modal, com.github.gwtbootstrap.client.ui.AccordionGroup, mitll.langtest.client.user.StudentDialog.RegistrationInfo, String, java.util.Collection)
+   * @see mitll.langtest.client.user.StudentDialog#checkUserAndMaybeRegister
    * @param user
    * @return
    */
