@@ -358,11 +358,15 @@ class StudentDialog extends UserDialog {
             dialogBox.hide();
             langTest.rememberAudioType(audioType);
             userManager.storeUser(result, audioType, userID, PropertyHandler.LOGIN_TYPE.STUDENT);
-          } else if (checkValidUser(user)) {
+          } 
+          else{
+        	  markError(user, "You are not a registered participant.");
+          }
+          /*else if (checkValidUser(user)) {
             System.out.println("checkUserAndMaybeRegister for " + purposeSetting + " user does not exist id=" + result);
 
             checkThenRegister(audioType, registrationInfo, dialogBox, userID, permissions);
-          }
+          } */ //for this specific application, allow no more users!
         }
       });
     }
