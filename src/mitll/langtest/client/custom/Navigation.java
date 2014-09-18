@@ -928,6 +928,7 @@ public class Navigation implements RequiresResize {
 			  if(!showPart)
 				  sent.setText("(Say your part)"); // be careful to not get the sentence for scoring from here!
 			  PlayAudioPanel play = new PlayAudioPanel(controller, "config/mandarinClassroom/bestAudio/"+sentToAudioPath.get(sentence));
+			  controller.register(play.getPlayButton(), "played reference audio for sentence "+sentence);
 			  play.setMinWidth(82);
 			  play.setPlayLabel("Play");
 			  final HTML score = new HTML("0.0");
@@ -983,15 +984,11 @@ public class Navigation implements RequiresResize {
 					  x.setVisible(false);
 				  }
 			  });
-			  if(yourFirstReco){
-				  controller.register(recordButton, "recording started with sent " + sentence + " in dialog "+ dialog + " as speaker " + part + " with audio speed " + (regAudio ? "regular" : "slow") + " and part " + (showPart ? "visible" : "hidden"));
-				  yourFirstReco = false;
-			  }
-			  else{
-				  controller.register(recordButton, "record button for sent: " + sentence + " in dialog " + dialog);
-			  }
+
+			  controller.register(recordButton, "record button for sent: " + sentence + " in dialog " + dialog);
+
 			  if(sentIndex == yourLast){
-				  controller.register(continueButton, "recording stopped with sent " + sentence + " in dialog "+dialog);
+				  controller.register(continueButton, "recording stopped with sent " + sentence + " in dialog "+ dialog + " as speaker " + part + " with audio speed " + (regAudio ? "regular" : "slow") + " and part " + (showPart ? "visible" : "hidden"));
 			  }
 			  else{
 			      controller.register(continueButton, "continue button for sent: " + sentence + " in dialog " + dialog);
@@ -1457,6 +1454,9 @@ public class Navigation implements RequiresResize {
 	  pw.put("zh",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/zho1.mp3").setPlayLabel("zh"));
 	  pw.put("sil",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/x.mp3").setPlayLabel("sil"));
 	  pw.put("unk",new PlayAudioPanel(controller, "config/mandarinClassroom/phones/x.mp3").setPlayLabel("unk"));
+	  for(String k: pw.keySet()){
+		  controller.register(pw.get(k).getPlayButton(), "playing example phone for "+k);
+	  }
 	  return pw;
   }
   
