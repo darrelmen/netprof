@@ -9,6 +9,8 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.custom.TooltipHelper;
@@ -39,6 +41,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   private static final int HEIGHT = 18;
   private static final int ROW_LEFT_MARGIN = 18 + 5;
   private static final String PLAY_REFERENCE = "";
+  public static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
 
   private final PretestGauge ASRGauge;
   private final Panel phoneList;
@@ -184,7 +187,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     TooltipHelper tooltipHelper = new TooltipHelper();
     for (ScoreAndPath scoreAndPath : scoreAndPaths) {
       int i = scores2.indexOf(scoreAndPath);
-      Panel hp = getAudioAndScore(tooltipHelper, scoreAndPath, "Score #" + (i + 1));
+      Panel hp = getAudioAndScore(tooltipHelper, scoreAndPath, "Score #" + (i + 1),i);
       vp.add(hp);
     }
 
@@ -238,7 +241,16 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     return hp2;
   }
 
-  private Panel getAudioAndScore(TooltipHelper tooltipHelper, ScoreAndPath scoreAndPath, String title) {
+  /**
+   *
+   * @param tooltipHelper to make tooltips
+   * @param scoreAndPath the audio path and score for the audio
+   * @param title link title
+   * @return
+   * @see #showChart(boolean)
+   */
+  private Panel getAudioAndScore(TooltipHelper tooltipHelper, ScoreAndPath scoreAndPath, String title,
+                                 int i) {
     Widget w = getAudioWidget(scoreAndPath, title);
    // if (false) {
    //   makeChildGreen(w);
@@ -253,7 +265,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     container.setWidth("100px");
     container.add(row);
     hp.add(container);
-    hp.add(getDownload(scoreAndPath.getPath()));
+    hp.add(getDownload(scoreAndPath.getPath(),i));
 
     return hp;
   }
@@ -264,15 +276,29 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     as.getStyle().setBackgroundColor("green");
   }
 
-  IconAnchor getDownload(String audioPath) {
-    IconAnchor download = new IconAnchor();
-    download.getElement().setId("Download_user_audio_link");
+  /**
+   * @see #getAudioAndScore
+   * @param audioPath
+   * @return link for this audio
+   */
+  IconAnchor getDownload(final String audioPath, int i) {
+    final IconAnchor download = new IconAnchor();
+    download.getElement().setId("Download_user_audio_link_"+i);
     download.setIcon(IconType.DOWNLOAD);
     download.setIconSize(IconSize.LARGE);
     download.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
 
     addTooltip(download);
     setDownloadHref(download, audioPath);
+
+    download.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        controller.logEvent(download, "DownloadUserAudio_History",
+            exerciseID, "downloading audio file " +audioPath);
+      }
+    });
+
     return download;
   }
 
@@ -289,12 +315,12 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   }
 
   private void addTooltip(Widget w) {
-    new TooltipHelper().createAddTooltip(w, "Download your recording.", Placement.LEFT);
+    new TooltipHelper().createAddTooltip(w, DOWNLOAD_YOUR_RECORDING, Placement.LEFT);
   }
 
-
   private Anchor getAudioWidget(ScoreAndPath scoreAndPath, String title) {
-    return new PlayAudioWidget().getAudioWidgetWithEventRecording(scoreAndPath.getPath(), title, exerciseID, controller);
+    return new PlayAudioWidget().getAudioWidgetWithEventRecording(scoreAndPath.getPath(), title,
+        exerciseID, controller);
   }
 
   /**
@@ -303,7 +329,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
    * @param tooltipHelper
    * @param scoreAndPath
    * @return
-   * @see #getAudioAndScore(mitll.langtest.client.custom.TooltipHelper, mitll.langtest.shared.ScoreAndPath, String)
+   * @see #getAudioAndScore
    */
   private Widget makeRow(TooltipHelper tooltipHelper, ScoreAndPath scoreAndPath) {
     Widget row = new DivWidget();
