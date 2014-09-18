@@ -33,7 +33,9 @@ import java.util.Map;
 public interface LangTestDatabase extends RemoteService {
   boolean WRITE_ALTERNATE_COMPRESSED_AUDIO = false;
 
-  ExerciseListWrapper getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix, long userListID, int userID, String role, boolean onlyUnrecordedByMe, boolean onlyExamples);
+  ExerciseListWrapper getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection,
+                                     String prefix, long userListID, int userID, String role,
+                                     boolean onlyUnrecordedByMe, boolean onlyExamples);
 
   CommonExercise getExercise(String id, long userID);
 
