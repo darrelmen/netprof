@@ -47,6 +47,4 @@ public class TabAndContent {
   public DivWidget getContent() {
     return content;
   }
-
-  public String toString() { return "Tab_Content label="+tab.getHeading(); }
 }
