@@ -36,7 +36,7 @@ import java.util.List;
 public abstract class UserDialog extends BasicDialog {
   protected static final int USER_ID_MAX_LENGTH = 25;
   private static final String GRADING = "grading";
-  private static final String TESTING = "dlitesting";  // TODO make these safer
+  private static final String TESTING = "testing";  // TODO make these safer
 
   static final int MIN_AGE = 12;
   static final int MAX_AGE = 90;
