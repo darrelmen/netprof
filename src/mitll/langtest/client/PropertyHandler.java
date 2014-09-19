@@ -1,6 +1,7 @@
 package mitll.langtest.client;
 
 import com.google.gwt.user.client.Window;
+
 import mitll.langtest.client.list.ResponseChoice;
 
 import java.util.Map;
@@ -31,6 +32,7 @@ public class PropertyHandler {
   private static final String NAME_FOR_RECORDER = "nameForRecorder";
   private static final String NUM_GRADES_TO_COLLECT = "numGradesToCollect";
   private static final String LOG_CLIENT_MESSAGES = "logClient";
+  private static final String DIALOG = "dialog";
 
   private static final String LANGUAGE = "language";
   private static final String CONTINUE_PROMPT = "promptBeforeNextItem";
@@ -106,6 +108,8 @@ public class PropertyHandler {
   private String nameForAnswer = "Recording";
   private String nameForRecorder = "Speaker";
   private String language = "";
+  private boolean dialog = false;
+  //private boolean timedGame = false;
 
   private String releaseDate;
   private String turkID = "";
@@ -181,6 +185,7 @@ public class PropertyHandler {
       else if (key.equals(SHOW_SPECTROGRAM)) spectrogram = getBoolean(value);
    //   else if (key.equals(INSTRUMENT)) instrument = getBoolean(value);
       else if (key.equals(NO_MODEL)) noModel = getBoolean(value);
+      else if (key.equals(DIALOG)) dialog = getBoolean(value);
       else if (key.equals(QUIET_AUDIO_OK)) quietAudioOK = getBoolean(value);
       else if (key.equals(SHOW_CONTEXT)) showContext = getBoolean(value);
       else if (key.equals(LOGIN_TYPE_PARAM)) {
@@ -420,8 +425,12 @@ public class PropertyHandler {
   public boolean isShowSections() {
     return showSections;
   }
+ */ 
+  public boolean hasDialog(){
+	  return dialog;
+  }
 
-  *//**
+  /**
    * @see LangTest#makeExerciseList
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
    * @seex mitll.langtest.client.LangTest#setFactory
