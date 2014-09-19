@@ -9,7 +9,6 @@ import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.thirdparty.javascript.rhino.head.commonjs.module.Require;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -294,7 +293,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
     }
 
     /**
-     * @see #getSkipToEnd()
+     * @see #addWidgetsBelow(com.google.gwt.user.client.ui.Panel)
      * @see #loadNext()
      * @see #nextAfterDelay(boolean, String)
      */
