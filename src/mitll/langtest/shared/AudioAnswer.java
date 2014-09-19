@@ -28,7 +28,7 @@ public class AudioAnswer implements IsSerializable {
   private int durationInMillis;
   private long resultID;
   private AudioAttribute audioAttribute;
-  //private PretestScore pretestScore;
+  private PretestScore pretestScore;
 
   public enum Validity implements IsSerializable {
     OK("Audio OK."),
@@ -151,18 +151,16 @@ public class AudioAnswer implements IsSerializable {
     this.audioAttribute = audioAttribute;
   }
 
-/*
   public PretestScore getPretestScore() {
     return pretestScore;
   }
-*/
 
   /**
    * @see mitll.langtest.server.audio.AudioFileHelper#getAlignment(String, String, String, int)
    * @param pretestScore
    */
   public void setPretestScore(PretestScore pretestScore) {
-   // this.pretestScore = pretestScore;
+    this.pretestScore = pretestScore;
     this.score = pretestScore.getHydecScore();
   }
 
