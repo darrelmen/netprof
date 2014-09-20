@@ -51,8 +51,8 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
 
   private CommonExercise currentExercise;
   private final ControlState controlState;
-  private List<CommonShell> allExercises, originalExercises;
-  private List<CommonShell> incorrectFirst = new ArrayList<CommonShell>();
+  private List<CommonShell> allExercises;//, originalExercises;
+  //private List<CommonShell> incorrectFirst = new ArrayList<CommonShell>();
 
   private final Map<String,Boolean> exToCorrect = new HashMap<String, Boolean>();
   private final Map<String,Double>   exToScore = new HashMap<String, Double>();
@@ -95,7 +95,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
       public void listChanged(List<CommonShell> items, String selectionID) {
         StatsFlashcardFactory.this.selectionID = selectionID;
         allExercises = items;
-        originalExercises = items;
+        //originalExercises = items;
         System.out.println("StatsFlashcardFactory : " + selectionID + " got new set of items from list. " + items.size());
         reset();
       }
@@ -205,9 +205,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
     sticky.resetStorage();
   }
 
-  public void setSelection(Map<String, Collection<String>> selection) {
-    this.selection = selection;
-  }
+  public void setSelection(Map<String, Collection<String>> selection) { this.selection = selection;  }
 
 /*  public Map<String, Collection<String>> getSelection() {
     return selection;
@@ -293,7 +291,8 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
     }
 
     /**
-     * @see #addWidgetsBelow(com.google.gwt.user.client.ui.Panel)
+     * @see #getSkipToEnd()
+     * @see #gotClickOnNext()
      * @see #loadNext()
      * @see #nextAfterDelay(boolean, String)
      */
@@ -409,20 +408,20 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
       for (CommonShell commonShell : allExercises) {
         idToExercise.put(commonShell.getID() +"/1",commonShell);
       }
-      incorrectFirst.clear();
+/*      incorrectFirst.clear();
 
       for (ExerciseCorrectAndScore exerciseCorrectAndScore : sortedHistory) {
         incorrectFirst.add(idToExercise.get(exerciseCorrectAndScore.getId()));
       }
-      allExercises = incorrectFirst;
+      allExercises = incorrectFirst;*/
 
       currentExercise = null;
-      exerciseList.rememberExercises(allExercises);
+     // exerciseList.rememberExercises(allExercises);
       reset();
 
-      String first = allExercises.iterator().next().getID();
-      exerciseList.loadExercise(first);
-
+     // String first = allExercises.iterator().next().getID();
+     // exerciseList.loadExercise(first);
+      exerciseList.reload(selection);
       makeFlashcardButtonsVisible();
 
       sticky.resetStorage();
@@ -601,8 +600,8 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
     }
 
     protected void startOverInOrder() {
-      allExercises = originalExercises;
-      exerciseList.rememberExercises(allExercises);
+      //allExercises = originalExercises;
+     // exerciseList.rememberExercises(allExercises);
       startOver();
     }
 
