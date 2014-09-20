@@ -412,7 +412,7 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
     Heading recoOutput = getRecoOutput();
     if (recoOutput != null && controlState.isAudioFeedbackOn()) {
       recoOutput.setText(correctPrompt);
-      DOM.setStyleAttribute(recoOutput.getElement(), "color", "#000000");
+      recoOutput.getElement().getStyle().setColor("#000000");
     }
     return correctPrompt;
   }
