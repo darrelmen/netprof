@@ -52,6 +52,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   ValueChangeHandler<String> {
   private static final Map<String, Collection<String>> TYPE_TO_SELECTION = new HashMap<String, Collection<String>>();
   private static final int MAX_MSG_LEN = 200;
+  protected boolean incorrectFirstOrder = false;
 
   private SimplePanel innerContainer;
   protected final LangTestDatabaseAsync service;
@@ -79,7 +80,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
                ExercisePanelFactory factory,
                ExerciseController controller,
-               String instance) {
+               String instance, boolean incorrectFirst) {
     addWidgets(currentExerciseVPanel);
     this.service = service;
     this.feedback = feedback;
@@ -93,6 +94,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     if (handlerRegistration == null) {
       handlerRegistration = History.addValueChangeHandler(this);
     }
+    this.incorrectFirstOrder = incorrectFirst;
   }
 
   private HandlerRegistration handlerRegistration;
@@ -148,29 +150,32 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   public boolean getExercises(long userID) {
     System.out.println("ExerciseList.getExercises for user " + userID + " instance " + instance);
     lastReqID++;
-    service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, controller.getUser(), getRole(), false, false, new SetExercisesCallback(""));
+    service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, controller.getUser(), getRole(), false, false,
+        incorrectFirstOrder, new SetExercisesCallback(""));
     return true;
   }
 
   /**
-   * @see mitll.langtest.client.custom.ReviewEditableExercise#doAfterEditComplete(ListInterface, boolean)
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#doAfterEditComplete(ListInterface, boolean)
    * @see mitll.langtest.client.LangTest#doEverythingAfterFactory(long)
    */
   public void reload() {
     System.out.println("ExerciseList.reload for user " + controller.getUser() + " instance " + instance + " id " + getElement().getId());
-    service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, controller.getUser(), getRole(), false, false, new SetExercisesCallback(""));
+    service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, controller.getUser(), getRole(), false, false,
+        incorrectFirstOrder, new SetExercisesCallback(""));
   }
 
   /**
    * After re-fetching the ids, select this one.
    *
    * @param id
-   * @see mitll.langtest.client.custom.EditableExercise#doAfterEditComplete(ListInterface, boolean)
+   * @see mitll.langtest.client.custom.dialog.EditableExercise#doAfterEditComplete(ListInterface, boolean)
    */
   @Override
   public void reloadWith(String id) {
     System.out.println("ExerciseList.reloadWith id = " + id + " for user " + controller.getUser() + " instance " + instance);
-    service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, controller.getUser(), getRole(), false, false, new SetExercisesCallbackWithID(id));
+    service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, controller.getUser(), getRole(), false, false,
+        incorrectFirstOrder, new SetExercisesCallbackWithID(id));
   }
 
   /**
