@@ -165,45 +165,70 @@ public class ResultDAO extends DAO {
    * @param latestResultID
    * @return
    */
-  public SessionsAndScores getSessionsForUserIn2(Collection<String> ids, long latestResultID,long userid,
+  public SessionsAndScores getSessionsForUserIn2(Collection<String> ids, long latestResultID, long userid,
                                                  Collection<String> allIds) {
     List<Session> sessions = new ArrayList<Session>();
     Map<Long, List<Result>> userToAnswers = populateUserToAnswers(getResultsForExIDIn(ids, true));
     if (debug) logger.debug("Got " + userToAnswers.size() + " user->answer map");
-    for (Map.Entry<Long,List<Result>> userToResults : userToAnswers.entrySet()) {
+    for (Map.Entry<Long, List<Result>> userToResults : userToAnswers.entrySet()) {
       List<Session> c = partitionIntoSessions2(userToResults.getValue(), ids, latestResultID);
-      if (debug) logger.debug("\tfound " +c.size() + " sessions for " +userToResults.getKey() + " " +ids + " given  " + userToResults.getValue().size());
+      if (debug)
+        logger.debug("\tfound " + c.size() + " sessions for " + userToResults.getKey() + " " + ids + " given  " + userToResults.getValue().size());
 
       sessions.addAll(c);
     }
 
-   // List<Result> results = userToAnswers.get(userid);
-    List<Result> results = getResultsForExIDInForUser(allIds,true,userid);
-    if (true) logger.debug("found " +results.size() + " results for " +allIds.size() + " items" );
+    // List<Result> results = userToAnswers.get(userid);
+    List<CorrectAndScore> results = getResultsForExIDInForUser(allIds, true, userid);
+    if (true) logger.debug("found " + results.size() + " results for " + allIds.size() + " items");
 
-    List<ExerciseCorrectAndScore> sortedResults = getSortedAVPHistory(results,allIds);
-    if (debug) logger.debug("found " +sessions.size() + " sessions for " +ids );
+    List<ExerciseCorrectAndScore> sortedResults = getSortedAVPHistory(results, allIds);
+    if (debug) logger.debug("found " + sessions.size() + " sessions for " + ids);
 
-    return new SessionsAndScores(sessions,sortedResults);
+    return new SessionsAndScores(sessions, sortedResults);
   }
 
-  protected List<ExerciseCorrectAndScore> getSortedAVPHistory(List<Result> results, Collection<String> allIds) {
+  public List<CommonExercise> getExercisesSortedIncorrectFirst(Collection<CommonExercise> exercises, long userid) {
+    List<String> allIds = new ArrayList<String>();
+    Map<String,CommonExercise> idToEx = new HashMap<String, CommonExercise>();
+    for (CommonExercise exercise : exercises) {
+      allIds.add(exercise.getID());
+      idToEx.put(exercise.getID(),exercise);
+    }
+    List<CorrectAndScore> results = getResultsForExIDInForUser(allIds, true, userid);
+    if (true) logger.debug("found " + results.size() + " results for " + allIds.size() + " items");
+
+    List<ExerciseCorrectAndScore> sortedResults = getSortedAVPHistory(results, allIds);
+
+    List<CommonExercise> commonExercises = new ArrayList<CommonExercise>(exercises.size());
+    for (ExerciseCorrectAndScore score : sortedResults) {
+      commonExercises.add(idToEx.get(score.getId()));
+    }
+    return commonExercises;
+  }
+
+  /**
+   * @see #getSessionsForUserIn2(java.util.Collection, long, long, java.util.Collection)
+   * @param results
+   * @param allIds
+   * @return
+   */
+  protected List<ExerciseCorrectAndScore> getSortedAVPHistory(List<CorrectAndScore> results, Collection<String> allIds) {
     SortedMap<String,ExerciseCorrectAndScore> idToScores = new TreeMap<String, ExerciseCorrectAndScore>();
     if (results != null) {
-      for (Result r : results) {
-        String id = r.getID();
+      for (CorrectAndScore r : results) {
+        String id = r.getId();
         ExerciseCorrectAndScore correctAndScores = idToScores.get(id);
         if (correctAndScores == null) idToScores.put(id, correctAndScores = new ExerciseCorrectAndScore(id));
-        CorrectAndScore correctAndScore = new CorrectAndScore(r);
+        //CorrectAndScore correctAndScore = new CorrectAndScore(r);
         //logger.debug("added " + correctAndScore + " for "+ id + " from " + r);
-        correctAndScores.add(correctAndScore);
+        correctAndScores.add(r);
       }
     }
     for (ExerciseCorrectAndScore exerciseCorrectAndScore  : idToScores.values()) { exerciseCorrectAndScore.sort(); }
 
-
     for (String id : allIds) {
-      if (idToScores.containsKey(id)) idToScores.put(id,new ExerciseCorrectAndScore(id));
+      if (!idToScores.containsKey(id)) idToScores.put(id, new ExerciseCorrectAndScore(id));
     }
     List<ExerciseCorrectAndScore> sortedResults = new ArrayList<ExerciseCorrectAndScore>(idToScores.values());
     Collections.sort(sortedResults);
@@ -271,23 +296,36 @@ public class ResultDAO extends DAO {
     return new ArrayList<Result>();
   }
 
-  private List<Result> getResultsForExIDInForUser(Collection<String> ids, boolean matchAVP, long userid) {
+  /**
+   * TODO : inefficient - better ways to do this in h2
+   * @see #getSessionsForUserIn2(java.util.Collection, long, long, java.util.Collection)
+   * @param ids
+   * @param matchAVP
+   * @param userid
+   * @return
+   */
+  private List<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, boolean matchAVP, long userid) {
     try {
       String list = getInList(ids);
 
-      String sql = "SELECT * FROM " + RESULTS + " where " +
+      String sql = "SELECT " + Database.EXID +", "+Database.TIME + ", " + CORRECT + ", " + PRON_SCORE +
+          " FROM " + RESULTS + " where " +
           USERID + "=" + userid + " AND "+
           VALID + "=true" +       " AND " +
           AUDIO_TYPE + (matchAVP?"=":"<>") + "'avp'" + " AND " +
-          Database.EXID + " in (" + list + ")" +
-          " order by " + Database.TIME + " asc";
-      List<Result> resultsSQL = getResultsSQL(sql);
-      if (debug) logger.debug("getResultsForExIDIn for  " +sql+ " got\n\t" + resultsSQL.size());
-      return resultsSQL;
+          Database.EXID + " in (" + list + ")";
+
+      Connection connection = database.getConnection(this.getClass().toString());
+      PreparedStatement statement = connection.prepareStatement(sql);
+
+      List<CorrectAndScore> scores = getScoreResultsForQuery(connection, statement);
+
+      //if (debug) logger.debug("getResultsForExIDInForUser for  " +sql+ " got\n\t" + scores.size());
+      return scores;
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
-    return new ArrayList<Result>();
+    return new ArrayList<CorrectAndScore>();
   }
 
   /**
@@ -364,6 +402,23 @@ public class ResultDAO extends DAO {
         flq, spoken, type, dur, correct, pronScore);
       result.setStimulus(stimulus);
       trimPathForWebPage(result);
+      results.add(result);
+    }
+    finish(connection, statement, rs);
+
+    return results;
+  }
+
+  private List<CorrectAndScore> getScoreResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
+    ResultSet rs = statement.executeQuery();
+    List<CorrectAndScore> results = new ArrayList<CorrectAndScore>();
+    while (rs.next()) {
+      String id = rs.getString(Database.EXID);
+      Timestamp timestamp = rs.getTimestamp(Database.TIME);
+      boolean correct = rs.getBoolean(CORRECT);
+      float pronScore = rs.getFloat(PRON_SCORE);
+
+      CorrectAndScore result = new CorrectAndScore(id, correct, Math.round(100f * pronScore), timestamp.getTime());
       results.add(result);
     }
     finish(connection, statement, rs);
