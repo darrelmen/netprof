@@ -120,7 +120,7 @@ public class NavigationHelper extends HorizontalPanel {
     if (addButtons)  add(next);
     if (controller.getProps().isBindNextToEnter()) next.setTitle(RIGHT_ARROW_TOOLTIP);
 
-    DOM.setElementAttribute(next.getElement(), "id", "nextButton");
+    next.getElement().setId("nextButton");
 
     // send answers to server
     next.addClickHandler(new ClickHandler() {
