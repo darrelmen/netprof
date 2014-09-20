@@ -251,7 +251,8 @@ public class NewUserExercise extends BasicDialog {
   protected Button makeDeleteButton(UserList ul) {
     Button delete = new Button(REMOVE_FROM_LIST);
     delete.getElement().setId("Remove_from_list");
-    DOM.setStyleAttribute(delete.getElement(), "marginRight", "5px");
+    delete.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
+
     delete.setType(ButtonType.WARNING);
     delete.addStyleName("floatRight");
     controller.register(delete, newUserExercise.getID(), "Remove from list " + ul.getID() + "/" + ul.getName());
@@ -339,8 +340,8 @@ public class NewUserExercise extends BasicDialog {
                         ControlGroup normalSpeedRecording
   ) {
     Button submit = makeCreateButton(ul, pagingContainer, toAddTo, foreignLang, rap, normalSpeedRecording,  CREATE);
-    DOM.setStyleAttribute(submit.getElement(), "marginBottom", "5px");
-    DOM.setStyleAttribute(submit.getElement(), "marginRight", "15px");
+    submit.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
+    submit.getElement().getStyle().setMarginRight(15, Style.Unit.PX);
 
     Panel row = new DivWidget();
     row.addStyleName("marginBottomTen");
