@@ -16,10 +16,10 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
   public ExerciseCorrectAndScore() {
   }
 
-  public ExerciseCorrectAndScore(String id, List<CorrectAndScore> correctAndScores) {
+/*  public ExerciseCorrectAndScore(String id, List<CorrectAndScore> correctAndScores) {
     this.id = id;
     this.correctAndScores = correctAndScores;
-  }
+  }*/
 
   public ExerciseCorrectAndScore(String id) {
     this.id = id;
@@ -27,27 +27,33 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
 
   @Override
   public int compareTo(ExerciseCorrectAndScore o) {
-    int myI = getNumIncorrect();
-    int oI = o.getNumIncorrect();
-    int i = myI < oI ? +1 : myI > oI ? -1 : 0;
-    if (i == 0) {
-      int n = getNumCorrect();
-      int on = o.getNumCorrect();
-
-      i = n < on ? -1 : n > on ? +1 : 0;
-
+    if (isEmpty() && !o.isEmpty()) return -1;
+    else if (!isEmpty() && o.isEmpty()) return +1;
+    else {
+      int myI = getNumIncorrect();
+      int oI = o.getNumIncorrect();
+      int i = myI < oI ? +1 : myI > oI ? -1 : 0;
       if (i == 0) {
-        float myScore = getAvgScore();
-        float otherScore = o.getAvgScore();
+        int n = getNumCorrect();
+        int on = o.getNumCorrect();
 
-        return myScore < otherScore ? -1 : otherScore > myScore ? +1 : 0;
+        i = n < on ? -1 : n > on ? +1 : 0;
+
+        if (i == 0) {
+          float myScore = getAvgScore();
+          float otherScore = o.getAvgScore();
+
+          return myScore < otherScore ? -1 : otherScore > myScore ? +1 : 0;
+        } else {
+          return i;
+        }
       } else {
         return i;
       }
-    } else {
-      return i;
     }
   }
+
+  private boolean isEmpty() {  return correctAndScores.isEmpty();  }
 
   private int getNumCorrect() {
     int c = 0;
@@ -70,6 +76,7 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
   }
 
   private float getAvgCorrect() {
+    if  (isEmpty()) return 0f;
     float c = 0;
     List<CorrectAndScore> toUse= getCorrectAndScores();
     if (toUse.size() > 5) toUse=toUse.subList(toUse.size()-5,toUse.size());
@@ -81,6 +88,8 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
 
 
   private float getAvgScore() {
+    if  (isEmpty()) return 0f;
+
     float c = 0;
     List<CorrectAndScore> toUse= getCorrectAndScores();
     if (toUse.size() > 5) toUse=toUse.subList(toUse.size()-5,toUse.size());
