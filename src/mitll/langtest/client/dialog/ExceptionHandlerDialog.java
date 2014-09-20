@@ -27,7 +27,7 @@ public class ExceptionHandlerDialog {
     }
     DialogBox dialogBox = new DialogBox(true, false);
     dialogBox.setWidth("80%");
-    DOM.setStyleAttribute(dialogBox.getElement(), "backgroundColor", "#ABCDEF");
+    dialogBox.getElement().getStyle().setBackgroundColor("#ABCDEF");
     System.err.print(text);
     text = text.replaceAll(" ", "&nbsp;");
     dialogBox.setHTML("<pre>" + text + "</pre>");
