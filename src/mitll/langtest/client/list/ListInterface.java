@@ -9,7 +9,9 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.STATE;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -93,7 +95,7 @@ public interface ListInterface extends RequiresResize {
   void reloadExercises();
   void addExercise(CommonShell es);
 
-  List<CommonShell> rememberExercises(List<CommonShell> result);
+  //List<CommonShell> rememberExercises(List<CommonShell> result);
 
   CommonShell simpleRemove(String id);
 
@@ -113,4 +115,6 @@ public interface ListInterface extends RequiresResize {
   void setInstance(String instance);
   void setShuffle(boolean doShuffle);
   void simpleSetShuffle(boolean doShuffle);
+
+  void reload(Map<String, Collection<String>> typeToSection);
 }
