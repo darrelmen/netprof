@@ -65,7 +65,7 @@ public class ExerciseListLayout {
     String instance = hasQC ? User.Permission.QUALITY_CONTROL.toString() : "flex";
 
     return new FlexSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
-       false, props.showExercisesInOrder(), controller, true, instance);
+       false, props.showExercisesInOrder(), controller, true, instance, false);
   }
 
   /**
