@@ -133,7 +133,7 @@ public class EditItem {
 
     final PagingExerciseList exerciseList =
       new PagingExerciseList(right, service, feedback, null, controller,
-        true, instanceName) {
+        true, instanceName, false) {
         @Override
         protected void onLastItem() {
           new ModalInfoDialog("Complete", "List complete!", new HiddenHandler() {
