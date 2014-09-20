@@ -30,11 +30,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.STATE;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Show exercises with a cell table that can handle thousands of rows.
@@ -66,11 +62,12 @@ public class PagingExerciseList extends ExerciseList {
    * @param controller
    * @param showTypeAhead
    * @param instance
+   * @param incorrectFirst
    */
   public PagingExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
                             ExercisePanelFactory factory, ExerciseController controller,
-                            boolean showTypeAhead, String instance) {
-    super(currentExerciseVPanel, service, feedback, factory, controller, instance);
+                            boolean showTypeAhead, String instance, boolean incorrectFirst) {
+    super(currentExerciseVPanel, service, feedback, factory, controller, instance, incorrectFirst);
     this.controller = controller;
     this.showTypeAhead = showTypeAhead;
     addComponents();
@@ -88,6 +85,11 @@ public class PagingExerciseList extends ExerciseList {
   @Override
   public void setSecondState(String id, STATE state) {
     byID(id).setSecondState(state);
+  }
+
+  @Override
+  public void reload(Map<String, Collection<String>> typeToSection) {
+
   }
 
   /**
@@ -111,7 +113,7 @@ public class PagingExerciseList extends ExerciseList {
     System.out.println("PagingExerciseList.loadExercises : looking for " +
       "'" + prefix + "' (" + prefix.length() + " chars) in list id "+userListID + " instance " + getInstance());
     service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), prefix, userListID,
-      controller.getUser(), getRole(), getUnrecorded(), isOnlyExamples(), new SetExercisesCallback(""));
+      controller.getUser(), getRole(), getUnrecorded(), isOnlyExamples(), incorrectFirstOrder, new SetExercisesCallback(""));
   }
 
   /**
@@ -174,7 +176,7 @@ public class PagingExerciseList extends ExerciseList {
   }
 
   /**
-   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#FlexSectionExerciseList(com.google.gwt.user.client.ui.Panel, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, boolean, boolean, mitll.langtest.client.exercise.ExerciseController, boolean, String)
+   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#FlexSectionExerciseList(com.google.gwt.user.client.ui.Panel, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, boolean, boolean, mitll.langtest.client.exercise.ExerciseController, boolean, String, boolean)
    * @param v
    */
   public void setUnaccountedForVertical(int v) {
