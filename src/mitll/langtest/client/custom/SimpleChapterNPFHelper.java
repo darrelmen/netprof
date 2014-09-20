@@ -146,8 +146,9 @@ class SimpleChapterNPFHelper implements RequiresResize {
   protected static class MyFlexListLayout extends NPFHelper.FlexListLayout {
     private final SimpleChapterNPFHelper outer;
 
-    public MyFlexListLayout(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager, ExerciseController controller, SimpleChapterNPFHelper outer) {
-      super(service, feedback, userManager, controller);
+    public MyFlexListLayout(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager,
+                            ExerciseController controller, SimpleChapterNPFHelper outer) {
+      super(service, feedback, userManager, controller, false);
       this.outer = outer;
     }
 
