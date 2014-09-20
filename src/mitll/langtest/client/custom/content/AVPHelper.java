@@ -53,8 +53,8 @@ public class AVPHelper extends NPFHelper {
   @Override
   protected PagingExerciseList makeExerciseList(final Panel right, final String instanceName) {
     final ExercisePanelFactory factory = getFactory(null, instanceName, true);
-    PagingExerciseList complete = new PagingExerciseList(right, service, feedback, factory, controller,
-      true, instanceName) {
+    return new PagingExerciseList(right, service, feedback, factory, controller,
+      true, instanceName, true) {
       @Override
       protected void onLastItem() {
         ((StatsFlashcardFactory)factory).resetStorage();
@@ -75,7 +75,6 @@ public class AVPHelper extends NPFHelper {
       @Override
       protected void addMinWidthStyle(Panel leftColumn) {}
     };
-    return complete;
   }
 
   @Override
