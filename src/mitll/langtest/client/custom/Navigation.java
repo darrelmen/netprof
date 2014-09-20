@@ -178,11 +178,13 @@ public class Navigation implements RequiresResize {
 
       @Override
       protected NPFHelper.FlexListLayout getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
-                                                         UserManager userManager, ExerciseController controller, SimpleChapterNPFHelper outer) {
+                                                         UserManager userManager, ExerciseController controller,
+                                                         SimpleChapterNPFHelper outer) {
         return new MyFlexListLayout(service, feedback, userManager, controller, outer) {
           @Override
-          protected FlexSectionExerciseList makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName) {
-            return new MyFlexSectionExerciseList(topRow, currentExercisePanel, instanceName) {
+          protected FlexSectionExerciseList makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName,
+                                                             boolean incorrectFirst) {
+            return new MyFlexSectionExerciseList(topRow, currentExercisePanel, instanceName, true) {
               @Override
               protected CommonShell findFirstExercise() {
                 String currentExerciseID = statsFlashcardFactory.getCurrentExerciseID();
@@ -786,8 +788,9 @@ public class Navigation implements RequiresResize {
   private Panel makeTabContent(UserList ul, String instanceName) {
     FluidContainer container = new FluidContainer();
     container.getElement().setId("showListContainer");
-    DOM.setStyleAttribute(container.getElement(), "paddingLeft", "2px");
-    DOM.setStyleAttribute(container.getElement(), "paddingRight", "2px");
+
+    container.getElement().getStyle().setPaddingLeft(2, Style.Unit.PX);
+    container.getElement().getStyle().setPaddingRight(2, Style.Unit.PX);
 
     Panel firstRow = new FluidRow();    // TODO : this is wacky -- clean up...
     firstRow.getElement().setId("container_first_row");
@@ -1163,11 +1166,13 @@ public class Navigation implements RequiresResize {
 
     @Override
     protected NPFHelper.FlexListLayout getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
-                                                       UserManager userManager, ExerciseController controller, SimpleChapterNPFHelper outer) {
+                                                       UserManager userManager, ExerciseController controller,
+                                                       SimpleChapterNPFHelper outer) {
       return new MyFlexListLayout(service, feedback, userManager, controller, outer) {
         @Override
-        protected FlexSectionExerciseList makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName) {
-          return new MyFlexSectionExerciseList(topRow, currentExercisePanel, instanceName) {
+        protected FlexSectionExerciseList makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName,
+                                                           boolean incorrectFirst) {
+          return new MyFlexSectionExerciseList(topRow, currentExercisePanel, instanceName, incorrectFirst) {
             @Override
             protected void addTableWithPager(PagingContainer pagingContainer) {
               Panel column = new FlowPanel();
