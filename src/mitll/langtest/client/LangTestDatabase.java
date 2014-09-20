@@ -35,7 +35,7 @@ public interface LangTestDatabase extends RemoteService {
 
   ExerciseListWrapper getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection,
                                      String prefix, long userListID, int userID, String role,
-                                     boolean onlyUnrecordedByMe, boolean onlyExamples);
+                                     boolean onlyUnrecordedByMe, boolean onlyExamples, boolean incorrectFirstOrder);
 
   CommonExercise getExercise(String id, long userID);
 
