@@ -262,7 +262,8 @@ public class Flashcard implements RequiresResize {
       if (clientWidth < 1100) {
         setFontWidth();
       } else {
-        DOM.setStyleAttribute(appName.getElement(), "fontSize", MAX_FONT_EM + "em");
+        //DOM.setStyleAttribute(appName.getElement(), "fontSize", MAX_FONT_EM + "em");
+        appName.getElement().getStyle().setFontSize(MAX_FONT_EM, Style.Unit.EM);
       }
   }
 
@@ -283,6 +284,8 @@ public class Flashcard implements RequiresResize {
     if (ratio > MAX_FONT_EM) ratio =  MAX_FONT_EM;
     String fontsize = ratio + "em";
   //  System.out.println("setFontWidth : Setting font size to " + fontsize);
-    DOM.setStyleAttribute(appName.getElement(), "fontSize", fontsize);
+    //DOM.setStyleAttribute(appName.getElement(), "fontSize", fontsize);
+    appName.getElement().getStyle().setFontSize(ratio, Style.Unit.EM);
+
   }
 }
