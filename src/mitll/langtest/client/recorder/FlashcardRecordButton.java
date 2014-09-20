@@ -64,8 +64,11 @@ public class FlashcardRecordButton extends RecordButton {
 
     setWidth(WIDTH_FOR_BUTTON + "px");
     setHeight("48px");
-    DOM.setStyleAttribute(getElement(), "fontSize", "x-large");
-    DOM.setStyleAttribute(getElement(), "fontFamily", "Arial Unicode MS, Arial, sans-serif");
+    getElement().getStyle().setProperty("fontSize","x-large");
+   // DOM.setStyleAttribute(getElement(), "fontSize", "x-large");
+    getElement().getStyle().setProperty("fontFamily","Arial Unicode MS, Arial, sans-serif");
+
+   // DOM.setStyleAttribute(getElement(), "fontFamily", "Arial Unicode MS, Arial, sans-serif");
     getElement().getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
     getElement().getStyle().setLineHeight(37, Style.Unit.PX);
 
