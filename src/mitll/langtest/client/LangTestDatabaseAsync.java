@@ -68,7 +68,7 @@ public interface LangTestDatabaseAsync {
   void getGradeCountPerExercise(AsyncCallback<Map<Integer, Map<String, Map<String, Integer>>>> async);
 
   void getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix, long userListID,
-                      int userID, String role, boolean onlyUnrecordedByMe, boolean onlyExamples, AsyncCallback<ExerciseListWrapper> async);
+                      int userID, String role, boolean onlyUnrecordedByMe, boolean onlyExamples, boolean incorrectFirstOrder, AsyncCallback<ExerciseListWrapper> async);
 
   void getStartupInfo(AsyncCallback<StartupInfo> async);
 
