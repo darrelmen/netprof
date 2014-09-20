@@ -29,6 +29,7 @@ public class HistoryExerciseList extends PagingExerciseList {
   private static final boolean debugOnValueChange = false;
   private static final boolean DEBUG = false;
 
+
   protected final Map<String,SectionWidget> typeToBox = new HashMap<String, SectionWidget>();
   /**
    * So the concern is that if we allow people to send bookmarks with items, we can allow them to skip
@@ -40,8 +41,8 @@ public class HistoryExerciseList extends PagingExerciseList {
   protected long userID;
   protected HistoryExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
                                 ExerciseController controller,
-                                boolean showTypeAhead, String instance) {
-    super(currentExerciseVPanel, service, feedback, null, controller, showTypeAhead, instance);
+                                boolean showTypeAhead, String instance, boolean incorrectFirst) {
+    super(currentExerciseVPanel, service, feedback, null, controller, showTypeAhead, instance, incorrectFirst);
   }
 
   /**
@@ -280,18 +281,18 @@ public class HistoryExerciseList extends PagingExerciseList {
     String instance1 = selectionState1.getInstance();
 
     if (!instance1.equals(getInstance()) && instance1.length() > 0) {
-      if (debugOnValueChange)  System.out.println("onValueChange : skipping event " + rawToken + " for instance '" + instance1 +
-          "' that is not mine "+ getInstance());
+/*      if (debugOnValueChange)  System.out.println("onValueChange : skipping event " + rawToken + " for instance '" + instance1 +
+          "' that is not mine "+ getInstance());*/
       if (getCreatedPanel() == null) {
         noSectionsGetExercises(controller.getUser());
       }
       return;
     }
-    if (debugOnValueChange) {
+/*    if (debugOnValueChange) {
       System.out.println(new Date() + " HistoryExerciseList.onValueChange : originalValue '" +originalValue+
         "'" +
         " token is '" + rawToken + "' for " + instance1 + " vs my instance " + getInstance());
-    }
+    }*/
 
     String item = selectionState1.getItem();
 
@@ -337,6 +338,14 @@ public class HistoryExerciseList extends PagingExerciseList {
     loadExercisesUsingPrefix(typeToSection, prefix);
   }
 
+  /**
+   *
+   * @param typeToSection
+   * @param prefix
+   * @see #loadExercises(java.util.Map, String)
+   * @see #loadExercises(String, String)
+   * @see mitll.langtest.client.custom.content.NPFHelper.FlexListLayout.MyFlexSectionExerciseList#loadExercises(java.util.Map, String)
+   */
   protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection, String prefix) {
     lastReqID++;
     if (DEBUG || true) {
@@ -348,7 +357,12 @@ public class HistoryExerciseList extends PagingExerciseList {
     String selectionID = userListID + "_"+typeToSection.toString();
     scheduleWaitTimer();
     service.getExerciseIds(lastReqID, typeToSection, prefix, userListID, controller.getUser(), getRole(),
-        getUnrecorded(), isOnlyExamples(), new SetExercisesCallback(selectionID));
+        getUnrecorded(), isOnlyExamples(), incorrectFirstOrder, new SetExercisesCallback(selectionID));
+  }
+
+  @Override
+  public void reload(Map<String, Collection<String>> typeToSection) {
+    loadExercisesUsingPrefix(typeToSection,"");
   }
 
   /**
