@@ -186,8 +186,8 @@ public class CreateListDialog extends BasicDialog {
   }
 
   private void zeroPadding(Panel createContent) {
-    DOM.setStyleAttribute(createContent.getElement(), "paddingLeft", "0px");
-    DOM.setStyleAttribute(createContent.getElement(), "paddingRight", "0px");
+    createContent.getElement().getStyle().setPaddingLeft(0, Style.Unit.PX);
+    createContent.getElement().getStyle().setPaddingRight(0, Style.Unit.PX);
   }
 
   private boolean validateCreateList(BasicDialog.FormField titleBox) {
