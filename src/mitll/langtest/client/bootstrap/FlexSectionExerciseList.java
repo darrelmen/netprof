@@ -67,8 +67,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   private final Panel sectionPanel;
 
   /**
-   * @see mitll.langtest.client.ExerciseListLayout#makeExerciseList
-   * @param secondRow add the section panel to this row
+   * @param secondRow             add the section panel to this row
    * @param currentExerciseVPanel
    * @param service
    * @param feedback
@@ -77,16 +76,18 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @param controller
    * @param showTypeAhead
    * @param instance
-   * */
+   * @param incorrectFirst
+   * @see mitll.langtest.client.ExerciseListLayout#makeExerciseList
+   */
   public FlexSectionExerciseList(Panel secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                  UserFeedback feedback,
                                  boolean showTurkToken, boolean showInOrder,
                                  ExerciseController controller,
-                                 boolean showTypeAhead, String instance) {
-    super(currentExerciseVPanel, service, feedback, controller, showTypeAhead, instance);
+                                 boolean showTypeAhead, String instance, boolean incorrectFirst) {
+    super(currentExerciseVPanel, service, feedback, controller, showTypeAhead, instance, incorrectFirst);
 
     sectionPanel = new FluidContainer();
-    sectionPanel.getElement().setId("sectionPanel_"+instance);
+    sectionPanel.getElement().setId("sectionPanel_" + instance);
 
     sectionPanel.getElement().getStyle().setPaddingLeft(0, Style.Unit.PX);
     sectionPanel.getElement().getStyle().setPaddingRight(0, Style.Unit.PX);
@@ -134,8 +135,8 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   private Panel getWidgetsForTypes() {
     final FluidContainer container = new FluidContainer();
     container.getElement().setId("typeOrderContainer");
-    DOM.setStyleAttribute(container.getElement(), "paddingLeft", "2px");
-    DOM.setStyleAttribute(container.getElement(), "paddingRight", "2px");
+    container.getElement().getStyle().setPaddingLeft(2, Style.Unit.PX);
+    container.getElement().getStyle().setPaddingRight(2, Style.Unit.PX);
 
     getTypeOrder(container);
 
@@ -410,6 +411,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
 
   private Heading makeLabelWidget(String firstType) {
     Heading widget = new Heading(HEADING_FOR_LABEL, firstType);
+    // TODO : necessary?
     DOM.setStyleAttribute(widget.getElement(), "webkitMarginBefore", "0");
     DOM.setStyleAttribute(widget.getElement(), "webkitMarginAfter", "0");
     widget.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
@@ -493,8 +495,8 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     status.addStyleName("inlineBlockStyle");
     status.add(statusHeader);
     statusHeader.getElement().setId("statusHeader");
-    DOM.setStyleAttribute(statusHeader.getElement(), "marginTop", "0px");
-    DOM.setStyleAttribute(statusHeader.getElement(), "marginBottom", "0px");
+    statusHeader.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
+    statusHeader.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
     return status;
   }
 
@@ -577,8 +579,8 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   private ButtonWithChildren makeOverallButton(String type, String title) {
     ButtonWithChildren overallButton = makeButton(title, type);
     overallButton.setWidth("100%");
-    DOM.setStyleAttribute(overallButton.getElement(), "paddingLeft", "0px");
-    DOM.setStyleAttribute(overallButton.getElement(), "paddingRight", "0px");
+    overallButton.getElement().getStyle().setPaddingLeft(0, Style.Unit.PX);
+    overallButton.getElement().getStyle().setPaddingRight(0, Style.Unit.PX);
 
     overallButton.setType(ButtonType.PRIMARY);
     return overallButton;
@@ -586,9 +588,8 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
 
   private ButtonWithChildren makeClearButton() {
     ButtonWithChildren clear = makeButton(ANY, ANY);
-    DOM.setStyleAttribute(clear.getElement(), "marginTop", "5px");
-    DOM.setStyleAttribute(clear.getElement(), "marginBottom", "12px");
-
+    clear.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
+    clear.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
     clear.setType(ButtonType.DEFAULT);
     return clear;
   }
@@ -647,7 +648,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @param sectionWidget
    * @see FlexSectionExerciseList#addButtonRow
    */
-  private List<ButtonWithChildren> addButtonGroup(HorizontalPanel parentColumn, List<SectionNode> rootNodes,
+  private List<ButtonWithChildren> addButtonGroup(Panel parentColumn, List<SectionNode> rootNodes,
                                                   String typeForOriginal,
                                                   List<String> remainingTypes, ButtonGroupSectionWidget sectionWidget) {
     Map<String, SectionNode> nameToNode = getNameToNode(rootNodes);
@@ -680,8 +681,8 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
       if (!children.isEmpty() && subType != null) {
         rowForSection = new VerticalPanel();
 
-        DOM.setStyleAttribute(buttonForSection.getElement(), "paddingLeft", "0px");
-        DOM.setStyleAttribute(buttonForSection.getElement(), "paddingRight", "0px");
+        buttonForSection.getElement().getStyle().setPaddingLeft(0, Style.Unit.PX);
+        buttonForSection.getElement().getStyle().setPaddingRight(0, Style.Unit.PX);
         buttonForSection.setWidth("100%");
         rowForSection.add(buttonForSection);
 
@@ -751,8 +752,8 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    */
   private Widget getLabelWidget(String typeForOriginal) {
     Heading widget = new Heading(HEADING_FOR_LABEL, typeForOriginal);
-    DOM.setStyleAttribute(widget.getElement(), "marginBottom", "10px");
-    DOM.setStyleAttribute(widget.getElement(), "marginRight", "5px");
+    widget.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
+    widget.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
     return widget;
   }
 
@@ -762,7 +763,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @param buttonType
    * @param isClear
    * @return
-   * @see #addButtonGroup(com.google.gwt.user.client.ui.HorizontalPanel, java.util.List, String, java.util.List, ButtonGroupSectionWidget)
+   * @see #addButtonGroup(com.google.gwt.user.client.ui.Panel, java.util.List, String, java.util.List, ButtonGroupSectionWidget)
    * @see #makeSectionWidget
    */
   private ButtonWithChildren makeSubgroupButton(final ButtonGroupSectionWidget sectionWidgetFinal,
@@ -777,15 +778,15 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     //  System.out.println("num " + numSections + " shrinkHorizontally " +shrinkHorizontally );
 
     if (!isClear && shrinkHorizontally) { // squish buttons if we have lots of sections
-      DOM.setStyleAttribute(sectionButton.getElement(), "paddingLeft", "6px");
-      DOM.setStyleAttribute(sectionButton.getElement(), "paddingRight", "6px");
+      sectionButton.getElement().getStyle().setPaddingLeft(6, Style.Unit.PX);
+      sectionButton.getElement().getStyle().setPaddingRight(6, Style.Unit.PX);
     }
 
     sectionButton.setType(isClear ? ButtonType.DEFAULT : buttonType);
     sectionButton.setEnabled(!isClear);
 
     if (isClear) {
-      DOM.setStyleAttribute(sectionButton.getElement(), "marginBottom", "15px");
+      sectionButton.getElement().getStyle().setMarginBottom(15, Style.Unit.PX);
     }
 
     addClickHandlerToButton(sectionButton, section, sectionWidgetFinal);
@@ -816,7 +817,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
 
     /**
      * @param children
-     * @see FlexSectionExerciseList#addButtonGroup(com.google.gwt.user.client.ui.HorizontalPanel, java.util.List, String, java.util.List, ButtonGroupSectionWidget)
+     * @see FlexSectionExerciseList#addButtonGroup(com.google.gwt.user.client.ui.Panel, java.util.List, String, java.util.List, ButtonGroupSectionWidget)
      * @see FlexSectionExerciseList#addButtonRow
      */
     public void setChildren(List<ButtonWithChildren> children) {
