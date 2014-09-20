@@ -34,9 +34,11 @@ public class SetCompleteDisplay {
   private static final String SCORE_SUBTITLE = "score %";
   private static final String CORRECT_SUBTITLE = "% correct";
   private static final int ROWS_IN_TABLE = 7;
- // private static final String SKIP_TO_END = "See your scores";
-  private static final int TABLE_WIDTH = 2 * 275;
-  private static final int HORIZ_SPACE_FOR_CHARTS = (1250 - TABLE_WIDTH);
+  private static final int TABLE_HISTORY_WIDTH = 225;
+  public static final int ONE_TABLE_WIDTH = 275;//-(TABLE_HISTORY_WIDTH/2);//275;
+  // private static final String SKIP_TO_END = "See your scores";
+  private static final int TABLE_WIDTH = 2 * ONE_TABLE_WIDTH;
+  private static final int HORIZ_SPACE_FOR_CHARTS = (1250 - TABLE_WIDTH - TABLE_HISTORY_WIDTH);
   public static final int MAX_TO_SHOW = 5;
 
   /**
@@ -120,7 +122,7 @@ public class SetCompleteDisplay {
 
     boolean neither = true;
 
-    int chartWidth = (Window.getClientWidth() - TABLE_WIDTH) / 2 - 10;
+    int chartWidth = getChartWidth() / 2 - 10;
     chart.setWidth(chartWidth);
 
     if (yRatio < 1) {
@@ -131,8 +133,12 @@ public class SetCompleteDisplay {
     if (neither) chart.addStyleName("chartDim");
   }
 
+  private int getChartWidth() {
+    return (Window.getClientWidth() - TABLE_WIDTH - TABLE_HISTORY_WIDTH);
+  }
+
   private float needToScaleX() {
-    float width = (float) Window.getClientWidth() - TABLE_WIDTH;
+    float width = (float) getChartWidth();
     return width / HORIZ_SPACE_FOR_CHARTS;
   }
 
@@ -200,8 +206,11 @@ public class SetCompleteDisplay {
                                 List<CommonShell> allExercises, ExerciseController controller) {
     final Map<String,String> idToExercise = new HashMap<String, String>();
     for (CommonShell commonShell : allExercises) {
-      idToExercise.put(commonShell.getID() +"/1",commonShell.getTooltip());
+      idToExercise.put(commonShell.getID()/* +"/1"*/,commonShell.getTooltip());
     }
+
+   // System.out.println("map " + idToExercise);
+
     SimplePagingContainer<ExerciseCorrectAndScore> container = new SimplePagingContainer<ExerciseCorrectAndScore>(controller){
       @Override
       protected void addColumnsToTable() {
@@ -251,15 +260,17 @@ public class SetCompleteDisplay {
             return new SafeHtmlBuilder().appendHtmlConstant(html).toSafeHtml();
           }
 
-          private SafeHtml getColumnToolTip(String columnText) {
+ /*         private SafeHtml getColumnToolTip(String columnText) {
             if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
             return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
-          }
+          }*/
         };
       }
     };
     Panel tableWithPager = container.getTableWithPager();
-    tableWithPager.setWidth("225px");
+    tableWithPager.getElement().setId("TableScoreHistory");
+    tableWithPager.setWidth(TABLE_HISTORY_WIDTH +
+        "px");
     for (ExerciseCorrectAndScore exerciseCorrectAndScore : sortedHistory) {
       container.addItem(exerciseCorrectAndScore);
     }
