@@ -58,7 +58,8 @@ public class NPFHelper implements RequiresResize {
    * @param controller
    * @param showQC
    */
-  public NPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager, ExerciseController controller, boolean showQC) {
+  public NPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager,
+                   ExerciseController controller, boolean showQC) {
     this.service = service;
     this.feedback = feedback;
     this.controller = controller;
@@ -185,7 +186,7 @@ public class NPFHelper implements RequiresResize {
   PagingExerciseList makeExerciseList(final Panel right, final String instanceName) {
     //System.out.println(getClass() + ".makeExerciseList : instanceName " + instanceName);
     return new PagingExerciseList(right, service, feedback, null, controller,
-      true, instanceName) {
+      true, instanceName, false) {
       @Override
       protected void onLastItem() {
         new ModalInfoDialog(COMPLETE, LIST_COMPLETE, new HiddenHandler() {
@@ -269,9 +270,10 @@ public class NPFHelper implements RequiresResize {
      * @param ul
      * @param instanceName
      * @return
+     * @see #doNPF(mitll.langtest.shared.custom.UserList, String, boolean)
      */
     protected Panel doInternalLayout(final UserList ul, String instanceName) {
-      this.flexListLayout = new FlexListLayout(service,feedback,userManager,controller) {
+      this.flexListLayout = new FlexListLayout(service,feedback,userManager,controller, false) {
         @Override
         protected ExercisePanelFactory getFactory(final PagingExerciseList pagingExerciseList, String instanceName) {
           return new ExercisePanelFactory(service,feedback,controller,predefinedContent) {
@@ -319,6 +321,7 @@ public class NPFHelper implements RequiresResize {
     private final LangTestDatabaseAsync service;
     private final UserFeedback feedback;
     private final UserManager userManager;
+    boolean incorrectFirst;
 
     /**
      * @see ChapterNPFHelper#ChapterNPFHelper(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, boolean)
@@ -327,13 +330,15 @@ public class NPFHelper implements RequiresResize {
      * @param feedback
      * @param userManager
      * @param controller
+     * @param incorrectFirst
      */
     public FlexListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
-                          UserManager userManager, ExerciseController controller) {
+                          UserManager userManager, ExerciseController controller, boolean incorrectFirst) {
       this.controller = controller;
       this.service = service;
       this.feedback = feedback;
       this.userManager = userManager;
+      this.incorrectFirst = incorrectFirst;
     }
 
     /**
@@ -373,7 +378,7 @@ public class NPFHelper implements RequiresResize {
       bottomRow.add(currentExerciseVPanel);
 
       long uniqueID = ul == null ? -1 : ul.getUniqueID();
-      FlexSectionExerciseList widgets = makeNPFExerciseList(topRow, currentExerciseVPanel, instanceName, uniqueID);
+      FlexSectionExerciseList widgets = makeNPFExerciseList(topRow, currentExerciseVPanel, instanceName, uniqueID, incorrectFirst);
       npfExerciseList = widgets;
 
       Widget exerciseListOnLeftSide = npfExerciseList.getExerciseListOnLeftSide(controller.getProps());
@@ -388,8 +393,9 @@ public class NPFHelper implements RequiresResize {
       bottomRow.addStyleName("trueInlineStyle");
     }
 
-    private FlexSectionExerciseList makeNPFExerciseList(final Panel topRow, Panel currentExercisePanel, String instanceName, long userListID) {
-      final FlexSectionExerciseList exerciseList = makeExerciseList(topRow, currentExercisePanel, instanceName);
+    private FlexSectionExerciseList makeNPFExerciseList(final Panel topRow, Panel currentExercisePanel, String instanceName,
+                                                        long userListID, boolean incorrectFirst) {
+      final FlexSectionExerciseList exerciseList = makeExerciseList(topRow, currentExercisePanel, instanceName, incorrectFirst);
       exerciseList.setUserListID(userListID);
 
       exerciseList.setFactory(getFactory(exerciseList, instanceName), userManager, 1);
@@ -404,8 +410,9 @@ public class NPFHelper implements RequiresResize {
 
     protected abstract ExercisePanelFactory getFactory(final PagingExerciseList exerciseList, final String instanceName);
 
-    protected FlexSectionExerciseList makeExerciseList(final Panel topRow, Panel currentExercisePanel, final String instanceName) {
-      return new MyFlexSectionExerciseList(topRow, currentExercisePanel, instanceName);
+    protected FlexSectionExerciseList makeExerciseList(final Panel topRow, Panel currentExercisePanel,
+                                                       final String instanceName, boolean incorrectFirst) {
+      return new MyFlexSectionExerciseList(topRow, currentExercisePanel, instanceName, incorrectFirst);
     }
 
     @Override
@@ -416,8 +423,8 @@ public class NPFHelper implements RequiresResize {
     }
 
     protected class MyFlexSectionExerciseList extends FlexSectionExerciseList {
-      public MyFlexSectionExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName) {
-        super(topRow, currentExercisePanel, FlexListLayout.this.service, FlexListLayout.this.feedback, false, false, FlexListLayout.this.controller, true, instanceName);
+      public MyFlexSectionExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, boolean incorrectFirst) {
+        super(topRow, currentExercisePanel, FlexListLayout.this.service, FlexListLayout.this.feedback, false, false, FlexListLayout.this.controller, true, instanceName, incorrectFirst);
       }
 
       @Override
@@ -437,7 +444,8 @@ public class NPFHelper implements RequiresResize {
 
       @Override
       protected void loadExercises(final Map<String, Collection<String>> typeToSection, final String item) {
-        System.out.println(getClass() + ".loadExercises : instance " + getInstance() + " " + typeToSection + " and item '" + item + "'" + " for list " + userListID);
+        System.out.println(getClass() + ".loadExercises : instance " + getInstance() + " " + typeToSection +
+            " and item '" + item + "'" + " for list " + userListID);
         loadExercisesUsingPrefix(typeToSection, getPrefix());
       }
     }
