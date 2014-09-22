@@ -51,18 +51,16 @@ public class PretestGauge extends HTML{
   /**
    * @see mitll.langtest.client.gauge.ASRScorePanel#ASRScorePanel(String, mitll.langtest.client.exercise.ExerciseController, Exercise)
    * @paramx id
-   * @param label
-   * @param instructions
    */
-	public PretestGauge(String id, String label, String instructions, Canvas canvas){
+	public PretestGauge(String id){
 		this.id = id;
-    this.label = label;
+    this.label = "ASR";
 
 		setHTML("<div id='" + id + "Container' style='align:center; text-align: center'/>");
 
 		tooltip = new PopupPanel();
 		tooltip.setWidth("350px");
-    HTML tooltipLabel = new HTML("<div style='font-size: 10pt'>" + instructions + "</div>");
+    HTML tooltipLabel = new HTML("<div style='font-size: 10pt'>" + mitll.langtest.client.gauge.ASRScorePanel.INSTRUCTIONS + "</div>");
 
 		tooltip.setStyleName("TooltipPopup");
 		tooltipLabel.setStyleName("Tooltip");
