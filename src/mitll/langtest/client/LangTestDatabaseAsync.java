@@ -30,7 +30,7 @@ public interface LangTestDatabaseAsync {
 
   void getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, String exerciseID, AsyncCallback<ImageResponse> async);
 
-  void getExercise(String id, long userID, AsyncCallback<CommonExercise> async);
+  void getExercise(String id, long userID, boolean isFlashcardReq, AsyncCallback<CommonExercise> async);
 
   void getUserToResultCount(AsyncCallback<Map<User, Integer>> async);
 
