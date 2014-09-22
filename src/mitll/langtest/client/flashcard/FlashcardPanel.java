@@ -140,9 +140,14 @@ class FlashcardPanel extends HorizontalPanel {
     inner2.add(getFinalWidgets());
   }
 
-  // boolean commentPopupVisible = false;
   private CommentBox commentBox;
 
+  /**
+   *
+   * @param controller
+   * @return
+   * @see #FlashcardPanel
+   */
   DivWidget getFirstRow(ExerciseController controller) {
     DivWidget firstRow = new DivWidget();
     commentBox = new CommentBox(exercise, controller, new CommentAnnotator() {
@@ -358,23 +363,16 @@ class FlashcardPanel extends HorizontalPanel {
    * @see #FlashcardPanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ControlState, StatsFlashcardFactory.MySoundFeedback, mitll.langtest.client.sound.SoundFeedback.EndListener, String, mitll.langtest.client.list.ListInterface)
    */
   void addPrevNextWidgets(Panel toAddTo) {
-    final Button left = getPrevButton();
-    toAddTo.add(left);
-
-    DivWidget vp = getProgressBarWidget();
-    toAddTo.add(vp);
-
-    final Button right = getNextButton();
-    toAddTo.add(right);
+    toAddTo.add(getPrevButton());
+    toAddTo.add(getProgressBarWidget());
+    toAddTo.add(getNextButton());
   }
 
   public void setPrevNextVisible(boolean val) {
     prevNextRow.setVisible(val);
   }
 
-  void addRowBelowPrevNext(DivWidget lowestRow) {
-
-  }
+  void addRowBelowPrevNext(DivWidget lowestRow) {}
 
   private Button getPrevButton() {
     final Button left = new Button();
@@ -531,7 +529,7 @@ class FlashcardPanel extends HorizontalPanel {
       public void onClick(ClickEvent event) {
         if (!controlState.isForeign()) {
           controlState.setShowState(ControlState.FOREIGN);
-          System.out.println("getOn : now on " + controlState);
+          //System.out.println("getOn : now on " + controlState);
           showEnglishOrForeign();
         }
       }
@@ -550,7 +548,7 @@ class FlashcardPanel extends HorizontalPanel {
       public void onClick(ClickEvent event) {
         if (!controlState.isEnglish()) {
           controlState.setShowState(ControlState.ENGLISH);
-          System.out.println("getOff : now  " + controlState);
+          //System.out.println("getOff : now  " + controlState);
           showEnglishOrForeign();
         }
       }
@@ -569,7 +567,7 @@ class FlashcardPanel extends HorizontalPanel {
       public void onClick(ClickEvent event) {
         if (!controlState.showBoth()) {
           controlState.setShowState(ControlState.BOTH);
-          System.out.println("getBoth now  " + controlState);
+          //System.out.println("getBoth now  " + controlState);
           showEnglishOrForeign();
         }
       }
@@ -589,7 +587,6 @@ class FlashcardPanel extends HorizontalPanel {
   private DivWidget getCardPrompt(CommonExercise e) {
     DivWidget questionContent = getQuestionContent(e);
     questionContent.getElement().setId("cardPrompt");
-
     questionContent.addStyleName("cardContent");
     return questionContent;
   }
@@ -852,7 +849,7 @@ class FlashcardPanel extends HorizontalPanel {
     }
   }
 
-  private class ClickableIcon extends Icon {
+/*  private class ClickableIcon extends Icon {
     public ClickableIcon(IconType type) {
       super(type);
     }
@@ -860,5 +857,5 @@ class FlashcardPanel extends HorizontalPanel {
     public HandlerRegistration addClickHandler(ClickHandler handler) {
       return addDomHandler(handler, ClickEvent.getType());
     }
-  }
+  }*/
 }
