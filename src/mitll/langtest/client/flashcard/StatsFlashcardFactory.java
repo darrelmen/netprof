@@ -120,6 +120,9 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
     if (scoreHistory != null && scoreHistory instanceof RequiresResize) {
       ((RequiresResize)scoreHistory).onResize();
     }
+    else {
+      System.err.println("huh? score history doesn't implement requires resize????\\n\n");
+    }
   }
 
   /**
