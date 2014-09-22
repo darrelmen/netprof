@@ -87,6 +87,10 @@ public interface CommonExercise extends CommonShell {
   String getCombinedTooltip();
   void setTooltip();
 
+  /**
+   * @see mitll.langtest.server.database.ResultDAO#attachScoreHistory(long, CommonExercise, boolean)
+   * @param scoreTotal
+   */
   void setScores(List<CorrectAndScore> scoreTotal);
   List<CorrectAndScore> getScores();
 
