@@ -1,10 +1,7 @@
 package mitll.langtest.client.bootstrap;
 
 import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.Column;
-import com.github.gwtbootstrap.client.ui.FluidContainer;
-import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.Tooltip;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.core.client.Scheduler;
@@ -15,14 +12,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.ScrollPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -33,12 +23,7 @@ import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.SectionNode;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -71,20 +56,18 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @param currentExerciseVPanel
    * @param service
    * @param feedback
-   * @param showTurkToken
    * @param showInOrder
    * @param controller
-   * @param showTypeAhead
    * @param instance
    * @param incorrectFirst
    * @see mitll.langtest.client.ExerciseListLayout#makeExerciseList
    */
   public FlexSectionExerciseList(Panel secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                  UserFeedback feedback,
-                                 boolean showTurkToken, boolean showInOrder,
+                                 boolean showInOrder,
                                  ExerciseController controller,
-                                 boolean showTypeAhead, String instance, boolean incorrectFirst) {
-    super(currentExerciseVPanel, service, feedback, controller, showTypeAhead, instance, incorrectFirst);
+                                 String instance, boolean incorrectFirst) {
+    super(currentExerciseVPanel, service, feedback, controller, true, instance, incorrectFirst);
 
     sectionPanel = new FluidContainer();
     sectionPanel.getElement().setId("sectionPanel_" + instance);
@@ -238,7 +221,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
 
   private Anchor getDownloadLink() {
     final Anchor downloadLink = new Anchor(getURL2());
-    addTooltip(downloadLink, DOWNLOAD_SPREADSHEET);
+    addTooltip(downloadLink);
     downloadLink.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -280,11 +263,10 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   /**
    * @see #addButtonRow(java.util.List, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection)
    * @param widget
-   * @param tip
    * @return
    */
-  private Tooltip addTooltip(Widget widget, String tip) {
-    return new TooltipHelper().addTooltip(widget, tip);
+  private Tooltip addTooltip(Widget widget) {
+    return new TooltipHelper().addTooltip(widget, FlexSectionExerciseList.DOWNLOAD_SPREADSHEET);
   }
 
   /**
@@ -588,8 +570,8 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
 
   private ButtonWithChildren makeClearButton() {
     ButtonWithChildren clear = makeButton(ANY, ANY);
-    clear.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
-    clear.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
+    clear.getElement().getStyle().setMarginTop(5, Style.Unit.PX);
+    clear.getElement().getStyle().setMarginBottom(12, Style.Unit.PX);
     clear.setType(ButtonType.DEFAULT);
     return clear;
   }
