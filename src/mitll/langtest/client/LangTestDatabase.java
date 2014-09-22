@@ -34,10 +34,15 @@ public interface LangTestDatabase extends RemoteService {
   void markAudioDefect(AudioAttribute audioAttribute, String exid);
   void markGender(AudioAttribute attr, boolean isMale);
   // user DAO
+
+  // @deprecated
   long addUser(int age, String gender, int experience, String nativeLang, String dialect, String userID, Collection<User.Permission> permissions);
+
+  User addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email, boolean isMale, int age, String dialect);
 
   List<User> getUsers();
   int userExists(String login);
+  User userExists(String login, String passwordH);
   User getUserBy(long id);
 
   // answer DAO
@@ -70,6 +75,11 @@ public interface LangTestDatabase extends RemoteService {
 
   int getNumResults();
 
+  boolean changePFor(String token, String first);
+
+  long getUserIDForToken(String token);
+
+  boolean forgotUsername(String emailH, String email, String url);
 
   List<Result> getResults(int start, int end, String sortInfo);
 
@@ -115,4 +125,7 @@ public interface LangTestDatabase extends RemoteService {
 
   void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID);
   List<Event> getEvents();
+
+  boolean resetPassword(String userid, String text, String url);
+  Long enableCDUser(String cdToken, String emailR, String url);
 }
