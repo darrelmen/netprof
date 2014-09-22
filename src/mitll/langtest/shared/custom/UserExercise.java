@@ -8,6 +8,7 @@ import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.ScoreAndPath;
+import mitll.langtest.shared.flashcard.CorrectAndScore;
 
 import java.util.Collection;
 import java.util.Date;
@@ -33,7 +34,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   private boolean isPredef;
   private boolean isOverride;
   private Date modifiedDate;
-  private Collection<ScoreAndPath> scores;
+  private Collection<CorrectAndScore> scores;
   private float avgScore;
   private static final int MAX_TOOLTIP_LENGTH = 15;
 
@@ -242,7 +243,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   public UserExercise toUserExercise() {  return this;  }
 
   /**
-   * @see mitll.langtest.client.custom.ReviewEditableExercise#getCreateButton(UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, com.github.gwtbootstrap.client.ui.ControlGroup)
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getCreateButton(UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, com.github.gwtbootstrap.client.ui.ControlGroup)
    * @return
    */
   public boolean checkPredef() {  return !getID().startsWith(CUSTOM_PREFIX);  }
@@ -252,12 +253,12 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     return modifiedDate;
   }
 
-  public Collection<ScoreAndPath> getScores() {
+  public Collection<mitll.langtest.shared.flashcard.CorrectAndScore> getScores() {
     return scores;
   }
 
   @Override
-  public void setScores(Collection<ScoreAndPath> scores) {
+  public void setScores(Collection<CorrectAndScore> scores) {
     this.scores = scores;
   }
 
