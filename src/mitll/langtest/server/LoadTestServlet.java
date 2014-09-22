@@ -99,7 +99,7 @@ public class LoadTestServlet extends DatabaseServlet {
 
         //logger.debug("user " + userid + " ex " + exid);
 
-        CommonExercise exercise = loadTesting.getExercise(exid, Integer.parseInt(userid));
+        CommonExercise exercise = loadTesting.getExercise(exid, Integer.parseInt(userid), false);
         toReturn = getJsonForExercise(exercise);
       } else if (queryString.startsWith(LOG_EVENT)) {
         // logEvent=exid&userid=12
