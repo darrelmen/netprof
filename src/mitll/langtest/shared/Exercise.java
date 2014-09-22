@@ -6,7 +6,6 @@ import mitll.langtest.shared.flashcard.CorrectAndScore;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -320,8 +319,8 @@ public class Exercise extends AudioExercise implements CommonExercise {
   }
 
   @Override
-  public Date getModifiedDate() {
-    return null;
+  public long getModifiedDateTimestamp() {
+    return 0;
   }
 
   @Override
