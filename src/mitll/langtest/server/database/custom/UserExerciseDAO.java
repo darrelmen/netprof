@@ -425,7 +425,7 @@ public class UserExerciseDAO extends DAO {
           "",         // TODO complete fill in of context!
           rs.getBoolean(OVERRIDE),
           unitToValue,
-          date
+          date.getTime()
         );
 
         if (addMissingAudio) {
@@ -470,7 +470,7 @@ public class UserExerciseDAO extends DAO {
       }
     }
 
-    long time = e.getModifiedDate().getTime();
+    long time = e.getModifiedDateTimestamp();
     if (time == 0) time = System.currentTimeMillis();
     if (!foundReg && hasRef) {
       audioDAO.add((int) e.getCreator(), ref, e.getID(), time, Result.AUDIO_TYPE_REGULAR, 0);
