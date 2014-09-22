@@ -10,7 +10,6 @@ import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.STATE;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -25,9 +24,8 @@ public interface ListInterface extends RequiresResize {
    * @see mitll.langtest.client.LangTest#setFactory
    * @param factory
    * @param user
-   * @param expectedGrades
    */
-  void setFactory(ExercisePanelFactory factory, UserManager user, int expectedGrades);
+  void setFactory(ExercisePanelFactory factory, UserManager user);
 
     /**
      * @see mitll.langtest.client.LangTest#gotUser(long)
