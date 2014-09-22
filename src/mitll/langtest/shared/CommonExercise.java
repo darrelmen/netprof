@@ -87,11 +87,11 @@ public interface CommonExercise extends CommonShell {
   String getCombinedTooltip();
   void setTooltip();
 
-  void setScores(Collection<CorrectAndScore> scoreTotal);
-  Collection<CorrectAndScore> getScores();
+  void setScores(List<CorrectAndScore> scoreTotal);
+  List<CorrectAndScore> getScores();
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addAnnotationsAndAudio(long, CommonExercise)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addAnnotationsAndAudio
    * @param v
    */
   void setAvgScore(float v);
