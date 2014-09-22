@@ -1,11 +1,7 @@
 package mitll.langtest.client;
 
 import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.Column;
-import com.github.gwtbootstrap.client.ui.Container;
-import com.github.gwtbootstrap.client.ui.FluidContainer;
-import com.github.gwtbootstrap.client.ui.FluidRow;
-import com.github.gwtbootstrap.client.ui.Tab;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
@@ -27,20 +23,12 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.UIObject;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
-import mitll.langtest.client.custom.exercise.CommentNPFExercise;
 import mitll.langtest.client.custom.Navigation;
-import mitll.langtest.client.qc.QCNPFExercise;
+import mitll.langtest.client.custom.exercise.CommentNPFExercise;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.KeyPressHelper;
@@ -52,6 +40,7 @@ import mitll.langtest.client.instrumentation.EventLogger;
 import mitll.langtest.client.instrumentation.EventTable;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.monitoring.MonitoringManager;
+import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.recorder.MicPermission;
 import mitll.langtest.client.result.ResultManager;
@@ -62,18 +51,9 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserTable;
-import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.ImageResponse;
-import mitll.langtest.shared.Result;
-import mitll.langtest.shared.StartupInfo;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.*;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -116,7 +96,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private Navigation navigation;
   private EventLogger buttonFactory;
-  private KeyPressHelper keyPressHelper = new KeyPressHelper(false,true);
+  private final KeyPressHelper keyPressHelper = new KeyPressHelper(false,true);
 
   /**
    * Make an exception handler that displays the exception.
@@ -281,7 +261,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
-  private Cache<String, ImageResponse> imageCache = CacheBuilder.newBuilder()
+  private final Cache<String, ImageResponse> imageCache = CacheBuilder.newBuilder()
     .maximumSize(MAX_CACHE_SIZE)
     .expireAfterWrite(7, TimeUnit.DAYS)
     .build();
@@ -628,7 +608,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
                 hideFlash();
                 checkLogin();
 
-                flashcard.setSplash("RECORDING DISABLED");
+                flashcard.setSplash();
               }
             }
           );
@@ -645,7 +625,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           }
         });
 
-        flashcard.setSplash("RECORDING DISABLED");
+        flashcard.setSplash();
       }
     });
   }
@@ -667,14 +647,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         public Panel getExercisePanel(CommonExercise e) {
           boolean reviewer = permissions.contains(User.Permission.QUALITY_CONTROL);
           if (reviewer) {
-            return new QCNPFExercise(e, controller, exerciseList, 1.0f, false, "classroom");
+            return new QCNPFExercise(e, controller, exerciseList, "classroom");
           } else {
-            return new CommentNPFExercise(e, controller, exerciseList, 1.0f, false, "classroom");
+            return new CommentNPFExercise(e, controller, exerciseList, false, "classroom");
           }
         }
-      }, userManager, 1);
+      }, userManager);
     } else {
-      exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, this, this, exerciseList, getScreenPortion()), userManager, 1);
+      exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, this, this, exerciseList, getScreenPortion()), userManager);
     }
   }
 
@@ -869,7 +849,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
   private boolean isReviewMode() { return audioType.equals(Result.AUDIO_TYPE_REVIEW); }
 
-  private Set<User.Permission> permissions = new HashSet<User.Permission>();
+  private final Set<User.Permission> permissions = new HashSet<User.Permission>();
 
   /**
    * When we login, we ask for permissions for the user from the server.
@@ -906,7 +886,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public LangTestDatabaseAsync getService() { return service; }
   public UserFeedback getFeedback() { return this; }
 
-  private long then, now;
+  private long then;
   // recording methods...
   /**
    * Recording interface
@@ -923,8 +903,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
    */
   public void stopRecording(WavCallback wavCallback) {
-    now = System.currentTimeMillis();
-    System.out.println("stopRecording : time recording in UI " + (now-then) + " millis");
+    long now = System.currentTimeMillis();
+    System.out.println("stopRecording : time recording in UI " + (now -then) + " millis");
 
     flashRecordPanel.stopRecording(wavCallback);
   }
