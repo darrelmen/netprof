@@ -32,6 +32,7 @@ import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.*;
+import mitll.langtest.shared.flashcard.CorrectAndScore;
 
 import java.util.*;
 
@@ -194,7 +195,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
   private void showRecordingHistory(CommonExercise exercise, ScoringAudioPanel answerWidget, String refAudio) {
     answerWidget.setRefAudio(refAudio);
-    for (ScoreAndPath score : exercise.getScores()) {
+    for (CorrectAndScore score : exercise.getScores()) {
       answerWidget.addScore(score);
     }
     answerWidget.setClassAvg(exercise.getAvgScore());
