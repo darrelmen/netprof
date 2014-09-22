@@ -324,6 +324,7 @@ public class AudioDAO extends DAO {
     return getResultsForQuery(connection, statement);
   }
 
+  int c = 0;
   /**
    * Get a list of audio attributes for this Query.
    *
@@ -365,7 +366,9 @@ public class AudioDAO extends DAO {
         user);
 
       if (user == null) {
-        logger.warn("can't find user " + userID+ " for " + audioAttr + " in " + miniUsers.keySet());
+        if (c++ < 20) {
+          logger.warn("can't find user " + userID + " for " + audioAttr + " in " + miniUsers.keySet());
+        }
       }
       results.add(audioAttr);
     }
