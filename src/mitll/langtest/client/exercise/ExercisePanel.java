@@ -25,17 +25,13 @@ import java.util.*;
  */
 public class ExercisePanel extends VerticalPanel implements
   BusyPanel, ExerciseQuestionState, PostAnswerProvider, ProvidesResize, RequiresResize {
-  private static final String THREE_SPACES = "&nbsp;&nbsp;&nbsp;";
-  private static final String THE_FOREIGN_LANGUAGE = " the foreign language";
-  private static final String ENGLISH = "English";
-  private static final String TYPE_YOUR_ANSWER_IN = "Type your answer in ";
   private static final int CONTENT_SCROLL_HEIGHT = 220;
   private static final String PROMPT = "Read the following text and answer the question or questions below.";
   private final List<Widget> answers = new ArrayList<Widget>();
   private final Set<Widget> completed = new HashSet<Widget>();
   protected CommonExercise exercise = null;
   protected final ExerciseController controller;
-  protected final LangTestDatabaseAsync service;
+  private final LangTestDatabaseAsync service;
   private final NavigationHelper navigationHelper;
   protected final ListInterface exerciseList;
   private final Map<Integer,Set<Widget>> indexToWidgets = new HashMap<Integer, Set<Widget>>();
@@ -142,7 +138,7 @@ public class ExercisePanel extends VerticalPanel implements
   }
 
   private boolean isPashto() {
-    return getLanguage().equalsIgnoreCase("Pashto");
+    return controller.getLanguage().equalsIgnoreCase("Pashto");
   }
 
   public void onResize() {}
@@ -205,25 +201,26 @@ public class ExercisePanel extends VerticalPanel implements
   }
 
   protected String getQuestionPrompt() {
-    return getWrittenPrompt(true);
+    //return getWrittenPrompt(true);
+    return "";
   }
 
-  protected String getWrittenPrompt(boolean promptInEnglish) {
+/*  protected String getWrittenPrompt(boolean promptInEnglish) {
     return THREE_SPACES +
         TYPE_YOUR_ANSWER_IN +(promptInEnglish ? ENGLISH : getLanguage()) +" :";
-  }
+  }*/
 
-  private String getLanguage() {
+ /* private String getLanguage() {
     String language = controller.getLanguage();
     return (language == null || language.length() == 0) ? THE_FOREIGN_LANGUAGE : language;
-  }
+  }*/
 
-  @Override
+/*  @Override
   protected void onUnload() {
     super.onUnload();
    // System.out.println("onUnload : doing unload of prev/next handler " +keyHandler);
     navigationHelper.removeKeyHandler();
-  }
+  }*/
 
   /**
    * Record answers at the server.  For our purposes, add a row to the result table and possibly post
