@@ -1,6 +1,6 @@
 package mitll.langtest.client.scoring;
 
-import mitll.langtest.shared.ScoreAndPath;
+import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.scoring.PretestScore;
 
 /**
@@ -17,7 +17,7 @@ public class EmptyScoreListener implements ScoreListener {
   public int getOffsetWidth() { return 0; }
 
   @Override
-  public void addScore(ScoreAndPath hydecScore) {}
+  public void addScore(CorrectAndScore hydecScore) {}
 
   @Override
   public void showChart(boolean showOnlyOneExercise) {}
