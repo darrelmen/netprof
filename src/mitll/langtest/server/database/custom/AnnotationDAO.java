@@ -156,7 +156,7 @@ public class AnnotationDAO extends DAO {
     }
     Map<String, ExerciseAnnotation> latestByExerciseID = getFieldToAnnotationMap(userAnnotations);
     ExerciseAnnotation annotation = latestByExerciseID.get(field);
-    return (annotation != null) && (annotation.status.equals(status) && annotation.comment.equals(comment));
+    return (annotation != null) && (annotation.getStatus().equals(status) && annotation.getComment().equals(comment));
   }
 
   /**
