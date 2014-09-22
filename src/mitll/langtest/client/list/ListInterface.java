@@ -20,8 +20,10 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public interface ListInterface extends RequiresResize {
+  void removeHistoryListener();
+
   /**
-   * @see mitll.langtest.client.LangTest#setFactory
+   * @see mitll.langtest.client.LangTest#reallySetFactory()
    * @param factory
    * @param user
    */
@@ -78,7 +80,7 @@ public interface ListInterface extends RequiresResize {
    */
   void clear();
 
-  int getPercentComplete();
+ // int getPercentComplete();
 
   int getComplete();
 
