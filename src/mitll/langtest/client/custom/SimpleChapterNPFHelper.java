@@ -31,7 +31,7 @@ class SimpleChapterNPFHelper implements RequiresResize {
 
   protected final UserFeedback feedback;
   protected PagingExerciseList npfExerciseList;
-  ListInterface predefinedContentList;
+  final ListInterface predefinedContentList;
 
   /**
    * @see Navigation#Navigation
@@ -83,7 +83,7 @@ class SimpleChapterNPFHelper implements RequiresResize {
     listContent.addStyleName("userListBackground");
   }
 
-  private NPFHelper.FlexListLayout flexListLayout;
+  private final NPFHelper.FlexListLayout flexListLayout;
   /**
    * Make the instance name uses the unique id for the list.
    *
@@ -148,7 +148,7 @@ class SimpleChapterNPFHelper implements RequiresResize {
 
     public MyFlexListLayout(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager,
                             ExerciseController controller, SimpleChapterNPFHelper outer) {
-      super(service, feedback, userManager, controller, false);
+      super(service, feedback, userManager, controller);
       this.outer = outer;
     }
 
