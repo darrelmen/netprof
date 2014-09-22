@@ -17,7 +17,7 @@ import mitll.langtest.client.exercise.ExerciseController;
  */
 public class ButtonFactory implements EventLogger {
   private final LangTestDatabaseAsync service;
-  private PropertyHandler props;
+  private final PropertyHandler props;
 
   public ButtonFactory(LangTestDatabaseAsync service, PropertyHandler props) {
     this.service = service;
