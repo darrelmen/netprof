@@ -1,6 +1,5 @@
 package mitll.langtest.client.dialog;
 
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.DialogBox;
 import mitll.langtest.client.BrowserCheck;
 
