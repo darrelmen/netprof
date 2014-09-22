@@ -1,6 +1,12 @@
 package mitll.langtest.client.user;
 
-import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.Accordion;
+import com.github.gwtbootstrap.client.ui.AccordionGroup;
+import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.ControlGroup;
+import com.github.gwtbootstrap.client.ui.Modal;
+import com.github.gwtbootstrap.client.ui.PasswordTextBox;
+import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.BackdropType;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
@@ -16,9 +22,6 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * Created with IntelliJ IDEA.
  * User: GO22670
@@ -27,16 +30,13 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class UserDialog extends BasicDialog {
-  protected static final int USER_ID_MAX_LENGTH = 25;
+  protected static final int USER_ID_MAX_LENGTH = 35;
   private static final String GRADING = "grading";
   private static final String TESTING = "dlitesting";  // TODO make these safer
 
   static final int MIN_AGE = 12;
   static final int MAX_AGE = 90;
   static final int TEST_AGE = 100;
-  static final String UNSET = "Unset";
-  private static final String MALE = "Male";
-  private static final String FEMALE = "Female";
   public static final String HIT_ENTER_TO_LOG_IN = "Hit enter to log in.";
   final PropertyHandler props;
   final LangTestDatabaseAsync service;
@@ -181,8 +181,8 @@ public abstract class UserDialog extends BasicDialog {
     } else if (userID.length() == 0) {
       msg = "Please enter a user id.";
       foundError = true;
-    } else if (userID.length() < StudentDialog.MIN_LENGTH_USER_ID) {
-      msg = "Must be at least " + StudentDialog.MIN_LENGTH_USER_ID + " characters.";
+    } else if (userID.length() < BasicDialog.MIN_LENGTH_USER_ID) {
+      msg = "Must be at least " + BasicDialog.MIN_LENGTH_USER_ID + " characters.";
       foundError = true;
     } else {
       int c = 0;
@@ -212,19 +212,6 @@ public abstract class UserDialog extends BasicDialog {
   void removeKeyHandler() {
    // System.out.println("UserManager.removeKeyHandler : " + keyHandler);
     if (keyHandler != null) keyHandler.removeHandler();
-  }
-
-  ListBox getGenderBox() {
-    List<String> values = Arrays.asList(UNSET, MALE, FEMALE);
-    return getListBox(values);
-  }
-
-  protected ListBox getListBox(List<String> values) {
-    final ListBox genderBox = new ListBox(false);
-    for (String s : values) {
-      genderBox.addItem(s);
-    }
-    return genderBox;
   }
 
   boolean checkPassword(FormField password) { return checkPassword(password.box);  }
