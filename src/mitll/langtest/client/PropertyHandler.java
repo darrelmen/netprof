@@ -2,8 +2,6 @@ package mitll.langtest.client;
 
 import com.google.gwt.user.client.Window;
 
-import mitll.langtest.client.list.ResponseChoice;
-
 import java.util.Map;
 
 /**
@@ -295,7 +293,6 @@ public class PropertyHandler {
       spectrogram = !Window.Location.getParameter(SHOW_SPECTROGRAM).equals("false");
       if (spectrogram) System.out.println("spectrogram is " + spectrogram);
     }
-    setResponseType();
 
     String loginType = Window.Location.getParameter(LOGIN_TYPE_PARAM);
     if (loginType != null) {
@@ -308,35 +305,6 @@ public class PropertyHandler {
 
     return grading;
   }
-
-  /**
-   * Parse URL to extract the responseType values
-   */
-  private void setResponseType() {
-    String href = Window.Location.getHref();
-    if (href.contains("responseType=")) {
-      String s = href.split("responseType=")[1];
-      String candidate = s.split("\\*\\*\\*")[0];
-      if (ResponseChoice.knownChoice(candidate)) {
-        //responseType = candidate;
-        //System.out.println("responseType " + responseType);
-      }
-      else {
-        System.err.println("responseType unknown " + candidate);
-      }
-      if (s.contains("secondResponseType=")) {
-        String candidate2 = s.split("secondResponseType=")[1];
-        if (ResponseChoice.knownChoice(candidate2)) {
-          //secondResponseType = candidate2;
-         // System.out.println("secondResponseType " + secondResponseType);
-        }
-        else {
-          System.err.println("secondResponseType unknown " + candidate2);
-        }
-      }
-    }
-  }
-
 
   /**
    * @see mitll.langtest.client.LangTest#modeSelect()
