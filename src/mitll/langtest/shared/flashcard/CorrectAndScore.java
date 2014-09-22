@@ -1,36 +1,48 @@
 package mitll.langtest.shared.flashcard;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.shared.Result;
 
 /**
  * Created by go22670 on 9/13/14.
  */
 public class CorrectAndScore implements IsSerializable, Comparable<CorrectAndScore> {
+  private int uniqueID;
+  private long userid;
+
   private String id;
   private boolean correct;
-  private int score;
+  private float score;
   private long timestamp;
+  private String path;
 
-  public CorrectAndScore() {
+  public CorrectAndScore() {}
+
+  public CorrectAndScore(float score, String path) {
+    this.score = score;
+    this.path = path;
   }
 
-  public CorrectAndScore(String id, boolean correct, int score, long timestamp) {
+  public CorrectAndScore(int uniqueID, long userid, String id, boolean correct, float score, long timestamp, String path) {
+    this.uniqueID = uniqueID;
     this.id = id;
+    this.userid = userid;
     this.correct = correct;
     this.score = score;
     this.timestamp = timestamp;
+    this.path = path;
   }
 
+/*
   public CorrectAndScore(Result r) {
     this.correct =r.isCorrect();
     this.score = (int)(r.getPronScore()*100f);
     this.timestamp = r.timestamp;
   }
+*/
 
   @Override
   public int compareTo(CorrectAndScore o) {
-    return getTimestamp() < o.getTimestamp() ? -1: getTimestamp() > o.getTimestamp() ? +1 :0;
+    return getTimestamp() < o.getTimestamp() ? -1 : getTimestamp() > o.getTimestamp() ? +1 : 0;
   }
 
   public boolean isCorrect() {
@@ -38,11 +50,14 @@ public class CorrectAndScore implements IsSerializable, Comparable<CorrectAndSco
   }
 
   /**
-   *
    * @return 0-100
    */
-  public int getScore() {
+  public float getScore() {
     return score;
+  }
+
+  public int getPercentScore() {
+    return Math.round(100f * score);
   }
 
   public String getId() {
@@ -53,5 +68,19 @@ public class CorrectAndScore implements IsSerializable, Comparable<CorrectAndSco
     return timestamp;
   }
 
-  public String toString() { return "id " + getId() + " " +(isCorrect() ? "C":"I")+ " score " + getScore(); }
+  public String getPath() {
+    return path;
+  }
+
+  public String toString() {
+    return "id " + getId() + " " + (isCorrect() ? "C" : "I") + " score " + getPercentScore();
+  }
+
+  public int getUniqueID() {
+    return uniqueID;
+  }
+
+  public long getUserid() {
+    return userid;
+  }
 }
