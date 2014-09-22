@@ -36,13 +36,12 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
    * @param controller
    * @param exercise
    * @param index
-   * @param audioType
    * @param instance
-   * @see BootstrapExercisePanel#getAnswerWidget(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int, boolean, String)
+   * @see BootstrapExercisePanel#getAnswerWidget(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, String)
    */
   public FlashcardRecordButtonPanel(AudioAnswerListener exercisePanel, LangTestDatabaseAsync service,
-                                    ExerciseController controller, CommonExercise exercise, int index, String audioType, String instance) {
-    super(service, controller, exercise, null, index, true, audioType, "Record");
+                                    ExerciseController controller, CommonExercise exercise, int index, String instance) {
+    super(service, controller, exercise, index, true, "avp", "Record");
     this.instance = instance;
     this.exercisePanel = exercisePanel;
    // recordButton.setTitle(PRESS_AND_HOLD_THE_MOUSE_BUTTON_TO_RECORD);
@@ -118,14 +117,6 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
     }
 
     exercisePanel.receivedAudioAnswer(result);
-  }
-
-  /**
-   * @see #postAudioFile(com.google.gwt.user.client.ui.Panel, int)
-   */
-  @Override
-  protected void receivedAudioFailure() {
-    recordButton.setBaseIcon(MyCustomIconType.enter);
   }
 
   @Override
