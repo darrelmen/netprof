@@ -584,7 +584,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   protected void askServerForExercise(String itemID) {
     System.out.println("ExerciseList.askServerForExercise id = " + itemID + " instance " + instance);
     controller.checkUser();
-    service.getExercise(itemID, controller.getUser(), new ExerciseAsyncCallback());
+    service.getExercise(itemID, controller.getUser(), incorrectFirstOrder, new ExerciseAsyncCallback());
   }
 
   private class ExerciseAsyncCallback implements AsyncCallback<CommonExercise> {
