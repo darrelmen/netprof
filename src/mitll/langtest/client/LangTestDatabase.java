@@ -29,7 +29,7 @@ public interface LangTestDatabase extends RemoteService {
                                      String prefix, long userListID, int userID, String role,
                                      boolean onlyUnrecordedByMe, boolean onlyExamples, boolean incorrectFirstOrder);
 
-  CommonExercise getExercise(String id, long userID);
+  CommonExercise getExercise(String id, long userID, boolean isFlashcardReq);
 
   void markAudioDefect(AudioAttribute audioAttribute, String exid);
   void markGender(AudioAttribute attr, boolean isMale);
