@@ -279,8 +279,8 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
     column.add(row);
 
-    if (e.getModifiedDate() != null && e.getModifiedDate().getTime() != 0) {
-      Heading widgets = new Heading(5, "Changed", e.getModifiedDate().toString());
+    if (e.getModifiedDateTimestamp() != 0) {
+      Heading widgets = new Heading(5, "Changed", new Date(e.getModifiedDateTimestamp()).toString());
     //  if (!e.getAudioAttributes().isEmpty()) {
     //    widgets.addStyleName("floatRight");
     //  }
@@ -580,7 +580,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   private Widget getCommentWidget(final String field, Widget content, ExerciseAnnotation annotation) {
     final FocusWidget commentEntry = makeCommentEntry(field, annotation);
 
-    boolean alreadyMarkedCorrect = annotation == null || annotation.status == null || annotation.status.equals("correct");
+    boolean alreadyMarkedCorrect = annotation == null || annotation.getStatus() == null || annotation.getStatus().equals("correct");
     if (!alreadyMarkedCorrect) {
       incorrectFields.add(field);
     }
@@ -645,7 +645,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     commentEntry.getElement().setId("QCNPFExercise_Comment_TextBox_"+field);
     commentEntry.addStyleName("topFiveMargin");
     if (annotation != null) {
-      commentEntry.setText(annotation.comment);
+      commentEntry.setText(annotation.getComment());
     }
     commentEntry.setVisibleLength(100);
     commentEntry.setWidth("400px");
