@@ -2,6 +2,7 @@ package mitll.langtest.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.shared.custom.UserExercise;
+import mitll.langtest.shared.flashcard.CorrectAndScore;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,7 +39,7 @@ public class Exercise extends AudioExercise implements CommonExercise {
   private List<String> refSentences = new ArrayList<String>();
   private List<String> translitSentences = new ArrayList<String>();
   private STATE state;
-  private Collection<ScoreAndPath> scores;
+  private Collection<CorrectAndScore> scores;
   private float avgScore;
 
   public static class QAPair implements IsSerializable {
@@ -333,12 +334,12 @@ public class Exercise extends AudioExercise implements CommonExercise {
     this.state = state;
   }
 
-  public Collection<ScoreAndPath> getScores() {
+  public Collection<CorrectAndScore> getScores() {
     return scores;
   }
 
   @Override
-  public void setScores(Collection<ScoreAndPath> scores) { this.scores = scores; }
+  public void setScores(Collection<CorrectAndScore> scores) { this.scores = scores; }
 
   public float getAvgScore() {
     return avgScore;
