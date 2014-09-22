@@ -37,9 +37,9 @@ class EditableExercise extends NewUserExercise {
   private String originalEnglish = "";
   final UserList originalList;
 
-  protected PagingExerciseList exerciseList;
-  protected ListInterface predefinedContentList;
-  protected NPFHelper npfHelper;
+  protected final PagingExerciseList exerciseList;
+  protected final ListInterface predefinedContentList;
+  protected final NPFHelper npfHelper;
 
   /**
    *

@@ -20,7 +20,7 @@ import java.util.Map;
 public class KeyPressHelper {
   private final boolean removeOnEnter;
   private HandlerRegistration keyHandler;
-  private Map<String,KeyListener> listeners = new HashMap<String, KeyListener>();
+  private final Map<String,KeyListener> listeners = new HashMap<String, KeyListener>();
 
   /**
    * @see mitll.langtest.client.dialog.ModalInfoDialog
@@ -38,7 +38,7 @@ public class KeyPressHelper {
   }
 
   public KeyPressHelper(boolean removeOnPress, boolean hearAllEvents) {
-    this(removeOnPress);
+    this(false);
     makeKeyHandler();
   }
 
