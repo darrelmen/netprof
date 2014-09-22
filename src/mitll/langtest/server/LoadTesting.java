@@ -18,7 +18,7 @@ public interface LoadTesting {
 
     ExerciseListWrapper getExerciseIDs(int userID);
   */
-  CommonExercise getExercise(String id, long userID);
+  CommonExercise getExercise(String id, long userID, boolean isFlashcardReq);
 
   CommonExercise getFirstExercise();
 
