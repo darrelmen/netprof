@@ -38,7 +38,7 @@ public class ButtonFactory implements EventLogger {
     button.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        logEvent(button, "button",exid, context, userid);
+        logEvent(button, "button", exid, context, userid);
       }
     });
   }
