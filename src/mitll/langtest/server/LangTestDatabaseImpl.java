@@ -4,6 +4,8 @@ import audio.image.ImageType;
 import audio.imagewriter.ImageWriter;
 import com.google.common.io.Files;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import com.google.gwt.util.tools.shared.Md5Utils;
+import com.google.gwt.util.tools.shared.StringUtils;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.server.audio.AudioCheck;
@@ -49,6 +51,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private static final String MP3 = ".mp3";
   public static final String DATABASE_REFERENCE = "databaseReference";
   private static final int SLOW_EXERCISE_EMAIL = 2000;
+  private static final String NP_SERVER = "np.ll.mit.edu";
+  private static final String REPLY_TO = "admin@" + NP_SERVER;
+  private static final String CONTENT_DEVELOPER_APPROVAL_EMAIL = "gordon.vidaver@ll.mit.edu";
+  private static final String RP = "rp";
 
   private DatabaseImpl db;
   private AudioFileHelper audioFileHelper;
@@ -56,6 +62,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private String configDir;
   private ServerProperties serverProps;
   private PathHelper pathHelper;
+  private String reqURL, path, info;
 
   /**
    * @param request
@@ -67,6 +74,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   protected void service(HttpServletRequest request,
                          HttpServletResponse response) throws ServletException, IOException {
     try {
+      reqURL = request.getRequestURI();
+      path = request.getServletPath();
+      info = request.getPathInfo();
       super.service(request, response);
     } catch (ServletException e) {
       logAndNotifyServerException(e);
@@ -253,7 +263,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
               if (onlyExamples) {
                 if (hasExample) break;
-              } else if ((hasReg && hasSlow)) {
+              }
+              else if (hasReg && hasSlow) {
                 break;
               }
             }
@@ -722,7 +733,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
+<<<<<<< HEAD
    * TODOx : come back to this!!!
+=======
+   * TODO : come back to this!!!
+>>>>>>> newLogin
    *
    * @param wavFile
    * @return true if mp3 file exists
@@ -895,14 +910,22 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db.addAnswer(userID, exercise, questionID, answer, answerType);
   }
 
-  // Grades ---------------------
+  // Users ---------------------
 
   @Override
   public synchronized int userExists(String login) {
     return db.userExists(login);
   }
 
-  // Users ---------------------
+  /**
+   * @param login
+   * @param passwordH
+   * @return
+   * @see mitll.langtest.client.user.UserPassLogin#gotLogin
+   */
+  public User userExists(String login, String passwordH) {
+    return db.getUserDAO().getUser(login, passwordH);
+  }
 
   /**
    * @param userid
@@ -1177,11 +1200,70 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param userID
    * @param permissions
    * @return
+   * @deprecated called from student dialog
    */
   @Override
   public long addUser(int age, String gender, int experience,
                       String nativeLang, String dialect, String userID, Collection<User.Permission> permissions) {
     return db.addUser(getThreadLocalRequest(), age, gender, experience, nativeLang, dialect, userID, permissions);
+  }
+
+  /**
+   * @param userID
+   * @param passwordH
+   * @param emailH
+   * @param kind
+   * @param url
+   * @param email
+   * @param isMale
+   * @param age
+   * @param dialect @return null if existing user
+   * @see mitll.langtest.client.user.UserPassLogin#gotSignUp(String, String, String, mitll.langtest.shared.User.Kind)
+   */
+  @Override
+  public User addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email,
+                      boolean isMale, int age, String dialect) {
+    User user = db.addUser(getThreadLocalRequest(), userID, passwordH, emailH, kind, isMale, age, dialect);
+    if (user != null && !user.isEnabled()) { // user = null means existing user.
+      url = trimURL(url);
+      String userID1 = user.getUserID();
+      String toHash = userID1 + "_" + System.currentTimeMillis();
+      String hash = getHash(toHash);
+      db.getUserDAO().addKey(user.getId(), false, hash);
+
+      String message = "Hi Tamas" + ",<br/><br/>" +
+          "User '" + userID1 +
+          "' would like to be a content developer for " + serverProps.getLanguage() +
+          "." + "<br/>" +
+
+          "Click the link to allow them." +
+          "<br/><br/>" +
+          "Regards, Administrator";
+
+      getMailSupport().sendEmail(NP_SERVER,
+          url + "?cd=" + hash + "&" +
+              "er" +
+              "=" + rot13(email),
+          serverProps.getApprovalEmailAddress(),
+          "gordon.vidaver@ll.mit.edu",
+          "Content Developer approval for " + userID1 + " for " + serverProps.getLanguage(),
+          message,
+          "Click to approve" // link text
+      );
+    }
+    return user;
+  }
+
+  private String rot13(String val) {
+    StringBuilder builder = new StringBuilder();
+    for (char c : val.toCharArray()) {
+      if (c >= 'a' && c <= 'm') c += 13;
+      else if (c >= 'A' && c <= 'M') c += 13;
+      else if (c >= 'n' && c <= 'z') c -= 13;
+      else if (c >= 'N' && c <= 'Z') c -= 13;
+      builder.append(c);
+    }
+    return builder.toString();
   }
 
   /**
@@ -1195,6 +1277,183 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public User getUserBy(long id) {
     return db.getUserDAO().getUserWhere(id);
+  }
+
+  /// TODO : replace with columns on user id table
+  //Map<String,Long> keyToUser = new HashMap<String, Long>();
+  // Map<String,Long> keyToEnabledUser = new HashMap<String, Long>();
+
+  /**
+   * @param user
+   * @param email
+   * @param url
+   * @return true if there's a user with this email
+   * @see mitll.langtest.client.user.UserPassLogin#getForgotPassword()
+   */
+  public boolean resetPassword(String user, String email, String url) {
+    logger.debug("resetPassword for " + user);
+
+    User validUserAndEmail = db.getUserDAO().isValidUserAndEmail(user, getHash(email));
+
+    if (validUserAndEmail != null) {
+      logger.debug("resetPassword for " + user + " sending reset password email.");
+      //keyToUser.put(hash,validUserAndEmail.getId());
+      String toHash = user + "_" + System.currentTimeMillis();
+      String hash = getHash(toHash);
+      db.getUserDAO().addKey(validUserAndEmail.getId(), true, hash);
+
+      String message = "Hi " + user + ",<br/><br/>" +
+          "Click the link below to change your password." +
+          "<br/><br/>" +
+          "Regards, Administrator";
+
+      url = trimURL(url);
+      sendEmail(url + "?" + RP + "=" + hash,
+          email,
+          "Password Reset",
+          message,
+          "Reset Password" // link text
+      );
+
+      //logger.debug("key map is " +keyToUser);
+      return true;
+    } else {
+      logger.debug("couldn't find user " + user + " and email " + email);
+      String message = "User " + user + " with email " + email + " tried to reset password - but they're not valid.";
+      String prefixedMessage = "for " + pathHelper.getInstallPath() + " got " + message;
+      logger.debug(prefixedMessage);
+      getMailSupport().email(serverProps.getEmailAddress(), "Invalid password reset for " + serverProps.getLanguage(), prefixedMessage);
+      return false;
+    }
+  }
+
+  private void sendEmail(String link, String to, String subject, String message, String linkText) {
+    getMailSupport().sendEmail(NP_SERVER,
+        link,
+        to,
+        REPLY_TO,
+        subject,
+        message,
+        linkText// link text
+    );
+  }
+
+  /**
+   * @param token
+   * @return
+   * @see mitll.langtest.client.LangTest#handleCDToken
+   */
+  public Long enableCDUser(String token, String emailR, String url) {
+    // Long userID = keyToEnabledUser.remove(token);
+
+    User userWhereEnabledReq = db.getUserDAO().getUserWhereEnabledReq(token);
+    Long userID = null;
+    if (userWhereEnabledReq == null) {
+      logger.debug("user id '" + userID + "' for " + token);
+      userID = null;
+    } else {
+      userID = userWhereEnabledReq.getId();
+      logger.debug("user id '" + userID + "' for " + token + " vs " + userWhereEnabledReq.getId());
+    }
+    String email = rot13(emailR);
+
+    if (userID == null) {
+      return null;
+    } else {
+      boolean b = db.getUserDAO().enableUser(userID);
+      if (b) {
+        db.getUserDAO().clearKey(userID, false);
+
+        User userWhere = db.getUserDAO().getUserWhere(userID);
+        url = trimURL(url);
+
+        logger.debug("Sending user email... link is " + url);
+        String message = "Hi " + userWhere.getUserID() + ",<br/>" +
+            "You have been approved to be a content developer for " + serverProps.getLanguage() + "." +
+            "<br/>Click on the link below to log in." +
+            "<br/><br/>" +
+            "Regards, Administrator";
+        sendEmail(url // baseURL
+            ,
+            email, // destination email
+            "Account approved", // subject
+            message,
+            "Click here to return to the site." // link text
+        );
+      }
+      return (b ? userID : -1);
+    }
+  }
+
+  public String getHash(String toHash) {
+    return StringUtils.toHexString(Md5Utils.getMd5Digest(toHash.getBytes()));
+  }
+
+  /**
+   * @param token
+   * @return
+   * @see mitll.langtest.client.LangTest#showLogin()
+   */
+  @Override
+  public long getUserIDForToken(String token) {
+    //Long aLong = keyToUser.get(token);
+    User user = db.getUserDAO().getUserWhereResetKey(token);
+    if (user == null) {
+      //if (aLong != null) logger.error("huh? disagree - ");
+      return -1;
+    } else {
+      //if (aLong != user.getId()) logger.error("disagree --");
+      return user.getId();
+      //  return aLong;
+    }
+  }
+
+  @Override
+  public boolean changePFor(String token, String passwordH) {
+    User userWhereResetKey = db.getUserDAO().getUserWhereResetKey(token);
+    if (userWhereResetKey != null) {
+      db.getUserDAO().clearKey(userWhereResetKey.getId(), true);
+
+      if (!db.getUserDAO().changePassword(userWhereResetKey.getId(), passwordH)) {
+        logger.error("couldn't update user password for user " + userWhereResetKey);
+      }
+      return true;
+    } else return false;
+  }
+
+  /**
+   * @param emailH
+   * @param email
+   * @param url
+   * @return
+   * @see mitll.langtest.client.user.UserPassLogin#getForgotUser()
+   */
+  @Override
+  public boolean forgotUsername(String emailH, String email, String url) {
+    User valid = db.getUserDAO().isValidEmail(emailH);
+
+    url = trimURL(url);
+
+    if (valid != null) {
+      logger.debug("Sending user email...");
+      String message = "Hi " + valid.getUserID() + ",<br/>" +
+          "Your user name is " + valid.getUserID() + "." +
+          "<br/><br/>" +
+          "Regards, Administrator";
+      sendEmail(url // baseURL
+          ,
+          email, // destination email
+          "Your user name", // subject
+          message,
+          "Click here to return to the site." // link text
+      );
+    }
+    return valid != null;
+  }
+
+  public String trimURL(String url) {
+    if (url.contains("127.0.0.1")) return url;
+    else return url.split("\\?")[0].split("\\#")[0];
   }
 
   // Results ---------------------
