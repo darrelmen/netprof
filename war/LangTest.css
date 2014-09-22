@@ -505,6 +505,7 @@ fieldset > legend {
     word-break: keep-all;
     white-space: normal;
     font-family: sans-serif;
+    line-height: 1;
 }
 
 .blueColor {
@@ -1027,6 +1028,44 @@ body>.dropdown-popup .nav-list>li.active>a  {
     margin: 0 auto;
 }
 
+.loginPage {
+    margin: -154px -228px 0 -418px;
+    top: 33%;
+    width: 838px;
+    left: 50%;
+    position: absolute;
+}
+
+.resetPage {
+    margin: -154px -228px 0 -418px;
+    top: 33%;
+    width: 838px;
+    left: 32%;
+    position: absolute;
+}
+
+.loginPageBack {
+    position: fixed;
+    width: 200%;
+    height: 200%;
+    left: -50%;
+    background: rgba(173, 216, 230, 0.61);
+}
+
+.formRounded {
+    /*margin-top: 2px;*/
+    border-radius: 3px 3px 3px 3px;
+    box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
+    padding: 5px 5px 5px 5px;
+}
+
+.signUp {
+    border-bottom: 1px solid #E1E8ED;
+    margin-left: 11px;
+    margin-top: 0;
+    padding-top: 0;
+}
+
 body .btn-success.active {
     background-color: #B75AB6;
     background-image: linear-gradient(to bottom, #C362C3, #A351A3);
@@ -1051,4 +1090,3 @@ body .btn-toolbar > .btn-group > .btn.active {
     background-position: center;
     text-shadow: none;
 }
-
