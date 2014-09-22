@@ -596,7 +596,7 @@ public class UserListManager {
     // copy the annotations
     for (Map.Entry<String, ExerciseAnnotation> pair : userExercise.getFieldToAnnotation().entrySet()) {
       ExerciseAnnotation value = pair.getValue();
-      addAnnotation(assignedID, pair.getKey(), value.status, value.comment, userExercise.getCreator());
+      addAnnotation(assignedID, pair.getKey(), value.getStatus(), value.getComment(), userExercise.getCreator());
     }
 
     userExercise.setTooltip();
@@ -744,7 +744,7 @@ public class UserListManager {
     if (exercise != null) {
       Map<String, ExerciseAnnotation> latestByExerciseID = annotationDAO.getLatestByExerciseID(exercise.getID());
       for (Map.Entry<String, ExerciseAnnotation> pair : latestByExerciseID.entrySet()) {
-        exercise.addAnnotation(pair.getKey(), pair.getValue().status, pair.getValue().comment);
+        exercise.addAnnotation(pair.getKey(), pair.getValue().getStatus(), pair.getValue().getComment());
       }
     }
     else {
