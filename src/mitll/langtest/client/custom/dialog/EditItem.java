@@ -53,7 +53,7 @@ public class EditItem {
   private HasText itemMarker;
 
   protected PagingExerciseList exerciseList;
-  protected NPFHelper npfHelper;
+  protected final NPFHelper npfHelper;
 
   /**
    * @param service
@@ -203,7 +203,7 @@ public class EditItem {
         populatePanel(e.toCommonUserExercise(), panel, ul, originalList, itemMarker, outer);
         return panel;
       }
-    }, userManager, 1);
+    }, userManager);
   }
 
   /**

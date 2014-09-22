@@ -1,25 +1,15 @@
 package mitll.langtest.client.flashcard;
 
-import com.github.gwtbootstrap.client.ui.Dropdown;
-import com.github.gwtbootstrap.client.ui.Icon;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.Image;
-import com.github.gwtbootstrap.client.ui.NavLink;
-import com.github.gwtbootstrap.client.ui.Paragraph;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconSize;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.AttachEvent;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.shared.User;
@@ -67,7 +57,7 @@ public class Flashcard implements RequiresResize {
                                 ClickHandler results,
                                 ClickHandler monitoring,
                                 ClickHandler events) {
-    return getHeaderRow(splashText, isBeta,NEW_PRO_F1_PNG, PRONUNCIATION_FEEDBACK, userName, browserInfo, logoutClickHandler,
+    return getHeaderRow(splashText, isBeta,NEW_PRO_F1_PNG, userName, browserInfo, logoutClickHandler,
       users, results, monitoring,events, new ArrayList<User.Permission>());
   }
 
@@ -76,7 +66,6 @@ public class Flashcard implements RequiresResize {
    * @param splashText
    * @param isBeta
    * @param appIcon
-   * @param appTitle
    * @param userName
    * @param browserInfo
    * @param logoutClickHandler
@@ -88,7 +77,7 @@ public class Flashcard implements RequiresResize {
    * @return
    */
   public Panel getHeaderRow(String splashText,
-                            boolean isBeta, String appIcon, String appTitle, String userName,
+                            boolean isBeta, String appIcon, String userName,
                             HTML browserInfo,
                             ClickHandler logoutClickHandler,
                             ClickHandler users,
@@ -108,7 +97,7 @@ public class Flashcard implements RequiresResize {
     flashcard.addStyleName("inlineBlockStyle");
     flashcard.addStyleName("headerBackground");
     flashcard.addStyleName("leftAlign");
-    appName = new Paragraph("<span>" + appTitle + "</span>" +(isBeta?("<span><font color='yellow'>" + "&nbsp;BETA" + "</font></span>"):""));
+    appName = new Paragraph("<span>" + Flashcard.PRONUNCIATION_FEEDBACK + "</span>" +(isBeta?("<span><font color='yellow'>" + "&nbsp;BETA" + "</font></span>"):""));
     appName.addStyleName("bigFont");
 
     flashcard.add(appName);
@@ -118,7 +107,7 @@ public class Flashcard implements RequiresResize {
 
       flashcard.add(subtitle);
 
-    flashcardImage = new Image(LangTest.LANGTEST_IMAGES + appIcon);
+    flashcardImage = new Image(LangTest.LANGTEST_IMAGES + Flashcard.NEW_PRO_F1_PNG);
     flashcardImage.addStyleName("floatLeft");
     flashcardImage.addStyleName("rightFiveMargin");
     iconLeftHeader.add(flashcardImage);
@@ -249,7 +238,7 @@ public class Flashcard implements RequiresResize {
    * @param name
    */
   public void setUserName(String name) {  this.userNameWidget.setText(name);  }
-  public void setSplash(String name) {  this.subtitle.setText(name);
+  public void setSplash() {  this.subtitle.setText("RECORDING DISABLED");
 
     subtitle.removeStyleName("subtitleForeground");
     subtitle.addStyleName("subtitleNoRecordingForeground");
@@ -282,7 +271,7 @@ public class Flashcard implements RequiresResize {
     ratio /= 10;
     if (ratio < 0.7) ratio = 0.7;
     if (ratio > MAX_FONT_EM) ratio =  MAX_FONT_EM;
-    String fontsize = ratio + "em";
+   // String fontsize = ratio + "em";
   //  System.out.println("setFontWidth : Setting font size to " + fontsize);
     //DOM.setStyleAttribute(appName.getElement(), "fontSize", fontsize);
     appName.getElement().getStyle().setFontSize(ratio, Style.Unit.EM);
