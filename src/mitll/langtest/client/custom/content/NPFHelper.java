@@ -421,7 +421,7 @@ public class NPFHelper implements RequiresResize {
 
     protected class MyFlexSectionExerciseList extends FlexSectionExerciseList {
       public MyFlexSectionExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, boolean incorrectFirst) {
-        super(topRow, currentExercisePanel, FlexListLayout.this.service, FlexListLayout.this.feedback, false, FlexListLayout.this.controller, instanceName, incorrectFirst);
+        super(topRow, currentExercisePanel, FlexListLayout.this.service, FlexListLayout.this.feedback, FlexListLayout.this.controller, instanceName, incorrectFirst);
       }
 
       @Override
