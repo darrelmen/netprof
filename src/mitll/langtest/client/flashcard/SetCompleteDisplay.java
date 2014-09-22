@@ -229,31 +229,12 @@ public class SetCompleteDisplay {
                 if (columnText.length() > MAX_LENGTH_ID)
                   columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
 
-                StringBuilder builder = new StringBuilder();
-                List<CorrectAndScore> correctAndScores = shell.getCorrectAndScores();
-                int size = correctAndScores.size();
-                if (size > MAX_TO_SHOW) correctAndScores = correctAndScores.subList(size - MAX_TO_SHOW, size);
-                for (CorrectAndScore correctAndScore : correctAndScores) {
-                  boolean correct = correctAndScore.isCorrect();
-                  String icon =
-                      correct ? "icon-plus-sign" :
-                          "icon-minus-sign";
-                 // String color = SimpleColumnChart.getColor(((float)correctAndScore.getScore())/100f);
-                  builder.append("<i " +
-                      (correct ? "style='color:" +
-                          "green" +
-                          "'" :
-                          "style='color:" +
-                              "red" +
-                              "'") +
-                      " class='" +
-                      icon +
-                      "'></i>" +
+                String history = SetCompleteDisplay.this.getScoreHistory(shell);
 
-                      "&nbsp;");
-                }
-
-                String s = "<span style='float:right;margin-right:-10px;'>" + builder.toString() + "</span>";
+                String s = "<span style='float:right;" +
+                    "margin-right:-10px;" +
+                    "'>" + history+ "&nbsp;" +shell.getAvgScorePercent()+
+                    "</span>";
                 html = "<span style='float:left;margin-left:-10px;'>" + columnText + "</span>" + s;
 
               }
@@ -277,6 +258,38 @@ public class SetCompleteDisplay {
     container.flush();
 
     return tableWithPager;
+  }
+
+  protected String getScoreHistory(ExerciseCorrectAndScore shell) {
+    List<CorrectAndScore> correctAndScores = shell.getCorrectAndScores();
+    return getScoreHistory(correctAndScores);
+  }
+
+  public static String getScoreHistory(List<CorrectAndScore> correctAndScores) {
+    int size = correctAndScores.size();
+    if (size > MAX_TO_SHOW) correctAndScores = correctAndScores.subList(size - MAX_TO_SHOW, size);
+
+    StringBuilder builder = new StringBuilder();
+    for (CorrectAndScore correctAndScore : correctAndScores) {
+      boolean correct = correctAndScore.isCorrect();
+      String icon =
+          correct ? "icon-plus-sign" :
+              "icon-minus-sign";
+     // String color = SimpleColumnChart.getColor(((float)correctAndScore.getScore())/100f);
+      builder.append("<i " +
+          (correct ? "style='color:" +
+              "green" +
+              "'" :
+              "style='color:" +
+                  "red" +
+                  "'") +
+          " class='" +
+          icon +
+          "'></i>" +
+
+          "&nbsp;");
+    }
+    return builder.toString();
   }
 
   private String bold(AVPHistoryForList.UserScore score, String html) {
