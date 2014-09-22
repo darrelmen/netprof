@@ -13,14 +13,7 @@ import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -46,7 +39,7 @@ public class PagingExerciseList extends ExerciseList {
   protected PagingContainer pagingContainer;
   private final boolean showTypeAhead;
 
-  private TextBox typeAhead = new TextBox();
+  private final TextBox typeAhead = new TextBox();
   private String lastTypeAheadValue = "";
   protected long userListID = -1;
   private int unaccountedForVertical = 160;
@@ -122,12 +115,12 @@ public class PagingExerciseList extends ExerciseList {
    */
   protected String getPrefix() { return typeAhead.getText(); }
 
-  private ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget user) {
+  private ControlGroup addControlGroupEntry(Panel dialogBox, Widget user) {
     final ControlGroup userGroup = new ControlGroup();
     userGroup.addStyleName("leftFiveMargin");
 
     Controls controls = new Controls();
-    userGroup.add(new ControlLabel(label));
+    userGroup.add(new ControlLabel("Search"));
     controls.add(user);
     userGroup.add(controls);
 
@@ -176,7 +169,7 @@ public class PagingExerciseList extends ExerciseList {
   }
 
   /**
-   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#FlexSectionExerciseList(com.google.gwt.user.client.ui.Panel, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, boolean, boolean, mitll.langtest.client.exercise.ExerciseController, boolean, String, boolean)
+   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#FlexSectionExerciseList(com.google.gwt.user.client.ui.Panel, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, boolean, mitll.langtest.client.exercise.ExerciseController, String, boolean)
    * @param v
    */
   public void setUnaccountedForVertical(int v) {
@@ -193,8 +186,8 @@ public class PagingExerciseList extends ExerciseList {
   }
 
   private Timer waitTimer = null;
-  private SafeUri animated = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress28.gif");
-  private SafeUri white = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "white_32x32.png");
+  private final SafeUri animated = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress28.gif");
+  private final SafeUri white = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "white_32x32.png");
   private final com.github.gwtbootstrap.client.ui.Image waitCursor = new com.github.gwtbootstrap.client.ui.Image(white);
 
   /**
@@ -224,7 +217,7 @@ public class PagingExerciseList extends ExerciseList {
       waitCursor.getElement().getStyle().setMarginTop(-7, Style.Unit.PX);
       waitCursor.setUrl(white);
 
-      addControlGroupEntry(column, "Search", flow);
+      addControlGroupEntry(column, flow);
       Scheduler.get().scheduleDeferred(new Command() {
         public void execute() {
           typeAhead.setFocus(true);
