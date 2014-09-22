@@ -2,9 +2,7 @@ package mitll.langtest.client.custom;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.CheckBox;
-import com.github.gwtbootstrap.client.ui.FluidContainer;
-import com.github.gwtbootstrap.client.ui.FluidRow;
-import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.InlineLabel;
@@ -16,15 +14,9 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.ScrollPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.custom.content.AVPHelper;
@@ -50,11 +42,7 @@ import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserList;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -148,14 +136,14 @@ public class Navigation implements RequiresResize {
         return new GoodwaveExercisePanelFactory(service, feedback, controller, exerciseList, 1.0f) {
           @Override
           public Panel getExercisePanel(CommonExercise e) {
-            return new CommentNPFExercise(e, controller, exerciseList, 1.0f, false, CLASSROOM);
+            return new CommentNPFExercise(e, controller, exerciseList, false, CLASSROOM);
           }
         };
       }
     };
 
     practiceHelper = makePracticeHelper(service, userManager, controller, feedback);
-    reviewItem = new NPFHelper.ReviewItemHelper(service, feedback, userManager, controller, null, predefinedContentList, npfHelper);
+    reviewItem = new NPFHelper.ReviewItemHelper(service, feedback, userManager, controller, predefinedContentList, npfHelper);
     editItem = new EditItem(service, userManager, controller, predefinedContentList, feedback, npfHelper);
   }
 
@@ -569,9 +557,6 @@ public class Navigation implements RequiresResize {
       } else if (value.equals(CONTENT) && contentTab != null) {
         contentHelper.showNPF(contentTab, CONTENT1);
       } else if (value.equals(PRACTICE) && practiceTab != null) {
-
-        System.out.println("showing practice\n\n\n ");
-
         practiceHelper.showNPF(practiceTab, PRACTICE);
         practiceHelper.hideList();
       } else {
@@ -1140,7 +1125,7 @@ public class Navigation implements RequiresResize {
   }
 
   private class RecorderNPFHelper extends SimpleChapterNPFHelper {
-    boolean doNormalRecording;
+    final boolean doNormalRecording;
 
     public RecorderNPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager, ExerciseController controller, boolean doNormalRecording) {
       super(service, feedback, userManager, controller, Navigation.this.listInterface);
