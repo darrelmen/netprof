@@ -6,11 +6,7 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.list.HistoryExerciseList;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 //import mitll.langtest.client.list.section.SectionExerciseList;
 
