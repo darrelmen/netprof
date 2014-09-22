@@ -1,21 +1,20 @@
 package mitll.langtest.client.custom.exercise;
 
 import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.ButtonGroup;
+import com.github.gwtbootstrap.client.ui.ButtonToolbar;
 import com.github.gwtbootstrap.client.ui.RadioButton;
-import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
-import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.CloseEvent;
-import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.AudioTag;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.BrowserCheck;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -28,7 +27,9 @@ import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseFormatter;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -50,8 +51,8 @@ public class CommentNPFExercise extends NPFExercise {
   private CommentBox commentBox;
 
   public CommentNPFExercise(CommonExercise e, ExerciseController controller, ListInterface listContainer,
-                            float screenPortion, boolean addKeyHandler, String instance) {
-    super(e, controller, listContainer, screenPortion, addKeyHandler, instance);
+                            boolean addKeyHandler, String instance) {
+    super(e, controller, listContainer, 1.0f, addKeyHandler, instance);
   }
 
   /**
@@ -220,7 +221,7 @@ public class CommentNPFExercise extends NPFExercise {
 
 
   private void addGenderChoices(CommonExercise e, Panel hp) {
-    String path = null;
+    String path;
 
     long maleTime = 0, femaleTime = 0;
     for (AudioAttribute audioAttribute : e.getAudioAttributes()) {
@@ -328,7 +329,7 @@ public class CommentNPFExercise extends NPFExercise {
    * @see #makeFastAndSlowAudio(String)
    */
   private Widget getEntry(final String field, final String label, String value, ExerciseAnnotation annotation) {
-    return commentBox.getEntry(field, getContentWidget(label, value, true, false), annotation);
+    return commentBox.getEntry(field, getContentWidget(label, value, false), annotation);
   }
 
   /**
