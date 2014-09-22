@@ -94,9 +94,8 @@ class StudentDialog extends UserDialog {
     dialogBox.setAnimation(false);
     dialogBox.setMaxHeigth("760px");
 
-    Element element = dialogBox.getElement();
-    element.setId("Student_LoginBoxDialog");
-    element.getStyle().setTop(1, Style.Unit.PCT);
+    dialogBox.getElement().setId("Student_LoginBoxDialog");
+    dialogBox.getElement().getStyle().setTop(1, Style.Unit.PCT);
     Form form = new Form();
     form.addStyleName("form-horizontal");
     form.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
