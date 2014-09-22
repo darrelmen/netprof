@@ -7,10 +7,8 @@ import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
-import mitll.langtest.shared.ScoreAndPath;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +32,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   private long creator;
   private boolean isPredef;
   private boolean isOverride;
-  private Date modifiedDate;
+  private long modifiedTimestamp;
   private List<CorrectAndScore> scores;
   private float avgScore;
   private static final int MAX_TOOLTIP_LENGTH = 15;
@@ -86,17 +84,17 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
    * @param transliteration
    * @param context
    * @param isOverride
-   * @param modifiedDate
+   * @param modifiedTimestamp
    */
   public UserExercise(long uniqueID, String exerciseID, long creator, String english, String foreignLanguage,
                       String transliteration, String context,
                       boolean isOverride,
-                      Map<String, String> unitToValue, Date modifiedDate
+                      Map<String, String> unitToValue, long modifiedTimestamp
   ) {
     this(uniqueID, exerciseID, creator, english, foreignLanguage, transliteration);
     setUnitToValue(unitToValue);
     this.isOverride = isOverride;
-    this.modifiedDate = modifiedDate;
+    this.modifiedTimestamp = modifiedTimestamp;
     this.context = context;
   }
 
@@ -250,8 +248,8 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   public boolean checkPredef() {  return !getID().startsWith(CUSTOM_PREFIX);  }
 
   @Override
-  public Date getModifiedDate() {
-    return modifiedDate;
+  public long getModifiedDateTimestamp() {
+    return modifiedTimestamp;
   }
 
   public List<CorrectAndScore> getScores() {
@@ -284,6 +282,6 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
       "' audio attr (" + getAudioAttributes().size() +
       ") :" + getAudioAttributes() + " unit/lesson " + getUnitToValue() +
       " state " + getState()+"/" +getSecondState()+
-      " modified " + modifiedDate;
+      " modified " + modifiedTimestamp;
   }
 }
