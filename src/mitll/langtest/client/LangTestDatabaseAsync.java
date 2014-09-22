@@ -1,18 +1,9 @@
 package mitll.langtest.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.AudioAttribute;
-import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.ExerciseListWrapper;
-import mitll.langtest.shared.ImageResponse;
-import mitll.langtest.shared.Result;
-import mitll.langtest.shared.STATE;
-import mitll.langtest.shared.StartupInfo;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.*;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.monitoring.Session;
@@ -32,7 +23,7 @@ public interface LangTestDatabaseAsync {
   void getUsers(AsyncCallback<List<User>> async);
   void getUserBy(long id, AsyncCallback<User> async);
 
-  void writeAudioFile(String base64EncodedString, String plan, String exercise, int question, int user,
+  void writeAudioFile(String base64EncodedString, String exercise, int question, int user,
                       int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults, boolean addToAudioTable, boolean recordedWithFlash, AsyncCallback<AudioAnswer> async);
 
   void getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence, int width, int height, boolean useScoreToColorBkg, String exerciseID, AsyncCallback<PretestScore> async);
