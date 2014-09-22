@@ -4,11 +4,7 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.WavCallback;
@@ -47,15 +43,15 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
   /**
    * Has three parts -- record/stop button, audio validity feedback icon, and the audio control widget that allows playback.
    *
-   * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#FlashcardRecordButtonPanel(mitll.langtest.client.flashcard.AudioAnswerListener, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.CommonExercise, int, String, String)
+   * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#FlashcardRecordButtonPanel(mitll.langtest.client.flashcard.AudioAnswerListener, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.CommonExercise, int, String)
    */
   protected RecordButtonPanel(final LangTestDatabaseAsync service, final ExerciseController controller,
-                              final CommonExercise exercise, final ExerciseQuestionState questionState, final int index,
+                              final CommonExercise exercise, final int index,
                               boolean doFlashcardAudio, String audioType, String recordButtonTitle){
     this.service = service;
     this.controller = controller;
     this.exercise = exercise;
-    this.questionState = questionState;
+    this.questionState = null;
     this.index = index;
     this.doFlashcardAudio = doFlashcardAudio;
     layoutRecordButton(recordButton = makeRecordButton(controller,recordButtonTitle));
@@ -143,8 +139,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
 
     final int len = base64EncodedWavFile.length();
     service.writeAudioFile(base64EncodedWavFile,
-      "plan",
-      exercise.getID(),
+        exercise.getID(),
       index,
       controller.getUser(),
       reqid,
