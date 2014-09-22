@@ -301,7 +301,7 @@ public class DatabaseImpl implements Database {
   public List<CommonExercise> getExercises() { return getExercises(useFile, lessonPlanFile); }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise
+   * @see mitll.langtest.server.LoadTesting#getExercise
    * @param id
    * @return
    */
@@ -917,7 +917,7 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise
+   * @see mitll.langtest.server.LoadTesting#getExercise
    * @param id
    * @return
    */
@@ -930,7 +930,7 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise
+   * @see mitll.langtest.server.LoadTesting#getExercise
    * @param id
    * @return
    */
