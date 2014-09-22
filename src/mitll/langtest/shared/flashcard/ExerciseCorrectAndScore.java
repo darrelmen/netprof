@@ -86,19 +86,23 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
     return c / (float) toUse.size();
   }
 
-
   private float getAvgScore() {
     if  (isEmpty()) return 0f;
 
     float c = 0;
+    float n = 0;
     List<CorrectAndScore> toUse= getCorrectAndScores();
     if (toUse.size() > 5) toUse=toUse.subList(toUse.size()-5,toUse.size());
     for (CorrectAndScore correctAndScore : toUse) {
-       c += (float) correctAndScore.getPercentScore();
+      if (correctAndScore.getScore() > 0) {
+        c += (float) correctAndScore.getPercentScore();
+        n++;
+      }
     }
-    return c / (float) toUse.size();
+    return n > 0f? c / n : 0f;
   }
 
+  public int getAvgScorePercent() { return Math.round(getAvgScore());}
 
   public void add(CorrectAndScore correctAndScore) {
     getCorrectAndScores().add(correctAndScore);
