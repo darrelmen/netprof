@@ -35,7 +35,7 @@ public class GoodwaveExercisePanelFactory extends ExercisePanelFactory {
   @Override
   public Panel getExercisePanel(CommonExercise e) {
     return new GoodwaveExercisePanel(e, controller, exerciseList, screenPortion,
-      !controller.getProps().isClassroomMode() // don't do keybinding stuff in classroom mode... at least for now
+      false // don't do keybinding stuff in classroom mode... at least for now
       ,
       "normal");
   }
