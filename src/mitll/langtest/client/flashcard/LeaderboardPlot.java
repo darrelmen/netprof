@@ -178,7 +178,8 @@ public class LeaderboardPlot {
   }
 
   private static class Range {
-    float from,to;
+    final float from;
+    final float to;
     public Range(float from, float to) {
       this.from = from;
       this.to = to;
