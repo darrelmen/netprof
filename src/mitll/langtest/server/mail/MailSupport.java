@@ -20,6 +20,8 @@ public class MailSupport {
   private static final String DATA_COLLECT_WEBMASTER = "Data Collect Webmaster";
   private static final Logger logger = Logger.getLogger(MailSupport.class);
   private static final String EMAIL = "gordon.vidaver@ll.mit.edu";
+  private static final String LOCALHOST = "localhost";
+  private static final int MAIL_PORT = 1025;
   private final boolean debugEmail;
 
   /**
@@ -31,90 +33,87 @@ public class MailSupport {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#sendEmail(int, String, String, String, String, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#sendEmail(String, String, String, String, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addUser(String, String, String, mitll.langtest.shared.User.Kind, String, String)
    * @param serverName
    * @param baseURL
    * @param to
    * @param replyTo
    * @param subject
    * @param message
-   * @param token
+   * @param linkText
    */
-  public void sendEmail(String serverName, String baseURL, String to, String replyTo, String subject, String message, String token) {
+  public void sendEmail(String serverName, String baseURL, String to, String replyTo, String subject, String message, String linkText) {
     List<String> toAddresses = (to.contains(",")) ? Arrays.asList(to.split(",")) : new ArrayList<String>();
     if (toAddresses.isEmpty()) {
       toAddresses.add(to);
     }
-//    logger.debug("server info " + getServletContext().getServerInfo());
-    //  URI uri = new URI();
-    //String serverName = getThreadLocalRequest().getServerName();
-    logger.info("server name " + serverName);
-/*
-    String link = "\nHere's a link <a href='" + getBaseUrl() + "#" + URLEncoder.encode(token) +
-      "'>" + linkTitle + "</a>.\n";
-    //message += link;
 
-    logger.info("link " +link);*/
+    String body = getHTMLEmail(linkText, message, baseURL);
 
-    String link2 = baseURL + "?showSectionWidgets=false"+"#" + URLEncoder.encode(token);
-    String body = "<html>" +
-      "<head>" +
-      "</head>" +
-      "<body lang=EN-US link=blue vlink=purple style='tab-interval:.5in'>" +
-      "<div align=center>" +
-      "<table>" +
-      (message.length() > 0 ?
-        "<tr>" +
-          "    <td colspan=2 style='padding:.75pt .75pt .75pt .75pt'>\n" +
-          "    <p ><span style='font-size:13.0pt;font-family:\"Georgia\",\"serif\";\n" +
-          "    color:#333333'>" +
-          message +
-          "<p></p></span></p>\n" +
-          "    </td>" +
-          "</tr>" : "") +
-      "     <tr >\n" +
-      "      <td style='border:none;padding:10.5pt 10.5pt 10.5pt 10.5pt'>\n" +
-      "      <h1 style='margin-top:0in;margin-right:0in;margin-bottom:3.0pt;\n" + "      margin-left:0in'>" +
-      "<span style='font-size:12.5pt;font-family:\"Georgia\",\"serif\";\n" +  "      font-weight:normal'>" +
-      "<a\n" + "      href=\"" +
-      link2 +
-      "\">" +
-      "<span\n" + "      style='color:#004276'>" +
-      subject +
-      "</span>" +
-      "</a><p></p>" +
-      "</span>" +
-      "</h1>\n" +
-      "      </td>\n" +
-      "     </tr>" +
-
-      "   <tr>\n" +
-      "    <td style='padding:0in 0in 0in 0in'>\n" +
-      "    <p>" +
-      "<span style='font-size:8.5pt;font-family:\"Arial\",\"sans-serif\";\n" +
-      "    color:#333333'>Or, copy and paste this URL into your browser: <a\n" +
-      "    href=\"" +
-      link2 +
-      "\"><b>" +
-      "<span\n" +
-      "    style='color:#004276'>" +
-      link2 +
-      "</span></b></a>" +
-      "<p></p></span>" +
-      "</p>\n" +
-      "    </td>\n" +
-      //     "    <td style='padding:.75pt .75pt .75pt .75pt'></td>\n" +
-      "   </tr>"+
-
-      "</table>" +
-      "</div>" +
-      "</body>" +
-      "</html>";
-
-    String fromEmail = "email@" + serverName;
+    String fromEmail = "admin@" + serverName;
     normalFullEmail(fromEmail, fromEmail, replyTo, toAddresses,
-      subject,
-      body);
+        subject,
+        body);
+  }
+
+  public String getHTMLEmail(String linkText, String message, String link2) {
+    return "<html>" +
+        "<head>" +
+        "</head>" +
+
+        "<body lang=EN-US link=blue vlink=purple style='tab-interval:.5in'>" +
+        "<div align=center>" +
+        "<table>" +
+        (message.length() > 0 ?
+            "<tr>" +
+                "    <td colspan=2 style='padding:.75pt .75pt .75pt .75pt'>\n" +
+                "    <p ><span style='font-size:13.0pt;font-family:\"Georgia\",\"serif\";\n" +
+                "    color:#333333'>" +
+                message +
+                "<p></p></span></p>\n" +
+                "    </td>" +
+                "</tr>" : "") +
+        "     <tr >\n" +
+        "      <td style='border:none;padding:10.5pt 10.5pt 10.5pt 10.5pt'>\n" +
+        "      <h1 style='margin-top:0in;margin-right:0in;margin-bottom:3.0pt;\n" + "      margin-left:0in'>" +
+        "<span style='font-size:12.5pt;font-family:\"Georgia\",\"serif\";\n" + "      font-weight:normal'>" +
+        "<a\n" + "      href=\"" +
+        link2 +
+        "\">" +
+        "<span\n" + "      style='color:#004276'>" +
+        linkText +
+        "</span>" +
+        "</a>" +
+
+        "<p></p>" +
+        "</span>" +
+        "</h1>\n" +
+        "      </td>\n" +
+        "     </tr>" +
+
+        "   <tr>\n" +
+        "    <td style='padding:0in 0in 0in 0in'>\n" +
+        "    <p>" +
+        "<span style='font-size:8.5pt;font-family:\"Arial\",\"sans-serif\";\n" +
+        "    color:#333333'>Or, copy and paste this URL into your browser: <a\n" +
+        "    href=\"" +
+        link2 +
+        "\"><b>" +
+        "<span\n" +
+        "    style='color:#004276'>" +
+        link2 +
+        "</span></b></a>" +
+        "<p></p></span>" +
+        "</p>\n" +
+        "    </td>\n" +
+        //     "    <td style='padding:.75pt .75pt .75pt .75pt'></td>\n" +
+        "   </tr>" +
+
+        "</table>" +
+        "</div>" +
+        "</body>" +
+        "</html>";
   }
 
   /**
@@ -124,11 +123,19 @@ public class MailSupport {
    * @param subject
    * @param message
    */
-  public void email(String subject, String message) {
-    normalEmail(RECIPIENT_NAME, EMAIL, new ArrayList<String>(),subject, message,"localhost");
-  }
+ /* private void email(String subject, String message) {
+    normalEmail(RECIPIENT_NAME, EMAIL, new ArrayList<String>(),subject, message, LOCALHOST);
+  }*/
+
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#logAndNotifyServerException(Exception)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#logMessage(String)
+   * @param receiver
+   * @param subject
+   * @param message
+   */
   public void email(String receiver, String subject, String message) {
-    normalEmail(RECIPIENT_NAME, receiver, new ArrayList<String>(),subject, message,"localhost");
+    normalEmail(RECIPIENT_NAME, receiver, new ArrayList<String>(),subject, message, LOCALHOST);
   }
 
 /*  public void email(String recipientName, String recipientEmail, String subject, String message) {
@@ -156,19 +163,24 @@ public class MailSupport {
       Message msg = makeMessage(session, recipientName, recipientEmail, ccEmails, subject, message);
       Transport.send(msg);
     } catch (Exception e) {
-      logger.error("Couldn't send email to " +recipientEmail+". Got " +e,e);
+      if (e.getMessage().contains("Could not connect to SMTP")) {
+        logger.info("couldn't send email - no mail daemon? ");
+      }
+      else {
+        logger.error("Couldn't send email to " +recipientEmail+". Got " +e,e);
+      }
     }
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#sendEmail
+   * @see #sendEmail(String, String, String, String, String, String, String)
    * @param senderName
    * @param senderEmail
    * @param recipientEmails
    * @param subject
    * @param message
    */
-  public void normalFullEmail(String senderName,
+  private void normalFullEmail(String senderName,
                               String senderEmail,
                               String replyToEmail,
                               List<String> recipientEmails,
@@ -176,15 +188,27 @@ public class MailSupport {
                               String subject, String message) {
     try {
       Properties props = new Properties();
-      props.put("mail.smtp.host", "localhost");
+      props.put("mail.smtp.host", LOCALHOST);
       props.put("mail.debug", ""+debugEmail);
+
+      // TODO : Remove me!
+      if (debugEmail) {
+        props.put("mail.smtp.port", MAIL_PORT);
+        logger.debug("using port " + MAIL_PORT);
+      }
+
       Session session = Session.getDefaultInstance(props, null);
       Message msg = makeHTMLMessage(session,
         senderName, senderEmail, replyToEmail, recipientEmails,
         subject, message);
       Transport.send(msg);
     } catch (Exception e) {
-      logger.error("Couldn't send email to " +recipientEmails+". Got " +e,e);
+      if (e.getMessage().contains("Could not connect to SMTP")) {
+        logger.info("couldn't send email - no mail daemon? subj " + subject,e);
+      }
+      else {
+        logger.error("Couldn't send email to " + recipientEmails + ". Got " + e, e);
+      }
     }
   }
 
