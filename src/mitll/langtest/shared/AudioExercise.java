@@ -62,7 +62,9 @@ public class AudioExercise extends ExerciseShell {
 
   public void addAudio(AudioAttribute audioAttribute) {
     if (audioAttribute == null) throw new IllegalArgumentException("adding null audio?");
-    audioAttributes.put(audioAttribute.getKey(),audioAttribute);
+    else {
+      audioAttributes.put(audioAttribute.getKey(), audioAttribute);
+    }
   }
 
   /**
@@ -395,6 +397,7 @@ public class AudioExercise extends ExerciseShell {
    * @param value
    */
   public void addUnitToValue(String unit, String value) {
+    if (value == null) return;
     if (value.isEmpty()) {
       System.out.println("addUnitToValue " + unit + " value " + value);
     }
