@@ -24,9 +24,9 @@ import java.util.Map;
  * Created by go22670 on 9/8/14.
  */
 public class CommentBox extends PopupContainer {
-  private CommonExercise exercise;
-  private CommentAnnotator commentAnnotator;
-  private EventRegistration registration;
+  private final CommonExercise exercise;
+  private final CommentAnnotator commentAnnotator;
+  private final EventRegistration registration;
   private MyPopup commentPopup;
 
   /**
