@@ -44,19 +44,15 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
   private static final String START_OVER = "Start Over";
 
   private static final String SKIP_TO_END = "See your scores";
- // private static final int TABLE_WIDTH = 2 * 275;
   private static final boolean ADD_KEY_BINDING = true;
- // public static final String JUMP_TO_THE_END = "Jump to end and see your scores.";
  private static final String JUMP_TO_THE_END = "See your scores.";
 
   private CommonExercise currentExercise;
   private final ControlState controlState;
   private List<CommonShell> allExercises;//, originalExercises;
-  //private List<CommonShell> incorrectFirst = new ArrayList<CommonShell>();
 
   private final Map<String,Boolean> exToCorrect = new HashMap<String, Boolean>();
   private final Map<String,Double>   exToScore = new HashMap<String, Double>();
-  //private final Set<String> skipped = new HashSet<String>();
   private final Set<Long> resultIDs = new HashSet<Long>();
   private String selectionID = "";
   private final String instance;
@@ -152,9 +148,9 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
   private void reset() {
     exToCorrect.clear();
     exToScore.clear();
-    //skipped.clear();
     latestResultID = -1;
     resultIDs.clear();
+    sticky.clearCurrent();
   }
 
   public String getCurrentExerciseID() { return sticky.getCurrentExerciseID(); }
@@ -189,16 +185,6 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
         }
       }
     }
-
-/*    value = sticky.getSkipped();
-    if (value != null && !value.trim().isEmpty()) {
-      for (String pair : value.split(",")) {
-        String trim = pair.trim();
-        if (!trim.isEmpty()) {
-          skipped.add(trim);
-        }
-      }
-    }*/
   }
 
   private long latestResultID = -1;
@@ -210,15 +196,10 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
 
   public void setSelection(Map<String, Collection<String>> selection) { this.selection = selection;  }
 
-/*  public Map<String, Collection<String>> getSelection() {
-    return selection;
-  }*/
-
   /**
    * @see #getExercisePanel(mitll.langtest.shared.CommonExercise)
    */
   private class StatsPracticePanel extends BootstrapExercisePanel {
-    String currentExerciseID;
     private Widget container;
     final SetCompleteDisplay completeDisplay = new SetCompleteDisplay();
     public StatsPracticePanel(CommonExercise e, ListInterface exerciseListToUse) {
@@ -341,18 +322,15 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
       setMainContentVisible(false);
       container = completeDisplay.showFeedbackCharts(result, exToScore, getCorrect(), getIncorrect(), allExercises.size());
       Panel leftRight = new HorizontalPanel();
-     // belowContentDiv.add(container);
       belowContentDiv.add(leftRight);
       scoreHistory = completeDisplay.getScoreHistory(sortedHistory, allExercises, controller);
-      //scoreHistory.addStyleName("floatLeft");
       leftRight.add(scoreHistory);
       Panel child = new VerticalPanel();
       scoreHistory.add(child);
 
-      final Button w = getIncorrectListButton(sortedHistory);
+      final Button w = getIncorrectListButton();
       child.add(w);
       w.addStyleName("topFiveMargin");
-      //child.add(getInOrderButton());
       Button repeatButton = getRepeatButton();
       repeatButton.addStyleName("topFiveMargin");
 
@@ -361,14 +339,11 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
       DivWidget right = new DivWidget();
       right.add(container);
       leftRight.add(right);
-      //belowContentDiv.add(getRepeatButton());
-
       sticky.resetStorage();
     }
 
-    private Button getIncorrectListButton(final List<ExerciseCorrectAndScore> sortedHistory) {
+    private Button getIncorrectListButton() {
       final Button w = new Button();
-      //w.setIcon(IconType.);
       w.setType(ButtonType.SUCCESS);
       w.setText(START_OVER);
       w.setIcon(IconType.REPEAT);
@@ -377,7 +352,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
         @Override
         public void onClick(ClickEvent event) {
           w.setVisible(false);
-          doIncorrectFirst( sortedHistory);
+          doIncorrectFirst();
         }
       });
 
@@ -385,46 +360,15 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
       return w;
     }
 
-/*    private Button getStartOve(final List<ExerciseCorrectAndScore> sortedHistory) {
-      final Button w = new Button();
-      //w.setIcon(IconType.);
-      w.setType(ButtonType.PRIMARY);
-      w.setText("Do these again");
 
-      w.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          w.setVisible(false);
-          doIncorrectFirst( sortedHistory);
-        }
-      });
-
-      controller.register(w, currentExercise.getID());
-      return w;
-    }*/
-
-    protected void doIncorrectFirst(List<ExerciseCorrectAndScore> sortedHistory) {
+    protected void doIncorrectFirst() {
       abortPlayback();
       setMainContentVisible(true);
       belowContentDiv.clear();
 
-/*      final Map<String,CommonShell> idToExercise = new HashMap<String, CommonShell>();
-      for (CommonShell commonShell : allExercises) {
-        idToExercise.put(commonShell.getID() +"/1",commonShell);
-      }*/
-/*      incorrectFirst.clear();
-
-      for (ExerciseCorrectAndScore exerciseCorrectAndScore : sortedHistory) {
-        incorrectFirst.add(idToExercise.get(exerciseCorrectAndScore.getId()));
-      }
-      allExercises = incorrectFirst;*/
-
       currentExercise = null;
-     // exerciseList.rememberExercises(allExercises);
       reset();
 
-     // String first = allExercises.iterator().next().getID();
-     // exerciseList.loadExercise(first);
       exerciseList.reload(selection);
       makeFlashcardButtonsVisible();
 
@@ -467,60 +411,21 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
           startOver();
         }
       });
-   //   w1.getElement().getStyle().setMarginTop(-5, Style.Unit.PX);
       controller.register(w1, currentExercise.getID());
       return w1;
     }
 
-/*    private Button getInOrderButton() {
-      final Button w1 = new Button("Do in order.");
-      w1.setIcon(IconType.UNDO);
-      w1.getElement().setId("AVP_DoWholeSetFromStart2");
-      w1.setType(ButtonType.PRIMARY);
-      w1.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          abortPlayback();
-          w1.setVisible(false);
-          setMainContentVisible(true);
-          belowContentDiv.remove(container);
-
-          startOver();
-        }
-      });
-     // w1.getElement().getStyle().setMarginTop(-5, Style.Unit.PX);
-      controller.register(w1, currentExercise.getID());
-      return w1;
-    }*/
-
-    /**
-     * Don't count these items in the scoring for this user.
-     */
-    void startOverAndForgetScores() {
-      System.out.println(START_OVER + " : set of ids is "+resultIDs.size());
-      service.setAVPSkip(resultIDs, new AsyncCallback<Void>() {
-        @Override
-        public void onFailure(Throwable caught) {
-        }
-
-        @Override
-        public void onSuccess(Void result) {
-          // System.out.println("!setAVPSkip success!");
-        }
-      });
-    }
-
-    /**
+     /**
      * If we're coming back to the cards at the end, we want to start over from the start,
      * otherwise, we want to pick back up where we left off.
      * @see #getRepeatButton()
      * @see #getStartOver()
      */
     void startOver() {
-      //skip.setVisible(true);
       makeFlashcardButtonsVisible();
 
       String lastID = allExercises.get(allExercises.size() - 1).getID();
+      String currentExerciseID = sticky.getCurrentExerciseID();
       if (currentExerciseID != null && !currentExerciseID.equals(lastID)) {
         exerciseList.loadExercise(currentExerciseID);
       } else {
@@ -551,10 +456,6 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
       }
       else {
         int delayMillis = DELAY_MILLIS;
-     //   System.out.println("control state " + controlState);
-     /*   if ((controlState.isEnglish() || controlState.isForeign())) {
-          delayMillis *= 3;
-        }*/
         loadNextOnTimer(delayMillis);
       }
     }
@@ -593,9 +494,10 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
         @Override
         public void onClick(ClickEvent event) {
           abortPlayback();
-          currentExerciseID = null;
+          sticky.clearCurrent();
+
           startOver.setEnabled(false);
-          startOverAndForgetScores();
+          //startOverAndForgetScores();
           startOverInOrder();
         }
       });
@@ -605,11 +507,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
       return startOver;
     }
 
-    protected void startOverInOrder() {
-      //allExercises = originalExercises;
-     // exerciseList.rememberExercises(allExercises);
-      startOver();
-    }
+    protected void startOverInOrder() {  startOver();  }
 
     protected void abortPlayback() {
       cancelTimer();
@@ -633,7 +531,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
         public void onClick(ClickEvent event) {
           abortPlayback();
           seeScores.setEnabled(false);
-          currentExerciseID = currentExercise.getID();
+          //currentExerciseID = currentExercise.getID();
           onSetComplete();
         }
       });
