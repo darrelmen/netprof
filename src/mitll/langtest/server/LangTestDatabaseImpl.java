@@ -448,7 +448,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       db.getUserListManager().markState(exerciseShells);
     }
 
-    return new ExerciseListWrapper(reqID, exerciseShells, firstExercise);
+    ExerciseListWrapper exerciseListWrapper = new ExerciseListWrapper(reqID, exerciseShells, firstExercise);
+    logger.debug("returning " + exerciseListWrapper);
+    return exerciseListWrapper;
   }
 
   /**
@@ -645,6 +647,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     } else if (diff > 5) {
       logger.debug(message);
     }
+
+    logger.debug("returning " + byID);
     return byID;
   }
 
