@@ -9,17 +9,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
-import com.google.gwt.user.client.ui.DecoratedPopupPanel;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.ProvidesResize;
-import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.UIObject;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.custom.dialog.EditItem;
@@ -33,12 +23,7 @@ import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.Result;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Handles left side of NetPron2 -- which exercise is the current one, highlighting, etc.
@@ -131,10 +116,9 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   /**
    * @param factory
    * @param user
-   * @param expectedGrades
    * @see mitll.langtest.client.LangTest#reallySetFactory()
    */
-  public void setFactory(ExercisePanelFactory factory, UserManager user, int expectedGrades) {
+  public void setFactory(ExercisePanelFactory factory, UserManager user) {
     this.factory = factory;
     this.user = user;
   }
@@ -273,7 +257,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see ListInterface#getExercises(long)
    */
   class SetExercisesCallback implements AsyncCallback<ExerciseListWrapper> {
-    private String selectionID;
+    private final String selectionID;
 
     public SetExercisesCallback(String selectionID) {
       this.selectionID = selectionID;
@@ -310,7 +294,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see #reloadWith(String)
    */
   private class SetExercisesCallbackWithID implements AsyncCallback<ExerciseListWrapper> {
-    private String id;
+    private final String id;
 
     public SetExercisesCallbackWithID(String id) {
       this.id = id;
