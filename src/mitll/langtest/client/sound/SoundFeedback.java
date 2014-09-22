@@ -1,7 +1,5 @@
 package mitll.langtest.client.sound;
 
-import com.google.gwt.user.client.ui.HTML;
-
 /**
  * Does sound feedback - correct/incorrect to user.
  * User: GO22670
@@ -14,56 +12,16 @@ public class SoundFeedback {
   public static final String INCORRECT = "langtest/sounds/incorrect1.mp3";
   private static final int SOFT_VOL = 50;
 
-  // private final HTML warnNoFlash;
   private Sound currentSound = null;
   private final SoundManagerAPI soundManager;
 
-  public SoundFeedback(SoundManagerAPI soundManager) {
-    this(soundManager, null);
-  }
-
   /**
    * @param soundManager
-   * @param warnNoFlash
    * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#BootstrapExercisePanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, mitll.langtest.client.flashcard.ControlState, SoundFeedback, mitll.langtest.client.sound.SoundFeedback.EndListener)
    */
-  private SoundFeedback(SoundManagerAPI soundManager, HTML warnNoFlash) {
+  public SoundFeedback(SoundManagerAPI soundManager) {
     this.soundManager = soundManager;
-    //   this.warnNoFlash = warnNoFlash;
   }
-
-/*
-  public boolean playCorrect(EndListener endListener) {
-    return startSong(CORRECT, endListener, false);
-  }
-*/
-
-  /**
-   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#showIncorrectFeedback(mitll.langtest.shared.AudioAnswer, double, boolean)
-   * @param endListener
-   */
-/*  public boolean playIncorrect(EndListener endListener) {
-    return startSong(INCORRECT, endListener, true);
-  }*/
-
-/*  private boolean startSong(String path, EndListener endListener, boolean soft) {
-   //  System.out.println("SoundFeedback : start song : " + path);
-    if (soundManager.isReady()) {
-      if (soundManager.isOK()) {
-        destroySound();
-        createSound(path, endListener, soft);
-        return true;
-      } else {
-        System.out.println(new Date() + " Sound manager is not OK!.");
-        if (warnNoFlash != null) {  // TODO : remove this...
-          warnNoFlash.setVisible(true);
-        }
-        return false;
-      }
-    } else {
-      return false;
-    }
-  }*/
 
   /**
    * @param song
@@ -91,7 +49,6 @@ public class SoundFeedback {
       @Override
       public void songFirstLoaded(double durationEstimate) {
         // System.out.println("songFirstLoaded " +song);
-
       }
 
       @Override
