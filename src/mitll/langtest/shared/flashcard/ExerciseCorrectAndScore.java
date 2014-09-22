@@ -94,7 +94,7 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
     List<CorrectAndScore> toUse= getCorrectAndScores();
     if (toUse.size() > 5) toUse=toUse.subList(toUse.size()-5,toUse.size());
     for (CorrectAndScore correctAndScore : toUse) {
-       c += correctAndScore.getScore();
+       c += (float) correctAndScore.getPercentScore();
     }
     return c / (float) toUse.size();
   }
@@ -117,9 +117,10 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
 
   public String toString() {
     StringBuilder builder = new StringBuilder();
-    for (CorrectAndScore correctAndScore: getCorrectAndScores()) { if (correctAndScore.isCorrect()) builder.append("+"); else builder.append("-"); }
+    for (CorrectAndScore correctAndScore: getCorrectAndScores()) {
+      if (correctAndScore.isCorrect()) builder.append("+"); else builder.append("-");
+    }
 
-    return "id " + id + " " +builder +" correct " +getAvgCorrect() +
-        " score " + (int)getAvgScore();
+    return "id " + id + " " +builder +" correct " +getAvgCorrect() + " score " + (int)getAvgScore();
   }
 }
