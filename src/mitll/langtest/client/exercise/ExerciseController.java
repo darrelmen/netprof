@@ -36,13 +36,11 @@ public interface ExerciseController extends EventRegistration {
 
   SoundManagerAPI getSoundManager();
 
-  // parameters
-  float getScreenPortion();
   boolean showOnlyOneExercise();
+
   boolean useBkgColorForRef();
+
   int getRecordTimeout();
-  boolean isCollectAudio();
-  boolean isMinimalUI();
   boolean isGrading();
   boolean isLogClientMessages();
   String getAudioType();
@@ -53,9 +51,7 @@ public interface ExerciseController extends EventRegistration {
   void getImage(int reqid, String path, String type, int toUse, int height, String exerciseID, AsyncCallback<ImageResponse> client);
 
   String getLanguage();
-  boolean isPromptBeforeNextItem();
   boolean isRightAlignContent();
-  boolean isGoodwaveMode();
   int getLeftColumnWidth();
   int getHeightOfTopRows();
 
