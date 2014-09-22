@@ -73,13 +73,15 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     this.allowPlusInURL = controller.getProps().shouldAllowPlusInURL();
     this.controller = controller;
     this.instance = instance;
+    this.incorrectFirstOrder = incorrectFirst;
     getElement().setId("ExerciseList_" + instance);
 
     // Add history listener
-    if (handlerRegistration == null) {
+/*    if (handlerRegistration == null) {
       handlerRegistration = History.addValueChangeHandler(this);
     }
     this.incorrectFirstOrder = incorrectFirst;
+    }*/
   }
 
   private HandlerRegistration handlerRegistration;
@@ -88,8 +90,20 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   protected void onLoad() {
     super.onLoad();
 //    System.out.println("ExerciseList : History onLoad  " + instance);
+    addHistoryListener();
+  }
+
+  private void addHistoryListener() {
     if (handlerRegistration == null) {
       handlerRegistration = History.addValueChangeHandler(this);
+    }
+  }
+
+  @Override
+  public void removeHistoryListener() {
+    if (handlerRegistration != null) {
+      handlerRegistration.removeHandler();
+      handlerRegistration = null;
     }
   }
 
@@ -97,8 +111,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   protected void onUnload() {
     super.onUnload();
     //  System.out.println("ExerciseList : History onUnload  " + instance);
-    handlerRegistration.removeHandler();
-    handlerRegistration = null;
+    removeHistoryListener();
   }
 
   /**
@@ -121,6 +134,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   public void setFactory(ExercisePanelFactory factory, UserManager user) {
     this.factory = factory;
     this.user = user;
+    addHistoryListener();
   }
 
   /**
@@ -687,12 +701,12 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   protected abstract CommonShell getAt(int i);
 
-  @Override
+/*  @Override
   public int getPercentComplete() {
     float ratio = (float) getIndex(getCurrentExerciseID()) / (float) getSize();
    // System.out.println("Ratio " + ratio);
     return (int) (Math.ceil(100f * Math.abs(ratio)));
-  }
+  }*/
 
   @Override
   public int getComplete() {  return  getIndex(getCurrentExerciseID()); }
