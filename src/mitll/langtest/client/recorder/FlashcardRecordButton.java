@@ -1,10 +1,10 @@
 package mitll.langtest.client.recorder;
 
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -38,7 +38,7 @@ public class FlashcardRecordButton extends RecordButton {
 
   private boolean warnUserWhenNotSpace = true;
   private final boolean addKeyBinding;
-  private ExerciseController controller;
+  private final ExerciseController controller;
 
   /**
    * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#makeRecordButton
@@ -121,14 +121,12 @@ public class FlashcardRecordButton extends RecordButton {
         }
         else {
           //System.out.println("warn - key code is " + keyCode);
-
           warnNotASpace();
         }
       }
     }
     else {
       //System.out.println("checkKeyDown ignoring key press...");
-
     }
   }
 
@@ -196,20 +194,13 @@ public class FlashcardRecordButton extends RecordButton {
   protected void hideBothRecordImages() {
     initRecordButton();
     removeImage();
+    setIcon(IconType.MICROPHONE);
   }
 
   public void initRecordButton() {
     super.initRecordButton();
     setText(addKeyBinding ? SPACE_BAR : PROMPT);
     setType(ButtonType.PRIMARY);
-    //getFocus();
+
   }
-/*
-  private void getFocus() {
-    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-      public void execute() {
-        setFocus(true);
-      }
-    });
-  }*/
 }
