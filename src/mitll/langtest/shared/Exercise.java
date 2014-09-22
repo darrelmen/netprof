@@ -39,7 +39,7 @@ public class Exercise extends AudioExercise implements CommonExercise {
   private List<String> refSentences = new ArrayList<String>();
   private List<String> translitSentences = new ArrayList<String>();
   private STATE state;
-  private Collection<CorrectAndScore> scores;
+  private List<CorrectAndScore> scores;
   private float avgScore;
 
   public static class QAPair implements IsSerializable {
@@ -334,12 +334,12 @@ public class Exercise extends AudioExercise implements CommonExercise {
     this.state = state;
   }
 
-  public Collection<CorrectAndScore> getScores() {
+  public List<CorrectAndScore> getScores() {
     return scores;
   }
 
   @Override
-  public void setScores(Collection<CorrectAndScore> scores) { this.scores = scores; }
+  public void setScores(List<CorrectAndScore> scores) { this.scores = scores; }
 
   public float getAvgScore() {
     return avgScore;
