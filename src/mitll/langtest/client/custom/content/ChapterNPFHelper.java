@@ -13,7 +13,7 @@ import mitll.langtest.shared.custom.UserList;
  * Created by GO22670 on 3/26/2014.
  */
 public class ChapterNPFHelper extends NPFHelper {
-  private FlexListLayout flexListLayout;
+  private final FlexListLayout flexListLayout;
 
   /**
    * @see mitll.langtest.client.custom.Navigation#Navigation(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, mitll.langtest.client.user.UserFeedback)
@@ -27,7 +27,7 @@ public class ChapterNPFHelper extends NPFHelper {
                           final UserManager userManager, final ExerciseController controller, final boolean showQC) {
     super(service, feedback, userManager, controller, showQC);
     final NPFHelper outer = this;
-    this.flexListLayout = new FlexListLayout(service,feedback,userManager,controller, false) {
+    this.flexListLayout = new FlexListLayout(service,feedback,userManager,controller) {
       @Override
       protected ExercisePanelFactory getFactory(PagingExerciseList exerciseList, String instanceName) {
         return outer.getFactory(exerciseList, instanceName, showQC);
