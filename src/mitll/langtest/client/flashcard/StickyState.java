@@ -34,6 +34,8 @@ public class StickyState {
     return value;
   }
 
+  public void clearCurrent() { storage.removeValue(CURRENT_EXERCISE); }
+
   protected String getIncorrect() {
     return storage.getValue(INCORRECT);
   }
