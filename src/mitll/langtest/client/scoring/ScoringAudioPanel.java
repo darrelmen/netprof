@@ -286,7 +286,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
    * @see #addClickHandlers
    */
   private class TranscriptEventClickHandler extends MyClickHandler {
-    UIObject widget;
+    final UIObject widget;
     /**
      * @see mitll.langtest.client.scoring.ScoringAudioPanel#addClickHandlers
      * @param type
