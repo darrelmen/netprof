@@ -1,14 +1,11 @@
 package mitll.langtest.client.qc;
 
 import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.ButtonGroup;
-import com.github.gwtbootstrap.client.ui.ButtonToolbar;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.CheckBox;
-import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.TextBox;
-import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
@@ -19,13 +16,7 @@ import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.FocusWidget;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.custom.tabs.RememberTabAndContent;
@@ -38,19 +29,9 @@ import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.sound.PlayListener;
-import mitll.langtest.shared.AudioAttribute;
-import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.CommonShell;
-import mitll.langtest.shared.ExerciseAnnotation;
-import mitll.langtest.shared.ExerciseFormatter;
-import mitll.langtest.shared.MiniUser;
-import mitll.langtest.shared.STATE;
+import mitll.langtest.shared.*;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -81,8 +62,8 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   //public static final int DEFAULT_USER = -1;
   public static final int DEFAULT_MALE_ID = -2;
   public static final int DEFAULT_FEMALE_ID = -3;
-  private static MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 30, 0, "default", "default", "Male");
-  private static MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 30, 1, "default", "default", "Female");
+  private static final MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 30, 0, "default", "default", "Male");
+  private static final MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 30, 1, "default", "default", "Female");
 
   private Set<String> incorrectFields;
   private List<RequiresResize> toResize;
@@ -93,8 +74,8 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   private Tooltip nextTooltip;
 
   public QCNPFExercise(CommonExercise e, ExerciseController controller, ListInterface listContainer,
-                       float screenPortion, boolean addKeyHandler, String instance) {
-    super(e, controller, listContainer, screenPortion, addKeyHandler, instance);
+                       String instance) {
+    super(e, controller, listContainer, 1.0f, false, instance);
 
     this.listContainer = listContainer;
   }
@@ -138,7 +119,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
       public void postAnswers(ExerciseController controller, CommonExercise completedExercise) {
         nextWasPressed(listContainer, completedExercise);
       }
-    }, listContainer, true, addKeyHandler) {
+    }, listContainer, addKeyHandler) {
       /**
        * So only allow next button when all audio has been played
        * @param exercise
@@ -573,8 +554,8 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   }
 
   private static class Pair {
-    Widget entry;
-    AudioPanel audioPanel;
+    final Widget entry;
+    final AudioPanel audioPanel;
 
     public Pair(Widget entry, AudioPanel audioPanel) {
       this.entry = entry;
@@ -584,11 +565,11 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   }
 
   private Widget getEntry(CommonExercise e, final String field, final String label, String value) {
-    return getEntry(field, label, value, e.getAnnotation(field), true);
+    return getEntry(field, label, value, e.getAnnotation(field));
   }
 
-  private Widget getEntry(final String field, final String label, String value, ExerciseAnnotation annotation, boolean includeLabel) {
-    return getCommentWidget(field, getContentWidget(label, value, true, includeLabel), annotation);
+  private Widget getEntry(final String field, final String label, String value, ExerciseAnnotation annotation) {
+    return getCommentWidget(field, getContentWidget(label, value, true), annotation);
   }
 
   /**
