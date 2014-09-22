@@ -35,7 +35,7 @@ import java.util.*;
 public class FlexSectionExerciseList extends HistoryExerciseList {
   private static final int HEADING_FOR_LABEL = 4;
   private static final int UNACCOUNTED_WIDTH = 60;
-  private static final int VERTICAL_DEFAULT = 160;
+  //private static final int VERTICAL_DEFAULT = 160;
   private static final int CLASSROOM_VERTICAL_EXTRA = 270;
   private static final String SHOWING_ALL_ENTRIES = "Showing all entries";
   private static final String DOWNLOAD_SPREADSHEET = "Download spreadsheet and audio for selected sections.";
@@ -56,7 +56,6 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @param currentExerciseVPanel
    * @param service
    * @param feedback
-   * @param showInOrder
    * @param controller
    * @param instance
    * @param incorrectFirst
@@ -64,7 +63,6 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    */
   public FlexSectionExerciseList(Panel secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                  UserFeedback feedback,
-                                 boolean showInOrder,
                                  ExerciseController controller,
                                  String instance, boolean incorrectFirst) {
     super(currentExerciseVPanel, service, feedback, controller, true, instance, incorrectFirst);
@@ -80,7 +78,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     buttonTypes.add(ButtonType.SUCCESS);
     buttonTypes.add(ButtonType.INFO);
     buttonTypes.add(ButtonType.WARNING);
-    setUnaccountedForVertical(controller.getProps().isClassroomMode() ? CLASSROOM_VERTICAL_EXTRA : VERTICAL_DEFAULT);
+    setUnaccountedForVertical(CLASSROOM_VERTICAL_EXTRA);
   }
 
   /**
@@ -95,7 +93,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   /**
    *
    * @param userID
-   * @see mitll.langtest.client.LangTest#doEverythingAfterFactory
+   * @see mitll.langtest.client.LangTest#configureUIGivenUser(long)
    */
   public boolean getExercises(final long userID) {
     //System.out.println("FlexSectionExerciseList.getExercises : Get exercises for user=" + userID + " instance " + getInstance());
@@ -719,12 +717,11 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
       int width = Window.getClientWidth() - leftSideWidth - UNACCOUNTED_WIDTH;
 /*      System.out.println("FlexSectionExeciseList.setScrollPanelWidth : scrollPanel width is " + width +" client " +Window.getClientWidth() +
         " label col " +labelColumn.getOffsetWidth() + " clear " +clearColumnContainer.getOffsetWidth() + " unacct "+UNACCOUNTED_WIDTH);*/
-        scrollPanel.setWidth(Math.max(300, width) + "px");
-
+      scrollPanel.setWidth(Math.max(300, width) + "px");
     }
-    else {
+//    else {
      // System.out.println("\tsetScrollPanelWidth : labelColumn is null instance " + instance);
-    }
+  //  }
   }
 
   /**
@@ -734,8 +731,9 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    */
   private Widget getLabelWidget(String typeForOriginal) {
     Heading widget = new Heading(HEADING_FOR_LABEL, typeForOriginal);
-    widget.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
-    widget.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
+    Style style = widget.getElement().getStyle();
+    style.setMarginBottom(10, Style.Unit.PX);
+    style.setMarginRight(5, Style.Unit.PX);
     return widget;
   }
 
