@@ -346,7 +346,7 @@ public class ResultDAO extends DAO {
 
       List<CorrectAndScore> scores = getScoreResultsForQuery(connection, statement);
 
-      //if (debug) logger.debug("getResultsForExIDInForUser for  " +sql+ " got\n\t" + scores.size());
+      logger.debug("getResultsForExIDInForUser for  " +sql+ " got\n\t" + scores.size());
       return scores;
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
