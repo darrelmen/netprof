@@ -509,7 +509,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         DivWidget south = new DivWidget();
         south.add(getDownloadAnchor());
         downloadContainer.add(south);
-
         downloadContainer.setVisible(false);
         downloadContainer.addStyleName("leftFiveMargin");
 
