@@ -75,8 +75,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    // System.out.println("PostAudioRecordButton.postAudioFile : " +  getAudioType());
 
     service.writeAudioFile(base64EncodedWavFile,
-      "plan",
-      exercise.getID(),
+        exercise.getID(),
       index,
       controller.getUser(),
       reqid,
