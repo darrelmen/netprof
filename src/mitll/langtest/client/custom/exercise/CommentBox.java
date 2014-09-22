@@ -64,10 +64,10 @@ public class CommentBox extends PopupContainer {
     Button clearButton = getClearButton(commentEntryText, commentButton, field);
     commentPopup = makeCommentPopup(field, commentButton, commentEntryText, clearButton);
     commentPopup.addAutoHidePartner(commentButton.getElement()); // fix for bug Wade found where click didn't toggle comment
-    configureTextBox(annotation != null ? annotation.comment : null, commentEntryText, commentPopup);
+    configureTextBox(annotation != null ? annotation.getComment() : null, commentEntryText, commentPopup);
 
-    boolean isCorrect = annotation == null || annotation.status == null || annotation.isCorrect();
-    String comment = !isCorrect ? annotation.comment : "";
+    boolean isCorrect = annotation == null || annotation.getStatus() == null || annotation.isCorrect();
+    String comment = !isCorrect ? annotation.getComment() : "";
 /*    System.out.println("getEntry : field " + field + " annotation " + annotation +
       " correct " + isCorrect + " comment '" + comment+
       "', fields " + exercise.getFields());*/
