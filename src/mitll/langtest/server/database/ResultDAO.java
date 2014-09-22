@@ -127,6 +127,7 @@ public class ResultDAO extends DAO {
   }*/
 
   private List<Result> cachedResultsForQuery = null;
+  private List<CorrectAndScore> cachedResultsForQuery2 = null;
 
   /**
    * Pulls the list of results out of the database.
@@ -141,7 +142,7 @@ public class ResultDAO extends DAO {
           return cachedResultsForQuery;
         }
       }
-      String sql = "SELECT * FROM " + RESULTS + ";";
+      String sql = "SELECT * FROM " + RESULTS;
       List<Result> resultsForQuery = getResultsSQL(sql);
 
       synchronized (this) {
@@ -152,6 +153,26 @@ public class ResultDAO extends DAO {
       logger.error("got " + ee, ee);
     }
     return new ArrayList<Result>();
+  }
+
+  public List<CorrectAndScore> getCorrectAndScores() {
+    try {
+      synchronized (this) {
+        if (cachedResultsForQuery2 != null) {
+          return cachedResultsForQuery2;
+        }
+      }
+      String sql = getCSSelect()+ " FROM " + RESULTS;
+      List<CorrectAndScore> resultsForQuery = getScoreResultsSQL(sql);
+
+      synchronized (this) {
+        cachedResultsForQuery2 = resultsForQuery;
+      }
+      return resultsForQuery;
+    } catch (Exception ee) {
+      logger.error("got " + ee, ee);
+    }
+    return new ArrayList<CorrectAndScore>();
   }
 
   /**
@@ -168,9 +189,9 @@ public class ResultDAO extends DAO {
   public SessionsAndScores getSessionsForUserIn2(Collection<String> ids, long latestResultID, long userid,
                                                  Collection<String> allIds) {
     List<Session> sessions = new ArrayList<Session>();
-    Map<Long, List<Result>> userToAnswers = populateUserToAnswers(getResultsForExIDIn(ids, true));
+    Map<Long, List<CorrectAndScore>> userToAnswers = populateUserToAnswers(getResultsForExIDIn(ids, true));
     if (debug) logger.debug("Got " + userToAnswers.size() + " user->answer map");
-    for (Map.Entry<Long, List<Result>> userToResults : userToAnswers.entrySet()) {
+    for (Map.Entry<Long, List<CorrectAndScore>> userToResults : userToAnswers.entrySet()) {
       List<Session> c = partitionIntoSessions2(userToResults.getValue(), ids, latestResultID);
       if (debug)
         logger.debug("\tfound " + c.size() + " sessions for " + userToResults.getKey() + " " + ids + " given  " + userToResults.getValue().size());
@@ -244,29 +265,29 @@ public class ResultDAO extends DAO {
     }
   }
 
-  public void attachScoreHistory(long userID, CommonExercise firstExercise) {
-    List<Result> resultsForExercise = getResultsForExercise(firstExercise.getID());
+  public void attachScoreHistory(long userID, CommonExercise firstExercise, boolean isFlashcardRequest) {
+    List<CorrectAndScore> resultsForExercise = getResultsForExIDInForUser(Collections.singleton(firstExercise.getID()), isFlashcardRequest, userID);
 
     int total = 0;
     float scoreTotal = 0f;
-    List<ScoreAndPath> scores = new ArrayList<ScoreAndPath>();
-    for (Result r : resultsForExercise) {
-      float pronScore = r.getPronScore();
+    //List<ScoreAndPath> scores = new ArrayList<ScoreAndPath>();
+    for (CorrectAndScore r : resultsForExercise) {
+      float pronScore = r.getScore();
       if (pronScore > 0) { // overkill?
         total++;
         scoreTotal += pronScore;
-        if (r.userid == userID) {
-          scores.add(new ScoreAndPath(pronScore, r.answer));
-        }
+        //    scores.add(new ScoreAndPath(pronScore, r.answer));
       }
     }
-    firstExercise.setScores(scores);
-    firstExercise.setAvgScore(total == 0 ? 0f : scoreTotal/total);
+    firstExercise.setScores(resultsForExercise);
+    firstExercise.setAvgScore(total == 0 ? 0f : scoreTotal / total);
   }
+/*
 
   public List<Result> getResultsForExercise(String id) {
     return getResultsForExIDIn(Collections.singleton(id), false);
   }
+*/
 
   /**
    * Only take avp audio type and *valid* audio.
@@ -276,25 +297,31 @@ public class ResultDAO extends DAO {
    * @param matchAVP
    * @return
    */
-  private List<Result> getResultsForExIDIn(Collection<String> ids, boolean matchAVP) {
+
+  private List<CorrectAndScore> getResultsForExIDIn(Collection<String> ids, boolean matchAVP) {
     try {
       String list = getInList(ids);
 
-      String sql = "SELECT * FROM " + RESULTS + " where " +
+      String sql = getCSSelect()+ " FROM " + RESULTS + " WHERE " +
+        VALID + "=true" + " AND " +
+        AUDIO_TYPE + (matchAVP?"=":"<>") + "'avp'" +" AND " +
           Database.EXID + " in (" + list + ")" +
-          " AND " +
-        VALID + "=true" +
-          " AND " +
-        AUDIO_TYPE + (matchAVP?"=":"<>") + "'avp'" +
           " order by " + Database.TIME + " asc";
-      List<Result> resultsSQL = getResultsSQL(sql);
-      if (debug) logger.debug("getResultsForExIDIn for  " +sql+ " got\n\t" + resultsSQL.size());
-      return resultsSQL;
+      //List<Result> resultsSQL = getResultsSQL(sql);
+
+      Connection connection = database.getConnection(this.getClass().toString());
+      PreparedStatement statement = connection.prepareStatement(sql);
+
+      List<CorrectAndScore> scores = getScoreResultsForQuery(connection, statement);
+
+      if (debug) logger.debug("getResultsForExIDIn for  " +sql+ " got\n\t" + scores.size());
+      return scores;
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
-    return new ArrayList<Result>();
+    return new ArrayList<CorrectAndScore>();
   }
+
 
   /**
    * TODO : inefficient - better ways to do this in h2
@@ -308,11 +335,10 @@ public class ResultDAO extends DAO {
     try {
       String list = getInList(ids);
 
-      String sql = "SELECT " + Database.EXID +", "+Database.TIME + ", " + CORRECT + ", " + PRON_SCORE +
-          " FROM " + RESULTS + " where " +
-          USERID + "=" + userid + " AND "+
-          VALID + "=true" +       " AND " +
-          AUDIO_TYPE + (matchAVP?"=":"<>") + "'avp'" + " AND " +
+      String sql = getCSSelect() + " FROM " + RESULTS + " WHERE " +
+          USERID + "=" + userid + " AND " +
+          VALID + "=true" + " AND " +
+          AUDIO_TYPE + (matchAVP ? "=" : "<>") + "'avp'" + " AND " +
           Database.EXID + " in (" + list + ")";
 
       Connection connection = database.getConnection(this.getClass().toString());
@@ -328,9 +354,14 @@ public class ResultDAO extends DAO {
     return new ArrayList<CorrectAndScore>();
   }
 
+  private String getCSSelect() {
+    return "SELECT " + ID + ", " + USERID + ", " +
+        Database.EXID + ", " + Database.TIME + ", " + CORRECT + ", " + PRON_SCORE + ", " + ANSWER + " ";
+  }
+
   /**
    * @see #getResults()
-   * @see #getResultsForExIDIn(java.util.Collection, boolean)
+   * @seex #getResultsForExIDIn
    * @param sql
    * @return
    * @throws SQLException
@@ -344,6 +375,7 @@ public class ResultDAO extends DAO {
 
   public synchronized void invalidateCachedResults() {
     cachedResultsForQuery = null;
+    cachedResultsForQuery2 = null;
   }
 
   public int getNumResults() {
@@ -409,16 +441,34 @@ public class ResultDAO extends DAO {
     return results;
   }
 
+  private List<CorrectAndScore> getScoreResultsSQL(String sql) throws SQLException {
+    Connection connection = database.getConnection(this.getClass().toString());
+    PreparedStatement statement = connection.prepareStatement(sql);
+
+    return getScoreResultsForQuery(connection, statement);
+  }
+
+  /**
+   *
+   * @param connection
+   * @param statement
+   * @return
+   * @throws SQLException
+   * @see #getResultsForExIDInForUser(java.util.Collection, boolean, long)
+   */
   private List<CorrectAndScore> getScoreResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
     ResultSet rs = statement.executeQuery();
     List<CorrectAndScore> results = new ArrayList<CorrectAndScore>();
     while (rs.next()) {
+      int uniqueID = rs.getInt(ID);
+      long userid = rs.getInt(USERID);
       String id = rs.getString(Database.EXID);
       Timestamp timestamp = rs.getTimestamp(Database.TIME);
       boolean correct = rs.getBoolean(CORRECT);
       float pronScore = rs.getFloat(PRON_SCORE);
+      String path = rs.getString(ANSWER);
 
-      CorrectAndScore result = new CorrectAndScore(id, correct, Math.round(100f * pronScore), timestamp.getTime());
+      CorrectAndScore result = new CorrectAndScore(uniqueID, userid, id, correct, pronScore, timestamp.getTime(), path);
       results.add(result);
     }
     finish(connection, statement, rs);
@@ -555,15 +605,15 @@ public class ResultDAO extends DAO {
    * @return list of duration and numAnswer pairs
    */
   public SessionInfo getSessions() {
-    List<Result> results = getResults();
+   // List<Result> results = getResults();
 
-    Map<Long, List<Result>> userToAnswers = populateUserToAnswers(results);
+    Map<Long, List<CorrectAndScore>> userToAnswers = populateUserToAnswers(getCorrectAndScores());
     List<Session> sessions = new ArrayList<Session>();
 
     Map<Long, List<Session>> userToSessions = new HashMap<Long, List<Session>>();
     Map<Long, Float> userToRate = new HashMap<Long, Float>();
 
-    for (Map.Entry<Long, List<Result>> userToAnswersEntry : userToAnswers.entrySet()) {
+    for (Map.Entry<Long, List<CorrectAndScore>> userToAnswersEntry : userToAnswers.entrySet()) {
       sessions.addAll(makeSessionsForUser(userToSessions, userToAnswersEntry));
     }
     for (Session session : sessions) session.setNumAnswers();
@@ -591,30 +641,31 @@ public class ResultDAO extends DAO {
   }
 
   private List<Session> makeSessionsForUser(Map<Long, List<Session>> userToSessions,
-                                            Map.Entry<Long, List<Result>> userToAnswersEntry) {
+                                            Map.Entry<Long, List<CorrectAndScore>> userToAnswersEntry) {
     Long userid = userToAnswersEntry.getKey();
-    List<Result> answersForUser = userToAnswersEntry.getValue();
+    List<CorrectAndScore> answersForUser = userToAnswersEntry.getValue();
 
     return makeSessionsForUser(userToSessions, userid, answersForUser);
   }
 
   private List<Session> makeSessionsForUser(Map<Long, List<Session>> userToSessions,
                                             Long userid,
-                                            List<Result> answersForUser) {
+                                            List<CorrectAndScore> answersForUser) {
     sortByTime(answersForUser);
 
     return partitionIntoSessions(userToSessions, userid, answersForUser);
   }
 
   private List<Session> partitionIntoSessions(Map<Long, List<Session>> userToSessions,
-                                              Long userid, List<Result> answersForUser) {
+                                              Long userid, List<CorrectAndScore> answersForUser) {
     Session s = null;
     long last = 0;
 
     List<Session> sessions = new ArrayList<Session>();
 
-    for (Result r : answersForUser) {
-      if (s == null || r.timestamp - last > SESSION_GAP) {
+    for (CorrectAndScore r : answersForUser) {
+      long timestamp = r.getTimestamp();
+      if (s == null || timestamp - last > SESSION_GAP) {
         s = new Session();
         sessions.add(s);
 
@@ -622,10 +673,10 @@ public class ResultDAO extends DAO {
         if (sessions1 == null) userToSessions.put(userid, sessions1 = new ArrayList<Session>());
         sessions1.add(s);
       } else {
-        s.duration += r.timestamp - last;
+        s.duration += timestamp - last;
       }
-      s.addExerciseID(r.id);
-      last = r.timestamp;
+      s.addExerciseID(r.getId());
+      last = timestamp;
     }
     return sessions;
   }
@@ -635,7 +686,7 @@ public class ResultDAO extends DAO {
    * @param answersForUser
    * @return
    */
-  private List<Session> partitionIntoSessions2(List<Result> answersForUser, Collection<String> ids, long latestResultID) {
+  private List<Session> partitionIntoSessions2(List<CorrectAndScore> answersForUser, Collection<String> ids, long latestResultID) {
     Session s = null;
     long lastTimestamp = 0;
 
@@ -644,30 +695,32 @@ public class ResultDAO extends DAO {
     List<Session> sessions = new ArrayList<Session>();
 
     int id = 0;
-    for (Result r : answersForUser) {
+    for (CorrectAndScore r : answersForUser) {
       //logger.debug("got " + r);
-      if (s == null || r.timestamp - lastTimestamp > SESSION_GAP || !expected.contains(r.id)) {
-        sessions.add(s = new Session(id++, r.userid, r.timestamp));
+      String id1 = r.getId();
+      long timestamp = r.getTimestamp();
+      if (s == null || timestamp - lastTimestamp > SESSION_GAP || !expected.contains(id1)) {
+        sessions.add(s = new Session(id++, r.getUserid(), timestamp));
         expected = new HashSet<String>(ids); // start a new set of expected items
 //        logger.debug("\tpartitionIntoSessions2 expected " +expected.size());
       } else {
-        s.duration += r.timestamp - lastTimestamp;
+        s.duration += timestamp - lastTimestamp;
       }
 
-      s.addExerciseID(r.id);
-      s.incrementCorrect(r.id, r.isCorrect());
-      s.setScore(r.id, r.getPronScore());
+      s.addExerciseID(id1);
+      s.incrementCorrect(id1, r.isCorrect());
+      s.setScore(id1, r.getScore());
 
-      if (r.uniqueID == latestResultID) {
+      if (r.getUniqueID() == latestResultID) {
         logger.debug("\tpartitionIntoSessions2 found current session " +s);
 
         s.setLatest(true);
       }
 
-      expected.remove(r.id);
+      expected.remove(id1);
      // logger.debug("\tpartitionIntoSessions2 expected now " + expected.size() + " session " + s);
 
-      lastTimestamp = r.timestamp;
+      lastTimestamp = timestamp;
     }
     for (Session session : sessions) session.setNumAnswers();
     if (sessions.isEmpty() && !answersForUser.isEmpty()) {
@@ -688,25 +741,19 @@ public class ResultDAO extends DAO {
     }
   }
 
-  private void sortByTime(List<Result> answersForUser) {
-    Collections.sort(answersForUser, new Comparator<Result>() {
-      @Override
-      public int compare(Result o1, Result o2) {
-        return o1.timestamp < o2.timestamp ? -1 : o1.timestamp > o2.timestamp ? +1 : 0;
-      }
-    });
-  }
+  private void sortByTime(List<CorrectAndScore> answersForUser) { Collections.sort(answersForUser); }
 
   private void removeShortSessions(List<Session> sessions) {
     Iterator<Session> iter = sessions.iterator();
     while (iter.hasNext()) if (iter.next().getNumAnswers() < 2) iter.remove();
   }
 
-  private Map<Long, List<Result>> populateUserToAnswers(List<Result> results) {
-    Map<Long, List<Result>> userToAnswers = new HashMap<Long, List<Result>>();
-    for (Result r : results) {
-      List<Result> results1 = userToAnswers.get(r.userid);
-      if (results1 == null) userToAnswers.put(r.userid, results1 = new ArrayList<Result>());
+  private Map<Long, List<CorrectAndScore>> populateUserToAnswers(List<CorrectAndScore> results) {
+    Map<Long, List<CorrectAndScore>> userToAnswers = new HashMap<Long, List<CorrectAndScore>>();
+    for (CorrectAndScore r : results) {
+      long userid = r.getUserid();
+      List<CorrectAndScore> results1 = userToAnswers.get(userid);
+      if (results1 == null) userToAnswers.put(userid, results1 = new ArrayList<CorrectAndScore>());
       results1.add(r);
     }
     return userToAnswers;
@@ -773,8 +820,10 @@ public class ResultDAO extends DAO {
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
       RESULTS +
       " (" +
-      "id IDENTITY, " +
-      "userid INT, " +
+        ID +
+        " IDENTITY, " +
+        USERID +
+        " INT, " +
       "plan VARCHAR, " +
       Database.EXID + " VARCHAR, " +
       "qid INT," +
@@ -941,7 +990,7 @@ public class ResultDAO extends DAO {
     cellStyle.setDataFormat(dataFormat.getFormat("MMM dd HH:mm:ss"));
     Row headerRow = sheet.createRow(rownum++);
 
-    List<String> columns = Arrays.asList("id", "userid", Database.EXID, "qid", Database.TIME, "answer",
+    List<String> columns = Arrays.asList(ID, USERID, Database.EXID, "qid", Database.TIME, "answer",
       "valid", "grades", FLQ, SPOKEN, AUDIO_TYPE, DURATION, CORRECT, PRON_SCORE, STIMULUS);
 
     for (int i = 0; i < columns.size(); i++) {
