@@ -8,9 +8,9 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
+import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
 import mitll.langtest.client.custom.exercise.CommentNPFExercise;
 import mitll.langtest.client.custom.tabs.TabAndContent;
-import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -48,7 +48,7 @@ public class NPFHelper implements RequiresResize {
   protected final UserFeedback feedback;
   public PagingExerciseList npfExerciseList;
   private Panel npfContentPanel;
-  private boolean showQC;
+  private final boolean showQC;
 
   /**
    * @see mitll.langtest.client.custom.Navigation#Navigation
@@ -206,7 +206,7 @@ public class NPFHelper implements RequiresResize {
    * @param showQC
    */
   void setFactory(final PagingExerciseList exerciseList, final String instanceName, boolean showQC) {
-    exerciseList.setFactory(getFactory(exerciseList, instanceName, showQC), userManager, 1);
+    exerciseList.setFactory(getFactory(exerciseList, instanceName, showQC), userManager);
   }
 
   protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList, final String instanceName, final boolean showQC) {
@@ -215,11 +215,11 @@ public class NPFHelper implements RequiresResize {
       public Panel getExercisePanel(CommonExercise e) {
         if (showQC) {
           System.out.println("\nNPFHelper : making new QCNPFExercise for " +e + " instance " + instanceName);
-          return new QCNPFExercise(e, controller, exerciseList, 1.0f, false, instanceName);
+          return new QCNPFExercise(e, controller, exerciseList, instanceName);
         }
         else {
           System.out.println("\nmaking new CommentNPFExercise for " +e + " instance " + instanceName);
-          return new CommentNPFExercise(e, controller, exerciseList, 1.0f, false, instanceName);
+          return new CommentNPFExercise(e, controller, exerciseList, false, instanceName);
         }
       }
     };
@@ -239,9 +239,9 @@ public class NPFHelper implements RequiresResize {
    */
   public static class ReviewItemHelper extends NPFHelper {
     private FlexListLayout flexListLayout;
-    private HasText itemMarker;
-    private ListInterface predefinedContent;
-    private NPFHelper npfHelper;
+    private final HasText itemMarker;
+    private final ListInterface predefinedContent;
+    private final NPFHelper npfHelper;
 
     /**
      * @see mitll.langtest.client.custom.Navigation#Navigation(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, mitll.langtest.client.user.UserFeedback)
@@ -249,16 +249,14 @@ public class NPFHelper implements RequiresResize {
      * @param feedback
      * @param userManager
      * @param controller
-     * @param itemMarker
      * @param predefinedContent
      */
     public ReviewItemHelper(final LangTestDatabaseAsync service, final UserFeedback feedback,
                             final UserManager userManager, final ExerciseController controller,
-                            final HasText itemMarker,
                             final ListInterface predefinedContent,
                             NPFHelper npfHelper) {
       super(service, feedback, userManager, controller, true);
-      this.itemMarker = itemMarker;
+      this.itemMarker = null;
       this.predefinedContent = predefinedContent;
       this.npfHelper = npfHelper;
     }
@@ -273,7 +271,7 @@ public class NPFHelper implements RequiresResize {
      * @see #doNPF(mitll.langtest.shared.custom.UserList, String, boolean)
      */
     protected Panel doInternalLayout(final UserList ul, String instanceName) {
-      this.flexListLayout = new FlexListLayout(service,feedback,userManager,controller, false) {
+      this.flexListLayout = new FlexListLayout(service,feedback,userManager,controller) {
         @Override
         protected ExercisePanelFactory getFactory(final PagingExerciseList pagingExerciseList, String instanceName) {
           return new ExercisePanelFactory(service,feedback,controller,predefinedContent) {
@@ -321,7 +319,7 @@ public class NPFHelper implements RequiresResize {
     private final LangTestDatabaseAsync service;
     private final UserFeedback feedback;
     private final UserManager userManager;
-    boolean incorrectFirst;
+    final boolean incorrectFirst;
 
     /**
      * @see ChapterNPFHelper#ChapterNPFHelper(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, boolean)
@@ -330,15 +328,14 @@ public class NPFHelper implements RequiresResize {
      * @param feedback
      * @param userManager
      * @param controller
-     * @param incorrectFirst
      */
     public FlexListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
-                          UserManager userManager, ExerciseController controller, boolean incorrectFirst) {
+                          UserManager userManager, ExerciseController controller) {
       this.controller = controller;
       this.service = service;
       this.feedback = feedback;
       this.userManager = userManager;
-      this.incorrectFirst = incorrectFirst;
+      this.incorrectFirst = false;
     }
 
     /**
@@ -398,7 +395,7 @@ public class NPFHelper implements RequiresResize {
       final FlexSectionExerciseList exerciseList = makeExerciseList(topRow, currentExercisePanel, instanceName, incorrectFirst);
       exerciseList.setUserListID(userListID);
 
-      exerciseList.setFactory(getFactory(exerciseList, instanceName), userManager, 1);
+      exerciseList.setFactory(getFactory(exerciseList, instanceName), userManager);
       Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
         @Override
         public void execute() {
@@ -424,7 +421,7 @@ public class NPFHelper implements RequiresResize {
 
     protected class MyFlexSectionExerciseList extends FlexSectionExerciseList {
       public MyFlexSectionExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, boolean incorrectFirst) {
-        super(topRow, currentExercisePanel, FlexListLayout.this.service, FlexListLayout.this.feedback, false, false, FlexListLayout.this.controller, true, instanceName, incorrectFirst);
+        super(topRow, currentExercisePanel, FlexListLayout.this.service, FlexListLayout.this.feedback, false, FlexListLayout.this.controller, instanceName, incorrectFirst);
       }
 
       @Override
