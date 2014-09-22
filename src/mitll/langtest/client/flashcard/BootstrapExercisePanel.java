@@ -605,6 +605,9 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
 
       historyDiv.add(new HTML(s));
     }
+    else {
+      System.out.println("scores are empty??? for " + exercise);
+    }
     return firstRow;
   }
 
