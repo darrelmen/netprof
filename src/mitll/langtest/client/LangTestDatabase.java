@@ -2,15 +2,7 @@ package mitll.langtest.client;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.AudioAttribute;
-import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.ExerciseListWrapper;
-import mitll.langtest.shared.ImageResponse;
-import mitll.langtest.shared.Result;
-import mitll.langtest.shared.STATE;
-import mitll.langtest.shared.StartupInfo;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.*;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
@@ -50,7 +42,7 @@ public interface LangTestDatabase extends RemoteService {
 
   // answer DAO
   void addTextAnswer(int userID, CommonExercise exercise, int questionID, String answer, String answerType);
-  AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int question, int user,
+  AudioAnswer writeAudioFile(String base64EncodedString, String exercise, int question, int user,
                              int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults, boolean addToAudioTable, boolean recordedWithFlash);
 
   ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, String exerciseID);
