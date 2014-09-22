@@ -12,6 +12,7 @@ import mitll.langtest.shared.flashcard.CorrectAndScore;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,7 +35,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   private boolean isPredef;
   private boolean isOverride;
   private Date modifiedDate;
-  private Collection<CorrectAndScore> scores;
+  private List<CorrectAndScore> scores;
   private float avgScore;
   private static final int MAX_TOOLTIP_LENGTH = 15;
 
@@ -253,12 +254,12 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     return modifiedDate;
   }
 
-  public Collection<mitll.langtest.shared.flashcard.CorrectAndScore> getScores() {
+  public List<CorrectAndScore> getScores() {
     return scores;
   }
 
   @Override
-  public void setScores(Collection<CorrectAndScore> scores) {
+  public void setScores(List<CorrectAndScore> scores) {
     this.scores = scores;
   }
 
