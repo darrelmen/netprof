@@ -60,7 +60,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
   private final Set<Long> resultIDs = new HashSet<Long>();
   private String selectionID = "";
   private final String instance;
-  StickyState sticky;
+  final StickyState sticky;
   Panel scoreHistory;
   private Map<String, Collection<String>> selection;
 
@@ -217,7 +217,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
   private class StatsPracticePanel extends BootstrapExercisePanel {
     String currentExerciseID;
     private Widget container;
-    SetCompleteDisplay completeDisplay = new SetCompleteDisplay();
+    final SetCompleteDisplay completeDisplay = new SetCompleteDisplay();
     public StatsPracticePanel(CommonExercise e, ListInterface exerciseListToUse) {
       super(e,
         StatsFlashcardFactory.this.service,
@@ -366,8 +366,9 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
     private Button getIncorrectListButton(final List<ExerciseCorrectAndScore> sortedHistory) {
       final Button w = new Button();
       //w.setIcon(IconType.);
-      w.setType(ButtonType.PRIMARY);
-      w.setText("Do these again");
+      w.setType(ButtonType.SUCCESS);
+      w.setText(START_OVER);
+      w.setIcon(IconType.REPEAT);
 
       w.addClickHandler(new ClickHandler() {
         @Override
@@ -404,10 +405,10 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
       setMainContentVisible(true);
       belowContentDiv.clear();
 
-      final Map<String,CommonShell> idToExercise = new HashMap<String, CommonShell>();
+/*      final Map<String,CommonShell> idToExercise = new HashMap<String, CommonShell>();
       for (CommonShell commonShell : allExercises) {
         idToExercise.put(commonShell.getID() +"/1",commonShell);
-      }
+      }*/
 /*      incorrectFirst.clear();
 
       for (ExerciseCorrectAndScore exerciseCorrectAndScore : sortedHistory) {
@@ -468,7 +469,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
       return w1;
     }
 
-    private Button getInOrderButton() {
+/*    private Button getInOrderButton() {
       final Button w1 = new Button("Do in order.");
       w1.setIcon(IconType.UNDO);
       w1.getElement().setId("AVP_DoWholeSetFromStart2");
@@ -487,7 +488,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
      // w1.getElement().getStyle().setMarginTop(-5, Style.Unit.PX);
       controller.register(w1, currentExercise.getID());
       return w1;
-    }
+    }*/
 
     /**
      * Don't count these items in the scoring for this user.
@@ -546,11 +547,16 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
         onSetComplete();
       }
       else {
-        loadNextOnTimer(/*correct ? 100 :*/ DELAY_MILLIS);
+        int delayMillis = DELAY_MILLIS;
+     //   System.out.println("control state " + controlState);
+     /*   if ((controlState.isEnglish() || controlState.isForeign())) {
+          delayMillis *= 3;
+        }*/
+        loadNextOnTimer(delayMillis);
       }
     }
 
-    private Button /*skip,*/ startOver, seeScores;
+    private Button startOver, seeScores;
     private Panel belowContentDiv;
 
     /**
@@ -559,13 +565,10 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
      */
     @Override
     protected void addRowBelowPrevNext(DivWidget toAddTo) {
-      //toAddTo.add(getSkipItem());
       toAddTo.add(getSkipToEnd());
       toAddTo.add(getStartOver());
-
       belowContentDiv = toAddTo;
     }
-
 
     @Override
     protected void gotClickOnNext() {
