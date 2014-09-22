@@ -55,8 +55,10 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
                                 final ControlState controlState,
                                 StatsFlashcardFactory.MySoundFeedback soundFeedback,
                                 SoundFeedback.EndListener endListener,
-                                String instance, ListInterface  exerciseList) {
-    super(e,service,controller,addKeyBinding,controlState,soundFeedback,endListener,instance, exerciseList);
+                                String instance, ListInterface exerciseList) {
+    super(e, service, controller, addKeyBinding, controlState, soundFeedback, endListener, instance, exerciseList);
+
+    System.out.println("history " + e.getScores());
   }
 
   /**
@@ -132,6 +134,7 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
     }
     scoreFeedbackRow = new DivWidget();
     scoreFeedbackRow.addStyleName("bottomFiveMargin");
+    scoreFeedbackRow.setHeight("52px");
     toAddTo.add(scoreFeedbackRow);
   }
 
