@@ -66,13 +66,13 @@ public class ServerProperties {
   private static final String DIALOG = "dialog";
   public static final String VLR_PARLE_PILOT_ITEMS_TXT = "vlr-parle-pilot-items.txt";
   public static final String QUIET_AUDIO_OK = "quietAudioOK";
+  public static final String APPROVAL_EMAIL = "approvalEmail";
 
   private Properties props = new Properties();
 
   public boolean dataCollectMode;
   public boolean biasTowardsUnanswered;
   private double minPronScore;
-  private final int maxNumExercises = Integer.MAX_VALUE;
   private boolean quietAudioOK;
 
   public ServerProperties() {}
@@ -208,9 +208,11 @@ public class ServerProperties {
     return getDefaultFalse(ARABIC_TEXT_DATA_COLLECT);
   }
 
+/*
   public boolean isGoodwaveMode() {
     return getDefaultFalse(GOODWAVE_MODE);
   }
+*/
 
   public boolean usePredefinedTypeOrder() {
     return getDefaultFalse(USE_PREDEFINED_TYPE_ORDER);
@@ -228,12 +230,18 @@ public class ServerProperties {
   public boolean isNoModel() {
     return getDefaultFalse(NO_MODEL);
   }
+/*
   public boolean useDictionary() {
     return getDefaultTrue(USE_MODEL_DICTIONARY);
   }
+*/
 
   public String getEmailAddress() {
     return props.getProperty(EMAIL_ADDRESS, DEFAULT_EMAIL);
+  }
+
+  public String getApprovalEmailAddress() {
+    return props.getProperty(APPROVAL_EMAIL, DEFAULT_EMAIL);
   }
 
   public int getAudioOffset() {
@@ -249,6 +257,7 @@ public class ServerProperties {
   }
 
   public int getMaxNumExercises() {
+    int maxNumExercises = Integer.MAX_VALUE;
     try {
       String property = props.getProperty(MAX_NUM_EXERCISES);
       if (property == null) return maxNumExercises;
