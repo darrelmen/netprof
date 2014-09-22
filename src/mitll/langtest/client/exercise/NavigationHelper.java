@@ -7,13 +7,8 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.CommonExercise;
 
@@ -51,12 +46,11 @@ public class NavigationHelper extends HorizontalPanel {
    * @param controller
    * @param provider
    * @param listContainer
-   * @param addButtons
    * @param addKeyHandler
    */
   public NavigationHelper(CommonExercise exercise, ExerciseController controller, PostAnswerProvider provider,
-                          ListInterface listContainer, boolean addButtons, boolean addKeyHandler) {
-    this(exercise, controller, provider, listContainer, addButtons, addKeyHandler,
+                          ListInterface listContainer, boolean addKeyHandler) {
+    this(exercise, controller, provider, listContainer, true, addKeyHandler,
       !controller.getLanguage().equalsIgnoreCase(PASHTO) && !controller.getProps().isClassroomMode());
   }
 
