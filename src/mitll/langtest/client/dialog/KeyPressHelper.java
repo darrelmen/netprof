@@ -129,13 +129,13 @@ public class KeyPressHelper {
     }
   }
 
-  private void userHitEnterKey(Button button) {
+  public void userHitEnterKey(Button button) {
     //System.out.println("\tEnterKeyButtonHelper.userHitEnterKey " + keyHandler);
     if (removeOnEnter) removeKeyHandler();
     button.fireEvent(new ButtonClickEvent());
   }
 
-  private class ButtonClickEvent extends ClickEvent {
+  public static class ButtonClickEvent extends ClickEvent {
         /*To call click() function for Programmatic equivalent of the user clicking the button.*/
   }
 
