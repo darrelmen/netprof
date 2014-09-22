@@ -12,12 +12,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.STATE;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -154,7 +149,7 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
   protected void addColumnsToTable() {
     //System.out.println("addColumnsToTable : completed " + controller.showCompleted() +  " now " + getCompleted().size());
 
-    Column<CommonShell, SafeHtml> id2 = getExerciseIdColumn2(true);
+    Column<CommonShell, SafeHtml> id2 = getExerciseIdColumn2();
     addColumn(id2);
 
     // this would be better, but want to consume clicks
@@ -175,9 +170,9 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
     table.setSelectionModel(selectionModel);
   }
 
-  private Column<CommonShell, SafeHtml> getExerciseIdColumn2(final boolean consumeClicks) {
+  private Column<CommonShell, SafeHtml> getExerciseIdColumn2() {
 
-    return new Column<CommonShell, SafeHtml>(new MySafeHtmlCell(consumeClicks)) {
+    return new Column<CommonShell, SafeHtml>(new MySafeHtmlCell(true)) {
 
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, CommonShell object, NativeEvent event) {
