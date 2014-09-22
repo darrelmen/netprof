@@ -108,6 +108,13 @@ public class ExcelImport implements ExerciseDAO {
 //    logger.debug("unit " + unitIndex + " chapter " +chapterIndex + " week " +weekIndex);
   }
 
+  /**
+   * @deprecated we include items with missing audio now
+   * @param relativeConfigDir
+   * @param file
+   * @param missing
+   * @return
+   */
   public boolean getMissing(String relativeConfigDir, String file, Set<String> missing) {
     File missingSlow = new File(relativeConfigDir, file);
     if (missingSlow.exists()) {
@@ -129,9 +136,7 @@ public class ExcelImport implements ExerciseDAO {
       }
 
     } else {
-      if (serverProps.isGoodwaveMode()) {
-        logger.debug("Can't find " + file + " under " + relativeConfigDir + " abs path " + missingSlow.getAbsolutePath());
-      }
+      //logger.debug("Can't find " + file + " under " + relativeConfigDir + " abs path " + missingSlow.getAbsolutePath());
     }
     return missingSlow.exists();
   }
