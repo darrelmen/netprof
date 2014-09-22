@@ -315,7 +315,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     Panel firstRow = makeFirstTwoRows(verticalContainer);
 
     if (!showLogin(verticalContainer, firstRow)) {
-      System.out.println("populate below header...");
+      //System.out.println("populate below header...");
 
       populateBelowHeader(verticalContainer, firstRow);
     }
