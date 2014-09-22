@@ -1,5 +1,6 @@
 package mitll.langtest.client;
 
+import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.custom.UserExercise;
@@ -19,6 +20,18 @@ import java.util.Map;
 public interface LangTestDatabaseAsync {
   void addTextAnswer(int usedID, CommonExercise exercise, int questionID, String answer, String answerType, AsyncCallback<Void> async);
   void userExists(String login, AsyncCallback<Integer> async);
+
+  /**
+   * @param age
+   * @param gender
+   * @param experience
+   * @param nativeLang
+   * @param dialect
+   * @param userID
+   * @param permissions
+   * @param async
+   * @deprecated
+   */
   void addUser(int age, String gender, int experience, String nativeLang, String dialect, String userID, Collection<User.Permission> permissions, AsyncCallback<Long> async);
   void getUsers(AsyncCallback<List<User>> async);
   void getUserBy(long id, AsyncCallback<User> async);
@@ -125,4 +138,18 @@ public interface LangTestDatabaseAsync {
                     String textToAlign,
                     String identifier,
                     int reqid, AsyncCallback<AudioAnswer> async);
+
+  void userExists(String login, String passwordH, AsyncCallback<User> async);
+
+  void addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email, boolean isMale, int age, String dialect, AsyncCallback<User> async);
+
+  void resetPassword(String userid, String text, String url, AsyncCallback<Boolean> asyncCallback);
+
+  void forgotUsername(String emailH, String email, String url, AsyncCallback<Boolean> async);
+
+  void getUserIDForToken(String token, AsyncCallback<Long> async);
+
+  void changePFor(String token, String first, AsyncCallback<Boolean> asyncCallback);
+
+  void enableCDUser(String cdToken, String emailR, String url, AsyncCallback<Long> asyncCallback);
 }
