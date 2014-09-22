@@ -1,5 +1,7 @@
 package mitll.langtest.shared;
 
+import mitll.langtest.shared.flashcard.CorrectAndScore;
+
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -85,8 +87,8 @@ public interface CommonExercise extends CommonShell {
   String getCombinedTooltip();
   void setTooltip();
 
-  void setScores(Collection<ScoreAndPath> scoreTotal);
-  Collection<ScoreAndPath> getScores();
+  void setScores(Collection<CorrectAndScore> scoreTotal);
+  Collection<CorrectAndScore> getScores();
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#addAnnotationsAndAudio(long, CommonExercise)
