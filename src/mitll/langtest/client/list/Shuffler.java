@@ -34,9 +34,9 @@ public class Shuffler {
 
       // Dump array back into list
       ListIterator it = list.listIterator();
-      for (int i = 0; i < arr.length; i++) {
+      for (Object anArr : arr) {
         it.next();
-        it.set(arr[i]);
+        it.set(anArr);
       }
     }
   }
