@@ -1,21 +1,11 @@
 package mitll.langtest.client.custom.dialog;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.ControlGroup;
-import com.github.gwtbootstrap.client.ui.FluidContainer;
-import com.github.gwtbootstrap.client.ui.FluidRow;
-import com.github.gwtbootstrap.client.ui.TextBox;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.BlurEvent;
-import com.google.gwt.event.dom.client.BlurHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
-import com.google.gwt.user.client.DOM;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasText;
@@ -29,11 +19,7 @@ import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.user.BasicDialog;
-import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.CommonShell;
-import mitll.langtest.shared.CommonUserExercise;
-import mitll.langtest.shared.Result;
+import mitll.langtest.shared.*;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 
@@ -339,7 +325,7 @@ public class NewUserExercise extends BasicDialog {
   Panel getCreateButton(UserList ul, ListInterface pagingContainer, Panel toAddTo,
                         ControlGroup normalSpeedRecording
   ) {
-    Button submit = makeCreateButton(ul, pagingContainer, toAddTo, foreignLang, rap, normalSpeedRecording,  CREATE);
+    Button submit = makeCreateButton(ul, pagingContainer, toAddTo, foreignLang, rap, normalSpeedRecording);
     submit.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
     submit.getElement().getStyle().setMarginRight(15, Style.Unit.PX);
 
@@ -353,8 +339,8 @@ public class NewUserExercise extends BasicDialog {
 
   private Button makeCreateButton(final UserList ul, final ListInterface pagingContainer, final Panel toAddTo,
                                   final FormField foreignLang,
-                                  final RecordAudioPanel rap, final ControlGroup normalSpeedRecording, final String buttonName) {
-    final Button submit = new Button(buttonName);
+                                  final RecordAudioPanel rap, final ControlGroup normalSpeedRecording) {
+    final Button submit = new Button(NewUserExercise.CREATE);
     submit.setType(ButtonType.SUCCESS);
     submit.getElement().setId("CreateButton_NewExercise_for_" + ul.getID());
     controller.register(submit, "UserList_" + ul.getID());
@@ -380,7 +366,7 @@ public class NewUserExercise extends BasicDialog {
 
   /**
    * @see #audioPosted()
-   * @see #makeCreateButton(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.user.BasicDialog.FormField, mitll.langtest.client.exercise.RecordAudioPanel, com.github.gwtbootstrap.client.ui.ControlGroup, String)
+   * @see #makeCreateButton(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.user.BasicDialog.FormField, mitll.langtest.client.exercise.RecordAudioPanel, com.github.gwtbootstrap.client.ui.ControlGroup)
    * @param foreignLang
    * @param rap
    * @param normalSpeedRecording
