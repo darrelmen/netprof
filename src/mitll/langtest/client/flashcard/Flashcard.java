@@ -14,7 +14,6 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.shared.User;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -33,9 +32,10 @@ public class Flashcard implements RequiresResize {
   private HTML userNameWidget;
   private final String nameForAnswer;
   private final boolean adminView;
-  Paragraph subtitle;
-  HTML browserInfo;
-  Panel qc,recordAudio;
+  private Paragraph subtitle;
+  private HTML browserInfo;
+  private Panel qc,recordAudio;
+  private Dropdown cogMenu;
 
   /**
    * @see mitll.langtest.client.LangTest#makeHeaderRow()
@@ -58,7 +58,7 @@ public class Flashcard implements RequiresResize {
                                 ClickHandler monitoring,
                                 ClickHandler events) {
     return getHeaderRow(splashText, isBeta,NEW_PRO_F1_PNG, userName, browserInfo, logoutClickHandler,
-      users, results, monitoring,events, new ArrayList<User.Permission>());
+      users, results, monitoring,events);
   }
 
   /**
@@ -73,18 +73,17 @@ public class Flashcard implements RequiresResize {
    * @param results
    * @param monitoring
    * @param events
-   * @param permissions
    * @return
    */
   public Panel getHeaderRow(String splashText,
                             boolean isBeta, String appIcon, String userName,
                             HTML browserInfo,
                             ClickHandler logoutClickHandler,
+
                             ClickHandler users,
                             ClickHandler results,
                             ClickHandler monitoring,
-                            ClickHandler events,
-                            Collection<User.Permission> permissions) {
+                            ClickHandler events) {
     HorizontalPanel headerRow = new HorizontalPanel();
     headerRow.setWidth("100%");
     headerRow.addStyleName("headerBackground");
@@ -124,6 +123,9 @@ public class Flashcard implements RequiresResize {
     if (!isAnonymous || adminView) {
       hp.add(userNameWidget);
     }
+    else {
+      System.out.println("anon " +isAnonymous + " admin " + adminView);
+    }
 
     //if (permissions.contains(User.Permission.QUALITY_CONTROL)) {
       hp.add(qc = new SimplePanel());
@@ -133,15 +135,15 @@ public class Flashcard implements RequiresResize {
       hp.add(recordAudio = new SimplePanel());
     //}
 
-    // add log out/admin options menu
-    Dropdown menu = makeMenu(users, results, monitoring,events);
-    menu.addStyleName("cogStyle");
+    // add log out/admin options cogMenu
+    cogMenu = makeMenu(users, results, monitoring, events);
+    cogMenu.addStyleName("cogStyle");
     NavLink widget1 = new NavLink("Log Out");
     widget1.addClickHandler(logoutClickHandler);
-    menu.add(widget1);
+    cogMenu.add(widget1);
 
     if (!isAnonymous || adminView) {
-      hp.add(menu);
+      hp.add(cogMenu);
     }
 
     browserInfo.addStyleName("leftFiveMargin");
@@ -183,8 +185,29 @@ public class Flashcard implements RequiresResize {
     }
   }
 
+  /**
+   * @see mitll.langtest.client.LangTest#gotUser(mitll.langtest.shared.User)
+   * @see mitll.langtest.client.LangTest#handleCDToken(com.github.gwtbootstrap.client.ui.Container, com.google.gwt.user.client.ui.Panel, String, String)
+   * @see mitll.langtest.client.LangTest#showLogin(com.github.gwtbootstrap.client.ui.Container, com.google.gwt.user.client.ui.Panel)
+   *
+   * @param val
+   */
+  public void setCogVisible(boolean val) {
+    cogMenu.setVisible(val);
+    userNameWidget.setVisible(val);
+  }
+
+  /**
+   * @see mitll.langtest.client.LangTest#configureUIGivenUser(long)
+   * @param v
+   */
   public void setBrowserInfo(String v) { browserInfo.setHTML(v);}
 
+  /**
+   * @see #getHeaderRow(String, boolean, String, String, String, com.google.gwt.user.client.ui.HTML, com.google.gwt.event.dom.client.ClickHandler, com.google.gwt.event.dom.client.ClickHandler, com.google.gwt.event.dom.client.ClickHandler, com.google.gwt.event.dom.client.ClickHandler, com.google.gwt.event.dom.client.ClickHandler)
+   * @param userName
+   * @return
+   */
   private HTML getUserNameWidget(String userName) {
     userNameWidget = new HTML(userName);
     userNameWidget.getElement().setId("Username");
@@ -195,6 +218,7 @@ public class Flashcard implements RequiresResize {
     return userNameWidget;
   }
 
+  NavLink userC, resultsC, monitoringC, eventsC;
   /**
    * @see #getHeaderRow
    * @param users
@@ -208,29 +232,32 @@ public class Flashcard implements RequiresResize {
     w.setIcon(IconType.COG);
     w.setIconSize(IconSize.LARGE);
 
-    if (users != null) {
-      NavLink widget2 = new NavLink("Users");
-      widget2.addClickHandler(users);
-      w.add(widget2);
-    }
+    userC = new NavLink("Users");
+    userC.addClickHandler(users);
+    w.add(userC);
 
-    if (results != null) {
-      NavLink widget2 = new NavLink(nameForAnswer.substring(0,1).toUpperCase()+nameForAnswer.substring(1));
-      widget2.addClickHandler(results);
-      w.add(widget2);
-    }
+    resultsC = new NavLink(nameForAnswer.substring(0, 1).toUpperCase() + nameForAnswer.substring(1));
+    resultsC.addClickHandler(results);
+    w.add(resultsC);
 
-    if (monitoring != null) {
-      NavLink widget2 = new NavLink("Monitoring");
-      widget2.addClickHandler(monitoring);
-      w.add(widget2);
-    }
-    if (events != null) {
-      NavLink widget2 = new NavLink("Events");
-      widget2.addClickHandler(events);
-      w.add(widget2);
-    }
+    monitoringC = new NavLink("Monitoring");
+    monitoringC.addClickHandler(monitoring);
+    w.add(monitoringC);
+
+    eventsC = new NavLink("Events");
+    eventsC.addClickHandler(events);
+    w.add(eventsC);
+
     return w;
+  }
+
+  public void setVisibleAdmin(boolean visibleAdmin) {
+   // if (visibleAdmin) {
+      userC.setVisible(visibleAdmin);
+      resultsC.setVisible(visibleAdmin);
+      monitoringC.setVisible(visibleAdmin);
+      eventsC.setVisible(visibleAdmin);
+    //}
   }
 
   /**
