@@ -5,28 +5,12 @@ import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FocusWidget;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasValue;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.ProvidesResize;
-import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.ScrollPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.CommonExercise;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Note that for text input answers, the user is prevented from cut-copy-paste.<br></br>
@@ -55,7 +39,7 @@ public class ExercisePanel extends VerticalPanel implements
   private final NavigationHelper navigationHelper;
   protected final ListInterface exerciseList;
   private final Map<Integer,Set<Widget>> indexToWidgets = new HashMap<Integer, Set<Widget>>();
-  protected String message;
+  protected final String message;
 
   /**
    * @see ExercisePanelFactory#getExercisePanel
@@ -90,7 +74,7 @@ public class ExercisePanel extends VerticalPanel implements
     }
     add(hp);
 
-    addQuestions(e, service, controller, 1);
+    addQuestions(e, service, controller);
 
     // add next and prev buttons
     add(navigationHelper);
@@ -112,7 +96,7 @@ public class ExercisePanel extends VerticalPanel implements
   private Widget getQuestionContent(CommonExercise e) {
     String content = getExerciseContent(e);
 
-    HTML maybeRTLContent = getMaybeRTLContent(content, true);
+    HTML maybeRTLContent = getMaybeRTLContent(content);
     maybeRTLContent.addStyleName("rightTenMargin");
     maybeRTLContent.addStyleName("topMargin");
     if (content.length() > 200) {
@@ -134,17 +118,16 @@ public class ExercisePanel extends VerticalPanel implements
   /**
    * @see #getQuestionContent(mitll.langtest.shared.CommonExercise)
    * @param content
-   * @param requireAlignment
    * @return
    */
-  protected HTML getMaybeRTLContent(String content, boolean requireAlignment) {
+  protected HTML getMaybeRTLContent(String content) {
     boolean rightAlignContent = controller.isRightAlignContent();
     HasDirection.Direction direction =
-      requireAlignment && rightAlignContent ? HasDirection.Direction.RTL : WordCountDirectionEstimator.get().estimateDirection(content);
+      true && rightAlignContent ? HasDirection.Direction.RTL : WordCountDirectionEstimator.get().estimateDirection(content);
 
     HTML html = new HTML(content, direction);
     html.setWidth("100%");
-    if (requireAlignment && rightAlignContent) {
+    if (true && rightAlignContent) {
       html.addStyleName("rightAlign");
     }
 
@@ -179,10 +162,9 @@ public class ExercisePanel extends VerticalPanel implements
    * @param e
    * @param service
    * @param controller used in subclasses for audio control
-   * @param questionNumber
    */
-  private void addQuestions(CommonExercise e, LangTestDatabaseAsync service, ExerciseController controller, int questionNumber) {
-      add(getQuestionPanel(e, service, controller, questionNumber
+  private void addQuestions(CommonExercise e, LangTestDatabaseAsync service, ExerciseController controller) {
+      add(getQuestionPanel(e, service, controller, 1
       ));
   }
 
@@ -216,14 +198,14 @@ public class ExercisePanel extends VerticalPanel implements
    * @paramx e
    */
   protected void addQuestionPrompt(Panel vp) {
-    HTML prompt = new HTML(getQuestionPrompt(true));
+    HTML prompt = new HTML(getQuestionPrompt());
     prompt.getElement().setId("questionPrompt");
     prompt.addStyleName("marginBottomTen");
     vp.add(prompt);
   }
 
-  protected String getQuestionPrompt(boolean promptInEnglish) {
-    return getWrittenPrompt(promptInEnglish);
+  protected String getQuestionPrompt() {
+    return getWrittenPrompt(true);
   }
 
   protected String getWrittenPrompt(boolean promptInEnglish) {
