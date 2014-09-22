@@ -6,19 +6,10 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.ColumnSortEvent;
-import com.google.gwt.user.cellview.client.ColumnSortList;
-import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.cellview.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.ListDataProvider;
@@ -30,11 +21,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.grade.Grade;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Show a dialog with all the results we've collected so far.
@@ -184,7 +171,7 @@ public class ResultManager extends PagerTable {
       dialogVPanel.remove(closeButton);
     }
 
-    Widget table = getAsyncTable(numResults, !textResponse, new ArrayList<Grade>(), -1, 1);
+    Widget table = getAsyncTable(numResults, !textResponse, new ArrayList<Grade>(), -1);
     table.setWidth("100%");
 
     dialogVPanel.add(new Anchor(getURL2()));
@@ -261,9 +248,9 @@ public class ResultManager extends PagerTable {
   }
 
   private Widget getAsyncTable(int numResults, boolean showQuestionColumn,
-                         Collection<Grade> grades, final int grader, int numGrades) {
+                               Collection<Grade> grades, final int grader) {
     CellTable<Result> table = new CellTable<Result>();
-    addColumnsToTable(showQuestionColumn, grades, grader, numGrades, table);
+    addColumnsToTable(showQuestionColumn, grades, grader, 1, table);
     table.setRowCount(numResults, true);
     table.setVisibleRange(0,15);
     createProvider(numResults, table);
@@ -273,16 +260,16 @@ public class ResultManager extends PagerTable {
     ColumnSortEvent.AsyncHandler columnSortHandler = new ColumnSortEvent.AsyncHandler(table);
     table.addColumnSortHandler(columnSortHandler);
 
-    Column<?, ?> time = getColumn(TIMESTAMP);
+    Column<?, ?> time = getColumn();
     table.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(time, false));
 
     // Create a SimplePager.
     return getPagerAndTable(table);
   }
 
-  private Column<?,?> getColumn(String name) {
+  private Column<?,?> getColumn() {
     for (Map.Entry<Column<?, ?>, String> pair : colToField.entrySet()) {
-      if (pair.getValue().equals(name)) {
+      if (pair.getValue().equals(ResultManager.TIMESTAMP)) {
         return pair.getKey();
       }
     }
@@ -350,11 +337,11 @@ public class ResultManager extends PagerTable {
   }
 
   /**
-   * @see #getAsyncTable(int, boolean, java.util.Collection, int, int)
+   * @see #getAsyncTable(int, boolean, java.util.Collection, int)
    * @param numResults
    * @param table
    * @return
-   * @see #getAsyncTable(int, boolean, java.util.Collection, int, int)
+   * @see #getAsyncTable(int, boolean, java.util.Collection, int)
    */
   private AsyncDataProvider<Result> createProvider(final int numResults, final CellTable<Result> table) {
     AsyncDataProvider<Result> dataProvider = new AsyncDataProvider<Result>() {
