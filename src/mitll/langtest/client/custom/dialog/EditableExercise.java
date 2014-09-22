@@ -441,11 +441,11 @@ class EditableExercise extends NewUserExercise {
   private void useAnnotation(ExerciseAnnotation anno, HTML annoField) {
     boolean isIncorrect = anno != null && !anno.isCorrect();
     if (isIncorrect) {
-      if (anno.comment.isEmpty()) {
+      if (anno.getComment().isEmpty()) {
         annoField.setHTML("<i>Empty Comment</i>");
       }
       else {
-        annoField.setHTML("<i>\"" + anno.comment+ "\"</i>");
+        annoField.setHTML("<i>\"" + anno.getComment() + "\"</i>");
       }
     }
     annoField.setVisible(isIncorrect);
