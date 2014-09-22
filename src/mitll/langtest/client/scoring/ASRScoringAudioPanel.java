@@ -24,7 +24,7 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
   private boolean useScoreToColorBkg = true;
 
   /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.ASRRecordAudioPanel#ASRRecordAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, int, mitll.langtest.client.exercise.ExerciseController)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.ASRRecordAudioPanel#ASRRecordAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
    * @param refSentence
    * @param service
    * @param gaugePanel
