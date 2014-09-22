@@ -12,7 +12,6 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.pretest.PretestGauge;
@@ -30,7 +29,7 @@ import java.util.*;
  */
 public class ASRScorePanel extends FlowPanel implements ScoreListener {
   private static final int NUM_TO_SHOW = 5;
-  private static final String INSTRUCTIONS = "Your speech is scored by a speech recognizer trained on speech from many native speakers. " +
+  public static final String INSTRUCTIONS = "Your speech is scored by a speech recognizer trained on speech from many native speakers. " +
       "The recognizer generates scores for each word and phonetic unit (see the color-coded transcript for details).";
   private static final String WARNING = "Repeat the phrase exactly as it is written. " +
       "<b>Saying something different or adding/omitting words could result in incorrect scores.</b>";
@@ -90,7 +89,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     Panel gaugePanel = new FlowPanel();
     gaugePanel.setHeight("100%");
     gaugePanel.setWidth("100%");
-    ASRGauge = new PretestGauge("ASR_" + parent, "ASR", INSTRUCTIONS, null);
+    ASRGauge = new PretestGauge("ASR_" + parent);
     gaugePanel.add(ASRGauge);
 
     gaugeCaptionPanel.add(gaugePanel);
