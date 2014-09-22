@@ -218,7 +218,9 @@ public class ResultDAO extends DAO {
     }
     List<CorrectAndScore> results = getResultsForExIDInForUser(allIds, true, userid);
     if (true) logger.debug("found " + results.size() + " results for " + allIds.size() + " items");
-
+/*    for (CorrectAndScore exerciseCorrectAndScore : results) {
+      logger.debug("Got " + exerciseCorrectAndScore);
+    }*/
     List<ExerciseCorrectAndScore> sortedResults = getSortedAVPHistory(results, allIds);
 
     List<CommonExercise> commonExercises = new ArrayList<CommonExercise>(exercises.size());
@@ -270,24 +272,16 @@ public class ResultDAO extends DAO {
 
     int total = 0;
     float scoreTotal = 0f;
-    //List<ScoreAndPath> scores = new ArrayList<ScoreAndPath>();
     for (CorrectAndScore r : resultsForExercise) {
       float pronScore = r.getScore();
       if (pronScore > 0) { // overkill?
         total++;
         scoreTotal += pronScore;
-        //    scores.add(new ScoreAndPath(pronScore, r.answer));
       }
     }
     firstExercise.setScores(resultsForExercise);
     firstExercise.setAvgScore(total == 0 ? 0f : scoreTotal / total);
   }
-/*
-
-  public List<Result> getResultsForExercise(String id) {
-    return getResultsForExIDIn(Collections.singleton(id), false);
-  }
-*/
 
   /**
    * Only take avp audio type and *valid* audio.
@@ -346,7 +340,7 @@ public class ResultDAO extends DAO {
 
       List<CorrectAndScore> scores = getScoreResultsForQuery(connection, statement);
 
-      logger.debug("getResultsForExIDInForUser for  " +sql+ " got\n\t" + scores.size());
+   //   logger.debug("getResultsForExIDInForUser for  " +sql+ " got\n\t" + scores.size());
       return scores;
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
