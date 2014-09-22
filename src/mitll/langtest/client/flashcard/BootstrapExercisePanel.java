@@ -19,6 +19,9 @@ import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.flashcard.CorrectAndScore;
+
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -57,8 +60,6 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
                                 SoundFeedback.EndListener endListener,
                                 String instance, ListInterface exerciseList) {
     super(e, service, controller, addKeyBinding, controlState, soundFeedback, endListener, instance, exerciseList);
-
-    System.out.println("history " + e.getScores());
   }
 
   /**
@@ -447,26 +448,29 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
    * @param path
    */
   private void playRefAndGoToNext(String path) {
-    path = getPath(path);
-
-    getSoundFeedback().queueSong(path, new SoundFeedback.EndListener() {
+    getSoundFeedback().queueSong(getPath(path), new SoundFeedback.EndListener() {
       @Override
       public void songStarted() {
+        Widget widget = isSiteEnglish() ? english : foreign;
+        widget.addStyleName(PLAYING_AUDIO_HIGHLIGHT);
         endListener.songStarted();
       }
 
       @Override
       public void songEnded() {
         endListener.songEnded();
+       // removePlayingHighlight(textWidget);
         loadNext();
       }
     });
   }
 
-
+  /**
+   * @see #cancelTimer()
+   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#recordingStarted()
+   */
   protected void removePlayingHighlight() {
-    final Widget textWidget = isSiteEnglish() ? english : foreign;
-    textWidget.removeStyleName("playingAudioHighlight");
+    removePlayingHighlight(isSiteEnglish() ? english : foreign);
   }
 
   /**
@@ -549,6 +553,8 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#nextAfterDelay(boolean, String)
    */
   protected void loadNextOnTimer(final int delay) {
+    System.out.println("loadNextOnTimer ----> load next on " + delay);
+
     if (!preventFutureTimerUse) {
       if (delay > 100) {
         System.out.println("loadNextOnTimer ----> load next on " + delay);
@@ -582,5 +588,38 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
   protected void loadNext() {
    // System.out.println("loadNext after " + exercise.getID());
     controller.getExerciseList().loadNextExercise(exercise);
+  }
+
+  @Override
+  DivWidget getFirstRow(ExerciseController controller) {
+    DivWidget firstRow = super.getFirstRow(controller);
+    List<CorrectAndScore> scores = exercise.getScores();
+    if (!scores.isEmpty()) {
+      DivWidget historyDiv = new DivWidget();
+      firstRow.add(historyDiv);
+      String history = SetCompleteDisplay.getScoreHistory(scores);
+      String s = "<span style='float:right;" +
+          //   "margin-right:-10px;" +
+          "'>" + history + "&nbsp;" + Math.round(getAvgScore(scores)) +
+          "</span>";
+
+      historyDiv.add(new HTML(s));
+    }
+    return firstRow;
+  }
+
+  private float getAvgScore(List<CorrectAndScore> toUse) {
+    if (toUse.isEmpty()) return 0f;
+
+    float c = 0;
+    float n = 0;
+    if (toUse.size() > 5) toUse = toUse.subList(toUse.size() - 5, toUse.size());
+    for (CorrectAndScore correctAndScore : toUse) {
+      if (correctAndScore.getScore() > 0) {
+        c += (float) correctAndScore.getPercentScore();
+        n++;
+      }
+    }
+    return n > 0f ? c / n : 0f;
   }
 }

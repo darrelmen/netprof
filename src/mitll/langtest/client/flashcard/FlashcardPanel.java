@@ -31,6 +31,7 @@ import mitll.langtest.shared.CommonExercise;
  * Created by GO22670 on 6/26/2014.
  */
 class FlashcardPanel extends HorizontalPanel {
+  protected static final String PLAYING_AUDIO_HIGHLIGHT = "playingAudioHighlight";
   private static final String WARN_NO_FLASH = "<font color='red'>Flash is not activated. " +
     "Do you have a flashblocker? Please add this site to its whitelist.</font>";
 
@@ -161,7 +162,10 @@ class FlashcardPanel extends HorizontalPanel {
         addAnnotation(field, GoodwaveExercisePanel.CORRECT, "");
       }
     });
-    firstRow.add(commentBox.getEntry(QCNPFExercise.FOREIGN_LANGUAGE,null,exercise.getAnnotation(QCNPFExercise.FOREIGN_LANGUAGE)));
+    DivWidget left = new DivWidget();
+    left.add(commentBox.getEntry(QCNPFExercise.FOREIGN_LANGUAGE,null,exercise.getAnnotation(QCNPFExercise.FOREIGN_LANGUAGE)));
+    left.addStyleName("floatLeft");
+    firstRow.add(left);
     return firstRow;
   }
 
@@ -716,39 +720,31 @@ class FlashcardPanel extends HorizontalPanel {
   }
 
   private void showEnglishOrForeign() {
-    System.out.println("show english or foreign " + controlState);
+    //System.out.println("show english or foreign " + controlState);
 
     if (controlState.showBoth()) {
       showBoth();
     } else if (controlState.isEnglish()) {
       english.setHeight("100%");
-     // english.setVisible(true);
       showEnglish();
-      // foreign.setVisible(false);
       foreign.getElement().getStyle().setVisibility(Style.Visibility.HIDDEN);
 
       if (clickToFlip != null) {
-//        clickToFlipContainer.setVisible(true);
         clickToFlipContainer.getElement().getStyle().setVisibility(Style.Visibility.VISIBLE);
       }
     } else if (controlState.isForeign()) {
       foreign.setHeight("100%");
-//      english.setVisible(false);
       english.getElement().getStyle().setVisibility(Style.Visibility.HIDDEN);
 
-      //foreign.setVisible(true);
       showForeign();
 
       if (clickToFlip != null) {
-        //clickToFlipContainer.setVisible(true);
         clickToFlipContainer.getElement().getStyle().setVisibility(Style.Visibility.VISIBLE);
       }
     }
     else {
-      System.err.println("huh? show english or foreign " + controlState);
-
+//      System.err.println("huh? show english or foreign " + controlState);
     }
-    //setTitleOfClick(controlState.isEnglish(), controlState.isForeign(), true);
   }
 
   private void showBoth() {
@@ -802,7 +798,7 @@ class FlashcardPanel extends HorizontalPanel {
    * @see #playRef()
    * @param path
    */
-  private void playRef(String path) {
+  void playRef(String path) {
   //  System.out.println("playRef... ---------- " + exercise.getID() + " path " + path );
 
     path = getPath(path);
@@ -810,7 +806,7 @@ class FlashcardPanel extends HorizontalPanel {
     getSoundFeedback().queueSong(path, new SoundFeedback.EndListener() {
       @Override
       public void songStarted() {
-        textWidget.addStyleName("playingAudioHighlight");
+        textWidget.addStyleName(PLAYING_AUDIO_HIGHLIGHT);
         endListener.songStarted();
       }
 
@@ -823,7 +819,7 @@ class FlashcardPanel extends HorizontalPanel {
   }
 
   void removePlayingHighlight(Widget textWidget) {
-    textWidget.removeStyleName("playingAudioHighlight");
+    textWidget.removeStyleName(PLAYING_AUDIO_HIGHLIGHT);
   }
 
   String getPath(String path) {
@@ -838,24 +834,11 @@ class FlashcardPanel extends HorizontalPanel {
    * @see BootstrapExercisePanel#getAnswerWidget(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, String)
    * @return
    */
-  boolean otherReasonToIgnoreKeyPress() {
-    //if (commentBox.isPopupShowing()) System.out.println("comment is visible so ignoring key press...");
-    return commentBox.isPopupShowing();
-  }
+  boolean otherReasonToIgnoreKeyPress() { return commentBox.isPopupShowing();  }
 
   private class ClickableSimplePanel extends SimplePanel {
     public HandlerRegistration addClickHandler(ClickHandler handler) {
       return addDomHandler(handler, ClickEvent.getType());
     }
   }
-
-/*  private class ClickableIcon extends Icon {
-    public ClickableIcon(IconType type) {
-      super(type);
-    }
-
-    public HandlerRegistration addClickHandler(ClickHandler handler) {
-      return addDomHandler(handler, ClickEvent.getType());
-    }
-  }*/
 }
