@@ -199,9 +199,6 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
   protected String getAudioType() { return controller.getAudioType();  }
 
   public Widget getRecordButton() { return recordButton; }
- public Button getActualRecordButton() { return recordButton; }
- /*  public void setRecordButtonEnabled(boolean val) { recordButton.setEnabled(val); }*/
-
   protected void receivedAudioAnswer(AudioAnswer result, final ExerciseQuestionState questionState, final Panel outer) {}
   protected void receivedAudioFailure() {}
 }
