@@ -524,6 +524,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
      */
     private Button getSkipToEnd() {
       seeScores = new Button(SKIP_TO_END);
+      seeScores.setIcon(IconType.TROPHY);
       seeScores.getElement().setId("AVP_SkipToEnd");
       controller.register(seeScores, currentExercise.getID());
 
