@@ -165,7 +165,11 @@ class FlashcardPanel extends HorizontalPanel {
     DivWidget left = new DivWidget();
     left.add(commentBox.getEntry(QCNPFExercise.FOREIGN_LANGUAGE,null,exercise.getAnnotation(QCNPFExercise.FOREIGN_LANGUAGE)));
     left.addStyleName("floatLeft");
+    left.getElement().setId("leftCommentBoxContainer");
+   // left.setWidth("50%");
+
     firstRow.add(left);
+    firstRow.getElement().setId("firstRow");
     return firstRow;
   }
 
@@ -611,8 +615,9 @@ class FlashcardPanel extends HorizontalPanel {
       usedForeign = true;
     }
     FocusPanel widgets = makeEnglishPhrase(englishSentence);
-
+    widgets.setWidth("100%");
     DivWidget div = new DivWidget();
+    div.getElement().setId("FieldContainer");
     div.addStyleName("blockStyle");
     div.add(widgets);
 
