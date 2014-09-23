@@ -121,13 +121,31 @@ public class FlashcardRecordButton extends RecordButton {
         }
         else {
           //System.out.println("warn - key code is " + keyCode);
-          warnNotASpace();
+          if (keyCode == KeyCodes.KEY_LEFT) {
+            gotLeftArrow();
+            event.stopPropagation();
+          }
+          else if (keyCode == KeyCodes.KEY_RIGHT) {
+            gotRightArrow();
+            event.stopPropagation();
+          }
+          else {
+            warnNotASpace();
+          }
         }
       }
     }
     else {
       //System.out.println("checkKeyDown ignoring key press...");
     }
+  }
+
+  protected void gotRightArrow() {
+
+  }
+
+  protected void gotLeftArrow() {
+
   }
 
   protected void checkKeyUp(NativeEvent event) {
@@ -159,6 +177,9 @@ public class FlashcardRecordButton extends RecordButton {
     return $wnd.jQuery('#'+id).is(":hidden");
   }-*/;
 
+  /**
+   * @see #checkKeyDown(com.google.gwt.dom.client.NativeEvent)
+   */
   private void warnNotASpace() { showPopup(NO_SPACE_WARNING);  }
 
   private void showPopup(String html) {
