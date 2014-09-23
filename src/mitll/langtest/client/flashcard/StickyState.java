@@ -13,7 +13,6 @@ public class StickyState {
 
   private static final String CURRENT_EXERCISE = "currentExercise";
   private static final String CORRECT1 = "correct";
-  private static final String SKIPPED = "skipped";
   private final KeyStorage storage;
 
   /**
@@ -21,16 +20,19 @@ public class StickyState {
    * @param storage
    */
   public StickyState(KeyStorage storage) { this.storage = storage; }
+
+  /**
+   *
+   * @param e
+   */
   protected void storeCurrent(CommonExercise e) {
-   // System.out.println("store current " + e.getID());
-
-
+    //System.out.println("StickyState.storeCurrent store current " + e.getID());
     storage.storeValue(CURRENT_EXERCISE, e.getID());
   }
-  public String getCurrentExerciseID() {
 
+  public String getCurrentExerciseID() {
     String value = storage.getValue(CURRENT_EXERCISE);
-   // System.out.println("getCurrentExerciseID " + value);
+  //  System.out.println("StickyState.getCurrentExerciseID '" + value +"'");
     return value;
   }
 
@@ -44,16 +46,8 @@ public class StickyState {
     return storage.getValue(CORRECT1);
   }
 
-  protected String getSkipped() {
-    return storage.getValue(SKIPPED);
-  }
-
   protected String getScore() {
     return storage.getValue(SCORE);
-  }
-
-  protected void storeSkipped(StringBuilder builder) {
-    storage.storeValue(SKIPPED, builder.toString());
   }
 
   protected void storeScore(StringBuilder builder3) {
@@ -69,12 +63,10 @@ public class StickyState {
   }
 
   public void resetStorage() {
-   // System.out.println("reset storage for "+ storage);
-
+//    System.out.println("StickyState : reset storage for "+ storage);
     storage.removeValue(CORRECT1);
     storage.removeValue(INCORRECT);
     storage.removeValue(CURRENT_EXERCISE);
     storage.removeValue(SCORE);
-    storage.removeValue(SKIPPED);
   }
 }
