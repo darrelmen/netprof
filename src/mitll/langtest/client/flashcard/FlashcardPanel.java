@@ -666,26 +666,8 @@ class FlashcardPanel extends HorizontalPanel {
     w.setSize(IconSize.TWO_TIMES);
     toShow = w;
 
-    if (hasRefAudio) {
-    /*  Icon w = new Icon(IconType.VOLUME_UP);
-      w.setSize(IconSize.TWO_TIMES);
-      toShow = w;
-*/
-    } else {
+    if (!hasRefAudio) {
       w.getElement().getStyle().setColor("red");
-      //w.setMuted(true);
- /*     IconStack stack = new IconStack();
-      Icon w = new Icon(IconType.VOLUME_UP);
-      w.setSize(IconSize.TWO_TIMES);
-      stack.add(w,true);
-      Icon child = new Icon(IconType.REMOVE);
-      child.setSize(IconSize.TWO_TIMES);
-      child.setLight(true);
-      child.getElement().getStyle().setBackgroundColor("red");
-      stack.add(child);
-//stack.setSize();
-      toShow = stack;*/
-
     }
 
     Panel simple = new SimplePanel();
