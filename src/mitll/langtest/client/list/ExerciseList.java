@@ -587,6 +587,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   private CommonExercise cachedNext = null;
 
   /**
+   * goes ahead and asks the server for the next item so we don't have to wait for it.
    * @param itemID
    * @see #checkAndAskServer(String)
    */
@@ -594,7 +595,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     System.out.println("ExerciseList.askServerForExercise id = " + itemID + " instance " + instance);
     controller.checkUser();
     if (cachedNext != null && cachedNext.getID().equals(itemID)) {
-      System.out.println("\tExerciseList.askServerForExercise using cached id = " + itemID + " instance " + instance);
+      //System.out.println("\tExerciseList.askServerForExercise using cached id = " + itemID + " instance " + instance);
 
       useExercise(cachedNext);
     } else {
@@ -602,19 +603,25 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
 
     // go get next and cache it
-    int i = getIndex(itemID);
-    CommonShell next = getAt(i + 1);
-    service.getExercise(next.getID(), controller.getUser(), incorrectFirstOrder, new AsyncCallback<CommonExercise>() {
-      @Override
-      public void onFailure(Throwable caught) {
-      }
+    goGetNextAndCacheIt(itemID);
+  }
 
-      @Override
-      public void onSuccess(CommonExercise result) {
-        cachedNext = result;
-        System.out.println("\tExerciseList.askServerForExercise got cached id = " + cachedNext.getID() + " instance " + instance);
-      }
-    });
+  private void goGetNextAndCacheIt(String itemID) {
+    int i = getIndex(itemID);
+    if (!isOnLastItem(i)) {
+      CommonShell next = getAt(i + 1);
+      service.getExercise(next.getID(), controller.getUser(), incorrectFirstOrder, new AsyncCallback<CommonExercise>() {
+        @Override
+        public void onFailure(Throwable caught) {
+        }
+
+        @Override
+        public void onSuccess(CommonExercise result) {
+          cachedNext = result;
+          //System.out.println("\tExerciseList.askServerForExercise got cached id = " + cachedNext.getID() + " instance " + instance);
+        }
+      });
+    }
   }
 
   private class ExerciseAsyncCallback implements AsyncCallback<CommonExercise> {
