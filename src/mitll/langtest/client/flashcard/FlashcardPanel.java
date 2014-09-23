@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.KeyStorage;
+import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.custom.exercise.CommentBox;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
@@ -93,9 +94,6 @@ class FlashcardPanel extends HorizontalPanel {
     this.instance = instance;
     this.exerciseList = exerciseList;
     this.service = service;
-    //  addStyleName("centeringPractice");
-    // System.out.println("BootstrapExercisePanel.instance = " + instance);
-
     controlState.setStorage(new KeyStorage(controller));
 
     this.soundFeedback = soundFeedback;
@@ -387,6 +385,7 @@ class FlashcardPanel extends HorizontalPanel {
     left.setIcon(IconType.CARET_LEFT);
     left.addStyleName("floatLeft");
     left.setSize(ButtonSize.LARGE);
+    new TooltipHelper().addTooltip(left, "Left Arrow Key");
     left.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -417,6 +416,8 @@ class FlashcardPanel extends HorizontalPanel {
   private Button getNextButton() {
     final Button right = new Button();
     right.setIcon(IconType.CARET_RIGHT);
+    new TooltipHelper().addTooltip(right,"Right Arrow Key");
+
     right.addStyleName("floatRight");
     right.setSize(ButtonSize.LARGE);
     right.getElement().getStyle().setMarginTop(-30, Style.Unit.PX);
@@ -615,6 +616,7 @@ class FlashcardPanel extends HorizontalPanel {
       usedForeign = true;
     }
     FocusPanel widgets = makeEnglishPhrase(englishSentence);
+    widgets.getElement().getStyle().setMarginLeft(-20, Style.Unit.PX);
     widgets.setWidth("100%");
     DivWidget div = new DivWidget();
     div.getElement().setId("FieldContainer");
