@@ -5,9 +5,11 @@ import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -238,7 +240,7 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
       @Override
       protected RecordButton makeRecordButton(final ExerciseController controller, String buttonTitle) {
        // System.out.println("makeRecordButton : using " + instance);
-        FlashcardRecordButton widgets = new FlashcardRecordButton(controller.getRecordTimeout(), this, true,
+        final FlashcardRecordButton widgets = new FlashcardRecordButton(controller.getRecordTimeout(), this, true,
             addKeyBinding, controller,
             BootstrapExercisePanel.this.instance) {
           @Override
@@ -270,7 +272,11 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
             return super.shouldIgnoreKeyPress() || otherReasonToIgnoreKeyPress();
           }
         };
-        //widgets.addStyleName("dontSelect");
+        Scheduler.get().scheduleDeferred(new Command() {
+          public void execute() {
+            widgets.setFocus(true);
+          }
+        });
         return widgets;
       }
     };
