@@ -864,6 +864,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     else {
       System.out.println("ignoring got user for current user " + userID);
+      navigation.refreshInitialState();
     }
     if (userID > -1) {
       flashcard.setCogVisible(true);
@@ -966,7 +967,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private void checkLogin() {
     //console("checkLogin");
-    System.out.println("checkLogin -- ");
+    //System.out.println("checkLogin -- ");
     userManager.isUserExpired();
     userManager.checkLogin();
   }
