@@ -322,6 +322,8 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
       setMainContentVisible(false);
       container = completeDisplay.showFeedbackCharts(result, exToScore, getCorrect(), getIncorrect(), allExercises.size());
       Panel leftRight = new HorizontalPanel();
+    //  DivWidget leftRight = new DivWidget();
+      leftRight.addStyleName("floatLeft");
       belowContentDiv.add(leftRight);
       scoreHistory = completeDisplay.getScoreHistory(sortedHistory, allExercises, controller);
       leftRight.add(scoreHistory);
@@ -338,6 +340,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
 
       DivWidget right = new DivWidget();
       right.add(container);
+      right.addStyleName("floatRight");
       leftRight.add(right);
       sticky.resetStorage();
     }
@@ -488,7 +491,8 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
       startOver = new Button(START_OVER);
       startOver.getElement().setId("AVP_StartOver");
 
-      startOver.setType(ButtonType.PRIMARY);
+      startOver.setType(ButtonType.SUCCESS);
+      startOver.setIcon(IconType.REPEAT);
       startOver.addStyleName("floatRight");
       startOver.addClickHandler(new ClickHandler() {
         @Override
