@@ -75,13 +75,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     this.instance = instance;
     this.incorrectFirstOrder = incorrectFirst;
     getElement().setId("ExerciseList_" + instance);
-
-    // Add history listener
-/*    if (handlerRegistration == null) {
-      handlerRegistration = History.addValueChangeHandler(this);
-    }
-    this.incorrectFirstOrder = incorrectFirst;
-    }*/
   }
 
   private HandlerRegistration handlerRegistration;
@@ -116,7 +109,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   /**
    * @param currentExerciseVPanel
-   * @see #ExerciseList(com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExercisePanelFactory, mitll.langtest.client.exercise.ExerciseController, String)
+   * @see #ExerciseList
    */
   private void addWidgets(final Panel currentExerciseVPanel) {
     this.innerContainer = new SimplePanel();
@@ -142,7 +135,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    *
    * @param userID
    * @return true if we asked the server for exercises
-   * @see mitll.langtest.client.LangTest#doEverythingAfterFactory(long)
+   * @see mitll.langtest.client.LangTest#configureUIGivenUser(long)
    * @see mitll.langtest.client.list.HistoryExerciseList#noSectionsGetExercises(long)
    */
   public boolean getExercises(long userID) {
@@ -155,7 +148,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   /**
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#doAfterEditComplete(ListInterface, boolean)
-   * @see mitll.langtest.client.LangTest#doEverythingAfterFactory(long)
+   * @see mitll.langtest.client.LangTest#configureUIGivenUser(long)
    */
   public void reload() {
     System.out.println("ExerciseList.reload for user " + controller.getUser() + " instance " + instance + " id " + getElement().getId());
@@ -591,6 +584,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
   }
 
+  private CommonExercise cachedNext = null;
+
   /**
    * @param itemID
    * @see #checkAndAskServer(String)
@@ -598,7 +593,28 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   protected void askServerForExercise(String itemID) {
     System.out.println("ExerciseList.askServerForExercise id = " + itemID + " instance " + instance);
     controller.checkUser();
-    service.getExercise(itemID, controller.getUser(), incorrectFirstOrder, new ExerciseAsyncCallback());
+    if (cachedNext != null && cachedNext.getID().equals(itemID)) {
+      System.out.println("\tExerciseList.askServerForExercise using cached id = " + itemID + " instance " + instance);
+
+      useExercise(cachedNext);
+    } else {
+      service.getExercise(itemID, controller.getUser(), incorrectFirstOrder, new ExerciseAsyncCallback());
+    }
+
+    // go get next and cache it
+    int i = getIndex(itemID);
+    CommonShell next = getAt(i + 1);
+    service.getExercise(next.getID(), controller.getUser(), incorrectFirstOrder, new AsyncCallback<CommonExercise>() {
+      @Override
+      public void onFailure(Throwable caught) {
+      }
+
+      @Override
+      public void onSuccess(CommonExercise result) {
+        cachedNext = result;
+        System.out.println("\tExerciseList.askServerForExercise got cached id = " + cachedNext.getID() + " instance " + instance);
+      }
+    });
   }
 
   private class ExerciseAsyncCallback implements AsyncCallback<CommonExercise> {
@@ -886,7 +902,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   /**
-   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#StatsPracticePanel(mitll.langtest.shared.CommonExercise)
+   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#StatsPracticePanel
    * @param doShuffle
    */
   public void simpleSetShuffle(boolean doShuffle) {
