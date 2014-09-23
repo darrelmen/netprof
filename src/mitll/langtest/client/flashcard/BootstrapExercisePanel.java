@@ -217,11 +217,6 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
     recoOutputContainer.addStyleName("alignCenter");
 
     recoOutputRow.add(new Column(12, recoOutputContainer));
-
-/*    recoOutput = new Heading(3, "Answer");
-    recoOutput.addStyleName("cardHiddenText");   // same color as background so text takes up space but is invisible
-    recoOutput.getElement().getStyle().setProperty("color", "#ebebec");*/
-
     recoOutputContainer.add(recoOutput);
     recoOutputRow.getElement().setId("recoOutputRow");
 
@@ -257,6 +252,17 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
           public void stop() {
             controller.logEvent(this, "AVP_RecordButton", exercise.getID(), "Stop_Recording");
             super.stop();
+          }
+
+          @Override
+          protected void gotLeftArrow() {
+            exerciseList.loadPrev();
+          }
+
+          @Override
+          protected void gotRightArrow() {
+            exerciseList.loadNext();
+
           }
 
           @Override
@@ -596,6 +602,8 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
     List<CorrectAndScore> scores = exercise.getScores();
     if (!scores.isEmpty()) {
       DivWidget historyDiv = new DivWidget();
+      historyDiv.getElement().setId("historyDiv");
+      //historyDiv.setWidth("50%");
       firstRow.add(historyDiv);
       String history = SetCompleteDisplay.getScoreHistory(scores);
       String s = "<span style='float:right;" +
