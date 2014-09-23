@@ -62,7 +62,6 @@ import java.util.concurrent.TimeUnit;
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   public static final String LANGTEST_IMAGES = "langtest/images/";
   private static final String DIVIDER = "|";
- // private static final String NEW_PRO_F2_PNG = "NewProF2.png";
   private static final int MAX_EXCEPTION_STRING = 300;
   private static final int MAX_CACHE_SIZE = 100;
   private static final int NO_USER_INITIAL = -2;
@@ -945,6 +944,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   @Override
   public void registerWidget(HasClickHandlers clickable, UIObject uiObject, String exid, String context) {
     buttonFactory.registerWidget(clickable, uiObject, exid, context, getUser());
+  }
+
+  @Override
+  public void logEvent(UIObject button, String widgetType, CommonShell ex, String context) {
+    buttonFactory.logEvent(button, widgetType, ex.getID(), context, getUser());
   }
 
   @Override
