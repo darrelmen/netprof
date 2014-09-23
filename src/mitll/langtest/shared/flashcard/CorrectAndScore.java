@@ -32,14 +32,6 @@ public class CorrectAndScore implements IsSerializable, Comparable<CorrectAndSco
     this.path = path;
   }
 
-/*
-  public CorrectAndScore(Result r) {
-    this.correct =r.isCorrect();
-    this.score = (int)(r.getPronScore()*100f);
-    this.timestamp = r.timestamp;
-  }
-*/
-
   @Override
   public int compareTo(CorrectAndScore o) {
     return getTimestamp() < o.getTimestamp() ? -1 : getTimestamp() > o.getTimestamp() ? +1 : 0;
@@ -72,15 +64,15 @@ public class CorrectAndScore implements IsSerializable, Comparable<CorrectAndSco
     return path;
   }
 
-  public String toString() {
-    return "id " + getId() + " " + (isCorrect() ? "C" : "I") + " score " + getPercentScore();
-  }
-
   public int getUniqueID() {
     return uniqueID;
   }
 
   public long getUserid() {
     return userid;
+  }
+
+  public String toString() {
+    return "id " + getId() + " " + (isCorrect() ? "C" : "I") + " score " + getPercentScore();
   }
 }
