@@ -192,11 +192,7 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
 
   private Panel getCenteredWrapper(Widget recordButton) {
     Panel recordButtonRow = new FluidRow();
-  //  recordButtonRow.addStyleName("dontSelect");
-  //  recordButtonRow.getElement().setId("RecordButtonRow");
     Paragraph recordButtonContainer = new Paragraph();
-    //recordButtonContainer.getElement().setId("RecordButtonRowContainer");
-
     recordButtonContainer.addStyleName("alignCenter");
     recordButtonContainer.add(recordButton);
     recordButton.addStyleName("alignCenter");
@@ -245,14 +241,14 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
             BootstrapExercisePanel.this.instance) {
           @Override
           protected void start() {
-            controller.logEvent(this, "AVP_RecordButton", exercise.getID(), "Start_Recording");
+            controller.logEvent(this, "AVP_RecordButton", exercise, "Start_Recording");
             super.start();
             recordingStarted();
           }
 
           @Override
           public void stop() {
-            controller.logEvent(this, "AVP_RecordButton", exercise.getID(), "Stop_Recording");
+            controller.logEvent(this, "AVP_RecordButton", exercise, "Stop_Recording");
             super.stop();
           }
 
@@ -272,6 +268,10 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
             return super.shouldIgnoreKeyPress() || otherReasonToIgnoreKeyPress();
           }
         };
+
+        widgets.getElement().setId("FlashcardRecordButton");
+
+        // without this, the arrow keys may go to the chapter selector
         Scheduler.get().scheduleDeferred(new Command() {
           public void execute() {
             widgets.setFocus(true);
@@ -318,11 +318,6 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
         score > 0.6 ? ProgressBarBase.Color.DEFAULT :
           score > 0.4 ? ProgressBarBase.Color.WARNING : ProgressBarBase.Color.DANGER);
 
-/*    if (centerVertically) {
-      DOM.setStyleAttribute(scoreFeedback.getElement(), "marginTop", "18px");
-      DOM.setStyleAttribute(scoreFeedback.getElement(), "marginBottom", "10px");
-    }
-    DOM.setStyleAttribute(scoreFeedback.getElement(), "marginLeft", "10px");*/
     return scoreFeedback;
   }
 
@@ -343,17 +338,22 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
 
     boolean badAudioRecording = result.getValidity() != AudioAnswer.Validity.OK;
     System.out.println("receivedAudioAnswer: correct " + correct + " pron score : " + score +
-      " has ref " + hasRefAudio + " bad audio " + badAudioRecording + " result " + result);
+        " has ref " + hasRefAudio + " bad audio " + badAudioRecording + " result " + result);
 
     String feedback = "";
     if (badAudioRecording) {
+      controller.logEvent(button, "Button", exercise.getID(), "bad recording");
       putBackText();
       showPopup(result.getValidity().getPrompt(), button);
       initRecordButton();
       clearFeedback();
     } else if (correct) {
+      controller.logEvent(button, "Button", exercise.getID(), "correct response - score " + Math.round(score * 100f));
+
       showCorrectFeedback(score);
     } else {   // incorrect!!
+      controller.logEvent(button, "Button", exercise.getID(), "incorrect response - score " + Math.round(score * 100f));
+
       feedback = showIncorrectFeedback(result, score, hasRefAudio);
     }
     if (!badAudioRecording && (correct || !hasRefAudio)) {
