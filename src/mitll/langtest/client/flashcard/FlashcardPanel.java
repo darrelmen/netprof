@@ -661,14 +661,37 @@ class FlashcardPanel extends HorizontalPanel {
 
     Panel hp = new HorizontalPanel();
     hp.add(heading);
+    Widget toShow;
+    Icon w = new Icon(IconType.VOLUME_UP);
+    w.setSize(IconSize.TWO_TIMES);
+    toShow = w;
+
     if (hasRefAudio) {
+    /*  Icon w = new Icon(IconType.VOLUME_UP);
+      w.setSize(IconSize.TWO_TIMES);
+      toShow = w;
+*/
+    } else {
+      w.getElement().getStyle().setColor("red");
+      //w.setMuted(true);
+ /*     IconStack stack = new IconStack();
       Icon w = new Icon(IconType.VOLUME_UP);
       w.setSize(IconSize.TWO_TIMES);
-      Panel simple = new SimplePanel();
-      simple.add(w);
-      simple.addStyleName("leftTenMargin");
-      hp.add(simple);
+      stack.add(w,true);
+      Icon child = new Icon(IconType.REMOVE);
+      child.setSize(IconSize.TWO_TIMES);
+      child.setLight(true);
+      child.getElement().getStyle().setBackgroundColor("red");
+      stack.add(child);
+//stack.setSize();
+      toShow = stack;*/
+
     }
+
+    Panel simple = new SimplePanel();
+    simple.add(toShow);
+    simple.addStyleName("leftTenMargin");
+    hp.add(simple);
     DivWidget centeringRow = getCenteringRow();
     centeringRow.add(hp);
     container.add(centeringRow);
