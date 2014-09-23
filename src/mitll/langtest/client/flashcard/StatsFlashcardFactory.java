@@ -45,7 +45,8 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
 
   private static final String SKIP_TO_END = "See your scores";
   private static final boolean ADD_KEY_BINDING = true;
- private static final String JUMP_TO_THE_END = "See your scores.";
+ //private static final String JUMP_TO_THE_END = "See your scores.";
+  private static final String GO_BACK = "Go back";
 
   private CommonExercise currentExercise;
   private final ControlState controlState;
@@ -287,6 +288,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
       setPrevNextVisible(false);
 
       sticky.resetStorage();
+      sticky.storeCurrent(currentExercise);
 
       final int user = controller.getUser();
 
@@ -315,7 +317,6 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
           showFeedbackCharts(result,scoreReport.getSortedHistory());
         }
       });
-      // TODO : maybe add table showing results per word
     }
 
     private void showFeedbackCharts(List<AVPHistoryForList> result, final List<ExerciseCorrectAndScore> sortedHistory) {
@@ -342,7 +343,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
       right.add(container);
       right.addStyleName("floatRight");
       leftRight.add(right);
-      sticky.resetStorage();
+//      sticky.resetStorage();
     }
 
     private Button getIncorrectListButton() {
@@ -354,6 +355,8 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
       w.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
+
+       //   System.out.println("----> click on " + START_OVER);
           w.setVisible(false);
           doIncorrectFirst();
         }
@@ -363,7 +366,9 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
       return w;
     }
 
-
+    /**
+     * @see #getIncorrectListButton()
+     */
     protected void doIncorrectFirst() {
       abortPlayback();
       setMainContentVisible(true);
@@ -399,13 +404,16 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
      * @return
      */
     private Button getRepeatButton() {
-      final Button w1 = new Button("Go back");
+      final Button w1 = new Button(GO_BACK);
       w1.setIcon(IconType.UNDO);
       w1.getElement().setId("AVP_DoWholeSetFromStart");
       w1.setType(ButtonType.PRIMARY);
       w1.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
+
+          //System.out.println("getRepeatButton : click on " + GO_BACK);
+
           abortPlayback();
           w1.setVisible(false);
           setMainContentVisible(true);
@@ -429,6 +437,9 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
 
       String lastID = allExercises.get(allExercises.size() - 1).getID();
       String currentExerciseID = sticky.getCurrentExerciseID();
+
+     // System.out.println("startOver : current " + currentExerciseID);
+
       if (currentExerciseID != null && !currentExerciseID.equals(lastID)) {
         exerciseList.loadExercise(currentExerciseID);
       } else {
@@ -540,7 +551,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
           onSetComplete();
         }
       });
-      new TooltipHelper().addTooltip(seeScores, JUMP_TO_THE_END);
+      new TooltipHelper().addTooltip(seeScores, SKIP_TO_END);
       return seeScores;
     }
 
