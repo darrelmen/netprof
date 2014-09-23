@@ -58,7 +58,6 @@ public class Navigation implements RequiresResize {
   private static final String STUDY_LISTS = "Study Lists and Favorites";
   private static final String OTHERS_LISTS = "Study Visited Lists";
   private static final String PRACTICE = "Do Flashcards";
-  //private static final String PRACTICE2 = "Do Flashcards";
   public static final String REVIEW = "review";
   public static final String COMMENT = "comment";
   private static final String ATTENTION = "attention";
@@ -280,9 +279,7 @@ public class Navigation implements RequiresResize {
     nameToIndex.clear();
 
     boolean isQualityControl = isQC();
-    //if (!isQualityControl) {
     addPracticeTab();
-    // }
 
     // chapter tab
     final String chapterNameToUse = getChapterName();
@@ -424,8 +421,7 @@ public class Navigation implements RequiresResize {
     practiceTab.getTab().addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-
-        System.out.println("got practice click !!! \n\n\n");
+        //System.out.println("got practice click !!! \n\n\n");
         checkAndMaybeClearTab(PRACTICE);
         practiceHelper.showNPF(practiceTab, PRACTICE);
         practiceHelper.hideList();
@@ -487,7 +483,7 @@ public class Navigation implements RequiresResize {
 
   /**
    *
-   * @see mitll.langtest.client.LangTest#doEverythingAfterFactory(long)
+   * @see mitll.langtest.client.LangTest#configureUIGivenUser(long)
    */
   public void showInitialState() {
     final int user = userManager.getUser();
@@ -526,8 +522,19 @@ public class Navigation implements RequiresResize {
         }
       });
     } else {
-
       System.out.println("previous selection was " + value);
+      selectPreviousTab(value);
+    }
+  }
+
+  public void refreshInitialState() {
+    String value = storage.getValue(CLICKED_TAB);
+    if (value.isEmpty()) {   // no previous tab
+      checkAndMaybeClearTab(PRACTICE);
+      practiceHelper.showNPF(practiceTab, PRACTICE);
+      practiceHelper.hideList();
+    }
+    else {
       selectPreviousTab(value);
     }
   }
@@ -624,16 +631,8 @@ public class Navigation implements RequiresResize {
     } else if (toUse.getTab() == null) {
       System.err.println("huh? toUse has a null tab? " + toUse);
     } else {
-
-      System.out.println("clicking on " +toUse);
+      System.out.println("click on tab " + toUse);
       toUse.getTab().fireEvent(new ButtonClickEvent());
-
-   /*   Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-        public void execute() {
-          toUse.getTab().fireEvent(new ButtonClickEvent());
-        }
-      });
-*/
     }
   }
 
