@@ -113,7 +113,7 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
     return v;
   }
 
-  public int getAvgScorePercent() { return Math.round(getAvgScore());}
+  public int getAvgScorePercent() { return Math.round(getAvgScore()*100f);}
 
   public void add(CorrectAndScore correctAndScore) {
     getCorrectAndScores().add(correctAndScore);
