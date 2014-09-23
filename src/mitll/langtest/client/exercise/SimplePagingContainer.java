@@ -65,6 +65,7 @@ public class SimplePagingContainer<T> implements RequiresResize {
     Panel column = new FlowPanel();
     column.add(pager);
     column.add(table);
+    table.addStyleName("floatLeft");
 /*    Scheduler.get().scheduleDeferred(new Command() {
       @Override
       public void execute() {
@@ -77,7 +78,7 @@ public class SimplePagingContainer<T> implements RequiresResize {
     return column;
   }
 
-  private void makeCellTable() {
+  protected void makeCellTable() {
     CellTable.Resources o = chooseResources();
 
     this.table = makeCellTable(o);
@@ -85,7 +86,7 @@ public class SimplePagingContainer<T> implements RequiresResize {
     configureTable();
   }
 
-  private CellTable.Resources chooseResources() {
+  protected CellTable.Resources chooseResources() {
     CellTable.Resources o;
 
     if (controller.isRightAlignContent()) {   // so when we truncate long entries, the ... appears on the correct end
