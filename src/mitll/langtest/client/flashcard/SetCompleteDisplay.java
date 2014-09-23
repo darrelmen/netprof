@@ -3,12 +3,16 @@ package mitll.langtest.client.flashcard;
 import com.github.gwtbootstrap.client.ui.incubator.Table;
 import com.github.gwtbootstrap.client.ui.incubator.TableHeader;
 import com.google.gwt.cell.client.SafeHtmlCell;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
+import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
@@ -26,7 +30,7 @@ import java.util.Map;
 public class SetCompleteDisplay {
   private static final String CORRECT_NBSP = "Correct&nbsp;%";
   // private static final String SKIP_THIS_ITEM = "Skip this item";
-  private static final int MAX_LENGTH_ID = 35;
+  private static final int MAX_LENGTH_ID = 30;
 
   private static final String RANK = "Rank";
   private static final String NAME = "Name";
@@ -34,7 +38,7 @@ public class SetCompleteDisplay {
   private static final String SCORE_SUBTITLE = "score %";
   private static final String CORRECT_SUBTITLE = "% correct";
   private static final int ROWS_IN_TABLE = 7;
-  private static final int TABLE_HISTORY_WIDTH = 225;
+  private static final int TABLE_HISTORY_WIDTH = 326;
   public static final int ONE_TABLE_WIDTH = 275;//-(TABLE_HISTORY_WIDTH/2);//275;
   // private static final String SKIP_TO_END = "See your scores";
   private static final int TABLE_WIDTH = 2 * ONE_TABLE_WIDTH;
@@ -206,52 +210,103 @@ public class SetCompleteDisplay {
                                 List<CommonShell> allExercises, ExerciseController controller) {
     final Map<String,String> idToExercise = new HashMap<String, String>();
     for (CommonShell commonShell : allExercises) {
-      idToExercise.put(commonShell.getID()/* +"/1"*/,commonShell.getTooltip());
+      idToExercise.put(commonShell.getID()/* +"/1"*/, commonShell.getTooltip());
     }
 
-   // System.out.println("map " + idToExercise);
+    // System.out.println("map " + idToExercise);
 
-    SimplePagingContainer<ExerciseCorrectAndScore> container = new SimplePagingContainer<ExerciseCorrectAndScore>(controller){
+    SimplePagingContainer<ExerciseCorrectAndScore> container = new SimplePagingContainer<ExerciseCorrectAndScore>(controller) {
+
+        @Override
+      protected CellTable.Resources chooseResources() {
+        CellTable.Resources o;
+
+          o = GWT.create(LocalTableResources.class);
+        return o;
+      }
+
       @Override
       protected void addColumnsToTable() {
-        addColumn(getColumn());
+        Column<ExerciseCorrectAndScore, SafeHtml> column = getColumn();
+
+        table.setWidth("100%", true);
+        table.addColumn(column, "Item");
+        table.setColumnWidth(column, "180px");
+        Column<ExerciseCorrectAndScore, SafeHtml> column2 = getColumn2();
+        table.addColumn(column2, "History");
+        table.setColumnWidth(column2, "88px");
+        new TooltipHelper().addTooltip(table,"Correct/Incorrect history and average pronunciation score");
+
+        Column<ExerciseCorrectAndScore, SafeHtml> column3 = getColumn3();
+        table.addColumn(column3, "Score");
+        column3.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        table.setColumnWidth(column3, "70" +
+            "px");
       }
 
       private Column<ExerciseCorrectAndScore, SafeHtml> getColumn() {
+        return new Column<ExerciseCorrectAndScore, SafeHtml>(new SafeHtmlCell()) {
+          @Override
+          public SafeHtml getValue(ExerciseCorrectAndScore shell) {
+            String columnText = idToExercise.get(shell.getId());
+            String html = shell.getId();
+            if (columnText != null) {
+              if (columnText.length() > MAX_LENGTH_ID)
+                columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
+
+              html = "<span style='float:left;" +
+                  //"margin-left:-10px;" +
+                  "'>" + columnText + "</span>";
+            }
+            return new SafeHtmlBuilder().appendHtmlConstant(html).toSafeHtml();
+          }
+        };
+      }
+
+      private Column<ExerciseCorrectAndScore, SafeHtml> getColumn2() {
 
         return new Column<ExerciseCorrectAndScore, SafeHtml>(new SafeHtmlCell()) {
 
           @Override
           public SafeHtml getValue(ExerciseCorrectAndScore shell) {
-              String columnText = idToExercise.get(shell.getId());
-              String html = shell.getId();
-              if (columnText != null) {
-                if (columnText.length() > MAX_LENGTH_ID)
-                  columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
 
-                String history = SetCompleteDisplay.this.getScoreHistory(shell);
+            String history = SetCompleteDisplay.this.getScoreHistory(shell);
 
-                String s = "<span style='float:right;" +
-                    "margin-right:-10px;" +
-                    "'>" + history+ "&nbsp;" +shell.getAvgScorePercent()+
-                    "</span>";
-                html = "<span style='float:left;margin-left:-10px;'>" + columnText + "</span>" + s;
+            String s = shell.getCorrectAndScores().isEmpty() ? "" : "<span style='float:right;" +
+               // "margin-right:-10px;" +
+                "'>" + history +
+                "</span>";
 
-              }
-            return new SafeHtmlBuilder().appendHtmlConstant(html).toSafeHtml();
+            return new SafeHtmlBuilder().appendHtmlConstant(s).toSafeHtml();
           }
+        };
+      }
 
- /*         private SafeHtml getColumnToolTip(String columnText) {
-            if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
-            return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
-          }*/
+      private Column<ExerciseCorrectAndScore, SafeHtml> getColumn3() {
+
+        return new Column<ExerciseCorrectAndScore, SafeHtml>(new SafeHtmlCell()) {
+
+          @Override
+          public SafeHtml getValue(ExerciseCorrectAndScore shell) {
+           // String s = "<span>" + shell.getAvgScorePercent() + "</span>";
+
+            String s = shell.getCorrectAndScores().isEmpty() ? "" : "<span " +
+                "style='" +
+                //"float:right;" +
+                "margin-left:10px;" +
+                "'" +
+                ">" + shell.getAvgScorePercent()+
+                "</span>";
+
+            return new SafeHtmlBuilder().appendHtmlConstant(s).toSafeHtml();
+          }
         };
       }
     };
     Panel tableWithPager = container.getTableWithPager();
     tableWithPager.getElement().setId("TableScoreHistory");
-    tableWithPager.setWidth(TABLE_HISTORY_WIDTH +
-        "px");
+    tableWithPager.setWidth(TABLE_HISTORY_WIDTH + "px");
+    tableWithPager.addStyleName("floatLeft");
     for (ExerciseCorrectAndScore exerciseCorrectAndScore : sortedHistory) {
       container.addItem(exerciseCorrectAndScore);
     }
@@ -320,4 +375,15 @@ public class SetCompleteDisplay {
     return ((int) (num * 100f)) + "%";
   }
 
+  public interface LocalTableResources extends CellTable.Resources {
+    /**
+     * The styles applied to the table.
+     */
+    interface TableStyle extends CellTable.Style {
+    }
+
+    @Override
+    @Source({CellTable.Style.DEFAULT_CSS, "ScoresCellTableStyleSheet.css"})
+    PagingContainer.TableResources.TableStyle cellTableStyle();
+  }
 }
