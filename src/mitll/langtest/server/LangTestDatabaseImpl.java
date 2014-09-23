@@ -1739,7 +1739,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         db.getSectionHelper().getExercisesForSelectionState(typeToSection);
     List<String> allIDs = new ArrayList<String>();
     for (CommonExercise exercise : exercisesForState) allIDs.add(exercise.getID());
-    logger.debug("for " + typeToSection + " found " + allIDs);
+    //logger.debug("for " + typeToSection + " found " + allIDs.size());
     return db.getUserHistoryForList(userid, ids, latestResultID, allIDs);
   }
 
