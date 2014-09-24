@@ -54,9 +54,9 @@ public class UserDAO extends DAO {
   public static final int DEFAULT_USER_ID = -1;
   public static final int DEFAULT_MALE_ID = -2;
   public static final int DEFAULT_FEMALE_ID = -3;
-  public static MiniUser DEFAULT_USER = new MiniUser(DEFAULT_USER_ID, 30, 0, "default", "default", "default");
-  public static MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 30, 0, "default", "default", "Male");
-  public static MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 30, 1, "default", "default", "Female");
+  public static MiniUser DEFAULT_USER = new MiniUser(DEFAULT_USER_ID, 30, 0, "default");
+  public static MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 30, 0, "Male");
+  public static MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 30, 1, "Female");
   private static final List<String> admins = Arrays.asList("swade", "gvidaver", "tmarius", "acohen", "drandolph", "djones");
 
   public UserDAO(Database database) {
