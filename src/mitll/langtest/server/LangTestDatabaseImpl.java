@@ -53,7 +53,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private static final int SLOW_EXERCISE_EMAIL = 2000;
   private static final String NP_SERVER = "np.ll.mit.edu";
   private static final String REPLY_TO = "admin@" + NP_SERVER;
-  private static final String CONTENT_DEVELOPER_APPROVAL_EMAIL = "gordon.vidaver@ll.mit.edu";
+  //private static final String CONTENT_DEVELOPER_APPROVAL_EMAIL = "gordon.vidaver@ll.mit.edu";
   private static final String RP = "rp";
 
   private DatabaseImpl db;
@@ -62,7 +62,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private String configDir;
   private ServerProperties serverProps;
   private PathHelper pathHelper;
-  private String reqURL, path, info;
+  //private String reqURL, path, info;
 
   /**
    * @param request
@@ -74,9 +74,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   protected void service(HttpServletRequest request,
                          HttpServletResponse response) throws ServletException, IOException {
     try {
-      reqURL = request.getRequestURI();
-      path = request.getServletPath();
-      info = request.getPathInfo();
+    //  reqURL = request.getRequestURI();
+    //  path = request.getServletPath();
+    //  info = request.getPathInfo();
       super.service(request, response);
     } catch (ServletException e) {
       logAndNotifyServerException(e);
@@ -1733,9 +1733,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public AVPScoreReport getUserHistoryForList(long userid, Collection<String> ids, long latestResultID,
                                               Map<String, Collection<String>> typeToSection) {
-    //logger.debug("getUserHistoryForList " + userid + " and " + ids);
+    //logger.debug("getUserHistoryForList " + userid + " and " + ids + " type to section " + typeToSection);
 
-    Collection<CommonExercise> exercisesForState = typeToSection.isEmpty() ? getExercises() :
+    Collection<CommonExercise> exercisesForState = (typeToSection == null || typeToSection.isEmpty()) ? getExercises() :
         db.getSectionHelper().getExercisesForSelectionState(typeToSection);
     List<String> allIDs = new ArrayList<String>();
     for (CommonExercise exercise : exercisesForState) allIDs.add(exercise.getID());
