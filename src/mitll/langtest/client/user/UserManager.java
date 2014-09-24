@@ -422,10 +422,13 @@ public class UserManager {
 
   /**
    * If we have lots of students moving through stations quickly, we want to auto logout once a day, once an hour?
+   *
+   * Egyptian should never time out -- for anonymous students
    * @return
    */
   private long getUserSessionDuration() {
     //boolean useShortExpiration = loginType.equals(PropertyHandler.LOGIN_TYPE.STUDENT);
-    return HOUR_IN_MILLIS * EXPIRATION_HOURS;//(useShortExpiration ? SHORT_EXPIRATION_HOURS : EXPIRATION_HOURS);
+    long mult = loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS) ? 52 : 4;
+    return HOUR_IN_MILLIS * mult;//(useShortExpiration ? SHORT_EXPIRATION_HOURS : EXPIRATION_HOURS);
   }
 }
