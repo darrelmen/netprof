@@ -45,15 +45,14 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
 
   private static final String SKIP_TO_END = "See your scores";
   private static final boolean ADD_KEY_BINDING = true;
- //private static final String JUMP_TO_THE_END = "See your scores.";
   private static final String GO_BACK = "Go back";
 
   private CommonExercise currentExercise;
   private final ControlState controlState;
   private List<CommonShell> allExercises;//, originalExercises;
 
-  private final Map<String,Boolean> exToCorrect = new HashMap<String, Boolean>();
-  private final Map<String,Double>   exToScore = new HashMap<String, Double>();
+  private final Map<String, Boolean> exToCorrect = new HashMap<String, Boolean>();
+  private final Map<String, Double> exToScore = new HashMap<String, Double>();
   private final Set<Long> resultIDs = new HashSet<Long>();
   private String selectionID = "";
   private final String instance;
@@ -62,13 +61,13 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
   private Map<String, Collection<String>> selection;
 
   /**
-   * @see mitll.langtest.client.custom.content.AVPHelper#getFactory
-   * @see mitll.langtest.client.custom.Navigation#makePracticeHelper(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.user.UserFeedback)
    * @param service
    * @param feedback
    * @param controller
    * @param exerciseList
    * @param instance
+   * @see mitll.langtest.client.custom.content.AVPHelper#getFactory
+   * @see mitll.langtest.client.custom.Navigation#makePracticeHelper(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.user.UserFeedback)
    */
   public StatsFlashcardFactory(LangTestDatabaseAsync service, UserFeedback feedback, ExerciseController controller,
                                ListInterface exerciseList, String instance) {
@@ -76,7 +75,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
     controlState = new ControlState();
     this.instance = instance;
 
-   // System.out.println("made factory ---------------------\n");
+    // System.out.println("made factory ---------------------\n");
     boolean sharedList = exerciseList == null;
     if (sharedList) {   // when does this happen??
       exerciseList = controller.getExerciseList();
@@ -100,12 +99,12 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
     KeyStorage storage = new KeyStorage(controller) {
       @Override
       protected String getKey(String name) {
-        return (selectionID.isEmpty() ? "":selectionID + "_") + super.getKey(name); // in the context of this selection
+        return (selectionID.isEmpty() ? "" : selectionID + "_") + super.getKey(name); // in the context of this selection
       }
     };
     sticky = new StickyState(storage);
     controlState.setStorage(storage);
-   // System.out.println("setting shuffle --------------------- " +controlState.isShuffle()+ "\n");
+    // System.out.println("setting shuffle --------------------- " +controlState.isShuffle()+ "\n");
 
     if (!sharedList) {
       exerciseList.simpleSetShuffle(controlState.isShuffle());
@@ -115,17 +114,16 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
   @Override
   public void onResize() {
     if (scoreHistory != null && scoreHistory instanceof RequiresResize) {
-      ((RequiresResize)scoreHistory).onResize();
-    }
-    else {
+      ((RequiresResize) scoreHistory).onResize();
+    } else {
       System.err.println("huh? score history doesn't implement requires resize????\\n\n");
     }
   }
 
   /**
-   * @see mitll.langtest.client.list.ExerciseList#makeExercisePanel(mitll.langtest.shared.CommonExercise)
    * @param e
    * @return
+   * @see mitll.langtest.client.list.ExerciseList#makeExercisePanel(mitll.langtest.shared.CommonExercise)
    */
   @Override
   public Panel getExercisePanel(CommonExercise e) {
@@ -143,7 +141,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
         sticky.resetStorage();
         super.gotShuffleClick(b);
       }
-    } : new StatsPracticePanel(e,exerciseList);
+    } : new StatsPracticePanel(e, exerciseList);
   }
 
   private void reset() {
@@ -154,26 +152,29 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
     sticky.clearCurrent();
   }
 
-  public String getCurrentExerciseID() { return sticky.getCurrentExerciseID(); }
+  public String getCurrentExerciseID() {
+    return sticky.getCurrentExerciseID();
+  }
 
   /**
    * Pull state out of cache and re-populate correct, incorrect, and score history.
+   *
    * @see mitll.langtest.client.custom.Navigation#makePracticeHelper(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.user.UserFeedback)
    */
   public void populateCorrectMap() {
     String value = sticky.getCorrect();
     if (value != null && !value.trim().isEmpty()) {
-     // System.out.println("using correct map " + value);
+      // System.out.println("using correct map " + value);
       for (String ex : value.split(",")) {
-        exToCorrect.put(ex,Boolean.TRUE);
+        exToCorrect.put(ex, Boolean.TRUE);
       }
     }
 
     value = sticky.getIncorrect();
     if (value != null && !value.trim().isEmpty()) {
-    //  System.out.println("using incorrect map " + value);
+      //  System.out.println("using incorrect map " + value);
       for (String ex : value.split(",")) {
-        exToCorrect.put(ex,Boolean.FALSE);
+        exToCorrect.put(ex, Boolean.FALSE);
       }
     }
 
@@ -182,7 +183,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
       for (String pair : value.split(",")) {
         String[] split = pair.split("=");
         if (split.length == 2) {
-          exToScore.put(split[0],Double.parseDouble(split[1]));
+          exToScore.put(split[0], Double.parseDouble(split[1]));
         }
       }
     }
@@ -195,7 +196,9 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
     sticky.resetStorage();
   }
 
-  public void setSelection(Map<String, Collection<String>> selection) { this.selection = selection;  }
+  public void setSelection(Map<String, Collection<String>> selection) {
+    this.selection = selection;
+  }
 
   /**
    * @see #getExercisePanel(mitll.langtest.shared.CommonExercise)
@@ -203,14 +206,15 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
   private class StatsPracticePanel extends BootstrapExercisePanel {
     private Widget container;
     final SetCompleteDisplay completeDisplay = new SetCompleteDisplay();
+
     public StatsPracticePanel(CommonExercise e, ListInterface exerciseListToUse) {
       super(e,
-        StatsFlashcardFactory.this.service,
-        StatsFlashcardFactory.this.controller,
-        ADD_KEY_BINDING,
-        StatsFlashcardFactory.this.controlState,
-        soundFeedback,
-        soundFeedback.endListener, StatsFlashcardFactory.this.instance, exerciseListToUse);
+          StatsFlashcardFactory.this.service,
+          StatsFlashcardFactory.this.controller,
+          ADD_KEY_BINDING,
+          StatsFlashcardFactory.this.controlState,
+          soundFeedback,
+          soundFeedback.endListener, StatsFlashcardFactory.this.instance, exerciseListToUse);
     }
 
     @Override
@@ -219,6 +223,11 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
       removePlayingHighlight();
     }
 
+    /**
+     * @see #loadNextOnTimer(int)
+     * @see #nextAfterDelay(boolean, String)
+     * @see #playRefAndGoToNext(String)
+     */
     @Override
     protected void loadNext() {
       if (exerciseList.onLast()) {
@@ -235,8 +244,8 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
     }
 
     /**
-     * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#receivedAudioAnswer(mitll.langtest.shared.AudioAnswer, mitll.langtest.client.exercise.ExerciseQuestionState, com.google.gwt.user.client.ui.Panel)
      * @param result
+     * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#receivedAudioAnswer(mitll.langtest.shared.AudioAnswer, mitll.langtest.client.exercise.ExerciseQuestionState, com.google.gwt.user.client.ui.Panel)
      */
     public void receivedAudioAnswer(final AudioAnswer result) {
       //System.out.println("StatsPracticePanel.receivedAudioAnswer: result " + result);
@@ -261,9 +270,9 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
       sticky.storeCorrect(builder);
       sticky.storeIncorrect(builder2);
 
-      StringBuilder builder3= new StringBuilder();
+      StringBuilder builder3 = new StringBuilder();
       for (Map.Entry<String, Double> pair : exToScore.entrySet()) {
-          builder3.append(pair.getKey()).append("=").append(pair.getValue()).append(",");
+        builder3.append(pair.getKey()).append("=").append(pair.getValue()).append(",");
       }
       sticky.storeScore(builder3);
 
@@ -281,8 +290,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
      * @see #loadNext()
      * @see #nextAfterDelay(boolean, String)
      */
-    private void onSetComplete() {
-      //skip.setVisible(false);
+    public void onSetComplete() {
       startOver.setVisible(false);
       seeScores.setVisible(false);
       setPrevNextVisible(false);
@@ -313,8 +321,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
         @Override
         public void onSuccess(AVPScoreReport scoreReport) {
           List<AVPHistoryForList> result = scoreReport.getAvpHistoryForLists();
-         // System.out.println("Got back " + scoreReport.getSortedHistory());
-          showFeedbackCharts(result,scoreReport.getSortedHistory());
+          showFeedbackCharts(result, scoreReport.getSortedHistory());
         }
       });
     }
@@ -323,7 +330,6 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
       setMainContentVisible(false);
       container = completeDisplay.showFeedbackCharts(result, exToScore, getCorrect(), getIncorrect(), allExercises.size());
       Panel leftRight = new HorizontalPanel();
-    //  DivWidget leftRight = new DivWidget();
       leftRight.addStyleName("floatLeft");
       belowContentDiv.add(leftRight);
       scoreHistory = completeDisplay.getScoreHistory(sortedHistory, allExercises, controller);
@@ -343,7 +349,6 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
       right.add(container);
       right.addStyleName("floatRight");
       leftRight.add(right);
-//      sticky.resetStorage();
     }
 
     private Button getIncorrectListButton() {
@@ -356,7 +361,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
         @Override
         public void onClick(ClickEvent event) {
 
-       //   System.out.println("----> click on " + START_OVER);
+          //   System.out.println("----> click on " + START_OVER);
           w.setVisible(false);
           doIncorrectFirst();
         }
@@ -400,8 +405,8 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
     }
 
     /**
-     * @see StatsFlashcardFactory.StatsPracticePanel#showFeedbackCharts
      * @return
+     * @see StatsFlashcardFactory.StatsPracticePanel#showFeedbackCharts
      */
     private Button getRepeatButton() {
       final Button w1 = new Button(GO_BACK);
@@ -426,9 +431,10 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
       return w1;
     }
 
-     /**
+    /**
      * If we're coming back to the cards at the end, we want to start over from the start,
      * otherwise, we want to pick back up where we left off.
+     *
      * @see #getRepeatButton()
      * @see #getStartOver()
      */
@@ -438,7 +444,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
       String lastID = allExercises.get(allExercises.size() - 1).getID();
       String currentExerciseID = sticky.getCurrentExerciseID();
 
-     // System.out.println("startOver : current " + currentExerciseID);
+      // System.out.println("startOver : current " + currentExerciseID);
 
       if (currentExerciseID != null && !currentExerciseID.equals(lastID)) {
         exerciseList.loadExercise(currentExerciseID);
@@ -459,16 +465,15 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
     }
 
     /**
-     * @see #receivedAudioAnswer(mitll.langtest.shared.AudioAnswer)
-     * @see #showIncorrectFeedback(mitll.langtest.shared.AudioAnswer, double, boolean)
      * @param correct
      * @param feedback
+     * @see #receivedAudioAnswer(mitll.langtest.shared.AudioAnswer)
+     * @see #showIncorrectFeedback(mitll.langtest.shared.AudioAnswer, double, boolean)
      */
     protected void nextAfterDelay(boolean correct, String feedback) {
       if (exerciseList.onLast()) {
         onSetComplete();
-      }
-      else {
+      } else {
         int delayMillis = DELAY_MILLIS;
         loadNextOnTimer(delayMillis);
       }
@@ -478,8 +483,8 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
     private Panel belowContentDiv;
 
     /**
-     * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#BootstrapExercisePanel
      * @param toAddTo
+     * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#BootstrapExercisePanel
      */
     @Override
     protected void addRowBelowPrevNext(DivWidget toAddTo) {
@@ -488,12 +493,19 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
       belowContentDiv = toAddTo;
     }
 
+    /**
+     * @see FlashcardPanel#getNextButton()
+     */
     @Override
     protected void gotClickOnNext() {
       abortPlayback();
+
+      System.out.println("on last " +exerciseList.onLast());
       if (exerciseList.onLast()) {
         onSetComplete();
       } else {
+        System.out.println("load next " +exerciseList.getCurrentExerciseID());
+
         exerciseList.loadNext();
       }
     }
@@ -522,7 +534,9 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
       return startOver;
     }
 
-    protected void startOverInOrder() {  startOver();  }
+    protected void startOverInOrder() {
+      startOver();
+    }
 
     protected void abortPlayback() {
       cancelTimer();
@@ -530,8 +544,8 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
     }
 
     /**
-     * @see #addRowBelowPrevNext(com.github.gwtbootstrap.client.ui.base.DivWidget)
      * @return
+     * @see #addRowBelowPrevNext(com.github.gwtbootstrap.client.ui.base.DivWidget)
      */
     private Button getSkipToEnd() {
       seeScores = new Button(SKIP_TO_END);
@@ -630,7 +644,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
       // TODO : come back to the color coding ...
       LabelType type = total > 0.8 ? LabelType.SUCCESS :
           total > 0.5 ? LabelType.INFO : LabelType.WARNING;
-    //  System.out.println("type "+type + " score " + total);
+      //  System.out.println("type "+type + " score " + total);
       pronScore.setType(type);
 
       total *= 100;
@@ -644,6 +658,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
     public MySoundFeedback() {
       super(StatsFlashcardFactory.this.controller.getSoundManager());
     }
+
     public synchronized void queueSong(String song, SoundFeedback.EndListener endListener) {
       //System.out.println("\t queueSong song " +song+ " -------  "+ System.currentTimeMillis());
       destroySound(); // if there's something playing, stop it!
@@ -657,7 +672,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
     }
 
     public synchronized void clear() {
-    //  System.out.println("\t stop playing current sound -------  "+ System.currentTimeMillis());
+      //  System.out.println("\t stop playing current sound -------  "+ System.currentTimeMillis());
       destroySound(); // if there's something playing, stop it!
 
     }
