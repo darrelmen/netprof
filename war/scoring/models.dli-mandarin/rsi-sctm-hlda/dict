@@ -1,5 +1,5 @@
---foreign--                    unk
---number--                     unk
+--foreign--                    unk sp
+--number--                     unk sp
 </s>                           sil
 <s>                            sil
 A   a1 sp
@@ -220,7 +220,6 @@ Hòutou   h o4 u4 t o3 u3 sp
 Hòutou   h o4 u4 t o4 u4 sp
 Hóu   h o2 u2 sp
 Hăo   h a3 o3 sp
-Hăo   h a3 o3sp
 Hăole   h a3 o3 l e4 sp
 Hăoxiàng   h a3 o3 x i4 a4 ng sp
 Hĕn   h e3 n sp
@@ -496,10 +495,10 @@ Qīshí   q i1 sh i2 sp
 Qīyuè   q i1 y u4 e4 sp
 Qĭng   q i3 ng sp
 Qǐchuáng   q i3 ch u2 a2 ng sp
-Ram   r a1 m sp
-Ram   r a2 m sp
-Ram   r a3 m sp
-Ram   r a4 m sp
+RAM   r a1 m sp
+RAM   r a2 m sp
+RAM   r a3 m sp
+RAM   r a4 m sp
 Ràng   r a4 ng sp
 Ránhòu   r a2 n h o4 u4 sp
 Rènshi   r e4 n sh i1 sp
@@ -722,8 +721,8 @@ Xībianr   x i1 b i4 a4 n r sp
 Xībiān   x i1 b i1 a1 n sp
 Xībiānr   x i1 b i1 a1 n r sp
 Xībānyá   x i1 b a1 n y a2 sp
-Xīingqīsì   x i1 i1 ng q i1 s i4 sp
-Xīingqīsān   x i1 i1 ng q i1 s a1 n sp
+Xīngqīsì   x i1 ng q i1 s i4 sp
+Xīngqīsān   x i1 ng q i1 s a1 n sp
 Xīn   x i1 n sp
 Xīngqī   x i1 ng q i1 sp
 Xīngqīer   x i1 ng q i1 e1 r sp
@@ -852,6 +851,7 @@ Zhīdaole   zh i1 d a4 o4 l e2 sp
 Zhīdào   zh i1 d a4 o4 sp
 Zhĭ   zh i3 sp
 Zhōng   zh o1 ng sp
+Měi   m e3 i3 sp
 ZhōngMěi   zh o1 ng m e3 i3 sp
 Zhōngfàn   zh o1 ng f a4 n sp
 Zhōngguo   zh o1 ng g u1 o1 sp
@@ -1116,7 +1116,6 @@ hòutou   h o4 u4 t o3 u3 sp
 hòutou   h o4 u4 t o4 u4 sp
 hóu   h o2 u2 sp
 hăo   h a3 o3 sp
-hăo   h a3 o3sp
 hăole   h a3 o3 l e4 sp
 hăoxiàng   h a3 o3 x i4 a4 ng sp
 hĕn   h e3 n sp
@@ -1621,8 +1620,8 @@ xībianr   x i1 b i4 a4 n r sp
 xībiān   x i1 b i1 a1 n sp
 xībiānr   x i1 b i1 a1 n r sp
 xībānyá   x i1 b a1 n y a2 sp
-xīingqīsì   x i1 i1 ng q i1 s i4 sp
-xīingqīsān   x i1 i1 ng q i1 s a1 n sp
+xīngqīsì   x i1 ng q i1 s i4 sp
+xīngqīsān   x i1 ng q i1 s a1 n sp
 xīn   x i1 n sp
 xīngqī   x i1 ng q i1 sp
 xīngqīer   x i1 ng q i1 e1 r sp
@@ -6467,8 +6466,8 @@ zǎoshang   z a3 o3 sh a4 ng sp
 咀嚼                             j uu3 j uu2 e2 sp
 和                              h e2 sp
 和                              h e4 sp
-和                              h u2 o2 sp
 和                              h u2 sp
+和                              h u2 o2 sp
 和                              h u4 o4 sp
 和乐                             h e2 l e4 sp
 和会                             h e2 h u4 i4 sp
@@ -7430,8 +7429,8 @@ zǎoshang   z a3 o3 sh a4 ng sp
 够                              g o4 u4 sp
 夥                              h u3 o3 sp
 夥伴                             h u3 o3 b a4 n sp
-大                              d a4 i4 sp
 大                              d a4 sp
+大                              d a4 i4 sp
 大一                             d a4 y i1 sp
 大专                             d a4 zh u1 a1 n sp
 大业                             d a4 y e4 sp
@@ -8777,8 +8776,8 @@ zǎoshang   z a3 o3 sh a4 ng sp
 巩义市                            g o3 ng y i4 sh i4 sp
 巩固                             g o3 ng g u4 sp
 巫                              w u1 sp
-差                              ch a1 i1 sp
 差                              ch a1 sp
+差                              ch a1 i1 sp
 差                              ch a4 sp
 差不多                            ch a4 b u1 d u1 o1 sp
 差价                             ch a1 j i4 a4 sp
@@ -9508,8 +9507,8 @@ zǎoshang   z a3 o3 sh a4 ng sp
 徒刑                             t u2 x i2 ng sp
 徒有虚名                           t u2 y o3 u3 x uu1 m i2 ng sp
 得                              d e2 sp
-得                              d e3 i3 sp
 得                              d e3 sp
+得                              d e3 i3 sp
 得不到                            d e2 b u4 d a4 o4 sp
 得了                             d e2 l e3 sp
 得了                             d e2 l i3 a3 o3 sp
@@ -11217,8 +11216,8 @@ zǎoshang   z a3 o3 sh a4 ng sp
 敬老                             j i4 ng l a3 o3 sp
 敬酒                             j i4 ng j i3 u3 sp
 数                              sh u3 sp
-数                              sh u4 o4 sp
 数                              sh u4 sp
+数                              sh u4 o4 sp
 数万                             sh u4 w a4 n sp
 数不多                            sh u4 b u4 d u1 o1 sp
 数以万计                           sh u4 y i3 w a4 n j i4 sp
@@ -16841,8 +16840,8 @@ zǎoshang   z a3 o3 sh a4 ng sp
 萨达特                            s a4 d a2 t e4 sp
 萨里                             s a4 l i3 sp
 萨默塞特县                          s a4 m o4 s a1 i1 t e4 x i4 a4 n sp
-落                              l a4 o4 sp
 落                              l a4 sp
+落                              l a4 o4 sp
 落                              l u4 o4 sp
 落下                             l u4 o4 x i4 a4 sp
 落入                             l u4 o4 r u4 sp
