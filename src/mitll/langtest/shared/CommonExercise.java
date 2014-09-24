@@ -33,6 +33,12 @@ public interface CommonExercise extends CommonShell {
   String getSlowAudioRef();
 
   Collection<AudioAttribute> getAudioAttributes();
+
+  /**
+   * @see mitll.langtest.server.DatabaseServlet#getJsonForExercise(CommonExercise)
+   * @see mitll.langtest.server.ScoreServlet#getJsonArray(java.util.List)
+   * @return
+   */
   AudioAttribute getLatestContext();
   AudioAttribute getRecordingsBy(long userID, boolean regularSpeed);
   AudioAttribute getRecordingsBy(long userID, String speed);
