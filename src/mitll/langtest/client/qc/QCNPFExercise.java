@@ -59,11 +59,11 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   private static final String APPROVED_BUTTON_TOOLTIP2 = "Item has been marked with a defect";
   private static final String ATTENTION_LL = "Attention LL";
   private static final String MARK_FOR_LL_REVIEW = "Mark for review by Lincoln Laboratory.";
-  //public static final int DEFAULT_USER = -1;
+
   public static final int DEFAULT_MALE_ID = -2;
   public static final int DEFAULT_FEMALE_ID = -3;
-  private static final MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 30, 0, "default", "default", "Male");
-  private static final MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 30, 1, "default", "default", "Female");
+  private static final MiniUser DEFAULT_MALE   = new MiniUser(DEFAULT_MALE_ID,   30, 0, "Male");
+  private static final MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 30, 1, "Female");
 
   private Set<String> incorrectFields;
   private List<RequiresResize> toResize;
