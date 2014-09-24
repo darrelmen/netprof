@@ -3,14 +3,14 @@ package mitll.langtest.shared;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
+ * Much of the time the UI doesn't need to know a lot about a user so just send the little it needs.
+ * 
  * Created by GO22670 on 4/9/2014.
  */
 public class MiniUser implements IsSerializable, Comparable<MiniUser> {
   private long id;
   private int age;
   private int gender;
-  private String nativeLang;
-  private String dialect;
   private String userID;
 
   public MiniUser() {
@@ -22,12 +22,10 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
    * @param gender
    * @param userID
    */
-  public MiniUser(long id, int age, int gender, String nativeLang, String dialect, String userID) {
+  public MiniUser(long id, int age, int gender, String userID) {
     this.id = id;
     this.age = age;
     this.gender = gender;
-    this.nativeLang = nativeLang;
-    this.dialect = dialect;
     this.userID = userID;
   }
 
@@ -38,7 +36,7 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
    * @param user
    */
   public MiniUser(User user) {
-    this(user.getId(), user.getAge(), user.getGender(), user.getNativeLang(), user.getDialect(), user.getUserID());
+    this(user.getId(), user.getAge(), user.getGender(), new String(user.getUserID()));
   }
 
   public boolean isMale() {
@@ -72,14 +70,6 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
     return age;
   }
 
-  public String getNativeLang() {
-    return nativeLang;
-  }
-
-  public String getDialect() {
-    return dialect;
-  }
-
   public String getUserID() {
     return userID;
   }
@@ -89,6 +79,6 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
   }
 
   public String toString() {
-    return "mini-user " + id + " age " + age + " gender " + gender + " native " + nativeLang + " dialect " + dialect;
+    return "mini-user " + id + " : " + age + " yr old " + (isMale() ? "male":"female");
   }
 }
