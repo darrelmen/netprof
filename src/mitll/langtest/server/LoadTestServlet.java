@@ -390,11 +390,6 @@ public class LoadTestServlet extends DatabaseServlet {
     return exercises;
   }
 
-  /* protected JSONObject getJsonForExercise(CommonExercise exercise) {
-     JSONObject ex = super.getJsonForExercise(exercise);
-     return ex;
-   }
- */
   private JSONObject getJsonForAudio(HttpServletRequest request) throws IOException {
     // Gets file name for HTTP header
     String fileName = request.getHeader("fileName");
