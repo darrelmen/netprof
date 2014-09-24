@@ -4,7 +4,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * Much of the time the UI doesn't need to know a lot about a user so just send the little it needs.
- * 
+ *
  * Created by GO22670 on 4/9/2014.
  */
 public class MiniUser implements IsSerializable, Comparable<MiniUser> {
