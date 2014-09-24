@@ -260,6 +260,11 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     this.instance = instance;
   }
 
+  @Override
+  public boolean isPendingReq() {
+    return pendingReq;
+  }
+
   /**
    * @see ListInterface#getExercises(long)
    */
@@ -585,6 +590,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   private CommonExercise cachedNext = null;
+  private boolean pendingReq = false;
 
   /**
    * goes ahead and asks the server for the next item so we don't have to wait for it.
@@ -599,6 +605,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
       useExercise(cachedNext);
     } else {
+      pendingReq = true;
       service.getExercise(itemID, controller.getUser(), incorrectFirstOrder, new ExerciseAsyncCallback());
     }
 
@@ -627,6 +634,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   private class ExerciseAsyncCallback implements AsyncCallback<CommonExercise> {
     @Override
     public void onFailure(Throwable caught) {
+      pendingReq = false;
       if (caught instanceof IncompatibleRemoteServiceException) {
         Window.alert("This application has recently been updated.\nPlease refresh this page, or restart your browser." +
           "\nIf you still see this message, clear your cache. (" + caught.getMessage() +
@@ -641,6 +649,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
     @Override
     public void onSuccess(CommonExercise result) {
+      pendingReq = false;
+
       if (result == null) {
         Window.alert("Unfortunately there's a configuration error and we can't find this exercise.");
       } else {
