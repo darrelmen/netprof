@@ -101,6 +101,8 @@ public interface ListInterface extends RequiresResize {
 
   int getSize();
 
+  boolean isPendingReq();
+
   void hide();
   void show();
   Panel getCreatedPanel();
