@@ -259,8 +259,9 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
 
           @Override
           protected void gotRightArrow() {
-            exerciseList.loadNext();
-
+            if (!exerciseList.isPendingReq()) {
+              gotClickOnNext();
+            }
           }
 
           @Override
