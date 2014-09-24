@@ -197,7 +197,8 @@ public class Navigation implements RequiresResize {
               @Override
               protected void onLastItem() {
                 statsFlashcardFactory.resetStorage();
-                super.onLastItem();
+
+                //super.onLastItem();
               }
 
               @Override
