@@ -26,6 +26,16 @@ public class User extends MiniUser {
   private boolean complete;
   private float completePercent;
   private Kind userKind;
+  private String nativeLang;
+  private String dialect;
+
+  public String getNativeLang() {
+    return nativeLang;
+  }
+
+  public String getDialect() {
+    return dialect;
+  }
 
   public static enum Kind implements IsSerializable { UNSET, STUDENT, TEACHER, CONTENT_DEVELOPER, ANONYMOUS }
 
@@ -69,7 +79,7 @@ public class User extends MiniUser {
   public User(long id, int age, int gender, int experience, String ipaddr, String passwordH,
               String nativeLang, String dialect, String userID, boolean enabled, boolean isAdmin,
               Collection<Permission> permissions, Kind userKind, String emailHash) {
-    super(id,age,gender,nativeLang,dialect,userID);
+    super(id,age,gender, userID);
     this.experience = experience;
     this.ipaddr = ipaddr;
     this.passwordHash = passwordH;
@@ -78,6 +88,8 @@ public class User extends MiniUser {
     this.setEnabled(enabled);
     this.admin = isAdmin;
     this.permissions = permissions;
+    this.nativeLang = nativeLang;
+    this.dialect = dialect;
   }
 
   public Collection<Permission> getPermissions() {
