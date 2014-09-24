@@ -624,7 +624,7 @@ fieldset > legend {
 
 .bigFont {
     font-size: 1.8em;
-    letter-spacing: 0.4em;
+/*    letter-spacing: 0.4em; */
     padding-top: 19px;
 }
 
