@@ -1,5 +1,8 @@
 package mitll.langtest.server.database;
 
+import com.github.gwtbootstrap.client.ui.Heading;
+import com.google.gwt.thirdparty.guava.common.util.concurrent.Monitor;
+import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
@@ -13,13 +16,7 @@ import mitll.langtest.server.database.custom.UserListDAO;
 import mitll.langtest.server.database.custom.UserListExerciseJoinDAO;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.instrumentation.EventDAO;
-import mitll.langtest.shared.AudioAttribute;
-import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.CommonUserExercise;
-import mitll.langtest.shared.DLIUser;
-import mitll.langtest.shared.ExerciseAnnotation;
-import mitll.langtest.shared.Result;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.*;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
@@ -535,7 +532,7 @@ public class DatabaseImpl implements Database {
     historyForLists.add(sessionAVPHistoryForList);
     historyForLists.add(sessionAVPHistoryForList2);
 
-    logger.debug("returning " +historyForLists);
+    logger.debug("returning " + historyForLists);
 
     return historyForLists;
   }
@@ -742,7 +739,41 @@ public class DatabaseImpl implements Database {
     return results;
   }
 
-  public int getNumResults() { return resultDAO.getNumResults(); }
+  public Collection<MonitorResult> getMonitorResults() {
+   // return resultDAO.getMonitorResults();
+
+    List<MonitorResult> monitorResults = resultDAO.getMonitorResults();
+    Map<String,CommonExercise> join = new HashMap<String, CommonExercise>();
+
+
+
+
+
+    for (CommonExercise exercise : getExercises()) {
+      String id = exercise.getID();
+     // if (id.contains("\\/")) id = id.substring(0,id.length()-2);
+      join.put(id,exercise);
+    }
+ //   List<CommonExercise> exercises = ;
+
+    int n = 0;
+    for (MonitorResult result : monitorResults) {
+      String id = result.getId();
+       if (id.contains("\\/")) id = id.substring(0,id.length()-2);
+      CommonExercise exercise = join.get(id);
+      if (exercise == null) {
+        //logger.error("couldn't find " + exercise);
+        n++;
+      }
+      else {
+        result.setUnitToValue(exercise.getUnitToValue());
+        result.setForeignText(exercise.getForeignLanguage());
+      }
+    }
+    if (n > 0) logger.warn("huh? skipped " + n + " out of " + monitorResults.size());
+
+    return monitorResults;
+  }
 
   /**
    * Creates the result table if it's not there.
@@ -761,8 +792,8 @@ public class DatabaseImpl implements Database {
 
   private void addAnswer(int userID, CommonExercise e, int questionID, String answer, boolean correct, String answerType) {
     answerDAO.addAnswer(userID, e, questionID, answer, "",
-      true,//!e.isPromptInEnglish(),
-      false, answerType, correct, 0);
+        true,//!e.isPromptInEnglish(),
+        false, answerType, correct, 0);
   }
 
   public AnswerDAO getAnswerDAO() { return answerDAO; }
