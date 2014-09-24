@@ -392,8 +392,8 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   private Heading makeLabelWidget(String firstType) {
     Heading widget = new Heading(HEADING_FOR_LABEL, firstType);
     // TODO : necessary?
-    DOM.setStyleAttribute(widget.getElement(), "webkitMarginBefore", "0");
-    DOM.setStyleAttribute(widget.getElement(), "webkitMarginAfter", "0");
+    //DOM.setStyleAttribute(widget.getElement(), "webkitMarginBefore", "0");
+   // DOM.setStyleAttribute(widget.getElement(), "webkitMarginAfter", "0");
     widget.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
     widget.getElement().getStyle().setMarginBottom(15, Style.Unit.PX);
     widget.getElement().getStyle().setProperty("whiteSpace","nowrap");
