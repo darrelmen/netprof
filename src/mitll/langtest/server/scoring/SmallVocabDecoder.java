@@ -81,9 +81,10 @@ public class SmallVocabDecoder {
   public List<String> getTokens(String sentence) {
     List<String> all = new ArrayList<String>();
 
-    for (String untrimedToken : sentence.split("\\p{Z}+")) { // split on spaces
-      String tt = untrimedToken.replaceAll("\\p{P}", ""); // remove all punct
-      String token = tt.trim();  // necessary?
+    String trimmedSent = sentence.replaceAll("'", "").replaceAll("\\p{P}", " ").replaceAll("\\s+", " ").trim();
+    for (String untrimedToken : trimmedSent.split("\\p{Z}+")) { // split on spaces
+      //String tt = untrimedToken.replaceAll("\\p{P}", ""); // remove all punct
+      String token = untrimedToken.trim();  // necessary?
       if (token.length() > 0) {
         all.add(token);
       }
