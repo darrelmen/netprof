@@ -29,7 +29,6 @@ import java.util.Map;
  */
 public class SetCompleteDisplay {
   private static final String CORRECT_NBSP = "Correct&nbsp;%";
-  // private static final String SKIP_THIS_ITEM = "Skip this item";
   private static final int MAX_LENGTH_ID = 30;
 
   private static final String RANK = "Rank";
@@ -40,7 +39,6 @@ public class SetCompleteDisplay {
   private static final int ROWS_IN_TABLE = 7;
   private static final int TABLE_HISTORY_WIDTH = 326;
   public static final int ONE_TABLE_WIDTH = 275;//-(TABLE_HISTORY_WIDTH/2);//275;
-  // private static final String SKIP_TO_END = "See your scores";
   private static final int TABLE_WIDTH = 2 * ONE_TABLE_WIDTH;
   private static final int HORIZ_SPACE_FOR_CHARTS = (1250 - TABLE_WIDTH - TABLE_HISTORY_WIDTH);
   public static final int MAX_TO_SHOW = 5;
@@ -74,12 +72,8 @@ public class SetCompleteDisplay {
 
   private Chart makeCorrectChart(List<AVPHistoryForList> result, AVPHistoryForList sessionAVPHistoryForList,
                                  int totalCorrect, int totalIncorrect, int numExercises) {
-   // int totalCorrect = getCorrect();
-   // int totalIncorrect = getIncorrect();
     int all = totalCorrect + totalIncorrect;
-    System.out.println("onSetComplete.onSuccess : results " + result + " " + (numExercises
-        //    -skipped.size()
-    ) +
+    System.out.println("onSetComplete.onSuccess : results " + result + " " + (numExercises) +
         " all " + all + " correct " + totalCorrect + " inc " + totalIncorrect);
 
     return makeChart(totalCorrect, all, sessionAVPHistoryForList,totalIncorrect,numExercises);
