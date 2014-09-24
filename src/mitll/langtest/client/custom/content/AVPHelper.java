@@ -1,11 +1,8 @@
 package mitll.langtest.client.custom.content;
 
-import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
-import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.PagingContainer;
@@ -56,16 +53,7 @@ public class AVPHelper extends NPFHelper {
     return new PagingExerciseList(right, service, feedback, factory, controller,
       true, instanceName, true) {
       @Override
-      protected void onLastItem() {
-        ((StatsFlashcardFactory)factory).resetStorage();
-        new ModalInfoDialog(COMPLETE, LIST_COMPLETE, new HiddenHandler() {
-          @Override
-          public void onHidden(HiddenEvent hiddenEvent) {
-            ((StatsFlashcardFactory)factory).resetStorage();
-            reloadExercises();
-          }
-        });
-      }
+      protected void onLastItem() {} // TODO : necessary?
 
       @Override
       protected void addTableWithPager(PagingContainer pagingContainer) {
@@ -81,14 +69,6 @@ public class AVPHelper extends NPFHelper {
   protected ExercisePanelFactory getFactory(PagingExerciseList exerciseList, final String instanceName, boolean showQC) {
     return new StatsFlashcardFactory(service, feedback, controller, exerciseList, "AVPHelper");
   }
-/*
-  @Override
-  protected Panel setupContent(Panel hp) {
-    Panel widgets = super.setupContent(hp);
-    float v = Window.getClientWidth() * 0.5f;
-    widgets.setWidth(v + "px");
-    return widgets;
-  }*/
 
   @Override
   public void onResize() {}
