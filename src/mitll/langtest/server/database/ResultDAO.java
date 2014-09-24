@@ -1,10 +1,7 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
-import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.Result;
-import mitll.langtest.shared.ScoreAndPath;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.*;
 import mitll.langtest.shared.monitoring.Session;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
@@ -71,74 +68,8 @@ public class ResultDAO extends DAO {
     super(database);
   }
 
-/*  private List<SimpleResult> getSimpleResults(String whereClause) {
-    try {
-      String sql = "SELECT " +
-        ID + ", " +
-        USERID + ", " +
-        Database.EXID + ", " +
-        QID +
-        " FROM " +
-        RESULTS + whereClause;
-      Connection connection = database.getConnection();
-      PreparedStatement statement = connection.prepareStatement(sql);
-      List<SimpleResult> simpleResultsForQuery = getSimpleResultsForQuery(connection, statement);
-//      logger.debug("for sql " + sql  + " found " + simpleResultsForQuery.size() + " results");
-      return simpleResultsForQuery;
-    } catch (Exception ee) {
-      logger.error("got " + ee, ee);
-    }
-    return new ArrayList<SimpleResult>();
-  }*/
-
-  /**
-   * Get a list of Results for this Query.
-   *
-   * @param connection
-   * @param statement
-   * @return
-   * @throws SQLException
-   */
-/*
-  private List<SimpleResult> getSimpleResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
-    ResultSet rs = statement.executeQuery();
-    List<SimpleResult> results = new ArrayList<SimpleResult>();
-    while (rs.next()) {
-      int uniqueID = rs.getInt(ID);
-      long userID = rs.getLong(USERID);
-      String exid = rs.getString(Database.EXID);
-      int qid = rs.getInt(QID);
-
-      SimpleResult e = new SimpleResult(uniqueID, exid, qid, userID);
-      results.add(e);
-    }
-    rs.close();
-    statement.close();
-    database.closeConnection(connection);
-
-    return results;
-  }
-*/
-
-/*  public static class SimpleResult {
-    public final int uniqueID;
-    public final String id;
-    private final int qid;
-    public final long userid;
-
-    public SimpleResult(int uniqueID, String id, int qid, long userid) {
-      this.uniqueID = uniqueID;
-      this.id = id;
-      this.qid = qid;
-      this.userid = userid;
-    }
-
-    public String getID() {
-      return id + "/" + qid;
-    }
-  }*/
-
   private List<Result> cachedResultsForQuery = null;
+  private List<MonitorResult> cachedMonitorResultsForQuery = null;
 
   /**
    * Pulls the list of results out of the database.
@@ -164,6 +95,26 @@ public class ResultDAO extends DAO {
       logger.error("got " + ee, ee);
     }
     return new ArrayList<Result>();
+  }
+
+  public List<MonitorResult> getMonitorResults() {
+    try {
+      synchronized (this) {
+        if (cachedMonitorResultsForQuery != null) {
+          return cachedMonitorResultsForQuery;
+        }
+      }
+      String sql = "SELECT * FROM " + RESULTS + ";";
+      List<MonitorResult> resultsForQuery = getMonitorResultsSQL(sql);
+
+      synchronized (this) {
+        cachedMonitorResultsForQuery = resultsForQuery;
+      }
+      return resultsForQuery;
+    } catch (Exception ee) {
+      logger.error("got " + ee, ee);
+    }
+    return new ArrayList<MonitorResult>();
   }
 
   /**
@@ -250,6 +201,12 @@ public class ResultDAO extends DAO {
 
     return getResultsForQuery(connection, statement);
   }
+  private List<MonitorResult> getMonitorResultsSQL(String sql) throws SQLException {
+    Connection connection = database.getConnection(this.getClass().toString());
+    PreparedStatement statement = connection.prepareStatement(sql);
+
+    return getMonitorResultsForQuery(connection, statement);
+  }
 
   public synchronized void invalidateCachedResults() {
     cachedResultsForQuery = null;
@@ -318,10 +275,48 @@ public class ResultDAO extends DAO {
     return results;
   }
 
+  private List<MonitorResult> getMonitorResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
+    ResultSet rs = statement.executeQuery();
+    List<MonitorResult> results = new ArrayList<MonitorResult>();
+    while (rs.next()) {
+      int uniqueID = rs.getInt(ID);
+      long userID = rs.getLong(USERID);
+      String exid = rs.getString(Database.EXID);
+      Timestamp timestamp = rs.getTimestamp(Database.TIME);
+      String answer = rs.getString(ANSWER);
+      boolean valid = rs.getBoolean(VALID);
+      String type = rs.getString(AUDIO_TYPE);
+      int dur = rs.getInt(DURATION);
+
+      boolean correct = rs.getBoolean(CORRECT);
+      float pronScore = rs.getFloat(PRON_SCORE);
+
+      MonitorResult result = new MonitorResult(uniqueID, userID, //id
+          // plan
+          exid, // id
+          // qid
+          trimPathForWebPage2(answer), // answer
+          valid, // valid
+          timestamp.getTime(),
+          type, dur, correct, pronScore);
+      results.add(result);
+    }
+    finish(connection, statement, rs);
+
+    return results;
+  }
+
+
   private void trimPathForWebPage(Result r) {
     int answer = r.answer.indexOf(PathHelper.ANSWERS);
     if (answer == -1) return;
     r.answer = r.answer.substring(answer);
+  }
+
+
+  private String trimPathForWebPage2(String path) {
+    int answer = path.indexOf(PathHelper.ANSWERS);
+     return (answer == -1) ? path : path.substring(answer);
   }
 
   /**
