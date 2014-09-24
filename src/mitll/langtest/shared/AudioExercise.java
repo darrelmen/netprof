@@ -92,22 +92,22 @@ public class AudioExercise extends ExerciseShell {
     return null;
   }
 
-  public Collection<AudioAttribute> getAudioAtSpeed(boolean isRegular) {
+/*  public Collection<AudioAttribute> getAudioAtSpeed(boolean isRegular) {
     return getAudioAtSpeed(isRegular ? REGULAR : SLOW);
-  }
+  }*/
 
   /**
    * @see mitll.langtest.server.database.AudioExport#writeFolderContents
-   * @param value
+   * @paramx value
    * @return
    */
-  private Collection<AudioAttribute> getAudioAtSpeed(String value) {
+/*  private Collection<AudioAttribute> getAudioAtSpeed(String value) {
     List<AudioAttribute> ret = new ArrayList<AudioAttribute>();
     for (AudioAttribute audio : getAudioAttributes()) {
       if (audio.matches(SPEED, value)) ret.add(audio);
     }
     return ret;
-  }
+  }*/
 
   public boolean hasRefAudio() {
     return !audioAttributes.isEmpty();
@@ -117,6 +117,10 @@ public class AudioExercise extends ExerciseShell {
     return audioAttributes.values();
   }
 
+  /**
+   * @see mitll.langtest.server.DatabaseServlet#getJsonForExercise(CommonExercise)
+   * @return
+   */
   public AudioAttribute getLatestContext() {
     long maleTime = 0;
     AudioAttribute latest = null;
