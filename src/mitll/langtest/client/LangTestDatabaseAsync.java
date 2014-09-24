@@ -1,15 +1,7 @@
 package mitll.langtest.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.AudioAttribute;
-import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.ExerciseListWrapper;
-import mitll.langtest.shared.ImageResponse;
-import mitll.langtest.shared.Result;
-import mitll.langtest.shared.STATE;
-import mitll.langtest.shared.StartupInfo;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.*;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
@@ -52,7 +44,7 @@ public interface LangTestDatabaseAsync {
 
   void getSessions(AsyncCallback<List<Session>> async);
 
-  void getNumResults(AsyncCallback<Integer> async);
+  void getMonitorResults(AsyncCallback<Collection<MonitorResult>> async);
 
   void getResults(int start, int end, String sortInfo, AsyncCallback<List<Result>> async);
 
