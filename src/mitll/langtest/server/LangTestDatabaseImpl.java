@@ -1202,8 +1202,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.result.ResultManager#showResults()
    */
   @Override
-  public int getNumResults() {
-    return db.getNumResults();
+  public Collection<MonitorResult> getMonitorResults() {
+    return db.getMonitorResults();
   }
 
   /**
