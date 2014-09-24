@@ -20,15 +20,20 @@ import java.util.Collection;
  * Does fancy font sizing depending on available width...
  */
 public class Flashcard implements RequiresResize {
-  private static final String PRONUNCIATION_FEEDBACK = "PRONUNCIATION FEEDBACK";
+  private static final String PRONUNCIATION_FEEDBACK = "NetProF";//"PRONUNCIATION FEEDBACK";
   private static final double MAX_FONT_EM = 1.7d;
   private static final int SLOP = 55;
   private static final String NEW_PRO_F1_PNG = "NewProF1.png";
+  private static final String RECORDING_DISABLED = "RECORDING DISABLED";
+  private static final int MIN_SCREEN_WIDTH = 1100;
+  private static final String LOG_OUT = "Log Out";
+  private static final double MIN_RATIO = 0.7;
+  private static final int min = 720;
+
   private final boolean isAnonymous;
   private Paragraph appName;
   private Image flashcardImage;
   private Image collab;
-  private static final int min = 720;
   private HTML userNameWidget;
   private final String nameForAnswer;
   private final boolean adminView;
@@ -57,7 +62,7 @@ public class Flashcard implements RequiresResize {
                                 ClickHandler results,
                                 ClickHandler monitoring,
                                 ClickHandler events) {
-    return getHeaderRow(splashText, isBeta,NEW_PRO_F1_PNG, userName, browserInfo, logoutClickHandler,
+    return getHeaderRow(splashText, isBeta, userName, browserInfo, logoutClickHandler,
       users, results, monitoring,events);
   }
 
@@ -65,7 +70,6 @@ public class Flashcard implements RequiresResize {
    * @see mitll.langtest.client.LangTest#makeHeaderRow()
    * @param splashText
    * @param isBeta
-   * @param appIcon
    * @param userName
    * @param browserInfo
    * @param logoutClickHandler
@@ -76,7 +80,7 @@ public class Flashcard implements RequiresResize {
    * @return
    */
   public Panel getHeaderRow(String splashText,
-                            boolean isBeta, String appIcon, String userName,
+                            boolean isBeta, String userName,
                             HTML browserInfo,
                             ClickHandler logoutClickHandler,
 
@@ -96,7 +100,8 @@ public class Flashcard implements RequiresResize {
     flashcard.addStyleName("inlineBlockStyle");
     flashcard.addStyleName("headerBackground");
     flashcard.addStyleName("leftAlign");
-    appName = new Paragraph("<span>" + Flashcard.PRONUNCIATION_FEEDBACK + "</span>" +(isBeta?("<span><font color='yellow'>" + "&nbsp;BETA" + "</font></span>"):""));
+    String betaMark = isBeta ? ("<span><font color='yellow'>" + "&nbsp;BETA" + "</font></span>") : "";
+    appName = new Paragraph("<span>" + Flashcard.PRONUNCIATION_FEEDBACK + "</span>" + betaMark);
     appName.addStyleName("bigFont");
 
     flashcard.add(appName);
@@ -123,22 +128,13 @@ public class Flashcard implements RequiresResize {
     if (!isAnonymous || adminView) {
       hp.add(userNameWidget);
     }
-    else {
-      System.out.println("anon " +isAnonymous + " admin " + adminView);
-    }
-
-    //if (permissions.contains(User.Permission.QUALITY_CONTROL)) {
-      hp.add(qc = new SimplePanel());
-    //}
-
-    //if (permissions.contains(User.Permission.RECORD_AUDIO)) {
-      hp.add(recordAudio = new SimplePanel());
-    //}
+    hp.add(qc = new SimplePanel());
+    hp.add(recordAudio = new SimplePanel());
 
     // add log out/admin options cogMenu
     cogMenu = makeMenu(users, results, monitoring, events);
     cogMenu.addStyleName("cogStyle");
-    NavLink widget1 = new NavLink("Log Out");
+    NavLink widget1 = new NavLink(LOG_OUT);
     widget1.addClickHandler(logoutClickHandler);
     cogMenu.add(widget1);
 
@@ -252,20 +248,18 @@ public class Flashcard implements RequiresResize {
   }
 
   public void setVisibleAdmin(boolean visibleAdmin) {
-   // if (visibleAdmin) {
-      userC.setVisible(visibleAdmin);
-      resultsC.setVisible(visibleAdmin);
-      monitoringC.setVisible(visibleAdmin);
-      eventsC.setVisible(visibleAdmin);
-    //}
+    userC.setVisible(visibleAdmin);
+    resultsC.setVisible(visibleAdmin);
+    monitoringC.setVisible(visibleAdmin);
+    eventsC.setVisible(visibleAdmin);
   }
 
   /**
-   * @see mitll.langtest.client.LangTest#gotUser(long)
+   * @see mitll.langtest.client.LangTest#gotUser
    * @param name
    */
   public void setUserName(String name) {  this.userNameWidget.setText(name);  }
-  public void setSplash() {  this.subtitle.setText("RECORDING DISABLED");
+  public void setSplash() {  this.subtitle.setText(RECORDING_DISABLED);
 
     subtitle.removeStyleName("subtitleForeground");
     subtitle.addStyleName("subtitleNoRecordingForeground");
@@ -273,14 +267,11 @@ public class Flashcard implements RequiresResize {
 
   @Override
   public void onResize() {
-      int clientWidth = Window.getClientWidth();
-
-      if (clientWidth < 1100) {
-        setFontWidth();
-      } else {
-        //DOM.setStyleAttribute(appName.getElement(), "fontSize", MAX_FONT_EM + "em");
-        appName.getElement().getStyle().setFontSize(MAX_FONT_EM, Style.Unit.EM);
-      }
+    if (Window.getClientWidth() < MIN_SCREEN_WIDTH) {
+      setFontWidth();
+    } else {
+      appName.getElement().getStyle().setFontSize(MAX_FONT_EM, Style.Unit.EM);
+    }
   }
 
   private void setFontWidth() {
@@ -296,12 +287,8 @@ public class Flashcard implements RequiresResize {
     ratio *= 10;
     ratio = Math.floor(ratio);
     ratio /= 10;
-    if (ratio < 0.7) ratio = 0.7;
+    if (ratio < MIN_RATIO) ratio = MIN_RATIO;
     if (ratio > MAX_FONT_EM) ratio =  MAX_FONT_EM;
-   // String fontsize = ratio + "em";
-  //  System.out.println("setFontWidth : Setting font size to " + fontsize);
-    //DOM.setStyleAttribute(appName.getElement(), "fontSize", fontsize);
     appName.getElement().getStyle().setFontSize(ratio, Style.Unit.EM);
-
   }
 }
