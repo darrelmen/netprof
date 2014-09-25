@@ -421,7 +421,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         }
 
         public void onSuccess() {
-          resultManager = new ResultManager(service, outer, props.getNameForAnswer(), props, getStartupInfo().getTypeOrder());
+          resultManager = new ResultManager(service, outer, props.getNameForAnswer(), props, getStartupInfo().getTypeOrder(), outer);
         }
       });
 
@@ -467,28 +467,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @return
    */
   private Panel makeHeaderRow() {
-    Widget title;
-//    if (isGoodwaveMode()) {
-      flashcard = new Flashcard(props);
-      title = flashcard.makeNPFHeaderRow(props.getSplash(), props.isClassroomMode(), getGreeting(), getReleaseStatus(), new LogoutClickHandler(),
-
+    flashcard = new Flashcard(props,this);
+    Widget title = flashcard.makeNPFHeaderRow(props.getSplash(), props.isClassroomMode(), getGreeting(), getReleaseStatus(), new LogoutClickHandler(),
         (props.isAdminView()) ? new UsersClickHandler() : null,
         (props.isAdminView()) ? new ResultsClickHandler() : null,
         (props.isAdminView()) ? new MonitoringClickHandler() : null,
         (props.isAdminView()) ? new EventsClickHandler() : null
-      );
-/*
-    } else {
-      flashcard = new Flashcard(props);
-      title = flashcard.getHeaderRow(props.getSplash(), props.isClassroomMode(), NEW_PRO_F2_PNG, props.getAppTitle(), getGreeting(), getReleaseStatus(), new LogoutClickHandler(),
-
-        (props.isAdminView()) ? new UsersClickHandler() : null,
-        (props.isAdminView()) ? new ResultsClickHandler() : null,
-        (props.isAdminView()) ? new MonitoringClickHandler() : null,
-        (props.isAdminView()) ? new EventsClickHandler() : null, permissions);
-    }
-*/
-
+    );
 
     headerRow = new FluidRow();
     headerRow.add(new Column(12, title));
