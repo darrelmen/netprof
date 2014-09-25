@@ -94,19 +94,7 @@ public class ExerciseTrie extends Trie<CommonExercise> {
    * @return
    */
   public Collection<CommonExercise> getExercises(String prefix) {
-    String lc = prefix.toLowerCase();
-    List<EmitValue<CommonExercise>> emits = getEmits(lc);
-    Set<CommonExercise> unique = new HashSet<CommonExercise>();
-    List<CommonExercise> ids = new ArrayList<CommonExercise>();
-    for (EmitValue<CommonExercise> ev : emits) {
-      CommonExercise exercise = ev.getValue();
-      if (!unique.contains(exercise)) {
-        ids.add(exercise);
-        unique.add(exercise);
-      }
-    }
-    logger.debug("getExercises : for '" +prefix + "' (" +lc+ ") got " + ids.size() + " matches");
-    return ids;
+    return getMatches(prefix.toLowerCase());
   }
 
   private static class ExerciseWrapper implements TextEntityValue<CommonExercise> {
