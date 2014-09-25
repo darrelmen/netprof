@@ -467,10 +467,10 @@ public class AudioDAO extends DAO {
    * @see #add(mitll.langtest.shared.Result, int, String)
    */
   private long add(Connection connection, Result result, int userid, String audioRef) throws SQLException {
-    String exerciseID = result.id;
-    long timestamp = result.timestamp;
+    String exerciseID = result.getId();
+    long timestamp = result.getTimestamp();
     String audioType = result.getAudioType();
-    int durationInMillis = result.durationInMillis;
+    int durationInMillis = result.getDurationInMillis();
 
     return addAudio(connection, userid, audioRef, exerciseID, timestamp, audioType, durationInMillis);
   }
