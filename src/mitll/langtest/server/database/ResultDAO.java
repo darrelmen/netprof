@@ -154,8 +154,8 @@ public class ResultDAO extends DAO {
       if (pronScore > 0) { // overkill?
         total++;
         scoreTotal += pronScore;
-        if (r.userid == userID) {
-          scores.add(new ScoreAndPath(pronScore, r.answer));
+        if (r.getUserid() == userID) {
+          scores.add(new ScoreAndPath(pronScore, r.getAnswer()));
         }
       }
     }
@@ -248,26 +248,26 @@ public class ResultDAO extends DAO {
       Timestamp timestamp = rs.getTimestamp(Database.TIME);
       String answer = rs.getString(ANSWER);
       boolean valid = rs.getBoolean(VALID);
-      boolean flq = rs.getBoolean(FLQ);
-      boolean spoken = rs.getBoolean(SPOKEN);
+     // boolean flq = rs.getBoolean(FLQ);
+    //  boolean spoken = rs.getBoolean(SPOKEN);
 
       String type = rs.getString(AUDIO_TYPE);
       int dur = rs.getInt(DURATION);
 
       boolean correct = rs.getBoolean(CORRECT);
       float pronScore = rs.getFloat(PRON_SCORE);
-      String stimulus = rs.getString(STIMULUS);
+      //String stimulus = rs.getString(STIMULUS);
 
       Result result = new Result(uniqueID, userID, //id
         plan, // plan
         exid, // id
         qid, // qid
-        answer, // answer
+        trimPathForWebPage2(answer), // answer
         valid, // valid
         timestamp.getTime(),
-        flq, spoken, type, dur, correct, pronScore);
-      result.setStimulus(stimulus);
-      trimPathForWebPage(result);
+        //flq, spoken,
+          type, dur, correct, pronScore);
+//      result.setStimulus(stimulus);
       results.add(result);
     }
     finish(connection, statement, rs);
@@ -305,14 +305,6 @@ public class ResultDAO extends DAO {
 
     return results;
   }
-
-
-  private void trimPathForWebPage(Result r) {
-    int answer = r.answer.indexOf(PathHelper.ANSWERS);
-    if (answer == -1) return;
-    r.answer = r.answer.substring(answer);
-  }
-
 
   private String trimPathForWebPage2(String path) {
     int answer = path.indexOf(PathHelper.ANSWERS);
@@ -501,7 +493,7 @@ public class ResultDAO extends DAO {
     List<Session> sessions = new ArrayList<Session>();
 
     for (Result r : answersForUser) {
-      if (s == null || r.timestamp - last > SESSION_GAP) {
+      if (s == null || r.getTimestamp() - last > SESSION_GAP) {
         s = new Session();
         sessions.add(s);
 
@@ -509,10 +501,10 @@ public class ResultDAO extends DAO {
         if (sessions1 == null) userToSessions.put(userid, sessions1 = new ArrayList<Session>());
         sessions1.add(s);
       } else {
-        s.duration += r.timestamp - last;
+        s.duration += r.getTimestamp() - last;
       }
-      s.addExerciseID(r.id);
-      last = r.timestamp;
+      s.addExerciseID(r.getId());
+      last = r.getTimestamp();
     }
     return sessions;
   }
@@ -533,28 +525,28 @@ public class ResultDAO extends DAO {
     int id = 0;
     for (Result r : answersForUser) {
       //logger.debug("got " + r);
-      if (s == null || r.timestamp - lastTimestamp > SESSION_GAP || !expected.contains(r.id)) {
-        sessions.add(s = new Session(id++, r.userid, r.timestamp));
+      if (s == null || r.getTimestamp() - lastTimestamp > SESSION_GAP || !expected.contains(r.getId())) {
+        sessions.add(s = new Session(id++, r.getUserid(), r.getTimestamp()));
         expected = new HashSet<String>(ids); // start a new set of expected items
 //        logger.debug("\tpartitionIntoSessions2 expected " +expected.size());
       } else {
-        s.duration += r.timestamp - lastTimestamp;
+        s.duration += r.getTimestamp() - lastTimestamp;
       }
 
-      s.addExerciseID(r.id);
-      s.incrementCorrect(r.id, r.isCorrect());
-      s.setScore(r.id, r.getPronScore());
+      s.addExerciseID(r.getId());
+      s.incrementCorrect(r.getId(), r.isCorrect());
+      s.setScore(r.getId(), r.getPronScore());
 
-      if (r.uniqueID == latestResultID) {
+      if (r.getUniqueID() == latestResultID) {
         logger.debug("\tpartitionIntoSessions2 found current session " +s);
 
         s.setLatest(true);
       }
 
-      expected.remove(r.id);
+      expected.remove(r.getId());
      // logger.debug("\tpartitionIntoSessions2 expected now " + expected.size() + " session " + s);
 
-      lastTimestamp = r.timestamp;
+      lastTimestamp = r.getTimestamp();
     }
     for (Session session : sessions) session.setNumAnswers();
     if (sessions.isEmpty() && !answersForUser.isEmpty()) {
@@ -579,7 +571,7 @@ public class ResultDAO extends DAO {
     Collections.sort(answersForUser, new Comparator<Result>() {
       @Override
       public int compare(Result o1, Result o2) {
-        return o1.timestamp < o2.timestamp ? -1 : o1.timestamp > o2.timestamp ? +1 : 0;
+        return o1.getTimestamp() < o2.getTimestamp() ? -1 : o1.getTimestamp() > o2.getTimestamp() ? +1 : 0;
       }
     });
   }
@@ -592,8 +584,8 @@ public class ResultDAO extends DAO {
   private Map<Long, List<Result>> populateUserToAnswers(List<Result> results) {
     Map<Long, List<Result>> userToAnswers = new HashMap<Long, List<Result>>();
     for (Result r : results) {
-      List<Result> results1 = userToAnswers.get(r.userid);
-      if (results1 == null) userToAnswers.put(r.userid, results1 = new ArrayList<Result>());
+      List<Result> results1 = userToAnswers.get(r.getUserid());
+      if (results1 == null) userToAnswers.put(r.getUserid(), results1 = new ArrayList<Result>());
       results1.add(r);
     }
     return userToAnswers;
@@ -779,15 +771,15 @@ public class ResultDAO extends DAO {
     Map<Long, User> userMap = userDAO.getUserMap();
 
     for (Result r : results) {
-      if (r.valid && r.audioType.equals(typeToUse)) {
-        User user = userMap.get(r.userid);
+      if (r.isValid() && r.getAudioType().equals(typeToUse)) {
+        User user = userMap.get(r.getUserid());
         if (user != null && user.getExperience() == 240) {    // only natives!
-          Map<String, Result> results1 = userToResult.get(r.userid);
+          Map<String, Result> results1 = userToResult.get(r.getUserid());
           if (results1 == null)
-            userToResult.put(r.userid, results1 = new HashMap<String, Result>());
-          Result result = results1.get(r.id);
-          if (result == null || (r.timestamp > result.timestamp)) {
-            results1.put(r.id, r);
+            userToResult.put(r.getUserid(), results1 = new HashMap<String, Result>());
+          Result result = results1.get(r.getId());
+          if (result == null || (r.getTimestamp() > result.getTimestamp())) {
+            results1.put(r.getId(), r);
           }
         }
       }
@@ -828,8 +820,13 @@ public class ResultDAO extends DAO {
     cellStyle.setDataFormat(dataFormat.getFormat("MMM dd HH:mm:ss"));
     Row headerRow = sheet.createRow(rownum++);
 
-    List<String> columns = Arrays.asList("id", "userid", Database.EXID, "qid", Database.TIME, "answer",
-      "valid", "grades", FLQ, SPOKEN, AUDIO_TYPE, DURATION, CORRECT, PRON_SCORE, STIMULUS);
+    List<String> columns = Arrays.asList("id", "userid", Database.EXID,
+        //"qid",
+        Database.TIME, "answer",
+      "valid",
+        //"grades", FLQ, SPOKEN,
+        AUDIO_TYPE, DURATION, CORRECT, PRON_SCORE//, STIMULUS
+    );
 
     for (int i = 0; i < columns.size(); i++) {
       Cell headerCell = headerRow.createCell(i);
@@ -840,37 +837,37 @@ public class ResultDAO extends DAO {
       Row row = sheet.createRow(rownum++);
       int j = 0;
       Cell cell = row.createCell(j++);
-      cell.setCellValue(result.uniqueID);
+      cell.setCellValue(result.getUniqueID());
       cell = row.createCell(j++);
-      cell.setCellValue(result.userid);
+      cell.setCellValue(result.getUserid());
       cell = row.createCell(j++);
-      cell.setCellValue(result.id);
+      cell.setCellValue(result.getId());
+ //     cell = row.createCell(j++);
+  //    cell.setCellValue(result.qid);
       cell = row.createCell(j++);
-      cell.setCellValue(result.qid);
-      cell = row.createCell(j++);
-      cell.setCellValue(new Date(result.timestamp));
+      cell.setCellValue(new Date(result.getTimestamp()));
       cell.setCellStyle(cellStyle);
 
       cell = row.createCell(j++);
-      cell.setCellValue(result.answer);
+      cell.setCellValue(result.getAnswer());
       cell = row.createCell(j++);
-      cell.setCellValue(result.valid);
+      cell.setCellValue(result.isValid());
+     // cell = row.createCell(j++);
+     // cell.setCellValue(result.getGradeInfo());
+      //cell = row.createCell(j++);
+     // cell.setCellValue(result.flq);
+    //  cell = row.createCell(j++);
+     // cell.setCellValue(result.spoken);
+     // cell = row.createCell(j++);
+      cell.setCellValue(result.getAudioType());
       cell = row.createCell(j++);
-      cell.setCellValue(result.getGradeInfo());
-      cell = row.createCell(j++);
-      cell.setCellValue(result.flq);
-      cell = row.createCell(j++);
-      cell.setCellValue(result.spoken);
-      cell = row.createCell(j++);
-      cell.setCellValue(result.audioType);
-      cell = row.createCell(j++);
-      cell.setCellValue(result.durationInMillis);
+      cell.setCellValue(result.getDurationInMillis());
       cell = row.createCell(j++);
       cell.setCellValue(result.isCorrect());
       cell = row.createCell(j++);
       cell.setCellValue(result.getPronScore());
-      cell = row.createCell(j++);
-      cell.setCellValue(result.getStimulus());
+/*      cell = row.createCell(j++);
+      cell.setCellValue(result.getStimulus());*/
     }
     now = System.currentTimeMillis();
     if (now-then > 100) {
