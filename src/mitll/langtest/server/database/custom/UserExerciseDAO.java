@@ -341,6 +341,16 @@ public class UserExerciseDAO extends DAO {
     return null;
   }
 
+  public Collection<CommonUserExercise> getAll() {
+    String sql = "SELECT * from " + USEREXERCISE;
+    try {
+      return getUserExercises(sql, false);
+    } catch (SQLException e) {
+      logger.error("got " + e, e);
+    }
+    return Collections.emptyList();
+  }
+
   /**
    * @see mitll.langtest.server.database.ExcelImport#getRawExercises()
    * @see #setAudioDAO(mitll.langtest.server.database.AudioDAO)
@@ -362,7 +372,7 @@ public class UserExerciseDAO extends DAO {
    * @param exids
    * @return
    */
-  List<CommonUserExercise> getWhere(Collection<String> exids) {
+   public List<CommonUserExercise> getWhere(Collection<String> exids) {
     if (exids.isEmpty()) return new ArrayList<CommonUserExercise>();
     String s = getIds(exids);
     String sql = "SELECT * from " + USEREXERCISE + " where " +
@@ -391,7 +401,7 @@ public class UserExerciseDAO extends DAO {
   /**
    * @see #getOnList(long)
    * @see #getOverrides(boolean)
-   * @see #getWhere(java.util.Collection)
+   * @seex #getWhere(java.util.Collection)
    * @see #getWhere(java.lang.String)
    * @param sql
    * @param addMissingAudio always false
