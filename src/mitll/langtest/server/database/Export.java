@@ -32,21 +32,6 @@ public class Export {
   private ResultDAO resultDAO = null;
   private GradeDAO gradeDAO = null;
 
-/*  public Export(String dburl) {
-    this.h2DbName = dburl;
-    this.url = "jdbc:h2:" + h2DbName + ";IFEXISTS=TRUE;QUERY_CACHE_SIZE=0;";
-    UserDAO userDAO = new UserDAO(this);
-    try {
-      getConnection();
-      resultDAO = new ResultDAO(this,userDAO);
-      resultDAO.createResultTable(getConnection());
-    } catch (Exception e) {
-      logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
-    }
-    exerciseDAO = new SQLExerciseDAO(this, "");
-    gradeDAO = new GradeDAO(this,userDAO, resultDAO);
-  }*/
-
   public Export(ExerciseDAO exerciseDAO, ResultDAO resultDAO, GradeDAO gradeDAO) {
     this.exerciseDAO = exerciseDAO;
     this.resultDAO = resultDAO;
@@ -88,8 +73,8 @@ public class Export {
     logger.debug("populateMapOfExerciseIdToResults : got " +results.size() + " results");
 
     for (Result r : results) {
-      List<Result> res = exerciseToResult.get(r.id);
-      if (res == null) exerciseToResult.put(r.id, res = new ArrayList<Result>());
+      List<Result> res = exerciseToResult.get(r.getId());
+      if (res == null) exerciseToResult.put(r.getId(), res = new ArrayList<Result>());
       res.add(r);
     }
     return exerciseToResult;
@@ -141,7 +126,7 @@ public class Export {
   private List<ExerciseExport> getExports(Map<Integer, List<Grade>> idToGrade,
                                           List<Result> resultsForExercise,
                                           CommonExercise exercise, boolean useFLQ, boolean useSpoken) {
-    boolean debug = false;
+  //  boolean debug = false;
     Map<Integer, ExerciseExport> qidToExport = populateIdToExportMap(exercise.toExercise());
   //  logger.debug("got qid->export " +qidToExport.size() + " items");
     addPredefinedAnswers(exercise.toExercise(), useFLQ, qidToExport);
@@ -152,20 +137,20 @@ public class Export {
 
     // find results, after join with schedule, add join with the grade
     for (Result r : resultsForExercise) {
-      if (r.flq == useFLQ && r.spoken == useSpoken) {
-        ExerciseExport exerciseExport = qidToExport.get(r.qid);
+      //if (r.flq == useFLQ && r.spoken == useSpoken) {
+        ExerciseExport exerciseExport = qidToExport.get(r.getQid());
         if (exerciseExport == null) {
-          logger.warn("getExports : for " + r.getID() +" can't find r qid " + r.qid + " in keys " + qidToExport.keySet());
+          logger.warn("getExports : for " + r.getID() +" can't find r qid " + r.getQid() + " in keys " + qidToExport.keySet());
         }
         else {
-          List<Grade> gradesForResult = idToGrade.get(r.uniqueID);
+          List<Grade> gradesForResult = idToGrade.get(r.getUniqueID());
           if (gradesForResult == null) {
             //System.err.println("no grades for result " + r);
           } else {
             for (Grade g : gradesForResult) {
               if (g.grade > 0) {  // filter out bad items (valid grades are 1-5)
-                if (r.answer.length() > 0) {
-                  exerciseExport.addRG(r.answer, g.grade);
+                if (r.getAnswer().length() > 0) {
+                  exerciseExport.addRG(r.getAnswer(), g.grade);
                   if (!valid.contains(exerciseExport)) {
                     ret.add(exerciseExport);
                     valid.add(exerciseExport);
@@ -178,9 +163,9 @@ public class Export {
             }
           }
         }
-      } else {
-        if (debug) logger.debug("\tSkipping result " + r + " since not match to " + useFLQ + " and " + useSpoken);
-      }
+     // } else {
+     //   if (debug) logger.debug("\tSkipping result " + r + " since not match to " + useFLQ + " and " + useSpoken);
+     // }
     }
     return ret;
   }
@@ -194,6 +179,19 @@ public class Export {
     }
     return qidToExport;
   }
+
+/*
+  private Collection<ExerciseExport> getExports(Exercise exercise) {
+    List<ExerciseExport> qidToExport = new ArrayList<ExerciseExport>();
+    //int qid = 0;
+  //  for (Exercise.QAPair q : exercise.getQuestions()) {
+      qidToExport.add(new ExerciseExport(exercise.getID(), q.getAnswer()));
+      //qidToExport.put(qid, e1);
+  //  }
+    return qidToExport;
+  }
+*/
+
 
   /**
    * If the exercise already has predefined answers, add those
@@ -238,107 +236,4 @@ public class Export {
     }
     return idToGrade;
   }
-
-  //private class DatabaseImpl2 implements Database {
-  /*  private Logger logger = Logger.getLogger(Export.class);
-    private String url = "jdbc:h2:" + H2_DB_NAME + ";IFEXISTS=TRUE;QUERY_CACHE_SIZE=0;",
-        dbOptions = "",//"?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull",
-        driver = "org.h2.Driver";
-
-    private static final boolean TESTING = false;
-
-    private static final String H2_DB_NAME = TESTING ? "vlr-parle" : "/services/apache-tomcat-7.0.27/webapps/langTest/vlr-parle";
-
-    private String h2DbName = H2_DB_NAME;
-
-    public Connection getConnection() throws Exception {
-      //  if (c != null) return c;
-      Connection c;
-      //  logger.info("install path is " +servlet.getInitParameter());
-      try {
-     //   if (servlet == null) {
-          c = this.dbLogin();
-      //  } else {
-      //    ServletContext servletContext = servlet.getServletContext();
-      //    c = (Connection) servletContext.getAttribute("connection");
-     //   }
-      } catch (Exception e) {  // for standalone testing
-        logger.warn("The context DBStarter is not working : " + e.getMessage(), e);
-        c = this.dbLogin();
-      }
-      if (c == null) {
-        return c;
-      }
-      c.setAutoCommit(true);
-      if (c.isClosed()) {
-        logger.warn("getConnection : conn " + c + " is closed!");
-      }
-      return c;
-    }*/
-
-    /**
-     * Just for dbLogin
-     */
-   // private Connection localConnection;
-    /**
-     * Not necessary if we use the h2 DBStarter service -- see web.xml reference
-     *
-     * @return
-     * @throws Exception
-     */
- /*   private Connection dbLogin() throws Exception {
-      if (localConnection != null) return localConnection;
-      try {
-        Class.forName(driver).newInstance();
-        try {
-        //  url = servlet.getServletContext().getInitParameter("db.url"); // from web.xml
-        } catch (Exception e) {
-          logger.warn("no servlet context?");
-        }
-        logger.info("connecting to " + url);
-
-    //    GWT.log("connecting to " + url);
-        File f = new java.io.File(h2DbName + ".h2.db");
-        if (!f.exists()) {
-          String s = "huh? no file at " + f.getAbsolutePath();
-          logger.warn(s);
-
-      //    GWT.log(s);
-        }
-        Connection connection = DriverManager.getConnection(url + dbOptions);
-        connection.setAutoCommit(false);
-        boolean closed = connection.isClosed();
-        if (closed) {
-          logger.warn("connection is closed to : " + url);
-        }
-        this.localConnection = connection;
-        return connection;
-      } catch (Exception ex) {
-        ex.printStackTrace();
-        throw ex;
-      }
-    }*/
-
-
-/*  public void closeConnection(Connection connection) throws SQLException {
-    //  System.err.println("Closing " + connection);
-    //connection.close();
-    // System.err.println("Closing " + connection + " " + connection.isClosed());
-  }*/
-
-/*  public static void main(String[] arg) {
-    Export langTestDatabase = new Export("C:\\Users\\go22670\\mt_repo\\jdewitt\\pilot\\vlr-parle");
-    //List<Exercise> exercises = langTestDatabase.getExercises();
-    if (true) {
-      List<ExerciseExport> exerciseNames = langTestDatabase.getExport(true, false);
-
-      System.out.println("names " + exerciseNames.size() + " e.g. " + exerciseNames.get(0));
-      for (ExerciseExport ee : exerciseNames) {
-        System.out.println("ee " + ee);
-      }
-    } else {
-    //  List<Exercise> exercises = langTestDatabase.getRandomBalancedList();
-
-    }
-  }*/
 }
