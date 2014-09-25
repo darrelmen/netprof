@@ -2,8 +2,7 @@ package mitll.langtest.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 
 /**
  * So egyptian monitoring needs to show :
@@ -13,6 +12,17 @@ import java.util.Map;
  * Created by go22670 on 9/24/14.
  */
 public class MonitorResult implements IsSerializable {
+  private static final String ASC = "ASC";
+  public static final String USERID = "userid";
+  public static final String ID = "id";
+  public static final String VALID = "valid";
+  public static final String TIMESTAMP = "timestamp";
+  public static final String AUDIO_TYPE = "audioType";
+  public static final String DURATION_IN_MILLIS = "durationInMillis";
+  public static final String CORRECT = "correct";
+  public static final String PRON_SCORE = "pronScore";
+  public static final String TEXT = "text";
+
   private int uniqueID;
   private long userid;
   private String id;
@@ -97,6 +107,127 @@ public class MonitorResult implements IsSerializable {
 
   public void setUnitToValue(Map<String, String> unitToValue) {
     this.unitToValue = unitToValue;
+  }
+
+  /**
+   * Expects a query where the columns are field_ASC or field_DESC
+   * @param columns
+   * @return
+   */
+  public Comparator<MonitorResult> getComparator(final Collection<String> columns) {
+    System.out.println("getComparator columns " + columns);
+    final List<String> copy = new ArrayList<String>(columns);
+    if (copy.isEmpty() || copy.iterator().next().equals("")) {
+      return new Comparator<MonitorResult>() {
+        @Override
+        public int compare(MonitorResult o1, MonitorResult o2) {
+          return o1.uniqueID < o2.uniqueID ? -1 : o1.uniqueID > o2.uniqueID ? +1 : 0;
+        }
+      };
+    } else {
+      return new Comparator<MonitorResult>() {
+        @Override
+        public int compare(MonitorResult o1, MonitorResult o2) {
+          for (String col : copy) {
+            String[] split = col.split("_");
+            String field = split[0];
+
+            if (split.length != 2) System.err.println("huh? col = " + col);
+            boolean asc = split.length <= 1 || split[1].equals(ASC);
+
+            // USERID ---------------
+            long comp = 0;
+            if (field.equals(USERID)) {
+              comp = o1.userid - o2.userid;// ? -1 : o2.userid > o1.userid ? +1 : 0;
+            }
+            if (comp != 0) return getComp(asc, comp);
+
+            // id
+            if (field.equals(ID)) {
+              String id1 = o1.id;
+              String id2 = o2.id;
+              comp = compareTwoMaybeInts(id1, id2);
+            }
+            if (comp != 0) return getComp(asc, comp);
+
+            // text
+            if (field.equals(TEXT)) {
+              comp = o1.getForeignText().compareTo(o2.getForeignText());
+            }
+            if (comp != 0) return getComp(asc, comp);
+
+            // valid
+            if (field.equals(VALID)) {
+              comp = o1.valid == o2.valid ? 0 : (!o1.valid && o2.valid ? -1 : +1);
+            }
+            if (comp != 0) return getComp(asc, comp);
+
+            // timestamp
+            if (field.equals(TIMESTAMP)) {
+              comp = o1.timestamp - o2.timestamp;// ? -1 : o2.timestamp < o1.timestamp ? +1 : 0;
+            }
+            if (comp != 0) return getComp(asc, comp);
+
+            // audio type
+            if (o1.audioType != null) {
+              if (field.equals(AUDIO_TYPE)) {
+                comp = o1.audioType.compareTo(o2.audioType);
+              }
+              if (comp != 0) return getComp(asc, comp);
+            }
+
+            // duration
+            if (field.equals(DURATION_IN_MILLIS)) {
+              comp = o1.durationInMillis - o2.durationInMillis;
+            }
+            if (comp != 0) return getComp(asc, comp);
+
+            // correct
+            if (field.equals(CORRECT)) {
+              comp = o1.isCorrect() == o2.isCorrect() ? 0 : (!o1.isCorrect() && o2.isCorrect() ? -1 : +1);
+            }
+            if (comp != 0) return getComp(asc, comp);
+
+            // score ------------
+            if (field.equals(PRON_SCORE)) {
+              comp = o1.getPronScore() < o2.getPronScore() ? -1 : o2.getPronScore() < o1.getPronScore() ? +1 : 0;
+            }
+            if (comp != 0) return getComp(asc, comp);
+
+            // unit and chapter
+            Map<String, String> unitToValue1 = o1.getUnitToValue();
+            Map<String, String> unitToValue2 = o2.getUnitToValue();
+            if (unitToValue1.containsKey(field) || unitToValue2.containsKey(field)) {
+              String first  = unitToValue1.get(field);
+              String second = unitToValue2.get(field);
+              comp = first == null ? +1 : second == null ? -1 : 0;
+              if (comp == 0) {
+                comp = compareTwoMaybeInts(first, second);
+              }
+            }
+
+            return getComp(asc, comp);
+          }
+          return 0;  //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        protected int getComp(boolean asc, long comp) {
+          return (int)(asc ? comp : -1 * comp);
+        }
+
+        protected int compareTwoMaybeInts(String id1, String id2) {
+          int comp;
+          try {   // this could be slow
+            int i = Integer.parseInt(id1);
+            int j = Integer.parseInt(id2);
+            comp = i-j;
+          } catch (NumberFormatException e) {
+            comp = id1.compareTo(id2);
+          }
+          return comp;
+        }
+      };
+    }
   }
 
   @Override
