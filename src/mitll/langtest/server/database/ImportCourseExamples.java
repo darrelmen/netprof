@@ -133,15 +133,15 @@ public class ImportCourseExamples {
       for (Result r : exIdToResult.values()) {
         if (count %  100 == 0) {
           logger.debug("\tcount " + count +
-            " result = " + r.uniqueID + " for " + r.getID() + " type " + r.getAudioType() + " path " + r.answer);
+            " result = " + r.getUniqueID() + " for " + r.getID() + " type " + r.getAudioType() + " path " + r.getAnswer());
         }
 
-        audioDAO.add(r, oldToNew.get(r.userid).intValue(), "bestAudio/" + r.answer);
+        audioDAO.add(r, oldToNew.get(r.getUserid()).intValue(), "bestAudio/" + r.getAnswer());
 
         try {
-          File destFile = new File(destAudioDir, r.answer);
+          File destFile = new File(destAudioDir, r.getAnswer());
           destFile.getParentFile().mkdirs();
-          File srcFile = new File(candidateAudioDir, r.answer);
+          File srcFile = new File(candidateAudioDir, r.getAnswer());
           if (!srcFile.exists() && bad++ < 20) {
             logger.error("can't find " + srcFile.getAbsolutePath());
           } else {
