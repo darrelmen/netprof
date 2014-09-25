@@ -40,6 +40,9 @@ public interface LangTestDatabase extends RemoteService {
 
   // answer DAO
   void addTextAnswer(int userID, CommonExercise exercise, int questionID, String answer, String answerType);
+
+  int getNumResults();
+
   AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int question, int user,
                              int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults, boolean addToAudioTable, boolean recordedWithFlash);
 
@@ -66,10 +69,7 @@ public interface LangTestDatabase extends RemoteService {
   Map<String, Map<String, Integer>> getResultPerExercise();
   List<Session> getSessions();
 
-  Collection<MonitorResult> getMonitorResults();
-
-
-  List<Result> getResults(int start, int end, String sortInfo);
+  List<MonitorResult> getResults(int start, int end, String sortInfo);
 
   Map<String,Number> getResultStats();
 
