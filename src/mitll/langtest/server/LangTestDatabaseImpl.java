@@ -1186,25 +1186,28 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.result.ResultManager#showResults()
    */
   @Override
-  public List<Result> getResults(int start, int end, String sortInfo) {
-    List<Result> results = db.getResultsWithGrades();
+  public List<MonitorResult> getResults(int start, int end, String sortInfo) {
+    List<MonitorResult> results = db.getMonitorResults();
     if (!results.isEmpty()) {
       String[] columns = sortInfo.split(",");
-      Comparator<Result> comparator = results.get(0).getComparator(Arrays.asList(columns));
+      Comparator<MonitorResult> comparator = results.get(0).getComparator(Arrays.asList(columns));
       Collections.sort(results, comparator);
     }
-    List<Result> resultList = results.subList(start, end);
-    return new ArrayList<Result>(resultList);
+    List<MonitorResult> resultList = results.subList(start, end);
+    return new ArrayList<MonitorResult>(resultList);
   }
 
   /**
    * @return
    * @see mitll.langtest.client.result.ResultManager#showResults()
    */
-  @Override
+/*  @Override
   public Collection<MonitorResult> getMonitorResults() {
     return db.getMonitorResults();
-  }
+  }*/
+
+  @Override
+  public int getNumResults() { return db.getResultDAO().getNumResults(); }
 
   /**
    * Record an answer entry in the database.<br></br>
