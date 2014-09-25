@@ -8,24 +8,17 @@ package mitll.langtest.server.trie;
  * To change this template use File | Settings | File Templates.
  */
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 
 /**
  * A tree-like data structure that enables quick lookup due to sharing common prefixes (using Aho Corasick algorithm).
- *
  */
 public class Trie<T> {
   private static final boolean USE_SINGLE_TOKEN_MAP = false;
   private static final boolean SPLIT_ON_CHARACTERS = true;
   private final TrieNode<T> root;
-  private final Map<String,TextEntityValue<T>> singleTokenMap;
-  private Map<String,String> tempCache;
+  private final Map<String, TextEntityValue<T>> singleTokenMap;
+  private Map<String, String> tempCache;
   private boolean convertToUpper = true;
 
   public Trie() {
@@ -35,26 +28,26 @@ public class Trie<T> {
   private Trie(boolean convertToUpper) {
     this.convertToUpper = convertToUpper;
     this.root = new TrieNode<T>();
-    this.singleTokenMap = new HashMap<String,TextEntityValue<T>>();
+    this.singleTokenMap = new HashMap<String, TextEntityValue<T>>();
   }
 
   /**
    * Just for testing.
+   *
    * @paramx entryList
    */
 /*  public Trie(List<TextEntityValue> entryList) {
     this();
     build(entryList);
   }*/
-
   private TrieNode<T> getRoot() {
     return root;
   }
 
   /**
-   * @see mitll.langtest.server.ExerciseTrie#getExercises(String)
    * @param toMatch
    * @return
+   * @see mitll.langtest.server.ExerciseTrie#getExercises(String)
    */
   protected List<EmitValue<T>> getEmits(String toMatch) {
     TrieNode<T> start = getRoot();
@@ -64,8 +57,7 @@ public class Trie<T> {
     }
     if (start == null) {
       return Collections.emptyList();
-    }
-    else {
+    } else {
       return start.getEmitsBelow();
     }
   }
@@ -87,6 +79,7 @@ public class Trie<T> {
 
   /**
    * Check in HashMap for single tokens (less memory than putting everything in the trie).
+   *
    * @param transitionLabel
    * @return entity found with this label
    */
@@ -120,7 +113,7 @@ public class Trie<T> {
    * Start building
    */
   public void startMakingNodes() {
-    this.tempCache = new HashMap<String,String>();
+    this.tempCache = new HashMap<String, String>();
   }
 
   /**
@@ -141,17 +134,17 @@ public class Trie<T> {
 
   /**
    * addEntryToTrie is a method to implement algorithm 2 in the AC paper
-   *
+   * <p/>
    * NOTE : All variant forms (normalized_value) of entries in the dictionary in database are whitespace separated
    * with possessive apostrophe as only punctuation.
-   *
+   * <p/>
    * Example: JASON 'S HOUSE OF PANCAKES
    *
    * @param textEntityDescription
-   * @param stringCache - don't keep around multiple copies of identical strings (10-15% memory savings)
+   * @param stringCache           - don't keep around multiple copies of identical strings (10-15% memory savings)
    * @return true if entry went into trie, false if into singleTokenMap
    */
-  private boolean addEntryToTrie(TextEntityValue<T> textEntityDescription, Map<String,String> stringCache) {
+  private boolean addEntryToTrie(TextEntityValue<T> textEntityDescription, Map<String, String> stringCache) {
     String normalizedValue = textEntityDescription.getNormalizedValue();
     List<String> split = SPLIT_ON_CHARACTERS ? getChars(normalizedValue) : getSpaceSeparatedTokens(normalizedValue);
 
@@ -266,6 +259,25 @@ public class Trie<T> {
         }
       }
     }
+  }
+
+  public Collection<T> getMatchesLC(String toMatch) {
+    return getMatches(toMatch.toLowerCase());
+  }
+
+  public Collection<T> getMatches(String lc) {
+    List<EmitValue<T>> emits = getEmits(lc);
+    Set<T> unique = new HashSet<T>();
+    List<T> ids = new ArrayList<T>();
+    for (EmitValue<T> ev : emits) {
+      T exercise = ev.getValue();
+      if (!unique.contains(exercise)) {
+        ids.add(exercise);
+        unique.add(exercise);
+      }
+    }
+    //logger.debug("getExercises : for '" +prefix + "' (" +lc+ ") got " + ids.size() + " matches");
+    return ids;
   }
 
 /*  private static class MyTextEntityValue implements TextEntityValue<String> {
