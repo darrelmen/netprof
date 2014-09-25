@@ -128,7 +128,8 @@ public class MonitorResult implements IsSerializable {
       return new Comparator<MonitorResult>() {
         @Override
         public int compare(MonitorResult o1, MonitorResult o2) {
-          for (String col : copy) {
+          //for (String col : copy) {
+          String col = copy.get(0);
             String[] split = col.split("_");
             String field = split[0];
 
@@ -190,7 +191,7 @@ public class MonitorResult implements IsSerializable {
 
             // score ------------
             if (field.equals(PRON_SCORE)) {
-              comp = o1.getPronScore() < o2.getPronScore() ? -1 : o2.getPronScore() < o1.getPronScore() ? +1 : 0;
+              comp = o1.getPronScore() < o2.getPronScore() ? -1 : o2.getPronScore() > o1.getPronScore() ? +1 : 0;
             }
             if (comp != 0) return getComp(asc, comp);
 
@@ -207,8 +208,8 @@ public class MonitorResult implements IsSerializable {
             }
 
             return getComp(asc, comp);
-          }
-          return 0;  //To change body of implemented methods use File | Settings | File Templates.
+        //  }
+        //  return 0;
         }
 
         protected int getComp(boolean asc, long comp) {
