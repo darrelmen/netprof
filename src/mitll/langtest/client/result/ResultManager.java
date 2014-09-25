@@ -10,6 +10,8 @@ import com.google.gwt.user.cellview.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.view.client.AsyncDataProvider;
+import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.ListDataProvider;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -37,13 +39,24 @@ public class ResultManager extends PagerTable {
 //  protected static final String SKIP = "Skip";
 //  protected static final int GRADING_WIDTH = 700;
   protected static final String TIMESTAMP = "timestamp";
-  public static final String CORRECT = "Correct";
-  public static final String PRO_F_SCORE = "ProFScore";
-  public static final String DURATION_SEC = "Duration (Sec)";
-  public static final String AUDIO_TYPE = "Audio Type";
-  public static final String USER_ID = "User";// ID";
-  public static final String DESC = "DESC";
-  public static final String ASC = "ASC";
+  private static final String CORRECT = "Correct";
+  private static final String PRO_F_SCORE = "ProFScore";
+  private static final String DURATION_SEC = "Duration (Sec)";
+  private static final String AUDIO_TYPE = "Audio Type";
+  private static final String USER_ID = "User";// ID";
+  private static final String DESC = "DESC";
+  private static final String ASC = "ASC";
+
+
+  private static final String ANSWER = "answer";
+  private static final String USERID = MonitorResult.USERID;
+  private static final String ID = MonitorResult.ID;
+  private static final String TEXT = MonitorResult.TEXT;
+  private static final String CORRECT1 = MonitorResult.CORRECT;
+  private static final String VALID = MonitorResult.VALID;
+  private static final String DURATION_IN_MILLIS = MonitorResult.DURATION_IN_MILLIS;
+  private static final String AUDIO_TYPE1 = MonitorResult.AUDIO_TYPE;
+  private static final String PRON_SCORE = MonitorResult.PRON_SCORE;
 
   private final boolean textResponse;
   protected int pageSize = PAGE_SIZE;
@@ -52,7 +65,7 @@ public class ResultManager extends PagerTable {
   private final AudioTag audioTag = new AudioTag();
   private final String nameForAnswer;
   private final Map<Column<?, ?>, String> colToField = new HashMap<Column<?, ?>, String>();
-  Collection<String> typeOrder;
+  private Collection<String> typeOrder;
 
   /**
    * @param s
@@ -93,14 +106,14 @@ public class ResultManager extends PagerTable {
     dialogBox.setPopupPosition(left, top);
     dialogVPanel.setWidth("100%");
 
-    service.getMonitorResults(new AsyncCallback<Collection<MonitorResult>>() {
+    service.getNumResults(new AsyncCallback<Integer>() {
       @Override
       public void onFailure(Throwable caught) {
       }
 
       @Override
-      public void onSuccess(Collection<MonitorResult> results) {
-        populateTableOld(results, dialogVPanel, dialogBox);
+      public void onSuccess(Integer num) {
+        populateTableOld(num, dialogVPanel, dialogBox);
       }
     });
 
@@ -180,14 +193,15 @@ public class ResultManager extends PagerTable {
    * @param dialogBox
    * @see #showResults()
    */
-  private void populateTableOld(Collection<MonitorResult> numResults, Panel dialogVPanel, DialogBox dialogBox) {
+  private void populateTableOld(int numResults,
+      Panel dialogVPanel, DialogBox dialogBox) {
     if (lastTable != null) {
       dialogVPanel.remove(lastTable);
       dialogVPanel.remove(closeButton);
     }
 
     Widget table = getAsyncTable(numResults);
-    //   Widget table = createProvider(numResults);
+  //    Widget table = createProvider(numResults);
     table.setWidth("100%");
 
     dialogVPanel.add(new Anchor(getURL2()));
@@ -218,7 +232,7 @@ public class ResultManager extends PagerTable {
     dialogBox.show();
   }*/
 
-  private List<MonitorResult> createProvider(Collection<MonitorResult> result, CellTable<MonitorResult> table) {
+/*  private List<MonitorResult> createProvider(Collection<MonitorResult> result, CellTable<MonitorResult> table) {
     ListDataProvider<MonitorResult> dataProvider = new ListDataProvider<MonitorResult>();
 
     // Connect the table to the data provider.
@@ -232,19 +246,21 @@ public class ResultManager extends PagerTable {
     }
     table.setRowCount(list.size());
     return list;
-  }
+  }*/
 
   /**
-   * @param results
+   * @param numResults
    * @return
    * @see #populateTableOld
    */
-  private Widget getAsyncTable(Collection<MonitorResult> results) {
+  private Widget getAsyncTable(//Collection<MonitorResult> results
+                               int numResults
+  ) {
     CellTable<MonitorResult> table = new CellTable<MonitorResult>();
     addColumnsToTable(table);
-    table.setRowCount(results.size(), true);
+    table.setRowCount(numResults, true);
     table.setVisibleRange(0, 15);
-    createProvider(results, table);
+    createProvider(numResults, table);
 
     // Add a ColumnSortEvent.AsyncHandler to connect sorting to the
     // AsyncDataPRrovider.
@@ -301,7 +317,7 @@ public class ResultManager extends PagerTable {
     audioFile.setSortable(true);
 
     table.addColumn(audioFile, nameForAnswer);
-    colToField.put(audioFile, "answer");
+    colToField.put(audioFile, ANSWER);
 /*
     TextColumn<MonitorResult> score = new TextColumn<MonitorResult>() {
       @Override
@@ -330,7 +346,6 @@ public class ResultManager extends PagerTable {
    * @seex #getAsyncTable(int)
    * @seex #getAsyncTable(int)
    */
-/*
   private AsyncDataProvider<MonitorResult> createProvider(final int numResults, final CellTable<MonitorResult> table) {
     AsyncDataProvider<MonitorResult> dataProvider = new AsyncDataProvider<MonitorResult>() {
       @Override
@@ -361,7 +376,7 @@ public class ResultManager extends PagerTable {
 
     return dataProvider;
   }
-*/
+
   private StringBuilder getColumnSortedState(CellTable<MonitorResult> table) {
     final ColumnSortList sortList = table.getColumnSortList();
     StringBuilder builder = new StringBuilder();
@@ -395,7 +410,7 @@ public class ResultManager extends PagerTable {
     };
     id.setSortable(true);
     table.addColumn(id, USER_ID);
-    colToField.put(id, "userid");
+    colToField.put(id, USERID);
 
     TextColumn<MonitorResult> exercise = new TextColumn<MonitorResult>() {
       @Override
@@ -405,7 +420,7 @@ public class ResultManager extends PagerTable {
     };
     exercise.setSortable(true);
     table.addColumn(exercise, "Exercise");
-    colToField.put(exercise, "id");
+    colToField.put(exercise, ID);
 
     TextColumn<MonitorResult> fl = new TextColumn<MonitorResult>() {
       @Override
@@ -415,7 +430,7 @@ public class ResultManager extends PagerTable {
     };
     fl.setSortable(true);
     table.addColumn(fl, "Text");
-    colToField.put(fl, "fl");
+    colToField.put(fl, TEXT);
 
     for (final String type : typeOrder) {
       TextColumn<MonitorResult> unit = new TextColumn<MonitorResult>() {
@@ -427,7 +442,7 @@ public class ResultManager extends PagerTable {
       };
       unit.setSortable(true);
       table.addColumn(unit, type);
-      colToField.put(unit, "unit_" + type);
+      colToField.put(unit, /*"unit_" +*/ type);
     }
 
     return id;
@@ -448,7 +463,7 @@ public class ResultManager extends PagerTable {
       };
       audioType.setSortable(true);
       table.addColumn(audioType, AUDIO_TYPE);
-      colToField.put(audioType, "audioType");
+      colToField.put(audioType, AUDIO_TYPE1);
 
       TextColumn<MonitorResult> dur = new TextColumn<MonitorResult>() {
         @Override
@@ -460,7 +475,7 @@ public class ResultManager extends PagerTable {
       };
       dur.setSortable(true);
       table.addColumn(dur, DURATION_SEC);
-      colToField.put(dur, "durationInMillis");
+      colToField.put(dur, DURATION_IN_MILLIS);
 
       TextColumn<MonitorResult> valid = new TextColumn<MonitorResult>() {
         @Override
@@ -470,7 +485,7 @@ public class ResultManager extends PagerTable {
       };
       valid.setSortable(true);
       table.addColumn(valid, "Valid");
-      colToField.put(valid, "valid");
+      colToField.put(valid, VALID);
     }
 
     TextColumn<MonitorResult> correct = new TextColumn<MonitorResult>() {
@@ -481,7 +496,7 @@ public class ResultManager extends PagerTable {
     };
     correct.setSortable(true);
     table.addColumn(correct, CORRECT);
-    colToField.put(correct, "correct");
+    colToField.put(correct, CORRECT1);
 
     TextColumn<MonitorResult> pronScore = new TextColumn<MonitorResult>() {
       @Override
@@ -491,7 +506,7 @@ public class ResultManager extends PagerTable {
     };
     pronScore.setSortable(true);
     table.addColumn(pronScore, PRO_F_SCORE);
-    colToField.put(pronScore, "pronScore");
+    colToField.put(pronScore, PRON_SCORE);
   }
 
   private void addNoWrapColumn(CellTable<MonitorResult> table) {
