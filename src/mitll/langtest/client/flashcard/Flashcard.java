@@ -22,6 +22,7 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.User;
 
 import java.util.ArrayList;
@@ -46,14 +47,16 @@ public class Flashcard implements RequiresResize {
   Paragraph subtitle;
   HTML browserInfo;
   Panel qc,recordAudio;
+  EventRegistration eventRegistration;
 
   /**
    * @see mitll.langtest.client.LangTest#makeHeaderRow()
    */
-  public Flashcard(PropertyHandler props) {
+  public Flashcard(PropertyHandler props, EventRegistration eventRegistration) {
     this.nameForAnswer = props.getNameForAnswer() + "s";
     isAnonymous = props.getLoginType().equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS);
     adminView = props.isAdminView();
+    this.eventRegistration = eventRegistration;
   }
 
   /**
@@ -222,23 +225,28 @@ public class Flashcard implements RequiresResize {
     if (users != null) {
       NavLink widget2 = new NavLink("Users");
       widget2.addClickHandler(users);
+      eventRegistration.registerWidget(widget2,widget2,"N/A","show user list");
       w.add(widget2);
     }
 
     if (results != null) {
       NavLink widget2 = new NavLink(nameForAnswer.substring(0,1).toUpperCase()+nameForAnswer.substring(1));
       widget2.addClickHandler(results);
+      eventRegistration.registerWidget(widget2,widget2,"N/A","show recordings");
       w.add(widget2);
     }
 
     if (monitoring != null) {
       NavLink widget2 = new NavLink("Monitoring");
       widget2.addClickHandler(monitoring);
+      eventRegistration.registerWidget(widget2,widget2,"N/A","show monitoring");
       w.add(widget2);
     }
     if (events != null) {
       NavLink widget2 = new NavLink("Events");
       widget2.addClickHandler(events);
+      eventRegistration.registerWidget(widget2,widget2,"N/A","show events");
+
       w.add(widget2);
     }
     return w;
