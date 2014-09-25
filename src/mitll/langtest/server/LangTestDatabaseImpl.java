@@ -16,6 +16,8 @@ import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.AutoCRTScoring;
+import mitll.langtest.server.trie.TextEntityValue;
+import mitll.langtest.server.trie.Trie;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
@@ -48,6 +50,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
   public static final String DATABASE_REFERENCE = "databaseReference";
+  public static final int MAX = 30;
 
   private DatabaseImpl db;
   private AudioFileHelper audioFileHelper;
@@ -622,7 +625,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     try {
       hostName = InetAddress.getLocalHost().getHostName();
     } catch (UnknownHostException e) {
-      logger.error("Got "+e,e);
+      logger.error("Got " + e, e);
     }
     sendEmail("slow exercise on " + language, "Getting ex " + id + " on " + language + " took " + diff +
         " millis, threads " + threadInfo + " on " + hostName);
@@ -1186,28 +1189,267 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.result.ResultManager#showResults()
    */
   @Override
-  public List<MonitorResult> getResults(int start, int end, String sortInfo) {
-    List<MonitorResult> results = db.getMonitorResults();
+  public ResultAndTotal getResults(int start, int end, String sortInfo, Map<String, String> unitToValue, long userid, String flText) {
+    // List<MonitorResult> results = db.getMonitorResults();
+    List<MonitorResult> results = getResults(unitToValue, userid, flText);
     if (!results.isEmpty()) {
-      String[] columns = sortInfo.split(",");
-      Comparator<MonitorResult> comparator = results.get(0).getComparator(Arrays.asList(columns));
+      Comparator<MonitorResult> comparator = results.get(0).getComparator(Arrays.asList(sortInfo.split(",")));
       Collections.sort(results, comparator);
     }
-    List<MonitorResult> resultList = results.subList(start, end);
-    return new ArrayList<MonitorResult>(resultList);
+    int n = results.size();
+    List<MonitorResult> resultList = results.subList(start, Math.min(end,n));
+    return new ResultAndTotal(new ArrayList<MonitorResult>(resultList),n);
   }
 
-  /**
-   * @return
-   * @see mitll.langtest.client.result.ResultManager#showResults()
-   */
-/*  @Override
-  public Collection<MonitorResult> getMonitorResults() {
-    return db.getMonitorResults();
-  }*/
+  @Override
+  public int getNumResults() {
+    return db.getResultDAO().getNumResults();
+  }
+
+  private List<MonitorResult> getResults(Map<String, String> unitToValue, long userid, String flText) {
+    Collection<MonitorResult> results = db.getMonitorResults();
+    logger.debug("request " + unitToValue + " " + userid + " " + flText);
+
+    Trie<MonitorResult> trie;
+
+    for (String type : getTypeOrder()) {
+      if (unitToValue.containsKey(type)) {
+
+        logger.debug("making trie for " + type);
+        // make trie from results
+        trie = new Trie<MonitorResult>();
+
+        trie.startMakingNodes();
+        for (MonitorResult result : results) {
+          String s = result.getUnitToValue().get(type);
+          if (s != null) {
+            trie.addEntryToTrie(new ResultWrapper(s, result));
+          }
+        }
+        trie.endMakingNodes();
+
+        String s = unitToValue.get(type);
+        Collection<MonitorResult> matchesLC = trie.getMatchesLC(s);
+
+        // stop!
+
+        results = matchesLC;
+      }
+    }
+
+    if (userid > -1) { // asking for userid
+      // make trie from results
+
+      logger.debug("making trie for userid " + userid);
+
+      trie = new Trie<MonitorResult>();
+      trie.startMakingNodes();
+      for (MonitorResult result : results) {
+        trie.addEntryToTrie(new ResultWrapper(Long.toString(result.getUserid()), result));
+      }
+      trie.endMakingNodes();
+
+      Set<Long> imatches = new TreeSet<Long>();
+      Collection<MonitorResult> matchesLC = trie.getMatchesLC(Long.toString(userid));
+
+      results = matchesLC;
+    }
+
+    // must be asking for text
+    if (flText != null && !flText.isEmpty()) { // asking for text
+      trie = new Trie<MonitorResult>();
+      trie.startMakingNodes();
+      logger.debug("searching over " + results.size());
+      // int n = 0;
+      for (MonitorResult result : results) {
+        // if (n++ < 10) {
+        //    logger.debug("adding " + result.getForeignText());
+        //  }
+        trie.addEntryToTrie(new ResultWrapper(result.getForeignText(), result));
+      }
+      trie.endMakingNodes();
+
+      results = trie.getMatchesLC(flText);
+    }
+    logger.debug("returning " + results.size());
+    return new ArrayList<MonitorResult>(results);
+  }
 
   @Override
-  public int getNumResults() { return db.getResultDAO().getNumResults(); }
+  public Collection<String> getResultAlternatives(Map<String, String> unitToValue, long userid, String flText, String which) {
+    Collection<MonitorResult> results = db.getMonitorResults();
+
+    logger.debug("request " + unitToValue + " " + userid + " " + flText + " :'" + which + "'");
+
+    Collection<String> matches = new TreeSet<String>();
+    Trie<MonitorResult> trie;
+
+    for (String type : getTypeOrder()) {
+      if (unitToValue.containsKey(type)) {
+
+        logger.debug("making trie for " + type);
+        // make trie from results
+        trie = new Trie<MonitorResult>();
+
+        trie.startMakingNodes();
+        for (MonitorResult result : results) {
+          String s = result.getUnitToValue().get(type);
+          if (s != null) {
+            trie.addEntryToTrie(new ResultWrapper(s, result));
+          }
+        }
+        trie.endMakingNodes();
+
+        String s = unitToValue.get(type);
+        Collection<MonitorResult> matchesLC = trie.getMatchesLC(s);
+
+        // stop!
+        if (which.equals(type)) {
+          logger.debug("\tmatch for " + type);
+
+          boolean allInt = true;
+          for (MonitorResult result : matchesLC) {
+            String e = result.getUnitToValue().get(type);
+            if (allInt) {
+              try {
+                Integer.parseInt(e);
+              } catch (NumberFormatException e1) {
+                allInt = false;
+              }
+            }
+            matches.add(e);
+          }
+
+          if (allInt) {
+            List<String> sorted = new ArrayList<String>(matches);
+            Collections.sort(sorted, new Comparator<String>() {
+              @Override
+              public int compare(String o1, String o2) {
+                return compareTwoMaybeInts(o1, o2);
+              }
+            });
+            return sorted;
+          }
+
+          logger.debug("returning " + matches);
+
+          return matches;
+        } else {
+          results = matchesLC;
+        }
+      }
+    }
+
+    if (userid > -1) { // asking for userid
+      // make trie from results
+
+      logger.debug("making trie for userid " + userid);
+
+      trie = new Trie<MonitorResult>();
+      trie.startMakingNodes();
+      for (MonitorResult result : results) {
+        trie.addEntryToTrie(new ResultWrapper(Long.toString(result.getUserid()), result));
+      }
+      trie.endMakingNodes();
+
+      Set<Long> imatches = new TreeSet<Long>();
+      Collection<MonitorResult> matchesLC = trie.getMatchesLC(Long.toString(userid));
+
+      // stop!
+      if (which.equals(MonitorResult.USERID)) {
+        for (MonitorResult result : matchesLC) {
+          imatches.add(result.getUserid());
+        }
+        logger.debug("returning " + imatches);
+
+        for (Long m : imatches) matches.add(Long.toString(m));
+        matches = getLimitedSizeList(matches);
+        return matches;
+      } else {
+        results = matchesLC;
+      }
+    }
+
+    // must be asking for text
+    //if (flText != null) { // asking for text
+    trie = new Trie<MonitorResult>();
+    trie.startMakingNodes();
+    logger.debug("searching over " + results.size());
+    // int n = 0;
+    for (MonitorResult result : results) {
+      // if (n++ < 10) {
+      //    logger.debug("adding " + result.getForeignText());
+      //  }
+      trie.addEntryToTrie(new ResultWrapper(result.getForeignText(), result));
+    }
+    trie.endMakingNodes();
+
+    Collection<MonitorResult> matchesLC = trie.getMatchesLC(flText);
+
+    for (MonitorResult result : matchesLC) {
+      matches.add(result.getForeignText());
+    }
+    logger.debug("returning text " + matches);
+
+    // if (which.equals(MonitorResult.TEXT)) {
+    matches = getLimitedSizeList(matches);
+    return matches;
+    // }
+    //}
+
+  }
+
+  private Collection<String> getLimitedSizeList(Collection<String> matches) {
+    if (matches.size() > MAX) {
+      List<String> matches2 = new ArrayList<String>();
+      int nn = 0;
+      for (String match : matches) {
+        if (nn++ < MAX) {
+          matches2.add(match);
+        }
+      }
+      matches = matches2;
+    }
+    return matches;
+  }
+
+
+  protected int compareTwoMaybeInts(String id1, String id2) {
+    int comp;
+    try {   // this could be slow
+      int i = Integer.parseInt(id1);
+      int j = Integer.parseInt(id2);
+      comp = i - j;
+    } catch (NumberFormatException e) {
+      comp = id1.compareTo(id2);
+    }
+    return comp;
+  }
+
+  private static class ResultWrapper implements TextEntityValue<MonitorResult> {
+    private final String value;
+    private final MonitorResult e;
+
+    public ResultWrapper(String value, MonitorResult e) {
+      this.value = value;
+      this.e = e;
+    }
+
+    @Override
+    public MonitorResult getValue() {
+      return e;
+    }
+
+    @Override
+    public String getNormalizedValue() {
+      return value;
+    }
+
+    public String toString() {
+      return "result " + e.getId() + " : " + value;
+    }
+  }
+
 
   /**
    * Record an answer entry in the database.<br></br>
