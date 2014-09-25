@@ -44,9 +44,11 @@ public interface LangTestDatabaseAsync {
 
   void getSessions(AsyncCallback<List<Session>> async);
 
+/*
   void getMonitorResults(AsyncCallback<Collection<MonitorResult>> async);
+*/
 
-  void getResults(int start, int end, String sortInfo, AsyncCallback<List<Result>> async);
+  void getResults(int start, int end, String sortInfo, AsyncCallback<List<MonitorResult>> async);
 
   void getResultStats(AsyncCallback<Map<String, Number>> async);
 
@@ -125,4 +127,6 @@ public interface LangTestDatabaseAsync {
                     String textToAlign,
                     String identifier,
                     int reqid, AsyncCallback<AudioAnswer> async);
+
+  void getNumResults(AsyncCallback<Integer> async);
 }
