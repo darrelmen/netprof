@@ -1,21 +1,12 @@
 package mitll.langtest.client.list;
 
-import com.github.gwtbootstrap.client.ui.ControlGroup;
-import com.github.gwtbootstrap.client.ui.ControlLabel;
-import com.github.gwtbootstrap.client.ui.Controls;
 import com.github.gwtbootstrap.client.ui.base.TextBox;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -51,7 +42,7 @@ public class PagingExerciseList extends ExerciseList {
   private final boolean showTypeAhead;
 
   private TextBox typeAhead = new TextBox();
-  private String lastTypeAheadValue = "";
+  //private String lastTypeAheadValue = "";
   protected long userListID = -1;
   private int unaccountedForVertical = 160;
   private boolean unrecorded;
@@ -120,7 +111,7 @@ public class PagingExerciseList extends ExerciseList {
    */
   protected String getPrefix() { return typeAhead.getText(); }
 
-  private ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget user) {
+/*  private ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget user) {
     final ControlGroup userGroup = new ControlGroup();
     userGroup.addStyleName("leftFiveMargin");
 
@@ -131,7 +122,7 @@ public class PagingExerciseList extends ExerciseList {
 
     dialogBox.add(userGroup);
     return userGroup;
-  }
+  }*/
 
   /**
    * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#addComponents()
@@ -202,32 +193,13 @@ public class PagingExerciseList extends ExerciseList {
    */
   protected void addTypeAhead(Panel column) {
     if (showTypeAhead) {
-      typeAhead.getElement().setId("ExerciseList_TypeAhead");
-      typeAhead.setDirectionEstimator(true);   // automatically detect whether text is RTL
-      typeAhead.addKeyUpHandler(new KeyUpHandler() {
-        public void onKeyUp(KeyUpEvent event) {
-          String text = typeAhead.getText();
-          if (!text.equals(lastTypeAheadValue)) {
-            //System.out.println("addTypeAhead : looking for '" + text + "' (" + text.length() + " chars)");
-            controller.logEvent(typeAhead, "TypeAhead", "UserList_" + userListID, "User search ='" + text + "'");
-            loadExercises(getHistoryToken(""), text);
-            lastTypeAheadValue = text;
-          }
+      new TypeAhead(column, waitCursor, "Search", true) {
+        @Override
+        public void gotTypeAheadEntry(String text) {
+          controller.logEvent(getTypeAhead(), "TypeAhead", "UserList_" + userListID, "User search ='" + text + "'");
+          loadExercises(getHistoryToken(""), text);
         }
-      });
-
-      Panel flow = new HorizontalPanel();
-      flow.add(typeAhead);
-      flow.add(waitCursor);
-      waitCursor.getElement().getStyle().setMarginTop(-7, Style.Unit.PX);
-      waitCursor.setUrl(white);
-
-      addControlGroupEntry(column, "Search", flow);
-      Scheduler.get().scheduleDeferred(new Command() {
-        public void execute() {
-          typeAhead.setFocus(true);
-        }
-      });
+      };
     }
   }
 
