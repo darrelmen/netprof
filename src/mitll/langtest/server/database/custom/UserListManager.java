@@ -133,7 +133,7 @@ public class UserListManager {
   }
 
   // set states on user exercises
-  protected void setStateOnUserExercises(Map<String, ReviewedDAO.StateCreator> exerciseToState,
+  private void setStateOnUserExercises(Map<String, ReviewedDAO.StateCreator> exerciseToState,
                                          Set<String> userExercisesRemaining, boolean firstState) {
     int count = 0;
     List<CommonUserExercise> userExercises = userExerciseDAO.getWhere(userExercisesRemaining);
