@@ -1,8 +1,5 @@
 package mitll.langtest.server.database;
 
-import com.github.gwtbootstrap.client.ui.Heading;
-import com.google.gwt.thirdparty.guava.common.util.concurrent.Monitor;
-import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
@@ -58,6 +55,7 @@ import java.util.Set;
 public class DatabaseImpl implements Database {
   private static final Logger logger = Logger.getLogger(DatabaseImpl.class);
   public static final int LOG_THRESHOLD = 10;
+  public static final Map<String,String> EMPTY_MAP = new HashMap<String,String>();
 
   private String installPath;
   private ExerciseDAO exerciseDAO = null;
@@ -661,13 +659,13 @@ public class DatabaseImpl implements Database {
     Map<Long, Integer> idToCount = new HashMap<Long, Integer>();
     Map<Long, Set<String>> idToUniqueCount = new HashMap<Long, Set<String>>();
     for (Result r : resultDAO.getResults()) {
-      Integer count = idToCount.get(r.userid);
-      if (count == null) idToCount.put(r.userid, 1);
-      else idToCount.put(r.userid, count + 1);
+      Integer count = idToCount.get(r.getUserid());
+      if (count == null) idToCount.put(r.getUserid(), 1);
+      else idToCount.put(r.getUserid(), count + 1);
 
-      Set<String> uniqueForUser = idToUniqueCount.get(r.userid);
-      if (uniqueForUser == null) idToUniqueCount.put(r.userid, uniqueForUser = new HashSet<String>());
-      uniqueForUser.add(r.id);
+      Set<String> uniqueForUser = idToUniqueCount.get(r.getUserid());
+      if (uniqueForUser == null) idToUniqueCount.put(r.getUserid(), uniqueForUser = new HashSet<String>());
+      uniqueForUser.add(r.getId());
     }
     return new Pair(idToCount, idToUniqueCount);
   }
@@ -723,9 +721,9 @@ public class DatabaseImpl implements Database {
 
   public List<Result> getResultsWithGrades() {
     List<Result> results = resultDAO.getResults();
-    Map<Integer,Result> idToResult = new HashMap<Integer, Result>();
+/*    Map<Integer,Result> idToResult = new HashMap<Integer, Result>();
     for (Result r : results) {
-      idToResult.put(r.uniqueID, r);
+      idToResult.put(r.getUniqueID(), r);
       r.clearGradeInfo();
     }
     Collection<Grade> grades = gradeDAO.getGrades();
@@ -735,26 +733,27 @@ public class DatabaseImpl implements Database {
       if (result != null) {
         result.addGrade(g);
       }
-    }
+    }*/
     return results;
   }
 
-  public Collection<MonitorResult> getMonitorResults() {
+  public List<MonitorResult> getMonitorResults() {
    // return resultDAO.getMonitorResults();
 
     List<MonitorResult> monitorResults = resultDAO.getMonitorResults();
     Map<String,CommonExercise> join = new HashMap<String, CommonExercise>();
 
-
-
-
-
     for (CommonExercise exercise : getExercises()) {
       String id = exercise.getID();
-     // if (id.contains("\\/")) id = id.substring(0,id.length()-2);
-      join.put(id,exercise);
+      // if (id.contains("\\/")) id = id.substring(0,id.length()-2);
+      join.put(id, exercise);
     }
- //   List<CommonExercise> exercises = ;
+
+    for (CommonExercise exercise : userExerciseDAO.getAll()) {
+      String id = exercise.getID();
+      // if (id.contains("\\/")) id = id.substring(0,id.length()-2);
+      join.put(id, exercise);
+    }
 
     int n = 0;
     for (MonitorResult result : monitorResults) {
@@ -762,8 +761,10 @@ public class DatabaseImpl implements Database {
        if (id.contains("\\/")) id = id.substring(0,id.length()-2);
       CommonExercise exercise = join.get(id);
       if (exercise == null) {
-        //logger.error("couldn't find " + exercise);
+        if (n < 200) logger.error("couldn't find " + result);
         n++;
+        result.setUnitToValue(EMPTY_MAP);
+        result.setForeignText("");
       }
       else {
         result.setUnitToValue(exercise.getUnitToValue());
