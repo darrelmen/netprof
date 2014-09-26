@@ -139,7 +139,7 @@ public class MonitorResult implements IsSerializable {
             // USERID ---------------
             long comp = 0;
             if (field.equals(USERID)) {
-              comp = o1.userid - o2.userid;// ? -1 : o2.userid > o1.userid ? +1 : 0;
+              comp = o1.userid < o2.userid ? -1 : o1.userid > o2.userid ? +1 : 0;
             }
             if (comp != 0) return getComp(asc, comp);
 
@@ -165,7 +165,7 @@ public class MonitorResult implements IsSerializable {
 
             // timestamp
             if (field.equals(TIMESTAMP)) {
-              comp = o1.timestamp - o2.timestamp;// ? -1 : o2.timestamp < o1.timestamp ? +1 : 0;
+              comp = o1.timestamp < o2.timestamp ? -1 : o1.timestamp > o2.timestamp ? +1 : 0;
             }
             if (comp != 0) return getComp(asc, comp);
 
@@ -179,7 +179,7 @@ public class MonitorResult implements IsSerializable {
 
             // duration
             if (field.equals(DURATION_IN_MILLIS)) {
-              comp = o1.durationInMillis - o2.durationInMillis;
+              comp = o1.durationInMillis < o2.durationInMillis ? -1 : o1.durationInMillis > o2.durationInMillis ? +1 : 0;
             }
             if (comp != 0) return getComp(asc, comp);
 
@@ -191,7 +191,9 @@ public class MonitorResult implements IsSerializable {
 
             // score ------------
             if (field.equals(PRON_SCORE)) {
-              comp = o1.getPronScore() < o2.getPronScore() ? -1 : o2.getPronScore() > o1.getPronScore() ? +1 : 0;
+              float pronScore1 = o1.getPronScore();
+              float pronScore2 = o2.getPronScore();
+              comp = pronScore1 < pronScore2 ? -1 : pronScore1 > pronScore2 ? +1 : 0;
             }
             if (comp != 0) return getComp(asc, comp);
 
@@ -221,7 +223,7 @@ public class MonitorResult implements IsSerializable {
           try {   // this could be slow
             int i = Integer.parseInt(id1);
             int j = Integer.parseInt(id2);
-            comp = i-j;
+            comp = i < j ? -1 : i > j ? +1 : 0;
           } catch (NumberFormatException e) {
             comp = id1.compareTo(id2);
           }
