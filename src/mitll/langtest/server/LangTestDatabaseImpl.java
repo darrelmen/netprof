@@ -1186,19 +1186,25 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * @return
-   * @see mitll.langtest.client.result.ResultManager#showResults()
+   * @see mitll.langtest.client.result.ResultManager#createProvider(int, com.google.gwt.user.cellview.client.CellTable)
    */
   @Override
-  public ResultAndTotal getResults(int start, int end, String sortInfo, Map<String, String> unitToValue, long userid, String flText) {
+  public ResultAndTotal getResults(int start, int end, String sortInfo, Map<String, String> unitToValue, long userid, String flText, int req) {
     // List<MonitorResult> results = db.getMonitorResults();
     List<MonitorResult> results = getResults(unitToValue, userid, flText);
     if (!results.isEmpty()) {
       Comparator<MonitorResult> comparator = results.get(0).getComparator(Arrays.asList(sortInfo.split(",")));
-      Collections.sort(results, comparator);
+      try {
+        Collections.sort(results, comparator);
+      } catch (Exception e) {
+        logger.error("Doing " + sortInfo + " " + unitToValue +" " + userid + " " + flText + " " + start +"-" + end +
+            " Got " +e,e);
+        //throw e;
+      }
     }
     int n = results.size();
-    List<MonitorResult> resultList = results.subList(start, Math.min(end,n));
-    return new ResultAndTotal(new ArrayList<MonitorResult>(resultList),n);
+    List<MonitorResult> resultList = results.subList(start, Math.min(end, n));
+    return new ResultAndTotal(new ArrayList<MonitorResult>(resultList), n, req);
   }
 
   @Override
@@ -1208,14 +1214,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   private List<MonitorResult> getResults(Map<String, String> unitToValue, long userid, String flText) {
     Collection<MonitorResult> results = db.getMonitorResults();
-    logger.debug("request " + unitToValue + " " + userid + " " + flText);
+    logger.debug("getResults : request " + unitToValue + " " + userid + " " + flText);
 
     Trie<MonitorResult> trie;
 
     for (String type : getTypeOrder()) {
       if (unitToValue.containsKey(type)) {
 
-        logger.debug("making trie for " + type);
+        logger.debug("getResults making trie for " + type);
         // make trie from results
         trie = new Trie<MonitorResult>();
 
@@ -1265,13 +1271,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         // if (n++ < 10) {
         //    logger.debug("adding " + result.getForeignText());
         //  }
-        trie.addEntryToTrie(new ResultWrapper(result.getForeignText(), result));
+        trie.addEntryToTrie(new ResultWrapper(result.getForeignText().trim(), result));
       }
       trie.endMakingNodes();
 
       results = trie.getMatchesLC(flText);
     }
-    logger.debug("returning " + results.size());
+    logger.debug("getResults returning " + results.size());
     return new ArrayList<MonitorResult>(results);
   }
 
@@ -1279,7 +1285,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public Collection<String> getResultAlternatives(Map<String, String> unitToValue, long userid, String flText, String which) {
     Collection<MonitorResult> results = db.getMonitorResults();
 
-    logger.debug("request " + unitToValue + " " + userid + " " + flText + " :'" + which + "'");
+    logger.debug("getResultAlternatives request " + unitToValue + " " + userid + " " + flText + " :'" + which + "'");
 
     Collection<String> matches = new TreeSet<String>();
     Trie<MonitorResult> trie;
@@ -1287,7 +1293,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     for (String type : getTypeOrder()) {
       if (unitToValue.containsKey(type)) {
 
-        logger.debug("making trie for " + type);
+        logger.debug("getResultAlternatives making trie for " + type);
         // make trie from results
         trie = new Trie<MonitorResult>();
 
@@ -1387,7 +1393,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     Collection<MonitorResult> matchesLC = trie.getMatchesLC(flText);
 
     for (MonitorResult result : matchesLC) {
-      matches.add(result.getForeignText());
+      matches.add(result.getForeignText().trim());
     }
     logger.debug("returning text " + matches);
 
